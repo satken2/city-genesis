@@ -37,17 +37,17 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
     };
     private static readonly Spec[] SeaSpecs =
     {
-        new Spec { model = "ambient_container_ship", minSpeed = 4.5f, maxSpeed = 6, turnRate = 1.0f, length = 200, weight = 3,
-                   trailLife = 80, trailSpacing = 40, trailStart = 18, trailEnd = 90, trailAlpha = .3f },
-        new Spec { model = "ambient_tanker", minSpeed = 3.5f, maxSpeed = 5, turnRate = .8f, length = 240, weight = 2,
-                   trailLife = 90, trailSpacing = 40, trailStart = 24, trailEnd = 100, trailAlpha = .3f },
-        new Spec { model = "ambient_cruise_ship", minSpeed = 4.5f, maxSpeed = 6, turnRate = 1.0f, length = 250, weight = 1.5f,
-                   trailLife = 80, trailSpacing = 40, trailStart = 20, trailEnd = 90, trailAlpha = .3f },
-        new Spec { model = "ambient_fishing_boat", minSpeed = 3, maxSpeed = 5, turnRate = 5f, length = 18, weight = 3.5f,
+        new Spec { model = "ambient_container_ship", minSpeed = 4.5f, maxSpeed = 6, turnRate = 1.0f, length = 172, weight = 3,
+                   trailLife = 80, trailSpacing = 40, trailStart = 15.5f, trailEnd = 77, trailAlpha = .3f },
+        new Spec { model = "ambient_tanker", minSpeed = 3.5f, maxSpeed = 5, turnRate = .8f, length = 168, weight = 2,
+                   trailLife = 90, trailSpacing = 40, trailStart = 15.5f, trailEnd = 64, trailAlpha = .3f },
+        new Spec { model = "ambient_cruise_ship", minSpeed = 4.5f, maxSpeed = 6, turnRate = 1.0f, length = 160, weight = 1.5f,
+                   trailLife = 80, trailSpacing = 40, trailStart = 14, trailEnd = 62, trailAlpha = .3f },
+        new Spec { model = "ambient_fishing_boat", minSpeed = 3, maxSpeed = 5, turnRate = 5f, length = 22, weight = 3.5f,
                    trailLife = 30, trailSpacing = 5, trailStart = 2.5f, trailEnd = 9, trailAlpha = .35f },
     };
     private static readonly Spec BulkCarrier = new Spec { model = "ambient_bulk_carrier",
-        trailLife = 80, trailSpacing = 40, trailStart = 18, trailEnd = 90, trailAlpha = .3f };
+        trailLife = 80, trailSpacing = 40, trailStart = 15, trailEnd = 76, trailAlpha = .3f };
 
     // 港の種類ごとの入港船。速度は港外の航路の速さ(9〜12ノット)、停泊時間は実際の港での荷役・寄港の時間。漁港は対象外。
     private static readonly PortSpec[] PortSpecs =
@@ -69,6 +69,7 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         public float expiresAt;         // 船の寿命(Time.time)。過ぎたら画面外に出た時点で消す
         public bool dead;               // 岸に乗り上げた船・停泊を終えた入港船。次の更新で消す
         public PortCall call;           // 入港船の航路と接岸位置。環境演出の船と航空機は null
+        public DrawLod lod = DrawLod.Normal;   // 前のフレームの描画LOD(昇格と降格のしきい値を分けるため)
         public Vector3 Direction => new Vector3(Mathf.Sin(heading * Mathf.Deg2Rad), 0, Mathf.Cos(heading * Mathf.Deg2Rad));
     }
 
@@ -205,17 +206,23 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         if (vehicles.Count == 0) return;
         Vector3 camera = CameraSavedPosition();
         Vector3 offset = Offset;
+        var view = Camera.main;
+        float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(view);
         foreach (var v in vehicles)
         {
             if ((v.position - camera).sqrMagnitude > DrawDistance * DrawDistance) continue;
             var matrix = Matrix4x4.TRS(v.position + offset, Quaternion.LookRotation(v.Direction, Vector3.up), Vector3.one);
             var bounds = Utils.TransformBounds(v.model.bounds, matrix);
-            foreach (var part in v.model.normal)
+            v.lod = view != null
+                ? SelectLod(v, Vector3.Distance(view.transform.position, bounds.center), tanHalfFov, view.orthographic)
+                : DrawLod.Normal;
+            var parts = v.lod == DrawLod.Close ? v.model.close : v.lod == DrawLod.Far ? v.model.far : v.model.normal;
+            foreach (var part in parts)
             {
                 var rp = new RenderParams(part.material)
                 {
                     worldBounds = bounds,
-                    shadowCastingMode = v.spec.air ? ShadowCastingMode.Off : ShadowCastingMode.On,
+                    shadowCastingMode = v.spec.air || v.lod == DrawLod.Far ? ShadowCastingMode.Off : ShadowCastingMode.On,
                     receiveShadows = !v.spec.air,
                 };
                 Graphics.RenderMesh(rp, part.mesh, part.submesh, matrix * part.local);
@@ -226,6 +233,18 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
                 v.trail.Draw(v.spec.air ? v.position : v.position + Vector3.up * WakeHeight, Time.time, offset, trailMaterial);
             }
         }
+    }
+
+    /// <summary>
+    /// 描画LOD。専用の接写・遠景モデル(`_close` / `_far`)を持つもの(船)だけを、建物と同じ投影比の判定で切り替える。
+    /// 専用モデルの無いもの(航空機)は常に無印で描く。自動の頂点集約は数十m〜の機体・船体の輪郭を崩すため使わない。
+    /// </summary>
+    private static DrawLod SelectLod(Vehicle v, float distance, float tanHalfFov, bool orthographic)
+    {
+        var model = v.model;
+        if (!model.DedicatedClose && !model.DedicatedFar) return DrawLod.Normal;
+        var lod = DrawLodEvaluator.EvaluateBySize(model.Radius, distance, tanHalfFov, v.lod, model.DedicatedClose, orthographic);
+        return lod == DrawLod.Far && !model.DedicatedFar ? DrawLod.Normal : lod;
     }
 
     private static Material CreateTrailMaterial()

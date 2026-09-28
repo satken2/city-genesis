@@ -11,7 +11,7 @@
   ],
   "steps": [
     {
-      "id": "tourism.1",
+      "id": "tourism.hotel",
       "legacyStep": 1,
       "phases": [
         {
@@ -71,7 +71,7 @@
       ]
     },
     {
-      "id": "tourism.2",
+      "id": "tourism.terminal",
       "legacyStep": 2,
       "phases": [
         {
@@ -136,7 +136,7 @@
       ]
     },
     {
-      "id": "tourism.3",
+      "id": "tourism.epoch",
       "legacyStep": 3,
       "phases": [
         {
@@ -179,7 +179,7 @@
       }
     },
     {
-      "id": "tourism.4",
+      "id": "tourism.growth",
       "legacyStep": 4,
       "phases": [
         {

@@ -28,6 +28,14 @@ const typeModules = import.meta.glob<{ default: string }>(
 );
 
 /**
+ * バリアント専用の画像だけを取得する(建物画像・タイプ画像へはフォールバックしない)。
+ * 専用画像の無いバリアントは空文字を返すので、呼び出し側でアイコン枠を空けておく。
+ */
+export function resolveAgentVariantIcon(variant: number): string {
+  return variantModules[`../assets/images/agent_variants/variant_${variant}.png`]?.default ?? "";
+}
+
+/**
  * 経済主体の表示アイコンを取得する
  * バリアント画像 → 建物画像 → タイプ画像の順にフォールバックする
  */
@@ -37,9 +45,9 @@ export function resolveAgentIcon(
   isBd: boolean,
   bdType: number
 ): string {
-  const variantKey = `../assets/images/agent_variants/variant_${variant}.png`;
-  if (variantModules[variantKey]) {
-    return variantModules[variantKey].default;
+  const variantIcon = resolveAgentVariantIcon(variant);
+  if (variantIcon) {
+    return variantIcon;
   }
 
   if (isBd || type === TYPE_BUILDING) {

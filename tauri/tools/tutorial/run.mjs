@@ -15,24 +15,32 @@ await import(pathToFileURL(hookOutput).href + `?run=${Date.now()}`);
 const componentOutput = resolve("node_modules/.cache/tutorial-component-tests.mjs");
 await build({ entryPoints: ["tools/tutorial/component-tests.tsx"], outfile: componentOutput, bundle: true, platform: "node", format: "esm", packages: "external", loader: { ".css": "empty" }, define: { "import.meta.env.DEV": "false" }, alias: { "@tauri-apps/api/event": mock, "@tauri-apps/api/window": mock, "@tauri-apps/api/core": mock, "react-i18next": mock }, plugins: [{ name: "tutorial-component-boundaries", setup(plugin) {
   plugin.onResolve({ filter: /\/(environment|MasterDataContext|ipc)$/ }, args => args.importer.replaceAll("\\", "/").includes("/src/tutorial/") ? { path: mock } : undefined);
-  plugin.onResolve({ filter: /\/?(tutorialSteps|tutorialSetup|notification)$/ }, args => args.importer.replaceAll("\\", "/").endsWith("/src/components/tutorial/Tutorial.tsx") ? { path: mock } : undefined);
+  plugin.onResolve({ filter: /\/?(tutorialSteps|useTutorialGuide|notification)$/ }, args => args.importer.replaceAll("\\", "/").endsWith("/src/components/tutorial/Tutorial.tsx") ? { path: mock } : undefined);
 } }] });
 await import(pathToFileURL(componentOutput).href + `?run=${Date.now()}`);
 const registry = JSON.parse(await readFile("src-tauri/config/window-registry.json", "utf8"));
-for (const name of ["basic", "scenario3", "trade", "highway", "mining", "tourism"]) {
-  const definition = JSON.parse(await readFile(`src/tutorial/definitions/${name}.json`, "utf8"));
-  const walk = (value, visit) => { if (value && typeof value === "object") { visit(value); Object.values(value).forEach(v => walk(v, visit)); } };
-  for (const lang of ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"]) {
+const LANGS = ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"];
+const SCENARIOS = ["basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism"];
+const walk = (value, visit) => { if (value && typeof value === "object") { visit(value); Object.values(value).forEach(v => walk(v, visit)); } };
+const lookup = (text, key) => key.split(".").reduce((v, k) => v?.[k], text);
+const definitions = {};
+for (const name of SCENARIOS) {
+  const definition = definitions[name] = JSON.parse(await readFile(`src/tutorial/definitions/${name}.json`, "utf8"));
+  for (const lang of LANGS) {
     const text = JSON.parse(await readFile(`src/i18n/${lang}/tutorial.json`, "utf8"));
     walk(definition, value => {
-      if (value.textKey && !value.textKey.split(".").reduce((v, k) => v?.[k], text)) throw new Error(`Missing translation ${lang}:${value.textKey}`);
+      if (value.textKey && !lookup(text, value.textKey)) throw new Error(`Missing translation ${lang}:${value.textKey}`);
       if (value.type === "window" && !registry[value.window]) throw new Error(`Unknown window ${value.window}`);
     });
+    for (const step of definition.steps) {
+      const key = `tutorial.${name}.step${step.legacyStep}.title`;
+      if (!lookup(text, key)) throw new Error(`Missing step title ${lang}:${key}`);
+    }
   }
 }
-for (const lang of ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"]) {
+for (const lang of LANGS) {
   const text = JSON.parse(await readFile(`src/i18n/${lang}/tutorial.json`, "utf8"));
-  for (const id of ["basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "heading"]) {
+  for (const id of [...SCENARIOS, "heading"]) {
     if (!text.tutorial.intro?.[id]) throw new Error(`Missing intro ${lang}:${id}`);
   }
 }
@@ -40,7 +48,9 @@ if (!registry.tutorial_intro) throw new Error("Intro window is not registered");
 let steps = 0;
 for (const name of ["basic", "scenario2", "scenario3", "scenario4"]) {
   const text = await readFile(`../docs/tutorials/${name}.md`, "utf8");
-  steps += [...text.matchAll(/^ID: `/gm)].length;
+  const designed = [...text.matchAll(/^ID: `([^`]+)`/gm)].map(m => m[1]);
+  const defined = definitions[name].steps.map(step => step.id);
+  if (designed.join() !== defined.join()) throw new Error(`Design steps of ${name} differ from the definition: ${designed} / ${defined}`);
+  steps += designed.length;
 }
-if (steps !== 27) throw new Error(`Expected 27 design steps, got ${steps}`);
-console.log("PASS: definitions, translations, intro texts, window names and 27-step design inventory");
+console.log(`PASS: definitions, translations, step titles, intro texts, window names and ${steps} designed steps`);

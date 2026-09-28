@@ -42,10 +42,7 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 | 111・112 | 屋根付き歩道橋（24m・32m道路用、コの字階段） | `111`・`112`と専用Far | `Props/111.fbx`・`112.fbx`と`_far` |
 | 121〜126 | 片持ち青・緑・電光看板（各4/6車線用） | `121`〜`126` | `Props/121.fbx`〜。面は共有画像 |
 | 201〜204 | 工事車両 | `construction_*` のメッシュを共有する別名 `201`〜`204` | `Props/201.fbx`〜 |
-| 301〜307 | 航空機・船舶 | `ambient_*` のメッシュを共有する別名 `301`〜`307` | `Props/301.fbx`〜 |
-| 101〜104 | 駅階段 | `101`〜`104` | `Props/101.fbx`〜 |
-| 201〜204 | 工事車両 | `construction_*` のメッシュを共有する別名 `201`〜`204` | `Props/201.fbx`〜 |
-| 301〜307 | 航空機・船舶 | `ambient_*` のメッシュを共有する別名 `301`〜`307` | `Props/301.fbx`〜 |
+| 301〜307 | 航空機・船舶 | `ambient_*` のメッシュを共有する別名 `301`〜`307` | `Props/301.fbx`〜。船304〜307は `_close`・`_far` も |
 
 - 種別の一覧は `genesis-core/assets/master.yaml` の `prop_master`(`display_name` のみ)。
   **`prop_master` はスプレッドシート由来ではなく master.yaml に直書き**されており、生成スクリプトは無い
@@ -58,13 +55,10 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 - **固定名モデル**: `construction_*`(工事車両。G文書§15)と `ambient_*`(空と海の環境演出の航空機・船舶。V文書)は
   同じ `props.blend` / `Props/` に置く。固定名のFBXは描画コードが直接読み、手動配置用には数値ID別名を `prop_master` に登録する。
   `ambient_*` は船が喫水線原点(船体は原点より下)なので、バリデータは接地検査をせず水平中心と専用予算だけを見る。
-  再生成は `pipeline/jobs/ambient_vehicles.md`。手動配置用の数値ID別名(201〜204・301〜307)は
-  `pipeline/jobs/build_prop_aliases.py` がメッシュ共有で作る。**元モデルを再著作したら別名も再実行して書き出す**。手動配置用の数値ID別名(201〜204・301〜307)は
+  船5種は通常・接写・遠景を持ち、非公開制作ツールの `pipeline/jobs/ambient_ships.py` が同じ寸法表から著作する(航空機は通常だけ)。
+  Unityは専用の `_close` / `_far` を持つモデルだけを投影比で切り替える。検証は `city-genesis/unity/Tests/AmbientShips/run.ps1`。
+  再生成は `pipeline/jobs/ambient_vehicles.md`。手動配置用の数値ID別名(201〜204・301〜307。船は `_close` / `_far` も)は
   `pipeline/jobs/build_prop_aliases.py` がメッシュ共有で作る。**元モデルを再著作したら別名も再実行して書き出す**。
-- **固定名モデル**: `construction_*`(工事車両。G文書§15)と `ambient_*`(空と海の環境演出の航空機・船舶。V文書)は
-  同じ `props.blend` / `Props/` に置く。固定名のFBXは描画コードが直接読み、手動配置用には数値ID別名を `prop_master` に登録する。
-  `ambient_*` は船が喫水線原点(船体は原点より下)なので、バリデータは接地検査をせず水平中心と専用予算だけを見る。
-  再生成は `pipeline/jobs/ambient_vehicles.md`。
 - **交差点の信号機** `traffic_signal_{様式}_{pole|arm|head}`(G文書§11.8)も固定名モデルで、`prop_master` に登録しない。
   Unityが交差点ごとに3部品を1メッシュへ結合するので、原点は3部品とも柱の接地面の高さに揃え、取付高さはモデルが持つ。
   アームはBlender Y+0.5(柱の軸)〜-0.5(先端)の単位長で長手だけ伸縮され、灯器は吊り金具の真下が原点で表示面をBlender -Yへ向ける。

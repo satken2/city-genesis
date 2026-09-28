@@ -13,7 +13,7 @@
   height: 100%;
   overflow: hidden;
   color: #e2e8f0;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
 }
 
 /* ========== タブバー ========== */
@@ -33,7 +33,7 @@
   gap: 6px;
   padding: 6px 12px;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   font-weight: 600;
   color: #94a3b8;
   background: transparent;
@@ -79,7 +79,7 @@
 
 .regulation-pane__description {
   margin: 0 0 4px 0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #64748b;
 }
 
@@ -117,7 +117,7 @@
 }
 
 .regulation-speed-group__toggle-icon {
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   width: 12px;
   text-align: center;
   color: #64748b;
@@ -125,14 +125,14 @@
 
 .regulation-speed-group__label {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   color: #94a3b8;
   font-weight: 600;
   flex: 1;
 }
 
 .regulation-speed-group__count {
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   color: #64748b;
   background: rgba(15, 23, 42, 0.5);
   padding: 1px 6px;
@@ -165,7 +165,7 @@
   flex: 1;
   min-width: 0;
   color: #cbd5e1;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -189,7 +189,7 @@
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 4px;
   color: #e2e8f0;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   font-family: monospace;
   text-align: right;
   outline: none;
@@ -205,7 +205,7 @@
 }
 
 .regulation-speed-unit {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #64748b;
   min-width: 32px;
 }
@@ -237,7 +237,7 @@
   flex: 1;
   min-width: 0;
   color: #cbd5e1;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -260,7 +260,7 @@
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 4px;
   color: #e2e8f0;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-family: monospace;
   text-align: right;
   outline: none;
@@ -276,7 +276,7 @@
 }
 
 .regulation-building-unit {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #64748b;
   min-width: 24px;
 }
@@ -289,7 +289,7 @@
   justify-content: center;
   padding: 40px;
   color: #94a3b8;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
 }
 
 .regulation-window__error {
@@ -298,7 +298,7 @@
 
 .regulation-window__error-inline {
   color: #f87171;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   padding: 4px 8px;
   background: rgba(239, 68, 68, 0.1);
   border-radius: 4px;
@@ -316,7 +316,7 @@
 }
 
 .regulation-window__unsaved {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #38bdf8;
 }
 
@@ -326,7 +326,7 @@
   color: #ffffff;
   border: none;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -371,7 +371,7 @@
   flex: 1;
   min-width: 0;
   color: #cbd5e1;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -394,7 +394,7 @@
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 4px;
   color: #e2e8f0;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-family: monospace;
   text-align: right;
   outline: none;
@@ -410,7 +410,7 @@
 }
 
 .regulation-immigration-separator {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #64748b;
   min-width: 16px;
   text-align: center;
@@ -422,7 +422,7 @@
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 4px;
   color: #e2e8f0;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   outline: none;
   cursor: pointer;
 }
@@ -443,7 +443,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   color: #cbd5e1;
   cursor: pointer;
 }
@@ -468,14 +468,14 @@
 }
 
 .regulation-immigration-skills__title {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   color: #cbd5e1;
   font-weight: 600;
 }
 
 .regulation-immigration-skills__hint {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.94rem;
   color: #64748b;
 }
 
@@ -496,7 +496,7 @@
   flex: 0 0 90px;
   min-width: 0;
   color: #cbd5e1;
-  font-size: 0.72rem;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -523,7 +523,7 @@
 .regulation-skill-value {
   flex: 0 0 32px;
   text-align: right;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   font-family: monospace;
   color: #94a3b8;
 }
@@ -531,6 +531,6 @@
 /* クオータの補足文 */
 .regulation-immigration-quota-hint {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.94rem;
   color: #64748b;
 }

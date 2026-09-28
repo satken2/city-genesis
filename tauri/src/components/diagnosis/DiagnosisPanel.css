@@ -20,13 +20,13 @@
 
 .diagnosis-header-name {
   font-weight: bold;
-  font-size: 0.95rem;
+  font-size: 1.32rem;
 }
 
 .diagnosis-refresh-btn {
   padding: 3px 10px;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   cursor: pointer;
   color: #cbd5e1;
   background: rgba(255, 255, 255, 0.06);
@@ -39,7 +39,7 @@
 
 .diagnosis-note {
   margin: 0 0 4px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   opacity: 0.6;
   line-height: 1.4;
 }
@@ -57,7 +57,7 @@
   gap: 4px;
   border-radius: 8px;
   padding: 8px 12px;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   line-height: 1.35;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -85,7 +85,7 @@
 
 .diagnosis-card-title {
   font-weight: bold;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -108,7 +108,7 @@
 
 .diagnosis-node-chip {
   padding: 2px 6px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   border-radius: 5px;
   color: #a5b4fc;
   border: 1px solid rgba(165, 180, 252, 0.35);

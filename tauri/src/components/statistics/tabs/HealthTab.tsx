@@ -32,6 +32,7 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./HealthTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- バックエンド GET /api/v1/stats/health のレスポンス型 ---
 
@@ -99,13 +100,13 @@ const DEATH_CAUSES = [
 const STACK_STROKE = "#1e293b";
 
 const CHART_MARGIN = { top: 10, right: 15, left: 5, bottom: 5 };
-const Y_AXIS_WIDTH = 40;
-const AXIS_TICK = { fontSize: 9, fill: "#8ba3bb" };
+const Y_AXIS_WIDTH_REM = 3.7; // Y軸の幅(rem)。描画時に useRemPx で px に直す
+const AXIS_TICK = { fontSize: "0.83rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 function scopeKey(scope: Scope): string {
@@ -114,6 +115,7 @@ function scopeKey(scope: Scope): string {
 
 export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<HealthStats>(
     apiBaseUrl,
     "/api/v1/stats/health"
@@ -188,7 +190,7 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} />
                   <YAxis
-                    width={Y_AXIS_WIDTH}
+                    width={remPx(Y_AXIS_WIDTH_REM)}
                     tick={AXIS_TICK}
                     tickLine={false}
                     tickFormatter={(v: number) => `${v}${t("statistics.yearsOldUnit")}`}
@@ -260,8 +262,8 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <YAxis
                     type="category"
                     dataKey="band"
-                    width={40}
-                    tick={{ fontSize: 8, fill: "#8ba3bb" }}
+                    width={remPx(3.7)}
+                    tick={{ fontSize: "0.74rem", fill: "#8ba3bb" }}
                     tickLine={false}
                     interval={0}
                   />
@@ -277,7 +279,7 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     }}
                   />
                   <Legend
-                    wrapperStyle={{ fontSize: 10 }}
+                    wrapperStyle={{ fontSize: "0.93rem" }}
                     iconSize={8}
                     formatter={(value: string) => {
                       const cause = DEATH_CAUSES.find((c) => c.key === value);
@@ -324,8 +326,8 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 <YAxis
                   type="category"
                   dataKey="bin"
-                  width={60}
-                  tick={{ fontSize: 8, fill: "#8ba3bb" }}
+                  width={remPx(5.56)}
+                  tick={{ fontSize: "0.74rem", fill: "#8ba3bb" }}
                   tickLine={false}
                   interval={0}
                 />
@@ -361,8 +363,8 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 <YAxis
                   type="category"
                   dataKey="bin"
-                  width={60}
-                  tick={{ fontSize: 8, fill: "#8ba3bb" }}
+                  width={remPx(5.56)}
+                  tick={{ fontSize: "0.74rem", fill: "#8ba3bb" }}
                   tickLine={false}
                   interval={0}
                 />

@@ -35,8 +35,8 @@
 /* 見本画像は正方形だが、タイルを低く保つため横長の枠に収める */
 .tvs-thumbnail { display: grid; place-items: center; aspect-ratio: 4 / 3; overflow: hidden; }
 .tvs-thumbnail img { width: 100%; height: 100%; object-fit: contain; }
-.tvs-thumbnail-missing { color: #93a9c0; font-size: 0.62rem; text-align: center; }
-.tvs-name { font-size: 0.7rem; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+.tvs-thumbnail-missing { color: #93a9c0; font-size: 0.86rem; text-align: center; }
+.tvs-name { font-size: 0.97rem; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
 
 /* 読み取り表示(基本情報の行)。見本画像は行の高さに収まる大きさにする */
 .tvs-label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }

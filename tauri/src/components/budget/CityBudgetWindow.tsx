@@ -32,6 +32,7 @@ import {
   spendCategoryColor,
 } from "../common/FiscalSankey";
 import "./CityBudgetWindow.css";
+import { useRemPx } from "../../hooks/useRemPx";
 
 type BudgetAgent = {
   kind?: "agent" | "path" | "parcel" | "welfare";
@@ -443,6 +444,7 @@ function ChartValueTooltip({
 
 export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
+  const remPx = useRemPx();
   const masterData = useMasterData();
 
   const [budgetData, setBudgetData] = useState<BudgetData | null>(null);
@@ -990,14 +992,14 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_LINE} vertical={false} />
                   <XAxis
                     dataKey="label"
-                    tick={{ fontSize: 10, fill: CHART_AXIS_TEXT }}
+                    tick={{ fontSize: "0.93rem", fill: CHART_AXIS_TEXT }}
                     tickLine={false}
                     stroke={CHART_AXIS_LINE}
                   />
                   <YAxis
-                    tick={{ fontSize: 10, fill: CHART_AXIS_TEXT }}
+                    tick={{ fontSize: "0.93rem", fill: CHART_AXIS_TEXT }}
                     tickLine={false}
-                    width={52}
+                    width={remPx(4.81)}
                     tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
                     stroke={CHART_AXIS_LINE}
                   />
@@ -1015,7 +1017,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     }
                     cursor={{ fill: CHART_CURSOR_FILL }}
                   />
-                  <Legend wrapperStyle={{ fontSize: 10 }} />
+                  <Legend wrapperStyle={{ fontSize: "0.93rem" }} />
                   {/* 債務超過(現預金マイナス)が一目でわかるようにゼロ線を引く */}
                   <ReferenceLine y={0} stroke={CHART_ZERO_LINE} />
                   {/* 実績と現在は同じ stackId に載せることで、同じX位置で1本の棒として描かれる */}
@@ -1153,14 +1155,14 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_LINE} vertical={false} />
                     <XAxis
                       dataKey="name"
-                      tick={{ fontSize: 11, fill: CHART_AXIS_TEXT }}
+                      tick={{ fontSize: "1.02rem", fill: CHART_AXIS_TEXT }}
                       tickLine={false}
                       stroke={CHART_AXIS_LINE}
                     />
                     <YAxis
-                      tick={{ fontSize: 10, fill: CHART_AXIS_TEXT }}
+                      tick={{ fontSize: "0.93rem", fill: CHART_AXIS_TEXT }}
                       tickLine={false}
-                      width={52}
+                      width={remPx(4.81)}
                       tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
                       stroke={CHART_AXIS_LINE}
                     />
@@ -1173,7 +1175,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                       }
                       cursor={{ fill: CHART_CURSOR_FILL }}
                     />
-                    <Legend wrapperStyle={{ fontSize: 10 }} />
+                    <Legend wrapperStyle={{ fontSize: "0.93rem" }} />
                     {balanceChart.series.map((s) => (
                       <Bar
                         key={s.key}

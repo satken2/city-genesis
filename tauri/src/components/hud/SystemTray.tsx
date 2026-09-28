@@ -21,7 +21,7 @@ import { sendSessionForceReload, sendSessionReload } from "../../utils/ipc";
 import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
 import { showNotification, dismissNotification } from "../../utils/notification";
 import { TRAY_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
-import { useHudSession, useTutorialHighlight } from "./useHudSession";
+import { useHudSession } from "./useHudSession";
 import "./hud.css";
 import "./SystemTray.css";
 
@@ -36,7 +36,6 @@ type CompleteConstructionResult = {
 export function SystemTray() {
   const { t } = useTranslation();
   const { visible, apiBaseUrl, templateMode, debugExecution, epochExecuting } = useHudSession();
-  const getBtnClassName = useTutorialHighlight();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [completing, setCompleting] = useState(false);
 
@@ -128,7 +127,7 @@ export function SystemTray() {
       {debugExecution && (
         <button
           id="debug_template"
-          className={getBtnClassName("debug_template", "hud-icon-btn system-tray-icon")}
+          className="hud-icon-btn system-tray-icon"
           type="button"
           title={t(templateMode ? "taskbar.trayTemplateOn" : "taskbar.trayTemplateOff")}
           onClick={() => void toggleTemplateMode()}
@@ -168,7 +167,7 @@ export function SystemTray() {
         <button
           key={icon.id}
           id={icon.id}
-          className={getBtnClassName(icon.id, "hud-icon-btn system-tray-icon")}
+          className="hud-icon-btn system-tray-icon"
           type="button"
           title={t(icon.tooltipKey)}
           style={{ padding: icon.padding }}

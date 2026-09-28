@@ -488,6 +488,9 @@ export type AgentMasterEntry = {
   shared_building?: boolean;
   space_limits?: Record<string, number>;
   bd_type?: number;
+  // 建物建設パネルで建物を選ぶときの分類(constants.ts の BD_CATEGORY_*)。建物のバリアントだけが持つ。
+  // 未設定の建物はパネルが「その他」(BD_CATEGORY_OTHER)に並べる。建築規制の bd_type とは別の軸。
+  bd_category?: number;
   building_shape?: number;
   cost_ratio?: number;
   min_space?: number;

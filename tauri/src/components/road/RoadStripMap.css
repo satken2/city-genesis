@@ -14,7 +14,7 @@
   align-items: center;
   gap: 4px 12px;
   padding: 0 2px 4px;
-  font-size: 0.68rem;
+  font-size: 0.94rem;
   color: #9db0c5;
 }
 
@@ -55,13 +55,13 @@
 }
 
 .road-strip__axis-title {
-  font-size: 10px;
+  font-size: 0.93rem;
   font-weight: 600;
   fill: #6b8299;
 }
 
 .road-strip__tick {
-  font-size: 10px;
+  font-size: 0.93rem;
   font-family: "Consolas", "Menlo", monospace;
   fill: #8397ab;
 }
@@ -73,13 +73,13 @@
 }
 
 .road-strip__sign-text {
-  font-size: 7.5px;
+  font-size: 0.69rem;
   font-weight: 700;
   fill: #1d4ed8;
 }
 
 .road-strip__traffic-text {
-  font-size: 10px;
+  font-size: 0.93rem;
   font-variant-numeric: tabular-nums;
   fill: #b7c7d7;
 }

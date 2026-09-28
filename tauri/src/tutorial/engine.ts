@@ -32,6 +32,7 @@ function matches(row: Record<string, unknown>, where: Match[], env: Environment)
     const value = field(row, m.field);
     if (m.oneOf) return m.oneOf.some(v => equal(value, resolve(v, env)));
     if (m.greaterThan !== undefined) return typeof value === "number" && value > m.greaterThan;
+    if (m.notEquals !== undefined) return value !== undefined && !equal(value, resolve(m.notEquals, env));
     return equal(value, resolve(m.equals ?? null, env));
   });
 }

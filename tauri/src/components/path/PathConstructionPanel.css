@@ -21,7 +21,7 @@
 }
 
 .pc-section-title {
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #c5d4e3;
   text-transform: uppercase;
@@ -33,7 +33,7 @@
 .pc-select {
   width: 100%;
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   background: rgba(255, 255, 255, 0.08);
   color: #f6fbff;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -63,7 +63,7 @@
   padding: 12px;
   color: #93a9c0;
   text-align: center;
-  font-size: 0.65rem;
+  font-size: 0.9rem;
 }
 
 /* ---- 説明文（アイコン＋枠付き） ---- */
@@ -90,14 +90,14 @@
 }
 
 .pc-description-name {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   color: #f6fbff;
   margin-bottom: 4px;
 }
 
 .pc-description-text {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   line-height: 1.5;
 }
@@ -126,7 +126,7 @@
 
 .pc-spec-value {
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #c5d4e3;
 }
 
@@ -146,7 +146,7 @@
 }
 
 .pc-no-nodes-message {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   text-align: center;
   padding: 8px;
@@ -161,7 +161,7 @@
 }
 
 .pc-settings-label {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #c5d4e3;
   min-width: max-content;
 }
@@ -173,7 +173,7 @@
 }
 
 .pc-stepper-unit {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
 }
 
@@ -199,7 +199,7 @@
 
 .pc-validation-message {
   margin-bottom: 8px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   line-height: 1.5;
   color: #f38ba8;
 }
@@ -212,7 +212,7 @@
   flex: 1;
   min-width: 60px;
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 0.72rem;
+  font-size: 1rem;
   padding: 6px 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.08);
@@ -246,7 +246,7 @@
 /* ---- ローディング/empty ---- */
 .pc-muted {
   color: #9db0c5;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   text-align: center;
   padding: 8px;
 }
@@ -344,7 +344,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
   color: inherit;
-  font-size: 0.72rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -377,7 +377,7 @@
   background: rgba(255, 255, 255, 0.04);
   color: rgba(246, 251, 255, 0.6);
   font-family: inherit;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
@@ -425,7 +425,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
   color: #f6fbff;
-  font-size: 0.72rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
@@ -443,7 +443,7 @@
 .pc-spacing-value {
   min-width: 52px;
   text-align: center;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #f6fbff;
 }
 
@@ -462,7 +462,7 @@
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.06);
   color: #f6fbff;
-  font-size: 1rem;
+  font-size: 1.39rem;
   line-height: 1;
   cursor: pointer;
   display: grid;
@@ -489,7 +489,7 @@
 
 /* ---- Dev モックセクション ---- */
 .pc-dev-note {
-  font-size: 0.55rem;
+  font-size: 0.76rem;
   color: #585b70;
   margin-top: 4px;
 }

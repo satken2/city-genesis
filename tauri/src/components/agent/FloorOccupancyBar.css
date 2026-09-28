@@ -29,7 +29,7 @@
 }
 
 .floor-occupancy__label {
-  font-size: 0.62rem;
+  font-size: 0.86rem;
   color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
   padding: 0 3px;
@@ -46,7 +46,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   color: #9db0c5;
 }
 

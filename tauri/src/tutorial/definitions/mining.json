@@ -4,7 +4,7 @@
   "terrainMap": "yoron",
   "steps": [
     {
-      "id": "mining.1",
+      "id": "mining.resource",
       "legacyStep": 1,
       "phases": [
         {
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "id": "mining.2",
+      "id": "mining.mine",
       "legacyStep": 2,
       "phases": [
         {
@@ -105,7 +105,7 @@
       ]
     },
     {
-      "id": "mining.3",
+      "id": "mining.loading",
       "legacyStep": 3,
       "phases": [
         {
@@ -165,7 +165,7 @@
       ]
     },
     {
-      "id": "mining.4",
+      "id": "mining.unloading",
       "legacyStep": 4,
       "phases": [
         {
@@ -225,7 +225,7 @@
       ]
     },
     {
-      "id": "mining.5",
+      "id": "mining.port",
       "legacyStep": 5,
       "phases": [
         {
@@ -285,7 +285,7 @@
       ]
     },
     {
-      "id": "mining.6",
+      "id": "mining.platforms",
       "legacyStep": 6,
       "phases": [
         {
@@ -426,7 +426,7 @@
       }
     },
     {
-      "id": "mining.7",
+      "id": "mining.rail",
       "legacyStep": 7,
       "phases": [
         {
@@ -491,7 +491,7 @@
       }
     },
     {
-      "id": "mining.8",
+      "id": "mining.depot",
       "legacyStep": 8,
       "phases": [
         {
@@ -602,7 +602,7 @@
       }
     },
     {
-      "id": "mining.9",
+      "id": "mining.power",
       "legacyStep": 9,
       "phases": [
         {
@@ -667,7 +667,7 @@
       }
     },
     {
-      "id": "mining.10",
+      "id": "mining.line",
       "legacyStep": 10,
       "phases": [
         {
@@ -729,7 +729,7 @@
       ]
     },
     {
-      "id": "mining.11",
+      "id": "mining.epoch",
       "legacyStep": 11,
       "phases": [
         {
@@ -772,7 +772,7 @@
       }
     },
     {
-      "id": "mining.12",
+      "id": "mining.exports",
       "legacyStep": 12,
       "phases": [
         {

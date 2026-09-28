@@ -23,7 +23,7 @@
 | `VehicleModelConfig.cs` / `VehicleModelResolver.cs` | `vehicle_model_config.yaml` の解析と、モデル解決・接地原点/前方軸の正規化・LODGroup 構成 |
 | `DriveMode.cs` | ドライブモードの選択UI・開始位置・走行HUD |
 | `RopewayNetworkStore.cs` / `RopewayNetwork.cs` / `RopewayGeometry.cs` / `RopewayCabinManager.cs` | 索道(PATH_CONVEYOR)の駅間抽出・ケーブル形状・搬器の循環描画 |
-| `AmbientVehicleManager.cs` / `AmbientTrail.cs` | 空と海の環境演出(航空機3種・船舶5種)と飛行機雲・航跡 |
+| `AmbientVehicleManager.cs` / `AmbientTrail.cs` | 空と海の環境演出(航空機3種・船舶5種)と飛行機雲・航跡。船は専用の接写・遠景を投影比で切り替える |
 | `AmbientVehicleManager.PortCalls.cs` / `SeaRoute.cs` | 稼働中の港へ向かう入港船(抽選・接岸位置・入港の減速と横寄せ) / その航路(海岸線までの距離の格子上の最短経路。バックグラウンドスレッドで動く純データ) |
 
 ## 知らないと事故る不変条件
@@ -51,9 +51,10 @@
 - 走行音は `Weather/VehicleAmbience.Report` へ通知するだけ(車両側に AudioSource を持たない)。都市切替は `TransitDataStore.Session` でクリアする。
 - 入港船はエポックが進んだときだけ入れ替える。海岸線の世代(`CoastlineStore.Version`)の変化で消すのは沖合の船と航空機だけで、入港船まで消すと建物の編集のたびに船が入れ替わる。港は `TerrainManager.ShoreDataVersion`(埋立地まで取り終えた版)で読み直す。水際は `PortBuildingMeshBuilder.ResolveWorldWaterlines` を使い、別の規則で求め直さない。
 - `SeaRoute` は Unity の Random・地形の高さ・GameObject を使わない(バックグラウンドスレッドで動く)。乱数は要求の `seed` から作る。
+- 環境演出の描画LODは、専用の `_close` / `_far` を持つモデル(`PropRenderModel.DedicatedClose` / `DedicatedFar`)だけを切り替える。専用モデルの無い航空機に `PropRenderModel` の自動集約の遠景を使わない(大きな機体の輪郭が崩れる)。`SelectLod` は `Tests/AmbientShips/AmbientShipsQA.cs` がリフレクションで呼ぶので、シグネチャを変えたら QA も直す。
 
 ## 参照
 
 - 仕様: `geometries/O_車両の走行描画.md`(一般車・路駐・公共交通・車両アセット・路線カラー・LRT軌道・ドライブ・索道・路面標示との共有)
 - 関連: `geometries/W_歩行者の描画.md`、`V_環境演出の乗り物.md`、`T_交通シミュレーションと走行描画の整合.md`、`programs/サウンドシステム.md`(走行音)、`programs/公共交通ハイライト.md`
-- 検証: `unity/Tests/Vehicles/run.ps1`(`-TransitOnly` / `-DriveOnly` / `-ParkingOnly` / `-PedestrianModelsOnly`)、`unity/Tests/Ropeway/animation.ps1`
+- 検証: `unity/Tests/Vehicles/run.ps1`(`-TransitOnly` / `-DriveOnly` / `-ParkingOnly` / `-PedestrianModelsOnly`)、`unity/Tests/Ropeway/animation.ps1`、`unity/Tests/AmbientShips/run.ps1`(環境演出の船のFBXと描画LOD)

@@ -37,7 +37,7 @@
 
 .transit-estimate__label {
   flex-shrink: 0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--flat-text-label);
 }
@@ -51,7 +51,7 @@
 }
 
 .transit-estimate__main {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
@@ -59,7 +59,7 @@
 }
 
 .transit-estimate__sub {
-  font-size: 0.66rem;
+  font-size: 0.92rem;
   line-height: 1.35;
   color: var(--flat-text-muted);
 }
@@ -75,7 +75,7 @@
 }
 
 .transit-estimate__row--total .transit-estimate__main {
-  font-size: 0.92rem;
+  font-size: 1.28rem;
 }
 
 .transit-estimate__row--positive {
@@ -95,7 +95,7 @@
 /* ---- 注記・警告 ---- */
 .transit-estimate__note {
   margin: 0;
-  font-size: 0.66rem;
+  font-size: 0.92rem;
   line-height: 1.45;
   color: var(--flat-text-muted);
 }
@@ -104,7 +104,7 @@
   margin: 0;
   padding: 6px 8px;
   border-radius: 4px;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   line-height: 1.4;
   color: var(--flat-warn);
   background: var(--flat-warn-surface);
@@ -112,13 +112,13 @@
 
 .transit-estimate__muted {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   line-height: 1.4;
   color: var(--flat-text-muted);
 }
 
 .transit-estimate__error {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: var(--flat-danger);
 }

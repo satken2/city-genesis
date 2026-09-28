@@ -16,7 +16,7 @@
 
 .resource-detail__loading {
   color: #9db0c5;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
 }
 
 .resource-detail__error {
@@ -51,7 +51,7 @@
 }
 
 .resource-detail__card-name {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   color: #f6fbff;
   margin-bottom: 6px;
@@ -65,13 +65,13 @@
 }
 
 .resource-detail__card-label {
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #93a9c0;
 }
 
 .resource-detail__card-value {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #e2e8f0;
   font-variant-numeric: tabular-nums;
 }
@@ -86,7 +86,7 @@
 
 .resource-detail__chart-title {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 600;
   color: #cbd5e1;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);

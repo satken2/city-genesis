@@ -17,7 +17,7 @@
 }
 
 .employment-chart-title {
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   font-weight: 600;
   color: #9db0c5;
   margin-bottom: 6px;
@@ -41,7 +41,7 @@
 .employment-legend-item {
   display: flex;
   align-items: center;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   gap: 6px;
 }
 
@@ -67,7 +67,7 @@
 .employment-info-bottom-title {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   margin-bottom: 4px;
 }
 

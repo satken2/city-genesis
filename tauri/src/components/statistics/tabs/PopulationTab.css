@@ -30,7 +30,7 @@
 }
 
 .pop-tab__scope-label {
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 600;
   color: #94a3b8;
 }
@@ -41,7 +41,7 @@
   border-radius: 6px;
   color: #e2e8f0;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   padding: 6px 10px;
   cursor: pointer;
   min-width: 160px;
@@ -59,7 +59,7 @@
 }
 
 .pop-tab__current-label {
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #7b8fa5;
   text-transform: uppercase;
@@ -67,20 +67,20 @@
 }
 
 .pop-tab__current-value {
-  font-size: 1.5rem;
+  font-size: 2.08rem;
   font-weight: 700;
   color: #e2e8f0;
   font-variant-numeric: tabular-nums;
 }
 
 .pop-tab__current-unit {
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   color: #5a6f86;
 }
 
 .pop-tab__current-immig {
   margin-left: 8px;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   color: #f59e0b;
   font-variant-numeric: tabular-nums;
 }
@@ -123,7 +123,7 @@
 
 .pop-chart__title {
   margin: 0 0 2px;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 600;
   color: #cbd5e1;
 }
@@ -138,7 +138,7 @@
   place-items: center;
   height: 100%;
   color: #5a6f86;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
 }
 
 /* ========== 人口ピラミッド ========== */
@@ -153,7 +153,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #94a3b8;
 }
 
@@ -167,7 +167,7 @@
 .pop-pyramid__sides {
   display: flex;
   justify-content: space-between;
-  font-size: 0.68rem;
+  font-size: 0.94rem;
   color: #7b8fa5;
 }
 
@@ -199,7 +199,7 @@
 .pop-zones__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: 1.02rem;
   text-align: left;
 }
 
@@ -243,7 +243,7 @@
 .pop-ratio {
   display: inline-block;
   padding: 1px 6px;
-  font-size: 10px;
+  font-size: 0.93rem;
   font-weight: 700;
   border-radius: 4px;
 }

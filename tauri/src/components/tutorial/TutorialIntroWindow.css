@@ -33,7 +33,7 @@
 
 .tutorial-intro-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.39rem;
   font-weight: 600;
   color: var(--flat-text);
 }
@@ -41,7 +41,7 @@
 .tutorial-intro-heading {
   margin: 0;
   padding: 2px 0 2px 8px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--flat-text-label);
   box-shadow: inset 3px 0 0 var(--flat-accent);
@@ -49,7 +49,7 @@
 
 .tutorial-intro-text {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   line-height: 1.7;
   color: var(--flat-text-body);
 }
@@ -59,7 +59,7 @@
   align-self: flex-end;
   margin-top: 8px;
   padding: 8px 28px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   background-color: var(--flat-selected);
   border: none;

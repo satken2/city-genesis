@@ -30,6 +30,7 @@ import {
 } from "../../map/CityMapCanvas";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./CommuteTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- 型定義 ---
 
@@ -194,6 +195,7 @@ function CarOwnershipMap({
 
 export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<CommuteStats>(
     apiBaseUrl,
     "/api/v1/stats/commute"
@@ -274,7 +276,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           y={y + height / 2}
           textAnchor={isSource ? "end" : "start"}
           dominantBaseline="middle"
-          fontSize="10"
+          fontSize="0.93rem"
           fill="#c1c9d2"
         >
           {cleanName}
@@ -351,8 +353,8 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
-                <XAxis type="number" stroke="#8ba3bb" fontSize={9} />
-                <YAxis dataKey="bucket" type="category" stroke="#8ba3bb" fontSize={9} width={40} />
+                <XAxis type="number" stroke="#8ba3bb" fontSize="0.83rem" />
+                <YAxis dataKey="bucket" type="category" stroke="#8ba3bb" fontSize="0.83rem" width={remPx(3.7)} />
                 <Tooltip content={<CustomBarTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
                 <Bar dataKey="workers" stackId="a" fill={COLOR_WORKER} radius={[0, 0, 0, 0]} name="通勤者" />
                 <Bar dataKey="students" stackId="a" fill={COLOR_STUDENT} radius={[0, 2, 2, 0]} name="通学者" />

@@ -43,7 +43,7 @@
   text-align: center;
   color: #6b8299;
   padding: 40px 16px;
-  font-size: 0.88rem;
+  font-size: 1.22rem;
 }
 
 /**
@@ -104,7 +104,7 @@
 }
 
 .save-list-card-name {
-  font-size: 1rem;
+  font-size: 1.39rem;
   font-weight: 700;
   color: #eaf3ff;
   display: flex;
@@ -114,7 +114,7 @@
 }
 
 .save-list-card-current-badge {
-  font-size: 0.66rem;
+  font-size: 0.92rem;
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 0;
@@ -142,7 +142,7 @@
 .save-list-card-load-btn,
 .save-list-card-delete-btn {
   padding: 6px 16px;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 700;
   border: none;
   border-radius: 0;
@@ -183,7 +183,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   color: #a4bccc;
 }
 
@@ -197,7 +197,7 @@
  */
 .save-list-card-savedat {
   grid-column: 1 / -1;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   color: #6b8299;
 }
 
@@ -208,7 +208,7 @@
 .save-list-status {
   padding: 9px 12px;
   border-radius: 0;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
 }
 
 .save-list-status--success {
@@ -254,7 +254,7 @@
 }
 
 .save-list-confirm-text {
-  font-size: 0.88rem;
+  font-size: 1.22rem;
   line-height: 1.5;
   color: #d0dde9;
 }
@@ -268,7 +268,7 @@
 /* 全体既定(枠線+角丸)の打ち消しを含むため、キャンセル側もここで定義する */
 .save-list-confirm-actions button {
   padding: 8px 22px;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
   font-weight: 600;
   border: none;
   border-radius: 0;
@@ -311,7 +311,7 @@
   text-align: center;
   color: #6b8299;
   padding: 32px;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
 }
 
 /**
@@ -325,7 +325,7 @@
 
 .save-list-open-folder-btn {
   padding: 7px 14px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   border: none;
   border-radius: 0;

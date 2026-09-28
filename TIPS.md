@@ -46,6 +46,14 @@
 
 - Git Bash からネイティブのコマンド(node など)へ `//` で始まる引数を渡すと、MSYSのパス変換で先頭の `//` が `/` に縮む。`///` で始まるコメント行を検索キーとして渡すと1文字ずれた位置に一致し、置換後に `/` が1本余る。
 
+- Chromium(WebView2)の SVG は `font-size` 属性に rem を書いても効き、ルートの文字サイズを変えると即座に追従する(2026-09-28 に実測)。recharts の `fontSize` に `"0.93rem"` のような文字列を渡せるのはこのため。
+
+- recharts 3 の `YAxis width="auto"` は目盛りの実寸で軸幅を決める。縦に並べたグラフが共通の軸幅(`Y_AXIS_WIDTH_REM`)で描画域の左端を揃えている箇所に使うと、グラフごとに幅が変わって揃わなくなる。
+
+- ウィンドウの本文領域(`.content` / `.content-empty-shell`)だけ一時的に `font-size: 40px !important` にすると、大きさを継承している文字だけが 40px になる。文字サイズを明示していない箇所を機械的に洗い出せる。2026-09-28 時点で、本文を継承(1rem)させて書いているのは `template/Scenarios.css` を使うシナリオ画面だけで、ほかの画面はすべて明示している。
+
+- 開発用バックエンドの実データで UI をブラウザに描いて確かめるときは、確認用の Vite で `server.proxy` を使い `/backend` → `http://127.0.0.1:5000` へ GET だけを中継し、POST などは `window.fetch` の差し替えでモックすると、都市の状態を変えずに済む。
+
 ## docs
 
 - この環境には mkdocs が入っておらず、`python` はストアのエイリアスで起動しない。`py -m venv outputs/mkdocs-venv` に `docs/requirements.txt` を入れ、`docs/` で `outputs/mkdocs-venv/Scripts/python.exe -m mkdocs build --strict -d <リポジトリ外>` を実行すると、既定の `site/` を上書きせずに strict 検査だけできる。

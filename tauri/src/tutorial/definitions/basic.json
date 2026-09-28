@@ -425,6 +425,209 @@
           }
         ]
       }
+    },
+    {
+      "id": "basic.road_active",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.basic.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "paths",
+        "target": "basic.road",
+        "where": [
+          {
+            "field": "status",
+            "equals": {
+              "$constant": "STATUS_ACTIVE"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "basic.parcels",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.basic.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.land"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "parcels",
+        "where": [
+          {
+            "field": "front_path_id",
+            "equals": {
+              "$ref": "basic.road"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "basic.home",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.basic.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "buildings",
+        "bind": "basic.home",
+        "where": [
+          {
+            "field": "variant",
+            "equals": {
+              "$constant": "VARIANT_APARTMENT"
+            }
+          },
+          {
+            "field": "status",
+            "oneOf": [
+              {
+                "$constant": "STATUS_SCHEDULED_CONSTRUCTION"
+              },
+              {
+                "$constant": "STATUS_CONSTRUCTING"
+              },
+              {
+                "$constant": "STATUS_ACTIVE"
+              }
+            ]
+          },
+          {
+            "field": "agent_id",
+            "notEquals": {
+              "$ref": "support.housing.building"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "basic.home_active",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.basic.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "buildings",
+        "target": "basic.home",
+        "where": [
+          {
+            "field": "status",
+            "equals": {
+              "$constant": "STATUS_ACTIVE"
+            }
+          }
+        ]
+      }
     }
   ]
 }

@@ -36,7 +36,7 @@
 .info-header-icon-frame-label {
   /* 枠の下部余白に収める小さめのラベル。英語(Public Facility)は2行に折り返す */
   max-width: 48px;
-  font-size: 0.56rem;
+  font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.15;
   color: #000000;
@@ -57,7 +57,7 @@
   align-items: center;
   border-radius: 5px;
   padding: 2px 8px;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   font-weight: 600;
   width: 100%;
 }
@@ -92,12 +92,12 @@
   justify-content: center;
   height: 100%;
   padding: 0 6px;
-  font-size: 0.68rem;
+  font-size: 0.94rem;
   white-space: nowrap;
 }
 
 .info-header-name {
-  font-size: 0.92rem;
+  font-size: 1.28rem;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -105,7 +105,7 @@
 }
 
 .info-header-variant {
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;

@@ -1,8 +1,9 @@
 /**
  * フォントサイズをアプリケーション全体で管理するReact Context
  *
- * ユーザーが設定画面で選択したフォントサイズをlocalStorageに永続化し、
- * ドキュメントルートのCSS変数(--font-size-base)に反映する。
+ * 設定値は本文の文字サイズ(px)で、ドキュメントルートのCSS変数(--font-size-base)を通じて 1rem になる。
+ * 各コンポーネントは文字サイズを rem で書くので、本文(1rem)を基準に全体が同じ比率で拡縮する。
+ * 値は設定ファイル(settings.json)から読み込み、保存は設定画面(SettingsWindow)が行う。
  * 全コンポーネントで useFontSize() フックから現在のフォントサイズと
  * 変更関数を利用できる。
  *
@@ -10,7 +11,7 @@
  * Tauriイベント(font-size-changed)を全ウィンドウにブロードキャストする。
  * 各ウィンドウのFontSizeProviderはこのイベントをリッスンし、
  * リアルタイムにフォントサイズを更新する。
- * 併せてlocalStorageにも保存するため、後から開いたウィンドウにも反映される。
+ * 後から開いたウィンドウは起動時に設定ファイルから読み込む。
  */
 
 import {
@@ -28,13 +29,14 @@ import { loadAppSettings } from "../utils/settings";
 const EVENT_FONT_SIZE_CHANGED = "font-size-changed";
 
 /**
- * プリセットフォントサイズの定義
- * keyはi18nの翻訳キーとしても使用する
+ * プリセットフォントサイズの定義(本文の文字サイズ px)
+ * keyはi18nの翻訳キーとしても使用する。中はWindows標準の本文(Segoe UI 9pt)に相当する。
+ * 中は設定ファイルが無いときの既定値でもあり、Rust側 settings.rs の既定値と揃える。
  */
 export const FONT_SIZE_PRESETS: Record<string, number> = {
-  small: 13,
-  medium: 15,
-  large: 18,
+  small: 10,
+  medium: 12,
+  large: 14,
 };
 
 type FontSizeContextValue = {

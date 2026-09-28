@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #cdd6f4;
   white-space: nowrap;
 }
@@ -46,7 +46,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   white-space: nowrap;
 }
@@ -58,7 +58,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
 }
 
 .street-grid__field input[type="number"] {
@@ -82,7 +82,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   cursor: pointer;
 }
 
@@ -120,7 +120,7 @@
   padding: 4px 10px;
   border-radius: 4px;
   background: rgba(15, 20, 32, 0.85);
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   color: #cdd6f4;
   pointer-events: none;
 }

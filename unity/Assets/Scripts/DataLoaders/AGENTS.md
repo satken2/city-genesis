@@ -83,7 +83,7 @@
 
 ### プロップ
 - 仕様の正は `M_地形プロップ.md`。分担: `PropManager`(候補・小区画バッチ・`RenderMeshInstanced`)、`PropGeometry`(穴付き領域と固定格子ハッシュ。`ForestPlacement.compute` と同一規則)、`ForestRenderer`(種類1/2のGPU散布)、`ForestOverview`(全域被覆マスク)。
-- `PropRenderPolicy`(種類別の距離・影)、`PropRenderModel`(共有FBXから複製材質と `_close` / `_far` を抽出)、`StableSample`(固定順位抽出)。
+- `PropRenderPolicy`(種類別の距離・影)、`PropRenderModel`(共有FBXから複製材質と `_close` / `_far` を抽出。専用モデルを読んだかは `DedicatedClose` / `DedicatedFar`)、`StableSample`(固定順位抽出)。
 - `Forest.shader` は Forward+ の `_CLUSTER_LIGHT_LOOP` バリアント必須(欠くと太陽光の陰影が消える)。GraphicsSettings の Instancing Variants は Keep All を維持する。
 
 ### その他

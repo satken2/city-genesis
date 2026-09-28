@@ -20,6 +20,7 @@ import {
 import { useEpochCachedStats } from "../useEpochCache";
 import { UsageMeter } from "./AccidentsTab";
 import "./EducationTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- バックエンド GET /api/v1/stats/education のレスポンス型 ---
 
@@ -106,11 +107,12 @@ const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 export function EducationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<EducationStats>(
     apiBaseUrl,
     "/api/v1/stats/education"
@@ -352,12 +354,12 @@ export function EducationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     <PolarGrid stroke="#374151" />
                     <PolarAngleAxis
                       dataKey="subject"
-                      tick={{ fill: "#9ca3af", fontSize: 10 }}
+                      tick={{ fill: "#9ca3af", fontSize: "0.93rem" }}
                     />
                     <PolarRadiusAxis
                       angle={30}
                       domain={[0, 2.0]}
-                      tick={{ fill: "#6b7280", fontSize: 8 }}
+                      tick={{ fill: "#6b7280", fontSize: "0.74rem" }}
                     />
                     <Radar
                       name="Average Skill"
@@ -398,9 +400,10 @@ export function EducationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     >
                       <XAxis type="number" hide />
                       <YAxis
+                        width={remPx(5.56)}
                         dataKey="bin"
                         type="category"
-                        tick={{ fill: "#9ca3af", fontSize: 8 }}
+                        tick={{ fill: "#9ca3af", fontSize: "0.74rem" }}
                         axisLine={false}
                         tickLine={false}
                       />

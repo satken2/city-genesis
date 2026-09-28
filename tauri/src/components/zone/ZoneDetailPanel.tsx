@@ -19,7 +19,6 @@ import { InfoHeader } from "../common/InfoHeader";
 import { DataList } from "../common/DataList";
 import { SpaceAmountChart } from "../common/SpaceAmountChart";
 import { RestrictionFields, type RestrictionValues } from "../parcel/RestrictionFields";
-import { TUTORIAL_FLAG_ZONE_PANEL_OPEN } from "../tutorial/tutorialSetup";
 import zoneIcon from "../../assets/images/zone.png";
 import "./ZoneDetailPanel.css";
 
@@ -148,16 +147,6 @@ export function ZoneDetailPanel({
       setManagementBusy(false);
     }
   };
-
-  // 地区詳細パネルの開閉状態をチュートリアル用の localStorage フラグに反映する。
-  // チュートリアル(シナリオ2)のステップ判定はバックエンドから観測できない
-  // パネルの開閉状態を localStorage 経由で受け取るため、ここで橋渡しする。
-  useEffect(() => {
-    localStorage.setItem(TUTORIAL_FLAG_ZONE_PANEL_OPEN, "1");
-    return () => {
-      localStorage.setItem(TUTORIAL_FLAG_ZONE_PANEL_OPEN, "0");
-    };
-  }, []);
 
   // --- Data fetch ---
   useEffect(() => {

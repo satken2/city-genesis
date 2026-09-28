@@ -20,7 +20,7 @@
 }
 
 .bc-section-title {
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #c5d4e3;
   text-transform: uppercase;
@@ -32,7 +32,7 @@
 .bc-select {
   width: 100%;
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   background: rgba(255, 255, 255, 0.08);
   color: #f6fbff;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -56,8 +56,49 @@
   padding: 12px;
   color: #93a9c0;
   text-align: center;
-  font-size: 0.65rem;
+  font-size: 0.9rem;
 }
+
+/* ---- 分類・建物の選択タイル ---- */
+.bc-back-btn {
+  display: block;
+  width: fit-content;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.bc-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+}
+
+/* App.css の button 既定(枠線・余白)を打ち消してタイルにする */
+.bc-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6fbff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bc-tile:hover { background: rgba(255, 255, 255, 0.14); }
+.bc-tile:focus-visible { outline: 2px solid #4ea1ff; outline-offset: 1px; }
+.bc-tile:disabled { opacity: 0.5; cursor: default; }
+
+/* 画像の無いタイルも同じ高さの空枠を残し、名前の位置を揃える */
+.bc-tile-icon { display: grid; place-items: center; height: 52px; }
+.bc-tile-icon img { width: 52px; height: 52px; object-fit: contain; }
+.bc-tile-name { font-size: 0.97rem; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
 
 /* ---- 説明文（アイコン＋枠付き） ---- */
 .bc-description-frame {
@@ -83,14 +124,14 @@
 }
 
 .bc-description-name {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   color: #f6fbff;
   margin-bottom: 4px;
 }
 
 .bc-description-text {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   line-height: 1.5;
 }
@@ -117,7 +158,7 @@
 .bc-floor-range {
   margin-left: 2px;
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #c5d4e3;
   cursor: default;
 }
@@ -129,7 +170,7 @@
 
 /* ---- 敷地選択メッセージ ---- */
 .bc-parcel-message {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   text-align: center;
   padding: 8px;
@@ -155,7 +196,8 @@
 .bc-info-grid {
   display: grid;
   grid-template-columns: max-content 1fr;
-  grid-auto-rows: 22px;
+  /* 行の高さは文字サイズに連動させ、値が折り返したら行ごと伸ばす(固定高だと次の行に重なる) */
+  grid-auto-rows: minmax(2.04rem, auto);
   gap: 3px 10px;
   align-items: center;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -167,15 +209,13 @@
 .bc-info-label {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 0.72rem;
-  line-height: 22px;
+  font-size: 1rem;
 }
 
 .bc-info-value {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: inherit;
   font-family: "Consolas", "Menlo", monospace;
-  line-height: 22px;
 }
 
 /* ランニングコストの内訳行(人件費・原料費)。親行より一段インデントし、色を落とす。 */
@@ -216,7 +256,7 @@
 }
 
 .bc-stepper-unit {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
 }
 
@@ -233,7 +273,7 @@
 }
 
 .bc-slider-label {
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #93a9c0;
   width: 12px;
@@ -272,7 +312,7 @@
 }
 
 .bc-slider-value {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   font-family: "Consolas", "Menlo", monospace;
   width: 36px;
@@ -295,7 +335,7 @@
 .bc-budget-ratio-inline {
   margin-left: 6px;
   color: #93a9c0;
-  font-size: 0.68rem;
+  font-size: 0.94rem;
 }
 
 /* ---- アクションボタン (パネル下部に固定) ---- */
@@ -317,7 +357,7 @@
   flex: 1;
   min-width: 60px;
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 0.72rem;
+  font-size: 1rem;
   padding: 6px 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.08);
@@ -351,7 +391,7 @@
 /* ---- ローディング/empty ---- */
 .bc-muted {
   color: #9db0c5;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   text-align: center;
   padding: 8px;
 }
@@ -376,7 +416,7 @@
   border: 1px solid rgba(80, 200, 120, 0.35);
   border-radius: 6px;
   background: rgba(80, 200, 120, 0.08);
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   color: #cfe6d6;
 }
 

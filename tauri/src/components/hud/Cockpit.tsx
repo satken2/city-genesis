@@ -49,7 +49,7 @@ import { PublicServiceGauges } from "./PublicServiceGauges";
 import { ScoreMiniMeter } from "./ScoreMiniMeter";
 import { TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
 import { setHudMode, useHudMode } from "./hudMode";
-import { useHudSession, useTutorialHighlight } from "./useHudSession";
+import { useHudSession } from "./useHudSession";
 import { useWeather } from "./useWeather";
 import { WeatherStatus } from "./WeatherStatus";
 import "./hud.css";
@@ -63,7 +63,6 @@ export function Cockpit() {
   const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting, templateMode } = useHudSession();
   const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, templateMode);
   const mode = useHudMode();
-  const getBtnClassName = useTutorialHighlight();
   // ブルドーザの削除確認ダイアログでプロップ種別名を出すために参照する。
   const masterData = useMasterData();
 
@@ -232,7 +231,7 @@ export function Cockpit() {
             <button
               key={icon.id}
               id={icon.id}
-              className={`${getBtnClassName(icon.id, "hud-icon-btn cockpit-tool")}${active ? " hud-icon-btn--active" : ""}`}
+              className={`hud-icon-btn cockpit-tool${active ? " hud-icon-btn--active" : ""}`}
               type="button"
               title={tooltip}
               aria-pressed={icon.id === "bulldozer" ? active : undefined}
@@ -289,13 +288,12 @@ export function Cockpit() {
         <BudgetMiniMeter
           apiBaseUrl={apiBaseUrl}
           onOpen={() => void openRegisteredWindow("city_budget")}
-          extraClassName={getBtnClassName("budget", "").trim()}
         />
       </div>
 
       <button
         id="notifications"
-        className={`${getBtnClassName("notifications", "hud-icon-btn cockpit-alert")}${warningCount > 0 ? " cockpit-alert--active" : ""}`}
+        className={`hud-icon-btn cockpit-alert${warningCount > 0 ? " cockpit-alert--active" : ""}`}
         type="button"
         title={t("notifications.trayTooltip")}
         onClick={() => void openRegisteredWindow("city_notifications")}
@@ -309,7 +307,7 @@ export function Cockpit() {
 
       <button
         id="execute"
-        className={getBtnClassName("execute", "cockpit-execute")}
+        className="cockpit-execute"
         type="button"
         title={t("taskbar.menuExecute")}
         disabled={isLocked}

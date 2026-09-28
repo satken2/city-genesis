@@ -21,7 +21,7 @@
 .ic-conn__head {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
 }
 
 .ic-conn__roads {
@@ -52,12 +52,12 @@
 
 .ic-conn__road-name {
   color: #e2eaf2;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
 }
 
 .ic-conn__road-zone {
   color: #93a9c0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   min-height: 1.2em;
 }
 

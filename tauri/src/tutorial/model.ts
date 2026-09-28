@@ -4,7 +4,7 @@ export type Resource = "paths" | "parcels" | "buildings" | "agents" | "zones" | 
 export type Value = null | boolean | number | string | Value[] | { [key: string]: Value };
 export type Ref = { kind: Resource; id: number };
 export type Bindings = Record<string, Ref>;
-export type Match = { field: string; equals?: Value; oneOf?: Value[]; greaterThan?: number };
+export type Match = { field: string; equals?: Value; notEquals?: Value; oneOf?: Value[]; greaterThan?: number };
 export type Condition =
   | { type: "ack" }
   | { type: "all" | "any"; conditions: Condition[] }

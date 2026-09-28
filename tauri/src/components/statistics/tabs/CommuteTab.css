@@ -16,7 +16,7 @@
 
 /* 共通タイトル */
 .commute-panel-title {
-  font-size: 12px;
+  font-size: 1.11rem;
   font-weight: 700;
   color: #8ba3bb;
   text-transform: uppercase;
@@ -81,12 +81,12 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #8ba3bb;
 }
 
 .commute-car__metric b {
-  font-size: 16px;
+  font-size: 1.48rem;
   font-weight: 700;
   color: #4dabf7;
   font-variant-numeric: tabular-nums;
@@ -94,13 +94,13 @@
 
 /* 希望率は保有率の補助情報なので、色と大きさで主従をつける */
 .commute-car__metric--sub b {
-  font-size: 13px;
+  font-size: 1.2rem;
   color: #94a3b8;
 }
 
 .commute-car__note {
   margin: 0 0 8px;
-  font-size: 10px;
+  font-size: 0.93rem;
   line-height: 1.4;
   color: #64748b;
 }
@@ -124,7 +124,7 @@
   padding: 4px 10px;
   border-radius: 4px;
   background: rgba(15, 20, 32, 0.75);
-  font-size: 10px;
+  font-size: 0.93rem;
   color: #93a9c0;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
@@ -142,7 +142,7 @@
   padding: 4px 10px;
   border-radius: 4px;
   background: rgba(15, 20, 32, 0.75);
-  font-size: 10px;
+  font-size: 0.93rem;
   color: #93a9c0;
   text-align: center;
   pointer-events: none;
@@ -182,7 +182,7 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #64748b;
   text-align: center;
 }
@@ -195,7 +195,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   padding: 8px 12px;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #cbd5e1;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   pointer-events: none;
@@ -250,7 +250,7 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  font-size: 13px;
+  font-size: 1.2rem;
   color: #8ba3bb;
 }
 

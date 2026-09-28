@@ -45,7 +45,8 @@
     "path_shape_editor": "Editor de forma de vía",
     "grading": "Movimiento de tierras",
     "scenario_manager": "Gestor de escenarios",
-    "scenario_metadata": "Información"
+    "scenario_metadata": "Información",
+    "tutorial_intro": "Tutorial"
   },
   "cityMap": {
     "layers": {

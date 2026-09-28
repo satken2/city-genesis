@@ -45,7 +45,8 @@
     "path_shape_editor": "Path Shape Editor",
     "grading": "Earthworks",
     "scenario_manager": "Scenario manager",
-    "scenario_metadata": "Metadata"
+    "scenario_metadata": "Metadata",
+    "tutorial_intro": "Tutorial"
   },
   "cityMap": {
     "layers": {

@@ -19,12 +19,12 @@
 
 .cp-description {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   color: #9fb3c8;
 }
 
 .cp-showall-btn {
-  font-size: 0.72rem;
+  font-size: 1rem;
   padding: 4px 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 4px;
@@ -42,7 +42,7 @@
 .cp-empty {
   margin: 24px 0;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   color: #8195a9;
 }
 
@@ -61,7 +61,7 @@
 
 .cp-project-title {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 1.28rem;
   color: #f6fbff;
   white-space: nowrap;
   overflow: hidden;
@@ -82,13 +82,13 @@
 }
 
 .cp-summary-item dt {
-  font-size: 0.64rem;
+  font-size: 0.89rem;
   color: #8195a9;
 }
 
 .cp-summary-item dd {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: 1.19rem;
   color: #f6fbff;
   font-variant-numeric: tabular-nums;
 }
@@ -101,7 +101,7 @@
   border-radius: 4px;
   background: transparent;
   color: #8195a9;
-  font-size: 0.9rem;
+  font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
 }
@@ -113,7 +113,7 @@
 
 .cp-warning {
   margin: 8px 0 0;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #ffc46b;
 }
 
@@ -121,13 +121,13 @@
   width: 100%;
   margin-top: 8px;
   border-collapse: collapse;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
 }
 
 .cp-table th {
   text-align: left;
   font-weight: normal;
-  font-size: 0.66rem;
+  font-size: 0.92rem;
   color: #8195a9;
   padding: 2px 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -169,7 +169,7 @@
 
 .cp-variant {
   margin-left: 6px;
-  font-size: 0.66rem;
+  font-size: 0.92rem;
   color: #8195a9;
 }
 
@@ -178,7 +178,7 @@
   border-radius: 4px;
   background: transparent;
   color: #c5d4e3;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   line-height: 1;
   padding: 2px 4px;
   cursor: pointer;

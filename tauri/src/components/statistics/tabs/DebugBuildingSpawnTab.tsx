@@ -44,6 +44,7 @@ import {
   formatCompact,
 } from "./spawnDebugShared";
 import "./DebugSpawnTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // 折れ線系列の色
 const COLOR_BEST_SCORE = "#4ea1ff"; // 最高最終スコア
@@ -57,6 +58,7 @@ function totalCost(entry: ConstructionVariantEntry): number {
 
 export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const masterData = useMasterData();
   const { data, loading, error } = useEpochCachedStats<SpawnDebugStats>(
     apiBaseUrl,
@@ -178,7 +180,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
-                      width={52}
+                      width={remPx(4.81)}
                       tickFormatter={formatCompact}
                       domain={["auto", "auto"]}
                     />
@@ -188,7 +190,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
-                      width={30}
+                      width={remPx(2.78)}
                       allowDecimals={false}
                     />
                     <Tooltip
@@ -199,7 +201,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                           : formatCompact(Number(value))
                       }
                     />
-                    <Legend wrapperStyle={{ fontSize: "11px" }} />
+                    <Legend wrapperStyle={{ fontSize: "1.02rem" }} />
                     {/* スコア0 = 建設が成立するライン */}
                     <ReferenceLine
                       yAxisId="score"
@@ -210,7 +212,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         value: t("statistics.debugSpawnZeroLine"),
                         position: "insideTopRight",
                         fill: "#f59e0b",
-                        fontSize: 11,
+                        fontSize: "1.02rem",
                       }}
                     />
                     <Bar

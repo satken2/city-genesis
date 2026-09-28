@@ -53,6 +53,7 @@ import {
   formatCoefficient,
 } from "./spawnDebugShared";
 import "./DebugSpawnTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 /** 経済主体スポーンのバリアント選択値。"all" は全業種の合算を表す。 */
 type AgentVariantSelection = number | "all";
@@ -121,6 +122,7 @@ type LatestAgentRow = {
 
 export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const masterData = useMasterData();
   const { data, loading, error } = useEpochCachedStats<SpawnDebugStats>(
     apiBaseUrl,
@@ -329,9 +331,9 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <ComposedChart data={blockerChartData} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
                     <XAxis dataKey="date" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
-                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={40} allowDecimals={false} />
+                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={remPx(3.7)} allowDecimals={false} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} />
-                    <Legend wrapperStyle={{ fontSize: "11px" }} />
+                    <Legend wrapperStyle={{ fontSize: "1.02rem" }} />
                     {BLOCKER_SERIES.map((s) => (
                       <Bar
                         key={s.key}
@@ -386,7 +388,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
-                      width={52}
+                      width={remPx(4.81)}
                       tickFormatter={formatCompact}
                       domain={["auto", "auto"]}
                     />
@@ -398,7 +400,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         tick={AXIS_TICK}
                         tickLine={false}
                         axisLine={{ stroke: "#253246" }}
-                        width={40}
+                        width={remPx(3.7)}
                       />
                     )}
                     <Tooltip
@@ -410,7 +412,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                           : formatCompact(Number(value));
                       }}
                     />
-                    <Legend wrapperStyle={{ fontSize: "11px" }} />
+                    <Legend wrapperStyle={{ fontSize: "1.02rem" }} />
                     {visibleMetricSeries.map((s) => (
                       <Line
                         key={s.key}

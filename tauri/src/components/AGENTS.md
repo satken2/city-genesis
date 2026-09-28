@@ -4,7 +4,7 @@
 
 ## フォルダ一覧
 
-チュートリアルの表示は `tutorial/`、JSON定義・進行・各WebViewの制限は `../tutorial/`。通常コンポーネントは安定した操作名の `data-guide` と観測・確定直前の接点を提供し、シナリオ固有の条件を持たない。登録済み操作名は `../tutorial/definitions.ts` が正。
+チュートリアルの表示は `tutorial/`(ヒントバー型の `Tutorial` と開始時の説明ウィンドウ `TutorialIntroWindow`)、JSON定義・進行・各WebViewの制限は `../tutorial/`。通常コンポーネントは安定した操作名の `data-guide` と観測・確定直前の接点を提供し、シナリオ固有の条件を持たない。登録済み操作名は `../tutorial/definitions.ts` が正。
 
 | フォルダ | 内容 |
 | --- | --- |
@@ -68,7 +68,7 @@
 | `ColorSwatchPicker` | 色選択。OSのカラーダイアログは最前面固定の透明ウィンドウの裏に開くので使わない |
 | `SettingsRow` / `SettingsForm.css` | アプリ設定・都市設定の共通フォーム。見出し・カード・設定行・Coming soon・セグメント選択・入力欄は同じ意匠を使う。`disabled` は表示用なので子の操作部品にもネイティブの `disabled` を指定する |
 
-このほか`SatisfactionFace`・`SpeedLimitSign`・グラフ類・`NumberStepper`・`Money`等がある。フック`hooks/useVariantAffordability`は資金目安でプルダウンを無効化する。
+このほか`SatisfactionFace`・`SpeedLimitSign`・グラフ類・`NumberStepper`・`Money`等がある。フック`hooks/useVariantAffordability`は資金目安で選択肢(プルダウンの項目・建物建設のタイル)を無効化する。
 
 ## hud/ の常駐パネル
 
@@ -77,8 +77,7 @@
 - 常駐モード(ブルドーザ/地区編集)は排他。状態の正はグローバルイベント`hud:mode_changed`(`hudMode.ts`)で、副作用は操作した側だけが実行する。編集モードのウィンドウを開いたときの解除はRust(`window.rs`の`apply_mutex_rules`)が送るので、開く側のコンポーネントで`setHudMode(null)`しない。
 - BGM再生、3Dのオブジェクト選択受信、Unityの確認要求`remove_object:request_confirm`は`Cockpit`だけが受ける。確認結果は取消でも必ず`sendRemoveObjectConfirmResult`で返す(返さないとUnityが待ち続ける)。
 - 地区統合の確認は`IconPanel`が`edit_zone:request_merge`を受けて開く。
-- チュートリアルのハイライトID(`tutorial/tutorialSteps.ts`の`targetElementId`)はHUDのウィンドウをまたぐ。アイコンを消す/移す前に参照先を確認する(消えると無言で進行する)。
-  - ステップは`prepare`→`validate`→`onComplete`。パスの端点ノードは稼働後にしか付かないので、接続判定を伴う工期スキップは`prepare`に置く。
+- チュートリアルの定義(`../tutorial/definitions/*.json`)はHUDのボタンIDを操作名 `hud.<id>` として強調・許可に使う。アイコンのIDを変える/消す前に定義と `../tutorial/definitions.ts` の登録表を確認する(消えるとその段階でボタンを押せなくなる)。
 
 ## 個別パネルの契約(知らないと壊すもの)
 
@@ -90,6 +89,8 @@
 - エポック実行(`taskbar/EpochConfirmWindow`): HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
 
 - 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物・構造種別の階数上限はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
+  - 選択は分類タイル→建物タイル→建設画面の3段で、左上の戻るで1段ずつ戻る。分類はマスターの`bd_category`(`BD_CATEGORY_*`。ID順がタイルの並び、未設定は「その他」)で、建築規制の`bd_type`では分けない。建設画面から戻る先は選んでいた建物の分類(編集・コピーで直接開いた場合も同じ)。
+  - 既存建物の編集は分類へ戻れず、候補を編集対象と同じ`bd_type`に絞る(敷地を選び直さないので建築規制の照合を通らない)。タイルのアイコンは専用画像だけを出し(分類=`utils/bdCategoryIcon`、建物=`resolveAgentVariantIcon`)、無ければ枠を空けておく。
   - 市庁舎の移転は、市庁舎の詳細パネルの移転ボタンが`params.extra.relocateCityHall`で開く移転モード(市庁舎に固定し自由配置から始める)。送信は新規の配置と同じで、配置済みならバックエンドが移転として扱う。創設後の一覧には市政府を出さない。
 - 区画作成(`parcel/ParcelCreationPanel`): 作成方法の真実源はUnity(`edit_parcel:set_mode`はUnity起点だけ)。確定後も`STATE_NORMAL`を送らず連続作成。`parcel_type`は送らない。
 - 公共施設(`agent/PublicFacilityPanel`): 放棄中は解除以外を無効化。`status_from`の見出しは`resolveStatusSinceLabel`で選ぶ(再開でも更新されるので一律「竣工日」にしない)。

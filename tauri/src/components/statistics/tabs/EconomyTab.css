@@ -15,7 +15,7 @@
 
 .econ-tab__title {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.46rem;
   font-weight: 700;
   color: #e2e8f0;
 }
@@ -44,7 +44,7 @@
 .econ-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   text-align: left;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .econ-table__id {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #5a6f86;
 }
 

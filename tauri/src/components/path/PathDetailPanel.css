@@ -12,8 +12,8 @@
 }
 
 .zone-change-select {
-  font-size: 0.8rem;
-  line-height: 22px;
+  font-size: 1.11rem;
+  line-height: 2.04rem;
   background: rgba(255, 255, 255, 0.08);
   color: #c5d4e3;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -38,7 +38,7 @@
 }
 
 .zone-change-error {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #ff7171;
   margin-top: 2px;
 }
@@ -62,7 +62,7 @@
 }
 
 .pending-banner__text {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   color: #ffb03a;
   font-weight: 500;
 }
@@ -76,7 +76,7 @@
   border: none;
   border-radius: 4px;
   padding: 5px 10px;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;

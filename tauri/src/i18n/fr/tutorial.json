@@ -1,113 +1,90 @@
 {
   "tutorial": {
     "startButton": "Commencer",
-    "step1": {
-      "title": "Bienvenue",
-      "description": "Bienvenue ! En tant que maire de cette ville, vous allez œuvrer à son développement. Nous allons vous enseigner les bases de la construction urbaine !"
-    },
-    "step2": {
-      "title": "Traçons une route",
-      "description": "Il faut d'abord une route. Pour en construire une, choisissez l'icône des routes dans la barre d'outils, sélectionnez « Rue résidentielle à deux voies » dans la catégorie « Voirie » et tracez-la. Les routes longues demandent plus de temps de chantier : commencez par une route courte."
-    },
-    "step3": {
-      "title": "Réglons le budget de la ville",
-      "description": "Pour consacrer les fonds en priorité au chantier routier, réglons le budget de la ville. Ouvrez la fenêtre du budget depuis le panneau d'icônes à gauche et réduisez les autres catégories afin de pouvoir allouer davantage à la catégorie construction (le budget de construction doit atteindre au moins 95 % du total). Vous pouvez ajuster en faisant glisser les limites de la barre du haut ou en saisissant des chiffres dans les champs de chaque poste."
-    },
-    "step4": {
-      "title": "Terminons la route",
-      "description": "La route est encore « en projet ». Une fois le chantier lancé, il faudra un certain temps avant qu'elle soit terminée. Faisons avancer le temps et attendons son achèvement. Appuyez sur le bouton « Démarrer » de la barre d'outils pour avancer un peu. Pendant les travaux, un coût de construction est prélevé chaque mois."
-    },
-    "step5": {
-      "title": "Créons des parcelles",
-      "description": "La route est terminée. Créons maintenant les parcelles sur lesquelles construire des bâtiments. Choisissez l'icône des parcelles dans la barre d'outils et créez-les avec « Le long de la route ». Lorsque des contours rouges apparaissent le long de la route, validez avec le bouton pour créer les parcelles."
-    },
-    "step6": {
-      "title": "Construisons un bâtiment",
-      "description": "Nous pouvons enfin construire. Choisissez l'icône des bâtiments dans la barre d'outils et sélectionnez « Logement collectif » dans la catégorie « Logement collectif ». Vous pouvez choisir comme site de chantier n'importe laquelle des parcelles que vous venez de créer."
-    },
-    "step7": {
-      "title": "Terminons le bâtiment",
-      "description": "Comme la route, le bâtiment ne se termine pas immédiatement. Il est encore en projet : faites avancer le temps et attendez son achèvement."
+    "basic": {
+      "step1": {
+        "title": "Traçons une route"
+      },
+      "step2": {
+        "title": "Terminons la route",
+        "description": "La route est encore « en projet ». Une fois le chantier lancé, il faudra un certain temps avant qu'elle soit terminée. Faisons avancer le temps et attendons son achèvement. Appuyez sur le bouton « Démarrer » de la barre d'outils pour avancer un peu. Pendant les travaux, un coût de construction est prélevé chaque mois."
+      },
+      "step3": {
+        "title": "Créons des parcelles",
+        "description": "La route est terminée. Créons maintenant les parcelles sur lesquelles construire des bâtiments. Choisissez l'icône des parcelles dans la barre d'outils et créez-les avec « Le long de la route ». Lorsque des contours rouges apparaissent le long de la route, validez avec le bouton pour créer les parcelles."
+      },
+      "step4": {
+        "title": "Construisons un bâtiment",
+        "description": "Nous pouvons enfin construire. Choisissez l'icône des bâtiments dans la barre d'outils et sélectionnez « Logement collectif » dans la catégorie « Logement ». Vous pouvez choisir comme site de chantier n'importe laquelle des parcelles que vous venez de créer."
+      },
+      "step5": {
+        "title": "Terminons le bâtiment",
+        "description": "Comme la route, le bâtiment ne se termine pas immédiatement. Il est encore en projet : faites avancer le temps et attendez son achèvement."
+      }
     },
     "scenario2": {
       "title": "Configurons les quartiers",
       "description": "Apprenez à découper la ville en quartiers et à définir une réglementation de construction pour chacun.",
       "step1": {
-        "title": "Qu'est-ce qu'un quartier",
-        "description": "Dans ce tutoriel, vous apprendrez à définir des quartiers dans la ville et à régler la réglementation et d'autres paramètres à l'échelle du quartier."
+        "title": "Créons un quartier",
+        "description": "Le quartier est l'unité qui découpe la ville en zones ; il se définit sur les routes. Appuyez sur le bouton des quartiers du panneau d'icônes pour entrer en mode d'édition des quartiers : vous verrez que le réseau de routes en H forme un seul quartier. Avec l'outil de création (état initial), cliquez sur la route au repère jaune pour en faire, avec les parcelles qui la bordent, un nouveau quartier."
       },
       "step2": {
-        "title": "Créons un quartier",
-        "description": "Le quartier est l'unité de découpage de la ville et se définit sur les routes qui la composent. Appuyez sur le bouton des quartiers dans le panneau d'icônes à gauche pour entrer en mode d'édition des quartiers. Vous verrez que toute la ville ne forme actuellement qu'un seul quartier. Dans la vue 3D, avec l'outil de création (état initial ; on change d'outil via le menu obtenu en maintenant Ctrl), cliquez sur la route en haut à droite pour ériger cette route et les parcelles qui la bordent en nouveau quartier."
+        "title": "Le quartier est découpé",
+        "description": "Vous avez détaché une partie de la ville en un nouveau quartier. Créer des quartiers permet d'agréger les prix, la population et d'autres données par quartier, et de définir une réglementation de construction pour l'ensemble du quartier. Pour quitter le mode d'édition des quartiers, appuyez de nouveau sur le bouton des quartiers."
       },
       "step3": {
-        "title": "Le quartier est découpé",
-        "description": "Vous avez détaché une partie de la ville en un nouveau quartier. Créer des quartiers permet d'agréger les prix, la population et d'autres données par quartier, et de définir une réglementation de construction pour l'ensemble du quartier."
+        "title": "Affichons les ressources naturelles",
+        "description": "Voyons s'il y a des ressources naturelles dans ce quartier. Ouvrez les modes d'affichage avec l'icône en forme d'œil du cockpit, en bas au centre de l'écran, et activez l'affichage dans l'onglet des ressources naturelles. Une fois affichées, cliquez sur le filon au repère jaune pour ouvrir son détail."
       },
       "step4": {
-        "title": "Affichons les ressources naturelles",
-        "description": "Voyons s'il y a des ressources naturelles dans le périmètre de ce quartier. Cliquez sur l'icône en forme d'œil dans le cockpit, en bas au centre de l'écran, pour changer de mode d'affichage. Sélectionnez l'onglet des ressources naturelles et activez leur affichage."
-      },
-      "step5": {
         "title": "Ouvrons le détail du quartier",
         "description": "On constate qu'un filon se trouve à l'emplacement du quartier nouvellement créé. Cette zone semble se prêter à une mine. Cliquez sur l'étiquette du nouveau quartier pour ouvrir son panneau de détail."
       },
-      "step6": {
+      "step5": {
         "title": "Définissons la réglementation de construction",
-        "description": "Dans la réglementation de construction, en bas du panneau, vous pouvez choisir quels bâtiments sont autorisés sur les parcelles de ce quartier. Ici, nous ne voulons que des mines : cliquez sur tous les autres bâtiments pour les désactiver."
+        "description": "Dans la réglementation de construction, en bas du panneau, vous pouvez choisir quels bâtiments sont autorisés sur les parcelles de ce quartier. Ici, nous ne voulons que des mines : cliquez sur tous les bâtiments sauf « Installation d'extraction » pour les désactiver."
+      },
+      "step6": {
+        "title": "Vérifions une parcelle",
+        "description": "La réglementation du quartier est définie. Vérifions qu'elle s'applique bien aux parcelles qu'il contient. Cliquez sur la parcelle au repère jaune pour ouvrir son panneau de détail."
       },
       "step7": {
-        "title": "Vérifions une parcelle",
-        "description": "La réglementation du quartier est définie. Vérifions qu'elle s'applique bien aux parcelles qu'il contient. Cliquez sur une parcelle du quartier pour ouvrir son panneau de détail."
-      },
-      "step8": {
         "title": "La réglementation est appliquée",
-        "description": "En regardant le bas du panneau de la parcelle, vous voyez que la restriction définie au niveau du quartier — n'autoriser que les mines — est bien répercutée. Sur cette parcelle, il n'est plus possible de construire autre chose qu'une mine."
+        "description": "En regardant le bas du panneau de la parcelle, vous voyez que la restriction définie au niveau du quartier — n'autoriser que « Installation d'extraction » — est bien répercutée. Sur cette parcelle, il n'est plus possible de construire autre chose qu'une installation d'extraction."
       }
     },
     "scenario3": {
       "title": "Aménageons les infrastructures",
       "description": "Apprenez à acheminer l'électricité jusqu'à la ville à l'aide d'une centrale, d'un poste électrique et de lignes de transmission.",
       "step1": {
-        "title": "Qu'est-ce que l'aménagement des infrastructures",
-        "description": "Dans ce tutoriel, vous apprendrez à aménager l'infrastructure nécessaire pour alimenter la ville en électricité. Appuyez sur « Démarrer » pour continuer."
+        "description": "Le logement collectif de cette ville n'est pas encore alimenté en électricité. Cliquez sur le logement collectif au repère jaune pour ouvrir son détail, choisissez l'un des occupants dans l'onglet « Bâtiment », puis ouvrez son onglet « Offre et demande » : vous verrez que la quantité obtenue d'électricité est de 0.",
+        "title": "Examinons le logement collectif"
       },
       "step2": {
-        "title": "Examinons la maison",
-        "description": "Une maison est déjà construite dans cette ville, mais elle n'est pas encore alimentée en électricité. Cliquez dessus pour ouvrir ses informations détaillées et constater l'absence d'alimentation."
+        "description": "Pour produire de l'électricité, il faut une centrale. Construisez une « Centrale solaire » sur la parcelle au repère jaune, sur le terrain plat à l'ouest de la ville. Normalement, l'achèvement prend du temps, mais comme il s'agit d'un tutoriel, la durée du chantier est ignorée après confirmation et la centrale est achevée.",
+        "title": "Construisons une centrale solaire"
       },
       "step3": {
-        "title": "Construisons une centrale solaire",
-        "description": "Pour produire de l'électricité, il faut d'abord une centrale. Cette ville n'en a aucune. Un vaste terrain se trouve à l'ouest de la ville : choisissez « Centrale solaire » dans le panneau des bâtiments et construisez-la là."
+        "description": "L'électricité haute tension produite par la centrale ne peut pas être utilisée telle quelle dans les foyers. Construisez un « Poste électrique » sur la parcelle au repère jaune à côté du logement collectif pour la convertir en électricité domestique. L'électricité du poste atteint une zone donnée autour de lui.",
+        "title": "Construisons un poste électrique"
       },
       "step4": {
-        "title": "Nous passons le chantier",
-        "description": "Normalement, une centrale met du temps à être achevée, mais comme il s'agit d'un tutoriel, nous passons le chantier. En appuyant sur « J'ai terminé », la centrale solaire sera immédiatement achevée."
+        "description": "Ouvrez « Infrastructures » dans le panneau d'icônes et choisissez « Ligne de transmission » sous « Électricité ». Tracez une ligne depuis la borne de raccordement de la centrale solaire jusqu'à celle du poste électrique de la ville. Même s'ils sont éloignés, vous pouvez la tracer d'un seul tenant en reliant les bornes en ligne droite. Après confirmation, la ligne de transmission est achevée et la liaison est vérifiée.",
+        "title": "Raccordons par une ligne de transmission"
       },
       "step5": {
-        "title": "Construisons un poste électrique",
-        "description": "La centrale solaire est achevée. Cependant, le courant haute tension qu'elle produit ne peut pas être utilisé tel quel dans les foyers. Il faut placer un poste électrique près du lieu de consommation pour le convertir en électricité domestique. Un terrain libre jouxte la maison : construisez-y un « Poste électrique »."
+        "description": "Faites avancer les époques et vérifiez que le poste électrique reçoit de l'électricité haute tension. Cliquez sur le poste pour ouvrir son détail et, dans l'onglet « Offre et demande », vérifiez que la quantité reçue d'électricité haute tension n'est pas nulle. Il faut quelques époques pour que la centrale démarre et que l'électricité arrive.",
+        "title": "Vérifions l'alimentation électrique"
       },
       "step6": {
-        "title": "Posons la ligne de transmission",
-        "description": "Pour acheminer le courant haute tension de la centrale vers le poste, nous allons poser une « Ligne haute tension ». La centrale et le poste disposent chacun d'un nœud « borne de raccordement » : accrochez une extrémité de la ligne à la borne de la centrale solaire et l'autre à celle du poste électrique."
-      },
-      "step7": {
-        "title": "Vérifions l'alimentation électrique",
-        "description": "L'aménagement de l'infrastructure est terminé. Faites avancer le temps et vérifiez que le poste électrique reçoit bien le courant haute tension."
-      },
-      "step8": {
-        "title": "Aménagement terminé",
-        "description": "Bravo ! La centrale produit du courant haute tension, la ligne de transmission l'achemine jusqu'au poste électrique, et celui-ci le convertit en électricité pour la ville : voilà la structure en deux étages de l'infrastructure électrique. Le même mécanisme permet d'aménager d'autres réseaux, comme l'eau potable."
+        "description": "Enfin, comme à l'étape 1, ouvrez l'onglet « Offre et demande » d'un occupant du logement collectif et vérifiez que la quantité obtenue d'électricité n'est plus nulle ; cela peut prendre encore quelques époques. Produire, transporter, transformer : voilà comment l'électricité arrive dans les foyers, et l'eau suit le même principe.",
+        "title": "Aménagement terminé"
       }
     },
     "scenario4": {
       "title": "Construisons un chemin de fer",
       "description": "Apprenez à mettre une ligne ferroviaire en service en préparant tour à tour la voie, le dépôt, la ligne de transmission, le quai et le bâtiment de gare.",
-      "step1": {
-        "title": "Le chemin de fer fonctionne par assemblage",
-        "description": "Dans ce tutoriel, vous apprendrez à faire passer le chemin de fer dans la ville. Poser des rails ne suffit pas à faire circuler des trains. Il faut un dépôt qui fournit le matériel roulant, une ligne de transmission qui alimente la voie électrifiée, un quai et un bâtiment de gare pour la montée et la descente des voyageurs, et enfin une ligne qui fait rouler les trains : tout cela réuni, le système se met en marche. Cette ville ne dispose que de routes et d'une centrale solaire. Appuyez sur « Commencer » et construisons tout cela dans l'ordre."
-      },
       "step2": {
         "title": "Posons la voie",
         "description": "D'abord la voie sur laquelle rouleront les trains. Ouvrez « Construction ferroviaire » dans le panneau d'icônes à gauche et, dans l'onglet « Voie ferrée », choisissez « Voie électrifiée de surface ». Une voie seule est une voie unique : pour un aller-retour, il faut une double voie. Réglez le nombre de voies « parallèles » sur 2, puis posez-les bien droites d'est en ouest sur le terrain libre au nord (au fond) de la route. Dans la vue 3D, le clic gauche ajoute des sommets et le clic droit valide."
@@ -143,10 +120,10 @@
     },
     "complete": {
       "title": "Tutoriel terminé",
-      "description": "Félicitations ! Le tutoriel est terminé. Retour au menu.",
-      "button": "Revenir au menu"
+      "description": "Félicitations ! Le tutoriel est terminé. Appuyez sur « Terminer » pour fermer le guide et continuer à jouer librement dans cette ville.",
+      "button": "Terminer"
     },
-    "completeButton": "J'ai terminé",
+    "nextButton": "Suivant",
     "checking": "Vérification...",
     "failed": "Les conditions ne sont pas remplies. Réessayez.",
     "completed": "Tutoriel terminé ! Beau travail.",
@@ -160,29 +137,50 @@
       "confirmRoad": "Confirmez dans le panneau de construction pour enregistrer la route, puis appuyez sur Terminer.",
       "failed": "Échec de la préparation ou de la communication. Réessayez ; si le problème persiste, quittez et lancez le tutoriel dans une nouvelle ville.",
       "retry": "Réessayer",
-      "exit": "Quitter",
-      "exitFailed": "Impossible de quitter. Réessayez.",
       "placementRequired": "Utilisez la variante et les positions indiquées pour la route.",
-      "preparing": "Préparation de la ville du tutoriel."
+      "preparing": "Préparation de la ville du tutoriel.",
+      "finishFailed": "Impossible de terminer le tutoriel. Veuillez réessayer."
     },
     "trade": {
       "title": "Développer le commerce international",
       "description": "Apprenez à exporter des marchandises par mer et à en importer par rail en construisant un port à conteneurs et une gare de fret internationale.",
       "step1": {
-        "title": "Construire un port à conteneurs",
-        "description": "Construire un port à conteneurs。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez un « Terminal à conteneurs » sur la parcelle côtière au repère jaune. Après confirmation, la durée du chantier est ignorée.",
+        "title": "Construire un port à conteneurs"
       },
       "step2": {
-        "title": "Vérifier les exportations alimentaires",
-        "description": "Vérifier les exportations alimentaires。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Faites avancer les époques et vérifiez les exportations alimentaires dans le détail du port. La production de l'usine et le transport mettent quelques époques à démarrer.",
+        "title": "Vérifier les exportations alimentaires"
       },
       "step3": {
-        "title": "Construire une gare de fret internationale",
-        "description": "Construire une gare de fret internationale。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez une « Gare de fret internationale » sur la parcelle au repère jaune le long de la route. À la frontière est se trouvent une voie ferrée qui mène au pays voisin et une gare de fret frontalière.",
+        "title": "Construire une gare de fret internationale"
       },
       "step4": {
-        "title": "Vérifier les importations ferroviaires",
-        "description": "Vérifier les importations ferroviaires。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "open": "Ouvrez « Voies ferrées » dans le panneau d'icônes et choisissez « Quai de fret pour conteneurs » dans l'onglet « Quai ».",
+        "place": "Posez un quai au nord de la gare de fret internationale, parallèlement à celle-ci. Changez le « Côté du quai » pour que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Si vous le posez d'ouest en est, choisissez « Intérieur ». Une fois la pose terminée, appuyez sur le bouton « J'ai terminé ».",
+        "title": "Construire un quai à côté de la gare"
+      },
+      "step5": {
+        "description": "Avec « Voie de chemin de fer » dans l'onglet « Voie ferrée », posez la voie depuis l'extrémité est du quai jusqu'à l'extrémité ouest du quai de la gare de fret frontalière. Après confirmation, la voie est achevée et la liaison est vérifiée.",
+        "title": "Poser la voie jusqu'à la frontière"
+      },
+      "step6": {
+        "build": "Construisez un « Dépôt ferroviaire » sur la parcelle au repère jaune le long de la route.",
+        "branch": "Posez une voie de desserte depuis la borne de raccordement située au nord du dépôt jusqu'à la ligne principale. Raccordez-la à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est. Une fois la pose terminée, appuyez sur le bouton « J'ai terminé ».",
+        "title": "Construire le dépôt et le relier à la ligne principale"
+      },
+      "step7": {
+        "description": "Ouvrez « Infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire située à l'est de la ville à celle du dépôt.",
+        "title": "Alimenter le dépôt en électricité"
+      },
+      "step8": {
+        "description": "Dans « Transports publics », appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de fret internationale » comme type de ligne. Placez des arrêts sur les quais de la gare de fret internationale et de la gare de fret frontalière, puis mettez la ligne en service. Après confirmation, le point d'entrée des importations passe du port à la gare de fret internationale.",
+        "title": "Mettre en service la ligne de fret internationale"
+      },
+      "step9": {
+        "description": "Faites avancer les époques et vérifiez les importations dans le détail de la gare de fret internationale. L'acquisition des véhicules et la montée en puissance du transport prennent quelques époques.",
+        "title": "Vérifier les importations ferroviaires"
       }
     },
     "highway": {
@@ -190,72 +188,106 @@
       "description": "Apprenez à construire une autoroute surélevée et des bretelles pour créer un échangeur relié aux routes locales.",
       "step1": {
         "title": "Croiser la rue en viaduc",
-        "description": "Croiser la rue en viaduc。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez une autoroute qui franchit la rue centrale sur un viaduc d’au moins 6 m de hauteur. Par exemple, tracez-la du nord au sud à 10 m de hauteur. La confirmation termine la construction."
       },
       "step2": {
         "title": "Nommer l’autoroute",
-        "description": "Nommer l’autoroute。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Depuis le détail de l’autoroute construite, enregistrez-la comme route et saisissez son nom."
       },
       "step3": {
         "title": "Construire une bretelle",
-        "description": "Construire une bretelle。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Reliez l’autoroute surélevée à la rue centrale par une bretelle. La confirmation saute le délai de construction et détecte l’échangeur à partir du raccordement."
       },
       "step4": {
         "title": "Inspecter l’échangeur",
-        "description": "Inspecter l’échangeur。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Ouvrez le détail de l’échangeur et vérifiez que la rue et l’autoroute sont bien raccordées."
       }
     },
     "mining": {
       "title": "Extraire des ressources",
       "description": "Apprenez à extraire du minerai, à le transporter par rail et à l’exporter en aménageant une mine, des gares de fret et un port de vrac.",
       "step1": {
-        "title": "Inspecter le gisement",
-        "description": "Inspecter le gisement。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Activez l'affichage des ressources naturelles avec l'icône en forme d'œil du cockpit, en bas de l'écran, puis cliquez sur le filon situé sur le versant ouest de la montagne centrale (repère jaune) pour ouvrir son détail.",
+        "title": "Inspecter le filon"
       },
       "step2": {
-        "title": "Construire une mine",
-        "description": "Construire une mine。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez une « Mine » sur la parcelle au repère jaune, au-dessus du filon. Choisissez « Mine » dans le panneau de construction, puis cliquez sur la parcelle pour la placer. Après confirmation, comme il s'agit d'un tutoriel, la durée du chantier est ignorée et la mine est achevée.",
+        "title": "Construire une mine"
       },
       "step3": {
-        "title": "Construire la gare de chargement",
-        "description": "Construire la gare de chargement。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez une « Gare de chargement de minerai » sur la parcelle au repère jaune, au pied de la montagne, au nord de la rue principale. Le minerai extrait de la mine est amené ici par camion, puis chargé dans des trains de fret.",
+        "title": "Construire la gare de chargement au pied de la montagne"
       },
       "step4": {
-        "title": "Construire la gare de déchargement",
-        "description": "Construire la gare de déchargement。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez une « Gare de déchargement de minerai » sur la parcelle au repère jaune, à l'angle de la rue du port. Le minerai acheminé par le rail y est déchargé. Attention à ne pas la confondre avec la « Gare de déchargement de pétrole », au nom similaire.",
+        "title": "Construire la gare de déchargement près du port"
       },
       "step5": {
-        "title": "Construire un port de vrac",
-        "description": "Construire un port de vrac。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez un « Port de vrac » sur la parcelle au repère jaune face à la mer, au bout de la rue du port. C'est d'ici que le minerai est exporté à l'étranger.",
+        "title": "Construire un port de vrac"
       },
       "step6": {
-        "title": "Avancer d’une époque",
-        "description": "Avancer d’une époque。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "open": "Ouvrez « Voies ferrées » dans le panneau d'icônes et choisissez « Quai de fret pour minerai » dans l'onglet « Quai ».",
+        "loading": "Posez un quai au nord de la gare de chargement, parallèlement à celle-ci. Changer le « Côté du quai » déplace le quai dans l'aperçu : réglez-le pour que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Si vous le posez d'ouest en est, choisissez « Intérieur ». Le terrain descend en pente raide. En cas d'erreur de pente, réglez la « Hauteur du remblai » pour que le quai soit horizontal.",
+        "unloading": "De la même manière, posez aussi un quai au nord de la gare de déchargement, en le plaçant du côté du bâtiment de la gare. Une fois la pose terminée, appuyez sur le bouton « J'ai terminé ».",
+        "title": "Construire des quais à côté des gares"
       },
       "step7": {
-        "title": "Vérifier les exportations de minerai",
-        "description": "Vérifier les exportations de minerai。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Avec « Voie de chemin de fer » dans l'onglet « Voie ferrée », posez la voie depuis l'extrémité est du quai de la gare de déchargement jusqu'à l'extrémité ouest du quai de la gare de chargement (une seule voie suffit). Après confirmation, la voie et les quais sont achevés et la liaison est vérifiée.",
+        "title": "Relier les deux gares par le rail"
+      },
+      "step8": {
+        "build": "Les trains partent du dépôt. Construisez un « Dépôt ferroviaire » sur la parcelle au repère jaune le long de la rue principale.",
+        "branch": "Posez une voie de desserte depuis la borne de raccordement située au nord du dépôt jusqu'à la ligne principale. L'astuce est de la raccorder à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est (un véritable aiguillage ne permet pas de bifurquer selon un grand angle). Une fois la pose terminée, appuyez sur le bouton « J'ai terminé ».",
+        "title": "Construire le dépôt et le relier à la ligne principale"
+      },
+      "step9": {
+        "description": "La voie est électrifiée : l'électricité y circule depuis la borne de raccordement du dépôt. Ouvrez « Infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire de la ville à celle du dépôt.",
+        "title": "Alimenter le dépôt en électricité"
+      },
+      "step10": {
+        "description": "Dans « Transports publics » du panneau d'icônes, appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de transport de minerai » comme type de ligne. Cliquez sur les quais des gares de chargement et de déchargement pour placer les arrêts, puis appuyez sur « Créer » pour mettre la ligne en service.",
+        "title": "Mettre en service la ligne de transport de minerai"
+      },
+      "step11": {
+        "description": "Exécutez des époques pour lancer l'extraction, le chargement, le transport ferroviaire, le déchargement et l'exportation. L'acquisition des véhicules et la montée en puissance du transport prennent quelques époques.",
+        "title": "Avancer les époques"
+      },
+      "step12": {
+        "description": "Vérifiez les exportations de minerai dans le détail du port de vrac. S'il n'y a pas encore d'exportations, faites avancer d'autres époques.",
+        "title": "Vérifier les exportations de minerai"
       }
     },
     "tourism": {
       "title": "Développer le tourisme",
       "description": "Apprenez à attirer des touristes et à développer la fréquentation des restaurants et des bus en construisant un hôtel et un terminal de passagers.",
       "step1": {
-        "title": "Construire un hôtel près des ruines",
-        "description": "Construire un hôtel près des ruines。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez un « Hôtel touristique » sur la parcelle au repère jaune à l'est des ruines antiques, au bord de la mer. Après confirmation, la durée du chantier est ignorée.",
+        "title": "Construire un hôtel près des ruines"
       },
       "step2": {
-        "title": "Construire un terminal de passagers",
-        "description": "Construire un terminal de passagers。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Construisez un « Terminal de croisière » sur la parcelle marquée du port. Une ligne de bus et un dépôt de bus sont déjà prêts entre le port et les ruines.",
+        "title": "Construire un terminal de croisière"
       },
       "step3": {
-        "title": "Avancer les époques",
-        "description": "Avancer les époques。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Faites avancer les époques pour accueillir les touristes. La mise en route prend quelques époques.",
+        "title": "Avancer les époques"
       },
       "step4": {
-        "title": "Vérifier recettes et fréquentation du bus",
-        "description": "Vérifier recettes et fréquentation du bus。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "description": "Vérifiez le chiffre d'affaires du restaurant devant les ruines et la fréquentation de la ligne de bus. L'objectif est atteint lorsque les deux dépassent leur valeur de départ et que des touristes sont arrivés.",
+        "title": "Vérifier la hausse des ventes et de la fréquentation du bus"
       }
+    },
+    "intro": {
+      "basic": "Bienvenue ! Vous êtes le maire de cette ville. Dans ce tutoriel, vous apprendrez les étapes de base de la construction d'une ville : tracer une route, attendre la fin des travaux, puis construire un bâtiment sur des parcelles.",
+      "scenario2": "Une ville peut être gérée en la découpant en « quartiers ». Dans ce tutoriel, vous apprendrez à créer un nouveau quartier en sélectionnant des routes, à repérer la répartition des ressources naturelles et à réglementer les bâtiments constructibles dans chaque quartier.",
+      "scenario3": "L'action se déroule dans une ville portuaire au nord-ouest d'une île entourée de hauts-fonds coralliens. Cette ville n'a pas encore l'électricité. Vous construirez une centrale solaire sur le terrain plat à l'ouest, loin de la ville, acheminerez l'électricité jusqu'au poste électrique de la ville par une ligne de transmission, et découvrirez que l'infrastructure électrique repose sur trois étapes : production, transport et transformation.",
+      "scenario4": "Poser des rails ne suffit pas à faire circuler des trains. Dans ce tutoriel, vous aménagerez tour à tour la voie, le dépôt, la ligne de transmission, le quai et le bâtiment de gare, puis mettrez enfin une ligne en service, pour comprendre que le chemin de fer fonctionne grâce à l'assemblage de nombreux éléments.",
+      "trade": "Cette ville est reliée par le rail au pays voisin à sa frontière est et donne sur la mer à l'ouest. Dans ce tutoriel, vous créerez deux routes commerciales : exporter par la mer les produits alimentaires d'une usine depuis un port à conteneurs, et importer par le rail grâce à une ligne de fret posée jusqu'à la frontière.",
+      "highway": "Quand la ville s'agrandit, les routes locales ne suffisent plus à absorber la circulation. Dans ce tutoriel, vous apprendrez à construire une autoroute surélevée qui enjambe une route locale, puis à les relier par des bretelles pour créer un échangeur.",
+      "mining": "L'action se déroule sur une île entourée de hauts-fonds coralliens. Un filon de minerai sommeille dans la montagne centrale. Dans ce tutoriel, vous apprendrez tout le processus — extraire le minerai dans la montagne, l'acheminer par train de fret depuis la gare de chargement au pied de la montagne jusqu'à la ville portuaire, puis l'exporter à l'étranger depuis le port de vrac — en construisant vous-même les voies et le dépôt.",
+      "tourism": "La ville portuaire de cette île entourée de mers coralliennes possède des ruines antiques au bord de la mer. Dans ce tutoriel, vous attirerez des touristes en aménageant un hôtel à côté des ruines et un terminal de croisière au port, et verrez s'animer les restaurants et la ligne de bus de la ville.",
+      "heading": "Dans ce tutoriel"
     }
   },
   "tips": {

@@ -2,7 +2,7 @@
  * 統計ウィンドウのスタイル
  *
  * 左右2ペイン構成:
- * - 左ペイン(固定幅): 縦並びのタブリスト（アイコン＋ラベル）
+ * - 左ペイン(文字サイズに連動する固定幅): 縦並びのタブリスト（アイコン＋ラベル）
  * - 右ペイン(残り幅): 選択中のタブのコンテンツ
  *
  * 既存ウィンドウのダークテーマ（rgba(30,41,59,...) / #e2e8f0 系）に統一する。
@@ -17,8 +17,8 @@
 /* ========== 左ペイン: タブリスト ========== */
 
 .stats-window__tabs {
-  width: 180px;
-  min-width: 160px;
+  width: 16.67rem;
+  min-width: 14.81rem;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
@@ -42,7 +42,7 @@
   text-align: left;
   color: #94a3b8;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   font-weight: 600;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }

@@ -7,7 +7,7 @@
 .meter-label {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   white-space: nowrap;
 }
 
@@ -37,7 +37,7 @@
 }
 
 .meter-value {
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   color: #c0d0e0;
   min-width: 32px;
   text-align: right;

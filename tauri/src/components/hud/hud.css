@@ -130,31 +130,3 @@
   font-size: 12px;
   color: #8ba3bb;
 }
-
-/* ─── チュートリアル用ハイライト ─── */
-
-@keyframes hud-organic-pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(28, 113, 216, 0.4);
-  }
-  50% {
-    transform: scale(1.12);
-    box-shadow: 0 0 16px 4px rgba(28, 113, 216, 0.8);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(28, 113, 216, 0.4);
-  }
-}
-
-.hud-highlighted-btn {
-  animation: hud-organic-pulse 1.8s infinite ease-in-out;
-  position: relative;
-  z-index: 10;
-}
-
-.hud-icon-btn.hud-highlighted-btn {
-  background: rgba(28, 113, 216, 0.25);
-  border: 1px solid rgba(28, 113, 216, 0.6);
-}

@@ -1,113 +1,90 @@
 {
   "tutorial": {
     "startButton": "Start",
-    "step1": {
-      "title": "Welcome",
-      "description": "Welcome! As the mayor of this city, you will dedicate yourself to its development. I'll teach you the basics of city building!"
-    },
-    "step2": {
-      "title": "Place a Road",
-      "description": "First, you need a road. Select the road icon from the toolbar, choose \"2-lane Local Street\" from the \"Street\" category, and place it. Long roads take more time to build, so let's start with a short one."
-    },
-    "step3": {
-      "title": "Set the City Budget",
-      "description": "Let's set the city budget to prioritize funding for road construction. Open the budget window from the icon panel on the left edge of the screen, and reduce budgets for other categories so that you can allocate more budget to the construction category (you need to allocate 95% or more to construction). You can set the budget by dragging the slider boundaries at the top or by entering numbers directly in the text box for each category."
-    },
-    "step4": {
-      "title": "Complete the Road",
-      "description": "The road is still under construction. It takes time to actually begin and complete. Let's advance time and wait for it. Press the \"Start\" button on the toolbar to progress time. Construction incurs monthly costs while underway."
-    },
-    "step5": {
-      "title": "Create a Parcel",
-      "description": "The road is complete! Now let's create a parcel to build on. Select the parcel icon from the toolbar and use \"Create Along Road\". When you see red outlines along the road, press confirm to create the parcels."
-    },
-    "step6": {
-      "title": "Build a Building",
-      "description": "Now you can build! Select the building icon from the toolbar and choose \"Apartment\" from the \"Residential\" category. You can select any of the parcels you just created as the construction site."
-    },
-    "step7": {
-      "title": "Complete the Building",
-      "description": "Like roads, buildings don't complete instantly. It's still under construction, so advance time and wait for it to finish."
+    "basic": {
+      "step1": {
+        "title": "Place a Road"
+      },
+      "step2": {
+        "title": "Complete the Road",
+        "description": "The road is still under construction. It takes time to actually begin and complete. Let's advance time and wait for it. Press the \"Start\" button on the toolbar to progress time. Construction incurs monthly costs while underway."
+      },
+      "step3": {
+        "title": "Create a Parcel",
+        "description": "The road is complete! Now let's create a parcel to build on. Select the parcel icon from the toolbar and use \"Create Along Road\". When you see red outlines along the road, press confirm to create the parcels."
+      },
+      "step4": {
+        "title": "Build a Building",
+        "description": "Now you can build! Select the building icon from the toolbar and choose \"Apartment\" from the \"Residential\" category. You can select any of the parcels you just created as the construction site."
+      },
+      "step5": {
+        "title": "Complete the Building",
+        "description": "Like roads, buildings don't complete instantly. It's still under construction, so advance time and wait for it to finish."
+      }
     },
     "scenario2": {
       "title": "Set Up Districts",
       "description": "Learn how to divide your city into districts and set building regulations for each one.",
       "step1": {
-        "title": "What Is a District?",
-        "description": "In this tutorial you'll learn how to set up districts in your city and configure regulations, such as zoning, on a per-district basis."
+        "title": "Create a District",
+        "description": "A district is a unit that divides the city into areas, and it is assigned to roads. Press the district button on the icon panel to enter district edit mode: you'll see that the H-shaped road network forms a single district. With the Create tool (the default), click the road with the yellow marker to turn that road and the parcels facing it into a new district."
       },
       "step2": {
-        "title": "Create a District",
-        "description": "A district is a unit for dividing your city into areas, and you assign it to the roads within the city. Press the district button on the icon panel on the left edge of the screen to enter district edit mode. You'll see the whole city currently forms a single district. In the 3D view, with the Create tool (the default; switch tools by holding Ctrl), click the road in the top right to turn that road—and the land parcels facing it—into a new district. (Completion: the top-right road belongs to a new district.)"
+        "title": "District Created",
+        "description": "You've split off part of the city as a new district. Districts let you aggregate figures such as prices and population per district, and apply building regulations to the district as a whole. Press the district button again to leave district edit mode."
       },
       "step3": {
-        "title": "District Created",
-        "description": "You've split off part of the city as a new district. Districts let you aggregate figures such as prices and population per district, and apply building regulations to the district as a whole."
+        "title": "Show Natural Resources",
+        "description": "Let's check whether this district contains natural resources. Open the display modes with the eye icon in the cockpit at the bottom center of the screen, and turn natural resources on in the natural resources tab. Once they appear, click the ore vein at the yellow marker to open its details."
       },
       "step4": {
-        "title": "Show Natural Resources",
-        "description": "Let's check whether this district's area contains natural resources. Click the eye icon in the cockpit at the bottom center of the screen to switch display modes. Select the natural resources tab and turn the display of natural resources on. (Completion: natural resources are shown.)"
+        "title": "Open District Details",
+        "description": "You can see there's an ore vein where you created the new district. This area looks like a good spot for a mine. Click the label of the district you just created to open its detail panel."
       },
       "step5": {
-        "title": "Open District Details",
-        "description": "You can see there's an ore vein where you created the new district. This area looks like a good spot for a mine. Click the label of the district you just created to open its detail panel. (Completion: the district detail panel is open.)"
+        "title": "Set Building Regulations",
+        "description": "Using the building regulations near the bottom of the panel, you can choose which buildings may be built on the parcels in this district. We only want mines here, so click every building other than \"Mine\" to disable them."
       },
       "step6": {
-        "title": "Set Building Regulations",
-        "description": "Using the building regulations near the bottom of the panel, you can choose which buildings may be built on the parcels in this district. We only want mines here, so click every building other than the mine to disable them. (Completion: only the mine is allowed in the new district.)"
+        "title": "Check a Parcel",
+        "description": "You've set building regulations for the district. Let's confirm they are reflected on the parcels inside it. Click the parcel with the yellow marker to open its detail panel."
       },
       "step7": {
-        "title": "Check a Parcel",
-        "description": "You've set building regulations for the district. Let's confirm they are reflected on the parcels inside it. Click a parcel within the district to open its detail panel. (Completion: the parcel detail panel is open.)"
-      },
-      "step8": {
         "title": "Regulation Applied",
-        "description": "Looking near the bottom of the parcel panel, you can see the district's regulation allowing only mines is reflected here. You can no longer build anything other than a mine on this parcel."
+        "description": "Looking near the bottom of the parcel panel, you can see the district's regulation allowing only \"Mine\" is reflected here. You can no longer build anything other than a mine on this parcel."
       }
     },
     "scenario3": {
       "title": "Build the Infrastructure",
       "description": "Learn how to deliver electricity to your city by building power plants, substations, and power lines.",
       "step1": {
-        "title": "About Infrastructure",
-        "description": "In this tutorial, you will learn how to build the infrastructure that supplies electricity to your city. Press \"Start\" to continue."
+        "description": "The apartment building in this town doesn't have electricity yet. Click the apartment building with the yellow marker to open its details, pick one of the tenants in the \"Building Info\" tab, then open its \"Trade\" tab: you can see that the Acquired amount of Electricity is 0.",
+        "title": "Check the Apartment Building"
       },
       "step2": {
-        "title": "Check the House",
-        "description": "There is a house in this city, but it is not yet supplied with electricity. Click the house to open its details and confirm that no electricity is being supplied."
+        "description": "To generate electricity, you need a power plant. Build a \"Solar Power Plant\" on the parcel with the yellow marker on the flat land west of town. It would normally take time to complete, but since this is a tutorial, the construction period is skipped once confirmed and the plant is completed.",
+        "title": "Build a Solar Power Plant"
       },
       "step3": {
-        "title": "Build a Solar Power Plant",
-        "description": "To generate electricity, you first need a power plant. This city does not have one yet. There is a large plot of land on the west side of the city, so select \"Solar Power Plant\" from the building panel and construct it there."
+        "description": "The high-voltage electricity produced by a power plant can't be used by households as it is. Build a \"Substation\" on the parcel with the yellow marker next to the apartment building to convert it into power that homes can use. A substation's electricity reaches a certain area around it.",
+        "title": "Build a Substation"
       },
       "step4": {
-        "title": "Skipping Construction",
-        "description": "Normally a power plant takes time to finish, but since this is a tutorial we will skip the construction. Press \"Done\" and the solar power plant will be completed immediately."
+        "description": "Open \"Infrastructure\" on the icon panel and choose \"Power Line\" under \"Electricity\". Draw a line from the solar power plant's connection terminal to the connection terminal of the substation in town. Even though they're far apart, you can draw it as a single line by linking the terminals in a straight line. Once confirmed, the power line is completed and the connection is checked.",
+        "title": "Connect with a Power Line"
       },
       "step5": {
-        "title": "Build a Substation",
-        "description": "The solar power plant is complete. However, the high-voltage current it produces cannot be used directly by households. You need to place a substation near where the power is used to convert it into usable electricity. There is an empty plot next to the house, so build a \"Substation\" there."
+        "description": "Advance epochs and check whether the substation is receiving high-voltage electricity. Click the substation to open its details and, in the \"Trade\" tab, make sure the Received amount of High-voltage electricity isn't 0. It takes a few epochs for the power plant to start up and the power to arrive.",
+        "title": "Confirm the Power Supply"
       },
       "step6": {
-        "title": "Lay a Power Line",
-        "description": "To send high-voltage current from the power plant to the substation, lay a \"High-Voltage Power Line\". Each facility has a dedicated \"connection terminal\" node, so snap one end of the line to the solar power plant's terminal and the other end to the substation's terminal."
-      },
-      "step7": {
-        "title": "Confirm the Power Supply",
-        "description": "The infrastructure is now in place. Advance time and confirm that the substation is receiving high-voltage current."
-      },
-      "step8": {
-        "title": "Infrastructure Complete",
-        "description": "Well done. The high-voltage current generated by the power plant is sent through the power line to the substation, which converts it into electricity and supplies it to the city — this is the two-stage structure of the power infrastructure. Other infrastructure such as water supply works the same way."
+        "description": "Finally, open a tenant's \"Trade\" tab from the apartment building's details as in step 1, and check that the Acquired amount of Electricity is no longer 0. It may take a few more epochs for power to reach households. Generation, transmission and transformation linked together bring power to homes — that's how power infrastructure works, and water supply works the same way.",
+        "title": "Infrastructure Complete"
       }
     },
     "scenario4": {
       "title": "Build a Railway",
       "description": "Learn how to open a rail line by building tracks, a depot, power lines, a platform, and a station house in order.",
-      "step1": {
-        "title": "A Railway Is a Combination",
-        "description": "In this tutorial you will learn how to bring a railway to your city. Laying track alone won't make trains run. You also need a depot to supply rolling stock, power lines to feed the electrified track, a platform and a station house for passengers, and finally a line to run the trains. This city has only a road and a solar power plant. Press 'Start' and we'll build them one by one."
-      },
       "step2": {
         "title": "Lay the Track",
         "description": "First, the track the trains will run on. Open 'Track Construction' from the icon panel on the left and pick 'Electrified Surface Track' on the 'Track' tab. A single track only runs one way, so you need a double track for round trips. Set the parallel track count to 2, then lay it straight east–west on the open land north of the road. Left-click to add a vertex and right-click to confirm."
@@ -143,10 +120,10 @@
     },
     "complete": {
       "title": "Tutorial Complete",
-      "description": "Congratulations! You have completed the tutorial. Returning to the menu.",
-      "button": "Return to Menu"
+      "description": "Congratulations! You have completed the tutorial. Press \"Finish\" to close the guide and keep playing this city freely.",
+      "button": "Finish"
     },
-    "completeButton": "Completed",
+    "nextButton": "Next",
     "checking": "Verifying...",
     "failed": "Condition not met. Please try again.",
     "completed": "Tutorial complete! Well done.",
@@ -160,29 +137,50 @@
       "confirmRoad": "Confirm in the construction panel to save the road, then press Complete.",
       "failed": "Setup or communication failed. Retry; if the problem persists, exit and start the tutorial in a new city.",
       "retry": "Retry",
-      "exit": "Exit",
-      "exitFailed": "Could not exit. Please try again.",
       "placementRequired": "Use the road variant and positions shown by the guide.",
-      "preparing": "Preparing the tutorial city."
+      "preparing": "Preparing the tutorial city.",
+      "finishFailed": "Could not finish the tutorial. Please try again."
     },
     "trade": {
       "title": "Start international trade",
       "description": "Learn how to export goods by sea and import them by rail by building a container port and an international freight station.",
       "step1": {
-        "title": "Build a container port",
-        "description": "Build a container terminal on the marked coastal parcel. Confirmation completes construction."
+        "description": "Build a \"Container Terminal\" on the coastal parcel with the yellow marker. Once confirmed, the construction period is skipped.",
+        "title": "Build a container port"
       },
       "step2": {
-        "title": "Confirm food exports",
-        "description": "Advance epochs and inspect food exports at your port. Production and transport may need several epochs."
+        "description": "Advance epochs and check the food exports in the port's details. It takes a few epochs for the factory's production and transport to get going.",
+        "title": "Confirm food exports"
       },
       "step3": {
-        "title": "Build an international freight station",
-        "description": "Build the station on the marked parcel beside the railway leading off the map. The cross-border freight route is ready."
+        "description": "Build an \"International Freight Station\" on the parcel with the yellow marker along the road. At the eastern border, there is a railway leading into the neighboring country and a border freight station.",
+        "title": "Build an international freight station"
       },
       "step4": {
-        "title": "Confirm rail imports",
-        "description": "Advance epochs and inspect imports at your international freight station. Port imports do not count."
+        "open": "Open \"Track Construction\" on the icon panel and choose \"Container Freight Platform\" on the \"Platform\" tab.",
+        "place": "Lay a platform north of the international freight station, parallel to it. Switch \"Platform Side\" so that the platform is on the station building's side (the south side) before confirming. If you lay it from west to east, choose \"Inside\". When you're done, press the \"Completed\" button.",
+        "title": "Build a platform beside the station"
+      },
+      "step5": {
+        "description": "Using \"Railway Track\" on the \"Track\" tab, lay track from the east end of the platform to the west end of the border freight station's platform. Once confirmed, the track is completed and the connection is checked.",
+        "title": "Lay track to the border"
+      },
+      "step6": {
+        "build": "Build a \"Rail Depot\" on the parcel with the yellow marker along the road.",
+        "branch": "Lay a siding from the connection terminal on the north side of the depot to the main line. Join the main line at a shallow angle heading east rather than at a right angle. When you're done, press the \"Completed\" button.",
+        "title": "Build a depot and connect it to the main line"
+      },
+      "step7": {
+        "description": "Open \"Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the solar power plant east of town to the depot's connection terminal.",
+        "title": "Supply power to the depot"
+      },
+      "step8": {
+        "description": "In \"Public Transport\", press \"+ New line\" and choose \"International Freight Line\" as the line type. Place stops on the platforms of the international freight station and the border freight station, and open the line. Once confirmed, the city's import gateway switches from the port to the international freight station.",
+        "title": "Open the international freight line"
+      },
+      "step9": {
+        "description": "Advance epochs and check the imports in the international freight station's details. Procuring vehicles and getting transport up and running takes a few epochs.",
+        "title": "Confirm rail imports"
       }
     },
     "highway": {
@@ -209,53 +207,87 @@
       "title": "Mine resources",
       "description": "Learn how to mine ore, transport it by rail, and export it by building a mine, freight stations, and a bulk port.",
       "step1": {
-        "title": "Inspect the ore deposit",
-        "description": "Enable natural resources and open the marked inland deposit details."
+        "description": "Turn on the natural resources display with the eye icon in the cockpit at the bottom of the screen, then click the ore vein on the western slope of the central mountain (yellow marker) to open its details.",
+        "title": "Inspect the ore vein"
       },
       "step2": {
-        "title": "Build a mine",
-        "description": "Build a mine on the marked ore parcel. Confirmation completes each facility."
+        "description": "Build a \"Mine\" on the parcel with the yellow marker above the ore vein. Select \"Mine\" in the construction panel and click the parcel to place it. Once confirmed, the construction period is skipped because this is a tutorial, and the mine is completed.",
+        "title": "Build a mine"
       },
       "step3": {
-        "title": "Build an ore loading station",
-        "description": "Build an ore loading station on the parcel beside the track north of the mine."
+        "description": "Build an \"Ore Loading Station\" on the parcel with the yellow marker at the foot of the mountain, on the north side of the main street. Ore dug at the mine is gathered here by truck and loaded onto freight trains.",
+        "title": "Build a loading station at the foot of the mountain"
       },
       "step4": {
-        "title": "Build an ore unloading station",
-        "description": "Build an ore unloading station beside the coastal track to receive ore from trains."
+        "description": "Build an \"Ore Unloading Station\" on the parcel with the yellow marker at the corner of the harbor road. Ore brought in by rail is unloaded here. Be careful not to mix it up with the similarly named \"Oil Unloading Station\".",
+        "title": "Build an unloading station near the port"
       },
       "step5": {
-        "title": "Build a bulk port",
-        "description": "Build a bulk port on the marked coastal parcel."
+        "description": "Build a \"Bulk Port\" on the seafront parcel with the yellow marker at the end of the harbor road. The ore is exported overseas from here.",
+        "title": "Build a bulk port"
       },
       "step6": {
-        "title": "Advance an epoch",
-        "description": "Run an epoch to start mining, loading, transport, unloading and trade."
+        "open": "Open \"Track Construction\" on the icon panel and choose \"Ore Freight Platform\" on the \"Platform\" tab.",
+        "loading": "Lay a platform north of the loading station, parallel to it. Switching \"Platform Side\" changes where the platform appears in the preview, so make sure the platform is on the station building's side (the south side) before confirming. If you lay it from west to east, choose \"Inside\". The site slopes steeply downhill. If you get a grade error, adjust the \"Embankment Height\" to keep the platform level.",
+        "unloading": "Lay a platform north of the unloading station in the same way, so that the platform is on the station building's side. When you're done, press the \"Completed\" button.",
+        "title": "Build platforms beside the stations"
       },
       "step7": {
-        "title": "Confirm ore exports",
-        "description": "Inspect ore exports at the bulk port. Advance more epochs if needed."
+        "description": "Using \"Railway Track\" on the \"Track\" tab, lay track from the east end of the unloading station's platform to the west end of the loading station's platform (a single track is fine). Once confirmed, the track and platforms are completed and the connection is checked.",
+        "title": "Connect the two stations by rail"
+      },
+      "step8": {
+        "build": "Trains are dispatched from a depot. Build a \"Rail Depot\" on the parcel with the yellow marker along the main street.",
+        "branch": "Lay a siding from the connection terminal on the north side of the depot to the main line. The trick is to join the main line at a shallow angle heading east rather than at a right angle (real turnouts can't turn at large angles). When you're done, press the \"Completed\" button.",
+        "title": "Build a depot and connect it to the main line"
+      },
+      "step9": {
+        "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal.",
+        "title": "Supply power to the depot"
+      },
+      "step10": {
+        "description": "In \"Public Transport\" on the icon panel, press \"+ New line\" and choose \"Ore Freight Line\" as the line type. Click on the platforms at the loading and unloading stations to place stops, then press \"Create\" to open the line.",
+        "title": "Open the ore freight line"
+      },
+      "step11": {
+        "description": "Run epochs to get mining, loading, rail transport, unloading, and exports going. Procuring vehicles and getting transport up and running takes a few epochs.",
+        "title": "Advance epochs"
+      },
+      "step12": {
+        "description": "Check the ore exports in the bulk port's details. If nothing has been exported yet, advance more epochs.",
+        "title": "Confirm ore exports"
       }
     },
     "tourism": {
       "title": "Develop tourism",
       "description": "Learn how to attract tourists and encourage visits to restaurants and use of bus services by building a hotel and a passenger terminal.",
       "step1": {
-        "title": "Build a hotel by the ruins",
-        "description": "Build a tourist hotel on the parcel east of the ruins. Confirmation completes construction."
+        "description": "Build a \"Tourist Hotel\" on the parcel with the yellow marker east of the ancient ruins by the sea. Once confirmed, the construction period is skipped.",
+        "title": "Build a hotel by the ruins"
       },
       "step2": {
-        "title": "Build a passenger terminal",
-        "description": "Build a passenger terminal on the marked coastal parcel. The bus route and depot are ready."
+        "description": "Build a \"Cruise Terminal\" on the marked parcel at the port. A bus route and a bus depot are already in place between the port and the ruins.",
+        "title": "Build a cruise terminal"
       },
       "step3": {
-        "title": "Advance epochs",
-        "description": "Advance epochs to welcome visitors. Operations may take several epochs to start."
+        "description": "Advance epochs to welcome tourists. It takes a few epochs for operations to get going.",
+        "title": "Advance epochs"
       },
       "step4": {
-        "title": "Check revenue and bus ridership",
-        "description": "Inspect restaurant revenue and bus ridership. Both must exceed their starting values and tourists must have arrived."
+        "description": "Check the sales of the restaurant in front of the ruins and the ridership of the bus route. You succeed once both have risen above their starting values and tourists have arrived.",
+        "title": "Check for higher sales and bus ridership"
       }
+    },
+    "intro": {
+      "basic": "Welcome! You are the mayor of this city. In this tutorial, you'll learn the basic flow of city building: laying a road, waiting for it to be completed, and putting up a building on land parcels.",
+      "scenario2": "You can manage a city by dividing it into \"districts\". In this tutorial, you'll learn how to create a new district by selecting roads, check where natural resources are found, and regulate which buildings can be built in each district.",
+      "scenario3": "The setting is a harbor town in the northwest of an island surrounded by coral shallows. The town has no electricity yet. You'll build a solar power plant on the flat land to the west, away from town, deliver power to the town's substation through a power line, and learn how power infrastructure is made up of three stages: generation, transmission, and transformation.",
+      "scenario4": "Laying track alone won't get trains running. In this tutorial, you'll set up the track, a depot, power lines, a platform, and a station building in order, then finally open a line, learning how a railway runs on a combination of many elements.",
+      "trade": "This city is connected by rail to a neighboring country at its eastern border and faces the sea to the west. In this tutorial, you'll create two trade routes: exporting a factory's food by sea through a container port, and importing goods by rail over a freight line you lay to the border.",
+      "highway": "As a city grows, local streets alone can no longer handle all the cars. In this tutorial, you'll learn how to build an elevated motorway that crosses over a local street, then connect the two with ramps to create an interchange.",
+      "mining": "The setting is an island surrounded by coral shallows. An ore vein lies untouched in the central mountain. In this tutorial, you'll learn the whole flow — mining ore in the mountain, carrying it by freight rail from a loading station at the foot of the mountain to the harbor town, and exporting it overseas from a bulk port — while building the track and depot yourself.",
+      "tourism": "The harbor town on this island, surrounded by coral seas, has ancient ruins by the shore. In this tutorial, you'll attract tourists by building a hotel beside the ruins and a cruise terminal at the port, and see the town's restaurants and bus route come alive.",
+      "heading": "In this tutorial"
     }
   },
   "tips": {

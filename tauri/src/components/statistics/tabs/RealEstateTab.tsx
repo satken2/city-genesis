@@ -26,6 +26,7 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./RealEstateTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- 型定義 ---
 
@@ -61,6 +62,7 @@ const CHART_MARGIN = { top: 10, right: 15, left: -5, bottom: 5 };
 
 export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<RealEstateStats>(
     apiBaseUrl,
     "/api/v1/stats/realestate"
@@ -210,12 +212,12 @@ export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     margin={CHART_MARGIN}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
-                    <XAxis dataKey="epoch" stroke="#8ba3bb" fontSize={9} />
-                    <YAxis stroke="#8ba3bb" fontSize={9} />
+                    <XAxis dataKey="epoch" stroke="#8ba3bb" fontSize="0.83rem" />
+                    <YAxis width={remPx(5.56)} stroke="#8ba3bb" fontSize="0.83rem" />
                     <Tooltip
                       contentStyle={{ background: "#1a2230", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px" }}
-                      itemStyle={{ fontSize: 10 }}
-                      labelStyle={{ fontSize: 10, fontWeight: "bold", color: "#8ba3bb" }}
+                      itemStyle={{ fontSize: "0.93rem" }}
+                      labelStyle={{ fontSize: "0.93rem", fontWeight: "bold", color: "#8ba3bb" }}
                     />
                     <Line
                       type="monotone"
@@ -246,12 +248,12 @@ export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     margin={CHART_MARGIN}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
-                    <XAxis dataKey="epoch" stroke="#8ba3bb" fontSize={9} />
-                    <YAxis stroke="#8ba3bb" fontSize={9} />
+                    <XAxis dataKey="epoch" stroke="#8ba3bb" fontSize="0.83rem" />
+                    <YAxis width={remPx(5.56)} stroke="#8ba3bb" fontSize="0.83rem" />
                     <Tooltip
                       contentStyle={{ background: "#1a2230", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px" }}
-                      itemStyle={{ fontSize: 10 }}
-                      labelStyle={{ fontSize: 10, fontWeight: "bold", color: "#8ba3bb" }}
+                      itemStyle={{ fontSize: "0.93rem" }}
+                      labelStyle={{ fontSize: "0.93rem", fontWeight: "bold", color: "#8ba3bb" }}
                     />
                     <Line
                       type="monotone"

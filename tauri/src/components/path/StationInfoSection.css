@@ -13,13 +13,13 @@
 
 .station-info__meta {
   color: #93a9c0;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   white-space: nowrap;
 }
 
 .station-info__subtitle {
   margin: 10px 0 4px;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 600;
   color: #c5d4e3;
 }

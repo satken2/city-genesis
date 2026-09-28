@@ -51,6 +51,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 - 音声は `src/assets/sounds/` に Ogg Opus(`.opus`)で置き、`.wav` は置かない。再生には `import` したURLを渡す(パス文字列の直指定は本番ビルドだけ無音になる)。外部素材の取り込み・差し替えは `src/data/credits.ts` への追記とセット(Skill: `asset-credits`)。
 - スクロールバーは `App.css` で全域を従来型に切り替えている。`scrollbar-width` / `scrollbar-color` は使わない(指定した要素で `::-webkit-scrollbar` が無効化され、右端を隠すオーバーレイ式に戻る)。
 - トップメニュー系ウィンドウのフラット意匠は `App.css` の `--flat-*` トークンが唯一の正で、色・影を直値で書かない。どちらも詳細は `コンポーネント連携.md` の「UIの共通スタイル」。
+- 文字サイズは rem で書く。1rem = 設定の文字サイズ = 本文で、見出し・補足はその倍率にする(本文を 1rem 未満で書くと、設定値より小さく表示される)。文字に連動する寸法(行の高さ、ラベル列やタブ列の幅)も rem で書き、px の数値しか受け付けない寸法(recharts の Y 軸の `width` など)は `hooks/useRemPx` で rem から換算する。グラフの `fontSize` は `"0.93rem"` のような rem の文字列で渡す。px で固定してよいのは、寸法固定の常駐ウィンドウ(HUD・ヒントバー・チュートリアル・通知・Tips)、設定フォーム(`SettingsForm.css`)、canvas などの図の中の文字だけ(理由は同節)。
 - HUD・ヒントバーの表示可否はRust側とUI側(`hud/useHudSession.ts`・`TopMenu.tsx`)が同じ条件で二重に判定する(取りこぼし対策)。ヒントバーをRust側で出す入口は `show_hintbar_if_enabled` だけ(`hintbar.show()` を直接呼ぶと設定 `hintbar_visible` が無視される)。
 - 本番ではconsoleが見えない。無言で止まりうる重要フロー(エポック実行など)は `utils/log.ts` の `logInfoToFile` で実行ファイル横の `city-genesis/tauri.log` へ記録する。
 - 本番はWindows(WebView2)のみ。開発中はLinux(gnome)で起動することもある(`GDK_BACKEND=x11 npm run tauri dev`)。
@@ -81,7 +82,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `playSound.ts` / `bgm.ts` | 効果音(URLごとにキャッシュ)・BGM(`BgmManager`。Cockpitだけが所有) |
 | `weatherAudio.ts` | 音量設定をUnityへ送るだけ(再生しない) |
 | `epochPresentation.ts` / `epochFlow.ts` | 演出ID付きの暗転通知待ち、HTTPと日没の並行実行、処理時間に応じたTipsの開閉。結果画面のクローズまで黒幕を保持する |
-| `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` | 各種アイコン画像の解決 |
+| `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` / `bdCategoryIcon.ts` | 各種アイコン画像の解決。`bdCategoryIcon` は建物建設パネルの分類(`assets/images/bd_categories/{id}.png`)。`agentIcon` の `resolveAgentVariantIcon` はバリアント専用画像だけを返す(無ければ空文字) |
 | `propThumbnail.ts` | プロップサムネイルの解決。画像のglobはここ1箇所だけ |
 
 ## 詳細の参照先

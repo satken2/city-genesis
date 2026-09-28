@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.6rem;
+  font-size: 0.83rem;
   color: #94a3b8;
   white-space: nowrap;
 }
@@ -65,7 +65,7 @@
 }
 
 .budget-actual-graph__cat-label {
-  font-size: 0.6rem;
+  font-size: 0.83rem;
   color: #cbd5e1;
   white-space: nowrap;
   width: 32px;

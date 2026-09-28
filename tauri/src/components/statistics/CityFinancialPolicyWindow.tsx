@@ -13,6 +13,7 @@ import {
 import { useEpochCachedStats } from "./useEpochCache";
 import { fetchApi, buildApiUrl } from "../../utils/api";
 import "./CityFinancialPolicyWindow.css";
+import { useRemPx } from "../../hooks/useRemPx";
 
 type FinanceStats = {
   epoch: number;
@@ -38,16 +39,17 @@ type FinanceStats = {
 };
 
 const CHART_MARGIN = { top: 12, right: 16, left: 10, bottom: 0 };
-const AXIS_TICK = { fontSize: 10, fill: "#8ba3bb" };
+const AXIS_TICK = { fontSize: "0.93rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<FinanceStats>(
     apiBaseUrl,
     "/api/v1/stats/finance"
@@ -248,7 +250,7 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
                   <LineChart data={qeChartData} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
                     <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
-                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={60} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
+                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={remPx(5.56)} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} formatter={(value: any) => `¥${Number(value).toLocaleString()}`} />
                     <Line type="monotone" dataKey="qe" stroke="#fbbf24" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
                   </LineChart>
@@ -264,9 +266,9 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
                   <LineChart data={gdpChartData} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
                     <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
-                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={60} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
+                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={remPx(5.56)} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} formatter={(value: any) => `¥${Number(value).toLocaleString()}`} />
-                    <Legend wrapperStyle={{ fontSize: "10px" }} iconType="plainline" />
+                    <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconType="plainline" />
                     <Line type="monotone" dataKey="nominal" name={t("financialPolicy.nominalGdp")} stroke="#4ea1ff" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
                     <Line type="monotone" dataKey="real" name={t("financialPolicy.realGdp")} stroke="#c084fc" strokeWidth={2} strokeDasharray="5 4" dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
                   </LineChart>
@@ -282,7 +284,7 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
                   <LineChart data={priceChartData} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
                     <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
-                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={60} tickFormatter={(v) => v.toFixed(2)} />
+                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={remPx(5.56)} tickFormatter={(v) => v.toFixed(2)} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} formatter={(value: any) => `${Number(value).toFixed(3)} (${(Number(value) * 100).toFixed(1)}%)`} />
                     <Line type="monotone" dataKey="price" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
                   </LineChart>
@@ -298,7 +300,7 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
                   <LineChart data={cbDebtChartData} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
                     <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
-                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={60} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
+                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={remPx(5.56)} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} formatter={(value: any) => `¥${Number(value).toLocaleString()}`} />
                     <Line type="monotone" dataKey="debt" stroke="#f87171" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
                   </LineChart>
@@ -314,7 +316,7 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
                   <LineChart data={cbCollectionsChartData} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
                     <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
-                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={60} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
+                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={remPx(5.56)} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} formatter={(value: any) => `¥${Number(value).toLocaleString()}`} />
                     <Line type="monotone" dataKey="collections" stroke="#6366f1" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
                   </LineChart>

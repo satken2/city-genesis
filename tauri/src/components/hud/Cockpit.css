@@ -208,7 +208,3 @@
   flex-shrink: 0;
   pointer-events: none;
 }
-
-.cockpit-execute.hud-highlighted-btn {
-  box-shadow: 0 0 16px 4px rgba(28, 113, 216, 0.8);
-}

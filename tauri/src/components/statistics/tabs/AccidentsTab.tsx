@@ -30,6 +30,7 @@ import { useEpochCachedStats } from "../useEpochCache";
 import { useMasterData } from "../../../contexts/MasterDataContext";
 import { PathLink } from "../../common/PathLink";
 import "./AccidentsTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- バックエンド GET /api/v1/stats/accidents のレスポンス型 ---
 
@@ -109,13 +110,13 @@ const COLOR_CRIME = "#06b6d4"; // 犯罪: シアン
 const COLOR_CRIME_SIGN = "rgba(6, 182, 212, 0.35)"; // 犯罪の兆候
 
 const CHART_MARGIN = { top: 10, right: 15, left: 5, bottom: 5 };
-const Y_AXIS_WIDTH = 30;
-const AXIS_TICK = { fontSize: 9, fill: "#8ba3bb" };
+const Y_AXIS_WIDTH_REM = 2.78; // Y軸の幅(rem)。描画時に useRemPx で px に直す
+const AXIS_TICK = { fontSize: "0.83rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 /**
@@ -152,6 +153,7 @@ export function UsageMeter({ usage_ratio, goodHigh = false }: { usage_ratio: num
 
 export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const masterData = useMasterData();
   const { data, loading, error } = useEpochCachedStats<AccidentsStats>(
     apiBaseUrl,
@@ -200,7 +202,7 @@ export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
       <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} />
       <YAxis
-        width={Y_AXIS_WIDTH}
+        width={remPx(Y_AXIS_WIDTH_REM)}
         tick={AXIS_TICK}
         tickLine={false}
         allowDecimals={false}
@@ -306,7 +308,7 @@ export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={history} margin={CHART_MARGIN}>
                     {renderAxesAndGrid()}
-                    <Legend wrapperStyle={{ fontSize: "10px" }} />
+                    <Legend wrapperStyle={{ fontSize: "0.93rem" }} />
                     <Bar
                       dataKey="traffic_deaths"
                       name={t("statistics.trafficDeaths")}
@@ -384,7 +386,7 @@ export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={processedHistory} margin={CHART_MARGIN}>
                           {renderAxesAndGrid()}
-                          <Legend wrapperStyle={{ fontSize: "10px" }} />
+                          <Legend wrapperStyle={{ fontSize: "0.93rem" }} />
                           <Bar
                             dataKey="fire_count"
                             name={t("statistics.fireCount")}
@@ -545,7 +547,7 @@ export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={history} margin={CHART_MARGIN}>
                           {renderAxesAndGrid()}
-                          <Legend wrapperStyle={{ fontSize: "10px" }} />
+                          <Legend wrapperStyle={{ fontSize: "0.93rem" }} />
                           <Bar
                             dataKey="crime_count"
                             name={t("statistics.crimeCount")}

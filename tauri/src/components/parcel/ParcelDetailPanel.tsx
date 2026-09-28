@@ -41,7 +41,6 @@ import {
 } from "../../utils/ipc";
 import { IPC_EVENT_EDIT_PARCEL_UPDATE_SHAPE } from "../../utils/ipc";
 import { STATUS_ACTIVE } from "../../constants";
-import { TUTORIAL_FLAG_PARCEL_PANEL_OPEN } from "../tutorial/tutorialSetup";
 import "./ParcelDetailPanel.css";
 
 type ResourceListItem = {
@@ -105,16 +104,6 @@ export function ParcelDetailPanel({
     limit_height: null,
     min_structure: 0,
   });
-
-  // 土地区画詳細パネルの開閉状態をチュートリアル用の localStorage フラグに反映する。
-  // チュートリアル(シナリオ2)のステップ判定はバックエンドから観測できない
-  // パネルの開閉状態を localStorage 経由で受け取るため、ここで橋渡しする。
-  useEffect(() => {
-    localStorage.setItem(TUTORIAL_FLAG_PARCEL_PANEL_OPEN, "1");
-    return () => {
-      localStorage.setItem(TUTORIAL_FLAG_PARCEL_PANEL_OPEN, "0");
-    };
-  }, []);
 
   // パネル表示中、選択中区画の接道(front_path)を Unity の3Dビューに青い矢印で可視化する。
   // マウント時に表示要求、アンマウント時にクリア要求を送る。Unity 側が parcel_id から

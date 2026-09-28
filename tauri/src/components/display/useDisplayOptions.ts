@@ -6,19 +6,6 @@ import {
   IPC_EVENT_VIEW_CURRENT_STATE,
 } from "../../utils/ipc";
 import { DISPLAY_LAYERS } from "./displayConstants";
-import { TUTORIAL_FLAG_RESOURCE_VISIBLE } from "../tutorial/tutorialSetup";
-
-/**
- * 天然資源レイヤーの表示状態をチュートリアル用の localStorage フラグに反映する。
- * チュートリアル(シナリオ2)のステップ判定はバックエンドから観測できない
- * 表示状態を localStorage 経由で受け取るため、ここで橋渡しする。
- */
-function syncResourceTutorialFlag(mode: string): void {
-  localStorage.setItem(
-    TUTORIAL_FLAG_RESOURCE_VISIBLE,
-    mode === "visible" ? "1" : "0"
-  );
-}
 
 export type DisplaySelection = {
   mode: string;
@@ -69,10 +56,6 @@ export function useDisplayOptions() {
           [layerId]: { mode, subMode: subMode ?? null, flags },
         };
       });
-
-      if (layerId === "resource") {
-        syncResourceTutorialFlag(mode);
-      }
     },
     [],
   );
@@ -129,9 +112,6 @@ export function useDisplayOptions() {
                   subMode: state.sub_mode || null,
                   flags: state.flags ? state.flags.split(",") : [],
                 };
-                if (layerId === "resource") {
-                  syncResourceTutorialFlag(state.mode);
-                }
               }
             }
             return next;

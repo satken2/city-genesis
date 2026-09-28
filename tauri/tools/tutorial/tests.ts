@@ -35,7 +35,7 @@ env.read = async () => [{ path_id: 9, path_variant: 221, start_point: [-100, 0, 
 check(await findPhase(basic, env), 5, "saved road survives closed panel");
 env.bindings["support.housing.building"] = { kind: "agents", id: 30 };
 env.facts.windows.detail = { visible: true, window: "agent_detail", entity: 31 };
-const house = DEFINITIONS.scenario3.steps[0].phases[0].until;
+const house = { type: "window" as const, window: "agent_detail", target: "support.housing.building" };
 check(await evaluate(house, env), false, "wrong house cannot pass");
 env.facts.windows.detail.entity = 30;
 check(await evaluate(house, env), true, "exact house detail passes");
@@ -45,6 +45,14 @@ check(entityId({ agent_id: 30, parcel_id: 4, zone_id: 2 }, "buildings"), 30, "en
 env.read = async (kind, id) => kind === "buildings" ? id ? [{ agent_id: 30, parcel_id: 4, variant: 1 }] : [{ agent_id: 30, variant: 1 }] : [];
 check(await evaluate({ type: "entity", resource: "buildings", where: [{ field: "parcel_id", equals: 4 }], bind: "found" }, env), true, "missing list fields are read from detail");
 check(env.bindings.found.id, 30, "detail condition binds correct ID");
+env.bindings.original = { kind: "zones", id: 2 };
+env.read = async () => [{ path_id: 5, zone_id: 2 }];
+const split = { type: "entity" as const, resource: "paths" as const, where: [{ field: "zone_id", greaterThan: 0 }, { field: "zone_id", notEquals: { $ref: "original" } }] };
+check(await evaluate(split, env), false, "notEquals rejects the bound value");
+env.read = async () => [{ path_id: 5, zone_id: 7 }];
+check(await evaluate(split, env), true, "notEquals accepts another value");
+env.read = async (_kind, id) => id ? [{ path_id: 5 }] : [{ path_id: 5 }];
+check(await evaluate(split, env), false, "notEquals does not accept a missing field");
 env.read = async (kind, id) => kind === "agents" ? [{ infra_node_id: id }] : [{ start_node_id: 1, end_node_id: 2 }, { start_node_id: 3, end_node_id: 4 }];
 env.bindings.a = { kind: "agents", id: 1 }; env.bindings.b = { kind: "agents", id: 4 };
 const connected = { type: "connected" as const, from: "a", to: "b", terminal: "infra_node_id", where: [] };
@@ -105,7 +113,13 @@ const appended = document.createElement("button"); document.body.append(appended
 check(appended.inert, true, "late-mounted controls gated");
 cleanup(); check(other.inert, false, "cleanup restores interaction"); check((document.getElementById("existing") as HTMLElement).inert, true, "existing inert preserved");
 const related = installUiGuide({ policy: "related", allow: ["window.path_build"], highlight: [] }, "path_build"); check(other.inert, false, "related allows selected window"); related();
-const highlight = installUiGuide({ policy: "highlight", allow: [], highlight: ["hud.road"] }, "icon-panel"); check(other.inert, false, "highlight allows other operations"); highlight();
+const highlight = installUiGuide({ policy: "highlight", allow: [], highlight: ["hud.road"] }, "cockpit"); check(other.inert, false, "highlight allows other operations"); highlight();
+const menu = installUiGuide({ policy: "highlight", allow: ["hud.other"], highlight: ["hud.road"] }, "icon-panel");
+check([(document.getElementById("road") as HTMLElement).inert, other.inert, (document.getElementById("close") as HTMLElement).inert], [false, false, false], "icon panel keeps highlighted and allowed buttons");
+menu();
+const menuOnly = installUiGuide({ policy: "highlight", allow: [], highlight: ["hud.road"] }, "icon-panel");
+check([(document.getElementById("road") as HTMLElement).inert, other.inert], [false, true], "icon panel disables buttons the step does not use");
+menuOnly();
 for (const windowType of ["system-tray", "settings", "save_load", "save_list", "new_game", "credits", "confirm_dialog", "tutorial", "notification", "tips"]) {
   document.body.innerHTML = '<button id="settings">Settings</button><button id="save">Save</button><button id="reload">Reload</button><input><button disabled>Busy</button>';
   let handled = 0;

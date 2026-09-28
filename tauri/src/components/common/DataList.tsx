@@ -96,7 +96,7 @@ export function DataList({ values, formatter, clampRange }: DataListProps) {
               <BarChart data={chartData}>
                 <XAxis
                   dataKey="index"
-                  tick={{ fontSize: 10, fill: "#9cb3cb" }}
+                  tick={{ fontSize: "0.93rem", fill: "#9cb3cb" }}
                   axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
                   tickLine={false}
                 />

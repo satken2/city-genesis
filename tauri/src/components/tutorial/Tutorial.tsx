@@ -2,15 +2,16 @@
  * チュートリアルウィンドウコンポーネント
  *
  * 新規ゲーム開始直後に表示されるステップ型チュートリアル。
- * 各ステップではユーザーに操作を促し、完了ボタン押下時に
- * バックエンド API を検証して条件クリアなら次のステップへ進む。
+ * 各ステップの案内と完了判定は専用の進行管理(`useTutorialGuide`)が担い、
+ * 「次へ」ボタン押下時に条件を確認して、満たしていれば次のステップへ進む。
  *
  * - タイトルバーや×ボタンを持たない、ヒントバー風のシンプルな表示
  * - 画面上部中央に固定され、ヒントバーの下に配置される
- * - 左側に正方形の画像、右側に説明文と完了ボタンを配置
+ * - 左側に正方形の画像、右側に説明文とボタンを配置
  * - 進捗はセーブ ID ごとに localStorage に保持する
- * - 全ステップ完了で完了メッセージを表示し、「メニューに戻る」ボタンで
- *   セッションを終了してトップメニューに戻る
+ * - 途中でやめるボタンは置かない(システムトレイから終了・保存できる)
+ * - 全ステップ完了で完了メッセージを表示し、「終了」ボタンでテンプレートモードを解除して
+ *   このウィンドウを隠す。都市はそのまま通常のプレイとして続けられる
  *
  * 表示・非表示の制御:
  * - ウィンドウの表示は Rust 側で制御する（tutorial.show() + tutorial:show イベント）
@@ -22,10 +23,9 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { emit, listen } from "@tauri-apps/api/event";
+import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { TUTORIAL_SCENARIOS } from "./tutorialSteps";
-import { runTutorialSetup } from "./tutorialSetup";
 import { useTutorialGuide } from "../../tutorial/useTutorialGuide";
 import { fetchApi } from "../../utils/api";
 import { showNotification } from "../../utils/notification";
@@ -103,8 +103,8 @@ export function Tutorial() {
   const [visible, setVisible] = useState(false);
   /** 全ステップ完了後の完了メッセージ表示中かどうか */
   const [showComplete, setShowComplete] = useState(false);
-  /** セッション終了中（DELETEリクエスト送信後）かどうか */
-  const [returningToMenu, setReturningToMenu] = useState(false);
+  /** 完了後の「終了」(テンプレートモードの解除)を送信中かどうか */
+  const [finishing, setFinishing] = useState(false);
   /** 開始時の説明ウィンドウを閉じたか。閉じるまでは案内と操作制限を始めない */
   const [introDone, setIntroDone] = useState(true);
   const introOpenedRef = useRef<string | null>(null);
@@ -117,60 +117,12 @@ export function Tutorial() {
   const totalSteps = steps.length;
   const guide = useTutorialGuide(visible && !completed && !showComplete && introDone, tutorialId, currentStep + 1, saveId, apiBaseUrl);
 
-  // チュートリアルの有効状態とターゲットボタンの同期処理
-  useEffect(() => {
-    const active = visible && !completed && !showComplete && introDone;
-    const target = active && !guide.managed ? steps[currentStep]?.targetElementId : undefined;
-
-    localStorage.setItem("tutorial_active", String(active));
-    if (target) {
-      localStorage.setItem("tutorial_target", target);
-    } else {
-      localStorage.removeItem("tutorial_target");
-    }
-
-    emit("tutorial:state_changed", {
-      active,
-      targetElementId: target,
-    }).catch(console.error);
-
-    return () => {
-      localStorage.setItem("tutorial_active", "false");
-      localStorage.removeItem("tutorial_target");
-      emit("tutorial:state_changed", {
-        active: false,
-        targetElementId: undefined,
-      }).catch(console.error);
-    };
-  }, [visible, completed, currentStep, showComplete, guide.managed, steps, introDone]);
-
   /**
    * 前回のセーブ ID を保持する ref。
    * ポーリングで同一セーブ ID の session-state イベントが何度も飛んでくるため、
    * セーブ ID が実際に変化した時だけ進捗を復元するために使用する。
    */
   const prevSaveIdRef = useRef<string | null>(null);
-
-  /**
-   * 初期状態セットアップを実行済みのキー(saveId + tutorialId)を保持する ref。
-   * ポーリングで何度も条件が満たされても、1つのセッションにつき一度だけ
-   * runTutorialSetup を呼ぶための重複実行ガード。
-   */
-  const setupRanForRef = useRef<string | null>(null);
-
-  /**
-   * チュートリアル開始時に、シナリオごとの初期都市状態を構築する。
-   * 表示中かつ API URL・セーブ ID が確定したタイミングで一度だけ実行する。
-   * runTutorialSetup 側でもバックエンドの状態を見て冪等性を担保しているが、
-   * ここでも saveId + tutorialId 単位でガードして無駄な呼び出しを避ける。
-   */
-  useEffect(() => {
-    if (!visible || !apiBaseUrl || !saveId || guide.hasSetup) return;
-    const key = `${saveId}_${tutorialId}`;
-    if (setupRanForRef.current === key) return;
-    setupRanForRef.current = key;
-    void runTutorialSetup(tutorialId, apiBaseUrl);
-  }, [visible, apiBaseUrl, saveId, tutorialId, guide.hasSetup]);
 
   /** 説明ウィンドウを1セッションにつき1回開く。閉じられたら(開始ボタン・×とも)案内を始める */
   useEffect(() => {
@@ -217,7 +169,7 @@ export function Tutorial() {
           // セーブ ID が変化した場合のみ進捗を復元する
           if (current_save_id !== prevSaveIdRef.current) {
             prevSaveIdRef.current = current_save_id;
-            setReturningToMenu(false);
+            setFinishing(false);
             setCheckState("idle");
             const storedStep = loadProgress(current_save_id, activeTutorialId, activeTotalSteps);
             if (storedStep >= activeTotalSteps) {
@@ -237,7 +189,7 @@ export function Tutorial() {
           prevSaveIdRef.current = null;
           setSaveId(null);
           setVisible(false);
-          setReturningToMenu(false);
+          setFinishing(false);
           setCheckState("idle");
         }
 
@@ -265,6 +217,9 @@ export function Tutorial() {
         }
         if (!completed) {
           setVisible(true);
+        } else {
+          // 終えたチュートリアルの透明なウィンドウが画面上部のクリックを吸わないよう隠し直す。
+          appWindow.hide().catch(() => {});
         }
       })
       .then((fn) => {
@@ -288,7 +243,7 @@ export function Tutorial() {
     };
   }, [appWindow, completed]);
 
-  /** 完了ボタン押下時の検証処理 */
+  /** 「次へ」ボタン押下時の検証処理。条件の確認と工期スキップ等の代行は進行管理が行う */
   const handleComplete = useCallback(async () => {
     if (checkState === "checking" || !apiBaseUrl || !guide.ready) return;
 
@@ -297,26 +252,8 @@ export function Tutorial() {
 
     setCheckState("checking");
     try {
-      // 検証の前提を整える処理(例: 工期スキップによるパスの即時完成)を先に実行する。
-      // 端点ノードの接続など「完成したパスにしか現れない状態」を検証条件にするステップは、
-      // ここで完成させておかないと何度押しても条件を満たせない。
-      // 前提整備の失敗は検証を止めない(条件未達として通常どおり不合格になる)。
-      try {
-        if (!guide.managed) await step.prepare?.(apiBaseUrl);
-      } catch (e) {
-        console.error("Tutorial step prepare failed:", e);
-      }
-
-      const passed = guide.managed ? await guide.check() : await step.validate(apiBaseUrl);
+      const passed = await guide.check();
       if (passed) {
-        // 検証成功時、ステップ固有の副作用(例: 建設スキップによる強制稼働)を実行する。
-        // 副作用の失敗はチュートリアルの進行を止めないよう握りつぶす。
-        try {
-          if (!guide.managed) await step.onComplete?.(apiBaseUrl);
-        } catch (e) {
-          console.error("Tutorial step onComplete failed:", e);
-        }
-
         setCheckState("success");
         const nextStep = currentStep + 1;
 
@@ -375,21 +312,27 @@ export function Tutorial() {
   }, [checkState, apiBaseUrl, currentStep, saveId, guide, steps, tutorialId, totalSteps]);
 
   /**
-   * 完了メッセージの「メニューに戻る」ボタン押下時の処理。
-   * バックエンドの DELETE /api/v1/sessions を呼び出してセッションを終了する。
-   * Rust 側のポーリングが current_save_id の null 化を検知し、
-   * 自動的にトップメニューに戻る。
+   * 完了メッセージの「終了」ボタン押下時の処理。
+   * チュートリアル中の都市はテンプレートモード(工期スキップ等の代行に必要)で動いているため、
+   * それを解除してからこのウィンドウを隠す。都市はそのまま通常のプレイとして続けられる。
    */
-  const handleReturnToMenu = useCallback(async () => {
-    if (returningToMenu || !apiBaseUrl) return;
-    setReturningToMenu(true);
+  const handleFinish = useCallback(async () => {
+    if (finishing || !apiBaseUrl) return;
+    setFinishing(true);
     try {
-      await fetchApi(`${apiBaseUrl}/api/v1/sessions`, { method: "DELETE" });
+      await fetchApi(`${apiBaseUrl}/api/v1/sessions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ template_mode: false }),
+      });
+      setVisible(false);
+      await appWindow.hide().catch(() => {});
     } catch {
-      setReturningToMenu(false);
-      void showNotification({ message: t("tutorial.guide.exitFailed") });
+      void showNotification({ message: t("tutorial.guide.finishFailed") });
+    } finally {
+      setFinishing(false);
     }
-  }, [returningToMenu, apiBaseUrl, t]);
+  }, [finishing, apiBaseUrl, appWindow, t]);
 
   if (!visible || !introDone) {
     return null;
@@ -434,8 +377,8 @@ export function Tutorial() {
               <div className="tutorial-actions">
                 <button
                   className="tutorial-complete-button"
-                  onClick={() => void handleReturnToMenu()}
-                  disabled={returningToMenu}
+                  onClick={() => void handleFinish()}
+                  disabled={finishing}
                   type="button"
                 >
                   {t("tutorial.complete.button")}
@@ -449,7 +392,6 @@ export function Tutorial() {
   }
 
   const step = steps[currentStep];
-  const buttonTextKey = step?.buttonTextKey ?? "tutorial.completeButton";
 
   return (
     <div className="tutorial-root">
@@ -488,9 +430,8 @@ export function Tutorial() {
               >
                 {checkState === "checking"
                   ? t("tutorial.checking")
-                  : t(buttonTextKey)}
+                  : t("tutorial.nextButton")}
               </button>
-              <button className="tutorial-complete-button" type="button" onClick={() => void handleReturnToMenu()} disabled={returningToMenu}>{t("tutorial.guide.exit")}</button>
             </div>
             {import.meta.env.DEV && guide.managed && <details className="tutorial-guide-debug"><summary>Guide</summary>{guide.debug}</details>}
           </div>

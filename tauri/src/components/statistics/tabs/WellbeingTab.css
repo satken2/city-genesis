@@ -20,15 +20,15 @@
 
 .wellbeing-tab__description {
   margin: 0;
-  font-size: 11px;
+  font-size: 1.02rem;
   line-height: 1.5;
   color: #8ba3bb;
 }
 
-.wellbeing-scope { display: flex; align-items: center; gap: 8px; flex-shrink: 0; font-size: 11px; color: #8ba3bb; }
+.wellbeing-scope { display: flex; align-items: center; gap: 8px; flex-shrink: 0; font-size: 1.02rem; color: #8ba3bb; }
 .wellbeing-scope select { background: #1e293b; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 4px 8px; max-width: 300px; }
 /* 範囲切替中の表示。数値は前の範囲のままなので、追いついていないことを明示する */
-.wellbeing-scope__pending { color: #64748b; font-size: 10px; }
+.wellbeing-scope__pending { color: #64748b; font-size: 0.93rem; }
 
 /* ========== 中段: KPIカード列 ========== */
 
@@ -56,7 +56,7 @@
 }
 
 .wellbeing-kpi-card__label {
-  font-size: 10px;
+  font-size: 0.93rem;
   font-weight: 500;
   color: #94a3b8;
   white-space: nowrap;
@@ -65,7 +65,7 @@
 }
 
 .wellbeing-kpi-card__value {
-  font-size: 20px;
+  font-size: 1.85rem;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.5px;
@@ -75,7 +75,7 @@
 
 .wellbeing-kpi-card__unit {
   margin-left: 3px;
-  font-size: 10px;
+  font-size: 0.93rem;
   font-weight: 500;
   color: #94a3b8;
 }
@@ -131,7 +131,7 @@
 
 .wellbeing-card__title {
   margin: 0 0 8px;
-  font-size: 12px;
+  font-size: 1.11rem;
   font-weight: 600;
   color: #cbd5e1;
   border-left: 3px solid var(--wellbeing-accent, #38bdf8);
@@ -140,7 +140,7 @@
 
 .wellbeing-card__note {
   margin: 0 0 8px;
-  font-size: 10px;
+  font-size: 0.93rem;
   line-height: 1.5;
   color: #8ba3bb;
 }
@@ -170,7 +170,7 @@
   border-radius: 6px;
   color: #9ca3af;
   font: inherit;
-  font-size: 11px;
+  font-size: 1.02rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -197,7 +197,7 @@
 }
 
 .wellbeing-detail__value {
-  font-size: 24px;
+  font-size: 2.22rem;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.5px;
@@ -207,7 +207,7 @@
 
 .wellbeing-detail__unit {
   margin-left: 3px;
-  font-size: 10px;
+  font-size: 0.93rem;
   font-weight: 500;
   color: #94a3b8;
 }
@@ -217,7 +217,7 @@
   justify-content: space-between;
   gap: 8px;
   margin-top: 6px;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #94a3b8;
 }
 
@@ -259,7 +259,7 @@
   padding: 4px 10px;
   border-radius: 4px;
   background: rgba(15, 20, 32, 0.75);
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   font-variant-numeric: tabular-nums;
   pointer-events: none;
@@ -277,7 +277,7 @@
   padding: 4px 10px;
   border-radius: 4px;
   background: rgba(15, 20, 32, 0.75);
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   text-align: center;
   pointer-events: none;
@@ -292,7 +292,7 @@
   place-items: center;
   height: 200px;
   color: #9db0c5;
-  font-size: 12px;
+  font-size: 1.11rem;
 }
 
 .wellbeing-tab__error {

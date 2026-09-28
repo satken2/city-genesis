@@ -30,6 +30,7 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./PopulationTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- バックエンド GET /api/v1/stats/commute のレスポンス型のうち、地区別人口が使う部分 ---
 
@@ -94,13 +95,13 @@ const COLOR_F_IMMIGRANT = "#faa2c1";  // 女性・移民: 淡いピンク
 
 // グラフ間で横スケールを揃えるための共通設定。
 const CHART_MARGIN = { top: 6, right: 10, left: 0, bottom: 0 };
-const Y_AXIS_WIDTH = 44;
-const AXIS_TICK = { fontSize: 9, fill: "#8ba3bb" };
+const Y_AXIS_WIDTH_REM = 4.07; // Y軸の幅(rem)。描画時に useRemPx で px に直す
+const AXIS_TICK = { fontSize: "0.83rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 /** プルダウンの選択キー。都市全体は "city"、地区は zone_id の文字列。 */
@@ -176,6 +177,7 @@ function ZonePopulationTable({ apiBaseUrl }: { apiBaseUrl: string }) {
 
 export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<PopulationStats>(
     apiBaseUrl,
     "/api/v1/stats/population"
@@ -277,7 +279,7 @@ export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <AreaChart data={scope.history} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                     <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} />
-                    <YAxis width={Y_AXIS_WIDTH} tick={AXIS_TICK} tickLine={false} />
+                    <YAxis width={remPx(Y_AXIS_WIDTH_REM)} tick={AXIS_TICK} tickLine={false} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={{ color: "#fff" }} />
                     <Area
                       type="monotone"
@@ -314,7 +316,7 @@ export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <BarChart data={scope.history} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                     <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} />
-                    <YAxis width={Y_AXIS_WIDTH} tick={AXIS_TICK} tickLine={false} />
+                    <YAxis width={remPx(Y_AXIS_WIDTH_REM)} tick={AXIS_TICK} tickLine={false} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={{ color: "#fff" }} />
                     <Bar
                       dataKey="births"
@@ -346,7 +348,7 @@ export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <BarChart data={scope.history} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                     <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} />
-                    <YAxis width={Y_AXIS_WIDTH} tick={AXIS_TICK} tickLine={false} />
+                    <YAxis width={remPx(Y_AXIS_WIDTH_REM)} tick={AXIS_TICK} tickLine={false} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={{ color: "#fff" }} />
                     <Bar
                       dataKey="deaths"
@@ -409,8 +411,8 @@ export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <YAxis
                     type="category"
                     dataKey="band"
-                    width={36}
-                    tick={{ fontSize: 8, fill: "#8ba3bb" }}
+                    width={remPx(3.33)}
+                    tick={{ fontSize: "0.74rem", fill: "#8ba3bb" }}
                     tickLine={false}
                     interval={0}
                   />

@@ -18,7 +18,7 @@
 }
 
 .education-chart-title {
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   font-weight: 600;
   color: #9db0c5;
   margin-bottom: 6px;
@@ -42,7 +42,7 @@
 .education-legend-item {
   display: flex;
   align-items: center;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   gap: 6px;
 }
 
@@ -61,7 +61,7 @@
 .education-block-title {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   margin-bottom: 4px;
 }
 
@@ -77,7 +77,7 @@
 
 .education-settings-hint {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #7f93aa;
 }
 
@@ -97,7 +97,7 @@
 }
 
 .education-settings-header {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #7f93aa;
   font-weight: 600;
 }
@@ -124,7 +124,7 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
   color: inherit;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   padding: 4px 6px;
   text-align: right;
 }
@@ -135,7 +135,7 @@
 
 .education-settings-error {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   color: #f87171;
 }
 
@@ -145,7 +145,7 @@
   border: none;
   border-radius: 4px;
   color: #fff;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 600;
   padding: 6px 16px;
   cursor: pointer;
@@ -177,7 +177,7 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
   color: #9db0c5;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   padding: 4px 12px;
   cursor: pointer;
 }

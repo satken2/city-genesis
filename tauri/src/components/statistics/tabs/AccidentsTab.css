@@ -36,7 +36,7 @@
 
 .accidents-summary-title {
   margin: 0 0 10px 0;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   font-weight: 600;
   color: #cbd5e1;
   border-left: 3px solid #3b82f6;
@@ -67,13 +67,13 @@
 }
 
 .accidents-summary-item__label {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #8ba3bb;
   margin-bottom: 2px;
 }
 
 .accidents-summary-item__value {
-  font-size: 1.3rem;
+  font-size: 1.81rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -112,7 +112,7 @@
   border-radius: 4px 4px 0 0;
   padding: 6px 12px;
   color: #9db0c5;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -169,7 +169,7 @@
 
 .accidents-chart__title {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   font-weight: 600;
   color: #cbd5e1;
   border-left: 3px solid #ef4444; /* 既定は警告色 */
@@ -201,7 +201,7 @@
   place-items: center;
   height: 100%;
   color: #5a6f86;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
 }
 
 /* 発生一覧 */
@@ -214,7 +214,7 @@
 
 .accidents-list__title {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   font-weight: 600;
   color: #cbd5e1;
   border-left: 3px solid #f59e0b;
@@ -226,7 +226,7 @@
 }
 
 .accidents-list__count {
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 400;
   color: #8ba3bb;
 }
@@ -247,14 +247,14 @@
   min-height: 60px;
   padding: 16px;
   color: #5a6f86;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
 }
 
 /* テーブル */
 .accidents-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
 }
 
 .accidents-table thead {
@@ -271,7 +271,7 @@
   font-weight: 600;
   color: #94a3b8;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.72rem;
+  font-size: 1rem;
 }
 
 .accidents-table th.accidents-table__th--num {
@@ -298,7 +298,7 @@
 
 .accidents-table__cell--muted {
   color: #8ba3bb;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
 }
 
 .accidents-table__cell--num {
@@ -350,7 +350,7 @@
 }
 
 .usage-meter__label {
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   width: 32px;
@@ -364,7 +364,7 @@
   place-items: center;
   height: 200px;
   color: #9db0c5;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
 }
 
 .accidents-tab__error {

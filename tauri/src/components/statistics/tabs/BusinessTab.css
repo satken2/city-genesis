@@ -33,7 +33,7 @@
 }
 
 .biz-filter__label {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #8ba3bb;
@@ -48,7 +48,7 @@
   background: rgba(15, 23, 42, 0.85);
   color: #e2e8f0;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   cursor: pointer;
   transition: border-color 0.12s, background 0.12s;
 }
@@ -65,7 +65,7 @@
 .biz-filter__count {
   margin-left: auto;
   align-self: center;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   color: #94a3b8;
 }
 
@@ -87,7 +87,7 @@
   padding: 24px;
   text-align: center;
   color: #94a3b8;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
 }
 
 .biz-status--error {
@@ -97,7 +97,7 @@
 .biz-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   color: #e2e8f0;
 }
 
@@ -109,7 +109,7 @@
   padding: 9px 12px;
   text-align: left;
   font-weight: 600;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   color: #8ba3bb;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -140,7 +140,7 @@
 
 .biz-th__arrow {
   margin-left: 4px;
-  font-size: 0.66rem;
+  font-size: 0.92rem;
   opacity: 0.65;
 }
 
@@ -188,7 +188,7 @@
   padding: 2px 7px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.05);
-  font-size: 0.74rem;
+  font-size: 1.03rem;
 }
 
 .biz-enrollment__skill {

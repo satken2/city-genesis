@@ -264,11 +264,11 @@ export function usePathConstruction(
   const [rawWaypointControls, setRawWaypointControls] = useState<WaypointControls[]>([]);
 
   /* ---- 軌道(複線)敷設の設定 ---- */
-  const [trackCount, setTrackCount] = useState<number>(2);
+  const [trackCount, setTrackCount] = useState<number>(1);
   // 線路間隔の調整量(m)。実効間隔 = マスター幅 + この値(クランプあり)。パス1本確定ごとに0へ戻す。
   const [trackSpacingDelta, setTrackSpacingDelta] = useState<number>(0);
   // 各線の進行方向のユーザー上書き(null=既定を使う)。長さは trackCount に一致させる。
-  const [directionOverrides, setDirectionOverrides] = useState<(number | null)[]>([null, null]);
+  const [directionOverrides, setDirectionOverrides] = useState<(number | null)[]>([null]);
   // 都市の通行方向。既定の進行方向の左右割り当てに使う。既定は左側通行。
   const [trafficHand, setTrafficHand] = useState<number>(TRAFFIC_HAND_LEFT);
 

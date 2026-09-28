@@ -15,7 +15,7 @@
 .editor-tab-btn {
   flex: 1;
   padding: 14px 20px;
-  font-size: 16px;
+  font-size: 1.48rem;
   font-weight: 600;
   background: none;
   border: none;
@@ -57,7 +57,7 @@
 
 .terrain-add-btn {
   padding: 10px 20px;
-  font-size: 14px;
+  font-size: 1.3rem;
   font-weight: 600;
   background-color: #2a6b3a;
   color: #e0e0e0;
@@ -83,5 +83,5 @@
   background-color: #3a1f1f;
   border: 1px solid #5a2a2a;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 1.2rem;
 }

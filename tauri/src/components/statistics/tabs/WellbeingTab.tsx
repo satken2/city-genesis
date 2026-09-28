@@ -43,6 +43,7 @@ import { useEpochCachedStats } from "../useEpochCache";
 import { resolveIntlLocale } from "../../../utils/locale";
 import { formatEpochDate } from "../../../utils/date";
 import "./WellbeingTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 type View = "satisfaction" | "leisure" | "comfort";
 
@@ -169,13 +170,13 @@ const SERIES_COLORS: Record<string, string> = {
 };
 
 const CHART_MARGIN = { top: 8, right: 12, left: 0, bottom: 0 };
-const Y_AXIS_WIDTH = 40;
-const AXIS_TICK = { fontSize: 10, fill: "#8ba3bb" };
+const Y_AXIS_WIDTH_REM = 3.7; // Y軸の幅(rem)。描画時に useRemPx で px に直す
+const AXIS_TICK = { fontSize: "0.93rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 /** 非選択の系列の不透明度。選択中の指標との主従を色の濃さで示す */
@@ -373,6 +374,7 @@ function WellbeingSidePanel({
 
 export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: View }) {
   const { t, i18n } = useTranslation();
+  const remPx = useRemPx();
   const [selectedKey, setSelectedKey] = useState("city");
   const { data, loading, error } = useEpochCachedStats<WellbeingStats>(
     apiBaseUrl,
@@ -524,7 +526,7 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
                   <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} minTickGap={40} />
                   <YAxis
                     yAxisId="score"
-                    width={Y_AXIS_WIDTH}
+                    width={remPx(Y_AXIS_WIDTH_REM)}
                     domain={[0, 100]}
                     tick={AXIS_TICK}
                     tickLine={false}
@@ -533,7 +535,7 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
                     <YAxis
                       yAxisId="hours"
                       orientation="right"
-                      width={Y_AXIS_WIDTH}
+                      width={remPx(Y_AXIS_WIDTH_REM)}
                       domain={[0, 16]}
                       tick={AXIS_TICK}
                       tickLine={false}
@@ -547,7 +549,7 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
                       name,
                     ]}
                   />
-                  <Legend wrapperStyle={{ fontSize: 10 }} iconSize={8} />
+                  <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconSize={8} />
                   {chartKeys.map((key) => (
                     <Line
                       key={key}
@@ -576,7 +578,7 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                     <XAxis dataKey="label" tick={AXIS_TICK} tickLine={false} minTickGap={40} />
                     <YAxis
-                      width={Y_AXIS_WIDTH}
+                      width={remPx(Y_AXIS_WIDTH_REM)}
                       domain={[0, 100]}
                       tick={AXIS_TICK}
                       tickLine={false}

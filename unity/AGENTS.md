@@ -60,7 +60,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 - 生成は `RenderWorkScheduler` の共通予算で走らせ、`Start` / `Stop` を対で使う(Unity の `StopCoroutine` だけでは内側の IEnumerator が破棄されない)。常駐ワーカーを追加するときは `hasPendingWork` を指定しないと `game:loaded` が出ず初期ロードが終わらない。
 - 全件走査を避ける。既存の逆引きインデックスは専用の登録・削除メソッド経由でだけ更新する(`geometries/H_バックエンドデータロード.md` §全件走査の回避)。
 - `CameraCellChecker.ResetViewState` は視点検出を未初期化に戻し、カメラが静止していても次の判定で通知させる(セッション切替後にカメラを動かさなくてもロードが始まる入口)。
-- `CameraController` は `game:start` で保存視点を復元し、静止するたび `PATCH /api/v1/city` へ送る。`session:reset` / `game:end` では `SuspendCameraSync` で止める(前の視点で新しい都市の保存値を上書きしないため)。
+- `CameraController` は `game:start` で保存視点を復元し、静止するたび `PATCH /api/v1/city` へ送る。外部から視点を動かす入口は `FocusOn`(注視点・距離・方位・俯角へ滑らかに移動し、入力で中断)で、チュートリアルのカメラ案内が使う。`session:reset` / `game:end` では `SuspendCameraSync` で止める(前の視点で新しい都市の保存値を上書きしないため)。
 - HTTP は必ず `ApiClient`(単体=`Get`、一括=`GetBulk`。MessagePack は自動判別)を経由する。例外は地形バイナリなど非JSON応答だけ。
 
 ### アセットと描画

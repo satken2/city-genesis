@@ -7,7 +7,7 @@
  */
 
 .construction-info-title {
-  font-size: 0.65rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #c5d4e3;
   text-transform: uppercase;
@@ -18,7 +18,8 @@
 .construction-info-grid {
   display: grid;
   grid-template-columns: max-content 1fr;
-  grid-auto-rows: 22px;
+  /* 行の高さは文字サイズに連動させ、値が折り返したら行ごと伸ばす(固定高だと次の行に重なる) */
+  grid-auto-rows: minmax(2.04rem, auto);
   gap: 3px 10px;
   align-items: center;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -30,15 +31,13 @@
 .construction-info-label {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 0.72rem;
-  line-height: 22px;
+  font-size: 1rem;
 }
 
 .construction-info-value {
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: inherit;
   font-family: "Consolas", "Menlo", monospace;
-  line-height: 22px;
 }
 
 /* 推定建設コストの右に出す「x1.3」の倍率バッジ。背景色は割高度合い(緑→黄→赤) */
@@ -46,7 +45,7 @@
   color: #fff;
   border-radius: 4px;
   padding: 1px 4px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   margin-left: 6px;
   font-weight: bold;
   display: inline-block;
@@ -56,7 +55,7 @@
 
 /* 「来期の建設予算の X%」の注記 */
 .construction-budget-note {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #93a9c0;
   margin-top: 4px;
 }
@@ -77,7 +76,7 @@
 
 /* 建設サービスの供給不足警告バナー */
 .construction-supply-note {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   line-height: 1.5;
   margin-top: 6px;
   padding: 6px 8px;

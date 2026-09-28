@@ -86,12 +86,12 @@ export const SPAWN_DEBUG_ENDPOINT = "/api/v1/stats/spawn_debug";
 
 // recharts の共通スタイル定数（他統計タブと同じダークテーマ）
 export const CHART_MARGIN = { top: 12, right: 16, left: 0, bottom: 0 };
-export const AXIS_TICK = { fontSize: 10, fill: "#8ba3bb" };
+export const AXIS_TICK = { fontSize: "0.93rem", fill: "#8ba3bb" };
 export const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 /** 大きな数値を短縮表記する（スコアや需要量は非常に大きくなり得るため） */

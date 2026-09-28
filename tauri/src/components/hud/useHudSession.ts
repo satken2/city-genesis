@@ -5,8 +5,6 @@
  * `session-state` イベントを受け取り、表示可否と都市の基本情報を返す。
  * ネイティブウィンドウ自体の表示/非表示はRust側(`set_hud_visible`)が行うが、
  * 表示直後に前セッションの内容が一瞬見えるのを避けるため、React側でも `visible` で描画を止める。
- *
- * チュートリアルのハイライト対象も全HUDウィンドウで共通のため、ここでまとめて扱う。
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -126,34 +124,3 @@ export function useHudSession(): HudSession {
   };
 }
 
-/**
- * チュートリアルのハイライト対象を購読し、ボタンのクラス名を解決する関数を返す。
- * ハイライト対象のIDはHUD3ウィンドウにまたがるが、各ウィンドウは自分が持つIDだけ反応する。
- */
-export function useTutorialHighlight(): (id: string, baseClass: string) => string {
-  const [tutorialActive, setTutorialActive] = useState(false);
-  const [tutorialTarget, setTutorialTarget] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    // 初期状態は localStorage から復元する(ウィンドウ生成がチュートリアル開始より後になる場合があるため)
-    setTutorialActive(localStorage.getItem("tutorial_active") === "true");
-    setTutorialTarget(localStorage.getItem("tutorial_target") || undefined);
-
-    let unlistenState: (() => void) | undefined;
-    listen<{ active: boolean; targetElementId?: string }>("tutorial:state_changed", (event) => {
-      setTutorialActive(event.payload.active);
-      setTutorialTarget(event.payload.targetElementId);
-    })
-      .then((fn) => {
-        unlistenState = fn;
-      })
-      .catch(console.error);
-
-    return () => {
-      unlistenState?.();
-    };
-  }, []);
-
-  return (id: string, baseClass: string) =>
-    tutorialActive && tutorialTarget === id ? `${baseClass} hud-highlighted-btn` : baseClass;
-}

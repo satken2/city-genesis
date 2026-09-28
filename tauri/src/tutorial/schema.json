@@ -523,6 +523,9 @@
         "equals": {
           "$ref": "#/definitions/value"
         },
+        "notEquals": {
+          "$ref": "#/definitions/value"
+        },
         "oneOf": {
           "type": "array",
           "items": {
@@ -542,6 +545,11 @@
         {
           "required": [
             "equals"
+          ]
+        },
+        {
+          "required": [
+            "notEquals"
           ]
         },
         {

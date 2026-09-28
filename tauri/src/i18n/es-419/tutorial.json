@@ -1,113 +1,90 @@
 {
   "tutorial": {
     "startButton": "Empezar",
-    "step1": {
-      "title": "Bienvenido",
-      "description": "¡Bienvenido! Como alcalde de esta ciudad, te encargarás de impulsar su desarrollo. ¡Vamos a enseñarte lo básico de la construcción urbana!"
-    },
-    "step2": {
-      "title": "Coloquemos una calle",
-      "description": "Lo primero que hace falta es una calle. Para construirla, elige el icono de calles en la barra de herramientas, selecciona «Calle residencial de dos carriles» en la categoría «Vialidad» y colócala. Las calles largas tardan más en construirse, así que por ahora coloca una calle corta."
-    },
-    "step3": {
-      "title": "Configuremos el presupuesto de la ciudad",
-      "description": "Para destinar dinero de forma prioritaria a la obra vial, configuremos el presupuesto de la ciudad. Abre la ventana de presupuesto desde el panel de iconos de la izquierda y reduce las demás categorías para poder destinar más a la categoría de construcción (el presupuesto de construcción debe quedar en el 95 % o más del total). Puedes ajustarlo arrastrando los límites de la barra deslizante superior o escribiendo cifras en las cajas de texto de cada partida."
-    },
-    "step4": {
-      "title": "Terminemos la calle",
-      "description": "La calle todavía está «en proyecto». Tras iniciar la obra pasará un tiempo hasta que quede terminada. Avancemos el tiempo y esperemos a que se complete. Pulsa el botón «Iniciar» de la barra de herramientas para avanzar un poco el tiempo. Durante la obra se paga un costo de construcción cada mes."
-    },
-    "step5": {
-      "title": "Creemos parcelas",
-      "description": "La calle ya está lista. Ahora creemos las parcelas donde levantar edificios. Elige el icono de parcelas en la barra de herramientas y crea parcelas con «A lo largo de la calle». Cuando aparezcan los contornos rojos junto a la calle, confirma con el botón para crearlas."
-    },
-    "step6": {
-      "title": "Construyamos un edificio",
-      "description": "Por fin podemos construir. Elige el icono de edificios en la barra de herramientas y selecciona «Vivienda colectiva» dentro de la categoría «Vivienda colectiva». Puedes elegir como sitio de obra cualquiera de las parcelas que acabas de crear."
-    },
-    "step7": {
-      "title": "Terminemos el edificio",
-      "description": "El edificio, igual que la calle, no se termina de inmediato. Todavía está en proyecto, así que avancemos el tiempo y esperemos a que se complete."
+    "basic": {
+      "step1": {
+        "title": "Coloquemos una calle"
+      },
+      "step2": {
+        "title": "Terminemos la calle",
+        "description": "La calle todavía está «en proyecto». Tras iniciar la obra pasará un tiempo hasta que quede terminada. Avancemos el tiempo y esperemos a que se complete. Pulsa el botón «Iniciar» de la barra de herramientas para avanzar un poco el tiempo. Durante la obra se paga un costo de construcción cada mes."
+      },
+      "step3": {
+        "title": "Creemos parcelas",
+        "description": "La calle ya está lista. Ahora creemos las parcelas donde levantar edificios. Elige el icono de parcelas en la barra de herramientas y crea parcelas con «A lo largo de la calle». Cuando aparezcan los contornos rojos junto a la calle, confirma con el botón para crearlas."
+      },
+      "step4": {
+        "title": "Construyamos un edificio",
+        "description": "Por fin podemos construir. Elige el icono de edificios en la barra de herramientas y selecciona «Vivienda colectiva» dentro de la categoría «Vivienda». Puedes elegir como sitio de obra cualquiera de las parcelas que acabas de crear."
+      },
+      "step5": {
+        "title": "Terminemos el edificio",
+        "description": "El edificio, igual que la calle, no se termina de inmediato. Todavía está en proyecto, así que avancemos el tiempo y esperemos a que se complete."
+      }
     },
     "scenario2": {
       "title": "Configuremos los distritos",
       "description": "Aprende a dividir la ciudad en distritos y a definir normativa de construcción para cada uno.",
       "step1": {
-        "title": "Qué es un distrito",
-        "description": "En este tutorial aprenderás a definir distritos en la ciudad y a configurar normativas y otros ajustes por distrito."
+        "title": "Creemos un distrito",
+        "description": "El distrito es la unidad que divide la ciudad en zonas y se define sobre las calles. Pulsa el botón de distritos del panel de iconos para entrar en el modo de edición de distritos: verás que la red de calles en forma de H forma un solo distrito. Con la herramienta de creación (estado inicial), haz clic en la calle del marcador amarillo para convertirla, junto con las parcelas que dan a ella, en un distrito nuevo."
       },
       "step2": {
-        "title": "Creemos un distrito",
-        "description": "El distrito es la unidad con la que se divide la ciudad y se define sobre las calles que la componen. Pulsa el botón de distritos en el panel de iconos de la izquierda para entrar en el modo de edición de distritos. Verás que ahora toda la ciudad forma un solo distrito. En la vista 3D, con la herramienta de creación (estado inicial; se cambia con el menú que aparece al mantener Ctrl), haz clic en la calle de arriba a la derecha para convertir esa calle y las parcelas que dan a ella en un distrito nuevo."
+        "title": "El distrito quedó dividido",
+        "description": "Has separado una parte de la ciudad como distrito nuevo. Al crear distritos puedes consultar precios, población y otros datos por distrito, y definir normativa de construcción para todo el distrito. Para salir del modo de edición de distritos, vuelve a pulsar el botón de distritos."
       },
       "step3": {
-        "title": "El distrito quedó dividido",
-        "description": "Has separado una parte de la ciudad como distrito nuevo. Al crear distritos puedes consultar precios, población y otros datos por distrito, y definir normativa de construcción para todo el distrito."
+        "title": "Mostremos los recursos naturales",
+        "description": "Veamos si hay recursos naturales en este distrito. Abre los modos de visualización con el icono del ojo en la cabina, al centro de la parte inferior de la pantalla, y activa los recursos naturales en su pestaña. Cuando aparezcan, haz clic en la veta mineral del marcador amarillo para abrir su detalle."
       },
       "step4": {
-        "title": "Mostremos los recursos naturales",
-        "description": "Veamos si hay recursos naturales dentro de este distrito. Haz clic en el icono del ojo en la cabina, al centro de la parte inferior de la pantalla, para cambiar el modo de visualización. Selecciona la pestaña de recursos naturales y actívalos."
-      },
-      "step5": {
         "title": "Abramos el detalle del distrito",
         "description": "Resulta que en el distrito recién creado hay una veta mineral. Parece buena idea destinar esta zona a una mina. Haz clic en la etiqueta del distrito recién creado para abrir su panel de detalle."
       },
-      "step6": {
+      "step5": {
         "title": "Definamos la normativa de construcción",
-        "description": "En la normativa de construcción, en la parte baja del panel, puedes elegir qué edificios pueden levantarse en las parcelas de este distrito. Como aquí solo queremos minas, haz clic en todos los demás edificios para desactivarlos."
+        "description": "En la normativa de construcción, en la parte baja del panel, puedes elegir qué edificios pueden levantarse en las parcelas de este distrito. Como aquí solo queremos minas, haz clic en todos los edificios salvo «Instalación de extracción» para desactivarlos."
+      },
+      "step6": {
+        "title": "Revisemos una parcela",
+        "description": "Ya definiste la normativa del distrito. Comprobemos que se aplica a las parcelas que contiene. Haz clic en la parcela del marcador amarillo para abrir su panel de detalle."
       },
       "step7": {
-        "title": "Revisemos una parcela",
-        "description": "Ya definiste la normativa del distrito. Comprobemos que se aplica a las parcelas que contiene. Haz clic en una parcela del distrito para abrir su panel de detalle."
-      },
-      "step8": {
         "title": "La normativa se aplicó",
-        "description": "Si miras la parte baja del panel de la parcela, verás que se refleja la restricción del distrito que solo permite minas. En esta parcela ya no se puede construir nada que no sea una mina."
+        "description": "Si miras la parte baja del panel de la parcela, verás que se refleja la restricción del distrito que solo permite «Instalación de extracción». En esta parcela ya no se puede construir nada que no sea una instalación de extracción."
       }
     },
     "scenario3": {
       "title": "Construyamos la infraestructura",
       "description": "Aprende a llevar electricidad a la ciudad mediante centrales, subestaciones y líneas de transmisión.",
       "step1": {
-        "title": "Qué es desarrollar infraestructura",
-        "description": "En este tutorial aprenderás a construir la infraestructura necesaria para abastecer de electricidad a la ciudad. Pulsa «Iniciar» para continuar."
+        "description": "La vivienda colectiva de este pueblo todavía no tiene electricidad. Haz clic en la vivienda colectiva del marcador amarillo para abrir su detalle, elige uno de los inquilinos en la pestaña «Edificio» y abre su pestaña «Oferta y demanda»: verás que la cantidad obtenida de electricidad es 0.",
+        "title": "Revisemos la vivienda colectiva"
       },
       "step2": {
-        "title": "Revisemos la vivienda",
-        "description": "En esta ciudad ya hay una vivienda construida, pero todavía no recibe electricidad. Haz clic en ella para abrir su información y comprobar que no tiene suministro eléctrico."
+        "description": "Para generar electricidad hace falta una central. Construye una «Central solar» en la parcela del marcador amarillo, en el terreno llano al oeste del pueblo. Normalmente tarda en terminarse, pero como es un tutorial, al confirmar se omitirá el plazo de obra y quedará terminada.",
+        "title": "Construyamos una central solar"
       },
       "step3": {
-        "title": "Construyamos una central solar",
-        "description": "Para generar electricidad hace falta primero una central. Esta ciudad aún no tiene ninguna. Hay un terreno amplio al oeste de la ciudad: elige «Central solar» en el panel de edificios y constrúyela ahí."
+        "description": "La electricidad de alta tensión que genera la central no puede usarse tal cual en los hogares. Construye una «Subestación» en la parcela del marcador amarillo junto a la vivienda colectiva para convertirla en electricidad de uso doméstico. La electricidad de la subestación llega a una zona determinada a su alrededor.",
+        "title": "Construyamos una subestación"
       },
       "step4": {
-        "title": "Nos saltamos la obra",
-        "description": "Normalmente una central tarda en construirse, pero como esto es un tutorial nos saltaremos la obra. Si pulsas «Ya terminé», la central solar quedará lista de inmediato."
+        "description": "Abre «Infraestructura» en el panel de iconos y elige «Línea de transmisión» en «Electricidad». Traza la línea desde el terminal de conexión de la central solar hasta el terminal de conexión de la subestación del pueblo. Aunque estén lejos, puedes tenderla como una sola línea si unes los terminales en línea recta. Al confirmar, se completará la línea de transmisión y se comprobará la conexión.",
+        "title": "Conectemos con una línea de transmisión"
       },
       "step5": {
-        "title": "Construyamos una subestación",
-        "description": "La central solar ya está lista. Sin embargo, la corriente de alta tensión que genera no puede usarse directamente en los hogares. Hace falta colocar una subestación cerca del punto de consumo para convertirla en electricidad doméstica. Hay un terreno libre junto a la vivienda: construye ahí una «Subestación»."
+        "description": "Avanza épocas y comprueba si la subestación recibe electricidad de alta tensión. Haz clic en la subestación para abrir su detalle y, en la pestaña «Oferta y demanda», confirma que la cantidad recibida de electricidad de alta tensión no sea 0. La central tarda unas cuantas épocas en ponerse en marcha y en que llegue la electricidad.",
+        "title": "Comprobemos el suministro eléctrico"
       },
       "step6": {
-        "title": "Tendamos la línea de transmisión",
-        "description": "Para llevar la corriente de alta tensión de la central a la subestación, instalaremos una «Línea de alta tensión». Tanto la central como la subestación tienen un nodo de «terminal de conexión»: engancha un extremo de la línea al terminal de la central solar y el otro al de la subestación."
-      },
-      "step7": {
-        "title": "Comprobemos el suministro eléctrico",
-        "description": "Con esto la infraestructura queda lista. Avanza el tiempo y comprueba que la subestación recibe la corriente de alta tensión."
-      },
-      "step8": {
-        "title": "Infraestructura completada",
-        "description": "¡Buen trabajo! La central genera corriente de alta tensión, la línea de transmisión la lleva hasta la subestación y esta la convierte en electricidad para la ciudad: esa es la estructura en dos etapas de la infraestructura eléctrica. Con el mismo mecanismo puedes desarrollar otras infraestructuras, como el agua potable."
+        "description": "Por último, como en el paso 1, abre la pestaña «Oferta y demanda» de un inquilino de la vivienda colectiva y comprueba que la cantidad obtenida de electricidad ya no sea 0; puede tardar unas cuantas épocas más. Generar, transmitir y transformar: así llega la electricidad a los hogares, y el agua potable funciona igual.",
+        "title": "Infraestructura completada"
       }
     },
     "scenario4": {
       "title": "Construyamos un ferrocarril",
       "description": "Aprende a poner en servicio una línea ferroviaria preparando en orden las vías, el depósito, la línea de transmisión, el andén y el edificio de estación.",
-      "step1": {
-        "title": "El ferrocarril funciona por combinación",
-        "description": "En este tutorial aprenderás a llevar el ferrocarril a la ciudad. Un ferrocarril no funciona solo con tender vías. Hace falta un depósito que aporte los trenes, una línea de transmisión que alimente la vía electrificada, un andén y un edificio de estación para que suban y bajen los pasajeros, y una línea que haga circular los trenes: solo con todo eso reunido se pone en marcha. Esta ciudad solo cuenta con calles y una central solar. Pulsa «Empezar» y vamos construyéndolo por partes."
-      },
       "step2": {
         "title": "Tendamos las vías",
         "description": "Primero, la vía por donde circularán los trenes. Abre «Construcción ferroviaria» en el panel de iconos de la izquierda y, en la pestaña «Vía férrea», elige «Vía electrificada de superficie». Una sola vía es vía única, así que para ir y volver hace falta doble vía. Pon el número de vías «paralelas» en 2 y tiéndelas rectas en dirección este-oeste sobre el terreno libre al norte (al fondo) de la calle. En la vista 3D, el clic izquierdo añade vértices y el derecho confirma."
@@ -143,10 +120,10 @@
     },
     "complete": {
       "title": "Tutorial completado",
-      "description": "¡Felicidades! Con esto termina el tutorial. Volveremos al menú.",
-      "button": "Volver al menú"
+      "description": "¡Felicidades! Con esto termina el tutorial. Pulsa «Terminar» para cerrar la guía y seguir jugando libremente en esta ciudad.",
+      "button": "Terminar"
     },
-    "completeButton": "Ya terminé",
+    "nextButton": "Siguiente",
     "checking": "Comprobando...",
     "failed": "No se cumplen las condiciones. Inténtalo de nuevo.",
     "completed": "¡Tutorial completado! Buen trabajo.",
@@ -160,29 +137,50 @@
       "confirmRoad": "Confirma en el panel de construcción para guardar la carretera y luego pulsa Completar.",
       "failed": "Falló la preparación o la comunicación. Reintenta; si el problema persiste, sal e inicia el tutorial en una ciudad nueva.",
       "retry": "Reintentar",
-      "exit": "Salir",
-      "exitFailed": "No se pudo salir. Inténtalo de nuevo.",
       "placementRequired": "Usa la variante y las posiciones de carretera indicadas.",
-      "preparing": "Preparando la ciudad del tutorial."
+      "preparing": "Preparando la ciudad del tutorial.",
+      "finishFailed": "No se pudo terminar el tutorial. Inténtalo de nuevo."
     },
     "trade": {
       "title": "Iniciar el comercio internacional",
       "description": "Aprende a exportar mercancías por mar e importarlas por ferrocarril construyendo un puerto de contenedores y una estación internacional de carga.",
       "step1": {
-        "title": "Construir un puerto de contenedores",
-        "description": "Construir un puerto de contenedores。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye una «Terminal de contenedores» en la parcela costera del marcador amarillo. Al confirmar, se omitirá el plazo de obra.",
+        "title": "Construir un puerto de contenedores"
       },
       "step2": {
-        "title": "Confirmar exportaciones de alimentos",
-        "description": "Confirmar exportaciones de alimentos。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Avanza épocas y revisa las exportaciones de alimentos en el detalle del puerto. La producción de la fábrica y el transporte tardan algunas épocas en ponerse en marcha.",
+        "title": "Confirmar exportaciones de alimentos"
       },
       "step3": {
-        "title": "Construir una estación internacional de carga",
-        "description": "Construir una estación internacional de carga。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye una «Estación internacional de carga» en la parcela del marcador amarillo junto a la calle. En la frontera este hay una vía que continúa hasta el país vecino y una estación fronteriza de carga.",
+        "title": "Construir una estación internacional de carga"
       },
       "step4": {
-        "title": "Confirmar importaciones por tren",
-        "description": "Confirmar importaciones por tren。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "open": "Abre «Vías férreas» en el panel de iconos y elige «Andén de carga de contenedores» en la pestaña «Andén».",
+        "place": "Tiende un andén al norte de la estación internacional de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (el lado sur) antes de confirmar. Si lo tiendes de oeste a este, elige «Interior». Cuando termines, pulsa el botón «Ya terminé».",
+        "title": "Construir un andén junto a la estación"
+      },
+      "step5": {
+        "description": "Con «Vía de ferrocarril» de la pestaña «Vía férrea», tiende la vía desde el extremo este del andén hasta el extremo oeste del andén de la estación fronteriza de carga. Al confirmar, se completará la vía y se comprobará la conexión.",
+        "title": "Tender la vía hasta la frontera"
+      },
+      "step6": {
+        "build": "Construye un «Depósito ferroviario» en la parcela del marcador amarillo junto a la calle.",
+        "branch": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. Empálmala con la línea principal en un ángulo suave hacia el este, no en ángulo recto. Cuando termines, pulsa el botón «Ya terminé».",
+        "title": "Construir el depósito y conectarlo a la línea principal"
+      },
+      "step7": {
+        "description": "Abre «Infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del este del pueblo con el terminal de conexión del depósito.",
+        "title": "Llevar electricidad al depósito"
+      },
+      "step8": {
+        "description": "En «Transporte público», pulsa «＋ Nueva línea» y elige «Línea internacional de carga» como tipo de línea. Coloca paradas sobre los andenes de la estación internacional de carga y de la estación fronteriza de carga, e inaugura la línea. Al confirmar, la entrada de las importaciones pasará del puerto a la estación internacional de carga.",
+        "title": "Inaugurar la línea internacional de carga"
+      },
+      "step9": {
+        "description": "Avanza épocas y revisa las importaciones en el detalle de la estación internacional de carga. Conseguir los vehículos y arrancar el transporte lleva algunas épocas.",
+        "title": "Confirmar importaciones por tren"
       }
     },
     "highway": {
@@ -190,72 +188,106 @@
       "description": "Aprende a construir una autopista elevada y rampas para crear un enlace con las calles locales.",
       "step1": {
         "title": "Cruzar la calle con un viaducto",
-        "description": "Cruzar la calle con un viaducto。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye una autopista que cruce la calle central sobre un viaducto de al menos 6 m de altura. Por ejemplo, trázala de norte a sur a 10 m de altura. Al confirmar, la obra se completa."
       },
       "step2": {
         "title": "Nombrar la autopista",
-        "description": "Nombrar la autopista。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Desde los detalles de la autopista que construiste, regístrala como carretera e introduce su nombre."
       },
       "step3": {
         "title": "Construir una rampa",
-        "description": "Construir una rampa。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Conecta la autopista elevada con la calle central mediante una rampa. Al confirmar se omite el tiempo de obra y se detecta el intercambiador a partir de la conexión."
       },
       "step4": {
         "title": "Inspeccionar el intercambiador",
-        "description": "Inspeccionar el intercambiador。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Abre el panel de detalles del intercambiador y comprueba que la calle y la autopista están conectadas."
       }
     },
     "mining": {
       "title": "Extraer recursos",
       "description": "Aprende a extraer mineral, transportarlo por ferrocarril y exportarlo construyendo una mina, estaciones de carga y un puerto de graneles.",
       "step1": {
-        "title": "Inspeccionar el yacimiento",
-        "description": "Inspeccionar el yacimiento。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Activa la visualización de los recursos naturales con el icono del ojo de la cabina, en la parte inferior de la pantalla, y haz clic en la veta mineral de la ladera oeste de la montaña central (marcador amarillo) para abrir su detalle.",
+        "title": "Inspeccionar la veta mineral"
       },
       "step2": {
-        "title": "Construir una mina",
-        "description": "Construir una mina。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye una «Mina» en la parcela del marcador amarillo, sobre la veta mineral. Elige «Mina» en el panel de construcción y haz clic en la parcela para colocarla. Al confirmar, como es un tutorial, se omite el plazo de obra y la mina queda terminada.",
+        "title": "Construir una mina"
       },
       "step3": {
-        "title": "Construir una estación de carga de mineral",
-        "description": "Construir una estación de carga de mineral。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye una «Estación de carga de mineral» en la parcela del marcador amarillo al pie de la montaña, al norte de la calle principal. El mineral extraído en la mina llega aquí en camiones y se carga en los trenes de carga.",
+        "title": "Construir la estación de carga al pie de la montaña"
       },
       "step4": {
-        "title": "Construir una estación de descarga",
-        "description": "Construir una estación de descarga。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye una «Estación de descarga de mineral» en la parcela del marcador amarillo, en la esquina de la calle del puerto. Aquí se descarga el mineral que llega por ferrocarril. Ten cuidado de no confundirla con la «Estación de descarga de petróleo», que tiene un nombre parecido.",
+        "title": "Construir la estación de descarga cerca del puerto"
       },
       "step5": {
-        "title": "Construir un puerto a granel",
-        "description": "Construir un puerto a granel。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye un «Puerto de graneles» en la parcela del marcador amarillo que da al mar, al final de la calle del puerto. Desde aquí el mineral se exporta al extranjero.",
+        "title": "Construir un puerto de graneles"
       },
       "step6": {
-        "title": "Avanzar una época",
-        "description": "Avanzar una época。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "open": "Abre «Vías férreas» en el panel de iconos y elige «Andén de carga de mineral» en la pestaña «Andén».",
+        "loading": "Tiende un andén al norte de la estación de carga, paralelo a ella. Al cambiar «Lado del andén», cambia la posición del andén en la vista previa; ajústalo para que el andén quede del lado del edificio de la estación (el lado sur) antes de confirmar. Si lo tiendes de oeste a este, elige «Interior». El terreno baja en pendiente pronunciada. Si aparece un error de pendiente, ajusta la «Altura del terraplén» para dejar el andén horizontal.",
+        "unloading": "Del mismo modo, tiende también un andén al norte de la estación de descarga, de manera que quede del lado del edificio de la estación. Cuando termines, pulsa el botón «Ya terminé».",
+        "title": "Construir andenes junto a las estaciones"
       },
       "step7": {
-        "title": "Confirmar exportaciones de mineral",
-        "description": "Confirmar exportaciones de mineral。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Con «Vía de ferrocarril» de la pestaña «Vía férrea», tiende la vía desde el extremo este del andén de la estación de descarga hasta el extremo oeste del andén de la estación de carga (basta con una sola vía). Al confirmar, se completarán la vía y los andenes y se comprobará la conexión.",
+        "title": "Unir las dos estaciones con vías"
+      },
+      "step8": {
+        "build": "Los trenes salen del depósito. Construye un «Depósito ferroviario» en la parcela del marcador amarillo junto a la calle principal.",
+        "branch": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. La clave es empalmarla con la línea principal en un ángulo suave hacia el este, no en ángulo recto (los desvíos reales no pueden girar en ángulos grandes). Cuando termines, pulsa el botón «Ya terminé».",
+        "title": "Construir el depósito y conectarlo a la línea principal"
+      },
+      "step9": {
+        "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito.",
+        "title": "Llevar electricidad al depósito"
+      },
+      "step10": {
+        "description": "En «Transporte público» del panel de iconos, pulsa «＋ Nueva línea» y elige «Línea de transporte de mineral» como tipo de línea. Haz clic sobre los andenes de las estaciones de carga y de descarga para colocar las paradas, y pulsa «Crear» para inaugurar la línea.",
+        "title": "Inaugurar la línea de transporte de mineral"
+      },
+      "step11": {
+        "description": "Ejecuta épocas para poner en marcha la extracción, la carga, el transporte ferroviario, la descarga y la exportación. Conseguir los vehículos y arrancar el transporte lleva algunas épocas.",
+        "title": "Avanzar épocas"
+      },
+      "step12": {
+        "description": "Revisa las exportaciones de mineral en el detalle del puerto de graneles. Si todavía no hay exportaciones, avanza más épocas.",
+        "title": "Confirmar exportaciones de mineral"
       }
     },
     "tourism": {
       "title": "Desarrollar el turismo",
       "description": "Aprende a atraer turistas y fomentar el uso de restaurantes y autobuses construyendo un hotel y una terminal de pasajeros.",
       "step1": {
-        "title": "Construir un hotel junto a las ruinas",
-        "description": "Construir un hotel junto a las ruinas。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye un «Hotel turístico» en la parcela del marcador amarillo al este de las ruinas antiguas, junto al mar. Al confirmar, se omitirá el plazo de obra.",
+        "title": "Construir un hotel junto a las ruinas"
       },
       "step2": {
-        "title": "Construir una terminal de pasajeros",
-        "description": "Construir una terminal de pasajeros。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Construye una «Terminal de cruceros» en la parcela marcada del puerto. Entre el puerto y las ruinas ya están preparados una línea de autobús y un depósito de autobuses.",
+        "title": "Construir una terminal de cruceros"
       },
       "step3": {
-        "title": "Avanzar épocas",
-        "description": "Avanzar épocas。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Avanza épocas para recibir a los turistas. La puesta en marcha tarda algunas épocas.",
+        "title": "Avanzar épocas"
       },
       "step4": {
-        "title": "Verificar ingresos y pasajeros del autobús",
-        "description": "Verificar ingresos y pasajeros del autobús。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "description": "Revisa las ventas del restaurante frente a las ruinas y los pasajeros de la línea de autobús. Lo habrás logrado cuando ambos superen sus valores iniciales y hayan llegado turistas.",
+        "title": "Verificar el aumento de ventas y pasajeros del autobús"
       }
+    },
+    "intro": {
+      "basic": "¡Bienvenido! Eres el alcalde de esta ciudad. En este tutorial aprenderás el flujo básico para construir una ciudad: tender una calle, esperar a que se termine y levantar un edificio en las parcelas.",
+      "scenario2": "La ciudad se puede administrar dividiéndola en «distritos». En este tutorial aprenderás a crear un distrito nuevo seleccionando calles, a revisar la distribución de los recursos naturales y a restringir qué edificios pueden construirse en cada distrito.",
+      "scenario3": "La historia transcurre en un pueblo portuario del noroeste de una isla rodeada de bajíos de coral. Este pueblo todavía no tiene electricidad. Construirás una central solar en el terreno llano del oeste, lejos del pueblo, llevarás la electricidad hasta la subestación del pueblo con una línea de transmisión y aprenderás que la infraestructura eléctrica se compone de tres etapas: generación, transmisión y transformación.",
+      "scenario4": "Un ferrocarril no funciona solo con tender vías. En este tutorial prepararás en orden la vía, el depósito, la línea de transmisión, el andén y el edificio de estación, y al final pondrás en servicio una línea para aprender que el ferrocarril funciona gracias a la combinación de muchos elementos.",
+      "trade": "Esta ciudad está conectada por ferrocarril con el país vecino en su frontera este y da al mar por el oeste. En este tutorial crearás dos rutas comerciales: exportarás por mar los alimentos de una fábrica desde un puerto de contenedores, y tenderás una línea de carga hasta la frontera para importar por ferrocarril.",
+      "highway": "Cuando la ciudad crece, las calles locales ya no dan abasto con tantos autos. En este tutorial aprenderás a construir una autopista elevada que pase por encima de una calle local y a conectarlas con rampas para crear un intercambiador.",
+      "mining": "La historia transcurre en una isla rodeada de bajíos de coral. En la montaña central yace una veta de mineral. En este tutorial aprenderás todo el proceso —extraer el mineral en la montaña, llevarlo en tren de carga desde la estación de carga al pie de la montaña hasta el pueblo portuario y exportarlo al extranjero desde el puerto de graneles— construyendo tú mismo las vías y el depósito.",
+      "tourism": "El pueblo portuario de esta isla, rodeada de mares de coral, tiene unas ruinas antiguas a la orilla del mar. En este tutorial atraerás turistas construyendo un hotel junto a las ruinas y una terminal de cruceros en el puerto, y comprobarás cómo se animan los restaurantes y la línea de autobús del pueblo.",
+      "heading": "En este tutorial"
     }
   },
   "tips": {

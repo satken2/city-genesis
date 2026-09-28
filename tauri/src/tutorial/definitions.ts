@@ -1,6 +1,7 @@
 import Ajv from "ajv";
 import schema from "./schema.json";
 import basic from "./definitions/basic.json";
+import district from "./definitions/scenario2.json";
 import infra from "./definitions/scenario3.json";
 import trade from "./definitions/trade.json";
 import highway from "./definitions/highway.json";
@@ -53,4 +54,4 @@ export function validateDefinition(value: unknown): asserts value is Definition 
   }
 }
 export const DEFINITIONS: Record<string, Definition> = {};
-for (const value of [basic, infra, trade, highway, mining, tourism]) { validateDefinition(value); DEFINITIONS[value.id] = value; }
+for (const value of [basic, district, infra, trade, highway, mining, tourism]) { validateDefinition(value); DEFINITIONS[value.id] = value; }

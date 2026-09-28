@@ -30,6 +30,7 @@ import {
 import { useEpochCachedStats } from "../useEpochCache";
 import { GOODS_RESOURCE } from "../../../constants";
 import "./EconomyTrendTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 /** /api/v1/stats/market_price の商品別推移データ */
 type MarketPriceProduct = {
@@ -67,13 +68,13 @@ const COLOR_SHORTAGE = "#f97316";    // 不足: Orange
 
 // recharts の共通スタイル定数(他タブと同じテーマ)
 const CHART_MARGIN = { top: 12, right: 16, left: -10, bottom: 0 };
-const Y_AXIS_WIDTH = 48;
-const AXIS_TICK = { fontSize: 10, fill: "#8ba3bb" };
+const Y_AXIS_WIDTH_REM = 4.44; // Y軸の幅(rem)。描画時に useRemPx で px に直す
+const AXIS_TICK = { fontSize: "0.93rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 /**
@@ -133,6 +134,7 @@ function TrendChartCard({
   secondaryColor?: string;
   secondaryLabel?: string;
 }) {
+  const remPx = useRemPx();
   const hasSecondary = !!secondaryData;
 
   // 主系列・副系列を {epoch, value, secondary} の結合データに揃える。
@@ -163,7 +165,7 @@ function TrendChartCard({
                 axisLine={{ stroke: "#253246" }}
               />
               <YAxis
-                width={Y_AXIS_WIDTH}
+                width={remPx(Y_AXIS_WIDTH_REM)}
                 tick={AXIS_TICK}
                 tickLine={false}
                 axisLine={{ stroke: "#253246" }}
@@ -176,7 +178,7 @@ function TrendChartCard({
                 formatter={(value: any) => formatter(Number(value))}
               />
               {hasSecondary && (
-                <Legend wrapperStyle={{ fontSize: "11px" }} iconType="plainline" />
+                <Legend wrapperStyle={{ fontSize: "1.02rem" }} iconType="plainline" />
               )}
               <Line
                 type="monotone"
@@ -254,6 +256,7 @@ function SupplyDemandTrendCard({
     order: string;
   };
 }) {
+  const remPx = useRemPx();
   // 各系列を同長に揃えて recharts 用データポイントに変換する。
   // 古いエポック順に並んでいる前提で、epochs を基準にインデックスを進める。
   const len = Math.min(
@@ -310,7 +313,7 @@ function SupplyDemandTrendCard({
                 axisLine={{ stroke: "#253246" }}
               />
               <YAxis
-                width={Y_AXIS_WIDTH}
+                width={remPx(Y_AXIS_WIDTH_REM)}
                 tick={AXIS_TICK}
                 tickLine={false}
                 axisLine={{ stroke: "#253246" }}
@@ -322,7 +325,7 @@ function SupplyDemandTrendCard({
                 labelFormatter={(label) => `Epoch ${label}`}
                 formatter={(value: any) => formatter(Number(value))}
               />
-              <Legend wrapperStyle={{ fontSize: "11px" }} iconType="plainline" />
+              <Legend wrapperStyle={{ fontSize: "1.02rem" }} iconType="plainline" />
               <Line
                 type="monotone"
                 dataKey="production"
@@ -566,7 +569,7 @@ function SankeyFlowCard({
                         y={props.y + props.height / 2}
                         dy=".35em"
                         fill="#cbd5e1"
-                        fontSize={11}
+                        fontSize="1.02rem"
                         textAnchor={textAnchor}
                       >
                         {props.payload?.name}

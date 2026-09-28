@@ -23,14 +23,14 @@
 
 .credits-lead {
   margin: 0;
-  font-size: 11px;
+  font-size: 1.02rem;
   line-height: 1.6;
   color: var(--flat-text-muted);
 }
 
 .credits-empty {
   margin: 0;
-  font-size: 12px;
+  font-size: 1.11rem;
   color: var(--flat-text-muted);
 }
 
@@ -44,7 +44,7 @@
 .credits-group-title {
   margin: 0;
   padding: 2px 0 2px 10px;
-  font-size: 14px;
+  font-size: 1.3rem;
   font-weight: 600;
   color: var(--flat-text);
   box-shadow: inset 4px 0 0 var(--flat-accent);
@@ -75,7 +75,7 @@
 }
 
 .credits-title {
-  font-size: 13px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--flat-text);
 }
@@ -101,19 +101,19 @@
   padding: 2px 6px;
   background-color: var(--flat-sunken);
   color: var(--flat-text-body);
-  font-size: 10px;
+  font-size: 0.93rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  white-space: nowrap;
+  overflow-wrap: anywhere; /* 通常は1行に収め、URL入りの長い名前だけ幅に合わせて折り返す */
 }
 
 .credits-attribution {
-  font-size: 12px;
+  font-size: 1.11rem;
   color: var(--flat-text-body);
 }
 
 .credits-note {
-  font-size: 11px;
+  font-size: 1.02rem;
   color: var(--flat-text-muted);
 }
 
@@ -128,7 +128,7 @@
 }
 
 .credits-required-label {
-  font-size: 10px;
+  font-size: 0.93rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--flat-text-muted);
@@ -136,7 +136,7 @@
 
 .credits-required-body {
   font-family: "Consolas", "Courier New", monospace;
-  font-size: 11px;
+  font-size: 1.02rem;
   line-height: 1.6;
   color: var(--flat-text);
   white-space: pre-wrap;

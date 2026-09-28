@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./TradeTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 type HistoryPoint = {
   epoch: number;
@@ -38,17 +39,18 @@ const COLOR_EXPORT = "#10b981";        // 輸出: エメラルドグリーン
 const COLOR_IMPORT = "#ef4444";        // 輸入: ローズレッド
 
 const CHART_MARGIN = { top: 12, right: 16, left: -10, bottom: 0 };
-const Y_AXIS_WIDTH = 48;
-const AXIS_TICK = { fontSize: 10, fill: "#8ba3bb" };
+const Y_AXIS_WIDTH_REM = 4.44; // Y軸の幅(rem)。描画時に useRemPx で px に直す
+const AXIS_TICK = { fontSize: "0.93rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<TradeStats>(
     apiBaseUrl,
     "/api/v1/stats/trade"
@@ -122,7 +124,7 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       axisLine={{ stroke: "#253246" }}
                     />
                     <YAxis
-                      width={Y_AXIS_WIDTH}
+                      width={remPx(Y_AXIS_WIDTH_REM)}
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
@@ -168,7 +170,7 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       axisLine={{ stroke: "#253246" }}
                     />
                     <YAxis
-                      width={Y_AXIS_WIDTH}
+                      width={remPx(Y_AXIS_WIDTH_REM)}
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}

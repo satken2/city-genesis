@@ -46,7 +46,8 @@
  * 都市外の陸地:
  *   背景地形を持つマップでは、遠景用海岸線(GET /api/v1/terrain/background/coastline。マップ作成時に
  *   作られた粗い輪郭で、プレイ中は変わらない)を都市の矩形の外だけ陸地色で塗る。標高色分け・等高線・
- *   グリッド・海岸線の線は都市内だけに描く。
+ *   グリッド・海岸線の線は都市内だけに描く。都市の矩形はレイヤーに依らず常に灰色の点線で囲み、
+ *   どこまでを都市として使えるかを示す。
  *
  * ヒートマップ(heatmap propで1種別だけ選ぶ排他表示):
  *   騒音・大気汚染・治安・日照の環境スコアを土地区画の塗り分けで表現する。APIが返すのは
@@ -496,6 +497,10 @@ const COLOR_STREET = "#c6ced3";
 const COLOR_STREET_TRUNK = "#aab7c1";
 const COLOR_MOTORWAY = "#778896";
 const COLOR_RAIL = "#7c8389";
+/** 都市の範囲(詳細地形の矩形)を囲む点線の色と、点の直径・間隔(画面上のpx。ズームによらず一定) */
+const COLOR_CITY_BOUNDARY = "#5f666c";
+const CITY_BOUNDARY_DOT_PX = 3;
+const CITY_BOUNDARY_GAP_PX = 5;
 /** 道路の強調時に、強調していない道路・線路を描く不透明度 */
 const FOCUS_DIM_ALPHA = 0.35;
 /** 強調の帯の画面上の幅(px)。道路の実幅によらず一定にして、遠景でも道筋を追えるようにする */
@@ -1652,6 +1657,18 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.setLineDash([px(10), px(7)]);
           ctx.stroke(vec.previewPath);
           ctx.setLineDash([]);
+        }
+
+        // 都市の範囲。背景の陸地と地続きでも、どこまでが都市として使えるかが分かるように常に点線で囲む。
+        // 長さ0の区間を丸い線端で描くと、線幅の直径の点が並ぶ。
+        if (settings) {
+          ctx.save();
+          ctx.strokeStyle = COLOR_CITY_BOUNDARY;
+          ctx.lineWidth = px(CITY_BOUNDARY_DOT_PX);
+          ctx.lineCap = "round";
+          ctx.setLineDash([0, px(CITY_BOUNDARY_DOT_PX + CITY_BOUNDARY_GAP_PX)]);
+          ctx.strokeRect(-settings.map_width / 2, -settings.map_height / 2, settings.map_width, settings.map_height);
+          ctx.restore();
         }
 
         const places = vec.places.filter((place) => place.station ? L.stations : L.buildings);

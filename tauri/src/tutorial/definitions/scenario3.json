@@ -4,7 +4,7 @@
   "terrainMap": "yoron",
   "steps": [
     {
-      "id": "scenario3.1",
+      "id": "scenario3.house",
       "legacyStep": 1,
       "phases": [
         {
@@ -36,15 +36,13 @@
             }
           },
           "until": {
-            "type": "window",
-            "window": "agent_detail",
-            "target": "support.housing.building"
+            "type": "ack"
           }
         }
       ]
     },
     {
-      "id": "scenario3.2",
+      "id": "scenario3.solar",
       "legacyStep": 2,
       "phases": [
         {
@@ -104,7 +102,7 @@
       ]
     },
     {
-      "id": "scenario3.3",
+      "id": "scenario3.substation",
       "legacyStep": 3,
       "phases": [
         {
@@ -164,7 +162,7 @@
       ]
     },
     {
-      "id": "scenario3.4",
+      "id": "scenario3.powerline",
       "legacyStep": 4,
       "phases": [
         {
@@ -236,7 +234,7 @@
       ]
     },
     {
-      "id": "scenario3.5",
+      "id": "scenario3.received",
       "legacyStep": 5,
       "phases": [
         {
@@ -286,7 +284,7 @@
       }
     },
     {
-      "id": "scenario3.6",
+      "id": "scenario3.summary",
       "legacyStep": 6,
       "phases": [
         {
@@ -299,15 +297,22 @@
           },
           "world": {
             "mode": "observe",
+            "markers": [
+              [
+                -1331.5,
+                0,
+                80.5
+              ]
+            ],
             "camera": {
               "target": [
-                -1800,
+                -1331,
                 0,
                 60
               ],
-              "distance": 1400,
+              "distance": 300,
               "yaw": 0,
-              "pitch": 55
+              "pitch": 50
             }
           },
           "until": {

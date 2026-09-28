@@ -42,19 +42,19 @@
 }
 
 .budget-window__reserves-card-label {
-  font-size: 12px;
+  font-size: 1.11rem;
   color: var(--flat-text-label);
 }
 
 .budget-window__reserves-card-value {
-  font-size: 20px;
+  font-size: 1.85rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
 }
 
 .budget-window__period-info {
-  font-size: 13px;
+  font-size: 1.2rem;
   color: var(--flat-text-body);
 }
 
@@ -62,7 +62,7 @@
 .budget-window__auto-adjust-banner {
   flex-shrink: 0;
   padding: 8px 14px;
-  font-size: 13px;
+  font-size: 1.2rem;
   color: var(--flat-warn);
   background-color: var(--flat-warn-surface);
   box-shadow: inset 4px 0 0 var(--flat-warn), var(--flat-shadow-sm);
@@ -126,7 +126,7 @@
 .budget-window__section-title {
   margin: 0;
   padding: 2px 0 2px 10px;
-  font-size: 14px;
+  font-size: 1.3rem;
   font-weight: 600;
   color: var(--flat-text);
   box-shadow: inset 4px 0 0 var(--flat-accent);
@@ -135,7 +135,7 @@
 /* 自動保存の送信中表示。編集トグルの左隣に控えめに出す。 */
 .budget-window__saving-note {
   margin-left: auto;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: var(--flat-text-muted);
 }
 
@@ -143,7 +143,7 @@
 .budget-window__edit-btn {
   margin-left: auto;
   padding: 5px 14px;
-  font-size: 12px;
+  font-size: 1.11rem;
   font-weight: 600;
   font-family: inherit;
   background-color: var(--flat-raised);
@@ -190,7 +190,7 @@
 
 .budget-tier-group__title {
   padding: 1px 0 1px 8px;
-  font-size: 12px;
+  font-size: 1.11rem;
   font-weight: 600;
   color: var(--flat-text-label);
 }
@@ -271,7 +271,7 @@
 
 .budget-category-card__name {
   padding-right: 42px;
-  font-size: 13px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--flat-text);
   overflow: hidden;
@@ -285,7 +285,7 @@
   top: 0;
   right: 0;
   padding: 1px 6px;
-  font-size: 11px;
+  font-size: 1.02rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.5;
@@ -301,7 +301,7 @@
 
 /* 比率から導出された配分予算額。カテゴリ名の直下に小さく出す。 */
 .budget-category-card__amount {
-  font-size: 12px;
+  font-size: 1.11rem;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text-label);
 }
@@ -350,7 +350,7 @@
 .budget-window__balance-note {
   flex: 1;
   min-width: 0;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: var(--flat-text-muted);
 }
 
@@ -367,12 +367,12 @@
 }
 
 .budget-window__balance-summary-label {
-  font-size: 12px;
+  font-size: 1.11rem;
   color: var(--flat-text-label);
 }
 
 .budget-window__balance-summary-value {
-  font-size: 16px;
+  font-size: 1.48rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -393,7 +393,7 @@
 /* 金額グラフ共通のツールチップ(ChartValueTooltip)。値のある系列だけを並べる。 */
 .budget-chart-tooltip {
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: 1.11rem;
   color: var(--flat-text-body);
   background-color: var(--flat-surface);
   box-shadow: var(--flat-shadow);
@@ -455,7 +455,7 @@
 .budget-agent-title {
   margin: 0 0 10px 0;
   padding: 2px 0 2px 10px;
-  font-size: 14px;
+  font-size: 1.3rem;
   font-weight: 600;
   color: var(--flat-text);
   box-shadow: inset 4px 0 0 var(--flat-accent);
@@ -465,7 +465,7 @@
 .budget-agent-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 1.2rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -496,7 +496,7 @@
 .budget-agent-table__header {
   text-align: left;
   padding: 5px 8px;
-  font-size: 11px;
+  font-size: 1.02rem;
   font-weight: 600;
   color: var(--flat-text-label);
   background-color: var(--flat-surface);
@@ -557,7 +557,7 @@
 
 .budget-util-note {
   margin-top: 1px;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: var(--flat-text-muted);
 }
 
@@ -568,7 +568,7 @@
   align-items: center;
   justify-content: center;
   height: 300px;
-  font-size: 14px;
+  font-size: 1.3rem;
   color: var(--flat-text-muted);
 }
 

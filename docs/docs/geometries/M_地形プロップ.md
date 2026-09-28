@@ -234,7 +234,7 @@ Unityからの`edit_prop:update_instances`とPOST/GETの各個別配置は`x, y,
 
 モノレール先頭車308・中間車309は`build_monorail.py`がprops.blendへ著作する手動配置車両。通勤電車風の平らな角型前面・白い面取り車体・青帯・乗降扉・屋上機器・連結部を持ち、幅2.7m、連結端間14m、高さ3.85m。原点は走行タイヤの接地面、前方はUnity +Z。501/502の桁上面（スプライン+0.12m）へ原点を合わせると床高1.38mがホーム面と一致する。14mピッチで連結し、後尾は先頭車を180度回して使う。同じFBXを走行用の`Vehicles/24`（先頭`0`・中間`middle`）にも置き、モノレール路線の車両として描く（[O文書](O_車両の走行描画.md) §O.10.1）。既存のPROP材質だけを使い、通常は先頭車328・中間車304三角形。接写版308_close/309_closeは曲面車体・窓枠・空調ファン・点検扉を持つ。通常と原点・桁用開口・連結ピッチを共有し、約6,600〜6,700三角形。接写の著作は非公開制作ツールのbuild_rail_close.pyで行う。
 
-工事車両と環境演出の航空機・船舶は固定名のFBX(`construction_*` / `ambient_*`)で描画されるが、飾りとして自由に置けるよう数値IDの別名でも `prop_master` に登録している。`genesis-gallery/pipeline/jobs/build_prop_aliases.py` が `props.blend` 内でメッシュデータを共有した数値IDコレクションを作り、`Props/{ID}.fbx` として書き出す。元モデルを再著作したら別名も再生成する。
+工事車両と環境演出の航空機・船舶は固定名のFBX(`construction_*` / `ambient_*`)で描画されるが、飾りとして自由に置けるよう数値IDの別名でも `prop_master` に登録している。`genesis-gallery/pipeline/jobs/build_prop_aliases.py` が `props.blend` 内でメッシュデータを共有した数値IDコレクションを作り、`Props/{ID}.fbx` として書き出す。元モデルが接写・遠景を持つ船304〜307は、別名も `{ID}_close` / `{ID}_far` を持ち、個別配置でも§M.5の投影LODで切り替わる。元モデルを再著作したら別名も再生成する。
 
 | ID | モデル | 原点 |
 |---|---|---|

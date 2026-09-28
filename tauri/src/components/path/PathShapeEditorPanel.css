@@ -32,7 +32,7 @@
 .pse-section-title {
   flex-shrink: 0;
   color: #cdd6f4;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -41,7 +41,7 @@
 .pse-hint {
   flex: 1;
   min-width: 0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #cdd6f4;
   white-space: normal;
   line-height: 1.4;
@@ -79,7 +79,7 @@
   flex-wrap: wrap;
   gap: 8px;
   padding: 8px 12px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
 }
 
@@ -97,7 +97,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 0.72rem;
+  font-size: 1rem;
 }
 
 .pse-route-message {
@@ -114,7 +114,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -151,7 +151,7 @@
   padding: 4px 10px;
   border-radius: 4px;
   background: rgba(15, 20, 32, 0.8);
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   pointer-events: none;
 }
@@ -189,7 +189,7 @@
   border-radius: 4px;
   background: rgba(15, 20, 32, 0.75);
   font-family: Consolas, Menlo, monospace;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #93a9c0;
   white-space: pre;
   pointer-events: none;

@@ -31,7 +31,7 @@
 .path-traffic-list-title {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
 }
 
 .path-traffic-list {
@@ -88,7 +88,7 @@
 
 .path-traffic-row__count {
   text-align: right;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   color: #e2eaf2;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -111,12 +111,12 @@
 
 .path-save-error {
   color: #fc8181;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
 }
 
 .path-save-btn {
   padding: 4px 14px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   border-radius: 6px;
   background: rgba(34, 197, 94, 0.18);
   border: 1px solid rgba(34, 197, 94, 0.4);

@@ -44,7 +44,7 @@
   background: #1b2635;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   color: #c8d8e8;
-  font-size: 0.9rem;
+  font-size: 1.25rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.12s, box-shadow 0.12s, transform 0.12s;
@@ -101,7 +101,7 @@
 .save-load-status {
   padding: 10px 14px;
   border-radius: 0;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   line-height: 1.4;
   min-height: 20px;
 }
@@ -149,7 +149,7 @@
 }
 
 .save-load-confirm-text {
-  font-size: 0.88rem;
+  font-size: 1.22rem;
   line-height: 1.5;
   color: #d0dde9;
 }
@@ -163,7 +163,7 @@
 /* 全体既定(枠線+角丸)の打ち消しを含むため、キャンセル側もここで定義する */
 .save-load-confirm-actions button {
   padding: 8px 22px;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
   font-weight: 600;
   border: none;
   border-radius: 0;

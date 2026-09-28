@@ -18,7 +18,7 @@
 
 .scenario-info__title {
   margin: 0 0 6px 0;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 700;
   color: #9db0c5;
   text-transform: uppercase;
@@ -40,7 +40,7 @@
 }
 
 .scenario-info__label {
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #a4bccc;
 }
@@ -48,7 +48,7 @@
 .scenario-info__input,
 .scenario-info__textarea {
   padding: 6px 8px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-family: inherit;
   line-height: 1.6;
   background-color: #10161f;
@@ -77,7 +77,7 @@
 
 .scenario-info__save-btn {
   padding: 6px 18px;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 600;
   background-color: #2a6b3a;
   border: none;
@@ -96,7 +96,7 @@
 }
 
 .scenario-info__result {
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   color: #7fd18f;
 }
 
@@ -113,7 +113,7 @@
 }
 
 .scenario-info__read-title {
-  font-size: 0.95rem;
+  font-size: 1.32rem;
   font-weight: 700;
   color: #e0e0e0;
 }
@@ -127,7 +127,7 @@
 /* 作成者が入力した改行をそのまま活かす */
 .scenario-info__read-text {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   line-height: 1.7;
   color: #c8d8e8;
   white-space: pre-wrap;
@@ -155,7 +155,7 @@
 
 .scenario-info__thumb-btn {
   padding: 4px 12px;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   font-weight: 500;
   background-color: #1b2635;
   border: 1px solid rgba(255, 255, 255, 0.15);

@@ -45,7 +45,8 @@
     "path_shape_editor": "Édition de la forme de la voie",
     "grading": "Terrassement",
     "scenario_manager": "Gestion des scénarios",
-    "scenario_metadata": "Présentation"
+    "scenario_metadata": "Présentation",
+    "tutorial_intro": "Tutoriel"
   },
   "cityMap": {
     "layers": {

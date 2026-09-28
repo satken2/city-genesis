@@ -62,16 +62,6 @@
   background: rgba(221, 85, 37, 0.74);
 }
 
-/*
- * チュートリアルのハイライト対象(点滅は`hud.css`のアニメーション)。
- * 共通スタイルが付ける border は打ち消す。枠線を足すと画像の描画領域が縮んでアイコンが揺れる。
- */
-.hud-icon-btn.icon-panel-slot.hud-highlighted-btn {
-  border: none;
-  background: rgba(29, 101, 188, 0.65);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
-}
-
 /* テンプレートモード専用アイコン群の区切り線 */
 .icon-panel-divider {
   width: 28px;

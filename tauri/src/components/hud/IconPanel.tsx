@@ -31,7 +31,7 @@ import {
   type HudIconDef,
 } from "./hudCommon";
 import { setHudMode, useHudMode } from "./hudMode";
-import { useHudSession, useTutorialHighlight } from "./useHudSession";
+import { useHudSession } from "./useHudSession";
 import "./hud.css";
 import "./IconPanel.css";
 
@@ -39,7 +39,6 @@ export function IconPanel() {
   const { t } = useTranslation();
   const { visible, templateMode, isLocked, epochExecuting } = useHudSession();
   const mode = useHudMode();
-  const getBtnClassName = useTutorialHighlight();
   const panelRef = useRef<HTMLElement | null>(null);
 
   /**
@@ -162,7 +161,7 @@ export function IconPanel() {
             {startsTemplateGroup && <div className="icon-panel-divider" />}
             <button
               id={icon.id}
-              className={`${getBtnClassName(icon.id, "hud-icon-btn icon-panel-slot")}${active ? " hud-icon-btn--active" : ""}`}
+              className={`hud-icon-btn icon-panel-slot${active ? " hud-icon-btn--active" : ""}`}
               type="button"
               title={t(icon.tooltipKey)}
               aria-pressed={icon.id === "district" ? active : undefined}

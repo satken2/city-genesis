@@ -32,7 +32,7 @@
   flex: 1;
   min-width: 0;
   color: #fcd34d;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   line-height: 1.4;
 }
 
@@ -51,13 +51,13 @@
 /* 値に添える単位・補足 */
 .transit-detail__unit {
   margin-left: 4px;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #93a9c0;
 }
 
 .transit-detail__hint {
   margin-left: 8px;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #6b8299;
 }
 
@@ -74,7 +74,7 @@
 .transit-detail__meter-value {
   flex-shrink: 0;
   min-width: 32px;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   font-variant-numeric: tabular-nums;
   text-align: right;
   color: var(--flat-text-body);
@@ -99,7 +99,7 @@
 }
 
 .transit-detail__tile-label {
-  font-size: 0.68rem;
+  font-size: 0.94rem;
   font-weight: 600;
   color: var(--flat-text-label);
   white-space: nowrap;
@@ -108,7 +108,7 @@
 }
 
 .transit-detail__tile-value {
-  font-size: 0.98rem;
+  font-size: 1.36rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
@@ -151,7 +151,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   font-weight: 700;
   color: var(--flat-text-body);
 }
@@ -160,7 +160,7 @@
 .transit-detail__estimate-tag {
   padding: 1px 6px;
   border-radius: 3px;
-  font-size: 0.64rem;
+  font-size: 0.89rem;
   font-weight: 600;
   color: var(--flat-warn);
   background: var(--flat-warn-surface);
@@ -184,7 +184,7 @@
 
 .transit-detail__note {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   line-height: 1.45;
   color: #6b8299;
 }
@@ -204,7 +204,7 @@
 }
 
 .transit-detail__dirty {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #6b8299;
   white-space: nowrap;
   overflow: hidden;
@@ -234,7 +234,7 @@
 
 .transit-detail__error {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   color: #ff9a9a;
 }
 
@@ -243,7 +243,7 @@
   padding: 5px 12px;
   border: none;
   border-radius: 5px;
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;
@@ -312,7 +312,7 @@
 
 .transit-detail__route-desc {
   min-width: 0;
-  font-size: 0.72rem;
+  font-size: 1rem;
   line-height: 1.4;
   color: #6b8299;
 }
@@ -339,13 +339,13 @@
 }
 
 .transit-detail__danger-title {
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   font-weight: 700;
   color: #fca5a5;
 }
 
 .transit-detail__danger-desc {
-  font-size: 0.68rem;
+  font-size: 0.94rem;
   line-height: 1.4;
   color: #6b8299;
 }

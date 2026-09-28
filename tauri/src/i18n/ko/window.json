@@ -45,7 +45,8 @@
     "path_shape_editor": "경로 형상 편집",
     "grading": "부지 조성",
     "scenario_manager": "시나리오 관리",
-    "scenario_metadata": "소개 정보"
+    "scenario_metadata": "소개 정보",
+    "tutorial_intro": "튜토리얼"
   },
   "cityMap": {
     "layers": {

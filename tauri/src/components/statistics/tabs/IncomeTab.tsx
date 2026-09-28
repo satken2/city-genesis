@@ -32,6 +32,7 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./IncomeTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- 型定義 ---
 
@@ -83,6 +84,7 @@ const CHART_MARGIN = { top: 10, right: 15, left: -5, bottom: 5 };
 
 export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<IncomeStats>(
     apiBaseUrl,
     "/api/v1/stats/income"
@@ -206,8 +208,8 @@ export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   margin={CHART_MARGIN}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
-                  <XAxis type="number" stroke="#8ba3bb" fontSize={9} />
-                  <YAxis dataKey="bin" type="category" stroke="#8ba3bb" fontSize={9} width={80} />
+                  <XAxis type="number" stroke="#8ba3bb" fontSize="0.83rem" />
+                  <YAxis dataKey="bin" type="category" stroke="#8ba3bb" fontSize="0.83rem" width={remPx(7.41)} />
                   <Tooltip
                     content={makeDistBarTooltip(COLOR_INCOME, t("statistics.incomeLegend", "平均所得"))}
                     cursor={{ fill: "rgba(255,255,255,0.03)" }}
@@ -235,8 +237,8 @@ export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   margin={CHART_MARGIN}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
-                  <XAxis type="number" stroke="#8ba3bb" fontSize={9} />
-                  <YAxis dataKey="bin" type="category" stroke="#8ba3bb" fontSize={9} width={80} />
+                  <XAxis type="number" stroke="#8ba3bb" fontSize="0.83rem" />
+                  <YAxis dataKey="bin" type="category" stroke="#8ba3bb" fontSize="0.83rem" width={remPx(7.41)} />
                   <Tooltip
                     content={makeDistBarTooltip(COLOR_DISCRETIONARY, t("statistics.discretionaryLegend", "可処分所得"))}
                     cursor={{ fill: "rgba(255,255,255,0.03)" }}
@@ -324,12 +326,12 @@ export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     margin={CHART_MARGIN}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
-                    <XAxis dataKey="epoch" stroke="#8ba3bb" fontSize={9} />
-                    <YAxis stroke="#8ba3bb" fontSize={9} />
+                    <XAxis dataKey="epoch" stroke="#8ba3bb" fontSize="0.83rem" />
+                    <YAxis width={remPx(5.56)} stroke="#8ba3bb" fontSize="0.83rem" />
                     <Tooltip
                       contentStyle={{ background: "#1a2230", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px" }}
-                      itemStyle={{ fontSize: 10 }}
-                      labelStyle={{ fontSize: 10, fontWeight: "bold", color: "#8ba3bb" }}
+                      itemStyle={{ fontSize: "0.93rem" }}
+                      labelStyle={{ fontSize: "0.93rem", fontWeight: "bold", color: "#8ba3bb" }}
                     />
                     <Line
                       type="monotone"

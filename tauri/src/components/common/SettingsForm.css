@@ -166,7 +166,7 @@
   opacity: 0.5;
 }
 
-/* プリセットの実サイズ(18pxなど)をラベルの下に小さく添える */
+/* プリセットの実サイズ(14pxなど)をラベルの下に小さく添える */
 .settings-seg-sub {
   display: block;
   margin-top: 2px;

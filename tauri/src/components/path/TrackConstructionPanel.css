@@ -21,7 +21,7 @@
   border-radius: 999px;
   background: transparent;
   color: rgba(246, 251, 255, 0.55);
-  font-size: 0.68rem;
+  font-size: 0.94rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
@@ -45,7 +45,7 @@
 /* タブより上位の選択であることが分かるよう、他のプルダウンより大きく見せる。 */
 .tc-railtype-select {
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
   font-weight: 600;
   padding: 8px 10px;
 }

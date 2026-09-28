@@ -246,7 +246,7 @@ export function CitizenDetailPanel({
                     }}
                   />
                 </div>
-                <span style={{ fontSize: "12px", color: "#c5d4e3" }}>
+                <span style={{ fontSize: "1.11rem", color: "#c5d4e3" }}>
                   {`${citizenData.commute_time.toFixed(1)} ${t("common.minutes")}`}
                 </span>
               </span>
@@ -296,7 +296,7 @@ export function CitizenDetailPanel({
                 <PolarGrid />
                 <PolarAngleAxis
                   dataKey="subject"
-                  tick={{ fontSize: 11, fill: "#c5d4e3" }}
+                  tick={{ fontSize: "1.02rem", fill: "#c5d4e3" }}
                 />
                 <PolarRadiusAxis
                   angle={30}

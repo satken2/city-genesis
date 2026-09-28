@@ -30,7 +30,7 @@
   border-bottom: 2px solid transparent;
   border-radius: 4px 4px 0 0;
   padding: 6px 12px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   color: #9db0c5;
   cursor: pointer;
@@ -68,7 +68,7 @@
   gap: 4px;
   border-radius: 8px;
   padding: 8px 12px;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
   line-height: 1.35;
   background: rgba(220, 120, 30, 0.12);
   border: 1px solid rgba(255, 160, 50, 0.35);
@@ -77,7 +77,7 @@
 
 .agent-detail-alert-title {
   font-weight: bold;
-  font-size: 0.85rem;
+  font-size: 1.18rem;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -108,7 +108,7 @@
 }
 
 .agent-detail-alert-hint {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   opacity: 0.6;
   padding-left: 20px;
 }
@@ -132,14 +132,14 @@
 }
 
 .agent-detail-utilization-target-title {
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   font-weight: 600;
   color: #9db0c5;
   white-space: nowrap;
 }
 
 .agent-detail-utilization-target-value {
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: bold;
   color: #4ea1ff;
 }
@@ -194,7 +194,7 @@
 }
 
 .pending-banner__text {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   color: #ffb03a;
   font-weight: 500;
 }
@@ -208,7 +208,7 @@
   border: none;
   border-radius: 4px;
   padding: 5px 10px;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;

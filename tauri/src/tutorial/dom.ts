@@ -16,8 +16,14 @@ export function installUiGuide(ui: Phase["ui"], windowType: string): () => void 
     const id = el?.closest<HTMLElement>("button[id]")?.id;
     return id ? `hud.${id}` : undefined;
   };
+  // アイコンパネルは各段階の操作の入口なので、方針に関わらず許可・強調したボタンだけを押せるようにする。
+  const menu = windowType === "icon-panel";
   const allowed = (el: Element) => {
     if (el.closest(".titlebar, [data-guide-escape]")) return true;
+    if (menu) {
+      const name = targetName(el);
+      return !!name && (ui.allow.includes(name) || ui.highlight.includes(name));
+    }
     if (ui.policy === "highlight") return true;
     if (ui.policy === "related" && ui.allow.includes(`window.${windowType}`)) return true;
     const name = targetName(el);

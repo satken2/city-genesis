@@ -2,7 +2,7 @@
   color: #e5eef9;
   background: transparent;
   font-family: "Segoe UI", sans-serif;
-  font-size: var(--font-size-base, 15px);
+  font-size: var(--font-size-base, 12px); /* 1rem = 本文。値は設定の文字サイズ(FontSizeContext) */
   line-height: 1.35;
 }
 
@@ -59,7 +59,7 @@ select {
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.08);
   color: #f6fbff;
-  padding: 0.4rem 0.6rem;
+  padding: 0.56rem 0.83rem;
   font: inherit;
   cursor: pointer;
 }
@@ -74,7 +74,7 @@ button {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.08);
   color: #f6fbff;
-  padding: 0.4rem 0.8rem;
+  padding: 0.56rem 1.11rem;
   cursor: pointer;
   font: inherit;
 }
@@ -172,7 +172,7 @@ button:hover {
 }
 
 .titlebar-title {
-  font-size: 0.88rem;
+  font-size: 1.22rem;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -211,8 +211,8 @@ button:hover {
 }
 
 .ghost-button {
-  padding: 0.36rem 0.7rem;
-  font-size: 0.8rem;
+  padding: 0.5rem 0.97rem;
+  font-size: 1.11rem;
 }
 
 .content {
@@ -248,13 +248,13 @@ button:hover {
 
 .agent-detail-back {
   padding: 2px 8px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   width: fit-content;
 }
 
 .agent-detail-muted {
   color: #9db0c5;
-  font-size: 0.76rem;
+  font-size: 1.06rem;
 }
 
 .agent-detail-error {
@@ -276,7 +276,7 @@ button:hover {
 }
 
 .agent-detail-section-title {
-  font-size: 0.85rem;
+  font-size: 1.18rem;
   font-weight: bold;
   color: #c5d4e3;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
@@ -295,7 +295,7 @@ button:hover {
 .agent-detail-label {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   display: flex;
   align-items: center;
   padding: 5px 12px 5px 0;
@@ -305,7 +305,7 @@ button:hover {
 }
 
 .agent-detail-value {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   word-break: break-all;
   display: flex;
   align-items: center;
@@ -355,7 +355,7 @@ button:hover {
 .panel-header h2,
 .host-panel h1 {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: 1.19rem;
 }
 
 .status-grid,
@@ -394,7 +394,7 @@ button:hover {
   overflow: auto;
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 0.8rem;
+  font-size: 1.11rem;
 }
 
 .muted {
@@ -415,7 +415,7 @@ button:hover {
  */
 .entity-link {
   padding: 2px 6px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   border-radius: 5px;
   cursor: pointer;
   color: #4ea1ff;
@@ -439,7 +439,7 @@ button:hover {
   border-radius: 4px;
   background: rgba(245, 158, 11, 0.1);
   color: #f59e0b;
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;

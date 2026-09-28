@@ -1,0 +1,305 @@
+{
+  "version": 1,
+  "id": "scenario2",
+  "terrainMap": "flat",
+  "steps": [
+    {
+      "id": "scenario2.split",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario2.step1.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.district"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                60,
+                0,
+                120
+              ]
+            ],
+            "camera": {
+              "target": [
+                -65,
+                0,
+                0
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "paths",
+        "target": "lesson.right_top",
+        "where": [
+          {
+            "field": "zone_id",
+            "greaterThan": 0
+          },
+          {
+            "field": "zone_id",
+            "notEquals": {
+              "$ref": "lesson.zone"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario2.explain",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario2.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [
+              "hud.district"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                -65,
+                0,
+                0
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scenario2.resources",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario2.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [
+              "hud.district"
+            ],
+            "highlight": [
+              "hud.visibility"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                60,
+                0,
+                120
+              ]
+            ],
+            "camera": {
+              "target": [
+                -65,
+                0,
+                0
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "resource_detail"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scenario2.detail",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario2.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [
+              "hud.district"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                -65,
+                0,
+                0
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "zone_detail"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scenario2.regulation",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario2.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [
+              "hud.district"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                -65,
+                0,
+                0
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "zones",
+        "where": [
+          {
+            "field": "allowed_bd_mask",
+            "equals": {
+              "$constant": "BUILDING_MINE"
+            }
+          },
+          {
+            "field": "zone_id",
+            "notEquals": {
+              "$ref": "lesson.zone"
+            }
+          },
+          {
+            "field": "zone_id",
+            "notEquals": {
+              "$ref": "support.zone"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario2.parcel_detail",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario2.step6.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [
+              "hud.district"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                81.5,
+                0,
+                140
+              ]
+            ],
+            "camera": {
+              "target": [
+                -65,
+                0,
+                0
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "parcel_detail"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scenario2.summary",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario2.step7.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [
+              "hud.district"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                -65,
+                0,
+                0
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    }
+  ]
+}

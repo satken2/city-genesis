@@ -27,7 +27,7 @@
 
 .debug-spawn-tab__title {
   margin: 0;
-  font-size: 15px;
+  font-size: 1.39rem;
   color: #dbe7f3;
 }
 
@@ -35,7 +35,7 @@
 .debug-spawn-tab__error {
   padding: 16px;
   color: #8ba3bb;
-  font-size: 12px;
+  font-size: 1.11rem;
 }
 
 /* 全体レイアウト: 左3/4（チャート群）+ 右1/4（最新エポックの表） */
@@ -80,7 +80,7 @@
 
 .debug-spawn-card__title {
   margin: 0;
-  font-size: 12px;
+  font-size: 1.11rem;
   font-weight: 600;
   color: #9cb3cb;
   display: flex;
@@ -92,7 +92,7 @@
 .debug-spawn-card__meta {
   font-weight: 400;
   color: #64748b;
-  font-size: 10px;
+  font-size: 0.93rem;
 }
 
 /* カード見出しと絞り込みセレクタを横並びにするヘッダ */
@@ -128,7 +128,7 @@
   padding: 24px 0;
   text-align: center;
   color: #64748b;
-  font-size: 12px;
+  font-size: 1.11rem;
 }
 
 .debug-spawn-control {
@@ -138,7 +138,7 @@
 }
 
 .debug-spawn-control__label {
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #8ba3bb;
   white-space: nowrap;
 }
@@ -150,7 +150,7 @@
   color: #dbe7f3;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 1.02rem;
   padding: 3px 6px;
 }
 
@@ -171,7 +171,7 @@
 .debug-spawn-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #c4d3e3;
 }
 
@@ -228,7 +228,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
-  font-size: 10px;
+  font-size: 0.93rem;
   color: #8ba3bb;
 }
 

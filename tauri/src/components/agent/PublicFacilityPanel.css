@@ -12,7 +12,7 @@
 }
 
 .pf-panel__title {
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 700;
   color: #9db0c5;
   letter-spacing: 0.02em;
@@ -45,7 +45,7 @@
 }
 
 .operation-btn__util-value {
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   font-weight: bold;
   color: #4ea1ff;
   line-height: 1;

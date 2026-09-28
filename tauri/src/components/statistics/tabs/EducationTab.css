@@ -22,7 +22,7 @@
 }
 
 .scope-selector__label {
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #94a3b8;
   font-weight: 500;
 }
@@ -32,7 +32,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   color: #f1f5f9;
-  font-size: 11px;
+  font-size: 1.02rem;
   padding: 4px 8px;
   outline: none;
   cursor: pointer;
@@ -109,7 +109,7 @@
 }
 
 .edu-card__title {
-  font-size: 13px;
+  font-size: 1.2rem;
   font-weight: 600;
   margin: 0 0 10px 0;
   color: #38bdf8;
@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 1.02rem;
 }
 
 .edu-legend__bullet {
@@ -184,7 +184,7 @@
 
 .edu-schools-list__title {
   margin: 0;
-  font-size: 13px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #cbd5e1;
   border-left: 3px solid #38bdf8;
@@ -196,7 +196,7 @@
 }
 
 .edu-schools-list__count {
-  font-size: 11px;
+  font-size: 1.02rem;
   font-weight: 400;
   color: #8ba3bb;
 }
@@ -217,13 +217,13 @@
   min-height: 60px;
   padding: 16px;
   color: #5a6f86;
-  font-size: 11px;
+  font-size: 1.02rem;
 }
 
 .edu-schools-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11px;
+  font-size: 1.02rem;
 }
 
 .edu-schools-table thead {
@@ -240,7 +240,7 @@
   font-weight: 600;
   color: #94a3b8;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 10px;
+  font-size: 0.93rem;
 }
 
 .edu-schools-table td {
@@ -263,7 +263,7 @@
 
 .edu-schools-table__cell--muted {
   color: #8ba3bb;
-  font-size: 10px;
+  font-size: 0.93rem;
 }
 
 .edu-schools-table__cell--meter {
@@ -311,7 +311,7 @@
 }
 
 .edu-skill-card__title {
-  font-size: 11.5px;
+  font-size: 1.06rem;
   font-weight: 600;
   margin: 0;
   color: #f8fafc;
@@ -336,14 +336,14 @@
 }
 
 .edu-skill-card__capacity-label {
-  font-size: 9px;
+  font-size: 0.83rem;
   color: #8ba3bb;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .edu-no-capacity {
-  font-size: 9px;
+  font-size: 0.83rem;
   color: #475569;
 }
 
@@ -379,7 +379,7 @@
   height: 100%;
   width: 100%;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 1.11rem;
 }
 
 .stats-tab-error {

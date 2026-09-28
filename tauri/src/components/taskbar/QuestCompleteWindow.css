@@ -108,7 +108,7 @@
   transform: translateX(-50%);
   padding: 3px 16px;
   border-radius: 10px;
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -131,7 +131,7 @@
 
 .quest-complete-title {
   text-align: center;
-  font-size: 1.4rem;
+  font-size: 1.94rem;
   font-weight: 700;
   color: #f0c040;
   margin: 0;
@@ -147,7 +147,7 @@
 
 .quest-complete-subtitle {
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 1.25rem;
   color: #b0c4de;
   margin: 0;
 }
@@ -165,14 +165,14 @@
 }
 
 .quest-complete-item-name {
-  font-size: 1.05rem;
+  font-size: 1.46rem;
   font-weight: 600;
   color: #e8d48a;
   text-align: center;
 }
 
 .quest-complete-item-desc {
-  font-size: 0.82rem;
+  font-size: 1.14rem;
   color: #a0b8d0;
   text-align: center;
 }
@@ -193,18 +193,18 @@
 }
 
 .quest-complete-value-current {
-  font-size: 1.3rem;
+  font-size: 1.81rem;
   font-weight: 700;
   color: #ffffff;
 }
 
 .quest-complete-value-sep {
-  font-size: 0.85rem;
+  font-size: 1.18rem;
   color: #7b8fa5;
 }
 
 .quest-complete-value-target {
-  font-size: 0.95rem;
+  font-size: 1.32rem;
   color: #9db0c5;
 }
 
@@ -222,12 +222,12 @@
 }
 
 .quest-complete-reward-label {
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   color: #8fd0a0;
 }
 
 .quest-complete-reward-value {
-  font-size: 1rem;
+  font-size: 1.39rem;
   font-weight: 700;
   color: #6cd47f;
 }
@@ -235,7 +235,7 @@
 /* 複数達成時のページ位置 */
 .quest-complete-pager {
   text-align: center;
-  font-size: 0.78rem;
+  font-size: 1.08rem;
   color: #7b8fa5;
 }
 
@@ -246,7 +246,7 @@
   border-radius: 6px;
   background: #f0c040;
   color: #1a2a4a;
-  font-size: 0.9rem;
+  font-size: 1.25rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;

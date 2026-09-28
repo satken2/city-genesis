@@ -17,6 +17,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import "./TimeSeriesChart.css";
+import { useRemPx } from "../../hooks/useRemPx";
 
 type ReferenceLineConfig = {
   /** 基準線のY座標 */
@@ -48,6 +49,7 @@ export function TimeSeriesChart({
   formatter,
 }: TimeSeriesChartProps) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
 
   if (!data || data.length === 0) {
     return (
@@ -66,15 +68,15 @@ export function TimeSeriesChart({
         <LineChart data={chartData}>
           <XAxis
             dataKey="index"
-            tick={{ fontSize: 10, fill: "#9cb3cb" }}
+            tick={{ fontSize: "0.93rem", fill: "#9cb3cb" }}
             axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 10, fill: "#9cb3cb" }}
+            tick={{ fontSize: "0.93rem", fill: "#9cb3cb" }}
             axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
             tickLine={false}
-            width={45}
+            width={remPx(4.17)}
           />
           <Tooltip
             content={({ payload }) => {
@@ -97,7 +99,7 @@ export function TimeSeriesChart({
                 value: referenceLine.label,
                 position: "insideTopRight",
                 fill: referenceLine.color ?? "#f59e0b",
-                fontSize: 11,
+                fontSize: "1.02rem",
               }}
             />
           )}

@@ -36,6 +36,7 @@ import { resolveIntlLocale } from "../../utils/locale";
 import type { RoadDetail, RoadSegment, RoadSegmentDirection } from "./roadTypes";
 import { ROAD_COLOR_VC_HIGH, ROAD_COLOR_VC_MID, formatKm, segmentSpeedKmh } from "./roadFormat";
 import "./RoadTrafficProfile.css";
+import { useRemPx } from "../../hooks/useRemPx";
 
 type Metric = "traffic" | "vc" | "speed" | "noise" | "durability" | "parking";
 
@@ -156,6 +157,7 @@ function directionLabel(dir: RoadSegmentDirection, t: TFunction): string {
 
 export function RoadTrafficProfile({ road }: RoadTrafficProfileProps) {
   const { t, i18n } = useTranslation();
+  const remPx = useRemPx();
   const masterData = useMasterData();
   const locale = resolveIntlLocale(i18n.language);
   const [metric, setMetric] = useState<Metric>("traffic");
@@ -296,16 +298,16 @@ export function RoadTrafficProfile({ road }: RoadTrafficProfileProps) {
                 dataKey="km"
                 type="number"
                 domain={[0, totalKm]}
-                tick={{ fontSize: 10, fill: CHART_AXIS_TEXT }}
+                tick={{ fontSize: "0.93rem", fill: CHART_AXIS_TEXT }}
                 tickLine={false}
                 stroke={CHART_AXIS_LINE}
                 tickFormatter={(v) => `${fmt(Number(v), totalKm < 2 ? 2 : 1)}`}
                 unit=" km"
               />
               <YAxis
-                tick={{ fontSize: 10, fill: CHART_AXIS_TEXT }}
+                tick={{ fontSize: "0.93rem", fill: CHART_AXIS_TEXT }}
                 tickLine={false}
-                width={48}
+                width={remPx(4.44)}
                 stroke={CHART_AXIS_LINE}
                 domain={metric === "durability" ? [0, 100] : [0, "auto"]}
                 tickFormatter={(v) => fmt(Number(v), valueDigits)}

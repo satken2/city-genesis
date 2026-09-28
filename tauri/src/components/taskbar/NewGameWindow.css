@@ -51,7 +51,7 @@
   text-align: center;
   padding: 24px;
   color: #6b8299;
-  font-size: 14px;
+  font-size: 1.3rem;
 }
 
 /* =========================================================================
@@ -68,7 +68,7 @@
 .new-game-section-title {
   margin: 0;
   padding: 4px 0 4px 10px;
-  font-size: 18px;
+  font-size: 1.67rem;
   font-weight: 600;
   color: #e0e0e0;
   box-shadow: inset 4px 0 0 #4ea1ff;
@@ -149,7 +149,7 @@
 }
 
 .new-game-tile-name {
-  font-size: 14px;
+  font-size: 1.3rem;
   font-weight: 500;
   color: #e0e0e0;
   line-height: 1.3;
@@ -173,7 +173,7 @@
   border-radius: 0;
   background-color: #4ea1ff;
   color: #0e1520;
-  font-size: 11px;
+  font-size: 1.02rem;
   font-weight: 600;
   line-height: 1.4;
   white-space: nowrap;
@@ -181,7 +181,7 @@
 
 /* ロック表示: チュートリアル未クリア時にシナリオタイルに表示する小さなラベル */
 .new-game-tile-lock {
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #8fa5bb;
   line-height: 1.3;
   opacity: 0.8;
@@ -248,7 +248,7 @@
 
 .new-game-detail-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.85rem;
   font-weight: 600;
   color: #e0e0e0;
   line-height: 1.3;
@@ -258,7 +258,7 @@
 .new-game-detail-desc,
 .new-game-detail-block-text {
   margin: 0;
-  font-size: 13px;
+  font-size: 1.2rem;
   line-height: 1.7;
   color: #c8d8e8;
   white-space: pre-wrap;
@@ -289,7 +289,7 @@
 
 .new-game-fact dt {
   color: var(--flat-text-label);
-  font-size: 12px;
+  font-size: 1.11rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
@@ -301,13 +301,13 @@
   min-height: 40px;
   margin: 0;
   color: var(--flat-text);
-  font-size: 13px;
+  font-size: 1.2rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
 .new-game-fact .new-game-fact-size {
-  font-size: 16px;
+  font-size: 1.48rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -325,7 +325,7 @@
 .new-game-detail-block-title {
   margin: 0;
   padding: 2px 0 2px 8px;
-  font-size: 13px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #a4bccc;
   box-shadow: inset 3px 0 0 #4ea1ff;
@@ -335,7 +335,7 @@
   margin: auto;
   padding: 24px;
   text-align: center;
-  font-size: 13px;
+  font-size: 1.2rem;
   line-height: 1.7;
   color: #6b8299;
 }
@@ -344,7 +344,7 @@
   flex-shrink: 0;
   margin: 0 16px 16px;
   padding: 12px 20px;
-  font-size: 15px;
+  font-size: 1.39rem;
   font-weight: 600;
   background-color: #2a6b3a;
   border: none;
@@ -379,7 +379,7 @@
 
 .new-game-confirm-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.85rem;
   font-weight: 600;
   color: #e0e0e0;
   text-align: center;
@@ -393,7 +393,7 @@
 }
 
 .new-game-confirm-label {
-  font-size: 14px;
+  font-size: 1.3rem;
   font-weight: 600;
   color: #a4bccc;
 }
@@ -401,7 +401,7 @@
 /* 入力欄は沈んだ面として暗く塗り、フォーカスは下端の実線ブロックで示す */
 .new-game-confirm-input {
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 1.3rem;
   background-color: #10161f;
   border: none;
   border-radius: 0;
@@ -435,7 +435,7 @@
   flex: 1;
   padding: 10px 32px 10px 12px;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 1.3rem;
   background-color: #10161f;
   border: none;
   border-radius: 0;
@@ -489,7 +489,7 @@
   flex: 1;
   padding: 10px 16px;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 1.3rem;
   font-weight: 500;
   background-color: #1b2635;
   border: none;
@@ -516,7 +516,7 @@
 
 /* 注釈テキスト（「※後から変更できません」など） */
 .new-game-confirm-note {
-  font-size: 12px;
+  font-size: 1.11rem;
   color: #6b8299;
 }
 
@@ -530,7 +530,7 @@
 
 .new-game-confirm-btn {
   padding: 10px 28px;
-  font-size: 14px;
+  font-size: 1.3rem;
   font-weight: 600;
   border: none;
   border-radius: 0;
@@ -574,7 +574,7 @@
   padding: 10px 20px;
   border-radius: 0;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
-  font-size: 14px;
+  font-size: 1.3rem;
   white-space: nowrap;
   z-index: 10;
 }

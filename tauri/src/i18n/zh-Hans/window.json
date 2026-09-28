@@ -45,7 +45,8 @@
     "path_shape_editor": "路径形状编辑",
     "grading": "土方工程",
     "scenario_manager": "场景管理",
-    "scenario_metadata": "介绍信息"
+    "scenario_metadata": "介绍信息",
+    "tutorial_intro": "教程"
   },
   "cityMap": {
     "layers": {

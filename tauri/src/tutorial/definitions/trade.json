@@ -4,7 +4,7 @@
   "terrainMap": "flat",
   "steps": [
     {
-      "id": "trade.1",
+      "id": "trade.port",
       "legacyStep": 1,
       "phases": [
         {
@@ -69,7 +69,7 @@
       ]
     },
     {
-      "id": "trade.2",
+      "id": "trade.exports",
       "legacyStep": 2,
       "phases": [
         {
@@ -119,7 +119,7 @@
       }
     },
     {
-      "id": "trade.3",
+      "id": "trade.freight",
       "legacyStep": 3,
       "phases": [
         {
@@ -179,7 +179,7 @@
       ]
     },
     {
-      "id": "trade.4",
+      "id": "trade.platform",
       "legacyStep": 4,
       "phases": [
         {
@@ -272,7 +272,7 @@
       }
     },
     {
-      "id": "trade.5",
+      "id": "trade.rail",
       "legacyStep": 5,
       "phases": [
         {
@@ -337,7 +337,7 @@
       }
     },
     {
-      "id": "trade.6",
+      "id": "trade.depot",
       "legacyStep": 6,
       "phases": [
         {
@@ -448,7 +448,7 @@
       }
     },
     {
-      "id": "trade.7",
+      "id": "trade.power",
       "legacyStep": 7,
       "phases": [
         {
@@ -513,7 +513,7 @@
       }
     },
     {
-      "id": "trade.8",
+      "id": "trade.line",
       "legacyStep": 8,
       "phases": [
         {
@@ -575,7 +575,7 @@
       ]
     },
     {
-      "id": "trade.9",
+      "id": "trade.imports",
       "legacyStep": 9,
       "phases": [
         {

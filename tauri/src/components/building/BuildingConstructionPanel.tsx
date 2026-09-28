@@ -2,11 +2,12 @@
  * 建物建設パネル
  *
  * window_type="building_construction" のポップアップウィンドウで表示する専用パネル。
- * 建物タイプ(bd_type)の選択、バリアント選択、階数設定、形状プレビューを行う。
+ * 分類(マスターの bd_category)と建物(バリアント)の選択、階数設定、形状プレビューを行う。
  *
  * 操作フロー:
- *   1. 建物タイププルダウンでカテゴリを選択 → バリアントタイルが表示される
- *   2. バリアントタイルをクリックして選択 → 説明文が表示される
+ *   1. 分類タイルを選ぶ → その分類の建物タイルに切り替わる
+ *   2. 建物タイルを選ぶ → タイルが消えて説明文と建設の設定欄が表示される
+ *      (左上の戻るボタンで建物タイル、さらに分類タイルへ1段ずつ戻れる)
  *   3. IPC で graphic モジュールに STATE_EDIT_BUILDING を指示
  *   4. graphic 側で土地区画が選択されると edit_building.select_parcel が通知される
  *      Ctrlで自由/道路沿い配置を選んだ場合はplacement_stateで矩形と位置を受け取る
@@ -26,7 +27,8 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import type { AgentMasterEntry, LandmarkMasterEntry, ParcelData, StructureMasterEntry } from "../../types";
-import { resolveAgentIcon } from "../../utils/agentIcon";
+import { resolveAgentIcon, resolveAgentVariantIcon } from "../../utils/agentIcon";
+import { resolveBdCategoryIcon } from "../../utils/bdCategoryIcon";
 import { resolveParcelIcon } from "../../utils/parcelIcon";
 
 import { setHintbarText } from "../../utils/hintbar";
@@ -62,7 +64,7 @@ import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { BuildingFloorSpecs } from "./BuildingFloorSpecs";
 import { showNotification } from "../../utils/notification";
-import { BUILDING_PUBLIC, PARCEL_LAND, VARIANT_CITY } from "../../constants";
+import { BD_CATEGORY_OTHER, PARCEL_LAND, VARIANT_CITY } from "../../constants";
 import { isGradingVariant } from "../grading/grading";
 import "./BuildingConstructionPanel.css";
 
@@ -104,7 +106,7 @@ type BuildingConstructionPanelProps = {
 export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, relocateCityHall = false }: BuildingConstructionPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  // バリアント単位の資金目安(最小規模すら建てられない施設をプルダウンで選ばせない)
+  // バリアント単位の資金目安(最小規模すら建てられない施設をタイルで選ばせない)
   const { affordability: variantAffordability } = useVariantAffordability("buildings", apiBaseUrl);
   const isVariantUnaffordable = (variantId: number) =>
     variantAffordability != null
@@ -112,7 +114,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     && variantAffordability.variants[variantId]?.affordable === false;
   const appWindow = useMemo(() => getCurrentWindow(), []);
 
-  const [selectedBdType, setSelectedBdType] = useState<number | null>(null);
+  // 建物タイルを表示している分類(BD_CATEGORY_*)。null のときは分類タイルを表示する。
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  // 既存建物の編集で候補を絞る bd_type(編集対象の建物の値)。新規建設では null。
+  const [editBdType, setEditBdType] = useState<number | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
   const [floors, setFloors] = useState(1);
   // 構造種別(structures マスターのID)。構造を持つバリアントを選ぶと許可構造の最上位で初期化され、
@@ -294,7 +299,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       .then((data) => {
         if (controller.signal.aborted) return;
         const agent = data.economic_agent;
-        setSelectedBdType(agent.bd_type);
+        setEditBdType(agent.bd_type);
         setSelectedVariant(agent.variant);
         setFloors(agent.floors);
         setStructure(agent.structure != null && agent.structure > 0 ? agent.structure : null);
@@ -325,10 +330,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     return () => controller.abort();
   }, [editAgentId, apiBaseUrl]);
 
-  // 市庁舎だけを置くモードでは、自動的に「公共施設」の「市政府」を選択状態にする
+  // 市庁舎だけを置くモードでは、自動的に「市政府」を選択状態にする
   useEffect(() => {
     if (cityHallOnly && editAgentId == null) {
-      setSelectedBdType(BUILDING_PUBLIC);
       // マスターデータ取得後にのみ市庁舎を自動選択する。未取得のまま選択すると
       // min_floors 等が読めず floors を誤った初期値で固定してしまい、
       // 一度 selectedVariant が確定すると下の再選択ガードで訂正されなくなるため。
@@ -392,7 +396,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
    * 建物として建設可能なバリアント一覧 (building === true)
    * TYPE_BUILDING(共有建物)だけでなく、building=trueのTYPE_STANDARD(一般施設)、
    * TYPE_EDUCATION(教育機関)、TYPE_TRADE(輸出入拠点)など、
-   * 全ての建設可能エージェントを含む。建物種類(bd_type)でグループ化して表示する。
+   * 全ての建設可能エージェントを含む。分類(bd_category)ごとのタイルにまとめて表示する。
    * template_only のバリアント(国境検問所・観光名所)はシナリオ制作専用なので、
    * テンプレートモードでないときは候補から外す。
    * 造成工事は範囲を描いて発注する造成ウィンドウ専用なので、常に外す。
@@ -406,29 +410,21 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     ) as [string, AgentMasterEntry][];
   }, [masterData, templateMode, cityHallPlaced, relocateCityHall]);
 
-  /** ユニークな建物タイプ一覧 */
-  const availableBdTypes = useMemo(() => {
-    if (cityHallOnly) {
-      return [BUILDING_PUBLIC];
-    }
-    const typeSet = new Set<number>();
-    for (const [, entry] of buildingVariants) {
-      if (entry.bd_type != null) {
-        typeSet.add(entry.bd_type);
-      }
-    }
-    return [...typeSet].sort((a, b) => a - b);
-  }, [buildingVariants, cityHallOnly]);
+  /** 分類タイルに並べる分類(ID順=並び順)。建設できる建物を1つも持たない分類は出さない。 */
+  const availableCategories = useMemo(
+    () => [...new Set(buildingVariants.map(([, entry]) => categoryOf(entry)))].sort((a, b) => a - b),
+    [buildingVariants],
+  );
 
-  /** 選択中の建物タイプに属するバリアント */
-  const variantsForType = useMemo(() => {
-    if (selectedBdType === null) return [];
-    const filtered = buildingVariants.filter(([, entry]) => entry.bd_type === selectedBdType);
-    if (cityHallOnly && selectedBdType === BUILDING_PUBLIC) {
-      return filtered.filter(([idStr]) => parseInt(idStr) === VARIANT_CITY);
-    }
-    return filtered;
-  }, [buildingVariants, selectedBdType, cityHallOnly]);
+  /**
+   * 選択中の分類に属するバリアント。既存建物の編集は敷地を選び直さず建築規制(allowed_bd_mask)の
+   * 照合を通らないため、規制の単位である bd_type が編集対象と同じものに限る。
+   */
+  const variantsForCategory = useMemo(() => {
+    if (selectedCategory === null) return [];
+    return buildingVariants.filter(([, entry]) =>
+      categoryOf(entry) === selectedCategory && (editBdType === null || entry.bd_type === editBdType));
+  }, [buildingVariants, selectedCategory, editBdType]);
 
   /** 選択中のバリアントのマスターデータ */
   const selectedVariantData = useMemo((): AgentMasterEntry | null => {
@@ -1174,7 +1170,6 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           });
           return;
         }
-        setSelectedBdType(entry?.bd_type ?? null);
         setSelectedVariant(p.variant);
         setFloors(p.floors);
         // 構造もコピーする(元建物の構造が許可集合に無ければ既定=最上位)。
@@ -1257,61 +1252,60 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
 
   /* ---- ハンドラ ---- */
 
-  function handleBdTypeChange(bdType: number | null) {
-    setSelectedBdType(bdType);
-    setSelectedVariant(null);
-    setBuildingPreview(null);
+  function handleVariantSelect(variantId: number) {
+    // 建物バリアントを選択した際、そのバリアントのマスターデータに定義された最小階数を初期値として設定する。
+    // これにより、1階では建てられない建物（例: 高層ビル）を選択した際にも、適切な階数でプレビューが表示される。
+    const entry = masterData?.agents[variantId];
+    const initialStructure = defaultStructureOf(entry);
+    // 観光名所バリアントは未配置の最小IDを既定にする(全部配置済みなら最小ID。
+    // 確定はバックエンドが拒否する)。名所は敷地寸法と階数を名所側が決める。
+    const initialLandmark = defaultLandmarkOf(masterData?.landmarks, variantId, placedLandmarkIds);
+    const landmarkEntry = initialLandmark != null ? masterData?.landmarks?.[initialLandmark] : undefined;
+    const initialFloors = landmarkEntry?.floors ?? entry?.min_floors ?? 1;
+    setPlacementMode("parcel");
+    pendingPlacementRequest.current = null;
+    setPlacementCommandPending(false);
+    setSelectedVariant(variantId);
+    setFloors(initialFloors);
+    setStructure(initialStructure);
+    setLandmark(initialLandmark);
+    // 直接配置モードの底面サイズを default_width × default_height で初期化する
+    // (default_height 未設定なら正方形)。
+    const initialWidth = landmarkEntry?.width ?? entry?.default_width ?? DEFAULT_BUILDING_WIDTH;
+    const initialDepth = landmarkEntry?.depth ?? entry?.default_height ?? initialWidth;
+    setRectWidth(initialWidth);
+    setRectDepth(initialDepth);
+    setRectAngle(0);
+    // 新規建設時の外観バリアント初期値。編集モードの場合は別途useEffectで既存値を読み込み上書きされる。
+    setVisualVariant(Math.random());
+    setVisualVariant2(Math.random());
+    setVisualVariant3(Math.random());
+    sendChangeState("STATE_EDIT_BUILDING", {
+      building_variant: variantId,
+      agent_id: editAgentId ?? null,
+      structure: initialStructure ?? 0,
+      landmark: initialLandmark ?? 0,
+    }).catch((err) => {
+      console.error("[BuildingConstruction] sendChangeState failed:", err);
+    });
   }
 
-  function handleVariantClick(variantId: number) {
-    if (selectedVariant === variantId) {
-      setSelectedVariant(null);
-      setStructure(null);
-      setLandmark(null);
-      // 外観バリアントをリセット
-      setVisualVariant(null);
-      setVisualVariant2(null);
-      setVisualVariant3(null);
-      sendChangeState("STATE_NORMAL").catch((err) => {
-        console.error("[BuildingConstruction] sendChangeState failed:", err);
-      });
-    } else {
-      // 建物バリアントを選択した際、そのバリアントのマスターデータに定義された最小階数を初期値として設定する。
-      // これにより、1階では建てられない建物（例: 高層ビル）を選択した際にも、適切な階数でプレビューが表示される。
-      const entry = masterData?.agents[variantId];
-      const initialStructure = defaultStructureOf(entry);
-      // 観光名所バリアントは未配置の最小IDを既定にする(全部配置済みなら最小ID。
-      // 確定はバックエンドが拒否する)。名所は敷地寸法と階数を名所側が決める。
-      const initialLandmark = defaultLandmarkOf(masterData?.landmarks, variantId, placedLandmarkIds);
-      const landmarkEntry = initialLandmark != null ? masterData?.landmarks?.[initialLandmark] : undefined;
-      const initialFloors = landmarkEntry?.floors ?? entry?.min_floors ?? 1;
-      setPlacementMode("parcel");
-      pendingPlacementRequest.current = null;
-      setPlacementCommandPending(false);
-      setSelectedVariant(variantId);
-      setFloors(initialFloors);
-      setStructure(initialStructure);
-      setLandmark(initialLandmark);
-      // 直接配置モードの底面サイズを default_width × default_height で初期化する
-      // (default_height 未設定なら正方形)。
-      const initialWidth = landmarkEntry?.width ?? entry?.default_width ?? DEFAULT_BUILDING_WIDTH;
-      const initialDepth = landmarkEntry?.depth ?? entry?.default_height ?? initialWidth;
-      setRectWidth(initialWidth);
-      setRectDepth(initialDepth);
-      setRectAngle(0);
-      // 新規建設時の外観バリアント初期値。編集モードの場合は別途useEffectで既存値を読み込み上書きされる。
-      setVisualVariant(Math.random());
-      setVisualVariant2(Math.random());
-      setVisualVariant3(Math.random());
-      sendChangeState("STATE_EDIT_BUILDING", {
-        building_variant: variantId,
-        agent_id: editAgentId ?? null,
-        structure: initialStructure ?? 0,
-        landmark: initialLandmark ?? 0,
-      }).catch((err) => {
-        console.error("[BuildingConstruction] sendChangeState failed:", err);
-      });
-    }
+  /**
+   * 建設画面から建物タイルへ戻る。戻り先は選んでいた建物の分類で、既存建物の編集やコピー建設のように
+   * 分類タイルを経ずに建物が決まった場合も同じ規則で決まる。
+   */
+  function handleVariantDeselect() {
+    if (selectedVariantData) setSelectedCategory(categoryOf(selectedVariantData));
+    setSelectedVariant(null);
+    setStructure(null);
+    setLandmark(null);
+    // 外観バリアントをリセット
+    setVisualVariant(null);
+    setVisualVariant2(null);
+    setVisualVariant3(null);
+    sendChangeState("STATE_NORMAL").catch((err) => {
+      console.error("[BuildingConstruction] sendChangeState failed:", err);
+    });
   }
 
   /**
@@ -1555,80 +1549,70 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
 
   return (
     <div className="bc-layout" onClick={handlePanelClick}>
-      {/* 建物タイプ選択 */}
-      <div className="bc-section">
-        <select
-          className="bc-select"
-          value={selectedBdType ?? ""}
-          onChange={(e) =>
-            handleBdTypeChange(e.target.value ? parseInt(e.target.value) : null)
-          }
-          disabled={editAgentId != null || cityHallOnly}
-        >
-          <option value="">{t("building_construction.selectBdType")}</option>
-          {availableBdTypes.map((bdType) => (
-            <option key={bdType} value={bdType}>
-              {masterData.bd_types[bdType]?.display_name ?? `Type ${bdType}`}
-            </option>
-          ))}
-        </select>
-      {/* バリアント選択 */}
-        {variantsForType.length === 0 ? (
-          <div className="bc-empty-variants">
-            {selectedBdType === null
-              ? t("building_construction.selectVariant")
-              : t("building_construction.noVariants")}
-          </div>
-        ) : (
-          <select
-            className="bc-select"
-            value={selectedVariant ?? ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val) {
-                const variantId = parseInt(val);
-                if (selectedVariant !== variantId) {
-                  handleVariantClick(variantId);
-                }
-              } else {
-                if (selectedVariant !== null) {
-                  handleVariantClick(selectedVariant);
-                }
-              }
-            }}
-            style={{ marginTop: 10 }}
-            disabled={cityHallOnly}
-          >
-            <option value="">{t("building_construction.selectVariant")}</option>
-            {variantsForType.map(([idStr, entry]) => (
-              <option key={idStr} value={idStr} disabled={isVariantUnaffordable(parseInt(idStr))}>
-                {entry.display_name}
-                {isVariantUnaffordable(parseInt(idStr)) ? t("construction.variantUnaffordableSuffix") : ""}
-              </option>
-            ))}
-          </select>
-        )}
-        {/* 既存建物をコピー: バリアント未選択のときだけ表示する。押すと Unity が
-            コピー元建物の選択モードに入り、選ばれた建物の見た目・階数・フットプリントを取り込む。 */}
-        {selectedVariant === null && editAgentId == null && !cityHallOnly && (
-          <button
-            className="bc-btn"
-            type="button"
-            style={{ marginTop: 10 }}
-            onClick={() => {
-              sendPickCopySource().catch((err) => {
-                console.error("[BuildingConstruction] sendPickCopySource failed:", err);
-              });
-            }}
-          >
-            {t("building_construction.copyExisting")}
-          </button>
-        )}
-      </div>
+      {/* 分類タイル → 建物タイル。市庁舎だけを置くモードは選択が固定なので出さない。
+          既存建物の編集は分類を変えられないため、分類タイルを出さず建物タイルから戻れない。 */}
+      {selectedVariant === null && !cityHallOnly && (
+        <div className="bc-section">
+          {selectedCategory !== null && editAgentId == null && (
+            <button className="bc-back-btn" type="button" onClick={() => setSelectedCategory(null)}>
+              ← {t("building_construction.back")}
+            </button>
+          )}
+          {selectedCategory === null && editAgentId != null ? (
+            <p className="bc-muted">{t("common.loading")}</p>
+          ) : (
+            <div className="bc-tile-grid">
+              {selectedCategory === null
+                ? availableCategories.map((category) => (
+                    <SelectionTile
+                      key={category}
+                      icon={resolveBdCategoryIcon(category)}
+                      name={t(`building_construction.category.${category}`)}
+                      onClick={() => setSelectedCategory(category)}
+                    />
+                  ))
+                : variantsForCategory.map(([idStr, entry]) => {
+                    const variantId = Number(idStr);
+                    const unaffordable = isVariantUnaffordable(variantId);
+                    return (
+                      <SelectionTile
+                        key={idStr}
+                        icon={resolveAgentVariantIcon(variantId)}
+                        name={entry.display_name + (unaffordable ? t("construction.variantUnaffordableSuffix") : "")}
+                        disabled={unaffordable}
+                        onClick={() => handleVariantSelect(variantId)}
+                      />
+                    );
+                  })}
+            </div>
+          )}
+          {/* 既存建物をコピー: 押すと Unity がコピー元建物の選択モードに入り、
+              選ばれた建物の見た目・階数・フットプリントを取り込む。 */}
+          {editAgentId == null && (
+            <button
+              className="bc-btn"
+              type="button"
+              style={{ marginTop: 10 }}
+              onClick={() => {
+                sendPickCopySource().catch((err) => {
+                  console.error("[BuildingConstruction] sendPickCopySource failed:", err);
+                });
+              }}
+            >
+              {t("building_construction.copyExisting")}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 説明文 */}
       {selectedVariantData && (
         <div className="bc-section">
+          {!cityHallOnly && (
+            <button className="bc-back-btn" type="button" onClick={handleVariantDeselect}>
+              ← {t("building_construction.back")}
+            </button>
+          )}
           <div className="bc-description-frame">
             <img
               src={resolveAgentIcon(
@@ -2146,7 +2130,27 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   );
 }
 
+/** 分類・建物の選択タイル。アイコン画像が無いものは枠だけ空けておく。 */
+function SelectionTile({ icon, name, disabled = false, onClick }: {
+  icon: string;
+  name: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button className="bc-tile" type="button" disabled={disabled} onClick={onClick}>
+      <span className="bc-tile-icon">{icon && <img src={icon} alt="" draggable={false} />}</span>
+      <span className="bc-tile-name">{name}</span>
+    </button>
+  );
+}
+
 /* ---- ユーティリティ ---- */
+
+/** 建設パネルでの分類。マスターで bd_category が空欄の建物は「その他」に並べる。 */
+function categoryOf(entry: AgentMasterEntry): number {
+  return entry.bd_category ?? BD_CATEGORY_OTHER;
+}
 
 /**
  * バリアントの既定の構造種別(許可構造の最上位=最も耐火・長寿命)。構造を持たないバリアントは null。

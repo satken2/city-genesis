@@ -36,7 +36,7 @@ impl Default for AppSettings {
         volumes.insert("sfx".to_string(), 70);
         Self {
             language: "ja".to_string(),
-            font_size: 15.0,
+            font_size: 12.0, // 本文の文字サイズ(px)。UIの FONT_SIZE_PRESETS.medium と揃える
             volumes,
             monitor_index: 0,
             hintbar_visible: true,

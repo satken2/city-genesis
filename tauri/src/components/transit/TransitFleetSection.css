@@ -9,14 +9,14 @@
 }
 
 .transit-fleet__total {
-  font-size: 1.05rem;
+  font-size: 1.46rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
 }
 
 .transit-fleet__formation {
-  font-size: 0.74rem;
+  font-size: 1.03rem;
   color: var(--flat-text-label);
 }
 
@@ -44,7 +44,7 @@
 
 .transit-fleet__note {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #6b8299;
 }
 

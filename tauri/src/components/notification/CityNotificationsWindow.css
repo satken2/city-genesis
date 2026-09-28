@@ -12,7 +12,7 @@
 
 .city-notifications-description {
   margin: 0;
-  font-size: 12px;
+  font-size: 1.11rem;
   color: #8ba3bb;
 }
 
@@ -20,7 +20,7 @@
 .city-notifications-empty {
   margin: 24px 0;
   text-align: center;
-  font-size: 13px;
+  font-size: 1.2rem;
   color: #8ba3bb;
 }
 
@@ -33,7 +33,7 @@
 
 .city-notifications-section-title {
   margin: 0;
-  font-size: 12px;
+  font-size: 1.11rem;
   font-weight: 700;
   color: #8ba3bb;
 }
@@ -91,13 +91,13 @@
 
 .city-notifications-row-message {
   flex: 1;
-  font-size: 13px;
+  font-size: 1.2rem;
   line-height: 1.4;
 }
 
 .city-notifications-row-date {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #8ba3bb;
   white-space: nowrap;
 }

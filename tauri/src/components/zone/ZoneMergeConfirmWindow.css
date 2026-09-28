@@ -16,7 +16,7 @@
 
 .zone-merge-muted {
   padding: 16px;
-  font-size: 13px;
+  font-size: 1.2rem;
   opacity: 0.75;
 }
 
@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 15px;
+  font-size: 1.39rem;
   font-weight: 600;
   flex-wrap: wrap;
 }
@@ -41,14 +41,14 @@
 
 .zone-merge-desc {
   margin: 0;
-  font-size: 12px;
+  font-size: 1.11rem;
   line-height: 1.6;
   opacity: 0.85;
 }
 
 .zone-merge-error {
   margin: 0;
-  font-size: 12px;
+  font-size: 1.11rem;
   color: #fca5a5;
 }
 
@@ -63,7 +63,7 @@
 .zone-merge-cancel-btn {
   padding: 8px 16px;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: background-color 0.15s ease, opacity 0.15s ease;
 }

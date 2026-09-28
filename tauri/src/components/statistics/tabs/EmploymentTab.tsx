@@ -26,6 +26,7 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./EmploymentTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- バックエンド GET /api/v1/stats/employment のレスポンス型 ---
 
@@ -100,13 +101,13 @@ const COLOR_FILL_WARN  = "#ef4444"; // 充足率不足: レッド
 
 // recharts の共通スタイル定数(他タブと同じテーマ)
 const CHART_MARGIN = { top: 8, right: 16, left: -10, bottom: 0 };
-const Y_AXIS_WIDTH = 44;
-const AXIS_TICK = { fontSize: 10, fill: "#8ba3bb" };
+const Y_AXIS_WIDTH_REM = 4.07; // Y軸の幅(rem)。描画時に useRemPx で px に直す
+const AXIS_TICK = { fontSize: "0.93rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 function getFillColor(rate: number): string {
@@ -149,6 +150,7 @@ function KpiCard({
 
 export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<EmploymentStats>(
     apiBaseUrl,
     "/api/v1/stats/employment"
@@ -309,7 +311,7 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       axisLine={{ stroke: "#253246" }}
                     />
                     <YAxis
-                      width={Y_AXIS_WIDTH}
+                      width={remPx(Y_AXIS_WIDTH_REM)}
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}

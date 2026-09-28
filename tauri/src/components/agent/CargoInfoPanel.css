@@ -9,20 +9,20 @@
 
 .cargo-description {
   margin: 0 0 10px;
-  font-size: 0.75rem;
+  font-size: 1.04rem;
   line-height: 1.5;
   color: #93a9c0;
 }
 
 .cargo-unit-suffix {
   margin-left: 2px;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #93a9c0;
 }
 
 .cargo-products-title {
   margin: 14px 0 6px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
   font-weight: 600;
   color: #c6d4e2;
 }
@@ -32,7 +32,7 @@
   display: flex;
   gap: 12px;
   margin-bottom: 8px;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #93a9c0;
 }
 
@@ -61,7 +61,7 @@
   align-items: baseline;
   gap: 8px;
   margin-bottom: 3px;
-  font-size: 0.8rem;
+  font-size: 1.11rem;
 }
 
 .cargo-row__name {
@@ -102,7 +102,7 @@
   justify-content: space-between;
   gap: 8px;
   margin-top: 2px;
-  font-size: 0.7rem;
+  font-size: 0.97rem;
   color: #93a9c0;
 }
 

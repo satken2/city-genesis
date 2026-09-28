@@ -24,6 +24,7 @@ import {
 import { TAX_REVENUE_META } from "../common/FiscalSankey";
 import { formatCompactAmount, formatExactAmount } from "../../utils/money";
 import { resolveIntlLocale } from "../../utils/locale";
+import { useRemPx } from "../../hooks/useRemPx";
 
 /** history 1エポック分。revenues は台帳キー(文字列)→実績額。 */
 export type TaxRevenueHistoryEntry = {
@@ -38,16 +39,17 @@ export type TaxRevenueChartProps = {
 /** 合計線の色。カテゴリ色(TAX_REVENUE_META)と重ならない中立色。 */
 const COLOR_TOTAL = "#e2e8f0";
 
-const AXIS_TICK = { fontSize: 10, fill: "#9cb3cb" } as const;
+const AXIS_TICK = { fontSize: "0.93rem", fill: "#9cb3cb" } as const;
 const TOOLTIP_STYLE = {
   background: "rgba(15, 23, 42, 0.95)",
   border: "1px solid rgba(148, 163, 184, 0.2)",
   borderRadius: "6px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 } as const;
 
 export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
   const { t, i18n } = useTranslation();
+  const remPx = useRemPx();
   const locale = resolveIntlLocale(i18n.language);
 
   if (!data || data.length === 0) {
@@ -81,7 +83,7 @@ export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
             axisLine={{ stroke: "#253246" }}
           />
           <YAxis
-            width={48}
+            width={remPx(4.44)}
             tick={AXIS_TICK}
             tickLine={false}
             axisLine={{ stroke: "#253246" }}
@@ -93,7 +95,7 @@ export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
             labelFormatter={(label) => `Epoch ${label}`}
             formatter={(value: unknown) => formatExactAmount(Number(value), locale, true)}
           />
-          <Legend wrapperStyle={{ fontSize: "10px" }} iconType="plainline" />
+          <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconType="plainline" />
           {/* 合計線を先頭に描画。参考値として太めの実線。 */}
           <Line
             type="monotone"

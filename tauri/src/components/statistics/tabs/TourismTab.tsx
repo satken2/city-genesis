@@ -28,6 +28,7 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./TourismTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 // --- バックエンド GET /api/v1/stats/tourism のレスポンス型 ---
 
@@ -138,13 +139,13 @@ const COLOR_TOURISM = "#ec4899";
 const COLOR_QOL = "#60a5fa";
 
 const CHART_MARGIN = { top: 12, right: 16, left: -10, bottom: 0 };
-const Y_AXIS_WIDTH = 48;
-const AXIS_TICK = { fontSize: 10, fill: "#8ba3bb" };
+const Y_AXIS_WIDTH_REM = 4.44; // Y軸の幅(rem)。描画時に useRemPx で px に直す
+const AXIS_TICK = { fontSize: "0.93rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "11px",
+  fontSize: "1.02rem",
 };
 
 function fmt(value: number, digits = 0): string {
@@ -157,6 +158,7 @@ function pct(ratio: number): string {
 
 export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
+  const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<TourismStats>(
     apiBaseUrl,
     "/api/v1/stats/tourism"
@@ -234,7 +236,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
             <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
             <YAxis
               yAxisId="left"
-              width={Y_AXIS_WIDTH}
+              width={remPx(Y_AXIS_WIDTH_REM)}
               tick={AXIS_TICK}
               tickLine={false}
               axisLine={{ stroke: "#253246" }}
@@ -244,7 +246,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                width={Y_AXIS_WIDTH}
+                width={remPx(Y_AXIS_WIDTH_REM)}
                 tick={AXIS_TICK}
                 tickLine={false}
                 axisLine={{ stroke: "#253246" }}
@@ -252,7 +254,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               />
             )}
             <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} />
-            <Legend wrapperStyle={{ fontSize: 10 }} iconSize={8} />
+            <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconSize={8} />
             {children}
           </LineChart>
         </ResponsiveContainer>
@@ -449,10 +451,10 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={satisfaction.distribution} margin={{ top: 4, right: 8, left: -20, bottom: 0 }} barCategoryGap={2}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#253246" vertical={false} />
-                      <XAxis dataKey="bin" tick={{ fontSize: 8, fill: "#8ba3bb" }} tickLine={false} interval={0} />
-                      <YAxis tick={AXIS_TICK} tickLine={false} allowDecimals={false} />
+                      <XAxis dataKey="bin" tick={{ fontSize: "0.74rem", fill: "#8ba3bb" }} tickLine={false} interval={0} />
+                      <YAxis width={remPx(5.56)} tick={AXIS_TICK} tickLine={false} allowDecimals={false} />
                       <Tooltip contentStyle={TOOLTIP_STYLE} />
-                      <Legend wrapperStyle={{ fontSize: 10 }} iconSize={8} />
+                      <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconSize={8} />
                       <Bar dataKey="entertainment" name={t("statistics.tourism.avgEntertainment")} fill={COLOR_ENTERTAINMENT} />
                       <Bar dataKey="tourism" name={t("statistics.tourism.avgTourism")} fill={COLOR_TOURISM} />
                       <Bar dataKey="qol" name={t("statistics.tourism.avgQol")} fill={COLOR_QOL} />

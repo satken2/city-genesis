@@ -35,7 +35,7 @@
 }
 
 .terrain-editor-tools-title {
-  font-size: 15px;
+  font-size: 1.39rem;
   font-weight: 600;
   color: #a0c8ff;
 }
@@ -73,7 +73,7 @@
 }
 
 .terrain-editor-card-title {
-  font-size: 12px;
+  font-size: 1.11rem;
   font-weight: 600;
   color: #9aa0b0;
   margin-bottom: 10px;
@@ -95,7 +95,7 @@
 }
 
 .terrain-editor-section-title {
-  font-size: 11px;
+  font-size: 1.02rem;
   font-weight: 600;
   color: #9aa0b0;
   margin-bottom: 6px;
@@ -115,7 +115,7 @@
 .terrain-editor-toggle-btn {
   flex: 1 1 0;
   padding: 5px 6px;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #c8c8d0;
   background-color: #1c1c24;
   border: 1px solid #30303c;
@@ -149,7 +149,7 @@
 }
 
 .terrain-editor-param-label {
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #b0b0bc;
   flex: 1 1 auto;
 }
@@ -163,11 +163,11 @@
   border: 1px solid #30303c;
   border-radius: 4px;
   padding: 4px 6px;
-  font-size: 11px;
+  font-size: 1.02rem;
 }
 
 .terrain-editor-hint {
-  font-size: 10px;
+  font-size: 0.93rem;
   color: #777;
   line-height: 1.5;
   margin-top: 3px;
@@ -189,7 +189,7 @@
   border: 1px solid #30303c;
   border-radius: 4px;
   padding: 4px 6px;
-  font-size: 11px;
+  font-size: 1.02rem;
 }
 
 .terrain-editor-text-input:disabled {
@@ -197,18 +197,18 @@
 }
 
 .terrain-editor-meta-readonly {
-  font-size: 10px;
+  font-size: 0.93rem;
   color: #777;
   line-height: 1.5;
 }
 
 .terrain-editor-polygon-count {
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #a0c8ff;
 }
 
 .terrain-editor-selection-status {
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #a0c8ff;
   font-weight: 600;
 }
@@ -228,7 +228,7 @@
 .terrain-editor-btn {
   flex: 1 1 0;
   padding: 6px 6px;
-  font-size: 11px;
+  font-size: 1.02rem;
   color: #e0e0e0;
   background-color: #23232d;
   border: 1px solid #383846;
@@ -312,7 +312,7 @@
   background-color: rgba(20, 20, 28, 0.9);
   border: 1px solid #333;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 1.3rem;
   color: #ccc;
   z-index: 5;
   pointer-events: none;
@@ -333,7 +333,7 @@
   background-color: rgba(0, 0, 0, 0.55);
   border-radius: 4px;
   font-family: Consolas, Menlo, monospace;
-  font-size: 12px;
+  font-size: 1.11rem;
   color: #c0c0c0;
   pointer-events: none;
   z-index: 5;
@@ -348,7 +348,7 @@
   background-color: rgba(0, 0, 0, 0.55);
   border-radius: 4px;
   font-family: Consolas, Menlo, monospace;
-  font-size: 12px;
+  font-size: 1.11rem;
   color: #c0c0c0;
   pointer-events: none;
   z-index: 5;
@@ -366,7 +366,7 @@
 }
 
 .terrain-editor-tabs-label {
-  font-size: 11px;
+  font-size: 1.02rem;
   font-weight: 600;
   color: #9aa0b0;
   flex: 0 0 auto;
@@ -377,7 +377,7 @@
   flex: 1 1 auto;
   min-width: 0;
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: 1.11rem;
   font-weight: 600;
   background-color: #2a3a52;
   border-color: #5a8fd6;

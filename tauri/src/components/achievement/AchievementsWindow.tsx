@@ -11,6 +11,7 @@ import { requestConfirm } from "../../utils/confirmDialog";
 import { SatisfactionFace, getSatisfactionAppearance } from "../common/SatisfactionFace";
 import { Meter } from "../common/Meter";
 import "./AchievementsWindow.css";
+import { useRemPx } from "../../hooks/useRemPx";
 
 type QuestsResponse = {
   quests: Quest[];
@@ -95,6 +96,7 @@ function formatMetricValue(v: number | null, locale: string): string {
 
 export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
+  const remPx = useRemPx();
   const locale = resolveIntlLocale(i18n.language);
   const fmt = (value: number, digits = 1) => value.toLocaleString(locale, { maximumFractionDigits: digits });
   const [historyMode, setHistoryMode] = useState<"household" | "total">("household");
@@ -411,8 +413,8 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={history} stackOffset="sign" margin={{ top: 8, right: 12, bottom: 4, left: 0 }} accessibilityLayer>
                   <CartesianGrid vertical={false} stroke="#26374d" />
-                  <XAxis dataKey="name" tick={{ fill: "#a4bccc", fontSize: 11 }} minTickGap={32} tickLine={false} />
-                  <YAxis domain={historyMode === "household" ? [historyMinimum, MAX_SCORE_PER_HOUSEHOLD] : ["auto", "auto"]} ticks={historyMode === "household" ? [-1, -0.5, 0, 0.5, 1, 1.5, 2].filter((value) => value >= historyMinimum) : undefined} tick={{ fill: "#a4bccc", fontSize: 11 }} tickFormatter={(value: number) => fmt(value)} width={50} tickLine={false} />
+                  <XAxis dataKey="name" tick={{ fill: "#a4bccc", fontSize: "1.02rem" }} minTickGap={32} tickLine={false} />
+                  <YAxis domain={historyMode === "household" ? [historyMinimum, MAX_SCORE_PER_HOUSEHOLD] : ["auto", "auto"]} ticks={historyMode === "household" ? [-1, -0.5, 0, 0.5, 1, 1.5, 2].filter((value) => value >= historyMinimum) : undefined} tick={{ fill: "#a4bccc", fontSize: "1.02rem" }} tickFormatter={(value: number) => fmt(value)} width={remPx(4.63)} tickLine={false} />
                   <ReferenceLine y={0} stroke="#a4bccc" />
                   <Tooltip content={({ active, payload, label }) => active && payload?.length ? <div className="resident-score-tooltip"><strong>{label}</strong>{payload.map((entry) => <div key={String(entry.dataKey)}>{entry.name}: {fmt(Number(entry.value), 2)} {t("achievements.points")}</div>)}</div> : null} />
                   <Bar dataKey="qol" name={t("achievements.qolScore")} stackId="score" fill="#4ea1ff" maxBarSize={30} isAnimationActive={false} />
