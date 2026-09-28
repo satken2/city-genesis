@@ -265,11 +265,11 @@ Unity は `PathTopologyEditManager` が対象選択を担う。**結合**では�
 
 genesis-core は起動時にポート5000から順に空きポートを探し、最初に確保できたポートで FastAPI を起動する。ポートが占有されていた場合は5001、5002…と順次試行する。
 
-この動的に決定したポート番号は、以降の UI および Graphic プログラムに対して正しく伝達される必要がある。伝達の経路は以下の通り。
+この動的に決定したポート番号と、起動ごとに作るローカルAPIの認証トークンは、以降の UI および Graphic プログラムに対して正しく伝達される必要がある。伝達の経路は以下の通り(詳細は[コンポーネント連携](コンポーネント連携.md)の「起動順序」「ローカルAPIの認証」)。
 
-1. **genesis-core → city-genesis/tauri**: 環境変数 `GENESIS_UI_API_BASE_URL` に `http://localhost:{ポート番号}` を設定してから `config.toml` の `[ui] launch_command` を実行する。
-2. **city-genesis/tauri → city-genesis/unity**: `graphic-launch.json` の `launch_command` の末尾に `--api-base-url http://localhost:{ポート番号}` を追加してから Unity を起動する。
-3. **city-genesis/unity**: `AppRoot.Start()` でコマンドライン引数 `--api-base-url` をパースし、`ApiClient.BASE_URL` を上書きする。以降、全ての HTTP 通信はこの `BASE_URL` を参照する。
+1. **genesis-core → city-genesis/tauri**: 環境変数 `GENESIS_API_PORT`(ポート番号)・`GENESIS_API_TOKEN`(トークン)・`GENESIS_GRAPHIC_EXTERNAL=true` を設定してから `config.toml` の `[ui] launch_command` を実行する。開発時に単独で起動した Tauri は、環境変数 `GENESIS_UI_API_BASE_URL` で接続先を上書きでき、トークンはユーザーフォルダの `api_token` から読む。
+2. **genesis-core → city-genesis/unity**: `config.toml` の `[graphic] launch_command` の末尾に `--api-base-url http://127.0.0.1:{ポート番号}/api/v1` を付け、環境変数 `GENESIS_API_TOKEN` を設定して Unity を起動する。バックエンドが Unity を起動しない構成(開発時)では、Tauri が `graphic-launch.json` の `launch_command` に `--api-base-url` を付けて起動し、Unity は Tauri の環境変数を引き継ぐ。
+3. **city-genesis/unity**: `AppRoot.Start()` でコマンドライン引数 `--api-base-url` をパースし、`ApiClient.BASE_URL` を上書きする。以降、全ての HTTP 通信はこの `BASE_URL` を参照し、`ApiClient` が認証トークンを付ける。トークンは起動引数では渡さない(同じPCの他のプロセスから一覧できるため)。
 
 ## 各プログラムの起動シーケンス
 
@@ -284,14 +284,15 @@ genesis-core (main.py)
   └─ サーバー起動完了後:
       ├─ スプラッシュ破棄
       └─ config.toml の [ui] launch_command から city-genesis/tauri を起動
-         └─ 環境変数 GENESIS_UI_API_BASE_URL = http://localhost:{ポート}
+         └─ 環境変数 GENESIS_API_PORT = {ポート}、GENESIS_API_TOKEN = {トークン}
          （異常終了時は3秒後に自動再起動。正常終了(code 0)は監視終了）
 ```
 
 ```
 city-genesis/tauri (Tauri/Rust)
   │
-  ├─ 環境変数 GENESIS_UI_API_BASE_URL を読み込み、以降の API 通信先とする
+  ├─ 環境変数 GENESIS_UI_API_BASE_URL(無ければ GENESIS_API_PORT)から API 通信先を決める
+  ├─ 認証トークンは要求のたびに GENESIS_API_TOKEN → ユーザーフォルダの api_token の順で解決する
   ├─ 設定読み込み: window-registry.json, window-mutex-groups.json, graphic-launch.json
   ├─ ウィンドウ作成:
   │   ├─ "main" ウィンドウ → 即座に非表示（常駐ホスト）
@@ -359,7 +360,7 @@ Tauri 側の常駐スレッドが 5 秒ごとにバックエンドをポーリ�
 
 #### ポーリング内容
 
-- `GET /api/v1/sessions` — `current_save_id` の有無でセッション状態を判定
+- `GET /api/v1/sessions` — `current_save_id` の有無でセッション状態を判定(シナリオの地形編集などコアがセッションを使わずに都市を組み立てている間も `null` が返る)
 - `GET /api/v1/city` — 都市名・日付（Taskbar 表示用）
 
 #### 配信イベント: `session-state`
@@ -415,7 +416,7 @@ invoke("start_load_game", { saveId })
   1. launch_graphic() → Unity 起動
   2. topmenu.hide()
   3. loading.show()
-  4. POST /api/v1/sessions/load
+  4. POST /api/v1/sessions?save_id={saveId}
   5. ポーリングスレッドが current_save_id の変化を検知
   6. loading.hide()
   7. taskbar.show()
@@ -487,7 +488,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 `ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時とグラフィックの起動通知（`system:graphic_ready`）の受信時に送り、CameraAmbience（環境音）・ConstructionAmbience（工事音）・VehicleAmbience（走行音）・VisualEffectManager（完成・解体音）が所有するAudioSourceへ適用する。高度と天気の音響制御はUnity内で完結する。
 
-天気と時刻の正はUnityにあり、バックエンドへの書き込みや経済パラメータは追加しない。マップの気候区分だけはUnityが `GET /api/v1/city` の `climate` から読む。Cockpitは購読後に問い合わせ、応答した天気に合わせて表示を更新する。
+天気と時刻の正はUnityにあり、バックエンドへの書き込みや経済パラメータは追加しない。都市の気候区分だけはUnityが `GET /api/v1/city` の `climate` から読む。Cockpitは購読後に問い合わせ、応答した天気に合わせて表示を更新する。
 
 | イベント | 方向 | ペイロード・意味 |
 | --- | --- | --- |

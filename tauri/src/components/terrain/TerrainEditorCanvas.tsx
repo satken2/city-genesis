@@ -1,8 +1,9 @@
 /**
  * 地形エディタのキャンバス本体。
  *
- * EditorWindow から terrain_editor ウィンドウとして開かれ、指定された地形マップの
- * 作業コピー(near.bin) を読み込んで、その解像度(nearマップ解像度)のまま描画する。
+ * シナリオに含まれる地形を編集する。シナリオ管理の「地形を編集」から terrain_editor ウィンドウとして
+ * 開かれ、Rust の prepare_scenario_terrain_editor がシナリオの地形 API から作った作業コピー(near.bin・
+ * meta.json)を読み込んで、その解像度(nearマップ解像度)のまま描画する。
  * 地図は3枚のキャンバスを重ねて描く。最下段の WebGL2 キャンバス(terrainEditorRenderer.ts)が
  * 標高から地形の色・選択範囲のハイライト・100m間隔のグリッド・セル境界(cell_size間隔。
  * 通常のグリッドより濃く強調する)・等高線を画素単位で描き、その上の Canvas2D が確定済みの
@@ -16,7 +17,13 @@
  *     移動量の閾値で判定し、閾値を超えるまではパンへ移行しない。
  *   - 右クリック: 描画中のポリゴン(頂点3つ以上)を確定
  *
- * 地形編集はTauri(本ウィンドウ)内で完結し、バックエンドの状態には影響しない。
+ * 編集はこのウィンドウ内で完結し、「シナリオに保存」(Rust の save_scenario_terrain → コアの
+ * PUT /api/v1/scenarios/{id}/terrain)を押すまでシナリオは変わらない。マップの寸法は変えられない。
+ * 建設物(道路・建物・造成跡・埋立)があるシナリオでは標高・水面・川がロックされ(heights_locked)、
+ * 地形・水面・川のタブと自動編集を使えず、保存でもそれらを送らない。
+ * 保存していない編集はウィンドウを閉じると失われるので、未保存の変更があれば保存ボタンの上に表示する。
+ * 表示中に同じシナリオの「地形を編集」を押し直しても、このウィンドウが前面に出るだけで編集は残る
+ * (Rust 側が表示中のウィンドウの作業コピーIDを返す)。
  * 編集ツールは左パネルに配置され、以下の2系統を提供する。
  *   - 手動編集: 円/四角ブラシまたは任意ポリゴンで範囲を「選択」し(ブラシは単発クリック、
  *     ポリゴンは右クリックまたは「確定」ボタンで選択にマージされる)、その後
@@ -39,9 +46,9 @@
  * 地形編集・水面編集・川編集に加えて「資源編集」タブがあり、天然資源エリア(鉱脈・油田
  * などのポリゴン領域)を水面と同じ作図フローでオーサリングできる。資源は経済シミュレー
  * ションのエンティティだが、埋蔵資源は地形と密接に結び付く(山に鉱脈、平野に水源など)
- * ため、地形マップ固有のオーサリング済みデータとしてここで定義する。定義した資源は
- * meta.json / サイドカーJSON(map_xxx.resources.json)に永続化され、バックエンドが
- * 新規都市の初期化時(init_game)に読み込んで資源エンティティとして配置する。
+ * ため、シナリオの地形と一緒にここで編集する。保存するとコアが資源を ID で差分適用する
+ * (既存は更新、新規は追加、一覧から消したものは削除)。エディタで作った資源は保存まで仮のIDで持ち、
+ * 保存の応答(resource_ids)で DB の ID に替える。
  * 資源種別の一覧はマスターデータ(resource_master)に依存するため、バックエンドが
  * 起動していない場合は資源種別を選択できない(既存の資源の表示・削除は可能)。
  */
@@ -50,19 +57,20 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
-import { save as saveFileDialog } from "@tauri-apps/plugin-dialog";
-import { showNotification } from "../../utils/notification";
 import { NumberStepper } from "../common/NumberStepper";
-import { NEW_TERRAIN_INITIAL_ELEVATION_M } from "../../local-constants";
+import { errorCode, saveError } from "../../utils/saves";
+import { terrainMapTitle } from "../../utils/terrainMaps";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { CLIMATE_TEMPERATE, CLIMATE_TYPES, GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
 import {
   type TerrainEditorData,
+  type TerrainEditorLocks,
   type WaterSurfacePayload,
   type WaterPolygonGeoJson,
   type RiverPayload,
   type ResourceAreaPayload,
   type TerrainCameraPayload,
+  type ScenarioTerrainSaveResult,
   type GridRect,
   type Terrain3DRequestStatePayload,
   type Terrain3DDetachPayload,
@@ -78,6 +86,9 @@ import {
   landElevationRange,
   normalizeClimate,
   normalizeGroundCover,
+  normalizeTerrainEditorLocks,
+  resourceIdReplacer,
+  scenarioTerrainSaveArgs,
   extractElevRect,
   quantizeMaskRect,
   SEA_RGB,
@@ -113,8 +124,7 @@ import {
   dischargeFromWidth,
   nearestPointIndex,
 } from "./terrainRiver";
-import { polygonArea, polygonParts, ringSignedArea, translatePolygon } from "./riverGeometry";
-import { captureTerrainThumbnail } from "./terrainThumbnail";
+import { polygonArea, polygonParts, ringSignedArea } from "./riverGeometry";
 import { ResourcePresetHint } from "../resource/ResourcePresetHint";
 import { useResourcePresetInputs } from "../../hooks/useResourcePresetInputs";
 import { RESOURCE_MAX_AMOUNT_LIMIT } from "../../data/resourcePresets";
@@ -124,7 +134,7 @@ import "./TerrainEditorCanvas.css";
 import { TerrainPropEditor, useTerrainPropEditor, emptyTerrainProps, type TerrainProps } from "./TerrainPropEditor";
 
 type TerrainEditorCanvasProps = {
-  /** 編集対象の地形マップID。window-registry の entity_id 経由で渡される。 */
+  /** 作業コピーのID(editor_id)。window-registry の entity_id 経由で渡され、3Dプレビューとの同期にも使う */
   mapId: string;
 };
 
@@ -155,7 +165,7 @@ type WorldPoint = { x: number; z: number };
 /**
  * 地形エディタ内での水面(海面以外の湖など)1枚分の内部表現。
  * points は外周ポリゴンの頂点(ワールド座標XZ)。waterLevel は水面のY標高(m、海面=0)。
- * エクスポート・3Dプレビュー送信時に GeoJSON ライクな WaterSurfacePayload へ変換する。
+ * 保存・3Dプレビュー送信時に GeoJSON ライクな WaterSurfacePayload へ変換する。
  */
 type EditorWaterSurface = { id: string; waterLevel: number; points: WorldPoint[] };
 
@@ -164,7 +174,7 @@ type EditorWaterSurface = { id: string; waterLevel: number; points: WorldPoint[]
  * GeneratedRiver(terrainRiver.ts)に以下を加えたもの。
  *   - params: 生成時のパラメータ(再生成の参考用)
  *   - carved: 川床を地形へ彫り込み済みか。「流路を計算」直後は false(プレビュー状態)で、
- *     一覧から1本ずつ「彫る」ことで true になる。エクスポート・3Dプレビューの
+ *     一覧から1本ずつ「彫る」ことで true になる。保存・3Dプレビューの
  *     対象になるのは彫り込み済みの川のみ。
  *   - depthCoef: この川を彫るときの深さ係数。生成時の既定値から川ごとに調整できる。
  *   - polygon: 川の範囲(彫り込み後の地形で水面より低い領域。穴=中州)。彫り込み時に抽出し、
@@ -198,12 +208,15 @@ type RiverPointerMode = "rain" | "draw" | "node";
 /** 左ツールパネル上部のプルダウンで排他的に切り替える編集対象 */
 type EditorTab = "terrain" | "water" | "river" | "resource" | "camera" | "prop";
 
+/** 標高のロック中(heights_locked)に使えない編集対象。どれも標高・水面・川のいずれかを書き換える */
+const HEIGHT_LOCKED_TABS: ReadonlySet<EditorTab> = new Set<EditorTab>(["terrain", "water", "river"]);
+
 /** ノード編集でノード・流路を拾う画面上の許容距離(px)。ワールド座標へはズームで割って換算する */
 const RIVER_NODE_HIT_PX = 9;
 
 /**
  * 地形エディタ内での天然資源エリア1件分の内部表現。
- * points は外周ポリゴンの頂点(ワールド座標XZ)。エクスポート時に GeoJSON ライクな
+ * points は外周ポリゴンの頂点(ワールド座標XZ)。保存時に GeoJSON ライクな
  * ResourceAreaPayload へ変換する。種別の表示名はマスターデータから都度解決するため持たない。
  */
 type EditorResourceArea = {
@@ -1224,9 +1237,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // 何度呼ばれても描画は1回にまとまる。fullFramePendingRef はそのフレームで全層を描き直すか。
   const frameRequestRef = useRef<number | null>(null);
   const fullFramePendingRef = useRef(false);
-  // セル境界(cell_size間隔)のグリッド間隔。cell_size はメタデータ欄で編集可能で、描画は
-  // イベントハンドラのクロージャ(status 変更時にしか張り直されない)からも呼ばれるため、
-  // cellSize state ではなくこの ref から読む。
+  // セル境界(cell_size間隔)のグリッド間隔。描画はイベントハンドラのクロージャ(status 変更時にしか
+  // 張り直されない)からも呼ばれるため、state ではなくこの ref から読む。
   const cellGridIntervalRef = useRef<number>(500);
   const settingsRef = useRef<TerrainSettings | null>(null);
   const viewRef = useRef<ViewState>({ offsetX: 0, offsetY: 0, zoom: 1 });
@@ -1319,8 +1331,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   // --- 水面(海面以外の湖など)のUI状態 ---
   // 水面モードON中は、左クリックが水面ポリゴンの頂点追加・右クリックが形状の確定(閉じる)になる
-  // (標高編集の選択操作とは独立)。水面はこのエディタ内で作成し、保存/エクスポートで
-  // meta.json / サイドカーJSON に永続化する。実体は waterSurfacesRef / waterPointsRef。
+  // (標高編集の選択操作とは独立)。水面はこのエディタ内で作成し、「シナリオに保存」で
+  // シナリオへ書き戻す。実体は waterSurfacesRef / waterPointsRef。
   const [waterMode, setWaterMode] = useState(false);
   // 次に作成する水面のY標高(m)。heightmap と同じ絶対標高フレーム(海面=0)。
   const [waterLevelInput, setWaterLevelInput] = useState(0);
@@ -1437,24 +1449,26 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // 川幅の下限は設けない(小川・用水路も作れるようにする)。格子間隔より細い河道は
   // 彫り込み側(carveRivers のタルウェグ線の直接刻み)が1格子幅の連続した溝として表現する。
 
-  // --- 地図メタデータ(保存欄) ---
-  // map_width/map_height/near_spacing/grid_rows/grid_cols は標高データのグリッド構造そのものと
-  // 結び付いており、リサンプリングなしに変更すると near.bin との整合性が壊れるため編集不可にし、
-  // settingsRef の値をそのまま読み取り専用表示する。map_id(エクスポート先の登録ID)/
-  // far_spacing/cell_size は近景標高データに影響しない独立したメタデータなので編集可能にする。
-  const [mapIdInput, setMapIdInput] = useState<string>(mapId);
-  const [farSpacing, setFarSpacing] = useState<number>(0);
-  const [cellSize, setCellSize] = useState<number>(0);
-  const [exportStatus, setExportStatus] = useState<"idle" | "exporting" | "exported" | "error">("idle");
-  const [exportErrorMsg, setExportErrorMsg] = useState<string>("");
+  // --- 編集対象のシナリオ ---
+  // 寸法・格子間隔・セルサイズはシナリオの都市と結び付いていて変えられない(コアの保存 API が寸法の変更を拒否する)。
+  // メタデータ欄では読み取り専用で表示し、地表・気候だけを編集できる。
+  const [scenarioInfo, setScenarioInfo] = useState<{ title: string; terrainMapId: string; farSpacing: number; cellSize: number } | null>(null);
+  const [locks, setLocks] = useState<TerrainEditorLocks>({ heights_locked: false, reasons: [] });
+  const heightsLockedRef = useRef(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveErrorMsg, setSaveErrorMsg] = useState<string>("");
+  // 保存対象(標高・水面・彫り込み済みの川・資源・プロップ・カメラ・地表・気候)を変えるたびに進める世代と、
+  // 最後に保存し終えた時点の世代。保存中の編集は、保存を始めた時点の世代と比べて未保存として残す。
+  const [editVersion, setEditVersion] = useState(0);
+  const [savedVersion, setSavedVersion] = useState(0);
+  const hasUnsavedChanges = editVersion !== savedVersion;
+  const editVersionRef = useRef(0);
 
-  // --- マップサイズ変更(セル単位での追加/削除) ---
-  type ResizeEdge = "top" | "bottom" | "left" | "right";
-  type ResizeAction = "add" | "remove";
-  const [resizeEdge, setResizeEdge] = useState<ResizeEdge>("top");
-  const [resizeAction, setResizeAction] = useState<ResizeAction>("add");
-  const [resizeStatus, setResizeStatus] = useState<"idle" | "ok" | "error">("idle");
-  const [resizeErrorMsg, setResizeErrorMsg] = useState<string>("");
+  /** 保存対象を変えたことを記録する。保存対象を書き換える操作は必ず呼ぶ(pushUndoState・Undo/Redo も呼ぶ) */
+  function markDirty() {
+    editVersionRef.current++;
+    setEditVersion(editVersionRef.current);
+  }
 
   // --- 自動編集(侵食シミュレーション) ---
   // ボタンのonClickから直接読むだけなので、ポインタハンドラ用のref(toolStateRef)へは
@@ -1468,10 +1482,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // --- Undo / Redo ---
   // rivers も標高と一緒にスナップショットする。川床の彫り込みを Undo したときに、
   // 地形だけ戻って川リストが残る(またはその逆の)不整合を防ぐため。
-  // 水面・資源エリアもスナップショットする。マップリサイズが標高と一緒にこれらの
-  // ワールド座標を平行移動するため、リサイズを Undo したときに地形だけ戻って
-  // 水面・資源がズレたまま残る不整合を防ぐ(各リストは常にイミュータブルに差し替える
-  // 運用なので、配列の浅いコピーでスナップショットとして成立する)。
+  // 水面・資源エリア・プロップ・カメラも同じスナップショットに含める(各リストは常にイミュータブルに
+  // 差し替える運用なので、配列の浅いコピーでスナップショットとして成立する)。
   type UndoState = {
     elev: Float32Array;
     mapWidth: number;
@@ -1494,6 +1506,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const elev = elevRef.current;
     const s = settingsRef.current;
     if (!elev || !s) return;
+    markDirty();
     undoStackRef.current.push({
       elev: new Float32Array(elev),
       mapWidth: s.mapWidth,
@@ -1516,6 +1529,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const s = settingsRef.current;
     const target = undoStackRef.current.pop();
     if (!target || !s) return;
+    markDirty();
     // 現在の状態を redo スタックへ退避
     const elev = elevRef.current;
     if (elev) {
@@ -1551,6 +1565,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const s = settingsRef.current;
     const target = redoStackRef.current.pop();
     if (!target || !s) return;
+    markDirty();
     const elev = elevRef.current;
     if (elev) {
       undoStackRef.current.push({
@@ -1632,14 +1647,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   // === 水面(海面以外の湖など)の実体 ===
   // 作成済み水面の一覧。内部表現は {id, waterLevel, points(頂点のワールド座標列)}。
-  // エクスポート・3Dプレビュー送信時に GeoJSON ライク(WaterSurfacePayload)へ変換する。
+  // 保存・3Dプレビュー送信時に GeoJSON ライク(WaterSurfacePayload)へ変換する。
   const waterSurfacesRef = useRef<EditorWaterSurface[]>([]);
   // 水面モードで作図中(未確定)の頂点列。
   const waterPointsRef = useRef<WorldPoint[]>([]);
 
   // === 川の実体 ===
   // 未彫り込み(計算直後)と彫り込み済みの両方を carved フラグつきで持つ。
-  // エクスポート・3Dプレビュー送信の対象になるのは彫り込み済みの川のみ。
+  // 保存・3Dプレビュー送信の対象になるのは彫り込み済みの川のみ。
   const riversRef = useRef<EditorRiver[]>([]);
 
   // === 天然資源エリアの実体 ===
@@ -1658,18 +1673,17 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const resourceInputs = useResourcePresetInputs(resourceProductId, resourceDraftAreaM2);
 
   // === カメラ初期状態の実体 ===
-  // エクスポート(meta.json / terrain_maps.yaml の camera)の対象。3Dプレビューへは送らない。
+  // シナリオへの保存の対象(シナリオを始めたときの視点)。3Dプレビューへは送らない。
   const cameraRef = useRef<TerrainCameraPayload | null>(null);
-  const backgroundRef = useRef<TerrainEditorData["background"]>(null);
 
   // === 地表種別 ===
-  // エクスポート(meta.json / terrain_maps.yaml の ground_cover)の対象で、2D・3Dプレビュー・サムネイルの
-  // 地形色のランプも決める。描画関数はイベントのクロージャから呼ばれ state を読めないため実体は ref に持つ。
+  // シナリオへの保存の対象で、2D・3Dプレビューの地形色のランプも決める。
+  // 描画関数はイベントのクロージャから呼ばれ state を読めないため実体は ref に持つ。
   const groundCoverRef = useRef<number>(GROUND_COVER_GRASSLAND);
   const [groundCover, setGroundCover] = useState<number>(GROUND_COVER_GRASSLAND);
 
   // === 気候区分 ===
-  // エクスポート(meta.json / terrain_maps.yaml の climate)の対象。ゲーム内の天気の出方だけを決め、エディタの描画には使わない。
+  // シナリオへの保存の対象。ゲーム内の天気の出方だけを決め、エディタの描画には使わない。
   const [climate, setClimate] = useState<number>(CLIMATE_TEMPERATE);
 
   // 資源種別の表示名の対応表。draw()(イベントハンドラのクロージャから呼ばれ、React state を
@@ -2099,6 +2113,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 未彫り込みの川はタブを離れても破棄しない(一覧から個別に彫る途中の状態を保つため)。
    */
   function handleTabChange(tab: EditorTab) {
+    if (heightsLockedRef.current && HEIGHT_LOCKED_TABS.has(tab)) return;
     const leavingRiver = activeTabRef.current === "river" && tab !== "river";
     activeTabRef.current = tab;
     setActiveTab(tab);
@@ -2157,6 +2172,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       points: poly.map((p) => ({ x: p.x, z: p.z })),
     };
     waterSurfacesRef.current = [...waterSurfacesRef.current, surface];
+    markDirty();
     setWaterSurfaceCount(waterSurfacesRef.current.length);
     waterPointsRef.current = [];
     setWaterPointCount(0);
@@ -2169,6 +2185,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   function removeLastWaterSurface() {
     if (waterSurfacesRef.current.length === 0) return;
     waterSurfacesRef.current = waterSurfacesRef.current.slice(0, -1);
+    markDirty();
     setWaterSurfaceCount(waterSurfacesRef.current.length);
     draw();
     scheduleTerrain3dFullState();
@@ -2176,6 +2193,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   /** 作成済みの水面をすべて削除する。作図中の頂点も破棄する。 */
   function clearAllWaterSurfaces() {
+    if (waterSurfacesRef.current.length > 0) markDirty();
     waterSurfacesRef.current = [];
     waterPointsRef.current = [];
     setWaterSurfaceCount(0);
@@ -2201,7 +2219,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   /**
    * 3Dプレビュー送信用の水面一覧。確定済みの水面に加えて、「形状を閉じたが未確定の水面」を
    * 現在の水位(waterLevelInput)で仮の1枚として含める。これにより、確定前でも水位を変えると
-   * 3Dプレビューの水面が上下する。エクスポートには使わない(未確定分を含めないため)。
+   * 3Dプレビューの水面が上下する。保存には使わない(未確定分を含めないため)。
    * 送信予約のタイマーやイベントのクロージャからも呼ばれるので、state ではなく toolStateRef を読む。
    */
   function serializeWaterSurfacesForPreview(): WaterSurfacePayload[] {
@@ -2220,7 +2238,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     return list;
   }
 
-  /** meta.json / サイドカーから読み込んだ WaterSurfacePayload 配列を内部表現へ変換する。 */
+  /** 作業コピー(meta.json)から読み込んだ WaterSurfacePayload 配列を内部表現へ変換する。 */
   function deserializeWaterSurfaces(payload: WaterSurfacePayload[] | undefined): EditorWaterSurface[] {
     if (!Array.isArray(payload)) return [];
     const result: EditorWaterSurface[] = [];
@@ -2244,8 +2262,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    *
    * 作図フローは水面と同じ2段階(左クリックで頂点追加→右クリックで形状を閉じる→
    * 種別・埋蔵量上限・回復率を設定して「資源を確定」で1件として登録)。
-   * 登録した資源はエクスポート(サイドカー map_xxx.resources.json)の
-   * 対象になり、バックエンドが新規都市の初期化時に資源エンティティとして配置する。
+   * 登録した資源は「シナリオに保存」でシナリオの資源エンティティへ反映される。
    * ========================================================================== */
 
   /** 資源編集タブで、作図中の資源ポリゴンに頂点を追加する(形状を閉じる前のみ)。 */
@@ -2303,6 +2320,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       points: poly.map((p) => ({ x: p.x, z: p.z })),
     };
     resourceAreasRef.current = [...resourceAreasRef.current, area];
+    markDirty();
     syncResourceListState();
     resourcePointsRef.current = [];
     setResourcePointCount(0);
@@ -2314,12 +2332,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   /** 資源エリアを1件削除する。 */
   function removeResourceArea(id: string) {
     resourceAreasRef.current = resourceAreasRef.current.filter((area) => area.id !== id);
+    markDirty();
     syncResourceListState();
     draw();
   }
 
   /** 作成済みの資源エリアをすべて削除する。作図中の頂点も破棄する。 */
   function clearAllResourceAreas() {
+    if (resourceAreasRef.current.length > 0) markDirty();
     resourceAreasRef.current = [];
     syncResourceListState();
     clearResourcePoints();
@@ -2344,8 +2364,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    *
    * 左クリックでカメラ位置(x, z)を置き、右クリックで注視点を指定して方位(yaw)を決める。
    * 高さ(y)・見下ろし角(pitch)・方位はカードの数値入力でも変えられる。マップに1つだけ持ち、
-   * エクスポート(terrain_maps.yaml の camera)の対象になる。
-   * ゲームは新規都市の開始時にこの視点で始まり、以後はセーブデータ側の視点が正になる。
+   * シナリオへの保存の対象で、シナリオを始めたときにこの視点で始まる(以後はセーブデータ側の視点が正)。
    * ========================================================================== */
 
   /** cameraRef を差し替えて表示用 state へミラーする。カメラを変更したら必ずここを通す。 */
@@ -2357,6 +2376,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   /** カメラ位置をワールド座標 (wx, wz) に置く。未設定なら高さ・向きは既定値で新規作成する。 */
   function placeCamera(wx: number, wz: number) {
     const current = cameraRef.current;
+    markDirty();
     restoreCamera({
       x: wx,
       y: current?.y ?? CAMERA_DEFAULT_HEIGHT_M,
@@ -2378,6 +2398,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const dz = wz - current.z;
     if (Math.hypot(dx, dz) < 1e-6) return;
     const yaw = ((Math.atan2(dx, dz) * 180) / Math.PI + 360) % 360;
+    markDirty();
     restoreCamera({ ...current, yaw });
     draw();
   }
@@ -2386,12 +2407,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   function updateCameraField(field: "y" | "yaw" | "pitch", value: number) {
     const current = cameraRef.current;
     if (!current) return;
+    markDirty();
     restoreCamera({ ...current, [field]: value });
     draw();
   }
 
   /** カメラ初期状態を未設定に戻す(ゲームは原点の既定視点で始まる)。 */
   function clearCamera() {
+    if (cameraRef.current) markDirty();
     restoreCamera(null);
     draw();
   }
@@ -2406,7 +2429,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     return { x: payload.x, y: payload.y, z: payload.z, yaw: payload.yaw, pitch: payload.pitch };
   }
 
-  /** meta.json / サイドカーから読み込んだ ResourceAreaPayload 配列を内部表現へ変換する。 */
+  /** 作業コピー(meta.json)から読み込んだ ResourceAreaPayload 配列を内部表現へ変換する。 */
   function deserializeResourceAreas(payload: ResourceAreaPayload[] | undefined): EditorResourceArea[] {
     if (!Array.isArray(payload)) return [];
     const result: EditorResourceArea[] = [];
@@ -2418,7 +2441,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       if (!Array.isArray(exterior) || exterior.length < 3) continue;
       if (typeof ra.resource_type !== "number") continue;
       result.push({
-        id: ra.id ?? `resource_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+        id: ra.id != null ? String(ra.id) : `resource_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
         resourceType: ra.resource_type,
         maxAmount: typeof ra.max_amount === "number" ? ra.max_amount : 1000,
         recoveryRate: typeof ra.recovery_rate === "number" ? ra.recovery_rate : 0,
@@ -2541,7 +2564,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
-   * 地表種別を差し替える。repaint なら2D表示を描き直して3Dプレビューにも送り直す(選択範囲・表示位置は保つ)。
+   * 地表種別を差し替える。repaint はユーザーの変更で、2D表示を描き直して3Dプレビューにも送り直し(選択範囲・表示位置は保つ)、
+   * 未保存の変更として記録する。
    * 2D表示の地形色は描画時にランプを渡して塗るので、標高の転送はやり直さない。
    */
   function applyGroundCover(value: unknown, repaint: boolean) {
@@ -2549,6 +2573,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     groundCoverRef.current = next;
     setGroundCover(next);
     if (repaint) {
+      markDirty();
       draw();
       scheduleTerrain3dFullState();
     }
@@ -2787,6 +2812,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * (地形も戻したい場合は Ctrl+Z を使う)。
    */
   function removeRiver(id: string) {
+    if (riversRef.current.some((river) => river.id === id && river.carved)) markDirty();
     riversRef.current = riversRef.current.filter((river) => river.id !== id);
     syncRiverListState();
     // 削除した川のプレビュー彫り込みも消す(残りの川で作り直す)
@@ -2795,6 +2821,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   /** 川をすべて削除する(地形は戻さない) */
   function clearAllRivers() {
+    if (riversRef.current.some((river) => river.carved)) markDirty();
     riversRef.current = [];
     syncRiverListState();
     // 削除した川のプレビュー彫り込みも消す(残りの川で作り直す)
@@ -2821,7 +2848,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
-   * meta.json / サイドカーから読み込んだ RiverPayload 配列を内部表現へ変換する。
+   * 作業コピー(meta.json)から読み込んだ RiverPayload 配列を内部表現へ変換する。
    * 流量・曲率・幅・川床など生成時の中間量は保存していないため 0(川床は水面標高)で埋める。
    * 復元した川は再彫り込みには使わず、表示・削除・範囲の再計算・再保存のみに使う
    * (範囲の再計算は幅ではなく既存ポリゴンの膨張帯で行う)。
@@ -3352,161 +3379,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
-   * ワールド座標を持つベクター系の編集データ(水面・川・資源エリア・各作図中の頂点列)を
-   * (dx, dz) だけ平行移動する。マップリサイズ専用の補正処理。
-   *
-   * ワールド座標の原点はマップ中心なので、端へのセル追加/削除でマップ寸法が変わると、
-   * 同じ地形コンテンツのワールド座標が step/2 だけずれる。標高配列は handleResizeMap が
-   * 行・列の詰め替えで追従させるが、ベクター系は座標そのものを持つため、ここで同じ量だけ
-   * 動かして地形との位置関係を保つ。各リストはイミュータブルに差し替える(Undoスタックが
-   * 浅いコピーのスナップショットを保持しており、要素をin-placeで書き換えるとスナップ
-   * ショットまで壊れるため)。
-   */
-  function shiftVectorFeatures(dx: number, dz: number) {
-    if (dx === 0 && dz === 0) return;
-    waterSurfacesRef.current = waterSurfacesRef.current.map((ws) => ({
-      ...ws,
-      points: ws.points.map((p) => ({ x: p.x + dx, z: p.z + dz })),
-    }));
-    riversRef.current = riversRef.current.map((river) => ({
-      ...river,
-      points: river.points.map((p) => ({ ...p, x: p.x + dx, z: p.z + dz })),
-      polygon: river.polygon ? translatePolygon(river.polygon, dx, dz) : null,
-      controlPoints: river.controlPoints ? river.controlPoints.map((p) => ({ ...p, x: p.x + dx, z: p.z + dz })) : null,
-    }));
-    riverDraftPointsRef.current = riverDraftPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
-    resourceAreasRef.current = resourceAreasRef.current.map((area) => ({
-      ...area,
-      points: area.points.map((p) => ({ x: p.x + dx, z: p.z + dz })),
-    }));
-    waterPointsRef.current = waterPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
-    resourcePointsRef.current = resourcePointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
-    propEditor.current.shift(dx, dz);
-    polygonPointsRef.current = polygonPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
-    if (cameraRef.current) {
-      restoreCamera({ ...cameraRef.current, x: cameraRef.current.x + dx, z: cameraRef.current.z + dz });
-    }
-  }
-
-  /**
-   * マップサイズをセル単位で変更する(追加/削除)。
-   * map_width/map_height は 2*cell_size 刻みで増減する。
-   * 追加時は新規エリアを新規地形作成時と同じ初期標高(`NEW_TERRAIN_INITIAL_ELEVATION_M`、海面より低い)で埋め、
-   * 削除時は指定端から切り落とす。水面・川・資源エリアなどのベクター系データは
-   * shiftVectorFeatures で標高配列と同じだけ平行移動し、地形との位置関係を保つ。
-   */
-  function handleResizeMap() {
-    const s = settingsRef.current;
-    const elev = elevRef.current;
-    if (!s || !elev || cellSize <= 0) return;
-
-    pushUndoState();
-
-    const stepMeters = 2 * cellSize;
-    const stepGrids = stepMeters / s.spacing;
-    if (stepGrids !== Math.floor(stepGrids) || stepGrids <= 0) {
-      setResizeStatus("error");
-      setResizeErrorMsg(t("terrainEditor.resizeGridError", { defaultValue: "セルサイズ×2 が 近景間隔で割り切れません" }));
-      return;
-    }
-
-    let newMapWidth = s.mapWidth;
-    let newMapHeight = s.mapHeight;
-    const deltaGrids = stepGrids;
-
-    if (resizeEdge === "left" || resizeEdge === "right") {
-      newMapWidth = resizeAction === "add" ? newMapWidth + stepMeters : newMapWidth - stepMeters;
-    } else {
-      newMapHeight = resizeAction === "add" ? newMapHeight + stepMeters : newMapHeight - stepMeters;
-    }
-
-    if (newMapWidth < stepMeters || newMapHeight < stepMeters) {
-      setResizeStatus("error");
-      setResizeErrorMsg(t("terrainEditor.resizeMinReached", { defaultValue: "マップサイズが最小に達しました" }));
-      return;
-    }
-
-    const newCols = newMapWidth / s.spacing + 1;
-    const newRows = newMapHeight / s.spacing + 1;
-    const maxTextureSize = rendererRef.current?.maxTextureSize ?? Infinity;
-    if (newCols > maxTextureSize || newRows > maxTextureSize) {
-      setResizeStatus("error");
-      setResizeErrorMsg(t("terrainEditor.terrainTooLargeForGpu", { cols: newCols, rows: newRows, max: maxTextureSize }));
-      return;
-    }
-    const newCount = newRows * newCols;
-    const newElev = new Float32Array(newCount);
-    const oldCols = s.cols;
-    const oldRows = s.rows;
-
-    if (resizeAction === "add") {
-      // 追加される新規エリアを、新規地形作成時と同じ初期標高(海面より低い)で埋める。
-      // 既存エリアはこのあとの分岐で上書きされる。
-      newElev.fill(NEW_TERRAIN_INITIAL_ELEVATION_M);
-      if (resizeEdge === "top") {
-        for (let r = 0; r < oldRows; r++) {
-          for (let c = 0; c < oldCols; c++) newElev[r * newCols + c] = elev[r * oldCols + c];
-        }
-      } else if (resizeEdge === "bottom") {
-        const rowOff = deltaGrids;
-        for (let r = 0; r < oldRows; r++) {
-          for (let c = 0; c < oldCols; c++) newElev[(r + rowOff) * newCols + c] = elev[r * oldCols + c];
-        }
-      } else if (resizeEdge === "left") {
-        const colOff = deltaGrids;
-        for (let r = 0; r < oldRows; r++) {
-          for (let c = 0; c < oldCols; c++) newElev[r * newCols + c + colOff] = elev[r * oldCols + c];
-        }
-      } else {
-        for (let r = 0; r < oldRows; r++) {
-          for (let c = 0; c < oldCols; c++) newElev[r * newCols + c] = elev[r * oldCols + c];
-        }
-      }
-    } else {
-      if (resizeEdge === "top") {
-        for (let r = 0; r < newRows; r++) {
-          for (let c = 0; c < newCols; c++) newElev[r * newCols + c] = elev[r * oldCols + c];
-        }
-      } else if (resizeEdge === "bottom") {
-        const rowOff = oldRows - newRows;
-        for (let r = 0; r < newRows; r++) {
-          for (let c = 0; c < newCols; c++) newElev[r * newCols + c] = elev[(r + rowOff) * oldCols + c];
-        }
-      } else if (resizeEdge === "left") {
-        const colOff = oldCols - newCols;
-        for (let r = 0; r < newRows; r++) {
-          for (let c = 0; c < newCols; c++) newElev[r * newCols + c] = elev[r * oldCols + c + colOff];
-        }
-      } else {
-        for (let r = 0; r < newRows; r++) {
-          for (let c = 0; c < newCols; c++) newElev[r * newCols + c] = elev[r * oldCols + c];
-        }
-      }
-    }
-
-    // 既存の地形コンテンツはワールド原点(マップ中心)から見て step/2 だけ平行移動する
-    // (例: 上端に追加→中心が新規エリア側へ寄るため、既存コンテンツは反対側へ半分ずれる)。
-    // 標高の詰め替え(上のループ)と同じずれ量をベクター系データにも適用する。
-    const half = stepMeters / 2;
-    let shiftX = 0;
-    let shiftZ = 0;
-    if (resizeEdge === "left") shiftX = resizeAction === "add" ? half : -half;
-    else if (resizeEdge === "right") shiftX = resizeAction === "add" ? -half : half;
-    else if (resizeEdge === "bottom") shiftZ = resizeAction === "add" ? half : -half;
-    else shiftZ = resizeAction === "add" ? -half : half;
-    shiftVectorFeatures(shiftX, shiftZ);
-
-    rebuildTerrainVisuals(newElev, newMapWidth, newMapHeight, s.spacing, newRows, newCols);
-    // 彫り込みプレビューは rebuildTerrainVisuals が破棄するので、新しい地形で作り直す(川編集タブ以外では解除のまま)
-    scheduleRiverPreviewRebuild();
-
-    setResizeStatus("ok");
-  }
-
-  /**
    * 「3Dプレビューを開く」ボタン押下時、terrain_3d_preview ウィンドウを開く。
-   * single_per_entity ポリシー(entity_type: terrain_map)のため、同じマップIDに対しては
-   * 既に開いているウィンドウが前面に出るだけで多重には開かない。
+   * single_per_entity ポリシーで作業コピーのID(mapId)ごとに1枚なので、既に開いていれば前面に出るだけで多重には開かない。
    */
   async function handleOpen3dPreview() {
     try {
@@ -3517,88 +3391,71 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
-   * 編集中の標高データを、バックエンドが読み込める .npy ファイルへエクスポートする。
-   *
-   * 保存先パスは @tauri-apps/plugin-dialog の保存ダイアログでユーザーに選ばせ、
-   * その後 Tauriコマンド export_terrain_as_npy に現在の標高データ(メモリ上の elev 配列)を
-   * そのまま渡す。.npy への変換はRust側が自前で行う(外部プロセスに依存しない)。
-   * サムネイル画像(長辺512px・海が透過の平面図)も保存する標高データから生成し、.npyと同じファイル名
-   * (拡張子だけ.png)で同じ場所に書き出す。
+   * 編集内容をシナリオへ保存する(Rust の save_scenario_terrain → コアの PUT /api/v1/scenarios/{id}/terrain)。
+   * 標高のロック中は標高・水面・川を送らない。保存に成功したら新しく作った資源のIDを DB の ID に替え、
+   * シナリオ一覧(content_revision)を更新させる。
    */
-  async function handleExportTerrainAsNpy() {
-    const s = settingsRef.current;
+  async function handleSaveToScenario() {
     const elev = elevRef.current;
-    if (!s || !elev) return;
-
-    const suggestedName = `map_${mapIdInput.trim() || mapId}.npy`;
-    let outPath: string | null;
+    if (!elev) return;
+    const version = editVersionRef.current;
+    setSaveStatus("saving");
+    setSaveErrorMsg("");
     try {
-      outPath = await saveFileDialog({
-        defaultPath: suggestedName,
-        filters: [{ name: "NumPy", extensions: ["npy"] }],
-      });
-    } catch (error) {
-      setExportStatus("error");
-      setExportErrorMsg(error instanceof Error ? error.message : String(error));
-      return;
-    }
-    if (!outPath) return;
-
-    setExportStatus("exporting");
-    setExportErrorMsg("");
-    try {
-      const bytes = encodeFloat16Array(elev);
-      const dataBase64 = uint8ToBase64(bytes);
-      const thumbnailBase64 = captureTerrainThumbnail({
-        elev: decodeFloat16Array(bytes, elev.length),
-        rows: s.rows,
-        cols: s.cols,
-        mapWidth: s.mapWidth,
-        mapHeight: s.mapHeight,
-        spacing: s.spacing,
-        groundCover: groundCoverRef.current,
-      });
-      const result = await invoke<{ yaml_updated: boolean }>("export_terrain_as_npy", {
-        mapId: mapIdInput.trim() || mapId,
-        mapWidth: s.mapWidth,
-        mapHeight: s.mapHeight,
-        nearSpacing: s.spacing,
-        farSpacing,
-        cellSize,
-        gridRows: s.rows,
-        gridCols: s.cols,
-        dataBase64,
-        outPath,
-        thumbnailBase64,
+      const result = await invoke<ScenarioTerrainSaveResult>("save_scenario_terrain", scenarioTerrainSaveArgs(mapId, heightsLockedRef.current, {
+        elev,
         waterSurfaces: serializeWaterSurfaces(),
         rivers: serializeRivers(),
         resources: serializeResourceAreas(),
         props: propEditor.current.data.current,
         camera: cameraRef.current,
-        background: backgroundRef.current,
         groundCover: groundCoverRef.current,
         climate,
-      });
-      setExportStatus("exported");
-      // エクスポート先にterrain_maps.yamlが見つからなかった場合は、通知ポップアップで知らせる。
-      // 見つかった場合はyaml側への追記/上書きまでTauri側で完了しているので、ここでは何もしない。
-      if (!result.yaml_updated) {
-        void showNotification({
-          message: t("terrainEditor.exportYamlNotFound", {
-            defaultValue: "エクスポート先に terrain_maps.yaml が見つからなかったため、追記していません",
-          }),
-        });
-      }
+      }));
+      applySavedResourceIds(result.resource_ids);
+      setSavedVersion(version);
+      setSaveStatus("saved");
+      void emit("scenarios:changed");
     } catch (error) {
-      setExportStatus("error");
-      setExportErrorMsg(error instanceof Error ? error.message : String(error));
+      setSaveStatus("error");
+      setSaveErrorMsg(describeSaveError(error));
     }
   }
 
   /**
+   * 保存で作られた資源の仮IDを、現在の一覧と Undo/Redo の履歴の両方で DB の ID に替える。
+   * 応答を待つ間の編集を消さないよう、送った内容ではなく今の状態に当てる。IDだけの置き換えなので未保存にはしない。
+   */
+  function applySavedResourceIds(resourceIds: Record<string, string> | undefined) {
+    const replace = resourceIdReplacer<EditorResourceArea>(resourceIds);
+    const withIds = (state: UndoState) => {
+      const resourceAreas = replace(state.resourceAreas);
+      return resourceAreas === state.resourceAreas ? state : { ...state, resourceAreas };
+    };
+    undoStackRef.current = undoStackRef.current.map(withIds);
+    redoStackRef.current = redoStackRef.current.map(withIds);
+    const current = replace(resourceAreasRef.current);
+    if (current !== resourceAreasRef.current) restoreResourceAreas(current);
+  }
+
+  /**
+   * 保存の失敗を表示文にする。地形固有のコードは terrainEditor.saveErrors、それ以外はシナリオ共通の文言で引く。
+   * コードの無い失敗(Rust 側の通信・ファイルの失敗)は本文が日本語固定なので、画面には汎用の文言を出し、本文はログにだけ残す。
+   */
+  function describeSaveError(error: unknown): string {
+    const code = errorCode(error);
+    if (!code) {
+      console.error("[TerrainEditor] failed to save the scenario terrain", error);
+      return t("terrainEditor.saveFailed");
+    }
+    return t(`terrainEditor.saveErrors.${code}`, { defaultValue: saveError(error, t) });
+  }
+
+  /**
    * 地形データをロードする。
-   * Tauri コマンド load_terrain_editor_data でローカル作業コピーを読み込み、
+   * Tauri コマンド load_terrain_editor_data で作業コピーを読み込み、
    * float16 を float32 に変換した上でオフスクリーン地形画像・等高線・グリッドを構築する。
+   * 標高がロックされたシナリオでは、使えるタブ(資源編集)へ切り替えてから表示する。
    */
   useEffect(() => {
     if (!mapId) {
@@ -3610,8 +3467,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
     async function load() {
       try {
-        const data = await invoke<TerrainEditorData>("load_terrain_editor_data", { mapId });
-        backgroundRef.current = data.background;
+        const data = await invoke<TerrainEditorData>("load_terrain_editor_data", { editorId: mapId });
         if (cancelled) return;
         applyGroundCover(data.ground_cover, false);
         setClimate(normalizeClimate(data.climate));
@@ -3626,12 +3482,16 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         const mapWidth = data.map_width;
         const mapHeight = data.map_height;
 
-        // 地図メタデータ欄の初期値。map_id はロード元のIDから開始し、変更すれば別のIDでエクスポートする。
-        // cellSize state は rebuildTerrainVisuals より先にセットする（すでに引数で渡しているので
-        // 実害はないが、後続のセル境界グリッドuseEffectが古い値で走るのを避けるため）。
-        setMapIdInput(data.map_id);
-        setFarSpacing(data.far_spacing > 0 ? data.far_spacing : 200);
-        setCellSize(data.cell_size > 0 ? data.cell_size : 500);
+        const cellSize = data.cell_size > 0 ? data.cell_size : 500;
+        setScenarioInfo({
+          title: data.title ?? "",
+          terrainMapId: data.terrain_map_id ?? "",
+          farSpacing: data.far_spacing,
+          cellSize,
+        });
+        const nextLocks = normalizeTerrainEditorLocks(data.locks);
+        heightsLockedRef.current = nextLocks.heights_locked;
+        setLocks(nextLocks);
 
         // 標高レンジ計算・地形層への転送・選択マスクの初期化・settingsRef 設定・リセットビュー・描画
         // は rebuildTerrainVisuals で一括実行する。
@@ -3642,7 +3502,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           spacing,
           data.grid_rows,
           data.grid_cols,
-          data.cell_size > 0 ? data.cell_size : 500,
+          cellSize,
         );
 
         // 作業コピー(meta.json)に保存されている水面(海面以外の湖など)を復元する。
@@ -3665,6 +3525,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         // 作業コピー(meta.json)に保存されているカメラ初期状態を復元する。
         restoreCamera(deserializeCamera(data.camera));
 
+        if (nextLocks.heights_locked && HEIGHT_LOCKED_TABS.has(activeTabRef.current)) handleTabChange("resource");
         setStatus("ready");
       } catch (error) {
         if (cancelled) return;
@@ -3703,15 +3564,6 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     if (status === "ready") scheduleTerrain3dFullState();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, waterLevelInput, waterPolygonClosed]);
-
-  /** セルサイズ(メタデータ欄で編集可能)を変えたら、セル境界グリッドの間隔を差し替える */
-  useEffect(() => {
-    if (status === "ready" && cellSize > 0) {
-      cellGridIntervalRef.current = cellSize;
-      draw();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, cellSize]);
 
   /**
    * マウス操作: 左クリック(その場で離す)でブラシ/ポリゴンの範囲選択を単発適用、
@@ -3976,24 +3828,24 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                 {t("terrainEditor.metadataTitle", { defaultValue: "地図メタデータ" })}
               </div>
               <div className="terrain-editor-param-group">
-                <div className="terrain-editor-param-row">
-                  <span className="terrain-editor-param-label">{t("terrainEditor.metaMapId", { defaultValue: "マップID" })}</span>
-                  <input
-                    type="text"
-                    className="terrain-editor-text-input"
-                    value={mapIdInput}
-                    onChange={(e) => setMapIdInput(e.target.value)}
-                    disabled={status !== "ready"}
-                  />
-                </div>
-                <div className="terrain-editor-param-row">
-                  <span className="terrain-editor-param-label">{t("terrainEditor.metaFarSpacing", { defaultValue: "遠景グリッド間隔" })}</span>
-                  <NumberStepper value={farSpacing} onChange={setFarSpacing} min={1} max={2000} step={10} disabled={status !== "ready"} />
-                </div>
-                <div className="terrain-editor-param-row">
-                  <span className="terrain-editor-param-label">{t("terrainEditor.metaCellSize", { defaultValue: "セルサイズ" })}</span>
-                  <NumberStepper value={cellSize} onChange={setCellSize} min={1} max={5000} step={10} disabled={status !== "ready"} />
-                </div>
+                {scenarioInfo && (
+                  <>
+                    <div className="terrain-editor-param-row">
+                      <span className="terrain-editor-param-label">{t("terrainEditor.metaTerrainMap")}</span>
+                      <span className="terrain-editor-param-value">
+                        {scenarioInfo.terrainMapId ? terrainMapTitle({ id: scenarioInfo.terrainMapId, name: scenarioInfo.terrainMapId }, t) : "-"}
+                      </span>
+                    </div>
+                    <div className="terrain-editor-param-row">
+                      <span className="terrain-editor-param-label">{t("terrainEditor.metaFarSpacing")}</span>
+                      <span className="terrain-editor-param-value">{scenarioInfo.farSpacing}m</span>
+                    </div>
+                    <div className="terrain-editor-param-row">
+                      <span className="terrain-editor-param-label">{t("terrainEditor.metaCellSize")}</span>
+                      <span className="terrain-editor-param-value">{scenarioInfo.cellSize}m</span>
+                    </div>
+                  </>
+                )}
                 <div className="terrain-editor-param-row">
                   <span className="terrain-editor-param-label">{t("groundCover.label")}</span>
                   <select
@@ -4013,7 +3865,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                   <select
                     className="terrain-editor-select"
                     value={climate}
-                    onChange={(e) => setClimate(normalizeClimate(Number(e.target.value)))}
+                    onChange={(e) => {
+                      setClimate(normalizeClimate(Number(e.target.value)));
+                      markDirty();
+                    }}
                     disabled={status !== "ready"}
                   >
                     {CLIMATE_TYPES.map((type) => (
@@ -4036,68 +3891,16 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                 )}
               </div>
 
-              {/* マップサイズ変更(セル単位での追加/削除) */}
-              <div className="terrain-editor-section-title" style={{ marginTop: 10 }}>
-                {t("terrainEditor.resizeMapTitle", { defaultValue: "マップサイズ変更" })}
-              </div>
-              <div className="terrain-editor-hint">
-                {settingsRef.current
-                  ? t("terrainEditor.resizeHint", {
-                      defaultValue: `${2 * cellSize}m (${(2 * cellSize) / settingsRef.current.spacing}グリッド) 単位で追加/削除します`,
-                      stepMeters: 2 * cellSize,
-                      stepGrids: (2 * cellSize) / settingsRef.current.spacing,
-                    })
-                  : ""}
-              </div>
-              <div className="terrain-editor-resize-row">
-                <select
-                  className="terrain-editor-select"
-                  value={resizeEdge}
-                  onChange={(e) => setResizeEdge(e.target.value as ResizeEdge)}
-                  disabled={status !== "ready"}
-                >
-                  <option value="top">{t("terrainEditor.resizeTop", { defaultValue: "上端" })}</option>
-                  <option value="bottom">{t("terrainEditor.resizeBottom", { defaultValue: "下端" })}</option>
-                  <option value="left">{t("terrainEditor.resizeLeft", { defaultValue: "左端" })}</option>
-                  <option value="right">{t("terrainEditor.resizeRight", { defaultValue: "右端" })}</option>
-                </select>
-                <select
-                  className="terrain-editor-select"
-                  value={resizeAction}
-                  onChange={(e) => setResizeAction(e.target.value as ResizeAction)}
-                  disabled={status !== "ready"}
-                >
-                  <option value="add">{t("terrainEditor.resizeAdd", { defaultValue: "追加" })}</option>
-                  <option value="remove">{t("terrainEditor.resizeRemove", { defaultValue: "削除" })}</option>
-                </select>
-                <button
-                  type="button"
-                  className="terrain-editor-btn"
-                  disabled={status !== "ready"}
-                  onClick={handleResizeMap}
-                >
-                  {t("terrainEditor.resizeExecute", { defaultValue: "実行" })}
-                </button>
-              </div>
-              {resizeStatus === "ok" && (
-                <div className="terrain-editor-hint terrain-editor-hint--success">
-                  {t("terrainEditor.resizeOk", { defaultValue: "マップサイズを変更しました" })}
-                </div>
-              )}
-              {resizeStatus === "error" && (
-                <div className="terrain-editor-hint terrain-editor-hint--error">
-                  {resizeErrorMsg}
-                </div>
-              )}
-
             </div>
       </dialog>
       {/* 左ツールパネル。カード形式の編集UIを配置する。 */}
       <aside className="terrain-editor-tools">
         <div className="terrain-editor-tools-title-row">
-          <div className="terrain-editor-tools-title">
-            {t("terrainEditor.toolsTitle", { defaultValue: "編集ツール" })}
-          </div>
+          <h1 className="terrain-editor-tools-title">
+            {scenarioInfo?.title
+              ? t("terrainEditor.scenarioHeading", { title: scenarioInfo.title })
+              : t("terrainEditor.toolsTitle")}
+          </h1>
           <div className="terrain-editor-header-actions">
           <button type="button" className="terrain-editor-btn" onClick={() => void handleOpen3dPreview()}>
             {t("terrainEditor.open3dPreview", { defaultValue: "3Dプレビューを開く" })}
@@ -4106,7 +3909,20 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           </div>
         </div>
 
-        {/* 編集対象はプルダウンで選ぶ。 */}
+        {locks.heights_locked && (
+          <div className="terrain-editor-lock-notice" role="note">
+            <p>{t("terrainEditor.heightsLocked")}</p>
+            {locks.reasons.length > 0 && (
+              <ul>
+                {locks.reasons.map((code) => (
+                  <li key={code}>{t(`terrainEditor.lockReason.${code}`, { defaultValue: code })}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/* 編集対象はプルダウンで選ぶ。標高のロック中は標高・水面・川を書き換えるタブを選べない。 */}
         <div className="terrain-editor-tabs">
           <label className="terrain-editor-tabs-label" htmlFor="terrain-editor-tab-select">
             {t("terrainEditor.tabSelectLabel", { defaultValue: "編集対象" })}
@@ -4118,9 +3934,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
             onChange={(e) => handleTabChange(e.target.value as EditorTab)}
             disabled={status !== "ready"}
           >
-            <option value="terrain">{t("terrainEditor.tabTerrain", { defaultValue: "地形編集" })}</option>
-            <option value="water">{t("terrainEditor.tabWater", { defaultValue: "水面編集" })}</option>
-            <option value="river">{t("terrainEditor.tabRiver", { defaultValue: "川編集" })}</option>
+            <option value="terrain" disabled={locks.heights_locked}>{t("terrainEditor.tabTerrain", { defaultValue: "地形編集" })}</option>
+            <option value="water" disabled={locks.heights_locked}>{t("terrainEditor.tabWater", { defaultValue: "水面編集" })}</option>
+            <option value="river" disabled={locks.heights_locked}>{t("terrainEditor.tabRiver", { defaultValue: "川編集" })}</option>
             <option value="resource">{t("terrainEditor.tabResource", { defaultValue: "資源編集" })}</option>
             <option value="prop">{t("terrainEditor.tabProp")}</option>
             <option value="camera">{t("terrainEditor.tabCamera", { defaultValue: "カメラ" })}</option>
@@ -4411,7 +4227,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                     <div className="terrain-editor-hint">
                       {t("terrainEditor.resourceHint", {
                         defaultValue:
-                          "資源編集タブがアクティブのときは資源追加モードになり、左クリックで資源ポリゴンの頂点を追加、右クリック(または「形状を確定」)で形状を閉じます(3点以上)。左ドラッグで画面移動。形状を閉じたあと、種別・埋蔵量上限・回復率を設定して「資源を確定」で1件の資源エリアとして登録します。登録した資源はこのマップで新規都市を始めたときに配置されます",
+                          "資源編集タブがアクティブのときは資源追加モードになり、左クリックで資源ポリゴンの頂点を追加、右クリック(または「形状を確定」)で形状を閉じます(3点以上)。左ドラッグで画面移動。形状を閉じたあと、種別・埋蔵量上限・回復率を設定して「資源を確定」で1件の資源エリアとして登録します。登録した資源は「シナリオに保存」でこのシナリオに反映されます",
                       })}
                     </div>
                     {!masterData && (
@@ -4602,7 +4418,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                   <div className="terrain-editor-hint">
                     {t("terrainEditor.cameraHint", {
                       defaultValue:
-                        "このマップで新規都市を始めたときのカメラの位置と向きです。左クリックでカメラ位置を置き、右クリックで注視点を指定して向きを決めます。左ドラッグで画面移動。未設定のままならゲームはマップ中心(原点)の既定視点で始まります",
+                        "このシナリオを始めたときのカメラの位置と向きです。左クリックでカメラ位置を置き、右クリックで注視点を指定して向きを決めます。左ドラッグで画面移動。未設定のままならゲームはマップ中心(原点)の既定視点で始まります",
                     })}
                   </div>
                   {cameraState ? (
@@ -5458,29 +5274,29 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           </div>
         </div>
         <div className="terrain-editor-save-actions">
-              {/* エクスポート */}
-              <div className="terrain-editor-action-buttons" style={{ marginTop: 10 }}>
-                <button
-                  type="button"
-                  className="terrain-editor-btn"
-                  disabled={status !== "ready" || exportStatus === "exporting"}
-                  onClick={() => void handleExportTerrainAsNpy()}
-                >
-                  {exportStatus === "exporting"
-                    ? t("terrainEditor.exporting", { defaultValue: "エクスポート中..." })
-                    : t("terrainEditor.export", { defaultValue: ".npyへエクスポート" })}
-                </button>
-              </div>
-              {exportStatus === "exported" && (
-                <div className="terrain-editor-hint terrain-editor-hint--success">
-                  {t("terrainEditor.exportSuccess", { defaultValue: ".npyへエクスポートしました" })}
-                </div>
-              )}
-              {exportStatus === "error" && (
-                <div className="terrain-editor-hint terrain-editor-hint--error">
-                  {exportErrorMsg || t("terrainEditor.exportFailed", { defaultValue: "エクスポートに失敗しました" })}
-                </div>
-              )}
+          {hasUnsavedChanges && (
+            <div className="terrain-editor-hint terrain-editor-unsaved" role="status">
+              {t("terrainEditor.unsavedChanges")}
+            </div>
+          )}
+          <div className="terrain-editor-action-buttons">
+            <button
+              type="button"
+              className="terrain-editor-btn terrain-editor-btn-confirm"
+              disabled={status !== "ready" || saveStatus === "saving"}
+              onClick={() => void handleSaveToScenario()}
+            >
+              {saveStatus === "saving" ? t("terrainEditor.saving") : t("terrainEditor.saveToScenario")}
+            </button>
+          </div>
+          {saveStatus === "saved" && !hasUnsavedChanges && (
+            <div className="terrain-editor-hint terrain-editor-hint--success">{t("terrainEditor.saveSuccess")}</div>
+          )}
+          {saveStatus === "error" && (
+            <div className="terrain-editor-hint terrain-editor-hint--error" role="alert">
+              {saveErrorMsg || t("terrainEditor.saveFailed")}
+            </div>
+          )}
         </div>
       </aside>
 

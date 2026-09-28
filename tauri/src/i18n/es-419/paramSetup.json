@@ -348,10 +348,7 @@
     }
   },
   "newGame": {
-    "fromTerrain": "Empezar desde un terreno",
-    "fromScenario": "Empezar desde un escenario",
     "loading": "Cargando...",
-    "noTerrainMaps": "No hay terrenos disponibles",
     "noTemplates": "No hay escenarios disponibles",
     "starting": "Iniciando...",
     "startFailed": "No se pudo iniciar",
@@ -369,14 +366,16 @@
     "tutorialName": "Construyamos calles y edificios",
     "tutorialDesc": "Aprende a construir las calles y los edificios que son la base de la ciudad.",
     "tutorialNoTerrain": "No se encontraron datos de terreno. Revisa el estado de la instalación.",
-    "detailPlaceholder": "Elige un terreno o un escenario de la lista de la izquierda.",
+    "detailPlaceholder": "Elige un escenario de la lista de la izquierda.",
     "detailMapLabel": "Mapa",
     "detailMapSizeLabel": "Tamaño del mapa",
     "detailObjectiveLabel": "Condiciones de logro",
     "detailNoDescription": "Este escenario no tiene descripción.",
-    "terrainDetailDesc": "Construye una ciudad desde un terreno vacío. No hay condiciones de logro: desarróllala como quieras.",
     "tutorialObjective": "Completa todos los pasos del tutorial.",
-    "startTerrainButton": "Empezar con este terreno",
-    "startScenarioButton": "Empezar este escenario"
+    "startScenarioButton": "Empezar este escenario",
+    "tabSelect": "Elegir escenario",
+    "tabBrowse": "Buscar escenarios",
+    "comingSoon": "Coming soon",
+    "closeWindowsNote": "Al empezar se cierran todas las ventanas abiertas. Se perderán los cambios sin guardar del editor de terreno."
   }
 }

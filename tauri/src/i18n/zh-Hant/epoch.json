@@ -8,6 +8,7 @@
     "yes": "是",
     "executing": "紀元執行中...",
     "errorSteamLimit": "無法確認Steam認證，因此無法繼續執行紀元。（未認證狀態下最多可遊玩10個紀元）",
+    "errorAlreadyRunning": "另一個紀元正在執行。請在其完成後再試。",
     "errorFailed": "紀元執行失敗：{{reason}}"
   },
   "epochResult": {

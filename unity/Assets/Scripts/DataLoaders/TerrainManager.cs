@@ -745,14 +745,13 @@ public partial class TerrainManager : BaseApiDataManager
         int farRows = terrainSettings.map_height / terrainSettings.far_map_spacing + 1;
         int farCols = terrainSettings.map_width / terrainSettings.far_map_spacing + 1;
 
-        string url = $"{ApiClient.BASE_URL}/terrain/far";
         byte[] rawBytes = null;
 
         var swFar = System.Diagnostics.Stopwatch.StartNew();
-        using (UnityWebRequest req = UnityWebRequest.Get(url))
+        using (ApiRequest call = ApiClient.Request("GET", "/terrain/far", timeoutSeconds: 30))
         {
-            req.timeout = 30;
-            yield return req.SendWebRequest();
+            yield return call.Send();
+            UnityWebRequest req = call.Web;
 
             if (req.result != UnityWebRequest.Result.Success)
             {
@@ -882,21 +881,19 @@ public partial class TerrainManager : BaseApiDataManager
             if (IsJobCanceled(job)) yield break;
 
             Vector2Int backend = UnityCellToBackendCell(cell);
-            string url = $"{ApiClient.BASE_URL}/terrain/surface?cell_x={backend.x}&cell_z={backend.y}&resolution={TILE_RESOLUTION}";
+            string path = $"/terrain/surface?cell_x={backend.x}&cell_z={backend.y}&resolution={TILE_RESOLUTION}";
             byte[] bytes;
             int version;
             RenderWorkScheduler.CountEvent("terrain.tileDownload");
-            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            using (ApiRequest call = ApiClient.Request("GET", path, timeoutSeconds: 30))
             {
-                request.timeout = 30;
-                UnityWebRequestAsyncOperation operation = request.SendWebRequest();
-                yield return new WaitUntil(() => operation.isDone || IsJobCanceled(job));
-                if (!operation.isDone)
+                yield return call.Send(() => IsJobCanceled(job));
+                if (call.Aborted)
                 {
-                    request.Abort();
                     RenderWorkScheduler.CountEvent("terrain.tileDownloadAborted");
                     yield break;
                 }
+                UnityWebRequest request = call.Web;
                 if (request.result != UnityWebRequest.Result.Success)
                 {
                     Debug.LogWarning($"地形セル{cell}の取得失敗: {request.error}");

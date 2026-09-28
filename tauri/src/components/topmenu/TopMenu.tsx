@@ -9,7 +9,7 @@ import exitIcon from "../../assets/images/exit.png";
 import githubIcon from "../../assets/images/github.png";
 import settingIcon from "../../assets/images/setting.png";
 import "./TopMenu.css";
-import { fetchApi, buildApiUrl } from "../../utils/api";
+import { ApiError, fetchApi, buildApiUrl } from "../../utils/api";
 import { CoreVersion, frontendVersion } from "../../utils/version";
 
 type SessionStatePayload = {
@@ -36,7 +36,14 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         setCore(value);
         const error = value.api_contract_version !== frontendVersion.api_contract_version ? "API_CONTRACT_MISMATCH" : status.error;
         setVersionError(error ? t(`saveCompatibility.${error}`) : "");
-      }).catch(() => { if (active) { setCore(null); setVersionError(t("saveCompatibility.versionUnavailable")); } });
+      }).catch((error: unknown) => {
+        if (!active) return;
+        setCore(null);
+        // 認証・Host 検査で断られたときは、コアに届かないのではなく拒否されたことを理由コードで示す。
+        const rejected = error instanceof ApiError && (error.status === 401 || error.status === 421);
+        setVersionError(t(rejected ? `saveCompatibility.${error.code}` : "saveCompatibility.versionUnavailable",
+          { defaultValue: t("saveCompatibility.versionUnavailable") }));
+      });
     };
     refresh();
     const timer = setInterval(refresh, 5000);
@@ -90,7 +97,7 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
    * 新規ゲームボタン押下時の処理。
    *
    * Unity を起動し、シナリオ選択ウィンドウ（new_game）を開く。
-   * ユーザーは地形またはテンプレートを選択後、NewGameWindow 内で create_session を呼び出す。
+   * ユーザーはチュートリアルまたはシナリオを選択後、NewGameWindow 内で create_session を呼び出す。
    * そのため、ここでは Tips は表示しない。
    */
   async function handleNewGame() {
@@ -110,12 +117,12 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }
 
-  async function handleEditor() {
+  /** シナリオ管理(一覧・地形の取り込み・紹介情報・地形エディタ)はUIだけで完結する。都市を開くときは create_session が Unity を起動する。 */
+  async function handleScenarioManager() {
     try {
-      await invoke<string>("launch_graphic");
-      await invoke("open_registered_window", { windowType: "template_editor" });
+      await invoke("open_registered_window", { windowType: "scenario_manager" });
     } catch (error) {
-      console.error("[TopMenu] handleEditor error:", error);
+      console.error("[TopMenu] handleScenarioManager error:", error);
     }
   }
 
@@ -181,14 +188,14 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         <button className="topmenu-btn" onClick={handleLoad} disabled={!core || !!versionError} type="button">
           {t("topmenu.load")}
         </button>
-        <button className="topmenu-btn" onClick={handleEditor} disabled={!core || !!versionError} type="button">
-          {t("topmenu.editor")}
+        <button className="topmenu-btn" onClick={handleScenarioManager} disabled={!core || !!versionError} type="button">
+          {t("scenarios.manage")}
         </button>
       </div>
 
       {/**
        * デバッグ初期化ボタン。
-       * デバッグ実行時のみ設定・シナリオ管理ボタンの左に表示する。
+       * デバッグ実行時のみ設定ボタンの左に表示する。
        */}
       {debugExecution && (
         <button
@@ -220,12 +227,6 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
 
       <div className="topmenu-versions"><span>core {core ? `v${core.core_version}` : t("saveCompatibility.unknown")}</span><span>ui v{frontendVersion.frontend_version}</span>
         {versionError && <span role="alert">{versionError}</span>}</div>
-      <button className="topmenu-btn topmenu-btn-scenarios" title={t("scenarios.manage")} aria-label={t("scenarios.manage")}
-        onClick={() => void invoke("open_registered_window", { windowType: "scenario_manager" })}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
-          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-        </svg>
-      </button>
       {/**
        * オプションボタン。
        * 終了ボタンの左側に正方形で配置し、アイコン画像のみを表示する。

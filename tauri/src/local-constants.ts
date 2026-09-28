@@ -11,18 +11,6 @@
 export const IS_PACKAGED_PRODUCTION_UI = import.meta.env.PROD;
 
 /**
- * 地形の初期標高(メートル)。
- * 新規地形作成時(Rust側 `create_new_terrain_for_editor`)、および地形エディタでの
- * マップ拡張時に新しく追加されるセルの標高として使う。海面(標高0m)と区別できるように、
- * あえて負の値にしている。
- *
- * Rust側(`src-tauri/src/lib.rs` の `create_new_terrain_for_editor`)にも同じ値が
- * float16バイト列として直接埋め込まれているため、この値を変更する場合はそちらも
- * 合わせて変更すること(言語をまたぐため定数の共有はできない)。
- */
-export const NEW_TERRAIN_INITIAL_ELEVATION_M = -10;
-
-/**
  * 公共交通の新設時の運賃・目標運行間隔(分)の既定値。
  * 路線の種別は path_master の PATH_TRANSPORT バリアントそのものであり、UI 側で種別定数は持たない。
  */

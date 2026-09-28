@@ -1,0 +1,67 @@
+.scenario-badges,
+.required-packs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+/* 保存元の札。自作は沈んだ面、コミュニティ・DLC・公式は色で区別する */
+.scenario-badge,
+.required-pack {
+  padding: 2px 8px;
+  background: var(--flat-sunken);
+  color: var(--flat-text-label);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.scenario-badge--workshop {
+  background: var(--flat-raised-hover);
+  color: var(--flat-text);
+}
+
+.scenario-badge--dlc {
+  background: var(--flat-selected);
+  color: var(--flat-text);
+}
+
+.scenario-badge--official {
+  background: var(--flat-accent);
+  color: var(--flat-sunken);
+}
+
+.required-packs-label {
+  color: var(--flat-text-label);
+  font-size: 0.9rem;
+}
+
+.required-pack--owned {
+  color: var(--flat-good);
+}
+
+.required-pack--not_owned {
+  background: var(--flat-danger-surface);
+  color: var(--flat-danger);
+}
+
+.required-pack--unverified {
+  background: var(--flat-warn-surface);
+  color: var(--flat-warn);
+}
+
+/* SaveVersionInfo。保存版の行・必要パック・読み込めない理由を縦に積む */
+.save-version-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--flat-text-label);
+  font-size: 0.85rem;
+}
+
+.save-version-info .save-version-info-reason {
+  margin: 0;
+  color: var(--flat-danger);
+}

@@ -348,10 +348,7 @@
     }
   },
   "newGame": {
-    "fromTerrain": "Commencer depuis un terrain",
-    "fromScenario": "Commencer depuis un scénario",
     "loading": "Chargement...",
-    "noTerrainMaps": "Aucun terrain disponible",
     "noTemplates": "Aucun scénario disponible",
     "starting": "Démarrage...",
     "startFailed": "Échec du démarrage",
@@ -369,14 +366,16 @@
     "tutorialName": "Construisons des routes et des bâtiments",
     "tutorialDesc": "Apprenez à construire les routes et les bâtiments qui forment la base de la ville.",
     "tutorialNoTerrain": "Données de terrain introuvables. Vérifiez l'état de l'installation.",
-    "detailPlaceholder": "Choisissez un terrain ou un scénario dans la liste de gauche.",
+    "detailPlaceholder": "Choisissez un scénario dans la liste de gauche.",
     "detailMapLabel": "Carte",
     "detailMapSizeLabel": "Taille de la carte",
     "detailObjectiveLabel": "Conditions de réussite",
     "detailNoDescription": "Aucune description n'est définie pour ce scénario.",
-    "terrainDetailDesc": "Bâtissez une ville sur un terrain vierge. Sans condition de réussite : développez-la comme bon vous semble.",
     "tutorialObjective": "Terminer toutes les étapes du tutoriel.",
-    "startTerrainButton": "Commencer sur ce terrain",
-    "startScenarioButton": "Commencer ce scénario"
+    "startScenarioButton": "Commencer ce scénario",
+    "tabSelect": "Choisir un scénario",
+    "tabBrowse": "Trouver des scénarios",
+    "comingSoon": "Coming soon",
+    "closeWindowsNote": "Commencer ferme toutes les fenêtres ouvertes. Les modifications non enregistrées de l’éditeur de terrain seront perdues."
   }
 }

@@ -121,7 +121,6 @@
     "scoreMeterTooltip": "Governance score (per household, max 2.0)"
   },
   "topmenu": {
-    "editor": "Editor",
     "newGame": "New Game",
     "load": "Load",
     "options": "Options",

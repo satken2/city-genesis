@@ -121,7 +121,6 @@
     "scoreMeterTooltip": "Score de gouvernance (par ménage, maximum 2,0)"
   },
   "topmenu": {
-    "editor": "Éditeur",
     "newGame": "Nouvelle partie",
     "load": "Charger",
     "options": "Options",

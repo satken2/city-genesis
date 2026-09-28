@@ -350,10 +350,10 @@ public class RemovalManager : MonoBehaviour
     /// </summary>
     private IEnumerator DeleteRequest(string endpoint, int id, System.Action onSuccess)
     {
-        string url = $"{ApiClient.BASE_URL}/{endpoint}/{id}";
-        using (UnityWebRequest request = UnityWebRequest.Delete(url))
+        using (ApiRequest call = ApiClient.Request("DELETE", $"/{endpoint}/{id}"))
         {
-            yield return request.SendWebRequest();
+            yield return call.Send();
+            UnityWebRequest request = call.Web;
 
             if (request.result == UnityWebRequest.Result.Success)
             {

@@ -348,10 +348,7 @@
     }
   },
   "newGame": {
-    "fromTerrain": "从地形开始",
-    "fromScenario": "从剧本开始",
     "loading": "加载中...",
-    "noTerrainMaps": "没有可用的地形",
     "noTemplates": "没有可用的剧本",
     "starting": "开始中...",
     "startFailed": "开始失败",
@@ -369,14 +366,16 @@
     "tutorialName": "来建造道路和建筑吧",
     "tutorialDesc": "学习如何建造作为城市基础的道路与建筑。",
     "tutorialNoTerrain": "找不到地形数据。请检查安装状态。",
-    "detailPlaceholder": "请从左侧列表中选择地形或剧本。",
+    "detailPlaceholder": "请从左侧列表中选择剧本。",
     "detailMapLabel": "地图",
     "detailMapSizeLabel": "地图尺寸",
     "detailObjectiveLabel": "达成条件",
     "detailNoDescription": "该剧本没有设置说明。",
-    "terrainDetailDesc": "从一无所有的土地上建设城市。没有达成条件，可以随心所欲地发展。",
     "tutorialObjective": "完成新手教程的所有步骤。",
-    "startTerrainButton": "使用该地形开始",
-    "startScenarioButton": "开始该剧本"
+    "startScenarioButton": "开始该剧本",
+    "tabSelect": "选择剧本",
+    "tabBrowse": "寻找剧本",
+    "comingSoon": "Coming soon",
+    "closeWindowsNote": "开始后所有打开的窗口都将关闭，地形编辑器中未保存的编辑将丢失。"
   }
 }

@@ -2,12 +2,10 @@
  * ゲーム全体で使用する定数を定義する
  * バックエンドの定数定義に基づいて自動生成される
  */
-export const VERIFICATION_SERVER_URL: string = "http://127.0.0.1:8080";
-export const TEMPLATE_PUBLIC_URL: string = "https://storage.googleapis.com/cg2025/initial_saves_metadata.json";
 export const STEAM_TICKET_IDENTITY: string = "city-genesis";
 export const GAME_VERIFIED: number = 0;
 export const GAME_UNVERIFIED: number = 1;
-export const CITY_TEMPLATE_DIR: string = "UrbanGenesis/templates";
+export const CITY_SCENARIO_DIR: string = "UrbanGenesis/scenarios";
 export const CITY_SAVE_DIR: string = "UrbanGenesis/saves";
 export const HISTORY_COUNT: number = 120;
 export const DAYS_PER_YEAR: number = 365.0;

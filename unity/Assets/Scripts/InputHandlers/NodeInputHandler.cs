@@ -222,7 +222,6 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
         if (idInfo != null && IsTerminalRole(idInfo.role))
         {
             // 接続端子ノード（インフラ / 走行網 / 共用）の場合は、ノード自身を更新する (PATCH /api/v1/nodes/{nodeId})
-            string patchUrl = $"{ApiClient.BASE_URL}/nodes/{nodeId}";
 
             // ノードの position はバックエンド座標系 [x, 地面からの相対高さ, z] で保持される
             // （相対高さの考え方はルートAGENTS.md参照。フロントの NodeData.GetAbsolutePosition も
@@ -239,15 +238,11 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
             };
 
             string patchJson = JsonConvert.SerializeObject(updateData);
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(patchJson);
 
-            using (UnityWebRequest patchRequest = new UnityWebRequest(patchUrl, "PATCH"))
+            using (ApiRequest patchCall = ApiClient.Request("PATCH", $"/nodes/{nodeId}", patchJson))
             {
-                patchRequest.uploadHandler = new UploadHandlerRaw(bodyRaw);
-                patchRequest.downloadHandler = new DownloadHandlerBuffer();
-                patchRequest.SetRequestHeader("Content-Type", "application/json");
-
-                yield return patchRequest.SendWebRequest();
+                yield return patchCall.Send();
+                UnityWebRequest patchRequest = patchCall.Web;
 
                 if (patchRequest.result == UnityWebRequest.Result.Success)
                 {
@@ -281,11 +276,10 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
         }
 
         // まず現在のパス情報を取得
-        string getUrl = $"{ApiClient.BASE_URL}/paths/{relatedPathId}";
-        
-        using (UnityWebRequest getRequest = UnityWebRequest.Get(getUrl))
+        using (ApiRequest getCall = ApiClient.Request("GET", $"/paths/{relatedPathId}"))
         {
-            yield return getRequest.SendWebRequest();
+            yield return getCall.Send();
+            UnityWebRequest getRequest = getCall.Web;
 
             if (getRequest.result != UnityWebRequest.Result.Success)
             {
@@ -339,7 +333,6 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
             }
 
             // パス情報を更新
-            string putUrl = $"{ApiClient.BASE_URL}/paths/{relatedPathId}";
             var updateData = new {
                 start_point = pathData.start_point,
                 end_point = pathData.end_point,
@@ -347,23 +340,24 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
             };
             
             string putJson = JsonConvert.SerializeObject(updateData);
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(putJson);
 
-            UnityWebRequest putRequest = UnityWebRequest.Put(putUrl, bodyRaw);
-            putRequest.SetRequestHeader("Content-Type", "application/json");
-            yield return putRequest.SendWebRequest();
+            using (ApiRequest putCall = ApiClient.Request("PUT", $"/paths/{relatedPathId}", putJson))
+            {
+                yield return putCall.Send();
+                UnityWebRequest putRequest = putCall.Web;
 
-            if (putRequest.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log($"ノード {nodeId} の位置を保存しました: {newPosition}");
-                RequestPathRedraw();
-            }
-            else
-            {
-                Debug.LogError($"ノード位置の保存に失敗: {putRequest.error}");
-                
-                // 失敗した場合は元の位置に戻す
-                transform.position = originalPosition;
+                if (putRequest.result == UnityWebRequest.Result.Success)
+                {
+                    Debug.Log($"ノード {nodeId} の位置を保存しました: {newPosition}");
+                    RequestPathRedraw();
+                }
+                else
+                {
+                    Debug.LogError($"ノード位置の保存に失敗: {putRequest.error}");
+
+                    // 失敗した場合は元の位置に戻す
+                    transform.position = originalPosition;
+                }
             }
         }
     }

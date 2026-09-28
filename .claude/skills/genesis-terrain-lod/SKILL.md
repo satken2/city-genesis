@@ -8,9 +8,16 @@ description: City Genesisの地形/LOD/セル分割まわり(heightmap、LODテ�
 このSkillはコード本体を持たない「道しるべ」です。実際の仕様・ロジックは以下のドキュメントに書かれているので、実装前に必ず読むこと。
 
 ## 読むべきドキュメント(概念、公開)
-- `city-genesis/docs/docs/geometries/D_地形形状.md`
+- `city-genesis/docs/docs/geometries/D_地形形状.md`(オリジナル地形とシナリオの地形の区別・シナリオの地形APIは §D.14)
 - `city-genesis/docs/docs/geometries/E_LOD処理.md`
 - `city-genesis/docs/docs/geometries/K_Unity差分ロード整理.md`
+- `city-genesis/docs/docs/geometries/L_地形データ作成マニュアル.md`(地形エディタとオリジナル地形の登録手順)
+
+## 地形エディタの位置づけ
+- Tauriの地形エディタ(`city-genesis/tauri/src/components/terrain/`)は「シナリオに含まれる地形」を編集するツールで、シナリオ管理の「地形を編集」から開き、`PUT /api/v1/scenarios/{id}/terrain` で保存する。オリジナル地形(`genesis-core/assets/terrains/terrain_maps.yaml` の標高・サムネイル・メタデータ)は編集しない。
+- 水面・川・資源・プロップ・カメラ・地表種別・気候区分はシナリオ(都市)の保存値で、オリジナル地形は持たない。ゲーム中の地形・LODの処理はセッションの都市のデータだけを見る。
+- 建設物のあるシナリオでは標高・水面・川がロックされる(D §D.14.4)。標高を変えたときの遠景・海岸線・区画の種別と勾配の作り直しはコアが保存時に行う。
+- DLC由来の暗号化されたシナリオは地形エディタの対象外(シナリオの地形APIが409 `SCENARIO_ENCRYPTED`)。新しく作った資源のIDは保存の応答 `resource_ids` で返る(D §D.14.3)。
 
 ## 読むべきドキュメント(詳細ロジック、非公開)
 - `genesis-core/docs/game-logic/LOD地形データ管理詳細.md`

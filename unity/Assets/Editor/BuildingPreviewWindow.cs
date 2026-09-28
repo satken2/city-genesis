@@ -7,12 +7,6 @@ using GeneratedModels;
 
 public class BuildingPreviewWindow : EditorWindow
 {
-    /// <summary>
-    /// バックエンド API のベース URL。
-    /// ApiClient.BASE_URL を参照することで、動的ポート対応と一貫性を保つ。
-    /// </summary>
-    private static string API_BASE => ApiClient.BASE_URL;
-
     private int buildingIdInput = 0;
     private Vector2 scrollPosition;
     private GameObject previewRoot;
@@ -22,7 +16,7 @@ public class BuildingPreviewWindow : EditorWindow
     private int selectedIndex = -1;
     private string statusMessage = "";
     private bool isFetching = false;
-    private UnityWebRequest activeRequest;
+    private ApiRequest activeRequest;
 
     // プレビュー対象の BuildingSummary
     private BuildingSummary previewTarget;
@@ -159,7 +153,7 @@ public class BuildingPreviewWindow : EditorWindow
 
     void Update()
     {
-        if (isFetching && activeRequest != null && activeRequest.isDone)
+        if (isFetching && activeRequest != null && activeRequest.Web.isDone && !activeRequest.RetryIfUnauthorized())
         {
             HandleFetchResult();
         }
@@ -170,7 +164,7 @@ public class BuildingPreviewWindow : EditorWindow
         ClearPreview();
         if (activeRequest != null)
         {
-            activeRequest.Abort();
+            activeRequest.Web?.Abort();
             activeRequest.Dispose();
         }
     }
@@ -179,26 +173,22 @@ public class BuildingPreviewWindow : EditorWindow
     {
         if (isFetching) return;
 
-        string url = $"{API_BASE}/buildings/{id}";
-        StartFetch(url, single: true);
+        StartFetch($"/buildings/{id}", single: true);
     }
 
     private void FetchBuildingsByBbox(float x1, float z1, float x2, float z2)
     {
         if (isFetching) return;
 
-        string url = $"{API_BASE}/buildings/?bbox={x1},{z1},{x2},{z2}";
-        StartFetch(url, single: false);
+        StartFetch($"/buildings/?bbox={x1},{z1},{x2},{z2}", single: false);
     }
 
-    private void StartFetch(string url, bool single)
+    private void StartFetch(string path, bool single)
     {
         isFetching = true;
-        statusMessage = $"Fetching: {url}";
+        statusMessage = $"Fetching: {ApiClient.BASE_URL}{path}";
 
-        activeRequest = UnityWebRequest.Get(url);
-        activeRequest.timeout = 10;
-        activeRequest.SendWebRequest();
+        activeRequest = ApiClient.Request("GET", path, timeoutSeconds: 10).Begin();
 
         // single フラグをトラッキング
         _isSingleFetch = single;
@@ -210,15 +200,15 @@ public class BuildingPreviewWindow : EditorWindow
     {
         isFetching = false;
 
-        if (activeRequest.result != UnityWebRequest.Result.Success)
+        if (activeRequest.Web.result != UnityWebRequest.Result.Success)
         {
-            statusMessage = $"Error: {activeRequest.error}";
+            statusMessage = $"Error: {activeRequest.Web.error}";
             activeRequest.Dispose();
             activeRequest = null;
             return;
         }
 
-        string json = activeRequest.downloadHandler.text;
+        string json = activeRequest.Web.downloadHandler.text;
         activeRequest.Dispose();
         activeRequest = null;
 

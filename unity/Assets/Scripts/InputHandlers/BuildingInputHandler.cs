@@ -156,11 +156,10 @@ public class BuildingInputHandler : MonoBehaviour, IInputHandler
 
     private IEnumerator DemolishBuilding()
     {
-        string url = $"{ApiClient.BASE_URL}/buildings/{buildingId}/demolish";
-
-        using (UnityWebRequest request = UnityWebRequest.PostWwwForm(url, ""))
+        using (ApiRequest call = ApiClient.Request("POST", $"/buildings/{buildingId}/demolish"))
         {
-            yield return request.SendWebRequest();
+            yield return call.Send();
+            UnityWebRequest request = call.Web;
 
             if (request.result == UnityWebRequest.Result.Success)
             {

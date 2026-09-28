@@ -348,10 +348,7 @@
     }
   },
   "newGame": {
-    "fromTerrain": "Start from Terrain",
-    "fromScenario": "Start from Scenario",
     "loading": "Loading...",
-    "noTerrainMaps": "No terrain maps available",
     "noTemplates": "No scenarios available",
     "starting": "Starting...",
     "startFailed": "Failed to start",
@@ -369,14 +366,16 @@
     "tutorialName": "Tutorial Mission",
     "tutorialDesc": "Learn the basics while building your city",
     "tutorialNoTerrain": "Terrain data is not available. Please verify your installation.",
-    "detailPlaceholder": "Select a terrain or scenario from the list on the left.",
+    "detailPlaceholder": "Select a scenario from the list on the left.",
     "detailMapLabel": "Map",
     "detailMapSizeLabel": "Map Size",
     "detailObjectiveLabel": "Objectives",
     "detailNoDescription": "This scenario has no description.",
-    "terrainDetailDesc": "Build a city from empty land. There are no objectives — develop it however you like.",
     "tutorialObjective": "Complete every step of the tutorial.",
-    "startTerrainButton": "Start on This Terrain",
-    "startScenarioButton": "Start This Scenario"
+    "startScenarioButton": "Start This Scenario",
+    "tabSelect": "Choose a scenario",
+    "tabBrowse": "Find scenarios",
+    "comingSoon": "Coming soon",
+    "closeWindowsNote": "Starting closes all open windows. Unsaved edits in the terrain editor will be lost."
   }
 }

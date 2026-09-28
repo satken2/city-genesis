@@ -348,10 +348,7 @@
     }
   },
   "newGame": {
-    "fromTerrain": "地形から始める",
-    "fromScenario": "シナリオから始める",
     "loading": "読み込み中...",
-    "noTerrainMaps": "利用可能な地形がありません",
     "noTemplates": "利用可能なシナリオがありません",
     "starting": "開始中...",
     "startFailed": "開始に失敗しました",
@@ -369,14 +366,16 @@
     "tutorialName": "道路と建物を作ろう",
     "tutorialDesc": "都市の基盤となる道路や建物を作る方法を学びます。",
     "tutorialNoTerrain": "地形データが見つかりません。インストール状態を確認してください。",
-    "detailPlaceholder": "左の一覧から地形またはシナリオを選んでください。",
+    "detailPlaceholder": "左の一覧からシナリオを選んでください。",
     "detailMapLabel": "マップ",
     "detailMapSizeLabel": "マップサイズ",
     "detailObjectiveLabel": "達成条件",
     "detailNoDescription": "このシナリオには説明が設定されていません。",
-    "terrainDetailDesc": "何もない土地から都市を築きます。達成条件はなく、好きなように発展させられます。",
     "tutorialObjective": "チュートリアルのすべてのステップを完了する。",
-    "startTerrainButton": "この地形で始める",
-    "startScenarioButton": "このシナリオを始める"
+    "startScenarioButton": "このシナリオを始める",
+    "tabSelect": "シナリオを選択",
+    "tabBrowse": "シナリオを探す",
+    "comingSoon": "Coming soon",
+    "closeWindowsNote": "開始すると開いているウィンドウはすべて閉じます。地形エディタで保存していない編集は失われます。"
   }
 }

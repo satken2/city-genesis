@@ -11,7 +11,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/main.tsx` | 起動処理。未キャッチ例外・`console.error` をRust側のファイルログへ転送する |
 | `src/components/` | ドメイン別のUIコンポーネント(`components/AGENTS.md`) |
 | `src/contexts/` | `MasterDataContext`(マスターデータ)・`FontSizeContext` |
-| `src/hooks/` | 共通Reactフック。仕様は各ファイル冒頭のコメント |
+| `src/hooks/` | 共通Reactフック。仕様は各ファイル冒頭のコメント。APIの画像は `useApiImageUrl`(fetch→Blob URL)で表示する |
 | `src/utils/` | 共通処理(下記の一覧) |
 | `src/data/` | 静的な掲載データ。`credits.ts`(クレジット表示の正)・`propCategories.json`・`transitVehicleModels.json`・`resourcePresets.ts`・`terrainProfiles.ts`(翻訳された地形紹介を持つマップID) |
 | `src/i18n/` | 翻訳リソース `<言語コード>/<ドメイン>.json`(`index.ts` がglobで集約) |
@@ -21,7 +21,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/local-constants.ts` | UI独自の定数と、自動生成に載らないバックエンド定数の写し |
 | `src/App.css` | 全ウィンドウ共通のグローバルスタイル |
 | `src-tauri/` | Rust側(ウィンドウ管理・MMF IPC・セッションポーリング)。`config/window-registry.json`=ポップアップ定義、`window-mutex-groups.json`=同時に開けない組 |
-| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・地形PNG一括再生成 `regenerate_terrain_thumbnails.py`・Unity音源の再生成・開発プロセス掃除 ほか) |
+| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・地形PNG一括再生成 `regenerate_terrain_thumbnails.py`・Unity音源の再生成・開発プロセス掃除 ほか)と検証。`tutorial/generate-schema-validator.mjs`(チュートリアルのJSON Schema検証コードの事前生成)、`api-auth/`(`npm run test:api-auth`。認証トークンの付与・401での取り直し・画像のBlob URL)、`scenarios/`(`npm run test:scenarios`)、`terrain-editor-save-test.mjs`(地形エディタの保存引数・ロック情報の正規化・保存後の資源IDの置き換え) |
 | `scripts/` | 河川生成(`terrainRiver.ts`)の開発用検証スクリプト(`npx tsx`。CI外) |
 | `*-launch.toml` | Rust側が子プロセスとしてバックエンド/Unityを起動するコマンド |
 | `public/debug/`・`SPEC.md` | 素のHTMLのデバッグページ・初期設計時の仕様書(現行の正ではない) |
@@ -39,7 +39,9 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 - 自動生成ファイル(`src/constants.ts`・`src/types/generated.ts`)を編集しない。正と生成器は非公開のコア側(`genesis-core/consts.py`・`tools/sync_consts.py`)にあり、このレポジトリ単体では再生成できない。必要ならユーザーに依頼する(Skill: `consts-sync`)。
 - `local-constants.ts` の `PATH_TYPES_INFRA`・`PATH_TYPES_WITH_*` は、生成器がタプルを出力しないために置いているバックエンド定数の写し。バックエンド側を変えたら合わせる。パス種別を各コンポーネントで直接列挙しない。
-- バックエンドHTTPは `utils/api.ts` の `fetchApi<T>()` 経由のみ。`fetch` を直接書かない(MessagePack受信とエラー処理を一箇所に寄せている)。
+- バックエンドHTTPは `utils/api.ts` の `fetchApi<T>()` 経由のみ。`fetch` を直接書かない(MessagePack受信とエラー処理を一箇所に寄せている)。ローカルAPIの認証トークン(`X-City-Genesis-Token`)もここと置き換え後の `fetch` が付けるので、各画面でヘッダーを組まない。Rust側から送る要求は `version.rs` の `headers()` / `client()` を通す(`src-tauri/AGENTS.md`)。
+- APIの画像(サムネイル等)を `<img src>` にAPIのURLで直接書かない。画像要求にはトークンを付けられず401になる。`hooks/useApiImageUrl` で取得して Blob URL を表示する(`ScenarioThumbnail`・`TerrainMapThumbnail` が実例)。
+- WebViewはCSPで `eval` を許していない(`tauri.conf.json`)。実行時に `new Function` を使うライブラリを入れない。JSON Schema検証は `npm run gen:tutorial-validator` の事前生成コードを使う。本番ビルドは devtools を含まない。
 - Unityへの送信は `utils/ipc.ts` に関数を足して行う。`setInterval` 等で周期的に送らない(Unity不在の間はMMFに溜まり続け、満杯になると以後の送信が `MMF buffer full` で全滅する)。Unity起動後の再同期は `graphic-reconnected` イベントを受けて送る。
 - 3Dビューの表示切替は2系統。`sendChangeDisplay` はユーザーの選択(Unityが通常表示として記憶)、`sendViewApplyPreset` はウィンドウを開いている間だけの一時差し替え。編集作業中だけ表示を変えたいときに前者を使わない(ユーザーの選択を上書きする)。
 - 確認ダイアログは `utils/confirmDialog.ts` の `requestConfirm()`。`window.confirm` は使わない(tauri-plugin-dialogがPromiseを返す非同期版に差し替えるため、`if (!window.confirm(...))` は常に素通りする)。
@@ -65,7 +67,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 | ファイル | 内容 |
 | --- | --- |
-| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口。`cache`オプションで取得時のHTTPキャッシュ方針を指定できる |
+| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口。`cache`オプションで取得時のHTTPキャッシュ方針を指定できる。`configureBackendRequests` が `fetch` を置き換え、版の照合と版ヘッダー・認証トークンの付与を行う。トークンは `setApiToken`(`App.tsx` が `get_connection_status` の値を渡す)で保持し、設定したバックエンドの `/api/v1/` 配下にだけ付ける。401なら `get_connection_status` で取り直して1回だけ再送する。版の照合が401・421で断られたら `API_CONTRACT_MISMATCH` にせず、応答の `API_TOKEN_REQUIRED`・`HOST_NOT_ALLOWED` で失敗させる |
 | `ipc.ts` | Unityへのイベント送信(`send*`) |
 | `notification.ts` / `tutorial.ts` | 通知ウィンドウ・チュートリアルウィンドウの表示 |
 | `cityNotifications.ts` | L1通知(重大通知)の取得・文言化・詳細ウィンドウ対応表 |
@@ -84,17 +86,20 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `epochPresentation.ts` / `epochFlow.ts` | 演出ID付きの暗転通知待ち、HTTPと日没の並行実行、処理時間に応じたTipsの開閉。結果画面のクローズまで黒幕を保持する |
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` / `bdCategoryIcon.ts` | 各種アイコン画像の解決。`bdCategoryIcon` は建物建設パネルの分類(`assets/images/bd_categories/{id}.png`)。`agentIcon` の `resolveAgentVariantIcon` はバリアント専用画像だけを返す(無ければ空文字) |
 | `propThumbnail.ts` | プロップサムネイルの解決。画像のglobはここ1箇所だけ |
+| `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`)、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま) |
+| `terrainMaps.ts` | オリジナル地形の一覧要素 `TerrainMapEntry`、表示名 `terrainMapTitle`・紹介文 `terrainMapDescription`(翻訳の無い地形は登録表の名前と共通の文言)、大きさの整形 `formatMapSize` |
 
 ## 詳細の参照先
 
-- チュートリアルの定義と進行基盤は `src/tutorial/`。シナリオ作者向け設計は `../docs/tutorials/`、通信・制約・永続化の契約は `../docs/docs/programs/チュートリアル基盤.md`。操作名や条件を追加したらJSON Schemaと `npm run test:tutorial` を揃える。
+- チュートリアルの定義と進行基盤は `src/tutorial/`。シナリオ作者向け設計は `../docs/tutorials/`、通信・制約・永続化の契約は `../docs/docs/programs/チュートリアル基盤.md`。操作名や条件を追加したらJSON Schemaと `npm run test:tutorial` を揃える。`schema.json` を変えたら `npm run gen:tutorial-validator` で `schemaValidator.generated.ts` を作り直す(`src/tutorial/AGENTS.md`)。
 
-- 公開ドキュメント(`../docs/docs/programs/`): コンポーネント連携(ウィンドウ構成・セッション状態・初期ロード・多言語対応・共通スタイル)、IPC連携の整理(MMF・イベント一覧・起動フロー)、モックバックエンド、ファイル配置、通知レベル管理、素材クレジット管理、サウンドシステム、建設プロジェクト管理。プロップ分類とサムネイルは `geometries/M_地形プロップ.md` §M.7.8、車両外観カタログは `geometries/O_車両の走行描画.md`。
+- 公開ドキュメント(`../docs/docs/programs/`): コンポーネント連携(ウィンドウ構成・セッション状態・ローカルAPIの認証とCSP・初期ロード・多言語対応・共通スタイル)、シナリオ制作と配布、セーブデータ仕様、IPC連携の整理(MMF・イベント一覧・起動フロー)、モックバックエンド、ファイル配置、通知レベル管理、素材クレジット管理、サウンドシステム、建設プロジェクト管理。プロップ分類とサムネイルは `geometries/M_地形プロップ.md` §M.7.8、車両外観カタログは `geometries/O_車両の走行描画.md`。
 - Skill: `genesis-ipc`(Unityとの通信イベント・APIの追加)、`asset-credits`(素材の取り込み)、`consts-sync`(コア側。共有定数の同期)。
 - 配下: `src/components/AGENTS.md`(共通部品・HUD・ウィンドウ追加手順・各パネルの契約)、`src-tauri/AGENTS.md`(Rust側)。
 
 ## 版情報とシナリオ
 
 - フロントの版の正は `../version.json`。`npm run sync:version` でTauri・Unityの配布設定を同期する。開発・ビルド前処理も同じ同期を使う。
-- `utils/api.ts` の `configureBackendRequests` は既存のバイナリHTTP取得も含めてコアの通信契約を照合する。API互換性検証・ヘッダー付与を各画面へ複製しない。
+- `utils/api.ts` の `configureBackendRequests` は既存のバイナリHTTP取得も含めてコアの通信契約を照合し、版ヘッダーと認証トークンを付ける。API互換性検証・ヘッダー付与・401の再送を各画面へ複製しない。
 - 保存データの型・ロード前確認・エラー表示は `utils/saves.ts`。新しいロード入口も `prepareSaveLoad` を通し、確認後にRustの開始コマンドを呼ぶ。
+- シナリオの保存元(`local` / `workshop` / `dlc`)・読み取り専用・暗号化・必要パックの契約は `../docs/docs/programs/シナリオ制作と配布.md` と `セーブデータ仕様.md`。自作とみなすのは `origin === "local" && !read_only` で、それ以外のシナリオは変更操作を出さず「コピーして編集」だけにする。

@@ -21,7 +21,7 @@
   flex-direction: column;
 }
 
-/* 見出しの下にプレビュー・メタデータのボタンを横並びで配置する。 */
+/* 見出し(シナリオ名)の下にプレビュー・メタデータのボタンを横並びで配置する。 */
 .terrain-editor-tools-title-row {
   display: flex;
   flex-direction: column;
@@ -35,9 +35,33 @@
 }
 
 .terrain-editor-tools-title {
+  margin: 0;
   font-size: 1.39rem;
   font-weight: 600;
   color: #a0c8ff;
+  overflow-wrap: anywhere;
+}
+
+/* 標高・水面・川のロックの説明。タブの選択肢が無効になっている理由を示す。 */
+.terrain-editor-lock-notice {
+  flex: 0 0 auto;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid #6a5a2e;
+  border-radius: 4px;
+  background-color: rgba(240, 200, 100, 0.08);
+  color: #e8d6a0;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.terrain-editor-lock-notice p,
+.terrain-editor-lock-notice ul {
+  margin: 0;
+}
+
+.terrain-editor-lock-notice ul {
+  padding-left: 1.2em;
 }
 
 /* カード配置領域。選択中の1列だけ表示し、残りの高さをスクロールに使う。 */
@@ -181,19 +205,13 @@
   color: #f0a0a0;
 }
 
-.terrain-editor-text-input {
+.terrain-editor-param-value {
   flex: 0 0 auto;
-  width: 110px;
-  background-color: #1c1c24;
-  color: #e0e0e0;
-  border: 1px solid #30303c;
-  border-radius: 4px;
-  padding: 4px 6px;
   font-size: 1.02rem;
 }
 
-.terrain-editor-text-input:disabled {
-  color: #666;
+.terrain-editor-unsaved {
+  color: #e8c878;
 }
 
 .terrain-editor-meta-readonly {
@@ -253,23 +271,6 @@
 
 .terrain-editor-btn-confirm:hover:not(:disabled) {
   border-color: #6ad07a;
-}
-
-/* マップリサイズ操作用のコンパクトな行 */
-.terrain-editor-resize-row {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  margin-top: 8px;
-}
-
-.terrain-editor-resize-row .terrain-editor-select {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.terrain-editor-resize-row .terrain-editor-btn {
-  flex: 0 0 auto;
 }
 
 /* キャンバス領域。ディスプレイいっぱいに広げる。 */
@@ -415,7 +416,7 @@
   margin-bottom: 10px;
 }
 .terrain-editor-header-actions { display: flex; gap: 6px; }
-.terrain-editor-save-actions { flex: 0 0 auto; }
+.terrain-editor-save-actions { flex: 0 0 auto; margin-top: 10px; }
 .terrain-editor-metadata-dialog {
   width: min(560px, calc(100vw - 48px));
   max-height: calc(100vh - 48px);

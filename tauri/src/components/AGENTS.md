@@ -14,15 +14,15 @@
 | `path` | 道路/インフラ/軌道の建設、パス詳細(駅情報・交通・設備・結合分割)、2D形状編集、経路提案 |
 | `road` / `intersection` | 名前付き道路の詳細、インターチェンジ詳細 |
 | `transit` | 公共交通の管理ウィンドウ、路線詳細、路線新設/経路編集、収支見込み |
-| `resource` / `prop` / `terrain` | 天然資源、プロップ配置、地形エディタ(2D `TerrainEditorCanvas`・3D `Terrain3DPreviewCanvas`) |
+| `resource` / `prop` / `terrain` | 天然資源、プロップ配置、シナリオの地形エディタ(2D `TerrainEditorCanvas`・3D `Terrain3DPreviewCanvas`) |
 | `grading` | 造成(整地・埋立)の範囲作図ウィンドウ、造成工事の建設工事タブ、造成バリアントの判定と見積もりの型(`grading.ts`) |
 | `map` | 2D都市マップ。`CityMapCanvas`は共通地図部品で、局所地図が要るパネルは新規実装せずこれを埋め込む |
 | `budget` / `tax` / `regulation` / `statistics` / `achievement` | 市政系ウィンドウ(予算・公共施設、税、規制、統計、達成目標) |
 | `construction` / `diagnosis` / `notification` | 建設プロジェクト、診断、通知トースト+L1通知一覧 |
 | `hud` | 常駐HUD(4枚の専用ウィンドウ) |
-| `taskbar` / `topmenu` | HUDから開くポップアップ群(エポック確認・結果、セーブ/ロード、設定、クレジット、ニューゲーム、エディタ)とトップメニュー |
+| `taskbar` / `topmenu` | HUDから開くポップアップ群(エポック確認・結果、セーブ/ロード、設定、クレジット、ニューゲーム)とトップメニュー |
 | `display` | 表示オプション(レイヤー定義`displayConstants.ts`、送信フック`useDisplayOptions`) |
-| `template` | テンプレート作成モード専用(路地作成、経済主体作成) |
+| `template` | シナリオ管理(`ScenarioManagerWindow`)・紹介情報(`ScenarioMetadataWindow`)と、テンプレート作成モード専用(路地作成、経済主体作成) |
 | `tips` / `hintbar` / `tutorial` / `parameter-setup` | Tips兼初期ローディング、ヒントバー、チュートリアル、初期パラメータ設定 |
 | `debug` | デバッグ用パネル |
 | `common` | 共通部品(下記) |
@@ -67,6 +67,11 @@
 | `FiscalSankey` | 財政Sankey。歳入項目の定義と支出カテゴリ色はここに置き、予算ウィンドウも共用 |
 | `ColorSwatchPicker` | 色選択。OSのカラーダイアログは最前面固定の透明ウィンドウの裏に開くので使わない |
 | `SettingsRow` / `SettingsForm.css` | アプリ設定・都市設定の共通フォーム。見出し・カード・設定行・Coming soon・セグメント選択・入力欄は同じ意匠を使う。`disabled` は表示用なので子の操作部品にもネイティブの `disabled` を指定する |
+| `FlatTabs` | フラット意匠のウィンドウ上部のタブ列(ニューゲーム・シナリオ管理)。`role=tab`・`aria-selected`、無効タブと札(Coming soon)。選択状態と中身の出し分けは呼び出し側が持つ |
+| `ScenarioSource`(`ScenarioOriginBadges` / `RequiredPacks`) | シナリオの保存元(自作/コミュニティ/DLC)と公式の札、都市に刻まれた必要パックと所有状況。読み込めるかの判定はコアの `compatibility` が正で、ここは表示だけ |
+| `SaveVersionInfo` | 保存版・互換性・必要パックの表示。セーブ一覧・ニューゲーム・シナリオ管理で共通 |
+| `ScenarioThumbnail` / `TerrainMapThumbnail` | シナリオ・オリジナル地形の画像。`hooks/useApiImageUrl` で取得した Blob URL を表示し(APIの画像を `<img src>` で直接読まない)、シナリオ画像が無ければ地形画像、それも無ければプレースホルダー |
+| `TerrainFacts` | 地形の大きさ・地表・気候の欄(シナリオ管理の地形タブ・ニューゲームの詳細)。値の整形は `utils/terrainMaps.ts` |
 
 このほか`SatisfactionFace`・`SpeedLimitSign`・グラフ類・`NumberStepper`・`Money`等がある。フック`hooks/useVariantAffordability`は資金目安で選択肢(プルダウンの項目・建物建設のタイル)を無効化する。
 
@@ -85,7 +90,7 @@
 
 - 都市設定(`taskbar/CityRenameWindow`、種別 `city_rename`): コックピットの都市名から開く。保存する値は都市名のみ。近似設定は Coming soon の無効な表示で、値の保持・送信を行わない。不可逆の警告は名称変更ではなく近似設定の節に置く。
 
-- ニューゲーム(`taskbar/NewGameWindow`): 地形の名称・自然地理の説明は全7言語の`terrainProfiles.json`に置き、`data/terrainProfiles.ts`で対象IDを管理する。収録地形の表示名は地形や景観を表す短い名称とし、実在・架空の固有地名を使わない。説明にも固有名詞・人間の都市・歴史・文化を含めない。マップIDは表示名と分けて維持する。気候はAPIの`climate`を`normalizeClimate`で正規化して`climate.<値>`で表示する。マップIDから別の気候を割り当てない。未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
+- ニューゲーム(`taskbar/NewGameWindow`): `FlatTabs` で「シナリオを選択」「シナリオを探す」(未提供。無効+Coming soon)の2タブ。一覧はチュートリアルと `GET /api/v1/scenarios`(全保存元)で、`scenarios:changed` で取り直す。地形から直接始める入口は持たない(チュートリアル用に `GET /api/v1/terrain/maps` だけ取る)。読み込めないシナリオは開始ボタンを無効にし、開始の確認画面に「開いているウィンドウをすべて閉じ、地形エディタの未保存の編集は失われる」旨を出す。地形の名称・自然地理の説明は全7言語の`terrainProfiles.json`に置き、`data/terrainProfiles.ts`で対象IDを管理する。収録地形の表示名は地形や景観を表す短い名称とし、実在・架空の固有地名を使わない。説明にも固有名詞・人間の都市・歴史・文化を含めない。マップIDは表示名と分けて維持する。気候はAPIの`climate`を`normalizeClimate`で正規化して`climate.<値>`で表示する。シナリオの地表・気候は一覧の要素の`ground_cover`・`climate`(都市が持つ値。地形エディタで変わる)を優先し、無いときだけ登録表の値を使う。大きさは寸法を変えられないので登録表から引く。マップIDから別の気候を割り当てない。未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
 - エポック実行(`taskbar/EpochConfirmWindow`): HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
 
 - 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物・構造種別の階数上限はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
@@ -109,26 +114,32 @@
 - 予算(`budget/CityBudgetWindow`): 比率は自動保存で`AUTO_SAVE_DEBOUNCE_MS`のデバウンス必須(PATCHは再導出を伴い重い)。rechartsはCSS変数を解決できないのでグラフ色だけ直値定数。
 - 公共交通(`transit/`): 路線カラーの正はバックエンドの`line_color`。作成/更新/削除後は`emit("transit:lines_changed")`。収支見込みはバックエンドの試算を並べるだけ。貨物は `TransitMasterEntry.freight` で判定し、編成の総両数（機関車1両を含む）の下限を2にする。外観候補は新設・詳細が `TransitVehicleSelector` と同じカタログを共有する。
 - 道路詳細(`road/`): 型・API・変更通知は`roadTypes.ts` / `roadApi.ts`が唯一の窓口(道路を変えたら`notifyRoadsChanged`)。強調帯はアンマウント時に送らず、区間編集の終了に`STATE_NORMAL`を送らない。
-- 地形エディタ(`terrain/`): 実データの編集は`elevRef`、表示だけ`displayElev()`。川・水面・資源のオブジェクトと配列はin-placeで書き換えず差し替える(Undoと描画キャッシュが同じ参照を持つ)。
-  - 地形PNGは`terrainThumbnail.ts`で作る北上・海透過の平面図(長辺512px)。保存時と`tools/regenerate_terrain_thumbnails.py`の一括生成は同じ描画処理を使う。標高色と陸地の標高範囲は`terrainData.ts`が正。`TerrainMapThumbnail`は縦横比を保ち全域を表示する。
+- 地形エディタ(`terrain/`): シナリオの地形を編集する。シナリオ管理の「地形を編集」が Rust の `prepare_scenario_terrain_editor` で作業コピーを作って開き、`TerrainEditorCanvas` の `mapId` は作業コピーのID(`editor_id`)。実データの編集は`elevRef`、表示だけ`displayElev()`。川・水面・資源のオブジェクトと配列はin-placeで書き換えず差し替える(Undoと描画キャッシュが同じ参照を持つ)。
+  - `locks.heights_locked` のときは地形(自動編集を含む)・水面・川のタブを無効にし、理由を表示して資源タブで始める。ロック情報は `normalizeTerrainEditorLocks` で正規化し、欠けていればロック扱いにする。
+  - 保存対象(標高・水面・川・資源・プロップ・カメラ・地表・気候)を変える操作は必ず `markDirty` か `pushUndoState` を通す(未保存表示の根拠)。「シナリオに保存」の引数は `terrainData.ts` の `scenarioTerrainSaveArgs` で作る(ロック中は標高・水面・川を null にし、標高は送るときだけ符号化する)。保存成功で `scenarios:changed` をemitする。
+  - 新しく作った資源は保存まで仮IDを持つ。保存の応答の `resource_ids` で、今の一覧と Undo/Redo スタックの両方の仮IDを DB の ID に替える(`terrainData.ts` の `resourceIdReplacer`。資源は差し替えで、同じオブジェクトは同じ差し替え先を共有する)。仮IDのまま送るとコアが前回の資源を削除して作り直す。送った内容ではなく応答時点の状態に当てるので、保存中の編集は残る。
+  - 保存の失敗は理由コードで `terrainEditor.saveErrors.<code>` → `saveCompatibility.<code>` の順に翻訳し、コードの無い失敗(本文が日本語固定のRust側の失敗)は `terrainEditor.saveFailed` にする。マップの寸法は変えない。
+  - 地形PNGは`terrainThumbnail.ts`の画素生成で作る北上・海透過の平面図(長辺512px)。作るのは`tools/regenerate_terrain_thumbnails.py`の一括生成だけで、エディタは作らない。標高色と陸地の標高範囲は`terrainData.ts`が正。`TerrainMapThumbnail`は縦横比を保ち全域を表示する。
   - 3Dプレビューに関わる変更は`scheduleTerrain3dFullState()`か`emitPreviewDelta`を必ず通す。カーソル層にはマウス位置だけで変わるものしか描かない。
 - パラメータ設定(`parameter-setup/`): `GET /api/v1/parameters`のメタデータ駆動。パラメータを増やすだけならi18n追加は不要(タブ名`paramSetup.category.*`だけ要る)。
 
 ## ウィンドウ間イベント(Tauri内)
 
-`epoch:executing`、`tags:changed`、`roads:changed`、`transit:lines_changed`、`city:renamed`、`hud:mode_changed`、`building_direct:acquisition_confirmed`、`road:member_edit_started`。一覧・詳細はこれらを購読して取り直す。
+`epoch:executing`、`tags:changed`、`roads:changed`、`transit:lines_changed`、`city:renamed`、`hud:mode_changed`、`building_direct:acquisition_confirmed`、`road:member_edit_started`、`scenarios:changed`(シナリオの作成・紹介情報・地形の保存)。一覧・詳細はこれらを購読して取り直す。
 
 ## 参照先
 
 - 公開docs(`city-genesis/docs/docs/`)。`programs/`に各機能のUI仕様(ページ名は機能名)。
   - 横断: `IPC連携の整理.md`(確定送信の責務分担・編集モードの同期契約)、`Unity入力制御.md` §9.1(表示プリセット)、`コンポーネント連携.md`(統計・満足度タブ)。
   - `都市マップの検索と経路案内.md`(CityMapCanvasの契約)、`アラートフラグ管理.md`(表示フィルタのビット合成)。
-  - 概念とAPI: `economics/`の3_道路網・6_公共交通機関・12_建物・19_環境・22_予算管理・29_駅と駅舎。地形エディタは`geometries/D_地形形状.md` §D.10〜D.16、プロップは`M_地形プロップ.md`。
+  - 概念とAPI: `economics/`の3_道路網・6_公共交通機関・12_建物・19_環境・22_予算管理・29_駅と駅舎。地形エディタは`geometries/D_地形形状.md` §D.10〜D.16と`L_地形データ作成マニュアル.md`、プロップは`M_地形プロップ.md`。シナリオは`programs/シナリオ制作と配布.md`と`セーブデータ仕様.md`。
 - 親の`tauri/AGENTS.md`(utils一覧、フラット意匠トークン、多言語、マスターデータ、車両外観カタログ)。
 - Skill: `genesis-ipc`(IPC/API)、`genesis-input-mode`(Unity側の編集モード)、`genesis-visual-mode`(表示モード)、`asset-credits`(素材)。
 
 ## シナリオの管理と紹介情報
 
-- `template/ScenarioManagerWindow` は同梱・ダウンロード・自作のカード一覧。`scenario_manager` / `scenario_metadata` はレジストリ駆動のポップアップで、後者へ `params.extra.scenarioId` を渡す。
-- 紹介文入力は `common/ScenarioTextFields`、画像は `ScenarioThumbnail`、保存版と互換性は `SaveVersionInfo`。同じ項目の入力・表示を各画面で再実装しない。
+- `template/ScenarioManagerWindow` はトップメニューの「シナリオ管理」から開き、Unityを起動しない。`FlatTabs` で「シナリオ」「地形を取り込む」の2タブ。`scenario_manager` / `scenario_metadata` はレジストリ駆動のポップアップで、後者へ `params.extra.scenarioId` を渡す。
+- シナリオタブは `GET /api/v1/scenarios` の全保存元(自作・コミュニティ・DLC)を1つの一覧にする。自作(`origin === "local" && !read_only`)のカードは「都市を編集」「地形を編集」「紹介情報」「アップロード」、それ以外は「コピーして編集」だけ。都市を開く2つは `create_session {templateId, templateMode: true, acceptBalanceChange: true}` で、ポップアップが全部閉じるので確認文で地形エディタの未保存の編集に触れる。「地形を編集」は `invoke("prepare_scenario_terrain_editor", {scenarioId})` の戻り値で `terrain_editor` を開く。自作でも `encrypted`(DLC由来)なら「地形を編集」を無効にし、理由をツールチップ(`scenarios.terrainEncryptedHint`)で出す(作業コピーが平文で残るため、コアも409 `SCENARIO_ENCRYPTED` で断る)。
+- 地形を取り込むタブは初回表示で `GET /api/v1/terrain/maps` を取り、以後は隠すだけで選択を保つ。「シナリオを作成」は `POST /api/v1/scenarios/from-terrain {terrain_map_id, title: 翻訳名, language: アプリ設定の言語}` → 一覧の取り直し → シナリオタブへ切り替えて新しいカードを選択 → `scenarios:changed`。
+- 紹介文入力は `common/ScenarioTextFields`、画像は `ScenarioThumbnail`、保存元の札と必要パックは `ScenarioSource`、保存版と互換性は `SaveVersionInfo`。同じ項目の入力・表示を各画面で再実装しない。
 - 変更通知は `scenarios:changed`。保存成功後に紹介情報を開き、投稿は別操作として確認する。投稿先の可否はコアの一覧レスポンスに従う。

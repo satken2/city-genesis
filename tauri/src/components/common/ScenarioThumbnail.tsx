@@ -2,12 +2,12 @@
  * シナリオ（テンプレート）のサムネイル画像を表示する共通部品。
  *
  * まずバックエンドの GET /api/v1/saves/{templateId}/thumbnail?template=true から
- * シナリオ固有のサムネイル画像を取得する。
+ * シナリオ固有のサムネイル画像を取得する(認証ヘッダーが要るので `useApiImageUrl` で Blob URL にする)。
  * 画像が登録されていない（404）場合は、舞台となる地形マップのサムネイル(TerrainMapThumbnail)にフォールバックする。
  * 地形マップも未設定またはサムネイルが無い場合は、プレースホルダー(div)を表示する。
  */
 
-import { useState } from "react";
+import { useApiImageUrl } from "../../hooks/useApiImageUrl";
 import { TerrainMapThumbnail } from "./TerrainMapThumbnail";
 
 type ScenarioThumbnailProps = {
@@ -29,21 +29,15 @@ export function ScenarioThumbnail({
   className = "new-game-tile-image",
   placeholderModifier = "new-game-tile-image--template",
 }: ScenarioThumbnailProps) {
-  // 404だったテンプレートIDを覚える
-  const [failedId, setFailedId] = useState<string | null>(null);
+  const url = apiBaseUrl
+    ? `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/saves/${encodeURIComponent(templateId)}/thumbnail?template=true${revision === undefined ? "" : `&revision=${revision}`}`
+    : null;
+  const { src, failed, onError } = useApiImageUrl(url);
 
-  const base = apiBaseUrl ? apiBaseUrl.replace(/\/+$/, "") : "";
-  const hasFailed = !apiBaseUrl || failedId === templateId;
-
-  if (!hasFailed) {
-    return (
-      <img
-        className={className}
-        src={`${base}/api/v1/saves/${encodeURIComponent(templateId)}/thumbnail?template=true${revision === undefined ? "" : `&revision=${revision}`}`}
-        alt=""
-        onError={() => setFailedId(templateId)}
-      />
-    );
+  if (url && !failed) {
+    return src
+      ? <img className={className} src={src} alt="" onError={onError} />
+      : <div className={className} />;
   }
 
   // シナリオ固有の画像が無い場合は地形サムネイルへフォールバック

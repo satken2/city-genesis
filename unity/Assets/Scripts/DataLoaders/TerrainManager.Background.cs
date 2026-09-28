@@ -103,9 +103,10 @@ public partial class TerrainManager
     {
         try
         {
-            using (var request = UnityWebRequest.Get($"{ApiClient.BASE_URL}/terrain/background"))
+            using (ApiRequest call = ApiClient.Request("GET", "/terrain/background"))
             {
-                yield return request.SendWebRequest();
+                yield return call.Send();
+                UnityWebRequest request = call.Web;
                 if (epoch != clearEpoch) yield break;
                 if (request.responseCode == 204)
                 {

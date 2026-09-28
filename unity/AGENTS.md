@@ -9,7 +9,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 
 | 場所 | 役割 |
 | --- | --- |
-| `API/` | `ApiClient`(HTTP)、サブクライアント、応答スキーマ。`GeneratedModels.cs` は自動生成 |
+| `API/` | `ApiClient`(HTTP。版ヘッダーと認証トークンの付与、401での再送)と `ApiRequest`、サブクライアント、応答スキーマ。`GeneratedModels.cs` は自動生成 |
 | `DataLoaders/` | 取得データから Unity オブジェクトを作る各 Manager。セル常駐・LOD・共通生成予算・キャッシュ(`DataLoaders/AGENTS.md`) |
 | `MeshGenerators/` | 建物・道路・線路・区画・遠景陸地のメッシュ生成。バリアント→タイプ→既定の順にフォールバック(`MeshGenerators/AGENTS.md`) |
 | `Editors/` | 道路・建物・区画・地区・プロップ編集の状態管理と確定送信(`Editors/AGENTS.md`) |
@@ -21,7 +21,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 | `Weather/` | 天気・時刻・環境光・降水と、環境音・工事音・走行音(`Weather/AGENTS.md`) |
 | `Utils/`、`Utils.cs` | 汎用ユーティリティ。新しい汎用処理を書く前に必ず確認(`Utils/AGENTS.md`) |
 | `UI/` | 3D側のUI部品: ツールチップ、モード表示、ラジアルメニュー、カーソルHUD、多言語フォント `UiFontProvider`、標識、吹き出し、方位磁針 `CompassPanel`(専用レイヤー `Compass` の上空に実体を置き専用カメラで描く) |
-| `Grid/`、`Steam/` | グリッドオーバーレイ、Steam 認証 |
+| `Grid/`、`Steam/` | グリッドオーバーレイ、Steam 認証(`SteamAuthClient`。チケットを `POST /system/verify` へ送る) |
 | `AppRoot.cs` | 起動処理。天気・音・エフェクトのシングルトンをここで生成する(シーン配置しない) |
 | `GameStateManager.cs` | ゲーム状態(シングルトン)と状態変化イベント。`IsGameStarted()`=データ取得の許可、`IsWorldVisible`=表示の許可 |
 | `MasterDataStore.cs` | マスターデータの保持。道路幅・車線数などの描画パラメータの正 |
@@ -61,7 +61,8 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 - 全件走査を避ける。既存の逆引きインデックスは専用の登録・削除メソッド経由でだけ更新する(`geometries/H_バックエンドデータロード.md` §全件走査の回避)。
 - `CameraCellChecker.ResetViewState` は視点検出を未初期化に戻し、カメラが静止していても次の判定で通知させる(セッション切替後にカメラを動かさなくてもロードが始まる入口)。
 - `CameraController` は `game:start` で保存視点を復元し、静止するたび `PATCH /api/v1/city` へ送る。外部から視点を動かす入口は `FocusOn`(注視点・距離・方位・俯角へ滑らかに移動し、入力で中断)で、チュートリアルのカメラ案内が使う。`session:reset` / `game:end` では `SuspendCameraSync` で止める(前の視点で新しい都市の保存値を上書きしないため)。
-- HTTP は必ず `ApiClient`(単体=`Get`、一括=`GetBulk`。MessagePack は自動判別)を経由する。例外は地形バイナリなど非JSON応答だけ。
+- HTTP は必ず `ApiClient` を経由する。定型は単体=`Get`、一括=`GetBulk`(MessagePack は自動判別)、`Post`、`Patch`。それ以外(バイナリ応答、PUT・DELETE、並列送信、取消しつき)は `ApiClient.Request(method, path, json, timeoutSeconds)` が返す `ApiRequest` を `Send(isCanceled)` で送り、結果は `.Web` から読む(並列は全部 `Begin()` してから1件ずつ `Send()`)。`UnityWebRequest` を直接作らない。版ヘッダー `X-City-Genesis-API` と認証ヘッダー `X-City-Genesis-Token` が付かずコアが401を返し、本番では `AppRoot.BackendHealthPolling` がそれを失敗に数えてアプリを終了させる。
+- 認証トークンは環境変数 `GENESIS_API_TOKEN` → `<ユーザーフォルダ>/api_token` の順で解決してプロセス内に保持し、401を受けたら解決し直して、値が変わったときだけ1回再送する。ユーザーフォルダの決め方はコアの `consts._get_appdata_dir` と同じ(ずれるとファイルを見つけられない)。トークンはログに出さない。`/system/verify` の401のうち、本文に `API_TOKEN_REQUIRED` を含むもの(`ApiClient.IsTokenRejected`)はローカルAPIの認証の失敗なので、`SteamAuthClient` はチケット無効と区別して一時障害として再送する。契約は `programs/コンポーネント連携.md` の「ローカルAPIの認証」。
 
 ### アセットと描画
 
@@ -78,7 +79,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 
 ## 参照
 
-上記以外の入口: `geometries/K_Unity差分ロード整理.md`(差分ロード・初期ロード完了)、`M_地形プロップ.md`、`programs/コンポーネント連携.md`(起動順序・セッション・カメラ同期)、`programs/IPC連携の整理.md`、`geometries/U_天気と環境光.md`、`programs/サウンドシステム.md`。
+上記以外の入口: `geometries/K_Unity差分ロード整理.md`(差分ロード・初期ロード完了)、`M_地形プロップ.md`、`programs/コンポーネント連携.md`(起動順序・ローカルAPIの認証・セッション・Steam認証・カメラ同期)、`programs/IPC連携の整理.md`、`geometries/U_天気と環境光.md`、`programs/サウンドシステム.md`。
 
 ## フロントの版
 

@@ -135,10 +135,10 @@ public class AppRoot : MonoBehaviour
 
             if (GameStateManager.Instance != null && BackendCompatibility.Compatible && IpcClient.Instance != null && IpcClient.Instance.ProtocolCompatible)
             {
-                using (var req = UnityWebRequest.Get($"{ApiClient.BASE_URL}/sessions"))
+                using (ApiRequest call = ApiClient.Request("GET", "/sessions", timeoutSeconds: 5))
                 {
-                    req.timeout = 5;
-                    yield return req.SendWebRequest();
+                    yield return call.Send();
+                    UnityWebRequest req = call.Web;
                     if (req.result == UnityWebRequest.Result.Success)
                     {
                         try
@@ -185,6 +185,7 @@ public class AppRoot : MonoBehaviour
     /// <summary>
     /// 一定間隔でバックエンドのセッションエンドポイントに問い合わせ、生存確認を行う。
     /// 2回連続で通信に失敗した場合はアプリケーションを終了する。
+    /// 認証トークンの拒否(401)も失敗に数えるので、要求は必ず ApiClient を通してヘッダーを付ける。
     /// 本番ビルド（非 Development Build）でのみ有効。
     /// </summary>
     private IEnumerator BackendHealthPolling()
@@ -194,10 +195,10 @@ public class AppRoot : MonoBehaviour
         {
             yield return new WaitForSeconds(5f);
 
-            using (var req = UnityWebRequest.Get($"{ApiClient.BASE_URL}/sessions"))
+            using (ApiRequest call = ApiClient.Request("GET", "/sessions", timeoutSeconds: 10))
             {
-                req.timeout = 10;
-                yield return req.SendWebRequest();
+                yield return call.Send();
+                UnityWebRequest req = call.Web;
 
                 if (req.result == UnityWebRequest.Result.Success)
                 {

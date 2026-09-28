@@ -2,19 +2,6 @@
   "terrain3dPreview": {
     "waitingForEditor": "지형 에디터에서 불러오기를 기다리는 중…"
   },
-  "editor": {
-    "originalTerrains": "원본 지형",
-    "originalTerrainsHelp": "순수한 지형 데이터입니다",
-    "gameTerrains": "기존 맵 편집",
-    "terrainTab": "지형 에디터",
-    "scenarioTab": "시나리오 에디터",
-    "addNewTerrain": "새 지형 추가",
-    "creating": "작성 중...",
-    "createFailed": "새 지형 작성에 실패했습니다",
-    "copying": "복사 중...",
-    "copyFailed": "지형 데이터를 가져오지 못했습니다",
-    "gameTerrainsHelp": "강, 자원, 프롭 등이 포함됩니다"
-  },
   "groundCover": {
     "label": "지표 유형",
     "hint": "게임 내 지표의 색과 질감, 2D 지도의 배색을 바꿉니다. 시뮬레이션에는 영향을 주지 않습니다.",

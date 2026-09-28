@@ -276,39 +276,31 @@ public class MasterDataStore : MonoBehaviour
 	private IEnumerator InitializeAttempt(Action<bool> onComplete)
 	{
 		// 並列でリクエストを開始
-		var productsReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/products");
-		var pathsReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/paths");
-		var transitReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/transit");
-		var pathTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/path_types");
-		var agentsReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/agents");
-		var subBuildingsReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/subbuildings");
-		var landmarksReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/landmarks");
-		var buildingTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/bd_types");
-		var parcelTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/parcel_types");
-		var agentTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/agent_types");
-
-		var opProducts = productsReq.SendWebRequest();
-		var opPaths = pathsReq.SendWebRequest();
-		var opTransit = transitReq.SendWebRequest();
-		var opPathTypes = pathTypesReq.SendWebRequest();
-		var opAgents = agentsReq.SendWebRequest();
-		var opSubBuildings = subBuildingsReq.SendWebRequest();
-		var opLandmarks = landmarksReq.SendWebRequest();
-		var opBuildingTypes = buildingTypesReq.SendWebRequest();
-		var opParcelTypes = parcelTypesReq.SendWebRequest();
-		var opAgentTypes = agentTypesReq.SendWebRequest();
+		var productsCall = ApiClient.Request("GET", "/master/products").Begin();
+		var pathsCall = ApiClient.Request("GET", "/master/paths").Begin();
+		var transitCall = ApiClient.Request("GET", "/master/transit").Begin();
+		var pathTypesCall = ApiClient.Request("GET", "/master/path_types").Begin();
+		var agentsCall = ApiClient.Request("GET", "/master/agents").Begin();
+		var subBuildingsCall = ApiClient.Request("GET", "/master/subbuildings").Begin();
+		var landmarksCall = ApiClient.Request("GET", "/master/landmarks").Begin();
+		var buildingTypesCall = ApiClient.Request("GET", "/master/bd_types").Begin();
+		var parcelTypesCall = ApiClient.Request("GET", "/master/parcel_types").Begin();
+		var agentTypesCall = ApiClient.Request("GET", "/master/agent_types").Begin();
+		var calls = new[] { productsCall, pathsCall, transitCall, pathTypesCall, agentsCall, subBuildingsCall, landmarksCall, buildingTypesCall, parcelTypesCall, agentTypesCall };
 
 		// すべて完了を待つ
-		yield return opProducts;
-		yield return opPaths;
-		yield return opTransit;
-		yield return opPathTypes;
-		yield return opAgents;
-		yield return opSubBuildings;
-		yield return opLandmarks;
-		yield return opBuildingTypes;
-		yield return opParcelTypes;
-		yield return opAgentTypes;
+		foreach (var call in calls) yield return call.Send();
+
+		var productsReq = productsCall.Web;
+		var pathsReq = pathsCall.Web;
+		var transitReq = transitCall.Web;
+		var pathTypesReq = pathTypesCall.Web;
+		var agentsReq = agentsCall.Web;
+		var subBuildingsReq = subBuildingsCall.Web;
+		var landmarksReq = landmarksCall.Web;
+		var buildingTypesReq = buildingTypesCall.Web;
+		var parcelTypesReq = parcelTypesCall.Web;
+		var agentTypesReq = agentTypesCall.Web;
 
 		// Products
 		if (productsReq.result == UnityWebRequest.Result.Success)
@@ -512,6 +504,7 @@ public class MasterDataStore : MonoBehaviour
 			parcelTypesReq.result == UnityWebRequest.Result.Success &&
 			agentTypesReq.result == UnityWebRequest.Result.Success;
 
+		foreach (var call in calls) call.Dispose();
 		onComplete(allSucceeded);
 	}
 

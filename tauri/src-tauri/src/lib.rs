@@ -2,7 +2,6 @@ mod ipc;
 mod messages;
 mod settings;
 mod state;
-mod terrain_export_paths;
 mod window;
 mod version;
 
@@ -35,8 +34,7 @@ fn api_base_url() -> String {
         return url;
     }
     // genesis.py(スーパーバイザ)経由で起動された場合は GENESIS_API_PORT が渡される。
-    // find_free_port により 5000 以外のポートになることがあるため必ずこれを読む
-    // (以前はこの env を読んでおらず、5000 が使用中の環境で接続先を誤るバグがあった)。
+    // find_free_port により 5000 以外のポートになることがあるため必ずこれを読む。
     let port = std::env::var("GENESIS_API_PORT")
         .ok()
         .and_then(|p| p.parse::<u16>().ok())
@@ -603,14 +601,10 @@ async fn start_load_game(
     Ok(())
 }
 
-/// セーブデータの保存先ディレクトリをOSのファイルエクスプローラー等で開く。
+/// セーブデータの保存先ディレクトリ(`<ユーザーフォルダ>/saves`。コアの CITY_SAVE_DIR と同じ)をOSのファイルエクスプローラー等で開く。
 #[tauri::command]
-async fn open_save_directory(app: tauri::AppHandle) -> Result<(), String> {
-    let local_data = app.path().app_local_data_dir().map_err(|e| e.to_string())?;
-    let base = local_data
-        .parent()
-        .ok_or_else(|| "ローカルデータディレクトリの親を解決できません".to_string())?;
-    let dir = base.join("UrbanGenesis").join("saves");
+async fn open_save_directory() -> Result<(), String> {
+    let dir = version::user_data_dir().ok_or("ユーザーフォルダを解決できません")?.join("saves");
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
 
     #[cfg(target_os = "windows")]
@@ -638,212 +632,240 @@ async fn open_save_directory(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
-/// 地形エディタの作業コピー保存先ディレクトリを解決する。
+/// 地形エディタの作業コピーの置き場(`<ユーザーフォルダ>/terrain_editor/`)を返す。
 ///
-/// ファイル配置.md で定義された AppData 共通ディレクトリ(UrbanGenesis/) 配下の
-/// terrain_editor/ を返す。バックエンド(Python)が管理する saves/ や templates/ と
-/// 同一の UrbanGenesis/ ルートを共有するが、Tauri が独立して管理する領域である。
-///
-/// Tauri の app_local_data_dir() は OS ローカルデータディレクトリ配下の
-/// バンドル識別子(com.citygenesis.ui)を返すため、親ディレクトリに遡ってから
-/// UrbanGenesis/terrain_editor を結合することで、バックエンドとパスを統一する。
-fn terrain_editor_dir(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
-    let local_data = app.path().app_local_data_dir().map_err(|e| e.to_string())?;
-    let base = local_data
-        .parent()
-        .ok_or_else(|| "ローカルデータディレクトリの親を解決できません".to_string())?;
-    let dir = base.join("UrbanGenesis").join("terrain_editor");
+/// 作業コピーはウィンドウ間の初期データ受け渡し専用で、シナリオへの反映は save_scenario_terrain(コアの PUT)だけが行う
+/// (保存に成功したら、作業コピーも保存した内容に合わせる)。
+fn terrain_editor_dir() -> Result<std::path::PathBuf, String> {
+    let dir = version::user_data_dir().ok_or("ユーザーフォルダを解決できません")?.join("terrain_editor");
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
     Ok(dir)
 }
 
-/// レスポンスヘッダの値を f64 として取得する。失敗時は 0.0。
-fn header_f64(res: &reqwest::Response, name: &str) -> f64 {
-    res.headers()
-        .get(name)
-        .and_then(|v| v.to_str().ok())
-        .and_then(|s| s.parse::<f64>().ok())
-        .unwrap_or(0.0)
+/// 作業コピーのID(= ディレクトリ名)か。`Uuid::to_string()` と同じ小文字・ハイフン区切りの形だけを通し、
+/// 区切り文字や `..` で terrain_editor/ の外を指させない。
+fn is_terrain_editor_id(id: &str) -> bool {
+    uuid::Uuid::parse_str(id).is_ok_and(|parsed| parsed.to_string() == id)
 }
 
-/// 地形エディタの編集対象として、指定マップの近景標高マップをバックエンドから取得し、
-/// ローカル(AppData)に作業コピーを保存する。
-///
-/// 地形編集はこのローカルコピーに対して行われ、バックエンドには書き戻さない。
-/// 原本は標高だけを新しいIDへ複製し、ゲームへの反映はエクスポートで行う。
-#[tauri::command]
-async fn copy_terrain_for_editor(
-    app: tauri::AppHandle,
-    state: tauri::State<'_, SharedState>,
-    map_id: String,
-    original: Option<bool>,
-) -> Result<String, String> {
-    let api_base_url = {
-        let guard = state.lock();
-        guard.api_base_url.clone()
-    };
-    let base = api_base_url.trim_end_matches('/');
-    let original = original.unwrap_or(false);
-    let url = format!("{}/api/v1/terrain/maps/{}/near?original={}", base, map_id, original);
-
-    let client = version::client();
-    let res = client
-        .get(&url)
-        .timeout(Duration::from_secs(60))
-        .send()
-        .await
-        .map_err(|e| format!("地形データの取得に失敗しました: {e}"))?;
-    if !res.status().is_success() {
-        return Err(format!(
-            "地形データの取得に失敗しました: HTTP {}",
-            res.status()
-        ));
+fn terrain_editor_copy_dir(editor_id: &str) -> Result<std::path::PathBuf, String> {
+    if !is_terrain_editor_id(editor_id) {
+        return Err(format!("地形エディタの作業コピーのIDが不正です: {editor_id}"));
     }
-
-    let map_width = header_f64(&res, "X-Map-Width");
-    let map_height = header_f64(&res, "X-Map-Height");
-    let near_spacing = header_f64(&res, "X-Near-Spacing");
-    let far_spacing = header_f64(&res, "X-Far-Spacing");
-    let cell_size = header_f64(&res, "X-Cell-Size");
-    let grid_rows = header_f64(&res, "X-Grid-Rows");
-    let grid_cols = header_f64(&res, "X-Grid-Cols");
-
-    let bytes = res
-        .bytes()
-        .await
-        .map_err(|e| format!("地形データの読み込みに失敗しました: {e}"))?;
-
-    // 登録マップの配置定義を取得し、編集中の都市とは独立した作業コピーへ持ち込む。
-    let props: serde_json::Value = if original {
-        serde_json::json!({"instances": [], "scatters": []})
-    } else {
-        client
-            .get(format!("{}/api/v1/terrain/maps/{}/props", base, map_id))
-            .timeout(Duration::from_secs(60))
-            .send()
-            .await
-            .map_err(|e| format!("プロップ定義の取得に失敗しました: {e}"))?
-            .error_for_status()
-            .map_err(|e| format!("プロップ定義の取得に失敗しました: {e}"))?
-            .json()
-            .await
-            .map_err(|e| format!("プロップ定義の読み込みに失敗しました: {e}"))?
-    };
-
-    let resource_document: serde_json::Value = if original {
-        serde_json::json!({"resources": []})
-    } else {
-        client
-            .get(format!("{}/api/v1/terrain/maps/{}/resources", base, map_id))
-            .timeout(Duration::from_secs(60))
-            .send()
-            .await
-            .map_err(|e| format!("資源定義の取得に失敗しました: {e}"))?
-            .error_for_status()
-            .map_err(|e| format!("資源定義の取得に失敗しました: {e}"))?
-            .json()
-            .await
-            .map_err(|e| format!("資源定義の読み込みに失敗しました: {e}"))?
-    };
-    let resources = terrain_editor_resources(&resource_document)?;
-
-    let features: serde_json::Value = {
-        client
-            .get(format!("{}/api/v1/terrain/maps/{}/features?original={}", base, map_id, original))
-            .timeout(Duration::from_secs(60))
-            .send()
-            .await
-            .map_err(|e| format!("川・水面定義の取得に失敗しました: {e}"))?
-            .error_for_status()
-            .map_err(|e| format!("川・水面定義の取得に失敗しました: {e}"))?
-            .json()
-            .await
-            .map_err(|e| format!("川・水面定義の読み込みに失敗しました: {e}"))?
-    };
-
-    let map_id = if original {
-        format!("{}_{}", map_id, uuid::Uuid::new_v4())
-    } else {
-        map_id
-    };
-    // ウィンドウ再利用で前回の編集状態が残らないよう、取り込みごとに別のIDで開く。
-    let editor_id = uuid::Uuid::new_v4().to_string();
-    let map_dir = terrain_editor_dir(&app)?.join(&editor_id);
-    std::fs::create_dir_all(&map_dir).map_err(|e| e.to_string())?;
-
-    let meta = serde_json::json!({
-        "map_id": map_id,
-        "map_width": map_width,
-        "map_height": map_height,
-        "near_spacing": near_spacing,
-        "far_spacing": far_spacing,
-        "cell_size": cell_size,
-        "grid_rows": grid_rows,
-        "grid_cols": grid_cols,
-        "props": props,
-        "resources": resources,
-        "water_surfaces": features["water_surfaces"],
-        "rivers": features["rivers"],
-        "camera": features["camera"],
-        "background": features["background"],
-        "ground_cover": features["ground_cover"],
-        "climate": features["climate"],
-    });
-    std::fs::write(map_dir.join("meta.json"), meta.to_string())
-        .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
-    std::fs::write(map_dir.join("near.bin"), &bytes)
-        .map_err(|e| format!("near.bin の書き込みに失敗しました: {e}"))?;
-
-    log::info!("[copy_terrain_for_editor] map_id={} を保存しました", map_id);
-    Ok(editor_id)
+    Ok(terrain_editor_dir()?.join(editor_id))
 }
 
-/// 都市生成ローダーと同じ2種類の外形を受け入れ、資源の各フィールドは加工しない。
-fn terrain_editor_resources(document: &serde_json::Value) -> Result<&serde_json::Value, String> {
-    let resources = if document.is_array() {
-        document
-    } else {
-        document.get("resources").unwrap_or(&serde_json::Value::Null)
-    };
-    if !resources.is_array() {
-        return Err("資源定義の形式が不正です(resources配列が必要です)".to_string());
-    }
-    Ok(resources)
+fn read_terrain_editor_meta(dir: &std::path::Path) -> Result<Value, String> {
+    let text = std::fs::read_to_string(dir.join("meta.json"))
+        .map_err(|e| format!("meta.json の読み込みに失敗しました: {e}"))?;
+    serde_json::from_str(&text).map_err(|e| format!("meta.json の形式が不正です: {e}"))
 }
 
-#[cfg(test)]
-mod terrain_resource_import_tests {
-    use super::terrain_editor_resources;
-    use serde_json::json;
-
-    #[test]
-    fn preserves_resource_fields_in_both_supported_formats() {
-        let entries = json!([{
-            "id": "ore", "resource_type": 3, "max_amount": 123456.5,
-            "recovery_rate": 0.025,
-            "polygon": {"type": "Polygon", "coordinates": [[[0, 0], [10, 0], [10, 10], [0, 0]]]}
-        }]);
-        let document = json!({"version": 1, "resources": entries});
-        assert_eq!(terrain_editor_resources(&document).unwrap(), &entries);
-        assert_eq!(terrain_editor_resources(&entries).unwrap(), &entries);
-        assert_eq!(terrain_editor_resources(&json!({"resources": []})).unwrap(), &json!([]));
+/// 地形エディタのウィンドウが持つ作業コピーのID。表示中のものと、再利用待ち(非表示)を含む全体を返す。
+fn terrain_editor_window_ids(state: &SharedState) -> (Vec<String>, std::collections::HashSet<String>) {
+    let guard = state.lock();
+    let mut visible = Vec::new();
+    let mut all = std::collections::HashSet::new();
+    for window in guard.open_windows.values().filter(|w| w.window_type == "terrain_editor") {
+        let Some(id) = window.entity.as_ref().and_then(|e| e.id.clone()) else { continue };
+        if !window.hidden {
+            visible.push(id.clone());
+        }
+        all.insert(id);
     }
+    (visible, all)
+}
 
-    #[test]
-    fn rejects_missing_or_invalid_resource_array() {
-        for document in [json!(null), json!({}), json!({"resources": null}), json!({"resources": {}})] {
-            assert!(terrain_editor_resources(&document).is_err());
+/// どのウィンドウにも結び付かず、作ってから1時間を過ぎた作業コピーを消す。
+/// 作った直後(ウィンドウを開く前)のものを巻き込まないよう、経過時間でも絞る。
+fn remove_stale_terrain_editor_copies(root: &std::path::Path, referenced: &std::collections::HashSet<String>) {
+    let Ok(entries) = std::fs::read_dir(root) else { return };
+    for entry in entries.flatten() {
+        let name = entry.file_name().to_string_lossy().into_owned();
+        let stale = entry
+            .metadata()
+            .and_then(|metadata| metadata.modified())
+            .ok()
+            .and_then(|modified| modified.elapsed().ok())
+            .is_some_and(|age| age > Duration::from_secs(3600));
+        if stale && is_terrain_editor_id(&name) && !referenced.contains(&name) {
+            if let Err(e) = std::fs::remove_dir_all(entry.path()) {
+                log::warn!("古い地形エディタの作業コピーを削除できません: {name}: {e}");
+            }
         }
     }
 }
 
-/// 地形エディタが表示・編集するためのローカル作業コピーを読み込む。
+/// シナリオの地形 API(`/api/v1/scenarios/{id}/terrain`)の URL。ID はパスの1区間として符号化する。
+fn scenario_terrain_url(state: &SharedState, scenario_id: &str) -> Result<reqwest::Url, String> {
+    let base = state.lock().api_base_url.clone();
+    let mut url = reqwest::Url::parse(&format!("{}/api/v1/scenarios/", base.trim_end_matches('/')))
+        .map_err(|e| e.to_string())?;
+    url.path_segments_mut()
+        .map_err(|_| "invalid API URL")?
+        .pop_if_empty()
+        .push(scenario_id)
+        .push("terrain");
+    Ok(url)
+}
+
+/// コアのエラー応答を「CODE: 本文」の文字列にする。UI は先頭のコードで翻訳文を引く(`utils/saves.ts` の saveError)。
+async fn scenario_api_error(response: reqwest::Response) -> String {
+    let status = response.status();
+    let data: Value = response.json().await.unwrap_or(Value::Null);
+    let body = data.get("detail").filter(|detail| detail.is_object()).unwrap_or(&data);
+    match body.get("code").and_then(Value::as_str) {
+        Some(code) => format!("{code}: {}", body.get("message").and_then(Value::as_str).unwrap_or_default()),
+        None => format!("HTTP {status}"),
+    }
+}
+
+/// GET /api/v1/scenarios/{id}/terrain の応答。契約の正はコアのシナリオ地形 API。
+#[derive(serde::Deserialize)]
+struct ScenarioTerrainDocument {
+    settings: ScenarioTerrainSettings,
+    /// float16 LE の近景標高(行優先、grid_rows×grid_cols)を base64 にしたもの。
+    near_base64: String,
+    #[serde(default)]
+    water_surfaces: Value,
+    #[serde(default)]
+    rivers: Value,
+    #[serde(default)]
+    resources: Value,
+    #[serde(default)]
+    props: Value,
+    #[serde(default)]
+    camera: Value,
+    #[serde(default)]
+    ground_cover: Value,
+    #[serde(default)]
+    climate: Value,
+    #[serde(default)]
+    terrain_map_id: Value,
+    #[serde(default)]
+    title: Value,
+    locks: ScenarioTerrainLocks,
+}
+
+#[derive(serde::Deserialize)]
+struct ScenarioTerrainSettings {
+    map_width: f64,
+    map_height: f64,
+    near_spacing: f64,
+    far_spacing: f64,
+    cell_size: f64,
+    grid_rows: f64,
+    grid_cols: f64,
+}
+
+/// 建設物(道路・建物・造成跡・埋立)があるシナリオでは標高・水面・川を変えられない。reasons は理由コードの一覧。
+#[derive(serde::Deserialize, serde::Serialize)]
+struct ScenarioTerrainLocks {
+    heights_locked: bool,
+    #[serde(default)]
+    reasons: Vec<Value>,
+}
+
+/// GET 応答から作業コピー(meta.json の内容と near.bin のバイト列)を作る。標高のバイト数が格子と合わなければ拒否する。
+fn scenario_terrain_working_copy(scenario_id: &str, document: ScenarioTerrainDocument) -> Result<(Value, Vec<u8>), String> {
+    use base64::Engine;
+    let ScenarioTerrainDocument {
+        settings, near_base64, water_surfaces, rivers, resources, props, camera,
+        ground_cover, climate, terrain_map_id, title, locks,
+    } = document;
+    let near = base64::engine::general_purpose::STANDARD
+        .decode(&near_base64)
+        .map_err(|e| format!("標高データのデコードに失敗しました: {e}"))?;
+    let grid = |count: f64| (count.fract() == 0.0 && (2.0..=u32::MAX as f64).contains(&count)).then_some(count as u64);
+    let (rows, cols) = (grid(settings.grid_rows), grid(settings.grid_cols));
+    let expected = rows.zip(cols).and_then(|(rows, cols)| rows.checked_mul(cols)?.checked_mul(2));
+    let (Some(rows), Some(cols)) = (rows, cols) else {
+        return Err(format!("標高データの格子数が不正です({}×{})", settings.grid_cols, settings.grid_rows));
+    };
+    if expected != Some(near.len() as u64) {
+        return Err(format!("標高データのサイズが格子({cols}×{rows})と一致しません({} バイト)", near.len()));
+    }
+    let array = |value: Value| if value.is_array() { value } else { Value::Array(Vec::new()) };
+    let props = if props.is_object() { props } else { serde_json::json!({"instances": [], "scatters": []}) };
+    let meta = serde_json::json!({
+        "scenario_id": scenario_id,
+        "terrain_map_id": terrain_map_id,
+        "title": title,
+        "locks": locks,
+        "map_width": settings.map_width,
+        "map_height": settings.map_height,
+        "near_spacing": settings.near_spacing,
+        "far_spacing": settings.far_spacing,
+        "cell_size": settings.cell_size,
+        "grid_rows": rows,
+        "grid_cols": cols,
+        "water_surfaces": array(water_surfaces),
+        "rivers": array(rivers),
+        "resources": array(resources),
+        "props": props,
+        "camera": camera,
+        "ground_cover": ground_cover,
+        "climate": climate,
+    });
+    Ok((meta, near))
+}
+
+/// シナリオの地形を地形エディタの作業コピーへ書き出し、作業コピーのID(editor_id)を返す。
 ///
-/// copy_terrain_for_editor で保存した meta.json と near.bin を読み込み、
-/// 標高データは base64 文字列として返す(float16 LE バイト列)。
+/// 同じシナリオの地形エディタが表示中ならそのIDを返す(開き直しで未保存の編集を捨てず、
+/// 2枚のウィンドウの保存が互いを上書きしないようにする)。ゲームのセッション中はコアが 409 SESSION_ACTIVE で断る。
+#[tauri::command]
+async fn prepare_scenario_terrain_editor(
+    state: tauri::State<'_, SharedState>,
+    scenario_id: String,
+) -> Result<String, String> {
+    let root = terrain_editor_dir()?;
+    let (visible, referenced) = terrain_editor_window_ids(state.inner());
+    let opened = visible.into_iter().find(|id| {
+        is_terrain_editor_id(id)
+            && read_terrain_editor_meta(&root.join(id)).is_ok_and(|meta| meta["scenario_id"] == scenario_id.as_str())
+    });
+    if let Some(editor_id) = opened {
+        return Ok(editor_id);
+    }
+    remove_stale_terrain_editor_copies(&root, &referenced);
+
+    let url = scenario_terrain_url(state.inner(), &scenario_id)?;
+    let response = version::client()
+        .get(url)
+        .timeout(Duration::from_secs(120))
+        .send()
+        .await
+        .map_err(|e| format!("シナリオの地形を取得できません: {e}"))?;
+    if !response.status().is_success() {
+        return Err(scenario_api_error(response).await);
+    }
+    let document: ScenarioTerrainDocument = response
+        .json()
+        .await
+        .map_err(|e| format!("シナリオの地形の形式が不正です: {e}"))?;
+    let (meta, near) = scenario_terrain_working_copy(&scenario_id, document)?;
+
+    let editor_id = uuid::Uuid::new_v4().to_string();
+    let dir = root.join(&editor_id);
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    std::fs::write(dir.join("near.bin"), &near)
+        .map_err(|e| format!("near.bin の書き込みに失敗しました: {e}"))?;
+    std::fs::write(dir.join("meta.json"), meta.to_string())
+        .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
+    log::info!("[prepare_scenario_terrain_editor] scenario_id={} editor_id={}", scenario_id, editor_id);
+    Ok(editor_id)
+}
+
+/// load_terrain_editor_data の戻り値。作業コピーの meta.json に、near.bin を base64 にした標高を加えたもの。
+/// 水面・川・資源・プロップ・カメラの形式の正は公開docs `D_地形形状.md` §D.11〜D.13。
 #[derive(serde::Serialize)]
 struct TerrainEditorData {
-    map_id: String,
+    scenario_id: String,
+    terrain_map_id: Value,
+    title: Value,
+    /// `{heights_locked, reasons}`。heights_locked なら標高・水面・川を保存できない。
+    locks: Value,
     map_width: f64,
     map_height: f64,
     near_spacing: f64,
@@ -853,530 +875,280 @@ struct TerrainEditorData {
     grid_cols: u32,
     /// float16 LE バイト列を base64 エンコードした文字列。
     data_base64: String,
-    /// 水面ポリゴン(海面以外の湖など)の一覧。meta.json の water_surfaces をそのまま返す。
-    /// 各要素は {id, water_level, kind, polygon(GeoJSONライク)}。未設定なら空配列。
-    water_surfaces: serde_json::Value,
-    /// 川の一覧。meta.json の rivers をそのまま返す。
-    /// 各要素は {id, kind, centerline, widths, surface_offsets, footprint}(RiverPayload)。
-    /// 未設定なら空配列。仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.11。
-    rivers: serde_json::Value,
-    /// 天然資源エリアの一覧。meta.json の resources をそのまま返す。
-    /// 各要素は {id, resource_type, max_amount, recovery_rate, polygon(GeoJSONライク)}
-    /// (ResourceAreaPayload)。未設定なら空配列。仕様の正は同 §D.12。
-    resources: serde_json::Value,
-    props: serde_json::Value,
-    /// カメラ初期状態 {x, y, z, yaw, pitch}(TerrainCameraPayload)。未設定なら null。
-    /// 仕様の正は同 §D.13。
-    camera: serde_json::Value,
-    background: serde_json::Value,
-    /// 地表種別(GROUND_COVER_*)。未設定なら null で、フロントエンドが草原として扱う。仕様の正は同 §D.15。
-    ground_cover: serde_json::Value,
-    /// 気候区分(CLIMATE_*)。未設定なら null で、フロントエンドが温暖湿潤として扱う。仕様の正は同 §D.16。
-    climate: serde_json::Value,
+    water_surfaces: Value,
+    rivers: Value,
+    /// id は資源の DB ID の文字列。保存時はコアが ID で差分適用する(無い ID は新規)。
+    resources: Value,
+    props: Value,
+    /// 未設定なら null。
+    camera: Value,
+    /// 未設定なら null で、フロントエンドが草原として扱う。
+    ground_cover: Value,
+    /// 未設定なら null で、フロントエンドが温暖湿潤として扱う。
+    climate: Value,
 }
 
+/// 地形エディタの作業コピーを読み込む。near.bin は大きいので、メインスレッドを塞がないよう非同期コマンドにしている。
 #[tauri::command]
-fn load_terrain_editor_data(
-    app: tauri::AppHandle,
-    map_id: String,
-) -> Result<TerrainEditorData, String> {
+async fn load_terrain_editor_data(editor_id: String) -> Result<TerrainEditorData, String> {
     use base64::Engine;
-    let map_dir = terrain_editor_dir(&app)?.join(&map_id);
-    let meta_str = std::fs::read_to_string(map_dir.join("meta.json"))
-        .map_err(|e| format!("meta.json の読み込みに失敗しました: {e}"))?;
-    let meta: serde_json::Value =
-        serde_json::from_str(&meta_str).map_err(|e| e.to_string())?;
-    let bytes = std::fs::read(map_dir.join("near.bin"))
+    let dir = terrain_editor_copy_dir(&editor_id)?;
+    let meta = read_terrain_editor_meta(&dir)?;
+    let bytes = std::fs::read(dir.join("near.bin"))
         .map_err(|e| format!("near.bin の読み込みに失敗しました: {e}"))?;
-
-    let data_base64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+    let number = |key: &str| meta.get(key).and_then(Value::as_f64).unwrap_or(0.0);
+    let value = |key: &str| meta.get(key).cloned().unwrap_or(Value::Null);
+    let array = |key: &str| meta.get(key).filter(|v| v.is_array()).cloned().unwrap_or_else(|| Value::Array(Vec::new()));
     Ok(TerrainEditorData {
-        map_id: meta
-            .get("map_id")
-            .and_then(|v| v.as_str())
-            .unwrap_or(&map_id)
-            .to_string(),
-        map_width: meta
-            .get("map_width")
-            .and_then(|v| v.as_f64())
-            .unwrap_or(0.0),
-        map_height: meta
-            .get("map_height")
-            .and_then(|v| v.as_f64())
-            .unwrap_or(0.0),
-        near_spacing: meta
-            .get("near_spacing")
-            .and_then(|v| v.as_f64())
-            .unwrap_or(0.0),
-        far_spacing: meta
-            .get("far_spacing")
-            .and_then(|v| v.as_f64())
-            .unwrap_or(0.0),
-        cell_size: meta
-            .get("cell_size")
-            .and_then(|v| v.as_f64())
-            .unwrap_or(0.0),
-        grid_rows: meta
-            .get("grid_rows")
-            .and_then(|v| v.as_f64())
-            .unwrap_or(0.0) as u32,
-        grid_cols: meta
-            .get("grid_cols")
-            .and_then(|v| v.as_f64())
-            .unwrap_or(0.0) as u32,
-        data_base64,
-        water_surfaces: meta
-            .get("water_surfaces")
-            .cloned()
-            .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
-        rivers: meta
-            .get("rivers")
-            .cloned()
-            .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
-        resources: meta
-            .get("resources")
-            .cloned()
-            .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
+        scenario_id: meta.get("scenario_id").and_then(Value::as_str).unwrap_or_default().to_string(),
+        terrain_map_id: value("terrain_map_id"),
+        title: value("title"),
+        locks: value("locks"),
+        map_width: number("map_width"),
+        map_height: number("map_height"),
+        near_spacing: number("near_spacing"),
+        far_spacing: number("far_spacing"),
+        cell_size: number("cell_size"),
+        grid_rows: number("grid_rows") as u32,
+        grid_cols: number("grid_cols") as u32,
+        data_base64: base64::engine::general_purpose::STANDARD.encode(&bytes),
+        water_surfaces: array("water_surfaces"),
+        rivers: array("rivers"),
+        resources: array("resources"),
         props: meta
             .get("props")
+            .filter(|v| v.is_object())
             .cloned()
             .unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []})),
-        camera: meta.get("camera").cloned().unwrap_or(serde_json::Value::Null),
-        background: meta.get("background").cloned().unwrap_or(serde_json::Value::Null),
-        ground_cover: meta.get("ground_cover").cloned().unwrap_or(serde_json::Value::Null),
-        climate: meta.get("climate").cloned().unwrap_or(serde_json::Value::Null),
+        camera: value("camera"),
+        ground_cover: value("ground_cover"),
+        climate: value("climate"),
     })
 }
 
-/// 新しい地形を作成し、地形エディタ用の作業コピーを初期化する。
-///
-/// 最小サイズ(2×2セル、1000m×1000m)の標高マップを標高-10mで生成し、
-/// ローカル(AppData)に作業コピーとして保存する。生成したマップIDを返す。
-/// マップリサイズは 2*cell_size 刻みのため、初期マップは 2*cell_size 以上である必要がある。
-#[tauri::command]
-fn create_new_terrain_for_editor(app: tauri::AppHandle) -> Result<String, String> {
-    let map_id = uuid::Uuid::new_v4().to_string();
-
-    let near_spacing = 10.0f64;
-    let far_spacing = 200.0f64;
-    let cell_size = 500.0f64;
-    let cells_x = 2u32;
-    let cells_y = 2u32;
-    let map_width = cell_size * cells_x as f64;   // 1000m
-    let map_height = cell_size * cells_y as f64;   // 1000m
-    let grid_cols = (map_width / near_spacing) as u32 + 1;   // 101
-    let grid_rows = (map_height / near_spacing) as u32 + 1;  // 101
-
-    // 標高-10.0 を float16 LE バイト列にする(-10.0 = 0xC900 LE → [0x00, 0xC9])
-    let elev_f16: u16 = 0xC900;
-    let lo = (elev_f16 & 0xFF) as u8;
-    let hi = ((elev_f16 >> 8) & 0xFF) as u8;
-    let sample = [lo, hi];
-    let count = (grid_rows * grid_cols) as usize;
-    let mut bytes = Vec::with_capacity(count * 2);
-    for _ in 0..count {
-        bytes.extend_from_slice(&sample);
-    }
-
-    let map_dir = terrain_editor_dir(&app)?.join(&map_id);
-    std::fs::create_dir_all(&map_dir).map_err(|e| e.to_string())?;
-
-    let meta = serde_json::json!({
-        "map_id": map_id,
-        "map_width": map_width,
-        "map_height": map_height,
-        "near_spacing": near_spacing,
-        "far_spacing": far_spacing,
-        "cell_size": cell_size,
-        "grid_rows": grid_rows,
-        "grid_cols": grid_cols,
-    });
-    std::fs::write(map_dir.join("meta.json"), meta.to_string())
-        .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
-    std::fs::write(map_dir.join("near.bin"), &bytes)
-        .map_err(|e| format!("near.bin の書き込みに失敗しました: {e}"))?;
-
-    log::info!(
-        "[create_new_terrain_for_editor] map_id={} を作成しました ({}x{} cells, {}x{} grid, {}m x {}m)",
-        map_id, cells_x, cells_y, grid_cols, grid_rows, map_width, map_height
-    );
-    Ok(map_id)
+/// PUT /api/v1/scenarios/{id}/terrain の応答のうち、地形エディタが使う項目。
+#[derive(serde::Deserialize, serde::Serialize)]
+struct ScenarioTerrainSaveResult {
+    content_revision: i64,
+    /// 保存前に判定したロック。
+    locks: ScenarioTerrainLocks,
+    /// 今回新しく作った資源の {エディタ側の仮ID: DB の ID の文字列}。
+    resource_ids: std::collections::HashMap<String, String>,
 }
 
-/// export_terrain_as_npy の戻り値。terrain_maps.yaml への追記可否をフロントに伝えるために使う。
-#[derive(serde::Serialize)]
-struct ExportTerrainResult {
-    /// エクスポート先ディレクトリに terrain_maps.yaml が見つかり、エントリを追記/上書きできたか。
-    /// false の場合、フロントエンドは「terrain_maps.yaml が見つからない」旨の通知を出す。
-    yaml_updated: bool,
-}
-
-/// 地形エディタで編集中の標高データを、バックエンドが読み込める .npy ファイルへ変換して書き出す。
-///
-/// フロントエンドから受け取る標高データは既に .npy の data 部と同じ float16 リトルエンディアンの
-/// 生バイト列なので、変換は build_npy_float16 でヘッダを被せるだけで完結する(外部プロセスや
-/// 一時ファイルは介さない)。
-///
-/// エクスポート先と同じディレクトリに terrain_maps.yaml が存在する場合は、そのマップのエントリを
-/// 追記(同じ map_id が既にあれば上書き)する。存在しなければ何もせず、戻り値の yaml_updated を
-/// false にしてフロントエンドに伝える(フロントエンド側で「見つからない」旨の通知を出す)。
-#[tauri::command]
-fn export_terrain_as_npy(
-    map_id: String,
-    map_width: f64,
-    map_height: f64,
-    near_spacing: f64,
-    far_spacing: f64,
-    cell_size: f64,
-    grid_rows: u32,
-    grid_cols: u32,
-    data_base64: String,
-    out_path: String,
-    thumbnail_base64: Option<String>,
-    water_surfaces: Option<serde_json::Value>,
-    rivers: Option<serde_json::Value>,
-    resources: Option<serde_json::Value>,
-    props: Option<serde_json::Value>,
-    camera: Option<serde_json::Value>,
-    background: Option<serde_json::Value>,
-    ground_cover: Option<i64>,
-    climate: Option<i64>,
-) -> Result<ExportTerrainResult, String> {
-    use base64::Engine;
-    // 付随JSONを含め、最初のファイルを書く前に原本への出力を拒否する。
-    let checked_path = terrain_export_paths::checked_export_path(std::path::Path::new(&out_path))?;
-    let out_path = checked_path.to_string_lossy().into_owned();
-    let bytes = base64::engine::general_purpose::STANDARD
-        .decode(&data_base64)
-        .map_err(|e| format!("標高データのデコードに失敗しました: {e}"))?;
-
-    let expected_len = (grid_rows as usize) * (grid_cols as usize) * 2;
-    if bytes.len() != expected_len {
-        return Err(format!(
-            "標高データのサイズが不正です(期待値: {expected_len} バイト、実際: {} バイト)",
-            bytes.len()
-        ));
-    }
-
-    let props = props.unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []}));
-    let props_doc = serde_json::json!({"version": 1, "props": props});
-    std::fs::write(std::path::Path::new(&out_path).with_extension("props.json"), props_doc.to_string())
-        .map_err(|e| format!("プロップ定義の書き込みに失敗しました: {e}"))?;
-
-    let npy = build_npy_float16(&bytes, grid_rows as usize, grid_cols as usize);
-    std::fs::write(&out_path, &npy)
-        .map_err(|e| format!(".npyファイルの書き込みに失敗しました: {e}"))?;
-
-    // サムネイル画像は .npy と同じファイル名(拡張子だけ.png)で同じディレクトリに書き出す。
-    // これは genesis-core側の terrain_registry が「.npyの拡張子をpngに置き換えた名前」を
-    // サムネイルパスの命名規則として前提にしているため(terrain_maps.yamlへの新規フィールド追加を避ける)。
-    if let Some(thumb_b64) = thumbnail_base64 {
-        let thumb_bytes = base64::engine::general_purpose::STANDARD
-            .decode(&thumb_b64)
-            .map_err(|e| format!("サムネイル画像のデコードに失敗しました: {e}"))?;
-        let thumb_path = std::path::Path::new(&out_path).with_extension("png");
-        std::fs::write(&thumb_path, &thumb_bytes)
-            .map_err(|e| format!("サムネイル画像の書き込みに失敗しました: {e}"))?;
-    }
-
-    // 水面ポリゴン(海面以外の湖など)は .npy と同じファイル名(拡張子だけ .water.json)で
-    // 同じディレクトリに書き出す。genesis-core側の terrain_registry.get_water_surfaces_path が
-    // 「.npyの拡張子を .water.json に置き換えた名前」を命名規則として前提にしているため
-    // (terrain_maps.yaml への新規フィールド追加を避ける)。水面が空でもファイルを書き出し、
-    // 以前のエクスポートで残った古い水面が読まれ続けるのを防ぐ。
-    {
-        let water_surfaces = water_surfaces.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
-        let water_doc = serde_json::json!({
-            "version": 1,
-            "water_surfaces": water_surfaces,
-        });
-        // out_path が "map_foo.npy" なら "map_foo.water.json" にする。
-        let water_path = std::path::Path::new(&out_path).with_extension("water.json");
-        std::fs::write(&water_path, water_doc.to_string())
-            .map_err(|e| format!("水面定義ファイルの書き込みに失敗しました: {e}"))?;
-    }
-
-    // 川は .npy と同じファイル名(拡張子だけ .rivers.json)で同じディレクトリに書き出す
-    // (.water.json と同じ命名規則・方針)。川床の彫り込み自体は標高データ(.npy)に含まれて
-    // おり、このファイルは川の範囲ポリゴン(polygon)と水面標高のプロファイル線(profile)を持つ。
-    // 川が無くてもファイルを書き出し、以前のエクスポートで残った古い川が読まれ続けるのを防ぐ。
-    // version 2 = 範囲ポリゴン方式(1 はスプライン帯方式で、バックエンドは読まない)。
-    // 仕様の正は D_地形形状.md §D.11。
-    {
-        let rivers = rivers.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
-        let rivers_doc = serde_json::json!({
-            "version": 2,
-            "rivers": rivers,
-        });
-        // out_path が "map_foo.npy" なら "map_foo.rivers.json" にする。
-        let rivers_path = std::path::Path::new(&out_path).with_extension("rivers.json");
-        std::fs::write(&rivers_path, rivers_doc.to_string())
-            .map_err(|e| format!("川定義ファイルの書き込みに失敗しました: {e}"))?;
-    }
-
-    // 天然資源エリアは .npy と同じファイル名(拡張子だけ .resources.json)で同じディレクトリに
-    // 書き出す(.water.json と同じ命名規則・方針)。genesis-core側の terrain_registry が
-    // この命名規則を前提に読み込み、新規都市の初期化時に資源エンティティとして配置する。
-    // 資源が無くてもファイルを書き出し、以前のエクスポートで残った古い資源が読まれ続けるのを防ぐ。
-    // 仕様の正は D_地形形状.md §D.12。
-    {
-        let resources = resources.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
-        let resources_doc = serde_json::json!({
-            "version": 1,
-            "resources": resources,
-        });
-        // out_path が "map_foo.npy" なら "map_foo.resources.json" にする。
-        let resources_path = std::path::Path::new(&out_path).with_extension("resources.json");
-        std::fs::write(&resources_path, resources_doc.to_string())
-            .map_err(|e| format!("資源定義ファイルの書き込みに失敗しました: {e}"))?;
-    }
-
-    log::info!("[export_terrain_as_npy] out_path={} へエクスポートしました", out_path);
-
-    // カメラ初期状態はサイドカーではなく terrain_maps.yaml のエントリ(camera:)に書く。
-    // 5つのスカラーだけなので専用ファイルを増やさず、バックエンドの terrain_registry が
-    // マップ定義の一部として読む。数値が揃っていない値は未設定として扱う。
-    let camera_spec: Option<TerrainCameraSpec> = camera
-        .and_then(|v| serde_json::from_value::<TerrainCameraSpec>(v).ok());
-
-    // エクスポート先と同じディレクトリの terrain_maps.yaml にエントリを追記する。
-    // 存在しなければ何もせず yaml_updated=false を返し、フロントエンドが通知を出す。
-    let out_path_buf = std::path::Path::new(&out_path);
-    let yaml_updated = match out_path_buf.parent() {
-        Some(dir) => {
-            let yaml_path = dir.join("terrain_maps.yaml");
-            if yaml_path.exists() {
-                let file_name = terrain_export_paths::registry_file_name(out_path_buf);
-                upsert_terrain_yaml_entry(
-                    &yaml_path,
-                    &map_id,
-                    file_name,
-                    near_spacing,
-                    map_width,
-                    map_height,
-                    near_spacing,
-                    far_spacing,
-                    cell_size,
-                    camera_spec.as_ref(),
-                    background.as_ref(),
-                    ground_cover,
-                    climate,
-                )?;
-                true
-            } else {
-                false
+/// 保存した内容を反映した作業コピーの meta.json。新しく作った資源は DB の ID に替える
+/// (作業コピーを読み直したときに仮IDのまま保存すると、コアが資源を削除して作り直すため)。
+/// 水面・川は送ったとき(null でないとき)だけ置き換える。コアも null を「変更しない」と扱う。
+fn saved_terrain_editor_meta(mut meta: Value, body: &Value, result: &ScenarioTerrainSaveResult) -> Value {
+    let mut resources = body["resources"].clone();
+    if let Some(entries) = resources.as_array_mut() {
+        for entry in entries.iter_mut().filter_map(Value::as_object_mut) {
+            let saved_id = entry.get("id").and_then(Value::as_str).and_then(|id| result.resource_ids.get(id)).cloned();
+            if let Some(saved_id) = saved_id {
+                entry.insert("id".into(), Value::String(saved_id));
             }
         }
-        None => false,
-    };
-
-    Ok(ExportTerrainResult { yaml_updated })
+    }
+    if let Some(fields) = meta.as_object_mut() {
+        for key in ["props", "camera", "ground_cover", "climate"] {
+            fields.insert(key.into(), body[key].clone());
+        }
+        for key in ["water_surfaces", "rivers"] {
+            if !body[key].is_null() {
+                fields.insert(key.into(), body[key].clone());
+            }
+        }
+        fields.insert("resources".into(), resources);
+        fields.insert("locks".into(), serde_json::to_value(&result.locks).unwrap_or(Value::Null));
+    }
+    meta
 }
 
-/// terrain_maps.yaml のエントリに書くカメラ初期状態(TerrainCameraPayload と同じ契約)。
-/// 位置はワールド座標(m)、yaw は北(+Z)を0とする時計回りの度、pitch は見下ろし角の度。
-#[derive(serde::Deserialize)]
-struct TerrainCameraSpec {
-    x: f64,
-    y: f64,
-    z: f64,
-    yaw: f64,
-    pitch: f64,
-}
-
-/// terrain_maps.yaml に1マップ分のエントリをテキストベースで追記/上書きする。
-///
-/// serde_yamlでパース→再シリアライズすると、既存の他エントリのコメント(`# 与論島`等)や
-/// 空行区切りが失われてしまう。terrain_maps.yaml はトップレベルキー(`{map_id}:`、行頭に
-/// インデントなし)ごとにブロックが並ぶ単純な構造であることを前提に、対象ブロックの行範囲
-/// だけをテキストとして置換/追記することで、無関係な箇所の見た目を変えない。
-///
-/// ブロックの開始位置は、キー行(`{id}:`)の直前に空行を挟まず連続するコメント行(`# 名前`等)
-/// があればそこまで遡ったものとする。これにより、次のエントリの見出しコメントを誤って
-/// 対象ブロックに含めてしまうことを避ける。
-#[allow(clippy::too_many_arguments)]
-fn upsert_terrain_yaml_entry(
-    yaml_path: &std::path::Path,
-    map_id: &str,
-    file_name: String,
-    src_spacing: f64,
-    map_width: f64,
-    map_height: f64,
-    near_map_spacing: f64,
-    far_map_spacing: f64,
-    cell_size: f64,
-    camera: Option<&TerrainCameraSpec>,
-    background: Option<&serde_json::Value>,
-    ground_cover: Option<i64>,
-    climate: Option<i64>,
+/// 保存に成功した内容で作業コピー(near.bin・meta.json)を書き換える。標高は送ったときだけ書く。
+fn write_saved_terrain_editor_copy(
+    dir: &std::path::Path,
+    meta: Value,
+    body: &Value,
+    result: &ScenarioTerrainSaveResult,
 ) -> Result<(), String> {
-    let original = std::fs::read_to_string(yaml_path)
-        .map_err(|e| format!("terrain_maps.yaml の読み込みに失敗しました: {e}"))?;
-    let lines: Vec<&str> = original.lines().collect();
-
-    // トップレベルキー行(行頭にインデントがなく、コメント/区切り線でもない `xxx:` 形式の行)を探す。
-    let is_top_level_key = |line: &str| -> Option<String> {
-        if line.is_empty() || line.starts_with(char::is_whitespace) || line.starts_with('#') || line.starts_with("---") {
-            return None;
-        }
-        let colon_pos = line.find(':')?;
-        let key = &line[..colon_pos];
-        if !key.is_empty() && key.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-') {
-            Some(key.to_string())
-        } else {
-            None
-        }
-    };
-
-    let key_line_idxs: Vec<usize> = lines
-        .iter()
-        .enumerate()
-        .filter(|(_, line)| is_top_level_key(line).is_some())
-        .map(|(i, _)| i)
-        .collect();
-
-    // 各キー行の「ブロック開始位置」= 直前に空行を挟まず連続するコメント行があればその先頭。
-    let block_start_of = |key_idx: usize| -> usize {
-        let mut start = key_idx;
-        while start > 0 && lines[start - 1].starts_with('#') {
-            start -= 1;
-        }
-        start
-    };
-
-    // カメラ初期状態が未設定ならキー自体を書かない(バックエンドは未設定=原点の既定視点)。
-    let camera_text = match camera {
-        Some(c) => format!(
-            "\n  camera:\n    x: {x:.1}\n    y: {y:.1}\n    z: {z:.1}\n    yaw: {yaw:.1}\n    pitch: {pitch:.1}",
-            x = c.x,
-            y = c.y,
-            z = c.z,
-            yaw = c.yaw,
-            pitch = c.pitch,
-        ),
-        None => String::new(),
-    };
-
-    // 背景は不変の原本を参照する。JSONのオブジェクト表記はYAMLでも有効。
-    let background_text = background.filter(|v| !v.is_null())
-        .map(|v| format!("\n  background: {v}")).unwrap_or_default();
-    // 地表種別(GROUND_COVER_*)は1つの整数。値の検証はバックエンドの terrain_registry が読み込み時に行う。
-    let ground_cover_text = ground_cover.map(|v| format!("\n  ground_cover: {v}")).unwrap_or_default();
-    // 気候区分(CLIMATE_*)も1つの整数で、検証はバックエンドの terrain_registry が読み込み時に行う。
-    let climate_text = climate.map(|v| format!("\n  climate: {v}")).unwrap_or_default();
-    let entry_text = format!(
-        "# {map_id}\n\
-         {map_id}:\n\
-        \x20 id: {map_id}\n\
-        \x20 name: {map_id}\n\
-        \x20 file_name: {file_name}\n\
-        \x20 src_spacing: {src_spacing:.1}\n\
-        \x20 settings:\n\
-        \x20   map_width: {map_width}\n\
-        \x20   map_height: {map_height}\n\
-        \x20   near_map_spacing: {near_map_spacing}\n\
-        \x20   far_map_spacing: {far_map_spacing}\n\
-        \x20   dynamic_map_spacing: 1\n\
-        \x20   cell_size: {cell_size}{camera_text}{background_text}{ground_cover_text}{climate_text}",
-        map_width = map_width as i64,
-        map_height = map_height as i64,
-        near_map_spacing = near_map_spacing as i64,
-        far_map_spacing = far_map_spacing as i64,
-        cell_size = cell_size as i64,
-    );
-
-    // 既存の同一IDブロックを探す。見つかればその範囲を置換、なければ末尾に追記する。
-    let existing_range = key_line_idxs.iter().enumerate().find_map(|(idx, &key_idx)| {
-        if is_top_level_key(lines[key_idx]).as_deref() == Some(map_id) {
-            let block_start = block_start_of(key_idx);
-            let mut block_end = key_line_idxs.get(idx + 1).map(|&next_key_idx| block_start_of(next_key_idx)).unwrap_or(lines.len());
-            // ブロック末尾の空行は置換対象から除外し、次のブロックとの間隔を保つ。
-            while block_end > block_start && lines[block_end - 1].trim().is_empty() {
-                block_end -= 1;
-            }
-            Some((block_start, block_end))
-        } else {
-            None
-        }
-    });
-
-    let mut new_lines: Vec<String> = lines.iter().map(|s| s.to_string()).collect();
-    let entry_lines: Vec<String> = entry_text.lines().map(|s| s.to_string()).collect();
-
-    if let Some((start, end)) = existing_range {
-        new_lines.splice(start..end, entry_lines);
-    } else {
-        // 末尾の空行を正規化してから、区切りの空行1つを挟んで新規ブロックを追記する。
-        while new_lines.last().map(|l| l.trim().is_empty()).unwrap_or(false) {
-            new_lines.pop();
-        }
-        new_lines.push(String::new());
-        new_lines.extend(entry_lines);
+    use base64::Engine;
+    if let Some(near) = body["near_base64"].as_str() {
+        let bytes = base64::engine::general_purpose::STANDARD
+            .decode(near)
+            .map_err(|e| format!("標高データのデコードに失敗しました: {e}"))?;
+        std::fs::write(dir.join("near.bin"), bytes).map_err(|e| format!("near.bin の書き込みに失敗しました: {e}"))?;
     }
+    std::fs::write(dir.join("meta.json"), saved_terrain_editor_meta(meta, body, result).to_string())
+        .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))
+}
 
-    let mut output = new_lines.join("\n");
-    output.push('\n');
-    std::fs::write(yaml_path, output).map_err(|e| format!("terrain_maps.yaml の書き込みに失敗しました: {e}"))
+/// 地形エディタの編集内容をシナリオへ保存する(PUT /api/v1/scenarios/{id}/terrain)。
+///
+/// 保存先のシナリオは作業コピーの meta.json から引き、UI からは受け取らない。標高・水面・川は、
+/// ロック中なら None(null)で送る決まりで、ここでも先に弾く。寸法の変更拒否などの最終判定はコアが行う。
+/// 成功したら作業コピーを保存した内容に合わせ、応答(版・ロック・新しい資源のID)を返す。
+#[tauri::command]
+async fn save_scenario_terrain(
+    state: tauri::State<'_, SharedState>,
+    editor_id: String,
+    near_base64: Option<String>,
+    water_surfaces: Option<Value>,
+    rivers: Option<Value>,
+    resources: Value,
+    props: Value,
+    camera: Option<Value>,
+    ground_cover: i64,
+    climate: i64,
+) -> Result<ScenarioTerrainSaveResult, String> {
+    let dir = terrain_editor_copy_dir(&editor_id)?;
+    let meta = read_terrain_editor_meta(&dir)?;
+    let scenario_id = meta["scenario_id"]
+        .as_str()
+        .filter(|id| !id.is_empty())
+        .ok_or("作業コピーにシナリオIDがありません")?
+        .to_string();
+    let heights_locked = meta["locks"]["heights_locked"].as_bool().unwrap_or(true);
+    if heights_locked && (near_base64.is_some() || water_surfaces.is_some() || rivers.is_some()) {
+        return Err("TERRAIN_LOCKED: 建設物があるシナリオでは標高・水面・川を保存できません".into());
+    }
+    let body = serde_json::json!({
+        "near_base64": near_base64,
+        "water_surfaces": water_surfaces,
+        "rivers": rivers,
+        "resources": resources,
+        "props": props,
+        "camera": camera,
+        "ground_cover": ground_cover,
+        "climate": climate,
+    });
+    let url = scenario_terrain_url(state.inner(), &scenario_id)?;
+    let response = version::client()
+        .put(url)
+        .json(&body)
+        .timeout(Duration::from_secs(600))
+        .send()
+        .await
+        .map_err(|e| format!("シナリオへ保存できません: {e}"))?;
+    if !response.status().is_success() {
+        return Err(scenario_api_error(response).await);
+    }
+    let result: ScenarioTerrainSaveResult = response
+        .json()
+        .await
+        .map_err(|e| format!("シナリオへの保存の応答の形式が不正です: {e}"))?;
+    log::info!(
+        "[save_scenario_terrain] scenario_id={} editor_id={} content_revision={} new_resources={}",
+        scenario_id, editor_id, result.content_revision, result.resource_ids.len()
+    );
+    if let Err(e) = write_saved_terrain_editor_copy(&dir, meta, &body, &result) {
+        log::warn!("[save_scenario_terrain] 作業コピーを保存した内容に合わせられません: {e}");
+    }
+    Ok(result)
 }
 
 #[cfg(test)]
-mod terrain_yaml_entry_tests {
-    use super::upsert_terrain_yaml_entry;
+mod terrain_editor_tests {
+    use super::{
+        is_terrain_editor_id, saved_terrain_editor_meta, scenario_terrain_working_copy, ScenarioTerrainDocument,
+        ScenarioTerrainSaveResult,
+    };
+    use serde_json::json;
 
-    const EXISTING: &str = "# island\nisland:\n  id: island\n  name: island\n  file_name: terrains/map_island.npy\n  src_spacing: 10.0\n  settings:\n    map_width: 1000\n    map_height: 1000\n    near_map_spacing: 10\n    far_map_spacing: 200\n    dynamic_map_spacing: 1\n    cell_size: 500\n";
+    const ID: &str = "0f8fad5b-d9cb-469f-a165-70867728950e";
 
-    /// 同じIDのブロックを置換する形で書き出し、書かれた内容を返す。
-    fn upsert() -> String {
-        let dir = std::env::temp_dir().join(format!("cg_yaml_test_{}", uuid::Uuid::new_v4()));
-        std::fs::create_dir_all(&dir).unwrap();
-        let path = dir.join("terrain_maps.yaml");
-        std::fs::write(&path, EXISTING).unwrap();
-        upsert_terrain_yaml_entry(
-            &path, "island", "terrains/map_island.npy".to_string(),
-            10.0, 1000.0, 1000.0, 10.0, 200.0, 500.0, None, Some(&serde_json::json!({"file_name":"terrains/original/bg.npy"})),
-            Some(2), Some(6),
-        ).unwrap();
-        let text = std::fs::read_to_string(&path).unwrap();
-        std::fs::remove_dir_all(&dir).ok();
-        text
-    }
-
-    /// 既存の同一IDブロックは重複追記されず、見出しコメントと settings を保ったまま置き換わる。
     #[test]
-    fn replaces_existing_block_in_place() {
-        let text = upsert();
-        assert_eq!(text.matches("\nisland:\n").count(), 1, "{text}");
-        assert!(text.starts_with("# island\n"), "{text}");
-        assert!(text.contains("    cell_size: 500\n"), "{text}");
-        assert!(text.contains("terrains/original/bg.npy"), "{text}");
-        assert!(text.contains("\n  ground_cover: 2\n  climate: 6\n"), "{text}");
+    fn editor_id_accepts_only_canonical_uuid() {
+        assert!(is_terrain_editor_id(ID));
+        for bad in [
+            String::new(),
+            "..".to_string(),
+            format!("../{ID}"),
+            format!("{ID}/.."),
+            ID.to_uppercase(),
+            ID.replace('-', ""),
+            format!("{{{ID}}}"),
+            format!("urn:uuid:{ID}"),
+        ] {
+            assert!(!is_terrain_editor_id(&bad), "{bad}");
+        }
     }
-}
 
-/// float16(リトルエンディアン)の生バイト列に NumPy の .npy(バージョン1.0)ヘッダを被せる。
-///
-/// 構造は「マジック(\x93NUMPY) + バージョン(1,0) + ヘッダ長(u16 LE) + ヘッダ辞書 + データ部」。
-/// ヘッダ辞書は改行で終わるASCII文字列で、データ部が64バイト境界から始まるよう空白で詰める
-/// (numpy自身の書き出し規約。np.load は境界に依存しないが、既存の assets/*.npy と
-/// バイナリ互換な体裁にしておく)。
-///
-/// dtype は '<f2' 固定。バックエンド(terrain_registry.build_near_map)は np.load した配列を
-/// float32へキャストしてから使うため、海底の負の標高もそのまま保持される。
-fn build_npy_float16(data: &[u8], rows: usize, cols: usize) -> Vec<u8> {
-    let dict = format!("{{'descr': '<f2', 'fortran_order': False, 'shape': ({rows}, {cols}), }}");
-    // マジック6 + バージョン2 + ヘッダ長2 = 10バイトの後に辞書が続く。辞書末尾の改行1バイトを
-    // 含めた長さを64の倍数へ切り上げた差分が、詰める空白の数になる。
-    let unpadded = 10 + dict.len() + 1;
-    let header_len = dict.len() + 1 + (64 - unpadded % 64) % 64;
+    fn document(near: &[u8], rows: u64, cols: u64) -> ScenarioTerrainDocument {
+        use base64::Engine;
+        serde_json::from_value(json!({
+            "settings": {
+                "map_width": 10.0, "map_height": 10.0, "near_spacing": 10.0, "far_spacing": 200.0,
+                "cell_size": 500.0, "grid_rows": rows, "grid_cols": cols,
+            },
+            "near_base64": base64::engine::general_purpose::STANDARD.encode(near),
+            "water_surfaces": null,
+            "rivers": [{"id": "r"}],
+            "resources": [],
+            "props": null,
+            "camera": null,
+            "ground_cover": 2,
+            "climate": 6,
+            "terrain_map_id": "flat",
+            "title": "テスト",
+            "locks": {"heights_locked": true, "reasons": ["PATHS_EXIST"]},
+        }))
+        .unwrap()
+    }
 
-    let mut out = Vec::with_capacity(10 + header_len + data.len());
-    out.extend_from_slice(b"\x93NUMPY\x01\x00");
-    out.extend_from_slice(&(header_len as u16).to_le_bytes());
-    out.extend_from_slice(dict.as_bytes());
-    out.resize(10 + header_len - 1, b' ');
-    out.push(b'\n');
-    out.extend_from_slice(data);
-    out
+    #[test]
+    fn working_copy_keeps_scenario_and_locks() {
+        let (meta, near) = scenario_terrain_working_copy("local~abc", document(&[0; 8], 2, 2)).unwrap();
+        assert_eq!(near.len(), 8);
+        assert_eq!(meta["scenario_id"], "local~abc");
+        assert_eq!(meta["title"], "テスト");
+        assert_eq!(meta["locks"], json!({"heights_locked": true, "reasons": ["PATHS_EXIST"]}));
+        assert_eq!(meta["water_surfaces"], json!([]));
+        assert_eq!(meta["rivers"], json!([{"id": "r"}]));
+        assert_eq!(meta["props"], json!({"instances": [], "scatters": []}));
+        assert_eq!(meta["grid_cols"], 2);
+    }
+
+    #[test]
+    fn working_copy_rejects_elevation_size_mismatch() {
+        assert!(scenario_terrain_working_copy("local~abc", document(&[0; 6], 2, 2)).is_err());
+        assert!(scenario_terrain_working_copy("local~abc", document(&[0; 2], 1, 1)).is_err());
+    }
+
+    #[test]
+    fn saved_meta_uses_database_ids_for_new_resources() {
+        let meta = json!({
+            "scenario_id": "local~abc",
+            "locks": {"heights_locked": false, "reasons": []},
+            "water_surfaces": [{"id": "lake"}],
+            "rivers": [],
+            "resources": [{"id": "7"}],
+            "camera": {"x": 0.0},
+        });
+        let body = json!({
+            "near_base64": null,
+            "water_surfaces": null,
+            "rivers": [{"id": "river"}],
+            "resources": [{"id": "7", "resource_type": 1}, {"id": "resource_1", "resource_type": 2}],
+            "props": {"instances": [], "scatters": []},
+            "camera": null,
+            "ground_cover": 3,
+            "climate": 2,
+        });
+        let result: ScenarioTerrainSaveResult = serde_json::from_value(json!({
+            "success": true, "id": "local~abc", "content_revision": 4,
+            "locks": {"heights_locked": false, "reasons": []},
+            "resource_ids": {"resource_1": "12"},
+        }))
+        .unwrap();
+        let saved = saved_terrain_editor_meta(meta, &body, &result);
+        assert_eq!(saved["scenario_id"], "local~abc");
+        assert_eq!(saved["resources"], json!([{"id": "7", "resource_type": 1}, {"id": "12", "resource_type": 2}]));
+        assert_eq!(saved["water_surfaces"], json!([{"id": "lake"}]), "送らなかった水面はそのまま");
+        assert_eq!(saved["rivers"], json!([{"id": "river"}]));
+        assert_eq!(saved["camera"], json!(null), "カメラの null は未設定に戻したことを表す");
+        assert_eq!(saved["ground_cover"], 3);
+        assert_eq!(saved["locks"], json!({"heights_locked": false, "reasons": []}));
+    }
 }
 
 /// デバッグ初期化を実行してゲームセッションを開始する。
@@ -1757,7 +1529,8 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
         // クライアントをループ外で生成してコネクションプールを維持する。
         // localhost 内の通信でも、都度クライアントを作り直すと TCP コネクションの
         // 確立に時間がかかり、Python 側の GIL や接続キューの影響でタイムアウトしやすくなる。
-        let client = reqwest::blocking::Client::builder().default_headers(version::headers())
+        // 認証トークンはバックエンドの再起動で変わるので、既定ヘッダーにせず周回ごとに付け直す。
+        let client = reqwest::blocking::Client::builder()
             .timeout(Duration::from_secs(10))
             // Python 側 (uvicorn) の keep-alive タイムアウトより短く設定することで、
             // サーバ側ですでに切断された idle コネクションを再利用してしまい、
@@ -1786,8 +1559,9 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             }
 
             let base = api_base_url.trim_end_matches('/');
+            let headers = version::headers();
 
-            let compatible = client.get(format!("{}/api/v1/system/version", base)).send()
+            let compatible = client.get(format!("{}/api/v1/system/version", base)).headers(headers.clone()).send()
                 .ok().filter(|response| response.status().is_success())
                 .and_then(|response| response.json::<Value>().ok())
                 .map(|remote| remote["api_contract_version"] == version::definition()["api_contract_version"])
@@ -1811,6 +1585,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             // ゲーム終了を誤判定するのを防ぐ。
             let session_data: Option<Value> = match client
                 .get(format!("{}/api/v1/sessions", base))
+                .headers(headers.clone())
                 .send()
             {
                 Ok(res) => {
@@ -1908,6 +1683,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             // 失敗してもセッション情報には影響しない
             let city_data: Option<Value> = client
                 .get(format!("{}/api/v1/city", base))
+                .headers(headers)
                 .send()
                 .ok()
                 .and_then(|r| {
@@ -2155,6 +1931,9 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(shared_state.clone())
         .setup(move |app| {
+            // 認証トークンのファイルを読む基準。バックエンドへの通信(セッションポーリング等)より先に決める。
+            version::init_user_data_dir(app.handle());
+
             if let Some(main_window) = app.get_webview_window("main") {
                 let _ = main_window.hide();
             }
@@ -2376,7 +2155,6 @@ pub fn run() {
             launch_graphic,
             start_new_game,
             start_load_game,
-            version::export_scenario,
             version::get_frontend_status,
             start_debug_init,
             create_session,
@@ -2398,10 +2176,9 @@ pub fn run() {
             close_tips_window,
             get_initial_loading_ready,
             reset_window_geometries,
-            copy_terrain_for_editor,
-            create_new_terrain_for_editor,
+            prepare_scenario_terrain_editor,
             load_terrain_editor_data,
-            export_terrain_as_npy,
+            save_scenario_terrain,
             open_save_directory,
         ])
         .run(tauri::generate_context!())

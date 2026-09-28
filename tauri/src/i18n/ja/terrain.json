@@ -2,19 +2,6 @@
   "terrain3dPreview": {
     "waitingForEditor": "地形エディタからの読み込みを待っています…"
   },
-  "editor": {
-    "originalTerrains": "オリジナル地形",
-    "originalTerrainsHelp": "純粋な地形データです",
-    "gameTerrains": "既存マップを編集",
-    "terrainTab": "地形エディタ",
-    "scenarioTab": "シナリオエディタ",
-    "addNewTerrain": "新しい地形を追加",
-    "creating": "作成中...",
-    "createFailed": "新しい地形の作成に失敗しました",
-    "copying": "コピー中...",
-    "copyFailed": "地形データの取得に失敗しました",
-    "gameTerrainsHelp": "川、資源、プロップなどを含みます"
-  },
   "groundCover": {
     "label": "地表の種類",
     "hint": "ゲーム内の地表の色と質感、2D表示の配色を切り替えます。シミュレーションには影響しません。",

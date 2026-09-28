@@ -2,19 +2,6 @@
   "terrain3dPreview": {
     "waitingForEditor": "正在等待地形编辑器的数据…"
   },
-  "editor": {
-    "originalTerrains": "原始地形",
-    "originalTerrainsHelp": "仅包含地形数据",
-    "gameTerrains": "编辑现有地图",
-    "terrainTab": "地形编辑器",
-    "scenarioTab": "剧本编辑器",
-    "addNewTerrain": "添加新地形",
-    "creating": "创建中...",
-    "createFailed": "新地形创建失败",
-    "copying": "复制中...",
-    "copyFailed": "地形数据获取失败",
-    "gameTerrainsHelp": "包含河流、资源、装饰物等"
-  },
   "groundCover": {
     "label": "地表类型",
     "hint": "切换游戏中地表的颜色与质感以及2D地图的配色。不会影响模拟。",

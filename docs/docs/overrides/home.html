@@ -3,7 +3,6 @@
 {% block container %}
 {% if config.theme.language == 'en' %}
   {% set t_nav_docs = "Documentation" %}
-  {% set t_nav_download = "Download" %}
   {% set t_hero = "Not a diorama maker, not a traffic simulator—a true city simulation game." %}
   {% set t_features_title = "Features" %}
   {% set t_f1_title = "Autonomous Economic Simulation" %}
@@ -27,10 +26,8 @@
   {% set t_d3_desc = "Shape specifications for paths, land, buildings, and terrain." %}
   {% set t_d4_title = "API Reference" %}
   {% set t_d4_desc = "Full endpoint specifications for the backend REST API." %}
-  {% set t_download_href = "../download.html" %}
 {% else %}
   {% set t_nav_docs = "ドキュメント" %}
-  {% set t_nav_download = "ダウンロード" %}
   {% set t_hero = "ジオラマメーカーでも渋滞シミュレーターでもない、本物の都市シミュレーション" %}
   {% set t_features_title = "特徴" %}
   {% set t_f1_title = "自律経済シミュレーション" %}
@@ -54,7 +51,6 @@
   {% set t_d3_desc = "パス・土地・建物・地形の形状仕様" %}
   {% set t_d4_title = "API リファレンス" %}
   {% set t_d4_desc = "バックエンド REST API の全エンドポイント仕様" %}
-  {% set t_download_href = "download.html" %}
 {% endif %}
 
 <style>
@@ -191,14 +187,6 @@
     filter: brightness(1);
   }
   
-  .header-link.btn-download-nav {
-    color: #4ea1ff !important;
-    font-weight: normal;
-  }
-  .header-link.btn-download-nav:hover {
-    color: #75b7ff !important;
-  }
-
   .header-lang {
     display: flex;
     align-items: center;
@@ -244,9 +232,6 @@
     }
     .header-link span {
       display: none;
-    }
-    .header-link.btn-download-nav span {
-      display: inline;
     }
   }
 
@@ -396,7 +381,6 @@
             <img src="assets/images/steam_logo.svg" alt="Steam">
             <span>Steam</span>
           </a>
-          <a href="{{ t_download_href }}" class="header-link btn-download-nav">{{ t_nav_download }}</a>
         </nav>
       </div>
       <div class="header-right">

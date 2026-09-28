@@ -93,6 +93,7 @@ for (const mutate of [
   (d: any) => d.steps[0].phases[0].world.camera = { target: [0, 0, 0], distance: 300, yaw: 0, pitch: 0 },
   (d: any) => d.steps[0].phases[0].world.camera = { target: [0, 0], distance: 300, yaw: 0, pitch: 45 },
   (d: any) => delete d.terrainMap,
+  (d: any) => d.id = "",
 ]) { const d = structuredClone(DEFINITIONS.basic); mutate(d); throws(() => validateDefinition(d), "invalid definition rejected"); }
 { const d = structuredClone(DEFINITIONS.scenario3); d.steps[0].phases[0].until = { type: "window", window: "agent_detail", target: "lesson.house" }; validateDefinition(d); checks++; }
 { const d = structuredClone(DEFINITIONS.scenario3); d.steps[0].phases[0].until = { type: "window", window: "agent_detail", target: "house" }; throws(() => validateDefinition(d), "only core targets may be referenced without a local binding"); }
