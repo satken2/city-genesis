@@ -12,9 +12,9 @@ import type { Definition } from "./model";
 import * as constants from "../constants";
 
 /** DOMの構造や翻訳文ではなく、登録済みの操作名だけを定義で指定する。 */
-export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "path.type", "path.variant", "path.confirm", "path.cancel", "building.category", "building.variant", "transit.new", "transit.type", "window.path_build", "window.agent_detail"];
-/** 同じ名前の要素が並ぶ操作。`名前:値`(値はカテゴリ番号・バリアント番号)で1つだけを指せる。 */
-export const VALUE_TARGETS = ["path.type", "path.variant", "building.category", "building.variant"];
+export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "path.type", "path.variant", "path.followTerrain", "path.confirm", "path.cancel", "building.category", "building.variant", "transit.new", "transit.type", "window.path_build", "window.agent_detail"];
+/** 同じ名前の要素が並ぶ操作。`名前:値`(値はカテゴリ番号・バリアント番号・地形追従の設定値)で1つだけを指せる。 */
+export const VALUE_TARGETS = ["path.type", "path.variant", "path.followTerrain", "building.category", "building.variant"];
 /** コアが初期配置した対象の名前。束縛はチュートリアル開始時にコアから受け取る。 */
 const CORE_TARGET = /^(support|lesson)\./;
 /** schema.json の検証。CSP で eval を許さないため、Ajv の事前生成コードを使う(npm run gen:tutorial-validator)。 */
@@ -52,7 +52,6 @@ export function validateDefinition(value: unknown): asserts value is Definition 
       if (phase.world.mode === "path" && !phase.world.path) throw new Error(`Missing path constraint: ${step.id}`);
       if (phase.world.path) {
         const [a, b] = phase.world.path.points;
-        if (a[1] !== 0 || b[1] !== 0) throw new Error("Tutorial path v1 supports ground-level endpoints only");
         if (Math.hypot(a[0] - b[0], a[2] - b[2]) < 1) throw new Error("Tutorial path endpoints overlap");
       }
     }

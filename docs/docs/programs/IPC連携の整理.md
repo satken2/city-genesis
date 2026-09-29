@@ -258,11 +258,11 @@ Unity は `PathTopologyEditManager` が対象選択を担う。**結合**では�
 
 genesis-core は起動時にポート5000から順に空きポートを探し、最初に確保できたポートで FastAPI を起動する。ポートが占有されていた場合は5001、5002…と順次試行する。
 
-この動的に決定したポート番号と、起動ごとに作るローカルAPIの認証トークンは、以降の UI および Graphic プログラムに対して正しく伝達される必要がある。伝達の経路は以下の通り(詳細は[コンポーネント連携](コンポーネント連携.md)の「起動順序」「ローカルAPIの認証」)。
+この動的に決定したポート番号は、以降の UI および Graphic プログラムに対して正しく伝達される必要がある。伝達の経路は以下の通り(詳細は[コンポーネント連携](コンポーネント連携.md)の「起動順序」)。
 
-1. **genesis-core → city-genesis/tauri**: 環境変数 `GENESIS_API_PORT`(ポート番号)・`GENESIS_API_TOKEN`(トークン)・`GENESIS_GRAPHIC_EXTERNAL=true` を設定してから `config.toml` の `[ui] launch_command` を実行する。開発時に単独で起動した Tauri は、環境変数 `GENESIS_UI_API_BASE_URL` で接続先を上書きでき、トークンはユーザーフォルダの `api_token` から読む。
-2. **genesis-core → city-genesis/unity**: `config.toml` の `[graphic] launch_command` の末尾に `--api-base-url http://127.0.0.1:{ポート番号}/api/v1` を付け、環境変数 `GENESIS_API_TOKEN` を設定して Unity を起動する。バックエンドが Unity を起動しない構成(開発時)では、Tauri が `graphic-launch.json` の `launch_command` に `--api-base-url` を付けて起動し、Unity は Tauri の環境変数を引き継ぐ。
-3. **city-genesis/unity**: `AppRoot.Start()` でコマンドライン引数 `--api-base-url` をパースし、`ApiClient.BASE_URL` を上書きする。以降、全ての HTTP 通信はこの `BASE_URL` を参照し、`ApiClient` が認証トークンを付ける。トークンは起動引数では渡さない(同じPCの他のプロセスから一覧できるため)。
+1. **genesis-core → city-genesis/tauri**: 環境変数 `GENESIS_API_PORT`(ポート番号)・`GENESIS_GRAPHIC_EXTERNAL=true` を設定してから `config.toml` の `[ui] launch_command` を実行する。開発時に単独で起動した Tauri は、環境変数 `GENESIS_UI_API_BASE_URL` で接続先を上書きできる。
+2. **genesis-core → city-genesis/unity**: `config.toml` の `[graphic] launch_command` の末尾に `--api-base-url http://127.0.0.1:{ポート番号}/api/v1` を付けて Unity を起動する。バックエンドが Unity を起動しない構成(開発時)では、Tauri が `graphic-launch.json` の `launch_command` に `--api-base-url` を付けて起動し、Unity は Tauri の環境変数を引き継ぐ。
+3. **city-genesis/unity**: `AppRoot.Start()` でコマンドライン引数 `--api-base-url` をパースし、`ApiClient.BASE_URL` を上書きする。以降、全ての HTTP 通信はこの `BASE_URL` を参照する。
 
 ## 各プログラムの起動シーケンス
 
@@ -277,7 +277,7 @@ genesis-core (main.py)
   └─ サーバー起動完了後:
       ├─ スプラッシュ破棄
       └─ config.toml の [ui] launch_command から city-genesis/tauri を起動
-         └─ 環境変数 GENESIS_API_PORT = {ポート}、GENESIS_API_TOKEN = {トークン}
+         └─ 環境変数 GENESIS_API_PORT = {ポート}
          （異常終了時は3秒後に自動再起動。正常終了(code 0)は監視終了）
 ```
 
@@ -285,7 +285,6 @@ genesis-core (main.py)
 city-genesis/tauri (Tauri/Rust)
   │
   ├─ 環境変数 GENESIS_UI_API_BASE_URL(無ければ GENESIS_API_PORT)から API 通信先を決める
-  ├─ 認証トークンは要求のたびに GENESIS_API_TOKEN → ユーザーフォルダの api_token の順で解決する
   ├─ 設定読み込み: window-registry.json, window-mutex-groups.json, graphic-launch.json
   ├─ ウィンドウ作成:
   │   ├─ "main" ウィンドウ → 即座に非表示（常駐ホスト）

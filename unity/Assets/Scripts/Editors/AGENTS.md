@@ -4,7 +4,7 @@
 
 ## 確定送信の契約
 
-- `RoadEditor/RoadPlanManager.Tutorial.cs` はチュートリアルの地上直線制約との接点。マーカー・吸着・許可判定は `Tutorial/TutorialRuntime.cs` にまとめる。3D入力、Ctrlメニュー、2D形状変更と確定通知に同じ制約を適用し、シナリオIDを道路エディタで分岐しない。
+- `RoadEditor/RoadPlanManager.Tutorial.cs` はチュートリアルの直線制約との接点(次に置く点の高さもここで揃える)。マーカー・吸着・許可判定は `Tutorial/TutorialRuntime.cs` にまとめる。3D入力、Ctrlメニュー、2D形状変更と確定通知に同じ制約を適用し、シナリオIDを道路エディタで分岐しない。
 
 - パネル確定型(道路・建物・区画・資源・造成・公共交通・プロップ・結合/分割・区間編集)の確定はUI(Tauri)が直接バックエンドへ送る。ここは`edit_*:update_*`で形状を逐次通知し、成功後の`edit_*:finish`系(または`session:reload`)でリセットするだけ。
 - 3Dジェスチャ完結型(地区の作成・拡張、接続端子のドラッグ移動)だけはUnityが直接送信する。地区の統合は不可逆なのでUIの確認ウィンドウを経由する。

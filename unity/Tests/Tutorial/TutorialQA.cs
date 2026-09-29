@@ -19,14 +19,14 @@ public static class TutorialQA
     private static void Check(bool pass, string label) { checks++; if (!pass) throw new Exception(label); }
     private static void Set(object target, string key, object value) => target.GetType().GetField(key, Flags).SetValue(target, value);
     private static object Get(object target, string key) => target.GetType().GetField(key, Flags).GetValue(target);
-    private static void Apply(string run, int revision, bool active = true, string mode = "path")
+    private static void Apply(string run, int revision, bool active = true, string mode = "path", float startHeight = 0f, float endHeight = 0f)
     {
         Static("ApplyFromIpc", new Dictionary<string, object> {
             ["active"] = active, ["runId"] = run, ["revision"] = revision,
             ["world"] = new Dictionary<string, object> {
                 ["mode"] = mode,
                 ["path"] = new Dictionary<string, object> {
-                    ["points"] = new[] { new[] { -100f, 0f, 0f }, new[] { 100f, 0f, 0f } },
+                    ["points"] = new[] { new[] { -100f, startHeight, 0f }, new[] { 100f, endHeight, 0f } },
                     ["radius"] = 12, ["variant"] = 221
                 }
             }
@@ -108,6 +108,22 @@ public static class TutorialQA
             Static("Clear"); Check(!Property("PathRestricted"), "session cleanup releases gate");
             Apply("two", 2); Check(!Property("PathRestricted"), "retired run cannot reactivate");
             Apply("three", 1); Apply("three", 2, false); Check(!Property("PathRestricted"), "explicit exit releases gate");
+            // 高架: 始終点の高さ(地面からの相対Y)を定義に書くと、エディタは点ごとにその高さへ置く。
+            Apply("elevated", 1, startHeight: 7f, endHeight: 12f);
+            var raised = new GameObject("RoadQA2").AddComponent(source.GetType("RoadPlanManager"));
+            ((Behaviour)raised).enabled = false;
+            Set(raised, "phase", Enum.Parse(source.GetType("RoadEditorPhase"), "Placing"));
+            Set(raised, "PathSubtype", 221); Set(raised, "PathType", 1);
+            Call(raised, "ApplyTutorialPathSettings");
+            var raisedPoints = (IList)Get(raised, "points");
+            Call(raised, "OnTerrainLeftClick", new Vector3(-96, 0, 3));
+            Call(raised, "OnTerrainLeftClick", new Vector3(96, 0, 3));
+            Call(raised, "OnTerrainRightClick", new Vector3(500, 0, 500));
+            Check(raisedPoints.Count == 2 && Get(raised, "phase").ToString() == "Editing", "elevated endpoints are placed and finalized");
+            Check((bool)Static("AcceptsPath", raisedPoints, 221, false), "each endpoint snaps to its own height");
+            Check(Mathf.Approximately(((Vector3)Get(raisedPoints[1], "position")).y - ((Vector3)Get(raisedPoints[0], "position")).y, 5f), "start and end keep their own heights");
+            Apply("elevated", 2, startHeight: 0f, endHeight: 0f);
+            Check(!(bool)Static("AcceptsPath", raisedPoints, 221, false), "ground-level rule rejects the raised points");
             ApplyCamera("camera", 1, 45f); Check(Property("BlocksWorldInput"), "camera guidance accepted with the directive");
             ApplyCamera("camera", 2, 0f); Check(!Property("BlocksWorldInput"), "invalid camera pitch rejects the directive");
             Apply("visual", 1);

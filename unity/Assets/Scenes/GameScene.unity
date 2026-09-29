@@ -2690,7 +2690,7 @@ GameObject:
   - component: {fileID: 1358878184}
   - component: {fileID: 1358878183}
   m_Layer: 5
-  m_Name: FlyModeButton
+  m_Name: CinemaModeButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

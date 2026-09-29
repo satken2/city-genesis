@@ -42,7 +42,7 @@
 - 大量の描画物で `Renderer.material(s)` を個別複製しない。建物は `BuildingManager.GetSharedDepthOffsetMaterials`、道路の帯・ノード円柱は `GetFarRoadDepthMaterial` / `GetNodeDepthMaterial`。色替えは `VisualModeObject`。
 - 地形マテリアルを `new Material(既存)` で複製しない(Properties 未宣言の手続き色が落ちる)。遠景は `ApplyFarTerrainMaterialSettings` で直接設定する。
 - HTTPは `ApiClient`(`GetBulk`=別スレッドデコード+MessagePack / `Get`=小さい単体)。`GetBulk` は `isCanceled` が真になるとコールバックを呼ばないので、取得中フラグは finally で外す。
-- 地形バイナリ(`/terrain/far`・`/terrain/surface`・`/terrain/background`)も `ApiClient.Request` → `ApiRequest.Send(isCanceled)` で送り、応答ヘッダーと本体は `.Web` から読む。取消しは `Aborted` で判定する。`UnityWebRequest` を直接作ると認証ヘッダーが付かず401になる。
+- 地形バイナリ(`/terrain/far`・`/terrain/surface`・`/terrain/background`)も `ApiClient.Request` → `ApiRequest.Send(isCanceled)` で送り、応答ヘッダーと本体は `.Web` から読む。取消しは `Aborted` で判定する。`UnityWebRequest` を直接作ると通信契約ヘッダーが付かない。
 - `GeneratedModels.cs` は自動生成物なので編集しない。
 - `LodConfig.CalculateCellSets` にオーバーロードを足さない(`Tests/Lod/LodQA.cs` がリフレクションで呼ぶ)。`ParcelManager.RegisterParcelDataForLines` も VehicleQA が名前で引くので多重定義にしない。
 
@@ -90,6 +90,7 @@
 ### その他
 - アラート: `alert` は version 管理外なので毎回全件走査。表示マスクは下位バイト=agent、上位バイト=path(`ALERT_PATH_MASK_SHIFT`)、廃墟は表示専用ビット `ALERT_DISPLAY_RUIN`。
 - アイコン対象ビットの正は `consts.py` の `ALERT_*_ICON_BITS`(Unity側で再宣言しない)。火災2ビットは `FireEffectManager` へ委譲し、応答をアイコン準備より先に渡す。火災エフェクトは建物GOの子にしない(詳細数上限で建物GOが消える)。
+- 3D追従のクリック可能ラベル(uGUI の Button)は、その Rect 上で `InputHandler` の3D入力とカメラ操作(ホイール含む)を止める。Rect は文字列を囲む大きさに詰め、編集中も表示するもの(地区名・資源名)は `Utils.SyncOverlayCanvasClickable` で編集中のクリックを透過させる(IC名・道路名は編集中は非表示)。
 - `InterchangeManager` / `RoadManager` は `ReloadAllData` の `RequestRefresh` で取り直す(外すと竣工ランプのICが出ない)。`GET /roads/` は末尾スラッシュ必須。カメラ移動では取らない。
 - 公共交通の路線一覧の取得主体は `Vehicles/TransitDataStore`(`TransitOverlayManager` / `LrtStopPlatforms` は購読側)。
 

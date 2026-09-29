@@ -35,7 +35,7 @@ export type SaveEntry = {
   /** 作者が固定した開始設定の項目。固定しない項目はゲーム開始時にプレイヤーが選べる */
   scenario_fixed_options?: ScenarioStartOption[];
   author?: string;
-  category?: "sandbox" | "challenge" | "tutorial"; content_revision?: number;
+  content_revision?: number;
   /** 地形の出どころ(取り込んだ標高ファイルの名前、またはチュートリアルの舞台の名前)。表示用の情報で、判定には使わない */
   terrain_source?: string;
   /** マップの大きさ(m)。地形エディタでも変わらない */

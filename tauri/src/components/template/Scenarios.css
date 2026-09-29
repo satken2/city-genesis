@@ -30,9 +30,6 @@
 /* 地形を取り込むタブ: 左右に等分して、左に入力(項目名と入力を1行ずつ並べ、作成ボタンは末尾の右に置く)、右に取り込み前のプレビュー。どちらもカードにしない */
 .scenario-import-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; flex: 1; min-height: 0; }
 .scenario-import { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; scrollbar-gutter: stable; min-height: 0; }
-.scenario-import-group { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--flat-raised-hover); border-radius: 8px; }
-.scenario-import-group-title { margin: 0; color: var(--flat-text); font-size: 1.2rem; font-weight: 600; }
-.scenario-import-group-title small { margin-left: .5em; color: var(--flat-text-label); font-size: .85rem; font-weight: 400; }
 .scenario-import-preview { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .scenario-import-preview-stage { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 14rem; }
 .scenario-import-preview-stage > .scenario-hint { padding: 12px; text-align: center; }
@@ -51,9 +48,13 @@
 .scenario-import-size { color: var(--flat-text); font-weight: 600; font-variant-numeric: tabular-nums; }
 .scenario-import-actions { display: flex; justify-content: flex-end; padding-top: 4px; }
 
-/* 紹介情報の開始設定: 項目名・値・「固定する」を1行に並べる */
-.scenario-start-settings { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 12px; border: 0; background: var(--flat-surface); }
-.scenario-start-settings legend { padding: 0; color: var(--flat-text-label); font-weight: 600; }
+/* 項目のまとまり(取り込みの詳細地形・背景地形、紹介情報の開始設定)を薄い線の角丸で囲む。見出しは枠の内側に置く */
+.scenario-group { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--flat-raised-hover); border-radius: 8px; }
+.scenario-group-title { margin: 0; color: var(--flat-text); font-size: 1.2rem; font-weight: 600; }
+.scenario-group-title small { margin-left: .5em; color: var(--flat-text-label); font-size: .85rem; font-weight: 400; }
+.scenario-group > p { margin: 0; }
+
+/* 紹介情報の開始設定: 項目名・値・「変更可能」を1行に並べる */
 .scenario-start-row { display: grid; grid-template-columns: 12rem minmax(0, 1fr) auto; align-items: center; gap: 10px; }
-.scenario-start-fixed { display: inline-flex; align-items: center; gap: 6px; color: var(--flat-text-label); }
-.scenario-start-value { color: var(--flat-text); }
+.scenario-start-changeable { display: inline-flex; align-items: center; gap: 6px; color: var(--flat-text-label); }
+.scenario-start-value { padding: 0 8px; color: var(--flat-text); } /* 下の行の select と文字の開始位置を揃える */

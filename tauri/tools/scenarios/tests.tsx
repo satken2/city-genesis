@@ -19,7 +19,7 @@ const window = ((globalThis as { window?: Window }).window ?? new Window()) as W
 Object.assign(globalThis, { window, document: window.document, HTMLElement: window.HTMLElement,
   IS_REACT_ACT_ENVIRONMENT: true });
 const entry = { id: "local~mine", city_name: "City", scenario_title: { en: "My scenario" } as Record<string, string>, author: "Author",
-  scenario_description: { en: "Description", ja: "説明" }, scenario_objective: { en: "Objective" }, category: "sandbox", language: "ja",
+  scenario_description: { en: "Description", ja: "説明" }, scenario_objective: { en: "Objective" }, language: "ja",
   scenario_city_name: { ja: "見本市", en: "Sample Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, asset_region: 1,
   terrain_source: "flat.png", map_width: 2000, map_height: 1000, ground_cover: 4 as number | undefined, climate: 7 as number | undefined,
   saved_core_version: "1.0.0", created_core_version: "1.0.0", compatibility: { loadable: true }, origin: "local",
@@ -260,9 +260,9 @@ assert.ok(!fieldInput("scenarios.importMinHeight").disabled && !fieldInput("scen
 assert.equal(fieldInput("scenarios.importMinHeight").parentElement, fieldInput("scenarios.importMaxHeight").parentElement, "the lowest and highest elevations share one row");
 assert.equal(fieldInput("scenarios.importMinHeight").parentElement?.textContent, "〜", "a wave dash sits between the two inputs");
 assert.equal(importForm().querySelector("label")?.textContent, "scenarios.importTitle", "the title comes first");
-const groups = [...importForm().querySelectorAll(".scenario-import-group")];
+const groups = [...importForm().querySelectorAll(".scenario-group")];
 assert.equal(groups.length, 2, "the terrain and the background are each framed");
-assert.deepEqual(groups.map(value => value.querySelector(".scenario-import-group-title")?.textContent),
+assert.deepEqual(groups.map(value => value.querySelector(".scenario-group-title")?.textContent),
   ["scenarios.importDetail", "scenarios.importBackgroundscenarios.importOptional"], "each area has its own title");
 assert.deepEqual(groups.map(value => value.querySelector(".scenario-hint")?.textContent), ["scenarios.importDetailHint", "scenarios.importBackgroundHint"],
   "a short description sits under each title");
@@ -462,10 +462,15 @@ assert.ok(languageTabs[0].textContent?.includes("localizedText.required"));
 assert.equal(container.querySelector(".localized-text [aria-selected=true]")?.textContent, "settings.language.ja", "the display language opens first");
 assert.equal(container.querySelectorAll("textarea").length, 2);
 assert.equal((container.querySelector("textarea") as HTMLTextAreaElement).value, "説明");
-assert.equal(container.querySelectorAll(".scenario-start-row").length, 4);
-const fixedBox = (option: string) => container.querySelector<HTMLInputElement>(`.scenario-start-row[data-option=${option}] input[type=checkbox]`)!;
-assert.ok(fixedBox("climate").checked && !fixedBox("simulation_days").checked);
-await act(async () => { fixedBox("simulation_days").click(); });
+assert.ok(container.querySelector(".localized-text__panel")?.contains(container.querySelector("textarea")), "the fields switched by the tabs are framed");
+assert.ok(!container.querySelector(".localized-text__panel")?.textContent?.includes("scenarios.author"), "the author is outside the tab frame");
+assert.equal(container.querySelector(".scenario-group-title")?.textContent, "scenarios.startSettings", "the start settings title sits inside its frame");
+assert.deepEqual([...container.querySelectorAll<HTMLElement>(".scenario-start-row")].map(row => row.dataset.option),
+  ["language", "simulation_days", "climate", "ground_cover", "asset_region"], "the city language leads the start settings");
+const changeableBox = (option: string) => container.querySelector<HTMLInputElement>(`.scenario-start-row[data-option=${option}] input[type=checkbox]`)!;
+assert.ok(changeableBox("language").checked && changeableBox("language").disabled, "players can always change the language");
+assert.ok(!changeableBox("climate").checked && changeableBox("simulation_days").checked, "the checkbox shows what players may change");
+await act(async () => { changeableBox("simulation_days").click(); });
 await act(async () => { setText(container.querySelector<HTMLSelectElement>(".scenario-start-row[data-option=simulation_days] select")!, "7"); });
 await submit();
 assert.deepEqual(metadataWritten.scenario_title, { en: "My scenario" });
@@ -524,7 +529,23 @@ await act(async () => { tile("My scenario").click(); });
 state.results.load_app_settings = { language: "en" };
 await act(async () => { button("newGame.startScenarioButton").click(); });
 await settle();
-assert.ok(container.textContent?.includes("newGame.closeWindowsNote"));
+// 開始設定は選択画面の上に重なるダイアログで決める。幕を押すか「戻る」で閉じ、選択は残る。
+const overlay = () => container.querySelector<HTMLElement>(".new-game-confirm-overlay");
+const pressDown = (element: Element) => act(async () => { element.dispatchEvent(new window.MouseEvent("mousedown", { bubbles: true })); });
+assert.ok(overlay()?.querySelector("[role=dialog] .new-game-confirm-select"), "the start settings open as a dialog");
+assert.ok(container.querySelector(".new-game-list .new-game-tile") && container.querySelector(".new-game-detail-title"), "the scenario list and detail stay behind the dialog");
+assert.ok(!container.textContent?.includes("newGame.closeWindowsNote"), "the dialog does not announce that windows close");
+await pressDown(overlay()!.querySelector("[role=dialog]")!);
+assert.ok(overlay(), "pressing inside the dialog keeps it open");
+await pressDown(overlay()!);
+assert.equal(overlay(), null, "pressing the backdrop closes the dialog");
+assert.equal(container.querySelector(".new-game-detail-title")?.textContent, "My scenario", "the selection remains");
+await act(async () => { button("newGame.startScenarioButton").click(); });
+await settle();
+await act(async () => { button("newGame.backButton").click(); });
+assert.equal(overlay(), null, "back closes the dialog");
+await act(async () => { button("newGame.startScenarioButton").click(); });
+await settle();
 // 都市の言語の既定はアプリ設定の言語。シナリオと違えば名前の付け直しを知らせ、都市名は初期の都市名をその言語で引く。
 const languageSelect = container.querySelector<HTMLSelectElement>(".new-game-confirm-select")!;
 const cityNameInput = container.querySelector<HTMLInputElement>(".new-game-confirm-input")!;
@@ -541,6 +562,13 @@ assert.equal(cityNameInput.value, "Mine", "a typed city name is kept");
 const optionRow = (option: string) => container.querySelector(`.new-game-confirm-field[data-option=${option}]`)!;
 assert.ok(optionRow("climate").querySelector(".new-game-confirm-fixed") && !optionRow("climate").querySelector("select"));
 await act(async () => { setText(optionRow("ground_cover").querySelector("select")!, "2"); });
+// 開始に失敗したら、理由をダイアログの中に出して開いたままにする。
+state.errors.create_session = "SAVE_CORRUPT: corrupt";
+await act(async () => { button("newGame.startButton").click(); });
+await settle();
+assert.ok(overlay()?.querySelector(".new-game-confirm .new-game-status--error"), "a failed start is reported in the dialog");
+assert.ok(!button("newGame.startButton").disabled, "the dialog stays usable after a failure");
+delete state.errors.create_session;
 await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const session = lastCall("create_session");
@@ -586,7 +614,7 @@ assert.equal(saveError("SCENARIO_TOO_LARGE: 上限超過", echo), "saveCompatibi
 assert.equal(saveError("HTTP 502", echo), "HTTP 502");
 
 // コアが返す理由コードの翻訳(日本語が原本。他の言語との揃いは check_i18n_parity.py が見る)。
-for (const code of ["SCENARIO_TOO_LARGE", "SCENARIO_READ_ONLY", "SCENARIO_ENCRYPTED", "NOT_FOUND", "SESSION_ACTIVE", "API_TOKEN_REQUIRED", "HOST_NOT_ALLOWED", "HEIGHTMAP_INVALID"]) {
+for (const code of ["SCENARIO_TOO_LARGE", "SCENARIO_READ_ONLY", "SCENARIO_ENCRYPTED", "NOT_FOUND", "SESSION_ACTIVE", "HEIGHTMAP_INVALID"]) {
   assert.ok(code in jaScenarios.saveCompatibility, `saveCompatibility.${code} is translated`);
 }
 for (const code of ["TERRAIN_LOCKED", "TERRAIN_INVALID", "TERRAIN_SIZE_MISMATCH", "RESOURCE_VALIDATION_ERROR", "PROP_VALIDATION_ERROR"]) {

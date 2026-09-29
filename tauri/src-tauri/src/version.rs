@@ -1,13 +1,10 @@
 use crate::state::SharedState;
-use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest::header::HeaderMap;
 use serde_json::{json, Value};
 use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::time::Duration;
 use tauri::Manager;
-
-/// ローカルAPIの認証ヘッダー。コアは欠落・不一致を 401 `API_TOKEN_REQUIRED` で拒否する。
-pub const TOKEN_HEADER: &str = "X-City-Genesis-Token";
 
 static USER_DATA_DIR: OnceLock<PathBuf> = OnceLock::new();
 
@@ -16,7 +13,7 @@ pub fn definition() -> Value {
 }
 
 /// <ユーザーフォルダ>(コアの `consts._get_appdata_dir()` と同じ `UrbanGenesis/`)を決めて記録する。setup で1回呼ぶ。
-/// トークンファイル・セーブの置き場・地形エディタの作業コピーはすべてここを基準にする(`user_data_dir`)。
+/// セーブの置き場・地形エディタの作業コピーはすべてここを基準にする(`user_data_dir`)。
 pub fn init_user_data_dir(app: &tauri::AppHandle) {
     match user_data_base(app) {
         Ok(base) => { let _ = USER_DATA_DIR.set(base.join("UrbanGenesis")); }
@@ -25,7 +22,7 @@ pub fn init_user_data_dir(app: &tauri::AppHandle) {
 }
 
 /// OS のローカルデータフォルダ。Windows はコア・Unity と同じく環境変数 `LOCALAPPDATA` → `APPDATA` を先に見る
-/// (既知フォルダ API は環境変数を見ないので、`LOCALAPPDATA` の無い環境でトークンファイルの場所がずれる)。
+/// (既知フォルダ API は環境変数を見ないので、`LOCALAPPDATA` の無い環境でコアとフォルダの場所がずれる)。
 /// それ以外は app_local_data_dir(バンドル識別子のフォルダ)の親で、Linux ではコアと同じく `XDG_DATA_HOME` を反映する。
 fn user_data_base(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     #[cfg(target_os = "windows")]
@@ -50,25 +47,10 @@ pub fn user_data_dir() -> Option<PathBuf> {
     USER_DATA_DIR.get().cloned()
 }
 
-/// ローカルAPIの認証トークン。環境変数 `GENESIS_API_TOKEN` → `<ユーザーフォルダ>/api_token` の順で解決する。
-/// トークンはバックエンドの起動ごとに変わるので、キャッシュせず呼ぶたびに読み直す。
-pub fn api_token() -> Option<String> {
-    let trimmed = |value: String| Some(value.trim().to_string()).filter(|token| !token.is_empty());
-    if let Some(token) = std::env::var("GENESIS_API_TOKEN").ok().and_then(trimmed) {
-        return Some(token);
-    }
-    let path = USER_DATA_DIR.get()?.join("api_token");
-    std::fs::read_to_string(path).ok().and_then(trimmed)
-}
-
-/// 版の契約ヘッダーと認証トークン。長く使い回すクライアントは既定ヘッダーにせず、リクエストごとに付け直す。
+/// 版の契約ヘッダー。
 pub fn headers() -> HeaderMap {
     let mut headers = HeaderMap::new();
     headers.insert("X-City-Genesis-API", definition()["api_contract_version"].to_string().parse().unwrap());
-    if let Some(mut token) = api_token().and_then(|token| HeaderValue::from_str(&token).ok()) {
-        token.set_sensitive(true);
-        headers.insert(TOKEN_HEADER, token);
-    }
     headers
 }
 

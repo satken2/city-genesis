@@ -878,6 +878,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 Debug.Log($"RoadPlanManager: ウェイポイント追加 {snapped} (total: {points.Count})");
             }
 
+            SyncTutorialPlacementHeight();
             if (Curved) RecomputeAllControlPoints();
             InvalidateShapeCache();
             Update3DPreview();

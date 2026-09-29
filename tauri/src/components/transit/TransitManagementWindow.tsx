@@ -74,13 +74,7 @@ function lineDisplayName(line: TransitLine): string {
   return line.name ? line.name : `#${line.line_agent_id}`;
 }
 
-export function TransitManagementWindow({
-  apiBaseUrl,
-  onClose,
-}: {
-  apiBaseUrl: string;
-  onClose: () => void;
-}) {
+export function TransitManagementWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
   const masterData = useMasterData();
   const locale = resolveIntlLocale(i18n.language);
@@ -246,11 +240,11 @@ export function TransitManagementWindow({
     [apiBaseUrl, load, t],
   );
 
+  // 管理ウィンドウは排他グループで閉じられ、路線新設ウィンドウはその再利用待ちWebViewに開くことがある。
+  // ここで自分を閉じると、閉じる要求が新設ウィンドウに当たって一瞬で消えるので、閉じるのはRust側に任せる。
   const openCreation = useCallback(() => {
     void invoke("open_registered_window", { windowType: "transit_creation" });
-    // 管理ウィンドウは閉じて、路線新設ウィンドウだけを表示する。
-    onClose();
-  }, [onClose]);
+  }, []);
 
   const openDetail = useCallback((lineAgentId: number) => {
     void invoke("open_registered_window", {

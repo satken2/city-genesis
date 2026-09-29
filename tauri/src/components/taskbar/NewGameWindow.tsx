@@ -14,8 +14,8 @@
  * (大きさ・地表・気候。シナリオだけ)・達成条件を並べる。シナリオの説明文・達成条件は作者のフリーテキスト。
  * 事実欄の値はすべて一覧の要素(都市が持つ値)から引く。
  *
- * 詳細パネルの開始ボタンで「ゲーム設定の確認」画面に切り替わり、
- * 都市名・都市の言語・シミュレーション日数などを設定してからゲームを開始する。
+ * 詳細パネルの開始ボタンで「ゲーム設定の確認」ダイアログが選択画面の上に重なり(ウィンドウ内のオーバーレイで、
+ * ネイティブのウィンドウは開かない)、都市名・都市の言語・シミュレーション日数などを設定してからゲームを開始する。
  *
  * シナリオの紹介文・初期の都市名は作者が多言語で書くテキストで、紹介文は表示言語、初期の都市名は
  * 選んだ都市の言語で引く(無ければ英語)。都市の言語はいつでも選べ、既定はアプリ設定の言語。シナリオと
@@ -294,7 +294,7 @@ export function NewGameWindow({
    * 設定確認モーダルで「開始」を押した時のハンドラ。
    * Rust 側の create_session を呼び出し、Unity 起動 → LoadingWindow 表示 →
    * バックエンド POST → ポーリング待機 → HUD 表示 のフローを実行する。
-   * create_session は開いているポップアップをすべて閉じる(確認画面の注記で予告する)。
+   * create_session は開いているポップアップをすべて閉じる。
    */
   const handleConfirmStart = useCallback(async () => {
     if (!confirmSelection) return;
@@ -358,150 +358,10 @@ export function NewGameWindow({
     />
   );
 
-  // 設定確認モーダル表示中
-  if (confirmSelection) {
-    const template = confirmSelection.template;
-    const fixedOptions = new Set<ScenarioStartOption>(template?.scenario_fixed_options ?? []);
-    return (
-      <div className="new-game-window">
-        {tabs}
-        <div className="new-game-body new-game-body--confirm">
-          <div className="new-game-confirm">
-            <h2 className="new-game-confirm-title">{t("newGame.confirmTitle")}</h2>
+  const confirmTemplate = confirmSelection?.template ?? null;
+  const fixedOptions = new Set<ScenarioStartOption>(confirmTemplate?.scenario_fixed_options ?? []);
 
-            {/* 都市名 */}
-            <div className="new-game-confirm-field">
-              <label className="new-game-confirm-label">
-                {t("newGame.cityNameLabel")}
-              </label>
-              <input
-                className="new-game-confirm-input"
-                type="text"
-                value={cityName}
-                onChange={(e) => { setCityName(e.target.value); setCityNameEdited(true); }}
-                placeholder={t("newGame.cityNamePlaceholder")}
-                disabled={busy}
-              />
-            </div>
-
-            {/* 都市の言語 */}
-            <div className="new-game-confirm-field">
-              <label className="new-game-confirm-label">
-                {t("newGame.languageLabel")}
-              </label>
-              <div className="new-game-confirm-select-wrap">
-                <select
-                  className="new-game-confirm-select"
-                  value={language}
-                  onChange={(e) => handleLanguageChange(e.target.value)}
-                  disabled={busy}
-                >
-                  {AVAILABLE_LANGUAGES.map((lang) => (
-                    <option key={lang} value={lang}>
-                      {t(`settings.language.${lang}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <span className="new-game-confirm-note">{t("newGame.languageNote")}</span>
-              {template && language !== template.language && (
-                <span className="new-game-confirm-note new-game-confirm-relocalize">
-                  {t("newGame.relocalizeNote", {
-                    from: t(`settings.language.${template.language}`, { defaultValue: template.language }),
-                    to: t(`settings.language.${language}`),
-                  })}
-                </span>
-              )}
-            </div>
-
-            {/* シミュレーション日数 */}
-            <div className="new-game-confirm-field">
-              <label className="new-game-confirm-label">
-                {t("newGame.simulationDaysLabel")}
-              </label>
-              {fixedOptions.has("simulation_days") ? (
-                <span className="new-game-confirm-fixed">
-                  {t("newGame.daysOption", { days: simulationDays })}
-                  <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
-                </span>
-              ) : (
-                <div className="new-game-confirm-days">
-                  {SIMULATION_DAYS_OPTIONS.map((days) => (
-                    <button
-                      key={days}
-                      className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
-                      onClick={() => setSimulationDays(days)}
-                      disabled={busy}
-                      type="button"
-                    >
-                      {t("newGame.daysOption", { days })}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
-            </div>
-
-            {/* 気候・地表・アセットの地域(シナリオから始めるときだけ) */}
-            {template && EXTRA_START_OPTIONS.map(({ key, values, labelKey }) => (
-              <div className="new-game-confirm-field" key={key} data-option={key}>
-                <label className="new-game-confirm-label">{t(`${labelKey}.label`)}</label>
-                {fixedOptions.has(key) ? (
-                  <span className="new-game-confirm-fixed">
-                    {t(`${labelKey}.${startOptions[key]}`)}
-                    <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
-                  </span>
-                ) : (
-                  <div className="new-game-confirm-select-wrap">
-                    <select
-                      className="new-game-confirm-select"
-                      value={startOptions[key]}
-                      aria-label={t(`${labelKey}.label`)}
-                      onChange={(e) => setStartOptions({ ...startOptions, [key]: Number(e.target.value) })}
-                      disabled={busy}
-                    >
-                      {values.map((value) => (
-                        <option key={value} value={value}>{t(`${labelKey}.${value}`)}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* ボタン */}
-            <p className="new-game-confirm-note new-game-confirm-warning">{t("newGame.closeWindowsNote")}</p>
-            <div className="new-game-confirm-actions">
-              <button
-                className="new-game-confirm-btn new-game-confirm-btn--back"
-                onClick={handleCancelConfirm}
-                disabled={busy}
-                type="button"
-              >
-                {t("newGame.backButton")}
-              </button>
-              <button
-                className="new-game-confirm-btn new-game-confirm-btn--start"
-                onClick={() => void handleConfirmStart()}
-                disabled={busy}
-                type="button"
-              >
-                {t("newGame.startButton")}
-              </button>
-            </div>
-          </div>
-
-          {status && (
-            <div className={`new-game-status new-game-status--${status.type}`}>
-              {status.text}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // タイル選択画面
+  // 選択画面。設定確認ダイアログを開いている間も、幕の下に描いたままにする
   return (
     <div className="new-game-window">
       {tabs}
@@ -623,13 +483,150 @@ export function NewGameWindow({
             <div className="new-game-detail-placeholder">{t("newGame.detailPlaceholder")}</div>
           )}
         </aside>
-
-        {status && (
-          <div className={`new-game-status new-game-status--${status.type}`}>
-            {status.text}
-          </div>
-        )}
       </div>
+
+      {/* 設定確認ダイアログ: 選択画面の上に重ねる。開始処理中は幕を押しても閉じない */}
+      {confirmSelection && (
+        <div className="new-game-confirm-overlay" onMouseDown={busy ? undefined : handleCancelConfirm}>
+          <div
+            className="new-game-confirm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="new-game-confirm-title"
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <h2 id="new-game-confirm-title" className="new-game-confirm-title">{t("newGame.confirmTitle")}</h2>
+
+            <div className="new-game-confirm-fields">
+              {/* 都市名 */}
+              <div className="new-game-confirm-field">
+                <label className="new-game-confirm-label">
+                  {t("newGame.cityNameLabel")}
+                </label>
+                <input
+                  className="new-game-confirm-input"
+                  type="text"
+                  value={cityName}
+                  onChange={(e) => { setCityName(e.target.value); setCityNameEdited(true); }}
+                  placeholder={t("newGame.cityNamePlaceholder")}
+                  disabled={busy}
+                />
+              </div>
+
+              {/* 都市の言語 */}
+              <div className="new-game-confirm-field">
+                <label className="new-game-confirm-label">
+                  {t("newGame.languageLabel")}
+                </label>
+                <div className="new-game-confirm-select-wrap">
+                  <select
+                    className="new-game-confirm-select"
+                    value={language}
+                    onChange={(e) => handleLanguageChange(e.target.value)}
+                    disabled={busy}
+                  >
+                    {AVAILABLE_LANGUAGES.map((lang) => (
+                      <option key={lang} value={lang}>
+                        {t(`settings.language.${lang}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <span className="new-game-confirm-note">{t("newGame.languageNote")}</span>
+                {confirmTemplate && language !== confirmTemplate.language && (
+                  <span className="new-game-confirm-note new-game-confirm-relocalize">
+                    {t("newGame.relocalizeNote", {
+                      from: t(`settings.language.${confirmTemplate.language}`, { defaultValue: confirmTemplate.language }),
+                      to: t(`settings.language.${language}`),
+                    })}
+                  </span>
+                )}
+              </div>
+
+              {/* シミュレーション日数 */}
+              <div className="new-game-confirm-field">
+                <label className="new-game-confirm-label">
+                  {t("newGame.simulationDaysLabel")}
+                </label>
+                {fixedOptions.has("simulation_days") ? (
+                  <span className="new-game-confirm-fixed">
+                    {t("newGame.daysOption", { days: simulationDays })}
+                    <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
+                  </span>
+                ) : (
+                  <div className="new-game-confirm-days">
+                    {SIMULATION_DAYS_OPTIONS.map((days) => (
+                      <button
+                        key={days}
+                        className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
+                        onClick={() => setSimulationDays(days)}
+                        disabled={busy}
+                        type="button"
+                      >
+                        {t("newGame.daysOption", { days })}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
+              </div>
+
+              {/* 気候・地表・アセットの地域(シナリオから始めるときだけ) */}
+              {confirmTemplate && EXTRA_START_OPTIONS.map(({ key, values, labelKey }) => (
+                <div className="new-game-confirm-field" key={key} data-option={key}>
+                  <label className="new-game-confirm-label">{t(`${labelKey}.label`)}</label>
+                  {fixedOptions.has(key) ? (
+                    <span className="new-game-confirm-fixed">
+                      {t(`${labelKey}.${startOptions[key]}`)}
+                      <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
+                    </span>
+                  ) : (
+                    <div className="new-game-confirm-select-wrap">
+                      <select
+                        className="new-game-confirm-select"
+                        value={startOptions[key]}
+                        aria-label={t(`${labelKey}.label`)}
+                        onChange={(e) => setStartOptions({ ...startOptions, [key]: Number(e.target.value) })}
+                        disabled={busy}
+                      >
+                        {values.map((value) => (
+                          <option key={value} value={value}>{t(`${labelKey}.${value}`)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {status && (
+              <div className={`new-game-status new-game-status--${status.type}`}>
+                {status.text}
+              </div>
+            )}
+
+            {/* ボタン */}
+            <div className="new-game-confirm-actions">
+              <button
+                className="new-game-confirm-btn new-game-confirm-btn--back"
+                onClick={handleCancelConfirm}
+                disabled={busy}
+                type="button"
+              >
+                {t("newGame.backButton")}
+              </button>
+              <button
+                className="new-game-confirm-btn new-game-confirm-btn--start"
+                onClick={() => void handleConfirmStart()}
+                disabled={busy}
+                type="button"
+              >
+                {t("newGame.startButton")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

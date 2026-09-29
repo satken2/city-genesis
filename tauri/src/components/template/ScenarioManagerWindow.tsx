@@ -302,8 +302,8 @@ function TerrainImportPanel({ apiBaseUrl, hidden, busy, error, onCreate }: {
           <input type="text" value={title} maxLength={HEIGHTMAP_LIMITS.titleMaxLength} disabled={busy}
             onChange={e => { setTitle(e.target.value); setTitleEdited(true); }} />
         </label>
-        <section className="scenario-import-group">
-          <h3 className="scenario-import-group-title">{t("scenarios.importDetail")}</h3>
+        <section className="scenario-group">
+          <h3 className="scenario-group-title">{t("scenarios.importDetail")}</h3>
           <p className="scenario-hint">{t("scenarios.importDetailHint")}</p>
           <div className="scenario-import-row">
             <span>{t("scenarios.importFile")}<InfoTip text={t("scenarios.importFormats")} /></span>
@@ -331,8 +331,8 @@ function TerrainImportPanel({ apiBaseUrl, hidden, busy, error, onCreate }: {
           {!valid && <p className="scenario-error">{t("scenarios.importInvalid")}</p>}
           {tooLarge && <p className="scenario-error">{t("scenarios.importTooLarge", { max: HEIGHTMAP_LIMITS.maxMapSize / 1000 })}</p>}
         </section>
-        <section className="scenario-import-group">
-          <h3 className="scenario-import-group-title">{t("scenarios.importBackground")}<small>{t("scenarios.importOptional")}</small></h3>
+        <section className="scenario-group">
+          <h3 className="scenario-group-title">{t("scenarios.importBackground")}<small>{t("scenarios.importOptional")}</small></h3>
           <p className="scenario-hint">{t("scenarios.importBackgroundHint")}</p>
           <div className="scenario-import-row">
             <span>{t("scenarios.importFile")}<InfoTip text={t("scenarios.importBackgroundFormats")} /></span>

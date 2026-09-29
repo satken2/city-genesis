@@ -24,7 +24,7 @@ docs/
 
 ## API Reference の再生成
 
-`docs/api/openapi.json` と、それを埋め込んだ `docs/api/index.html` は `fetch_openapi.py` で作り直す。`--source` を省くと起動中の開発用バックエンド(`http://localhost:5000/openapi.json`)から取得し、`--source` には URL か openapi.json のパスを渡せる。URL から取得するときは、ローカルAPIの認証トークン(環境変数 `GENESIS_API_TOKEN` → `<ユーザーフォルダ>/api_token`)と `Host` をループバック(`127.0.0.1`・`localhost`・`[::1]`)の URL にだけ付ける。製品版・モックのバックエンドは `/openapi.json` を配信しないので、開発用のバックエンドを使う。サーバーを起動しないときは、開発用のコアで `from api import app; app.openapi()` の出力をファイルに書いて `--source` に渡す。このとき `api` の import はユーザーフォルダのトークンファイルを書き換えるので、`XDG_DATA_HOME`(Windows は `LOCALAPPDATA`)を一時フォルダに向けて実行する。
+`docs/api/openapi.json` と、それを埋め込んだ `docs/api/index.html` は `fetch_openapi.py` で作り直す。`--source` を省くと起動中の開発用バックエンド(`http://localhost:5000/openapi.json`)から取得し、`--source` には URL か openapi.json のパスを渡せる。製品版・モックのバックエンドは `/openapi.json` を配信しないので、開発用のバックエンドを使う。サーバーを起動しないときは、開発用のコアで `from api import app; app.openapi()` の出力をファイルに書いて `--source` に渡す。
 
 ## 公開 docs と非公開 docs の振り分け
 

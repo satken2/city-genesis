@@ -306,6 +306,18 @@ public static class Utils
     }
 
     /// <summary>
+    /// クリック可能なラベルを載せた CreateOverlayCanvas の Canvas を、入力モードが通常のときだけクリック判定させる。毎フレーム呼ぶ。
+    /// 判定の矩形上では EventSystem がポインタをUI上とみなし、InputHandler の3D入力とカメラ操作が止まるため、
+    /// 編集中はラベルを表示したままクリックを下の3Dへ通す。
+    /// </summary>
+    public static void SyncOverlayCanvasClickable(GraphicRaycaster raycaster)
+    {
+        if (raycaster == null) return;
+        bool clickable = InputHandler.Instance == null || InputHandler.Instance.IsNormalMode;
+        if (raycaster.enabled != clickable) raycaster.enabled = clickable;
+    }
+
+    /// <summary>
     /// Resources/UIIcons からアイコン Sprite をロードする。テクスチャの Sprite Mode が Multiple で
     /// インポートされていると単体ロードが null になるため、その場合はサブスプライトの先頭を採用する(正しい設定は Single)。
     /// </summary>

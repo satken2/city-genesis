@@ -60,10 +60,12 @@ public sealed class TutorialRuntime : MonoBehaviour
         if (rule.mode == "path" && rule.path == null) return false;
         return rule.path == null || (rule.path.points?.Length == 2 && Array.TrueForAll(rule.path.points, ValidPoint)
             && rule.path.radius > 0 && !float.IsInfinity(rule.path.radius) && rule.path.variant > 0
-            && Array.TrueForAll(rule.path.points, p => p[1] == 0)
             && Vector2.Distance(new Vector2(rule.path.points[0][0], rule.path.points[0][2]), new Vector2(rule.path.points[1][0], rule.path.points[1][2])) >= 1);
     }
-    private static Vector3 GroundPoint(float[] p) { var pos = new Vector3(p[0], 0, p[2]); pos.y = Utils.GetGroundHeight(pos) + p[1]; return pos; }
+    private static Vector3 SurfacePoint(float[] p) { var pos = new Vector3(p[0], 0, p[2]); pos.y = Utils.GetGroundHeight(pos); return pos; }
+    private static Vector3 GroundPoint(float[] p) => SurfacePoint(p) + Vector3.up * p[1];
+    /// <summary>次に置く点(0=始点、1=終点)の地面からの相対高さ。始点と終点で違ってよい。</summary>
+    public static float PointHeight(int index) => PathRestricted ? CurrentPath.points[Mathf.Clamp(index, 0, 1)][1] : 0f;
     /// <summary>始終点を左クリックで置き、2点を置いた後の右クリックで形状を確定する。</summary>
     public static bool AllowRoadClick(Vector3 raw, int count, bool rightClick, int variant, bool placing)
     {
@@ -117,10 +119,10 @@ public sealed class TutorialRuntime : MonoBehaviour
         overlay.BeginFrame();
         if (current.world.path != null)
         {
-            // 画面上の固定サイズではなく、実際に受け付ける半径を地面へ描く。
+            // 画面上の固定サイズではなく、実際に受け付ける半径を地面へ描く。高架の点でも、受理範囲は地表上の水平距離。
             for (int index = 0; index < 2; index++)
             {
-                var center = GroundPoint(current.world.path.points[index]) + Vector3.up * .1f;
+                var center = SurfacePoint(current.world.path.points[index]) + Vector3.up * .1f;
                 var color = index == 0 ? Color.cyan : Color.yellow;
                 for (int i = 0; i < 48; i++)
                 {

@@ -1,4 +1,4 @@
-import { configureBackendRequests, setApiToken } from "./utils/api";
+import { configureBackendRequests } from "./utils/api";
 import { useEffect, useMemo, useState, lazy, Suspense, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -137,8 +137,7 @@ function App() {
       } else if (label !== "main") {
         setWindowKind("popup");
       }
-      const status = await invoke<{ api_base_url: string; api_token: string | null; open_window_count: number }>("get_connection_status");
-      setApiToken(status.api_token);
+      const status = await invoke<{ api_base_url: string; open_window_count: number }>("get_connection_status");
       if (!disposed) {
         setApiBaseUrl(status.api_base_url);
         setOpenWindowCount(status.open_window_count);
@@ -491,7 +490,7 @@ function App() {
             ) : context.window_type === "public_facilities" ? (
               <PublicFacilitiesWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "transit_management" ? (
-              <TransitManagementWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
+              <TransitManagementWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "transit_creation" ? (
               // editLineId があれば既存路線の経路編集。路線を切り替えて開き直したとき状態が残らないよう key で作り直す
               <TransitCreationPanel

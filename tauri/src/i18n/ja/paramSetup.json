@@ -375,7 +375,6 @@
     "tabSelect": "シナリオを選択",
     "tabBrowse": "シナリオを探す",
     "comingSoon": "Coming soon",
-    "closeWindowsNote": "開始すると開いているウィンドウはすべて閉じます。地形エディタで保存していない編集は失われます。",
     "relocalizeNote": "このシナリオは{{from}}で作られています。{{to}}で始めると、地区・施設・住民・駅などの名前を{{to}}で付け直します(作者が付けた名前も置き換わります。道路名などは残ります)。",
     "fixedByScenario": "シナリオで固定"
   }

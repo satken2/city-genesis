@@ -153,7 +153,7 @@ public class BuildingPreviewWindow : EditorWindow
 
     void Update()
     {
-        if (isFetching && activeRequest != null && activeRequest.Web.isDone && !activeRequest.RetryIfUnauthorized())
+        if (isFetching && activeRequest != null && activeRequest.Web.isDone)
         {
             HandleFetchResult();
         }

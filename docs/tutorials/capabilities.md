@@ -14,7 +14,7 @@
 | 初期配置・代行 | 道路・矩形探索区画・地区・建物の作成、対象指定の完成、再描画 | 利用可 |
 | 都市内の選択対象限定 | 指定建物・道路・区画・ノードだけ選択可能にする | 共通部品として追加が必要 |
 | 面と既存物の案内 | 複数区画の輪郭、名前付き物体から座標を取得して追従するマーカー | 共通部品として追加が必要 |
-| 高架・端子間の配置 | 実ノードへの接続、高さ・複数点・線路平行間隔の制約 | 共通部品として追加が必要 |
+| 高架・端子間の配置 | 実ノードへの接続、複数点・線路平行間隔の制約(始終点の高さは `world.path` で指定できる) | 共通部品として追加が必要 |
 | 集合・路線の判定 | 新規作成集合の束縛、2駅・ホーム所属・往復経路・運行可能状態 | 共通部品として追加が必要 |
 | 初期都市 | 支援の町・教材の区画・資源・既存施設 | 利用可(コアが作り、`support.` / `lesson.` の名前で束縛に入る) |
 | カメラの案内 | 段階ごとの注視点・距離・方位・俯角 | 利用可 |
@@ -32,15 +32,15 @@
 | `world.mode` | `observe` は制限なし、`blocked` はワールド編集停止、`path` は指定パス(道路・プラットフォーム)の配置 |
 | `world.markers` | `[x, 地面相対y, z]` の配列。保存されない描画物 |
 | `world.camera` | `target`(地面相対の `[x, y, z]`)、`distance`、`yaw`(北=0の時計回り)、`pitch`(5〜89度)。直前と違う案内先のときだけカメラが滑らかに移動する |
-| `world.path` | `points` は始終点2点、`radius` はクリック許容半径m、`variant` はバリアント、`bind` は保存IDの格納名。この項目がある段階では、パス建設パネルで `variant` 以外のカテゴリ・カードを選べない |
-| パスの範囲 | v1は地上・直線・相対高さ0・盛土0・線路1本。道路と同じ敷設エディタで敷くプラットフォームにも使える(ホームの側は検証しない)。水色の始点と黄色の終点を左クリックし、右クリックで形状確定。確定の右クリック位置は問わない。普通の建設可否も通る必要がある |
+| `world.path` | `points` は始終点2点(`[x, 地面相対y, z]`)、`radius` は地表上のクリック許容半径m、`variant` はバリアント、`bind` は保存IDの格納名。この項目がある段階では、パス建設パネルで `variant` 以外のカテゴリ・カードを選べない |
+| パスの範囲 | v1は直線・盛土0・線路1本。始終点の相対高さは点ごとに書ける(地上は0、高架の高速道路は正の値。高さ編集ができるバリアントだけ)。円は地表に描き、吸着した点は指定の高さに置かれる。道路と同じ敷設エディタで敷くプラットフォームにも使える(ホームの側は検証しない)。水色の始点と黄色の終点を左クリックし、右クリックで形状確定。確定の右クリック位置は問わない。普通の建設可否も通る必要がある |
 | `$constant` | 共有定数名、または `TUTORIAL_STREET`。後者は街路・2車線・高さ編集不可・接道可のマスター候補が1件のときだけ解決 |
 | `$ref` | 名前付き対象の数値ID。文字列埋め込み・任意式・コード実行は不可 |
 | コアの対象名 | `support.<名前>`・`lesson.<名前>` はコアが作った初期都市の対象。定義内の `bind` なしで `target` 等から参照できる |
 
-利用できるHUD操作名は `hud.road`、`hud.construction`、`hud.land`、`hud.district`、`hud.execute`、`hud.visibility`、`hud.transport`。道路・鉄道・インフラはすべて `hud.road` のパス建設パネルで敷き、パネル内は `path.type`(カテゴリのタイル)、`path.variant`(バリアントのカード)、`path.confirm`、`path.cancel`。建物建設パネル(`hud.construction`)は `building.category`(分類のタイル)、`building.variant`(建物のカード)。公共交通(`hud.transport`)は `transit.new`(路線の新設ボタン)、`transit.type`(路線種別の選択)。ウィンドウ単位の許可は `window.path_build`、`window.agent_detail`。新しい対象は実要素に `data-guide` を付け、`definitions.ts` の登録表・テスト・本表を同時に更新する。
+利用できるHUD操作名は `hud.road`、`hud.construction`、`hud.land`、`hud.district`、`hud.execute`、`hud.visibility`、`hud.transport`。道路・鉄道・インフラはすべて `hud.road` のパス建設パネルで敷き、パネル内は `path.type`(カテゴリのタイル)、`path.variant`(バリアントのカード)、`path.followTerrain`(地形追従の選択肢)、`path.confirm`、`path.cancel`。建物建設パネル(`hud.construction`)は `building.category`(分類のタイル)、`building.variant`(建物のカード)。公共交通(`hud.transport`)は `transit.new`(路線の新設ボタン)、`transit.type`(路線種別の選択)。ウィンドウ単位の許可は `window.path_build`、`window.agent_detail`。新しい対象は実要素に `data-guide` を付け、`definitions.ts` の登録表・テスト・本表を同時に更新する。
 
-タイルとカード(`path.type`・`path.variant`・`building.category`・`building.variant`)は `名前:値` で1枚だけを指せる。値はカテゴリ(`path_type`・`bd_category`)またはバリアントの番号で、例えば `["hud.construction", "building.category:7", "building.variant:1054"]` は建設アイコン・発電所の分類・太陽光発電所のカードを順に強調する。値の無い名前はその名前の要素すべてを指す。押せない(`disabled`)タイル・カードは強調しないので、`world.path` で選べるバリアントが1つに絞られる段階は値の無い名前でもその1枚だけが光る。建設や敷設を案内するステップは、HUDのアイコンに加えてパネル内で選ぶタイルとカードを強調する。
+タイルとカード(`path.type`・`path.variant`・`building.category`・`building.variant`)と地形追従の選択肢(`path.followTerrain`)は `名前:値` で1つだけを指せる。値はカテゴリ(`path_type`・`bd_category`)・バリアントの番号・地形追従の設定値(`0`=非追従、`1`=追従)で、例えば `["hud.construction", "building.category:7", "building.variant:1054"]` は建設アイコン・発電所の分類・太陽光発電所のカードを順に強調する。値の無い名前はその名前の要素すべてを指す。押せない(`disabled`)タイル・カードは強調しないので、`world.path` で選べるバリアントが1つに絞られる段階は値の無い名前でもその1枚だけが光る。建設や敷設を案内するステップは、HUDのアイコンに加えてパネル内で選ぶタイルとカードを強調する。パネルを開いたこと(`window`)で段階を進めるときは、カードを選ぶまで(`pathVariant`)を別の段階にして、同じ説明のままタイルとカードを強調し続ける。`world.path` を使えない敷設(盛土が要る斜面のプラットフォームなど)は、この段階を `strict` にして `allow` にタイルとカードを `名前:値` で書き、他のタイル・カードを押せなくする。
 
 ウィンドウ移動・閉じるための `.titlebar` と明示した `data-guide-escape`、チュートリアル・通知・Tipsは操作制限の対象外。システムトレイと設定・クレジット・セーブ/ロード・セーブ一覧・新規ゲーム・確認ダイアログも常に操作できる。除外一覧は `dom.ts` が管理する。スクロールとカメラは保持する。通常のdisabledは解除しない。別WebViewはそれぞれ同じ案内を受け取り、自分のDOMへ適用する。
 

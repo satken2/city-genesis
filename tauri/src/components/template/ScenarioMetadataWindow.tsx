@@ -3,9 +3,10 @@
  *
  * - 紹介文(タイトル・説明・達成条件)と初期の都市名を多言語で書く。英語は必須(タイトルは常に、
  *   ほかの項目は1言語でも書けば)で、表示する言語の文が無いときは英語が出る。
- * - 開始設定(シミュレーション日数・気候・地表・アセットの地域)の値と、それを固定するかを決める。
- *   固定しない項目はゲーム開始時にプレイヤーが選び直せる。言語は常にプレイヤーが選べる。
- * - 都市内の名前の言語は変えられない(名前を付け直さずに言語だけを変えると、ゲーム開始時の付け直しの判定が狂う)。
+ * - 開始設定(シミュレーション日数・気候・地表・アセットの地域)の値と、ゲーム開始時にプレイヤーが変更できるかを決める。
+ *   画面は「変更可能」のチェックで見せ、コアへは反転して固定する項目(scenario_fixed_options)として送る。
+ * - 開始設定の先頭に都市内の名前の言語を並べる。値はここでは変えられず(名前を付け直さずに言語だけを変えると、
+ *   ゲーム開始時の付け直しの判定が狂う)、プレイヤーは常に変更できるので「変更可能」はオンのまま外せない。
  */
 import { useEffect, useState } from "react";
 import { emit } from "@tauri-apps/api/event";
@@ -42,7 +43,6 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
   const [entry, setEntry] = useState<SaveEntry | null>(null);
   const [texts, setTexts] = useState<Texts>({});
   const [author, setAuthor] = useState("");
-  const [category, setCategory] = useState("sandbox");
   const [options, setOptions] = useState<Options | null>(null);
   const [fixed, setFixed] = useState<ScenarioStartOption[]>([]);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
@@ -55,7 +55,6 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
         setEntry(save);
         setTexts(Object.fromEntries(TEXT_KEYS.map(key => [key, save[key] ?? {}])));
         setAuthor(save.author ?? "");
-        setCategory(save.category ?? "sandbox");
         setOptions(startOptionsOf(save));
         setFixed(save.scenario_fixed_options ?? []);
       }).catch(e => { if (!controller.signal.aborted) setError(saveError(e, t)); });
@@ -85,7 +84,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...Object.fromEntries(TEXT_KEYS.map(key => [key, compactLocalizedText(texts[key])])),
-          author, category, ...options,
+          author, ...options,
           scenario_fixed_options: START_OPTIONS.filter(option => fixed.includes(option)),
         }),
       });
@@ -97,7 +96,6 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
   }
 
   return <form className="scenario-editor" onSubmit={e => { e.preventDefault(); void save(); }}>
-    <p>{t("scenarios.metadataHint")}</p>
     {error && <p role="alert" className="scenario-error">{error}</p>}
     {entry && options && <>
       <SaveVersionInfo entry={entry} />
@@ -109,29 +107,30 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
       ]} />
       <label className="scenario-info__field"><span>{t("scenarios.author")}</span>
         <input type="text" className="scenario-info__input" value={author} maxLength={120} disabled={busy} onChange={e => setAuthor(e.target.value)} /></label>
-      <label className="scenario-info__field"><span>{t("scenarios.category")}</span>
-        <select value={category} disabled={busy} onChange={e => setCategory(e.target.value)}>
-          {["sandbox", "challenge", "tutorial"].map(value => <option key={value} value={value}>{t(`scenarios.${value}`)}</option>)}
-        </select></label>
-      <div className="scenario-info__field"><span>{t("scenarios.cityLanguage")}</span>
-        <span className="scenario-start-value">{t(`settings.language.${entry.language}`, { defaultValue: entry.language })}</span>
-        <span className="scenario-hint">{t("scenarios.cityLanguageHint")}</span></div>
-      <fieldset className="scenario-start-settings">
-        <legend>{t("scenarios.startSettings")}</legend>
+      <section className="scenario-group">
+        <h3 className="scenario-group-title">{t("scenarios.startSettings")}</h3>
         <p className="scenario-hint">{t("scenarios.startSettingsHint")}</p>
+        <div className="scenario-start-row" data-option="language">
+          <span>{t("scenarios.cityLanguage")}</span>
+          <span className="scenario-start-value">{t(`settings.language.${entry.language}`, { defaultValue: entry.language })}</span>
+          <label className="scenario-start-changeable">
+            <input type="checkbox" checked disabled readOnly />
+            {t("scenarios.changeableOption")}
+          </label>
+        </div>
         {START_OPTIONS.map(option => <div className="scenario-start-row" key={option} data-option={option}>
           <span>{optionLabels[option]}</span>
           <select value={options[option]} disabled={busy} aria-label={optionLabels[option]}
             onChange={e => setOptions({ ...options, [option]: Number(e.target.value) })}>
             {choices[option].values.map(value => <option key={value} value={value}>{choices[option].label(value)}</option>)}
           </select>
-          <label className="scenario-start-fixed">
-            <input type="checkbox" checked={fixed.includes(option)} disabled={busy}
-              onChange={e => setFixed(e.target.checked ? [...fixed, option] : fixed.filter(value => value !== option))} />
-            {t("scenarios.fixedOption")}
+          <label className="scenario-start-changeable">
+            <input type="checkbox" checked={!fixed.includes(option)} disabled={busy}
+              onChange={e => setFixed(e.target.checked ? fixed.filter(value => value !== option) : [...fixed, option])} />
+            {t("scenarios.changeableOption")}
           </label>
         </div>)}
-      </fieldset>
+      </section>
       <label className="scenario-info__field"><span>{t("achievements.scenarioImageLabel")}</span>
         <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={scenarioId} revision={entry.content_revision} className="scenario-thumbnail" />
         <input type="file" accept="image/png" disabled={busy} onChange={e => setThumbnail(e.target.files?.[0] ?? null)} /></label>
