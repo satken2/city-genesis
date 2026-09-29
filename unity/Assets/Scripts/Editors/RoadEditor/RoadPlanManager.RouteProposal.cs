@@ -133,6 +133,7 @@ public partial class RoadPlanManager
             var ci = route.controls_in[i]; var co = route.controls_out[i];
             if (i > 0) { point.control_in = new Vector3(ci[0], ci[1], ci[2]); point.control_in_manual = true; }
             if (i < count-1) { point.control_out = new Vector3(co[0], co[1], co[2]); point.control_out_manual = true; }
+            point.control_height_manual = true; // 探索は勾配の制約込みで制御点の高さを決めている
             replacement.Add(point);
         }
         if (authored != original.Count) return;

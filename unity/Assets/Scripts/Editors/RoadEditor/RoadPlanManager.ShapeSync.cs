@@ -6,7 +6,8 @@ using UnityEngine;
 /// Tauriの2Dパス形状編集パネル(path_shape_editor)との形状同期。
 /// 形状の真実源はこのクラス(3Dエディタ)のままで、2Dパネルはノード・制御点の操作を
 /// <see cref="ShapeCommand"/> として送り、結果は既存の edit_path:update_shape(全状態)で受け取る。
-/// 2Dからの操作はXZだけを動かし、標高・盛土は3D側の値をそのまま維持する。吸着は適用しない。
+/// 2Dからの操作はXZだけを動かし、ノードの標高・盛土は3D側の値をそのまま維持する。制御点の高さは
+/// 3Dのドラッグと同じくアンカーの縦断勾配から決まる。吸着は適用しない。
 /// </summary>
 public partial class RoadPlanManager
 {
@@ -173,27 +174,11 @@ public partial class RoadPlanManager
                 {
                     // 直線モードでは制御点を持たない(2Dにも表示しない)
                     if (!Curved || cmd.index < 0 || cmd.index >= points.Count) return;
-                    var pt = points[cmd.index];
                     bool moveIn = cmd.which == "in";
                     // 始点は control_in、終点は control_out を持たない
                     if (moveIn && cmd.index == 0) return;
                     if (!moveIn && cmd.index == points.Count - 1) return;
-                    Vector3 nc = new Vector3(cmd.x, 0f, cmd.z);
-                    if (moveIn)
-                    {
-                        // 3DのXZドラッグと同じく制御点の絶対標高を維持する
-                        nc.y = (pt.control_in ?? pt.position).y;
-                        pt.control_in = nc;
-                        pt.control_in_manual = true;
-                    }
-                    else
-                    {
-                        nc.y = (pt.control_out ?? pt.position).y;
-                        pt.control_out = nc;
-                        pt.control_out_manual = true;
-                    }
-                    points[cmd.index] = pt;
-                    EnforceCollinearControls(cmd.index, movedControlOut: !moveIn);
+                    MoveControlXZ(cmd.index, moveIn, cmd.x, cmd.z);
                     InvalidateShapeCache();
                     Update3DPreview();
                     EmitShapeUpdate();

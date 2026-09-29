@@ -39,7 +39,8 @@
 - 新しいポリゴン編集・Ctrlメニュー・配置キー操作は上の共通基底/部品を使い、各マネージャに複製しない。
 - `PolygonAreaEditManager`の頂点ドラッグは`InputHandler`が地形との交点から求めた`worldPos`のXZを使い、地形高さを適用する。固定深度の`ScreenToWorldPoint`で逆投影すると斜め視点でカーソルからずれるため使わない。共通吸着は`UseDragSnapping`で制御し、`ParcelShapeEditManager`と`GradingAreaEditManager`は常にfalse。区画形状編集と造成範囲の作図は頂点の配置・移動・挿入とも吸着なし固定で、共有吸着フラグやグリッド表示には依存しない(造成は頂点が道路の中心線に吸い付くと範囲がパスに掛かり、発注で必ず拒否される)。
 - 曲線/直線・吸着フラグ・区画の作成方法の真実源はUnity側(ラジアルメニュー)。ホーム設置側・複線のオフセット/進行方向・駅舎の`HouseEnds`/`PassageMode`・矩形区画の寸法はUIパネルが真実源。標高・盛土だけは双方向同期(`edit_path:change_node`⇔`select_node`)。
-- 頂点の移動・標高変更は必ず`RoadPlanManager.MoveAnchorPosition`を通す(手動制御点の平行移動と未調整制御点の再計算を一箇所で行う)。2Dパネルの`shape_command`も同じ経路に委譲し、吸着は通さない。
+- 頂点の移動・標高変更は必ず`RoadPlanManager.MoveAnchorPosition`を、制御点(ハンドル)の移動は`MoveControlXZ`を通す(手動制御点の平行移動・高さ固定の解除・制御点の再計算を一箇所で行う)。2Dパネルの`shape_command`も同じ経路に委譲し、吸着は通さない。
+- 制御点の手動フラグ`control_*_manual`はXZだけを守る。高さは`RecomputeAllControlPoints`がアンカーの自動接線の縦断勾配×水平距離で毎回決め直す。高さを保つのは`control_height_manual`(経路提案の結果と、再開時に保存値が規則から外れた制御点)だけで、そのアンカーか両隣を動かすと解除する。ハンドルの高さを固定すると、ノードの高さをどう変えてもそのノードの勾配が変わらず、左右のハンドル長の差で縦断が折れる。
 - 制御点はエディタ内では絶対標高、保存・IPCでは所属アンカー直下の地盤基準の相対Y(`ControlToRelativeList`⇔`RestoreControl`)。
 - 造成後の縦断(`path_profiles`)は操作停止後の3Dモデルにだけ使い、操作中はローカル近似。応答は要求キー一致時のみ採用し、生成器へ`follow_terrain=0`+一時の`station_grade_profile`を渡して生地形へ再投影させない。
 - 線分への射影・距離は`Utils/PolylineUtils`に委譲する。

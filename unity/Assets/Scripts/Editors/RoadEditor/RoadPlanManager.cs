@@ -767,7 +767,8 @@ public partial class RoadPlanManager : MonoBehaviour
                     // 保存値が無い箇所(スキーマ再生成前の端点など)は自動計算値のまま残る。
                     // 保存値は自動計算結果も含む(確定時に整列済み制御点を明示送信するため)ので、
                     // 自動計算値と一致する制御点は未調整扱いにし、以後の頂点移動で再計算されるようにする。
-                    // 乖離している制御点だけ手動調整済み扱いにして保持する。
+                    // XZが乖離している制御点だけ手動調整済み扱いにして保持する。高さが縦断勾配の規則から
+                    // 外れる制御点(経路提案の結果など)は、そのアンカーの高さを固定して保存値を再現する。
                     var savedControlIn = new Vector3?[points.Count];
                     var savedControlOut = new Vector3?[points.Count];
                     for (int i = 0; i < points.Count; i++)
@@ -782,18 +783,31 @@ public partial class RoadPlanManager : MonoBehaviour
                     for (int i = 0; i < points.Count; i++)
                     {
                         var pt = points[i];
+                        float grade = HorizontalGrade(AutoTangent(i));
+                        bool heightManual = false;
                         if (savedControlIn[i].HasValue)
                         {
+                            Vector3 saved = savedControlIn[i].Value;
                             pt.control_in_manual = !pt.control_in.HasValue
-                                || Vector3.Distance(savedControlIn[i].Value, pt.control_in.Value) > manualEpsilon;
-                            pt.control_in = savedControlIn[i];
+                                || Utils.XZDistance(saved, pt.control_in.Value) > manualEpsilon;
+                            heightManual |= Mathf.Abs(saved.y - WithGrade(saved, pt.position, -grade).y) > manualEpsilon;
+                            pt.control_in = saved;
                         }
                         if (savedControlOut[i].HasValue)
                         {
+                            Vector3 saved = savedControlOut[i].Value;
                             pt.control_out_manual = !pt.control_out.HasValue
-                                || Vector3.Distance(savedControlOut[i].Value, pt.control_out.Value) > manualEpsilon;
-                            pt.control_out = savedControlOut[i];
+                                || Utils.XZDistance(saved, pt.control_out.Value) > manualEpsilon;
+                            heightManual |= Mathf.Abs(saved.y - WithGrade(saved, pt.position, grade).y) > manualEpsilon;
+                            pt.control_out = saved;
                         }
+                        if (heightManual)
+                        {
+                            // 高さの固定は手動の制御点にだけ効くので、片側だけ自動に戻って縦断が折れないよう両側を手動にする
+                            pt.control_in_manual |= pt.control_in.HasValue;
+                            pt.control_out_manual |= pt.control_out.HasValue;
+                        }
+                        pt.control_height_manual = heightManual;
                         points[i] = pt;
                     }
 
@@ -1008,31 +1022,11 @@ public partial class RoadPlanManager : MonoBehaviour
             // 手動調整済みの制御点はアンカーに追従させ、未調整の制御点だけ再計算する
             MoveAnchorPosition(dragPointIndex, snappedPos);
         }
-        else if (dragTarget == DragTarget.ControlIn)
+        else if (dragTarget == DragTarget.ControlIn || dragTarget == DragTarget.ControlOut)
         {
             if (dragPointIndex < 0 || dragPointIndex >= points.Count) return;
-            var pt = points[dragPointIndex];
-            // XZドラッグでは絶対標高を維持し、制御点直下の地形の起伏を混入させない。
-            Vector3 nc = worldPos;
-            nc.y = (pt.control_in ?? pt.position).y;
-            pt.control_in = nc;
-            pt.control_in_manual = true;
-            points[dragPointIndex] = pt;
-            // 反対側(control_out)を頂点を挟んで一直線に保ち、道路が折れないようにする
-            EnforceCollinearControls(dragPointIndex, movedControlOut: false);
-        }
-        else if (dragTarget == DragTarget.ControlOut)
-        {
-            if (dragPointIndex < 0 || dragPointIndex >= points.Count) return;
-            var pt = points[dragPointIndex];
-            // XZドラッグでは既存の制御点の絶対標高を維持する。
-            Vector3 nc = worldPos;
-            nc.y = (pt.control_out ?? pt.position).y;
-            pt.control_out = nc;
-            pt.control_out_manual = true;
-            points[dragPointIndex] = pt;
-            // 反対側(control_in)を頂点を挟んで一直線に保ち、道路が折れないようにする
-            EnforceCollinearControls(dragPointIndex, movedControlOut: true);
+            // 制御点直下の地形は使わない。高さはアンカーの縦断勾配から決まる。
+            MoveControlXZ(dragPointIndex, dragTarget == DragTarget.ControlIn, worldPos.x, worldPos.z);
         }
 
         InvalidateShapeCache();
@@ -1188,9 +1182,12 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 端点は片側の隣接アンカーとのベクトルを使用する。
     /// これによりX・Y・Zすべての軸で滑らかなベジェ曲線が得られる。
     ///
-    /// 手動調整済み(control_*_manual)の制御点は上書きしない。頂点の移動・挿入・削除で
+    /// 手動調整済み(control_*_manual)の制御点はXZを上書きしない。頂点の移動・挿入・削除で
     /// 呼ばれるたびに全制御点を作り直すと、ユーザーが整えた曲線が毎回消えてしまうため。
-    /// 手動調整済みの制御点は隣接アンカーの移動には追従しない(ユーザーの意図した方向を保つ)。
+    /// 手動調整済みの制御点のXZは隣接アンカーの移動には追従しない(ユーザーの意図した方向を保つ)。
+    /// 高さは control_height_manual でない限り、自動の制御点と同じ縦断勾配 V_i.y / |V_i.xz| を
+    /// アンカーからの水平距離に掛けて決める。ハンドルの高さを固定すると、ノードの高さを
+    /// いくら変えてもそのノードの勾配が変わらず、左右のハンドルの長さが違えば縦断が折れるため。
     /// </summary>
     /// <param name="resetManual">true なら手動調整フラグを全て落とし、全制御点を自動計算し直す</param>
     private void RecomputeAllControlPoints(bool resetManual = false)
@@ -1206,46 +1203,28 @@ public partial class RoadPlanManager : MonoBehaviour
             {
                 pt.control_out_manual = false;
                 pt.control_in_manual = false;
+                pt.control_height_manual = false;
             }
 
+            Vector3 tangent = AutoTangent(i);
+            float grade = HorizontalGrade(tangent);
+
             // control_out: このポイントから次へ向かう出口制御点
-            if (i < n - 1 && pt.role != PathPointRole.End && !pt.control_out_manual)
+            if (i < n - 1 && pt.role != PathPointRole.End)
             {
-                Vector3 curr = pt.position;
-                Vector3 next = points[i + 1].position;
-                Vector3 prev = i > 0 ? points[i - 1].position : curr;
-
-                Vector3 tangent;
-                if (i == 0)
-                {
-                    tangent = next - curr;
-                }
-                else
-                {
-                    tangent = next - prev;
-                }
-
-                pt.control_out = curr + tangent * (1f / 6f);
+                if (!pt.control_out_manual)
+                    pt.control_out = pt.position + tangent * (1f / 6f);
+                else if (pt.control_out.HasValue && !pt.control_height_manual)
+                    pt.control_out = WithGrade(pt.control_out.Value, pt.position, grade);
             }
 
             // control_in: 前のポイントからこのポイントへ入る入口制御点
-            if (pt.role != PathPointRole.Start && !pt.control_in_manual)
+            if (pt.role != PathPointRole.Start)
             {
-                Vector3 curr = pt.position;
-                Vector3 prev = points[i - 1].position;
-                Vector3 after = i < n - 1 ? points[i + 1].position : curr;
-
-                Vector3 tangent;
-                if (i == n - 1)
-                {
-                    tangent = curr - prev;
-                }
-                else
-                {
-                    tangent = after - prev;
-                }
-
-                pt.control_in = curr - tangent * (1f / 6f);
+                if (!pt.control_in_manual)
+                    pt.control_in = pt.position - tangent * (1f / 6f);
+                else if (pt.control_in.HasValue && !pt.control_height_manual)
+                    pt.control_in = WithGrade(pt.control_in.Value, pt.position, -grade);
             }
 
             points[i] = pt;
@@ -1256,10 +1235,31 @@ public partial class RoadPlanManager : MonoBehaviour
         AlignEndpointControlsToExistingPaths();
     }
 
+    /// <summary>アンカー i の自動接線 P_{i+1} - P_{i-1}(端点は片側)。バックエンド Path._auto_fill_controls と同じ形。</summary>
+    private Vector3 AutoTangent(int i)
+    {
+        int n = points.Count;
+        return points[Mathf.Min(i + 1, n - 1)].position - points[Mathf.Max(i - 1, 0)].position;
+    }
+
+    /// <summary>接線の縦断勾配(水平1mあたりの高さ)。水平成分が無い接線は0。</summary>
+    private static float HorizontalGrade(Vector3 tangent)
+    {
+        float horizontal = Mathf.Sqrt(tangent.x * tangent.x + tangent.z * tangent.z);
+        return horizontal > 1e-4f ? tangent.y / horizontal : 0f;
+    }
+
+    /// <summary>制御点のXZを保ち、高さをアンカーから水平距離×勾配の位置にする。入口制御点は勾配の符号を反転して渡す。</summary>
+    private static Vector3 WithGrade(Vector3 control, Vector3 anchor, float grade)
+    {
+        control.y = anchor.y + grade * Utils.XZDistance(control, anchor);
+        return control;
+    }
+
     /// <summary>
     /// アンカー(頂点)を newPosition へ移動し、制御点を追従させる。
     /// 手動調整済みの制御点はアンカーからの相対位置(XZ)を保ったまま平行移動し、
-    /// Yはアンカーの相対高さ(標高)を移動先の地形高さに乗せ直す。
+    /// 高さは RecomputeAllControlPoints が移動後の縦断勾配から決め直す。
     /// 未調整の制御点は移動後の頂点列から RecomputeAllControlPoints で再計算する。
     /// ドラッグ移動・標高変更(キー/IPC)の全経路がここを通る。
     /// </summary>
@@ -1270,24 +1270,53 @@ public partial class RoadPlanManager : MonoBehaviour
         var pt = points[index];
         Vector3 oldPosition = pt.position;
         Vector3 deltaXZ = new Vector3(newPosition.x - oldPosition.x, 0f, newPosition.z - oldPosition.z);
-        float deltaY = newPosition.y - oldPosition.y;
         pt.position = newPosition;
         pt.proposalGenerated = false;
 
-        if (pt.control_out_manual && pt.control_out.HasValue)
-        {
-            Vector3 c = pt.control_out.Value + deltaXZ;
-            c.y += deltaY;
-            pt.control_out = c;
-        }
-        if (pt.control_in_manual && pt.control_in.HasValue)
-        {
-            Vector3 c = pt.control_in.Value + deltaXZ;
-            c.y += deltaY;
-            pt.control_in = c;
-        }
+        if (pt.control_out_manual && pt.control_out.HasValue) pt.control_out = pt.control_out.Value + deltaXZ;
+        if (pt.control_in_manual && pt.control_in.HasValue) pt.control_in = pt.control_in.Value + deltaXZ;
         points[index] = pt;
 
+        // 自動接線が変わるのは両隣。動かしたアンカー自身も、経路提案で固定した勾配より新しい配置の勾配を優先する。
+        ReleaseControlHeights(index - 1, index + 1);
+        RecomputeAllControlPoints();
+    }
+
+    /// <summary>first〜last(範囲外は無視)のアンカーの制御点の高さ固定を解除する。</summary>
+    private void ReleaseControlHeights(int first, int last)
+    {
+        for (int i = Mathf.Max(0, first); i <= Mathf.Min(points.Count - 1, last); i++)
+        {
+            var pt = points[i];
+            pt.control_height_manual = false;
+            points[i] = pt;
+        }
+    }
+
+    /// <summary>
+    /// 制御点(ハンドル)のXZを動かす。3Dのドラッグと2Dパネルの共通処理。
+    /// 手動になるのはXZだけで、高さはアンカーの縦断勾配から左右同じ勾配で決め直す
+    /// (経路提案などで固定した高さも解除する)。ハンドルは平面の曲がりを調整する道具で、
+    /// 高さを固定するとノードの高さを変えても勾配が変わらなくなるため。
+    /// </summary>
+    private void MoveControlXZ(int index, bool controlIn, float x, float z)
+    {
+        var pt = points[index];
+        Vector3 control = new Vector3(x, pt.position.y, z);
+        if (controlIn)
+        {
+            pt.control_in = control;
+            pt.control_in_manual = true;
+        }
+        else
+        {
+            pt.control_out = control;
+            pt.control_out_manual = true;
+        }
+        pt.control_height_manual = false;
+        points[index] = pt;
+        // 反対側(control_in / control_out)を頂点を挟んで一直線に保ち、道路が折れないようにする
+        EnforceCollinearControls(index, movedControlOut: !controlIn);
         RecomputeAllControlPoints();
     }
 
@@ -1298,7 +1327,8 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 反対側ハンドルの長さ（アンカーからの距離）は維持し、向きだけを反転させる。
     /// 両方の制御点を持つポイント（ウェイポイント）でのみ機能する。
     /// 始点/終点は片側しか持たないため何もしない。
-    /// XZ平面上で一直線にし、各制御点の絶対標高は維持する。
+    /// XZ平面上で一直線にするだけで、高さは変えない(呼び出し側の RecomputeAllControlPoints が
+    /// 左右同じ縦断勾配で決め直す)。
     /// 追従させた反対側も手動調整済み扱いにする。片方だけ自動計算のままだと、
     /// 次の頂点移動で再計算されて一直線が崩れ、頂点で道路が折れるため。
     /// </summary>
@@ -1551,6 +1581,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         if (selectedPointIndex > edgeIndex) selectedPointIndex++;
 
+        ReleaseControlHeights(edgeIndex, edgeIndex + 2);
         InvalidateShapeCache();
         RecomputeAllControlPoints();
         Update3DPreview();
@@ -1595,6 +1626,7 @@ public partial class RoadPlanManager : MonoBehaviour
         }
         else if (selectedPointIndex > index) selectedPointIndex--;
 
+        ReleaseControlHeights(index - 1, index);
         InvalidateShapeCache();
         RecomputeAllControlPoints();
         Update3DPreview();

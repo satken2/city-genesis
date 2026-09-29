@@ -21,7 +21,8 @@ public enum PathPointRole
 ///
 /// 始点は control_out のみ、終点は control_in のみを持つ。
 /// ウェイポイントは両方を持つ。
-/// Catmull-Romスプラインに基づき自動計算されるが、ドラッグで手動編集可能。
+/// Catmull-Romスプラインに基づき自動計算されるが、ドラッグで平面位置(XZ)を手動編集できる。
+/// 高さ(Y)は control_height_manual でない限り、アンカーの自動の縦断勾配から決める。
 /// </summary>
 [System.Serializable]
 public struct PathBuildPoint
@@ -39,14 +40,22 @@ public struct PathBuildPoint
     public Vector3? control_in;
 
     /// <summary>
-    /// control_out がユーザーの手動調整済みなら true。
-    /// 自動計算(RecomputeAllControlPoints)はこのフラグが立った制御点を上書きしない。
-    /// アンカーを動かしたときは自動計算し直さず、アンカーと同じ量だけ平行移動する。
+    /// control_out の平面位置(XZ)がユーザーの手動調整済みなら true。
+    /// 自動計算(RecomputeAllControlPoints)はこのフラグが立った制御点のXZを上書きしない。
+    /// アンカーを動かしたときはXZを自動計算し直さず、アンカーと同じ量だけ平行移動する。
+    /// 高さは control_height_manual でない限り自動計算が決め直す。
     /// </summary>
     public bool control_out_manual;
 
     /// <summary>control_in の手動調整フラグ。意味は control_out_manual と同じ。</summary>
     public bool control_in_manual;
+
+    /// <summary>
+    /// 手動調整済みの制御点の高さ(Y)を固定するなら true。経路提案の結果と、既存パスの再開で
+    /// 保存値が自動の縦断勾配と食い違った制御点だけに立て、ハンドルのドラッグでは立てない。
+    /// このアンカーか両隣のアンカーを動かすと解除する(自動の縦断勾配が変わるため)。
+    /// </summary>
+    public bool control_height_manual;
 
     /// <summary>
     /// 盛土オフセット(m)。-5〜+5。
@@ -65,6 +74,7 @@ public struct PathBuildPoint
         control_in = null;
         control_out_manual = false;
         control_in_manual = false;
+        control_height_manual = false;
         embankmentHeight = 0f;
     }
 }

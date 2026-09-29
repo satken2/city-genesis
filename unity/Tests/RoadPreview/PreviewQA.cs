@@ -315,19 +315,47 @@ public static class PreviewQA
         var pt = asm.GetType("PathBuildPoint");
         var role = asm.GetType("PathPointRole");
         var anchors = (IList)type.GetField("points", flags).GetValue(manager);
-        var point = Activator.CreateInstance(pt, anchor, Enum.Parse(role, "Start"));
-        pt.GetField("control_out").SetValue(point, control);
-        pt.GetField("control_out_manual").SetValue(point, true);
-        anchors.Add(point);
-        type.GetMethod("MoveAnchorPosition", flags).Invoke(manager, new object[] { 0, anchor + new Vector3(20, 5, 0) });
-        var moved = (Vector3)pt.GetField("control_out").GetValue(anchors[0]);
-        Require(Vector3.Distance(moved, control + new Vector3(20, 5, 0)) < 0.001f, "Anchor movement changed vertical tangent with underlying terrain");
-        point = anchors[0];
-        pt.GetField("control_in").SetValue(point, new Vector3(10, 62, 10));
-        anchors[0] = point;
-        type.GetMethod("EnforceCollinearControls", flags).Invoke(manager, new object[] { 0, true });
-        var opposite = (Vector3)pt.GetField("control_in").GetValue(anchors[0]);
-        Require(Mathf.Abs(opposite.y - 62) < 0.001f, "Planar collinearity changed control height");
+        void Add(Vector3 position, string name) => anchors.Add(Activator.CreateInstance(pt, position, Enum.Parse(role, name)));
+        object Call(string name, params object[] args) => type.GetMethod(name, flags).Invoke(manager, args);
+        Vector3 Get(int index, string field) => (Vector3)pt.GetField(field).GetValue(anchors[index]);
+        void Set(int index, string field, object value)
+        {
+            object point = anchors[index];
+            pt.GetField(field).SetValue(point, value);
+            anchors[index] = point;
+        }
+        float Grade(Vector3 from, Vector3 to) => (to.y - from.y) / new Vector2(to.x - from.x, to.z - from.z).magnitude;
+        void RequireGrade(int index, float expected, string message)
+        {
+            Vector3 a = Get(index, "position");
+            Require(Mathf.Abs(Grade(Get(index, "control_in"), a) - expected) < 1e-4f, message + " (in)");
+            Require(Mathf.Abs(Grade(a, Get(index, "control_out")) - expected) < 1e-4f, message + " (out)");
+        }
+        // 地形は+X方向に16%で上るので、ハンドル直下とアンカー直下の地盤は大きく違う。
+        Add(anchor, "Start");
+        Add(new Vector3(100, 70, 20), "Waypoint");
+        Add(new Vector3(200, 64, 20), "End");
+        Call("RecomputeAllControlPoints", false);
+        RequireGrade(1, 0.02f, "Automatic handle grade");
+        Call("MoveControlXZ", 1, true, 80f, 35f);
+        Require((bool)pt.GetField("control_in_manual").GetValue(anchors[1]), "Dragged handle lost its planar position");
+        Require(Mathf.Abs(Get(1, "control_in").x - 80) < 0.001f && Mathf.Abs(Get(1, "control_in").z - 35) < 0.001f, "Handle drag moved the wrong point");
+        RequireGrade(1, 0.02f, "Dragged handle kept its height instead of the anchor grade");
+        Call("MoveAnchorPosition", 1, Get(1, "position") + new Vector3(10, 10, 0));
+        Require(Mathf.Abs(Get(1, "control_in").x - 90) < 0.001f, "Manual handle did not follow its anchor");
+        RequireGrade(1, 0.02f, "Raising the anchor changed its own grade");
+        Call("MoveAnchorPosition", 2, Get(2, "position") + new Vector3(0, 20, 0));
+        RequireGrade(1, 0.12f, "Manual handle ignored the neighbour height");
+        Set(1, "control_height_manual", true);
+        Set(1, "control_in", Get(1, "control_in") + Vector3.up * 5);
+        Call("RecomputeAllControlPoints", false);
+        Require(Mathf.Abs(Grade(Get(1, "control_in"), Get(1, "position")) - 0.12f) > 0.01f, "Fixed proposal height was recomputed");
+        Call("MoveAnchorPosition", 0, Get(0, "position") + new Vector3(0, 4, 0));
+        Require(!(bool)pt.GetField("control_height_manual").GetValue(anchors[1]), "Moving a neighbour kept the fixed height");
+        RequireGrade(1, 0.1f, "Released handle did not return to the anchor grade");
+        Set(1, "control_in", new Vector3(95, 62, 10));
+        Call("EnforceCollinearControls", 1, true);
+        Require(Mathf.Abs(Get(1, "control_in").y - 62) < 0.001f, "Planar collinearity changed control height");
         UnityEngine.Object.DestroyImmediate(terrain);
         UnityEngine.Object.DestroyImmediate(terrainData);
         asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null, null);
@@ -559,6 +587,7 @@ public static class PreviewQA
             Require((bool)pointType.GetField("proposalGenerated").GetValue(points[1]), "Generated point lost provenance");
             Require((bool)pointType.GetField("control_out_manual").GetValue(points[0]), "Optimizer controls will be overwritten");
             Require(((Vector3)pointType.GetField("control_out").GetValue(points[0])).y == 11, "Proposal control height changed");
+            Require((bool)pointType.GetField("control_height_manual").GetValue(points[0]), "Proposal control height is not fixed");
             Command("undo_route", before);
             Require(points.Count == 3, "Stale undo changed shape");
             Command("undo_route", Revision());
@@ -567,6 +596,7 @@ public static class PreviewQA
             type.GetMethod("MoveAnchorPosition", flags).Invoke(manager, new object[] { 1, new Vector3(100, 13, 30) });
             type.GetMethod("InvalidateShapeCache", flags).Invoke(manager, null);
             Require(!(bool)pointType.GetField("proposalGenerated").GetValue(points[1]), "Manual edit did not promote generated point");
+            Require(!(bool)pointType.GetField("control_height_manual").GetValue(points[0]), "Moving a neighbour kept the proposal height");
             Command("undo_route", Revision());
             Require(points.Count == 3, "Undo erased a later manual edit");
             phase.SetValue(manager, Enum.Parse(phase.FieldType, "Placing"));
