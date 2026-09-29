@@ -35,8 +35,21 @@
     "createFromTerrain": "Create scenario",
     "creating": "Creating...",
     "created": "Scenario created.",
-    "terrainHint": "Choose a terrain to create your own scenario on it. The game does not start. Afterwards, use Edit city and Edit terrain on the Scenarios tab to build it out.",
-    "terrainEmpty": "No terrains available.",
+    "terrainHint": "Pick an elevation file from anywhere on your PC to create your own scenario on that terrain. The game does not start. Afterwards, use Edit city and Edit terrain on the Scenarios tab to build it out.",
+    "importFile": "Elevation file",
+    "chooseFile": "Choose file",
+    "noFileChosen": "No file chosen",
+    "importFormats": "Use a grayscale PNG (8- or 16-bit; the top of the image is north, the darkest pixel is the lowest elevation and the brightest pixel the highest) or a .npy 2-D array of elevations in meters (the first row is the southern edge).",
+    "importSpacing": "Distance per pixel (m)",
+    "importMinHeight": "Lowest elevation (m)",
+    "importMaxHeight": "Highest elevation (m)",
+    "importNpyHeights": "A .npy file uses its values as elevations directly, so the lowest and highest elevations are not used.",
+    "importSeaLevel": "Sea level (m)",
+    "importSeaLevelHint": "Everything at or below this height becomes sea, and a sea floor is generated.",
+    "importTitle": "Title",
+    "importMapSize": "Map size (estimated)",
+    "importInvalid": "Check the values. The distance per pixel must be greater than 0 and at most 1000, elevations and sea level must be between -10000 and 10000, and the highest elevation must be above the lowest.",
+    "importTooLarge": "The map would be larger than {{max}} km on a side. Use a smaller distance per pixel or a file with fewer pixels.",
     "terrainOpenFailed": "Could not open the scenario terrain.",
     "terrainEncryptedHint": "This scenario was made from a DLC city and is encrypted, so the terrain editor cannot open it. Use Edit city to edit resources and props.",
     "initialCityName": "Initial city name",
@@ -89,6 +102,7 @@
     "HOST_NOT_ALLOWED": "The host used to connect to the core is not allowed. Check the connection settings.",
     "SCENARIO_ENGLISH_REQUIRED": "Enter the English text. The title requires English.",
     "SCENARIO_OPTION_FIXED": "Settings fixed by the scenario cannot be changed.",
-    "SCENARIO_OPTION_INVALID": "A start setting has an invalid value."
+    "SCENARIO_OPTION_INVALID": "A start setting has an invalid value.",
+    "HEIGHTMAP_INVALID": "This elevation file cannot be imported. Check the format (grayscale PNG or .npy) and the values you entered."
   }
 }

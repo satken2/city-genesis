@@ -112,8 +112,8 @@ export type TerrainEditorLocks = { heights_locked: boolean; reasons: string[] };
 /** Rust の load_terrain_editor_data の戻り値。シナリオの地形 API から作った作業コピーの中身 */
 export type TerrainEditorData = {
   scenario_id: string;
-  /** シナリオの元になったオリジナル地形のID */
-  terrain_map_id: string | null;
+  /** 地形の出どころ(取り込んだ標高ファイルの名前、またはチュートリアルの舞台の名前)。表示だけに使う */
+  terrain_source: string | null;
   /** シナリオのタイトル(多言語テキスト。見出しに表示言語で出す) */
   title: LocalizedText | null;
   locks: unknown;

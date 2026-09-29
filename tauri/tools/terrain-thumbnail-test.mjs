@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
-import { loadThumbnailRenderer } from "./terrain-thumbnail-render.mjs";
+import { build } from "esbuild";
+import { fileURLToPath } from "node:url";
 
-const { renderTerrainThumbnail } = await loadThumbnailRenderer();
+// ブラウザと同じTypeScriptを束ねて検証する(色・補間・海岸処理はシナリオ管理の取り込みと共通)。
+const bundle = await build({
+  entryPoints: [fileURLToPath(new URL("../src/components/terrain/terrainThumbnail.ts", import.meta.url))],
+  bundle: true, platform: "node", format: "esm", write: false,
+});
+const { renderTerrainThumbnail } = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString("base64")}`);
 const make = (values, cols, groundCover) => renderTerrainThumbnail({
   elev: new Float32Array(values), rows: values.length / cols, cols,
   mapWidth: (cols - 1) * 10, mapHeight: (values.length / cols - 1) * 10,

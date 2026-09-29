@@ -7,6 +7,8 @@ import { ScenarioMetadataWindow } from "../../src/components/template/ScenarioMe
 import { NewGameWindow } from "../../src/components/taskbar/NewGameWindow";
 import { errorCode, prepareSaveLoad, saveError } from "../../src/utils/saves";
 import { ApiError } from "../../src/utils/api";
+import { importedMapExtent, readHeightmapInfo } from "../../src/components/template/heightmapImport";
+import { encodeFloat16Array, uint8ToBase64 } from "../../src/components/terrain/terrainData";
 import { state } from "./mock-runtime";
 import jaScenarios from "../../src/i18n/ja/scenarios.json";
 import jaTerrainEditor from "../../src/i18n/ja/terrainEditor.json";
@@ -18,7 +20,7 @@ Object.assign(globalThis, { window, document: window.document, HTMLElement: wind
 const entry = { id: "local~mine", city_name: "City", scenario_title: { en: "My scenario" } as Record<string, string>, author: "Author",
   scenario_description: { en: "Description", ja: "説明" }, scenario_objective: { en: "Objective" }, category: "sandbox", language: "ja",
   scenario_city_name: { ja: "見本市", en: "Sample Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, asset_region: 1,
-  terrain_map_id: "flat", ground_cover: 4 as number | undefined, climate: 7 as number | undefined,
+  terrain_source: "flat.png", map_width: 2000, map_height: 1000, ground_cover: 4 as number | undefined, climate: 7 as number | undefined,
   saved_core_version: "1.0.0", created_core_version: "1.0.0", compatibility: { loadable: true }, origin: "local",
   read_only: false, encrypted: false, required_packs: [], pack_status: {}, official: false };
 const entries = [entry,
@@ -26,24 +28,36 @@ const entries = [entry,
   { ...entry, id: "dlc~pack~city", origin: "dlc", read_only: true, official: true, encrypted: true,
     required_packs: ["pack"], pack_status: { pack: "not_owned" }, compatibility: { loadable: false, code: "SCENARIO_PACK_NOT_OWNED" } },
   { ...entry, id: "local~future", compatibility: { loadable: false, code: "SAVE_VERSION_NEWER" } }];
-const maps = [
-  { id: "flat", name: "flat", settings: { map_width: 2000, map_height: 1000 }, ground_cover: 0, climate: 0 },
-  { id: "uuid-map", name: "uuid-map", settings: {} },
-];
 let validation: object = { balance_changed: false };
 let rejectLoad = false;
 let metadataWritten: any;
-let fromTerrain: any;
+/** 標高ファイルの取り込み要求(クエリ・本文・Content-Type)。rejectHeightmap なら 422 で断る */
+let imported: { query: URLSearchParams; body: unknown; contentType: string | null } | undefined;
+let rejectHeightmap = false;
+/** シナリオの地形の取得(平面図の元)を失敗させる */
+let terrainUnavailable = false;
+let thumbnailUploads: { url: string; contentType: string | null; body: unknown }[] = [];
+// 3列×2行(20m×10m)の小さな地形。行0が南で、南西だけ海。
+const terrainDocument = { settings: { map_width: 20, map_height: 10, near_spacing: 10, far_spacing: 200, cell_size: 500, grid_rows: 2, grid_cols: 3 },
+  near_base64: uint8ToBase64(encodeFloat16Array(new Float32Array([-5, 3, 8, 2, 12, 40]))), ground_cover: 2 };
 globalThis.fetch = async (input, init) => {
   const url = String(input);
+  const headers = new Headers(init?.headers);
   if (url.includes("/validation?template=true")) return new Response(JSON.stringify(rejectLoad
     ? { code: "SAVE_CORRUPT", message: "corrupt" } : { compatibility: validation }), { status: rejectLoad ? 422 : 200 });
+  if (url.includes("/thumbnail") && init?.method === "PUT") {
+    thumbnailUploads.push({ url, contentType: headers.get("Content-Type"), body: init.body });
+    return new Response(JSON.stringify({ success: true }));
+  }
   if (url.includes("/thumbnail")) return new Response("", { status: 404 });
-  if (url.endsWith("/api/v1/terrain/maps")) return new Response(JSON.stringify({ maps }));
-  if (url.endsWith("/api/v1/scenarios/from-terrain")) {
-    fromTerrain = JSON.parse(String(init?.body));
-    entries.push({ ...entry, id: "local~new", scenario_title: fromTerrain.title });
-    return new Response(JSON.stringify({ id: "local~new" }));
+  if (url.includes("/api/v1/scenarios/from-heightmap?")) {
+    imported = { query: new URL(url).searchParams, body: init?.body, contentType: headers.get("Content-Type") };
+    if (rejectHeightmap) return new Response(JSON.stringify({ code: "HEIGHTMAP_INVALID", message: "陸地がありません。" }), { status: 422 });
+    entries.push({ ...entry, id: "local~new", scenario_title: { en: imported.query.get("title")! } });
+    return new Response(JSON.stringify({ id: "local~new", map_width: 2000, map_height: 1000 }));
+  }
+  if (url.endsWith("/api/v1/scenarios/local~new/terrain")) {
+    return terrainUnavailable ? new Response("{}", { status: 500 }) : new Response(JSON.stringify(terrainDocument));
   }
   if (init?.method === "PATCH") { metadataWritten = JSON.parse(String(init.body)); return new Response("{}"); }
   if (url.includes("/saves/")) return new Response(JSON.stringify({ save: entry }));
@@ -58,6 +72,11 @@ const button = (text: string) => buttons(text)[0]!;
 const card = (id: string) => [...container.querySelectorAll<HTMLElement>("article")].find(value => value.dataset.scenarioId === id)!;
 const cardButton = (id: string, text: string) => [...card(id).querySelectorAll("button")].find(value => value.textContent === text)!;
 const lastCall = (command: string) => state.calls.filter(call => call.command === command).at(-1)?.args;
+const setText = (element: HTMLInputElement | HTMLSelectElement, value: string) => {
+  const prototype = element.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype;
+  Object.getOwnPropertyDescriptor(prototype, "value")!.set!.call(element, value);
+  element.dispatchEvent(new window.Event(element.tagName === "SELECT" ? "change" : "input", { bubbles: true }));
+};
 
 // シナリオ管理: 全保存元を1つの一覧に並べ、保存元ごとに操作を出し分ける。
 let root = createRoot(container);
@@ -111,23 +130,125 @@ await act(async () => { cardButton("workshop~123~copy", "scenarios.editCopy").cl
 await settle();
 assert.deepEqual(lastCall("create_session"), { templateId: "workshop~123~copy", templateMode: true, acceptBalanceChange: true });
 
-// 地形を取り込む: 翻訳名で作成し、シナリオタブへ戻って新しいカードを選択する。
+// 地形を取り込む: 画素数・形式は先頭のバイトから読み、マップの大きさはコアと同じく1km単位に切り上げる。
+assert.deepEqual([importedMapExtent(1001, 1), importedMapExtent(1002, 1), importedMapExtent(2, 0.5), importedMapExtent(3001, 10), importedMapExtent(11, 100)],
+  [1000, 2000, 1000, 30000, 1000]);
+const png = (columns: number, rows: number, name = "island.png") => {
+  const bytes = new Uint8Array(33);
+  bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52]);
+  new DataView(bytes.buffer).setUint32(16, columns);
+  new DataView(bytes.buffer).setUint32(20, rows);
+  return new File([bytes], name, { type: "image/png" });
+};
+const npy = (header: string, name = "dem.npy", version = 1) => {
+  const text = new TextEncoder().encode(header);
+  const prefix = version === 1 ? [0x93, 0x4e, 0x55, 0x4d, 0x50, 0x59, 1, 0, text.length & 0xff, text.length >> 8]
+    : [0x93, 0x4e, 0x55, 0x4d, 0x50, 0x59, version, 0, text.length & 0xff, text.length >> 8, 0, 0];
+  return new File([new Uint8Array(prefix), text, new Uint8Array(8)], name);
+};
+assert.deepEqual(await readHeightmapInfo(png(201, 101)), { format: "png", columns: 201, rows: 101 });
+assert.deepEqual(await readHeightmapInfo(npy("{'descr': '<f4', 'fortran_order': False, 'shape': (101, 201), }")), { format: "npy", columns: 201, rows: 101 });
+assert.deepEqual(await readHeightmapInfo(npy("{'descr': '<f4', 'fortran_order': False, 'shape': (7, 9), }", "v2.npy", 2)), { format: "npy", columns: 9, rows: 7 });
+assert.deepEqual(await readHeightmapInfo(npy("{'descr': '<f4', 'fortran_order': False, 'shape': (4, 5, 3), }")), { format: "npy", columns: null, rows: null }, "only 2-D arrays have a size");
+assert.deepEqual(await readHeightmapInfo(new File([new Uint8Array([1, 2, 3])], "notes.PNG")), { format: "png", columns: null, rows: null }, "unknown bytes fall back to the extension");
+
+// 平面図は canvas で PNG にする(happy-dom の canvas は描けないので、描いた大きさと形式だけを見る)。
+const drawn: { width: number; height: number }[] = [];
+Object.assign(globalThis, { ImageData: window.ImageData });
+window.HTMLCanvasElement.prototype.getContext = function () {
+  return { putImageData: (image: ImageData) => { drawn.push({ width: image.width, height: image.height }); } };
+} as any;
+window.HTMLCanvasElement.prototype.toBlob = function (callback: (blob: Blob | null) => void, type?: string) {
+  callback(new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], { type }));
+} as any;
+const importForm = () => container.querySelector<HTMLFormElement>(".scenario-import")!;
+const fileInput = () => importForm().querySelector<HTMLInputElement>("input[type=file]")!;
+const fieldInput = (label: string) => [...importForm().querySelectorAll("label")].find(value => value.textContent?.startsWith(label))!.querySelector("input")!;
+const createButton = () => button("scenarios.createFromTerrain");
+const choose = async (file: File) => {
+  await act(async () => {
+    Object.defineProperty(fileInput(), "files", { value: [file], configurable: true });
+    fileInput().dispatchEvent(new window.Event("change", { bubbles: true }));
+  });
+  await settle();
+};
+
 await act(async () => { button("scenarios.tabTerrains").click(); });
 await settle();
-assert.equal(container.querySelectorAll(".scenario-terrain-tile").length, 2);
-assert.ok(container.textContent?.includes("terrainProfiles.maps.flat.name"));
-assert.ok(container.querySelector(".scenario-terrain-tile")?.textContent?.includes("2 × 1 km"), "the tile shows the map size");
-assert.ok(button("scenarios.createFromTerrain").disabled, "nothing to create before a terrain is selected");
-await act(async () => { (container.querySelector(".scenario-terrain-tile") as HTMLButtonElement).click(); });
-assert.ok(!button("scenarios.createFromTerrain").disabled);
-await act(async () => { button("scenarios.createFromTerrain").click(); });
+assert.equal(fileInput().accept, ".png,.npy");
+assert.ok(importForm().textContent?.includes("scenarios.noFileChosen"));
+assert.ok(createButton().disabled, "nothing to create before a file is chosen");
+assert.ok(!importForm().querySelector(".scenario-import-size"), "the map size is unknown before a file is chosen");
+await choose(png(201, 101));
+assert.ok(importForm().textContent?.includes("island.png"));
+assert.equal(fieldInput("scenarios.importTitle").value, "island", "the title defaults to the file name without its extension");
+assert.equal(importForm().querySelector(".scenario-import-size")?.textContent, "2 × 1 km", "the map size is previewed from the PNG header");
+assert.ok(!fieldInput("scenarios.importMinHeight").disabled && !fieldInput("scenarios.importMaxHeight").disabled);
+assert.ok(!createButton().disabled);
+await act(async () => { setText(fieldInput("scenarios.importSpacing"), "200"); });
+assert.ok(importForm().textContent?.includes("scenarios.importTooLarge"), "maps over 30 km per side are rejected before sending");
+assert.ok(createButton().disabled);
+await act(async () => { setText(fieldInput("scenarios.importSpacing"), "10"); });
+await act(async () => { setText(fieldInput("scenarios.importMinHeight"), "100"); });
+await act(async () => { setText(fieldInput("scenarios.importMaxHeight"), "50"); });
+assert.ok(importForm().textContent?.includes("scenarios.importInvalid"), "the highest elevation must be above the lowest");
+assert.ok(createButton().disabled);
+await act(async () => { setText(fieldInput("scenarios.importMaxHeight"), "900"); });
+await act(async () => { setText(fieldInput("scenarios.importSeaLevel"), ""); });
+assert.ok(createButton().disabled, "an empty value is not treated as 0");
+await act(async () => { setText(fieldInput("scenarios.importSeaLevel"), "5"); });
+await act(async () => { setText(fieldInput("scenarios.importTitle"), "Island Town"); });
+assert.ok(!createButton().disabled && !importForm().textContent?.includes("scenarios.importInvalid"));
+
+// 失敗の理由コードは翻訳して出し、タブはそのまま。
+rejectHeightmap = true;
+await act(async () => { createButton().click(); });
 await settle();
-// タイトルは多言語テキストで、地形の翻訳名を全言語分送る(英語は必須)。
-assert.deepEqual(fromTerrain, { terrain_map_id: "flat", language: "ja", title: Object.fromEntries(
-  ["ja", "en", "es-419", "zh-Hans", "zh-Hant", "fr", "ko"].map(language => [language, `${language}:terrainProfiles.maps.flat.name`])) });
+assert.equal(container.querySelector(".scenario-error[role=alert]")?.textContent, "saveCompatibility.HEIGHTMAP_INVALID");
+assert.equal(container.querySelector("[role=tab][aria-selected=true]")?.textContent, "scenarios.tabTerrains");
+rejectHeightmap = false;
+
+// 生バイトを送り、作成後は平面図をシナリオ画像にしてからシナリオタブで新しいカードを選択する。
+await act(async () => { createButton().click(); });
+await settle();
+assert.equal(imported?.contentType, "application/octet-stream");
+assert.ok(imported?.body instanceof File && imported.body.name === "island.png", "the file itself is the request body");
+assert.deepEqual(Object.fromEntries(imported!.query), { spacing: "10", sea_level: "5", min_height: "100", max_height: "900",
+  title: "Island Town", language: "ja", source_name: "island.png" });
+assert.deepEqual(drawn, [{ width: 512, height: 256 }], "the thumbnail keeps the map's aspect ratio");
+assert.equal(thumbnailUploads.length, 1);
+assert.ok(thumbnailUploads[0].url.endsWith("/api/v1/saves/local~new/thumbnail?template=true"));
+assert.equal(thumbnailUploads[0].contentType, "image/png");
 assert.equal(container.querySelector("[role=tab][aria-selected=true]")?.textContent, "scenarios.tabScenarios");
+assert.equal(container.querySelector(".scenario-status")?.textContent, "scenarios.created");
 assert.equal(card("local~new").getAttribute("aria-current"), "true");
 assert.ok(card("local~new").classList.contains("scenario-card--selected"));
+entries.pop();
+
+// .npy は値がそのまま標高なので最低・最高標高を送らない。平面図を作れなくても作成は成功する。
+await act(async () => { button("scenarios.tabTerrains").click(); });
+await settle();
+assert.ok(importForm().textContent?.includes("scenarios.noFileChosen"), "the file is cleared after a successful import");
+assert.equal(fieldInput("scenarios.importSpacing").value, "10", "conversion settings are kept for the next import");
+await choose(npy("{'descr': '<f4', 'fortran_order': False, 'shape': (101, 201), }"));
+assert.ok(fieldInput("scenarios.importMinHeight").disabled && fieldInput("scenarios.importMaxHeight").disabled);
+assert.ok(importForm().textContent?.includes("scenarios.importNpyHeights"));
+assert.equal(importForm().querySelector(".scenario-import-size")?.textContent, "2 × 1 km", "the map size is previewed from the .npy header");
+assert.equal(fieldInput("scenarios.importTitle").value, "dem");
+terrainUnavailable = true;
+thumbnailUploads = [];
+const thumbnailErrors: unknown[][] = [];
+console.error = (...args: unknown[]) => { thumbnailErrors.push(args); };
+await act(async () => { createButton().click(); });
+await settle();
+console.error = consoleError;
+assert.ok(!imported!.query.has("min_height") && !imported!.query.has("max_height"));
+assert.equal(imported!.query.get("source_name"), "dem.npy");
+assert.equal(thumbnailUploads.length, 0);
+assert.ok(thumbnailErrors.length > 0, "a thumbnail failure is logged");
+assert.equal(container.querySelector("[role=tab][aria-selected=true]")?.textContent, "scenarios.tabScenarios", "a thumbnail failure does not fail the import");
+assert.equal(card("local~new").getAttribute("aria-current"), "true");
+terrainUnavailable = false;
 await act(async () => { root.unmount(); });
 entries.pop();
 
@@ -146,11 +267,6 @@ entries.pop();
 
 // 紹介情報: 紹介文と初期の都市名を言語のタブで書き(英語が先頭で必須)、開始設定の値と固定を決める。
 const submit = () => act(async () => { container.querySelector("form")!.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true })); });
-const setText = (element: HTMLInputElement | HTMLSelectElement, value: string) => {
-  const prototype = element.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype;
-  Object.getOwnPropertyDescriptor(prototype, "value")!.set!.call(element, value);
-  element.dispatchEvent(new window.Event(element.tagName === "SELECT" ? "change" : "input", { bubbles: true }));
-};
 root = createRoot(container);
 let closed = false;
 await act(async () => { root.render(<ScenarioMetadataWindow apiBaseUrl="http://test" scenarioId={entry.id} onClose={() => { closed = true; }} />); });
@@ -203,15 +319,16 @@ const tile = (title: string) => [...container.querySelectorAll<HTMLButtonElement
 assert.equal(container.querySelectorAll(".new-game-tile").length - container.querySelectorAll(".new-game-tile--tutorial").length, 4);
 await act(async () => { tile("My scenario").click(); });
 assert.ok(!button("newGame.startScenarioButton").disabled);
-// シナリオの地表・気候は一覧の要素(都市が持つ値)を優先し、大きさは登録表から引く。
+// 事実欄(大きさ・地表・気候)はすべて一覧の要素(都市が持つ値)から引く。
 const facts = () => container.querySelector(".new-game-detail .terrain-facts");
-assert.equal(facts()?.querySelector("title")?.textContent, "groundCover.4", "the scenario's own ground cover wins over the registry");
-assert.ok(facts()?.textContent?.includes("climate.7"), "the scenario's own climate wins over the registry");
-assert.ok(facts()?.textContent?.includes("2 × 1 km"), "the map size comes from the registry");
+assert.equal(facts()?.querySelector("title")?.textContent, "groundCover.4");
+assert.ok(facts()?.textContent?.includes("climate.7"));
+assert.ok(facts()?.textContent?.includes("2 × 1 km"), "the map size comes from the entry");
+assert.ok(!container.querySelector(".new-game-detail")?.textContent?.includes("flat.png"), "the terrain source file name is not shown");
 const workshopTile = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]
   .find(value => value.textContent?.includes("scenarios.origin.workshop"))!;
 await act(async () => { workshopTile.click(); });
-assert.equal(facts()?.querySelector("title")?.textContent, "groundCover.1", "entries without values fall back to the registry");
+assert.equal(facts()?.querySelector("title")?.textContent, "groundCover.1", "entries without values use the game's default ground cover");
 assert.ok(facts()?.textContent?.includes("climate.1"));
 const unloadable = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]
   .filter(value => value.textContent?.includes("scenarios.origin.dlc"));
@@ -248,6 +365,21 @@ assert.equal(session.templateMode, undefined, "new games never start in template
 assert.deepEqual([session.language, session.cityName, session.climate, session.groundCover, session.assetRegion, session.simulationDays],
   ["fr", "Mine", null, 2, 1, 30]);
 delete state.results.load_app_settings;
+
+// チュートリアルは同梱の教材の都市から始まるので、地形の情報を出さずにIDだけを送る。
+await act(async () => { root.unmount(); });
+root = createRoot(container);
+await act(async () => { root.render(<NewGameWindow apiBaseUrl="http://test" onClose={() => {}} />); });
+await settle();
+await act(async () => { container.querySelector<HTMLButtonElement>(".new-game-tile--tutorial")!.click(); });
+assert.equal(facts(), null, "tutorials have no map facts");
+await act(async () => { button("newGame.startScenarioButton").click(); });
+await settle();
+await act(async () => { button("newGame.startButton").click(); });
+await settle();
+const tutorialSession = lastCall("create_session");
+assert.deepEqual([tutorialSession.isTutorial, tutorialSession.tutorialId, tutorialSession.templateId], [true, "basic", null]);
+assert.ok(!("terrainMapId" in tutorialSession), "no terrain is sent for tutorials");
 await act(async () => { root.unmount(); });
 
 validation = { balance_changed: true, balance_core_version: "1.0.0", core_version: "1.1.0" };
@@ -270,10 +402,10 @@ assert.equal(saveError("SCENARIO_TOO_LARGE: 上限超過", echo), "saveCompatibi
 assert.equal(saveError("HTTP 502", echo), "HTTP 502");
 
 // コアが返す理由コードの翻訳(日本語が原本。他の言語との揃いは check_i18n_parity.py が見る)。
-for (const code of ["SCENARIO_TOO_LARGE", "SCENARIO_READ_ONLY", "SCENARIO_ENCRYPTED", "NOT_FOUND", "SESSION_ACTIVE", "API_TOKEN_REQUIRED", "HOST_NOT_ALLOWED"]) {
+for (const code of ["SCENARIO_TOO_LARGE", "SCENARIO_READ_ONLY", "SCENARIO_ENCRYPTED", "NOT_FOUND", "SESSION_ACTIVE", "API_TOKEN_REQUIRED", "HOST_NOT_ALLOWED", "HEIGHTMAP_INVALID"]) {
   assert.ok(code in jaScenarios.saveCompatibility, `saveCompatibility.${code} is translated`);
 }
 for (const code of ["TERRAIN_LOCKED", "TERRAIN_INVALID", "TERRAIN_SIZE_MISMATCH", "RESOURCE_VALIDATION_ERROR", "PROP_VALIDATION_ERROR"]) {
   assert.ok(code in jaTerrainEditor.terrainEditor.saveErrors, `terrainEditor.saveErrors.${code} is translated`);
 }
-console.log("PASS: scenario manager tabs and origin actions, encrypted terrain lock, terrain editor open errors, terrain import, new game tabs and terrain facts, new game language and start options, localized metadata and start settings, load confirmation and error codes");
+console.log("PASS: scenario manager tabs and origin actions, encrypted terrain lock, terrain editor open errors, heightmap import (size preview, validation, request, thumbnail), new game tabs and terrain facts, tutorial start, new game language and start options, localized metadata and start settings, load confirmation and error codes");

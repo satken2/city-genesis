@@ -19,7 +19,7 @@
     "open3dPreview": "Abrir la vista previa 3D",
     "loadingTerrain": "Cargando los datos del terreno...",
     "metadataTitle": "Metadatos del mapa",
-    "metaTerrainMap": "Terreno de origen",
+    "metaTerrainSource": "Terreno de origen",
     "metaFarSpacing": "Espaciado de la retícula lejana",
     "metaCellSize": "Tamaño de celda",
     "metaReadonlySummary": "{{width}}×{{height}} m / espaciado cercano {{spacing}} m / retícula {{cols}}×{{rows}} (no modificable)",

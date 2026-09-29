@@ -379,15 +379,15 @@ Tauri 側の常駐スレッドが 5 秒ごとにバックエンドをポーリ�
 ### ゲーム開始フロー（新規）
 
 ```
-[TopMenu] 「新規ゲーム」ボタン押下
+[NewGameWindow] シナリオ・チュートリアルを選んで開始
   ↓
-invoke("start_new_game")
+invoke("create_session", { templateId | isTutorial + tutorialId, cityName, language, ... })
   ↓
 [Rust]
   1. launch_graphic() → Unity 起動
   2. topmenu.hide()
   3. loading.show()
-  4. POST /api/v1/sessions
+  4. POST /api/v1/sessions(template_id または is_tutorial・tutorial_id)
   5. ポーリングスレッドが current_save_id の変化を検知
   6. loading.hide()
   7. taskbar.show()

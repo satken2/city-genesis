@@ -477,17 +477,12 @@
         ],
         "additionalProperties": false
       }
-    },
-    "terrainMap": {
-      "type": "string",
-      "minLength": 1
     }
   },
   "required": [
     "version",
     "id",
-    "steps",
-    "terrainMap"
+    "steps"
   ],
   "additionalProperties": false,
   "$schema": "http://json-schema.org/draft-07/schema#",

@@ -19,7 +19,7 @@
     "open3dPreview": "開啟3D預覽",
     "loadingTerrain": "正在讀取地形資料...",
     "metadataTitle": "地圖中繼資料",
-    "metaTerrainMap": "原始地形",
+    "metaTerrainSource": "原始地形",
     "metaFarSpacing": "遠景格線間距",
     "metaCellSize": "單元大小",
     "metaReadonlySummary": "{{width}}×{{height}}m / 近景間距{{spacing}}m / {{cols}}×{{rows}}格線（不可變更）",

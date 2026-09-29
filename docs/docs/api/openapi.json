@@ -63,67 +63,6 @@
         }
       }
     },
-    "/api/v1/terrain/maps": {
-      "get": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Get Terrain Maps",
-        "description": "オリジナル地形(ゲーム用の登録表)を列挙する。シナリオ管理の「地形を取り込む」とチュートリアルが使う。",
-        "operationId": "get_terrain_maps_api_v1_terrain_maps_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/terrain/maps/{map_id}/thumbnail": {
-      "get": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Get Terrain Map Thumbnail",
-        "description": "指定したオリジナル地形のサムネイル画像(長辺512pxの透過PNG)を返す。\n\n.npy と同じ場所に置いた同名の .png を配信する。画像は2時間キャッシュできる。\n未生成時は404をキャッシュさせず、画像追加後の取得を妨げない。",
-        "operationId": "get_terrain_map_thumbnail_api_v1_terrain_maps__map_id__thumbnail_get",
-        "parameters": [
-          {
-            "name": "map_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Map Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/terrain/settings": {
       "get": {
         "tags": [
@@ -4724,19 +4663,8 @@
           "system"
         ],
         "summary": "App Debug Init",
-        "description": "デバッグ用のシミュレーション初期化を行うエンドポイント。\n\n保存操作のロックで直列化するので、シナリオのヘッドレス処理(読み込み→編集→保存)の途中で\n都市が作り直されることはない(処理が終わってセッションなしに戻ってから実行される)。\n\nterrain_map_id を指定した場合は、指定した地形マップでまっさらな新規ゲームを\n開始する。テスト用の建物や道路などの臨時データは投入しない。\n\nterrain_map_id を指定しない場合は従来通り、与論島の地形に加えて\nテスト用の建物・道路・ゾーンなどの臨時データを作成する。\n\n開発環境(生 Python 実行)専用。Nuitka ビルド(製品版・モック版とも)では\nis_debug_enabled() が常に False であり、501 を返す。テストデータ投入の実装\n(app.services.debug)もビルドには含まれないため、遅延 import で参照する。",
+        "description": "デバッグ用のシミュレーション初期化を行うエンドポイント。\n\n保存操作のロックで直列化するので、シナリオのヘッドレス処理(読み込み→編集→保存)の途中で\n都市が作り直されることはない(処理が終わってセッションなしに戻ってから実行される)。\n\n与論島の地形(チュートリアルの舞台から読む)に、テスト用の建物・道路・ゾーンなどの臨時データを作成する。\n\n開発環境(生 Python 実行)専用。Nuitka ビルド(製品版・モック版とも)では\nis_debug_enabled() が常に False であり、501 を返す。テストデータ投入の実装\n(app.services.debug)もビルドには含まれないため、遅延 import で参照する。",
         "operationId": "app_debug_init_api_v1_system_debug_init_post",
-        "parameters": [
-          {
-            "name": "terrain_map_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Terrain Map Id"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -4744,16 +4672,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MessageResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -4943,7 +4861,7 @@
           "sessions"
         ],
         "summary": "Create Session",
-        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. template_id … シナリオ（テンプレート）データをロードする\n  3. terrain_map_id … 指定した地形マップでまっさらな新規ゲームを開始する\n  4. 何も指定しない … デフォルトの平坦な地形で新規ゲームを開始する\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。シナリオで指定しない場合はシナリオの初期の都市名(都市の言語 → 英語の順)。\n  - language: 都市の言語。シナリオと違う言語なら、都市内の固有名詞を付け直す。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\nシナリオをプレイとして始めるとき(template_mode でない)は、作者が固定していない開始設定\n(simulation_days・climate・ground_cover・asset_region)を選べる。固定の項目にシナリオと違う値を\n送ると 422 SCENARIO_OPTION_FIXED、値域の外は 422 SCENARIO_OPTION_INVALID(どちらもロード前に断る)。\n言語を変えたときは応答の relocalized に {from, to, counts} を入れる。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
+        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. is_tutorial … 同梱のチュートリアルの都市(tutorial~<tutorial_id>)をシナリオとして開始する\n  3. template_id … シナリオ（テンプレート）データをロードする\n  4. 何も指定しない … 既定の地形(平坦な海)で新規ゲームを開始する(開発用)\n\nチュートリアルはシナリオの開始と同じ手順(言語が違えば名前の付け直し・開始設定)で始め、\nその後で神モードにする(代行アクションの工期スキップなどに要る)。\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。シナリオで指定しない場合はシナリオの初期の都市名(都市の言語 → 英語の順)。\n  - language: 都市の言語。シナリオと違う言語なら、都市内の固有名詞を付け直す。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\nシナリオをプレイとして始めるとき(template_mode でない)は、作者が固定していない開始設定\n(simulation_days・climate・ground_cover・asset_region)を選べる。固定の項目にシナリオと違う値を\n送ると 422 SCENARIO_OPTION_FIXED、値域の外は 422 SCENARIO_OPTION_INVALID(どちらもロード前に断る)。\n言語を変えたときは応答の relocalized に {from, to, counts} を入れる。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
         "operationId": "create_session_api_v1_sessions_post",
         "parameters": [
           {
@@ -4962,15 +4880,6 @@
             "schema": {
               "type": "string",
               "title": "Template Id"
-            }
-          },
-          {
-            "name": "terrain_map_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "title": "Terrain Map Id"
             }
           },
           {
@@ -5497,24 +5406,95 @@
         }
       }
     },
-    "/api/v1/scenarios/from-terrain": {
+    "/api/v1/scenarios/from-heightmap": {
       "post": {
         "tags": [
           "scenarios"
         ],
-        "summary": "Create Scenario From Terrain",
-        "description": "オリジナル地形から新しい自作シナリオを作り、`{\"id\": \"local~<id>\"}` を返す(ゲームは始まらない)。\n\n水面・川・資源・プロップ・カメラは空で、地表種別・気候区分はオリジナル地形の値。\nゲームのセッション中は 409 SESSION_ACTIVE、未登録の地形は 404 NOT_FOUND。",
-        "operationId": "create_scenario_from_terrain_api_v1_scenarios_from_terrain_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ScenarioFromTerrain"
-              }
+        "summary": "Create Scenario From Heightmap",
+        "description": "標高ファイル(グレースケールPNG 8/16bit・.npy)から新しい自作シナリオを作る(ゲームは始まらない)。\n\n本文はファイルの生バイト。PNG は上が北で、最も暗い色を min_height、最も明るい色を max_height(m)に当てる。\n.npy は行0が南・値が m の2次元配列。どちらも sea_level(m)以下を海にし、1画素を spacing(m)として\n一辺を1km単位に切り上げた大きさのマップにする。水面・川・資源・プロップ・カメラは空。\n応答は `{\"id\": \"local~<id>\", \"map_width\", \"map_height\"}`。変換できないファイルは 422 HEIGHTMAP_INVALID、\nゲームのセッション中は 409 SESSION_ACTIVE。",
+        "operationId": "create_scenario_from_heightmap_api_v1_scenarios_from_heightmap_post",
+        "parameters": [
+          {
+            "name": "spacing",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 1000,
+              "exclusiveMinimum": 0,
+              "title": "Spacing"
             }
           },
-          "required": true
-        },
+          {
+            "name": "min_height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": -10000,
+              "default": 0.0,
+              "title": "Min Height"
+            }
+          },
+          {
+            "name": "max_height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": -10000,
+              "default": 1000.0,
+              "title": "Max Height"
+            }
+          },
+          {
+            "name": "sea_level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": -10000,
+              "default": 0.0,
+              "title": "Sea Level"
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160,
+              "title": "Title"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ja",
+              "title": "Language"
+            }
+          },
+          {
+            "name": "source_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "default": "",
+              "title": "Source Name"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -11449,33 +11429,6 @@
           "mode"
         ],
         "title": "RouteRequest"
-      },
-      "ScenarioFromTerrain": {
-        "properties": {
-          "terrain_map_id": {
-            "type": "string",
-            "maxLength": 128,
-            "minLength": 1,
-            "title": "Terrain Map Id"
-          },
-          "title": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Title"
-          },
-          "language": {
-            "type": "string",
-            "title": "Language",
-            "default": "ja"
-          }
-        },
-        "type": "object",
-        "required": [
-          "terrain_map_id",
-          "title"
-        ],
-        "title": "ScenarioFromTerrain",
-        "description": "POST /api/v1/scenarios/from-terrain の本文。title は多言語テキストで、英語が必須。"
       },
       "ScenarioMetadata": {
         "properties": {

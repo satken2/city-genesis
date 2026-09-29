@@ -35,8 +35,21 @@
     "createFromTerrain": "建立場景",
     "creating": "建立中...",
     "created": "場景已建立。",
-    "terrainHint": "選擇地形，以此建立你自己的場景。不會開始遊戲。建立後可在「場景」分頁中透過「編輯城市」與「編輯地形」繼續製作。",
-    "terrainEmpty": "沒有可匯入的地形。",
+    "terrainHint": "可以選擇電腦中任何位置的高程檔案，以該地形建立你自己的場景。不會開始遊戲。建立後可在「場景」分頁中透過「編輯城市」與「編輯地形」繼續製作。",
+    "importFile": "高程檔案",
+    "chooseFile": "選擇檔案",
+    "noFileChosen": "未選擇檔案",
+    "importFormats": "可使用灰階 PNG（8 位元或 16 位元；影像上方為北，最暗的像素為最低高程，最亮的像素為最高高程），或以公尺為單位儲存高程的二維陣列 .npy（第一列為南端）。",
+    "importSpacing": "每像素距離（m）",
+    "importMinHeight": "最低高程（m）",
+    "importMaxHeight": "最高高程（m）",
+    "importNpyHeights": ".npy 檔案直接將陣列的值作為高程，因此不使用最低與最高高程。",
+    "importSeaLevel": "海平面高度（m）",
+    "importSeaLevelHint": "等於或低於此高度的區域會成為海洋，並產生海底。",
+    "importTitle": "標題",
+    "importMapSize": "地圖尺寸（估計）",
+    "importInvalid": "請確認輸入值。每像素距離須大於 0 且不超過 1000，高程與海平面高度須介於 -10000 到 10000，且最高高程須高於最低高程。",
+    "importTooLarge": "地圖邊長將超過 {{max}} km。請縮小每像素距離，或使用像素較少的檔案。",
     "terrainOpenFailed": "無法開啟場景地形。",
     "terrainEncryptedHint": "此場景由 DLC 城市建立並已加密，因此無法在地形編輯器中開啟。可透過「編輯城市」編輯資源與裝飾物。",
     "initialCityName": "初始城市名稱",
@@ -89,6 +102,7 @@
     "HOST_NOT_ALLOWED": "不允許使用該主機連線核心。請檢查連線設定。",
     "SCENARIO_ENGLISH_REQUIRED": "請輸入英文。標題必須有英文。",
     "SCENARIO_OPTION_FIXED": "無法變更由場景固定的設定。",
-    "SCENARIO_OPTION_INVALID": "開局設定的值不正確。"
+    "SCENARIO_OPTION_INVALID": "開局設定的值不正確。",
+    "HEIGHTMAP_INVALID": "無法匯入此高程檔案。請確認格式（灰階 PNG 或 .npy）與輸入值。"
   }
 }

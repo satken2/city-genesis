@@ -1,7 +1,6 @@
 {
   "version": 1,
   "id": "scenario4",
-  "terrainMap": "flat",
   "steps": [
     {
       "id": "scenario4.platforms",

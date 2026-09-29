@@ -1,7 +1,6 @@
 {
   "version": 1,
   "id": "scenario3",
-  "terrainMap": "yoron",
   "steps": [
     {
       "id": "scenario3.house",

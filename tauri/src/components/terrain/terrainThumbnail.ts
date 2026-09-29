@@ -14,7 +14,7 @@ const THUMBNAIL_LONG_EDGE = 512;
 const SAMPLES_PER_AXIS = 2;
 
 /**
- * オリジナル地形のサムネイル(一括再生成 `tools/regenerate_terrain_thumbnails.py`)の平面図。DOM・WebGLには依存しない。
+ * 標高から作るシナリオ画像(シナリオ管理の「地形を取り込む」が作成直後に登録する)の平面図。DOM・WebGLには依存しない。
  * 格子の行0は南端なので画像の行順を反転し、北を上・東を右にする。
  * 海岸の各画素を4点で評価し、陸地の被覆率をアルファにすることで海の色が縁に混ざるのを防ぐ。
  */

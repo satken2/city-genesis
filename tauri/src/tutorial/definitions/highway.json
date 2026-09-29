@@ -1,7 +1,6 @@
 {
   "version": 1,
   "id": "highway",
-  "terrainMap": "flat",
   "setup": [],
   "steps": [
     {

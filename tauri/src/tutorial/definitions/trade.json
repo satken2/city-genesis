@@ -1,7 +1,6 @@
 {
   "version": 1,
   "id": "trade",
-  "terrainMap": "flat",
   "steps": [
     {
       "id": "trade.port",

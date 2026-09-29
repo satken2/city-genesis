@@ -34,9 +34,13 @@ export type SaveEntry = {
   scenario_city_name?: LocalizedText;
   /** 作者が固定した開始設定の項目。固定しない項目はゲーム開始時にプレイヤーが選べる */
   scenario_fixed_options?: ScenarioStartOption[];
-  terrain_map_id?: string; terrain_map_name?: string; author?: string;
+  author?: string;
   category?: "sandbox" | "challenge" | "tutorial"; content_revision?: number;
-  /** 都市が持つ地表・気候(`GROUND_COVER_*` / `CLIMATE_*`)。地形エディタ・紹介情報で変わるので、オリジナル地形の登録表の値とは異なりうる */
+  /** 地形の出どころ(取り込んだ標高ファイルの名前、またはチュートリアルの舞台の名前)。表示用の情報で、判定には使わない */
+  terrain_source?: string;
+  /** マップの大きさ(m)。地形エディタでも変わらない */
+  map_width?: number; map_height?: number;
+  /** 都市が持つ地表・気候(`GROUND_COVER_*` / `CLIMATE_*`)。地形エディタ・紹介情報で変わる */
   ground_cover?: number; climate?: number;
   /** 建物・道路アセットの地域(`ASSET_REGION_*`) */
   asset_region?: number;
@@ -61,6 +65,13 @@ export function saveError(error: unknown, t: TFunction): string {
   const message = error instanceof Error ? error.message : String(error);
   const code = errorCode(error);
   return code ? t(`saveCompatibility.${code}`, { defaultValue: message }) : message;
+}
+
+/** シナリオ画像(PNG)を登録する。紹介情報ウィンドウと、地形を取り込んだ直後の平面図で共用する。 */
+export async function uploadScenarioThumbnail(apiBaseUrl: string, scenarioId: string, png: Blob): Promise<void> {
+  await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/saves/${encodeURIComponent(scenarioId)}/thumbnail?template=true`), {
+    method: "PUT", headers: { "Content-Type": "image/png" }, body: png,
+  });
 }
 
 /** 都市やウィンドウを切り替える前に検査・確認を済ませる。コアもロード直前に再検査する。 */

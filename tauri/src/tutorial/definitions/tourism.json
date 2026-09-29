@@ -1,7 +1,6 @@
 {
   "version": 1,
   "id": "tourism",
-  "terrainMap": "yoron",
   "setup": [
     {
       "type": "scenarioAction",

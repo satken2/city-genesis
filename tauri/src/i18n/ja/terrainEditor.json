@@ -19,7 +19,7 @@
     "open3dPreview": "3Dプレビューを開く",
     "loadingTerrain": "地形データを読み込んでいます...",
     "metadataTitle": "地図メタデータ",
-    "metaTerrainMap": "元の地形",
+    "metaTerrainSource": "元の地形",
     "metaFarSpacing": "遠景グリッド間隔",
     "metaCellSize": "セルサイズ",
     "metaReadonlySummary": "{{width}}×{{height}}m / 近景間隔{{spacing}}m / {{cols}}×{{rows}}グリッド(変更不可)",

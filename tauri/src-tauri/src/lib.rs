@@ -359,69 +359,7 @@ fn launch_graphic(state: tauri::State<'_, SharedState>) -> Result<String, String
     window::launch_graphic(state.inner())
 }
 
-/// 新規ゲームセッションを開始する。
-/// Unity を起動し、topmenu を隠して Tipsを表示した後、
-/// バックエンドに POST /api/v1/sessions を送信する。
-/// バックエンドの準備完了はポーリングスレッドが検知し、自動的にHUDを表示する。
-#[tauri::command]
-async fn start_new_game(
-    app: tauri::AppHandle,
-    state: tauri::State<'_, SharedState>,
-) -> Result<(), String> {
-    log::info!("[start_new_game] Unity 起動を開始");
-
-    // Unity を起動
-    window::launch_graphic(state.inner())?;
-
-    // topmenu を隠す
-    if let Some(topmenu) = app.get_webview_window("topmenu") {
-        let _ = topmenu.hide();
-    }
-
-    // ゲーム開始の確定に伴い、開いているポップアップを全て閉じる
-    window::close_all_popup_windows(&app, state.inner());
-
-    // Tipsをロード画面として表示
-    begin_initial_loading(&app, state.inner(), true)?;
-
-
-    // バックエンドにセッション作成リクエストを送信
-    let api_base_url = {
-        let guard = state.lock();
-        guard.api_base_url.clone()
-    };
-    let url = format!("{}/api/v1/sessions", api_base_url.trim_end_matches('/'));
-
-    let client = version::client();
-    let res = client
-        .post(&url)
-        .timeout(Duration::from_secs(60))
-        .send()
-        .await
-        .map_err(|e| { abort_initial_loading(&app, state.inner()); format!("セッション作成リクエストに失敗しました: {e}") })?;
-
-    if !res.status().is_success() {
-        let status = res.status();
-        let body = res.text().await.unwrap_or_default();
-        log::error!("[start_new_game] セッション作成失敗: {} {}", status, body);
-        // 失敗時は loading を閉じて topmenu を戻す
-        abort_initial_loading(&app, state.inner());
-        if let Some(topmenu) = app.get_webview_window("topmenu") {
-            let _ = topmenu.show();
-        }
-        {
-            let mut guard = state.lock();
-            guard.is_loading = false;
-        }
-        return Err(format!("セッション作成に失敗しました: {status} {body}"));
-    }
-
-    log::info!("[start_new_game] セッション作成リクエスト成功。ポーリング待機に委譲");
-    state.lock().backend_load_complete = true;
-    Ok(())
-}
-
-/// 新規ゲームセッションを作成する（地形またはテンプレート選択後に呼び出される）。
+/// 新規ゲームセッションを作成する（シナリオまたはチュートリアルの選択後に呼び出される）。
 /// Unity を起動し、topmenu と現在のポップアップを隠して Tipsを表示した後、
 /// バックエンドに POST /api/v1/sessions を送信する。
 ///
@@ -432,7 +370,6 @@ async fn start_new_game(
 async fn create_session(
     app: tauri::AppHandle,
     state: tauri::State<'_, SharedState>,
-    terrain_map_id: Option<String>,
     template_id: Option<String>,
     city_name: Option<String>,
     language: Option<String>,
@@ -446,8 +383,8 @@ async fn create_session(
     asset_region: Option<i32>,
 ) -> Result<(), String> {
     log::info!(
-        "[create_session] terrain_map_id={:?} template_id={:?} city_name={:?} language={:?} simulation_days={:?} is_tutorial={:?} template_mode={:?} tutorial_id={:?} climate={:?} ground_cover={:?} asset_region={:?}",
-        terrain_map_id, template_id, city_name, language, simulation_days, is_tutorial, template_mode, tutorial_id,
+        "[create_session] template_id={:?} city_name={:?} language={:?} simulation_days={:?} is_tutorial={:?} template_mode={:?} tutorial_id={:?} climate={:?} ground_cover={:?} asset_region={:?}",
+        template_id, city_name, language, simulation_days, is_tutorial, template_mode, tutorial_id,
         climate, ground_cover, asset_region
     );
 
@@ -491,7 +428,6 @@ async fn create_session(
     // 各パラメータを明示的に Option で包んで渡す。
     #[derive(serde::Serialize)]
     struct SessionParams {
-        terrain_map_id: Option<String>,
         template_id: Option<String>,
         city_name: Option<String>,
         language: Option<String>,
@@ -505,7 +441,6 @@ async fn create_session(
         asset_region: Option<i32>,
     }
     let query_params = SessionParams {
-        terrain_map_id: terrain_map_id.clone(),
         template_id: template_id.clone(),
         city_name: city_name.clone(),
         language: language.clone(),
@@ -544,7 +479,7 @@ async fn create_session(
     }
 
     // カメラの初期視点はUIを経由しない。グラフィックが game:start 受信時に
-    // GET /api/v1/city の camera(セーブ値、または地形マップ定義の初期値)を自分で読む。
+    // GET /api/v1/city の camera(セーブ・シナリオに保存された値)を自分で読む。
     log::info!("[create_session] セッション作成リクエスト成功。ポーリング待機に委譲");
     state.lock().backend_load_complete = true;
     Ok(())
@@ -751,8 +686,9 @@ struct ScenarioTerrainDocument {
     ground_cover: Value,
     #[serde(default)]
     climate: Value,
+    /// 地形の出どころ(取り込んだ標高ファイルの名前、またはチュートリアルの舞台の名前)。表示だけに使う。
     #[serde(default)]
-    terrain_map_id: Value,
+    terrain_source: Value,
     #[serde(default)]
     title: Value,
     locks: ScenarioTerrainLocks,
@@ -782,7 +718,7 @@ fn scenario_terrain_working_copy(scenario_id: &str, document: ScenarioTerrainDoc
     use base64::Engine;
     let ScenarioTerrainDocument {
         settings, near_base64, water_surfaces, rivers, resources, props, camera,
-        ground_cover, climate, terrain_map_id, title, locks,
+        ground_cover, climate, terrain_source, title, locks,
     } = document;
     let near = base64::engine::general_purpose::STANDARD
         .decode(&near_base64)
@@ -800,7 +736,7 @@ fn scenario_terrain_working_copy(scenario_id: &str, document: ScenarioTerrainDoc
     let props = if props.is_object() { props } else { serde_json::json!({"instances": [], "scatters": []}) };
     let meta = serde_json::json!({
         "scenario_id": scenario_id,
-        "terrain_map_id": terrain_map_id,
+        "terrain_source": terrain_source,
         "title": title,
         "locks": locks,
         "map_width": settings.map_width,
@@ -873,7 +809,7 @@ async fn prepare_scenario_terrain_editor(
 #[derive(serde::Serialize)]
 struct TerrainEditorData {
     scenario_id: String,
-    terrain_map_id: Value,
+    terrain_source: Value,
     title: Value,
     /// `{heights_locked, reasons}`。heights_locked なら標高・水面・川を保存できない。
     locks: Value,
@@ -912,7 +848,7 @@ async fn load_terrain_editor_data(editor_id: String) -> Result<TerrainEditorData
     let array = |key: &str| meta.get(key).filter(|v| v.is_array()).cloned().unwrap_or_else(|| Value::Array(Vec::new()));
     Ok(TerrainEditorData {
         scenario_id: meta.get("scenario_id").and_then(Value::as_str).unwrap_or_default().to_string(),
-        terrain_map_id: value("terrain_map_id"),
+        terrain_source: value("terrain_source"),
         title: value("title"),
         locks: value("locks"),
         map_width: number("map_width"),
@@ -1099,7 +1035,7 @@ mod terrain_editor_tests {
             "camera": null,
             "ground_cover": 2,
             "climate": 6,
-            "terrain_map_id": "flat",
+            "terrain_source": "flat",
             "title": "テスト",
             "locks": {"heights_locked": true, "reasons": ["PATHS_EXIST"]},
         }))
@@ -1112,6 +1048,7 @@ mod terrain_editor_tests {
         assert_eq!(near.len(), 8);
         assert_eq!(meta["scenario_id"], "local~abc");
         assert_eq!(meta["title"], "テスト");
+        assert_eq!(meta["terrain_source"], "flat");
         assert_eq!(meta["locks"], json!({"heights_locked": true, "reasons": ["PATHS_EXIST"]}));
         assert_eq!(meta["water_surfaces"], json!([]));
         assert_eq!(meta["rivers"], json!([{"id": "r"}]));
@@ -1202,7 +1139,7 @@ async fn start_debug_init(
     if !res.status().is_success() {
         let status = res.status();
         let body = res.text().await.unwrap_or_default();
-        log::error!("[start_new_game] セッション作成失敗: {} {}", status, body);
+        log::error!("[start_debug_init] セッション作成失敗: {} {}", status, body);
         abort_initial_loading(&app, state.inner());
         if let Some(topmenu) = app.get_webview_window("topmenu") {
             let _ = topmenu.show();
@@ -1214,7 +1151,7 @@ async fn start_debug_init(
         return Err(format!("セッション作成に失敗しました: {status} {body}"));
     }
 
-    log::info!("[start_new_game] セッション作成リクエスト成功。ポーリング待機に委譲");
+    log::info!("[start_debug_init] セッション作成リクエスト成功。ポーリング待機に委譲");
     state.lock().backend_load_complete = true;
     Ok(())
 }
@@ -2164,7 +2101,6 @@ pub fn run() {
             open_registered_window,
             close_registered_window,
             launch_graphic,
-            start_new_game,
             start_load_game,
             version::get_frontend_status,
             start_debug_init,

@@ -6,14 +6,13 @@
  *
  * 「シナリオを選択」は左右2カラム構成で、左に選択肢の一覧、右に固定幅の詳細パネルを置く。
  * 一覧はチュートリアルミッション(常に表示)と、全保存元(自作・コミュニティ・DLC)のシナリオ
- * (GET /api/v1/scenarios)を並べる。地形から直接始める入口は無く、地形はシナリオ管理で
- * シナリオにしてから遊ぶ。チュートリアルだけは教材が前提とする地形から直接始める。
+ * (GET /api/v1/scenarios)を並べる。地形から直接始める入口は無く、標高ファイルはシナリオ管理で
+ * シナリオにしてから遊ぶ。チュートリアルはコアが同梱の教材の都市から始める(チュートリアルIDだけを送る)。
  *
  * 一覧のタイルはサムネイルと名前と保存元の札だけを出す。説明・達成条件は右カラムに集約する。
- * 右カラム(詳細パネル)はサムネイルを大きく出し、その下にタイトル・説明・舞台となるマップ
- * (大きさ・地表・気候)・達成条件を並べる。シナリオの説明文・達成条件は作者のフリーテキスト。
- * シナリオの地表・気候は地形エディタで変えられるので、一覧の要素(都市が持つ値)を優先する。
- * マップの寸法は変えられないので、大きさはオリジナル地形の登録表から引く。
+ * 右カラム(詳細パネル)はサムネイルを大きく出し、その下にタイトル・説明・マップの事実欄
+ * (大きさ・地表・気候。シナリオだけ)・達成条件を並べる。シナリオの説明文・達成条件は作者のフリーテキスト。
+ * 事実欄の値はすべて一覧の要素(都市が持つ値)から引く。
  *
  * 詳細パネルの開始ボタンで「ゲーム設定の確認」画面に切り替わり、
  * 都市名・都市の言語・シミュレーション日数などを設定してからゲームを開始する。
@@ -33,7 +32,7 @@ import { SUPPORTED_LANGUAGES, resolveLocalizedText, resolveSupportedLanguage } f
 import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
-import { formatMapSize, terrainMapTitle, type TerrainMapEntry } from "../../utils/terrainMaps";
+import { formatMapSize } from "../../utils/mapSize";
 import { FlatTabs } from "../common/FlatTabs";
 import { TerrainFacts } from "../common/TerrainFacts";
 import { ScenarioOriginBadges } from "../common/ScenarioSource";
@@ -50,7 +49,7 @@ type NewGameWindowProps = {
 
 /**
  * シナリオ一覧(GET /api/v1/scenarios)の要素。
- * scenario_* と terrain_map_* は紹介用の項目で、紹介文は任意。読み込み可否はコアの検証結果に従う。
+ * scenario_* は紹介用の項目で、紹介文は任意。読み込み可否はコアの検証結果に従う。
  */
 type TemplateEntry = SaveEntry;
 
@@ -82,20 +81,15 @@ type DetailView = {
   thumbnailUrl: string | null;
   /** シナリオ一覧の要素。チュートリアルでは null */
   template: TemplateEntry | null;
-  /** シナリオ固有の画像が無いときにサムネイルとして使う地形マップID */
-  terrainMapId: string | null;
   /** サムネイルが無いときに使うプレースホルダーのCSS修飾子 */
   placeholderModifier: string;
   title: string;
   description: string;
-  /** 舞台となるマップ名 */
-  mapName: string | null;
-  /** マップサイズの表示文字列（例: 7 × 6 km）。不明なら null */
-  mapSize: string | null;
-  /** 地表種別。値の供給元(シナリオの一覧要素・登録表)がどちらも無いときは null */
-  groundCover: number | null;
-  /** 気候区分。未指定・未知の値はゲームと同じ温暖湿潤に正規化する */
-  climate: number;
+  /**
+   * マップの事実欄。チュートリアルは出さない(null)。
+   * mapSize は「7 × 6 km」の形で、不明なら null。地表・気候は未指定・未知の値をゲームと同じ既定に正規化する。
+   */
+  terrain: { mapSize: string | null; groundCover: number; climate: number } | null;
   /** 達成条件のフリーテキスト。未設定なら null */
   objective: string | null;
   /** 開始ボタンのラベル */
@@ -108,11 +102,9 @@ type DetailView = {
 /**
  * 設定確認モーダルの選択状態
  *
- * チュートリアルは terrainId(教材が前提とする地形)、シナリオは templateId をセットし、
- * もう一方は null になる。
+ * シナリオは templateId、チュートリアルは tutorialId をセットする。
  */
 type ConfirmSelection = {
-  terrainId: string | null;
   templateId: string | null;
   /** シナリオから始めるときの一覧の要素(言語・開始設定の値と固定の有無)。チュートリアルでは null */
   template: TemplateEntry | null;
@@ -159,7 +151,6 @@ export function NewGameWindow({
   onClose,
 }: NewGameWindowProps) {
   const { t, i18n } = useTranslation();
-  const [terrainMaps, setTerrainMaps] = useState<TerrainMapEntry[]>([]);
   const [templates, setTemplates] = useState<TemplateEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -180,10 +171,8 @@ export function NewGameWindow({
   const [startOptions, setStartOptions] = useState(() => startOptionValuesOf(null));
 
   /**
-   * ウィンドウ初期化時に地形マップ一覧とシナリオ一覧を並列で取得する。
-   * 地形マップはチュートリアルの開始と、詳細パネルの舞台の名前・大きさ(チュートリアルは地表・気候も)に使う。
-   * いずれかの取得に失敗しても、成功した方は表示する。
-   * シナリオ管理でシナリオが増減したら(scenarios:changed)シナリオ一覧だけ取り直す。
+   * ウィンドウ初期化時にシナリオ一覧を取得する。失敗してもチュートリアルは始められるので一覧を空で出す。
+   * シナリオ管理でシナリオが増減したら(scenarios:changed)取り直す。
    */
   useEffect(() => {
     if (!apiBaseUrl) return;
@@ -192,18 +181,8 @@ export function NewGameWindow({
     const fetchTemplates = () => fetchApi<{ scenarios: Record<string, TemplateEntry> }>(`${base}/api/v1/scenarios`, { cache: "reload" })
       .then(data => { if (active) setTemplates(Object.values(data.scenarios)); });
 
-    async function fetchData() {
-      setLoading(true);
-      const [terrainRes] = await Promise.allSettled([
-        fetchApi<{ maps: TerrainMapEntry[] }>(`${base}/api/v1/terrain/maps`),
-        fetchTemplates(),
-      ]);
-      if (!active) return;
-      if (terrainRes.status === "fulfilled") setTerrainMaps(terrainRes.value.maps);
-      setLoading(false);
-    }
-
-    void fetchData();
+    setLoading(true);
+    void fetchTemplates().catch(() => {}).finally(() => { if (active) setLoading(false); });
     const listener = listen("scenarios:changed", () => { void fetchTemplates().catch(() => {}); });
     return () => { active = false; void listener.then(unlisten => unlisten()); };
   }, [apiBaseUrl]);
@@ -225,7 +204,6 @@ export function NewGameWindow({
       setSimulationDays(defaultDays);
       setStartOptions(startOptionValuesOf(template));
       setConfirmSelection({
-        terrainId: null,
         templateId: template.id,
         template,
         defaultCityName,
@@ -240,20 +218,10 @@ export function NewGameWindow({
 
   /**
    * チュートリアルミッションでの開始。
-   * 教材の初期配置は特定の地形を前提にするため、シナリオが指定する地形マップ
-   * (TutorialScenario.terrainMapId)をチュートリアルモードでロードする。
-   * 地形マップが取得できていない場合はエラーメッセージを表示する。
+   * 教材の都市(地形と初期配置)はコアが同梱しているので、チュートリアルIDだけを送る。
+   * 都市の言語が教材と違えば、コアがシナリオと同じく名前を付け直す。
    */
   const handleStartTutorial = useCallback(async (tutorialId: string) => {
-    const scenario = TUTORIAL_SCENARIOS.find((s) => s.id === tutorialId);
-    const terrainMap = terrainMaps.find((m) => m.id === scenario?.terrainMapId);
-    if (!terrainMap) {
-      setStatus({
-        text: t("newGame.tutorialNoTerrain"),
-        type: "error",
-      });
-      return;
-    }
     const settings = await loadAppSettings();
     const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
     setCityName("");
@@ -261,7 +229,6 @@ export function NewGameWindow({
     setLanguage(defaultLang);
     setSimulationDays(30);
     setConfirmSelection({
-      terrainId: terrainMap.id,
       templateId: null,
       template: null,
       defaultCityName: "",
@@ -270,7 +237,7 @@ export function NewGameWindow({
       isTutorial: true,
       tutorialId,
     });
-  }, [terrainMaps, i18n, t]);
+  }, [i18n]);
 
   /**
    * 選択中の対象を詳細パネル用の表示データへ正規化する。
@@ -282,18 +249,13 @@ export function NewGameWindow({
     if (selection.kind === "tutorial") {
       const scenario = TUTORIAL_SCENARIOS.find((s) => s.id === selection.id);
       if (!scenario) return null;
-      const map = terrainMaps.find((m) => m.id === scenario.terrainMapId);
       return {
         thumbnailUrl: scenario.image || null,
         template: null,
-        terrainMapId: null,
         placeholderModifier: `new-game-detail-image--tutorial new-game-detail-image--${scenario.id}`,
         title: t(scenario.titleKey),
         description: t(scenario.descriptionKey),
-        mapName: terrainMapTitle({ id: scenario.terrainMapId, name: map?.name ?? scenario.terrainMapId }, t),
-        mapSize: formatMapSize(map?.settings, i18n.language),
-        groundCover: map ? normalizeGroundCover(map.ground_cover) : null,
-        climate: normalizeClimate(map?.climate),
+        terrain: null,
         objective: t("newGame.tutorialObjective"),
         startLabel: t("newGame.startScenarioButton"),
         startDisabled: false,
@@ -303,24 +265,17 @@ export function NewGameWindow({
 
     const template = templates.find((tmpl) => tmpl.id === selection.id);
     if (!template) return null;
-    const terrainMap = template.terrain_map_id
-      ? terrainMaps.find((m) => m.id === template.terrain_map_id)
-      : undefined;
     return {
       thumbnailUrl: null,
       template,
-      terrainMapId: template.terrain_map_id || null,
       placeholderModifier: "new-game-detail-image--template",
       title: scenarioDisplayTitle(template, i18n.language),
       description: resolveLocalizedText(template.scenario_description, i18n.language) || t("newGame.detailNoDescription"),
-      mapName: template.terrain_map_id
-        ? terrainMapTitle({ id: template.terrain_map_id, name: terrainMap?.name || template.terrain_map_name || template.terrain_map_id }, t)
-        : null,
-      mapSize: formatMapSize(terrainMap?.settings, i18n.language),
-      groundCover: template.ground_cover !== undefined || terrainMap
-        ? normalizeGroundCover(template.ground_cover ?? terrainMap?.ground_cover)
-        : null,
-      climate: normalizeClimate(template.climate ?? terrainMap?.climate),
+      terrain: {
+        mapSize: formatMapSize(template.map_width, template.map_height, i18n.language),
+        groundCover: normalizeGroundCover(template.ground_cover),
+        climate: normalizeClimate(template.climate),
+      },
       objective: resolveLocalizedText(template.scenario_objective, i18n.language) || null,
       startLabel: t("newGame.startScenarioButton"),
       startDisabled: template.compatibility?.loadable === false,
@@ -328,7 +283,6 @@ export function NewGameWindow({
     };
   }, [
     selection,
-    terrainMaps,
     templates,
     t,
     i18n.language,
@@ -357,7 +311,6 @@ export function NewGameWindow({
       }
       await invoke("create_session", {
         acceptBalanceChange: true,
-        terrainMapId: confirmSelection.terrainId,
         templateId: confirmSelection.templateId,
         cityName: cityName || null,
         language,
@@ -598,7 +551,6 @@ export function NewGameWindow({
                     <ScenarioThumbnail
                       apiBaseUrl={apiBaseUrl}
                       templateId={tmpl.id} revision={tmpl.content_revision}
-                      terrainMapId={tmpl.terrain_map_id}
                     />
                     <span className="new-game-tile-name">
                       {scenarioDisplayTitle(tmpl, i18n.language)}
@@ -631,7 +583,6 @@ export function NewGameWindow({
                   apiBaseUrl={apiBaseUrl}
                   templateId={detail.template.id}
                   revision={detail.template.content_revision}
-                  terrainMapId={detail.terrainMapId}
                   className="new-game-detail-image"
                   placeholderModifier={detail.placeholderModifier}
                 />
@@ -647,14 +598,7 @@ export function NewGameWindow({
                 </>}
                 <p className="new-game-detail-desc">{detail.description}</p>
 
-                {detail.mapName && (
-                  <div className="new-game-detail-block">
-                    <h3 className="new-game-detail-block-title">{t("newGame.detailMapLabel")}</h3>
-                    <p className="new-game-detail-block-text">{detail.mapName}</p>
-                  </div>
-                )}
-
-                <TerrainFacts mapSize={detail.mapSize} groundCover={detail.groundCover} climate={detail.climate} />
+                {detail.terrain && <TerrainFacts {...detail.terrain} />}
 
                 {detail.objective && (
                   <div className="new-game-detail-block">

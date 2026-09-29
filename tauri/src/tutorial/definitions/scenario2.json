@@ -1,7 +1,6 @@
 {
   "version": 1,
   "id": "scenario2",
-  "terrainMap": "flat",
   "steps": [
     {
       "id": "scenario2.split",

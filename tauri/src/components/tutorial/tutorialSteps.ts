@@ -41,8 +41,6 @@ export interface TutorialScenario {
   descriptionKey: string;
   /** 開始時の説明ウィンドウに表示する「このチュートリアルで何をするか」の翻訳キー */
   introKey: string;
-  /** 開始する地形マップ。教材の座標はこの地形を前提にする */
-  terrainMapId: string;
   /** シナリオ一覧や詳細パネル、説明ウィンドウで表示するサムネイル画像URL */
   image?: string;
   steps: TutorialStep[];
@@ -84,7 +82,6 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = SCENARIO_ORDER.map((id) =>
   titleKey: TITLE_KEYS[id]?.titleKey ?? `tutorial.${id}.title`,
   descriptionKey: TITLE_KEYS[id]?.descriptionKey ?? `tutorial.${id}.description`,
   introKey: `tutorial.intro.${id}`,
-  terrainMapId: DEFINITIONS[id].terrainMap,
   image: THUMBNAILS[id],
   steps: DEFINITIONS[id].steps.map((step) => ({
     id: step.legacyStep,

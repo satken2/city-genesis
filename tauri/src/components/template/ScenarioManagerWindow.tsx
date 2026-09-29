@@ -6,10 +6,10 @@
  *   コミュニティ・DLC は読み取り専用なので「コピーして編集」だけを出す(保存すると自作になる)。
  *   DLC 由来の暗号化された自作シナリオは地形を編集できない(作業コピーが平文でディスクに残るため、コアが
  *   SCENARIO_ENCRYPTED で断る)ので、「地形を編集」を無効にして理由をツールチップで示す。
- * - 地形を取り込むタブ: オリジナル地形をタイルで並べ、選んだ地形から新しい自作シナリオを作る(ゲームは始まらない)。
- *   地表・気候はシナリオ側で決める値なので出さず、タイルには名前と大きさだけを載せる。
- *   タイトルは地形の翻訳名を全言語分送る(紹介文は多言語テキストで、英語が必須のため)。
- *   作成後はシナリオタブへ切り替え、新しいカードを選択状態にする。
+ * - 地形を取り込むタブ: PC内のどこにある標高ファイル(グレースケールPNG・.npy)でも選び、新しい自作シナリオにする
+ *   (ゲームは始まらない)。ゲームは地形を同梱しないので、新しい地形の入口はここだけ。タイトルは1つの文で、
+ *   コアが英語とアプリ設定の言語の両方に入れる。作成直後に地形の平面図をシナリオ画像として登録し(失敗しても
+ *   作成は成功のまま)、シナリオタブへ切り替えて新しいカードを選択状態にする。
  *
  * 都市の編集は create_session でポップアップをすべて閉じるので、確認文で地形エディタの未保存の編集に触れる。
  */
@@ -21,13 +21,16 @@ import { buildApiUrl, fetchApi } from "../../utils/api";
 import { errorCode, prepareSaveLoad, SaveEntry, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { loadAppSettings } from "../../utils/settings";
-import { SUPPORTED_LANGUAGES, resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
-import { formatMapSize, terrainMapTitle, type TerrainMapEntry } from "../../utils/terrainMaps";
+import { resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
+import { formatMapSize } from "../../utils/mapSize";
 import { FlatTabs } from "../common/FlatTabs";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
-import { TerrainMapThumbnail } from "../common/TerrainMapThumbnail";
 import { SaveVersionInfo } from "../common/SaveVersionInfo";
 import { ScenarioOriginBadges } from "../common/ScenarioSource";
+import {
+  HEIGHTMAP_LIMITS, heightmapFormatOfName, importHeightmap, importedMapExtent, readHeightmapInfo, registerTerrainThumbnail,
+  type HeightmapImportRequest, type HeightmapInfo,
+} from "./heightmapImport";
 import "./Scenarios.css";
 
 type Catalog = { scenarios: Record<string, SaveEntry>; upload_available: boolean; upload_host: string | null };
@@ -59,9 +62,10 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     card?.scrollIntoView?.({ block: "nearest" });
   }, [tab, selectedId, catalog]);
 
-  async function run(operation: () => Promise<unknown>) {
+  /** 操作を1つずつ実行し、失敗は理由コードで翻訳して出す。成功したかを返す */
+  async function run(operation: () => Promise<unknown>): Promise<boolean> {
     setBusy(true); setError(""); setStatus("");
-    try { await operation(); } catch (e) { setError(saveError(e, t)); } finally { setBusy(false); }
+    try { await operation(); return true; } catch (e) { setError(saveError(e, t)); return false; } finally { setBusy(false); }
   }
   /** 都市を神モード(template_mode)で開く。自作は上書き、コミュニティ・DLC はコピーとして保存される。 */
   async function editCity(entry: SaveEntry, copy: boolean) {
@@ -81,16 +85,11 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     });
     await invoke("open_registered_window", { windowType: "terrain_editor", entityId: editorId });
   }
-  async function createFromTerrain(map: TerrainMapEntry) {
+  async function createFromHeightmap(request: HeightmapImportRequest, format: HeightmapInfo["format"]) {
     const settings = await loadAppSettings().catch(() => null);
-    const { id } = await fetchApi<{ id: string }>(buildApiUrl(apiBaseUrl, "/api/v1/scenarios/from-terrain"), {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        terrain_map_id: map.id,
-        title: Object.fromEntries(SUPPORTED_LANGUAGES.map(language => [language, terrainMapTitle(map, i18n.getFixedT(language))])),
-        language: resolveSupportedLanguage(settings?.language || i18n.language),
-      }),
-    });
+    const { id } = await importHeightmap(apiBaseUrl, request, resolveSupportedLanguage(settings?.language || i18n.language), format);
+    // 画像は後から紹介情報で差し替えられるので、平面図を作れなくてもシナリオの作成は成功とする。
+    await registerTerrainThumbnail(apiBaseUrl, id).catch((e: unknown) => console.error("[ScenarioManager] failed to register the terrain thumbnail", e));
     await reload();
     setSelectedId(id);
     setTab("scenarios");
@@ -120,7 +119,7 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           const description = resolveLocalizedText(entry.scenario_description, i18n.language);
           return <article key={entry.id} data-scenario-id={entry.id} aria-current={entry.id === selectedId ? "true" : undefined}
             className={`scenario-card${entry.id === selectedId ? " scenario-card--selected" : ""}`} onClick={() => setSelectedId(entry.id)}>
-            <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={entry.id} revision={entry.content_revision} terrainMapId={entry.terrain_map_id} className="scenario-thumbnail" />
+            <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={entry.id} revision={entry.content_revision} className="scenario-thumbnail" />
             <div className="scenario-card-content">
               <ScenarioOriginBadges entry={entry} />
               <h3>{scenarioDisplayTitle(entry, i18n.language)}</h3>
@@ -150,48 +149,103 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {catalog && entries.length === 0 && <p className="scenario-empty">{t("scenarios.empty")}</p>}
       </div>
     </div>}
-    {terrainOpened && <TerrainImportPanel apiBaseUrl={apiBaseUrl} hidden={tab !== "terrains"} busy={busy} error={tab === "terrains" ? error : ""}
-      onCreate={map => void run(() => createFromTerrain(map))} />}
+    {terrainOpened && <TerrainImportPanel hidden={tab !== "terrains"} busy={busy} error={tab === "terrains" ? error : ""}
+      onCreate={(request, format) => run(() => createFromHeightmap(request, format))} />}
   </div>;
 }
 
-/** オリジナル地形のタイル一覧。一度開いたら選択を保つため、タブを離れても隠すだけにする。 */
-function TerrainImportPanel({ apiBaseUrl, hidden, busy, error, onCreate }: {
-  apiBaseUrl: string; hidden: boolean; busy: boolean; error: string; onCreate: (map: TerrainMapEntry) => void;
+/** 数値の入力欄の値。空欄は未入力として NaN にする(Number("") は0になるため) */
+const numberOf = (value: string) => value.trim() === "" ? NaN : Number(value);
+const withinHeightRange = (value: number) => Number.isFinite(value) && Math.abs(value) <= HEIGHTMAP_LIMITS.maxAbsHeight;
+
+/**
+ * 標高ファイルの取り込みフォーム。一度開いたら入力を保つため、タブを離れても隠すだけにする。
+ * 画素数が分かればマップの大きさを見込みで出し、一辺の上限を超えるなら作成を止める(判定の正はコア)。
+ * 作成に成功したらファイルとタイトルだけを空にする(変換の設定は続けて使うことが多いので残す)。
+ */
+function TerrainImportPanel({ hidden, busy, error, onCreate }: {
+  hidden: boolean; busy: boolean; error: string;
+  onCreate: (request: HeightmapImportRequest, format: HeightmapInfo["format"]) => Promise<boolean>;
 }) {
   const { t, i18n } = useTranslation();
-  const [maps, setMaps] = useState<TerrainMapEntry[] | null>(null);
-  const [loadError, setLoadError] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [info, setInfo] = useState<HeightmapInfo | null>(null);
+  const [title, setTitle] = useState("");
+  const [titleEdited, setTitleEdited] = useState(false);
+  const [values, setValues] = useState({ spacing: "10", minHeight: "0", maxHeight: "1000", seaLevel: "0" });
   useEffect(() => {
-    const controller = new AbortController();
-    fetchApi<{ maps: TerrainMapEntry[] }>(buildApiUrl(apiBaseUrl, "/api/v1/terrain/maps"), { signal: controller.signal })
-      .then(data => setMaps(data.maps))
-      .catch(e => { if (!controller.signal.aborted) { setMaps([]); setLoadError(saveError(e, t)); } });
-    return () => controller.abort();
-  }, [apiBaseUrl, t]);
-  const selected = maps?.find(map => map.id === selectedId) ?? null;
+    if (!file) return;
+    let active = true;
+    readHeightmapInfo(file).then(value => { if (active) setInfo(value); }).catch(() => { if (active) setInfo(null); });
+    return () => { active = false; };
+  }, [file]);
+
+  const format = info?.format ?? heightmapFormatOfName(file?.name);
+  const usesHeightRange = format !== "npy";
+  const spacing = numberOf(values.spacing);
+  const minHeight = numberOf(values.minHeight);
+  const maxHeight = numberOf(values.maxHeight);
+  const seaLevel = numberOf(values.seaLevel);
+  const valid = Number.isFinite(spacing) && spacing > 0 && spacing <= HEIGHTMAP_LIMITS.maxSpacing && withinHeightRange(seaLevel)
+    && (!usesHeightRange || (withinHeightRange(minHeight) && withinHeightRange(maxHeight) && maxHeight > minHeight));
+  const extent = valid && info?.columns && info.rows
+    ? { width: importedMapExtent(info.columns, spacing), height: importedMapExtent(info.rows, spacing) } : null;
+  const tooLarge = !!extent && Math.max(extent.width, extent.height) > HEIGHTMAP_LIMITS.maxMapSize;
+  const ready = !!file && valid && !tooLarge && title.trim() !== "";
+  const field = (key: keyof typeof values, label: string, disabled = false) => <label className="scenario-import-row">
+    <span>{label}</span>
+    <input type="number" step="any" value={values[key]} disabled={busy || disabled} onChange={e => setValues({ ...values, [key]: e.target.value })} />
+  </label>;
+
+  function chooseFile(next: File | null) {
+    setFile(next);
+    setInfo(null);
+    if (next && !titleEdited) setTitle(next.name.replace(/\.[^.]*$/, "").slice(0, HEIGHTMAP_LIMITS.titleMaxLength));
+  }
+  async function submit() {
+    if (!file || !ready) return;
+    if (await onCreate({ file, spacing, minHeight, maxHeight, seaLevel, title: title.trim() }, format)) {
+      setFile(null); setInfo(null); setTitle(""); setTitleEdited(false);
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  }
 
   return <div className="scenario-manager-body" hidden={hidden}>
-    <div className="scenario-toolbar">
-      <p className="scenario-hint">{t("scenarios.terrainHint")}</p>
-      <button type="button" className="scenario-primary" disabled={busy || !selected} onClick={() => { if (selected) onCreate(selected); }}>
-        {busy ? t("scenarios.creating") : t("scenarios.createFromTerrain")}
-      </button>
-    </div>
-    {(loadError || error) && <p className="scenario-error" role="alert">{loadError || error}</p>}
-    {maps === null ? <p className="scenario-empty">{t("newGame.loading")}</p>
-      : maps.length === 0 ? <p className="scenario-empty">{t("scenarios.terrainEmpty")}</p>
-      : <div className="scenario-terrain-tiles">
-        {maps.map(map => {
-          const size = formatMapSize(map.settings, i18n.language);
-          return <button key={map.id} type="button" className="scenario-terrain-tile" aria-pressed={map.id === selectedId}
-            title={terrainMapTitle(map, t)} onClick={() => setSelectedId(map.id)}>
-            <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={map.id} className="scenario-terrain-tile-image" placeholderModifier="scenario-terrain-placeholder" />
-            <span className="scenario-terrain-tile-name">{terrainMapTitle(map, t)}</span>
-            {size && <span className="scenario-terrain-tile-size">{size}</span>}
-          </button>;
-        })}
+    <p className="scenario-hint">{t("scenarios.terrainHint")}</p>
+    {error && <p className="scenario-error" role="alert">{error}</p>}
+    <form className="scenario-import" onSubmit={e => { e.preventDefault(); void submit(); }}>
+      <div className="scenario-import-row">
+        <span>{t("scenarios.importFile")}</span>
+        <div className="scenario-import-file">
+          <button type="button" disabled={busy} onClick={() => fileInput.current?.click()}>{t("scenarios.chooseFile")}</button>
+          <span className="scenario-import-file-name" title={file?.name}>{file?.name ?? t("scenarios.noFileChosen")}</span>
+          <input ref={fileInput} type="file" accept=".png,.npy" hidden onChange={e => chooseFile(e.target.files?.[0] ?? null)} />
+        </div>
+      </div>
+      <p className="scenario-hint">{t("scenarios.importFormats")}</p>
+      {field("spacing", t("scenarios.importSpacing"))}
+      {field("minHeight", t("scenarios.importMinHeight"), !usesHeightRange)}
+      {field("maxHeight", t("scenarios.importMaxHeight"), !usesHeightRange)}
+      {!usesHeightRange && <p className="scenario-hint">{t("scenarios.importNpyHeights")}</p>}
+      {field("seaLevel", t("scenarios.importSeaLevel"))}
+      <p className="scenario-hint">{t("scenarios.importSeaLevelHint")}</p>
+      <label className="scenario-import-row">
+        <span>{t("scenarios.importTitle")}</span>
+        <input type="text" value={title} maxLength={HEIGHTMAP_LIMITS.titleMaxLength} disabled={busy}
+          onChange={e => { setTitle(e.target.value); setTitleEdited(true); }} />
+      </label>
+      {extent && <div className="scenario-import-row">
+        <span>{t("scenarios.importMapSize")}</span>
+        <span className="scenario-import-size">{formatMapSize(extent.width, extent.height, i18n.language)}</span>
       </div>}
+      {!valid && <p className="scenario-error">{t("scenarios.importInvalid")}</p>}
+      {tooLarge && <p className="scenario-error">{t("scenarios.importTooLarge", { max: HEIGHTMAP_LIMITS.maxMapSize / 1000 })}</p>}
+      <div className="scenario-import-actions">
+        <button type="submit" className="scenario-primary" disabled={busy || !ready}>
+          {busy ? t("scenarios.creating") : t("scenarios.createFromTerrain")}
+        </button>
+      </div>
+    </form>
   </div>;
 }

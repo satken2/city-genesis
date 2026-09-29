@@ -23,7 +23,7 @@
 
 ## JSONに書ける項目
 
-トップレベルは `version: 1`、`id`、開始する地形マップ `terrainMap`、任意の `setup`、`steps`。ステップには安定IDの `id`、既存ステップとの対応番号 `legacyStep`(1始まりの並び順)、段階列 `phases` を書く。段階は `id`・7言語へ登録した `textKey`・`ui`・`world`・`until` を持つ。実ファイルは `tauri/src/tutorial/definitions/basic.json` と `scenario3.json` を読む。
+トップレベルは `version: 1`、`id`、任意の `setup`、`steps`。座標が前提とする舞台の地形は、コアの教材JSON(`stage`)と同梱の都市が決める。ステップには安定IDの `id`、既存ステップとの対応番号 `legacyStep`(1始まりの並び順)、段階列 `phases` を書く。段階は `id`・7言語へ登録した `textKey`・`ui`・`world`・`until` を持つ。実ファイルは `tauri/src/tutorial/definitions/basic.json` と `scenario3.json` を読む。
 
 | 分類 | 契約 |
 | --- | --- |

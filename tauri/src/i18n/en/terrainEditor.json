@@ -19,7 +19,7 @@
     "open3dPreview": "Open 3D Preview",
     "loadingTerrain": "Loading terrain data...",
     "metadataTitle": "Map Metadata",
-    "metaTerrainMap": "Source terrain",
+    "metaTerrainSource": "Source terrain",
     "metaFarSpacing": "Far Grid Spacing",
     "metaCellSize": "Cell Size",
     "metaReadonlySummary": "{{width}}x{{height}}m / near spacing {{spacing}}m / {{cols}}x{{rows}} grid (read-only)",

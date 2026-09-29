@@ -141,11 +141,6 @@
   flex-shrink: 0;
 }
 
-/* 地形マップ用のプレースホルダー色（緑系） */
-.new-game-tile-image--terrain {
-  background-color: #3a6b3a;
-}
-
 /* テンプレート用のプレースホルダー色（青系） */
 .new-game-tile-image--template {
   background-color: #3a4a6b;
@@ -222,12 +217,6 @@
   background-size: cover;
   background-position: center;
   flex: 0 1 170px;
-}
-
-/* 海は透過のまま、縦長・横長の地形も全域が見えるように収める。 */
-.new-game-tile-image.terrain-map-thumbnail,
-.new-game-detail-image.terrain-map-thumbnail {
-  object-fit: contain;
 }
 
 .new-game-detail-image--template {

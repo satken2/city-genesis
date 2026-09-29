@@ -35,7 +35,7 @@ export type Phase = {
   until: Condition;
 };
 export type GuideStep = { id: string; legacyStep: number; phases: Phase[]; beforeCheck?: Action[]; complete?: Condition; afterCheck?: Action[] };
-export type Definition = { version: 1; id: string; terrainMap: string; setup?: Action[]; steps: GuideStep[] };
+export type Definition = { version: 1; id: string; setup?: Action[]; steps: GuideStep[] };
 export type Facts = {
   windows: Record<string, { window: string; visible: boolean; entity?: number }>;
   pathVariant?: number;

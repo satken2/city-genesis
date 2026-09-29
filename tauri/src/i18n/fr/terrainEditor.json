@@ -19,7 +19,7 @@
     "open3dPreview": "Ouvrir l'aperçu 3D",
     "loadingTerrain": "Chargement des données de terrain...",
     "metadataTitle": "Métadonnées de la carte",
-    "metaTerrainMap": "Terrain d'origine",
+    "metaTerrainSource": "Terrain d'origine",
     "metaFarSpacing": "Pas de la grille lointaine",
     "metaCellSize": "Taille de cellule",
     "metaReadonlySummary": "{{width}}×{{height}} m / pas proche {{spacing}} m / grille {{cols}}×{{rows}} (non modifiable)",

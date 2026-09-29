@@ -21,8 +21,8 @@ globalThis.fetch = async (input, init) => {
       ? Response.json({ api_contract_version: definition.api_contract_version })
       : new Response("unavailable", { status: server.versionStatus });
   }
+  if (request.url.includes("/saves/local~a/thumbnail")) return new Response(new Blob([new Uint8Array([137, 80, 78, 71])], { type: "image/png" }));
   if (request.url.includes("/saves/")) return Response.json({ code: "NOT_FOUND", message: "none" }, { status: 404 });
-  if (request.url.includes("/thumbnail")) return new Response(new Blob([new Uint8Array([137, 80, 78, 71])], { type: "image/png" }));
   return Response.json({ ok: true });
 };
 const api = await import("../../src/utils/api");
@@ -61,13 +61,18 @@ const { ScenarioThumbnail } = await import("../../src/components/common/Scenario
 const container = window.document.createElement("div");
 window.document.body.append(container);
 const root = createRoot(container);
-await act(async () => { root.render(<ScenarioThumbnail apiBaseUrl={base} templateId="local~a" terrainMapId="island" />); });
+await act(async () => { root.render(<ScenarioThumbnail apiBaseUrl={base} templateId="local~a" />); });
 await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
 const src = container.querySelector("img")?.getAttribute("src") ?? "";
-assert.ok(src.startsWith("blob:"), "missing scenario image falls back to the terrain thumbnail as a Blob URL");
-assert.ok(server.requests.some(r => r.url === `${base}/api/v1/terrain/maps/island/thumbnail` && r.token === "shared"));
+assert.ok(src.startsWith("blob:"), "the scenario image is shown as a Blob URL");
+assert.ok(server.requests.some(r => r.url === `${base}/api/v1/saves/local~a/thumbnail?template=true` && r.token === "shared"));
 await act(async () => { root.unmount(); });
 assert.deepEqual(revoked, [src], "Blob URL is revoked on unmount");
+const missing = createRoot(container);
+await act(async () => { missing.render(<ScenarioThumbnail apiBaseUrl={base} templateId="local~none" className="thumb" placeholderModifier="thumb--empty" />); });
+await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
+assert.ok(!container.querySelector("img") && container.querySelector(".thumb.thumb--empty"), "a scenario without an image shows the placeholder");
+await act(async () => { missing.unmount(); });
 
 // 版の照合が認証・Host 検査で断られたら、版の不一致にせずその理由コードで失敗する。失敗した照合は共有しない。
 const other = "http://127.0.0.1:5001";

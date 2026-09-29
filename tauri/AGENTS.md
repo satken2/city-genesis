@@ -13,7 +13,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/contexts/` | `MasterDataContext`(マスターデータ)・`FontSizeContext` |
 | `src/hooks/` | 共通Reactフック。仕様は各ファイル冒頭のコメント。APIの画像は `useApiImageUrl`(fetch→Blob URL)で表示する |
 | `src/utils/` | 共通処理(下記の一覧) |
-| `src/data/` | 静的な掲載データ。`credits.ts`(クレジット表示の正)・`propCategories.json`・`transitVehicleModels.json`・`resourcePresets.ts`・`terrainProfiles.ts`(翻訳された表示名を持つマップID) |
+| `src/data/` | 静的な掲載データ。`credits.ts`(クレジット表示の正)・`propCategories.json`・`transitVehicleModels.json`・`resourcePresets.ts` |
 | `src/i18n/` | 翻訳リソース `<言語コード>/<ドメイン>.json`(`index.ts` がglobで集約) |
 | `src/assets/` | 画像(`images/`)と音声(`sounds/`) |
 | `src/types.ts` | 手書きの共通型(`WindowContext` など) |
@@ -21,7 +21,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/local-constants.ts` | UI独自の定数と、自動生成に載らないバックエンド定数の写し |
 | `src/App.css` | 全ウィンドウ共通のグローバルスタイル |
 | `src-tauri/` | Rust側(ウィンドウ管理・MMF IPC・セッションポーリング)。`config/window-registry.json`=ポップアップ定義、`window-mutex-groups.json`=同時に開けない組 |
-| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・地形PNG一括再生成 `regenerate_terrain_thumbnails.py`・Unity音源の再生成・開発プロセス掃除 ほか)と検証。`tutorial/generate-schema-validator.mjs`(チュートリアルのJSON Schema検証コードの事前生成)、`api-auth/`(`npm run test:api-auth`。認証トークンの付与・401での取り直し・画像のBlob URL)、`scenarios/`(`npm run test:scenarios`)、`terrain-editor-save-test.mjs`(地形エディタの保存引数・ロック情報の正規化・保存後の資源IDの置き換え) |
+| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・Unity音源の再生成・開発プロセス掃除 ほか)と検証。`tutorial/generate-schema-validator.mjs`(チュートリアルのJSON Schema検証コードの事前生成)、`api-auth/`(`npm run test:api-auth`。認証トークンの付与・401での取り直し・画像のBlob URL)、`scenarios/`(`npm run test:scenarios`。シナリオ管理・標高ファイルの取り込み・ニューゲーム)、`terrain-thumbnail-test.mjs`(地形の平面図の画素生成)、`terrain-editor-save-test.mjs`(地形エディタの保存引数・ロック情報の正規化・保存後の資源IDの置き換え) |
 | `scripts/` | 河川生成(`terrainRiver.ts`)の開発用検証スクリプト(`npx tsx`。CI外) |
 | `*-launch.toml` | Rust側が子プロセスとしてバックエンド/Unityを起動するコマンド |
 | `SPEC.md` | 初期設計時の仕様書(現行の正ではない) |
@@ -40,7 +40,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 - 自動生成ファイル(`src/constants.ts`・`src/types/generated.ts`)を編集しない。正と生成器は非公開のコア側(`genesis-core/consts.py`・`tools/sync_consts.py`)にあり、このレポジトリ単体では再生成できない。必要ならユーザーに依頼する(Skill: `consts-sync`)。
 - `local-constants.ts` の `PATH_TYPES_INFRA`・`PATH_TYPES_WITH_*` は、生成器がタプルを出力しないために置いているバックエンド定数の写し。バックエンド側を変えたら合わせる。パス種別を各コンポーネントで直接列挙しない。
 - バックエンドHTTPは `utils/api.ts` の `fetchApi<T>()` 経由のみ。`fetch` を直接書かない(MessagePack受信とエラー処理を一箇所に寄せている)。ローカルAPIの認証トークン(`X-City-Genesis-Token`)もここと置き換え後の `fetch` が付けるので、各画面でヘッダーを組まない。Rust側から送る要求は `version.rs` の `headers()` / `client()` を通す(`src-tauri/AGENTS.md`)。
-- APIの画像(サムネイル等)を `<img src>` にAPIのURLで直接書かない。画像要求にはトークンを付けられず401になる。`hooks/useApiImageUrl` で取得して Blob URL を表示する(`ScenarioThumbnail`・`TerrainMapThumbnail` が実例)。
+- APIの画像(サムネイル等)を `<img src>` にAPIのURLで直接書かない。画像要求にはトークンを付けられず401になる。`hooks/useApiImageUrl` で取得して Blob URL を表示する(`ScenarioThumbnail` が実例)。
 - WebViewはCSPで `eval` を許していない(`tauri.conf.json`)。実行時に `new Function` を使うライブラリを入れない。JSON Schema検証は `npm run gen:tutorial-validator` の事前生成コードを使う。本番ビルドは devtools を含まない。
 - Unityへの送信は `utils/ipc.ts` に関数を足して行う。`setInterval` 等で周期的に送らない(Unity不在の間はMMFに溜まり続け、満杯になると以後の送信が `MMF buffer full` で全滅する)。Unity起動後の再同期は `graphic-reconnected` イベントを受けて送る。
 - 3Dビューの表示切替は2系統。`sendChangeDisplay` はユーザーの選択(Unityが通常表示として記憶)、`sendViewApplyPreset` はウィンドウを開いている間だけの一時差し替え。編集作業中だけ表示を変えたいときに前者を使わない(ユーザーの選択を上書きする)。
@@ -87,8 +87,8 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `epochPresentation.ts` / `epochFlow.ts` | 演出ID付きの暗転通知待ち、HTTPと日没の並行実行、処理時間に応じたTipsの開閉。結果画面のクローズまで黒幕を保持する |
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` / `bdCategoryIcon.ts` / `pathCategoryIcon.ts` | 各種アイコン画像の解決。`bdCategoryIcon` は建物建設パネルの分類(`assets/images/bd_categories/{id}.png`)、`pathCategoryIcon` はパス建設パネルのカテゴリ(`assets/images/paths/path_{path_type}.png`)。`agentIcon` の `resolveAgentVariantIcon` はバリアント専用画像だけを返す(無ければ空文字) |
 | `propThumbnail.ts` | プロップサムネイルの解決。画像のglobはここ1箇所だけ |
-| `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`・開始設定の項目 `ScenarioStartOption`)、シナリオの見出し `scenarioDisplayTitle`、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま) |
-| `terrainMaps.ts` | オリジナル地形の一覧要素 `TerrainMapEntry`、表示名 `terrainMapTitle`(翻訳の無い地形は登録表の名前)、大きさの整形 `formatMapSize` |
+| `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`・開始設定の項目 `ScenarioStartOption`)、シナリオの見出し `scenarioDisplayTitle`、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま)、シナリオ画像の登録 `uploadScenarioThumbnail` |
+| `mapSize.ts` | マップの大きさ(m)をkmで整形する `formatMapSize`(例: 7 × 6 km。ニューゲームの事実欄・地形の取り込みの見込み) |
 
 ## 詳細の参照先
 

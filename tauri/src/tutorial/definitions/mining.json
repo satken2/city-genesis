@@ -1,7 +1,6 @@
 {
   "version": 1,
   "id": "mining",
-  "terrainMap": "yoron",
   "steps": [
     {
       "id": "mining.resource",

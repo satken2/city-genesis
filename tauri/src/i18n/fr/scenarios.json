@@ -35,8 +35,21 @@
     "createFromTerrain": "Créer un scénario",
     "creating": "Création...",
     "created": "Scénario créé.",
-    "terrainHint": "Choisissez un terrain pour y créer votre propre scénario. La partie ne démarre pas. Ensuite, utilisez « Modifier la ville » et « Modifier le terrain » dans l’onglet Scénarios pour le développer.",
-    "terrainEmpty": "Aucun terrain disponible.",
+    "terrainHint": "Choisissez un fichier d’altitudes situé n’importe où sur votre PC pour créer votre propre scénario sur ce terrain. La partie ne démarre pas. Ensuite, utilisez « Modifier la ville » et « Modifier le terrain » dans l’onglet Scénarios pour le développer.",
+    "importFile": "Fichier d’altitudes",
+    "chooseFile": "Choisir un fichier",
+    "noFileChosen": "Aucun fichier choisi",
+    "importFormats": "Utilisez un PNG en niveaux de gris (8 ou 16 bits ; le haut de l’image est le nord, le pixel le plus sombre correspond à l’altitude minimale et le plus clair à l’altitude maximale) ou un fichier .npy contenant un tableau 2D d’altitudes en mètres (la première ligne est le bord sud).",
+    "importSpacing": "Distance par pixel (m)",
+    "importMinHeight": "Altitude minimale (m)",
+    "importMaxHeight": "Altitude maximale (m)",
+    "importNpyHeights": "Un fichier .npy utilise directement ses valeurs comme altitudes : les altitudes minimale et maximale ne sont pas utilisées.",
+    "importSeaLevel": "Niveau de la mer (m)",
+    "importSeaLevelHint": "Tout ce qui se trouve à cette hauteur ou en dessous devient la mer, et un fond marin est généré.",
+    "importTitle": "Titre",
+    "importMapSize": "Taille de la carte (estimée)",
+    "importInvalid": "Vérifiez les valeurs. La distance par pixel doit être supérieure à 0 et au plus égale à 1000, les altitudes et le niveau de la mer doivent être compris entre -10000 et 10000, et l’altitude maximale doit dépasser l’altitude minimale.",
+    "importTooLarge": "La carte dépasserait {{max}} km de côté. Réduisez la distance par pixel ou utilisez un fichier comportant moins de pixels.",
     "terrainOpenFailed": "Impossible d’ouvrir le terrain du scénario.",
     "terrainEncryptedHint": "Ce scénario a été créé à partir d’une ville de DLC et il est chiffré : l’éditeur de terrain ne peut pas l’ouvrir. Utilisez « Modifier la ville » pour modifier les ressources et les objets décoratifs.",
     "initialCityName": "Nom initial de la ville",
@@ -89,6 +102,7 @@
     "HOST_NOT_ALLOWED": "L’hôte utilisé pour se connecter au moteur n’est pas autorisé. Vérifiez les paramètres de connexion.",
     "SCENARIO_ENGLISH_REQUIRED": "Saisissez le texte en anglais. Le titre exige l'anglais.",
     "SCENARIO_OPTION_FIXED": "Les paramètres fixés par le scénario ne peuvent pas être modifiés.",
-    "SCENARIO_OPTION_INVALID": "Un paramètre de départ a une valeur incorrecte."
+    "SCENARIO_OPTION_INVALID": "Un paramètre de départ a une valeur incorrecte.",
+    "HEIGHTMAP_INVALID": "Impossible d’importer ce fichier d’altitudes. Vérifiez le format (PNG en niveaux de gris ou .npy) et les valeurs saisies."
   }
 }

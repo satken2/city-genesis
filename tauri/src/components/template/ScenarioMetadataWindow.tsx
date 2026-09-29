@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { emit } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { SaveEntry, ScenarioStartOption, saveError } from "../../utils/saves";
+import { SaveEntry, ScenarioStartOption, saveError, uploadScenarioThumbnail } from "../../utils/saves";
 import { compactLocalizedText, missingEnglish, type LocalizedText } from "../../utils/locale";
 import { ASSET_REGION_STANDARD, ASSET_REGION_TYPES, CLIMATE_TYPES, GROUND_COVER_TYPES, SIMULATION_DAYS_CHOICES } from "../../constants";
 import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
@@ -89,9 +89,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
           scenario_fixed_options: START_OPTIONS.filter(option => fixed.includes(option)),
         }),
       });
-      if (thumbnail) await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/saves/${encodeURIComponent(scenarioId)}/thumbnail?template=true`), {
-        method: "PUT", headers: { "Content-Type": "image/png" }, body: thumbnail,
-      });
+      if (thumbnail) await uploadScenarioThumbnail(apiBaseUrl, scenarioId, thumbnail);
       await emit("scenarios:changed");
       onClose();
     } catch (e) { setError(saveError(e, t)); }
@@ -135,7 +133,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
         </div>)}
       </fieldset>
       <label className="scenario-info__field"><span>{t("achievements.scenarioImageLabel")}</span>
-        <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={scenarioId} revision={entry.content_revision} terrainMapId={entry.terrain_map_id} className="scenario-thumbnail" />
+        <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={scenarioId} revision={entry.content_revision} className="scenario-thumbnail" />
         <input type="file" accept="image/png" disabled={busy} onChange={e => setThumbnail(e.target.files?.[0] ?? null)} /></label>
       <div className="scenario-actions"><button type="submit" disabled={busy}>{t("achievements.scenarioSave")}</button>
         <button type="button" disabled={busy} onClick={onClose}>{t("scenarios.close")}</button></div>

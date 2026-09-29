@@ -59,7 +59,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { NumberStepper } from "../common/NumberStepper";
 import { errorCode, saveError } from "../../utils/saves";
-import { terrainMapTitle } from "../../utils/terrainMaps";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { CLIMATE_TEMPERATE, CLIMATE_TYPES, GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
 import {
@@ -1452,7 +1451,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // --- 編集対象のシナリオ ---
   // 寸法・格子間隔・セルサイズはシナリオの都市と結び付いていて変えられない(コアの保存 API が寸法の変更を拒否する)。
   // メタデータ欄では読み取り専用で表示し、地表・気候だけを編集できる。
-  const [scenarioInfo, setScenarioInfo] = useState<{ title: LocalizedText; terrainMapId: string; farSpacing: number; cellSize: number } | null>(null);
+  const [scenarioInfo, setScenarioInfo] = useState<{ title: LocalizedText; terrainSource: string; farSpacing: number; cellSize: number } | null>(null);
   const [locks, setLocks] = useState<TerrainEditorLocks>({ heights_locked: false, reasons: [] });
   const heightsLockedRef = useRef(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -3485,7 +3484,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         const cellSize = data.cell_size > 0 ? data.cell_size : 500;
         setScenarioInfo({
           title: data.title ?? {},
-          terrainMapId: data.terrain_map_id ?? "",
+          terrainSource: data.terrain_source ?? "",
           farSpacing: data.far_spacing,
           cellSize,
         });
@@ -3832,9 +3831,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                 {scenarioInfo && (
                   <>
                     <div className="terrain-editor-param-row">
-                      <span className="terrain-editor-param-label">{t("terrainEditor.metaTerrainMap")}</span>
+                      <span className="terrain-editor-param-label">{t("terrainEditor.metaTerrainSource")}</span>
                       <span className="terrain-editor-param-value">
-                        {scenarioInfo.terrainMapId ? terrainMapTitle({ id: scenarioInfo.terrainMapId, name: scenarioInfo.terrainMapId }, t) : "-"}
+                        {scenarioInfo.terrainSource || "-"}
                       </span>
                     </div>
                     <div className="terrain-editor-param-row">

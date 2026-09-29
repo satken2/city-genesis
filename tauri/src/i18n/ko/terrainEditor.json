@@ -19,7 +19,7 @@
     "open3dPreview": "3D 미리보기 열기",
     "loadingTerrain": "지형 데이터를 불러오는 중...",
     "metadataTitle": "지도 메타데이터",
-    "metaTerrainMap": "원본 지형",
+    "metaTerrainSource": "원본 지형",
     "metaFarSpacing": "원경 그리드 간격",
     "metaCellSize": "셀 크기",
     "metaReadonlySummary": "{{width}}×{{height}}m / 근경 간격 {{spacing}}m / {{cols}}×{{rows}} 그리드(변경 불가)",
