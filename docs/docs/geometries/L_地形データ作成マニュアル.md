@@ -154,7 +154,7 @@ terrain_editor/
 ```text
 assets/
 └── terrains/
-    ├── original/                      # 編集禁止の標高原本の保管庫(ゲームは背景地形以外を読まない)
+    ├── original/                      # 編集禁止の標高原本の保管庫(ゲームが読むのは、新しい都市を作るときの背景地形だけ)
     ├── original_terrains.yaml         # 原本の寸法・解像度(開発者用)
     ├── terrain_maps.yaml              # オリジナル地形の登録表
     ├── map_yoron.npy                  # 与論島

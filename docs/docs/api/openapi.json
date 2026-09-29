@@ -537,7 +537,7 @@
           "terrain"
         ],
         "summary": "Get Background Coastline",
-        "description": "背景地形の遠景用海岸線(標高0m超の陸地の粗い輪郭)を、ワールド座標の MultiPolygon で返す。\n\n都市マップが都市の外の陸地を塗るためのもの。マップ作成時に背景と一緒に作った\n.coastline.json を登録表の原点へ平行移動するだけで、ここでは計算しない。背景が無い都市は空。",
+        "description": "背景地形の遠景用海岸線(標高0m超の陸地の粗い輪郭)を、ワールド座標の MultiPolygon で返す。\n\n都市マップが都市の外の陸地を塗るためのもの。マップ作成時に背景と一緒に作った海岸線\n(新しい都市を作るときに背景と一緒に都市へ写したもの)を背景の原点へ平行移動するだけで、\nここでは計算しない。背景が無い都市は空。",
         "operationId": "get_background_coastline_api_v1_terrain_background_coastline_get",
         "responses": {
           "200": {
