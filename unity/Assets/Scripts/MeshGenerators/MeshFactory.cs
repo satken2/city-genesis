@@ -292,7 +292,7 @@ public class NodeMeshResult
 
     /// <summary>
     /// 線路ノード（分岐器・平面交差）で交差点内に敷くレールの幾何情報。
-    /// 転回制約（偏向角）を満たす通行可能な線路ペアにのみ生成される。
+    /// 転回制約（偏向角）と通行方向を満たす動きごとに、進む向きで決まる軌道端どうしを結ぶ。
     /// 実体化は TrackPath.CreateRailConnectorObject が行う。
     /// </summary>
     public List<RailConnectorSpec> RailConnectors { get; }
@@ -364,7 +364,7 @@ public class SidewalkConnectorSpec
 /// <summary>
 /// 交差点内に敷く1本分のレールコネクタの幾何情報。
 /// Points はノード基準のローカル座標（Yは基準面 + TRACK_ABOVE_SPLINE 込み）で、
-/// 通行可能な線路ペアの切断点どうしを端点接線に沿って滑らかに結ぶ。
+/// 通行可能な動きの2つの軌道端（切断点での軌道中心）を端点接線に沿って滑らかに結ぶ。
 /// レールは実寸配置（幅の伸縮なし）のため、歩道コネクタと違い幅の配列は持たない。
 /// </summary>
 public class RailConnectorSpec

@@ -7,6 +7,8 @@ using Dreamteck.Splines;
 /// <summary>車両と路線ハイライトが共有する方向付き経路。欠けた下地やレール接続を直線で補わない。</summary>
 public sealed class TransitRouteGeometry
 {
+    /// <summary>同じパスで折り返した編成が、到着した軌道から出発する軌道へ移る渡り線の長さ(m)。</summary>
+    public const float CrossoverLength = 50f;
     private readonly PathManager paths;
     private readonly Dictionary<int, Geometry> geometry = new();
     private readonly Dictionary<int, List<VehiclePolyline>> railConnectors = new();
@@ -14,6 +16,10 @@ public sealed class TransitRouteGeometry
     {
         public TransitMotionClock motion;
         public int VehicleType;
+        /// <summary>描画する編成の全長(m)。0(色帯など編成を持たない描画)なら折り返しの渡り線を描かない。</summary>
+        public float ConsistLength;
+        /// <summary>停留所を置いたパス。コアと同じく、自分が止まるホームの上だけは通行方向によらず走れる。</summary>
+        public readonly HashSet<int> StopPaths = new();
         public readonly List<Run> runs = new();
     }
     public sealed class Run
@@ -23,6 +29,8 @@ public sealed class TransitRouteGeometry
         public float from, to;
         /// <summary>継ぎ目の前後で車端を解くために1周ずらして足した写し。色帯などで経路そのものを描くときは飛ばす。</summary>
         public bool Wrapped;
+        /// <summary>停留所で直前の走行区間と同じパスを逆向きに出発する区間。軌道数2以上のパスでは走る軌道が入れ替わる。</summary>
+        public bool Turnback;
         public bool Forward => to > from;
     }
     private sealed class Geometry
@@ -31,7 +39,7 @@ public sealed class TransitRouteGeometry
         public VehiclePolyline full, trimmed;
         public float trimStart, trimEnd, offset, tramOffset;
         public bool rail;
-        /// <summary>駅のホーム(platform_width を持つバリアント)。停車中に折り返せるよう通行方向によらず両方向に走れる</summary>
+        /// <summary>駅のホーム(platform_width を持つバリアント)。路線が停留所を置いたホームでは通行方向によらず両方向に走れる</summary>
         public bool platform;
         public RoadLaneLayout lanes;
         public RoadMarkingTurns startTurns, endTurns;
@@ -45,15 +53,21 @@ public sealed class TransitRouteGeometry
     public static void BuildRuns(Route line)
     {
         line.runs.Clear();
-        for (int i = 0; i < line.motion.Steps.Count; i++)
+        line.StopPaths.Clear();
+        int count = line.motion.Steps.Count;
+        for (int i = 0; i < count; i++)
         {
             var s = line.motion.Steps[i];
+            // 停留所間の区間の境目が停留所。到着する区間の最後と出発する区間の最初のパスに停留所がある。
+            if (i == 0 || line.motion.JourneyIndices[i] != line.motion.JourneyIndices[i-1])
+            { line.StopPaths.Add(s.path_id); line.StopPaths.Add(line.motion.Steps[(i+count-1)%count].path_id); }
             Run previous = line.runs.Count > 0 ? line.runs[line.runs.Count-1] : null;
             bool forward = s.to_fraction > s.from_fraction;
             if (previous != null && previous.path == s.path_id && previous.Forward == forward && Math.Abs(previous.to-s.from_fraction) < .0001)
             { previous.to = s.to_fraction; previous.end += s.length_m; }
             else line.runs.Add(new Run { path = s.path_id, start = line.motion.Distances[i], end = line.motion.Distances[i]+s.length_m, from = s.from_fraction, to = s.to_fraction });
         }
+        MarkTurnbacks(line);
         // 継ぎ目で折り返さない路線は、1周の前後に1周ずらした写しを並べ、継ぎ目を跨ぐ編成の車端を隣の走行区間として解けるようにする。
         if (!line.motion.Closed || line.runs.Count == 0) return;
         double length = line.motion.Length;
@@ -64,7 +78,25 @@ public sealed class TransitRouteGeometry
         foreach (var r in body) line.runs.Add(Shifted(r, length));
     }
     private static Run Shifted(Run r, double by)
-        => new Run { path = r.path, start = r.start + by, end = r.end + by, from = r.from, to = r.to, Wrapped = true };
+        => new Run { path = r.path, start = r.start + by, end = r.end + by, from = r.from, to = r.to, Wrapped = true, Turnback = r.Turnback };
+
+    /// <summary>
+    /// 直前に動いた走行区間と同じパスを逆向きに出発する区間に折り返しの印を付ける。停車だけの長さ0の区間は飛ばす。
+    /// 継ぎ目で折り返す路線の先頭の区間は、1周の最後の区間(先頭の停留所への到着)と比べる。
+    /// </summary>
+    private static void MarkTurnbacks(Route line)
+    {
+        Run previous = null;
+        if (!line.motion.Closed)
+            for (int i = line.runs.Count-1; i >= 0 && previous == null; i--) if (Moves(line.runs[i])) previous = line.runs[i];
+        foreach (var run in line.runs)
+        {
+            if (!Moves(run)) continue;
+            run.Turnback = previous != null && previous.path == run.path && previous.Forward != run.Forward && Math.Abs(previous.to-run.from) < .0001;
+            previous = run;
+        }
+    }
+    private static bool Moves(Run run) => Math.Abs(run.to-run.from) > 1e-6f;
     public void Refresh(HashSet<int> routePaths, IEnumerable<PathSummary> candidates)
     {
         Clear();
@@ -120,32 +152,75 @@ public sealed class TransitRouteGeometry
     {
         position = default; tangent = Vector3.forward;
         if (line.runs.Count == 0) return false;
-        bool tram = line.VehicleType == Constants.VEHICLE_TRAM;
         int refRun = FindRun(line.runs, reference), index = FindRun(line.runs,distance);
         if (line.runs[refRun].Forward != referenceForward && refRun > 0 && Math.Abs(line.runs[refRun].start-reference)<.001) refRun--;
         // 終点で逆方向の脚へ車体を曲げず、同じ線路上に編成を保つ。
         if (index != refRun && line.runs[index].Forward != line.runs[refRun].Forward && line.runs[index].path == line.runs[refRun].path) index = refRun;
+        if (!CrossoverProgress(line,index,distance,out float progress))
+            return SampleOnTrack(line,index,distance,false,out position,out tangent);
+        if (progress <= 0) return SampleOnTrack(line,index,distance,true,out position,out tangent);
+        if (!SampleOnTrack(line,index,distance,false,out position,out tangent)
+            || !SampleOnTrack(line,index,distance,true,out var arrival,out var arrivalTangent)) return false;
+        float weight = 1-Mathf.SmoothStep(0,1,progress);
+        // 横移動の傾き(weight の距離微分)を接線に含め、渡り線の中でも向きを連続にする。
+        float slope = -6*progress*(1-progress)/CrossoverLength;
+        tangent = (Vector3.Lerp(tangent,arrivalTangent,weight)+(arrival-position)*slope).normalized;
+        position = Vector3.Lerp(position,arrival,weight);
+        return true;
+    }
+
+    /// <summary>
+    /// 折り返した編成の渡り線の進み具合(0以下=到着した軌道、1以上=出発する軌道)。停車していた編成の先頭(出発方向)の
+    /// 位置から CrossoverLength で渡る。各車が自分の位置で求めるので、編成は先頭から順に渡る。
+    /// 時計の距離(コアの水平延長)を m とみなす。バスは停車中に転回するので渡り線を持たない。
+    /// </summary>
+    private static bool CrossoverProgress(Route line, int index, double distance, out float progress)
+    {
+        progress = 1;
+        if (line.ConsistLength <= 0 || line.VehicleType == Constants.VEHICLE_BUS) return false;
+        double head = line.ConsistLength*.5;
+        for (int i = index; i >= 0; i--)
+        {
+            var run = line.runs[i];
+            double begin = run.start+head;
+            if (run.Turnback)
+            {
+                progress = (float)((distance-begin)/CrossoverLength);
+                return progress < 1;
+            }
+            if (begin+CrossoverLength <= distance) return false;
+        }
+        return false;
+    }
+
+    /// <summary>走行区間 index の上の時計の距離 distance を描く。arrivalTrack なら逆向きの通行側の軌道(折り返す前に到着した軌道)を走る。</summary>
+    private bool SampleOnTrack(Route line, int index, double distance, bool arrivalTrack, out Vector3 position, out Vector3 tangent)
+    {
+        position = default; tangent = Vector3.forward;
+        bool tram = line.VehicleType == Constants.VEHICLE_TRAM;
         var run = line.runs[index];
-        if (!geometry.TryGetValue(run.path,out var g) || !(g.platform || VehicleManager.DirectionAllowsEntry(g.data.travel_direction,run.Forward))) return false;
+        if (!geometry.TryGetValue(run.path,out var g) || !((g.platform && line.StopPaths.Contains(run.path)) || VehicleManager.DirectionAllowsEntry(g.data.travel_direction,run.Forward))) return false;
         float fraction = run.from+(float)((distance-run.start)/Math.Max(.001,run.end-run.start))*(run.to-run.from);
         float s = fraction*g.full.Length;
         if (s < -.01 || s > g.full.Length+.01) return false;
         if (s >= g.trimStart && s <= g.trimEnd)
-        { SampleRun(line,index,s,tram,out position,out tangent); return true; }
+        { SampleRun(line,index,s,tram,arrivalTrack,out position,out tangent); return true; }
         bool ahead = run.Forward ? s > g.trimEnd : s < g.trimStart;
         int otherIndex = index+(ahead ? 1 : -1);
         if (otherIndex < 0 || otherIndex >= line.runs.Count)
-        { SampleRun(line,index,s,tram,out position,out tangent); return true; }
+        { SampleRun(line,index,s,tram,arrivalTrack,out position,out tangent); return true; }
         var other = line.runs[otherIndex];
         if (other.path == run.path)
-        { SampleRun(line,index,s,tram,out position,out tangent); return true; }
+        { SampleRun(line,index,s,tram,arrivalTrack,out position,out tangent); return true; }
         if (!geometry.TryGetValue(other.path,out var next)) return false;
         var a = ahead ? g : next; var b = ahead ? next : g;
         var ra = ahead ? run : other; var rb = ahead ? other : run;
         int node = ra.Forward ? a.data.end_node_id : a.data.start_node_id;
         if (node != (rb.Forward ? b.data.start_node_id : b.data.end_node_id)) return false;
-        SampleRun(line,ahead?index:otherIndex,ra.Forward?a.trimEnd:a.trimStart,tram,out var p0,out var t0);
-        SampleRun(line,ahead?otherIndex:index,rb.Forward?b.trimStart:b.trimEnd,tram,out var p1,out var t1);
+        int indexA = ahead?index:otherIndex, indexB = ahead?otherIndex:index;
+        float endA = ra.Forward?a.trimEnd:a.trimStart, endB = rb.Forward?b.trimStart:b.trimEnd;
+        SampleRun(line,indexA,endA,tram,arrivalTrack,out var p0,out var t0);
+        SampleRun(line,indexB,endB,tram,arrivalTrack,out var p1,out var t1);
         float tail = ra.Forward?a.full.Length-a.trimEnd:a.trimStart;
         float head = rb.Forward?b.trimStart:b.full.Length-b.trimEnd;
         float along = ahead ? (run.Forward?s-g.trimEnd:g.trimStart-s) : tail+(run.Forward?s:g.full.Length-s);
@@ -153,14 +228,15 @@ public sealed class TransitRouteGeometry
         bool reverse = false;
         if (g.rail || tram)
         {
-            float best = float.PositiveInfinity;
-            if (railConnectors.TryGetValue(node,out var options)) foreach (var option in options)
+            if (!FindRailConnector(node,p0,p1,out connector,out reverse))
             {
-                float f = (option.points[0]-p0).sqrMagnitude+(option.points[option.points.Length-1]-p1).sqrMagnitude;
-                float r = (option.points[0]-p1).sqrMagnitude+(option.points[option.points.Length-1]-p0).sqrMagnitude;
-                if (Math.Min(f,r)<best) { best=Math.Min(f,r); connector=option; reverse=r<f; }
+                // 渡り線の相手にする到着した軌道の側に接続が無いノード(一方通行の線路へ分かれる所など)では、
+                // 出発する軌道の接続を到着した軌道の端へ寄せて使う(下の端点合わせが寄せる)。
+                if (!arrivalTrack) return false;
+                SampleRun(line,indexA,endA,tram,false,out var q0,out _);
+                SampleRun(line,indexB,endB,tram,false,out var q1,out _);
+                if (!FindRailConnector(node,q0,q1,out connector,out reverse)) return false;
             }
-            if (connector == null || best > 4) return false;
         }
         else connector = VehiclePolyline.Connector(p0,t0,p1,t1,1f/3f);
         float progress = Mathf.Clamp01(along/Math.Max(.001f,tail+head));
@@ -178,6 +254,20 @@ public sealed class TransitRouteGeometry
             position += Vector3.Lerp(p0-start-Vector3.up*height,p1-end-Vector3.up*height,progress);
         }
         return true;
+    }
+
+    /// <summary>ノードの描画済みレール接続のうち、両端が p0・p1 に最も近いもの。両端のずれの二乗和が4m²を超えるなら無いものとする。</summary>
+    private bool FindRailConnector(int node, Vector3 p0, Vector3 p1, out VehiclePolyline connector, out bool reverse)
+    {
+        connector = null; reverse = false;
+        float best = float.PositiveInfinity;
+        if (railConnectors.TryGetValue(node,out var options)) foreach (var option in options)
+        {
+            float f = (option.points[0]-p0).sqrMagnitude+(option.points[option.points.Length-1]-p1).sqrMagnitude;
+            float r = (option.points[0]-p1).sqrMagnitude+(option.points[option.points.Length-1]-p0).sqrMagnitude;
+            if (Math.Min(f,r)<best) { best=Math.Min(f,r); connector=option; reverse=r<f; }
+        }
+        return connector != null && best <= 4;
     }
 
     /// <summary>停止中心から前後へ剛体の車体を並べる。隣接車は同じ車端位置を共有する。</summary>
@@ -271,11 +361,12 @@ public sealed class TransitRouteGeometry
             && Sample(line,frontDistance,reference,forward,out front,out _);
     }
 
-    private static void SampleTrack(Geometry g,bool forward,float s,bool tram,out Vector3 p,out Vector3 t)
+    private static void SampleTrack(Geometry g,bool forward,float s,bool tram,bool arrivalTrack,out Vector3 p,out Vector3 t)
     {
         float sign = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1;
         float offset = tram ? g.tramOffset : g.offset;
-        if (g.rail || tram) g.full.SampleOffset(s,forward,offset*sign,out p,out t);
+        // 走る軌道は進行方向に対して通行側で最も外側の1本(TrackPath.TrackIndexForTravel と同じ規則)。到着した軌道はその反対側で、単線では同じ位置。
+        if (g.rail || tram) g.full.SampleOffset(s,forward,offset*sign*(arrivalTrack ? -1 : 1),out p,out t);
         else
         {
             g.full.Sample(s,forward,out p,out t);
@@ -288,10 +379,10 @@ public sealed class TransitRouteGeometry
     /// <summary>軌道パーツの原点から車輪の接地面までの高さ。鉄道はレール頭頂、跨座式モノレールは軌道桁の天端が原点なので0。</summary>
     private static float RunningSurface(Geometry g) => g.data.path_type == Constants.PATH_MONORAIL ? 0f : .2f;
 
-    private void SampleRun(Route route, int index, float s, bool tram, out Vector3 position, out Vector3 tangent)
+    private void SampleRun(Route route, int index, float s, bool tram, bool arrivalTrack, out Vector3 position, out Vector3 tangent)
     {
         var run = route.runs[index]; var g = geometry[run.path];
-        SampleTrack(g, run.Forward, s, tram, out position, out tangent);
+        SampleTrack(g, run.Forward, s, tram, arrivalTrack, out position, out tangent);
         if (g.rail || tram || index + 1 >= route.runs.Count) return;
         var available = run.Forward ? g.endTurns : g.startTurns;
         if (available == RoadMarkingTurns.None) return;

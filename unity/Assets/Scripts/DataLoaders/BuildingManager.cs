@@ -1768,10 +1768,12 @@ public class BuildingManager : BaseApiDataManager
     private static ParcelKeyPart GetParcelKeyPart(ParcelSummary parcel) => parcelKeyParts.GetValue(parcel, createParcelKeyPart);
 
     /// <summary>
-    /// 描画物の再利用キー。形状・外観・状態・サブ建物・区画・形状版・描画LOD・接地範囲の地形版・埋立地の版(港の詳細だけ)を区別し、
-    /// version だけの変化では変わらない。同じデータからは常に同じキーになる(テストがキーを外から計算して照合する)。
+    /// 描画物の再利用キー。形状・外観・状態・サブ建物・区画・形状版・描画LOD・接地範囲の地形版・埋立地の版(港の詳細だけ)・
+    /// 引き込み線の軌道間隔(車両基地の詳細だけ)を区別し、version だけの変化では変わらない。
+    /// 同じデータからは常に同じキーになる(テストがキーを外から計算して照合する)。
     /// 港は区画が埋立地の岸壁に面するかで岸壁・配置が変わる(遠景も同じ組み立て)ので <see cref="ReclaimedLandStore.ContentVersion"/> を混ぜる。
     /// 港以外は埋立地に依存しないので "-"(埋立のたびに作り直さない)。
+    /// 車両基地は端子へつながる線路の軌道数で引き込み線が単線・複線に変わる(遠景の箱は変わらない)。
     /// </summary>
     private string BuildingRenderKey(BuildingSummary data, DrawLod lod)
     {
@@ -1779,13 +1781,16 @@ public class BuildingManager : BaseApiDataManager
         var terrain = Utils.CachedTerrainManager;
         string surface = terrain != null ? terrain.GetSurfaceStamp(GetBuildingTerrainBounds(data, parcel)) : "none";
         buildingGeometryRevisions.TryGetValue(data.agent_id, out int revision);
-        string reclaimed = BuildingMeshBuilder.GetModelType(data) == Constants.MODEL_PORT
+        int modelType = BuildingMeshBuilder.GetModelType(data);
+        string reclaimed = modelType == Constants.MODEL_PORT
             ? ReclaimedLandStore.ContentVersion.ToString(CultureInfo.InvariantCulture) : "-";
+        string yardLead = modelType == Constants.MODEL_RAIL_YARD && lod != DrawLod.Far
+            ? RailYardBuildingMeshBuilder.ResolveLeadHalfSpacing(data).ToString("R", CultureInfo.InvariantCulture) : "-";
         return string.Concat(new[]
         {
             data.agent_id.ToString(CultureInfo.InvariantCulture), ":", buildingShapeKeys.GetValue(data, createBuildingShapeKey), ":",
             revision.ToString(CultureInfo.InvariantCulture), ":", parcel != null ? GetParcelKeyPart(parcel).token : "-", ":",
-            ((int)lod).ToString(CultureInfo.InvariantCulture), ":", surface, ":", reclaimed,
+            ((int)lod).ToString(CultureInfo.InvariantCulture), ":", surface, ":", reclaimed, ":", yardLead,
         });
     }
 
@@ -2137,6 +2142,25 @@ public class BuildingManager : BaseApiDataManager
         // データの版は変わらないので、形状版を進めて退避キャッシュや表示中オブジェクトの再利用を外す。
         buildingGeometryRevisions[building.agent_id] = ++buildingGeometryRevisionCounter;
         CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true, drawLod: GetCurrentDrawLod(building.agent_id));
+    }
+
+    /// <summary>
+    /// 車両基地の端子ノード（depot_node_id）へつながる線路が追加・変更・削除されたときに PathManager から呼ばれる。
+    /// 車両基地（MODEL_RAIL_YARD）の引き込み線は端子へつながる線路の軌道数で単線・複線が決まり、
+    /// 建物の version は変わらないので、表示中の詳細オブジェクトの再利用キーが変わったときだけ作り直す。
+    /// 退避中・未生成の基地は再利用キーに引き込み線が入っているので次の生成で新しい形になる。
+    /// </summary>
+    public void OnDepotTerminalPathsChanged(int nodeId)
+    {
+        if (nodeId <= 0 || !buildingIdByDepotNodeId.TryGetValue(nodeId, out int agentId)
+            || !buildingDataCache.TryGetValue(agentId, out BuildingSummary building)) return;
+        if (BuildingMeshBuilder.GetModelType(building) != Constants.MODEL_RAIL_YARD) return;
+        if (!buildingObjectsCache.TryGetValue(agentId, out GameObject obj) || obj == null || !obj.activeSelf) return;
+        DrawLod lod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
+        if (lod == DrawLod.Far) return;
+        var identity = obj.GetComponent<RenderCacheIdentity>();
+        if (identity != null && identity.key == BuildingRenderKey(building, lod)) return;
+        CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), drawLod: lod);
     }
 
     /// <summary>

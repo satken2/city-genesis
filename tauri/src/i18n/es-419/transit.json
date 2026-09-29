@@ -106,7 +106,7 @@
       "note": "Valores por época ({{days}} días). Los ingresos suponen que cada servicio llena el {{percent}}% de su capacidad dos veces por vuelta (una en cada sentido en una línea de ida y vuelta) y que cada viaje paga la tarifa.",
       "estimatedLeaseNote": "Ningún depósito tiene aún un precio de vehículos, así que se estima a partir del costo de producción de un depósito.",
       "noDepot": "No hay ningún depósito en funcionamiento conectado a la red de esta línea. Así, la línea no podrá obtener vehículos ni operar.",
-      "trackOverload": "Supera la capacidad de la vía (previsto {{load}} trenes/día > capacidad {{capacity}} trenes/día). Alarga el intervalo o agrega vías.",
+      "trackOverload": "Supera la capacidad de la vía (previsto {{load}} trenes/día > capacidad por vía {{capacity}} trenes/día). Alarga el intervalo o agrega vías.",
       "unavailable": {
         "insufficientStops": "Coloca al menos dos paradas para obtener una estimación.",
         "invalidStop": "Hay paradas o puntos de paso en lugares donde no se pueden colocar; no se puede estimar.",

@@ -106,7 +106,7 @@
       "note": "Par époque ({{days}} jours). Les recettes supposent que chaque service remplit {{percent}} % de sa capacité deux fois par tour (une fois dans chaque sens pour un aller-retour) et que chaque trajet paie le tarif.",
       "estimatedLeaseNote": "Aucun dépôt n'a encore de prix de véhicule ; le prix est estimé à partir du coût de production d'un dépôt.",
       "noDepot": "Aucun dépôt en service n'est relié au réseau de cette ligne. En l'état, la ligne ne peut pas obtenir de véhicules ni circuler.",
-      "trackOverload": "Dépasse la capacité de la voie (prévu {{load}} trains/jour > capacité {{capacity}} trains/jour). Allongez l'intervalle ou ajoutez des voies.",
+      "trackOverload": "Dépasse la capacité de la voie (prévu {{load}} trains/jour > capacité par voie {{capacity}} trains/jour). Allongez l'intervalle ou ajoutez des voies.",
       "unavailable": {
         "insufficientStops": "Placez au moins deux arrêts pour obtenir une estimation.",
         "invalidStop": "Certains arrêts ou points de passage sont à des endroits où ils ne peuvent pas être placés ; estimation impossible.",

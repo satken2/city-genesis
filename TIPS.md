@@ -30,6 +30,12 @@
 - 別ワークツリーの Unity スクリプトをコンパイル確認するときは、本体の `Assembly-CSharp.csproj` を写してレポジトリの外に置き、`Assets\Scripts` の明示列挙をワークツリーの `Assets\Scripts\**\*.cs` のワイルドカードに、相対の `HintPath`(`Library\...`)を本体の絶対パスに置き換える。Dreamteck の `ProjectReference` は本体の `Library\ScriptAssemblies\Dreamteck.*.dll` への参照に替える(プロジェクト参照のままだと本体の `Temp` にビルド成果物を書く)。ワイルドカードにすれば、Unity が csproj を再生成していない新しい .cs も載る。
 - API の地区ポリゴン(`zone.polygon`)は外周が時計回り(XZで符号付き面積が負)で、末尾に始点と同じ点が付いて届く(穴は含まない)。`BuildingMeshBuilder.TriangulateEarClip` / `TriangulateOrFan` は反時計回り前提なので、そのまま渡すと必ず耳切りに失敗して扇形分割に落ち、凹型の地区では三角形が外へはみ出して重なる(2026-09-28、地区編集のホバー塗りで発生。Editor.log に「耳が見つかりませんでした」が出る)。`WaterSurfaceManager.AppendRingMesh` と同じく、閉じ点を除いて `PolygonUtils.SignedArea` が負なら反転してから渡す。
  
+- ワークツリーで Unity の独立検証(`unity/Tests/*/run*.ps1`)を動かすには、ワークツリーの `unity/` に本体の `Library` を絶対パスで参照する `Assembly-CSharp.csproj`(gitignore 対象)を置き、本体の `Library` の DLL を `unity/Temp/bin/Debug` へ写す。どちらも無いと `BuildRuntime.ps1` が動かない。
+- ワークツリー用にビルドした DLL を .NET 8 のコンソールアプリから読むと、Unity を起動せずに車両の経路計算(`TransitRouteGeometry`)を検査できる。`Debug.Log` などネイティブを呼ぶ API を通る経路は避ける。
+- `MasterDataStore.GetPathMaster` は未登録のバリアントで null を返さず例外を投げる(`?.` では防げない)。検証用の仮マスターには、触るバリアントをすべて登録する。
+- 線路端の車止めの作り直しは、標示の署名 `JunctionSignature`(通行方向を含む)が変わったこと(`markingsChanged`)に依存している。
+- `unity/Tests/Intersections/Unity/PlatformQA.cs` の `Check` はデッキを `StartsWith("PlatformDeck")` で探しているが、実際のオブジェクト名は `TrackPlatformDeck_*` なので、デッキの検査は効いていない。
+- Write ツールは LF でファイルを書くが、作業ツリーは CRLF(autocrlf=true)。既存ファイルを丸ごと書き直すときは改行をそろえる。
 ## UI / Tauri
 
 - チュートリアルの初期配置は現行HTTP契約を確認する。`POST /parcels` は `mode: empty_area` などを受け付け、旧チュートリアルにある `mode: manual` は未対応。空き領域作成の成功応答は `{ "parcel": 数値ID }`。道路マスターの名称は「2車線道路」であり、表示文に残る「2車線生活道路」で検索すると見つからない。新基盤は属性でバリアントを解決する。

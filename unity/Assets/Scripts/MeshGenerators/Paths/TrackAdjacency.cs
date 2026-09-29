@@ -27,6 +27,12 @@ public class TrackNeighborInfo
     public float PlatformRight;
 
     /// <summary>
+    /// ホームの淵ライン（デッキの線路側の縁）の中心線からの距離（TrackPath.PlatformEdgeDistance）。
+    /// 島式結合で相手の淵までデッキを張るのに使う。軌道数2の駅は外側の軌道から測るので単線より遠い。
+    /// </summary>
+    public float PlatformEdge = TrackPath.PLATFORM_EDGE_OFFSET;
+
+    /// <summary>
     /// LRT停留所のホーム区間(Points の始点からの3D累積距離。LrtPlatformParts.ZoneRanges)。無ければ null。
     /// 結合コリドーの主線路は、相手のこの区間では相手のホーム外縁(LrtPlatformOuter)の外に架線柱を立てる。
     /// </summary>
@@ -39,9 +45,9 @@ public class TrackNeighborInfo
 /// <summary>
 /// 自線路の描画点列に沿った、近接線路との「結合コリドー」情報。
 ///
-/// ゲームの内部データに「複線線路」という単位は存在せず、複線は一方通行の単線線路を
-/// 2本並べて表現される。そのままでは単線が2本並ぶだけの見た目になるため、
-/// XZ平面・Y方向ともに近接して並走する線路どうしを1つのコリドー（廊下）とみなし、
+/// 複線は軌道数2の1本のパス（まとめた複線）のほか、一方通行の単線線路を2本並べても表現される。
+/// 後者はそのままでは単線が2本並ぶだけの見た目になるため、
+/// XZ平面・Y方向ともに近接して並走する線路どうし（まとめた複線を含む）を1つのコリドー（廊下）とみなし、
 /// 道床（body）・防音壁（wall）・架線柱（pole）・架線ビーム（beam）を結合して描画する。
 ///
 /// 添字はすべて自線路の点列（スプライン制御点）のインデックスに対応する。
@@ -111,10 +117,10 @@ public class TrackCorridorInfo
     /// NaN はこの点でデッキを張らないことを意味する（その側にホームが無い、または
     /// 島式結合区間でデッキの充填担当が相手線路の側）。
     /// 通常値は「自半幅 + platform_width」で、島式結合区間の充填担当側では相手線路の
-    /// 淵ライン（相手中心線から TrackPath.PLATFORM_EDGE_OFFSET）まで、他線路の道床が
+    /// 淵ライン（相手中心線から TrackNeighborInfo.PlatformEdge）まで、他線路の道床が
     /// ホームに掛かる区間ではその手前までクランプされる。
-    /// なお淵側（線路側）のエッジは常に自中心線から PLATFORM_EDGE_OFFSET の固定値
-    /// （TrackPath 側が持つ）で、この配列は外縁側だけを表す。
+    /// なお淵側（線路側）のエッジは自分の淵ライン（TrackPath.PlatformEdgeDistance。
+    /// TrackPath 側が持つ）で、この配列は外縁側だけを表す。
     /// </summary>
     public float[] LeftDeckFar;
 
@@ -506,9 +512,8 @@ public static class TrackAdjacency
                         && edgeGap > 0f && edgeGap <= myPlatform + nbFacingPlatform;
                     if (island)
                     {
-                        // デッキの充填先は相手の淵ライン（相手中心線から PLATFORM_EDGE_OFFSET の
-                        // 固定値。相手の淵パーツの縁の位置と一致し、継ぎ目を相手の淵が覆う）。
-                        float joinTo = absO - TrackPath.PLATFORM_EDGE_OFFSET;
+                        // デッキの充填先は相手の淵ライン（相手の淵パーツの縁の位置と一致し、継ぎ目を相手の淵が覆う）。
+                        float joinTo = absO - nb.PlatformEdge;
                         float outerTo = absO + nbHalf + nbOuterPlatform;
                         if (o > 0f)
                         {

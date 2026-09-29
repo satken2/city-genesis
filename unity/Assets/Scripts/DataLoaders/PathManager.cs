@@ -1550,6 +1550,7 @@ public class PathManager : BaseApiDataManager
                 // 高速道路の本線とランプの結合描画も同じ理由で相手側を作り直す。
                 EnqueueAdjacentTrackNeighborRebuilds(p);
                 EnqueueAdjacentRoadMergeRebuilds(p, affectedNodeIds);
+                NotifyDepotTerminals(p);
 
                 LodTier tier = DeterminePathLodTier(p, nearSet, dynamicSet);
 
@@ -2043,6 +2044,7 @@ public class PathManager : BaseApiDataManager
             }
 
             UnregisterPathDataById(pathId);
+            if (removedPath != null) NotifyDepotTerminals(removedPath);
             UnregisterPathCells(pathId);
             UnregisterPathSegments(pathId);
             DropEndNodeIntersectionSignatures(removedPath);
@@ -3032,7 +3034,7 @@ public class PathManager : BaseApiDataManager
 
     /// <summary>
     /// TrackAdjacency.NeighborProvider の実体。指定線路の近接候補線路の描画点列と幅、
-    /// 駅パスならプラットフォームの左右張り出し幅（島式ホームの結合判定用）、LRTの線路なら
+    /// 駅パスならプラットフォームの左右張り出し幅と淵ライン（島式ホームの結合判定用）、LRTの線路なら
     /// 停留所のホーム区間（主線路の架線柱をホームの外へ出すため）を返す。
     /// 点列は生成済みならキャッシュ(pathPointsCache)を使い、未生成（同一ロード内で
     /// 相手がまだ描画されていない等）なら CalculatePathPoints で算出する。
@@ -3074,13 +3076,15 @@ public class PathManager : BaseApiDataManager
                     lrtZones = LrtPlatformParts.ZoneRanges(lrtSpans, LrtRoadParts.PlatformRampLength(other.path_variant), LrtRoadParts.PLATFORM_TRACK_ZONE_MARGIN);
             }
 
+            float width = GetRoadWidth(other.path_variant);
             result.Add(new TrackNeighborInfo
             {
                 PathId = id,
                 Points = points,
-                Width = GetRoadWidth(other.path_variant),
+                Width = width,
                 PlatformLeft = platformLeft,
                 PlatformRight = platformRight,
+                PlatformEdge = TrackPath.PlatformEdgeDistance(width, Mathf.Max(1, otherMaster?.lanes ?? 1)),
                 LrtPlatformZones = lrtZones,
                 LrtPlatformOuter = lrtZones != null ? LrtRoadParts.PlatformOuterOffset(other) : 0f,
             });
@@ -3102,6 +3106,20 @@ public class PathManager : BaseApiDataManager
             pendingTrackNeighborRebuildIds.Add(id);
         }
         FlushPendingTrackNeighborRebuilds(null);
+    }
+
+    /// <summary>
+    /// 線路の登録・変更・削除のあと、両端のノードが車両基地の端子なら基地へ知らせる。
+    /// 車両基地の引き込み線は端子へつながる線路の軌道数で単線・複線が決まるため
+    /// (BuildingManager.OnDepotTerminalPathsChanged。変わらなければ作り直さない)。
+    /// 削除では pathsByNodeIndex から外した後に呼ぶ。
+    /// </summary>
+    private static void NotifyDepotTerminals(PathSummary path)
+    {
+        BuildingManager buildings = BuildingManager.Instance;
+        if (!IsTrackTypePath(path) || buildings == null) return;
+        if (buildings.IsDepotTerminalNode(path.start_node_id)) buildings.OnDepotTerminalPathsChanged(path.start_node_id);
+        if (buildings.IsDepotTerminalNode(path.end_node_id)) buildings.OnDepotTerminalPathsChanged(path.end_node_id);
     }
 
     /// <summary>
@@ -4720,6 +4738,7 @@ public class PathManager : BaseApiDataManager
         }
 
         UnregisterPathDataById(pathId);
+        if (removedPath != null) NotifyDepotTerminals(removedPath);
         UnregisterPathCells(pathId);
         UnregisterPathSegments(pathId);
         DropEndNodeIntersectionSignatures(removedPath);
@@ -5080,6 +5099,8 @@ public class PathManager : BaseApiDataManager
             return;
         }
 
+        // 標示の署名は通行区分と接続パスの種別・状態・通行方向・向きを含む。線路端の車止め(TrackPath)もこれらとマスターだけで
+        // 決まるので、変わったら切断点が同じでも接続パスを作り直す(下の markingsChanged)。
         string markingSignature = RoadMarkingRules.JunctionSignature(nodeId, connectedPaths);
         bool markingsChanged = !nodeMarkingSignatures.TryGetValue(nodeId, out var oldMarkingSignature) || oldMarkingSignature != markingSignature;
 
@@ -6011,8 +6032,9 @@ public class PathMasterItem
     /// <summary>
     /// 駅パスのプラットフォーム幅(m)。null または 0 以下ならホームなし（通常の線路・道路）。
     /// 駅バリアントの width は通常線路と同じ「線路コリドーの幅」であり、プラットフォームは
-    /// この幅ぶん道床の外側へ片側（または両側）に張り出して描画される。設置側はパスの
-    /// platform_side（内側/外側/両側。左右の解決は city.traffic_hand 基準）で決まる。
+    /// この幅ぶん道床の外側へ片側（または両側）に張り出して描画される。単線の設置側はパスの
+    /// platform_side（内側/外側/両側。左右の解決は city.traffic_hand 基準）で決まり、
+    /// lanes が2以上の駅は両外側（TrackPath.ResolvePlatformExtents）。
     /// </summary>
     public float? platform_width;
 

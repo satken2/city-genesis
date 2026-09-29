@@ -81,12 +81,14 @@ public partial class RoadRenderer
         stripTriangles.Clear();
         var master = MasterDataStore.Instance?.GetPathMaster(variant);
         float width = (master?.width ?? 0f);
+        float platformEdge = TrackPath.PlatformEdgeDistance(width, Mathf.Max(1, master?.lanes ?? 1));
         int count = offsets != null && offsets.Length > 0 ? offsets.Length : 1;
         for (int line = 0; line < count; line++)
         {
             float offset = offsets != null && offsets.Length > 0 ? offsets[line] : 0f;
             var path = new PathSummary
             {
+                path_variant = variant,
                 platform_side = platformSide,
                 travel_direction = directions != null && line < directions.Length
                     ? directions[line] : Constants.DIR_BOTH
@@ -95,9 +97,9 @@ public partial class RoadRenderer
                 out float left, out float right);
             AddStrip(offset - width * 0.5f, offset + width * 0.5f, RoadPartHeights.BODY_ABOVE_SPLINE);
             if (left > 0f)
-                AddStrip(offset - width * 0.5f - left, offset - TrackPath.PLATFORM_EDGE_OFFSET, RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE);
+                AddStrip(offset - width * 0.5f - left, offset - platformEdge, RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE);
             if (right > 0f)
-                AddStrip(offset + TrackPath.PLATFORM_EDGE_OFFSET, offset + width * 0.5f + right, RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE);
+                AddStrip(offset + platformEdge, offset + width * 0.5f + right, RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE);
         }
         previewMesh.Clear();
         previewMesh.indexFormat = stripVertices.Count > 65535

@@ -12,10 +12,11 @@
  * 道路と同じ扱い(両方向のロープが張られたメッシュを単一パス1本で配置)のため、複線展開の対象外。
  * 経済上は路線ではなく「乗降区間からしか乗れない速い歩道」であり、路線・停留所は作らない。
  *
- * 線路系(線路・モノレール)でマスターの lanes が2以上のバリアント(LRT専用軌道)も複線展開しない。
- * 1本のパスが上下線(複線)を持ち、Unity が lanes 本の軌道を描き、バックエンドは通行方向を
- * 両方向(DIR_BOTH)に固定して一方通行を拒否するため、単線パスを並べる方式とは両立しない。
- * 判定は isSingleRailPathVariant に集約している。
+ * 線路系(線路・モノレール)でマスターの lanes が2以上のバリアント(複線一体の線路。鉄道・モノレールの
+ * 1本で敷く複線やLRT専用軌道)も複線展開しない。1本のパスが上下線(複線)を持ち、Unity が lanes 本の
+ * 軌道を描き、バックエンドは通行方向を両方向(DIR_BOTH)に固定して一方通行を拒否するため、単線パスを
+ * 並べる方式とは両立しない。どの軌道を走るかは進む向きで決まる。判定は isSingleRailPathVariant に集約している。
+ * 複線一体の線路の駅は両外側にホームを持ち(相対式)、ホーム設置側を選ばない(hasPlatformSideChoice)。
  *
  * 展開後の敷設・プレビュー・コスト見積りは既存の複合パス機構(pathOffset / confirmPath)を
  * そのまま再利用する。ここで生成する components は combined_paths のコンポーネントと同型。
@@ -106,12 +107,21 @@ export function variantTrackCount(entry: PathMasterEntry | null | undefined): nu
 }
 
 /**
- * 1本のパスで上下線(複線)を表す線路バリアント(複線一体の線路。LRT専用軌道)かを返す。
+ * 1本のパスで上下線(複線)を表す線路バリアント(複線一体の線路)かを返す。
  * バックエンドの MasterData.is_multi_track_variant と同じ定義で、バックエンドはこのバリアントの
  * 通行方向を DIR_BOTH に固定する。
  */
 export function isMultiTrackRailVariant(entry: PathMasterEntry | null | undefined): boolean {
   return variantTrackCount(entry) >= 2;
+}
+
+/**
+ * 建設時にホーム設置側(外側/内側/両側)を選ぶ駅バリアントかを返す(platform_width を持つ単線の駅)。
+ * 複線一体の線路の駅は両外側にホームを持つので設置側を選ばず、platform_side も送らない。
+ */
+export function hasPlatformSideChoice(entry: PathMasterEntry | null | undefined): boolean {
+  const width = entry?.platform_width;
+  return typeof width === "number" && width > 0 && !isMultiTrackRailVariant(entry);
 }
 
 /**
@@ -128,7 +138,7 @@ export function isSingleRailPathVariant(entry: PathMasterEntry | null | undefine
  * すべてバリアントの違いとして並べ、プレイヤーに直接選ばせる。
  * 地上/高架/地下はバリアントではなくノードの高さで決まるので、一覧には現れない。
  * 並び順は 構造(通常→橋梁→駅) → 複線一体の線路は後ろ → 非電化→電化 → ID昇順。
- * 複線一体の線路(LRT専用軌道)は線路数などを設定できないので、設定できる通常の線路より後ろに置く。
+ * 同じ構造の中では、線路数などを設定して並べる単線を先に、1本で上下線を持つ複線一体の線路を後ろに置く。
  */
 export function railVariantsInOrder(
   masterData: MasterData | null,

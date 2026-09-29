@@ -682,8 +682,8 @@ export type PathMasterEntry = {
   max_span?: number | null;
   /**
    * 駅パスのプラットフォーム幅(m)。master.yaml の platform_width に対応する。
-   * 正の値を持つバリアント(駅)だけが建設時にホーム設置側(platform_side)を指定できる。
-   * 未定義・null はホームなし(通常の道路・線路)。
+   * 正の値を持つ単線のバリアント(駅)だけが建設時にホーム設置側(platform_side)を指定できる
+   * (lanes≥2 の複線一体の線路の駅は両外側にホームを持つ)。未定義・null はホームなし(通常の道路・線路)。
    */
   platform_width?: number | null;
   /**
@@ -823,7 +823,7 @@ export type TransitLineEstimate = {
   break_even_load_factor: number | null;
   /** 路線の走行網につながった稼働中の車両基地があるか(試算できないときは null) */
   depot_connected: boolean | null;
-  /** この設定を確定すると容量を超える線路(作成・更新の事前検証と同じ判定) */
+  /** この設定を確定すると容量を超える線路(作成・更新の事前検証と同じ判定)。load・capacity は軌道1本あたりの便数/日 */
   track_overloads: { path_id: number; load: number; capacity: number }[];
 };
 

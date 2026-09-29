@@ -46,7 +46,7 @@
       "labor_unfilled": { "title": "有求職者但招不到人", "description": "失業率為 {{unemployment_rate}}%。可能是通勤距離過遠、薪資偏低或技能不符。" },
       "budget_capped": { "title": "預算不足", "description": "分配的預算遠低於所需金額。請重新檢視預算分配。" },
       "construction_shortage": { "title": "無法採購{{product_name}}", "description": "" },
-      "line_paused_route_disconnected": { "title": "站點之間的路線中斷", "description": "依序相鄰的站點之間沒有軌道或街道相連。在單向軌道上折返，需要通往反方向軌道的渡線。請重建中斷路段或調整路線走向。" },
+      "line_paused_route_disconnected": { "title": "站點之間的路線中斷", "description": "依序相鄰的站點之間沒有可依所需方向通行的軌道或街道相連。請重建中斷路段或調整路線走向。要在單向軌道上折返，可在能雙向行駛的軌道（例如以1條路徑表示上下行的複線）的車站折返，或將上下行軌道匯集到同一個節點、鋪設渡線，使列車能轉到反方向的軌道，並將回程站點設在反方向的月台上。" },
       "line_paused_no_underlay": { "title": "站點沒有底層路徑", "description": "站點所在的軌道或街道已不存在。" },
       "line_paused_train_too_long": { "title": "列車編組長於停靠站所在區段", "description": "請減少每列車的車輛數，或延長停靠站所在的區段（車站月台，或道路、軌道區段）。" },
       "line_no_vehicle_product": { "title": "此路線類型未定義車輛", "description": "" },

@@ -62,6 +62,7 @@
 - 地形追従・隣接通知・切断点変化による再生成の投入は `EnqueueTerrainFollowPath(id, serial, reason)` に一本化(視野優先ワーカー)。ハンドラ内で同期一括再生成しない。
 - 交差点ノード取得中フラグ `fetchingIntersectionNodeIds` は取得コルーチンの finally で外す(残ると後続バッチが永久に待ち、地形追従が止まる)。
 - 交差点生成器(`NodeMeshFactory.GenerateNodeMesh` / `GetIntersectionCutLimit`)に外部依存を足したら入力署名 `ComputeNodeIntersectionSignature` にも足す。接続数が `MAX_INTERSECTION_CONNECTED_PATHS`(32)超のノードはO(N²)フリーズ防止で生成しない。
+- 線路端の車止めは線路のメッシュの一部で、ノードでつながる軌道端(接続パスの種別・状態・通行方向・向き)で決まる。切断点が変わらなくても、標示の署名 `RoadMarkingRules.JunctionSignature` が変わると `markingsChanged` で接続パスを作り直すので、これが車止めの作り直しも担う(署名から通行方向などを外さない)。
 - 道路GOを `SetActive(true)` に戻す経路を足したら `EnsureEndIntersectionsVisible` を呼ぶ(交差点メッシュは道路の子ではない)。
 - `CalculatePathPoints` の制御点自動計算(Catmull-Rom、テンション1/6)はバックエンド `Path._auto_fill_controls` と同一式。変えるなら両方。
 - インフラノード(`InfraNetworkUtil.IsInfraMask`)には交差点アスファルトも端点切断もしない(端点Yとノードの不一致=垂直結合が正規状態)。端子ノードの所属施設は `BuildingManager.TryGetInfraTerminalOwner`(ノードAPIは owner を持たない)。
@@ -69,6 +70,7 @@
 
 ### 建物 (BuildingManager)
 - 見た目に効くフィールドを足したら `HashBuildingShape` にも足す(再利用キー `BuildingRenderKey` の形状ハッシュ)。
+- 車両基地(MODEL_RAIL_YARD)の引き込み線は端子へつながる線路の軌道数で単線・複線が変わるが、建物の version は変わらない。再利用キーの詳細LODに `RailYardBuildingMeshBuilder.ResolveLeadHalfSpacing` を混ぜ、PathManager が線路パスの登録・version 変化・削除のたびに両端の端子へ `OnDepotTerminalPathsChanged` を呼ぶ(キーが変わった表示中の基地だけ作り直す。F9§8)。
 - 港(MODEL_PORT)は区画が埋立地の岸壁に面するかで形が変わるが、埋立で version は変わらない。再利用キーは港だけ全LODで `ReclaimedLandStore.ContentVersion` を混ぜ(遠景も岸壁と `_far` パーツの組み立て)、`ReclaimedLandManager.OnContentChanged` を購読する `OnReclaimedLandsChanged` が逆引き `portBuildingIds` から表示中の港を作り直す(遠景は即時、詳細の視野外は遅延キュー)。`portBuildingIds` の登録・削除は他の逆引きと同じ経路(`RegisterBuildingDataToCache` / `SyncBuildingsInCells` / `ClearAllCells`)。
 - 配置Yは `ResolveBuildingBaseHeight` の1箇所。陸上は model_type によらず `center_point` の地形標高、海上区画(`PARCEL_WATER`)だけ `parcel.altitude`(地形をサンプルすると海底が返る)。区画側の同じ入口は `ParcelManager.GetParcelBaseY`。
 - `parcel.altitude` は海面基準の絶対標高(接道の路面標高、接道なしは区画中心の地形標高)。パス・ノードのYは地面からの相対高さなので混ぜない。陸上の建物の接地に使うと、区画が分かる経路(プレビュー等)と分からない一括ロードで高さが食い違う。

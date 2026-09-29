@@ -41,8 +41,8 @@
 | `ConstructionPathBuilder.cs` / `ConstructionMeshUtil.cs` | 工事中パス(G§15) |
 | `RoadIntersectionMeshGenerator.cs` | 交差点(G§11、J「Unity側の交差点メッシュの再計算」) |
 | `TrafficSignalLayout.cs` / `TrafficSignalBuilder.cs` / `TrafficSignalStyle.cs` | 交差点の信号機。描画専用(G§11.8) |
-| `TrackPath.cs` | 線路・モノレール・LRT専用軌道431(N) |
-| `TrackIntersectionMeshGenerator.cs` | ポイント・平面交差のレールコネクタ。`RailsConnect` は車止めとも共有(N§4) |
+| `TrackPath.cs` | 線路・モノレール・LRT専用軌道431(N)。進む向きで走る軌道を決める `TrackIndexForTravel`、ホームの基準になる軌道の `PlatformTrackOffset` / `PlatformEdgeDistance`(N§1.1・§7.3) |
+| `TrackIntersectionMeshGenerator.cs` | ポイント・平面交差のレールコネクタ。つながる軌道端の判定(`ResolveConnectedTrackEnds`)は車止めとも共有(N§4.3) |
 | `TrackAdjacency.cs` | 近接線路の結合(複線見え化)・島式ホーム(N§7.4・§8) |
 | `TrackDirectionArrows.cs` / `PlatformFoundationGenerator.cs` / `FarPlatformPath.cs` | 一方通行線路の矢印(敷設モードのみ。N§9)・高架ホーム外壁下部(N「高規格高架PF」)・駅と乗り場の遠景簡易立体(N§6。対象バリアントは `FarPlatformPath.Handles` に列挙。貨物PF 463〜465 は上屋の無い荷役床に品目別の設備を載せ、コンテナは通常パーツの16mタイルと同じ区間に並べる) |
 | `LrtRoadParts.cs` / `LrtPlatformParts.cs` | LRT の軌道位置・踏面・ホーム寸法の唯一の正と、併用軌道・停留所ホーム(G「LRT付き道路」「LRT停留所のホーム」、N「LRT専用軌道431」) |
@@ -54,7 +54,7 @@
 | `BuildingMeshUtils.cs` | パーツ解決(prefix・`_close`・common)・`CombineModuleMeshes`・`AddStackedModule`・`ResolveParcelContext`・`SanitizeRingPolygon`・屋根共通幾何 |
 | `ModularBuildingMeshBuilder.cs` / `ModularBodyBuilder.cs` / `DefaultBodyBuilder.cs` | モジュラー躯体(壁・角の敷き詰め `BuildWallRun`、敷地装飾 `GenerateSiteDecorations`)と白箱フォールバック(F・F1) |
 | `FlatRoofBuilder.cs` / `HouseRoofBuilder.cs` / `GableRoofBuilder.cs` / `ShedRoofBuilder.cs` / `InteriorFloorBuilder.cs` / `ExteriorStairBuilder.cs` | 屋根4種・各階の床(F1)、辺ごとの外階段(F§11.4) |
-| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間に港ごとのヤードの荷(403 はコンテナ `port_container` の段積み、401・402・1001 は `port_cargo` を積まずに並べる。荷のパーツは各港の `a{variant}` にだけ置き、`b128` に置くと他の港へフォールバックする)を置く)、車両基地(F9) |
+| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間に港ごとのヤードの荷(403 はコンテナ `port_container` の段積み、401・402・1001 は `port_cargo` を積まずに並べる。荷のパーツは各港の `a{variant}` にだけ置き、`b128` に置くと他の港へフォールバックする)を置く)、車両基地(F9。引き込み線の単線・複線は端子へつながる線路の軌道数で決まり、`ResolveLeadHalfSpacing` を BuildingManager が再利用キーに混ぜる) |
 | `PortLayout.cs` | 港の配置計画(施設モジュール・荷役設備・ヤードの荷の置き場)。通常モデルの寸法と入力の形だけで決まる純データ(F4 §5)。荷の置き方は `CargoSpec`(コンテナは `ContainerSpec`、並べる荷は `GroundCargoSpec` がパーツの外接箱から作る) |
 | `OpenSpaceLayout.cs` / `OpenSpaceBuildingMeshBuilder.cs` | 駐車場・駅前ロータリー・公園(F10) |
 | `BuildingRoadAccess.cs` | 施設側の決定論的な間口(ロータリーの舗装交線・既成モデルのEmpty)。描画GOを間口の正にしない(F§16) |
@@ -80,6 +80,8 @@
 - マテリアルはパス系が `RoadPath.GetOrCreateRoadMaterial`、建物系がパーツプレハブの `sharedMaterials`(R§7)。生成器ごとの `Resources.Load<Material>` / `new Material` を増やさず、URP なので Built-in 用 `Standard` を生成しない。
   - 特定バリアントだけ専用シェーダーにする唯一の口は `Resources/{マテリアル名}.mat`(例: G§16 の `Custom/PathDirt`。頂点α規約を持つメッシュ専用で他の body に流用しない)。
 - 車線中心・区画線境界は `RoadLaneLayout`、LRT の軌道位置・踏面・ホーム寸法は `LrtRoadParts` が唯一の正。車両・交差点・設備側に独立した横オフセット式を書かない。
+- 軌道数2のパス(まとめた複線・431)で走る軌道は「パスと進む向き」だけで決まる(`TrackPath.TrackIndexForTravel`。左側通行なら進行方向の左)。交差点のレールコネクタと車止めは `TrackIntersectionMeshGenerator` の同じ判定(通行方向を見る。駅のホームは両方向扱い)を使い、車両の走行描画(`Vehicles/TransitRouteGeometry`)も同じ規則で軌道を選んでレールを端点の近さで拾う。どれか1つだけ規則を変えると列車がレールの無い所を走る。
+- ホームの部品(淵・外縁・下部外壁・端壁・遠景)は、その側で最も外側の軌道の中心線を原点に置く(`PlatformTrackOffset`)。パスの中心線基準で書くと軌道数2の駅で淵が軌道の間に出る。
 - 建物は mid レベルだけ Y を階高スケールし、base/top/fence/mashup は著作寸法のまま。配置は階高グリッドなので著作高さとのズレは隙間として出るのが仕様(F§6.3・§6.4)。`ResolveParcelContext` の区画ポリゴンは center_point 基準のローカルXZ(ワールドで扱うと敷地装飾が建物から離れる)。
 - 建物のパーツが無言で消えるときは FBX の Read/Write Enabled を疑う(壁・角・prebuilt は頂点を読み、ceil/floor は参照専用なので屋根と地面だけ残る)。強制は `Assets/Editor/ModelImportSettings.cs`(`unity/AGENTS.md`「モデルアセットの構成」)。
 - `Mesh.CombineMeshes` はサブメッシュ単位の `CombineInstance` でもインデックスの最小〜最大の頂点を丸ごと写す。FBX 取り込みの溶接で別材質の面が頂点を共有するパーツでは範囲が重なり、未参照の頂点まで複製される。プレハブを事前結合するときは `CombineModuleMeshes`(サブメッシュごとに参照頂点だけを連続区画へ詰める)を通す。壁・角・エントランス・塔屋・フェンス・タイルは元メッシュを直接積むので詰め直しを通らない(F§12.1)。
@@ -98,7 +100,7 @@
 
 | Unity | genesis-core(非公開) |
 | --- | --- |
-| `TrackPath.ResolvePlatformExtents`(`platform_side`→左右。`DIR_BACKWARD` は反転) | `geo_paths.get_platform_extension_widths`(ホームの敷地) |
+| `TrackPath.ResolvePlatformExtents`(`platform_side`→左右。`DIR_BACKWARD` は反転。軌道数2以上は両側) | `geo_paths.get_platform_extension_widths`(ホームの敷地) |
 | `StationHousePath` の専有エリア(`ComputeEndFootprints` / `ResolveHousePosition`) | `geo_station_house.py`(建屋の占有) |
 | `TrackIntersectionMeshGenerator` の転回閾値 `RAIL_MAX_TURN_ANGLE_DEG` | `parameters.yaml` の同名値と経路探索の転回制約 |
 | `Test/TestSubBuildingLayout`(テスト専用の棟配置。露天掘りの前庭の絞り込みを含む) | `crud_buildings.generate_sub_building_layout` + `geo_buildings.generate_mashup_cells` + `geo_open_pit.open_pit_yard_cells` |

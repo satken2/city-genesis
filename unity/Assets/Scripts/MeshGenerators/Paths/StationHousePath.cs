@@ -503,11 +503,11 @@ public class StationHousePath : IPathMeshGenerator
 
     /// <summary>
     /// 線路パスの中心線から左右それぞれへの占有半幅を返す(m)。線路コリドーの半幅に、
-    /// プラットフォームの片側張り出し幅(TrackPath.ResolvePlatformExtents で解決)を
+    /// プラットフォームの張り出し幅(TrackPath.ResolvePlatformExtents で解決)を
     /// 足した値で、バックエンドの敷地ポリゴンと同じ形を表す。左右は幾何の進行方向
     /// (始点→終点)基準(バックエンド _rail_side_extents と同一)。
-    /// プラットフォームは片側にしか無いため、両側に platform_width を見込むと
-    /// ホームの無い側で常にホーム1本ぶんの無駄な隙間が空く。
+    /// 単線の駅のホームは片側にしか無いため、両側に platform_width を見込むと
+    /// ホームの無い側で常にホーム1本ぶんの無駄な隙間が空く(軌道数2の駅は両側にある)。
     /// </summary>
     private static void RailSideExtents(PathSummary rail, out float extLeft, out float extRight)
     {

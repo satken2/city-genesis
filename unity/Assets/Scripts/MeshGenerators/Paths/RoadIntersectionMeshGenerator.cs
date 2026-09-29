@@ -88,8 +88,8 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             sidewalkConnectors ??= new List<SidewalkConnectorSpec>();
             BuildBoundaryParts(nodeId, nodePosition, horizontalPlane, paths, roadResult.Sections, sidewalkConnectors, roadResult.Corners);
             // 線路（PATH_TRACK/PATH_MONORAIL）が2本以上接続するノードでは、
-            // ポイント（分岐器）・平面交差の表現として、転回制約を満たす通行可能ペアにのみ
-            // レールコネクタを敷く（TrackIntersectionMeshGenerator参照）。
+            // ポイント（分岐器）・平面交差の表現として、転回制約と通行方向を満たす動きごとに
+            // 向きで決まる軌道端どうしをレールコネクタでつなぐ（TrackIntersectionMeshGenerator参照）。
             List<RailConnectorSpec> railConnectors = TrackIntersectionMeshGenerator.BuildRailConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints, roadResult.Sections);
 
             sidewalkConnectors.RemoveAll(spec => spec.Part == "wall" && WallBlocksRail(spec, railConnectors));

@@ -23,8 +23,9 @@ using GeneratedModels;
 /// crud_agents.py の _connection_node_position）を模した位置へフォールバックする。端子の移動が確定した
 /// ときは BuildingManager.OnTerminalNodeMoved がこの建物を再生成する。
 ///
-/// 端子へ入る引き込み線が1本で複線のパス（LRT専用軌道431）の基地は、端子の手前を同じ軌道間隔の
-/// 複線にする。片側の軌道が集約線で、もう片側は渡り線で集約線へ合流する。
+/// 端子へつながる線路が1本で複線のパス（LRT専用軌道431・まとめた複線）の基地は、端子の手前を同じ軌道間隔の
+/// 複線にする。片側の軌道が集約線で、もう片側は渡り線で集約線へ合流する。端子へつながる線路が変わると
+/// BuildingManager.OnDepotTerminalPathsChanged がこの建物を作り直す。
 ///
 /// 高さはすべてローカルY=0の水平面（center_point 位置の地形標高に接地。傾斜地の
 /// 起伏やノードの相対高さには追従しない）。
@@ -95,7 +96,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         public Vector2 MergePoint;  // 同じ側の集約線が中央線へ接続する位置
     }
 
-    /// <summary>基地が車両を送り出す走行網から決まる、端子と引き込み線の描き方。</summary>
+    /// <summary>基地が車両を送り出す走行網と端子へつながる線路から決まる、端子と引き込み線の描き方。</summary>
     private struct YardProfile
     {
         public bool TerminalOnFrontage; // 端子の初期位置が前面辺（頂点0→1）の中点
@@ -124,7 +125,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         // 端子ノードのローカルXZ位置（未ロード時はバックエンドの初期配置を模したフォールバック）。
-        YardProfile profile = ResolveProfile(buildingData.variant);
+        YardProfile profile = ResolveProfile(buildingData);
         Vector2 nodeLocal = ResolveTerminalNodeLocal(buildingData, centerPointWorld, footprint, profile.TerminalOnFrontage);
 
         // ローカル基底: U=敷地の初期接続辺へ向かう線路方向、V=その左手垂直。
@@ -417,20 +418,23 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 基地の供給する車両財（agent_master.supply）を使う路線種別の走行網から、端子と引き込み線の
-    /// 描き方を導く。溶接を要する軌道系と街路の両方を走る網（LRT）は端子が前面辺にあり
-    /// （バックエンドの transit_route.depot_terminal_on_frontage と同じ判定）、複線の線路パス
-    /// （lanes≥2）を持つ網は引き込み線がその軌道間隔の複線になる。マスター未取得（テストシーン等）は
-    /// 鉄道車両基地と同じ描き方。
+    /// 端子の位置と引き込み線の描き方を導く。端子の位置は、基地の供給する車両財（agent_master.supply）を
+    /// 使う路線種別の走行網で決まり、溶接を要する軌道系と街路の両方を走る網（LRT）は端子が前面辺にある
+    /// （バックエンドの transit_route.depot_terminal_on_frontage と同じ判定）。
+    /// 引き込み線は、端子へ実際につながる線路パスの軌道数が2以上ならその軌道間隔の複線になる
+    /// （同じ網に単線と複線の線路が併存するので、網からは決まらない）。つながる線路が無い間（未接続・未ロード）は
+    /// 網の線路のうち軌道数の最も少ないもので描く（単線がある網は単線、複線の線路しか無いLRTは複線）。
+    /// マスター未取得（テストシーン等）は鉄道車両基地と同じ描き方。
     /// </summary>
-    private static YardProfile ResolveProfile(int agentVariant)
+    private static YardProfile ResolveProfile(BuildingSummary building)
     {
         var profile = new YardProfile();
         MasterDataStore store = MasterDataStore.Instance;
-        if (store == null || !store.GetAgentMasterDictionary().TryGetValue(agentVariant, out var agent) || agent.supply == null)
+        if (store == null || !store.GetAgentMasterDictionary().TryGetValue(building.variant, out var agent) || agent.supply == null)
             return profile;
         var paths = store.GetPathMasterDictionary();
         bool guided = false, road = false;
+        float networkLead = float.MaxValue;
         foreach (var transit in store.GetTransitMasterDictionary().Values)
         {
             if (transit.vehicle != agent.supply) continue;
@@ -440,16 +444,47 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
                 foreach (int variant in variants)
                 {
                     if (!paths.TryGetValue(variant, out PathMasterItem path)) continue;
-                    guided |= path.type == Constants.PATH_TRACK || path.type == Constants.PATH_MONORAIL;
+                    bool track = TrackIntersectionMeshGenerator.IsTrackType(path.type);
+                    guided |= track;
                     road |= path.type == Constants.PATH_STREET || path.type == Constants.PATH_WALKWAY;
-                    if (path.type == Constants.PATH_TRACK && (path.lanes ?? 1) >= 2)
-                        profile.LeadHalfSpacing = Mathf.Max(profile.LeadHalfSpacing,
-                            Mathf.Abs(TrackPath.GetTrackCenterOffset(path.width, path.lanes.Value, 0)));
+                    if (track) networkLead = Mathf.Min(networkLead, LeadHalfSpacing(path.width, path.lanes ?? 1));
                 }
             }
         }
         profile.TerminalOnFrontage = guided && road;
+        profile.LeadHalfSpacing = ConnectedLeadHalfSpacing(building) ?? (networkLead < float.MaxValue ? networkLead : 0f);
         return profile;
+    }
+
+    /// <summary>
+    /// 引き込み線の軌道中心の半間隔（単線は0）。建物の version が変わらないまま端子へつながる線路が変わると
+    /// 見た目が変わるので、BuildingManager が再利用キーに混ぜる。
+    /// </summary>
+    public static float ResolveLeadHalfSpacing(BuildingSummary building)
+    {
+        return ResolveProfile(building).LeadHalfSpacing;
+    }
+
+    /// <summary>端子へつながる線路パスから決まる引き込み線の半間隔。つながる線路が無ければ null。</summary>
+    private static float? ConnectedLeadHalfSpacing(BuildingSummary building)
+    {
+        int nodeId = building.depot_node_id > 0 ? building.depot_node_id : building.infra_node_id;
+        var connected = nodeId > 0 ? TrackPath.ConnectedPathsProvider?.Invoke(nodeId) : null;
+        if (connected == null) return null;
+        float? spacing = null;
+        foreach (PathSummary path in connected)
+        {
+            if (!TrackIntersectionMeshGenerator.IsTrackType(path.path_type)) continue;
+            TrackPath.GetTrackMasterParams(path, out float width, out int lanes, out _, out _, out _, out _, out _, out _);
+            spacing = Mathf.Max(spacing ?? 0f, LeadHalfSpacing(width, lanes));
+        }
+        return spacing;
+    }
+
+    /// <summary>軌道数2以上の線路の軌道中心の半間隔。単線は0。</summary>
+    private static float LeadHalfSpacing(float width, int lanes)
+    {
+        return lanes >= 2 ? Mathf.Abs(TrackPath.GetTrackCenterOffset(width, lanes, 0)) : 0f;
     }
 
     /// <summary>

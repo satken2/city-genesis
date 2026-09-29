@@ -2,7 +2,11 @@ using System.Collections.Generic;
 using GeneratedModels;
 using UnityEngine;
 
-/// <summary>遠景の乗り場。通常パーツの材質で大きな断面だけを押し出し、小物や8mタイル反復を省く。</summary>
+/// <summary>
+/// 遠景の乗り場。通常パーツの材質で大きな断面だけを押し出し、小物や8mタイル反復を省く。
+/// 軌道・ホームの断面は1軌道ぶんの寸法で持ち、軌道数と軌道の横位置（TrackPath.GetTrackCenterOffset）から並べる。
+/// ホームはその側で最も外側の軌道の中心線から外へ組み立てる（通常パーツの「原点＝軌道の中心線・右側用」と同じ）。
+/// </summary>
 public static class FarPlatformPath
 {
     // 貨物PF(貨物列車専用のホーム)。463=コンテナ、464=鉱石、465=石油。
@@ -19,6 +23,10 @@ public static class FarPlatformPath
         BuildInto(root, path.path_variant, points, left > 0, right > 0);
     }
 
+    /// <summary>
+    /// 軌道数と全幅はマスターから引く。マスターが無い(検証用の独立プロジェクト等)ときは単線の既定幅
+    /// (モノレール502は3m、それ以外は5m)で組み立てる。
+    /// </summary>
     public static void BuildInto(GameObject root, int variant, List<Vector3> points, bool left, bool right)
     {
         if (points == null || points.Count < 2) return;
@@ -26,14 +34,18 @@ public static class FarPlatformPath
         if (variant == Constants.PATH_VARIANT_ROPEWAY_STATION) builder.Ropeway();
         else
         {
-            if (variant == 502) builder.Box("PATH_CONCRETE", -.4f, .4f, -1.08f, .12f);
-            else
+            var master = MasterDataStore.Instance?.GetPathMaster(variant);
+            int lanes = Mathf.Max(1, master?.lanes ?? 1);
+            float width = master != null && master.width > 0f ? master.width : lanes * (variant == 502 ? 3f : 5f);
+            if (variant != 502) builder.Box(variant == 462 ? "PATH_CONCRETE" : "PATH_ROADBED", -width * .5f, width * .5f, -.20f, .12f);
+            for (int track = 0; track < lanes; track++)
             {
-                builder.Box(variant == 462 ? "PATH_CONCRETE" : "PATH_ROADBED", -2.5f, 2.5f, -.20f, .12f);
-                foreach(int sign in new[]{-1,1}) builder.Box("PATH_RAIL",sign*.7175f-.04f,sign*.7175f+.04f,.35f,.475f);
+                float center = TrackPath.GetTrackCenterOffset(width, lanes, track);
+                if (variant == 502) builder.Box("PATH_CONCRETE", center - .4f, center + .4f, -1.08f, .12f);
+                else foreach(int sign in new[]{-1,1}) builder.Box("PATH_RAIL",center+sign*.7175f-.04f,center+sign*.7175f+.04f,.35f,.475f);
             }
-            if (left) builder.Platform(-1, variant);
-            if (right) builder.Platform(1, variant);
+            if (left) builder.Platform(-1, variant, width / lanes, Mathf.Abs(TrackPath.PlatformTrackOffset(width, lanes, true)));
+            if (right) builder.Platform(1, variant, width / lanes, Mathf.Abs(TrackPath.PlatformTrackOffset(width, lanes, false)));
         }
         builder.Finish();
     }
@@ -47,6 +59,8 @@ public static class FarPlatformPath
         readonly Dictionary<string, List<Vector3>> vertices = new Dictionary<string, List<Vector3>>();
         readonly Dictionary<string, List<int>> triangles = new Dictionary<string, List<int>>();
         readonly Dictionary<string, Material> sourceMaterials = new Dictionary<string, Material>();
+        // ホームを組み立てている間だけ、断面の横位置を軌道の中心線から外向きにずらす量。
+        float shift;
         public Builder(GameObject root, int variant, List<Vector3> points)
         {
             this.root = root; this.variant = variant; this.points = points;
@@ -82,6 +96,7 @@ public static class FarPlatformPath
         void Extrude(string mat, Vector2[] profile, int side, IList<Vector3> pts, IList<Vector3> rights)
         {
             var p = (Vector2[])profile.Clone();
+            for (int i = 0; i < p.Length; i++) p[i].x += shift;
             if (side < 0) { for (int i = 0; i < p.Length; i++) p[i].x = -p[i].x; System.Array.Reverse(p); }
             Vector3 Pt(int j, Vector2 q) => pts[j] + rights[j] * q.x + Vector3.up * q.y;
             for (int j = 0; j + 1 < pts.Count; j++)
@@ -97,9 +112,20 @@ public static class FarPlatformPath
         public void Box(string mat, float x0, float x1, float y0, float y1, int side = 1)
             => Prism(mat, new[] { new Vector2(x0,y0), new Vector2(x1,y0), new Vector2(x1,y1), new Vector2(x0,y1) }, side);
 
-        public void Platform(int side, int type)
+        /// <summary>
+        /// 片側のホーム。断面は単線の駅の寸法(ホームが面する軌道の中心線から外向きの距離)で持ち、
+        /// trackShift(その軌道の中心の横距離)だけ外へずらす。trackWidth は1軌道ぶんの幅(width/lanes)。
+        /// </summary>
+        public void Platform(int side, int type, float trackWidth, float trackShift)
         {
-            if (IsFreight(type)) { Freight(side, type); return; }
+            shift = trackShift;
+            if (IsFreight(type)) Freight(side, type, trackWidth);
+            else Passenger(side, type);
+            shift = 0f;
+        }
+
+        void Passenger(int side, int type)
+        {
             float outer = type == 502 ? 4.5f : 5.5f;
             Box("PATH_CONCRETE",type == 502 ? .3f : 2.3f,outer,type == 502 ? -1.08f : -.3f,type == 502 ? -.83f : .10f,side);
             Posts(side,outer-.2f,type == 502 ? -.83f : .10f,1.2f,"PATH_CONCRETE");
@@ -134,9 +160,9 @@ public static class FarPlatformPath
         // 床の外縁だけをマスターの platform_width から取る(Unityの動的デッキと同じ淵1.5m〜外縁、上面1.48m)。
         const float FreightTile = 16f;
 
-        void Freight(int side, int type)
+        void Freight(int side, int type, float trackWidth)
         {
-            float outer = 2.5f + (MasterDataStore.Instance?.GetPathMaster(type)?.platform_width ?? (type == 463 ? 14f : type == 464 ? 12f : 10f));
+            float outer = trackWidth * .5f + (MasterDataStore.Instance?.GetPathMaster(type)?.platform_width ?? (type == 463 ? 14f : type == 464 ? 12f : 10f));
             Box("PATH_CONCRETE", 1.5f, outer, -.4f, 1.46f, side);
             Box(type == 463 ? "PATH_ASPHALT" : type == 464 ? "BD_IRON_DUST" : "PATH_CONCRETE", 1.5f, outer, 1.46f, 1.48f, side);
             if (type == 463)
@@ -206,7 +232,7 @@ public static class FarPlatformPath
                     float length=Vector3.Distance(points[i-1],points[i]);
                     if(walked+length>=target)
                     {
-                        Vector3 c=Vector3.Lerp(points[i-1],points[i],length>.0001f?(target-walked)/length:0)+Vector3.Lerp(right[i-1],right[i],.5f).normalized*x*side;
+                        Vector3 c=Vector3.Lerp(points[i-1],points[i],length>.0001f?(target-walked)/length:0)+Vector3.Lerp(right[i-1],right[i],.5f).normalized*(x+shift)*side;
                         Vector3 a=c+Vector3.up*bottom,b=c+Vector3.up*top;
                         // 支柱は幅のある交差板2枚。両面を持たせてどの方向からも消えない。
                         foreach(Vector3 axis in new[]{Vector3.right*.1f,Vector3.forward*.1f})

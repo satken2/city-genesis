@@ -794,13 +794,6 @@ export async function sendEditPathFinish(): Promise<void> {
   });
 }
 
-/**
- * `edit_path.change_platform_side`
- * 駅パス敷設モードにおいて、ホーム設置側(PLATFORM_SIDE_OUTSIDE/INSIDE/BOTH)を変更する。
- * Unity側は敷設中プレビューメッシュのプラットフォーム張り出し側を即座に切り替える
- * (曲線モード等と同じく、プレビューへの逐次反映のためのイベント)。
- * 駅バリアント(platform_width>0)以外では無視される。
- */
 export async function sendSetPassageMode(passageMode: string): Promise<void> {
   await invoke("send_window_action", {
     windowType: "path_build", entity: null,
@@ -815,6 +808,14 @@ export async function sendSetHouseEnds(houseEnds: string): Promise<void> {
   });
 }
 
+/**
+ * `edit_path.change_platform_side`
+ * 駅パス敷設モードにおいて、ホーム設置側(PLATFORM_SIDE_OUTSIDE/INSIDE/BOTH)を変更する。
+ * Unity側は敷設中プレビューメッシュのプラットフォーム張り出し側を即座に切り替える
+ * (曲線モード等と同じく、プレビューへの逐次反映のためのイベント)。
+ * 設置側を選ぶ駅バリアント(platform_width>0 の単線の駅。railBuild.hasPlatformSideChoice)の敷設中だけ送る。
+ * 1本で上下線を持つ複線一体の線路の駅は両外側にホームが付くので送らない。
+ */
 export async function sendSetPlatformSide(platformSide: number): Promise<void> {
   await invoke("send_window_action", {
     windowType: "path_build",

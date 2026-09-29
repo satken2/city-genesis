@@ -11,9 +11,9 @@
  *     線路間隔の既定はバリアントのマスター幅で、広げる/縮めるボタンで一定範囲内を
  *     調整できる(パス1本確定ごとに既定へ戻る)。
  *     複線は中心線を平行な単線パス群へ展開して一括敷設する(railComponents)。
- *     人員搬送(ロープウェイ等)と、1本で上下線を持つ複線一体の線路(LRT専用軌道。線路系で
- *     lanes≥2)は、道路と同じ「両方向(DIR_BOTH)の単一パス1本」扱いで複線展開しない
- *     (判定は railBuild.isSingleRailPathVariant)。
+ *     人員搬送(ロープウェイ等)と、1本で上下線を持つ複線一体の線路(線路系で lanes≥2)は、
+ *     道路と同じ「両方向(DIR_BOTH)の単一パス1本」扱いで複線展開しない
+ *     (判定は railBuild.isSingleRailPathVariant)。複線一体の線路の駅はホーム設置側を持たない。
  *
  * 状態:
  *   selectedVariant: 敷設する単一(=軌道では中心線の代表)バリアントID
@@ -84,6 +84,7 @@ import {
   clampTrackSpacing,
   isRailType,
   isSingleRailPathVariant,
+  hasPlatformSideChoice,
   defaultTravelDirections,
   cycleDirection,
   buildRailComponents,
@@ -213,7 +214,7 @@ export function usePathConstruction(
   const [embankmentHeight, setEmbankmentHeight] = useState(0);
   const [selectedNodeIndex, setSelectedNodeIndex] = useState<number>(-1);
   // 駅パスのプラットフォーム設置側(PLATFORM_SIDE_OUTSIDE/INSIDE/BOTH)。
-  // platform_width を持つバリアント(駅)を選択しているときだけ意味を持つ。
+  // ホーム設置側を選ぶ駅バリアント(hasPlatformSide)を選択しているときだけ意味を持つ。
   // 建設時にのみ指定でき、建設後の変更はできない(バックエンド側の制約)。
   const [platformSide, setPlatformSide] = useState<number>(PLATFORM_SIDE_OUTSIDE);
   const [houseEnds, setHouseEnds] = useState("both");
@@ -311,13 +312,11 @@ export function usePathConstruction(
   }, [selectedVariantData]);
 
   /**
-   * 選択中バリアントがプラットフォーム(platform_width)を持つ駅パスか。
-   * true のときだけパネルにホーム設置側(外側/内側/両側)のトグルを表示する。
+   * 選択中バリアントが建設時にホーム設置側(外側/内側/両側)を選ぶ駅パスか(railBuild.hasPlatformSideChoice)。
+   * true のときだけパネルにトグルを出し、platform_side を送り、Unity へ切り替えを通知する。
+   * 複線一体の線路の駅はホームが両外側に付くので false。
    */
-  const hasPlatform = useMemo(() => {
-    const w = selectedVariantData?.platform_width;
-    return typeof w === "number" && w > 0;
-  }, [selectedVariantData]);
+  const hasPlatformSide = useMemo(() => hasPlatformSideChoice(selectedVariantData), [selectedVariantData]);
 
   /**
    * 各線の実効進行方向(既定 + ユーザー上書き)。
@@ -365,7 +364,7 @@ export function usePathConstruction(
    * 軌道の新規敷設でのみ生成し、道路・インフラ・駅舎・既存パス編集では null。
    * null のときは単一パスとして扱う(confirmPath / コスト見積り / プレビュー共通)。
    * 単線(trackCount=1)でも travel_direction を送るためコンポーネント経路を使う。
-   * 人員搬送(ロープウェイ等)と複線一体の線路(LRT専用軌道)は「両方向の単一パス1本」なので複線展開しない。
+   * 人員搬送(ロープウェイ等)と複線一体の線路は「両方向の単一パス1本」なので複線展開しない。
    */
   const railComponents = useMemo((): CombinedPathComponent[] | null => {
     if (selectedVariant === null || pathId != null) return null;
@@ -430,7 +429,8 @@ export function usePathConstruction(
       path_id: pathId ?? null,
       // 駅パスのホーム設置側の初期値。敷設モード初期化時にUnityへ渡し、
       // 以後の切り替えは下の useEffect が edit_path:change_platform_side で逐次反映する。
-      platform_side: platformSide,
+      // 設置側を選ばないバリアントには、送らずに作られるパスと同じ既定(外側)を渡す。
+      platform_side: hasPlatformSideChoice(variantData) ? platformSide : PLATFORM_SIDE_OUTSIDE,
       house_ends: houseEnds,
       passage_mode: passageMode,
       // 軌道複線の各線横オフセット・進行方向の初期値。3Dプレビューを平行N本で描かせる。
@@ -544,7 +544,7 @@ export function usePathConstruction(
       path_type: variantData?.type ?? null,
       path_variant: selectedVariant,
       path_id: pathId ?? null,
-      platform_side: platformSide,
+      platform_side: hasPlatformSideChoice(variantData) ? platformSide : PLATFORM_SIDE_OUTSIDE,
       house_ends: houseEnds,
       passage_mode: passageMode,
       initial_height: height,
@@ -592,8 +592,8 @@ export function usePathConstruction(
           travel_direction: comp.travel_direction ?? DIR_BOTH,
           path_temp_id: `${tempIdBase}_${idx}`,
         };
-        // 駅バリアント(platform_width>0)ならホーム設置側を全線共通で付与する。
-        if (hasPlatform) {
+        // ホーム設置側を選ぶ駅バリアントなら、設置側を全線共通で付与する。
+        if (hasPlatformSide) {
           data.platform_side = platformSide;
         }
         if (isCurved && startControl) {
@@ -647,7 +647,10 @@ export function usePathConstruction(
         return data;
       });
 
-      return { paths: pathsPayload, align_station_tracks: hasPlatform && selectedVariantData?.type === PATH_TRACK };
+      return {
+        paths: pathsPayload,
+        align_station_tracks: (selectedVariantData?.platform_width ?? 0) > 0 && selectedVariantData?.type === PATH_TRACK,
+      };
     }
     const pathData: Record<string, unknown> = {
       path_variant: selectedVariant,
@@ -670,7 +673,8 @@ export function usePathConstruction(
     }
 
     // 駅パスのホーム設置側。建設時にのみ指定できる(既存パスの更新では送らない)。
-    if (pathId == null && hasPlatform) {
+    // 複線一体の線路の駅は設置側を持たないので送らない。
+    if (pathId == null && hasPlatformSide) {
       pathData.platform_side = platformSide;
     }
 
@@ -711,7 +715,7 @@ export function usePathConstruction(
     }
 
     return { paths: [pathData], align_station_tracks: false };
-  }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, passageMode, platformSide, followTerrain]);
+  }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatformSide, houseEnds, passageMode, platformSide, followTerrain]);
 
   const [localCanConfirm, setLocalCanConfirm] = useState(false);
   const [maxSpanViolations, setMaxSpanViolations] = useState<PathMaxSpanViolation[]>([]);
@@ -901,14 +905,14 @@ export function usePathConstruction(
 
   /* ---- ホーム設置側の変更をUnityへ逐次通知 ---- */
   // 駅バリアント選択中にホーム設置側トグルを切り替えたら、敷設中プレビューメッシュの
-  // プラットフォーム張り出し側を即座に更新させる。駅以外(hasPlatform=false)や
+  // プラットフォーム張り出し側を即座に更新させる。設置側を選ばないバリアント(hasPlatformSide=false)や
   // 未選択のときは送らない(初期値は selectVariant の STATE_EDIT_PATH で渡す)。
   useEffect(() => {
-    if (selectedVariant === null || !hasPlatform) return;
+    if (selectedVariant === null || !hasPlatformSide) return;
     sendSetPlatformSide(platformSide).catch((err) => {
       console.error("[usePathConstruction] sendSetPlatformSide failed:", err);
     });
-  }, [platformSide, selectedVariant, hasPlatform]);
+  }, [platformSide, selectedVariant, hasPlatformSide]);
 
   /* ---- Tauriイベントリスナー (Unity → UI) ---- */
 
@@ -1173,7 +1177,7 @@ export function usePathConstruction(
     setHouseEnds,
     passageMode,
     setPassageMode,
-    hasPlatform,
+    hasPlatformSide,
     platformSide,
     setPlatformSide,
     followTerrain,

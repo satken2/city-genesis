@@ -30,7 +30,7 @@ public sealed partial class TransitVehicleManager
         RefreshGeometry(point);
         int step = line.motion.AtTime(time, out double distance, out _);
         if (step < 0) return false;
-        float spacing = line.data.length_per_vehicle > 0 ? line.data.length_per_vehicle : VehicleModelResolver.GetVehicleLength(line.type);
+        float spacing = CarLength(line);
         for (int car = 0; car < line.positions.Length; car++)
         {
             double offset = ((line.positions.Length - 1) * .5 - car) * spacing;

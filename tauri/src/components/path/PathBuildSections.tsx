@@ -11,7 +11,8 @@
  *   - 曲線/直線・吸着の操作はUnity側(Ctrlラジアルメニュー)へ移管済みのため置かない。
  *   - 標高・盛土は既存ノードを選んで数値で微調整する用途があるためステッパーを残す
  *     (真実源はUnity。ステッパー変更を change_node/change_embankment で送り返す双方向同期)。
- *   - ホーム設置側は建設時にしか指定できないためここに置く(プラットフォーム系のみ表示)。
+ *   - ホーム設置側は建設時にしか指定できないためここに置く(設置側を選ぶ単線の駅のみ表示。
+ *     1本で上下線を持つ複線一体の線路の駅は両外側にホームが付くので出さない)。
  */
 
 import { useCallback } from "react";
@@ -57,7 +58,7 @@ type PathBuildSectionsProps = {
   /**
    * ホーム設置側(外側/内側/両側)トグルを表示してよいか。
    * 軌道の新規敷設でだけ true にする(ホーム設置側は建設後に変えられない)。
-   * 実際の表示は pc.hasPlatform(platform_width>0)との論理積で決まる。
+   * 実際の表示は pc.hasPlatformSide(設置側を選ぶ駅バリアント)との論理積で決まる。
    */
   showPlatformSide: boolean;
 };
@@ -118,7 +119,7 @@ export function PathBuildSections({
         高さ編集不可(街路)かつインフラでない場合でも盛土は使えるので、いずれかを持つとき表示する。
       */}
       {pc.selectedVariant !== null &&
-        (pc.heightEditable || !pc.isInfrastructure || pc.hasPlatform) && (
+        (pc.heightEditable || !pc.isInfrastructure || pc.hasPlatformSide) && (
         <div className="pc-section">
           <div className="pc-section-title">{t("path_construction.shape", "形状")}</div>
 
@@ -199,12 +200,13 @@ export function PathBuildSections({
           )}
 
           {/*
-            駅パスのホーム設置側（platform_width を持つバリアントのみ表示）。
+            駅パスのホーム設置側（platform_width を持つ単線の駅のみ表示）。
             「内側/外側」は都市の通行方向を基準に解決される（左側通行なら内側=進行方向右）。
             複線（単線2本）の上下線とも内側にすると島式ホーム、外側にすると相対式ホームになる。
+            1本で上下線を持つ複線一体の線路の駅は両外側にホームが付く（相対式）ので出さない。
             建設時にのみ指定でき、建設後の変更はできない。
           */}
-          {showPlatformSide && pc.hasPlatform && (
+          {showPlatformSide && pc.hasPlatformSide && (
             <div className="pc-settings-row">
               <span className="pc-settings-label">{t("path_construction.platformSide", "ホーム設置側")}</span>
               <div className="pc-platform-side-group">

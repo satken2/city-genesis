@@ -122,6 +122,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 livery = TransitLivery.Parse(data.line_color) };
             line.VehicleType = line.type;
             if (line.motion.Duration <= 0 || line.motion.Length <= 0 || line.type == 0 || data.cars_per_train > maxVisibleCars) continue;
+            line.ConsistLength = Math.Max(1,data.cars_per_train)*CarLength(line);
             line.positions = new Vector3[Math.Max(1,data.cars_per_train)]; line.directions = new Vector3[line.positions.Length];
             line.keys = new string[line.positions.Length]; line.modelKeys = new string[line.positions.Length];
             line.models = new VehicleModelConfig.TransitCarModel[line.positions.Length];
@@ -132,6 +133,10 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         scanTimer = 0;
         if (DrivenLineId >= 0 && !lines.Exists(line => line.data.line_agent_id == DrivenLineId)) StopDrive();
     }
+
+    /// <summary>1両の公称車長(m)。路線サマリに車長が無い種別はモデルの長さを使う。</summary>
+    private static float CarLength(Line line)
+        => line.data.length_per_vehicle > 0 ? line.data.length_per_vehicle : VehicleModelResolver.GetVehicleLength(line.type);
 
     private void RefreshGeometry(Vector3 center)
     {
@@ -151,7 +156,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         if (creationFrame != Time.frameCount) { creationFrame = Time.frameCount; trainCreationsThisFrame = 0; }
         int cars = Math.Max(1,line.data.cars_per_train), trains = line.data.vehicle_count/cars;
         if (line.keys == null || line.keys.Length != cars) { line.keys = new string[cars]; line.modelKeys = new string[cars]; }
-        float spacing = line.data.length_per_vehicle > 0 ? line.data.length_per_vehicle : VehicleModelResolver.GetVehicleLength(line.type);
+        float spacing = CarLength(line);
         int stride = Math.Max(1,(int)Math.Ceiling((double)trains / Math.Max(1,maxVisibleCars/cars*4)));
         // 編成は実効運行間隔(コアの transit_capacity.effective_headway と同じ式)ずつずらして発車する。
         double headway = Math.Max(line.data.target_headway * 60.0, line.motion.Duration / trains);

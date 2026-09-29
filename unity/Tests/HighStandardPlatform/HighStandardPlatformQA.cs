@@ -59,7 +59,7 @@ public static class HighStandardPlatformQA
                 var points = new List<Vector3> { new Vector3(0,height,0), new Vector3(0,height+2,direction*32) };
                 object spline = road.GetMethod("BuildSpline").Invoke(null, new object[] { parent, points, false });
                 double from = clipped ? .25 : 0, to = clipped ? .75 : 1;
-                foundation.Invoke(null, new[] { parent, spline, "Models/Paths/p462", "Models/Paths/p4", (object)left, from, to });
+                foundation.Invoke(null, new[] { parent, spline, "Models/Paths/p462", "Models/Paths/p4", (object)left, 0f, from, to });
                 var meshes = parent.GetComponentsInChildren<MeshFilter>();
                 Require(meshes.Length > 0, "Foundation missing");
                 float sign = (left ? -1f : 1f) * direction;
@@ -85,7 +85,7 @@ public static class HighStandardPlatformQA
             var empty = new GameObject("ExistingPlatform");
             object emptySpline = road.GetMethod("BuildSpline").Invoke(null, new object[] { empty,
                 new List<Vector3> { new Vector3(0,6,0), new Vector3(0,6,32) }, false });
-            foundation.Invoke(null, new[] { empty, emptySpline, "Models/Paths/p461", "Models/Paths/p4", (object)false, 0d, 1d });
+            foundation.Invoke(null, new[] { empty, emptySpline, "Models/Paths/p461", "Models/Paths/p4", (object)false, 0f, 0d, 1d });
             Require(empty.GetComponentsInChildren<MeshFilter>().Length==0, "Existing platform acquired a wall");
             AssetDatabase.SaveAssets();
             File.WriteAllText(report, $"PASS: {cases} height/side/direction/clip cases, {checks} checks, 16 FBX and wrapper generation");

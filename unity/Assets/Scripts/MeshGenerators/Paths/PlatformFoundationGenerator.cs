@@ -5,8 +5,12 @@ using UnityEngine;
 /// <summary>ホーム外壁の下部を線路面から地盤まで伸ばす。上屋と窓の寸法は変えない。</summary>
 public static class PlatformFoundationGenerator
 {
+    /// <summary>
+    /// trackOffset はホームが面する軌道の中心の横位置（TrackPath.PlatformTrackOffset。単線は0）。
+    /// 部品は「原点＝軌道の中心線・右側用」の規約なので、この位置から外側へ置く。
+    /// </summary>
     public static void Generate(GameObject parent, SplineComputer spline, string variantBase,
-        string typeBase, bool leftSide, double from, double to)
+        string typeBase, bool leftSide, float trackOffset, double from, double to)
     {
         var prefab = PathDrawContext.ResolvePrefab($"{variantBase}/platform_foundation",
             $"{typeBase}/platform_foundation", out _);
@@ -38,7 +42,7 @@ public static class PlatformFoundationGenerator
                     section = (sample.position, Vector3.Cross(Vector3.up, sample.forward).normalized);
                     sections.Add(v.z, section);
                 }
-                Vector3 top = section.point + section.right * (side * v.x)
+                Vector3 top = section.point + section.right * (trackOffset + side * v.x)
                     + Vector3.up * RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE;
                 var key = new Vector2(v.x, v.z);
                 if (!groundBySection.TryGetValue(key, out float ground))

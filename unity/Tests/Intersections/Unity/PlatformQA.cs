@@ -40,7 +40,7 @@ public static class PlatformQA
                 foreach (string part in new[] { "buffer_stop", "platform_end" })
                     cache[$"Models/Paths/p4/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Paths/p4/{part}.fbx");
                 CheckTerminations();
-                File.WriteAllText(report, $"PASS platform ends: {checks} checks; continuation floors, real encroachment, rail and monorail end walls");
+                File.WriteAllText(report, $"PASS platform ends: {checks} checks; continuation floors, real encroachment, rail and monorail end walls, bundled double track ends and platforms");
                 EditorApplication.Exit(0);
                 return;
             }
@@ -83,7 +83,7 @@ public static class PlatformQA
         var material = new Material(Shader.Find("Standard"));
         assembly.GetType("TrackPath").GetMethod("CreatePlatformSide", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] {
             parent, spline, null, points, new[] { Vector3.right * direction, Vector3.right * direction },
-            new[] { 0f, 64f }, left, 2.5f, 3f, material, $"Models/Paths/p{variant}", "Models/Paths/p4"
+            new[] { 0f, 64f }, left, 0f, 2.5f, 3f, material, $"Models/Paths/p{variant}", "Models/Paths/p4"
         });
         foreach (var component in parent.GetComponentsInChildren<Component>()) {
             if (component == null || component.GetType().Name != "SplineMesh") continue;
@@ -184,7 +184,7 @@ public static class PlatformQA
         }
         var material = new Material(Shader.Find("Standard")) { color = new Color(.28f,.3f,.32f) };
         track.GetMethod("CreatePlatformSide", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
-            parent, spline, null, points, new[] { Vector3.right, Vector3.right }, new[] { 0f,32f }, false, 2.5f, 3f,
+            parent, spline, null, points, new[] { Vector3.right, Vector3.right }, new[] { 0f,32f }, false, 0f, 2.5f, 3f,
             material, "Models/Paths/p461", "Models/Paths/p4" });
         track.GetMethod("CreateTerminations", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
             parent, points, null, path, 5f, 1, 0f, 3f, "Models/Paths/p461", "Models/Paths/p4" });
@@ -209,13 +209,22 @@ public static class PlatformQA
         provider.SetValue(null,null);
     }
 
+    // 始点ノード・終点ノードと中心線の両端(z)を持つ線路。車止めの判定は交差点のコネクタと同じく転回角と進む向きを見る。
+    static object TrackData(Type summary, int id, int variant, int startNode, int endNode, float startZ, float endZ, int direction = 0)
+    {
+        var path = Activator.CreateInstance(summary);
+        foreach (var pair in new[] { ("path_id", id), ("path_type", 4), ("path_variant", variant), ("start_node_id", startNode), ("end_node_id", endNode), ("travel_direction", direction) })
+            summary.GetField(pair.Item1).SetValue(path, pair.Item2);
+        summary.GetField("start_point").SetValue(path, new List<object> { 0f, 0f, startZ });
+        summary.GetField("end_point").SetValue(path, new List<object> { 0f, 0f, endZ });
+        return path;
+    }
+
     static void CheckTerminations()
     {
         var track = assembly.GetType("TrackPath");
         var summary = assembly.GetType("GeneratedModels.PathSummary");
-        var path = Activator.CreateInstance(summary);
-        foreach (var pair in new[] { ("path_id", 1), ("path_type", 4), ("path_variant", 461), ("start_node_id", 1), ("end_node_id", 2) })
-            summary.GetField(pair.Item1).SetValue(path, pair.Item2);
+        var path = TrackData(summary, 1, 461, 1, 2, 0f, 32f);
         var provider = track.GetField("ConnectedPathsProvider");
         provider.SetValue(null, Delegate.CreateDelegate(provider.FieldType,
             typeof(PlatformQA).GetMethod("Connections", BindingFlags.Static|BindingFlags.NonPublic).MakeGenericMethod(summary)));
@@ -226,10 +235,9 @@ public static class PlatformQA
             connected.Clear(); connected.Add(path);
             infrastructure.SetValue(null, mode == 2 ? (Func<int, bool>)(node => node == 2) : null);
             if (mode == 1) {
-                var other = Activator.CreateInstance(summary);
-                summary.GetField("path_id").SetValue(other, 2);
-                summary.GetField("path_type").SetValue(other, 4);
-                connected.Add(other);
+                // 両端とも直進で続く線路。端点がノードに無い線路は接続判定から外れる。
+                connected.Add(TrackData(summary, 2, 0, 3, 1, -32f, 0f));
+                connected.Add(TrackData(summary, 3, 0, 2, 4, 32f, 64f));
             }
             var parent = new GameObject("EndsQA");
             var points = new List<Vector3> { new Vector3(0,6,0), new Vector3(0,6,32) };
@@ -257,6 +265,127 @@ public static class PlatformQA
             Require(ends.All(t => Mathf.Abs(t.position.x) >= 1.5f && Mathf.Abs(t.position.x) <= 4.5f), "Monorail end outside deck");
             Require(!parent.GetComponentsInChildren<Transform>().Any(t => t.name == "TrackBufferStop"), "Rail buffer stop on monorail");
             UnityEngine.Object.DestroyImmediate(parent);
+        }
+        CheckBundledTracks();
+    }
+
+    // まとめた複線(軌道数2)と駅のホームの軌道端。パスと進む向きで軌道が決まり、使われない軌道の端にだけ車止めが付く。
+    static void CheckBundledTracks()
+    {
+        var track = assembly.GetType("TrackPath");
+        var summary = assembly.GetType("GeneratedModels.PathSummary");
+        var storeType = assembly.GetType("MasterDataStore");
+        var instance = storeType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic);
+        var store = new GameObject("MasterFixture").AddComponent(storeType);
+        instance.SetValue(null, store);
+        var masters = (IDictionary)storeType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(store);
+        foreach (var (id, width, lanes, platform) in new[] { (421, 10f, 2, 0f), (411, 5f, 1, 0f), (461, 5f, 1, 3f) })
+        {
+            var item = Activator.CreateInstance(assembly.GetType("PathMasterItem"));
+            item.GetType().GetField("type").SetValue(item, 4);
+            item.GetType().GetField("width").SetValue(item, width);
+            item.GetType().GetField("lanes").SetValue(item, (int?)lanes);
+            item.GetType().GetField("platform_width").SetValue(item, platform > 0f ? (float?)platform : null);
+            masters[id] = item;
+        }
+        var provider = track.GetField("ConnectedPathsProvider");
+        provider.SetValue(null, Delegate.CreateDelegate(provider.FieldType,
+            typeof(PlatformQA).GetMethod("Connections", BindingFlags.Static|BindingFlags.NonPublic).MakeGenericMethod(summary)));
+        var terminations = track.GetMethod("CreateTerminations", BindingFlags.Static|BindingFlags.NonPublic);
+        var connectors = assembly.GetType("TrackIntersectionMeshGenerator").GetMethod("BuildRailConnectorSpecs");
+        const int forward = 1, backward = 2;
+        var points = new List<Vector3> { Vector3.zero, new Vector3(0, 0, 32) };
+        try
+        {
+            // 複線の終点(ノード2)から出ていく単線。一方通行なら、ノード2へ入ってくる向き(左側通行で+x側)の軌道だけが行き止まり。
+            var bundled = TrackData(summary, 1, 421, 1, 2, 0f, 32f);
+            foreach (int direction in new[] { forward, 0 })
+            {
+                var single = TrackData(summary, 2, 411, 2, 3, 32f, 64f, direction);
+                connected.Clear(); connected.Add(bundled); connected.Add(single);
+                var parent = new GameObject("BundledEndsQA");
+                terminations.Invoke(null, new object[] { parent, points, null, bundled, 10f, 2, 0f, 0f, "Models/Paths/p421", "Models/Paths/p4" });
+                var stops = parent.GetComponentsInChildren<Transform>().Where(t => t.name == "TrackBufferStop").ToArray();
+                Require(stops.Count(t => t.position.z < 16f) == 2, "Bundled dead end must close both tracks");
+                var joined = stops.Where(t => t.position.z > 16f).ToArray();
+                Require(joined.Length == (direction == forward ? 1 : 0), $"Bundled end stops mismatch for direction {direction}");
+                Require(joined.All(t => t.position.x > 2f), "Buffer stop placed on the track used by the one-way single");
+                UnityEngine.Object.DestroyImmediate(parent);
+
+                var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(summary));
+                list.Add(bundled); list.Add(single);
+                var cuts = new Dictionary<int, Vector2> { { 1, new Vector2(0, 28) }, { 2, new Vector2(0, 36) } };
+                var specs = (IList)connectors.Invoke(null, new object[] { 2, Vector3.zero, true, list, cuts, null });
+                Require(specs != null && specs.Count == (direction == forward ? 1 : 2), $"Bundled connector count for direction {direction}");
+                foreach (var spec in specs)
+                {
+                    var line = (List<Vector3>)spec.GetType().GetProperty("Points").GetValue(spec);
+                    Require(Mathf.Abs(Mathf.Abs(line[0].x) - 2.5f) < .001f && Mathf.Abs(line[line.Count - 1].x) < .001f, "Connector does not join the track ends");
+                    if (direction == forward) Require(line[0].x < 0f, "One-way single joined the wrong track of the bundled path");
+                }
+            }
+
+            // 向きの食い違う一方通行でも、駅のホームは停車する列車が折り返すので両方向に走れるものとしてつなぐ。
+            foreach (float platform in new[] { 3f, 0f })
+            {
+                var station = TrackData(summary, 1, platform > 0f ? 461 : 411, 1, 2, 0f, 32f, forward);
+                var incoming = TrackData(summary, 2, 411, 2, 3, 32f, 64f, backward);
+                connected.Clear(); connected.Add(station); connected.Add(incoming);
+                var parent = new GameObject("PlatformDirectionQA");
+                terminations.Invoke(null, new object[] { parent, points, null, station, 5f, 1, 0f, 0f, "Models/Paths/p461", "Models/Paths/p4" });
+                int stops = parent.GetComponentsInChildren<Transform>().Count(t => t.name == "TrackBufferStop" && t.position.z > 16f);
+                Require(stops == (platform > 0f ? 0 : 1), "Platform must accept trains in both directions");
+                UnityEngine.Object.DestroyImmediate(parent);
+            }
+
+            // まとめた複線の駅(幅10m・2軌道・ホーム3m)は、各側の外側の軌道(±2.5m)を原点に単線の駅の部品を置き、
+            // デッキは淵ライン(軌道から1.5m)から外縁(width/2+platform_width)まで張る。
+            var modelType = assembly.GetType("ModelManager");
+            var model = modelType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+            var cache = (IDictionary)modelType.GetField("_modelCache", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(model);
+            foreach (string part in new[] { "platform", "platform_wall" })
+            {
+                string asset = $"Assets/Paths/p461/{part}.fbx";
+                var importer = (ModelImporter)AssetImporter.GetAtPath(asset);
+                if (!importer.isReadable) { importer.isReadable = true; importer.SaveAndReimport(); }
+                cache[$"Models/Paths/p461/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>(asset);
+            }
+            foreach (bool left in new[] { false, true })
+            {
+                var parent = new GameObject("BundledStationQA");
+                var line = new List<Vector3> { Vector3.zero, new Vector3(0, 0, 64) };
+                object spline = assembly.GetType("RoadPath").GetMethod("BuildSpline").Invoke(null, new object[] { parent, line, true });
+                var material = new Material(Shader.Find("Standard"));
+                track.GetMethod("CreatePlatformSide", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
+                    parent, spline, null, line, new[] { Vector3.right, Vector3.right }, new[] { 0f, 64f }, left, left ? -2.5f : 2.5f, 5f, 3f,
+                    material, "Models/Paths/p461", "Models/Paths/p4" });
+                foreach (var component in parent.GetComponentsInChildren<Component>()) {
+                    if (component == null || component.GetType().Name != "SplineMesh") continue;
+                    MethodInfo rebuild = component.GetType().GetMethod("RebuildImmediate");
+                    rebuild.Invoke(component, rebuild.GetParameters().Length == 0 ? null : new object[] { true });
+                }
+                float side = left ? -1f : 1f;
+                var filters = parent.GetComponentsInChildren<MeshFilter>();
+                Require(filters.Any(f => f.name.EndsWith("/platform")) && filters.Any(f => f.name.EndsWith("/platform_wall")), "Bundled station parts missing");
+                Require(filters.Any(f => f.name.StartsWith("TrackPlatformDeck")), "Bundled station deck missing");
+                foreach (var filter in filters)
+                {
+                    var vertices = filter.sharedMesh.vertices.Select(v => filter.transform.TransformPoint(v)).ToArray();
+                    if (filter.name.EndsWith("/platform") || filter.name.EndsWith("/platform_wall"))
+                        Require(vertices.All(v => v.x * side > 3.75f && v.x * side < 8.15f), $"Bundled station part is not on its outer track (left={left})");
+                    else if (filter.name.StartsWith("TrackPlatformDeck"))
+                        Require(vertices.All(v => v.x * side >= 3.999f && v.x * side <= 8.001f), $"Bundled station deck exceeds edge line or outer edge (left={left})");
+                }
+                UnityEngine.Object.DestroyImmediate(parent);
+                UnityEngine.Object.DestroyImmediate(material);
+            }
+        }
+        finally
+        {
+            provider.SetValue(null, null);
+            connected.Clear();
+            instance.SetValue(null, null);
+            UnityEngine.Object.DestroyImmediate(store.gameObject);
         }
     }
 

@@ -17,7 +17,7 @@
 | `ParkedVehicleManager.cs` / `ParkedVehicleLayout.cs` | 路上駐車(`PathSummary.parked_cars` の静止台数を GPU インスタンシング) |
 | `TransitDataStore.cs` | 路線一覧の共有ストア(5秒ポーリング+明示 Refresh)。`Session` が都市切替の世代 |
 | `TransitMotionClock.cs` | コアの `journeys.steps` を時刻から参照する純粋な時計 |
-| `TransitRouteGeometry.cs` | 方向付き Run・地形追従点列・レール接続・車線オフセット・編成配置 `SampleConsist`。車両とハイライトで共有 |
+| `TransitRouteGeometry.cs` | 方向付き Run・地形追従点列・レール接続・車線オフセット・折り返しの渡り線・編成配置 `SampleConsist`。車両とハイライトで共有 |
 | `TransitVehicleManager.cs` / `.Drive.cs` | 公共交通の編成描画・選択 `TryPick`・走行音通知。Drive は乗車編成の時計合わせ |
 | `TransitLivery.cs` | 路線カラー(`line_color`)の塗装 |
 | `VehicleModelConfig.cs` / `VehicleModelResolver.cs` | `vehicle_model_config.yaml` の解析と、モデル解決・接地原点/前方軸の正規化・LODGroup 構成 |
@@ -43,6 +43,9 @@
 - 公共交通: 欠けたパス・未生成のレールコネクタを直線で補完しない(表示しない)。公称車長はワールド座標の弦長で満たし、時計の論理距離に車長を足さない。
   - LRT・鉄道の交差点レールは `PathManager.GetNodeIntersectionObject`(`NodeMesh_*`)の子 `Rail` から読む(`GetNodeObject` のノード円柱とは別物)。軌道の横位置と踏面高さの正は `LrtRoadParts`。
   - 停止中心はコアと同じ「割合×未切断3D点列長」で求め、片方だけ別の式にしない。
+  - 走る軌道はパスと進む向きで1つに決まる(`TrackPath.TrackIndexForTravel` と同じ規則)。通行方向の例外は、路線が停留所を置いたホーム(`Route.StopPaths`)だけ(コアの下地経路と同じ規則)。
+  - 同じパスでの折り返しの渡り線は `TransitRouteGeometry.Sample` の中だけで補間する(`Run.Turnback`・`Route.ConsistLength`・`CrossoverLength`)。車体側で横位置を足さない。`ConsistLength` を持たない色帯・経路編集のプレビューは渡り線を描かない。
+  - `Sample` / `SampleConsist` は `Tests/Vehicles` がリフレクションで名前だけで引く。同名のオーバーロードを足さない(`GetMethod` が曖昧になり検証が落ちる)。
 - 路線カラーは `MaterialPropertyBlock` を使わない(SRP Batcher から外れる)。塗る材質の唯一の正は `Resources/Config/transit_vehicle_livery.json`。新しい外観は帯を専用材質で著作して表に登録する。
 - モデル対応は `Resources/Config/transit_vehicle_models.json`（路線種別→`vehicle_type`・任意の`wagon`）、候補番号は Tauri の `tauri/src/data/transitVehicleModels.json` と揃える。編成内の実体モデル・塗装対象・後尾反転は `VehicleModelConfig.GetTransitCarModel` を描画と事前生成で共有する。貨物は機関車1両＋路線種別の貨車で、総両数と公称車長は路線サマリに従う。折り返しで機関車を先頭へ移さない。
   - モノレール(車種24)の FBX は手動配置プロップ308/309と同一ファイルのコピー。308/309を書き出し直したら24にも置き直す(`Tests/Vehicles` がバイト一致を検査)。

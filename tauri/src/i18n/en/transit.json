@@ -106,7 +106,7 @@
       "note": "Per epoch ({{days}} days). Revenue assumes every run fills {{percent}}% of its capacity twice per loop (once each way on a round-trip line) and every ride pays the fare.",
       "estimatedLeaseNote": "No depot has a vehicle price yet, so the price is estimated from a depot's production cost.",
       "noDepot": "No operating depot is connected to this line's network. As is, the line cannot get vehicles and will not run.",
-      "trackOverload": "Exceeds track capacity (planned {{load}} trains/day > capacity {{capacity}} trains/day). Lengthen the headway or add tracks.",
+      "trackOverload": "Exceeds track capacity (planned {{load}} trains/day > {{capacity}} trains/day per track). Lengthen the headway or add tracks.",
       "unavailable": {
         "insufficientStops": "Place at least two stops to get an estimate.",
         "invalidStop": "Some stops or waypoints are in places where they cannot be placed, so no estimate is available.",
