@@ -54,7 +54,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { NumberStepper } from "../common/NumberStepper";
 import { errorCode, saveError } from "../../utils/saves";
-import { useMasterData } from "../../contexts/MasterDataContext";
 import { CLIMATE_TEMPERATE, CLIMATE_TYPES, GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
 import {
   type TerrainEditorData,
@@ -117,9 +116,8 @@ import {
   dischargeFromWidth,
   nearestPointIndex,
 } from "./terrainRiver";
-import { polygonArea, polygonParts, ringSignedArea } from "./riverGeometry";
-import { formatCompactAmount } from "../../utils/money";
-import { resolveIntlLocale, resolveLocalizedText, type LocalizedText } from "../../utils/locale";
+import { polygonArea, polygonParts } from "./riverGeometry";
+import { resolveLocalizedText, type LocalizedText } from "../../utils/locale";
 import "./TerrainEditorCanvas.css";
 
 type TerrainEditorCanvasProps = {
@@ -1649,9 +1647,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   /**
    * 1フレーム分の描画。地図は3枚のキャンバスを重ねて描く。
    *   - 地形層(WebGL2): 地形色・選択範囲・100mグリッド・セル境界・等高線。描画器が描く
-   *   - ベクター層(Canvas2D): 確定済みの水面・川・資源・プロップ・カメラ
+   *   - ベクター層(Canvas2D): 確定済みの水面・川・カメラ
    *   - カーソル層(Canvas2D): ブラシ・作図中の図形・川のノードなど、マウスに追従して変わるもの
-   * full=false(マウスが動いただけ)のフレームはカーソル層だけを描き直し、川や資源が多くても
+   * full=false(マウスが動いただけ)のフレームはカーソル層だけを描き直し、川が多くても
    * ホバーの負荷が増えないようにする。
    */
   function renderFrame(full: boolean) {

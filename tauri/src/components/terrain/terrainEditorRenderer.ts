@@ -10,7 +10,7 @@
  *
  * 格子点(col, row)はワールド座標 (col*spacing - mapWidth/2, row*spacing - mapHeight/2) にあり、
  * 行0が南端(D_地形形状 §D.3.1)。画面の向き(北=+Zが上)とビューの定義は TerrainEditorCanvas と
- * 同じで、水面・川・資源などのベクター表示はこのキャンバスの上に重ねた Canvas2D が描く。
+ * 同じで、水面・川・カメラなどのベクター表示はこのキャンバスの上に重ねた Canvas2D が描く。
  */
 
 import type { GridRect, Rgb } from "./terrainData";

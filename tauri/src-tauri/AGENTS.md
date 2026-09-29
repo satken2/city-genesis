@@ -66,7 +66,7 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 ### 地形エディタ
 
 - 地形エディタはシナリオの地形を編集する。`prepare_scenario_terrain_editor(scenario_id)` が `GET /api/v1/scenarios/{id}/terrain` から作業コピー(`terrain_editor/<editor_id>/meta.json`・`near.bin`)を作って `editor_id` を返し、`save_scenario_terrain(editor_id, …)` が `PUT /api/v1/scenarios/{id}/terrain` へ保存する。形式の正は公開docs `geometries/D_地形形状.md` §D.14.3。
-- `save_scenario_terrain` は応答を `ScenarioTerrainSaveResult`(`content_revision`・`locks`・`resource_ids`)で読んでUIへ返す。`resource_ids`(新しく作った資源の {仮ID: DB ID})が無いとUIが仮IDのまま次に送り、コアが資源を作り直すので、応答の形が合わなければ失敗にする。成功したら作業コピー(`meta.json`、標高を送ったときは `near.bin`)を保存した内容に合わせ、資源のIDも置き換える(`saved_terrain_editor_meta`)。水面・川は null(変更しない)なら書かない。書き込みの失敗は保存を失敗にせずログに残す。
+- `save_scenario_terrain` は応答を `ScenarioTerrainSaveResult`(`content_revision`・`locks`・`resource_ids`)で読んでUIへ返す。`resource_ids`(新しく作った資源の {仮ID: DB ID})を欠く応答は形が合わないので失敗にする(地形エディタのUIは資源を編集せず、読み込んだ資源を送り返すだけなので、通常は空)。成功したら作業コピー(`meta.json`、標高を送ったときは `near.bin`)を保存した内容に合わせ、資源のIDも置き換える(`saved_terrain_editor_meta`)。水面・川は null(変更しない)なら書かない。書き込みの失敗は保存を失敗にせずログに残す。
 - `editor_id` は `Uuid::to_string()` と同じ正規形(小文字・ハイフン区切り)だけを通す(`is_terrain_editor_id`)。区切り文字や `..` で `terrain_editor/` の外を指させない。
 - 保存先のシナリオはUIから受け取らず、作業コピーの `meta.json` の `scenario_id` から引く。
 - 作業コピーの `locks.heights_locked` が真(欠けている・形が崩れているときも真とみなす)なら、標高・水面・川は `None` で送る決まり。値が来たらコアへ送る前に `TERRAIN_LOCKED:` で拒否する。

@@ -119,10 +119,10 @@
 - 予算(`budget/CityBudgetWindow`): 比率は自動保存で`AUTO_SAVE_DEBOUNCE_MS`のデバウンス必須(PATCHは再導出を伴い重い)。rechartsはCSS変数を解決できないのでグラフ色だけ直値定数。
 - 公共交通(`transit/`): 路線カラーの正はバックエンドの`line_color`。作成/更新/削除後は`emit("transit:lines_changed")`。収支見込みはバックエンドの試算を並べるだけ。貨物は `TransitMasterEntry.freight` で判定し、編成の総両数（機関車1両を含む）の下限を2にする。外観候補は新設・詳細が `TransitVehicleSelector` と同じカタログを共有する。
 - 道路詳細(`road/`): 型・API・変更通知は`roadTypes.ts` / `roadApi.ts`が唯一の窓口(道路を変えたら`notifyRoadsChanged`)。強調帯はアンマウント時に送らず、区間編集の終了に`STATE_NORMAL`を送らない。
-- 地形エディタ(`terrain/`): シナリオの地形を編集する。シナリオ管理の「地形を編集」が Rust の `prepare_scenario_terrain_editor` で作業コピーを作って開き、`TerrainEditorCanvas` の `mapId` は作業コピーのID(`editor_id`)。実データの編集は`elevRef`、表示だけ`displayElev()`。川・水面・資源のオブジェクトと配列はin-placeで書き換えず差し替える(Undoと描画キャッシュが同じ参照を持つ)。
-  - `locks.heights_locked` のときは地形(自動編集を含む)・水面・川のタブを無効にし、理由を表示して資源タブで始める。ロック情報は `normalizeTerrainEditorLocks` で正規化し、欠けていればロック扱いにする。
-  - 保存対象(標高・水面・川・資源・プロップ・カメラ・地表・気候)を変える操作は必ず `markDirty` か `pushUndoState` を通す(未保存表示の根拠)。「シナリオに保存」の引数は `terrainData.ts` の `scenarioTerrainSaveArgs` で作る(ロック中は標高・水面・川を null にし、標高は送るときだけ符号化する)。保存成功で `scenarios:changed` をemitする。
-  - 新しく作った資源は保存まで仮IDを持つ。保存の応答の `resource_ids` で、今の一覧と Undo/Redo スタックの両方の仮IDを DB の ID に替える(`terrainData.ts` の `resourceIdReplacer`。資源は差し替えで、同じオブジェクトは同じ差し替え先を共有する)。仮IDのまま送るとコアが前回の資源を削除して作り直す。送った内容ではなく応答時点の状態に当てるので、保存中の編集は残る。
+- 地形エディタ(`terrain/`): シナリオの地形を編集する。シナリオ管理の「地形を編集」が Rust の `prepare_scenario_terrain_editor` で作業コピーを作って開き、`TerrainEditorCanvas` の `mapId` は作業コピーのID(`editor_id`)。実データの編集は`elevRef`、表示だけ`displayElev()`。川・水面のオブジェクトと配列はin-placeで書き換えず差し替える(Undoと描画キャッシュが同じ参照を持つ)。
+  - 編集対象は地形・水面・川・カメラの4つで、資源とプロップは編集も表示もしない(編集は「都市を編集」のテンプレート作成モードの資源編集・プロップ配置)。ただし保存APIは資源をID差分・プロップを全置換で受けるので、読み込んだ`resources`/`props`を`untouchedContentRef`に持ち、保存でそのまま送り返す(送らないとシナリオの資源とプロップが消える)。
+  - `locks.heights_locked` のときは地形(自動編集を含む)・水面・川のタブを無効にし、理由を表示してカメラのタブで始める。ロック情報は `normalizeTerrainEditorLocks` で正規化し、欠けていればロック扱いにする。
+  - 保存対象(標高・水面・川・カメラ・地表・気候)を変える操作は必ず `markDirty` か `pushUndoState` を通す(未保存表示の根拠)。「シナリオに保存」の引数は `terrainData.ts` の `scenarioTerrainSaveArgs` で作る(ロック中は標高・水面・川を null にし、標高は送るときだけ符号化する)。保存成功で `scenarios:changed` をemitする。
   - 保存の失敗は理由コードで `terrainEditor.saveErrors.<code>` → `saveCompatibility.<code>` の順に翻訳し、コードの無い失敗(本文が日本語固定のRust側の失敗)は `terrainEditor.saveFailed` にする。マップの寸法は変えない。
   - 地形の平面図(`terrainThumbnail.ts`の画素生成。北上・海透過、長辺512px)は、シナリオ管理が標高ファイルを取り込んだ直後にシナリオ画像として作る(`template/heightmapImport.ts`)。エディタは作らない。標高色と陸地の標高範囲は`terrainData.ts`が正。
   - 「元の地形」の欄は作業コピーの `terrain_source`(取り込んだファイル名、またはチュートリアルの舞台の名前)をそのまま出す。表示だけで、判定には使わない。

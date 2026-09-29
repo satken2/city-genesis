@@ -1,4 +1,4 @@
-/** 地形エディタの「シナリオに保存」の引数、ロック情報の正規化、保存後の資源IDの置き換えを検証する。 */
+/** 地形エディタの「シナリオに保存」の引数とロック情報の正規化を検証する。 */
 import assert from "node:assert/strict";
 import { build } from "esbuild";
 import { fileURLToPath } from "node:url";
@@ -10,7 +10,7 @@ const bundled = await build({
   format: "esm",
   write: false,
 });
-const { normalizeTerrainEditorLocks, scenarioTerrainSaveArgs, resourceIdReplacer, base64ToUint8, decodeFloat16Array } = await import(
+const { normalizeTerrainEditorLocks, scenarioTerrainSaveArgs, base64ToUint8, decodeFloat16Array } = await import(
   `data:text/javascript;base64,${Buffer.from(bundled.outputFiles[0].text).toString("base64")}`
 );
 
@@ -46,24 +46,4 @@ for (const broken of [null, undefined, {}, { heights_locked: "no" }, "locked"]) 
   assert.equal(normalizeTerrainEditorLocks(broken).heights_locked, true, "形の崩れたロック情報はロック扱い");
 }
 
-const existing = { id: "7", resourceType: 1, points: [] };
-const created = { id: "resource_1", resourceType: 2, points: [] };
-const addedWhileSaving = { id: "resource_2", resourceType: 3, points: [] };
-const replace = resourceIdReplacer({ resource_1: "12", unknown: "13", broken: 5 });
-const current = [existing, created, addedWhileSaving];
-const replaced = replace(current);
-assert.notEqual(replaced, current, "置き換えがあれば新しい配列");
-assert.deepEqual(replaced.map((area) => area.id), ["7", "12", "resource_2"], "保存中に足した資源は仮IDのまま");
-assert.equal(replaced[0], existing, "置き換えの無い資源は同じオブジェクト");
-assert.equal(replaced[2], addedWhileSaving);
-assert.equal(created.id, "resource_1", "元のオブジェクトは書き換えない");
-assert.equal(replaced[1].resourceType, 2);
-const history = [existing, created];
-assert.equal(replace(history)[1], replaced[1], "履歴と現在の一覧で差し替え先のオブジェクトを共有する");
-const unchanged = [existing, addedWhileSaving];
-assert.equal(replace(unchanged), unchanged, "置き換えの無い一覧は同じ配列");
-for (const empty of [undefined, null, {}]) {
-  assert.equal(resourceIdReplacer(empty)(current), current);
-}
-
-console.log("PASS: terrain editor save arguments, lock normalization and resource ID replacement");
+console.log("PASS: terrain editor save arguments and lock normalization");

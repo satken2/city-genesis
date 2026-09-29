@@ -1,4 +1,3 @@
-import type { TerrainProps } from "./TerrainPropEditor";
 import type { LocalizedText } from "../../utils/locale";
 import {
   CLIMATE_TEMPERATE,
@@ -69,8 +68,8 @@ export type RiverPayload = {
 /**
  * 天然資源エリア1件分の保存契約。
  * 地形エディタの作業コピー(meta.json)とシナリオの地形 API で共通の契約。id は資源の DB ID の文字列で、
- * 保存時はコアが ID で差分適用する(知らない ID は新規の資源になる)。エディタで作った資源は保存まで仮のIDで、
- * 保存の応答の resource_ids で DB の ID に替える(resourceIdReplacer)。
+ * 保存時はコアが ID で差分適用する(送らなかった資源は削除される)。地形エディタは資源を編集せず、
+ * 読み込んだ内容をそのまま送り返す。
  * 経済シミュレーション上の意味(埋蔵量・回復率・分配)は genesis-docs/docs/economics/21_天然資源.md、
  * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.12。
  */
@@ -84,6 +83,20 @@ export type ResourceAreaPayload = {
   recovery_rate: number;
   polygon: WaterPolygonGeoJson;
 };
+
+export type TerrainPropInstance = {
+  id: string; prop_type: number; x: number; y: number; z: number; rotation: number; scale: number;
+};
+export type TerrainPropScatter = {
+  id: string; prop_type: number; polygon: number[][]; density: number; seed: number;
+  edge_fade_width: number; allow_water: boolean;
+};
+/**
+ * プロップの配置定義の保存契約(個別配置と範囲散布)。シナリオの地形 API で送受信し、保存では全置換。
+ * y は地面からの相対高さ。地形エディタはプロップを編集せず、読み込んだ内容をそのまま送り返す。
+ * 仕様の正は genesis-docs/docs/geometries/M_地形プロップ.md。
+ */
+export type TerrainProps = { instances: TerrainPropInstance[]; scatters: TerrainPropScatter[] };
 
 /**
  * カメラ初期状態の保存契約。
@@ -158,7 +171,7 @@ export function normalizeTerrainEditorLocks(value: unknown): TerrainEditorLocks 
   return { heights_locked: locks.heights_locked, reasons };
 }
 
-/** シナリオへ保存する地形エディタの編集内容 */
+/** シナリオへ保存する地形エディタの内容。資源とプロップは編集せず、読み込んだ内容がそのまま入る */
 export type ScenarioTerrainContent = {
   elev: Float32Array;
   waterSurfaces: WaterSurfacePayload[];
@@ -185,45 +198,6 @@ export function scenarioTerrainSaveArgs(editorId: string, heightsLocked: boolean
     camera: content.camera,
     groundCover: content.groundCover,
     climate: content.climate,
-  };
-}
-
-/** Rust の save_scenario_terrain の戻り値(コアの PUT 応答のうちエディタが使う項目) */
-export type ScenarioTerrainSaveResult = {
-  content_revision: number;
-  /** 保存前に判定したロック */
-  locks: TerrainEditorLocks;
-  /** 今回新しく作った資源の {エディタ側の仮ID: DB の ID の文字列} */
-  resource_ids: Record<string, string>;
-};
-
-/**
- * 保存で作られた資源の仮IDを DB の ID に置き換える関数を作る。仮IDのまま次に保存すると、コアは前回作った資源を
- * 削除して別のIDで作り直してしまうため、現在の一覧にも Undo/Redo の履歴にも使う。
- * 資源オブジェクトは書き換えずに差し替え、同じオブジェクトはどの一覧から渡しても同じ差し替え先にする
- * (履歴と現在の一覧が同じオブジェクトを共有している関係を保つ)。置き換えの無い一覧は同じ配列を返す。
- */
-export function resourceIdReplacer<T extends { id: string }>(
-  resourceIds: Record<string, string> | null | undefined,
-): (areas: T[]) => T[] {
-  const ids = new Map(
-    Object.entries(resourceIds ?? {}).filter((entry) => typeof entry[1] === "string" && entry[1].length > 0),
-  );
-  const replaced = new Map<T, T>();
-  return (areas) => {
-    let changed = false;
-    const next = areas.map((area) => {
-      const id = ids.get(area.id);
-      if (id === undefined) return area;
-      changed = true;
-      let copy = replaced.get(area);
-      if (!copy) {
-        copy = { ...area, id };
-        replaced.set(area, copy);
-      }
-      return copy;
-    });
-    return changed ? next : areas;
   };
 }
 
