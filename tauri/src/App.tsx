@@ -523,7 +523,8 @@ function App() {
             ) : context.window_type === "scenario_manager" ? (
               <ScenarioManagerWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "scenario_metadata" ? (
-              <ScenarioMetadataWindow apiBaseUrl={context.api_base_url} scenarioId={String(windowExtra(context)?.scenarioId ?? "")}
+              <ScenarioMetadataWindow key={windowExtra(context)?.create === true ? "create" : String(windowExtra(context)?.scenarioId ?? "")}
+                apiBaseUrl={context.api_base_url} scenarioId={String(windowExtra(context)?.scenarioId ?? "")}
                 create={windowExtra(context)?.create === true} onClose={closeWindow} />
             ) : context.window_type === "save_list" ? (
               <SaveListWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />

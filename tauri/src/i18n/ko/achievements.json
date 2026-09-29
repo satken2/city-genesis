@@ -74,7 +74,7 @@
       "failed": "기한 만료"
     },
     "scenarioImageLabel": "이미지 (썸네일)",
-    "scenarioEditHint": "소개 문구는 시나리오로 저장한 뒤 소개 정보 창에서 편집합니다."
+    "scenarioEditHint": "소개 문구는 “시나리오로 저장” 화면에서 쓰거나, 나중에 시나리오 관리의 “소개 정보 편집”에서 씁니다."
   },
   "achievementQuests": {
     "createTitle": "퀘스트 작성",

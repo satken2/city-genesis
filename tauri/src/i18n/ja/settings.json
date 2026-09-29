@@ -86,11 +86,8 @@
     "load": "ロード",
     "quitGame": "ゲーム終了",
     "returnToTop": "トップメニューに戻る",
-    "saving": "保存中...",
     "loading": "読み込み中...",
     "shuttingDown": "終了処理中...",
-    "saveSuccess": "保存が完了しました",
-    "newGameSuccess": "新しいゲームを開始しました",
     "saveFailed": "保存に失敗しました",
     "loadFailed": "読み込みに失敗しました",
     "confirmNewGame": "現在のデータは失われます。新しいゲームを開始しますか？",
@@ -98,7 +95,11 @@
     "confirmReturnToTop": "トップメニューに戻りますか？現在の進行状況は自動保存されません。",
     "confirm": "はい",
     "cancel": "いいえ",
-    "debugInit": "Debug Init"
+    "debugInit": "Debug Init",
+    "saveAsScenario": "シナリオとして保存",
+    "backToGame": "ゲームに戻る",
+    "saveName": "セーブ名",
+    "confirmOverwrite": "「{{name}}」に上書きセーブしますか？"
   },
   "saveList": {
     "noSaves": "セーブデータがありません",
@@ -110,13 +111,10 @@
     "deleteButton": "削除",
     "confirmLoad": "このセーブデータを読み込みますか？",
     "confirmDelete": "このセーブデータを削除しますか？この操作は取り消せません。",
-    "confirm": "はい",
-    "cancel": "いいえ",
     "loading": "読み込み中...",
     "loadFailed": "読み込みに失敗しました",
-    "loadSuccess": "読み込みが完了しました",
     "deleteFailed": "削除に失敗しました",
-    "deleteSuccess": "セーブデータを削除しました",
-    "openFolderButton": "フォルダの場所を表示"
+    "openFolderButton": "フォルダの場所を表示",
+    "scenario": "シナリオ"
   }
 }

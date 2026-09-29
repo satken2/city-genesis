@@ -74,7 +74,7 @@
       "failed": "已过期"
     },
     "scenarioImageLabel": "图片（缩略图）",
-    "scenarioEditHint": "保存为场景后，在介绍信息窗口中编辑介绍文。"
+    "scenarioEditHint": "介绍文可在“另存为场景”的画面中填写，之后也可在场景管理的“编辑介绍信息”中修改。"
   },
   "achievementQuests": {
     "createTitle": "创建任务",

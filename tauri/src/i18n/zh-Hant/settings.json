@@ -86,11 +86,8 @@
     "load": "讀檔",
     "quitGame": "結束遊戲",
     "returnToTop": "返回主選單",
-    "saving": "儲存中...",
     "loading": "載入中...",
     "shuttingDown": "正在結束...",
-    "saveSuccess": "儲存完成",
-    "newGameSuccess": "已開始新遊戲",
     "saveFailed": "儲存失敗",
     "loadFailed": "載入失敗",
     "confirmNewGame": "目前的資料將會遺失。確定開始新遊戲嗎？",
@@ -98,7 +95,11 @@
     "confirmReturnToTop": "確定返回主選單嗎？目前的進度不會自動儲存。",
     "confirm": "是",
     "cancel": "否",
-    "debugInit": "Debug Init"
+    "debugInit": "Debug Init",
+    "saveAsScenario": "另存為場景",
+    "backToGame": "返回遊戲",
+    "saveName": "存檔名稱",
+    "confirmOverwrite": "要覆蓋存檔「{{name}}」嗎？"
   },
   "saveList": {
     "noSaves": "沒有存檔資料",
@@ -110,13 +111,10 @@
     "deleteButton": "刪除",
     "confirmLoad": "要讀取此存檔資料嗎？",
     "confirmDelete": "確定刪除此存檔資料嗎？此操作無法復原。",
-    "confirm": "是",
-    "cancel": "否",
     "loading": "載入中...",
     "loadFailed": "載入失敗",
-    "loadSuccess": "載入完成",
     "deleteFailed": "刪除失敗",
-    "deleteSuccess": "已刪除存檔資料",
-    "openFolderButton": "顯示資料夾位置"
+    "openFolderButton": "顯示資料夾位置",
+    "scenario": "場景"
   }
 }

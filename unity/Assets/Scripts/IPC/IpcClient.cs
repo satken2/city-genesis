@@ -127,6 +127,8 @@ public class IpcClient : MonoBehaviour
     // エポック演出の開始(true)と結果画面クローズ時の終了(false)。日没→暗転→日の出に使う。
     public event Action<bool> OnEpochExecuting;
     public event Action<string> OnEpochPrepare;
+    // セーブ・シナリオ保存の直前の撮影要求(引数は要求ID)。撮った画像はコアへ直接送る。
+    public event Action<string> OnCameraCaptureThumbnail;
     // 接道(front_path)の矢印表示。土地区画詳細パネルの開閉に対応する。
     public event Action<int> OnParcelShowFrontPath;
     public event Action OnParcelHideFrontPath;
@@ -904,6 +906,11 @@ public class IpcClient : MonoBehaviour
                     EmitCameraState();
                     break;
 
+                case "camera:capture_thumbnail":
+                    Debug.Log("IpcClient: camera:capture_thumbnail");
+                    OnCameraCaptureThumbnail?.Invoke(GetParamString(payload, "id"));
+                    break;
+
                 case "edit_connector:show":
                     {
                         int agentId = GetParamInt(payload, "agent_id");
@@ -1594,6 +1601,15 @@ public class IpcClient : MonoBehaviour
     public void EmitEpochDarkened(string id)
     {
         SendEnvelope("epoch:darkened", new Dictionary<string, object> { ["id"] = id });
+    }
+
+    /// <summary>
+    /// camera:thumbnail_captured イベントを送信する(camera:capture_thumbnail への応答)。
+    /// success は撮った画像をコアへ預けられたか。UIは失敗でも保存を続けるので、撮れなくても必ず送る。
+    /// </summary>
+    public void EmitCameraThumbnailCaptured(string id, bool success)
+    {
+        SendEnvelope("camera:thumbnail_captured", new Dictionary<string, object> { ["id"] = id, ["success"] = success });
     }
 
     /// <summary>

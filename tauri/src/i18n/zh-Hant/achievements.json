@@ -74,7 +74,7 @@
       "failed": "已到期"
     },
     "scenarioImageLabel": "圖片（縮圖）",
-    "scenarioEditHint": "儲存為場景後，在介紹資訊視窗中編輯介紹文。"
+    "scenarioEditHint": "介紹文可在「另存為場景」的畫面中填寫，之後也可在場景管理的「編輯介紹資訊」中修改。"
   },
   "achievementQuests": {
     "createTitle": "建立任務",

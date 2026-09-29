@@ -36,7 +36,15 @@ public static class ApiClient
     /// </summary>
     public static ApiRequest Request(string method, string path, string json = null, int timeoutSeconds = 0)
     {
-        return new ApiRequest(method, $"{BASE_URL}{path}", json, timeoutSeconds);
+        return new ApiRequest(method, $"{BASE_URL}{path}", json != null ? Encoding.UTF8.GetBytes(json) : null, "application/json", timeoutSeconds);
+    }
+
+    /// <summary>
+    /// バイナリの本文(画像など)を contentType で送る要求を作る(まだ送らない)。送り方と結果の読み方は <see cref="Request"/> と同じ。
+    /// </summary>
+    public static ApiRequest Request(string method, string path, byte[] body, string contentType, int timeoutSeconds = 0)
+    {
+        return new ApiRequest(method, $"{BASE_URL}{path}", body, contentType, timeoutSeconds);
     }
 
     /// <summary>
@@ -237,6 +245,7 @@ public sealed class ApiRequest : IDisposable
     private readonly string method;
     private readonly string url;
     private readonly byte[] body;
+    private readonly string contentType;
     private readonly int timeoutSeconds;
     private List<KeyValuePair<string, string>> extraHeaders;
     private UnityWebRequestAsyncOperation operation;
@@ -247,11 +256,12 @@ public sealed class ApiRequest : IDisposable
     /// <summary>Send の isCanceled により通信を中断した。</summary>
     public bool Aborted { get; private set; }
 
-    internal ApiRequest(string method, string url, string json, int timeoutSeconds)
+    internal ApiRequest(string method, string url, byte[] body, string contentType, int timeoutSeconds)
     {
         this.method = method;
         this.url = url;
-        body = json != null ? Encoding.UTF8.GetBytes(json) : null;
+        this.body = body;
+        this.contentType = contentType;
         this.timeoutSeconds = timeoutSeconds;
     }
 
@@ -267,7 +277,7 @@ public sealed class ApiRequest : IDisposable
     {
         Web?.Dispose();
         Web = new UnityWebRequest(url, method, new DownloadHandlerBuffer(), body != null ? new UploadHandlerRaw(body) : null);
-        if (body != null) Web.SetRequestHeader("Content-Type", "application/json");
+        if (body != null) Web.SetRequestHeader("Content-Type", contentType);
         if (timeoutSeconds > 0) Web.timeout = timeoutSeconds;
         if (extraHeaders != null)
         {

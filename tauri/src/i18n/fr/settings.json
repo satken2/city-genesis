@@ -86,11 +86,8 @@
     "load": "Charger",
     "quitGame": "Quitter le jeu",
     "returnToTop": "Revenir au menu principal",
-    "saving": "Enregistrement...",
     "loading": "Chargement...",
     "shuttingDown": "Fermeture...",
-    "saveSuccess": "Sauvegarde terminée",
-    "newGameSuccess": "Nouvelle partie démarrée",
     "saveFailed": "Échec de la sauvegarde",
     "loadFailed": "Échec du chargement",
     "confirmNewGame": "Les données actuelles seront perdues. Démarrer une nouvelle partie ?",
@@ -98,7 +95,11 @@
     "confirmReturnToTop": "Revenir au menu principal ? La progression actuelle n'est pas sauvegardée automatiquement.",
     "confirm": "Oui",
     "cancel": "Non",
-    "debugInit": "Debug Init"
+    "debugInit": "Debug Init",
+    "saveAsScenario": "Enregistrer comme scénario",
+    "backToGame": "Retour au jeu",
+    "saveName": "Nom de la sauvegarde",
+    "confirmOverwrite": "Écraser la sauvegarde « {{name}} » ?"
   },
   "saveList": {
     "noSaves": "Aucune sauvegarde",
@@ -110,13 +111,10 @@
     "deleteButton": "Supprimer",
     "confirmLoad": "Charger cette sauvegarde ?",
     "confirmDelete": "Supprimer cette sauvegarde ? Cette action est irréversible.",
-    "confirm": "Oui",
-    "cancel": "Non",
     "loading": "Chargement...",
     "loadFailed": "Échec du chargement",
-    "loadSuccess": "Chargement terminé",
     "deleteFailed": "Échec de la suppression",
-    "deleteSuccess": "Sauvegarde supprimée",
-    "openFolderButton": "Afficher le dossier"
+    "openFolderButton": "Afficher le dossier",
+    "scenario": "Scénario"
   }
 }

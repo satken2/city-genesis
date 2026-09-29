@@ -86,11 +86,8 @@
     "load": "Cargar",
     "quitGame": "Salir del juego",
     "returnToTop": "Volver al menú principal",
-    "saving": "Guardando...",
     "loading": "Cargando...",
     "shuttingDown": "Cerrando...",
-    "saveSuccess": "Se guardó correctamente",
-    "newGameSuccess": "Se inició una partida nueva",
     "saveFailed": "No se pudo guardar",
     "loadFailed": "No se pudo cargar",
     "confirmNewGame": "Se perderán los datos actuales. ¿Iniciar una partida nueva?",
@@ -98,7 +95,11 @@
     "confirmReturnToTop": "¿Volver al menú principal? El progreso actual no se guarda automáticamente.",
     "confirm": "Sí",
     "cancel": "No",
-    "debugInit": "Debug Init"
+    "debugInit": "Debug Init",
+    "saveAsScenario": "Guardar como escenario",
+    "backToGame": "Volver al juego",
+    "saveName": "Nombre de la partida",
+    "confirmOverwrite": "¿Sobrescribir la partida «{{name}}»?"
   },
   "saveList": {
     "noSaves": "No hay partidas guardadas",
@@ -110,13 +111,10 @@
     "deleteButton": "Eliminar",
     "confirmLoad": "¿Cargar esta partida guardada?",
     "confirmDelete": "¿Eliminar esta partida guardada? Esta acción no se puede deshacer.",
-    "confirm": "Sí",
-    "cancel": "No",
     "loading": "Cargando...",
     "loadFailed": "No se pudo cargar",
-    "loadSuccess": "Se cargó correctamente",
     "deleteFailed": "No se pudo eliminar",
-    "deleteSuccess": "Se eliminó la partida guardada",
-    "openFolderButton": "Mostrar la carpeta"
+    "openFolderButton": "Mostrar la carpeta",
+    "scenario": "Escenario"
   }
 }

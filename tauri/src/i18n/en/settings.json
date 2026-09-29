@@ -86,11 +86,8 @@
     "load": "Load",
     "quitGame": "Quit Game",
     "returnToTop": "Return to Top Menu",
-    "saving": "Saving...",
     "loading": "Loading...",
     "shuttingDown": "Shutting down...",
-    "saveSuccess": "Save completed",
-    "newGameSuccess": "New game started",
     "saveFailed": "Save failed",
     "loadFailed": "Load failed",
     "confirmNewGame": "Current data will be lost. Start a new game?",
@@ -98,7 +95,11 @@
     "confirmReturnToTop": "Return to the top menu? Unsaved progress will be lost.",
     "confirm": "Yes",
     "cancel": "No",
-    "debugInit": "Debug Init"
+    "debugInit": "Debug Init",
+    "saveAsScenario": "Save as scenario",
+    "backToGame": "Back to Game",
+    "saveName": "Save name",
+    "confirmOverwrite": "Overwrite the save “{{name}}”?"
   },
   "saveList": {
     "noSaves": "No save data found",
@@ -110,13 +111,10 @@
     "deleteButton": "Delete",
     "confirmLoad": "Load this save data?",
     "confirmDelete": "Delete this save data? This cannot be undone.",
-    "confirm": "Yes",
-    "cancel": "No",
     "loading": "Loading...",
     "loadFailed": "Load failed",
-    "loadSuccess": "Load completed",
     "deleteFailed": "Delete failed",
-    "deleteSuccess": "Save data deleted",
-    "openFolderButton": "Open Save Folder"
+    "openFolderButton": "Open Save Folder",
+    "scenario": "Scenario"
   }
 }

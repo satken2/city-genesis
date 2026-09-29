@@ -1,4 +1,7 @@
+using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking;
 
 /// <summary>
 /// IpcClientの受信イベントを各Editor Managerのメソッドにルーティングするハンドラ。
@@ -48,6 +51,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnWorldClearRoadFocus += HandleWorldClearRoadFocus;
             IpcClient.Instance.OnWorldRefreshRoads += HandleWorldRefreshRoads;
             IpcClient.Instance.OnEditRoadSetMembers += HandleEditRoadSetMembers;
+            IpcClient.Instance.OnCameraCaptureThumbnail += HandleCameraCaptureThumbnail;
         }
     }
 
@@ -88,7 +92,49 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnWorldClearRoadFocus -= HandleWorldClearRoadFocus;
             IpcClient.Instance.OnWorldRefreshRoads -= HandleWorldRefreshRoads;
             IpcClient.Instance.OnEditRoadSetMembers -= HandleEditRoadSetMembers;
+            IpcClient.Instance.OnCameraCaptureThumbnail -= HandleCameraCaptureThumbnail;
         }
+    }
+
+    // セーブデータの画像の大きさ(16:9)。一覧のカードとシナリオの紹介に足りる小ささにする
+    private const int ThumbnailWidth = 480;
+    private const int ThumbnailHeight = 270;
+
+    /// <summary>
+    /// camera:capture_thumbnail。保存の直前に3Dビューを撮ってコアへ預け(次の保存に入る画像)、camera:thumbnail_captured で返す。
+    /// UIは返事か時間切れまで保存を待つので、撮れなくても送れなくても必ず返す。
+    /// </summary>
+    private void HandleCameraCaptureThumbnail(string id)
+    {
+        StartCoroutine(CaptureThumbnail(id));
+    }
+
+    private IEnumerator CaptureThumbnail(string id)
+    {
+        byte[] png = null;
+        Camera camera = CameraController.Instance != null ? CameraController.Instance.GetComponent<Camera>() : Camera.main;
+        if (camera != null)
+        {
+            try
+            {
+                png = CameraCaptureUtil.CapturePng(camera, ThumbnailWidth, ThumbnailHeight);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"IpcEventHandler: 保存用の画像を撮れませんでした: {e.Message}");
+            }
+        }
+        bool success = false;
+        if (png != null)
+        {
+            using (ApiRequest call = ApiClient.Request("PUT", "/sessions/thumbnail", png, "image/png", 10))
+            {
+                yield return call.Send();
+                success = call.Web.result == UnityWebRequest.Result.Success;
+                if (!success) Debug.LogWarning($"IpcEventHandler: 保存用の画像を送れませんでした: {call.Web.error}");
+            }
+        }
+        IpcClient.Instance?.EmitCameraThumbnailCaptured(id, success);
     }
 
     private void HandleBuildingExploded(int agentId)

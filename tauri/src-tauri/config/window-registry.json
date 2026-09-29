@@ -458,7 +458,7 @@
   "save_load": {
     "title": "セーブ・ロード",
     "width": 380,
-    "height": 540,
+    "height": 500,
     "resizable": false,
     "policy": "single",
     "empty_shell": true,

@@ -1,187 +1,155 @@
 /**
- * セーブ・ロードウィンドウのスタイル定義
+ * システムメニュー(セーブ・ロード)のスタイル。
  *
- * システムトレイのセーブアイコンから開くウィンドウ。
- * アクションボタン群(ニューゲーム・上書きセーブ・別名セーブ・ロード・トップへ戻る・終了)と
- * 処理結果のステータスメッセージを表示する。
- *
- * 意匠はトップメニューと揃える: 枠線・発光を持たないベタ塗りの四角で、
- * 落ち影だけで面の高さを表現する。操作の性質(通常・主操作・破壊的)は
- * 枠線の色ではなく塗りの色で区別する。
+ * タイトルバーの無いウィンドウ全体に、アイコン付きの項目を縦に並べる。上端のアクセントの細い線が窓の縁を示す。
+ * 意匠はフラット系(App.css の --flat-*): 項目は地色を持たず、ホバー・フォーカスで左端の実線ブロックと
+ * 淡い帯を出す。操作の性質は色で分け、取り返しのつかない操作(終了)だけを警告色にする。
+ * 確認・名前の入力は SaveDialog(幕とボックス)を .save-menu の上に重ねる。
  */
 
-.save-load-body {
-  padding: 20px;
+.save-menu {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
   height: 100%;
+  padding: 12px 8px 8px;
+  overflow: hidden;
+  background: radial-gradient(130% 55% at 50% 0%, rgba(78, 161, 255, 0.1), transparent 70%);
+  user-select: none;
+}
+
+.save-menu::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--flat-accent) 50%, transparent);
+}
+
+.save-menu-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
-/**
- * アクションボタングリッド
- * 2列のグリッドでボタンを並べる
- */
-.save-load-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.save-menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
 }
 
-/**
- * 各アクションボタン
- * ベタ塗りの矩形タイル。高さを揃えて面として並べる
- */
-.save-load-action-btn {
+.save-menu-group + .save-menu-group {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* 全体既定(枠線+角丸+半透明の地色)のボタンを打ち消す */
+.save-menu-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 56px;
-  padding: 14px 10px;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 14px;
+  font: inherit;
+  text-align: left;
+  color: var(--flat-text-body);
+  background: transparent;
   border: none;
   border-radius: 0;
-  background: #1b2635;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  color: #c8d8e8;
-  font-size: 1.25rem;
-  font-weight: 600;
+  box-shadow: none;
   cursor: pointer;
-  transition: background 0.12s, box-shadow 0.12s, transform 0.12s;
-  text-align: center;
+  transition: background 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.save-menu-item:hover:not(:disabled),
+.save-menu-item:focus-visible {
+  color: #ffffff;
+  background: linear-gradient(90deg, rgba(78, 161, 255, 0.18), rgba(78, 161, 255, 0.02));
+  box-shadow: inset 3px 0 0 var(--flat-accent);
+  outline: none;
+}
+
+.save-menu-item:active:not(:disabled) {
+  background: linear-gradient(90deg, rgba(78, 161, 255, 0.28), rgba(78, 161, 255, 0.04));
+}
+
+.save-menu-item:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.save-menu-icon {
+  display: flex;
+  flex-shrink: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  color: #7fb6ff;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.save-menu-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.save-menu-item:hover:not(:disabled) .save-menu-icon {
+  color: #b9d9ff;
+  transform: translateX(1px);
+}
+
+.save-menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.save-menu-label {
+  font-size: 1.15rem;
+  font-weight: 600;
   line-height: 1.3;
 }
 
-.save-load-action-btn:hover:not(:disabled) {
-  background: #26374d;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
-  transform: translateY(-2px);
+/* 上書きセーブの対象(現在のセーブの名前) */
+.save-menu-detail {
+  overflow: hidden;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: var(--flat-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.save-load-action-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+.save-menu-item:hover:not(:disabled) .save-menu-detail {
+  color: var(--flat-text-label);
 }
 
-.save-load-action-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.save-menu-item--danger .save-menu-icon {
+  color: #ff8f8f;
 }
 
-/**
- * ニューゲーム・終了ボタン
- * 現在のデータが失われる操作なので警告色のベタ塗りで示す
- */
-.save-load-action-btn--danger {
-  background: #4a2020;
-  color: #f0c4c4;
+.save-menu-item--danger:hover:not(:disabled),
+.save-menu-item--danger:focus-visible {
+  background: linear-gradient(90deg, rgba(255, 107, 107, 0.18), rgba(255, 107, 107, 0.02));
+  box-shadow: inset 3px 0 0 #ff6b6b;
 }
 
-.save-load-action-btn--danger:hover:not(:disabled) {
-  background: #6b2b2b;
+.save-menu-item--danger:hover:not(:disabled) .save-menu-icon {
+  color: #ffc2c2;
 }
 
-/**
- * ロードボタン
- * 別ウィンドウ(save_list)を開く主操作なのでアクセント色のベタ塗りで示す
- */
-.save-load-action-btn--accent {
-  background: #1d3a5c;
-  color: #ffffff;
+/* ゲームに戻る: メニューの外側に置く閉じる操作なので、区切り線の下で控えめに出す */
+.save-menu-back {
+  flex-shrink: 0;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--flat-text-label);
 }
 
-.save-load-action-btn--accent:hover:not(:disabled) {
-  background: #2c5687;
-}
-
-/**
- * ステータスメッセージ
- * 各操作の結果(成功・エラー・処理中)を下部に表示する
- */
-.save-load-status {
-  padding: 10px 14px;
-  border-radius: 0;
-  font-size: 1.14rem;
-  line-height: 1.4;
-  min-height: 20px;
-}
-
-.save-load-status--success {
-  background: #1e4a1e;
-  color: #d2ffd2;
-}
-
-.save-load-status--error {
-  background: #4a1e1e;
-  color: #ffd2d2;
-}
-
-.save-load-status--info {
-  background: #1e3a5f;
-  color: #cfe2ff;
-}
-
-/**
- * 確認ダイアログ
- * ニューゲームなど取り返しのつかない操作を行う前に表示する確認オーバーレイ
- */
-.save-load-confirm-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 14, 24, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-.save-load-confirm-box {
-  background: #16202e;
-  border: none;
-  border-radius: 0;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
-  padding: 24px;
-  max-width: 320px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.save-load-confirm-text {
-  font-size: 1.22rem;
-  line-height: 1.5;
-  color: #d0dde9;
-}
-
-.save-load-confirm-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-
-/* 全体既定(枠線+角丸)の打ち消しを含むため、キャンセル側もここで定義する */
-.save-load-confirm-actions button {
-  padding: 8px 22px;
-  font-size: 1.18rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 0;
-  background: #2c3646;
-  color: #c8d8e8;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  transition: background 0.12s;
-}
-
-.save-load-confirm-actions button:hover {
-  background: #3a4759;
-}
-
-.save-load-confirm-actions .save-load-confirm-yes {
-  background: #6b2b2b;
-  color: #ffffff;
-}
-
-.save-load-confirm-actions .save-load-confirm-yes:hover {
-  background: #8a3838;
+.save-menu-back .save-menu-icon {
+  color: var(--flat-text-label);
 }

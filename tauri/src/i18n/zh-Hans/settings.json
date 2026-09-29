@@ -86,11 +86,8 @@
     "load": "读档",
     "quitGame": "退出游戏",
     "returnToTop": "返回主菜单",
-    "saving": "保存中...",
     "loading": "加载中...",
     "shuttingDown": "正在结束...",
-    "saveSuccess": "保存完成",
-    "newGameSuccess": "已开始新游戏",
     "saveFailed": "保存失败",
     "loadFailed": "加载失败",
     "confirmNewGame": "当前数据将会丢失。确定开始新游戏吗？",
@@ -98,7 +95,11 @@
     "confirmReturnToTop": "确定返回主菜单吗？当前进度不会自动保存。",
     "confirm": "是",
     "cancel": "否",
-    "debugInit": "Debug Init"
+    "debugInit": "Debug Init",
+    "saveAsScenario": "另存为场景",
+    "backToGame": "返回游戏",
+    "saveName": "存档名称",
+    "confirmOverwrite": "要覆盖存档“{{name}}”吗？"
   },
   "saveList": {
     "noSaves": "没有存档数据",
@@ -110,13 +111,10 @@
     "deleteButton": "删除",
     "confirmLoad": "要读取该存档数据吗？",
     "confirmDelete": "确定删除该存档数据吗？此操作无法撤销。",
-    "confirm": "是",
-    "cancel": "否",
     "loading": "加载中...",
     "loadFailed": "加载失败",
-    "loadSuccess": "加载完成",
     "deleteFailed": "删除失败",
-    "deleteSuccess": "已删除存档数据",
-    "openFolderButton": "显示文件夹位置"
+    "openFolderButton": "显示文件夹位置",
+    "scenario": "场景"
   }
 }

@@ -1,5 +1,5 @@
 /**
- * シナリオの紹介情報ウィンドウ(テンプレートとして保存した直後と、シナリオ管理の「紹介情報を編集」から開く)。
+ * シナリオの紹介情報ウィンドウ。システムメニューの「シナリオとして保存」(作成モード)と、シナリオ管理の「紹介情報を編集」から開く。
  *
  * - 紹介文(タイトル・説明・達成条件)と初期の都市名を多言語で書く。英語は必須(タイトルは常に、
  *   ほかの項目は1言語でも書けば)で、表示する言語の文が無いときは英語が出る。
@@ -7,12 +7,15 @@
  *   画面は「変更可能」のチェックで見せ、コアへは反転して固定する項目(scenario_fixed_options)として送る。
  * - 開始設定の先頭に都市内の名前の言語を並べる。値はここでは変えられず(名前を付け直さずに言語だけを変えると、
  *   ゲーム開始時の付け直しの判定が狂う)、プレイヤーは常に変更できるので「変更可能」はオンのまま外せない。
+ * - 作成モード(create)はプレイ中の都市の紹介情報・開始設定を初期値にし、「保存」で新しいシナリオを作る
+ *   (既存のシナリオは上書きしない)。保存するまで何も書かないので、キャンセルすれば何も残らない。
+ *   画像は選んだファイル、選ばなければ保存の直前に撮った3Dビューを、次の保存に入る画像としてコアへ預けてから作る。
  */
 import { useEffect, useState } from "react";
 import { emit } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { SaveEntry, ScenarioStartOption, saveError, uploadScenarioThumbnail } from "../../utils/saves";
+import { SaveEntry, ScenarioStartOption, captureSaveThumbnail, saveError, uploadScenarioThumbnail } from "../../utils/saves";
 import { compactLocalizedText, missingEnglish, type LocalizedText } from "../../utils/locale";
 import { ASSET_REGION_STANDARD, ASSET_REGION_TYPES, CLIMATE_TYPES, GROUND_COVER_TYPES, SIMULATION_DAYS_CHOICES } from "../../constants";
 import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
@@ -27,20 +30,25 @@ type Options = Record<ScenarioStartOption, number>;
 const TEXT_KEYS = ["scenario_title", "scenario_description", "scenario_objective", "scenario_city_name"] as const;
 const START_OPTIONS: ScenarioStartOption[] = ["simulation_days", "climate", "ground_cover", "asset_region"];
 
-function startOptionsOf(save: SaveEntry): Options {
+/** フォームの初期値の元。編集では保存済みのシナリオ、作成ではプレイ中の都市(GET /api/v1/city/)と都市の言語 */
+type ScenarioSource = Pick<SaveEntry, (typeof TEXT_KEYS)[number] | "scenario_fixed_options" | "author" | "language"
+  | "simulation_days" | "climate" | "ground_cover" | "asset_region">;
+
+function startOptionsOf(source: ScenarioSource): Options {
   return {
-    simulation_days: save.simulation_days || 30,
-    climate: normalizeClimate(save.climate),
-    ground_cover: normalizeGroundCover(save.ground_cover),
-    asset_region: save.asset_region ?? ASSET_REGION_STANDARD,
+    simulation_days: source.simulation_days || 30,
+    climate: normalizeClimate(source.climate),
+    ground_cover: normalizeGroundCover(source.ground_cover),
+    asset_region: source.asset_region ?? ASSET_REGION_STANDARD,
   };
 }
 
-export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
-  apiBaseUrl: string; scenarioId: string; onClose: () => void;
+export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false, onClose }: {
+  apiBaseUrl: string; scenarioId: string; create?: boolean; onClose: () => void;
 }) {
   const { t } = useTranslation();
   const [entry, setEntry] = useState<SaveEntry | null>(null);
+  const [language, setLanguage] = useState<string | null>(null);
   const [texts, setTexts] = useState<Texts>({});
   const [author, setAuthor] = useState("");
   const [options, setOptions] = useState<Options | null>(null);
@@ -50,16 +58,24 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
   const [error, setError] = useState("");
   useEffect(() => {
     const controller = new AbortController();
-    fetchApi<{ save: SaveEntry }>(buildApiUrl(apiBaseUrl, `/api/v1/saves/${encodeURIComponent(scenarioId)}?template=true`), { signal: controller.signal, cache: "reload" })
-      .then(({ save }) => {
-        setEntry(save);
-        setTexts(Object.fromEntries(TEXT_KEYS.map(key => [key, save[key] ?? {}])));
-        setAuthor(save.author ?? "");
-        setOptions(startOptionsOf(save));
-        setFixed(save.scenario_fixed_options ?? []);
-      }).catch(e => { if (!controller.signal.aborted) setError(saveError(e, t)); });
+    const signal = controller.signal;
+    const apply = (source: ScenarioSource) => {
+      setTexts(Object.fromEntries(TEXT_KEYS.map(key => [key, source[key] ?? {}])));
+      setAuthor(source.author ?? "");
+      setOptions(startOptionsOf(source));
+      setFixed(source.scenario_fixed_options ?? []);
+      setLanguage(source.language);
+    };
+    const load = create
+      ? Promise.all([
+        fetchApi<{ city: Omit<ScenarioSource, "author" | "language"> }>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), { signal }),
+        fetchApi<{ language: string }>(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), { signal, cache: "reload" }),
+      ]).then(([{ city }, session]) => apply({ ...city, language: session.language }))
+      : fetchApi<{ save: SaveEntry }>(buildApiUrl(apiBaseUrl, `/api/v1/saves/${encodeURIComponent(scenarioId)}?template=true`), { signal, cache: "reload" })
+        .then(({ save }) => { setEntry(save); apply(save); });
+    load.catch(e => { if (!signal.aborted) setError(saveError(e, t)); });
     return () => controller.abort();
-  }, [apiBaseUrl, scenarioId, t]);
+  }, [apiBaseUrl, create, scenarioId, t]);
 
   const choices: Record<ScenarioStartOption, { values: number[]; label: (value: number) => string }> = {
     simulation_days: { values: SIMULATION_DAYS_CHOICES, label: days => t("newGame.daysOption", { days }) },
@@ -79,16 +95,27 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
       return;
     }
     setBusy(true); setError("");
+    const body = JSON.stringify({
+      ...Object.fromEntries(TEXT_KEYS.map(key => [key, compactLocalizedText(texts[key])])),
+      author, ...options,
+      scenario_fixed_options: START_OPTIONS.filter(option => fixed.includes(option)),
+    });
     try {
-      await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/scenarios/${encodeURIComponent(scenarioId)}`), {
-        method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...Object.fromEntries(TEXT_KEYS.map(key => [key, compactLocalizedText(texts[key])])),
-          author, ...options,
-          scenario_fixed_options: START_OPTIONS.filter(option => fixed.includes(option)),
-        }),
-      });
-      if (thumbnail) await uploadScenarioThumbnail(apiBaseUrl, scenarioId, thumbnail);
+      if (create) {
+        if (thumbnail) {
+          await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/sessions/thumbnail"), {
+            method: "PUT", headers: { "Content-Type": "image/png" }, body: thumbnail,
+          });
+        } else {
+          await captureSaveThumbnail();
+        }
+        await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/templates"), { method: "POST", headers: { "Content-Type": "application/json" }, body });
+      } else {
+        await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/scenarios/${encodeURIComponent(scenarioId)}`), {
+          method: "PATCH", headers: { "Content-Type": "application/json" }, body,
+        });
+        if (thumbnail) await uploadScenarioThumbnail(apiBaseUrl, scenarioId, thumbnail);
+      }
       await emit("scenarios:changed");
       onClose();
     } catch (e) { setError(saveError(e, t)); }
@@ -97,8 +124,8 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
 
   return <form className="scenario-editor" onSubmit={e => { e.preventDefault(); void save(); }}>
     {error && <p role="alert" className="scenario-error">{error}</p>}
-    {entry && options && <>
-      <SaveVersionInfo entry={entry} />
+    {language !== null && options && <>
+      {entry && <SaveVersionInfo entry={entry} />}
       <LocalizedTextFields disabled={busy} value={texts} onChange={setTexts} fields={[
         { key: "scenario_title", label: t("achievements.scenarioTitleLabel"), maxLength: 160 },
         { key: "scenario_description", label: t("achievements.scenarioDescriptionLabel"), maxLength: 8000, multiline: true },
@@ -112,7 +139,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
         <p className="scenario-hint">{t("scenarios.startSettingsHint")}</p>
         <div className="scenario-start-row" data-option="language">
           <span>{t("scenarios.cityLanguage")}</span>
-          <span className="scenario-start-value">{t(`settings.language.${entry.language}`, { defaultValue: entry.language })}</span>
+          <span className="scenario-start-value">{t(`settings.language.${language}`, { defaultValue: language })}</span>
           <label className="scenario-start-changeable">
             <input type="checkbox" checked disabled readOnly />
             {t("scenarios.changeableOption")}
@@ -132,10 +159,12 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, onClose }: {
         </div>)}
       </section>
       <label className="scenario-info__field"><span>{t("achievements.scenarioImageLabel")}</span>
-        <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={scenarioId} revision={entry.content_revision} className="scenario-thumbnail" />
+        {entry
+          ? <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={scenarioId} revision={entry.content_revision} className="scenario-thumbnail" />
+          : <div className="scenario-thumbnail" />}
         <input type="file" accept="image/png" disabled={busy} onChange={e => setThumbnail(e.target.files?.[0] ?? null)} /></label>
       <div className="scenario-actions"><button type="submit" disabled={busy}>{t("achievements.scenarioSave")}</button>
-        <button type="button" disabled={busy} onClick={onClose}>{t("scenarios.close")}</button></div>
+        <button type="button" disabled={busy} onClick={onClose}>{create ? t("common.cancel") : t("scenarios.close")}</button></div>
     </>}
   </form>;
 }

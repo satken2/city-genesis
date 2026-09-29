@@ -5,6 +5,8 @@ import { createRoot } from "react-dom/client";
 import { ScenarioManagerWindow } from "../../src/components/template/ScenarioManagerWindow";
 import { ScenarioMetadataWindow } from "../../src/components/template/ScenarioMetadataWindow";
 import { NewGameWindow } from "../../src/components/taskbar/NewGameWindow";
+import { SaveLoadWindow } from "../../src/components/taskbar/SaveLoadWindow";
+import { SaveListWindow } from "../../src/components/taskbar/SaveListWindow";
 import { errorCode, prepareSaveLoad, saveError } from "../../src/utils/saves";
 import { ApiError } from "../../src/utils/api";
 import { importedBackgroundExtent, importedMapExtent, readHeightmapInfo } from "../../src/components/template/heightmapImport";
@@ -45,12 +47,47 @@ const deleteRequests: string[] = [];
 let rejectDelete = false;
 let listFetches = 0;
 let thumbnailUploads: { url: string; contentType: string | null; body: unknown }[] = [];
+/** システムメニュー・セーブ一覧・シナリオとして保存が送った変更系の要求と、応答に使うセッション・セーブの一覧 */
+const saveRequests: { method: string; url: string; body: unknown }[] = [];
+let currentSaveId: string | null = null;
+let savedGames: Record<string, object> = {};
+const saveEntry = { id: "", city_name: "港町", save_name: "", population: 1234, current_date: 400, epoch: 3, simulation_days: 30,
+  saved_at: "20260930_120000", is_scenario: false, language: "ja", saved_core_version: "1.0.0", created_core_version: "1.0.0",
+  compatibility: { loadable: true }, origin: "save", required_packs: [], pack_status: {} };
+const playingCity = { name: "港町", scenario_title: { en: "Port" }, scenario_description: {}, scenario_objective: {},
+  scenario_city_name: { en: "Port Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, climate: 2, ground_cover: 1, asset_region: 1 };
+/** 変更系の要求(保存・シナリオ作成・画像の保留)だけを拾う。一覧・詳細の取得はほかの分岐が返す */
+function saveMenuResponse(url: string, init?: RequestInit): Response | null {
+  const method = init?.method ?? "GET";
+  const saveId = /\/api\/v1\/saves\/([^/?]+)$/.exec(url)?.[1];
+  if (url.endsWith("/api/v1/city/")) return new Response(JSON.stringify({ city: playingCity }));
+  if (url.endsWith("/api/v1/sessions") && method === "GET") {
+    return new Response(JSON.stringify({ current_save_id: currentSaveId, debug_execution: false, language: "ja" }));
+  }
+  if (url.endsWith("/api/v1/saves") && method === "GET") return new Response(JSON.stringify({ success: true, saves: savedGames }));
+  if (url.includes("/validation?template=false")) return new Response(JSON.stringify({ compatibility: { balance_changed: false } }));
+  if (saveId && method === "GET") {
+    const found = savedGames[decodeURIComponent(saveId)];
+    return found ? new Response(JSON.stringify({ save: found })) : new Response(JSON.stringify({ success: false }), { status: 404 });
+  }
+  if (url.endsWith("/api/v1/templates") || url.endsWith("/api/v1/sessions/thumbnail") || url.endsWith("/api/v1/saves") || saveId) {
+    saveRequests.push({ method, url, body: init?.body });
+    if (saveId && method === "DELETE") {
+      delete savedGames[decodeURIComponent(saveId)];
+      return new Response(null, { status: 204 });
+    }
+    return new Response(JSON.stringify({ success: true, id: "local~created" }), { status: 201 });
+  }
+  return null;
+}
 // 3列×2行(20m×10m)の小さな地形。行0が南で、南西だけ海。
 const terrainDocument = { settings: { map_width: 20, map_height: 10, near_spacing: 10, far_spacing: 200, cell_size: 500, grid_rows: 2, grid_cols: 3 },
   near_base64: uint8ToBase64(encodeFloat16Array(new Float32Array([-5, 3, 8, 2, 12, 40]))), ground_cover: 2 };
 globalThis.fetch = async (input, init) => {
   const url = String(input);
   const headers = new Headers(init?.headers);
+  const saveMenu = saveMenuResponse(url, init);
+  if (saveMenu) return saveMenu;
   if (url.includes("/validation?template=true")) return new Response(JSON.stringify(rejectLoad
     ? { code: "SAVE_CORRUPT", message: "corrupt" } : { compatibility: validation }), { status: rejectLoad ? 422 : 200 });
   if (url.includes("/thumbnail") && init?.method === "PUT") {
@@ -620,4 +657,121 @@ for (const code of ["SCENARIO_TOO_LARGE", "SCENARIO_READ_ONLY", "SCENARIO_ENCRYP
 for (const code of ["TERRAIN_LOCKED", "TERRAIN_INVALID", "TERRAIN_SIZE_MISMATCH", "RESOURCE_VALIDATION_ERROR", "PROP_VALIDATION_ERROR"]) {
   assert.ok(code in jaTerrainEditor.terrainEditor.saveErrors, `terrainEditor.saveErrors.${code} is translated`);
 }
-console.log("PASS: scenario manager tabs and origin actions, icon buttons and delete, encrypted terrain lock, terrain editor open errors, heightmap import (size preview, validation, request, thumbnail, terrain preview and background terrain), new game tabs and terrain facts, tutorial start, new game language and start options, localized metadata and start settings, load confirmation and error codes");
+// シナリオとして保存(紹介情報ウィンドウの作成モード): プレイ中の都市の紹介情報を初期値にし、保存を押すまで何も書かない。
+state.results.request_thumbnail_capture = false; // Unityが無いときは撮影を待たずに保存する
+const submitDialog = () => act(async () => {
+  container.querySelector(".save-dialog")!.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+});
+root = createRoot(container);
+let createClosed = false;
+await act(async () => { root.render(<ScenarioMetadataWindow apiBaseUrl="http://test" scenarioId="" create onClose={() => { createClosed = true; }} />); });
+await settle();
+assert.equal(container.querySelector(".scenario-start-row[data-option=language] .scenario-start-value")?.textContent, "settings.language.ja",
+  "the city language comes from the session");
+assert.ok(!container.querySelector(".save-version-info"), "an unsaved scenario has no saved format version");
+await act(async () => { button("common.cancel").click(); });
+assert.ok(createClosed);
+assert.equal(saveRequests.length, 0, "cancelling saves nothing");
+await act(async () => { root.unmount(); });
+root = createRoot(container);
+await act(async () => { root.render(<ScenarioMetadataWindow apiBaseUrl="http://test" scenarioId="" create onClose={() => {}} />); });
+await settle();
+state.emitted.length = 0;
+await submit();
+await settle();
+const createdScenario = saveRequests.find(request => request.url.endsWith("/api/v1/templates"));
+assert.ok(createdScenario && createdScenario.method === "POST", "saving creates a new scenario");
+const createdBody = JSON.parse(String(createdScenario!.body));
+assert.deepEqual([createdBody.scenario_title, createdBody.scenario_city_name, createdBody.scenario_fixed_options, createdBody.climate],
+  [{ en: "Port" }, { en: "Port Town" }, ["climate"], 2], "the playing city's introduction is the starting point");
+assert.ok(lastCall("request_thumbnail_capture"), "without a chosen image the 3D view is captured first");
+assert.ok(state.emitted.includes("scenarios:changed"));
+await act(async () => { root.unmount(); });
+
+// システムメニュー: まだ保存していない都市の上書きセーブは別名セーブになり、都市名を名前の初期値にする。保存したら閉じる。
+saveRequests.length = 0;
+currentSaveId = "fresh";
+let menuClosed = 0;
+const renderMenu = async () => {
+  root = createRoot(container);
+  await act(async () => { root.render(<SaveLoadWindow apiBaseUrl="http://test" onClose={() => { menuClosed++; }} />); });
+  await settle();
+};
+const menuItem = (label: string) => [...container.querySelectorAll<HTMLButtonElement>(".save-menu-item")]
+  .find(item => item.querySelector(".save-menu-label")?.textContent === label)!;
+const saveDialog = () => container.querySelector<HTMLElement>(".save-dialog");
+await renderMenu();
+await act(async () => { menuItem("saveLoad.overwriteSave").click(); });
+assert.equal(saveDialog()?.getAttribute("aria-label"), "saveLoad.saveAs", "a city that was never saved gets a name first");
+const nameInput = () => container.querySelector<HTMLInputElement>(".save-dialog-input")!;
+assert.equal(nameInput().value, "港町");
+assert.equal(saveRequests.length, 0, "nothing is saved before the name is confirmed");
+await act(async () => { setText(nameInput(), "  港町 序盤 "); });
+await submitDialog();
+await settle();
+assert.deepEqual(saveRequests.map(request => [request.method, request.url.replace("http://test", "")]), [["POST", "/api/v1/saves"]]);
+assert.deepEqual(JSON.parse(String(saveRequests[0].body)), { name: "港町 序盤" });
+assert.equal(menuClosed, 1, "the menu closes after saving");
+await act(async () => { root.unmount(); });
+
+// 保存済みの都市: 上書きセーブは対象の名前を示して確認してから保存する。
+saveRequests.length = 0;
+currentSaveId = "slot1";
+savedGames = { slot1: { ...saveEntry, id: "slot1", save_name: "港町 序盤" } };
+await renderMenu();
+assert.equal(menuItem("saveLoad.overwriteSave").querySelector(".save-menu-detail")?.textContent, "港町 序盤");
+await act(async () => { menuItem("saveLoad.overwriteSave").click(); });
+assert.equal(saveDialog()?.getAttribute("aria-label"), "saveLoad.overwriteSave");
+assert.equal(saveRequests.length, 0, "overwriting waits for the confirmation");
+await act(async () => { saveDialog()!.parentElement!.dispatchEvent(new window.MouseEvent("mousedown", { bubbles: true })); });
+assert.equal(saveDialog(), null, "pressing the backdrop cancels");
+await act(async () => { menuItem("saveLoad.overwriteSave").click(); });
+await submitDialog();
+await settle();
+assert.deepEqual(saveRequests.map(request => [request.method, request.url.replace("http://test", "")]), [["PUT", "/api/v1/saves/slot1"]]);
+assert.equal(menuClosed, 2);
+// シナリオとして保存は作成モードの紹介情報ウィンドウを開くだけで、ここでは保存しない。どのモードでも押せる。
+saveRequests.length = 0;
+assert.ok(!menuItem("saveLoad.saveAsScenario").disabled);
+await act(async () => { menuItem("saveLoad.saveAsScenario").click(); });
+await settle();
+assert.deepEqual(lastCall("open_registered_window"),
+  { windowType: "scenario_metadata", params: { extra: { create: true, titleKey: "saveLoad.saveAsScenario" } } });
+assert.equal(saveRequests.length, 0);
+assert.equal(menuClosed, 3);
+await act(async () => { window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" })); });
+assert.equal(menuClosed, 4, "Esc closes the menu");
+await act(async () => { root.unmount(); });
+
+// セーブ一覧: 新しいものが先頭。名前(無ければ都市名)・元のシナリオ・言語の国旗を出し、削除は知らせずに一覧から外す。
+saveRequests.length = 0;
+currentSaveId = "new";
+savedGames = {
+  old: { ...saveEntry, id: "old", save_name: "古い", saved_at: "20260101_100000", language: "en" },
+  new: { ...saveEntry, id: "new", scenario_title: { en: "Port" } },
+};
+let listClosed = false;
+root = createRoot(container);
+await act(async () => { root.render(<SaveListWindow apiBaseUrl="http://test" onClose={() => { listClosed = true; }} />); });
+await settle();
+const saveCards = () => [...container.querySelectorAll<HTMLElement>(".save-card")];
+assert.deepEqual(saveCards().map(card => card.querySelector(".save-card-name")?.textContent), ["港町", "古い"]);
+assert.deepEqual(saveCards().map(card => card.querySelector(".save-card-flag")?.textContent), ["🇯🇵", "🇺🇸"]);
+assert.equal(saveCards()[0].querySelector(".save-card-scenario")?.textContent, "Port");
+assert.equal(saveCards()[1].querySelector(".save-card-scenario"), null, "saves without a scenario title show no scenario line");
+assert.ok(saveCards()[0].classList.contains("save-card--current"));
+await act(async () => { saveCards()[1].querySelector<HTMLButtonElement>(".save-card-delete")!.click(); });
+assert.equal(saveDialog()?.getAttribute("aria-label"), "古い");
+await act(async () => { [...saveDialog()!.querySelectorAll("button")].find(named("saveList.deleteButton"))!.click(); });
+await settle();
+assert.deepEqual(saveRequests.map(request => [request.method, request.url.replace("http://test", "")]), [["DELETE", "/api/v1/saves/old"]]);
+assert.equal(saveCards().length, 1);
+assert.equal(saveDialog(), null, "a finished delete leaves no message behind");
+await act(async () => { saveCards()[0].querySelector<HTMLButtonElement>(".save-card-load")!.click(); });
+await submitDialog();
+await settle();
+assert.deepEqual(lastCall("start_load_game"), { saveId: "new", acceptBalanceChange: true });
+assert.ok(listClosed);
+await act(async () => { root.unmount(); });
+
+console.log("PASS: scenario manager tabs and origin actions, icon buttons and delete, encrypted terrain lock, terrain editor open errors, heightmap import (size preview, validation, request, thumbnail, terrain preview and background terrain), new game tabs and terrain facts, tutorial start, new game language and start options, localized metadata and start settings, load confirmation and error codes, save as scenario, system menu saves, save list");

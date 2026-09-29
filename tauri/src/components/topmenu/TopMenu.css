@@ -148,7 +148,7 @@
 /**
  * GitHub ボタン。
  * ウィンドウ下部中央に配置し、アイコンとリポジトリ名を横に並べる。
- * 共通ボタンの不透明・角ばった見た目は適用せず、半透明角丸の発光スタイルを個別に指定する。
+ * 共通ボタンの角ばった暗い見た目は適用せず、角丸の発光スタイルを個別に指定する。
  */
 .topmenu-btn-github {
   position: absolute;
@@ -156,7 +156,6 @@
   border: 1px solid rgba(130, 190, 255, 0.4);
   border-radius: 4px;
   box-shadow: 0 0 15px rgba(130, 190, 255, 0.1), inset 0 0 15px rgba(130, 190, 255, 0.1);
-  backdrop-filter: blur(3px);
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
@@ -177,13 +176,14 @@
  */
 .topmenu-btn-github:active {
   transform: translateX(-50%) scale(0.98);
+  background: #d8e5f5;
   box-shadow: 0 0 15px rgba(130, 190, 255, 0.1), inset 0 0 15px rgba(130, 190, 255, 0.1);
 }
 
 .topmenu-btn-github:hover {
   transform: translateX(-50%) translateY(-2px);
-  background: rgba(30, 60, 100, 0.6);
-  box-shadow: 0 0 20px rgba(130, 190, 255, 0.4), inset 0 0 15px rgba(130, 190, 255, 0.2);
+  background: #ffffff;
+  box-shadow: 0 0 20px rgba(130, 190, 255, 0.5), inset 0 0 15px rgba(130, 190, 255, 0.2);
 }
 
 .topmenu-github-icon {

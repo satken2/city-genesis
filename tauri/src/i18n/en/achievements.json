@@ -74,7 +74,7 @@
       "failed": "Expired"
     },
     "scenarioImageLabel": "Image (Thumbnail)",
-    "scenarioEditHint": "Edit the scenario introduction in the metadata window after saving it as a scenario."
+    "scenarioEditHint": "Write the introduction when you choose “Save as scenario”, or later with “Edit metadata” in the scenario manager."
   },
   "achievementQuests": {
     "createTitle": "Create Quest",
