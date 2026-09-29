@@ -72,6 +72,8 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `view:set_grid`                 | `ui -> graphic`  | グリッドの表示有無や設定を切り替え。Unity側はグリッド表示とグリッド吸着を連動させる（表示ON=吸着ON） |
 | `view:grid_toggled`             | `graphic -> ui`  | 3Dビューのラジアルメニューでグリッド表示がトグルされた（`{ visible }`）。UI側はパス建設パネルのグリッド設定UIの表示状態を追従させる |
 | `camera:query_state`            | `ui -> graphic`  | 3Dカメラの現在位置と視線方位を問い合わせる。2D都市マップがカメラマーカーを描くために、開いたときと再読み込みのときに送る |
+| `camera:capture_thumbnail`      | `ui -> graphic`  | セーブ・シナリオ保存の直前に、3Dビューの撮影を頼む(`{ id }`)。グラフィックはメインカメラを16:9の小さな画像(480×270)へ直接描き(画面に重ねたUIは写らない)、PNGを `PUT /api/v1/sessions/thumbnail` でコアへ預ける(次の保存に入る画像)。UIはTauriコマンド `request_thumbnail_capture` で送り、グラフィックが接続していなければ送らずに撮影なしで保存する |
+| `camera:thumbnail_captured`     | `graphic -> ui`  | `camera:capture_thumbnail`への応答(`{ id, success }`)。撮れなくても送れなくても必ず返す。UIはこの応答か時間切れ(5秒)まで保存を待つ |
 | `camera:state`                  | `graphic -> ui`  | `camera:query_state`への応答。3Dカメラの現在位置と視線方位（`{ position:[x,y,z], yaw }`）。`yaw` は北（ワールド+Z）を0とする時計回りの度。**カメラの動きへの追従配信は行わない**（問い合わせ1回につき1回だけ送る） |
 | `edit_path:select_node`         | `graphic -> ui`  | パス敷設モードにおいて、敷設済みノードを選択した（`node_id`, `height`=相対標高, `embankment_height` を含む。`node_id=-1` は次回配置ノードの値）。UIパネルの標高・盛土ステッパーの表示と編集対象ノードを同期する。Unityのキー操作や吸着で値が変わったときも送られる |
 | `edit_path:change_node`         | `ui -> graphic`  | パス敷設モードにおいて、パネルの標高ステッパーからノードの相対標高を変更した（`node_index`, `height`。`node_index=-1` は次回配置値）。曲線/直線・吸着はラジアルメニューが真実源だが、標高・盛土は既存ノードを選んで数値で微調整する用途のためパネルにもステッパーを残し、Unityキー操作と双方向同期する |
