@@ -1,3 +1,5 @@
+import type { LocalizedText } from "./utils/locale";
+
 export type EntityRef = {
   type?: string;
   id?: string;
@@ -1101,11 +1103,11 @@ export type QuestClauseState = {
   progress: number;
 };
 
-/** GET /api/v1/quests が返すクエスト1件分 */
+/** GET /api/v1/quests が返すクエスト1件分。名前・説明は作者が書く多言語テキスト(表示は resolveLocalizedText) */
 export type Quest = {
   id: number;
-  name: string;
-  description: string;
+  name: LocalizedText;
+  description: LocalizedText;
   condition: QuestCondition;
   latch: boolean;
   notify: QuestNotify;
@@ -1133,8 +1135,8 @@ export type Quest = {
  */
 export type QuestNotification = {
   id: number;
-  name: string;
-  description: string;
+  name: LocalizedText;
+  description: LocalizedText;
   latch: boolean;
   notify: QuestNotify;
   tier: QuestTier;

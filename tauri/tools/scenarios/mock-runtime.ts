@@ -23,4 +23,6 @@ export async function invoke(command: string, args?: any) {
   return command in state.results ? state.results[command] : { error: null };
 }
 const translate = (key: string) => key;
-export function useTranslation() { return { t: translate, i18n: { language: "ja" } }; }
+/** 言語ごとの翻訳は「言語:キー」を返し、どの言語で引いたかを確かめられるようにする */
+const fixedT = (language: string) => (key: string) => `${language}:${key}`;
+export function useTranslation() { return { t: translate, i18n: { language: "ja", getFixedT: fixedT } }; }

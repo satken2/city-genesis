@@ -14,7 +14,6 @@
     "sandbox": "Modo libre",
     "challenge": "Desafío",
     "tutorial": "Tutorial",
-    "language": "Idioma",
     "close": "Cerrar",
     "saveTemplate": "Guardar como plantilla",
     "templateModeRequired": "Solo se pueden guardar las ciudades abiertas para editar desde el gestor de escenarios.",
@@ -39,7 +38,14 @@
     "terrainHint": "Elige un terreno para crear tu propio escenario sobre él. La partida no comienza. Después, usa Editar ciudad y Editar terreno en la pestaña Escenarios para desarrollarlo.",
     "terrainEmpty": "No hay terrenos disponibles.",
     "terrainOpenFailed": "No se pudo abrir el terreno del escenario.",
-    "terrainEncryptedHint": "Este escenario se creó a partir de una ciudad de un DLC y está cifrado, por lo que el editor de terreno no puede abrirlo. Usa Editar ciudad para editar los recursos y los objetos decorativos."
+    "terrainEncryptedHint": "Este escenario se creó a partir de una ciudad de un DLC y está cifrado, por lo que el editor de terreno no puede abrirlo. Usa Editar ciudad para editar los recursos y los objetos decorativos.",
+    "initialCityName": "Nombre inicial de la ciudad",
+    "cityLanguage": "Idioma de los nombres de la ciudad",
+    "cityLanguageHint": "Es el idioma de los nombres de distritos, instalaciones y residentes. Al iniciar una partida, el jugador puede elegir otro idioma y entonces los nombres se cambian.",
+    "startSettings": "Configuración inicial",
+    "startSettingsHint": "Los elementos fijados comienzan con estos valores. El jugador puede cambiar los demás al iniciar la partida. El idioma siempre lo elige el jugador.",
+    "fixedOption": "Fijar",
+    "englishRequired": "Se requiere el texto en inglés. El título debe estar en inglés, y cualquier otro campo que completes también lo necesita."
   },
   "saveCompatibility": {
     "unknown": "Desconocida",
@@ -57,7 +63,7 @@
     "SAVE_BALANCE_CONFIRMATION_REQUIRED": "Confirma el cambio de equilibrio.",
     "SCENARIO_UPLOAD_UNCONFIGURED": "No hay un destino de subida configurado.",
     "SCENARIO_UPLOAD_FAILED": "La subida falló. Tu escenario local sigue guardado.",
-    "SCENARIO_METADATA_REQUIRED": "Ingresa el título y el autor.",
+    "SCENARIO_METADATA_REQUIRED": "Ingresa un título en inglés y el autor.",
     "SCENARIO_PACKAGE_INVALID": "No se puede cargar la imagen. Elige una imagen de 10 MB o menos.",
     "TEMPLATE_MODE_REQUIRED": "Guarda en el modo de edición de plantillas.",
     "SCENARIO_REQUIRED": "Selecciona un archivo de plantilla.",
@@ -80,6 +86,9 @@
     "SCENARIO_READ_ONLY": "Los escenarios de la comunidad y los DLC no se pueden modificar. Edita una copia.",
     "NOT_FOUND": "No se encontraron los datos. Es posible que se hayan eliminado. Actualiza la lista.",
     "API_TOKEN_REQUIRED": "Falló la autenticación con el núcleo. Reinicia el juego.",
-    "HOST_NOT_ALLOWED": "El host usado para conectarse al núcleo no está permitido. Revisa la configuración de conexión."
+    "HOST_NOT_ALLOWED": "El host usado para conectarse al núcleo no está permitido. Revisa la configuración de conexión.",
+    "SCENARIO_ENGLISH_REQUIRED": "Escribe el texto en inglés. El título requiere inglés.",
+    "SCENARIO_OPTION_FIXED": "No se puede cambiar una configuración fijada por el escenario.",
+    "SCENARIO_OPTION_INVALID": "Un valor de la configuración inicial no es válido."
   }
 }

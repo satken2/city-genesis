@@ -425,8 +425,9 @@ async fn start_new_game(
 /// Unity を起動し、topmenu と現在のポップアップを隠して Tipsを表示した後、
 /// バックエンドに POST /api/v1/sessions を送信する。
 ///
-/// 追加パラメータ（都市名・言語・シミュレーション日数）はクエリパラメータとして
-/// バックエンドに渡される。テンプレートロード時はテンプレートの値を上書きする。
+/// 追加パラメータ（都市名・言語・シミュレーション日数・気候・地表・アセットの地域）はクエリパラメータとして
+/// バックエンドに渡される。テンプレートロード時は、作者が固定していない項目だけテンプレートの値を上書きできる
+/// (固定の項目に違う値を送るとコアが 422 で断る)。
 #[tauri::command]
 async fn create_session(
     app: tauri::AppHandle,
@@ -440,10 +441,14 @@ async fn create_session(
     template_mode: Option<bool>,
     tutorial_id: Option<String>,
     accept_balance_change: Option<bool>,
+    climate: Option<i32>,
+    ground_cover: Option<i32>,
+    asset_region: Option<i32>,
 ) -> Result<(), String> {
     log::info!(
-        "[create_session] terrain_map_id={:?} template_id={:?} city_name={:?} language={:?} simulation_days={:?} is_tutorial={:?} template_mode={:?} tutorial_id={:?}",
-        terrain_map_id, template_id, city_name, language, simulation_days, is_tutorial, template_mode, tutorial_id
+        "[create_session] terrain_map_id={:?} template_id={:?} city_name={:?} language={:?} simulation_days={:?} is_tutorial={:?} template_mode={:?} tutorial_id={:?} climate={:?} ground_cover={:?} asset_region={:?}",
+        terrain_map_id, template_id, city_name, language, simulation_days, is_tutorial, template_mode, tutorial_id,
+        climate, ground_cover, asset_region
     );
 
     version::verify_core(state.inner()).await?;
@@ -495,6 +500,9 @@ async fn create_session(
         template_mode: Option<bool>,
         tutorial_id: Option<String>,
         accept_balance_change: bool,
+        climate: Option<i32>,
+        ground_cover: Option<i32>,
+        asset_region: Option<i32>,
     }
     let query_params = SessionParams {
         terrain_map_id: terrain_map_id.clone(),
@@ -506,6 +514,9 @@ async fn create_session(
         template_mode,
         tutorial_id: tutorial_id.clone(),
         accept_balance_change: accept_balance_change.unwrap_or(false),
+        climate,
+        ground_cover,
+        asset_region,
     };
 
     let client = version::client();

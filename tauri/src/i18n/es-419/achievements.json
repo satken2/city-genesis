@@ -36,14 +36,9 @@
     "hiddenQuestDesc": "Este objetivo se revelará al alcanzarlo",
     "scenarioSection": "Información del escenario",
     "scenarioTitleLabel": "Título",
-    "scenarioTitlePlaceholder": "Ej.: Construyamos una sociedad autosuficiente",
     "scenarioDescriptionLabel": "Descripción",
-    "scenarioDescriptionPlaceholder": "Texto que describe el entorno y la situación de este escenario",
     "scenarioObjectiveLabel": "Condiciones de logro",
-    "scenarioObjectivePlaceholder": "Ej.: exportaciones en 0, importaciones en 0, población mayor a 10 000",
     "scenarioSave": "Guardar",
-    "scenarioSaved": "Guardado",
-    "scenarioSaveFailed": "No se pudo guardar",
     "tier": {
       "gold": "Oro",
       "silver": "Plata",
@@ -79,8 +74,7 @@
       "failed": "Vencido"
     },
     "scenarioImageLabel": "Imagen (Miniatura)",
-    "scenarioImageSelect": "Seleccionar imagen...",
-    "scenarioImageClear": "Eliminar"
+    "scenarioEditHint": "La presentación se edita en la ventana de información después de guardar como escenario."
   },
   "achievementQuests": {
     "createTitle": "Crear objetivo",
@@ -141,7 +135,8 @@
     "groupDisplay": "Presentación",
     "fieldTier": "Nivel (intensidad de la celebración)",
     "fieldCategory": "Categoría",
-    "fieldHidden": "Objetivo oculto (se revela al cumplirse)"
+    "fieldHidden": "Objetivo oculto (se revela al cumplirse)",
+    "englishRequired": "El nombre y la descripción requieren texto en inglés."
   },
   "questComplete": {
     "title": "¡Objetivo alcanzado!",

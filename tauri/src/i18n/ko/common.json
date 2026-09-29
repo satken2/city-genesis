@@ -73,5 +73,9 @@
     "GRADING_VALIDATION_ERROR": "이 범위는 조성할 수 없습니다. 부지 조성 창에 표시된 이유를 확인하세요.",
     "CREATEPATH_SEA_LAKE_CROSSING": "바다나 호수 위를 지상으로 지날 수 없습니다. 수면보다 충분히 높은 다리로 만들거나 지하로 통과시키세요.",
     "CREATEPATH_QUAY_BAND_CROSSING": "매립지의 안벽을 지상에서 가로지를 수 없습니다. 고가나 지하로 통과시키고, 끝점과 경유점은 안벽 상부 밖에 두세요."
+  },
+  "localizedText": {
+    "languages": "입력 언어",
+    "required": "필수"
   }
 }

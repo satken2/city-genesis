@@ -36,14 +36,9 @@
     "hiddenQuestDesc": "此目標達成後才會揭曉",
     "scenarioSection": "劇本資訊",
     "scenarioTitleLabel": "標題",
-    "scenarioTitlePlaceholder": "例：打造自給自足的社會",
     "scenarioDescriptionLabel": "說明",
-    "scenarioDescriptionPlaceholder": "描述此劇本舞台與背景的文字",
     "scenarioObjectiveLabel": "達成條件",
-    "scenarioObjectivePlaceholder": "例：出口額為0、進口額為0、人口1萬以上",
     "scenarioSave": "儲存",
-    "scenarioSaved": "已儲存",
-    "scenarioSaveFailed": "儲存失敗",
     "tier": {
       "gold": "金",
       "silver": "銀",
@@ -79,8 +74,7 @@
       "failed": "已到期"
     },
     "scenarioImageLabel": "圖片（縮圖）",
-    "scenarioImageSelect": "選擇圖片...",
-    "scenarioImageClear": "刪除"
+    "scenarioEditHint": "儲存為場景後，在介紹資訊視窗中編輯介紹文。"
   },
   "achievementQuests": {
     "createTitle": "建立任務",
@@ -141,7 +135,8 @@
     "groupDisplay": "顯示",
     "fieldTier": "等級（演出強度）",
     "fieldCategory": "分類",
-    "fieldHidden": "隱藏目標（達成前不顯示內容）"
+    "fieldHidden": "隱藏目標（達成前不顯示內容）",
+    "englishRequired": "名稱和說明需要填寫英文。"
   },
   "questComplete": {
     "title": "目標達成！",

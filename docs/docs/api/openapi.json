@@ -4943,7 +4943,7 @@
           "sessions"
         ],
         "summary": "Create Session",
-        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. template_id … シナリオ（テンプレート）データをロードする\n  3. terrain_map_id … 指定した地形マップでまっさらな新規ゲームを開始する\n  4. 何も指定しない … デフォルトの平坦な地形で新規ゲームを開始する\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。指定しない場合はデフォルト値が使用される。\n  - language: 都市の言語。指定しない場合はデフォルト(\"ja\")が使用される。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
+        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. template_id … シナリオ（テンプレート）データをロードする\n  3. terrain_map_id … 指定した地形マップでまっさらな新規ゲームを開始する\n  4. 何も指定しない … デフォルトの平坦な地形で新規ゲームを開始する\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。シナリオで指定しない場合はシナリオの初期の都市名(都市の言語 → 英語の順)。\n  - language: 都市の言語。シナリオと違う言語なら、都市内の固有名詞を付け直す。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\nシナリオをプレイとして始めるとき(template_mode でない)は、作者が固定していない開始設定\n(simulation_days・climate・ground_cover・asset_region)を選べる。固定の項目にシナリオと違う値を\n送ると 422 SCENARIO_OPTION_FIXED、値域の外は 422 SCENARIO_OPTION_INVALID(どちらもロード前に断る)。\n言語を変えたときは応答の relocalized に {from, to, counts} を入れる。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
         "operationId": "create_session_api_v1_sessions_post",
         "parameters": [
           {
@@ -5059,6 +5059,54 @@
               "type": "boolean",
               "default": false,
               "title": "Accept Balance Change"
+            }
+          },
+          {
+            "name": "climate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Climate"
+            }
+          },
+          {
+            "name": "ground_cover",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ground Cover"
+            }
+          },
+          {
+            "name": "asset_region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Asset Region"
             }
           }
         ],
@@ -11411,10 +11459,9 @@
             "title": "Terrain Map Id"
           },
           "title": {
-            "type": "string",
-            "maxLength": 160,
-            "title": "Title",
-            "default": ""
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Title"
           },
           "language": {
             "type": "string",
@@ -11424,53 +11471,149 @@
         },
         "type": "object",
         "required": [
-          "terrain_map_id"
+          "terrain_map_id",
+          "title"
         ],
         "title": "ScenarioFromTerrain",
-        "description": "POST /api/v1/scenarios/from-terrain の本文。"
+        "description": "POST /api/v1/scenarios/from-terrain の本文。title は多言語テキストで、英語が必須。"
       },
       "ScenarioMetadata": {
         "properties": {
           "scenario_title": {
-            "type": "string",
-            "maxLength": 160,
-            "title": "Scenario Title",
-            "default": ""
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Title"
           },
           "scenario_description": {
-            "type": "string",
-            "maxLength": 8000,
-            "title": "Scenario Description",
-            "default": ""
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Description"
           },
           "scenario_objective": {
-            "type": "string",
-            "maxLength": 4000,
-            "title": "Scenario Objective",
-            "default": ""
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Objective"
+          },
+          "scenario_city_name": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario City Name"
           },
           "author": {
-            "type": "string",
-            "maxLength": 120,
-            "title": "Author",
-            "default": ""
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
           },
           "category": {
-            "type": "string",
-            "pattern": "^(sandbox|challenge|tutorial)$",
-            "title": "Category",
-            "default": "sandbox"
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(sandbox|challenge|tutorial)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
           },
-          "language": {
-            "type": "string",
-            "pattern": "^(ja|en|es-419|zh-Hans|zh-Hant|fr|ko)$",
-            "title": "Language",
-            "default": "ja"
+          "scenario_fixed_options": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Fixed Options"
+          },
+          "simulation_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation Days"
+          },
+          "climate": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Climate"
+          },
+          "ground_cover": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ground Cover"
+          },
+          "asset_region": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Region"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "ScenarioMetadata"
+        "title": "ScenarioMetadata",
+        "description": "PATCH /api/v1/scenarios/{id} の本文。送った項目だけを書き換える(null・省略は変更しない)。\n\n言語(都市内の名前の言語)は紹介情報では変えられない。名前を付け直さずに言語だけを書き換えると、\nゲーム開始時の付け直しの判定が狂うため。"
       },
       "ScenarioTerrainUpdate": {
         "properties": {

@@ -21,5 +21,10 @@
     "5": "Estepa",
     "6": "Desértico",
     "7": "Subártico"
+  },
+  "assetRegion": {
+    "label": "Región de recursos de edificios y calles",
+    "hint": "Elige la variedad de apariencias de edificios y calles. No afecta la simulación.",
+    "1": "Estándar"
   }
 }

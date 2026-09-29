@@ -14,7 +14,6 @@
     "sandbox": "Bac à sable",
     "challenge": "Défi",
     "tutorial": "Tutoriel",
-    "language": "Langue",
     "close": "Fermer",
     "saveTemplate": "Enregistrer comme modèle",
     "templateModeRequired": "Seules les villes ouvertes en modification depuis la gestion des scénarios peuvent être enregistrées.",
@@ -39,7 +38,14 @@
     "terrainHint": "Choisissez un terrain pour y créer votre propre scénario. La partie ne démarre pas. Ensuite, utilisez « Modifier la ville » et « Modifier le terrain » dans l’onglet Scénarios pour le développer.",
     "terrainEmpty": "Aucun terrain disponible.",
     "terrainOpenFailed": "Impossible d’ouvrir le terrain du scénario.",
-    "terrainEncryptedHint": "Ce scénario a été créé à partir d’une ville de DLC et il est chiffré : l’éditeur de terrain ne peut pas l’ouvrir. Utilisez « Modifier la ville » pour modifier les ressources et les objets décoratifs."
+    "terrainEncryptedHint": "Ce scénario a été créé à partir d’une ville de DLC et il est chiffré : l’éditeur de terrain ne peut pas l’ouvrir. Utilisez « Modifier la ville » pour modifier les ressources et les objets décoratifs.",
+    "initialCityName": "Nom initial de la ville",
+    "cityLanguage": "Langue des noms de la ville",
+    "cityLanguageHint": "Langue des noms des quartiers, des installations et des habitants. Le joueur peut choisir une autre langue en commençant la partie ; les noms sont alors renommés.",
+    "startSettings": "Paramètres de départ",
+    "startSettingsHint": "Les éléments fixés commencent avec ces valeurs. Le joueur peut modifier les autres au début de la partie. La langue est toujours au choix du joueur.",
+    "fixedOption": "Fixer",
+    "englishRequired": "Le texte en anglais est requis. Le titre doit avoir de l'anglais, et tout autre champ rempli en a aussi besoin."
   },
   "saveCompatibility": {
     "unknown": "Inconnue",
@@ -57,7 +63,7 @@
     "SAVE_BALANCE_CONFIRMATION_REQUIRED": "Veuillez confirmer le changement d’équilibrage.",
     "SCENARIO_UPLOAD_UNCONFIGURED": "Aucune destination de publication configurée.",
     "SCENARIO_UPLOAD_FAILED": "Échec de la publication. Le scénario local reste enregistré.",
-    "SCENARIO_METADATA_REQUIRED": "Saisissez un titre et un auteur.",
+    "SCENARIO_METADATA_REQUIRED": "Saisissez un titre en anglais et un auteur.",
     "SCENARIO_PACKAGE_INVALID": "Impossible de charger l’image. Choisissez une image de 10 Mo maximum.",
     "TEMPLATE_MODE_REQUIRED": "Enregistrez en mode édition de modèle.",
     "SCENARIO_REQUIRED": "Choisissez un fichier modèle.",
@@ -80,6 +86,9 @@
     "SCENARIO_READ_ONLY": "Les scénarios de la communauté et des DLC ne peuvent pas être modifiés. Modifiez une copie.",
     "NOT_FOUND": "Données introuvables. Elles ont peut-être été supprimées. Actualisez la liste.",
     "API_TOKEN_REQUIRED": "L’authentification auprès du moteur a échoué. Redémarrez le jeu.",
-    "HOST_NOT_ALLOWED": "L’hôte utilisé pour se connecter au moteur n’est pas autorisé. Vérifiez les paramètres de connexion."
+    "HOST_NOT_ALLOWED": "L’hôte utilisé pour se connecter au moteur n’est pas autorisé. Vérifiez les paramètres de connexion.",
+    "SCENARIO_ENGLISH_REQUIRED": "Saisissez le texte en anglais. Le titre exige l'anglais.",
+    "SCENARIO_OPTION_FIXED": "Les paramètres fixés par le scénario ne peuvent pas être modifiés.",
+    "SCENARIO_OPTION_INVALID": "Un paramètre de départ a une valeur incorrecte."
   }
 }

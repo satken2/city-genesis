@@ -1,6 +1,7 @@
 import type { TFunction } from "i18next";
 import { ApiError, buildApiUrl, fetchApi } from "./api";
 import { requestConfirm } from "./confirmDialog";
+import { resolveLocalizedText, type LocalizedText } from "./locale";
 
 export type SaveCompatibility = {
   loadable: boolean;
@@ -28,12 +29,26 @@ export type SaveEntry = {
   pack_status?: Record<string, PackStatus>;
   /** 公式署名が有効か */
   official?: boolean;
-  scenario_title?: string; scenario_description?: string; scenario_objective?: string;
+  /** 紹介文と初期の都市名。作者が書く多言語テキストで、表示は `resolveLocalizedText` で言語を選ぶ */
+  scenario_title?: LocalizedText; scenario_description?: LocalizedText; scenario_objective?: LocalizedText;
+  scenario_city_name?: LocalizedText;
+  /** 作者が固定した開始設定の項目。固定しない項目はゲーム開始時にプレイヤーが選べる */
+  scenario_fixed_options?: ScenarioStartOption[];
   terrain_map_id?: string; terrain_map_name?: string; author?: string;
   category?: "sandbox" | "challenge" | "tutorial"; content_revision?: number;
-  /** 都市が持つ地表・気候(`GROUND_COVER_*` / `CLIMATE_*`)。地形エディタの保存でだけ変わるので、オリジナル地形の登録表の値とは異なりうる */
+  /** 都市が持つ地表・気候(`GROUND_COVER_*` / `CLIMATE_*`)。地形エディタ・紹介情報で変わるので、オリジナル地形の登録表の値とは異なりうる */
   ground_cover?: number; climate?: number;
+  /** 建物・道路アセットの地域(`ASSET_REGION_*`) */
+  asset_region?: number;
 };
+
+/** 作者が「固定」にできる開始設定の項目(コアの `SCENARIO_START_OPTIONS`)。言語は常にプレイヤーが選べるので含まない */
+export type ScenarioStartOption = "simulation_days" | "climate" | "ground_cover" | "asset_region";
+
+/** シナリオの見出し。タイトル(表示言語 → 英語)、無ければ都市名、それも無ければIDの先頭 */
+export function scenarioDisplayTitle(entry: SaveEntry, language: string | undefined): string {
+  return resolveLocalizedText(entry.scenario_title, language) || entry.city_name || entry.id.slice(0, 8);
+}
 
 /** エラーの理由コード。ApiError はその code、Rust コマンドの失敗は「CODE: 本文」の先頭(版照合の `"CODE": 本文` を含む)。無ければ null */
 export function errorCode(error: unknown): string | null {

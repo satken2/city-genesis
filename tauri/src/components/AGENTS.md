@@ -67,6 +67,7 @@
 | `FiscalSankey` | 財政Sankey。歳入項目の定義と支出カテゴリ色はここに置き、予算ウィンドウも共用 |
 | `ColorSwatchPicker` | 色選択。OSのカラーダイアログは最前面固定の透明ウィンドウの裏に開くので使わない |
 | `SettingsRow` / `SettingsForm.css` | アプリ設定・都市設定の共通フォーム。見出し・カード・設定行・Coming soon・セグメント選択・入力欄は同じ意匠を使う。`disabled` は表示用なので子の操作部品にもネイティブの `disabled` を指定する |
+| `LocalizedTextFields` | 作者が書く多言語テキスト(シナリオの紹介文・初期の都市名・クエストの名前と説明)の入力欄。言語のタブで同じ言語の全項目をまとめて書き、英語のタブを先頭に置いて必須と示す(英語の欠けの判定は呼び出し側が `missingEnglish` で行う)。最初に開くタブは表示言語 |
 | `FlatTabs` | フラット意匠のウィンドウ上部のタブ列(ニューゲーム・シナリオ管理)。`role=tab`・`aria-selected`、無効タブと札(Coming soon)。選択状態と中身の出し分けは呼び出し側が持つ |
 | `ScenarioSource`(`ScenarioOriginBadges` / `RequiredPacks`) | シナリオの保存元(自作/コミュニティ/DLC)と公式の札、都市に刻まれた必要パックと所有状況。読み込めるかの判定はコアの `compatibility` が正で、ここは表示だけ |
 | `SaveVersionInfo` | 保存版・互換性・必要パックの表示。セーブ一覧・ニューゲーム・シナリオ管理で共通 |
@@ -91,6 +92,8 @@
 - 都市設定(`taskbar/CityRenameWindow`、種別 `city_rename`): コックピットの都市名から開く。保存する値は都市名のみ。近似設定は Coming soon の無効な表示で、値の保持・送信を行わない。不可逆の警告は名称変更ではなく近似設定の節に置く。
 
 - ニューゲーム(`taskbar/NewGameWindow`): `FlatTabs` で「シナリオを選択」「シナリオを探す」(未提供。無効+Coming soon)の2タブ。一覧はチュートリアルと `GET /api/v1/scenarios`(全保存元)で、`scenarios:changed` で取り直す。地形から直接始める入口は持たない(チュートリアル用に `GET /api/v1/terrain/maps` だけ取る)。読み込めないシナリオは開始ボタンを無効にし、開始の確認画面に「開いているウィンドウをすべて閉じ、地形エディタの未保存の編集は失われる」旨を出す。地形の名称は全7言語の`terrainProfiles.json`に置き、`data/terrainProfiles.ts`で対象IDを管理する。収録地形の表示名は実在の地名(与論島・マンハッタン島など)で、紹介文は持たない。マップIDは表示名と分けて維持する。気候はAPIの`climate`を`normalizeClimate`で正規化して`climate.<値>`で表示する。シナリオの地表・気候は一覧の要素の`ground_cover`・`climate`(都市が持つ値。地形エディタで変わる)を優先し、無いときだけ登録表の値を使う。大きさは寸法を変えられないので登録表から引く。マップIDから別の気候を割り当てない。未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
+  - 紹介文は多言語テキストを表示言語で引く(`resolveLocalizedText`、見出しは `scenarioDisplayTitle`)。確認画面の都市の言語の既定はアプリ設定の言語で、シナリオの言語と違えば名前の付け直しを注記する。都市名の初期値は初期の都市名を選んだ言語で引き、プレイヤーが書き換えていなければ言語の切り替えで引き直す。
+  - シナリオでは作者が固定した開始設定(`scenario_fixed_options`)を値の表示だけにし、固定していない項目(日数・気候・地表・アセットの地域)を選ばせる。`create_session` には固定していない項目の値だけを送る(固定は null。コアは固定値と違う値を 422 で断る)。
 - エポック実行(`taskbar/EpochConfirmWindow`): HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
 
 - 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物・構造種別の階数上限はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
@@ -141,6 +144,8 @@
 
 - `template/ScenarioManagerWindow` はトップメニューの「シナリオ管理」から開き、Unityを起動しない。`FlatTabs` で「シナリオ」「地形を取り込む」の2タブ。`scenario_manager` / `scenario_metadata` はレジストリ駆動のポップアップで、後者へ `params.extra.scenarioId` を渡す。
 - シナリオタブは `GET /api/v1/scenarios` の全保存元(自作・コミュニティ・DLC)を1つの一覧にする。自作(`origin === "local" && !read_only`)のカードは「都市を編集」「地形を編集」「紹介情報」「アップロード」、それ以外は「コピーして編集」だけ。都市を開く2つは `create_session {templateId, templateMode: true, acceptBalanceChange: true}` で、ポップアップが全部閉じるので確認文で地形エディタの未保存の編集に触れる。「地形を編集」は `invoke("prepare_scenario_terrain_editor", {scenarioId})` の戻り値で `terrain_editor` を開く。自作でも `encrypted`(DLC由来)なら「地形を編集」を無効にし、理由をツールチップ(`scenarios.terrainEncryptedHint`)で出す(作業コピーが平文で残るため、コアも409 `SCENARIO_ENCRYPTED` で断る)。
-- 地形を取り込むタブは初回表示で `GET /api/v1/terrain/maps` を取り、以後は隠すだけで選択を保つ。地形はタイル(サムネイル・翻訳名・大きさ)だけで並べ、詳細欄は持たない。登録表の地表・気候はシナリオの初期値にすぎないので表示しない。「シナリオを作成」はツールバーに置き、選択するまで無効。押すと `POST /api/v1/scenarios/from-terrain {terrain_map_id, title: 翻訳名, language: アプリ設定の言語}` → 一覧の取り直し → シナリオタブへ切り替えて新しいカードを選択 → `scenarios:changed`。
-- 紹介文入力は `common/ScenarioTextFields`、画像は `ScenarioThumbnail`、保存元の札と必要パックは `ScenarioSource`、保存版と互換性は `SaveVersionInfo`。同じ項目の入力・表示を各画面で再実装しない。
+- 地形を取り込むタブは初回表示で `GET /api/v1/terrain/maps` を取り、以後は隠すだけで選択を保つ。地形はタイル(サムネイル・翻訳名・大きさ)だけで並べ、詳細欄は持たない。登録表の地表・気候はシナリオの初期値にすぎないので表示しない。「シナリオを作成」はツールバーに置き、選択するまで無効。押すと `POST /api/v1/scenarios/from-terrain {terrain_map_id, title: 全言語の翻訳名, language: アプリ設定の言語}` → 一覧の取り直し → シナリオタブへ切り替えて新しいカードを選択 → `scenarios:changed`。
+- 紹介文・初期の都市名の入力は `common/LocalizedTextFields`、画像は `ScenarioThumbnail`、保存元の札と必要パックは `ScenarioSource`、保存版と互換性は `SaveVersionInfo`。同じ項目の入力・表示を各画面で再実装しない。
+- 紹介文を編集するのは紹介情報ウィンドウ(`template/ScenarioMetadataWindow`)だけ。達成目標ウィンドウの `ScenarioInfoSection` は神モードでも表示だけにする。紹介情報ウィンドウは開始設定(日数・気候・地表・アセットの地域の値と「固定する」)も書き、都市内の名前の言語は表示だけにする(`PATCH /api/v1/scenarios/{id}` は `language` を受けない)。
+- 「シナリオを作成」の `title` は地形の翻訳名を `i18n.getFixedT(言語)` で全言語分引いた多言語テキスト(英語が必須のため)。
 - 変更通知は `scenarios:changed`。保存成功後に紹介情報を開き、投稿は別操作として確認する。投稿先の可否はコアの一覧レスポンスに従う。

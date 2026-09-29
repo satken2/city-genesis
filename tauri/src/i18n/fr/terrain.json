@@ -21,5 +21,10 @@
     "5": "Steppique",
     "6": "Désertique",
     "7": "Subarctique"
+  },
+  "assetRegion": {
+    "label": "Région des ressources de bâtiments et de routes",
+    "hint": "Choisit la gamme d'apparences des bâtiments et des routes. N'affecte pas la simulation.",
+    "1": "Standard"
   }
 }

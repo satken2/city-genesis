@@ -37,7 +37,7 @@ import { EpochDate } from "../common/EpochDate";
 import { STATUS_STYLE_MAP } from "../../local-constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { formatCompactAmount } from "../../utils/money";
-import { resolveIntlLocale } from "../../utils/locale";
+import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
 import type { Quest, QuestNotification } from "../../types";
 import populationIcon from "../../assets/images/population.png";
 import gdpIcon from "../../assets/images/menu/menu_stat.png";
@@ -339,7 +339,7 @@ export function EpochResultWindow({
   const questSummary = useMemo(() => {
     const items: QuestCheckItem[] = quests.map((q) => ({
       id: q.id,
-      name: q.hidden && q.status !== "completed" ? t("achievements.hiddenQuestName") : q.name,
+      name: q.hidden && q.status !== "completed" ? t("achievements.hiddenQuestName") : resolveLocalizedText(q.name, i18n.language),
       state:
         q.status === "completed"
           ? "completed"
@@ -350,7 +350,7 @@ export function EpochResultWindow({
               : "active",
     }));
     return { items, completedCount: items.filter((i) => i.state === "completed").length };
-  }, [quests, t]);
+  }, [quests, t, i18n.language]);
 
   // 統計タイルの表示データ。値・水準の警戒色・変動方向の3点を1タイルにまとめる。
   const statTiles = useMemo(() => {
@@ -502,10 +502,10 @@ export function EpochResultWindow({
             <div
               key={`done-${q.id}`}
               className={`epoch-result-quest-chip epoch-result-quest-chip--completed epoch-result-quest-chip--${q.tier}`}
-              title={q.description}
+              title={resolveLocalizedText(q.description, i18n.language)}
             >
               <span className="epoch-result-quest-chip-icon">&#10003;</span>
-              <span className="epoch-result-quest-chip-name">{q.name}</span>
+              <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
               <span className="epoch-result-quest-chip-label">{t("epochResult.questCompleted")}</span>
             </div>
           ))}
@@ -513,10 +513,10 @@ export function EpochResultWindow({
             <div
               key={`failed-${q.id}`}
               className="epoch-result-quest-chip epoch-result-quest-chip--failed"
-              title={q.description}
+              title={resolveLocalizedText(q.description, i18n.language)}
             >
               <span className="epoch-result-quest-chip-icon">&#10005;</span>
-              <span className="epoch-result-quest-chip-name">{q.name}</span>
+              <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
               <span className="epoch-result-quest-chip-label">{t("epochResult.questFailed")}</span>
             </div>
           ))}
@@ -524,9 +524,9 @@ export function EpochResultWindow({
             <div
               key={`near-${q.id}`}
               className="epoch-result-quest-chip epoch-result-quest-chip--near"
-              title={q.description}
+              title={resolveLocalizedText(q.description, i18n.language)}
             >
-              <span className="epoch-result-quest-chip-name">{q.name}</span>
+              <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
               <span className="epoch-result-quest-chip-bar">
                 <span
                   className="epoch-result-quest-chip-bar-fill"

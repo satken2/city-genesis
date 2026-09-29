@@ -46,6 +46,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 - 3Dビューの表示切替は2系統。`sendChangeDisplay` はユーザーの選択(Unityが通常表示として記憶)、`sendViewApplyPreset` はウィンドウを開いている間だけの一時差し替え。編集作業中だけ表示を変えたいときに前者を使わない(ユーザーの選択を上書きする)。
 - 確認ダイアログは `utils/confirmDialog.ts` の `requestConfirm()`。`window.confirm` は使わない(tauri-plugin-dialogがPromiseを返す非同期版に差し替えるため、`if (!window.confirm(...))` は常に素通りする)。
 - 表示文字列は `useTranslation()` の `t("key")`。ハードコード禁止。
+- 作者が書く文(シナリオの紹介文・初期の都市名・クエストの名前と説明)は i18n ではなく多言語テキスト(`LocalizedText`)で、コアから `{言語コード: 文}` で届く。そのまま描画せず `resolveLocalizedText(値, i18n.language)` で引き、入力は `common/LocalizedTextFields` を使う(英語が必須)。
 - 対応言語は `utils/locale.ts` の `SUPPORTED_LANGUAGES`(`ja` / `en` / `es-419` / `zh-Hans` / `zh-Hant` / `fr` / `ko`)が唯一の正で、日本語が原本。言語を増やすときは `SUPPORTED_LANGUAGES`・`INTL_LOCALES`、`src/i18n/<コード>/` の全JSON、`tools/check_i18n_parity.py` の `LANGS` を揃える。
 - 翻訳キーを足したら全言語のJSONを更新し、`python tools/check_i18n_parity.py` で過不足と `{{変数}}` の食い違いを確認する。
 - i18nインスタンスはウィンドウごとに独立し、言語変更は `settings-updated` イベントで各ウィンドウが追従する(`App.tsx`)。`Intl` に渡すロケールは `resolveIntlLocale(i18n.language)` で解決し、`i18n.language` を直接渡さない。
@@ -75,7 +76,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `hintbar.ts` | `setHintbarText`(置換) / `clearHintbarTextIf(expected)`(自分が出した案内だけ消す) |
 | `log.ts` | `logInfoToFile`。Rust側ファイルログへのINFO転送 |
 | `settings.ts` | アプリ設定のロード・保存。保存時に `settings-updated` が全ウィンドウへ飛ぶ |
-| `locale.ts` | 対応言語と `Intl` ロケールの解決(`SUPPORTED_LANGUAGES` / `resolveIntlLocale` / `resolveSupportedLanguage`) |
+| `locale.ts` | 対応言語と `Intl` ロケールの解決(`SUPPORTED_LANGUAGES` / `resolveIntlLocale` / `resolveSupportedLanguage`)。作者が書く多言語テキスト `LocalizedText`(`{言語コード: 文}`。シナリオの紹介文・初期の都市名・クエストの名前と説明)の表示 `resolveLocalizedText`(表示言語 → 英語 → 対応言語)・送信前の整理 `compactLocalizedText`・英語の欠け `missingEnglish` |
 | `date.ts` / `money.ts` | 仮想暦(1ヶ月=30日・1年=360日)と金額の整形 |
 | `parking.ts` | 駐車メーターの使用率 `parkingUsage`。表示桁に丸めてから割る(生値だと「20 / 20台」で100%超に光る) |
 | `constructionTags.ts` | 建設プロジェクトのタグ。`fetchEntityTag` は専用API(`tag` は単体取得に載らない)。`TAGGABLE_STATUSES` はバックエンドの写し |
@@ -86,7 +87,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `epochPresentation.ts` / `epochFlow.ts` | 演出ID付きの暗転通知待ち、HTTPと日没の並行実行、処理時間に応じたTipsの開閉。結果画面のクローズまで黒幕を保持する |
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` / `bdCategoryIcon.ts` / `pathCategoryIcon.ts` | 各種アイコン画像の解決。`bdCategoryIcon` は建物建設パネルの分類(`assets/images/bd_categories/{id}.png`)、`pathCategoryIcon` はパス建設パネルのカテゴリ(`assets/images/paths/path_{path_type}.png`)。`agentIcon` の `resolveAgentVariantIcon` はバリアント専用画像だけを返す(無ければ空文字) |
 | `propThumbnail.ts` | プロップサムネイルの解決。画像のglobはここ1箇所だけ |
-| `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`)、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま) |
+| `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`・開始設定の項目 `ScenarioStartOption`)、シナリオの見出し `scenarioDisplayTitle`、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま) |
 | `terrainMaps.ts` | オリジナル地形の一覧要素 `TerrainMapEntry`、表示名 `terrainMapTitle`(翻訳の無い地形は登録表の名前)、大きさの整形 `formatMapSize` |
 
 ## 詳細の参照先

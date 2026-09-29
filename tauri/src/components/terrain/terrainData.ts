@@ -1,4 +1,5 @@
 import type { TerrainProps } from "./TerrainPropEditor";
+import type { LocalizedText } from "../../utils/locale";
 import {
   CLIMATE_TEMPERATE,
   CLIMATE_TYPES,
@@ -113,8 +114,8 @@ export type TerrainEditorData = {
   scenario_id: string;
   /** シナリオの元になったオリジナル地形のID */
   terrain_map_id: string | null;
-  /** シナリオのタイトル(見出しに出す) */
-  title: string | null;
+  /** シナリオのタイトル(多言語テキスト。見出しに表示言語で出す) */
+  title: LocalizedText | null;
   locks: unknown;
   map_width: number;
   map_height: number;

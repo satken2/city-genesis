@@ -36,11 +36,11 @@
 }
 
 /* 設定確認画面: 入力欄が間延びしないよう中央に寄せる */
+/* 縦の中央寄せは子の margin で行う(justify-content: center だと、はみ出したとき上端へスクロールできない) */
 .new-game-body--confirm {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   padding: 20px;
   overflow-y: auto;
 }
@@ -323,6 +323,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin: auto 0;
   padding: 8px 0;
   width: 100%;
   max-width: 520px;
@@ -469,6 +470,28 @@
 .new-game-confirm-note {
   font-size: 1.11rem;
   color: #6b8299;
+}
+
+/* シナリオと違う言語で始めると名前が付け直されることの予告。注釈より目立たせる */
+.new-game-confirm-relocalize {
+  color: var(--flat-warn);
+}
+
+/* 作者が固定した開始設定。値を読み取り専用で出し、固定であることを札で示す */
+.new-game-confirm-fixed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 1.3rem;
+  color: var(--flat-text);
+}
+
+.new-game-confirm-fixed-badge {
+  padding: 2px 8px;
+  font-size: 0.93rem;
+  background: var(--flat-raised);
+  color: var(--flat-text-label);
 }
 
 /* 開始でポップアップがすべて閉じることの予告。操作の直前に置き、注釈より目立たせる */

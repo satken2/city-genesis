@@ -69,3 +69,39 @@ export function resolveSupportedLanguage(language: string | undefined): Supporte
 export function resolveIntlLocale(language: string | undefined): string {
   return INTL_LOCALES[resolveSupportedLanguage(language)];
 }
+
+/**
+ * 作者が複数の言語で書く文({言語コード: 文})。シナリオの紹介文・初期の都市名・クエストの名前と説明に使う。
+ * 表示する言語の文が無ければ英語を出すので、英語だけは必須(コアの localized_text と同じ規則)。
+ */
+export type LocalizedText = Partial<Record<SupportedLanguage, string>>;
+
+/** 表示する言語の文が無いときに使う言語。 */
+export const LOCALIZED_TEXT_FALLBACK: SupportedLanguage = "en";
+
+/** 表示用の文を選ぶ。指定言語 → 英語 → 対応言語の順に最初に見つかった文。無ければ空文字。 */
+export function resolveLocalizedText(texts: LocalizedText | null | undefined, language: string | undefined): string {
+  if (!texts) return "";
+  for (const code of [resolveSupportedLanguage(language), LOCALIZED_TEXT_FALLBACK, ...SUPPORTED_LANGUAGES]) {
+    const text = texts[code];
+    if (text && text.trim()) return text;
+  }
+  return "";
+}
+
+/** 空白だけの言語を落とした文(送信用)。 */
+export function compactLocalizedText(texts: LocalizedText | null | undefined): LocalizedText {
+  const result: LocalizedText = {};
+  for (const code of SUPPORTED_LANGUAGES) {
+    const text = texts?.[code];
+    if (text && text.trim()) result[code] = text;
+  }
+  return result;
+}
+
+/** 英語の文が欠けているか。required でない項目も、1言語でも書かれていれば英語が要る。 */
+export function missingEnglish(texts: LocalizedText | null | undefined, required: boolean): boolean {
+  const compact = compactLocalizedText(texts);
+  if (compact[LOCALIZED_TEXT_FALLBACK]) return false;
+  return required || Object.keys(compact).length > 0;
+}

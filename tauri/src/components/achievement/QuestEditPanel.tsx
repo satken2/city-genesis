@@ -22,7 +22,10 @@
  *
  * 条件以外にも、ライフサイクル(latch/notify/期限/先行クエスト)・報酬(交付金)・
  * 表示メタ(tier/category/hidden)を編集できる。仕様の正は
- * genesis-docs/docs/economics/24_達成クエスト.md。
+ * city-genesis/docs/docs/economics/24_達成クエスト.md。
+ *
+ * 名前と説明は多言語テキスト(LocalizedTextFields)で、どちらも英語が必須
+ * (表示する言語の文が無いときは英語が出る。コアも英語の無い文を拒否する)。
  */
 
 import { useEffect, useState } from "react";
@@ -36,6 +39,8 @@ import type {
   QuestTier,
 } from "../../types";
 import { requestConfirm } from "../../utils/confirmDialog";
+import { compactLocalizedText, missingEnglish, type LocalizedText } from "../../utils/locale";
+import { LocalizedTextFields } from "../common/LocalizedTextFields";
 import "./QuestEditPanel.css";
 
 type QuestEditPanelProps = {
@@ -78,8 +83,8 @@ const EMPTY_CLAUSE: ClauseForm = {
 
 /** クエスト全体のフォーム入力値 */
 type QuestFormState = {
-  name: string;
-  description: string;
+  name: LocalizedText;
+  description: LocalizedText;
   conditionOp: "all" | "any";
   clauses: ClauseForm[];
   /** JSONモード時の condition のJSON文字列 */
@@ -99,8 +104,8 @@ type QuestFormState = {
 };
 
 const EMPTY_FORM: QuestFormState = {
-  name: "",
-  description: "",
+  name: {},
+  description: {},
   conditionOp: "all",
   clauses: [{ ...EMPTY_CLAUSE }],
   conditionJson: "",
@@ -207,8 +212,8 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
         // not 演算子や入れ子の合成条件はフォームで表現できないため、JSONモードで開く
         const nested = hasNestedCondition(condition);
         setForm({
-          name: data.name ?? "",
-          description: data.description ?? "",
+          name: data.name ?? {},
+          description: data.description ?? {},
           conditionOp: condition.op === "any" ? "any" : "all",
           clauses: nested
             ? [{ ...EMPTY_CLAUSE }]
@@ -324,9 +329,9 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
     form.prerequisites.trim() === "" ||
     form.prerequisites.split(",").every((s) => /^\s*\d+\s*$/.test(s));
 
+  const textValid = !missingEnglish(form.name, true) && !missingEnglish(form.description, true);
   const isFormValid =
-    form.name.trim() !== "" &&
-    form.description.trim() !== "" &&
+    textValid &&
     conditionValid &&
     prerequisitesValid &&
     (!form.rewardEnabled || (form.rewardAmount.trim() !== "" && Number(form.rewardAmount) > 0)) &&
@@ -340,8 +345,8 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
     setError(null);
 
     const body: Record<string, unknown> = {
-      name: form.name,
-      description: form.description,
+      name: compactLocalizedText(form.name),
+      description: compactLocalizedText(form.description),
       latch: form.latch,
       notify: form.notify,
       tier: form.tier,
@@ -422,25 +427,15 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
         <>
           <div className="quest-edit-fields">
             {/* ── 基本情報 ── */}
-            <label className="quest-edit-field">
-              <span className="quest-edit-field-label">{t("achievementQuests.fieldName")}</span>
-              <input
-                className="quest-edit-input"
-                type="text"
-                value={form.name}
-                onChange={(e) => updateField("name", e.target.value)}
-              />
-            </label>
-
-            <label className="quest-edit-field">
-              <span className="quest-edit-field-label">{t("achievementQuests.fieldDescription")}</span>
-              <textarea
-                className="quest-edit-textarea"
-                rows={2}
-                value={form.description}
-                onChange={(e) => updateField("description", e.target.value)}
-              />
-            </label>
+            <LocalizedTextFields
+              value={{ name: form.name, description: form.description }}
+              onChange={(value) => setForm((prev) => ({ ...prev, name: value.name ?? {}, description: value.description ?? {} }))}
+              fields={[
+                { key: "name", label: t("achievementQuests.fieldName"), maxLength: 200 },
+                { key: "description", label: t("achievementQuests.fieldDescription"), maxLength: 2000, multiline: true },
+              ]}
+            />
+            {!textValid && <span className="quest-edit-field-hint">{t("achievementQuests.englishRequired")}</span>}
 
             <label className="quest-edit-checkbox-label">
               <input

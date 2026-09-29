@@ -11,11 +11,13 @@ import { state } from "./mock-runtime";
 import jaScenarios from "../../src/i18n/ja/scenarios.json";
 import jaTerrainEditor from "../../src/i18n/ja/terrainEditor.json";
 
-const window = new Window();
+// DOM は run.mjs が React より先に用意する(単体で読み込んだときだけここで作る)。
+const window = ((globalThis as { window?: Window }).window ?? new Window()) as Window;
 Object.assign(globalThis, { window, document: window.document, HTMLElement: window.HTMLElement,
   IS_REACT_ACT_ENVIRONMENT: true });
-const entry = { id: "local~mine", city_name: "City", scenario_title: "My scenario", author: "Author",
-  scenario_description: "Description", scenario_objective: "Objective", category: "sandbox", language: "ja",
+const entry = { id: "local~mine", city_name: "City", scenario_title: { en: "My scenario" } as Record<string, string>, author: "Author",
+  scenario_description: { en: "Description", ja: "説明" }, scenario_objective: { en: "Objective" }, category: "sandbox", language: "ja",
+  scenario_city_name: { ja: "見本市", en: "Sample Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, asset_region: 1,
   terrain_map_id: "flat", ground_cover: 4 as number | undefined, climate: 7 as number | undefined,
   saved_core_version: "1.0.0", created_core_version: "1.0.0", compatibility: { loadable: true }, origin: "local",
   read_only: false, encrypted: false, required_packs: [], pack_status: {}, official: false };
@@ -120,7 +122,9 @@ await act(async () => { (container.querySelector(".scenario-terrain-tile") as HT
 assert.ok(!button("scenarios.createFromTerrain").disabled);
 await act(async () => { button("scenarios.createFromTerrain").click(); });
 await settle();
-assert.deepEqual(fromTerrain, { terrain_map_id: "flat", title: "terrainProfiles.maps.flat.name", language: "ja" });
+// タイトルは多言語テキストで、地形の翻訳名を全言語分送る(英語は必須)。
+assert.deepEqual(fromTerrain, { terrain_map_id: "flat", language: "ja", title: Object.fromEntries(
+  ["ja", "en", "es-419", "zh-Hans", "zh-Hant", "fr", "ko"].map(language => [language, `${language}:terrainProfiles.maps.flat.name`])) });
 assert.equal(container.querySelector("[role=tab][aria-selected=true]")?.textContent, "scenarios.tabScenarios");
 assert.equal(card("local~new").getAttribute("aria-current"), "true");
 assert.ok(card("local~new").classList.contains("scenario-card--selected"));
@@ -140,14 +144,50 @@ assert.equal(cardButton("local~mine", "scenarios.editTerrain").title, "");
 await act(async () => { root.unmount(); });
 entries.pop();
 
+// 紹介情報: 紹介文と初期の都市名を言語のタブで書き(英語が先頭で必須)、開始設定の値と固定を決める。
+const submit = () => act(async () => { container.querySelector("form")!.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true })); });
+const setText = (element: HTMLInputElement | HTMLSelectElement, value: string) => {
+  const prototype = element.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype;
+  Object.getOwnPropertyDescriptor(prototype, "value")!.set!.call(element, value);
+  element.dispatchEvent(new window.Event(element.tagName === "SELECT" ? "change" : "input", { bubbles: true }));
+};
 root = createRoot(container);
 let closed = false;
 await act(async () => { root.render(<ScenarioMetadataWindow apiBaseUrl="http://test" scenarioId={entry.id} onClose={() => { closed = true; }} />); });
+await settle();
+const languageTabs = [...container.querySelectorAll<HTMLButtonElement>(".localized-text [role=tab]")];
+assert.equal(languageTabs.length, 7);
+assert.ok(languageTabs[0].textContent?.startsWith("settings.language.en"), "English comes first");
+assert.ok(languageTabs[0].textContent?.includes("localizedText.required"));
+assert.equal(container.querySelector(".localized-text [aria-selected=true]")?.textContent, "settings.language.ja", "the display language opens first");
 assert.equal(container.querySelectorAll("textarea").length, 2);
-await act(async () => { container.querySelector("form")!.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true })); });
-assert.equal(metadataWritten.scenario_title, entry.scenario_title);
+assert.equal((container.querySelector("textarea") as HTMLTextAreaElement).value, "説明");
+assert.equal(container.querySelectorAll(".scenario-start-row").length, 4);
+const fixedBox = (option: string) => container.querySelector<HTMLInputElement>(`.scenario-start-row[data-option=${option}] input[type=checkbox]`)!;
+assert.ok(fixedBox("climate").checked && !fixedBox("simulation_days").checked);
+await act(async () => { fixedBox("simulation_days").click(); });
+await act(async () => { setText(container.querySelector<HTMLSelectElement>(".scenario-start-row[data-option=simulation_days] select")!, "7"); });
+await submit();
+assert.deepEqual(metadataWritten.scenario_title, { en: "My scenario" });
+assert.deepEqual(metadataWritten.scenario_description, { ja: "説明", en: "Description" });
+assert.deepEqual(metadataWritten.scenario_city_name, { ja: "見本市", en: "Sample Town" });
+assert.deepEqual(metadataWritten.scenario_fixed_options, ["simulation_days", "climate"]);
+assert.deepEqual([metadataWritten.simulation_days, metadataWritten.climate, metadataWritten.ground_cover, metadataWritten.asset_region], [7, 7, 4, 1]);
 assert.equal(metadataWritten.author, entry.author);
+assert.ok(!("language" in metadataWritten), "the city language is not editable here");
 assert.ok(closed);
+await act(async () => { root.unmount(); });
+
+// 英語のタイトルを消すと保存しない。
+metadataWritten = undefined;
+root = createRoot(container);
+await act(async () => { root.render(<ScenarioMetadataWindow apiBaseUrl="http://test" scenarioId={entry.id} onClose={() => {}} />); });
+await settle();
+await act(async () => { container.querySelector<HTMLButtonElement>(".localized-text [role=tab]")!.click(); });
+await act(async () => { setText(container.querySelector<HTMLInputElement>(".localized-text input")!, ""); });
+await submit();
+assert.equal(metadataWritten, undefined, "a title without English is not sent");
+assert.equal(container.querySelector(".scenario-error")?.textContent, "scenarios.englishRequired");
 await act(async () => { root.unmount(); });
 
 // ニューゲーム: 「シナリオを探す」は準備中。地形から直接始める入口は無い。
@@ -180,14 +220,34 @@ await act(async () => { unloadable[0].click(); });
 assert.ok(button("newGame.startScenarioButton").disabled, "unloadable scenarios cannot be started");
 assert.ok(container.querySelector(".new-game-detail .required-pack--not_owned"));
 await act(async () => { tile("My scenario").click(); });
+state.results.load_app_settings = { language: "en" };
 await act(async () => { button("newGame.startScenarioButton").click(); });
 await settle();
 assert.ok(container.textContent?.includes("newGame.closeWindowsNote"));
+// 都市の言語の既定はアプリ設定の言語。シナリオと違えば名前の付け直しを知らせ、都市名は初期の都市名をその言語で引く。
+const languageSelect = container.querySelector<HTMLSelectElement>(".new-game-confirm-select")!;
+const cityNameInput = container.querySelector<HTMLInputElement>(".new-game-confirm-input")!;
+assert.equal(languageSelect.value, "en");
+assert.ok(container.querySelector(".new-game-confirm-relocalize"), "starting in another language renames the city");
+assert.equal(cityNameInput.value, "Sample Town");
+await act(async () => { setText(languageSelect, "ja"); });
+assert.equal(cityNameInput.value, "見本市");
+assert.ok(!container.querySelector(".new-game-confirm-relocalize"));
+await act(async () => { setText(cityNameInput, "Mine"); });
+await act(async () => { setText(languageSelect, "fr"); });
+assert.equal(cityNameInput.value, "Mine", "a typed city name is kept");
+// 作者が固定した気候は表示だけ。固定していない項目は選べる。
+const optionRow = (option: string) => container.querySelector(`.new-game-confirm-field[data-option=${option}]`)!;
+assert.ok(optionRow("climate").querySelector(".new-game-confirm-fixed") && !optionRow("climate").querySelector("select"));
+await act(async () => { setText(optionRow("ground_cover").querySelector("select")!, "2"); });
 await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const session = lastCall("create_session");
 assert.equal(session.templateId, "local~mine");
 assert.equal(session.templateMode, undefined, "new games never start in template mode");
+assert.deepEqual([session.language, session.cityName, session.climate, session.groundCover, session.assetRegion, session.simulationDays],
+  ["fr", "Mine", null, 2, 1, 30]);
+delete state.results.load_app_settings;
 await act(async () => { root.unmount(); });
 
 validation = { balance_changed: true, balance_core_version: "1.0.0", core_version: "1.1.0" };
@@ -216,4 +276,4 @@ for (const code of ["SCENARIO_TOO_LARGE", "SCENARIO_READ_ONLY", "SCENARIO_ENCRYP
 for (const code of ["TERRAIN_LOCKED", "TERRAIN_INVALID", "TERRAIN_SIZE_MISMATCH", "RESOURCE_VALIDATION_ERROR", "PROP_VALIDATION_ERROR"]) {
   assert.ok(code in jaTerrainEditor.terrainEditor.saveErrors, `terrainEditor.saveErrors.${code} is translated`);
 }
-console.log("PASS: scenario manager tabs and origin actions, encrypted terrain lock, terrain editor open errors, terrain import, new game tabs and terrain facts, metadata submission, load confirmation and error codes");
+console.log("PASS: scenario manager tabs and origin actions, encrypted terrain lock, terrain editor open errors, terrain import, new game tabs and terrain facts, new game language and start options, localized metadata and start settings, load confirmation and error codes");

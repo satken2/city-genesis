@@ -36,14 +36,9 @@
     "hiddenQuestDesc": "この目標は達成すると明かされます",
     "scenarioSection": "シナリオ情報",
     "scenarioTitleLabel": "タイトル",
-    "scenarioTitlePlaceholder": "例: 自給自足社会を作ろう",
     "scenarioDescriptionLabel": "説明",
-    "scenarioDescriptionPlaceholder": "このシナリオの舞台や状況を説明する文章",
     "scenarioObjectiveLabel": "達成条件",
-    "scenarioObjectivePlaceholder": "例: 輸出額が0、輸入額が0、人口1万人以上",
     "scenarioSave": "保存",
-    "scenarioSaved": "保存しました",
-    "scenarioSaveFailed": "保存に失敗しました",
     "tier": {
       "gold": "ゴールド",
       "silver": "シルバー",
@@ -79,8 +74,7 @@
       "failed": "期限切れ"
     },
     "scenarioImageLabel": "画像（サムネイル）",
-    "scenarioImageSelect": "画像を選択...",
-    "scenarioImageClear": "削除"
+    "scenarioEditHint": "紹介文はシナリオとして保存したあと、紹介情報ウィンドウで編集します。"
   },
   "achievementQuests": {
     "createTitle": "クエスト作成",
@@ -141,7 +135,8 @@
     "groupDisplay": "表示",
     "fieldTier": "ティア(演出強度)",
     "fieldCategory": "カテゴリ",
-    "fieldHidden": "隠し目標(達成まで内容を伏せる)"
+    "fieldHidden": "隠し目標(達成まで内容を伏せる)",
+    "englishRequired": "名前と説明は英語の入力が必要です。"
   },
   "questComplete": {
     "title": "目標達成！",

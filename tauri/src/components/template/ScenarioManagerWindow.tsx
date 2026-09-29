@@ -8,6 +8,7 @@
  *   SCENARIO_ENCRYPTED で断る)ので、「地形を編集」を無効にして理由をツールチップで示す。
  * - 地形を取り込むタブ: オリジナル地形をタイルで並べ、選んだ地形から新しい自作シナリオを作る(ゲームは始まらない)。
  *   地表・気候はシナリオ側で決める値なので出さず、タイルには名前と大きさだけを載せる。
+ *   タイトルは地形の翻訳名を全言語分送る(紹介文は多言語テキストで、英語が必須のため)。
  *   作成後はシナリオタブへ切り替え、新しいカードを選択状態にする。
  *
  * 都市の編集は create_session でポップアップをすべて閉じるので、確認文で地形エディタの未保存の編集に触れる。
@@ -17,10 +18,10 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { errorCode, prepareSaveLoad, SaveEntry, saveError } from "../../utils/saves";
+import { errorCode, prepareSaveLoad, SaveEntry, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { loadAppSettings } from "../../utils/settings";
-import { resolveSupportedLanguage } from "../../utils/locale";
+import { SUPPORTED_LANGUAGES, resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
 import { formatMapSize, terrainMapTitle, type TerrainMapEntry } from "../../utils/terrainMaps";
 import { FlatTabs } from "../common/FlatTabs";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
@@ -86,7 +87,7 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         terrain_map_id: map.id,
-        title: terrainMapTitle(map, t),
+        title: Object.fromEntries(SUPPORTED_LANGUAGES.map(language => [language, terrainMapTitle(map, i18n.getFixedT(language))])),
         language: resolveSupportedLanguage(settings?.language || i18n.language),
       }),
     });
@@ -116,13 +117,14 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {catalog && entries.map(entry => {
           const own = entry.origin === "local" && !entry.read_only;
           const loadable = entry.compatibility.loadable;
+          const description = resolveLocalizedText(entry.scenario_description, i18n.language);
           return <article key={entry.id} data-scenario-id={entry.id} aria-current={entry.id === selectedId ? "true" : undefined}
             className={`scenario-card${entry.id === selectedId ? " scenario-card--selected" : ""}`} onClick={() => setSelectedId(entry.id)}>
             <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={entry.id} revision={entry.content_revision} terrainMapId={entry.terrain_map_id} className="scenario-thumbnail" />
             <div className="scenario-card-content">
               <ScenarioOriginBadges entry={entry} />
-              <h3>{entry.scenario_title || entry.city_name}</h3>
-              {entry.scenario_description && <p className="scenario-description">{entry.scenario_description}</p>}
+              <h3>{scenarioDisplayTitle(entry, i18n.language)}</h3>
+              {description && <p className="scenario-description">{description}</p>}
               {entry.author && <p>{t("scenarios.byAuthor", { author: entry.author })}</p>}
               <SaveVersionInfo entry={entry} />
               <div className="scenario-actions">

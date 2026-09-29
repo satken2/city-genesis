@@ -376,6 +376,8 @@
     "tabSelect": "Elegir escenario",
     "tabBrowse": "Buscar escenarios",
     "comingSoon": "Coming soon",
-    "closeWindowsNote": "Al empezar se cierran todas las ventanas abiertas. Se perderán los cambios sin guardar del editor de terreno."
+    "closeWindowsNote": "Al empezar se cierran todas las ventanas abiertas. Se perderán los cambios sin guardar del editor de terreno.",
+    "relocalizeNote": "Este escenario se creó en {{from}}. Si empiezas en {{to}}, los nombres de distritos, instalaciones, residentes, estaciones y otros se cambian a {{to}} (también se reemplazan los nombres que puso el autor; se conservan los nombres de las calles y algunos otros).",
+    "fixedByScenario": "Fijado por el escenario"
   }
 }

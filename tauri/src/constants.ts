@@ -286,6 +286,7 @@ export const CLIMATE_MEDITERRANEAN: number = 4;
 export const CLIMATE_STEPPE: number = 5;
 export const CLIMATE_DESERT: number = 6;
 export const CLIMATE_SUBARCTIC: number = 7;
+export const ASSET_REGION_STANDARD: number = 1;
 export const INTERCHANGE_KIND_IC: number = 1;
 export const INTERCHANGE_KIND_JCT: number = 2;
 export const INTERCHANGE_HULL_MARGIN_M: number = 10.0;
@@ -412,6 +413,12 @@ export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23, 24];
 export const GROUND_COVER_TYPES: number[] = [1, 2, 3, 4, 5];
 
 export const CLIMATE_TYPES: number[] = [1, 2, 3, 4, 5, 6, 7];
+
+export const ASSET_REGION_TYPES: number[] = [1];
+
+export const SIMULATION_DAYS_CHOICES: number[] = [7, 30];
+
+export const SCENARIO_START_OPTIONS: string[] = ["simulation_days", "climate", "ground_cover", "asset_region"];
 
 export const PATH_TYPES_NAMED_ROAD: number[] = [1, 2];
 

@@ -129,7 +129,7 @@ import { ResourcePresetHint } from "../resource/ResourcePresetHint";
 import { useResourcePresetInputs } from "../../hooks/useResourcePresetInputs";
 import { RESOURCE_MAX_AMOUNT_LIMIT } from "../../data/resourcePresets";
 import { formatCompactAmount } from "../../utils/money";
-import { resolveIntlLocale } from "../../utils/locale";
+import { resolveIntlLocale, resolveLocalizedText, type LocalizedText } from "../../utils/locale";
 import "./TerrainEditorCanvas.css";
 import { TerrainPropEditor, useTerrainPropEditor, emptyTerrainProps, type TerrainProps } from "./TerrainPropEditor";
 
@@ -1452,7 +1452,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // --- 編集対象のシナリオ ---
   // 寸法・格子間隔・セルサイズはシナリオの都市と結び付いていて変えられない(コアの保存 API が寸法の変更を拒否する)。
   // メタデータ欄では読み取り専用で表示し、地表・気候だけを編集できる。
-  const [scenarioInfo, setScenarioInfo] = useState<{ title: string; terrainMapId: string; farSpacing: number; cellSize: number } | null>(null);
+  const [scenarioInfo, setScenarioInfo] = useState<{ title: LocalizedText; terrainMapId: string; farSpacing: number; cellSize: number } | null>(null);
   const [locks, setLocks] = useState<TerrainEditorLocks>({ heights_locked: false, reasons: [] });
   const heightsLockedRef = useRef(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -3484,7 +3484,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
         const cellSize = data.cell_size > 0 ? data.cell_size : 500;
         setScenarioInfo({
-          title: data.title ?? "",
+          title: data.title ?? {},
           terrainMapId: data.terrain_map_id ?? "",
           farSpacing: data.far_spacing,
           cellSize,
@@ -3818,6 +3818,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const scenarioTitle = resolveLocalizedText(scenarioInfo?.title, i18n.language);
   return (
     <div className="terrain-editor-root">
       <dialog ref={metadataDialogRef} className="terrain-editor-metadata-dialog" aria-label={t("terrainEditor.metadataTitle")}>
@@ -3897,8 +3898,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       <aside className="terrain-editor-tools">
         <div className="terrain-editor-tools-title-row">
           <h1 className="terrain-editor-tools-title">
-            {scenarioInfo?.title
-              ? t("terrainEditor.scenarioHeading", { title: scenarioInfo.title })
+            {scenarioTitle
+              ? t("terrainEditor.scenarioHeading", { title: scenarioTitle })
               : t("terrainEditor.toolsTitle")}
           </h1>
           <div className="terrain-editor-header-actions">

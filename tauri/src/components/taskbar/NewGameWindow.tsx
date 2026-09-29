@@ -16,7 +16,12 @@
  * マップの寸法は変えられないので、大きさはオリジナル地形の登録表から引く。
  *
  * 詳細パネルの開始ボタンで「ゲーム設定の確認」画面に切り替わり、
- * 都市名・都市の言語・シミュレーション日数を設定してからゲームを開始する。
+ * 都市名・都市の言語・シミュレーション日数などを設定してからゲームを開始する。
+ *
+ * シナリオの紹介文・初期の都市名は作者が多言語で書くテキストで、紹介文は表示言語、初期の都市名は
+ * 選んだ都市の言語で引く(無ければ英語)。都市の言語はいつでも選べ、既定はアプリ設定の言語。シナリオと
+ * 違う言語を選ぶと、コアが都市内の名前を付け直す。シミュレーション日数・気候・地表・アセットの地域は、
+ * 作者が固定した項目は表示だけ、固定していない項目はシナリオの値を初期値に選べる。
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -24,7 +29,7 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { loadAppSettings } from "../../utils/settings";
-import { SUPPORTED_LANGUAGES, resolveSupportedLanguage } from "../../utils/locale";
+import { SUPPORTED_LANGUAGES, resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
 import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
@@ -34,7 +39,8 @@ import { TerrainFacts } from "../common/TerrainFacts";
 import { ScenarioOriginBadges } from "../common/ScenarioSource";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
-import { SaveEntry, prepareSaveLoad, saveError } from "../../utils/saves";
+import { SaveEntry, ScenarioStartOption, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
+import { ASSET_REGION_STANDARD, ASSET_REGION_TYPES, CLIMATE_TYPES, GROUND_COVER_TYPES } from "../../constants";
 import { SaveVersionInfo } from "../common/SaveVersionInfo";
 
 type NewGameWindowProps = {
@@ -108,12 +114,34 @@ type DetailView = {
 type ConfirmSelection = {
   terrainId: string | null;
   templateId: string | null;
+  /** シナリオから始めるときの一覧の要素(言語・開始設定の値と固定の有無)。チュートリアルでは null */
+  template: TemplateEntry | null;
   defaultCityName: string;
   defaultLanguage: string;
   defaultSimulationDays: number;
   isTutorial: boolean;
   tutorialId?: string | null;
 };
+
+/** シナリオの開始設定のうち、シミュレーション日数以外の選択肢(値の一覧と翻訳キーの接頭辞) */
+const EXTRA_START_OPTIONS: { key: Exclude<ScenarioStartOption, "simulation_days">; values: number[]; labelKey: string }[] = [
+  { key: "climate", values: CLIMATE_TYPES, labelKey: "climate" },
+  { key: "ground_cover", values: GROUND_COVER_TYPES, labelKey: "groundCover" },
+  { key: "asset_region", values: ASSET_REGION_TYPES, labelKey: "assetRegion" },
+];
+
+/** 初期の都市名。選んだ都市の言語 → 英語の順に引き、無ければ保存済みの都市名 */
+function defaultCityNameOf(template: TemplateEntry, language: string): string {
+  return resolveLocalizedText(template.scenario_city_name, language) || template.city_name || "";
+}
+
+function startOptionValuesOf(template: TemplateEntry | null): Record<Exclude<ScenarioStartOption, "simulation_days">, number> {
+  return {
+    climate: normalizeClimate(template?.climate),
+    ground_cover: normalizeGroundCover(template?.ground_cover),
+    asset_region: template?.asset_region ?? ASSET_REGION_STANDARD,
+  };
+}
 
 /**
  * ゲームで使用可能な言語の一覧
@@ -145,8 +173,11 @@ export function NewGameWindow({
 
   // 設定確認モーダル内の入力値
   const [cityName, setCityName] = useState("");
+  // プレイヤーが都市名を書き換えたか。書き換えていなければ、言語を変えたとき初期の都市名を引き直す
+  const [cityNameEdited, setCityNameEdited] = useState(false);
   const [language, setLanguage] = useState("ja");
   const [simulationDays, setSimulationDays] = useState(30);
+  const [startOptions, setStartOptions] = useState(() => startOptionValuesOf(null));
 
   /**
    * ウィンドウ初期化時に地形マップ一覧とシナリオ一覧を並列で取得する。
@@ -184,17 +215,20 @@ export function NewGameWindow({
   const handleStartTemplate = useCallback(
     async (template: TemplateEntry) => {
       const settings = await loadAppSettings();
-      const defaultLang = resolveSupportedLanguage(
-        template.language || settings.language || i18n.language
-      );
+      // 都市の言語の既定はアプリ設定の言語(他言語のプレイヤーが何もしなくても自分の言語で始まる)
+      const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
       const defaultDays = template.simulation_days || 30;
-      setCityName(template.city_name || "");
+      const defaultCityName = defaultCityNameOf(template, defaultLang);
+      setCityName(defaultCityName);
+      setCityNameEdited(false);
       setLanguage(defaultLang);
       setSimulationDays(defaultDays);
+      setStartOptions(startOptionValuesOf(template));
       setConfirmSelection({
         terrainId: null,
         templateId: template.id,
-        defaultCityName: template.city_name || "",
+        template,
+        defaultCityName,
         defaultLanguage: defaultLang,
         defaultSimulationDays: defaultDays,
         isTutorial: false,
@@ -223,11 +257,13 @@ export function NewGameWindow({
     const settings = await loadAppSettings();
     const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
     setCityName("");
+    setCityNameEdited(false);
     setLanguage(defaultLang);
     setSimulationDays(30);
     setConfirmSelection({
       terrainId: terrainMap.id,
       templateId: null,
+      template: null,
       defaultCityName: "",
       defaultLanguage: defaultLang,
       defaultSimulationDays: 30,
@@ -275,11 +311,8 @@ export function NewGameWindow({
       template,
       terrainMapId: template.terrain_map_id || null,
       placeholderModifier: "new-game-detail-image--template",
-      title:
-        template.scenario_title ||
-        template.city_name ||
-        `Template ${template.id.slice(0, 8)}`,
-      description: template.scenario_description || t("newGame.detailNoDescription"),
+      title: scenarioDisplayTitle(template, i18n.language),
+      description: resolveLocalizedText(template.scenario_description, i18n.language) || t("newGame.detailNoDescription"),
       mapName: template.terrain_map_id
         ? terrainMapTitle({ id: template.terrain_map_id, name: terrainMap?.name || template.terrain_map_name || template.terrain_map_id }, t)
         : null,
@@ -288,7 +321,7 @@ export function NewGameWindow({
         ? normalizeGroundCover(template.ground_cover ?? terrainMap?.ground_cover)
         : null,
       climate: normalizeClimate(template.climate ?? terrainMap?.climate),
-      objective: template.scenario_objective || null,
+      objective: resolveLocalizedText(template.scenario_objective, i18n.language) || null,
       startLabel: t("newGame.startScenarioButton"),
       startDisabled: template.compatibility?.loadable === false,
       onStart: () => void handleStartTemplate(template),
@@ -314,6 +347,10 @@ export function NewGameWindow({
 
     setBusy(true);
     setStatus({ text: t("newGame.starting"), type: "info" });
+    // 作者が固定した項目は送らない(コアがシナリオの値で始める)
+    const fixed = new Set(confirmSelection.template?.scenario_fixed_options ?? []);
+    const chosen = (option: ScenarioStartOption, value: number) =>
+      confirmSelection.template && !fixed.has(option) ? value : null;
     try {
       if (confirmSelection.templateId && !await prepareSaveLoad(apiBaseUrl, confirmSelection.templateId, true, t)) {
         setBusy(false); setStatus(null); return;
@@ -324,7 +361,10 @@ export function NewGameWindow({
         templateId: confirmSelection.templateId,
         cityName: cityName || null,
         language,
-        simulationDays,
+        simulationDays: fixed.has("simulation_days") ? null : simulationDays,
+        climate: chosen("climate", startOptions.climate),
+        groundCover: chosen("ground_cover", startOptions.ground_cover),
+        assetRegion: chosen("asset_region", startOptions.asset_region),
         isTutorial: confirmSelection.isTutorial,
         tutorialId: confirmSelection.tutorialId || null,
       });
@@ -336,7 +376,13 @@ export function NewGameWindow({
       });
       setBusy(false);
     }
-  }, [apiBaseUrl, t, onClose, confirmSelection, cityName, language, simulationDays]);
+  }, [apiBaseUrl, t, onClose, confirmSelection, cityName, language, simulationDays, startOptions]);
+
+  /** 都市の言語を変える。都市名を書き換えていなければ、その言語の初期の都市名に引き直す */
+  const handleLanguageChange = useCallback((next: string) => {
+    setLanguage(next);
+    if (confirmSelection?.template && !cityNameEdited) setCityName(defaultCityNameOf(confirmSelection.template, next));
+  }, [confirmSelection, cityNameEdited]);
 
   /**
    * 設定確認モーダルを閉じてタイル選択画面に戻る
@@ -361,6 +407,8 @@ export function NewGameWindow({
 
   // 設定確認モーダル表示中
   if (confirmSelection) {
+    const template = confirmSelection.template;
+    const fixedOptions = new Set<ScenarioStartOption>(template?.scenario_fixed_options ?? []);
     return (
       <div className="new-game-window">
         {tabs}
@@ -377,7 +425,7 @@ export function NewGameWindow({
                 className="new-game-confirm-input"
                 type="text"
                 value={cityName}
-                onChange={(e) => setCityName(e.target.value)}
+                onChange={(e) => { setCityName(e.target.value); setCityNameEdited(true); }}
                 placeholder={t("newGame.cityNamePlaceholder")}
                 disabled={busy}
               />
@@ -392,7 +440,7 @@ export function NewGameWindow({
                 <select
                   className="new-game-confirm-select"
                   value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
+                  onChange={(e) => handleLanguageChange(e.target.value)}
                   disabled={busy}
                 >
                   {AVAILABLE_LANGUAGES.map((lang) => (
@@ -403,6 +451,14 @@ export function NewGameWindow({
                 </select>
               </div>
               <span className="new-game-confirm-note">{t("newGame.languageNote")}</span>
+              {template && language !== template.language && (
+                <span className="new-game-confirm-note new-game-confirm-relocalize">
+                  {t("newGame.relocalizeNote", {
+                    from: t(`settings.language.${template.language}`, { defaultValue: template.language }),
+                    to: t(`settings.language.${language}`),
+                  })}
+                </span>
+              )}
             </div>
 
             {/* シミュレーション日数 */}
@@ -410,21 +466,55 @@ export function NewGameWindow({
               <label className="new-game-confirm-label">
                 {t("newGame.simulationDaysLabel")}
               </label>
-              <div className="new-game-confirm-days">
-                {SIMULATION_DAYS_OPTIONS.map((days) => (
-                  <button
-                    key={days}
-                    className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
-                    onClick={() => setSimulationDays(days)}
-                    disabled={busy}
-                    type="button"
-                  >
-                    {t("newGame.daysOption", { days })}
-                  </button>
-                ))}
-              </div>
+              {fixedOptions.has("simulation_days") ? (
+                <span className="new-game-confirm-fixed">
+                  {t("newGame.daysOption", { days: simulationDays })}
+                  <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
+                </span>
+              ) : (
+                <div className="new-game-confirm-days">
+                  {SIMULATION_DAYS_OPTIONS.map((days) => (
+                    <button
+                      key={days}
+                      className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
+                      onClick={() => setSimulationDays(days)}
+                      disabled={busy}
+                      type="button"
+                    >
+                      {t("newGame.daysOption", { days })}
+                    </button>
+                  ))}
+                </div>
+              )}
               <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
             </div>
+
+            {/* 気候・地表・アセットの地域(シナリオから始めるときだけ) */}
+            {template && EXTRA_START_OPTIONS.map(({ key, values, labelKey }) => (
+              <div className="new-game-confirm-field" key={key} data-option={key}>
+                <label className="new-game-confirm-label">{t(`${labelKey}.label`)}</label>
+                {fixedOptions.has(key) ? (
+                  <span className="new-game-confirm-fixed">
+                    {t(`${labelKey}.${startOptions[key]}`)}
+                    <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
+                  </span>
+                ) : (
+                  <div className="new-game-confirm-select-wrap">
+                    <select
+                      className="new-game-confirm-select"
+                      value={startOptions[key]}
+                      aria-label={t(`${labelKey}.label`)}
+                      onChange={(e) => setStartOptions({ ...startOptions, [key]: Number(e.target.value) })}
+                      disabled={busy}
+                    >
+                      {values.map((value) => (
+                        <option key={value} value={value}>{t(`${labelKey}.${value}`)}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            ))}
 
             {/* ボタン */}
             <p className="new-game-confirm-note new-game-confirm-warning">{t("newGame.closeWindowsNote")}</p>
@@ -503,7 +593,7 @@ export function NewGameWindow({
                     onClick={() => setSelection({ kind: "template", id: tmpl.id })}
                     disabled={busy}
                     type="button"
-                    title={tmpl.scenario_title || tmpl.city_name || tmpl.id}
+                    title={scenarioDisplayTitle(tmpl, i18n.language)}
                   >
                     <ScenarioThumbnail
                       apiBaseUrl={apiBaseUrl}
@@ -511,7 +601,7 @@ export function NewGameWindow({
                       terrainMapId={tmpl.terrain_map_id}
                     />
                     <span className="new-game-tile-name">
-                      {tmpl.scenario_title || tmpl.city_name || `Template ${tmpl.id.slice(0, 8)}`}
+                      {scenarioDisplayTitle(tmpl, i18n.language)}
                     </span>
                     <ScenarioOriginBadges entry={tmpl} />
                   </button>

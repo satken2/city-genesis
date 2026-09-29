@@ -19,6 +19,7 @@ import type { QuestNotification, QuestTier } from "../../types";
 // 外れ、本番ビルドではファイルが存在せず無音になる。
 import tadaSound from "../../assets/sounds/tada.opus";
 import { logInfoToFile } from "../../utils/log";
+import { resolveLocalizedText } from "../../utils/locale";
 import "./QuestCompleteWindow.css";
 
 type QuestCompleteWindowProps = {
@@ -63,7 +64,7 @@ function playFanfare(audio: HTMLAudioElement): void {
 }
 
 export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestCompleteWindowProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -136,8 +137,8 @@ export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestComplete
         <p className="quest-complete-subtitle">{t("questComplete.congratulations")}</p>
 
         <div className="quest-complete-item">
-          <span className="quest-complete-item-name">{quest.name}</span>
-          <span className="quest-complete-item-desc">{quest.description}</span>
+          <span className="quest-complete-item-name">{resolveLocalizedText(quest.name, i18n.language)}</span>
+          <span className="quest-complete-item-desc">{resolveLocalizedText(quest.description, i18n.language)}</span>
 
           {/* 達成時の実測値。「実測値 / 目標値」で達成の瞬間を可視化する */}
           {achievedEntries.length > 0 && (

@@ -14,7 +14,6 @@
     "sandbox": "自由都市",
     "challenge": "チャレンジ",
     "tutorial": "チュートリアル",
-    "language": "言語",
     "close": "閉じる",
     "saveTemplate": "テンプレートとして保存",
     "templateModeRequired": "シナリオ管理で編集用に開いた都市だけ保存できます。",
@@ -39,7 +38,14 @@
     "terrainHint": "地形を選んで、その地形の自作シナリオを作ります。ゲームは始まりません。作成後はシナリオタブの「都市を編集」「地形を編集」で作り込めます。",
     "terrainEmpty": "取り込める地形がありません。",
     "terrainOpenFailed": "シナリオの地形を開けませんでした。",
-    "terrainEncryptedHint": "DLCの都市から作ったシナリオは暗号化されているため、地形エディタでは編集できません。資源・プロップは「都市を編集」で編集できます。"
+    "terrainEncryptedHint": "DLCの都市から作ったシナリオは暗号化されているため、地形エディタでは編集できません。資源・プロップは「都市を編集」で編集できます。",
+    "initialCityName": "初期の都市名",
+    "cityLanguage": "都市内の名前の言語",
+    "cityLanguageHint": "地区・施設・住民などの名前の言語です。プレイヤーはゲーム開始時に別の言語を選ぶこともでき、そのときは名前が付け直されます。",
+    "startSettings": "開始設定",
+    "startSettingsHint": "固定した項目はこの値で始まります。固定しない項目は、プレイヤーがゲーム開始時にこの値から変更できます。言語はいつでもプレイヤーが選べます。",
+    "fixedOption": "固定する",
+    "englishRequired": "英語の入力が必要です。タイトルは英語が必須で、ほかの項目も書くなら英語も書いてください。"
   },
   "saveCompatibility": {
     "unknown": "不明",
@@ -57,7 +63,7 @@
     "SAVE_BALANCE_CONFIRMATION_REQUIRED": "ゲームバランス変更の確認が必要です。",
     "SCENARIO_UPLOAD_UNCONFIGURED": "アップロード先が未設定です。",
     "SCENARIO_UPLOAD_FAILED": "アップロードできませんでした。ローカルのデータは保存されています。",
-    "SCENARIO_METADATA_REQUIRED": "タイトルと作者名を入力してください。",
+    "SCENARIO_METADATA_REQUIRED": "英語のタイトルと作者名を入力してください。",
     "SCENARIO_PACKAGE_INVALID": "画像を読み込めません。10MB以下の画像を選んでください。",
     "TEMPLATE_MODE_REQUIRED": "テンプレート作成モードで保存してください。",
     "SCENARIO_REQUIRED": "テンプレートファイルを選択してください。",
@@ -80,6 +86,9 @@
     "SCENARIO_READ_ONLY": "コミュニティ・DLCのシナリオは変更できません。コピーを編集してください。",
     "NOT_FOUND": "対象のデータが見つかりません。削除された可能性があります。一覧を更新してください。",
     "API_TOKEN_REQUIRED": "コアとの認証に失敗しました。ゲームを再起動してください。",
-    "HOST_NOT_ALLOWED": "コアへの接続先ホストが許可されていません。接続先の設定を確認してください。"
+    "HOST_NOT_ALLOWED": "コアへの接続先ホストが許可されていません。接続先の設定を確認してください。",
+    "SCENARIO_ENGLISH_REQUIRED": "英語の文を入力してください。タイトルは英語が必須です。",
+    "SCENARIO_OPTION_FIXED": "シナリオで固定された設定は変更できません。",
+    "SCENARIO_OPTION_INVALID": "開始設定の値が正しくありません。"
   }
 }

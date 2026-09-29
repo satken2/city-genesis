@@ -73,5 +73,9 @@
     "GRADING_VALIDATION_ERROR": "No se puede acondicionar esta área. Revisa los motivos que se muestran en la ventana de movimiento de tierras.",
     "CREATEPATH_SEA_LAKE_CROSSING": "Un trazado no puede pasar sobre el mar o un lago a nivel del suelo. Conviértelo en un puente bien por encima del agua o hazlo pasar bajo tierra.",
     "CREATEPATH_QUAY_BAND_CROSSING": "Un trazado no puede cruzar el muelle de un terreno ganado al mar a nivel del suelo. Hazlo pasar en elevado o bajo tierra, y deja sus extremos y puntos intermedios fuera de la plataforma del muelle."
+  },
+  "localizedText": {
+    "languages": "Idioma de escritura",
+    "required": "Obligatorio"
   }
 }

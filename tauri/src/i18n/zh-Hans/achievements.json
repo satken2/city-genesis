@@ -36,14 +36,9 @@
     "hiddenQuestDesc": "该目标达成后才会揭晓",
     "scenarioSection": "剧本信息",
     "scenarioTitleLabel": "标题",
-    "scenarioTitlePlaceholder": "例：打造自给自足的社会",
     "scenarioDescriptionLabel": "说明",
-    "scenarioDescriptionPlaceholder": "描述该剧本的舞台与背景的文字",
     "scenarioObjectiveLabel": "达成条件",
-    "scenarioObjectivePlaceholder": "例：出口额为0、进口额为0、人口1万以上",
     "scenarioSave": "保存",
-    "scenarioSaved": "已保存",
-    "scenarioSaveFailed": "保存失败",
     "tier": {
       "gold": "金",
       "silver": "银",
@@ -79,8 +74,7 @@
       "failed": "已过期"
     },
     "scenarioImageLabel": "图片（缩略图）",
-    "scenarioImageSelect": "选择图片...",
-    "scenarioImageClear": "删除"
+    "scenarioEditHint": "保存为场景后，在介绍信息窗口中编辑介绍文。"
   },
   "achievementQuests": {
     "createTitle": "创建任务",
@@ -141,7 +135,8 @@
     "groupDisplay": "显示",
     "fieldTier": "等级（演出强度）",
     "fieldCategory": "分类",
-    "fieldHidden": "隐藏目标（达成前不显示内容）"
+    "fieldHidden": "隐藏目标（达成前不显示内容）",
+    "englishRequired": "名称和说明需要填写英文。"
   },
   "questComplete": {
     "title": "目标达成！",

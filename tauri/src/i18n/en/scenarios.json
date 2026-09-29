@@ -14,7 +14,6 @@
     "sandbox": "Sandbox",
     "challenge": "Challenge",
     "tutorial": "Tutorial",
-    "language": "Language",
     "close": "Close",
     "saveTemplate": "Save as template",
     "templateModeRequired": "Only cities opened for editing from the scenario manager can be saved.",
@@ -39,7 +38,14 @@
     "terrainHint": "Choose a terrain to create your own scenario on it. The game does not start. Afterwards, use Edit city and Edit terrain on the Scenarios tab to build it out.",
     "terrainEmpty": "No terrains available.",
     "terrainOpenFailed": "Could not open the scenario terrain.",
-    "terrainEncryptedHint": "This scenario was made from a DLC city and is encrypted, so the terrain editor cannot open it. Use Edit city to edit resources and props."
+    "terrainEncryptedHint": "This scenario was made from a DLC city and is encrypted, so the terrain editor cannot open it. Use Edit city to edit resources and props.",
+    "initialCityName": "Initial city name",
+    "cityLanguage": "Language of names in the city",
+    "cityLanguageHint": "The language of district, facility, and resident names. Players can choose another language when starting a game, and the names are then renamed.",
+    "startSettings": "Start settings",
+    "startSettingsHint": "Fixed items start with these values. Players can change the other items from these values when starting a game. Players can always choose the language.",
+    "fixedOption": "Fixed",
+    "englishRequired": "English text is required. The title must have English, and any other item you fill in also needs English."
   },
   "saveCompatibility": {
     "unknown": "Unknown",
@@ -57,7 +63,7 @@
     "SAVE_BALANCE_CONFIRMATION_REQUIRED": "Please confirm the balance change.",
     "SCENARIO_UPLOAD_UNCONFIGURED": "No upload destination is configured.",
     "SCENARIO_UPLOAD_FAILED": "Upload failed. Your local scenario is still saved.",
-    "SCENARIO_METADATA_REQUIRED": "Enter a title and author.",
+    "SCENARIO_METADATA_REQUIRED": "Enter an English title and the author.",
     "SCENARIO_PACKAGE_INVALID": "The image cannot be loaded. Choose an image of 10 MB or less.",
     "TEMPLATE_MODE_REQUIRED": "Save in template editing mode.",
     "SCENARIO_REQUIRED": "Select a template file.",
@@ -80,6 +86,9 @@
     "SCENARIO_READ_ONLY": "Community and DLC scenarios cannot be modified. Edit a copy instead.",
     "NOT_FOUND": "The data was not found. It may have been deleted. Refresh the list.",
     "API_TOKEN_REQUIRED": "Authentication with the core failed. Restart the game.",
-    "HOST_NOT_ALLOWED": "The host used to connect to the core is not allowed. Check the connection settings."
+    "HOST_NOT_ALLOWED": "The host used to connect to the core is not allowed. Check the connection settings.",
+    "SCENARIO_ENGLISH_REQUIRED": "Enter the English text. The title requires English.",
+    "SCENARIO_OPTION_FIXED": "Settings fixed by the scenario cannot be changed.",
+    "SCENARIO_OPTION_INVALID": "A start setting has an invalid value."
   }
 }

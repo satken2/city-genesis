@@ -1,0 +1,45 @@
+.localized-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.localized-text .localized-text__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* 置かれる画面のボタンの共通指定(.scenario-editor button など)より強くするため2クラスで書く */
+.localized-text .localized-text__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.93rem;
+  background: var(--flat-raised);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+  color: var(--flat-text-label);
+  cursor: pointer;
+}
+
+.localized-text .localized-text__tab:hover:not(:disabled) {
+  background: var(--flat-raised-hover);
+}
+
+.localized-text .localized-text__tab--active {
+  background: var(--flat-selected);
+  color: var(--flat-text);
+}
+
+/* 文が入っている言語は下線で示す(選択中の塗りと重ねても見分けられるように) */
+.localized-text .localized-text__tab--filled {
+  border-bottom-color: var(--flat-good);
+}
+
+.localized-text .localized-text__required {
+  font-size: 0.8rem;
+  color: var(--flat-warn);
+}

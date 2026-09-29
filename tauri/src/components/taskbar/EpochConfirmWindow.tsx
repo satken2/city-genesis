@@ -42,7 +42,7 @@ import type { EpochReport } from "./EpochResultWindow";
 import { logInfoToFile } from "../../utils/log";
 import { showNotification } from "../../utils/notification";
 import { formatEpochDate } from "../../utils/date";
-import { resolveIntlLocale } from "../../utils/locale";
+import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
 import type { QuestNotification } from "../../types";
 import nextIcon from "../../assets/images/next.png";
@@ -139,13 +139,13 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
       // 期限切れで失敗したクエストも同様に通知する(お祝いではないため常にトースト)。
       for (const q of toastQuests) {
         void showNotification({
-          message: t("questComplete.toastCompleted", { name: q.name }),
+          message: t("questComplete.toastCompleted", { name: resolveLocalizedText(q.name, i18n.language) }),
           durationMs: 5000,
         });
       }
       for (const q of failedQuests) {
         void showNotification({
-          message: t("questComplete.toastFailed", { name: q.name }),
+          message: t("questComplete.toastFailed", { name: resolveLocalizedText(q.name, i18n.language) }),
           durationMs: 5000,
         });
       }

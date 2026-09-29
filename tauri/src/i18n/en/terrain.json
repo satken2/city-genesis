@@ -21,5 +21,10 @@
     "5": "Steppe",
     "6": "Desert",
     "7": "Subarctic"
+  },
+  "assetRegion": {
+    "label": "Building and road asset region",
+    "hint": "Chooses the lineup of building and road appearances. It does not affect the simulation.",
+    "1": "Standard"
   }
 }

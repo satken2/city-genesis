@@ -6,7 +6,7 @@ import { useTemplateMode } from "../../hooks/useTemplateMode";
 import { ScenarioInfoSection } from "./ScenarioInfoSection";
 import type { Quest, QuestClauseState } from "../../types";
 import { ResponsiveContainer, ComposedChart, Bar, Line, CartesianGrid, ReferenceLine, XAxis, YAxis, Tooltip } from "recharts";
-import { resolveIntlLocale } from "../../utils/locale";
+import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { SatisfactionFace, getSatisfactionAppearance } from "../common/SatisfactionFace";
 import { Meter } from "../common/Meter";
@@ -243,6 +243,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               const failed = quest.status === "failed";
               // 隠しクエストは達成するまで名前・内容・条件を伏せる（テンプレートモードでは見せる）
               const masked = quest.hidden && !completed && !templateMode;
+              const name = resolveLocalizedText(quest.name, i18n.language);
               const progress = completed ? 1 : Math.max(0, Math.min(1, quest.progress ?? 0));
               const barColor = completed ? "var(--flat-good)" : failed ? "var(--flat-danger)" : "var(--flat-accent)";
               return (
@@ -277,8 +278,8 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                         <span className="quest-grid-card__circle" />
                       )}
                     </span>
-                    <span className="quest-grid-card__name" title={masked ? undefined : quest.name}>
-                      {masked ? t("achievements.hiddenQuestName") : quest.name}
+                    <span className="quest-grid-card__name" title={masked ? undefined : name}>
+                      {masked ? t("achievements.hiddenQuestName") : name}
                     </span>
                     {/* tier バッジ（bronze はデフォルト扱いで表示しない） */}
                     {quest.tier !== "bronze" && (
@@ -301,7 +302,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
                   <span className="quest-grid-card__status">{t(`achievements.status.${quest.status}`)}</span>
                   <p className="quest-grid-card__desc">
-                    {masked ? t("achievements.hiddenQuestDesc") : quest.description}
+                    {masked ? t("achievements.hiddenQuestDesc") : resolveLocalizedText(quest.description, i18n.language)}
                   </p>
 
                   {/* メタ情報行: カテゴリ・期限・報酬 */}

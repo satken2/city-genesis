@@ -376,6 +376,8 @@
     "tabSelect": "選擇劇本",
     "tabBrowse": "尋找劇本",
     "comingSoon": "Coming soon",
-    "closeWindowsNote": "開始後所有開啟的視窗都將關閉，地形編輯器中未儲存的編輯將遺失。"
+    "closeWindowsNote": "開始後所有開啟的視窗都將關閉，地形編輯器中未儲存的編輯將遺失。",
+    "relocalizeNote": "此場景以{{from}}製作。以{{to}}開始時，區、設施、居民、車站等名稱將以{{to}}重新命名(作者取的名稱也會被取代;道路名稱等會保留)。",
+    "fixedByScenario": "由場景固定"
   }
 }

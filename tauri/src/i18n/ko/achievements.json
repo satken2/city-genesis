@@ -36,14 +36,9 @@
     "hiddenQuestDesc": "이 목표는 달성하면 공개됩니다",
     "scenarioSection": "시나리오 정보",
     "scenarioTitleLabel": "제목",
-    "scenarioTitlePlaceholder": "예: 자급자족 사회를 만들자",
     "scenarioDescriptionLabel": "설명",
-    "scenarioDescriptionPlaceholder": "이 시나리오의 배경과 상황을 설명하는 문장",
     "scenarioObjectiveLabel": "달성 조건",
-    "scenarioObjectivePlaceholder": "예: 수출액 0, 수입액 0, 인구 1만 명 이상",
     "scenarioSave": "저장",
-    "scenarioSaved": "저장했습니다",
-    "scenarioSaveFailed": "저장에 실패했습니다",
     "tier": {
       "gold": "골드",
       "silver": "실버",
@@ -79,8 +74,7 @@
       "failed": "기한 만료"
     },
     "scenarioImageLabel": "이미지 (썸네일)",
-    "scenarioImageSelect": "이미지 선택...",
-    "scenarioImageClear": "삭제"
+    "scenarioEditHint": "소개 문구는 시나리오로 저장한 뒤 소개 정보 창에서 편집합니다."
   },
   "achievementQuests": {
     "createTitle": "퀘스트 작성",
@@ -141,7 +135,8 @@
     "groupDisplay": "표시",
     "fieldTier": "티어(연출 강도)",
     "fieldCategory": "카테고리",
-    "fieldHidden": "숨김 목표(달성 전까지 내용 비공개)"
+    "fieldHidden": "숨김 목표(달성 전까지 내용 비공개)",
+    "englishRequired": "이름과 설명은 영어 입력이 필요합니다."
   },
   "questComplete": {
     "title": "목표 달성!",

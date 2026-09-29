@@ -32,3 +32,10 @@
 .scenario-terrain-tile-size { color: var(--flat-text-label); font-size: .85rem; }
 .scenario-manager .scenario-primary { flex-shrink: 0; padding: 9px 20px; background: var(--flat-selected); font-weight: 600; box-shadow: var(--flat-shadow); }
 .scenario-manager .scenario-primary:hover:not(:disabled) { background: var(--flat-selected-hover); }
+
+/* 紹介情報の開始設定: 項目名・値・「固定する」を1行に並べる */
+.scenario-start-settings { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 12px; border: 0; background: var(--flat-surface); }
+.scenario-start-settings legend { padding: 0; color: var(--flat-text-label); font-weight: 600; }
+.scenario-start-row { display: grid; grid-template-columns: 12rem minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.scenario-start-fixed { display: inline-flex; align-items: center; gap: 6px; color: var(--flat-text-label); }
+.scenario-start-value { color: var(--flat-text); }

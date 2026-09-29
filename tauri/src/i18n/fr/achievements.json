@@ -36,14 +36,9 @@
     "hiddenQuestDesc": "Cet objectif sera révélé une fois atteint",
     "scenarioSection": "Informations du scénario",
     "scenarioTitleLabel": "Titre",
-    "scenarioTitlePlaceholder": "Ex. : Bâtir une société autosuffisante",
     "scenarioDescriptionLabel": "Description",
-    "scenarioDescriptionPlaceholder": "Texte décrivant le cadre et la situation de ce scénario",
     "scenarioObjectiveLabel": "Conditions de réussite",
-    "scenarioObjectivePlaceholder": "Ex. : exportations nulles, importations nulles, population supérieure à 10 000",
     "scenarioSave": "Enregistrer",
-    "scenarioSaved": "Enregistré",
-    "scenarioSaveFailed": "Échec de l'enregistrement",
     "tier": {
       "gold": "Or",
       "silver": "Argent",
@@ -79,8 +74,7 @@
       "failed": "Expiré"
     },
     "scenarioImageLabel": "Image (Miniature)",
-    "scenarioImageSelect": "Sélectionner une image...",
-    "scenarioImageClear": "Supprimer"
+    "scenarioEditHint": "Modifiez la présentation dans la fenêtre de présentation après l'enregistrement du scénario."
   },
   "achievementQuests": {
     "createTitle": "Créer un objectif",
@@ -141,7 +135,8 @@
     "groupDisplay": "Affichage",
     "fieldTier": "Palier (intensité de la célébration)",
     "fieldCategory": "Catégorie",
-    "fieldHidden": "Objectif caché (masqué jusqu'à sa réussite)"
+    "fieldHidden": "Objectif caché (masqué jusqu'à sa réussite)",
+    "englishRequired": "Le nom et la description exigent un texte en anglais."
   },
   "questComplete": {
     "title": "Objectif atteint !",

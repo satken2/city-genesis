@@ -73,5 +73,9 @@
     "GRADING_VALIDATION_ERROR": "該範圍無法施工。請查看土方工程視窗中顯示的原因。",
     "CREATEPATH_SEA_LAKE_CROSSING": "路徑不能在地面上經過海面或湖面。請改為高出水面足夠高度的橋梁，或從地下通過。",
     "CREATEPATH_QUAY_BAND_CROSSING": "路徑不能在地面上橫越填海地的岸壁。請以高架或地下方式通過，並將端點和途經點置於岸壁頂面之外。"
+  },
+  "localizedText": {
+    "languages": "輸入語言",
+    "required": "必填"
   }
 }
