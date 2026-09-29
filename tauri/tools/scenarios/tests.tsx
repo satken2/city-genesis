@@ -7,9 +7,10 @@ import { ScenarioMetadataWindow } from "../../src/components/template/ScenarioMe
 import { NewGameWindow } from "../../src/components/taskbar/NewGameWindow";
 import { errorCode, prepareSaveLoad, saveError } from "../../src/utils/saves";
 import { ApiError } from "../../src/utils/api";
-import { importedMapExtent, readHeightmapInfo } from "../../src/components/template/heightmapImport";
+import { importedBackgroundExtent, importedMapExtent, readHeightmapInfo } from "../../src/components/template/heightmapImport";
+import { BACKGROUND_RGB, renderImportPreview, type PreviewLayer } from "../../src/components/template/heightmapPreview";
 import { encodeFloat16Array, uint8ToBase64 } from "../../src/components/terrain/terrainData";
-import { state } from "./mock-runtime";
+import { emit, state } from "./mock-runtime";
 import jaScenarios from "../../src/i18n/ja/scenarios.json";
 import jaTerrainEditor from "../../src/i18n/ja/terrainEditor.json";
 
@@ -36,6 +37,13 @@ let imported: { query: URLSearchParams; body: unknown; contentType: string | nul
 let rejectHeightmap = false;
 /** シナリオの地形の取得(平面図の元)を失敗させる */
 let terrainUnavailable = false;
+/** プレビューの要求(クエリ・本文の大きさ)。応答は要求が背景かどうかで決まる3×4の標高(詳細は元が 101×201、背景は 61×101 画素) */
+const previewRequests: { query: URLSearchParams; size: number }[] = [];
+const previewElevation = uint8ToBase64(encodeFloat16Array(new Float32Array([-5, 3, 8, 2, 12, 40, 6, 1, 9, 7, 4, 3])));
+/** 削除要求のURL。rejectDelete なら自作でないシナリオと同じ 422 で断る。listFetches は一覧の取得回数 */
+const deleteRequests: string[] = [];
+let rejectDelete = false;
+let listFetches = 0;
 let thumbnailUploads: { url: string; contentType: string | null; body: unknown }[] = [];
 // 3列×2行(20m×10m)の小さな地形。行0が南で、南西だけ海。
 const terrainDocument = { settings: { map_width: 20, map_height: 10, near_spacing: 10, far_spacing: 200, cell_size: 500, grid_rows: 2, grid_cols: 3 },
@@ -50,6 +58,12 @@ globalThis.fetch = async (input, init) => {
     return new Response(JSON.stringify({ success: true }));
   }
   if (url.includes("/thumbnail")) return new Response("", { status: 404 });
+  if (url.includes("/api/v1/scenarios/heightmap-preview?")) {
+    const query = new URL(url).searchParams;
+    previewRequests.push({ query, size: (init?.body as Blob).size });
+    return new Response(JSON.stringify({ source_rows: query.has("background") ? 61 : 101, source_cols: query.has("background") ? 101 : 201,
+      rows: 3, cols: 4, min_height: -12.34, max_height: 513, heights_base64: previewElevation }));
+  }
   if (url.includes("/api/v1/scenarios/from-heightmap?")) {
     imported = { query: new URL(url).searchParams, body: init?.body, contentType: headers.get("Content-Type") };
     if (rejectHeightmap) return new Response(JSON.stringify({ code: "HEIGHTMAP_INVALID", message: "陸地がありません。" }), { status: 422 });
@@ -60,17 +74,26 @@ globalThis.fetch = async (input, init) => {
     return terrainUnavailable ? new Response("{}", { status: 500 }) : new Response(JSON.stringify(terrainDocument));
   }
   if (init?.method === "PATCH") { metadataWritten = JSON.parse(String(init.body)); return new Response("{}"); }
+  if (init?.method === "DELETE") {
+    deleteRequests.push(url);
+    if (rejectDelete) return new Response(JSON.stringify({ code: "SCENARIO_READ_ONLY", message: "read only" }), { status: 422 });
+    entries.splice(entries.findIndex(value => url.includes(`/saves/${value.id}?`)), 1);
+    return new Response(null, { status: 204 });
+  }
   if (url.includes("/saves/")) return new Response(JSON.stringify({ save: entry }));
+  listFetches++;
   return new Response(JSON.stringify({ scenarios: Object.fromEntries(entries.map(value => [value.id, value])), upload_available: false }));
 };
 const settle = () => act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); });
 
 const container = window.document.createElement("div");
 window.document.body.append(container);
-const buttons = (text: string) => [...container.querySelectorAll("button")].filter(value => value.textContent === text);
+/** 文字のボタンは表示文字、アイコンだけのボタンは aria-label で探す */
+const named = (text: string) => (value: Element) => value.textContent === text || value.getAttribute("aria-label") === text;
+const buttons = (text: string) => [...container.querySelectorAll("button")].filter(named(text));
 const button = (text: string) => buttons(text)[0]!;
 const card = (id: string) => [...container.querySelectorAll<HTMLElement>("article")].find(value => value.dataset.scenarioId === id)!;
-const cardButton = (id: string, text: string) => [...card(id).querySelectorAll("button")].find(value => value.textContent === text)!;
+const cardButton = (id: string, text: string) => [...card(id).querySelectorAll("button")].find(named(text))!;
 const lastCall = (command: string) => state.calls.filter(call => call.command === command).at(-1)?.args;
 const setText = (element: HTMLInputElement | HTMLSelectElement, value: string) => {
   const prototype = element.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype;
@@ -84,10 +107,18 @@ await act(async () => { root.render(<ScenarioManagerWindow apiBaseUrl="http://te
 await settle();
 assert.deepEqual([...container.querySelectorAll("[role=tab]")].map(tab => tab.textContent), ["scenarios.tabScenarios", "scenarios.tabTerrains"]);
 assert.equal(container.querySelectorAll("article").length, 4);
+// タブの下に、シナリオの作り方の説明を1つだけ出す。更新ボタンと「アップロード先が未設定」の常時表示は無い(未設定の理由は upload の title だけ)。
+const hints = [...container.querySelectorAll(".scenario-hint")];
+assert.deepEqual(hints.map(value => value.textContent), ["scenarios.createHint"]);
+assert.ok(container.querySelector("[role=tablist]")!.compareDocumentPosition(hints[0]) & window.Node.DOCUMENT_POSITION_FOLLOWING, "the hint is below the tabs");
+assert.ok(hints[0].compareDocumentPosition(container.querySelector(".scenario-grid")!) & window.Node.DOCUMENT_POSITION_FOLLOWING, "the hint is above the cards");
+assert.equal(buttons("scenarios.refresh").length, 0, "the list refreshes itself, so there is no refresh button");
+assert.ok(!container.textContent?.includes("scenarios.uploadUnconfigured"), "the unconfigured upload note is not shown on the page");
 assert.ok(button("scenarios.upload").disabled, "unconfigured upload must be disabled");
 assert.equal(buttons("scenarios.editTerrain").length, 2, "only own scenarios can edit terrain");
 assert.equal(buttons("scenarios.editCopy").length, 2, "workshop and DLC scenarios are copied before editing");
-assert.equal(buttons("scenarios.metadata").length, 2);
+assert.equal(buttons("scenarios.editMetadata").length, 2);
+assert.equal(buttons("common.delete").length, 2, "only own scenarios can be deleted");
 assert.ok(!cardButton("workshop~123~copy", "scenarios.editCopy").disabled);
 assert.ok(cardButton("dlc~pack~city", "scenarios.editCopy").disabled, "unowned DLC cannot be opened");
 assert.ok(card("workshop~123~copy").textContent?.includes("scenarios.origin.workshop"));
@@ -97,7 +128,47 @@ assert.ok(card("dlc~pack~city").textContent?.includes("saveCompatibility.SCENARI
 assert.ok(card("local~future").textContent?.includes("saveCompatibility.SAVE_VERSION_NEWER"));
 assert.ok(!container.textContent?.includes("scenarios.play") && !container.textContent?.includes("scenarios.export"));
 
-await act(async () => { cardButton("local~mine", "scenarios.metadata").click(); });
+// 操作はアイコンだけのボタンで、説明は title に出す。左詰めに並べ、削除だけが右端(順序: 紹介情報・地形・都市・アップロード・削除)。
+const actionLabels = (id: string) => [...card(id).querySelectorAll<HTMLButtonElement>(".scenario-actions button")].map(value => value.getAttribute("aria-label"));
+assert.deepEqual(actionLabels("local~mine"), ["scenarios.editMetadata", "scenarios.editTerrain", "scenarios.editCity", "scenarios.upload", "common.delete"]);
+assert.ok([...card("local~mine").querySelectorAll(".scenario-actions button")].every(value => value.textContent === "" && value.querySelector("img")), "own scenario actions are icons only");
+assert.ok(cardButton("local~mine", "common.delete").classList.contains("scenario-icon-button--delete"), "delete sits at the right end");
+assert.equal(cardButton("local~mine", "scenarios.editCity").title, "scenarios.editCity", "the description shows on mouse over");
+assert.equal(cardButton("local~mine", "scenarios.upload").title, "scenarios.upload\nscenarios.uploadUnconfigured", "a disabled reason follows the description");
+assert.deepEqual(actionLabels("workshop~123~copy"), [null], "read-only scenarios keep the text button only (no delete)");
+
+// 削除: 確認を断れば何もしない。確認すると(元に戻せない操作なので danger の確認)ファイルを消し、一覧から外して他のウィンドウへ知らせる。
+// 読み込めない(壊れた・新しすぎる)シナリオこそ片付けたいので、読み込めなくても削除は押せる。失敗しても一覧を取り直す。
+assert.ok(!cardButton("local~future", "common.delete").disabled, "an unloadable scenario can still be deleted");
+state.confirmed = false;
+await act(async () => { cardButton("local~future", "common.delete").click(); });
+await settle();
+assert.deepEqual(deleteRequests, [], "declining the confirmation deletes nothing");
+assert.equal(lastCall("open_registered_window").params.extra.confirmRequest.tone, "danger");
+assert.equal(lastCall("open_registered_window").params.extra.confirmRequest.confirmLabel, "common.delete");
+state.confirmed = true;
+rejectDelete = true;
+const fetchesBefore = listFetches;
+await act(async () => { cardButton("local~future", "common.delete").click(); });
+await settle();
+assert.equal(container.querySelector("[role=alert]")?.textContent, "saveCompatibility.SCENARIO_READ_ONLY");
+assert.ok(listFetches > fetchesBefore, "a failed delete refreshes the list");
+assert.ok(card("local~future"), "a rejected delete keeps the card");
+rejectDelete = false;
+entries.push({ ...entry, id: "local~doomed" });
+await act(async () => { await emit("scenarios:changed"); });
+await settle();
+await act(async () => { cardButton("local~doomed", "common.delete").click(); });
+await settle();
+assert.deepEqual(deleteRequests.slice(-1), ["http://test/api/v1/saves/local~doomed?template=true"], "the scenario is deleted by its origin-qualified ID");
+assert.equal(container.querySelectorAll("article").length, 4);
+assert.ok(!container.querySelector("[data-scenario-id='local~doomed']"), "the deleted card is gone");
+assert.equal(container.querySelector(".scenario-status")?.textContent, "scenarios.deleted");
+assert.equal(container.querySelector("[role=alert]")?.textContent, undefined, "a successful delete shows no error");
+assert.ok(!container.querySelector(".scenario-card--selected"), "the deleted card is no longer selected");
+assert.ok(state.emitted.includes("scenarios:changed"), "other windows are told the list changed");
+
+await act(async () => { cardButton("local~mine", "scenarios.editMetadata").click(); });
 assert.equal(lastCall("open_registered_window").params.extra.scenarioId, entry.id);
 
 state.results.prepare_scenario_terrain_editor = "editor-1";
@@ -163,7 +234,9 @@ window.HTMLCanvasElement.prototype.toBlob = function (callback: (blob: Blob | nu
 } as any;
 const importForm = () => container.querySelector<HTMLFormElement>(".scenario-import")!;
 const fileInput = () => importForm().querySelector<HTMLInputElement>("input[type=file]")!;
-const fieldInput = (label: string) => [...importForm().querySelectorAll("label")].find(value => value.textContent?.startsWith(label))!.querySelector("input")!;
+// 最低・最高標高は1行に並ぶ2つの入力なので、ラベルではなく aria-label(項目名)で探す。
+const fieldInput = (label: string) => importForm().querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)
+  ?? [...importForm().querySelectorAll("label")].find(value => value.textContent?.startsWith(label))!.querySelector("input")!;
 const createButton = () => button("scenarios.createFromTerrain");
 const choose = async (file: File) => {
   await act(async () => {
@@ -184,6 +257,20 @@ assert.ok(importForm().textContent?.includes("island.png"));
 assert.equal(fieldInput("scenarios.importTitle").value, "island", "the title defaults to the file name without its extension");
 assert.equal(importForm().querySelector(".scenario-import-size")?.textContent, "2 × 1 km", "the map size is previewed from the PNG header");
 assert.ok(!fieldInput("scenarios.importMinHeight").disabled && !fieldInput("scenarios.importMaxHeight").disabled);
+assert.equal(fieldInput("scenarios.importMinHeight").parentElement, fieldInput("scenarios.importMaxHeight").parentElement, "the lowest and highest elevations share one row");
+assert.equal(fieldInput("scenarios.importMinHeight").parentElement?.textContent, "〜", "a wave dash sits between the two inputs");
+assert.equal(importForm().querySelector("label")?.textContent, "scenarios.importTitle", "the title comes first");
+const groups = [...importForm().querySelectorAll(".scenario-import-group")];
+assert.equal(groups.length, 2, "the terrain and the background are each framed");
+assert.deepEqual(groups.map(value => value.querySelector(".scenario-import-group-title")?.textContent),
+  ["scenarios.importDetail", "scenarios.importBackgroundscenarios.importOptional"], "each area has its own title");
+assert.deepEqual(groups.map(value => value.querySelector(".scenario-hint")?.textContent), ["scenarios.importDetailHint", "scenarios.importBackgroundHint"],
+  "a short description sits under each title");
+assert.deepEqual(groups.map(value => value.querySelector(".scenario-import-row span")?.textContent), ["scenarios.importFile", "scenarios.importFile"]);
+assert.ok(groups[0].contains(fileInput()) && groups[1].contains(importForm().querySelectorAll("input[type=file]")[1]) && !groups[0].contains(fieldInput("scenarios.importTitle")));
+assert.deepEqual([...importForm().querySelectorAll(".scenario-import-info")].map(value => value.getAttribute("title")), ["scenarios.importFormats", "scenarios.importBackgroundFormats"],
+  "the format explanations are tooltips next to the item names");
+assert.ok(!container.textContent?.includes("scenarios.importFormats") && !container.textContent?.includes("scenarios.importBackgroundFormats"), "and they are not always shown");
 assert.ok(!createButton().disabled);
 await act(async () => { setText(fieldInput("scenarios.importSpacing"), "200"); });
 assert.ok(importForm().textContent?.includes("scenarios.importTooLarge"), "maps over 30 km per side are rejected before sending");
@@ -209,6 +296,7 @@ assert.equal(container.querySelector("[role=tab][aria-selected=true]")?.textCont
 rejectHeightmap = false;
 
 // 生バイトを送り、作成後は平面図をシナリオ画像にしてからシナリオタブで新しいカードを選択する。
+drawn.length = 0; // ここまでのプレビューの描画は平面図に数えない
 await act(async () => { createButton().click(); });
 await settle();
 assert.equal(imported?.contentType, "application/octet-stream");
@@ -232,7 +320,10 @@ assert.ok(importForm().textContent?.includes("scenarios.noFileChosen"), "the fil
 assert.equal(fieldInput("scenarios.importSpacing").value, "10", "conversion settings are kept for the next import");
 await choose(npy("{'descr': '<f4', 'fortran_order': False, 'shape': (101, 201), }"));
 assert.ok(fieldInput("scenarios.importMinHeight").disabled && fieldInput("scenarios.importMaxHeight").disabled);
-assert.ok(importForm().textContent?.includes("scenarios.importNpyHeights"));
+assert.ok(!importForm().textContent?.includes("scenarios.importNpyHeights"), "no explanation is written out; the fields show the file's actual range instead");
+await act(async () => { await new Promise(resolve => setTimeout(resolve, 350)); });
+assert.deepEqual([fieldInput("scenarios.importMinHeight").value, fieldInput("scenarios.importMaxHeight").value], ["-12.3", "513"],
+  "a .npy shows its own lowest and highest elevations (one decimal place)");
 assert.equal(importForm().querySelector(".scenario-import-size")?.textContent, "2 × 1 km", "the map size is previewed from the .npy header");
 assert.equal(fieldInput("scenarios.importTitle").value, "dem");
 terrainUnavailable = true;
@@ -249,8 +340,101 @@ assert.ok(thumbnailErrors.length > 0, "a thumbnail failure is logged");
 assert.equal(container.querySelector("[role=tab][aria-selected=true]")?.textContent, "scenarios.tabScenarios", "a thumbnail failure does not fail the import");
 assert.equal(card("local~new").getAttribute("aria-current"), "true");
 terrainUnavailable = false;
+
+// プレビューと背景地形: 選んだファイルの標高をコアから受け取って描く。標高を取り直すのはファイル・海面の高さ・PNGの標高範囲が変わったときだけで、
+// 1画素あたりの距離は配置を変えるだけ。背景は .npy だけで、詳細地形の後ろへ続けて1本の本文で送る。
+const backgroundInput = () => importForm().querySelectorAll<HTMLInputElement>("input[type=file]")[1];
+const chooseBackground = async (file: File) => {
+  await act(async () => {
+    Object.defineProperty(backgroundInput(), "files", { value: [file], configurable: true });
+    backgroundInput().dispatchEvent(new window.Event("change", { bubbles: true }));
+  });
+  await settle();
+};
+const waitPreview = () => act(async () => { await new Promise(resolve => setTimeout(resolve, 350)); });
+const clearBackgroundButton = () => [...importForm().querySelectorAll("button")].find(value => value.textContent === "scenarios.clearBackground");
+await act(async () => { button("scenarios.tabTerrains").click(); });
+await settle();
+previewRequests.length = 0;
+drawn.length = 0;
+assert.equal(backgroundInput().accept, ".npy");
+assert.ok(container.querySelector(".scenario-import-preview")?.textContent?.includes("scenarios.previewEmpty"), "nothing to preview before a file is chosen");
+assert.ok(!clearBackgroundButton(), "there is no background to remove yet");
+assert.ok(fieldInput("scenarios.importBackgroundSpacing").disabled, "the background distance needs a background file");
+await choose(png(201, 101));
+await waitPreview();
+assert.equal(previewRequests.length, 1);
+assert.deepEqual(Object.fromEntries(previewRequests[0].query), { sea_level: "5", min_height: "100", max_height: "900" }, "a PNG is read with its elevation range");
+assert.equal(previewRequests[0].size, 33, "the file itself is sent");
+assert.deepEqual(drawn, [{ width: 768, height: 384 }], "the preview keeps the map's aspect ratio (2 x 1 km)");
+await act(async () => { setText(fieldInput("scenarios.importSeaLevel"), "7"); });
+await waitPreview();
+assert.equal(previewRequests.length, 2);
+assert.equal(previewRequests[1].query.get("sea_level"), "7", "the sea level changes the elevations, so they are read again");
+await act(async () => { setText(fieldInput("scenarios.importSpacing"), "20"); });
+await waitPreview();
+assert.equal(previewRequests.length, 2, "the distance per pixel only moves the layout");
+await act(async () => { setText(fieldInput("scenarios.importSpacing"), "10"); });
+await act(async () => { setText(fieldInput("scenarios.importMaxHeight"), "50"); });
+await waitPreview();
+assert.equal(previewRequests.length, 2, "an invalid range keeps the previous preview and asks for nothing");
+await act(async () => { setText(fieldInput("scenarios.importMaxHeight"), "900"); });
+await waitPreview();
+assert.equal(previewRequests.length, 3, "a valid range reads the file again");
+assert.equal(previewRequests[2].query.get("max_height"), "900");
+
+const backgroundFile = npy("{'descr': '<f4', 'fortran_order': False, 'shape': (61, 101), }", "bg.npy");
+await chooseBackground(backgroundFile);
+await waitPreview();
+assert.equal(previewRequests.length, 4);
+assert.deepEqual(Object.fromEntries(previewRequests[3].query), { sea_level: "7", background: "true" }, "a background is read as .npy, without an elevation range");
+assert.equal(importForm().querySelectorAll(".scenario-import-size")[1]?.textContent, "5 × 3 km", "the background size is previewed from the .npy header (50 m grid)");
+assert.deepEqual(drawn.at(-1), { width: 768, height: 461 }, "the preview fits the background, which is larger than the map");
+assert.ok(!fieldInput("scenarios.importBackgroundSpacing").disabled && !!clearBackgroundButton());
+assert.deepEqual([importedBackgroundExtent(101, 50), importedBackgroundExtent(101, 2000), importedBackgroundExtent(3, 10)], [5000, 200000, 0],
+  "the extent is rounded to the 50 m grid without rounding up to whole kilometres (0 when the grid would have fewer than 2 pixels)");
+await chooseBackground(npy("{'descr': '<f4', 'fortran_order': False, 'shape': (61, 201), }", "wide.npy"));
+await act(async () => { setText(fieldInput("scenarios.importBackgroundSpacing"), "1000"); });
+assert.ok(importForm().textContent?.includes("scenarios.importBackgroundTooLarge"), "backgrounds over 100 km per side are rejected before sending");
+assert.ok(createButton().disabled);
+await act(async () => { setText(fieldInput("scenarios.importBackgroundSpacing"), "0"); });
+assert.ok(importForm().textContent?.includes("scenarios.importBackgroundInvalid"));
+assert.ok(createButton().disabled);
+await act(async () => { setText(fieldInput("scenarios.importBackgroundSpacing"), "50"); });
+await chooseBackground(backgroundFile);
+assert.ok(!createButton().disabled && !importForm().textContent?.includes("scenarios.importBackgroundTooLarge"));
+await act(async () => { clearBackgroundButton()!.click(); });
+assert.ok(!clearBackgroundButton() && fieldInput("scenarios.importBackgroundSpacing").disabled, "removing the background leaves only the terrain");
+await chooseBackground(backgroundFile);
+await act(async () => { createButton().click(); });
+await settle();
+assert.equal(imported!.query.get("background_spacing"), "50");
+assert.equal(imported!.query.get("background_size"), String(backgroundFile.size));
+assert.ok(imported!.body instanceof Blob && !(imported!.body instanceof File), "the background follows the terrain file in one body");
+assert.equal((imported!.body as Blob).size, 33 + backgroundFile.size);
+entries.pop();
+await act(async () => { button("scenarios.tabTerrains").click(); });
+await settle();
+assert.ok(!clearBackgroundButton(), "the background is cleared with the file after a successful import");
+assert.equal(importForm().textContent?.split("scenarios.noFileChosen").length, 3, "both files are cleared");
 await act(async () => { root.unmount(); });
 entries.pop();
+
+// プレビューの画素: 標高0m以下(海)は透明、詳細地形は標高で色分け、背景は淡い単色。詳細地形の海の下に背景の陸地があればそれが見え、北が上。
+const layer = (values: number[], rows: number, cols: number, extent: number): PreviewLayer => ({
+  elev: new Float32Array(values), rows, cols, dataWidth: extent, dataHeight: extent, fillWidth: extent, fillHeight: extent });
+const previewImage = renderImportPreview({
+  detail: layer([-50, -50, 30, 30], 2, 2, 2000), // 行0が南: 南半分が海・北半分が陸
+  background: layer([-1, -1, 5, 5], 2, 2, 4000), // 南が海・北が陸(境目は南寄り)
+}, 8)!;
+assert.deepEqual([previewImage.width, previewImage.height], [8, 8], "the whole background fits: 4000 m / 8 px");
+const pixel = (x: number, y: number) => [...previewImage.pixels.subarray((y * 8 + x) * 4, (y * 8 + x) * 4 + 4)];
+assert.deepEqual(pixel(0, 7), [0, 0, 0, 0], "the sea of the background is transparent (south-west corner)");
+assert.deepEqual(pixel(0, 0), [...BACKGROUND_RGB, 255], "the background land is a flat pale colour (north-west corner)");
+assert.equal(pixel(3, 2)[3], 255);
+assert.notDeepEqual(pixel(3, 2).slice(0, 3), [...BACKGROUND_RGB], "the terrain is coloured by elevation (north of the centre)");
+assert.deepEqual(pixel(3, 5), [...BACKGROUND_RGB, 255], "the background land shows through where the terrain is sea (south of the centre)");
+assert.equal(renderImportPreview({ detail: null, background: null }, 8), null);
 
 // DLC 由来の暗号化された自作シナリオは、地形エディタを開けない(作業コピーが平文で残るため)。都市は編集できる。
 entries.push({ ...entry, id: "local~dlc-copy", encrypted: true });
@@ -258,10 +442,10 @@ root = createRoot(container);
 await act(async () => { root.render(<ScenarioManagerWindow apiBaseUrl="http://test" />); });
 await settle();
 assert.ok(cardButton("local~dlc-copy", "scenarios.editTerrain").disabled, "encrypted scenarios cannot open the terrain editor");
-assert.equal(cardButton("local~dlc-copy", "scenarios.editTerrain").title, "scenarios.terrainEncryptedHint");
+assert.equal(cardButton("local~dlc-copy", "scenarios.editTerrain").title, "scenarios.editTerrain\nscenarios.terrainEncryptedHint");
 assert.ok(!cardButton("local~dlc-copy", "scenarios.editCity").disabled);
 assert.ok(!cardButton("local~mine", "scenarios.editTerrain").disabled);
-assert.equal(cardButton("local~mine", "scenarios.editTerrain").title, "");
+assert.equal(cardButton("local~mine", "scenarios.editTerrain").title, "scenarios.editTerrain");
 await act(async () => { root.unmount(); });
 entries.pop();
 
@@ -408,4 +592,4 @@ for (const code of ["SCENARIO_TOO_LARGE", "SCENARIO_READ_ONLY", "SCENARIO_ENCRYP
 for (const code of ["TERRAIN_LOCKED", "TERRAIN_INVALID", "TERRAIN_SIZE_MISMATCH", "RESOURCE_VALIDATION_ERROR", "PROP_VALIDATION_ERROR"]) {
   assert.ok(code in jaTerrainEditor.terrainEditor.saveErrors, `terrainEditor.saveErrors.${code} is translated`);
 }
-console.log("PASS: scenario manager tabs and origin actions, encrypted terrain lock, terrain editor open errors, heightmap import (size preview, validation, request, thumbnail), new game tabs and terrain facts, tutorial start, new game language and start options, localized metadata and start settings, load confirmation and error codes");
+console.log("PASS: scenario manager tabs and origin actions, icon buttons and delete, encrypted terrain lock, terrain editor open errors, heightmap import (size preview, validation, request, thumbnail, terrain preview and background terrain), new game tabs and terrain facts, tutorial start, new game language and start options, localized metadata and start settings, load confirmation and error codes");

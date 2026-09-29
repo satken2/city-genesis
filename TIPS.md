@@ -66,6 +66,8 @@
 
 - チュートリアルの段階に `world.path` を書くと、パス建設パネルは指定バリアント以外のカテゴリとカードを選べなくなる(`tutorialVariantAllowed`)。プラットフォームも道路と同じ敷設エディタなので、同じ制約(水色・黄色の円への吸着)がそのまま効く。
 
+- `npm run test:scenarios` で `assert.equal(要素, null)` が落ちると、Node が DOM 要素の差分を計算しようとして `RangeError: Array buffer allocation failed` になり、どの検証か分からない(メモリ枯渇ではない)。`node --trace-uncaught tools/scenarios/run.mjs` で投げた位置を見るか、要素は `assert.ok(!el, "…")`、文字は `?.textContent` で比べる。また `.scenario-error` はウィンドウ全体のエラーだけでなくカードの互換性表示(`SaveVersionInfo`)にも付くので、ウィンドウのエラーは `[role=alert]` で探す。
+
 ## docs
 
 - この環境には mkdocs が入っておらず、`python` はストアのエイリアスで起動しない。`py -m venv outputs/mkdocs-venv` に `docs/requirements.txt` を入れ、`docs/` で `outputs/mkdocs-venv/Scripts/python.exe -m mkdocs build --strict -d <リポジトリ外>` を実行すると、既定の `site/` を上書きせずに strict 検査だけできる。

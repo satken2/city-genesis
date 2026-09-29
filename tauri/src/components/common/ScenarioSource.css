@@ -58,7 +58,7 @@
   flex-direction: column;
   gap: 6px;
   color: var(--flat-text-label);
-  font-size: 0.85rem;
+  font-size: 0.93rem;
 }
 
 .save-version-info .save-version-info-reason {

@@ -5,13 +5,15 @@ export const state = {
   results: {} as Record<string, unknown>,
   /** コマンドごとの失敗(Rust の Err(String) と同じく文字列で reject する)。results より優先する */
   errors: {} as Record<string, string>,
+  /** emit されたイベント名(他のウィンドウへ知らせたかを確かめる) */
+  emitted: [] as string[],
 };
 const listeners = new Map<string, (event: any) => void>();
 export async function listen(event: string, callback: (event: any) => void) {
   listeners.set(event, callback);
   return () => { listeners.delete(event); };
 }
-export async function emit(event: string, payload?: unknown) { listeners.get(event)?.({ payload }); }
+export async function emit(event: string, payload?: unknown) { state.emitted.push(event); listeners.get(event)?.({ payload }); }
 export async function invoke(command: string, args?: any) {
   state.calls.push({ command, args });
   if (command === "open_registered_window" && args.windowType === "confirm_dialog") {
