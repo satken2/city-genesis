@@ -93,12 +93,12 @@
       },
       "step2": {
         "title": "Construisons les bâtiments de gare",
-        "town": "Un quai seul n'est pas encore une gare. Appuyez sur « Retour » pour revenir à la liste, choisissez « Gare simple » et tracez une ligne entre les deux repères jaunes qui croise le quai côté ville. Les quais croisés par la ligne sont regroupés dans cette gare.",
+        "town": "Un quai seul n'est pas encore une gare. Appuyez sur « Retour » jusqu'aux catégories, choisissez « Gare simple » dans « Bâtiments de gare » et tracez une ligne entre les deux repères jaunes qui croise le quai côté ville. Les quais croisés par la ligne sont regroupés dans cette gare.",
         "new": "Faites de même pour le quai ouest : tracez la ligne de « Gare simple » entre les deux repères jaunes. Une fois le tracé terminé, appuyez sur « Suivant »."
       },
       "step3": {
         "title": "Relions les deux gares par la voie",
-        "description": "Appuyez sur « Retour » pour revenir à la liste, choisissez « Voie de chemin de fer » et posez la voie depuis l'extrémité ouest du quai côté ville jusqu'à l'extrémité est du quai ouest (une seule voie). En appuyant sur « Suivant », la voie et les gares sont achevées et la liaison est vérifiée."
+        "description": "Appuyez sur « Retour » jusqu'aux catégories, choisissez « Voie de chemin de fer » dans « Chemin de fer » et posez la voie depuis l'extrémité ouest du quai côté ville jusqu'à l'extrémité est du quai ouest (une seule voie). En appuyant sur « Suivant », la voie et les gares sont achevées et la liaison est vérifiée."
       },
       "step4": {
         "title": "Construisons le dépôt",

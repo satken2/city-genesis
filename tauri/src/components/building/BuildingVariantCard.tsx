@@ -20,8 +20,6 @@ export type BuildingVariantCardProps = {
   fixedFloors?: number | null;
   /** 資金不足等で選択不可の場合に true */
   disabled?: boolean;
-  /** 名称の後ろに付与する補足文字列(「 (資金不足)」など) */
-  titleSuffix?: string;
   /** クリック時のハンドラ。指定時はインタラクティブなボタンとして描画される */
   onClick?: () => void;
 };
@@ -31,7 +29,6 @@ export function BuildingVariantCard({
   entry,
   fixedFloors,
   disabled = false,
-  titleSuffix,
   onClick,
 }: BuildingVariantCardProps) {
   const icon = resolveAgentIcon(
@@ -50,10 +47,7 @@ export function BuildingVariantCard({
         draggable={false}
       />
       <div className="bc-description-body">
-        <div className="bc-description-name">
-          {entry.display_name}
-          {titleSuffix}
-        </div>
+        <div className="bc-description-name">{entry.display_name}</div>
         <div className="bc-description-text">{entry.description || "—"}</div>
         <BuildingFloorSpecs entry={entry} fixedFloors={fixedFloors} />
       </div>

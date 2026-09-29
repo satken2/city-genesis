@@ -123,6 +123,11 @@
     "alignmentUnready": "Una curva o pendiente supera los límites de este estándar. Suaviza el trazado.",
     "constructionSpeed": "Velocidad de construcción",
     "back": "Volver",
+    "group": {
+      "road": "Carreteras",
+      "track": "Vías férreas",
+      "infra": "Infraestructura"
+    },
     "category": {
       "1": "Calles",
       "2": "Autopistas",
@@ -132,7 +137,8 @@
       "6": "Teleférico",
       "11": "Electricidad",
       "12": "Agua",
-      "13": "Petróleo"
+      "13": "Petróleo",
+      "20": "Edificios de estación"
     },
     "shape": "Forma",
     "elevation": "Altitud (Y)",

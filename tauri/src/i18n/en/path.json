@@ -123,6 +123,11 @@
     "alignmentUnready": "A curve or grade exceeds the limits of this standard. Ease the alignment.",
     "constructionSpeed": "Construction Speed",
     "back": "Back",
+    "group": {
+      "road": "Roads",
+      "track": "Rail",
+      "infra": "Infrastructure"
+    },
     "category": {
       "1": "Streets",
       "2": "Motorways",
@@ -132,7 +137,8 @@
       "6": "Ropeway",
       "11": "Electricity",
       "12": "Water",
-      "13": "Oil"
+      "13": "Oil",
+      "20": "Station Buildings"
     },
     "shape": "Shape",
     "elevation": "Elevation (Y)",

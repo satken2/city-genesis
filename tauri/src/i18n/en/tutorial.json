@@ -93,12 +93,12 @@
       },
       "step2": {
         "title": "Build the Station Houses",
-        "town": "A platform alone isn't a station yet. Press \"Back\" to return to the list, choose \"Simple Station House\", and draw a line between the two yellow markers so that it crosses the town-side platform. Platforms crossed by the line are gathered into that station.",
+        "town": "A platform alone isn't a station yet. Press \"Back\" until the categories appear, choose \"Simple Station House\" under \"Station Buildings\", and draw a line between the two yellow markers so that it crosses the town-side platform. Platforms crossed by the line are gathered into that station.",
         "new": "Do the same for the western platform: draw a \"Simple Station House\" line between the two yellow markers. When you're done, press \"Next\"."
       },
       "step3": {
         "title": "Link the Two Stations by Track",
-        "description": "Press \"Back\" to return to the list, choose \"Railway Track\", and lay track from the west end of the town-side platform to the east end of the western platform (a single track). Press \"Next\" to complete the track and stations and check the connection."
+        "description": "Press \"Back\" until the categories appear, choose \"Railway Track\" under \"Railways\", and lay track from the west end of the town-side platform to the east end of the western platform (a single track). Press \"Next\" to complete the track and stations and check the connection."
       },
       "step4": {
         "title": "Build a Depot",

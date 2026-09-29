@@ -24,7 +24,7 @@
     "budgetRatioNote": "来期の建設予算の {{percent}}%",
     "availableFunds": "利用可能な資金",
     "insufficientFunds": "資金が不足しているため発注できません（不足額 {{value}}）",
-    "variantUnaffordableSuffix": "（資金不足）",
+    "variantUnaffordable": "資金不足",
     "constructionCostPerEpoch": "1エポックの建設コスト",
     "demolitionCostPerEpoch": "1エポックの解体コスト",
     "remainingConstruction": "残り建設期間",

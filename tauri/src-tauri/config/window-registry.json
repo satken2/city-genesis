@@ -457,17 +457,18 @@
   },
   "save_load": {
     "title": "セーブ・ロード",
-    "width": 420,
-    "height": 400,
+    "width": 380,
+    "height": 540,
     "resizable": false,
     "policy": "single",
     "empty_shell": true,
+    "chromeless": true,
     "actions": []
   },
   "save_list": {
     "title": "セーブデータ一覧",
-    "width": 560,
-    "height": 520,
+    "width": 760,
+    "height": 640,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,

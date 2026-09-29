@@ -24,7 +24,7 @@
     "budgetRatioNote": "{{percent}}% of next epoch construction budget",
     "availableFunds": "Available funds",
     "insufficientFunds": "Cannot place this order: insufficient funds (short by {{value}})",
-    "variantUnaffordableSuffix": " (insufficient funds)",
+    "variantUnaffordable": "Insufficient funds",
     "constructionCostPerEpoch": "Construction Cost / Epoch",
     "demolitionCostPerEpoch": "Demolition Cost / Epoch",
     "remainingConstruction": "Remaining Duration",

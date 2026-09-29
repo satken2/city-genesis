@@ -262,7 +262,7 @@
             "allow": [],
             "highlight": [
               "hud.road",
-              "path.type:4",
+              "path.type:20",
               "path.variant:2001"
             ]
           },
@@ -310,7 +310,7 @@
             "allow": [],
             "highlight": [
               "hud.road",
-              "path.type:4",
+              "path.type:20",
               "path.variant:2001"
             ]
           },

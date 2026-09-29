@@ -5,8 +5,8 @@
  * 既存パスの形状編集(パス詳細の「編集」が params.extra.editPathId 付きで開く)を1つのパネルで扱う。
  *
  * 選択は建物建設パネルと同じ3段で、左上の戻るで1段ずつ戻る。
- *   1. カテゴリのタイル: カテゴリは path_type そのもの(local-constants の PATH_BUILD_CATEGORIES)
- *   2. バリアントのカード一覧: 並び順は pathBuildCategories が決める(鉄道・モノレールは末尾に駅舎)
+ *   1. カテゴリのタイル: カテゴリは path_type そのもので、道路・軌道・インフラの区分ごとに並べる(pathBuildCategories)
+ *   2. バリアントのカード一覧: そのカテゴリの path_type のバリアントだけを並べる
  *   3. 建設画面: 選んだバリアントのカードを概要として先頭に出し、その下に敷設の設定と確定/キャンセルを並べる
  * 既存パスの形状編集は種別・バリアントを変えないので、建設画面から始まり戻れない。
  *
@@ -41,9 +41,10 @@ import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
 import { PATH_STATION_HOUSE } from "../../constants";
 import { tutorialVariantAllowed } from "../../tutorial/TutorialLayer";
-import { availableBuildCategories, buildCategoryVariants } from "./pathBuildCategories";
+import { buildCategoryGroups, buildCategoryVariants } from "./pathBuildCategories";
 import { isRailType } from "./railBuild";
 import { PathVariantCard } from "./PathVariantCard";
+import { UnaffordableOverlay } from "../common/UnaffordableOverlay";
 import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
 import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
 import { StationPassageModeSelect } from "./StationPassageModeSelect";
@@ -154,7 +155,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
   /* ---- カテゴリとバリアントの候補 ---- */
   // タイル・カードの選択可否はチュートリアルの案内状態にも依存する。案内状態が変わると
   // usePathConstruction(内部で useGuideSnapshot を購読)がパネルを描き直すので、描画のたびに判定すればよい。
-  const availableCategories = useMemo(() => availableBuildCategories(masterData), [masterData]);
+  const categoryGroups = useMemo(() => buildCategoryGroups(masterData), [masterData]);
   const variantsForCategory = useMemo(
     () => (selectedCategory === null ? [] : buildCategoryVariants(masterData, selectedCategory)),
     [masterData, selectedCategory],
@@ -354,43 +355,46 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
     }
     return (
       <div className="pc-layout" onClick={handlePanelClick}>
-        <div className="pc-section">
-          {selectedCategory === null ? (
-            <div className="bc-tile-grid">
-              {availableCategories.map((category) => (
-                <CategoryTile
-                  key={category}
-                  category={category}
-                  icon={resolvePathCategoryIcon(category)}
-                  name={t(`path_construction.category.${category}`)}
-                  disabled={!buildCategoryVariants(masterData, category).some((v) => tutorialVariantAllowed(v.id))}
-                  onClick={() => setSelectedCategory(category)}
-                />
-              ))}
-            </div>
-          ) : (
-            <>
-              <div className="bc-selection-header">
-                <BackButton onClick={() => setSelectedCategory(null)} />
+        {selectedCategory === null ? (
+          categoryGroups.map(({ group, categories }) => (
+            <div key={group} className="pc-section">
+              <div className="pc-section-title">{t(`path_construction.group.${group}`)}</div>
+              <div className="bc-tile-grid">
+                {categories.map((category) => (
+                  <CategoryTile
+                    key={category}
+                    category={category}
+                    icon={resolvePathCategoryIcon(category)}
+                    name={t(`path_construction.category.${category}`)}
+                    disabled={!buildCategoryVariants(masterData, category).some((v) => tutorialVariantAllowed(v.id))}
+                    onClick={() => setSelectedCategory(category)}
+                  />
+                ))}
               </div>
-              <div className="bc-variant-card-list">
-                {variantsForCategory.map(({ id, data }) => {
-                  const unaffordable = isVariantUnaffordable(id);
-                  return (
+            </div>
+          ))
+        ) : (
+          <div className="pc-section">
+            <div className="bc-selection-header">
+              <BackButton onClick={() => setSelectedCategory(null)} />
+            </div>
+            <div className="bc-variant-card-list">
+              {variantsForCategory.map(({ id, data }) => {
+                const unaffordable = isVariantUnaffordable(id);
+                return (
+                  <UnaffordableOverlay key={id} unaffordable={unaffordable}>
                     <PathVariantCard
-                      key={id}
                       variantId={id}
                       entry={data}
                       disabled={unaffordable || !tutorialVariantAllowed(id)}
-                      titleSuffix={unaffordable ? t("construction.variantUnaffordableSuffix") : undefined}
                       onClick={() => handleVariantSelect(id)}
                     />
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
+                  </UnaffordableOverlay>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -400,7 +404,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
       {/* 選択中のバリアントの概要。戻るとカテゴリのカード一覧へ戻る */}
       <div className="pc-section">
         {isNewBuild && <BackButton onClick={pathConstruction.deselectVariant} />}
-        <PathVariantCard entry={selectedVariantData} />
+        <PathVariantCard entry={selectedVariantData} variantId={pathConstruction.selectedVariant ?? undefined} />
       </div>
 
       {/* 駅舎の建屋の配置端と通路方式は建設時に決める(配置端は着工後に変えられない) */}

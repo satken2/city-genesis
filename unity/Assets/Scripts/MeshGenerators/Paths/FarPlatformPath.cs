@@ -12,9 +12,10 @@ public static class FarPlatformPath
     // 貨物PF(貨物列車専用のホーム)。463=コンテナ、464=鉱石、465=石油。
     static bool IsFreight(int variant) => variant == 463 || variant == 464 || variant == 465;
 
+    // 471(複線鉄道PF・相対式)は 461 と同じ部品の見た目で、軌道数2の並びは BuildInto が軌道の横位置から組み立てる。
     public static bool Handles(PathSummary path) => path != null &&
-        (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || IsFreight(path.path_variant)
-         || path.path_variant == 502 || path.path_variant == Constants.PATH_VARIANT_ROPEWAY_STATION);
+        (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || path.path_variant == 471
+         || IsFreight(path.path_variant) || path.path_variant == 502 || path.path_variant == Constants.PATH_VARIANT_ROPEWAY_STATION);
 
     public static void GenerateInto(GameObject root, PathSummary path, List<Vector3> points)
     {

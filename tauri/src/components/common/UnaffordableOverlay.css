@@ -1,0 +1,23 @@
+.unaffordable-overlay {
+  position: relative;
+}
+
+/* 角丸は重ねる相手のカード(.bc-description-frame / .pc-description-frame)に合わせる */
+.unaffordable-overlay__veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(8, 14, 24, 0.55);
+  pointer-events: none;
+}
+
+.unaffordable-overlay__label {
+  padding: 2px 10px;
+  border-radius: 4px;
+  background: var(--flat-warn-surface);
+  color: var(--flat-warn);
+  font-weight: 600;
+}

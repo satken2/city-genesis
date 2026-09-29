@@ -85,7 +85,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `playSound.ts` / `bgm.ts` | 効果音(URLごとにキャッシュ)・BGM(`BgmManager`。Cockpitだけが所有) |
 | `weatherAudio.ts` | 音量設定をUnityへ送るだけ(再生しない) |
 | `epochPresentation.ts` / `epochFlow.ts` | 演出ID付きの暗転通知待ち、HTTPと日没の並行実行、処理時間に応じたTipsの開閉。結果画面のクローズまで黒幕を保持する |
-| `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` / `bdCategoryIcon.ts` / `pathCategoryIcon.ts` | 各種アイコン画像の解決。`bdCategoryIcon` は建物建設パネルの分類(`assets/images/bd_categories/{id}.png`)、`pathCategoryIcon` はパス建設パネルのカテゴリ(`assets/images/paths/path_{path_type}.png`)。`agentIcon` の `resolveAgentVariantIcon` はバリアント専用画像だけを返す(無ければ空文字) |
+| `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` / `bdCategoryIcon.ts` / `pathCategoryIcon.ts` | 各種アイコン画像の解決。`bdCategoryIcon` は建物建設パネルの分類(`assets/images/building_categories/{id}.png`)、`pathCategoryIcon` はパス建設パネルのカテゴリ(`assets/images/paths/path_{path_type}.png`)。`pathIcon` は種別画像に加えバリアント別画像・対応マップ(橋梁・駅PF等)を解決する。`agentIcon` の `resolveAgentVariantIcon` はバリアント専用画像だけを返す(無ければ空文字) |
 | `propThumbnail.ts` | プロップサムネイルの解決。画像のglobはここ1箇所だけ |
 | `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`・開始設定の項目 `ScenarioStartOption`)、シナリオの見出し `scenarioDisplayTitle`、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま)、シナリオ画像の登録 `uploadScenarioThumbnail` |
 | `mapSize.ts` | マップの大きさ(m)をkmで整形する `formatMapSize`(例: 7 × 6 km。ニューゲームの事実欄・地形の取り込みの見込み) |

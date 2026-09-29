@@ -1,0 +1,11 @@
+/* 旗は文字の高さに合わせる。白地の旗が暗い面に溶けないよう、細い明るい縁を影で付ける */
+.language-flag {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1rem;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 1px 3px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  vertical-align: middle;
+}

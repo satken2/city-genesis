@@ -21,9 +21,43 @@ const pathModules = import.meta.glob<{ default: string }>(
 );
 
 /**
- * パスタイプに対応するアイコン画像パスを返す
+ * パスバリアントIDと個別アイコンファイル名の対応。
+ * master.yaml にアイコン指定項目が無いため、線路の橋梁や駅プラットフォームなど
+ * 種別画像(path_{path_type}.png)とは明確に異なる意匠を持つバリアントの対応をここで持つ。
  */
-export function resolvePathIcon(pathType: number): string {
+const PATH_VARIANT_ICON_MAP: Record<number, string> = {
+  413: "path_4b", // 鉄道橋
+  423: "path_4b", // 複線鉄道橋
+  461: "path_4s", // 鉄道PF
+  462: "path_4s", // 階段付PF(対向)
+  463: "path_4s", // コンテナ積卸PF
+  464: "path_4s", // 砕石積卸PF
+  465: "path_4s", // 原油積卸PF
+  471: "path_4s", // 鉄道PF(対向)
+  472: "path_4s", // 鉄道PF(島)
+  502: "path_5s", // モノレールPF(対向)
+  602: "path_6s", // ロープウェイ駅
+};
+
+/**
+ * パスタイプおよびバリアントに対応するアイコン画像パスを返す。
+ * バリアント個別画像(または対応マップ)が存在すれば優先し、無ければパスタイプの画像、
+ * それも無ければ PATH_DEFAULT (0) にフォールバックする。
+ */
+export function resolvePathIcon(pathType: number, variantId?: number): string {
+  if (variantId != null) {
+    const variantKey = `../assets/images/paths/path_${variantId}.png`;
+    if (pathModules[variantKey]) {
+      return pathModules[variantKey].default;
+    }
+    const mappedName = PATH_VARIANT_ICON_MAP[variantId];
+    if (mappedName) {
+      const mappedKey = `../assets/images/paths/${mappedName}.png`;
+      if (pathModules[mappedKey]) {
+        return pathModules[mappedKey].default;
+      }
+    }
+  }
   const key = `../assets/images/paths/path_${pathType}.png`;
   if (pathModules[key]) {
     return pathModules[key].default;

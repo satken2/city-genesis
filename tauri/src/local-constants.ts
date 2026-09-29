@@ -74,6 +74,7 @@ import {
   STATUS_CANCELED,
   STATUS_EMPTY,
   STATUS_COLLAPSED,
+  PATH_DEFAULT,
   PATH_STREET,
   PATH_MOTORWAY,
   PATH_WALKWAY,
@@ -84,6 +85,7 @@ import {
   PATH_ELECTRICITY,
   PATH_WATER,
   PATH_PIPELINE,
+  PATH_STATION_HOUSE,
   PRODUCT_WATER_SUPPLY,
   PRODUCT_ELECTRICITY,
   PRODUCT_HIGH_ELECTRICITY,
@@ -119,27 +121,16 @@ export function isInfraPathType(pathType: number | null | undefined): boolean {
 }
 
 /**
- * パス建設パネルの最上位カテゴリ(カテゴリ=path_type)。この順にタイルを並べる。
- * 仮想道路・公共交通の区間パスはプレイヤーが敷くものではないので含めない。
- * 駅舎(PATH_STATION_HOUSE)は独立したカテゴリにせず、PATH_TYPES_WITH_STATION_HOUSE の一覧に含める。
+ * パス建設パネルにカテゴリとして出さない path_type。
+ * 未設定を表す既定値(実体を持たない)と、公共交通ウィンドウが作る路線の区間パスはプレイヤーが敷くものではない。
  */
-export const PATH_BUILD_CATEGORIES: readonly number[] = [
-  PATH_STREET,
-  PATH_MOTORWAY,
-  PATH_WALKWAY,
-  PATH_TRACK,
-  PATH_MONORAIL,
-  PATH_CONVEYOR,
-  PATH_ELECTRICITY,
-  PATH_WATER,
-  PATH_PIPELINE,
-];
+export const PATH_TYPES_HIDDEN_IN_BUILD_PANEL: readonly number[] = [PATH_DEFAULT, PATH_TRANSPORT];
 
 /**
- * パス建設パネルで、バリアント一覧の末尾に駅舎を並べるカテゴリ。
- * 駅舎は軌道の種別を問わずプラットフォームを束ねるが、ロープウェイは乗り場のパス自体が駅で駅舎を持たない。
+ * パス建設パネルでカテゴリのタイルを「軌道」の区分に並べる path_type。
+ * 「インフラ」の区分は PATH_TYPES_INFRA で、どちらにも入らない path_type はすべて「道路」に並べる。
  */
-export const PATH_TYPES_WITH_STATION_HOUSE: readonly number[] = [PATH_TRACK, PATH_MONORAIL];
+export const PATH_TYPES_TRACK_GROUP: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_CONVEYOR, PATH_STATION_HOUSE];
 
 /**
  * 形状から最小曲線半径・最大勾配を算出するパス種別。

@@ -24,7 +24,7 @@
     "budgetRatioNote": "下期建设预算的 {{percent}}%",
     "availableFunds": "可用资金",
     "insufficientFunds": "资金不足，无法下达建设指令（缺口 {{value}}）",
-    "variantUnaffordableSuffix": "（资金不足）",
+    "variantUnaffordable": "资金不足",
     "constructionCostPerEpoch": "每纪元建设成本",
     "demolitionCostPerEpoch": "每纪元拆除成本",
     "remainingConstruction": "剩余工期",

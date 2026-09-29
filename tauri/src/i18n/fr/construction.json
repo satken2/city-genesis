@@ -24,7 +24,7 @@
     "budgetRatioNote": "{{percent}} % du budget de construction de la prochaine période",
     "availableFunds": "Fonds disponibles",
     "insufficientFunds": "Commande impossible : fonds insuffisants (il manque {{value}})",
-    "variantUnaffordableSuffix": " (fonds insuffisants)",
+    "variantUnaffordable": "Fonds insuffisants",
     "constructionCostPerEpoch": "Coût de chantier par époque",
     "demolitionCostPerEpoch": "Coût de démolition par époque",
     "remainingConstruction": "Durée de chantier restante",

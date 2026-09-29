@@ -646,6 +646,10 @@ pub async fn handle_incoming_message(
             // camera:query_state への応答で、問い合わせ1回につき1回だけ流れる。
             let _ = app.emit("camera:state", envelope.payload);
         }
+        "camera:thumbnail_captured" => {
+            // camera:capture_thumbnail(保存直前の撮影)への応答。頼んだウィンドウが id で自分の要求を見分ける。
+            let _ = app.emit("camera:thumbnail_captured", envelope.payload);
+        }
         "system:ping" => {
             send_to_parent(
                 &state,

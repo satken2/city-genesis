@@ -23,8 +23,6 @@ type PathVariantCardProps = {
   entry: PathMasterEntry;
   /** 資金不足・チュートリアルの制限などで選べない場合に true */
   disabled?: boolean;
-  /** 名称の後ろに付ける補足(「（資金不足）」など) */
-  titleSuffix?: string;
   /** 指定すると押せるボタンとして描画する */
   onClick?: () => void;
 };
@@ -101,23 +99,20 @@ function collectSpecs(entry: PathMasterEntry): SpecItem[] {
   return specs;
 }
 
-export function PathVariantCard({ variantId, entry, disabled = false, titleSuffix, onClick }: PathVariantCardProps) {
+export function PathVariantCard({ variantId, entry, disabled = false, onClick }: PathVariantCardProps) {
   const { t } = useTranslation();
   const specs = collectSpecs(entry);
 
   const cardBody = (
     <>
       <img
-        src={resolvePathIcon(entry.type)}
+        src={resolvePathIcon(entry.type, variantId)}
         alt={entry.display_name}
         className="pc-description-icon"
         draggable={false}
       />
       <div className="pc-description-body">
-        <div className="pc-description-name">
-          {entry.display_name}
-          {titleSuffix}
-        </div>
+        <div className="pc-description-name">{entry.display_name}</div>
         <div className="pc-description-text">{entry.description || "—"}</div>
         {specs.length > 0 && (
           <div className="pc-description-specs">

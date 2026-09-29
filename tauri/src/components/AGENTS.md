@@ -61,6 +61,7 @@
 | `AgentLink` / `CitizenLink` / `PathLink` / `ZoneLink` | 名前をクリックで詳細を開く。エンティティ名を生テキストで出さない |
 | `InfoHeader` / `EditableLabel` | 見出しとインライン改名。改名可否は呼び出し側が決める |
 | `ConfirmDialogWindow` | 直接開かず`requestConfirm()`経由 |
+| `UnaffordableOverlay` | 建設パネルのバリアント一覧で、資金不足のカードに「資金不足」の札を外から重ねる。カード(`BuildingVariantCard` / `PathVariantCard`)は一覧と建設画面の概要で同じものを使うので、一覧だけの表示をカードに足さない。選べなくするのはカードの`disabled` |
 | `ConstructionInfoCard` | 建設コスト・期間・需給見通し・資金・線形の表示。確定可否は`utils/constructionFunding`と同じ判定。ドメイン固有の数量は`leadingRows`で表の先頭に足す(造成の種類・切盛土量など) |
 | `TagPicker` / `TagSelect` / `TagRow` | 建設プロジェクトのタグ。現在値は詳細レスポンスに載らず`GET /tags/object`で引く。変更後は`tags:changed`をemit |
 | `Meter` / `DonutGauge` | 0〜1のメーター。`polarity="negative"`で悪さ指標。1超は全箇所一律に頭打ち+赤紫の発光 |
@@ -74,7 +75,7 @@
 | `ScenarioThumbnail` | シナリオ画像。`hooks/useApiImageUrl` で取得した Blob URL を表示し(APIの画像を `<img src>` で直接読まない)、画像が無ければプレースホルダー。標高ファイルから取り込んだシナリオには作成直後に地形の平面図が登録される |
 | `TerrainFacts` | マップの大きさ・地表・気候の欄(ニューゲームのシナリオの詳細)。大きさの整形は `utils/mapSize.ts` |
 
-このほか`SatisfactionFace`・`SpeedLimitSign`・グラフ類・`NumberStepper`・`Money`等がある。フック`hooks/useVariantAffordability`は資金目安で選択肢(プルダウンの項目・建物建設のタイル)を無効化する。
+このほか`SatisfactionFace`・`SpeedLimitSign`・グラフ類・`NumberStepper`・`Money`等がある。フック`hooks/useVariantAffordability`は資金目安で建設パネルのバリアントのカードを無効化する(札は`UnaffordableOverlay`)。
 
 ## hud/ の常駐パネル
 
@@ -103,7 +104,7 @@
 - 区画作成(`parcel/ParcelCreationPanel`): 作成方法の真実源はUnity(`edit_parcel:set_mode`はUnity起点だけ)。確定後も`STATE_NORMAL`を送らず連続作成。`parcel_type`は送らない。
 - 公共施設(`agent/PublicFacilityPanel`): 放棄中は解除以外を無効化。`status_from`の見出しは`resolveStatusSinceLabel`で選ぶ(再開でも更新されるので一律「竣工日」にしない)。
 - パス建設(`path/`): 道路・鉄道・インフラは`path_build`の`PathConstructionPanel`1つで敷く。曲線/直線・吸着はUnity側で、`curveMode`の書き込み元は`edit_path:update_shape`の`is_curved`だけ。
-  - 選択は建物建設と同じカテゴリのタイル→バリアントのカード一覧→建設画面の3段。カテゴリは`path_type`そのもので、対象と並びは`local-constants`の`PATH_BUILD_CATEGORIES`、一覧の中身と並びは`pathBuildCategories`(駅舎は独立したカテゴリを持たず鉄道・モノレールの一覧の末尾)。カード(`PathVariantCard`)は一覧の項目と建設画面の概要に共用する。カテゴリのアイコンは`utils/pathCategoryIcon`の専用画像だけで、無ければ枠を空けておく。
+  - 選択は建物建設と同じカテゴリのタイル→バリアントのカード一覧→建設画面の3段。カテゴリはマスターにバリアントがある`path_type`そのもので(`local-constants`の`PATH_TYPES_HIDDEN_IN_BUILD_PANEL`は出さない)、一覧にはそのカテゴリの`path_type`のバリアントだけを並べる。タイルは道路・軌道・インフラの3区分に分けて並べ、区分は`pathBuildCategories`で決め打ちしている(軌道=`PATH_TYPES_TRACK_GROUP`、インフラ=`PATH_TYPES_INFRA`、残りは道路)。カード(`PathVariantCard`)は一覧の項目と建設画面の概要に共用する。カテゴリのアイコンは`utils/pathCategoryIcon`の専用画像だけで、無ければ枠を空けておく。
   - 建設画面の設定(複線構成・ホーム設置側・駅舎の配置端と通路方式・所属道路・タグ)は選んだバリアントの種別で決まり、新規敷設でだけ出す。既存パスの形状編集(`params.extra.editPathId`)は建設画面から始まり、カテゴリへ戻れない。
   - ホーム設置側は単線の駅だけが持つ(`railBuild.hasPlatformSideChoice`)。1本で上下線を持つ複線一体の線路(線路系で`lanes`≥2)の駅は両外側にホームが付くので、トグルを出さず、`platform_side` を送らず、`edit_path:change_platform_side` も送らない。
   - 確定は`usePathConstruction.canConfirm`(Unityの`can_confirm`∧全線`/paths/validate`。先頭1本だけの検証は禁止)。成功のたびに`notifyRoadsChanged`。

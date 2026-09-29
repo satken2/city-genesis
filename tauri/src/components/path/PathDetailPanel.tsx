@@ -322,7 +322,7 @@ export function PathDetailPanel({
     );
   }
 
-  const iconSrc = resolvePathIcon(pathData.path_type);
+  const iconSrc = resolvePathIcon(pathData.path_type, pathData.path_variant);
 
   /** マスターデータからパスバリアントの表示名を取得する */
   const variantName = masterData?.paths[pathData.path_variant]?.display_name;

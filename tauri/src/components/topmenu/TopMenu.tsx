@@ -222,7 +222,7 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         <span className="topmenu-github-label">satken2/city-genesis</span>
       </button>
 
-      <div className="topmenu-versions"><span>core {core ? `v${core.core_version}` : t("saveCompatibility.unknown")}</span><span>ui v{frontendVersion.frontend_version}</span>
+      <div className="topmenu-versions"><span>Core {core ? `v${core.core_version}` : t("saveCompatibility.unknown")}</span><span>Graphic v{frontendVersion.frontend_version}</span>
         {versionError && <span role="alert">{versionError}</span>}</div>
       {/**
        * オプションボタン。

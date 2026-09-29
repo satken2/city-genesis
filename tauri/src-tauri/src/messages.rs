@@ -127,6 +127,10 @@ pub struct WindowDefinition {
     /// true のときタイトルバーのみで本文は空（プレースホルダー用）
     #[serde(default)]
     pub empty_shell: bool,
+    /// true のときタイトルバー(ドラッグ領域と×)を出さず、パネルがウィンドウ全体を描く。
+    /// 閉じる操作と余白はパネルが持つ。
+    #[serde(default)]
+    pub chromeless: bool,
     /// ウィンドウの配置方法。未設定なら Default（中央配置）。
     #[serde(default)]
     pub layout: WindowLayout,

@@ -62,6 +62,7 @@ import { isConstructionAffordable } from "../../utils/constructionFunding";
 import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { BuildingVariantCard } from "./BuildingVariantCard";
+import { UnaffordableOverlay } from "../common/UnaffordableOverlay";
 import { showNotification } from "../../utils/notification";
 import { BD_CATEGORY_OTHER, PARCEL_LAND, VARIANT_CITY } from "../../constants";
 import { isGradingVariant } from "../grading/grading";
@@ -1602,14 +1603,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                 const variantId = Number(idStr);
                 const unaffordable = isVariantUnaffordable(variantId);
                 return (
-                  <BuildingVariantCard
-                    key={idStr}
-                    variantId={variantId}
-                    entry={entry}
-                    disabled={unaffordable}
-                    titleSuffix={unaffordable ? t("construction.variantUnaffordableSuffix") : undefined}
-                    onClick={() => handleVariantSelect(variantId)}
-                  />
+                  <UnaffordableOverlay key={idStr} unaffordable={unaffordable}>
+                    <BuildingVariantCard
+                      variantId={variantId}
+                      entry={entry}
+                      disabled={unaffordable}
+                      onClick={() => handleVariantSelect(variantId)}
+                    />
+                  </UnaffordableOverlay>
                 );
               })}
             </div>

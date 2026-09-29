@@ -93,12 +93,12 @@
       },
       "step2": {
         "title": "Construyamos los edificios de estación",
-        "town": "Un andén solo todavía no es una estación. Pulsa «Volver» para regresar a la lista, elige «Estación sencilla» y traza una línea entre los dos marcadores amarillos que cruce el andén del pueblo. Los andenes que cruza la línea se agrupan en esa estación.",
+        "town": "Un andén solo todavía no es una estación. Pulsa «Volver» hasta ver las categorías, elige «Estación sencilla» en «Edificios de estación» y traza una línea entre los dos marcadores amarillos que cruce el andén del pueblo. Los andenes que cruza la línea se agrupan en esa estación.",
         "new": "Haz lo mismo en el andén del oeste: traza la línea de «Estación sencilla» entre los dos marcadores amarillos. Cuando termines, pulsa «Siguiente»."
       },
       "step3": {
         "title": "Unamos las dos estaciones con vía",
-        "description": "Pulsa «Volver» para regresar a la lista, elige «Vía de ferrocarril» y tiende la vía desde el extremo oeste del andén del pueblo hasta el extremo este del andén del oeste (una sola vía). Al pulsar «Siguiente», se completarán la vía y las estaciones y se comprobará la conexión."
+        "description": "Pulsa «Volver» hasta ver las categorías, elige «Vía de ferrocarril» en «Ferrocarril» y tiende la vía desde el extremo oeste del andén del pueblo hasta el extremo este del andén del oeste (una sola vía). Al pulsar «Siguiente», se completarán la vía y las estaciones y se comprobará la conexión."
       },
       "step4": {
         "title": "Construyamos el depósito",

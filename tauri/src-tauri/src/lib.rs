@@ -194,6 +194,18 @@ fn is_epoch_presentation_current(state: tauri::State<'_, SharedState>, id: Strin
     state.lock().epoch_presentation_id.as_deref() == Some(&id)
 }
 
+/// セーブ・シナリオ保存の直前に、3Dビューの撮影をUnityへ頼む。
+/// Unityが接続していなければ送らずに false を返す(不在の間の要求をMMFに溜めず、UIは撮影を待たずに保存する)。
+/// Unityは撮った画像をコア(`PUT /api/v1/sessions/thumbnail`)へ直接送り、`camera:thumbnail_captured {id, success}` で返す。
+#[tauri::command]
+fn request_thumbnail_capture(state: tauri::State<'_, SharedState>, id: String) -> Result<bool, String> {
+    if !state.lock().graphic_connected {
+        return Ok(false);
+    }
+    ipc::send_ui_action(state.inner(), "".into(), None, "camera:capture_thumbnail".into(), serde_json::json!({"id": id}))?;
+    Ok(true)
+}
+
 /// アイコンパネルの高さをReact側の実測値に合わせる。
 /// アイコン数がテンプレートモードの有無で変わるため、中身の高さが変わるたびに
 /// React(`IconPanel`)から通知させ、ウィンドウに透明な余白ができないようにする。
@@ -2090,6 +2102,7 @@ pub fn run() {
             set_epoch_tips_visible,
             finish_epoch_presentation,
             is_epoch_presentation_current,
+            request_thumbnail_capture,
             get_connection_status,
             resize_icon_panel,
             resize_system_tray,

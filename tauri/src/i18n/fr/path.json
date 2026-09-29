@@ -123,6 +123,11 @@
     "alignmentUnready": "Une courbe ou une pente dépasse les limites de cette norme. Adoucissez le tracé.",
     "constructionSpeed": "Vitesse de construction",
     "back": "Retour",
+    "group": {
+      "road": "Routes",
+      "track": "Voies ferrées",
+      "infra": "Infrastructures"
+    },
     "category": {
       "1": "Rues",
       "2": "Autoroutes",
@@ -132,7 +137,8 @@
       "6": "Téléphérique",
       "11": "Électricité",
       "12": "Eau",
-      "13": "Pétrole"
+      "13": "Pétrole",
+      "20": "Bâtiments de gare"
     },
     "shape": "Forme",
     "elevation": "Altitude (Y)",

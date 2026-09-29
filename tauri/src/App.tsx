@@ -334,8 +334,8 @@ function App() {
       ) : windowKind === "notification" ? (
         <NotificationWindow />
       ) : windowKind === "popup" && context ? (
-        <main className="popup-shell">
-          <header className="titlebar">
+        <main className={context.definition.chromeless ? "popup-shell popup-shell--chromeless" : "popup-shell"}>
+          {!context.definition.chromeless && <header className="titlebar">
             <div
               className="titlebar-drag-region"
               onMouseDown={(event) => {
@@ -356,7 +356,7 @@ function App() {
                 <img src={closeIcon} alt="Close" />
               </button>
             </div>
-          </header>
+          </header>}
 
           <section
             className={
@@ -523,7 +523,8 @@ function App() {
             ) : context.window_type === "scenario_manager" ? (
               <ScenarioManagerWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "scenario_metadata" ? (
-              <ScenarioMetadataWindow apiBaseUrl={context.api_base_url} scenarioId={String(windowExtra(context)?.scenarioId ?? "")} onClose={closeWindow} />
+              <ScenarioMetadataWindow apiBaseUrl={context.api_base_url} scenarioId={String(windowExtra(context)?.scenarioId ?? "")}
+                create={windowExtra(context)?.create === true} onClose={closeWindow} />
             ) : context.window_type === "save_list" ? (
               <SaveListWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "new_game" ? (

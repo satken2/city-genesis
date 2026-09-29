@@ -1,4 +1,6 @@
 import type { TFunction } from "i18next";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { ApiError, buildApiUrl, fetchApi } from "./api";
 import { requestConfirm } from "./confirmDialog";
 import { resolveLocalizedText, type LocalizedText } from "./locale";
@@ -17,6 +19,9 @@ export type PackStatus = "owned" | "not_owned" | "unverified";
 export type SaveEntry = {
   id: string; city_name: string; population: number; current_date: number;
   epoch: number; simulation_days: number; saved_at: string; is_scenario: boolean; language: string;
+  /** 通常セーブの名前(別名セーブで付ける)。無ければ見出しは都市名 */
+  save_name?: string;
+  has_thumbnail?: boolean;
   saved_core_version?: string; created_core_version?: string; last_simulated_core_version?: string | null;
   compatibility: SaveCompatibility;
   /** 通常セーブの一覧では "save" */
@@ -52,6 +57,36 @@ export type ScenarioStartOption = "simulation_days" | "climate" | "ground_cover"
 /** シナリオの見出し。タイトル(表示言語 → 英語)、無ければ都市名、それも無ければIDの先頭 */
 export function scenarioDisplayTitle(entry: SaveEntry, language: string | undefined): string {
   return resolveLocalizedText(entry.scenario_title, language) || entry.city_name || entry.id.slice(0, 8);
+}
+
+/** 通常セーブの見出し。名前、無ければ都市名、それも無ければIDの先頭 */
+export function saveDisplayName(entry: SaveEntry): string {
+  return entry.save_name || entry.city_name || entry.id.slice(0, 8);
+}
+
+/** Unityの撮影を待つ上限。応答が無くても保存は止めない */
+const THUMBNAIL_CAPTURE_TIMEOUT_MS = 5000;
+
+/**
+ * 保存の直前に3Dビューを撮り、次の保存に入る画像としてコアへ預ける(Unityがコアへ直接送る)。
+ * Unityが接続していない・応答しないときは撮らずに戻り、保存には前の画像が入る。
+ */
+export async function captureSaveThumbnail(): Promise<void> {
+  const id = crypto.randomUUID();
+  let finish!: () => void;
+  const captured = new Promise<void>(resolve => { finish = resolve; });
+  const unlisten = await listen<{ id: string }>("camera:thumbnail_captured", event => {
+    if (event.payload.id === id) finish();
+  });
+  const timer = setTimeout(() => finish(), THUMBNAIL_CAPTURE_TIMEOUT_MS);
+  try {
+    if (await invoke<boolean>("request_thumbnail_capture", { id })) await captured;
+  } catch (error) {
+    console.error("failed to capture save thumbnail", error);
+  } finally {
+    clearTimeout(timer);
+    unlisten();
+  }
 }
 
 /** エラーの理由コード。ApiError はその code、Rust コマンドの失敗は「CODE: 本文」の先頭(版照合の `"CODE": 本文` を含む)。無ければ null */

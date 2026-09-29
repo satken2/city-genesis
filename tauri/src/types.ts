@@ -27,6 +27,8 @@ export type WindowDefinition = {
   html_path?: string;
   /** 本文を描画せず空の領域だけにする（モック用） */
   empty_shell?: boolean;
+  /** タイトルバー(ドラッグ領域と×)を出さず、パネルがウィンドウ全体を描く。閉じる操作はパネルが持つ */
+  chromeless?: boolean;
 };
 
 export type WindowContext = {
