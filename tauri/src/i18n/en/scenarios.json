@@ -71,7 +71,7 @@
     "savedVersion": "Format v{{version}}",
     "history": "Created: core v{{created}} / Last simulated: {{simulated}}",
     "balanceConfirm": "This city uses core v{{from}} rules. Core v{{to}} may change game balance. Back up the original and continue?",
-    "versionUnavailable": "Core version is unavailable.",
+    "versionUnavailable": "Core simulator connection failed.",
     "API_CONTRACT_MISMATCH": "Core and UI API versions differ. Update to compatible builds.",
     "IPC_CONTRACT_MISMATCH": "Unity and UI contracts differ, or Unity cannot connect to the core.",
     "SAVE_VERSION_UNKNOWN": "Cannot load a save with unknown version information.",

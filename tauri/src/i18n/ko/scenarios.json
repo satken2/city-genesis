@@ -71,7 +71,7 @@
     "savedVersion": "포맷 v{{version}}",
     "history": "생성: core v{{created}} / 마지막 실행: {{simulated}}",
     "balanceConfirm": "이 도시는 core v{{from}} 규칙을 사용합니다. core v{{to}}에서는 게임 밸런스가 바뀔 수 있습니다. 원본을 백업하고 계속할까요?",
-    "versionUnavailable": "코어 버전을 확인할 수 없습니다.",
+    "versionUnavailable": "코어 시뮬레이터 연결 실패",
     "API_CONTRACT_MISMATCH": "코어와 UI의 API 버전이 다릅니다. 호환되는 버전으로 업데이트하세요.",
     "IPC_CONTRACT_MISMATCH": "Unity와 UI 버전이 호환되지 않거나 Unity가 코어에 연결할 수 없습니다.",
     "SAVE_VERSION_UNKNOWN": "버전 정보가 없어 불러올 수 없습니다.",

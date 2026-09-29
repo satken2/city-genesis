@@ -50,7 +50,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 - 対応言語は `utils/locale.ts` の `SUPPORTED_LANGUAGES`(`ja` / `en` / `es-419` / `zh-Hans` / `zh-Hant` / `fr` / `ko`)が唯一の正で、日本語が原本。言語を増やすときは `SUPPORTED_LANGUAGES`・`INTL_LOCALES`、`src/i18n/<コード>/` の全JSON、`tools/check_i18n_parity.py` の `LANGS` を揃える。
 - 翻訳キーを足したら全言語のJSONを更新し、`python tools/check_i18n_parity.py` で過不足と `{{変数}}` の食い違いを確認する。
 - i18nインスタンスはウィンドウごとに独立し、言語変更は `settings-updated` イベントで各ウィンドウが追従する(`App.tsx`)。`Intl` に渡すロケールは `resolveIntlLocale(i18n.language)` で解決し、`i18n.language` を直接渡さない。
-- マスターデータ(建物・道路の種別と表示名など)は起動時に取得済み。`useMasterData()`(`contexts/MasterDataContext.tsx`。キー一覧は `MasterData` 型)で参照し、各コンポーネントで取り直さない。
+- マスターデータ(建物・道路の種別と表示名など)は起動時に取得済み。`useMasterData()`(`contexts/MasterDataContext.tsx`。キー一覧は `MasterData` 型)で参照し、各コンポーネントで取り直さない。未取得時は `MasterDataProvider` が一定間隔(3秒)で自動リトライする。
 - 音声は `src/assets/sounds/` に Ogg Opus(`.opus`)で置き、`.wav` は置かない。再生には `import` したURLを渡す(パス文字列の直指定は本番ビルドだけ無音になる)。外部素材の取り込み・差し替えは `src/data/credits.ts` への追記とセット(Skill: `asset-credits`)。
 - スクロールバーは `App.css` で全域を従来型に切り替えている。`scrollbar-width` / `scrollbar-color` は使わない(指定した要素で `::-webkit-scrollbar` が無効化され、右端を隠すオーバーレイ式に戻る)。
 - トップメニュー系ウィンドウのフラット意匠は `App.css` の `--flat-*` トークンが唯一の正で、色・影を直値で書かない。どちらも詳細は `コンポーネント連携.md` の「UIの共通スタイル」。

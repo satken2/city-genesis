@@ -24,7 +24,7 @@
     },
     "scenario2": {
       "title": "Configurons les quartiers",
-      "description": "La ville veut exploiter un gisement, mais d'autres bâtiments pourraient occuper le terrain. Réservez un quartier à l'exploitation minière.",
+      "description": "La ville veut exploiter un gisement, mais d'autres bâtiments pourraient occuper le terrain. Ce tutoriel vous permettra d'apprendre à repérer les ressources naturelles, à créer des quartiers et à limiter les types de bâtiments autorisés.",
       "step1": {
         "title": "Créons un quartier",
         "description": "Le quartier découpe la ville en zones et se définit sur les routes. Appuyez sur le bouton des quartiers du panneau d'icônes pour entrer en mode d'édition : le réseau de routes en H forme un seul quartier. Avec l'outil de création (état initial), cliquez sur la route au repère jaune pour en faire, avec les parcelles qui la bordent, un nouveau quartier."
@@ -56,7 +56,7 @@
     },
     "scenario3": {
       "title": "Aménageons les infrastructures",
-      "description": "Les habitants n'ont pas d'électricité chez eux. Construisez une centrale et un réseau pour alimenter leurs foyers.",
+      "description": "Les habitants n'ont pas d'électricité chez eux. Ce tutoriel vous permettra d'apprendre à construire une centrale et un poste de transformation, à les relier par des lignes électriques et à vérifier que le courant arrive aux foyers.",
       "step1": {
         "description": "Le logement collectif de cette ville n'est pas encore alimenté en électricité. Cliquez sur le logement collectif au repère jaune pour ouvrir son détail, choisissez l'un des occupants dans l'onglet « Bâtiment », puis ouvrez son onglet « Offre et demande » : vous verrez que la quantité obtenue d'électricité est de 0.",
         "title": "Examinons le logement collectif"
@@ -84,7 +84,7 @@
     },
     "scenario4": {
       "title": "Construisons un chemin de fer",
-      "description": "Les habitants vont à pied travailler loin de chez eux. Reliez les logements aux emplois par le train.",
+      "description": "Les habitants vont à pied travailler loin de chez eux. Ce tutoriel vous permettra d'apprendre à aménager des gares, des voies, un dépôt et des lignes électriques, à ouvrir une ligne ferroviaire et à vérifier sa fréquentation.",
       "step1": {
         "title": "Construisons les quais",
         "open": "D'abord, les quais où les voyageurs attendent le train. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Quai ferroviaire » dans « Chemin de fer ». Utilisez une seule voie.",
@@ -150,7 +150,7 @@
     },
     "trade": {
       "title": "Développer le commerce international",
-      "description": "Une usine locale cherche des clients à l'étranger. Exportez des aliments par mer et importez les biens nécessaires par train.",
+      "description": "Une usine locale cherche des clients à l'étranger. Ce tutoriel vous permettra d'apprendre à exporter des aliments par un port et à importer des marchandises par une voie ferrée reliée au pays voisin.",
       "step1": {
         "description": "Construisez un « Terminal à conteneurs » sur la parcelle côtière au repère jaune. Après confirmation, la durée du chantier est ignorée.",
         "title": "Construire un port à conteneurs"
@@ -195,7 +195,7 @@
     },
     "highway": {
       "title": "Construire une autoroute",
-      "description": "La ville aura besoin d'un autre itinéraire pour ses véhicules en grandissant. Construisez une autoroute surélevée et ses accès.",
+      "description": "La ville aura besoin d'un autre itinéraire pour ses véhicules en grandissant. Ce tutoriel vous permettra d'apprendre à faire passer une autoroute au-dessus d'une route locale et à les relier par des bretelles pour créer un échangeur.",
       "step1": {
         "title": "Croiser la rue en viaduc",
         "open": "Franchissez la rue centrale avec une autoroute surélevée. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes et choisissez l’autoroute à deux voies dans « Autoroutes ».",
@@ -218,7 +218,7 @@
     },
     "mining": {
       "title": "Extraire des ressources",
-      "description": "L'île possède des ressources précieuses, mais aucun moyen de les acheminer. Reliez une mine au port par le rail pour les exporter.",
+      "description": "L'île possède des ressources précieuses, mais aucun moyen de les acheminer. Ce tutoriel vous permettra d'apprendre à aménager une mine, un chemin de fer de fret et un port pour extraire, transporter et exporter du minerai.",
       "step1": {
         "description": "Activez l'affichage des ressources naturelles avec l'icône en forme d'œil du cockpit, en bas de l'écran, puis cliquez sur le filon situé sur le versant ouest de la montagne centrale (repère jaune) pour ouvrir son détail.",
         "title": "Inspecter le filon"
@@ -277,7 +277,7 @@
     },
     "tourism": {
       "title": "Développer le tourisme",
-      "description": "Les insulaires veulent faire découvrir leurs ruines antiques, mais manquent d'un port et d'hébergements. Aidez-les à accueillir des touristes.",
+      "description": "Les insulaires veulent faire découvrir leurs ruines antiques, mais manquent d'un port et d'hébergements. Ce tutoriel vous permettra d'apprendre à accueillir des touristes grâce à un hôtel et un terminal de passagers, puis à vérifier les effets sur les ventes des restaurants et la fréquentation des bus.",
       "step1": {
         "description": "Construisez un « Hôtel touristique » sur la parcelle au repère jaune à l'est des ruines antiques, au bord de la mer. Après confirmation, la durée du chantier est ignorée.",
         "title": "Construire un hôtel près des ruines"
@@ -296,14 +296,14 @@
       }
     },
     "intro": {
-      "basic": "Des familles aimeraient commencer une nouvelle vie dans cette ville, mais les logements manquent pour les accueillir. Monsieur le maire, prolongez la route, préparez des terrains constructibles et achevez un immeuble résidentiel pour leur offrir un foyer.",
-      "scenario2": "Un gisement de minerai a été découvert dans un secteur de la ville. Sans protection, d'autres bâtiments risquent d'être construits dessus. Monsieur le maire, repérez les ressources, créez un quartier minier et fixez les règles de construction pour réserver ce terrain aux mines.",
-      "scenario3": "Les habitants de cette ville vivent sans électricité. Ils voudraient allumer leurs lampes et utiliser leurs appareils, mais les installations pour produire et acheminer le courant manquent. Monsieur le maire, construisez une centrale, des lignes électriques et un poste de transformation pour alimenter les foyers.",
-      "scenario4": "Les habitants se rendent à pied dans une épicerie située dans un immeuble commercial éloigné pour travailler. Ils demandent un moyen de transport pour leurs trajets quotidiens. Monsieur le maire, construisez des gares près des logements et du lieu de travail, préparez les installations et la ligne nécessaires, puis ouvrez le chemin de fer aux voyageurs.",
-      "trade": "Une usine alimentaire locale souhaite vendre ses produits à l'étranger. La ville voudrait aussi disposer d'un moyen de faire venir les biens dont elle a besoin. Monsieur le maire, exportez les aliments par un port à conteneurs et importez des marchandises par une voie ferrée reliée au pays voisin pour ouvrir le commerce de la ville au monde.",
-      "highway": "Avec le développement de la ville, davantage de véhicules transporteront personnes et marchandises. Il faut prévoir un autre itinéraire pour que le trafic de transit ne se concentre pas sur la route locale. Monsieur le maire, construisez une autoroute qui la franchit en hauteur et un échangeur permettant d'entrer en ville et d'en sortir.",
-      "mining": "Des ressources précieuses dorment sous cette île, mais aucun moyen de transport ne relie la montagne au port. Sans ce lien, l'île ne peut pas en faire une industrie. Monsieur le maire, ouvrez une mine et aménagez un chemin de fer de fret et un port pour expédier le minerai à l'étranger.",
-      "tourism": "Les insulaires aimeraient faire découvrir les ruines antiques du bord de mer à davantage de visiteurs. Mais sans port ni hébergement pour les accueillir, les restaurants peinent aussi à attirer des touristes. Monsieur le maire, construisez un terminal de passagers et un hôtel pour accueillir les voyageurs et animer les restaurants et la ligne de bus.",
+      "basic": "Des familles aimeraient commencer une nouvelle vie dans cette ville, mais les logements manquent pour les accueillir. Ce tutoriel vous permettra d'apprendre à planifier des routes et des bâtiments, à faire avancer le temps et à mener leur construction jusqu'à son terme.",
+      "scenario2": "Un gisement de minerai a été découvert dans un secteur de la ville. Sans protection, d'autres bâtiments risquent d'être construits dessus. Ce tutoriel vous permettra d'apprendre à repérer les ressources naturelles, à créer des quartiers et à limiter les types de bâtiments autorisés.",
+      "scenario3": "Les habitants de cette ville vivent sans électricité. Ils voudraient allumer leurs lampes et utiliser leurs appareils, mais les installations pour produire et acheminer le courant manquent. Ce tutoriel vous permettra d'apprendre à construire une centrale et un poste de transformation, à les relier par des lignes électriques et à vérifier que le courant arrive aux foyers.",
+      "scenario4": "Les habitants se rendent à pied dans une épicerie située dans un immeuble commercial éloigné pour travailler. Ils demandent un moyen de transport pour leurs trajets quotidiens. Ce tutoriel vous permettra d'apprendre à aménager des gares, des voies, un dépôt et des lignes électriques, à ouvrir une ligne ferroviaire et à vérifier sa fréquentation.",
+      "trade": "Une usine alimentaire locale souhaite vendre ses produits à l'étranger. La ville voudrait aussi disposer d'un moyen de faire venir les biens dont elle a besoin. Ce tutoriel vous permettra d'apprendre à exporter des aliments par un port et à importer des marchandises par une voie ferrée reliée au pays voisin.",
+      "highway": "Avec le développement de la ville, davantage de véhicules transporteront personnes et marchandises. Il faut prévoir un autre itinéraire pour que le trafic de transit ne se concentre pas sur la route locale. Ce tutoriel vous permettra d'apprendre à faire passer une autoroute au-dessus d'une route locale et à les relier par des bretelles pour créer un échangeur.",
+      "mining": "Des ressources précieuses dorment sous cette île, mais aucun moyen de transport ne relie la montagne au port. Sans ce lien, l'île ne peut pas en faire une industrie. Ce tutoriel vous permettra d'apprendre à aménager une mine, un chemin de fer de fret et un port pour extraire, transporter et exporter du minerai.",
+      "tourism": "Les insulaires aimeraient faire découvrir les ruines antiques du bord de mer à davantage de visiteurs. Mais sans port ni hébergement pour les accueillir, les restaurants peinent aussi à attirer des touristes. Ce tutoriel vous permettra d'apprendre à accueillir des touristes grâce à un hôtel et un terminal de passagers, puis à vérifier les effets sur les ventes des restaurants et la fréquentation des bus.",
       "heading": "Une demande au maire"
     }
   },

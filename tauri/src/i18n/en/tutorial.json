@@ -24,7 +24,7 @@
     },
     "scenario2": {
       "title": "Set Up Districts",
-      "description": "The town wants to mine an ore deposit, but other buildings could occupy the land. Create a district and reserve it for mining.",
+      "description": "The town wants to mine an ore deposit, but other buildings could occupy the land. In this tutorial, you'll learn how to locate natural resources, divide the town into districts, and restrict which types of buildings can be built.",
       "step1": {
         "title": "Create a District",
         "description": "A district is a unit that divides the city into areas, and it is assigned to roads. Press the district button on the icon panel to enter district edit mode: you'll see that the H-shaped road network forms a single district. With the Create tool (the default), click the road with the yellow marker to turn that road and the parcels facing it into a new district."
@@ -56,7 +56,7 @@
     },
     "scenario3": {
       "title": "Build the Infrastructure",
-      "description": "Residents have no electricity at home. Build a power plant and a supply network to bring power to their daily lives.",
+      "description": "Residents have no electricity at home. In this tutorial, you'll learn how to build a power plant and a substation, connect them with power lines, and check that electricity reaches homes.",
       "step1": {
         "description": "The apartment building in this town doesn't have electricity yet. Click the apartment building with the yellow marker to open its details, pick one of the tenants in the \"Building Info\" tab, then open its \"Trade\" tab: you can see that the Acquired amount of Electricity is 0.",
         "title": "Check the Apartment Building"
@@ -84,7 +84,7 @@
     },
     "scenario4": {
       "title": "Build a Railway",
-      "description": "Residents walk to jobs far from home. Connect their homes and workplaces by rail to support their commute.",
+      "description": "Residents walk to jobs far from home. In this tutorial, you'll learn how to build stations, tracks, a depot, and power lines, open a railway route, and check its ridership.",
       "step1": {
         "title": "Build the Platforms",
         "open": "First, the platforms where passengers wait for trains. Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Rail Platform\" under \"Railways\". Use a single track.",
@@ -150,7 +150,7 @@
     },
     "trade": {
       "title": "Start international trade",
-      "description": "A local factory wants to reach overseas customers. Export food by sea and bring in needed goods by rail.",
+      "description": "A local factory wants to reach overseas customers. In this tutorial, you'll learn how to export food through a port and import goods by freight rail from a neighboring country.",
       "step1": {
         "description": "Build a \"Container Terminal\" on the coastal parcel with the yellow marker. Once confirmed, the construction period is skipped.",
         "title": "Build a container port"
@@ -195,7 +195,7 @@
     },
     "highway": {
       "title": "Build a motorway",
-      "description": "The town needs another route for vehicles as it grows. Build a highway over the local road and provide access ramps.",
+      "description": "The town needs another route for vehicles as it grows. In this tutorial, you'll learn how to build an elevated highway over a local road and connect them with ramps to create an interchange.",
       "step1": {
         "title": "Cross above the street",
         "open": "Cross the central street with an elevated motorway. Open \"Roads, Rail & Infrastructure\" on the icon panel and choose the two-lane motorway under \"Motorways\".",
@@ -218,7 +218,7 @@
     },
     "mining": {
       "title": "Mine resources",
-      "description": "Valuable resources lie beneath the island, but there's no way to haul them out. Connect a mine to the port by freight rail and start exporting.",
+      "description": "Valuable resources lie beneath the island, but there's no way to haul them out. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",
       "step1": {
         "description": "Turn on the natural resources display with the eye icon in the cockpit at the bottom of the screen, then click the ore vein on the western slope of the central mountain (yellow marker) to open its details.",
         "title": "Inspect the ore vein"
@@ -277,7 +277,7 @@
     },
     "tourism": {
       "title": "Develop tourism",
-      "description": "Islanders want to share their ancient ruins, but lack a port and accommodation for visitors. Help them welcome tourists.",
+      "description": "Islanders want to share their ancient ruins, but lack a port and accommodation for visitors. In this tutorial, you'll learn how to welcome tourists with a hotel and passenger terminal, and check the effects on restaurant sales and bus ridership.",
       "step1": {
         "description": "Build a \"Tourist Hotel\" on the parcel with the yellow marker east of the ancient ruins by the sea. Once confirmed, the construction period is skipped.",
         "title": "Build a hotel by the ruins"
@@ -296,14 +296,14 @@
       }
     },
     "intro": {
-      "basic": "People are hoping to start a new life in this town, but there aren't enough homes to welcome them. Mayor, extend the road, prepare land for building, and complete an apartment building to give them a place to call home.",
-      "scenario2": "An ore deposit has been found in a corner of town. Unless the land is protected, other buildings could go up on top of it. Mayor, locate the resources, create a mining district, and set building regulations so the land can be used for mines.",
-      "scenario3": "The people of this town live in homes without electricity. They want to turn on lights and use appliances, but the facilities to generate power and deliver it to their homes are missing. Mayor, build a power plant, power lines, and a substation so residents can use electricity.",
-      "scenario4": "Residents walk from their homes to work at a grocery store in a distant commercial building. They've asked for transport to help with the journey each day. Mayor, build stations near their homes and workplace, provide the facilities and route needed to run trains, and open a railway they can use to commute.",
-      "trade": "A local food factory has asked for help selling its products overseas. The town also wants a way to bring in goods it needs from abroad. Mayor, export food through a container port and import goods over a freight railway connected to the neighboring country, opening the town's trade to the world.",
-      "highway": "As the town grows, more vehicles will carry people and goods through it. The town wants another route ready so through traffic won't all end up on the local road. Mayor, build an elevated highway across that road and an interchange that lets vehicles enter and leave the town.",
-      "mining": "Valuable resources lie beneath this island, but there is no way to haul them from the mountain to the port. Without transport, the island can't turn that wealth into an industry. Mayor, open a mine and build a freight railway and port so the ore can be shipped overseas.",
-      "tourism": "Islanders want more people to visit the ancient ruins by the sea. But without a port and accommodation to welcome travelers, local restaurants are missing out on visitors too. Mayor, build a passenger terminal and a hotel, welcome tourists, and bring more customers to the restaurants and local bus service.",
+      "basic": "People are hoping to start a new life in this town, but there aren't enough homes to welcome them. In this tutorial, you'll learn the full process of planning roads and buildings, advancing time, and seeing construction through to completion.",
+      "scenario2": "An ore deposit has been found in a corner of town. Unless the land is protected, other buildings could go up on top of it. In this tutorial, you'll learn how to locate natural resources, divide the town into districts, and restrict which types of buildings can be built.",
+      "scenario3": "The people of this town live in homes without electricity. They want to turn on lights and use appliances, but the facilities to generate power and deliver it to their homes are missing. In this tutorial, you'll learn how to build a power plant and a substation, connect them with power lines, and check that electricity reaches homes.",
+      "scenario4": "Residents walk from their homes to work at a grocery store in a distant commercial building. They've asked for transport to help with the journey each day. In this tutorial, you'll learn how to build stations, tracks, a depot, and power lines, open a railway route, and check its ridership.",
+      "trade": "A local food factory has asked for help selling its products overseas. The town also wants a way to bring in goods it needs from abroad. In this tutorial, you'll learn how to export food through a port and import goods by freight rail from a neighboring country.",
+      "highway": "As the town grows, more vehicles will carry people and goods through it. The town wants another route ready so through traffic won't all end up on the local road. In this tutorial, you'll learn how to build an elevated highway over a local road and connect them with ramps to create an interchange.",
+      "mining": "Valuable resources lie beneath this island, but there is no way to haul them from the mountain to the port. Without transport, the island can't turn that wealth into an industry. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",
+      "tourism": "Islanders want more people to visit the ancient ruins by the sea. But without a port and accommodation to welcome travelers, local restaurants are missing out on visitors too. In this tutorial, you'll learn how to welcome tourists with a hotel and passenger terminal, and check the effects on restaurant sales and bus ridership.",
       "heading": "A Request for the Mayor"
     }
   },

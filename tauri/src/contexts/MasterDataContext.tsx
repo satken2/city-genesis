@@ -5,8 +5,8 @@
  * 任意のコンポーネントから useMasterData() フックで参照できるようにする。
  * apiBaseUrl が渡されたタイミングでフェッチを開始する。
  *
- * バックエンドの起動が間に合わず初回フェッチに失敗した場合は、
- * useMasterData() が呼ばれたタイミングで自動的にリトライを行う。
+ * バックエンド未起動などによりフェッチに失敗した場合は、
+ * 一定間隔(RETRY_INTERVAL_MS)を空けて自動的に再試行する。
  */
 
 import {
@@ -66,6 +66,12 @@ const MASTER_ENDPOINTS: { key: keyof MasterData; path: string }[] = [
 ];
 
 /**
+ * マスターデータ取得失敗時のリトライ間隔(ミリ秒)。
+ * バックエンド未起動時に過剰な頻度でリクエストが繰り返されるのを防ぐ。
+ */
+const RETRY_INTERVAL_MS = 3000;
+
+/**
  * APIレスポンスの文字列キーを数値キーに変換する
  * JSONの仕様上オブジェクトのキーは常に文字列になるため、
  * 数値IDでアクセスしやすいようにフェッチ時に変換を行う
@@ -106,8 +112,8 @@ async function fetchMasterEndpoint<T>(
  * apiBaseUrlがundefinedの間はフェッチを行わず、masterDataはnullのまま。
  * apiBaseUrlが変更された場合は再フェッチする。
  *
- * フェッチに失敗した場合は isLoading が false に戻り、
- * useMasterData() 側で自動リトライがトリガされる。
+ * バックエンド未起動などでフェッチに失敗した場合は、
+ * 一定間隔(RETRY_INTERVAL_MS)を空けて自動的に再試行する。
  */
 export function MasterDataProvider({
   apiBaseUrl,
@@ -120,11 +126,31 @@ export function MasterDataProvider({
   const [isLoading, setIsLoading] = useState(false);
   const apiBaseUrlRef = useRef(apiBaseUrl);
   apiBaseUrlRef.current = apiBaseUrl;
+  const prevBaseUrlRef = useRef<string | undefined>(undefined);
+  const masterDataRef = useRef(masterData);
+  masterDataRef.current = masterData;
+  const inFlightRef = useRef(false);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const disposedRef = useRef(false);
+
+  const clearRetryTimer = useCallback(() => {
+    if (retryTimerRef.current !== null) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
+  }, []);
 
   const fetchAll = useCallback(async () => {
+    clearRetryTimer();
+
+    if (masterDataRef.current !== null || inFlightRef.current) {
+      return;
+    }
+
     const base = (apiBaseUrlRef.current ?? "").replace(/\/+$/, "");
     if (!base) return;
 
+    inFlightRef.current = true;
     setIsLoading(true);
     try {
       const results = await Promise.all(
@@ -133,36 +159,60 @@ export function MasterDataProvider({
           return [key, entries] as const;
         })
       );
-      setMasterData(Object.fromEntries(results) as unknown as MasterData);
+      if (!disposedRef.current) {
+        setMasterData(Object.fromEntries(results) as unknown as MasterData);
+      }
     } catch (error: unknown) {
-      console.error("マスターデータの取得に失敗しました:", error);
+      console.error(`マスターデータの取得に失敗しました(${RETRY_INTERVAL_MS / 1000}秒後に再試行):`, error);
+      if (!disposedRef.current && masterDataRef.current === null) {
+        clearRetryTimer();
+        retryTimerRef.current = setTimeout(() => {
+          retryTimerRef.current = null;
+          void fetchAll();
+        }, RETRY_INTERVAL_MS);
+      }
     } finally {
-      setIsLoading(false);
+      inFlightRef.current = false;
+      if (!disposedRef.current) {
+        setIsLoading(false);
+      }
     }
-  }, []);
+  }, [clearRetryTimer]);
+
+  useEffect(() => {
+    disposedRef.current = false;
+    return () => {
+      disposedRef.current = true;
+      clearRetryTimer();
+    };
+  }, [clearRetryTimer]);
 
   /**
    * apiBaseUrlが設定・変更された時にフェッチを開始する
    */
   useEffect(() => {
     if (!apiBaseUrl) return;
-    let disposed = false;
-
-    if (!disposed) {
-      fetchAll();
+    if (prevBaseUrlRef.current !== undefined && prevBaseUrlRef.current !== apiBaseUrl) {
+      setMasterData(null);
+      masterDataRef.current = null;
     }
+    prevBaseUrlRef.current = apiBaseUrl;
 
-    return () => {
-      disposed = true;
-    };
+    void fetchAll();
   }, [apiBaseUrl, fetchAll]);
+
+  const refetch = useCallback(() => {
+    setMasterData(null);
+    masterDataRef.current = null;
+    return fetchAll();
+  }, [fetchAll]);
 
   const contextValue = useRef<MasterDataContextValue>({
     data: null,
     isLoading: false,
-    refetch: fetchAll,
+    refetch,
   });
-  contextValue.current = { data: masterData, isLoading, refetch: fetchAll };
+  contextValue.current = { data: masterData, isLoading, refetch };
 
   return (
     <MasterDataContext.Provider value={contextValue.current}>
@@ -175,18 +225,10 @@ export function MasterDataProvider({
  * マスターデータを参照するためのフック
  * MasterDataProvider 配下のコンポーネントからのみ使用可能
  *
- * データが未取得（null）かつフェッチ中でなければ、
- * バックエンドがまだ起動していない可能性があるため自動的にリトライを行う。
- * データが取得済みの場合はそのまま返す。
+ * データが取得済みの場合は MasterData を返し、未取得の場合は null を返す。
+ * バックエンド未起動などで未取得の場合は、MasterDataProvider 側で定期的に自動リトライされる。
  */
 export function useMasterData(): MasterData | null {
-  const { data, isLoading, refetch } = useContext(MasterDataContext);
-
-  useEffect(() => {
-    if (data === null && !isLoading) {
-      refetch();
-    }
-  }, [data, isLoading, refetch]);
-
+  const { data } = useContext(MasterDataContext);
   return data;
 }

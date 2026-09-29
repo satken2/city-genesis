@@ -71,7 +71,7 @@
     "savedVersion": "フォーマット v{{version}}",
     "history": "都市作成: core v{{created}} / 最終実行: {{simulated}}",
     "balanceConfirm": "この都市は core v{{from}} のルールを使っています。core v{{to}} ではゲームバランスが変わる可能性があります。元データをバックアップして続行しますか？",
-    "versionUnavailable": "コアのバージョンを取得できません。",
+    "versionUnavailable": "コアシミュレーター接続失敗",
     "API_CONTRACT_MISMATCH": "コアとUIの通信バージョンが一致しません。対応する配布物に更新してください。",
     "IPC_CONTRACT_MISMATCH": "UnityとUIの通信バージョンが一致しないか、Unityがコアに接続できません。",
     "SAVE_VERSION_UNKNOWN": "バージョン不明のため読み込めません。",
