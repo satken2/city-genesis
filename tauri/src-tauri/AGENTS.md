@@ -28,6 +28,7 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 - `CAPACITY`(1MiB)はUnity側`Assets/Scripts/IPC/IpcTransport.cs`と、`Envelope`は`IpcEnvelope.cs`と同一に保つ。ズレると通知が黙って捨てられる。
 - Unity→UIのイベントは`ipc.rs`の受信matchで`app.emit`(全ウィンドウ)しないとどのWebViewにも届かない。常駐1枚だけが扱うもの(`remove_object:request_confirm`・`weather:state`)は`emit_to(LABEL_COCKPIT)`。UI→Unityは`send_window_action`→`ui:action`の汎用転送で専用分岐は要らない。
 - 1通が`CAPACITY`に収まらないと`send_to_parent`が`Message too large`で失敗する。握り潰すと「UIは動くがUnityだけ更新が止まる」になるので、大きくなり得るペイロード(区画一括プレビュー等)は失敗をユーザーへ通知する。周期送信は置かない(Unity不在中に溜まって`MMF buffer full`になる)。
+- 保存直前の撮影 `request_thumbnail_capture` は、Unity接続中(`graphic_connected`)のときだけ `camera:capture_thumbnail` を送り、未接続なら送らずに false を返す(不在の間の要求をMMFへ溜めない。UIは false なら撮影を待たずに保存する)。
 - `setup`では`ipc::start_ipc`をウィンドウ生成より先に呼ぶ。WebView起動直後の送信(`ambience:volume`)が`IPC not initialized`で失われるため。
 - Unity接続中の判定は`graphic_connected`(`system:graphic_ready`で立ち`system:graphic_stopped`で下りる)。再接続時のポップアップ一掃用`graphic_ready_seen`(一度立ったら戻さない)を流用すると、EditorのPlay停止後の再ロードで描画完了を永遠に待つ。
 

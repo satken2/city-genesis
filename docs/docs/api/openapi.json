@@ -5059,6 +5059,26 @@
         }
       }
     },
+    "/api/v1/sessions/thumbnail": {
+      "put": {
+        "tags": [
+          "sessions"
+        ],
+        "summary": "Set Session Thumbnail",
+        "description": "現在の都市を次に保存するときの画像(本文はPNGの生バイト)を設定する。\n\nグラフィックがセーブ・シナリオ保存の直前に3Dビューを撮って送る。画像は次の保存(通常・別名・シナリオ・緊急)の\nどれか1回に入って消える。都市が読み込まれていなければ 409 NO_ACTIVE_SESSION。",
+        "operationId": "set_session_thumbnail_api_v1_sessions_thumbnail_put",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/saves": {
       "get": {
         "tags": [
@@ -5085,12 +5105,39 @@
         "summary": "Create Save",
         "description": "現在のゲーム状態をセーブデータとして新規保存する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）として保存される。\n成功時は 201 Created と共に Location ヘッダーで作成されたリソースの URL を返す。",
         "operationId": "create_save_api_v1_saves_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/NewSaveRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -5103,7 +5150,7 @@
           "saves"
         ],
         "summary": "Overwrite Current Save",
-        "description": "指定した save_id の通常セーブを、現在のゲーム状態で上書き保存する。\n現在ロード中のセーブIDと一致しない場合は 409 Conflict を返す。\nシナリオの上書きは POST /api/v1/templates(自作シナリオとして保存)を使う。",
+        "description": "指定した save_id の通常セーブを、現在のゲーム状態で上書き保存する。名前はファイルの名前を引き継ぐ。\n現在ロード中のセーブIDと一致しない場合は 409 Conflict を返す。\nシナリオは上書きせず、POST /api/v1/templates で常に新しいシナリオとして保存する。",
         "operationId": "overwrite_current_save_api_v1_saves__save_id__put",
         "parameters": [
           {
@@ -5765,14 +5812,41 @@
           "templates"
         ],
         "summary": "Create Template",
-        "description": "現在のゲーム状態を自作シナリオとして保存する(編集中の自作シナリオがあれば上書き、なければ新規)。\nコミュニティ・DLCのシナリオから開いた都市(コピーして編集)は新しい自作シナリオになり、\n出自(必要パック・元シナリオ)を引き継ぐ。必要パックがあれば暗号化して書く。\n*が付いたエンドポイントはテンプレ作成モード(gd3.template_mode)でしか編集不可。",
+        "description": "現在のゲーム状態を新しい自作シナリオとして保存する。既存のシナリオは上書きしない\n(シナリオから開いた都市でも常に新しいIDになる)。神モードでなくても保存できる。\n本文には紹介情報の更新(PATCH /api/v1/scenarios/{id})と同じ項目を任意で渡せ、\n新しいシナリオにだけ書く(プレイ中の都市の紹介情報は変えない)。\n出自(必要パック・元シナリオ)は引き継ぎ、必要パックがあれば暗号化して書く。",
         "operationId": "create_template_api_v1_templates_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ScenarioMetadata"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Values"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -11027,6 +11101,20 @@
           "message"
         ],
         "title": "MessageResponse"
+      },
+      "NewSaveRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Name",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "NewSaveRequest",
+        "description": "POST /api/v1/saves の本文(任意)。name はセーブデータ一覧の見出しで、省略すると空(一覧は都市名で表示する)。"
       },
       "NodeItem": {
         "properties": {

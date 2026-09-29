@@ -39,6 +39,7 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 - ポップアップは閉じても非表示になるだけでReactのアンマウントが走らないため、上記の打ち切りはRust `window.rs`(`close_window_by_label`)が送る。新しい編集モードには`EDIT_MODE_WINDOW_TYPES`か専用cancelのどちらかで必ず戻り道を用意する(無いと3Dビューの入力が固まる)。
 - 起動直後に1回だけ届く設定通知(`ambience:volume`)は`IpcClient`が最新値を保持し、購読時に即時再通知する。購読前の1通を取りこぼすと次の変更まで反映されないため、同種の通知を足すときも同じ形にする。
 - 曲線/直線・吸着の正はUnity(`Editors/RoadEditor/RoadEditControlMenu`のCtrlラジアルメニュー)で、UIへは`edit_path:update_shape`の`is_curved`で逆流する。UI側にトグルを足して正を二重にしない。
+- 保存直前の撮影要求 `camera:capture_thumbnail` は `IpcEventHandler` が受け、`CameraCaptureUtil` で撮った画像を `PUT /sessions/thumbnail` でコアへ送ってから `camera:thumbnail_captured` を返す。UIは返事か時間切れまで保存を待つので、撮れなくても送れなくても必ず返す。
 - 詳細パネルを操作し続けるステート(`STATE_MERGE_PATH`/`STATE_SPLIT_PATH`/`STATE_EDIT_CONNECTOR`/`STATE_EDIT_ROAD_MEMBERS`)では`WindowUtil.BringToForeground()`を呼ばない。
 
 ## 参照

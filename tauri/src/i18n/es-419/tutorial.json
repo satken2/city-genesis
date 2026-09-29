@@ -24,7 +24,7 @@
     },
     "scenario2": {
       "title": "Configuremos los distritos",
-      "description": "Aprende a dividir la ciudad en distritos y a definir normativa de construcción para cada uno.",
+      "description": "El pueblo quiere aprovechar un yacimiento, pero otros edificios podrían ocupar el terreno. Crea un distrito reservado para la minería.",
       "step1": {
         "title": "Creemos un distrito",
         "description": "El distrito divide la ciudad en zonas y se define sobre las calles. Pulsa el botón de distritos del panel de iconos para entrar en el modo de edición: verás que la red de calles en forma de H es un solo distrito. Con la herramienta de creación (estado inicial), haz clic en la calle del marcador amarillo para convertirla, con las parcelas que dan a ella, en un distrito nuevo."
@@ -56,7 +56,7 @@
     },
     "scenario3": {
       "title": "Construyamos la infraestructura",
-      "description": "Aprende a llevar electricidad a la ciudad mediante centrales, subestaciones y líneas de transmisión.",
+      "description": "Las familias no tienen electricidad en sus casas. Construye una central y una red de suministro para llevarles energía.",
       "step1": {
         "description": "La vivienda colectiva de este pueblo todavía no tiene electricidad. Haz clic en la vivienda colectiva del marcador amarillo para abrir su detalle, elige uno de los inquilinos en la pestaña «Edificio» y abre su pestaña «Oferta y demanda»: verás que la cantidad obtenida de electricidad es 0.",
         "title": "Revisemos la vivienda colectiva"
@@ -84,7 +84,7 @@
     },
     "scenario4": {
       "title": "Construyamos un ferrocarril",
-      "description": "Aprende a poner en servicio una línea ferroviaria que une la vivienda colectiva del pueblo con un edificio comercial preparando andenes, edificios de estación, vías, un depósito y la línea de transmisión.",
+      "description": "Los habitantes caminan hasta sus trabajos, lejos de casa. Conecta las viviendas y los lugares de trabajo por tren.",
       "step1": {
         "title": "Construyamos los andenes",
         "open": "Primero, los andenes donde los pasajeros esperan el tren. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén ferroviario» en «Ferrocarril». Usa una sola vía.",
@@ -150,7 +150,7 @@
     },
     "trade": {
       "title": "Iniciar el comercio internacional",
-      "description": "Aprende a exportar mercancías por mar e importarlas por ferrocarril construyendo un puerto de contenedores y una estación internacional de carga.",
+      "description": "Una fábrica local busca clientes en el extranjero. Exporta alimentos por mar e importa los productos necesarios por tren.",
       "step1": {
         "description": "Construye una «Terminal de contenedores» en la parcela costera del marcador amarillo. Al confirmar, se omitirá el plazo de obra.",
         "title": "Construir un puerto de contenedores"
@@ -195,7 +195,7 @@
     },
     "highway": {
       "title": "Construir una autopista",
-      "description": "Aprende a construir una autopista elevada y rampas para crear un enlace con las calles locales.",
+      "description": "El pueblo necesitará otra vía para los vehículos a medida que crezca. Construye una autopista elevada y sus accesos.",
       "step1": {
         "title": "Cruzar la calle con un viaducto",
         "open": "Cruza la calle central con una autopista elevada. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige la autopista de dos carriles en «Autopistas».",
@@ -218,7 +218,7 @@
     },
     "mining": {
       "title": "Extraer recursos",
-      "description": "Aprende a extraer mineral, transportarlo por ferrocarril y exportarlo construyendo una mina, estaciones de carga y un puerto de graneles.",
+      "description": "La isla tiene recursos valiosos, pero no hay cómo transportarlos. Une una mina y el puerto por tren para exportarlos.",
       "step1": {
         "description": "Activa la visualización de los recursos naturales con el icono del ojo de la cabina, en la parte inferior de la pantalla, y haz clic en la veta mineral de la ladera oeste de la montaña central (marcador amarillo) para abrir su detalle.",
         "title": "Inspeccionar la veta mineral"
@@ -277,7 +277,7 @@
     },
     "tourism": {
       "title": "Desarrollar el turismo",
-      "description": "Aprende a atraer turistas y fomentar el uso de restaurantes y autobuses construyendo un hotel y una terminal de pasajeros.",
+      "description": "Los isleños quieren compartir sus ruinas antiguas, pero faltan un puerto y alojamiento. Ayúdalos a recibir turistas.",
       "step1": {
         "description": "Construye un «Hotel turístico» en la parcela del marcador amarillo al este de las ruinas antiguas, junto al mar. Al confirmar, se omitirá el plazo de obra.",
         "title": "Construir un hotel junto a las ruinas"
@@ -296,15 +296,15 @@
       }
     },
     "intro": {
-      "basic": "¡Bienvenido! Eres el alcalde de esta ciudad. En este tutorial aprenderás el flujo básico para construir una ciudad: tender una calle, esperar a que se termine y levantar un edificio en las parcelas.",
-      "scenario2": "La ciudad se puede administrar dividiéndola en «distritos». En este tutorial aprenderás a crear un distrito nuevo seleccionando calles, a revisar la distribución de los recursos naturales y a restringir qué edificios pueden construirse en cada distrito.",
-      "scenario3": "La historia transcurre en un pueblo portuario del noroeste de una isla rodeada de bajíos de coral. Este pueblo todavía no tiene electricidad. Construirás una central solar en el terreno llano del oeste, lejos del pueblo, llevarás la electricidad hasta la subestación del pueblo con una línea de transmisión y aprenderás que la infraestructura eléctrica se compone de tres etapas: generación, transmisión y transformación.",
-      "scenario4": "Un ferrocarril no funciona solo con tender vías. En este tutorial unirás por ferrocarril la vivienda colectiva del pueblo con un edificio comercial al extremo oeste de la calle. Formarás las estaciones con andenes y edificios de estación, prepararás la vía, el depósito y la línea de transmisión, pondrás en servicio una línea y verás a los vecinos ir en tren a trabajar a la tienda de alimentos del edificio comercial.",
-      "trade": "Esta ciudad está conectada por ferrocarril con el país vecino en su frontera este y da al mar por el oeste. En este tutorial crearás dos rutas comerciales: exportarás por mar los alimentos de una fábrica desde un puerto de contenedores, y tenderás una línea de carga hasta la frontera para importar por ferrocarril.",
-      "highway": "Cuando la ciudad crece, las calles locales ya no dan abasto con tantos autos. En este tutorial aprenderás a construir una autopista elevada que pase por encima de una calle local y a conectarlas con rampas para crear un intercambiador.",
-      "mining": "La historia transcurre en una isla rodeada de bajíos de coral. En la montaña central yace una veta de mineral. En este tutorial aprenderás todo el proceso —extraer el mineral en la montaña, llevarlo en tren de carga desde la estación de carga junto a la mina hasta el pueblo portuario y exportarlo al extranjero desde el puerto de graneles— construyendo tú mismo las vías y el depósito.",
-      "tourism": "El pueblo portuario de esta isla, rodeada de mares de coral, tiene unas ruinas antiguas a la orilla del mar. En este tutorial atraerás turistas construyendo un hotel junto a las ruinas y una terminal de cruceros en el puerto, y comprobarás cómo se animan los restaurantes y la línea de autobús del pueblo.",
-      "heading": "En este tutorial"
+      "basic": "Hay personas que esperan empezar una nueva vida en este pueblo, pero faltan viviendas para recibirlas. Extiende la calle, prepara terrenos para construir y termina un edificio de departamentos para darles un nuevo hogar.",
+      "scenario2": "Se encontró un yacimiento de mineral en un sector del pueblo. Si no se protege el terreno, podrían construirse otros edificios sobre él. Localiza los recursos, crea un distrito minero y establece normas de construcción que reserven el lugar para las minas.",
+      "scenario3": "Las familias de este pueblo viven sin electricidad. Quieren encender las luces y usar sus electrodomésticos, pero faltan las instalaciones para generar energía y llevarla a sus casas. Construye una central eléctrica, líneas de transmisión y una subestación para que puedan usar electricidad.",
+      "scenario4": "Los habitantes caminan desde sus casas hasta una tienda de alimentos en un edificio comercial lejano para trabajar. Han pedido un transporte que los ayude en sus viajes diarios. Construye estaciones cerca de las viviendas y del trabajo, prepara las instalaciones y la ruta, y abre un ferrocarril que puedan usar para ir a trabajar.",
+      "trade": "Una fábrica de alimentos pide ayuda para vender sus productos en el extranjero. El pueblo también quiere contar con una vía para traer los productos que necesita de otros países. Exporta alimentos por un puerto de contenedores e importa mercancías por un ferrocarril conectado al país vecino para abrir el comercio del pueblo al mundo.",
+      "highway": "A medida que crezca el pueblo, aumentarán los vehículos que transportan personas y mercancías. Hace falta preparar otra vía para que el tránsito de paso no se concentre en la calle local. Construye una autopista que cruce por encima de ella y un enlace que permita entrar y salir del pueblo.",
+      "mining": "Esta isla tiene recursos valiosos bajo tierra, pero no hay cómo llevarlos de la montaña al puerto. Sin transporte, la isla no puede convertir esa riqueza en una industria. Abre una mina y construye un ferrocarril de carga y un puerto para enviar el mineral al extranjero.",
+      "tourism": "Los isleños quieren que más personas conozcan las ruinas antiguas junto al mar. Sin un puerto ni alojamiento para recibir viajeros, los restaurantes del pueblo tampoco logran atraer turistas. Construye una terminal de pasajeros y un hotel para recibir visitantes y dar más actividad a los restaurantes y a la ruta de autobús.",
+      "heading": "Un pedido para la alcaldía"
     }
   },
   "tips": {

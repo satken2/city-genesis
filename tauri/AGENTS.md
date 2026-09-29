@@ -21,7 +21,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/local-constants.ts` | UI独自の定数と、自動生成に載らないバックエンド定数の写し |
 | `src/App.css` | 全ウィンドウ共通のグローバルスタイル |
 | `src-tauri/` | Rust側(ウィンドウ管理・MMF IPC・セッションポーリング)。`config/window-registry.json`=ポップアップ定義、`window-mutex-groups.json`=同時に開けない組 |
-| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・Unity音源の再生成・開発プロセス掃除 ほか)と検証。`tutorial/generate-schema-validator.mjs`(チュートリアルのJSON Schema検証コードの事前生成)、`api-client/`(`npm run test:api-client`。版ヘッダーの付与範囲・画像のBlob URL・版照合の失敗)、`scenarios/`(`npm run test:scenarios`。シナリオ管理・標高ファイルの取り込み・ニューゲーム)、`terrain-thumbnail-test.mjs`(地形の平面図の画素生成)、`terrain-editor-save-test.mjs`(地形エディタの保存引数・ロック情報の正規化・保存後の資源IDの置き換え) |
+| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・Unity音源の再生成・開発プロセス掃除 ほか)と検証。`tutorial/generate-schema-validator.mjs`(チュートリアルのJSON Schema検証コードの事前生成)、`api-client/`(`npm run test:api-client`。版ヘッダーの付与範囲・画像のBlob URL・版照合の失敗)、`scenarios/`(`npm run test:scenarios`。シナリオ管理・標高ファイルの取り込み・ニューゲーム・システムメニューの保存・セーブ一覧・シナリオとして保存)、`terrain-thumbnail-test.mjs`(地形の平面図の画素生成)、`terrain-editor-save-test.mjs`(地形エディタの保存引数・ロック情報の正規化・保存後の資源IDの置き換え) |
 | `scripts/` | 河川生成(`terrainRiver.ts`)の開発用検証スクリプト(`npx tsx`。CI外) |
 | `*-launch.toml` | Rust側が子プロセスとしてバックエンド/Unityを起動するコマンド |
 | `SPEC.md` | 初期設計時の仕様書(現行の正ではない) |
@@ -87,7 +87,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `epochPresentation.ts` / `epochFlow.ts` | 演出ID付きの暗転通知待ち、HTTPと日没の並行実行、処理時間に応じたTipsの開閉。結果画面のクローズまで黒幕を保持する |
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` / `bdCategoryIcon.ts` / `pathCategoryIcon.ts` | 各種アイコン画像の解決。`bdCategoryIcon` は建物建設パネルの分類(`assets/images/building_categories/{id}.png`)、`pathCategoryIcon` はパス建設パネルのカテゴリ(`assets/images/paths/path_{path_type}.png`)。`pathIcon` は種別画像に加えバリアント別画像・対応マップ(橋梁・駅PF等)を解決する。`agentIcon` の `resolveAgentVariantIcon` はバリアント専用画像だけを返す(無ければ空文字) |
 | `propThumbnail.ts` | プロップサムネイルの解決。画像のglobはここ1箇所だけ |
-| `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`・開始設定の項目 `ScenarioStartOption`)、シナリオの見出し `scenarioDisplayTitle`、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま)、シナリオ画像の登録 `uploadScenarioThumbnail` |
+| `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`・開始設定の項目 `ScenarioStartOption`)、シナリオの見出し `scenarioDisplayTitle`、セーブの見出し `saveDisplayName`(名前 → 都市名)、保存直前の3Dビューの撮影 `captureSaveThumbnail`(Unityがコアへ画像を預けるのを待つ。Unityが無い・応答しないときは待たない)、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま)、シナリオ画像の登録 `uploadScenarioThumbnail` |
 | `mapSize.ts` | マップの大きさ(m)をkmで整形する `formatMapSize`(例: 7 × 6 km。ニューゲームの事実欄・地形の取り込みの見込み) |
 
 ## 詳細の参照先

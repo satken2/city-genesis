@@ -49,7 +49,7 @@
 
 1. ドメインフォルダにコンポーネントを作る
 2. `App.tsx`にimportし、`SPECIALIZED_PANEL_TYPES`に追加して分岐を書く
-3. `src-tauri/config/window-registry.json`に定義(`empty_shell: true`で共通余白`.content`の`padding`が外れ、余白とスクロールをパネルが持つ)
+3. `src-tauri/config/window-registry.json`に定義(`empty_shell: true`で共通余白`.content`の`padding`が外れ、余白とスクロールをパネルが持つ。`chromeless: true`でタイトルバー(ドラッグ領域と×)も出さず、閉じる操作をパネルが持つ)
 4. 排他にするウィンドウがあれば`window-mutex-groups.json`に追加。Unityの編集ステートに入るウィンドウは`window.rs`の`EDIT_MODE_WINDOW_TYPES`に足し、一覧の全種別と双方向に排他にする(`src-tauri/AGENTS.md`)。排他の相手を開くボタン(公共交通の「路線を新設」など)で自分の`onClose`を呼ばない。排他で非表示になった自分のWebViewに相手が転用されることがあり、後から届く閉じる要求が開いたばかりの相手を閉じる
 
 初期内容や新設/編集の使い分けは`params.extra`(`App.tsx`の`windowExtra`。`titleKey`でタイトル差し替え可)で渡す。イベントを投げてからウィンドウを開くと購読が間に合わない。
@@ -88,7 +88,8 @@
 
 ## 個別パネルの契約(知らないと壊すもの)
 
-- ロード画面(`taskbar/SaveListWindow`): 開くたびにセーブ一覧と現在のセーブ情報を`fetchApi`の`cache: "reload"`で取得する。画像URLへランダムなクエリは付けない。セーブ・シナリオのサムネイルのキャッシュ期限は配信APIが2時間に設定する。
+- システムメニュー(`taskbar/SaveLoadWindow`、種別 `save_load`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのは「ゲームに戻る」とEsc。保存・確認はウィンドウ内のオーバーレイ(`taskbar/SaveDialog`)で行い、保存に成功したら閉じる(「保存しました」は出さない)。上書きセーブは確認してから、まだ保存していない都市(`GET /saves/{current_save_id}` が404)では別名セーブ(名前の入力)になる。保存の直前に `captureSaveThumbnail` で3Dビューを撮る。「シナリオとして保存」は神モードでなくても押せ、紹介情報ウィンドウを作成モード(`params.extra.create`)で開くだけで、ここでは保存しない。別のウィンドウを開く項目は、開いてから自分を閉じる。
+- ロード画面(`taskbar/SaveListWindow`): 開くたびにセーブ一覧と現在のセーブ情報を`fetchApi`の`cache: "reload"`で取得する。画像URLへランダムなクエリは付けない。セーブ・シナリオのサムネイルのキャッシュ期限は配信APIが2時間に設定するので、セーブの画像には保存日時(`saved_at`)をリビジョンとして付ける(上書き保存で撮り直される)。カードは新しい順で、名前(`saveDisplayName`)・元のシナリオのタイトル・都市の言語(国旗の絵文字)・人口・ゲーム内日付・保存日時を出す。ロード・削除はウィンドウ内のオーバーレイで確認し、削除が成功しても知らせず一覧から外すだけにする。
 
 - 都市設定(`taskbar/CityRenameWindow`、種別 `city_rename`): コックピットの都市名から開く。保存する値は都市名のみ。近似設定は Coming soon の無効な表示で、値の保持・送信を行わない。不可逆の警告は名称変更ではなく近似設定の節に置く。
 
@@ -145,13 +146,13 @@
 
 ## シナリオの管理と紹介情報
 
-- `template/ScenarioManagerWindow` はトップメニューの「シナリオ管理」から開き、Unityを起動しない。`FlatTabs` で「シナリオ」「地形を取り込む」の2タブ。`scenario_manager` / `scenario_metadata` はレジストリ駆動のポップアップで、後者へ `params.extra.scenarioId` を渡す。
+- `template/ScenarioManagerWindow` はトップメニューの「シナリオ管理」から開き、Unityを起動しない。`FlatTabs` で「シナリオ」「地形を取り込む」の2タブ。`scenario_manager` / `scenario_metadata` はレジストリ駆動のポップアップで、後者へ `params.extra.scenarioId`(編集)か `params.extra.create`(システムメニューの「シナリオとして保存」)を渡す。
 - シナリオタブは `GET /api/v1/scenarios` の全保存元(自作・コミュニティ・DLC)を1つの一覧にする。タブの下に作り方の説明(`scenarios.createHint`)を常に出し、更新ボタンは無い(一覧は `scenarios:changed` で取り直す)。アップロード先が未設定の旨はページに出さず、アップロードボタンの `title` にだけ添える。自作(`origin === "local" && !read_only`)のカードはアイコンだけのボタン(`ScenarioActionButton`。名前は `title`・`aria-label`、押せない理由は `title` の2行目)で、左詰めに「紹介情報を編集」「地形を編集」「都市を編集」「アップロード」、右端に離して「削除」を並べる。それ以外は文字のボタン「コピーして編集」だけ。「削除」は `requestConfirm`(`tone: "danger"`)の後に `DELETE /api/v1/saves/{id}?template=true` を呼ぶ。壊れたシナリオを片付けられるよう読み込めないカードでも押せ、失敗しても一覧を取り直し、成功したら選択を外して `scenarios:changed` をemitする。都市を開く2つは `create_session {templateId, templateMode: true, acceptBalanceChange: true}` で、ポップアップが全部閉じるので確認文で地形エディタの未保存の編集に触れる。「地形を編集」は `invoke("prepare_scenario_terrain_editor", {scenarioId})` の戻り値で `terrain_editor` を開く。自作でも `encrypted`(DLC由来)なら「地形を編集」を無効にし、理由をツールチップ(`scenarios.terrainEncryptedHint`)で出す(作業コピーが平文で残るため、コアも409 `SCENARIO_ENCRYPTED` で断る)。
 - 地形を取り込むタブ(`TerrainImportPanel`、補助は `template/heightmapImport.ts`)は、PC内のどこにある標高ファイルでも `<input type="file" accept=".png,.npy">` で選ばせる(Tauriのダイアログ・権限は使わない)。初回表示後は隠すだけで入力を保つ。入力は上から、タイトル(既定はファイル名から拡張子を除いたもの)→「詳細地形」の枠(標高データのファイル・1画素あたりの距離・最低/最高標高を1行に並べた2つの入力(PNGだけ編集できる。.npy は値そのものが標高なので、欄にファイルの実際の最低・最高を出し、説明文は出さない)・海面の高さ・マップの大きさの見込み)→「背景地形(省略可)」の枠(標高データの `<input type="file" accept=".npy">`・背景の1画素あたりの距離は別欄・既定50・背景の大きさの見込み。「外す」で選び直す。海面の高さは詳細地形と共通)。2つの枠は薄い線の角丸の枠(`.scenario-group`。紹介情報の開始設定と共通)で囲み、枠の内側に少し大きめの見出し(`.scenario-group-title`)と、その下に短い説明文(詳細地形=プレイヤーが都市開発をし道路や建物を作れる範囲、背景地形=マップ外の背景として描かれプレイヤーは道路や建物を作れない)を付ける。形式の説明は常に出さず、項目名の横のインフォメーションアイコン(`InfoTip`)のツールチップにする。左に入力フォーム、右にプレビューを均等に並べ(`.scenario-import-layout`。1fr:1fr)、どちらもカードにしない。
   - 画素数はファイルの先頭だけを読んで得る(PNG は IHDR、.npy はヘッダーの `shape`)。分かればマップの大きさの見込み(`importedMapExtent`。コアの `terrain_import._map_extent` と同じ1km単位の切り上げ)と背景の大きさの見込み(`importedBackgroundExtent`。50m格子の画素数へ丸めるだけで切り上げない)を出し、マップが一辺30km・背景が一辺100kmを超えるなら作成を止める。値域(`HEIGHTMAP_LIMITS`)はコアの写しで、変換の可否の正はコア(422 `HEIGHTMAP_INVALID` → `saveCompatibility.HEIGHTMAP_INVALID`)。
   - プレビュー(`TerrainImportPreview`。標高は `useHeightmapPreview`、画素は `heightmapPreview.ts` の `renderImportPreview`)は、選んだファイルを `POST /api/v1/scenarios/heightmap-preview?sea_level&min_height&max_height`(背景は `background=true`。本文はファイルの生バイト)へ送ってコアが取り込みと同じ読み方で間引いた標高を受け取り、詳細地形は `terrainData.ts` の標高色(`computePixelRGB`)・背景は淡い単色(`BACKGROUND_RGB`)で、どちらも標高0m以下は透明に重ねて描く(下地は `SEA_RGB`)。2つの中心は原点で揃え、詳細地形の範囲は取り込みと同じ1km単位への切り上げで縁の標高を延ばす。標高を取り直すのはファイル・海面の高さ・PNGの標高範囲が変わったとき(250msのデバウンス。値が不正な間は取り直さず前の結果を残す)だけで、1画素あたりの距離は配置を変えるだけ。読めない理由は各ファイルの入力欄の下に出し、プレビューの図には出さない。
   - 「シナリオを作成」は `POST /api/v1/scenarios/from-heightmap?spacing&min_height&max_height&sea_level&title&language&source_name`(本文はファイルの生バイト。.npy では min/max を送らない。`language` はアプリ設定の言語で、都市内の名前の言語になる)。背景を選んでいれば本文を `new Blob([詳細, 背景])` にして末尾へ背景を続け、`background_spacing`・`background_size`(背景のバイト数)を付ける(multipart は使わない)→ `GET /api/v1/scenarios/{id}/terrain` から平面図を描いて `uploadScenarioThumbnail`(失敗はログだけで作成は成功のまま)→ 一覧の取り直し → シナリオタブへ切り替えて新しいカードを選択 → `scenarios:changed`。成功したらファイル(背景も)とタイトルだけを空にする。
 - 紹介文・初期の都市名の入力は `common/LocalizedTextFields`、画像は `ScenarioThumbnail`、保存元の札と必要パックは `ScenarioSource`、保存版と互換性は `SaveVersionInfo`。同じ項目の入力・表示を各画面で再実装しない。
-- 紹介文を編集するのは紹介情報ウィンドウ(`template/ScenarioMetadataWindow`)だけ。達成目標ウィンドウの `ScenarioInfoSection` は神モードでも表示だけにする。紹介情報ウィンドウは開始設定(日数・気候・地表・アセットの地域の値と「変更可能」)も書く。「変更可能」はコアの固定する項目の一覧(`scenario_fixed_options`)の反転で、送るときに裏返す。開始設定の先頭には都市内の名前の言語を値の表示だけで並べ、「変更可能」はオンのまま外せなくする(`PATCH /api/v1/scenarios/{id}` は `language` を受けず、プレイヤーはゲーム開始時に常に選べる)。開始設定は `<fieldset>`/`<legend>` を使わず `.scenario-group` の枠に見出しを入れる(legend は枠線をまたいで描かれ、見出しが枠からはみ出す)。
+- 紹介文を編集するのは紹介情報ウィンドウ(`template/ScenarioMetadataWindow`)だけ。作成モードはプレイ中の都市(`GET /api/v1/city/`)の紹介情報・開始設定と都市の言語(`GET /api/v1/sessions`)を初期値にし、「保存」で画像(選んだファイルは `PUT /api/v1/sessions/thumbnail`、無ければ `captureSaveThumbnail`)を預けてから `POST /api/v1/templates` で新しいシナリオを作る。保存するまで何も書かないので、「キャンセル」なら何も残らない。達成目標ウィンドウの `ScenarioInfoSection` は神モードでも表示だけにする。紹介情報ウィンドウは開始設定(日数・気候・地表・アセットの地域の値と「変更可能」)も書く。「変更可能」はコアの固定する項目の一覧(`scenario_fixed_options`)の反転で、送るときに裏返す。開始設定の先頭には都市内の名前の言語を値の表示だけで並べ、「変更可能」はオンのまま外せなくする(`PATCH /api/v1/scenarios/{id}` は `language` を受けず、プレイヤーはゲーム開始時に常に選べる)。開始設定は `<fieldset>`/`<legend>` を使わず `.scenario-group` の枠に見出しを入れる(legend は枠線をまたいで描かれ、見出しが枠からはみ出す)。
 - 取り込みの `title` は1つの文で、コアは英語にだけ入れる(何語で書いたかを尋ねないため。ほかの言語は英語で表示される)。言語ごとの書き分けは後から紹介情報ウィンドウで行う。
-- 変更通知は `scenarios:changed`。保存成功後に紹介情報を開き、投稿は別操作として確認する。投稿先の可否はコアの一覧レスポンスに従う。
+- 変更通知は `scenarios:changed`。投稿は保存とは別の操作として確認する。投稿先の可否はコアの一覧レスポンスに従う。

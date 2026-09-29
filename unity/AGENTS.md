@@ -61,7 +61,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 - 全件走査を避ける。既存の逆引きインデックスは専用の登録・削除メソッド経由でだけ更新する(`geometries/H_バックエンドデータロード.md` §全件走査の回避)。
 - `CameraCellChecker.ResetViewState` は視点検出を未初期化に戻し、カメラが静止していても次の判定で通知させる(セッション切替後にカメラを動かさなくてもロードが始まる入口)。
 - `CameraController` は `game:start` で保存視点を復元し、静止するたび `PATCH /api/v1/city` へ送る。外部から視点を動かす入口は `FocusOn`(注視点・距離・方位・俯角へ滑らかに移動し、入力で中断)で、チュートリアルのカメラ案内が使う。`session:reset` / `game:end` では `SuspendCameraSync` で止める(前の視点で新しい都市の保存値を上書きしないため)。
-- HTTP は必ず `ApiClient` を経由する。定型は単体=`Get`、一括=`GetBulk`(MessagePack は自動判別)、`Post`、`Patch`。それ以外(バイナリ応答、PUT・DELETE、並列送信、取消しつき)は `ApiClient.Request(method, path, json, timeoutSeconds)` が返す `ApiRequest` を `Send(isCanceled)` で送り、結果は `.Web` から読む(並列は全部 `Begin()` してから1件ずつ `Send()`)。`UnityWebRequest` を直接作らない。版ヘッダー `X-City-Genesis-API` が付かない。
+- HTTP は必ず `ApiClient` を経由する。定型は単体=`Get`、一括=`GetBulk`(MessagePack は自動判別)、`Post`、`Patch`。それ以外(バイナリ応答、PUT・DELETE、並列送信、取消しつき)は `ApiClient.Request(method, path, json, timeoutSeconds)`(画像などバイナリの本文は `Request(method, path, body, contentType, timeoutSeconds)`)が返す `ApiRequest` を `Send(isCanceled)` で送り、結果は `.Web` から読む(並列は全部 `Begin()` してから1件ずつ `Send()`)。`UnityWebRequest` を直接作らない。版ヘッダー `X-City-Genesis-API` が付かない。
 
 ### アセットと描画
 

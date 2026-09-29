@@ -20,6 +20,7 @@
 | `OccupancyVolumeUtil.cs` | 道路・建物の占有警告箱の三角形列。`RoadPlanManager` と `HighlightManager` で共用し、既存の材質は変えない。検証 `Tests/Occupancy/run-unity.ps1` |
 | `OverlayMeshRenderer.cs` | オーバーレイ用メッシュ描画(`Custom/OverlayLine`)。生成は静的ファクトリ `Create(name, alwaysOnTop, parent, persistent)` |
 | `ObjectIdInfo.cs` | GameObject のメタデータ(id / status / isFarObject / role)。名前の文字列パースの代わり |
+| `CameraCaptureUtil.cs` | `CapturePng(camera, width, height)`。カメラを直接レンダーテクスチャへ描いてPNGにする(画面に重ねたCanvas・OnGUIは写らない)。セーブデータの画像に使う |
 | `Billboard.cs` / `UILineRenderer.cs` / `WindowUtil.cs` | 常にカメラを向く / UI 上の線描画 / ウィンドウ操作 |
 
 ## 知らないと事故ること
