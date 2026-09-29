@@ -60,53 +60,14 @@ let configuredBase = "";
 let versionCheck: Promise<void> | null = null;
 let checkedAt = 0;
 
-/** ローカルAPIの認証ヘッダー。コアは欠落・不一致を 401 `API_TOKEN_REQUIRED` で拒否する。 */
-const TOKEN_HEADER = "X-City-Genesis-Token";
-let apiToken: string | null = null;
-let tokenRequest: Promise<string | null> | null = null;
-
-/** Rust の `get_connection_status` で受け取ったトークンを保持する。 */
-export function setApiToken(token: string | null | undefined) {
-  apiToken = token || null;
-}
-
-/** トークンを Rust から取り直す(環境変数→トークンファイル)。同時に届いた 401 の取り直しは1回にまとめる。 */
-function refreshApiToken(): Promise<string | null> {
-  if (!tokenRequest) {
-    tokenRequest = invoke<{ api_token?: string | null }>("get_connection_status")
-      .then(status => { setApiToken(status.api_token); return apiToken; })
-      .catch(() => apiToken)
-      .finally(() => { tokenRequest = null; });
-  }
-  return tokenRequest;
-}
-
-/** 設定済みのバックエンドAPIのURLか。トークンはここにだけ付け、他のオリジンへ漏らさない。 */
+/** 設定済みのバックエンドAPIのURLか。版ヘッダーはここにだけ付け、他のオリジンへ送らない。 */
 function isBackendApiUrl(url: string): boolean {
   return configuredBase !== "" && url.startsWith(`${configuredBase}/api/v1/`);
 }
 
 /**
- * トークンを付けて送る。バックエンドの再起動でトークンが変わるため、401 なら取り直して1回だけ再試行する。
- * 401 は認証ミドルウェアが処理前に返すので、POST 等を再送しても二重実行にならない。
- */
-async function authorizedFetch(input: RequestInfo | URL, init: RequestInit & { headers: Headers }): Promise<Response> {
-  const retryInput = input instanceof Request ? input.clone() : input;
-  const token = apiToken ?? await refreshApiToken();
-  if (token) init.headers.set(TOKEN_HEADER, token);
-  const response = await nativeFetch(input, init);
-  if (response.status !== 401) return response;
-  const refreshed = await refreshApiToken();
-  if (!refreshed) return response;
-  init.headers.set(TOKEN_HEADER, refreshed);
-  return nativeFetch(retryInput, init);
-}
-
-/**
  * 旧画面のバイナリ取得も同じHTTP契約を通す。コア再起動に備え短時間だけ結果を共有する。
- * 各画面が直接書いた fetch もここで版ヘッダーと認証トークンが付く。
- * 版の照合が認証(401 `API_TOKEN_REQUIRED`)・Host 検査(421 `HOST_NOT_ALLOWED`)で断られたときはそのコードで失敗させる。
- * 版の不一致と取り違えると、トークンの問題なのに「配布物を更新して」と案内してしまうため。
+ * 各画面が直接書いた fetch もここで版ヘッダーが付く。
  */
 export function configureBackendRequests(baseUrl: string) {
   if (!baseUrl || configuredBase === baseUrl.replace(/\/+$/, "")) return;
@@ -118,12 +79,8 @@ export function configureBackendRequests(baseUrl: string) {
     if (!url.endsWith("/system/version") && !url.includes("/system/shutdown")) {
       if (!versionCheck || (checkedAt !== 0 && Date.now() - checkedAt > 5000)) {
         versionCheck = (async () => {
-          const response = await authorizedFetch(`${configuredBase}/api/v1/system/version`, { cache: "no-store", headers: new Headers() });
+          const response = await nativeFetch(`${configuredBase}/api/v1/system/version`, { cache: "no-store" });
           if (!response.ok) {
-            const body: Partial<ApiErrorResponse> = await response.json().catch(() => ({}));
-            if ((response.status === 401 || response.status === 421) && body.code) {
-              throw new ApiError(body.code, body.message ?? `HTTP ${response.status}`, response.status);
-            }
             throw new ApiError("API_CONTRACT_MISMATCH", "Core version unavailable", response.status);
           }
           const version = await response.json();
@@ -140,7 +97,7 @@ export function configureBackendRequests(baseUrl: string) {
     const headers = new Headers(input instanceof Request ? input.headers : undefined);
     new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
     headers.set("X-City-Genesis-API", String(frontendVersion.api_contract_version));
-    return authorizedFetch(input, { ...init, headers });
+    return nativeFetch(input, { ...init, headers });
   };
 }
 
@@ -161,7 +118,6 @@ export async function fetchApi<T>(
     headers: {
       Accept: `${MSGPACK_MEDIA_TYPE}, application/json`,
       "X-City-Genesis-API": String(frontendVersion.api_contract_version),
-      ...(apiToken && isBackendApiUrl(url) ? { [TOKEN_HEADER]: apiToken } : {}),
       ...options?.headers,
     },
     body: options?.body,

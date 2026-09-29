@@ -42,5 +42,6 @@
 - `DestroyObjectAfterFrames(MonoBehaviour, GameObject)`: 2フレーム遅延の破棄(ポッピング防止)。
 - `WaitTask(Task)`: Task をコルーチンで待ち、失敗時は例外をログ出力。
 - `CalculateAverageWidth(List<float>)`、`TransformBounds(Bounds, Matrix4x4)`(変換後の8隅を包み直す外接AABB)、`XZDistance(Squared)`(水平距離)、`GetCameraHorizontalForward` / `IsInHorizontalView`(視野優先処理の水平視野判定)。
-- `CreateOverlayCanvas(name, sortingOrder, persistent)`: ScreenSpaceOverlay の Canvas。sortingOrder が前後関係を決める(`programs/アラートフラグ管理.md` §Canvas sortingOrder 階層)。
+- `CreateOverlayCanvas(name, sortingOrder, persistent)`: ScreenSpaceOverlay の Canvas。sortingOrder が前後関係を決める(`programs/アラートフラグ管理.md` §Canvas sortingOrder 階層)。GraphicRaycaster 付きなので、クリックを受けない画像・文字は `raycastTarget = false` にする。
+- `SyncOverlayCanvasClickable(GraphicRaycaster)`: 上の Canvas を入力モードが通常のときだけクリック判定させる(毎フレーム呼ぶ)。編集中も表示するクリック可能ラベル(地区名・資源名)が使う。
 - `LoadUIIcon(name)`: `Resources/UIIcons/{name}` の Sprite。Sprite Mode が Multiple だと単体ロードが null になるためサブスプライト先頭を採用する(正しい設定は Single)。

@@ -185,7 +185,6 @@ public class AppRoot : MonoBehaviour
     /// <summary>
     /// 一定間隔でバックエンドのセッションエンドポイントに問い合わせ、生存確認を行う。
     /// 2回連続で通信に失敗した場合はアプリケーションを終了する。
-    /// 認証トークンの拒否(401)も失敗に数えるので、要求は必ず ApiClient を通してヘッダーを付ける。
     /// 本番ビルド（非 Development Build）でのみ有効。
     /// </summary>
     private IEnumerator BackendHealthPolling()

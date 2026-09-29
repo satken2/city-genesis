@@ -11492,18 +11492,6 @@
             ],
             "title": "Author"
           },
-          "category": {
-            "anyOf": [
-              {
-                "type": "string",
-                "pattern": "^(sandbox|challenge|tutorial)$"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Category"
-          },
           "scenario_fixed_options": {
             "anyOf": [
               {

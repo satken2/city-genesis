@@ -375,7 +375,6 @@
     "tabSelect": "Choisir un scénario",
     "tabBrowse": "Trouver des scénarios",
     "comingSoon": "Coming soon",
-    "closeWindowsNote": "Commencer ferme toutes les fenêtres ouvertes. Les modifications non enregistrées de l’éditeur de terrain seront perdues.",
     "relocalizeNote": "Ce scénario a été créé en {{from}}. Commencer en {{to}} renomme en {{to}} les quartiers, installations, habitants, gares et autres noms (les noms donnés par l'auteur sont aussi remplacés ; les noms de rues et quelques autres sont conservés).",
     "fixedByScenario": "Fixé par le scénario"
   }

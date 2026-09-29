@@ -8,25 +8,348 @@
       "legacyStep": 1,
       "phases": [
         {
-          "id": "perform",
-          "textKey": "tutorial.highway.step1.description",
+          "id": "open",
+          "textKey": "tutorial.highway.step1.open",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
             "highlight": [
               "hud.road",
-              "path.type:2"
+              "path.type:2",
+              "path.variant:100"
             ]
           },
           "world": {
-            "mode": "observe",
+            "mode": "blocked",
             "markers": [
               [
                 0,
+                7,
+                -150
+              ],
+              [
                 0,
-                0
+                7,
+                150
               ]
             ],
+            "path": {
+              "points": [
+                [
+                  0,
+                  7,
+                  -150
+                ],
+                [
+                  0,
+                  7,
+                  150
+                ]
+              ],
+              "radius": 15,
+              "variant": 100,
+              "bind": "highway.road"
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                0
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.highway.step1.open",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:2",
+              "path.variant:100"
+            ],
+            "highlight": [
+              "path.type:2",
+              "path.variant:100"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                0,
+                7,
+                -150
+              ],
+              [
+                0,
+                7,
+                150
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  0,
+                  7,
+                  -150
+                ],
+                [
+                  0,
+                  7,
+                  150
+                ]
+              ],
+              "radius": 15,
+              "variant": 100,
+              "bind": "highway.road"
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                0
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 100
+          }
+        },
+        {
+          "id": "start",
+          "textKey": "tutorial.highway.step1.start",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                0,
+                7,
+                -150
+              ],
+              [
+                0,
+                7,
+                150
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  0,
+                  7,
+                  -150
+                ],
+                [
+                  0,
+                  7,
+                  150
+                ]
+              ],
+              "radius": 15,
+              "variant": 100,
+              "bind": "highway.road"
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                0
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 1
+          }
+        },
+        {
+          "id": "end",
+          "textKey": "tutorial.highway.step1.end",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                0,
+                7,
+                -150
+              ],
+              [
+                0,
+                7,
+                150
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  0,
+                  7,
+                  -150
+                ],
+                [
+                  0,
+                  7,
+                  150
+                ]
+              ],
+              "radius": 15,
+              "variant": 100,
+              "bind": "highway.road"
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                0
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2
+          }
+        },
+        {
+          "id": "finalize",
+          "textKey": "tutorial.guide.finalizeRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                0,
+                7,
+                -150
+              ],
+              [
+                0,
+                7,
+                150
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  0,
+                  7,
+                  -150
+                ],
+                [
+                  0,
+                  7,
+                  150
+                ]
+              ],
+              "radius": 15,
+              "variant": 100,
+              "bind": "highway.road"
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                0
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2,
+            "phase": "editing"
+          }
+        },
+        {
+          "id": "confirm",
+          "textKey": "tutorial.highway.step1.confirm",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel",
+              "path.confirm"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                0,
+                7,
+                -150
+              ],
+              [
+                0,
+                7,
+                150
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  0,
+                  7,
+                  -150
+                ],
+                [
+                  0,
+                  7,
+                  150
+                ]
+              ],
+              "radius": 15,
+              "variant": 100,
+              "bind": "highway.road"
+            },
             "camera": {
               "target": [
                 20,

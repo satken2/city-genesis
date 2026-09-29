@@ -72,6 +72,7 @@
 - **高さの再計算**: 地形ロード完了時、変化のあったセルに掛かる地区だけ枠線・ラベルの高さを予算内で再計算する。非表示中は印を付けるだけで、表示ONのときに始める
 - **再取得の経路**: カメラ由来のロード(`LoadCells`)は未ロード時と強制時だけ全件を取る。エポック完了・編集確定の `ReloadAllData` は isForce=false のため、代わりに `RequestZoneRefresh()`(version差分の全件リロード。進行中なら完了後に1回だけ追加実行)を明示的に呼ぶ。地区はエポックごとに自動で作成・統合・分離されるので、この呼び出しが無いと地区表示が起動時のスナップショットのまま更新されない。地区編集の確定は `ReloadAllZonesForced()`(version差分を使わない全再取得)
 - **枠線の描き方**: 隣り合う地区は境界の街路を共有して辺が重なるため、枠線は各地区の内側へ3mセットバックして描き、境界では2本の線が平行に並んで両方の地区色が読めるようにする。地区編集モード中だけ枠線の `_ZTest` を `Always` にして太くし(地形・建物に隠れないように)、通常プレイでは `LEqual` に戻す。編集中にマウスが入った既存地区は枠線とは別のレンダラーの半透明フィルで強調し、ホバー地区が変わったフレームだけ作り直す
+- **選択**: 地区名のクリックで `world:select_object`（`window_type=zone_detail`、`entity.type=zone`）を送る。クリック判定は文字列を囲む矩形だけで、建物アイコンはクリックを受けない。ラベルの矩形上ではポインタがUI上とみなされて3Dの入力とカメラ操作が止まるため、編集中（入力モードが通常以外）はラベルを表示したままクリックを下の3Dへ通す
 - **個別取得**: `CellDataLoader.FetchZone(zoneId)`
 
 ### ResourceManager
@@ -81,7 +82,7 @@
 - **ロード方式**: セル単位ではなく `GET /resources` で取得する
 - **描画方式**: `OverlayMeshRenderer` ではなく、UVと頂点カラーを持つ専用の MeshFilter/MeshRenderer と `Custom/ResourceHeatmap`(プロシージャルノイズ)。各ポリゴンのAABB内を10m格子に細分化して頂点ごとに地形高さをサンプルする(ポリゴン頂点だけの板では丘に埋もれる)。境界からの符号付き距離で12mのソフトフェードを付け、輪郭線は引かない
 - **再構築**: ワールド固定メッシュなのでカメラ移動では作り直さない。資源ロードの完了と、資源のあるセルの `OnTerrainTileReady` で作り直し、同一フレームの複数イベントは `LateUpdate` で1回にまとめる
-- **ラベル**: `ZoneManager` と同じ ScreenSpaceOverlay Canvas(sortingOrder 55。地区の60より奥)に `resource_type_label` を出し、カメラが1m/2°以上動いたフレームだけ位置を更新する
+- **ラベル**: `ZoneManager` と同じ ScreenSpaceOverlay Canvas(sortingOrder 55。地区の60より奥)に `resource_type_label` を出し、カメラが1m/2°以上動いたフレームだけ位置を更新する。クリックで `world:select_object`（`window_type=resource_detail`、`entity.type=resource`）を送る。クリック判定の範囲と編集中の透過は地区名と同じ
 
 ### InterchangeManager
 

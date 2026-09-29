@@ -15,7 +15,7 @@
     "mock-parent": "node tools/mock-parent/server.mjs",
     "cleanup-dev": "powershell -ExecutionPolicy Bypass -File tools/cleanup-dev.ps1",
     "test:scenarios": "node tools/scenarios/run.mjs",
-    "test:api-auth": "node tools/api-auth/run.mjs",
+    "test:api-client": "node tools/api-client/run.mjs",
     "test:tutorial": "node tools/tutorial/run.mjs",
     "check:tutorial": "node tools/tutorial/run.mjs"
   },

@@ -9,7 +9,7 @@ import exitIcon from "../../assets/images/exit.png";
 import githubIcon from "../../assets/images/github.png";
 import settingIcon from "../../assets/images/setting.png";
 import "./TopMenu.css";
-import { ApiError, fetchApi, buildApiUrl } from "../../utils/api";
+import { fetchApi, buildApiUrl } from "../../utils/api";
 import { CoreVersion, frontendVersion } from "../../utils/version";
 
 type SessionStatePayload = {
@@ -36,13 +36,10 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         setCore(value);
         const error = value.api_contract_version !== frontendVersion.api_contract_version ? "API_CONTRACT_MISMATCH" : status.error;
         setVersionError(error ? t(`saveCompatibility.${error}`) : "");
-      }).catch((error: unknown) => {
+      }).catch(() => {
         if (!active) return;
         setCore(null);
-        // 認証・Host 検査で断られたときは、コアに届かないのではなく拒否されたことを理由コードで示す。
-        const rejected = error instanceof ApiError && (error.status === 401 || error.status === 421);
-        setVersionError(t(rejected ? `saveCompatibility.${error.code}` : "saveCompatibility.versionUnavailable",
-          { defaultValue: t("saveCompatibility.versionUnavailable") }));
+        setVersionError(t("saveCompatibility.versionUnavailable"));
       });
     };
     refresh();

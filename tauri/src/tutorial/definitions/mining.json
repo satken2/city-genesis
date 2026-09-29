@@ -20,14 +20,14 @@
             "mode": "observe",
             "markers": [
               [
-                -419.5,
+                -349.5,
                 0,
                 100
               ]
             ],
             "camera": {
               "target": [
-                -420,
+                -350,
                 0,
                 100
               ],
@@ -63,14 +63,14 @@
             "mode": "observe",
             "markers": [
               [
-                -419.5,
+                -349.5,
                 0,
                 100
               ]
             ],
             "camera": {
               "target": [
-                -420,
+                -350,
                 0,
                 100
               ],
@@ -125,14 +125,14 @@
             "mode": "observe",
             "markers": [
               [
-                -947.5,
+                -482.5,
                 0,
                 134
               ]
             ],
             "camera": {
               "target": [
-                -947,
+                -482,
                 0,
                 150
               ],
@@ -187,16 +187,16 @@
             "mode": "observe",
             "markers": [
               [
-                -1781,
+                -1776,
                 0,
-                134
+                355.5
               ]
             ],
             "camera": {
               "target": [
-                -1781,
+                -1776,
                 0,
-                150
+                350
               ],
               "distance": 380,
               "yaw": 0,
@@ -311,19 +311,19 @@
             "mode": "observe",
             "markers": [
               [
-                -1005,
+                -540,
                 0,
                 176
               ],
               [
-                -890,
+                -425,
                 0,
                 176
               ]
             ],
             "camera": {
               "target": [
-                -947,
+                -482,
                 0,
                 160
               ],
@@ -338,6 +338,50 @@
           }
         },
         {
+          "id": "variant",
+          "textKey": "tutorial.mining.step6.open",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "path.type:4",
+              "path.variant:464"
+            ],
+            "highlight": [
+              "path.type:4",
+              "path.variant:464"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -540,
+                0,
+                176
+              ],
+              [
+                -425,
+                0,
+                176
+              ]
+            ],
+            "camera": {
+              "target": [
+                -482,
+                0,
+                160
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 464
+          }
+        },
+        {
           "id": "loading",
           "textKey": "tutorial.mining.step6.loading",
           "ui": {
@@ -349,19 +393,19 @@
             "mode": "observe",
             "markers": [
               [
-                -1005,
+                -540,
                 0,
                 176
               ],
               [
-                -890,
+                -425,
                 0,
                 176
               ]
             ],
             "camera": {
               "target": [
-                -947,
+                -482,
                 0,
                 160
               ],
@@ -395,19 +439,19 @@
               [
                 -1835,
                 0,
-                176
+                313.5
               ],
               [
                 -1725,
                 0,
-                176
+                313.5
               ]
             ],
             "camera": {
               "target": [
                 -1780,
                 0,
-                160
+                330
               ],
               "distance": 320,
               "yaw": 0,
@@ -439,8 +483,8 @@
       "legacyStep": 7,
       "phases": [
         {
-          "id": "perform",
-          "textKey": "tutorial.mining.step7.description",
+          "id": "town",
+          "textKey": "tutorial.mining.step7.town",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -456,23 +500,72 @@
               [
                 -1725,
                 0,
-                176
+                313.5
               ],
               [
-                -1005,
+                -1200,
+                0,
+                252.6
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1462,
+                0,
+                283
+              ],
+              "distance": 800,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "entity",
+            "resource": "paths",
+            "where": [
+              {
+                "field": "path_variant",
+                "equals": 411
+              }
+            ]
+          }
+        },
+        {
+          "id": "climb",
+          "textKey": "tutorial.mining.step7.climb",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.road",
+              "path.type:4",
+              "path.variant:411",
+              "path.followTerrain:0"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1200,
+                0,
+                252.6
+              ],
+              [
+                -540,
                 0,
                 176
               ]
             ],
             "camera": {
               "target": [
-                -1365,
+                -870,
                 0,
-                170
+                214
               ],
-              "distance": 1150,
+              "distance": 900,
               "yaw": 0,
-              "pitch": 60
+              "pitch": 40
             }
           },
           "until": {
@@ -523,16 +616,16 @@
               [
                 -1350,
                 0,
-                137.25
+                166.5
               ]
             ],
             "camera": {
               "target": [
                 -1350,
                 0,
-                145
+                175
               ],
-              "distance": 380,
+              "distance": 420,
               "yaw": 0,
               "pitch": 55
             }
@@ -585,21 +678,21 @@
               [
                 -1350,
                 0,
-                168
+                226.5
               ],
               [
-                -1304.6,
+                -1200,
                 0,
-                176
+                252.6
               ]
             ],
             "camera": {
               "target": [
-                -1330,
+                -1275,
                 0,
-                160
+                240
               ],
-              "distance": 250,
+              "distance": 300,
               "yaw": 0,
               "pitch": 60
             }
@@ -657,16 +750,16 @@
               [
                 -1350,
                 0,
-                168
+                226.5
               ]
             ],
             "camera": {
               "target": [
                 -1400,
                 0,
-                90
+                115
               ],
-              "distance": 420,
+              "distance": 500,
               "yaw": 0,
               "pitch": 60
             }
@@ -717,23 +810,23 @@
             "mode": "observe",
             "markers": [
               [
-                -947.5,
+                -482.5,
                 0,
                 176
               ],
               [
                 -1780,
                 0,
-                176
+                313.5
               ]
             ],
             "camera": {
               "target": [
-                -1365,
+                -1130,
                 0,
-                170
+                245
               ],
-              "distance": 1150,
+              "distance": 1500,
               "yaw": 0,
               "pitch": 60
             }
@@ -779,9 +872,9 @@
             "mode": "observe",
             "camera": {
               "target": [
-                -1150,
+                -1130,
                 0,
-                150
+                230
               ],
               "distance": 1500,
               "yaw": 20,

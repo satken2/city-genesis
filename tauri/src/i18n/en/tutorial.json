@@ -198,7 +198,10 @@
       "description": "Learn how to build an elevated motorway and ramps to create an interchange connecting to local streets.",
       "step1": {
         "title": "Cross above the street",
-        "description": "Build a motorway across the central street at least 6 m above ground. A north–south route at 10 m works. Confirmation completes it."
+        "open": "Cross the central street with an elevated motorway. Open \"Roads, Rail & Infrastructure\" on the icon panel and choose the two-lane motorway under \"Motorways\".",
+        "start": "Left-click inside the cyan circle to place the start of the motorway. It snaps to a viaduct 7 m above the ground.",
+        "end": "Left-click inside the yellow circle to place the end. It snaps to the same 7 m height on the far side of the street.",
+        "confirm": "Confirm in the construction panel to save the motorway, then press \"Next\". Since this is a tutorial, construction time is skipped and it is completed right away."
       },
       "step2": {
         "title": "Name the motorway",
@@ -225,25 +228,26 @@
         "title": "Build a mine"
       },
       "step3": {
-        "description": "Build an \"Ore Loading Station\" on the parcel with the yellow marker at the foot of the mountain, on the north side of the main street. Ore dug at the mine is gathered here by truck and loaded onto freight trains.",
-        "title": "Build a loading station at the foot of the mountain"
+        "description": "Build an \"Ore Loading Station\" on the parcel with the yellow marker on the graded, level ground on the mountain, just west of the mine. Ore dug at the mine is gathered here by truck and loaded onto freight trains.",
+        "title": "Build a loading station next to the mine"
       },
       "step4": {
-        "description": "Build an \"Ore Unloading Station\" on the parcel with the yellow marker at the corner of the harbor road. Ore brought in by rail is unloaded here. Be careful not to mix it up with the similarly named \"Oil Unloading Station\".",
+        "description": "Build an \"Ore Unloading Station\" on the parcel with the yellow marker south of the bulk port's parcel, along the road that turns east from the end of the harbor road. Its entrance faces north, toward the port. Ore brought in by rail is unloaded here. Be careful not to mix it up with the similarly named \"Oil Unloading Station\".",
         "title": "Build an unloading station near the port"
       },
       "step5": {
-        "description": "Build a \"Bulk Port\" on the seafront parcel with the yellow marker at the end of the harbor road. The ore is exported overseas from here.",
+        "description": "Build a \"Bulk Port\" on the seafront parcel with the yellow marker, across the road north of the unloading station. The ore is exported overseas from here.",
         "title": "Build a bulk port"
       },
       "step6": {
         "open": "Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Ore Freight Platform\" under \"Railways\".",
-        "loading": "Lay a platform north of the loading station, parallel to it. Switch \"Platform Side\" so the platform is on the station building's side (south) before confirming; from west to east, that's \"Inside\". The site slopes steeply downhill: if you get a grade error, adjust the \"Embankment Height\" to keep the platform level.",
-        "unloading": "Lay a platform north of the unloading station in the same way, so that the platform is on the station building's side. When you're done, press \"Next\".",
+        "loading": "Lay a platform north of the loading station, parallel to it. Switch \"Platform Side\" so the platform is on the station building's side (south) before confirming; from west to east, that's \"Inside\".",
+        "unloading": "At the unloading station, lay a platform south of the station building so that the platform is on the building's side (north); from west to east, that's \"Outside\". When you're done, press \"Next\".",
         "title": "Build platforms beside the stations"
       },
       "step7": {
-        "description": "Press \"Back\" to return to the list, choose \"Railway Track\", and lay track from the east end of the unloading station's platform to the west end of the loading station's platform (a single track is fine). Once confirmed, the track and platforms are completed and the connection is checked.",
+        "town": "Press \"Back\" to return to the list, choose \"Railway Track\", and lay track diagonally from the east end of the unloading station's platform to the marker northeast of the town (a single track is fine). The land here is flat, so the track can keep following the terrain.",
+        "climb": "Next, lay the track up the mountain from there to the west end of the loading station's platform. Track can only climb grades of up to 5%, so before laying it, set \"Terrain Follow\" in the construction panel to \"No Follow\": the track then climbs at a steady grade instead of following the ground, and crosses valleys on bridges. If a section is too long to confirm, split it and lay it in several pieces. Once confirmed, the track and platforms are completed and the connection is checked.",
         "title": "Connect the two stations by rail"
       },
       "step8": {
@@ -298,7 +302,7 @@
       "scenario4": "Laying track alone won't get trains running. In this tutorial, you'll link the apartment building in town with a commercial building at the west end of the street by rail. You'll build stations from platforms and station houses, set up the track, a depot and power lines, open a line, and see residents ride the train to work at the grocery store in the commercial building.",
       "trade": "This city is connected by rail to a neighboring country at its eastern border and faces the sea to the west. In this tutorial, you'll create two trade routes: exporting a factory's food by sea through a container port, and importing goods by rail over a freight line you lay to the border.",
       "highway": "As a city grows, local streets alone can no longer handle all the cars. In this tutorial, you'll learn how to build an elevated motorway that crosses over a local street, then connect the two with ramps to create an interchange.",
-      "mining": "The setting is an island surrounded by coral shallows. An ore vein lies untouched in the central mountain. In this tutorial, you'll learn the whole flow — mining ore in the mountain, carrying it by freight rail from a loading station at the foot of the mountain to the harbor town, and exporting it overseas from a bulk port — while building the track and depot yourself.",
+      "mining": "The setting is an island surrounded by coral shallows. An ore vein lies untouched in the central mountain. In this tutorial, you'll learn the whole flow — mining ore in the mountain, carrying it by freight rail from a loading station next to the mine to the harbor town, and exporting it overseas from a bulk port — while building the track and depot yourself.",
       "tourism": "The harbor town on this island, surrounded by coral seas, has ancient ruins by the shore. In this tutorial, you'll attract tourists by building a hotel beside the ruins and a cruise terminal at the port, and see the town's restaurants and bus route come alive.",
       "heading": "In this tutorial"
     }

@@ -18,7 +18,7 @@ using Steamworks;
 ///      GetTicketForWebApiResponse_t コールバックで受け取る。
 ///   3. チケットを hex 文字列化してバックエンドへ POST する。
 ///   4. バックエンドが 401/403 を返した場合はチケット無効(確定失敗)として終了。
-///      それ以外の失敗(接続不可・502・ローカル API の認証トークン拒否等)は一時障害として、チケットを
+///      それ以外の失敗(接続不可・502等)は一時障害として、チケットを
 ///      取り直した上でバックオフ再送する(チケットは使い捨てのため再利用しない)。
 ///
 /// Steam 不在(SteamService.Initialized == false)の場合は何もしない。
@@ -192,9 +192,8 @@ public class SteamAuthClient : MonoBehaviour
                 },
                 onError: (code, error) =>
                 {
-                    // 401/403 はチケット無効の確定失敗(再送しない)。
-                    // それ以外(0=接続不可, 502, 5xx)と、ローカル API の認証トークンの拒否は一時障害として再送する。
-                    definitiveFailure = (code == 401 || code == 403) && !ApiClient.IsTokenRejected(code, error);
+                    // 401/403 はチケット無効の確定失敗(再送しない)。それ以外(0=接続不可, 502, 5xx)は一時障害として再送する。
+                    definitiveFailure = code == 401 || code == 403;
                     Debug.LogWarning($"SteamAuthClient: 検証リクエスト失敗 (HTTP {code}): {error}");
                     requestDone = true;
                 });

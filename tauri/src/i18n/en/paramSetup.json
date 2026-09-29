@@ -375,7 +375,6 @@
     "tabSelect": "Choose a scenario",
     "tabBrowse": "Find scenarios",
     "comingSoon": "Coming soon",
-    "closeWindowsNote": "Starting closes all open windows. Unsaved edits in the terrain editor will be lost.",
     "relocalizeNote": "This scenario was made in {{from}}. Starting in {{to}} renames districts, facilities, residents, stations, and other names in {{to}} (names given by the author are replaced too; road names and a few others are kept).",
     "fixedByScenario": "Fixed by the scenario"
   }

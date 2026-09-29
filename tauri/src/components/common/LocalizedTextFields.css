@@ -1,13 +1,12 @@
 .localized-text {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .localized-text .localized-text__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 2px;
 }
 
 /* 置かれる画面のボタンの共通指定(.scenario-editor button など)より強くするため2クラスで書く */
@@ -15,11 +14,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  font-size: 0.93rem;
+  padding: 6px 10px;
+  font-size: 1rem;
   background: var(--flat-raised);
   border: 0;
-  border-bottom: 2px solid transparent;
   border-radius: 6px 6px 0 0;
   color: var(--flat-text-label);
   cursor: pointer;
@@ -29,17 +27,34 @@
   background: var(--flat-raised-hover);
 }
 
-.localized-text .localized-text__tab--active {
+/* 選択中のタブは枠の上辺と同じ色にして、下の枠へつながって見えるようにする */
+.localized-text .localized-text__tab--active,
+.localized-text .localized-text__tab--active:hover:not(:disabled) {
   background: var(--flat-selected);
   color: var(--flat-text);
 }
 
-/* 文が入っている言語は下線で示す(選択中の塗りと重ねても見分けられるように) */
-.localized-text .localized-text__tab--filled {
-  border-bottom-color: var(--flat-good);
+/* 文が入っている言語は緑の点で示す(選択中の塗りと重ねても見分けられるように) */
+.localized-text .localized-text__tab--filled::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--flat-good);
 }
 
 .localized-text .localized-text__required {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--flat-warn);
+}
+
+/* タブで切り替わる範囲。上辺をタブ列に接して選択中のタブと同じ色にする */
+.localized-text .localized-text__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--flat-raised-hover);
+  border-top: 2px solid var(--flat-selected);
+  border-radius: 0 8px 8px 8px;
 }

@@ -593,9 +593,6 @@ public class IpcStateCoordinator : MonoBehaviour
     /// STATE_EDIT_PATH: 道路敷設モード
     /// ipcParams には UI側で選択された path_type / path_variant / path_id が含まれる。
     /// path_id が指定されている場合は既存パスの編集モードとして動作する。
-    ///
-    /// 地区表示は非表示にする。道路敷設中に地区を誤ってクリックして
-    /// 地区パネルが開くのを防ぐため。
     /// </summary>
     private void ApplyStateEditPath(Dictionary<string, object> ipcParams)
     {

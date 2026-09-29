@@ -71,6 +71,7 @@ public class ResourceManager : BaseApiDataManager
     private GameObject uiCanvasRoot;
     private Canvas uiCanvas;
     private RectTransform uiCanvasRect;
+    private GraphicRaycaster uiRaycaster;
 
     // 資源IDごとのラベル GameObject。
     private Dictionary<int, GameObject> resourceLabelUIs = new Dictionary<int, GameObject>();
@@ -330,6 +331,8 @@ public class ResourceManager : BaseApiDataManager
 
     private void Update()
     {
+        Utils.SyncOverlayCanvasClickable(uiRaycaster);
+
         // ヒートマップメッシュは world-space なのでカメラ移動で再構築不要だが、
         // ラベルはスクリーン座標へ投影するためカメラが動いたら位置更新が必要。
         if (!isVisible || !areResourcesLoaded) return;
@@ -394,6 +397,7 @@ public class ResourceManager : BaseApiDataManager
         uiCanvas = Utils.CreateOverlayCanvas("ResourceUICanvas", 55, persistent: true);
         uiCanvasRoot = uiCanvas.gameObject;
         uiCanvasRect = uiCanvasRoot.GetComponent<RectTransform>();
+        uiRaycaster = uiCanvasRoot.GetComponent<GraphicRaycaster>();
 
         // 資源表示の現在の状態に合わせる
         uiCanvasRoot.SetActive(isVisible);
@@ -402,6 +406,7 @@ public class ResourceManager : BaseApiDataManager
     /// <summary>
     /// 1つの資源に対する名前ラベルを2D UI上に生成する。
     /// 実際の位置は Update で毎フレーム更新される。
+    /// クリック判定は Rect の範囲なので、Rect を文字列を囲む大きさに詰める(下の建物・道路のクリックを奪わないため)。
     /// </summary>
     private void CreateResourceLabelUI(ResourceItem resource)
     {
@@ -432,6 +437,8 @@ public class ResourceManager : BaseApiDataManager
         text.font = osFont != null ? osFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         text.color = Color.white;
         text.alignment = TextAnchor.MiddleCenter;
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
 
         // 読みやすさのためテキストに黒いアウトラインを付ける。
         // ヒートマップの色（油田=黒、水源=シアン等）に関わらず視認性を確保するため。
@@ -443,7 +450,7 @@ public class ResourceManager : BaseApiDataManager
         rt.anchorMin = Vector2.zero;
         rt.anchorMax = Vector2.zero;
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(500, 75);
+        rt.sizeDelta = new Vector2(text.preferredWidth, text.preferredHeight);
 
         // クリック可能にして、クリック時に天然資源詳細ウィンドウを開く
         Button button = labelGO.AddComponent<Button>();

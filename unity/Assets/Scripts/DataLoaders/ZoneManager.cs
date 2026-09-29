@@ -142,6 +142,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     private GameObject uiCanvasRoot;
     private Canvas uiCanvas;
     private RectTransform uiCanvasRect;
+    private GraphicRaycaster uiRaycaster;
 
     private GameObject overlayMeshObj;
     private OverlayMeshRenderer overlayRenderer;
@@ -542,6 +543,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         uiCanvas = Utils.CreateOverlayCanvas("ZoneUICanvas", 60, persistent: true); // 3Dより前、モーダルより後ろ
         uiCanvasRoot = uiCanvas.gameObject;
         uiCanvasRect = uiCanvas.GetComponent<RectTransform>();
+        uiRaycaster = uiCanvas.GetComponent<GraphicRaycaster>();
     }
 
     private void EnsureOverlayRenderer()
@@ -768,6 +770,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// 2D UIキャンバス上に地区名テキストを生成する。
     /// 実際の位置更新は Update で毎フレーム行う。
     /// クリック可能にし、クリック時に zone_detail ウィンドウを開く IPC イベントを送信する。
+    /// クリック判定は Rect の範囲なので、Rect を文字列を囲む大きさに詰める(下の建物・道路のクリックを奪わないため)。
     /// </summary>
     private void CreateZoneLabelUI(ZoneData zone)
     {
@@ -785,6 +788,8 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         text.font = UiFontProvider.GetFont(text.fontSize);
         text.color = Color.white;
         text.alignment = TextAnchor.MiddleCenter;
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
 
         // 読みやすさのためテキストに黒いアウトラインを付ける
         Outline outline = labelGO.AddComponent<Outline>();
@@ -795,7 +800,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         rt.anchorMin = Vector2.zero;
         rt.anchorMax = Vector2.zero;
         rt.pivot = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = new Vector2(500, 75);
+        rt.sizeDelta = new Vector2(text.preferredWidth, text.preferredHeight);
 
         // クリック可能にして、クリック時に地区詳細ウィンドウを開く
         Button button = labelGO.AddComponent<Button>();
@@ -808,7 +813,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// <summary>
     /// 2D UIキャンバス上に建物アイコンを生成する。
     /// 実際の位置更新は Update で毎フレーム行う。
-    /// クリック可能にし、クリック時に zone_detail ウィンドウを開く IPC イベントを送信する。
+    /// アイコンはクリックを受けず、地区詳細を開けるのは地区名だけにする(アイコン列の下の3Dを常に触れるようにするため)。
     /// </summary>
     private void CreateZoneIconsUI(ZoneData zone)
     {
@@ -827,7 +832,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
         var icons = new List<RectTransform>();
         const float iconSize = 60f;
-        int capturedZoneId = zone.zone_id;
 
         for (int i = 0; i < allowedBuildingTypes.Count; i++)
         {
@@ -844,16 +848,13 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
             Image image = iconGO.AddComponent<Image>();
             image.sprite = iconSprite;
+            image.raycastTarget = false;
 
             RectTransform rt = image.rectTransform;
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.zero;
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = new Vector2(iconSize, iconSize);
-
-            // クリック可能にして、クリック時に地区詳細ウィンドウを開く
-            Button button = iconGO.AddComponent<Button>();
-            button.onClick.AddListener(() => OnZoneLabelClicked(capturedZoneId));
 
             icons.Add(rt);
         }
@@ -862,7 +863,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
-    /// 地区名ラベルまたはアイコンがクリックされた時のハンドラ。
+    /// 地区名ラベルがクリックされた時のハンドラ。
     /// Tauri UI に対して zone_detail ウィンドウを開くよう IPC イベントを送信する。
     /// </summary>
     private void OnZoneLabelClicked(int zoneId)
@@ -1027,6 +1028,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     private void Update()
     {
+        Utils.SyncOverlayCanvasClickable(uiRaycaster);
         if (!IsOverlayVisible) return;
 
         Camera cam = Camera.main;

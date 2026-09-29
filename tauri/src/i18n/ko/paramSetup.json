@@ -375,7 +375,6 @@
     "tabSelect": "시나리오 선택",
     "tabBrowse": "시나리오 찾기",
     "comingSoon": "Coming soon",
-    "closeWindowsNote": "시작하면 열려 있는 모든 창이 닫힙니다. 지형 편집기에서 저장하지 않은 편집 내용은 사라집니다.",
     "relocalizeNote": "이 시나리오는 {{from}}(으)로 만들어졌습니다. {{to}}(으)로 시작하면 지구·시설·주민·역 등의 이름을 {{to}}(으)로 다시 붙입니다(제작자가 붙인 이름도 바뀝니다. 도로 이름 등은 유지됩니다).",
     "fixedByScenario": "시나리오에서 고정"
   }

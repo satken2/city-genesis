@@ -163,6 +163,8 @@ export function PathBuildSections({
                   <button
                     key={option.value}
                     type="button"
+                    data-guide="path.followTerrain"
+                    data-guide-value={option.value}
                     className={`pc-platform-side-btn ${pc.followTerrain === option.value ? "active" : ""}`}
                     onClick={() => pc.setFollowTerrain(option.value)}
                     title={t(

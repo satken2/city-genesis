@@ -1477,7 +1477,6 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
         // クライアントをループ外で生成してコネクションプールを維持する。
         // localhost 内の通信でも、都度クライアントを作り直すと TCP コネクションの
         // 確立に時間がかかり、Python 側の GIL や接続キューの影響でタイムアウトしやすくなる。
-        // 認証トークンはバックエンドの再起動で変わるので、既定ヘッダーにせず周回ごとに付け直す。
         let client = reqwest::blocking::Client::builder()
             .timeout(Duration::from_secs(10))
             // Python 側 (uvicorn) の keep-alive タイムアウトより短く設定することで、
@@ -1879,7 +1878,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(shared_state.clone())
         .setup(move |app| {
-            // 認証トークンのファイルを読む基準。バックエンドへの通信(セッションポーリング等)より先に決める。
+            // セーブの置き場・地形エディタの作業コピーの基準になるユーザーフォルダを決める。
             version::init_user_data_dir(app.handle());
 
             if let Some(main_window) = app.get_webview_window("main") {

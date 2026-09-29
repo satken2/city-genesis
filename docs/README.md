@@ -129,7 +129,7 @@ mkdocs serve
 ## OpenAPI 仕様の更新
 
 開発用のバックエンド（genesis-core）を起動した状態でスクリプトを実行すると、`docs/api/openapi.json` が更新される。
-バックエンドはローカルAPIの認証トークンを要求するので、スクリプトは環境変数 `GENESIS_API_TOKEN`、無ければバックエンドが書くトークンファイル（`<ユーザーフォルダ>/api_token`）を読んで付ける。トークンと `Host` を付けるのはループバック（`127.0.0.1`・`localhost`・`[::1]`）の URL だけ。製品版・モックのバックエンドは `/openapi.json` を配信しない。
+製品版・モックのバックエンドは `/openapi.json` を配信しない。
 
 ```bash
 # バックエンドが localhost:5000 で起動中の場合

@@ -198,7 +198,10 @@
       "description": "Apprenez à construire une autoroute surélevée et des bretelles pour créer un échangeur relié aux routes locales.",
       "step1": {
         "title": "Croiser la rue en viaduc",
-        "description": "Construisez une autoroute qui franchit la rue centrale sur un viaduc d’au moins 6 m de hauteur. Par exemple, tracez-la du nord au sud à 10 m de hauteur. La confirmation termine la construction."
+        "open": "Franchissez la rue centrale avec une autoroute surélevée. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes et choisissez l’autoroute à deux voies dans « Autoroutes ».",
+        "start": "Faites un clic gauche dans le cercle cyan pour placer le début de l’autoroute. Il s’aimante sur un viaduc à 7 m de hauteur.",
+        "end": "Faites un clic gauche dans le cercle jaune pour placer la fin. Elle s’aimante à la même hauteur de 7 m, de l’autre côté de la rue.",
+        "confirm": "Confirmez dans le panneau de construction pour enregistrer l’autoroute, puis appuyez sur « Suivant ». Comme il s’agit d’un tutoriel, le délai de construction est sauté et l’autoroute est terminée aussitôt."
       },
       "step2": {
         "title": "Nommer l’autoroute",
@@ -225,25 +228,26 @@
         "title": "Construire une mine"
       },
       "step3": {
-        "description": "Construisez une « Gare de chargement de minerai » sur la parcelle au repère jaune, au pied de la montagne, au nord de la rue principale. Le minerai extrait de la mine est amené ici par camion, puis chargé dans des trains de fret.",
-        "title": "Construire la gare de chargement au pied de la montagne"
+        "description": "Construisez une « Gare de chargement de minerai » sur la parcelle au repère jaune, sur le terrain nivelé de la montagne, juste à l'ouest de la mine. Le minerai extrait de la mine est amené ici par camion, puis chargé dans des trains de fret.",
+        "title": "Construire la gare de chargement à côté de la mine"
       },
       "step4": {
-        "description": "Construisez une « Gare de déchargement de minerai » sur la parcelle au repère jaune, à l'angle de la rue du port. Le minerai acheminé par le rail y est déchargé. Attention à ne pas la confondre avec la « Gare de déchargement de pétrole », au nom similaire.",
+        "description": "Construisez une « Gare de déchargement de minerai » sur la parcelle au repère jaune, au sud de la parcelle du port de vrac, le long de la rue qui tourne vers l'est au bout de la rue du port. Son entrée donne au nord, vers le port. Le minerai acheminé par le rail y est déchargé. Attention à ne pas la confondre avec la « Gare de déchargement de pétrole », au nom similaire.",
         "title": "Construire la gare de déchargement près du port"
       },
       "step5": {
-        "description": "Construisez un « Port de vrac » sur la parcelle au repère jaune face à la mer, au bout de la rue du port. C'est d'ici que le minerai est exporté à l'étranger.",
+        "description": "Construisez un « Port de vrac » sur la parcelle au repère jaune face à la mer, de l'autre côté de la rue, au nord de la gare de déchargement. C'est d'ici que le minerai est exporté à l'étranger.",
         "title": "Construire un port de vrac"
       },
       "step6": {
         "open": "Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Quai de fret pour minerai » dans « Chemin de fer ».",
-        "loading": "Posez un quai au nord de la gare de chargement, parallèlement à celle-ci. Réglez le « Côté du quai » pour que le quai soit du côté du bâtiment de la gare (sud) avant de valider ; d'ouest en est, c'est « Intérieur ». Le terrain descend en pente raide : en cas d'erreur de pente, réglez la « Hauteur du remblai » pour que le quai soit horizontal.",
-        "unloading": "De la même manière, posez aussi un quai au nord de la gare de déchargement, en le plaçant du côté du bâtiment de la gare. Une fois la pose terminée, appuyez sur « Suivant ».",
+        "loading": "Posez un quai au nord de la gare de chargement, parallèlement à celle-ci. Réglez le « Côté du quai » pour que le quai soit du côté du bâtiment de la gare (sud) avant de valider ; d'ouest en est, c'est « Intérieur ».",
+        "unloading": "À la gare de déchargement, posez un quai au sud du bâtiment, du côté du bâtiment de la gare (nord) ; d'ouest en est, c'est « Extérieur ». Une fois la pose terminée, appuyez sur « Suivant ».",
         "title": "Construire des quais à côté des gares"
       },
       "step7": {
-        "description": "Appuyez sur « Retour » pour revenir à la liste, choisissez « Voie de chemin de fer » et posez la voie depuis l'extrémité est du quai de la gare de déchargement jusqu'à l'extrémité ouest du quai de la gare de chargement (une seule voie suffit). Après confirmation, la voie et les quais sont achevés et la liaison est vérifiée.",
+        "town": "Appuyez sur « Retour » pour revenir à la liste, choisissez « Voie de chemin de fer » et posez la voie en diagonale depuis l'extrémité est du quai de la gare de déchargement jusqu'au repère au nord-est de la ville (une seule voie suffit). Le terrain y est plat : la voie peut suivre le terrain.",
+        "climb": "Posez ensuite, à partir de là, la voie qui monte la montagne jusqu'à l'extrémité ouest du quai de la gare de chargement. Une voie ne peut gravir que des pentes de 5 % au plus : avant de la poser, réglez « Suivi du terrain » sur « Ne pas suivre » dans le panneau de construction. La voie monte alors selon une pente constante au lieu de suivre le sol, et franchit les vallées sur des ponts. Si un tronçon est trop long pour être validé, découpez-le et posez-le en plusieurs parties. Après confirmation, la voie et les quais sont achevés et la liaison est vérifiée.",
         "title": "Relier les deux gares par le rail"
       },
       "step8": {
@@ -298,7 +302,7 @@
       "scenario4": "Poser des rails ne suffit pas à faire circuler des trains. Dans ce tutoriel, vous relierez par le rail le logement collectif de la ville à un immeuble commercial au bout ouest de la rue. Vous formerez les gares avec des quais et des bâtiments de gare, aménagerez la voie, le dépôt et la ligne de transmission, mettrez une ligne en service et verrez les habitants aller en train travailler à l'épicerie de l'immeuble commercial.",
       "trade": "Cette ville est reliée par le rail au pays voisin à sa frontière est et donne sur la mer à l'ouest. Dans ce tutoriel, vous créerez deux routes commerciales : exporter par la mer les produits alimentaires d'une usine depuis un port à conteneurs, et importer par le rail grâce à une ligne de fret posée jusqu'à la frontière.",
       "highway": "Quand la ville s'agrandit, les routes locales ne suffisent plus à absorber la circulation. Dans ce tutoriel, vous apprendrez à construire une autoroute surélevée qui enjambe une route locale, puis à les relier par des bretelles pour créer un échangeur.",
-      "mining": "L'action se déroule sur une île entourée de hauts-fonds coralliens. Un filon de minerai sommeille dans la montagne centrale. Dans ce tutoriel, vous apprendrez tout le processus — extraire le minerai dans la montagne, l'acheminer par train de fret depuis la gare de chargement au pied de la montagne jusqu'à la ville portuaire, puis l'exporter à l'étranger depuis le port de vrac — en construisant vous-même les voies et le dépôt.",
+      "mining": "L'action se déroule sur une île entourée de hauts-fonds coralliens. Un filon de minerai sommeille dans la montagne centrale. Dans ce tutoriel, vous apprendrez tout le processus — extraire le minerai dans la montagne, l'acheminer par train de fret depuis la gare de chargement voisine de la mine jusqu'à la ville portuaire, puis l'exporter à l'étranger depuis le port de vrac — en construisant vous-même les voies et le dépôt.",
       "tourism": "La ville portuaire de cette île entourée de mers coralliennes possède des ruines antiques au bord de la mer. Dans ce tutoriel, vous attirerez des touristes en aménageant un hôtel à côté des ruines et un terminal de croisière au port, et verrez s'animer les restaurants et la ligne de bus de la ville.",
       "heading": "Dans ce tutoriel"
     }

@@ -198,7 +198,10 @@
       "description": "Aprende a construir una autopista elevada y rampas para crear un enlace con las calles locales.",
       "step1": {
         "title": "Cruzar la calle con un viaducto",
-        "description": "Construye una autopista que cruce la calle central sobre un viaducto de al menos 6 m de altura. Por ejemplo, trázala de norte a sur a 10 m de altura. Al confirmar, la obra se completa."
+        "open": "Cruza la calle central con una autopista elevada. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige la autopista de dos carriles en «Autopistas».",
+        "start": "Haz clic izquierdo dentro del círculo celeste para colocar el inicio de la autopista. Se ajusta a un viaducto a 7 m de altura.",
+        "end": "Haz clic izquierdo dentro del círculo amarillo para colocar el final. Se ajusta a la misma altura de 7 m, al otro lado de la calle.",
+        "confirm": "Confirma en el panel de construcción para guardar la autopista y luego pulsa «Siguiente». Al ser un tutorial, se omite el tiempo de obra y se completa de inmediato."
       },
       "step2": {
         "title": "Nombrar la autopista",
@@ -225,25 +228,26 @@
         "title": "Construir una mina"
       },
       "step3": {
-        "description": "Construye una «Estación de carga de mineral» en la parcela del marcador amarillo al pie de la montaña, al norte de la calle principal. El mineral extraído en la mina llega aquí en camiones y se carga en los trenes de carga.",
-        "title": "Construir la estación de carga al pie de la montaña"
+        "description": "Construye una «Estación de carga de mineral» en la parcela del marcador amarillo, en el terreno nivelado de la montaña, justo al oeste de la mina. El mineral extraído en la mina llega aquí en camiones y se carga en los trenes de carga.",
+        "title": "Construir la estación de carga junto a la mina"
       },
       "step4": {
-        "description": "Construye una «Estación de descarga de mineral» en la parcela del marcador amarillo, en la esquina de la calle del puerto. Aquí se descarga el mineral que llega por ferrocarril. Ten cuidado de no confundirla con la «Estación de descarga de petróleo», que tiene un nombre parecido.",
+        "description": "Construye una «Estación de descarga de mineral» en la parcela del marcador amarillo, al sur de la parcela del puerto de graneles, junto a la calle que gira hacia el este al final de la calle del puerto. Su entrada mira al norte, hacia el puerto. Aquí se descarga el mineral que llega por ferrocarril. Ten cuidado de no confundirla con la «Estación de descarga de petróleo», que tiene un nombre parecido.",
         "title": "Construir la estación de descarga cerca del puerto"
       },
       "step5": {
-        "description": "Construye un «Puerto de graneles» en la parcela del marcador amarillo que da al mar, al final de la calle del puerto. Desde aquí el mineral se exporta al extranjero.",
+        "description": "Construye un «Puerto de graneles» en la parcela del marcador amarillo que da al mar, al otro lado de la calle, al norte de la estación de descarga. Desde aquí el mineral se exporta al extranjero.",
         "title": "Construir un puerto de graneles"
       },
       "step6": {
         "open": "Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén de carga de mineral» en «Ferrocarril».",
-        "loading": "Tiende un andén al norte de la estación de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (sur) antes de confirmar; de oeste a este es «Interior». El terreno baja en pendiente pronunciada: si aparece un error de pendiente, ajusta la «Altura del terraplén» para dejar el andén horizontal.",
-        "unloading": "Del mismo modo, tiende también un andén al norte de la estación de descarga, de manera que quede del lado del edificio de la estación. Cuando termines, pulsa «Siguiente».",
+        "loading": "Tiende un andén al norte de la estación de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (sur) antes de confirmar; de oeste a este es «Interior».",
+        "unloading": "En la estación de descarga, tiende un andén al sur del edificio, de manera que quede del lado del edificio de la estación (norte); de oeste a este es «Exterior». Cuando termines, pulsa «Siguiente».",
         "title": "Construir andenes junto a las estaciones"
       },
       "step7": {
-        "description": "Pulsa «Volver» para regresar a la lista, elige «Vía de ferrocarril» y tiende la vía desde el extremo este del andén de la estación de descarga hasta el extremo oeste del andén de la estación de carga (basta con una sola vía). Al confirmar, se completarán la vía y los andenes y se comprobará la conexión.",
+        "town": "Pulsa «Volver» para regresar a la lista, elige «Vía de ferrocarril» y tiende la vía en diagonal desde el extremo este del andén de la estación de descarga hasta el marcador al noreste del pueblo (basta con una sola vía). Aquí el terreno es llano, así que la vía puede seguir el terreno.",
+        "climb": "A continuación, tiende desde ahí la vía que sube la montaña hasta el extremo oeste del andén de la estación de carga. Las vías solo pueden subir pendientes de hasta el 5 %, así que antes de tenderla pon «Seguimiento del terreno» en «No seguir» en el panel de construcción: la vía subirá con una pendiente constante sin seguir el suelo y cruzará los valles con puentes. Si un tramo es demasiado largo para confirmarlo, divídelo y tiéndelo en varias partes. Al confirmar, se completarán la vía y los andenes y se comprobará la conexión.",
         "title": "Unir las dos estaciones con vías"
       },
       "step8": {
@@ -298,7 +302,7 @@
       "scenario4": "Un ferrocarril no funciona solo con tender vías. En este tutorial unirás por ferrocarril la vivienda colectiva del pueblo con un edificio comercial al extremo oeste de la calle. Formarás las estaciones con andenes y edificios de estación, prepararás la vía, el depósito y la línea de transmisión, pondrás en servicio una línea y verás a los vecinos ir en tren a trabajar a la tienda de alimentos del edificio comercial.",
       "trade": "Esta ciudad está conectada por ferrocarril con el país vecino en su frontera este y da al mar por el oeste. En este tutorial crearás dos rutas comerciales: exportarás por mar los alimentos de una fábrica desde un puerto de contenedores, y tenderás una línea de carga hasta la frontera para importar por ferrocarril.",
       "highway": "Cuando la ciudad crece, las calles locales ya no dan abasto con tantos autos. En este tutorial aprenderás a construir una autopista elevada que pase por encima de una calle local y a conectarlas con rampas para crear un intercambiador.",
-      "mining": "La historia transcurre en una isla rodeada de bajíos de coral. En la montaña central yace una veta de mineral. En este tutorial aprenderás todo el proceso —extraer el mineral en la montaña, llevarlo en tren de carga desde la estación de carga al pie de la montaña hasta el pueblo portuario y exportarlo al extranjero desde el puerto de graneles— construyendo tú mismo las vías y el depósito.",
+      "mining": "La historia transcurre en una isla rodeada de bajíos de coral. En la montaña central yace una veta de mineral. En este tutorial aprenderás todo el proceso —extraer el mineral en la montaña, llevarlo en tren de carga desde la estación de carga junto a la mina hasta el pueblo portuario y exportarlo al extranjero desde el puerto de graneles— construyendo tú mismo las vías y el depósito.",
       "tourism": "El pueblo portuario de esta isla, rodeada de mares de coral, tiene unas ruinas antiguas a la orilla del mar. En este tutorial atraerás turistas construyendo un hotel junto a las ruinas y una terminal de cruceros en el puerto, y comprobarás cómo se animan los restaurantes y la línea de autobús del pueblo.",
       "heading": "En este tutorial"
     }

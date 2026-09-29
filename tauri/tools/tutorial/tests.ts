@@ -33,6 +33,17 @@ check(await findPhase(basic, env), 2, "cancel rewinds placement");
 env.bindings["basic.road"] = { kind: "paths", id: 9 };
 env.read = async () => [{ path_id: 9, path_variant: 221, start_point: [-100, 0, 0], end_point: [100, 0, 0], curved: false, status: 1 }];
 check(await findPhase(basic, env), 5, "saved road survives closed panel");
+{
+  const platforms = DEFINITIONS.mining.steps.find(s => s.id === "mining.platforms")!;
+  const mining = fake();
+  mining.facts.windows.panel = { visible: true, window: "path_build" };
+  const phase = async () => platforms.phases[await findPhase(platforms, mining)];
+  check([(await phase()).textKey, (await phase()).ui.policy], [platforms.phases[0].textKey, "strict"], "opening the panel keeps the card guide and locks other cards");
+  mining.facts.pathVariant = 464;
+  check((await phase()).id, "loading", "choosing the platform card moves on to placement");
+  mining.facts.pathVariant = -1;
+  check((await phase()).ui.policy, "strict", "going back to the cards restores the lock");
+}
 env.bindings["support.housing.building"] = { kind: "agents", id: 30 };
 env.facts.windows.detail = { visible: true, window: "agent_detail", entity: 31 };
 const house = { type: "window" as const, window: "agent_detail", target: "support.housing.building" };
@@ -90,7 +101,7 @@ for (const mutate of [
   (d: any) => d.steps[0].phases[0].ui.highlight.push("path.variant:"),
   (d: any) => d.steps[0].phases[0].world.path.variant = { $constant: "TYPO" },
   (d: any) => d.steps[0].complete.target = "typo",
-  (d: any) => d.steps[0].phases[0].world.path.points[0][1] = 10,
+  (d: any) => d.steps[0].phases[0].world.path.points[1] = d.steps[0].phases[0].world.path.points[0],
   (d: any) => d.steps[0].phases[0].ui.allow.push("window.path_build"),
   (d: any) => d.steps.push(d.steps[0]),
   (d: any) => d.steps[0].phases[0].world.camera = { target: [0, 0, 0], distance: 300, yaw: 0, pitch: 0 },
@@ -98,6 +109,30 @@ for (const mutate of [
   (d: any) => d.terrainMap = "flat",
   (d: any) => d.id = "",
 ]) { const d = structuredClone(DEFINITIONS.basic); mutate(d); throws(() => validateDefinition(d), "invalid definition rejected"); }
+{ const d = structuredClone(DEFINITIONS.basic); d.steps[0].phases[0].world.path!.points[0][1] = 10; validateDefinition(d); checks++; }
+{
+  // 高架の道路は、始終点の高さ(地面からの相対Y)を定義に書いて敷く。
+  const highway = DEFINITIONS.highway.steps[0], road = fake();
+  const phaseId = async () => highway.phases[await findPhase(highway, road)].id;
+  check(await phaseId(), "open", "highway opens the road panel first");
+  road.facts.windows.road = { visible: true, window: "path_build" };
+  check(await phaseId(), "variant", "highway selects the motorway next");
+  road.facts.pathVariant = 100;
+  check(await phaseId(), "start", "highway places the start");
+  road.facts.pathShape = { phase: "placing", selected_points: [[0, 7, -150]] };
+  check(await phaseId(), "end", "highway places the end");
+  road.facts.pathShape = { phase: "placing", selected_points: [[0, 7, -150], [0, 7, 150]] };
+  check(await phaseId(), "finalize", "highway finalizes the shape by right-click");
+  road.facts.pathShape = { phase: "editing", selected_points: [[0, 7, -150], [0, 7, 150]] };
+  check(await phaseId(), "confirm", "highway confirms in the panel");
+  delete road.facts.pathShape; road.bindings["highway.road"] = { kind: "paths", id: 9 }; road.read = async () => [{ checks: { crossing: true } }];
+  check(await phaseId(), "confirm", "saved crossing survives the reset editor");
+  const place = highway.phases.find(p => p.id === "start")!;
+  const guided: Snapshot = { ...state, scenario: "highway", stepId: highway.id, phaseId: "start", ui: place.ui, world: place.world };
+  const line = { path_variant: 100, curved: false, start_point: [0, 7, -150], end_point: [0, 7, 150] };
+  check(allowsPathBody({ paths: [line] }, guided), true, "elevated path accepted at the guided height");
+  for (const bad of [{ start_point: [0, 0, -150] }, { end_point: [0, 6, 150] }, { embankment_heights: [0, 1] }]) check(allowsPathBody({ paths: [{ ...line, ...bad }] }, guided), false, `reject ${JSON.stringify(bad)}`);
+}
 { const d = structuredClone(DEFINITIONS.scenario3); d.steps[0].phases[0].until = { type: "window", window: "agent_detail", target: "lesson.house" }; validateDefinition(d); checks++; }
 { const d = structuredClone(DEFINITIONS.scenario3); d.steps[0].phases[0].until = { type: "window", window: "agent_detail", target: "house" }; throws(() => validateDefinition(d), "only core targets may be referenced without a local binding"); }
 const browser = new Window();
