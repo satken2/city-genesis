@@ -86,7 +86,7 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
         return {
           type: "meter",
           description:
-            "道路や線路の通過速度(制限速度に加え、カーブ・勾配・交差点での加減速を含めて形状から決まる速度)で色分けします。0km/hが赤、100km/h以上が緑です",
+            "道路や線路の通過速度(制限速度に加え、カーブ・勾配を含めて形状から決まる速度。交差点での減速・停止は含まない)で色分けします。0km/hが赤、100km/h以上が緑です",
           meterStartColor: "#ff0000",
           meterEndColor: "#00ff00",
           meterLabel: "0 ← 通過速度 → 100km/h",

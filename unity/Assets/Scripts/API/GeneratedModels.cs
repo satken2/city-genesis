@@ -397,7 +397,7 @@ namespace GeneratedModels
         public object max_speed;
         /// <summary>所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道</summary>
         public int? road_id;
-        /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配・端点の加減速から算出</summary>
+        /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配から算出し、交差点での減速・停止は含まない</summary>
         public float base_speed;
     }
 
@@ -446,7 +446,7 @@ namespace GeneratedModels
         public object max_speed;
         /// <summary>制限速度をプレイヤー指定で上書きしているか（0/1）</summary>
         public bool override_max_speed;
-        /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配・端点の加減速から算出(geo_path_alignment)</summary>
+        /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配から算出し、交差点での減速・停止は含まない(geo_path_alignment)</summary>
         public float base_speed;
         /// <summary>パス内の最小曲線半径(m)。直線は上限値(1e6)</summary>
         public float min_curve_radius;

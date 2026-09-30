@@ -44,7 +44,7 @@ UIからは `view:change_view {layer, mode, sub_mode, flags}` で届く([IPC連�
 | 統計 | 供給元 |
 | --- | --- |
 | `utilization`・`durability`・`zone_id` | `PathSummary` の同名フィールド |
-| 通過速度 | `PathSummary.base_speed`。形状から決まる通過速度(km/h)で、カーブ・勾配・交差点の加減速を含むため短い区間ほど制限速度より低い |
+| 通過速度 | `PathSummary.base_speed`。形状から決まる通過速度(km/h)で、カーブ・勾配で制限速度より低くなる。交差点での減速・停止は含まない |
 | 歩行者量 | `path_traffic` の歩行者キー(`VEHICLE_PEDESTRIAN` を文字列にした `"0"`)。1日あたりの通過トリップ数 |
 
 存在しないフィールドをリフレクションで読むと常に0になり色分けが無反応になるため、フィールド名で直接参照する。

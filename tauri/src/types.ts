@@ -898,7 +898,7 @@ export type PathData = {
   air_pollution: number | null;
   max_speed: number | null;
   override_max_speed: boolean;
-  /** 形状から決まる通過速度(km/h)。制限速度・曲線半径・勾配・端点の加減速から算出 */
+  /** 形状から決まる通過速度(km/h)。制限速度・曲線半径・勾配から算出し、交差点での減速・停止は含まない */
   base_speed?: number | null;
   /** パス内の最小曲線半径(m)。直線は 1e6 */
   min_curve_radius?: number | null;
