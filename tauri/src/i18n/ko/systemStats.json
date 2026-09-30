@@ -1,0 +1,106 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "계산 부하",
+      "heading": "최근 에포크({{days}}일분)의 계산 시간",
+      "noData": "아직 데이터가 없습니다. 에포크를 실행하면 최근 에포크의 계산 시간이 표시됩니다.",
+      "note": "여러 에포크를 연속으로 실행한 경우 마지막 에포크의 값입니다. 문제 규모는 주요 비교의 조합 수를 도시 규모로부터 추정한 대략적인 값입니다.",
+      "colGroup": "처리",
+      "colTime": "시간",
+      "colShare": "비율",
+      "colWorkload": "문제 규모",
+      "workloadHint": "주요 비교의 조합 수(배열 요소 수)의 대략적인 값입니다. 값에 마우스를 올리면 내역이 표시됩니다.",
+      "seconds": "{{value}}초",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "상품 시장",
+      "realestate": "부동산 시장",
+      "labor": "노동 시장",
+      "building_spawn": "건물 생성",
+      "agent_spawn": "경제 주체 생성",
+      "routing": "경로 탐색",
+      "transit": "대중교통 경로",
+      "environment": "주거 환경",
+      "other": "기타"
+    },
+    "workload": {
+      "market": "수요자 {{demanders}} × 공급자 {{suppliers}}(상품별로 곱해 합계)",
+      "realestate": "이사를 고려하는 세대 {{movers}} × 주택이 있는 건물 {{housing}}",
+      "labor": "구직자 {{seekers}} × 고용 주체 {{employers}}",
+      "building_spawn": "후보 구획 {{parcels}} × 건물 종류 × 층수 × 층 용도",
+      "agent_spawn": "상품 × 지구 {{zones}} × 지구 {{zones}}",
+      "routing": "교통수단 2 × 지구 {{zones}} × 지구 {{zones}} × 후보 경로 3 × 경로 {{paths}}",
+      "transit": "정류장 {{stops}} × 노드 {{nodes}}",
+      "environment": "격자 {{width}} × {{height}} × 태양 위치"
+    },
+    "entities": {
+      "title": "도시 규모",
+      "agents": "경제 주체",
+      "households": "세대",
+      "businesses": "사업소",
+      "publicFacilities": "공공시설",
+      "buildings": "건물",
+      "citizens": "시민",
+      "population": "인구",
+      "zones": "지구",
+      "parcels": "토지 구획",
+      "paths": "경로",
+      "roads": "도로",
+      "tracks": "궤도",
+      "infra": "인프라망",
+      "nodes": "노드",
+      "transitLines": "대중교통 노선",
+      "epochs": "경과 에포크"
+    },
+    "memory": {
+      "title": "메모리",
+      "current": "현재 사용량",
+      "peak": "실행 이후 최대",
+      "total": "탑재 메모리",
+      "ofTotal": "최대는 탑재 메모리의 {{percent}}",
+      "note": "시뮬레이터 본체 프로세스가 사용하는 물리 메모리입니다. 최대에는 에포크 중 일시적으로 늘어난 양도 포함됩니다."
+    },
+    "environment": {
+      "title": "실행 환경",
+      "cpu": "CPU",
+      "cores": "논리 코어 수",
+      "os": "OS",
+      "device": "연산 장치",
+      "devices": {
+        "cpu": "CPU"
+      }
+    },
+    "approximation": {
+      "title": "시뮬레이션 근사",
+      "intro": "대도시의 계산을 간소화하는 옵션을 추가할 예정입니다. 현재는 설정을 변경할 수 없습니다.",
+      "warning": "게임 밸런스에 영향을 줄 수 있습니다. 되돌릴 수 없습니다.",
+      "irreversible": "근사 계산으로 발생한 변화는 이후 에포크에도 남습니다. 활성화한 근사 계산을 해제하거나 근사 수준을 낮출 수 없습니다.",
+      "undecided": "미정",
+      "candidates": "개 후보까지",
+      "epochs": "에포크마다",
+      "off": "끄기",
+      "on": "켜기",
+      "goods": {
+        "label": "상품 구매 후보 수",
+        "description": "가격과 거리를 비교할 공급자의 수를 제한합니다."
+      },
+      "jobs": {
+        "label": "취업·이직 후보 수",
+        "description": "임금과 통근 조건을 비교할 고용주의 수를 제한합니다."
+      },
+      "housing": {
+        "label": "이사 후보 수",
+        "description": "임대료와 입지를 비교할 주거지의 수를 제한합니다."
+      },
+      "interval": {
+        "label": "정기 판단 간격",
+        "description": "구매처, 직장, 주거지를 재검토하는 빈도를 낮춥니다."
+      },
+      "aggregation": {
+        "label": "비슷한 시민·가구를 묶어 계산",
+        "description": "조건이 비슷한 시민이나 가구의 일부 판단을 집단 단위로 처리합니다."
+      }
+    }
+  }
+}

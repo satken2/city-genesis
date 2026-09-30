@@ -1,0 +1,106 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "计算负载",
+      "heading": "最近一个纪元（{{days}}天）的计算时间",
+      "noData": "暂无数据。运行纪元后，将显示最近一个纪元的计算时间。",
+      "note": "连续运行多个纪元时，显示的是最后一个纪元的值。问题规模是根据城市规模估算的主要比较组合数，仅供参考。",
+      "colGroup": "处理",
+      "colTime": "时间",
+      "colShare": "占比",
+      "colWorkload": "问题规模",
+      "workloadHint": "主要比较的组合数（数组元素数）的估算值。将鼠标悬停在数值上可查看明细。",
+      "seconds": "{{value}} 秒",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "商品市场",
+      "realestate": "不动产市场",
+      "labor": "劳动力市场",
+      "building_spawn": "建筑生成",
+      "agent_spawn": "经济主体生成",
+      "routing": "路径搜索",
+      "transit": "公共交通路径",
+      "environment": "居住环境",
+      "other": "其他"
+    },
+    "workload": {
+      "market": "需求方 {{demanders}} × 供应方 {{suppliers}}（按商品相乘后合计）",
+      "realestate": "考虑搬家的家庭 {{movers}} × 有住宅的建筑 {{housing}}",
+      "labor": "求职者 {{seekers}} × 雇主 {{employers}}",
+      "building_spawn": "候选地块 {{parcels}} × 建筑种类 × 层数 × 楼层用途",
+      "agent_spawn": "商品 × 地区 {{zones}} × 地区 {{zones}}",
+      "routing": "交通方式 2 × 地区 {{zones}} × 地区 {{zones}} × 候选路线 3 × 道路 {{paths}}",
+      "transit": "站点 {{stops}} × 节点 {{nodes}}",
+      "environment": "网格 {{width}} × {{height}} × 太阳位置"
+    },
+    "entities": {
+      "title": "城市规模",
+      "agents": "经济主体",
+      "households": "家庭",
+      "businesses": "企业",
+      "publicFacilities": "公共设施",
+      "buildings": "建筑",
+      "citizens": "市民",
+      "population": "人口",
+      "zones": "地区",
+      "parcels": "地块",
+      "paths": "道路",
+      "roads": "街道",
+      "tracks": "轨道",
+      "infra": "基础设施网",
+      "nodes": "节点",
+      "transitLines": "公共交通线路",
+      "epochs": "已过纪元"
+    },
+    "memory": {
+      "title": "内存",
+      "current": "当前使用量",
+      "peak": "启动以来的最大值",
+      "total": "物理内存",
+      "ofTotal": "最大值为物理内存的 {{percent}}",
+      "note": "模拟器本体进程使用的物理内存。最大值包括纪元计算中临时增加的部分。"
+    },
+    "environment": {
+      "title": "运行环境",
+      "cpu": "CPU",
+      "cores": "逻辑核心数",
+      "os": "操作系统",
+      "device": "计算设备",
+      "devices": {
+        "cpu": "CPU"
+      }
+    },
+    "approximation": {
+      "title": "模拟近似",
+      "intro": "计划为大型城市提供简化计算的选项。目前无法更改这些设置。",
+      "warning": "可能影响游戏平衡。更改后无法恢复。",
+      "irreversible": "近似计算产生的变化会持续影响后续纪元。启用后，无法关闭近似计算或降低近似程度。",
+      "undecided": "待定",
+      "candidates": "个候选上限",
+      "epochs": "个纪元一次",
+      "off": "关",
+      "on": "开",
+      "goods": {
+        "label": "商品购买候选数",
+        "description": "限制按价格和距离比较的供应商数量。"
+      },
+      "jobs": {
+        "label": "求职与换工作候选数",
+        "description": "限制按工资和通勤条件比较的雇主数量。"
+      },
+      "housing": {
+        "label": "搬家候选数",
+        "description": "限制按租金和位置比较的住房数量。"
+      },
+      "interval": {
+        "label": "定期决策间隔",
+        "description": "降低重新评估购物、就业和住房选择的频率。"
+      },
+      "aggregation": {
+        "label": "合并计算相似市民与家庭",
+        "description": "将情况相似的市民或家庭的部分决策作为群体处理。"
+      }
+    }
+  }
+}

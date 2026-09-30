@@ -20,7 +20,8 @@
     "save_load": "存档・读档",
     "save_list": "存档列表",
     "new_game": "新游戏",
-    "city_rename": "城市设置",
+    "city_rename": "更改城市名称",
+    "system_stats": "系统统计",
     "resource_detail": "资源详情",
     "achievements": "成就",
     "city_regulation": "法规",
@@ -82,7 +83,7 @@
   },
   "cityRename": {
     "label": "城市名称",
-    "tooltip": "点击打开城市设置"
+    "tooltip": "点击更改城市名称"
   },
   "taskbar": {
     "menuMap": "地图",
@@ -98,6 +99,7 @@
     "menuCity": "政策",
     "menuFinance": "金融政策",
     "menuView": "显示",
+    "traySystemStats": "系统统计",
     "traySettings": "设置",
     "traySave": "存档・读档",
     "trayReload": "重新载入",

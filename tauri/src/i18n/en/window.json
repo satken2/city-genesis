@@ -20,7 +20,8 @@
     "save_load": "Save / Load",
     "save_list": "Save Data List",
     "new_game": "New Game",
-    "city_rename": "City settings",
+    "city_rename": "Rename City",
+    "system_stats": "System Statistics",
     "resource_detail": "Resource Details",
     "achievements": "Achievements",
     "city_regulation": "Regulations",
@@ -82,7 +83,7 @@
   },
   "cityRename": {
     "label": "City name",
-    "tooltip": "Click to open city settings"
+    "tooltip": "Click to rename the city"
   },
   "taskbar": {
     "menuMap": "Map",
@@ -98,6 +99,7 @@
     "menuCity": "Policies",
     "menuFinance": "Financial Policy",
     "menuView": "View",
+    "traySystemStats": "System Statistics",
     "traySettings": "Settings",
     "traySave": "Save / Load",
     "trayReload": "Reload",

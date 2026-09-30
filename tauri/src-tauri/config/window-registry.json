@@ -484,9 +484,18 @@
     "actions": []
   },
   "city_rename": {
-    "title": "都市設定",
-    "width": 600,
-    "height": 720,
+    "title": "都市名の変更",
+    "width": 460,
+    "height": 210,
+    "resizable": false,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
+  },
+  "system_stats": {
+    "title": "システム統計",
+    "width": 680,
+    "height": 780,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,

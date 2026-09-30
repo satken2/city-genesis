@@ -1,0 +1,106 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Computation load",
+      "heading": "Computation time of the latest epoch ({{days}} days)",
+      "noData": "No data yet. Run an epoch to see how long the latest epoch took to compute.",
+      "note": "When several epochs run in a row, this shows the last one. Problem size is a rough estimate of the main comparisons, based on the size of the city.",
+      "colGroup": "Process",
+      "colTime": "Time",
+      "colShare": "Share",
+      "colWorkload": "Problem size",
+      "workloadHint": "Rough number of main comparisons (array elements). Hover over a value to see the breakdown.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Goods market",
+      "realestate": "Real estate market",
+      "labor": "Labor market",
+      "building_spawn": "Building spawn",
+      "agent_spawn": "Agent spawn",
+      "routing": "Pathfinding",
+      "transit": "Transit routing",
+      "environment": "Living environment",
+      "other": "Other"
+    },
+    "workload": {
+      "market": "Buyers {{demanders}} × sellers {{suppliers}} (multiplied per product and summed)",
+      "realestate": "Households considering a move {{movers}} × residential buildings {{housing}}",
+      "labor": "Job seekers {{seekers}} × employers {{employers}}",
+      "building_spawn": "Candidate parcels {{parcels}} × building types × floor counts × floor uses",
+      "agent_spawn": "Products × zones {{zones}} × zones {{zones}}",
+      "routing": "2 travel modes × zones {{zones}} × zones {{zones}} × 3 candidate routes × paths {{paths}}",
+      "transit": "Stops {{stops}} × nodes {{nodes}}",
+      "environment": "Grid {{width}} × {{height}} × sun positions"
+    },
+    "entities": {
+      "title": "City size",
+      "agents": "Agents",
+      "households": "Households",
+      "businesses": "Businesses",
+      "publicFacilities": "Public facilities",
+      "buildings": "Buildings",
+      "citizens": "Citizens",
+      "population": "Population",
+      "zones": "Zones",
+      "parcels": "Parcels",
+      "paths": "Paths",
+      "roads": "Roads",
+      "tracks": "Tracks",
+      "infra": "Utility networks",
+      "nodes": "Nodes",
+      "transitLines": "Transit lines",
+      "epochs": "Epochs elapsed"
+    },
+    "memory": {
+      "title": "Memory",
+      "current": "Current usage",
+      "peak": "Peak since launch",
+      "total": "Installed memory",
+      "ofTotal": "Peak is {{percent}} of installed memory",
+      "note": "Physical memory used by the simulator process. The peak includes temporary increases during epochs."
+    },
+    "environment": {
+      "title": "System",
+      "cpu": "CPU",
+      "cores": "Logical cores",
+      "os": "OS",
+      "device": "Compute device",
+      "devices": {
+        "cpu": "CPU"
+      }
+    },
+    "approximation": {
+      "title": "Simulation approximation",
+      "intro": "Options to simplify calculations for large cities are planned. These settings cannot be changed yet.",
+      "warning": "These changes may affect game balance. They cannot be undone.",
+      "irreversible": "Changes caused by approximation persist in later epochs. Once enabled, approximation cannot be disabled or reduced.",
+      "undecided": "TBD",
+      "candidates": "candidates max.",
+      "epochs": "epochs between reviews",
+      "off": "Off",
+      "on": "On",
+      "goods": {
+        "label": "Purchase candidates",
+        "description": "Limit the suppliers compared by price and distance."
+      },
+      "jobs": {
+        "label": "Job candidates",
+        "description": "Limit the employers compared by wages and commuting conditions."
+      },
+      "housing": {
+        "label": "Housing candidates",
+        "description": "Limit the homes compared by rent and location."
+      },
+      "interval": {
+        "label": "Routine decision interval",
+        "description": "Review shopping, job and housing choices less often."
+      },
+      "aggregation": {
+        "label": "Group similar citizens and households",
+        "description": "Make some decisions collectively for citizens or households with similar circumstances."
+      }
+    }
+  }
+}

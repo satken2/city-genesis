@@ -1,0 +1,106 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "計算負載",
+      "heading": "最近一個紀元（{{days}}天）的計算時間",
+      "noData": "尚無資料。執行紀元後，將顯示最近一個紀元的計算時間。",
+      "note": "連續執行多個紀元時，顯示的是最後一個紀元的值。問題規模是依城市規模估算的主要比較組合數，僅供參考。",
+      "colGroup": "處理",
+      "colTime": "時間",
+      "colShare": "比例",
+      "colWorkload": "問題規模",
+      "workloadHint": "主要比較的組合數（陣列元素數）的估算值。將滑鼠移到數值上可查看明細。",
+      "seconds": "{{value}} 秒",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "商品市場",
+      "realestate": "不動產市場",
+      "labor": "勞動市場",
+      "building_spawn": "建築生成",
+      "agent_spawn": "經濟主體生成",
+      "routing": "路徑搜尋",
+      "transit": "大眾運輸路徑",
+      "environment": "居住環境",
+      "other": "其他"
+    },
+    "workload": {
+      "market": "需求方 {{demanders}} × 供應方 {{suppliers}}（依商品相乘後加總）",
+      "realestate": "考慮搬家的家庭 {{movers}} × 有住宅的建築 {{housing}}",
+      "labor": "求職者 {{seekers}} × 雇主 {{employers}}",
+      "building_spawn": "候選地塊 {{parcels}} × 建築種類 × 樓層數 × 樓層用途",
+      "agent_spawn": "商品 × 地區 {{zones}} × 地區 {{zones}}",
+      "routing": "交通方式 2 × 地區 {{zones}} × 地區 {{zones}} × 候選路線 3 × 道路 {{paths}}",
+      "transit": "站點 {{stops}} × 節點 {{nodes}}",
+      "environment": "網格 {{width}} × {{height}} × 太陽位置"
+    },
+    "entities": {
+      "title": "城市規模",
+      "agents": "經濟主體",
+      "households": "家庭",
+      "businesses": "企業",
+      "publicFacilities": "公共設施",
+      "buildings": "建築",
+      "citizens": "市民",
+      "population": "人口",
+      "zones": "地區",
+      "parcels": "地塊",
+      "paths": "道路",
+      "roads": "街道",
+      "tracks": "軌道",
+      "infra": "基礎設施網",
+      "nodes": "節點",
+      "transitLines": "大眾運輸路線",
+      "epochs": "已過紀元"
+    },
+    "memory": {
+      "title": "記憶體",
+      "current": "目前使用量",
+      "peak": "啟動以來的最大值",
+      "total": "實體記憶體",
+      "ofTotal": "最大值為實體記憶體的 {{percent}}",
+      "note": "模擬器本體程序使用的實體記憶體。最大值包含紀元計算中暫時增加的部分。"
+    },
+    "environment": {
+      "title": "執行環境",
+      "cpu": "CPU",
+      "cores": "邏輯核心數",
+      "os": "作業系統",
+      "device": "運算裝置",
+      "devices": {
+        "cpu": "CPU"
+      }
+    },
+    "approximation": {
+      "title": "模擬近似",
+      "intro": "計畫為大型城市提供簡化計算的選項。目前無法變更這些設定。",
+      "warning": "可能影響遊戲平衡。變更後無法還原。",
+      "irreversible": "近似計算產生的變化會持續影響後續紀元。啟用後，無法關閉近似計算或降低近似程度。",
+      "undecided": "待定",
+      "candidates": "個候選上限",
+      "epochs": "個紀元一次",
+      "off": "關",
+      "on": "開",
+      "goods": {
+        "label": "商品購買候選數",
+        "description": "限制按價格和距離比較的供應商數量。"
+      },
+      "jobs": {
+        "label": "求職與換工作候選數",
+        "description": "限制按薪資和通勤條件比較的雇主數量。"
+      },
+      "housing": {
+        "label": "搬家候選數",
+        "description": "限制按租金和位置比較的住宅數量。"
+      },
+      "interval": {
+        "label": "定期決策間隔",
+        "description": "降低重新評估購物、就業和住宅選擇的頻率。"
+      },
+      "aggregation": {
+        "label": "合併計算相似市民與家庭",
+        "description": "將情況相似的市民或家庭的部分決策作為群體處理。"
+      }
+    }
+  }
+}

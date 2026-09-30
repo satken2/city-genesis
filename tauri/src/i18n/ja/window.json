@@ -39,7 +39,8 @@
     "transit_detail": "路線詳細",
     "prop_placement": "プロップ配置",
     "mashup_edit": "サブ建物の配置",
-    "city_rename": "都市設定",
+    "city_rename": "都市名の変更",
+    "system_stats": "システム統計",
     "path_shape_editor": "パス形状編集",
     "grading": "造成",
     "scenario_manager": "シナリオ管理",
@@ -48,7 +49,7 @@
   },
   "cityRename": {
     "label": "都市名",
-    "tooltip": "クリックして都市設定を開く"
+    "tooltip": "クリックして都市名を変更"
   },
   "cityMap": {
     "layers": {
@@ -98,6 +99,7 @@
     "menuCity": "政策",
     "menuFinance": "金融政策",
     "menuView": "表示",
+    "traySystemStats": "システム統計",
     "traySettings": "設定",
     "traySave": "セーブ・ロード",
     "trayReload": "リロード",

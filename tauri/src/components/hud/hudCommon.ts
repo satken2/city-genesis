@@ -9,7 +9,7 @@
  * | --- | --- | --- | --- |
  * | `icon-panel` | `IconPanel` | 画面左端・上下中央 | 各種メニュー(道路/建設/予算/統計…)。背景は透明 |
  * | `cockpit` | `Cockpit` | 画面下部中央 | 常用ツール3種・都市名と日付・施政スコア/予算メータ・アラート・エポック実行 |
- * | `system-tray` | `SystemTray` | 画面右下 | 設定・セーブ・リロード |
+ * | `system-tray` | `SystemTray` | 画面右下 | システム統計・設定・セーブ・リロード |
  * | `display-tray` | `DisplayTray` | 画面左下 | 表示レイヤーの簡易ON/OFF(建物・パス・プロップ・区画・地形・地区) |
  *
  * コックピット・システムトレイのアイコンは背景板の上に画像を直接置くため、
@@ -92,6 +92,7 @@ export const TOOL_ICONS: HudIconDef[] = [
  * システムトレイ(画面右下)に置くアイコン。
  */
 export const TRAY_ICONS: HudIconDef[] = [
+  { id: "system_stats", src: "menu_stat.png", tooltipKey: "taskbar.traySystemStats", padding: "4px", windowType: "system_stats" }, // 専用アイコンが未用意のため統計メニューの画像を仮当てしている
   { id: "settings", src: "tray_settings.png", tooltipKey: "taskbar.traySettings", padding: "4px", windowType: "settings" },
   { id: "save", src: "tray_save.png", tooltipKey: "taskbar.traySave", padding: "4px", windowType: "save_load" },
   { id: "reload", src: "tray_reload.png", tooltipKey: "taskbar.trayReload", padding: "4px" },

@@ -1,5 +1,5 @@
 {
   "frontend_version": "1.0.0",
-  "api_contract_version": 5,
+  "api_contract_version": 6,
   "ipc_contract_version": 1
 }

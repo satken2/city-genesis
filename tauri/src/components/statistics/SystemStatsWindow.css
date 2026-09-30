@@ -1,0 +1,237 @@
+/**
+ * システム統計ウィンドウのスタイル
+ *
+ * 意匠はフラット(App.css の --flat-*)。節は「左端の実線ブロックの見出し + 面」の縦並びで、
+ * タブを持たずに1枚でスクロールする。近似設定の行だけは設定フォームの共通部品(SettingsForm.css)を使う。
+ */
+
+.system-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: 100%;
+  padding: 1.5rem;
+  overflow-y: auto;
+  color: var(--flat-text-body);
+}
+
+.system-stats--message {
+  align-items: center;
+  justify-content: center;
+  color: var(--flat-text-muted);
+}
+
+.system-stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.67rem;
+  min-width: 0;
+}
+
+.system-stats-section-title {
+  margin: 0;
+  padding: 0.17rem 0 0.17rem 0.83rem;
+  font-size: 1.17rem;
+  font-weight: 600;
+  color: var(--flat-text);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+.system-stats-note {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--flat-text-muted);
+}
+
+.system-stats-empty {
+  margin: 0;
+  padding: 1.5rem 1.17rem;
+  background: var(--flat-surface);
+  color: var(--flat-text-muted);
+  line-height: 1.6;
+}
+
+/* ========== 計算負荷 ========== */
+
+.system-stats-headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.33rem 1rem;
+}
+
+.system-stats-headline-label {
+  color: var(--flat-text-label);
+}
+
+.system-stats-headline-value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--flat-text);
+}
+
+/* 区分の間を2pxの溝で分け、隣り合う色を境界線なしで見分けられるようにする */
+.system-stats-bar {
+  display: flex;
+  gap: 2px;
+  height: 2rem;
+  padding: 2px;
+  background: var(--flat-sunken);
+}
+
+.system-stats-bar-segment {
+  flex-basis: 0;
+  min-width: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.system-stats-bar-segment.is-dimmed {
+  opacity: 0.3;
+}
+
+.system-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--flat-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.system-stats-table th,
+.system-stats-table td {
+  padding: 0.42rem 0.83rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.system-stats-table th {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--flat-text-muted);
+  background: var(--flat-sunken);
+}
+
+.system-stats-table td {
+  color: var(--flat-text-body);
+}
+
+.system-stats-table tbody tr + tr td {
+  border-top: 2px solid var(--flat-sunken);
+}
+
+.system-stats-table tbody tr.is-hovered td {
+  background: var(--flat-raised-hover);
+}
+
+.system-stats-table .is-number {
+  text-align: right;
+}
+
+.system-stats-swatch {
+  display: inline-block;
+  width: 0.83rem;
+  height: 0.83rem;
+  margin-right: 0.5rem;
+  vertical-align: -0.08rem;
+}
+
+/* ========== 都市の規模 ========== */
+
+.system-stats-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 2px;
+  background: var(--flat-sunken);
+  box-shadow: var(--flat-shadow-sm);
+}
+
+.system-stats-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.17rem;
+  min-width: 0;
+  padding: 0.67rem 0.83rem;
+  background: var(--flat-surface);
+}
+
+/* 内訳を持つタイルは内訳の1行が収まるよう2列分を使う */
+.system-stats-tile.is-wide {
+  grid-column: span 2;
+}
+
+.system-stats-tile-label {
+  font-size: 0.92rem;
+  color: var(--flat-text-label);
+}
+
+.system-stats-tile-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--flat-text);
+}
+
+.system-stats-tile-detail {
+  font-size: 0.92rem;
+  color: var(--flat-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ========== メモリ・実行環境 ========== */
+
+.system-stats-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.5rem;
+}
+
+.system-stats-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px;
+  margin: 0;
+  background: var(--flat-sunken);
+}
+
+.system-stats-list dt,
+.system-stats-list dd {
+  margin: 0;
+  padding: 0.42rem 0.83rem;
+  background: var(--flat-surface);
+}
+
+.system-stats-list dt {
+  color: var(--flat-text-label);
+}
+
+.system-stats-list dd {
+  color: var(--flat-text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.system-stats-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* ========== シミュレーションの近似 ========== */
+
+.system-stats-warning {
+  padding: 0.83rem 1.17rem;
+  background: var(--flat-warn-surface);
+  color: var(--flat-warn);
+  box-shadow: inset 4px 0 0 var(--flat-warn);
+  line-height: 1.6;
+}
+
+.system-stats-warning p {
+  margin: 0.5rem 0 0;
+  color: var(--flat-text-body);
+}
+
+.system-stats .settings-number[type="number"] {
+  width: 90px;
+}

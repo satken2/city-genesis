@@ -5459,20 +5459,9 @@
           "scenarios"
         ],
         "summary": "Create Scenario From Heightmap",
-        "description": "標高ファイル(グレースケールPNG 8/16bit・.npy)から新しい自作シナリオを作る(ゲームは始まらない)。\n\n本文はファイルの生バイト。PNG は上が北で、最も暗い色を min_height、最も明るい色を max_height(m)に当てる。\n.npy は行0が南・値が m の2次元配列。どちらも sea_level(m)以下を海にし、1画素を spacing(m)として\n一辺を1km単位に切り上げた大きさのマップにする。水面・川・資源・プロップ・カメラは空。\n応答は `{\"id\": \"local~<id>\", \"map_width\", \"map_height\"}`。変換できないファイルは 422 HEIGHTMAP_INVALID、\nゲームのセッション中は 409 SESSION_ACTIVE。",
+        "description": "標高ファイル(グレースケールPNG 8/16bit・.npy)から新しい自作シナリオを作る(ゲームは始まらない)。\n\n本文はファイルの生バイト。PNG は上が北で、最も暗い色を min_height、最も明るい色を max_height(m)に当てる。\n.npy は行0が南・値が m の2次元配列。どちらも sea_level(m)以下を海にし、1画素を spacing(m)として\n一辺を1km単位に切り上げた大きさのマップにする。水面・川・資源・プロップ・カメラは空。\n\n背景地形を付けるときは、本文の末尾へ背景の .npy を続け、その大きさを background_size(バイト)、\n1画素あたりの距離を background_spacing(m)で渡す(2つは対)。背景は sea_level を共有し、50m格子に\n直して格子の中心を都市の原点に置き、海を彫って遠景用海岸線も作る。\n応答は `{\"id\": \"local~<id>\", \"map_width\", \"map_height\"}`。変換できないファイルは 422 HEIGHTMAP_INVALID、\nゲームのセッション中は 409 SESSION_ACTIVE。",
         "operationId": "create_scenario_from_heightmap_api_v1_scenarios_from_heightmap_post",
         "parameters": [
-          {
-            "name": "spacing",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "number",
-              "maximum": 1000,
-              "exclusiveMinimum": 0,
-              "title": "Spacing"
-            }
-          },
           {
             "name": "min_height",
             "in": "query",
@@ -5510,6 +5499,46 @@
             }
           },
           {
+            "name": "spacing",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "maximum": 1000,
+              "exclusiveMinimum": 0,
+              "title": "Spacing"
+            }
+          },
+          {
+            "name": "background_spacing",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 1000,
+                  "exclusiveMinimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Background Spacing"
+            }
+          },
+          {
+            "name": "background_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Background Size"
+            }
+          },
+          {
             "name": "title",
             "in": "query",
             "required": true,
@@ -5539,6 +5568,96 @@
               "maxLength": 255,
               "default": "",
               "title": "Source Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scenarios/heightmap-preview": {
+      "post": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "Preview Heightmap",
+        "description": "標高ファイルの中身をプレビュー用に返す。都市もディスクも使わないので、ゲームのセッション中でも呼べる。\n\n本文は標高ファイルの生バイト。取り込み(from-heightmap)と同じ読み方で標高を作り、長辺1024画素以下へ間引く。\nbackground=true なら背景として読む(.npy だけ)。応答は\n`{\"source_rows\", \"source_cols\", \"rows\", \"cols\", \"min_height\", \"max_height\", \"heights_base64\"}` で、\nheights_base64 は間引いた標高(sea_level を引いた m)の float16 LE(行0が南)、min_height/max_height は\n間引く前のファイルの標高の最小・最大(sea_level を引く前)。読めないファイルは 422 HEIGHTMAP_INVALID。",
+        "operationId": "preview_heightmap_api_v1_scenarios_heightmap_preview_post",
+        "parameters": [
+          {
+            "name": "min_height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": -10000,
+              "default": 0.0,
+              "title": "Min Height"
+            }
+          },
+          {
+            "name": "max_height",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": -10000,
+              "default": 1000.0,
+              "title": "Max Height"
+            }
+          },
+          {
+            "name": "sea_level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 10000,
+              "minimum": -10000,
+              "default": 0.0,
+              "title": "Sea Level"
+            }
+          },
+          {
+            "name": "background",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Background"
+            }
+          },
+          {
+            "name": "max_side",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1024,
+              "minimum": 16,
+              "default": 1024,
+              "title": "Max Side"
             }
           }
         ],
@@ -6857,6 +6976,28 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stats/system": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get System Stats",
+        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの数\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)と搭載RAM。取得できなければ各値が null\n- environment: CPU・OS・演算デバイス",
+        "operationId": "get_system_stats_api_v1_stats_system_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemStatsResponse"
+                }
               }
             }
           }
@@ -11887,6 +12028,283 @@
         ],
         "title": "StatisticsReport",
         "description": "エポック実行完了時点の都市統計。実行結果ウィンドウの統計タイルに表示する。"
+      },
+      "SystemAgentCounts": {
+        "properties": {
+          "households": {
+            "type": "integer",
+            "title": "Households"
+          },
+          "businesses": {
+            "type": "integer",
+            "title": "Businesses"
+          },
+          "public_facilities": {
+            "type": "integer",
+            "title": "Public Facilities"
+          },
+          "buildings": {
+            "type": "integer",
+            "title": "Buildings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "households",
+          "businesses",
+          "public_facilities",
+          "buildings"
+        ],
+        "title": "SystemAgentCounts"
+      },
+      "SystemEntityCounts": {
+        "properties": {
+          "agents": {
+            "$ref": "#/components/schemas/SystemAgentCounts"
+          },
+          "citizens": {
+            "type": "integer",
+            "title": "Citizens"
+          },
+          "population": {
+            "type": "integer",
+            "title": "Population"
+          },
+          "zones": {
+            "type": "integer",
+            "title": "Zones"
+          },
+          "parcels": {
+            "type": "integer",
+            "title": "Parcels"
+          },
+          "paths": {
+            "$ref": "#/components/schemas/SystemPathCounts"
+          },
+          "nodes": {
+            "type": "integer",
+            "title": "Nodes"
+          },
+          "transit_lines": {
+            "type": "integer",
+            "title": "Transit Lines"
+          },
+          "epochs": {
+            "type": "integer",
+            "title": "Epochs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "agents",
+          "citizens",
+          "population",
+          "zones",
+          "parcels",
+          "paths",
+          "nodes",
+          "transit_lines",
+          "epochs"
+        ],
+        "title": "SystemEntityCounts"
+      },
+      "SystemEnvironment": {
+        "properties": {
+          "cpu_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpu Name"
+          },
+          "cpu_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpu Count"
+          },
+          "os": {
+            "type": "string",
+            "title": "Os"
+          },
+          "device": {
+            "type": "string",
+            "title": "Device"
+          }
+        },
+        "type": "object",
+        "required": [
+          "os",
+          "device"
+        ],
+        "title": "SystemEnvironment"
+      },
+      "SystemEpochGroup": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "ms": {
+            "type": "number",
+            "title": "Ms"
+          },
+          "workload": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workload"
+          },
+          "terms": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Terms",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "ms"
+        ],
+        "title": "SystemEpochGroup"
+      },
+      "SystemEpochStats": {
+        "properties": {
+          "number": {
+            "type": "integer",
+            "title": "Number"
+          },
+          "simulation_days": {
+            "type": "integer",
+            "title": "Simulation Days"
+          },
+          "total_ms": {
+            "type": "number",
+            "title": "Total Ms"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/SystemEpochGroup"
+            },
+            "type": "array",
+            "title": "Groups"
+          }
+        },
+        "type": "object",
+        "required": [
+          "number",
+          "simulation_days",
+          "total_ms",
+          "groups"
+        ],
+        "title": "SystemEpochStats"
+      },
+      "SystemMemory": {
+        "properties": {
+          "current_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Bytes"
+          },
+          "peak_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Peak Bytes"
+          },
+          "system_total_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "System Total Bytes"
+          }
+        },
+        "type": "object",
+        "title": "SystemMemory"
+      },
+      "SystemPathCounts": {
+        "properties": {
+          "road": {
+            "type": "integer",
+            "title": "Road"
+          },
+          "track": {
+            "type": "integer",
+            "title": "Track"
+          },
+          "infra": {
+            "type": "integer",
+            "title": "Infra"
+          }
+        },
+        "type": "object",
+        "required": [
+          "road",
+          "track",
+          "infra"
+        ],
+        "title": "SystemPathCounts"
+      },
+      "SystemStatsResponse": {
+        "properties": {
+          "epoch": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SystemEpochStats"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "entities": {
+            "$ref": "#/components/schemas/SystemEntityCounts"
+          },
+          "memory": {
+            "$ref": "#/components/schemas/SystemMemory"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/SystemEnvironment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entities",
+          "memory",
+          "environment"
+        ],
+        "title": "SystemStatsResponse"
       },
       "TemplateModeRequest": {
         "properties": {

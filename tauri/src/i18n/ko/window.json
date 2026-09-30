@@ -20,7 +20,8 @@
     "save_load": "세이브・로드",
     "save_list": "세이브 데이터 목록",
     "new_game": "새 게임",
-    "city_rename": "도시 설정",
+    "city_rename": "도시 이름 변경",
+    "system_stats": "시스템 통계",
     "resource_detail": "천연자원 상세",
     "achievements": "업적",
     "city_regulation": "규제",
@@ -82,7 +83,7 @@
   },
   "cityRename": {
     "label": "도시 이름",
-    "tooltip": "클릭하여 도시 설정 열기"
+    "tooltip": "클릭하여 도시 이름 변경"
   },
   "taskbar": {
     "menuMap": "지도",
@@ -98,6 +99,7 @@
     "menuCity": "정책",
     "menuFinance": "금융 정책",
     "menuView": "표시",
+    "traySystemStats": "시스템 통계",
     "traySettings": "설정",
     "traySave": "세이브・로드",
     "trayReload": "다시 불러오기",
