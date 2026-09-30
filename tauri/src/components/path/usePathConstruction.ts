@@ -314,7 +314,7 @@ export function usePathConstruction(
   /**
    * 選択中バリアントが建設時にホーム設置側(外側/内側/両側)を選ぶ駅パスか(railBuild.hasPlatformSideChoice)。
    * true のときだけパネルにトグルを出し、platform_side を送り、Unity へ切り替えを通知する。
-   * 複線一体の線路の駅はホームが両外側に付くので false。
+   * 複線一体の線路の駅はホームの位置(相対式・島式)がバリアントで決まるので false。
    */
   const hasPlatformSide = useMemo(() => hasPlatformSideChoice(selectedVariantData), [selectedVariantData]);
 

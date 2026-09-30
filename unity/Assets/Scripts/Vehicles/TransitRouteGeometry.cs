@@ -41,6 +41,8 @@ public sealed class TransitRouteGeometry
         public bool rail;
         /// <summary>駅のホーム(platform_width を持つバリアント)。路線が停留所を置いたホームでは通行方向によらず両方向に走れる</summary>
         public bool platform;
+        /// <summary>島式ホームの駅。軌道の間にホームがあるので、ここで折り返した編成はパスを出てから渡り線で移る</summary>
+        public bool island;
         public RoadLaneLayout lanes;
         public RoadMarkingTurns startTurns, endTurns;
         public Vector2 startIncoming, endIncoming;
@@ -110,7 +112,8 @@ public sealed class TransitRouteGeometry
             if (g.rail)
             {
                 TrackPath.GetTrackMasterParams(data, out float width, out int lanes, out _, out _, out _, out _, out _, out _);
-                g.offset = Math.Abs(TrackPath.GetTrackCenterOffset(width, Math.Max(1,lanes), 0));
+                g.offset = Math.Abs(TrackPath.GetTrackCenterOffset(width, Math.Max(1,lanes), 0, TrackPath.GetTrackCenterWidth(data)));
+                g.island = TrackPath.IsIslandPlatform(data);
                 ReadRailConnectors(data.start_node_id); ReadRailConnectors(data.end_node_id);
             }
             else
@@ -172,9 +175,10 @@ public sealed class TransitRouteGeometry
     /// <summary>
     /// 折り返した編成の渡り線の進み具合(0以下=到着した軌道、1以上=出発する軌道)。停車していた編成の先頭(出発方向)の
     /// 位置から CrossoverLength で渡る。各車が自分の位置で求めるので、編成は先頭から順に渡る。
+    /// 島式ホームの駅で折り返したときは、軌道の間のホームを横切らないよう、そのパスを出た位置から渡る。
     /// 時計の距離(コアの水平延長)を m とみなす。バスは停車中に転回するので渡り線を持たない。
     /// </summary>
-    private static bool CrossoverProgress(Route line, int index, double distance, out float progress)
+    private bool CrossoverProgress(Route line, int index, double distance, out float progress)
     {
         progress = 1;
         if (line.ConsistLength <= 0 || line.VehicleType == Constants.VEHICLE_BUS) return false;
@@ -185,6 +189,7 @@ public sealed class TransitRouteGeometry
             double begin = run.start+head;
             if (run.Turnback)
             {
+                if (geometry.TryGetValue(run.path, out var g) && g.island) begin = Math.Max(begin, run.end);
                 progress = (float)((distance-begin)/CrossoverLength);
                 return progress < 1;
             }

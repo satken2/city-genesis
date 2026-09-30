@@ -51,6 +51,13 @@ public static class MonorailQA
                 Near(pillar.Max(v => v.y), 0, "Pillar top pivot");
                 var cap = Vertices($"Paths/p{id}/pillar_cap");
                 Near(cap.Max(v => v.y), track.Min(v => v.y) + .12f, "Bearing joins guideway");
+                // 複線(軌道中心±1.5m)の2本の軌道桁を、それぞれの下の支承で受ける。
+                float guideway = 1.5f, halfWidth = track.Max(v => v.x);
+                var bearings = cap.Where(v => Mathf.Abs(v.y - cap.Max(c => c.y)) < .001f).ToArray();
+                Check(bearings.Any(v => v.x > 0) && bearings.Any(v => v.x < 0), "Bearings under both guideways");
+                Check(bearings.All(v => Mathf.Abs(Mathf.Abs(v.x) - guideway) <= halfWidth), "Bearing outside its guideway");
+                Check(cap.Max(v => Mathf.Abs(v.x)) >= guideway + halfWidth, "Cap must span both guideways");
+                Check(pillar.Max(v => Mathf.Abs(v.x)) <= cap.Where(v => v.y < cap.Min(c => c.y) + .001f).Max(v => Mathf.Abs(v.x)), "Pillar wider than the cap seat");
             }
             var platform = Vertices("Paths/p502/platform");
             Check(platform.All(v => v.x >= .299f && v.x <= 4.501f), "Platform must face Unity +X");

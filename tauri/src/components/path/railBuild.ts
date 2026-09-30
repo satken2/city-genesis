@@ -16,7 +16,7 @@
  * 1本で敷く複線やLRT専用軌道)も複線展開しない。1本のパスが上下線(複線)を持ち、Unity が lanes 本の
  * 軌道を描き、バックエンドは通行方向を両方向(DIR_BOTH)に固定して一方通行を拒否するため、単線パスを
  * 並べる方式とは両立しない。どの軌道を走るかは進む向きで決まる。判定は isSingleRailPathVariant に集約している。
- * 複線一体の線路の駅は両外側にホームを持ち(相対式)、ホーム設置側を選ばない(hasPlatformSideChoice)。
+ * 複線一体の線路の駅はホームの位置がバリアントで決まり(両外側の相対式か、軌道の間の島式)、ホーム設置側を選ばない(hasPlatformSideChoice)。
  *
  * 展開後の敷設・プレビュー・コスト見積りは既存の複合パス機構(pathOffset / confirmPath)を
  * そのまま再利用する。ここで生成する components は combined_paths のコンポーネントと同型。
@@ -117,7 +117,7 @@ export function isMultiTrackRailVariant(entry: PathMasterEntry | null | undefine
 
 /**
  * 建設時にホーム設置側(外側/内側/両側)を選ぶ駅バリアントかを返す(platform_width を持つ単線の駅)。
- * 複線一体の線路の駅は両外側にホームを持つので設置側を選ばず、platform_side も送らない。
+ * 複線一体の線路の駅はホームの位置(相対式・島式)がバリアントで決まるので設置側を選ばず、platform_side も送らない。
  */
 export function hasPlatformSideChoice(entry: PathMasterEntry | null | undefined): boolean {
   const width = entry?.platform_width;

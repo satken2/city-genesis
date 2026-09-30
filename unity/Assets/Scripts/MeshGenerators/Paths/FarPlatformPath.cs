@@ -6,16 +6,18 @@ using UnityEngine;
 /// 遠景の乗り場。通常パーツの材質で大きな断面だけを押し出し、小物や8mタイル反復を省く。
 /// 軌道・ホームの断面は1軌道ぶんの寸法で持ち、軌道数と軌道の横位置（TrackPath.GetTrackCenterOffset）から並べる。
 /// ホームはその側で最も外側の軌道の中心線から外へ組み立てる（通常パーツの「原点＝軌道の中心線・右側用」と同じ）。
+/// 島式ホームの駅は左右の軌道の中心線から中央へ向けて同じ断面を組み立てる。
 /// </summary>
 public static class FarPlatformPath
 {
     // 貨物PF(貨物列車専用のホーム)。463=コンテナ、464=鉱石、465=石油。
     static bool IsFreight(int variant) => variant == 463 || variant == 464 || variant == 465;
 
-    // 471(複線鉄道PF・相対式)は 461 と同じ部品の見た目で、軌道数2の並びは BuildInto が軌道の横位置から組み立てる。
+    // 471(複線鉄道PF・相対式)・472(同・島式)は 461 と同じ部品の見た目で、軌道数2の並びは BuildInto が軌道の横位置から組み立てる。
     public static bool Handles(PathSummary path) => path != null &&
         (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || path.path_variant == 471
-         || IsFreight(path.path_variant) || path.path_variant == 502 || path.path_variant == Constants.PATH_VARIANT_ROPEWAY_STATION);
+         || path.path_variant == 472 || IsFreight(path.path_variant) || path.path_variant == 502
+         || path.path_variant == Constants.PATH_VARIANT_ROPEWAY_STATION);
 
     public static void GenerateInto(GameObject root, PathSummary path, List<Vector3> points)
     {
@@ -25,8 +27,9 @@ public static class FarPlatformPath
     }
 
     /// <summary>
-    /// 軌道数と全幅はマスターから引く。マスターが無い(検証用の独立プロジェクト等)ときは単線の既定幅
-    /// (モノレール502は3m、それ以外は5m)で組み立てる。
+    /// 軌道数・全幅・中央の間隔はマスターから引く。マスターが無い(検証用の独立プロジェクト等)ときは単線の既定幅
+    /// (モノレール502は3m、それ以外は5m)で組み立てる。島式ホームの駅(TrackPath.IsIslandPlatform)は left/right によらず
+    /// 軌道の間にホームを組み立てる。
     /// </summary>
     public static void BuildInto(GameObject root, int variant, List<Vector3> points, bool left, bool right)
     {
@@ -38,15 +41,24 @@ public static class FarPlatformPath
             var master = MasterDataStore.Instance?.GetPathMaster(variant);
             int lanes = Mathf.Max(1, master?.lanes ?? 1);
             float width = master != null && master.width > 0f ? master.width : lanes * (variant == 502 ? 3f : 5f);
+            float centerWidth = master?.center_width ?? 0f;
+            float trackWidth = (width - (lanes % 2 == 0 ? centerWidth : 0f)) / lanes;
             if (variant != 502) builder.Box(variant == 462 ? "PATH_CONCRETE" : "PATH_ROADBED", -width * .5f, width * .5f, -.20f, .12f);
             for (int track = 0; track < lanes; track++)
             {
-                float center = TrackPath.GetTrackCenterOffset(width, lanes, track);
+                float center = TrackPath.GetTrackCenterOffset(width, lanes, track, centerWidth);
                 if (variant == 502) builder.Box("PATH_CONCRETE", center - .4f, center + .4f, -1.08f, .12f);
                 else foreach(int sign in new[]{-1,1}) builder.Box("PATH_RAIL",center+sign*.7175f-.04f,center+sign*.7175f+.04f,.35f,.475f);
             }
-            if (left) builder.Platform(-1, variant, width / lanes, Mathf.Abs(TrackPath.PlatformTrackOffset(width, lanes, true)));
-            if (right) builder.Platform(1, variant, width / lanes, Mathf.Abs(TrackPath.PlatformTrackOffset(width, lanes, false)));
+            if (TrackPath.IsIslandPlatform(master))
+            {
+                builder.IslandPlatform(variant, Mathf.Abs(TrackPath.GetTrackCenterOffset(width, lanes, lanes / 2, centerWidth)));
+            }
+            else
+            {
+                if (left) builder.Platform(-1, variant, trackWidth, Mathf.Abs(TrackPath.PlatformTrackOffset(width, lanes, true, centerWidth)));
+                if (right) builder.Platform(1, variant, trackWidth, Mathf.Abs(TrackPath.PlatformTrackOffset(width, lanes, false, centerWidth)));
+            }
         }
         builder.Finish();
     }
@@ -121,11 +133,23 @@ public static class FarPlatformPath
         {
             shift = trackShift;
             if (IsFreight(type)) Freight(side, type, trackWidth);
-            else Passenger(side, type);
+            else Passenger(side, type, false);
             shift = 0f;
         }
 
-        void Passenger(int side, int type)
+        /// <summary>
+        /// 島式ホーム。左右の軌道(中心から ±trackOffset)から中央へ向けて単線の駅と同じ断面を組み立てる。
+        /// 断面の外縁が中央に来るので、外縁の柵は置かない。
+        /// </summary>
+        public void IslandPlatform(int type, float trackOffset)
+        {
+            shift = -trackOffset;
+            Passenger(1, type, true);
+            Passenger(-1, type, true);
+            shift = 0f;
+        }
+
+        void Passenger(int side, int type, bool island)
         {
             float outer = type == 502 ? 4.5f : 5.5f;
             Box("PATH_CONCRETE",type == 502 ? .3f : 2.3f,outer,type == 502 ? -1.08f : -.3f,type == 502 ? -.83f : .10f,side);
@@ -152,7 +176,7 @@ public static class FarPlatformPath
             else
             {
                 Prism("BD_CONCRETE",new[] { new Vector2(1.55f,4.28f),new Vector2(3.6f,4.43f),new Vector2(5.6f,4.28f),new Vector2(5.6f,4.36f),new Vector2(3.6f,4.51f),new Vector2(1.55f,4.36f) },side);
-                Box("PATH_METAL",5.44f,5.52f,2.60f,2.70f,side);
+                if (!island) Box("PATH_METAL",5.44f,5.52f,2.60f,2.70f,side);
                 Posts(side,3.6f,1.48f,4.4f,"PATH_METAL");
             }
         }

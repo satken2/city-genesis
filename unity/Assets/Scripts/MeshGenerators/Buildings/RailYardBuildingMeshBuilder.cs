@@ -609,7 +609,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
                     bool track = TrackIntersectionMeshGenerator.IsTrackType(path.type);
                     guided |= track;
                     road |= path.type == Constants.PATH_STREET || path.type == Constants.PATH_WALKWAY;
-                    if (track) networkLead = Mathf.Min(networkLead, LeadHalfSpacing(path.width, path.lanes ?? 1));
+                    if (track) networkLead = Mathf.Min(networkLead, LeadHalfSpacing(path.width, path.lanes ?? 1, path.center_width ?? 0f));
                 }
             }
         }
@@ -638,15 +638,15 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         {
             if (!TrackIntersectionMeshGenerator.IsTrackType(path.path_type)) continue;
             TrackPath.GetTrackMasterParams(path, out float width, out int lanes, out _, out _, out _, out _, out _, out _);
-            spacing = Mathf.Max(spacing ?? 0f, LeadHalfSpacing(width, lanes));
+            spacing = Mathf.Max(spacing ?? 0f, LeadHalfSpacing(width, lanes, TrackPath.GetTrackCenterWidth(path)));
         }
         return spacing;
     }
 
-    /// <summary>軌道数2以上の線路の軌道中心の半間隔。単線は0。</summary>
-    private static float LeadHalfSpacing(float width, int lanes)
+    /// <summary>軌道数2以上の線路の軌道中心の半間隔(島式ホームの駅は中央の間隔を含む)。単線は0。</summary>
+    private static float LeadHalfSpacing(float width, int lanes, float centerWidth)
     {
-        return lanes >= 2 ? Mathf.Abs(TrackPath.GetTrackCenterOffset(width, lanes, 0)) : 0f;
+        return lanes >= 2 ? Mathf.Abs(TrackPath.GetTrackCenterOffset(width, lanes, 0, centerWidth)) : 0f;
     }
 
     /// <summary>

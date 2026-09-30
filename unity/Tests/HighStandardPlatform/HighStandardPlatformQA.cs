@@ -46,6 +46,15 @@ public static class HighStandardPlatformQA
             ModelPrefabGenerator.SyncAll();
             Require(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Models/Paths/p462/platform.prefab") != null,
                 "Wrapper prefab not generated");
+            // 462は幅10m・軌道数2。各側のホームの部品は外側の軌道の中心(±2.5m)を原点に置き、外壁は中心線から7.86〜8.13m。
+            const float trackOffset = 2.5f, wallInner = 7.85f, wallOuter = 8.13f;
+            Bounds MeshBounds(string part) => ((GameObject)cache["Models/Paths/p462/" + part]).GetComponentInChildren<MeshFilter>().sharedMesh.bounds;
+            // 高架桁は全体の bbox を幅へ合わせるので±5.0ちょうど(横倍率1)。橋脚の梁は外壁の内側で受け梁を受ける。
+            var girder = MeshBounds("body_elevated");
+            Require(Mathf.Abs(girder.min.x + 5f) < .002f && Mathf.Abs(girder.max.x - 5f) < .002f, "Girder must span the 10m width");
+            var cap = MeshBounds("pillar_cap");
+            Require(cap.max.x < wallInner && cap.max.x > trackOffset + 1.3f, "Pier cap must reach the platform beams inside the outer wall");
+            Require(Mathf.Abs(MeshBounds("beam").size.x - 17f) < .002f, "Portal beam spans the poles outside both platforms");
             var foundation = assembly.GetType("PlatformFoundationGenerator").GetMethod("Generate");
             var road = assembly.GetType("RoadPath");
             int cases = 0;
@@ -59,14 +68,14 @@ public static class HighStandardPlatformQA
                 var points = new List<Vector3> { new Vector3(0,height,0), new Vector3(0,height+2,direction*32) };
                 object spline = road.GetMethod("BuildSpline").Invoke(null, new object[] { parent, points, false });
                 double from = clipped ? .25 : 0, to = clipped ? .75 : 1;
-                foundation.Invoke(null, new[] { parent, spline, "Models/Paths/p462", "Models/Paths/p4", (object)left, 0f, from, to });
+                foundation.Invoke(null, new[] { parent, spline, "Models/Paths/p462", "Models/Paths/p4", (object)left, left ? -trackOffset : trackOffset, from, to });
                 var meshes = parent.GetComponentsInChildren<MeshFilter>();
                 Require(meshes.Length > 0, "Foundation missing");
                 float sign = (left ? -1f : 1f) * direction;
                 foreach (var filter in meshes)
                 {
                     var vs = filter.sharedMesh.vertices.Select(v => filter.transform.TransformPoint(v)).ToArray();
-                    Require(vs.All(v => v.x*sign >= 5.35f && v.x*sign <= 5.63f), "Foundation on wrong side");
+                    Require(vs.All(v => v.x*sign >= wallInner && v.x*sign <= wallOuter), "Foundation on wrong side");
                     Require(Mathf.Abs(vs.Min(v=>v.y)+.15f)<.002f, "Wall does not reach ground");
                     Require(vs.All(v=> v.z*direction >= from*32-.01 && v.z*direction <= to*32+.01), "Wall exceeds visible interval");
                     foreach (var section in vs.GroupBy(v=>Mathf.Round(v.z*1000)))
@@ -88,7 +97,8 @@ public static class HighStandardPlatformQA
             foundation.Invoke(null, new[] { empty, emptySpline, "Models/Paths/p461", "Models/Paths/p4", (object)false, 0f, 0d, 1d });
             Require(empty.GetComponentsInChildren<MeshFilter>().Length==0, "Existing platform acquired a wall");
             AssetDatabase.SaveAssets();
-            File.WriteAllText(report, $"PASS: {cases} height/side/direction/clip cases, {checks} checks, 16 FBX and wrapper generation");
+            int fbxCount = Directory.GetFiles("Assets/Models/Paths/p462", "*.fbx").Length;
+            File.WriteAllText(report, $"PASS: {cases} height/side/direction/clip cases, {checks} checks, {fbxCount} FBX and wrapper generation");
             EditorApplication.Exit(0);
         }
         catch (Exception e)

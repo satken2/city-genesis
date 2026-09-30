@@ -814,7 +814,7 @@ export async function sendSetHouseEnds(houseEnds: string): Promise<void> {
  * Unity側は敷設中プレビューメッシュのプラットフォーム張り出し側を即座に切り替える
  * (曲線モード等と同じく、プレビューへの逐次反映のためのイベント)。
  * 設置側を選ぶ駅バリアント(platform_width>0 の単線の駅。railBuild.hasPlatformSideChoice)の敷設中だけ送る。
- * 1本で上下線を持つ複線一体の線路の駅は両外側にホームが付くので送らない。
+ * 1本で上下線を持つ複線一体の線路の駅はホームの位置(相対式・島式)がバリアントで決まるので送らない。
  */
 export async function sendSetPlatformSide(platformSide: number): Promise<void> {
   await invoke("send_window_action", {

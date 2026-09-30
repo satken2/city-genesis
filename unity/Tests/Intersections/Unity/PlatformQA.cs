@@ -57,19 +57,19 @@ public static class PlatformQA
             foreach (string part in new[] { "buffer_stop", "platform_end" })
                 cache[$"Models/Paths/p4/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Paths/p4/{part}.fbx");
             CheckTerminations();
-            foreach (int variant in new[] { 451, 452, 461, 462 })
+            foreach (int variant in new[] { 451, 461, 462 })
                 foreach (string part in new[] { "platform", "platform_wall" }) {
                     string asset = $"Assets/Paths/p{variant}/{part}.fbx";
                     var importer = (ModelImporter)AssetImporter.GetAtPath(asset);
                     if (!importer.isReadable) { importer.isReadable = true; importer.SaveAndReimport(); }
                     cache[$"Models/Paths/p{variant}/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>(asset);
                 }
-            foreach (int variant in new[] { 451, 452, 461, 462 })
+            foreach (int variant in new[] { 451, 461, 462 })
                 foreach (bool left in new[] { false, true })
                     foreach (float direction in new[] { 1f, -1f })
                         Check(variant, left, direction);
             RenderEnds(root, cache);
-            File.WriteAllText(report, $"PASS platforms: {checks} checks across 16 station sides; canopy 4m, fence 1.6m");
+            File.WriteAllText(report, $"PASS platforms: {checks} checks across 12 station sides; canopy 4m, fence 1.6m");
             EditorApplication.Exit(0);
         }
         catch (Exception e) { File.WriteAllText(report, e.ToString()); Debug.LogException(e); EditorApplication.Exit(1); }
@@ -157,6 +157,11 @@ public static class PlatformQA
 
     static readonly List<object> connected = new List<object>();
     static List<T> Connections<T>(int node) { return connected.Cast<T>().ToList(); }
+    static List<T> NodeConnections<T>(int node)
+    {
+        return connected.Cast<T>().Where(p => (int)typeof(T).GetField("start_node_id").GetValue(p) == node
+            || (int)typeof(T).GetField("end_node_id").GetValue(p) == node).ToList();
+    }
 
     static void RenderEnds(string root, IDictionary cache)
     {
@@ -279,13 +284,14 @@ public static class PlatformQA
         var store = new GameObject("MasterFixture").AddComponent(storeType);
         instance.SetValue(null, store);
         var masters = (IDictionary)storeType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(store);
-        foreach (var (id, width, lanes, platform) in new[] { (421, 10f, 2, 0f), (411, 5f, 1, 0f), (461, 5f, 1, 3f) })
+        foreach (var (id, width, lanes, platform, center) in new[] { (421, 10f, 2, 0f, 0f), (411, 5f, 1, 0f, 0f), (461, 5f, 1, 3f, 0f), (472, 16f, 2, 3f, 6f) })
         {
             var item = Activator.CreateInstance(assembly.GetType("PathMasterItem"));
             item.GetType().GetField("type").SetValue(item, 4);
             item.GetType().GetField("width").SetValue(item, width);
             item.GetType().GetField("lanes").SetValue(item, (int?)lanes);
             item.GetType().GetField("platform_width").SetValue(item, platform > 0f ? (float?)platform : null);
+            item.GetType().GetField("center_width").SetValue(item, (float?)center);
             masters[id] = item;
         }
         var provider = track.GetField("ConnectedPathsProvider");
@@ -379,6 +385,8 @@ public static class PlatformQA
                 UnityEngine.Object.DestroyImmediate(parent);
                 UnityEngine.Object.DestroyImmediate(material);
             }
+
+            CheckIslandStation(track, summary, terminations);
         }
         finally
         {
@@ -386,6 +394,63 @@ public static class PlatformQA
             connected.Clear();
             instance.SetValue(null, null);
             UnityEngine.Object.DestroyImmediate(store.gameObject);
+        }
+    }
+
+    // 島式ホームの駅(幅16m・2軌道・中央の間隔6m)。軌道は ±5.5m で、単線の駅の淵を左右の軌道から中央へ向けて置き、
+    // デッキは両淵の間(±4.0m)に1枚だけ張る。外側へは張り出さず、ホーム端は続く島式の駅が無い端だけ淵から淵まで閉じる。
+    static void CheckIslandStation(Type track, Type summary, MethodInfo terminations)
+    {
+        var laterals = (List<float>)assembly.GetType("LrtRoadParts").GetMethod("TrackLaterals").Invoke(null, new[] { TrackData(summary, 1, 472, 1, 2, 0f, 32f) });
+        Require(laterals.Count == 2 && Mathf.Abs(laterals[0] + 5.5f) < .001f && Mathf.Abs(laterals[1] - 5.5f) < .001f, "Island station tracks are not opened by the center gap");
+        var extents = new object[] { TrackData(summary, 1, 472, 1, 2, 0f, 32f), 3f, 0f, 0f };
+        track.GetMethod("ResolvePlatformExtents").Invoke(null, extents);
+        Require((float)extents[2] == 0f && (float)extents[3] == 0f, "Island station must not extend platforms outward");
+
+        var parent = new GameObject("IslandStationQA");
+        var line = new List<Vector3> { Vector3.zero, new Vector3(0, 0, 64) };
+        object spline = assembly.GetType("RoadPath").GetMethod("BuildSpline").Invoke(null, new object[] { parent, line, true });
+        track.GetMethod("CreateIslandPlatformParts", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
+            parent, spline, line, null, 16f, 2, 6f, "Models/Paths/p461", "Models/Paths/p4" });
+        foreach (var component in parent.GetComponentsInChildren<Component>()) {
+            if (component == null || component.GetType().Name != "SplineMesh") continue;
+            MethodInfo rebuild = component.GetType().GetMethod("RebuildImmediate");
+            rebuild.Invoke(component, rebuild.GetParameters().Length == 0 ? null : new object[] { true });
+        }
+        var filters = parent.GetComponentsInChildren<MeshFilter>();
+        var edges = filters.Where(f => f.name.EndsWith("/platform")).ToArray();
+        Require(edges.Length == 2, "Island station needs one platform edge per track");
+        Require(!filters.Any(f => f.name.EndsWith("/platform_wall")), "Island station has no outer wall");
+        foreach (var edge in edges)
+        {
+            var vertices = edge.sharedMesh.vertices.Select(v => edge.transform.TransformPoint(v)).ToArray();
+            bool leftTrack = vertices.Average(v => v.x) < 0f;
+            float track0 = leftTrack ? -5.5f : 5.5f, side = leftTrack ? 1f : -1f;
+            Require(vertices.All(v => (v.x - track0) * side > 1.25f && (v.x - track0) * side < 5.65f), "Island platform edge does not face the center");
+        }
+        var decks = filters.Where(f => f.name.StartsWith("TrackPlatformDeck")).ToArray();
+        Require(decks.Length == 1, "Island station needs a single deck");
+        Require(decks[0].sharedMesh.vertices.All(v => Mathf.Abs(decks[0].transform.TransformPoint(v).x) <= 4.001f), "Island deck exceeds the edge lines");
+        UnityEngine.Object.DestroyImmediate(parent);
+
+        var points = new List<Vector3> { Vector3.zero, new Vector3(0, 0, 32) };
+        var island = TrackData(summary, 1, 472, 1, 2, 0f, 32f);
+        var provider = track.GetField("ConnectedPathsProvider");
+        provider.SetValue(null, Delegate.CreateDelegate(provider.FieldType,
+            typeof(PlatformQA).GetMethod("NodeConnections", BindingFlags.Static|BindingFlags.NonPublic).MakeGenericMethod(summary)));
+        foreach (bool continues in new[] { false, true })
+        {
+            connected.Clear(); connected.Add(island);
+            if (continues) connected.Add(TrackData(summary, 2, 472, 2, 3, 32f, 64f));
+            var ends = new GameObject("IslandEndsQA");
+            terminations.Invoke(null, new object[] { ends, points, null, island, 16f, 2, 0f, 0f, "Models/Paths/p472", "Models/Paths/p4" });
+            var walls = ends.GetComponentsInChildren<Transform>().Where(t => t.name == "TrackPlatformEnd").ToArray();
+            Require(walls.Length == (continues ? 7 : 14), $"Island platform ends mismatch (continues={continues})");
+            Require(walls.All(t => Mathf.Abs(t.position.x) <= 4.001f), "Island platform end outside the deck");
+            Require(!walls.Any(t => continues && t.position.z > 16f), "Island platform closed toward a continuing island station");
+            var stops = ends.GetComponentsInChildren<Transform>().Where(t => t.name == "TrackBufferStop").ToArray();
+            Require(stops.All(t => Mathf.Abs(Mathf.Abs(t.position.x) - 5.5f) < .001f), "Buffer stop is not on an opened track");
+            UnityEngine.Object.DestroyImmediate(ends);
         }
     }
 

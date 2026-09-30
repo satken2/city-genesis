@@ -1484,6 +1484,13 @@ public class IpcStateCoordinator : MonoBehaviour
         {
             CellDataLoader.Instance.ClearAllManagerDataForSessionReset();
         }
+
+        // 別の都市を始める前にマスターを取り直す(バックエンドの再起動でマスターが変わっていることがある)。
+        // session:reload のロードは取り直しの完了を待つ(FetchCoastlineThenReload)。
+        if (MasterDataStore.Instance != null)
+        {
+            StartCoroutine(MasterDataStore.Instance.Refresh());
+        }
     }
 
     /// <summary>
@@ -1520,6 +1527,7 @@ public class IpcStateCoordinator : MonoBehaviour
     private System.Collections.IEnumerator FetchCoastlineThenReload(TerrainManager terrainManager)
     {
         yield return terrainManager.FetchCoastline();
+        while (MasterDataStore.Instance != null && MasterDataStore.Instance.IsRefreshing) yield return null;
         if (CellDataLoader.Instance != null)
         {
             CellDataLoader.Instance.ReloadAllData();

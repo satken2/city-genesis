@@ -268,6 +268,31 @@ public class MasterDataStore : MonoBehaviour
 		OnInitialized?.Invoke();
 	}
 
+	/// <summary>取り直し(Refresh)の最中か。</summary>
+	public bool IsRefreshing { get; private set; }
+
+	/// <summary>
+	/// 初期化済みのマスターを取り直す。マスターはバックエンドの起動時に読まれるので、バックエンドだけ再起動すると
+	/// Unity の知らないバリアントが UI に現れ、GetPathMaster が例外を投げ続けて敷設などが止まる。そのため
+	/// バックエンドへの再接続とセッションの切り替えで呼ぶ。取得中も直前のマスターを使い続けられるよう
+	/// IsInitialized は下げず、取得できた種類から差し替える。失敗は再試行せず次の機会に取り直す。
+	/// </summary>
+	public IEnumerator Refresh()
+	{
+		if (!IsInitialized || IsRefreshing) yield break;
+		IsRefreshing = true;
+		try
+		{
+			bool succeeded = false;
+			yield return InitializeAttempt(ok => succeeded = ok);
+			if (!succeeded) Debug.LogWarning("MasterDataStore: マスターデータの取り直しに失敗しました。直前のマスターを使い続けます");
+		}
+		finally
+		{
+			IsRefreshing = false;
+		}
+	}
+
 	/// <summary>
 	/// 全マスターの取得を1回試行する。全リクエストが成功した場合のみ
 	/// onComplete(true) を呼ぶ(パース失敗はスキーマ不一致でありリトライで

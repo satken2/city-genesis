@@ -174,7 +174,7 @@ public static class LandmarkPathsQA
     }
     static void Arcade(int id,float height)
     {
-        var go=Generate(id,5,1,height,24,0,false);
+        var go=Generate(id,id==414?10:5,id==414?2:1,height,24,0,false);
         var meshes=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="BrickArcade").ToArray();
         Require(meshes.Length>0,"arcade present");
         var vs=meshes.SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).ToArray();
@@ -207,7 +207,7 @@ public static class LandmarkPathsQA
                 Set(corridor,"Points",new List<Vector3>{new Vector3(-20,y,z),new Vector3(20,y,z)});
                 Set(corridor,"HalfWidth",scenario=="wide"?6f:1f);
                 if(scenario=="deleted") corridors.Clear();
-                var go=Generate(id,5,1,12,24,0,false);
+                var go=Generate(id,id==414?10:5,id==414?2:1,12,24,0,false);
                 var vertices=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="BrickArcade")
                     .SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).ToArray();
                 if(scenario=="above") baseline=vertices.Length;

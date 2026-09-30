@@ -107,7 +107,7 @@
 - パス建設(`path/`): 道路・鉄道・インフラは`path_build`の`PathConstructionPanel`1つで敷く。曲線/直線・吸着はUnity側で、`curveMode`の書き込み元は`edit_path:update_shape`の`is_curved`だけ。
   - 選択は建物建設と同じカテゴリのタイル→バリアントのカード一覧→建設画面の3段。カテゴリはマスターにバリアントがある`path_type`そのもので(`local-constants`の`PATH_TYPES_HIDDEN_IN_BUILD_PANEL`は出さない)、一覧にはそのカテゴリの`path_type`のバリアントだけを並べる。タイルは道路・軌道・インフラの3区分に分けて並べ、区分は`pathBuildCategories`で決め打ちしている(軌道=`PATH_TYPES_TRACK_GROUP`、インフラ=`PATH_TYPES_INFRA`、残りは道路)。カード(`PathVariantCard`)は一覧の項目と建設画面の概要に共用する。カテゴリのアイコンは`utils/pathCategoryIcon`の専用画像だけで、無ければ枠を空けておく。
   - 建設画面の設定(複線構成・ホーム設置側・駅舎の配置端と通路方式・所属道路・タグ)は選んだバリアントの種別で決まり、新規敷設でだけ出す。既存パスの形状編集(`params.extra.editPathId`)は建設画面から始まり、カテゴリへ戻れない。
-  - ホーム設置側は単線の駅だけが持つ(`railBuild.hasPlatformSideChoice`)。1本で上下線を持つ複線一体の線路(線路系で`lanes`≥2)の駅は両外側にホームが付くので、トグルを出さず、`platform_side` を送らず、`edit_path:change_platform_side` も送らない。
+  - ホーム設置側は単線の駅だけが持つ(`railBuild.hasPlatformSideChoice`)。1本で上下線を持つ複線一体の線路(線路系で`lanes`≥2)の駅はホームの位置がバリアントで決まる(両外側の相対式か、`center_width` を持つ島式)ので、トグルを出さず、`platform_side` を送らず、`edit_path:change_platform_side` も送らない。
   - 確定は`usePathConstruction.canConfirm`(Unityの`can_confirm`∧全線`/paths/validate`。先頭1本だけの検証は禁止)。成功のたびに`notifyRoadsChanged`。
   - 確定欄は`confirmMessages`を並べる。区間ごとの形状の違反(ノード間距離・曲線半径・勾配)は形状編集パネルの吹き出しが区間を示すので「形状にエラーがあります」の1行に畳み、ほかの拒否理由(干渉・川・海湖・岸壁の天端・工事中の造成)は`pathValidation.describePathValidation`の文言で出す。`/paths/validate`に`colliding_*`が増えたらそこへ文言を足す(足さないと汎用の「敷設条件を満たしていません」になる)。
   - 複線はUIが平行な単線群へ展開するが、`railBuild.isSingleRailPathVariant`(複線一体の線路・人員搬送)は`DIR_BOTH`の1本で送る。

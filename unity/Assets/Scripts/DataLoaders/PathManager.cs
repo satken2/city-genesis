@@ -3084,7 +3084,7 @@ public class PathManager : BaseApiDataManager
                 Width = width,
                 PlatformLeft = platformLeft,
                 PlatformRight = platformRight,
-                PlatformEdge = TrackPath.PlatformEdgeDistance(width, Mathf.Max(1, otherMaster?.lanes ?? 1)),
+                PlatformEdge = TrackPath.PlatformEdgeDistance(width, Mathf.Max(1, otherMaster?.lanes ?? 1), otherMaster?.center_width ?? 0f),
                 LrtPlatformZones = lrtZones,
                 LrtPlatformOuter = lrtZones != null ? LrtRoadParts.PlatformOuterOffset(other) : 0f,
             });

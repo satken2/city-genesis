@@ -685,7 +685,7 @@ export type PathMasterEntry = {
   /**
    * 駅パスのプラットフォーム幅(m)。master.yaml の platform_width に対応する。
    * 正の値を持つ単線のバリアント(駅)だけが建設時にホーム設置側(platform_side)を指定できる
-   * (lanes≥2 の複線一体の線路の駅は両外側にホームを持つ)。未定義・null はホームなし(通常の道路・線路)。
+   * (lanes≥2 の複線一体の線路の駅はホームの位置がバリアントで決まり、両外側の相対式か、center_width を持つ島式)。未定義・null はホームなし(通常の道路・線路)。
    */
   platform_width?: number | null;
   /**

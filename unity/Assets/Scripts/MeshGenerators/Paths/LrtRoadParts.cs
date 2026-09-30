@@ -40,7 +40,7 @@ public static class LrtRoadParts
         if (!IsEmbedded(path.path_variant))
         {
             TrackPath.GetTrackMasterParams(path, out float trackWidth, out int trackLanes, out _, out _, out _, out _, out _, out _);
-            return Mathf.Abs(TrackPath.GetTrackCenterOffset(trackWidth, trackLanes, 0));
+            return Mathf.Abs(TrackPath.GetTrackCenterOffset(trackWidth, trackLanes, 0, TrackPath.GetTrackCenterWidth(path)));
         }
         RoadPath.GetPathMasterParams(path, out float width, out float sidewalk, out float side, out _,
             out int lanes, out _, out float center, out _, out _, out _, out _);
@@ -59,8 +59,9 @@ public static class LrtRoadParts
         }
         TrackPath.GetTrackMasterParams(path, out float width, out int lanes, out _, out _, out _, out _, out _, out _);
         int count = Mathf.Max(1, lanes);
+        float centerWidth = TrackPath.GetTrackCenterWidth(path);
         var laterals = new List<float>(count);
-        for (int i = 0; i < count; i++) laterals.Add(TrackPath.GetTrackCenterOffset(width, count, i));
+        for (int i = 0; i < count; i++) laterals.Add(TrackPath.GetTrackCenterOffset(width, count, i, centerWidth));
         return laterals;
     }
 

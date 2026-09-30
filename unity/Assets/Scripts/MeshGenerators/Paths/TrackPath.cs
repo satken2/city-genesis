@@ -48,6 +48,9 @@ using GeneratedModels;
 /// （ResolvePlatformExtents。DIR_BACKWARD の線路は幾何フレームで左右が反転する）。
 /// 軌道数2以上の駅（まとめた複線の駅）は platform_side によらず両外側のホーム（相対式）で、
 /// 各側のホームの部品はその側の外側の軌道の中心線を原点に置く（単線と同じ「右側用」の部品を使える）。
+/// ただし左右の軌道の間に中央の間隔（center_width）を持つ駅は島式ホームの駅（IsIslandPlatform）で、
+/// その間にホームを1面持ち外側へは張り出さない。淵は同じ部品を左右の軌道から中央へ向けて置き、
+/// デッキは両淵の間に1枚張る（CreateIslandPlatformParts）。軌道の位置は GetTrackCenterOffset が中央の間隔を除いて決める。
 /// この解決ロジックはバックエンドの敷地ポリゴン算出（geo_paths.get_platform_extension_widths）
 /// と鏡写しであり、片方だけ変えると敷地と見た目が食い違う。
 /// プラットフォームがある側では、防音壁を立てず（ホーム外縁は platform_wall が担う）、
@@ -250,7 +253,7 @@ public class TrackPath : IPathMeshGenerator
     /// 左右はスプライン進行方向（start→end。right = Cross(up, forward)）基準。
     ///
     /// 軌道数2以上のパス（まとめた複線の駅）は platform_side によらず両外側にホームを持つ（相対式）。
-    /// 軌道の間のホーム（島式）は持たない。
+    /// ただし島式ホームの駅（IsIslandPlatform）は軌道の間にホームを持ち、外側へは張り出さないので左右とも0。
     ///
     /// 単線の「内側」とは複線（一方通行の単線線路2本）における相手線路側のことで、
     /// 左側通行では相手線路が走行方向の右側に来るため 内側=走行方向右、右側通行では 内側=走行方向左。
@@ -273,7 +276,9 @@ public class TrackPath : IPathMeshGenerator
         if (platformWidth <= 0f || pathData == null) return;
 
         int side = pathData.GetPlatformSide();
-        int lanes = MasterDataStore.Instance?.GetPathMaster(pathData.path_variant)?.lanes ?? 1;
+        var master = MasterDataStore.Instance?.GetPathMaster(pathData.path_variant);
+        if (IsIslandPlatform(master)) return;
+        int lanes = master?.lanes ?? 1;
         if (side == Constants.PLATFORM_SIDE_BOTH || lanes >= 2)
         {
             leftWidth = platformWidth;
@@ -290,14 +295,54 @@ public class TrackPath : IPathMeshGenerator
 
     /// <summary>
     /// 指定した軌道インデックスの中心オフセット（スプライン中心線からの横方向距離）を返す。
-    /// 道路の車線と同じ導出で、全幅を軌道数で等分した各帯の中央に軌道を置く。
-    /// 例: 単線(width5, lanes1)=0、複線(width11, lanes2)=±2.75、複々線(width16, lanes4)=±2, ±6。
+    /// 道路の車線と同じ導出で、全幅から中央の間隔（centerWidth。マスターの center_width）を除いた幅を
+    /// 軌道数で等分した各帯の中央に軌道を置く。中央の間隔は左右半分ずつの軌道の間に取るので、
+    /// 軌道数が偶数のときだけ効く（島式ホームの駅はここにホームを置く）。
+    /// 例: 単線(width5, lanes1)=0、複線(width10, lanes2)=±2.5、島式の複線(width16, lanes2, center6)=±5.5。
     /// </summary>
-    public static float GetTrackCenterOffset(float width, int lanes, int trackIndex)
+    public static float GetTrackCenterOffset(float width, int lanes, int trackIndex, float centerWidth = 0f)
     {
         int laneCount = Mathf.Max(1, lanes);
-        float laneWidth = width / laneCount;
-        return -width * 0.5f + laneWidth * (trackIndex + 0.5f);
+        if (centerWidth <= 0f || centerWidth >= width || laneCount % 2 != 0)
+        {
+            return -width * 0.5f + width / laneCount * (trackIndex + 0.5f);
+        }
+        int half = laneCount / 2;
+        float laneWidth = (width - centerWidth) / laneCount;
+        return trackIndex < half
+            ? -width * 0.5f + laneWidth * (trackIndex + 0.5f)
+            : centerWidth * 0.5f + laneWidth * (trackIndex - half + 0.5f);
+    }
+
+    /// <summary>パスのバリアントの中央の間隔（マスターの center_width）。軌道の横位置と島式ホームの幅を決める。</summary>
+    public static float GetTrackCenterWidth(PathSummary pathData)
+    {
+        if (pathData == null || MasterDataStore.Instance == null) return 0f;
+        return MasterDataStore.Instance.GetPathMaster(pathData.path_variant)?.center_width ?? 0f;
+    }
+
+    /// <summary>
+    /// 島式ホームの駅か。軌道数2以上の駅（platform_width を持つ）のうち、左右の軌道の間に中央の間隔
+    /// （center_width）を持つもので、ホームはその間に1面だけあり外側へは張り出さない。
+    /// バックエンドの MasterData.is_island_platform_variant と同じ定義。
+    /// </summary>
+    public static bool IsIslandPlatform(PathMasterItem master)
+    {
+        return master != null && (master.platform_width ?? 0f) > 0f
+            && (master.lanes ?? 1) >= 2 && (master.center_width ?? 0f) > 0f;
+    }
+
+    /// <summary>パスのバリアントが島式ホームの駅か。</summary>
+    public static bool IsIslandPlatform(PathSummary pathData)
+    {
+        return pathData != null && MasterDataStore.Instance != null
+            && IsIslandPlatform(MasterDataStore.Instance.GetPathMaster(pathData.path_variant));
+    }
+
+    /// <summary>島式ホームの淵ラインの中心線からの距離（デッキは ±この値）。内側の軌道の中心から PLATFORM_EDGE_OFFSET だけ中央寄り。</summary>
+    public static float IslandEdgeDistance(float width, int lanes, float centerWidth)
+    {
+        return Mathf.Abs(GetTrackCenterOffset(width, lanes, Mathf.Max(1, lanes) / 2, centerWidth)) - PLATFORM_EDGE_OFFSET;
     }
 
     /// <summary>
@@ -319,18 +364,19 @@ public class TrackPath : IPathMeshGenerator
     /// ホームの部品（淵・外縁・下部外壁・端壁）はこの軌道の中心線を原点に置くので、
     /// 単線の駅と同じ「右側用」の部品がまとめた複線の駅でもそのまま使える。単線は0。
     /// </summary>
-    public static float PlatformTrackOffset(float width, int lanes, bool leftSide)
+    public static float PlatformTrackOffset(float width, int lanes, bool leftSide, float centerWidth = 0f)
     {
-        return GetTrackCenterOffset(width, lanes, leftSide ? 0 : Mathf.Max(1, lanes) - 1);
+        return GetTrackCenterOffset(width, lanes, leftSide ? 0 : Mathf.Max(1, lanes) - 1, centerWidth);
     }
 
     /// <summary>
-    /// ホームの淵ライン（デッキの線路側の縁）の中心線からの距離。
+    /// 外側のホームの淵ライン（デッキの線路側の縁）の中心線からの距離。
     /// ホームが面する軌道の中心から PLATFORM_EDGE_OFFSET 外側で、左右とも同じ値。単線は PLATFORM_EDGE_OFFSET。
+    /// 島式ホームの淵は IslandEdgeDistance。
     /// </summary>
-    public static float PlatformEdgeDistance(float width, int lanes)
+    public static float PlatformEdgeDistance(float width, int lanes, float centerWidth = 0f)
     {
-        return Mathf.Abs(PlatformTrackOffset(width, lanes, false)) + PLATFORM_EDGE_OFFSET;
+        return Mathf.Abs(PlatformTrackOffset(width, lanes, false, centerWidth)) + PLATFORM_EDGE_OFFSET;
     }
 
     private static TrackCorridorInfo ResolveCorridor(PathSummary pathData, List<Vector3> points,
@@ -377,7 +423,8 @@ public class TrackPath : IPathMeshGenerator
         string variantBase = $"Models/Paths/p{pathData.path_variant}";
         string typeBase = $"Models/Paths/p{pathData.path_type}";
         int laneCount = Mathf.Max(1, lanes);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] CreateTrackParts開始: variant={variantBase}, type={typeBase}, width={width}, lanes={laneCount}, wallWidth={wallWidth}, wireSpacing={wireSpacing}");
+        float centerWidth = GetTrackCenterWidth(pathData);
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] CreateTrackParts開始: variant={variantBase}, type={typeBase}, width={width}, lanes={laneCount}, center={centerWidth}, wallWidth={wallWidth}, wireSpacing={wireSpacing}");
 
         // 地上・高架・地下はバリアントではなくアンカーの高さで決まるため、桁・スラブ軌道・高欄の
         // 描き分けは「地表より高い区間」の percent 区間で行う。地表区間（開削区間を含む）は無印パーツ、
@@ -414,7 +461,7 @@ public class TrackPath : IPathMeshGenerator
         int placedTracks = 0;
         for (int i = 0; i < laneCount; i++)
         {
-            float offset = GetTrackCenterOffset(width, laneCount, i);
+            float offset = GetTrackCenterOffset(width, laneCount, i, centerWidth);
             foreach (var range in groundRanges)
             {
                 GameObject track = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/track", width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
@@ -450,9 +497,14 @@ public class TrackPath : IPathMeshGenerator
         // （クラスコメント参照）。張り出し幅は platform_width、デッキの高さは
         // RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE が正。淵・外縁プレハブは
         // 原点＝ホームが面する軌道の中心線・線路面で、ホーム面までの立ち上がりをプレハブ形状が持つ。
+        // 島式ホームの駅は外側に張り出さず（platformLeft/Right=0）、軌道の間に淵2本とデッキ1枚を置く。
         if (!constructionOnly && (platformLeft > 0f || platformRight > 0f))
         {
-            CreatePlatformParts(container, spline, points, corridor, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
+            CreatePlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, platformLeft, platformRight, variantBase, typeBase);
+        }
+        else if (!constructionOnly && IsIslandPlatform(pathData))
+        {
+            CreateIslandPlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, variantBase, typeBase);
         }
 
         // 架線系（電化バリアントのみ: wire_spacing が設定されている場合）
@@ -460,7 +512,7 @@ public class TrackPath : IPathMeshGenerator
         {
             for (int i = 0; i < laneCount; i++)
             {
-                float offset = GetTrackCenterOffset(width, laneCount, i);
+                float offset = GetTrackCenterOffset(width, laneCount, i, centerWidth);
                 RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wire", width / laneCount, offset, RoadPartHeights.OVERHEAD_ABOVE_SPLINE, false, $"{typeBase}/wire", isDashed: false, stretchToWidth: false);
             }
             float lrtPoleOffset = lrtPlatformZones.Count > 0
@@ -511,20 +563,23 @@ public class TrackPath : IPathMeshGenerator
     /// 車止めは、ノードでどのレールにも使われない軌道の端にだけ置く。使われる軌道端は交差点のレールコネクタと
     /// 同じ TrackIntersectionMeshGenerator.ResolveConnectedTrackEnds（進む向きで決まる軌道どうしをつなぐ規則）で求める。
     /// ホーム端は、接続先に同じ側のホームが続かなければ閉じる（島式デッキの描画担当が実幅に合わせて生成する）。
+    /// 島式ホームの駅の端は、接続先も島式ホームの駅なら続いているとみなし、そうでなければ淵から淵までを閉じる。
     /// </summary>
     private static void CreateTerminations(GameObject container, List<Vector3> points, TrackCorridorInfo corridor,
         PathSummary path, float width, int lanes, float leftWidth, float rightWidth, string variantBase, string typeBase)
     {
         if (path.path_type != Constants.PATH_TRACK && path.path_type != Constants.PATH_MONORAIL) return;
         ComputeStripFrames(points, out var rights, out var lengths);
-        float platformEdge = PlatformEdgeDistance(width, lanes);
+        float centerWidth = GetTrackCenterWidth(path);
+        float platformEdge = PlatformEdgeDistance(width, lanes, centerWidth);
+        bool island = IsIslandPlatform(path);
         for (int end = 0; end < 2; end++)
         {
             int idx = end == 0 ? 0 : points.Count - 1;
             int nodeId = end == 0 ? path.start_node_id : path.end_node_id;
             var connections = ConnectedPathsProvider?.Invoke(nodeId);
             bool facilityContinues = InfrastructureConnectionProvider?.Invoke(nodeId) == true;
-            bool leftContinues = false, rightContinues = false;
+            bool leftContinues = false, rightContinues = false, islandContinues = false;
             // レールがつながり得ない線路は、自分の軌道端が使われるかに関わらない。
             var nodePaths = new List<PathSummary> { path };
             if (connections != null)
@@ -539,6 +594,7 @@ public class TrackPath : IPathMeshGenerator
                     bool reverse = (end == 0) == (other.start_node_id == nodeId);
                     leftContinues |= (reverse ? otherRight : otherLeft) > 0f;
                     rightContinues |= (reverse ? otherLeft : otherRight) > 0f;
+                    islandContinues |= IsIslandPlatform(other);
                 }
             Vector3 forward = Vector3.Cross(rights[idx], Vector3.up);
             Vector3 inward = end == 0 ? forward : -forward;
@@ -556,10 +612,20 @@ public class TrackPath : IPathMeshGenerator
                 {
                     if (usedEnds.Contains((path.path_id, lane))) continue;
                     PlaceEndPart(container, LoadPrefab($"{variantBase}/buffer_stop", $"{typeBase}/buffer_stop"),
-                        "TrackBufferStop", points[idx] + inward * 1.0f + rights[idx] * GetTrackCenterOffset(width, lanes, lane)
+                        "TrackBufferStop", points[idx] + inward * 1.0f + rights[idx] * GetTrackCenterOffset(width, lanes, lane, centerWidth)
                             + Vector3.up * RoadPartHeights.TRACK_ABOVE_SPLINE,
                         Quaternion.LookRotation(inward), Vector3.one);
                 }
+            }
+            if (leftWidth <= 0f && rightWidth <= 0f && (!island || islandContinues)) continue;
+            var prefab = LoadPrefab($"{variantBase}/platform_end", $"{typeBase}/platform_end");
+            // モノレールもホーム面の高さを共有するため、専用部品が無ければ鉄道の端壁を使う。
+            if (prefab == null && path.path_type == Constants.PATH_MONORAIL)
+                prefab = LoadPrefab($"Models/Paths/p{Constants.PATH_TRACK}/platform_end", null);
+            if (island && !islandContinues)
+            {
+                float edge = IslandEdgeDistance(width, lanes, centerWidth);
+                PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, -edge, edge);
             }
             for (int side = 0; side < 2; side++)
             {
@@ -569,20 +635,26 @@ public class TrackPath : IPathMeshGenerator
                 float[] farValues = corridor == null ? null : (left ? corridor.LeftDeckFar : corridor.RightDeckFar);
                 float far = farValues == null ? width * .5f + pf : farValues[idx];
                 if (float.IsNaN(far) || far <= platformEdge + PLATFORM_DECK_MIN_WIDTH) continue;
-                var prefab = LoadPrefab($"{variantBase}/platform_end", $"{typeBase}/platform_end");
-                // モノレールもホーム面の高さを共有するため、専用部品が無ければ鉄道の端壁を使う。
-                if (prefab == null && path.path_type == Constants.PATH_MONORAIL)
-                    prefab = LoadPrefab($"Models/Paths/p{Constants.PATH_TRACK}/platform_end", null);
-                float span = far - platformEdge;
-                int panels = Mathf.Max(1, Mathf.CeilToInt(span / 1.2f));
-                for (int panel = 0; panel < panels; panel++)
-                {
-                    float lateral = (left ? -1f : 1f) * (platformEdge + span * (panel + .5f) / panels);
-                    PlaceEndPart(container, prefab, "TrackPlatformEnd", points[idx] + rights[idx] * lateral
-                        + inward * .12f + Vector3.up * (RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE - PLATFORM_DECK_SINK),
-                        Quaternion.LookRotation(inward), new Vector3(span / panels, 1f, 1f));
-                }
+                if (left) PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, -far, -platformEdge);
+                else PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, platformEdge, far);
             }
+        }
+    }
+
+    /// <summary>
+    /// ホーム端の妻壁を、横位置 from〜to（中心線からの符号付き距離）へ1.2m以下のパネルに等分して並べる。
+    /// 端から12cm内側、デッキ上面の高さに置き、横方向だけをパネル幅へ伸縮する。
+    /// </summary>
+    private static void PlacePlatformEndPanels(GameObject container, GameObject prefab, Vector3 point, Vector3 right, Vector3 inward, float from, float to)
+    {
+        float span = to - from;
+        int panels = Mathf.Max(1, Mathf.CeilToInt(span / 1.2f));
+        for (int panel = 0; panel < panels; panel++)
+        {
+            float lateral = from + span * (panel + .5f) / panels;
+            PlaceEndPart(container, prefab, "TrackPlatformEnd", point + right * lateral
+                + inward * .12f + Vector3.up * (RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE - PLATFORM_DECK_SINK),
+                Quaternion.LookRotation(inward), new Vector3(span / panels, 1f, 1f));
         }
     }
 
@@ -607,25 +679,68 @@ public class TrackPath : IPathMeshGenerator
     /// 未配置なら共通コンクリートへフォールバックする（ホームは駅の視認性の本体のため、
     /// 他のオプショナルパーツと違い「未配置＝スキップ」にはしない）。
     /// </summary>
-    private static void CreatePlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, int lanes, float platformLeft, float platformRight, string variantBase, string typeBase)
+    private static void CreatePlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, int lanes, float centerWidth, float platformLeft, float platformRight, string variantBase, string typeBase)
     {
-        Material deckMaterial = null;
+        Material deckMaterial = ResolveDeckMaterial(variantBase, typeBase);
+        ResolveDeckFrames(corridor, points, out Vector3[] rightDir, out float[] cumLength);
+
+        float halfWidth = width * 0.5f;
+        if (platformLeft > 0f)
+        {
+            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: true, PlatformTrackOffset(width, lanes, true, centerWidth), halfWidth, platformLeft, deckMaterial, variantBase, typeBase);
+        }
+        if (platformRight > 0f)
+        {
+            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: false, PlatformTrackOffset(width, lanes, false, centerWidth), halfWidth, platformRight, deckMaterial, variantBase, typeBase);
+        }
+    }
+
+    /// <summary>
+    /// 島式ホームの駅のホーム（淵2本・デッキ1枚）を軌道の間に生成する。
+    /// 淵は単線の駅と同じ「右側用」の platform を、左の軌道にはそのまま、右の軌道にはミラーして置き、
+    /// 両方とも中央を向ける。デッキは両側の淵ラインの間（±IslandEdgeDistance）に1枚張り、両縁は淵パーツが覆うので
+    /// 側面の小口を張らない。外縁（platform_wall）と外壁の下部（platform_foundation）は島式には無い。
+    /// </summary>
+    private static void CreateIslandPlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, int lanes, float centerWidth, string variantBase, string typeBase)
+    {
+        int laneCount = Mathf.Max(1, lanes);
+        float leftTrack = GetTrackCenterOffset(width, laneCount, laneCount / 2 - 1, centerWidth);
+        float rightTrack = GetTrackCenterOffset(width, laneCount, laneCount / 2, centerWidth);
+        RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, leftTrack, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, false, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f);
+        RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, rightTrack, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, true, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f);
+
+        float edge = IslandEdgeDistance(width, laneCount, centerWidth);
+        if (edge * 2f < PLATFORM_DECK_MIN_WIDTH || points == null || points.Count < 2) return;
+        ResolveDeckFrames(corridor, points, out Vector3[] rightDir, out float[] cumLength);
+        if (cumLength[points.Count - 1] - cumLength[0] < PLATFORM_DECK_MIN_RUN_LENGTH) return;
+        var joined = new bool[points.Count];
+        for (int i = 0; i < joined.Length; i++) joined[i] = true;
+        BuildPlatformDeckMesh(container, points, rightDir, cumLength, 0, points.Count - 1, false, -edge, null, joined, edge, ResolveDeckMaterial(variantBase, typeBase), 0);
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] 島式ホーム: 軌道 {leftTrack}/{rightTrack}, デッキ ±{edge}");
+    }
+
+    /// <summary>
+    /// デッキ用マテリアルを platform_panel プレハブ（マテリアル参照専用パーツ）から採取する。未配置なら共通コンクリート
+    /// （ホームは駅の視認性の本体のため、他のオプショナルパーツと違い「未配置＝スキップ」にはしない）。
+    /// </summary>
+    private static Material ResolveDeckMaterial(string variantBase, string typeBase)
+    {
         GameObject panelPrefab = LoadPrefab($"{variantBase}/platform_panel", $"{typeBase}/platform_panel");
         MeshRenderer panelRenderer = panelPrefab != null ? panelPrefab.GetComponent<MeshRenderer>() : null;
         if (panelRenderer != null && panelRenderer.sharedMaterial != null)
         {
-            deckMaterial = RoadPath.GetOrCreateRoadMaterial(panelRenderer.sharedMaterial);
+            return RoadPath.GetOrCreateRoadMaterial(panelRenderer.sharedMaterial);
         }
-        if (deckMaterial == null)
-        {
-            deckMaterial = BuildingMeshBuilder.GetCommonConcreteMaterial();
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[TrackPath] platform_panel プレハブなし: デッキは共通コンクリートで描画");
-        }
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[TrackPath] platform_panel プレハブなし: デッキは共通コンクリートで描画");
+        return BuildingMeshBuilder.GetCommonConcreteMaterial();
+    }
 
-        // デッキの動的生成にはコリドーと同じ「右方向・累積弧長」のフレームが必要。
-        // コリドーがあればその配列を共有し、無ければ（隣接線路なし）ここで計算する。
-        Vector3[] rightDir;
-        float[] cumLength;
+    /// <summary>
+    /// デッキの動的生成に使う「右方向・累積弧長」のフレーム。コリドーがあればその配列を共有し、
+    /// 無ければ（隣接線路なし）点列から計算する。
+    /// </summary>
+    private static void ResolveDeckFrames(TrackCorridorInfo corridor, List<Vector3> points, out Vector3[] rightDir, out float[] cumLength)
+    {
         if (corridor != null)
         {
             rightDir = corridor.RightDir;
@@ -634,16 +749,6 @@ public class TrackPath : IPathMeshGenerator
         else
         {
             ComputeStripFrames(points, out rightDir, out cumLength);
-        }
-
-        float halfWidth = width * 0.5f;
-        if (platformLeft > 0f)
-        {
-            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: true, PlatformTrackOffset(width, lanes, true), halfWidth, platformLeft, deckMaterial, variantBase, typeBase);
-        }
-        if (platformRight > 0f)
-        {
-            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: false, PlatformTrackOffset(width, lanes, false), halfWidth, platformRight, deckMaterial, variantBase, typeBase);
         }
     }
 

@@ -41,7 +41,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 | Close（必要な部品のみ） | 同じフォルダの `{part}_close.fbx`。留め具、レール締結部、手すりの細い桟、厚みや面取りなど、近距離で見える構造上妥当な細部を加える |
 | Far | Unityの遠景生成を使う。パス用の `_far` は著作しない |
 
-ホーム451/461・462・502と乗り場602のFarは`FarPlatformPath.cs`の簡易断面生成。通常と同じ共有材質で大きな屋根・壁・床を保つ。通常モデルの外形・材質を変えた場合は、この遠景断面との整合も確認する。通常・接写の8m反復とは別に、間引き済みのパス点列を使う。
+ホーム451/461・462・471・472・502と乗り場602のFarは`FarPlatformPath.cs`の簡易断面生成(471は相対式、472は島式で、軌道の横位置はマスターの `width`・`lanes`・`center_width` から決まる)。通常と同じ共有材質で大きな屋根・壁・床を保つ。通常モデルの外形・材質を変えた場合は、この遠景断面との整合も確認する。通常・接写の8m反復とは別に、間引き済みのパス点列を使う。
 
 ### `_close` が実際に使われる対象
 
@@ -96,10 +96,16 @@ p411 5個  body track wire pole beam                (電化地上線路)
 p413 6個  body track wall wire pole beam           (電化鉄橋。poleはトラス上弦取付)
 p461 8個  body track platform platform_wall platform_panel wire pole beam (電化駅+上屋)
 p463〜465 18〜19個 461と同じ線路・架線・高架の14個(メッシュ共有) + platform platform_wall platform_panel + 接写(463=platform_wall_close、464・465=platform_close platform_wall_close) (貨物PF)
+p421 14個 411の軌道・架線・高欄・坑口(共有) + 幅10mの body/body_close・body_elevated・pillar/pillar_cap・11m beam (軌道数2の複線)
+p423 8個  413の軌道・主構・架線・柱(共有) + 幅10mの床組 body・pillar/pillar_cap (軌道数2の鉄橋)
+p471 19個 461のホーム・軌道・架線(共有) + 421の道床・高架桁 + 駅用門型橋脚・17m beam・幅広 portal (軌道数2の相対式の駅)
+p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 + 島式の platform/platform_close (軌道数2・center_width 6 の島式の駅)
 ```
 
-電化バリアント(411系/461系)のパーツは `pipeline/jobs/build_electric_rail.py` の
+電化バリアント(411系/461系)のパーツは `pipeline/jobs/build_electric_rail.py`、
+軌道数2の鉄道(421/423/471/472。462の桁・橋脚・梁も)は `pipeline/jobs/build_double_track.py` の
 コード著作。寸法調整はジョブを直して再実行する(手編集すると再実行で消える)。
+411/413/461を作り直したら `build_double_track` → `build_p462` → `build_platform_close` の順に再実行して共有をつなぎ直す。
 
 まず最小構成で作ってギャラリーの組み立てプレビューを見せ、ユーザーの追加指示
 (「歩道をつけて」「防音壁を」)を受けてから足す。
@@ -175,12 +181,13 @@ p463〜465 18〜19個 461と同じ線路・架線・高架の14個(メッシュ�
 6. `validator/validate.py <FBX>` (パスはマテリアル命名検査が対象)
 7. `pipeline/build_gallery.py` → ギャラリーの組み立てプレビュー(直線30m敷設)で目視確認
    - `pillar` を持つバリアントは高架状態でプレビューされる
-   - `platform` を持つ駅バリアント(`platform_width`設定)は片側ホーム
-     (淵+動的デッキ+外縁)付きでプレビューされる(デッキがモデルと食い違えば
+   - `platform` を持つ駅バリアント(`platform_width`設定)はホーム
+     (淵+動的デッキ+外縁)付きでプレビューされる。単線の駅は片側、軌道数2の駅は両外側(相対式)、
+     `center_width` を持つ駅は軌道の間の1面(島式。外縁なし)(デッキがモデルと食い違えば
      著作寸法が規約とずれているサイン)
    - 電化バリアント(`wire_spacing`設定)は架線・架線柱・門型梁付きでプレビュー
      される(柱間隔は見やすさのため最大15mに詰められる)
-   - 線路の軌道・架線は `lanes` 本を TrackPath と同じ横位置(幅を lanes 等分した各中心)に並べる
+   - 線路の軌道・架線は `lanes` 本を TrackPath と同じ横位置(全幅から中央の間隔 `center_width` を除いた幅を lanes 等分した各中心)に並べる
    - `lrt_platform` を持つLRTバリアントは、直線56mの中央に2両編成相当の相対式ホーム
      (両側・両端スロープ・中央の上屋)を置き、`pillar` があっても地上で見せる
    - 交差点・曲線・分岐器・近接線路の結合描画はプレビュー対象外(実機でしか確認できない)
@@ -210,7 +217,7 @@ p463〜465 18〜19個 461と同じ線路・架線・高架の14個(メッシュ�
 | `pillar` / `pillar_cap` | `height_editable=true` と `pillar_spacing`(高架にできないバリアントでは柱は出ない) |
 | `pole` / `beam` | **`wire_spacing`。null は非電化を意味し架線・柱・梁を一切描画しない** |
 | `platform` / `platform_wall` / `platform_panel` | **`platform_width`。null はホームなし** |
-| `track` | `lanes`(軌道の本数)・`track_type` |
+| `track` | `lanes`(軌道の本数)・`track_type`。軌道の間を広げる島式ホームの駅は `center_width` |
 | 新しいバリアントを作った | `type`(フォールバック先のタイプ)・`model_type`・`body_material`・`curve_allowed`・`max_span` 等の行一式 |
 
 パーツの造形寸法とマスター値は**一致させる**こと(特にホームは

@@ -81,7 +81,10 @@ public partial class RoadRenderer
         stripTriangles.Clear();
         var master = MasterDataStore.Instance?.GetPathMaster(variant);
         float width = (master?.width ?? 0f);
-        float platformEdge = TrackPath.PlatformEdgeDistance(width, Mathf.Max(1, master?.lanes ?? 1));
+        int lanes = Mathf.Max(1, master?.lanes ?? 1);
+        float centerWidth = master?.center_width ?? 0f;
+        float platformEdge = TrackPath.PlatformEdgeDistance(width, lanes, centerWidth);
+        float islandEdge = TrackPath.IsIslandPlatform(master) ? TrackPath.IslandEdgeDistance(width, lanes, centerWidth) : 0f;
         int count = offsets != null && offsets.Length > 0 ? offsets.Length : 1;
         for (int line = 0; line < count; line++)
         {
@@ -100,6 +103,8 @@ public partial class RoadRenderer
                 AddStrip(offset - width * 0.5f - left, offset - platformEdge, RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE);
             if (right > 0f)
                 AddStrip(offset + platformEdge, offset + width * 0.5f + right, RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE);
+            if (islandEdge > 0f)
+                AddStrip(offset - islandEdge, offset + islandEdge, RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE);
         }
         previewMesh.Clear();
         previewMesh.indexFormat = stripVertices.Count > 65535

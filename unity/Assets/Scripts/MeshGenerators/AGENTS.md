@@ -41,10 +41,10 @@
 | `ConstructionPathBuilder.cs` / `ConstructionMeshUtil.cs` | 工事中パス(G§15) |
 | `RoadIntersectionMeshGenerator.cs` | 交差点(G§11、J「Unity側の交差点メッシュの再計算」) |
 | `TrafficSignalLayout.cs` / `TrafficSignalBuilder.cs` / `TrafficSignalStyle.cs` | 交差点の信号機。描画専用(G§11.8) |
-| `TrackPath.cs` | 線路・モノレール・LRT専用軌道431(N)。進む向きで走る軌道を決める `TrackIndexForTravel`、ホームの基準になる軌道の `PlatformTrackOffset` / `PlatformEdgeDistance`(N§1.1・§7.3) |
+| `TrackPath.cs` | 線路・モノレール・LRT専用軌道431(N)。軌道の横位置 `GetTrackCenterOffset`(中央の間隔は `GetTrackCenterWidth`)、進む向きで走る軌道を決める `TrackIndexForTravel`、ホームの基準になる軌道の `PlatformTrackOffset` / `PlatformEdgeDistance`、島式ホームの駅の判定 `IsIslandPlatform` と淵ライン `IslandEdgeDistance`(N§1.1・§7.3) |
 | `TrackIntersectionMeshGenerator.cs` | ポイント・平面交差のレールコネクタ。つながる軌道端の判定(`ResolveConnectedTrackEnds`)は車止めとも共有(N§4.3) |
 | `TrackAdjacency.cs` | 近接線路の結合(複線見え化)・島式ホーム(N§7.4・§8) |
-| `TrackDirectionArrows.cs` / `PlatformFoundationGenerator.cs` / `FarPlatformPath.cs` | 一方通行線路の矢印(敷設モードのみ。N§9)・高架ホーム外壁下部(N「高規格高架PF」)・駅と乗り場の遠景簡易立体(N§6。対象バリアントは `FarPlatformPath.Handles` に列挙。貨物PF 463〜465 は上屋の無い荷役床に品目別の設備を載せ、コンテナは通常パーツの16mタイルと同じ区間に並べる) |
+| `TrackDirectionArrows.cs` / `PlatformFoundationGenerator.cs` / `FarPlatformPath.cs` | 一方通行線路の矢印(敷設モードのみ。N§9)・高架ホーム外壁下部(N「高規格高架PF」)・駅と乗り場の遠景簡易立体(N§6。対象バリアントは `FarPlatformPath.Handles` に列挙。島式ホームの駅は左右の軌道から中央へ向けて組む。貨物PF 463〜465 は上屋の無い荷役床に品目別の設備を載せ、コンテナは通常パーツの16mタイルと同じ区間に並べる) |
 | `LrtRoadParts.cs` / `LrtPlatformParts.cs` | LRT の軌道位置・踏面・ホーム寸法の唯一の正と、併用軌道・停留所ホーム(G「LRT付き道路」「LRT停留所のホーム」、N「LRT専用軌道431」) |
 | `StationHousePath.cs` | 駅舎パス(連絡橋+両終端の建屋)(Q) |
 
@@ -81,7 +81,9 @@
   - 特定バリアントだけ専用シェーダーにする唯一の口は `Resources/{マテリアル名}.mat`(例: G§16 の `Custom/PathDirt`。頂点α規約を持つメッシュ専用で他の body に流用しない)。
 - 車線中心・区画線境界は `RoadLaneLayout`、LRT の軌道位置・踏面・ホーム寸法は `LrtRoadParts` が唯一の正。車両・交差点・設備側に独立した横オフセット式を書かない。
 - 軌道数2のパス(まとめた複線・431)で走る軌道は「パスと進む向き」だけで決まる(`TrackPath.TrackIndexForTravel`。左側通行なら進行方向の左)。交差点のレールコネクタと車止めは `TrackIntersectionMeshGenerator` の同じ判定(通行方向を見る。駅のホームは両方向扱い)を使い、車両の走行描画(`Vehicles/TransitRouteGeometry`)も同じ規則で軌道を選んでレールを端点の近さで拾う。どれか1つだけ規則を変えると列車がレールの無い所を走る。
-- ホームの部品(淵・外縁・下部外壁・端壁・遠景)は、その側で最も外側の軌道の中心線を原点に置く(`PlatformTrackOffset`)。パスの中心線基準で書くと軌道数2の駅で淵が軌道の間に出る。
+- 軌道の横位置は `TrackPath.GetTrackCenterOffset(width, lanes, i, centerWidth)` の1つの式で、中央の間隔(マスターの `center_width`。島式ホームの駅で軌道を外へ開く)は `GetTrackCenterWidth` でパスのマスターから引く。レール・架線・車止め・レールコネクタ(`LrtRoadParts.TrackLaterals`)・車両・遠景・引き込み線・敷設プレビューはすべて中央の間隔を渡してこの式を使う。1か所でも渡し忘れると、その描画だけ軌道が内側にずれる。
+- ホームの部品(淵・外縁・下部外壁・端壁・遠景)は、その側で最も外側の軌道の中心線を原点に置く(`PlatformTrackOffset`)。パスの中心線基準で書くと軌道数2の駅で淵が軌道の間に出る。島式ホームの駅(`IsIslandPlatform`)は外側に張り出さず(`ResolvePlatformExtents` が0)、淵を左右の軌道から中央へ向けて置いてデッキを両淵の間に1枚張る(`CreateIslandPlatformParts`)。
+- `TrackPath.CreatePlatformSide`・`CreateTerminations` は `Tests/Intersections`・`Tests/Lrt`・gallery の `PlatformCloseQA` がリフレクションで引数の数まで合わせて呼ぶ。引数を足さず、必要な値はパスのマスターから関数の中で引く。
 - 建物は mid レベルだけ Y を階高スケールし、base/top/fence/mashup は著作寸法のまま。配置は階高グリッドなので著作高さとのズレは隙間として出るのが仕様(F§6.3・§6.4)。`ResolveParcelContext` の区画ポリゴンは center_point 基準のローカルXZ(ワールドで扱うと敷地装飾が建物から離れる)。
 - 建物のパーツが無言で消えるときは FBX の Read/Write Enabled を疑う(壁・角・prebuilt は頂点を読み、ceil/floor は参照専用なので屋根と地面だけ残る)。強制は `Assets/Editor/ModelImportSettings.cs`(`unity/AGENTS.md`「モデルアセットの構成」)。
 - `Mesh.CombineMeshes` はサブメッシュ単位の `CombineInstance` でもインデックスの最小〜最大の頂点を丸ごと写す。FBX 取り込みの溶接で別材質の面が頂点を共有するパーツでは範囲が重なり、未参照の頂点まで複製される。プレハブを事前結合するときは `CombineModuleMeshes`(サブメッシュごとに参照頂点だけを連続区画へ詰める)を通す。壁・角・エントランス・塔屋・フェンス・タイルは元メッシュを直接積むので詰め直しを通らない(F§12.1)。
@@ -100,7 +102,8 @@
 
 | Unity | genesis-core(非公開) |
 | --- | --- |
-| `TrackPath.ResolvePlatformExtents`(`platform_side`→左右。`DIR_BACKWARD` は反転。軌道数2以上は両側) | `geo_paths.get_platform_extension_widths`(ホームの敷地) |
+| `TrackPath.ResolvePlatformExtents`(`platform_side`→左右。`DIR_BACKWARD` は反転。軌道数2以上は両側、島式ホームの駅は0) | `geo_paths.get_platform_extension_widths`(ホームの敷地) |
+| `TrackPath.IsIslandPlatform`(駅・軌道数2以上・`center_width` が正) | `MasterData.is_island_platform_variant` |
 | `StationHousePath` の専有エリア(`ComputeEndFootprints` / `ResolveHousePosition`) | `geo_station_house.py`(建屋の占有) |
 | `TrackIntersectionMeshGenerator` の転回閾値 `RAIL_MAX_TURN_ANGLE_DEG` | `parameters.yaml` の同名値と経路探索の転回制約 |
 | `RailYardBuildingMeshBuilder.TryGetRectangleShortSideMidpoint`・`ResolveTerminalNodeLocal`(端子未ロード時の初期位置。線路の向きの基準にもなる) | `crud_agents._rectangle_short_side_midpoint`・`_connection_node_position`(接続端子の初期配置) |
