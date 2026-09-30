@@ -41,6 +41,7 @@
     },
     "language": {
       "label": "Idioma",
+      "description": "Idioma de visualización de la interfaz. No es el mismo que el idioma de los datos guardados.",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",

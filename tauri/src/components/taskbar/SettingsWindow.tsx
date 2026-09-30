@@ -339,7 +339,10 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       <section className="settings-group">
         <h3 className="settings-group-title">{t("settings.groups.general")}</h3>
         <div className="settings-card">
-          <SettingsRow label={t("settings.language.label")}>
+          <SettingsRow
+            label={t("settings.language.label")}
+            description={t("settings.language.description")}
+          >
             <div className="settings-select-wrap">
               <select
                 className="settings-select"

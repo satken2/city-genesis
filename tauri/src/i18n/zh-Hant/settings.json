@@ -41,6 +41,7 @@
     },
     "language": {
       "label": "語言",
+      "description": "介面的顯示語言。與存檔資料的語言不同。",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",

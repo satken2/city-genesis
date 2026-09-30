@@ -41,6 +41,7 @@
     },
     "language": {
       "label": "言語",
+      "description": "UIの表示言語です。セーブデータの言語とは異なります",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",

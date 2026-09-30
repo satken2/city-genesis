@@ -41,6 +41,7 @@
     },
     "language": {
       "label": "언어",
+      "description": "UI 표시 언어입니다. 세이브 데이터의 언어와는 다릅니다.",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",

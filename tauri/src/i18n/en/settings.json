@@ -41,6 +41,7 @@
     },
     "language": {
       "label": "Language",
+      "description": "The display language of the UI. This is separate from the language of your save data.",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",
