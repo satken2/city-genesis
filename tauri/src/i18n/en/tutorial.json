@@ -304,7 +304,53 @@
       "highway": "As the town grows, more vehicles will carry people and goods through it. The town wants another route ready so through traffic won't all end up on the local road. In this tutorial, you'll learn how to build an elevated highway over a local road and connect them with ramps to create an interchange.",
       "mining": "Valuable resources lie beneath this island, but there is no way to haul them from the mountain to the port. Without transport, the island can't turn that wealth into an industry. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",
       "tourism": "Islanders want more people to visit the ancient ruins by the sea. But without a port and accommodation to welcome travelers, local restaurants are missing out on visitors too. In this tutorial, you'll learn how to welcome tourists with a hotel and passenger terminal, and check the effects on restaurant sales and bus ridership.",
-      "heading": "A Request for the Mayor"
+      "heading": "A Request for the Mayor",
+      "reclamation": "This tiny reef has no flat ground for a city hall. In this tutorial, you will learn to reclaim coastal land, create a parcel, and place a city hall.",
+      "acquisition": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, explicitly demolish a public facility, and complete the connection."
+    },
+    "reclamation": {
+      "title": "Reclaim the coast",
+      "description": "This tiny reef has no flat ground for a city hall. In this tutorial, you will learn to reclaim coastal land, create a parcel, and place a city hall.",
+      "step1": {
+        "title": "Plan the reclamation",
+        "description": "Open the grading tool. Left-click the four yellow markers in order to draw a rectangle from the shore into the sea. Right-click to close it, check that the estimate is for reclamation, and confirm the project."
+      },
+      "step2": {
+        "title": "Complete the reclaimed land",
+        "description": "Use Start to advance at least one epoch, then press Next. Since this lesson has no construction suppliers, Next skips the remaining reclamation work. The sea inside the project becomes land."
+      },
+      "step3": {
+        "title": "Create a parcel on the new land",
+        "description": "Open the parcel tool and choose Single. Set both Depth and Length to 60 m, click the center of the four markers, and confirm. Keep the parcel inside the reclaimed land, away from the quay, with enough room for a city hall."
+      },
+      "step4": {
+        "title": "Place the city hall",
+        "description": "Open the building tool, select City Hall in the Public Services category, and place it at the center of your new parcel. Placing it founds the city and completes this tutorial."
+      }
+    },
+    "acquisition": {
+      "title": "Land acquisition and metro construction",
+      "description": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, explicitly demolish a public facility, and complete the connection.",
+      "step1": {
+        "title": "Connect the platforms with tracks",
+        "open": "Open the road and railway tool. Connect the two existing platforms with elevated tracks 7 m above the ground.",
+        "start": "Select Double Track and left-click the inner end of the western platform at the cyan marker. The start snaps to the existing endpoint at a height of 7 m.",
+        "end": "Left-click the inner end of the eastern platform at the yellow marker. You can plan construction even where the tracks overlap homes and offices.",
+        "confirm": "Review the estimate and press Confirm. This lesson covers track construction; it does not require setting up a train service.",
+        "variant": "In the railway category, select the highlighted Double Track card."
+      },
+      "step2": {
+        "title": "Observe acquisition and the obstruction",
+        "description": "Use Start to advance an epoch. Acquisition negotiations begin for private parcels in the track corridor. The fire station at the yellow marker is a public facility, so it cannot be acquired automatically and the tracks remain planned. Inspect parcel and building details to see what is happening."
+      },
+      "step3": {
+        "title": "Demolish the fire station explicitly",
+        "description": "Click the fire station at the yellow marker to open its details, then press Bulldoze to order its removal. Public facilities require your explicit demolition order. Leave the other homes and offices to land acquisition."
+      },
+      "step4": {
+        "title": "Wait for acquisition and completion",
+        "description": "Keep advancing epochs with Start. Track construction proceeds once private land acquisition and demolition are complete. Connecting the two platforms with completed tracks finishes this tutorial."
+      }
     }
   },
   "tips": {

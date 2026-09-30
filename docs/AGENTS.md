@@ -10,7 +10,7 @@ docs/
 ├── mkdocs.yml          # MkDocs 設定。新規ページは nav に追記する
 ├── requirements.txt
 ├── fetch_openapi.py    # OpenAPI仕様から api/openapi.json と api/index.html を作る(下記)
-├── tutorials/          # シナリオ作者向けのステップ設計(基本・地区・インフラ・鉄道)と共通部品表(MkDocsソース階層外)
+├── tutorials/          # シナリオ作者向けのステップ設計(基本・地区・インフラ・鉄道・埋立・用地買収)と共通部品表(MkDocsソース階層外)
 ├── docs/               # ビルドソース(実ファイルはこの1段深い階層)
 │   ├── index.md
 │   ├── overrides/      # テンプレート上書き

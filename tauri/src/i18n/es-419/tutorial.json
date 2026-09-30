@@ -304,7 +304,53 @@
       "highway": "A medida que crezca el pueblo, aumentarán los vehículos que transportan personas y mercancías. Hace falta preparar otra vía para que el tránsito de paso no se concentre en la calle local. En este tutorial aprenderás a construir una autopista elevada sobre una calle local y conectarlas con rampas para crear un enlace vial.",
       "mining": "Esta isla tiene recursos valiosos bajo tierra, pero no hay cómo llevarlos de la montaña al puerto. Sin transporte, la isla no puede convertir esa riqueza en una industria. En este tutorial aprenderás a preparar una mina, un ferrocarril de carga y un puerto para extraer mineral, transportarlo y exportarlo al extranjero.",
       "tourism": "Los isleños quieren que más personas conozcan las ruinas antiguas junto al mar. Sin un puerto ni alojamiento para recibir viajeros, los restaurantes del pueblo tampoco logran atraer turistas. En este tutorial aprenderás a recibir turistas con un hotel y una terminal de pasajeros, y a comprobar el efecto en las ventas de los restaurantes y el uso del autobús.",
-      "heading": "Un pedido para la alcaldía"
+      "heading": "Un pedido para la alcaldía",
+      "reclamation": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal. En este tutorial aprenderás a ganar terreno al mar, crear una parcela y colocar la sede municipal.",
+      "acquisition": "Entre dos plataformas elevadas hay viviendas, oficinas y una estación de bomberos. En este tutorial aprenderás a planificar vías, adquirir terrenos privados, ordenar la demolición de una instalación pública y completar la conexión."
+    },
+    "reclamation": {
+      "title": "Gana terreno al mar",
+      "description": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal. En este tutorial aprenderás a ganar terreno al mar, crear una parcela y colocar la sede municipal.",
+      "step1": {
+        "title": "Planifica el relleno costero",
+        "description": "Abre la herramienta de nivelación. Haz clic izquierdo en los cuatro marcadores amarillos en orden para dibujar un rectángulo desde la costa hacia el mar. Ciérralo con clic derecho, comprueba que el presupuesto sea de relleno costero y confirma el proyecto."
+      },
+      "step2": {
+        "title": "Completa el terreno ganado",
+        "description": "Avanza al menos una época con Iniciar y pulsa Siguiente. Como este tutorial no tiene proveedores de construcción, Siguiente omite el trabajo de relleno restante. El mar dentro del proyecto se convierte en tierra."
+      },
+      "step3": {
+        "title": "Crea una parcela en el terreno nuevo",
+        "description": "Abre la herramienta de parcelas y elige Parcela única. Ajusta Fondo y Largo a 60 m, haz clic en el centro de los cuatro marcadores y confirma. Deja la parcela dentro del terreno ganado y lejos del muelle, con espacio para la sede municipal."
+      },
+      "step4": {
+        "title": "Coloca la sede municipal",
+        "description": "Abre la herramienta de edificios y elige la sede del gobierno municipal en Servicios públicos. Colócala en el centro de la parcela nueva. Así fundas la ciudad y completas el tutorial."
+      }
+    },
+    "acquisition": {
+      "title": "Adquisición de terrenos y construcción del metro",
+      "description": "Entre dos plataformas elevadas hay viviendas, oficinas y una estación de bomberos. En este tutorial aprenderás a planificar vías, adquirir terrenos privados, ordenar la demolición de una instalación pública y completar la conexión.",
+      "step1": {
+        "title": "Conecta las plataformas con vías",
+        "open": "Abre la herramienta de carreteras y vías. Conecta las dos plataformas existentes con vías elevadas a 7 m del suelo.",
+        "start": "Elige vía doble y haz clic izquierdo en el extremo interior de la plataforma oeste, en el marcador celeste. El inicio se ajusta al extremo existente a una altura de 7 m.",
+        "end": "Haz clic izquierdo en el extremo interior de la plataforma este, en el marcador amarillo. Puedes planificar las vías aunque se superpongan con viviendas y oficinas.",
+        "confirm": "Revisa el presupuesto y pulsa Confirmar. Este tutorial trata la construcción de vías y no requiere configurar un servicio de trenes.",
+        "variant": "En la categoría ferroviaria, elige la tarjeta resaltada de vía doble."
+      },
+      "step2": {
+        "title": "Observa la adquisición y el bloqueo",
+        "description": "Avanza una época con Iniciar. Comienzan las negociaciones para adquirir las parcelas privadas que interfieren con las vías. La estación de bomberos del marcador amarillo es pública: no se adquiere automáticamente y las vías siguen planificadas. Revisa los detalles de parcelas y edificios."
+      },
+      "step3": {
+        "title": "Ordena la demolición de la estación de bomberos",
+        "description": "Haz clic en la estación de bomberos del marcador amarillo para abrir sus detalles y pulsa Demoler para ordenar su retiro. Las instalaciones públicas necesitan tu orden explícita. Deja las demás viviendas y oficinas a la adquisición de terrenos."
+      },
+      "step4": {
+        "title": "Espera la adquisición y la finalización",
+        "description": "Sigue avanzando épocas con Iniciar. Cuando terminan la adquisición de terrenos privados y la demolición, la obra de las vías puede avanzar. El tutorial termina al conectar ambas plataformas con vías completas."
+      }
     }
   },
   "tips": {

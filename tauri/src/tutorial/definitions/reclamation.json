@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "id": "reclamation",
+  "setup": [],
+  "steps": [
+    {
+      "id": "reclamation.plan",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step1.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.grading"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                4,
+                0
+              ],
+              "distance": 300,
+              "yaw": 0,
+              "pitch": 65
+            },
+            "markers": [
+              [
+                0,
+                4,
+                -70
+              ],
+              [
+                160,
+                4,
+                -70
+              ],
+              [
+                160,
+                4,
+                70
+              ],
+              [
+                0,
+                4,
+                70
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.planned",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "reclamation",
+          "action": "mark_epoch"
+        }
+      ]
+    },
+    {
+      "id": "reclamation.land",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                0,
+                0
+              ],
+              "distance": 300,
+              "yaw": 0,
+              "pitch": 65
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.land",
+            "equals": true
+          }
+        ]
+      },
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "reclamation",
+          "action": "commission"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "reclamation.parcel",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.land"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                0,
+                0
+              ],
+              "distance": 300,
+              "yaw": 0,
+              "pitch": 65
+            },
+            "markers": [
+              [
+                50,
+                0,
+                -30
+              ],
+              [
+                110,
+                0,
+                -30
+              ],
+              [
+                110,
+                0,
+                30
+              ],
+              [
+                50,
+                0,
+                30
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.parcel",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "reclamation.hall",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction",
+              "building.category:9",
+              "building.variant:100"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                0,
+                0
+              ],
+              "distance": 300,
+              "yaw": 0,
+              "pitch": 65
+            },
+            "markers": [
+              [
+                80,
+                0,
+                0
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.hall",
+            "equals": true
+          }
+        ]
+      }
+    }
+  ]
+}
