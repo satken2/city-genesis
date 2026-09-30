@@ -7,6 +7,7 @@
 
 - 編集・書き出し・検証の道具はここには無く、別レポジトリ `genesis-gallery`(非公開。`city-genesis` と並置される前提)にある。FBX への書き戻しは `../genesis-gallery/pipeline/library.py export --category <cat> --only <パス>`。ここには .blend 以外を置かない。
 - 手著作でないモデルは `genesis-gallery/pipeline/jobs/build_*.py` が形状をコードで持っており、ジョブを再実行すると .blend 側の手編集が消える。編集前にジョブの有無を確認する。ジョブと対象モデルの対応・制作記録は `genesis-gallery/pipeline/jobs/*.md`。
+- 駅舎の番号は `path_variant` と一致させる。`stations.blend` は2001〜2007、`paths.blend` の専用通路はp2002・p2004・p2005・p2007を使う。対応するフォルダと通路方式は公開仕様 `Q_駅舎パスのメッシュ生成.md` を参照。
 - 通常(Normal)を再著作したら、接写(Close)・遠景(Far)を別ジョブで著作しているモデルはそのジョブも実行し直す。接写ジョブは通常の FBX・bbox・原点・材質を保つ前提で作られている。
 - `props.blend` の 308/309(手動配置のモノレール車両)は、走行車両 `Models/Vehicles/24/0`・`middle` の原本でもある。書き出し直したら同じファイルを `Vehicles/24` にも置く(`unity/Tests/Vehicles/run.ps1 -TransitOnly` がバイト一致を検査する)。
 - 路線車両(vehicles.blend のバス12・LRT14・メトロ20・中距離21・貨物22の機関車、props.blend の 308/309)の帯は専用の材質で塗り分けてあり、Unity がその材質だけを路線カラーで塗り替える(`unity/Assets/Resources/Config/transit_vehicle_livery.json`)。帯の材質を車体の他の部位に流用しない。

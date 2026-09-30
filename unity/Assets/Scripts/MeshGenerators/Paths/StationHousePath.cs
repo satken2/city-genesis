@@ -85,8 +85,8 @@ public class StationHousePath : IPathMeshGenerator
 
             // 既存の専用通路は対応する方式で使い、他の組み合わせは共通パーツへ解決する。
             bool existingBody = ground
-                ? pathData.path_variant == 2003 || pathData.path_variant == 2013
-                : pathData.path_variant == 2001 || pathData.path_variant == 2011;
+                ? pathData.path_variant == 2004 || pathData.path_variant == 2007
+                : pathData.path_variant == 2002 || pathData.path_variant == 2005;
             if (existingBody) bodyPath = $"Models/Paths/p{pathData.path_variant}/body";
             RoadPath.CreateSplineMesh(container, spline, bodyPath, width,
                 0f, RoadPartHeights.STATION_BRIDGE_BASE_ABOVE_SPLINE, false, bodyFallbackPath,

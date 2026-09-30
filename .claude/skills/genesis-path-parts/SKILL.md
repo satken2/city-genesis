@@ -86,7 +86,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 ### 既存アセットの実例
 
 ```
-p201/p2001/p2011   1個  body                      (最小構成)
+p201/p2002/p2005   1個  body                      (最小構成)
 p1   4個  body line sidewalk tree                 (街路=PATH_STREET のタイプ既定)
 p2   8個  body line sidewalk tree wall center pillar portal   (高速道路=PATH_MOTORWAY のタイプ既定)
 p401 3個  body track portal                       (最小の線路)
