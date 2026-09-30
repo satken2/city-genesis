@@ -7,12 +7,14 @@ import trade from "./definitions/trade.json";
 import highway from "./definitions/highway.json";
 import mining from "./definitions/mining.json";
 import tourism from "./definitions/tourism.json";
+import reclamation from "./definitions/reclamation.json";
+import acquisition from "./definitions/acquisition.json";
 
 import type { Definition } from "./model";
 import * as constants from "../constants";
 
 /** DOMの構造や翻訳文ではなく、登録済みの操作名だけを定義で指定する。 */
-export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "path.type", "path.variant", "path.followTerrain", "path.platformSide", "path.back", "path.confirm", "path.cancel", "building.category", "building.variant", "building.back", "building.cancel", "building.confirm", "parcel.mode", "parcel.clear", "parcel.confirm", "transit.new", "transit.type", "transit.fare", "transit.headway", "transit.confirm", "transit.cancel", "window.path_build", "window.agent_detail"];
+export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "hud.grading", "agent.demolish", "path.type", "path.variant", "path.followTerrain", "path.platformSide", "path.back", "path.confirm", "path.cancel", "building.category", "building.variant", "building.back", "building.cancel", "building.confirm", "parcel.mode", "parcel.clear", "parcel.confirm", "transit.new", "transit.type", "transit.fare", "transit.headway", "transit.confirm", "transit.cancel", "window.path_build", "window.agent_detail"];
 /** 同じ名前の要素が並ぶ操作。`名前:値`(値はカテゴリ番号・バリアント番号・地形追従の設定値・ホーム設置側の値・区画の作成方法の名前)で1つだけを指せる。 */
 export const VALUE_TARGETS = ["path.type", "path.variant", "path.followTerrain", "path.platformSide", "building.category", "building.variant", "parcel.mode"];
 /** 値が番号でない操作の書式(それ以外の値は数字)。 */
@@ -60,4 +62,4 @@ export function validateDefinition(value: unknown): asserts value is Definition 
   }
 }
 export const DEFINITIONS: Record<string, Definition> = {};
-for (const value of [basic, district, infra, rail, trade, highway, mining, tourism]) { validateDefinition(value); DEFINITIONS[value.id] = value; }
+for (const value of [basic, district, infra, rail, trade, highway, mining, tourism, reclamation, acquisition]) { validateDefinition(value); DEFINITIONS[value.id] = value; }

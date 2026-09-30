@@ -16,6 +16,8 @@ import tradeScenarioThumbnail from "../../assets/images/scenarios/trade.png";
 import highwayScenarioThumbnail from "../../assets/images/scenarios/highway.png";
 import miningScenarioThumbnail from "../../assets/images/scenarios/mining.png";
 import tourismScenarioThumbnail from "../../assets/images/scenarios/tourism.png";
+import reclamationScenarioThumbnail from "../../assets/images/scenarios/reclamation.svg";
+import acquisitionScenarioThumbnail from "../../assets/images/scenarios/acquisition.svg";
 import roadStepImage from "../../assets/images/tutorial/step2.png";
 import roadActiveStepImage from "../../assets/images/tutorial/step4.png";
 import parcelStepImage from "../../assets/images/tutorial/step5.png";
@@ -47,7 +49,7 @@ export interface TutorialScenario {
 }
 
 /** 一覧の並び順(学ぶ順) */
-const SCENARIO_ORDER = ["basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism"];
+const SCENARIO_ORDER = ["basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
 
 const THUMBNAILS: Record<string, string> = {
   basic: basicScenarioThumbnail,
@@ -58,6 +60,8 @@ const THUMBNAILS: Record<string, string> = {
   highway: highwayScenarioThumbnail,
   mining: miningScenarioThumbnail,
   tourism: tourismScenarioThumbnail,
+  reclamation: reclamationScenarioThumbnail,
+  acquisition: acquisitionScenarioThumbnail,
 };
 
 /** 基本編は操作するボタンと同じ絵柄の画像をステップに添える(定義のステップIDで引く) */

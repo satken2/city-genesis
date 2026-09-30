@@ -295,4 +295,31 @@ if (process.env.TUTORIAL_API_TEST_URL) {
   const wrongSession = await createEnvironment(base, "another-city", {}, {}, { windows: {} }, master, () => {}, () => {});
   await rejects(() => wrongSession.create("buildings", {}), "HTTP writes rejected for another save");
 }
+{
+  const projects = fake();
+  const status = { planned: false, land: false, parcel: false, hall: false, track: false, negotiating: false, blocked: false, demolition: false, connected: false };
+  projects.read = async () => [{ checks: status }];
+  const negotiate = DEFINITIONS.acquisition.steps[1];
+  const demolition = DEFINITIONS.acquisition.steps[2];
+  projects.bindings["lesson.fire_station.building"] = { kind: "agents", id: 42 };
+  projects.facts.windows.detail = { visible: true, window: "agent_detail", entity: 43 };
+  check(await findPhase(demolition, projects), 0, "demolition waits for the exact public facility details");
+  projects.facts.windows.detail.entity = 42;
+  check(await findPhase(demolition, projects), 1, "the public facility details unlock the demolition button guide");
+  status.negotiating = true;
+  check(await evaluate(negotiate.complete!, projects), false, "acquisition alone cannot skip observing the public obstruction");
+  status.blocked = true;
+  check(await evaluate(negotiate.complete!, projects), true, "both acquisition and public obstruction unlock demolition");
+  check(await evaluate(DEFINITIONS.acquisition.steps[3].complete!, projects), false, "a planned track does not complete the lesson");
+  status.connected = true;
+  check(await evaluate(DEFINITIONS.acquisition.steps[3].complete!, projects), true, "completed platform connection passes");
+  const actions: string[] = [];
+  projects.scenarioAction = async (scenario, action) => { actions.push(`${scenario}.${action}`); };
+  const land = DEFINITIONS.reclamation.steps[1];
+  await execute(land.beforeCheck!, projects);
+  check(actions, ["reclamation.commission"], "reclamation commissions through the core action before rechecking land");
+  check(await evaluate(land.complete!, projects), false, "an unfinished reclamation remains incomplete after a refused early action");
+  status.land = true;
+  check(await evaluate(land.complete!, projects), true, "finished reclaimed land passes");
+}
 console.log(`PASS: ${checks} tutorial checks`);

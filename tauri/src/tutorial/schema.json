@@ -87,7 +87,8 @@
                   "trade",
                   "highway",
                   "mining",
-                  "tourism"
+                  "tourism",
+                  "reclamation"
                 ]
               },
               "action": {
@@ -351,7 +352,8 @@
                         "trade",
                         "highway",
                         "mining",
-                        "tourism"
+                        "tourism",
+                        "reclamation"
                       ]
                     },
                     "action": {
@@ -451,7 +453,8 @@
                         "trade",
                         "highway",
                         "mining",
-                        "tourism"
+                        "tourism",
+                        "reclamation"
                       ]
                     },
                     "action": {
@@ -856,7 +859,8 @@
                 "trade",
                 "highway",
                 "mining",
-                "tourism"
+                "tourism",
+                "reclamation"
               ]
             },
             "action": {

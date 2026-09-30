@@ -9,4 +9,5 @@
 - `TutorialLayer.tsx` / `dom.ts` は操作名で案内・制限を適用する。強調の見た目もここだけが付け、押せない(`disabled`)要素には付けない。同じ操作名が並ぶタイル・カードは `data-guide-value` を持ち、定義の `名前:値` で1つだけを指す(値を取れる名前は `definitions.ts` の `VALUE_TARGETS`。値は番号で、`parcel.mode` だけ作成方法の名前)。アイコンパネルは方針に関わらず段階の `allow`・`highlight` にあるボタンだけを押せる。システムトレイと設定・保存/ロード・新規ゲーム・確認ダイアログなどの関連画面は制限対象外。除外一覧は `dom.ts` が正。既存のdisabledを上書きしない。解除時に他の処理が設定したinertを消さない。
 - 建物・道路・鉄道・インフラの種別を選んで建てさせるステップと公共交通の路線の新設は、パネルを開く段階から確定までの全段階を `strict` にし、案内した操作(`name:値` のタイル・カード・戻る・取消・確定など)だけを `allow` に書く(`npm run test:tutorial` が全定義で検査する)。複数段階のステップは達成条件(`complete`)を満たすと `findPhase` が最終段階にし、`check`(「次へ」)も最終段階でなくても達成条件そのものを確かめる。確定でパネルが閉じても進めるため。
 - 全チュートリアルの全ステップを定義で書く。`components/tutorial/tutorialSteps.ts` は定義から一覧・タイトル・進捗表示の情報を導くだけで判定を持たない。ステップのタイトルは `tutorial.<シナリオID>.step<legacyStep>.title`。
+- `reclamation` は造成・埋立地内の区画・市庁舎の4ステップ、`acquisition` は線路計画・買収観測・公共施設の撤去・線路完成の4ステップ。造成と撤去の入口は `hud.grading` / `agent.demolish`(建物詳細の取り壊しボタン)。案内先は通常パネルと同じ操作名を使う。
 - 作者の設計書は `docs/tutorials/`、公開契約は `docs/docs/programs/チュートリアル基盤.md`。`npm run test:tutorial` と7言語の翻訳整合を検証する。

@@ -24,7 +24,7 @@ await build({ entryPoints: ["tools/tutorial/component-tests.tsx"], outfile: comp
 await import(pathToFileURL(componentOutput).href + `?run=${Date.now()}`);
 const registry = JSON.parse(await readFile("src-tauri/config/window-registry.json", "utf8"));
 const LANGS = ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"];
-const SCENARIOS = ["basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism"];
+const SCENARIOS = ["basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
 const walk = (value, visit) => { if (value && typeof value === "object") { visit(value); Object.values(value).forEach(v => walk(v, visit)); } };
 const lookup = (text, key) => key.split(".").reduce((v, k) => v?.[k], text);
 const definitions = {};
@@ -50,7 +50,7 @@ for (const lang of LANGS) {
 }
 if (!registry.tutorial_intro) throw new Error("Intro window is not registered");
 let steps = 0;
-for (const name of ["basic", "scenario2", "scenario3", "scenario4"]) {
+for (const name of ["basic", "scenario2", "scenario3", "scenario4", "reclamation", "acquisition"]) {
   const text = await readFile(`../docs/tutorials/${name}.md`, "utf8");
   const designed = [...text.matchAll(/^ID: `([^`]+)`/gm)].map(m => m[1]);
   const defined = definitions[name].steps.map(step => step.id);

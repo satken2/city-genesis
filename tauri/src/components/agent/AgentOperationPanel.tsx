@@ -279,6 +279,7 @@ export function AgentOperationPanel({
         className="operation-btn"
         type="button"
         title={agent.status === STATUS_SCHEDULED_DEMOLITION ? t("agent.action.cancelBulldoze") : t("agent.action.bulldoze")}
+        data-guide="agent.demolish"
         disabled={loading || !canBulldoze}
         onClick={() => void handleBulldoze()}
       >

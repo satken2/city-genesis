@@ -307,7 +307,53 @@
       "highway": "Avec le développement de la ville, davantage de véhicules transporteront personnes et marchandises. Il faut prévoir un autre itinéraire pour que le trafic de transit ne se concentre pas sur la route locale. Ce tutoriel vous permettra d'apprendre à faire passer une autoroute au-dessus d'une route locale et à les relier par des bretelles pour créer un échangeur.",
       "mining": "Des ressources précieuses dorment sous cette île, mais aucun moyen de transport ne relie la montagne au port. Sans ce lien, l'île ne peut pas en faire une industrie. Ce tutoriel vous permettra d'apprendre à aménager une mine, un chemin de fer de fret et un port pour extraire, transporter et exporter du minerai.",
       "tourism": "Les insulaires aimeraient faire découvrir les ruines antiques du bord de mer à davantage de visiteurs. Mais sans port ni hébergement pour les accueillir, les restaurants peinent aussi à attirer des touristes. Ce tutoriel vous permettra d'apprendre à accueillir des touristes grâce à un hôtel et un terminal de passagers, puis à vérifier les effets sur les ventes des restaurants et la fréquentation des bus.",
-      "heading": "Une demande au maire"
+      "heading": "Une demande au maire",
+      "reclamation": "Ce minuscule récif manque de terrain plat pour un hôtel de ville. Dans ce tutoriel, vous apprendrez à remblayer la côte, créer une parcelle et y placer un hôtel de ville.",
+      "acquisition": "Des logements, des bureaux et une caserne de pompiers se trouvent entre deux quais surélevés. Dans ce tutoriel, vous apprendrez à planifier les voies, acquérir les terrains privés, démolir explicitement un équipement public et terminer la liaison."
+    },
+    "reclamation": {
+      "title": "Gagner du terrain sur la mer",
+      "description": "Ce minuscule récif manque de terrain plat pour un hôtel de ville. Dans ce tutoriel, vous apprendrez à remblayer la côte, créer une parcelle et y placer un hôtel de ville.",
+      "step1": {
+        "title": "Planifier le remblaiement",
+        "description": "Ouvrez l’outil de terrassement. Cliquez avec le bouton gauche sur les quatre repères jaunes dans l’ordre pour dessiner un rectangle du rivage vers la mer. Fermez-le avec un clic droit, vérifiez que le devis concerne un remblaiement et confirmez le projet."
+      },
+      "step2": {
+        "title": "Terminer le terrain gagné sur la mer",
+        "description": "Avancez d’au moins une époque avec Démarrer, puis appuyez sur Suivant. Ce tutoriel n’a pas de fournisseurs de construction : Suivant achève les travaux de remblaiement restants. La mer devient un terrain constructible."
+      },
+      "step3": {
+        "title": "Créer une parcelle sur le nouveau terrain",
+        "description": "Ouvrez l’outil de parcelles et choisissez Parcelle unique. Réglez Profondeur et Longueur à 60 m, cliquez au centre des quatre repères et confirmez. Gardez la parcelle à l’intérieur du remblai, à l’écart du quai, avec assez de place pour l’hôtel de ville."
+      },
+      "step4": {
+        "title": "Placer l’hôtel de ville",
+        "description": "Ouvrez l’outil de bâtiments et choisissez l’hôtel de ville dans Services publics. Placez-le au centre de votre nouvelle parcelle. La ville est alors fondée et le tutoriel se termine."
+      }
+    },
+    "acquisition": {
+      "title": "Acquisition foncière et construction du métro",
+      "description": "Des logements, des bureaux et une caserne de pompiers se trouvent entre deux quais surélevés. Dans ce tutoriel, vous apprendrez à planifier les voies, acquérir les terrains privés, démolir explicitement un équipement public et terminer la liaison.",
+      "step1": {
+        "title": "Relier les quais par des voies",
+        "open": "Ouvrez l’outil de routes et de voies. Reliez les deux quais existants par des voies surélevées à 7 m du sol.",
+        "start": "Choisissez la double voie et cliquez avec le bouton gauche sur l’extrémité intérieure du quai ouest, au repère cyan. Le départ s’accroche à l’extrémité existante à 7 m de hauteur.",
+        "end": "Cliquez avec le bouton gauche sur l’extrémité intérieure du quai est, au repère jaune. Vous pouvez planifier les voies même si elles traversent des logements et des bureaux.",
+        "confirm": "Vérifiez le devis et appuyez sur Confirmer. Ce tutoriel porte sur la construction des voies et ne demande pas de créer un service de trains.",
+        "variant": "Dans la catégorie ferroviaire, choisissez la carte de double voie mise en évidence."
+      },
+      "step2": {
+        "title": "Observer l’acquisition et le blocage",
+        "description": "Avancez d’une époque avec Démarrer. Les négociations d’acquisition commencent pour les parcelles privées sur le tracé. La caserne au repère jaune est un équipement public : elle n’est pas acquise automatiquement et les voies restent à l’état de projet. Consultez les détails des parcelles et bâtiments."
+      },
+      "step3": {
+        "title": "Ordonner la démolition de la caserne",
+        "description": "Cliquez sur la caserne au repère jaune pour ouvrir ses détails, puis appuyez sur Démolir pour ordonner sa démolition. Les équipements publics exigent votre ordre explicite. Laissez l’acquisition foncière traiter les autres logements et bureaux."
+      },
+      "step4": {
+        "title": "Attendre l’acquisition et l’achèvement",
+        "description": "Continuez à avancer les époques avec Démarrer. La construction des voies progresse après l’acquisition des terrains privés et les démolitions. Le tutoriel se termine lorsque les deux quais sont reliés par des voies achevées."
+      }
     }
   },
   "tips": {
