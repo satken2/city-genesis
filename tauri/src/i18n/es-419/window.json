@@ -119,6 +119,7 @@
     "scoreMeterTooltip": "Puntaje de gestión (por hogar, máximo 2.0)"
   },
   "topmenu": {
+    "coreConnectionFailed": "Error de conexión",
     "newGame": "Partida nueva",
     "load": "Cargar",
     "options": "Opciones",

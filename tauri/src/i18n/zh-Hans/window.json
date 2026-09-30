@@ -119,6 +119,7 @@
     "scoreMeterTooltip": "施政评分（每户，满分2.0）"
   },
   "topmenu": {
+    "coreConnectionFailed": "连接失败",
     "newGame": "新游戏",
     "load": "读档",
     "options": "选项",

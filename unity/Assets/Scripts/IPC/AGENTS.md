@@ -28,6 +28,10 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 - 周期的に送り続けるメッセージを置かない。Unity不在中もUI→Unityの送信はMMFに溜まり、満杯になると以後の送信が`MMF buffer full`で失敗し続ける。再同期は`system:graphic_ready`起点か、Unityが起動時に自分から状態を送る(`weather:state`等)。カメラ等の連続値は問い合わせ方式(`camera:query_state`)。
 - 用語: Envelope上Unityは"parent"。Rustの`send_to_parent`はUnity宛て送信のこと。
 
+明示的な `system:shutdown` は互換性不一致の状態でも終了要求として受け付ける。
+
+`system:backend_connection {connected: boolean}` は `ApiClient.UiBackendConnected` を更新する。都市表示や編集モードをクリアせず、入力ゲートとHTTP更新要求の停止に使う。状態変更時と `system:graphic_ready` の応答時にだけ送る。製品版の独立したHTTP監視結果(`HealthBackendConnected`)と両方が真のときに操作できる。
+
 ## 実装側の規約
 
 - 表示状態の正は`IpcViewCoordinator`のレイヤー記憶(`_layerModes`/`_layerSubModes`/`_layerFlags`)だけ。編集ステート中の表示も`SyncFromState`のプリセットが`ForceLayer`で適用するので、`IpcStateCoordinator.ApplyState*`から`VisualModeHandler`を直接触らない(UIへ通知する状態と実際の見え方がズレる)。
@@ -52,4 +56,4 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 
 - `FrontendVersion` はリポジトリ直下 `version.json` から生成する。手編集せず `tauri` の `npm run sync:version` を使う。
 - `system:graphic_ready` / `system:ready` でフロント版・API契約・IPC契約を照合する。`IpcClient.ProtocolCompatible` と `BackendCompatibility.Compatible` の両方が成立するまでゲーム用操作を受け付けない。
-- 起動直後・コア接続状態の変化時だけ起動通知を送る。同じ通知を定期的にMMFへ溜めない。
+- 起動時のHTTP照合とIPC初期化に合わせて起動通知を送る。コアの版情報を取得できるまでの再試行後も照合結果を伝えるが、取得後は版情報を再取得せず、同じ起動通知を定期的にMMFへ溜めない。

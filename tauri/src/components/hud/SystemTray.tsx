@@ -33,7 +33,7 @@ type CompleteConstructionResult = {
   remaining_buildings: number;
 };
 
-export function SystemTray() {
+export function SystemTray({ backendConnected = true }: { backendConnected?: boolean }) {
   const { t } = useTranslation();
   const { visible, apiBaseUrl, templateMode, debugExecution, epochExecuting } = useHudSession();
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -60,6 +60,7 @@ export function SystemTray() {
 
   /** テンプレートモード(製作者向けの編集モード)の切替。バックエンドのセッション設定を書き換える。 */
   async function toggleTemplateMode() {
+    if (!backendConnected) return;
     try {
       await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), {
         method: "PATCH",
@@ -76,7 +77,7 @@ export function SystemTray() {
    * セッション再読み込みを送る(地形の平坦化・交差点の分割が起きるため差分ではなく再読み込み)。
    */
   async function completeConstruction() {
-    if (completing) return;
+    if (completing || !backendConnected) return;
     setCompleting(true);
     await emit("epoch:executing", { executing: true });
     await showNotification({ message: t("templateTools.completing") });
@@ -113,6 +114,7 @@ export function SystemTray() {
   }
 
   function handleTrayClick(icon: HudIconDef) {
+    if (!backendConnected && icon.id !== "settings") return;
     if (icon.id === "reload") {
       void sendSessionForceReload();
       return;
@@ -130,6 +132,7 @@ export function SystemTray() {
           className="hud-icon-btn system-tray-icon"
           type="button"
           title={t(templateMode ? "taskbar.trayTemplateOn" : "taskbar.trayTemplateOff")}
+          disabled={!backendConnected}
           onClick={() => void toggleTemplateMode()}
         >
           <img
@@ -147,7 +150,7 @@ export function SystemTray() {
             className="hud-icon-btn system-tray-icon"
             type="button"
             title={t("templateTools.trayComplete")}
-            disabled={completing}
+            disabled={completing || !backendConnected}
             onClick={() => void completeConstruction()}
           >
             <img src={iconUrl("tray_complete.png")} alt={t("templateTools.trayComplete")} className="hud-icon-img" draggable={false} />
@@ -157,6 +160,7 @@ export function SystemTray() {
             className="hud-icon-btn system-tray-icon"
             type="button"
             title={t("templateTools.trayStreetGrid")}
+            disabled={!backendConnected}
             onClick={() => void openRegisteredWindow("street_grid")}
           >
             <img src={iconUrl("tray_street_grid.png")} alt={t("templateTools.trayStreetGrid")} className="hud-icon-img" draggable={false} />
@@ -170,6 +174,7 @@ export function SystemTray() {
           className="hud-icon-btn system-tray-icon"
           type="button"
           title={t(icon.tooltipKey)}
+          disabled={!backendConnected && icon.id !== "settings"}
           style={{ padding: icon.padding }}
           onClick={() => handleTrayClick(icon)}
         >

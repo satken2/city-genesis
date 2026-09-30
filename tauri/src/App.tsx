@@ -1,4 +1,4 @@
-import { configureBackendRequests } from "./utils/api";
+import { configureBackendRequests, setBackendConnected } from "./utils/api";
 import { useEffect, useMemo, useState, lazy, Suspense, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -104,6 +104,7 @@ function App() {
   const appWindow = useMemo(() => getCurrentWindow(), []);
   const [context, setContext] = useState<WindowContext | null>(null);
   const [apiBaseUrl, setApiBaseUrl] = useState<string>("");
+  const [backendConnected, setConnection] = useState(true);
   const [openWindowCount, setOpenWindowCount] = useState<number>(0);
   const [queryState, setQueryState] = useState<QueryState>({ status: "idle" });
   const [actionState, setActionState] = useState<string>("");
@@ -111,7 +112,18 @@ function App() {
 
   useEffect(() => {
     let disposed = false;
+    let receivedConnectionEvent = false;
+    const applyConnection = (connected: boolean) => {
+      if (disposed) return;
+      setBackendConnected(connected);
+      setConnection(connected);
+    };
+    const connectionListener = listen<{ connected: boolean }>("backend-connection", (event) => {
+      receivedConnectionEvent = true;
+      applyConnection(event.payload.connected);
+    });
     const initialize = async () => {
+      await connectionListener;
       const label = appWindow.label;
       if (label === "icon-panel") {
         setWindowKind("icon-panel");
@@ -138,10 +150,11 @@ function App() {
       } else if (label !== "main") {
         setWindowKind("popup");
       }
-      const status = await invoke<{ api_base_url: string; open_window_count: number }>("get_connection_status");
+      const status = await invoke<{ api_base_url: string; open_window_count: number; backend_connected: boolean }>("get_connection_status");
       if (!disposed) {
         setApiBaseUrl(status.api_base_url);
         setOpenWindowCount(status.open_window_count);
+        if (!receivedConnectionEvent) applyConnection(status.backend_connected);
       }
 
       // window-registry のポップアップ以外(HUD各枚・トップメニュー・通知・Tips・ヒントバー・
@@ -186,6 +199,7 @@ function App() {
     return () => {
       disposed = true;
       unlistenWindow?.();
+      void connectionListener.then((unlisten) => unlisten());
     };
   }, [appWindow, i18n]);
 
@@ -309,9 +323,12 @@ function App() {
   }
 
   configureBackendRequests(apiBaseUrl);
+  const connectionBlocked = !backendConnected && windowKind !== "topmenu" && windowKind !== "system-tray"
+    && !["settings", "credits"].includes(context?.window_type ?? "");
 
   return (
     <MasterDataProvider apiBaseUrl={apiBaseUrl}>
+      <div className="connection-content" {...(connectionBlocked ? { inert: "" } : {})}>
       <TutorialLayer windowType={context?.window_type ?? windowKind} entity={context?.entity?.id} />
       {windowKind === "topmenu" ? (
         <TopMenu apiBaseUrl={apiBaseUrl} />
@@ -320,7 +337,7 @@ function App() {
       ) : windowKind === "cockpit" ? (
         <Cockpit />
       ) : windowKind === "system-tray" ? (
-        <SystemTray />
+        <SystemTray backendConnected={backendConnected} />
       ) : windowKind === "display-tray" ? (
         <DisplayTray />
       ) : windowKind === "hintbar" ? (
@@ -677,6 +694,8 @@ function App() {
         </section>
         </main>
       )}
+      </div>
+      {connectionBlocked && <div className="backend-connection-overlay" role="status">{t("common.backendConnectionWaiting")}</div>}
     </MasterDataProvider>
   );
 }

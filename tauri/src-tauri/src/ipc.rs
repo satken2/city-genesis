@@ -690,6 +690,8 @@ pub async fn handle_incoming_message(
                 let _ = app.emit("compatibility-error", "IPC_CONTRACT_MISMATCH");
                 return Ok(());
             }
+            let connected = state.lock().backend_health.connected;
+            crate::publish_backend_connection(&app, &state, connected);
 
             // Unity の起動完了通知。初回起動と、クラッシュ後にスーパーバイザ
             // (genesis.py)が Unity を自動再起動した場合の両方で送られてくる。

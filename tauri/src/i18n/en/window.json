@@ -119,6 +119,7 @@
     "scoreMeterTooltip": "Governance score (per household, max 2.0)"
   },
   "topmenu": {
+    "coreConnectionFailed": "Connection failed",
     "newGame": "New Game",
     "load": "Load",
     "options": "Options",

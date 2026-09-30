@@ -9,43 +9,35 @@ import exitIcon from "../../assets/images/exit.png";
 import githubIcon from "../../assets/images/github.png";
 import settingIcon from "../../assets/images/setting.png";
 import "./TopMenu.css";
-import { fetchApi, buildApiUrl } from "../../utils/api";
 import { CoreVersion, frontendVersion } from "../../utils/version";
 
 type SessionStatePayload = {
   current_save_id: string | null;
-  session?: Record<string, unknown>;
+  session: Record<string, unknown> | null;
   city?: Record<string, unknown>;
   isLoading: boolean;
+  coreVersion: string | null;
+  backendConnected: boolean;
 };
 
 export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const appWindow = useMemo(() => getCurrentWindow(), []);
-  const [core, setCore] = useState<CoreVersion | null>(null);
-  const [versionError, setVersionError] = useState("");
+  const [coreVersion, setCoreVersion] = useState<string | null>(null);
+  const [backendConnected, setBackendConnected] = useState(false);
+  const coreAvailable = backendConnected && !!coreVersion;
   useEffect(() => {
     if (!apiBaseUrl) return;
     let active = true;
-    const refresh = () => {
-      void Promise.all([
-        fetchApi<CoreVersion>(buildApiUrl(apiBaseUrl, "/api/v1/system/version"), { cache: "no-store" }),
-        invoke<{ error: string | null }>("get_frontend_status"),
-      ]).then(([value, status]) => {
-        if (!active) return;
-        setCore(value);
-        const error = value.api_contract_version !== frontendVersion.api_contract_version ? "API_CONTRACT_MISMATCH" : status.error;
-        setVersionError(error ? t(`saveCompatibility.${error}`) : "");
-      }).catch(() => {
-        if (!active) return;
-        setCore(null);
-        setVersionError(t("saveCompatibility.versionUnavailable"));
-      });
-    };
-    refresh();
-    const timer = setInterval(refresh, 5000);
-    return () => { active = false; clearInterval(timer); };
-  }, [apiBaseUrl, t]);
+    void invoke<CoreVersion>("get_core_version").then(value => {
+      if (!active) return;
+      setCoreVersion(value.core_version);
+    }).catch(() => {
+      if (!active) return;
+      setCoreVersion(null);
+    });
+    return () => { active = false; };
+  }, [apiBaseUrl]);
   const [quitting, setQuitting] = useState(false);
   const [debugExecution, setDebugExecution] = useState(false);
 
@@ -59,12 +51,15 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
    */
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    const connectionListener = appWindow.listen<{ connected: boolean }>("backend-connection", (event) => {
+      setBackendConnected(event.payload.connected);
+    });
     appWindow
       .listen<SessionStatePayload>("session-state", (event) => {
         const payload = event.payload;
+        setCoreVersion(payload.coreVersion);
+        setBackendConnected(payload.backendConnected);
         setDebugExecution((payload.session?.debug_execution as boolean) ?? false);
-
-        if (versionError) { void appWindow.show(); return; }
 
         // ローディング中はトップメニューを隠す。
         // Tips が前面に表示されており、トップメニューがその上に出てくるのを防ぐ。
@@ -87,8 +82,9 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
       .catch(console.error);
     return () => {
       unlisten?.();
+      void connectionListener.then((stop) => stop());
     };
-  }, [appWindow, versionError]);
+  }, [appWindow]);
 
   /**
    * 新規ゲームボタン押下時の処理。
@@ -177,15 +173,15 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         <button
           className="topmenu-btn topmenu-btn-primary"
           onClick={handleNewGame}
-          disabled={!core || !!versionError}
+          disabled={!coreAvailable}
           type="button"
         >
           {t("topmenu.newGame")}
         </button>
-        <button className="topmenu-btn" onClick={handleLoad} disabled={!core || !!versionError} type="button">
+        <button className="topmenu-btn" onClick={handleLoad} disabled={!coreAvailable} type="button">
           {t("topmenu.load")}
         </button>
-        <button className="topmenu-btn" onClick={handleScenarioManager} disabled={!core || !!versionError} type="button">
+        <button className="topmenu-btn" onClick={handleScenarioManager} disabled={!coreAvailable} type="button">
           {t("scenarios.manage")}
         </button>
       </div>
@@ -198,7 +194,7 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         <button
           className="topmenu-btn topmenu-btn-debug"
           onClick={handleDebugInit}
-          disabled={!core || !!versionError}
+          disabled={!coreAvailable}
           title={t("topmenu.debugInit")}
           aria-label={t("topmenu.debugInit")}
           type="button"
@@ -222,8 +218,10 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         <span className="topmenu-github-label">satken2/city-genesis</span>
       </button>
 
-      <div className="topmenu-versions"><span>Core {core ? `v${core.core_version}` : t("saveCompatibility.unknown")}</span><span>Graphic v{frontendVersion.frontend_version}</span>
-        {versionError && <span role="alert">{versionError}</span>}</div>
+      <div className="topmenu-versions">
+        <span>Core {coreAvailable ? `v${coreVersion}` : t("topmenu.coreConnectionFailed")}</span>
+        <span>Graphic v{frontendVersion.frontend_version}</span>
+      </div>
       {/**
        * オプションボタン。
        * 終了ボタンの左側に正方形で配置し、アイコン画像のみを表示する。

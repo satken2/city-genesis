@@ -1,5 +1,6 @@
 {
   "common": {
+    "backendConnectionWaiting": "正在检查后端连接…",
     "loading": "加载中...",
     "fetchError": "数据获取失败",
     "noData": "无数据",

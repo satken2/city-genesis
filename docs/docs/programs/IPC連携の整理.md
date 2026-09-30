@@ -132,6 +132,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_connector:show`           | `ui -> graphic`  | 経済主体詳細パネル(AgentDetailPanel)の表示中、施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`）を Unity 上に色付きマーカーで読み取り専用ハイライトする。`{ agent_id, infra_node_id, depot_node_id }` を含む。`infra_node_id == depot_node_id`（共用接続ノード）ならマーカーは1つ。0 のノードIDは表示しない |
 | `edit_connector:hide`           | `ui -> graphic`  | 接続端子ノードのハイライト表示をクリアする。Unity は接続点編集モード（`STATE_EDIT_CONNECTOR`）中だった場合のみ、モードを終了して通常モードへ戻す。他のステート中はハイライトを消すだけ（`agent_detail` は建物建設などの編集ウィンドウと同時に開けるため、素の `STATE_NORMAL` だとそちらのステートまで打ち切る。`edit_path:cancel_topology_edit` と同じ考え方）。パネルが別エージェントへ遷移したときは UI が、ウィンドウが閉じられたときは Rust（`window.rs`）が送る |
 | `game:time_update`              | `graphic -> ui`  | ゲーム内時間（エポック・日付）の更新通知                  |
+| `system:backend_connection`     | `ui -> graphic`  | `{connected: boolean}`。Tauriが確認したコアの接続・互換状態。状態変更時と `system:graphic_ready` の応答時に送り、Unityは都市表示を保持したまま入力とHTTP更新要求を止める。周期送信はしない。IPC契約2から必須 |
 | `system:shutdown`               | `ui -> graphic`  | グラフィックプログラムを終了する                      |
 | `system:ready`                  | `ui -> graphic`  | UIプログラムの準備完了通知                        |
 | `system:ping`                   | `ui <-> graphic` | 疎通確認用                                 |
@@ -564,4 +565,4 @@ Unity は `RoadMemberEditManager` が担う。入力プリセット `ROAD_MEMBER
 
 `system:graphic_ready` のペイロードは `frontend_version`、`api_contract_version`、`ipc_contract_version`、`core_compatible`。UIは自身の契約番号との一致を検査し、`system:ready` に自身の同3項目と `accepted` を返す。Envelope自体の `version: "1.0"` は変更しない。
 
-UnityはコアとのHTTP契約とUIとのIPC契約が成立するまでマスター取得・ゲーム用操作・セッションポーリングによる開始を解禁しない。不一致のUnityを未接続として扱い、開発用の描画待ち省略に流さない。コアのAPI照合は再起動に備えて再実行する。詳細は[バージョニングと互換性](バージョニングと互換性.md)。
+UnityはコアとのHTTP契約とUIとのIPC契約が成立するまでマスター取得・ゲーム用操作・セッションポーリングによる開始を解禁しない。不一致のUnityを未接続として扱い、開発用の描画待ち省略に流さない。HTTP契約は各プロセスの起動時に照合し、コアの版情報を周期的に取得しない。起動準備中の取得失敗は再試行できるが、受信できた版情報は契約不一致でも保持する。詳細は[バージョニングと互換性](バージョニングと互換性.md)。

@@ -200,4 +200,3 @@
 }
 
 .topmenu-versions { position: absolute; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 1.11rem; color: var(--flat-text-body); }
-.topmenu-versions [role="alert"] { color: var(--flat-danger); max-width: 260px; }

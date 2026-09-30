@@ -243,10 +243,11 @@ public class InputHandler : MonoBehaviour
 
     private void Update()
     {
+        if (!ApiClient.BackendConnected && isDragging) EndDrag();
         // フライ・撮影モード中はマウス入力（クリック・ホバー・ドラッグ）を一切受け付けない。
         // カメラを自由飛行させている間は3Dオブジェクトの選択やホバー（ツールチップ含む）を
         // 完全に無効化するため、他のどの判定よりも先に即抜けする。
-        if (TutorialRuntime.BlocksWorldInput || DriveMode.IsOpen || (CameraController.Instance != null && CameraController.Instance.BlocksWorldInput))
+        if (!ApiClient.BackendConnected || TutorialRuntime.BlocksWorldInput || DriveMode.IsOpen || (CameraController.Instance != null && CameraController.Instance.BlocksWorldInput))
         {
             ClearHover();
             TooltipManager.Instance?.Hide();

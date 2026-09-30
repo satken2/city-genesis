@@ -119,6 +119,7 @@
     "scoreMeterTooltip": "시정 점수(1가구당 / 만점 2.0)"
   },
   "topmenu": {
+    "coreConnectionFailed": "연결 실패",
     "newGame": "새 게임",
     "load": "불러오기",
     "options": "옵션",

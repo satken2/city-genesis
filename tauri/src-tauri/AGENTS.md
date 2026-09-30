@@ -87,5 +87,7 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 ## 版の照合
 
 - `src/version.rs` は `../../version.json` の埋め込み定義、HTTPの共通ヘッダー(版)、コア照合、ロード事前検証の共通窓口。
+- コアの版情報と照合結果は `AppState.core_info` の `OnceCell` に保持し、全WebView・開始・ロード・セッション監視が共有する。同時取得は1本にまとまり、取得成功後は不一致の結果もプロセス終了まで保持する。未取得時の通信失敗だけは再試行できる。コアの再起動・版の差し替えを前提にした定期確認は置かない。開発中に通信契約やマスターデータを変更したときはフロントも起動し直す。
+- `get_core_version` は共有した版情報を返す。接続表示はセッション監視の `session-state` に含める `coreVersion`・`backendConnected` を使い、版情報APIを死活監視に使わない。セッション消失・開発版の2回連続の通信失敗時の後始末は `return_to_topmenu` に集約する。製品版は2回連続で失敗したらUnityへ終了を通知して終了する。1回目は表示状態を保持し、`backend-connection` イベントで操作を止める。`AppState.backend_health` は連続失敗と接続状態を保持し、成功時に失敗回数を解除する。
 - Unityは `system:graphic_ready` にフロント版・API契約・IPC契約・コア照合結果を付ける。`system:ready` で照合結果を返す。不一致は `graphic_contract_error` に保持し、Unityなしの開発起動として迂回しない。
 - ゲーム開始コマンドは、ポップアップや現セッションを閉じる前に版・保存データ・確認済みフラグを検査する。

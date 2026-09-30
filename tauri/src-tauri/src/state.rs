@@ -38,6 +38,8 @@ pub struct AppState {
     /// UI→Graphic方向のMMFライター。
     pub writer_channel: Option<MmfChannel>,
     pub api_base_url: String,
+    /// コアの版情報と照合結果。全WebView・開始処理・セッション監視が同じ起動時の結果を使う。
+    pub core_info: Arc<tokio::sync::OnceCell<crate::version::CoreInfo>>,
     /// HUD(とヒントバー・チュートリアル・トップメニュー等)を表示しているモニターのインデックス
     pub current_monitor_index: usize,
     /// マルチディスプレイモード。ポップアップをHUDとは別のモニターに表示する
@@ -53,6 +55,7 @@ pub struct AppState {
     pub shutdown: Arc<AtomicBool>,
     /// 最後に取得したセッション情報
     pub session_state: Option<serde_json::Value>,
+    pub backend_health: crate::backend_health::BackendHealth,
     /// 最後に確認した current_save_id
     pub last_save_id: Option<String>,
     /// ローディング中フラグ（ゲーム開始処理中）
@@ -139,6 +142,7 @@ impl SharedState {
             saved_geometries: HashMap::new(),
             writer_channel: None,
             api_base_url,
+            core_info: Arc::new(tokio::sync::OnceCell::new()),
             current_monitor_index: 0,
             multi_display: false,
             popup_monitor_index: 0,
@@ -146,6 +150,7 @@ impl SharedState {
             graphic_launch_command,
             shutdown: Arc::new(AtomicBool::new(false)),
             session_state: None,
+            backend_health: Default::default(),
             last_save_id: None,
             is_loading: false,
             loading_id: 0,

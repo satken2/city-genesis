@@ -58,16 +58,40 @@ pub fn client() -> reqwest::Client {
     reqwest::Client::builder().default_headers(headers()).build().expect("HTTP client")
 }
 
+#[derive(Clone)]
+pub struct CoreInfo {
+    pub version: Value,
+    pub error: Option<String>,
+}
+
+/// コアはアプリ実行中に差し替わらないため、取得成功後の版情報と照合結果を起動中ずっと共有する。
+/// 起動準備中の取得失敗は確定せず、次の初期取得で再試行できる。同時要求もOnceCellで1本にまとめる。
+pub async fn core_info(state: &SharedState) -> Result<CoreInfo, String> {
+    let (base, cache) = { let guard = state.lock(); (guard.api_base_url.clone(), guard.core_info.clone()) };
+    cache.get_or_try_init(|| async {
+        let response = client().get(format!("{}/api/v1/system/version", base.trim_end_matches('/')))
+            .timeout(Duration::from_secs(10)).send().await.map_err(|e| e.to_string())?;
+        let remote: Value = response.error_for_status().map_err(|e| e.to_string())?.json().await.map_err(|e| e.to_string())?;
+        let error = if remote["api_contract_version"] != definition()["api_contract_version"] {
+            Some(format!("API_CONTRACT_MISMATCH: core {} / UI {}", remote["api_contract_version"], definition()["api_contract_version"]))
+        } else { None };
+        Ok(CoreInfo { version: remote, error })
+    }).await.cloned()
+}
+
 pub async fn verify_core(state: &SharedState) -> Result<(), String> {
-    let (base, error) = { let guard = state.lock(); (guard.api_base_url.clone(), guard.graphic_contract_error.clone()) };
+    if !state.lock().backend_health.connected { return Err("BACKEND_DISCONNECTED".into()); }
+    let error = state.lock().graphic_contract_error.clone();
     if let Some(error) = error { return Err(error); }
-    let response = client().get(format!("{}/api/v1/system/version", base.trim_end_matches('/')))
-        .timeout(Duration::from_secs(10)).send().await.map_err(|e| e.to_string())?;
-    let remote: Value = response.error_for_status().map_err(|e| e.to_string())?.json().await.map_err(|e| e.to_string())?;
-    if remote["api_contract_version"] != definition()["api_contract_version"] {
-        return Err(format!("API_CONTRACT_MISMATCH: core {} / UI {}", remote["api_contract_version"], definition()["api_contract_version"]));
+    if let Some(error) = core_info(state).await?.error {
+        return Err(error);
     }
     Ok(())
+}
+
+#[tauri::command]
+pub async fn get_core_version(state: tauri::State<'_, SharedState>) -> Result<Value, String> {
+    Ok(core_info(state.inner()).await?.version)
 }
 
 pub async fn prepare_graphic(state: &SharedState) -> Result<(), String> {
@@ -104,4 +128,83 @@ pub async fn validate_load(state: &SharedState, id: &str, template: bool, accept
 pub fn get_frontend_status(state: tauri::State<'_, SharedState>) -> Value {
     let guard = state.lock();
     json!({ "error": guard.graphic_contract_error, "graphic_version": guard.graphic_version })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+
+    fn mock_core(contract: Value, statuses: Vec<u16>) -> (SharedState, std::thread::JoinHandle<()>) {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let base = format!("http://{}", listener.local_addr().unwrap());
+        let server = std::thread::spawn(move || {
+            for status in statuses {
+                let (mut stream, _) = listener.accept().unwrap();
+                stream.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
+                let mut request = Vec::new();
+                let mut buffer = [0u8; 1024];
+                while !request.ends_with(b"\r\n\r\n") {
+                    let count = stream.read(&mut buffer).unwrap();
+                    assert!(count > 0);
+                    request.extend_from_slice(&buffer[..count]);
+                }
+                let request = String::from_utf8(request).unwrap();
+                assert!(request.starts_with("GET /api/v1/system/version HTTP/1.1"));
+                assert!(request.to_lowercase().contains("x-city-genesis-api:"));
+                let body = json!({ "core_version": "1.0.0", "api_contract_version": contract }).to_string();
+                write!(stream, "HTTP/1.1 {status} Test\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).unwrap();
+            }
+        });
+        let state = SharedState::new(
+            serde_json::from_str("{}").unwrap(), serde_json::from_str("{}").unwrap(),
+            base, String::new(), String::new(),
+        );
+        state.lock().backend_health.observe(true, true);
+        (state, server)
+    }
+
+    fn runtime() -> tokio::runtime::Runtime {
+        tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap()
+    }
+
+    #[test]
+    fn startup_version_is_shared_across_concurrent_callers_and_later_operations() {
+        let (state, server) = mock_core(definition()["api_contract_version"].clone(), vec![200]);
+        runtime().block_on(async {
+            let mut callers = Vec::new();
+            for _ in 0..12 {
+                let state = state.clone();
+                callers.push(tokio::spawn(async move { core_info(&state).await.unwrap() }));
+            }
+            for caller in callers { assert!(caller.await.unwrap().error.is_none()); }
+            // サーバ終了後の開始・ロード前確認も起動時の結果だけで通る。
+            server.join().unwrap();
+            for _ in 0..3 { verify_core(&state).await.unwrap(); }
+            assert_eq!(core_info(&state).await.unwrap().version["core_version"], "1.0.0");
+        });
+    }
+
+    #[test]
+    fn contract_mismatch_is_retained_without_repeated_requests() {
+        let (state, server) = mock_core(json!(999999), vec![200]);
+        runtime().block_on(async {
+            assert!(verify_core(&state).await.unwrap_err().starts_with("API_CONTRACT_MISMATCH:"));
+            server.join().unwrap();
+            assert!(verify_core(&state).await.unwrap_err().starts_with("API_CONTRACT_MISMATCH:"));
+            assert_eq!(core_info(&state).await.unwrap().version["core_version"], "1.0.0");
+        });
+    }
+
+    #[test]
+    fn initial_unavailable_response_can_be_retried_until_first_success() {
+        let (state, server) = mock_core(definition()["api_contract_version"].clone(), vec![503, 200]);
+        runtime().block_on(async {
+            assert!(core_info(&state).await.is_err());
+            verify_core(&state).await.unwrap();
+            server.join().unwrap();
+            verify_core(&state).await.unwrap();
+        });
+    }
 }

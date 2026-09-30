@@ -119,6 +119,7 @@
     "scoreMeterTooltip": "施政スコア（1世帯あたり / 満点2.0）"
   },
   "topmenu": {
+    "coreConnectionFailed": "接続失敗",
     "newGame": "ニューゲーム",
     "load": "ロード",
     "options": "オプション",

@@ -4,6 +4,7 @@ mod settings;
 mod state;
 mod window;
 mod version;
+mod backend_health;
 
 use messages::{BackendLaunchConfig, EntityRef, GraphicLaunchConfig, MutexGroups, WindowRegistry};
 use serde_json::Value;
@@ -144,7 +145,46 @@ fn send_window_action(
     action: String,
     params: Value,
 ) -> Result<(), String> {
+    require_backend(state.inner())?;
     ipc::send_ui_action(state.inner(), window_type, entity, action, params)
+}
+
+fn require_backend(state: &SharedState) -> Result<(), String> {
+    if state.lock().backend_health.connected { Ok(()) }
+    else { Err("BACKEND_DISCONNECTED".into()) }
+}
+
+fn publish_backend_connection(app: &tauri::AppHandle, state: &SharedState, connected: bool) {
+    let _ = app.emit("backend-connection", serde_json::json!({ "connected": connected }));
+    if state.lock().graphic_connected {
+        let _ = ipc::send_ui_action(state, String::new(), None, "system:backend_connection".into(),
+            serde_json::json!({ "connected": connected }));
+    }
+}
+
+fn observe_backend(app: &tauri::AppHandle, state: &SharedState, success: bool) -> bool {
+    let (action, connected, changed) = {
+        let mut guard = state.lock();
+        let previous = guard.backend_health.connected;
+        let action = guard.backend_health.observe(success, cfg!(all(debug_assertions, dev)));
+        guard.backend_health.connected = success && guard.graphic_contract_error.is_none()
+            && guard.core_info.get().is_some_and(|core| core.error.is_none());
+        (action, guard.backend_health.connected, previous != guard.backend_health.connected)
+    };
+    if changed { publish_backend_connection(app, state, connected); }
+    match action {
+        backend_health::HealthAction::Exit => {
+            log::warn!("[session-poll] 通信確認が2回連続で失敗したため終了します");
+            request_app_exit(app, state);
+            false
+        }
+        backend_health::HealthAction::ReturnToMenu => {
+            log::warn!("[session-poll] 通信確認が2回連続で失敗しました。開発版は再接続を待ちます");
+            return_to_topmenu(app, state);
+            true
+        }
+        backend_health::HealthAction::Continue => true,
+    }
 }
 
 #[tauri::command]
@@ -154,6 +194,7 @@ fn get_connection_status(state: tauri::State<'_, SharedState>) -> Value {
 
 #[tauri::command]
 fn begin_epoch_presentation(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, id: String) -> Result<bool, String> {
+    require_backend(state.inner())?;
     let connected = {
         let mut guard = state.lock();
         if guard.is_loading || guard.epoch_presentation_id.is_some() {
@@ -407,6 +448,7 @@ async fn create_session(
 
     // Unity が起動していなければ起動する
     version::prepare_graphic(state.inner()).await?;
+    require_backend(state.inner())?;
 
     if let Some(topmenu) = app.get_webview_window("topmenu") {
         let _ = topmenu.hide();
@@ -511,6 +553,7 @@ async fn start_load_game(
 
     version::validate_load(state.inner(), &save_id, false, accept_balance_change.unwrap_or(false)).await?;
     version::prepare_graphic(state.inner()).await?;
+    require_backend(state.inner())?;
 
     if let Some(topmenu) = app.get_webview_window("topmenu") {
         let _ = topmenu.hide();
@@ -959,6 +1002,7 @@ async fn save_scenario_terrain(
     ground_cover: i64,
     climate: i64,
 ) -> Result<ScenarioTerrainSaveResult, String> {
+    require_backend(state.inner())?;
     let dir = terrain_editor_copy_dir(&editor_id)?;
     let meta = read_terrain_editor_meta(&dir)?;
     let scenario_id = meta["scenario_id"]
@@ -1123,6 +1167,7 @@ async fn start_debug_init(
 
     version::verify_core(state.inner()).await?;
     version::prepare_graphic(state.inner()).await?;
+    require_backend(state.inner())?;
 
     if let Some(topmenu) = app.get_webview_window("topmenu") {
         let _ = topmenu.hide();
@@ -1476,6 +1521,35 @@ fn reset_window_geometries(app: tauri::AppHandle, state: tauri::State<'_, Shared
     window::reset_window_geometries(&app, state.inner())
 }
 
+/// セッション消失・開発版の持続的な通信断で表示と待機状態を片付ける。
+fn return_to_topmenu(app: &tauri::AppHandle, state: &SharedState) {
+    {
+        let mut guard = state.lock();
+        guard.last_save_id = None;
+        guard.session_state = None;
+        guard.loading_id += 1;
+        guard.is_loading = false;
+        guard.backend_load_complete = false;
+        guard.loading_started = false;
+        guard.graphic_load_ready = false;
+        guard.needs_parameter_setup = false;
+        guard.awaiting_parameter_setup = false;
+        guard.tutorial_id = None;
+        guard.notification_queue.clear();
+    }
+    window::cancel_epoch_presentation(app, state);
+    window::close_all_popup_windows(app, state);
+    let _ = window::dismiss_notification(app, state);
+    window::close_tips_window(app);
+    window::close_parameter_setup_window(app);
+    window::set_hud_visible(app, false);
+    if let Some(hintbar) = app.get_webview_window("hintbar") { let _ = hintbar.hide(); }
+    if let Some(tutorial) = app.get_webview_window("tutorial") { let _ = tutorial.hide(); }
+    let _ = app.emit("tutorial:hide", ());
+    if let Some(topmenu) = app.get_webview_window("topmenu") { let _ = topmenu.show(); }
+    let _ = ipc::send_ui_action(state, "".into(), None, "game:end".into(), serde_json::json!({}));
+}
+
 /// セッション状態を定期的にポーリングし、全ウィンドウに配信するスレッドを起動する。
 ///
 /// 5秒ごとにバックエンドの `/api/v1/sessions` と `/api/v1/city` を取得し、
@@ -1499,8 +1573,19 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             .build()
             .unwrap_or_default();
 
-        // 連続失敗回数をカウントする。本番ビルド（exe）でのみ終了判定に使用する。
-        let mut consecutive_failures: u32 = 0;
+        // 起動準備が済むまでだけ取得を試み、取得後は同じ版情報・照合結果を使う。
+        let core = loop {
+            if state.lock().shutdown.load(Ordering::Relaxed) { return; }
+            match tauri::async_runtime::block_on(version::core_info(&state)) {
+                Ok(info) => break info,
+                Err(error) => {
+                    log::warn!("[startup] コアの版情報を取得できません: {}", error);
+                    if !observe_backend(&app, &state, false) { return; }
+                    std::thread::sleep(Duration::from_secs(5));
+                }
+            }
+        };
+        let compatible = core.error.is_none();
 
         loop {
             let (api_base_url, should_stop) = {
@@ -1520,28 +1605,13 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             let base = api_base_url.trim_end_matches('/');
             let headers = version::headers();
 
-            let compatible = client.get(format!("{}/api/v1/system/version", base)).headers(headers.clone()).send()
-                .ok().filter(|response| response.status().is_success())
-                .and_then(|response| response.json::<Value>().ok())
-                .map(|remote| remote["api_contract_version"] == version::definition()["api_contract_version"])
-                .unwrap_or(false);
-            if !compatible || state.lock().graphic_contract_error.is_some() {
-                window::set_hud_visible(&app, false);
-                if let Some(topmenu) = app.get_webview_window("topmenu") { let _ = topmenu.show(); }
-                std::thread::sleep(Duration::from_secs(5));
-                continue;
-            }
-
             // このGETより後にPOSTが終わった場合、古い応答を新セッションの状態として採用しない。
             let (polled_loading_id, load_complete_before_poll, started_before_poll) = {
                 let guard = state.lock();
                 (guard.loading_id, guard.backend_load_complete, guard.loading_started)
             };
 
-            // セッション情報を取得
-            // send() 失敗や status != 2xx の場合はリクエスト失敗として扱い、
-            // current_save_id の変化判定をスキップする。これにより一時的な通信エラーで
-            // ゲーム終了を誤判定するのを防ぐ。
+            // 通信確認は互換性の照合結果から独立させる。
             let session_data: Option<Value> = match client
                 .get(format!("{}/api/v1/sessions", base))
                 .headers(headers.clone())
@@ -1554,7 +1624,8 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                             Ok(body) => {
                                 // 成功時の生データは毎ポーリングごとに出すとノイズになるため出力しない。
                                 match serde_json::from_str::<Value>(&body) {
-                                    Ok(json) => Some(json),
+                                    Ok(json) if json.is_object() && json.get("current_save_id").is_some() => Some(json),
+                                    Ok(_) => { log::error!("[session-poll] セッション応答の形式が不正です"); None },
                                     Err(e) => {
                                         log::error!("[session-poll] JSONパース失敗: {} body={}", e, body);
                                         None
@@ -1621,22 +1692,37 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 break;
             }
 
+            if session_data.is_none() {
+                if !observe_backend(&app, &state, false) { break; }
+                let guard = state.lock();
+                // 瞬断では既存の都市情報を配信し直さず、各画面の表示内容を保持する。
+                if guard.last_save_id.is_none() && !guard.is_loading {
+                    let _ = app.emit("session-state", serde_json::json!({
+                        "current_save_id": null,
+                        "session": null,
+                        "city": null,
+                        "apiBaseUrl": api_base_url,
+                        "isLoading": false,
+                        "tutorialId": null,
+                        "coreVersion": core.version["core_version"],
+                        "backendConnected": false,
+                    }));
+                }
+                drop(guard);
+                std::thread::sleep(Duration::from_secs(5));
+                continue;
+            }
+            // 互換性エラーで画面の起動を止めても、正常なHTTP応答を通信断として数えない。
+            if !compatible || state.lock().graphic_contract_error.is_some() {
+                if !observe_backend(&app, &state, true) { break; }
+                std::thread::sleep(Duration::from_secs(5));
+                continue;
+            }
+
             let current_save_id = session_data
                 .as_ref()
                 .and_then(|d| d.get("current_save_id"))
                 .and_then(|v| v.as_str());
-
-            let request_ok = session_data.is_some();
-
-            // リクエスト失敗時は前回の current_save_id を維持してイベントを配信する。
-            // これによりフロントエンドが current_save_id == null を受信して
-            // 誤った表示切り替え（TopMenu が前面に出るなど）をするのを防ぐ。
-            let current_save_id_for_emit: Option<String> = if request_ok {
-                current_save_id.map(|s| s.to_string())
-            } else {
-                let guard = state.lock();
-                guard.last_save_id.clone()
-            };
 
             // 都市情報を取得（Taskbar の cityName / currentDate 用）
             // 失敗してもセッション情報には影響しない
@@ -1652,53 +1738,6 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                         None
                     }
                 });
-
-            let is_loading = {
-                let guard = state.lock();
-                guard.is_loading
-            };
-
-            let tutorial_id = {
-                let guard = state.lock();
-                guard.tutorial_id.clone()
-            };
-
-            // 全ウィンドウにセッション状態を配信
-            let _ = app.emit(
-                "session-state",
-                serde_json::json!({
-                    "current_save_id": current_save_id_for_emit,
-                    "session": session_data,
-                    "city": city_data,
-                    "apiBaseUrl": api_base_url,
-                    "isLoading": is_loading,
-                    "tutorialId": tutorial_id,
-                }),
-            );
-
-            // current_save_id の変化を検知
-            // リクエストが失敗した場合は変化判定をスキップし、前回の last_save_id を維持する。
-            // これにより一時的な通信エラーでゲーム終了を誤判定するのを防ぐ。
-            if !request_ok {
-                consecutive_failures += 1;
-                log::warn!(
-                    "[session-poll] リクエスト失敗のため current_save_id の変化判定をスキップ（連続失敗: {}回）",
-                    consecutive_failures
-                );
-
-                // 本番ビルド（exe）でのみ、バックエンドへの通信が2回連続で失敗したらUIを終了する。
-                // 開発中（tauri dev）はゲームを維持し、一時的な通信切れでも終了しない。
-                if cfg!(not(dev)) && consecutive_failures >= 2 {
-                    log::error!("[session-poll] バックエンドへの通信が2回連続で失敗しました。アプリケーションを終了します。");
-                    app.exit(1);
-                    break;
-                }
-
-                std::thread::sleep(Duration::from_secs(5));
-                continue;
-            } else {
-                consecutive_failures = 0;
-            }
 
             let (prev_save_id, is_loading) = {
                 let guard = state.lock();
@@ -1742,6 +1781,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                     );
 
                     if !is_loading {
+                        if save_id_changed { window::close_all_popup_windows(&app, &state); }
                         if let Err(error) = begin_initial_loading(&app, &state, false) {
                             log::error!("初期ロード画面を開けません: {error}");
                         }
@@ -1752,60 +1792,32 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 } else {
                     // null: ゲーム終了。ロード中に消失した場合は前回値もnullのことがある。
                     log::info!("[session-poll] current_save_id がクリアされました。ゲーム終了を検知");
-                    window::cancel_epoch_presentation(&app, &state);
-
-                    // 開いているすべてのポップアップウィンドウ（モーダル・パネル）を閉じる。
-                    // トップメニューに戻る前に残っている UI を一掃し、編集モードの後始末も行う。
-                    window::close_all_popup_windows(&app, &state);
-
-                    // 通知ウィンドウも非表示にして、次のゲーム開始時に前回の通知が残らないようにする。
-                    let _ = window::dismiss_notification(&app, &state);
-
-                    // Tips ウィンドウを非表示にする/閉じる
-                    window::close_tips_window(&app);
-
-                    // HUD・Hintbar を隠して topmenu を表示
-                    window::set_hud_visible(&app, false);
-                    if let Some(hintbar) = app.get_webview_window("hintbar") {
-                        let _ = hintbar.hide();
-                    }
-                    // チュートリアルウィンドウも非表示にする
-                    if let Some(tutorial) = app.get_webview_window("tutorial") {
-                        let _ = tutorial.hide();
-                    }
-                    let _ = app.emit("tutorial:hide", ());
-                    if let Some(topmenu) = app.get_webview_window("topmenu") {
-                        let _ = topmenu.show();
-                    }
-                    window::close_tips_window(&app);
-                    window::close_parameter_setup_window(&app);
-
-                    {
-                        let mut guard = state.lock();
-                        guard.is_loading = false;
-                        guard.backend_load_complete = false;
-                        guard.loading_started = false;
-                        guard.graphic_load_ready = false;
-                        guard.needs_parameter_setup = false;
-                        guard.awaiting_parameter_setup = false;
-                        guard.tutorial_id = None;
-                    }
-
-                    let _ = ipc::send_ui_action(
-                        &state,
-                        "".to_string(),
-                        None,
-                        "game:end".to_string(),
-                        serde_json::json!({}),
-                    );
+                    return_to_topmenu(&app, &state);
                 }
             }
 
             // セッション状態を保存
             {
                 let mut guard = state.lock();
-                guard.session_state = session_data;
+                guard.session_state = session_data.clone();
             }
+            // 復旧時はセッションの消失・切り替えを反映してから操作を解禁する。
+            // 再接続先の都市へ古い画面から更新要求を送らないため、この順序を守る。
+            if !observe_backend(&app, &state, true) { break; }
+            let (is_loading, tutorial_id) = {
+                let guard = state.lock();
+                (guard.is_loading, guard.tutorial_id.clone())
+            };
+            let _ = app.emit("session-state", serde_json::json!({
+                "current_save_id": current_save_id,
+                "session": session_data,
+                "city": city_data,
+                "apiBaseUrl": api_base_url,
+                "isLoading": is_loading,
+                "tutorialId": tutorial_id,
+                "coreVersion": core.version["core_version"],
+                "backendConnected": true,
+            }));
 
             std::thread::sleep(Duration::from_secs(5));
         }
@@ -2115,6 +2127,7 @@ pub fn run() {
             launch_graphic,
             start_load_game,
             version::get_frontend_status,
+            version::get_core_version,
             start_debug_init,
             create_session,
             start_backend,

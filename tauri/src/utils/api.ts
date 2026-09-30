@@ -1,4 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
 /**
  * APIリクエストのヘルパー関数
  */
@@ -57,8 +56,11 @@ export class ApiError extends Error {
 
 const nativeFetch = globalThis.fetch.bind(globalThis);
 let configuredBase = "";
-let versionCheck: Promise<void> | null = null;
-let checkedAt = 0;
+let backendConnected = true;
+
+export function setBackendConnected(connected: boolean) {
+  backendConnected = connected;
+}
 
 /** 設定済みのバックエンドAPIのURLか。版ヘッダーはここにだけ付け、他のオリジンへ送らない。 */
 function isBackendApiUrl(url: string): boolean {
@@ -66,33 +68,20 @@ function isBackendApiUrl(url: string): boolean {
 }
 
 /**
- * 旧画面のバイナリ取得も同じHTTP契約を通す。コア再起動に備え短時間だけ結果を共有する。
+ * バイナリ取得も含め、バックエンドへの要求に版ヘッダーを付ける。
+ * 起動時の互換性確認はRust側で共有し、通常要求の契約番号はコア側で検査する。
  * 各画面が直接書いた fetch もここで版ヘッダーが付く。
  */
 export function configureBackendRequests(baseUrl: string) {
   if (!baseUrl || configuredBase === baseUrl.replace(/\/+$/, "")) return;
   configuredBase = baseUrl.replace(/\/+$/, "");
-  versionCheck = null; checkedAt = 0;
   globalThis.fetch = async (input, init) => {
     const url = input instanceof Request ? input.url : String(input);
     if (!isBackendApiUrl(url)) return nativeFetch(input, init);
-    if (!url.endsWith("/system/version") && !url.includes("/system/shutdown")) {
-      if (!versionCheck || (checkedAt !== 0 && Date.now() - checkedAt > 5000)) {
-        versionCheck = (async () => {
-          const response = await nativeFetch(`${configuredBase}/api/v1/system/version`, { cache: "no-store" });
-          if (!response.ok) {
-            throw new ApiError("API_CONTRACT_MISMATCH", "Core version unavailable", response.status);
-          }
-          const version = await response.json();
-          if (version.api_contract_version !== frontendVersion.api_contract_version) {
-            throw new ApiError("API_CONTRACT_MISMATCH", `API: core ${version.api_contract_version ?? "?"} / UI ${frontendVersion.api_contract_version}`, 409);
-          }
-          const frontend = await invoke<{ error: string | null }>("get_frontend_status");
-          if (frontend.error) throw new ApiError(frontend.error, frontend.error, 409);
-          checkedAt = Date.now();
-        })().catch(error => { versionCheck = null; throw error; });
-      }
-      await versionCheck;
+    const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
+    // 更新要求を保留・再送すると、応答だけ失われた操作を二重に実行する危険がある。
+    if (!backendConnected && !["GET", "HEAD", "OPTIONS"].includes(method)) {
+      throw new ApiError("BACKEND_DISCONNECTED", "BACKEND_DISCONNECTED", 503);
     }
     const headers = new Headers(input instanceof Request ? input.headers : undefined);
     new Headers(init?.headers).forEach((value, key) => headers.set(key, value));

@@ -21,7 +21,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/local-constants.ts` | UI独自の定数と、自動生成に載らないバックエンド定数の写し |
 | `src/App.css` | 全ウィンドウ共通のグローバルスタイル |
 | `src-tauri/` | Rust側(ウィンドウ管理・MMF IPC・セッションポーリング)。`config/window-registry.json`=ポップアップ定義、`window-mutex-groups.json`=同時に開けない組 |
-| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・Unity音源の再生成・開発プロセス掃除 ほか)と検証。`tutorial/generate-schema-validator.mjs`(チュートリアルのJSON Schema検証コードの事前生成)、`api-client/`(`npm run test:api-client`。版ヘッダーの付与範囲・画像のBlob URL・版照合の失敗)、`scenarios/`(`npm run test:scenarios`。シナリオ管理・標高ファイルの取り込み・ニューゲーム・システムメニューの保存・セーブ一覧・シナリオとして保存)、`terrain-thumbnail-test.mjs`(地形の平面図の画素生成)、`terrain-editor-save-test.mjs`(地形エディタの保存引数・ロック情報の正規化・保存後の資源IDの置き換え) |
+| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・Unity音源の再生成・開発プロセス掃除 ほか)と検証。`tutorial/generate-schema-validator.mjs`(チュートリアルのJSON Schema検証コードの事前生成)、`api-client/`(`npm run test:api-client`。版ヘッダーの付与範囲・画像のBlob URL・通常APIの契約不一致・WebViewが版情報を取得しないこと)、`scenarios/`(`npm run test:scenarios`。シナリオ管理・標高ファイルの取り込み・ニューゲーム・システムメニューの保存・セーブ一覧・シナリオとして保存)、`terrain-thumbnail-test.mjs`(地形の平面図の画素生成)、`terrain-editor-save-test.mjs`(地形エディタの保存引数・ロック情報の正規化・保存後の資源IDの置き換え) |
 | `scripts/` | 河川生成(`terrainRiver.ts`)の開発用検証スクリプト(`npx tsx`。CI外) |
 | `*-launch.toml` | Rust側が子プロセスとしてバックエンド/Unityを起動するコマンド |
 | `SPEC.md` | 初期設計時の仕様書(現行の正ではない) |
@@ -40,7 +40,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 - 自動生成ファイル(`src/constants.ts`・`src/types/generated.ts`)を編集しない。正と生成器は非公開のコア側(`genesis-core/consts.py`・`tools/sync_consts.py`)にあり、このレポジトリ単体では再生成できない。必要ならユーザーに依頼する(Skill: `consts-sync`)。
 - `local-constants.ts` の `PATH_TYPES_INFRA`・`PATH_TYPES_WITH_*` は、生成器がタプルを出力しないために置いているバックエンド定数の写し。バックエンド側を変えたら合わせる。パス種別を各コンポーネントで直接列挙しない。
 - バックエンドHTTPは `utils/api.ts` の `fetchApi<T>()` 経由のみ。`fetch` を直接書かない(MessagePack受信とエラー処理を一箇所に寄せている)。版ヘッダー(`X-City-Genesis-API`)もここと置き換え後の `fetch` が付けるので、各画面でヘッダーを組まない。Rust側から送る要求は `version.rs` の `headers()` / `client()` を通す(`src-tauri/AGENTS.md`)。
-- APIの画像(サムネイル等)を `<img src>` にAPIのURLで直接書かない。画像要求は通信契約の版ヘッダー・版の照合を通らない。`hooks/useApiImageUrl` で取得して Blob URL を表示する(`ScenarioThumbnail` が実例)。
+- APIの画像(サムネイル等)を `<img src>` にAPIのURLで直接書かない。画像要求には通信契約の版ヘッダーが付かない。`hooks/useApiImageUrl` で取得して Blob URL を表示する(`ScenarioThumbnail` が実例)。
 - WebViewはCSPで `eval` を許していない(`tauri.conf.json`)。実行時に `new Function` を使うライブラリを入れない。JSON Schema検証は `npm run gen:tutorial-validator` の事前生成コードを使う。本番ビルドは devtools を含まない。
 - Unityへの送信は `utils/ipc.ts` に関数を足して行う。`setInterval` 等で周期的に送らない(Unity不在の間はMMFに溜まり続け、満杯になると以後の送信が `MMF buffer full` で全滅する)。Unity起動後の再同期は `graphic-reconnected` イベントを受けて送る。
 - 3Dビューの表示切替は2系統。`sendChangeDisplay` はユーザーの選択(Unityが通常表示として記憶)、`sendViewApplyPreset` はウィンドウを開いている間だけの一時差し替え。編集作業中だけ表示を変えたいときに前者を使わない(ユーザーの選択を上書きする)。
@@ -68,7 +68,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 | ファイル | 内容 |
 | --- | --- |
-| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口。`cache`オプションで取得時のHTTPキャッシュ方針を指定できる。`configureBackendRequests` が `fetch` を置き換え、版の照合と版ヘッダーの付与を行う。版ヘッダーは設定したバックエンドの `/api/v1/` 配下にだけ付ける |
+| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口。`cache`オプションで取得時のHTTPキャッシュ方針を指定できる。`configureBackendRequests` が `fetch` を置き換え、設定したバックエンドの `/api/v1/` 配下にだけ版ヘッダーを付ける。WebViewから版情報の取得は行わない |
 | `ipc.ts` | Unityへのイベント送信(`send*`) |
 | `notification.ts` / `tutorial.ts` | 通知ウィンドウ・チュートリアルウィンドウの表示 |
 | `cityNotifications.ts` | L1通知(重大通知)の取得・文言化・詳細ウィンドウ対応表 |
@@ -101,6 +101,8 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 ## 版情報とシナリオ
 
 - フロントの版の正は `../version.json`。`npm run sync:version` でTauri・Unityの配布設定を同期する。開発・ビルド前処理も同じ同期を使う。
-- `utils/api.ts` の `configureBackendRequests` は既存のバイナリHTTP取得も含めてコアの通信契約を照合し、版ヘッダーを付ける。API互換性検証・ヘッダー付与を各画面へ複製しない。
+- コアの通信契約はRust側で起動時に照合し、版情報と結果をプロセス終了まで共有する。`utils/api.ts` の `configureBackendRequests` は既存のバイナリHTTP取得も含めて版ヘッダーを付ける。版確認を各画面へ複製したり、要求の前に版情報を取得したりしない。
 - 保存データの型・ロード前確認・エラー表示は `utils/saves.ts`。新しいロード入口も `prepareSaveLoad` を通し、確認後にRustの開始コマンドを呼ぶ。
 - シナリオの保存元(`local` / `workshop` / `dlc`)・読み取り専用・暗号化・必要パックの契約は `../docs/docs/programs/シナリオ制作と配布.md` と `セーブデータ仕様.md`。自作とみなすのは `origin === "local" && !read_only` で、それ以外のシナリオは変更操作を出さず「コピーして編集」だけにする。
+
+通信確認の状態はRustの共通監視が管理し、各WebViewは `get_connection_status.backend_connected` と状態変更時の `backend-connection {connected}` を受け取る。`App` は通信待ちのゲーム画面を `inert` にして表示を保持し、`utils/api.ts` は更新要求を送信前に拒否する。設定・クレジット・トップメニューの終了操作は利用できる。瞬断と連続失敗の製品版・開発版の違いは公開docs `programs/コンポーネント連携.md` が正。

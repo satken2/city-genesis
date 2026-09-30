@@ -119,6 +119,7 @@
     "scoreMeterTooltip": "施政評分（每戶，滿分2.0）"
   },
   "topmenu": {
+    "coreConnectionFailed": "連線失敗",
     "newGame": "新遊戲",
     "load": "讀檔",
     "options": "選項",

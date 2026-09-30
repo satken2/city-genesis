@@ -1,5 +1,6 @@
 {
   "common": {
+    "backendConnectionWaiting": "Checking the backend connection…",
     "loading": "Loading...",
     "fetchError": "Failed to fetch data",
     "noData": "No data",

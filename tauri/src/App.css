@@ -453,3 +453,17 @@ button:hover {
 .god-edit-open-btn:hover {
   background: rgba(245, 158, 11, 0.2);
 }
+/* 通信待ちでは既存画面を保持し、ポインタとキーボードによる操作を止める。 */
+.connection-content { display: contents; }
+.backend-connection-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: rgba(16, 20, 28, 0.85);
+  color: white;
+  font-size: 14px;
+}

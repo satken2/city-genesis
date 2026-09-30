@@ -1323,6 +1323,7 @@ pub fn get_connection_status(state: &SharedState) -> Value {
     let guard = state.lock();
     json!({
         "api_base_url": guard.api_base_url,
+        "backend_connected": guard.backend_health.connected,
         // 非表示(再利用待ち)ウィンドウは表示中のポップアップ数に含めない。
         "open_window_count": guard.open_windows.values().filter(|w| !w.hidden).count(),
     })

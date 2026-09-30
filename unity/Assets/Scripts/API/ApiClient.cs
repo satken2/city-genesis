@@ -22,6 +22,9 @@ public static class ApiClient
     public static string BASE_URL = "http://127.0.0.1:5000/api/v1";
 
     public const string CONTRACT_HEADER = "X-City-Genesis-API";
+    public static bool UiBackendConnected { get; set; } = true;
+    public static bool HealthBackendConnected { get; set; } = true;
+    public static bool BackendConnected => UiBackendConnected && HealthBackendConnected;
 
     /// <summary>通信契約ヘッダーを付ける。要求の組み立ては <see cref="ApiRequest"/> が行うので、呼び出し元は <see cref="Request"/> を使う。</summary>
     internal static void ApplyHeaders(UnityWebRequest request)
@@ -178,6 +181,7 @@ public static class ApiClient
     /// </summary>
     public static IEnumerator Post<T>(string path, object payload, Action<T> onSuccess, Action<long, string> onError = null)
     {
+        if (!BackendConnected) { onError?.Invoke(503, "BACKEND_DISCONNECTED"); yield break; }
         string json = JsonConvert.SerializeObject(payload, Formatting.Indented);
 
         using (ApiRequest call = Request("POST", path, json))
@@ -214,6 +218,7 @@ public static class ApiClient
     /// </summary>
     public static IEnumerator Patch(string path, object payload, Action onSuccess, Action<long, string> onError = null)
     {
+        if (!BackendConnected) { onError?.Invoke(503, "BACKEND_DISCONNECTED"); yield break; }
         string json = JsonConvert.SerializeObject(payload);
 
         using (ApiRequest call = Request("PATCH", path, json))
@@ -275,6 +280,9 @@ public sealed class ApiRequest : IDisposable
     /// <summary>送信を始めるだけで待たない。複数の要求を並列に送るときは、全部 Begin してから1件ずつ Send で待つ。</summary>
     public ApiRequest Begin()
     {
+        // 応答を失った更新を自動再送しない。直接Requestを使う経路も送信前に止める。
+        if (!ApiClient.BackendConnected && method != "GET" && method != "HEAD" && method != "OPTIONS")
+            throw new InvalidOperationException("BACKEND_DISCONNECTED");
         Web?.Dispose();
         Web = new UnityWebRequest(url, method, new DownloadHandlerBuffer(), body != null ? new UploadHandlerRaw(body) : null);
         if (body != null) Web.SetRequestHeader("Content-Type", contentType);

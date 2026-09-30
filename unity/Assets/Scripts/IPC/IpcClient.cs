@@ -330,7 +330,8 @@ public class IpcClient : MonoBehaviour
 
             string action = payload.ContainsKey("action") ? payload["action"]?.ToString() : null;
             if (action == null) return;
-            if ((!ProtocolCompatible || !BackendCompatibility.Compatible) && action != "app:quit") return;
+            if ((!ProtocolCompatible || !BackendCompatibility.Compatible)
+                && action != "app:quit" && action != "system:shutdown") return;
 
             switch (action)
             {
@@ -942,6 +943,10 @@ public class IpcClient : MonoBehaviour
                 case "system:shutdown":
                     Debug.Log("IpcClient: system:shutdown");
                     OnSystemShutdown?.Invoke();
+                    break;
+
+                case "system:backend_connection":
+                    ApiClient.UiBackendConnected = GetParamToken(payload, "connected")?.ToObject<bool>() == true;
                     break;
 
                 default:

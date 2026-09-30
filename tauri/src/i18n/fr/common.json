@@ -1,5 +1,6 @@
 {
   "common": {
+    "backendConnectionWaiting": "Vérification de la connexion au serveur…",
     "loading": "Chargement...",
     "fetchError": "Échec de la récupération des données",
     "noData": "Aucune donnée",

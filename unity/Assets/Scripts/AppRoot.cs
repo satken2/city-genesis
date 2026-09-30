@@ -69,6 +69,10 @@ public class AppRoot : MonoBehaviour
             ipcGO.AddComponent<IpcEventHandler>();
         }
 
+        // 製品版はUI側の終了通知が届かない場合にも自分で終了する。
+        // EditorとDevelopment Buildはバックエンドを再起動して開発を続けられる。
+        if (!Application.isEditor && !Debug.isDebugBuild) StartCoroutine(BackendHealthPolling());
+
         // Tauri へ起動完了を通知する。初回起動と、クラッシュ後にスーパーバイザ
         // (genesis.py)が Unity を自動再起動した場合の両方で毎回送信する。
         // Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを
@@ -76,8 +80,9 @@ public class AppRoot : MonoBehaviour
         do {
             yield return BackendCompatibility.Verify();
             IpcClient.Instance?.EmitGraphicReady();
-            if (!BackendCompatibility.Compatible) yield return new WaitForSeconds(2f);
-        } while (!BackendCompatibility.Compatible);
+            if (!BackendCompatibility.VersionReceived) yield return new WaitForSeconds(2f);
+        } while (!BackendCompatibility.VersionReceived);
+        if (!BackendCompatibility.Compatible) yield break;
         yield return new WaitUntil(() => IpcClient.Instance != null && IpcClient.Instance.ProtocolCompatible);
 
         if (WeatherController.Instance == null)
@@ -100,15 +105,6 @@ public class AppRoot : MonoBehaviour
         // UI（Tauri）より後から起動した場合、IPC 経由の game:start イベントを
         // 受け損ねる可能性があるため、自らバックエンドに問い合わせてゲーム開始状態を確認する。
         StartCoroutine(PollBackendSessionState());
-
-        StartCoroutine(WatchBackendContract());
-
-        // 本番ビルド（exe）でのみ、定期的にバックエンドの生存を確認する。
-        // 開発ビルド（Development Build）やエディタ実行時は、一時的な通信切れでも終了しない。
-        if (!Debug.isDebugBuild)
-        {
-            StartCoroutine(BackendHealthPolling());
-        }
     }
 
     /// <summary>
@@ -121,8 +117,8 @@ public class AppRoot : MonoBehaviour
     ///   進行中のセッションを検知してゲームへ復帰する経路
     ///
     /// ゲーム開始済みになった時点でループを終了する(IPC 経由で開始された場合も含む)。
-    /// 通信失敗(起動直後のバックエンド未準備・再起動レース等)は次周期で再試行する。
-    /// バックエンドの死活監視は BackendHealthPolling が担う。
+    /// 起動直後の通信失敗は次周期で再試行する。
+    /// 開発版の持続的な切断時のトップメニュー復帰はTauriのポーリングと game:end 通知が担う。
     /// </summary>
     private IEnumerator PollBackendSessionState()
     {
@@ -162,17 +158,39 @@ public class AppRoot : MonoBehaviour
         }
     }
 
-    private IEnumerator WatchBackendContract()
+    private IEnumerator BackendHealthPolling()
     {
+        int failures = 0;
         while (true)
         {
-            yield return new WaitForSeconds(5f);
-            bool wasCompatible = BackendCompatibility.Compatible;
-            yield return BackendCompatibility.Verify();
-            if (wasCompatible == BackendCompatibility.Compatible) continue;
-            if (!BackendCompatibility.Compatible) GameStateManager.Instance?.SetGameStarted(false, null);
-            IpcClient.Instance?.EmitGraphicReady();
-            if (BackendCompatibility.Compatible) StartCoroutine(PollBackendSessionState());
+            yield return new WaitForSecondsRealtime(5f);
+            bool success = false;
+            using (ApiRequest call = ApiClient.Request("GET", "/sessions", timeoutSeconds: 10))
+            {
+                yield return call.Send();
+                if (call.Web.result == UnityWebRequest.Result.Success)
+                {
+                    try
+                    {
+                        var session = Newtonsoft.Json.Linq.JObject.Parse(call.Web.downloadHandler.text);
+                        success = session.ContainsKey("current_save_id");
+                        if (session.Value<bool>("shutting_down"))
+                        {
+                            Application.Quit();
+                            yield break;
+                        }
+                    }
+                    catch (Exception error) { Debug.LogWarning($"AppRoot: セッション確認の応答が不正です: {error.Message}"); }
+                }
+            }
+            ApiClient.HealthBackendConnected = success;
+            failures = success ? 0 : failures + 1;
+            if (failures >= 2)
+            {
+                Debug.LogWarning("AppRoot: バックエンドの通信確認が2回連続で失敗したため終了します");
+                Application.Quit();
+                yield break;
+            }
         }
     }
 
@@ -180,42 +198,6 @@ public class AppRoot : MonoBehaviour
     {
         // IPC切断
         IpcClient.Instance?.Disconnect();
-    }
-
-    /// <summary>
-    /// 一定間隔でバックエンドのセッションエンドポイントに問い合わせ、生存確認を行う。
-    /// 2回連続で通信に失敗した場合はアプリケーションを終了する。
-    /// 本番ビルド（非 Development Build）でのみ有効。
-    /// </summary>
-    private IEnumerator BackendHealthPolling()
-    {
-        int consecutiveFailures = 0;
-        while (true)
-        {
-            yield return new WaitForSeconds(5f);
-
-            using (ApiRequest call = ApiClient.Request("GET", "/sessions", timeoutSeconds: 10))
-            {
-                yield return call.Send();
-                UnityWebRequest req = call.Web;
-
-                if (req.result == UnityWebRequest.Result.Success)
-                {
-                    consecutiveFailures = 0;
-                }
-                else
-                {
-                    consecutiveFailures++;
-                    Debug.LogWarning($"AppRoot: バックエンド生存確認に失敗（連続{consecutiveFailures}回）: {req.error}");
-                    if (consecutiveFailures >= 2)
-                    {
-                        Debug.LogError("AppRoot: バックエンドへの通信が2回連続で失敗しました。アプリケーションを終了します。");
-                        Application.Quit();
-                        yield break;
-                    }
-                }
-            }
-        }
     }
 
 }
