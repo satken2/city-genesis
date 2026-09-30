@@ -72,7 +72,6 @@
     "history": "创建：core v{{created}} / 上次模拟：{{simulated}}",
     "balanceConfirm": "此城市使用 core v{{from}} 的规则。core v{{to}} 可能改变游戏平衡。要备份原文件并继续吗？",
     "versionUnavailable": "核心模拟器连接失败",
-    "API_CONTRACT_MISMATCH": "核心与界面的 API 版本不一致，请更新为兼容版本。",
     "IPC_CONTRACT_MISMATCH": "Unity 与界面版本不兼容，或 Unity 无法连接核心。",
     "SAVE_VERSION_UNKNOWN": "版本信息未知，无法读取。",
     "SAVE_VERSION_NEWER": "此数据由更新的核心版本保存。",

@@ -72,7 +72,6 @@
     "history": "Création : core v{{created}} / Dernière simulation : {{simulated}}",
     "balanceConfirm": "Cette ville utilise les règles de core v{{from}}. Core v{{to}} peut modifier l’équilibrage. Sauvegarder l’original et continuer ?",
     "versionUnavailable": "Échec de connexion au simulateur central.",
-    "API_CONTRACT_MISMATCH": "Les versions API du moteur et de l’interface diffèrent. Installez des versions compatibles.",
     "IPC_CONTRACT_MISMATCH": "Unity et l’interface sont incompatibles, ou Unity ne peut pas joindre le moteur.",
     "SAVE_VERSION_UNKNOWN": "Impossible de charger une sauvegarde de version inconnue.",
     "SAVE_VERSION_NEWER": "Enregistrée avec un moteur plus récent.",

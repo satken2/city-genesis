@@ -6988,7 +6988,7 @@
           "stats"
         ],
         "summary": "Get System Stats",
-        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの数\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)と搭載RAM。取得できなければ各値が null\n- environment: CPU・OS・演算デバイス",
+        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの総数。種別ごとの内訳は含めない\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)と搭載RAM。取得できなければ各値が null\n- environment: CPU・OS・演算デバイス",
         "operationId": "get_system_stats_api_v1_stats_system_get",
         "responses": {
           "200": {
@@ -12029,46 +12029,15 @@
         "title": "StatisticsReport",
         "description": "エポック実行完了時点の都市統計。実行結果ウィンドウの統計タイルに表示する。"
       },
-      "SystemAgentCounts": {
-        "properties": {
-          "households": {
-            "type": "integer",
-            "title": "Households"
-          },
-          "businesses": {
-            "type": "integer",
-            "title": "Businesses"
-          },
-          "public_facilities": {
-            "type": "integer",
-            "title": "Public Facilities"
-          },
-          "buildings": {
-            "type": "integer",
-            "title": "Buildings"
-          }
-        },
-        "type": "object",
-        "required": [
-          "households",
-          "businesses",
-          "public_facilities",
-          "buildings"
-        ],
-        "title": "SystemAgentCounts"
-      },
       "SystemEntityCounts": {
         "properties": {
           "agents": {
-            "$ref": "#/components/schemas/SystemAgentCounts"
+            "type": "integer",
+            "title": "Agents"
           },
           "citizens": {
             "type": "integer",
             "title": "Citizens"
-          },
-          "population": {
-            "type": "integer",
-            "title": "Population"
           },
           "zones": {
             "type": "integer",
@@ -12079,7 +12048,8 @@
             "title": "Parcels"
           },
           "paths": {
-            "$ref": "#/components/schemas/SystemPathCounts"
+            "type": "integer",
+            "title": "Paths"
           },
           "nodes": {
             "type": "integer",
@@ -12098,7 +12068,6 @@
         "required": [
           "agents",
           "citizens",
-          "population",
           "zones",
           "parcels",
           "paths",
@@ -12252,29 +12221,6 @@
         },
         "type": "object",
         "title": "SystemMemory"
-      },
-      "SystemPathCounts": {
-        "properties": {
-          "road": {
-            "type": "integer",
-            "title": "Road"
-          },
-          "track": {
-            "type": "integer",
-            "title": "Track"
-          },
-          "infra": {
-            "type": "integer",
-            "title": "Infra"
-          }
-        },
-        "type": "object",
-        "required": [
-          "road",
-          "track",
-          "infra"
-        ],
-        "title": "SystemPathCounts"
       },
       "SystemStatsResponse": {
         "properties": {

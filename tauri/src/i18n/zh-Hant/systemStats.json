@@ -3,7 +3,7 @@
     "load": {
       "title": "計算負載",
       "heading": "最近一個紀元（{{days}}天）的計算時間",
-      "noData": "尚無資料。執行紀元後，將顯示最近一個紀元的計算時間。",
+      "noData": "暫無測量資料",
       "note": "連續執行多個紀元時，顯示的是最後一個紀元的值。問題規模是依城市規模估算的主要比較組合數，僅供參考。",
       "colGroup": "處理",
       "colTime": "時間",
@@ -35,6 +35,8 @@
       "environment": "網格 {{width}} × {{height}} × 太陽位置"
     },
     "entities": {
+      "colMetric": "項目",
+      "colCount": "數量",
       "title": "城市規模",
       "agents": "經濟主體",
       "households": "家庭",
@@ -58,10 +60,10 @@
       "current": "目前使用量",
       "peak": "啟動以來的最大值",
       "total": "實體記憶體",
-      "ofTotal": "最大值為實體記憶體的 {{percent}}",
       "note": "模擬器本體程序使用的實體記憶體。最大值包含紀元計算中暫時增加的部分。"
     },
     "environment": {
+      "gpuAcceleration": "GPU 加速",
       "title": "執行環境",
       "cpu": "CPU",
       "cores": "邏輯核心數",

@@ -3,7 +3,7 @@
     "load": {
       "title": "Computation load",
       "heading": "Computation time of the latest epoch ({{days}} days)",
-      "noData": "No data yet. Run an epoch to see how long the latest epoch took to compute.",
+      "noData": "No measurement data",
       "note": "When several epochs run in a row, this shows the last one. Problem size is a rough estimate of the main comparisons, based on the size of the city.",
       "colGroup": "Process",
       "colTime": "Time",
@@ -35,6 +35,8 @@
       "environment": "Grid {{width}} × {{height}} × sun positions"
     },
     "entities": {
+      "colMetric": "Metric",
+      "colCount": "Count",
       "title": "City size",
       "agents": "Agents",
       "households": "Households",
@@ -58,10 +60,10 @@
       "current": "Current usage",
       "peak": "Peak since launch",
       "total": "Installed memory",
-      "ofTotal": "Peak is {{percent}} of installed memory",
       "note": "Physical memory used by the simulator process. The peak includes temporary increases during epochs."
     },
     "environment": {
+      "gpuAcceleration": "GPU acceleration",
       "title": "System",
       "cpu": "CPU",
       "cores": "Logical cores",

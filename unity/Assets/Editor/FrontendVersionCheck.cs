@@ -23,7 +23,6 @@ public class FrontendVersionCheck : IPreprocessBuildWithReport
         var path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../../version.json"));
         var value = JObject.Parse(File.ReadAllText(path));
         return (string)value["frontend_version"] == FrontendVersion.Version
-            && (int)value["api_contract_version"] == FrontendVersion.ApiContract
             && (int)value["ipc_contract_version"] == FrontendVersion.IpcContract
             && PlayerSettings.bundleVersion == FrontendVersion.Version;
     }

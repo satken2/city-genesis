@@ -675,7 +675,6 @@ pub async fn handle_incoming_message(
         "system:graphic_ready" => {
             let expected = crate::version::definition();
             let compatible = envelope.payload["ipc_contract_version"] == expected["ipc_contract_version"]
-                && envelope.payload["api_contract_version"] == expected["api_contract_version"]
                 && envelope.payload["core_compatible"] == true;
             {
                 let mut guard = state.lock();

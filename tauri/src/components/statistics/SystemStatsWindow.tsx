@@ -2,10 +2,10 @@
  * システム統計ウィンドウ
  *
  * window_type="system_stats" のポップアップ。システムトレイから開く。
- * `GET /api/v1/stats/system` の内容を1枚に並べる(タブは持たない)。
+ * `GET /api/v1/stats/system` の内容を左右2列に並べる(タブは持たない)。
  *   - 計算負荷 … 直近エポックの計算時間を大きな処理ごとに色分けした1本の積み上げ棒と、その内訳の表
  *   - 都市の規模 … プレイで増えるエンティティの数
- *   - メモリ・実行環境 … シミュレーター(コア)のプロセスのメモリと、CPU・OS
+ *   - メモリ・実行環境 … シミュレーター(コア)のプロセスのメモリ、CPU名とGPUアクセラレーションの状態
  *   - シミュレーションの近似 … 提供前の予告表示(値の保持・送信はしない)
  *
  * 計算時間はコアが記録済みのフェーズ別の時間を読むだけで、全体はフェーズの合計。計測値はセーブに
@@ -37,12 +37,11 @@ type EpochGroup = {
 type SystemStatsResponse = {
   epoch: { number: number; simulation_days: number; total_ms: number; groups: EpochGroup[] } | null;
   entities: {
-    agents: { households: number; businesses: number; public_facilities: number; buildings: number };
+    agents: number;
     citizens: number;
-    population: number;
     zones: number;
     parcels: number;
-    paths: { road: number; track: number; infra: number };
+    paths: number;
     nodes: number;
     transit_lines: number;
     epochs: number;
@@ -122,14 +121,22 @@ export function SystemStatsWindow({ apiBaseUrl }: SystemStatsWindowProps) {
   }
 
   return (
-    <div className="system-stats">
-      <EpochLoadSection stats={stats} formatters={formatters} />
-      <EntitySection stats={stats} formatters={formatters} />
-      <div className="system-stats-columns">
-        <MemorySection stats={stats} formatters={formatters} />
-        <EnvironmentSection stats={stats} formatters={formatters} />
+    <div className="system-stats-frame">
+      <div className="system-stats">
+        <div className="system-stats-analysis">
+          <EpochLoadSection stats={stats} formatters={formatters} />
+          <div className="system-stats-overview">
+            <EntitySection stats={stats} formatters={formatters} />
+            <div className="system-stats-resources">
+              <MemorySection stats={stats} formatters={formatters} />
+              <EnvironmentSection stats={stats} formatters={formatters} />
+            </div>
+          </div>
+        </div>
+        <aside className="system-stats-sidebar" aria-label={t("systemStats.approximation.title")}>
+          <ApproximationSection />
+        </aside>
       </div>
-      <ApproximationSection />
     </div>
   );
 }
@@ -171,7 +178,10 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
 
   return (
     <section className="system-stats-section">
-      <h3 className="system-stats-section-title">{t("systemStats.load.title")}</h3>
+      <div className="system-stats-section-heading">
+        <h3 className="system-stats-section-title">{t("systemStats.load.title")}</h3>
+        <span className="system-stats-epoch">{t("systemStats.entities.epochs")} <b>{formatters.count.format(epoch.number)}</b></span>
+      </div>
       <div className="system-stats-headline">
         <span className="system-stats-headline-label">{t("systemStats.load.heading", { days: epoch.simulation_days })}</span>
         <span className="system-stats-headline-value">
@@ -195,10 +205,10 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
       <table className="system-stats-table">
         <thead>
           <tr>
-            <th>{t("systemStats.load.colGroup")}</th>
-            <th className="is-number">{t("systemStats.load.colTime")}</th>
-            <th className="is-number">{t("systemStats.load.colShare")}</th>
-            <th className="is-number" title={t("systemStats.load.workloadHint")}>{t("systemStats.load.colWorkload")}</th>
+            <th scope="col">{t("systemStats.load.colGroup")}</th>
+            <th scope="col" className="is-number">{t("systemStats.load.colTime")}</th>
+            <th scope="col" className="is-number">{t("systemStats.load.colShare")}</th>
+            <th scope="col" className="is-number" title={t("systemStats.load.workloadHint")}>{t("systemStats.load.colWorkload")}</th>
           </tr>
         </thead>
         <tbody>
@@ -222,7 +232,6 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
           ))}
         </tbody>
       </table>
-      <p className="system-stats-note">{t("systemStats.load.note")}</p>
     </section>
   );
 }
@@ -230,35 +239,14 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
 function EntitySection({ stats, formatters }: SectionProps) {
   const { t } = useTranslation();
   const { entities } = stats;
-  const agents = entities.agents;
-  const paths = entities.paths;
   const fmt = (value: number) => formatters.count.format(value);
 
-  const tiles: { key: string; value: number; detail?: string; wide?: boolean }[] = [
-    {
-      key: "agents",
-      wide: true,
-      value: agents.households + agents.businesses + agents.public_facilities + agents.buildings,
-      detail: [
-        `${t("systemStats.entities.households")} ${fmt(agents.households)}`,
-        `${t("systemStats.entities.businesses")} ${fmt(agents.businesses)}`,
-        `${t("systemStats.entities.publicFacilities")} ${fmt(agents.public_facilities)}`,
-        `${t("systemStats.entities.buildings")} ${fmt(agents.buildings)}`,
-      ].join(" · "),
-    },
-    { key: "citizens", value: entities.citizens, detail: `${t("systemStats.entities.population")} ${fmt(entities.population)}` },
+  const rows: { key: string; value: number }[] = [
+    { key: "agents", value: entities.agents },
+    { key: "citizens", value: entities.citizens },
     { key: "zones", value: entities.zones },
     { key: "parcels", value: entities.parcels },
-    {
-      key: "paths",
-      wide: true,
-      value: paths.road + paths.track + paths.infra,
-      detail: [
-        `${t("systemStats.entities.roads")} ${fmt(paths.road)}`,
-        `${t("systemStats.entities.tracks")} ${fmt(paths.track)}`,
-        `${t("systemStats.entities.infra")} ${fmt(paths.infra)}`,
-      ].join(" · "),
-    },
+    { key: "paths", value: entities.paths },
     { key: "nodes", value: entities.nodes },
     { key: "transitLines", value: entities.transit_lines },
     { key: "epochs", value: entities.epochs },
@@ -267,15 +255,22 @@ function EntitySection({ stats, formatters }: SectionProps) {
   return (
     <section className="system-stats-section">
       <h3 className="system-stats-section-title">{t("systemStats.entities.title")}</h3>
-      <div className="system-stats-tiles">
-        {tiles.map((tile) => (
-          <div key={tile.key} className={`system-stats-tile${tile.wide ? " is-wide" : ""}`}>
-            <span className="system-stats-tile-label">{t(`systemStats.entities.${tile.key}`)}</span>
-            <span className="system-stats-tile-value">{fmt(tile.value)}</span>
-            {tile.detail && <span className="system-stats-tile-detail">{tile.detail}</span>}
-          </div>
-        ))}
-      </div>
+      <table className="system-stats-table system-stats-entities">
+        <thead>
+          <tr>
+            <th scope="col">{t("systemStats.entities.colMetric")}</th>
+            <th scope="col" className="is-number">{t("systemStats.entities.colCount")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.key}>
+              <th scope="row">{t(`systemStats.entities.${row.key}`)}</th>
+              <td className="is-number system-stats-entity-count">{fmt(row.value)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </section>
   );
 }
@@ -295,7 +290,7 @@ function MemorySection({ stats, formatters }: SectionProps) {
   return (
     <section className="system-stats-section">
       <h3 className="system-stats-section-title">{t("systemStats.memory.title")}</h3>
-      <dl className="system-stats-list">
+      <dl className="system-stats-facts">
         <dt>{t("systemStats.memory.current")}</dt>
         <dd>{formatBytes(current, formatters)}</dd>
         <dt>{t("systemStats.memory.peak")}</dt>
@@ -303,32 +298,24 @@ function MemorySection({ stats, formatters }: SectionProps) {
         <dt>{t("systemStats.memory.total")}</dt>
         <dd>{formatBytes(total, formatters)}</dd>
       </dl>
-      {peakRatio != null && (
-        <div className="system-stats-meter">
-          <Meter value={peakRatio} polarity="negative" />
-          <span className="system-stats-note">{t("systemStats.memory.ofTotal", { percent: formatters.percent.format(peakRatio) })}</span>
-        </div>
-      )}
-      <p className="system-stats-note">{t("systemStats.memory.note")}</p>
+      {peakRatio != null && <div className="system-stats-memory-meter">
+        <Meter value={peakRatio} polarity="negative" color="var(--flat-text-label)" />
+      </div>}
     </section>
   );
 }
 
-function EnvironmentSection({ stats, formatters }: SectionProps) {
+function EnvironmentSection({ stats }: SectionProps) {
   const { t } = useTranslation();
   const env = stats.environment;
   return (
     <section className="system-stats-section">
       <h3 className="system-stats-section-title">{t("systemStats.environment.title")}</h3>
-      <dl className="system-stats-list">
+      <dl className="system-stats-facts">
         <dt>{t("systemStats.environment.cpu")}</dt>
-        <dd>{env.cpu_name ?? "—"}</dd>
-        <dt>{t("systemStats.environment.cores")}</dt>
-        <dd>{env.cpu_count != null ? formatters.count.format(env.cpu_count) : "—"}</dd>
-        <dt>{t("systemStats.environment.os")}</dt>
-        <dd>{env.os || "—"}</dd>
-        <dt>{t("systemStats.environment.device")}</dt>
-        <dd>{t(`systemStats.environment.devices.${env.device}`, { defaultValue: env.device.toUpperCase() })}</dd>
+        <dd>{env.cpu_name || "—"}</dd>
+        <dt>{t("systemStats.environment.gpuAcceleration")}</dt>
+        <dd>{t("systemStats.approximation.off")}</dd>
       </dl>
     </section>
   );
@@ -342,20 +329,19 @@ function ApproximationSection() {
   const { t } = useTranslation();
   const comingSoon = t("settings.compute.comingSoon");
   return (
-    <section className="system-stats-section">
-      <h3 className="system-stats-section-title">{t("systemStats.approximation.title")}</h3>
-      <p className="system-stats-note">{t("systemStats.approximation.intro")}</p>
+    <section className="system-stats-section system-stats-approximation">
+      <div className="system-stats-section-heading">
+        <h3 className="system-stats-section-title">{t("systemStats.approximation.title")}</h3>
+        <span className="system-stats-status">{comingSoon}</span>
+      </div>
       <div className="system-stats-warning" role="note">
         <strong>{t("systemStats.approximation.warning")}</strong>
-        <p>{t("systemStats.approximation.irreversible")}</p>
       </div>
       <div className="settings-card">
         {APPROXIMATION_CANDIDATES.map((key) => (
           <SettingsRow
             key={key}
             label={t(`systemStats.approximation.${key}.label`)}
-            description={t(`systemStats.approximation.${key}.description`)}
-            badge={comingSoon}
             disabled
           >
             <input
@@ -370,8 +356,6 @@ function ApproximationSection() {
         ))}
         <SettingsRow
           label={t("systemStats.approximation.interval.label")}
-          description={t("systemStats.approximation.interval.description")}
-          badge={comingSoon}
           disabled
         >
           <input
@@ -385,8 +369,6 @@ function ApproximationSection() {
         </SettingsRow>
         <SettingsRow
           label={t("systemStats.approximation.aggregation.label")}
-          description={t("systemStats.approximation.aggregation.description")}
-          badge={comingSoon}
           disabled
         >
           <div className="settings-seg" role="group" aria-label={t("systemStats.approximation.aggregation.label")}>

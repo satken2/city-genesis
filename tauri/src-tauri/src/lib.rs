@@ -168,7 +168,7 @@ fn observe_backend(app: &tauri::AppHandle, state: &SharedState, success: bool) -
         let previous = guard.backend_health.connected;
         let action = guard.backend_health.observe(success, cfg!(all(debug_assertions, dev)));
         guard.backend_health.connected = success && guard.graphic_contract_error.is_none()
-            && guard.core_info.get().is_some_and(|core| core.error.is_none());
+            && guard.core_info.get().is_some();
         (action, guard.backend_health.connected, previous != guard.backend_health.connected)
     };
     if changed { publish_backend_connection(app, state, connected); }
@@ -508,7 +508,7 @@ async fn create_session(
         asset_region,
     };
 
-    let client = version::client();
+    let client = reqwest::Client::new();
     let res = client
         .post(&url)
         .query(&query_params)
@@ -573,7 +573,7 @@ async fn start_load_game(
     };
     let url = format!("{}/api/v1/sessions", api_base_url.trim_end_matches('/'));
 
-    let client = version::client();
+    let client = reqwest::Client::new();
     let res = client
         .post(&url)
         .query(&[("save_id", save_id.as_str()), ("accept_balance_change", if accept_balance_change.unwrap_or(false) { "true" } else { "false" })])
@@ -833,7 +833,7 @@ async fn prepare_scenario_terrain_editor(
     remove_stale_terrain_editor_copies(&root, &referenced);
 
     let url = scenario_terrain_url(state.inner(), &scenario_id)?;
-    let response = version::client()
+    let response = reqwest::Client::new()
         .get(url)
         .timeout(Duration::from_secs(120))
         .send()
@@ -1025,7 +1025,7 @@ async fn save_scenario_terrain(
         "climate": climate,
     });
     let url = scenario_terrain_url(state.inner(), &scenario_id)?;
-    let response = version::client()
+    let response = reqwest::Client::new()
         .put(url)
         .json(&body)
         .timeout(Duration::from_secs(600))
@@ -1185,7 +1185,7 @@ async fn start_debug_init(
     };
     let url = format!("{}/api/v1/system/debug-init", api_base_url.trim_end_matches('/'));
 
-    let client = version::client();
+    let client = reqwest::Client::new();
     let res = client
         .post(&url)
         .timeout(Duration::from_secs(60))
@@ -1308,7 +1308,7 @@ fn request_app_exit(app: &tauri::AppHandle, state: &SharedState) {
         guard.api_base_url.trim_end_matches('/').to_string()
     };
     if !base.is_empty() {
-        let client = reqwest::blocking::Client::builder().default_headers(version::headers())
+        let client = reqwest::blocking::Client::builder()
             .timeout(Duration::from_secs(2))
             .build()
             .unwrap_or_default();
@@ -1573,7 +1573,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             .build()
             .unwrap_or_default();
 
-        // 起動準備が済むまでだけ取得を試み、取得後は同じ版情報・照合結果を使う。
+        // 起動準備が済むまでだけ取得を試み、取得後は同じ版情報を使う。
         let core = loop {
             if state.lock().shutdown.load(Ordering::Relaxed) { return; }
             match tauri::async_runtime::block_on(version::core_info(&state)) {
@@ -1585,7 +1585,12 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 }
             }
         };
-        let compatible = core.error.is_none();
+        // フロントのMAJORがコアのMAJOR未満なら、起動できない。待っても版は変わらないので再試行せず終了する。
+        if let Err(error) = version::check_frontend_version(&core) {
+            log::error!("[startup] {error}。終了します");
+            request_app_exit(&app, &state);
+            return;
+        }
 
         loop {
             let (api_base_url, should_stop) = {
@@ -1603,7 +1608,6 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             }
 
             let base = api_base_url.trim_end_matches('/');
-            let headers = version::headers();
 
             // このGETより後にPOSTが終わった場合、古い応答を新セッションの状態として採用しない。
             let (polled_loading_id, load_complete_before_poll, started_before_poll) = {
@@ -1614,7 +1618,6 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             // 通信確認は互換性の照合結果から独立させる。
             let session_data: Option<Value> = match client
                 .get(format!("{}/api/v1/sessions", base))
-                .headers(headers.clone())
                 .send()
             {
                 Ok(res) => {
@@ -1704,7 +1707,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                         "apiBaseUrl": api_base_url,
                         "isLoading": false,
                         "tutorialId": null,
-                        "coreVersion": core.version["core_version"],
+                        "coreVersion": core["core_version"],
                         "backendConnected": false,
                     }));
                 }
@@ -1712,8 +1715,8 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 std::thread::sleep(Duration::from_secs(5));
                 continue;
             }
-            // 互換性エラーで画面の起動を止めても、正常なHTTP応答を通信断として数えない。
-            if !compatible || state.lock().graphic_contract_error.is_some() {
+            // IPC契約の不一致で画面の起動を止めても、正常なHTTP応答を通信断として数えない。
+            if state.lock().graphic_contract_error.is_some() {
                 if !observe_backend(&app, &state, true) { break; }
                 std::thread::sleep(Duration::from_secs(5));
                 continue;
@@ -1728,7 +1731,6 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             // 失敗してもセッション情報には影響しない
             let city_data: Option<Value> = client
                 .get(format!("{}/api/v1/city", base))
-                .headers(headers)
                 .send()
                 .ok()
                 .and_then(|r| {
@@ -1815,7 +1817,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 "apiBaseUrl": api_base_url,
                 "isLoading": is_loading,
                 "tutorialId": tutorial_id,
-                "coreVersion": core.version["core_version"],
+                "coreVersion": core["core_version"],
                 "backendConnected": true,
             }));
 

@@ -72,7 +72,6 @@
     "history": "Creación: core v{{created}} / Última simulación: {{simulated}}",
     "balanceConfirm": "Esta ciudad usa las reglas de core v{{from}}. Core v{{to}} puede cambiar el equilibrio. ¿Crear una copia de seguridad y continuar?",
     "versionUnavailable": "Error de conexión con el simulador central.",
-    "API_CONTRACT_MISMATCH": "Las versiones de API del núcleo y la interfaz no coinciden. Actualiza a versiones compatibles.",
     "IPC_CONTRACT_MISMATCH": "Unity y la interfaz no son compatibles, o Unity no puede conectarse al núcleo.",
     "SAVE_VERSION_UNKNOWN": "No se puede cargar: versión desconocida.",
     "SAVE_VERSION_NEWER": "Guardado con una versión más reciente del núcleo.",

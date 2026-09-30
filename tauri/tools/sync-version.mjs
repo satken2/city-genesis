@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf8"));
 if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version.frontend_version)
-    || ![version.api_contract_version, version.ipc_contract_version].every(v => Number.isSafeInteger(v) && v > 0)) {
+    || !(Number.isSafeInteger(version.ipc_contract_version) && version.ipc_contract_version > 0)) {
   throw new Error("version.json is invalid");
 }
 const check = process.argv.includes("--check");
@@ -29,4 +29,4 @@ update("tauri/package-lock.json", text => {
 });
 update("tauri/src-tauri/Cargo.toml", text => text.replace(/^version = "[^"]+"/m, `version = "${version.frontend_version}"`));
 update("unity/ProjectSettings/ProjectSettings.asset", text => text.replace(/bundleVersion: [^\r\n]+/, `bundleVersion: ${version.frontend_version}`));
-update("unity/Assets/Scripts/FrontendVersion.cs", () => `// version.json から生成。編集は tauri/tools/sync-version.mjs を通す。\npublic static class FrontendVersion\n{\n    public const string Version = "${version.frontend_version}";\n    public const int ApiContract = ${version.api_contract_version};\n    public const int IpcContract = ${version.ipc_contract_version};\n}\n`);
+update("unity/Assets/Scripts/FrontendVersion.cs", () => `// version.json から生成。編集は tauri/tools/sync-version.mjs を通す。\npublic static class FrontendVersion\n{\n    public const string Version = "${version.frontend_version}";\n    public const int IpcContract = ${version.ipc_contract_version};\n}\n`);

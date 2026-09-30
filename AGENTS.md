@@ -36,10 +36,10 @@
 MemoryMappedFileのEnvelope構造は送信側と受信側で一致していないと無言で壊れるので、
 イベントを追加・変更するときは必ず `unity/Assets/Scripts/IPC/AGENTS.md` を読むこと。
 
-コアへのHTTPは、すべての要求にローカルAPIの認証トークン(`X-City-Genesis-Token`)と版ヘッダー(`X-City-Genesis-API`)が要る。
-トークンが無い要求はコアが401で拒否し、本番ではUI・グラフィックの死活監視がこれを失敗に数えてアプリを終了させる。
+コアへのHTTPには認証トークン・Host検査によるアクセス制限を設けない。サードパーティ製プログラムも同じAPIで都市を閲覧・編集でき、コアは `127.0.0.1` にだけ bind する。
+ゲーム内の要求には版ヘッダー(`X-City-Genesis-API`)を付ける。コアは通常のAPIで申告された契約番号の不一致を409で拒否し、版ヘッダーの無い要求は許容する。
 新しい要求は必ず各モジュールの共通窓口(Tauri は `tauri/src/utils/api.ts` の `fetchApi` と Rust の `version.rs`、Unity は `ApiClient`)を通す。
-契約は `docs/docs/programs/コンポーネント連携.md` の「ローカルAPIの認証」。
+契約は `docs/docs/programs/コンポーネント連携.md` の「ローカルAPIへの接続」。
 
 ## 自動生成ファイル
 

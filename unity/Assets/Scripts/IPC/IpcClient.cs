@@ -293,7 +293,6 @@ public class IpcClient : MonoBehaviour
             case "system:ready":
                 var version = Newtonsoft.Json.Linq.JObject.FromObject(envelope.payload);
                 ProtocolCompatible = (int?)version["ipc_contract_version"] == FrontendVersion.IpcContract
-                    && (int?)version["api_contract_version"] == FrontendVersion.ApiContract
                     && (bool?)version["accepted"] != false;
                 IsConnected = ProtocolCompatible;
                 if (!ProtocolCompatible) {
@@ -1649,7 +1648,6 @@ public class IpcClient : MonoBehaviour
     {
         SendEnvelope("system:graphic_ready", new Dictionary<string, object> {
             { "frontend_version", FrontendVersion.Version },
-            { "api_contract_version", FrontendVersion.ApiContract },
             { "ipc_contract_version", FrontendVersion.IpcContract },
             { "core_compatible", BackendCompatibility.Compatible }
         });

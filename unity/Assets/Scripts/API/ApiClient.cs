@@ -9,8 +9,7 @@ using Newtonsoft.Json;
 
 /// <summary>
 /// HTTPリクエストを統一的に処理する共通APIクライアント。
-/// ローカル API への要求は、通信契約ヘッダーを付けるため、すべてここ(<see cref="Get{T}"/> などの定型か <see cref="Request"/>)を通す。
-/// UnityWebRequest を直接作るとヘッダーが付かず、コアとの契約版の不一致を検知できない。
+/// ローカル API への要求は、すべてここ(<see cref="Get{T}"/> などの定型か <see cref="Request"/>)を通す。
 /// </summary>
 public static class ApiClient
 {
@@ -21,16 +20,9 @@ public static class ApiClient
     /// </summary>
     public static string BASE_URL = "http://127.0.0.1:5000/api/v1";
 
-    public const string CONTRACT_HEADER = "X-City-Genesis-API";
     public static bool UiBackendConnected { get; set; } = true;
     public static bool HealthBackendConnected { get; set; } = true;
     public static bool BackendConnected => UiBackendConnected && HealthBackendConnected;
-
-    /// <summary>通信契約ヘッダーを付ける。要求の組み立ては <see cref="ApiRequest"/> が行うので、呼び出し元は <see cref="Request"/> を使う。</summary>
-    internal static void ApplyHeaders(UnityWebRequest request)
-    {
-        request.SetRequestHeader(CONTRACT_HEADER, FrontendVersion.ApiContract.ToString());
-    }
 
     /// <summary>
     /// 定型(Get/GetBulk/Post/Patch)に当てはまらない要求を作る(まだ送らない)。
@@ -243,7 +235,6 @@ public static class ApiClient
 
 /// <summary>
 /// ローカル API への1件の要求(<see cref="ApiClient.Request"/> で作る)。
-/// 送るときに <see cref="ApiClient.ApplyHeaders"/> でヘッダーを付ける。
 /// </summary>
 public sealed class ApiRequest : IDisposable
 {
@@ -291,7 +282,6 @@ public sealed class ApiRequest : IDisposable
         {
             foreach (var header in extraHeaders) Web.SetRequestHeader(header.Key, header.Value);
         }
-        ApiClient.ApplyHeaders(Web);
         operation = Web.SendWebRequest();
         return this;
     }

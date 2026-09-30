@@ -2,7 +2,6 @@
  * APIリクエストのヘルパー関数
  */
 
-import { frontendVersion } from "./version";
 import { decode } from "@msgpack/msgpack";
 
 /**
@@ -62,15 +61,14 @@ export function setBackendConnected(connected: boolean) {
   backendConnected = connected;
 }
 
-/** 設定済みのバックエンドAPIのURLか。版ヘッダーはここにだけ付け、他のオリジンへ送らない。 */
+/** 設定済みのバックエンドAPIのURLか。 */
 function isBackendApiUrl(url: string): boolean {
   return configuredBase !== "" && url.startsWith(`${configuredBase}/api/v1/`);
 }
 
 /**
- * バイナリ取得も含め、バックエンドへの要求に版ヘッダーを付ける。
- * 起動時の互換性確認はRust側で共有し、通常要求の契約番号はコア側で検査する。
- * 各画面が直接書いた fetch もここで版ヘッダーが付く。
+ * バイナリ取得も含め、各画面が直接書いた fetch もバックエンドへの要求はここを通す。
+ * 通信断の間は、応答だけ失われると二重実行になる更新要求を送らない。
  */
 export function configureBackendRequests(baseUrl: string) {
   if (!baseUrl || configuredBase === baseUrl.replace(/\/+$/, "")) return;
@@ -83,10 +81,7 @@ export function configureBackendRequests(baseUrl: string) {
     if (!backendConnected && !["GET", "HEAD", "OPTIONS"].includes(method)) {
       throw new ApiError("BACKEND_DISCONNECTED", "BACKEND_DISCONNECTED", 503);
     }
-    const headers = new Headers(input instanceof Request ? input.headers : undefined);
-    new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
-    headers.set("X-City-Genesis-API", String(frontendVersion.api_contract_version));
-    return nativeFetch(input, { ...init, headers });
+    return nativeFetch(input, init);
   };
 }
 
@@ -106,7 +101,6 @@ export async function fetchApi<T>(
     method: options?.method ?? "GET",
     headers: {
       Accept: `${MSGPACK_MEDIA_TYPE}, application/json`,
-      "X-City-Genesis-API": String(frontendVersion.api_contract_version),
       ...options?.headers,
     },
     body: options?.body,

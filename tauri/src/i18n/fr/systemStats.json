@@ -3,7 +3,7 @@
     "load": {
       "title": "Charge de calcul",
       "heading": "Temps de calcul de la dernière époque ({{days}} jours)",
-      "noData": "Aucune donnée pour l'instant. Lancez une époque pour voir combien de temps son calcul a pris.",
+      "noData": "Aucune donnée de mesure",
       "note": "Si plusieurs époques sont lancées à la suite, la dernière est affichée. La taille du problème est une estimation approximative des principales comparaisons, d'après la taille de la ville.",
       "colGroup": "Traitement",
       "colTime": "Temps",
@@ -35,6 +35,8 @@
       "environment": "Grille {{width}} × {{height}} × positions du soleil"
     },
     "entities": {
+      "colMetric": "Indicateur",
+      "colCount": "Nombre",
       "title": "Taille de la ville",
       "agents": "Agents",
       "households": "Ménages",
@@ -58,10 +60,10 @@
       "current": "Utilisation actuelle",
       "peak": "Maximum depuis le lancement",
       "total": "Mémoire installée",
-      "ofTotal": "Le maximum représente {{percent}} de la mémoire installée",
       "note": "Mémoire physique utilisée par le processus du simulateur. Le maximum inclut les hausses temporaires pendant les époques."
     },
     "environment": {
+      "gpuAcceleration": "Accélération GPU",
       "title": "Système",
       "cpu": "Processeur",
       "cores": "Cœurs logiques",

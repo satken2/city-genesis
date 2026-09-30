@@ -39,7 +39,7 @@ pub struct AppState {
     pub writer_channel: Option<MmfChannel>,
     pub api_base_url: String,
     /// コアの版情報と照合結果。全WebView・開始処理・セッション監視が同じ起動時の結果を使う。
-    pub core_info: Arc<tokio::sync::OnceCell<crate::version::CoreInfo>>,
+    pub core_info: Arc<tokio::sync::OnceCell<serde_json::Value>>,
     /// HUD(とヒントバー・チュートリアル・トップメニュー等)を表示しているモニターのインデックス
     pub current_monitor_index: usize,
     /// マルチディスプレイモード。ポップアップをHUDとは別のモニターに表示する

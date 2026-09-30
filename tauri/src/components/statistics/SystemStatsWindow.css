@@ -1,24 +1,48 @@
 /**
- * システム統計ウィンドウのスタイル
- *
- * 意匠はフラット(App.css の --flat-*)。節は「左端の実線ブロックの見出し + 面」の縦並びで、
- * タブを持たずに1枚でスクロールする。近似設定の行だけは設定フォームの共通部品(SettingsForm.css)を使う。
+ * システム統計の分析ビュー。左は計測と都市の規模、右は近似設定で独立してスクロールする。
+ * 配色は App.css の --flat-* を使い、数値の桁と細い区切りで情報の階層を示す。
+ * 狭いウィンドウや大きな文字サイズでは、縦並びにして本文全体をスクロールする。
  */
+.system-stats-frame {
+  height: 100%;
+  min-height: 0;
+  container-type: inline-size;
+}
 
 .system-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(27rem, 0.52fr);
   height: 100%;
-  padding: 1.5rem;
-  overflow-y: auto;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--flat-surface);
   color: var(--flat-text-body);
 }
 
 .system-stats--message {
+  display: flex;
   align-items: center;
   justify-content: center;
   color: var(--flat-text-muted);
+}
+
+.system-stats-analysis,
+.system-stats-sidebar {
+  min-width: 0;
+  min-height: 0;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.system-stats-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.system-stats-sidebar {
+  background: var(--flat-sunken);
+  border-left: 1px solid var(--flat-raised-hover);
 }
 
 .system-stats-section {
@@ -28,51 +52,79 @@
   min-width: 0;
 }
 
+.system-stats-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 .system-stats-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.67rem;
   margin: 0;
-  padding: 0.17rem 0 0.17rem 0.83rem;
   font-size: 1.17rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--flat-text);
-  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+.system-stats-section-title::before {
+  content: "";
+  width: 0.33rem;
+  height: 1rem;
+  background: var(--flat-accent);
+  flex-shrink: 0;
+}
+
+.system-stats-epoch {
+  color: var(--flat-text-muted);
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.system-stats-epoch b {
+  margin-left: 0.5rem;
+  color: var(--flat-text-body);
+  font-weight: 500;
 }
 
 .system-stats-note {
   margin: 0;
   font-size: 0.92rem;
-  line-height: 1.5;
-  color: var(--flat-text-muted);
+  line-height: 1.65;
+  color: var(--flat-text-label);
 }
 
 .system-stats-empty {
   margin: 0;
-  padding: 1.5rem 1.17rem;
-  background: var(--flat-surface);
-  color: var(--flat-text-muted);
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--flat-raised-hover);
+  color: var(--flat-text-label);
   line-height: 1.6;
 }
 
-/* ========== 計算負荷 ========== */
-
 .system-stats-headline {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.33rem 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-.system-stats-headline-label {
-  color: var(--flat-text-label);
-}
-
+.system-stats-headline-label { color: var(--flat-text-label); }
 .system-stats-headline-value {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0;
   color: var(--flat-text);
+  font-variant-numeric: tabular-nums;
 }
 
-/* 区分の間を2pxの溝で分け、隣り合う色を境界線なしで見分けられるようにする */
+/* 微小な処理も選べる最小幅を保つ。表と横棒は同じ区分に反応する。 */
 .system-stats-bar {
   display: flex;
   gap: 2px;
@@ -80,158 +132,135 @@
   padding: 2px;
   background: var(--flat-sunken);
 }
-
 .system-stats-bar-segment {
   flex-basis: 0;
   min-width: 2px;
   transition: opacity 0.15s ease;
 }
-
-.system-stats-bar-segment.is-dimmed {
-  opacity: 0.3;
-}
+.system-stats-bar-segment.is-dimmed { opacity: 0.3; }
 
 .system-stats-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--flat-surface);
   font-variant-numeric: tabular-nums;
 }
-
 .system-stats-table th,
 .system-stats-table td {
-  padding: 0.42rem 0.83rem;
+  padding: 0.35rem 0.67rem;
   text-align: left;
-  white-space: nowrap;
+  vertical-align: middle;
 }
-
-.system-stats-table th {
+.system-stats-table th:first-child,
+.system-stats-table td:first-child { padding-left: 0; }
+.system-stats-table th:last-child,
+.system-stats-table td:last-child { padding-right: 0; }
+.system-stats-table thead th {
+  padding-top: 0.33rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--flat-text-muted);
+  color: var(--flat-text-label);
   font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--flat-text-muted);
-  background: var(--flat-sunken);
+  font-weight: 500;
 }
-
-.system-stats-table td {
-  color: var(--flat-text-body);
-}
-
-.system-stats-table tbody tr + tr td {
-  border-top: 2px solid var(--flat-sunken);
-}
-
-.system-stats-table tbody tr.is-hovered td {
-  background: var(--flat-raised-hover);
-}
-
-.system-stats-table .is-number {
-  text-align: right;
-}
-
+.system-stats-table tbody tr { border-bottom: 1px solid var(--flat-raised); }
+.system-stats-table tbody tr.is-hovered,
+.system-stats-entities tbody tr:hover { background: var(--flat-raised); }
+.system-stats-table .is-number { text-align: right; white-space: nowrap; }
 .system-stats-swatch {
   display: inline-block;
-  width: 0.83rem;
-  height: 0.83rem;
-  margin-right: 0.5rem;
-  vertical-align: -0.08rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.67rem;
+  vertical-align: 0.08rem;
 }
-
-/* ========== 都市の規模 ========== */
-
-.system-stats-tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-  gap: 2px;
-  background: var(--flat-sunken);
-  box-shadow: var(--flat-shadow-sm);
+.system-stats-entities tbody th {
+  font-weight: 400;
+  color: var(--flat-text-body);
 }
-
-.system-stats-tile {
-  display: flex;
-  flex-direction: column;
-  gap: 0.17rem;
-  min-width: 0;
-  padding: 0.67rem 0.83rem;
-  background: var(--flat-surface);
-}
-
-/* 内訳を持つタイルは内訳の1行が収まるよう2列分を使う */
-.system-stats-tile.is-wide {
-  grid-column: span 2;
-}
-
-.system-stats-tile-label {
-  font-size: 0.92rem;
-  color: var(--flat-text-label);
-}
-
-.system-stats-tile-value {
-  font-size: 1.5rem;
+.system-stats-entity-count {
   font-weight: 600;
   color: var(--flat-text);
 }
-
-.system-stats-tile-detail {
-  font-size: 0.92rem;
-  color: var(--flat-text-muted);
-  overflow-wrap: anywhere;
-}
-
-/* ========== メモリ・実行環境 ========== */
-
-.system-stats-columns {
+.system-stats-overview {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  gap: 2rem;
+}
+.system-stats-resources {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
-
-.system-stats-list {
+.system-stats-facts {
   display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 2px;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 1rem;
   margin: 0;
-  background: var(--flat-sunken);
 }
-
-.system-stats-list dt,
-.system-stats-list dd {
+.system-stats-facts dt,
+.system-stats-facts dd {
   margin: 0;
-  padding: 0.42rem 0.83rem;
-  background: var(--flat-surface);
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--flat-raised-hover);
 }
-
-.system-stats-list dt {
-  color: var(--flat-text-label);
-}
-
-.system-stats-list dd {
-  color: var(--flat-text);
+.system-stats-facts dt { color: var(--flat-text-label); }
+.system-stats-facts dd {
   text-align: right;
+  color: var(--flat-text);
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
 
-.system-stats-meter {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.system-stats-memory-meter .meter-bar { height: 4px; border-radius: 0; background: var(--flat-sunken); }
+.system-stats-memory-meter .meter-fill { border-radius: 0; }
+
+.system-stats-approximation { gap: 1rem; }
+.system-stats-status {
+  color: var(--flat-accent);
+  font-size: 0.83rem;
+  letter-spacing: 0.06em;
 }
-
-/* ========== シミュレーションの近似 ========== */
-
 .system-stats-warning {
-  padding: 0.83rem 1.17rem;
-  background: var(--flat-warn-surface);
+  padding: 1rem 0 1rem 1rem;
+  border-left: 2px solid var(--flat-warn);
   color: var(--flat-warn);
-  box-shadow: inset 4px 0 0 var(--flat-warn);
-  line-height: 1.6;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+.system-stats-warning strong { font-weight: 500; }
+.system-stats-warning p { margin: 0.5rem 0 0; color: var(--flat-text-label); }
+
+/* SettingsRow の入力契約を共用し、分析ビューでは箱を重ねず設定を縦に並べる。 */
+.system-stats-approximation .settings-card { gap: 0; background: transparent; box-shadow: none; }
+.system-stats-approximation .settings-row {
+  align-items: center;
+  gap: 10px 12px;
+  padding: 14px 0;
+  background: transparent;
+  border-top: 1px solid var(--flat-raised-hover);
+}
+.system-stats-approximation .settings-row-name { color: var(--flat-text-body); }
+.system-stats-approximation .settings-row-desc { color: var(--flat-text-label); }
+.system-stats-approximation .settings-row-control { margin-left: auto; opacity: 0.65; flex-wrap: wrap; }
+.system-stats-approximation .settings-number[type="number"] { width: 90px; background: var(--flat-raised); }
+
+@container (max-width: 70rem) {
+  .system-stats { display: flex; flex-direction: column; overflow-y: auto; }
+  .system-stats-analysis,
+  .system-stats-sidebar { overflow: visible; flex-shrink: 0; }
+  .system-stats-sidebar { border-left: none; border-top: 1px solid var(--flat-raised-hover); }
+}
+@container (max-width: 42rem) {
+  .system-stats-analysis,
+  .system-stats-sidebar { padding: 1.25rem; }
+  .system-stats-overview { grid-template-columns: minmax(0, 1fr); }
+  .system-stats-table th,
+  .system-stats-table td { padding-right: 0.33rem; padding-left: 0.33rem; }
 }
 
-.system-stats-warning p {
-  margin: 0.5rem 0 0;
-  color: var(--flat-text-body);
-}
-
-.system-stats .settings-number[type="number"] {
-  width: 90px;
+.system-stats-table .is-number,
+.system-stats-headline-value,
+.system-stats-facts dd {
+  font-family: Consolas, "Cascadia Mono", monospace;
 }

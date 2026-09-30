@@ -494,8 +494,8 @@
   },
   "system_stats": {
     "title": "システム統計",
-    "width": 680,
-    "height": 780,
+    "width": 1120,
+    "height": 850,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,

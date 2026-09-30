@@ -3,7 +3,7 @@
     "load": {
       "title": "계산 부하",
       "heading": "최근 에포크({{days}}일분)의 계산 시간",
-      "noData": "아직 데이터가 없습니다. 에포크를 실행하면 최근 에포크의 계산 시간이 표시됩니다.",
+      "noData": "측정 데이터 없음",
       "note": "여러 에포크를 연속으로 실행한 경우 마지막 에포크의 값입니다. 문제 규모는 주요 비교의 조합 수를 도시 규모로부터 추정한 대략적인 값입니다.",
       "colGroup": "처리",
       "colTime": "시간",
@@ -35,6 +35,8 @@
       "environment": "격자 {{width}} × {{height}} × 태양 위치"
     },
     "entities": {
+      "colMetric": "항목",
+      "colCount": "수량",
       "title": "도시 규모",
       "agents": "경제 주체",
       "households": "세대",
@@ -58,10 +60,10 @@
       "current": "현재 사용량",
       "peak": "실행 이후 최대",
       "total": "탑재 메모리",
-      "ofTotal": "최대는 탑재 메모리의 {{percent}}",
       "note": "시뮬레이터 본체 프로세스가 사용하는 물리 메모리입니다. 최대에는 에포크 중 일시적으로 늘어난 양도 포함됩니다."
     },
     "environment": {
+      "gpuAcceleration": "GPU 가속",
       "title": "실행 환경",
       "cpu": "CPU",
       "cores": "논리 코어 수",

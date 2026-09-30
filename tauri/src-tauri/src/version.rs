@@ -1,5 +1,4 @@
 use crate::state::SharedState;
-use reqwest::header::HeaderMap;
 use serde_json::{json, Value};
 use std::path::PathBuf;
 use std::sync::OnceLock;
@@ -47,35 +46,31 @@ pub fn user_data_dir() -> Option<PathBuf> {
     USER_DATA_DIR.get().cloned()
 }
 
-/// 版の契約ヘッダー。
-pub fn headers() -> HeaderMap {
-    let mut headers = HeaderMap::new();
-    headers.insert("X-City-Genesis-API", definition()["api_contract_version"].to_string().parse().unwrap());
-    headers
+/// フロントのMAJORがコアのMAJOR未満なら起動できない(フロントの方が新しい分には構わない)。
+/// コアの版を読めないときも、互換であると推測しない。
+pub fn check_frontend_version(core: &Value) -> Result<(), String> {
+    let frontend = definition()["frontend_version"].as_str().unwrap_or_default().to_string();
+    let core_version = core["core_version"].as_str().unwrap_or_default();
+    if frontend_covers_core(&frontend, core_version) { Ok(()) }
+    else { Err(format!("FRONTEND_VERSION_OUTDATED: core {core_version} / UI {frontend}")) }
 }
 
-pub fn client() -> reqwest::Client {
-    reqwest::Client::builder().default_headers(headers()).build().expect("HTTP client")
+fn frontend_covers_core(frontend: &str, core: &str) -> bool {
+    matches!((major_of(frontend), major_of(core)), (Some(frontend), Some(core)) if frontend >= core)
 }
 
-#[derive(Clone)]
-pub struct CoreInfo {
-    pub version: Value,
-    pub error: Option<String>,
+fn major_of(version: &str) -> Option<u64> {
+    version.split('.').next()?.parse().ok()
 }
 
-/// コアはアプリ実行中に差し替わらないため、取得成功後の版情報と照合結果を起動中ずっと共有する。
+/// コアはアプリ実行中に差し替わらないため、取得成功後の版情報を起動中ずっと共有する。
 /// 起動準備中の取得失敗は確定せず、次の初期取得で再試行できる。同時要求もOnceCellで1本にまとめる。
-pub async fn core_info(state: &SharedState) -> Result<CoreInfo, String> {
+pub async fn core_info(state: &SharedState) -> Result<Value, String> {
     let (base, cache) = { let guard = state.lock(); (guard.api_base_url.clone(), guard.core_info.clone()) };
     cache.get_or_try_init(|| async {
-        let response = client().get(format!("{}/api/v1/system/version", base.trim_end_matches('/')))
+        let response = reqwest::Client::new().get(format!("{}/api/v1/system/version", base.trim_end_matches('/')))
             .timeout(Duration::from_secs(10)).send().await.map_err(|e| e.to_string())?;
-        let remote: Value = response.error_for_status().map_err(|e| e.to_string())?.json().await.map_err(|e| e.to_string())?;
-        let error = if remote["api_contract_version"] != definition()["api_contract_version"] {
-            Some(format!("API_CONTRACT_MISMATCH: core {} / UI {}", remote["api_contract_version"], definition()["api_contract_version"]))
-        } else { None };
-        Ok(CoreInfo { version: remote, error })
+        response.error_for_status().map_err(|e| e.to_string())?.json().await.map_err(|e| e.to_string())
     }).await.cloned()
 }
 
@@ -83,15 +78,13 @@ pub async fn verify_core(state: &SharedState) -> Result<(), String> {
     if !state.lock().backend_health.connected { return Err("BACKEND_DISCONNECTED".into()); }
     let error = state.lock().graphic_contract_error.clone();
     if let Some(error) = error { return Err(error); }
-    if let Some(error) = core_info(state).await?.error {
-        return Err(error);
-    }
+    core_info(state).await?;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn get_core_version(state: tauri::State<'_, SharedState>) -> Result<Value, String> {
-    Ok(core_info(state.inner()).await?.version)
+    core_info(state.inner()).await
 }
 
 pub async fn prepare_graphic(state: &SharedState) -> Result<(), String> {
@@ -113,7 +106,7 @@ pub async fn validate_load(state: &SharedState, id: &str, template: bool, accept
     let base = state.lock().api_base_url.clone();
     let mut url = reqwest::Url::parse(&format!("{}/api/v1/saves/", base.trim_end_matches('/'))).map_err(|e| e.to_string())?;
     url.path_segments_mut().map_err(|_| "invalid API URL")?.pop_if_empty().push(id).push("validation");
-    let response = client().get(url).query(&[("template", template)]).timeout(Duration::from_secs(120))
+    let response = reqwest::Client::new().get(url).query(&[("template", template)]).timeout(Duration::from_secs(120))
         .send().await.map_err(|e| e.to_string())?;
     let status = response.status();
     let data: Value = response.json().await.map_err(|e| e.to_string())?;
@@ -136,7 +129,7 @@ mod tests {
     use std::io::{Read, Write};
     use std::net::TcpListener;
 
-    fn mock_core(contract: Value, statuses: Vec<u16>) -> (SharedState, std::thread::JoinHandle<()>) {
+    fn mock_core(statuses: Vec<u16>) -> (SharedState, std::thread::JoinHandle<()>) {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let base = format!("http://{}", listener.local_addr().unwrap());
         let server = std::thread::spawn(move || {
@@ -152,8 +145,7 @@ mod tests {
                 }
                 let request = String::from_utf8(request).unwrap();
                 assert!(request.starts_with("GET /api/v1/system/version HTTP/1.1"));
-                assert!(request.to_lowercase().contains("x-city-genesis-api:"));
-                let body = json!({ "core_version": "1.0.0", "api_contract_version": contract }).to_string();
+                let body = json!({ "core_version": "1.0.0" }).to_string();
                 write!(stream, "HTTP/1.1 {status} Test\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).unwrap();
             }
         });
@@ -171,40 +163,38 @@ mod tests {
 
     #[test]
     fn startup_version_is_shared_across_concurrent_callers_and_later_operations() {
-        let (state, server) = mock_core(definition()["api_contract_version"].clone(), vec![200]);
+        let (state, server) = mock_core(vec![200]);
         runtime().block_on(async {
             let mut callers = Vec::new();
             for _ in 0..12 {
                 let state = state.clone();
                 callers.push(tokio::spawn(async move { core_info(&state).await.unwrap() }));
             }
-            for caller in callers { assert!(caller.await.unwrap().error.is_none()); }
+            for caller in callers { assert_eq!(caller.await.unwrap()["core_version"], "1.0.0"); }
             // サーバ終了後の開始・ロード前確認も起動時の結果だけで通る。
             server.join().unwrap();
             for _ in 0..3 { verify_core(&state).await.unwrap(); }
-            assert_eq!(core_info(&state).await.unwrap().version["core_version"], "1.0.0");
-        });
-    }
-
-    #[test]
-    fn contract_mismatch_is_retained_without_repeated_requests() {
-        let (state, server) = mock_core(json!(999999), vec![200]);
-        runtime().block_on(async {
-            assert!(verify_core(&state).await.unwrap_err().starts_with("API_CONTRACT_MISMATCH:"));
-            server.join().unwrap();
-            assert!(verify_core(&state).await.unwrap_err().starts_with("API_CONTRACT_MISMATCH:"));
-            assert_eq!(core_info(&state).await.unwrap().version["core_version"], "1.0.0");
+            assert_eq!(core_info(&state).await.unwrap()["core_version"], "1.0.0");
         });
     }
 
     #[test]
     fn initial_unavailable_response_can_be_retried_until_first_success() {
-        let (state, server) = mock_core(definition()["api_contract_version"].clone(), vec![503, 200]);
+        let (state, server) = mock_core(vec![503, 200]);
         runtime().block_on(async {
             assert!(core_info(&state).await.is_err());
             verify_core(&state).await.unwrap();
             server.join().unwrap();
             verify_core(&state).await.unwrap();
         });
+    }
+
+    #[test]
+    fn frontend_must_not_be_older_than_core_major() {
+        assert!(frontend_covers_core("1.0.0", "1.9.9"));
+        assert!(frontend_covers_core("2.0.0", "1.9.9"));
+        assert!(!frontend_covers_core("1.9.9", "2.0.0"));
+        assert!(!frontend_covers_core("1.0.0", ""));
+        assert!(!frontend_covers_core("1.0.0", "unknown"));
     }
 }
