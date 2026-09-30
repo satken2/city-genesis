@@ -172,12 +172,7 @@ public class AppRoot : MonoBehaviour
             if (wasCompatible == BackendCompatibility.Compatible) continue;
             if (!BackendCompatibility.Compatible) GameStateManager.Instance?.SetGameStarted(false, null);
             IpcClient.Instance?.EmitGraphicReady();
-            if (BackendCompatibility.Compatible)
-            {
-                // 再接続したバックエンドは別のマスターで起動しているかもしれないので取り直す。
-                if (MasterDataStore.Instance != null) StartCoroutine(MasterDataStore.Instance.Refresh());
-                StartCoroutine(PollBackendSessionState());
-            }
+            if (BackendCompatibility.Compatible) StartCoroutine(PollBackendSessionState());
         }
     }
 

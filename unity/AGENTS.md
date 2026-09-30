@@ -24,7 +24,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 | `Grid/`、`Steam/` | グリッドオーバーレイ、Steam 認証(`SteamAuthClient`。チケットを `POST /system/verify` へ送る) |
 | `AppRoot.cs` | 起動処理。天気・音・エフェクトのシングルトンをここで生成する(シーン配置しない) |
 | `GameStateManager.cs` | ゲーム状態(シングルトン)と状態変化イベント。`IsGameStarted()`=データ取得の許可、`IsWorldVisible`=表示の許可 |
-| `MasterDataStore.cs` | マスターデータの保持。道路幅・車線数などの描画パラメータの正。起動時に取得し、バックエンドへの再接続と `session:reset` で取り直す(`Refresh`。取得中も直前のマスターを使う)。知らないバリアントを `GetPathMaster` で引くと例外になる |
+| `MasterDataStore.cs` | マスターデータの保持。道路幅・車線数などの描画パラメータの正。起動時にバックエンドの応答を待って取得し(取れるまで2秒ごとに再試行)、以後は取り直さない。開発中にマスターを変えてバックエンドだけ再起動したら Unity も再起動する(知らないバリアントを `GetPathMaster` で引くと例外になる) |
 | `CameraController.cs` / `.Cinematic.cs` / `CameraCellChecker.cs` | カメラ操作・撮影モードとバックエンド `City.camera` との視点同期 / 視野中心セルの判定と `CellDataLoader` への通知(ロードの起点) |
 | `Constants.cs` / `LocalConstants.cs` | 共有定数(自動生成) / Unity ローカルの定数とログフラグ |
 | `ZoneEditContext.cs`、`InputUtil.cs`、`LoadingOverlay.cs` | 地区編集の状態、入力抑制、ロード中の黒画面 |
