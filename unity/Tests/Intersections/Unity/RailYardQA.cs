@@ -30,6 +30,7 @@ public static class RailYardQA
             var assembly = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
             Type yard = assembly.GetType("RailYardBuildingMeshBuilder");
             CheckPlan(yard);
+            CheckTerminalFallback(yard);
             Type modelType = assembly.GetType("ModelManager");
             var model = new GameObject("Models").AddComponent(modelType);
             modelType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, model);
@@ -47,7 +48,7 @@ public static class RailYardQA
             var building = Activator.CreateInstance(summary);
             summary.GetField("variant").SetValue(building, 1060);
             summary.GetField("_polygonArrayCache", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(building,
-                new[] { new[] { -19f, -80f }, new[] { 19f, -80f }, new[] { 19f, 80f }, new[] { -19f, 80f } });
+                new[] { new[] { 19f, 80f }, new[] { -19f, 80f }, new[] { -19f, -80f }, new[] { 19f, -80f } });
             object result = yard.GetMethod("Generate").Invoke(Activator.CreateInstance(yard), new[] { building, (object)false });
             var mesh = (Mesh)result.GetType().GetProperty("Mesh").GetValue(result);
             var materials = (Material[])result.GetType().GetProperty("Materials").GetValue(result);
@@ -56,7 +57,6 @@ public static class RailYardQA
             Require(mesh.vertices.Where(v=>Mathf.Abs(v.x)<1.6f && v.z>0f).Max(v=>v.z) <= 80.01f, "Lead extends beyond terminal");
             Require(mesh.vertices.Any(v=>Mathf.Abs(v.x)>18.8f && v.y>2.1f && v.y<2.3f), "Boundary fence missing");
             Require(!mesh.vertices.Any(v=>Mathf.Abs(v.x)<2.9f && v.z>79.7f && v.y>.5f && v.y<2.3f), "Fence blocks terminal opening");
-            Require(!Covers(mesh, new Vector2(18f, 60f)), "Floor covers empty corner");
             Require(Covers(mesh, new Vector2(0f, 77f)), "Missing terminal lead");
             CheckMovedMeshes(assembly,yard,summary,building);
             Render(root, mesh, materials);
@@ -143,6 +143,22 @@ public static class RailYardQA
                 }
             }
         }
+    }
+
+    // 端子が未ロードのときの初期位置。長方形の敷地は短辺(2本のうち辺番号の若い方)の中点で、バックエンドと同じ規則。
+    static void CheckTerminalFallback(Type yard)
+    {
+        var method=yard.GetMethod("TryGetRectangleShortSideMidpoint",PrivateStatic);
+        Func<Vector2[],Vector2?> midpoint=ring=>{
+            var args=new object[] { ring,null };
+            return (bool)method.Invoke(null,args) ? (Vector2?)args[1] : null;
+        };
+        Require(midpoint(new[] { new Vector2(19,80),new Vector2(-19,80),new Vector2(-19,-80),new Vector2(19,-80) })==new Vector2(0,80),"Terminal is not on the first short side");
+        Require(midpoint(new[] { new Vector2(0,0),new Vector2(60,0),new Vector2(60,40),new Vector2(0,40) })==new Vector2(60,20),"Terminal is not on the short side");
+        Require(midpoint(new[] { new Vector2(0,0),new Vector2(30,0),new Vector2(30,30),new Vector2(0,30) })==new Vector2(15,0),"Square does not use side 0");
+        Require(midpoint(new[] { new Vector2(0,0),new Vector2(30,0),new Vector2(60,0),new Vector2(60,40),new Vector2(0,40),new Vector2(0,0) })==new Vector2(60,20),"Mid-edge vertex is counted as a corner");
+        Require(midpoint(new[] { new Vector2(0,0),new Vector2(60,0),new Vector2(62,40),new Vector2(2,40) })==null,"Parallelogram treated as rectangle");
+        Require(midpoint(new[] { new Vector2(0,0),new Vector2(60,0),new Vector2(60,20),new Vector2(30,20),new Vector2(30,40),new Vector2(0,40) })==null,"L-shape treated as rectangle");
     }
 
     static void CheckMovedMeshes(Assembly assembly,Type yard,Type summary,object building)

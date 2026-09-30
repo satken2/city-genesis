@@ -54,7 +54,7 @@
 | `BuildingMeshUtils.cs` | パーツ解決(prefix・`_close`・common)・`CombineModuleMeshes`・`AddStackedModule`・`ResolveParcelContext`・`SanitizeRingPolygon`・屋根共通幾何 |
 | `ModularBuildingMeshBuilder.cs` / `ModularBodyBuilder.cs` / `DefaultBodyBuilder.cs` | モジュラー躯体(壁・角の敷き詰め `BuildWallRun`、敷地装飾 `GenerateSiteDecorations`)と白箱フォールバック(F・F1) |
 | `FlatRoofBuilder.cs` / `HouseRoofBuilder.cs` / `GableRoofBuilder.cs` / `ShedRoofBuilder.cs` / `InteriorFloorBuilder.cs` / `ExteriorStairBuilder.cs` | 屋根4種・各階の床(F1)、辺ごとの外階段(F§11.4) |
-| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間に港ごとのヤードの荷(403 はコンテナ `port_container` の段積み、401・402・1001 は `port_cargo` を積まずに並べる。荷のパーツは各港の `a{variant}` にだけ置き、`b128` に置くと他の港へフォールバックする)を置く)、車両基地(F9。引き込み線の単線・複線は端子へつながる線路の軌道数で決まり、`ResolveLeadHalfSpacing` を BuildingManager が再利用キーに混ぜる) |
+| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間に港ごとのヤードの荷(403 はコンテナ `port_container` の段積み、401・402・1001 は `port_cargo` を積まずに並べる。荷のパーツは各港の `a{variant}` にだけ置き、`b128` に置くと他の港へフォールバックする)を置く)、車両基地(F9。引き込み線の単線・複線は端子へつながる線路の軌道数で決まり、`ResolveLeadHalfSpacing` を BuildingManager が再利用キーに混ぜる。構内の設備は材質ごとに結合してから頂点を地形へ沿わせ、敷地全面は `a{variant}` 自身の floor で覆う=`ResolveFloorMaterialFromMaster(ownPartOnly)`) |
 | `PortLayout.cs` | 港の配置計画(施設モジュール・荷役設備・ヤードの荷の置き場)。通常モデルの寸法と入力の形だけで決まる純データ(F4 §5)。荷の置き方は `CargoSpec`(コンテナは `ContainerSpec`、並べる荷は `GroundCargoSpec` がパーツの外接箱から作る) |
 | `OpenSpaceLayout.cs` / `OpenSpaceBuildingMeshBuilder.cs` | 駐車場・駅前ロータリー・公園(F10) |
 | `BuildingRoadAccess.cs` | 施設側の決定論的な間口(ロータリーの舗装交線・既成モデルのEmpty)。描画GOを間口の正にしない(F§16) |
@@ -103,6 +103,7 @@
 | `TrackPath.ResolvePlatformExtents`(`platform_side`→左右。`DIR_BACKWARD` は反転。軌道数2以上は両側) | `geo_paths.get_platform_extension_widths`(ホームの敷地) |
 | `StationHousePath` の専有エリア(`ComputeEndFootprints` / `ResolveHousePosition`) | `geo_station_house.py`(建屋の占有) |
 | `TrackIntersectionMeshGenerator` の転回閾値 `RAIL_MAX_TURN_ANGLE_DEG` | `parameters.yaml` の同名値と経路探索の転回制約 |
+| `RailYardBuildingMeshBuilder.TryGetRectangleShortSideMidpoint`・`ResolveTerminalNodeLocal`(端子未ロード時の初期位置。線路の向きの基準にもなる) | `crud_agents._rectangle_short_side_midpoint`・`_connection_node_position`(接続端子の初期配置) |
 | `Test/TestSubBuildingLayout`(テスト専用の棟配置。露天掘りの前庭の絞り込みを含む) | `crud_buildings.generate_sub_building_layout` + `geo_buildings.generate_mashup_cells` + `geo_open_pit.open_pit_yard_cells` |
 | `Tests/Quay/QuayQA.cs` の造成の書き込み規則(埋立地の中で岸壁から `QUAY_KEEP_WIDTH` を超える1m格子点を天端に)と地形タイルの再標本化(500/512m 間隔の双線形) | `geo_grading.compute_grading_heights` + `geo_reclaimed_land` の keep 領域、`terrain_surface.tile` |
 

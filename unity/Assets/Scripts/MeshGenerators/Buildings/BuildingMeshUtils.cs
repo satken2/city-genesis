@@ -1075,8 +1075,10 @@ public static class BuildingMeshUtils
     /// どこにも floor パーツが無ければ null（既定建物マテリアルにはフォールバックしない）。
     /// prefix は呼び出し側で解決済みの建物プレフィックス（a{variant} または b{bd_type}）。
     /// モジュラー・既成建物の両方から共通で使う。
+    /// ownPartOnly は b{bd_type}・common へフォールバックせず prefix 自身の floor パーツだけを使う
+    /// （車両基地。共通の舗装が線路の下に敷かれないようにする。F9 §6）。
     /// </summary>
-    public static Material ResolveFloorMaterialFromMaster(BuildingSummary buildingData, string prefix)
+    public static Material ResolveFloorMaterialFromMaster(BuildingSummary buildingData, string prefix, bool ownPartOnly = false)
     {
         if (buildingData == null || MasterDataStore.Instance == null || !MasterDataStore.Instance.IsInitialized)
         {
@@ -1096,6 +1098,13 @@ public static class BuildingMeshUtils
         if (agentMaster?.draw_floor != true)
         {
             return null;
+        }
+
+        if (ownPartOnly)
+        {
+            GameObject part = GetPartBySuffixScan(prefix, "floor", ComputeVariantNumber(buildingData.visual_variant));
+            Material[] materials = part != null ? GetModuleMaterials(part) : null;
+            return (materials != null && materials.Length > 0) ? materials[0] : null;
         }
 
         int bdType = agentMaster.bd_type ?? buildingData.bd_type ?? 0;

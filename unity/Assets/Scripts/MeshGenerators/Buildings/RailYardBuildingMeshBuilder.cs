@@ -19,16 +19,17 @@ using GeneratedModels;
 /// 軌間と高さは実寸を維持する。yard_beam は柱間へXスケールする。
 ///
 /// 端子ノードの位置は PathManager のノードキャッシュから引く。未ロード・テストシーン
-/// では、バックエンドの初期配置（接道辺から最も遠い辺の中点。LRT車両基地は前面辺の中点。
-/// crud_agents.py の _connection_node_position）を模した位置へフォールバックする。端子の移動が確定した
-/// ときは BuildingManager.OnTerminalNodeMoved がこの建物を再生成する。
+/// では、バックエンドの初期配置（長方形の区画は短辺の中点、それ以外は接道辺から最も遠い辺の中点。
+/// LRT車両基地は前面辺の中点。crud_agents.py の _connection_node_position）を模した位置へフォールバックする。
+/// 端子の移動が確定したときは BuildingManager.OnTerminalNodeMoved がこの建物を再生成する。
 ///
 /// 端子へつながる線路が1本で複線のパス（LRT専用軌道431・まとめた複線）の基地は、端子の手前を同じ軌道間隔の
 /// 複線にする。片側の軌道が集約線で、もう片側は渡り線で集約線へ合流する。端子へつながる線路が変わると
 /// BuildingManager.OnDepotTerminalPathsChanged がこの建物を作り直す。
 ///
-/// 高さはすべてローカルY=0の水平面（center_point 位置の地形標高に接地。傾斜地の
-/// 起伏やノードの相対高さには追従しない）。
+/// 配置はローカルY=0の水平面で計画し、地形追従（isDynamic）では線路・架線・架線柱・車止め・検修庫の各頂点を
+/// その水平位置の地形標高へ持ち上げる（center_point 位置の地形標高が基準。傾斜地でも線路が埋まらない）。
+/// 敷地全面は a{variant} 自身の floor パーツ（1060は道床と同じ PATH_ROADBED）で覆う。
 ///
 /// 詳細仕様は genesis-docs/docs/geometries/F9_車両基地のメッシュ生成.md を参照。
 /// </summary>
@@ -83,6 +84,9 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>コライダーの押し出し高さ(m)。架線柱の天端相当。</summary>
     private const float COLLIDER_HEIGHT = 7f;
 
+    /// <summary>長方形の判定で許す角度の誤差（sin）。バックエンドの RECTANGLE_ANGLE_TOLERANCE（1°）と同じ値。</summary>
+    private static readonly float RECTANGLE_ANGLE_TOLERANCE = Mathf.Sin(1f * Mathf.Deg2Rad);
+
     /// <summary>1本の線路（1行）の敷設計画。座標は U(線路方向)/V(横方向) の2次元。</summary>
     private struct TrackRow
     {
@@ -124,9 +128,14 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             centerPointWorld = new Vector3(cx, cy, cz);
         }
 
+        Vector2[] parcelPolygon = BuildingMeshUtils.ResolveParcelContext(buildingData, out ParcelSummary parcel, out _);
+        Vector2[] sitePolygon = (parcelPolygon != null && parcelPolygon.Length >= 3) ? parcelPolygon : footprint;
+        // 端子の初期配置の規則は区画の頂点番号で決まるので、向きを揃える前の頂点列で判定する。
+        Vector2[] siteRing = ToLocalRing(parcel, centerPointWorld) ?? footprint;
+
         // 端子ノードのローカルXZ位置（未ロード時はバックエンドの初期配置を模したフォールバック）。
         YardProfile profile = ResolveProfile(buildingData);
-        Vector2 nodeLocal = ResolveTerminalNodeLocal(buildingData, centerPointWorld, footprint, profile.TerminalOnFrontage);
+        Vector2 nodeLocal = ResolveTerminalNodeLocal(buildingData, centerPointWorld, footprint, siteRing, profile.TerminalOnFrontage);
 
         // ローカル基底: U=敷地の初期接続辺へ向かう線路方向、V=その左手垂直。
         Vector2 centroid = Vector2.zero;
@@ -137,7 +146,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         centroid /= footprint.Length;
 
         // 端子の横移動で全線の向きが回転しないよう、敷地の初期接続辺を方向の基準にする。
-        Vector2 u2 = ResolveTerminalNodeLocal(null, centerPointWorld, footprint, profile.TerminalOnFrontage) - centroid;
+        Vector2 u2 = ResolveTerminalNodeLocal(null, centerPointWorld, footprint, siteRing, profile.TerminalOnFrontage) - centroid;
         if (u2.sqrMagnitude < 1e-4f)
         {
             // 端子が重心に一致する退化ケース。前面辺（頂点0→1）の法線方向を使う
@@ -342,14 +351,16 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
 
-        // 線路直下の道床はyard_trackが持つ。線路のない余白には敷地全面パネルを張らない。
-        Vector2[] parcelPolygon = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, out _, out _);
-        Vector2[] sitePolygon = (parcelPolygon != null && parcelPolygon.Length >= 3) ? parcelPolygon : footprint;
+        // 敷地装飾は地形追従を自前で行うので、構内の設備だけを先に地形へ沿わせる。
+        TerrainOffsetSampler terrain = isDynamic ? new TerrainOffsetSampler(centerPointWorld) : null;
+        if (terrain != null) ConformToTerrain(terrain, combineInstances, materials, temporaryMeshes);
+
+        // 線路の間の余白は道床と同じ材質の地面パネルで覆う。共通の舗装へはフォールバックしない。
+        Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix, ownPartOnly: true);
         ModularBodyBuilder.GenerateSiteDecorations(
             prefix, 0,
             sitePolygon, sitePolygon, sitePolygon,
-            null,
+            floorMaterial,
             centerPointWorld, deformToTerrain: isDynamic,
             combineInstances, materials, temporaryMeshes,
             fenceOpeningCenter: ResolveFenceOpening(sitePolygon,nodeLocal,u2), fenceOpeningRadius: 3f + profile.LeadHalfSpacing);
@@ -371,6 +382,16 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(footprint, COLLIDER_HEIGHT);
+        if (terrain != null && colliderMesh != null)
+        {
+            // 傾斜地で高い側の線路がコライダーの天端を超えないよう、底面の頂点ごとに地形へ沿わせる。
+            Vector3[] colliderVertices = colliderMesh.vertices;
+            for (int i = 0; i < colliderVertices.Length; i++)
+                colliderVertices[i].y += terrain.Offset(colliderVertices[i].x, colliderVertices[i].z);
+            colliderMesh.vertices = colliderVertices;
+            colliderMesh.RecalculateNormals();
+            colliderMesh.RecalculateBounds();
+        }
         var result = new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh);
         return BuildingMeshBuilder.MergeSubMeshes(result);
     }
@@ -378,11 +399,12 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// 端子ノード（depot_node_id / 共用時は infra_node_id と同一）のローカルXZ位置を解決する。
     /// PathManager のノードキャッシュに無い場合（未ロード・テストシーン）は、バックエンドの
-    /// 初期配置ロジック（接道辺=前面辺から最も遠い辺の中点。onFrontage なら前面辺の中点。
-    /// crud_agents._connection_node_position）を模した位置へフォールバックする。
-    /// ユーザーが端子を移動していない限り両者は一致する。
+    /// 初期配置ロジック（crud_agents._connection_node_position）を模した位置へフォールバックする:
+    /// onFrontage なら前面辺の中点、敷地（siteRing。区画の頂点列）が長方形なら短辺の中点、
+    /// それ以外は接道辺=前面辺から最も遠い辺の中点。ユーザーが端子を移動していない限り両者は一致する。
     /// </summary>
-    private static Vector2 ResolveTerminalNodeLocal(BuildingSummary buildingData, Vector3 centerPointWorld, Vector2[] footprint, bool onFrontage)
+    private static Vector2 ResolveTerminalNodeLocal(BuildingSummary buildingData, Vector3 centerPointWorld,
+        Vector2[] footprint, Vector2[] siteRing, bool onFrontage)
     {
         int nodeId = buildingData == null ? 0 : buildingData.depot_node_id > 0 ? buildingData.depot_node_id : buildingData.infra_node_id;
         if (nodeId > 0)
@@ -398,6 +420,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
 
         int n = footprint.Length;
         if (onFrontage) return (footprint[0] + footprint[1 % n]) * 0.5f;
+        if (TryGetRectangleShortSideMidpoint(siteRing, out Vector2 shortSide)) return shortSide;
 
         // フォールバック: 前面辺（頂点0→1）から最も遠い辺の中点
         Vector2 frontA = footprint[0];
@@ -415,6 +438,145 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
         return best;
+    }
+
+    /// <summary>
+    /// 区画が長方形なら短辺（2本のうち辺番号の若い方。正方形は辺0）の中点を返す。辺番号は始点の頂点番号。
+    /// 重複頂点と辺の途中の頂点を角とみなさずに除いてから判定する。バックエンドの端子の初期配置
+    /// （crud_agents._rectangle_short_side_midpoint）と同じ規則なので、片方だけ変えない。
+    /// </summary>
+    private static bool TryGetRectangleShortSideMidpoint(Vector2[] ring, out Vector2 midpoint)
+    {
+        midpoint = default;
+        if (ring == null) return false;
+        var points = new List<Vector2>(ring.Length);
+        foreach (Vector2 p in ring)
+            if (points.Count == 0 || Vector2.Distance(points[points.Count - 1], p) > 1e-4f) points.Add(p);
+        if (points.Count > 1 && Vector2.Distance(points[0], points[points.Count - 1]) <= 1e-4f) points.RemoveAt(points.Count - 1);
+        if (points.Count < 4) return false;
+
+        // 頂点 b で進む向きが変わる角の |sin| と cos。
+        void Turn(Vector2 a, Vector2 b, Vector2 c, out float sine, out float cosine)
+        {
+            Vector2 d0 = b - a, d1 = c - b;
+            float norm = d0.magnitude * d1.magnitude;
+            sine = Mathf.Abs(d0.x * d1.y - d0.y * d1.x) / norm;
+            cosine = Vector2.Dot(d0, d1) / norm;
+        }
+        var corners = new List<Vector2>(4);
+        for (int i = 0; i < points.Count; i++)
+        {
+            Turn(points[(i + points.Count - 1) % points.Count], points[i], points[(i + 1) % points.Count], out float sine, out float cosine);
+            if (cosine < 0f || sine >= RECTANGLE_ANGLE_TOLERANCE) corners.Add(points[i]);
+        }
+        if (corners.Count != 4) return false;
+        for (int i = 0; i < 4; i++)
+        {
+            Turn(corners[(i + 3) % 4], corners[i], corners[(i + 1) % 4], out _, out float cosine);
+            if (Mathf.Abs(cosine) >= RECTANGLE_ANGLE_TOLERANCE) return false;
+        }
+        float Length(int i) => Vector2.Distance(corners[i], corners[(i + 1) % 4]);
+        int side = Length(1) + Length(3) < Length(0) + Length(2) ? 1 : 0;
+        midpoint = (corners[side] + corners[side + 1]) * 0.5f;
+        return true;
+    }
+
+    /// <summary>区画ポリゴンを、頂点番号を保ったまま center_point 基準のローカルXZへ写す（区画が無ければ null）。</summary>
+    private static Vector2[] ToLocalRing(ParcelSummary parcel, Vector3 centerPointWorld)
+    {
+        float[][] polygon = parcel?.GetPolygonArray();
+        if (polygon == null || polygon.Length < 3) return null;
+        var ring = new Vector2[polygon.Length];
+        for (int i = 0; i < polygon.Length; i++)
+            ring[i] = new Vector2(polygon[i][0] - centerPointWorld.x, polygon[i][1] - centerPointWorld.z);
+        return ring;
+    }
+
+    /// <summary>
+    /// 構内の設備（線路・架線・架線柱・車止め・検修庫）の各頂点を、その水平位置の地形標高まで持ち上げる。
+    /// 頂点間の相対的な高さ（レール面・架線高・庫の軒高）は保つので、柱や壁は鉛直のまま地形の傾きに沿う。
+    /// 直線区間は1つのメッシュを配置行列で参照しているため、材質ごとに1つのメッシュへ結合してから頂点を動かす。
+    /// </summary>
+    private static void ConformToTerrain(TerrainOffsetSampler terrain,
+        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
+    {
+        var groupMaterials = new List<Material>();
+        var groups = new List<List<CombineInstance>>();
+        for (int i = 0; i < combineInstances.Count; i++)
+        {
+            int group = groupMaterials.IndexOf(materials[i]);
+            if (group < 0)
+            {
+                group = groups.Count;
+                groupMaterials.Add(materials[i]);
+                groups.Add(new List<CombineInstance>());
+            }
+            groups[group].Add(combineInstances[i]);
+        }
+        combineInstances.Clear();
+        materials.Clear();
+        for (int g = 0; g < groups.Count; g++)
+        {
+            var mesh = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            mesh.CombineMeshes(groups[g].ToArray(), true, true);
+            Vector3[] vertices = mesh.vertices;
+            for (int v = 0; v < vertices.Length; v++)
+                vertices[v].y += terrain.Offset(vertices[v].x, vertices[v].z);
+            mesh.vertices = vertices;
+            mesh.RecalculateBounds();
+            temporaryMeshes.Add(mesh);
+            combineInstances.Add(new CombineInstance { mesh = mesh, subMeshIndex = 0, transform = Matrix4x4.identity });
+            materials.Add(groupMaterials[g]);
+        }
+    }
+
+    /// <summary>
+    /// center_point 基準のローカルXZで、地形標高と center_point 位置の地形標高との差を返す。
+    /// 地形格子の頂点だけを標本化し、格子の三角形（対角線はXZの最小点→最大点）で補間するので、
+    /// 地形追従の地面パネル（BuildingMeshBuilder.GenerateTerrainSurfaceMesh）と同じ面になる。
+    /// 頂点ごとに地形を引くより標本数が桁違いに少ない（線路タイルは頂点が多い）。
+    /// 地形の未ロード時は1m格子で補間し、地形が届くと建物ごと作り直される。
+    /// </summary>
+    private sealed class TerrainOffsetSampler
+    {
+        private readonly Vector3 center;
+        private readonly Vector2 origin;
+        private readonly Vector2 spacing;
+        private readonly Dictionary<Vector2Int, float> heights = new Dictionary<Vector2Int, float>();
+
+        public TerrainOffsetSampler(Vector3 center)
+        {
+            this.center = center;
+            if (!Utils.TryGetTerrainGrid(center, out origin, out spacing))
+            {
+                origin = Vector2.zero;
+                spacing = Vector2.one;
+            }
+        }
+
+        public float Offset(float localX, float localZ)
+        {
+            float gx = (localX + center.x - origin.x) / spacing.x;
+            float gz = (localZ + center.z - origin.y) / spacing.y;
+            int x = Mathf.FloorToInt(gx), z = Mathf.FloorToInt(gz);
+            float fx = gx - x, fz = gz - z;
+            float h00 = Height(x, z), h11 = Height(x + 1, z + 1);
+            float h = fx >= fz
+                ? h00 + (Height(x + 1, z) - h00) * fx + (h11 - Height(x + 1, z)) * fz
+                : h00 + (Height(x, z + 1) - h00) * fz + (h11 - Height(x, z + 1)) * fx;
+            return h - center.y;
+        }
+
+        private float Height(int x, int z)
+        {
+            var key = new Vector2Int(x, z);
+            if (!heights.TryGetValue(key, out float h))
+            {
+                h = Utils.GetGroundHeight(new Vector3(origin.x + x * spacing.x, 1000f, origin.y + z * spacing.y));
+                heights.Add(key, h);
+            }
+            return h;
+        }
     }
 
     /// <summary>
