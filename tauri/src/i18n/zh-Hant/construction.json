@@ -222,6 +222,8 @@
       "rail": "鐵路車輛",
       "aircraft": "航空器",
       "ships": "船舶",
+      "containers": "貨櫃",
+      "streetscape": "街道設施",
       "other": "其他"
     }
   }

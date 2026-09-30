@@ -222,6 +222,8 @@
       "rail": "Véhicules ferroviaires",
       "aircraft": "Aéronefs",
       "ships": "Navires",
+      "containers": "Conteneurs",
+      "streetscape": "Mobilier urbain",
       "other": "Autres"
     }
   }

@@ -222,6 +222,8 @@
       "rail": "철도 차량",
       "aircraft": "항공기",
       "ships": "선박",
+      "containers": "컨테이너",
+      "streetscape": "가로 시설",
       "other": "기타"
     }
   }

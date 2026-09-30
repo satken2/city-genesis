@@ -222,6 +222,8 @@
       "rail": "鉄道車両",
       "aircraft": "航空機",
       "ships": "船舶",
+      "containers": "コンテナ",
+      "streetscape": "街路設備",
       "other": "その他"
     }
   }
