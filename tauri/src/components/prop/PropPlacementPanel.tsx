@@ -327,7 +327,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
   return (
     <div className="pc-layout">
       {/* プロップ種別選択 */}
-      <div className="pc-section">
+      <div className="pc-section pp-type-section">
         {propTypeEntries.length === 0 ? (
           <div className="pc-no-nodes-message">{t("prop_placement.noVariants")}</div>
         ) : (

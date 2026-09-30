@@ -36,22 +36,37 @@
   font-weight: 600;
 }
 
+/* ---- プロップ種別セレクタ ----
+ * 種別セクションはパネルの余り高さをすべて使い、タイル一覧はその中でスクロールする。
+ * 設定・操作ボタンのセクションは自然な高さのまま下端に並ぶ。 */
+.pp-type-section {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .pp-type-grid {
+  flex: 1 1 0;
+  min-height: 10rem; /* 窓が低すぎるときは一覧を潰さず、パネル全体をスクロールさせる */
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(7.3rem, 1fr));
+  align-content: start; /* 種別が少ないとき、余り高さで行間が引き伸ばされないようにする */
   gap: 6px;
-  max-height: min(46vh, 420px);
   overflow-y: auto;
   margin-top: 10px;
   padding: 3px;
 }
 
+/* 正方形のタイル。上に見本画像、下に名前を収める。
+ * overflow は指定しない(hidden/auto にすると自動最小高さが 0 になり、行数が多いとき
+ * グリッドが行を一覧の高さへ押し込んでタイルが重なる)。内容は必ず正方形に収まる */
 .pp-type-tile {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  gap: 2px;
+  aspect-ratio: 1;
   min-width: 0;
-  padding: 5px;
+  padding: 4px;
   border: 1px solid transparent;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.06);
@@ -63,8 +78,23 @@
 .pp-type-tile[aria-pressed="true"] { border-color: #4ea1ff; background: #203e60; }
 .pp-type-tile:focus-visible { outline: 2px solid #4ea1ff; outline-offset: 1px; }
 .pp-type-tile:disabled { opacity: 0.5; cursor: default; }
-.pp-thumbnail { display: grid; place-items: center; aspect-ratio: 1; }
-.pp-thumbnail img { width: 100%; height: 100%; object-fit: contain; }
+.pp-thumbnail { position: relative; flex: 1 1 0; min-height: 0; display: grid; place-items: center; }
+.pp-thumbnail img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .pp-thumbnail-missing { color: #93a9c0; font-size: 0.9rem; }
-.pp-type-name { font-size: 0.97rem; line-height: 1.4; overflow-wrap: anywhere; text-align: center; }
+
+/* 名前は2行まで。1行の名前でも2行分の高さを確保し、見本画像の大きさをタイル間で揃える。
+ * 切れた名前は title(ツールチップ)と「選択中」の行で全文を確認できる */
+.pp-type-name {
+  flex: none;
+  height: 2.6em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.97rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
 .pp-selected-type { margin-top: 8px; font-size: 1rem; color: #c5d4e3; overflow-wrap: anywhere; }

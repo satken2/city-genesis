@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import categories from "../../data/propCategories.json";
 import type { PropMasterEntry } from "../../types";
@@ -31,6 +31,12 @@ export function PropTypeSelector({ entries, selectedType, onSelect, disabled }: 
   const activeCategory = availableCategories.includes(category) ? category : "all";
   const visible = entries.filter(([id]) => activeCategory === "all" || categoryOf(id) === activeCategory);
   const selected = entries.find(([id]) => Number(id) === selectedType)?.[1];
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  // 種別を選ぶと下に設定欄が現れて一覧が縮むため、選んだタイルが隠れないよう表示位置へ寄せる
+  useEffect(() => {
+    gridRef.current?.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: "nearest" });
+  }, [selectedType]);
 
   return (
     <>
@@ -41,7 +47,7 @@ export function PropTypeSelector({ entries, selectedType, onSelect, disabled }: 
           <option key={id} value={id}>{t(`prop_placement.categories.${id}`)}</option>
         ))}
       </select>
-      <div className="pp-type-grid" role="group" aria-label={t("prop_placement.selectType")}>
+      <div ref={gridRef} className="pp-type-grid" role="group" aria-label={t("prop_placement.selectType")}>
         {visible.map(([id, entry]) => (
           <button key={id} type="button" className="pp-type-tile" disabled={disabled}
             aria-pressed={selectedType === Number(id)} title={entry.display_name}
