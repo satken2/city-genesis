@@ -10,7 +10,7 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 | --- | --- |
 | `src/main.rs` | エントリ。`lib.rs`の`run()`を呼ぶだけ |
 | `src/lib.rs` | Tauriコマンドの集約と`setup`。ゲーム開始/ロード(`begin_initial_loading`)、セッションポーリング、地形エディタのコマンド群(`prepare_scenario_terrain_editor`・`load_terrain_editor_data`・`save_scenario_terrain`) |
-| `src/version.rs` | `../../version.json` の埋め込み定義、HTTPの共通ヘッダー `headers()`(版 `X-City-Genesis-API`)とクライアント `client()`、ユーザーフォルダ `user_data_dir()`、コア照合、ロード事前検証 |
+| `src/version.rs` | `../../version.json` の埋め込み定義、コアの版情報の取得 `core_info()` と照合 `check_frontend_version()`、ユーザーフォルダ `user_data_dir()`、ロード事前検証 |
 | `src/window.rs` | ウィンドウ管理の本体。モニター上への配置(`Placement`・`build_placed`)、HUD4枚の生成・配置(`create_hud_windows`/`layout_hud_windows`/`set_hud_visible`)、ポップアップの表示先(`resolve_popup_monitor`・`update_display_target`)、`open_window`(レジストリ駆動のポップアップ生成と再利用)、`close_window_by_label`(閉じたときの後始末)、`reassert_topmost`、通知キュー、`launch_graphic` |
 | `src/ipc.rs` | MMF IPC。リーダースレッド、`send_to_parent`(Unity宛て送信)、Unity→UIイベントをWebViewへ中継するmatch。`CAPACITY`=1MiB |
 | `src/messages.rs` | `Envelope`・`WindowContextDto`等の型 |
@@ -59,7 +59,6 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 
 ### HTTP
 
-- バックエンドへの要求には必ず `version::headers()`(版ヘッダー)を付ける。単発の要求は `version::client()`(`headers()` を既定ヘッダーにして作る)か、要求ごとの `.headers(version::headers())` で送る。
 - ユーザーフォルダ(`<ベース>/UrbanGenesis`)は `setup` の先頭で `version::init_user_data_dir` が一度だけ決め、`version::user_data_dir()` で引く。ベースはコア・Unityと同じ決め方で、Windowsは環境変数 `LOCALAPPDATA` → `APPDATA` → 既知フォルダ(LocalAppData)、それ以外は `app_local_data_dir()` の親(Linuxは `XDG_DATA_HOME` を反映)。既知フォルダを先に使うと、`LOCALAPPDATA` の無い環境でコアとフォルダがずれる。セーブの置き場(`open_save_directory`)と地形エディタの作業コピー(`terrain_editor_dir`)もここを基準にし、パスを各所で組み立てない。
 - `tauri.conf.json` の `csp` はスクリプトを `'self'` に限り、`eval` を許さない。`dangerousDisableAssetCspModification: ["style-src"]` は、Tauri が style-src へハッシュ・nonce を足すと `'unsafe-inline'` が無効になり、React の `style` 属性が本番だけ効かなくなるのを防ぐため。デスクトップの `tauri dev` は `devUrl`(Vite)を直接読むため、`csp` は適用されない(Tauri がCSPを付けるのは tauri プロトコルで組み込みアセットを配るときだけ)。そのため `devCsp` は置かず、CSP違反は `tauri build` の成果物で確認する。画像・通信の許可は `http://127.0.0.1:*`・`http://localhost:*` なので、接続先に `[::1]` は使えない。
 - `Cargo.toml` の tauri は `devtools` 機能を持たない(本番ビルドに開発者ツールを含めない)。
@@ -87,7 +86,7 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 ## 版の照合
 
 - `src/version.rs` は `../../version.json` の埋め込み定義、HTTPの共通ヘッダー(版)、コア照合、ロード事前検証の共通窓口。
-- コアの版情報と照合結果は `AppState.core_info` の `OnceCell` に保持し、全WebView・開始・ロード・セッション監視が共有する。同時取得は1本にまとまり、取得成功後は不一致の結果もプロセス終了まで保持する。未取得時の通信失敗だけは再試行できる。コアの再起動・版の差し替えを前提にした定期確認は置かない。開発中に通信契約やマスターデータを変更したときはフロントも起動し直す。
+- コアの版情報は `AppState.core_info` の `OnceCell` に保持し、全WebView・開始・ロード・セッション監視が共有する。同時取得は1本にまとまり、未取得時の通信失敗だけは再試行できる。取得できたらセッション監視の開始前に `check_frontend_version` で照合し、フロントのMAJORがコアのMAJORより小さければ `request_app_exit` で終了する(待っても版は変わらないので再試行しない)。コアの再起動・版の差し替えを前提にした定期確認は置かない。開発中にコアやマスターデータを変更したときはフロントも起動し直す。
 - `get_core_version` は共有した版情報を返す。接続表示はセッション監視の `session-state` に含める `coreVersion`・`backendConnected` を使い、版情報APIを死活監視に使わない。セッション消失・開発版の2回連続の通信失敗時の後始末は `return_to_topmenu` に集約する。製品版は2回連続で失敗したらUnityへ終了を通知して終了する。1回目は表示状態を保持し、`backend-connection` イベントで操作を止める。`AppState.backend_health` は連続失敗と接続状態を保持し、成功時に失敗回数を解除する。
-- Unityは `system:graphic_ready` にフロント版・API契約・IPC契約・コア照合結果を付ける。`system:ready` で照合結果を返す。不一致は `graphic_contract_error` に保持し、Unityなしの開発起動として迂回しない。
+- Unityは `system:graphic_ready` にフロント版・IPC契約・コア照合結果を付ける。`system:ready` で照合結果を返す。不一致は `graphic_contract_error` に保持し、Unityなしの開発起動として迂回しない。
 - ゲーム開始コマンドは、ポップアップや現セッションを閉じる前に版・保存データ・確認済みフラグを検査する。

@@ -55,5 +55,5 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 ## 起動時の互換性
 
 - `FrontendVersion` はリポジトリ直下 `version.json` から生成する。手編集せず `tauri` の `npm run sync:version` を使う。
-- `system:graphic_ready` / `system:ready` でフロント版・API契約・IPC契約を照合する。`IpcClient.ProtocolCompatible` と `BackendCompatibility.Compatible` の両方が成立するまでゲーム用操作を受け付けない。
+- `system:graphic_ready` / `system:ready` でフロント版・IPC契約・コア照合結果を照合する。`IpcClient.ProtocolCompatible` と `BackendCompatibility.Compatible` の両方が成立するまでゲーム用操作を受け付けない。
 - 起動時のHTTP照合とIPC初期化に合わせて起動通知を送る。コアの版情報を取得できるまでの再試行後も照合結果を伝えるが、取得後は版情報を再取得せず、同じ起動通知を定期的にMMFへ溜めない。

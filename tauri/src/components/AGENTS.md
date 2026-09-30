@@ -31,7 +31,7 @@
 
 ## 全体の規約
 
-- `topmenu/TopMenu` の左下のコア表示は、Rust側が起動時に取得した版を `get_core_version` で受け取り、`Core v<core_version>` を表示する。未取得・取得失敗・セッション監視での接続失敗時は `Core 接続失敗`(各言語に翻訳)とする。`session-state` の `coreVersion` と `backendConnected`、状態変更時の `backend-connection` で表示を更新し、版取得のHTTP要求・タイマー・通信契約番号の比較・Unityの状態取得・詳細エラーの表示はここでは行わない。
+- `topmenu/TopMenu` の左下のコア表示は、Rust側が起動時に取得した版を `get_core_version` で受け取り、`Core v<core_version>` を表示する。未取得・取得失敗・セッション監視での接続失敗時は `Core 接続失敗`(各言語に翻訳)とする。`session-state` の `coreVersion` と `backendConnected`、状態変更時の `backend-connection` で表示を更新し、版取得のHTTP要求・タイマー・版の比較・Unityの状態取得・詳細エラーの表示はここでは行わない。
 - 表示文字列は必ずi18n(`t("key")`。`src/i18n/`の全7言語に追加)。マスターの表示名は日本語のみなので多言語ラベルはi18nから採る。
 - 他コンポーネントのCSSクラスを借りるときは、そのCSSを明示的に`import`する。パネルは`App.tsx`で`lazy()`されCSSもチャンク分割されるため、importしないと直前に開いたウィンドウ次第で当たる/当たらない崩れになる。
   - 共通クラス(`.hud-icon-btn`等)の上書きは2クラス以上のセレクタで書く(同点の詳細度は読み込み順に依存する)。
@@ -75,7 +75,7 @@
 | `FlatTabs` | フラット意匠のウィンドウ上部のタブ列(ニューゲーム・シナリオ管理)。`role=tab`・`aria-selected`、無効タブと札(Coming soon)。選択状態と中身の出し分けは呼び出し側が持つ |
 | `ScenarioSource`(`ScenarioOriginBadges` / `RequiredPacks`) | シナリオの保存元(自作/コミュニティ/DLC)と公式の札、都市に刻まれた必要パックと所有状況。読み込めるかの判定はコアの `compatibility` が正で、ここは表示だけ |
 | `SaveVersionInfo` | 保存形式の版(「フォーマット vN」。保存したコアのMAJORだけ)・互換性・必要パックの表示。セーブ一覧・ニューゲーム・シナリオ管理・紹介情報で共通 |
-| `ScenarioThumbnail` | シナリオ画像。`hooks/useApiImageUrl` で取得した Blob URL を表示し(APIの画像を `<img src>` で直接読まない)、画像が無ければプレースホルダー。標高ファイルから取り込んだシナリオには作成直後に地形の平面図が登録される |
+| `ScenarioThumbnail` | シナリオ画像。`hooks/useApiImageUrl` で取得した Blob URL を表示し、画像が無ければプレースホルダー。標高ファイルから取り込んだシナリオには作成直後に地形の平面図が登録される |
 | `TerrainFacts` | マップの大きさ・地表・気候の欄(ニューゲームのシナリオの詳細)。大きさの整形は `utils/mapSize.ts` |
 
 このほか`SatisfactionFace`・`SpeedLimitSign`・グラフ類・`NumberStepper`・`Money`等がある。フック`hooks/useVariantAffordability`は資金目安で建設パネルのバリアントのカードを無効化する(札は`UnaffordableOverlay`)。

@@ -6,8 +6,7 @@ type ApiImageState = { url: string | null; src: string | null; failed: boolean }
 /**
  * バックエンドAPIの画像を Blob URL にして返す。
  *
- * `<img src>` でAPIを直接読むと通信契約の版ヘッダーが付かないので、fetchApi で取得して Blob URL に変える。
- * URLが変わったときとアンマウント時に古い Blob URL を解放する。
+ * fetchApi で取得して Blob URL に変え、URLが変わったときとアンマウント時に古い Blob URL を解放する。
  * 取得中は `src` も `failed` も立たない。404 などの取得失敗と、`onError`(画像として読めない)で `failed` になる。
  */
 export function useApiImageUrl(url: string | null): { src: string | null; failed: boolean; onError: () => void } {

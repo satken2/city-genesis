@@ -563,6 +563,6 @@ Unity は `RoadMemberEditManager` が担う。入力プリセット `ROAD_MEMBER
 
 ## 起動・再接続時の版照合
 
-`system:graphic_ready` のペイロードは `frontend_version`、`api_contract_version`、`ipc_contract_version`、`core_compatible`。UIは自身の契約番号との一致を検査し、`system:ready` に自身の同3項目と `accepted` を返す。Envelope自体の `version: "1.0"` は変更しない。
+`system:graphic_ready` のペイロードは `frontend_version`、`ipc_contract_version`、`core_compatible`（Unityがコアの版と照合した結果）。UIは自身のIPC契約番号との一致と `core_compatible` を検査し、`system:ready` に自身の `frontend_version`・`ipc_contract_version` と `accepted` を返す。Envelope自体の `version: "1.0"` は変更しない。
 
-UnityはコアとのHTTP契約とUIとのIPC契約が成立するまでマスター取得・ゲーム用操作・セッションポーリングによる開始を解禁しない。不一致のUnityを未接続として扱い、開発用の描画待ち省略に流さない。HTTP契約は各プロセスの起動時に照合し、コアの版情報を周期的に取得しない。起動準備中の取得失敗は再試行できるが、受信できた版情報は契約不一致でも保持する。詳細は[バージョニングと互換性](バージョニングと互換性.md)。
+Unityはコアの版の照合とUIとのIPC契約が成立するまでマスター取得・ゲーム用操作・セッションポーリングによる開始を解禁しない。不一致のUnityを未接続として扱い、開発用の描画待ち省略に流さない。コアの版は各プロセスの起動時に照合し、周期的に取得しない。起動準備中の取得失敗は再試行できる。フロントのMAJORがコアより小さければ、Unityは終了する。詳細は[バージョニングと互換性](バージョニングと互換性.md)。

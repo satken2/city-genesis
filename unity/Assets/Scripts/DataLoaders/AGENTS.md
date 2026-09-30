@@ -42,7 +42,7 @@
 - 大量の描画物で `Renderer.material(s)` を個別複製しない。建物は `BuildingManager.GetSharedDepthOffsetMaterials`、道路の帯・ノード円柱は `GetFarRoadDepthMaterial` / `GetNodeDepthMaterial`。色替えは `VisualModeObject`。
 - 地形マテリアルを `new Material(既存)` で複製しない(Properties 未宣言の手続き色が落ちる)。遠景は `ApplyFarTerrainMaterialSettings` で直接設定する。
 - HTTPは `ApiClient`(`GetBulk`=別スレッドデコード+MessagePack / `Get`=小さい単体)。`GetBulk` は `isCanceled` が真になるとコールバックを呼ばないので、取得中フラグは finally で外す。
-- 地形バイナリ(`/terrain/far`・`/terrain/surface`・`/terrain/background`)も `ApiClient.Request` → `ApiRequest.Send(isCanceled)` で送り、応答ヘッダーと本体は `.Web` から読む。取消しは `Aborted` で判定する。`UnityWebRequest` を直接作ると通信契約ヘッダーが付かない。
+- 地形バイナリ(`/terrain/far`・`/terrain/surface`・`/terrain/background`)も `ApiClient.Request` → `ApiRequest.Send(isCanceled)` で送り、応答ヘッダーと本体は `.Web` から読む。取消しは `Aborted` で判定する。`UnityWebRequest` を直接作らない。
 - `GeneratedModels.cs` は自動生成物なので編集しない。
 - `LodConfig.CalculateCellSets` にオーバーロードを足さない(`Tests/Lod/LodQA.cs` がリフレクションで呼ぶ)。`ParcelManager.RegisterParcelDataForLines` も VehicleQA が名前で引くので多重定義にしない。
 

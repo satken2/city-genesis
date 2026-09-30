@@ -10,7 +10,7 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 ## 読むべきドキュメント(概念、公開)
 - `city-genesis/docs/docs/programs/IPC連携の整理.md`
 - `city-genesis/docs/docs/programs/コンポーネント連携.md`(特に「ローカルAPIへの接続」: CORS・各クライアントの窓口、CSP)
-- `city-genesis/docs/docs/programs/バージョニングと互換性.md`(HTTP・IPCの契約番号と版ヘッダー)
+- `city-genesis/docs/docs/programs/バージョニングと互換性.md`(コアとフロントのMAJOR規則・IPCの契約番号)
 - `city-genesis/docs/docs/programs/ファイル配置.md`
 
 ## 読むべきドキュメント(非公開)
@@ -29,13 +29,13 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 - HTTP: `genesis-core/app/controllers/`配下、Unity側`city-genesis/unity/Assets/Scripts/API/ApiClient.cs`(`GeneratedModels.cs`は自動生成のため直接編集禁止)、UI側`city-genesis/tauri/src/utils/api.ts`(WebView)と`city-genesis/tauri/src-tauri/src/version.rs`(Rust)
 
 ## HTTPの契約(新しいクライアント・HTTP呼び出しを足すときに必ず守る)
-- コアへの要求には、版ヘッダー `X-City-Genesis-API` を付ける。APIに認証・Host検査は無く、サードパーティ製プログラムからも同じAPIで読み書きできることが仕様なので、アクセス制限を足さない。コアは `127.0.0.1` にだけ bind する。
+- APIに認証・Host検査は無く、サードパーティ製プログラムからも同じAPIで読み書きできることが仕様なので、アクセス制限を足さない。コアは `127.0.0.1` にだけ bind する。
 - ゲームのセッションが無い間(ゲーム開始前・シナリオの地形編集などのヘッドレス処理中)に通るのは system・sessions・saves・scenarios・parameters・templates・master と `/api/v1/terrain/maps` だけで、ほかは503 `NO_SAVE_LOADED`。トップメニューやシナリオ管理から呼ぶ新しいAPIは、この範囲に置くか、コアの `api.py` の許可一覧を見直す(契約は `コンポーネント連携.md` の「セッション状態の管理」)。
 - ヘッダーは各モジュールの共通窓口が付けるので、窓口を通すことだけを守る。
   - UI(WebView): `fetchApi` か、`configureBackendRequests` が置き換えた `fetch`。APIの画像は `<img src>` で直接読まず `hooks/useApiImageUrl`(fetch→Blob URL。版ヘッダーを付けるため)。コアの版情報と照合結果は起動時にRust側で取得・共有し、WebViewごとの版取得や定期的な版確認は行わない。
   - UI(Rust): `version::client()` か、要求ごとの `.headers(version::headers())`。
   - Unity: `ApiClient`(`Get`・`GetBulk`・`Post`・`Patch`・`Request`→`ApiRequest`)。`UnityWebRequest` を直接作らない。
-- HTTP契約を壊す変更(項目の削除・型や意味の変更・相手の実装を必須にする追加)では、`genesis-core/version.py` の `API_CONTRACT_VERSION` と `city-genesis/version.json` の `api_contract_version` を揃えて上げ、`tauri/` で `npm run sync:version` を実行する。
+- コアとフロントの接続可否は、フロントのMAJORがコアのMAJOR以上であることだけで決まる(満たさなければ起動しない)。IPC契約を壊す変更(項目の削除・型や意味の変更・相手の実装を必須にする追加)では、`city-genesis/version.json` の `ipc_contract_version` を上げ、`tauri/` で `npm run sync:version` を実行する。
 
 ## 進め方
 1. 公開ドキュメントで通信経路全体(HTTP/MMFのどちらを使うべきか)を把握する
