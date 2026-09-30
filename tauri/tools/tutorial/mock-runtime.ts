@@ -2,7 +2,7 @@ import * as constants from "../../src/constants";
 import type { Bindings, Environment, Facts, Ref } from "../../src/tutorial/model";
 const subscribers = new Map<string, Set<(event: { payload: any }) => void>>();
 const master = {};
-export const fixture = { records: new Map<string, Record<string, unknown>>(), creates: 0, failComplete: false, actions: 0, failAction: false };
+export const fixture = { records: new Map<string, Record<string, unknown>>(), creates: 0, failComplete: false, actions: 0, failAction: false, onAction: undefined as (() => void) | undefined };
 export async function emit(name: string, payload: unknown) { for (const fn of [...subscribers.get(name) ?? []]) fn({ payload }); }
 export async function listen(name: string, fn: (event: { payload: any }) => void) {
   if (!subscribers.has(name)) subscribers.set(name, new Set());
@@ -30,7 +30,7 @@ export async function createEnvironment(_base: string, _save: string, bindings: 
     read: async (kind, id) => id ? [fixture.records.get(`${kind}:${id}`)!].filter(Boolean) : [...fixture.records].filter(([key]) => key.startsWith(kind + ":")).map(([, value]) => value),
     create: async (kind, body) => { const id = ++fixture.creates; fixture.records.set(`${kind}:${id}`, { id, ...(body as object) }); return id; },
     complete: async (_ref: Ref) => { if (fixture.failComplete) { fixture.failComplete = false; throw new Error("Injected completion failure"); } },
-    scenarioAction: async () => { fixture.actions++; if (fixture.failAction) { fixture.failAction = false; throw new Error("Injected action failure"); } },
+    scenarioAction: async () => { fixture.actions++; if (fixture.failAction) { fixture.failAction = false; throw new Error("Injected action failure"); } fixture.onAction?.(); },
     reload: async () => {},
   };
 }

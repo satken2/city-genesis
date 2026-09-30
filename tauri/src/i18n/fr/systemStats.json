@@ -7,8 +7,7 @@
       "note": "Si plusieurs époques sont lancées à la suite, la dernière est affichée. La taille du problème est une estimation approximative des principales comparaisons, d'après la taille de la ville.",
       "colGroup": "Traitement",
       "colTime": "Temps",
-      "colShare": "Part",
-      "colWorkload": "Taille du problème",
+      "colWorkload": "Nombre d’opérations",
       "workloadHint": "Nombre approximatif de comparaisons principales (éléments de tableaux). Survolez une valeur pour voir le détail.",
       "seconds": "{{value}} s",
       "ms": "{{value}} ms"
@@ -37,7 +36,7 @@
     "entities": {
       "colMetric": "Indicateur",
       "colCount": "Nombre",
-      "title": "Taille de la ville",
+      "title": "Nombre d’entités",
       "agents": "Agents",
       "households": "Ménages",
       "businesses": "Entreprises",
@@ -54,24 +53,6 @@
       "nodes": "Nœuds",
       "transitLines": "Lignes de transport",
       "epochs": "Époques écoulées"
-    },
-    "memory": {
-      "title": "Mémoire",
-      "current": "Utilisation actuelle",
-      "peak": "Maximum depuis le lancement",
-      "total": "Mémoire installée",
-      "note": "Mémoire physique utilisée par le processus du simulateur. Le maximum inclut les hausses temporaires pendant les époques."
-    },
-    "environment": {
-      "gpuAcceleration": "Accélération GPU",
-      "title": "Système",
-      "cpu": "Processeur",
-      "cores": "Cœurs logiques",
-      "os": "Système d'exploitation",
-      "device": "Unité de calcul",
-      "devices": {
-        "cpu": "Processeur"
-      }
     },
     "approximation": {
       "title": "Approximation de la simulation",
@@ -103,6 +84,13 @@
         "label": "Regrouper les citoyens et ménages similaires",
         "description": "Prendre certaines décisions collectivement pour les citoyens ou ménages dans des situations similaires."
       }
+    },
+    "status": {
+      "title": "État du système",
+      "gpuDisabled": "Accélération GPU : Désactivée",
+      "coreSimulator": "Simulateur principal",
+      "currentMemory": "Utilisation actuelle de la mémoire : {{value}}",
+      "peakMemory": "Pic de mémoire depuis le démarrage : {{value}}"
     }
   }
 }

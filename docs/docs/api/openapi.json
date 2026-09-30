@@ -6988,7 +6988,7 @@
           "stats"
         ],
         "summary": "Get System Stats",
-        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの総数。種別ごとの内訳は含めない\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)と搭載RAM。取得できなければ各値が null\n- environment: CPU・OS・演算デバイス",
+        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの総数。種別ごとの内訳は含めない\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)と搭載RAM。取得できなければ各値が null\n- environment: CPU・GPU名と専用メモリ容量・OS・演算デバイス。GPU情報が取得できなければ null",
         "operationId": "get_system_stats_api_v1_stats_system_get",
         "responses": {
           "200": {
@@ -12100,6 +12100,28 @@
               }
             ],
             "title": "Cpu Count"
+          },
+          "gpu_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gpu Name"
+          },
+          "gpu_memory_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gpu Memory Bytes"
           },
           "os": {
             "type": "string",

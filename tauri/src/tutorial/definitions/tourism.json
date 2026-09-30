@@ -14,15 +14,59 @@
       "legacyStep": 1,
       "phases": [
         {
-          "id": "perform",
+          "id": "open",
           "textKey": "tutorial.tourism.step1.description",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
             "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1140,
+                0,
+                356.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1180,
+                0,
+                360
+              ],
+              "distance": 420,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.tourism.step1.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
               "hud.construction",
               "building.category:6",
-              "building.variant:2016"
+              "building.variant:2016",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:6",
+              "building.variant:2016",
+              "building.confirm"
             ]
           },
           "world": {
@@ -76,15 +120,59 @@
       "legacyStep": 2,
       "phases": [
         {
-          "id": "perform",
+          "id": "open",
           "textKey": "tutorial.tourism.step2.description",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
             "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1783.5,
+                0,
+                440
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1783,
+                0,
+                400
+              ],
+              "distance": 420,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.tourism.step2.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
               "hud.construction",
               "building.category:12",
-              "building.variant:1068"
+              "building.variant:1068",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:12",
+              "building.variant:1068",
+              "building.confirm"
             ]
           },
           "world": {

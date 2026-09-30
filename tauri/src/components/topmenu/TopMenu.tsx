@@ -89,13 +89,12 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
   /**
    * 新規ゲームボタン押下時の処理。
    *
-   * Unity を起動し、シナリオ選択ウィンドウ（new_game）を開く。
+   * シナリオ選択ウィンドウ（new_game）を開く。
    * ユーザーはチュートリアルまたはシナリオを選択後、NewGameWindow 内で create_session を呼び出す。
-   * そのため、ここでは Tips は表示しない。
+   * Unityの起動・リセットとTipsの表示は、開始設定を確定した後に行う。
    */
   async function handleNewGame() {
     try {
-      await invoke<string>("launch_graphic");
       await invoke("open_registered_window", { windowType: "new_game" });
     } catch (error) {
       console.error("[TopMenu] handleNewGame error:", error);

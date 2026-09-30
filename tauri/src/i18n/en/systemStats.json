@@ -7,8 +7,7 @@
       "note": "When several epochs run in a row, this shows the last one. Problem size is a rough estimate of the main comparisons, based on the size of the city.",
       "colGroup": "Process",
       "colTime": "Time",
-      "colShare": "Share",
-      "colWorkload": "Problem size",
+      "colWorkload": "Operation count",
       "workloadHint": "Rough number of main comparisons (array elements). Hover over a value to see the breakdown.",
       "seconds": "{{value}} s",
       "ms": "{{value}} ms"
@@ -37,7 +36,7 @@
     "entities": {
       "colMetric": "Metric",
       "colCount": "Count",
-      "title": "City size",
+      "title": "Entity counts",
       "agents": "Agents",
       "households": "Households",
       "businesses": "Businesses",
@@ -54,24 +53,6 @@
       "nodes": "Nodes",
       "transitLines": "Transit lines",
       "epochs": "Epochs elapsed"
-    },
-    "memory": {
-      "title": "Memory",
-      "current": "Current usage",
-      "peak": "Peak since launch",
-      "total": "Installed memory",
-      "note": "Physical memory used by the simulator process. The peak includes temporary increases during epochs."
-    },
-    "environment": {
-      "gpuAcceleration": "GPU acceleration",
-      "title": "System",
-      "cpu": "CPU",
-      "cores": "Logical cores",
-      "os": "OS",
-      "device": "Compute device",
-      "devices": {
-        "cpu": "CPU"
-      }
     },
     "approximation": {
       "title": "Simulation approximation",
@@ -103,6 +84,13 @@
         "label": "Group similar citizens and households",
         "description": "Make some decisions collectively for citizens or households with similar circumstances."
       }
+    },
+    "status": {
+      "title": "System status",
+      "gpuDisabled": "GPU acceleration: Disabled",
+      "coreSimulator": "Core simulator",
+      "currentMemory": "Current memory usage: {{value}}",
+      "peakMemory": "Peak memory usage since startup: {{value}}"
     }
   }
 }

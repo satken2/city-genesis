@@ -26,32 +26,19 @@ public class IpcViewCoordinator : MonoBehaviour
     /// </summary>
     public const string PRESET_PARCEL_DETAIL = "parcel_detail";
 
-    private Dictionary<string, string> _layerModes = new Dictionary<string, string>
-    {
-        { "terrain", "default" },
-        { "grid", "hidden" },
-        { "road", "default" },
-        { "building", "default" },
-        { "parcel", "border" },
-        { "district", "hidden" },
-        { "resource", "hidden" },
-        { "alert", "visible" },
-        { "transit", "hidden" },
-        { "prop", "visible" }
-    };
+    /// <summary>
+    /// レイヤーごとの色モード。初期値は Awake と game:loading で <see cref="LAYER_DEFAULTS"/> から入れる。
+    /// grid だけは表示パネルの外(独自の切替)なので既定表に載せず、ここで初期値を持つ。
+    /// </summary>
+    private Dictionary<string, string> _layerModes = new Dictionary<string, string> { { "grid", "hidden" } };
 
     private Dictionary<string, string> _layerSubModes = new Dictionary<string, string>();
 
     /// <summary>
     /// レイヤーごとの表示フラグ(CSV文字列。例 "plan,public")。
     /// 色モードと独立したON/OFF集合で、現状 road / building レイヤーのみが使用する。
-    /// UI側の初期値(計画中=ON)と一致させる。
     /// </summary>
-    private Dictionary<string, string> _layerFlags = new Dictionary<string, string>
-    {
-        { "road", "plan" },
-        { "building", "plan" }
-    };
+    private Dictionary<string, string> _layerFlags = new Dictionary<string, string>();
 
     /// <summary>
     /// 現在のステート。HandleViewChange で STATE_NORMAL 中の変更のみ記憶するために使用する。
@@ -83,10 +70,89 @@ public class IpcViewCoordinator : MonoBehaviour
         { "alert", ("visible", null, null) },
     };
 
+    /// <summary>
+    /// 表示パネル(displayConstants.ts の DISPLAY_LAYERS)で選べるレイヤーの既定表示。
+    /// UI側の初期値と一致させること。通常モードへ戻すときの既定(NORMAL_DEFAULTS)に、
+    /// 色モードを強制しない地形を足したもの。
+    /// </summary>
+    private static readonly Dictionary<string, (string mode, string subMode, string flags)> LAYER_DEFAULTS = BuildLayerDefaults();
+
+    private static Dictionary<string, (string mode, string subMode, string flags)> BuildLayerDefaults()
+    {
+        var defaults = new Dictionary<string, (string mode, string subMode, string flags)>(NORMAL_DEFAULTS);
+        defaults["terrain"] = ("default", null, null);
+        return defaults;
+    }
+
+    private void Awake()
+    {
+        ResetLayersToDefaults();
+    }
+
+    /// <summary>記憶(_layerModes / _layerSubModes / _layerFlags)だけを既定へ戻す。描画には触れない。</summary>
+    private void ResetLayersToDefaults()
+    {
+        foreach (var entry in LAYER_DEFAULTS)
+        {
+            _layerModes[entry.Key] = entry.Value.mode;
+            SetOrRemove(_layerSubModes, entry.Key, entry.Value.subMode);
+            SetOrRemove(_layerFlags, entry.Key, entry.Value.flags);
+        }
+    }
+
+    private static void SetOrRemove(Dictionary<string, string> dictionary, string key, string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            dictionary.Remove(key);
+        }
+        else
+        {
+            dictionary[key] = value;
+        }
+    }
+
+    /// <summary>
+    /// 新しい都市の読み込み(game:loading。新規ゲーム・チュートリアル・ロード共通)で、
+    /// 表示パネルで選べる表示状態をすべて既定へ戻す。前の都市で選んだ色モード・フラグ・サブモード
+    /// (資源表示・アラートの絞り込みなど)を次の都市へ持ち越さないため。
+    /// 変更後の状態はUIへ通知し、表示パネルと表示トレイの選択表示も揃える。
+    /// </summary>
+    private void HandleGameLoading()
+    {
+        ResetLayersToDefaults();
+        _normalStateMemory.Clear();
+        _currentState = "STATE_NORMAL";
+        ApplyDefaultLayers();
+        NotifyStateChanged();
+    }
+
+    /// <summary>既定へ戻した記憶を描画へ反映する。</summary>
+    private void ApplyDefaultLayers()
+    {
+        if (VisualModeHandler.Instance != null)
+        {
+            foreach (var layer in LAYER_DEFAULTS.Keys)
+            {
+                // 公共交通は下で表示する種別を空にするだけにする(ApplyTransitMode は路線一覧を取り直すので、
+                // 都市を読み込む前に前の都市の路線を取りに行かない)。
+                if (layer == "transit") continue;
+                _layerSubModes.TryGetValue(layer, out var subMode);
+                _layerFlags.TryGetValue(layer, out var flags);
+                ApplyLayerMode(layer, _layerModes[layer], subMode, flags ?? "");
+            }
+        }
+        TransitOverlayManager.Instance?.SetVisibleVariants(new HashSet<int>());
+        // ApplyLayerMode はアラートを適用しない(アラートの絞り込みは view:change_view でだけ変わる)。
+        _layerSubModes.TryGetValue("alert", out var alertSubMode);
+        ApplyAlertMode(_layerModes["alert"], alertSubMode);
+    }
+
     private void OnEnable()
     {
         if (IpcClient.Instance != null)
         {
+            IpcClient.Instance.OnGameLoading += HandleGameLoading;
             IpcClient.Instance.OnViewChangeView += HandleViewChange;
             IpcClient.Instance.OnViewSetObjectFilter += HandleSetObjectFilter;
             IpcClient.Instance.OnViewQueryObjectFilter += NotifyObjectFilterState;
@@ -97,6 +163,7 @@ public class IpcViewCoordinator : MonoBehaviour
     {
         if (IpcClient.Instance != null)
         {
+            IpcClient.Instance.OnGameLoading -= HandleGameLoading;
             IpcClient.Instance.OnViewChangeView -= HandleViewChange;
             IpcClient.Instance.OnViewSetObjectFilter -= HandleSetObjectFilter;
             IpcClient.Instance.OnViewQueryObjectFilter -= NotifyObjectFilterState;

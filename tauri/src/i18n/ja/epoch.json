@@ -17,9 +17,6 @@
     "sectionConstruction": "建設状況",
     "kindPath": "道路",
     "kindBuilding": "施設",
-    "columnName": "名称",
-    "columnStatus": "ステータス",
-    "columnProgress": "進捗",
     "noItems": "対象なし",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "完成",
@@ -27,14 +24,12 @@
     "sectionScore": "スコア",
     "scoreGain": "加点",
     "scoreLoss": "減点",
-    "questProgress": "{{completed}} / {{total}} 達成",
     "questState": {
       "completed": "達成",
       "active": "進行中",
       "locked": "未解放",
       "failed": "失敗"
     },
-    "trendLegend": "矢印は直近{{count}}エポックの傾向",
     "trendHint": "直近{{count}}エポックの傾向: {{trend}}",
     "trend": {
       "up": "上昇傾向",

@@ -11,11 +11,13 @@
       },
       "step3": {
         "title": "Create a Parcel",
-        "description": "The road is complete! Now let's create a parcel to build on. Select the parcel icon from the toolbar and use \"Create Along Road\". When you see red outlines along the road, press confirm to create the parcels."
+        "description": "The road is complete! Now let's create a parcel to build on. Select the parcel icon from the toolbar.",
+        "create": "Make sure \"Create Along Road\" is selected, then click the road in the 3D view. When you see red outlines along the road, press confirm to create the parcels."
       },
       "step4": {
         "title": "Build a Building",
-        "description": "Now you can build! Select the building icon from the toolbar and choose \"Apartment\" from the \"Residential\" category. You can select any of the parcels you just created as the construction site."
+        "description": "Now you can build! Select the building icon from the toolbar.",
+        "select": "Choose \"Apartment\" from the \"Residential\" category. Pick any of the parcels you just created as the construction site, then press confirm to build."
       },
       "step5": {
         "title": "Complete the Building",
@@ -27,7 +29,8 @@
       "description": "The town wants to mine an ore deposit, but other buildings could occupy the land. In this tutorial, you'll learn how to locate natural resources, divide the town into districts, and restrict which types of buildings can be built.",
       "step1": {
         "title": "Create a District",
-        "description": "A district is a unit that divides the city into areas, and it is assigned to roads. Press the district button on the icon panel to enter district edit mode: you'll see that the H-shaped road network forms a single district. With the Create tool (the default), click the road with the yellow marker to turn that road and the parcels facing it into a new district."
+        "description": "A district is a unit that divides the city into areas, and it is assigned to roads. Press the district button on the icon panel to enter district edit mode: you'll see that the H-shaped road network forms a single district.",
+        "create": "With the Create tool (the default), click the road with the yellow marker to turn that road and the parcels facing it into a new district."
       },
       "step2": {
         "title": "District Created",

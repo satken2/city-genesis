@@ -7,6 +7,7 @@ import { ScenarioInfoSection } from "./ScenarioInfoSection";
 import type { Quest, QuestClauseState } from "../../types";
 import { ResponsiveContainer, ComposedChart, Bar, Line, CartesianGrid, ReferenceLine, XAxis, YAxis, Tooltip } from "recharts";
 import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
+import { formatQuestValue, questCompareLabel } from "../../utils/quest";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { SatisfactionFace, getSatisfactionAppearance } from "../common/SatisfactionFace";
 import { Meter } from "../common/Meter";
@@ -64,34 +65,8 @@ type ScoreResponse = {
   history: ScoreHistoryItem[];
 };
 
-function compareToLabel(op: string): string {
-  switch (op) {
-    case ">":
-      return ">";
-    case "<":
-      return "<";
-    case ">=":
-      return "≥";
-    case "<=":
-      return "≤";
-    case "==":
-      return "=";
-    case "!=":
-      return "≠";
-    default:
-      return op;
-  }
-}
-
 function isCompleted(quest: Quest): boolean {
   return quest.status === "completed";
-}
-
-function formatMetricValue(v: number | null, locale: string): string {
-  if (v === null || v === undefined) return "—";
-  return Number.isInteger(v)
-    ? v.toLocaleString(locale)
-    : v.toLocaleString(locale, { maximumFractionDigits: 2 });
 }
 
 export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
@@ -494,9 +469,9 @@ function ClauseRow({ clause }: { clause: QuestClauseState }) {
     clause.mode !== "value" ? t(`achievements.mode.${clause.mode}`, { window: clause.window }) : null;
   return (
     <div className="quest-grid-card__clause">
-      <span className="quest-grid-card__current">{formatMetricValue(clause.current, locale)}</span>
-      <span className="quest-grid-card__operator">{compareToLabel(clause.compare)}</span>
-      <span className="quest-grid-card__target">{formatMetricValue(clause.target, locale)}</span>
+      <span className="quest-grid-card__current">{formatQuestValue(clause.current, locale)}</span>
+      <span className="quest-grid-card__operator">{questCompareLabel(clause.compare)}</span>
+      <span className="quest-grid-card__target">{formatQuestValue(clause.target, locale)}</span>
       {clause.mode === "streak" && (
         <span className="quest-grid-card__streak">
           {t("achievements.streakProgress", { current: clause.streak ?? 0, window: clause.window })}

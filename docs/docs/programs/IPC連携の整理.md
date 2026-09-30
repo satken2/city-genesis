@@ -381,19 +381,27 @@ Tauri 側の常駐スレッドが 5 秒ごとにバックエンドをポーリ�
 ### ゲーム開始フロー（新規）
 
 ```
-[NewGameWindow] シナリオ・チュートリアルを選んで開始
+[TopMenu / SaveLoadWindow] 「ニューゲーム」ボタン押下
+  ↓
+invoke("open_registered_window", { windowType: "new_game" })
+  ↓
+[NewGameWindow] シナリオ・チュートリアルを選び「このシナリオを始める」
+  ↓
+ゲーム設定の確認(プレイ中だけ未保存の変更が失われる警告を表示)
+  ↓
+最終の「開始」を押す(ここまでは現在の都市とUnityの表示を保持)
   ↓
 invoke("create_session", { templateId | isTutorial + tutorialId, cityName, language, ... })
   ↓
 [Rust]
-  1. launch_graphic() → Unity 起動
-  2. topmenu.hide()
-  3. loading.show()
-  4. POST /api/v1/sessions(template_id または is_tutorial・tutorial_id)
-  5. ポーリングスレッドが current_save_id の変化を検知
-  6. loading.hide()
-  7. taskbar.show()
-  8. Unity に session:reload + game:start を送信
+  1. コアの版・シナリオの互換性を検証
+  2. prepare_graphic() → Unityの起動・session:resetとIPC契約の確認
+  3. トップメニューとポップアップを隠す
+  4. begin_initial_loading() → game:loadingで暗転・HUD非表示・Tips表示
+  5. POST /api/v1/sessions(template_id または is_tutorial・tutorial_id)
+  6. POST成功後、ポーリングからUnityにsession:reload + game:start {loading_id}を送信
+  7. 同じloading_idのgame:loadedを受け、Tipsを開始ボタンに切り替える
+  8. Tipsの開始ボタンでgame:revealを送り、HUDとヒントバーを表示
 ```
 
 ### ゲーム開始フロー（ロード）
@@ -532,7 +540,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 ## 初期ロードの表示契約
 
-UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、`game:loaded` を通知済みの世代だけを表示する。受信した瞬間の準備状態は再判定しない（Tipsは既に閉じているため、ここで捨てると黒画面から戻れなくなる）。
+UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始し、表示パネルで選べる表示状態を既定へ戻して `view:current_state` で通知する([Unity入力制御](Unity入力制御.md) 9.1)。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、`game:loaded` を通知済みの世代だけを表示する。受信した瞬間の準備状態は再判定しない（Tipsは既に閉じているため、ここで捨てると黒画面から戻れなくなる）。
 
 `system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。
 

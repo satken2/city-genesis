@@ -25,7 +25,7 @@ export function TerrainFacts({ mapSize, groundCover, climate }: {
         <dt>{t("groundCover.label")}</dt>
         <dd><GroundCoverIcon cover={groundCover} label={t(`groundCover.${groundCover}`)} /></dd>
       </div>
-      <div className="terrain-fact terrain-fact--climate">
+      <div className="terrain-fact">
         <dt>{t("climate.label")}</dt>
         <dd>{t(`climate.${climate}`)}</dd>
       </div>

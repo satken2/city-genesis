@@ -17,9 +17,6 @@
     "sectionConstruction": "建設狀況",
     "kindPath": "道路",
     "kindBuilding": "設施",
-    "columnName": "名稱",
-    "columnStatus": "狀態",
-    "columnProgress": "進度",
     "noItems": "無對象",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "完成",
@@ -27,14 +24,12 @@
     "sectionScore": "評分",
     "scoreGain": "加分",
     "scoreLoss": "扣分",
-    "questProgress": "已達成 {{completed}} / {{total}}",
     "questState": {
       "completed": "已達成",
       "active": "進行中",
       "locked": "未解鎖",
       "failed": "失敗"
     },
-    "trendLegend": "箭頭表示最近{{count}}個紀元的趨勢",
     "trendHint": "最近{{count}}個紀元的趨勢：{{trend}}",
     "trend": {
       "up": "上升趨勢",

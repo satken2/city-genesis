@@ -1,8 +1,9 @@
 /**
- * セーブメニュー・セーブ一覧の線画アイコン(自作のSVG)。
+ * セーブメニュー・セーブ一覧・エポック実行の確認と結果の線画アイコン(自作のSVG)。
  * 24×24 の座標で描き、線の色は文字色(currentColor)に従う。大きさはCSSで決める。
  */
 import type { ReactNode } from "react";
+import type { Season } from "../../utils/season";
 
 type IconProps = { className?: string };
 
@@ -111,6 +112,45 @@ export function ClockIcon(props: IconProps) {
   return <Icon {...props}>
     <circle cx="12" cy="12" r="8.5" />
     <path d="M12 7.5V12l3 2" />
+  </Icon>;
+}
+
+/** 季節(春=芽・夏=太陽・秋=葉・冬=雪の結晶) */
+export function SeasonIcon({ season, ...props }: IconProps & { season: Season }) {
+  switch (season) {
+    case "spring":
+      return <Icon {...props}>
+        <path d="M12 20.5v-8" />
+        <path d="M12 12.5C12 8.6 9.6 6 5.5 6c0 3.9 2.5 6.5 6.5 6.5z" />
+        <path d="M12 10.5c0-3.9 2.4-6.5 6.5-6.5 0 3.9-2.5 6.5-6.5 6.5z" />
+      </Icon>;
+    case "summer":
+      return <Icon {...props}>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" />
+      </Icon>;
+    case "autumn":
+      return <Icon {...props}>
+        <path d="M5 19C5 10.5 10 5 19 5c0 9-5.5 14-14 14z" />
+        <path d="M5 19l8.5-8.5M9.5 14.5h3.5M9.5 14.5V11" />
+      </Icon>;
+    case "winter":
+      return <Icon {...props}>
+        <path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9" />
+        <path d="M9.5 4.5 12 6.5l2.5-2M9.5 19.5 12 17.5l2.5 2M4.9 10.2l3-.9-.6-3M19.1 13.8l-3 .9.6 3M4.9 13.8l3 .9-.6 3M19.1 10.2l-3-.9.6-3" />
+      </Icon>;
+  }
+}
+
+export function MinusIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M5.5 12h13" />
+  </Icon>;
+}
+
+export function PlusIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M5.5 12h13M12 5.5v13" />
   </Icon>;
 }
 

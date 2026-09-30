@@ -4,11 +4,10 @@
       "title": "計算負荷",
       "heading": "直近のエポック({{days}}日分)の計算時間",
       "noData": "計測データなし",
-      "note": "複数のエポックを続けて実行したときは、最後のエポックの値です。問題規模は、主な比較の組み合わせ数を都市の規模から見積もった目安です。",
+      "note": "複数のエポックを続けて実行したときは、最後のエポックの値です。処理件数は、主な比較の組み合わせ数を都市の規模から見積もった目安です。",
       "colGroup": "処理",
       "colTime": "時間",
-      "colShare": "割合",
-      "colWorkload": "問題規模",
+      "colWorkload": "処理件数",
       "workloadHint": "主な比較の組み合わせ数(配列の要素数)の目安です。値にマウスを重ねると内訳が出ます。",
       "seconds": "{{value}} 秒",
       "ms": "{{value}} ms"
@@ -37,7 +36,7 @@
     "entities": {
       "colMetric": "項目",
       "colCount": "件数",
-      "title": "都市の規模",
+      "title": "エンティティ数",
       "agents": "経済主体",
       "households": "世帯",
       "businesses": "事業所",
@@ -54,24 +53,6 @@
       "nodes": "ノード",
       "transitLines": "公共交通の路線",
       "epochs": "経過エポック"
-    },
-    "memory": {
-      "title": "メモリ",
-      "current": "現在の使用量",
-      "peak": "起動以降の最大",
-      "total": "搭載メモリ",
-      "note": "シミュレーター本体のプロセスが使う物理メモリです。最大には、エポック中に一時的に増えた分も含まれます。"
-    },
-    "environment": {
-      "gpuAcceleration": "GPUアクセラレーション",
-      "title": "実行環境",
-      "cpu": "CPU",
-      "cores": "論理コア数",
-      "os": "OS",
-      "device": "演算デバイス",
-      "devices": {
-        "cpu": "CPU"
-      }
     },
     "approximation": {
       "title": "シミュレーションの近似",
@@ -103,6 +84,13 @@
         "label": "似た市民・世帯をまとめて計算",
         "description": "条件が似た市民や世帯の一部の判断を、集団として扱います。"
       }
+    },
+    "status": {
+      "title": "システムステータス",
+      "gpuDisabled": "GPUアクセラレーション: 無効",
+      "coreSimulator": "コアシミュレーター",
+      "currentMemory": "現在のメモリ使用量: {{value}}",
+      "peakMemory": "起動以降の最大メモリ使用量: {{value}}"
     }
   }
 }

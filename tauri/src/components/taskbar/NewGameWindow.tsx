@@ -1,21 +1,22 @@
 /**
  * ニューゲームウィンドウコンポーネント
  *
- * トップメニューの「ニューゲーム」ボタンから開かれるポップアップウィンドウ。
- * 上部のタブは「シナリオを選択」と「シナリオを探す」(共有シナリオの閲覧。未提供なので無効)。
+ * トップメニューとシステムメニューの「ニューゲーム」ボタンから開かれるポップアップウィンドウ。
+ * タイトルバーを持たないウィンドウ(レジストリの chromeless)で、閉じるのは左下の「閉じる」と Esc。
  *
- * 「シナリオを選択」は左右2カラム構成で、左に選択肢の一覧、右に固定幅の詳細パネルを置く。
- * 一覧はチュートリアルミッション(常に表示)と、全保存元(自作・コミュニティ・DLC)のシナリオ
- * (GET /api/v1/scenarios)を並べる。地形から直接始める入口は無く、標高ファイルはシナリオ管理で
+ * 左カラムの上端はヒーローで、小見出しの下にタブ「シナリオを選択」と「シナリオを探す」(共有シナリオの閲覧。未提供なので無効)を
+ * 見出しの大きさで並べる。その下が選択肢のタイル一覧で、チュートリアルミッション(常に表示)と、全保存元(自作・コミュニティ・DLC)の
+ * シナリオ(GET /api/v1/scenarios)を節に分けて並べる。地形から直接始める入口は無く、標高ファイルはシナリオ管理で
  * シナリオにしてから遊ぶ。チュートリアルはコアが同梱の教材の都市から始める(チュートリアルIDだけを送る)。
  *
- * 一覧のタイルはサムネイルと名前と保存元の札だけを出す。説明・達成条件は右カラムに集約する。
- * 右カラム(詳細パネル)はサムネイルを大きく出し、その下にタイトル・説明・マップの事実欄
- * (大きさ・地表・気候。シナリオだけ)・達成条件を並べる。シナリオの説明文・達成条件は作者のフリーテキスト。
- * 事実欄の値はすべて一覧の要素(都市が持つ値)から引く。
+ * 一覧のタイルは画像を全面に敷き、名前と保存元の札だけを重ねる。説明・達成条件は右カラムに集約する。
+ * 右カラム(詳細パネル)はウィンドウの右端・上端・下端まで届く固定幅の面で、選んだ対象の画像を上端いっぱいに敷き、
+ * 画像の下端にタイトルを重ねる。その下に説明・マップの事実欄(大きさ・地表・気候。シナリオだけ)・達成条件を並べ、
+ * 下端に開始ボタンを置く。シナリオの説明文・達成条件は作者のフリーテキスト。事実欄の値はすべて一覧の要素(都市が持つ値)から引く。
  *
- * 詳細パネルの開始ボタンで「ゲーム設定の確認」ダイアログが選択画面の上に重なり(ウィンドウ内のオーバーレイで、
+ * 開始ボタンで「ゲーム設定の確認」ダイアログが選択画面の上に重なり(ウィンドウ内のオーバーレイで、
  * ネイティブのウィンドウは開かない)、都市名・都市の言語・シミュレーション日数などを設定してからゲームを開始する。
+ * プレイ中はこのダイアログに未保存の変更が失われる警告を出す。最終の「開始」まで現在の都市とUnityの表示を保持する。
  *
  * シナリオの紹介文・初期の都市名は作者が多言語で書くテキストで、紹介文は表示言語、初期の都市名は
  * 選んだ都市の言語で引く(無ければ英語)。都市の言語はいつでも選べ、既定はアプリ設定の言語。シナリオと
@@ -23,7 +24,7 @@
  * 作者が固定した項目は表示だけ、固定していない項目はシナリオの値を初期値に選べる。
  */
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, type CSSProperties, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -36,6 +37,8 @@ import { formatMapSize } from "../../utils/mapSize";
 import { FlatTabs } from "../common/FlatTabs";
 import { TerrainFacts } from "../common/TerrainFacts";
 import { ScenarioOriginBadges } from "../common/ScenarioSource";
+import { SaveDialogButton } from "./SaveDialog";
+import { BackIcon, NewGameIcon, ScenarioIcon } from "./SaveIcons";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
 import { SaveEntry, ScenarioStartOption, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
@@ -54,14 +57,6 @@ type NewGameWindowProps = {
 type TemplateEntry = SaveEntry;
 
 type NewGameTab = "select" | "browse";
-
-/**
- * ステータスメッセージの型
- */
-type StatusMessage = {
-  text: string;
-  type: "success" | "error" | "info";
-};
 
 /**
  * 詳細パネルに表示する選択対象。
@@ -90,10 +85,8 @@ type DetailView = {
    * mapSize は「7 × 6 km」の形で、不明なら null。地表・気候は未指定・未知の値をゲームと同じ既定に正規化する。
    */
   terrain: { mapSize: string | null; groundCover: number; climate: number } | null;
-  /** 達成条件のフリーテキスト。未設定なら null */
+  /** 達成条件のフリーテキスト。未設定なら null で、詳細には節ごと出したうえで「達成条件なし」と書く(無いことも情報なので隠さない) */
   objective: string | null;
-  /** 開始ボタンのラベル */
-  startLabel: string;
   /** 読み込めないシナリオは詳細で理由を見せ、開始だけ止める */
   startDisabled: boolean;
   onStart: () => void;
@@ -146,6 +139,35 @@ const AVAILABLE_LANGUAGES = SUPPORTED_LANGUAGES;
  */
 const SIMULATION_DAYS_OPTIONS = [7, 30] as const;
 
+/**
+ * 一覧のタイル。画像(children)を全面に敷き、下端に名前を重ねる。
+ * index は一覧を開いたときにタイルを順に浮かび上がらせる時差に使う。
+ */
+function ScenarioTile({ title, selected, disabled, className, index, onSelect, children }: {
+  title: string;
+  selected: boolean;
+  disabled: boolean;
+  className?: string;
+  index: number;
+  onSelect: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      className={["new-game-tile", className, selected ? "selected" : ""].filter(Boolean).join(" ")}
+      style={{ "--new-game-tile-index": index } as CSSProperties}
+      onClick={onSelect}
+      disabled={disabled}
+      type="button"
+      title={title}
+      aria-pressed={selected}
+    >
+      {children}
+      <span className="new-game-tile-name">{title}</span>
+    </button>
+  );
+}
+
 export function NewGameWindow({
   apiBaseUrl,
   onClose,
@@ -154,7 +176,8 @@ export function NewGameWindow({
   const [templates, setTemplates] = useState<TemplateEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState<StatusMessage | null>(null);
+  const [failure, setFailure] = useState("");
+  const [hasCurrentGame, setHasCurrentGame] = useState<boolean | null>(null);
 
   // 詳細パネルに表示中の選択対象
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -169,6 +192,29 @@ export function NewGameWindow({
   const [language, setLanguage] = useState("ja");
   const [simulationDays, setSimulationDays] = useState(30);
   const [startOptions, setStartOptions] = useState(() => startOptionValuesOf(null));
+
+  // 未保存の都市にもIDがあるため、保存ファイルの有無ではなくセッションで警告の必要性を判定する。
+  useEffect(() => {
+    if (!apiBaseUrl) return;
+    const controller = new AbortController();
+    let active = true;
+    let receivedSessionState = false;
+    const listener = listen<{ current_save_id: string | null; backendConnected: boolean }>("session-state", ({ payload }) => {
+      if (!active || !payload.backendConnected) return;
+      receivedSessionState = true;
+      setHasCurrentGame(payload.current_save_id != null);
+    });
+    void fetchApi<{ current_save_id: string | null }>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/sessions`, {
+      cache: "reload", signal: controller.signal,
+    }).then(session => {
+      if (active && !receivedSessionState) setHasCurrentGame(session.current_save_id != null);
+    }).catch(() => {});
+    return () => {
+      active = false;
+      controller.abort();
+      void listener.then(unlisten => unlisten());
+    };
+  }, [apiBaseUrl]);
 
   /**
    * ウィンドウ初期化時にシナリオ一覧を取得する。失敗してもチュートリアルは始められるので一覧を空で出す。
@@ -257,7 +303,6 @@ export function NewGameWindow({
         description: t(scenario.descriptionKey),
         terrain: null,
         objective: t("newGame.tutorialObjective"),
-        startLabel: t("newGame.startScenarioButton"),
         startDisabled: false,
         onStart: () => void handleStartTutorial(scenario.id),
       };
@@ -277,7 +322,6 @@ export function NewGameWindow({
         climate: normalizeClimate(template.climate),
       },
       objective: resolveLocalizedText(template.scenario_objective, i18n.language) || null,
-      startLabel: t("newGame.startScenarioButton"),
       startDisabled: template.compatibility?.loadable === false,
       onStart: () => void handleStartTemplate(template),
     };
@@ -297,17 +341,18 @@ export function NewGameWindow({
    * create_session は開いているポップアップをすべて閉じる。
    */
   const handleConfirmStart = useCallback(async () => {
-    if (!confirmSelection) return;
+    if (!confirmSelection || hasCurrentGame == null) return;
 
     setBusy(true);
-    setStatus({ text: t("newGame.starting"), type: "info" });
+    setFailure("");
     // 作者が固定した項目は送らない(コアがシナリオの値で始める)
     const fixed = new Set(confirmSelection.template?.scenario_fixed_options ?? []);
     const chosen = (option: ScenarioStartOption, value: number) =>
       confirmSelection.template && !fixed.has(option) ? value : null;
     try {
       if (confirmSelection.templateId && !await prepareSaveLoad(apiBaseUrl, confirmSelection.templateId, true, t)) {
-        setBusy(false); setStatus(null); return;
+        setBusy(false);
+        return;
       }
       await invoke("create_session", {
         acceptBalanceChange: true,
@@ -323,13 +368,10 @@ export function NewGameWindow({
       });
       onClose();
     } catch (error) {
-      setStatus({
-        text: saveError(error, t),
-        type: "error",
-      });
+      setFailure(saveError(error, t) || t("newGame.startFailed"));
       setBusy(false);
     }
-  }, [apiBaseUrl, t, onClose, confirmSelection, cityName, language, simulationDays, startOptions]);
+  }, [apiBaseUrl, t, onClose, confirmSelection, hasCurrentGame, cityName, language, simulationDays, startOptions]);
 
   /** 都市の言語を変える。都市名を書き換えていなければ、その言語の初期の都市名に引き直す */
   const handleLanguageChange = useCallback((next: string) => {
@@ -342,8 +384,20 @@ export function NewGameWindow({
    */
   const handleCancelConfirm = useCallback(() => {
     setConfirmSelection(null);
-    setStatus(null);
+    setFailure("");
   }, []);
+
+  // Esc は設定確認ダイアログを開いていればダイアログを、いなければウィンドウを閉じる。開始処理中は何もしない
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || busy) return;
+      event.preventDefault();
+      if (confirmSelection) handleCancelConfirm();
+      else onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [busy, confirmSelection, handleCancelConfirm, onClose]);
 
   // 「シナリオを探す」は共有シナリオの閲覧画面の予定地。未提供なので常に「シナリオを選択」を表示する。
   const tabs = (
@@ -360,130 +414,132 @@ export function NewGameWindow({
 
   const confirmTemplate = confirmSelection?.template ?? null;
   const fixedOptions = new Set<ScenarioStartOption>(confirmTemplate?.scenario_fixed_options ?? []);
+  const isSelected = (kind: Selection["kind"], id: string) => selection?.kind === kind && selection.id === id;
 
   // 選択画面。設定確認ダイアログを開いている間も、幕の下に描いたままにする
   return (
-    <div className="new-game-window">
-      {tabs}
-      <div className="new-game-body new-game-body--select">
-        <div className="new-game-list">
-          {loading ? (
-            <div className="new-game-loading">{t("newGame.loading")}</div>
-          ) : (
-            <section className="new-game-section">
-              <div className="new-game-tiles">
-                {/* チュートリアルミッション: 常に表示、常に選択可能 */}
-                {TUTORIAL_SCENARIOS.map((scenario) => (
-                  <button
-                    key={scenario.id}
-                    className={`new-game-tile new-game-tile--tutorial ${
-                      selection?.kind === "tutorial" && selection.id === scenario.id
-                        ? "selected"
-                        : ""
-                    }`}
-                    onClick={() => setSelection({ kind: "tutorial", id: scenario.id })}
-                    disabled={busy}
-                    type="button"
-                    title={t(scenario.titleKey)}
-                  >
-                    <span className="new-game-tile-badge">{t("newGame.tutorialBadge")}</span>
-                    {scenario.image ? (
-                      <img className="new-game-tile-image" src={scenario.image} alt="" />
-                    ) : (
-                      <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
-                    )}
-                    <span className="new-game-tile-name">{t(scenario.titleKey)}</span>
-                  </button>
-                ))}
+    <div className="new-game">
+      <div className="new-game-main">
+        <header className="new-game-hero">
+          <span className="new-game-overline">{t("windowType.new_game")}</span>
+          {tabs}
+        </header>
 
+        <div className="new-game-list">
+          {/* チュートリアルミッション: 常に表示、常に選択可能 */}
+          <section className="new-game-section">
+            <h3 className="new-game-section-title">{t("newGame.sectionTutorials")}</h3>
+            <div className="new-game-tiles">
+              {TUTORIAL_SCENARIOS.map((scenario, index) => (
+                <ScenarioTile
+                  key={scenario.id}
+                  className="new-game-tile--tutorial"
+                  title={t(scenario.titleKey)}
+                  selected={isSelected("tutorial", scenario.id)}
+                  disabled={busy}
+                  index={index}
+                  onSelect={() => setSelection({ kind: "tutorial", id: scenario.id })}
+                >
+                  {scenario.image ? (
+                    <img className="new-game-tile-image" src={scenario.image} alt="" draggable={false} />
+                  ) : (
+                    <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
+                  )}
+                </ScenarioTile>
+              ))}
+            </div>
+          </section>
+
+          <section className="new-game-section">
+            <h3 className="new-game-section-title">{t("newGame.sectionScenarios")}</h3>
+            {loading ? (
+              <div className="new-game-empty">{t("newGame.loading")}</div>
+            ) : templates.length === 0 ? (
+              <div className="new-game-empty">{t("newGame.noTemplates")}</div>
+            ) : (
+              <div className="new-game-tiles">
                 {/* 読み込めない作品も選択し、詳細で理由を確認できる。 */}
-                {templates.map((tmpl) => (
-                  <button
+                {templates.map((tmpl, index) => (
+                  <ScenarioTile
                     key={tmpl.id}
-                    className={`new-game-tile ${
-                      selection?.kind === "template" && selection.id === tmpl.id ? "selected" : ""
-                    }`}
-                    onClick={() => setSelection({ kind: "template", id: tmpl.id })}
-                    disabled={busy}
-                    type="button"
                     title={scenarioDisplayTitle(tmpl, i18n.language)}
+                    selected={isSelected("template", tmpl.id)}
+                    disabled={busy}
+                    index={TUTORIAL_SCENARIOS.length + index}
+                    onSelect={() => setSelection({ kind: "template", id: tmpl.id })}
                   >
-                    <ScenarioThumbnail
-                      apiBaseUrl={apiBaseUrl}
-                      templateId={tmpl.id} revision={tmpl.content_revision}
-                    />
-                    <span className="new-game-tile-name">
-                      {scenarioDisplayTitle(tmpl, i18n.language)}
-                    </span>
+                    <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={tmpl.id} revision={tmpl.content_revision} />
                     <ScenarioOriginBadges entry={tmpl} />
-                  </button>
+                  </ScenarioTile>
                 ))}
               </div>
-
-              {/* チュートリアル以外のシナリオがない場合の空状態メッセージ */}
-              {templates.length === 0 && (
-                <div className="new-game-empty">{t("newGame.noTemplates")}</div>
-              )}
-            </section>
-          )}
+            )}
+          </section>
         </div>
 
-        {/* 詳細パネル（固定幅） */}
-        <aside className="new-game-detail">
-          {detail ? (
-            <>
-              {detail.thumbnailUrl ? (
-                <img
-                  className="new-game-detail-image"
-                  src={detail.thumbnailUrl}
-                  alt=""
-                />
-              ) : detail.template ? (
-                <ScenarioThumbnail
-                  apiBaseUrl={apiBaseUrl}
-                  templateId={detail.template.id}
-                  revision={detail.template.content_revision}
-                  className="new-game-detail-image"
-                  placeholderModifier={detail.placeholderModifier}
-                />
-              ) : (
-                <div className={`new-game-detail-image ${detail.placeholderModifier}`} />
-              )}
-
-              <div className="new-game-detail-content">
-                <h2 className="new-game-detail-title">{detail.title}</h2>
-                {detail.template && <>
-                  <ScenarioOriginBadges entry={detail.template} />
-                  <SaveVersionInfo entry={detail.template} />
-                </>}
-                <p className="new-game-detail-desc">{detail.description}</p>
-
-                {detail.terrain && <TerrainFacts {...detail.terrain} />}
-
-                {detail.objective && (
-                  <div className="new-game-detail-block">
-                    <h3 className="new-game-detail-block-title">
-                      {t("newGame.detailObjectiveLabel")}
-                    </h3>
-                    <p className="new-game-detail-block-text">{detail.objective}</p>
-                  </div>
-                )}
-              </div>
-
-              <button
-                className="new-game-detail-start"
-                onClick={detail.onStart}
-                disabled={busy || detail.startDisabled}
-                type="button"
-              >
-                {detail.startLabel}
-              </button>
-            </>
-          ) : (
-            <div className="new-game-detail-placeholder">{t("newGame.detailPlaceholder")}</div>
-          )}
-        </aside>
+        <footer className="new-game-footer">
+          <SaveDialogButton disabled={busy} onClick={onClose}>{t("common.close")}</SaveDialogButton>
+        </footer>
       </div>
+
+      {/* 詳細パネル: 固定幅で、ウィンドウの右端・上端・下端まで届く */}
+      <aside className="new-game-detail">
+        {detail ? (
+          // 選択を変えるたびに中身を作り直し、切り替わりの演出を毎回流す
+          <div className="new-game-detail-scroll" key={`${selection?.kind}:${selection?.id}`}>
+            {detail.thumbnailUrl ? (
+              <img className="new-game-detail-image" src={detail.thumbnailUrl} alt="" draggable={false} />
+            ) : detail.template ? (
+              <ScenarioThumbnail
+                apiBaseUrl={apiBaseUrl}
+                templateId={detail.template.id}
+                revision={detail.template.content_revision}
+                className="new-game-detail-image"
+                placeholderModifier={detail.placeholderModifier}
+              />
+            ) : (
+              <div className={`new-game-detail-image ${detail.placeholderModifier}`} />
+            )}
+
+            {/* タイトルは画像の下端に重ねる */}
+            <div className="new-game-detail-head">
+              {detail.template
+                ? <ScenarioOriginBadges entry={detail.template} />
+                : <span className="new-game-detail-kind">{t("newGame.tutorialBadge")}</span>}
+              <h2 className="new-game-detail-title">{detail.title}</h2>
+            </div>
+
+            <div className="new-game-detail-content">
+              {detail.template && <SaveVersionInfo entry={detail.template} />}
+              <p className="new-game-detail-desc">{detail.description}</p>
+
+              {detail.terrain && <TerrainFacts {...detail.terrain} />}
+
+              <section className="new-game-detail-block">
+                <h3 className="new-game-detail-block-title">{t("newGame.detailObjectiveLabel")}</h3>
+                <p className="new-game-detail-block-text">{detail.objective ?? t("newGame.detailNoObjective")}</p>
+              </section>
+            </div>
+          </div>
+        ) : (
+          <div className="new-game-detail-placeholder">
+            <ScenarioIcon className="new-game-detail-placeholder-icon" />
+            <p>{t("newGame.detailPlaceholder")}</p>
+          </div>
+        )}
+
+        <div className="new-game-detail-actions">
+          <button
+            className="new-game-start"
+            onClick={detail?.onStart}
+            disabled={busy || !detail || detail.startDisabled}
+            type="button"
+          >
+            <span>{t("newGame.startScenarioButton")}</span>
+            <BackIcon className="new-game-start-arrow" />
+          </button>
+        </div>
+      </aside>
 
       {/* 設定確認ダイアログ: 選択画面の上に重ねる。開始処理中は幕を押しても閉じない */}
       {confirmSelection && (
@@ -493,9 +549,19 @@ export function NewGameWindow({
             role="dialog"
             aria-modal="true"
             aria-labelledby="new-game-confirm-title"
+            aria-describedby={hasCurrentGame ? "new-game-confirm-warning" : undefined}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <h2 id="new-game-confirm-title" className="new-game-confirm-title">{t("newGame.confirmTitle")}</h2>
+            <h2 id="new-game-confirm-title" className="new-game-confirm-title">
+              <NewGameIcon />
+              <span>{t("newGame.confirmTitle")}</span>
+            </h2>
+
+            {hasCurrentGame && (
+              <p id="new-game-confirm-warning" className="new-game-confirm-warning">
+                {t("newGame.unsavedChangesWarning")}
+              </p>
+            )}
 
             <div className="new-game-confirm-fields">
               {/* 都市名 */}
@@ -562,6 +628,7 @@ export function NewGameWindow({
                         onClick={() => setSimulationDays(days)}
                         disabled={busy}
                         type="button"
+                        aria-pressed={simulationDays === days}
                       >
                         {t("newGame.daysOption", { days })}
                       </button>
@@ -599,30 +666,16 @@ export function NewGameWindow({
               ))}
             </div>
 
-            {status && (
-              <div className={`new-game-status new-game-status--${status.type}`}>
-                {status.text}
-              </div>
-            )}
+            {/* 開始に失敗した理由。開始中はボタンのスピナーで示す */}
+            {failure && <p className="save-dialog-error" role="alert">{failure}</p>}
 
-            {/* ボタン */}
             <div className="new-game-confirm-actions">
-              <button
-                className="new-game-confirm-btn new-game-confirm-btn--back"
-                onClick={handleCancelConfirm}
-                disabled={busy}
-                type="button"
-              >
+              <SaveDialogButton disabled={busy} onClick={handleCancelConfirm}>
                 {t("newGame.backButton")}
-              </button>
-              <button
-                className="new-game-confirm-btn new-game-confirm-btn--start"
-                onClick={() => void handleConfirmStart()}
-                disabled={busy}
-                type="button"
-              >
-                {t("newGame.startButton")}
-              </button>
+              </SaveDialogButton>
+              <SaveDialogButton kind={hasCurrentGame ? "danger" : "primary"} busy={busy} disabled={hasCurrentGame == null} onClick={() => void handleConfirmStart()}>
+                {busy ? t("newGame.starting") : t("newGame.startButton")}
+              </SaveDialogButton>
             </div>
           </div>
         </div>

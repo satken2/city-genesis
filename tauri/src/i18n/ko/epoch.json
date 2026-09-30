@@ -17,9 +17,6 @@
     "sectionConstruction": "건설 상황",
     "kindPath": "도로",
     "kindBuilding": "시설",
-    "columnName": "명칭",
-    "columnStatus": "상태",
-    "columnProgress": "진척도",
     "noItems": "대상 없음",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "완성",
@@ -27,14 +24,12 @@
     "sectionScore": "점수",
     "scoreGain": "가점",
     "scoreLoss": "감점",
-    "questProgress": "{{completed}} / {{total}} 달성",
     "questState": {
       "completed": "달성",
       "active": "진행 중",
       "locked": "미해금",
       "failed": "실패"
     },
-    "trendLegend": "화살표는 최근 {{count}}에포크의 추세",
     "trendHint": "최근 {{count}}에포크의 추세: {{trend}}",
     "trend": {
       "up": "상승 추세",

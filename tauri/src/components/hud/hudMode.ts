@@ -18,7 +18,7 @@ import { emit, listen } from "@tauri-apps/api/event";
 /** 排他的な常駐モード。null はどちらも解除された通常状態。 */
 export type HudMode = "bulldozer" | "district" | null;
 
-const HUD_EVENT_MODE_CHANGED = "hud:mode_changed";
+export const HUD_EVENT_MODE_CHANGED = "hud:mode_changed";
 
 /**
  * 自ウィンドウ内の購読者。Tauriイベントの往復を待たず即時に反映するために持つ

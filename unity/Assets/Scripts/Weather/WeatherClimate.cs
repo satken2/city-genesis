@@ -76,7 +76,8 @@ public static class WeatherClimate
     public static int Normalize(int climate) =>
         System.Array.IndexOf(Constants.CLIMATE_TYPES, climate) >= 0 ? climate : Constants.CLIMATE_TEMPERATE;
 
-    /// <summary>都市の日付(1800年1月1日からの日数。1か月30日・1年360日の暦)の季節。北半球の暦月で分ける。</summary>
+    /// <summary>都市の日付(1800年1月1日からの日数。1か月30日・1年360日の暦)の季節。北半球の暦月で分ける。
+    /// UIのエポック実行確認の季節の帯(tauri/src/utils/season.ts)も同じ区切りを使う。</summary>
     public static int SeasonOf(int currentDate)
     {
         int month = ((currentDate % 360) + 360) % 360 / 30 + 1;

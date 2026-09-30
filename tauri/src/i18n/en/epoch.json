@@ -17,9 +17,6 @@
     "sectionConstruction": "Under Construction",
     "kindPath": "Road",
     "kindBuilding": "Facility",
-    "columnName": "Name",
-    "columnStatus": "Status",
-    "columnProgress": "Progress",
     "noItems": "None",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "Completed",
@@ -27,14 +24,12 @@
     "sectionScore": "Score",
     "scoreGain": "Gains",
     "scoreLoss": "Penalties",
-    "questProgress": "{{completed}} / {{total}} achieved",
     "questState": {
       "completed": "Achieved",
       "active": "In progress",
       "locked": "Locked",
       "failed": "Failed"
     },
-    "trendLegend": "Arrows show the trend over the last {{count}} epochs",
     "trendHint": "Trend over the last {{count}} epochs: {{trend}}",
     "trend": {
       "up": "Rising",

@@ -37,8 +37,9 @@ export function installUiGuide(ui: Phase["ui"], windowType: string): () => void 
   const update = () => {
     reset();
     document.querySelectorAll<HTMLElement>("button, input, select, textarea, a, [role=button], [role=tab], [data-guide]").forEach(el => {
-      // 押せない要素(案内外のバリアントのカードなど)は強調しない。
-      if (listed(ui.highlight, el) && !el.matches(":disabled")) { el.setAttribute("data-tutorial-highlight", ""); highlighted.add(el); }
+      // 押せない要素(案内外のバリアントのカードなど)は強調しない。data-guide を持つ枠(運賃の入力欄など)は、
+      // 枠だけを強調し、中のボタンや入力欄には二重に枠を付けない。
+      if (listed(ui.highlight, el) && !el.matches(":disabled") && (el.hasAttribute("data-guide") || !el.parentElement?.closest("[data-guide]"))) { el.setAttribute("data-tutorial-highlight", ""); highlighted.add(el); }
       if (!allowed(el) && !el.inert) { el.inert = true; el.setAttribute("data-tutorial-blocked", ""); blocked.add(el); }
     });
   };

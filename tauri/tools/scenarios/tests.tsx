@@ -533,8 +533,11 @@ assert.equal(container.querySelector(".scenario-error")?.textContent, "scenarios
 await act(async () => { root.unmount(); });
 
 // ニューゲーム: 「シナリオを探す」は準備中。地形から直接始める入口は無い。
+currentSaveId = "unsaved-city";
+const callsBeforeNewGame = state.calls.length;
+let newGameClosed = 0;
 root = createRoot(container);
-await act(async () => { root.render(<NewGameWindow apiBaseUrl="http://test" onClose={() => {}} />); });
+await act(async () => { root.render(<NewGameWindow apiBaseUrl="http://test" onClose={() => { newGameClosed++; }} />); });
 await settle();
 const newGameTabs = [...container.querySelectorAll<HTMLButtonElement>("[role=tab]")];
 assert.deepEqual(newGameTabs.map(tab => tab.textContent), ["newGame.tabSelect", "newGame.tabBrowsenewGame.comingSoon"]);
@@ -570,6 +573,9 @@ await settle();
 const overlay = () => container.querySelector<HTMLElement>(".new-game-confirm-overlay");
 const pressDown = (element: Element) => act(async () => { element.dispatchEvent(new window.MouseEvent("mousedown", { bubbles: true })); });
 assert.ok(overlay()?.querySelector("[role=dialog] .new-game-confirm-select"), "the start settings open as a dialog");
+assert.equal(overlay()?.querySelector(".new-game-confirm-warning")?.textContent, "newGame.unsavedChangesWarning",
+  "an active city needs a discard warning even when it has never been saved");
+assert.ok(button("newGame.startButton").classList.contains("save-dialog-button--danger"));
 assert.ok(container.querySelector(".new-game-list .new-game-tile") && container.querySelector(".new-game-detail-title"), "the scenario list and detail stay behind the dialog");
 assert.ok(!container.textContent?.includes("newGame.closeWindowsNote"), "the dialog does not announce that windows close");
 await pressDown(overlay()!.querySelector("[role=dialog]")!);
@@ -581,6 +587,11 @@ await act(async () => { button("newGame.startScenarioButton").click(); });
 await settle();
 await act(async () => { button("newGame.backButton").click(); });
 assert.equal(overlay(), null, "back closes the dialog");
+await act(async () => { window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" })); });
+await act(async () => { button("common.close").click(); });
+assert.equal(newGameClosed, 2, "Esc and the footer can return to the current game");
+assert.ok(!state.calls.slice(callsBeforeNewGame).some(call => ["launch_graphic", "create_session", "send_window_action"].includes(call.command)),
+  "browsing scenarios and cancelling does not reset Unity or replace the city");
 await act(async () => { button("newGame.startScenarioButton").click(); });
 await settle();
 // 都市の言語の既定はアプリ設定の言語。シナリオと違えば名前の付け直しを知らせ、都市名は初期の都市名をその言語で引く。
@@ -603,7 +614,7 @@ await act(async () => { setText(optionRow("ground_cover").querySelector("select"
 state.errors.create_session = "SAVE_CORRUPT: corrupt";
 await act(async () => { button("newGame.startButton").click(); });
 await settle();
-assert.ok(overlay()?.querySelector(".new-game-confirm .new-game-status--error"), "a failed start is reported in the dialog");
+assert.ok(overlay()?.querySelector(".new-game-confirm .save-dialog-error"), "a failed start is reported in the dialog");
 assert.ok(!button("newGame.startButton").disabled, "the dialog stays usable after a failure");
 delete state.errors.create_session;
 await act(async () => { button("newGame.startButton").click(); });
@@ -624,6 +635,13 @@ await act(async () => { container.querySelector<HTMLButtonElement>(".new-game-ti
 assert.equal(facts(), null, "tutorials have no map facts");
 await act(async () => { button("newGame.startScenarioButton").click(); });
 await settle();
+assert.ok(container.querySelector(".new-game-confirm-warning"), "tutorials also warn before replacing the current game");
+await act(async () => { await emit("session-state", { current_save_id: null, backendConnected: false }); });
+assert.ok(container.querySelector(".new-game-confirm-warning"), "a connection failure does not erase the discard warning");
+currentSaveId = null;
+await act(async () => { await emit("session-state", { current_save_id: null, backendConnected: true }); });
+assert.equal(container.querySelector(".new-game-confirm-warning"), null, "there is nothing to discard from the top menu");
+assert.ok(button("newGame.startButton").classList.contains("save-dialog-button--primary"));
 await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const tutorialSession = lastCall("create_session");
@@ -741,6 +759,18 @@ assert.equal(saveRequests.length, 0);
 assert.equal(menuClosed, 3);
 await act(async () => { window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" })); });
 assert.equal(menuClosed, 4, "Esc closes the menu");
+await act(async () => { root.unmount(); });
+
+// プレイ中のニューゲーム入口は選択画面を開くだけ。確認・Unityリセットは最終の開始まで行わない。
+await renderMenu();
+const callsBeforeNewGameMenu = state.calls.length;
+const menuClosedBeforeNewGame = menuClosed;
+await act(async () => { menuItem("saveLoad.newGame").click(); });
+await settle();
+assert.equal(saveDialog(), null, "opening the new game window does not ask to discard the current game");
+assert.deepEqual(state.calls.slice(callsBeforeNewGameMenu), [{ command: "open_registered_window", args: { windowType: "new_game", params: undefined } }],
+  "the new game menu only opens the scenario browser");
+assert.equal(menuClosed, menuClosedBeforeNewGame + 1, "the system menu closes after opening the scenario browser");
 await act(async () => { root.unmount(); });
 
 // セーブ一覧: 新しいものが先頭。名前(無ければ都市名)・元のシナリオ・言語の国旗を出し、削除は知らせずに一覧から外す。

@@ -220,6 +220,8 @@ export function PathBuildSections({
                   <button
                     key={option.value}
                     type="button"
+                    data-guide="path.platformSide"
+                    data-guide-value={option.value}
                     className={`pc-platform-side-btn ${pc.platformSide === option.value ? "active" : ""}`}
                     onClick={() => pc.setPlatformSide(option.value)}
                   >

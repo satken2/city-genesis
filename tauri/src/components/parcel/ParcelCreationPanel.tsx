@@ -689,6 +689,8 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   className={`pc-variant-tile ${
                     selectedMode === item.mode ? "selected" : ""
                   }`}
+                  data-guide="parcel.mode"
+                  data-guide-value={item.mode}
                   onClick={() => handleModeClick(item.mode)}
                   title={t(item.tooltipKey)}
                 >
@@ -976,13 +978,14 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       {/* アクションボタン */}
       {hasSelection && (
         <div className="pc-actions">
-          <button className="pc-btn" type="button" onClick={handleClear}>
+          <button className="pc-btn" type="button" data-guide="parcel.clear" onClick={handleClear}>
             {t("parcel_creation.clear")}
           </button>
           <button
             className="pc-btn pc-btn-confirm"
             disabled={!canConfirm}
             type="button"
+            data-guide="parcel.confirm"
             onClick={() => void handleConfirm()}
           >
             {t("parcel_creation.confirm")}

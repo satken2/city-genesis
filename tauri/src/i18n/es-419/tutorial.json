@@ -11,11 +11,13 @@
       },
       "step3": {
         "title": "Creemos parcelas",
-        "description": "La calle ya está lista. Ahora creemos las parcelas donde levantar edificios. Elige el icono de parcelas en la barra de herramientas y crea parcelas con «A lo largo de la calle». Cuando aparezcan los contornos rojos junto a la calle, confirma con el botón para crearlas."
+        "description": "La calle ya está lista. Ahora creemos las parcelas donde levantar edificios. Elige el icono de parcelas en la barra de herramientas.",
+        "create": "Comprueba que esté seleccionada «A lo largo de la calle» y haz clic en la calle en la vista 3D. Cuando aparezcan los contornos rojos junto a la calle, confirma con el botón para crear las parcelas."
       },
       "step4": {
         "title": "Construyamos un edificio",
-        "description": "Por fin podemos construir. Elige el icono de edificios en la barra de herramientas y selecciona «Vivienda colectiva» dentro de la categoría «Vivienda». Puedes elegir como sitio de obra cualquiera de las parcelas que acabas de crear."
+        "description": "Por fin podemos construir. Elige el icono de edificios en la barra de herramientas.",
+        "select": "Selecciona «Vivienda colectiva» dentro de la categoría «Vivienda». Elige como sitio de obra cualquiera de las parcelas que acabas de crear y confirma con el botón para construir."
       },
       "step5": {
         "title": "Terminemos el edificio",
@@ -27,7 +29,8 @@
       "description": "El pueblo quiere aprovechar un yacimiento, pero otros edificios podrían ocupar el terreno. En este tutorial aprenderás a localizar recursos naturales, dividir el pueblo en distritos y limitar los tipos de edificios que pueden construirse.",
       "step1": {
         "title": "Creemos un distrito",
-        "description": "El distrito divide la ciudad en zonas y se define sobre las calles. Pulsa el botón de distritos del panel de iconos para entrar en el modo de edición: verás que la red de calles en forma de H es un solo distrito. Con la herramienta de creación (estado inicial), haz clic en la calle del marcador amarillo para convertirla, con las parcelas que dan a ella, en un distrito nuevo."
+        "description": "El distrito divide la ciudad en zonas y se define sobre las calles. Pulsa el botón de distritos del panel de iconos para entrar en el modo de edición: verás que la red de calles en forma de H es un solo distrito.",
+        "create": "Con la herramienta de creación (estado inicial), haz clic en la calle del marcador amarillo para convertirla, con las parcelas que dan a ella, en un distrito nuevo."
       },
       "step2": {
         "title": "El distrito quedó dividido",

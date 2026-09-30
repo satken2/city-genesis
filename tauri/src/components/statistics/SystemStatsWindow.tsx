@@ -4,8 +4,8 @@
  * window_type="system_stats" のポップアップ。システムトレイから開く。
  * `GET /api/v1/stats/system` の内容を左右2列に並べる(タブは持たない)。
  *   - 計算負荷 … 直近エポックの計算時間を大きな処理ごとに色分けした1本の積み上げ棒と、その内訳の表
- *   - 都市の規模 … プレイで増えるエンティティの数
- *   - メモリ・実行環境 … シミュレーター(コア)のプロセスのメモリ、CPU名とGPUアクセラレーションの状態
+ *   - エンティティ数 … プレイで増えるエンティティの数
+ *   - システムステータス … ハードウェア情報とコアのメモリ使用量をテキストで表示
  *   - シミュレーションの近似 … 提供前の予告表示(値の保持・送信はしない)
  *
  * 計算時間はコアが記録済みのフェーズ別の時間を読むだけで、全体はフェーズの合計。計測値はセーブに
@@ -47,7 +47,14 @@ type SystemStatsResponse = {
     epochs: number;
   };
   memory: { current_bytes: number | null; peak_bytes: number | null; system_total_bytes: number | null };
-  environment: { cpu_name: string | null; cpu_count: number | null; os: string; device: string };
+  environment: {
+    cpu_name: string | null;
+    cpu_count: number | null;
+    gpu_name?: string | null;
+    gpu_memory_bytes?: number | null;
+    os: string;
+    device: string;
+  };
 };
 
 /**
@@ -107,7 +114,6 @@ export function SystemStatsWindow({ apiBaseUrl }: SystemStatsWindowProps) {
   const locale = resolveIntlLocale(i18n.language);
   const formatters = useMemo(() => ({
     count: new Intl.NumberFormat(locale),
-    compact: new Intl.NumberFormat(locale, { notation: "compact", maximumSignificantDigits: 3 }),
     ms: new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }),
     seconds: new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     percent: new Intl.NumberFormat(locale, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }),
@@ -124,14 +130,11 @@ export function SystemStatsWindow({ apiBaseUrl }: SystemStatsWindowProps) {
     <div className="system-stats-frame">
       <div className="system-stats">
         <div className="system-stats-analysis">
-          <EpochLoadSection stats={stats} formatters={formatters} />
           <div className="system-stats-overview">
+            <SystemStatusSection stats={stats} formatters={formatters} />
             <EntitySection stats={stats} formatters={formatters} />
-            <div className="system-stats-resources">
-              <MemorySection stats={stats} formatters={formatters} />
-              <EnvironmentSection stats={stats} formatters={formatters} />
-            </div>
           </div>
+          <EpochLoadSection stats={stats} formatters={formatters} />
         </div>
         <aside className="system-stats-sidebar" aria-label={t("systemStats.approximation.title")}>
           <ApproximationSection />
@@ -143,7 +146,6 @@ export function SystemStatsWindow({ apiBaseUrl }: SystemStatsWindowProps) {
 
 type Formatters = {
   count: Intl.NumberFormat;
-  compact: Intl.NumberFormat;
   ms: Intl.NumberFormat;
   seconds: Intl.NumberFormat;
   percent: Intl.NumberFormat;
@@ -207,7 +209,6 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
           <tr>
             <th scope="col">{t("systemStats.load.colGroup")}</th>
             <th scope="col" className="is-number">{t("systemStats.load.colTime")}</th>
-            <th scope="col" className="is-number">{t("systemStats.load.colShare")}</th>
             <th scope="col" className="is-number" title={t("systemStats.load.workloadHint")}>{t("systemStats.load.colWorkload")}</th>
           </tr>
         </thead>
@@ -224,9 +225,8 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
                 {t(`systemStats.group.${group.key}`)}
               </td>
               <td className="is-number">{t("systemStats.load.ms", { value: formatters.ms.format(group.ms) })}</td>
-              <td className="is-number">{formatters.percent.format(share(group.ms))}</td>
               <td className="is-number" title={group.workload != null ? formula(group) : undefined}>
-                {group.workload != null ? formatters.compact.format(group.workload) : "—"}
+                {group.workload != null ? formatters.count.format(group.workload) : "—"}
               </td>
             </tr>
           ))}
@@ -278,45 +278,38 @@ function EntitySection({ stats, formatters }: SectionProps) {
 /** バイト数を GB(1GB以上)か MB で表す。単位記号は言語によらず共通。 */
 function formatBytes(bytes: number | null, formatters: Formatters): string {
   if (bytes == null) return "—";
-  if (bytes >= 1e9) return `${formatters.seconds.format(bytes / 1e9)} GB`;
-  return `${formatters.ms.format(bytes / 1e6)} MB`;
+  if (bytes >= 1e9) return `${formatters.seconds.format(bytes / 1e9)}GB`;
+  return `${formatters.ms.format(bytes / 1e6)}MB`;
 }
 
-function MemorySection({ stats, formatters }: SectionProps) {
+/** ドライバーやOSが返す利用可能容量を、製品の容量表記に近い整数GBで示す。 */
+function formatCapacity(bytes: number, formatters: Formatters): string {
+  return `${formatters.ms.format(bytes / 1024 ** 3)}GB`;
+}
+
+function SystemStatusSection({ stats, formatters }: SectionProps) {
   const { t } = useTranslation();
   const { current_bytes: current, peak_bytes: peak, system_total_bytes: total } = stats.memory;
+  const env = stats.environment;
   const peakRatio = peak != null && total ? peak / total : null;
 
   return (
     <section className="system-stats-section">
-      <h3 className="system-stats-section-title">{t("systemStats.memory.title")}</h3>
-      <dl className="system-stats-facts">
-        <dt>{t("systemStats.memory.current")}</dt>
-        <dd>{formatBytes(current, formatters)}</dd>
-        <dt>{t("systemStats.memory.peak")}</dt>
-        <dd>{formatBytes(peak, formatters)}</dd>
-        <dt>{t("systemStats.memory.total")}</dt>
-        <dd>{formatBytes(total, formatters)}</dd>
-      </dl>
+      <h3 className="system-stats-section-title">{t("systemStats.status.title")}</h3>
+      <div className="system-stats-status-text">
+        <p>{env.cpu_name || "—"}</p>
+        {env.gpu_name && <p>{env.gpu_name}{env.gpu_memory_bytes != null ? ` ${formatCapacity(env.gpu_memory_bytes, formatters)}` : ""}</p>}
+        <p>{total != null ? formatCapacity(total, formatters) : "—"} RAM</p>
+        <p>{t("systemStats.status.gpuDisabled")}</p>
+      </div>
+      <div className="system-stats-status-text system-stats-core-status">
+        <p className="system-stats-core-label">[{t("systemStats.status.coreSimulator")}]</p>
+        <p>{t("systemStats.status.currentMemory", { value: formatBytes(current, formatters) })}</p>
+        <p>{t("systemStats.status.peakMemory", { value: formatBytes(peak, formatters) })}</p>
+      </div>
       {peakRatio != null && <div className="system-stats-memory-meter">
-        <Meter value={peakRatio} polarity="negative" color="var(--flat-text-label)" />
+        <Meter value={peakRatio} polarity="negative" color="var(--flat-good)" />
       </div>}
-    </section>
-  );
-}
-
-function EnvironmentSection({ stats }: SectionProps) {
-  const { t } = useTranslation();
-  const env = stats.environment;
-  return (
-    <section className="system-stats-section">
-      <h3 className="system-stats-section-title">{t("systemStats.environment.title")}</h3>
-      <dl className="system-stats-facts">
-        <dt>{t("systemStats.environment.cpu")}</dt>
-        <dd>{env.cpu_name || "—"}</dd>
-        <dt>{t("systemStats.environment.gpuAcceleration")}</dt>
-        <dd>{t("systemStats.approximation.off")}</dd>
-      </dl>
     </section>
   );
 }

@@ -467,11 +467,12 @@
   },
   "save_list": {
     "title": "セーブデータ一覧",
-    "width": 760,
-    "height": 640,
+    "width": 800,
+    "height": 680,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,
+    "chromeless": true,
     "actions": []
   },
   "new_game": {
@@ -481,6 +482,7 @@
     "resizable": true,
     "policy": "single",
     "empty_shell": true,
+    "chromeless": true,
     "actions": []
   },
   "city_rename": {
@@ -504,9 +506,11 @@
   "epoch_confirm": {
     "title": "シミュレーション実行",
     "width": 420,
-    "height": 360,
-    "resizable": true,
+    "height": 317,
+    "resizable": false,
     "policy": "single",
+    "empty_shell": true,
+    "chromeless": true,
     "actions": []
   },
   "city_notifications": {
@@ -520,9 +524,11 @@
   "epoch_result": {
     "title": "エポック実行結果",
     "width": 1230,
-    "height": 960,
+    "height": 900,
     "resizable": true,
     "policy": "single",
+    "empty_shell": true,
+    "chromeless": true,
     "actions": []
   },
   "quest_complete": {

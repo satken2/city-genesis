@@ -17,9 +17,6 @@
     "sectionConstruction": "Estado de las obras",
     "kindPath": "Calle",
     "kindBuilding": "Instalación",
-    "columnName": "Nombre",
-    "columnStatus": "Estado",
-    "columnProgress": "Avance",
     "noItems": "Sin elementos",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "Terminado",
@@ -27,14 +24,12 @@
     "sectionScore": "Puntaje",
     "scoreGain": "Puntos ganados",
     "scoreLoss": "Puntos perdidos",
-    "questProgress": "{{completed}} / {{total}} alcanzados",
     "questState": {
       "completed": "Alcanzado",
       "active": "En curso",
       "locked": "Bloqueado",
       "failed": "Fallido"
     },
-    "trendLegend": "Las flechas muestran la tendencia de las últimas {{count}} épocas",
     "trendHint": "Tendencia de las últimas {{count}} épocas: {{trend}}",
     "trend": {
       "up": "Al alza",

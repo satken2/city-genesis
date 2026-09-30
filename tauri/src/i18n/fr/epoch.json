@@ -17,9 +17,6 @@
     "sectionConstruction": "État des chantiers",
     "kindPath": "Route",
     "kindBuilding": "Installation",
-    "columnName": "Nom",
-    "columnStatus": "Statut",
-    "columnProgress": "Avancement",
     "noItems": "Aucun élément",
     "progressFormat": "{{before}} % → {{after}} %",
     "completed": "Achevé",
@@ -27,14 +24,12 @@
     "sectionScore": "Score",
     "scoreGain": "Points gagnés",
     "scoreLoss": "Points perdus",
-    "questProgress": "{{completed}} / {{total}} atteints",
     "questState": {
       "completed": "Atteint",
       "active": "En cours",
       "locked": "Verrouillé",
       "failed": "Échoué"
     },
-    "trendLegend": "Les flèches indiquent la tendance des {{count}} dernières époques",
     "trendHint": "Tendance des {{count}} dernières époques : {{trend}}",
     "trend": {
       "up": "En hausse",

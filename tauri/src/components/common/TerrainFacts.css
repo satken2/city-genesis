@@ -1,53 +1,80 @@
-/* 地形の事実欄。大きさと地表を2列に、気候は名称が長いので全幅に置く。 */
+/*
+ * 地形の事実欄。大きさ・地表・気候を1段に並べた諸元の帯にする。
+ * 帯は上下の細い罫線で区切り、項目の間は縦の細い罫線で分ける(カードにしない)。
+ * 上の罫線の左端だけアクセントの短い線にして、見出しのタブの下線と同じ印を付ける。
+ * 各項目は小さな見出しの下に値を大きく出す。
+ */
 .terrain-facts {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.terrain-facts::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 2.6rem;
+  height: 2px;
+  background: var(--flat-accent);
 }
 
 .terrain-fact {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
-  padding: 12px;
-  background: var(--flat-raised);
-  box-shadow: var(--flat-shadow-sm);
+  padding: 12px 14px 13px;
+}
+
+.terrain-fact:first-child {
+  padding-left: 0;
+}
+
+.terrain-fact:last-child {
+  padding-right: 0;
+}
+
+.terrain-fact + .terrain-fact {
+  border-left: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 .terrain-fact dt {
-  color: var(--flat-text-label);
-  font-size: 1.11rem;
-  line-height: 1.5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  color: var(--flat-text-muted);
   overflow-wrap: anywhere;
 }
 
+/* 値の段は地表のアイコンと文字の値で高さを揃える */
 .terrain-fact dd {
   display: flex;
   align-items: center;
   flex: 1;
-  min-height: 40px;
+  min-height: 2.2rem;
   margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
   color: var(--flat-text);
-  font-size: 1.2rem;
-  line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
 .terrain-fact .terrain-fact-size {
-  font-size: 1.48rem;
-  font-weight: 600;
+  font-size: 1.35rem;
   font-variant-numeric: tabular-nums;
-}
-
-.terrain-fact--climate {
-  grid-column: 1 / -1;
+  white-space: nowrap;
 }
 
 /* GroundCoverIcon の寸法。SVG側のクラス名はニューゲーム由来のまま */
 .new-game-ground-icon {
-  width: 44px;
-  height: 44px;
-  color: var(--flat-text-body);
+  width: 2.2rem;
+  height: 2.2rem;
+  color: color-mix(in srgb, var(--flat-accent) 55%, var(--flat-text));
 }

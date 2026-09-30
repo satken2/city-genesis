@@ -11,11 +11,13 @@
       },
       "step3": {
         "title": "Créons des parcelles",
-        "description": "La route est terminée. Créons maintenant les parcelles sur lesquelles construire des bâtiments. Choisissez l'icône des parcelles dans la barre d'outils et créez-les avec « Le long de la route ». Lorsque des contours rouges apparaissent le long de la route, validez avec le bouton pour créer les parcelles."
+        "description": "La route est terminée. Créons maintenant les parcelles sur lesquelles construire des bâtiments. Choisissez l'icône des parcelles dans la barre d'outils.",
+        "create": "Vérifiez que « Le long de la route » est sélectionné, puis cliquez sur la route dans la vue 3D. Lorsque des contours rouges apparaissent le long de la route, validez avec le bouton pour créer les parcelles."
       },
       "step4": {
         "title": "Construisons un bâtiment",
-        "description": "Nous pouvons enfin construire. Choisissez l'icône des bâtiments dans la barre d'outils et sélectionnez « Logement collectif » dans la catégorie « Logement ». Vous pouvez choisir comme site de chantier n'importe laquelle des parcelles que vous venez de créer."
+        "description": "Nous pouvons enfin construire. Choisissez l'icône des bâtiments dans la barre d'outils.",
+        "select": "Sélectionnez « Logement collectif » dans la catégorie « Logement ». Choisissez comme site de chantier n'importe laquelle des parcelles que vous venez de créer, puis validez avec le bouton pour construire."
       },
       "step5": {
         "title": "Terminons le bâtiment",
@@ -27,7 +29,8 @@
       "description": "La ville veut exploiter un gisement, mais d'autres bâtiments pourraient occuper le terrain. Ce tutoriel vous permettra d'apprendre à repérer les ressources naturelles, à créer des quartiers et à limiter les types de bâtiments autorisés.",
       "step1": {
         "title": "Créons un quartier",
-        "description": "Le quartier découpe la ville en zones et se définit sur les routes. Appuyez sur le bouton des quartiers du panneau d'icônes pour entrer en mode d'édition : le réseau de routes en H forme un seul quartier. Avec l'outil de création (état initial), cliquez sur la route au repère jaune pour en faire, avec les parcelles qui la bordent, un nouveau quartier."
+        "description": "Le quartier découpe la ville en zones et se définit sur les routes. Appuyez sur le bouton des quartiers du panneau d'icônes pour entrer en mode d'édition : le réseau de routes en H forme un seul quartier.",
+        "create": "Avec l'outil de création (état initial), cliquez sur la route au repère jaune pour en faire, avec les parcelles qui la bordent, un nouveau quartier."
       },
       "step2": {
         "title": "Le quartier est découpé",

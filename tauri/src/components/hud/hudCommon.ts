@@ -92,7 +92,7 @@ export const TOOL_ICONS: HudIconDef[] = [
  * システムトレイ(画面右下)に置くアイコン。
  */
 export const TRAY_ICONS: HudIconDef[] = [
-  { id: "system_stats", src: "menu_stat.png", tooltipKey: "taskbar.traySystemStats", padding: "4px", windowType: "system_stats" }, // 専用アイコンが未用意のため統計メニューの画像を仮当てしている
+  { id: "system_stats", src: "tray_system_stats.png", tooltipKey: "taskbar.traySystemStats", padding: "4px", windowType: "system_stats" },
   { id: "settings", src: "tray_settings.png", tooltipKey: "taskbar.traySettings", padding: "4px", windowType: "settings" },
   { id: "save", src: "tray_save.png", tooltipKey: "taskbar.traySave", padding: "4px", windowType: "save_load" },
   { id: "reload", src: "tray_reload.png", tooltipKey: "taskbar.trayReload", padding: "4px" },

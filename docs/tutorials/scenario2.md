@@ -4,7 +4,7 @@
 
 ## 初期状態と対象名
 
-平坦マップの支援町の西に、コアの教材がH字形の道路網(`lesson.left_top`・`lesson.left_bottom`・`lesson.crossbar`・`lesson.right_top`・`lesson.right_bottom`)と沿道区画、道路網の地区 `lesson.zone`、右上の道路 `lesson.right_top` とその沿道区画に重なる鉱脈を作る。支援町は別の地区 `support.zone`。
+平坦マップの支援町の西に、コアの教材がH字形の道路網(`lesson.left_top`・`lesson.left_bottom`・`lesson.crossbar`・`lesson.right_top`・`lesson.right_bottom`)と、コアが「道路沿いに作成」と同じ処理で並べた交差点の際まで届く沿道区画、道路網の地区 `lesson.zone`、右上の道路 `lesson.right_top` とその沿道区画に重なる鉱脈を作る。支援町は別の地区 `support.zone`。
 
 ## 共通の戻り方
 
@@ -19,8 +19,8 @@ ID: `scenario2.split`
 | 学習目的 | 道路を新しい地区に割り当てる |
 | 前提 | 直前ステップの完了と上記の対象名の解決 |
 | 基本分類 | 強調だけ(アイコンパネルは地区ボタンだけ) |
-| Tauri・操作順 | 地区編集ボタンを強調 |
-| Unity・操作範囲 | 右上の道路にマーカー、カメラを道路網へ向ける |
+| Tauri・操作順 | 2段階。(1)地区の説明と地区編集ボタンの強調(地区編集モードに入るまで)→(2)作成ツールで黄色いマーカーの道路をクリックする案内 |
+| Unity・操作範囲 | (1)はカメラを道路網の全景へ向ける。(2)は地区編集モードに入ると自動で右上の道路のマーカーへカメラが寄り、マーカーを出す |
 | クリア条件 | `lesson.right_top` の地区が `lesson.zone` 以外の有効IDになった |
 | 代行と順序 | なし |
 | 進行 | 途中の操作段階は自動、最終条件を確認して次へボタン |

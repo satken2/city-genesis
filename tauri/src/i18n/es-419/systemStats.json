@@ -7,8 +7,7 @@
       "note": "Si se ejecutan varias épocas seguidas, se muestra la última. El tamaño del problema es una estimación aproximada de las comparaciones principales, según el tamaño de la ciudad.",
       "colGroup": "Proceso",
       "colTime": "Tiempo",
-      "colShare": "Proporción",
-      "colWorkload": "Tamaño del problema",
+      "colWorkload": "Cantidad de operaciones",
       "workloadHint": "Número aproximado de comparaciones principales (elementos de los arreglos). Pasa el cursor sobre un valor para ver el desglose.",
       "seconds": "{{value}} s",
       "ms": "{{value}} ms"
@@ -37,7 +36,7 @@
     "entities": {
       "colMetric": "Indicador",
       "colCount": "Cantidad",
-      "title": "Tamaño de la ciudad",
+      "title": "Cantidad de entidades",
       "agents": "Agentes",
       "households": "Hogares",
       "businesses": "Negocios",
@@ -54,24 +53,6 @@
       "nodes": "Nodos",
       "transitLines": "Líneas de transporte",
       "epochs": "Épocas transcurridas"
-    },
-    "memory": {
-      "title": "Memoria",
-      "current": "Uso actual",
-      "peak": "Máximo desde el inicio",
-      "total": "Memoria instalada",
-      "note": "Memoria física que usa el proceso del simulador. El máximo incluye los aumentos temporales durante las épocas."
-    },
-    "environment": {
-      "gpuAcceleration": "Aceleración por GPU",
-      "title": "Sistema",
-      "cpu": "CPU",
-      "cores": "Núcleos lógicos",
-      "os": "Sistema operativo",
-      "device": "Dispositivo de cálculo",
-      "devices": {
-        "cpu": "CPU"
-      }
     },
     "approximation": {
       "title": "Aproximación de la simulación",
@@ -103,6 +84,13 @@
         "label": "Agrupar ciudadanos y hogares similares",
         "description": "Toma algunas decisiones en conjunto para ciudadanos u hogares con condiciones similares."
       }
+    },
+    "status": {
+      "title": "Estado del sistema",
+      "gpuDisabled": "Aceleración GPU: Desactivada",
+      "coreSimulator": "Simulador principal",
+      "currentMemory": "Uso actual de memoria: {{value}}",
+      "peakMemory": "Uso máximo de memoria desde el inicio: {{value}}"
     }
   }
 }

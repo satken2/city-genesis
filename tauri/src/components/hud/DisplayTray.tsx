@@ -113,9 +113,11 @@ export function DisplayTray() {
    * セッション開始でHUDが出たタイミングでUnityへ現在の表示状態を問い合わせ直す。
    * このトレイはアプリ起動時からマウントされたままなので、`useDisplayOptions` が
    * マウント時に投げる問い合わせはUnityの準備前に飛んでしまうことがある。
+   * OFFにする直前の色モードの記憶も、前の都市のものなので捨てる(Unity側は読み込みの開始時に既定へ戻る)。
    */
   useEffect(() => {
     if (!visible) return;
+    lastVisibleModeRef.current = {};
     sendViewQueryState().catch((err) => {
       console.warn("[DisplayTray] sendViewQueryState failed:", err);
     });

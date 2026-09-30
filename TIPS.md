@@ -80,3 +80,6 @@
 
 - この環境には mkdocs が入っておらず、`python` はストアのエイリアスで起動しない。`py -m venv outputs/mkdocs-venv` に `docs/requirements.txt` を入れ、`docs/` で `outputs/mkdocs-venv/Scripts/python.exe -m mkdocs build --strict -d <リポジトリ外>` を実行すると、既定の `site/` を上書きせずに strict 検査だけできる。
 - `[[ページ名]]` のウィキリンクを解決するプラグインは入っていないので、そのまま文字として表示される。`[[名前]](xxx)` と書くと `xxx` が相対リンクとして扱われ、`--strict` のビルドが失敗する。ページへのリンクは `[表示名](F2_地面アセットのメッシュ生成.md)` の形で書く。
+
+- チュートリアルの `hudMode` 条件は、HUDの常駐モード(地区編集・ブルドーザ)を `hud:mode_changed` から `facts.hudMode` へ写して判定する。`facts` はステートごとに作り直されるので、ステップをまたいでモードを覚えていない(モードに入った状態で次のステップから始めても未設定になる)。
+- `IpcViewCoordinator.ApplyAllLayerModes` は `alert` を適用しない。アラートの絞り込みを既定へ戻すときは `ApplyAlertMode` を別に呼ぶ(`HandleGameLoading`)。`HandleSessionReload` はエポックのたびに `_normalStateMemory` を消すので、通常モードで選んだ表示は、エポックを挟むと編集ステートから戻ったときに既定へ戻る。

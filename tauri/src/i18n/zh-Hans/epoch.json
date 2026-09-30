@@ -17,9 +17,6 @@
     "sectionConstruction": "建设状况",
     "kindPath": "道路",
     "kindBuilding": "设施",
-    "columnName": "名称",
-    "columnStatus": "状态",
-    "columnProgress": "进度",
     "noItems": "无对象",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "完成",
@@ -27,14 +24,12 @@
     "sectionScore": "评分",
     "scoreGain": "加分",
     "scoreLoss": "扣分",
-    "questProgress": "已达成 {{completed}} / {{total}}",
     "questState": {
       "completed": "已达成",
       "active": "进行中",
       "locked": "未解锁",
       "failed": "失败"
     },
-    "trendLegend": "箭头表示最近{{count}}个纪元的趋势",
     "trendHint": "最近{{count}}个纪元的趋势：{{trend}}",
     "trend": {
       "up": "上升趋势",

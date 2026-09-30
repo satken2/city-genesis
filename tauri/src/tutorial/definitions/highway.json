@@ -16,9 +16,7 @@
               "hud.road"
             ],
             "highlight": [
-              "hud.road",
-              "path.type:2",
-              "path.variant:100"
+              "hud.road"
             ]
           },
           "world": {
@@ -435,14 +433,107 @@
       "legacyStep": 3,
       "phases": [
         {
-          "id": "perform",
+          "id": "open",
           "textKey": "tutorial.highway.step3.description",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
             "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                100,
+                0,
+                0
+              ]
+            ],
+            "camera": {
+              "target": [
+                100,
+                0,
+                0
+              ],
+              "distance": 400,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.highway.step3.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
               "hud.road",
-              "path.type:2"
+              "path.type:2",
+              "path.variant:102",
+              "path.variant:103",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:2",
+              "path.variant:102",
+              "path.variant:103"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                100,
+                0,
+                0
+              ]
+            ],
+            "camera": {
+              "target": [
+                100,
+                0,
+                0
+              ],
+              "distance": 400,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "pathVariant",
+                "value": 102
+              },
+              {
+                "type": "pathVariant",
+                "value": 103
+              }
+            ]
+          }
+        },
+        {
+          "id": "draw",
+          "textKey": "tutorial.highway.step3.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.back",
+              "path.cancel",
+              "path.confirm"
+            ],
+            "highlight": [
+              "path.confirm"
             ]
           },
           "world": {

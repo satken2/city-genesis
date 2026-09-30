@@ -135,6 +135,64 @@ for (const mutate of [
 }
 { const d = structuredClone(DEFINITIONS.scenario3); d.steps[0].phases[0].until = { type: "window", window: "agent_detail", target: "lesson.house" }; validateDefinition(d); checks++; }
 { const d = structuredClone(DEFINITIONS.scenario3); d.steps[0].phases[0].until = { type: "window", window: "agent_detail", target: "house" }; throws(() => validateDefinition(d), "only core targets may be referenced without a local binding"); }
+{
+  // 基本編の区画・建物は、アイコンでパネルを開く段階のあと、パネル内の必要な操作だけを許す段階へ進む。
+  for (const [id, window, panel, allowed] of [["basic.parcels", "parcel_creation", "create", ["parcel.mode:along_path", "parcel.confirm"]],
+    ["basic.home", "building_construction", "select", ["building.category:1", "building.variant:2001", "building.confirm"]]] as const) {
+    const step = DEFINITIONS.basic.steps.find(s => s.id === id)!, shown = fake();
+    const phase = async () => step.phases[await findPhase(step, shown)];
+    check([(await phase()).id, (await phase()).ui.policy], ["open", "strict"], `${id}: the icon opens the panel first`);
+    shown.facts.windows.panel = { visible: true, window };
+    check([(await phase()).id, (await phase()).ui.policy], [panel, "strict"], `${id}: the open panel offers only the guided controls`);
+    for (const target of allowed) check((await phase()).ui.highlight.includes(target) && (await phase()).ui.allow.includes(target), true, `${id}: ${target} is highlighted and allowed`);
+    shown.facts.windows.panel.visible = false;
+    check((await phase()).id, "open", `${id}: closing the panel rewinds`);
+  }
+  // 地区編の step1: 地区編集モードに入るまでは全景でボタンを案内し、入ったらマーカーの道路へカメラが寄る。
+  const zoning = DEFINITIONS.scenario2.steps[0], hud = fake();
+  const now = async () => zoning.phases[await findPhase(zoning, hud)];
+  check((await now()).id, "enter", "district guide starts before the edit mode");
+  hud.facts.hudMode = "bulldozer";
+  check((await now()).id, "enter", "another HUD mode does not count");
+  hud.facts.hudMode = "district";
+  check([(await now()).id, (await now()).world.markers], ["create", [[60, 0, 120]]], "district edit mode moves on and shows the road marker");
+  check((await now()).world.camera!.distance < zoning.phases[0].world.camera!.distance, true, "the camera approaches the marker");
+  delete hud.facts.hudMode;
+  check((await now()).id, "enter", "leaving the edit mode rewinds");
+  check(await evaluate({ type: "hudMode", mode: "district" }, hud), false, "hudMode is false in the normal state");
+  for (const target of ["parcel.mode:along_path", "parcel.confirm", "building.back", "building.cancel", "building.confirm"]) {
+    const d = structuredClone(DEFINITIONS.basic); d.steps[0].phases[0].ui.highlight.push(target); validateDefinition(d); checks++;
+  }
+  for (const target of ["parcel.mode:1", "parcel.mode:Along", "parcel.mode:", "path.variant:along_path", "parcel.confirm:1"]) {
+    const d = structuredClone(DEFINITIONS.basic); d.steps[0].phases[0].ui.highlight.push(target); throws(() => validateDefinition(d), `${target} is rejected`);
+  }
+}
+{
+  // 建物を建て終えてパネルが閉じても、案内は「パネルを開く段階」へ巻き戻らず最終段階のままにする。
+  const home = DEFINITIONS.basic.steps.find(s => s.id === "basic.home")!, built = fake();
+  built.constants.VARIANT_APARTMENT = 2001;
+  built.bindings["support.housing.building"] = { kind: "agents", id: 30 };
+  check(await findPhase(home, built), 0, "no building yet: the panel has to be opened first");
+  built.read = async () => [{ agent_id: 31, variant: 2001, status: 3 }];
+  check(await findPhase(home, built), 1, "a placed building keeps the last phase after the panel closes");
+  built.bindings = {};
+  check(await findPhase(home, built), 0, "a condition that cannot be judged yet counts as not achieved");
+}
+{
+  // 建物・道路・公共交通の種別を選ばせるステップは、どの段階も strict にして、案内した操作以外を押せなくする。
+  const selecting = /^(building.(category|variant)|path.(type|variant)|transit.(new|type))(:|$)/;
+  const covers = (allow: string[], target: string) => allow.includes(target) || allow.includes(target.split(":")[0]);
+  let selectingSteps = 0;
+  for (const [name, definition] of Object.entries(DEFINITIONS)) for (const step of definition.steps) {
+    if (!step.phases.some(p => [...p.ui.allow, ...p.ui.highlight].some(t => selecting.test(t)))) continue;
+    selectingSteps++;
+    for (const phase of step.phases) {
+      check([name, step.id, phase.id, phase.ui.policy], [name, step.id, phase.id, "strict"], "a selection step is strict in every phase");
+      check(phase.ui.highlight.filter(t => !t.startsWith("hud.") && !covers(phase.ui.allow, t)), [], `${step.id}/${phase.id}: highlighted controls are allowed`);
+    }
+  }
+  check(selectingSteps >= 33, true, "every building, path and transit selection step was covered");
+}
 const browser = new Window();
 for (const key of ["document", "Element", "HTMLElement", "KeyboardEvent", "MutationObserver"]) Object.assign(globalThis, { [key]: (browser as any)[key] });
 document.body.innerHTML = '<div class="titlebar"><button id="close">×</button></div><button id="road">Road</button><button id="other">Other</button><button id="existing" inert>Inert</button><button data-guide="path.confirm"><span>Confirm</span></button>';
@@ -175,6 +233,24 @@ menuOnly();
   check(cards(), [true, false], "a valued target allows only its own card"); allowOne();
   const allowAll = installUiGuide({ policy: "strict", allow: ["building.variant"], highlight: [] }, "building_construction");
   check(cards(), [false, false], "a plain target covers every card of the name"); allowAll();
+}
+{
+  // 区画作成パネル: 「道路沿いに作成」の方法と確定だけが押せて、他の方法・入力は押せない。
+  document.body.innerHTML = '<div data-guide="parcel.mode" data-guide-value="along_path"><img alt="">Along</div><div data-guide="parcel.mode" data-guide-value="random">Random</div>'
+    + '<input type="radio"><button data-guide="parcel.clear">Clear</button><button data-guide="parcel.confirm">Confirm</button>';
+  const inert = () => [...document.querySelectorAll<HTMLElement>("[data-guide], input")].map(el => el.inert);
+  const guide = installUiGuide({ policy: "strict", allow: ["parcel.mode:along_path", "parcel.clear", "parcel.confirm"], highlight: ["parcel.mode:along_path", "parcel.confirm"] }, "parcel_creation");
+  check(inert(), [false, true, true, false, false], "only the guided parcel controls can be pressed");
+  check([...document.querySelectorAll("[data-tutorial-highlight]")].map(el => el.textContent), ["Along", "Confirm"], "the guided tile and confirm button are highlighted");
+  guide();
+}
+{
+  // 運賃・運行間隔の入力欄のように data-guide を持つ枠は、枠だけを強調し、中のボタンと入力欄も押せる。
+  document.body.innerHTML = '<div data-guide="transit.fare"><button>-</button><input><button>+</button></div><div data-guide="transit.headway"><button>-</button><input></div><button data-guide="transit.confirm">OK</button>';
+  const guide = installUiGuide({ policy: "strict", allow: ["transit.fare", "transit.confirm"], highlight: ["transit.fare", "transit.confirm"] }, "transit_creation");
+  check([...document.querySelectorAll("[data-tutorial-highlight]")].map(el => el.tagName + ":" + (el.getAttribute("data-guide") ?? "")), ["DIV:transit.fare", "BUTTON:transit.confirm"], "only the frame is highlighted, not the controls inside it");
+  check([...document.querySelectorAll<HTMLElement>("button, input")].map(el => el.inert), [false, false, false, true, true, false], "controls inside an allowed frame stay usable and the others are blocked");
+  guide();
 }
 for (const windowType of ["system-tray", "settings", "save_load", "save_list", "new_game", "credits", "confirm_dialog", "tutorial", "notification", "tips"]) {
   document.body.innerHTML = '<button id="settings">Settings</button><button id="save">Save</button><button id="reload">Reload</button><input><button disabled>Busy</button>';

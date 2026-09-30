@@ -4,18 +4,21 @@
  * エポック実行完了後に別ウィンドウとして開かれ、バックエンドの
  * POST /api/v1/epochs レスポンスの epoch_report フィールドを受け取って表示する。
  *
- * レイアウトはヘッダ + クエストストリップ + 横2分割のメインエリア + フッタ(閉じるボタン):
- * - ヘッダ: 左上に大きく現在のゲーム内日付(実行後)
+ * タイトルバーを持たないウィンドウ(レジストリの chromeless)で、閉じるのはフッタの「閉じる」と Esc。
+ * レイアウトはヒーロー + クエストストリップ + 横2分割のメインエリア + フッタ:
+ * - 背景: 実行後の月の画像(`utils/season` の seasonImageUrl。無ければ既定の画像、それも無ければ画像なし)を、
+ *   ウィンドウの上半分に左右いっぱいで薄く敷き、縦の中央で消える。
+ * - ヒーロー: 左に実行後のゲーム内日付、右にスコアを大きく出す。
+ *   スコアは当期スコアとその構成(生活水準+住環境-災害ペナルティ)。GET /api/v1/score の
+ *   latest を、達成目標ウィンドウと同じ内訳で軽量に描く(グラフライブラリは使わない)。
  * - クエストストリップ: このエポックで達成したクエスト(お祝いウィンドウの予告)と、
  *   達成間近(進捗70%以上)のアクティブなクエストの進捗バーを横並びで表示する。
  *   達成間近は GET /api/v1/quests のサーバ計算 progress を使う。
- * - 左(主役): 達成目標 / 統計タイル / スコア を縦に並べる。左カラムの各ブロックは
+ * - 左(主役): 統計タイル / 達成目標 を縦に並べる。左カラムの各ブロックは
  *   カード(枠)を持たない。中身のタイルがカードなので、入れ子にすると二重枠になるため。
- *   - 達成目標: 全目標をチェックマーク1個ずつで表し、達成のみ色付きにした簡易表示。
- *     ホバーで目標名と状態の一覧をポップアップする(GET /api/v1/quests)。
  *   - 統計: 人口/GDP/物価/所得/失業率/医療・栄養・娯楽充足度/火災/交通事故/犯罪/為替レート。
- *   - スコア: 当期スコアとその構成(生活水準+住環境-災害ペナルティ)。GET /api/v1/score の
- *     latest を、達成目標ウィンドウと同じ内訳で軽量に描く(グラフライブラリは使わない)。
+ *   - 達成目標: 進行中の目標の説明・条件ごとの現在値と目標値・進捗と、達成・失敗した目標の一覧
+ *     (GET /api/v1/quests)。左カラムの残りの高さを使い、溢れたらスクロールする。
  * - 右カラム: 建設状況(道路と公共施設を種別バッジ付きの単一リストにまとめたもの)
  *
  * 統計タイルは2種類の視覚効果を持つ。この2つは独立した軸である。
@@ -26,11 +29,12 @@
  * - 水準の警戒色(タイル自体の色): 現在値の絶対基準による評価。相対的な傾向がどうであれ
  *   「失業率15%」のような水準そのものが危険な状態を赤で示す。しきい値はこのファイルの
  *   UI定数(STAT_*_WARN / STAT_*_DANGER)。
+ * タイルの背景には、矢印の判定に使うのと同じ履歴(直近 trend_window エポック)の推移を矢印と同じ色で薄く描く。
  *
- * 閉じるボタンで親から渡された onClose を呼ぶ。notify="modal" の達成クエストがあれば
+ * 閉じる操作で親から渡された onClose を1回だけ呼ぶ。notify="modal" の達成クエストがあれば
  * 親側で引き続き QuestCompleteWindow を表示する(結果→お祝いの連続演出)。
  */
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { emit } from "@tauri-apps/api/event";
 import { EpochDate } from "../common/EpochDate";
@@ -38,17 +42,22 @@ import { STATUS_STYLE_MAP } from "../../local-constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { formatCompactAmount } from "../../utils/money";
 import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
-import type { Quest, QuestNotification } from "../../types";
-import populationIcon from "../../assets/images/population.png";
-import gdpIcon from "../../assets/images/menu/menu_stat.png";
-import priceIcon from "../../assets/images/visual/price.png";
-import incomeIcon from "../../assets/images/purchase.png";
-import unemploymentIcon from "../../assets/images/citizen.png";
-import healthcareIcon from "../../assets/images/visual/health.png";
-import fireIcon from "../../assets/images/alerts/fire.png";
-import trafficIcon from "../../assets/images/alerts/car-accident.png";
-import crimeIcon from "../../assets/images/alerts/shooting.png";
-import exchangeIcon from "../../assets/images/menu/menu_finance.png";
+import { seasonImageUrl } from "../../utils/season";
+import { formatQuestValue, questCompareLabel } from "../../utils/quest";
+import type { Quest, QuestClauseState, QuestNotification } from "../../types";
+import { SaveDialogButton } from "./SaveDialog";
+import populationIcon from "../../assets/images/stats/population.png";
+import tourismIcon from "../../assets/images/stats/tourism.png";
+import gdpIcon from "../../assets/images/stats/gdp.png";
+import priceIcon from "../../assets/images/stats/price.png";
+import incomeIcon from "../../assets/images/stats/income.png";
+import unemploymentIcon from "../../assets/images/stats/unemployment.png";
+import healthcareIcon from "../../assets/images/stats/healthcare.png";
+import entertainmentIcon from "../../assets/images/stats/entertainment.png";
+import fireIcon from "../../assets/images/stats/fire.png";
+import trafficIcon from "../../assets/images/stats/traffic_accident.png";
+import crimeIcon from "../../assets/images/stats/crime.png";
+import exchangeIcon from "../../assets/images/stats/exchange_rate.png";
 import placeholderIcon from "../../assets/images/ui/help.png";
 import "./EpochResultWindow.css";
 
@@ -129,7 +138,7 @@ type EpochResultWindowProps = {
   epochCount: number;
   /** 実行後のゲーム内日付(1800年1月1日からの経過日数)。左上に大きく表示する。 */
   currentDate: number;
-  onClose: () => void;
+  onClose: () => void | Promise<void>;
   apiBaseUrl: string;
   /** このエポック(count>1なら全エポック累積)で達成したクエスト */
   completedQuests?: QuestNotification[];
@@ -164,18 +173,19 @@ const MIN_TREND_POINTS = 3;
 const TREND_FLAT_RATIO = 0.02;
 
 /**
- * タイルのアイコン。専用の画像が用意されていない指標(栄養・娯楽)は、
+ * タイルのアイコン(`assets/images/stats/`)。専用の画像が用意されていない指標(栄養)は、
  * 未整備であることが分かるようプレースホルダ(?アイコン)を出しておく。
  */
 const STAT_ICONS: Record<string, string> = {
   population: populationIcon,
+  tourists: tourismIcon,
   gdp: gdpIcon,
   price: priceIcon,
   income: incomeIcon,
   unemployment_rate: unemploymentIcon,
   avg_healthcare: healthcareIcon,
   avg_nutrition: placeholderIcon,
-  avg_entertainment: placeholderIcon,
+  avg_entertainment: entertainmentIcon,
   fire_count: fireIcon,
   traffic_accident_count: trafficIcon,
   crime_count: crimeIcon,
@@ -256,6 +266,27 @@ export function EpochResultWindow({
   const [quests, setQuests] = useState<Quest[]>([]);
   const [scoreLatest, setScoreLatest] = useState<ScoreLatest | null>(null);
 
+  // 閉じる処理(お祝いウィンドウを開いてから閉じる)は、ボタンとEscが重なっても1回だけ走らせる
+  const closingRef = useRef(false);
+  const close = useCallback(() => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    Promise.resolve(onClose()).catch((err) => {
+      console.error("failed to close epoch result", err);
+      closingRef.current = false;
+    });
+  }, [onClose]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      close();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [close]);
+
   // エポック結果画面の表示中は専用BGM (bgm-result.opus) に切り替える
   useEffect(() => {
     void emit("bgm:request", { id: "epoch_result", track: "result", priority: 10 });
@@ -264,7 +295,7 @@ export function EpochResultWindow({
     };
   }, []);
 
-  // 達成目標の一覧(達成状況の簡易表示と達成間近ストリップの元データ)を取得する。
+  // 達成目標の一覧(左下の一覧と達成間近ストリップの元データ)を取得する。
   useEffect(() => {
     const controller = new AbortController();
     (async () => {
@@ -334,23 +365,14 @@ export function EpochResultWindow({
   const stats = report.statistics;
   const trendWindow = stats.trend_window ?? 0;
 
-  // 達成目標の簡易表示用データ。1目標=チェックマーク1個で、達成済みだけ色が付く。
-  // 隠し目標は達成するまで名前を伏せる(達成目標ウィンドウと同じ扱い)。
-  const questSummary = useMemo(() => {
-    const items: QuestCheckItem[] = quests.map((q) => ({
-      id: q.id,
-      name: q.hidden && q.status !== "completed" ? t("achievements.hiddenQuestName") : resolveLocalizedText(q.name, i18n.language),
-      state:
-        q.status === "completed"
-          ? "completed"
-          : q.status === "failed"
-            ? "failed"
-            : q.status === "locked"
-              ? "locked"
-              : "active",
-    }));
-    return { items, completedCount: items.filter((i) => i.state === "completed").length };
-  }, [quests, t, i18n.language]);
+  // 達成目標の一覧に出す目標。進行中(進捗の高い順)→達成→失敗の順に並べる。
+  // 未解放の目標と、達成するまで中身を伏せる隠し目標は出さない(達成目標ウィンドウでも条件を見せないため)。
+  const listedQuests = useMemo(() => {
+    const order: Partial<Record<Quest["status"], number>> = { active: 0, completed: 1, failed: 2 };
+    return quests
+      .filter((q) => order[q.status] !== undefined && !(q.hidden && q.status !== "completed"))
+      .sort((a, b) => (order[a.status] ?? 0) - (order[b.status] ?? 0) || b.progress - a.progress);
+  }, [quests]);
 
   // 統計タイルの表示データ。値・水準の警戒色・変動方向の3点を1タイルにまとめる。
   const statTiles = useMemo(() => {
@@ -481,11 +503,19 @@ export function EpochResultWindow({
     });
   }, [stats, report.population.after, report.exchange_rate.after, populationDelta, fxDelta, epochCount, locale, t]);
 
+  const seasonImage = seasonImageUrl(currentDate);
+
   return (
-    <div className="epoch-result-root">
-      {/* ヘッダ: 左上に大きく日付 */}
-      <header className="epoch-result-header">
+    <div className="epoch-result">
+      {/* 実行後の月の画像。左右いっぱい・高さ=ウィンドウの半分に切り抜いて薄く敷き、下へ向かって地に溶かす */}
+      {seasonImage && (
+        <img className="epoch-result-backdrop" src={seasonImage} alt="" aria-hidden={true} draggable={false} />
+      )}
+
+      {/* ヒーロー: 左に日付、右にスコアを大きく出す */}
+      <header className="epoch-result-hero">
         <div className="epoch-result-date-block">
+          <span className="epoch-result-overline">{t("windowType.epoch_result")}</span>
           <EpochDate daysSinceEpoch={currentDate} />
           {epochCount > 1 ? (
             <span className="epoch-result-date-sub">
@@ -493,177 +523,188 @@ export function EpochResultWindow({
             </span>
           ) : null}
         </div>
+        <ScoreBlock latest={scoreLatest} />
       </header>
 
-      {/* クエストストリップ: 達成・失敗・達成間近をチップで横並び表示する */}
-      {(completedQuests.length > 0 || failedQuests.length > 0 || nearQuests.length > 0) && (
-        <div className="epoch-result-quest-strip">
-          {completedQuests.map((q) => (
-            <div
-              key={`done-${q.id}`}
-              className={`epoch-result-quest-chip epoch-result-quest-chip--completed epoch-result-quest-chip--${q.tier}`}
-              title={resolveLocalizedText(q.description, i18n.language)}
-            >
-              <span className="epoch-result-quest-chip-icon">&#10003;</span>
-              <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
-              <span className="epoch-result-quest-chip-label">{t("epochResult.questCompleted")}</span>
-            </div>
-          ))}
-          {failedQuests.map((q) => (
-            <div
-              key={`failed-${q.id}`}
-              className="epoch-result-quest-chip epoch-result-quest-chip--failed"
-              title={resolveLocalizedText(q.description, i18n.language)}
-            >
-              <span className="epoch-result-quest-chip-icon">&#10005;</span>
-              <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
-              <span className="epoch-result-quest-chip-label">{t("epochResult.questFailed")}</span>
-            </div>
-          ))}
-          {nearQuests.map((q) => (
-            <div
-              key={`near-${q.id}`}
-              className="epoch-result-quest-chip epoch-result-quest-chip--near"
-              title={resolveLocalizedText(q.description, i18n.language)}
-            >
-              <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
-              <span className="epoch-result-quest-chip-bar">
-                <span
-                  className="epoch-result-quest-chip-bar-fill"
-                  style={{ width: `${Math.round(q.progress * 100)}%` }}
-                />
-              </span>
-              <span className="epoch-result-quest-chip-pct">{Math.round(q.progress * 100)}%</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* メインエリア: 達成目標/統計/スコア(主役) + 建設状況 の2カラム */}
-      <div className="epoch-result-main">
-        {/* ── 左カラム: 枠を持たないブロックを縦に並べる ── */}
-        <div className="epoch-result-col epoch-result-col-stats">
-          {/* 達成目標: チェックマークの並びで達成数だけを見せる簡易表示 */}
-          <section className="epoch-result-block">
-            <div className="epoch-result-section-head">
-              <h3 className="epoch-result-section-title">{t("achievements.title")}</h3>
-              <span className="epoch-result-section-note">
-                {t("epochResult.questProgress", {
-                  completed: questSummary.completedCount,
-                  total: questSummary.items.length,
-                })}
-              </span>
-            </div>
-            <QuestCheckStrip items={questSummary.items} />
-          </section>
-
-          {/* 統計タイル */}
-          <section className="epoch-result-block">
-            <div className="epoch-result-section-head">
-              <h3 className="epoch-result-section-title">{t("epochResult.sectionStatistics")}</h3>
-              {trendWindow > 0 ? (
-                <span className="epoch-result-section-note">
-                  {t("epochResult.trendLegend", { count: trendWindow })}
+      <div className="epoch-result-body">
+        {/* クエストストリップ: 達成・失敗・達成間近をチップで横並び表示する */}
+        {(completedQuests.length > 0 || failedQuests.length > 0 || nearQuests.length > 0) && (
+          <div className="epoch-result-quest-strip">
+            {completedQuests.map((q) => (
+              <div
+                key={`done-${q.id}`}
+                className={`epoch-result-quest-chip epoch-result-quest-chip--completed epoch-result-quest-chip--${q.tier}`}
+                title={resolveLocalizedText(q.description, i18n.language)}
+              >
+                <span className="epoch-result-quest-chip-icon">&#10003;</span>
+                <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
+                <span className="epoch-result-quest-chip-label">{t("epochResult.questCompleted")}</span>
+              </div>
+            ))}
+            {failedQuests.map((q) => (
+              <div
+                key={`failed-${q.id}`}
+                className="epoch-result-quest-chip epoch-result-quest-chip--failed"
+                title={resolveLocalizedText(q.description, i18n.language)}
+              >
+                <span className="epoch-result-quest-chip-icon">&#10005;</span>
+                <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
+                <span className="epoch-result-quest-chip-label">{t("epochResult.questFailed")}</span>
+              </div>
+            ))}
+            {nearQuests.map((q) => (
+              <div
+                key={`near-${q.id}`}
+                className="epoch-result-quest-chip epoch-result-quest-chip--near"
+                title={resolveLocalizedText(q.description, i18n.language)}
+              >
+                <span className="epoch-result-quest-chip-name">{resolveLocalizedText(q.name, i18n.language)}</span>
+                <span className="epoch-result-quest-chip-bar">
+                  <span
+                    className="epoch-result-quest-chip-bar-fill"
+                    style={{ width: `${Math.round(q.progress * 100)}%` }}
+                  />
                 </span>
-              ) : null}
-            </div>
-            <div className="epoch-result-stat-grid">
-              {statTiles.map((tile) => (
-                <StatTile
-                  key={tile.key}
-                  icon={STAT_ICONS[tile.key] ?? placeholderIcon}
-                  label={tile.label}
-                  value={tile.value}
-                  sub={tile.sub}
-                  tone={tile.tone}
-                  direction={tile.direction}
-                  trendTone={tile.trendTone}
-                  trendTitle={
-                    trendWindow > 0
-                      ? t("epochResult.trendHint", { count: trendWindow, trend: tile.trendLabel })
-                      : tile.trendLabel
-                  }
-                />
-              ))}
-            </div>
-          </section>
+                <span className="epoch-result-quest-chip-pct">{Math.round(q.progress * 100)}%</span>
+              </div>
+            ))}
+          </div>
+        )}
 
-          {/* スコア: 当期スコアとその構成 */}
-          <section className="epoch-result-block">
-            <div className="epoch-result-section-head">
-              <h3 className="epoch-result-section-title">{t("epochResult.sectionScore")}</h3>
-            </div>
-            <ScoreBlock latest={scoreLatest} />
-          </section>
-        </div>{/* /.epoch-result-col-stats */}
+        {/* メインエリア: 統計・達成目標(主役) + 建設状況 の2カラム */}
+        <div className="epoch-result-main">
+          {/* ── 左カラム: 枠を持たないブロックを縦に並べる ── */}
+          <div className="epoch-result-col epoch-result-col-stats">
+            {/* 統計タイル */}
+            <section className="epoch-result-block">
+              <h3 className="epoch-result-section-title">{t("epochResult.sectionStatistics")}</h3>
+              <div className="epoch-result-stat-grid">
+                {statTiles.map((tile) => (
+                  <StatTile
+                    key={tile.key}
+                    icon={STAT_ICONS[tile.key] ?? placeholderIcon}
+                    label={tile.label}
+                    value={tile.value}
+                    sub={tile.sub}
+                    tone={tile.tone}
+                    direction={tile.direction}
+                    trendTone={tile.trendTone}
+                    series={stats.history?.[tile.key]}
+                    trendTitle={
+                      trendWindow > 0
+                        ? t("epochResult.trendHint", { count: trendWindow, trend: tile.trendLabel })
+                        : tile.trendLabel
+                    }
+                  />
+                ))}
+              </div>
+            </section>
 
-        {/* ── 右カラム: 建設状況(道路・公共施設の統合リスト) ── */}
-        <div className="epoch-result-col epoch-result-col-right">
-          <section className="epoch-result-section epoch-result-section-construction">
-            <h3 className="epoch-result-section-title">{t("epochResult.sectionConstruction")}</h3>
-            <div className="epoch-result-construction-scroll">
-              <ConstructionTable items={constructionItems} />
-            </div>
-          </section>
-        </div>{/* /.epoch-result-col-right */}
-      </div>{/* /.epoch-result-main */}
+            {/* 達成目標: 進行中の目標の条件と現在値。左カラムの残りの高さを使い、溢れたらスクロールする */}
+            <section className="epoch-result-block epoch-result-block--fill">
+              <h3 className="epoch-result-section-title">{t("achievements.title")}</h3>
+              <div className="epoch-result-scroll">
+                <QuestList quests={listedQuests} />
+              </div>
+            </section>
+          </div>{/* /.epoch-result-col-stats */}
 
-      {/* フッタ: 閉じるボタン */}
-      <div className="epoch-result-buttons">
-        <button className="epoch-result-btn epoch-result-close" onClick={onClose} type="button">
-          {t("common.close")}
-        </button>
-      </div>
+          {/* ── 右カラム: 建設状況(道路・公共施設の統合リスト)。見出しはカードの外に置く ── */}
+          <div className="epoch-result-col epoch-result-col-right">
+            <section className="epoch-result-block epoch-result-block--fill">
+              <h3 className="epoch-result-section-title">{t("epochResult.sectionConstruction")}</h3>
+              <div className="epoch-result-scroll epoch-result-panel">
+                <ConstructionList items={constructionItems} />
+              </div>
+            </section>
+          </div>{/* /.epoch-result-col-right */}
+        </div>{/* /.epoch-result-main */}
+      </div>{/* /.epoch-result-body */}
+
+      <footer className="epoch-result-footer">
+        <SaveDialogButton kind="primary" onClick={close}>{t("common.close")}</SaveDialogButton>
+      </footer>
     </div>
   );
 }
 
-/** 達成目標の簡易表示1件分。state はチェックマークの見た目を決める。 */
-type QuestCheckItem = {
-  id: number;
-  name: string;
-  state: "completed" | "active" | "locked" | "failed";
-};
-
 /**
- * 達成目標の簡易表示。1目標につきチェックマークを1個並べ、達成済みだけ色を付ける
- * (未達成・未解放・失敗はグレー)。個数以上の情報は出さない代わりに、
- * ホバーで「どれが達成できているのか」の一覧をポップアップする。
+ * 達成目標の一覧。進行中の目標は、名前・説明・期限・全体の進捗率と、条件ごとの進捗のバー・現在値・目標値を出す。
+ * 達成・失敗した目標は、名前と状態だけの1行にまとめて控えめに出す。
+ * 条件の指標名は内部のパスなので出さず、何を目指すかは作者が書いた名前と説明で伝える。
  */
-function QuestCheckStrip({ items }: { items: QuestCheckItem[] }): ReactNode {
-  const { t } = useTranslation();
+function QuestList({ quests }: { quests: Quest[] }): ReactNode {
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
 
-  if (items.length === 0) {
+  if (quests.length === 0) {
     return <p className="epoch-result-empty">{t("achievements.noQuests")}</p>;
   }
 
   return (
-    <div className="epoch-result-quest-checks">
-      <div className="epoch-result-quest-check-row">
-        {items.map((item) => (
-          <span
-            key={item.id}
-            className={`epoch-result-quest-check epoch-result-quest-check--${item.state}`}
-            aria-hidden={true}
-          >
-            &#10003;
-          </span>
-        ))}
-      </div>
-      {/* ホバー時のみ表示する内訳。目標数が多いと縦に伸びるためスクロールさせる。 */}
-      <div className="epoch-result-quest-popup" role="tooltip">
-        {items.map((item) => (
-          <div key={item.id} className="epoch-result-quest-popup-row">
-            <span className={`epoch-result-quest-check epoch-result-quest-check--${item.state}`}>
-              &#10003;
-            </span>
-            <span className="epoch-result-quest-popup-name">{item.name}</span>
-            <span className="epoch-result-quest-popup-state">
-              {t(`epochResult.questState.${item.state}`)}
-            </span>
-          </div>
-        ))}
-      </div>
+    <ul className="epoch-result-quests">
+      {quests.map((q) => {
+        const name = resolveLocalizedText(q.name, i18n.language);
+        if (q.status !== "active") {
+          return (
+            <li key={q.id} className={`epoch-result-quest epoch-result-quest--${q.status}`}>
+              <div className="epoch-result-quest-head">
+                <span className="epoch-result-quest-mark" aria-hidden={true}>
+                  {q.status === "completed" ? "✓" : "✕"}
+                </span>
+                <span className="epoch-result-quest-name">{name}</span>
+                <span className="epoch-result-quest-state">{t(`epochResult.questState.${q.status}`)}</span>
+              </div>
+            </li>
+          );
+        }
+        const description = resolveLocalizedText(q.description, i18n.language);
+        return (
+          <li key={q.id} className={`epoch-result-quest epoch-result-quest--active epoch-result-quest--${q.tier}`}>
+            <div className="epoch-result-quest-head">
+              <span className="epoch-result-quest-name">{name}</span>
+              {description && <span className="epoch-result-quest-desc" title={description}>{description}</span>}
+              {q.deadline_epoch !== null && (
+                <span className="epoch-result-quest-deadline">
+                  {t("achievements.deadlineEpoch", { epoch: q.deadline_epoch })}
+                </span>
+              )}
+              {/* 切り捨てて、未達成の目標が100%と表示されないようにする */}
+              <span className="epoch-result-quest-pct">{Math.floor(q.progress * 100)}%</span>
+            </div>
+            {q.clause_states.map((clause) => (
+              <QuestClauseLine key={clause.clause_key} clause={clause} locale={locale} />
+            ))}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * 条件1つ分の行。進捗のバーと「現在値 / 比較 目標値」を並べ、時間派生の条件(前エポック比・連続など)は
+ * 小さなラベルで補う。満たしている条件はバーを達成の色にする。
+ */
+function QuestClauseLine({ clause, locale }: { clause: QuestClauseState; locale: string }): ReactNode {
+  const { t } = useTranslation();
+  const modeLabel =
+    clause.mode === "streak"
+      ? t("achievements.streakProgress", { current: clause.streak ?? 0, window: clause.window })
+      : clause.mode !== "value"
+        ? t(`achievements.mode.${clause.mode}`, { window: clause.window })
+        : null;
+  return (
+    <div className={`epoch-result-quest-clause${clause.satisfied ? " epoch-result-quest-clause--ok" : ""}`}>
+      <span className="epoch-result-quest-bar" aria-hidden={true}>
+        <span style={{ width: `${Math.round(Math.min(1, Math.max(0, clause.progress)) * 100)}%` }} />
+      </span>
+      <span className="epoch-result-quest-values">
+        <span className="epoch-result-quest-current">{formatQuestValue(clause.current, locale)}</span>
+        {" / "}
+        {questCompareLabel(clause.compare)} {formatQuestValue(clause.target, locale)}
+      </span>
+      {modeLabel && <span className="epoch-result-quest-mode">{modeLabel}</span>}
     </div>
   );
 }
@@ -678,8 +719,14 @@ function QuestCheckStrip({ items }: { items: QuestCheckItem[] }): ReactNode {
 function ScoreBlock({ latest }: { latest: ScoreLatest | null }): ReactNode {
   const { t } = useTranslation();
 
+  const overline = <span className="epoch-result-overline">{t("epochResult.sectionScore")}</span>;
   if (!latest) {
-    return <p className="epoch-result-empty">{t("common.loading")}</p>;
+    return (
+      <div className="epoch-result-score">
+        {overline}
+        <p className="epoch-result-empty">{t("common.loading")}</p>
+      </div>
+    );
   }
 
   const fmt = (v: number) => v.toLocaleString(undefined, { maximumFractionDigits: 1 });
@@ -691,6 +738,7 @@ function ScoreBlock({ latest }: { latest: ScoreLatest | null }): ReactNode {
 
   return (
     <div className="epoch-result-score">
+      {overline}
       <div className="epoch-result-score-head">
         <span className="epoch-result-score-label">{t("achievements.currentScore")}</span>
         <span className="epoch-result-score-value">{fmt(latest.city_score)}</span>
@@ -766,8 +814,43 @@ function TrendArrow({
   );
 }
 
+/** 推移の線を描く縦の範囲(viewBox 0〜100)。タイルの下半分に収め、上段の文字にかからないようにする */
+const SPARK_TOP = 48;
+const SPARK_BOTTOM = 90;
+
 /**
- * 統計タイル1枚。[アイコン][ラベル+値][変動矢印]の横並びで、行の高さを抑えた密なタイルにする。
+ * 統計タイルの背景に薄く描く推移(`statistics.history` の直近 trend_window エポック)。
+ * 値の最小〜最大で上下いっぱいに伸ばして形だけを見せる(横ばいなら中ほどの水平線)。
+ * 都市の歴史より古い(null)点は除き、2点未満なら描かない。色は変動方向の矢印と同じ。
+ */
+function StatSparkline({ series, tone }: { series?: (number | null)[]; tone: TrendTone }): ReactNode {
+  const gradientId = `epoch-result-spark-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const values = (series ?? []).filter((v): v is number => typeof v === "number" && Number.isFinite(v));
+  if (values.length < 2) return null;
+
+  const min = Math.min(...values);
+  const range = Math.max(...values) - min;
+  const x = (i: number) => (i / (values.length - 1)) * 100;
+  const y = (v: number) =>
+    range > 0 ? SPARK_BOTTOM - ((v - min) / range) * (SPARK_BOTTOM - SPARK_TOP) : (SPARK_TOP + SPARK_BOTTOM) / 2;
+  const line = values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(2)},${y(v).toFixed(2)}`).join(" ");
+
+  return (
+    <svg className={`epoch-result-spark epoch-result-spark-${tone}`} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden={true}>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="currentColor" stopOpacity="0.22" />
+          <stop offset="1" stopColor="currentColor" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${line} L100,100 L0,100 Z`} fill={`url(#${gradientId})`} />
+      <path d={line} fill="none" stroke="currentColor" strokeOpacity="0.55" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
+/**
+ * 統計タイル1枚。上段に[アイコン][ラベル][変動矢印]、下段に値を大きく出し、背景に推移を薄く描く。
  * tone は現在値の絶対基準による水準評価で、warn/danger のときタイル全体を着色する。
  * sub を渡すと値の右に補助テキストを添える(人口の増減、為替レートの変動幅など)。
  */
@@ -779,6 +862,7 @@ function StatTile({
   tone,
   direction,
   trendTone,
+  series,
   trendTitle,
 }: {
   icon: string;
@@ -788,29 +872,34 @@ function StatTile({
   tone: StatTone;
   direction: TrendDirection;
   trendTone: TrendTone;
+  series?: (number | null)[];
   trendTitle: string;
 }): ReactNode {
   return (
     <div className={`epoch-result-stat-tile epoch-result-stat-tile-${tone}`} title={trendTitle}>
-      <img className="epoch-result-stat-icon" src={icon} alt="" aria-hidden={true} />
-      <span className="epoch-result-stat-body">
-        <span className="epoch-result-stat-label">{label}</span>
-        <span className="epoch-result-stat-value-row">
-          <span className="epoch-result-stat-value">{value}</span>
-          {sub != null ? <span className="epoch-result-stat-sub">{sub}</span> : null}
+      <StatSparkline series={series} tone={trendTone} />
+      <span className="epoch-result-stat-head">
+        <span className="epoch-result-stat-icon">
+          <img src={icon} alt="" aria-hidden={true} />
         </span>
+        <span className="epoch-result-stat-label">{label}</span>
+        <TrendArrow direction={direction} tone={trendTone} />
       </span>
-      <TrendArrow direction={direction} tone={trendTone} />
+      <span className="epoch-result-stat-value-row">
+        <span className="epoch-result-stat-value">{value}</span>
+        {sub != null ? <span className="epoch-result-stat-sub">{sub}</span> : null}
+      </span>
     </div>
   );
 }
 
 /**
- * 建設進捗のテーブル表示(道路・公共施設の統合リスト)。
- * 列: 名前(種別バッジ付き) / ステータス(after_status でバッジ表示) / 進捗(バー+テキスト)。
+ * 建設進捗の一覧(道路・公共施設の統合リスト)。1件を2段で表示する。
+ * 上段: 種別バッジ・名前・ステータス(after_status のバッジ)、下段: 進捗バー・前後の進捗率・完成の札。
+ * 進捗バーは実行後までを淡く、実行前までをさらに淡く重ね、このエポックで進んだ区間を明るく見せる。
  * リストが空の場合は「対象なし」メッセージを表示する。
  */
-function ConstructionTable({
+function ConstructionList({
   items,
 }: {
   items: ConstructionProgressItem[];
@@ -822,63 +911,50 @@ function ConstructionTable({
   }
 
   return (
-    <table className="epoch-result-table">
-      <thead>
-        <tr>
-          <th className="epoch-result-th epoch-result-th-name">{t("epochResult.columnName")}</th>
-          <th className="epoch-result-th epoch-result-th-status">{t("epochResult.columnStatus")}</th>
-          <th className="epoch-result-th epoch-result-th-progress">{t("epochResult.columnProgress")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {items.map((item) => {
-          const displayName = item.name || `#${item.id}`;
-          const statusStyle = STATUS_STYLE_MAP[item.after_status] ?? { bg: "#6b7280", text: "#ffffff" };
-          const kindLabel =
-            item.entity_type === "path" ? t("epochResult.kindPath") : t("epochResult.kindBuilding");
-          return (
-            <tr key={`${item.entity_type}-${item.id}`} className="epoch-result-tr">
-              <td className="epoch-result-td epoch-result-td-name" title={displayName}>
-                <span className={`epoch-result-kind-badge epoch-result-kind-badge-${item.entity_type}`}>
-                  {kindLabel}
-                </span>
-                <span className="epoch-result-name-text">{displayName}</span>
-              </td>
-              <td className="epoch-result-td epoch-result-td-status">
-                <span
-                  className="epoch-result-status-badge"
-                  style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}
-                >
-                  {t(`status.${item.after_status}`)}
-                </span>
-              </td>
-              <td className="epoch-result-td epoch-result-td-progress">
-                <div className="epoch-result-progress">
-                  <div className="epoch-result-progress-bar" aria-hidden={true}>
-                    <div
-                      className="epoch-result-progress-before"
-                      style={{ width: `${Math.min(100, Math.max(0, item.before_pct))}%` }}
-                    />
-                    <div
-                      className="epoch-result-progress-after"
-                      style={{ width: `${Math.min(100, Math.max(0, item.after_pct))}%` }}
-                    />
-                  </div>
-                  <span className="epoch-result-progress-text">
-                    {t("epochResult.progressFormat", {
-                      before: item.before_pct.toFixed(0),
-                      after: item.after_pct.toFixed(0),
-                    })}
-                  </span>
-                  {item.completed && (
-                    <span className="epoch-result-completed">{t("epochResult.completed")}</span>
-                  )}
-                </div>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <ul className="epoch-result-construction-list">
+      {items.map((item) => {
+        const displayName = item.name || `#${item.id}`;
+        const statusStyle = STATUS_STYLE_MAP[item.after_status] ?? { bg: "#6b7280", text: "#ffffff" };
+        const kindLabel =
+          item.entity_type === "path" ? t("epochResult.kindPath") : t("epochResult.kindBuilding");
+        return (
+          <li key={`${item.entity_type}-${item.id}`} className="epoch-result-construction-item">
+            <div className="epoch-result-construction-head">
+              <span className={`epoch-result-kind-badge epoch-result-kind-badge-${item.entity_type}`}>
+                {kindLabel}
+              </span>
+              <span className="epoch-result-name-text" title={displayName}>{displayName}</span>
+              <span
+                className="epoch-result-status-badge"
+                style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}
+              >
+                {t(`status.${item.after_status}`)}
+              </span>
+            </div>
+            <div className="epoch-result-progress">
+              <div className="epoch-result-progress-bar" aria-hidden={true}>
+                <div
+                  className="epoch-result-progress-after"
+                  style={{ width: `${Math.min(100, Math.max(0, item.after_pct))}%` }}
+                />
+                <div
+                  className="epoch-result-progress-before"
+                  style={{ width: `${Math.min(100, Math.max(0, item.before_pct))}%` }}
+                />
+              </div>
+              <span className="epoch-result-progress-text">
+                {t("epochResult.progressFormat", {
+                  before: item.before_pct.toFixed(0),
+                  after: item.after_pct.toFixed(0),
+                })}
+              </span>
+              {item.completed && (
+                <span className="epoch-result-completed">{t("epochResult.completed")}</span>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

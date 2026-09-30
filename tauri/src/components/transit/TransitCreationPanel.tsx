@@ -354,14 +354,14 @@ export function TransitCreationPanel({
               <div className="bc-split-row">
                 <div className="bc-split-col">
                   <div className="bc-section-title">{t("transit.fare")}</div>
-                  <div className="bc-stepper-row">
+                  <div className="bc-stepper-row" data-guide="transit.fare">
                     <NumberStepper value={fare} onChange={setFare} min={0} max={100000} step={10} integerOnly={true} />
                     <span className="bc-stepper-unit">{t("transit.currencyUnit")}</span>
                   </div>
                 </div>
                 <div className="bc-split-col">
                   <div className="bc-section-title">{t("transit.headway")}</div>
-                  <div className="bc-stepper-row">
+                  <div className="bc-stepper-row" data-guide="transit.headway">
                     <NumberStepper value={headway} onChange={setHeadway} min={1} max={120} step={1} integerOnly={true} />
                     <span className="bc-stepper-unit">{t("transit.minutesUnit")}</span>
                   </div>
@@ -426,12 +426,13 @@ export function TransitCreationPanel({
       {selectedEntry && (
         <div className="bc-section bc-action-bar">
           <div className="bc-actions">
-            <button className="bc-btn" type="button" onClick={onClose}>
+            <button className="bc-btn" type="button" data-guide="transit.cancel" onClick={onClose}>
               {t("transit.cancel")}
             </button>
             <button
               className="bc-btn bc-btn-confirm"
               type="button"
+              data-guide="transit.confirm"
               disabled={isSaving || stopCount < 2}
               onClick={() => void handleConfirm()}
             >

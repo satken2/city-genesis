@@ -7,8 +7,7 @@
       "note": "连续运行多个纪元时，显示的是最后一个纪元的值。问题规模是根据城市规模估算的主要比较组合数，仅供参考。",
       "colGroup": "处理",
       "colTime": "时间",
-      "colShare": "占比",
-      "colWorkload": "问题规模",
+      "colWorkload": "处理数量",
       "workloadHint": "主要比较的组合数（数组元素数）的估算值。将鼠标悬停在数值上可查看明细。",
       "seconds": "{{value}} 秒",
       "ms": "{{value}} ms"
@@ -37,7 +36,7 @@
     "entities": {
       "colMetric": "项目",
       "colCount": "数量",
-      "title": "城市规模",
+      "title": "实体数量",
       "agents": "经济主体",
       "households": "家庭",
       "businesses": "企业",
@@ -54,24 +53,6 @@
       "nodes": "节点",
       "transitLines": "公共交通线路",
       "epochs": "已过纪元"
-    },
-    "memory": {
-      "title": "内存",
-      "current": "当前使用量",
-      "peak": "启动以来的最大值",
-      "total": "物理内存",
-      "note": "模拟器本体进程使用的物理内存。最大值包括纪元计算中临时增加的部分。"
-    },
-    "environment": {
-      "gpuAcceleration": "GPU 加速",
-      "title": "运行环境",
-      "cpu": "CPU",
-      "cores": "逻辑核心数",
-      "os": "操作系统",
-      "device": "计算设备",
-      "devices": {
-        "cpu": "CPU"
-      }
     },
     "approximation": {
       "title": "模拟近似",
@@ -103,6 +84,13 @@
         "label": "合并计算相似市民与家庭",
         "description": "将情况相似的市民或家庭的部分决策作为群体处理。"
       }
+    },
+    "status": {
+      "title": "系统状态",
+      "gpuDisabled": "GPU加速: 已禁用",
+      "coreSimulator": "核心模拟器",
+      "currentMemory": "当前内存使用量: {{value}}",
+      "peakMemory": "启动以来的最大内存使用量: {{value}}"
     }
   }
 }

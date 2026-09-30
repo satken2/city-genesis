@@ -11,6 +11,7 @@ export type Condition =
   | { type: "window"; window: string; target?: string }
   | { type: "pathVariant"; value: Value }
   | { type: "pathPoints"; count: number; phase?: string }
+  | { type: "hudMode"; mode: "district" | "bulldozer" }
   | { type: "entity"; resource: Resource; where: Match[]; bind?: string; target?: string }
   | { type: "budgetRatio"; category: string; min: number }
   | { type: "connected"; from: string; to: string; terminal: string; where: Match[] };
@@ -40,6 +41,8 @@ export type Facts = {
   windows: Record<string, { window: string; visible: boolean; entity?: number }>;
   pathVariant?: number;
   pathShape?: { selected_points: number[][]; phase: string; is_curved?: boolean };
+  /** HUDの常駐モード(地区編集・ブルドーザ)。通常状態は未設定。 */
+  hudMode?: "district" | "bulldozer";
 };
 export type Snapshot = {
   active: boolean; runId: string; revision: number; saveId: string; scenario: string;

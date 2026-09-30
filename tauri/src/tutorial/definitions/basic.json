@@ -476,13 +476,49 @@
       "legacyStep": 3,
       "phases": [
         {
-          "id": "perform",
+          "id": "open",
           "textKey": "tutorial.basic.step3.description",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.land"
+            ],
             "highlight": [
               "hud.land"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "parcel_creation"
+          }
+        },
+        {
+          "id": "create",
+          "textKey": "tutorial.basic.step3.create",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.land",
+              "parcel.mode:along_path",
+              "parcel.clear",
+              "parcel.confirm"
+            ],
+            "highlight": [
+              "parcel.mode:along_path",
+              "parcel.confirm"
             ]
           },
           "world": {
@@ -521,13 +557,52 @@
       "legacyStep": 4,
       "phases": [
         {
-          "id": "perform",
+          "id": "open",
           "textKey": "tutorial.basic.step4.description",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
             "highlight": [
               "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.basic.step4.select",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction",
+              "building.category:1",
+              "building.variant:2001",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:1",
+              "building.variant:2001",
+              "building.confirm"
             ]
           },
           "world": {

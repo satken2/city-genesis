@@ -3,6 +3,7 @@
  *
  * 幕の下に元の画面を残したまま中央にボックスを重ねる。幕を押すと onDismiss(取消し)。
  * 処理中(busy)は幕でもEscでも閉じない。Escは呼び出し側がウィンドウ全体のキー操作とまとめて扱う。
+ * ボタン(SaveDialogButton)はエポック実行確認ウィンドウでも使う。
  */
 import type { FormEvent, ReactNode } from "react";
 import "./SaveDialog.css";

@@ -35,6 +35,7 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 ## 実装側の規約
 
 - 表示状態の正は`IpcViewCoordinator`のレイヤー記憶(`_layerModes`/`_layerSubModes`/`_layerFlags`)だけ。編集ステート中の表示も`SyncFromState`のプリセットが`ForceLayer`で適用するので、`IpcStateCoordinator.ApplyState*`から`VisualModeHandler`を直接触らない(UIへ通知する状態と実際の見え方がズレる)。
+- 表示パネルの既定は`NORMAL_DEFAULTS`(と地形の`LAYER_DEFAULTS`)が唯一の表で、初期値(`Awake`)と`game:loading`のリセット(`HandleGameLoading`)が同じ表を使う。表示パネルにレイヤーを足したら表にも足す(`grid`は表示パネルの外なのでこの表に載せない)。`ApplyAllLayerModes`は`alert`を適用しないので、アラートの絞り込みを戻すときは`ApplyAlertMode`を別に呼ぶ。
 - プリセットで強制するレイヤーは`NORMAL_DEFAULTS`にも載せる(無いと`STATE_NORMAL`復帰で編集中の表示が残る)。`view:change_view`の`flags`はnull=維持・空文字=全OFF。
 - Unity→UIの状態通知(`*:placement_state`・`edit_path:update_shape`・`edit_prop:placement_settings`等)は「コマンド入力・全状態出力」。UIは受信値をエコーしない前提なので、Unity側でも受信をトリガに同じ値を送り返さない(往復ループ)。
 - 確定後の後始末は`edit_*:finish`系の1イベントにまとめ、順序は`IpcEventHandler`/`IpcStateCoordinator`のハンドラが持つ。UIに`session:reload`と`world:change_state`を別々に送らせない: 差分リロードは複数フレームのコルーチンで、後続の状態遷移が割り込むと再生成・削除が中途半端に終わる。

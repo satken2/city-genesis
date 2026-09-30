@@ -78,6 +78,8 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `settings.ts` | アプリ設定のロード・保存。保存時に `settings-updated` が全ウィンドウへ飛ぶ |
 | `locale.ts` | 対応言語と `Intl` ロケールの解決(`SUPPORTED_LANGUAGES` / `resolveIntlLocale` / `resolveSupportedLanguage`)。作者が書く多言語テキスト `LocalizedText`(`{言語コード: 文}`。シナリオの紹介文・初期の都市名・クエストの名前と説明)の表示 `resolveLocalizedText`(表示言語 → 英語 → 対応言語)・送信前の整理 `compactLocalizedText`・英語の欠け `missingEnglish` |
 | `date.ts` / `money.ts` | 仮想暦(1ヶ月=30日・1年=360日)と金額の整形 |
+| `quest.ts` | 達成目標の条件の表示(比較記号 `questCompareLabel`・現在値と目標値 `formatQuestValue`)。達成目標ウィンドウとエポック結果で共用 |
+| `season.ts` | 季節(北半球の温帯の暦月。Unityの `WeatherClimate.SeasonOf` と同じ区切りで、気候区分の違いは持たない)と月ごとの季節画像 `seasonImageUrl`(`assets/images/seasons/{月}.png`、無ければ `default.png`) |
 | `parking.ts` | 駐車メーターの使用率 `parkingUsage`。表示桁に丸めてから割る(生値だと「20 / 20台」で100%超に光る) |
 | `constructionTags.ts` | 建設プロジェクトのタグ。`fetchEntityTag` は専用API(`tag` は単体取得に載らない)。`TAGGABLE_STATUSES` はバックエンドの写し |
 | `constructionFunding.ts` | 公共工事の発注時資金審査の先回り判定(最終判定はバックエンド) |

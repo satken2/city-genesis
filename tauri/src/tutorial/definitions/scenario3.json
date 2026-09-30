@@ -45,15 +45,59 @@
       "legacyStep": 2,
       "phases": [
         {
-          "id": "perform",
+          "id": "open",
           "textKey": "tutorial.scenario3.step2.description",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
             "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -2255,
+                0,
+                48.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -2255,
+                0,
+                60
+              ],
+              "distance": 420,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.scenario3.step2.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
               "hud.construction",
               "building.category:7",
-              "building.variant:1054"
+              "building.variant:1054",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:7",
+              "building.variant:1054",
+              "building.confirm"
             ]
           },
           "world": {
@@ -107,15 +151,59 @@
       "legacyStep": 3,
       "phases": [
         {
-          "id": "perform",
+          "id": "open",
           "textKey": "tutorial.scenario3.step3.description",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
             "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1368.75,
+                0,
+                81
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1350,
+                0,
+                70
+              ],
+              "distance": 300,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.scenario3.step3.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
               "hud.construction",
               "building.category:7",
-              "building.variant:1062"
+              "building.variant:1062",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:7",
+              "building.variant:1062",
+              "building.confirm"
             ]
           },
           "world": {
@@ -169,15 +257,106 @@
       "legacyStep": 4,
       "phases": [
         {
-          "id": "perform",
+          "id": "open",
           "textKey": "tutorial.scenario3.step4.description",
           "ui": {
-            "policy": "highlight",
-            "allow": [],
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
             "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -2200,
+                0,
+                48.5
+              ],
+              [
+                -1368.75,
+                0,
+                68.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1818,
+                0,
+                40
+              ],
+              "distance": 1300,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.scenario3.step4.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
               "hud.road",
               "path.type:11",
+              "path.variant:1101",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:11",
               "path.variant:1101"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -2200,
+                0,
+                48.5
+              ],
+              [
+                -1368.75,
+                0,
+                68.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1818,
+                0,
+                40
+              ],
+              "distance": 1300,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 1101
+          }
+        },
+        {
+          "id": "draw",
+          "textKey": "tutorial.scenario3.step4.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.back",
+              "path.cancel",
+              "path.confirm"
+            ],
+            "highlight": [
+              "path.confirm"
             ]
           },
           "world": {

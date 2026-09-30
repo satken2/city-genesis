@@ -1,12 +1,14 @@
 /**
- * セーブデータ一覧(ロード画面)。システムメニューの「ロード」から別ウィンドウとして開く。
+ * セーブデータ一覧(ロード画面)。システムメニューの「ロード」とトップメニューから別ウィンドウとして開く。
  *
+ * タイトルバーを持たないウィンドウ(レジストリの chromeless)で、閉じるのはフッタの「閉じる」と Esc。
  * 各セーブをカードにし、画像(保存したときの3Dビュー)・名前・元のシナリオのタイトル・都市の言語(国旗)・
- * 人口・ゲーム内日付・保存日時を並べる。新しく保存したものが先頭。現在読み込み中のセーブは左端の実線ブロックと札で示す。
+ * 人口・ゲーム内日付を並べる。保存日時(実時間)はゲーム内日付と取り違えないよう、カードの右下に離して置く。
+ * 新しく保存したものが先頭。現在読み込み中のセーブは左端の実線ブロックと札で示す。
  * ロードと削除はウィンドウ内のオーバーレイで確認する。削除は成功しても知らせず、一覧から外すだけにする。
  */
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { EpochDate } from "../common/EpochDate";
@@ -16,7 +18,7 @@ import { isSupportedLanguage, resolveIntlLocale, resolveLocalizedText, type Supp
 import { SaveEntry, prepareSaveLoad, saveDisplayName, saveError } from "../../utils/saves";
 import { useApiImageUrl } from "../../hooks/useApiImageUrl";
 import { SaveDialog, SaveDialogButton } from "./SaveDialog";
-import { CalendarIcon, CityIcon, ClockIcon, LoadIcon, PopulationIcon, ScenarioIcon, TrashIcon } from "./SaveIcons";
+import { CalendarIcon, CityIcon, LoadIcon, PopulationIcon, ScenarioIcon, TrashIcon } from "./SaveIcons";
 import "./SaveListWindow.css";
 
 type SaveListWindowProps = {
@@ -61,7 +63,7 @@ function SaveThumbnail({ apiBaseUrl, entry }: { apiBaseUrl: string; entry: SaveE
   const { src, onError } = useApiImageUrl(url);
   return (
     <div className="save-card-thumb">
-      {src ? <img src={src} alt="" onError={onError} /> : <CityIcon className="save-card-thumb-placeholder" />}
+      {src ? <img src={src} alt="" onError={onError} draggable={false} /> : <CityIcon className="save-card-thumb-placeholder" />}
       {isSupportedLanguage(entry.language) && (
         <span className="save-card-flag" title={t(`settings.language.${entry.language}`)}>{LANGUAGE_FLAGS[entry.language]}</span>
       )}
@@ -106,16 +108,17 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
     setPending(null);
   }, [busy]);
 
+  // Esc は確認を開いていれば確認を、いなければウィンドウを閉じる。処理中は何もしない
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && pending) {
-        event.preventDefault();
-        dismiss();
-      }
+      if (event.key !== "Escape" || busy) return;
+      event.preventDefault();
+      if (pending) dismiss();
+      else onClose();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [dismiss, pending]);
+  }, [busy, dismiss, onClose, pending]);
 
   /**
    * ロードは Rust の start_load_game に任せる(Unity起動 → 読み込み画面 → コアのロード → 待機 → HUD表示)。
@@ -184,13 +187,11 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
   }
 
   return (
-    <div className="save-list-body">
-      <div className="save-list-toolbar">
-        <button className="save-list-folder-btn" onClick={() => void handleOpenFolder()} type="button">
-          <LoadIcon className="save-list-folder-icon" />
-          {t("saveList.openFolderButton")}
-        </button>
-      </div>
+    <div className="save-list">
+      <header className="save-list-hero">
+        <span className="save-list-overline">{t("saveLoad.load")}</span>
+        <h1 className="save-list-title">{t("windowType.save_list")}</h1>
+      </header>
 
       <div className="save-list-scroll">
         {loading ? (
@@ -202,11 +203,12 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
           </div>
         ) : (
           <ul className="save-list-items">
-            {sortedEntries.map((entry) => {
+            {sortedEntries.map((entry, index) => {
               const isCurrent = entry.id === currentSaveId;
               const scenarioTitle = resolveLocalizedText(entry.scenario_title, i18n.language);
               return (
-                <li key={entry.id} className={`save-card${isCurrent ? " save-card--current" : ""}`}>
+                <li key={entry.id} className={`save-card${isCurrent ? " save-card--current" : ""}`}
+                  style={{ "--save-card-index": index } as CSSProperties}>
                   <SaveThumbnail apiBaseUrl={apiBaseUrl} entry={entry} />
                   <div className="save-card-body">
                     <div className="save-card-heading">
@@ -228,22 +230,21 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
                         <CalendarIcon className="save-card-meta-icon" />
                         <EpochDate daysSinceEpoch={entry.current_date ?? 0} />
                       </span>
-                      <span title={t("saveList.savedAt")}>
-                        <ClockIcon className="save-card-meta-icon" />
-                        {formatSavedAt(entry.saved_at, locale)}
-                      </span>
                     </div>
                     <SaveVersionInfo entry={entry} />
                   </div>
-                  <div className="save-card-actions">
-                    <button className="save-card-load" type="button" disabled={busy || entry.compatibility?.loadable === false}
-                      onClick={() => { setFailure(""); setPending({ kind: "load", entry }); }}>
-                      {t("saveList.loadButton")}
-                    </button>
-                    <button className="save-card-delete" type="button" disabled={busy} title={t("saveList.deleteButton")}
-                      aria-label={t("saveList.deleteButton")} onClick={() => { setFailure(""); setPending({ kind: "delete", entry }); }}>
-                      <TrashIcon />
-                    </button>
+                  <div className="save-card-side">
+                    <div className="save-card-actions">
+                      <button className="save-card-load" type="button" disabled={busy || entry.compatibility?.loadable === false}
+                        onClick={() => { setFailure(""); setPending({ kind: "load", entry }); }}>
+                        {t("saveList.loadButton")}
+                      </button>
+                      <button className="save-card-delete" type="button" disabled={busy} title={t("saveList.deleteButton")}
+                        aria-label={t("saveList.deleteButton")} onClick={() => { setFailure(""); setPending({ kind: "delete", entry }); }}>
+                        <TrashIcon />
+                      </button>
+                    </div>
+                    <span className="save-card-saved-at" title={t("saveList.savedAt")}>{formatSavedAt(entry.saved_at, locale)}</span>
                   </div>
                 </li>
               );
@@ -251,6 +252,14 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
           </ul>
         )}
       </div>
+
+      <footer className="save-list-footer">
+        <button className="save-list-folder-btn" onClick={() => void handleOpenFolder()} type="button">
+          <LoadIcon className="save-list-folder-icon" />
+          {t("saveList.openFolderButton")}
+        </button>
+        <SaveDialogButton disabled={busy} onClick={onClose}>{t("common.close")}</SaveDialogButton>
+      </footer>
 
       {pending && renderPending(pending)}
     </div>

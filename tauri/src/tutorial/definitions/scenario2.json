@@ -7,7 +7,7 @@
       "legacyStep": 1,
       "phases": [
         {
-          "id": "perform",
+          "id": "enter",
           "textKey": "tutorial.scenario2.step1.description",
           "ui": {
             "policy": "highlight",
@@ -15,6 +15,34 @@
             "highlight": [
               "hud.district"
             ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                -65,
+                0,
+                0
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "hudMode",
+            "mode": "district"
+          }
+        },
+        {
+          "id": "create",
+          "textKey": "tutorial.scenario2.step1.create",
+          "ui": {
+            "policy": "highlight",
+            "allow": [
+              "hud.district"
+            ],
+            "highlight": []
           },
           "world": {
             "mode": "observe",
@@ -27,11 +55,11 @@
             ],
             "camera": {
               "target": [
-                -65,
+                60,
                 0,
-                0
+                110
               ],
-              "distance": 700,
+              "distance": 350,
               "yaw": 0,
               "pitch": 55
             }
@@ -244,9 +272,9 @@
             "mode": "observe",
             "markers": [
               [
-                81.5,
+                84,
                 0,
-                140
+                147
               ]
             ],
             "camera": {

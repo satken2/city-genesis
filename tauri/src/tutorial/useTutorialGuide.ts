@@ -5,6 +5,7 @@ import { createEnvironment } from "./environment";
 import { evaluate, execute, findPhase, resolve } from "./engine";
 import { acceptSnapshot, GUIDE_OBSERVE, GUIDE_QUERY, GUIDE_STATE } from "./bus";
 import { useMasterData } from "../contexts/MasterDataContext";
+import { HUD_EVENT_MODE_CHANGED, type HudMode } from "../components/hud/hudMode";
 import { sendTutorialGuide } from "../utils/ipc";
 import type { Bindings, Environment, Facts, Phase, Snapshot } from "./model";
 
@@ -66,7 +67,9 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
         await queue;
         if (!step) return true;
         await reconcile();
-        if (phaseIndex !== step.phases.length - 1 || !await evaluate(step.phases[phaseIndex].until, env)) return false;
+        // 達成条件を持つステップは、段階(開いているパネル)ではなく達成条件そのものを確かめる。確定でパネルが閉じても「次へ」を押せる。
+        const last = step.phases.length - 1;
+        if ((phaseIndex !== last && !step.complete) || !await evaluate(step.phases[last].until, env)) return false;
         await execute(step.beforeCheck ?? [], env);
         if (step.complete && !await evaluate(step.complete, env)) return false;
         await execute(step.afterCheck ?? [], env);
@@ -91,6 +94,10 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
       await subscribe<{ label: string; window: string; entity?: number; visible: boolean }>("tutorial:window_visibility", data => {
         facts.windows[data.label] = data;
         if (data.window === "path_build" && !data.visible) { delete facts.pathVariant; delete facts.pathShape; }
+        queue = queue.then(reconcile).catch(fail);
+      });
+      await subscribe<{ mode: HudMode }>(HUD_EVENT_MODE_CHANGED, data => {
+        if (data.mode) facts.hudMode = data.mode; else delete facts.hudMode;
         queue = queue.then(reconcile).catch(fail);
       });
       await subscribe("graphic-reconnected", () => { if (current) void sendTutorialGuide(current).catch(fail); });

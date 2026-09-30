@@ -1,35 +1,118 @@
 /**
  * エポック実行結果ウィンドウのスタイル定義
  *
- * 意匠はニューゲームウィンドウ(NewGameWindow.css)と揃える: 枠線・角丸・発光を持たない
- * ベタ塗りの四角で、落ち影だけで面の高さを表現し、強調は左端の実線ブロックで示す。
- * 配色・影は App.css の共通トークン(--flat-*)を参照する(直値を書かないこと)。
+ * タイトルバーの無いウィンドウ全体を1枚の面として使い、上端のアクセントの細い線で窓の縁を示す
+ * (システムメニュー・エポック実行確認と同じ)。意匠はフラット系: 枠線・角丸・発光を持たない四角で、
+ * 強調は左端の実線ブロックで示す。配色は App.css の共通トークン(--flat-*)を参照する(直値を書かないこと)。
+ * 背景に季節の画像を敷くので、タイル・チップ・カード・パネルは落ち影を持たない半透明の面(--epoch-result-pane)にして
+ * 画像を透かす。面は地より少し明るくし、画像が消えた下半分でも地に溶け込まないようにする。
  *
  * レイアウト構成:
- * - ヘッダ: 左上に大きく日付
+ * - 背景: 実行後の月の画像。左右いっぱい・高さ=ウィンドウの半分で敷き、下へ段階的に透明にして縦の中央で消す。
+ *   右へも少し薄め、スコアの後ろは楕円の影でさらに沈めて文字を読ませる
+ * - ヒーロー: 左に日付、右にスコア
  * - クエストストリップ: 達成・失敗・達成間近のクエストチップ(横並び・折返し)
- * - メインエリア: 統計タイル(上詰め・実寸) + 建設状況(高さいっぱい) の2カラム
- * - フッタ: 閉じるボタン
+ * - メインエリア: 統計タイル(実寸)と達成目標(残りの高さ) + 建設状況(高さいっぱい) の2カラム。見出しはカードの外
+ * - フッタ: 閉じるボタン(右寄せ)
  *
- * 統計タイルは「水準の警戒色(タイル全体の色 = 絶対基準)」と
- * 「変動方向の矢印(色 = 指標の極性)」の2系統の視覚効果を持つ。
+ * 統計タイルは「水準の警戒色(タイルの四辺の内側の色 = 絶対基準)」と
+ * 「変動方向の矢印(色 = 指標の極性)」の2系統の視覚効果を持ち、背景に推移を矢印と同じ色で薄く描く。
  */
 
-.epoch-result-root {
-  padding: 20px;
+/* isolation で重なりの基準を作り、背景画像と影(z-index: -1)を中身の後ろ・ウィンドウの地の手前に置く */
+.epoch-result {
+  --epoch-result-pane: color-mix(in srgb, var(--flat-raised-hover) 48%, transparent);
+  --epoch-result-pane-hover: color-mix(in srgb, var(--flat-raised-hover) 72%, transparent);
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: 14px;
   height: 100%;
-  box-sizing: border-box;
+  overflow: hidden;
 }
 
-/* ── ヘッダ: 日付(左・大) */
-.epoch-result-header {
+.epoch-result::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--flat-accent) 50%, transparent);
+}
+
+/* スコアの後ろの影。画像の上に重ね(画像より後に描かれる)、縁が見えないよう楕円の勾配で要素の内側で透明にする */
+.epoch-result::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: -1;
+  width: 60%;
+  height: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 75% 70% at 85% 25%,
+    color-mix(in srgb, var(--flat-sunken) 70%, transparent) 0%,
+    color-mix(in srgb, var(--flat-sunken) 35%, transparent) 50%,
+    transparent 100%
+  );
+}
+
+/* 季節の画像。左右いっぱい・高さ=ウィンドウの半分に切り抜いて敷く。
+   下へ向かって何段かに分けて透明へ落とし、ウィンドウの縦の中央でちょうど透明になる。
+   右へは少しだけ薄め、右端で 0.15 にする(2つの勾配の積)。拡大した画像の粗さはぼかしで目立たなくする */
+.epoch-result-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 50%;
+  object-fit: cover;
+  object-position: center 35%;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.5;
+  filter: blur(1px) saturate(0.9);
+  mask-image:
+    linear-gradient(
+      to bottom,
+      #000 0%,
+      rgba(0, 0, 0, 0.9) 20%,
+      rgba(0, 0, 0, 0.65) 40%,
+      rgba(0, 0, 0, 0.35) 60%,
+      rgba(0, 0, 0, 0.12) 80%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to right,
+      #000 0%,
+      #000 40%,
+      rgba(0, 0, 0, 0.55) 62%,
+      rgba(0, 0, 0, 0.28) 82%,
+      rgba(0, 0, 0, 0.15) 100%
+    );
+  mask-composite: intersect;
+}
+
+/* ── ヒーロー: 日付(左) + スコア(右) ── */
+.epoch-result-hero {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  gap: 32px;
+  flex: 0 0 auto;
+  min-height: 12rem;
+  padding: 28px 28px 20px;
+}
+
+/* ヒーローの小見出し(「エポック結果」「スコア」) */
+.epoch-result-overline {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--flat-accent);
 }
 
 .epoch-result-date-block {
@@ -41,15 +124,134 @@
 
 /* EpochDate コンポーネント(span.epoch-date)を大きく上書き表示する */
 .epoch-result-date-block .epoch-date {
-  font-size: 2.22rem;
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.15;
   color: var(--flat-text);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
 
 .epoch-result-date-sub {
   font-size: 1.11rem;
-  color: var(--flat-text-muted);
+  color: var(--flat-text-label);
+}
+
+/* ── スコア(ヒーローの右): 当期スコアと構成の帯 ── */
+.epoch-result-score {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 1 30rem;
+  min-width: 0;
+}
+
+/* 言語によって1行に収まらないので、項目の途中では折り返さず項目ごとに次の行へ送る */
+.epoch-result-score-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+}
+
+.epoch-result-score-label {
+  font-size: 1.02rem;
+  color: var(--flat-text-label);
+  white-space: nowrap;
+}
+
+.epoch-result-score-value {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.epoch-result-score-unit {
+  font-size: 1.11rem;
+  color: var(--flat-text-label);
+}
+
+.epoch-result-score-per-household {
+  margin-left: auto;
+  font-size: 1.02rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text-label);
+  white-space: nowrap;
+}
+
+/* 構成の帯。加点(1行目)と減点(2行目)を同じ尺度=加点合計を全幅として並べる。
+   ラベル列と帯列の2列グリッドにして、2本の帯の左端と長さを揃える。 */
+.epoch-result-score-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.epoch-result-score-row-label {
+  font-size: 1.02rem;
+  color: var(--flat-text-label);
+  white-space: nowrap;
+}
+
+.epoch-result-score-bar {
+  display: flex;
+  height: 8px;
+  background-color: rgba(16, 22, 31, 0.8);
+  overflow: hidden;
+}
+
+.epoch-result-score-seg {
+  display: block;
+  height: 100%;
+}
+
+/* 内訳の色。帯のセグメントと凡例のスウォッチで共有する
+   (達成目標ウィンドウのウォーターフォールと同じ配色) */
+.epoch-result-score-qol {
+  background-color: #3b82f6;
+}
+
+.epoch-result-score-env {
+  background-color: #10b981;
+}
+
+.epoch-result-score-penalty {
+  background-color: #ef4444;
+}
+
+.epoch-result-score-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 1.02rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text-body);
+}
+
+.epoch-result-score-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.epoch-result-score-swatch {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+}
+
+/* ── 本文: クエストストリップ + 2カラム ── */
+.epoch-result-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px 28px 0;
 }
 
 /* ── クエストストリップ: 達成・失敗・達成間近のチップを横並びで表示 ── */
@@ -66,29 +268,28 @@
   gap: 8px;
   padding: 6px 12px 6px 14px;
   font-size: 1.11rem;
-  background-color: var(--flat-raised);
-  box-shadow: var(--flat-shadow-sm);
+  background-color: var(--epoch-result-pane);
   max-width: 320px;
 }
 
 .epoch-result-quest-chip--completed {
-  box-shadow: inset 4px 0 0 var(--flat-warn), var(--flat-shadow-sm);
+  box-shadow: inset 3px 0 0 var(--flat-warn);
 }
 
 .epoch-result-quest-chip--completed.epoch-result-quest-chip--silver {
-  box-shadow: inset 4px 0 0 #c0c8d8, var(--flat-shadow-sm);
+  box-shadow: inset 3px 0 0 #c0c8d8;
 }
 
 .epoch-result-quest-chip--completed.epoch-result-quest-chip--bronze {
-  box-shadow: inset 4px 0 0 #c08850, var(--flat-shadow-sm);
+  box-shadow: inset 3px 0 0 #c08850;
 }
 
 .epoch-result-quest-chip--failed {
-  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+  box-shadow: inset 3px 0 0 var(--flat-danger);
 }
 
 .epoch-result-quest-chip--near {
-  box-shadow: inset 4px 0 0 var(--flat-accent), var(--flat-shadow-sm);
+  box-shadow: inset 3px 0 0 var(--flat-accent);
 }
 
 .epoch-result-quest-chip-icon {
@@ -138,10 +339,10 @@
   flex-shrink: 0;
 }
 
-/* ── メインエリア: 統計タイル + 建設状況 の2カラム */
+/* ── メインエリア: 統計タイル・達成目標 + 建設状況 の2カラム */
 .epoch-result-main {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   flex: 1;
   min-height: 0;
 }
@@ -151,77 +352,65 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
+/* 左カラムは統計タイルを実寸で上詰めにし、残りの高さを達成目標の一覧に使う。
+   文字サイズが大きく統計タイルだけで溢れるときはカラムごとスクロールする */
 .epoch-result-col-stats {
   flex: 2 1 0;
+  gap: 20px;
+  overflow-y: auto;
 }
 
-/* 建設状況は名称が読める幅を確保する(項目名が長く、進捗バーも並ぶため)。 */
+/* 建設状況は名称が読める幅を確保する(項目名が長く、進捗バーも並ぶため) */
 .epoch-result-col-right {
   flex: 1 1 0;
   min-width: 360px;
   max-width: 520px;
 }
 
-/* 左カラムは実寸で上詰め(無理に引き伸ばさない)。
-   建設状況は一覧が長くなるのでウィンドウの高さいっぱいまで伸ばす。 */
-.epoch-result-col-stats {
-  gap: 14px;
-}
-
-.epoch-result-col-right > .epoch-result-section {
-  flex: 1 1 0;
-  min-height: 0;
-}
-
-/* 左カラムのブロックは枠(カード)を持たない。中身のタイルがカードなので、
-   さらにカードで囲むと入れ子の二重枠になって読みにくくなる。 */
+/* ブロックは見出しと中身だけで、ブロック自体は枠(カード)を持たない。見出しは常にカードの外に置く */
 .epoch-result-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   flex: 0 0 auto;
   min-width: 0;
 }
 
-.epoch-result-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px 16px;
-  background-color: var(--flat-surface);
-  box-shadow: var(--flat-shadow);
+/* カラムの残りの高さいっぱいに伸ばすブロック(達成目標・建設状況)。中身は .epoch-result-scroll で縦に流す */
+.epoch-result-block--fill {
+  flex: 1 1 0;
+  min-height: 8rem;
 }
 
-/* セクション見出し行(タイトル + 補助説明) */
-.epoch-result-section-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+.epoch-result-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
 }
 
-/* 見出しは左端の実線ブロックで段を示す(ニューゲームウィンドウと同じ規約) */
+/* 建設状況の一覧を載せる面 */
+.epoch-result-panel {
+  padding: 6px;
+  background-color: var(--epoch-result-pane);
+}
+
+/* 見出しは左端の実線ブロックで段を示す(ニューゲームウィンドウと同じ規約)。
+   地の上に直接置くので、ずらした inset の影ではなく左の境界線で描く(影だと拡大率によって上下の縁に細い線が出る) */
 .epoch-result-section-title {
   margin: 0;
-  padding: 2px 0 2px 10px;
-  font-size: 1.39rem;
+  padding: 1px 0 1px 9px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: var(--flat-text);
-  box-shadow: inset 4px 0 0 var(--flat-accent);
-}
-
-.epoch-result-section-note {
-  font-size: 1.02rem;
-  color: var(--flat-text-muted);
+  border-left: 3px solid var(--flat-accent);
 }
 
 .epoch-result-empty {
   margin: 0;
   padding: 4px 0;
-  font-size: 1.2rem;
+  font-size: 1.11rem;
   color: var(--flat-text-muted);
 }
 
@@ -230,53 +419,83 @@
   display: grid;
   /* 既定のウィンドウ幅で4列×3行(タイル12枚)がちょうど埋まる下限幅。
      ウィンドウを広げれば自動で列数が増える。 */
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  grid-auto-rows: auto;
+  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
   align-content: start;
-  gap: 8px;
-  flex: 0 0 auto;
+  gap: 14px;  /* 推移のグラフはタイルの左右端まで描くので、隣のタイルの線とつながって見えない間隔を空ける */
 }
 
-/* [アイコン][ラベル+値][矢印]の横並び。1枚あたり2行分の高さに収める。 */
+/* 上段に[アイコン][ラベル][矢印]、下段に値。推移のグラフ(z-index: -1)は文字の後ろに敷く */
 .epoch-result-stat-tile {
+  position: relative;
+  isolation: isolate;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 12px 14px;
+  overflow: hidden;
+  background-color: var(--epoch-result-pane);
+  transition: background-color 0.15s ease;
+}
+
+.epoch-result-stat-tile-normal:hover {
+  background-color: var(--epoch-result-pane-hover);
+}
+
+.epoch-result-spark {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+
+.epoch-result-spark-good {
+  color: var(--flat-good);
+}
+
+.epoch-result-spark-bad {
+  color: var(--flat-danger);
+}
+
+.epoch-result-spark-neutral {
+  color: var(--flat-accent);
+}
+
+.epoch-result-stat-head {
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
-  background-color: var(--flat-raised);
-  box-shadow: var(--flat-shadow-sm);
   min-width: 0;
 }
 
-/* 水準の警戒色(絶対基準)。面の色と左端の実線ブロックで、相対トレンド(矢印)とは
+/* 水準の警戒色(絶対基準)。面は塗らず、四辺の内側から中央へ薄れる色で、相対トレンド(矢印)とは
    別軸の「今の水準そのものが良くない」ことを示す。 */
 .epoch-result-stat-tile-warn {
-  background-color: var(--flat-warn-surface);
-  box-shadow: inset 4px 0 0 var(--flat-warn), var(--flat-shadow-sm);
+  box-shadow: inset 0 0 1.1rem color-mix(in srgb, var(--flat-warn) 45%, transparent);
 }
 
 .epoch-result-stat-tile-danger {
-  background-color: var(--flat-danger-surface);
-  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+  box-shadow: inset 0 0 1.1rem color-mix(in srgb, var(--flat-danger) 55%, transparent);
 }
 
+/* アイコンは透過画像なので地を敷かず、枠いっぱいに大きく出す */
 .epoch-result-stat-icon {
-  width: 22px;
-  height: 22px;
+  display: flex;
   flex: 0 0 auto;
-  object-fit: contain;
-  opacity: 0.85;
+  width: 2rem;
+  height: 2rem;
 }
 
-.epoch-result-stat-body {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-width: 0;
+.epoch-result-stat-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .epoch-result-stat-label {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 1.02rem;
   line-height: 1.3;
   color: var(--flat-text-label);
@@ -289,13 +508,13 @@
 .epoch-result-stat-value-row {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: 6px;
   min-width: 0;
 }
 
 .epoch-result-stat-value {
-  font-size: 1.48rem;
-  font-weight: 600;
+  font-size: 1.65rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
   line-height: 1.2;
@@ -337,237 +556,206 @@
   color: var(--flat-text-muted);
 }
 
-/* ── 達成目標の簡易表示: チェックマークの並び + ホバーの内訳ポップアップ ── */
-.epoch-result-quest-checks {
-  position: relative;
-  align-self: flex-start;
-}
-
-.epoch-result-quest-check-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 5px 8px;
-  background-color: var(--flat-raised);
-  box-shadow: var(--flat-shadow-sm);
-}
-
-.epoch-result-quest-check {
-  font-size: 1.3rem;
-  line-height: 1.2;
-  color: var(--flat-text-muted);
-}
-
-/* 達成済みだけ色を付ける。未達成・未解放・失敗はグレーのまま(個数だけを見せる) */
-.epoch-result-quest-check--completed {
-  color: var(--flat-good);
-}
-
-/* ホバー時だけ「どれが達成できているか」を一覧で見せる */
-.epoch-result-quest-popup {
-  display: none;
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 20;
-  min-width: 240px;
-  max-width: 380px;
-  max-height: 320px;
-  overflow-y: auto;
-  padding: 8px 10px;
-  background-color: var(--flat-surface);
-  box-shadow: var(--flat-shadow);
-}
-
-.epoch-result-quest-checks:hover .epoch-result-quest-popup {
-  display: block;
-}
-
-.epoch-result-quest-popup-row {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 2px 0;
-  font-size: 1.11rem;
-}
-
-.epoch-result-quest-popup-name {
-  flex: 1 1 auto;
-  min-width: 0;
-  color: var(--flat-text-body);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.epoch-result-quest-popup-state {
-  flex: 0 0 auto;
-  font-size: 1.02rem;
-  color: var(--flat-text-muted);
-}
-
-/* ── スコア: 当期スコアと構成の帯 ── */
-.epoch-result-score {
+/* ── 達成目標の一覧 ── */
+.epoch-result-quests {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 8px 10px;
-  background-color: var(--flat-raised);
-  box-shadow: var(--flat-shadow-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.epoch-result-score-head {
+/* 1件=半透明の面。進行中の目標は左端の実線ブロックを演出強度(tier)の色にする */
+.epoch-result-quest {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px 9px 14px;
+  background-color: var(--epoch-result-pane);
+}
+
+.epoch-result-quest--gold {
+  box-shadow: inset 3px 0 0 var(--flat-warn);
+}
+
+.epoch-result-quest--silver {
+  box-shadow: inset 3px 0 0 #c0c8d8;
+}
+
+.epoch-result-quest--bronze {
+  box-shadow: inset 3px 0 0 #c08850;
+}
+
+/* 達成・失敗した目標は1行で控えめに出す */
+.epoch-result-quest--completed,
+.epoch-result-quest--failed {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  background-color: color-mix(in srgb, var(--flat-raised-hover) 28%, transparent);
+}
+
+.epoch-result-quest-head {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 10px;
+  min-width: 0;
 }
 
-.epoch-result-score-label {
-  font-size: 1.02rem;
+.epoch-result-quest-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: var(--flat-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.epoch-result-quest--completed .epoch-result-quest-name,
+.epoch-result-quest--failed .epoch-result-quest-name {
+  flex: 1 1 auto;
+  font-weight: 500;
   color: var(--flat-text-label);
 }
 
-.epoch-result-score-value {
-  font-size: 1.85rem;
-  font-weight: 600;
+/* 説明は名前の後ろに1行で続け、収まらない分は省略する(全文は title) */
+.epoch-result-quest-desc {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.epoch-result-quest-deadline {
+  flex: 0 0 auto;
+  font-size: 0.95rem;
+  color: var(--flat-warn);
+  white-space: nowrap;
+}
+
+.epoch-result-quest-pct {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 1.2rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
 }
 
-.epoch-result-score-unit {
-  font-size: 1.02rem;
-  color: var(--flat-text-label);
+.epoch-result-quest-mark {
+  flex: 0 0 auto;
+  font-weight: 700;
 }
 
-.epoch-result-score-per-household {
-  margin-left: auto;
-  font-size: 1.02rem;
-  font-variant-numeric: tabular-nums;
+.epoch-result-quest--completed .epoch-result-quest-mark {
+  color: var(--flat-good);
+}
+
+.epoch-result-quest--failed .epoch-result-quest-mark {
+  color: var(--flat-danger);
+}
+
+.epoch-result-quest-state {
+  flex: 0 0 auto;
+  font-size: 0.95rem;
   color: var(--flat-text-muted);
 }
 
-/* 構成の帯。加点(1行目)と減点(2行目)を同じ尺度=加点合計を全幅として並べる。
-   ラベル列と帯列の2列グリッドにして、2本の帯の左端と長さを揃える。 */
-.epoch-result-score-rows {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 4px 8px;
-}
-
-.epoch-result-score-row-label {
-  font-size: 1.02rem;
-  color: var(--flat-text-label);
-  white-space: nowrap;
-}
-
-.epoch-result-score-bar {
+/* 条件1つ=[進捗のバー][現在値 / 比較 目標値][時間派生のラベル] */
+.epoch-result-quest-clause {
   display: flex;
-  height: 10px;
-  background-color: var(--flat-sunken);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.epoch-result-quest-bar {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 4rem;
+  height: 5px;
+  background-color: color-mix(in srgb, var(--flat-sunken) 80%, transparent);
   overflow: hidden;
 }
 
-.epoch-result-score-seg {
-  display: block;
-  height: 100%;
+.epoch-result-quest-bar > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background-color: var(--flat-accent);
 }
 
-/* 内訳の色。帯のセグメントと凡例のスウォッチで共有する
-   (達成目標ウィンドウのウォーターフォールと同じ配色) */
-.epoch-result-score-qol {
-  background-color: #3b82f6;
+.epoch-result-quest-clause--ok .epoch-result-quest-bar > span {
+  background-color: var(--flat-good);
 }
 
-.epoch-result-score-env {
-  background-color: #10b981;
-}
-
-.epoch-result-score-penalty {
-  background-color: #ef4444;
-}
-
-.epoch-result-score-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 1.02rem;
+.epoch-result-quest-values {
+  flex: 0 0 auto;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
+  color: var(--flat-text-muted);
+  white-space: nowrap;
+}
+
+.epoch-result-quest-current {
+  font-weight: 600;
   color: var(--flat-text-body);
 }
 
-.epoch-result-score-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.epoch-result-score-swatch {
-  width: 9px;
-  height: 9px;
+.epoch-result-quest-mode {
   flex: 0 0 auto;
+  padding: 1px 6px;
+  font-size: 0.95rem;
+  color: var(--flat-text-label);
+  background-color: color-mix(in srgb, var(--flat-sunken) 70%, transparent);
+  white-space: nowrap;
 }
 
 /* ── 建設状況(道路・公共施設の統合リスト) */
-.epoch-result-construction-scroll {
-  /* 建設進捗テーブルをスクロール領域に収め、カードの残りの高さを埋める。 */
-  flex: 1 1 0;
-  min-height: 80px;
-  overflow-y: auto;
+
+.epoch-result-construction-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.epoch-result-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-size: 1.2rem;
+/* 1件=2段。区切りは罫線ではなく交互の面の色で示す */
+.epoch-result-construction-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 8px 9px;
 }
 
-/* 罫線は引かず、ヘッダは面の色で区別する(枠なしの意匠) */
-.epoch-result-th {
-  text-align: left;
-  padding: 5px 6px;
-  font-size: 1.02rem;
-  font-weight: 600;
-  color: var(--flat-text-label);
-  position: sticky;
-  top: 0;
-  background-color: var(--flat-surface);
-}
-
-.epoch-result-th-name { width: 44%; }
-.epoch-result-th-status { width: 20%; }
-.epoch-result-th-progress { width: 36%; }
-
-/* 行の区切りは罫線ではなく交互の面の色で示す */
-.epoch-result-tr:nth-child(even) {
+.epoch-result-construction-item:nth-child(even) {
   background-color: rgba(255, 255, 255, 0.03);
 }
 
-.epoch-result-tr:hover {
-  background-color: var(--flat-raised);
+.epoch-result-construction-item:hover {
+  background-color: var(--epoch-result-pane-hover);
 }
 
-.epoch-result-td {
-  padding: 6px;
-  vertical-align: middle;
-}
-
-.epoch-result-td-name {
-  color: var(--flat-text-body);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.epoch-result-construction-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 /* 道路と公共施設を1つのリストにまとめているため、種別をベタ塗りのラベルで区別する */
 .epoch-result-kind-badge {
-  display: inline-block;
-  margin-right: 6px;
+  flex: 0 0 auto;
   padding: 1px 5px;
-  font-size: 1.02rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  vertical-align: middle;
 }
 
 .epoch-result-kind-badge-path {
@@ -581,106 +769,80 @@
 }
 
 .epoch-result-name-text {
-  vertical-align: middle;
-}
-
-.epoch-result-td-status {
-  text-align: left;
-}
-
-.epoch-result-td-progress {
+  flex: 1 1 auto;
   min-width: 0;
+  font-size: 1.11rem;
+  color: var(--flat-text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ステータスバッジ。色は STATUS_STYLE_MAP からインライン指定する */
 .epoch-result-status-badge {
-  display: inline-block;
-  padding: 2px 6px;
-  font-size: 1.02rem;
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  font-size: 0.95rem;
   font-weight: 500;
   white-space: nowrap;
 }
 
-/* ── 進捗バー+テキスト(テーブルセル内に収める) */
+/* ── 進捗バー+テキスト */
 .epoch-result-progress {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
 }
 
-/* 進捗バー: 沈んだ溝の上に before(暗)→after(アクセント) を重ね描き */
+/* 進捗バー: 沈んだ溝の上に、実行後まで(アクセント)と実行前まで(暗い青)を重ね描きし、
+   このエポックで進んだ区間だけがアクセントの色で残るようにする */
 .epoch-result-progress-bar {
   position: relative;
   flex: 1;
-  height: 7px;
+  height: 6px;
   min-width: 40px;
   background-color: var(--flat-sunken);
   overflow: hidden;
 }
 
+.epoch-result-progress-after,
 .epoch-result-progress-before {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
-  background-color: #3a4759;
 }
 
 .epoch-result-progress-after {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
   background-color: var(--flat-accent);
+}
+
+.epoch-result-progress-before {
+  background-color: #2f4f75;
 }
 
 .epoch-result-progress-text {
   flex: 0 0 auto;
-  font-size: 1.02rem;
+  font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
-  color: var(--flat-text-body);
+  color: var(--flat-text-label);
   white-space: nowrap;
 }
 
 .epoch-result-completed {
   flex: 0 0 auto;
   padding: 1px 5px;
-  font-size: 1.02rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   background-color: var(--flat-warn);
   color: #0e1520;
 }
 
-/* ── 閉じるボタン */
-.epoch-result-buttons {
+/* ── フッタ: 閉じるボタン(右寄せ) */
+.epoch-result-footer {
   display: flex;
-  justify-content: center;
-  margin-top: auto;
-  padding-top: 4px;
-}
-
-.epoch-result-btn {
-  padding: 10px 28px;
-  border: none;
-  border-radius: 0;
-  box-shadow: var(--flat-shadow);
-  font-size: 1.3rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.15s ease, opacity 0.15s ease;
-}
-
-.epoch-result-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.epoch-result-close {
-  background-color: var(--flat-selected);
-  color: #ffffff;
-}
-
-.epoch-result-close:hover:not(:disabled) {
-  background-color: var(--flat-selected-hover);
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  padding: 16px 28px 20px;
 }

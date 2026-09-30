@@ -46,6 +46,31 @@ assert.equal(guide!.failed, true); assert.equal(guide!.ready, false); assert.equ
 await settle(() => guide!.retry());
 assert.equal(guide!.failed, false); assert.equal(guide!.ready, true); assert.equal(fixture.actions, 2);
 assert.deepEqual(snapshot()?.world.camera, { target: [-1180, 0, 360], distance: 420, yaw: 0, pitch: 50 }, "phase camera reaches the snapshot");
+// 地区編集モードの切り替え(HUD間で共有されるグローバルイベント)で段階とカメラが動く。
+await settle(() => root.render(<Harness scenario="scenario2" step={1} save="D" />));
+assert.equal(snapshot()?.phaseId, "enter");
+const overview = snapshot()!.world.camera;
+await settle(() => emit("hud:mode_changed", { mode: "district" }));
+assert.equal(snapshot()?.phaseId, "create");
+assert.ok(snapshot()!.world.camera!.distance < overview!.distance, "the camera moves closer once the edit mode starts");
+await settle(() => emit("hud:mode_changed", { mode: null }));
+assert.equal(snapshot()?.phaseId, "enter");
+// 建て終えてパネルが閉じても、達成条件を満たしていれば「次へ」で進める(案内は最終段階のまま)。
+localStorage.setItem("tutorial_runtime_v1:basic:E", JSON.stringify({ bindings: { "support.housing.building": { kind: "agents", id: 30 } }, setupDone: true }));
+fixture.records.set("buildings:31", { agent_id: 31, variant: 2001, status: 3 });
+await settle(() => root.render(<Harness scenario="basic" step={4} save="E" />));
+await observation({ label: "construction", window: "building_construction", visible: false });
+assert.equal(snapshot()?.phaseId, "select");
+await settle(async () => { assert.equal(await guide!.check(), true); });
+// 接続の確認のように、確認時の代行(beforeCheck)の後でしか達成しないステップも、パネルが閉じていて進める。
+fixture.records.set("tutorial:1", { id: 1, checks: { grid: false } });
+fixture.onAction = () => { fixture.records.set("tutorial:1", { id: 1, checks: { grid: true } }); };
+fixture.actions = 0;
+await settle(() => root.render(<Harness scenario="scenario3" step={4} save="F" />));
+assert.equal(snapshot()?.phaseId, "open");
+await settle(async () => { assert.equal(await guide!.check(), true); });
+assert.ok(fixture.actions >= 1, "the commissioning action ran before the completion check");
+fixture.onAction = undefined;
 await settle(() => root.unmount());
 assert.equal(snapshot()?.active, false);
 await browser.happyDOM.close();

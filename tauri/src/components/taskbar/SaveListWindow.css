@@ -1,55 +1,71 @@
 /**
  * セーブデータ一覧(ロード画面)のスタイル。
  *
- * 各セーブは横長のカード: 左に保存時の画像(16:9。左上に都市の言語の国旗)、中央に名前・元のシナリオ・人口と日付、
- * 右にロードと削除。意匠はフラット系(App.css の --flat-*): 面と落ち影で浮かせ、現在のデータは左端の実線ブロックで示す。
- * 確認は SaveDialog(幕とボックス)をウィンドウ全体に重ねるので、ルートはスクロールさせず基準の位置だけを持つ。
+ * タイトルバーの無いウィンドウ全体を1枚の面として使い、上端のアクセントの細い線で窓の縁を示す
+ * (システムメニュー・エポック結果と同じ)。意匠はフラット系(App.css の --flat-*): 枠線・角丸・発光を持たない四角で、
+ * 強調は左端の実線ブロックで示す。
+ *
+ * レイアウト構成:
+ * - ヒーロー: 小見出し(ロード)と見出し(セーブデータ一覧)
+ * - 一覧: 横長のカード。左に保存時の画像(16:9。左上に都市の言語の国旗)、中央に名前・元のシナリオ・人口とゲーム内日付、
+ *   右にロードと削除、右下に保存日時。保存日時はゲーム内日付と取り違えないよう中央の列から離し、版の行と同じ控えめな文字にする。
+ *   カードは落ち影の無い半透明の面にし、現在のデータは選択色の面と左端の実線ブロックで示す
+ * - フッタ: 左にフォルダの場所、右に閉じる
+ * 確認は SaveDialog(幕とボックス)をウィンドウ全体に重ねるので、ルートは基準の位置を持つ。
  */
 
-.save-list-body {
+.save-list {
+  --save-list-pane: color-mix(in srgb, var(--flat-raised-hover) 48%, transparent);
+  --save-list-pane-hover: color-mix(in srgb, var(--flat-raised-hover) 72%, transparent);
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background: radial-gradient(120% 50% at 50% 0%, rgba(78, 161, 255, 0.1), transparent 70%);
 }
 
-.save-list-toolbar {
+.save-list::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--flat-accent) 50%, transparent);
+  pointer-events: none;
+}
+
+/* ── ヒーロー ── */
+.save-list-hero {
   display: flex;
-  justify-content: flex-end;
-  padding: 12px 16px 0;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding: 28px 28px 18px;
 }
 
-/* 全体既定(枠線+角丸)のボタンを打ち消す */
-.save-list-folder-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  font: inherit;
-  font-size: 1.04rem;
-  color: var(--flat-text-label);
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+.save-list-overline {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--flat-accent);
 }
 
-.save-list-folder-btn:hover {
+.save-list-title {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.2;
   color: var(--flat-text);
-  background: var(--flat-raised);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
 
-.save-list-folder-icon {
-  width: 1.3rem;
-  height: 1.3rem;
-}
-
+/* ── 一覧 ── */
 .save-list-scroll {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  padding: 12px 16px 16px;
+  padding: 0 28px 20px;
   overflow-y: auto;
 }
 
@@ -57,55 +73,58 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 56px 16px;
+  gap: 14px;
+  padding: 48px 16px;
   font-size: 1.15rem;
   color: var(--flat-text-muted);
   text-align: center;
 }
 
 .save-list-empty-icon {
-  width: 3.2rem;
-  height: 3.2rem;
-  opacity: 0.6;
+  width: 3.6rem;
+  height: 3.6rem;
+  opacity: 0.5;
 }
 
 .save-list-items {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* 1件=横長のカード。一覧を開いたときに上から順に浮かび上がる */
 .save-card {
   display: grid;
-  grid-template-columns: 11.5rem minmax(0, 1fr) auto;
+  grid-template-columns: 12.5rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
-  padding: 10px 14px 10px 10px;
-  background: var(--flat-raised);
-  box-shadow: var(--flat-shadow);
-  transition: background 0.12s, box-shadow 0.12s;
+  gap: 18px;
+  padding: 10px 16px 10px 10px;
+  background: var(--save-list-pane);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  animation: save-list-rise 0.34s ease-out backwards;
+  animation-delay: calc(min(var(--save-card-index, 0), 10) * 36ms);
 }
 
 .save-card:hover {
-  background: #202d3f;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+  background: var(--save-list-pane-hover);
+  box-shadow: inset 3px 0 0 var(--flat-accent);
 }
 
 /* 現在読み込み中のデータ。左端の実線ブロックは inset の影で描き、枠線を使わない */
 .save-card--current {
-  background: #1d3350;
-  box-shadow: inset 4px 0 0 var(--flat-accent), var(--flat-shadow);
+  background: color-mix(in srgb, var(--flat-selected) 42%, transparent);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
 }
 
 .save-card--current:hover {
-  background: #22405f;
-  box-shadow: inset 4px 0 0 var(--flat-accent), 0 8px 18px rgba(0, 0, 0, 0.55);
+  background: color-mix(in srgb, var(--flat-selected) 58%, transparent);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
 }
 
+/* 画像の無いセーブは方眼の面に街並みのアイコンを置く(ニューゲームの画像の無いシナリオと同じ面) */
 .save-card-thumb {
   position: relative;
   display: flex;
@@ -114,19 +133,29 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: linear-gradient(160deg, #22324a, #121a26);
+  background-color: var(--flat-sunken);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--flat-accent) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--flat-accent) 12%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 28% 22%, color-mix(in srgb, var(--flat-selected) 55%, transparent), transparent 72%);
+  background-size: 16px 16px, 16px 16px, 100% 100%;
 }
 
 .save-card-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.save-card:hover .save-card-thumb img {
+  transform: scale(1.05);
 }
 
 .save-card-thumb-placeholder {
   width: 40%;
   height: 50%;
-  color: #3f5675;
+  color: color-mix(in srgb, var(--flat-accent) 45%, var(--flat-sunken));
 }
 
 /* 画像の上でも読めるよう、暗い下地に載せる */
@@ -137,28 +166,30 @@
   padding: 1px 5px;
   font-size: 1.15rem;
   line-height: 1.25;
-  background: rgba(8, 14, 24, 0.7);
-  border-radius: 3px;
+  background: color-mix(in srgb, var(--flat-sunken) 75%, transparent);
 }
 
+/* 中央の列もカードの高さいっぱいに伸ばし、版の行を下端に寄せて右下の保存日時と同じ段に揃える */
 .save-card-body {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  align-self: stretch;
+  gap: 6px;
   min-width: 0;
 }
 
 .save-card-heading {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
 .save-card-name {
   overflow: hidden;
-  font-size: 1.3rem;
+  font-size: 1.35rem;
   font-weight: 700;
+  line-height: 1.3;
   color: var(--flat-text);
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -167,9 +198,9 @@
 .save-card-current {
   flex-shrink: 0;
   padding: 2px 8px;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: #0e1520;
+  color: var(--flat-sunken);
   white-space: nowrap;
   background: var(--flat-accent);
 }
@@ -180,7 +211,7 @@
   gap: 6px;
   min-width: 0;
   font-size: 1.04rem;
-  color: #9cc7ff;
+  color: color-mix(in srgb, var(--flat-accent) 55%, var(--flat-text));
 }
 
 .save-card-scenario > span {
@@ -192,15 +223,16 @@
 .save-card-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 16px;
+  gap: 4px 18px;
   font-size: 1rem;
+  font-variant-numeric: tabular-nums;
   color: var(--flat-text-label);
 }
 
 .save-card-meta > span {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   white-space: nowrap;
 }
 
@@ -208,18 +240,38 @@
   flex-shrink: 0;
   width: 1.1rem;
   height: 1.1rem;
-  opacity: 0.8;
+  color: var(--flat-accent);
+  opacity: 0.85;
 }
 
 .save-card-body .save-version-info {
-  font-size: 0.92rem;
+  margin-top: auto;
+  font-size: 0.9rem;
   color: var(--flat-text-muted);
+}
+
+/* 右の列はカードの高さいっぱいに伸ばし、ボタンを残りの高さの中央に、保存日時を右下に置く */
+.save-card-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  align-self: stretch;
+  gap: 8px;
 }
 
 .save-card-actions {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin: auto 0;
+}
+
+/* 版の行(.save-version-info)と同じ大きさ・濃さ */
+.save-card-saved-at {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text-muted);
+  white-space: nowrap;
 }
 
 /* 全体既定(枠線+角丸)のボタンを打ち消し、ベタ塗りの四角にする */
@@ -232,26 +284,27 @@
   border: none;
   border-radius: 0;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .save-card-load {
-  min-width: 6rem;
-  padding: 9px 18px;
+  min-width: 6.5rem;
+  padding: 10px 20px;
   font-size: 1.08rem;
   font-weight: 700;
   color: #ffffff;
   background: var(--flat-selected);
-  box-shadow: var(--flat-shadow-sm);
+  box-shadow: inset 3px 0 0 var(--flat-accent);
 }
 
 .save-card-load:hover:not(:disabled) {
   background: var(--flat-selected-hover);
+  box-shadow: inset 6px 0 0 var(--flat-accent);
 }
 
 .save-card-delete {
-  width: 2.45rem;
-  height: 2.45rem;
+  width: 2.6rem;
+  height: 2.6rem;
   padding: 0;
   color: var(--flat-text-muted);
   background: transparent;
@@ -263,12 +316,60 @@
 }
 
 .save-card-delete:hover:not(:disabled) {
-  color: #ffb3b3;
+  color: var(--flat-danger);
   background: var(--flat-danger-surface);
+}
+
+.save-card-load:focus-visible,
+.save-card-delete:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: 2px;
 }
 
 .save-card-load:disabled,
 .save-card-delete:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* ── フッタ: フォルダの場所(左) + 閉じる(右) ── */
+.save-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+  padding: 14px 28px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* 全体既定(枠線+角丸)のボタンを打ち消し、文字だけの控えめな操作にする */
+.save-list-folder-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 10px;
+  font: inherit;
+  font-size: 1.04rem;
+  color: var(--flat-text-label);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.save-list-folder-btn:hover {
+  color: var(--flat-text);
+  background: var(--save-list-pane);
+}
+
+.save-list-folder-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+  color: var(--flat-accent);
+}
+
+@keyframes save-list-rise {
+  from { opacity: 0; transform: translateY(8px); }
 }

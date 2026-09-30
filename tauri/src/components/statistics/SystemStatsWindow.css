@@ -183,34 +183,22 @@
 }
 .system-stats-overview {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
   gap: 2rem;
 }
-.system-stats-resources {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  min-width: 0;
-}
-.system-stats-facts {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 1rem;
-  margin: 0;
-}
-.system-stats-facts dt,
-.system-stats-facts dd {
-  margin: 0;
-  padding: 0.35rem 0;
-  border-bottom: 1px solid var(--flat-raised-hover);
-}
-.system-stats-facts dt { color: var(--flat-text-label); }
-.system-stats-facts dd {
-  text-align: right;
-  color: var(--flat-text);
+.system-stats-status-text {
+  color: var(--flat-text-body);
+  line-height: 1.75;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
+.system-stats-status-text p {
+  margin: 0;
+}
+.system-stats-core-status {
+  margin-top: 0.67rem;
+}
+.system-stats-core-label { color: var(--flat-text-label); }
 
 .system-stats-memory-meter .meter-bar { height: 4px; border-radius: 0; background: var(--flat-sunken); }
 .system-stats-memory-meter .meter-fill { border-radius: 0; }
@@ -260,7 +248,6 @@
 }
 
 .system-stats-table .is-number,
-.system-stats-headline-value,
-.system-stats-facts dd {
+.system-stats-headline-value {
   font-family: Consolas, "Cascadia Mono", monospace;
 }

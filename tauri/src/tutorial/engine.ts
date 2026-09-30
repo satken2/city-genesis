@@ -67,6 +67,7 @@ export async function evaluate(condition: Condition, env: Environment): Promise<
     case "pathVariant": return env.facts.pathVariant === resolve(condition.value, env);
     case "pathPoints": return (env.facts.pathShape?.selected_points.length ?? 0) >= condition.count
       && (!condition.phase || env.facts.pathShape?.phase === condition.phase);
+    case "hudMode": return env.facts.hudMode === condition.mode;
     case "entity": {
       const target = condition.target ? env.bindings[condition.target] : undefined;
       if (condition.target && !target) return false;
@@ -110,6 +111,12 @@ export async function evaluate(condition: Condition, env: Environment): Promise<
   }
 }
 
+/** 段階の再計算のための達成判定。未束縛の対象を参照するなど、まだ判定できない条件は未達成として扱う。 */
+async function achieved(condition: Condition, env: Environment): Promise<boolean> {
+  try { return await evaluate(condition, env); }
+  catch (error) { env.assertCurrent(); return false; }
+}
+
 /** 都市を書き換える処理は判定から独立させ、各成功を保存して再試行時に再利用する。 */
 export async function execute(actions: Action[], env: Environment): Promise<void> {
   for (const action of actions) {
@@ -142,10 +149,13 @@ export async function execute(actions: Action[], env: Environment): Promise<void
   }
 }
 
-/** 取消やパネルの閉鎖も含め、現在満たしている前提から案内段階を再計算する。 */
+/**
+ * 取消やパネルの閉鎖も含め、現在満たしている前提から案内段階を再計算する。
+ * 複数段階のステップは、達成条件(complete)を満たしていれば最終段階にする。確定でパネルが閉じる建設の
+ * ステップで、閉じた後に「パネルを開く段階」へ戻して、作り終えたのに案内が巻き戻るのを防ぐため。
+ */
 export async function findPhase(step: GuideStep, env: Environment): Promise<number> {
-  const pathBinding = step.phases.find(p => p.world.path?.bind)?.world.path?.bind;
-  if (pathBinding && env.bindings[pathBinding] && step.complete && await evaluate(step.complete, env)) return step.phases.length - 1;
+  if (step.phases.length > 1 && step.complete && await achieved(step.complete, env)) return step.phases.length - 1;
   let index = 0;
   while (index < step.phases.length - 1 && await evaluate(step.phases[index].until, env)) index++;
   return index;

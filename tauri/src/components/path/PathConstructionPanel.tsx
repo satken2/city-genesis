@@ -489,7 +489,7 @@ function CategoryTile({ category, icon, name, disabled, onClick }: {
 function BackButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation();
   return (
-    <button className="bc-header-btn bc-back-btn" type="button" onClick={onClick}>
+    <button className="bc-header-btn bc-back-btn" type="button" data-guide="path.back" onClick={onClick}>
       <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
       <span>{t("path_construction.back")}</span>
     </button>

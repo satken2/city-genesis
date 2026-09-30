@@ -1561,6 +1561,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                 <button
                   className="bc-header-btn bc-back-btn"
                   type="button"
+                  data-guide="building.back"
                   onClick={() => setSelectedCategory(null)}
                 >
                   <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
@@ -1625,6 +1626,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
             <button
               className="bc-header-btn bc-back-btn"
               type="button"
+              data-guide="building.back"
               onClick={handleVariantDeselect}
             >
               <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
@@ -2050,6 +2052,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
             <button
               className="bc-btn"
               type="button"
+              data-guide="building.cancel"
               onClick={() => {
                 // 仮決定した設置位置(区画モードの選択区画/直接配置モードのクリック地点)だけを取り消す。
                 // バリアント選択・外観バリアントは維持し、続けて別の位置を選び直せるようにする。
@@ -2095,6 +2098,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                     : parcelId === null || parcelTypeMismatch)
               }
               type="button"
+              data-guide="building.confirm"
               onClick={async () => {
                 if (isDirectMode) {
                   if (directRequiresAcquisition) {

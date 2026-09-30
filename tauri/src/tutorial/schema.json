@@ -664,6 +664,25 @@
           "type": "object",
           "properties": {
             "type": {
+              "const": "hudMode"
+            },
+            "mode": {
+              "enum": [
+                "district",
+                "bulldozer"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "mode"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
               "const": "entity"
             },
             "resource": {

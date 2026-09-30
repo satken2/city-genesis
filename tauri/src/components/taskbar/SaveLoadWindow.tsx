@@ -31,7 +31,7 @@ type SessionInfo = {
   debug_execution: boolean;
 };
 
-type ConfirmAction = "newGame" | "returnToTop" | "quitGame";
+type ConfirmAction = "returnToTop" | "quitGame";
 
 type Dialog =
   | { kind: "overwrite" }
@@ -42,7 +42,6 @@ type Dialog =
 const SAVE_NAME_MAX_LENGTH = 120; // コアの POST /api/v1/saves の name の上限
 
 const CONFIRM_TEXT: Record<ConfirmAction, { label: string; message: string; busy: string }> = {
-  newGame: { label: "saveLoad.newGame", message: "saveLoad.confirmNewGame", busy: "saveLoad.loading" },
   returnToTop: { label: "saveLoad.returnToTop", message: "saveLoad.confirmReturnToTop", busy: "saveLoad.loading" },
   quitGame: { label: "saveLoad.quitGame", message: "saveLoad.confirmQuitGame", busy: "saveLoad.shuttingDown" },
 };
@@ -175,15 +174,9 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
         await invoke("exit_app");
         return;
       }
-      if (action === "newGame") {
-        // シナリオの選択と開始はニューゲームウィンドウが行う
-        await invoke<string>("launch_graphic");
-        await invoke("open_registered_window", { windowType: "new_game" });
-      } else {
-        await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), { method: "DELETE" });
-        // トップメニューはセッションのポーリングで current_save_id が消えたのを検知して出る
-        await sendSessionReset().catch(() => {});
-      }
+      await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), { method: "DELETE" });
+      // トップメニューはセッションのポーリングで current_save_id が消えたのを検知して出る
+      await sendSessionReset().catch(() => {});
       setDialog(null);
       onClose();
     } catch (error) {
@@ -239,7 +232,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
         );
       case "confirm": {
         const text = CONFIRM_TEXT[current.action];
-        const icon = current.action === "newGame" ? <NewGameIcon /> : current.action === "returnToTop" ? <HomeIcon /> : <PowerIcon />;
+        const icon = current.action === "returnToTop" ? <HomeIcon /> : <PowerIcon />;
         return (
           <SaveDialog icon={icon} title={t(text.label)} tone="danger" busy={busy} onDismiss={dismissDialog}
             actions={<>
@@ -276,7 +269,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
         <div className="save-menu-group">
           <MenuItem icon={<LoadIcon />} label={t("saveLoad.load")} disabled={busy} onClick={() => void openWindow("save_list")} />
           <MenuItem icon={<NewGameIcon />} label={t("saveLoad.newGame")} disabled={busy}
-            onClick={() => openDialog({ kind: "confirm", action: "newGame" })} />
+            onClick={() => void openWindow("new_game")} />
         </div>
         <div className="save-menu-group">
           <MenuItem icon={<HomeIcon />} label={t("saveLoad.returnToTop")} disabled={busy}

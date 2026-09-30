@@ -107,6 +107,8 @@ public class IpcClient : MonoBehaviour
     public event Action OnEditPropReset;
     // ブルドーザの確認付き削除(範囲配置プロップ)に対するUIの回答: (object_type, id, accepted)
     public event Action<string, int, bool> OnRemoveObjectConfirmResult;
+    // 新しい都市の読み込みを始めるとき(新規ゲーム・チュートリアル・ロードのすべて)に届く。
+    public event Action OnGameLoading;
     public event Action OnGameStart;
     public event Action OnGameEnd;
     // 音量は設定変更時とUnity起動通知(system:graphic_ready)への応答でしか届かないため、
@@ -836,6 +838,7 @@ public class IpcClient : MonoBehaviour
 
                 case "game:loading":
                     GameStateManager.Instance?.BeginLoading();
+                    OnGameLoading?.Invoke();
                     break;
                 case "game:reveal":
                     GameStateManager.Instance?.RevealWorld(GetParamInt(payload, "loading_id"));
