@@ -11,3 +11,4 @@
 - 全チュートリアルの全ステップを定義で書く。`components/tutorial/tutorialSteps.ts` は定義から一覧・タイトル・進捗表示の情報を導くだけで判定を持たない。ステップのタイトルは `tutorial.<シナリオID>.step<legacyStep>.title`。
 - `reclamation` は造成・埋立地内の区画・市庁舎の4ステップ、`acquisition` は線路計画・買収観測・公共施設の撤去・線路完成の4ステップ。造成と撤去の入口は `hud.grading` / `agent.demolish`(建物詳細の取り壊しボタン)。案内先は通常パネルと同じ操作名を使う。
 - 作者の設計書は `docs/tutorials/`、公開契約は `docs/docs/programs/チュートリアル基盤.md`。`npm run test:tutorial` と7言語の翻訳整合を検証する。
+- `tourism` はTourism Cityを舞台に、ホテル・客船ターミナル・プレイヤーによるバス路線新設・エポック進行・成果確認の5ステップ。路線新設は既存の `transit.*` 操作で案内し、開業判定はコアの `checks.line` を読む。

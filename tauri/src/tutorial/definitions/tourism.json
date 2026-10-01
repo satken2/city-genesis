@@ -29,18 +29,18 @@
             "mode": "observe",
             "markers": [
               [
-                -1140,
+                -1765,
                 0,
-                356.5
+                -25
               ]
             ],
             "camera": {
               "target": [
-                -1180,
+                -1750,
                 0,
-                360
+                20
               ],
-              "distance": 420,
+              "distance": 300,
               "yaw": 0,
               "pitch": 50
             }
@@ -73,18 +73,18 @@
             "mode": "observe",
             "markers": [
               [
-                -1140,
+                -1765,
                 0,
-                356.5
+                -25
               ]
             ],
             "camera": {
               "target": [
-                -1180,
+                -1750,
                 0,
-                360
+                20
               ],
-              "distance": 420,
+              "distance": 300,
               "yaw": 0,
               "pitch": 50
             }
@@ -135,18 +135,18 @@
             "mode": "observe",
             "markers": [
               [
-                -1783.5,
+                -1702,
                 0,
-                440
+                449
               ]
             ],
             "camera": {
               "target": [
-                -1783,
+                -1740,
                 0,
-                400
+                430
               ],
-              "distance": 420,
+              "distance": 300,
               "yaw": 0,
               "pitch": 50
             }
@@ -179,18 +179,18 @@
             "mode": "observe",
             "markers": [
               [
-                -1783.5,
+                -1702,
                 0,
-                440
+                449
               ]
             ],
             "camera": {
               "target": [
-                -1783,
+                -1740,
                 0,
-                400
+                430
               ],
-              "distance": 420,
+              "distance": 300,
               "yaw": 0,
               "pitch": 50
             }
@@ -218,7 +218,183 @@
         },
         {
           "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "tourism.line",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.tourism.step3.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.transport"
+            ],
+            "highlight": [
+              "hud.transport"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1701.079,
+                0,
+                412.703
+              ],
+              [
+                -1817.944,
+                0,
+                366.523
+              ],
+              [
+                -1744.418,
+                0,
+                7.665
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1770,
+                0,
+                200
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "window",
+                "window": "transit_management"
+              },
+              {
+                "type": "window",
+                "window": "transit_creation"
+              }
+            ]
+          }
         },
+        {
+          "id": "new",
+          "textKey": "tutorial.tourism.step3.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.transport",
+              "transit.new"
+            ],
+            "highlight": [
+              "transit.new"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1701.079,
+                0,
+                412.703
+              ],
+              [
+                -1817.944,
+                0,
+                366.523
+              ],
+              [
+                -1744.418,
+                0,
+                7.665
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1770,
+                0,
+                200
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "transit_creation"
+          }
+        },
+        {
+          "id": "create",
+          "textKey": "tutorial.tourism.step3.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.transport",
+              "transit.type",
+              "transit.fare",
+              "transit.headway",
+              "transit.confirm",
+              "transit.cancel"
+            ],
+            "highlight": [
+              "transit.type",
+              "transit.fare",
+              "transit.headway",
+              "transit.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1701.079,
+                0,
+                412.703
+              ],
+              [
+                -1817.944,
+                0,
+                366.523
+              ],
+              [
+                -1744.418,
+                0,
+                7.665
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1770,
+                0,
+                200
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.line",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
         {
           "type": "scenarioAction",
           "scenario": "tourism",
@@ -228,11 +404,11 @@
     },
     {
       "id": "tourism.epoch",
-      "legacyStep": 3,
+      "legacyStep": 4,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.tourism.step3.description",
+          "textKey": "tutorial.tourism.step4.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -244,11 +420,11 @@
             "mode": "observe",
             "camera": {
               "target": [
-                -1500,
+                -1770,
                 0,
-                330
+                200
               ],
-              "distance": 1000,
+              "distance": 700,
               "yaw": 0,
               "pitch": 50
             }
@@ -271,11 +447,11 @@
     },
     {
       "id": "tourism.growth",
-      "legacyStep": 4,
+      "legacyStep": 5,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.tourism.step4.description",
+          "textKey": "tutorial.tourism.step5.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -287,18 +463,18 @@
             "mode": "observe",
             "markers": [
               [
-                -1267.5,
+                -1758,
                 0,
-                310.5
+                1
               ]
             ],
             "camera": {
               "target": [
-                -1267,
+                -1770,
                 0,
-                330
+                200
               ],
-              "distance": 450,
+              "distance": 700,
               "yaw": 0,
               "pitch": 50
             }

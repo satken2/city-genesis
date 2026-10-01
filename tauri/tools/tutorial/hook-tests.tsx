@@ -45,7 +45,7 @@ try { await settle(() => root.render(<Harness scenario="tourism" step={1} save="
 assert.equal(guide!.failed, true); assert.equal(guide!.ready, false); assert.equal(fixture.actions, 1);
 await settle(() => guide!.retry());
 assert.equal(guide!.failed, false); assert.equal(guide!.ready, true); assert.equal(fixture.actions, 2);
-assert.deepEqual(snapshot()?.world.camera, { target: [-1180, 0, 360], distance: 420, yaw: 0, pitch: 50 }, "phase camera reaches the snapshot");
+assert.deepEqual(snapshot()?.world.camera, { target: [-1750, 0, 20], distance: 300, yaw: 0, pitch: 50 }, "phase camera reaches the snapshot");
 // 地区編集モードの切り替え(HUD間で共有されるグローバルイベント)で段階とカメラが動く。
 await settle(() => root.render(<Harness scenario="scenario2" step={1} save="D" />));
 assert.equal(snapshot()?.phaseId, "enter");

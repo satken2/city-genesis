@@ -280,22 +280,26 @@
     },
     "tourism": {
       "title": "Develop tourism",
-      "description": "Islanders want to share their ancient ruins, but lack a port and accommodation for visitors. In this tutorial, you'll learn how to welcome tourists with a hotel and passenger terminal, and check the effects on restaurant sales and bus ridership.",
+      "description": "The island needs a harbor, accommodation, and a bus route to welcome visitors to its ruins. Learn to build a hotel and passenger terminal, create a bus route, and check tourist arrivals, restaurant sales, and bus use.",
       "step1": {
-        "description": "Build a \"Tourist Hotel\" on the parcel with the yellow marker east of the ancient ruins by the sea. Once confirmed, the construction period is skipped.",
-        "title": "Build a hotel by the ruins"
+        "description": "Build a Tourist Hotel on the lot marked in yellow west of the ancient ruins. Construction time is skipped when you confirm.",
+        "title": "Build a hotel beside the ruins"
       },
       "step2": {
-        "description": "Build a \"Cruise Terminal\" on the marked parcel at the port. A bus route and a bus depot are already in place between the port and the ruins.",
-        "title": "Build a cruise terminal"
+        "description": "Build a Passenger Terminal on the marked harbor lot. A bus depot is ready, but there are no bus routes yet.",
+        "title": "Build a passenger terminal"
       },
       "step3": {
-        "description": "Advance epochs to welcome tourists. It takes a few epochs for operations to get going.",
-        "title": "Advance epochs"
+        "description": "Open Public Transport → New line and choose Bus Route. Place stops on the roads at the yellow markers in this order: harbor → housing → ruins → housing. Click the first harbor stop to close the return loop. Set the fare to 0 and the target headway to 1 minute, then confirm.",
+        "title": "Create a bus route from the harbor to the ruins"
       },
       "step4": {
-        "description": "Check the sales of the restaurant in front of the ruins and the ridership of the bus route. You succeed once both have risen above their starting values and tourists have arrived.",
-        "title": "Check for higher sales and bus ridership"
+        "description": "Advance epochs to welcome tourists. Facilities and bus vehicle procurement take a few epochs to get going.",
+        "title": "Advance the epoch"
+      },
+      "step5": {
+        "description": "Check the restaurant by the ruins and the bus route you created. Complete this step when tourists have arrived, restaurant sales exceed their starting level, and the bus has passengers. Advance more epochs if needed.",
+        "title": "Check restaurant sales and bus passengers"
       }
     },
     "intro": {
@@ -306,7 +310,7 @@
       "trade": "A local food factory has asked for help selling its products overseas. The town also wants a way to bring in goods it needs from abroad. In this tutorial, you'll learn how to export food through a port and import goods by freight rail from a neighboring country.",
       "highway": "As the town grows, more vehicles will carry people and goods through it. The town wants another route ready so through traffic won't all end up on the local road. In this tutorial, you'll learn how to build an elevated highway over a local road and connect them with ramps to create an interchange.",
       "mining": "Valuable resources lie beneath this island, but there is no way to haul them from the mountain to the port. Without transport, the island can't turn that wealth into an industry. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",
-      "tourism": "Islanders want more people to visit the ancient ruins by the sea. But without a port and accommodation to welcome travelers, local restaurants are missing out on visitors too. In this tutorial, you'll learn how to welcome tourists with a hotel and passenger terminal, and check the effects on restaurant sales and bus ridership.",
+      "tourism": "The islanders want to share their ancient seaside ruins with more visitors. But they lack a passenger harbor, accommodation, and a bus route from the harbor to town. In this tutorial, you will learn to build a hotel and passenger terminal, create a bus route, and check tourist arrivals, restaurant sales, and bus use.",
       "heading": "A Request for the Mayor",
       "reclamation": "This tiny reef has no flat ground for a city hall. In this tutorial, you will learn to reclaim coastal land, create a parcel, and place a city hall.",
       "acquisition": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, explicitly demolish a public facility, and complete the connection."
