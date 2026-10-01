@@ -108,6 +108,8 @@
     "bulldozerOn": "推土机：开（点击拆除）",
     "bulldozerConfirmScatter": "将删除散布区域内的全部“{{name}}”装饰物。确定要整片删除吗？",
     "bulldozerOff": "推土机（拆除空地、规划中的建筑/道路及地形装饰物）",
+    "bulldozerInstantOn": "推土机：开（点击立即删除，无法撤销）",
+    "bulldozerInstantOff": "推土机（立即删除建筑、道路、空地及地形装饰物）",
     "menuResourceEdit": "资源编辑",
     "menuParameterEdit": "参数编辑",
     "menuAgentCreation": "创建经济主体（将非建筑类设施安置到现有建筑中）",

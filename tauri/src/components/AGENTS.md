@@ -86,6 +86,7 @@
 - 寸法が変わるものは実測して通知する(`resize_icon_panel` / `resize_system_tray`)。`IconPanel.css`で高さを固定しない。`DisplayTray`の幅の正は`window.rs`の`DISPLAY_TRAY_WIDTH`。
 - 常駐モード(ブルドーザ/地区編集)は排他。状態の正はグローバルイベント`hud:mode_changed`(`hudMode.ts`)で、副作用は操作した側だけが実行する。編集モードのウィンドウを開いたときの解除はRust(`window.rs`の`apply_mutex_rules`)が送るので、開く側のコンポーネントで`setHudMode(null)`しない。
 - BGM再生、3Dのオブジェクト選択受信、Unityの確認要求`remove_object:request_confirm`は`Cockpit`だけが受ける。確認結果は取消でも必ず`sendRemoveObjectConfirmResult`で返す(返さないとUnityが待ち続ける)。
+- ブルドーザは神モード(`useHudSession().templateMode`。シナリオ制作とチュートリアルでONになる)のとき、`STATE_REMOVE_OBJECTS`に`instant_remove: true`を付けて開始する。建物・道路を確認なしに即時削除させるモードで、ヒント(`hint.bulldozerInstant`)とツールチップ(`taskbar.bulldozerInstantOn/Off`)も専用の文言に切り替える。Unityは神モードかを知らないので、判断はこのUIが持つ。
 - 地区統合の確認は`IconPanel`が`edit_zone:request_merge`を受けて開く。
 - チュートリアルの定義(`../tutorial/definitions/*.json`)はHUDのボタンIDを操作名 `hud.<id>` として強調・許可に使う。アイコンのIDを変える/消す前に定義と `../tutorial/definitions.ts` の登録表を確認する(消えるとその段階でボタンを押せなくなる)。
 
@@ -167,4 +168,4 @@
 
 ## チュートリアルの撤去案内
 
-`agent/AgentOperationPanel.tsx` の「取り壊し」ボタンは `data-guide="agent.demolish"` を持つ。稼働中の公共施設を撤去予定にする操作で、計画中の物体を削除するHUDのブルドーザとは別の入口。チュートリアルの用地買収編は対象の建物詳細を開いてからこのボタンを強調する。
+`agent/AgentOperationPanel.tsx` の「取り壊し」ボタンは `data-guide="agent.demolish"` を持つ。稼働中の公共施設を撤去予定にする操作で、HUDのブルドーザ(通常は計画中の物体の削除。神モードでは即時削除)とは別の入口。チュートリアルの用地買収編は対象の建物詳細を開いてからこのボタンを強調する。

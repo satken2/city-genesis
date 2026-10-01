@@ -108,6 +108,8 @@
     "bulldozerOn": "Bulldozer: ON (click to remove)",
     "bulldozerConfirmScatter": "This will delete every “{{name}}” prop in the scattered area. Delete the whole area?",
     "bulldozerOff": "Bulldozer (remove empty parcels, planned buildings/roads & terrain props)",
+    "bulldozerInstantOn": "Bulldozer: ON (click to delete instantly; cannot be undone)",
+    "bulldozerInstantOff": "Bulldozer (instantly delete buildings, roads, empty parcels & terrain props)",
     "menuResourceEdit": "Edit Resources",
     "menuParameterEdit": "Edit Parameters",
     "menuAgentCreation": "Create economic agent (place a non-building business in an existing building)",

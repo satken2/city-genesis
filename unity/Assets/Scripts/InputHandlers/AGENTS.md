@@ -18,7 +18,7 @@
 | `PathInputHandler.cs` | `PathManager`が付与(駅舎の建屋コライダーには`StationHousePath`が付与)。地区編集・区画作成の道路選択・結合/分割・区間編集の振り分け |
 | `NodeInputHandler.cs` | `PathManager`がノード生成時に付与(端子ノードには`ConnectorEditManager`が後付け)。ドラッグ移動と`PATCH /nodes/{id}`、失敗時のロールバック |
 | `TerrainInputHandler.cs` | `TerrainManager`が地形タイルと都市外の背景地形のチャンクごとに、`ReclaimedLandManager`が埋立地の岸壁ごとに付与し、`InputHandler.Start`が海面(`SeaObject`タグ)にも付与。地形クリックの委譲先分岐、共通吸着`ApplySnapping`、吸着フラグ(static) |
-| `RemovalManager.cs` | ブルドーザ(`MODE_REMOVE`)の実処理。プロップはコライダーが無いので`InputHandler`がクリック配送前に`TryRemovePropAt`で判定する |
+| `RemovalManager.cs` | ブルドーザ(`MODE_REMOVE`)の実処理。プロップはコライダーが無いので`InputHandler`がクリック配送前に`TryRemovePropAt`で判定する。削除はクリックのみ(ドラッグでは消さない)。UIが`STATE_REMOVE_OBJECTS`に`instant_remove`を付けて開始したとき(神モード)だけ、建物・道路をステータスで絞らない(`TYPE_CITY`/`TYPE_DEFAULT`の建物と`PATH_TRANSPORT`のパスは除く)。Unityは神モードかを知らず、可否の権威はバックエンドの`DELETE`(神モードのときだけ稼働中を受け付け、テナント・市民ごと消す) |
 | `TransitSelection.cs` | 通常モードで公共交通の帯・停留所・車両をスクリーン座標で選択。物理レイキャストより先に呼ぶ |
 
 モードとプリセットの一覧・各ハンドラのモード別挙動は`docs/programs/Unity入力制御.md`が正。編集モードに入るときは入力モードと表示モード(`VisualHandlers/`)をセットで切り替える(2系統は別物。`unity/AGENTS.md`「モード系は2系統ある」)。

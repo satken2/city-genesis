@@ -108,6 +108,8 @@
     "bulldozerOn": "Bulldozer : ACTIVÉ (cliquez pour supprimer)",
     "bulldozerConfirmScatter": "Tous les décors « {{name}} » de la zone dispersée seront supprimés. Supprimer toute la zone ?",
     "bulldozerOff": "Bulldozer (supprime terrains vides, projets en attente et décors du terrain)",
+    "bulldozerInstantOn": "Bulldozer : ACTIVÉ (cliquez pour supprimer immédiatement ; irréversible)",
+    "bulldozerInstantOff": "Bulldozer (supprime immédiatement bâtiments, routes, terrains vides et décors du terrain)",
     "menuResourceEdit": "Modifier les ressources",
     "menuParameterEdit": "Modifier les paramètres",
     "menuAgentCreation": "Créer un agent économique (installer une activité sans bâtiment propre dans un bâtiment existant)",

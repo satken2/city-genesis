@@ -12,6 +12,9 @@ using GeneratedModels;
 ///
 /// - 削除可否は Unity 側のキャッシュ(ParcelSummary.usage_id / BuildingSummary.status /
 ///   PathSummary.status)で事前判定し、最終的な可否はバックエンドの DELETE ガードが権威となる。
+/// - テンプレート作成モード(神モード)では UI が instant_remove を立てて開始する(Unity は神モードかを知らない)。
+///   このとき建物・道路はステータスを問わず確認なしで即時に削除する(保護対象を除く。IsRemovable 参照)。
+///   テナント・市民の道連れ削除や孤立ノードの片付けはバックエンドの DELETE 分岐が担う。
 /// - 削除は Unity が直接バックエンドの DELETE エンドポイントを叩く
 ///   (ZoneEditContext / NodeInputHandler と同じ直接REST方式)。
 /// - 同じオブジェクトへ何度も DELETE を出さないよう、(type, id) の組で重複排除する。
@@ -52,6 +55,8 @@ public class RemovalManager : MonoBehaviour
 
     /// <summary>ブルドーザモードが有効か。無効時は一切削除しない。</summary>
     private bool _active = false;
+    /// <summary>即時削除モードか。建物・道路の削除可否をステータスで絞らない。</summary>
+    private bool _instantRemove = false;
 
     // マネージャー参照(ParcelManager / PathManager はシングルトンでないため FindAnyObjectByType で取得)
     private ParcelManager _parcelManager;
@@ -108,10 +113,14 @@ public class RemovalManager : MonoBehaviour
         if (_overlayObj != null) Destroy(_overlayObj);
     }
 
-    /// <summary>削除モード開始。削除済みセットを初期化し、マネージャー参照を取り直す。</summary>
-    public void BeginRemovalMode()
+    /// <summary>
+    /// 削除モード開始。削除済みセットを初期化し、マネージャー参照を取り直す。
+    /// instantRemove=true は神モードの即時削除(建物・道路をステータスを問わず消す)。
+    /// </summary>
+    public void BeginRemovalMode(bool instantRemove = false)
     {
         _active = true;
+        _instantRemove = instantRemove;
         _processed.Clear();
         _processedScatters.Clear();
         _pendingScatterId = 0;
@@ -124,6 +133,7 @@ public class RemovalManager : MonoBehaviour
     public void EndRemovalMode()
     {
         _active = false;
+        _instantRemove = false;
         _processed.Clear();
         _processedScatters.Clear();
         _pendingScatterId = 0;
@@ -136,6 +146,8 @@ public class RemovalManager : MonoBehaviour
     /// 空き地区画: usage_id == VALUE_NONE(-1)
     /// 計画中の建物: status ∈ {PENDING, SCHEDULED_CONSTRUCTION}
     /// 計画中の道路: status ∈ {TEMPORARY, SCHEDULED_CONSTRUCTION, PENDING}
+    /// 即時削除モードでは建物・道路をステータスで絞らない。ただし建物は市政府・中央銀行(TYPE_CITY)と
+    /// 代理主体・国境検問所(TYPE_DEFAULT)を除き、道路は公共交通の区間パス(PATH_TRANSPORT。路線の持ち物)を除く。
     /// </summary>
     public bool IsRemovable(int objectType, int id)
     {
@@ -150,16 +162,19 @@ public class RemovalManager : MonoBehaviour
             case InputObjectType.BUILDING:
             {
                 BuildingSummary b = BuildingManager.Instance != null ? BuildingManager.Instance.GetBuildingSummary(id) : null;
-                return b != null && (b.status == Constants.STATUS_PENDING
-                                  || b.status == Constants.STATUS_SCHEDULED_CONSTRUCTION);
+                if (b == null) return false;
+                if (_instantRemove) return b.type != Constants.TYPE_CITY && b.type != Constants.TYPE_DEFAULT;
+                return b.status == Constants.STATUS_PENDING || b.status == Constants.STATUS_SCHEDULED_CONSTRUCTION;
             }
             case InputObjectType.PATH:
             {
                 if (_pathManager == null) _pathManager = FindAnyObjectByType<PathManager>();
                 PathSummary p = _pathManager != null ? _pathManager.GetPathData(id) : null;
-                return p != null && (p.status == Constants.STATUS_TEMPORARY
-                                  || p.status == Constants.STATUS_SCHEDULED_CONSTRUCTION
-                                  || p.status == Constants.STATUS_PENDING);
+                if (p == null) return false;
+                if (_instantRemove) return p.path_type != Constants.PATH_TRANSPORT;
+                return p.status == Constants.STATUS_TEMPORARY
+                    || p.status == Constants.STATUS_SCHEDULED_CONSTRUCTION
+                    || p.status == Constants.STATUS_PENDING;
             }
             default:
                 return false;

@@ -399,10 +399,12 @@ public class IpcStateCoordinator : MonoBehaviour
 
     /// <summary>
     /// STATE_REMOVE_OBJECTS: ブルドーザ(オブジェクト削除)モード。
-    /// 空き地区画・計画中の建物/道路を左クリックまたは左ドラッグ(ペイント式)で削除する。
+    /// 空き地区画・計画中の建物/道路を左クリックで削除する(ドラッグでは削除しない)。
     /// 実際の削除可否判定・DELETE 発行・重複排除は RemovalManager が担う
     /// (確定送信は Unity が直接バックエンドへ行い、成功後に差分リロードで反映する)。
     /// 地区表示は非表示にして、削除操作中に地区パネルが誤って開くのを防ぐ。
+    /// ipcParams の instant_remove=true(UI が神モードのときに付ける)では、
+    /// 建物・道路をステータスを問わず即時に削除する(Unity は神モードかを知らないので UI の指定に従う)。
     /// </summary>
     private void ApplyStateRemoveObjects(Dictionary<string, object> ipcParams)
     {
@@ -422,7 +424,10 @@ public class IpcStateCoordinator : MonoBehaviour
             removalManager = go.AddComponent<RemovalManager>();
         }
         removalManager.SetClickSound(trashSound);
-        removalManager.BeginRemovalMode();
+        bool instantRemove = ipcParams != null
+            && ipcParams.TryGetValue("instant_remove", out var ir)
+            && System.Convert.ToBoolean(ir);
+        removalManager.BeginRemovalMode(instantRemove);
     }
 
     /// <summary>

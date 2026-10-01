@@ -56,7 +56,7 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_EDIT_TRANSIT` | 13 | 公共交通設置モード |
 | `MODE_EDIT_PROP` | 14 | プロップ配置モード（個別配置・範囲散布） |
 | `MODE_EDIT_CONNECTOR` | 15 | 施設の接続端子ノードの移動編集モード。TERRAIN に適用し、端子マーカーを地形ドラッグとして掴む（§5.3） |
-| `MODE_REMOVE` | 17 | ブルドーザ（空き地区画・計画中の建物と道路・地形プロップの削除）。実処理は `RemovalManager` |
+| `MODE_REMOVE` | 17 | ブルドーザ（空き地区画・計画中の建物と道路・地形プロップの削除。神モードでは稼働中の建物・道路も即時削除）。実処理は `RemovalManager` |
 | `MODE_PATH_MERGE` | 18 | パス結合の相手選択。候補パスのクリックだけを受け付ける |
 | `MODE_PATH_SPLIT` | 19 | パス分割の分割点選択。PATH と TERRAIN に適用し、どちらのクリックも対象パスの中心線へ射影する |
 | `MODE_PICK_BUILDING` | 20 | 既存建物のコピー建設・経済主体作成の入居先の選択。建物だけをクリック可能にする |
@@ -374,7 +374,7 @@ Unity側の実装で守る点は次の3つ。
 | `STATE_EDIT_GRADING` | `EDIT_GRADING` | `GradingAreaEditManager` を動的生成して `InitializeCreateMode`（造成範囲の作図。Placing から開始。再送されると描いた範囲を捨てて描き直す） |
 | `STATE_EDIT_TRANSIT` | `TRANSIT_CONSTRUCTION` | `TransitPlanManager` を動的生成して `InitializeTransitPlacement`（`points` があれば経路編集として Editing から開始） |
 | `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` | `PATH_MERGE` / `PATH_SPLIT` | `PathTopologyEditManager.BeginMergeMode` / `BeginSplitMode`（Unity ウィンドウは最前面化しない） |
-| `STATE_REMOVE_OBJECTS` | `REMOVE_OBJECTS` | ブルドーザ（`RemovalManager`） |
+| `STATE_REMOVE_OBJECTS` | `REMOVE_OBJECTS` | ブルドーザ（`RemovalManager.BeginRemovalMode`。`instant_remove` を渡すと建物・道路を状態で絞らない即時削除モード） |
 | `STATE_SET_GRID` | `SET_GRID` | `GridSetManager`（吸着フラグを退避して「ノード吸着のみON」にする。10章） |
 
 ### 9.1. ステート別の表示プリセット
@@ -584,6 +584,19 @@ MODE_EDIT_PROPはクリック・ホバーともTerrainInputHandlerの共通吸�
 ## プロップの削除(ブルドーザ)
 
 `MODE_REMOVE`中、`InputHandler`はクリック候補の発火前に`RemovalManager.TryRemovePropAt`(画面レイ+ヒット物までの距離)を呼ぶ。個別配置は即DELETE、範囲配置はUIへ確認を求めて回答待ちにする(`remove_object:request_confirm`/`confirm_result`)。ホバーはレイが変わったフレームで`UpdatePropHover`を呼び、`RemovalManager`が`OverlayMeshRenderer`で対象のAABBと(範囲配置なら)散布範囲の外周を赤く描く。
+
+## 建物・道路・区画の削除(ブルドーザ)
+
+プロップ以外の対象は、`MODE_REMOVE`中の左クリックを各対象の入力ハンドラ(`ParcelInputHandler` / `BuildingInputHandler` / `PathInputHandler`)が`RemovalManager.TryRemove(type, id)`へ渡す。削除はクリックのみで、ドラッグでは削除しない。可否はUnity側のキャッシュで事前判定し(ホバーのハイライトも同じ判定)、通った対象へ`DELETE /agents/{id}`・`/paths/{id}`・`/parcels/{id}`を直接発行する。最終的な可否はバックエンドのガードが決める(拒否された場合は警告ログだけで、処理済みの集合には残す)。同じ対象への二重発行は`(type, id)`で防ぎ、成功後は`CellDataLoader.ReloadAllData`を0.35秒デバウンスして1回だけ呼ぶ。区画だけは成功時に即ローカル除去する。
+
+| モード | 区画 | 建物 | 道路 |
+| --- | --- | --- | --- |
+| 通常 | 空き地(`usage_id` なし) | `PENDING` / `SCHEDULED_CONSTRUCTION` | `TEMPORARY` / `SCHEDULED_CONSTRUCTION` / `PENDING` |
+| 即時削除(`instant_remove`) | 通常と同じ | ステータスを問わない。ただし `TYPE_CITY`(市政府・中央銀行)と `TYPE_DEFAULT`(代理主体・国境検問所)を除く | ステータスを問わない。ただし `PATH_TRANSPORT`(公共交通の区間。路線の持ち物)を除く |
+
+即時削除モードはテンプレート作成モード(神モード)用で、UIが`STATE_REMOVE_OBJECTS`の`instant_remove`で開始する。**Unityは神モードかどうかを知らない**ので、バックエンドが神モードのときだけ稼働中の建物・道路の削除を受け付ける。確認ダイアログは出さず、取り消しもできない。バックエンドは建物をテナントの経済主体・世帯の市民ごと消して区画を空き地に戻し、道路は削除後に端点が孤立したノードも片付ける(地形は元に戻さない)。路線や駅舎に属する区間は、路線側の既存の連鎖で整合を取る。範囲配置のプロップだけは、このモードでも従来どおりUIの確認を経てから範囲ごと消す。
+
+`instant_remove` はブルドーザの開始ごとに決まり、`EndRemovalMode`で下ろす。次の`STATE_REMOVE_OBJECTS`で指定がなければ通常モードに戻る。
 
 ## 道路・線路の曲率と勾配の警告
 

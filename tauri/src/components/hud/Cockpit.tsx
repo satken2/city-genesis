@@ -9,6 +9,8 @@
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
  *   解除し忘れによる誤削除を防ぐため、ON の間はパネル全体を工事現場風の
  *   黄黒斜線(`cockpit--bulldozer`)にして常駐中であることを目立たせる。
+ *   神モード(templateMode)では建物・道路をクリックで即時に削除する(確認も取り消しもない)。
+ *   通常は空き地・計画中の建物/道路・地形プロップだけが対象。
  * - 公共サービス充足度: 電力・水道などの需要/供給キャパシティを縦棒で常時表示する。
  *   クリックで公共施設ウィンドウを開く。
  * - アラート: L1通知は重要度2階調で表現する。warning(都市崩壊の差し迫った危機)が
@@ -184,18 +186,24 @@ export function Cockpit() {
   /**
    * ブルドーザ(オブジェクト削除)モードのトグル。
    * ON で Unity を STATE_REMOVE_OBJECTS にし、OFF で STATE_NORMAL に戻す。
+   * 神モード(templateMode)では instant_remove を付け、建物・道路をステータスを問わず確認なしで
+   * 即時に削除させる(Unity は神モードかを知らないので UI が伝える)。
    * windowType "bulldozer" は送信元ラベルであり、実ウィンドウは開かない。
    */
   const toggleBulldozer = useCallback(async () => {
     const next = mode !== "bulldozer";
     try {
-      await sendChangeState(next ? "STATE_REMOVE_OBJECTS" : "STATE_NORMAL", undefined, "bulldozer");
-      await setHintbarText(next ? t("hint.bulldozer") : "");
+      await sendChangeState(
+        next ? "STATE_REMOVE_OBJECTS" : "STATE_NORMAL",
+        next && templateMode ? { instant_remove: true } : undefined,
+        "bulldozer",
+      );
+      await setHintbarText(next ? t(templateMode ? "hint.bulldozerInstant" : "hint.bulldozer") : "");
       await setHudMode(next ? "bulldozer" : null);
     } catch (error) {
       console.error("failed to toggle bulldozer mode", error);
     }
-  }, [mode, t]);
+  }, [mode, t, templateMode]);
 
   const handleToolClick = useCallback(
     async (icon: HudIconDef) => {
@@ -224,9 +232,10 @@ export function Cockpit() {
       <div className="cockpit-tools">
         {TOOL_ICONS.map((icon) => {
           const active = icon.id === "bulldozer" && mode === "bulldozer";
-          const tooltip = icon.id === "bulldozer"
-            ? t(active ? "taskbar.bulldozerOn" : "taskbar.bulldozerOff")
-            : t(icon.tooltipKey);
+          const bulldozerTooltipKey = templateMode
+            ? (active ? "taskbar.bulldozerInstantOn" : "taskbar.bulldozerInstantOff")
+            : (active ? "taskbar.bulldozerOn" : "taskbar.bulldozerOff");
+          const tooltip = icon.id === "bulldozer" ? t(bulldozerTooltipKey) : t(icon.tooltipKey);
           return (
             <button
               key={icon.id}
