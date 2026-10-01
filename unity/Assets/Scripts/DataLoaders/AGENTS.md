@@ -66,6 +66,7 @@
 - 道路GOを `SetActive(true)` に戻す経路を足したら `EnsureEndIntersectionsVisible` を呼ぶ(交差点メッシュは道路の子ではない)。
 - `CalculatePathPoints` の制御点自動計算(Catmull-Rom、テンション1/6)はバックエンド `Path._auto_fill_controls` と同一式。変えるなら両方。
 - インフラノード(`InfraNetworkUtil.IsInfraMask`)には交差点アスファルトも端点切断もしない(端点Yとノードの不一致=垂直結合が正規状態)。端子ノードの所属施設は `BuildingManager.TryGetInfraTerminalOwner`(ノードAPIは owner を持たない)。
+- `base_height` は `PathManager.GetPathBaseHeight` が返す。確定済みパスの描画点列と、道路エディタの敷設プレビュー(`RoadRenderer.ToDrawPoints`・`UpdateStrip`・`RoadPlanManager`の地形追従判定)が共有するので、プレビュー側でマスターを読み直さない。
 - 仮の `PathSummary` を生成器へ渡すときは `follow_terrain = Constants.VALUE_NONE` を明示する(int既定の0は「非追従」)。`station_grade_profile` は駅以外にも付くので `ApplyStationGrade` をパス種別で限定しない。
 
 ### 建物 (BuildingManager)

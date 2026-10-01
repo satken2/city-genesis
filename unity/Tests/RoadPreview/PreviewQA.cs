@@ -84,7 +84,8 @@ public static class PreviewQA
             CheckRouteProposals(asm, item);
             CheckMaxSpan(asm, item);
             CheckSeaLakeCrossings(asm);
-            File.WriteAllText(result, "PASS: 100 preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase; sea and lake crossings.");
+            CheckPowerLinePreview(asm, renderer);
+            File.WriteAllText(result, "PASS: 100 preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase; sea and lake crossings; base_height power line preview height and waypoint pass-through.");
             EditorApplication.Exit(0);
         }
         catch (Exception ex)
@@ -728,6 +729,115 @@ public static class PreviewQA
             foreach (int id in new[] { 900, 901, 902 }) dict.Remove(id);
             UnityEngine.Object.DestroyImmediate(manager.gameObject);
             UnityEngine.Object.DestroyImmediate(terrainManager.gameObject);
+            UnityEngine.Object.DestroyImmediate(terrain);
+            UnityEngine.Object.DestroyImmediate(data);
+            utils.GetMethod("InvalidateHeightCache").Invoke(null, null);
+        }
+    }
+
+    private static void CheckPowerLinePreview(Assembly asm, Component renderer)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        const float baseHeight = 20f, spacing = 120f;
+        var constants = asm.GetType("Constants");
+        int variant = (int)constants.GetField("PATH_VARIANT_GRID").GetValue(null);
+        int pathType = (int)constants.GetField("PATH_ELECTRICITY").GetValue(null);
+        // 標高12mの平らな台地。送電線は設計高さを「地面+base_height」に置き、描画は base_height を引いて地面に載る。
+        var data = new TerrainData { heightmapResolution = 65, size = new Vector3(400, 100, 400) };
+        var heights = new float[65, 65];
+        for (int z = 0; z < 65; z++)
+        for (int x = 0; x < 65; x++) heights[z, x] = 0.12f;
+        data.SetHeights(0, 0, heights);
+        var terrain = Terrain.CreateTerrainGameObject(data);
+        var utils = asm.GetType("Utils");
+        utils.GetMethod("InvalidateHeightCache").Invoke(null, null);
+        float Ground(Vector2 xz) => (float)utils.GetMethod("GetGroundHeight", new[] { typeof(Vector3) })
+            .Invoke(null, new object[] { new Vector3(xz.x, 0, xz.y) });
+        Bounds WorldBounds(MeshFilter meshFilter)
+        {
+            var vertices = meshFilter.sharedMesh.vertices;
+            var bounds = new Bounds(meshFilter.transform.TransformPoint(vertices[0]), Vector3.zero);
+            foreach (var vertex in vertices) bounds.Encapsulate(meshFilter.transform.TransformPoint(vertex));
+            return bounds;
+        }
+        var masterStore = asm.GetType("MasterDataStore").GetProperty("Instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
+        var dict = (IDictionary)masterStore.GetType().GetField("pathMasterById", flags).GetValue(masterStore);
+        var itemType = asm.GetType("PathMasterItem");
+        var item = Activator.CreateInstance(itemType);
+        itemType.GetField("width").SetValue(item, 6f);
+        itemType.GetField("follow_terrain").SetValue(item, true);
+        itemType.GetField("base_height").SetValue(item, baseHeight);
+        itemType.GetField("pillar_spacing").SetValue(item, spacing);
+        dict[variant] = item;
+        var type = asm.GetType("RoadPlanManager");
+        var manager = new GameObject("PowerLineManager").AddComponent(type);
+        void Set(string name, object value) => type.GetField(name, flags).SetValue(manager, value);
+        Set("roadRenderer", renderer);
+        Set("PathType", pathType);
+        Set("PathSubtype", variant);
+        Set("phase", Enum.Parse(asm.GetType("RoadEditorPhase"), "Placing"));
+        Set("currentHeight", baseHeight);
+        Set("hoverWorldPosition", new Vector3(350, 0, 330));
+        var anchors = (IList)type.GetField("points", flags).GetValue(manager);
+        var pointType = asm.GetType("PathBuildPoint");
+        var roleType = asm.GetType("PathPointRole");
+        var rendererType = renderer.GetType();
+        var sections = (Array)rendererType.GetField("sections", flags).GetValue(renderer);
+        // 敷設済みアンカー列(始点+ウェイポイント)。ウェイポイントは0個・1個・2個。
+        var routes = new[]
+        {
+            new[] { new Vector2(50, 50), new Vector2(250, 200) },
+            new[] { new Vector2(50, 50), new Vector2(250, 200), new Vector2(50, 350) },
+            new[] { new Vector2(50, 50), new Vector2(250, 200), new Vector2(50, 350), new Vector2(300, 380) },
+        };
+        try
+        {
+            foreach (var route in routes)
+            {
+                string label = (route.Length - 2) + " waypoints: ";
+                rendererType.GetMethod("ResetPreview").Invoke(renderer, null);
+                anchors.Clear();
+                for (int i = 0; i < route.Length; i++)
+                {
+                    var position = new Vector3(route[i].x, Ground(route[i]) + baseHeight, route[i].y);
+                    anchors.Add(Activator.CreateInstance(pointType, position, Enum.Parse(roleType, i == 0 ? "Start" : "Waypoint")));
+                }
+                type.GetMethod("InvalidateShapeCache", flags).Invoke(manager, null);
+                var renderPoints = type.GetMethod("GetRenderPoints", flags).Invoke(manager, null);
+                type.GetMethod("UpdatePreviewSections", flags).Invoke(manager, new[] { renderPoints });
+
+                // プレハブの無い環境では、鉄塔は1基につき1つの FarPowerTower メッシュで描かれる。
+                var root = (GameObject)rendererType.GetField("currentPreviewObject", flags).GetValue(sections.GetValue(0));
+                Require(root != null, label + "power line preview was not generated");
+                var towers = new List<Bounds>();
+                foreach (var meshFilter in root.GetComponentsInChildren<MeshFilter>(true))
+                    if (meshFilter.name == "FarPowerTower") towers.Add(WorldBounds(meshFilter));
+                // 鉄塔は各アンカーに立ち、区間ごとに pillar_spacing 以下の間隔で並ぶ。ウェイポイントを通らないと数も位置も合わない。
+                int expected = 1;
+                for (int i = 1; i < route.Length; i++)
+                    expected += Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(route[i - 1], route[i]) / spacing));
+                Require(towers.Count == expected, label + "tower count " + towers.Count + ", expected " + expected);
+                foreach (var node in route)
+                    Require(towers.Exists(t => Vector2.Distance(new Vector2(t.center.x, t.center.z), node) < 1f), label + "no tower at " + node);
+                foreach (var tower in towers)
+                    Require(Mathf.Abs(tower.min.y - Ground(new Vector2(tower.center.x, tower.center.z))) < 1f,
+                        label + "tower base " + tower.min.y + " is not on the ground");
+
+                var stripSection = (Component)sections.GetValue(1);
+                var strip = stripSection != null ? stripSection.GetComponent<MeshFilter>() : null;
+                Require(strip != null && strip.sharedMesh != null && strip.sharedMesh.vertexCount > 0, label + "moving strip is missing");
+                foreach (var vertex in strip.sharedMesh.vertices)
+                {
+                    var world = strip.transform.TransformPoint(vertex);
+                    Require(Mathf.Abs(world.y - Ground(new Vector2(world.x, world.z))) < 1f, label + "moving strip is raised: " + world);
+                }
+            }
+        }
+        finally
+        {
+            rendererType.GetMethod("ResetPreview").Invoke(renderer, null);
+            dict.Remove(variant);
+            UnityEngine.Object.DestroyImmediate(manager.gameObject);
             UnityEngine.Object.DestroyImmediate(terrain);
             UnityEngine.Object.DestroyImmediate(data);
             utils.GetMethod("InvalidateHeightCache").Invoke(null, null);

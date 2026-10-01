@@ -53,6 +53,8 @@
 - `RoadPlanManager`のオーバーレイは2本。`overlayRenderer`は毎フレーム`BeginFrame`でクリアされる(配置点・ハンドル・端子マーカー)。`backgroundRenderer`はカメラ5m移動/`bgDirty`/`PathManager.NodeDataVersion`変化のときだけ作り直すキャッシュ(既存の辺・ノード)。既存物を`overlayRenderer`へ描くと同フレームで消えて何も表示されない。
 - ギズモのマテリアルだけ`_ZTest=Always`で常に手前。道路本体のプレビューには適用しない(地形をX線状に貫通して見える)。埋没は地形追従で防ぐ。
 - 曲線モードの`GetRenderPoints`はベジエを直接サンプリングするため、地上区間(相対高さ≒0)のYを地形+盛土へ追従させる処理(`PathManager.SampleBezierSegmentWithTerrain`と同一)を内に持つ。省くとアンカー間の起伏を無視して道路が丘に埋まる。
+- プレビューの点列は設計空間(地面+設計相対高さ+盛土)。`base_height`(`PathManager.GetPathBaseHeight`)を持つパス(送電線)は、生成器へ渡す直前(`RoadRenderer.ToDrawPoints`)と帯の頂点(`UpdateStrip`)で引く。引き忘れると鉄塔ごと`base_height`だけ浮く。地形追従区間の判定(`SamplePreviewSpans`・曲線の`GetRenderPoints`)も、基準は相対高さ0でなく`base_height`。
+- プレビューのウェイポイントは`{position:[x,相対Y,z]}`の辞書でパス要約へ詰める(`RoadRenderer.GenerateComponentPreview`)。`PathSummary.GetWaypointList`(`GeneratedModelUtils.ToWaypointList`)は辞書しか読まず、素の配列は黙って捨てられる。アンカーから経路を組む送電線(`PowerLinePath`)が始点→終点の直線になり、置いたウェイポイントを通らない。
 - 駅舎パス(type=`PATH_STATION_HOUSE`)の敷設中は`SnappingSuppressed`で既存地物への吸着を全て止める(グリッドのみ有効)。フラグ自体は書き換えない。
 - 複線敷設中の吸着はオフセット考慮版`TryOffsetAwareRailSnap`。中心線を素朴に吸着させると全線路がずれて1本も接続できない。
 - インフラパス敷設中の建物干渉推定は同一網の需給施設を除外する(端子は区画内にあり、引き込みで建物と重なるのが正常)。端子未ロード時は除外しない=安全側で赤。
