@@ -99,6 +99,16 @@ function num(v?: number | null, digits = 0): string {
       });
 }
 
+/** 料金・原価を小数第2位まで残して丸める。電力(1kWh)・水道(1L)は1円未満の単価になるため */
+function roundPrice(v: number): number {
+  return Math.round(v * 100) / 100;
+}
+
+/** 料金・原価を桁区切りで表示する(1円未満の端数は小数第2位まで) */
+function price(v: number): string {
+  return roundPrice(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
 /** 重さ(t)を桁区切りと単位つきで表示する(港湾の取扱能力・取扱量) */
 function tons(v?: number | null): string {
   return v == null ? "—" : `${num(v, 0)} t`;
@@ -441,14 +451,14 @@ function ServicePriceCard({
 
   const mode: PublicServicePriceMode = row?.mode ?? "cost_ratio";
   const isRatio = mode === "cost_ratio";
-  // 入力欄の表示値。編集中はドラフト、確定済みは fixed=整数価格 / cost_ratio=比率。
+  // 入力欄の表示値。編集中はドラフト、確定済みは fixed=価格(小数第2位まで) / cost_ratio=比率。
   const valueText =
     draft !== undefined
       ? draft
       : row
         ? isRatio
           ? String(row.value)
-          : String(Math.round(row.value))
+          : String(roundPrice(row.value))
         : "";
   // 原価比率モードでの実効価格 = 製造原価 × 比率。固定価格モードでは value がそのまま価格。
   const effectivePrice = row ? (isRatio ? row.unit_cost * row.value : row.value) : 0;
@@ -486,7 +496,7 @@ function ServicePriceCard({
                 className="psp-row__input"
                 value={valueText}
                 min={0}
-                step={isRatio ? 0.05 : 1}
+                step={isRatio ? 0.05 : "any"}
                 onChange={(e) => onDraftChange(e.target.value)}
                 onBlur={onCommit}
                 onKeyDown={(e) => {
@@ -501,7 +511,7 @@ function ServicePriceCard({
                   className="psp-row__effective"
                   title={t("publicServicePrices.effectivePrice")}
                 >
-                  = {Math.round(effectivePrice).toLocaleString()}
+                  = {price(effectivePrice)}
                 </span>
               )}
             </div>
@@ -512,7 +522,7 @@ function ServicePriceCard({
               {t("publicServicePrices.unitCost")}
             </span>
             <span className="psp-field__num">
-              {Math.round(row.unit_cost).toLocaleString()}
+              {price(row.unit_cost)}
               <span className="psp-row__unit">/{product.unit}</span>
             </span>
           </div>
@@ -662,7 +672,7 @@ export function PublicFacilitiesWindow({
         row.mode === "cost_ratio" ? row.unit_cost * row.value : row.value;
       let nextValue: number;
       if (nextMode === "fixed") {
-        nextValue = Math.max(0, Math.round(effective));
+        nextValue = Math.max(0, roundPrice(effective));
       } else {
         nextValue =
           row.unit_cost > 0
