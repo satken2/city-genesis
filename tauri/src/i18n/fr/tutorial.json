@@ -280,22 +280,26 @@
     },
     "tourism": {
       "title": "Développer le tourisme",
-      "description": "Les insulaires veulent faire découvrir leurs ruines antiques, mais manquent d'un port et d'hébergements. Ce tutoriel vous permettra d'apprendre à accueillir des touristes grâce à un hôtel et un terminal de passagers, puis à vérifier les effets sur les ventes des restaurants et la fréquentation des bus.",
+      "description": "L’île a besoin d’un port, d’hébergements et d’une ligne de bus pour accueillir les visiteurs de ses ruines. Apprenez à construire un hôtel et un terminal, créer une ligne et vérifier les arrivées, les ventes et l’utilisation du bus.",
       "step1": {
-        "description": "Construisez un « Hôtel touristique » sur la parcelle au repère jaune à l'est des ruines antiques, au bord de la mer. Après confirmation, la durée du chantier est ignorée.",
+        "description": "Construisez un Hôtel touristique sur la parcelle marquée en jaune à l’ouest des ruines antiques. La durée des travaux est ignorée après confirmation.",
         "title": "Construire un hôtel près des ruines"
       },
       "step2": {
-        "description": "Construisez un « Terminal de croisière » sur la parcelle marquée du port. Une ligne de bus et un dépôt de bus sont déjà prêts entre le port et les ruines.",
-        "title": "Construire un terminal de croisière"
+        "description": "Construisez un Terminal de passagers sur la parcelle indiquée du port. Un dépôt de bus est prêt, mais aucune ligne n’existe encore.",
+        "title": "Construire un terminal de passagers"
       },
       "step3": {
-        "description": "Faites avancer les époques pour accueillir les touristes. La mise en route prend quelques époques.",
-        "title": "Avancer les époques"
+        "description": "Ouvrez Transports publics → Nouvelle ligne et choisissez Ligne de bus. Placez les arrêts sur la route aux repères jaunes : port → logements → ruines → logements. Cliquez sur le premier arrêt du port pour fermer le trajet aller-retour. Fixez le tarif à 0 et l’intervalle cible à 1 minute, puis confirmez.",
+        "title": "Créer une ligne de bus du port aux ruines"
       },
       "step4": {
-        "description": "Vérifiez le chiffre d'affaires du restaurant devant les ruines et la fréquentation de la ligne de bus. L'objectif est atteint lorsque les deux dépassent leur valeur de départ et que des touristes sont arrivés.",
-        "title": "Vérifier la hausse des ventes et de la fréquentation du bus"
+        "description": "Avancez les périodes pour accueillir les touristes. Les installations et l’approvisionnement en bus mettent quelques périodes à démarrer.",
+        "title": "Avancer les périodes"
+      },
+      "step5": {
+        "description": "Consultez le restaurant près des ruines et la ligne créée. L’étape est accomplie lorsque des touristes sont arrivés, que les ventes dépassent leur niveau initial et que le bus transporte des voyageurs. Avancez davantage de périodes si nécessaire.",
+        "title": "Vérifier les ventes et les voyageurs"
       }
     },
     "intro": {
@@ -306,7 +310,7 @@
       "trade": "Une usine alimentaire locale souhaite vendre ses produits à l'étranger. La ville voudrait aussi disposer d'un moyen de faire venir les biens dont elle a besoin. Ce tutoriel vous permettra d'apprendre à exporter des aliments par un port et à importer des marchandises par une voie ferrée reliée au pays voisin.",
       "highway": "Avec le développement de la ville, davantage de véhicules transporteront personnes et marchandises. Il faut prévoir un autre itinéraire pour que le trafic de transit ne se concentre pas sur la route locale. Ce tutoriel vous permettra d'apprendre à faire passer une autoroute au-dessus d'une route locale et à les relier par des bretelles pour créer un échangeur.",
       "mining": "Des ressources précieuses dorment sous cette île, mais aucun moyen de transport ne relie la montagne au port. Sans ce lien, l'île ne peut pas en faire une industrie. Ce tutoriel vous permettra d'apprendre à aménager une mine, un chemin de fer de fret et un port pour extraire, transporter et exporter du minerai.",
-      "tourism": "Les insulaires aimeraient faire découvrir les ruines antiques du bord de mer à davantage de visiteurs. Mais sans port ni hébergement pour les accueillir, les restaurants peinent aussi à attirer des touristes. Ce tutoriel vous permettra d'apprendre à accueillir des touristes grâce à un hôtel et un terminal de passagers, puis à vérifier les effets sur les ventes des restaurants et la fréquentation des bus.",
+      "tourism": "Les habitants souhaitent faire découvrir leurs ruines antiques en bord de mer. Mais il manque un port de passagers, des hébergements et une ligne de bus vers le village. Ce tutoriel vous apprend à construire un hôtel et un terminal, créer une ligne de bus et vérifier les arrivées de touristes, les ventes du restaurant et l’utilisation du bus.",
       "heading": "Une demande au maire",
       "reclamation": "Ce minuscule récif manque de terrain plat pour un hôtel de ville. Dans ce tutoriel, vous apprendrez à remblayer la côte, créer une parcelle et y placer un hôtel de ville.",
       "acquisition": "Des logements, des bureaux et une caserne de pompiers se trouvent entre deux quais surélevés. Dans ce tutoriel, vous apprendrez à planifier les voies, acquérir les terrains privés, démolir explicitement un équipement public et terminer la liaison."

@@ -280,22 +280,26 @@
     },
     "tourism": {
       "title": "Desarrollar el turismo",
-      "description": "Los isleños quieren compartir sus ruinas antiguas, pero faltan un puerto y alojamiento. En este tutorial aprenderás a recibir turistas con un hotel y una terminal de pasajeros, y a comprobar el efecto en las ventas de los restaurantes y el uso del autobús.",
+      "description": "La isla necesita un puerto, alojamiento y una ruta de autobús para recibir visitantes en sus ruinas. Aprende a construir un hotel y una terminal, crear una ruta y revisar turistas, ventas y uso del autobús.",
       "step1": {
-        "description": "Construye un «Hotel turístico» en la parcela del marcador amarillo al este de las ruinas antiguas, junto al mar. Al confirmar, se omitirá el plazo de obra.",
-        "title": "Construir un hotel junto a las ruinas"
+        "description": "Construye un Hotel turístico en el terreno marcado en amarillo al oeste de las ruinas antiguas. Al confirmar se omite el tiempo de construcción.",
+        "title": "Construye un hotel junto a las ruinas"
       },
       "step2": {
-        "description": "Construye una «Terminal de cruceros» en la parcela marcada del puerto. Entre el puerto y las ruinas ya están preparados una línea de autobús y un depósito de autobuses.",
-        "title": "Construir una terminal de cruceros"
+        "description": "Construye una Terminal de pasajeros en el terreno marcado del puerto. Ya hay un depósito de autobuses, pero todavía no hay rutas.",
+        "title": "Construye una terminal de pasajeros"
       },
       "step3": {
-        "description": "Avanza épocas para recibir a los turistas. La puesta en marcha tarda algunas épocas.",
-        "title": "Avanzar épocas"
+        "description": "Abre Transporte público → Nueva ruta y elige Ruta de autobús. Coloca paradas sobre las calles en los marcadores amarillos: puerto → viviendas → ruinas → viviendas. Haz clic en la primera parada del puerto para cerrar el recorrido de ida y vuelta. Fija la tarifa en 0 y el intervalo objetivo en 1 minuto, y confirma.",
+        "title": "Crea una ruta de autobús entre el puerto y las ruinas"
       },
       "step4": {
-        "description": "Revisa las ventas del restaurante frente a las ruinas y los pasajeros de la línea de autobús. Lo habrás logrado cuando ambos superen sus valores iniciales y hayan llegado turistas.",
-        "title": "Verificar el aumento de ventas y pasajeros del autobús"
+        "description": "Avanza los períodos para recibir turistas. Las instalaciones y el suministro de autobuses tardan varios períodos en ponerse en marcha.",
+        "title": "Avanza el período"
+      },
+      "step5": {
+        "description": "Revisa el restaurante junto a las ruinas y la ruta que creaste. Completa el paso cuando lleguen turistas, las ventas superen el nivel inicial y haya pasajeros en el autobús. Avanza más períodos si hace falta.",
+        "title": "Revisa las ventas y los pasajeros"
       }
     },
     "intro": {
@@ -306,7 +310,7 @@
       "trade": "Una fábrica de alimentos pide ayuda para vender sus productos en el extranjero. El pueblo también quiere contar con una vía para traer los productos que necesita de otros países. En este tutorial aprenderás a exportar alimentos por un puerto e importar mercancías por un ferrocarril de carga conectado al país vecino.",
       "highway": "A medida que crezca el pueblo, aumentarán los vehículos que transportan personas y mercancías. Hace falta preparar otra vía para que el tránsito de paso no se concentre en la calle local. En este tutorial aprenderás a construir una autopista elevada sobre una calle local y conectarlas con rampas para crear un enlace vial.",
       "mining": "Esta isla tiene recursos valiosos bajo tierra, pero no hay cómo llevarlos de la montaña al puerto. Sin transporte, la isla no puede convertir esa riqueza en una industria. En este tutorial aprenderás a preparar una mina, un ferrocarril de carga y un puerto para extraer mineral, transportarlo y exportarlo al extranjero.",
-      "tourism": "Los isleños quieren que más personas conozcan las ruinas antiguas junto al mar. Sin un puerto ni alojamiento para recibir viajeros, los restaurantes del pueblo tampoco logran atraer turistas. En este tutorial aprenderás a recibir turistas con un hotel y una terminal de pasajeros, y a comprobar el efecto en las ventas de los restaurantes y el uso del autobús.",
+      "tourism": "Los habitantes quieren compartir sus antiguas ruinas costeras con más visitantes, pero no cuentan con un puerto de pasajeros, alojamiento ni una ruta de autobús al pueblo. En este tutorial aprenderás a construir un hotel y una terminal, crear una ruta de autobús y revisar la llegada de turistas, las ventas del restaurante y el uso del autobús.",
       "heading": "Un pedido para la alcaldía",
       "reclamation": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal. En este tutorial aprenderás a ganar terreno al mar, crear una parcela y colocar la sede municipal.",
       "acquisition": "Entre dos plataformas elevadas hay viviendas, oficinas y una estación de bomberos. En este tutorial aprenderás a planificar vías, adquirir terrenos privados, ordenar la demolición de una instalación pública y completar la conexión."
