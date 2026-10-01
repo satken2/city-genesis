@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "计算负载",
+      "title": "模拟负载",
       "heading": "最近一个纪元（{{days}}天）的计算时间",
       "noData": "暂无测量数据",
       "note": "连续运行多个纪元时，显示的是最后一个纪元的值。问题规模是根据城市规模估算的主要比较组合数，仅供参考。",
@@ -10,8 +10,7 @@
       "colWorkload": "处理数量",
       "workloadHint": "主要比较的组合数（数组元素数）的估算值。将鼠标悬停在数值上可查看明细。",
       "seconds": "{{value}} 秒",
-      "ms": "{{value}} ms",
-      "epochNumber": "测量的纪元"
+      "ms": "{{value}} ms"
     },
     "group": {
       "market": "商品市场",

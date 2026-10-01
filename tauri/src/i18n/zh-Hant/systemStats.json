@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "計算負載",
+      "title": "模擬負載",
       "heading": "最近一個紀元（{{days}}天）的計算時間",
       "noData": "暫無測量資料",
       "note": "連續執行多個紀元時，顯示的是最後一個紀元的值。問題規模是依城市規模估算的主要比較組合數，僅供參考。",
@@ -10,8 +10,7 @@
       "colWorkload": "處理數量",
       "workloadHint": "主要比較的組合數（陣列元素數）的估算值。將滑鼠移到數值上可查看明細。",
       "seconds": "{{value}} 秒",
-      "ms": "{{value}} ms",
-      "epochNumber": "測量的紀元"
+      "ms": "{{value}} ms"
     },
     "group": {
       "market": "商品市場",

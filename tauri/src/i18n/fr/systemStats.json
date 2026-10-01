@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "Charge de calcul",
+      "title": "Charge de simulation",
       "heading": "Temps de calcul de la dernière époque ({{days}} jours)",
       "noData": "Aucune donnée de mesure",
       "note": "Si plusieurs époques sont lancées à la suite, la dernière est affichée. La taille du problème est une estimation approximative des principales comparaisons, d'après la taille de la ville.",
@@ -10,8 +10,7 @@
       "colWorkload": "Nombre d’opérations",
       "workloadHint": "Nombre approximatif de comparaisons principales (éléments de tableaux). Survolez une valeur pour voir le détail.",
       "seconds": "{{value}} s",
-      "ms": "{{value}} ms",
-      "epochNumber": "Époque mesurée"
+      "ms": "{{value}} ms"
     },
     "group": {
       "market": "Marché des biens",

@@ -190,10 +190,7 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
 
   return (
     <section className="system-stats-section">
-      <div className="system-stats-section-heading">
-        <h3 className="system-stats-section-title">{t("systemStats.load.title")}</h3>
-        <span className="system-stats-epoch">{t("systemStats.load.epochNumber")} <b>{formatters.count.format(epoch.number)}</b></span>
-      </div>
+      <h3 className="system-stats-section-title">{t("systemStats.load.title")}</h3>
       <div className="system-stats-headline">
         <span className="system-stats-headline-label">{t("systemStats.load.heading", { days: epoch.simulation_days })}</span>
         <span className="system-stats-headline-value">

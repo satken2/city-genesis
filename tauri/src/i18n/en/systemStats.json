@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "Computation load",
+      "title": "Simulation load",
       "heading": "Computation time of the latest epoch ({{days}} days)",
       "noData": "No measurement data",
       "note": "When several epochs run in a row, this shows the last one. Problem size is a rough estimate of the main comparisons, based on the size of the city.",
@@ -10,8 +10,7 @@
       "colWorkload": "Operation count",
       "workloadHint": "Rough number of main comparisons (array elements). Hover over a value to see the breakdown.",
       "seconds": "{{value}} s",
-      "ms": "{{value}} ms",
-      "epochNumber": "Measured epoch"
+      "ms": "{{value}} ms"
     },
     "group": {
       "market": "Goods market",
