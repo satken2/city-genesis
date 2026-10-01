@@ -387,6 +387,7 @@ public static class PlatformQA
             }
 
             CheckIslandStation(track, summary, terminations);
+            CheckTrackTransition(track, summary, masters);
         }
         finally
         {
@@ -452,6 +453,145 @@ public static class PlatformQA
             Require(stops.All(t => Mathf.Abs(Mathf.Abs(t.position.x) - 5.5f) < .001f), "Buffer stop is not on an opened track");
             UnityEngine.Object.DestroyImmediate(ends);
         }
+    }
+
+    static readonly Dictionary<int, List<Vector3>> polylines = new Dictionary<int, List<Vector3>>();
+    static List<Vector3> Polyline<T>(T path) { return polylines[(int)typeof(T).GetField("path_id").GetValue(path)]; }
+
+    // 本編の PathManager.GetTrackLateralProfile と同じく、両端のノードにつながる線路から横位置の形を作る。
+    static R LateralProfile<T, R>(T path)
+    {
+        int start = (int)typeof(T).GetField("start_node_id").GetValue(path);
+        int end = (int)typeof(T).GetField("end_node_id").GetValue(path);
+        return (R)assembly.GetType("TrackEndTransition").GetMethod("BuildProfile").Invoke(null, new object[] { path, NodeConnections<T>(start), NodeConnections<T>(end) });
+    }
+
+    static float Smootherstep(float x) { return x * x * x * (x * (x * 6f - 15f) + 10f); }
+
+    // 軌道の位置が違う線路のつなぎ目(N§4.6・§4.7)。複線421(±2.5m)と島式の駅472(±5.5m)が真っすぐつながると、
+    // 双方が最小曲線半径(既定100m)のS字を20.8mずつ受け持ち、ノードで両方の軌道が±4.0mにそろって板なしでつながる。
+    // 線路のメッシュの軌道と道床もS字に沿う。道床の無いモノレールだけの分岐には板を作らずレールだけを置く。
+    static void CheckTrackTransition(Type track, Type summary, IDictionary masters)
+    {
+        var transition = assembly.GetType("TrackEndTransition");
+        var bundled = TrackData(summary, 1, 421, 1, 2, -64f, 0f);
+        var island = TrackData(summary, 2, 472, 2, 3, 0f, 64f);
+        summary.GetField("curved").SetValue(bundled, true);
+        summary.GetField("curved").SetValue(island, true);
+        var pair = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(summary));
+        pair.Add(bundled); pair.Add(island);
+        var shifts = (IDictionary)transition.GetMethod("ResolveNode").Invoke(null, new object[] { 2, pair });
+        Require(shifts.Count == 2, "421-472 transition pair missing");
+        float own = 0f;
+        foreach (DictionaryEntry entry in shifts)
+        {
+            var shift = entry.Value;
+            var outerShift = shift.GetType().GetMethod("OuterShift");
+            own = (float)shift.GetType().GetField("Own").GetValue(shift);
+            Require(Mathf.Abs(own - 20.81f) < .05f, $"Transition half length {own}");
+            float outer = (float)outerShift.Invoke(shift, new object[] { 0f });
+            Require(Mathf.Abs(((int)entry.Key == 1 ? 2.5f : 5.5f) + outer - 4f) < .001f, $"Track of path {entry.Key} does not meet at 4.0m ({outer})");
+            Require(Mathf.Abs((float)outerShift.Invoke(shift, new object[] { own })) < .001f, "Transition extends beyond its length");
+        }
+
+        polylines.Clear();
+        polylines[1] = Enumerable.Range(0, 33).Select(i => new Vector3(0, 0, -64 + i * 2)).ToList();
+        polylines[2] = Enumerable.Range(0, 33).Select(i => new Vector3(0, 0, i * 2)).ToList();
+        var resolver = Delegate.CreateDelegate(typeof(Func<,>).MakeGenericType(summary, typeof(List<Vector3>)),
+            typeof(PlatformQA).GetMethod("Polyline", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(summary));
+        var generator = Activator.CreateInstance(assembly.GetType("RoadIntersectionMeshGenerator"));
+        var generate = generator.GetType().GetMethod("GenerateWithSections");
+        var joined = generate.Invoke(generator, new object[] { 2, Vector3.zero, pair, 0f, resolver, null });
+        Require(joined != null && joined.GetType().GetProperty("TrackJoin").GetValue(joined) != null, "Straight 421-472 junction must join without a slab");
+        Require(joined.GetType().GetProperty("Mesh").GetValue(joined) == null, "Continuous track junction built a slab");
+
+        var modelType = assembly.GetType("ModelManager");
+        var model = modelType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+        var cache = (IDictionary)modelType.GetField("_modelCache", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(model);
+        foreach (string part in new[] { "body", "track" })
+        {
+            string asset = $"Assets/Paths/p421/{part}.fbx";
+            var importer = (ModelImporter)AssetImporter.GetAtPath(asset);
+            if (!importer.isReadable) { importer.isReadable = true; importer.SaveAndReimport(); }
+            cache[$"Models/Paths/p421/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>(asset);
+        }
+        connected.Clear(); connected.Add(bundled); connected.Add(island);
+        var connections = track.GetField("ConnectedPathsProvider");
+        connections.SetValue(null, Delegate.CreateDelegate(connections.FieldType,
+            typeof(PlatformQA).GetMethod("NodeConnections", BindingFlags.Static|BindingFlags.NonPublic).MakeGenericMethod(summary)));
+        var lateral = track.GetField("LateralProfileProvider");
+        lateral.SetValue(null, Delegate.CreateDelegate(lateral.FieldType,
+            typeof(PlatformQA).GetMethod("LateralProfile", BindingFlags.Static|BindingFlags.NonPublic).MakeGenericMethod(summary, assembly.GetType("TrackLateralProfile"))));
+        GameObject container = null;
+        try
+        {
+            var setback = Activator.CreateInstance(assembly.GetType("SidewalkSetback"));
+            var generated = track.GetMethod("Generate").Invoke(Activator.CreateInstance(track), new object[] { bundled, polylines[1], setback, setback });
+            container = (GameObject)generated.GetType().GetProperty("GeneratedObject").GetValue(generated);
+            foreach (var component in container.GetComponentsInChildren<Component>()) {
+                if (component == null || component.GetType().Name != "SplineMesh") continue;
+                MethodInfo rebuild = component.GetType().GetMethod("RebuildImmediate");
+                rebuild.Invoke(component, rebuild.GetParameters().Length == 0 ? null : new object[] { true });
+            }
+            var filters = container.GetComponentsInChildren<MeshFilter>().Where(f => f.sharedMesh != null).ToArray();
+            var tracks = filters.Where(f => f.name.EndsWith("/track")).ToArray();
+            var bodies = filters.Where(f => f.name.EndsWith("/body")).ToArray();
+            Require(tracks.Length >= 2 && bodies.Length >= 1, "Transition track or body missing");
+            // 断面(z の範囲)の頂点の、片側(sign)の横位置の最小・最大。
+            Vector2 LateralRange(MeshFilter[] parts, float sign, float from, float to)
+            {
+                var xs = parts.SelectMany(f => f.sharedMesh.vertices.Select(v => f.transform.TransformPoint(v)))
+                    .Where(v => v.z >= from && v.z <= to && v.x * sign > 0f).Select(v => v.x * sign).ToArray();
+                Require(xs.Length > 0, "No vertices in the measured section");
+                return new Vector2(xs.Min(), xs.Max());
+            }
+            float nodeShift = 3f * Smootherstep((own - .7f) / (2f * own));
+            foreach (float sign in new[] { -1f, 1f })
+            {
+                Vector2 nearTrack = LateralRange(tracks, sign, -1.2f, -.2f), farTrack = LateralRange(tracks, sign, -60f, -50f);
+                float nearCenter = (nearTrack.x + nearTrack.y) * .5f, farCenter = (farTrack.x + farTrack.y) * .5f;
+                Require(Mathf.Abs(nearCenter - (2.5f + nodeShift)) < .12f, $"Track does not follow the transition near the node ({nearCenter})");
+                Require(Mathf.Abs(farCenter - 2.5f) < .05f, $"Track moved outside the transition ({farCenter})");
+                Require(Mathf.Abs(LateralRange(bodies, sign, -1.2f, -.2f).y - (5f + nodeShift)) < .15f, "Ballast does not widen with the tracks");
+                Require(Mathf.Abs(LateralRange(bodies, sign, -60f, -50f).y - 5f) < .05f, "Ballast widened outside the transition");
+            }
+            Require(!container.GetComponentsInChildren<Transform>().Any(t => t.name == "TrackBufferStop" && t.position.z > -32f), "Buffer stop on the track joined to the island station");
+        }
+        finally
+        {
+            if (container != null) UnityEngine.Object.DestroyImmediate(container);
+            lateral.SetValue(null, null);
+            connections.SetValue(null, null);
+            connected.Clear();
+        }
+
+        // 道床の無いモノレールだけの分岐ノードは、板を作らずにレールのつなぎだけを置く。
+        var monorailMaster = Activator.CreateInstance(assembly.GetType("PathMasterItem"));
+        monorailMaster.GetType().GetField("type").SetValue(monorailMaster, 5);
+        monorailMaster.GetType().GetField("width").SetValue(monorailMaster, 6f);
+        monorailMaster.GetType().GetField("lanes").SetValue(monorailMaster, (int?)2);
+        masters[501] = monorailMaster;
+        var branch = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(summary));
+        var ends = new[] { new Vector3(0, 0, -64), new Vector3(0, 0, 64), new Vector3(16, 0, 62) };
+        for (int i = 0; i < 3; i++)
+        {
+            int id = 11 + i;
+            var path = TrackData(summary, id, 501, i == 0 ? 10 : 5, i == 0 ? 5 : 20 + i, 0f, 0f);
+            summary.GetField("path_type").SetValue(path, 5);
+            summary.GetField("curved").SetValue(path, true);
+            Vector3 start = i == 0 ? ends[0] : Vector3.zero, end = i == 0 ? Vector3.zero : ends[i];
+            summary.GetField("start_point").SetValue(path, new List<object> { start.x, 0f, start.z });
+            summary.GetField("end_point").SetValue(path, new List<object> { end.x, 0f, end.z });
+            polylines[id] = Enumerable.Range(0, 33).Select(k => Vector3.Lerp(start, end, k / 32f)).ToList();
+            branch.Add(path);
+        }
+        var railsOnly = generate.Invoke(generator, new object[] { 5, Vector3.zero, branch, 0f, resolver, null });
+        Require(railsOnly != null && (bool)railsOnly.GetType().GetProperty("RailsOnly").GetValue(railsOnly), "Monorail branch must be a rails-only node");
+        Require(railsOnly.GetType().GetProperty("Mesh").GetValue(railsOnly) == null, "Monorail branch built a slab");
+        var rails = (IList)railsOnly.GetType().GetProperty("RailConnectors").GetValue(railsOnly);
+        Require(rails != null && rails.Count >= 2, "Monorail branch lost its rail connectors");
+        masters.Remove(501);
+        polylines.Clear();
     }
 
     static void CheckPlatformContinuation()
