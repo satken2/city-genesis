@@ -7,6 +7,136 @@ using UnityEditor;
 
 public static partial class VehicleQA
 {
+    static Vector3[] RoadPosePoints()
+    {
+        var points = new Vector3[301];
+        for (int i = 0; i < points.Length; i++)
+            points[i] = new Vector3(70*Mathf.Sin(i/70f),i*.025f+.08f*(i%2),70*(1-Mathf.Cos(i/70f)));
+        return points;
+    }
+
+    static void RoadVehicleGeometry()
+    {
+        var geometry = New("TransitRouteGeometry",new object[]{null});
+        var g = ConsistTrack(geometry,1,RoadPosePoints(),2);
+        Set(g,"rail",false); Set(g,"trimmed",Get(g,"full"));
+        var polyline = Get(g,"full");
+        float[] distances = (float[])Get(polyline,"distances");
+        float length = Property(polyline,"Length");
+        var handProperty = game.GetType("CityInfoStore").GetProperty("TrafficHand");
+        int oldHand = (int)handProperty.GetValue(null);
+        try
+        {
+            foreach (int hand in new[]{0,1}) foreach (bool forward in new[]{false,true})
+            {
+                handProperty.SetValue(null,hand);
+                float sign = hand == 0 ? -1f : 1f;
+                var vehicle = New("Vehicle"); Call(vehicle,"SetPath",1,polyline,forward,50f);
+                Set(vehicle,"laneOffset",sign*2f); Set(vehicle,"shoulderOffset",sign*5f);
+                foreach (float blend in new[]{0f,7.5f,15f})
+                {
+                    Set(vehicle,"spawnBlendRemaining",blend);
+                    for (int vertex = 100; vertex < 140; vertex++)
+                    {
+                        object[] a = {null,null}, b = {null,null};
+                        Set(vehicle,"s",distances[vertex]-.0001f); Call(vehicle,"Sample",a);
+                        Set(vehicle,"s",distances[vertex]+.0001f); Call(vehicle,"Sample",b);
+                        Near(Vector3.Distance((Vector3)a[0],(Vector3)b[0]),0,.001f,"Road car offset jumps at vertex");
+                        Check(Vector3.Angle((Vector3)a[1],(Vector3)b[1])<.04f,"Road car pitch/yaw jumps at vertex");
+                    }
+                }
+                foreach (double logical in new[]{180.0,300.0,900.0}) foreach (float carLength in new[]{10f,12f})
+                {
+                    var route = ConsistRoute(logical,!forward); Set(route,"VehicleType",12);
+                    for (int vertex = 100; vertex < 140; vertex++)
+                    {
+                        double d = (forward ? distances[vertex]/length : 1-distances[vertex]/length)*logical;
+                        object[] a = {route,d-.0001,d,forward,carLength,null,null};
+                        object[] b = {route,d+.0001,d,forward,carLength,null,null};
+                        Check((bool)Call(geometry,"SampleBus",a) && (bool)Call(geometry,"SampleBus",b),"Loaded bus disappeared");
+                        Near(Vector3.Distance((Vector3)a[5],(Vector3)b[5]),0,.002f,"Bus offset jumps at vertex");
+                        Check(Vector3.Angle((Vector3)a[6],(Vector3)b[6])<.04f,"Bus pitch/yaw jumps at vertex");
+                    }
+                    foreach (double d in new[]{0.0,logical})
+                    {
+                        object[] pose = {route,d,d,forward,carLength,null,null};
+                        object[] center = {route,d,d,forward,null,null};
+                        Check((bool)Call(geometry,"SampleBus",pose),"Bus at road endpoint disappears");
+                        Check((bool)Call(geometry,"Sample",center),"Bus endpoint missing");
+                        Near(Vector3.Distance((Vector3)pose[5],(Vector3)center[4]),0,.001f,"Bus stop center moved");
+                        Near(((Vector3)pose[6]).magnitude,1,.001f,"Bus endpoint attitude is invalid");
+                    }
+                }
+            }
+        }
+        finally { handProperty.SetValue(null,oldHand); }
+        BusLaneBlendGeometry(geometry,g,polyline,distances);
+    }
+
+    static void BusLaneBlendGeometry(object geometry, object g, object polyline, float[] distances)
+    {
+        var turns = Enum.ToObject(game.GetType("RoadMarkingTurns"),7);
+        Set(g,"startTurns",turns); Set(g,"endTurns",turns);
+        Set(g,"startIncoming",Vector2.up); Set(g,"endIncoming",Vector2.up);
+        var next = ConsistTrack(geometry,2,new[]{Vector3.zero,Vector3.forward*100});
+        Set(next,"rail",false); Set(next,"startIncoming",Vector2.down); Set(next,"endIncoming",Vector2.down);
+        var handProperty = game.GetType("CityInfoStore").GetProperty("TrafficHand");
+        int oldHand = (int)handProperty.GetValue(null);
+        try
+        {
+            foreach (int hand in new[]{0,1}) foreach (bool forward in new[]{false,true})
+            {
+                handProperty.SetValue(null,hand);
+                var lanes = New("RoadLaneLayout",24f,3f,.5f,0f,6,0);
+                Set(g,"lanes",lanes); Set(g,"offset",Mathf.Abs((float)Call(lanes,"Center",0,hand)));
+                Set(Get(next,"data"),"end_node_id",forward?3:1);
+                var route = ConsistRoute(300,!forward); Set(route,"VehicleType",12);
+                var run = New("TransitRouteGeometry+Run");
+                Set(run,"path",2); Set(run,"start",300.0); Set(run,"end",400.0);
+                Set(run,"from",forward?0f:1f); Set(run,"to",forward?1f:0f); ((IList)Get(route,"runs")).Add(run);
+                for (int vertex = 1; vertex < distances.Length-1; vertex++)
+                {
+                    float remaining = forward ? Property(polyline,"Length")-distances[vertex] : distances[vertex];
+                    if (remaining < 12 || remaining > 42) continue;
+                    double d = (forward ? distances[vertex]/Property(polyline,"Length") : 1-distances[vertex]/Property(polyline,"Length"))*300;
+                    object[] a = {route,d-.0001,d,forward,null,null};
+                    object[] b = {route,d+.0001,d,forward,null,null};
+                    Check((bool)Call(geometry,"Sample",a) && (bool)Call(geometry,"Sample",b),"Bus lane blend missing");
+                    Near(Vector3.Distance((Vector3)a[4],(Vector3)b[4]),0,.002f,"Bus lane blend jumps at vertex");
+                }
+            }
+        }
+        finally { handProperty.SetValue(null,oldHand); }
+    }
+
+    static void BusRoadPlacement(Component manager, object data, IList sourceList, object geometry, object g)
+    {
+        Call(manager,"HideUnused",true);
+        Set(data,"path_variant",1001); Set(data,"vehicle_model",0);
+        Set(data,"cars_per_train",1); Set(data,"vehicle_count",1); Set(data,"length_per_vehicle",12f);
+        sourceList.Add(data); Call(manager,"RebuildLines",sourceList);
+        var route = ((IList)Get(manager,"lines"))[0];
+        var points = RoadPosePoints();
+        var line = Line(points);
+        Set(g,"full",line); Set(g,"trimmed",line); Set(g,"rail",false); Set(g,"offset",2f);
+        Set(g,"trimEnd",Property(line,"Length"));
+        ((IDictionary)Get(geometry,"geometry"))[1] = g;
+        Vector3 previous = default;
+        for (int frame = 0; frame < 40; frame++)
+        {
+            double time = 10+frame*.01;
+            Set(manager,"clock",time); ((HashSet<string>)Get(manager,"used")).Clear();
+            Call(manager,"DrawLine",route,points[120]); Call(manager,"HideUnused",false);
+            var visible = (IDictionary)Get(manager,"visible"); Check(visible.Count==1,"Road bus renderer disappeared");
+            Vector3 direction = ((Vector3[])Get(route,"directions"))[0];
+            if (frame > 0) Check(Vector3.Angle(previous,direction)<.3f,"Rendered road bus pitch/yaw jumps");
+            previous = direction;
+            foreach (DictionaryEntry entry in visible)
+                Check(Vector3.Angle(((GameObject)entry.Value).transform.forward,direction)<.03f,"Bus renderer ignores sampled attitude");
+        }
+        Call(manager,"HideUnused",true); sourceList.Clear(); Call(manager,"RebuildLines",sourceList);
+    }
+
     /// <summary>旅客の配置検証と同じ時計・線路のフィクスチャで、貨物の実FBXと編成内の個体を確かめる。</summary>
     static void FreightConsists(Component manager, object data, IList sourceList, IList journeys, object geometry, object g, object path)
     {

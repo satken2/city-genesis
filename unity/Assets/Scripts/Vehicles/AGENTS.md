@@ -9,7 +9,7 @@
 
 | ファイル | 役割 |
 | --- | --- |
-| `Vehicle.cs` | 車1台の状態と移動。`VehiclePolyline`(累積距離付き点列・円内区間・射影・軌道オフセット)も同居 |
+| `Vehicle.cs` | 車1台の状態と移動。`VehiclePolyline`(累積距離付き点列・円内区間・射影・車線/軌道オフセット・前後点からの姿勢 `SampleOffsetPose`)も同居 |
 | `VehicleManager.cs` / `.Drive.cs` | 一般車の道路スナップショット・分岐・密度調整・プール・沿道到着。`VehiclePopulationBudget`(全体枠)も同居。Drive はドライブモードの1台 |
 | `RoadMotionData.cs` | `/paths/motion` の自由秒数・混雑込み秒数と、前車追従の速度制御 `RoadMotionControl` |
 | `RoadsideAccess.cs` | 建物入口の幾何と有効性検査。車と歩行者で共有 |
@@ -30,6 +30,7 @@
 
 - ドライブと撮影の開始可否は`InputHandler.IsNormalMode`で編集との排他を判定する。ドライブ開始時の`CameraController.SetView`は撮影とマウス操作を終了し、カメラを同時に更新させない。
 - `VehiclePolyline.points` は構築後に書き換えない(`ShapeHash` のキャッシュ・`SameSource` の比較・Road の使い回しの前提)。交差点の点列は車線オフセット済みなので二重に横へずらさない。
+  - 道路・軌道の横位置は `SampleOffset` で頂点の断面から補間する。一般車の姿勢は `SampleOffsetPose` の標準車長4.5mの前後点、バスは `TransitRouteGeometry.SampleBus` の公称車長の車端で求める。バスの中心は停止位置を保ち、車端が経路外なら現在の道路内の前後点を使う。
   - 四隅検査など局所射影は `ProjectRange`(累積距離範囲の二分探索)、全長射影は `Project`。
 - 道路スナップショット(`vehicleRoads` / `pedestrianWalks` ワーカー)は共通予算で分割構築し、完成後に一括交換する。`roads` / `walks` への代入は Commit と Clear に限る(途中の集合を車に見せない)。乗車開始 `StartDrive` だけ同期版 `RefreshRoads` を使う。
 - 管理中心は `VehicleManager.ResolveTrafficCenter`(走行車300m・歩行者180m・路駐が使う。公共交通・索道は従来の中心)。大移動は `ClearVehicles` ではなく `Recenter`。`accessCache.Clear()` は全消去のときだけ。

@@ -189,7 +189,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 if (bus)
                 {
                     double offset = ((cars-1)*.5-car)*spacing;
-                    if (!routeGeometry.Sample(line,distance+offset,distance,forward,out positions[car],out directions[car])) { ready = false; break; }
+                    if (!routeGeometry.SampleBus(line,distance+offset,distance,forward,spacing,out positions[car],out directions[car])) { ready = false; break; }
                     if (stopped) BusTurnaround(line,step,runTime,ref positions[car],ref directions[car]);
                 }
                 Vector3 delta = positions[car]-center; delta.y = 0;

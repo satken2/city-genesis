@@ -309,6 +309,23 @@ public sealed class TransitRouteGeometry
         return true;
     }
 
+    /// <summary>停留所で指定された中心を保ち、鉄道と同じ車端探索でバスの姿勢を求める。</summary>
+    public bool SampleBus(Route line, double distance, double reference, bool forward, float length,
+        out Vector3 position, out Vector3 tangent)
+    {
+        if (!Sample(line,distance,reference,forward,out position,out tangent)) return false;
+        if (FindCarEnds(line,reference,forward,distance,length,0,out _,out _,out var rear,out var front))
+        { tangent = (front-rear).normalized; return true; }
+        // バスの停止中心は道路端にも置ける。前後点が経路外なら、現在の道路内で姿勢を求めて表示を維持する。
+        int index = FindRun(line.runs,reference);
+        if (line.runs[index].Forward != forward && index > 0 && Math.Abs(line.runs[index].start-reference)<.001) index--;
+        var run = line.runs[index]; var g = geometry[run.path];
+        float s = (run.from+(float)((distance-run.start)/Math.Max(.001,run.end-run.start))*(run.to-run.from))*g.full.Length;
+        float sign = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1;
+        g.full.SampleOffsetPose(s,run.Forward,g.offset*sign,length,out _,out tangent);
+        return true;
+    }
+
     private bool FindCarEnds(Route line,double reference,bool forward,double origin,float length,int side,
         out double rearDistance,out double frontDistance,out Vector3 rear,out Vector3 front)
     {
@@ -371,12 +388,7 @@ public sealed class TransitRouteGeometry
         float sign = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1;
         float offset = tram ? g.tramOffset : g.offset;
         // 走る軌道は進行方向に対して通行側で最も外側の1本(TrackPath.TrackIndexForTravel と同じ規則)。到着した軌道はその反対側で、単線では同じ位置。
-        if (g.rail || tram) g.full.SampleOffset(s,forward,offset*sign*(arrivalTrack ? -1 : 1),out p,out t);
-        else
-        {
-            g.full.Sample(s,forward,out p,out t);
-            p += Vector3.Cross(Vector3.up,t).normalized*(offset*sign);
-        }
+        g.full.SampleOffset(s,forward,offset*sign*(arrivalTrack ? -1 : 1),out p,out t);
         p.y += tram ? LrtRoadParts.RailTopAboveSpline(g.data.path_variant)
             : g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + RunningSurface(g) : RoadPartHeights.BODY_ABOVE_SPLINE;
     }
@@ -404,8 +416,12 @@ public sealed class TransitRouteGeometry
         float remaining = run.Forward ? g.trimEnd - s : s - g.trimStart;
         float length = Mathf.Min(30f, g.trimmed.Length * .4f);
         float blend = Mathf.SmoothStep(0f, 1f, 1f - Mathf.Clamp01((remaining - 12f) / Mathf.Max(1f, length)));
-        Vector3 right = Vector3.Cross(Vector3.up, tangent).normalized;
-        position += right * ((target - original) * blend);
+        // 車線寄せも頂点の断面上で補間し、中心線の線分切替で横位置を跳ばさない。
+        g.full.SampleOffset(s,run.Forward,Mathf.Lerp(original,target,blend),out position,out tangent);
+        position.y += RoadPartHeights.BODY_ABOVE_SPLINE;
+        g.full.SampleOffset(s,run.Forward,1f,out var side,out _);
+        g.full.SampleOffset(s,run.Forward,0f,out var center,out _);
+        Vector3 right = side - center;
         float progress = Mathf.Clamp01(1f - (remaining - 12f) / Mathf.Max(1f, length));
         tangent = (tangent + right * ((target - original) * 6f * progress * (1f - progress) / Mathf.Max(1f, length))).normalized;
     }

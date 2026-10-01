@@ -63,6 +63,15 @@ public sealed class VehiclePolyline
         if (tangent.sqrMagnitude < .001f) tangent = forward ? Vector3.forward : Vector3.back;
     }
 
+    /// <summary>車体中心の位置を保ち、前後の点から姿勢を求める。道路端では前後点を点列内へ収める。</summary>
+    public void SampleOffsetPose(float s, bool forward, float offset, float length, out Vector3 position, out Vector3 tangent)
+    {
+        SampleOffset(s, forward, offset, out position, out tangent);
+        SampleOffset(s - length * .5f, forward, offset, out var a, out _);
+        SampleOffset(s + length * .5f, forward, offset, out var b, out _);
+        if ((b - a).sqrMagnitude > .000001f) tangent = (b - a).normalized * (forward ? 1 : -1);
+    }
+
     private int FindSegment(float s)
     {
         int lo = 1, hi = distances.Length - 1;
@@ -228,10 +237,10 @@ public class Vehicle
             return;
         }
         if (InIntersection) { connector.Sample(connectorS, true, out position, out tangent); return; }
-        road.Sample(s, forward, out position, out tangent);
         float blend = Mathf.Max(Mathf.Clamp01(spawnBlendRemaining / 15f), ArrivalBlend);
         float offset = Mathf.Lerp(laneOffset, shoulderOffset, blend);
-        position += Vector3.Cross(Vector3.up, tangent).normalized * offset;
+        // 短い地形追従線分の傾きを車体へ直接使うと、頂点ごとにピッチが跳ぶ。標準車長の前後点から姿勢を求める。
+        road.SampleOffsetPose(s, forward, offset, 4.5f, out position, out tangent);
     }
 
     /// <summary>状態の端まで進め、未消費時間を返す。短いパスでも移動時間を捨てない。</summary>

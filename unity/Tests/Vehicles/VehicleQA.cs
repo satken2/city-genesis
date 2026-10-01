@@ -122,6 +122,7 @@ public static partial class VehicleQA
             bool actual=(bool)game.GetType("VehicleManager").GetMethod("DirectionAllowsEntry").Invoke(null,new object[]{dir,fwd});
             Check(actual==(dir==0 || dir==(fwd?1:2)),"One-way entry");
         }
+        RoadVehicleGeometry();
     }
     static void Budget()
     {
@@ -254,6 +255,7 @@ public static partial class VehicleQA
         Call(manager,"RefreshGeometry",Vector3.zero);
         Check(lines.Count==0,"Removed route retained");
         FreightConsists(manager, data, sourceList, journeys, routeGeometry, g, path);
+        BusRoadPlacement(manager, data, sourceList, routeGeometry, g);
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(models.gameObject);
     }
 
