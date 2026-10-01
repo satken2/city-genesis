@@ -173,6 +173,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
         var renderer = go.AddComponent<MeshRenderer>();
         renderer.sharedMaterial = first.source.sharedMaterial;
+        go.AddComponent<UndergroundGhostObject>();
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         go.AddComponent<RenderCacheIdentity>().mesh = mesh;
 
@@ -200,7 +201,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
 /// 集約元の寿命と表示変更を結合バッチへ伝える。有効化・無効化は自動で伝わる。
 /// 表示(Renderer.enabled)・位置・マテリアル・プロパティブロックを変えた側が Refresh を呼ぶ。毎フレームのポーリングはしない。
 /// </summary>
-public sealed class FarBuildingMember : MonoBehaviour
+public sealed class FarBuildingMember : MonoBehaviour, IVisualModeHandler
 {
     internal MeshRenderer source;
     internal Mesh mesh;
@@ -217,14 +218,33 @@ public sealed class FarBuildingMember : MonoBehaviour
     private void OnEnable()
     {
         if (registered || source == null || mesh == null || source.sharedMaterial == null || !isActiveAndEnabled) return;
+        RegisterBatch();
+        VisualModeHandler.Instance?.RegisterObject(InputObjectType.BUILDING, this);
+    }
+    private void RegisterBatch()
+    {
         matrix = transform.localToWorldMatrix; material = source.sharedMaterial; wasEnabled = source.enabled;
         hadPropertyBlock = source.HasPropertyBlock();
         FarBuildingBatcher.Register(this); registered = true;
     }
     private void OnDisable()
     {
+        VisualModeHandler.Instance?.UnregisterObject(InputObjectType.BUILDING, this);
         if (registered) FarBuildingBatcher.Remove(this);
         registered = false;
+    }
+
+    public void ApplyVisualMode(int mode)
+    {
+        if (source == null) return;
+        var id = GetComponent<ObjectIdInfo>();
+        bool visible = mode != VisualMode.MODE_HIDDEN && (id == null || !ObjectVisibilityFilter.IsHidden(InputObjectType.BUILDING, id.id));
+        if (id != null && (id.status == Constants.STATUS_PENDING || id.status == Constants.STATUS_TEMPORARY || id.status == Constants.STATUS_SCHEDULED_CONSTRUCTION))
+            visible &= VisualModeHandler.Instance == null || (VisualModeHandler.Instance.GetFlags(InputObjectType.BUILDING) & VisualFlag.SHOW_PLAN) != 0;
+        source.enabled = visible;
+        var collider = GetComponent<Collider>();
+        if (collider != null) collider.enabled = visible;
+        Refresh();
     }
 
     /// <summary>
@@ -236,7 +256,10 @@ public sealed class FarBuildingMember : MonoBehaviour
         if (source == null) return;
         if (matrix != transform.localToWorldMatrix || material != source.sharedMaterial || wasEnabled != source.enabled || hadPropertyBlock != source.HasPropertyBlock())
         {
-            OnDisable(); OnEnable();
+            // 材質の差し替えは表示モードの再登録を伴わない。適用途中の表示状態を再通知で上書きしないため。
+            if (registered) FarBuildingBatcher.Remove(this);
+            registered = false;
+            if (isActiveAndEnabled && mesh != null && source.sharedMaterial != null) RegisterBatch();
         }
     }
 

@@ -6,6 +6,8 @@ Shader "CityGenesis/Forest"
         _BaseColor("Tint", Color) = (1,1,1,1)
         _Smoothness("Smoothness", Range(0,1)) = 0.1
         _Metallic("Metallic", Range(0,1)) = 0
+        _UndergroundAlpha("Underground opacity", Range(0,1)) = 1
+        _ZWrite("Depth write", Float) = 1
     }
     SubShader
     {
@@ -19,7 +21,7 @@ Shader "CityGenesis/Forest"
         StructuredBuffer<ForestPoint> _ForestPoints;
         TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
         float4 _BaseColor, _BaseMap_ST;
-        half _Smoothness, _Metallic;
+        half _Smoothness, _Metallic, _UndergroundAlpha;
         float4x4 _PartLocal, _PartNormal;
         float3 _ForestCamera;
         float _DetailDistance, _TransitionWidth, _MaxDistance;
@@ -74,7 +76,7 @@ Shader "CityGenesis/Forest"
             half3 color = UniversalFragmentPBR(lighting,surface).rgb;
             // Terrain/Litと同じビュー空間距離を使い、正投影でも霧の濃さを揃える。
             float fog = InitializeInputDataFog(float4(input.positionWS,1),0);
-            return half4(MixFog(color,fog),1);
+            return half4(MixFog(color,fog),_UndergroundAlpha);
         }
         half4 DepthFragment(Varyings input) : SV_Target { return 0; }
         half4 NormalFragment(Varyings input) : SV_Target { return half4(normalize(input.normalWS),0); }
@@ -94,6 +96,8 @@ Shader "CityGenesis/Forest"
         Pass
         {
             Name "ForwardLit" Tags { "LightMode"="UniversalForwardOnly" }
+            Blend SrcAlpha OneMinusSrcAlpha
+            ZWrite [_ZWrite]
             HLSLPROGRAM
             #pragma vertex ForestVertex
             #pragma fragment ForestFragment

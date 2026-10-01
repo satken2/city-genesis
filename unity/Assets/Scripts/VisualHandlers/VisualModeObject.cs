@@ -65,6 +65,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     }
 
     private List<RendererInfo> targetRenderers = new List<RendererInfo>();
+    private UndergroundGhostObject undergroundGhost;
     /// <summary>表示モードとステータスの判定結果。付随する画面アイコンも同じ表示条件に追従する。</summary>
     public bool IsVisualVisible { get; private set; }
     private int objectStatus = Constants.STATUS_ACTIVE; // オブジェクトのステータス
@@ -123,6 +124,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
 
     private void CollectMaterials(bool preserveOriginals)
     {
+        undergroundGhost?.RestoreMaterials();
         var originals = new Dictionary<Renderer, RendererInfo>();
         if (preserveOriginals)
             foreach (var info in targetRenderers)
@@ -293,6 +295,17 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     /// </summary>
     private void UpdateVisuals(int? modeOverride = null)
     {
+        bool surfaceObject = (objectType == InputObjectType.BUILDING || objectType == InputObjectType.PATH)
+            && GetComponent<UndergroundPathMarker>() == null;
+        if (surfaceObject && UndergroundView.IsActive && undergroundGhost == null)
+            undergroundGhost = gameObject.AddComponent<UndergroundGhostObject>();
+        undergroundGhost?.RestoreMaterials();
+        try { UpdateVisualsCore(modeOverride); }
+        finally { undergroundGhost?.Refresh(); }
+    }
+
+    private void UpdateVisualsCore(int? modeOverride)
+    {
         if (targetRenderers == null || targetRenderers.Count == 0) return;
 
         // モードとフラグの取得。
@@ -303,7 +316,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         // 0. オブジェクト単位の表示フィルタ（最優先）。
         // プレイヤーが「この建物・この道路だけ消す」と明示した状態なので、建設中・計画中の
         // 常時表示やハイライトを含むあらゆる表示に優先する。クリックも拾わせない。
-        if (isFilterHidden)
+        if (isFilterHidden || (UndergroundView.IsActive && currentMode == VisualMode.MODE_HIDDEN))
         {
             SetRenderersEnabled(false);
             EnableCollider(false);

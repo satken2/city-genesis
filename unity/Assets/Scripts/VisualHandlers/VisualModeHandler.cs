@@ -106,6 +106,7 @@ public class VisualModeHandler : MonoBehaviour
             return;
         }
         Instance = this;
+        UndergroundView.Ensure();
     }
 
     private void Start()
@@ -149,6 +150,16 @@ public class VisualModeHandler : MonoBehaviour
     public void SetMode(int objectType, int mode)
     {
         if (!objectTypeModes.ContainsKey(objectType)) return;
+        if (objectType == InputObjectType.TERRAIN)
+        {
+            bool changed = UndergroundView.IsActive != (mode == VisualModeTerrain.TRANSPARENT);
+            UndergroundView.SetActive(mode == VisualModeTerrain.TRANSPARENT);
+            if (changed)
+            {
+                RefreshSurfaceObjects(InputObjectType.BUILDING);
+                RefreshSurfaceObjects(InputObjectType.PATH);
+            }
+        }
 
         // 差分チェック：前回と同じモードなら何もしない
         if (previousModes[objectType] == mode)
@@ -174,6 +185,12 @@ public class VisualModeHandler : MonoBehaviour
         {
             Debug.Log($"VisualModeHandler: {InputObjectType.GetName(objectType)} のモードを {GetModeName(mode)} に変更開始 (対象: {registeredObjects[objectType].Count} オブジェクト)");
         }
+    }
+
+    private void RefreshSurfaceObjects(int objectType)
+    {
+        if (activeUpdateCoroutines.TryGetValue(objectType, out var routine) && routine != null) StopCoroutine(routine);
+        activeUpdateCoroutines[objectType] = StartCoroutine(NotifyObjectsBatched(objectType, GetMode(objectType)));
     }
 
     public int GetMode(int objectType)

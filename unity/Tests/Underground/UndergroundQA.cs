@@ -1,0 +1,278 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
+
+// 本編の描画・物理・表示設定を独立プロジェクトで動かす。都市データや本編シーンには接続しない。
+[InitializeOnLoad]
+public static class UndergroundQA
+{
+    private static Assembly runtime;
+    private static int checks;
+    private const BindingFlags Flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+    private static Type T(string name) => runtime.GetType(name, true);
+    private static object Field(object obj, string name) => obj.GetType().GetField(name, Flags).GetValue(obj);
+    private static void Set(object obj, string name, object value) => (obj.GetType().GetField(name, Flags) ?? throw new Exception("Missing field: " + obj.GetType() + "." + name)).SetValue(obj, value);
+    private static object Call(object obj, string name, params object[] args) => obj.GetType().GetMethod(name, Flags).Invoke(obj, args);
+    private static object Static(string type, string name, params object[] args) => T(type).GetMethod(name, Flags).Invoke(null, args);
+    private static int C(string type, string name) => (int)(T(type).GetField(name) ?? throw new Exception("Missing constant: " + type + "." + name)).GetValue(null);
+    private static Component Add(string type, GameObject go = null)
+    {
+        var component = (go ?? new GameObject(type)).AddComponent(T(type));
+        ((Behaviour)component).enabled = false;
+        return component;
+    }
+    private static void Check(bool condition, string message) { checks++; if (!condition) throw new Exception(message); }
+
+    static UndergroundQA()
+    {
+        if (SessionState.GetBool("UndergroundQA.Pending", false)) EditorApplication.delayCall += Run;
+    }
+
+    public static void Run()
+    {
+        if (!EditorApplication.isPlaying)
+        {
+            foreach (string file in Directory.GetFiles("Assets/Models/Paths", "*.fbx", SearchOption.AllDirectories))
+            {
+                var importer = (ModelImporter)AssetImporter.GetAtPath(file.Replace('\\','/'));
+                if (!importer.isReadable) { importer.isReadable = true; importer.SaveAndReimport(); }
+            }
+            SessionState.SetBool("UndergroundQA.Pending", true);
+            EditorApplication.EnterPlaymode();
+            return;
+        }
+        SessionState.SetBool("UndergroundQA.Pending", false);
+        string[] args = Environment.GetCommandLineArgs();
+        string root = args[Array.IndexOf(args, "-sourceRoot") + 1];
+        string report = root + "/Temp/UndergroundQA/result.txt";
+        try
+        {
+            var referencePaths = File.ReadAllLines(root + "/Temp/UndergroundQA/references.txt");
+            AppDomain.CurrentDomain.AssemblyResolve += (_, e) => {
+                string name = new AssemblyName(e.Name).Name + ".dll";
+                foreach (string path in referencePaths)
+                    if (Path.GetFileName(path) == name && File.Exists(path)) return Assembly.LoadFrom(path);
+                foreach (string dir in new[] { "Temp/bin/Debug", "Assets/Plugins" })
+                {
+                    string path = Path.Combine(root, dir, name);
+                    if (File.Exists(path)) return Assembly.LoadFrom(path);
+                }
+                return null;
+            };
+            runtime = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
+            foreach (string name in new[] { "UndergroundGhost", "UndergroundGround", "UndergroundSoil", "UndergroundShore", "Forest" })
+            {
+                var shader = Resources.Load<Shader>("Shaders/" + name);
+                string errors = shader == null ? "missing" : string.Join("; ", Array.ConvertAll(ShaderUtil.GetShaderMessages(shader), message => message.message));
+                Check(shader != null && !ShaderUtil.ShaderHasError(shader), "shader import: " + name + ": " + errors);
+            }
+            var rendererData = ScriptableObject.CreateInstance<UniversalRendererData>();
+            var pipeline = UniversalRenderPipelineAsset.Create(rendererData);
+            GraphicsSettings.defaultRenderPipeline = pipeline;
+            QualitySettings.renderPipeline = pipeline;
+
+            var state = Add("GameStateManager");
+            state.GetType().GetProperty("IsWorldVisible").SetValue(state, true);
+            var modes = Add("VisualModeHandler");
+            var master = Add("MasterDataStore");
+            var models = Add("ModelManager");
+            var modelCache = (IDictionary)Field(models,"_modelCache");
+            // 元FBXを通常生成器へ渡す。検証プロジェクトでは既存プレハブの外部GUID依存を持ち込まない。
+            foreach (string file in Directory.GetFiles("Assets/Models/Paths", "*.fbx", SearchOption.AllDirectories))
+            {
+                string assetPath=file.Replace('\\','/');
+                var model=AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+                if (model==null) throw new Exception("FBX import failed: "+assetPath);
+                // 独立プロジェクトのFBX既定材質はBuilt-in。色と画像を保ってURPの検証用材質へ変換する。
+                foreach (var material in model.GetComponentsInChildren<MeshRenderer>().SelectMany(renderer=>renderer.sharedMaterials).Distinct())
+                {
+                    if (material.shader.name!="Standard") continue;
+                    var color=material.color; var texture=material.mainTexture;
+                    material.shader=Shader.Find("Universal Render Pipeline/Lit");
+                    material.SetColor("_BaseColor",color); material.SetTexture("_BaseMap",texture);
+                }
+                modelCache[assetPath.Substring("Assets/".Length).Replace(".fbx","")]=model;
+            }
+            master.GetType().GetProperty("IsInitialized").SetValue(master, true);
+            var masters = (IDictionary)Field(master, "pathMasterById");
+            foreach (int variant in new[] { 221, 405, 1103 })
+            {
+                object item = Activator.CreateInstance(masters.GetType().GetGenericArguments()[1]);
+                Set(item, "model_type", variant == 1103 ? "none" : variant == 405 ? "track" : "default");
+                Set(item, "width", variant == 1103 ? 3f : 8f);
+                Set(item, "type", variant == 1103 ? 11 : variant == 405 ? 4 : 1);
+                Set(item, "lanes", 2);
+                Set(item, "sidewalk_width", variant == 221 ? 1.5f : 0f);
+                Set(item, "side_width", variant == 221 ? .3f : 0f);
+                Set(item, "height", 3f); Set(item, "height_editable", true); Set(item, "follow_terrain", false);
+                masters[variant] = item;
+            }
+            var data = new TerrainData { heightmapResolution = 65, size = new Vector3(200,100,200) };
+            var heights = new float[65,65];
+            for (int z = 0; z < 65; z++) for (int x = 0; x < 65; x++) heights[z,x] = .2f+(x/64f-.6f)*.1f;
+            data.SetHeights(0,0,heights);
+            var terrainGO = Terrain.CreateTerrainGameObject(data);
+            terrainGO.transform.position = new Vector3(-100,-20,-100);
+            terrainGO.layer = LayerMask.NameToLayer("Ground");
+            var terrain = terrainGO.GetComponent<Terrain>();
+            terrain.materialTemplate = new Material(Shader.Find("Universal Render Pipeline/Terrain/Lit"));
+            var terrainManager = Add("TerrainManager");
+            var tiles = (IDictionary)Field(terrainManager,"terrainTiles");
+            foreach (int x in new[] {-1,0}) foreach (int z in new[] {-1,0}) tiles[new Vector2Int(x,z)] = terrain;
+            Static("Utils","InvalidateHeightCache");
+            var terrainVisual = Add("VisualTerrainObject",terrainGO);
+            var pathManager = Add("PathManager");
+            var paths = (IDictionary)Field(pathManager,"pathDataCache");
+            if (paths == null) throw new Exception("Path cache is null");
+            object MakePath(int id, int variant, int type, float z, float relativeY)
+            {
+                object path = Activator.CreateInstance(T("GeneratedModels.PathSummary"));
+                Set(path,"path_id",id); Set(path,"path_variant",variant); Set(path,"path_type",type);
+                Set(path,"status",C("Constants","STATUS_ACTIVE")); Set(path,"follow_terrain",0);
+                Set(path,"start_point",new List<object>{-70d,(double)relativeY,(double)z});
+                Set(path,"end_point",new List<object>{70d,(double)relativeY,(double)z});
+                paths[id] = path; return path;
+            }
+            var road = MakePath(1,221,C("Constants","PATH_STREET"),-25,-14);
+            var rail = MakePath(2,405,C("Constants","PATH_TRACK"),0,-20);
+            var infra = MakePath(3,1103,C("Constants","PATH_ELECTRICITY"),25,-28);
+
+            var camera = new GameObject("Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
+            camera.transform.position = new Vector3(155,120,-180); camera.transform.LookAt(new Vector3(0,-8,0));
+            camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = Color.gray; camera.aspect = 1.6f;
+            camera.GetUniversalAdditionalCameraData().renderPostProcessing = false;
+            var sun = new GameObject("Sun").AddComponent<Light>(); sun.type = LightType.Directional;
+            sun.transform.rotation = Quaternion.Euler(55,-25,0); sun.intensity = 1.2f; sun.color=Color.white;
+            RenderSettings.ambientMode=AmbientMode.Flat; RenderSettings.ambientLight=Color.gray;
+            var sea = GameObject.CreatePrimitive(PrimitiveType.Plane); sea.name="Sea"; sea.tag="SeaObject";
+            sea.transform.localScale = new Vector3(20,1,20); sea.transform.position = new Vector3(0,.01f,0);
+            var seaVisual = Add("VisualSeaObject",sea);
+            int terrainType = C("InputObjectType","TERRAIN"), pathType = C("InputObjectType","PATH");
+            int transparent = C("VisualModeTerrain","TRANSPARENT"), normal = C("VisualMode","MODE_NORMAL"), hidden = C("VisualMode","MODE_HIDDEN");
+            var far = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            far.name = "FarBuilding"; far.transform.position = new Vector3(-45,8,45); far.transform.localScale = new Vector3(12,16,12);
+            var farRenderer = far.GetComponent<MeshRenderer>();
+            var farOriginal = farRenderer.sharedMaterial;
+            var farId = far.AddComponent(T("ObjectIdInfo")); Set(farId,"id",42); Set(farId,"status",C("Constants","STATUS_ACTIVE"));
+            var member = far.AddComponent(T("FarBuildingMember"));
+            Call(member,"Configure",farRenderer,far.GetComponent<MeshFilter>().sharedMesh);
+            far.AddComponent(T("UndergroundGhostObject"));
+            var forest = Activator.CreateInstance(T("ForestRenderer"));
+            Call(modes,"SetMode",terrainType,transparent);
+            Call(terrainVisual,"ApplyVisualMode",transparent); Call(seaVisual,"ApplyVisualMode",transparent);
+            Check(!terrain.enabled && terrainGO.GetComponent<TerrainCollider>().enabled,"ground physics remains available");
+            Check(!sea.GetComponent<Renderer>().enabled,"sea is hidden below zero elevation");
+            Check(terrainGO.transform.Find("UndergroundGroundSurface").gameObject.activeSelf,"translucent ground membrane exists");
+            Check(farRenderer.sharedMaterial!=farOriginal,"far building fades with detailed models");
+            Call(member,"ApplyVisualMode",hidden); Check(!farRenderer.enabled,"far building hidden setting is respected");
+            Call(member,"ApplyVisualMode",normal);
+            Static("ObjectVisibilityFilter","SetHidden",new[]{42},null); Call(member,"ApplyVisualMode",normal);
+            Check(!farRenderer.enabled,"far building individual filter is respected");
+            Static("ObjectVisibilityFilter","Clear"); Call(member,"ApplyVisualMode",normal);
+            int buildingType = C("InputObjectType","BUILDING");
+            Call(modes,"SetMode",buildingType,hidden);
+            Static("ObjectVisibilityFilter","ApplyToObject",far,buildingType,42);
+            Check(!farRenderer.enabled && !far.GetComponent<Collider>().enabled,"filter refresh preserves hidden far building layer");
+            Call(modes,"SetMode",buildingType,normal);
+            Set(farId,"status",C("Constants","STATUS_PENDING"));
+            Call(modes,"SetFlags",buildingType,0);
+            Check(!farRenderer.enabled,"far planned building respects show-plan setting");
+            Set(farId,"status",C("Constants","STATUS_ACTIVE"));
+            Call(modes,"SetFlags",buildingType,C("VisualFlag","SHOW_PLAN"));
+            var forestMaterial=(Material)Call(forest,"MaterialFor",farOriginal);
+            Check(Mathf.Approximately(forestMaterial.GetFloat("_UndergroundAlpha"),.22f) && forestMaterial.GetFloat("_ZWrite")==0 && !forestMaterial.GetShaderPassEnabled("ShadowCaster"),"GPU forest fades without depth or shadow occlusion");
+            var propMaterial=(Material)Static("UndergroundMaterials","ForSurface",farOriginal);
+            Check(Mathf.Approximately(propMaterial.GetFloat("_Opacity"),.22f) && propMaterial.enableInstancing,"instanced props use the same opacity");
+            foreach(var path in new[]{road,rail,infra}) Call(pathManager,"BuildUndergroundPath",path);
+            var proxies = (IDictionary)Field(pathManager,"undergroundObjects");
+            Check(proxies.Count==3,"road, rail and model-less infrastructure are drawn");
+            var proxy = (GameObject)proxies[1];
+            var proxyRenderers = proxy.GetComponentsInChildren<MeshRenderer>();
+            Check(proxyRenderers.Length>1,"underground road uses real body and sidewalk models");
+            Check(((GameObject)proxies[2]).GetComponentsInChildren<MeshFilter>().Any(filter=>filter.gameObject.name.EndsWith("/track")),"underground rail uses the existing track model");
+            Check(proxy.GetComponent<Collider>()!=null,"underground selection collider exists");
+            Check(proxy.GetComponent<MeshFilter>().sharedMesh.bounds.center.y<0,"negative absolute elevation is preserved");
+            var roadMaterials=proxyRenderers.SelectMany(renderer=>renderer.sharedMaterials).ToArray();
+            Check(roadMaterials.All(material=>material!=null && material.shader.name!="CityGenesis/UndergroundGhost"),"underground models retain opaque original materials");
+            var setback=Activator.CreateInstance(T("SidewalkSetback"));
+            var reference=Static("PathMeshFactory","GeneratePathMesh",road,new List<Vector3>{new Vector3(-70,0,-25),new Vector3(70,0,-25)},setback,setback);
+            var referenceGO=(GameObject)reference.GetType().GetProperty("GeneratedObject").GetValue(reference);
+            var referenceMaterials=referenceGO.GetComponentsInChildren<MeshRenderer>().SelectMany(renderer=>renderer.sharedMaterials).ToArray();
+            Check(roadMaterials.Length==referenceMaterials.Length && roadMaterials.SequenceEqual(referenceMaterials),"ground and underground roads share exactly the same materials");
+            referenceGO.SetActive(false); UnityEngine.Object.Destroy(referenceGO);
+            UnityEngine.Object.Destroy((Mesh)reference.GetType().GetProperty("Mesh").GetValue(reference));
+            var proxyVisual=proxy.GetComponent(T("VisualModeObject"));
+            Call(proxyVisual,"SetHover",true);
+            var blue=Resources.Load<Material>("HighlightMaterial");
+            Check(blue!=null && proxyRenderers.All(renderer=>renderer.sharedMaterials.All(material=>material==blue)),"hover replaces underground models with existing blue material");
+            Call(proxyVisual,"SetHover",false);
+            Check(proxyRenderers.SelectMany(renderer=>renderer.sharedMaterials).SequenceEqual(roadMaterials),"leaving hover restores original model materials");
+
+            var input = Add("InputHandler");
+            Call(input,"SetModePreset",C("InputModePreset","ALL_NORMAL"));
+            var blocker = GameObject.CreatePrimitive(PrimitiveType.Cube); blocker.tag="BuildingObject";
+            blocker.transform.position=new Vector3(0,5,-25); blocker.transform.localScale=new Vector3(15,10,15);
+            var visual = Add("VisualModeObject",blocker); Set(visual,"objectType",C("InputObjectType","BUILDING"));
+            var originalMaterial = blocker.GetComponent<Renderer>().sharedMaterial;
+            Call(visual,"ApplyVisualMode",normal);
+            Check(blocker.GetComponent<Renderer>().sharedMaterial!=originalMaterial,"visible surface building fades");
+            Physics.SyncTransforms();
+            var hits = Physics.RaycastAll(new Ray(new Vector3(0,80,-25),Vector3.down),200);
+            object[] pick = {hits,default(RaycastHit)};
+            Check((bool)Call(input,"TryGetUndergroundHit",pick),"underground path is selectable through terrain and building");
+            Check(((RaycastHit)pick[1]).collider.gameObject==proxy,"selection reaches the intended underground path");
+            Call(input,"SetModePreset",C("InputModePreset","REMOVE_OBJECTS"));
+            Check((bool)Call(input,"TryGetUndergroundHit",pick),"bulldozer can select an underground plan");
+            var removal = Add("RemovalManager");
+            Check(!(bool)Call(removal,"IsRemovable",pathType,1),"completed roads retain existing demolition rules");
+            Set(road,"status",C("Constants","STATUS_PENDING"));
+            Check((bool)Call(removal,"IsRemovable",pathType,1),"planned underground roads retain delete eligibility");
+            Call(input,"SetModePreset",C("InputModePreset","ROAD_CONSTRUCTION"));
+            Check(!(bool)Call(input,"TryGetUndergroundHit",pick),"construction keeps terrain input");
+
+            Static("ObjectVisibilityFilter","SetHidden",null,new[]{1});
+            Check(proxyRenderers.All(renderer=>!renderer.enabled) && !proxy.GetComponent<Collider>().enabled,"individual hidden filter affects underground geometry and picking");
+            Static("ObjectVisibilityFilter","Clear");
+            Call(proxyVisual,"ApplyVisualMode",hidden);
+            Check(proxyRenderers.All(renderer=>!renderer.enabled),"hidden road layer stays hidden underground");
+            Call(proxyVisual,"ApplyVisualMode",normal);
+            Call(visual,"ApplyVisualMode",hidden); Check(!blocker.GetComponent<Renderer>().enabled,"hidden surface building stays hidden");
+            Call(visual,"ApplyVisualMode",normal);
+
+            var latePart=GameObject.CreatePrimitive(PrimitiveType.Cube); latePart.transform.SetParent(blocker.transform,false);
+            var lateOriginal=latePart.GetComponent<Renderer>().sharedMaterial;
+            Set(visual,"useChildRenderers",true); Call(visual,"RefreshMaterials");
+            Check(latePart.GetComponent<Renderer>().sharedMaterial!=lateOriginal,"late generated parts also fade");
+            Static("CoastlineStore","SetFromGeoJson",Newtonsoft.Json.Linq.JArray.Parse("[[[20,-100],[100,-100],[100,100],[20,100],[20,-100]]]"));
+            var underground=UnityEngine.Object.FindAnyObjectByType(T("UndergroundView"));
+            Call(underground,"LateUpdate");
+            Check(((Mesh)Field(underground,"shoreMesh")).vertexCount>0,"waterline outline exists");
+            File.WriteAllText(root+"/Temp/UndergroundQA/materials.txt",string.Join("\n",proxies.Values.Cast<GameObject>().SelectMany(go=>go.GetComponentsInChildren<MeshRenderer>()).SelectMany(renderer=>renderer.sharedMaterials).Distinct().Select(material=>material.name+": "+material.shader.name+" base="+material.color+" errors="+string.Join("; ",ShaderUtil.GetShaderMessages(material.shader).Select(message=>message.message)))));
+            File.WriteAllBytes(root+"/Temp/UndergroundQA/underground.png",(byte[])Static("CameraCaptureUtil","CapturePng",camera,1200,750));
+            foreach (string name in new[] { "UndergroundGhost", "UndergroundGround", "UndergroundSoil", "UndergroundShore", "Forest" })
+                Check(!ShaderUtil.ShaderHasError(Resources.Load<Shader>("Shaders/"+name)),"shader compile: "+name);
+
+            Call(modes,"SetMode",terrainType,normal);
+            Call(terrainVisual,"ApplyVisualMode",normal); Call(seaVisual,"ApplyVisualMode",normal); Call(visual,"ApplyVisualMode",normal);
+            Check(terrain.enabled && sea.GetComponent<Renderer>().enabled,"normal ground and sea are restored");
+            Check(blocker.GetComponent<Renderer>().sharedMaterial==originalMaterial && latePart.GetComponent<Renderer>().sharedMaterial==lateOriginal,"original materials survive switching and late generation");
+            Check(camera.backgroundColor==Color.gray,"camera background is restored");
+            Check(proxies.Count==0,"underground picking objects are removed on exit");
+            Check(farRenderer.sharedMaterial==farOriginal,"far building original material is restored");
+            forestMaterial=(Material)Call(forest,"MaterialFor",farOriginal);
+            Check(forestMaterial.GetFloat("_UndergroundAlpha")==1 && forestMaterial.GetFloat("_ZWrite")==1 && forestMaterial.GetShaderPassEnabled("ShadowCaster"),"GPU forest depth and shadows return in normal view");
+            Check((Material)Static("UndergroundMaterials","ForSurface",farOriginal)==farOriginal,"instanced props return to original material");
+            Call(forest,"Dispose");
+            File.WriteAllText(report,"PASS\n"+checks+" checks\nScreenshot: underground.png");
+            EditorApplication.Exit(0);
+        }
+        catch(Exception error) { File.WriteAllText(report,"FAIL\n"+checks+" checks\n"+error); EditorApplication.Exit(1); }
+    }
+}

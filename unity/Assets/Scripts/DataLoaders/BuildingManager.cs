@@ -1929,6 +1929,7 @@ public class BuildingManager : BaseApiDataManager
         UpdatePlannedIcon(buildingGO, buildingData);
 
         if (meshResult?.Mesh != null) buildingGO.AddComponent<FarBuildingMember>().Configure(mr, meshResult.Mesh);
+        buildingGO.AddComponent<UndergroundGhostObject>();
 
         // 辞書は即座に新しいオブジェクトに更新する。
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。

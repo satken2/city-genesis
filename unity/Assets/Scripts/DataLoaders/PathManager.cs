@@ -12,7 +12,7 @@ using NetTopologySuite.Algorithm;
 /// ノードとパスをまとめて管理する例。
 /// セルごとに「ノード情報」「パス情報」を取得し、描画する。
 /// </summary>
-public class PathManager : BaseApiDataManager
+public partial class PathManager : BaseApiDataManager
 {
     public int PendingTerrainRebuildCount => queuedTerrainFollowPathIds.Count;
     private readonly RenderObjectCache lodCache = new RenderObjectCache(128L * 1024 * 1024);
@@ -37,6 +37,7 @@ public class PathManager : BaseApiDataManager
     private void InvalidateTerrainFollowPath(PathSummary path)
     {
         if (path == null) return;
+        QueueUndergroundPath(path.path_id);
         pathLabelPositions.Remove(path.path_id);
         anchorPolylineCache.Remove(path.path_id);
         if (terrainFollowCompletedPaths.Remove(path.path_id))
@@ -440,6 +441,7 @@ public class PathManager : BaseApiDataManager
 
     private void Awake()
     {
+        InitializeUnderground();
         if (GetComponent<PathSpeedLimitOverlay>() == null) gameObject.AddComponent<PathSpeedLimitOverlay>();
         nodeGrid = new SpatialHash<NodeData>(gridCellSize);
         provisionalEndGrid = new SpatialHash<ProvisionalTrackEnd>(gridCellSize);
@@ -482,6 +484,7 @@ public class PathManager : BaseApiDataManager
 
     private void OnDestroy()
     {
+        DisposeUnderground();
         BuildingRoadAccessIndex.Changed -= OnBuildingRoadAccessChanged;
         if (RoadMarkingRules.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
         {
@@ -1338,6 +1341,7 @@ public class PathManager : BaseApiDataManager
 
     public override void ClearAllCells()
     {
+        ClearUndergroundPaths();
         GetComponent<PathSpeedLimitOverlay>()?.Clear();
         RoadMarkingAtlas.Clear();
         ClearTerrainFollowProgress();
@@ -2623,6 +2627,7 @@ public class PathManager : BaseApiDataManager
     /// </summary>
     public void RefreshVisibilityFilter()
     {
+        RefreshUndergroundVisibility();
         foreach (var pair in pathObjectsCache)
         {
             ObjectVisibilityFilter.ApplyToObject(pair.Value, InputObjectType.PATH, pair.Key);
@@ -4957,6 +4962,7 @@ public class PathManager : BaseApiDataManager
             && untrimmedPointsCache.TryGetValue(path.path_id, out PointsEntry pointsEntry) && ReferenceEquals(pointsEntry.source, oldPath))
             pointsEntry.source = path;
         pathDataCache[path.path_id] = path;
+        if (changed) QueueUndergroundPath(path.path_id);
         AddPathToNodeIndex(path);
         IndexProvisionalTrackEnds(path);
         // 工事音の点列は新しい通過セルで地形署名を取るので、セル登録の後に同期する。
@@ -4971,6 +4977,7 @@ public class PathManager : BaseApiDataManager
 
     private void RemovePathFromCache(int pathId)
     {
+        RemoveUndergroundPath(pathId);
         if (pathDataCache.TryGetValue(pathId, out var path))
         {
             EnqueuePowerNeighbors(path);

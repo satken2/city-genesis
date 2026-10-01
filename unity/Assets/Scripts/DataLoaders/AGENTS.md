@@ -15,7 +15,7 @@
 | `TerrainTileResources.cs` / `HeightmapTextureManager.cs` / `GroundCoverPalette.cs` | タイル専用資源 / GPU高さ窓 / 地表種別の見た目 |
 | `CoastlineStore.cs` / `RiverStore.cs` / `WaterSurfaceStore.cs` / `WaterSurfaceManager.cs` / `RiverSurfaceManager.cs` | 海岸線・川・湖の静的ストア(湖は `WaterSurfaceManager` が水面の生成時に登録) / 湖の水面 / 川の水面と川床マスク |
 | `ReclaimedLandStore.cs` / `ReclaimedLandManager.cs` | 埋立地の静的ストア(帯の天端 `TryGetBandTop`・港向けの岸壁区間 `GetQuaySegments`・中身の版 `ContentVersion`) / 岸壁(天端と垂直の面)の GameObject・地形の版による作り直し・`OnContentChanged` |
-| `PathManager.cs` / `SplinePartLod.cs` / `RoadMarkingAtlas.cs` | 道路・線路・ノード・交差点 / 長い道路の区間LOD / 路面標示画像の予算 |
+| `PathManager.cs` / `PathManager.Underground.cs` / `SplinePartLod.cs` / `RoadMarkingAtlas.cs` | 道路・線路・ノード・交差点 / 地下表示のモデルと選択 / 長い道路の区間LOD / 路面標示画像の予算 |
 | `BuildingManager.cs` / `BuildingExteriorRenderer.cs` / `FarBuildingBatcher.cs` / `ConstructionCraneAnimator.cs` | 建物 / 敷地装飾 / 遠景結合 / クレーン演出 |
 | `BuildingRoadAccessIndex.cs` | 建物データに同期する道路間口と配置計画の索引。GOのアンロードでは消さず、実削除・全消去で解除。変更時はPathManagerがセル逆引きで道路の描画版と再生成キューを更新する |
 | `ParcelManager.cs` / `ZoneManager.cs` / `ResourceManager.cs` | 区画 / 地区 / 天然資源ヒートマップ |
@@ -55,6 +55,7 @@
 - 帯の中の接地は `Utils.GetGroundHeight` が max(地形, 天端) で返す。ストアの更新・消去(`ReclaimedLandStore.Replace` / `Clear`)は `Utils.InvalidateHeightCache()` を伴う。岸壁の GameObject は背景地形のチャンクと同じ構成(Ground レイヤー、`MeshFilter`→`MeshRenderer`→`MeshCollider`→`VisualTerrainObject`→`TerrainInputHandler` の順、タグ無し)。
 
 ### 道路 (PathManager)
+- `PathManager.Underground.cs` は地下表示専用のモデルと選択コライダーを管理する。通常の `PathMeshFactory` と元材質を使い、種類別の着色をしない。モデルの無い地下インフラだけ通常道路のフォールバックを使う。地下表示への切り替え時だけ全パスをキューへ入れ、その後は `SavePathToCache`・地形追従の無効化・`RemovePathFromCache`・`ClearAllCells` から差分更新する。公共交通の論理パスと駅舎通路は対象外。生成は共通フレーム予算を使い、地下表示解除時に専用モデルを破棄する。
 - キャッシュ操作はヘルパー経由: パス=`SavePathToCache` / `RemovePathFromCache`(`pathsByNodeIndex`・通過セル・工事音を同期)、GO=`SetPathObject` / `RemovePathObject`、ノード=`nodeDataCache` 書込み時に `IndexNodeCell`。
 - `SavePathToCache` 内は「`pathDataCache` 更新 → `RegisterPathCells` → `SyncConstructionSound`」の順(工事音の先端点は新しい通過セルの地形署名で計算する)。version が変わったパスは `RegisterPathCells` 後にティア判定。隣接再生成(近接線路・高速ランプ)のエンキューは `UnregisterPathCells` より前。
 - ノード削除時は `nodeGrid` からも除去する(残すと削除済みノードへ吸着)。`ClearAllCells` では `nodeGrid` / `segmentGrid` を `SpatialHash.Clear()` し `NodeDataVersion` を進める(道路エディタの背景オーバーレイはこのカウンタでしか作り直されない)。
@@ -74,6 +75,7 @@
 - 仮の `PathSummary` を生成器へ渡すときは `follow_terrain = Constants.VALUE_NONE` を明示する(int既定の0は「非追従」)。`station_grade_profile` は駅以外にも付くので `ApplyStationGrade` をパス種別で限定しない。
 
 ### 建物 (BuildingManager)
+- 遠景建物の `FarBuildingMember` は `IVisualModeHandler` として建物の非表示・計画中表示・個別フィルタへ追従する。地下表示の材質を切り替えた側も `FarBuildingMember.RefreshObject` を呼び、結合バッチへ変更を伝える。
 - 見た目に効くフィールドを足したら `HashBuildingShape` にも足す(再利用キー `BuildingRenderKey` の形状ハッシュ)。
 - 車両基地(MODEL_RAIL_YARD)の引き込み線は端子へつながる線路の軌道数で単線・複線が変わるが、建物の version は変わらない。再利用キーの詳細LODに `RailYardBuildingMeshBuilder.ResolveLeadHalfSpacing` を混ぜ、PathManager が線路パスの登録・version 変化・削除のたびに両端の端子へ `OnDepotTerminalPathsChanged` を呼ぶ(キーが変わった表示中の基地だけ作り直す。F9§8)。
 - 港(MODEL_PORT)は区画が埋立地の岸壁に面するかで形が変わるが、埋立で version は変わらない。再利用キーは港だけ全LODで `ReclaimedLandStore.ContentVersion` を混ぜ(遠景も岸壁と `_far` パーツの組み立て)、`ReclaimedLandManager.OnContentChanged` を購読する `OnReclaimedLandsChanged` が逆引き `portBuildingIds` から表示中の港を作り直す(遠景は即時、詳細の視野外は遅延キュー)。`portBuildingIds` の登録・削除は他の逆引きと同じ経路(`RegisterBuildingDataToCache` / `SyncBuildingsInCells` / `ClearAllCells`)。

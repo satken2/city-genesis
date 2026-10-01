@@ -31,7 +31,7 @@ UIからは `view:change_view {layer, mode, sub_mode, flags}` で届く([IPC連�
 | `VisualModePath` | 100番台 | 利用率・通過速度・歩行者量・耐久度・所属地区色分け | `VisualModeObject` |
 | `VisualModeParcel` | 200番台 | 地価・建築可能フィルタ各種・所属地区色分け・環境スコア(騒音/大気汚染/治安/日照) | `ParcelManager.ResolveDataVisColor` |
 | `VisualModeBuilding` | 300番台 | 人口・家賃・耐久度・フロア種別・所属地区色分け | `VisualBuildingObject` |
-| `VisualModeTerrain` | 400番台 | 透過・標高色分け(`TRANSPARENT` だけ非表示、他は表示) | `VisualTerrainObject` |
+| `VisualModeTerrain` | 400番台 | 地下表示(`TRANSPARENT`)・標高色分け | `VisualTerrainObject` / `UndergroundView` |
 
 環境スコアは区画レイヤーのモードである。バックエンドが公開するのは区画中心でサンプリング済みの区画単位スコアで([環境](../economics/19_環境.md))、面として塗るための都市全体のビットマップは公開されない。
 
@@ -53,8 +53,25 @@ UIからは `view:change_view {layer, mode, sub_mode, flags}` で届く([IPC連�
 
 1. `VisualModeObject`: 建物・道路・交差点・地形タイルなど個々の GameObject に付くコンポーネント。生成元(`BuildingManager` / `PathManager` / `TerrainManager`)が `AddComponent` し、`Start()` で自動登録される。
 2. マネージャー自身: `ParcelManager` と `ZoneManager` は自分が `IVisualModeHandler` を実装して1件だけ登録する。区画の枠線・データ可視化は GameObject 単位ではなく `OverlayMeshRenderer` による一括描画のため。区画個体の `VisualParcelObject` は `VisualParcelStats` を渡すだけの軽量コンポーネントで、登録しない。
+3. `FarBuildingMember`: 遠景建物を有効化時に登録し、非表示・計画中表示・個別フィルタを集約元のRendererに適用する。表示や材質が変わると結合バッチを更新する。地形と水面はそれぞれ `VisualTerrainObject` / `VisualSeaObject` が担当する。
 
 ## VisualModeObject の表示規則
+
+### 地下表示
+
+地形レイヤーの既存の「透過」(`terrain=transparent` / `VisualModeTerrain.TRANSPARENT`)は地下表示を有効にする。独立した入力プリセットやIPCイベントは追加しない。
+
+- `UndergroundView` がカメラの背景を土色にし、粒状の模様と薄い地層の濃淡を描く。土は実体の遮蔽物ではなく背景なので、絶対標高が負の設備も隠れない。通常表示へ戻すと、カメラの背景色とクリア方式を復元する。
+- 地形タイルは通常のTerrain描画を止め、`UndergroundTerrainSurface` が同じ高さから最大129格子の半透明の地表を描く。10m間隔の薄い等高線で起伏を示す。高さ・接地・地形コライダーは元のTerrainを使用する。高さ変更時は膜のメッシュも更新する。背景地形・超遠景・埋立地の岸壁は既存メッシュの材質だけを半透明にする。
+- 海面・川・湖の水面は非表示にし、海岸線・水面ストアから作る細い水際の帯に波紋を描く。水際の版は `TerrainManager.ShoreDataVersion` を使用し、埋立やセッション切り替えに追従する。海岸線は地形上、湖は水位、川はプロファイルの水位に置く。
+- 建物・地上道路・プロップの表示可否は既存のレイヤー設定・計画中表示・個別フィルタに従う。表示される地上モデルだけを一律に半透明にし、色分けは保持する。地下表示中の非表示レイヤーは工事中の物体にも適用する。地上モデルを強制的に隠したり表示したりしない。
+- 半透明材質は `UndergroundMaterials` が元材質ごとに共有する。`UndergroundGhostObject` は元材質を退避し、表示更新前に復元してから表示更新後に差し替える。非同期で追加されるパーツにも適用し、通常表示へ戻したときに半透明材質を元材質として記録しない。遠景の建物と結合バッチ、インスタンス描画のプロップ、GPU森林も同じ透明度にする。
+- 完全埋設の道路・線路は `PathManager.Underground.cs` が地上と同じ生成器でモデルを補う。元の材質を不透明のまま使用し、種類別の着色は行わない。モデルを持たない地下インフラには通常道路のフォールバック形状・材質を使う。選択用コライダーと既存のパス入力ハンドラを付け、ホバー時は既存の青い `HighlightMaterial`、解除時は元材質へ戻す。地上／開削区間は従来の生成器に任せ、非描画の地下区間だけを追加する。計画中表示・個別フィルタ・既存の色モードは従来のパス表示規則に従う。
+- 地下表示を解除すると地下専用のモデルとコライダーを除去する。データ・地形・削除ルールは変更しない。深さを示す縦線や数値ラベルは表示しない。
+
+切り替え時だけ現在のパス集合を生成キューへ入れ、以後は登録・変更・地形追従・削除の通知で更新する。地下モデルの生成は `RenderWorkScheduler` の共通予算内で実行し、常駐セルのアンロード・全消去時に破棄する。検証は `unity/Tests/Underground/run.ps1`。
+
+### 通常の表示規則
 
 - `InitializeMaterials()` を呼んだ時点の `sharedMaterials` を「元の材質」として記憶し、ハイライト解除時にそこへ戻す。メッシュや材質を後から差し替えたら呼び直す(呼ばないと古い材質へ戻る)。
     - 非同期で子 Renderer を追加・復元するときは `RefreshMaterials()` を使う。既存 Renderer の元材質を保ちつつ新しい Renderer だけ材質を取得し、現在の表示を即時適用する。上塗り後に `InitializeMaterials()` を呼ぶと計画色などを元材質として記録してしまう。

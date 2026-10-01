@@ -200,6 +200,7 @@ public class InputHandler : MonoBehaviour
     public int HoveredZoneId => hoveredZoneId;
     private int hoveredZoneId = -1;
     private Ray lastRay;
+    private bool lastUndergroundView;
 
     // キャッシュされたマネージャー参照
     private RoadPlanManager cachedRoadPlanManager;
@@ -347,7 +348,7 @@ public class InputHandler : MonoBehaviour
                              InputUtil.RightMouseWasReleasedThisFrame ||
                              isDragging;
 
-        bool rayChanged = ray.origin != lastRay.origin || ray.direction != lastRay.direction;
+        bool rayChanged = ray.origin != lastRay.origin || ray.direction != lastRay.direction || lastUndergroundView != UndergroundView.IsActive;
 
         if (!rayChanged && !hasInputEvent)
         {
@@ -356,6 +357,7 @@ public class InputHandler : MonoBehaviour
         }
 
         lastRay = ray;
+        lastUndergroundView = UndergroundView.IsActive;
 
         // まずは地形との交点を計算してposX, posZを更新
         UpdateTerrainPosition(ray);
@@ -419,8 +421,15 @@ public class InputHandler : MonoBehaviour
         Vector3 validHitPoint = Vector3.zero;
         int validHitObjectType = -1;
 
+        if (TryGetUndergroundHit(hits, out var undergroundHit))
+        {
+            validHitObject = undergroundHit.collider.gameObject;
+            validHitPoint = undergroundHit.point;
+            validHitObjectType = InputObjectType.PATH;
+        }
         foreach (var hit in hits)
         {
+            if (validHitObject != null) break;
             int objectType = GetObjectType(hit.collider.gameObject);
             int mode = GetModeForObjectType(objectType);
 
@@ -461,6 +470,7 @@ public class InputHandler : MonoBehaviour
         if (GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_REMOVE && RemovalManager.Instance != null)
         {
             RemovalManager.Instance.UpdatePropHover(ray,
+                validHitObject != null && validHitObject.GetComponent<UndergroundPathMarker>() != null ? 0f :
                 validHitObject != null ? Vector3.Distance(ray.origin, validHitPoint) : rayDistance);
         }
 
@@ -552,7 +562,8 @@ public class InputHandler : MonoBehaviour
             if (hasPendingClick)
             {
                 float hitDistance = Vector3.Distance(ray.origin, pendingClickPoint);
-                if (!TryRemovePropAtScreenPoint(pendingClickScreenPos, hitDistance))
+                if ((pendingClickObject != null && pendingClickObject.GetComponent<UndergroundPathMarker>() != null)
+                    || !TryRemovePropAtScreenPoint(pendingClickScreenPos, hitDistance))
                 {
                     HandleObjectClick(pendingClickObject, pendingClickPoint, pendingClickObjectType);
                 }
@@ -773,6 +784,19 @@ public class InputHandler : MonoBehaviour
         if (IsTerrainSurfaceObject(obj)) return InputObjectType.TERRAIN;
 
         return -1; // 不明なタイプ
+    }
+
+    private bool TryGetUndergroundHit(RaycastHit[] hits, out RaycastHit selected)
+    {
+        selected = default;
+        if (!UndergroundView.IsActive || GetModeForObjectType(InputObjectType.PATH) == InputMode.MODE_NONE) return false;
+        // 地上の物体は位置の案内として半透明に残る。敷設などPATHが無効なモードは通常の地形レイを使う。
+        foreach (var hit in hits)
+        {
+            if (hit.collider.GetComponent<UndergroundPathMarker>() == null) continue;
+            if (selected.collider == null || hit.distance < selected.distance) selected = hit;
+        }
+        return selected.collider != null;
     }
 
     /// <summary>

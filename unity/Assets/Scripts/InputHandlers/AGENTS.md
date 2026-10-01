@@ -25,6 +25,8 @@
 
 ## 知らないと壊れる罠
 
+- 地下表示中は `UndergroundPathMarker` のコライダーを地上の物体より優先する。最も近い地下ヒットを選び、通常の `PathInputHandler` へ配送する。ブルドーザで地下パスに当たった場合は、地上プロップのホバーと削除を優先させない。PATHの入力モードが `MODE_NONE` のときは優先しない。地形コライダーは敷設・編集・カメラの基準面なので残す。
+
 - 左右クリックはマウスダウンで発火しない。5px未満の移動でアップしたときだけ`onClick`/`onRightClick`、以上なら左はドラッグ、右はカメラ回転。`CameraController`は`[DefaultExecutionOrder(-100)]`で先に走るので、押下フレームで`IsMouseRotating`を見ると右クリックが必ず回転に食われる。判定は移動量で行う。
 - `StartTerrainDrag()`はレイキャストが何にもヒットしなかったときしか呼ばれない。地形コライダーにヒットする通常ケースではクリック候補(type=TERRAIN)→`StartDrag`→`UpdateDrag`と流れ、マネージャの掴み開始は呼ばれず`ProcessMouseDrag(worldPos)`だけが毎フレーム届く。地形ドラッグを受けるマネージャは初回呼び出しで掴む(遅延グラブ)。`StartTerrainDrag`内の分岐だけに掴み開始を書くと実プレイで一度も通らない。
 - クリックのみでドラッグを持たないモード(`MODE_REMOVE`/`MODE_PATH_MERGE`/`MODE_PATH_SPLIT`/`MODE_EDIT_ROAD_MEMBERS`/`MODE_ZONE_EDIT`)は`StartDrag`/`StartTerrainDrag`の冒頭で明示的にreturnする。しないと既定経路で`RoadPlanManager`等のドラッグ処理へフォールバックする。

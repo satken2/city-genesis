@@ -135,7 +135,7 @@ public sealed class ForestRenderer : IDisposable
 
     Material MaterialFor(Material source)
     {
-        if (materials.TryGetValue(source, out var result)) return result;
+        if (materials.TryGetValue(source, out var result)) return ApplyUnderground(result);
         result = new Material(shader) { enableInstancing = true, name = source.name + " (Forest)" };
         var color = source.HasProperty("_BaseColor") ? source.GetColor("_BaseColor") : source.color;
         result.SetColor("_BaseColor", color);
@@ -146,7 +146,20 @@ public sealed class ForestRenderer : IDisposable
         result.SetVector("_BaseMap_ST", new Vector4(source.mainTextureScale.x, source.mainTextureScale.y,
             source.mainTextureOffset.x, source.mainTextureOffset.y));
         materials.Add(source, result);
-        return result;
+        return ApplyUnderground(result);
+    }
+
+    private static Material ApplyUnderground(Material material)
+    {
+        bool underground = UndergroundView.IsActive;
+        if (Mathf.Approximately(material.GetFloat("_UndergroundAlpha"), underground ? .22f : 1f)) return material;
+        material.SetFloat("_UndergroundAlpha", underground ? .22f : 1f);
+        material.SetFloat("_ZWrite", underground ? 0f : 1f);
+        material.renderQueue = underground ? 3010 : 2000;
+        material.SetShaderPassEnabled("DepthOnly", !underground);
+        material.SetShaderPassEnabled("DepthNormals", !underground);
+        material.SetShaderPassEnabled("ShadowCaster", !underground);
+        return material;
     }
 
     public int Draw(Patch p, Camera camera, Plane[] planes, ref int shadowBudget)

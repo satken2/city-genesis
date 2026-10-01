@@ -1031,7 +1031,7 @@ public class PropManager : BaseApiDataManager
             if (chunk.offset != Offset || !GeometryUtility.TestPlanesAABB(planes, batch.bounds)) continue;
             bool shadows = batch.shadows && SubmittedShadowInstances + batch.matrices.Length <= ShadowInstanceBudget;
             if (shadows) SubmittedShadowInstances += batch.matrices.Length;
-            var parameters = new RenderParams(batch.part.material) { worldBounds = batch.bounds, camera = cam,
+            var parameters = new RenderParams(UndergroundMaterials.ForSurface(batch.part.material)) { worldBounds = batch.bounds, camera = cam,
                 shadowCastingMode = shadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off,
                 receiveShadows = true };
             Graphics.RenderMeshInstanced(parameters, batch.part.mesh, batch.part.submesh, batch.matrices);
