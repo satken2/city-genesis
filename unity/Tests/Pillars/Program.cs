@@ -52,6 +52,56 @@ internal static class Program
         Check(true, pillar, curve);
         curve.Points.Reverse();
         Check(true, pillar, curve);
+        CheckPortalOffsets();
         Console.WriteLine($"PASS: {checks} pillar clearance cases");
+    }
+
+    private static void CheckPortalOffsets()
+    {
+        var parallel = Road(new Vector3(0, 0, -100), new Vector3(0, 0, 100), 12);
+        var corridors = new List<PillarClearance.Corridor> { parallel };
+        PillarClearance.FindPortalOffsets(Vector3.up * 10, Vector3.right, 0, 8, 1.2f, 3,
+            corridors, out float left, out float right);
+        if (left >= -13.45f || right <= 13.45f) throw new Exception("Portal legs must clear the whole road");
+        checks++;
+        foreach (float offset in new[] { left, right })
+            Check(false, new Bounds(new Vector3(offset, 4, 0), new Vector3(1.5f, 8, 1.8f)), parallel);
+        parallel.Points = new List<Vector3> { new Vector3(5, 0, -100), new Vector3(5, 0, 100) };
+        PillarClearance.FindPortalOffsets(Vector3.up * 10, Vector3.right, 0, 8, 1.2f, 3,
+            corridors, out left, out right);
+        if (Math.Abs(left + right - 10) > .001f) throw new Exception("Offset road must shift portal center");
+        checks++;
+        corridors.Add(Road(new Vector3(50, 0, -100), new Vector3(50, 0, 100)));
+        float expectedRight = right;
+        PillarClearance.FindPortalOffsets(Vector3.up * 10, Vector3.right, 0, 8, 1.2f, 3,
+            corridors, out left, out right);
+        if (right != expectedRight) throw new Exception("Distant roads must not widen the portal");
+        checks++;
+        corridors.Add(Road(new Vector3(20, 0, -100), new Vector3(20, 0, 100)));
+        PillarClearance.FindPortalOffsets(Vector3.up * 10, Vector3.right, 0, 8, 1.2f, 3,
+            corridors, out left, out right);
+        if (right <= 25.45f) throw new Exception("Overlapping corridors must move legs past both roads");
+        corridors.Reverse();
+        PillarClearance.FindPortalOffsets(Vector3.up * 10, Vector3.right, 0, 8, 1.2f, 3,
+            corridors, out float reversedLeft, out float reversedRight);
+        if (left != reversedLeft || right != reversedRight) throw new Exception("Portal must ignore registration order");
+        checks += 2;
+        for (int angle = 0; angle < 180; angle += 15)
+        {
+            float radians = angle * (float)Math.PI / 180;
+            var axis = new Vector3((float)Math.Cos(radians), 0, (float)Math.Sin(radians));
+            var forward = Vector3.Cross(axis, Vector3.up);
+            var road = Road(-forward * 50, forward * 50, 12);
+            PillarClearance.FindPortalOffsets(Vector3.up * 10, axis, 0, 8, 1.2f, 3,
+                new List<PillarClearance.Corridor> { road }, out left, out right);
+            if (Math.Abs(left + 13.46f) > .002f || Math.Abs(right - 13.46f) > .002f)
+                throw new Exception("Portal must rotate with the high railway");
+            checks++;
+        }
+        parallel.YOffset = 20;
+        PillarClearance.FindPortalOffsets(Vector3.up * 10, Vector3.right, 0, 8, 1.2f, 3,
+            new List<PillarClearance.Corridor> { parallel }, out left, out right);
+        if (left != -3 || right != 3) throw new Exception("Upper road must not affect portal legs");
+        checks++;
     }
 }

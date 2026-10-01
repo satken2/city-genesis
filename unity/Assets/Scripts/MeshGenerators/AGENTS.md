@@ -33,6 +33,7 @@
 | `PathDrawContext.cs` | 描画LOD・詳細区間・曲率適応タイル長・`_close` 解決(`ResolvePrefab`)・パーツの変形(`Warp`。横ずれ・横倍率)の静的コンテキスト |
 | `RoadAdjacency.cs` / `MotorwayMergeLayout.cs` | 高速道路の本線↔ランプ結合・板なし合流ノード(G§11.7) |
 | `PillarClearance.cs` | 橋脚と他パス通行空間の干渉判定。道路・線路・工事中・レンガ高架で共用(G§8.7) |
+| `PortalPillar.cs` | 通常橋脚が干渉する地点の門型橋脚。独立した `pillar_leg` 2本と `pillar_crossbeam` 1本を組み、柱の高さ・横位置と梁の幅を調整する。両モデルがそろったときだけ有効(鉄道共通 `p4`、無印のみ)。最大幅40m、完成・工事中で共用(G§8.7) |
 | `RoadEquipmentGenerator.cs` | 街灯・電柱・街路樹・柵・ベンチ等の点設備(G§8.6・§5.5) |
 | `RoadAccessPlan.cs` | 施設の間口を道路片側の切断区間へ変換し、接続舗装を生成する(G「施設への接続」) |
 | `RoadMarkingContext.cs` / `RoadMarkingPlan.cs` / `RoadMarkingSurface.cs` | 路面標示(G§8.3、E「路面標示のLODと画像予算」) |

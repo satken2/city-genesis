@@ -1314,7 +1314,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   }
 
   /**
-   * 建設確定に成功した後の共通処理。神モードの新規建設は位置だけを解除して配置を継続する。
+   * 建設確定に成功した後の共通処理。神モードの新規建設は位置を解除し、次の建物の外観を抽選して配置を継続する。
    * 効果範囲オーバーレイを明示的に消し(ウィンドウを閉じるとアンマウント時の
    * クリア送信が届かない可能性があるため)、Unity にセッションリロードを送って
    * 新しい建物を描画させる。
@@ -1328,6 +1328,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     await sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
     if (continueAfterConfirm && selectedVariant !== null) {
       clearPlacementSelection();
+      // コピー建設では元建物の外観を保持し、それ以外は建物ごとに外観を抽選する。
+      if (copySourceAgentId == null) {
+        setVisualVariant(Math.random());
+        setVisualVariant2(Math.random());
+        setVisualVariant3(Math.random());
+      }
       if (landmark != null) {
         setPlacedLandmarkIds(previous => previous.includes(landmark) ? previous : [...previous, landmark]);
       }

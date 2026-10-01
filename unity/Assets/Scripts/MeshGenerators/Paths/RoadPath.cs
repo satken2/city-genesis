@@ -1839,6 +1839,7 @@ public class RoadPath : IPathMeshGenerator
         var obstacles = PillarClearance.NeighborProvider?.Invoke(pathData);
         var pillarBounds = PillarClearance.GetPrefabBounds(pillarPrefab);
         var capBounds = PillarClearance.GetPrefabBounds(pillarCapPrefab);
+        var portal = PortalPillar.Load(variantBase, typeBase);
         int placedCount = 0;
         // 橋脚の梁は、その地点の路面の横幅の倍率(線路のつなぎ目のS字。PathDrawContext.Warp)だけ横に伸ばす。
         PartWarp warp = PathDrawContext.Warp;
@@ -1847,7 +1848,7 @@ public class RoadPath : IPathMeshGenerator
         {
             float capWidthScale = warp?.Scale != null ? warp.Scale(ClampSplinePercent(percent)) : 1f;
             if (onSupport == null)
-                return PlacePillar(container, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight, capWidthScale);
+                return PlacePillar(container, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight, capWidthScale, portal);
             Vector3 position = spline.EvaluatePosition(ClampSplinePercent(percent));
             float ground = Utils.GetGroundHeight(position);
             // キャップ下端が地面に届く高さが無い地点は施工単位にしない（PlacePillar と同じキャップ厚の定義）。
@@ -1856,7 +1857,7 @@ public class RoadPath : IPathMeshGenerator
             var support = new GameObject("ConstructionSupport");
             support.transform.SetParent(container.transform, false);
             support.transform.position = new Vector3(position.x, ground, position.z);
-            if (!PlacePillar(support, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight, capWidthScale))
+            if (!PlacePillar(support, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight, capWidthScale, portal))
             {
                 UnityEngine.Object.Destroy(support);
                 return false;
@@ -1974,7 +1975,7 @@ public class RoadPath : IPathMeshGenerator
     /// </summary>
     private static bool PlacePillar(GameObject container, GameObject pillarPrefab, GameObject pillarCapPrefab,
         Bounds? pillarBounds, Bounds? capBounds, List<PillarClearance.Corridor> obstacles,
-        SplineComputer spline, double percent, float baseHeight, float capWidthScale = 1f)
+        SplineComputer spline, double percent, float baseHeight, float capWidthScale = 1f, PortalPillar portal = null)
     {
         SplineSample sample = spline.Evaluate(ClampSplinePercent(percent));
         Vector3 forward = sample.forward;
@@ -1994,11 +1995,17 @@ public class RoadPath : IPathMeshGenerator
         // 橋脚モデルは実寸で著作され、種類ごとに高さが異なる。1mモデルとは限らない。
         pillarScale.y = height / Mathf.Max(0.001f, pillarBounds.GetValueOrDefault().size.y);
 
-        // キャップの張り出しは柱本体とは高さが異なる。別々に判定し、干渉時は一組とも生成しない。
-        if (capBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(capBounds.Value,
-                Matrix4x4.TRS(sample.position, rotation, capScale)), obstacles)) return false;
-        if (needsPillar && pillarBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(pillarBounds.Value,
-                Matrix4x4.TRS(pillarPosition, rotation, pillarScale)), obstacles)) return false;
+        // 通常橋脚を優先し、干渉する地点だけ独立した柱と横梁で通行帯をまたぐ。
+        bool blocked = capBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(capBounds.Value,
+                Matrix4x4.TRS(sample.position, rotation, capScale)), obstacles);
+        blocked |= needsPillar && pillarBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(pillarBounds.Value,
+                Matrix4x4.TRS(pillarPosition, rotation, pillarScale)), obstacles);
+        if (blocked)
+        {
+            float top = sample.position.y + (capBounds.HasValue ? capBounds.Value.max.y * capScale.y : 0f);
+            float halfWidth = capBounds.HasValue ? capBounds.Value.extents.x * capScale.x : pillarBounds.GetValueOrDefault().extents.x;
+            return portal != null && portal.TryPlace(container, sample.position, rotation, top, halfWidth, obstacles);
+        }
 
         bool placed = false;
         if (pillarCapPrefab != null)
