@@ -1,7 +1,7 @@
 {
   "agent": {
     "back": "뒤로",
-    "editSubBuildings": "부속 건물 배치 편집",
+    "editSubBuildings": "건물 배치 편집",
     "relocateCityHall": "시청 이전",
     "publicFacility": "공공시설",
     "underAcquisition": "매수 협상 중",

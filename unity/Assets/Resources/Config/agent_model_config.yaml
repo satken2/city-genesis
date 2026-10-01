@@ -124,6 +124,11 @@ agents:
     prebuilt: true
     variants:
       - 0
+  1057:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
   1058:
     model: true
     prebuilt: true
@@ -236,6 +241,13 @@ agents:
       - 400
       - 600
       - 800
+  2003:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 400
+      - 700
   2004:
     model: true
     prebuilt: false

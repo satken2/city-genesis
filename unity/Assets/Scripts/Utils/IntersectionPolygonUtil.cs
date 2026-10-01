@@ -99,13 +99,44 @@ public static class IntersectionPolygonUtil
             float length = Vector2.Distance(left, end);
             Vector2 p1 = left - s.Direction * length / 3f;
             Vector2 p2 = end - n.Direction * length / 3f;
-            int count = Mathf.Clamp(Mathf.CeilToInt(length / 0.5f), 4, 32);
+            Vector2 arcStart = left, arcEnd = end;
+            float cross = s.Direction.x * n.Direction.y - s.Direction.y * n.Direction.x;
+            if (Mathf.Abs(cross) > 1e-4f)
+            {
+                Vector2 delta = end - left;
+                float fromDistance = -(delta.x * n.Direction.y - delta.y * n.Direction.x) / cross;
+                float toDistance = -(delta.x * s.Direction.y - delta.y * s.Direction.x) / cross;
+                if (fromDistance > 0f && toDistance > 0f)
+                {
+                    // 道路の縁の交点から同じ距離だけ戻して角を丸める。余った距離は直線として保ち、
+                    // 異幅の道路でもベジエの制御点が相手の道路の縁を越えてくびれを作らないようにする。
+                    float turn = Mathf.Atan2(Mathf.Abs(cross), Vector2.Dot(-s.Direction, n.Direction));
+                    float tangent = Mathf.Tan(turn * 0.5f);
+                    float setback = Mathf.Min(maxWidth * 0.25f * tangent, Mathf.Min(fromDistance, toDistance));
+                    arcStart = left - s.Direction * (fromDistance - setback);
+                    arcEnd = end - n.Direction * (toDistance - setback);
+                    float handle = 4f / 3f * setback / tangent * Mathf.Tan(turn * 0.25f);
+                    p1 = arcStart - s.Direction * handle;
+                    p2 = arcEnd - n.Direction * handle;
+                }
+            }
+            if ((arcStart - left).sqrMagnitude > 1e-8f)
+            {
+                corner.Points.Add(left);
+                corner.Directions.Add(-s.Direction);
+            }
+            int count = Mathf.Clamp(Mathf.CeilToInt(Vector2.Distance(arcStart, arcEnd) / 0.5f), 4, 32);
             for (int j = 0; j <= count; j++)
             {
                 float t = (float)j / count, u = 1f - t;
-                Vector2 p = u*u*u*left + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*end;
-                Vector2 direction = (3*u*u*(p1-left) + 6*u*t*(p2-p1) + 3*t*t*(end-p2)).normalized;
+                Vector2 p = u*u*u*arcStart + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*arcEnd;
+                Vector2 direction = (3*u*u*(p1-arcStart) + 6*u*t*(p2-p1) + 3*t*t*(arcEnd-p2)).normalized;
                 corner.Points.Add(p); corner.Directions.Add(direction);
+            }
+            if ((end - arcEnd).sqrMagnitude > 1e-8f)
+            {
+                corner.Points.Add(end);
+                corner.Directions.Add(n.Direction);
             }
             result.Corners.Add(corner);
         }

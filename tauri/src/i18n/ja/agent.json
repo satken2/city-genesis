@@ -1,7 +1,7 @@
 {
   "agent": {
     "back": "戻る",
-    "editSubBuildings": "サブ建物の配置を編集",
+    "editSubBuildings": "建物配置を編集",
     "relocateCityHall": "市庁舎を移転",
     "publicFacility": "公共施設",
     "underAcquisition": "買収交渉中",
