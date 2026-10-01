@@ -75,7 +75,7 @@
     "confirm": "Valider la construction",
     "cancel": "Annuler",
     "selectParcel": "Cliquez sur le terrain dans la vue 3D",
-    "parcelSelected": "Terrain n° {{id}} sélectionné",
+    "parcelTitle": "Terrain n° {{id}}",
     "costRatioHelp": "Construire sur un terrain en pente ou complexe augmente le coût de la construction.",
     "coverageRatio": "Emprise au sol",
     "structure": "Structure",

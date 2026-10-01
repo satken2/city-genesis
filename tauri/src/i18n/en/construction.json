@@ -75,7 +75,7 @@
     "confirm": "Confirm Construction",
     "cancel": "Cancel",
     "selectParcel": "Click a parcel in the 3D view",
-    "parcelSelected": "Parcel #{{id}} selected",
+    "parcelTitle": "Parcel #{{id}}",
     "costRatioHelp": "Building on sloped or complex terrain increases the construction cost.",
     "coverageRatio": "Coverage Ratio",
     "structure": "Structure",

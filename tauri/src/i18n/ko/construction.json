@@ -75,7 +75,7 @@
     "confirm": "건설 확정",
     "cancel": "취소",
     "selectParcel": "3D 뷰에서 부지를 클릭하세요",
-    "parcelSelected": "부지 #{{id}}을(를) 선택함",
+    "parcelTitle": "부지 #{{id}}",
     "costRatioHelp": "경사지나 복잡한 지형 위에 건물을 지으면 건설 비용이 올라갑니다.",
     "coverageRatio": "건폐율",
     "structure": "구조",

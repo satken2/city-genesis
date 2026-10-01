@@ -75,7 +75,7 @@
     "confirm": "建設を確定",
     "cancel": "キャンセル",
     "selectParcel": "3Dビューで敷地をクリックしてください",
-    "parcelSelected": "敷地 #{{id}} を選択済み",
+    "parcelTitle": "敷地 #{{id}}",
     "costRatioHelp": "傾斜地や複雑な地形の上に建物を建設すると、建設コストが上がります。",
     "coverageRatio": "建ぺい率",
     "structure": "構造",

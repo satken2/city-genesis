@@ -75,7 +75,7 @@
     "confirm": "Confirmar la construcción",
     "cancel": "Cancelar",
     "selectParcel": "Haz clic en el predio en la vista 3D",
-    "parcelSelected": "Predio n.º {{id}} seleccionado",
+    "parcelTitle": "Predio n.º {{id}}",
     "costRatioHelp": "Construir sobre pendientes o terrenos complejos aumenta el costo de la obra.",
     "coverageRatio": "Ocupación del suelo",
     "structure": "Estructura",

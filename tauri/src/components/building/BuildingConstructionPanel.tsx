@@ -62,6 +62,7 @@ import { isConstructionAffordable } from "../../utils/constructionFunding";
 import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { BuildingVariantCard } from "./BuildingVariantCard";
+import { ParcelSpecs } from "./ParcelSpecs";
 import { UnaffordableOverlay } from "../common/UnaffordableOverlay";
 import { showNotification } from "../../utils/notification";
 import { BD_CATEGORY_OTHER, PARCEL_LAND, VARIANT_CITY } from "../../constants";
@@ -1824,43 +1825,31 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                 <img
                   src={parcelData ? resolveParcelIcon(parcelData.parcel_type) : resolveParcelIcon(0)}
                   alt=""
+                  title={parcelData ? masterData?.parcel_types[parcelData.parcel_type]?.display_name : undefined}
                   className="bc-description-icon"
                   draggable={false}
                 />
                 <div className="bc-description-body">
                   <div className="bc-description-name">
-                    {t("building_construction.parcelSelected", { id: parcelId })}
+                    {t("building_construction.parcelTitle", { id: parcelId })}
                   </div>
-                  <div className="bc-description-text">
-                    {isParcelLoading || !parcelData ? (
-                      t("common.loading")
-                    ) : (
-                      <>
-                        {t("building_construction.landArea")}: {parcelData.area.toFixed(1)}{t("building_construction.unitSqm")}
-                        <br />
-                        {parcelData.limit_height != null && (
-                          <>{t("building_construction.heightLimit")}: {parcelData.limit_height.toFixed(1)}{t("building_construction.unitMeter")}<br /></>
-                        )}
-                        {parcelData.limit_coverage_ratio != null && (
-                          <>{t("building_construction.coverageRatioLimit")}: {Math.round(parcelData.limit_coverage_ratio * 100)}%<br /></>
-                        )}
-                        {parcelData.limit_volume_ratio != null && (
-                          <>{t("building_construction.volumeRatioLimit")}: {Math.round(parcelData.limit_volume_ratio * 100)}%<br /></>
-                        )}
-                        {allowedBuildingNames.length > 0 && (
-                          <>{t("building_construction.allowedBuildings")}: {allowedBuildingNames.join(", ")}</>
-                        )}
-                        {parcelTypeMismatch && (
-                          <>
-                            <br />
-                            <span className="bc-direct-invalid">
-                              {t("building_construction.parcelTypeRequired", { type: requiredParcelTypeName })}
-                            </span>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </div>
+                  {isParcelLoading || !parcelData ? (
+                    <div className="bc-description-text">{t("common.loading")}</div>
+                  ) : (
+                    <>
+                      <ParcelSpecs parcel={parcelData} />
+                      {allowedBuildingNames.length > 0 && (
+                        <div className="bc-description-text bc-parcel-allowed">
+                          {t("building_construction.allowedBuildings")}: {allowedBuildingNames.join(", ")}
+                        </div>
+                      )}
+                      {parcelTypeMismatch && (
+                        <div className="bc-description-text bc-direct-invalid">
+                          {t("building_construction.parcelTypeRequired", { type: requiredParcelTypeName })}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </>
             )}

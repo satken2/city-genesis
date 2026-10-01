@@ -75,7 +75,7 @@
     "confirm": "確定建設",
     "cancel": "取消",
     "selectParcel": "請在3D視圖中點擊用地",
-    "parcelSelected": "已選擇用地 #{{id}}",
+    "parcelTitle": "用地 #{{id}}",
     "costRatioHelp": "在坡地或複雜地形上建造建築會提高建設成本。",
     "coverageRatio": "建蔽率",
     "structure": "結構",
