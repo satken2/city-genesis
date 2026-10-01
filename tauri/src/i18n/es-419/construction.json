@@ -78,8 +78,6 @@
     "parcelTitle": "Predio n.º {{id}}",
     "costRatioHelp": "Construir sobre pendientes o terrenos complejos aumenta el costo de la obra.",
     "coverageRatio": "Ocupación del suelo",
-    "structure": "Estructura",
-    "structureNote": "Las estructuras de mayor grado cuestan más, pero duran más y resisten mejor el fuego",
     "landmark": "Atracción turística",
     "landmarkNote": "Una atracción turística emblemática: solo puede haber una por ciudad",
     "landmarkPlacedSuffix": " (ya construida)",

@@ -3,7 +3,6 @@
     "type": "Building Type",
     "durability": "Durability",
     "floors": "Floors",
-    "structure": "Structure",
     "floorsValue": "{{floors}}F (Floor Area {{area, number}}㎡)",
     "heightLabel": "Height: {{value}}m",
     "baseAreaLabel": "Base Area: {{area, number}}㎡",

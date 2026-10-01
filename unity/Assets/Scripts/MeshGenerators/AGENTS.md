@@ -20,7 +20,7 @@
 | 直下 | 役割 |
 | --- | --- |
 | `MeshFactory.cs` | ファクトリと結果型。`PathMeshResult.Mesh` はコライダー用ストリップで描画用ではない |
-| `AgentModelConfig.cs` | `agent_model_config.yaml` のローダー。使うのはエージェントIDの有無・`structure_prefixes`・`landmark_prefixes` だけ |
+| `AgentModelConfig.cs` | `agent_model_config.yaml` のローダー。使うのはエージェントIDの有無・`landmark_prefixes` だけ |
 | `UltraFarLandMeshBuilder.cs` | 海岸線ポリゴンから超遠景の陸地シルエットを純データで返す(E「超遠景」) |
 | `ReclaimedLandMeshBuilder.cs` | 埋立地の岸壁を純データで返す。天端=帯の多角形(穴あり。分割は `OpenSpaceBuildingMeshBuilder.Triangulate` を共用)、面=壁の区間に沿って外側 `QUAY_PROBE_DISTANCE` の地面−1m まで下ろす縦の帯(2m 間隔)。地面の高さは関数で受け取り、シーンの状態に依存しない(D) |
 | `Percels/DefaultParcel.cs` | 区画の上面(ファン分割。凹ポリゴンでは破綻し得る)+押し出し側面 |
@@ -87,7 +87,7 @@
 - 建物は mid レベルだけ Y を階高スケールし、base/top/fence/mashup は著作寸法のまま。配置は階高グリッドなので著作高さとのズレは隙間として出るのが仕様(F§6.3・§6.4)。`ResolveParcelContext` の区画ポリゴンは center_point 基準のローカルXZ(ワールドで扱うと敷地装飾が建物から離れる)。
 - 建物のパーツが無言で消えるときは FBX の Read/Write Enabled を疑う(壁・角・prebuilt は頂点を読み、ceil/floor は参照専用なので屋根と地面だけ残る)。強制は `Assets/Editor/ModelImportSettings.cs`(`unity/AGENTS.md`「モデルアセットの構成」)。
 - `Mesh.CombineMeshes` はサブメッシュ単位の `CombineInstance` でもインデックスの最小〜最大の頂点を丸ごと写す。FBX 取り込みの溶接で別材質の面が頂点を共有するパーツでは範囲が重なり、未参照の頂点まで複製される。プレハブを事前結合するときは `CombineModuleMeshes`(サブメッシュごとに参照頂点だけを連続区画へ詰める)を通す。壁・角・エントランス・塔屋・フェンス・タイルは元メッシュを直接積むので詰め直しを通らない(F§12.1)。
-- `a{variant}` / `a{v}s{structure}` / `landmark-{prefix}` フォルダを足したら `genesis-core/tools/generate_agent_model_config.py` を再実行する。`agent_model_config.yaml` に無いフォルダは無印・`b{bd_type}` へ黙ってフォールバックし、プレハブがあっても白い箱になる(F§3.1・§4)。
+- `a{variant}` / `landmark-{prefix}` フォルダを足したら `genesis-core/tools/generate_agent_model_config.py` を再実行する。`agent_model_config.yaml` に無いフォルダは無印・`b{bd_type}` へ黙ってフォールバックし、プレハブがあっても白い箱になる(F§3.1・§4)。
 - 交差点・信号機の配置入力は PathManager の交差点署名に含まれるものだけにする(署名外の入力は変えても再生成されない)。
 - 港が埋立地の岸壁に面しているかは `PortBuildingMeshBuilder.FindFacingReclaimedQuays` の1つの規則(区画を0.1m膨らませた範囲に掛かる岸壁区間が1mより長く、区画がその岸壁の陸側にある=区間から内向き `QUAY_PROBE_DISTANCE` の帯の半分以上を覆う)で決め、岸壁区間は `ReclaimedLandStore.GetQuaySegments`(バックエンドの派生値)から取る。港側で岸壁を求め直さない。既存の港の隣の埋立(岸壁の海側にある区画)は面していないので直線カットのスラブのまま。
   - 直線カットの弦の端は、底面外周と海岸線の交点ではなく区画の中の水際が外周に届く点(`CollectQuayEndCandidates`)。隣の埋立地が区画の辺や角に外から接すると、その辺上の交点で弦が斜めになるため。区画の中に陸が無い(海岸線に外から接するだけの)区画だけ交点をそのまま使う。

@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using System;
 using GeneratedModels;
@@ -34,9 +33,6 @@ public partial class BuildingPlanManager : MonoBehaviour
     private float currentVisualVariant = 0.5f;
     private float currentVisualVariant2 = 0.5f;
     private float currentVisualVariant3 = 0.5f;
-    // 構造種別(structure_master のID。0=構造の区別なし)。UIの構造選択と連動し、
-    // プレビューメッシュの生成時に BuildingSummary.structure へ設定される(パーツ prefix の解決に効く)。
-    private int currentStructure = 0;
     // 観光名所の種別(landmark_master のID。0=観光名所ではない)。テンプレート作成モードの名所選択と連動し、
     // プレビューメッシュの生成時に BuildingSummary.landmark へ設定される(パーツ prefix の解決に効く)。
     private int currentLandmark = 0;
@@ -150,8 +146,6 @@ public partial class BuildingPlanManager : MonoBehaviour
         public float? visual_variant;
         public float? visual_variant2;
         public float? visual_variant3;
-        // 構造種別(未設定の旧スキーマなら null → 0 扱い)
-        public int? structure;
         // 観光名所の種別(観光名所でなければ null → 0 扱い)
         public int? landmark;
     }
@@ -183,18 +177,8 @@ public partial class BuildingPlanManager : MonoBehaviour
     public void SetBuildingVariant(int variant)
     {
         agentVariant = variant;
-        // 構造の既定は許可構造の最上位(UIの既定と同じ)。UI が明示的に送る structure で上書きされる。
-        currentStructure = 0;
         // 観光名所はテンプレート作成モードの名所選択でしか決まらないので、バリアント変更では未選択に戻す。
         currentLandmark = 0;
-        if (MasterDataStore.Instance != null)
-        {
-            var masterForStructure = MasterDataStore.Instance.GetAgentMaster(variant);
-            if (masterForStructure?.structures != null && masterForStructure.structures.Count > 0)
-            {
-                currentStructure = masterForStructure.structures.Max();
-            }
-        }
 
         // バリアント変更は新規の配置フロー開始とみなし、直接配置のゴースト状態を初期化する
         // (地点未確定=フェーズAへ戻す)。寸法はマスターから初期化し、回転は0度に戻す。
@@ -281,7 +265,6 @@ public partial class BuildingPlanManager : MonoBehaviour
 
                 // 現在の建設値も更新
                 currentFloors = editingBuildingData.floors;
-                currentStructure = editingBuildingData.structure ?? 0;
                 currentLandmark = editingBuildingData.landmark ?? 0;
 
                 // 外観バリアントを読み込む。
@@ -533,7 +516,6 @@ public partial class BuildingPlanManager : MonoBehaviour
             floors = floors,
             height = height,
             polygon = polygonObjList,
-            structure = currentStructure,
             landmark = currentLandmark,
             visual_variant = currentVisualVariant,
             visual_variant2 = currentVisualVariant2,
@@ -625,18 +607,6 @@ public partial class BuildingPlanManager : MonoBehaviour
         currentVisualVariant2 = vv2;
         currentVisualVariant3 = vv3;
         Debug.Log($"BuildingPlanManager: 外観バリアントを設定しました: vv1={vv1}, vv2={vv2}, vv3={vv3}");
-        RebuildPreviewFromCache();
-    }
-
-    /// <summary>
-    /// 構造種別を設定し、プレビューメッシュを再生成する。UIの構造選択変更時に呼ばれる。
-    /// 構造はパーツ prefix の解決(a{variant}s{structure} など)に効くだけで底面形状は変わらないため、
-    /// バックエンドへは再取得せずキャッシュした底面ポリゴンから再構築する。
-    /// </summary>
-    public void SetStructure(int structure)
-    {
-        currentStructure = structure;
-        Debug.Log($"BuildingPlanManager: 構造種別を設定しました: structure={structure}");
         RebuildPreviewFromCache();
     }
 

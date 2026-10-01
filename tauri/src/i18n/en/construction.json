@@ -78,8 +78,6 @@
     "parcelTitle": "Parcel #{{id}}",
     "costRatioHelp": "Building on sloped or complex terrain increases the construction cost.",
     "coverageRatio": "Coverage Ratio",
-    "structure": "Structure",
-    "structureNote": "Higher-grade structures cost more to build but last longer and resist fire better",
     "landmark": "Landmark",
     "landmarkNote": "An iconic tourist attraction; only one of each can stand in a city",
     "landmarkPlacedSuffix": " (already built)",

@@ -135,7 +135,6 @@ public class BuildingInputHandler : MonoBehaviour, IInputHandler
             buildingId,
             summary.variant,
             floors,
-            summary.structure,
             summary.visual_variant,
             summary.visual_variant2,
             summary.visual_variant3

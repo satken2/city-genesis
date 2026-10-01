@@ -174,6 +174,8 @@ public partial class RoadRenderer : MonoBehaviour
     /// PathMeshFactory へは実パスと同じ経路で仮の PathSummary を渡す。
     /// travelDirection(Constants.DIR_*)も仮 PathSummary に載せるため、駅バリアントの
     /// ホーム設置側の解決と一方通行線路の進行方向矢印が確定後と同じ見た目になる。
+    /// componentPoints は設計空間(地面+相対Y)の点列で、生成器へは base_height を引いた
+    /// 描画用の点列を渡す(ToDrawPoints)。仮 PathSummary の始点・終点・ウェイポイントは設計値のまま。
     /// </summary>
     private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent, string houseEnds, bool designed = false, string passageMode = "elevated")
     {
@@ -192,7 +194,8 @@ public partial class RoadRenderer : MonoBehaviour
                 Vector3 wpPos = componentPoints[i];
                 float wpGroundY = Utils.GetGroundHeight(wpPos);
                 float wpRelY = wpPos.y - wpGroundY;
-                waypointsList.Add(new List<object> { (object)wpPos.x, (object)wpRelY, (object)wpPos.z });
+                // GetWaypointList は {position:[x,relY,z]} の辞書だけを読む(素の配列は黙って捨てられる)
+                waypointsList.Add(new Dictionary<string, object> { ["position"] = new List<object> { (object)wpPos.x, (object)wpRelY, (object)wpPos.z } });
             }
         }
 
@@ -219,7 +222,7 @@ public partial class RoadRenderer : MonoBehaviour
             foreach (var p in componentPoints)
                 tempPathData.station_grade_profile.Add(new List<object> { p.x, p.y, p.z });
         }
-        PathMeshResult meshResult = PathMeshFactory.GeneratePathMesh(tempPathData, componentPoints);
+        PathMeshResult meshResult = PathMeshFactory.GeneratePathMesh(tempPathData, ToDrawPoints(componentPoints, pathSubtype));
         if (meshResult == null) return;
         // 生成器が返す帯は、詳細GOがある場合には未使用のクリック用メッシュ。
         // フォールバック表示を含め、このレンダラーが寿命を管理する。
@@ -282,6 +285,20 @@ public partial class RoadRenderer : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// 設計空間(地面+相対Y)の点列から base_height(3D描画用の高さオフセット。送電線など)を引き、
+    /// 生成器へ渡す描画用の点列にする。確定済みパスの PathManager.ComputeDesignedPathPoints と同じ規約で、
+    /// base_height が 0 のバリアントは点列をそのまま返す。
+    /// </summary>
+    private static List<Vector3> ToDrawPoints(List<Vector3> points, int pathVariant)
+    {
+        float baseHeight = PathManager.GetPathBaseHeight(pathVariant);
+        if (baseHeight == 0f) return points;
+        var result = new List<Vector3>(points.Count);
+        foreach (var p in points) result.Add(new Vector3(p.x, p.y - baseHeight, p.z));
+        return result;
     }
 
     /// <summary>

@@ -78,8 +78,6 @@
     "parcelTitle": "用地 #{{id}}",
     "costRatioHelp": "在坡地或複雜地形上建造建築會提高建設成本。",
     "coverageRatio": "建蔽率",
-    "structure": "結構",
-    "structureNote": "結構等級越高，建設費越高，但耐用年限與耐火性也越高",
     "landmark": "觀光名勝",
     "landmarkNote": "城市的地標性觀光設施，每座城市只能興建一處",
     "landmarkPlacedSuffix": "(已興建)",

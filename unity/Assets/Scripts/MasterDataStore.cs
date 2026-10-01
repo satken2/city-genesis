@@ -53,8 +53,6 @@ public class MasterDataStore : MonoBehaviour
 		public float? cost_ratio;
 		public float? min_space;
 		public float? max_space;
-		// 選択できる構造種別(structure_master のID一覧、昇順)。空は構造の区別を持たないバリアント。
-		public List<int> structures = new();
 	}
 
 	[Serializable]

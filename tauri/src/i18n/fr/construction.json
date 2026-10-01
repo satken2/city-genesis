@@ -78,8 +78,6 @@
     "parcelTitle": "Terrain n° {{id}}",
     "costRatioHelp": "Construire sur un terrain en pente ou complexe augmente le coût de la construction.",
     "coverageRatio": "Emprise au sol",
-    "structure": "Structure",
-    "structureNote": "Une structure de grade supérieur coûte plus cher mais dure plus longtemps et résiste mieux au feu",
     "landmark": "Site touristique",
     "landmarkNote": "Un site touristique emblématique : un seul exemplaire par ville",
     "landmarkPlacedSuffix": " (déjà construit)",

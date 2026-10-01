@@ -75,10 +75,6 @@ public static class Constants
     public const int MODEL_ROTARY = 11;
     public const int MODEL_PARK = 12;
     public const int MODEL_OPEN_PIT = 13;
-    public const int STRUCTURE_NONE = 0;
-    public const int STRUCTURE_WOOD = 1;
-    public const int STRUCTURE_SEMI_FIREPROOF = 2;
-    public const int STRUCTURE_FIREPROOF = 3;
     public const float MASHUP_CELL_SIZE = 8.0f;
     public const float OPEN_PIT_YARD_DEPTH = 40.0f;
     public const int FAMILY_SINGLE = 1;

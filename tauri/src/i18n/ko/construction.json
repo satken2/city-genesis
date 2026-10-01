@@ -78,8 +78,6 @@
     "parcelTitle": "부지 #{{id}}",
     "costRatioHelp": "경사지나 복잡한 지형 위에 건물을 지으면 건설 비용이 올라갑니다.",
     "coverageRatio": "건폐율",
-    "structure": "구조",
-    "structureNote": "구조 등급이 높을수록 건설비는 오르지만 내용연수와 내화성이 높아집니다",
     "landmark": "관광 명소",
     "landmarkNote": "도시의 상징이 되는 관광 시설로, 도시마다 하나만 지을 수 있습니다",
     "landmarkPlacedSuffix": "(설치됨)",

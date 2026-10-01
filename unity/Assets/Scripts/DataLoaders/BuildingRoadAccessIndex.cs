@@ -34,7 +34,7 @@ public static class BuildingRoadAccessIndex
     static string Signature(BuildingSummary data)
     {
         var key = new StringBuilder().Append(data.variant).Append(':').Append(data.status).Append(':').Append(data.landmark)
-            .Append(':').Append(data.structure).Append(':').Append(data.bd_type).Append(':').Append(data.floors);
+            .Append(':').Append(data.bd_type).Append(':').Append(data.floors);
         void Add(float value) => key.Append(':').Append(value.ToString("R", CultureInfo.InvariantCulture));
         Add(data.visual_variant); Add(data.visual_variant2);
         if (data.centerPointArray != null) foreach (float v in data.centerPointArray) Add(v);

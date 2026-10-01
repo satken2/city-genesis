@@ -53,8 +53,6 @@
     "limitHeight": "Hauteur maximale",
     "limitVolumeRatio": "COS",
     "limitCoverageRatio": "Emprise au sol",
-    "minStructure": "Structure minimale",
-    "minStructureNone": "Aucune restriction",
     "immigrationTitle": "Politique migratoire",
     "immigrationDescription": "Définit les conditions d'accueil des migrants. Les ménages candidats qui ne les remplissent pas ne sont pas admis.",
     "immigrationAgeRange": "Âge du chef de ménage",

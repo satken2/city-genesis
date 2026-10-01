@@ -3,7 +3,6 @@
     "type": "Type de bâtiment",
     "durability": "Durabilité",
     "floors": "Étages",
-    "structure": "Structure",
     "floorsValue": "{{floors}} étages (surface de plancher {{area, number}} ㎡)",
     "heightLabel": "Hauteur : {{value}} m",
     "baseAreaLabel": "Emprise au sol : {{area, number}} ㎡",

@@ -2873,7 +2873,7 @@
           "parcels"
         ],
         "summary": "Update Parcel Endpoint",
-        "description": "指定したIDのparcelを一部更新する。\nステータスに応じて更新可能なプロパティが異なる:\n- PENDING/SCHEDULED_CONSTRUCTION: status, polygon, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, min_structure, altitude, facade_edge_index\n- その他: status, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, min_structure, allowed_bd_mask",
+        "description": "指定したIDのparcelを一部更新する。\nステータスに応じて更新可能なプロパティが異なる:\n- PENDING/SCHEDULED_CONSTRUCTION: status, polygon, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, altitude, facade_edge_index\n- その他: status, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, allowed_bd_mask",
         "operationId": "update_parcel_endpoint_api_v1_parcels__parcel_id__patch",
         "parameters": [
           {
@@ -6190,25 +6190,6 @@
         }
       }
     },
-    "/api/v1/master/structures": {
-      "get": {
-        "tags": [
-          "master"
-        ],
-        "summary": "structures マスターを取得",
-        "operationId": "get_master_structures_api_v1_master_structures_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/master/landmarks": {
       "get": {
         "tags": [
@@ -7094,7 +7075,7 @@
           "zones"
         ],
         "summary": "Create Zone Endpoint",
-        "description": "zoneを作成する。\nプレイヤーが直接指定するのは地区に所属させる道路のみであり、\n地区のポリゴンは後付けで所属する土地区画の形状から自動計算される。\n任意で name, color, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, min_structure を指定可能。\ncolor(\"#rrggbb\")は地区の識別色で、無指定・不正形式ならバックエンドがランダム生成する\n(地区編集モードのUnityは、作成前にカーソル脇へ提示した色をここで送ってくる)。",
+        "description": "zoneを作成する。\nプレイヤーが直接指定するのは地区に所属させる道路のみであり、\n地区のポリゴンは後付けで所属する土地区画の形状から自動計算される。\n任意で name, color, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio を指定可能。\ncolor(\"#rrggbb\")は地区の識別色で、無指定・不正形式ならバックエンドがランダム生成する\n(地区編集モードのUnityは、作成前にカーソル脇へ提示した色をここで送ってくる)。",
         "operationId": "create_zone_endpoint_api_v1_zones__post",
         "requestBody": {
           "required": true,
@@ -7228,7 +7209,7 @@
           "zones"
         ],
         "summary": "Update Zone Endpoint",
-        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, min_structure, auto_managed\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
+        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, auto_managed\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
         "operationId": "update_zone_endpoint_api_v1_zones__zone_id__patch",
         "parameters": [
           {
@@ -9619,11 +9600,6 @@
             "title": "Variant",
             "description": "経済主体の小分類（agent_master のバリアントID）"
           },
-          "structure": {
-            "type": "integer",
-            "title": "Structure",
-            "description": "建物の構造種別（structure_master のID。0=構造の区別なし）"
-          },
           "landmark": {
             "type": "integer",
             "title": "Landmark",
@@ -10411,7 +10387,6 @@
           "version",
           "type",
           "variant",
-          "structure",
           "landmark",
           "status",
           "alert",
@@ -10495,11 +10470,6 @@
             "type": "integer",
             "title": "Variant",
             "description": "経済主体の小分類（agent_master のバリアントID）"
-          },
-          "structure": {
-            "type": "integer",
-            "title": "Structure",
-            "description": "建物の構造種別（structure_master のID。0=構造の区別なし）"
           },
           "landmark": {
             "type": "integer",
@@ -10690,7 +10660,6 @@
           "version",
           "type",
           "variant",
-          "structure",
           "landmark",
           "status",
           "public_facility",

@@ -26,7 +26,6 @@ export type RegulationsData = {
   limit_volume_ratio: number;
   limit_height: number;
   limit_coverage_ratio: number;
-  min_structure: number; // 新規地区の既定の最低構造種別(structures マスターのID)。0=制限なし
   // 移民規制（プレイヤーが政策として設定する受け入れ条件）
   immigration_age_min: number;
   immigration_age_max: number;
@@ -75,7 +74,7 @@ export type ImmigrationRegulations = {
  * 建築規制（数値型）のキー。
  * 移民規制は bool/dict 型を含むため、建築規制の数値ハンドラはこのキーのみを扱う。
  */
-export type BuildingRegKey = "limit_volume_ratio" | "limit_height" | "limit_coverage_ratio" | "min_structure";
+export type BuildingRegKey = "limit_volume_ratio" | "limit_height" | "limit_coverage_ratio";
 
 /**
  * 編集中の制限速度を保持する型

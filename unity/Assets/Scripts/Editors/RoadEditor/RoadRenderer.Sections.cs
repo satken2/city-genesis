@@ -80,6 +80,8 @@ public partial class RoadRenderer
         stripNormals.Clear();
         stripTriangles.Clear();
         var master = MasterDataStore.Instance?.GetPathMaster(variant);
+        // points は設計空間(地面+相対Y)。確定後の描画位置に合わせて base_height を引く
+        float baseHeight = PathManager.GetPathBaseHeight(variant);
         float width = (master?.width ?? 0f);
         int lanes = Mathf.Max(1, master?.lanes ?? 1);
         float centerWidth = master?.center_width ?? 0f;
@@ -121,8 +123,8 @@ public partial class RoadRenderer
             int start = stripVertices.Count;
             for (int i = 0; i < points.Count; i++)
             {
-                stripVertices.Add(rightPoints[i] + Vector3.up * height);
-                stripVertices.Add(leftPoints[i] + Vector3.up * height);
+                stripVertices.Add(rightPoints[i] + Vector3.up * (height - baseHeight));
+                stripVertices.Add(leftPoints[i] + Vector3.up * (height - baseHeight));
                 stripNormals.Add(Vector3.up);
                 stripNormals.Add(Vector3.up);
                 if (i == points.Count - 1) continue;

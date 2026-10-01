@@ -3671,8 +3671,9 @@ public class PathManager : BaseApiDataManager
     /// <summary>
     /// パスバリアントの base_height（3D描画用の高さオフセット）を取得する。
     /// マスター未定義の場合は 0m（シフトなし）。
+    /// 確定済みパスの描画点列と、道路エディタの敷設プレビュー（RoadRenderer）が共有する。
     /// </summary>
-    private static float GetPathBaseHeight(int pathVariant)
+    public static float GetPathBaseHeight(int pathVariant)
     {
         if (MasterDataStore.Instance == null) return 0f;
         var master = MasterDataStore.Instance.GetPathMaster(pathVariant);

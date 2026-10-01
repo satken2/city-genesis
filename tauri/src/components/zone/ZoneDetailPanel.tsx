@@ -49,7 +49,6 @@ export function ZoneDetailPanel({
     limit_coverage_ratio: null,
     limit_volume_ratio: null,
     limit_height: null,
-    min_structure: 0,
   });
 
   // 管理状態(自動管理/確定)のトグル送信中フラグと失敗表示
@@ -89,7 +88,6 @@ export function ZoneDetailPanel({
             limit_coverage_ratio: restrictionValues.limit_coverage_ratio,
             limit_volume_ratio: restrictionValues.limit_volume_ratio,
             limit_height: restrictionValues.limit_height,
-            min_structure: restrictionValues.min_structure,
           }),
         }
       );
@@ -100,7 +98,6 @@ export function ZoneDetailPanel({
         limit_coverage_ratio: zone.limit_coverage_ratio ?? null,
         limit_volume_ratio: zone.limit_volume_ratio ?? null,
         limit_height: zone.limit_height ?? null,
-        min_structure: zone.min_structure ?? 0,
       });
     } catch {
       setRestrictionSaveError(t("zone.restrictionUpdateFailed", "地区規制の更新に失敗しました"));
@@ -173,7 +170,6 @@ export function ZoneDetailPanel({
             limit_coverage_ratio: zone.limit_coverage_ratio ?? null,
             limit_volume_ratio: zone.limit_volume_ratio ?? null,
             limit_height: zone.limit_height ?? null,
-            min_structure: zone.min_structure ?? 0,
           });
           setLoading(false);
         }

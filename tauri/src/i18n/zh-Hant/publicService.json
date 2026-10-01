@@ -53,8 +53,6 @@
     "limitHeight": "高度限制",
     "limitVolumeRatio": "容積率",
     "limitCoverageRatio": "建蔽率",
-    "minStructure": "最低結構等級",
-    "minStructureNone": "無限制",
     "immigrationTitle": "移民法規",
     "immigrationDescription": "設定接收移民的條件。若申請的移民家庭不滿足條件，則不予進駐。",
     "immigrationAgeRange": "戶長年齡",

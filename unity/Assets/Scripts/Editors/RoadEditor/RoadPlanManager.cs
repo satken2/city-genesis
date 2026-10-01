@@ -3012,7 +3012,7 @@ public partial class RoadPlanManager : MonoBehaviour
                         p2 = Vector3.Lerp(p0, p3, 2f / 3f);
                     }
 
-                    // セグメント両端の相対高さ（標高）を求め、両端とも地面高さ（≒0）の
+                    // セグメント両端の相対高さ（標高）を求め、両端とも地面高さの
                     // 地上道路なら各サンプル点を地形に追従させる。
                     // これを行わないと、曲線モードではベジエがアンカー間の起伏を無視して
                     // Yを滑らかに補間するため、丘や谷の区間で道路が地形に埋まってしまう
@@ -3020,11 +3020,14 @@ public partial class RoadPlanManager : MonoBehaviour
                     // 実道路を生成する PathManager.SampleBezierSegmentWithTerrain と同じロジック。
                     // 閾値は立体交差判定（ElevationSegment.follows）と同じ0.01mに揃え、
                     // follow_terrain=false のバリアント（桁橋など）は常に非追従とする。
+                    // 地面高さは相対Y＝base_height（送電線など。それ以外は0）で、点列は設計空間のままなので
+                    // 追従時のYにも base_height を足す（描画用の引き算は RoadRenderer が行う）。
+                    float groundRel = PathManager.GetPathBaseHeight(PathSubtype);
                     float relStart = points[i].position.y - Utils.GetGroundHeight(points[i].position);
                     float relEnd = points[i + 1].position.y - Utils.GetGroundHeight(points[i + 1].position);
                     bool followTerrain = EffectiveFollowTerrain()
-                        && Mathf.Abs(relStart) <= ELEVATION_EPSILON_REL
-                        && Mathf.Abs(relEnd) <= ELEVATION_EPSILON_REL;
+                        && Mathf.Abs(relStart - groundRel) <= ELEVATION_EPSILON_REL
+                        && Mathf.Abs(relEnd - groundRel) <= ELEVATION_EPSILON_REL;
                     float embStart = points[i].embankmentHeight;
                     float embEnd = points[i + 1].embankmentHeight;
 
@@ -3036,7 +3039,7 @@ public partial class RoadPlanManager : MonoBehaviour
                         {
                             // XZはベジエ曲線のまま、Yだけ地形高さ＋盛土(線形補間)に追従させる
                             float gh = Utils.GetGroundHeight(new Vector3(sampled.x, 1000f, sampled.z));
-                            sampled.y = gh + Mathf.Lerp(embStart, embEnd, t) + 0.1f;
+                            sampled.y = gh + groundRel + Mathf.Lerp(embStart, embEnd, t) + 0.1f;
                         }
                         renderPoints.Add(sampled);
                     }
@@ -3138,11 +3141,13 @@ public partial class RoadPlanManager : MonoBehaviour
             Vector3 b = hover ? renderPoints[renderPoints.Count - 1] : renderPoints[(span + 1) * stride];
             float embA = points[span].embankmentHeight;
             float embB = hover ? currentEmbankmentHeight : points[span + 1].embankmentHeight;
+            // 地面高さは相対Y＝base_height（送電線など。それ以外は0）。点列は設計空間のままなので追従時のYにも足す
+            float groundRel = PathManager.GetPathBaseHeight(PathSubtype);
             float relA = points[span].position.y - Utils.GetGroundHeight(points[span].position);
             float relB = hover ? (hoverSnapWasElevated ? hoverSnapRelHeight : currentHeight)
                 : points[span + 1].position.y - Utils.GetGroundHeight(points[span + 1].position);
-            bool follow = EffectiveFollowTerrain() && Mathf.Abs(relA) <= ELEVATION_EPSILON_REL
-                && Mathf.Abs(relB) <= ELEVATION_EPSILON_REL;
+            bool follow = EffectiveFollowTerrain() && Mathf.Abs(relA - groundRel) <= ELEVATION_EPSILON_REL
+                && Mathf.Abs(relB - groundRel) <= ELEVATION_EPSILON_REL;
             Vector3 c1 = Vector3.Lerp(a, b, 1f / 3f);
             Vector3 c2 = Vector3.Lerp(a, b, 2f / 3f);
             if (Curved)
@@ -3184,7 +3189,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 float t = (float)i / steps;
                 Vector3 p = Curved ? PolylineUtils.CubicBezierPoint(localA, localC1, localC2, localB, t) : Vector3.Lerp(localA, localB, t);
                 if (follow)
-                    p.y = Utils.GetGroundHeight(p + origin) - origin.y + Mathf.Lerp(embA, embB, t) + (surfaceOffset ? RoadPartHeights.ROAD_SPLINE_OFFSET : 0f);
+                    p.y = Utils.GetGroundHeight(p + origin) - origin.y + groundRel + Mathf.Lerp(embA, embB, t) + (surfaceOffset ? RoadPartHeights.ROAD_SPLINE_OFFSET : 0f);
                 result.Add(p);
                 followSamples?.Add(follow);
             }

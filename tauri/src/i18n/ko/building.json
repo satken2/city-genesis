@@ -3,7 +3,6 @@
     "type": "건물 타입",
     "durability": "내구도",
     "floors": "층수",
-    "structure": "구조",
     "floorsValue": "{{floors}}층(연면적 {{area, number}}㎡)",
     "heightLabel": "높이: {{value}}m",
     "baseAreaLabel": "건축 면적: {{area, number}}㎡",

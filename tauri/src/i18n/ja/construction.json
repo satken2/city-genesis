@@ -78,8 +78,6 @@
     "parcelTitle": "敷地 #{{id}}",
     "costRatioHelp": "傾斜地や複雑な地形の上に建物を建設すると、建設コストが上がります。",
     "coverageRatio": "建ぺい率",
-    "structure": "構造",
-    "structureNote": "上位の構造ほど建設費は高くなりますが、耐用年数と耐火性が上がります",
     "landmark": "観光名所",
     "landmarkNote": "都市にひとつだけ建てられる象徴的な観光施設です",
     "landmarkPlacedSuffix": "(配置済み)",
