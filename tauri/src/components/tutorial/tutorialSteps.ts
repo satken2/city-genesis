@@ -94,3 +94,6 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = SCENARIO_ORDER.map((id) =>
     descriptionKey: step.phases[0].textKey,
   })),
 }));
+
+/** 買収は鉄道敷設編で学ぶ。旧教材の定義は保存済みチュートリアルの再開用に残す。 */
+export const NEW_GAME_TUTORIAL_SCENARIOS = TUTORIAL_SCENARIOS.filter((scenario) => scenario.id !== "acquisition");

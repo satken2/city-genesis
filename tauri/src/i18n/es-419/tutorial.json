@@ -87,45 +87,162 @@
     },
     "scenario4": {
       "title": "Construyamos un ferrocarril",
-      "description": "Los habitantes caminan hasta sus trabajos, lejos de casa. En este tutorial aprenderás a construir estaciones, vías, un depósito ferroviario y líneas eléctricas, abrir una ruta de tren y comprobar su uso por los pasajeros.",
+      "description": "MetroCity necesita un ferrocarril, pero hay edificios privados y un hospital público en su trazado. En este tutorial aprenderás adquisición y demolición, vías sobre avenidas, plataformas, estaciones, depósito, curvas y pendientes, electricidad y apertura de la línea.",
       "step1": {
-        "title": "Construyamos los andenes",
-        "open": "Primero, los andenes donde los pasajeros esperan el tren. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén ferroviario» en «Ferrocarril». Usa una sola vía.",
-        "town": "Junto a la vivienda colectiva del pueblo, haz clic izquierdo dentro del círculo celeste (oeste) para colocar el inicio y dentro del círculo amarillo (este) para colocar el final; luego haz clic derecho en la vista 3D para finalizar la forma. Comprueba en la vista previa que el andén quede del lado norte (el de la vivienda) y confirma en el panel de construcción.",
-        "new": "Junto al edificio comercial del oeste, haz lo mismo: clic izquierdo en el círculo celeste (oeste), luego en el círculo amarillo (este), y clic derecho para finalizar la forma, tendiendo un andén con el lado de embarque hacia el norte. Cuando termines, pulsa «Siguiente»."
+        "title": "Coloca plataformas elevadas",
+        "description": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m.",
+        "open": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m.",
+        "variant": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m.",
+        "start": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m.",
+        "end": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m.",
+        "confirm": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m.",
+        "town": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m.",
+        "new": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m.",
+        "east": "Abre Carreteras, ferrocarriles e infraestructura → Ferrocarril. Usa una plataforma isla electrificada de vía doble al oeste y una plataforma elevada electrificada de vía doble al este. Coloca ambos extremos marcados con clic izquierdo, termina con clic derecho y confirma. Ambas están a 6m."
       },
       "step2": {
-        "title": "Construyamos los edificios de estación",
-        "town": "Un andén solo todavía no es una estación. Pulsa «Volver» hasta ver las categorías, elige «Estación sencilla» en «Edificios de estación» y traza una línea entre los dos marcadores amarillos que cruce el andén del pueblo. Los andenes que cruza la línea se agrupan en esa estación.",
-        "new": "Haz lo mismo en el andén del oeste: traza la línea de «Estación sencilla» entre los dos marcadores amarillos. Cuando termines, pulsa «Siguiente»."
+        "title": "Construye entradas de estación",
+        "description": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
+        "open": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
+        "variant": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
+        "start": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
+        "end": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
+        "confirm": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
+        "town": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
+        "new": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
+        "east": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes."
       },
       "step3": {
-        "title": "Unamos las dos estaciones con vía",
-        "description": "Pulsa «Volver» hasta ver las categorías, elige «Vía de ferrocarril» en «Ferrocarril» y tiende la vía desde el extremo oeste del andén del pueblo hasta el extremo este del andén del oeste (una sola vía). Al pulsar «Siguiente», se completarán la vía y las estaciones y se comprobará la conexión."
+        "title": "Planea el tramo con adquisición",
+        "description": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo.",
+        "open": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo.",
+        "variant": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo.",
+        "start": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo.",
+        "end": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo.",
+        "confirm": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo.",
+        "town": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo.",
+        "new": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo.",
+        "east": "Elige vía doble electrificada y une el extremo este de la plataforma oeste con el inicio de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan; este tramo se construirá sin omitir el tiempo."
       },
       "step4": {
-        "title": "Construyamos el depósito",
-        "description": "Los trenes salen del depósito. Elige «Depósito ferroviario» en «Construcción» del panel de iconos y constrúyelo en la parcela del marcador amarillo junto a la calle. Al pulsar «Siguiente», como es un tutorial, se omitirá el plazo de obra."
+        "title": "Observa la adquisición y el bloqueo",
+        "description": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición.",
+        "open": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición.",
+        "variant": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición.",
+        "start": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición.",
+        "end": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición.",
+        "confirm": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición.",
+        "town": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición.",
+        "new": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición.",
+        "east": "Avanza épocas. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Los servicios públicos requieren una orden explícita de demolición."
       },
       "step5": {
-        "title": "Conectemos el depósito a la línea principal",
-        "description": "Tiende una vía de acceso desde el terminal de conexión del lado sur del depósito hasta la línea principal, con «Vía de ferrocarril» de «Ferrocarril», entre los dos marcadores amarillos. La clave es empalmarla con la línea principal en un ángulo suave hacia el este."
+        "title": "Ordena demoler el hospital",
+        "description": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada.",
+        "open": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada.",
+        "variant": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada.",
+        "start": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada.",
+        "end": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada.",
+        "confirm": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada.",
+        "town": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada.",
+        "new": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada.",
+        "east": "Haz clic en el hospital marcado y elige Demoler en sus detalles. Continúa cuando la demolición esté programada."
       },
       "step6": {
-        "title": "Llevemos electricidad al depósito",
-        "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito."
+        "title": "Espera que termine el tramo",
+        "description": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas.",
+        "open": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas.",
+        "variant": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas.",
+        "start": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas.",
+        "end": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas.",
+        "confirm": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas.",
+        "town": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas.",
+        "new": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas.",
+        "east": "Avanza épocas hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varias épocas."
       },
       "step7": {
-        "title": "Pongamos la línea en servicio",
-        "description": "En «Transporte público» del panel de iconos, pulsa «＋ Nueva línea», elige «Línea ferroviaria de media distancia» como tipo y coloca las paradas sobre los dos andenes. Si la tarifa es alta, conviene más caminar, así que pon la Tarifa en 0 y el Intervalo en 5 minutos antes de pulsar «Crear»."
+        "title": "Traza la vía sobre la avenida",
+        "description": "Traza vía doble electrificada a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición.",
+        "open": "Traza vía doble electrificada a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición.",
+        "variant": "Traza vía doble electrificada a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición.",
+        "start": "Traza vía doble electrificada a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición.",
+        "end": "Traza vía doble electrificada a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición.",
+        "confirm": "Traza vía doble electrificada a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición.",
+        "town": "Traza vía doble electrificada a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición.",
+        "new": "Traza vía doble electrificada a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición.",
+        "east": "Por último, tiende vía doble electrificada a 6 m desde el extremo este de la avenida hasta el extremo oeste del andén oriental. Cuando los dos andenes estén conectados, Siguiente completará la construcción."
       },
       "step8": {
-        "title": "Comprobemos los pasajeros",
-        "description": "Vecinos del pueblo trabajan en la tienda de alimentos del edificio comercial del oeste. Al avanzar épocas se consiguen los vehículos, los trenes empiezan a circular y la gente los usa para ir al trabajo. En la ventana de «Transporte público», comprueba que los Viajes de la línea ya no sean 0. Arrancar lleva unas cuantas épocas."
+        "title": "Construye el depósito ferroviario",
+        "description": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra.",
+        "open": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra.",
+        "variant": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra.",
+        "start": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra.",
+        "end": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra.",
+        "confirm": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra.",
+        "town": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra.",
+        "new": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra.",
+        "east": "En Construcción elige Depósito ferroviario y colócalo en el lote marcado al norte. Siguiente completará su obra."
       },
       "step9": {
-        "title": "Ferrocarril inaugurado",
-        "description": "¡Buen trabajo! Formar estaciones con andenes y edificios, unirlas con vía, sacar trenes del depósito, llevar electricidad con la línea de transmisión y hacer pasar una línea por encima: el ferrocarril funciona gracias a la suma de todos esos elementos."
+        "title": "Ajusta la curva y la pendiente",
+        "description": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión.",
+        "open": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión.",
+        "variant": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión.",
+        "start": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión.",
+        "end": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión.",
+        "confirm": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión.",
+        "town": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión.",
+        "new": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión.",
+        "east": "Con vía ferroviaria, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este por los marcadores y conecta la vía principal a 6m. Elige curvas en el menú Ctrl. PageUp/1 sube y PageDown/2 baja. Reparte la subida 0→1→2→3→4→5→6m en una distancia larga. Tras el clic derecho, ajusta vértices y controles; entra a la vía principal con un ángulo suave. Amplía curvas menores de 100m de radio; alarga o distribuye la subida si supera el 5%. Elimina las infracciones rojas y confirma. Siguiente comprueba la geometría y la conexión."
+      },
+      "step10": {
+        "title": "Conecta la electricidad del depósito",
+        "description": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
+        "open": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
+        "variant": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
+        "start": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
+        "end": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
+        "confirm": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
+        "town": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
+        "new": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
+        "east": "La central y la subestación ya están instaladas. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma."
+      },
+      "step11": {
+        "title": "Inaugura la línea",
+        "description": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos.",
+        "open": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos.",
+        "variant": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos.",
+        "start": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos.",
+        "end": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos.",
+        "confirm": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos.",
+        "town": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos.",
+        "new": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos.",
+        "east": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en ambas plataformas. Haz clic en la primera para cerrar el recorrido de vuelta. Tarifa 0 e intervalo objetivo de 5 minutos."
+      },
+      "step12": {
+        "title": "Confirma los vehículos y el servicio",
+        "description": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
+        "open": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
+        "variant": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
+        "start": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
+        "end": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
+        "confirm": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
+        "town": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
+        "new": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
+        "east": "Avanza épocas y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varias épocas para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía."
+      },
+      "step13": {
+        "title": "Repasa la construcción",
+        "description": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
+        "open": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
+        "variant": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
+        "start": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
+        "end": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
+        "confirm": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
+        "town": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
+        "new": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
+        "east": "Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar demoliciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente."
       }
     },
     "complete": {
@@ -223,50 +340,50 @@
       "title": "Extraer recursos",
       "description": "La isla tiene recursos valiosos, pero no hay cómo transportarlos. En este tutorial aprenderás a preparar una mina, un ferrocarril de carga y un puerto para extraer mineral, transportarlo y exportarlo al extranjero.",
       "step1": {
-        "description": "Activa la visualización de los recursos naturales con el icono del ojo de la cabina, en la parte inferior de la pantalla, y haz clic en la veta mineral de la ladera oeste de la montaña central (marcador amarillo) para abrir su detalle.",
+        "description": "Activa Recursos naturales e inspecciona el yacimiento de mineral marcado al sureste de MineCity2.",
         "title": "Inspeccionar la veta mineral"
       },
       "step2": {
-        "description": "Construye una «Mina» en la parcela del marcador amarillo, sobre la veta mineral. Elige «Mina» en el panel de construcción y haz clic en la parcela para colocarla. Al confirmar, como es un tutorial, se omite el plazo de obra y la mina queda terminada.",
+        "description": "Construye una mina en el lote marcado del yacimiento. Siguiente omite su tiempo de construcción.",
         "title": "Construir una mina"
       },
       "step3": {
-        "description": "Construye una «Estación de carga de mineral» en la parcela del marcador amarillo, en el terreno nivelado de la montaña, justo al oeste de la mina. El mineral extraído en la mina llega aquí en camiones y se carga en los trenes de carga.",
+        "description": "Construye una estación de carga de mineral en el lote grande al sureste de la mina. Su andén va al suroeste.",
         "title": "Construir la estación de carga junto a la mina"
       },
       "step4": {
-        "description": "Construye una «Estación de descarga de mineral» en la parcela del marcador amarillo, al sur de la parcela del puerto de graneles, junto a la calle que gira hacia el este al final de la calle del puerto. Su entrada mira al norte, hacia el puerto. Aquí se descarga el mineral que llega por ferrocarril. Ten cuidado de no confundirla con la «Estación de descarga de petróleo», que tiene un nombre parecido.",
+        "description": "Construye una estación de descarga de mineral en el lote existente al sur de la calle del puerto.",
         "title": "Construir la estación de descarga cerca del puerto"
       },
       "step5": {
-        "description": "Construye un «Puerto de graneles» en la parcela del marcador amarillo que da al mar, al otro lado de la calle, al norte de la estación de descarga. Desde aquí el mineral se exporta al extranjero.",
+        "description": "Construye un puerto de graneles en el lote costero marcado.",
         "title": "Construir un puerto de graneles"
       },
       "step6": {
-        "open": "Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén de carga de mineral» en «Ferrocarril».",
-        "loading": "Tiende un andén al norte de la estación de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (sur) antes de confirmar; de oeste a este es «Interior».",
-        "unloading": "En la estación de descarga, tiende un andén al sur del edificio, de manera que quede del lado del edificio de la estación (norte); de oeste a este es «Exterior». Cuando termines, pulsa «Siguiente».",
+        "open": "Elige plataforma de carga de mineral. Une cada par de marcadores, al suroeste de la estación de carga y al sur de la estación de descarga. Orienta el andén hacia la instalación.",
+        "loading": "Elige plataforma de carga de mineral. Une cada par de marcadores, al suroeste de la estación de carga y al sur de la estación de descarga. Orienta el andén hacia la instalación.",
+        "unloading": "Elige plataforma de carga de mineral. Une cada par de marcadores, al suroeste de la estación de carga y al sur de la estación de descarga. Orienta el andén hacia la instalación.",
         "title": "Construir andenes junto a las estaciones"
       },
       "step7": {
-        "town": "Pulsa «Volver» para regresar a la lista, elige «Vía de ferrocarril» y tiende la vía en diagonal desde el extremo este del andén de la estación de descarga hasta el marcador al noreste del pueblo (basta con una sola vía). Aquí el terreno es llano, así que la vía puede seguir el terreno.",
-        "climb": "A continuación, tiende desde ahí la vía que sube la montaña hasta el extremo oeste del andén de la estación de carga. Las vías solo pueden subir pendientes de hasta el 5 %, así que antes de tenderla pon «Seguimiento del terreno» en «No seguir» en el panel de construcción: la vía subirá con una pendiente constante sin seguir el suelo y cruzará los valles con puentes. Si un tramo es demasiado largo para confirmarlo, divídelo y tiéndelo en varias partes. Al confirmar, se completarán la vía y los andenes y se comprobará la conexión.",
+        "town": "Las estaciones aún no están conectadas. Traza la vía desde el extremo este del andén del puerto, pasando al sur de la curva intermedia de la carretera, hasta el extremo noroeste del andén de montaña. Añade puntos intermedios para mantener tramos de menos de 500m. Usa curvas suaves; para subir elige no seguir el terreno y elimina las infracciones de pendiente y radio antes de confirmar.",
+        "climb": "Las estaciones aún no están conectadas. Traza la vía desde el extremo este del andén del puerto, pasando al sur de la curva intermedia de la carretera, hasta el extremo noroeste del andén de montaña. Añade puntos intermedios para mantener tramos de menos de 500m. Usa curvas suaves; para subir elige no seguir el terreno y elimina las infracciones de pendiente y radio antes de confirmar.",
         "title": "Unir las dos estaciones con vías"
       },
       "step8": {
         "title": "Construir el depósito",
-        "description": "Los trenes salen del depósito. Construye un «Depósito ferroviario» en la parcela del marcador amarillo junto a la calle principal. Al pulsar «Siguiente», como es un tutorial, se omitirá el plazo de obra."
+        "description": "Construye el depósito ferroviario en el lote existente al suroeste del puerto. Su terminal estará en el extremo este."
       },
       "step9": {
         "title": "Conectar el depósito a la línea principal",
-        "description": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. La clave es empalmarla con la línea principal en un ángulo suave hacia el este, no en ángulo recto (los desvíos reales no pueden girar en ángulos grandes). Cuando termines, pulsa «Siguiente»."
+        "description": "Une el terminal este del depósito al extremo oeste del andén del puerto con un ramal suave, evitando un ángulo recto."
       },
       "step10": {
-        "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito.",
+        "description": "Traza una línea eléctrica desde la central solar existente al terminal compartido al este del depósito.",
         "title": "Llevar electricidad al depósito"
       },
       "step11": {
-        "description": "En «Transporte público» del panel de iconos, pulsa «＋ Nueva línea» y elige «Línea de transporte de mineral» como tipo de línea. Haz clic sobre los andenes de las estaciones de carga y de descarga para colocar las paradas, y pulsa «Crear» para inaugurar la línea.",
+        "description": "Crea una línea de transporte de mineral, coloca paradas en ambos andenes y haz clic en la primera para cerrar el regreso.",
         "title": "Inaugurar la línea de transporte de mineral"
       },
       "step12": {
@@ -274,7 +391,7 @@
         "title": "Avanzar épocas"
       },
       "step13": {
-        "description": "Revisa las exportaciones de mineral en el detalle del puerto de graneles. Si todavía no hay exportaciones, avanza más épocas.",
+        "description": "Avanza épocas y consulta las recepciones y exportaciones de mineral del puerto de graneles. Vehículos, extracción y transporte pueden tardar varias épocas.",
         "title": "Confirmar exportaciones de mineral"
       }
     },
@@ -306,7 +423,7 @@
       "basic": "Hay personas que esperan empezar una nueva vida en este pueblo, pero faltan viviendas para recibirlas. En este tutorial aprenderás todo el proceso de planificar calles y edificios, avanzar el tiempo y completar su construcción.",
       "scenario2": "Se encontró un yacimiento de mineral en un sector del pueblo. Si no se protege el terreno, podrían construirse otros edificios sobre él. En este tutorial aprenderás a localizar recursos naturales, dividir el pueblo en distritos y limitar los tipos de edificios que pueden construirse.",
       "scenario3": "Las familias de este pueblo viven sin electricidad. Quieren encender las luces y usar sus electrodomésticos, pero faltan las instalaciones para generar energía y llevarla a sus casas. En este tutorial aprenderás a construir una central eléctrica y una subestación, conectarlas con líneas de transmisión y comprobar que la electricidad llegue a los hogares.",
-      "scenario4": "Los habitantes caminan desde sus casas hasta una tienda de alimentos en un edificio comercial lejano para trabajar. Han pedido un transporte que los ayude en sus viajes diarios. En este tutorial aprenderás a construir estaciones, vías, un depósito ferroviario y líneas eléctricas, abrir una ruta de tren y comprobar su uso por los pasajeros.",
+      "scenario4": "MetroCity necesita un ferrocarril, pero hay edificios privados y un hospital público en su trazado. En este tutorial aprenderás adquisición y demolición, vías sobre avenidas, plataformas, estaciones, depósito, curvas y pendientes, electricidad y apertura de la línea.",
       "trade": "Una fábrica de alimentos pide ayuda para vender sus productos en el extranjero. El pueblo también quiere contar con una vía para traer los productos que necesita de otros países. En este tutorial aprenderás a exportar alimentos por un puerto e importar mercancías por un ferrocarril de carga conectado al país vecino.",
       "highway": "A medida que crezca el pueblo, aumentarán los vehículos que transportan personas y mercancías. Hace falta preparar otra vía para que el tránsito de paso no se concentre en la calle local. En este tutorial aprenderás a construir una autopista elevada sobre una calle local y conectarlas con rampas para crear un enlace vial.",
       "mining": "Esta isla tiene recursos valiosos bajo tierra, pero no hay cómo llevarlos de la montaña al puerto. Sin transporte, la isla no puede convertir esa riqueza en una industria. En este tutorial aprenderás a preparar una mina, un ferrocarril de carga y un puerto para extraer mineral, transportarlo y exportarlo al extranjero.",
