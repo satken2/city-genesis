@@ -65,7 +65,11 @@
 - 線路端の車止めは線路のメッシュの一部で、ノードでつながる軌道端(接続パスの種別・状態・通行方向・向き)で決まる。切断点が変わらなくても、標示の署名 `RoadMarkingRules.JunctionSignature` が変わると `markingsChanged` で接続パスを作り直すので、これが車止めの作り直しも担う(署名から通行方向などを外さない)。
 - 道路GOを `SetActive(true)` に戻す経路を足したら `EnsureEndIntersectionsVisible` を呼ぶ(交差点メッシュは道路の子ではない)。
 - `CalculatePathPoints` の制御点自動計算(Catmull-Rom、テンション1/6)はバックエンド `Path._auto_fill_controls` と同一式。変えるなら両方。
-- インフラノード(`InfraNetworkUtil.IsInfraMask`)には交差点アスファルトも端点切断もしない(端点Yとノードの不一致=垂直結合が正規状態)。端子ノードの所属施設は `BuildingManager.TryGetInfraTerminalOwner`(ノードAPIは owner を持たない)。
+- 交差点を作るのは、交通のパス(インフラのパスと人員搬送を除く)が2本以上つながり、施設の接続端子でないノードだけ(`NeedsIntersection`)。ノードtypeのインフラビット(`InfraNetworkUtil.IsInfraMask`)で判定しない(電化線路のノードはどれも電力ビットを持つので、線路の分岐・踏切まで交差点を失う)。インフラのパスは生成器が接続から外すので端点切断を受けない(端点Yとノードの不一致=垂直結合が正規状態)。施設の接続端子の判定は `IsInfrastructureConnection`(`BuildingManager.TryGetInfraTerminalOwner` / `IsDepotTerminalNode`。ノードAPIは owner を持たない)で、線路の車止めの省略にも使う。
+- 線路の軌道の横位置の形(つなぎ目のS字)は `GetTrackLateralProfile` が両端のつながりから作り、線路のメッシュ(`TrackPath.LateralProfileProvider`)・車両の走行描画・近接線路の結合判定(`TrackNeighborInfo.OuterShifts`)が共有する。ノードのS字の受け持ちは標示の署名に足し(`TrackTransitionSignature`)、変わったら接続パスを作り直し、`nodeTransitionSignatures` との比較で並走する線路の結合もやり直す。
+- 完成前の線路(計画中・着工保留中・建設中。ノードを持たない)の端点は `provisionalEndGrid` に索引する(`SavePathToCache` / `RemovePathFromCache` で同期、`ClearAllCells` で消去)。仮のつながりはコアの竣工時の溶接と同じ規則(`LocalConstants.PROVISIONAL_TRACK_WELD_DISTANCE` / `_HEIGHT`)で位置から探し、ノード番号を当てたパスの写し(`WithEndNode`)で既存のノード判定(S字・車止め・ホーム端)へ通す。キャッシュのパスを書き換えない。`GetTrackPathsAtNode`(= `TrackPath.ConnectedPathsProvider`)は実ノードのつながりにこの写しを足したもの。
+- 敷設プレビューの線は `RoadRenderer.PreviewTrackSink` → `SetPreviewTracks` で仮の相手として登録される(負の path_id。形の署名が変わったときだけ、前後の登録の近くの線路を作り直す)。形状を編集中の計画(`previewExcludedPathId`)は仮の相手からも並走の相手からも外す。
+- 近接線路の作り直しは `QueueTrackNeighborRebuild` で積む(積む時点で `geometryRevisions` を進め、退避中の古いGOを復元させない)。`pendingTrackNeighborRebuildIds` へ直接足さない。建設中の線路は施工済みの区間(`ConstructionPathBuilder.BuiltFraction`)だけを近接線路の相手として返す。
 - `base_height` は `PathManager.GetPathBaseHeight` が返す。確定済みパスの描画点列と、道路エディタの敷設プレビュー(`RoadRenderer.ToDrawPoints`・`UpdateStrip`・`RoadPlanManager`の地形追従判定)が共有するので、プレビュー側でマスターを読み直さない。
 - 仮の `PathSummary` を生成器へ渡すときは `follow_terrain = Constants.VALUE_NONE` を明示する(int既定の0は「非追従」)。`station_grade_profile` は駅以外にも付くので `ApplyStationGrade` をパス種別で限定しない。
 

@@ -109,8 +109,24 @@ public class TrackPath : IPathMeshGenerator
 {
     /// <summary>ノード逆引きによる接続パス。未設定時は車止めの配置を保留する。</summary>
     public static System.Func<int, List<PathSummary>> ConnectedPathsProvider;
-    /// <summary>共用インフラ接続ノードと車両基地の接続端子。施設内へ軌道が続くため車止めを置かない。</summary>
+    /// <summary>車両基地などの施設の接続端子。施設内へ軌道が続くため車止めを置かない。</summary>
     public static System.Func<int, bool> InfrastructureConnectionProvider;
+    /// <summary>軌道の横位置の形(つなぎ目のS字。TrackEndTransition)。PathManager が設定する。未設定なら全長で元の位置。</summary>
+    public static System.Func<PathSummary, TrackLateralProfile> LateralProfileProvider;
+
+    /// <summary>
+    /// 生成中のパスの横位置(S字が無ければ null)。検証がリフレクションで引数の数まで合わせて呼ぶ部品の生成
+    /// (CreatePlatformSide・CreateTerminations・CreateIslandPlatformParts)へ、引数を足さずに渡すための生成1回分の値。
+    /// </summary>
+    private static TrackLateralSampler activeLateral;
+
+    /// <summary>
+    /// 生成中のデッキの、点ごとの淵側・外縁側の端のずれ(幾何フレーム。S字が無ければ null)。
+    /// 片側のホームは両方とも面する軌道のずれ、島式は左右の軌道のずれ。CreatePlatformSide / CreateIslandPlatformParts が
+    /// デッキを作る間だけ設定する。
+    /// </summary>
+    private static float[] deckNearShift;
+    private static float[] deckFarShift;
     /// <summary>架線柱をコリドーの端（道床の端）からどれだけ外側に立てるか（m）。</summary>
     public const float POLE_MARGIN = 0.5f;
 
@@ -196,14 +212,24 @@ public class TrackPath : IPathMeshGenerator
         // 従来どおり単独描画になる（ホームは自幅の単独デッキ）。
         // ホームがある側の道床結合（バラスト充填等）の抑止と島式ホームの結合判定は
         // Compute 側が platformLeft / platformRight を見て行う。
-        var corridor = ResolveCorridor(pathData, points, width, wallWidth, platformLeft, platformRight);
+        // 軌道の位置が違う線路との直進接続のS字(TrackEndTransition)。無ければ null で、全長が元の位置。
+        TrackLateralSampler lateral = ResolveLateral(pathData, points);
+        var corridor = ResolveCorridor(pathData, points, width, wallWidth, platformLeft, platformRight, lateral);
 
         GameObject container = new GameObject($"Track_{pathData.path_id}");
         SplineComputer spline = RoadPath.BuildSpline(container, points, isCurved);
         // 道床・架線・防音壁の反復タイル長を曲率から決める(track/platform は著作長固定で影響しない)。
         PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, RoadPath.MAX_EXTRUDE_TILE_LENGTH));
 
-        CreateTrackParts(container, spline, points, width, lanes, wallWidth, pillarSpacing, heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight);
+        activeLateral = lateral;
+        try
+        {
+            CreateTrackParts(container, spline, points, width, lanes, wallWidth, pillarSpacing, heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight);
+        }
+        finally
+        {
+            activeLateral = null;
+        }
 
         // 一方通行線路には進行方向を示す矢印オーバーレイを付ける（双方向は何も出ない）。
         // 表示は道路敷設モード（STATE_EDIT_PATH）のみで、切替は TrackDirectionArrows が一括制御する。
@@ -380,7 +406,7 @@ public class TrackPath : IPathMeshGenerator
     }
 
     private static TrackCorridorInfo ResolveCorridor(PathSummary pathData, List<Vector3> points,
-        float width, float wallWidth, float platformLeft, float platformRight)
+        float width, float wallWidth, float platformLeft, float platformRight, TrackLateralSampler lateral)
     {
         TrackCorridorInfo corridor = null;
         if (TrackAdjacency.NeighborProvider != null)
@@ -388,11 +414,101 @@ public class TrackPath : IPathMeshGenerator
             List<TrackNeighborInfo> trackNeighbors = TrackAdjacency.NeighborProvider(pathData);
             if (trackNeighbors != null && trackNeighbors.Count > 0)
             {
-                corridor = TrackAdjacency.Compute(pathData.path_id, points, width, wallWidth, platformLeft, platformRight, trackNeighbors,
-                    LrtRoadParts.IsLrt(pathData.path_variant) ? LrtRoadParts.PlatformOuterOffset(pathData) : 0f);
+                corridor = TrackAdjacency.ComputeWithShifts(pathData.path_id, points, width, wallWidth, platformLeft, platformRight, trackNeighbors,
+                    LrtRoadParts.IsLrt(pathData.path_variant) ? LrtRoadParts.PlatformOuterOffset(pathData) : 0f, lateral?.OuterShiftsAtPoints(),
+                    TrackAdjacency.IsProvisional(pathData));
             }
         }
         return corridor;
+    }
+
+    /// <summary>描画点列の上でパスの軌道の横位置を読む準備。S字が無い・プロバイダが未設定なら null。</summary>
+    private static TrackLateralSampler ResolveLateral(PathSummary pathData, List<Vector3> points)
+    {
+        if (LateralProfileProvider == null || points == null || points.Count < 2) return null;
+        TrackLateralProfile profile = LateralProfileProvider(pathData);
+        return profile == null || profile.IsUniform ? null : new TrackLateralSampler(profile, pathData, points);
+    }
+
+    /// <summary>生成中のパスの、点 index での軌道 track の元の位置からのずれ(S字が無ければ0)。</summary>
+    private static float ActiveShift(int track, int index)
+    {
+        if (activeLateral == null || track < 0 || track >= activeLateral.Profile.TrackCount) return 0f;
+        return activeLateral.Shift(track, activeLateral.AlongAt(index));
+    }
+
+    /// <summary>生成中のパスで、横位置 trackOffset にある軌道の番号(S字が無ければ -1)。</summary>
+    private static int ActiveTrackIndex(float trackOffset)
+    {
+        if (activeLateral == null) return -1;
+        float[] laterals = activeLateral.Profile.Base;
+        int best = 0;
+        for (int i = 1; i < laterals.Length; i++)
+            if (Mathf.Abs(laterals[i] - trackOffset) < Mathf.Abs(laterals[best] - trackOffset)) best = i;
+        return best;
+    }
+
+    /// <summary>次に敷くパーツの変形(PathDrawContext.Warp)を設定して build を呼び、必ず戻す。</summary>
+    private static void WithWarp(PartWarp warp, System.Action build)
+    {
+        PathDrawContext.Warp = warp;
+        try
+        {
+            build();
+        }
+        finally
+        {
+            PathDrawContext.Warp = null;
+        }
+    }
+
+    /// <summary>
+    /// 軌道 track の中心線の点列(パスの中心線を各点の水平右方向へ横位置だけずらしたもの)でスプラインを作る。
+    /// S字の区間で枕木を軌道に直交させるため。スプラインの種類はパスの中心線のスプラインにそろえる。
+    /// </summary>
+    private static SplineComputer BuildTrackSpline(GameObject container, SplineComputer centerSpline, List<Vector3> points, TrackLateralSampler lateral, int track, out List<Vector3> trackPoints)
+    {
+        ComputeStripFrames(points, out Vector3[] rights, out _);
+        trackPoints = new List<Vector3>(points.Count);
+        for (int k = 0; k < points.Count; k++) trackPoints.Add(points[k] + rights[k] * lateral.Lateral(track, lateral.AlongAt(k)));
+        var holder = new GameObject($"TrackSpline_{track}");
+        holder.transform.SetParent(container.transform, false);
+        return RoadPath.BuildSpline(holder, trackPoints, centerSpline.type == Spline.Type.Bezier);
+    }
+
+    /// <summary>
+    /// パスの中心線のスプライン割合の区間を、軌道のスプラインの割合へ読み替える。両者は同じ点の並びから作るので、
+    /// 点ごとの累積距離の比で対応させる。
+    /// </summary>
+    private static TrackCorridorInfo.PercentRange MapRangeToTrack(TrackCorridorInfo.PercentRange range, List<Vector3> centerPoints, List<Vector3> trackPoints)
+    {
+        return new TrackCorridorInfo.PercentRange { From = MapPercent(range.From, centerPoints, trackPoints), To = MapPercent(range.To, centerPoints, trackPoints) };
+    }
+
+    private static double MapPercent(double percent, List<Vector3> from, List<Vector3> to)
+    {
+        if (percent <= 0.0 || percent >= 1.0 || from.Count != to.Count || from.Count < 2) return percent;
+        float totalFrom = 0f, totalTo = 0f;
+        for (int k = 1; k < from.Count; k++)
+        {
+            totalFrom += Vector3.Distance(from[k - 1], from[k]);
+            totalTo += Vector3.Distance(to[k - 1], to[k]);
+        }
+        if (totalFrom <= 0f || totalTo <= 0f) return percent;
+        float target = (float)percent * totalFrom, along = 0f, alongTo = 0f;
+        for (int k = 1; k < from.Count; k++)
+        {
+            float segment = Vector3.Distance(from[k - 1], from[k]);
+            float segmentTo = Vector3.Distance(to[k - 1], to[k]);
+            if (along + segment >= target)
+            {
+                float t = segment > 1e-6f ? (target - along) / segment : 0f;
+                return (alongTo + segmentTo * t) / totalTo;
+            }
+            along += segment;
+            alongTo += segmentTo;
+        }
+        return percent;
     }
 
     /// <summary>施工済み区間の道床・軌道・高欄。高架判定と隣接線路側の壁の省略は完成時と共通。</summary>
@@ -403,10 +519,19 @@ public class TrackPath : IPathMeshGenerator
             out float? pillarSpacing, out bool heightEditable, out float? wireSpacing,
             out float baseHeight, out float platformWidth);
         ResolvePlatformExtents(pathData, platformWidth, out float platformLeft, out float platformRight);
-        var corridor = ResolveCorridor(pathData, points, width, wallWidth, platformLeft, platformRight);
-        CreateTrackParts(container, spline, points, width, lanes, wallWidth, pillarSpacing,
-            heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight,
-            constructionOnly: true);
+        TrackLateralSampler lateral = ResolveLateral(pathData, points);
+        var corridor = ResolveCorridor(pathData, points, width, wallWidth, platformLeft, platformRight, lateral);
+        activeLateral = lateral;
+        try
+        {
+            CreateTrackParts(container, spline, points, width, lanes, wallWidth, pillarSpacing,
+                heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight,
+                constructionOnly: true);
+        }
+        finally
+        {
+            activeLateral = null;
+        }
     }
 
     /// <summary>
@@ -432,20 +557,28 @@ public class TrackPath : IPathMeshGenerator
         List<TrackCorridorInfo.PercentRange> elevatedRanges = GetElevatedPercentRanges(points, baseHeight);
         List<TrackCorridorInfo.PercentRange> groundRanges = ComplementRanges(elevatedRanges);
 
+        // つなぎ目のS字(TrackEndTransition)。軌道の外側の部品は外端のずれだけ横へ動き、道床・桁・アーチはその分だけ伸び縮みする。
+        // ずれは左右対称なので、道床の中心は動かない。
+        TrackLateralSampler lateral = activeLateral;
+        PartWarp bodyWarp = lateral != null ? new PartWarp { Scale = percent => 1f + 2f * lateral.OuterShiftAtPercent(percent) / width } : null;
+
         // 道床（body）: 全幅に引き伸ばして配置。高さは道路の body と同じ体系で、
         // 交差点の道床ハル（基準面 + BODY_ABOVE_SPLINE）とも同一平面になる。
         GameObject ballast = null;
-        foreach (var range in groundRanges)
+        WithWarp(bodyWarp, () =>
         {
-            GameObject part = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", clipFrom: range.From, clipTo: range.To);
-            if (ballast == null) ballast = part;
-        }
-        foreach (var range in elevatedRanges)
-        {
-            GameObject part = RoadPath.CreateSplineMesh(container, spline, ElevatedPartName(variantBase, "body"), width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", clipFrom: range.From, clipTo: range.To);
-            if (ballast == null) ballast = part;
-        }
-        if (!constructionOnly) BrickArcadeGenerator.Generate(container, spline, pathData, width);
+            foreach (var range in groundRanges)
+            {
+                GameObject part = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", clipFrom: range.From, clipTo: range.To);
+                if (ballast == null) ballast = part;
+            }
+            foreach (var range in elevatedRanges)
+            {
+                GameObject part = RoadPath.CreateSplineMesh(container, spline, ElevatedPartName(variantBase, "body"), width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", clipFrom: range.From, clipTo: range.To);
+                if (ballast == null) ballast = part;
+            }
+            if (!constructionOnly) BrickArcadeGenerator.Generate(container, spline, pathData, width);
+        });
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] body(道床): {(ballast != null ? "生成成功" : "プレハブなし")} 高架区間={elevatedRanges.Count}");
 
         // 結合区間では隣の線路との道床の隙間をバラスト帯で埋め、一体の道床に見せる。
@@ -458,18 +591,30 @@ public class TrackPath : IPathMeshGenerator
         }
 
         // 軌道（track）: 各軌道の中心に実寸配置（stretchToWidth=false。ゲージ維持）。
+        // S字があるときは軌道ごとにずらしたスプラインへ敷き、枕木を軌道に直交させる。架線も同じスプラインを使う。
+        var trackSplines = new SplineComputer[laneCount];
         int placedTracks = 0;
         for (int i = 0; i < laneCount; i++)
         {
             float offset = GetTrackCenterOffset(width, laneCount, i, centerWidth);
+            SplineComputer trackSpline = spline;
+            List<Vector3> trackPoints = null;
+            if (lateral != null)
+            {
+                trackSpline = BuildTrackSpline(container, spline, points, lateral, i, out trackPoints);
+                offset = 0f;
+            }
+            trackSplines[i] = trackSpline;
             foreach (var range in groundRanges)
             {
-                GameObject track = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/track", width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
+                var clip = trackPoints != null ? MapRangeToTrack(range, points, trackPoints) : range;
+                GameObject track = RoadPath.CreateSplineMesh(container, trackSpline, $"{variantBase}/track", width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, clipFrom: clip.From, clipTo: clip.To, maxTileLength: 0f);
                 if (track != null) placedTracks++;
             }
             foreach (var range in elevatedRanges)
             {
-                GameObject track = RoadPath.CreateSplineMesh(container, spline, ElevatedPartName(variantBase, "track"), width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
+                var clip = trackPoints != null ? MapRangeToTrack(range, points, trackPoints) : range;
+                GameObject track = RoadPath.CreateSplineMesh(container, trackSpline, ElevatedPartName(variantBase, "track"), width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, clipFrom: clip.From, clipTo: clip.To, maxTileLength: 0f);
                 if (track != null) placedTracks++;
             }
         }
@@ -512,8 +657,8 @@ public class TrackPath : IPathMeshGenerator
         {
             for (int i = 0; i < laneCount; i++)
             {
-                float offset = GetTrackCenterOffset(width, laneCount, i, centerWidth);
-                RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wire", width / laneCount, offset, RoadPartHeights.OVERHEAD_ABOVE_SPLINE, false, $"{typeBase}/wire", isDashed: false, stretchToWidth: false);
+                float offset = lateral != null ? 0f : GetTrackCenterOffset(width, laneCount, i, centerWidth);
+                RoadPath.CreateSplineMesh(container, trackSplines[i], $"{variantBase}/wire", width / laneCount, offset, RoadPartHeights.OVERHEAD_ABOVE_SPLINE, false, $"{typeBase}/wire", isDashed: false, stretchToWidth: false);
             }
             float lrtPoleOffset = lrtPlatformZones.Count > 0
                 ? LrtRoadParts.PlatformOuterOffset(pathData) + LrtRoadParts.PLATFORM_POLE_CLEARANCE : 0f;
@@ -536,17 +681,23 @@ public class TrackPath : IPathMeshGenerator
             List<TrackCorridorInfo.PercentRange> wallRanges = IntersectRanges(elevatedRanges, LrtPlatformParts.OutsidePercentRanges(spline, lrtPlatformZones));
             if (platformLeft <= 0f)
             {
-                foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: true), wallRanges))
+                WithWarp(lateral != null ? new PartWarp { Shift = percent => -lateral.OuterShiftAtPercent(percent) } : null, () =>
                 {
-                    RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
-                }
+                    foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: true), wallRanges))
+                    {
+                        RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+                    }
+                });
             }
             if (platformRight <= 0f)
             {
-                foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: false), wallRanges))
+                WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.OuterShiftAtPercent(percent) } : null, () =>
                 {
-                    RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
-                }
+                    foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: false), wallRanges))
+                    {
+                        RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+                    }
+                });
             }
         }
 
@@ -554,7 +705,10 @@ public class TrackPath : IPathMeshGenerator
         if (!constructionOnly && heightEditable && pillarSpacing.HasValue && pillarSpacing.Value > 0f
             && !TunnelSectionUtil.IsUndergroundPath(pathData))
         {
-            RoadPath.GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase);
+            // 交差点の板なしでつなぐ直進接続の端の橋脚は、つながる2本のうち片方だけが立てる。
+            RoadEndJoin startJoin = RoadAdjacency.EndJoin(pathData, true), endJoin = RoadAdjacency.EndJoin(pathData, false);
+            WithWarp(bodyWarp, () => RoadPath.GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase,
+                startJoin.Continuous && !startJoin.OwnsSupport, endJoin.Continuous && !endJoin.OwnsSupport));
         }
     }
 
@@ -612,7 +766,7 @@ public class TrackPath : IPathMeshGenerator
                 {
                     if (usedEnds.Contains((path.path_id, lane))) continue;
                     PlaceEndPart(container, LoadPrefab($"{variantBase}/buffer_stop", $"{typeBase}/buffer_stop"),
-                        "TrackBufferStop", points[idx] + inward * 1.0f + rights[idx] * GetTrackCenterOffset(width, lanes, lane, centerWidth)
+                        "TrackBufferStop", points[idx] + inward * 1.0f + rights[idx] * (GetTrackCenterOffset(width, lanes, lane, centerWidth) + ActiveShift(lane, idx))
                             + Vector3.up * RoadPartHeights.TRACK_ABOVE_SPLINE,
                         Quaternion.LookRotation(inward), Vector3.one);
                 }
@@ -625,18 +779,22 @@ public class TrackPath : IPathMeshGenerator
             if (island && !islandContinues)
             {
                 float edge = IslandEdgeDistance(width, lanes, centerWidth);
-                PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, -edge, edge);
+                float from = -edge + ActiveShift(lanes / 2 - 1, idx), to = edge + ActiveShift(lanes / 2, idx);
+                if (to - from >= PLATFORM_DECK_MIN_WIDTH) PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, from, to);
             }
             for (int side = 0; side < 2; side++)
             {
                 bool left = side == 0;
                 float pf = left ? leftWidth : rightWidth;
                 if (pf <= 0f || (left ? leftContinues : rightContinues)) continue;
+                // S字では淵と既定の外縁が外へ動く。コリドーの外縁(DeckFar)はずれを含んだ距離。
+                float outward = left ? -ActiveShift(0, idx) : ActiveShift(lanes - 1, idx);
                 float[] farValues = corridor == null ? null : (left ? corridor.LeftDeckFar : corridor.RightDeckFar);
-                float far = farValues == null ? width * .5f + pf : farValues[idx];
-                if (float.IsNaN(far) || far <= platformEdge + PLATFORM_DECK_MIN_WIDTH) continue;
-                if (left) PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, -far, -platformEdge);
-                else PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, platformEdge, far);
+                float far = farValues == null ? width * .5f + pf + outward : farValues[idx];
+                float near = platformEdge + outward;
+                if (float.IsNaN(far) || far <= near + PLATFORM_DECK_MIN_WIDTH) continue;
+                if (left) PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, -far, -near);
+                else PlacePlatformEndPanels(container, prefab, points[idx], rights[idx], inward, near, far);
             }
         }
     }
@@ -704,10 +862,15 @@ public class TrackPath : IPathMeshGenerator
     private static void CreateIslandPlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, int lanes, float centerWidth, string variantBase, string typeBase)
     {
         int laneCount = Mathf.Max(1, lanes);
-        float leftTrack = GetTrackCenterOffset(width, laneCount, laneCount / 2 - 1, centerWidth);
-        float rightTrack = GetTrackCenterOffset(width, laneCount, laneCount / 2, centerWidth);
-        RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, leftTrack, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, false, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f);
-        RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, rightTrack, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, true, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f);
+        int leftIndex = laneCount / 2 - 1, rightIndex = laneCount / 2;
+        float leftTrack = GetTrackCenterOffset(width, laneCount, leftIndex, centerWidth);
+        float rightTrack = GetTrackCenterOffset(width, laneCount, rightIndex, centerWidth);
+        // つなぎ目のS字では、両側の淵とデッキの両縁がそれぞれの軌道と一緒に動く(軌道が寄るとホームは細くなる)。
+        TrackLateralSampler lateral = activeLateral;
+        WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.ShiftAtPercent(leftIndex, percent) } : null, () =>
+            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, leftTrack, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, false, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f));
+        WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.ShiftAtPercent(rightIndex, percent) } : null, () =>
+            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, rightTrack, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, true, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f));
 
         float edge = IslandEdgeDistance(width, laneCount, centerWidth);
         if (edge * 2f < PLATFORM_DECK_MIN_WIDTH || points == null || points.Count < 2) return;
@@ -715,8 +878,44 @@ public class TrackPath : IPathMeshGenerator
         if (cumLength[points.Count - 1] - cumLength[0] < PLATFORM_DECK_MIN_RUN_LENGTH) return;
         var joined = new bool[points.Count];
         for (int i = 0; i < joined.Length; i++) joined[i] = true;
-        BuildPlatformDeckMesh(container, points, rightDir, cumLength, 0, points.Count - 1, false, -edge, null, joined, edge, ResolveDeckMaterial(variantBase, typeBase), 0);
+        Material material = ResolveDeckMaterial(variantBase, typeBase);
+        GameObject endPrefab = LoadPrefab($"{variantBase}/platform_end", $"{typeBase}/platform_end");
+        deckNearShift = lateral != null ? lateral.ShiftsAtPoints(leftIndex) : null;
+        deckFarShift = lateral != null ? lateral.ShiftsAtPoints(rightIndex) : null;
+        try
+        {
+            // 軌道が寄ってデッキが下限より細くなる区間には張らず、その手前でホームを閉じる。
+            int n = points.Count, run = 0, i = 0;
+            while (i < n)
+            {
+                if (!DeckWideEnough(i, false, -edge, null, edge)) { i++; continue; }
+                int s = i;
+                while (i < n && DeckWideEnough(i, false, -edge, null, edge)) i++;
+                int e = i - 1;
+                if (e - s < 1 || cumLength[e] - cumLength[s] < PLATFORM_DECK_MIN_RUN_LENGTH) continue;
+                BuildPlatformDeckMesh(container, points, rightDir, cumLength, s, e, false, -edge, null, joined, edge, material, run++);
+                if (s > 0) CloseIslandDeck(container, endPrefab, points, rightDir, s, edge, isEnd: false);
+                if (e < n - 1) CloseIslandDeck(container, endPrefab, points, rightDir, e, edge, isEnd: true);
+            }
+        }
+        finally
+        {
+            deckNearShift = null;
+            deckFarShift = null;
+        }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] 島式ホーム: 軌道 {leftTrack}/{rightTrack}, デッキ ±{edge}");
+    }
+
+    /// <summary>S字で細くなって途中で終わる島式ホームのデッキの端を、ホーム端と同じ柵で閉じる。</summary>
+    private static void CloseIslandDeck(GameObject container, GameObject prefab, List<Vector3> points, Vector3[] rightDir, int idx, float edge, bool isEnd)
+    {
+        int n = points.Count;
+        Vector3 forward = points[Mathf.Min(idx + 1, n - 1)] - points[Mathf.Max(idx - 1, 0)];
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 1e-6f) return;
+        forward.Normalize();
+        DeckEdges(idx, false, -edge, null, edge, out float near, out float far);
+        PlacePlatformEndPanels(container, prefab, points[idx], rightDir[idx], isEnd ? -forward : forward, near, far);
     }
 
     /// <summary>
@@ -778,14 +977,32 @@ public class TrackPath : IPathMeshGenerator
     {
         string sideLabel = leftSide ? "左" : "右";
 
+        // つなぎ目のS字では、ホームの部品は面する軌道と一緒に横へ動く。
+        TrackLateralSampler lateral = activeLateral;
+        int sideTrack = ActiveTrackIndex(trackOffset);
+        PartWarp sideWarp = lateral != null ? new PartWarp { Shift = percent => lateral.ShiftAtPercent(sideTrack, percent) } : null;
+
         // 支柱・柵の周期を保つため著作タイル長で並べる。曲線追従用の分割はモデル内に持つ。
         // 淵（platform）: 原点を軌道の中心線に合わせ、設置面（線路面）で配置する。
-        GameObject edge = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, trackOffset, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f);
+        GameObject edge = null;
+        WithWarp(sideWarp, () => edge = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, trackOffset, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f));
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] platform 淵({sideLabel}): {(edge != null ? "生成成功" : "プレハブなし")}");
 
         // デッキ（ホーム上面）: 淵（軌道の中心線から PLATFORM_EDGE_OFFSET）から外縁
         // （width/2 + platform_width）まで水平の板を動的生成する。
-        int deckRuns = BuildPlatformDeckRuns(container, corridor, points, rightDir, cumLength, leftSide, Mathf.Abs(trackOffset) + PLATFORM_EDGE_OFFSET, halfWidth + platformWidth, deckMaterial);
+        float[] sideShifts = lateral != null ? lateral.ShiftsAtPoints(sideTrack) : null;
+        deckNearShift = sideShifts;
+        deckFarShift = sideShifts;
+        int deckRuns;
+        try
+        {
+            deckRuns = BuildPlatformDeckRuns(container, corridor, points, rightDir, cumLength, leftSide, Mathf.Abs(trackOffset) + PLATFORM_EDGE_OFFSET, halfWidth + platformWidth, deckMaterial);
+        }
+        finally
+        {
+            deckNearShift = null;
+            deckFarShift = null;
+        }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] platform デッキ({sideLabel}): {deckRuns}区間");
 
         // 外縁（platform_wall）: 原点を軌道の中心線に合わせ、設置面（線路面）で配置する
@@ -794,11 +1011,14 @@ public class TrackPath : IPathMeshGenerator
         List<TrackCorridorInfo.PercentRange> ranges = corridor != null
             ? corridor.GetPlatformWallPercentIntervals(leftSide, MERGE_WALL_MIN_RUN_LENGTH)
             : new List<TrackCorridorInfo.PercentRange> { new TrackCorridorInfo.PercentRange { From = 0.0, To = 1.0 } };
-        foreach (var range in ranges)
+        WithWarp(sideWarp, () =>
         {
-            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform_wall", 0f, trackOffset, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform_wall", stretchToWidth: false, compensatePivot: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
-            PlatformFoundationGenerator.Generate(container, spline, variantBase, typeBase, leftSide, trackOffset, range.From, range.To);
-        }
+            foreach (var range in ranges)
+            {
+                RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform_wall", 0f, trackOffset, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform_wall", stretchToWidth: false, compensatePivot: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
+                PlatformFoundationGenerator.Generate(container, spline, variantBase, typeBase, leftSide, trackOffset, range.From, range.To);
+            }
+        });
     }
 
     /// <summary>
@@ -824,6 +1044,26 @@ public class TrackPath : IPathMeshGenerator
     }
 
     /// <summary>
+    /// 点 idx でのデッキの淵側の端と外縁側の端の横位置(幾何フレームの符号付き)。S字のずれ(deckNearShift / deckFarShift)を足す。
+    /// 外縁がコリドーの値(deckFar。S字のずれを含む実際の距離)のときは、外縁へは足さない。
+    /// </summary>
+    private static void DeckEdges(int idx, bool leftSide, float nearLat, float[] deckFar, float defaultFar, out float nearPos, out float farPos)
+    {
+        float sideSign = leftSide ? -1f : 1f;
+        float far = deckFar != null ? deckFar[idx] : defaultFar;
+        nearPos = sideSign * nearLat + (deckNearShift != null ? deckNearShift[idx] : 0f);
+        farPos = sideSign * far + (deckFar == null && deckFarShift != null ? deckFarShift[idx] : 0f);
+    }
+
+    /// <summary>点 idx でデッキを張れるか(外縁が決まっていて、幅が下限以上)。</summary>
+    private static bool DeckWideEnough(int idx, bool leftSide, float nearLat, float[] deckFar, float defaultFar)
+    {
+        if (deckFar != null && float.IsNaN(deckFar[idx])) return false;
+        DeckEdges(idx, leftSide, nearLat, deckFar, defaultFar, out float nearPos, out float farPos);
+        return Mathf.Abs(farPos - nearPos) >= PLATFORM_DECK_MIN_WIDTH;
+    }
+
+    /// <summary>
     /// 指定側のデッキ（ホーム上面）を連続区間ごとに生成する。戻り値は生成した区間数。
     /// nearLat は淵ライン（パスの中心線からの距離。PlatformEdgeDistance）、defaultFar は
     /// ホーム外縁（width/2 + platform_width）。外縁位置はコリドーの DeckFar
@@ -842,19 +1082,13 @@ public class TrackPath : IPathMeshGenerator
         int i = 0;
         while (i < n)
         {
-            float far = deckFar != null ? deckFar[i] : defaultFar;
-            if (float.IsNaN(far) || far - nearLat < PLATFORM_DECK_MIN_WIDTH)
+            if (!DeckWideEnough(i, leftSide, nearLat, deckFar, defaultFar))
             {
                 i++;
                 continue;
             }
             int s = i;
-            while (i < n)
-            {
-                float f = deckFar != null ? deckFar[i] : defaultFar;
-                if (float.IsNaN(f) || f - nearLat < PLATFORM_DECK_MIN_WIDTH) break;
-                i++;
-            }
+            while (i < n && DeckWideEnough(i, leftSide, nearLat, deckFar, defaultFar)) i++;
             int e = i - 1;
 
             if (e - s < 1) continue;
@@ -895,11 +1129,11 @@ public class TrackPath : IPathMeshGenerator
         for (int k = 0; k < count; k++)
         {
             int idx = s + k;
-            float far = deckFar != null ? deckFar[idx] : defaultFar;
+            DeckEdges(idx, leftSide, nearLat, deckFar, defaultFar, out float nearPos, out float farPos);
             Vector3 basePos = points[idx] + Vector3.up * deckTop;
             Vector3 right = rightDir[idx];
-            float lat0 = leftSide ? -far : nearLat;
-            float lat1 = leftSide ? -nearLat : far;
+            float lat0 = leftSide ? farPos : nearPos;
+            float lat1 = leftSide ? nearPos : farPos;
             vertices.Add(basePos + right * lat0);
             vertices.Add(basePos + right * lat1);
             normals.Add(Vector3.up);
@@ -912,11 +1146,11 @@ public class TrackPath : IPathMeshGenerator
         for (int k = 0; k < count; k++)
         {
             int idx = s + k;
-            float far = deckFar != null ? deckFar[idx] : defaultFar;
+            DeckEdges(idx, leftSide, nearLat, deckFar, defaultFar, out float nearPos, out float farPos);
             Vector3 basePos = points[idx] + Vector3.up * deckBottom;
             Vector3 right = rightDir[idx];
-            float lat0 = leftSide ? -far : nearLat;
-            float lat1 = leftSide ? -nearLat : far;
+            float lat0 = leftSide ? farPos : nearPos;
+            float lat1 = leftSide ? nearPos : farPos;
             vertices.Add(basePos + right * lat0);
             vertices.Add(basePos + right * lat1);
             normals.Add(Vector3.down);
@@ -947,10 +1181,10 @@ public class TrackPath : IPathMeshGenerator
             int b = s + k + 1;
             if (joined != null && (joined[a] || joined[b])) continue;
 
-            float farA = deckFar != null ? deckFar[a] : defaultFar;
-            float farB = deckFar != null ? deckFar[b] : defaultFar;
-            Vector3 latA = rightDir[a] * (sideSign * farA);
-            Vector3 latB = rightDir[b] * (sideSign * farB);
+            DeckEdges(a, leftSide, nearLat, deckFar, defaultFar, out _, out float farA);
+            DeckEdges(b, leftSide, nearLat, deckFar, defaultFar, out _, out float farB);
+            Vector3 latA = rightDir[a] * farA;
+            Vector3 latB = rightDir[b] * farB;
             Vector3 topA = points[a] + Vector3.up * deckTop + latA;
             Vector3 topB = points[b] + Vector3.up * deckTop + latB;
             Vector3 botA = points[a] + Vector3.up * deckBottom + latA;
@@ -998,9 +1232,10 @@ public class TrackPath : IPathMeshGenerator
         fwd.Normalize();
 
         float sideSign = leftSide ? -1f : 1f;
-        float far = deckFar != null ? deckFar[idx] : defaultFar;
-        Vector3 nearOff = rightDir[idx] * (sideSign * nearLat);
-        Vector3 farOff = rightDir[idx] * (sideSign * far);
+        DeckEdges(idx, leftSide, nearLat, deckFar, defaultFar, out float nearPos, out float farPos);
+        float near = sideSign * nearPos, far = sideSign * farPos;
+        Vector3 nearOff = rightDir[idx] * nearPos;
+        Vector3 farOff = rightDir[idx] * farPos;
         Vector3 nearTop = points[idx] + Vector3.up * deckTop + nearOff;
         Vector3 farTop = points[idx] + Vector3.up * deckTop + farOff;
         Vector3 nearBot = points[idx] + Vector3.up * deckBottom + nearOff;
@@ -1011,7 +1246,7 @@ public class TrackPath : IPathMeshGenerator
         AddDeckQuad(vertices, normals, uvs, triangles,
             nearTop, farTop, farBot, nearBot,
             isEnd ? fwd : -fwd,
-            new Vector2(nearLat * 0.25f, vTop), new Vector2(far * 0.25f, vTop), new Vector2(far * 0.25f, vBot), new Vector2(nearLat * 0.25f, vBot),
+            new Vector2(near * 0.25f, vTop), new Vector2(far * 0.25f, vTop), new Vector2(far * 0.25f, vBot), new Vector2(near * 0.25f, vBot),
             flip: leftSide != isEnd);
     }
 
@@ -1072,6 +1307,7 @@ public class TrackPath : IPathMeshGenerator
 
         float ownHalfWidth = width * 0.5f;
         float endClearance = spacing * 0.5f;
+        TrackLateralSampler lateral = activeLateral;
         if (length <= endClearance * 2f)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[TrackPath] 架線柱: 線路が短すぎるため配置なし");
@@ -1111,10 +1347,18 @@ public class TrackPath : IPathMeshGenerator
                 }
             }
 
+            // つなぎ目のS字では外端が外へ動く(コリドーの張り出しはずれを含む)。
+            float shift = lateral != null ? lateral.OuterShift(currentDistance) : 0f;
+            if (corridor == null)
+            {
+                leftHalf += shift;
+                rightHalf += shift;
+            }
+
             // プラットフォームがある側は、柱をホーム外縁の外側へ追い出す
             // （コリドーの張り出しとどちらか大きい方を採用する）。
-            leftHalf = Mathf.Max(leftHalf, ownHalfWidth + platformLeft);
-            rightHalf = Mathf.Max(rightHalf, ownHalfWidth + platformRight);
+            leftHalf = Mathf.Max(leftHalf, ownHalfWidth + shift + platformLeft);
+            rightHalf = Mathf.Max(rightHalf, ownHalfWidth + shift + platformRight);
 
             if (place)
             {
@@ -1300,27 +1544,31 @@ public class TrackPath : IPathMeshGenerator
     {
         float[] fillTo = leftSide ? corridor.LeftFillTo : corridor.RightFillTo;
         int n = corridor.Points.Count;
-        // フィラーの自分側エッジ（道床に少し食い込ませた位置）
-        float nearLat = corridor.OwnHalfWidth - MERGE_FILLER_EDGE_INSET;
 
         int runIndex = 0;
         int i = 0;
         while (i < n)
         {
-            if (!IsFillerSampleValid(fillTo[i], nearLat))
+            if (!IsFillerSampleValid(fillTo[i], FillerNearLat(corridor, i)))
             {
                 i++;
                 continue;
             }
             int s = i;
-            while (i < n && IsFillerSampleValid(fillTo[i], nearLat)) i++;
+            while (i < n && IsFillerSampleValid(fillTo[i], FillerNearLat(corridor, i))) i++;
             int e = i - 1;
 
             if (e - s < 1) continue;
             if (corridor.CumulativeLength[e] - corridor.CumulativeLength[s] < MERGE_FILLER_MIN_LENGTH) continue;
 
-            BuildFillerStrip(container, corridor, s, e, leftSide, nearLat, fillTo, bodyMaterial, runIndex++);
+            BuildFillerStrip(container, corridor, s, e, leftSide, fillTo, bodyMaterial, runIndex++);
         }
+    }
+
+    /// <summary>フィラーの自分側エッジ（道床に少し食い込ませた位置。つなぎ目のS字では道床の外端と一緒に動く）。</summary>
+    private static float FillerNearLat(TrackCorridorInfo corridor, int index)
+    {
+        return corridor.OwnHalfAt(index) - MERGE_FILLER_EDGE_INSET;
     }
 
     /// <summary>この点にフィラーを張れるか（充填担当であり、かつ幅が正になるか）。</summary>
@@ -1334,7 +1582,7 @@ public class TrackPath : IPathMeshGenerator
     /// 高さは道床天端（BODY_ABOVE_SPLINE）から MERGE_FILLER_SINK だけ沈めた水平帯で、
     /// 両側の道床のバラスト肩の下に潜り込む（エッジは EDGE_INSET 分重ねて裂け目を防ぐ）。
     /// </summary>
-    private static void BuildFillerStrip(GameObject container, TrackCorridorInfo corridor, int s, int e, bool leftSide, float nearLat, float[] fillTo, Material bodyMaterial, int runIndex)
+    private static void BuildFillerStrip(GameObject container, TrackCorridorInfo corridor, int s, int e, bool leftSide, float[] fillTo, Material bodyMaterial, int runIndex)
     {
         int count = e - s + 1;
         var vertices = new Vector3[count * 2];
@@ -1348,6 +1596,7 @@ public class TrackPath : IPathMeshGenerator
             Vector3 basePos = corridor.Points[idx] + Vector3.up * (RoadPartHeights.BODY_ABOVE_SPLINE - MERGE_FILLER_SINK);
             Vector3 right = corridor.RightDir[idx];
             float farLat = fillTo[idx] + MERGE_FILLER_EDGE_INSET;
+            float nearLat = FillerNearLat(corridor, idx);
 
             // 頂点は「横方向オフセットの小さい側 → 大きい側」の順に並べ、上向き面の巻き順を保つ
             float lat0 = leftSide ? -farLat : nearLat;

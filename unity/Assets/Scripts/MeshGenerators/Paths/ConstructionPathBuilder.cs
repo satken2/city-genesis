@@ -16,6 +16,22 @@ public static class ConstructionPathBuilder
     public static float PierProgress(float progress) => Mathf.Clamp01(progress / .25f);
     public static float DeckProgress(float progress) => Mathf.Clamp01((progress - .25f) / .65f);
 
+    /// <summary>
+    /// 施工済みの区間の終わり(始点からの割合)。地上は進捗まで、高架は桁が架かった径間まで。
+    /// 径間は全長を橋脚の間隔で等分したものとみなす(実際の区切りは橋脚の配置で決まるので近似)。
+    /// 近接線路の結合で、建設中の相手を施工済みの区間だけにするのに使う。
+    /// </summary>
+    public static float BuiltFraction(PathSummary path, List<Vector3> points)
+    {
+        float progress = Progress(path);
+        if (points == null || points.Count < 2 || !IsElevated(path, points, false)) return progress;
+        RoadPath.GetPathMasterParams(path, out _, out _, out _, out _, out _, out _, out _, out float? spacing, out _, out _, out _);
+        float total = 0f;
+        for (int i = 1; i < points.Count; i++) total += Vector3.Distance(points[i - 1], points[i]);
+        int spans = Mathf.Max(1, Mathf.CeilToInt(total / Mathf.Max(1f, spacing.GetValueOrDefault(total))));
+        return Mathf.Floor(DeckProgress(progress) * spans + .00001f) / spans;
+    }
+
     /// <summary>施工の先端の位置(始点からの割合)。高架は橋脚期間は橋脚の、桁架設以降は桁の進み具合で決まる。</summary>
     public static float FrontFraction(float progress, bool elevated)
         => elevated ? (progress < .25f ? PierProgress(progress) : DeckProgress(progress)) : progress;

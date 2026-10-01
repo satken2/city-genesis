@@ -3078,6 +3078,7 @@ public partial class RoadPlanManager : MonoBehaviour
         if (phase == RoadEditorPhase.Editing && !isDragging && profiles != null
             && profiles.Count > 0 && profiles.TrueForAll(line => line.Count >= 2))
         {
+            RegisterPreviewTracks(profiles[0], profiles);
             roadRenderer.UpdateSections(profiles[0], profiles[0], null, null, PathType,
                 PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds, profiles, PassageMode);
             return;
@@ -3111,6 +3112,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 ? renderPoints.GetRange(endIndex, (points.Count - 1) * stride - endIndex + 1) : null;
             List<Vector3> moving = placing || isDragging
                 ? GetMovingPreviewPoints(renderPoints, firstMoving, endMoving, placing) : null;
+            RegisterPreviewTracks(renderPoints, null);
             roadRenderer.UpdateSections(renderPoints, before, moving, after, PathType,
                 PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds, passageMode: PassageMode);
         }
@@ -3118,6 +3120,27 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             roadRenderer.ResetPreview();
         }
+    }
+
+    /// <summary>
+    /// 確定済みの形を、完成済み線路の描画(つなぎ目のS字・並走の縫い合わせ・車止め)に参加する仮の相手として登録する
+    /// (RoadRenderer.RegisterPreviewTracks)。配置中は仮終点を除いた確定済みの点まで、ドラッグ中は前の登録を保ち、
+    /// 離したときに更新する(既存の線路の作り直しを、操作の区切りだけに抑える)。形状を編集中の計画は相手から外す。
+    /// プレビューの線どうしも互いを相手にするので、プレビューのメッシュを作る前に呼ぶ。
+    /// </summary>
+    private void RegisterPreviewTracks(List<Vector3> renderPoints, List<List<Vector3>> profiles)
+    {
+        if (isDragging || roadRenderer == null) return;
+        List<Vector3> committed = renderPoints;
+        if (phase == RoadEditorPhase.Placing)
+        {
+            int stride = Curved ? bezierSamplesPerSegment + 1 : 1;
+            int end = (points.Count - 1) * stride;
+            committed = points.Count >= 2 && end < renderPoints.Count ? renderPoints.GetRange(0, end + 1) : null;
+            profiles = null;
+        }
+        roadRenderer.RegisterPreviewTracks(committed, PathType, PathSubtype, Curved, PlatformSide, LateralOffsets,
+            TravelDirections, HouseEnds, PassageMode, pathId, profiles);
     }
 
     /// <summary>

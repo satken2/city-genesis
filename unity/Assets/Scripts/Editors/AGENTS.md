@@ -57,10 +57,11 @@
 - プレビューのウェイポイントは`{position:[x,相対Y,z]}`の辞書でパス要約へ詰める(`RoadRenderer.GenerateComponentPreview`)。`PathSummary.GetWaypointList`(`GeneratedModelUtils.ToWaypointList`)は辞書しか読まず、素の配列は黙って捨てられる。アンカーから経路を組む送電線(`PowerLinePath`)が始点→終点の直線になり、置いたウェイポイントを通らない。
 - 駅舎パス(type=`PATH_STATION_HOUSE`)の敷設中は`SnappingSuppressed`で既存地物への吸着を全て止める(グリッドのみ有効)。フラグ自体は書き換えない。
 - 複線敷設中の吸着はオフセット考慮版`TryOffsetAwareRailSnap`。中心線を素朴に吸着させると全線路がずれて1本も接続できない。
+- 線路のプレビューは、既存線路の描画(つなぎ目のS字・並走の縫い合わせ・車止め)に参加する仮の相手として`RoadRenderer.RegisterPreviewTracks`でPathManagerへ登録する(`RoadPlanManager.RegisterPreviewTracks`。N§8.5)。登録はプレビューのメッシュを作る前に呼ぶ(プレビューの線どうしも互いを相手にするため。登録が変わると詳細区間を作り直させる)。配置中は仮終点を除いた確定済みの点まで、ドラッグ中は前の登録を保って離したときに更新する(既存線路の作り直しを操作の区切りに抑える)。線ごとの仮の`path_id`は負(線 i は −(i+1))で、形状を編集中の計画の`pathId`を除外として渡す。登録は`ResetPreview`(`OnDestroy`も経由)で消える。
 - インフラパス敷設中の建物干渉推定は同一網の需給施設を除外する(端子は区画内にあり、引き込みで建物と重なるのが正常)。端子未ロード時は除外しない=安全側で赤。
 
 ## 参照先
 
-- 公開docs: `programs/Unity入力制御.md`、`programs/IPC連携の整理.md`(ステートとイベント契約)、`geometries/A_パス形状.md`・`J_パスの交差処理.md`、`geometries/G_道路メッシュの生成.md`「敷設・形状編集時のプレビュー」、`geometries/N_線路メッシュの生成.md`§8.4、`geometries/M_地形プロップ.md`§M.7、`programs/経路提案.md`、`programs/道路の詳細と道路名.md`。
+- 公開docs: `programs/Unity入力制御.md`、`programs/IPC連携の整理.md`(ステートとイベント契約)、`geometries/A_パス形状.md`・`J_パスの交差処理.md`、`geometries/G_道路メッシュの生成.md`「敷設・形状編集時のプレビュー」、`geometries/N_線路メッシュの生成.md`§8.4・§8.5、`geometries/M_地形プロップ.md`§M.7、`programs/経路提案.md`、`programs/道路の詳細と道路名.md`。
 - Skill: `genesis-input-mode`、`genesis-path-geometry`。表示モードは別系統で`genesis-visual-mode`。
 - 回帰検証: `unity/Tests/RoadSnapping`、`Tests/RoadPreview`、`Tests/BuildingPlacement`。

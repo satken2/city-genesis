@@ -40,6 +40,19 @@ public class TrackNeighborInfo
 
     /// <summary>LRT停留所のホーム外縁の中心線からの距離(LrtRoadParts.PlatformOuterOffset。両側)。</summary>
     public float LrtPlatformOuter;
+
+    /// <summary>
+    /// 点ごとの道床の外端のずれ(Points と同じ添字。外へ広がると正、左右対称)。つなぎ目のS字(TrackEndTransition)で
+    /// 軌道とホーム・道床が外へ動く区間を表す。null は全長で0。
+    /// </summary>
+    public float[] OuterShifts;
+
+    /// <summary>
+    /// 完成前の仮の相手(計画中・着工保留中・建設中・敷設プレビュー)か。完成した線路は仮の相手に自分の部品
+    /// (島式のデッキ・架線柱)を譲らず、間を埋める部品(道床の隙間・島のデッキの残り)は仮の相手が自分の見た目で描く。
+    /// 架線柱は完成した線路と仮の相手の間では共有しない。
+    /// </summary>
+    public bool Provisional;
 }
 
 /// <summary>
@@ -77,6 +90,12 @@ public class TrackCorridorInfo
 
     /// <summary>自線路の半幅（マスター width の半分）。</summary>
     public float OwnHalfWidth;
+
+    /// <summary>自線路の点ごとの道床の外端のずれ(つなぎ目のS字。外へ広がると正、左右対称)。null は全長で0。</summary>
+    public float[] OwnOuterShift;
+
+    /// <summary>点 i での自線路の半幅(S字のずれを含む)。</summary>
+    public float OwnHalfAt(int i) => OwnHalfWidth + (OwnOuterShift != null ? OwnOuterShift[i] : 0f);
 
     /// <summary>左側に隣接線路（コリドー内の直接隣）が存在するか。</summary>
     public bool[] LeftCovered;
@@ -263,6 +282,14 @@ public class TrackCorridorInfo
 public static class TrackAdjacency
 {
     /// <summary>
+    /// 完成前の仮の線路か(計画中・着工予定・着工保留中・建設中。敷設プレビューの仮パスは状態0=計画中)。
+    /// 完成した線路は仮の線路に部品を譲らず、架線柱も共有しない(TrackNeighborInfo.Provisional)。
+    /// </summary>
+    public static bool IsProvisional(PathSummary path) => path != null
+        && (path.status == Constants.STATUS_TEMPORARY || path.status == Constants.STATUS_SCHEDULED_CONSTRUCTION
+            || path.status == Constants.STATUS_PENDING || path.status == Constants.STATUS_CONSTRUCTING);
+
+    /// <summary>
     /// 隣接線路の取得デリゲート。PathManager.Awake が設定する（キャッシュ済みパスデータと
     /// セル空間インデックスへのアクセスが必要なため）。null なら結合描画は行われない
     /// （メッシュ確認用テストシーンなど）。
@@ -304,7 +331,15 @@ public static class TrackAdjacency
         public float Half;
         public float Reach;
         public int Id;
+        public bool Provisional;
     }
+
+    /// <summary>
+    /// 隣り合う2本の間の充填(道床の隙間・島のデッキ)を自分が描くか。完成した線路と仮の相手の組では仮の相手が
+    /// (自分の見た目で)描き、同じ種類どうしは path_id の小さい側が描く。
+    /// </summary>
+    private static bool OwnsFill(int ownId, bool ownProvisional, int otherId, bool otherProvisional)
+        => ownProvisional != otherProvisional ? ownProvisional : ownId < otherId;
 
     /// <summary>
     /// 自線路の点列に沿って隣接線路との結合コリドーを計算する。
@@ -336,8 +371,19 @@ public static class TrackAdjacency
     /// （Left/RightLrtPlatformBlocked。道床結合はホームの有無に関わらず行う）。
     /// </summary>
     public static TrackCorridorInfo Compute(int ownPathId, List<Vector3> ownPoints, float ownWidth, float ownWallWidth, float ownPlatformLeft, float ownPlatformRight, List<TrackNeighborInfo> neighbors, float ownLrtPlatformOuter = 0f)
+        => ComputeWithShifts(ownPathId, ownPoints, ownWidth, ownWallWidth, ownPlatformLeft, ownPlatformRight, neighbors, ownLrtPlatformOuter, null, false);
+
+    /// <summary>
+    /// Compute に、自線路の点ごとの道床の外端のずれ(ownOuterShift。つなぎ目のS字。null は全長で0)を加えたもの。
+    /// 自線路・隣接線路の半幅とホームの淵は、点ごとにS字のずれだけ外へ動いた位置で判定する。
+    /// 出力の張り出し・デッキの外縁・充填先も、ずれを含んだ自中心線からの距離。
+    /// ownProvisional は自線路が完成前の仮の線路(計画中・建設中・敷設プレビュー)か。完成した線路と仮の線路の組では、
+    /// 間を埋める部品を仮の線路が描き、架線柱は共有しない(TrackNeighborInfo.Provisional)。
+    /// </summary>
+    public static TrackCorridorInfo ComputeWithShifts(int ownPathId, List<Vector3> ownPoints, float ownWidth, float ownWallWidth, float ownPlatformLeft, float ownPlatformRight, List<TrackNeighborInfo> neighbors, float ownLrtPlatformOuter, float[] ownOuterShift, bool ownProvisional)
     {
         if (ownPoints == null || ownPoints.Count < 2 || neighbors == null || neighbors.Count == 0) return null;
+        if (ownOuterShift != null && ownOuterShift.Length != ownPoints.Count) ownOuterShift = null;
 
         int n = ownPoints.Count;
         float ownHalf = ownWidth * 0.5f;
@@ -348,6 +394,7 @@ public static class TrackAdjacency
             RightDir = new Vector3[n],
             CumulativeLength = new float[n],
             OwnHalfWidth = ownHalf,
+            OwnOuterShift = ownOuterShift,
             LeftCovered = new bool[n],
             RightCovered = new bool[n],
             SuppressPoleSet = new bool[n],
@@ -372,21 +419,24 @@ public static class TrackAdjacency
         {
             if (i > 0) cum += Vector3.Distance(ownPoints[i - 1], ownPoints[i]);
             info.CumulativeLength[i] = cum;
-            info.LeftExtent[i] = ownHalf;
-            info.RightExtent[i] = ownHalf;
+            float half = info.OwnHalfAt(i);
+            info.LeftExtent[i] = half;
+            info.RightExtent[i] = half;
             info.LeftFillTo[i] = float.NaN;
             info.RightFillTo[i] = float.NaN;
-            info.LeftDeckFar[i] = ownPlatformLeft > 0f ? ownHalf + ownPlatformLeft : float.NaN;
-            info.RightDeckFar[i] = ownPlatformRight > 0f ? ownHalf + ownPlatformRight : float.NaN;
+            info.LeftDeckFar[i] = ownPlatformLeft > 0f ? half + ownPlatformLeft : float.NaN;
+            info.RightDeckFar[i] = ownPlatformRight > 0f ? half + ownPlatformRight : float.NaN;
         }
         info.TotalLength = cum;
 
         // 隣接候補ごとのXZ AABB（走査距離分マージン込み）。サンプル点ごとの全ポリライン走査を
         // 明らかに遠い候補で行わないための粗い前置フィルタ。
         var nbBounds = new Rect[neighbors.Count];
+        var nbCumulative = new float[neighbors.Count][];
         for (int j = 0; j < neighbors.Count; j++)
         {
             nbBounds[j] = ComputeExpandedBoundsXZ(neighbors[j]?.Points, MAX_SCAN_HALF_WIDTH);
+            nbCumulative[j] = CumulativeLengths(neighbors[j]);
         }
 
         float cosMaxAngle = Mathf.Cos(LocalConstants.TRACK_MERGE_MAX_ANGLE_DEG * Mathf.Deg2Rad);
@@ -410,8 +460,9 @@ public static class TrackAdjacency
             Vector3 right = Vector3.Cross(Vector3.up, fwd);
             info.RightDir[i] = right;
 
+            float ownHalfAt = info.OwnHalfAt(i);
             members.Clear();
-            members.Add(new Member { O = 0f, Half = ownHalf, Reach = ownHalf, Id = ownPathId });
+            members.Add(new Member { O = 0f, Half = ownHalfAt, Reach = ownHalfAt, Id = ownPathId, Provisional = ownProvisional });
 
             // プラットフォームの結合/干渉のサンプル単位の集計（左右それぞれ）。
             // island*   ... 島式結合の相手がいるか・最寄りの相手道床エッジ・最小path_id・島全幅の外縁
@@ -420,6 +471,9 @@ public static class TrackAdjacency
             float islandJoinLeft = float.MaxValue, islandJoinRight = float.MaxValue;
             int islandMinIdLeft = int.MaxValue, islandMinIdRight = int.MaxValue;
             float islandOuterLeft = 0f, islandOuterRight = 0f;
+            // 最寄りの島式の相手が仮の線路か(完成した線路との組かで担当が変わる)と、相手の単独のデッキの外縁(自中心線からの距離)。
+            bool islandProvisionalLeft = false, islandProvisionalRight = false;
+            float islandStandaloneLeft = float.MaxValue, islandStandaloneRight = float.MaxValue;
             float encroachLeft = float.MaxValue, encroachRight = float.MaxValue;
 
             for (int j = 0; j < neighbors.Count; j++)
@@ -441,7 +495,8 @@ public static class TrackAdjacency
                 float o = Vector3.Dot(right, delta);
                 if (Mathf.Abs(o) > MAX_SCAN_HALF_WIDTH) continue;
 
-                float nbHalf = nb.Width * 0.5f;
+                float nbShift = NeighborShift(nb, nbCumulative[j], nbAlong);
+                float nbHalf = nb.Width * 0.5f + nbShift;
                 float cosAngle = Mathf.Abs(Vector3.Dot(fwd, nbTan));
                 float centerDist = delta.magnitude;
 
@@ -449,7 +504,7 @@ public static class TrackAdjacency
                 // 重なる距離まで近い場合は、交差点ハルで切られた相手の端点が自線路の中心線近傍
                 // （反対側＝外側のこともある）へ投影された幾何的な虚像。結合メンバー・島式結合の
                 // 判定から除外する（許すと合流ノードの手前で壁・ホームの描画が数サンプル分乱れる）。
-                bool endClampVirtual = clampedAtPolylineEnd && centerDist < ownHalf + nbHalf;
+                bool endClampVirtual = clampedAtPolylineEnd && centerDist < ownHalfAt + nbHalf;
 
                 // 防音壁の物理ブロック判定（角度不問）。壁は他線路の道床の上に立ててはならない。
                 // 並走判定とは独立に、隣接線路の道床の横断面 [o-nbHalf, o+nbHalf] が自分の
@@ -458,8 +513,8 @@ public static class TrackAdjacency
                 // 相手線路の本体を壁が横切るのを防ぐ。
                 if (ownWallWidth > 0f)
                 {
-                    float zoneMin = ownHalf;
-                    float zoneMax = ownHalf + ownWallWidth + WALL_BLOCK_CLEARANCE;
+                    float zoneMin = ownHalfAt;
+                    float zoneMax = ownHalfAt + ownWallWidth + WALL_BLOCK_CLEARANCE;
                     if (o + nbHalf > zoneMin && o - nbHalf < zoneMax)
                     {
                         info.RightWallBlocked[i] = true;
@@ -477,12 +532,12 @@ public static class TrackAdjacency
                 if (ownLrtPlatformOuter > 0f && !endClampVirtual)
                 {
                     float zoneMax = ownLrtPlatformOuter + PLATFORM_ENCROACH_CLEARANCE;
-                    if (o + nbHalf > ownHalf && o - nbHalf < zoneMax)
+                    if (o + nbHalf > ownHalfAt && o - nbHalf < zoneMax)
                     {
                         info.RightLrtPlatformBlocked[i] = true;
                         anyLrtPlatformBlock = true;
                     }
-                    if (-o + nbHalf > ownHalf && -o - nbHalf < zoneMax)
+                    if (-o + nbHalf > ownHalfAt && -o - nbHalf < zoneMax)
                     {
                         info.LeftLrtPlatformBlocked[i] = true;
                         anyLrtPlatformBlock = true;
@@ -494,7 +549,7 @@ public static class TrackAdjacency
                 if (myPlatform > 0f)
                 {
                     float absO = Mathf.Abs(o);
-                    float edgeGap = absO - ownHalf - nbHalf;
+                    float edgeGap = absO - ownHalfAt - nbHalf;
 
                     // 相手のホームのうち「自分側を向いている張り出し幅」と「反対側（島の外縁側）の
                     // 張り出し幅」。相手の幾何フレームの左右を、自分が相手のどちら側にいるかで
@@ -513,21 +568,22 @@ public static class TrackAdjacency
                     if (island)
                     {
                         // デッキの充填先は相手の淵ライン（相手の淵パーツの縁の位置と一致し、継ぎ目を相手の淵が覆う）。
-                        float joinTo = absO - nb.PlatformEdge;
+                        float joinTo = absO - (nb.PlatformEdge + nbShift);
                         float outerTo = absO + nbHalf + nbOuterPlatform;
+                        float standalone = absO - nbHalf - nbFacingPlatform;
                         if (o > 0f)
                         {
                             islandRight = true;
-                            if (joinTo < islandJoinRight) islandJoinRight = joinTo;
-                            if (nb.PathId < islandMinIdRight) islandMinIdRight = nb.PathId;
-                            if (outerTo > islandOuterRight) islandOuterRight = outerTo;
+                            if (joinTo < islandJoinRight) { islandJoinRight = joinTo; islandProvisionalRight = nb.Provisional; islandStandaloneRight = standalone; }
+                            if (nb.Provisional == ownProvisional && nb.PathId < islandMinIdRight) islandMinIdRight = nb.PathId;
+                            if (nb.Provisional == ownProvisional && outerTo > islandOuterRight) islandOuterRight = outerTo;
                         }
                         else
                         {
                             islandLeft = true;
-                            if (joinTo < islandJoinLeft) islandJoinLeft = joinTo;
-                            if (nb.PathId < islandMinIdLeft) islandMinIdLeft = nb.PathId;
-                            if (outerTo > islandOuterLeft) islandOuterLeft = outerTo;
+                            if (joinTo < islandJoinLeft) { islandJoinLeft = joinTo; islandProvisionalLeft = nb.Provisional; islandStandaloneLeft = standalone; }
+                            if (nb.Provisional == ownProvisional && nb.PathId < islandMinIdLeft) islandMinIdLeft = nb.PathId;
+                            if (nb.Provisional == ownProvisional && outerTo > islandOuterLeft) islandOuterLeft = outerTo;
                         }
                     }
                     else if (!endClampVirtual && edgeGap < myPlatform + PLATFORM_ENCROACH_CLEARANCE)
@@ -553,7 +609,7 @@ public static class TrackAdjacency
                 // ようやく結合が始まり、線路間の壁が相手の本体に被ってしまう。
                 bool parallel = cosAngle >= cosMaxAngle;
                 bool converging = !parallel && cosAngle >= cosMaxConvergeAngle
-                    && (centerDist - nbHalf - ownHalf) <= LocalConstants.TRACK_MERGE_MAX_EDGE_GAP;
+                    && (centerDist - nbHalf - ownHalfAt) <= LocalConstants.TRACK_MERGE_MAX_EDGE_GAP;
                 if (!parallel && !converging) continue;
 
                 // 端点クランプの虚像ガード（上記 endClampVirtual）: 合流ノードの手前で
@@ -567,7 +623,7 @@ public static class TrackAdjacency
                 float reach = nbHalf;
                 if (nb.LrtPlatformOuter > 0f && LrtPlatformParts.Contains(nb.LrtPlatformZones, nbAlong))
                     reach = Mathf.Max(reach, nb.LrtPlatformOuter + LrtRoadParts.PLATFORM_POLE_CLEARANCE - TrackPath.POLE_MARGIN);
-                members.Add(new Member { O = o, Half = nbHalf, Reach = reach, Id = nb.PathId });
+                members.Add(new Member { O = o, Half = nbHalf, Reach = reach, Id = nb.PathId, Provisional = nb.Provisional });
             }
 
             // プラットフォームの結合/干渉の確定（道床結合のメンバー有無に関わらず反映する）。
@@ -577,21 +633,15 @@ public static class TrackAdjacency
                 {
                     anyPlatform = true;
                     info.RightPlatformWallOmit[i] = true;
-                    if (ownPathId < islandMinIdRight)
+                    ApplyIslandDeck(info.RightDeckFar, info.RightDeckJoined, i, ownPathId, ownProvisional, islandProvisionalRight,
+                        islandMinIdRight, islandJoinRight, islandStandaloneRight, encroachRight);
+                    // 架線柱は同じ種類(完成どうし・仮どうし)の最小path_idの線路が島全幅（相手の外縁側ホーム込み）の外側に立てる
+                    //（道床結合の柱コリドー化と同じ主線路方式）。完成した線路と仮の線路では共有しない。
+                    if (islandMinIdRight != int.MaxValue)
                     {
-                        // 自分が充填担当（最小path_id）: 相手の淵までデッキを張る。
-                        // さらに第三の線路が割り込む場合はその手前まででクランプする。
-                        info.RightDeckFar[i] = Mathf.Min(islandJoinRight, encroachRight);
-                        info.RightDeckJoined[i] = encroachRight >= islandJoinRight;
+                        info.RightExtent[i] = Mathf.Max(info.RightExtent[i], islandOuterRight);
+                        if (islandMinIdRight < ownPathId) info.SuppressPoleSet[i] = true;
                     }
-                    else
-                    {
-                        info.RightDeckFar[i] = float.NaN;
-                    }
-                    // 架線柱は最小path_idの線路が島全幅（相手の外縁側ホーム込み）の外側に立てる
-                    //（道床結合の柱コリドー化と同じ主線路方式）。
-                    info.RightExtent[i] = Mathf.Max(info.RightExtent[i], islandOuterRight);
-                    if (islandMinIdRight < ownPathId) info.SuppressPoleSet[i] = true;
                 }
                 else if (encroachRight < float.MaxValue)
                 {
@@ -606,17 +656,13 @@ public static class TrackAdjacency
                 {
                     anyPlatform = true;
                     info.LeftPlatformWallOmit[i] = true;
-                    if (ownPathId < islandMinIdLeft)
+                    ApplyIslandDeck(info.LeftDeckFar, info.LeftDeckJoined, i, ownPathId, ownProvisional, islandProvisionalLeft,
+                        islandMinIdLeft, islandJoinLeft, islandStandaloneLeft, encroachLeft);
+                    if (islandMinIdLeft != int.MaxValue)
                     {
-                        info.LeftDeckFar[i] = Mathf.Min(islandJoinLeft, encroachLeft);
-                        info.LeftDeckJoined[i] = encroachLeft >= islandJoinLeft;
+                        info.LeftExtent[i] = Mathf.Max(info.LeftExtent[i], islandOuterLeft);
+                        if (islandMinIdLeft < ownPathId) info.SuppressPoleSet[i] = true;
                     }
-                    else
-                    {
-                        info.LeftDeckFar[i] = float.NaN;
-                    }
-                    info.LeftExtent[i] = Mathf.Max(info.LeftExtent[i], islandOuterLeft);
-                    if (islandMinIdLeft < ownPathId) info.SuppressPoleSet[i] = true;
                 }
                 else if (encroachLeft < float.MaxValue)
                 {
@@ -650,14 +696,16 @@ public static class TrackAdjacency
             if (lo == ownIdx && hi == ownIdx) continue;
 
             info.AnyCoverage = true;
+            // 架線柱は同じ種類(完成どうし・仮どうし)のメンバーだけで共有する。完成した線路と仮の線路の間では、
+            // それぞれが自分の幅で立てる(仮の相手が非表示・取り消しになっても完成側の柱が欠けない)。
             // 島式ホームの柱コリドー化（上の確定処理）が反対側で先に張り出しを広げている
             // ことがあるため、上書きではなく最大値で合成する。
-            info.LeftExtent[i] = Mathf.Max(info.LeftExtent[i], -(members[lo].O - members[lo].Reach));
-            info.RightExtent[i] = Mathf.Max(info.RightExtent[i], members[hi].O + members[hi].Reach);
-
             int minId = ownPathId;
             for (int m = lo; m <= hi; m++)
             {
+                if (members[m].Provisional != ownProvisional) continue;
+                info.LeftExtent[i] = Mathf.Max(info.LeftExtent[i], -(members[m].O - members[m].Reach));
+                info.RightExtent[i] = Mathf.Max(info.RightExtent[i], members[m].O + members[m].Reach);
                 if (members[m].Id < minId) minId = members[m].Id;
             }
             if (minId < ownPathId) info.SuppressPoleSet[i] = true;
@@ -666,17 +714,72 @@ public static class TrackAdjacency
             {
                 Member lm = members[ownIdx - 1];
                 info.LeftCovered[i] = true;
-                if (ownPathId < lm.Id) info.LeftFillTo[i] = -(lm.O + lm.Half);
+                if (OwnsFill(ownPathId, ownProvisional, lm.Id, lm.Provisional)) info.LeftFillTo[i] = -(lm.O + lm.Half);
             }
             if (hi > ownIdx)
             {
                 Member rm = members[ownIdx + 1];
                 info.RightCovered[i] = true;
-                if (ownPathId < rm.Id) info.RightFillTo[i] = rm.O - rm.Half;
+                if (OwnsFill(ownPathId, ownProvisional, rm.Id, rm.Provisional)) info.RightFillTo[i] = rm.O - rm.Half;
             }
         }
 
         return (info.AnyCoverage || anyWallBlock || anyPlatform || anyLrtPlatformBlock) ? info : null;
+    }
+
+    /// <summary>
+    /// 島式結合の片側のデッキの外縁を決める。同じ種類(完成どうし・仮どうし)の相手とは path_id の小さい側が
+    /// 相手の淵まで張り、もう一方は張らない。完成した線路と仮の線路の組では、完成側は単独のときの外縁のまま張り
+    /// (仮の相手が消えても欠けない)、仮の側が完成側の外縁まで張って島をつなぐ。第三の線路が割り込む位置で止める。
+    /// </summary>
+    private static void ApplyIslandDeck(float[] deckFar, bool[] deckJoined, int i, int ownPathId, bool ownProvisional, bool partnerProvisional,
+        int minSameKindId, float joinTo, float partnerStandalone, float encroach)
+    {
+        if (partnerProvisional != ownProvisional)
+        {
+            if (ownProvisional)
+            {
+                deckFar[i] = Mathf.Min(partnerStandalone, encroach);
+                deckJoined[i] = encroach >= partnerStandalone;
+            }
+            else
+            {
+                deckFar[i] = Mathf.Min(deckFar[i], encroach);
+            }
+            return;
+        }
+        if (ownPathId < minSameKindId)
+        {
+            deckFar[i] = Mathf.Min(joinTo, encroach);
+            deckJoined[i] = encroach >= joinTo;
+        }
+        else
+        {
+            deckFar[i] = float.NaN;
+        }
+    }
+
+    /// <summary>S字のずれを持つ隣接候補の点列の3D累積距離(ずれが無ければ null)。</summary>
+    private static float[] CumulativeLengths(TrackNeighborInfo nb)
+    {
+        if (nb?.OuterShifts == null || nb.Points == null || nb.OuterShifts.Length != nb.Points.Count) return null;
+        var cumulative = new float[nb.Points.Count];
+        for (int i = 1; i < cumulative.Length; i++) cumulative[i] = cumulative[i - 1] + Vector3.Distance(nb.Points[i - 1], nb.Points[i]);
+        return cumulative;
+    }
+
+    /// <summary>隣接候補の、点列に沿った距離 along での道床の外端のずれ(点の間は線形補間)。</summary>
+    private static float NeighborShift(TrackNeighborInfo nb, float[] cumulative, float along)
+    {
+        if (cumulative == null) return 0f;
+        int hi = System.Array.BinarySearch(cumulative, along);
+        if (hi >= 0) return nb.OuterShifts[hi];
+        hi = ~hi;
+        if (hi <= 0) return nb.OuterShifts[0];
+        if (hi >= cumulative.Length) return nb.OuterShifts[cumulative.Length - 1];
+        float span = cumulative[hi] - cumulative[hi - 1];
+        float t = span > 1e-6f ? (along - cumulative[hi - 1]) / span : 0f;
+        return Mathf.Lerp(nb.OuterShifts[hi - 1], nb.OuterShifts[hi], t);
     }
 
     /// <summary>点列のXZ AABBを margin 分拡張した Rect を返す（点列不正時は空Rect）。</summary>

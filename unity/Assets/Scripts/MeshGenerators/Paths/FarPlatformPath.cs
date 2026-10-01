@@ -7,9 +7,15 @@ using UnityEngine;
 /// 軌道・ホームの断面は1軌道ぶんの寸法で持ち、軌道数と軌道の横位置（TrackPath.GetTrackCenterOffset）から並べる。
 /// ホームはその側で最も外側の軌道の中心線から外へ組み立てる（通常パーツの「原点＝軌道の中心線・右側用」と同じ）。
 /// 島式ホームの駅は左右の軌道の中心線から中央へ向けて同じ断面を組み立てる。
+/// つなぎ目のS字(TrackEndTransition)では、中心線より左の頂点は左端の軌道と、右の頂点は右端の軌道と一緒に横へ動く
+/// (中心をまたぐ道床・島のデッキは伸び縮みする。通常パーツと同じ規則)。
 /// </summary>
 public static class FarPlatformPath
 {
+    // 生成中のパスの、点ごとの左端・右端の軌道のずれ(S字が無ければ null)。BuildInto は検証がリフレクションで引数の数まで
+    // 合わせて呼ぶので、引数を足さずに GenerateInto から渡す。
+    static float[] activeLeftShift, activeRightShift;
+
     // 貨物PF(貨物列車専用のホーム)。463=コンテナ、464=鉱石、465=石油。
     static bool IsFreight(int variant) => variant == 463 || variant == 464 || variant == 465;
 
@@ -23,7 +29,22 @@ public static class FarPlatformPath
     {
         float width = MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.platform_width ?? 3f;
         TrackPath.ResolvePlatformExtents(path, width, out float left, out float right);
-        BuildInto(root, path.path_variant, points, left > 0, right > 0);
+        TrackLateralProfile profile = points != null && points.Count >= 2 ? TrackPath.LateralProfileProvider?.Invoke(path) : null;
+        if (profile != null && !profile.IsUniform)
+        {
+            var sampler = new TrackLateralSampler(profile, path, points);
+            activeLeftShift = sampler.ShiftsAtPoints(0);
+            activeRightShift = sampler.ShiftsAtPoints(profile.TrackCount - 1);
+        }
+        try
+        {
+            BuildInto(root, path.path_variant, points, left > 0, right > 0);
+        }
+        finally
+        {
+            activeLeftShift = null;
+            activeRightShift = null;
+        }
     }
 
     /// <summary>
@@ -34,7 +55,7 @@ public static class FarPlatformPath
     public static void BuildInto(GameObject root, int variant, List<Vector3> points, bool left, bool right)
     {
         if (points == null || points.Count < 2) return;
-        var builder = new Builder(root, variant, points);
+        var builder = new Builder(root, variant, points, activeLeftShift, activeRightShift);
         if (variant == Constants.PATH_VARIANT_ROPEWAY_STATION) builder.Ropeway();
         else
         {
@@ -69,14 +90,17 @@ public static class FarPlatformPath
         readonly int variant;
         readonly List<Vector3> points;
         readonly Vector3[] right;
+        readonly float[] leftShift, rightShift;
         readonly Dictionary<string, List<Vector3>> vertices = new Dictionary<string, List<Vector3>>();
         readonly Dictionary<string, List<int>> triangles = new Dictionary<string, List<int>>();
         readonly Dictionary<string, Material> sourceMaterials = new Dictionary<string, Material>();
         // ホームを組み立てている間だけ、断面の横位置を軌道の中心線から外向きにずらす量。
         float shift;
-        public Builder(GameObject root, int variant, List<Vector3> points)
+        public Builder(GameObject root, int variant, List<Vector3> points, float[] leftShift = null, float[] rightShift = null)
         {
             this.root = root; this.variant = variant; this.points = points;
+            this.leftShift = leftShift != null && leftShift.Length == points.Count ? leftShift : null;
+            this.rightShift = rightShift != null && rightShift.Length == points.Count ? rightShift : null;
             right = new Vector3[points.Count];
             for (int i = 0; i < points.Count; i++)
             {
@@ -104,14 +128,17 @@ public static class FarPlatformPath
         }
 
         // 断面はX/Y平面の反時計回り。両側の法線を保つため左右反転後も順序を揃える。
-        void Prism(string mat, Vector2[] profile, int side = 1) => Extrude(mat, profile, side, points, right);
+        void Prism(string mat, Vector2[] profile, int side = 1) => Extrude(mat, profile, side, points, right, leftShift, rightShift);
 
-        void Extrude(string mat, Vector2[] profile, int side, IList<Vector3> pts, IList<Vector3> rights)
+        // 中心線より左の頂点は左端の軌道のずれ、右の頂点は右端の軌道のずれだけ横へ動く(S字。無ければ0)。
+        static float LateralShift(float x, float left, float right) => x < 0f ? left : x > 0f ? right : 0f;
+
+        void Extrude(string mat, Vector2[] profile, int side, IList<Vector3> pts, IList<Vector3> rights, IList<float> lefts = null, IList<float> rightsShift = null)
         {
             var p = (Vector2[])profile.Clone();
             for (int i = 0; i < p.Length; i++) p[i].x += shift;
             if (side < 0) { for (int i = 0; i < p.Length; i++) p[i].x = -p[i].x; System.Array.Reverse(p); }
-            Vector3 Pt(int j, Vector2 q) => pts[j] + rights[j] * q.x + Vector3.up * q.y;
+            Vector3 Pt(int j, Vector2 q) => pts[j] + rights[j] * (q.x + LateralShift(q.x, lefts != null ? lefts[j] : 0f, rightsShift != null ? rightsShift[j] : 0f)) + Vector3.up * q.y;
             for (int j = 0; j + 1 < pts.Count; j++)
                 for (int i = 0; i < p.Length; i++)
                 {
@@ -227,22 +254,26 @@ public static class FarPlatformPath
                 {
                     float s0 = (t + span.a / FreightTile) * tile, s1 = (t + span.b / FreightTile) * tile;
                     var pts = new List<Vector3>(); var rights = new List<Vector3>();
+                    var lefts = new List<float>(); var rightsShift = new List<float>();
                     for (int i = 1; i < points.Count; i++)
                     {
                         if (cum[i] <= s0) continue;
-                        if (pts.Count == 0) AddAt(i, s0, cum, pts, rights);
-                        if (cum[i] >= s1) { AddAt(i, s1, cum, pts, rights); break; }
+                        if (pts.Count == 0) AddAt(i, s0, cum, pts, rights, lefts, rightsShift);
+                        if (cum[i] >= s1) { AddAt(i, s1, cum, pts, rights, lefts, rightsShift); break; }
                         pts.Add(points[i]); rights.Add(right[i]);
+                        lefts.Add(leftShift != null ? leftShift[i] : 0f); rightsShift.Add(rightShift != null ? rightShift[i] : 0f);
                     }
-                    if (pts.Count >= 2) Extrude(span.mat, profile, side, pts, rights);
+                    if (pts.Count >= 2) Extrude(span.mat, profile, side, pts, rights, lefts, rightsShift);
                 }
         }
 
-        void AddAt(int i, float s, float[] cum, List<Vector3> pts, List<Vector3> rights)
+        void AddAt(int i, float s, float[] cum, List<Vector3> pts, List<Vector3> rights, List<float> lefts, List<float> rightsShift)
         {
             float t = Mathf.InverseLerp(cum[i - 1], cum[i], s);
             pts.Add(Vector3.Lerp(points[i - 1], points[i], t));
             rights.Add(Vector3.Slerp(right[i - 1], right[i], t).normalized);
+            lefts.Add(leftShift != null ? Mathf.Lerp(leftShift[i - 1], leftShift[i], t) : 0f);
+            rightsShift.Add(rightShift != null ? Mathf.Lerp(rightShift[i - 1], rightShift[i], t) : 0f);
         }
 
         void Posts(int side, float x, float bottom, float top, string material, float spacing = 16f)
@@ -257,7 +288,9 @@ public static class FarPlatformPath
                     float length=Vector3.Distance(points[i-1],points[i]);
                     if(walked+length>=target)
                     {
-                        Vector3 c=Vector3.Lerp(points[i-1],points[i],length>.0001f?(target-walked)/length:0)+Vector3.Lerp(right[i-1],right[i],.5f).normalized*(x+shift)*side;
+                        float t=length>.0001f?(target-walked)/length:0, lateral=(x+shift)*side;
+                        lateral+=LateralShift(lateral,leftShift!=null?Mathf.Lerp(leftShift[i-1],leftShift[i],t):0f,rightShift!=null?Mathf.Lerp(rightShift[i-1],rightShift[i],t):0f);
+                        Vector3 c=Vector3.Lerp(points[i-1],points[i],t)+Vector3.Lerp(right[i-1],right[i],.5f).normalized*lateral;
                         Vector3 a=c+Vector3.up*bottom,b=c+Vector3.up*top;
                         // 支柱は幅のある交差板2枚。両面を持たせてどの方向からも消えない。
                         foreach(Vector3 axis in new[]{Vector3.right*.1f,Vector3.forward*.1f})

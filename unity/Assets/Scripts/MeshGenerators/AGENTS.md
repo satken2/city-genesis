@@ -9,11 +9,11 @@
 | 入口 | 振り分け |
 | --- | --- |
 | `PathMeshFactory.GeneratePathMesh` | `path_variant` 固有辞書(送電線1101/1102→`PowerLinePath`) → `path_master.model_type`(`default`→`RoadPath`、`track`→`TrackPath`、`station_house`→`StationHousePath`、`none`→null)。`path_type` では選ばない |
-| `NodeMeshFactory.GenerateNodeMesh` | 常に `RoadIntersectionMeshGenerator`(接続2本未満は null)。線路2本以上なら `TrackIntersectionMeshGenerator` がレールコネクタを追加。インフラノードは呼び出し側が除外 |
+| `NodeMeshFactory.GenerateNodeMesh` | 常に `RoadIntersectionMeshGenerator`(接続2本未満は null)。線路2本以上なら `TrackIntersectionMeshGenerator` がレールコネクタを追加。軌道の位置と幅がそろう2本の線路の直進は板なし(`NodeMeshResult.TrackJoin`。N§4.6)、道床の無い線路だけのノードは板なしでレールだけ(`RailsOnly`)。交差点を作るかは呼び出し側(`PathManager.NeedsIntersection`)が決める |
 | `ParcelMeshFactory.GenerateParcelMesh` | usage_id 辞書、未登録は `DefaultParcel`(現状は常に Default) |
 | 建物 | ファクトリを介さず `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)`。status(工事中/解体中→Constructing、倒壊→Collapsed)で先に分岐し、次に `model_type`。該当なしは白い箱 |
 
-交差点の生成器は PATH_CONVEYOR/ELECTRICITY/PIPELINE を接続から外すが、導水管(PATH_WATER)は地表の管路として路面を作る。`InfraNetworkUtil.IsInfraPathType` で一括判定しないのはこのため。
+交差点の生成器は PATH_CONVEYOR/ELECTRICITY/PIPELINE を接続から外すが、導水管(PATH_WATER)は外さず地表の管路として路面を作る(`InfraNetworkUtil.IsInfraPathType` で一括判定しないのはこのため)。ただしゲーム中に交差点を作るノードは PathManager が交通のパス(インフラのパスと人員搬送を除く)2本以上で選ぶので、導水管だけのノードには作られない。ノードtypeのインフラビットでは選ばない(電化線路のノードは電力ビットを持つ)。
 
 ## ファイル一覧
 
@@ -30,7 +30,7 @@
 | --- | --- |
 | `RoadPath.cs` | 道路。線路・駅舎・工事中とも共用する共通ヘルパーの置き場: `CreateSplineMesh` / `BuildSpline` / `SealSplineMesh` / `BuildColliderMeshFromSpline` / `CreateFallbackRoadBody` / `GeneratePillars` / `GetOrCreateRoadMaterial(ByName)` / `GetPathMasterParams` / `RoadLaneLayout` / `IntersectionMeshOwner`。再実装しない(G) |
 | `RoadPartHeights.cs` | パーツ高さオフセット定数の唯一の正(G§4.4) |
-| `PathDrawContext.cs` | 描画LOD・詳細区間・曲率適応タイル長・`_close` 解決(`ResolvePrefab`)の静的コンテキスト |
+| `PathDrawContext.cs` | 描画LOD・詳細区間・曲率適応タイル長・`_close` 解決(`ResolvePrefab`)・パーツの変形(`Warp`。横ずれ・横倍率)の静的コンテキスト |
 | `RoadAdjacency.cs` / `MotorwayMergeLayout.cs` | 高速道路の本線↔ランプ結合・板なし合流ノード(G§11.7) |
 | `PillarClearance.cs` | 橋脚と他パス通行空間の干渉判定。道路・線路・工事中・レンガ高架で共用(G§8.7) |
 | `RoadEquipmentGenerator.cs` | 街灯・電柱・街路樹・柵・ベンチ等の点設備(G§8.6・§5.5) |
@@ -38,12 +38,13 @@
 | `RoadMarkingContext.cs` / `RoadMarkingPlan.cs` / `RoadMarkingSurface.cs` | 路面標示(G§8.3、E「路面標示のLODと画像予算」) |
 | `SuspensionBridgeGenerator.cs` / `BrickArcadeGenerator.cs` / `PathStructureMesh.cs` | 吊り橋251〜256・レンガアーチ高架404/414と、その結合器(G「植栽中央分離帯と道路吊り橋」、N「レンガアーチ高架」) |
 | `PowerLinePath.cs` / `PowerLineSupport.cs` | 送電線1101/1102 の専用生成器と共有ノードの鉄塔所有権(G「送電線の専用描画」) |
-| `ConstructionPathBuilder.cs` / `ConstructionMeshUtil.cs` | 工事中パス(G§15) |
+| `ConstructionPathBuilder.cs` / `ConstructionMeshUtil.cs` | 工事中パス(G§15)。施工済みの区間 `BuiltFraction` は近接線路の相手にも使う(N§8.5) |
 | `RoadIntersectionMeshGenerator.cs` | 交差点(G§11、J「Unity側の交差点メッシュの再計算」) |
 | `TrafficSignalLayout.cs` / `TrafficSignalBuilder.cs` / `TrafficSignalStyle.cs` | 交差点の信号機。描画専用(G§11.8) |
 | `TrackPath.cs` | 線路・モノレール・LRT専用軌道431(N)。軌道の横位置 `GetTrackCenterOffset`(中央の間隔は `GetTrackCenterWidth`)、進む向きで走る軌道を決める `TrackIndexForTravel`、ホームの基準になる軌道の `PlatformTrackOffset` / `PlatformEdgeDistance`、島式ホームの駅の判定 `IsIslandPlatform` と淵ライン `IslandEdgeDistance`(N§1.1・§7.3) |
-| `TrackIntersectionMeshGenerator.cs` | ポイント・平面交差のレールコネクタ。つながる軌道端の判定(`ResolveConnectedTrackEnds`)は車止めとも共有(N§4.3) |
-| `TrackAdjacency.cs` | 近接線路の結合(複線見え化)・島式ホーム(N§7.4・§8) |
+| `TrackIntersectionMeshGenerator.cs` | ポイント・平面交差のレールコネクタ。つながる軌道端の判定(`ResolveConnectedTrackEnds`)は車止めとも共有(N§4.3)。板なしの直進接続の判定 `TryContinuousJoin`(N§4.6) |
+| `TrackEndTransition.cs` | 軌道の位置が違う線路のつなぎ目のS字(N§4.7)。ノードの組とずれ(`ResolveNode`)、パスの横位置の形 `TrackLateralProfile`、描画点列の上で読む `TrackLateralSampler` |
+| `TrackAdjacency.cs` | 近接線路の結合(複線見え化)・島式ホーム(N§7.4・§8)。S字のずれを含む判定 `ComputeWithShifts`、完成前の相手(`IsProvisional`)との担当(N§8.5) |
 | `TrackDirectionArrows.cs` / `PlatformFoundationGenerator.cs` / `FarPlatformPath.cs` | 一方通行線路の矢印(敷設モードのみ。N§9)・高架ホーム外壁下部(N「高規格高架PF」)・駅と乗り場の遠景簡易立体(N§6。対象バリアントは `FarPlatformPath.Handles` に列挙。島式ホームの駅は左右の軌道から中央へ向けて組む。貨物PF 463〜465 は上屋の無い荷役床に品目別の設備を載せ、コンテナは通常パーツの16mタイルと同じ区間に並べる) |
 | `LrtRoadParts.cs` / `LrtPlatformParts.cs` | LRT の軌道位置・踏面・ホーム寸法の唯一の正と、併用軌道・停留所ホーム(G「LRT付き道路」「LRT停留所のホーム」、N「LRT専用軌道431」) |
 | `StationHousePath.cs` | 駅舎パス(連絡橋+両終端の建屋)(Q) |
@@ -70,7 +71,7 @@
 
 ## 知らないと事故る規約
 
-- 隣接情報は PathManager.Awake が差す静的プロバイダ経由(`PillarClearance` / `TrackAdjacency` / `RoadAdjacency` の `NeighborProvider`、`TrackPath.ConnectedPathsProvider` / `InfrastructureConnectionProvider`、`LrtPlatformParts.StopProvider` / `PolylineProvider`、`PowerLinePath.ConnectedPaths`)。
+- 隣接情報は PathManager.Awake が差す静的プロバイダ経由(`PillarClearance` / `TrackAdjacency` / `RoadAdjacency` の `NeighborProvider`、`TrackPath.ConnectedPathsProvider` / `InfrastructureConnectionProvider` / `LateralProfileProvider`、`LrtPlatformParts.StopProvider` / `PolylineProvider`、`PowerLinePath.ConnectedPaths`)。`ConnectedPathsProvider` は実ノードのつながりに、端点がノードの位置にある完成前の線路(ノード番号を当てた写し)を加えた一覧を返す(N§8.5)。
   - 未設定のテストシーンでは結合・干渉回避が黙って無効になる。結合描画は描画専用でバックエンドに影響しない。
 - SplineMesh の頂点予算 `RoadPath.SPLINE_MESH_VERTEX_BUDGET`(60000)を超えると Dreamteck が毎フレームエラーを出し続ける。新しい SplineMesh 生成経路は同じガードを入れ、構築後に `RoadPath.SealSplineMesh` を呼ぶ。封印後は点や Transform を変えても再構築されない(形を変えるなら作り直す)。
 - `CreateSplineMesh` の連続する `body`・`sidewalk`・`lrt_track` は、`RemoveInternalTileCaps` が内部端面だけを除いて斜光の縞状の影を抑える。両外端は保持する。Dreamteck のタイル順・元頂点順を使うので、メッシュ結合や頂点最適化の順序を変える場合はこの前提も確認する。
@@ -83,7 +84,9 @@
 - 軌道数2のパス(まとめた複線・431)で走る軌道は「パスと進む向き」だけで決まる(`TrackPath.TrackIndexForTravel`。左側通行なら進行方向の左)。交差点のレールコネクタと車止めは `TrackIntersectionMeshGenerator` の同じ判定(通行方向を見る。駅のホームは両方向扱い)を使い、車両の走行描画(`Vehicles/TransitRouteGeometry`)も同じ規則で軌道を選んでレールを端点の近さで拾う。どれか1つだけ規則を変えると列車がレールの無い所を走る。
 - 軌道の横位置は `TrackPath.GetTrackCenterOffset(width, lanes, i, centerWidth)` の1つの式で、中央の間隔(マスターの `center_width`。島式ホームの駅で軌道を外へ開く)は `GetTrackCenterWidth` でパスのマスターから引く。レール・架線・車止め・レールコネクタ(`LrtRoadParts.TrackLaterals`)・車両・遠景・引き込み線・敷設プレビューはすべて中央の間隔を渡してこの式を使う。1か所でも渡し忘れると、その描画だけ軌道が内側にずれる。
 - ホームの部品(淵・外縁・下部外壁・端壁・遠景)は、その側で最も外側の軌道の中心線を原点に置く(`PlatformTrackOffset`)。パスの中心線基準で書くと軌道数2の駅で淵が軌道の間に出る。島式ホームの駅(`IsIslandPlatform`)は外側に張り出さず(`ResolvePlatformExtents` が0)、淵を左右の軌道から中央へ向けて置いてデッキを両淵の間に1枚張る(`CreateIslandPlatformParts`)。
-- `TrackPath.CreatePlatformSide`・`CreateTerminations` は `Tests/Intersections`・`Tests/Lrt`・gallery の `PlatformCloseQA` がリフレクションで引数の数まで合わせて呼ぶ。引数を足さず、必要な値はパスのマスターから関数の中で引く。
+- `TrackPath.CreatePlatformSide`・`CreateTerminations` は `Tests/Intersections`・`Tests/Lrt`・gallery の `PlatformCloseQA` がリフレクションで引数の数まで合わせて呼ぶ。引数を足さず、必要な値はパスのマスターから関数の中で引く。S字の横位置のように生成中のパスごとに決まる値は、生成1回分の静的な値(`activeLateral`・`deckNearShift` / `deckFarShift`。try/finally で戻す)で渡す。`RoadPath.CreateSplineMesh`・`GeneratePillars` も同じ理由で、パーツの変形は引数でなく `PathDrawContext.Warp` で渡す(`TrackPath.WithWarp` がパーツの呼び出しの直前に設定して直後に戻す。区間LODの遅延生成にも引き継がれる)。
+- 軌道の位置が違う線路のつなぎ目のS字は `TrackEndTransition` の1つの結果を、線路(`TrackPath`)・交差点(切断の幅・レールコネクタの端の位置と向き・板なしの判定)・近接線路の結合(`ComputeWithShifts` の自分のずれと `TrackNeighborInfo.OuterShifts`)・車両(`Vehicles/TransitRouteGeometry`)が共有する。どれか1つだけ別の式にすると、レールの無い所を列車が走る。S字を切る長さはパスの長さ(アンカーの折れ線。`TrackEndTransition.PathLength`)で決め、描画点列から決めない(切断・区間分割で点列が変わっても、同じ地点を同じ横位置にするため)。
+- 完成した線路と完成前の相手(計画中・着工予定・着工保留中・建設中・敷設プレビュー。`TrackAdjacency.IsProvisional`)の組では、完成側は単独のときの部品だけを描き(島式デッキは単独の外縁まで)、間の充填と島の残りは仮の側が描く。架線柱は同じ種類どうしでだけ共有する(`OwnsFill`・`ApplyIslandDeck`)。path_id の小さい側の規則だけで担当を決めると、仮の相手が非表示・取り消しになったときに完成側に穴が開く(N§8.5)。
 - 建物は mid レベルだけ Y を階高スケールし、base/top/fence/mashup は著作寸法のまま。配置は階高グリッドなので著作高さとのズレは隙間として出るのが仕様(F§6.3・§6.4)。`ResolveParcelContext` の区画ポリゴンは center_point 基準のローカルXZ(ワールドで扱うと敷地装飾が建物から離れる)。
 - 建物のパーツが無言で消えるときは FBX の Read/Write Enabled を疑う(壁・角・prebuilt は頂点を読み、ceil/floor は参照専用なので屋根と地面だけ残る)。強制は `Assets/Editor/ModelImportSettings.cs`(`unity/AGENTS.md`「モデルアセットの構成」)。
 - `Mesh.CombineMeshes` はサブメッシュ単位の `CombineInstance` でもインデックスの最小〜最大の頂点を丸ごと写す。FBX 取り込みの溶接で別材質の面が頂点を共有するパーツでは範囲が重なり、未参照の頂点まで複製される。プレハブを事前結合するときは `CombineModuleMeshes`(サブメッシュごとに参照頂点だけを連続区画へ詰める)を通す。壁・角・エントランス・塔屋・フェンス・タイルは元メッシュを直接積むので詰め直しを通らない(F§12.1)。

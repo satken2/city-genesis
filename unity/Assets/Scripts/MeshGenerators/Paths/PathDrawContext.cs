@@ -30,6 +30,14 @@ public static class PathDrawContext
     /// </summary>
     public static float AdaptiveTileLength { get; private set; }
 
+    /// <summary>
+    /// 次に RoadPath.CreateSplineMesh で敷くパーツの変形(スプライン割合ごとの横ずれと横幅の倍率)。
+    /// 線路のつなぎ目のS字(TrackEndTransition)で、軌道の外側の部品を横へ動かし道床・桁を伸び縮みさせる。
+    /// 生成器がパーツの呼び出しの直前に設定して直後に null へ戻す。区間LOD(SplinePartLod)の遅延生成にも引き継がれる。
+    /// CreateSplineMesh の引数はリフレクションで呼ぶ検証が数まで合わせているため、引数ではなくここで渡す。
+    /// </summary>
+    public static PartWarp Warp { get; set; }
+
     public static bool HasDetailRange => !SuppressDetailRange && (DetailFrom > 0.0001 || DetailTo < 0.9999);
 
     /// <summary>接写用パーツ名のサフィックス(例: Models/Paths/p411/body_close)。</summary>
@@ -53,6 +61,7 @@ public static class PathDrawContext
         DetailTo = System.Math.Clamp(detailTo, DetailFrom, 1.0);
         SuppressDetailRange = false;
         AdaptiveTileLength = 0f;
+        Warp = null;
     }
 
     public static void End()
@@ -62,6 +71,7 @@ public static class PathDrawContext
         DetailTo = 1.0;
         SuppressDetailRange = false;
         AdaptiveTileLength = 0f;
+        Warp = null;
     }
 
     public static void SetAdaptiveTileLength(float length)
@@ -210,4 +220,14 @@ public static class PathDrawContext
         }
         return result;
     }
+}
+
+/// <summary>
+/// パーツの変形。スプライン割合(0〜1)ごとの横ずれ(m。進行方向の右が正)と、横幅の倍率(1 で元の幅)。
+/// どちらも null なら変形しない。倍率はパーツの原点まわりに掛かり、原点の補正(ピボット補正)も倍率に合わせて動く。
+/// </summary>
+public sealed class PartWarp
+{
+    public System.Func<double, float> Shift;
+    public System.Func<double, float> Scale;
 }

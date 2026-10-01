@@ -38,6 +38,8 @@ public sealed class TransitRouteGeometry
         public PathSummary data;
         public VehiclePolyline full, trimmed;
         public float trimStart, trimEnd, offset, tramOffset;
+        /// <summary>つなぎ目のS字(TrackEndTransition)を持つ線路の軌道の横位置。S字が無ければ null で、一定の offset を使う。</summary>
+        public TrackLateralProfile lateral;
         public bool rail;
         /// <summary>駅のホーム(platform_width を持つバリアント)。路線が停留所を置いたホームでは通行方向によらず両方向に走れる</summary>
         public bool platform;
@@ -113,6 +115,8 @@ public sealed class TransitRouteGeometry
             {
                 TrackPath.GetTrackMasterParams(data, out float width, out int lanes, out _, out _, out _, out _, out _, out _);
                 g.offset = Math.Abs(TrackPath.GetTrackCenterOffset(width, Math.Max(1,lanes), 0, TrackPath.GetTrackCenterWidth(data)));
+                TrackLateralProfile profile = paths.GetTrackLateralProfile(data);
+                g.lateral = profile != null && !profile.IsUniform ? profile : null;
                 g.island = TrackPath.IsIslandPlatform(data);
                 ReadRailConnectors(data.start_node_id); ReadRailConnectors(data.end_node_id);
             }
@@ -229,6 +233,9 @@ public sealed class TransitRouteGeometry
         float tail = ra.Forward?a.full.Length-a.trimEnd:a.trimStart;
         float head = rb.Forward?b.trimStart:b.full.Length-b.trimEnd;
         float along = ahead ? (run.Forward?s-g.trimEnd:g.trimStart-s) : tail+(run.Forward?s:g.full.Length-s);
+        // 板なしでつなぐ線路の直進接続は、両パスがノードまで描かれてレール接続を持たない。端の誤差ぶんはパスの端で描く。
+        if ((g.rail || tram) && tail+head < .05f)
+        { SampleRun(line,index,Mathf.Clamp(s,g.trimStart,g.trimEnd),tram,arrivalTrack,out position,out tangent); return true; }
         VehiclePolyline connector = null;
         bool reverse = false;
         if (g.rail || tram)
@@ -371,7 +378,16 @@ public sealed class TransitRouteGeometry
         float sign = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1;
         float offset = tram ? g.tramOffset : g.offset;
         // 走る軌道は進行方向に対して通行側で最も外側の1本(TrackPath.TrackIndexForTravel と同じ規則)。到着した軌道はその反対側で、単線では同じ位置。
-        if (g.rail || tram) g.full.SampleOffset(s,forward,offset*sign*(arrivalTrack ? -1 : 1),out p,out t);
+        if (g.rail && !tram && g.lateral != null)
+        {
+            // つなぎ目のS字では軌道の横位置が地点で変わるので、線路のメッシュと同じ形を読み、向きに横位置の変化率を足す。
+            int track = TrackPath.TrackIndexForTravel(g.lateral.TrackCount, arrivalTrack ? !forward : forward);
+            float fromEnd = g.full.Length - s;
+            float lateral = g.lateral.Lateral(track, s, fromEnd);
+            g.full.SampleOffset(s, forward, forward ? lateral : -lateral, out p, out t);
+            t = (t + Vector3.Cross(Vector3.up, t).normalized * g.lateral.Slope(track, s, fromEnd)).normalized;
+        }
+        else if (g.rail || tram) g.full.SampleOffset(s,forward,offset*sign*(arrivalTrack ? -1 : 1),out p,out t);
         else
         {
             g.full.Sample(s,forward,out p,out t);

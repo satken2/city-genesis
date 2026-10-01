@@ -8,6 +8,7 @@ public static class PlatformFoundationGenerator
     /// <summary>
     /// trackOffset はホームが面する軌道の中心の横位置（TrackPath.PlatformTrackOffset。単線は0）。
     /// 部品は「原点＝軌道の中心線・右側用」の規約なので、この位置から外側へ置く。
+    /// つなぎ目のS字では、軌道と一緒に PathDrawContext.Warp の横ずれだけ動く。
     /// </summary>
     public static void Generate(GameObject parent, SplineComputer spline, string variantBase,
         string typeBase, bool leftSide, float trackOffset, double from, double to)
@@ -28,9 +29,10 @@ public static class PlatformFoundationGenerator
         var vertices = source.vertices;
         var world = new Vector3[vertices.Length];
         float side = leftSide ? -1f : 1f;
+        PartWarp warp = PathDrawContext.Warp;
         for (int tile = 0; tile < tiles; tile++)
         {
-            var sections = new Dictionary<float, (Vector3 point, Vector3 right)>();
+            var sections = new Dictionary<float, (Vector3 point, Vector3 right, float shift)>();
             var groundBySection = new Dictionary<Vector2, float>();
             for (int i = 0; i < vertices.Length; i++)
             {
@@ -38,11 +40,12 @@ public static class PlatformFoundationGenerator
                 if (!sections.TryGetValue(v.z, out var section))
                 {
                     float distance = (tile + (v.z - bounds.min.z) / bounds.size.z) * length / tiles;
-                    var sample = spline.Evaluate(RoadPath.ClampSplinePercent(spline.Travel(from, distance, Spline.Direction.Forward)));
-                    section = (sample.position, Vector3.Cross(Vector3.up, sample.forward).normalized);
+                    double percent = RoadPath.ClampSplinePercent(spline.Travel(from, distance, Spline.Direction.Forward));
+                    var sample = spline.Evaluate(percent);
+                    section = (sample.position, Vector3.Cross(Vector3.up, sample.forward).normalized, warp?.Shift != null ? warp.Shift(percent) : 0f);
                     sections.Add(v.z, section);
                 }
-                Vector3 top = section.point + section.right * (trackOffset + side * v.x)
+                Vector3 top = section.point + section.right * (trackOffset + section.shift + side * v.x)
                     + Vector3.up * RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE;
                 var key = new Vector2(v.x, v.z);
                 if (!groundBySection.TryGetValue(key, out float ground))

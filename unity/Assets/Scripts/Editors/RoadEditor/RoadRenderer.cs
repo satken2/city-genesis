@@ -37,6 +37,16 @@ public partial class RoadRenderer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 敷設プレビューの線路を、完成済み線路の描画に参加する仮の相手として受け取る口(PathManager が設定する)。
+    /// 引数は線ごとの仮の PathSummary(負の path_id)・描画点列・形状を編集中の計画の path_id。null なら登録を消す。
+    /// </summary>
+    public static System.Action<List<PathSummary>, List<List<Vector3>>, int> PreviewTrackSink;
+
+    // 仮の相手として登録中か(消すときだけ口を呼ぶ)と、前回登録した入力の署名(同じなら作り直さない)。
+    private bool registeredPreviewTracks;
+    private int registeredPreviewHash;
+
     private float[] lastLateralOffsets;
     private int[] lastTravelDirections;
     private bool hasPreviewState = false;
@@ -86,8 +96,9 @@ public partial class RoadRenderer : MonoBehaviour
     /// 駅バリアントのホーム設置側の解決(TrackPath.ResolvePlatformExtents)が走行方向を
     /// 参照するため、確定後と同じ側にホームを張り出させるのに必要。要素が無い線は
     /// DIR_BOTH(双方向)として扱う。
-    /// 確定時にUI側が平行な単線パス群へ展開して敷設するのと同じ見た目にするための機構で、
-    /// 敷設済み線路同士の結合描画(TrackAdjacency)はプレビューには適用されない。
+    /// 確定時にUI側が平行な単線パス群へ展開して敷設するのと同じ見た目にするための機構。
+    /// 線路のプレビューは RegisterPreviewTracks で仮の相手として登録され、既存の線路やプレビューの線どうしと
+    /// 近接線路の結合(TrackAdjacency)・つなぎ目のS字(TrackEndTransition)でつながる。
     /// </summary>
     public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, bool isValid = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null, int[] travelDirections = null, string houseEnds = "both", List<List<Vector3>> profiles = null, string passageMode = "elevated")
     {
@@ -131,7 +142,7 @@ public partial class RoadRenderer : MonoBehaviour
         if (lateralOffsets == null || lateralOffsets.Length == 0)
         {
             // 単一パス: 受け取った点列をそのまま中心線として1本生成する
-            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, activeMaterial, null, houseEnds, profiles != null, passageMode);
+            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, activeMaterial, null, houseEnds, profiles != null, passageMode, 0);
         }
         else
         {
@@ -146,7 +157,7 @@ public partial class RoadRenderer : MonoBehaviour
                     ? profiles[i] : OffsetPolylineLateral(subdividePoints, lateralOffsets[i]);
                 int travelDirection = (travelDirections != null && i < travelDirections.Length)
                     ? travelDirections[i] : Constants.DIR_BOTH;
-                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, activeMaterial, container, houseEnds, profiles != null, passageMode);
+                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, activeMaterial, container, houseEnds, profiles != null, passageMode, i);
             }
         }
 
@@ -177,51 +188,11 @@ public partial class RoadRenderer : MonoBehaviour
     /// componentPoints は設計空間(地面+相対Y)の点列で、生成器へは base_height を引いた
     /// 描画用の点列を渡す(ToDrawPoints)。仮 PathSummary の始点・終点・ウェイポイントは設計値のまま。
     /// </summary>
-    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent, string houseEnds, bool designed = false, string passageMode = "elevated")
+    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent, string houseEnds, bool designed = false, string passageMode = "elevated", int componentIndex = 0)
     {
-        Vector3 startPos = componentPoints[0];
-        Vector3 endPos = componentPoints[componentPoints.Count - 1];
-        float startGroundY = Utils.GetGroundHeight(startPos);
-        float endGroundY = Utils.GetGroundHeight(endPos);
-        float startRelY = startPos.y - startGroundY;
-        float endRelY = endPos.y - endGroundY;
-
-        List<object> waypointsList = new List<object>();
-        if (!curved)
-        {
-            for (int i = 1; i < componentPoints.Count - 1; i++)
-            {
-                Vector3 wpPos = componentPoints[i];
-                float wpGroundY = Utils.GetGroundHeight(wpPos);
-                float wpRelY = wpPos.y - wpGroundY;
-                // GetWaypointList は {position:[x,relY,z]} の辞書だけを読む(素の配列は黙って捨てられる)
-                waypointsList.Add(new Dictionary<string, object> { ["position"] = new List<object> { (object)wpPos.x, (object)wpRelY, (object)wpPos.z } });
-            }
-        }
-
-        PathSummary tempPathData = new PathSummary
-        {
-            path_type = pathType,
-            path_variant = pathSubtype,
-            waypoints = waypointsList,
-            curved = curved,
-            platform_side = platformSide,
-            house_ends = houseEnds,
-            passage_mode = passageMode,
-            travel_direction = travelDirection,
-            follow_terrain = Constants.VALUE_NONE, // intの既定値0は「非追従」になるため未設定を明示する
-            start_point = new List<object> { (object)startPos.x, (object)startRelY, (object)startPos.z },
-            end_point = new List<object> { (object)endPos.x, (object)endRelY, (object)endPos.z }
-        };
-
-        if (designed)
-        {
-            // 造成済みの設計点列を生成器が生地形へ再投影しないようにする。
-            tempPathData.follow_terrain = 0;
-            tempPathData.station_grade_profile = new List<object>();
-            foreach (var p in componentPoints)
-                tempPathData.station_grade_profile.Add(new List<object> { p.x, p.y, p.z });
-        }
+        PathSummary tempPathData = BuildPreviewSummary(componentPoints, pathType, pathSubtype, curved, platformSide, travelDirection, houseEnds, designed, passageMode);
+        // 線路は線ごとに一意な負の path_id を持たせ、仮の相手の登録(RegisterPreviewTracks)と同じ線として扱う。
+        tempPathData.path_id = PreviewPathId(componentIndex, pathType);
         PathMeshResult meshResult = PathMeshFactory.GeneratePathMesh(tempPathData, ToDrawPoints(componentPoints, pathSubtype));
         if (meshResult == null) return;
         // 生成器が返す帯は、詳細GOがある場合には未使用のクリック用メッシュ。
@@ -285,6 +256,131 @@ public partial class RoadRenderer : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// プレビューの1本分の仮の PathSummary。始点・終点・ウェイポイント(直線のとき)は設計値(相対Y)。
+    /// 線路は、ノードでの向きの判定(つなぎ目のS字・板なしの直進接続)に使うため、曲線でも両端の点列の向きを端点制御点として持つ。
+    /// </summary>
+    private static PathSummary BuildPreviewSummary(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, string houseEnds, bool designed, string passageMode)
+    {
+        Vector3 startPos = componentPoints[0];
+        Vector3 endPos = componentPoints[componentPoints.Count - 1];
+        float startGroundY = Utils.GetGroundHeight(startPos);
+        float endGroundY = Utils.GetGroundHeight(endPos);
+        float startRelY = startPos.y - startGroundY;
+        float endRelY = endPos.y - endGroundY;
+
+        List<object> waypointsList = new List<object>();
+        if (!curved)
+        {
+            for (int i = 1; i < componentPoints.Count - 1; i++)
+            {
+                Vector3 wpPos = componentPoints[i];
+                float wpGroundY = Utils.GetGroundHeight(wpPos);
+                float wpRelY = wpPos.y - wpGroundY;
+                // GetWaypointList は {position:[x,relY,z]} の辞書だけを読む(素の配列は黙って捨てられる)
+                waypointsList.Add(new Dictionary<string, object> { ["position"] = new List<object> { (object)wpPos.x, (object)wpRelY, (object)wpPos.z } });
+            }
+        }
+
+        PathSummary tempPathData = new PathSummary
+        {
+            path_type = pathType,
+            path_variant = pathSubtype,
+            waypoints = waypointsList,
+            curved = curved,
+            platform_side = platformSide,
+            house_ends = houseEnds,
+            passage_mode = passageMode,
+            travel_direction = travelDirection,
+            follow_terrain = Constants.VALUE_NONE, // intの既定値0は「非追従」になるため未設定を明示する
+            start_point = new List<object> { (object)startPos.x, (object)startRelY, (object)startPos.z },
+            end_point = new List<object> { (object)endPos.x, (object)endRelY, (object)endPos.z }
+        };
+        if (curved && componentPoints.Count >= 3 && (pathType == Constants.PATH_TRACK || pathType == Constants.PATH_MONORAIL))
+        {
+            Vector3 startControl = componentPoints[1], endControl = componentPoints[componentPoints.Count - 2];
+            tempPathData.start_control = new List<object> { (object)startControl.x, (object)(startControl.y - startGroundY), (object)startControl.z };
+            tempPathData.end_control = new List<object> { (object)endControl.x, (object)(endControl.y - endGroundY), (object)endControl.z };
+        }
+
+        if (designed)
+        {
+            // 造成済みの設計点列を生成器が生地形へ再投影しないようにする。
+            tempPathData.follow_terrain = 0;
+            tempPathData.station_grade_profile = new List<object>();
+            foreach (var p in componentPoints)
+                tempPathData.station_grade_profile.Add(new List<object> { p.x, p.y, p.z });
+        }
+        return tempPathData;
+    }
+
+    /// <summary>線路のプレビューの線 index の仮の path_id(負)。線路以外は0のまま。</summary>
+    private static int PreviewPathId(int index, int pathType)
+        => pathType == Constants.PATH_TRACK || pathType == Constants.PATH_MONORAIL ? -(index + 1) : 0;
+
+    /// <summary>
+    /// 敷設プレビューの線路を、完成済み線路の描画(つなぎ目のS字・並走の縫い合わせ・車止め)に参加する仮の相手として
+    /// PathManager へ登録する(PreviewTrackSink)。centerPoints は確定済みの形の中心線(配置中の仮終点・ドラッグ中の形を除く)で、
+    /// null や線路以外なら登録を消す。複線は lateralOffsets(または造成後の縦断 profiles)で線ごとに登録する。
+    /// excludedPathId は形状を編集中の計画(無ければ0)。前回と同じ入力なら何もしない。
+    /// </summary>
+    public void RegisterPreviewTracks(List<Vector3> centerPoints, int pathType, int pathSubtype, bool curved, int platformSide,
+        float[] lateralOffsets, int[] travelDirections, string houseEnds, string passageMode, int excludedPathId, List<List<Vector3>> profiles = null)
+    {
+        if (PreviewTrackSink == null) return;
+        bool track = pathType == Constants.PATH_TRACK || pathType == Constants.PATH_MONORAIL;
+        if (!track || centerPoints == null || centerPoints.Count < 2)
+        {
+            ClearPreviewTracks();
+            return;
+        }
+        int hash = PreviewInputHash(centerPoints, pathSubtype, curved, platformSide, lateralOffsets, travelDirections, excludedPathId, profiles);
+        if (registeredPreviewTracks && hash == registeredPreviewHash) return;
+
+        int count = profiles != null ? profiles.Count : lateralOffsets != null && lateralOffsets.Length > 0 ? lateralOffsets.Length : 1;
+        var summaries = new List<PathSummary>(count);
+        var drawPoints = new List<List<Vector3>>(count);
+        for (int i = 0; i < count; i++)
+        {
+            List<Vector3> component = profiles != null ? profiles[i]
+                : lateralOffsets != null && lateralOffsets.Length > 0 ? OffsetPolylineLateral(centerPoints, lateralOffsets[i]) : centerPoints;
+            if (component == null || component.Count < 2) continue;
+            int direction = travelDirections != null && i < travelDirections.Length ? travelDirections[i] : Constants.DIR_BOTH;
+            PathSummary summary = BuildPreviewSummary(component, pathType, pathSubtype, curved, platformSide, direction, houseEnds, profiles != null, passageMode);
+            summary.path_id = PreviewPathId(i, pathType);
+            summaries.Add(summary);
+            drawPoints.Add(ToDrawPoints(component, pathSubtype));
+        }
+        registeredPreviewTracks = true;
+        registeredPreviewHash = hash;
+        PreviewTrackSink(summaries, drawPoints, excludedPathId);
+        // 形が変わらない区間も、プレビューの線どうしの縫い合わせを新しい登録で描き直す。
+        foreach (var section in sections)
+            if (section != null) section.hasPreviewState = false;
+    }
+
+    /// <summary>仮の相手としての登録を消す(既存線路を元の形へ描き直させる)。</summary>
+    private void ClearPreviewTracks()
+    {
+        if (!registeredPreviewTracks) return;
+        registeredPreviewTracks = false;
+        PreviewTrackSink?.Invoke(null, null, 0);
+    }
+
+    private static int PreviewInputHash(List<Vector3> points, int variant, bool curved, int platformSide, float[] offsets, int[] directions, int excluded, List<List<Vector3>> profiles)
+    {
+        var hash = new System.HashCode();
+        hash.Add(variant); hash.Add(curved); hash.Add(platformSide); hash.Add(excluded);
+        hash.Add(points.Count);
+        foreach (var p in points) { hash.Add(Mathf.RoundToInt(p.x * 10f)); hash.Add(Mathf.RoundToInt(p.y * 10f)); hash.Add(Mathf.RoundToInt(p.z * 10f)); }
+        if (offsets != null) foreach (float o in offsets) hash.Add(Mathf.RoundToInt(o * 100f));
+        if (directions != null) foreach (int d in directions) hash.Add(d);
+        if (profiles != null)
+            foreach (var line in profiles)
+                if (line != null) foreach (var p in line) { hash.Add(Mathf.RoundToInt(p.x * 10f)); hash.Add(Mathf.RoundToInt(p.y * 10f)); hash.Add(Mathf.RoundToInt(p.z * 10f)); }
+        return hash.ToHashCode();
     }
 
     /// <summary>
@@ -414,6 +510,7 @@ public partial class RoadRenderer : MonoBehaviour
     /// </summary>
     public void ResetPreview()
     {
+        if (!isSection) ClearPreviewTracks();
         foreach (var section in sections)
             if (section != null) section.ResetPreview();
         if (currentPreviewObject != null)

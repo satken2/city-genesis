@@ -44,12 +44,25 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 return new NodeMeshResult(null, null, merge.ConnectionPoints) { MotorwayMerge = merge };
             }
             MainLineSurface mainLine = merge?.Surface;
+
+            // 軌道の位置が違う線路の直進接続のS字(TrackEndTransition)。前後のパスがノードで同じ横位置・幅にそろう。
+            var trackShifts = TrackEndTransition.ResolveNode(nodeId, paths);
+            // 軌道の位置と幅がそろう2本の線路の直進接続は、板を作らず両方をノードまで描く(架線・桁・ホームを途切れさせない)。
+            TrackContinuousJoin trackJoin = TrackIntersectionMeshGenerator.TryContinuousJoin(nodeId, paths, pointResolver, trackShifts, out var joinPoints);
+            if (trackJoin != null)
+            {
+                return new NodeMeshResult(null, null, joinPoints) { TrackJoin = trackJoin };
+            }
+
+            // S字では幅がノードからの距離で変わる。切断距離はS字の区間で最も広い幅(元の幅とノードでの幅の大きい方)で決め、
+            // 断面の幅は切断位置での幅にする(狭い幅で切断を決めると、広い断面どうしの外周が交わって板が作れない)。
             var roadResult = IntersectionPolygonUtil.ComputeIntersectionPolygon(
                 nodeId,
                 nodePos2D,
                 paths,
                 gf,
-                ResolveRoadWidth, pointResolver, cutLimitResolver
+                p => ResolveRoadWidth(p) + Mathf.Max(0f, TrackWidthShift(p, 0f, trackShifts)), pointResolver, cutLimitResolver,
+                (p, distance) => ResolveRoadWidth(p) + TrackWidthShift(p, distance, trackShifts)
             );
 
             if (roadResult.RequiresMoreSpace)
@@ -58,13 +71,15 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 return null;
             }
             Dictionary<int, Vector3> connectionPoints = BuildSectionPoints(roadResult.Sections, nodePosition, horizontalPlane, pointResolver != null);
-            Mesh roadMesh = BuildSurfaceMesh(roadResult.Geometry, nodePosition, roadResult.Sections, mainLine, "RoadIntersection");
-            if (roadMesh == null)
+            // 道床の無い線路(モノレール等)だけのノードは板を作らず、レールのつなぎと付帯パーツだけにする。
+            bool railsOnly = paths.TrueForAll(p => TrackIntersectionMeshGenerator.IsTrackType(p.path_type) && !HasSurfaceSource(p));
+            Mesh roadMesh = railsOnly ? null : BuildSurfaceMesh(roadResult.Geometry, nodePosition, roadResult.Sections, mainLine, "RoadIntersection");
+            if (!railsOnly && roadMesh == null)
             {
                 return null;
             }
 
-            Material roadMaterial = LoadRoadMaterial(paths);
+            Material roadMaterial = railsOnly ? null : LoadRoadMaterial(paths);
             foreach (var path in paths)
             {
                 if (!roadResult.Sections.TryGetValue(path.path_id, out var section)) continue;
@@ -93,10 +108,10 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             List<RailConnectorSpec> railConnectors = TrackIntersectionMeshGenerator.BuildRailConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints, roadResult.Sections);
 
             sidewalkConnectors.RemoveAll(spec => spec.Part == "wall" && WallBlocksRail(spec, railConnectors));
-            int surfaceVertexCount = roadMesh.vertexCount;
-            AddBodyShell(roadMesh, nodePosition, roadResult.Sections);
+            int surfaceVertexCount = roadMesh != null ? roadMesh.vertexCount : 0;
+            if (roadMesh != null) AddBodyShell(roadMesh, nodePosition, roadResult.Sections);
             RoadMarkingPlan markings = null;
-            if (paths.Exists(RoadMarkingRules.HasPaint))
+            if (roadMesh != null && paths.Exists(RoadMarkingRules.HasPaint))
             {
                 // 混在ノードが未舗装・石畳を代表材質に選んだ場合、その専用の縁や投影を維持する。
                 string surfaceShader = roadMaterial != null ? roadMaterial.shader.name : "";
@@ -129,7 +144,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             }
             var trafficSignals = TrafficSignalLayout.Build(nodeId, horizontalPlane, paths, roadResult.Sections, roadResult.Corners,
                 sidewalkSetbacks, mainLine, TrafficSignalStyle.Current.MinReach);
-            return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks) { MotorwayMerge = merge, Markings = markings, TrafficSignals = trafficSignals };
+            return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks) { MotorwayMerge = merge, Markings = markings, TrafficSignals = trafficSignals, RailsOnly = railsOnly };
         }
         catch (Exception ex)
         {
@@ -462,6 +477,25 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         }
         return result;
     }
+    /// <summary>線路のつなぎ目のS字で、ノードから distance の地点の幅が元の幅より広がる量(狭まると負。左右対称)。</summary>
+    private static float TrackWidthShift(PathSummary path, float distance, Dictionary<int, TrackEndTransition.EndShift> shifts)
+    {
+        return shifts != null && shifts.TryGetValue(path.path_id, out var shift) ? 2f * shift.OuterShift(distance) : 0f;
+    }
+
+    /// <summary>
+    /// 板の材質の元(マスターの body_material か道床の部品 body)を持つパスか。
+    /// モノレールのように道床を持たない線路は持たず、そのような線路だけのノードには板を作らない。
+    /// </summary>
+    private static bool HasSurfaceSource(PathSummary path)
+    {
+        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(path.path_variant) : null;
+        if (master != null && !string.IsNullOrEmpty(master.body_material) && RoadPath.GetOrCreateRoadMaterialByName(master.body_material) != null) return true;
+        if (ModelManager.Instance == null) return true;
+        return ModelManager.Instance.GetModel($"Models/Paths/p{path.path_variant}/body", true) != null
+            || ModelManager.Instance.GetModel($"Models/Paths/p{path.path_type}/body", true) != null;
+    }
+
     private static float ResolveRoadWidth(PathSummary path)
     {
         // 描画側の道路幅はマスターデータを正とする。PathSummary.width はバックエンド由来の値であり、
