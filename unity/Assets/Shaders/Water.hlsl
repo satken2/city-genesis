@@ -30,6 +30,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
+#include "Assets/Shaders/WaterNoise.hlsl"
 
 // --- マテリアルプロパティ(SRP Batcher 互換のため UnityPerMaterial にまとめる) ---
 CBUFFER_START(UnityPerMaterial)
@@ -52,44 +53,6 @@ CBUFFER_START(UnityPerMaterial)
     float  _FlowEnabled;        // 1 で頂点UV2の流下方向へさざ波・泡を流す(川)。海面・湖面は0
     float  _FlowSpeed;          // 流れの速度(m/s)
 CBUFFER_END
-
-// ---------------- プロシージャルノイズ ----------------
-// テクスチャを使わずに水面のさざ波・泡を作るための、ハッシュベースの
-// 値ノイズと fbm。ワールドXZ座標を入力にするため、メッシュのタイリングや
-// 頂点密度に依存せず継ぎ目が出ない。
-
-float2 WaterHash2(float2 p)
-{
-    p = float2(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)));
-    return frac(sin(p) * 43758.5453123) * 2.0 - 1.0;
-}
-
-// 勾配(Perlin風)ノイズ。-1..1 程度。
-float WaterGradNoise(float2 p)
-{
-    float2 i = floor(p);
-    float2 f = frac(p);
-    float2 u = f * f * (3.0 - 2.0 * f); // smoothstep 補間
-    float a = dot(WaterHash2(i + float2(0, 0)), f - float2(0, 0));
-    float b = dot(WaterHash2(i + float2(1, 0)), f - float2(1, 0));
-    float c = dot(WaterHash2(i + float2(0, 1)), f - float2(0, 1));
-    float d = dot(WaterHash2(i + float2(1, 1)), f - float2(1, 1));
-    return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
-}
-
-// 3オクターブの fbm。0..1 程度に正規化して返す。
-float WaterFbm(float2 p)
-{
-    float v = 0.0;
-    float amp = 0.5;
-    for (int i = 0; i < 3; i++)
-    {
-        v += amp * WaterGradNoise(p);
-        p *= 2.0;
-        amp *= 0.5;
-    }
-    return v * 0.5 + 0.5;
-}
 
 // 波の高さ場(ワールドXZ・時間 t)。2枚のスクロールする fbm を重ねる。
 // 川では呼び出し側が worldXZ を流下方向へ時間比例でずらして渡す(流れの表現)。

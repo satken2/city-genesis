@@ -293,16 +293,39 @@ public sealed partial class AmbientVehicleManager
         call.routeLength = call.along[n - 1];
         call.total = call.routeLength + Vector2.Distance(call.standOff, call.hull.Center);
         call.s = Random.Range(0f, call.total);
-        var v = new Vehicle { spec = call.spec.ship, model = model, trail = MakeTrail(call.spec.ship), call = call,
+        var v = new Vehicle { spec = call.spec.ship, model = model, call = call,
                               routeLength = float.PositiveInfinity, expiresAt = float.PositiveInfinity };
+        PrewarmWake(v);
         PlacePortShip(v);
         vehicles.Add(v);
     }
 
     /// <summary>
-    /// 航路では岸壁の沖の停止点までの残りで決まる一定の減速度で行き足を落とし、横寄せはさらに遅く寄せる。
-    /// 接岸したら停泊時間だけ留まり、過ぎたら描画範囲の外にある時点で消す(目の前では消さない)。
+    /// 航跡の寿命ぶん遡った道のりから今の位置まで進め直し、航跡の履歴を作る。航路の途中に置いた船が、
+    /// 後ろに航跡の無い状態で目の前に現れないようにする。遡った道のりを逆順にたどるので、最後の記録は今の位置と一致する。
     /// </summary>
+    private void PrewarmWake(Vehicle v)
+    {
+        const float Step = 1f;   // [s]
+        PortCall call = v.call;
+        var history = new List<float> { call.s };
+        for (float t = 0f; t < v.spec.wakeLife && history[history.Count - 1] > 0f; t += Step)
+        {
+            float s = history[history.Count - 1];
+            history.Add(Mathf.Max(0f, s - PortSpeed(call, s) * Step));
+        }
+        float target = call.s;
+        v.wake = MakeWake(v.spec, v.model, PortSpeed(call, history[history.Count - 1]));
+        for (int i = history.Count - 1; v.wake != null && i >= 0; i--)
+        {
+            call.s = history[i];
+            PlacePortShip(v);
+            v.wake.Record(v.position, v.Direction, Time.time - i * Step, Step);
+        }
+        call.s = target;
+    }
+
+    /// <summary>接岸したら停泊時間だけ留まり、過ぎたら描画範囲の外にある時点で消す(目の前では消さない)。</summary>
     private void MovePortShip(Vehicle v, float dt, Vector3 camera)
     {
         PortCall call = v.call;
@@ -312,12 +335,15 @@ public sealed partial class AmbientVehicleManager
             else if (Time.time > call.leavesAt && (v.position - camera).sqrMagnitude > DrawDistance * DrawDistance) v.dead = true;
             return;
         }
-        v.speed = call.s < call.routeLength
-            ? Mathf.Clamp(Mathf.Sqrt(PortArrivalSpeed * PortArrivalSpeed + 2f * PortDeceleration * (call.routeLength - call.s)), PortArrivalSpeed, call.cruise)
-            : Mathf.Clamp(Mathf.Sqrt(2f * BerthingDeceleration * (call.total - call.s)), BerthingSpeedMin, BerthingSpeedMax);
+        v.speed = PortSpeed(call, call.s);
         call.s = Mathf.Min(call.total, call.s + v.speed * dt);
         PlacePortShip(v);
     }
+
+    /// <summary>道のり s での速さ。航路では岸壁の沖の停止点までの残りで決まる一定の減速度で行き足を落とし、横寄せはさらに遅く寄せる。</summary>
+    private static float PortSpeed(PortCall call, float s) => s < call.routeLength
+        ? Mathf.Clamp(Mathf.Sqrt(PortArrivalSpeed * PortArrivalSpeed + 2f * PortDeceleration * (call.routeLength - s)), PortArrivalSpeed, call.cruise)
+        : Mathf.Clamp(Mathf.Sqrt(2f * BerthingDeceleration * (call.total - s)), BerthingSpeedMin, BerthingSpeedMax);
 
     /// <summary>道のり s の位置と向き。航路は岸壁と平行に進んで停止点に着くので、横寄せの間は船首をその向きのまま保つ。</summary>
     private static void PlacePortShip(Vehicle v)
