@@ -1005,6 +1005,16 @@ public static class BuildingMeshUtils
     /// </summary>
     public static GameObject GetPartBySuffixScan(string prefix, string partName, int variantNumber)
     {
+        int bestSuffix = FindPartSuffix(prefix, partName, variantNumber);
+        return bestSuffix >= 0 ? GetPartNoPosition(prefix, partName, bestSuffix, true) : null;
+    }
+
+    /// <summary>
+    /// <see cref="GetPartBySuffixScan"/> が選ぶ閾値フォルダ。無ければ -1。
+    /// 存在判定は無印の名前で行うので描画LODによらず同じ値になり、無印があるのに `_far` が無いことの判定にも使える。
+    /// </summary>
+    public static int FindPartSuffix(string prefix, string partName, int variantNumber)
+    {
         int bestSuffix = -1;
         for (int suffix = 0; suffix <= 1000; suffix += 100)
         {
@@ -1014,7 +1024,7 @@ public static class BuildingMeshUtils
                 bestSuffix = suffix;
             }
         }
-        return bestSuffix >= 0 ? GetPartNoPosition(prefix, partName, bestSuffix, true) : null;
+        return bestSuffix;
     }
 
     /// <summary>

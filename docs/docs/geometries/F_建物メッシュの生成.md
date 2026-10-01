@@ -1,6 +1,6 @@
 # 建物メッシュの生成
 
-全建物のFarは、共通のprefix解決で選ばれたフォルダの閾値0から `base/mid/top-prebuilt_far` を探し、存在する場合は既成建物と同じ規則で組み立てる。名所・通常の用途で経路を分けない。通常のmodel_typeがモジュラー等でも遠景は完成モデルで提供できる。敷地装飾は省略し、遠景用パーツが1つも無い場合は簡易形状へ戻る。工事・解体・倒壊状態は専用の簡易形状を使う。モデル構成は [[F3_既成建物のメッシュ生成]] を参照。
+全建物のFarは、共通のprefix解決で選ばれたフォルダの閾値0から `base/mid/top-prebuilt_far` を探し、存在する場合は既成建物と同じ規則で組み立てる。名所・通常の用途で経路を分けない。通常のmodel_typeがモジュラー等でも遠景は完成モデルで提供できる。敷地装飾は省略し、遠景用パーツが1つも無い場合は簡易形状へ戻る。ただしマッシュアップ建物は、簡易形状の前に棟ごとの `mashup-{model_prefix}-{base|mid|top}-prebuilt_far` を通常と同じ配置で組み立てる（[[F6_マッシュアップ建物のメッシュ生成]] §8）。工事・解体・倒壊状態は専用の簡易形状を使う。モデル構成は [[F3_既成建物のメッシュ生成]] を参照。
 
 `MODEL_PARKING=10` / `MODEL_ROTARY=11` / `MODEL_PARK=12` は `OpenSpaceBuildingMeshBuilder` が区画内の配置計画から面と実寸装飾を組み立てる。底面はSHAPE_FULL、接地は中心位置の地形標高。`site_*` パーツは独立した閾値走査で解決し、`mid-w1` は不要。遠景モデル未提供時のFarは0.3m板。3003舗装広場はGROUNDでfloorのみを描く。詳細は [[F10_オープンスペースのメッシュ生成]]。
 
@@ -57,7 +57,7 @@ Far建物は256m区画・親・マテリアル別に最大64個を結合する�
                                 ▼
                      BuildingMeshBuilder.Generate(data, isDynamic, drawLod)
                           │
-                          ├─ drawLod が Far → GenerateFarBuilding（共通の遠景モデル、無ければ簡易形状。§3.5）
+                          ├─ drawLod が Far → GenerateFarBuilding（共通の遠景モデル、マッシュアップ・港は専用の組み立て、無ければ簡易形状。§3.5）
                           │
                           ├─ status が STATUS_CONSTRUCTING → ConstructingBuildingMeshBuilder（F5）
                           │
@@ -326,13 +326,13 @@ Models/Paths/p1/body                   道路ボディ
 
 ### 3.5 接写用パーツ（`_close`）
 
-描画LOD（[E_LOD処理](E_LOD処理.md)「描画LOD（オブジェクト単位）」）が Close の建物は、パーツ名に `_close` を付けた接写用モデルで組み立てる。無印のパーツが Normal（制作の基準）であり、`_close` は任意の上乗せである。Farは全建物共通で `base/mid/top-prebuilt_far` を使い、遠景用パーツが無い場合はコード生成の簡易形状を使う。
+描画LOD（[E_LOD処理](E_LOD処理.md)「描画LOD（オブジェクト単位）」）が Close の建物は、パーツ名に `_close` を付けた接写用モデルで組み立てる。無印のパーツが Normal（制作の基準）であり、`_close` は任意の上乗せである。Farは全建物共通で `base/mid/top-prebuilt_far` を使い、遠景用パーツが無い場合はコード生成の簡易形状を使う（マッシュアップ建物は棟ごとの遠景パーツを先に試す）。
 
 - **命名**: `{パーツ名}_close`。無印と**同じ閾値フォルダ**に置く（例: `Models/Buildings/a2000/0/mid-w1_close`）。
 - **解決順**: Close のときは同じ閾値フォルダの `{パーツ名}_close` を先に試し、無ければ無印 `{パーツ名}` を使う（`BuildingMeshUtils.GetModelForDrawLod`）。閾値フォルダの選択（§4.2）とパーツの存在判定は無印の名前で行うため、`_close` だけを置いても無印が無ければ使われない。
 - **対象**: `BuildingMeshUtils.GetPart` / `GetPartNoPosition` / common パーツ経由で解決されるすべてのパーツ（壁・角・ceil・floor・entrance・roofprop・prebuilt・マッシュアップのサブ建物・common）。
 - **規約**: `_close` は無印と原点・配置寸法を一致させ、既存マテリアルを名前で共有する。壁（base/mid/top-w）と玄関は前方（Blender -Y）への追加張り出しを最大1.5m許可するが、幅X・高さZ・背面+Yは維持する。壁の奥行きは配置・伸縮に使われず、玄関は原点へ実寸配置されるため、庇・看板・バルコニーを付けても配置は変わらない。角・既成・タイル・塔屋などは全bboxを一致させる。生成側は配置計算を変えずプレハブを差し替える。
-- **仕組み**: `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` が生成の前後で静的コンテキスト `BuildingMeshUtils.CurrentDrawLod` を設定・復元し、十数箇所あるパーツ取得がこれを参照する（生成は同期的にメインスレッドで行われる）。`isDynamic`（地形追従の互換引数）と `drawLod`（見え方由来）は独立した引数である。`drawLod` が Far の建物は `GenerateFarBuilding` が遠景用prebuiltを共通経路で組み立て、未提供時はフットプリントを階数×階高で押し出した箱を返す（露天掘りは何も描かない。港は区画が海へはみ出しているので箱にせず、岸壁と `_far` パーツを同じ配置で組み立てる。[[F4_港湾岸壁のメッシュ生成]] §9）（工事中・解体中は1階分、倒壊は0.5階分の高さ、`MODEL_MODULAR_GROUND` は0.3mの板）。
+- **仕組み**: `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` が生成の前後で静的コンテキスト `BuildingMeshUtils.CurrentDrawLod` を設定・復元し、十数箇所あるパーツ取得がこれを参照する（生成は同期的にメインスレッドで行われる）。`isDynamic`（地形追従の互換引数）と `drawLod`（見え方由来）は独立した引数である。`drawLod` が Far の建物は `GenerateFarBuilding` が遠景用prebuiltを共通経路で組み立て、未提供時はフットプリントを階数×階高で押し出した箱を返す（露天掘りは何も描かない。港は区画が海へはみ出しているので箱にせず、岸壁と `_far` パーツを同じ配置で組み立てる。[[F4_港湾岸壁のメッシュ生成]] §9。マッシュアップは棟の配置が区画ごとに違うので、棟ごとの `mashup-{model_prefix}-{base|mid|top}-prebuilt_far` を通常と同じ配置で組み立て、1棟も描けなければ箱にする。[[F6_マッシュアップ建物のメッシュ生成]] §8）（工事中・解体中は1階分、倒壊は0.5階分の高さ、`MODEL_MODULAR_GROUND` は0.3mの板）。
 
 ---
 
@@ -817,7 +817,7 @@ X方向（辺の長さ方向）については、建物の壁と同じ敷き詰�
 | **`PreBuiltBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。既成パーツ組み立て（[[F3_既成建物のメッシュ生成]]）。                                                                         |
 | **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出す。埋立地の岸壁に面する港はスラブを作らず、その岸壁を水際にする。水際に荷役設備、道路側に施設モジュール、その間に港ごとのヤードの荷（コンテナの段積み、または野積みの山・油槽などを並べる）を `PortLayout` の計画どおりに置き、遠景も同じ配置で組み立てる（[[F4_港湾岸壁のメッシュ生成]]）。                                                  |
 | **`PortLayout.cs`**                         | **static クラス**。港の配置計画（施設モジュール・荷役設備・ヤードの荷の置き場）を通常モデルの寸法と入力の形から決める純データ。施設モジュールの置き方は区画だけで決まり、道路への開口（§16）と共有する（[[F4_港湾岸壁のメッシュ生成]] §5）。 |
-| **`MashupBuildingMeshBuilder.cs`**          | `IBuildingMeshGenerator`。`sub_buildings` の配置計画に従い、複数のサブ建物を既成パーツと同じ積み上げ規則で配置する（[[F6_マッシュアップ建物のメッシュ生成]]）。`openPit` を指定したインスタンスが露天掘り（[[F11_露天掘りのメッシュ生成]]）を担う。                                        |
+| **`MashupBuildingMeshBuilder.cs`**          | `IBuildingMeshGenerator`。`sub_buildings` の配置計画に従い、複数のサブ建物を既成パーツと同じ積み上げ規則で配置する（[[F6_マッシュアップ建物のメッシュ生成]]）。遠景は `GenerateFar` が棟ごとの遠景パーツを同じ配置で組み立てる。`openPit` を指定したインスタンスが露天掘り（[[F11_露天掘りのメッシュ生成]]）を担う。                                        |
 | **`RailYardBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。フットプリントと接続端子ノード位置から並行線路・集約曲線・架線・検修庫をプロシージャルに配置する（[[F9_車両基地のメッシュ生成]]）。 |
 | **`ConstructingBuildingMeshBuilder.cs`**    | `IBuildingMeshGenerator`。工事中専用の「工事現場」メッシュ（土マウンド + 足場リング + クレーン）を生成する（[[F5_工事中建物のメッシュ生成]]）。model_type 分岐より先に status で分岐する。 |
 | **`DefaultBodyBuilder.cs`**                 | **static クラス**。モジュラーパーツが一切存在しない場合のフォールバック躯体。底面ポリゴンを高さまで押し出した壁面と地面パネルを生成する（屋根は屋根ビルダーが担当）。 |

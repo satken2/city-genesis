@@ -51,10 +51,10 @@
 | `Buildings/` | 役割(参照先) |
 | --- | --- |
 | `BuildingMeshBuilder.cs` | 入口。static 幾何ユーティリティ(`GenerateColliderMesh` / `MergeSubMeshes` / `TriangulateOrFan` / `TriangulateEarClip`=失敗時は空 / `SubdivideTrianglesByEdgeLength` / `FlipToDelaunay` / `InsertInteriorPoints` / `GenerateTerrainSurfaceMesh` / `GenerateFoundationMesh` / `GenerateEntrance` / `GenerateRoofprop`)(F§15) |
-| `BuildingMeshUtils.cs` | パーツ解決(prefix・`_close`・common)・`CombineModuleMeshes`・`AddStackedModule`・`ResolveParcelContext`・`SanitizeRingPolygon`・屋根共通幾何 |
+| `BuildingMeshUtils.cs` | パーツ解決(prefix・`_close`・common・閾値フォルダ走査 `GetPartBySuffixScan`。採用される閾値は無印の有無で決まり `FindPartSuffix` で引ける)・`CombineModuleMeshes`・`AddStackedModule`・`ResolveParcelContext`・`SanitizeRingPolygon`・屋根共通幾何 |
 | `ModularBuildingMeshBuilder.cs` / `ModularBodyBuilder.cs` / `DefaultBodyBuilder.cs` | モジュラー躯体(壁・角の敷き詰め `BuildWallRun`、敷地装飾 `GenerateSiteDecorations`)と白箱フォールバック(F・F1) |
 | `FlatRoofBuilder.cs` / `HouseRoofBuilder.cs` / `GableRoofBuilder.cs` / `ShedRoofBuilder.cs` / `InteriorFloorBuilder.cs` / `ExteriorStairBuilder.cs` | 屋根4種・各階の床(F1)、辺ごとの外階段(F§11.4) |
-| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間に港ごとのヤードの荷(403 はコンテナ `port_container` の段積み、401・402・1001 は `port_cargo` を積まずに並べる。荷のパーツは各港の `a{variant}` にだけ置き、`b128` に置くと他の港へフォールバックする)を置く)、車両基地(F9。引き込み線の単線・複線は端子へつながる線路の軌道数で決まり、`ResolveLeadHalfSpacing` を BuildingManager が再利用キーに混ぜる。構内の設備は材質ごとに結合してから頂点を地形へ沿わせ、敷地全面は `a{variant}` 自身の floor で覆う=`ResolveFloorMaterialFromMaster(ownPartOnly)`) |
+| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11。遠景は static の `GenerateFar` が棟ごとの `_far` を同じ配置で組み、無印がある段の `_far` が欠けた棟は描かない)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間に港ごとのヤードの荷(403 はコンテナ `port_container` の段積み、401・402・1001 は `port_cargo` を積まずに並べる。荷のパーツは各港の `a{variant}` にだけ置き、`b128` に置くと他の港へフォールバックする)を置く)、車両基地(F9。引き込み線の単線・複線は端子へつながる線路の軌道数で決まり、`ResolveLeadHalfSpacing` を BuildingManager が再利用キーに混ぜる。構内の設備は材質ごとに結合してから頂点を地形へ沿わせ、敷地全面は `a{variant}` 自身の floor で覆う=`ResolveFloorMaterialFromMaster(ownPartOnly)`) |
 | `PortLayout.cs` | 港の配置計画(施設モジュール・荷役設備・ヤードの荷の置き場)。通常モデルの寸法と入力の形だけで決まる純データ(F4 §5)。荷の置き方は `CargoSpec`(コンテナは `ContainerSpec`、並べる荷は `GroundCargoSpec` がパーツの外接箱から作る) |
 | `OpenSpaceLayout.cs` / `OpenSpaceBuildingMeshBuilder.cs` | 駐車場・駅前ロータリー・公園(F10) |
 | `BuildingRoadAccess.cs` | 施設側の決定論的な間口(ロータリーの舗装交線・既成モデルのEmpty)。描画GOを間口の正にしない(F§16) |
@@ -63,7 +63,7 @@
 ## 描画LOD(DrawLod)が生成器に届く経路
 
 - 生成器はセルのティア表を見ない。DrawLod は呼び出し側が決め、建物は `Generate` の引数、パスは `PathDrawContext.Begin/End` で渡る。コンテキスト外の生成は Normal・全長扱い(E「物体の描画LOD」)。
-- Far は専用経路。建物は `GenerateFarBuilding`(`*-prebuilt_far` が無ければフットプリント押し出しの箱。露天掘りは穴に蓋をしないよう何も描かない。港は海へはみ出す区画の箱にせず、港の生成器が岸壁と `_far` パーツを同じ配置で組み立てる)、パスは PathManager 側の帯で生成器のパーツ組み立ては走らない(例外: `FarPlatformPath`・`PowerLinePath`)。
+- Far は専用経路。建物は `GenerateFarBuilding`(`*-prebuilt_far` が無ければフットプリント押し出しの箱。露天掘りは穴に蓋をしないよう何も描かない。港は海へはみ出す区画の箱にせず、港の生成器が岸壁と `_far` パーツを同じ配置で組み立てる。マッシュアップは `MashupBuildingMeshBuilder.GenerateFar` が棟ごとの `mashup-*-prebuilt_far` を通常と同じ配置で組み、1棟も描けなければ箱)、パスは PathManager 側の帯で生成器のパーツ組み立ては走らない(例外: `FarPlatformPath`・`PowerLinePath`)。
 - `_close` の解決点は2箇所だけ。建物は `BuildingMeshUtils.GetModelForDrawLod`、パスは `PathDrawContext.ResolvePrefab`(`CreateSplineMesh` で敷くパーツと送電鉄塔のみ。Instantiate 配置の tree/pillar/pole/設備やコネクタは常に無印)。新しいパーツ取得をこの2つを迂回して書かない。
 - `CreateSplineMesh` はクリップ区間と `PathDrawContext` の詳細区間の共通部分にだけ敷く。セグメントごとに別スプラインを作る生成器は割合基準が合わないので冒頭で `SuppressDetailRange = true` にする(`GenerateLinearPathWithCorners` が例)。複数スプラインの生成器を新設するときも同じ。
 - 曲率適応タイル長は `BuildSpline` 直後に `SetAdaptiveTileLength(ComputeAdaptiveTileLength(...))` を呼んで有効化する。`maxTileLength` に明示 `0`(著作長)を渡すパーツには適用されない。

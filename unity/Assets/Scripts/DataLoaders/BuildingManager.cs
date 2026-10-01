@@ -1880,7 +1880,7 @@ public class BuildingManager : BaseApiDataManager
         MeshFilter mf = buildingGO.AddComponent<MeshFilter>();
         MeshRenderer mr = buildingGO.AddComponent<MeshRenderer>();
 
-        // 遠景はパーツを読まない箱(フットプリント押し出し)。フル詳細と同じ組み立てを走らせない。
+        // 遠景は `_far` パーツだけで組み立て、無ければフットプリント押し出しの箱(GenerateFarBuilding)。フル詳細と同じ組み立てを走らせない。
         var farWatch = System.Diagnostics.Stopwatch.StartNew();
         BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, false, DrawLod.Far);
         // 遠景GOはコライダーを持たないので、生成されたコライダー用メッシュはここで解放する。

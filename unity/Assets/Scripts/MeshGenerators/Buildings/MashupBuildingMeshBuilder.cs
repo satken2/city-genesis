@@ -31,6 +31,10 @@ using GeneratedModels;
 /// 露天掘り（MODEL_OPEN_PIT）も同じ組み立てで、設備は前庭に並んだサブ建物として届く。
 /// 区画の奥はバックエンドが地形そのものを掘り下げた穴なので、区画を押し出した形
 /// （コライダー・白い箱）で穴を塞がず、地形に沿う区画の面と設備の箱をコライダーにする。
+///
+/// 遠景（Far）は <see cref="GenerateFar"/> が各棟を mashup-{model_prefix}-{base|mid|top}-prebuilt_far で
+/// 通常と同じ配置・積み上げで組み立てる。棟の配置は区画ごとに違うので、建物単位の固定の遠景モデルでは再現できない。
+/// 敷地の装飾・コライダー・白い箱は作らない。
 /// </summary>
 public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 {
@@ -77,16 +81,13 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         {
             foreach (SubBuildingPlacement placement in buildingData.sub_buildings)
             {
-                if (placement == null || placement.position == null || placement.position.Length < 2
-                    || string.IsNullOrEmpty(placement.model_prefix))
+                if (!IsValidPlacement(placement, buildingData))
                 {
-                    UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-                        $"[Mashup] agent_id={buildingData.agent_id} の sub_buildings に不正なエントリがあるためスキップします。");
                     continue;
                 }
                 int firstMesh = temporaryMeshes.Count;
                 float topY = GenerateSubBuilding(
-                    placement, glbPrefix, variantNumber, floorHeight, centerPointWorld,
+                    placement, glbPrefix, variantNumber, floorHeight, centerPointWorld, far: false,
                     combineInstances, materials, temporaryMeshes);
                 maxTopY = Mathf.Max(maxTopY, topY);
                 if (openPit && TryEncapsulate(temporaryMeshes, firstMesh, out Bounds bounds))
@@ -147,14 +148,101 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// サブ建物1棟を prebuilt と同じ積み上げロジックで生成し、CombineInstance リストへ追加する。
+    /// 遠景（Far）のマッシュアップ建物。BuildingMeshBuilder.GenerateFarBuilding が CurrentDrawLod=Far にして呼ぶので、
+    /// パーツ解決は `_far` だけを返す。遠景GOはコライダーを持たないのでコライダーは null。
     /// </summary>
-    /// <returns>この棟の天端のローカルY（コライダー高さの算出に使う）。</returns>
+    /// <returns>遠景パーツで描けた棟が1つも無ければ null（呼び出し側がフットプリント押し出しの箱にする）。</returns>
+    public static BuildingMeshResult GenerateFar(BuildingSummary buildingData)
+    {
+        if (buildingData?.sub_buildings == null || buildingData.sub_buildings.Count == 0)
+        {
+            return null;
+        }
+
+        BuildingMeshUtils.InitializeCache();
+
+        float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
+        string glbPrefix = BuildingMeshUtils.GetGlbPrefix1(buildingData);
+        int variantNumber = BuildingMeshUtils.ComputeVariantNumber(buildingData.visual_variant);
+
+        // 遠景は生成する建物数が最も多いので、区画ポリゴンを引く ResolveParcelContext を通さず、同じ規則で中心の地形標高だけを求める。
+        Vector3 centerPointWorld = Vector3.zero;
+        if (buildingData.centerPointArray != null && buildingData.centerPointArray.Length >= 2)
+        {
+            float cx = buildingData.centerPointArray[0];
+            float cz = buildingData.centerPointArray[1];
+            centerPointWorld = new Vector3(cx, Utils.GetGroundHeight(new Vector3(cx, 1000f, cz)), cz);
+        }
+
+        List<CombineInstance> combineInstances = new List<CombineInstance>();
+        List<Material> materials = new List<Material>();
+        List<Mesh> temporaryMeshes = new List<Mesh>();
+        foreach (SubBuildingPlacement placement in buildingData.sub_buildings)
+        {
+            if (IsValidPlacement(placement, buildingData))
+            {
+                GenerateSubBuilding(
+                    placement, glbPrefix, variantNumber, floorHeight, centerPointWorld, far: true,
+                    combineInstances, materials, temporaryMeshes);
+            }
+        }
+
+        if (combineInstances.Count == 0)
+        {
+            CleanupMeshes(temporaryMeshes);
+            return null;
+        }
+
+        Mesh finalMesh = new Mesh();
+        finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
+        finalMesh.RecalculateBounds();
+        finalMesh.RecalculateNormals();
+
+        CleanupMeshes(temporaryMeshes);
+
+        return new BuildingMeshResult(finalMesh, materials.ToArray(), null);
+    }
+
+    private static bool IsValidPlacement(SubBuildingPlacement placement, BuildingSummary buildingData)
+    {
+        if (placement != null && placement.position != null && placement.position.Length >= 2
+            && !string.IsNullOrEmpty(placement.model_prefix))
+        {
+            return true;
+        }
+        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+            $"[Mashup] agent_id={buildingData.agent_id} の sub_buildings に不正なエントリがあるためスキップします。");
+        return false;
+    }
+
+    /// <summary>
+    /// サブ建物1棟を積み上げて CombineInstance リストへ追加する。
+    /// far では無印があるレベルの `_far` が1つでも欠けた棟を描かない（欠けた段を詰めると積み上げが通常と食い違う）。
+    /// 白い箱の代替も遠景では置かない。
+    /// </summary>
+    /// <returns>この棟の天端のローカルY（コライダー高さの算出に使う）。遠景で描かなかった棟は 0。</returns>
     private static float GenerateSubBuilding(
         SubBuildingPlacement placement, string glbPrefix, int variantNumber, float floorHeight,
-        Vector3 centerPointWorld,
+        Vector3 centerPointWorld, bool far,
         List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
     {
+        // パーツはパーツごとに閾値フォルダを独立スキャンして解決する（common へのフォールバックはしない）。
+        string basePart = $"mashup-{placement.model_prefix}-base-prebuilt";
+        string midPart = $"mashup-{placement.model_prefix}-mid-prebuilt";
+        string topPart = $"mashup-{placement.model_prefix}-top-prebuilt";
+        GameObject baseModule = BuildingMeshUtils.GetPartBySuffixScan(glbPrefix, basePart, variantNumber);
+        GameObject middleModule = BuildingMeshUtils.GetPartBySuffixScan(glbPrefix, midPart, variantNumber);
+        GameObject topModule = BuildingMeshUtils.GetPartBySuffixScan(glbPrefix, topPart, variantNumber);
+
+        if (far && ((baseModule == null && middleModule == null && topModule == null)
+            || LacksFar(baseModule, glbPrefix, basePart, variantNumber)
+            || LacksFar(middleModule, glbPrefix, midPart, variantNumber)
+            || LacksFar(topModule, glbPrefix, topPart, variantNumber)))
+        {
+            return 0f;
+        }
+
         Vector2 xzOffset = new Vector2(placement.position[0], placement.position[1]);
         int floors = Mathf.Max(1, placement.floors);
         // パーツが1つも見つからない棟の白い箱の高さに使う。
@@ -173,20 +261,11 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
             new Vector3(centerPointWorld.x + xzOffset.x, 1000f, centerPointWorld.z + xzOffset.y));
         float baseY = terrainY - centerPointWorld.y;
 
-        // パーツはパーツごとに閾値フォルダを独立スキャンして解決する（common へのフォールバックはしない）。
-        string modelPrefix = placement.model_prefix;
-        GameObject baseModule = BuildingMeshUtils.GetPartBySuffixScan(
-            glbPrefix, $"mashup-{modelPrefix}-base-prebuilt", variantNumber);
-        GameObject middleModule = BuildingMeshUtils.GetPartBySuffixScan(
-            glbPrefix, $"mashup-{modelPrefix}-mid-prebuilt", variantNumber);
-        GameObject topModule = BuildingMeshUtils.GetPartBySuffixScan(
-            glbPrefix, $"mashup-{modelPrefix}-top-prebuilt", variantNumber);
-
         if (baseModule == null && middleModule == null && topModule == null)
         {
             Debug.LogWarning(
                 $"MashupBuildingMeshBuilder: サブ建物のプレハブが見つかりませんでした " +
-                $"(prefix={glbPrefix}, model_prefix={modelPrefix})。1セル分の白い箱で代替します。");
+                $"(prefix={glbPrefix}, model_prefix={placement.model_prefix})。1セル分の白い箱で代替します。");
             float boxHeight = floors * subFloorHeight;
             AddFallbackCellBox(xzOffset, rotation, baseY, boxHeight, combineInstances, materials, temporaryMeshes);
             return baseY + boxHeight;
@@ -231,6 +310,12 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         return maxDrawnTop;
+    }
+
+    /// <summary>無印のパーツはあるのに、遠景で `_far` が解決できなかったレベルか。</summary>
+    private static bool LacksFar(GameObject resolved, string glbPrefix, string partName, int variantNumber)
+    {
+        return resolved == null && BuildingMeshUtils.FindPartSuffix(glbPrefix, partName, variantNumber) >= 0;
     }
 
     /// <summary>
