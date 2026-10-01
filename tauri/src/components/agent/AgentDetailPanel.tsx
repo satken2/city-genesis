@@ -44,7 +44,8 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 import { InfoHeader } from "../common/InfoHeader";
 import { TagRow } from "../common/TagRow";
 import { isTaggable } from "../../utils/constructionTags";
-import { AgentAlertsPanel } from "./AgentAlertsPanel";
+import { SupplyChainSection } from "../supply/SupplyChainSection";
+import { supportsSupplyGraph } from "../supply/supplyGraph";
 import { AgentBasicInfoPanel } from "./AgentBasicInfoPanel";
 import { BuildingInfo } from "./BuildingInfo";
 import { BuildingInfoPanel } from "./BuildingInfoPanel";
@@ -489,6 +490,15 @@ export function AgentDetailPanel({
         onNameSave={agentData.public_facility ? handleNameSave : undefined}
       />
 
+      <SupplyChainSection
+        apiBaseUrl={apiBaseUrl}
+        agentId={currentEntityId}
+        enabled={supportsSupplyGraph(agentData, masterData)}
+        refreshToken={agentData}
+        fallbackAlert={agentData.alert}
+        onNavigate={navigateToAgent}
+      />
+
       {/* 建設プロジェクトのタグと、この建物だけを3Dビューで隠す切り替え。
           タグを付け替えられるのは着工前・建設中の公共施設だけなので、その間だけ行を出す
           (竣工後もタグ自体は残り、建設プロジェクトウィンドウで竣工済みとして数えられる)。 */}
@@ -575,17 +585,6 @@ export function AgentDetailPanel({
       })()}
       </>
       )}
-
-      {/* アラートカードのクリックで、原因を因果順に掘り下げる診断ウィンドウを開く */}
-      <AgentAlertsPanel
-        alert={agentData.alert}
-        onDiagnose={() => {
-          void invoke("open_registered_window", {
-            windowType: "diagnosis",
-            entityId: currentEntityId,
-          });
-        }}
-      />
 
       {/* マッシュアップ建物のサブ建物配置エディタを開くボタン。
           操作系は他のパネルと同じアイコンボタンに揃え、名称はツールチップに持たせる。 */}

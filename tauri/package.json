@@ -16,6 +16,7 @@
     "cleanup-dev": "powershell -ExecutionPolicy Bypass -File tools/cleanup-dev.ps1",
     "test:scenarios": "node tools/scenarios/run.mjs",
     "test:api-client": "node tools/api-client/run.mjs",
+    "test:supply": "node tools/supply/run.mjs",
     "test:tutorial": "node tools/tutorial/run.mjs",
     "check:tutorial": "node tools/tutorial/run.mjs"
   },

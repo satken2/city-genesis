@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "供給状況",
+    "refresh": "供給状況を更新",
+    "selected": "選択中",
+    "providers": "{{product}}の供給施設",
+    "noResults": "実績なし — 接続と資源配置は現在の状態を表示します。",
+    "epochNote": "生産・受領・警告はエポック {{epoch}} の実績。接続と資源残量は現在の状態です。",
+    "inputsNote": "箱は財ごとに集約しています。必要な入力は施設の種類によって異なります。箱を押すと内訳を確認できます。",
+    "executing": "シミュレーション完了後に供給状況を更新します。",
+    "fetchError": "供給状況を取得できませんでした。更新ボタンで再取得できます。",
+    "activeCount": "稼働 {{active}}／{{count}}",
+    "production": "前回生産量：{{amount}} {{unit}}",
+    "resourceRemaining": "利用できる資源の残量：{{amount}} {{unit}}",
+    "received": "前回受領量：{{amount}} {{unit}}",
+    "nextDemand": "次回需要：{{amount}} {{unit}}",
+    "recipients": "この入力を使う施設・路線：{{count}}",
+    "importers": "輸入拠点：{{count}}",
+    "cycle": "循環する供給関係",
+    "truncated": "上流の表示範囲を超えています。供給元の詳細で続きを確認できます。",
+    "capacityPaths": "容量制約の候補パス：{{ids}}",
+    "role": {
+      "resource": "資源",
+      "producer": "生産者",
+      "consumer": "中継・\n車両基地",
+      "vehicle_consumer": "路線",
+      "market": "商品市場"
+    },
+    "transport": {
+      "resource": "区画の資源から採取",
+      "infrastructure": "インフラ網",
+      "vehicle": "車両の走行網",
+      "market": "市場で調達"
+    },
+    "state": {
+      "ok": "利用可能",
+      "unknown": "未判定",
+      "missing": "なし",
+      "inactive": "非稼働",
+      "partial": "一部に問題",
+      "limited": "不足・停止",
+      "disconnected": "未接続",
+      "unavailable": "供給範囲外",
+      "supply_shortage": "供給不足の可能性",
+      "capacity_limited": "容量制約の可能性",
+      "unmatched": "調達不足"
+    }
+  }
+}

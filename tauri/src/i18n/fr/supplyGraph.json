@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Chaîne d’approvisionnement",
+    "refresh": "Actualiser l’approvisionnement",
+    "selected": "Sélection",
+    "providers": "Fournisseurs de {{product}}",
+    "noResults": "Aucun résultat — connexions et ressources dans leur état actuel.",
+    "epochNote": "Production, réception et alertes : époque {{epoch}}. Connexions et réserves : état actuel.",
+    "inputsNote": "Les installations sont regroupées par produit. Les besoins varient selon leur type. Sélectionnez une case pour voir le détail.",
+    "executing": "L’approvisionnement sera actualisé après la simulation.",
+    "fetchError": "Impossible de charger l’approvisionnement. Utilisez le bouton d’actualisation.",
+    "activeCount": "Actifs {{active}} / {{count}}",
+    "production": "Dernière production : {{amount}} {{unit}}",
+    "resourceRemaining": "Réserves accessibles : {{amount}} {{unit}}",
+    "received": "Dernière réception : {{amount}} {{unit}}",
+    "nextDemand": "Prochaine demande : {{amount}} {{unit}}",
+    "recipients": "Installations / lignes utilisant cet intrant : {{count}}",
+    "importers": "Centres d’importation : {{count}}",
+    "cycle": "Dépendance circulaire",
+    "truncated": "Limite d’affichage atteinte. Ouvrez les détails d’un fournisseur pour continuer.",
+    "capacityPaths": "Contraintes de capacité possibles : tronçons {{ids}}",
+    "role": {
+      "resource": "Ressource",
+      "producer": "Producteur",
+      "consumer": "Relais / dépôt",
+      "vehicle_consumer": "Ligne",
+      "market": "Marché"
+    },
+    "transport": {
+      "resource": "Extraction sur la parcelle",
+      "infrastructure": "Réseau d’infrastructure",
+      "vehicle": "Réseau des véhicules",
+      "market": "Achat sur le marché"
+    },
+    "state": {
+      "ok": "Disponible",
+      "unknown": "Indéterminé",
+      "missing": "Absent",
+      "inactive": "Inactif",
+      "partial": "Partiellement affecté",
+      "limited": "Limité / arrêté",
+      "disconnected": "Déconnecté",
+      "unavailable": "Hors couverture",
+      "supply_shortage": "Pénurie possible",
+      "capacity_limited": "Limite de capacité possible",
+      "unmatched": "Approvisionnement insuffisant"
+    }
+  }
+}

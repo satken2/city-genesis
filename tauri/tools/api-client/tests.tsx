@@ -14,11 +14,21 @@ globalThis.fetch = async (input, init) => {
   return Response.json({ ok: true });
 };
 const api = await import("../../src/utils/api");
+const { runtimeState } = await import("./mock-runtime");
 
 api.configureBackendRequests(base);
 assert.equal((await fetch(`${base}/api/v1/city`)).status, 200);
 await api.fetchApi(`${base}/api/v1/city`, { method: "POST", body: JSON.stringify({ a: 1 }) });
 assert.deepEqual(server.requests.filter(r => r.method === "POST").map(r => r.body), ["{\"a\":1}"], "the body is sent exactly once");
+assert.deepEqual(runtimeState.events, ["supply:changed"], "successful city edits notify the supply graph");
+runtimeState.events.length = 0;
+await api.fetchApi(`${base}/api/v1/paths/preview`, { method: "POST", body: "{}" });
+await api.fetchApi(`${base}/api/v1/transit/route-preview`, { method: "POST", body: "{}" });
+await api.fetchApi(`${base}/api/v1/agents/42`);
+await api.fetchApi(`${base}/api/v1/saves/absent`, { method: "DELETE" }).catch(() => {});
+assert.deepEqual(runtimeState.events, [], "previews, reads and failed edits do not trigger reanalysis");
+await api.fetchApi(`${base}/api/v1/paths/42`, { method: "PATCH", body: "{}" });
+assert.deepEqual(runtimeState.events, ["supply:changed"]);
 
 // 通信断の間は、応答だけ失われると二重実行になる更新要求を送らない。読み取りと他のオリジンへの要求は通す。
 api.setBackendConnected(false);

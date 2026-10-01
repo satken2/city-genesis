@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "供应情况",
+    "refresh": "更新供应情况",
+    "selected": "当前选择",
+    "providers": "{{product}}供应设施",
+    "noResults": "暂无实绩 — 连接与资源位置显示当前状态。",
+    "epochNote": "生产、接收与警告为时期 {{epoch}} 的实绩。连接和资源储量为当前状态。",
+    "inputsNote": "设施按产品合并显示。不同设施所需投入不同。点击方框查看明细。",
+    "executing": "模拟完成后更新供应情况。",
+    "fetchError": "无法获取供应情况。请点击更新重试。",
+    "activeCount": "运行 {{active}}／{{count}}",
+    "production": "上次产量：{{amount}} {{unit}}",
+    "resourceRemaining": "可利用资源储量：{{amount}} {{unit}}",
+    "received": "上次接收量：{{amount}} {{unit}}",
+    "nextDemand": "下次需求：{{amount}} {{unit}}",
+    "recipients": "使用此投入的设施或线路：{{count}}",
+    "importers": "进口枢纽：{{count}}",
+    "cycle": "循环供应关系",
+    "truncated": "已达到上游显示范围。请打开供应设施详情继续查看。",
+    "capacityPaths": "可能存在容量限制的路段：{{ids}}",
+    "role": {
+      "resource": "资源",
+      "producer": "生产者",
+      "consumer": "中转／车辆基地",
+      "vehicle_consumer": "线路",
+      "market": "商品市场"
+    },
+    "transport": {
+      "resource": "从地块资源开采",
+      "infrastructure": "基础设施网络",
+      "vehicle": "车辆运行网络",
+      "market": "市场采购"
+    },
+    "state": {
+      "ok": "可利用",
+      "unknown": "待判断",
+      "missing": "不存在",
+      "inactive": "未运行",
+      "partial": "部分存在问题",
+      "limited": "不足／停止",
+      "disconnected": "未连接",
+      "unavailable": "供应范围外",
+      "supply_shortage": "可能供应不足",
+      "capacity_limited": "可能存在容量限制",
+      "unmatched": "采购不足"
+    }
+  }
+}

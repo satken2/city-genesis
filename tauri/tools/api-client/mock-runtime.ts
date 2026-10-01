@@ -1,4 +1,5 @@
-export const runtimeState = { commands: [] as string[] };
+export const runtimeState = { commands: [] as string[], events: [] as string[] };
+export async function emit(event: string) { runtimeState.events.push(event); }
 const listeners = new Map<string, (event: { payload: unknown }) => void>();
 
 export async function invoke(command: string) {

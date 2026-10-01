@@ -12,7 +12,7 @@
  *   - 路線地図 ... 実地図上の路線(TransitLineMap。共通地図の公共交通路線レイヤーを当該路線に注目させたもの)
  *   - 路線図   ... 縦型ストリップ路線図(TransitLineDiagram)
  *
- * 運休理由と診断ウィンドウへの導線はタブに依らず常に見える位置(ヘッダ直下)に置く。
+ * 供給図と運休・車両不足の警告はタブに依らずヘッダ直下に置く。
  * データは GET /api/v1/transit/lines/{id} から取得し、設定の保存は PATCH、廃止は DELETE。
  * 保存・削除後は "transit:lines_changed" で公共交通ウィンドウに再取得を促し(経路編集パネルが経路を
  * 更新したときも同じ通知を受けて取り直す)、
@@ -39,6 +39,7 @@ import { TransitVehicleLabel, TransitVehicleSelector, transitVehicleOptions } fr
 import { pauseReasonKey } from "./transitPauseReason";
 import { TransitEstimateCard } from "./TransitEstimateCard";
 import { useTransitEstimate } from "../../hooks/useTransitEstimate";
+import { SupplyChainSection } from "../supply/SupplyChainSection";
 // 右パネルの体裁(セクション・ラベル/値グリッド・タブ)は経済主体詳細パネルと共有する。
 import "../agent/AgentDetailPanel.css";
 // 運行状態バッジ(.transit-badge)は公共交通ウィンドウの一覧と共通。
@@ -353,27 +354,9 @@ export function TransitDetailPanel({
         aria-hidden="true"
       />
 
-      {/* 運休理由・車両不足の注意と診断への導線は、タブに依らず常に見せる。
-          路線詳細のIDは路線エージェントの agent_id と同じなので、そのまま診断対象にできる。 */}
-      {(pauseReasonText || vehicleShortage) && (
-        <div className="transit-detail__notice" role="status">
-          <span className="transit-detail__notice-text">
-            {pauseReasonText ?? t("transit.vehicleShortage")}
-          </span>
-          <button
-            type="button"
-            className="transit-detail__btn transit-detail__btn--warn"
-            onClick={() => {
-              void invoke("open_registered_window", {
-                windowType: "diagnosis",
-                entityId: initialEntityId,
-              });
-            }}
-          >
-            {t("transit.diagnose")}
-          </button>
-        </div>
-      )}
+      <SupplyChainSection apiBaseUrl={apiBaseUrl} agentId={initialEntityId} refreshToken={line}
+        fallbackNotice={pauseReasonText ?? (vehicleShortage ? t("transit.vehicleShortage") : null)}
+        onNavigate={(entityId) => { void invoke("open_registered_window", { windowType: "agent_detail", entityId }); }} />
 
       <div className="agent-detail-tabs">
         {tabs.map((tab) => (
