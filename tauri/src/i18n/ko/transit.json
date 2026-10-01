@@ -2,7 +2,7 @@
   "transit": {
     "diagnose": "원인 진단",
     "tabAll": "전체",
-    "newLine": "＋ 노선 신설",
+    "newLine": "노선 신설",
     "noLines": "운행 중인 대중교통이 없습니다.",
     "colName": "노선",
     "colVehicles": "차량 수",

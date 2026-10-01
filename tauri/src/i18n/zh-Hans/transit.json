@@ -2,7 +2,7 @@
   "transit": {
     "diagnose": "诊断原因",
     "tabAll": "全部",
-    "newLine": "＋ 新建线路",
+    "newLine": "新建线路",
     "noLines": "没有运营中的公共交通。",
     "colName": "线路",
     "colVehicles": "车辆数",

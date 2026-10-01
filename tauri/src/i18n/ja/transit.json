@@ -2,7 +2,7 @@
   "transit": {
     "diagnose": "原因を診断",
     "tabAll": "すべて",
-    "newLine": "＋ 路線を新設",
+    "newLine": "路線を新設",
     "noLines": "稼働中の公共交通機関はありません。",
     "colName": "路線",
     "colVehicles": "車両数",

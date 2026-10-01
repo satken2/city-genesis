@@ -2,7 +2,7 @@
   "transit": {
     "diagnose": "Diagnosticar la causa",
     "tabAll": "Todas",
-    "newLine": "＋ Nueva línea",
+    "newLine": "Nueva línea",
     "noLines": "No hay transporte público en operación.",
     "colName": "Línea",
     "colVehicles": "Vehículos",

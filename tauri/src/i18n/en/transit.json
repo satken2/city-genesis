@@ -2,7 +2,7 @@
   "transit": {
     "diagnose": "Diagnose cause",
     "tabAll": "All",
-    "newLine": "+ New line",
+    "newLine": "New line",
     "noLines": "There are no active transit lines.",
     "colName": "Line",
     "colVehicles": "Vehicles",

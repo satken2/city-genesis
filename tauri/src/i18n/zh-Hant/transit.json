@@ -2,7 +2,7 @@
   "transit": {
     "diagnose": "診斷原因",
     "tabAll": "全部",
-    "newLine": "＋ 新建路線",
+    "newLine": "新建路線",
     "noLines": "沒有營運中的大眾運輸。",
     "colName": "路線",
     "colVehicles": "車輛數",
