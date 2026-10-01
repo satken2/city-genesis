@@ -128,6 +128,11 @@
       "track": "궤도",
       "infra": "인프라"
     },
+    "variantTab": {
+      "track": "선로",
+      "passenger": "여객 승강장",
+      "freight": "화물 승강장"
+    },
     "category": {
       "1": "일반 도로",
       "2": "고속도로",

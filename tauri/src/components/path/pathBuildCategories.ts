@@ -8,10 +8,49 @@
  */
 
 import type { MasterData, PathMasterEntry } from "../../types";
+import { PATH_TRACK } from "../../constants";
 import { PATH_TYPES_HIDDEN_IN_BUILD_PANEL, PATH_TYPES_TRACK_GROUP, isInfraPathType } from "../../local-constants";
 import { isRailType, railVariantsInOrder } from "./railBuild";
 
 export type PathVariantOption = { id: number; data: PathMasterEntry };
+
+export type PathVariantTab = {
+  id: string;
+  labelKey: string;
+  icon: "track" | "passenger" | "freight";
+  variants: PathVariantOption[];
+};
+
+type VariantTabBuilder = (masterData: MasterData, variants: PathVariantOption[]) => PathVariantTab[];
+
+/** 貨物専用ホームは停車可能な用途から判定し、旅客・貨物兼用のホームは旅客側に並べる。 */
+function buildRailwayTabs(masterData: MasterData, variants: PathVariantOption[]): PathVariantTab[] {
+  const passengerStops = new Set<number>();
+  const freightStops = new Set<number>();
+  for (const transit of Object.values(masterData.transit ?? {})) {
+    const stops = transit.freight ? freightStops : passengerStops;
+    for (const id of transit.stop_path_variants) stops.add(id);
+  }
+  const hasPlatform = ({ data }: PathVariantOption) => (data.platform_width ?? 0) > 0;
+  const freightOnly = ({ id }: PathVariantOption) => freightStops.has(id) && !passengerStops.has(id);
+  return [
+    { id: "track", labelKey: "path_construction.variantTab.track", icon: "track", variants: variants.filter(v => !hasPlatform(v)) },
+    { id: "passenger", labelKey: "path_construction.variantTab.passenger", icon: "passenger", variants: variants.filter(v => hasPlatform(v) && !freightOnly(v)) },
+    { id: "freight", labelKey: "path_construction.variantTab.freight", icon: "freight", variants: variants.filter(v => hasPlatform(v) && freightOnly(v)) },
+  ];
+}
+
+/** カテゴリごとの分類を登録する。描画側は種別や分類条件を持たない。 */
+const CATEGORY_TAB_BUILDERS: Partial<Record<number, VariantTabBuilder>> = {
+  [PATH_TRACK]: buildRailwayTabs,
+};
+
+/** タブ未登録のカテゴリは従来の一覧を使う。空の分類は表示しない。 */
+export function buildCategoryVariantTabs(masterData: MasterData | null, category: number): PathVariantTab[] {
+  if (!masterData) return [];
+  return (CATEGORY_TAB_BUILDERS[category]?.(masterData, buildCategoryVariants(masterData, category)) ?? [])
+    .filter(tab => tab.variants.length > 0);
+}
 
 /** カテゴリのタイルをまとめる区分。この順に並べる。 */
 export const PATH_BUILD_GROUPS = ["road", "track", "infra"] as const;

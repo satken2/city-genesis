@@ -72,7 +72,7 @@
 | `ColorSwatchPicker` | 色選択。OSのカラーダイアログは最前面固定の透明ウィンドウの裏に開くので使わない |
 | `SettingsRow` / `SettingsForm.css` | アプリ設定・都市名の変更・システム統計の近似の節の共通フォーム。見出し・カード・設定行・Coming soon・セグメント選択・入力欄は同じ意匠を使う。`disabled` は表示用なので子の操作部品にもネイティブの `disabled` を指定する |
 | `LocalizedTextFields` | 作者が書く多言語テキスト(シナリオの紹介文・初期の都市名・クエストの名前と説明)の入力欄。言語のタブで同じ言語の全項目をまとめて書き、英語のタブを先頭に置いて必須と示す(英語の欠けの判定は呼び出し側が `missingEnglish` で行う)。最初に開くタブは表示言語。タブで切り替わる項目はタブ列に接した枠(`.localized-text__panel`)に入るので、言語共通の項目はこの部品に渡さず枠の外に置く |
-| `FlatTabs` | フラット意匠のウィンドウ上部のタブ列(ニューゲーム・シナリオ管理)。`role=tab`・`aria-selected`、無効タブと札(Coming soon)。選択状態と中身の出し分けは呼び出し側が持つ |
+| `FlatTabs` | フラット意匠のタブ列。`role=tab`・`aria-selected`、無効タブと札(Coming soon)。`iconOnly`はアイコン専用表示(ラベルはツールチップ・読み上げ)、左右矢印/Home/Endで選択。`idPrefix`でtabpanelと関連付ける。選択状態と中身の出し分けは呼び出し側が持つ |
 | `ScenarioSource`(`ScenarioOriginBadges` / `RequiredPacks`) | シナリオの保存元(自作/コミュニティ/DLC)と公式の札、都市に刻まれた必要パックと所有状況。読み込めるかの判定はコアの `compatibility` が正で、ここは表示だけ |
 | `SaveVersionInfo` | 保存形式の版(「フォーマット vN」。保存したコアのMAJORだけ)・互換性・必要パックの表示。セーブ一覧・ニューゲーム・シナリオ管理・紹介情報で共通 |
 | `ScenarioThumbnail` | シナリオ画像。`hooks/useApiImageUrl` で取得した Blob URL を表示し、画像が無ければプレースホルダー。標高ファイルから取り込んだシナリオには作成直後に地形の平面図が登録される |
@@ -113,6 +113,7 @@
 - 公共施設(`agent/PublicFacilityPanel`): 放棄中は解除以外を無効化。`status_from`の見出しは`resolveStatusSinceLabel`で選ぶ(再開でも更新されるので一律「竣工日」にしない)。
 - パス建設(`path/`): 道路・鉄道・インフラは`path_build`の`PathConstructionPanel`1つで敷く。曲線/直線・吸着はUnity側で、`curveMode`の書き込み元は`edit_path:update_shape`の`is_curved`だけ。
   - 選択は建物建設と同じカテゴリのタイル→バリアントのカード一覧→建設画面の3段。カテゴリはマスターにバリアントがある`path_type`そのもので(`local-constants`の`PATH_TYPES_HIDDEN_IN_BUILD_PANEL`は出さない)、一覧にはそのカテゴリの`path_type`のバリアントだけを並べる。タイルは道路・軌道・インフラの3区分に分けて並べ、区分は`pathBuildCategories`で決め打ちしている(軌道=`PATH_TYPES_TRACK_GROUP`、インフラ=`PATH_TYPES_INFRA`、残りは道路)。カード(`PathVariantCard`)は一覧の項目と建設画面の概要に共用する。カテゴリのアイコンは`utils/pathCategoryIcon`の専用画像だけで、無ければ枠を空けておく。
+  - カード一覧内のタブは`pathBuildCategories.buildCategoryVariantTabs`のカテゴリ別ビルダーが返す分類で描画する。鉄道だけ「線路」「旅客ホーム」「貨物ホーム」に分類し、LRT専用軌道は線路に含む。ホームは`platform_width > 0`、貨物専用は`transit.stop_path_variants`の貨物路線に含まれ旅客路線には含まれないもの。旅客兼用・未分類のホームは旅客側。空タブは省略し、未登録カテゴリはタブを出さない。タブは`FlatTabs`のアイコン専用表示と`PathVariantTabIcon`の自作SVGを使い、分類名は一覧の見出し・ツールチップ・読み上げに残す。カテゴリを選ぶと先頭タブから始め、建設画面から戻ると選択を保持する。チュートリアルの指定カードを含むタブは自動表示する。
   - 建設画面の設定(複線構成・ホーム設置側・駅舎の配置端と通路方式・所属道路・タグ)は選んだバリアントの種別で決まり、新規敷設でだけ出す。既存パスの形状編集(`params.extra.editPathId`)は建設画面から始まり、カテゴリへ戻れない。
   - ホーム設置側は単線の駅だけが持つ(`railBuild.hasPlatformSideChoice`)。1本で上下線を持つ複線一体の線路(線路系で`lanes`≥2)の駅はホームの位置がバリアントで決まる(両外側の相対式か、`center_width` を持つ島式)ので、トグルを出さず、`platform_side` を送らず、`edit_path:change_platform_side` も送らない。
   - 確定は`usePathConstruction.canConfirm`(Unityの`can_confirm`∧全線`/paths/validate`。先頭1本だけの検証は禁止)。成功のたびに`notifyRoadsChanged`。

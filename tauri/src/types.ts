@@ -691,7 +691,7 @@ export type PathMasterEntry = {
   /**
    * 軌道(線路・モノレール・人員搬送)の構造種別。master.yaml の track_type に対応する。
    * consts.py の TRACK_* と一致する数値(TRACK_NORMAL=通常 / TRACK_BRIDGE=橋梁 / TRACK_STATION=駅)。
-   * 建設パネルの軌道カテゴリが「通常/橋梁/駅」ボタンでこの値を絞り込む。
+   * 建設パネルの軌道バリアントを通常・橋梁・駅の構造順に並べるために使う。
    * 未定義は TRACK_NORMAL 扱い(軌道以外のバリアントでは参照しない)。
    */
   track_type?: number;
@@ -704,8 +704,8 @@ export type PathMasterEntry = {
   board_wait_min?: number;
   /**
    * このバリアントが流せるインフラ財の製品IDリスト。master.yaml の infra_products に対応する。
-   * 電化軌道は電力財(PRODUCT_HIGH_ELECTRICITY=401)を含む。建設パネルの軌道カテゴリの
-   * 電化トグルは、この配列に PRODUCT_HIGH_ELECTRICITY を含むバリアントに絞り込む。
+   * 電化軌道は電力財(PRODUCT_HIGH_ELECTRICITY=401)を含む。建設パネルでは
+   * この配列から電化の有無を判定してバリアントの並び順に使う。
    * 未定義・空配列はインフラ財配送網に参加しない(非電化軌道・一般道路など)。
    */
   infra_products?: number[];

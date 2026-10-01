@@ -6,7 +6,7 @@
  *
  * 選択は建物建設パネルと同じ3段で、左上の戻るで1段ずつ戻る。
  *   1. カテゴリのタイル: カテゴリは path_type そのもので、道路・軌道・インフラの区分ごとに並べる(pathBuildCategories)
- *   2. バリアントのカード一覧: そのカテゴリの path_type のバリアントだけを並べる
+ *   2. バリアントのカード一覧: カテゴリ内の分類があればアイコンタブで切り替え、一覧内に分類名を表示する
  *   3. 建設画面: 選んだバリアントのカードを概要として先頭に出し、その下に敷設の設定と確定/キャンセルを並べる
  * 既存パスの形状編集は種別・バリアントを変えないので、建設画面から始まり戻れない。
  *
@@ -23,7 +23,7 @@
  * 駅舎の敷設中はUnityが既存の道路・線路への吸着を止める(グリッド吸着だけは有効)。
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
@@ -41,7 +41,9 @@ import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
 import { PATH_STATION_HOUSE } from "../../constants";
 import { tutorialVariantAllowed } from "../../tutorial/TutorialLayer";
-import { buildCategoryGroups, buildCategoryVariants } from "./pathBuildCategories";
+import { buildCategoryGroups, buildCategoryVariants, buildCategoryVariantTabs } from "./pathBuildCategories";
+import { FlatTabs } from "../common/FlatTabs";
+import { PathVariantTabIcon } from "./PathVariantTabIcon";
 import { isRailType } from "./railBuild";
 import { PathVariantCard } from "./PathVariantCard";
 import { UnaffordableOverlay } from "../common/UnaffordableOverlay";
@@ -79,6 +81,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
 
   // カード一覧を表示しているカテゴリ(path_type)。null のときはカテゴリのタイルを表示する。
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedVariantTab, setSelectedVariantTab] = useState<string | null>(null);
+  const variantTabPrefix = useId();
 
   const selectedVariantData = pathConstruction.selectedVariantData;
   const selectedPathType = selectedVariantData?.type ?? null;
@@ -160,6 +164,15 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
     () => (selectedCategory === null ? [] : buildCategoryVariants(masterData, selectedCategory)),
     [masterData, selectedCategory],
   );
+  const variantTabs = useMemo(
+    () => selectedCategory === null ? [] : buildCategoryVariantTabs(masterData, selectedCategory),
+    [masterData, selectedCategory],
+  );
+  // チュートリアルで指定されたカードが別タブに隠れないよう、選べる候補のあるタブを優先する。
+  const tabAllowed = (tab: (typeof variantTabs)[number]) => tab.variants.some(v => tutorialVariantAllowed(v.id));
+  const activeVariantTab = variantTabs.find(tab => tab.id === selectedVariantTab && tabAllowed(tab))
+    ?? variantTabs.find(tabAllowed) ?? variantTabs[0];
+  const visibleVariants = activeVariantTab?.variants ?? variantsForCategory;
 
   /**
    * 所属道路の選択は、街路・高速道路の新規敷設のときだけ扱う(既存パスの形状編集では所属を変えない。
@@ -180,7 +193,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
   const handlePanelClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     const button = target.closest("button, [role='button']");
-    if (button) {
+    if (button && button.getAttribute("role") !== "tab") {
       sendFocusGraphic().catch(() => {});
     }
   }, []);
@@ -367,7 +380,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
                     icon={resolvePathCategoryIcon(category)}
                     name={t(`path_construction.category.${category}`)}
                     disabled={!buildCategoryVariants(masterData, category).some((v) => tutorialVariantAllowed(v.id))}
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => { setSelectedCategory(category); setSelectedVariantTab(null); }}
                   />
                 ))}
               </div>
@@ -378,20 +391,45 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
             <div className="bc-selection-header">
               <BackButton onClick={() => setSelectedCategory(null)} />
             </div>
-            <div className="bc-variant-card-list">
-              {variantsForCategory.map(({ id, data }) => {
-                const unaffordable = isVariantUnaffordable(id);
-                return (
-                  <UnaffordableOverlay key={id} unaffordable={unaffordable}>
-                    <PathVariantCard
-                      variantId={id}
-                      entry={data}
-                      disabled={unaffordable || !tutorialVariantAllowed(id)}
-                      onClick={() => handleVariantSelect(id)}
-                    />
-                  </UnaffordableOverlay>
-                );
-              })}
+            {activeVariantTab && (
+              <div className="pc-variant-tabs">
+                <FlatTabs
+                  tabs={variantTabs.map(tab => ({
+                    id: tab.id,
+                    label: t(tab.labelKey),
+                    icon: <PathVariantTabIcon icon={tab.icon} />,
+                    disabled: !tabAllowed(tab),
+                  }))}
+                  active={activeVariantTab.id}
+                  onChange={setSelectedVariantTab}
+                  label={t(`path_construction.category.${selectedCategory}`)}
+                  iconOnly
+                  idPrefix={variantTabPrefix}
+                />
+              </div>
+            )}
+            <div
+              role={activeVariantTab ? "tabpanel" : undefined}
+              id={activeVariantTab ? `${variantTabPrefix}-panel-${activeVariantTab.id}` : undefined}
+              aria-labelledby={activeVariantTab ? `${variantTabPrefix}-tab-${activeVariantTab.id}` : undefined}
+              className={activeVariantTab ? "pc-variant-tab-panel" : undefined}
+            >
+              {activeVariantTab && <h2 className="pc-variant-tab-title">{t(activeVariantTab.labelKey)}</h2>}
+              <div className="bc-variant-card-list">
+                {visibleVariants.map(({ id, data }) => {
+                  const unaffordable = isVariantUnaffordable(id);
+                  return (
+                    <UnaffordableOverlay key={id} unaffordable={unaffordable}>
+                      <PathVariantCard
+                        variantId={id}
+                        entry={data}
+                        disabled={unaffordable || !tutorialVariantAllowed(id)}
+                        onClick={() => handleVariantSelect(id)}
+                      />
+                    </UnaffordableOverlay>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}

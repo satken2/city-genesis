@@ -128,6 +128,11 @@
       "track": "Vías férreas",
       "infra": "Infraestructura"
     },
+    "variantTab": {
+      "track": "Vías",
+      "passenger": "Andenes de pasajeros",
+      "freight": "Andenes de carga"
+    },
     "category": {
       "1": "Calles",
       "2": "Autopistas",
