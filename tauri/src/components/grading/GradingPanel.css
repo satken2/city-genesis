@@ -24,6 +24,74 @@
   padding: 0;
 }
 
+/* 手順ガイド。左サイドの狭いパネルでも場所を取らないよう、先頭の説明と3行の手順を詰めて縦に並べる */
+.grading-guide {
+  padding: 8px 12px;
+}
+
+.grading-guide-lead {
+  margin: 0 0 6px;
+  font-size: 0.93rem;
+  line-height: 1.4;
+  color: var(--flat-text-label);
+}
+
+.grading-guide-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.grading-guide-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.93rem;
+  line-height: 1.35;
+  color: var(--flat-text-label);
+  opacity: 0.75;
+}
+
+.grading-guide-step-current {
+  background: var(--flat-selected);
+  color: var(--flat-text);
+  font-weight: 600;
+  opacity: 1;
+}
+
+.grading-guide-num {
+  flex: none;
+  width: 1.3em;
+  height: 1.3em;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85em;
+}
+
+/* 高さの指定欄。ラベルが長い言語では欄を次の行へ折り返す */
+.grading-height {
+  margin-bottom: 10px;
+}
+
+.grading-height .pc-settings-row {
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.grading-height-note {
+  font-size: 0.93rem;
+  line-height: 1.4;
+  color: var(--flat-text-label);
+}
+
 /* パネル下部に固定。スクロール時に下の内容が透けないよう、ポップアップ土台の上端と同じ色で塗る */
 .grading-action-bar {
   position: sticky;

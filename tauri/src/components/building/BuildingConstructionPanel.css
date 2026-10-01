@@ -254,6 +254,39 @@
   cursor: default;
 }
 
+/* 敷地カードの面積・規制(アイコン+値。項目名はtitleのツールチップ) */
+.bc-parcel-specs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+}
+
+.bc-parcel-spec {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #93a9c0;
+  cursor: default;
+}
+
+.bc-parcel-spec-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+}
+
+.bc-parcel-spec-value {
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.97rem;
+  color: #c5d4e3;
+}
+
+/* 敷地カードの建築可能建物の一覧は、規制の行との間を少し空ける */
+.bc-parcel-allowed {
+  margin-top: 6px;
+}
+
 /* 敷地未選択時のプロンプトはアイコンなしで中央寄せ */
 .bc-parcel-prompt {
   text-align: center;

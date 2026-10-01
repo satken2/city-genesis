@@ -5,6 +5,7 @@
       "land": "Land grading",
       "shore": "Land reclamation"
     },
+    "baseHeight": "Base height",
     "targetHeight": "Target height",
     "cutVolume": "Cut volume",
     "fillVolume": "Fill volume",
@@ -16,6 +17,19 @@
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
+    "heightOffset": "Height (offset from base)",
+    "baseNote": {
+      "beforeClosed": "The base height is set once you close the area",
+      "frontage": "0 is the surface of the road it faces ({{value}} m)",
+      "terrain_mean": "0 is the current average height of the area ({{value}} m)"
+    },
+    "shoreHeightLocked": "The height of reclaimed land cannot be specified",
+    "guide": {
+      "lead": "Click the terrain in the 3D view to draw the area to develop.",
+      "step1": "Left-click the terrain to place vertices",
+      "step2": "Right-click to close the area (an estimate appears)",
+      "step3": "Set the height and place the order"
+    },
     "reasons": {
       "invalid_polygon": "The area shape is invalid. Draw it without crossing edges.",
       "outside_city": "The area extends outside the city.",
@@ -26,7 +40,8 @@
       "overlaps_path": "The area overlaps a road, track, or other path.",
       "overlaps_water": "The area touches a river or lake.",
       "overlaps_quay_band": "The area overlaps the quay of reclaimed land.",
-      "no_surface_frontage": "The area does not face a ground-level road. Land grading levels the ground to the surface of the road it faces.",
+      "invalid_height_offset": "The height is out of range (up to ±{{offsetLimit}} m).",
+      "below_sea_level": "The height cannot be set below sea level.",
       "too_narrow": "The area is too narrow; nothing is left to fill inside the quay.",
       "no_work": "The ground is already at the target height, so no work is needed.",
       "insufficient_funds": "Insufficient funds to place this order."

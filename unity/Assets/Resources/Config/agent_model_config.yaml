@@ -64,6 +64,11 @@ agents:
     prebuilt: true
     variants:
       - 0
+  1022:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
   1023:
     model: true
     prebuilt: true
@@ -329,9 +334,6 @@ agents:
     prebuilt: false
     variants:
       - 0
-structure_prefixes:
-  - a2000s2
-  - a2000s3
 landmark_prefixes:
   - landmark-ancient_ruins
   - landmark-colossal_statue

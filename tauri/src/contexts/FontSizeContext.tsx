@@ -19,6 +19,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -112,9 +113,10 @@ export function FontSizeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
-   * フォントサイズの変更をCSS変数に反映する
+   * フォントサイズの変更をCSS変数に反映する。
+   * 子の useEffect より先に反映するため layout effect にする(内容の高さを測ってウィンドウを合わせるパネルが、変更前の文字サイズで測らないように)。
    */
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.style.setProperty("--font-size-base", `${fontSize}px`);
   }, [fontSize]);
 

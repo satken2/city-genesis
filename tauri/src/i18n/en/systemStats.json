@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "Computation load",
+      "title": "Simulation load",
       "heading": "Computation time of the latest epoch ({{days}} days)",
       "noData": "No measurement data",
       "note": "When several epochs run in a row, this shows the last one. Problem size is a rough estimate of the main comparisons, based on the size of the city.",
@@ -18,8 +18,8 @@
       "labor": "Labor market",
       "building_spawn": "Building spawn",
       "agent_spawn": "Agent spawn",
-      "routing": "Pathfinding",
-      "transit": "Transit routing",
+      "routing": "Citizen pathfinding",
+      "transit": "Transit pathfinding",
       "environment": "Living environment",
       "other": "Other"
     },
@@ -50,9 +50,7 @@
       "roads": "Roads",
       "tracks": "Tracks",
       "infra": "Utility networks",
-      "nodes": "Nodes",
-      "transitLines": "Transit lines",
-      "epochs": "Epochs elapsed"
+      "nodes": "Nodes"
     },
     "approximation": {
       "title": "Simulation approximation",
@@ -90,7 +88,12 @@
       "gpuDisabled": "GPU acceleration: Disabled",
       "coreSimulator": "Core simulator",
       "currentMemory": "Current memory usage: {{value}}",
-      "peakMemory": "Peak memory usage since startup: {{value}}"
+      "peakMemory": "Peak memory usage since startup: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Current VRAM usage: {{value}}",
+      "usageTooltip": "Whole PC {{pc}} / This game {{game}} / Installed {{total}}",
+      "legendPc": "Whole PC",
+      "legendGame": "This game"
     }
   }
 }

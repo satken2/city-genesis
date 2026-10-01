@@ -53,8 +53,6 @@
     "limitHeight": "高さ規制",
     "limitVolumeRatio": "容積率",
     "limitCoverageRatio": "建ぺい率",
-    "minStructure": "最低構造種別",
-    "minStructureNone": "制限なし",
     "immigrationTitle": "移民規制",
     "immigrationDescription": "都市への移民受け入れ条件を設定します。応募した移民世帯がこの条件を満たさない場合、入居を許可しません。",
     "immigrationAgeRange": "世帯主の年齢",

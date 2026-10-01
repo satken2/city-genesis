@@ -299,6 +299,12 @@ public class NodeMeshResult
 
     public Dictionary<int, Vector3> ConnectionPoints { get; }
     public MotorwayMergeLayout MotorwayMerge { get; set; }
+
+    /// <summary>交差点の板なしで2本の線路をノードまでつなぐ直進接続(TrackIntersectionMeshGenerator.TryContinuousJoin)。無ければ null。</summary>
+    public TrackContinuousJoin TrackJoin { get; set; }
+
+    /// <summary>道床の無い線路(モノレール等)だけのノード。板(Mesh)を作らず、レールのつなぎと付帯パーツだけを持つ。</summary>
+    public bool RailsOnly { get; set; }
     public RoadMarkingPlan Markings { get; set; }
 
     /// <summary>交差点に置く信号機(TrafficSignalLayout)。置かない交差点は null。実体化は TrafficSignalBuilder.Apply が行う。</summary>

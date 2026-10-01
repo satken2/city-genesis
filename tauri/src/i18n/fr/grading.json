@@ -5,6 +5,7 @@
       "land": "Nivellement du terrain",
       "shore": "Remblaiement sur la mer"
     },
+    "baseHeight": "Hauteur de base",
     "targetHeight": "Hauteur cible",
     "cutVolume": "Volume de déblai",
     "fillVolume": "Volume de remblai",
@@ -16,6 +17,19 @@
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
+    "heightOffset": "Hauteur (écart à la base)",
+    "baseNote": {
+      "beforeClosed": "La hauteur de base est fixée une fois la zone fermée",
+      "frontage": "0 correspond à la chaussée de la route qui borde la zone ({{value}} m)",
+      "terrain_mean": "0 correspond à la hauteur moyenne actuelle de la zone ({{value}} m)"
+    },
+    "shoreHeightLocked": "La hauteur d'un remblai sur la mer ne peut pas être définie",
+    "guide": {
+      "lead": "Cliquez sur le terrain dans la vue 3D pour tracer la zone à aménager.",
+      "step1": "Clic gauche sur le terrain pour placer les sommets",
+      "step2": "Clic droit pour fermer la zone (l'estimation s'affiche)",
+      "step3": "Définissez la hauteur et passez la commande"
+    },
     "reasons": {
       "invalid_polygon": "La forme de la zone n'est pas valide. Tracez-la sans que les côtés se croisent.",
       "outside_city": "La zone dépasse les limites de la ville.",
@@ -26,7 +40,8 @@
       "overlaps_path": "La zone chevauche une route, une voie ou un autre tracé.",
       "overlaps_water": "La zone touche une rivière ou un lac.",
       "overlaps_quay_band": "La zone chevauche le quai d'un terrain gagné sur la mer.",
-      "no_surface_frontage": "La zone ne donne pas sur une route au niveau du sol. Le nivellement aligne le terrain sur la chaussée de la route qui la borde.",
+      "invalid_height_offset": "La hauteur indiquée est hors limites (jusqu'à ±{{offsetLimit}} m).",
+      "below_sea_level": "La hauteur ne peut pas être inférieure au niveau de la mer.",
       "too_narrow": "La zone est trop étroite ; il ne reste rien à remblayer à l'intérieur du quai.",
       "no_work": "Le terrain est déjà à la hauteur cible ; aucun travail n'est nécessaire.",
       "insufficient_funds": "Fonds insuffisants pour passer cette commande."

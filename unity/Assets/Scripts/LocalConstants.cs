@@ -73,6 +73,16 @@ public static class LocalConstants
     /// </summary>
     public const float TRACK_MERGE_MAX_CONVERGE_ANGLE_DEG = 45.0f;
 
+    // ------------------------------------------------------------------
+    // 線路のつなぎ目(TrackEndTransition のS字と、交差点の板なしでつなぐ直進接続)
+    // ------------------------------------------------------------------
+
+    public const float TRACK_TRANSITION_DEFAULT_RADIUS = 100f; // マスターに最小曲線半径が無い線路のS字に使う半径(m)
+    public const float TRACK_JOIN_MAX_BEND_DEG = 2.0f; // 交差点の板なしで線路をつなぐノードで許す中心線の折れ角(度)。高速道路の ROAD_MERGE_MAX_MAIN_BEND_DEG と同じ考え方
+    public const float TRACK_JOIN_LATERAL_TOLERANCE = 0.01f; // 板なしでつなぐ2本の端で、軌道の横位置と幅が一致するとみなす差(m)
+    public const float PROVISIONAL_TRACK_WELD_DISTANCE = 1.5f; // ノードを持たない計画中・建設中・プレビューの線路の端を、つながるとみなす水平距離(m)。コアの RAIL_NODE_SNAP_THRESHOLD と同じ値
+    public const float PROVISIONAL_TRACK_WELD_HEIGHT = 0.5f; // 同じく、つながるとみなす絶対標高の差の上限(m)。コアの竣工時の溶接と同じ値
+
     public const float ROAD_MERGE_MAX_EDGE_GAP = 2.0f; // 高速道路の本線とランプの路面の縁がこの隙間以内なら一つの路面につなぐ(m)
     public const float ROAD_MERGE_MAX_ANGLE_DEG = 30.0f; // 本線とランプを結合・取り込みとみなす最大の角度差(度)
     public const float ROAD_MERGE_MAX_DY = 1.0f; // 路面が重ならず隣り合う区間で結合する最大の高さ差(m)

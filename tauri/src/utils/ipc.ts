@@ -240,21 +240,6 @@ export async function sendEditBuildingUpdateFloors(floors: number): Promise<void
 }
 
 /**
- * `edit_building.update_structure`
- * 建物建設モードにおいて、構造種別(structures マスターのID。0=構造の区別なし)を変更する。
- * Unity側はキャッシュしている底面ポリゴンを用いて、構造に応じたパーツプレフィックス
- * (a{variant}s{structure} → a{variant} などのフォールバック)でプレビューメッシュを再生成する。
- */
-export async function sendEditBuildingUpdateStructure(structure: number): Promise<void> {
-  await invoke("send_window_action", {
-    windowType: "building_construction",
-    entity: null,
-    action: "edit_building:update_structure",
-    params: { structure },
-  });
-}
-
-/**
  * `edit_building.update_landmark`
  * 建物建設モードにおいて、観光名所の種別(landmarks マスターのID。0=観光名所ではない)を変更する。
  * Unity側は名所ごとの専用モデル(Resources/Models/Buildings/landmark-{model_prefix})に

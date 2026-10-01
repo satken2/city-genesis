@@ -5,6 +5,7 @@
       "land": "Nivelación del terreno",
       "shore": "Relleno costero"
     },
+    "baseHeight": "Altura base",
     "targetHeight": "Altura objetivo",
     "cutVolume": "Volumen de corte",
     "fillVolume": "Volumen de relleno",
@@ -16,6 +17,19 @@
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
+    "heightOffset": "Altura (diferencia con la base)",
+    "baseNote": {
+      "beforeClosed": "La altura base se fija al cerrar el área",
+      "frontage": "0 es la altura de la calzada a la que da ({{value}} m)",
+      "terrain_mean": "0 es la altura media actual del área ({{value}} m)"
+    },
+    "shoreHeightLocked": "La altura del relleno costero no se puede especificar",
+    "guide": {
+      "lead": "Haz clic en el terreno de la vista 3D para dibujar el área que quieres acondicionar.",
+      "step1": "Haz clic izquierdo en el terreno para colocar vértices",
+      "step2": "Haz clic derecho para cerrar el área (aparece el presupuesto)",
+      "step3": "Indica la altura y realiza el pedido"
+    },
     "reasons": {
       "invalid_polygon": "La forma del área no es válida. Dibújala sin que los lados se crucen.",
       "outside_city": "El área se sale de la ciudad.",
@@ -26,7 +40,8 @@
       "overlaps_path": "El área se superpone a una calle, vía u otro trazado.",
       "overlaps_water": "El área toca un río o un lago.",
       "overlaps_quay_band": "El área se superpone al muelle de un terreno ganado al mar.",
-      "no_surface_frontage": "El área no da a una calle a nivel del suelo. La nivelación iguala el terreno a la altura de la calzada a la que da.",
+      "invalid_height_offset": "La altura indicada está fuera del rango (hasta ±{{offsetLimit}} m).",
+      "below_sea_level": "No se puede dejar por debajo del nivel del mar.",
       "too_narrow": "El área es demasiado estrecha; no queda nada que rellenar dentro del muelle.",
       "no_work": "El terreno ya está a la altura objetivo, así que no hace falta ninguna obra.",
       "insufficient_funds": "Fondos insuficientes para realizar este pedido."

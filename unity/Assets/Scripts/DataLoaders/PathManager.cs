@@ -263,6 +263,28 @@ public class PathManager : BaseApiDataManager
     private Dictionary<int, HashSet<int>> pathsByNodeIndex = new Dictionary<int, HashSet<int>>();
     private Dictionary<int, GameObject> nodeIntersectionMeshes = new Dictionary<int, GameObject>();
     private readonly Dictionary<int, string> nodeMarkingSignatures = new();
+    /// <summary>ノードごとの線路のS字の受け持ちの署名(TrackTransitionSignature)。変わったら前後の線路と並走する線路も結合をやり直す。</summary>
+    private readonly Dictionary<int, string> nodeTransitionSignatures = new();
+
+    /// <summary>ノードを持たない線路(計画中・着工保留中・建設中)の端点。仮のつながりを位置で探す索引に入れる(Y は使わない)。</summary>
+    private sealed class ProvisionalTrackEnd
+    {
+        public int PathId;
+        public bool AtStart;
+        public Vector3 Position;
+    }
+    private SpatialHash<ProvisionalTrackEnd> provisionalEndGrid;
+    private readonly Dictionary<int, List<ProvisionalTrackEnd>> provisionalEndsByPath = new();
+
+    /// <summary>敷設プレビューの線(負の path_id。RoadRenderer.PreviewTrackSink から登録される)と、その描画点列。</summary>
+    private readonly List<PathSummary> previewTracks = new();
+    private readonly Dictionary<int, List<Vector3>> previewTrackPoints = new();
+    /// <summary>形状を編集中の計画。プレビューと元の計画が互いを相手にしないよう、仮の相手からも隣接候補からも外す。</summary>
+    private int previewExcludedPathId;
+    private ulong previewTrackSignature;
+
+    private static readonly System.Reflection.MethodInfo MemberwiseCloneMethod =
+        typeof(object).GetMethod("MemberwiseClone", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
     /// <summary>
     /// nodeDataCache のセル逆引き。セル単位の同期・アンロードで、プールに残る全ノードを走査せずに
@@ -420,6 +442,7 @@ public class PathManager : BaseApiDataManager
     {
         if (GetComponent<PathSpeedLimitOverlay>() == null) gameObject.AddComponent<PathSpeedLimitOverlay>();
         nodeGrid = new SpatialHash<NodeData>(gridCellSize);
+        provisionalEndGrid = new SpatialHash<ProvisionalTrackEnd>(gridCellSize);
         segmentGridCellSize = Mathf.Max(gridCellSize, 0.0001f);
         segmentGrid = new SpatialHash<PathSegment>(segmentGridCellSize);
 
@@ -431,7 +454,8 @@ public class PathManager : BaseApiDataManager
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
         RoadAdjacency.NeighborProvider = GetAdjacentRoadNeighbors;
         RoadAdjacency.EndJoinProvider = GetRoadEndJoin;
-        TrackPath.ConnectedPathsProvider = GetPathsConnectedToNode;
+        TrackPath.ConnectedPathsProvider = GetTrackPathsAtNode;
+        RoadRenderer.PreviewTrackSink = SetPreviewTracks;
         RoadMarkingRules.ConnectedPaths = GetPathsConnectedToNode;
         RoadMarkingRules.IsApproachEndpoint = (path, start, point) =>
         {
@@ -440,6 +464,7 @@ public class PathManager : BaseApiDataManager
         };
         PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
+        TrackPath.LateralProfileProvider = GetTrackLateralProfile;
         LrtPlatformParts.PolylineProvider = GetLrtPlatformPolyline;
         BuildingRoadAccessIndex.Changed += OnBuildingRoadAccessChanged;
     }
@@ -478,6 +503,11 @@ public class PathManager : BaseApiDataManager
             TrackAdjacency.NeighborProvider = null;
             TrackPath.ConnectedPathsProvider = null;
             TrackPath.InfrastructureConnectionProvider = null;
+            TrackPath.LateralProfileProvider = null;
+        }
+        if (RoadRenderer.PreviewTrackSink == (Action<List<PathSummary>, List<List<Vector3>>, int>)SetPreviewTracks)
+        {
+            RoadRenderer.PreviewTrackSink = null;
         }
         if (RoadAdjacency.NeighborProvider == (Func<PathSummary, List<RoadNeighborInfo>>)GetAdjacentRoadNeighbors)
         {
@@ -486,14 +516,267 @@ public class PathManager : BaseApiDataManager
         }
     }
 
+    /// <summary>
+    /// 施設の接続端子(インフラ施設の端子・車両基地の端子)か。施設内へ軌道や管が続くので、線路の車止めも交差点も置かない。
+    /// ノードの種別ビットでは判定しない(電化線路のノードはどれも電力ビットを持つ)。端子は建物側の逆引きで解くので、
+    /// 施設が未ロードの間は端子と分からない(建物→パスの順に読むので通常は先に揃う)。
+    /// </summary>
     private bool IsInfrastructureConnection(int nodeId)
     {
-        // 共用ノードの資格は建物のロード順に依存せず判定できる。
+        if (BuildingManager.Instance == null || nodeId <= 0) return false;
+        return BuildingManager.Instance.TryGetInfraTerminalOwner(nodeId, out _) || BuildingManager.Instance.IsDepotTerminalNode(nodeId);
+    }
+
+    /// <summary>
+    /// ノードに交差点(板・レールのつなぎ・端の切断)が要るか。交通のパス(インフラのパスと人員搬送を除く)が
+    /// 2本以上つながり、施設の接続端子でないノードだけ。
+    /// </summary>
+    private bool NeedsIntersection(int nodeId, List<PathSummary> connectedPaths)
+    {
+        int transport = 0;
+        foreach (var path in connectedPaths)
+            if (!InfraNetworkUtil.IsInfraPathType(path.path_type) && path.path_type != Constants.PATH_CONVEYOR) transport++;
+        return transport >= 2 && !IsInfrastructureConnection(nodeId);
+    }
+
+    /// <summary>
+    /// 線路の軌道の横位置の形(TrackEndTransition のS字)。両端のノードにつながるパスから求める。
+    /// 線路のメッシュ(TrackPath)・車両の走行描画・近接線路の結合判定が同じ形を使う。線路以外は null。
+    /// </summary>
+    public TrackLateralProfile GetTrackLateralProfile(PathSummary path)
+    {
+        if (path == null || !TrackIntersectionMeshGenerator.IsTrackType(path.path_type)) return null;
+        PathSummary self = path;
+        List<PathSummary> start = ResolveTrackEnd(ref self, true);
+        List<PathSummary> end = ResolveTrackEnd(ref self, false);
+        return TrackEndTransition.BuildProfile(self, start, end);
+    }
+
+    /// <summary>
+    /// 線路の端でつながるパスの一覧(自分を含む)。実ノードがあればそのノードのつながり(仮の線路を含む。GetTrackPathsAtNode)。
+    /// ノードを持たない端(計画中・建設中・プレビュー)は、竣工時の溶接と同じ規則で位置から探す。つながる先の実ノードがあれば
+    /// その番号を、無ければ仮の線路どうしの合流点の仮の番号を、self の写しの端へ当てる。
+    /// </summary>
+    private List<PathSummary> ResolveTrackEnd(ref PathSummary self, bool atStart)
+    {
+        int nodeId = atStart ? self.start_node_id : self.end_node_id;
+        if (nodeId > 0) return GetTrackPathsAtNode(nodeId);
+        if (!TryGetTrackEndPosition(self, atStart, out Vector3 position)) return null;
+        int selfId = self.path_id;
+        NodeData node = FindWeldNode(position);
+        if (node != null)
+        {
+            self = WithEndNode(self, atStart, node.node_id);
+            var paths = GetTrackPathsAtNode(node.node_id);
+            paths.RemoveAll(p => p.path_id == selfId);
+            paths.Add(self);
+            return paths;
+        }
+        int junction = ProvisionalJunctionId(position);
+        self = WithEndNode(self, atStart, junction);
+        var ends = new List<(PathSummary path, bool atStart)>();
+        CollectProvisionalEnds(position, selfId, ends);
+        if (ends.Count == 0) return null;
+        var result = new List<PathSummary> { self };
+        foreach (var (other, otherAtStart) in ends) result.Add(WithEndNode(other, otherAtStart, junction));
+        return result;
+    }
+
+    /// <summary>
+    /// ノードにつながるパス(実際のつながり)に、端点がノードの位置にある仮の線路(ノードを持たない計画中・着工保留中・建設中と
+    /// 敷設プレビュー)を、そのノードにつながる写しとして加えたもの。線路の車止め・S字の判定に使う(TrackPath.ConnectedPathsProvider)。
+    /// 仮の線路との交差点の板・レールの接続は作らない(竣工して溶接されたときに作られる)。
+    /// </summary>
+    private List<PathSummary> GetTrackPathsAtNode(int nodeId)
+    {
+        var result = GetPathsConnectedToNode(nodeId);
+        if (nodeId <= 0) return result;
         NodeData node = GetNodeData(nodeId);
-        if (node == null) return false;
-        if (InfraNetworkUtil.IsInfraMask(node.type)) return true;
-        // 電力ビットを持たない車両基地の端子(LRT車両基地)は建物側の逆引きで判定する。
-        return BuildingManager.Instance != null && BuildingManager.Instance.IsDepotTerminalNode(nodeId);
+        if (node == null) return result;
+        var ends = new List<(PathSummary path, bool atStart)>();
+        CollectProvisionalEnds(node.GetAbsolutePosition(), int.MinValue, ends);
+        foreach (var (path, atStart) in ends)
+        {
+            int id = path.path_id;
+            if (!result.Exists(p => p.path_id == id)) result.Add(WithEndNode(path, atStart, nodeId));
+        }
+        return result;
+    }
+
+    /// <summary>端の位置(アンカーの水平位置と、地面+相対高さの絶対標高)。</summary>
+    private static bool TryGetTrackEndPosition(PathSummary path, bool atStart, out Vector3 position)
+    {
+        position = default;
+        var anchor = atStart ? path.GetStartPointList() : path.GetEndPointList();
+        if (anchor == null || anchor.Count < 3) return false;
+        var ground = new Vector3(anchor[0], 0f, anchor[2]);
+        position = new Vector3(anchor[0], Utils.GetGroundHeight(ground) + anchor[1], anchor[2]);
+        return true;
+    }
+
+    /// <summary>
+    /// 位置に溶接される実ノード(線路がつながるノードのうち、竣工時の溶接と同じ距離・高さの差に収まる最寄りのもの)。
+    /// コアの find_nearby_node(RAIL_NODE_SNAP_THRESHOLD と標高差)の鏡写し。
+    /// </summary>
+    private NodeData FindWeldNode(Vector3 position)
+    {
+        NodeData best = null;
+        float bestDistance = float.MaxValue;
+        foreach (NodeData node in QueryNearbyNodes(position, LocalConstants.PROVISIONAL_TRACK_WELD_DISTANCE))
+        {
+            Vector3 nodePosition = node.GetAbsolutePosition();
+            float distance = Vector2.Distance(new Vector2(nodePosition.x, nodePosition.z), new Vector2(position.x, position.z));
+            if (distance > LocalConstants.PROVISIONAL_TRACK_WELD_DISTANCE || distance >= bestDistance) continue;
+            if (Mathf.Abs(nodePosition.y - position.y) >= LocalConstants.PROVISIONAL_TRACK_WELD_HEIGHT) continue;
+            if (!GetPathsConnectedToNode(node.node_id).Exists(IsTrackTypePath)) continue;
+            best = node;
+            bestDistance = distance;
+        }
+        return best;
+    }
+
+    /// <summary>
+    /// 位置にある仮の線路の端(ノードを持たない計画中・建設中の線路と敷設プレビュー)。excludePathId と、形状を編集中の計画は除く。
+    /// </summary>
+    private void CollectProvisionalEnds(Vector3 position, int excludePathId, List<(PathSummary path, bool atStart)> result)
+    {
+        float tolerance = LocalConstants.PROVISIONAL_TRACK_WELD_DISTANCE;
+        bool Matches(PathSummary path, bool atStart)
+        {
+            if (!TryGetTrackEndPosition(path, atStart, out Vector3 end)) return false;
+            return Vector2.Distance(new Vector2(end.x, end.z), new Vector2(position.x, position.z)) <= tolerance
+                && Mathf.Abs(end.y - position.y) < LocalConstants.PROVISIONAL_TRACK_WELD_HEIGHT;
+        }
+        if (provisionalEndGrid != null)
+        {
+            foreach (var end in provisionalEndGrid.Query(new Vector3(position.x, 0f, position.z), tolerance))
+            {
+                if (end.PathId == excludePathId || (previewExcludedPathId > 0 && end.PathId == previewExcludedPathId)) continue;
+                if (!pathDataCache.TryGetValue(end.PathId, out PathSummary path) || !Matches(path, end.AtStart)) continue;
+                result.Add((path, end.AtStart));
+            }
+        }
+        foreach (PathSummary preview in previewTracks)
+        {
+            if (preview.path_id == excludePathId) continue;
+            for (int end = 0; end < 2; end++)
+                if (Matches(preview, end == 0)) result.Add((preview, end == 0));
+        }
+    }
+
+    /// <summary>実ノードの無い、仮の線路どうしの合流点の番号。位置から決まる負の値(実ノードの番号・未設定の -1 と重ならない)。</summary>
+    private static int ProvisionalJunctionId(Vector3 position)
+    {
+        int hash = (Mathf.RoundToInt(position.x * 2f) * 73856093) ^ (Mathf.RoundToInt(position.z * 2f) * 19349663);
+        return -2 - (hash & 0x3FFFFFFF);
+    }
+
+    /// <summary>パスの写しの片端に、つながるノードの番号を当てる(仮のつながりを、ノードで判定する既存の処理へ通すため)。</summary>
+    private static PathSummary WithEndNode(PathSummary path, bool atStart, int nodeId)
+    {
+        var clone = (PathSummary)MemberwiseCloneMethod.Invoke(path, null);
+        if (atStart) clone.start_node_id = nodeId;
+        else clone.end_node_id = nodeId;
+        return clone;
+    }
+
+    /// <summary>ノードを持たない線路(計画中・着工保留中・建設中)の端点を索引に入れる。それ以外の線路は索引から外す。</summary>
+    private void IndexProvisionalTrackEnds(PathSummary path)
+    {
+        UnindexProvisionalTrackEnds(path.path_id);
+        if (provisionalEndGrid == null || !IsTrackTypePath(path) || !TrackAdjacency.IsProvisional(path)) return;
+        var ends = new List<ProvisionalTrackEnd>(2);
+        for (int end = 0; end < 2; end++)
+        {
+            bool atStart = end == 0;
+            if ((atStart ? path.start_node_id : path.end_node_id) > 0) continue;
+            var anchor = atStart ? path.GetStartPointList() : path.GetEndPointList();
+            if (anchor == null || anchor.Count < 3) continue;
+            var item = new ProvisionalTrackEnd { PathId = path.path_id, AtStart = atStart, Position = new Vector3(anchor[0], 0f, anchor[2]) };
+            provisionalEndGrid.Add(item, item.Position);
+            ends.Add(item);
+        }
+        if (ends.Count > 0) provisionalEndsByPath[path.path_id] = ends;
+    }
+
+    private void UnindexProvisionalTrackEnds(int pathId)
+    {
+        if (!provisionalEndsByPath.TryGetValue(pathId, out var ends)) return;
+        foreach (var end in ends) provisionalEndGrid?.Remove(end, end.Position);
+        provisionalEndsByPath.Remove(pathId);
+    }
+
+    /// <summary>
+    /// 敷設プレビューの線を仮の相手として登録する(RoadRenderer.PreviewTrackSink)。tracks が null なら消す。
+    /// 形(点列・バリアント・向き・除外する計画)が前回と同じなら何もしない。変わったら、前後のプレビューの近くの線路を
+    /// 作り直しの列に積む(S字のつながりと並走の縫い合わせを描き直す)。excludedPathId は形状を編集中の計画(無ければ0)。
+    /// </summary>
+    private void SetPreviewTracks(List<PathSummary> tracks, List<List<Vector3>> points, int excludedPathId)
+    {
+        ulong signature = PreviewTrackSignature(tracks, points, excludedPathId);
+        if (signature == previewTrackSignature) return;
+        var affected = new HashSet<int>();
+        foreach (PathSummary old in previewTracks) affected.UnionWith(CollectNearbyTrackPathIds(old));
+        previewTracks.Clear();
+        previewTrackPoints.Clear();
+        if (tracks != null && points != null)
+        {
+            for (int i = 0; i < tracks.Count && i < points.Count; i++)
+            {
+                if (tracks[i] == null || points[i] == null || points[i].Count < 2) continue;
+                previewTracks.Add(tracks[i]);
+                previewTrackPoints[tracks[i].path_id] = points[i];
+            }
+        }
+        foreach (PathSummary track in previewTracks) affected.UnionWith(CollectNearbyTrackPathIds(track));
+        if (previewExcludedPathId != excludedPathId)
+        {
+            foreach (int id in new[] { previewExcludedPathId, excludedPathId })
+                if (id > 0 && pathDataCache.TryGetValue(id, out PathSummary edited))
+                {
+                    affected.Add(id);
+                    affected.UnionWith(CollectNearbyTrackPathIds(edited));
+                }
+        }
+        previewExcludedPathId = excludedPathId;
+        previewTrackSignature = signature;
+        foreach (int id in affected) QueueTrackNeighborRebuild(id);
+        FlushPendingTrackNeighborRebuilds(null);
+    }
+
+    /// <summary>プレビューの線の形の署名(0.1m 単位)。0 は登録なし。</summary>
+    private static ulong PreviewTrackSignature(List<PathSummary> tracks, List<List<Vector3>> points, int excludedPathId)
+    {
+        if (tracks == null || tracks.Count == 0) return 0;
+        ulong h = SignatureMix((ulong)(uint)excludedPathId ^ 0x9E3779B97F4A7C15UL);
+        for (int i = 0; i < tracks.Count; i++)
+        {
+            PathSummary track = tracks[i];
+            if (track == null) continue;
+            h = SignatureMix(h ^ (uint)track.path_id ^ ((ulong)(uint)track.path_variant << 32));
+            h = SignatureMix(h ^ (uint)track.travel_direction ^ ((ulong)(uint)track.platform_side << 32));
+            if (points == null || i >= points.Count || points[i] == null) continue;
+            foreach (Vector3 point in points[i])
+                h = SignatureMix(h ^ (uint)Mathf.RoundToInt(point.x * 10f) ^ ((ulong)(uint)Mathf.RoundToInt(point.z * 10f) << 32) ^ (ulong)(uint)Mathf.RoundToInt(point.y * 10f) << 16);
+        }
+        return h == 0 ? 1 : h;
+    }
+
+    /// <summary>ノードの線路のS字の受け持ち(パスごとの受け持ち長さ・全長・横ずれ)の署名。S字が無ければ空。</summary>
+    private static string TrackTransitionSignature(int nodeId, List<PathSummary> connectedPaths)
+    {
+        var shifts = TrackEndTransition.ResolveNode(nodeId, connectedPaths);
+        if (shifts.Count == 0) return "";
+        var signature = new System.Text.StringBuilder("|S");
+        var ids = new List<int>(shifts.Keys);
+        ids.Sort();
+        foreach (int id in ids)
+        {
+            var shift = shifts[id];
+            signature.Append('|').Append(id).Append(':').Append(Mathf.RoundToInt(shift.Own * 100)).Append(':').Append(Mathf.RoundToInt(shift.Span * 100));
+            foreach (float delta in shift.Delta) signature.Append(':').Append(Mathf.RoundToInt(delta * 1000));
+        }
+        return signature.ToString();
     }
 
     // ================================================================
@@ -1111,6 +1394,8 @@ public class PathManager : BaseApiDataManager
         // 残すと存在しないパス・ノードへ吸着してしまう。
         nodeGrid?.Clear();
         segmentGrid?.Clear();
+        provisionalEndGrid?.Clear();
+        provisionalEndsByPath.Clear();
         // 背景オーバーレイはカメラ静止中 NodeDataVersion の変化でしか再構築されないため、
         // クリアを通知しないと旧セッションのパス線が残り続ける。
         NodeDataVersion++;
@@ -3035,19 +3320,20 @@ public class PathManager : BaseApiDataManager
     /// <summary>
     /// TrackAdjacency.NeighborProvider の実体。指定線路の近接候補線路の描画点列と幅、
     /// 駅パスならプラットフォームの左右張り出し幅と淵ライン（島式ホームの結合判定用）、LRTの線路なら
-    /// 停留所のホーム区間（主線路の架線柱をホームの外へ出すため）を返す。
+    /// 停留所のホーム区間（主線路の架線柱をホームの外へ出すため）、つなぎ目のS字で外へ動く量を返す。
     /// 点列は生成済みならキャッシュ(pathPointsCache)を使い、未生成（同一ロード内で
     /// 相手がまだ描画されていない等）なら CalculatePathPoints で算出する。
-    /// 工事中(STATUS_CONSTRUCTING)の線路は完成パーツを描画しない（土ストリップ表示）ため
-    /// 結合相手に含めない。
+    /// 完成前の線路(計画中・着工保留中・建設中)と敷設プレビューの線は仮の相手(TrackNeighborInfo.Provisional)として返す。
+    /// 建設中の線路は施工済みの区間だけを返す(桁が架かる前に完成側の高欄を外さないため)。
+    /// 形状を編集中の計画は、そのプレビューと二重にならないよう返さない。
     /// </summary>
     public List<TrackNeighborInfo> GetAdjacentTrackNeighbors(PathSummary path)
     {
         var result = new List<TrackNeighborInfo>();
         foreach (int id in CollectNearbyTrackPathIds(path))
         {
+            if (previewExcludedPathId > 0 && id == previewExcludedPathId) continue;
             if (!pathDataCache.TryGetValue(id, out PathSummary other)) continue;
-            if (other.status == Constants.STATUS_CONSTRUCTING) continue;
 
             List<Vector3> points;
             if (!pathPointsCache.TryGetValue(id, out points) || points == null || points.Count < 2)
@@ -3055,41 +3341,64 @@ public class PathManager : BaseApiDataManager
                 points = CalculatePathPoints(other);
             }
             if (points == null || points.Count < 2) continue;
-
-            // 駅パスのホーム張り出し幅を幾何フレーム（点列の start→end 方向）の左右へ解決する。
-            // TrackPath 側が自線路のホームと同じ規約で扱えるようにするため、
-            // 内側/外側→左右の解決（ResolvePlatformExtents）はここで済ませて渡す。
-            float platformLeft = 0f;
-            float platformRight = 0f;
-            var otherMaster = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(other.path_variant) : null;
-            if (otherMaster != null && otherMaster.platform_width.HasValue && otherMaster.platform_width.Value > 0f)
+            if (other.status == Constants.STATUS_CONSTRUCTING)
             {
-                TrackPath.ResolvePlatformExtents(other, otherMaster.platform_width.Value, out platformLeft, out platformRight);
+                points = PathDrawContext.SlicePolylineByFraction(points, 0f, ConstructionPathBuilder.BuiltFraction(other, points));
+                if (points == null || points.Count < 2) continue;
             }
-
-            // LRTの停留所のホーム区間。相手が自分の描画で使うのと同じ索引・点列から、点列の3D累積距離で求める。
-            List<Vector2> lrtZones = null;
-            if (LrtRoadParts.IsLrt(other.path_variant))
-            {
-                var lrtSpans = LrtPlatformParts.Resolve(other, points, new VehiclePolyline(points).Length);
-                if (lrtSpans.Count > 0)
-                    lrtZones = LrtPlatformParts.ZoneRanges(lrtSpans, LrtRoadParts.PlatformRampLength(other.path_variant), LrtRoadParts.PLATFORM_TRACK_ZONE_MARGIN);
-            }
-
-            float width = GetRoadWidth(other.path_variant);
-            result.Add(new TrackNeighborInfo
-            {
-                PathId = id,
-                Points = points,
-                Width = width,
-                PlatformLeft = platformLeft,
-                PlatformRight = platformRight,
-                PlatformEdge = TrackPath.PlatformEdgeDistance(width, Mathf.Max(1, otherMaster?.lanes ?? 1), otherMaster?.center_width ?? 0f),
-                LrtPlatformZones = lrtZones,
-                LrtPlatformOuter = lrtZones != null ? LrtRoadParts.PlatformOuterOffset(other) : 0f,
-            });
+            result.Add(BuildTrackNeighborInfo(other, points));
+        }
+        // 敷設プレビューの線(自分自身と、同じ線の区間は除く)。プレビューはセル表に載らないので別に加える。
+        bool lrt = LrtRoadParts.IsLrt(path.path_variant);
+        foreach (PathSummary preview in previewTracks)
+        {
+            if (preview.path_id == path.path_id || preview.path_type != path.path_type || LrtRoadParts.IsLrt(preview.path_variant) != lrt) continue;
+            if (previewTrackPoints.TryGetValue(preview.path_id, out var points)) result.Add(BuildTrackNeighborInfo(preview, points));
         }
         return result;
+    }
+
+    /// <summary>隣接候補1本分の情報(GetAdjacentTrackNeighbors)。</summary>
+    private TrackNeighborInfo BuildTrackNeighborInfo(PathSummary other, List<Vector3> points)
+    {
+        // 駅パスのホーム張り出し幅を幾何フレーム（点列の start→end 方向）の左右へ解決する。
+        // TrackPath 側が自線路のホームと同じ規約で扱えるようにするため、
+        // 内側/外側→左右の解決（ResolvePlatformExtents）はここで済ませて渡す。
+        float platformLeft = 0f;
+        float platformRight = 0f;
+        var otherMaster = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(other.path_variant) : null;
+        if (otherMaster != null && otherMaster.platform_width.HasValue && otherMaster.platform_width.Value > 0f)
+        {
+            TrackPath.ResolvePlatformExtents(other, otherMaster.platform_width.Value, out platformLeft, out platformRight);
+        }
+
+        // LRTの停留所のホーム区間。相手が自分の描画で使うのと同じ索引・点列から、点列の3D累積距離で求める。
+        List<Vector2> lrtZones = null;
+        if (LrtRoadParts.IsLrt(other.path_variant))
+        {
+            var lrtSpans = LrtPlatformParts.Resolve(other, points, new VehiclePolyline(points).Length);
+            if (lrtSpans.Count > 0)
+                lrtZones = LrtPlatformParts.ZoneRanges(lrtSpans, LrtRoadParts.PlatformRampLength(other.path_variant), LrtRoadParts.PLATFORM_TRACK_ZONE_MARGIN);
+        }
+
+        // つなぎ目のS字で道床・ホームの外端が動く区間(結合判定で相手の広がりに含める)。
+        TrackLateralProfile profile = GetTrackLateralProfile(other);
+        float[] outerShifts = profile != null && !profile.IsUniform ? new TrackLateralSampler(profile, other, points).OuterShiftsAtPoints() : null;
+
+        float width = GetRoadWidth(other.path_variant);
+        return new TrackNeighborInfo
+        {
+            PathId = other.path_id,
+            Points = points,
+            Width = width,
+            OuterShifts = outerShifts,
+            Provisional = TrackAdjacency.IsProvisional(other),
+            PlatformLeft = platformLeft,
+            PlatformRight = platformRight,
+            PlatformEdge = TrackPath.PlatformEdgeDistance(width, Mathf.Max(1, otherMaster?.lanes ?? 1), otherMaster?.center_width ?? 0f),
+            LrtPlatformZones = lrtZones,
+            LrtPlatformOuter = lrtZones != null ? LrtRoadParts.PlatformOuterOffset(other) : 0f,
+        };
     }
 
     /// <summary>
@@ -3103,9 +3412,20 @@ public class PathManager : BaseApiDataManager
 
         foreach (int id in CollectNearbyTrackPathIds(path))
         {
-            pendingTrackNeighborRebuildIds.Add(id);
+            QueueTrackNeighborRebuild(id);
         }
         FlushPendingTrackNeighborRebuilds(null);
+    }
+
+    /// <summary>
+    /// 近接線路の作り直しを積む。積む時点で描画の版を進め、視野外にあって後から表示される線路が
+    /// 結合状態の古い退避中のGOで復元されないようにする(橋脚・送電線などの通知と同じ)。
+    /// </summary>
+    private void QueueTrackNeighborRebuild(int id)
+    {
+        if (!pendingTrackNeighborRebuildIds.Add(id)) return;
+        geometryRevisions.TryGetValue(id, out int revision);
+        geometryRevisions[id] = revision + 1;
     }
 
     /// <summary>
@@ -3671,8 +3991,9 @@ public class PathManager : BaseApiDataManager
     /// <summary>
     /// パスバリアントの base_height（3D描画用の高さオフセット）を取得する。
     /// マスター未定義の場合は 0m（シフトなし）。
+    /// 確定済みパスの描画点列と、道路エディタの敷設プレビュー（RoadRenderer）が共有する。
     /// </summary>
-    private static float GetPathBaseHeight(int pathVariant)
+    public static float GetPathBaseHeight(int pathVariant)
     {
         if (MasterDataStore.Instance == null) return 0f;
         var master = MasterDataStore.Instance.GetPathMaster(pathVariant);
@@ -4637,6 +4958,7 @@ public class PathManager : BaseApiDataManager
             pointsEntry.source = path;
         pathDataCache[path.path_id] = path;
         AddPathToNodeIndex(path);
+        IndexProvisionalTrackEnds(path);
         // 工事音の点列は新しい通過セルで地形署名を取るので、セル登録の後に同期する。
         if (changed) RegisterPathCells(path);
         if (changed || progressChanged) SyncConstructionSound(path);
@@ -4655,6 +4977,7 @@ public class PathManager : BaseApiDataManager
             InvalidateTerrainFollowPath(path);
             EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
             RemovePathFromNodeIndex(pathId, path.start_node_id, path.end_node_id);
+            UnindexProvisionalTrackEnds(pathId);
             pathDataCache.Remove(pathId);
             DropUntrimmedPoints(pathId);
             ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Path, pathId);
@@ -5057,20 +5380,18 @@ public class PathManager : BaseApiDataManager
         }
         deferredNewNodeIntersectionIds.Remove(nodeId);
 
-        // インフラノード（送電線・導水管の分岐点や施設の接続端子）には
-        // 交差点のアスファルトメッシュを生成しない。
-        // また ConnectionPoints によるパス端点の差し替えも行わない。
-        // インフラパスは「垂直結合」（端点の相対YとノードのYの不一致）を許容する仕様であり、
-        // 交差点メッシュの切断点（ノード平面上のY）で端点を上書きすると、
-        // ユーザーが指定した端点の高さが破壊されてしまうため。
-        if (InfraNetworkUtil.IsInfraMask(nodeData.type))
+        List<PathSummary> connectedPaths = GetPathsConnectedToNode(nodeId);
+
+        // 交差点は、交通のパス(インフラのパスと人員搬送を除く)が2本以上つながるノードだけに作る。
+        // ノードの種別ビットでは判定しない(電化線路のノードは送電網を兼ねて電力ビットを持つ)。
+        // インフラのパスは「垂直結合」(端点の相対YとノードのYの不一致)を許容する仕様で、生成器が接続から外すので
+        // 切断点で端点の高さを上書きしない。施設の接続端子は施設内へ軌道や管が続くので作らない。
+        if (!NeedsIntersection(nodeId, connectedPaths))
         {
             RemoveNodeIntersectionMesh(nodeId);
             awaitingIntersectionNodes.Remove(nodeId);
             return;
         }
-
-        List<PathSummary> connectedPaths = GetPathsConnectedToNode(nodeId);
 
         // 接続パス数の防衛的上限（MAX_INTERSECTION_CONNECTED_PATHS のコメント参照）。
         // 超過ノードは awaitingIntersectionNodes にも積まない（パス追加のたびに
@@ -5101,8 +5422,18 @@ public class PathManager : BaseApiDataManager
 
         // 標示の署名は通行区分と接続パスの種別・状態・通行方向・向きを含む。線路端の車止め(TrackPath)もこれらとマスターだけで
         // 決まるので、変わったら切断点が同じでも接続パスを作り直す(下の markingsChanged)。
-        string markingSignature = RoadMarkingRules.JunctionSignature(nodeId, connectedPaths);
+        // 線路のつなぎ目のS字(TrackEndTransition)の受け持ちも、変われば接続パスを作り直す。
+        // S字の区間では道床・ホームの外端が動くので、その線路と並走する線路も結合をやり直す。
+        string transitionSignature = TrackTransitionSignature(nodeId, connectedPaths);
+        string markingSignature = RoadMarkingRules.JunctionSignature(nodeId, connectedPaths) + transitionSignature;
         bool markingsChanged = !nodeMarkingSignatures.TryGetValue(nodeId, out var oldMarkingSignature) || oldMarkingSignature != markingSignature;
+        nodeTransitionSignatures.TryGetValue(nodeId, out var oldTransitionSignature);
+        if ((oldTransitionSignature ?? "") != transitionSignature)
+        {
+            if (transitionSignature.Length > 0) nodeTransitionSignatures[nodeId] = transitionSignature;
+            else nodeTransitionSignatures.Remove(nodeId);
+            foreach (var path in connectedPaths) EnqueueAdjacentTrackNeighborRebuilds(path);
+        }
 
         Vector3 absolutePos = nodeData.GetAbsolutePosition();
         // 切断前の点列を共用し、本線の勾配と切断断面の高さを一致させる。
@@ -5116,9 +5447,12 @@ public class PathManager : BaseApiDataManager
             absolutePos.y = nodePoints[0].y;
         }
         NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
-        // 高速道路の本線をノードでつなぎ、ランプを本線の路面へ取り込む合流は板を持たない(MotorwayMergeLayout)。
-        bool slabless = meshResult != null && meshResult.Mesh == null && meshResult.MotorwayMerge != null;
-        if (!slabless && (meshResult == null || meshResult.Mesh == null))
+        // 高速道路の本線をノードでつなぎ、ランプを本線の路面へ取り込む合流(MotorwayMergeLayout)と、
+        // 軌道の位置がそろう線路の直進接続(TrackContinuousJoin)は板を持たない。
+        bool slabless = meshResult != null && meshResult.Mesh == null && (meshResult.MotorwayMerge != null || meshResult.TrackJoin != null);
+        // 道床の無い線路だけのノードは板を持たず、レールのつなぎだけをノードの GO に付ける。
+        bool railsOnly = meshResult != null && meshResult.Mesh == null && meshResult.RailsOnly;
+        if (!slabless && !railsOnly && (meshResult == null || meshResult.Mesh == null))
         {
             Debug.LogWarning($"[PathManager] meshResult or mesh is null for nodeId={nodeId}, removing mesh.");
             RemoveNodeIntersectionMesh(nodeId);
@@ -5151,13 +5485,15 @@ public class PathManager : BaseApiDataManager
         if (meshResult.MotorwayMerge != null) motorwayMerges[nodeId] = meshResult.MotorwayMerge;
         else motorwayMerges.Remove(nodeId);
 
-        // 本線をノードでつなぐ端は、分離帯の端を丸めず、つなぎ目の橋脚を片方だけが立てる。
+        // 本線・線路をノードでつなぐ端は、分離帯の端を丸めず、つなぎ目の橋脚を片方だけが立てる。
         var joinChanged = new HashSet<int>();
+        int joinA = -1, joinB = -1;
+        if (slabless && meshResult.MotorwayMerge != null) { joinA = meshResult.MotorwayMerge.MainA; joinB = meshResult.MotorwayMerge.MainB; }
+        else if (slabless && meshResult.TrackJoin != null) { joinA = meshResult.TrackJoin.PathA; joinB = meshResult.TrackJoin.PathB; }
         foreach (var path in connectedPaths)
         {
-            var merge = meshResult.MotorwayMerge;
-            bool main = slabless && (path.path_id == merge.MainA || path.path_id == merge.MainB);
-            var join = main ? new RoadEndJoin { Continuous = true, OwnsSupport = path.path_id == Mathf.Min(merge.MainA, merge.MainB) } : default;
+            bool main = slabless && (path.path_id == joinA || path.path_id == joinB);
+            var join = main ? new RoadEndJoin { Continuous = true, OwnsSupport = path.path_id == Mathf.Min(joinA, joinB) } : default;
             if (SetRoadEndJoin(path, nodeId, join)) joinChanged.Add(path.path_id);
         }
         foreach (var path in connectedPaths)
@@ -5387,6 +5723,7 @@ public class PathManager : BaseApiDataManager
     private void RemoveNodeIntersectionMesh(int nodeId)
     {
         nodeMarkingSignatures.Remove(nodeId);
+        nodeTransitionSignatures.Remove(nodeId);
         motorwayMerges.Remove(nodeId);
         slablessMergeNodes.Remove(nodeId);
         // 交差点が消えたときは切断も解除する。以前の切断点を残すと道路端だけが欠ける。
@@ -5453,6 +5790,7 @@ public class PathManager : BaseApiDataManager
         nodeIntersectionSignatures.Clear();
         deferredNewNodeIntersectionIds.Clear();
         nodeMarkingSignatures.Clear();
+        nodeTransitionSignatures.Clear();
         foreach (var meshGO in nodeIntersectionMeshes.Values)
         {
             if (meshGO != null)

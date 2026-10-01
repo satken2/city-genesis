@@ -53,8 +53,6 @@
     "limitHeight": "Límite de altura",
     "limitVolumeRatio": "Coeficiente de construcción",
     "limitCoverageRatio": "Coeficiente de ocupación",
-    "minStructure": "Estructura mínima",
-    "minStructureNone": "Sin restricción",
     "immigrationTitle": "Política migratoria",
     "immigrationDescription": "Define las condiciones para aceptar migrantes en la ciudad. Los hogares que no las cumplan no serán admitidos.",
     "immigrationAgeRange": "Edad del jefe de hogar",

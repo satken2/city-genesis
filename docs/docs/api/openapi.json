@@ -2089,7 +2089,7 @@
           "paths"
         ],
         "summary": "Get Path Construction Cost",
-        "description": "計画中パスの推定建設コストを計算する。\nフロントエンドから送信された形状情報をもとに一時的なPathオブジェクトを生成し、\n建設体積と地区の建設サービス財平均価格からコストを算出する。\n\nレスポンス:\n  estimated_construction_cost: 総推定建設コスト（体積 × 単価）\n  volume: 建設体積\n  estimated_duration_days: 推定建設期間（日）。ConstructionStartPhase の着工式と同じ。\n  cost_per_simulation_days: 1エポック(simulation_days日)あたりの支払コスト。\n  simulation_days: 現在の1エポックあたりの日数（フロントで単位表示に使用）。\n  next_epoch_construction_budget: 次エポックの建設予算（city.budgets[LEDGER_CONSTRUCTION]）。\n  construction_supply_ratio / expected_duration_days: 建設サービス財の需給見通し\n  （_estimate_path_supply_outlook 参照）。\n  alignment: 線形指標（geo_path_alignment.alignment_for_api）。形状から決まる通過速度\n    base_speed・制限速度 max_speed・最小曲線半径 min_curve_radius（直線は null）・\n    最大勾配 max_grade(%)・バリアントの閾値 curve_radius_limit / grade_limit（0=制限なし）・\n    違反区間 curve_violations / grade_violations・alignment_ok。UIは通過速度の表示と\n    閾値超過時の確定ブロックに使う。",
+        "description": "計画中パスの推定建設コストを計算する。\nフロントエンドから送信された形状情報をもとに一時的なPathオブジェクトを生成し、\n建設体積と地区の建設サービス財平均価格からコストを算出する。\n\nレスポンス:\n  estimated_construction_cost: 総推定建設コスト（体積 × 単価）\n  volume: 建設体積\n  estimated_duration_days: 推定建設期間（日）。ConstructionStartPhase の着工式と同じ。\n  cost_per_simulation_days: 1エポック(simulation_days日)あたりの支払コスト。\n  simulation_days: 現在の1エポックあたりの日数（フロントで単位表示に使用）。\n  next_epoch_construction_budget: 次エポックの建設予算（city.budgets[LEDGER_CONSTRUCTION]）。\n  construction_supply_ratio / expected_duration_days: 建設サービス財の需給見通し\n  （_estimate_path_supply_outlook 参照）。\n  estimated_maintenance_cost: 竣工後の1エポックあたりの修繕費の長期平均（概算維持費）。\n  last_epoch_revenue: 直近に終わったエポックの市の収入合計（税収と公営事業収入）。\n  alignment: 線形指標（geo_path_alignment.alignment_for_api）。形状から決まる通過速度\n    base_speed・制限速度 max_speed・最小曲線半径 min_curve_radius（直線は null）・\n    最大勾配 max_grade(%)・バリアントの閾値 curve_radius_limit / grade_limit（0=制限なし）・\n    違反区間 curve_violations / grade_violations・alignment_ok。UIは閾値超過時の\n    確定ブロックに使う。",
         "operationId": "get_path_construction_cost_api_v1_paths_construction_cost_post",
         "requestBody": {
           "content": {
@@ -2873,7 +2873,7 @@
           "parcels"
         ],
         "summary": "Update Parcel Endpoint",
-        "description": "指定したIDのparcelを一部更新する。\nステータスに応じて更新可能なプロパティが異なる:\n- PENDING/SCHEDULED_CONSTRUCTION: status, polygon, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, min_structure, altitude, facade_edge_index\n- その他: status, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, min_structure, allowed_bd_mask",
+        "description": "指定したIDのparcelを一部更新する。\nステータスに応じて更新可能なプロパティが異なる:\n- PENDING/SCHEDULED_CONSTRUCTION: status, polygon, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, altitude, facade_edge_index\n- その他: status, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, allowed_bd_mask",
         "operationId": "update_parcel_endpoint_api_v1_parcels__parcel_id__patch",
         "parameters": [
           {
@@ -6190,25 +6190,6 @@
         }
       }
     },
-    "/api/v1/master/structures": {
-      "get": {
-        "tags": [
-          "master"
-        ],
-        "summary": "structures マスターを取得",
-        "operationId": "get_master_structures_api_v1_master_structures_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/master/landmarks": {
       "get": {
         "tags": [
@@ -7094,7 +7075,7 @@
           "zones"
         ],
         "summary": "Create Zone Endpoint",
-        "description": "zoneを作成する。\nプレイヤーが直接指定するのは地区に所属させる道路のみであり、\n地区のポリゴンは後付けで所属する土地区画の形状から自動計算される。\n任意で name, color, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, min_structure を指定可能。\ncolor(\"#rrggbb\")は地区の識別色で、無指定・不正形式ならバックエンドがランダム生成する\n(地区編集モードのUnityは、作成前にカーソル脇へ提示した色をここで送ってくる)。",
+        "description": "zoneを作成する。\nプレイヤーが直接指定するのは地区に所属させる道路のみであり、\n地区のポリゴンは後付けで所属する土地区画の形状から自動計算される。\n任意で name, color, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio を指定可能。\ncolor(\"#rrggbb\")は地区の識別色で、無指定・不正形式ならバックエンドがランダム生成する\n(地区編集モードのUnityは、作成前にカーソル脇へ提示した色をここで送ってくる)。",
         "operationId": "create_zone_endpoint_api_v1_zones__post",
         "requestBody": {
           "required": true,
@@ -7228,7 +7209,7 @@
           "zones"
         ],
         "summary": "Update Zone Endpoint",
-        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, min_structure, auto_managed\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
+        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, auto_managed\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
         "operationId": "update_zone_endpoint_api_v1_zones__zone_id__patch",
         "parameters": [
           {
@@ -9619,11 +9600,6 @@
             "title": "Variant",
             "description": "経済主体の小分類（agent_master のバリアントID）"
           },
-          "structure": {
-            "type": "integer",
-            "title": "Structure",
-            "description": "建物の構造種別（structure_master のID。0=構造の区別なし）"
-          },
           "landmark": {
             "type": "integer",
             "title": "Landmark",
@@ -10411,7 +10387,6 @@
           "version",
           "type",
           "variant",
-          "structure",
           "landmark",
           "status",
           "alert",
@@ -10495,11 +10470,6 @@
             "type": "integer",
             "title": "Variant",
             "description": "経済主体の小分類（agent_master のバリアントID）"
-          },
-          "structure": {
-            "type": "integer",
-            "title": "Structure",
-            "description": "建物の構造種別（structure_master のID。0=構造の区別なし）"
           },
           "landmark": {
             "type": "integer",
@@ -10690,7 +10660,6 @@
           "version",
           "type",
           "variant",
-          "structure",
           "landmark",
           "status",
           "public_facility",

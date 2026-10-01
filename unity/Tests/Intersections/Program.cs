@@ -94,8 +94,9 @@ internal static class Program
         Check(RoadIntersectionMeshGenerator.TryGetPathDirectionFromNode(1,controlled,out origin,out reference)
             && Vector2.Dot((reference-origin).normalized,Vector2.right) > .999f, "折れ線が無効な制御点を参照しています。");
         int merges = CheckMotorwayMerges();
+        int junctions = CheckTrackJunctions();
         string surfaces = CheckSlopedSurfaces(factory);
-        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, original curve preservation, input-order invariance, {merges} motorway merge checks, sloped surfaces [{surfaces}].");
+        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, original curve preservation, input-order invariance, {merges} motorway merge checks, {junctions} track junction checks, sloped surfaces [{surfaces}].");
     }
 
     /// <summary>
@@ -206,6 +207,77 @@ internal static class Program
         var points = new List<Vector3>();
         for (float s = 0; s <= length + 1e-3f; s += 1f) points.Add(direction * s + side * lateral + Vector3.up * (10 + grade * s));
         return points;
+    }
+
+    /// <summary>始点から終点まで1m間隔の直線。</summary>
+    private static List<Vector3> Straight(Vector3 from, Vector3 to)
+    {
+        int count = Math.Max(1, (int)MathF.Ceiling(Vector3.Distance(from, to)));
+        var points = new List<Vector3>();
+        for (int i = 0; i <= count; i++) points.Add(Vector3.Lerp(from, to, (float)i / count));
+        return points;
+    }
+
+    /// <summary>
+    /// 軌道の位置が違う線路のつなぎ目のS字(TrackEndTransition。N文書§4.7)の式と、完成前の線路(仮の相手)との
+    /// 近接線路の結合の担当(N文書§8.5)を検査する。マスターを使わない部分だけで、ノードでの組の選び方・板なしの接続・
+    /// メッシュは Unity の PlatformQA が検査する。
+    /// </summary>
+    private static int CheckTrackJunctions()
+    {
+        int checks = 0;
+        // 421(±2.5m)→472(±5.5m)。前後20.81mずつを受け持つ1本のS字で、ノードで両方とも±4.0mになり、向きもそろう。
+        const float own = 20.81f;
+        var bundled = new TrackEndTransition.EndShift { Delta = new[] { -3f, 3f }, Own = own, Span = 2 * own };
+        var island = new TrackEndTransition.EndShift { Delta = new[] { 3f, -3f }, Own = own, Span = 2 * own };
+        float Bundled(float d) => 2.5f + bundled.Shift(1, d);
+        float Island(float d) => 5.5f + island.Shift(1, d);
+        Check(MathF.Abs(Bundled(0f) - 4f) < 1e-4f && MathF.Abs(Island(0f) - 4f) < 1e-4f, "S字の両側がノードで±4.0mにそろいません。");
+        Check(MathF.Abs(Bundled(own) - 2.5f) < 1e-4f && MathF.Abs(Island(own) - 5.5f) < 1e-4f, "S字が受け持ちの外へはみ出します。");
+        float slopeIn = (Bundled(0f) - Bundled(.01f)) / .01f, slopeOut = (Island(.01f) - Island(0f)) / .01f;
+        Check(MathF.Abs(slopeIn - slopeOut) < .01f, $"ノードで軌道の向きが折れます: {slopeIn} / {slopeOut}");
+        Check(MathF.Abs(bundled.Delta[1] * bundled.WeightSlope(0f) + slopeIn) < .01f, "S字の傾きの式が数値微分と一致しません。");
+        float radius = float.MaxValue;
+        for (float d = .5f; d < own - .5f; d += .25f)
+        {
+            float second = (Bundled(d - .5f) - 2f * Bundled(d) + Bundled(d + .5f)) / .25f;
+            if (MathF.Abs(second) > 1e-6f) radius = MathF.Min(radius, 1f / MathF.Abs(second));
+        }
+        Check(radius > 99f, $"S字の曲率半径が最小曲線半径を下回ります: {radius}");
+        var profile = new TrackLateralProfile(new[] { -2.5f, 2.5f }, null, bundled);
+        Check(MathF.Abs(profile.Lateral(0, 64f, 0f) + 4f) < 1e-4f && MathF.Abs(profile.OuterShift(64f, 0f) - 1.5f) < 1e-4f, "横位置の形が終点のS字を読みません。");
+        Check(MathF.Abs(profile.Lateral(1, 10f, 54f) - 2.5f) < 1e-4f && !profile.IsUniform, "S字の外の横位置が元の位置ではありません。");
+        checks += 7;
+
+        // 完成した線路と仮の相手(計画中・建設中・プレビュー)の組では、間の充填は仮の相手が描き、架線柱は共有しない。
+        var own0 = Straight(new Vector3(-50, 0, 0), new Vector3(50, 0, 0));
+        var parallel = Straight(new Vector3(-50, 0, 6f), new Vector3(50, 0, 6f));
+        int mid = own0.Count / 2;
+        TrackCorridorInfo Corridor(bool neighborProvisional, bool ownProvisional) => TrackAdjacency.ComputeWithShifts(9, own0, 5f, .4f, 0f, 0f,
+            new List<TrackNeighborInfo> { new() { PathId = 5, Points = parallel, Width = 5f, Provisional = neighborProvisional } }, 0f, null, ownProvisional);
+        float Fill(TrackCorridorInfo c) => !float.IsNaN(c.LeftFillTo[mid]) ? c.LeftFillTo[mid] : c.RightFillTo[mid];
+        var done = Corridor(false, false);
+        var completedSide = Corridor(true, false);
+        var provisionalSide = Corridor(false, true);
+        Check(new[] { done, completedSide, provisionalSide }.All(c => c != null && (c.LeftCovered[mid] || c.RightCovered[mid])), "完成した線路と仮の相手の間の壁が残ります。");
+        Check(float.IsNaN(Fill(done)) && float.IsNaN(Fill(completedSide)) && !float.IsNaN(Fill(provisionalSide)), "道床の隙間の充填の担当が完成側と仮の側で入れ替わっています。");
+        Check(done.SuppressPoleSet[mid] && !completedSide.SuppressPoleSet[mid] && !provisionalSide.SuppressPoleSet[mid], "完成した線路と仮の相手が架線柱を共有しています。");
+        Check(MathF.Abs(MathF.Max(completedSide.LeftExtent[mid], completedSide.RightExtent[mid]) - 2.5f) < 1e-3f, "共有しない架線柱が相手の幅まで張り出します。");
+        checks += 4;
+
+        // 島式の結合: 完成側は単独のときのデッキの外縁(5.5m)まで、仮の側が残りを張って島をつなぐ。
+        var partner = Straight(new Vector3(-50, 0, 9f), new Vector3(50, 0, 9f));
+        TrackCorridorInfo IslandCorridor(bool partnerProvisional, bool ownProvisional) => TrackAdjacency.ComputeWithShifts(9, own0, 5f, 0f, 3f, 0f,
+            new List<TrackNeighborInfo> { new() { PathId = 1, Points = partner, Width = 5f, PlatformRight = 3f, PlatformEdge = 1.5f, Provisional = partnerProvisional } }, 0f, null, ownProvisional);
+        var completedStation = IslandCorridor(true, false);
+        var provisionalStation = IslandCorridor(false, true);
+        var bothDone = IslandCorridor(false, false);
+        Check(completedStation != null && MathF.Abs(completedStation.LeftDeckFar[mid] - 5.5f) < 1e-3f && !completedStation.LeftDeckJoined[mid], "完成側のデッキが単独の外縁から変わりました。");
+        Check(provisionalStation != null && MathF.Abs(provisionalStation.LeftDeckFar[mid] - 3.5f) < 1e-3f && provisionalStation.LeftDeckJoined[mid], "仮の側のデッキが完成側の外縁まで届きません。");
+        Check(bothDone != null && float.IsNaN(bothDone.LeftDeckFar[mid]), "完成どうしの島のデッキを path_id の大きい側が張りました。");
+        Check(completedStation.LeftPlatformWallOmit[mid] && provisionalStation.LeftPlatformWallOmit[mid], "島式の結合で外縁の柵が残ります。");
+        checks += 4;
+        return checks;
     }
 
     private static int CheckMotorwayMerges()

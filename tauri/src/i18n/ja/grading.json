@@ -5,6 +5,7 @@
       "land": "陸地整地",
       "shore": "埋立"
     },
+    "baseHeight": "基準の高さ",
     "targetHeight": "目標の高さ",
     "cutVolume": "切土量",
     "fillVolume": "盛土量",
@@ -16,6 +17,19 @@
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
+    "heightOffset": "高さ（基準との差）",
+    "baseNote": {
+      "beforeClosed": "範囲を閉じると基準の高さが決まります",
+      "frontage": "0 は接する道路の路面の高さ（{{value}} m）",
+      "terrain_mean": "0 は範囲の現在の平均の高さ（{{value}} m）"
+    },
+    "shoreHeightLocked": "埋立の高さは指定できません",
+    "guide": {
+      "lead": "3Dビューの地形をクリックして、造成する範囲を描きます。",
+      "step1": "地形を左クリックして頂点を置く",
+      "step2": "右クリックで範囲を閉じる（見積もりが出ます）",
+      "step3": "高さを指定して発注する"
+    },
     "reasons": {
       "invalid_polygon": "範囲の形が正しくありません。辺が交差しない形で描いてください。",
       "outside_city": "範囲が都市の外にはみ出しています。",
@@ -26,7 +40,8 @@
       "overlaps_path": "道路・線路などのパスと重なっています。",
       "overlaps_water": "川や湖に掛かっています。",
       "overlaps_quay_band": "埋立地の岸壁に掛かっています。",
-      "no_surface_frontage": "地表の道路に接していません。陸地整地は接する道路の路面の高さに揃えます。",
+      "invalid_height_offset": "高さの指定が範囲外です（±{{offsetLimit}} m まで）。",
+      "below_sea_level": "海面より低くはできません。",
       "too_narrow": "範囲が狭すぎて、岸壁の内側に造成できる部分がありません。",
       "no_work": "地面がすでに目標の高さで、工事の必要がありません。",
       "insufficient_funds": "資金が不足しているため発注できません。"

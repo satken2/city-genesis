@@ -311,6 +311,9 @@ public class RoadPath : IPathMeshGenerator
             stretchToWidth = false;
             normalizeBodySurface = false;
         }
+        // 線路のつなぎ目のS字などの変形。区間LODの遅延生成・頂点上限での分割にも同じ変形を引き継ぐ。
+        PartWarp warp = PathDrawContext.Warp;
+
         // プレハブのロード。描画LODが接写なら `_close` を優先し、バリアント→タイプの順で解決する
         // (PathDrawContext.ResolvePrefab)。接写パーツは無印と bbox・原点が一致する規約なので配置計算は共通。
         GameObject prefab = null;
@@ -346,6 +349,7 @@ public class RoadPath : IPathMeshGenerator
                 {
                     PathDrawContext.Begin(lod, from, to);
                     PathDrawContext.SetAdaptiveTileLength(adaptive);
+                    PathDrawContext.Warp = warp;
                     try
                     {
                         return CreateSplineMesh(group, spline, prefabName, width, centerOffsetX, offsetY,
@@ -374,6 +378,8 @@ public class RoadPath : IPathMeshGenerator
         // bounds の中心が centerOffsetX に一致するよう offset を補正して、
         // プレハブごとのピボット規約の違い（中心/端）を吸収する。
         float pivotCompensationX = 0f;
+        // 変形の倍率に合わせて動かすピボット補正の基準(bounds 中心 × 横倍率)。
+        float warpPivotX = 0f;
 
         if(mf != null && mf.sharedMesh != null)
         {
@@ -403,6 +409,7 @@ public class RoadPath : IPathMeshGenerator
              float meshCenterX = fittingBounds.center.x;
              if (mirrorX) meshCenterX = -meshCenterX;
              if (compensatePivot) pivotCompensationX = -(meshCenterX * scaleX);
+             if (compensatePivot) warpPivotX = meshCenterX * scaleX;
              UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   scaleX計算: meshWidth={meshWidth:F3} → scaleX={scaleX:F3} (targetWidth={width}), pivotCompensationX={pivotCompensationX:F3}");
 
              MeshRenderer targetMr = go.GetComponent<MeshRenderer>();
@@ -549,6 +556,17 @@ public class RoadPath : IPathMeshGenerator
                     channel.count = Mathf.Max(1, Mathf.RoundToInt(clippedLen / tileLen));
                 }
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   チャンネル設定: offset=({offsetX:F3}, {offsetY:F3}), scale={scaleX:F3}, count={channel.count} (singleSpan={singleSpan}, clip={clipFrom:F3}〜{clipTo:F3})");
+            }
+
+            // 変形はスプライン割合ごとのずれと倍率としてチャンネルへ渡す(Dreamteck が断面ごとに評価する)。
+            if (warp != null && (warp.Shift != null || warp.Scale != null))
+            {
+                var shift = warp.Shift;
+                var scale = warp.Scale;
+                float pivot = warpPivotX;
+                if (scale != null) channel.scaleHandler = percent => new Vector3(scale(percent), 1f, 1f);
+                channel.offsetHandler = percent => new Vector2(
+                    (shift != null ? shift(percent) : 0f) - (scale != null ? pivot * (scale(percent) - 1f) : 0f), 0f);
             }
 
             // ===== 生成前の頂点数バジェットガード =====
@@ -1822,11 +1840,14 @@ public class RoadPath : IPathMeshGenerator
         var pillarBounds = PillarClearance.GetPrefabBounds(pillarPrefab);
         var capBounds = PillarClearance.GetPrefabBounds(pillarCapPrefab);
         int placedCount = 0;
+        // 橋脚の梁は、その地点の路面の横幅の倍率(線路のつなぎ目のS字。PathDrawContext.Warp)だけ横に伸ばす。
+        PartWarp warp = PathDrawContext.Warp;
 
         bool TryPlace(double percent)
         {
+            float capWidthScale = warp?.Scale != null ? warp.Scale(ClampSplinePercent(percent)) : 1f;
             if (onSupport == null)
-                return PlacePillar(container, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight);
+                return PlacePillar(container, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight, capWidthScale);
             Vector3 position = spline.EvaluatePosition(ClampSplinePercent(percent));
             float ground = Utils.GetGroundHeight(position);
             // キャップ下端が地面に届く高さが無い地点は施工単位にしない（PlacePillar と同じキャップ厚の定義）。
@@ -1835,7 +1856,7 @@ public class RoadPath : IPathMeshGenerator
             var support = new GameObject("ConstructionSupport");
             support.transform.SetParent(container.transform, false);
             support.transform.position = new Vector3(position.x, ground, position.z);
-            if (!PlacePillar(support, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight))
+            if (!PlacePillar(support, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight, capWidthScale))
             {
                 UnityEngine.Object.Destroy(support);
                 return false;
@@ -1953,7 +1974,7 @@ public class RoadPath : IPathMeshGenerator
     /// </summary>
     private static bool PlacePillar(GameObject container, GameObject pillarPrefab, GameObject pillarCapPrefab,
         Bounds? pillarBounds, Bounds? capBounds, List<PillarClearance.Corridor> obstacles,
-        SplineComputer spline, double percent, float baseHeight)
+        SplineComputer spline, double percent, float baseHeight, float capWidthScale = 1f)
     {
         SplineSample sample = spline.Evaluate(ClampSplinePercent(percent));
         Vector3 forward = sample.forward;
@@ -1961,6 +1982,7 @@ public class RoadPath : IPathMeshGenerator
         if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
         Quaternion rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
         Vector3 capScale = pillarCapPrefab != null ? pillarCapPrefab.transform.localScale : Vector3.one;
+        capScale.x *= capWidthScale;
         float capThickness = capBounds.HasValue ? Mathf.Max(0f, -capBounds.Value.min.y * capScale.y) : 0f;
         Vector3 pillarPosition = sample.position + Vector3.down * capThickness;
         float height = pillarPosition.y - Utils.GetGroundHeight(sample.position);

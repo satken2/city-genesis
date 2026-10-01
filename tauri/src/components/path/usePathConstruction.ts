@@ -263,7 +263,10 @@ export function usePathConstruction(
   const [estimatedDurationDays, setEstimatedDurationDays] = useState<number | null>(null);
   const [costPerSimulationDays, setCostPerSimulationDays] = useState<number | null>(null);
   const [costSimulationDays, setCostSimulationDays] = useState<number | null>(null);
-  const [nextEpochConstructionBudget, setNextEpochConstructionBudget] = useState<number | null>(null);
+  // 竣工後の1エポックあたりの修繕費の長期平均(全線の合計)。
+  const [maintenanceCost, setMaintenanceCost] = useState<number | null>(null);
+  // 直近に終わったエポックの市の収入合計。コスト・維持費の割合表示の分母。
+  const [epochRevenue, setEpochRevenue] = useState<number | null>(null);
   // 発注に使える市の資金(現預金 − 貯蓄目標 − 既存案件の拘束額)。資金審査の先回り表示に使う。
   const [availableFunds, setAvailableFunds] = useState<number | null>(null);
   // 建設サービス財の調達充足率(0〜1)と、それを織り込んだ見込み建設期間(日)。
@@ -271,8 +274,8 @@ export function usePathConstruction(
   const [supplyRatio, setSupplyRatio] = useState<number | null>(null);
   const [expectedDurationDays, setExpectedDurationDays] = useState<number | null>(null);
   const [isCostLoading, setIsCostLoading] = useState(false);
-  // 線形指標(通過速度・最小曲線半径・最大勾配・規格の閾値と違反)。construction-cost の
-  // alignment を複線は最悪値で集約する。null は未取得。
+  // 線形指標(規格の閾値と違反)。確定ブロックに使う。construction-cost の alignment を
+  // 複線は最悪値で集約する。null は未取得。
   const [alignment, setAlignment] = useState<PathAlignmentSummary | null>(null);
   const costAbortControllerRef = useRef<AbortController | null>(null);
 
@@ -538,8 +541,9 @@ export function usePathConstruction(
     setEstimatedDurationDays(null);
     setCostPerSimulationDays(null);
     setCostSimulationDays(null);
-    setNextEpochConstructionBudget(null);
-      setAvailableFunds(null);
+    setMaintenanceCost(null);
+    setEpochRevenue(null);
+    setAvailableFunds(null);
     sendChangeState("STATE_EDIT_PATH", {
       path_type: variantData?.type ?? null,
       path_variant: selectedVariant,
@@ -1053,7 +1057,8 @@ export function usePathConstruction(
       setEstimatedDurationDays(null);
       setCostPerSimulationDays(null);
       setCostSimulationDays(null);
-      setNextEpochConstructionBudget(null);
+      setMaintenanceCost(null);
+      setEpochRevenue(null);
       setAvailableFunds(null);
       setSupplyRatio(null);
       setExpectedDurationDays(null);
@@ -1113,8 +1118,11 @@ export function usePathConstruction(
           ? sum("cost_per_simulation_days")
           : null);
         setCostSimulationDays(results[0]?.simulation_days ?? null);
-        setNextEpochConstructionBudget(results[0]?.next_epoch_construction_budget ?? null);
-        // 利用可能額は都市全体の値なので全線で同じ。先頭の値を採用する。
+        setMaintenanceCost(results.some((r) => r.estimated_maintenance_cost != null)
+          ? sum("estimated_maintenance_cost")
+          : null);
+        // 収入と利用可能額は都市全体の値なので全線で同じ。先頭の値を採用する。
+        setEpochRevenue(results[0]?.last_epoch_revenue ?? null);
         setAvailableFunds(results[0]?.available_funds ?? null);
         // 充足率は最も低い線を採用する(全線が同じ地区の建設代理エージェントを共有するため、
         // 実際の按分は線ごとに大差ないが、悲観側に寄せて警告の取り逃しを防ぐ)。
@@ -1139,8 +1147,9 @@ export function usePathConstruction(
           setEstimatedDurationDays(null);
           setCostPerSimulationDays(null);
           setCostSimulationDays(null);
-          setNextEpochConstructionBudget(null);
-      setAvailableFunds(null);
+          setMaintenanceCost(null);
+          setEpochRevenue(null);
+          setAvailableFunds(null);
           setSupplyRatio(null);
           setExpectedDurationDays(null);
           setAlignment(null);
@@ -1199,14 +1208,14 @@ export function usePathConstruction(
     estimatedDurationDays,
     costPerSimulationDays,
     costSimulationDays,
-    nextEpochConstructionBudget,
+    maintenanceCost,
+    epochRevenue,
     availableFunds,
     supplyRatio,
     expectedDurationDays,
     isCostLoading,
     pathLength,
     // 線形
-    alignment: displayAlignment,
     alignmentOk: displayAlignment == null || (!displayAlignment.curveViolated && !displayAlignment.gradeViolated),
     // 選択・敷設
     selectVariant,

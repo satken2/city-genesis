@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "계산 부하",
+      "title": "시뮬레이션 부하",
       "heading": "최근 에포크({{days}}일분)의 계산 시간",
       "noData": "측정 데이터 없음",
       "note": "여러 에포크를 연속으로 실행한 경우 마지막 에포크의 값입니다. 문제 규모는 주요 비교의 조합 수를 도시 규모로부터 추정한 대략적인 값입니다.",
@@ -18,8 +18,8 @@
       "labor": "노동 시장",
       "building_spawn": "건물 생성",
       "agent_spawn": "경제 주체 생성",
-      "routing": "경로 탐색",
-      "transit": "대중교통 경로",
+      "routing": "시민 경로 탐색",
+      "transit": "대중교통 경로 탐색",
       "environment": "주거 환경",
       "other": "기타"
     },
@@ -50,9 +50,7 @@
       "roads": "도로",
       "tracks": "궤도",
       "infra": "인프라망",
-      "nodes": "노드",
-      "transitLines": "대중교통 노선",
-      "epochs": "경과 에포크"
+      "nodes": "노드"
     },
     "approximation": {
       "title": "시뮬레이션 근사",
@@ -90,7 +88,12 @@
       "gpuDisabled": "GPU 가속: 비활성화",
       "coreSimulator": "코어 시뮬레이터",
       "currentMemory": "현재 메모리 사용량: {{value}}",
-      "peakMemory": "시작 이후 최대 메모리 사용량: {{value}}"
+      "peakMemory": "시작 이후 최대 메모리 사용량: {{value}}",
+      "graphic": "3D",
+      "currentVram": "현재 VRAM 사용량: {{value}}",
+      "usageTooltip": "PC 전체 {{pc}} / 이 게임 {{game}} / 탑재 {{total}}",
+      "legendPc": "PC 전체",
+      "legendGame": "이 게임"
     }
   }
 }

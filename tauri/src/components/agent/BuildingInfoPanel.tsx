@@ -34,12 +34,6 @@ export function BuildingInfoPanel({ agent }: BuildingInfoPanelProps) {
     masterData?.bd_types[agent.bd_type]?.display_name ??
     String(agent.bd_type);
 
-  // 構造種別(0=構造の区別なし。農地・変電所などは行自体を出さない)
-  const structureName =
-    agent.structure != null && agent.structure > 0
-      ? (masterData?.structures?.[agent.structure]?.display_name ?? String(agent.structure))
-      : null;
-
   const hasDiagramData =
     agent.capacity &&
     Object.keys(agent.capacity).length > 0 &&
@@ -73,15 +67,6 @@ export function BuildingInfoPanel({ agent }: BuildingInfoPanelProps) {
               {t("building.type")}
             </span>
             <span className="agent-detail-value">{bdTypeName}</span>
-
-            {structureName != null && (
-              <>
-                <span className="agent-detail-label">
-                  {t("building.structure")}
-                </span>
-                <span className="agent-detail-value">{structureName}</span>
-              </>
-            )}
 
             {agent.floors != null && (
               <>

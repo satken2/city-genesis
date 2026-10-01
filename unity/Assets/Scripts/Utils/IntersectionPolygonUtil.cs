@@ -42,10 +42,13 @@ public static class IntersectionPolygonUtil
     /// <summary>
     /// 入口断面を角度順に結ぶ。切断上限は呼び出し元が隣接ノードの接続状態から指定する。
     /// 描画点列が供給される場合は、その点列上で断面を求めるため曲線の制御点を動かさない。
+    /// 切断距離はノードでの幅(widthResolver)から決める。sectionWidthResolver があれば、断面の幅は
+    /// 切断位置(ノードからの距離)での幅にする(線路のつなぎ目のS字で、幅がノードからの距離で変わるため)。
     /// </summary>
     public static IntersectionCalculationResult ComputeIntersectionPolygon(int intersectionNodeId,
         Vector2 intersectionPos, List<PathSummary> paths, GeometryFactory gf,
-        Func<PathSummary, float> widthResolver = null, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null)
+        Func<PathSummary, float> widthResolver = null, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null,
+        Func<PathSummary, float, float> sectionWidthResolver = null)
     {
         var entries = new List<(PathSummary path, List<Vector3> points, float width, Vector2 direction)>();
         foreach (var p in paths.OrderBy(p => p.path_id))
@@ -80,7 +83,7 @@ public static class IntersectionPolygonUtil
             float limit = cutLimitResolver != null ? cutLimitResolver(e.path) : length * 0.95f;
             cut = Mathf.Min(cut + maxWidth * 0.25f, Mathf.Max(0f, limit));
             var section = AtDistance(e.points, cut);
-            section.Width = e.width;
+            section.Width = sectionWidthResolver != null ? sectionWidthResolver(e.path, cut) : e.width;
             result.Sections[e.path.path_id] = section;
             result.ConnectionPoints[e.path.path_id] = section.Center;
         }

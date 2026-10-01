@@ -73,6 +73,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// 遠景(Far)用の建物メッシュ。建物種別によらず専用prebuiltを優先し、無ければ階数×階高の箱。
     /// 遠景は数が最も多いので、フル詳細と同じ組み立てを走らせてマテリアルだけ差し替える方式は使わない。
     /// 港は例外で、区画が海へはみ出しているので底面の箱では海に箱が立つ。岸壁と `_far` パーツを同じ配置で組み立てる(F4)。
+    /// マッシュアップも例外で、棟の配置が区画ごとに違うので、棟ごとの `_far` パーツを通常と同じ配置で組み立てる(F6)。
+    /// 遠景パーツで描ける棟が1つも無ければ箱にする。
     /// 工事中・解体中は箱の高さを1階分にして「まだ建っていない」ことを遠目にも保ち、
     /// 倒壊は瓦礫の高さ(0.5階分)にする。
     /// 露天掘りは何も描かない。穴は地形そのもので、中心位置の高さに置く箱や板は穴に蓋をしてしまう。
@@ -99,6 +101,11 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
                     || BuildingMeshUtils.GetPartNoPosition(prefix, "mid-prebuilt", 0, true) != null
                     || BuildingMeshUtils.GetPartNoPosition(prefix, "top-prebuilt", 0, true) != null)
                     return prebuiltGenerator.Generate(buildingData, false);
+                if (GetModelType(buildingData) == Constants.MODEL_MASHUP)
+                {
+                    BuildingMeshResult mashupFar = MashupBuildingMeshBuilder.GenerateFar(buildingData);
+                    if (mashupFar != null) return mashupFar;
+                }
                 if (GetModelType(buildingData) == Constants.MODEL_PORT)
                     return portGenerator.Generate(buildingData, false);
             }

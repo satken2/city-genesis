@@ -63,8 +63,6 @@ export type AgentData = {
   name: string;
   type: number;
   variant: number;
-  /** 構造種別(structures マスターのID)。0=構造の区別なし。建物以外は未設定 */
-  structure?: number;
   /** 観光名所の種別(landmarks マスターのID)。0=観光名所ではない */
   landmark?: number;
   status: number;
@@ -242,8 +240,6 @@ export type ZoneData = {
   limit_coverage_ratio: number | null;
   limit_volume_ratio: number | null;
   limit_height: number | null;
-  /** 建設を許可する最低構造種別(structures マスターのID)。0=制限なし */
-  min_structure: number;
   zone_average_prices: Record<string, number>;
   average_wage: number[];
   average_rent: number[];
@@ -358,8 +354,6 @@ export type ParcelData = {
   limit_coverage_ratio: number | null;
   limit_volume_ratio: number | null;
   limit_height: number | null;
-  /** 建設を許可する最低構造種別(structures マスターのID)。0=制限なし */
-  min_structure: number;
   area: number;
   altitude: number;
   /**
@@ -514,9 +508,6 @@ export type AgentMasterEntry = {
   // 建物メッシュの生成方式(constants.ts の MODEL_* 定数)。MODEL_MASHUP(7)の建物は
   // 複数のサブ建物(subbuildings マスター)で構成され、詳細パネルから配置エディタを開ける。
   model_type?: number;
-  // 選択できる構造種別(structures マスターのID一覧、昇順)。未設定・空は構造の区別を持たない
-  // バリアント(農地・変電所など。建物の structure は常に 0)。
-  structures?: number[];
   // シナリオ制作(テンプレートモード)でのみ設置できるバリアント。通常プレイの建設パネルには出さない。
   template_only?: boolean;
   // 建設できる土地区画種別(constants.ts の PARCEL_*)。区画の parcel_type と完全一致した区画にだけ
@@ -545,25 +536,6 @@ export type LandmarkMasterEntry = {
   height_per_floor: number;
   /** 建設費乗数(同じ延床の一般建物の何倍か) */
   cost_multiplier: number;
-};
-
-/**
- * 構造種別マスター (structures)
- * 建物の用途・形(agents マスターの variant)とは直交する軸で、木造/準耐火/耐火のように
- * 「どう造られているか」を表す。建設費乗数・耐用年数・火災耐性・構造上の最大階数だけを決める。
- * ID 0 は「構造の区別なし」の予約値でマスターには含まれない。
- */
-export type StructureMasterEntry = {
-  display_name: string;
-  description?: string;
-  /** 建設費乗数(耐火構造=1.0 基準。木造は 0.5 など) */
-  cost_multiplier?: number;
-  /** 耐用年数(年) */
-  useful_life?: number;
-  /** 火災耐性(0=無耐性〜1=不燃) */
-  fire_resistance?: number;
-  /** 構造上の最大階数。0 は無制限 */
-  max_floors?: number;
 };
 
 /**
@@ -938,7 +910,6 @@ export type MasterData = {
   agent_types: Record<number, AgentTypeEntry>;
   agents: Record<number, AgentMasterEntry>;
   subbuildings: Record<number, SubBuildingMasterEntry>;
-  structures: Record<number, StructureMasterEntry>;
   landmarks: Record<number, LandmarkMasterEntry>;
   products: Record<number, ProductMasterEntry>;
   paths: Record<number, PathMasterEntry>;

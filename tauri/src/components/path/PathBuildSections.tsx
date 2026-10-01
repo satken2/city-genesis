@@ -269,8 +269,7 @@ export function PathBuildSections({
       )}
 
       {/*
-        建設費用セクション(パネル最下部)。形状プレビューは廃止し、パス長・推定コスト・
-        工期などの数値情報に集約した。ノードが2点そろうまではコストを算出できないため
+        建設費用セクション(パネル最下部)。ノードが2点そろうまではコストを算出できないため
         敷設を促すメッセージを出す。
       */}
       {pc.selectedVariant !== null && (
@@ -290,12 +289,13 @@ export function PathBuildSections({
               costRatioHelp={t("path_construction.costRatioHelp")}
               estimatedDurationDays={pc.estimatedDurationDays}
               isCostLoading={pc.isCostLoading}
-              nextEpochConstructionBudget={pc.nextEpochConstructionBudget}
+              maintenanceCost={pc.maintenanceCost}
+              epochRevenue={pc.epochRevenue}
               availableFunds={pc.availableFunds}
               requiredTotal={pc.estimatedCost}
+              showAvailableFunds={false}
               supplyRatio={pc.supplyRatio}
               expectedDurationDays={pc.expectedDurationDays}
-              alignment={pc.alignment}
             />
           )}
         </div>

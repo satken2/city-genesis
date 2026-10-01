@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "Carga de cálculo",
+      "title": "Carga de simulación",
       "heading": "Tiempo de cálculo de la última época ({{days}} días)",
       "noData": "Sin datos de medición",
       "note": "Si se ejecutan varias épocas seguidas, se muestra la última. El tamaño del problema es una estimación aproximada de las comparaciones principales, según el tamaño de la ciudad.",
@@ -18,8 +18,8 @@
       "labor": "Mercado laboral",
       "building_spawn": "Aparición de edificios",
       "agent_spawn": "Aparición de agentes",
-      "routing": "Búsqueda de rutas",
-      "transit": "Rutas del transporte público",
+      "routing": "Búsqueda de rutas de los ciudadanos",
+      "transit": "Búsqueda de rutas del transporte público",
       "environment": "Entorno residencial",
       "other": "Otros"
     },
@@ -50,9 +50,7 @@
       "roads": "Calles",
       "tracks": "Vías férreas",
       "infra": "Redes de servicios",
-      "nodes": "Nodos",
-      "transitLines": "Líneas de transporte",
-      "epochs": "Épocas transcurridas"
+      "nodes": "Nodos"
     },
     "approximation": {
       "title": "Aproximación de la simulación",
@@ -90,7 +88,12 @@
       "gpuDisabled": "Aceleración GPU: Desactivada",
       "coreSimulator": "Simulador principal",
       "currentMemory": "Uso actual de memoria: {{value}}",
-      "peakMemory": "Uso máximo de memoria desde el inicio: {{value}}"
+      "peakMemory": "Uso máximo de memoria desde el inicio: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Uso actual de VRAM: {{value}}",
+      "usageTooltip": "Todo el PC {{pc}} / Este juego {{game}} / Instalada {{total}}",
+      "legendPc": "Todo el PC",
+      "legendGame": "Este juego"
     }
   }
 }

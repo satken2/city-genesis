@@ -59,7 +59,7 @@ public static class InputMode
     // 実体の掴み判定・移動は ConnectorEditManager がスクリーン座標のマーカー当たり判定で行う。
     public const int MODE_EDIT_CONNECTOR = 15;
     // ブルドーザ(オブジェクト削除)モード。空き地区画・計画中の建物/道路を
-    // 左クリックまたは左ドラッグ(ペイント式)で削除する。実処理は RemovalManager が担う。
+    // 左クリックで削除する(ドラッグでは削除しない)。実処理は RemovalManager が担う。
     public const int MODE_REMOVE = 17;
     // パス結合(merge)の相手選択モード。詳細パネルで開いているパスと共有ノードで繋がる
     // 候補パスだけをクリックできる。候補判定と選択通知は PathTopologyEditManager が担う。

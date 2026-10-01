@@ -740,11 +740,8 @@ public static class BuildingMeshUtils
     public static string GetGlbPrefix1(BuildingSummary buildingData) => ResolveModelNaming(buildingData).Prefix;
 
     /// <summary>
-    /// パーツフォルダの prefix を決める。構造種別(structure > 0)を持つ建物は、構造つきフォルダ
-    /// (a{variant}s{structure} / b{bd_type}s{structure})があればそれを優先し、無ければ従来どおり
-    /// a{variant} → b{bd_type} へ落ちる。構造の差は木造の板壁 / RC の打放しのようにマテリアルや
-    /// 壁パーツの差し替えで表現し、ジオメトリの生成方式(model_type)は変えない。
-    /// 解決順: landmark-{model_prefix} → a{v}s{s} → a{v} → b{bd}s{s} → b{bd}
+    /// パーツフォルダの prefix を決める。
+    /// 解決順: landmark-{model_prefix} → a{variant} → b{bd_type}
     ///
     /// 観光名所(landmark > 0)が先頭なのは、名所が一点物でありながら用途バリアントを
     /// 1つ(観光名所)しか持たないため、a{variant} では名所同士を区別できないからである。
@@ -757,29 +754,20 @@ public static class BuildingMeshUtils
             return landmarkPrefix;
         }
 
-        int structure = buildingData.structure;
         string variantPrefix = $"a{buildingData.variant}";
-        if (structure > 0 && AgentModelConfig.HasStructurePrefix($"{variantPrefix}s{structure}"))
-        {
-            return $"{variantPrefix}s{structure}";
-        }
         if (HasVariantDefinition(buildingData.variant))
         {
             return variantPrefix;
         }
 
         int bdType = ResolveBdTypeFallback(buildingData.variant, buildingData.bd_type ?? 0);
-        if (structure > 0 && AgentModelConfig.HasStructurePrefix($"b{bdType}s{structure}"))
-        {
-            return $"b{bdType}s{structure}";
-        }
         return $"b{bdType}";
     }
 
     /// <summary>
     /// 観光名所のパーツフォルダ名(landmark-{model_prefix})を返す。名所でない場合、
     /// マスターから model_prefix を解決できない場合、実在フォルダが無い場合は null。
-    /// 実在判定は agent_model_config.yaml の landmark_prefixes による(構造つきフォルダと同じ方式)。
+    /// 実在判定は agent_model_config.yaml の landmark_prefixes による。
     /// </summary>
     private static string DetermineLandmarkPrefix(int landmark)
     {
@@ -1017,6 +1005,16 @@ public static class BuildingMeshUtils
     /// </summary>
     public static GameObject GetPartBySuffixScan(string prefix, string partName, int variantNumber)
     {
+        int bestSuffix = FindPartSuffix(prefix, partName, variantNumber);
+        return bestSuffix >= 0 ? GetPartNoPosition(prefix, partName, bestSuffix, true) : null;
+    }
+
+    /// <summary>
+    /// <see cref="GetPartBySuffixScan"/> が選ぶ閾値フォルダ。無ければ -1。
+    /// 存在判定は無印の名前で行うので描画LODによらず同じ値になり、無印があるのに `_far` が無いことの判定にも使える。
+    /// </summary>
+    public static int FindPartSuffix(string prefix, string partName, int variantNumber)
+    {
         int bestSuffix = -1;
         for (int suffix = 0; suffix <= 1000; suffix += 100)
         {
@@ -1026,7 +1024,7 @@ public static class BuildingMeshUtils
                 bestSuffix = suffix;
             }
         }
-        return bestSuffix >= 0 ? GetPartNoPosition(prefix, partName, bestSuffix, true) : null;
+        return bestSuffix;
     }
 
     /// <summary>

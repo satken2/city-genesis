@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "計算負荷",
+      "title": "シミュレーション負荷",
       "heading": "直近のエポック({{days}}日分)の計算時間",
       "noData": "計測データなし",
       "note": "複数のエポックを続けて実行したときは、最後のエポックの値です。処理件数は、主な比較の組み合わせ数を都市の規模から見積もった目安です。",
@@ -18,8 +18,8 @@
       "labor": "労働市場",
       "building_spawn": "建物スポーン",
       "agent_spawn": "経済主体スポーン",
-      "routing": "経路探索",
-      "transit": "公共交通の経路",
+      "routing": "市民の経路探索",
+      "transit": "公共交通の経路探索",
       "environment": "住環境",
       "other": "その他"
     },
@@ -50,9 +50,7 @@
       "roads": "道路",
       "tracks": "軌道",
       "infra": "インフラ網",
-      "nodes": "ノード",
-      "transitLines": "公共交通の路線",
-      "epochs": "経過エポック"
+      "nodes": "ノード"
     },
     "approximation": {
       "title": "シミュレーションの近似",
@@ -90,7 +88,12 @@
       "gpuDisabled": "GPUアクセラレーション: 無効",
       "coreSimulator": "コアシミュレーター",
       "currentMemory": "現在のメモリ使用量: {{value}}",
-      "peakMemory": "起動以降の最大メモリ使用量: {{value}}"
+      "peakMemory": "起動以降の最大メモリ使用量: {{value}}",
+      "graphic": "3D",
+      "currentVram": "現在のVRAM使用量: {{value}}",
+      "usageTooltip": "PC全体 {{pc}} / 本ゲーム {{game}} / 搭載 {{total}}",
+      "legendPc": "PC全体",
+      "legendGame": "本ゲーム"
     }
   }
 }

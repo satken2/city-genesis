@@ -53,6 +53,12 @@
   cursor: help;
 }
 
+/* 概算コスト・概算維持費の右に添える収入に対する割合 */
+.construction-revenue-ratio {
+  margin-left: 6px;
+  color: #93a9c0;
+}
+
 /* 「来期の建設予算の X%」の注記 */
 .construction-budget-note {
   font-size: 0.97rem;
@@ -93,10 +99,4 @@
   color: #f97316;
   background: rgba(249, 115, 22, 0.08);
   border: 1px solid rgba(249, 115, 22, 0.35);
-}
-
-/* 線形制約(最小曲線半径・最大勾配)を超えた値。警告バナーと同じ系統の色で目立たせる */
-.construction-alignment-violated {
-  color: #e05a5a;
-  font-weight: 600;
 }

@@ -15,7 +15,7 @@
 | `road` / `intersection` | 名前付き道路の詳細、インターチェンジ詳細 |
 | `transit` | 公共交通の管理ウィンドウ、路線詳細、路線新設/経路編集、収支見込み |
 | `resource` / `prop` / `terrain` | 天然資源、プロップ配置、シナリオの地形エディタ(2D `TerrainEditorCanvas`・3D `Terrain3DPreviewCanvas`) |
-| `grading` | 造成(整地・埋立)の範囲作図ウィンドウ、造成工事の建設工事タブ、造成バリアントの判定と見積もりの型(`grading.ts`) |
+| `grading` | 造成(整地・埋立)の範囲作図ウィンドウ(手順ガイド・高さの指定欄・見積もり)、造成工事の建設工事タブ、造成バリアントの判定と見積もりの型(`grading.ts`) |
 | `map` | 2D都市マップ。`CityMapCanvas`は共通地図部品で、局所地図が要るパネルは新規実装せずこれを埋め込む |
 | `budget` / `tax` / `regulation` / `statistics` / `achievement` | 市政系ウィンドウ(予算・公共施設、税、規制、統計、達成目標) |
 | `construction` / `supply` / `notification` | 建設プロジェクト、詳細パネルに埋め込む供給図、通知トースト+L1通知一覧 |
@@ -67,7 +67,7 @@
 | `InfoHeader` / `EditableLabel` | 見出しとインライン改名。改名可否は呼び出し側が決める |
 | `ConfirmDialogWindow` | 直接開かず`requestConfirm()`経由 |
 | `UnaffordableOverlay` | 建設パネルのバリアント一覧で、資金不足のカードに「資金不足」の札を外から重ねる。カード(`BuildingVariantCard` / `PathVariantCard`)は一覧と建設画面の概要で同じものを使うので、一覧だけの表示をカードに足さない。選べなくするのはカードの`disabled` |
-| `ConstructionInfoCard` | 建設コスト・期間・需給見通し・資金・線形の表示。確定可否は`utils/constructionFunding`と同じ判定。ドメイン固有の数量は`leadingRows`で表の先頭に足す(造成の種類・切盛土量など) |
+| `ConstructionInfoCard` | 建設期間・概算コスト・概算維持費(直近エポックの収入に対する割合つき)・需給見通し・資金の表示。確定可否は`utils/constructionFunding`と同じ判定。ドメイン固有の数量は`leadingRows`で表の先頭に足す(造成の種類・切盛土量など) |
 | `TagPicker` / `TagSelect` / `TagRow` | 建設プロジェクトのタグ。現在値は詳細レスポンスに載らず`GET /tags/object`で引く。変更後は`tags:changed`をemit |
 | `Meter` / `DonutGauge` | 0〜1のメーター。`polarity="negative"`で悪さ指標。1超は全箇所一律に頭打ち+赤紫の発光 |
 | `FiscalSankey` | 財政Sankey。歳入項目の定義と支出カテゴリ色はここに置き、予算ウィンドウも共用 |
@@ -88,6 +88,7 @@
 - 寸法が変わるものは実測して通知する(`resize_icon_panel` / `resize_system_tray`)。`IconPanel.css`で高さを固定しない。`DisplayTray`の幅の正は`window.rs`の`DISPLAY_TRAY_WIDTH`。
 - 常駐モード(ブルドーザ/地区編集)は排他。状態の正はグローバルイベント`hud:mode_changed`(`hudMode.ts`)で、副作用は操作した側だけが実行する。編集モードのウィンドウを開いたときの解除はRust(`window.rs`の`apply_mutex_rules`)が送るので、開く側のコンポーネントで`setHudMode(null)`しない。
 - BGM再生、3Dのオブジェクト選択受信、Unityの確認要求`remove_object:request_confirm`は`Cockpit`だけが受ける。確認結果は取消でも必ず`sendRemoveObjectConfirmResult`で返す(返さないとUnityが待ち続ける)。
+- ブルドーザは神モード(`useHudSession().templateMode`。シナリオ制作とチュートリアルでONになる)のとき、`STATE_REMOVE_OBJECTS`に`instant_remove: true`を付けて開始する。建物・道路を確認なしに即時削除させるモードで、ヒント(`hint.bulldozerInstant`)とツールチップ(`taskbar.bulldozerInstantOn/Off`)も専用の文言に切り替える。Unityは神モードかを知らないので、判断はこのUIが持つ。
 - 地区統合の確認は`IconPanel`が`edit_zone:request_merge`を受けて開く。
 - チュートリアルの定義(`../tutorial/definitions/*.json`)はHUDのボタンIDを操作名 `hud.<id>` として強調・許可に使う。アイコンのIDを変える/消す前に定義と `../tutorial/definitions.ts` の登録表を確認する(消えるとその段階でボタンを押せなくなる)。
 
@@ -99,16 +100,17 @@
 - ロード画面(`taskbar/SaveListWindow`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのはフッタの「閉じる」とEsc(確認を開いているときはEscで確認だけを閉じる)。開くたびにセーブ一覧と現在のセーブ情報を`fetchApi`の`cache: "reload"`で取得する。画像URLへランダムなクエリは付けない。セーブ・シナリオのサムネイルのキャッシュ期限は配信APIが2時間に設定するので、セーブの画像には保存日時(`saved_at`)をリビジョンとして付ける(上書き保存で撮り直される)。カードは新しい順で、名前(`saveDisplayName`)・元のシナリオのタイトル・都市の言語(国旗の絵文字)・人口・ゲーム内日付を出す。保存日時(実時間)はゲーム内日付と取り違えないよう、カードの右下に版の行(`SaveVersionInfo`)と同じ大きさ・濃さで出す。ロード・削除はウィンドウ内のオーバーレイで確認し、削除が成功しても知らせず一覧から外すだけにする。
 
 - 都市名の変更(`taskbar/CityRenameWindow`、種別 `city_rename`): コックピットの都市名から開く。都市名の入力欄だけのウィンドウ(近似設定の予告表示はシステム統計にある)。
-- システム統計(`statistics/SystemStatsWindow`、種別 `system_stats`): システムトレイから開く。`GET /api/v1/stats/system` の1回の応答をタブなしの左右2列に並べる(初期1120×850)。左列の上段はシステムステータス(ハードウェア情報とコアのメモリ使用量を左寄せのテキストで表示)／エンティティ数(項目・件数だけの表)の2列、下段は計算負荷(処理・時間・処理件数の3列の表で、処理件数は省略しない桁区切りの整数)、右は近似の予告表示で、列ごとにスクロールする。幅が狭い場合は縦並びに戻し、本文全体をスクロールする。近似の設定行は `SettingsRow` を共用し、余白と区切りだけの意匠をこのパネル内で上書きする。計算時間の区分と処理件数の目安はコアが決めて返すので、区分や式をUI側で持たない(色だけUIの `GROUP_COLORS` で区分に固定する)。`epoch` が `null`(ロード直後・未実行・モック)なら「データなし」を出す。都市規模の `agents`・`paths` は整数の総数で、分類別の内訳と人口は応答に含めない。近似の節は値の保持・送信を行わない。
+- システム統計(`statistics/SystemStatsWindow`、種別 `system_stats`): システムトレイから開く。`GET /api/v1/stats/system` の1回の応答をタブなしの左右2列に並べる(初期1120×850)。左列の上段はシステムステータス(ハードウェア情報と[コアシミュレーター]・[3D]のメモリ使用量を左寄せのテキストで表示し、その下にRAM・VRAMの2段メーター。全体=搭載量・グレー=PC全体・緑=本ゲームのローカルな `UsageBar`)／エンティティ数(項目・件数だけの表)の2列、下段はシミュレーション負荷(処理・時間・処理件数の3列の表で、処理件数は省略しない桁区切りの整数)、右は近似の予告表示(スクロールしない枠 `.system-stats-sidebar-frame` に濃い半透明のComing Soon板を重ね、設定行は枠の中でスクロールする)で、列ごとにスクロールする。幅が狭い場合は縦並びに戻し、本文全体をスクロールする。近似の設定行は `SettingsRow` を共用し、余白と区切りだけの意匠をこのパネル内で上書きする。計算時間の区分と処理件数の目安はコアが決めて返すので、区分や式をUI側で持たない(色だけUIの `GROUP_COLORS` で区分に固定する)。`epoch` が `null`(ロード直後・未実行・モック)なら「データなし」を出す。都市規模は6項目(`agents`・`citizens`・`zones`・`parcels`・`paths`・`nodes`)の素の総数で、分類別の内訳・人口・路線数・経過エポックは応答に含めない。`memory.graphic`(3D)と `vram` は任意で、`null` のときは該当の行・バーを省く。近似の節は値の保持・送信を行わない。
 
 - ニューゲーム(`taskbar/NewGameWindow`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのは左下の「閉じる」とEsc(確認ダイアログを開いているときはEscでダイアログだけを閉じ、開始処理中は何もしない)。`FlatTabs` で「シナリオを選択」「シナリオを探す」(未提供。無効+Coming soon)の2タブで、ヒーローの中では見出しの大きさの文字だけのタブに上書きする(`.new-game-hero` の3クラスのセレクタ)。一覧は「チュートリアル」と「シナリオ」(`GET /api/v1/scenarios`。全保存元)の2節で、`scenarios:changed` で取り直す。地形から直接始める入口は持たない(ゲームは地形を同梱せず、標高ファイルはシナリオ管理でシナリオにする)。チュートリアルは同梱の教材の都市からコアが始めるので、`create_session` に `isTutorial`・`tutorialId` だけを送り、詳細に地形の事実欄を出さない。読み込めないシナリオは開始ボタンを無効にする。達成条件を持たないシナリオでも詳細の達成条件の節は隠さず、「達成条件なし」(`newGame.detailNoObjective`)と書く。開始ボタンは選択画面の上に確認ダイアログ(ウィンドウ内のオーバーレイ。ネイティブのウィンドウは開かない)を重ね、選択画面は幕の下に残す。幕を押すか「戻る」で閉じ、開始処理中は閉じない。ダイアログのボタンはセーブ系と共通の `SaveDialogButton` で、開始中は開始ボタンのスピナーで示し、失敗の理由(`.save-dialog-error`)はダイアログの中(項目とボタンの間)に出す(選択画面側に置くと幕の下に隠れる)。シナリオの事実欄(`TerrainFacts`)は一覧の要素の`map_width`・`map_height`・`ground_cover`・`climate`(都市が持つ値)だけで作る。`terrain_source`(取り込んだファイル名など)は表示しない。気候は`normalizeClimate`で正規化して`climate.<値>`で表示し、未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
   - 紹介文は多言語テキストを表示言語で引く(`resolveLocalizedText`、見出しは `scenarioDisplayTitle`)。確認ダイアログの都市の言語の既定はアプリ設定の言語で、シナリオの言語と違えば名前の付け直しを注記する。都市名の初期値は初期の都市名を選んだ言語で引き、プレイヤーが書き換えていなければ言語の切り替えで引き直す。
   - シナリオでは作者が固定した開始設定(`scenario_fixed_options`)を値の表示だけにし、固定していない項目(日数・気候・地表・アセットの地域)を選ばせる。`create_session` には固定していない項目の値だけを送る(固定は null。コアは固定値と違う値を 422 で断る)。
-- エポック実行(`taskbar/EpochConfirmWindow`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのは「いいえ」とEsc(実行中は閉じない)。ボタンはセーブ系と共通の `SaveDialogButton`。ウィンドウの高さは内容に合わせてパネルが `setSize` する(文字サイズの設定と言語で高さが変わるため。位置は動かさない。レジストリの高さは既定の文字サイズでの値)。2つの日付の間の季節の帯は、両端の季節の印を CSS のアンカー(`anchor-name`)にして1本で描き、帯の縮尺(実行する日数)を登録済みのCSS変数で補間してエポック数の変更をなめらかに見せる。HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
+- エポック実行(`taskbar/EpochConfirmWindow`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのは「いいえ」とEsc(実行中は閉じない)。ボタンはセーブ系と共通の `SaveDialogButton`。ウィンドウの高さは内容に合わせてパネルが `setSize` する(文字サイズの設定と言語で高さが変わるため。位置は動かさない。レジストリの高さは既定の文字サイズでの値)。測るのは内容(都市・エポック数・言語・文字サイズ)が変わったときだけで、ResizeObserver でウィンドウの大きさを監視しない(閉じたウィンドウはパネルがマウントされたまま別のポップアップへ転用されるので、転用先の大きさを書き換えてしまう)。2つの日付の間の季節の帯は、両端の季節の印を CSS のアンカー(`anchor-name`)にして1本で描き、帯の縮尺(実行する日数)を登録済みのCSS変数で補間してエポック数の変更をなめらかに見せる。HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
 - エポック結果(`taskbar/EpochResultWindow`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのはフッタの「閉じる」とEsc。閉じる処理(お祝いウィンドウを開いてから閉じる)は重なっても1回だけ走らせる。背景の画像は実行後の月の季節画像(`utils/season` の `seasonImageUrl`)で、上半分に左右いっぱいで切り抜いて敷き、下へ透明にして縦の中央で消す(右とスコアの後ろは薄く・暗くして文字を読ませる)。上に載る面は落ち影なしの半透明(`--epoch-result-pane`)で、画像の消えた下半分でも地に溶けないよう地より少し明るくする。統計タイルの背景の推移グラフは `statistics.history`(直近 `trend_window` エポック。矢印の判定と同じ窓)で描く。見出しはカードの外に置く。
 
-- 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物・構造種別の階数上限はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
+- 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
   - 選択は分類タイル→建物カード一覧→建設画面の3段で、左上の戻るで1段ずつ戻る。分類はマスターの`bd_category`(`BD_CATEGORY_*`。ID順がタイルの並び、未設定は「その他」)で、建築規制の`bd_type`では分けない。カテゴリ選択後の建物一覧は横一辺に広がるカード(`BuildingVariantCard`。アイコン・説明・フロア仕様を一体表示し、選択後も概要表示に流用)で表示する。建設画面から戻る先は選んでいた建物の分類(編集・コピーで直接開いた場合も同じ)。
+  - 選択した土地区画のカードは、区画種別アイコンの横に「敷地 #ID」と、面積・高さ/建ぺい率/容積率の規制を「アイコン+値」で並べる(`ParcelSpecs`。項目名はツールチップ、規制の無い項目は出さない)。建築可能な建物の一覧だけ文字で出す。
   - 既存建物をコピーするボタンはヘッダー右上(戻るボタンと同じ高さ)に配置する。既存建物の編集は分類へ戻れず、候補を編集対象と同じ`bd_type`に絞る(敷地を選び直さないので建築規制の照合を通らない)。
   - 市庁舎の移転は、市庁舎の詳細パネルの移転ボタンが`params.extra.relocateCityHall`で開く移転モード(市庁舎に固定し自由配置から始める)。送信は新規の配置と同じで、配置済みならバックエンドが移転として扱う。創設後の一覧には市政府を出さない。
 - 区画作成(`parcel/ParcelCreationPanel`): 作成方法の真実源はUnity(`edit_parcel:set_mode`はUnity起点だけ)。確定後も`STATE_NORMAL`を送らず連続作成。`parcel_type`は送らない。
@@ -124,6 +126,8 @@
 - 結合・分割(`path/PathTopologyEditPanel`): アンマウントで必ず`sendEndPathTopologyEdit`。確定成功は`sendFinishPathTopologyEdit`を1発だけ(リロードと`STATE_NORMAL`を分けると差分リロードに割り込んで形状が壊れる)。
 - 2D形状編集(`path/PathShapeEditorPanel`): 形状の真実源はUnity(`RoadPlanManager`)。操作結果はドラッグ終了時に1回送る。地図は`initialBounds`を決めてからマウントする。
 - 造成(`grading/`): 範囲の形の正はUnity(`edit_grading:update_shape`の`{polygon, finalized}`)。見積もり(`POST /grading/preview`)は`finalized`かつ3点以上のときだけ、デバウンスと古い要求の中断つきで取る(Unityは頂点ドラッグ中に毎フレーム送る)。
+  - 高さの指定(`heightOffset`。基準との差 m)は道路パネルの標高欄と同じ`NumberStepper`(±`GRADING_HEIGHT_OFFSET_LIMIT`・刻み0.1。`pc-*`のスタイルは`path/PathConstructionPanel.css`を取り込んで使う)で、範囲を閉じる前から出す。要求本文`{polygon, height_offset}`の一部なので、変えると同じデバウンスで見積もりを取り直す。頂点の編集では保持し、やり直し(キャンセル)で0に戻す(確定後はウィンドウごと再マウントされる)。欄の下の「0の意味」は応答の`base_kind`(`frontage`=接道の路面・`terrain_mean`=範囲の現在の平均。`sea_top`=埋立で接道なし)と`base_height`から出す。応答が埋立(`kind`が`shore`、または`base_kind`が`sea_top`)なら欄を無効にして適用値(`height_offset`。埋立は常に0)を出す。`GET /grading/{agent_id}`は`base_*`・`height_offset`がnullなので、詳細の建設工事タブの情報カードは目標の高さだけ出る(`gradingInfoRows`は`base_height`がnullなら基準の高さの行を出さない)。
+  - パネル上部の手順ガイド(先頭の説明と3ステップ)は、現在のステップを強調する(頂点3つ未満=①、未確定=②、確定後=③)。左サイドの狭いパネルに収まるよう縦に詰めて並べる。ヒントバー(`hint.grading`)は描き方と編集の操作だけで、高さはパネルの欄が担う。
   - 確定可否は今の範囲に対する応答の`valid`∧`affordable`。確定は`POST /grading`→主体の詳細を開く→`sendEditGradingFinish`→閉じる。finishの中でUnityが通常ステートへ戻して再取得するので、パネル自身は`STATE_NORMAL`を送らない(閉じるときにRustが×と同じ経路で`STATE_NORMAL`を送るが、冗長なだけで再取得は妨げない)。キャンセルは`STATE_EDIT_GRADING`の再送で描き直す。
   - 発注が拒否されたら(400/409)見積もりを取り直し、新しい応答が来るまで確定を押せなくする(拒否の理由と資金は見積もりの表示で見せる)。
   - 造成工事の主体の判定は`isGradingVariant`(TYPE_OPEN_SPACEの広場とtypeが同じ)。建設工事タブは`GET /grading/{agent_id}`(プレビューは自分の区画に当たって拒否される)、公共施設パネルは取り壊しと編集を出さない、建物建設の一覧から外す。
@@ -169,4 +173,4 @@
 
 ## チュートリアルの撤去案内
 
-`agent/AgentOperationPanel.tsx` の「取り壊し」ボタンは `data-guide="agent.demolish"` を持つ。稼働中の公共施設を撤去予定にする操作で、計画中の物体を削除するHUDのブルドーザとは別の入口。チュートリアルの用地買収編は対象の建物詳細を開いてからこのボタンを強調する。
+`agent/AgentOperationPanel.tsx` の「取り壊し」ボタンは `data-guide="agent.demolish"` を持つ。稼働中の公共施設を撤去予定にする操作で、HUDのブルドーザ(通常は計画中の物体の削除。神モードでは即時削除)とは別の入口。チュートリアルの用地買収編は対象の建物詳細を開いてからこのボタンを強調する。

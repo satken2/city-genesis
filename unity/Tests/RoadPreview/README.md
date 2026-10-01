@@ -31,4 +31,6 @@ Unityディレクトリで `powershell -NoProfile -File Tests/RoadPreview/run-un
 
 全線検証の共有は、先頭以外の線の違反・3Dと2Dの値と警告数の一致・検証サンプルの二重間引き防止・造成プレビュー受信後の保持・正常応答での警告解除・古い世代の応答拒否を実RoadPlanManagerで検証する。
 
+`base_height` を持つ送電線(1101)の敷設プレビュー(`CheckPowerLinePreview`)も実RoadPlanManagerで検証する。標高12mの台地に、始点＋0・1・2個のウェイポイントを置き、鉄塔の数が径間分割の式と一致すること、始点・ウェイポイントのすべてに鉄塔が立つこと、鉄塔の根元と最後のアンカーからカーソルまでの帯が地面から1m以内に載ることを確認する(`base_height` を引き忘れると20m浮き、ウェイポイントが素の配列で渡ると鉄塔が欠ける)。
+
 海・湖の横断のローカル判定(`CheckSeaLakeCrossings`)も実RoadPlanManagerで検証する。入り江を地表で横切る道路・水面+0.5mに届かない桁・海底より上の浅い地下の拒否、橋と完全埋設の許可、湖の水位での判定、簡略化した海岸線の外にある乾いた砂浜、川の範囲の除外、インフラ・`over_water_allowed`・都市外・海岸線なしの対象外を含む。バックエンドの登録時拒否は `genesis-core/tests/test_sea_lake_crossing.py` で検証する。

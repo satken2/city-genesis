@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "计算负载",
+      "title": "模拟负载",
       "heading": "最近一个纪元（{{days}}天）的计算时间",
       "noData": "暂无测量数据",
       "note": "连续运行多个纪元时，显示的是最后一个纪元的值。问题规模是根据城市规模估算的主要比较组合数，仅供参考。",
@@ -18,8 +18,8 @@
       "labor": "劳动力市场",
       "building_spawn": "建筑生成",
       "agent_spawn": "经济主体生成",
-      "routing": "路径搜索",
-      "transit": "公共交通路径",
+      "routing": "市民路径搜索",
+      "transit": "公共交通路径搜索",
       "environment": "居住环境",
       "other": "其他"
     },
@@ -50,9 +50,7 @@
       "roads": "街道",
       "tracks": "轨道",
       "infra": "基础设施网",
-      "nodes": "节点",
-      "transitLines": "公共交通线路",
-      "epochs": "已过纪元"
+      "nodes": "节点"
     },
     "approximation": {
       "title": "模拟近似",
@@ -90,7 +88,12 @@
       "gpuDisabled": "GPU加速: 已禁用",
       "coreSimulator": "核心模拟器",
       "currentMemory": "当前内存使用量: {{value}}",
-      "peakMemory": "启动以来的最大内存使用量: {{value}}"
+      "peakMemory": "启动以来的最大内存使用量: {{value}}",
+      "graphic": "3D",
+      "currentVram": "当前VRAM使用量: {{value}}",
+      "usageTooltip": "整台电脑 {{pc}} / 本游戏 {{game}} / 总容量 {{total}}",
+      "legendPc": "整台电脑",
+      "legendGame": "本游戏"
     }
   }
 }

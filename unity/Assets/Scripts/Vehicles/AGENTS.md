@@ -23,7 +23,8 @@
 | `VehicleModelConfig.cs` / `VehicleModelResolver.cs` | `vehicle_model_config.yaml` の解析と、モデル解決・接地原点/前方軸の正規化・LODGroup 構成 |
 | `DriveMode.cs` | ドライブモードの選択UI・開始位置・走行HUD |
 | `RopewayNetworkStore.cs` / `RopewayNetwork.cs` / `RopewayGeometry.cs` / `RopewayCabinManager.cs` | 索道(PATH_CONVEYOR)の駅間抽出・ケーブル形状・搬器の循環描画 |
-| `AmbientVehicleManager.cs` / `AmbientTrail.cs` | 空と海の環境演出(航空機3種・船舶5種)と飛行機雲・航跡。船は専用の接写・遠景を投影比で切り替える |
+| `AmbientVehicleManager.cs` / `AmbientTrail.cs` | 空と海の環境演出(航空機3種・船舶5種)と飛行機雲。船は専用の接写・遠景を投影比で切り替える |
+| `ShipWake.cs` | 船の航跡(船首波・船体沿いの泡・ケルビン波の腕・船尾の乱流)の帯メッシュ。喫水線の平面形はモデルのメッシュから測る。泡の形は `Resources/Shaders/ShipWake.shader` |
 | `AmbientVehicleManager.PortCalls.cs` / `SeaRoute.cs` | 稼働中の港へ向かう入港船(抽選・接岸位置・入港の減速と横寄せ) / その航路(海岸線までの距離の格子上の最短経路。バックグラウンドスレッドで動く純データ) |
 
 ## 知らないと事故る不変条件
@@ -46,7 +47,8 @@
   - 停止中心はコアと同じ「割合×未切断3D点列長」で求め、片方だけ別の式にしない。
   - 走る軌道はパスと進む向きで1つに決まる(`TrackPath.TrackIndexForTravel` と同じ規則)。通行方向の例外は、路線が停留所を置いたホーム(`Route.StopPaths`)だけ(コアの下地経路と同じ規則)。
   - 同じパスでの折り返しの渡り線は `TransitRouteGeometry.Sample` の中だけで補間する(`Run.Turnback`・`Route.ConsistLength`・`CrossoverLength`)。車体側で横位置を足さない。`ConsistLength` を持たない色帯・経路編集のプレビューは渡り線を描かない。島式ホームの駅(`TrackPath.IsIslandPlatform`)で折り返した編成は、軌道の間のホームを横切らないよう、駅のパスを出た位置から渡る(`CrossoverProgress`)。
-  - 軌道の横位置 `Geometry.offset` は線路メッシュと同じ `TrackPath.GetTrackCenterOffset` に中央の間隔(`GetTrackCenterWidth`)を渡して求める。
+  - 軌道の横位置 `Geometry.offset` は線路メッシュと同じ `TrackPath.GetTrackCenterOffset` に中央の間隔(`GetTrackCenterWidth`)を渡して求める。軌道の位置が違う線路のつなぎ目のS字を持つパスは、線路メッシュと同じ横位置の形(`Geometry.lateral` = `PathManager.GetTrackLateralProfile`)を地点ごとに読み、接線にも横位置の傾きを足す。車両側でS字を別の式で作らない。
+  - 交差点の板を作らずに2本の線路をノードまでつなぐ直進接続(N§4.6)にはレール接続が無い。両パスの切断が無い(パスの端の隙間が0の)ノードは、レール接続を探さずにパスの端で描く。
   - `Sample` / `SampleConsist` は `Tests/Vehicles` がリフレクションで名前だけで引く。同名のオーバーロードを足さない(`GetMethod` が曖昧になり検証が落ちる)。
 - 路線カラーは `MaterialPropertyBlock` を使わない(SRP Batcher から外れる)。塗る材質の唯一の正は `Resources/Config/transit_vehicle_livery.json`。新しい外観は帯を専用材質で著作して表に登録する。
 - モデル対応は `Resources/Config/transit_vehicle_models.json`（路線種別→`vehicle_type`・任意の`wagon`）、候補番号は Tauri の `tauri/src/data/transitVehicleModels.json` と揃える。編成内の実体モデル・塗装対象・後尾反転は `VehicleModelConfig.GetTransitCarModel` を描画と事前生成で共有する。貨物は機関車1両＋路線種別の貨車で、総両数と公称車長は路線サマリに従う。折り返しで機関車を先頭へ移さない。
@@ -56,6 +58,7 @@
 - 索道の body Renderer の抑制・復元は `PathPresentation.SetRendererForceOff` を介し、生成待ちの抑制を解除しない。搬器モデルは吊り点原点なので `VehicleModelResolver` で接地補正しない。
 - 走行音は `Weather/VehicleAmbience.Report` へ通知するだけ(車両側に AudioSource を持たない)。都市切替は `TransitDataStore.Session` でクリアする。
 - 入港船はエポックが進んだときだけ入れ替える。海岸線の世代(`CoastlineStore.Version`)の変化で消すのは沖合の船と航空機だけで、入港船まで消すと建物の編集のたびに船が入れ替わる。港は `TerrainManager.ShoreDataVersion`(埋立地まで取り終えた版)で読み直す。水際は `PortBuildingMeshBuilder.ResolveWorldWaterlines` を使い、別の規則で求め直さない。
+- 航跡の濃さは `ShipWake` が船尾の移動を船首の向きへ射影した前進の速さで決める(`Vehicle.speed` は使わない。入港船の横寄せは `speed` が正でも航跡にしない)。頂点属性の並び(UV0〜3)は `ShipWake.AddVertices` と `ShipWake.shader` の `Attributes` で揃える。
 - `SeaRoute` は Unity の Random・地形の高さ・GameObject を使わない(バックグラウンドスレッドで動く)。乱数は要求の `seed` から作る。
 - 環境演出の描画LODは、専用の `_close` / `_far` を持つモデル(`PropRenderModel.DedicatedClose` / `DedicatedFar`)だけを切り替える。専用モデルの無い航空機に `PropRenderModel` の自動集約の遠景を使わない(大きな機体の輪郭が崩れる)。`SelectLod` は `Tests/AmbientShips/AmbientShipsQA.cs` がリフレクションで呼ぶので、シグネチャを変えたら QA も直す。
 

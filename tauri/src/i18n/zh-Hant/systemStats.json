@@ -1,7 +1,7 @@
 {
   "systemStats": {
     "load": {
-      "title": "計算負載",
+      "title": "模擬負載",
       "heading": "最近一個紀元（{{days}}天）的計算時間",
       "noData": "暫無測量資料",
       "note": "連續執行多個紀元時，顯示的是最後一個紀元的值。問題規模是依城市規模估算的主要比較組合數，僅供參考。",
@@ -18,8 +18,8 @@
       "labor": "勞動市場",
       "building_spawn": "建築生成",
       "agent_spawn": "經濟主體生成",
-      "routing": "路徑搜尋",
-      "transit": "大眾運輸路徑",
+      "routing": "市民路徑搜尋",
+      "transit": "大眾運輸路徑搜尋",
       "environment": "居住環境",
       "other": "其他"
     },
@@ -50,9 +50,7 @@
       "roads": "街道",
       "tracks": "軌道",
       "infra": "基礎設施網",
-      "nodes": "節點",
-      "transitLines": "大眾運輸路線",
-      "epochs": "已過紀元"
+      "nodes": "節點"
     },
     "approximation": {
       "title": "模擬近似",
@@ -90,7 +88,12 @@
       "gpuDisabled": "GPU加速: 已停用",
       "coreSimulator": "核心模擬器",
       "currentMemory": "目前記憶體使用量: {{value}}",
-      "peakMemory": "啟動以來的最大記憶體使用量: {{value}}"
+      "peakMemory": "啟動以來的最大記憶體使用量: {{value}}",
+      "graphic": "3D",
+      "currentVram": "目前VRAM使用量: {{value}}",
+      "usageTooltip": "整台電腦 {{pc}} / 本遊戲 {{game}} / 總容量 {{total}}",
+      "legendPc": "整台電腦",
+      "legendGame": "本遊戲"
     }
   }
 }

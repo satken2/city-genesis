@@ -81,8 +81,6 @@ namespace GeneratedModels
         public int type;
         /// <summary>経済主体の小分類（agent_master のバリアントID）</summary>
         public int variant;
-        /// <summary>建物の構造種別（structure_master のID。0=構造の区別なし）</summary>
-        public int structure;
         /// <summary>公共施設かどうか（0=民間/1=公共）</summary>
         public bool public_facility;
         /// <summary>所属地区の名称（zone_idの参照解決）</summary>
@@ -104,8 +102,6 @@ namespace GeneratedModels
         public int type;
         /// <summary>経済主体の小分類（agent_master のバリアントID）</summary>
         public int variant;
-        /// <summary>建物の構造種別（structure_master のID。0=構造の区別なし）</summary>
-        public int structure;
         /// <summary>観光名所の種別（landmark_master のID。0=観光名所ではない）</summary>
         public int landmark;
         /// <summary>建物底面ポリゴンの座標列 [[x, z], ...]</summary>
@@ -157,8 +153,6 @@ namespace GeneratedModels
         public int type;
         /// <summary>経済主体の小分類（agent_master のバリアントID）</summary>
         public int variant;
-        /// <summary>建物の構造種別（structure_master のID。0=構造の区別なし）</summary>
-        public int structure;
         /// <summary>観光名所の種別（landmark_master のID。0=観光名所ではない）</summary>
         public int landmark;
         /// <summary>ステータス（計画中・建設中・稼働中など。STATUS_*）</summary>
@@ -549,8 +543,6 @@ namespace GeneratedModels
         public float limit_volume_ratio;
         /// <summary>高さの上限（m）</summary>
         public float limit_height;
-        /// <summary>建設を許可する最低構造種別（structure_master のID。0=制限なし）</summary>
-        public int min_structure;
         /// <summary>この区画を使用している建物エージェントのID（0=空き地）</summary>
         public int usage_id;
     }
@@ -607,8 +599,6 @@ namespace GeneratedModels
         public float limit_volume_ratio;
         /// <summary>高さの上限（m）</summary>
         public float limit_height;
-        /// <summary>建設を許可する最低構造種別（structure_master のID。0=制限なし）</summary>
-        public int min_structure;
         /// <summary>区画面積（m2）</summary>
         public float area;
         /// <summary>基準標高（m）</summary>
@@ -644,8 +634,6 @@ namespace GeneratedModels
         public float limit_volume_ratio;
         /// <summary>高さの上限（m）</summary>
         public float limit_height;
-        /// <summary>建設を許可する最低構造種別（structure_master のID。0=制限なし）</summary>
-        public int min_structure;
         /// <summary>製品別の地区平均価格（税込み。製品ID→価格）</summary>
         public Dictionary<string, float> zone_average_prices;
         /// <summary>標準ティア平均賃金の履歴</summary>

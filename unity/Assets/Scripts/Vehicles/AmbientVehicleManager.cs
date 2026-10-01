@@ -23,7 +23,8 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         public float weight;                      // 船種の抽選重み
         public float minInterval, maxInterval;    // 航空機の発生間隔 [s]
         public int maxAlive;                      // 航空機の同時存在数
-        public float trailLife, trailSpacing, trailStart, trailEnd, trailAlpha;   // trailLife 0 = 帯なし
+        public float trailLife, trailSpacing, trailStart, trailEnd, trailAlpha;   // 航空機の飛行機雲。trailLife 0 = なし
+        public float wakeLife;                    // 船の航跡が消えるまでの時間 [s]
     }
 
     private static readonly Spec[] AirSpecs =
@@ -37,17 +38,12 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
     };
     private static readonly Spec[] SeaSpecs =
     {
-        new Spec { model = "ambient_container_ship", minSpeed = 4.5f, maxSpeed = 6, turnRate = 1.0f, length = 172, weight = 3,
-                   trailLife = 80, trailSpacing = 40, trailStart = 15.5f, trailEnd = 77, trailAlpha = .3f },
-        new Spec { model = "ambient_tanker", minSpeed = 3.5f, maxSpeed = 5, turnRate = .8f, length = 168, weight = 2,
-                   trailLife = 90, trailSpacing = 40, trailStart = 15.5f, trailEnd = 64, trailAlpha = .3f },
-        new Spec { model = "ambient_cruise_ship", minSpeed = 4.5f, maxSpeed = 6, turnRate = 1.0f, length = 160, weight = 1.5f,
-                   trailLife = 80, trailSpacing = 40, trailStart = 14, trailEnd = 62, trailAlpha = .3f },
-        new Spec { model = "ambient_fishing_boat", minSpeed = 3, maxSpeed = 5, turnRate = 5f, length = 22, weight = 3.5f,
-                   trailLife = 30, trailSpacing = 5, trailStart = 2.5f, trailEnd = 9, trailAlpha = .35f },
+        new Spec { model = "ambient_container_ship", minSpeed = 4.5f, maxSpeed = 6, turnRate = 1.0f, length = 172, weight = 3, wakeLife = 150 },
+        new Spec { model = "ambient_tanker", minSpeed = 3.5f, maxSpeed = 5, turnRate = .8f, length = 168, weight = 2, wakeLife = 150 },
+        new Spec { model = "ambient_cruise_ship", minSpeed = 4.5f, maxSpeed = 6, turnRate = 1.0f, length = 160, weight = 1.5f, wakeLife = 150 },
+        new Spec { model = "ambient_fishing_boat", minSpeed = 3, maxSpeed = 5, turnRate = 5f, length = 22, weight = 3.5f, wakeLife = 60 },
     };
-    private static readonly Spec BulkCarrier = new Spec { model = "ambient_bulk_carrier",
-        trailLife = 80, trailSpacing = 40, trailStart = 15, trailEnd = 76, trailAlpha = .3f };
+    private static readonly Spec BulkCarrier = new Spec { model = "ambient_bulk_carrier", wakeLife = 150 };
 
     // 港の種類ごとの入港船。速度は港外の航路の速さ(9〜12ノット)、停泊時間は実際の港での荷役・寄港の時間。漁港は対象外。
     private static readonly PortSpec[] PortSpecs =
@@ -62,7 +58,8 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
     {
         public Spec spec;
         public PropRenderModel model;
-        public AmbientTrail trail;
+        public AmbientTrail trail;      // 航空機の飛行機雲
+        public ShipWake wake;           // 船の航跡
         public Vector3 position;        // 保存座標
         public float heading;           // 進行方位 [deg]。0=+Z、時計回り
         public float targetHeading, speed, decisionTimer, travelled, routeLength;
@@ -85,17 +82,17 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
     private const float SeaMargin = 1500f;            // 船がマップ外へ出てよい距離
     private const float ShipSpawnMinCameraDistance = 600f;
     private const float DecisionInterval = 2.5f;
-    private const float WakeHeight = .3f;
     private static readonly float[] HeadingDeltas = { 0, 10, -10, 20, -20, 35, -35, 50, -50, 70, -70, 90, -90, 120, -120, 150, -150, 180 };
 
     private readonly List<Vehicle> vehicles = new List<Vehicle>();
     private readonly Dictionary<string, PropRenderModel> models = new Dictionary<string, PropRenderModel>();
+    private readonly Dictionary<PropRenderModel, ShipWake.Hull> wakeHulls = new Dictionary<PropRenderModel, ShipWake.Hull>();
     private readonly float[] airTimers = new float[AirSpecs.Length];
     private float shipTimer;
     private float expectedShips;        // 外洋面積×密度。海岸線の世代ごとに見積もる
     private int coastVersion = -1;
     private bool visible = true;
-    private Material trailMaterial;
+    private Material trailMaterial, wakeMaterial;
     private IpcClient ipc;
     private TerrainManager terrain;
 
@@ -121,7 +118,9 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         Clear();
         foreach (var model in models.Values) model.Dispose();
         models.Clear();
+        wakeHulls.Clear();
         if (trailMaterial != null) Destroy(trailMaterial);
+        if (wakeMaterial != null) Destroy(wakeMaterial);
         if (ipc != null) ipc.OnSessionReset -= Clear;
         if (Instance == this) Instance = null;
     }
@@ -145,6 +144,7 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         {
             if (!match(vehicles[i])) continue;
             vehicles[i].trail?.Dispose();
+            vehicles[i].wake?.Dispose();
             vehicles.RemoveAt(i);
         }
     }
@@ -193,11 +193,12 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
             if (v.dead || v.travelled >= v.routeLength)
             {
                 v.trail?.Dispose();
+                v.wake?.Dispose();
                 vehicles.RemoveAt(i);
                 continue;
             }
-            // 航跡は海面板(Y=0)と重ならないよう少し浮かせる。
-            v.trail?.Record(v.spec.air ? v.position : v.position + Vector3.up * WakeHeight, Time.time);
+            v.trail?.Record(v.position, Time.time);
+            v.wake?.Record(v.position, v.Direction, Time.time, dt);
         }
     }
 
@@ -229,8 +230,13 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
             }
             if (v.trail != null)
             {
-                if (trailMaterial == null) trailMaterial = CreateTrailMaterial();
-                v.trail.Draw(v.spec.air ? v.position : v.position + Vector3.up * WakeHeight, Time.time, offset, trailMaterial);
+                if (trailMaterial == null) trailMaterial = CreateMaterial("AmbientTrail", "飛行機雲");
+                v.trail.Draw(v.position, Time.time, offset, trailMaterial);
+            }
+            if (v.wake != null)
+            {
+                if (wakeMaterial == null) wakeMaterial = CreateMaterial("ShipWake", "船の航跡");
+                v.wake.Draw(v.position, v.Direction, Time.time, offset, wakeMaterial);
             }
         }
     }
@@ -247,11 +253,11 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         return lod == DrawLod.Far && !model.DedicatedFar ? DrawLod.Normal : lod;
     }
 
-    private static Material CreateTrailMaterial()
+    private static Material CreateMaterial(string shaderName, string label)
     {
-        var shader = Resources.Load<Shader>("Shaders/AmbientTrail");
-        if (shader == null) { Debug.LogWarning("AmbientVehicleManager: Shaders/AmbientTrail が無い。飛行機雲・航跡は描かない"); return null; }
-        return new Material(shader) { name = "AmbientTrail" };
+        var shader = Resources.Load<Shader>("Shaders/" + shaderName);
+        if (shader == null) { Debug.LogWarning($"AmbientVehicleManager: Shaders/{shaderName} が無い。{label}は描かない"); return null; }
+        return new Material(shader) { name = shaderName };
     }
 
     private Vector3 CameraSavedPosition()
@@ -276,6 +282,14 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
     {
         if (spec.trailLife <= 0) return null;
         return new AmbientTrail(spec.trailSpacing, spec.trailLife, spec.trailStart, spec.trailEnd, spec.trailAlpha);
+    }
+
+    /// <summary>船体の喫水線の形はモデルごとに一度だけメッシュから測る。</summary>
+    private ShipWake MakeWake(Spec spec, PropRenderModel model, float speed)
+    {
+        if (spec.wakeLife <= 0) return null;
+        if (!wakeHulls.TryGetValue(model, out var hull)) wakeHulls.Add(model, hull = ShipWake.Hull.Measure(model));
+        return new ShipWake(hull, spec.wakeLife, speed);
     }
 
     // ---------------------------------------------------------------- 航空機
@@ -377,9 +391,10 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
             var p = new Vector3(Random.Range(-halfW, halfW), 0, Random.Range(-halfH, halfH));
             if ((p - camera).sqrMagnitude < ShipSpawnMinCameraDistance * ShipSpawnMinCameraDistance) continue;
             if (!IsOpenSea(p) || Clearance(p) < need) continue;
-            var v = new Vehicle { spec = spec, model = model, trail = MakeTrail(spec), position = p,
+            var v = new Vehicle { spec = spec, model = model, position = p,
                                   speed = Random.Range(spec.minSpeed, spec.maxSpeed), routeLength = float.PositiveInfinity,
                                   heading = Random.Range(0f, 360f), expiresAt = Time.time + Random.Range(ShipLifetimeMin, ShipLifetimeMax) };
+            v.wake = MakeWake(spec, model, v.speed);
             v.heading = v.targetHeading = ChooseHeading(v);
             v.decisionTimer = DecisionInterval;
             vehicles.Add(v);

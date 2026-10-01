@@ -108,6 +108,8 @@
     "bulldozerOn": "불도저: ON(클릭하여 철거)",
     "bulldozerConfirmScatter": "범위 배치된 프롭 “{{name}}”을(를) 범위째 모두 삭제합니다. 정말 삭제하시겠습니까?",
     "bulldozerOff": "불도저(빈 땅・계획 중인 건물/도로・지형 프롭 철거)",
+    "bulldozerInstantOn": "불도저: ON(클릭하면 즉시 삭제, 되돌릴 수 없음)",
+    "bulldozerInstantOff": "불도저(건물・도로・빈 땅・지형 프롭 즉시 삭제)",
     "menuResourceEdit": "자원 편집",
     "menuParameterEdit": "파라미터 편집",
     "menuAgentCreation": "경제 주체 생성(건물이 아닌 시설을 기존 건물에 입주시킴)",

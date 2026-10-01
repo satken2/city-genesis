@@ -3,7 +3,6 @@
     "type": "建筑类型",
     "durability": "耐久度",
     "floors": "层数",
-    "structure": "结构",
     "floorsValue": "{{floors}}层（建筑面积{{area, number}}㎡）",
     "heightLabel": "高度：{{value}}m",
     "baseAreaLabel": "占地面积：{{area, number}}㎡",

@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 /// <summary>
-/// 環境演出の乗り物が後ろへ残す帯(飛行機雲・航跡)。
+/// 旅客機が後ろへ残す飛行機雲。船の航跡は ShipWake。
 /// 一定距離ごとに通過点を記録し、古い点ほど広がりながら薄くなる水平な帯メッシュを毎フレーム組み直す。
 /// 座標は FloatingOrigin のずれを含まない保存座標で持ち、描画時にオフセットを足す。
 /// </summary>

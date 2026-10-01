@@ -1,6 +1,14 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using GeneratedModels;
+
+/// <summary>交差点の板なしで2本の線路をノードまでつなぐ直進接続(TrackIntersectionMeshGenerator.TryContinuousJoin)。</summary>
+public sealed class TrackContinuousJoin
+{
+    public int PathA;
+    public int PathB;
+}
 
 /// <summary>
 /// 線路（PATH_TRACK）・モノレール（PATH_MONORAIL）ノードのポイント（分岐器）・平面交差の描画を担う。
@@ -25,6 +33,8 @@ using GeneratedModels;
 /// 線路端の車止め（TrackPath）は同じ規則で使われない軌道の端に置く（ResolveConnectedTrackEnds）。
 ///
 /// 転回判定は制御点優先の論理端点接線、描画は切断断面の接線と勾配を使う。
+/// 軌道の位置が違う線路の直進接続(TrackEndTransition のS字)では、切断位置での軌道の横位置と向きをS字に合わせる。
+/// 軌道の位置と幅がそろう2本の直進接続は、交差点の板を作らず両方をノードまで描く(TryContinuousJoin)。
 ///
 /// 道路と線路が混在するノード（踏切）でも、線路ペアが通行可能な向きならレールが
 /// アスファルトハルの上に敷かれ、踏切らしい見た目になる。
@@ -71,6 +81,8 @@ public static class TrackIntersectionMeshGenerator
         public Vector2 Direction;
         public float Slope;
         public Vector2 ConnectionPoint;
+        /// <summary>切断点での各軌道の横位置の、ノードから離れる向きの変化率(S字の区間だけ0以外)。</summary>
+        public float[] LateralSlopes;
     }
 
     /// <summary>レールでつなぐ2つの軌道端。A・B は entries の添字で、A &lt; B に揃える。</summary>
@@ -100,14 +112,26 @@ public static class TrackIntersectionMeshGenerator
         {
             return null;
         }
+        var shifts = TrackEndTransition.ResolveNode(nodeId, paths);
+        Vector2 nodePoint = new Vector2(nodePosition.x, nodePosition.z);
         foreach (TrackEntry entry in entries)
         {
             entry.ConnectionPoint = connectionPoints[entry.Path.path_id];
             entry.Direction = entry.LogicalDirection;
+            float distance = Vector2.Distance(entry.ConnectionPoint, nodePoint);
             if (sections != null && sections.TryGetValue(entry.Path.path_id, out var section))
             {
                 entry.Direction = section.Direction;
                 entry.Slope = section.Tangent.y / Mathf.Max(1e-5f, IntersectionPolygonUtil.XZ(section.Tangent).magnitude);
+                distance = section.Distance;
+            }
+            // S字の区間では、切断位置での軌道の横位置と向きを本線(TrackPath)と同じ式で求める。
+            entry.LateralSlopes = new float[entry.Laterals.Count];
+            if (!shifts.TryGetValue(entry.Path.path_id, out var shift) || shift.Delta.Length != entry.Laterals.Count) continue;
+            for (int i = 0; i < entry.Laterals.Count; i++)
+            {
+                entry.Laterals[i] += shift.Shift(i, distance);
+                entry.LateralSlopes[i] = shift.Delta[i] * shift.WeightSlope(distance);
             }
         }
 
@@ -251,9 +275,9 @@ public static class TrackIntersectionMeshGenerator
     /// </summary>
     private static void AddConnector(List<RailConnectorSpec> specs, TrackEntry from, int trackFrom, TrackEntry to, int trackTo, Vector3 nodePosition, bool horizontalPlane)
     {
-        // from からノードへ入り、ノードから to へ抜ける向き。
-        Vector2 travelIn = -from.Direction;
-        Vector2 travelOut = to.Direction;
+        // from からノードへ入り、ノードから to へ抜ける向き。S字の区間では軌道の向きが中心線から傾く。
+        Vector2 travelIn = -TrackDirection(from, trackFrom);
+        Vector2 travelOut = TrackDirection(to, trackTo);
         Vector2 start = TrackEndPoint(from, trackFrom);
         Vector2 end = TrackEndPoint(to, trackTo);
 
@@ -297,6 +321,77 @@ public static class TrackIntersectionMeshGenerator
     {
         Vector2 geometricForward = entry.NodeIsStart ? entry.Direction : -entry.Direction;
         return entry.ConnectionPoint + RightOf(geometricForward) * entry.Laterals[track];
+    }
+
+    /// <summary>切断点での軌道 track の、ノードから線路の内部へ向かう向き(S字の横位置の変化を含む)。</summary>
+    private static Vector2 TrackDirection(TrackEntry entry, int track)
+    {
+        float slope = entry.LateralSlopes != null && track < entry.LateralSlopes.Length ? entry.LateralSlopes[track] : 0f;
+        if (Mathf.Abs(slope) < 1e-6f) return entry.Direction;
+        Vector2 geometricForward = entry.NodeIsStart ? entry.Direction : -entry.Direction;
+        return (entry.Direction + RightOf(geometricForward) * slope).normalized;
+    }
+
+    /// <summary>
+    /// 交差点の板なしで2本の線路をノードまでつなぐかを判定する。交差点の対象のパスがちょうど2本の線路で、
+    /// レールがつながる組で、中心線の折れ角が TRACK_JOIN_MAX_BEND_DEG 以下で、ノードでの軌道の横位置と幅
+    /// (S字のずれを含む)が一致するとき。切断しないので、架線・桁・ホームがノードで途切れない。
+    /// connectionPoints は各パスのノード側の端点(切断位置=端点)。条件を満たさなければ null を返す。
+    /// </summary>
+    public static TrackContinuousJoin TryContinuousJoin(int nodeId, List<PathSummary> paths, Func<PathSummary, List<Vector3>> pointResolver,
+        Dictionary<int, TrackEndTransition.EndShift> shifts, out Dictionary<int, Vector3> connectionPoints)
+    {
+        connectionPoints = null;
+        if (paths == null || paths.Count != 2) return null;
+        PathSummary a = paths[0], b = paths[1];
+        if (!IsTrackType(a.path_type) || !IsTrackType(b.path_type)
+            || !RailsConnect(a.path_type, a.path_variant, b.path_type, b.path_variant)) return null;
+        bool aStart = a.start_node_id == nodeId, bStart = b.start_node_id == nodeId;
+        if (aStart == (a.end_node_id == nodeId) || bStart == (b.end_node_id == nodeId)) return null;
+
+        if (!TryNodeEnd(a, aStart, pointResolver, out Vector3 nodeA, out Vector2 outA)
+            || !TryNodeEnd(b, bStart, pointResolver, out Vector3 nodeB, out Vector2 outB)) return null;
+        if (Vector2.Dot(outA, outB) > -Mathf.Cos(LocalConstants.TRACK_JOIN_MAX_BEND_DEG * Mathf.Deg2Rad)) return null;
+
+        List<float> lateralsA = LrtRoadParts.TrackLaterals(a), lateralsB = LrtRoadParts.TrackLaterals(b);
+        int count = lateralsA.Count;
+        if (count != lateralsB.Count) return null;
+        shifts.TryGetValue(a.path_id, out var shiftA);
+        shifts.TryGetValue(b.path_id, out var shiftB);
+        bool aligned = aStart != bStart;
+        for (int i = 0; i < count; i++)
+        {
+            int j = aligned ? i : count - 1 - i;
+            float lateralA = lateralsA[i] + (shiftA != null ? shiftA.Shift(i, 0f) : 0f);
+            float lateralB = lateralsB[j] + (shiftB != null ? shiftB.Shift(j, 0f) : 0f);
+            if (Mathf.Abs(lateralA - (aligned ? lateralB : -lateralB)) > LocalConstants.TRACK_JOIN_LATERAL_TOLERANCE) return null;
+        }
+        float widthA = MasterWidth(a) + (shiftA != null ? 2f * shiftA.OuterShift(0f) : 0f);
+        float widthB = MasterWidth(b) + (shiftB != null ? 2f * shiftB.OuterShift(0f) : 0f);
+        if (Mathf.Abs(widthA - widthB) > LocalConstants.TRACK_JOIN_LATERAL_TOLERANCE) return null;
+
+        connectionPoints = new Dictionary<int, Vector3> { { a.path_id, nodeA }, { b.path_id, nodeB } };
+        return new TrackContinuousJoin { PathA = a.path_id, PathB = b.path_id };
+    }
+
+    /// <summary>パスのノード側の端点と、そこからパスの内部へ向かう中心線の向き(XZ)。</summary>
+    private static bool TryNodeEnd(PathSummary path, bool nodeIsStart, Func<PathSummary, List<Vector3>> pointResolver, out Vector3 nodeEnd, out Vector2 outward)
+    {
+        nodeEnd = default;
+        outward = default;
+        var source = pointResolver != null ? pointResolver(path) : IntersectionPolygonUtil.SamplePlan(path);
+        if (source == null || source.Count < 2) return false;
+        var points = new List<Vector3>(source);
+        if (!nodeIsStart) points.Reverse();
+        nodeEnd = points[0];
+        outward = IntersectionPolygonUtil.AtDistance(points, 0f).Direction;
+        return outward.sqrMagnitude > 1e-6f;
+    }
+
+    private static float MasterWidth(PathSummary path)
+    {
+        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(path.path_variant) : null;
+        return master != null && master.width > 0f ? master.width : path.width;
     }
 
     /// <summary>

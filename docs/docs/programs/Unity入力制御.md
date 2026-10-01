@@ -56,7 +56,7 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_EDIT_TRANSIT` | 13 | 公共交通設置モード |
 | `MODE_EDIT_PROP` | 14 | プロップ配置モード（個別配置・範囲散布） |
 | `MODE_EDIT_CONNECTOR` | 15 | 施設の接続端子ノードの移動編集モード。TERRAIN に適用し、端子マーカーを地形ドラッグとして掴む（§5.3） |
-| `MODE_REMOVE` | 17 | ブルドーザ（空き地区画・計画中の建物と道路・地形プロップの削除）。実処理は `RemovalManager` |
+| `MODE_REMOVE` | 17 | ブルドーザ（空き地区画・計画中の建物と道路・地形プロップの削除。神モードでは稼働中の建物・道路も即時削除）。実処理は `RemovalManager` |
 | `MODE_PATH_MERGE` | 18 | パス結合の相手選択。候補パスのクリックだけを受け付ける |
 | `MODE_PATH_SPLIT` | 19 | パス分割の分割点選択。PATH と TERRAIN に適用し、どちらのクリックも対象パスの中心線へ射影する |
 | `MODE_PICK_BUILDING` | 20 | 既存建物のコピー建設・経済主体作成の入居先の選択。建物だけをクリック可能にする |
@@ -100,7 +100,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 
 `ROAD_MEMBER_EDIT` は `STATE_EDIT_ROAD_MEMBERS`（道路の区間編集）で適用され、PATH だけを `MODE_EDIT_ROAD_MEMBERS` にして他のオブジェクトタイプはクリックを無効化する（パス結合の相手選択と同型）。`IpcStateCoordinator.ApplyStateEditRoadMembers` が `RoadMemberEditManager` を生成して開始し、区間のクリックは `RoadMemberEditManager.OnPathClicked` が `edit_road:toggle_path` として UI へ送る。所属の付け外しは UI が API で行うので、Unity は所属を書き換えない。詳細は[道路の詳細と道路名の区間編集モード](道路の詳細と道路名.md#区間編集モード)を参照。
 
-`EDIT_GRADING` は `STATE_EDIT_GRADING`（造成範囲の作図）で適用され、TERRAIN だけを `MODE_EDIT_GRADING` にして他のオブジェクトタイプを貫通させる（資源エリアの作図 `EDIT_RESOURCE` と同型）。区画・道路・建物の上でも、その下の地面（埋立地の岸壁の天端を含む）に頂点を置ける。`IpcStateCoordinator.ApplyStateEditGrading` が `GradingAreaEditManager`（任意ポリゴン編集の共通基底 `PolygonAreaEditManager` の派生。§8）を生成し、Placing から作図を始める。範囲の変化は `edit_grading:update_shape` でUIへ送るだけで、見積もりと発注はUIとバックエンドが行う。資源エリアの作図と違い、頂点は吸着せず（§10）、Esc でもモードから抜けない（`CancelOnEscape=false`）。共通基底の Esc は入力プリセットを `ALL_NORMAL` に戻すだけでステート遷移もUIへの通知も伴わず、ウィンドウが開いたまま編集用の表示も残るためである。抜けるのはウィンドウを閉じたとき（Rust が `STATE_NORMAL` を送る）と確定後の `edit_grading:finish` だけ（[IPC連携の整理](IPC連携の整理.md)）。
+`EDIT_GRADING` は `STATE_EDIT_GRADING`（造成範囲の作図）で適用され、TERRAIN だけを `MODE_EDIT_GRADING` にして他のオブジェクトタイプを貫通させる（資源エリアの作図 `EDIT_RESOURCE` と同型）。区画・道路・建物の上でも、その下の地面（埋立地の岸壁の天端を含む）に頂点を置ける。`IpcStateCoordinator.ApplyStateEditGrading` が `GradingAreaEditManager`（任意ポリゴン編集の共通基底 `PolygonAreaEditManager` の派生。§8）を生成し、Placing から作図を始める。Placing 中は次の左クリックで頂点が置かれる位置にポインタマーカーを描く（§12「土地区画の形状編集」）。範囲の変化は `edit_grading:update_shape` でUIへ送るだけで、見積もりと発注はUIとバックエンドが行う。資源エリアの作図と違い、頂点は吸着せず（§10）、Esc でもモードから抜けない（`CancelOnEscape=false`）。共通基底の Esc は入力プリセットを `ALL_NORMAL` に戻すだけでステート遷移もUIへの通知も伴わず、ウィンドウが開いたまま編集用の表示も残るためである。抜けるのはウィンドウを閉じたとき（Rust が `STATE_NORMAL` を送る）と確定後の `edit_grading:finish` だけ（[IPC連携の整理](IPC連携の整理.md)）。
 
 ## 3. 入力フロー
 
@@ -169,9 +169,9 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 | `MODE_ZONE_EDIT` | Mergeツールのときだけカーソル下の地区を統合元にする（7章） | カーソル下の地区を選択（地区外なら選択解除） | カーソル下の地区の半透明フィル表示 |
 | `MODE_BUILDING_CONSTRUCTION` | `BuildingPlanManager.OnTerrainClickDirect` に委譲（直接配置=区画外地点の確定） | — | `BuildingPlanManager.OnTerrainHoverDirect` に委譲（直接配置=カーソル追従の矩形ゴースト表示）。ホバー離脱時 `HideDirectGhost` |
 | `MODE_PARCEL_CREATION_POINT` | 土地区画エディタに点を通知 | — | 配置マーカー表示 |
-| `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 頂点ホバー判定 |
-| `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
-| `MODE_EDIT_GRADING` | `GradingAreaEditManager.OnTerrainLeftClick` に委譲（Placing=頂点を末尾に追加／Editing=頂点の選択・辺上への頂点挿入）。共通吸着なし | 同右（Placing=頂点3以上で形を閉じて Editing へ／Editing=頂点削除。3頂点は残す）。共通吸着なし | 同 `OnTerrainHover` に委譲（ホバー判定は毎フレームの更新で行う）。共通吸着なし |
+| `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲（常に Editing なのでポインタマーカーは出ない。頂点・辺のホバー判定は毎フレームの更新で行う）。離脱時 `OnTerrainHoverEnd`。共通吸着なし |
+| `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲（Placing 中は次のクリックで置かれる位置にポインタマーカー）。離脱時 `OnTerrainHoverEnd` |
+| `MODE_EDIT_GRADING` | `GradingAreaEditManager.OnTerrainLeftClick` に委譲（Placing=頂点を末尾に追加／Editing=頂点の選択・辺上への頂点挿入）。共通吸着なし | 同右（Placing=頂点3以上で形を閉じて Editing へ／Editing=頂点削除。3頂点は残す）。共通吸着なし | 同 `OnTerrainHover` に委譲（Placing 中は次のクリックで頂点が置かれる位置にポインタマーカー。Editing の頂点・辺のホバー判定は毎フレームの更新で行う）。離脱時 `OnTerrainHoverEnd`。共通吸着なし |
 | `MODE_EDIT_TRANSIT` | `TransitPlanManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
 | `MODE_EDIT_PROP` | `PropPlacementManager.OnTerrainLeftClick` に委譲（個別=1個配置／範囲=頂点追加） | 同右（個別=直近取消／範囲=直近頂点取消） | 同 `OnTerrainHover` に委譲（個別=ゴースト追従。中ボタン回転中は位置を固定） |
 | `MODE_REMOVE` | 何もしない（地形に埋もれた空き区画は `InputHandler` の地形→区画置換で区画へ配送される。地形プロップは配送前に `InputHandler` が判定する） | — | — |
@@ -374,7 +374,7 @@ Unity側の実装で守る点は次の3つ。
 | `STATE_EDIT_GRADING` | `EDIT_GRADING` | `GradingAreaEditManager` を動的生成して `InitializeCreateMode`（造成範囲の作図。Placing から開始。再送されると描いた範囲を捨てて描き直す） |
 | `STATE_EDIT_TRANSIT` | `TRANSIT_CONSTRUCTION` | `TransitPlanManager` を動的生成して `InitializeTransitPlacement`（`points` があれば経路編集として Editing から開始） |
 | `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` | `PATH_MERGE` / `PATH_SPLIT` | `PathTopologyEditManager.BeginMergeMode` / `BeginSplitMode`（Unity ウィンドウは最前面化しない） |
-| `STATE_REMOVE_OBJECTS` | `REMOVE_OBJECTS` | ブルドーザ（`RemovalManager`） |
+| `STATE_REMOVE_OBJECTS` | `REMOVE_OBJECTS` | ブルドーザ（`RemovalManager.BeginRemovalMode`。`instant_remove` を渡すと建物・道路を状態で絞らない即時削除モード） |
 | `STATE_SET_GRID` | `SET_GRID` | `GridSetManager`（吸着フラグを退避して「ノード吸着のみON」にする。10章） |
 
 ### 9.1. ステート別の表示プリセット
@@ -545,6 +545,14 @@ Unity側の実装で守る点は次の3つ。
 
 造成範囲の作図も同じく吸着なし固定で、`TerrainInputHandler`は`MODE_EDIT_GRADING`のクリック・右クリック・ホバーで共通吸着を省略し、`GradingAreaEditManager`は`UseDragSnapping=false`でドラッグ時も省略する。ホバーで吸着した座標をカーソル位置へ書き戻すと後続のドラッグにも混入するため、ドラッグ側だけで無効にしても足りない。
 
+#### Placing中のポインタマーカー
+
+共通基底`PolygonAreaEditManager`は、Placing（頂点を順に置いている間）だけ、次の左クリックで頂点が置かれる位置に円のマーカーを出す。範囲が3頂点未満で形がまだ見えない間も、置く場所を確かめられる。Editing では出さない（頂点と辺のホバー強調が代わりを務める）。
+
+- 位置は`TerrainInputHandler`が`OnTerrainHover`へ渡すワールド座標のXZ。高さは`Utils.GetGroundHeight`で地面へ合わせるので、海上は頂点の円と同じく海底の位置に出る。描画は頂点と同じスクリーン座標のオーバーレイで、円は頂点より少し大きく、色は頂点と同じ。
+- 造成範囲と土地区画の形状編集は吸着なし固定なので、マーカーはクリックで置かれる頂点とXZが一致する。天然資源エリアは共通吸着を通し、ホバーもクリックも同じ吸着を掛けるため、マーカーは吸着後のXZを指す。
+- `onHover`はカーソルのレイが変わったフレームか入力のあるフレームにだけ呼ばれる。UI上へ出る・カメラをドラッグする・ラジアルメニューを開くなどで`InputHandler`が入力を止めたときは`onHoverEnd`が呼ばれ、`TerrainInputHandler`がこれを`OnTerrainHoverEnd`へ中継してマーカーを消す。再びカーソルが動くまで再表示しない。
+
 ## 補正済み線路への標高吸着
 
 線路の保存設計標高がある場合、吸着位置の絶対標高はその基準線から評価する。地上線路でも小数の相対高さを引き継ぎ、ドラッグ時にも接続先の高さを優先する。複線の中心線へ横移動するときは絶対標高を保ち、移動先の地形との差から相対高さを算出する。接続先に吸着できた鉄道は直線・直角補助で再移動しない。描画点列のYは高さ源にしない。高さ編集可能なバリアントの数値入力は小数対応で、ステッパーは0.1m刻み。
@@ -584,6 +592,19 @@ MODE_EDIT_PROPはクリック・ホバーともTerrainInputHandlerの共通吸�
 ## プロップの削除(ブルドーザ)
 
 `MODE_REMOVE`中、`InputHandler`はクリック候補の発火前に`RemovalManager.TryRemovePropAt`(画面レイ+ヒット物までの距離)を呼ぶ。個別配置は即DELETE、範囲配置はUIへ確認を求めて回答待ちにする(`remove_object:request_confirm`/`confirm_result`)。ホバーはレイが変わったフレームで`UpdatePropHover`を呼び、`RemovalManager`が`OverlayMeshRenderer`で対象のAABBと(範囲配置なら)散布範囲の外周を赤く描く。
+
+## 建物・道路・区画の削除(ブルドーザ)
+
+プロップ以外の対象は、`MODE_REMOVE`中の左クリックを各対象の入力ハンドラ(`ParcelInputHandler` / `BuildingInputHandler` / `PathInputHandler`)が`RemovalManager.TryRemove(type, id)`へ渡す。削除はクリックのみで、ドラッグでは削除しない。可否はUnity側のキャッシュで事前判定し(ホバーのハイライトも同じ判定)、通った対象へ`DELETE /agents/{id}`・`/paths/{id}`・`/parcels/{id}`を直接発行する。最終的な可否はバックエンドのガードが決める(拒否された場合は警告ログだけで、処理済みの集合には残す)。同じ対象への二重発行は`(type, id)`で防ぎ、成功後は`CellDataLoader.ReloadAllData`を0.35秒デバウンスして1回だけ呼ぶ。区画だけは成功時に即ローカル除去する。
+
+| モード | 区画 | 建物 | 道路 |
+| --- | --- | --- | --- |
+| 通常 | 空き地(`usage_id` なし) | `PENDING` / `SCHEDULED_CONSTRUCTION` | `TEMPORARY` / `SCHEDULED_CONSTRUCTION` / `PENDING` |
+| 即時削除(`instant_remove`) | 通常と同じ | ステータスを問わない。ただし `TYPE_CITY`(市政府・中央銀行)と `TYPE_DEFAULT`(代理主体・国境検問所)を除く | ステータスを問わない。ただし `PATH_TRANSPORT`(公共交通の区間。路線の持ち物)を除く |
+
+即時削除モードはテンプレート作成モード(神モード)用で、UIが`STATE_REMOVE_OBJECTS`の`instant_remove`で開始する。**Unityは神モードかどうかを知らない**ので、バックエンドが神モードのときだけ稼働中の建物・道路の削除を受け付ける。確認ダイアログは出さず、取り消しもできない。バックエンドは建物をテナントの経済主体・世帯の市民ごと消して区画を空き地に戻し、道路は削除後に端点が孤立したノードも片付ける(地形は元に戻さない)。路線や駅舎に属する区間は、路線側の既存の連鎖で整合を取る。範囲配置のプロップだけは、このモードでも従来どおりUIの確認を経てから範囲ごと消す。
+
+`instant_remove` はブルドーザの開始ごとに決まり、`EndRemovalMode`で下ろす。次の`STATE_REMOVE_OBJECTS`で指定がなければ通常モードに戻る。
 
 ## 道路・線路の曲率と勾配の警告
 
