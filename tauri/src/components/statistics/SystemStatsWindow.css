@@ -2,6 +2,8 @@
  * システム統計の分析ビュー。左は計測と都市の規模、右は近似設定で独立してスクロールする。
  * 配色は App.css の --flat-* を使い、数値の桁と細い区切りで情報の階層を示す。
  * 狭いウィンドウや大きな文字サイズでは、縦並びにして本文全体をスクロールする。
+ * 右の近似設定は、スクロールする本体(.system-stats-sidebar)をスクロールしない枠(-frame)に入れ、
+ * その枠にオーバーレイを重ねて、スクロールしても設定領域全体を覆い続ける。
  */
 .system-stats-frame {
   height: 100%;
@@ -40,9 +42,43 @@
   gap: 1.5rem;
 }
 
-.system-stats-sidebar {
-  background: var(--flat-sunken);
+.system-stats-sidebar-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
   border-left: 1px solid var(--flat-raised-hover);
+}
+
+.system-stats-sidebar {
+  flex: 1 1 0;
+  background: var(--flat-sunken);
+}
+
+/* 近似設定は未提供なので、設定領域全体(スクロールしない枠)を濃い半透明で覆い、項目はほとんど見えなくする。 */
+.system-stats-coming-soon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(8, 12, 18, 0.94);
+  text-align: center;
+}
+.system-stats-coming-soon-title {
+  color: var(--flat-text-label);
+  font-size: 1.17rem;
+  letter-spacing: 0.04em;
+}
+.system-stats-coming-soon-label {
+  color: var(--flat-accent);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .system-stats-section {
@@ -200,15 +236,50 @@
 }
 .system-stats-core-label { color: var(--flat-text-label); }
 
-.system-stats-memory-meter .meter-bar { height: 4px; border-radius: 0; background: var(--flat-sunken); }
-.system-stats-memory-meter .meter-fill { border-radius: 0; }
+/* 全体=搭載量。グレーがPC全体、緑が本ゲーム(グレーの内側に重ねる)。 */
+.system-stats-usage-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.67rem;
+}
+.system-stats-usage-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--flat-text-body);
+  font-variant-numeric: tabular-nums;
+}
+.system-stats-usage-bar {
+  position: relative;
+  height: 0.5rem;
+  background: var(--flat-sunken);
+}
+.system-stats-usage-pc,
+.system-stats-usage-game {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+.system-stats-usage-pc,
+.system-stats-usage-swatch.is-pc { background: var(--flat-text-muted); }
+.system-stats-usage-game,
+.system-stats-usage-swatch.is-game { background: var(--flat-good); }
+.system-stats-usage-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.33rem 1rem;
+  color: var(--flat-text-label);
+  font-size: 0.83rem;
+}
+.system-stats-usage-swatch {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.4rem;
+}
 
 .system-stats-approximation { gap: 1rem; }
-.system-stats-status {
-  color: var(--flat-accent);
-  font-size: 0.83rem;
-  letter-spacing: 0.06em;
-}
 .system-stats-warning {
   padding: 1rem 0 1rem 1rem;
   border-left: 2px solid var(--flat-warn);
@@ -237,7 +308,8 @@
   .system-stats { display: flex; flex-direction: column; overflow-y: auto; }
   .system-stats-analysis,
   .system-stats-sidebar { overflow: visible; flex-shrink: 0; }
-  .system-stats-sidebar { border-left: none; border-top: 1px solid var(--flat-raised-hover); }
+  .system-stats-sidebar-frame { flex-shrink: 0; border-left: none; border-top: 1px solid var(--flat-raised-hover); }
+  .system-stats-sidebar { flex: none; }
 }
 @container (max-width: 42rem) {
   .system-stats-analysis,

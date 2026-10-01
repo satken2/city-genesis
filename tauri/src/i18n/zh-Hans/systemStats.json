@@ -10,7 +10,8 @@
       "colWorkload": "处理数量",
       "workloadHint": "主要比较的组合数（数组元素数）的估算值。将鼠标悬停在数值上可查看明细。",
       "seconds": "{{value}} 秒",
-      "ms": "{{value}} ms"
+      "ms": "{{value}} ms",
+      "epochNumber": "测量的纪元"
     },
     "group": {
       "market": "商品市场",
@@ -18,8 +19,8 @@
       "labor": "劳动力市场",
       "building_spawn": "建筑生成",
       "agent_spawn": "经济主体生成",
-      "routing": "路径搜索",
-      "transit": "公共交通路径",
+      "routing": "市民路径搜索",
+      "transit": "公共交通路径搜索",
       "environment": "居住环境",
       "other": "其他"
     },
@@ -50,9 +51,7 @@
       "roads": "街道",
       "tracks": "轨道",
       "infra": "基础设施网",
-      "nodes": "节点",
-      "transitLines": "公共交通线路",
-      "epochs": "已过纪元"
+      "nodes": "节点"
     },
     "approximation": {
       "title": "模拟近似",
@@ -90,7 +89,12 @@
       "gpuDisabled": "GPU加速: 已禁用",
       "coreSimulator": "核心模拟器",
       "currentMemory": "当前内存使用量: {{value}}",
-      "peakMemory": "启动以来的最大内存使用量: {{value}}"
+      "peakMemory": "启动以来的最大内存使用量: {{value}}",
+      "graphic": "3D",
+      "currentVram": "当前VRAM使用量: {{value}}",
+      "usageTooltip": "整台电脑 {{pc}} / 本游戏 {{game}} / 总容量 {{total}}",
+      "legendPc": "整台电脑",
+      "legendGame": "本游戏"
     }
   }
 }

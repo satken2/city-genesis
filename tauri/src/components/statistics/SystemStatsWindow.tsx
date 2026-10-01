@@ -5,8 +5,8 @@
  * `GET /api/v1/stats/system` の内容を左右2列に並べる(タブは持たない)。
  *   - 計算負荷 … 直近エポックの計算時間を大きな処理ごとに色分けした1本の積み上げ棒と、その内訳の表
  *   - エンティティ数 … プレイで増えるエンティティの数
- *   - システムステータス … ハードウェア情報とコアのメモリ使用量をテキストで表示
- *   - シミュレーションの近似 … 提供前の予告表示(値の保持・送信はしない)
+ *   - システムステータス … ハードウェア情報、コアと3Dのメモリ使用量、PC全体と本ゲームのRAM/VRAM使用量の横棒
+ *   - シミュレーションの近似 … 提供前の予告表示(値の保持・送信はしない)。設定領域全体をComing Soonのオーバーレイで覆う
  *
  * 計算時間はコアが記録済みのフェーズ別の時間を読むだけで、全体はフェーズの合計。計測値はセーブに
  * 含まれないので、ロード直後やエポックを実行する前は「データなし」を出す。問題規模は、主な比較の
@@ -19,7 +19,6 @@ import { listen } from "@tauri-apps/api/event";
 
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { resolveIntlLocale } from "../../utils/locale";
-import { Meter } from "../common/Meter";
 import { SettingsRow } from "../common/SettingsRow";
 import "./SystemStatsWindow.css";
 
@@ -43,10 +42,15 @@ type SystemStatsResponse = {
     parcels: number;
     paths: number;
     nodes: number;
-    transit_lines: number;
-    epochs: number;
   };
-  memory: { current_bytes: number | null; peak_bytes: number | null; system_total_bytes: number | null };
+  memory: {
+    current_bytes: number | null;
+    peak_bytes: number | null;
+    system_total_bytes: number | null;
+    used_bytes?: number | null;
+    graphic?: { current_bytes: number; peak_bytes: number | null } | null;
+  };
+  vram?: { used_bytes: number; graphic_bytes: number | null } | null;
   environment: {
     cpu_name: string | null;
     cpu_count: number | null;
@@ -136,9 +140,15 @@ export function SystemStatsWindow({ apiBaseUrl }: SystemStatsWindowProps) {
           </div>
           <EpochLoadSection stats={stats} formatters={formatters} />
         </div>
-        <aside className="system-stats-sidebar" aria-label={t("systemStats.approximation.title")}>
-          <ApproximationSection />
-        </aside>
+        <div className="system-stats-sidebar-frame">
+          <aside className="system-stats-sidebar" aria-label={t("systemStats.approximation.title")}>
+            <ApproximationSection />
+          </aside>
+          <div className="system-stats-coming-soon">
+            <span className="system-stats-coming-soon-title">{t("systemStats.approximation.title")}</span>
+            <span className="system-stats-coming-soon-label">{t("settings.compute.comingSoon")}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -182,7 +192,7 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
     <section className="system-stats-section">
       <div className="system-stats-section-heading">
         <h3 className="system-stats-section-title">{t("systemStats.load.title")}</h3>
-        <span className="system-stats-epoch">{t("systemStats.entities.epochs")} <b>{formatters.count.format(epoch.number)}</b></span>
+        <span className="system-stats-epoch">{t("systemStats.load.epochNumber")} <b>{formatters.count.format(epoch.number)}</b></span>
       </div>
       <div className="system-stats-headline">
         <span className="system-stats-headline-label">{t("systemStats.load.heading", { days: epoch.simulation_days })}</span>
@@ -248,8 +258,6 @@ function EntitySection({ stats, formatters }: SectionProps) {
     { key: "parcels", value: entities.parcels },
     { key: "paths", value: entities.paths },
     { key: "nodes", value: entities.nodes },
-    { key: "transitLines", value: entities.transit_lines },
-    { key: "epochs", value: entities.epochs },
   ];
 
   return (
@@ -287,11 +295,49 @@ function formatCapacity(bytes: number, formatters: Formatters): string {
   return `${formatters.ms.format(bytes / 1024 ** 3)}GB`;
 }
 
+/**
+ * 全体が搭載量の横棒。グレーがPC全体の使用量、緑が本ゲームの使用量(重ねて描く)。
+ * 緑は常にグレーの内側に収める(計測の時刻のずれやプロセス間の共有ページで超えても、棒の意味を崩さない)。
+ */
+function UsageBar({ label, total, pcUsed, game, formatters }: {
+  label: string;
+  total: number;
+  pcUsed: number | null;
+  game: number;
+  formatters: Formatters;
+}) {
+  const { t } = useTranslation();
+  const used = pcUsed ?? game;
+  const ratio = (bytes: number) => `${Math.min(1, Math.max(0, bytes / total)) * 100}%`;
+  const tooltip = t("systemStats.status.usageTooltip", {
+    pc: formatBytes(used, formatters),
+    game: formatBytes(game, formatters),
+    total: formatCapacity(total, formatters),
+  });
+  return (
+    <div className="system-stats-usage" title={tooltip}>
+      <div className="system-stats-usage-head">
+        <span className="system-stats-core-label">{label}</span>
+        <span>{formatBytes(used, formatters)} / {formatCapacity(total, formatters)}</span>
+      </div>
+      <div className="system-stats-usage-bar" role="img" aria-label={`${label} ${tooltip}`}>
+        <div className="system-stats-usage-pc" style={{ width: ratio(used) }} />
+        <div className="system-stats-usage-game" style={{ width: ratio(Math.min(game, used)) }} />
+      </div>
+    </div>
+  );
+}
+
 function SystemStatusSection({ stats, formatters }: SectionProps) {
   const { t } = useTranslation();
-  const { current_bytes: current, peak_bytes: peak, system_total_bytes: total } = stats.memory;
+  const { current_bytes: current, peak_bytes: peak, system_total_bytes: total, used_bytes: pcUsed, graphic } = stats.memory;
+  const { vram } = stats;
   const env = stats.environment;
-  const peakRatio = peak != null && total ? peak / total : null;
+  const gameMemory = (current ?? 0) + (graphic?.current_bytes ?? 0);
+  const ramBar = total && current != null ? { total, pcUsed: pcUsed ?? null, game: gameMemory } : null;
+  const vramBar = vram && env.gpu_memory_bytes
+    ? { total: env.gpu_memory_bytes, pcUsed: vram.used_bytes, game: vram.graphic_bytes ?? 0 }
+    : null;
 
   return (
     <section className="system-stats-section">
@@ -307,8 +353,19 @@ function SystemStatusSection({ stats, formatters }: SectionProps) {
         <p>{t("systemStats.status.currentMemory", { value: formatBytes(current, formatters) })}</p>
         <p>{t("systemStats.status.peakMemory", { value: formatBytes(peak, formatters) })}</p>
       </div>
-      {peakRatio != null && <div className="system-stats-memory-meter">
-        <Meter value={peakRatio} polarity="negative" color="var(--flat-good)" />
+      {graphic && <div className="system-stats-status-text system-stats-core-status">
+        <p className="system-stats-core-label">[{t("systemStats.status.graphic")}]</p>
+        <p>{t("systemStats.status.currentMemory", { value: formatBytes(graphic.current_bytes, formatters) })}</p>
+        <p>{t("systemStats.status.peakMemory", { value: formatBytes(graphic.peak_bytes, formatters) })}</p>
+        {vram?.graphic_bytes != null && <p>{t("systemStats.status.currentVram", { value: formatBytes(vram.graphic_bytes, formatters) })}</p>}
+      </div>}
+      {(ramBar || vramBar) && <div className="system-stats-usage-group">
+        {ramBar && <UsageBar label="RAM" {...ramBar} formatters={formatters} />}
+        {vramBar && <UsageBar label="VRAM" {...vramBar} formatters={formatters} />}
+        <div className="system-stats-usage-legend">
+          <span><i className="system-stats-usage-swatch is-pc" aria-hidden="true" />{t("systemStats.status.legendPc")}</span>
+          <span><i className="system-stats-usage-swatch is-game" aria-hidden="true" />{t("systemStats.status.legendGame")}</span>
+        </div>
       </div>}
     </section>
   );
@@ -320,13 +377,9 @@ function SystemStatusSection({ stats, formatters }: SectionProps) {
  */
 function ApproximationSection() {
   const { t } = useTranslation();
-  const comingSoon = t("settings.compute.comingSoon");
   return (
     <section className="system-stats-section system-stats-approximation">
-      <div className="system-stats-section-heading">
-        <h3 className="system-stats-section-title">{t("systemStats.approximation.title")}</h3>
-        <span className="system-stats-status">{comingSoon}</span>
-      </div>
+      <h3 className="system-stats-section-title">{t("systemStats.approximation.title")}</h3>
       <div className="system-stats-warning" role="note">
         <strong>{t("systemStats.approximation.warning")}</strong>
       </div>

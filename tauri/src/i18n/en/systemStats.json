@@ -10,7 +10,8 @@
       "colWorkload": "Operation count",
       "workloadHint": "Rough number of main comparisons (array elements). Hover over a value to see the breakdown.",
       "seconds": "{{value}} s",
-      "ms": "{{value}} ms"
+      "ms": "{{value}} ms",
+      "epochNumber": "Measured epoch"
     },
     "group": {
       "market": "Goods market",
@@ -18,8 +19,8 @@
       "labor": "Labor market",
       "building_spawn": "Building spawn",
       "agent_spawn": "Agent spawn",
-      "routing": "Pathfinding",
-      "transit": "Transit routing",
+      "routing": "Citizen pathfinding",
+      "transit": "Transit pathfinding",
       "environment": "Living environment",
       "other": "Other"
     },
@@ -50,9 +51,7 @@
       "roads": "Roads",
       "tracks": "Tracks",
       "infra": "Utility networks",
-      "nodes": "Nodes",
-      "transitLines": "Transit lines",
-      "epochs": "Epochs elapsed"
+      "nodes": "Nodes"
     },
     "approximation": {
       "title": "Simulation approximation",
@@ -90,7 +89,12 @@
       "gpuDisabled": "GPU acceleration: Disabled",
       "coreSimulator": "Core simulator",
       "currentMemory": "Current memory usage: {{value}}",
-      "peakMemory": "Peak memory usage since startup: {{value}}"
+      "peakMemory": "Peak memory usage since startup: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Current VRAM usage: {{value}}",
+      "usageTooltip": "Whole PC {{pc}} / This game {{game}} / Installed {{total}}",
+      "legendPc": "Whole PC",
+      "legendGame": "This game"
     }
   }
 }

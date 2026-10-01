@@ -10,7 +10,8 @@
       "colWorkload": "處理數量",
       "workloadHint": "主要比較的組合數（陣列元素數）的估算值。將滑鼠移到數值上可查看明細。",
       "seconds": "{{value}} 秒",
-      "ms": "{{value}} ms"
+      "ms": "{{value}} ms",
+      "epochNumber": "測量的紀元"
     },
     "group": {
       "market": "商品市場",
@@ -18,8 +19,8 @@
       "labor": "勞動市場",
       "building_spawn": "建築生成",
       "agent_spawn": "經濟主體生成",
-      "routing": "路徑搜尋",
-      "transit": "大眾運輸路徑",
+      "routing": "市民路徑搜尋",
+      "transit": "大眾運輸路徑搜尋",
       "environment": "居住環境",
       "other": "其他"
     },
@@ -50,9 +51,7 @@
       "roads": "街道",
       "tracks": "軌道",
       "infra": "基礎設施網",
-      "nodes": "節點",
-      "transitLines": "大眾運輸路線",
-      "epochs": "已過紀元"
+      "nodes": "節點"
     },
     "approximation": {
       "title": "模擬近似",
@@ -90,7 +89,12 @@
       "gpuDisabled": "GPU加速: 已停用",
       "coreSimulator": "核心模擬器",
       "currentMemory": "目前記憶體使用量: {{value}}",
-      "peakMemory": "啟動以來的最大記憶體使用量: {{value}}"
+      "peakMemory": "啟動以來的最大記憶體使用量: {{value}}",
+      "graphic": "3D",
+      "currentVram": "目前VRAM使用量: {{value}}",
+      "usageTooltip": "整台電腦 {{pc}} / 本遊戲 {{game}} / 總容量 {{total}}",
+      "legendPc": "整台電腦",
+      "legendGame": "本遊戲"
     }
   }
 }

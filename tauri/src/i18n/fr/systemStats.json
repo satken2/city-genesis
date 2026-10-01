@@ -10,7 +10,8 @@
       "colWorkload": "Nombre d’opérations",
       "workloadHint": "Nombre approximatif de comparaisons principales (éléments de tableaux). Survolez une valeur pour voir le détail.",
       "seconds": "{{value}} s",
-      "ms": "{{value}} ms"
+      "ms": "{{value}} ms",
+      "epochNumber": "Époque mesurée"
     },
     "group": {
       "market": "Marché des biens",
@@ -18,8 +19,8 @@
       "labor": "Marché du travail",
       "building_spawn": "Apparition des bâtiments",
       "agent_spawn": "Apparition des agents",
-      "routing": "Recherche d'itinéraires",
-      "transit": "Itinéraires des transports",
+      "routing": "Recherche d'itinéraires des citoyens",
+      "transit": "Recherche d'itinéraires des transports",
       "environment": "Cadre de vie",
       "other": "Autres"
     },
@@ -50,9 +51,7 @@
       "roads": "Routes",
       "tracks": "Voies ferrées",
       "infra": "Réseaux",
-      "nodes": "Nœuds",
-      "transitLines": "Lignes de transport",
-      "epochs": "Époques écoulées"
+      "nodes": "Nœuds"
     },
     "approximation": {
       "title": "Approximation de la simulation",
@@ -90,7 +89,12 @@
       "gpuDisabled": "Accélération GPU : Désactivée",
       "coreSimulator": "Simulateur principal",
       "currentMemory": "Utilisation actuelle de la mémoire : {{value}}",
-      "peakMemory": "Pic de mémoire depuis le démarrage : {{value}}"
+      "peakMemory": "Pic de mémoire depuis le démarrage : {{value}}",
+      "graphic": "3D",
+      "currentVram": "Utilisation actuelle de la VRAM : {{value}}",
+      "usageTooltip": "Tout le PC {{pc}} / Ce jeu {{game}} / Installée {{total}}",
+      "legendPc": "Tout le PC",
+      "legendGame": "Ce jeu"
     }
   }
 }
