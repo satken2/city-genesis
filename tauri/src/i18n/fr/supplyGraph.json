@@ -8,12 +8,6 @@
     "activeCount": "Actifs {{active}} / {{count}}",
     "production": "Dernière production : {{amount}} {{unit}}",
     "resourceRemaining": "Réserves accessibles : {{amount}} {{unit}}",
-    "role": {
-      "resource": "Ressource",
-      "producer": "Producteur",
-      "consumer": "Relais / dépôt",
-      "vehicle_consumer": "Ligne"
-    },
     "state": {
       "ok": "Disponible",
       "unknown": "Indéterminé",
@@ -35,6 +29,17 @@
       "502": "Dépôts de bus",
       "503": "Dépôts de tramway",
       "504": "Dépôts de monorail"
+    },
+    "consumers": {
+      "401": "Consommateurs électriques",
+      "402": "Pompes à eau",
+      "403": "Consommateurs de pétrole",
+      "404": "Consommateurs de fret",
+      "405": "Consommateurs de minerai",
+      "501": "Lignes ferroviaires",
+      "502": "Lignes de bus",
+      "503": "Lignes de tramway",
+      "504": "Lignes de monorail"
     }
   }
 }

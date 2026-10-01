@@ -28,8 +28,10 @@ assert.equal(container.querySelectorAll(".supply-node").length, 3);
 assert.equal(container.querySelectorAll(".supply-edge").length, 2);
 assert.equal(container.querySelectorAll(".supply-node--selected").length, 1);
 assert.equal(container.querySelectorAll(".supply-node--missing").length, 1);
-assert.equal(container.querySelector(".supply-edge--missing text")?.textContent, "×");
-assert.equal(container.querySelector(".supply-edge--capacity_limited text")?.textContent, "!");
+assert.ok(container.querySelector(".supply-edge--missing .supply-edge-symbol"));
+assert.ok(container.querySelector(".supply-edge--capacity_limited .supply-edge-symbol-dot"));
+assert.equal(container.querySelectorAll(".supply-edge text").length, 0, "failure symbols do not depend on font metrics");
+assert.equal(container.querySelectorAll(".supply-edge-flow").length, 1, "only the line with received goods flows");
 assert.equal(container.querySelectorAll("button").length, 0, "the graph has no refresh or drill-down buttons");
 assert.ok(container.querySelector(".supply-node-amount[title]")?.getAttribute("title"));
 assert.equal(container.querySelectorAll(".supply-node-name")[1]?.textContent, "発電所");
@@ -40,6 +42,19 @@ const onePlant = { ...graph, nodes: graph.nodes.map(n => n.id === "plant" ? { ..
 await act(async () => { root.render(<SupplyChainGraph graph={onePlant} />); });
 assert.equal(container.querySelectorAll(".supply-node-name")[1]?.textContent, "発電所", "supplier names do not change with the facility count");
 assert.equal(container.querySelectorAll(".supply-node img")[1]?.getAttribute("src"), supplierIcon);
+const noFlow = { ...graph, edges: graph.edges.map(edge => ({ ...edge, received: 0 })) };
+await act(async () => { root.render(<SupplyChainGraph graph={noFlow} />); });
+assert.equal(container.querySelectorAll(".supply-edge-flow").length, 0, "zero receipts leave all lines still");
+const downstream: SupplyGraph = { ...graph,
+  nodes: [node("selected"), { ...node("consumers:401"), kind: "consumer", role: "consumer", state: "missing",
+    count: 0, active_count: 0, production: null }],
+  edges: [{ ...graph.edges[0], source: "selected", target: "consumers:401", product_id: 401 }] };
+await act(async () => { root.render(<SupplyChainGraph graph={downstream} />); });
+assert.equal(container.querySelectorAll(".supply-node-name")[1]?.textContent, "電力利用施設");
+assert.ok(container.querySelector(".supply-node--missing .supply-node-count")?.textContent?.includes("0"));
+assert.equal(container.querySelector(".supply-node--missing img")?.getAttribute("src"), "/variant-1062.png");
+assert.equal(container.querySelector(".supply-node--missing .supply-node-amount"), null, "consumers have no production total");
+assert.equal(container.querySelectorAll(".supply-node-role, .supply-node-state, button").length, 0);
 
 function Harness({ id, tab = "trade", epoch = 0, enabled = true }: { id: string; tab?: string; epoch?: number; enabled?: boolean }) {
   const state = useSupplyGraph("http://core/", id, enabled);

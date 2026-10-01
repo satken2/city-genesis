@@ -8,12 +8,6 @@
     "activeCount": "Active {{active}} / {{count}}",
     "production": "Last production: {{amount}} {{unit}}",
     "resourceRemaining": "Accessible reserves: {{amount}} {{unit}}",
-    "role": {
-      "resource": "Resource",
-      "producer": "Producer",
-      "consumer": "Relay / depot",
-      "vehicle_consumer": "Transit line"
-    },
     "state": {
       "ok": "Available",
       "unknown": "Undetermined",
@@ -35,6 +29,17 @@
       "502": "Bus depots",
       "503": "LRT depots",
       "504": "Monorail depots"
+    },
+    "consumers": {
+      "401": "Power consumers",
+      "402": "Water pumps",
+      "403": "Oil consumers",
+      "404": "Freight consumers",
+      "405": "Ore consumers",
+      "501": "Rail routes",
+      "502": "Bus routes",
+      "503": "Tram routes",
+      "504": "Monorail routes"
     }
   }
 }

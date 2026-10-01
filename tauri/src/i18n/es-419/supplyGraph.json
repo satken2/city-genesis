@@ -8,12 +8,6 @@
     "activeCount": "Activos {{active}} / {{count}}",
     "production": "Última producción: {{amount}} {{unit}}",
     "resourceRemaining": "Reservas accesibles: {{amount}} {{unit}}",
-    "role": {
-      "resource": "Recurso",
-      "producer": "Productor",
-      "consumer": "Distribuidor / depósito",
-      "vehicle_consumer": "Línea"
-    },
     "state": {
       "ok": "Disponible",
       "unknown": "Sin determinar",
@@ -35,6 +29,17 @@
       "502": "Depósitos de autobuses",
       "503": "Depósitos de tren ligero",
       "504": "Depósitos de monorriel"
+    },
+    "consumers": {
+      "401": "Instalaciones eléctricas",
+      "402": "Bombas de agua",
+      "403": "Instalaciones petroleras",
+      "404": "Instalaciones de carga",
+      "405": "Instalaciones de mineral",
+      "501": "Líneas ferroviarias",
+      "502": "Líneas de autobús",
+      "503": "Líneas de tranvía",
+      "504": "Líneas de monorriel"
     }
   }
 }

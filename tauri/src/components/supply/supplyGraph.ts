@@ -6,7 +6,7 @@ export type SupplyState = "ok" | "unknown" | "missing" | "inactive" | "partial" 
 
 export type SupplyNode = {
   id: string;
-  kind: "facility" | "resource";
+  kind: "facility" | "resource" | "consumer";
   role: "resource" | "producer" | "consumer" | "vehicle_consumer";
   selected: boolean;
   name?: string;
@@ -33,7 +33,7 @@ export type SupplyEdge = {
   path_ids: number[];
 };
 
-/** nodes と edges は上流から選択対象へ並ぶ一系列。 */
+/** nodes と edges は上流・選択対象・直接の消費先の順に並ぶ一系列。 */
 export type SupplyGraph = {
   nodes: SupplyNode[];
   edges: SupplyEdge[];

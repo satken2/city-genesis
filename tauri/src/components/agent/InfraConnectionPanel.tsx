@@ -86,7 +86,6 @@ export function InfraConnectionPanel({ agent, children }: InfraConnectionPanelPr
       <h3 className="agent-detail-section-title">
         {t("agent.infra.title", "インフラ接続")}
       </h3>
-      {children}
 
       {/* 接続状態バッジ(稼働中のみ。ビットが稼働中にしか立たないため、
           建設中は配線猶予期間として表示しない) */}
@@ -122,6 +121,7 @@ export function InfraConnectionPanel({ agent, children }: InfraConnectionPanelPr
           })}
         </div>
       )}
+      {children}
     </section>
   );
 }
