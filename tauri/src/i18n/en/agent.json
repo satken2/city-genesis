@@ -1,7 +1,7 @@
 {
   "agent": {
     "back": "Back",
-    "editSubBuildings": "Edit Sub-Building Layout",
+    "editSubBuildings": "Edit Building Layout",
     "relocateCityHall": "Relocate City Hall",
     "publicFacility": "Public Facility",
     "underAcquisition": "Acquiring Land",

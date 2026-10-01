@@ -83,10 +83,94 @@ public static class IntersectionQA
    CheckFanCaps(specs);
    CheckRailCrossing(asm, pathType, itemType, dict, cache, gen);
    CheckLinearCorner(asm, pathType);
+   CheckMixedWidthRoadCrossing(asm, pathType, itemType, dict, cache, gen);
    int motorwayCases = MotorwayMergeQA.Run(asm, dict, cache, root);
-   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+" normal seam="+normalSeam+"; mixed crossing and 2-to-1 rail endpoints; motorway merges="+motorwayCases);
+   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+" normal seam="+normalSeam+"; 24m/3m road crossing; mixed crossing and 2-to-1 rail endpoints; motorway merges="+motorwayCases);
    EditorApplication.Exit(0);
   } catch(Exception ex){File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt",ex.ToString());Debug.LogException(ex);EditorApplication.Exit(1);}
+ }
+
+ static void CheckMixedWidthRoadCrossing(Assembly asm, Type pathType, Type itemType, IDictionary masters, IDictionary cache, object generator)
+ {
+  var paths = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(pathType));
+  var preview = new GameObject("MixedWidthCrossing");
+  var roadType = asm.GetType("RoadPath");
+  var constants = asm.GetType("Constants");
+  int C(string name) => (int)constants.GetField(name).GetValue(null);
+  for (int i = 0; i < 4; i++)
+  {
+   int id = 800 + i, variant = 800 + i;
+   bool wide = i % 2 == 0;
+   var end = Quaternion.Euler(0, -90f * i, 0) * Vector3.right * 80f;
+   var path = Activator.CreateInstance(pathType);
+   void Set(string field, object value) => pathType.GetField(field).SetValue(path, value);
+   Set("path_id", id); Set("path_variant", variant); Set("path_type", C("PATH_STREET"));
+   Set("start_node_id", 1); Set("end_node_id", id + 100); Set("follow_terrain", C("VALUE_NONE"));
+   Set("start_point", new List<object> { 0f, 0f, 0f }); Set("end_point", new List<object> { end.x, end.y, end.z });
+   points[id] = new List<Vector3> { Vector3.zero, end };
+   paths.Add(path);
+   var master = Activator.CreateInstance(itemType);
+   itemType.GetField("width").SetValue(master, wide ? 24f : 3f);
+   itemType.GetField("lanes").SetValue(master, wide ? 4 : 1);
+   itemType.GetField("sidewalk_width").SetValue(master, wide ? 3f : 0f);
+   itemType.GetField("follow_terrain").SetValue(master, false);
+   masters[variant] = master;
+   foreach (string part in new[] { "body", "sidewalk", "line" })
+    cache["Models/Paths/p" + variant + "/" + part] = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Paths/p2/" + part + ".fbx");
+  }
+  var provider = Delegate.CreateDelegate(typeof(Func<,>).MakeGenericType(pathType, typeof(List<Vector3>)),
+   typeof(IntersectionQA).GetMethod("Samples", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(pathType));
+  var result = generator.GetType().GetMethod("GenerateWithSections").Invoke(generator, new object[] { 1, Vector3.zero, paths, 0f, provider, null });
+  if (result == null) throw new Exception("24m/3m crossing mesh missing");
+  var mesh = (Mesh)result.GetType().GetProperty("Mesh").GetValue(result);
+  var asphalt = new Material(Shader.Find("Standard")) { color = new Color(.28f, .28f, .28f) };
+  var pavement = new Material(Shader.Find("Standard")) { color = new Color(.65f, .65f, .65f) };
+  var surface = new GameObject("MixedWidthSurface");
+  surface.transform.SetParent(preview.transform, false);
+  surface.AddComponent<MeshFilter>().sharedMesh = mesh;
+  surface.AddComponent<MeshRenderer>().sharedMaterial = asphalt;
+  var specs = (IList)result.GetType().GetProperty("SidewalkConnectors").GetValue(result);
+  for (int i = 0; i < specs.Count; i++) roadType.GetMethod("CreateSidewalkConnectorObject").Invoke(null, new object[] { surface.transform, specs[i], i });
+  var cuts = (IDictionary)result.GetType().GetProperty("ConnectionPoints").GetValue(result);
+  foreach (var path in paths)
+  {
+   int id = (int)pathType.GetField("path_id").GetValue(path);
+   var cut = (Vector3)cuts[id];
+   var road = Activator.CreateInstance(roadType);
+   var setback = Activator.CreateInstance(asm.GetType("SidewalkSetback"));
+   var roadResult = roadType.GetMethod("Generate").Invoke(road, new object[] { path, new List<Vector3> { cut, points[id][1] }, setback, setback });
+   if (roadResult == null) throw new Exception("Mixed-width road body missing");
+   var body = (GameObject)roadResult.GetType().GetProperty("GeneratedObject").GetValue(roadResult);
+   body.transform.SetParent(preview.transform, false);
+   float halfWidth = id % 2 == 0 ? 12f : 1.5f;
+   var direction = new Vector3(points[id][1].x, 0f, points[id][1].z).normalized;
+   var right = Vector3.Cross(Vector3.up, direction);
+   var bodyVertices = body.GetComponentsInChildren<MeshFilter>().Where(f => f.name.EndsWith("/body"))
+    .SelectMany(f => f.sharedMesh.vertices.Select(v => f.transform.TransformPoint(v))).ToList();
+   foreach (float side in new[] { -1f, 1f })
+   {
+    var expected = cut + right * halfWidth * side + Vector3.up * .1f;
+    if (mesh.vertices.Min(v => Vector3.Distance(v, expected)) > .001f) throw new Exception("Mixed-width surface seam missing");
+    if (bodyVertices.Count == 0 || bodyVertices.Min(v => Vector3.Distance(v, expected)) > .001f) throw new Exception("Mixed-width road seam mismatch");
+   }
+  }
+  foreach (var renderer in preview.GetComponentsInChildren<MeshRenderer>())
+   renderer.sharedMaterials = renderer.sharedMaterials.Select(m => renderer.name.Contains("sidewalk") ? pavement : asphalt).ToArray();
+  preview.transform.position = new Vector3(3000f, 0f, 3000f);
+  var camera = new GameObject("MixedWidthCamera").AddComponent<Camera>();
+  camera.orthographic = true; camera.orthographicSize = 30f;
+  camera.transform.position = preview.transform.position + Vector3.up * 100f;
+  camera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+  camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(.32f, .42f, .22f);
+  var target = new RenderTexture(1000, 800, 24); camera.targetTexture = target;
+  camera.Render(); RenderTexture.active = target;
+  var image = new Texture2D(1000, 800, TextureFormat.RGB24, false);
+  image.ReadPixels(new Rect(0, 0, 1000, 800), 0, 0); image.Apply();
+  File.WriteAllBytes(root + "/Temp/IntersectionUnityQA/mixed-width-crossing.png", image.EncodeToPNG());
+  camera.targetTexture = null; RenderTexture.active = null; target.Release();
+  UnityEngine.Object.DestroyImmediate(image); UnityEngine.Object.DestroyImmediate(target);
+  UnityEngine.Object.DestroyImmediate(camera.gameObject); UnityEngine.Object.DestroyImmediate(preview);
+  UnityEngine.Object.DestroyImmediate(asphalt); UnityEngine.Object.DestroyImmediate(pavement);
  }
 
  static void CheckSurfaceOrigins(Assembly asm, IDictionary cache)

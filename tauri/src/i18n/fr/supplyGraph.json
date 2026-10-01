@@ -1,37 +1,13 @@
 {
   "supplyGraph": {
     "title": "Chaîne d’approvisionnement",
-    "refresh": "Actualiser l’approvisionnement",
     "selected": "Sélection",
     "providers": "Fournisseurs de {{product}}",
-    "noResults": "Aucun résultat — connexions et ressources dans leur état actuel.",
-    "epochNote": "Production, réception et alertes : époque {{epoch}}. Connexions et réserves : état actuel.",
-    "inputsNote": "Les installations sont regroupées par produit. Les besoins varient selon leur type. Sélectionnez une case pour voir le détail.",
-    "executing": "L’approvisionnement sera actualisé après la simulation.",
-    "fetchError": "Impossible de charger l’approvisionnement. Utilisez le bouton d’actualisation.",
+    "executing": "Les informations d’approvisionnement sont indisponibles pendant la simulation.",
+    "fetchError": "Impossible de charger les informations d’approvisionnement.",
     "activeCount": "Actifs {{active}} / {{count}}",
     "production": "Dernière production : {{amount}} {{unit}}",
     "resourceRemaining": "Réserves accessibles : {{amount}} {{unit}}",
-    "received": "Dernière réception : {{amount}} {{unit}}",
-    "nextDemand": "Prochaine demande : {{amount}} {{unit}}",
-    "recipients": "Installations / lignes utilisant cet intrant : {{count}}",
-    "importers": "Centres d’importation : {{count}}",
-    "cycle": "Dépendance circulaire",
-    "truncated": "Limite d’affichage atteinte. Ouvrez les détails d’un fournisseur pour continuer.",
-    "capacityPaths": "Contraintes de capacité possibles : tronçons {{ids}}",
-    "role": {
-      "resource": "Ressource",
-      "producer": "Producteur",
-      "consumer": "Relais / dépôt",
-      "vehicle_consumer": "Ligne",
-      "market": "Marché"
-    },
-    "transport": {
-      "resource": "Extraction sur la parcelle",
-      "infrastructure": "Réseau d’infrastructure",
-      "vehicle": "Réseau des véhicules",
-      "market": "Achat sur le marché"
-    },
     "state": {
       "ok": "Disponible",
       "unknown": "Indéterminé",
@@ -40,10 +16,30 @@
       "partial": "Partiellement affecté",
       "limited": "Limité / arrêté",
       "disconnected": "Déconnecté",
-      "unavailable": "Hors couverture",
       "supply_shortage": "Pénurie possible",
-      "capacity_limited": "Limite de capacité possible",
-      "unmatched": "Approvisionnement insuffisant"
+      "capacity_limited": "Limite de capacité possible"
+    },
+    "facilities": {
+      "401": "Centrales électriques",
+      "402": "Installations de captage d’eau",
+      "403": "Fournisseurs de pétrole",
+      "404": "Gares de fret",
+      "405": "Fournisseurs de minerai",
+      "501": "Dépôts ferroviaires",
+      "502": "Dépôts de bus",
+      "503": "Dépôts de tramway",
+      "504": "Dépôts de monorail"
+    },
+    "consumers": {
+      "401": "Consommateurs électriques",
+      "402": "Pompes à eau",
+      "403": "Consommateurs de pétrole",
+      "404": "Consommateurs de fret",
+      "405": "Consommateurs de minerai",
+      "501": "Lignes ferroviaires",
+      "502": "Lignes de bus",
+      "503": "Lignes de tramway",
+      "504": "Lignes de monorail"
     }
   }
 }

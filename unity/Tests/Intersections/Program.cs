@@ -36,6 +36,7 @@ internal static class Program
         }
         int layouts = 0, constrained = 0;
         var factory = new GeometryFactory();
+        int mixedWidths = CheckMixedWidthCorners(factory);
         foreach (float length in new[] { 4f, 20f, 100f })
         foreach (float width in new[] { 2f, 8f, 24f })
         foreach (float angle in new[] { 15f, 45f, 90f, 150f, 179f, 180f })
@@ -96,7 +97,57 @@ internal static class Program
         int merges = CheckMotorwayMerges();
         int junctions = CheckTrackJunctions();
         string surfaces = CheckSlopedSurfaces(factory);
-        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, original curve preservation, input-order invariance, {merges} motorway merge checks, {junctions} track junction checks, sloped surfaces [{surfaces}].");
+        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, {mixedWidths} mixed-width corners, original curve preservation, input-order invariance, {merges} motorway merge checks, {junctions} track junction checks, sloped surfaces [{surfaces}].");
+    }
+
+    private static int CheckMixedWidthCorners(GeometryFactory factory)
+    {
+        int checkedCorners = 0;
+        foreach (int count in new[] { 3, 4 })
+        foreach (float rotation in new[] { 0f, 37f })
+        foreach (bool reverse in new[] { false, true })
+        {
+            var origin = rotation == 0f ? Vector2.zero : new Vector2(7000f, -3000f);
+            var paths = new List<PathSummary>();
+            var points = new Dictionary<int, List<Vector3>>();
+            for (int i = 0; i < count; i++)
+            {
+                float radians = (rotation + 90f * i) * MathF.PI / 180f;
+                var direction = new Vector3(MathF.Cos(radians), 0f, MathF.Sin(radians));
+                var plan = new List<Vector3> { new Vector3(origin.x, 0f, origin.y), new Vector3(origin.x, 0f, origin.y) + direction * 100f };
+                if (reverse) plan.Reverse();
+                paths.Add(new PathSummary { path_id = i + 1, start_node_id = reverse ? 100 + i : 1,
+                    end_node_id = reverse ? 1 : 100 + i, width = i % 2 == 0 ? 24f : 3f });
+                points[i + 1] = plan;
+            }
+            var result = IntersectionPolygonUtil.ComputeIntersectionPolygon(1, origin, paths, factory, null, p => points[p.path_id]);
+            Check(!result.RequiresMoreSpace, "異幅の直交交差点を生成できません。");
+            foreach (var corner in result.Corners)
+            {
+                var a = result.Sections[corner.FromPath];
+                var b = result.Sections[corner.ToPath];
+                if (Vector2.Dot(a.Direction, b.Direction) < -.9f) continue;
+                var wide = a.Width > b.Width ? a : b;
+                bool fromWide = a == wide;
+                int endpoint = fromWide ? 0 : corner.Points.Count - 1;
+                int neighbor = fromWide ? 1 : endpoint - 1;
+                Vector2 straight = corner.Points[neighbor] - corner.Points[endpoint];
+                Check(MathF.Abs(Vector2.Dot(straight, wide.Left)) < .002f && straight.magnitude > 5f,
+                    "太い道路の外縁が角より手前で細い道路側へ引き込まれています。");
+                Vector2 previous = -a.Direction;
+                float turn = 0f;
+                foreach (var direction in corner.Directions)
+                {
+                    float delta = MathF.Atan2(previous.x * direction.y - previous.y * direction.x, Vector2.Dot(previous, direction));
+                    Check(delta <= .002f, "交差点の角が逆向きに曲がり、くびれています。");
+                    turn += delta;
+                    previous = direction;
+                }
+                Check(MathF.Abs(turn + MathF.PI * .5f) < .002f, "直交交差点の角の接線が一致しません。");
+                checkedCorners++;
+            }
+        }
+        return checkedCorners;
     }
 
     /// <summary>

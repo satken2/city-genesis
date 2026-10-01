@@ -31,7 +31,7 @@
 
 ## 全体の規約
 
-- 供給状況は `supply/SupplyChainSection` を経済主体・路線のヘッダー直下へ埋め込む。純粋な図部品 `SupplyChainGraph` は取得・ウィンドウ操作を持たず、施設への遷移は `onNavigate` に委譲する。取得と通知は `hooks/useSupplyGraph`、API契約と表示仕様は公開docs `programs/診断ウィンドウ.md` が正。独立した `diagnosis` ウィンドウはない。
+- 供給図は `supply/SupplyChainSection` を経済主体の「需給・取引」タブ先頭(「インフラ接続」があれば接続状態・受入れ量バッジの下)、路線の「基本情報」タブ先頭へ埋め込む。警告カードはヘッダー下に置く。図は資源財・インフラ財・車両財だけの一系列で、通常商品・サービス財はたどらない。選択施設が供給するインフラ財・車両財の直接の消費先は、不在でも右端に一箱表示する。上流・下流は財ごとの共通名・共通アイコンを使い、施設の種類や件数で切り替えない。個別の名前・アイコンは選択対象だけに使う。`SupplyChainGraph` と `SupplyChainSection` は取得・ウィンドウ操作を持たない。`hooks/useSupplyGraph` は詳細パネル側に置き、ウィンドウ表示時と対象変更時だけ取得する。更新ボタンとイベント購読はない。API契約と表示仕様は公開docs `programs/診断ウィンドウ.md` が正。独立した `diagnosis` ウィンドウはない。
 
 - `topmenu/TopMenu` の左下のコア表示は、Rust側が起動時に取得した版を `get_core_version` で受け取り、`Core v<core_version>` を表示する。未取得・取得失敗・セッション監視での接続失敗時は `Core 接続失敗`(各言語に翻訳)とする。`session-state` の `coreVersion` と `backendConnected`、状態変更時の `backend-connection` で表示を更新し、版取得のHTTP要求・タイマー・版の比較・Unityの状態取得・詳細エラーの表示はここでは行わない。
 - 表示文字列は必ずi18n(`t("key")`。`src/i18n/`の全7言語に追加)。マスターの表示名は日本語のみなので多言語ラベルはi18nから採る。
@@ -108,7 +108,9 @@
 - エポック実行(`taskbar/EpochConfirmWindow`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのは「いいえ」とEsc(実行中は閉じない)。ボタンはセーブ系と共通の `SaveDialogButton`。ウィンドウの高さは内容に合わせてパネルが `setSize` する(文字サイズの設定と言語で高さが変わるため。位置は動かさない。レジストリの高さは既定の文字サイズでの値)。測るのは内容(都市・エポック数・言語・文字サイズ)が変わったときだけで、ResizeObserver でウィンドウの大きさを監視しない(閉じたウィンドウはパネルがマウントされたまま別のポップアップへ転用されるので、転用先の大きさを書き換えてしまう)。2つの日付の間の季節の帯は、両端の季節の印を CSS のアンカー(`anchor-name`)にして1本で描き、帯の縮尺(実行する日数)を登録済みのCSS変数で補間してエポック数の変更をなめらかに見せる。HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
 - エポック結果(`taskbar/EpochResultWindow`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのはフッタの「閉じる」とEsc。閉じる処理(お祝いウィンドウを開いてから閉じる)は重なっても1回だけ走らせる。背景の画像は実行後の月の季節画像(`utils/season` の `seasonImageUrl`)で、上半分に左右いっぱいで切り抜いて敷き、下へ透明にして縦の中央で消す(右とスコアの後ろは薄く・暗くして文字を読ませる)。上に載る面は落ち影なしの半透明(`--epoch-result-pane`)で、画像の消えた下半分でも地に溶けないよう地より少し明るくする。統計タイルの背景の推移グラフは `statistics.history`(直近 `trend_window` エポック。矢印の判定と同じ窓)で描く。見出しはカードの外に置く。
 
+- 経済主体詳細(`agent/AgentDetailPanel`): マッシュアップ建物の「建物配置を編集」は「建物情報」タブの末尾に置き、「プロパティ編集」と同じ全幅ボタンで `mashup_edit` を開く。
 - 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
+  - 神モードの新規建設は確定後もパネル・建物設定を保持し、`placement_command {reset: true}`で設置位置だけを解除して連続配置する。外観3軸(`visual_variant`・`visual_variant2`・`visual_variant3`)は成功ごとに再抽選するが、コピー建設ではコピー元の外観を保持する。詳細パネルは自動で開かず、`STATE_NORMAL`も送らない。通常モード・既存建物の編集・市庁舎の移転は確定後に閉じる。
   - 選択は分類タイル→建物カード一覧→建設画面の3段で、左上の戻るで1段ずつ戻る。分類はマスターの`bd_category`(`BD_CATEGORY_*`。ID順がタイルの並び、未設定は「その他」)で、建築規制の`bd_type`では分けない。カテゴリ選択後の建物一覧は横一辺に広がるカード(`BuildingVariantCard`。アイコン・説明・フロア仕様を一体表示し、選択後も概要表示に流用)で表示する。建設画面から戻る先は選んでいた建物の分類(編集・コピーで直接開いた場合も同じ)。
   - 選択した土地区画のカードは、区画種別アイコンの横に「敷地 #ID」と、面積・高さ/建ぺい率/容積率の規制を「アイコン+値」で並べる(`ParcelSpecs`。項目名はツールチップ、規制の無い項目は出さない)。建築可能な建物の一覧だけ文字で出す。
   - 既存建物をコピーするボタンはヘッダー右上(戻るボタンと同じ高さ)に配置する。既存建物の編集は分類へ戻れず、候補を編集対象と同じ`bd_type`に絞る(敷地を選び直さないので建築規制の照合を通らない)。
@@ -147,7 +149,7 @@
 
 ## ウィンドウ間イベント(Tauri内)
 
-`epoch:executing`、`tags:changed`、`roads:changed`、`transit:lines_changed`、`supply:changed`、`city:renamed`、`hud:mode_changed`、`building_direct:acquisition_confirmed`、`road:member_edit_started`、`scenarios:changed`(シナリオの作成・削除・紹介情報・地形の保存)。一覧・詳細はこれらを購読して取り直す。
+`epoch:executing`、`tags:changed`、`roads:changed`、`transit:lines_changed`、`city:renamed`、`hud:mode_changed`、`building_direct:acquisition_confirmed`、`road:member_edit_started`、`scenarios:changed`(シナリオの作成・削除・紹介情報・地形の保存)。一覧・詳細は必要な通知を購読して取り直す。供給図はこれらの通知を購読しない。
 
 ## 参照先
 

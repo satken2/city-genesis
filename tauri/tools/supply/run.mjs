@@ -8,7 +8,7 @@ const mock = resolve("tools/supply/mock-runtime.ts");
 await mkdir(resolve("node_modules/.cache"), { recursive: true });
 await build({ entryPoints: ["tools/supply/tests.tsx"], outfile: output, bundle: true,
   platform: "node", format: "esm", packages: "external", loader: { ".css": "empty", ".png": "empty" },
-  alias: { "@tauri-apps/api/window": mock, "@tauri-apps/api/event": mock, "react-i18next": mock },
+  alias: { "react-i18next": mock },
   plugins: [{ name: "supply-runtime", setup(builder) {
     builder.onResolve({ filter: /(?:contexts\/MasterDataContext|utils\/(?:api|agentIcon|pathIcon|resourceIcon))$/ }, () => ({ path: mock }));
   } }] });

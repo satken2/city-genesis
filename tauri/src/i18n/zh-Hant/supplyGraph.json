@@ -1,37 +1,13 @@
 {
   "supplyGraph": {
     "title": "供應情況",
-    "refresh": "更新供應情況",
     "selected": "目前選取",
     "providers": "{{product}}供應設施",
-    "noResults": "尚無實績 — 連接與資源位置顯示目前狀態。",
-    "epochNote": "生產、接收與警告為時期 {{epoch}} 的實績。連接和資源存量為目前狀態。",
-    "inputsNote": "設施依產品合併顯示。不同設施所需投入不同。點選方框查看明細。",
-    "executing": "模擬完成後更新供應情況。",
-    "fetchError": "無法取得供應情況。請點選更新重試。",
+    "executing": "模擬執行期間無法取得供應資訊。",
+    "fetchError": "無法取得供應資訊。",
     "activeCount": "運作 {{active}}／{{count}}",
     "production": "上次產量：{{amount}} {{unit}}",
     "resourceRemaining": "可利用資源存量：{{amount}} {{unit}}",
-    "received": "上次接收量：{{amount}} {{unit}}",
-    "nextDemand": "下次需求：{{amount}} {{unit}}",
-    "recipients": "使用此投入的設施或路線：{{count}}",
-    "importers": "進口樞紐：{{count}}",
-    "cycle": "循環供應關係",
-    "truncated": "已達上游顯示範圍。請開啟供應設施詳情繼續查看。",
-    "capacityPaths": "可能有容量限制的路段：{{ids}}",
-    "role": {
-      "resource": "資源",
-      "producer": "生產者",
-      "consumer": "中繼／車輛基地",
-      "vehicle_consumer": "路線",
-      "market": "商品市場"
-    },
-    "transport": {
-      "resource": "從地塊資源開採",
-      "infrastructure": "基礎設施網路",
-      "vehicle": "車輛運行網路",
-      "market": "市場採購"
-    },
     "state": {
       "ok": "可利用",
       "unknown": "待判斷",
@@ -40,10 +16,30 @@
       "partial": "部分有問題",
       "limited": "不足／停止",
       "disconnected": "未連接",
-      "unavailable": "供應範圍外",
       "supply_shortage": "可能供應不足",
-      "capacity_limited": "可能有容量限制",
-      "unmatched": "採購不足"
+      "capacity_limited": "可能有容量限制"
+    },
+    "facilities": {
+      "401": "發電廠",
+      "402": "取水設施",
+      "403": "原油供應設施",
+      "404": "貨運站",
+      "405": "礦石供應設施",
+      "501": "鐵路車輛基地",
+      "502": "公車車庫",
+      "503": "輕軌車輛基地",
+      "504": "單軌車庫"
+    },
+    "consumers": {
+      "401": "用電設施",
+      "402": "水泵",
+      "403": "原油使用設施",
+      "404": "貨物使用設施",
+      "405": "礦石使用設施",
+      "501": "鐵路路線",
+      "502": "公車路線",
+      "503": "輕軌路線",
+      "504": "單軌路線"
     }
   }
 }

@@ -76,6 +76,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 | 防音壁・ガードレール | `wall` | `wall_width` |
 | 街路樹 | `tree` | `tree_spacing` |
 | 高架にできる道路の柱 | `pillar` (+ `pillar_cap`) | `height_editable=true`, `pillar_spacing` |
+| 他パスをまたぐ門型橋脚 | `pillar_leg`（柱1本） / `pillar_crossbeam`（横梁） | 通常橋脚の干渉時に組み立てる。原点・伸縮方向・幅上限はG文書§8.7。現行は鉄道共通 `p4` に無印のみ |
 | 地下道の坑口 | `portal` | — |
 | **線路**: 軌道(レール+枕木) | `track` | `lanes` |
 | 分岐器のレールコネクタ | `rail` (無ければ `track` で代用) | — |

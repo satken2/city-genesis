@@ -15,7 +15,7 @@
 | `FireEffectFactory.cs` | 火災・失火・爆破のパーティクル一式を建物寸法に合わせて手続き生成(テクスチャ・材質はコード生成で共有)。呼び出しは `DataLoaders/FireEffectManager`。調整の勘所は `geometries/S_火災エフェクトの描画.md` |
 | `VisualEffectManager.cs` | 完成/解体/爆破の遷移でパーティクルと単発3D音を鳴らすシングルトン(AppRoot が生成)。検証 `Tests/Explosion/run-unity.ps1` |
 | `InfraNetworkUtil.cs` | ノード溶接互換(吸着可否)。`IsNodeSnappable` / `IsPathSnappable` / `IsInfraMask` / `IsInfraPathVariant` / `IsInfraPathType` |
-| `IntersectionPolygonUtil.cs` | 交差点の路面ポリゴン。`PathEndSection` / `IntersectionCorner` / `AtDistance` / `Trim` / `SamplePlan` / `RequiresMoreSpace`。任意 `shapeLayout` は描画専用の外周調整で、保存パス・論理占有は変えない |
+| `IntersectionPolygonUtil.cs` | 交差点の路面ポリゴン。`PathEndSection` / `IntersectionCorner` / `AtDistance` / `Trim` / `SamplePlan` / `RequiresMoreSpace`。外周は道路の縁の直線と、縁の交点を基準に両側へ同じ距離を取った丸めで結ぶ(G§11.2)。保存パス・論理占有は変えない |
 | `TunnelSectionUtil.cs` | 地下パスの区間分類(バックエンド `geo_path_depth.py` と同一定義)。`IsUndergroundPath` / `SplitDrawableRuns` / `CollectTunnelRuns` / `HasTunnelSection` |
 | `OccupancyVolumeUtil.cs` | 道路・建物の占有警告箱の三角形列。`RoadPlanManager` と `HighlightManager` で共用し、既存の材質は変えない。検証 `Tests/Occupancy/run-unity.ps1` |
 | `OverlayMeshRenderer.cs` | オーバーレイ用メッシュ描画(`Custom/OverlayLine`)。生成は静的ファクトリ `Create(name, alwaysOnTop, parent, persistent)` |

@@ -49,6 +49,56 @@ public static class PillarClearance
     public static Func<PathSummary, List<Corridor>> NeighborProvider;
     public const float Margin = 0.25f;
 
+    /// <summary>
+    /// 橋脚の横断面で通行空間の左右端を求め、左右それぞれの柱を最小限だけ外へ逃がす。
+    /// 柱の外接円で通行帯を広げ、線分を高さと前後方向で切ってから横方向へ投影する保守的な近似。
+    /// </summary>
+    public static void FindPortalOffsets(Vector3 origin, Vector3 right, float minY, float maxY,
+        float legRadius, float minimumHalfSpan, List<Corridor> corridors, out float left, out float rightOffset)
+    {
+        left = -minimumHalfSpan;
+        rightOffset = minimumHalfSpan;
+        if (corridors == null) return;
+        var intervals = new List<Vector2>();
+        Vector3 forward = Vector3.Cross(right, Vector3.up);
+        foreach (var corridor in corridors)
+        {
+            if (corridor.Points == null) continue;
+            float radius = legRadius + corridor.HalfWidth + Margin;
+            for (int i = 1; i < corridor.Points.Count; i++)
+            {
+                Vector3 a = corridor.Points[i - 1] + Vector3.up * corridor.YOffset;
+                Vector3 b = corridor.Points[i] + Vector3.up * corridor.YOffset;
+                float lo = 0f, hi = 1f;
+                if (!ClipRange(a.y, b.y, minY - corridor.Height, maxY, ref lo, ref hi)) continue;
+                if (!ClipRange(Vector3.Dot(a - origin, forward), Vector3.Dot(b - origin, forward),
+                        -radius, radius, ref lo, ref hi)) continue;
+                float x0 = Vector3.Dot(Vector3.Lerp(a, b, lo) - origin, right);
+                float x1 = Vector3.Dot(Vector3.Lerp(a, b, hi) - origin, right);
+                intervals.Add(new Vector2(Mathf.Min(x0, x1) - radius, Mathf.Max(x0, x1) + radius));
+            }
+        }
+        // 重なる通行帯を順に抜ける。離れた道路までまとめてまたぐ必要はない。
+        intervals.Sort((a, b) => a.x.CompareTo(b.x));
+        for (int i = 0; i < intervals.Count; i++)
+            if (rightOffset >= intervals[i].x && rightOffset <= intervals[i].y)
+                rightOffset = intervals[i].y + 0.01f;
+        intervals.Sort((a, b) => b.y.CompareTo(a.y));
+        for (int i = 0; i < intervals.Count; i++)
+            if (left >= intervals[i].x && left <= intervals[i].y)
+                left = intervals[i].x - 0.01f;
+    }
+
+    private static bool ClipRange(float a, float b, float min, float max, ref float lo, ref float hi)
+    {
+        float delta = b - a;
+        if (Mathf.Abs(delta) < 1e-6f) return a >= min && a <= max;
+        float t0 = (min - a) / delta, t1 = (max - a) / delta;
+        lo = Mathf.Max(lo, Mathf.Min(t0, t1));
+        hi = Mathf.Min(hi, Mathf.Max(t0, t1));
+        return lo <= hi;
+    }
+
     /// <summary>子メッシュの変換を含む、プレハブルート座標での範囲。ルートのscaleは配置時に適用する。</summary>
     public static Bounds? GetPrefabBounds(GameObject prefab)
     {

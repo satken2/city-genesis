@@ -216,6 +216,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
 
   const [cityHallPlaced, setCityHallPlaced] = useState<boolean>(true);
   const [templateMode, setTemplateMode] = useState<boolean>(false);
+  const continueAfterConfirm = templateMode && editAgentId == null && !relocateCityHall;
 
   useEffect(() => {
     if (!apiBaseUrl) return;
@@ -1293,12 +1294,31 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     void showNotification({ message: displayMessage, durationMs: 5000 });
   }
 
+  /** 建物の設定を保持したまま、設置位置とその検証結果だけを解除する。 */
+  function clearPlacementSelection() {
+    setParcelId(null);
+    setParcelData(null);
+    setPickedPosition(null);
+    setBuildingPreview(null);
+    setValidatedDirectKey(null);
+    setDirectValid(false);
+    setDirectInvalidReason(null);
+    setDirectRequiresAcquisition(false);
+    setDirectAcquisition(null);
+    setCopyValid(false);
+    setCopyInvalidReason(null);
+    setEstimateError(null);
+    setEstimatedCost(null);
+    setPreviewEffectRegion(null);
+    setEffectRangeActive(false);
+  }
+
   /**
-   * 建設確定に成功した後の共通処理。
+   * 建設確定に成功した後の共通処理。神モードの新規建設は位置を解除し、次の建物の外観を抽選して配置を継続する。
    * 効果範囲オーバーレイを明示的に消し(ウィンドウを閉じるとアンマウント時の
    * クリア送信が届かない可能性があるため)、Unity にセッションリロードを送って
    * 新しい建物を描画させる。
-   * 先に STATE_NORMAL に戻してから表示モードを切り替える。
+   * 通常モード・既存建物の編集・市庁舎の移転では、先に STATE_NORMAL に戻してから表示モードを切り替える。
    * STATE_NORMAL でないと view:change_view の変更が _normalStateMemory に記憶されず、
    * 後から Rust 側が STATE_NORMAL を送った際に default に戻ってしまうため。
    * 最後に、ユーザーが建設結果を確認できるよう計画中表示をONにしてパネルを閉じる。
@@ -1306,6 +1326,21 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   async function finishAfterConfirm() {
     await sendEditBuildingUpdateEffectRange(null).catch(() => {});
     await sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
+    if (continueAfterConfirm && selectedVariant !== null) {
+      clearPlacementSelection();
+      // コピー建設では元建物の外観を保持し、それ以外は建物ごとに外観を抽選する。
+      if (copySourceAgentId == null) {
+        setVisualVariant(Math.random());
+        setVisualVariant2(Math.random());
+        setVisualVariant3(Math.random());
+      }
+      if (landmark != null) {
+        setPlacedLandmarkIds(previous => previous.includes(landmark) ? previous : [...previous, landmark]);
+      }
+      await sendBuildingPlacementCommand(selectedVariant, { reset: true });
+      await sendSessionReload();
+      return;
+    }
     await sendSessionReload();
     await sendChangeState("STATE_NORMAL");
     await sendChangeDisplay("building", "default", null, ["plan"]);
@@ -1366,7 +1401,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           }),
         });
         notifyTagAssigned();
-        if (created && created.agent_id) {
+        if (!continueAfterConfirm && created && created.agent_id) {
           void invoke("open_registered_window", {
             windowType: "agent_detail",
             entityId: String(created.agent_id),
@@ -1409,7 +1444,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         }),
       });
       notifyTagAssigned();
-      if (created && created.agent_id) {
+      if (!continueAfterConfirm && created && created.agent_id) {
         void invoke("open_registered_window", {
           windowType: "agent_detail",
           entityId: String(created.agent_id),
@@ -1945,15 +1980,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
               onClick={() => {
                 // 仮決定した設置位置(区画モードの選択区画/直接配置モードのクリック地点)だけを取り消す。
                 // バリアント選択・外観バリアントは維持し、続けて別の位置を選び直せるようにする。
-                setParcelId(null);
-                setParcelData(null);
-                setPickedPosition(null);
-                setBuildingPreview(null);
-                setDirectValid(false);
-                setDirectInvalidReason(null);
-                setDirectRequiresAcquisition(false);
-                setDirectAcquisition(null);
-                setEstimateError(null);
+                clearPlacementSelection();
                 void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
                 if (editAgentId == null) {
                   void sendBuildingPlacementCommand(selectedVariant, { reset: true }).catch(console.error);

@@ -3,7 +3,6 @@
  */
 
 import { decode } from "@msgpack/msgpack";
-import { emit } from "@tauri-apps/api/event";
 
 /**
  * MessagePackレスポンスのメディアタイプ。
@@ -82,15 +81,7 @@ export function configureBackendRequests(baseUrl: string) {
     if (!backendConnected && !["GET", "HEAD", "OPTIONS"].includes(method)) {
       throw new ApiError("BACKEND_DISCONNECTED", "BACKEND_DISCONNECTED", 503);
     }
-    const response = await nativeFetch(input, init);
-    const path = url.slice(configuredBase.length).split("?")[0];
-    if (response.ok && !["GET", "HEAD", "OPTIONS"].includes(method)
-      && /^\/api\/v1\/(agents|buildings|paths|transit|resources|parcels|city)(\/|$)/.test(path)
-      && !/\/(preview[^/]*|validate|construction-cost|motion|route-preview)(\/|$)/.test(path)) {
-      // 都市の変更を、表示中の供給図へ通知する。再分析は受信側が必要なときだけ行う。
-      void emit("supply:changed").catch(console.error);
-    }
-    return response;
+    return nativeFetch(input, init);
   };
 }
 

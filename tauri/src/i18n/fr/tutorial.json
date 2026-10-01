@@ -498,6 +498,10 @@
       "tip34": {
         "title": "Attention au surpompage",
         "description": "Si vous puisez plus d'eau que la source ne peut en reconstituer, la pénurie sera inévitable. Multiplier les pompes ne fera pas jaillir plus d'eau."
+      },
+      "tip35": {
+        "title": "Une erreur coûteuse",
+        "description": "Une fois la construction commencée, il n'est pas facile de déplacer une route ou un bâtiment. Planifiez bien avant de commencer. Mais une route courbée par mégarde peut aussi donner du caractère à votre ville, une fois que vous vous y êtes habitué."
       }
     }
   },

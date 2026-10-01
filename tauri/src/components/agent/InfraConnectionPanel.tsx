@@ -4,6 +4,7 @@
  * 経済主体詳細パネルの「需給・取引」タブに表示するインフラ財の接続情報。
  * インフラ財(GOODS_INFRASTRUCTURE: 電力・水道など)を授受する施設
  * (発電所・変電所など)にのみ表示される。
+ * 供給図を children として受け取り、接続情報がない施設では図だけを表示する。
  *
  * 表示対象の判定:
  * 施設の「マスターデータ定義」を見て、materials にインフラ財を持つ施設(=消費側。
@@ -25,6 +26,7 @@
  * 施設(供給不足など)は 0 として表示する。
  */
 
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import {
@@ -37,16 +39,17 @@ import "./InfraConnectionPanel.css";
 
 type InfraConnectionPanelProps = {
   agent: AgentData;
+  children?: ReactNode;
 };
 
-export function InfraConnectionPanel({ agent }: InfraConnectionPanelProps) {
+export function InfraConnectionPanel({ agent, children }: InfraConnectionPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
 
-  if (!masterData) return null;
+  if (!masterData) return <>{children}</>;
 
   const agentMaster = masterData.agents[agent.variant];
-  if (!agentMaster) return null;
+  if (!agentMaster) return <>{children}</>;
 
   /** 製品IDがインフラ財かどうか */
   const isInfraProduct = (pid: number) =>
@@ -62,9 +65,9 @@ export function InfraConnectionPanel({ agent }: InfraConnectionPanelProps) {
       ? agentMaster.supply
       : null;
 
-  // インフラ財を一切授受しない経済主体にはセクション自体を表示しない
+  // インフラ財を授受しない経済主体では、供給図だけを表示する。
   if (consumedPids.length === 0 && suppliedPid == null) {
-    return null;
+    return <>{children}</>;
   }
 
   const isActive = agent.status === STATUS_ACTIVE;
@@ -118,6 +121,7 @@ export function InfraConnectionPanel({ agent }: InfraConnectionPanelProps) {
           })}
         </div>
       )}
+      {children}
     </section>
   );
 }

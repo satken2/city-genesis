@@ -498,6 +498,10 @@
       "tip34": {
         "title": "Cuidado con sobreexplotar",
         "description": "Si extraes agua a un ritmo mayor del que la fuente se recarga, terminarás en escasez. Añadir más bombas no creará más agua."
+      },
+      "tip35": {
+        "title": "Un error costoso",
+        "description": "Una vez que empiezas a construir una carretera o un edificio, no es fácil cambiarlo de lugar. Planifica bien antes de comenzar. Aunque una carretera que quedó curva por accidente también puede darle personalidad a tu ciudad cuando te acostumbras a verla."
       }
     }
   },
