@@ -65,7 +65,7 @@
 | `InfoHeader` / `EditableLabel` | 見出しとインライン改名。改名可否は呼び出し側が決める |
 | `ConfirmDialogWindow` | 直接開かず`requestConfirm()`経由 |
 | `UnaffordableOverlay` | 建設パネルのバリアント一覧で、資金不足のカードに「資金不足」の札を外から重ねる。カード(`BuildingVariantCard` / `PathVariantCard`)は一覧と建設画面の概要で同じものを使うので、一覧だけの表示をカードに足さない。選べなくするのはカードの`disabled` |
-| `ConstructionInfoCard` | 建設コスト・期間・需給見通し・資金・線形の表示。確定可否は`utils/constructionFunding`と同じ判定。ドメイン固有の数量は`leadingRows`で表の先頭に足す(造成の種類・切盛土量など) |
+| `ConstructionInfoCard` | 建設期間・概算コスト・概算維持費(直近エポックの収入に対する割合つき)・需給見通し・資金の表示。確定可否は`utils/constructionFunding`と同じ判定。ドメイン固有の数量は`leadingRows`で表の先頭に足す(造成の種類・切盛土量など) |
 | `TagPicker` / `TagSelect` / `TagRow` | 建設プロジェクトのタグ。現在値は詳細レスポンスに載らず`GET /tags/object`で引く。変更後は`tags:changed`をemit |
 | `Meter` / `DonutGauge` | 0〜1のメーター。`polarity="negative"`で悪さ指標。1超は全箇所一律に頭打ち+赤紫の発光 |
 | `FiscalSankey` | 財政Sankey。歳入項目の定義と支出カテゴリ色はここに置き、予算ウィンドウも共用 |
