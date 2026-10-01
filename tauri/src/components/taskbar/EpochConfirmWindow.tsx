@@ -48,6 +48,7 @@ import { showNotification } from "../../utils/notification";
 import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { useFontSize } from "../../contexts/FontSizeContext";
 import type { QuestNotification } from "../../types";
 import { SaveDialogButton } from "./SaveDialog";
 import { ClockIcon, MinusIcon, PlusIcon, SeasonIcon } from "./SaveIcons";
@@ -121,6 +122,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
   const rootRef = useRef<HTMLDivElement>(null);
   const [epochCount, setEpochCount] = useState(1);
   const templateMode = useTemplateMode(apiBaseUrl);
+  const { fontSize } = useFontSize();
   const maxEpochCount = templateMode ? TEMPLATE_MAX_EPOCH_COUNT : MAX_EPOCH_COUNT;
 
   /** 直接入力(テンプレートモード)。空欄や範囲外は1〜上限に丸める */
@@ -139,21 +141,17 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
       .catch(console.error);
   }, [apiBaseUrl]);
 
+  // 高さは内容が変わったときだけ測り、ウィンドウの大きさの変化には反応しない。閉じたウィンドウは
+  // このパネルがマウントされたまま別のポップアップへ転用されるので、大きさの変化を監視すると転用先の大きさを書き換えてしまう。
   useEffect(() => {
     const root = rootRef.current;
     const shell = root?.closest<HTMLElement>(".popup-shell");
     if (!root || !shell) return;
-    const observer = new ResizeObserver(() => {
-      const border = shell.offsetHeight - shell.clientHeight;
-      const height = Math.min(root.scrollHeight + border, window.screen.availHeight || Infinity);
-      if (Math.abs(height - window.innerHeight) < 1) return;
-      void getCurrentWindow().setSize(new LogicalSize(window.innerWidth, height)).catch(console.error);
-    });
-    // ルートはウィンドウより高いと縮んでスクロールになり、中身が伸びても大きさが変わらないので、子も見る
-    observer.observe(root);
-    for (const child of root.children) observer.observe(child);
-    return () => observer.disconnect();
-  }, []);
+    const border = shell.offsetHeight - shell.clientHeight;
+    const height = Math.min(root.scrollHeight + border, window.screen.availHeight || Infinity);
+    if (Math.abs(height - window.innerHeight) < 1) return;
+    void getCurrentWindow().setSize(new LogicalSize(window.innerWidth, height)).catch(console.error);
+  }, [city, epochCount, templateMode, i18n.language, fontSize]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
