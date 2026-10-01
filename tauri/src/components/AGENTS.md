@@ -31,7 +31,7 @@
 
 ## 全体の規約
 
-- 供給状況は `supply/SupplyChainSection` を経済主体・路線のヘッダー直下へ埋め込む。純粋な図部品 `SupplyChainGraph` は取得・ウィンドウ操作を持たず、施設への遷移は `onNavigate` に委譲する。取得と通知は `hooks/useSupplyGraph`、API契約と表示仕様は公開docs `programs/診断ウィンドウ.md` が正。独立した `diagnosis` ウィンドウはない。
+- 供給図は `supply/SupplyChainSection` を経済主体の「需給・取引」タブ先頭(「インフラ接続」があればその中)、路線の「基本情報」タブ先頭へ埋め込む。警告カードはヘッダー下に置く。図は資源財・インフラ財・車両財だけの一系列で、通常商品・サービス財はたどらない。上流は財ごとの共通名・共通アイコンを使い、施設の種類や件数で切り替えない。個別の名前・アイコンは選択対象だけに使う。`SupplyChainGraph` と `SupplyChainSection` は取得・ウィンドウ操作を持たない。`hooks/useSupplyGraph` は詳細パネル側に置き、ウィンドウ表示時と対象変更時だけ取得する。更新ボタンとイベント購読はない。API契約と表示仕様は公開docs `programs/診断ウィンドウ.md` が正。独立した `diagnosis` ウィンドウはない。
 
 - `topmenu/TopMenu` の左下のコア表示は、Rust側が起動時に取得した版を `get_core_version` で受け取り、`Core v<core_version>` を表示する。未取得・取得失敗・セッション監視での接続失敗時は `Core 接続失敗`(各言語に翻訳)とする。`session-state` の `coreVersion` と `backendConnected`、状態変更時の `backend-connection` で表示を更新し、版取得のHTTP要求・タイマー・版の比較・Unityの状態取得・詳細エラーの表示はここでは行わない。
 - 表示文字列は必ずi18n(`t("key")`。`src/i18n/`の全7言語に追加)。マスターの表示名は日本語のみなので多言語ラベルはi18nから採る。
@@ -147,7 +147,7 @@
 
 ## ウィンドウ間イベント(Tauri内)
 
-`epoch:executing`、`tags:changed`、`roads:changed`、`transit:lines_changed`、`supply:changed`、`city:renamed`、`hud:mode_changed`、`building_direct:acquisition_confirmed`、`road:member_edit_started`、`scenarios:changed`(シナリオの作成・削除・紹介情報・地形の保存)。一覧・詳細はこれらを購読して取り直す。
+`epoch:executing`、`tags:changed`、`roads:changed`、`transit:lines_changed`、`city:renamed`、`hud:mode_changed`、`building_direct:acquisition_confirmed`、`road:member_edit_started`、`scenarios:changed`(シナリオの作成・削除・紹介情報・地形の保存)。一覧・詳細は必要な通知を購読して取り直す。供給図はこれらの通知を購読しない。
 
 ## 参照先
 

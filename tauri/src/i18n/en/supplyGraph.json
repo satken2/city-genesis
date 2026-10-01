@@ -1,36 +1,18 @@
 {
   "supplyGraph": {
     "title": "Supply chain",
-    "refresh": "Refresh supply chain",
     "selected": "Selected",
     "providers": "{{product}} suppliers",
-    "noResults": "No results yet — connections and resource locations reflect the current state.",
-    "epochNote": "Production, receipts and alerts: epoch {{epoch}}. Connections and resource reserves: current state.",
-    "inputsNote": "Facilities are grouped by product. Required inputs vary by facility type. Select a box to see the breakdown.",
-    "executing": "Supply information will update after the simulation finishes.",
-    "fetchError": "Could not load supply information. Use refresh to try again.",
+    "executing": "Supply information is unavailable while the simulation is running.",
+    "fetchError": "Could not load supply information.",
     "activeCount": "Active {{active}} / {{count}}",
     "production": "Last production: {{amount}} {{unit}}",
     "resourceRemaining": "Accessible reserves: {{amount}} {{unit}}",
-    "received": "Last received: {{amount}} {{unit}}",
-    "nextDemand": "Next demand: {{amount}} {{unit}}",
-    "recipients": "Facilities / lines using this input: {{count}}",
-    "importers": "Import hubs: {{count}}",
-    "cycle": "Circular supply relationship",
-    "truncated": "Upstream display limit reached. Open a supplier's details to continue.",
-    "capacityPaths": "Possible capacity constraints: paths {{ids}}",
     "role": {
       "resource": "Resource",
       "producer": "Producer",
       "consumer": "Relay / depot",
-      "vehicle_consumer": "Transit line",
-      "market": "Market"
-    },
-    "transport": {
-      "resource": "Parcel resource extraction",
-      "infrastructure": "Infrastructure network",
-      "vehicle": "Vehicle network",
-      "market": "Market procurement"
+      "vehicle_consumer": "Transit line"
     },
     "state": {
       "ok": "Available",
@@ -40,10 +22,19 @@
       "partial": "Partly affected",
       "limited": "Limited / stopped",
       "disconnected": "Disconnected",
-      "unavailable": "Outside coverage",
       "supply_shortage": "Possible supply shortage",
-      "capacity_limited": "Possible capacity limit",
-      "unmatched": "Procurement shortage"
+      "capacity_limited": "Possible capacity limit"
+    },
+    "facilities": {
+      "401": "Power plants",
+      "402": "Water intake facilities",
+      "403": "Oil suppliers",
+      "404": "Freight stations",
+      "405": "Ore suppliers",
+      "501": "Rail depots",
+      "502": "Bus depots",
+      "503": "LRT depots",
+      "504": "Monorail depots"
     }
   }
 }

@@ -1,36 +1,18 @@
 {
   "supplyGraph": {
     "title": "공급 현황",
-    "refresh": "공급 현황 새로 고침",
     "selected": "선택됨",
     "providers": "{{product}} 공급 시설",
-    "noResults": "실적 없음 — 연결과 자원 위치는 현재 상태입니다.",
-    "epochNote": "생산·수령·경고는 에포크 {{epoch}} 실적입니다. 연결과 자원 잔량은 현재 상태입니다.",
-    "inputsNote": "시설은 제품별로 묶여 있습니다. 필요한 투입물은 시설 유형마다 다릅니다. 상자를 눌러 내역을 확인하세요.",
-    "executing": "시뮬레이션이 끝나면 공급 현황을 갱신합니다.",
-    "fetchError": "공급 현황을 가져오지 못했습니다. 새로 고침 버튼으로 다시 시도하세요.",
+    "executing": "시뮬레이션 실행 중에는 공급 정보를 가져올 수 없습니다.",
+    "fetchError": "공급 정보를 가져오지 못했습니다.",
     "activeCount": "가동 {{active}} / {{count}}",
     "production": "지난 생산량: {{amount}} {{unit}}",
     "resourceRemaining": "이용 가능한 자원 잔량: {{amount}} {{unit}}",
-    "received": "지난 수령량: {{amount}} {{unit}}",
-    "nextDemand": "다음 수요: {{amount}} {{unit}}",
-    "recipients": "이 투입물을 사용하는 시설·노선: {{count}}",
-    "importers": "수입 거점: {{count}}",
-    "cycle": "순환 공급 관계",
-    "truncated": "상류 표시 범위에 도달했습니다. 공급 시설 상세 정보에서 계속 확인하세요.",
-    "capacityPaths": "용량 제약이 의심되는 경로: {{ids}}",
     "role": {
       "resource": "자원",
       "producer": "생산자",
       "consumer": "중계·차량 기지",
-      "vehicle_consumer": "노선",
-      "market": "상품 시장"
-    },
-    "transport": {
-      "resource": "구획 자원에서 채취",
-      "infrastructure": "인프라망",
-      "vehicle": "차량 운행망",
-      "market": "시장 조달"
+      "vehicle_consumer": "노선"
     },
     "state": {
       "ok": "이용 가능",
@@ -40,10 +22,19 @@
       "partial": "일부 문제",
       "limited": "부족·중단",
       "disconnected": "미연결",
-      "unavailable": "공급 범위 밖",
       "supply_shortage": "공급 부족 가능성",
-      "capacity_limited": "용량 제약 가능성",
-      "unmatched": "조달 부족"
+      "capacity_limited": "용량 제약 가능성"
+    },
+    "facilities": {
+      "401": "발전소",
+      "402": "취수 시설",
+      "403": "원유 공급 시설",
+      "404": "화물역",
+      "405": "광석 공급 시설",
+      "501": "철도 차량기지",
+      "502": "버스 차고지",
+      "503": "LRT 차량기지",
+      "504": "모노레일 차고지"
     }
   }
 }

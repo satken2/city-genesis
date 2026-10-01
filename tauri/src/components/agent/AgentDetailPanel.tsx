@@ -46,6 +46,8 @@ import { TagRow } from "../common/TagRow";
 import { isTaggable } from "../../utils/constructionTags";
 import { SupplyChainSection } from "../supply/SupplyChainSection";
 import { supportsSupplyGraph } from "../supply/supplyGraph";
+import { useSupplyGraph } from "../../hooks/useSupplyGraph";
+import { AgentAlertsPanel } from "./AgentAlertsPanel";
 import { AgentBasicInfoPanel } from "./AgentBasicInfoPanel";
 import { BuildingInfo } from "./BuildingInfo";
 import { BuildingInfoPanel } from "./BuildingInfoPanel";
@@ -112,6 +114,8 @@ export function AgentDetailPanel({
 
   const currentEntityId = entityHistory[entityHistory.length - 1];
   const canGoBack = entityHistory.length > 1;
+  const hasSupplyGraph = agentData?.agent_id === Number(currentEntityId) && supportsSupplyGraph(agentData, masterData);
+  const supplyGraph = useSupplyGraph(apiBaseUrl, currentEntityId, hasSupplyGraph);
 
   // 建設中の建物の「1エポック建設コスト」「残り建設期間（エポック）」。
   // （建設コスト・工期の算出ロジックは get_budget_agents に一元化されており、共通フックで取得する）
@@ -490,14 +494,7 @@ export function AgentDetailPanel({
         onNameSave={agentData.public_facility ? handleNameSave : undefined}
       />
 
-      <SupplyChainSection
-        apiBaseUrl={apiBaseUrl}
-        agentId={currentEntityId}
-        enabled={supportsSupplyGraph(agentData, masterData)}
-        refreshToken={agentData}
-        fallbackAlert={agentData.alert}
-        onNavigate={navigateToAgent}
-      />
+      <AgentAlertsPanel alert={agentData.alert} />
 
       {/* 建設プロジェクトのタグと、この建物だけを3Dビューで隠す切り替え。
           タグを付け替えられるのは着工前・建設中の公共施設だけなので、その間だけ行を出す
@@ -698,7 +695,9 @@ export function AgentDetailPanel({
           {activeTab === "trade" && hasTradeInfoTab && !isPreConstruction && (
             <>
               {/* インフラ財を授受する施設のみ表示される(コンポーネント内で判定) */}
-              <InfraConnectionPanel agent={agentData} />
+              <InfraConnectionPanel agent={agentData}>
+                {hasSupplyGraph && <SupplyChainSection {...supplyGraph} />}
+              </InfraConnectionPanel>
               {showDemandInfo && <DemandInfoPanel agent={agentData} />}
               {showSupplyInfo && <SupplyInfoPanel agent={agentData} />}
             </>

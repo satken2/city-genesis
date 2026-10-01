@@ -68,7 +68,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 | ファイル | 内容 |
 | --- | --- |
-| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口。`cache`オプションで取得時のHTTPキャッシュ方針を指定できる。`configureBackendRequests` が `fetch` を置き換え、通信断中のバックエンドへの更新要求を止める。施設・網・路線・資源・区画・都市の更新成功時は `supply:changed` を通知する(プレビュー・読み取り・失敗は対象外)。WebViewから版情報の取得は行わない |
+| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口。`cache`オプションで取得時のHTTPキャッシュ方針を指定できる。`configureBackendRequests` が `fetch` を置き換え、通信断中のバックエンドへの更新要求を止める。WebViewから版情報の取得は行わない |
 | `ipc.ts` | Unityへのイベント送信(`send*`) |
 | `notification.ts` / `tutorial.ts` | 通知ウィンドウ・チュートリアルウィンドウの表示 |
 | `cityNotifications.ts` | L1通知(重大通知)の取得・文言化・詳細ウィンドウ対応表 |
