@@ -5454,7 +5454,8 @@ public class PathManager : BaseApiDataManager
         bool railsOnly = meshResult != null && meshResult.Mesh == null && meshResult.RailsOnly;
         if (!slabless && !railsOnly && (meshResult == null || meshResult.Mesh == null))
         {
-            Debug.LogWarning($"[PathManager] meshResult or mesh is null for nodeId={nodeId}, removing mesh.");
+            if (connectedPaths.Count >= 2)
+                Debug.LogWarning($"[PathManager] meshResult or mesh is null for nodeId={nodeId}, removing mesh.");
             RemoveNodeIntersectionMesh(nodeId);
             // 接続パスが揃っていない、または交差点形状が計算できない可能性があるため、
             // 後からパス追加時に再評価できるよう追跡する。

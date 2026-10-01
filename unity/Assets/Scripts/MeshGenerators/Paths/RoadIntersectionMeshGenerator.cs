@@ -83,7 +83,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             foreach (var path in paths)
             {
                 if (!roadResult.Sections.TryGetValue(path.path_id, out var section)) continue;
-                GameObject body = ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_variant}/body")
+                GameObject body = ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_variant}/body", suppressWarning: true)
                     ?? ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_type}/body");
                 var source = body != null ? body.GetComponent<MeshFilter>()?.sharedMesh : null;
                 section.BodyDepth = source != null ? source.bounds.size.y : 0f;

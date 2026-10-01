@@ -49,6 +49,7 @@
 
 ## 知らないと壊れる罠
 
+- `RoadPlanManager` は `TerrainInputHandler` を吸着時に遅延取得する。起動時は地形タイルが未生成でも正常であり、キャッシュした参照もタイル破棄後には再取得する。
 - 地形ドラッグでは各マネージャの`StartDrag`は呼ばれず`ProcessMouseDrag`だけが毎フレーム届く。掴む対象は初回呼び出しで決める(遅延グラブ)。`CameraController.IsMouseOverEditHandle`にも当たり判定を足さないとカメラドラッグに掴みを奪われる(`InputHandlers/AGENTS.md`)。
 - `PolygonAreaEditManager.CancelOnEscape`(既定true)のEscは入力プリセットを`ALL_NORMAL`に戻して表示を再適用するだけで、`IpcStateCoordinator`のステート遷移もUIへの通知も通らない(ウィンドウは開いたまま、編集用の表示プリセットも残る)。造成範囲の作図はfalseにして、抜け道をウィンドウを閉じたときの`STATE_NORMAL`と確定の`edit_grading:finish`だけにしている。
 - `RoadPlanManager`のオーバーレイは2本。`overlayRenderer`は毎フレーム`BeginFrame`でクリアされる(配置点・ハンドル・端子マーカー)。`backgroundRenderer`はカメラ5m移動/`bgDirty`/`PathManager.NodeDataVersion`変化のときだけ作り直すキャッシュ(既存の辺・ノード)。既存物を`overlayRenderer`へ描くと同フレームで消えて何も表示されない。

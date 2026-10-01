@@ -376,12 +376,6 @@ public partial class RoadPlanManager : MonoBehaviour
             roadRenderer.CreatePreviewMeshComponents(previewMaterial);
         }
 
-        terrainInputHandler = FindAnyObjectByType<TerrainInputHandler>();
-        if (terrainInputHandler == null)
-        {
-            Debug.LogError("RoadPlanManager: TerrainInputHandlerが見つかりません");
-        }
-
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
@@ -1921,8 +1915,8 @@ public partial class RoadPlanManager : MonoBehaviour
         // 建設中バリアントを渡すことでインフラ網の互換性フィルタが働く
         // （道路はインフラノード/パスに吸着せず、インフラパスは同一網にのみ吸着する）。
         // terrainInputHandler は地形タイル上のコンポーネントで、LODによるタイルの生成・破棄で
-        // Start() 時にキャッシュした参照が破棄済み(Unityの疑似null)になりうる。null なら都度
-        // 再解決する。これを怠るとグリッド/ノード/パス吸着が丸ごと無効化される。
+        // キャッシュした参照が破棄済み(Unityの疑似null)になりうる。起動時はタイルが無いため、
+        // 吸着が必要になった時点で解決し、破棄後も再解決する。
         // 吸着ロジックはインスタンス非依存(フラグはstatic・pathManagerとthreshold override付き)
         // なので、生きているどのハンドラを引いても結果は同じ。
         if (terrainInputHandler == null)

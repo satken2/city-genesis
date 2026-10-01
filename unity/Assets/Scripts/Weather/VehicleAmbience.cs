@@ -316,7 +316,11 @@ public sealed class VehicleAmbience : MonoBehaviour
 
     private static void Stop(Voice voice)
     {
-        voice.source.Stop(); voice.source.volume = 0f; voice.gain = 0f; voice.emitter = null;
+        // 終了時は主音源と追加レイヤーが別々の順序で破棄されるため、それぞれの生存を確認する。
+        if (voice == null) return;
+        if (voice.source != null) { voice.source.Stop(); voice.source.volume = 0f; }
+        voice.gain = 0f;
+        voice.emitter = null;
         if (voice.motor != null) { voice.motor.Stop(); voice.motor.volume = 0f; }
         if (voice.slow != null) { voice.slow.Stop(); voice.slow.volume = 0f; }
         if (voice.fast != null) { voice.fast.Stop(); voice.fast.volume = 0f; }

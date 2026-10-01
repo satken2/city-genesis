@@ -207,7 +207,14 @@ public sealed class ConstructionAmbience : MonoBehaviour
     private void StopAudio()
     {
         if (!running) return;
-        foreach (var voice in voices) { voice.source.Stop(); voice.source.volume = 0f; voice.gain = 0f; voice.site = null; }
+        // 終了時はルート直下の音源が先に破棄される場合がある。割り当ては音源の生存に関係なく解除する。
+        foreach (var voice in voices)
+        {
+            if (voice == null) continue;
+            if (voice.source != null) { voice.source.Stop(); voice.source.volume = 0f; }
+            voice.gain = 0f;
+            voice.site = null;
+        }
         running = false;
     }
 

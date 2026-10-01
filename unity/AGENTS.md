@@ -70,7 +70,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 
 ### ログ
 
-- 冗長ログは `UnityLog.If(LocalConstants.UNITY_LOG_ROAD / _BUILDING / _LOADER / _TIMING, ...)`。ホットパスで無条件に `Debug.Log` を呼ばない。補間が重いときは `Func<object>` オーバーロード。`LogWarning` / `LogError` は無条件でよい。
+- 冗長ログは `UnityLog.If(LocalConstants.UNITY_LOG_ROAD / _BUILDING / _LOADER / _TIMING, ...)`。すべて既定で無効。ホットパスで無条件に `Debug.Log` を呼ばない。補間が重いときは `Func<object>` オーバーロード。`LogWarning` / `LogError` は無条件でよい。起動引数全体はHubの認証情報を含み得るためログに出さない。
 
 ## 検証ハーネス
 

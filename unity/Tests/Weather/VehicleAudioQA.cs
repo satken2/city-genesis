@@ -162,6 +162,43 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
         ambience.enabled = false;
         foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
             Check(!source.isPlaying, "disable stops every source");
+        // 主音源を先に破棄する終了順序を再現し、残った鉄道レイヤーも停止することを確認する。
+        ambience.enabled = true;
+        var construction = new GameObject("Construction ambience").AddComponent<ConstructionAmbience>();
+        construction.SetVolume(0.5f);
+        ConstructionAmbience.Register(ConstructionAmbience.Kind.Building, 1, new[] { Vector3.zero });
+        float shutdownTestUntil = Time.unscaledTime + 0.7f;
+        while (Time.unscaledTime < shutdownTestUntil)
+        {
+            VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, Vector3.zero, 10f);
+            yield return null;
+        }
+        Check(ambience.PlayingCount > 0 && construction.PlayingCount > 0, "shutdown starts with active vehicle and construction sounds");
+        var shutdownExceptions = new System.Collections.Generic.List<string>();
+        Application.LogCallback captureException = (message, trace, type) =>
+        {
+            if (type == LogType.Exception) shutdownExceptions.Add(message);
+        };
+        Application.logMessageReceived += captureException;
+        try
+        {
+            foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+                if (source.name.StartsWith("Vehicle voice ") || source.name.StartsWith("Construction voice "))
+                    DestroyImmediate(source.gameObject);
+            construction.enabled = false;
+            ambience.enabled = false;
+            foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+                Check(!source.isPlaying && source.volume == 0f, "surviving train layers stop after primary sources are destroyed");
+            DestroyImmediate(construction.gameObject);
+            DestroyImmediate(ambience.gameObject);
+            Check(shutdownExceptions.Count == 0, "disable and destroy tolerate already destroyed AudioSources");
+        }
+        finally
+        {
+            Application.logMessageReceived -= captureException;
+            ConstructionAmbience.Clear(ConstructionAmbience.Kind.Building);
+            VehicleAmbience.Clear(VehicleAmbience.Kind.Train);
+        }
         File.WriteAllText("result.txt", "PASS: " + checks + " checks");
         EditorApplication.Exit(0);
     }

@@ -1566,7 +1566,7 @@ public class RoadPath : IPathMeshGenerator
         if (connector?.Points == null || connector.Points.Count < 2 || ModelManager.Instance == null) return;
         string part = connector.Part;
         string resourcePath = $"Models/Paths/p{connector.PrefabVariant}/{part}";
-        GameObject prefab = ModelManager.Instance.GetModel(resourcePath);
+        GameObject prefab = ModelManager.Instance.GetModel(resourcePath, suppressWarning: true);
         if (prefab == null)
         {
             resourcePath = $"Models/Paths/p{connector.FallbackType}/{part}";
@@ -1580,7 +1580,7 @@ public class RoadPath : IPathMeshGenerator
         float length = IntersectionPolygonUtil.Length(connector.Points);
         if (length < 1e-5f) return;
         GameObject endPrefab = connector.EndPrefabVariant >= 0
-            ? ModelManager.Instance.GetModel($"Models/Paths/p{connector.EndPrefabVariant}/{part}")
+            ? ModelManager.Instance.GetModel($"Models/Paths/p{connector.EndPrefabVariant}/{part}", suppressWarning: true)
                 ?? ModelManager.Instance.GetModel($"Models/Paths/p{connector.EndFallbackType}/{part}") : prefab;
         Mesh endSource = endPrefab != null ? endPrefab.GetComponent<MeshFilter>()?.sharedMesh : null;
         float endHeight = endSource != null ? endSource.bounds.size.y : bounds.size.y;
