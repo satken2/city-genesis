@@ -30,7 +30,7 @@
 | `ZoneEditor/ZoneEditControlMenu.cs` | 地区編集の3ツール切替。状態本体は`Scripts/ZoneEditContext.cs` |
 | `PropEditor/PropPlacementManager.cs` | プロップの個別配置・範囲散布プレビュー(`PropGeometry`/`PropManager.CanPreview`を永続描画と共用) |
 | `ConnectorEditManager.cs` | 接続端子ノードのマーカー表示とドラッグ移動(`STATE_EDIT_CONNECTOR`)。実移動とPATCHは`NodeInputHandler`へ委譲 |
-| `PolygonAreaEditManager.cs` | 任意ポリゴン編集の共通基底(資源エリア・造成範囲・区画形状編集) |
+| `PolygonAreaEditManager.cs` | 任意ポリゴン編集の共通基底(資源エリア・造成範囲・区画形状編集)。Placing中は次の左クリックで頂点が置かれる位置にポインタマーカー(`DrawPlacingMarker`)を出す |
 | `EditControlMenuBase.cs` | Ctrlラジアルメニュー+カーソルHUDドライバの共通基底(道路・地区・区画) |
 | `PlacementInput.cs` | 配置エディタ共用の入力部品(`IsBlocked`・中ボタン回転・キー長押しリピート) |
 
@@ -38,6 +38,7 @@
 
 - 新しいポリゴン編集・Ctrlメニュー・配置キー操作は上の共通基底/部品を使い、各マネージャに複製しない。
 - `PolygonAreaEditManager`の頂点ドラッグは`InputHandler`が地形との交点から求めた`worldPos`のXZを使い、地形高さを適用する。固定深度の`ScreenToWorldPoint`で逆投影すると斜め視点でカーソルからずれるため使わない。共通吸着は`UseDragSnapping`で制御し、`ParcelShapeEditManager`と`GradingAreaEditManager`は常にfalse。区画形状編集と造成範囲の作図は頂点の配置・移動・挿入とも吸着なし固定で、共有吸着フラグやグリッド表示には依存しない(造成は頂点が道路の中心線に吸い付くと範囲がパスに掛かり、発注で必ず拒否される)。
+- `PolygonAreaEditManager`のPlacingマーカーは、`TerrainInputHandler`が渡す`OnTerrainHover`の位置を`UpdateOverlay`でスクリーン座標の円(`pointCircleRadius`×1.2、`VertexColor`)として描く(`RoadPlanManager`のようなワールド描画ではない)。位置は`Utils.GetGroundHeight`へ射影するので海上は海底側に出る(頂点の円と同じ)。`InputHandler`は入力ゲート(UI上・カメラドラッグ・ラジアルメニュー等)で`onHoverEnd`を呼び、`TerrainInputHandler`がそれを`OnTerrainHoverEnd`へ中継して消す。`onHover`はレイが変わらない静止フレームには届かないので、フレーム番号での失効判定は使えない。Editingでは出さない。
 - 曲線/直線・吸着フラグ・区画の作成方法の真実源はUnity側(ラジアルメニュー)。ホーム設置側・複線のオフセット/進行方向・駅舎の`HouseEnds`/`PassageMode`・矩形区画の寸法はUIパネルが真実源。標高・盛土だけは双方向同期(`edit_path:change_node`⇔`select_node`)。
 - 頂点の移動・標高変更は必ず`RoadPlanManager.MoveAnchorPosition`を、制御点(ハンドル)の移動は`MoveControlXZ`を通す(手動制御点の平行移動・高さ固定の解除・制御点の再計算を一箇所で行う)。2Dパネルの`shape_command`も同じ経路に委譲し、吸着は通さない。
 - 制御点の手動フラグ`control_*_manual`はXZだけを守る。高さは`RecomputeAllControlPoints`がアンカーの自動接線の縦断勾配×水平距離で毎回決め直す。高さを保つのは`control_height_manual`(経路提案の結果と、再開時に保存値が規則から外れた制御点)だけで、そのアンカーか両隣を動かすと解除する。ハンドルの高さを固定すると、ノードの高さをどう変えてもそのノードの勾配が変わらず、左右のハンドル長の差で縦断が折れる。

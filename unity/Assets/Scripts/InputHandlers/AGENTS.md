@@ -12,12 +12,12 @@
 | --- | --- |
 | `InputHandler.cs` | 中核。レイキャスト、タグによる種別判定、クリック/ドラッグ判定、モード定数(`InputMode`/`InputModePreset`/`InputObjectType`)、入力ゲート |
 | `InputSystemManager.cs` | `InputHandler.SetMode/SetModePreset`への薄いラッパー |
-| `IInputHandler.cs` | `onClick/onRightClick/onHoverStart/onHover/onHoverEnd`。実装しないと一切呼ばれない。レイキャストに載るにはコライダーとタグが必要。`onHover`は毎フレーム呼ばれる |
+| `IInputHandler.cs` | `onClick/onRightClick/onHoverStart/onHover/onHoverEnd`。実装しないと一切呼ばれない。レイキャストに載るにはコライダーとタグが必要。`onHover`はレイが変わったフレームか入力のあるフレームだけ届き、マウス・カメラが静止している間は呼ばれない(下記`lastRay`)。入力ゲートでハンドラが外れるときは`onHoverEnd`が呼ばれる |
 | `BuildingInputHandler.cs` | `BuildingManager`が建物生成時に付与。詳細表示、コピー元の選択(`MODE_PICK_BUILDING`) |
 | `ParcelInputHandler.cs` | `ParcelManager`が付与。建設モードでは区画データを添えて`BuildingPlanManager.OnParcelClick`へ渡す(`parcel_type`の一致判定に必要) |
 | `PathInputHandler.cs` | `PathManager`が付与(駅舎の建屋コライダーには`StationHousePath`が付与)。地区編集・区画作成の道路選択・結合/分割・区間編集の振り分け |
 | `NodeInputHandler.cs` | `PathManager`がノード生成時に付与(端子ノードには`ConnectorEditManager`が後付け)。ドラッグ移動と`PATCH /nodes/{id}`、失敗時のロールバック |
-| `TerrainInputHandler.cs` | `TerrainManager`が地形タイルと都市外の背景地形のチャンクごとに、`ReclaimedLandManager`が埋立地の岸壁ごとに付与し、`InputHandler.Start`が海面(`SeaObject`タグ)にも付与。地形クリックの委譲先分岐、共通吸着`ApplySnapping`、吸着フラグ(static) |
+| `TerrainInputHandler.cs` | `TerrainManager`が地形タイルと都市外の背景地形のチャンクごとに、`ReclaimedLandManager`が埋立地の岸壁ごとに付与し、`InputHandler.Start`が海面(`SeaObject`タグ)にも付与。地形クリックの委譲先分岐、共通吸着`ApplySnapping`、吸着フラグ(static)。ポリゴン編集3モード(資源エリア・区画形状・造成範囲)の`onHover`を`OnTerrainHover`、`onHoverEnd`を`OnTerrainHoverEnd`へ中継する |
 | `RemovalManager.cs` | ブルドーザ(`MODE_REMOVE`)の実処理。プロップはコライダーが無いので`InputHandler`がクリック配送前に`TryRemovePropAt`で判定する。削除はクリックのみ(ドラッグでは消さない)。UIが`STATE_REMOVE_OBJECTS`に`instant_remove`を付けて開始したとき(神モード)だけ、建物・道路をステータスで絞らない(`TYPE_CITY`/`TYPE_DEFAULT`の建物と`PATH_TRANSPORT`のパスは除く)。Unityは神モードかを知らず、可否の権威はバックエンドの`DELETE`(神モードのときだけ稼働中を受け付け、テナント・市民ごと消す) |
 | `TransitSelection.cs` | 通常モードで公共交通の帯・停留所・車両をスクリーン座標で選択。物理レイキャストより先に呼ぶ |
 
@@ -31,7 +31,7 @@
 - 地形ヒット時、区画の入力モードが`MODE_NONE`でなければ`ParcelManager.GetParcelIdAtPoint`で配送先を区画へ差し替える(起伏地では区画コライダーが地形に埋まりレイキャストで拾えない)。クリック候補は`RaycastHit`ではなく「対象GameObject+ヒット点」で持つ。
 - 共通吸着`ApplySnapping`(既定半径10m)は`TerrainInputHandler`の各イベント冒頭で掛かるが、`MODE_ROAD_CONSTRUCTION`/`MODE_EDIT_CONNECTOR`/`MODE_PATH_SPLIT`/`MODE_EDIT_PROP`は通さない。道路は`RoadPlanManager.snapThreshold`(シーンのシリアライズ値が優先)で一度だけ吸着するため、共通側も掛けると二重吸着になり半径を変えても効かない。
 - 吸着で引き継ぐ相対高さはバックエンド保存の相対Y(ノード/アンカー補間/建設中端点)から取り、描画点列の絶対Yから逆算しない。残差を継承すると地面のパスへ吸着しただけで端点が地下/空中扱いになり、インフラのT字タップが無言で不成立になる(幽霊接続)。
-- `MODE_PARCEL_SHAPE_EDIT`と`MODE_EDIT_GRADING`(造成範囲の作図)はクリック・右クリック・ホバーの共通吸着をすべて通さない。ホバーで`OverrideMousePosition`に吸着座標を渡すと後続のドラッグにも混入するため、頂点ドラッグ側だけで無効化してはならない。どちらも吸着は常に無効で、切り替え操作は持たない(造成は頂点が道路の中心線に吸い付くと範囲がパスに掛かり、発注で必ず拒否される)。
+- `MODE_PARCEL_SHAPE_EDIT`と`MODE_EDIT_GRADING`(造成範囲の作図)はクリック・右クリック・ホバーの共通吸着をすべて通さない。ホバーで`OverrideMousePosition`に吸着座標を渡すと後続のドラッグにも混入するため、頂点ドラッグ側だけで無効化してはならない。どちらも吸着は常に無効で、切り替え操作は持たない(造成は頂点が道路の中心線に吸い付くと範囲がパスに掛かり、発注で必ず拒否される)。そのためPlacing中のポインタマーカー(`PolygonAreaEditManager`)の位置は、次のクリックで置かれる頂点と同じXZになる。資源エリア(`MODE_EDIT_RESOURCE`)はホバー・クリックとも共通吸着を通す(冪等なので、マーカーも吸着後のXZを指す)。
 - 吸着フラグの真実源は`TerrainInputHandler`のstatic変数群(`Enable*Snapping`。既定Node=T/Path=T/他=F。敷設モードを跨いで保持)。切替はCtrlラジアルメニューだけで、UIからの設定イベントは無い。グリッド吸着は`GridOverlay`の表示と連動し、`GridSetManager`は角度設定中に退避・復元する。
 - `TerrainInputHandler`は地形タイルごとに付くコンポーネント。`Update`の条件は軽く保つ(Escの区画選択リセットは`ParcelEditorManager.Update`側で行う)。
 - 入力ゲート: UI上のポインタ・カメラドラッグ中・フライ/撮影モード(`CameraController.BlocksWorldInput`)・ドライブ(`DriveMode.IsOpen`)・ラジアルメニュー表示中(`RadialMenuController.IsOpen`)は`InputHandler.Update`先頭で非破壊的に止める。撮影終了フレームも遮断し、Escを背後の操作へ流さない。メニューのCanvasにはGraphicRaycasterが無いのでEventSystemのUI判定では止まらない。

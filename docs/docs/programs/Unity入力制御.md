@@ -100,7 +100,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 
 `ROAD_MEMBER_EDIT` は `STATE_EDIT_ROAD_MEMBERS`（道路の区間編集）で適用され、PATH だけを `MODE_EDIT_ROAD_MEMBERS` にして他のオブジェクトタイプはクリックを無効化する（パス結合の相手選択と同型）。`IpcStateCoordinator.ApplyStateEditRoadMembers` が `RoadMemberEditManager` を生成して開始し、区間のクリックは `RoadMemberEditManager.OnPathClicked` が `edit_road:toggle_path` として UI へ送る。所属の付け外しは UI が API で行うので、Unity は所属を書き換えない。詳細は[道路の詳細と道路名の区間編集モード](道路の詳細と道路名.md#区間編集モード)を参照。
 
-`EDIT_GRADING` は `STATE_EDIT_GRADING`（造成範囲の作図）で適用され、TERRAIN だけを `MODE_EDIT_GRADING` にして他のオブジェクトタイプを貫通させる（資源エリアの作図 `EDIT_RESOURCE` と同型）。区画・道路・建物の上でも、その下の地面（埋立地の岸壁の天端を含む）に頂点を置ける。`IpcStateCoordinator.ApplyStateEditGrading` が `GradingAreaEditManager`（任意ポリゴン編集の共通基底 `PolygonAreaEditManager` の派生。§8）を生成し、Placing から作図を始める。範囲の変化は `edit_grading:update_shape` でUIへ送るだけで、見積もりと発注はUIとバックエンドが行う。資源エリアの作図と違い、頂点は吸着せず（§10）、Esc でもモードから抜けない（`CancelOnEscape=false`）。共通基底の Esc は入力プリセットを `ALL_NORMAL` に戻すだけでステート遷移もUIへの通知も伴わず、ウィンドウが開いたまま編集用の表示も残るためである。抜けるのはウィンドウを閉じたとき（Rust が `STATE_NORMAL` を送る）と確定後の `edit_grading:finish` だけ（[IPC連携の整理](IPC連携の整理.md)）。
+`EDIT_GRADING` は `STATE_EDIT_GRADING`（造成範囲の作図）で適用され、TERRAIN だけを `MODE_EDIT_GRADING` にして他のオブジェクトタイプを貫通させる（資源エリアの作図 `EDIT_RESOURCE` と同型）。区画・道路・建物の上でも、その下の地面（埋立地の岸壁の天端を含む）に頂点を置ける。`IpcStateCoordinator.ApplyStateEditGrading` が `GradingAreaEditManager`（任意ポリゴン編集の共通基底 `PolygonAreaEditManager` の派生。§8）を生成し、Placing から作図を始める。Placing 中は次の左クリックで頂点が置かれる位置にポインタマーカーを描く（§12「土地区画の形状編集」）。範囲の変化は `edit_grading:update_shape` でUIへ送るだけで、見積もりと発注はUIとバックエンドが行う。資源エリアの作図と違い、頂点は吸着せず（§10）、Esc でもモードから抜けない（`CancelOnEscape=false`）。共通基底の Esc は入力プリセットを `ALL_NORMAL` に戻すだけでステート遷移もUIへの通知も伴わず、ウィンドウが開いたまま編集用の表示も残るためである。抜けるのはウィンドウを閉じたとき（Rust が `STATE_NORMAL` を送る）と確定後の `edit_grading:finish` だけ（[IPC連携の整理](IPC連携の整理.md)）。
 
 ## 3. 入力フロー
 
@@ -169,9 +169,9 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 | `MODE_ZONE_EDIT` | Mergeツールのときだけカーソル下の地区を統合元にする（7章） | カーソル下の地区を選択（地区外なら選択解除） | カーソル下の地区の半透明フィル表示 |
 | `MODE_BUILDING_CONSTRUCTION` | `BuildingPlanManager.OnTerrainClickDirect` に委譲（直接配置=区画外地点の確定） | — | `BuildingPlanManager.OnTerrainHoverDirect` に委譲（直接配置=カーソル追従の矩形ゴースト表示）。ホバー離脱時 `HideDirectGhost` |
 | `MODE_PARCEL_CREATION_POINT` | 土地区画エディタに点を通知 | — | 配置マーカー表示 |
-| `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 頂点ホバー判定 |
-| `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
-| `MODE_EDIT_GRADING` | `GradingAreaEditManager.OnTerrainLeftClick` に委譲（Placing=頂点を末尾に追加／Editing=頂点の選択・辺上への頂点挿入）。共通吸着なし | 同右（Placing=頂点3以上で形を閉じて Editing へ／Editing=頂点削除。3頂点は残す）。共通吸着なし | 同 `OnTerrainHover` に委譲（ホバー判定は毎フレームの更新で行う）。共通吸着なし |
+| `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲（常に Editing なのでポインタマーカーは出ない。頂点・辺のホバー判定は毎フレームの更新で行う）。離脱時 `OnTerrainHoverEnd`。共通吸着なし |
+| `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲（Placing 中は次のクリックで置かれる位置にポインタマーカー）。離脱時 `OnTerrainHoverEnd` |
+| `MODE_EDIT_GRADING` | `GradingAreaEditManager.OnTerrainLeftClick` に委譲（Placing=頂点を末尾に追加／Editing=頂点の選択・辺上への頂点挿入）。共通吸着なし | 同右（Placing=頂点3以上で形を閉じて Editing へ／Editing=頂点削除。3頂点は残す）。共通吸着なし | 同 `OnTerrainHover` に委譲（Placing 中は次のクリックで頂点が置かれる位置にポインタマーカー。Editing の頂点・辺のホバー判定は毎フレームの更新で行う）。離脱時 `OnTerrainHoverEnd`。共通吸着なし |
 | `MODE_EDIT_TRANSIT` | `TransitPlanManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
 | `MODE_EDIT_PROP` | `PropPlacementManager.OnTerrainLeftClick` に委譲（個別=1個配置／範囲=頂点追加） | 同右（個別=直近取消／範囲=直近頂点取消） | 同 `OnTerrainHover` に委譲（個別=ゴースト追従。中ボタン回転中は位置を固定） |
 | `MODE_REMOVE` | 何もしない（地形に埋もれた空き区画は `InputHandler` の地形→区画置換で区画へ配送される。地形プロップは配送前に `InputHandler` が判定する） | — | — |
@@ -544,6 +544,14 @@ Unity側の実装で守る点は次の3つ。
 土地区画の形状編集は、頂点移動・辺への頂点挿入とも吸着なし固定。道路・ノード・グリッドなどへの吸着は行わず、Ctrlメニューなどで吸着を切り替える操作も持たない。`TerrainInputHandler`はこのモードのクリック・右クリック・ホバーで共通吸着を省略し、`ParcelShapeEditManager`は`UseDragSnapping=false`でドラッグ時も吸着を省略する。道路編集の共有吸着設定は書き換えず、天然資源エリア編集では共通吸着を使う。
 
 造成範囲の作図も同じく吸着なし固定で、`TerrainInputHandler`は`MODE_EDIT_GRADING`のクリック・右クリック・ホバーで共通吸着を省略し、`GradingAreaEditManager`は`UseDragSnapping=false`でドラッグ時も省略する。ホバーで吸着した座標をカーソル位置へ書き戻すと後続のドラッグにも混入するため、ドラッグ側だけで無効にしても足りない。
+
+#### Placing中のポインタマーカー
+
+共通基底`PolygonAreaEditManager`は、Placing（頂点を順に置いている間）だけ、次の左クリックで頂点が置かれる位置に円のマーカーを出す。範囲が3頂点未満で形がまだ見えない間も、置く場所を確かめられる。Editing では出さない（頂点と辺のホバー強調が代わりを務める）。
+
+- 位置は`TerrainInputHandler`が`OnTerrainHover`へ渡すワールド座標のXZ。高さは`Utils.GetGroundHeight`で地面へ合わせるので、海上は頂点の円と同じく海底の位置に出る。描画は頂点と同じスクリーン座標のオーバーレイで、円は頂点より少し大きく、色は頂点と同じ。
+- 造成範囲と土地区画の形状編集は吸着なし固定なので、マーカーはクリックで置かれる頂点とXZが一致する。天然資源エリアは共通吸着を通し、ホバーもクリックも同じ吸着を掛けるため、マーカーは吸着後のXZを指す。
+- `onHover`はカーソルのレイが変わったフレームか入力のあるフレームにだけ呼ばれる。UI上へ出る・カメラをドラッグする・ラジアルメニューを開くなどで`InputHandler`が入力を止めたときは`onHoverEnd`が呼ばれ、`TerrainInputHandler`がこれを`OnTerrainHoverEnd`へ中継してマーカーを消す。再びカーソルが動くまで再表示しない。
 
 ## 補正済み線路への標高吸着
 

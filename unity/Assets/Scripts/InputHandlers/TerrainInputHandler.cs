@@ -337,6 +337,19 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             // 空き地形から外れた(区画上へ移動した等)ら直接配置のホバーゴーストを消す。
             GetBuildingPlanManager()?.HideDirectGhost();
         }
+        // ポリゴン編集のPlacingマーカーは、UI上へ移った・地形から外れたときに消す。
+        if (mode == InputMode.MODE_PARCEL_SHAPE_EDIT)
+        {
+            GetParcelShapeEditManager()?.OnTerrainHoverEnd();
+        }
+        else if (mode == InputMode.MODE_EDIT_RESOURCE)
+        {
+            GetResourceAreaEditManager()?.OnTerrainHoverEnd();
+        }
+        else if (mode == InputMode.MODE_EDIT_GRADING)
+        {
+            GetGradingAreaEditManager()?.OnTerrainHoverEnd();
+        }
     }
 
     public void onHover(int mode)

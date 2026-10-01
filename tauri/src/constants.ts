@@ -269,6 +269,7 @@ export const QUAY_BAND_WIDTH: number = 5.6;
 export const QUAY_PROBE_DISTANCE: number = 0.5;
 export const SEA_GRADING_TOP: number = 3.0;
 export const GRADING_MAX_AREA: number = 4000000.0;
+export const GRADING_HEIGHT_OFFSET_LIMIT: number = 100.0;
 export const GRADING_MIN_LAND_OVERLAP: number = 1.0;
 export const GROUND_COVER_GRASSLAND: number = 1;
 export const GROUND_COVER_DESERT: number = 2;

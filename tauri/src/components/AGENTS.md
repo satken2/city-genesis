@@ -15,7 +15,7 @@
 | `road` / `intersection` | 名前付き道路の詳細、インターチェンジ詳細 |
 | `transit` | 公共交通の管理ウィンドウ、路線詳細、路線新設/経路編集、収支見込み |
 | `resource` / `prop` / `terrain` | 天然資源、プロップ配置、シナリオの地形エディタ(2D `TerrainEditorCanvas`・3D `Terrain3DPreviewCanvas`) |
-| `grading` | 造成(整地・埋立)の範囲作図ウィンドウ、造成工事の建設工事タブ、造成バリアントの判定と見積もりの型(`grading.ts`) |
+| `grading` | 造成(整地・埋立)の範囲作図ウィンドウ(手順ガイド・高さの指定欄・見積もり)、造成工事の建設工事タブ、造成バリアントの判定と見積もりの型(`grading.ts`) |
 | `map` | 2D都市マップ。`CityMapCanvas`は共通地図部品で、局所地図が要るパネルは新規実装せずこれを埋め込む |
 | `budget` / `tax` / `regulation` / `statistics` / `achievement` | 市政系ウィンドウ(予算・公共施設、税、規制、統計、達成目標) |
 | `construction` / `diagnosis` / `notification` | 建設プロジェクト、診断、通知トースト+L1通知一覧 |
@@ -123,6 +123,8 @@
 - 結合・分割(`path/PathTopologyEditPanel`): アンマウントで必ず`sendEndPathTopologyEdit`。確定成功は`sendFinishPathTopologyEdit`を1発だけ(リロードと`STATE_NORMAL`を分けると差分リロードに割り込んで形状が壊れる)。
 - 2D形状編集(`path/PathShapeEditorPanel`): 形状の真実源はUnity(`RoadPlanManager`)。操作結果はドラッグ終了時に1回送る。地図は`initialBounds`を決めてからマウントする。
 - 造成(`grading/`): 範囲の形の正はUnity(`edit_grading:update_shape`の`{polygon, finalized}`)。見積もり(`POST /grading/preview`)は`finalized`かつ3点以上のときだけ、デバウンスと古い要求の中断つきで取る(Unityは頂点ドラッグ中に毎フレーム送る)。
+  - 高さの指定(`heightOffset`。基準との差 m)は道路パネルの標高欄と同じ`NumberStepper`(±`GRADING_HEIGHT_OFFSET_LIMIT`・刻み0.1。`pc-*`のスタイルは`path/PathConstructionPanel.css`を取り込んで使う)で、範囲を閉じる前から出す。要求本文`{polygon, height_offset}`の一部なので、変えると同じデバウンスで見積もりを取り直す。頂点の編集では保持し、やり直し(キャンセル)で0に戻す(確定後はウィンドウごと再マウントされる)。欄の下の「0の意味」は応答の`base_kind`(`frontage`=接道の路面・`terrain_mean`=範囲の現在の平均。`sea_top`=埋立で接道なし)と`base_height`から出す。応答が埋立(`kind`が`shore`、または`base_kind`が`sea_top`)なら欄を無効にして適用値(`height_offset`。埋立は常に0)を出す。`GET /grading/{agent_id}`は`base_*`・`height_offset`がnullなので、詳細の建設工事タブの情報カードは目標の高さだけ出る(`gradingInfoRows`は`base_height`がnullなら基準の高さの行を出さない)。
+  - パネル上部の手順ガイド(先頭の説明と3ステップ)は、現在のステップを強調する(頂点3つ未満=①、未確定=②、確定後=③)。左サイドの狭いパネルに収まるよう縦に詰めて並べる。ヒントバー(`hint.grading`)は描き方と編集の操作だけで、高さはパネルの欄が担う。
   - 確定可否は今の範囲に対する応答の`valid`∧`affordable`。確定は`POST /grading`→主体の詳細を開く→`sendEditGradingFinish`→閉じる。finishの中でUnityが通常ステートへ戻して再取得するので、パネル自身は`STATE_NORMAL`を送らない(閉じるときにRustが×と同じ経路で`STATE_NORMAL`を送るが、冗長なだけで再取得は妨げない)。キャンセルは`STATE_EDIT_GRADING`の再送で描き直す。
   - 発注が拒否されたら(400/409)見積もりを取り直し、新しい応答が来るまで確定を押せなくする(拒否の理由と資金は見積もりの表示で見せる)。
   - 造成工事の主体の判定は`isGradingVariant`(TYPE_OPEN_SPACEの広場とtypeが同じ)。建設工事タブは`GET /grading/{agent_id}`(プレビューは自分の区画に当たって拒否される)、公共施設パネルは取り壊しと編集を出さない、建物建設の一覧から外す。

@@ -6,7 +6,9 @@
  *
  * - マウントで STATE_EDIT_GRADING を送る(再表示は open_seq で再マウントされるので毎回送られる)。
  * - 見積もり(POST /grading/preview)は範囲が閉じた後(finalized)だけ取る。Unity は頂点のドラッグ中に
- *   毎フレーム送ってくるので、入力が落ち着くまで待ち、古い要求は中断する。
+ *   毎フレーム送ってくるので、入力が落ち着くまで待ち、古い要求は中断する。高さの指定(基準との差)も同じ要求に載せる。
+ * - 高さの指定 heightOffset は頂点の編集では保持し、やり直し(キャンセル)で 0 に戻す。確定後はウィンドウごと再マウントされる。
+ *   埋立は指定を受け付けない(応答の kind が shore、または基準が sea_top)ので、欄を無効にして適用値を出す。
  * - 確定は POST /grading → 主体の詳細を開く → edit_grading:finish → 閉じる。パネル自身は STATE_NORMAL を送らない
  *   (finish の中で Unity が通常ステートへ戻して再取得する)。閉じる処理は×と同じ Rust の経路なので、そこで冗長な
  *   STATE_NORMAL が届くが、Unity は既に通常ステートで再取得も取り消されないため無害。
@@ -19,22 +21,25 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
+import { NumberStepper } from "../common/NumberStepper";
 import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
 import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
 import { constructionFundsShortfall } from "../../utils/constructionFunding";
-import { GRADING_MAX_AREA } from "../../constants";
+import { GRADING_HEIGHT_OFFSET_LIMIT, GRADING_MAX_AREA } from "../../constants";
 import {
   sendChangeState,
   sendEditGradingFinish,
   IPC_EVENT_EDIT_GRADING_UPDATE_SHAPE,
 } from "../../utils/ipc";
 import {
+  gradingBaseNote,
   gradingInfoRows,
   type GradingCreateResponse,
   type GradingEstimate,
 } from "./grading";
 import "../common/ConstructionInfoCard.css";
+import "../path/PathConstructionPanel.css";
 import "./GradingPanel.css";
 
 type GradingPanelProps = {
@@ -58,12 +63,17 @@ const PREVIEW_DEBOUNCE_MS = 300;
 
 const EMPTY_SHAPE: GradingShape = { polygon: [], finalized: false };
 
+const HEIGHT_OFFSET_STEP = 0.1;
+
+const GUIDE_STEPS = [1, 2, 3] as const;
+
 export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
   const { t } = useTranslation();
   const [shape, setShape] = useState<GradingShape>(EMPTY_SHAPE);
   const [result, setResult] = useState<PreviewResult | null>(null);
   const [previewNonce, setPreviewNonce] = useState(0);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [heightOffset, setHeightOffset] = useState(0);
 
   useEffect(() => {
     sendChangeState("STATE_EDIT_GRADING", undefined, "grading").catch((err) => {
@@ -99,7 +109,9 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
   }, []);
 
   const requestBody =
-    shape.finalized && shape.polygon.length >= 3 ? JSON.stringify({ polygon: shape.polygon }) : null;
+    shape.finalized && shape.polygon.length >= 3
+      ? JSON.stringify({ polygon: shape.polygon, height_offset: heightOffset })
+      : null;
 
   useEffect(() => {
     if (requestBody === null) {
@@ -149,8 +161,20 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
     (code) => !(code === "insufficient_funds" && shortfall != null && shortfall > 0),
   );
 
+  // 埋立は高さを指定できないので、直前の応答が埋立(接道があっても kind は shore)なら欄を無効にして適用値(0)を出す。
+  const isShore = shownEstimate?.kind === "shore" || shownEstimate?.base_kind === "sea_top";
+  const baseNote = isShore
+    ? t("grading.shoreHeightLocked")
+    : requestBody === null
+      ? t("grading.baseNote.beforeClosed")
+      : gradingBaseNote(t, shownEstimate) ?? (isLoading ? t("common.loading") : null);
+
+  // 手順ガイドの現在位置。頂点が3つ未満=①、3つ以上で未確定=②、確定後=③
+  const guideStep = requestBody !== null ? 3 : shape.polygon.length < 3 ? 1 : 2;
+
   const handleCancel = useCallback(() => {
     setShape(EMPTY_SHAPE);
+    setHeightOffset(0);
     sendChangeState("STATE_EDIT_GRADING", undefined, "grading").catch((err) => {
       console.error("[GradingPanel] Failed to restart drawing:", err);
     });
@@ -194,7 +218,42 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
 
   return (
     <div className="grading-layout">
+      <div className="grading-section grading-guide">
+        <p className="grading-guide-lead">{t("grading.guide.lead")}</p>
+        <ol className="grading-guide-steps">
+          {GUIDE_STEPS.map((n) => (
+            <li
+              key={n}
+              className={n === guideStep ? "grading-guide-step grading-guide-step-current" : "grading-guide-step"}
+              aria-current={n === guideStep ? "step" : undefined}
+            >
+              <span className="grading-guide-num">{n}</span>
+              {t(`grading.guide.step${n}`)}
+            </li>
+          ))}
+        </ol>
+      </div>
+
       <div className="grading-section">
+        <div className="grading-height">
+          <div className="pc-settings-row">
+            <span className="pc-settings-label">{t("grading.heightOffset")}</span>
+            <div className="pc-stepper-row">
+              {/* NumberStepper は空欄・符号だけ・NaN では onChange を呼ばない。確定した有限の値だけが届く */}
+              <NumberStepper
+                value={isShore ? shownEstimate?.height_offset ?? 0 : heightOffset}
+                onChange={setHeightOffset}
+                min={-GRADING_HEIGHT_OFFSET_LIMIT}
+                max={GRADING_HEIGHT_OFFSET_LIMIT}
+                step={HEIGHT_OFFSET_STEP}
+                integerOnly={false}
+                disabled={isShore || isConfirming}
+              />
+              <span className="pc-stepper-unit">m</span>
+            </div>
+          </div>
+          {baseNote && <div className="grading-height-note">{baseNote}</div>}
+        </div>
         <ConstructionInfoCard
           title={t("construction.info")}
           leadingRows={gradingInfoRows(t, shownEstimate, isLoading)}
@@ -218,6 +277,7 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
                 {t(`grading.reasons.${code}`, {
                   defaultValue: code,
                   limit: GRADING_MAX_AREA / 1e6,
+                  offsetLimit: GRADING_HEIGHT_OFFSET_LIMIT,
                 })}
               </li>
             ))}

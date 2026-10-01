@@ -274,6 +274,7 @@ public static class Constants
     public const float QUAY_PROBE_DISTANCE = 0.5f;
     public const float SEA_GRADING_TOP = 3.0f;
     public const float GRADING_MAX_AREA = 4000000.0f;
+    public const float GRADING_HEIGHT_OFFSET_LIMIT = 100.0f;
     public const float GRADING_MIN_LAND_OVERLAP = 1.0f;
     public const int GROUND_COVER_GRASSLAND = 1;
     public const int GROUND_COVER_DESERT = 2;

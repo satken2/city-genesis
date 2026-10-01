@@ -56,6 +56,10 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
     protected Canvas overlayCanvas;
     protected RectTransform overlayCanvasRect;
 
+    // Placing中のポインタマーカーの位置。ホバーが途切れている間(UI上など)は hasHover=false で描かない。
+    private Vector3 hoverWorldPosition;
+    private bool hasHover;
+
     // TerrainInputHandler への参照(ドラッグ中のスナップ処理の共通化用)
     protected TerrainInputHandler terrainInputHandler;
 
@@ -196,6 +200,7 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
         hoveredEdgeIndex = -1;
         isDragging = false;
         dragVertexIndex = -1;
+        hasHover = false;
     }
 
     /// <summary>
@@ -297,11 +302,21 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 地形ホバー。
+    /// 地形ホバー。Placingのマーカー位置を保存する。
+    /// Editingの辺ホバーは <see cref="UpdateHoverState"/> が毎フレーム更新する。
     /// </summary>
     public void OnTerrainHover(Vector3 worldPos)
     {
-        // ホバー状態は UpdateHoverState で毎フレーム更新する
+        hoverWorldPosition = worldPos;
+        hasHover = true;
+    }
+
+    /// <summary>
+    /// ポインタが地形から外れた(UI上へ移った等)。Placingのマーカーを消す。
+    /// </summary>
+    public void OnTerrainHoverEnd()
+    {
+        hasHover = false;
     }
 
     /// <summary>
@@ -519,6 +534,7 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
         if (phase == PolygonEditPhase.Placing)
         {
             DrawPlacingPreviewLine(cam);
+            DrawPlacingMarker(cam);
         }
 
         if (phase == PolygonEditPhase.Editing && hoveredEdgeIndex >= 0)
@@ -564,6 +580,24 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
         Color baseColor = EdgeColor;
         Color previewColor = new Color(baseColor.r, baseColor.g, baseColor.b, 0.5f);
         overlayRenderer.AddSolidLine(lastScreen.x, lastScreen.y, mouseScreen.x, mouseScreen.y, previewColor, solidLineThickness);
+    }
+
+    /// <summary>
+    /// Placingフェーズで、次の左クリックで頂点が置かれる位置にマーカー円を描く。
+    /// 保存した位置を地形へ投影し、頂点(<see cref="DrawVertices"/>)と同じ画面位置の求め方をするので、
+    /// クリック後に頂点がマーカーの位置に残る。頂点より一回り大きく描いて見分ける。
+    /// </summary>
+    protected void DrawPlacingMarker(Camera cam)
+    {
+        if (!hasHover) return;
+
+        Vector3 markerPos = hoverWorldPosition;
+        markerPos.y = Utils.GetGroundHeight(markerPos);
+
+        Vector3 screen = cam.WorldToScreenPoint(markerPos);
+        if (screen.z < 0) return;
+
+        overlayRenderer.AddCircle(screen.x, screen.y, pointCircleRadius * 1.2f, VertexColor);
     }
 
     /// <summary>
