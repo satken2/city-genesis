@@ -858,6 +858,14 @@ public class IpcClient : MonoBehaviour
                     DriveMode.Ensure().Open(GetParamsDictionary(payload));
                     break;
 
+                case "citizen:follow":
+                    CitizenFollow.Ensure().Follow(GetParamInt(payload, "citizen_id"));
+                    break;
+
+                case "citizen:unfollow":
+                    CitizenFollow.Ensure().Unfollow(GetParamInt(payload, "citizen_id"));
+                    break;
+
                 case "weather:set":
                     OnWeatherSet?.Invoke(GetParamString(payload, "id"));
                     break;
@@ -1526,6 +1534,23 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("view:grid_toggled", payload);
+    }
+
+    /// <summary>
+    /// citizen:follow_state を送る。追従の開始・終了(Esc・カメラ操作・編集モードへの移行など Unity 側の理由を含む)を
+    /// 市民パネルと追跡リストへ知らせ、カメラボタンの表示を合わせる。
+    /// </summary>
+    public void EmitCitizenFollowState(int citizenId, bool following)
+    {
+        SendEnvelope("citizen:follow_state", new Dictionary<string, object> { ["citizen_id"] = citizenId, ["following"] = following });
+    }
+
+    /// <summary>
+    /// citizen:pick_failed を送る。クリックした個体の市民の抽選や行程の取得ができなかった理由(コアの status)を UI が案内する。
+    /// </summary>
+    public void EmitCitizenPickFailed(string status)
+    {
+        SendEnvelope("citizen:pick_failed", new Dictionary<string, object> { ["status"] = status });
     }
 
     /// <summary>

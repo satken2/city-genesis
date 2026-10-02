@@ -475,6 +475,15 @@
     "empty_shell": true,
     "actions": []
   },
+  "citizen_tracking": {
+    "title": "追跡リスト",
+    "width": 460,
+    "height": 520,
+    "resizable": true,
+    "policy": "single",
+    "layout": "right_panel",
+    "actions": []
+  },
   "system_stats": {
     "title": "システム統計",
     "width": 1120,

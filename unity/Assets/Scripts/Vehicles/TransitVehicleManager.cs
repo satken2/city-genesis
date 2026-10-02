@@ -92,7 +92,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         { HideUnused(true); return; }
         if (paths == null) paths = FindAnyObjectByType<PathManager>();
         if (paths == null || CameraCellChecker.Instance == null) return;
-        driveDelta = Time.deltaTime * DriveMode.SpeedMultiplier;
+        driveDelta = Time.deltaTime * DriveMode.SpeedMultiplier * TrafficClock.Scale;
         clock += driveDelta;
         if (revision != store.Revision) { revision = store.Revision; RebuildLines(store.Lines); }
         if (warmWorker == null && warmedRevision != revision && lines.Count > 0 && ModelManager.Instance != null)

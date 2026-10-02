@@ -42,6 +42,9 @@ public partial class CameraController : MonoBehaviour
     [SerializeField] private Button flyModeButton;  // フライモード切り替えボタン
     [SerializeField] private Sprite flyModeOnIcon;  // フライモード中のアイコン
     [SerializeField] private Sprite flyModeOffIcon; // 通常時（フライモードOFF）のアイコン
+    [SerializeField] private Button trafficPauseButton;  // 交通演出(車・歩行者など)の一時停止ボタン。停止中だけ車と人をクリックで選べる
+    [SerializeField] private Sprite trafficPauseIcon;    // 動いているとき(押すと止まる)のアイコン
+    [SerializeField] private Sprite trafficResumeIcon;   // 止まっているとき(押すと動き出す)のアイコン
 
     [Header("フライモード設定")]
     // フライモード時のマウス感度（度/ピクセル）。マウスの移動量にこの値を掛けて視線角を変化させる。
@@ -105,6 +108,7 @@ public partial class CameraController : MonoBehaviour
 
     // フライモードの有効状態を外部へ公開する（他システムからの参照用）。
     public bool IsFlyMode => isFlyMode;
+    public bool IsTopDownMode => isTopDownMode;
 
     // マウス操作用
     private bool isMouseRotating = false;
@@ -239,11 +243,30 @@ public partial class CameraController : MonoBehaviour
         {
             cinematicModeButton.onClick.AddListener(ToggleCinematicMode);
         }
+        if (trafficPauseButton != null)
+        {
+            trafficPauseButton.onClick.AddListener(ToggleTrafficPause);
+        }
+        TrafficClock.PausedChanged += HandleTrafficPausedChanged;
         UpdateUIButtons();
 
         currentHeight = transform.position.y; // 初期の高さを記録
         Debug.Log($"CameraController: スケール適用済み設定 - 移動速度: {scaledMoveSpeed}, 高度速度: {scaledHeightSpeed}, 初期高度: {scaledInitialHeight}");
     }
+
+    private void OnDestroy()
+    {
+        TrafficClock.PausedChanged -= HandleTrafficPausedChanged;
+    }
+
+    private void ToggleTrafficPause()
+    {
+        TrafficClock.Toggle();
+        // Buttonの選択を残すとSpace/方向キーがSubmit/Navigationとしても処理される。
+        EventSystem.current?.SetSelectedGameObject(null);
+    }
+
+    private void HandleTrafficPausedChanged(bool paused) => UpdateUIButtons();
 
     private void OnDisable()
     {
@@ -470,7 +493,7 @@ public partial class CameraController : MonoBehaviour
             return;
         }
         if (GameStateManager.Instance != null && !GameStateManager.Instance.IsWorldVisible) return;
-        if (DriveMode.BlocksCamera) return;
+        if (DriveMode.BlocksCamera || CitizenFollow.BlocksCamera) return;
         // GameStateManager を持つシーン（ゲーム本編）では、ゲーム開始前やロードによる
         // カメラロック中はカメラ操作を一切受け付けない。
         // GameStateManager が存在しないシーン（メッシュテスト等の単体シーン）では、
@@ -996,6 +1019,13 @@ public partial class CameraController : MonoBehaviour
             var fc = flyModeButton.image.color;
             fc.a = 1f;
             flyModeButton.image.color = fc;
+        }
+
+        // 一時停止ボタンも両方のアイコンが割り当てられている場合のみ切り替える。
+        if (trafficPauseButton != null && trafficPauseButton.image != null
+            && trafficPauseIcon != null && trafficResumeIcon != null)
+        {
+            trafficPauseButton.image.sprite = TrafficClock.Paused ? trafficResumeIcon : trafficPauseIcon;
         }
     }
 

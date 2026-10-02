@@ -52,6 +52,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 
 - 入力モード(`InputSystemManager` / `InputHandlers/`)はクリックで何が起きるか、ビジュアルモード(`VisualModeHandler` / `VisualHandlers/`)はどう見えるか。編集モードでは UI からの IPC を起点に両方をセットで切り替える(`programs/Unity入力制御.md` §9、`programs/Unity表示モード.md`)。
 - ドライブ(`Vehicles/DriveMode`)は描画専用の乗車操作で、両モードの定数を増やさない(`geometries/O_車両の走行描画.md` §O.12)。
+- 右上のカメラ操作のボタンはシーンに置き、`CameraController` の SerializeField(見下ろし `cameraModeButton`・フライ `flyModeButton`・撮影 `cinematicModeButton`・交通演出の一時停止 `trafficPauseButton`)へ接続する。一時停止は `Vehicles/TrafficClock` で行い、`Time.timeScale` は使わない。市民の追従(`Vehicles/CitizenFollow`)もドライブと同じく両モードの定数を増やさない(`programs/市民の追跡.md`)。
 - 撮影(`CameraController.Cinematic.cs`)もUnity内のカメラ操作として管理する。`GameScene`の`MinimapToggleButton`を`cinematicModeButton`へ接続し、モード1=画面中央の地面・建物・海面の周回、モード2=視線角と絶対高度を保つ水平移動。回転軸取得・周回計算・操作中断は通常カメラと共有する。編集との排他は`InputHandler.IsNormalMode`、3D選択の抑止は`CameraController.BlocksWorldInput`を使う。操作・速度・復帰の仕様は`programs/Unity入力制御.md`「撮影モード」、検証は`Tests/Camera/run-unity.ps1`。
 
 ### ロードと生成予算

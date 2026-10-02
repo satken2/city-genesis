@@ -63,7 +63,7 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         public Vector3 position;        // 保存座標
         public float heading;           // 進行方位 [deg]。0=+Z、時計回り
         public float targetHeading, speed, decisionTimer, travelled, routeLength;
-        public float expiresAt;         // 船の寿命(Time.time)。過ぎたら画面外に出た時点で消す
+        public float expiresAt;         // 船の寿命(TrafficClock.Time)。過ぎたら画面外に出た時点で消す
         public bool dead;               // 岸に乗り上げた船・停泊を終えた入港船。次の更新で消す
         public PortCall call;           // 入港船の航路と接岸位置。環境演出の船と航空機は null
         public DrawLod lod = DrawLod.Normal;   // 前のフレームの描画LOD(昇格と降格のしきい値を分けるため)
@@ -172,7 +172,7 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         if (terrain == null) terrain = FindAnyObjectByType<TerrainManager>();
         if (ModelManager.Instance == null || terrain == null) return;
 
-        float dt = Time.deltaTime;
+        float dt = Time.deltaTime * TrafficClock.Scale;
         Vector3 camera = CameraSavedPosition();
         if (coastVersion != CoastlineStore.Version)
         {
@@ -197,8 +197,8 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
                 vehicles.RemoveAt(i);
                 continue;
             }
-            v.trail?.Record(v.position, Time.time);
-            v.wake?.Record(v.position, v.Direction, Time.time, dt);
+            v.trail?.Record(v.position, TrafficClock.Time);
+            v.wake?.Record(v.position, v.Direction, TrafficClock.Time, dt);
         }
     }
 
@@ -231,12 +231,12 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
             if (v.trail != null)
             {
                 if (trailMaterial == null) trailMaterial = CreateMaterial("AmbientTrail", "飛行機雲");
-                v.trail.Draw(v.position, Time.time, offset, trailMaterial);
+                v.trail.Draw(v.position, TrafficClock.Time, offset, trailMaterial);
             }
             if (v.wake != null)
             {
                 if (wakeMaterial == null) wakeMaterial = CreateMaterial("ShipWake", "船の航跡");
-                v.wake.Draw(v.position, v.Direction, Time.time, offset, wakeMaterial);
+                v.wake.Draw(v.position, v.Direction, TrafficClock.Time, offset, wakeMaterial);
             }
         }
     }
@@ -353,7 +353,7 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             var v = TrySpawnShip(camera);
-            if (v != null) v.expiresAt = Time.time + Random.Range(0f, ShipLifetimeMax);
+            if (v != null) v.expiresAt = TrafficClock.Time + Random.Range(0f, ShipLifetimeMax);
         }
     }
 
@@ -370,7 +370,7 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         {
             if (existing.spec.air || existing.call != null) continue;
             ships++;
-            if (Time.time > existing.expiresAt && (existing.position - camera).sqrMagnitude > DrawDistance * DrawDistance)
+            if (TrafficClock.Time > existing.expiresAt && (existing.position - camera).sqrMagnitude > DrawDistance * DrawDistance)
                 existing.dead = true;
         }
         if (ships >= MaxShips || expectedShips <= 0f) return;
@@ -393,7 +393,7 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
             if (!IsOpenSea(p) || Clearance(p) < need) continue;
             var v = new Vehicle { spec = spec, model = model, position = p,
                                   speed = Random.Range(spec.minSpeed, spec.maxSpeed), routeLength = float.PositiveInfinity,
-                                  heading = Random.Range(0f, 360f), expiresAt = Time.time + Random.Range(ShipLifetimeMin, ShipLifetimeMax) };
+                                  heading = Random.Range(0f, 360f), expiresAt = TrafficClock.Time + Random.Range(ShipLifetimeMin, ShipLifetimeMax) };
             v.wake = MakeWake(spec, model, v.speed);
             v.heading = v.targetHeading = ChooseHeading(v);
             v.decisionTimer = DecisionInterval;

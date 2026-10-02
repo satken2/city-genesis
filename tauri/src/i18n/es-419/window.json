@@ -45,7 +45,9 @@
     "grading": "Movimiento de tierras",
     "scenario_manager": "Gestor de escenarios",
     "scenario_metadata": "Información",
-    "tutorial_intro": "Tutorial"
+    "tutorial_intro": "Tutorial",
+    "citizen_detail": "Ciudadano",
+    "citizen_tracking": "Lista de seguimiento"
   },
   "cityMap": {
     "layers": {
@@ -118,7 +120,8 @@
     "budgetMeterLabel": "Presupuesto",
     "budgetMeterTooltip": "Presupuesto previsto / efectivo disponible",
     "scoreMeterLabel": "Puntaje",
-    "scoreMeterTooltip": "Puntaje de gestión (por hogar, máximo 2.0)"
+    "scoreMeterTooltip": "Puntaje de gestión (por hogar, máximo 2.0)",
+    "menuCitizenTracking": "Lista de seguimiento"
   },
   "topmenu": {
     "coreConnectionFailed": "Error de conexión",

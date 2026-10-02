@@ -45,7 +45,9 @@
     "grading": "Earthworks",
     "scenario_manager": "Scenario manager",
     "scenario_metadata": "Metadata",
-    "tutorial_intro": "Tutorial"
+    "tutorial_intro": "Tutorial",
+    "citizen_detail": "Citizen",
+    "citizen_tracking": "Tracking list"
   },
   "cityMap": {
     "layers": {
@@ -118,7 +120,8 @@
     "budgetMeterLabel": "Budget",
     "budgetMeterTooltip": "Projected budget / cash on hand",
     "scoreMeterLabel": "Score",
-    "scoreMeterTooltip": "Governance score (per household, max 2.0)"
+    "scoreMeterTooltip": "Governance score (per household, max 2.0)",
+    "menuCitizenTracking": "Tracking list"
   },
   "topmenu": {
     "coreConnectionFailed": "Connection failed",

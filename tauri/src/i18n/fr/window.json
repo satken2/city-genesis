@@ -45,7 +45,9 @@
     "grading": "Terrassement",
     "scenario_manager": "Gestion des scénarios",
     "scenario_metadata": "Présentation",
-    "tutorial_intro": "Tutoriel"
+    "tutorial_intro": "Tutoriel",
+    "citizen_detail": "Citoyen",
+    "citizen_tracking": "Liste de suivi"
   },
   "cityMap": {
     "layers": {
@@ -118,7 +120,8 @@
     "budgetMeterLabel": "Budget",
     "budgetMeterTooltip": "Budget prévisionnel / trésorerie",
     "scoreMeterLabel": "Score",
-    "scoreMeterTooltip": "Score de gouvernance (par ménage, maximum 2,0)"
+    "scoreMeterTooltip": "Score de gouvernance (par ménage, maximum 2,0)",
+    "menuCitizenTracking": "Liste de suivi"
   },
   "topmenu": {
     "coreConnectionFailed": "Échec de connexion",

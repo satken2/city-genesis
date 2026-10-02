@@ -45,7 +45,9 @@
     "grading": "造成",
     "scenario_manager": "シナリオ管理",
     "scenario_metadata": "紹介情報",
-    "tutorial_intro": "チュートリアル"
+    "tutorial_intro": "チュートリアル",
+    "citizen_detail": "市民",
+    "citizen_tracking": "追跡リスト"
   },
   "cityRename": {
     "label": "都市名",
@@ -118,7 +120,8 @@
     "budgetMeterLabel": "予算",
     "budgetMeterTooltip": "予算見込み / 現預金",
     "scoreMeterLabel": "スコア",
-    "scoreMeterTooltip": "施政スコア（1世帯あたり / 満点2.0）"
+    "scoreMeterTooltip": "施政スコア（1世帯あたり / 満点2.0）",
+    "menuCitizenTracking": "追跡リスト"
   },
   "topmenu": {
     "coreConnectionFailed": "接続失敗",

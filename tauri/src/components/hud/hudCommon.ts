@@ -8,7 +8,7 @@
  * | ウィンドウラベル | コンポーネント | 位置 | 内容 |
  * | --- | --- | --- | --- |
  * | `icon-panel` | `IconPanel` | 画面左端・上下中央 | 各種メニュー(道路/建設/予算/統計…)。背景は透明 |
- * | `cockpit` | `Cockpit` | 画面下部中央 | 常用ツール3種・都市名と日付・施政スコア/予算メータ・アラート・エポック実行 |
+ * | `cockpit` | `Cockpit` | 画面下部中央 | 追跡リスト・常用ツール3種・都市名と日付・施政スコア/予算メータ・アラート・エポック実行 |
  * | `system-tray` | `SystemTray` | 画面右下 | システム統計・設定・セーブ・リロード |
  * | `display-tray` | `DisplayTray` | 画面左下 | 表示レイヤーの簡易ON/OFF(建物・パス・プロップ・区画・地形・地区) |
  *
@@ -87,6 +87,14 @@ export const TOOL_ICONS: HudIconDef[] = [
   { id: "map", src: "map.png", tooltipKey: "taskbar.menuMap", padding: "4px", windowType: "city_map" },
   { id: "bulldozer", src: "bulldozer.png", tooltipKey: "taskbar.bulldozerOff", padding: "3px" },
 ];
+
+/**
+ * コックピットの常用ツールのさらに左に置く追跡リスト(市民パネルの「追跡」で加えた市民の一覧)。
+ * 専用アイコンが未用意のため検索の画像を仮当てしている。
+ */
+export const CITIZEN_TRACKING_ICON: HudIconDef = {
+  id: "citizen_tracking", src: "search.png", tooltipKey: "taskbar.menuCitizenTracking", padding: "4px", windowType: "citizen_tracking",
+};
 
 /**
  * システムトレイ(画面右下)に置くアイコン。

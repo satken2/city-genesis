@@ -10,10 +10,12 @@
 | ファイル | 役割 |
 | --- | --- |
 | `Vehicle.cs` | 車1台の状態と移動。`VehiclePolyline`(累積距離付き点列・円内区間・射影・車線/軌道オフセット・前後点からの姿勢 `SampleOffsetPose`)も同居 |
-| `VehicleManager.cs` / `.Drive.cs` | 一般車の道路スナップショット・分岐・密度調整・プール・沿道到着。`VehiclePopulationBudget`(全体枠)も同居。Drive はドライブモードの1台 |
+| `VehicleManager.cs` / `.Drive.cs` / `.Follow.cs` | 一般車の道路スナップショット・分岐・密度調整・プール・沿道到着。`VehiclePopulationBudget`(全体枠)も同居。Drive はドライブモードの1台、Follow は市民の追従で指名した1台と一時停止中のクリック判定 |
 | `RoadMotionData.cs` | `/paths/motion` の自由秒数・混雑込み秒数と、前車追従の速度制御 `RoadMotionControl` |
 | `RoadsideAccess.cs` | 建物入口の幾何と有効性検査。車と歩行者で共有 |
-| `Pedestrian.cs` / `PedestrianManager.cs` | 歩行者(GameObject なしの instanced 描画。歩いた距離で3姿勢のモデルを差し替える) |
+| `Pedestrian.cs` / `PedestrianManager.cs` / `.Follow.cs` | 歩行者(GameObject なしの instanced 描画。歩いた距離で3姿勢のモデルを差し替える)。Follow は市民の追従で指名した1人と一時停止中のクリック判定 |
+| `TrafficClock.cs` | 交通演出の時計と一時停止(`Paused` / `Scale` / 止めている間は進まない `Time`) |
+| `CitizenFollow.cs` | 市民の追従(コアの行程を取り、指名した車・歩行者に経路を走らせてカメラで追う)と、クリックした個体の市民の抽選の依頼・記憶。`FollowRun`(続けて描けるパスの列)も同居 |
 | `ParkedVehicleManager.cs` / `ParkedVehicleLayout.cs` | 路上駐車(`PathSummary.parked_cars` の静止台数を GPU インスタンシング) |
 | `TransitDataStore.cs` | 路線一覧の共有ストア(5秒ポーリング+明示 Refresh)。`Session` が都市切替の世代 |
 | `TransitMotionClock.cs` | コアの `journeys.steps` を時刻から参照する純粋な時計 |
@@ -56,6 +58,11 @@
 - 歩行者の `side` / `lateral` はパス幾何(始点→終点)に対する左右で、反転しても符号を変えない。`PedestrianManager.ResolveBand` と `ResolvePose` は `Tests/Vehicles/VehicleQA.cs` がリフレクションで同じ引数列を呼ぶので、シグネチャを変えたら QA も直す。
   - 手足は `pedestrian_{n}`(揃い)・`_right`・`_left` の3モデルの差し替えで動かし、位置を補正しない。3姿勢は同じ原点で著作されている前提で、姿勢ごとにオフセットを足さない。
 - 索道の body Renderer の抑制・復元は `PathPresentation.SetRendererForceOff` を介し、生成待ちの抑制を解除しない。搬器モデルは吊り点原点なので `VehicleModelResolver` で接地補正しない。
+- 交通演出の一時停止は `TrafficClock` で行い、`Time.timeScale` を使わない(カメラの慣性・ドラッグ速度の除算や再試行の待ちまで止まる)。経過時間を使う Manager は `TrafficClock.Scale` を掛け、時刻で寿命・停泊を数える演出(飛行機雲・航跡・入港船の停泊・船の寿命)は `TrafficClock.Time` を使う。片方だけ `Time.time` に戻すと、航跡の点の時刻と描画の時刻が食い違う。
+- 市民の追従で指名した個体(`FollowedVehicle` / `FollowedPedestrian`)は、分岐を `FollowRun` のパスの列に従わせ、到着予約・管理範囲外の削除・路面標示の制約から外す(ドライブの `DrivenVehicle` と同じ扱い)。区間の終わりではフェードして消え、消えたら(理由を問わず)`FollowRun.done` を立てる。`CitizenFollow` はこれで次の区間へ進むので、指名した個体を消す経路は必ず `Despawn` を通す。
+  - 管理中心は `CitizenFollow.TryGetLoadCenter`(`ResolveTrafficCenter` がドライブの次に見る)。追従中は `CameraController` を止める(`CitizenFollow.BlocksCamera`)。
+  - 個体には市民の身元を持たせない。身元はクリックしたときにコアが推定し(`POST /citizens/pick`)、`CitizenFollow` が個体の参照と結果を覚える(エポックが進むと捨てる)。追従で引き継ぐのは、今いるパスと向きが抽選した移動の `steps`(抽選した位置から先)にある個体だけ。一時停止は行程が届いてから解く。
+  - 移動手段(`CitizenFollow.car`)は移動の途中で変えない。エポック後に取り直した行程で世帯の自動車保有が変わっても、次の移動から合わせる。直前に通ってきた2本のパス(`previousPath` / `previousPath2`)は分岐のたびに記録し、抽選に渡す。
 - 走行音は `Weather/VehicleAmbience.Report` へ通知するだけ(車両側に AudioSource を持たない)。都市切替は `TransitDataStore.Session` でクリアする。
 - 入港船はエポックが進んだときだけ入れ替える。海岸線の世代(`CoastlineStore.Version`)の変化で消すのは沖合の船と航空機だけで、入港船まで消すと建物の編集のたびに船が入れ替わる。港は `TerrainManager.ShoreDataVersion`(埋立地まで取り終えた版)で読み直す。水際は `PortBuildingMeshBuilder.ResolveWorldWaterlines` を使い、別の規則で求め直さない。
 - 航跡の濃さは `ShipWake` が船尾の移動を船首の向きへ射影した前進の速さで決める(`Vehicle.speed` は使わない。入港船の横寄せは `speed` が正でも航跡にしない)。頂点属性の並び(UV0〜3)は `ShipWake.AddVertices` と `ShipWake.shader` の `Attributes` で揃える。
@@ -64,6 +71,6 @@
 
 ## 参照
 
-- 仕様: `geometries/O_車両の走行描画.md`(一般車・路駐・公共交通・車両アセット・路線カラー・LRT軌道・ドライブ・索道・路面標示との共有)
+- 仕様: `geometries/O_車両の走行描画.md`(一般車・路駐・公共交通・車両アセット・路線カラー・LRT軌道・ドライブ・一時停止と市民の追従・索道・路面標示との共有)、`programs/市民の追跡.md`
 - 関連: `geometries/W_歩行者の描画.md`、`V_環境演出の乗り物.md`、`T_交通シミュレーションと走行描画の整合.md`、`programs/サウンドシステム.md`(走行音)、`programs/公共交通ハイライト.md`
 - 検証: `unity/Tests/Vehicles/run.ps1`(`-TransitOnly` / `-DriveOnly` / `-ParkingOnly` / `-PedestrianModelsOnly`)、`unity/Tests/Ropeway/animation.ps1`、`unity/Tests/AmbientShips/run.ps1`(環境演出の船のFBXと描画LOD)

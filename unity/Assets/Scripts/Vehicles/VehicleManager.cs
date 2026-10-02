@@ -164,7 +164,7 @@ public partial class VehicleManager : MonoBehaviour
             if (roadWorker == null) roadWorker = RenderWorkScheduler.Start(this, ScanRoads(center, true), "vehicleRoads", () => false);
             scanTimer = Mathf.Max(.1f, rangeScanInterval);
         }
-        float trafficDt = dt * DriveMode.SpeedMultiplier;
+        float trafficDt = dt * DriveMode.SpeedMultiplier * TrafficClock.Scale;
         // 早送りでも追従間隔を小刻みに再評価し、前車を一度に飛び越えない。
         for (float left = trafficDt; left > .00001f; left -= Mathf.Min(left, 1f / 30f))
             MoveVehicles(Mathf.Min(left, 1f / 30f), center);
@@ -176,17 +176,18 @@ public partial class VehicleManager : MonoBehaviour
             densityTimer -= .25f;
             RegulateDensity(.25f);
         }
-        if (spawnBacklog > 0 && !regulatedThisFrame) DrainSpawnBacklog();
+        if (spawnBacklog > 0 && !regulatedThisFrame && !TrafficClock.Paused) DrainSpawnBacklog();
     }
 
     /// <summary>
-    /// 周辺交通(走行車・路駐・歩行者)の管理中心。乗車中は乗車位置。それ以外は注視点(y=0 平面との交点)を
+    /// 周辺交通(走行車・路駐・歩行者)の管理中心。乗車中は乗車位置、市民の追従中は追従対象の位置。それ以外は注視点(y=0 平面との交点)を
     /// カメラ位置から水平 maxLead 以内へ寄せる。浅い俯角では交点が数km先へ飛び、見えない遠方を管理し続けるうえ、
     /// ピッチを少し変えただけで中心が大きく跳ぶため。ロード中心(CameraCellChecker)自体は変えない。
     /// </summary>
     public static Vector3 ResolveTrafficCenter(CameraCellChecker checker, float maxLead)
     {
         if (DriveMode.TryGetLoadCenter(out var ride)) return ride;
+        if (CitizenFollow.TryGetLoadCenter(out var follow)) return follow;
         var camera = Camera.main;
         Vector3 center = checker != null ? checker.CurrentWorldPosition : (camera != null ? camera.transform.position : Vector3.zero);
         if (camera == null || maxLead <= 0) return center;
@@ -578,7 +579,7 @@ public partial class VehicleManager : MonoBehaviour
         float best = float.NegativeInfinity;
         foreach (var v in active)
         {
-            if (v == DrivenVehicle || v.arrivalPending || v.fading || v.age < minimumJourneyTime) continue;
+            if (v == DrivenVehicle || v == FollowedVehicle || v.arrivalPending || v.fading || v.age < minimumJourneyTime) continue;
             if (!exitRanks.ContainsKey(State(v.pathId, v.forward))) continue;
             float surplus = 0;
             if (bucketByKey.TryGetValue(Key(v.pathId, v.vehicleType), out var b))
@@ -781,7 +782,7 @@ public partial class VehicleManager : MonoBehaviour
                 if (!v.InIntersection && v.arrivalDistance >= 0 && v.arrivalDistance < .001f)
                 {
                     var entry = new Entrance { parcel = v.destinationParcel, building = v.destinationBuilding, destination = v.destinationPoint };
-                    if (ValidEntrance(entry, v.pathId)) v.BeginParcelExit(v.destinationPoint);
+                    if (v == FollowedVehicle || ValidEntrance(entry, v.pathId)) v.BeginParcelExit(v.destinationPoint);
                     else v.ReleaseArrival();
                     continue;
                 }
@@ -803,7 +804,7 @@ public partial class VehicleManager : MonoBehaviour
                 break;
             }
             Place(v);
-            if (invalid || v.fadeElapsed >= Mathf.Max(.01f, fadeDuration) || (v != DrivenVehicle && !v.ExitingRoad && Utils.XZDistanceSquared(v.go.transform.position, center) > radius * radius))
+            if (invalid || v.fadeElapsed >= Mathf.Max(.01f, fadeDuration) || (v != DrivenVehicle && v != FollowedVehicle && !v.ExitingRoad && Utils.XZDistanceSquared(v.go.transform.position, center) > radius * radius))
                 Despawn(i);
         }
     }
@@ -813,9 +814,14 @@ public partial class VehicleManager : MonoBehaviour
         PathSummary current = pathManager.GetPathData(v.pathId);
         if (current == null) return false;
         int node = v.AheadNodeId(current.start_node_id, current.end_node_id);
-        float total = CollectCandidates(v, node);
+        float total = v == FollowedVehicle ? 0 : CollectCandidates(v, node);
         Road next; bool nextForward;
-        if (candidates.Count == 0)
+        if (v == FollowedVehicle)
+        {
+            // 行程の区間の終わりでは消えて(fading)ループを続け、走査がまだ届いていない道路は届くまで待つ。
+            if (!NextFollowStep(v, out next, out nextForward)) return v.fading;
+        }
+        else if (candidates.Count == 0)
         {
             if (current.path_type != Constants.PATH_STREET || !DirectionAllowsEntry(current.travel_direction, !v.forward) || !roads.TryGetValue(v.pathId, out next)) return false;
             // 退出先のない末端でも任意デスポーンはせず、街路で許可された折り返しを使う。
@@ -846,6 +852,7 @@ public partial class VehicleManager : MonoBehaviour
             next = candidates[chosen].road; nextForward = candidates[chosen].forward;
         }
         if (v == DrivenVehicle) RequestedDrivePath = -1;
+        if (next.data.path_id != v.pathId) { v.previousPath2 = v.previousPath; v.previousPath = v.pathId; }
         v.Sample(out Vector3 p0, out Vector3 t0);
         var merge = pathManager.GetMotorwayMerge(node);
         if (merge != null) v.lane = merge.TargetLane(current.path_id, next.data.path_id, v.lane, CityInfoStore.TrafficHand);
@@ -857,6 +864,7 @@ public partial class VehicleManager : MonoBehaviour
         v.connectorS = 0;
         v.connectorSpeed = v.speed;
         SetMotion(v,v.connector.Length);
+        if (v == FollowedVehicle) ApplyFollowArrival(v, next);
         return true;
     }
 
@@ -925,6 +933,7 @@ public partial class VehicleManager : MonoBehaviour
     {
         var v = active[index];
         if (v == DrivenVehicle) DrivenVehicle = null;
+        if (v == FollowedVehicle) EndFollowRun();
         if (v.go != null)
         {
             VehicleAmbience.Remove(VehicleAmbience.Kind.Car, v.go.GetInstanceID());

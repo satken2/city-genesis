@@ -45,7 +45,9 @@
     "grading": "土方工程",
     "scenario_manager": "场景管理",
     "scenario_metadata": "介绍信息",
-    "tutorial_intro": "教程"
+    "tutorial_intro": "教程",
+    "citizen_detail": "市民",
+    "citizen_tracking": "追踪列表"
   },
   "cityMap": {
     "layers": {
@@ -118,7 +120,8 @@
     "budgetMeterLabel": "预算",
     "budgetMeterTooltip": "预算预估 / 现金存款",
     "scoreMeterLabel": "评分",
-    "scoreMeterTooltip": "施政评分（每户，满分2.0）"
+    "scoreMeterTooltip": "施政评分（每户，满分2.0）",
+    "menuCitizenTracking": "追踪列表"
   },
   "topmenu": {
     "coreConnectionFailed": "连接失败",

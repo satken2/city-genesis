@@ -45,7 +45,9 @@
     "grading": "土方工程",
     "scenario_manager": "場景管理",
     "scenario_metadata": "介紹資訊",
-    "tutorial_intro": "教學"
+    "tutorial_intro": "教學",
+    "citizen_detail": "市民",
+    "citizen_tracking": "追蹤清單"
   },
   "cityMap": {
     "layers": {
@@ -118,7 +120,8 @@
     "budgetMeterLabel": "預算",
     "budgetMeterTooltip": "預算預估 / 現金存款",
     "scoreMeterLabel": "評分",
-    "scoreMeterTooltip": "施政評分（每戶，滿分2.0）"
+    "scoreMeterTooltip": "施政評分（每戶，滿分2.0）",
+    "menuCitizenTracking": "追蹤清單"
   },
   "topmenu": {
     "coreConnectionFailed": "連線失敗",

@@ -16,6 +16,9 @@
   "agent_detail": [
     "agent_detail"
   ],
+  "citizen_detail": [
+    "citizen_detail"
+  ],
   "parcel_detail": [
     "parcel_detail"
   ],

@@ -2,7 +2,10 @@
  * コックピット(画面下部中央の常駐パネル)
  *
  * プレイ中に最も頻繁に見る情報と操作を1枚に集約する。
- *   [常用ツール3種(2列のグリッド)] [公共サービス充足度] [都市名・施政スコア / 日付・予算メータ(2行2列)] [アラート] [エポック処理開始]
+ *   [追跡リスト] [常用ツール3種(2列のグリッド)] [公共サービス充足度] [都市名・施政スコア / 日付・予算メータ(2行2列)] [アラート] [エポック処理開始]
+ *
+ * - 追跡リスト: 市民パネルの「追跡」で加えた市民の一覧を開く。一時停止中の3Dビューで車・歩行者を
+ *   クリックしたときに市民を推定できなかった理由(`citizen:pick_failed`)は、常駐するこのウィンドウが通知で案内する。
  *
  * - 常用ツール: 表示切替・都市マップ・ブルドーザ。
  *   ブルドーザはウィンドウを開かずUnityの削除ステートに入る常駐モードで、
@@ -34,7 +37,10 @@ import {
   sendRemoveObjectConfirmResult,
   IPC_EVENT_REMOVE_OBJECT_REQUEST_CONFIRM,
   IPC_EVENT_WORLD_SELECT_OBJECT,
+  IPC_EVENT_CITIZEN_PICK_FAILED,
 } from "../../utils/ipc";
+import { clearFollowedCitizen, listenFollowState } from "../../utils/citizenTracking";
+import { showNotification } from "../../utils/notification";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { setHintbarText } from "../../utils/hintbar";
 import { formatEpochDate } from "../../utils/date";
@@ -49,7 +55,7 @@ import {
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
 import { PublicServiceGauges } from "./PublicServiceGauges";
 import { ScoreMiniMeter } from "./ScoreMiniMeter";
-import { TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
+import { CITIZEN_TRACKING_ICON, TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
 import { setHudMode, useHudMode } from "./hudMode";
 import { useHudSession } from "./useHudSession";
 import { useWeather } from "./useWeather";
@@ -145,6 +151,34 @@ export function Cockpit() {
     };
   }, [masterData, t]);
 
+  // 追従中の市民の共有状態はアプリの起動時に消し(Unityも起動し直していて、追従していないため)、
+  // 以後は市民パネル・追跡リストが閉じている間の通知も受けて保ち続ける。
+  useEffect(() => {
+    clearFollowedCitizen();
+    return listenFollowState();
+  }, []);
+
+  /** 一時停止中に車・歩行者をクリックしても市民を推定できなかった理由を通知する。 */
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    let unlisten: (() => void) | undefined;
+    appWindow
+      .listen<{ status: string }>(IPC_EVENT_CITIZEN_PICK_FAILED, (event) => {
+        const fallback = t("citizenTracking.pickFailed.error");
+        void showNotification({
+          message: t(`citizenTracking.pickFailed.${event.payload?.status ?? "error"}`, { defaultValue: fallback }),
+          durationMs: 5000,
+        }).catch(console.error);
+      })
+      .then((fn) => {
+        unlisten = fn;
+      })
+      .catch(console.error);
+    return () => {
+      unlisten?.();
+    };
+  }, [t]);
+
   // セッションが切れたら通知一覧を空にし、別の都市をロードし直したときに
   // 前の都市の件数バッジが残らないようにする。
   useEffect(() => {
@@ -229,6 +263,17 @@ export function Cockpit() {
     <div
       className={`hud-panel cockpit ${mode === "bulldozer" ? "cockpit--bulldozer" : ""} ${epochExecuting ? "hud-disabled" : ""}`}
     >
+      <button
+        id={CITIZEN_TRACKING_ICON.id}
+        className="hud-icon-btn cockpit-tool cockpit-tracking"
+        type="button"
+        title={t(CITIZEN_TRACKING_ICON.tooltipKey)}
+        style={{ padding: CITIZEN_TRACKING_ICON.padding }}
+        onClick={() => void openRegisteredWindow(CITIZEN_TRACKING_ICON.windowType!)}
+      >
+        <img src={iconUrl(CITIZEN_TRACKING_ICON.src)} alt={t(CITIZEN_TRACKING_ICON.tooltipKey)} className="hud-icon-img" draggable={false} />
+      </button>
+
       <div className="cockpit-tools">
         {TOOL_ICONS.map((icon) => {
           const active = icon.id === "bulldozer" && mode === "bulldozer";

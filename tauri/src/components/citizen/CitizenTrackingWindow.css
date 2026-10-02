@@ -1,0 +1,38 @@
+/* 追跡リスト。1行に名前・年齢と地区・勤務先(学校)を縦に並べ、右端にカメラと解除のボタンを置く。 */
+.citizen-tracking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.citizen-tracking-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* カメラで追いかけている市民の行 */
+.citizen-tracking-row--following {
+  border-color: rgba(255, 170, 80, 0.5);
+}
+
+.citizen-tracking-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.citizen-tracking-meta {
+  font-size: 0.9rem;
+  color: #9fb3c8;
+}
