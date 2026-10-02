@@ -40,9 +40,7 @@
       "searching": "道路を探しています",
       "sizeHint": "1/2 間口 · 3/4 奥行き · Shift 5m",
       "fixed": "寸法固定",
-      "rotateHint": "中ドラッグ 回転",
-      "menuHint": "3DビューでCtrlを押し、配置方法を選んで離します。",
-      "roadHint": "道路の外縁に合わせます。回転は道路に合わせて自動調整されます。"
+      "rotateHint": "中ドラッグ 回転"
     },
     "back": "戻る",
     "category": {

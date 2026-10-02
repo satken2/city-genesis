@@ -40,9 +40,7 @@
       "searching": "Searching for a road",
       "sizeHint": "1/2 Frontage · 3/4 Depth · Shift 5m",
       "fixed": "Fixed dimensions",
-      "rotateHint": "Middle drag Rotate",
-      "menuHint": "Hold Ctrl in the 3D view, point to a placement mode, then release.",
-      "roadHint": "Aligns to the outer road edge. Rotation follows the road automatically."
+      "rotateHint": "Middle drag Rotate"
     },
     "back": "Back",
     "category": {

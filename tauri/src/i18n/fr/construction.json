@@ -40,9 +40,7 @@
       "searching": "Recherche de route",
       "sizeHint": "1/2 Façade · 3/4 Profondeur · Shift 5m",
       "fixed": "Dimensions fixes",
-      "rotateHint": "Glisser bouton central Pivoter",
-      "menuHint": "Maintenez Ctrl dans la vue 3D, pointez un mode de placement, puis relâchez.",
-      "roadHint": "Alignement sur le bord extérieur de la route. La rotation suit automatiquement la route."
+      "rotateHint": "Glisser bouton central Pivoter"
     },
     "back": "Retour",
     "category": {

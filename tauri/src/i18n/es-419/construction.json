@@ -40,9 +40,7 @@
       "searching": "Buscando una carretera",
       "sizeHint": "1/2 Frente · 3/4 Fondo · Shift 5m",
       "fixed": "Dimensiones fijas",
-      "rotateHint": "Arrastrar botón central Girar",
-      "menuHint": "Mantén Ctrl en la vista 3D, apunta a un modo y suelta.",
-      "roadHint": "Se alinea con el borde exterior de la carretera. La rotación se ajusta automáticamente."
+      "rotateHint": "Arrastrar botón central Girar"
     },
     "back": "Volver",
     "category": {

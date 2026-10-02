@@ -40,9 +40,7 @@
       "searching": "正在尋找道路",
       "sizeHint": "1/2 臨街寬度 · 3/4 進深 · Shift 5m",
       "fixed": "尺寸固定",
-      "rotateHint": "中鍵拖曳 旋轉",
-      "menuHint": "在3D視圖中按住Ctrl，指向放置方式後放開。",
-      "roadHint": "對齊道路外緣，自動沿道路調整旋轉角度。"
+      "rotateHint": "中鍵拖曳 旋轉"
     },
     "back": "返回",
     "category": {

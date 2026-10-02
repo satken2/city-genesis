@@ -1843,18 +1843,6 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         </div>
       )}
 
-      {selectedVariantData && editAgentId == null && (
-        <div className="bc-section">
-          <div className="bc-section-title">{t(`building_construction.placement.${placementMode}`)}</div>
-          <div className="bc-muted">
-            {t("building_construction.placement.menuHint")}
-            {isDirectMode && <><br />{t(isResizable ? "building_construction.placement.sizeHint" : "building_construction.placement.fixed")}</>}
-            {isDirectMode && pickedPosition === null && <><br />{t("building_construction.placement.placeHint")}</>}
-            {placementMode === "roadside" && <><br />{t("building_construction.placement.roadHint")}</>}
-          </div>
-        </div>
-      )}
-
       {/* 直接配置モードの設定: 階数 + 間口/奥行き/回転角 — 地点選択前から表示。
           底面は矩形そのものなので建ぺい率は無い。resizable=false のバリアントは
           横幅・縦幅を固定(入力不可)とし、回転のみ編集できる。 */}

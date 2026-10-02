@@ -40,9 +40,7 @@
       "searching": "도로 찾는 중",
       "sizeHint": "1/2 전면 폭 · 3/4 깊이 · Shift 5m",
       "fixed": "크기 고정",
-      "rotateHint": "가운데 버튼 드래그 회전",
-      "menuHint": "3D 화면에서 Ctrl을 누른 채 배치 방식을 가리킨 다음 놓으세요.",
-      "roadHint": "도로 바깥쪽 가장자리에 맞춥니다. 회전은 도로 방향에 따라 자동 조정됩니다."
+      "rotateHint": "가운데 버튼 드래그 회전"
     },
     "back": "뒤로",
     "category": {
