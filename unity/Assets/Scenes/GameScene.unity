@@ -888,6 +888,9 @@ MonoBehaviour:
   flyModeButton: {fileID: 1358878183}
   flyModeOnIcon: {fileID: 21300000, guid: 7bbcdd7e5616519488e8e7176961f061, type: 3}
   flyModeOffIcon: {fileID: 21300000, guid: 175074b13c8d0e34590dd81dca7b3812, type: 3}
+  trafficPauseButton: {fileID: 62849179}
+  trafficPauseIcon: {fileID: 21300000, guid: 1d861e16f06bed04d9e37de0a9da6604, type: 3}
+  trafficResumeIcon: {fileID: 21300000, guid: e2d095ebc57b65743a68d122bdd3f79b, type: 3}
   flyMouseSensitivity: 0.1
   flySpeedMultiplier: 0.3
   moveHeightSpeedMultiplier: 0.5
