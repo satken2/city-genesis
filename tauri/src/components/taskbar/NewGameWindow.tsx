@@ -30,7 +30,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { loadAppSettings } from "../../utils/settings";
 import { SUPPORTED_LANGUAGES, resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
-import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
+import { NEW_GAME_TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
 import { formatMapSize } from "../../utils/mapSize";
@@ -293,7 +293,7 @@ export function NewGameWindow({
     if (!selection) return null;
 
     if (selection.kind === "tutorial") {
-      const scenario = TUTORIAL_SCENARIOS.find((s) => s.id === selection.id);
+      const scenario = NEW_GAME_TUTORIAL_SCENARIOS.find((s) => s.id === selection.id);
       if (!scenario) return null;
       return {
         thumbnailUrl: scenario.image || null,
@@ -430,7 +430,7 @@ export function NewGameWindow({
           <section className="new-game-section">
             <h3 className="new-game-section-title">{t("newGame.sectionTutorials")}</h3>
             <div className="new-game-tiles">
-              {TUTORIAL_SCENARIOS.map((scenario, index) => (
+              {NEW_GAME_TUTORIAL_SCENARIOS.map((scenario, index) => (
                 <ScenarioTile
                   key={scenario.id}
                   className="new-game-tile--tutorial"
@@ -465,7 +465,7 @@ export function NewGameWindow({
                     title={scenarioDisplayTitle(tmpl, i18n.language)}
                     selected={isSelected("template", tmpl.id)}
                     disabled={busy}
-                    index={TUTORIAL_SCENARIOS.length + index}
+                    index={NEW_GAME_TUTORIAL_SCENARIOS.length + index}
                     onSelect={() => setSelection({ kind: "template", id: tmpl.id })}
                   >
                     <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={tmpl.id} revision={tmpl.content_revision} />

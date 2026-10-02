@@ -136,45 +136,162 @@
     },
     "scenario4": {
       "title": "Build a Railway",
-      "description": "Residents walk to jobs far from home. In this tutorial, you'll learn how to build stations, tracks, a depot, and power lines, open a railway route, and check its ridership.",
+      "description": "MetroCity needs a railway, but private buildings and a public hospital obstruct its route. In this tutorial you will learn land acquisition, explicit public demolition, elevated track above roads, platforms and stations, a depot, curve and grade adjustment, power connection and opening a service.",
       "step1": {
-        "title": "Build the Platforms",
-        "open": "First, the platforms where passengers wait for trains. Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Rail Platform\" under \"Railways\". Use a single track.",
-        "town": "Near the apartment building in town, left-click inside the cyan circle (west) to place the start and inside the yellow circle (east) to place the end, then right-click in the 3D view to finish the shape. Check in the preview that the platform is on the north side (the apartment side), then confirm in the construction panel.",
-        "new": "Near the commercial building to the west, do the same: left-click the cyan circle (west), then the yellow circle (east), and right-click to finish the shape, laying a platform with the boarding side to the north. When you're done, press \"Next\"."
+        "title": "Lay elevated platforms",
+        "description": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself.",
+        "open": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself.",
+        "variant": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself.",
+        "start": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself.",
+        "end": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself.",
+        "confirm": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself.",
+        "town": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself.",
+        "new": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself.",
+        "east": "Open Roads, railways and infrastructure → Railway. Choose the electrified island platform (double track) in the west and electrified elevated platform (double track) in the east. Left-click both marked endpoints, right-click to finish the shape, then confirm. Both platforms are 6m high. Build them yourself."
       },
       "step2": {
-        "title": "Build the Station Houses",
-        "town": "A platform alone isn't a station yet. Press \"Back\" until the categories appear, choose \"Simple Station House\" under \"Station Buildings\", and draw a line between the two yellow markers so that it crosses the town-side platform. Platforms crossed by the line are gathered into that station.",
-        "new": "Do the same for the western platform: draw a \"Simple Station House\" line between the two yellow markers. When you're done, press \"Next\"."
+        "title": "Build station entrances",
+        "description": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
+        "open": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
+        "variant": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
+        "start": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
+        "end": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
+        "confirm": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
+        "town": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
+        "new": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
+        "east": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages."
       },
       "step3": {
-        "title": "Link the Two Stations by Track",
-        "description": "Press \"Back\" until the categories appear, choose \"Railway Track\" under \"Railways\", and lay track from the west end of the town-side platform to the east end of the western platform (a single track). Press \"Next\" to complete the track and stations and check the connection."
+        "title": "Plan the acquisition section",
+        "description": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here.",
+        "open": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here.",
+        "variant": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here.",
+        "start": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here.",
+        "end": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here.",
+        "confirm": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here.",
+        "town": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here.",
+        "new": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here.",
+        "east": "Choose electrified double track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan. Construction time is not skipped here."
       },
       "step4": {
-        "title": "Build a Depot",
-        "description": "Trains are dispatched from a depot. Choose \"Rail Depot\" under \"Construction\" on the icon panel and build it on the parcel with the yellow marker along the street. Press \"Next\" and, since this is a tutorial, the construction period is skipped."
+        "title": "Observe acquisition and the blocked project",
+        "description": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "open": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "variant": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "start": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "end": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "confirm": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "town": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "new": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "east": "Advance epochs. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction."
       },
       "step5": {
-        "title": "Connect the Depot to the Main Line",
-        "description": "Lay a siding from the connection terminal on the south side of the depot to the main line, using \"Railway Track\" under \"Railways\" between the two yellow markers. The trick is to join the main line at a shallow angle heading east."
+        "title": "Order the hospital demolished",
+        "description": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled.",
+        "open": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled.",
+        "variant": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled.",
+        "start": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled.",
+        "end": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled.",
+        "confirm": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled.",
+        "town": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled.",
+        "new": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled.",
+        "east": "Click the marked hospital and use Demolish in its building details. As mayor, you must explicitly remove this public facility. Continue once demolition is scheduled."
       },
       "step6": {
-        "title": "Send Power to the Depot",
-        "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Roads, Rail & Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal."
+        "title": "Wait for the acquisition section to finish",
+        "description": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction.",
+        "open": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction.",
+        "variant": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction.",
+        "start": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction.",
+        "end": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction.",
+        "confirm": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction.",
+        "town": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction.",
+        "new": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction.",
+        "east": "Advance epochs until private land acquisition, hospital demolition and track construction finish. This may take several epochs. This section completes through normal construction."
       },
       "step7": {
-        "title": "Open the Line",
-        "description": "In \"Public Transport\" on the icon panel, press \"+ New line\", choose \"Medium-Distance Rail Line\" as the type, and place stops on the two platforms. If the fare is high, walking pays off, so set the Fare to 0 and the Headway to 5 minutes before pressing \"Create\"."
+        "title": "Lay track directly above the main road",
+        "description": "Lay electrified double track at 6m directly over the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "open": "Lay electrified double track at 6m directly over the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "variant": "Lay electrified double track at 6m directly over the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "start": "Lay electrified double track at 6m directly over the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "end": "Lay electrified double track at 6m directly over the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "confirm": "Lay electrified double track at 6m directly over the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "town": "Lay electrified double track at 6m directly over the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "new": "Lay electrified double track at 6m directly over the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "east": "Finally, lay double electrified track at 6 m from the east end of the arterial road to the west end of the eastern platform. Once both platforms are connected, Next completes construction."
       },
       "step8": {
-        "title": "Check the Passengers",
-        "description": "Town residents work at the grocery store in the western commercial building. Advance epochs: vehicles are procured, trains start running, and people use them to commute. In the \"Public Transport\" window, check that the line's Ridership is no longer 0. It takes a few epochs to get going."
+        "title": "Build the rail depot",
+        "description": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time.",
+        "open": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time.",
+        "variant": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time.",
+        "start": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time.",
+        "end": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time.",
+        "confirm": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time.",
+        "town": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time.",
+        "new": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time.",
+        "east": "Select Rail depot in the construction panel and build it on the marked plot north of town. Place the depot yourself. Next skips its construction time."
       },
       "step9": {
-        "title": "The Railway Opens",
-        "description": "Well done. Stations built from platforms and station houses, track linking them, a depot sending out vehicles, power lines feeding the wires, and a line running over it all — a railway runs on all of these pieces together."
+        "title": "Shape the curved climbing branch",
+        "description": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection.",
+        "open": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection.",
+        "variant": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection.",
+        "start": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection.",
+        "end": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection.",
+        "confirm": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection.",
+        "town": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection.",
+        "new": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection.",
+        "east": "Choose Railway track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the intermediate markers, and join the main line at 6m. Use the Ctrl settings menu to select curves. PageUp/1 raises height; PageDown/2 lowers it. Spread the rise gradually over a long route, roughly 0→1→2→3→4→5→6m. Right-click to finish the shape, then drag vertices and control handles to smooth it. Approach the east-west main line at a shallow angle. Widen a curve if its radius falls below 100m; lengthen the climb or spread the height changes if the grade exceeds 5%. Remove red violations before confirming. Next completes the track and checks alignment and connection."
+      },
+      "step10": {
+        "title": "Power the depot from the existing plant",
+        "description": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "open": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "variant": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "start": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "end": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "confirm": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "town": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "new": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "east": "The power plant and substation are already built. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line."
+      },
+      "step11": {
+        "title": "Open the railway service",
+        "description": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "open": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "variant": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "start": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "end": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "confirm": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "town": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "new": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "east": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms, then click the first stop to close the return loop. Set fare to 0 and target headway to 5 minutes, then confirm."
+      },
+      "step12": {
+        "title": "Confirm vehicles and service",
+        "description": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "open": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "variant": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "start": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "end": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "confirm": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "town": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "new": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "east": "Advance epochs and check the line’s capacity and operating interval in public transport management. The depot needs several epochs to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet."
+      },
+      "step13": {
+        "title": "Review railway construction",
+        "description": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "open": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "variant": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "start": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "end": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "confirm": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "town": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "new": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "east": "You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and explicit public demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects."
       }
     },
     "complete": {
@@ -272,50 +389,50 @@
       "title": "Mine resources",
       "description": "Valuable resources lie beneath the island, but there's no way to haul them out. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",
       "step1": {
-        "description": "Turn on the natural resources display with the eye icon in the cockpit at the bottom of the screen, then click the ore vein on the western slope of the central mountain (yellow marker) to open its details.",
+        "description": "Enable natural resources and inspect the marked southeastern ore deposit in MineCity2.",
         "title": "Inspect the ore vein"
       },
       "step2": {
-        "description": "Build a \"Mine\" on the parcel with the yellow marker above the ore vein. Select \"Mine\" in the construction panel and click the parcel to place it. Once confirmed, the construction period is skipped because this is a tutorial, and the mine is completed.",
+        "description": "Build a Mine on the marked ore plot. Next skips construction time.",
         "title": "Build a mine"
       },
       "step3": {
-        "description": "Build an \"Ore Loading Station\" on the parcel with the yellow marker on the graded, level ground on the mountain, just west of the mine. Ore dug at the mine is gathered here by truck and loaded onto freight trains.",
+        "description": "Build an Ore loading station on the large existing plot southeast of the mine. Its platform belongs on the southwest side.",
         "title": "Build a loading station next to the mine"
       },
       "step4": {
-        "description": "Build an \"Ore Unloading Station\" on the parcel with the yellow marker south of the bulk port's parcel, along the road that turns east from the end of the harbor road. Its entrance faces north, toward the port. Ore brought in by rail is unloaded here. Be careful not to mix it up with the similarly named \"Oil Unloading Station\".",
+        "description": "Build an Ore unloading station on the existing plot south of the harbor road.",
         "title": "Build an unloading station near the port"
       },
       "step5": {
-        "description": "Build a \"Bulk Port\" on the seafront parcel with the yellow marker, across the road north of the unloading station. The ore is exported overseas from here.",
+        "description": "Build a Bulk port on the marked coastal plot.",
         "title": "Build a bulk port"
       },
       "step6": {
-        "open": "Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Ore Freight Platform\" under \"Railways\".",
-        "loading": "Lay a platform north of the loading station, parallel to it. Switch \"Platform Side\" so the platform is on the station building's side (south) before confirming; from west to east, that's \"Inside\".",
-        "unloading": "At the unloading station, lay a platform south of the station building so that the platform is on the building's side (north); from west to east, that's \"Outside\". When you're done, press \"Next\".",
+        "open": "Choose Ore freight platform and connect each pair of markers southwest of the loading station and south of the unloading station. Face the platforms toward their facilities.",
+        "loading": "Choose Ore freight platform and connect each pair of markers southwest of the loading station and south of the unloading station. Face the platforms toward their facilities.",
+        "unloading": "Choose Ore freight platform and connect each pair of markers southwest of the loading station and south of the unloading station. Face the platforms toward their facilities.",
         "title": "Build platforms beside the stations"
       },
       "step7": {
-        "town": "Press \"Back\" to return to the list, choose \"Railway Track\", and lay track diagonally from the east end of the unloading station's platform to the marker northeast of the town (a single track is fine). The land here is flat, so the track can keep following the terrain.",
-        "climb": "Next, lay the track up the mountain from there to the west end of the loading station's platform. Track can only climb grades of up to 5%, so before laying it, set \"Terrain Follow\" in the construction panel to \"No Follow\": the track then climbs at a steady grade instead of following the ground, and crosses valleys on bridges. If a section is too long to confirm, split it and lay it in several pieces. Once confirmed, the track and platforms are completed and the connection is checked.",
+        "town": "The stations are not yet connected. Lay freight track from the eastern harbor-platform end, past the intermediate road bend, to the northwestern mountain-platform end. Use smooth curves; choose Non-following terrain for the climb and adjust grade and radius until red violations disappear. Add intermediate points so each span remains below 500m.",
+        "climb": "The stations are not yet connected. Lay freight track from the eastern harbor-platform end, past the intermediate road bend, to the northwestern mountain-platform end. Use smooth curves; choose Non-following terrain for the climb and adjust grade and radius until red violations disappear. Add intermediate points so each span remains below 500m.",
         "title": "Connect the two stations by rail"
       },
       "step8": {
         "title": "Build a Depot",
-        "description": "Trains are dispatched from a depot. Build a \"Rail Depot\" on the parcel with the yellow marker along the main street. Press \"Next\" and, since this is a tutorial, the construction period is skipped."
+        "description": "Build a Rail depot on the existing plot southwest of the harbor, with its connection terminal at the eastern end."
       },
       "step9": {
         "title": "Connect the Depot to the Main Line",
-        "description": "Lay a siding from the connection terminal on the north side of the depot to the main line. The trick is to join the main line at a shallow angle heading east rather than at a right angle (real turnouts can't turn at large angles). When you're done, press \"Next\"."
+        "description": "Connect the depot’s eastern terminal to the western harbor-platform end with a smooth shallow-angle branch."
       },
       "step10": {
-        "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Roads, Rail & Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal.",
+        "description": "Connect the existing solar plant terminal to the depot’s eastern shared terminal with a power line.",
         "title": "Supply power to the depot"
       },
       "step11": {
-        "description": "In \"Public Transport\" on the icon panel, press \"+ New line\" and choose \"Ore Freight Line\" as the line type. Click on the platforms at the loading and unloading stations to place stops, then press \"Create\" to open the line.",
+        "description": "Create an Ore transport line, place stops on both ore freight platforms, and click the first stop to close the return loop.",
         "title": "Open the ore freight line"
       },
       "step12": {
@@ -323,7 +440,7 @@
         "title": "Advance epochs"
       },
       "step13": {
-        "description": "Check the ore exports in the bulk port's details. If nothing has been exported yet, advance more epochs.",
+        "description": "Advance epochs and inspect the coastal Bulk port’s ore receipts and exports. Mining, vehicle procurement and transport take several epochs.",
         "title": "Confirm ore exports"
       }
     },
@@ -356,7 +473,7 @@
       "controls": "You have just taken office as mayor, and a wide stretch of land lies ahead of you. Before you start building, it helps to know how to read the screen and how to operate the basics. In this tutorial, you'll learn what the cockpit and the icon panel do, how epochs advance time, how to move the camera, and where the city boundary is.",
       "scenario2": "An ore deposit has been found in a corner of town. Unless the land is protected, other buildings could go up on top of it. In this tutorial, you'll learn how to locate natural resources, divide the town into districts, and restrict which types of buildings can be built.",
       "scenario3": "The people of this town live in homes without electricity. They want to turn on lights and use appliances, but the facilities to generate power and deliver it to their homes are missing. In this tutorial, you'll learn how to build a power plant and a substation, connect them with power lines, and check that electricity reaches homes.",
-      "scenario4": "Residents walk from their homes to work at a grocery store in a distant commercial building. They've asked for transport to help with the journey each day. In this tutorial, you'll learn how to build stations, tracks, a depot, and power lines, open a railway route, and check its ridership.",
+      "scenario4": "MetroCity needs a railway, but private buildings and a public hospital obstruct its route. In this tutorial you will learn land acquisition, explicit public demolition, elevated track above roads, platforms and stations, a depot, curve and grade adjustment, power connection and opening a service.",
       "trade": "A local food factory has asked for help selling its products overseas. The town also wants a way to bring in goods it needs from abroad. In this tutorial, you'll learn how to export food through a port and import goods by freight rail from a neighboring country.",
       "highway": "As the town grows, more vehicles will carry people and goods through it. The town wants another route ready so through traffic won't all end up on the local road. In this tutorial, you'll learn how to build an elevated highway over a local road and connect them with ramps to create an interchange.",
       "mining": "Valuable resources lie beneath this island, but there is no way to haul them from the mountain to the port. Without transport, the island can't turn that wealth into an industry. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",

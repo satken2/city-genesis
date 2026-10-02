@@ -22,40 +22,40 @@
             "mode": "blocked",
             "markers": [
               [
-                230,
-                0,
-                -42.5
+                -240,
+                6,
+                -20
               ],
               [
-                330,
-                0,
-                -42.5
+                -140,
+                6,
+                -20
               ]
             ],
             "path": {
               "points": [
                 [
-                  230,
-                  0,
-                  -42.5
+                  -240,
+                  6,
+                  -20
                 ],
                 [
-                  330,
-                  0,
-                  -42.5
+                  -140,
+                  6,
+                  -20
                 ]
               ],
               "radius": 12,
-              "variant": 461
+              "variant": 462
             },
             "camera": {
               "target": [
-                280,
+                -190.0,
                 0,
-                -40
+                -20.0
               ],
               "distance": 330,
-              "yaw": 0,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -72,58 +72,58 @@
             "allow": [
               "hud.road",
               "path.type:4",
-              "path.variant:461",
+              "path.variant:462",
               "path.back"
             ],
             "highlight": [
               "path.type:4",
-              "path.variant:461"
+              "path.variant:462"
             ]
           },
           "world": {
             "mode": "blocked",
             "markers": [
               [
-                230,
-                0,
-                -42.5
+                -240,
+                6,
+                -20
               ],
               [
-                330,
-                0,
-                -42.5
+                -140,
+                6,
+                -20
               ]
             ],
             "path": {
               "points": [
                 [
-                  230,
-                  0,
-                  -42.5
+                  -240,
+                  6,
+                  -20
                 ],
                 [
-                  330,
-                  0,
-                  -42.5
+                  -140,
+                  6,
+                  -20
                 ]
               ],
               "radius": 12,
-              "variant": 461
+              "variant": 462
             },
             "camera": {
               "target": [
-                280,
+                -190.0,
                 0,
-                -40
+                -20.0
               ],
               "distance": 330,
-              "yaw": 0,
+              "yaw": 20,
               "pitch": 55
             }
           },
           "until": {
             "type": "pathVariant",
-            "value": 461
+            "value": 462
           }
         },
         {
@@ -148,40 +148,40 @@
             "mode": "path",
             "markers": [
               [
-                230,
-                0,
-                -42.5
+                -240,
+                6,
+                -20
               ],
               [
-                330,
-                0,
-                -42.5
+                -140,
+                6,
+                -20
               ]
             ],
             "path": {
               "points": [
                 [
-                  230,
-                  0,
-                  -42.5
+                  -240,
+                  6,
+                  -20
                 ],
                 [
-                  330,
-                  0,
-                  -42.5
+                  -140,
+                  6,
+                  -20
                 ]
               ],
               "radius": 12,
-              "variant": 461
+              "variant": 462
             },
             "camera": {
               "target": [
-                280,
+                -190.0,
                 0,
-                -40
+                -20.0
               ],
               "distance": 330,
-              "yaw": 0,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -208,7 +208,9 @@
               "path.confirm",
               "path.platformSide:0",
               "path.platformSide:1",
-              "path.platformSide:2"
+              "path.platformSide:2",
+              "path.type:4",
+              "path.variant:471"
             ],
             "highlight": [
               "path.confirm"
@@ -218,40 +220,40 @@
             "mode": "path",
             "markers": [
               [
-                -225,
-                0,
-                -42.5
+                360,
+                6,
+                -20
               ],
               [
-                -125,
-                0,
-                -42.5
+                440,
+                6,
+                -20
               ]
             ],
             "path": {
               "points": [
                 [
-                  -225,
-                  0,
-                  -42.5
+                  360,
+                  6,
+                  -20
                 ],
                 [
-                  -125,
-                  0,
-                  -42.5
+                  440,
+                  6,
+                  -20
                 ]
               ],
               "radius": 12,
-              "variant": 461
+              "variant": 471
             },
             "camera": {
               "target": [
-                -175,
+                400.0,
                 0,
-                -40
+                -20.0
               ],
               "distance": 330,
-              "yaw": 0,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -295,24 +297,24 @@
             "mode": "observe",
             "markers": [
               [
-                290,
+                -230,
                 0,
-                -62
+                -40
               ],
               [
-                290,
+                -60,
                 0,
-                -24
+                20
               ]
             ],
             "camera": {
               "target": [
-                280,
+                -145.0,
                 0,
-                -40
+                -10.0
               ],
-              "distance": 330,
-              "yaw": 0,
+              "distance": 400,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -341,24 +343,24 @@
             "mode": "observe",
             "markers": [
               [
-                290,
+                -230,
                 0,
-                -62
+                -40
               ],
               [
-                290,
+                -60,
                 0,
-                -24
+                20
               ]
             ],
             "camera": {
               "target": [
-                280,
+                -145.0,
                 0,
-                -40
+                -10.0
               ],
-              "distance": 330,
-              "yaw": 0,
+              "distance": 400,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -386,24 +388,24 @@
             "mode": "observe",
             "markers": [
               [
-                290,
+                -230,
                 0,
-                -62
+                -40
               ],
               [
-                290,
+                -60,
                 0,
-                -24
+                20
               ]
             ],
             "camera": {
               "target": [
-                280,
+                -145.0,
                 0,
-                -40
+                -10.0
               ],
-              "distance": 330,
-              "yaw": 0,
+              "distance": 400,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -437,24 +439,24 @@
             "mode": "observe",
             "markers": [
               [
-                -175,
+                440,
                 0,
-                -62
+                -40
               ],
               [
-                -175,
+                250,
                 0,
-                -24
+                20
               ]
             ],
             "camera": {
               "target": [
-                -175,
+                345.0,
                 0,
-                -40
+                -10.0
               ],
-              "distance": 330,
-              "yaw": 0,
+              "distance": 430,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -476,15 +478,25 @@
             "equals": true
           }
         ]
-      }
+      },
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario4",
+          "action": "commission_stations"
+        },
+        {
+          "type": "reload"
+        }
+      ]
     },
     {
-      "id": "scenario4.rail",
+      "id": "scenario4.acquisition_plan",
       "legacyStep": 3,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step3.description",
+          "textKey": "tutorial.scenario4.step3.open",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -495,28 +507,45 @@
             ]
           },
           "world": {
-            "mode": "observe",
+            "mode": "blocked",
             "markers": [
               [
-                230,
-                0,
-                -42.5
+                -140,
+                6,
+                -20
               ],
               [
-                -125,
                 0,
-                -42.5
+                6,
+                -20
               ]
             ],
             "camera": {
               "target": [
-                50,
+                -70.0,
                 0,
-                -40
+                -20.0
               ],
-              "distance": 800,
-              "yaw": 0,
-              "pitch": 50
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  -140,
+                  6,
+                  -20
+                ],
+                [
+                  0,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421,
+              "bind": "scenario4.track"
             }
           },
           "until": {
@@ -526,53 +555,639 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.scenario4.step3.description",
+          "textKey": "tutorial.scenario4.step3.variant",
           "ui": {
             "policy": "strict",
             "allow": [
               "hud.road",
               "path.type:4",
-              "path.variant:411",
-              "path.back"
+              "path.variant:421"
             ],
             "highlight": [
               "path.type:4",
-              "path.variant:411"
+              "path.variant:421"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                -140,
+                6,
+                -20
+              ],
+              [
+                0,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                -70.0,
+                0,
+                -20.0
+              ],
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  -140,
+                  6,
+                  -20
+                ],
+                [
+                  0,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421,
+              "bind": "scenario4.track"
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 100
+          }
+        },
+        {
+          "id": "start",
+          "textKey": "tutorial.scenario4.step3.start",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -140,
+                6,
+                -20
+              ],
+              [
+                0,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                -70.0,
+                0,
+                -20.0
+              ],
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  -140,
+                  6,
+                  -20
+                ],
+                [
+                  0,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421,
+              "bind": "scenario4.track"
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 1
+          }
+        },
+        {
+          "id": "end",
+          "textKey": "tutorial.scenario4.step3.end",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -140,
+                6,
+                -20
+              ],
+              [
+                0,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                -70.0,
+                0,
+                -20.0
+              ],
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  -140,
+                  6,
+                  -20
+                ],
+                [
+                  0,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421,
+              "bind": "scenario4.track"
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2
+          }
+        },
+        {
+          "id": "finalize",
+          "textKey": "tutorial.guide.finalizeRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -140,
+                6,
+                -20
+              ],
+              [
+                0,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                -70.0,
+                0,
+                -20.0
+              ],
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  -140,
+                  6,
+                  -20
+                ],
+                [
+                  0,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421,
+              "bind": "scenario4.track"
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2,
+            "phase": "editing"
+          }
+        },
+        {
+          "id": "confirm",
+          "textKey": "tutorial.scenario4.step3.confirm",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel",
+              "path.confirm"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -140,
+                6,
+                -20
+              ],
+              [
+                0,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                -70.0,
+                0,
+                -20.0
+              ],
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  -140,
+                  6,
+                  -20
+                ],
+                [
+                  0,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421,
+              "bind": "scenario4.track"
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.track",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.negotiate",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
             ]
           },
           "world": {
             "mode": "observe",
             "markers": [
               [
-                230,
+                -24.5,
                 0,
-                -42.5
-              ],
-              [
-                -125,
-                0,
-                -42.5
+                -35
               ]
             ],
             "camera": {
               "target": [
-                50,
+                -24.5,
                 0,
-                -40
+                -35.0
               ],
-              "distance": 800,
-              "yaw": 0,
-              "pitch": 50
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "all",
+        "conditions": [
+          {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.negotiating",
+                "equals": true
+              }
+            ]
+          },
+          {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.blocked",
+                "equals": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.demolish",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.scenario4.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -24.5,
+                0,
+                -35
+              ]
+            ],
+            "camera": {
+              "target": [
+                -24.5,
+                0,
+                -35.0
+              ],
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "agent_detail",
+            "target": "lesson.hospital.building"
+          }
+        },
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "agent.demolish"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -24.5,
+                0,
+                -35
+              ]
+            ],
+            "camera": {
+              "target": [
+                -24.5,
+                0,
+                -35.0
+              ],
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.demolition",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.acquisition_complete",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step6.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -24.5,
+                0,
+                -35
+              ]
+            ],
+            "camera": {
+              "target": [
+                -24.5,
+                0,
+                -35.0
+              ],
+              "distance": 480,
+              "yaw": 20,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.acquired_rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.road_rail",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.scenario4.step7.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                0,
+                6,
+                -20
+              ],
+              [
+                260,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                130.0,
+                0,
+                -20.0
+              ],
+              "distance": 600,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  0,
+                  6,
+                  -20
+                ],
+                [
+                  260,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.scenario4.step7.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:4",
+              "path.variant:421",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:4",
+              "path.variant:421"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                0,
+                6,
+                -20
+              ],
+              [
+                260,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                130.0,
+                0,
+                -20.0
+              ],
+              "distance": 600,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  0,
+                  6,
+                  -20
+                ],
+                [
+                  260,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421
             }
           },
           "until": {
             "type": "pathVariant",
-            "value": 411
+            "value": 421
           }
         },
         {
           "id": "draw",
-          "textKey": "tutorial.scenario4.step3.description",
+          "textKey": "tutorial.scenario4.step7.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -586,28 +1201,111 @@
             ]
           },
           "world": {
-            "mode": "observe",
+            "mode": "path",
             "markers": [
               [
-                230,
                 0,
-                -42.5
+                6,
+                -20
               ],
               [
-                -125,
-                0,
-                -42.5
+                260,
+                6,
+                -20
               ]
             ],
             "camera": {
               "target": [
-                50,
+                130.0,
                 0,
-                -40
+                -20.0
               ],
-              "distance": 800,
-              "yaw": 0,
-              "pitch": 50
+              "distance": 600,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  0,
+                  6,
+                  -20
+                ],
+                [
+                  260,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421
+            }
+          },
+          "until": {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.road_track",
+                "equals": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "east",
+          "textKey": "tutorial.scenario4.step7.east",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.back",
+              "path.cancel",
+              "path.confirm"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                260,
+                6,
+                -20
+              ],
+              [
+                360,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                310.0,
+                0,
+                -20.0
+              ],
+              "distance": 400,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  260,
+                  6,
+                  -20
+                ],
+                [
+                  360,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421
             }
           },
           "until": {
@@ -638,11 +1336,11 @@
     },
     {
       "id": "scenario4.depot",
-      "legacyStep": 4,
+      "legacyStep": 8,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step4.description",
+          "textKey": "tutorial.scenario4.step8.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -656,19 +1354,19 @@
             "mode": "observe",
             "markers": [
               [
-                -60,
+                -16.800568,
                 0,
-                -21
+                218.05
               ]
             ],
             "camera": {
               "target": [
-                -50,
+                -16.800568,
                 0,
-                -30
+                218.05
               ],
-              "distance": 300,
-              "yaw": 0,
+              "distance": 400,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -679,7 +1377,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.scenario4.step4.description",
+          "textKey": "tutorial.scenario4.step8.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -700,19 +1398,19 @@
             "mode": "observe",
             "markers": [
               [
-                -60,
+                -16.800568,
                 0,
-                -21
+                218.05
               ]
             ],
             "camera": {
               "target": [
-                -50,
+                -16.800568,
                 0,
-                -30
+                218.05
               ],
-              "distance": 300,
-              "yaw": 0,
+              "distance": 400,
+              "yaw": 20,
               "pitch": 55
             }
           },
@@ -744,15 +1442,17 @@
     },
     {
       "id": "scenario4.branch",
-      "legacyStep": 5,
+      "legacyStep": 9,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step5.description",
+          "textKey": "tutorial.scenario4.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
-              "hud.road"
+              "hud.road",
+              "path.followTerrain:0",
+              "path.followTerrain:1"
             ],
             "highlight": [
               "hud.road"
@@ -762,25 +1462,60 @@
             "mode": "observe",
             "markers": [
               [
-                -60,
+                28.1994324,
                 0,
-                -35.5
+                218.05
               ],
               [
-                0,
-                0,
-                -42.5
+                140,
+                0.4,
+                231
+              ],
+              [
+                248,
+                1.2,
+                286
+              ],
+              [
+                338,
+                1.7,
+                310
+              ],
+              [
+                447,
+                2.5,
+                260
+              ],
+              [
+                473,
+                3.6,
+                131
+              ],
+              [
+                427,
+                4.4,
+                34
+              ],
+              [
+                358,
+                5,
+                -4
+              ],
+              [
+                260,
+                6,
+                -20
               ]
             ],
             "camera": {
               "target": [
-                -30,
+                302.13327026666667,
                 0,
-                -40
+                160.67222222222222
               ],
-              "distance": 220,
-              "yaw": 0,
-              "pitch": 60
+              "distance": 900,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -790,14 +1525,16 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.scenario4.step5.description",
+          "textKey": "tutorial.scenario4.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
               "hud.road",
               "path.type:4",
               "path.variant:411",
-              "path.back"
+              "path.back",
+              "path.followTerrain:0",
+              "path.followTerrain:1"
             ],
             "highlight": [
               "path.type:4",
@@ -808,25 +1545,60 @@
             "mode": "observe",
             "markers": [
               [
-                -60,
+                28.1994324,
                 0,
-                -35.5
+                218.05
               ],
               [
-                0,
-                0,
-                -42.5
+                140,
+                0.4,
+                231
+              ],
+              [
+                248,
+                1.2,
+                286
+              ],
+              [
+                338,
+                1.7,
+                310
+              ],
+              [
+                447,
+                2.5,
+                260
+              ],
+              [
+                473,
+                3.6,
+                131
+              ],
+              [
+                427,
+                4.4,
+                34
+              ],
+              [
+                358,
+                5,
+                -4
+              ],
+              [
+                260,
+                6,
+                -20
               ]
             ],
             "camera": {
               "target": [
-                -30,
+                302.13327026666667,
                 0,
-                -40
+                160.67222222222222
               ],
-              "distance": 220,
-              "yaw": 0,
-              "pitch": 60
+              "distance": 900,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -836,14 +1608,16 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.scenario4.step5.description",
+          "textKey": "tutorial.scenario4.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
               "hud.road",
               "path.back",
               "path.cancel",
-              "path.confirm"
+              "path.confirm",
+              "path.followTerrain:0",
+              "path.followTerrain:1"
             ],
             "highlight": [
               "path.confirm"
@@ -853,25 +1627,60 @@
             "mode": "observe",
             "markers": [
               [
-                -60,
+                28.1994324,
                 0,
-                -35.5
+                218.05
               ],
               [
-                0,
-                0,
-                -42.5
+                140,
+                0.4,
+                231
+              ],
+              [
+                248,
+                1.2,
+                286
+              ],
+              [
+                338,
+                1.7,
+                310
+              ],
+              [
+                447,
+                2.5,
+                260
+              ],
+              [
+                473,
+                3.6,
+                131
+              ],
+              [
+                427,
+                4.4,
+                34
+              ],
+              [
+                358,
+                5,
+                -4
+              ],
+              [
+                260,
+                6,
+                -20
               ]
             ],
             "camera": {
               "target": [
-                -30,
+                302.13327026666667,
                 0,
-                -40
+                160.67222222222222
               ],
-              "distance": 220,
-              "yaw": 0,
-              "pitch": 60
+              "distance": 900,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -902,11 +1711,11 @@
     },
     {
       "id": "scenario4.power",
-      "legacyStep": 6,
+      "legacyStep": 10,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step6.description",
+          "textKey": "tutorial.scenario4.step10.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -920,25 +1729,25 @@
             "mode": "observe",
             "markers": [
               [
-                461.5,
+                -7.09423828,
                 0,
-                -177.5
+                168.826721
               ],
               [
-                -60,
+                28.1994324,
                 0,
-                -35.5
+                218.05
               ]
             ],
             "camera": {
               "target": [
-                200,
+                10.55259706,
                 0,
-                -100
+                193.4383605
               ],
-              "distance": 850,
-              "yaw": 0,
-              "pitch": 60
+              "distance": 380,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -948,7 +1757,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.scenario4.step6.description",
+          "textKey": "tutorial.scenario4.step10.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -966,25 +1775,25 @@
             "mode": "observe",
             "markers": [
               [
-                461.5,
+                -7.09423828,
                 0,
-                -177.5
+                168.826721
               ],
               [
-                -60,
+                28.1994324,
                 0,
-                -35.5
+                218.05
               ]
             ],
             "camera": {
               "target": [
-                200,
+                10.55259706,
                 0,
-                -100
+                193.4383605
               ],
-              "distance": 850,
-              "yaw": 0,
-              "pitch": 60
+              "distance": 380,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -994,7 +1803,7 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.scenario4.step6.description",
+          "textKey": "tutorial.scenario4.step10.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1011,25 +1820,25 @@
             "mode": "observe",
             "markers": [
               [
-                461.5,
+                -7.09423828,
                 0,
-                -177.5
+                168.826721
               ],
               [
-                -60,
+                28.1994324,
                 0,
-                -35.5
+                218.05
               ]
             ],
             "camera": {
               "target": [
-                200,
+                10.55259706,
                 0,
-                -100
+                193.4383605
               ],
-              "distance": 850,
-              "yaw": 0,
-              "pitch": 60
+              "distance": 380,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -1060,11 +1869,11 @@
     },
     {
       "id": "scenario4.line",
-      "legacyStep": 7,
+      "legacyStep": 11,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step7.description",
+          "textKey": "tutorial.scenario4.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1078,25 +1887,25 @@
             "mode": "observe",
             "markers": [
               [
-                320,
-                0,
-                -42.5
+                -190,
+                6,
+                -20
               ],
               [
-                -175,
-                0,
-                -42.5
+                400,
+                6,
+                -20
               ]
             ],
             "camera": {
               "target": [
-                50,
+                105.0,
                 0,
-                -40
+                -20.0
               ],
-              "distance": 800,
-              "yaw": 0,
-              "pitch": 50
+              "distance": 850,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -1115,7 +1924,7 @@
         },
         {
           "id": "new",
-          "textKey": "tutorial.scenario4.step7.description",
+          "textKey": "tutorial.scenario4.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1130,25 +1939,25 @@
             "mode": "observe",
             "markers": [
               [
-                320,
-                0,
-                -42.5
+                -190,
+                6,
+                -20
               ],
               [
-                -175,
-                0,
-                -42.5
+                400,
+                6,
+                -20
               ]
             ],
             "camera": {
               "target": [
-                50,
+                105.0,
                 0,
-                -40
+                -20.0
               ],
-              "distance": 800,
-              "yaw": 0,
-              "pitch": 50
+              "distance": 850,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -1158,7 +1967,7 @@
         },
         {
           "id": "create",
-          "textKey": "tutorial.scenario4.step7.description",
+          "textKey": "tutorial.scenario4.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1180,25 +1989,25 @@
             "mode": "observe",
             "markers": [
               [
-                320,
-                0,
-                -42.5
+                -190,
+                6,
+                -20
               ],
               [
-                -175,
-                0,
-                -42.5
+                400,
+                6,
+                -20
               ]
             ],
             "camera": {
               "target": [
-                50,
+                105.0,
                 0,
-                -40
+                -20.0
               ],
-              "distance": 800,
-              "yaw": 0,
-              "pitch": 50
+              "distance": 850,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -1225,12 +2034,12 @@
       ]
     },
     {
-      "id": "scenario4.riders",
-      "legacyStep": 8,
+      "id": "scenario4.operating",
+      "legacyStep": 12,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.scenario4.step8.description",
+          "textKey": "tutorial.scenario4.step12.description",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -1242,15 +2051,22 @@
           },
           "world": {
             "mode": "observe",
+            "markers": [
+              [
+                120,
+                0,
+                -20
+              ]
+            ],
             "camera": {
               "target": [
-                50,
+                120.0,
                 0,
-                -40
+                -20.0
               ],
-              "distance": 800,
-              "yaw": 0,
-              "pitch": 50
+              "distance": 900,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
@@ -1263,7 +2079,7 @@
         "resource": "tutorial",
         "where": [
           {
-            "field": "checks.riders",
+            "field": "checks.operating",
             "equals": true
           }
         ]
@@ -1271,11 +2087,11 @@
     },
     {
       "id": "scenario4.summary",
-      "legacyStep": 9,
+      "legacyStep": 13,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.scenario4.step9.description",
+          "textKey": "tutorial.scenario4.step13.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1283,15 +2099,22 @@
           },
           "world": {
             "mode": "observe",
+            "markers": [
+              [
+                120,
+                0,
+                50
+              ]
+            ],
             "camera": {
               "target": [
-                50,
+                120.0,
                 0,
-                -40
+                50.0
               ],
-              "distance": 800,
-              "yaw": 0,
-              "pitch": 50
+              "distance": 950,
+              "yaw": 20,
+              "pitch": 55
             }
           },
           "until": {
