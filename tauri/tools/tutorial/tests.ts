@@ -44,6 +44,49 @@ check(await findPhase(basic, env), 5, "saved road survives closed panel");
   mining.facts.pathVariant = -1;
   check((await phase()).ui.policy, "strict", "going back to the cards restores the lock");
 }
+{
+  const platforms = DEFINITIONS.scenario4.steps[0], metro = fake();
+  const saved = { pf_town: false, pf_new: false };
+  metro.read = async kind => kind === "tutorial" ? [{ checks: saved }] : [];
+  const phase = async () => platforms.phases[await findPhase(platforms, metro)];
+  check((await phase()).id, "open", "Metro opens the west platform panel first");
+  metro.facts.windows.panel = { visible: true, window: "path_build" };
+  metro.facts.pathVariant = 462;
+  check((await phase()).id, "town", "462 enables west platform placement");
+  saved.pf_town = true;
+  check((await phase()).id, "new_variant", "saved west platform requires selecting the east variant");
+  metro.facts.pathVariant = -1;
+  check((await phase()).world.camera?.target, [400, 0, -20], "back keeps the camera at the east platform");
+  metro.facts.windows.panel.visible = false; delete metro.facts.pathVariant;
+  check((await phase()).id, "new_open", "closing after west completion asks to reopen at the east platform");
+  metro.facts.windows.panel.visible = true;
+  check((await phase()).id, "new_variant", "reopening selects the east platform card");
+  check((await phase()).ui.allow.includes("path.variant:471"), true, "east selector allows 471");
+  metro.facts.pathVariant = 471;
+  check((await phase()).id, "new", "471 enables east platform placement");
+  const east = await phase();
+  const eastState: Snapshot = { active: true, runId: "metro", revision: 1, saveId: "Metro", scenario: "scenario4", stepId: platforms.id, phaseId: east.id, ui: east.ui, world: east.world };
+  const eastPath = { path_variant: 471, curved: false, start_point: [360, 6, -20], end_point: [440, 6, -20] };
+  check(allowsPathBody({ paths: [eastPath] }, eastState), true, "east platform accepts the required variant and endpoints");
+  check(allowsPathBody({ paths: [{ ...eastPath, path_variant: 462 }] }, eastState), false, "east placement rejects the west variant");
+  saved.pf_new = true; metro.facts.windows.panel.visible = false; delete metro.facts.pathVariant;
+  check((await phase()).id, "new", "both saved platforms stay complete with the panel closed");
+}
+{
+  const acquisition = DEFINITIONS.scenario4.steps[2], metro = fake();
+  metro.facts.windows.panel = { visible: true, window: "path_build" };
+  metro.facts.pathVariant = 421;
+  check(acquisition.phases[await findPhase(acquisition, metro)].id, "start", "selecting the permitted railway enters acquisition placement");
+  for (const [index, field, phaseId, variant] of [[1, "station_town", "new", 2001], [6, "road_track", "east", 421]] as const) {
+    const step = DEFINITIONS.scenario4.steps[index], env = fake();
+    env.read = async kind => kind === "tutorial" ? [{ checks: { [field]: true } }] : [];
+    check(step.phases[await findPhase(step, env)].id, phaseId + "_open", "completed first segment resumes at the second segment");
+    env.facts.windows.panel = { visible: true, window: "path_build" };
+    check(step.phases[await findPhase(step, env)].id, phaseId + "_variant", "reopened second segment asks for its variant");
+    env.facts.pathVariant = variant;
+    check(step.phases[await findPhase(step, env)].id, phaseId, "second segment can be placed after selecting its variant");
+  }
+}
 env.bindings["support.housing.building"] = { kind: "agents", id: 30 };
 env.facts.windows.detail = { visible: true, window: "agent_detail", entity: 31 };
 const house = { type: "window" as const, window: "agent_detail", target: "support.housing.building" };

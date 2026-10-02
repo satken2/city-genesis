@@ -70,6 +70,36 @@ await settle(() => root.render(<Harness scenario="scenario3" step={4} save="F" /
 assert.equal(snapshot()?.phaseId, "open");
 await settle(async () => { assert.equal(await guide!.check(), true); });
 assert.ok(fixture.actions >= 1, "the commissioning action ran before the completion check");
+// 西ホームの完成は都市に残るため、パネルの戻る・閉じる・再起動でも東ホームの案内を続ける。
+const metroChecks = { pf_town: false, pf_new: false };
+fixture.onAction = undefined;
+fixture.records.set("tutorial:1", { id: 1, checks: metroChecks });
+await settle(() => root.render(<Harness scenario="scenario4" step={1} save="Metro" />));
+assert.equal(snapshot()?.phaseId, "open");
+await observation({ label: "road", window: "path_build", visible: true, pathVariant: 462 });
+assert.equal(snapshot()?.phaseId, "town");
+metroChecks.pf_town = true;
+await observation({ savedPaths: [100] });
+assert.equal(snapshot()?.phaseId, "new_variant");
+assert.equal(snapshot()?.world.mode, "blocked");
+assert.ok(snapshot()?.ui.allow.includes("path.variant:471"));
+await observation({ pathVariant: -1 });
+assert.deepEqual(snapshot()?.world.camera?.target, [400, 0, -20]);
+await settle(() => emit("tutorial:window_visibility", { label: "road", window: "path_build", visible: false }));
+assert.equal(snapshot()?.phaseId, "new_open");
+await observation({ label: "road", window: "path_build", visible: true });
+assert.equal(snapshot()?.phaseId, "new_variant");
+await observation({ pathVariant: 471 });
+assert.equal(snapshot()?.phaseId, "new");
+assert.equal(snapshot()?.world.mode, "path");
+assert.equal(snapshot()?.world.path?.variant, 471);
+await settle(() => root.render(<Harness scenario="scenario4" step={1} save="MetroResume" />));
+assert.equal(snapshot()?.phaseId, "new_open", "saved west completion is recognized before the first observation");
+assert.deepEqual(snapshot()?.world.camera?.target, [400, 0, -20]);
+metroChecks.pf_new = true;
+await observation({ label: "road", window: "path_build", visible: false });
+assert.equal(snapshot()?.phaseId, "new");
+await settle(async () => { assert.equal(await guide!.check(), true); });
 // ページ送り: 「次へ」(advance)でフェーズが進み、最終ページでは false を返して達成確認(check)へ回る。
 await settle(() => root.render(<Harness scenario="controls" step={1} save="G" />));
 assert.equal(snapshot()?.phaseId, "tools");

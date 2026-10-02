@@ -6,7 +6,7 @@ MetroCityの道路・区画・民間建物と既設の公共施設を使う。�
 
 ID: `scenario4.platforms`
 
-案内の定義は `tutorial.scenario4.step1`。完了条件は checks.pf_town, checks.pf_new。
+案内の定義は `tutorial.scenario4.step1`。完了条件は checks.pf_town, checks.pf_new。西は「高規格高架PF(相対式)」(462)、東は「複線鉄道PF(相対式)」(471)。西の完成後は東の開く・種別選択・敷設を案内し、パネルを戻る・閉じる操作で西に戻らない。再開時も保存済みの西ホームを確認して東から案内する。
 
 ## 2. 駅舎を置く
 

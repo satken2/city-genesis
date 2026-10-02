@@ -60,8 +60,23 @@
             }
           },
           "until": {
-            "type": "window",
-            "window": "path_build"
+            "type": "any",
+            "conditions": [
+              {
+                "type": "entity",
+                "resource": "tutorial",
+                "where": [
+                  {
+                    "field": "checks.pf_town",
+                    "equals": true
+                  }
+                ]
+              },
+              {
+                "type": "window",
+                "window": "path_build"
+              }
+            ]
           }
         },
         {
@@ -122,8 +137,23 @@
             }
           },
           "until": {
-            "type": "pathVariant",
-            "value": 462
+            "type": "any",
+            "conditions": [
+              {
+                "type": "entity",
+                "resource": "tutorial",
+                "where": [
+                  {
+                    "field": "checks.pf_town",
+                    "equals": true
+                  }
+                ]
+              },
+              {
+                "type": "pathVariant",
+                "value": 462
+              }
+            ]
           }
         },
         {
@@ -194,6 +224,126 @@
                 "equals": true
               }
             ]
+          }
+        },
+        {
+          "id": "new_open",
+          "textKey": "tutorial.scenario4.step1.new",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                360,
+                6,
+                -20
+              ],
+              [
+                440,
+                6,
+                -20
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  360,
+                  6,
+                  -20
+                ],
+                [
+                  440,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 471
+            },
+            "camera": {
+              "target": [
+                400.0,
+                0,
+                -20.0
+              ],
+              "distance": 330,
+              "yaw": 20,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "new_variant",
+          "textKey": "tutorial.scenario4.step1.new",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:4",
+              "path.variant:471",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:4",
+              "path.variant:471"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                360,
+                6,
+                -20
+              ],
+              [
+                440,
+                6,
+                -20
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  360,
+                  6,
+                  -20
+                ],
+                [
+                  440,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 471
+            },
+            "camera": {
+              "target": [
+                400.0,
+                0,
+                -20.0
+              ],
+              "distance": 330,
+              "yaw": 20,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 471
           }
         },
         {
@@ -319,8 +469,23 @@
             }
           },
           "until": {
-            "type": "window",
-            "window": "path_build"
+            "type": "any",
+            "conditions": [
+              {
+                "type": "entity",
+                "resource": "tutorial",
+                "where": [
+                  {
+                    "field": "checks.station_town",
+                    "equals": true
+                  }
+                ]
+              },
+              {
+                "type": "window",
+                "window": "path_build"
+              }
+            ]
           }
         },
         {
@@ -365,8 +530,23 @@
             }
           },
           "until": {
-            "type": "pathVariant",
-            "value": 2001
+            "type": "any",
+            "conditions": [
+              {
+                "type": "entity",
+                "resource": "tutorial",
+                "where": [
+                  {
+                    "field": "checks.station_town",
+                    "equals": true
+                  }
+                ]
+              },
+              {
+                "type": "pathVariant",
+                "value": 2001
+              }
+            ]
           }
         },
         {
@@ -418,6 +598,94 @@
                 "equals": true
               }
             ]
+          }
+        },
+        {
+          "id": "new_open",
+          "textKey": "tutorial.scenario4.step2.new",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                440,
+                0,
+                -40
+              ],
+              [
+                250,
+                0,
+                20
+              ]
+            ],
+            "camera": {
+              "target": [
+                345.0,
+                0,
+                -10.0
+              ],
+              "distance": 430,
+              "yaw": 20,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "new_variant",
+          "textKey": "tutorial.scenario4.step2.new",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:20",
+              "path.variant:2001",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:20",
+              "path.variant:2001"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                440,
+                0,
+                -40
+              ],
+              [
+                250,
+                0,
+                20
+              ]
+            ],
+            "camera": {
+              "target": [
+                345.0,
+                0,
+                -10.0
+              ],
+              "distance": 430,
+              "yaw": 20,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 2001
           }
         },
         {
@@ -561,7 +829,8 @@
             "allow": [
               "hud.road",
               "path.type:4",
-              "path.variant:421"
+              "path.variant:421",
+              "path.back"
             ],
             "highlight": [
               "path.type:4",
@@ -612,7 +881,7 @@
           },
           "until": {
             "type": "pathVariant",
-            "value": 100
+            "value": 421
           }
         },
         {
@@ -1119,8 +1388,23 @@
             }
           },
           "until": {
-            "type": "window",
-            "window": "path_build"
+            "type": "any",
+            "conditions": [
+              {
+                "type": "entity",
+                "resource": "tutorial",
+                "where": [
+                  {
+                    "field": "checks.road_track",
+                    "equals": true
+                  }
+                ]
+              },
+              {
+                "type": "window",
+                "window": "path_build"
+              }
+            ]
           }
         },
         {
@@ -1181,8 +1465,23 @@
             }
           },
           "until": {
-            "type": "pathVariant",
-            "value": 421
+            "type": "any",
+            "conditions": [
+              {
+                "type": "entity",
+                "resource": "tutorial",
+                "where": [
+                  {
+                    "field": "checks.road_track",
+                    "equals": true
+                  }
+                ]
+              },
+              {
+                "type": "pathVariant",
+                "value": 421
+              }
+            ]
           }
         },
         {
@@ -1250,6 +1549,126 @@
                 "equals": true
               }
             ]
+          }
+        },
+        {
+          "id": "east_open",
+          "textKey": "tutorial.scenario4.step7.east",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                260,
+                6,
+                -20
+              ],
+              [
+                360,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                310.0,
+                0,
+                -20.0
+              ],
+              "distance": 400,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  260,
+                  6,
+                  -20
+                ],
+                [
+                  360,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "east_variant",
+          "textKey": "tutorial.scenario4.step7.east",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:4",
+              "path.variant:421",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:4",
+              "path.variant:421"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                260,
+                6,
+                -20
+              ],
+              [
+                360,
+                6,
+                -20
+              ]
+            ],
+            "camera": {
+              "target": [
+                310.0,
+                0,
+                -20.0
+              ],
+              "distance": 400,
+              "yaw": 20,
+              "pitch": 55
+            },
+            "path": {
+              "points": [
+                [
+                  260,
+                  6,
+                  -20
+                ],
+                [
+                  360,
+                  6,
+                  -20
+                ]
+              ],
+              "radius": 12,
+              "variant": 421
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 421
           }
         },
         {

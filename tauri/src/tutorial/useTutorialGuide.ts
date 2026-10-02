@@ -124,7 +124,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
         if (!stored.setupDone) { await execute(definition.setup ?? [], env); stored.setupDone = true; checkpoint(); }
       }
       assertCurrent();
-      await publish(0);
+      await publish(step ? await findPhase(step, env) : 0);
       setReady(true);
     })().catch(fail);
     return () => {
