@@ -1,0 +1,48 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Général",
+    "tabActivity": "Activité",
+    "follow": "Suivre avec la caméra",
+    "unfollow": "Arrêter de suivre",
+    "track": "Ajouter à la liste de suivi",
+    "untrack": "Retirer de la liste de suivi",
+    "home": "Logement",
+    "mobility": "Déplacements",
+    "mode": {
+      "automobile": "Voiture",
+      "pedestrian": "À pied et en transports en commun"
+    },
+    "visits": "Destinations",
+    "visitKind": {
+      "home": "Domicile",
+      "work": "Travail",
+      "school": "École",
+      "shop": "Achats"
+    },
+    "legs": {
+      "walk": "À pied",
+      "drive": "Voiture",
+      "transit": "Transports en commun",
+      "conveyor": "Transport de personnes"
+    },
+    "trip": "Aller simple {{minutes}} min · {{route}}",
+    "noRoute": "Aucun itinéraire",
+    "noVisits": "N'a nulle part où aller.",
+    "status": {
+      "not_ready": "Affiché après l'exécution de la simulation.",
+      "busy": "Indisponible pendant la simulation.",
+      "no_home": "En attente d'un logement, aucune activité.",
+      "missing": "Ce citoyen n'habite plus dans la ville.",
+      "error": "Chargement impossible."
+    },
+    "empty": "Aucun citoyen suivi. Ajoutez-en avec le bouton de suivi du panneau d'un citoyen.",
+    "pickFailed": {
+      "not_ready": "Exécutez la simulation pour cliquer sur les voitures et les piétons et voir qui ils sont.",
+      "busy": "Impossible d'afficher les citoyens pendant la simulation.",
+      "none": "Impossible de trouver qui se trouve dans cette voiture ou à pied.",
+      "missing": "Ce citoyen n'habite plus dans la ville.",
+      "no_home": "Ce citoyen attend un logement.",
+      "error": "Impossible d'afficher le citoyen."
+    }
+  }
+}

@@ -82,6 +82,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `season.ts` | 季節(北半球の温帯の暦月。Unityの `WeatherClimate.SeasonOf` と同じ区切りで、気候区分の違いは持たない)と月ごとの季節画像 `seasonImageUrl`(`assets/images/seasons/{月}.png`、無ければ `default.png`) |
 | `parking.ts` | 駐車メーターの使用率 `parkingUsage`。表示桁に丸めてから割る(生値だと「20 / 20台」で100%超に光る) |
 | `constructionTags.ts` | 建設プロジェクトのタグ。`fetchEntityTag` は専用API(`tag` は単体取得に載らない)。`TAGGABLE_STATUSES` はバックエンドの写し |
+| `citizenTracking.ts` | 市民の追跡。行程・追跡中の一覧のAPIと型(手書きJSON)、`tracking:changed`、追従中の市民ID `useFollowedCitizen`(Unityの `citizen:follow_state` を受けたウィンドウが `localStorage` に書き、後から開いたウィンドウも読む。常駐のコックピットも `listenFollowState` で書き続け、アプリ起動時に `clearFollowedCitizen` で消す) |
 | `constructionFunding.ts` | 公共工事の発注時資金審査の先回り判定(最終判定はバックエンド) |
 | `costRatio.ts` | 建設コストの標準コスト比の色分け(建物・道路で共用) |
 | `playSound.ts` / `bgm.ts` | 効果音(URLごとにキャッシュ)・BGM(`BgmManager`。Cockpitだけが所有) |

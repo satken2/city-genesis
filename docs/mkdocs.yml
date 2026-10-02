@@ -108,6 +108,7 @@ nav:
   - プログラム連携:
     - 都市マップの検索と経路案内: programs/都市マップの検索と経路案内.md
     - 道路の詳細と道路名: programs/道路の詳細と道路名.md
+    - 市民の追跡: programs/市民の追跡.md
     - IPC連携: programs/IPC連携の整理.md
     - コンポーネント連携: programs/コンポーネント連携.md
     - バージョニングと互換性: programs/バージョニングと互換性.md

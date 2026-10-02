@@ -87,7 +87,7 @@
 - 4枚の専用ウィンドウ(`icon-panel` / `cockpit` / `system-tray` / `display-tray`)。透明領域でもWebViewがクリックを吸うため、パネルの実面積ぴったりに分割する。生成・配置・表示切替はRust(`window.rs`)、Reactは中身だけ。
 - 寸法が変わるものは実測して通知する(`resize_icon_panel` / `resize_system_tray`)。`IconPanel.css`で高さを固定しない。`DisplayTray`の幅の正は`window.rs`の`DISPLAY_TRAY_WIDTH`。
 - 常駐モード(ブルドーザ/地区編集)は排他。状態の正はグローバルイベント`hud:mode_changed`(`hudMode.ts`)で、副作用は操作した側だけが実行する。編集モードのウィンドウを開いたときの解除はRust(`window.rs`の`apply_mutex_rules`)が送るので、開く側のコンポーネントで`setHudMode(null)`しない。
-- BGM再生、3Dのオブジェクト選択受信、Unityの確認要求`remove_object:request_confirm`は`Cockpit`だけが受ける。確認結果は取消でも必ず`sendRemoveObjectConfirmResult`で返す(返さないとUnityが待ち続ける)。
+- BGM再生、3Dのオブジェクト選択受信、Unityの確認要求`remove_object:request_confirm`、市民を推定できなかった通知`citizen:pick_failed`は`Cockpit`だけが受ける。確認結果は取消でも必ず`sendRemoveObjectConfirmResult`で返す(返さないとUnityが待ち続ける)。
 - ブルドーザは神モード(`useHudSession().templateMode`。シナリオ制作とチュートリアルでONになる)のとき、`STATE_REMOVE_OBJECTS`に`instant_remove: true`を付けて開始する。建物・道路を確認なしに即時削除させるモードで、ヒント(`hint.bulldozerInstant`)とツールチップ(`taskbar.bulldozerInstantOn/Off`)も専用の文言に切り替える。Unityは神モードかを知らないので、判断はこのUIが持つ。
 - 地区統合の確認は`IconPanel`が`edit_zone:request_merge`を受けて開く。
 - チュートリアルの定義(`../tutorial/definitions/*.json`)はHUDのボタンIDを操作名 `hud.<id>` として強調・許可に使う。アイコンのIDを変える/消す前に定義と `../tutorial/definitions.ts` の登録表を確認する(消えるとその段階でボタンを押せなくなる)。ボタンでない要素(公共サービスのメーター・スコアメーター・日付と天気・表示パネルの縦タブと表示モード列)は `data-guide` を付けて操作名で指す。祖先に `data-guide` を付けると、その中のボタンは `hud.<id>` で解決されなくなる。
@@ -99,6 +99,7 @@
 - システムメニュー(`taskbar/SaveLoadWindow`、種別 `save_load`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのは「ゲームに戻る」とEsc。保存・確認はウィンドウ内のオーバーレイ(`taskbar/SaveDialog`)で行い、保存に成功したら閉じる(「保存しました」は出さない)。上書きセーブは確認してから、まだ保存していない都市(`GET /saves/{current_save_id}` が404)では別名セーブ(名前の入力)になる。保存の直前に `captureSaveThumbnail` で3Dビューを撮る。「シナリオとして保存」は神モードでなくても押せ、紹介情報ウィンドウを作成モード(`params.extra.create`)で開くだけで、ここでは保存しない。別のウィンドウを開く項目は、開いてから自分を閉じる。
 - ロード画面(`taskbar/SaveListWindow`): タイトルバーの無いウィンドウ(`chromeless`)で、閉じるのはフッタの「閉じる」とEsc(確認を開いているときはEscで確認だけを閉じる)。開くたびにセーブ一覧と現在のセーブ情報を`fetchApi`の`cache: "reload"`で取得する。画像URLへランダムなクエリは付けない。セーブ・シナリオのサムネイルのキャッシュ期限は配信APIが2時間に設定するので、セーブの画像には保存日時(`saved_at`)をリビジョンとして付ける(上書き保存で撮り直される)。カードは新しい順で、名前(`saveDisplayName`)・元のシナリオのタイトル・都市の言語(国旗の絵文字)・人口・ゲーム内日付を出す。保存日時(実時間)はゲーム内日付と取り違えないよう、カードの右下に版の行(`SaveVersionInfo`)と同じ大きさ・濃さで出す。ロード・削除はウィンドウ内のオーバーレイで確認し、削除が成功しても知らせず一覧から外すだけにする。
 
+- 市民パネル(`citizen/CitizenDetailPanel`、種別 `citizen_detail`)と追跡リスト(`citizen/CitizenTrackingWindow`、種別 `citizen_tracking`): 市民パネルは自分自身と排他で、Unityが一時停止中の車・歩行者のクリックから `world:select_object` で開くこともある。カメラボタンは `citizen:follow` / `citizen:unfollow` を送り、表示は `useFollowedCitizen`(Unityの `citizen:follow_state`)に従う(押した側で状態を決め打ちしない。Unity側のEscや編集モードへの移行でも追従は終わる)。追跡の追加・解除は `tracking:changed` をemitする。「行動」タブ(`CitizenActivityPanel`)はコアの行程の表示だけで、店選びや経路をUI側で計算しない。追跡リストはコックピットの常用ツールの左のアイコンから開く。仕様は公開docs `programs/市民の追跡.md`。
 - 都市名の変更(`taskbar/CityRenameWindow`、種別 `city_rename`): コックピットの都市名から開く。都市名の入力欄だけのウィンドウ(近似設定の予告表示はシステム統計にある)。
 - システム統計(`statistics/SystemStatsWindow`、種別 `system_stats`): システムトレイから開く。`GET /api/v1/stats/system` の1回の応答をタブなしの左右2列に並べる(初期1120×850)。左列の上段はシステムステータス(ハードウェア情報と[コアシミュレーター]・[3D]のメモリ使用量を左寄せのテキストで表示し、その下にRAM・VRAMの2段メーター。全体=搭載量・グレー=PC全体・緑=本ゲームのローカルな `UsageBar`)／エンティティ数(項目・件数だけの表)の2列、下段はシミュレーション負荷(処理・時間・処理件数の3列の表で、処理件数は省略しない桁区切りの整数)、右は近似の予告表示(スクロールしない枠 `.system-stats-sidebar-frame` に濃い半透明のComing Soon板を重ね、設定行は枠の中でスクロールする)で、列ごとにスクロールする。幅が狭い場合は縦並びに戻し、本文全体をスクロールする。近似の設定行は `SettingsRow` を共用し、余白と区切りだけの意匠をこのパネル内で上書きする。計算時間の区分と処理件数の目安はコアが決めて返すので、区分や式をUI側で持たない(色だけUIの `GROUP_COLORS` で区分に固定する)。`epoch` が `null`(ロード直後・未実行・モック)なら「データなし」を出す。都市規模は6項目(`agents`・`citizens`・`zones`・`parcels`・`paths`・`nodes`)の素の総数で、分類別の内訳・人口・路線数・経過エポックは応答に含めない。`memory.graphic`(3D)と `vram` は任意で、`null` のときは該当の行・バーを省く。近似の節は値の保持・送信を行わない。
 
@@ -149,7 +150,7 @@
 
 ## ウィンドウ間イベント(Tauri内)
 
-`epoch:executing`、`tags:changed`、`roads:changed`、`transit:lines_changed`、`city:renamed`、`hud:mode_changed`、`building_direct:acquisition_confirmed`、`road:member_edit_started`、`scenarios:changed`(シナリオの作成・削除・紹介情報・地形の保存)。一覧・詳細は必要な通知を購読して取り直す。供給図はこれらの通知を購読しない。
+`epoch:executing`、`tags:changed`、`tracking:changed`(追跡中の市民の追加・解除)、`roads:changed`、`transit:lines_changed`、`city:renamed`、`hud:mode_changed`、`building_direct:acquisition_confirmed`、`road:member_edit_started`、`scenarios:changed`(シナリオの作成・削除・紹介情報・地形の保存)。一覧・詳細は必要な通知を購読して取り直す。供給図はこれらの通知を購読しない。
 
 ## 参照先
 

@@ -7,6 +7,7 @@ using UnityEngine;
 public sealed class Pedestrian
 {
     public int pathId, variant;
+    public int previousPath = -1, previousPath2 = -1;   // 直前に通ってきたパス(1つ前・2つ前)。クリックした個体の市民の抽選に渡す
     public bool forward;
     public float s, speed, age;
     public int side;                 // パス幾何に対する左右(+1=右 / -1=左)。中心帯を歩く歩行者専用道路は0

@@ -1948,7 +1948,7 @@
           "paths"
         ],
         "summary": "Delete Path Endpoint",
-        "description": "指定したIDのpathを削除する。\nstatus=PENDINGまたはstatus=PLANNEDのpathのみ削除可能。",
+        "description": "指定したIDのpathを削除する。\n通常は status=PENDINGまたはstatus=PLANNEDのpathのみ削除可能。\n\nテンプレート作成モード(神モード)では、ステータスを問わず即時に削除し、端点の孤立ノードも片付ける\n(ブルドーザの即時削除。地形は戻さない)。公共交通の区間パス(PATH_TRANSPORT)は消せない。",
         "operationId": "delete_path_endpoint_api_v1_paths__path_id__delete",
         "parameters": [
           {
@@ -4249,7 +4249,7 @@
           "agents"
         ],
         "summary": "Delete Agent Endpoint",
-        "description": "指定したIDのagentを削除する。\nstatus=PENDINGまたはstatus=PLANNEDのagentのみ削除可能。",
+        "description": "指定したIDのagentを削除する。\n通常は status=PENDINGまたはstatus=PLANNEDのagentのみ削除可能。\n\nテンプレート作成モード(神モード)では、建物をステータスを問わず入居テナント・世帯の市民ごと即時に削除する\n(ブルドーザの即時削除。区画は空き地として残し、地形は戻さない)。市政府・中央銀行・代理主体・国境検問所は消せない。\n建物ではない主体は神モードでも通常の削除条件に従う。",
         "operationId": "delete_agent_endpoint_api_v1_agents__agent_id__delete",
         "parameters": [
           {
@@ -4290,7 +4290,7 @@
           "agents"
         ],
         "summary": "Get Agent Diagnosis",
-        "description": "経済主体の不調の原因を因果の順にたどった診断木を取得する。\n\nアラートビット(原材料不足・インフラ網未接続・労働力不足・専門人材不足・予算不足・\n建設サービス不足)と公共交通路線の運休/車両不足を症状として、直接の原因→その原因→…を\nノードの木(type / params / targets / children)で返す。ルールは\nservices/agent_diagnosis.py。文言はフロントの i18n キー diagnosis.nodes.<type> が担う。\nエポック確定後の派生値のため endpoints.yaml は使わず手書きプレーンJSON。",
+        "description": "経済主体の診断木と、詳細パネル上部の供給図を読み取り専用で取得する。\n\nアラートビット(原材料不足・インフラ網未接続・労働力不足・専門人材不足・予算不足・\n建設サービス不足)と公共交通路線の運休/車両不足を症状として、直接の原因→その原因→…を\nノードの木(type / params / targets / children)で返す。ルールは\nservices/agent_diagnosis.py。文言はフロントの i18n キー diagnosis.nodes.<type> が担う。\ngraph は資源・上流施設を財ごとに集約した図。接続と資源は現在、受領と生産は前回、需要は次回。\nエポック実行中は pending=true で分析を保留する。endpoints.yaml は使わず手書きJSON。",
         "operationId": "get_agent_diagnosis_api_v1_agents__agent_id__diagnosis_get",
         "parameters": [
           {
@@ -4478,6 +4478,187 @@
               "title": "Filter"
             },
             "description": "フィルタ (例: [age][gt]30)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/citizens/pick": {
+      "post": {
+        "tags": [
+          "citizens"
+        ],
+        "summary": "Pick Citizen",
+        "description": "グラフィックでクリックした車・歩行者の市民を、そのパスの交通量への寄与に比例して抽選する。",
+        "operationId": "pick_citizen_api_v1_citizens_pick_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PickRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/citizens/tracked": {
+      "get": {
+        "tags": [
+          "citizens"
+        ],
+        "summary": "Get Tracked Citizens",
+        "description": "追跡中の市民の一覧(追加した順)。",
+        "operationId": "get_tracked_citizens_api_v1_citizens_tracked_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/citizens/tracked/{citizen_id}": {
+      "put": {
+        "tags": [
+          "citizens"
+        ],
+        "summary": "Track Citizen",
+        "description": "市民を追跡中の一覧に加える。",
+        "operationId": "track_citizen_api_v1_citizens_tracked__citizen_id__put",
+        "parameters": [
+          {
+            "name": "citizen_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Citizen Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "citizens"
+        ],
+        "summary": "Untrack Citizen",
+        "description": "市民を追跡中の一覧から外す。",
+        "operationId": "untrack_citizen_api_v1_citizens_tracked__citizen_id__delete",
+        "parameters": [
+          {
+            "name": "citizen_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Citizen Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/citizens/{citizen_id}/itinerary": {
+      "get": {
+        "tags": [
+          "citizens"
+        ],
+        "summary": "Get Citizen Itinerary",
+        "description": "市民の訪問先(自宅・勤務先・学校・店)と、自宅との往復の経路。",
+        "operationId": "get_citizen_itinerary_api_v1_citizens__citizen_id__itinerary_get",
+        "parameters": [
+          {
+            "name": "citizen_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Citizen Id"
+            }
           }
         ],
         "responses": {
@@ -4861,7 +5042,7 @@
           "sessions"
         ],
         "summary": "Create Session",
-        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. is_tutorial … 同梱のチュートリアルの都市(tutorial~<tutorial_id>)をシナリオとして開始する\n  3. template_id … シナリオ（テンプレート）データをロードする\n  4. 何も指定しない … 既定の地形(平坦な海)で新規ゲームを開始する(開発用)\n\nチュートリアルはシナリオの開始と同じ手順(言語が違えば名前の付け直し・開始設定)で始め、\nその後で神モードにする(代行アクションの工期スキップなどに要る)。\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。シナリオで指定しない場合はシナリオの初期の都市名(都市の言語 → 英語の順)。\n  - language: 都市の言語。シナリオと違う言語なら、都市内の固有名詞を付け直す。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\nシナリオをプレイとして始めるとき(template_mode でない)は、作者が固定していない開始設定\n(simulation_days・climate・ground_cover・asset_region)を選べる。固定の項目にシナリオと違う値を\n送ると 422 SCENARIO_OPTION_FIXED、値域の外は 422 SCENARIO_OPTION_INVALID(どちらもロード前に断る)。\n言語を変えたときは応答の relocalized に {from, to, counts} を入れる。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
+        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. is_tutorial … 同梱のチュートリアルの都市(tutorial~<tutorial_id>)をシナリオとして開始する\n  3. template_id … シナリオ（テンプレート）データをロードする\n  4. 何も指定しない … 既定の地形(平坦な海)で新規ゲームを開始する(開発用)\n\nチュートリアルはシナリオの開始と同じ手順(言語が違えば名前の付け直し・開始設定)で始め、\nその後で神モードにする(代行アクションの工期スキップなどに要る)。\n\nシナリオ・チュートリアルの都市の創設状態(city_hall_placed)は保存された値のまま始まる。\n市庁舎の無いシナリオ(地形だけのシナリオなど)は未創設で始まり、プレイヤーが市庁舎を置いて創設する。\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。シナリオで指定しない場合はシナリオの初期の都市名(都市の言語 → 英語の順)。\n  - language: 都市の言語。シナリオと違う言語なら、都市内の固有名詞を付け直す。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\nシナリオをプレイとして始めるとき(template_mode でない)は、作者が固定していない開始設定\n(simulation_days・climate・ground_cover・asset_region)を選べる。固定の項目にシナリオと違う値を\n送ると 422 SCENARIO_OPTION_FIXED、値域の外は 422 SCENARIO_OPTION_INVALID(どちらもロード前に断る)。\n言語を変えたときは応答の relocalized に {from, to, counts} を入れる。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
         "operationId": "create_session_api_v1_sessions_post",
         "parameters": [
           {
@@ -6969,7 +7150,7 @@
           "stats"
         ],
         "summary": "Get System Stats",
-        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの総数。種別ごとの内訳は含めない\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)と搭載RAM。取得できなければ各値が null\n- environment: CPU・GPU名と専用メモリ容量・OS・演算デバイス。GPU情報が取得できなければ null",
+        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの総数(描画の可否や種別で除外せず、テーブルの件数をそのまま返す)。種別ごとの内訳は含めない\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)、3D(Unity)のプロセスの同じ値、PC全体の使用中メモリ、搭載RAM。取得できなければ各値が null\n- vram: 3Dが使っているGPUの専用ビデオメモリ使用量(GPU全体と3Dのプロセス分、現在値のみ)。容量は environment.gpu_memory_bytes\n- environment: CPU・GPU名と専用メモリ容量・OS・演算デバイス。GPU情報が取得できなければ null",
         "operationId": "get_system_stats_api_v1_stats_system_get",
         "responses": {
           "200": {
@@ -9435,7 +9616,7 @@
           "grading"
         ],
         "summary": "Preview Grading Endpoint",
-        "description": "造成範囲の審査と見積もり（何も作らない）。\n\nリクエスト: {\"polygon\": [[x, z], ...]}（3点以上。閉じていなくてよい）\n応答: valid・reasons（理由コードの配列）・kind・variant・parcel_type・target_height・area・\ncut_volume・fill_volume・quay_length・quay_area・work_volume・estimated_construction_cost・\nstandard_construction_cost（常に null）・estimated_duration_days・next_epoch_construction_budget・\nconstruction_supply_ratio・expected_duration_days と資金審査の affordable・required_total・\navailable_funds・funds_shortfall・unlimited。",
+        "description": "造成範囲の審査と見積もり（何も作らない）。\n\nリクエスト: {\"polygon\": [[x, z], ...], \"height_offset\": 数値（省略可・既定0）}。\npolygon は3点以上で閉じていなくてよい。height_offset は整地の目標高さの基準高さからのずれ(m)で、\n埋立は無視する。\n応答: valid・reasons（理由コードの配列）・kind・variant・parcel_type・target_height・\nbase_height（基準高さ。測れなければ null）・base_kind（\"frontage\"=接道の高さ / \"terrain_mean\"=範囲の\n現況の平均高さ / \"sea_top\"=埋立の天端。測れなければ null）・height_offset（適用したずれ。埋立は0）・area・\ncut_volume・fill_volume・quay_length・quay_area・work_volume・estimated_construction_cost・\nstandard_construction_cost（常に null）・estimated_duration_days・next_epoch_construction_budget・\nconstruction_supply_ratio・expected_duration_days と資金審査の affordable・required_total・\navailable_funds・funds_shortfall・unlimited。",
         "operationId": "preview_grading_endpoint_api_v1_grading_preview_post",
         "requestBody": {
           "content": {
@@ -9519,7 +9700,7 @@
           "grading"
         ],
         "summary": "Get Grading Estimate",
-        "description": "既存の造成主体の見積もり（工事中の詳細ウィンドウ用）。プレビューと同じキー（valid=true・\nreasons=[]）に agent_id・parcel_id・status を足して返す。造成主体でなければ 404 NOT_FOUND。",
+        "description": "既存の造成主体の見積もり（工事中の詳細ウィンドウ用）。プレビューと同じキー（valid=true・\nreasons=[]）に agent_id・parcel_id・status を足して返す。target_height は発注時に保存した値で、\nbase_height・base_kind・height_offset は null。造成主体でなければ 404 NOT_FOUND。",
         "operationId": "get_grading_estimate_api_v1_grading__agent_id__get",
         "parameters": [
           {
@@ -11399,6 +11580,43 @@
         "title": "NotificationsResponse",
         "description": "L1通知一覧レスポンス。"
       },
+      "PickRequest": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "automobile",
+              "pedestrian"
+            ],
+            "title": "Mode"
+          },
+          "path_id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Path Id"
+          },
+          "forward": {
+            "type": "boolean",
+            "title": "Forward"
+          },
+          "previous_path_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Previous Path Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mode",
+          "path_id",
+          "forward"
+        ],
+        "title": "PickRequest"
+      },
       "PopulationReport": {
         "properties": {
           "before": {
@@ -12023,14 +12241,6 @@
           "nodes": {
             "type": "integer",
             "title": "Nodes"
-          },
-          "transit_lines": {
-            "type": "integer",
-            "title": "Transit Lines"
-          },
-          "epochs": {
-            "type": "integer",
-            "title": "Epochs"
           }
         },
         "type": "object",
@@ -12040,9 +12250,7 @@
           "zones",
           "parcels",
           "paths",
-          "nodes",
-          "transit_lines",
-          "epochs"
+          "nodes"
         ],
         "title": "SystemEntityCounts"
       },
@@ -12174,6 +12382,30 @@
         ],
         "title": "SystemEpochStats"
       },
+      "SystemGraphicMemory": {
+        "properties": {
+          "current_bytes": {
+            "type": "integer",
+            "title": "Current Bytes"
+          },
+          "peak_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Peak Bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_bytes"
+        ],
+        "title": "SystemGraphicMemory"
+      },
       "SystemMemory": {
         "properties": {
           "current_bytes": {
@@ -12208,6 +12440,27 @@
               }
             ],
             "title": "System Total Bytes"
+          },
+          "used_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Used Bytes"
+          },
+          "graphic": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SystemGraphicMemory"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -12231,6 +12484,16 @@
           "memory": {
             "$ref": "#/components/schemas/SystemMemory"
           },
+          "vram": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SystemVram"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "environment": {
             "$ref": "#/components/schemas/SystemEnvironment"
           }
@@ -12242,6 +12505,30 @@
           "environment"
         ],
         "title": "SystemStatsResponse"
+      },
+      "SystemVram": {
+        "properties": {
+          "used_bytes": {
+            "type": "integer",
+            "title": "Used Bytes"
+          },
+          "graphic_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graphic Bytes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "used_bytes"
+        ],
+        "title": "SystemVram"
       },
       "TemplateModeRequest": {
         "properties": {

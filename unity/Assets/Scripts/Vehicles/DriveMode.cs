@@ -68,6 +68,7 @@ public sealed class DriveMode : MonoBehaviour
         paths = FindAnyObjectByType<PathManager>();
         if (cameraRef == null || paths == null) return;
         BindEvents();
+        CitizenFollow.Instance?.Stop(true);
         CameraController.Instance?.SetFlyMode(false);
         RadialMenuController.Instance?.CloseAndCancel();
         savedPosition = cameraRef.transform.position; savedRotation = cameraRef.transform.rotation;

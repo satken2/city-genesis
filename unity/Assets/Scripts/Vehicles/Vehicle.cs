@@ -183,6 +183,7 @@ public sealed class VehiclePolyline
 public class Vehicle
 {
     public int pathId, vehicleType, variantId, lane;
+    public int previousPath = -1, previousPath2 = -1;   // 直前に通ってきたパス(1つ前・2つ前)。クリックした個体の市民の抽選に渡す
     public bool forward;
     public float s, speed, age, distanceSinceJunction;
     public float motionRemaining, motionFreeSpeed;

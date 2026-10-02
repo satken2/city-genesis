@@ -45,7 +45,9 @@
     "grading": "부지 조성",
     "scenario_manager": "시나리오 관리",
     "scenario_metadata": "소개 정보",
-    "tutorial_intro": "튜토리얼"
+    "tutorial_intro": "튜토리얼",
+    "citizen_detail": "시민",
+    "citizen_tracking": "추적 목록"
   },
   "cityMap": {
     "layers": {
@@ -118,7 +120,8 @@
     "budgetMeterLabel": "예산",
     "budgetMeterTooltip": "예산 전망 / 현금성 자산",
     "scoreMeterLabel": "점수",
-    "scoreMeterTooltip": "시정 점수(1가구당 / 만점 2.0)"
+    "scoreMeterTooltip": "시정 점수(1가구당 / 만점 2.0)",
+    "menuCitizenTracking": "추적 목록"
   },
   "topmenu": {
     "coreConnectionFailed": "연결 실패",

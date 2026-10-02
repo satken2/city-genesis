@@ -69,7 +69,7 @@ public sealed class RopewayCabinManager : MonoBehaviour
         var store = RopewayNetworkStore.Ensure();
         if (session != store.Session) { Clear(); session = store.Session; clock = 0; }
         if (GameStateManager.Instance == null || !GameStateManager.Instance.IsGameStarted()) { Clear(); return; }
-        clock += Time.unscaledDeltaTime;
+        clock += Time.unscaledDeltaTime * TrafficClock.Scale;
         if (paths == null) paths = FindAnyObjectByType<PathManager>();
         if (paths == null || Camera.main == null || CameraCellChecker.Instance == null || MasterDataStore.Instance == null) return;
         center = CameraCellChecker.Instance.CurrentWorldPosition;

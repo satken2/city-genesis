@@ -646,6 +646,14 @@ pub async fn handle_incoming_message(
             // camera:query_state への応答で、問い合わせ1回につき1回だけ流れる。
             let _ = app.emit("camera:state", envelope.payload);
         }
+        "citizen:follow_state" => {
+            // 市民の追従の開始・終了(Unity側のEscや編集モードへの移行を含む)を、市民パネルと追跡リストのカメラボタンへ中継する。
+            let _ = app.emit("citizen:follow_state", envelope.payload);
+        }
+        "citizen:pick_failed" => {
+            // クリックした車・歩行者の市民を推定できなかった理由。常駐するコックピットが通知で案内する。
+            let _ = app.emit_to(window::LABEL_COCKPIT, "citizen:pick_failed", envelope.payload);
+        }
         "camera:thumbnail_captured" => {
             // camera:capture_thumbnail(保存直前の撮影)への応答。頼んだウィンドウが id で自分の要求を見分ける。
             let _ = app.emit("camera:thumbnail_captured", envelope.payload);

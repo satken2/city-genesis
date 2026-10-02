@@ -130,6 +130,10 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `remove_object:confirm_result`  | `ui -> graphic`  | 上記の確認ダイアログの回答（`{ object_type, id, accepted }`。accepted は 1/0）。承諾なら Unity が `DELETE /api/v1/props/scatters/{id}` を発行して差分リロードする。取消でも必ず返し、Unity 側の確認待ちを解除する |
 | `edit_connector:show`           | `ui -> graphic`  | 経済主体詳細パネル(AgentDetailPanel)の表示中、施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`）を Unity 上に色付きマーカーで読み取り専用ハイライトする。`{ agent_id, infra_node_id, depot_node_id }` を含む。`infra_node_id == depot_node_id`（共用接続ノード）ならマーカーは1つ。0 のノードIDは表示しない |
 | `edit_connector:hide`           | `ui -> graphic`  | 接続端子ノードのハイライト表示をクリアする。Unity は接続点編集モード（`STATE_EDIT_CONNECTOR`）中だった場合のみ、モードを終了して通常モードへ戻す。他のステート中はハイライトを消すだけ（`agent_detail` は建物建設などの編集ウィンドウと同時に開けるため、素の `STATE_NORMAL` だとそちらのステートまで打ち切る。`edit_path:cancel_topology_edit` と同じ考え方）。パネルが別エージェントへ遷移したときは UI が、ウィンドウが閉じられたときは Rust（`window.rs`）が送る |
+| `citizen:follow`                | `ui -> graphic`  | 市民の追従を始める（`{citizen_id}`）。市民パネル・追跡リストのカメラボタンが送る。Unity は行程を `GET /api/v1/citizens/{id}/itinerary` で自分で取り、指名した車・歩行者とカメラで追う（経路を MMF で運ばない）。行程が届いたら交通演出の一時停止を解除する。詳細は[市民の追跡](市民の追跡.md) |
+| `citizen:unfollow`              | `ui -> graphic`  | 市民の追従をやめる（`{citizen_id}`）。指名した個体は通常の交通に戻り、カメラはその場から通常操作に戻る。追従していなければ、その市民の `citizen:follow_state`（`following: false`）を返し直す（UIが終了の通知を取りこぼしていてもボタンを戻せるように） |
+| `citizen:follow_state`          | `graphic -> ui`  | 追従の開始・終了（`{citizen_id, following}`）。UI の要求のほか、Esc・WASD・編集モードやドライブ・撮影の開始・セッションの終了など Unity 側の理由で終わったときも送る。Rust は全ウィンドウへ中継し、市民パネルと追跡リストがカメラボタンの表示を合わせる |
+| `citizen:pick_failed`           | `graphic -> ui`  | 一時停止中にクリックした車・歩行者の市民を推定できなかった、または追従の行程を取れなかった理由（`{status}`。コアの `not_ready` / `busy` / `none` / `missing` / `no_home`、通信の失敗は `error`）。Rust は常駐する `cockpit` だけへ中継し、コックピットが通知で案内する |
 | `game:time_update`              | `graphic -> ui`  | ゲーム内時間（エポック・日付）の更新通知                  |
 | `system:backend_connection`     | `ui -> graphic`  | `{connected: boolean}`。Tauriが確認したコアの接続・互換状態。状態変更時と `system:graphic_ready` の応答時に送り、Unityは都市表示を保持したまま入力とHTTP更新要求を止める。周期送信はしない。IPC契約2から必須 |
 | `system:shutdown`               | `ui -> graphic`  | グラフィックプログラムを終了する                      |
@@ -168,6 +172,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | 天然資源ラベル | `resource_detail` | `resource` | 資源エリアID |
 | インターチェンジ名ラベル | `intersection_detail` | `interchange` | インターチェンジID（`GET /api/v1/interchanges/{id}` の `interchange_id`） |
 | 道路名ラベル | `road_detail` | `road` | 道路（名前付き道路）ID（`GET /api/v1/roads/{id}` の `road_id`） |
+| 一時停止中の自家用車・歩行者 | `citizen_detail` | `citizen` | コアが抽選した市民ID（`POST /api/v1/citizens/pick`。[市民の追跡](市民の追跡.md)） |
 
 インターチェンジ（IC/JCT）はバックエンドがランプから自動検出するもので（[道路網のインターチェンジとジャンクション](../economics/3_道路網.md#インターチェンジとジャンクション)）、Unityは道路の閲覧状態（道路・地形の入力モードがともに通常）のときだけ中心にラベルを出す。編集中はラベルを隠すので、このイベントが道路編集のクリックと競合することはない。`intersection_detail` は名前と種別、どの道路からどの道路へ行けるかの接続図を表示するパネルで、カメラ移動などのアクションは持たない。
 

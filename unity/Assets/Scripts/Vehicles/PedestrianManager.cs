@@ -11,7 +11,7 @@ using GeneratedModels;
 /// 追従・信号・衝突判定は持たず、歩行者は互いにも車にもすり抜ける。
 /// 実体はGameObjectを持たず、毎フレーム Graphics.RenderMeshInstanced で描く。
 /// </summary>
-public sealed class PedestrianManager : MonoBehaviour
+public sealed partial class PedestrianManager : MonoBehaviour
 {
     [SerializeField] private PathManager pathManager;
     [SerializeField] private CameraCellChecker cameraCellChecker;
@@ -134,6 +134,7 @@ public sealed class PedestrianManager : MonoBehaviour
             if (walkWorker == null) walkWorker = RenderWorkScheduler.Start(this, ScanWalks(center), "pedestrianWalks", () => false);
             scanTimer = Mathf.Max(.1f, rangeScanInterval);
         }
+        if (TrafficClock.Paused) return;
         MovePedestrians(dt, center);
         densityTimer += dt;
         // 制御周期を固定し、フレームごとの確率の切り捨て・上限依存を避ける。
@@ -160,6 +161,7 @@ public sealed class PedestrianManager : MonoBehaviour
 
     private void ClearPedestrians()
     {
+        if (FollowedPedestrian != null) EndFollowRun();
         active.Clear();
         walks.Clear(); buckets.Clear(); bucketByPath.Clear();
         population.Reset(); scanTimer = 0; densityTimer = 0;
@@ -488,7 +490,7 @@ public sealed class PedestrianManager : MonoBehaviour
         float best = float.NegativeInfinity;
         foreach (var p in active)
         {
-            if (p.arrivalPending || p.fading || p.Entering || p.age < minimumJourneyTime) continue;
+            if (p == FollowedPedestrian || p.arrivalPending || p.fading || p.Entering || p.age < minimumJourneyTime) continue;
             float surplus = 0;
             if (bucketByPath.TryGetValue(p.pathId, out var b))
             {
@@ -605,7 +607,7 @@ public sealed class PedestrianManager : MonoBehaviour
                 if (!p.InConnector && p.arrivalDistance >= 0 && p.arrivalDistance < .001f)
                 {
                     var entry = new Entrance { parcel = p.destinationParcel, building = p.destinationBuilding, destination = p.destinationPoint };
-                    if (ValidEntrance(entry, p.pathId)) p.BeginEntering(p.destinationPoint);
+                    if (p == FollowedPedestrian || ValidEntrance(entry, p.pathId)) p.BeginEntering(p.destinationPoint);
                     else { p.arrivalDistance = -1; p.destinationParcel = 0; }
                     continue;
                 }
@@ -625,7 +627,7 @@ public sealed class PedestrianManager : MonoBehaviour
             }
             p.moving = p.walked > walkedBefore;
             if (invalid || p.fadeElapsed >= Mathf.Max(.01f, fadeDuration)) { Despawn(i); continue; }
-            if (!p.Entering)
+            if (!p.Entering && p != FollowedPedestrian)
             {
                 p.Sample(out Vector3 position, out _);
                 if (Utils.XZDistanceSquared(position, center) > radius * radius) Despawn(i);
@@ -641,6 +643,7 @@ public sealed class PedestrianManager : MonoBehaviour
     {
         PathSummary current = pathManager.GetPathData(p.pathId);
         if (current == null) return false;
+        if (p == FollowedPedestrian) return FollowTransition(p);
         int node = p.forward ? current.end_node_id : current.start_node_id;
         candidates.Clear();
         float total = 0;
@@ -669,7 +672,14 @@ public sealed class PedestrianManager : MonoBehaviour
                 if (pick <= 0) { chosen = i; break; }
             }
         }
-        var next = candidates[chosen].walk; bool nextForward = candidates[chosen].forward;
+        MoveToWalk(p, candidates[chosen].walk, candidates[chosen].forward);
+        return true;
+    }
+
+    /// <summary>次の道路の歩行帯へ移る。進行方向に対する左右を保って次のパスの幾何フレームへ写し、交差点を接続点列で渡る。</summary>
+    private void MoveToWalk(Pedestrian p, Walk next, bool nextForward)
+    {
+        if (next.data.path_id != p.pathId) { p.previousPath2 = p.previousPath; p.previousPath = p.pathId; }
         p.Sample(out Vector3 p0, out Vector3 t0);
         // 進行方向に対する左右(+1=右)を保って次のパスの幾何フレームへ写す。
         int travelSide = p.side == 0 ? (Random.value < .5f ? -1 : 1) : p.side * (p.forward ? 1 : -1);
@@ -681,10 +691,13 @@ public sealed class PedestrianManager : MonoBehaviour
         p.Sample(out Vector3 p1, out Vector3 t1);
         p.connector = VehiclePolyline.Connector(p0, t0, p1, t1, connectorTension);
         p.connectorS = 0;
-        return true;
     }
 
-    private void Despawn(int index) => active.RemoveAt(index);
+    private void Despawn(int index)
+    {
+        if (active[index] == FollowedPedestrian) EndFollowRun();
+        active.RemoveAt(index);
+    }
 
     private void LateUpdate()
     {

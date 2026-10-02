@@ -20,6 +20,19 @@ export const IPC_EVENT_WEATHER_STATE = "weather:state";
 export async function openDriveMode(labels: Record<string, string>): Promise<void> {
   await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "drive:open", params: labels });
 }
+/**
+ * 市民の追従をUnityで始める。指名する車・歩行者と経路はUnityがコアの推定(行程)から作り、カメラで追う。
+ * 開始・終了の通知は `citizen:follow_state` で返る(Unity側のEscや編集モードへの移行で終わったときも届く)。
+ */
+export async function sendCitizenFollow(windowType: string, citizenId: number): Promise<void> {
+  await invoke("send_window_action", { windowType, entity: null, action: "citizen:follow", params: { citizen_id: citizenId } });
+}
+/** 追従をやめる。Unity は追従していなくても `citizen_id` の終了を通知し直す(取りこぼした終了の通知で固まったボタンを戻すため)。 */
+export async function sendCitizenUnfollow(windowType: string, citizenId: number): Promise<void> {
+  await invoke("send_window_action", { windowType, entity: null, action: "citizen:unfollow", params: { citizen_id: citizenId } });
+}
+export const IPC_EVENT_CITIZEN_FOLLOW_STATE = "citizen:follow_state";
+export const IPC_EVENT_CITIZEN_PICK_FAILED = "citizen:pick_failed";
 export async function sendAmbienceVolume(volume: number): Promise<void> {
   await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "ambience:volume", params: { volume } });
 }

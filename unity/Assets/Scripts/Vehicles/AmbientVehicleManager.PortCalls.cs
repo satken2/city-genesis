@@ -37,7 +37,7 @@ public sealed partial class AmbientVehicleManager
         public float cruise;                // 港外の航路の速さ [m/s]
         public float stay;                  // 接岸している時間 [s]
         public float s;                     // 出発点からの進み [m]。total で接岸
-        public float leavesAt = -1f;        // 停泊を終える時刻(Time.time)。接岸するまで負
+        public float leavesAt = -1f;        // 停泊を終える時刻(TrafficClock.Time)。接岸するまで負
     }
 
     private sealed class CityEnvelope { public CityEpoch city; }
@@ -320,7 +320,7 @@ public sealed partial class AmbientVehicleManager
         {
             call.s = history[i];
             PlacePortShip(v);
-            v.wake.Record(v.position, v.Direction, Time.time - i * Step, Step);
+            v.wake.Record(v.position, v.Direction, TrafficClock.Time - i * Step, Step);
         }
         call.s = target;
     }
@@ -331,8 +331,8 @@ public sealed partial class AmbientVehicleManager
         PortCall call = v.call;
         if (call.s >= call.total)
         {
-            if (call.leavesAt < 0f) call.leavesAt = Time.time + call.stay;
-            else if (Time.time > call.leavesAt && (v.position - camera).sqrMagnitude > DrawDistance * DrawDistance) v.dead = true;
+            if (call.leavesAt < 0f) call.leavesAt = TrafficClock.Time + call.stay;
+            else if (TrafficClock.Time > call.leavesAt && (v.position - camera).sqrMagnitude > DrawDistance * DrawDistance) v.dead = true;
             return;
         }
         v.speed = PortSpeed(call, call.s);
