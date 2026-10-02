@@ -673,6 +673,10 @@
       "tip35": {
         "title": "Un error costoso",
         "description": "Una vez que empiezas a construir una carretera o un edificio, no es fácil cambiarlo de lugar. Planifica bien antes de comenzar. Aunque una carretera que quedó curva por accidente también puede darle personalidad a tu ciudad cuando te acostumbras a verla."
+      },
+      "tip36": {
+        "title": "Sociedad de vigilancia",
+        "description": "Haz clic en peatones o vehículos para añadir ciudadanos a tu lista de seguimiento. Echa un vistazo a la vida cotidiana de los habitantes de tu ciudad."
       }
     }
   },

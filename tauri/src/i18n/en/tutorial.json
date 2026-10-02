@@ -673,6 +673,10 @@
       "tip35": {
         "title": "A Costly Blunder",
         "description": "Once built, roads and buildings cannot be moved easily. Plan carefully before breaking ground. Though an unintentionally curved road can become part of the city's charm once you get used to it."
+      },
+      "tip36": {
+        "title": "Surveillance Society",
+        "description": "Click on pedestrians or vehicles to add citizens to your watchlist. Take a look at the daily lives of your city's residents."
       }
     }
   },

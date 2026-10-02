@@ -38,6 +38,7 @@ import tip32 from "../../assets/images/tips/tip_32.jpg";
 import tip33 from "../../assets/images/tips/tip_33.jpg";
 import tip34 from "../../assets/images/tips/tip_34.jpg";
 import tip35 from "../../assets/images/tips/tip_35.jpg";
+import tip36 from "../../assets/images/tips/tip_36.jpg";
 import reloadIcon from "../../assets/images/menu/tray_reload.png";
 
 type TipItem = {
@@ -81,6 +82,7 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip33", image: tip33 },
   { id: "tip34", image: tip34 },
   { id: "tip35", image: tip35 },
+  { id: "tip36", image: tip36 },
 ];
 
 export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" }) {

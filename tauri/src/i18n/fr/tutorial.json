@@ -673,6 +673,10 @@
       "tip35": {
         "title": "Une erreur coûteuse",
         "description": "Une fois la construction commencée, il n'est pas facile de déplacer une route ou un bâtiment. Planifiez bien avant de commencer. Mais une route courbée par mégarde peut aussi donner du caractère à votre ville, une fois que vous vous y êtes habitué."
+      },
+      "tip36": {
+        "title": "Société de surveillance",
+        "description": "Cliquez sur des piétons ou des véhicules pour ajouter des citoyens à votre liste de suivi. Observez quel genre de vie mènent les habitants de votre ville."
       }
     }
   },
