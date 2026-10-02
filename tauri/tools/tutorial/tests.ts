@@ -87,6 +87,14 @@ check(await findPhase(basic, env), 5, "saved road survives closed panel");
     check(step.phases[await findPhase(step, env)].id, phaseId, "second segment can be placed after selecting its variant");
   }
 }
+{
+  const stations = DEFINITIONS.scenario4.steps[1];
+  for (const [id, west, east] of [["town", -240, -140], ["new", 360, 440]] as const) {
+    const [a, b] = stations.phases.find(p => p.id === id)!.world.markers!;
+    check(a[0] === b[0] && west < a[0] && a[0] < east && a[2] < -20 && b[2] > -20, true, "station markers cross the platform at a right angle");
+    check(Math.hypot(b[0] - a[0], b[2] - a[2]) <= 60, true, "station markers keep entrances beside the platform");
+  }
+}
 env.bindings["support.housing.building"] = { kind: "agents", id: 30 };
 env.facts.windows.detail = { visible: true, window: "agent_detail", entity: 31 };
 const house = { type: "window" as const, window: "agent_detail", target: "support.housing.building" };

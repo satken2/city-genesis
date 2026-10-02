@@ -320,7 +320,7 @@ export function PathBuildSections({
             </div>
           )}
           <div className="pc-actions">
-            <button className="pc-btn" type="button" onClick={handleOpenShapeEditor}>
+            <button data-guide="path.shapeEditor" className="pc-btn" type="button" onClick={handleOpenShapeEditor}>
               {t("path_construction.openShapeEditor")}
             </button>
             <button data-guide="path.cancel" className="pc-btn" type="button" onClick={onCancel}>

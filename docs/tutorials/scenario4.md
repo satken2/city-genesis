@@ -12,7 +12,7 @@ ID: `scenario4.platforms`
 
 ID: `scenario4.stations`
 
-案内の定義は `tutorial.scenario4.step2`。完了条件は checks.station_town, checks.station_new。
+案内の定義は `tutorial.scenario4.step2`。完了条件は checks.station_town, checks.station_new。駅舎は西[-230,0,-40]→[-230,0,20]、東[430,0,-40]→[430,0,20]でホームを直角に横断し、両側の入口をホームの近くに置く。
 
 ## 3. 買収区間を計画
 
@@ -54,7 +54,7 @@ ID: `scenario4.depot`
 
 ID: `scenario4.branch`
 
-案内の定義は `tutorial.scenario4.step9`。完了条件は checks.depot_rail。通常の編集ツールで曲線・中間点・高さ・制御点を調整する。原本の接続端子と本線合流点を結び、勾配と曲率の通常の検証に合格した曲線経路だけを認める。短い直線で急に高さを変えず、線形表示の違反箇所を見ながら距離と接線を調整する。
+案内の定義は `tutorial.scenario4.step9`。完了条件は checks.depot_rail。通常の編集ツールで曲線・中間点・高さ・制御点を調整する。敷設段階は `path.shapeEditor`・`path.plan`・`path.profile` を許可し、2Dの平面図・縦断面も編集できる。原本の接続端子と本線合流点を結び、勾配と曲率の通常の検証に合格した曲線経路だけを認める。短い直線で急に高さを変えず、線形表示の違反箇所を見ながら距離と接線を調整する。
 
 ## 10. 既設発電所から給電
 

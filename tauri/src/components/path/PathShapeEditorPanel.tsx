@@ -342,7 +342,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   return (
     <div className="pse">
-      <section className="pse-plan">
+      <section className="pse-plan" data-guide="path.plan" tabIndex={0} onPointerDownCapture={e => e.currentTarget.focus()}>
         <div className="pse-section-header">
           <span className="pse-section-title">{t("path_shape_editor.planTitle")}</span>
           <span className={`pse-hint ${editing ? "" : "pse-hint--muted"}`}>{hint}</span>

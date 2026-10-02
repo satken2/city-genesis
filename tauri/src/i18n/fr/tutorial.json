@@ -151,15 +151,15 @@
       },
       "step2": {
         "title": "Construire les accès des gares",
-        "description": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages.",
-        "open": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages.",
-        "variant": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages.",
-        "start": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages.",
-        "end": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages.",
-        "confirm": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages.",
-        "town": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages.",
-        "new": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages.",
-        "east": "Choisissez une gare simple et reliez chaque paire de repères en traversant son quai, vers les logements ou la route principale. Confirmez les deux passages."
+        "description": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "open": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "variant": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "start": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "end": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "confirm": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "town": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "new": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "east": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages."
       },
       "step3": {
         "title": "Planifier la section à acquérir",

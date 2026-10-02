@@ -151,15 +151,15 @@
       },
       "step2": {
         "title": "Construye entradas de estación",
-        "description": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
-        "open": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
-        "variant": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
-        "start": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
-        "end": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
-        "confirm": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
-        "town": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
-        "new": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes.",
-        "east": "Elige una estación sencilla y une cada par de marcadores cruzando su plataforma, con acceso hacia las viviendas o la avenida. Confirma ambos pasajes."
+        "description": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes.",
+        "open": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes.",
+        "variant": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes.",
+        "start": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes.",
+        "end": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes.",
+        "confirm": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes.",
+        "town": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes.",
+        "new": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes.",
+        "east": "Elige Edificio de estación sencillo. Une cada par de marcadores con un pasaje corto que cruce la plataforma. Coloca las entradas justo a ambos lados de la plataforma. Marca los extremos con clic izquierdo, termina con clic derecho y confirma ambos pasajes."
       },
       "step3": {
         "title": "Planea el tramo con adquisición",

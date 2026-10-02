@@ -22,6 +22,11 @@ await build({ entryPoints: ["tools/tutorial/component-tests.tsx"], outfile: comp
   plugin.onResolve({ filter: /\/?(tutorialSteps|useTutorialGuide|notification)$/ }, args => args.importer.replaceAll("\\", "/").endsWith("/src/components/tutorial/Tutorial.tsx") ? { path: mock } : undefined);
 } }] });
 await import(pathToFileURL(componentOutput).href + `?run=${Date.now()}`);
+const shapeOutput = resolve("node_modules/.cache/tutorial-shape-editor-tests.mjs");
+await build({ entryPoints: ["tools/tutorial/shape-editor-tests.tsx"], outfile: shapeOutput, bundle: true, platform: "node", format: "esm", packages: "external", loader: { ".css": "empty" }, define: { "import.meta.env.DEV": "false" }, alias: { "@tauri-apps/api/event": mock, "@tauri-apps/api/core": mock, "react-i18next": mock }, plugins: [{ name: "shape-editor-map-boundary", setup(plugin) {
+  plugin.onResolve({ filter: /\/CityMapCanvas$/ }, () => ({ path: resolve("tools/tutorial/shape-map-mock.tsx") }));
+} }] });
+await import(pathToFileURL(shapeOutput).href + `?run=${Date.now()}`);
 const registry = JSON.parse(await readFile("src-tauri/config/window-registry.json", "utf8"));
 const LANGS = ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"];
 const SCENARIOS = ["basic", "controls", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];

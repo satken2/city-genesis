@@ -209,7 +209,7 @@ export function PathProfileStrip({ shape, geom, editing, onLocalHeightChange }: 
   }, [draw]);
 
   return (
-    <div className="pse-profile">
+    <div className="pse-profile" data-guide="path.profile" tabIndex={0} onPointerDownCapture={e => e.currentTarget.focus()}>
       <div className="pse-section-header">
         <span className="pse-section-title">{t("path_shape_editor.profileTitle")}</span>
         <span className={`pse-hint ${editing ? "" : "pse-hint--muted"}`}>

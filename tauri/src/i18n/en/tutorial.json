@@ -151,15 +151,15 @@
       },
       "step2": {
         "title": "Build station entrances",
-        "description": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
-        "open": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
-        "variant": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
-        "start": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
-        "end": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
-        "confirm": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
-        "town": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
-        "new": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages.",
-        "east": "Choose Simple station building. Connect each pair of markers so the passage crosses its platform and reaches the residential or main-road side. Confirm both station passages."
+        "description": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "open": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "variant": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "start": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "end": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "confirm": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "town": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "new": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "east": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages."
       },
       "step3": {
         "title": "Plan the acquisition section",
