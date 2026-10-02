@@ -1,0 +1,482 @@
+{
+  "version": 1,
+  "id": "controls",
+  "steps": [
+    {
+      "id": "controls.cockpit",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "tools",
+          "textKey": "tutorial.controls.step1.tools",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.visibility",
+              "hud.map",
+              "hud.bulldozer",
+              "hud.drive"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.tools"
+          }
+        },
+        {
+          "id": "services",
+          "textKey": "tutorial.controls.step1.services",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.publicServices"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.services"
+          }
+        },
+        {
+          "id": "status",
+          "textKey": "tutorial.controls.step1.status",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.score",
+              "hud.budget"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.status"
+          }
+        },
+        {
+          "id": "notifications",
+          "textKey": "tutorial.controls.step1.notifications",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.notifications",
+              "hud.date"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls.display",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.controls.step2.open",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.visibility"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "window",
+            "window": "display_options"
+          }
+        },
+        {
+          "id": "tabs",
+          "textKey": "tutorial.controls.step2.tabs",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "display.tabs"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "display.tabs"
+          }
+        },
+        {
+          "id": "modes",
+          "textKey": "tutorial.controls.step2.modes",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "display.modes"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls.icons",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "road",
+          "textKey": "tutorial.controls.step3.road",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.road"
+          }
+        },
+        {
+          "id": "land",
+          "textKey": "tutorial.controls.step3.land",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.land"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.land"
+          }
+        },
+        {
+          "id": "grading",
+          "textKey": "tutorial.controls.step3.grading",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.grading"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.grading"
+          }
+        },
+        {
+          "id": "district",
+          "textKey": "tutorial.controls.step3.district",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.district"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.district"
+          }
+        },
+        {
+          "id": "construction",
+          "textKey": "tutorial.controls.step3.construction",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.construction"
+          }
+        },
+        {
+          "id": "construction_projects",
+          "textKey": "tutorial.controls.step3.constructionProjects",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction_projects"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.construction_projects"
+          }
+        },
+        {
+          "id": "transport",
+          "textKey": "tutorial.controls.step3.transport",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.transport"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.transport"
+          }
+        },
+        {
+          "id": "regulation",
+          "textKey": "tutorial.controls.step3.regulation",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.regulation"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.regulation"
+          }
+        },
+        {
+          "id": "city",
+          "textKey": "tutorial.controls.step3.city",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.city"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.city"
+          }
+        },
+        {
+          "id": "finance",
+          "textKey": "tutorial.controls.step3.finance",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.finance"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.finance"
+          }
+        },
+        {
+          "id": "stat",
+          "textKey": "tutorial.controls.step3.stat",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.stat"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.stat"
+          }
+        },
+        {
+          "id": "prop_placement",
+          "textKey": "tutorial.controls.step3.propPlacement",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.prop_placement"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls.epoch",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "flow",
+          "textKey": "tutorial.controls.step4.flow",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "epoch.flow"
+          }
+        },
+        {
+          "id": "execute",
+          "textKey": "tutorial.controls.step4.execute",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls.camera",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "move",
+          "textKey": "tutorial.controls.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls.viewmodes",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "modes",
+          "textKey": "tutorial.controls.step6.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls.boundary",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "edge",
+          "textKey": "tutorial.controls.step7.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                500,
+                0,
+                0
+              ],
+              "distance": 520,
+              "yaw": 90,
+              "pitch": 35
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    }
+  ]
+}

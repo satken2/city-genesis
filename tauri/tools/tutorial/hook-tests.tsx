@@ -70,6 +70,26 @@ await settle(() => root.render(<Harness scenario="scenario3" step={4} save="F" /
 assert.equal(snapshot()?.phaseId, "open");
 await settle(async () => { assert.equal(await guide!.check(), true); });
 assert.ok(fixture.actions >= 1, "the commissioning action ran before the completion check");
+// ページ送り: 「次へ」(advance)でフェーズが進み、最終ページでは false を返して達成確認(check)へ回る。
+await settle(() => root.render(<Harness scenario="controls" step={1} save="G" />));
+assert.equal(snapshot()?.phaseId, "tools");
+await settle(async () => { assert.equal(await guide!.advance(), true); });
+assert.equal(snapshot()?.phaseId, "services");
+await settle(async () => { assert.equal(await guide!.advance(), true); assert.equal(await guide!.advance(), true); });
+assert.equal(snapshot()?.phaseId, "notifications");
+await settle(async () => { assert.equal(await guide!.advance(), false); assert.equal(await guide!.check(), true); });
+// 表示パネルを閉じると先頭へ戻り、開き直したときにページを読み直せる。
+await settle(() => root.render(<Harness scenario="controls" step={2} save="H" />));
+assert.equal(snapshot()?.phaseId, "open");
+await settle(async () => { assert.equal(await guide!.advance(), false); });
+await settle(() => emit("tutorial:window_visibility", { label: "display", window: "display_options", visible: true }));
+assert.equal(snapshot()?.phaseId, "tabs");
+await settle(async () => { assert.equal(await guide!.advance(), true); });
+assert.equal(snapshot()?.phaseId, "modes");
+await settle(() => emit("tutorial:window_visibility", { label: "display", window: "display_options", visible: false }));
+assert.equal(snapshot()?.phaseId, "open");
+await settle(() => emit("tutorial:window_visibility", { label: "display", window: "display_options", visible: true }));
+assert.equal(snapshot()?.phaseId, "tabs", "reopening the panel replays the tab page");
 fixture.onAction = undefined;
 await settle(() => root.unmount());
 assert.equal(snapshot()?.active, false);

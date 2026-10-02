@@ -22,6 +22,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
   const [debug, setDebug] = useState("");
   const [attempt, setAttempt] = useState(0);
   const checkRef = useRef<() => Promise<boolean>>(async () => false);
+  const advanceRef = useRef<() => Promise<boolean>>(async () => false);
 
   useEffect(() => {
     if (!active || !saveId || !base || !definition || !master) { setReady(!definition); setTextKey(undefined); return; }
@@ -31,7 +32,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
     let stored: { bindings: Bindings; pendingCreates?: Record<string, boolean>; setupDone?: boolean };
     try { stored = JSON.parse(localStorage.getItem(key) ?? '{"bindings":{}}'); } catch { stored = { bindings: {} }; }
     stored.pendingCreates ??= {};
-    const facts: Facts = { windows: {} };
+    const facts: Facts = { windows: {}, pages: {} };
     const unlisten: (() => void)[] = [];
     let queue = Promise.resolve();
     setReady(false); setFailed(false); setTextKey(undefined);
@@ -55,12 +56,27 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
     const reconcile = async () => {
       if (!env || !step || disposed) return;
       const index = await findPhase(step, env);
+      // 前の段階へ戻ったら、戻り先以降のページ送りを未送信に戻す。パネルを閉じて開き直したときに説明を最初から読み直せる。
+      if (index < phaseIndex) for (const phase of step.phases.slice(index)) if (phase.until.type === "page") delete facts.pages![phase.until.id];
       if (index !== phaseIndex) await publish(index);
     };
     async function subscribe<T>(event: string, handler: (payload: T) => void) {
       const stop = await listen<T>(event, e => handler(e.payload));
       if (disposed) stop(); else unlisten.push(stop);
     }
+    // 「次へ」がページ送りだったかを返す(送れなかった失敗も含む)。false のときは呼び出し側が達成条件を確かめる。
+    advanceRef.current = async () => {
+      if (!env || disposed) return false;
+      try {
+        await queue;
+        await reconcile();
+        const until = step?.phases[phaseIndex]?.until;
+        if (until?.type !== "page") return false;
+        facts.pages![until.id] = true;
+        await reconcile();
+        return true;
+      } catch (error) { fail(error); return true; }
+    };
     checkRef.current = async () => {
       if (!env || disposed) return false;
       try {
@@ -112,7 +128,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
       setReady(true);
     })().catch(fail);
     return () => {
-      disposed = true; unlisten.forEach(stop => stop()); checkRef.current = async () => false;
+      disposed = true; unlisten.forEach(stop => stop()); checkRef.current = async () => false; advanceRef.current = async () => false;
       const cleared: Snapshot = { active: false, runId, revision: (current?.revision ?? 0) + 1, saveId, scenario, stepId: "", phaseId: "", ui: idleUi, world: { mode: "observe" } };
       acceptSnapshot(cleared);
       void emit(GUIDE_STATE, cleared).catch(console.error);
@@ -121,5 +137,5 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
   }, [active, scenario, stepNumber, saveId, base, attempt, definition, step, master]);
 
   return { managed: !!step, hasSetup: !!definition?.setup, ready: definition ? ready : true, failed, textKey, debug,
-    check: () => checkRef.current(), retry: () => setAttempt(a => a + 1) };
+    check: () => checkRef.current(), advance: () => advanceRef.current(), retry: () => setAttempt(a => a + 1) };
 }

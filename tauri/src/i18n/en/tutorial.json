@@ -24,6 +24,55 @@
         "description": "Like roads, buildings don't complete instantly. It's still under construction, so advance time and wait for it to finish."
       }
     },
+    "controls": {
+      "title": "Basic Controls",
+      "description": "Learn the cockpit, the display panel and the icon panel, how epochs advance time, how to move the camera, and where the city boundary is.",
+      "step1": {
+        "title": "Look at the cockpit",
+        "tools": "Let's look at the cockpit. The highlighted buttons are the everyday tools. \"View\" opens the display panel and \"Map\" opens a map of the whole city. \"Bulldozer\" is a mode that removes empty parcels and planned buildings and roads, and \"Drive\" lets you travel through the city and look around. When you've read this, press \"Next\".",
+        "services": "This is the public service gauge. It shows whether supply capacity is keeping up with demand. Demand grows as the city grows, so check it from time to time. Press \"Next\".",
+        "status": "\"Score\" is your governance score (per household, out of 2.0). \"Budget\" shows the expected budget for this period and your cash on hand. Press \"Next\".",
+        "notifications": "Events in the city arrive at the \"Notifications\" button. The date and weather are shown here too. That's the cockpit. Press \"Next\"."
+      },
+      "step2": {
+        "title": "Open the display panel",
+        "open": "Press \"View\" in the cockpit to open the display panel.",
+        "tabs": "The vertical tabs are display layers. Use them to switch what you want to look at. Press \"Next\".",
+        "modes": "Each tab has buttons that switch how it is displayed. Use them when you want to see the state of the city in a particular way. Leave the panel open and press \"Next\"."
+      },
+      "step3": {
+        "title": "Look at the icon panel",
+        "road": "Let's go through the icon panel one icon at a time. \"Roads, Rail & Infrastructure\" lays roads, tracks, power lines, water pipes and other paths. Press \"Next\" to move on to the next icon.",
+        "land": "\"Land Parcels\" creates the parcels on which buildings are built.",
+        "grading": "\"Earthworks\" adjusts the ground height to create flat land and reclaimed land.",
+        "district": "\"District\" groups parcels into districts and restricts which kinds of buildings can be built.",
+        "construction": "\"Construction\" is where you plan homes, shops, factories, public facilities and other buildings.",
+        "constructionProjects": "\"Construction Projects\" lists planned and ongoing works, grouped by tag.",
+        "transport": "\"Public Transport\" creates and manages bus, rail and other lines.",
+        "regulation": "\"Regulations\" sets speed limits, the initial building regulations for new districts, immigration conditions, social security and repair settings.",
+        "city": "\"Policies\" sets taxes such as income tax, business tax and consumption tax.",
+        "finance": "\"Financial Policy\" sets quantitative easing and shows the financial state: money supply, GDP, prices and more.",
+        "stat": "\"Statistics\" shows statistics such as population and commuting as charts.",
+        "propPlacement": "\"Prop Placement\" places scenic props (small objects) on the terrain. That's the end of the icon panel. Press \"Next\"."
+      },
+      "step4": {
+        "title": "Advance time with epochs",
+        "flow": "Time in this game advances in units called epochs. Before each epoch, you allocate the budget and make construction plans. When your plans are ready, press \"Start\" to run the simulation.",
+        "execute": "The city does not change until you press \"Start\", so you can take your time planning. The city moves only while an epoch runs, and the results are shown when it ends. You don't need to press it now; when you've finished reading, press \"Next\"."
+      },
+      "step5": {
+        "title": "Move the camera",
+        "description": "You can move the camera like this: drag with the left button to move the view, drag with the right button to rotate, W/A/S/D (or the arrow keys) to move, Q/E to rotate, R/F to change the height, and the mouse wheel to zoom. Try it freely, then press \"Next\"."
+      },
+      "step6": {
+        "title": "Fly mode and cinema mode",
+        "description": "The camera has two special modes. \"Fly mode\" starts with Shift+F: move along your view with W/A/S/D, look around with the mouse, and go up or down with R/F. Press Shift+F again to leave it. \"Cinema mode\" starts from the button in the top-right corner of the screen and lets you circle around the city. Shift switches between orbiting and travelling, Space pauses, Backspace reverses, and Esc exits. When you've tried them, exit both modes and press \"Next\"."
+      },
+      "step7": {
+        "title": "See the city boundary",
+        "description": "We moved the camera to the east edge of the city. The area you can use as a city is this rectangle where detailed terrain exists, and the camera cannot leave it either. That's all for the basic controls. Press \"Next\" to finish the tutorial."
+      }
+    },
     "scenario2": {
       "title": "Set Up Districts",
       "description": "The town wants to mine an ore deposit, but other buildings could occupy the land. In this tutorial, you'll learn how to locate natural resources, divide the town into districts, and restrict which types of buildings can be built.",
@@ -304,6 +353,7 @@
     },
     "intro": {
       "basic": "People are hoping to start a new life in this town, but there aren't enough homes to welcome them. In this tutorial, you'll learn the full process of planning roads and buildings, advancing time, and seeing construction through to completion.",
+      "controls": "You have just taken office as mayor, and a wide stretch of land lies ahead of you. Before you start building, it helps to know how to read the screen and how to operate the basics. In this tutorial, you'll learn what the cockpit and the icon panel do, how epochs advance time, how to move the camera, and where the city boundary is.",
       "scenario2": "An ore deposit has been found in a corner of town. Unless the land is protected, other buildings could go up on top of it. In this tutorial, you'll learn how to locate natural resources, divide the town into districts, and restrict which types of buildings can be built.",
       "scenario3": "The people of this town live in homes without electricity. They want to turn on lights and use appliances, but the facilities to generate power and deliver it to their homes are missing. In this tutorial, you'll learn how to build a power plant and a substation, connect them with power lines, and check that electricity reaches homes.",
       "scenario4": "Residents walk from their homes to work at a grocery store in a distant commercial building. They've asked for transport to help with the journey each day. In this tutorial, you'll learn how to build stations, tracks, a depot, and power lines, open a railway route, and check its ridership.",

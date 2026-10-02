@@ -23,7 +23,7 @@ export async function showNotification({ message }: { message: string }) { notif
 export const TUTORIAL_SCENARIOS = [{ id: "basic", steps: [1, 2, 3].map(id => ({ id, image: "", titleKey: `step${id}`, descriptionKey: `description${id}` })) }];
 /** 画面部品の試験では進行管理を差し替え、「次へ」がそのまま合格するようにする。 */
 export function useTutorialGuide() {
-  return { managed: true, hasSetup: false, ready: true, failed: false, textKey: undefined, debug: "", check: async () => true, retry: () => {} };
+  return { managed: true, hasSetup: false, ready: true, failed: false, textKey: undefined, debug: "", check: async () => true, advance: async () => false, retry: () => {} };
 }
 export async function createEnvironment(_base: string, _save: string, bindings: Bindings, pendingCreates: Record<string, boolean>, facts: Facts, _master: unknown, checkpoint: () => void, assertCurrent: () => void): Promise<Environment> {
   return { bindings, pendingCreates, facts, checkpoint, assertCurrent, constants: { ...constants, TUTORIAL_STREET: 221 },

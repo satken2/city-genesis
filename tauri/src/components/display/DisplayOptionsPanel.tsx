@@ -426,7 +426,7 @@ export function DisplayOptionsPanel({ apiBaseUrl: _apiBaseUrl }: DisplayOptionsP
     <div className="do-panel-root">
       <div className="do-panel-frame">
         {/* 縦タブリスト */}
-        <div className="do-tabs">
+        <div className="do-tabs" data-guide="display.tabs">
           {orderedLayers.map((layer) => {
             const sel = selections[layer.id];
             const modeDef = layer.modes.find((m) => m.id === sel.mode);
@@ -506,7 +506,7 @@ function LayerSection({
 
   return (
     <div className="do-section">
-      <div className="do-mode-row">
+      <div className="do-mode-row" data-guide="display.modes">
         {layer.modes.map((mode) => (
           <ModeButton
             key={mode.id}

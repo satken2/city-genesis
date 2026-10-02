@@ -160,6 +160,7 @@ export function PublicServiceGauges({
     <button
       type="button"
       className="psg"
+      data-guide="hud.publicServices"
       title={t("publicServiceGauge.tooltip")}
       onClick={onOpen}
     >

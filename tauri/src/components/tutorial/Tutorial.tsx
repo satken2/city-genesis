@@ -252,6 +252,11 @@ export function Tutorial() {
 
     setCheckState("checking");
     try {
+      // ページ送りの段階では、次の段階へ進めるだけでステップは完了しない
+      if (await guide.advance()) {
+        setCheckState("idle");
+        return;
+      }
       const passed = await guide.check();
       if (passed) {
         setCheckState("success");

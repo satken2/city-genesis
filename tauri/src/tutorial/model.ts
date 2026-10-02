@@ -7,6 +7,7 @@ export type Bindings = Record<string, Ref>;
 export type Match = { field: string; equals?: Value; notEquals?: Value; oneOf?: Value[]; greaterThan?: number };
 export type Condition =
   | { type: "ack" }
+  | { type: "page"; id: string }
   | { type: "all" | "any"; conditions: Condition[] }
   | { type: "window"; window: string; target?: string }
   | { type: "pathVariant"; value: Value }
@@ -43,6 +44,8 @@ export type Facts = {
   pathShape?: { selected_points: number[][]; phase: string; is_curved?: boolean };
   /** HUDの常駐モード(地区編集・ブルドーザ)。通常状態は未設定。 */
   hudMode?: "district" | "bulldozer";
+  /** 「次へ」で送り終えたページ(`page` 条件のid)。ステップを始め直すと空に戻る。 */
+  pages?: Record<string, boolean>;
 };
 export type Snapshot = {
   active: boolean; runId: string; revision: number; saveId: string; scenario: string;

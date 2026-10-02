@@ -9,12 +9,13 @@ import mining from "./definitions/mining.json";
 import tourism from "./definitions/tourism.json";
 import reclamation from "./definitions/reclamation.json";
 import acquisition from "./definitions/acquisition.json";
+import controls from "./definitions/controls.json";
 
-import type { Definition } from "./model";
+import type { Condition, Definition } from "./model";
 import * as constants from "../constants";
 
 /** DOMの構造や翻訳文ではなく、登録済みの操作名だけを定義で指定する。 */
-export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "hud.grading", "agent.demolish", "path.type", "path.variant", "path.followTerrain", "path.platformSide", "path.back", "path.confirm", "path.cancel", "building.category", "building.variant", "building.back", "building.cancel", "building.confirm", "parcel.mode", "parcel.clear", "parcel.confirm", "transit.new", "transit.type", "transit.fare", "transit.headway", "transit.confirm", "transit.cancel", "window.path_build", "window.agent_detail"];
+export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "hud.grading", "hud.map", "hud.bulldozer", "hud.drive", "hud.notifications", "hud.budget", "hud.publicServices", "hud.score", "hud.date", "hud.construction_projects", "hud.regulation", "hud.city", "hud.finance", "hud.stat", "hud.prop_placement", "display.tabs", "display.modes", "agent.demolish", "path.type", "path.variant", "path.followTerrain", "path.platformSide", "path.back", "path.confirm", "path.cancel", "building.category", "building.variant", "building.back", "building.cancel", "building.confirm", "parcel.mode", "parcel.clear", "parcel.confirm", "transit.new", "transit.type", "transit.fare", "transit.headway", "transit.confirm", "transit.cancel", "window.path_build", "window.agent_detail"];
 /** 同じ名前の要素が並ぶ操作。`名前:値`(値はカテゴリ番号・バリアント番号・地形追従の設定値・ホーム設置側の値・区画の作成方法の名前)で1つだけを指せる。 */
 export const VALUE_TARGETS = ["path.type", "path.variant", "path.followTerrain", "path.platformSide", "building.category", "building.variant", "parcel.mode"];
 /** 値が番号でない操作の書式(それ以外の値は数字)。 */
@@ -39,14 +40,22 @@ export function validateDefinition(value: unknown): asserts value is Definition 
     if (node.type === "create" && node.resource === "parcels" && (node.body as Record<string, unknown>).mode !== "empty_area") throw new Error("Tutorial parcels use empty_area (one returned ID)");
     if (node.type === "create" && node.resource === "paths" && (!Array.isArray((node.body as Record<string, unknown>).paths) || ((node.body as Record<string, unknown>).paths as unknown[]).length !== 1)) throw new Error("Create one bound path per action");
   });
-  const ids = new Set<string>(), indices = new Set<number>();
+  const ids = new Set<string>(), indices = new Set<number>(), pageIds = new Set<string>();
   for (const step of definition.steps) {
     if (ids.has(step.id) || indices.has(step.legacyStep)) throw new Error(`Duplicate step: ${step.id}`);
     ids.add(step.id); indices.add(step.legacyStep);
     const phases = new Set<string>();
-    for (const phase of step.phases) {
+    const pageIn = (condition: Condition | undefined) => { let found = false; walk(condition, node => { if (node.type === "page") found = true; }); return found; };
+    if (pageIn(step.complete)) throw new Error(`page cannot be a completion condition: ${step.id}`);
+    for (const [index, phase] of step.phases.entries()) {
       if (phases.has(phase.id)) throw new Error(`Duplicate phase: ${phase.id}`);
       phases.add(phase.id);
+      // ページ送りは「次へ」だけで進む。最終段階は「次へ」がステップの完了になるので置けず、他の条件とも組み合わせない。
+      if (pageIn(phase.until)) {
+        if (phase.until.type !== "page" || index === step.phases.length - 1) throw new Error(`page must be the whole condition of a non-last phase: ${phase.id}`);
+        if (pageIds.has(phase.until.id)) throw new Error(`Duplicate page: ${phase.until.id}`);
+        pageIds.add(phase.until.id);
+      }
       for (const target of [...phase.ui.allow, ...phase.ui.highlight]) {
         const colon = target.indexOf(":");
         const name = colon < 0 ? target : target.slice(0, colon), value = colon < 0 ? undefined : target.slice(colon + 1);
@@ -62,4 +71,4 @@ export function validateDefinition(value: unknown): asserts value is Definition 
   }
 }
 export const DEFINITIONS: Record<string, Definition> = {};
-for (const value of [basic, district, infra, rail, trade, highway, mining, tourism, reclamation, acquisition]) { validateDefinition(value); DEFINITIONS[value.id] = value; }
+for (const value of [basic, district, infra, rail, trade, highway, mining, tourism, reclamation, acquisition, controls]) { validateDefinition(value); DEFINITIONS[value.id] = value; }

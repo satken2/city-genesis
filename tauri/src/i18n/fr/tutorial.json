@@ -24,6 +24,55 @@
         "description": "Comme la route, le bâtiment ne se termine pas immédiatement. Il est encore en projet : faites avancer le temps et attendez son achèvement."
       }
     },
+    "controls": {
+      "title": "Commandes de base",
+      "description": "Découvrez le cockpit, le panneau d'affichage et le panneau d'icônes, le fonctionnement des époques, le déplacement de la caméra et les limites de la ville.",
+      "step1": {
+        "title": "Découvrir le cockpit",
+        "tools": "Découvrons le cockpit. Les boutons en surbrillance sont les outils du quotidien. « Affichage » ouvre le panneau d'affichage et « Carte » ouvre la carte de toute la ville. « Bulldozer » est un mode qui supprime les terrains vides ainsi que les bâtiments et routes en projet, et « Balade » permet de parcourir la ville pour l'observer. Une fois la lecture terminée, appuyez sur « Suivant ».",
+        "services": "Voici la jauge des services publics. Elle indique si la capacité d'offre suffit à répondre à la demande. La demande augmente avec la ville, alors vérifiez-la de temps en temps. Appuyez sur « Suivant ».",
+        "status": "« Score » est votre score de gouvernance (par foyer, sur 2,0). « Budget » indique le budget prévu pour cette période et la trésorerie disponible. Appuyez sur « Suivant ».",
+        "notifications": "Les événements de la ville arrivent sur le bouton des notifications. La date et la météo s'affichent aussi ici. Voilà pour le cockpit. Appuyez sur « Suivant »."
+      },
+      "step2": {
+        "title": "Ouvrir le panneau d'affichage",
+        "open": "Appuyez sur « Affichage » dans le cockpit pour ouvrir le panneau d'affichage.",
+        "tabs": "Les onglets verticaux sont des couches d'affichage. Utilisez-les pour choisir ce que vous voulez observer. Appuyez sur « Suivant ».",
+        "modes": "Chaque onglet propose des boutons qui changent la manière de l'afficher. Utilisez-les pour voir l'état de la ville sous l'angle voulu. Laissez le panneau ouvert et appuyez sur « Suivant »."
+      },
+      "step3": {
+        "title": "Découvrir le panneau d'icônes",
+        "road": "Passons en revue le panneau d'icônes, une icône à la fois. « Routes, voies ferrées et infrastructures » sert à tracer routes, voies, lignes électriques, canalisations d'eau et autres tracés. Appuyez sur « Suivant » pour passer à l'icône suivante.",
+        "land": "« Parcelles » crée les parcelles sur lesquelles on construit les bâtiments.",
+        "grading": "« Terrassement » ajuste la hauteur du terrain pour créer des terrains plats et des terres gagnées sur la mer.",
+        "district": "« Quartiers » regroupe des parcelles en quartiers et limite les types de bâtiments constructibles.",
+        "construction": "« Construction » permet de planifier logements, commerces, usines, équipements publics et autres bâtiments.",
+        "constructionProjects": "« Projets de construction » liste les chantiers prévus et en cours, regroupés par étiquette.",
+        "transport": "« Transports publics » permet de créer et de gérer des lignes de bus, de train et autres.",
+        "regulation": "« Réglementations » règle les limitations de vitesse, les règles de construction initiales des nouveaux quartiers, les conditions d'immigration, la protection sociale et les réparations.",
+        "city": "« Politiques » règle les impôts, comme l'impôt sur le revenu, l'impôt sur les entreprises et la taxe de consommation.",
+        "finance": "« Politique monétaire » règle l'assouplissement quantitatif et montre la situation financière : masse monétaire, PIB, prix, etc.",
+        "stat": "« Statistiques » présente sous forme de graphiques des données comme la population et les trajets domicile-travail.",
+        "propPlacement": "« Placement de décors » place des décors (petits objets) sur le terrain. C'est tout pour le panneau d'icônes. Appuyez sur « Suivant »."
+      },
+      "step4": {
+        "title": "Faire avancer le temps avec les époques",
+        "flow": "Dans ce jeu, le temps avance par unités appelées époques. Avant chaque époque, vous répartissez le budget et établissez vos plans de construction. Quand vos plans sont prêts, appuyez sur « Démarrer » pour lancer la simulation.",
+        "execute": "La ville ne change pas tant que vous n'appuyez pas sur « Démarrer » : vous pouvez donc planifier tranquillement. La ville n'évolue que pendant l'exécution d'une époque, et les résultats s'affichent à la fin. Inutile d'appuyer maintenant ; une fois la lecture terminée, appuyez sur « Suivant »."
+      },
+      "step5": {
+        "title": "Déplacer la caméra",
+        "description": "Voici comment déplacer la caméra : faites glisser avec le bouton gauche pour déplacer la vue, avec le bouton droit pour la faire pivoter, utilisez W/A/S/D (ou les flèches) pour avancer, Q/E pour pivoter, R/F pour changer la hauteur et la molette de la souris pour zoomer. Essayez librement, puis appuyez sur « Suivant »."
+      },
+      "step6": {
+        "title": "Mode vol et mode cinéma",
+        "description": "La caméra dispose de deux modes spéciaux. Le « mode vol » s'active avec Maj+F : avancez dans la direction de votre regard avec W/A/S/D, regardez autour de vous avec la souris et montez ou descendez avec R/F. Appuyez de nouveau sur Maj+F pour en sortir. Le « mode cinéma » se lance depuis le bouton en haut à droite de l'écran et permet de tourner autour de la ville. Maj alterne entre orbite et déplacement, Espace met en pause, Retour arrière inverse et Échap quitte. Une fois les essais terminés, quittez les deux modes et appuyez sur « Suivant »."
+      },
+      "step7": {
+        "title": "Voir les limites de la ville",
+        "description": "Nous avons déplacé la caméra vers le bord est de la ville. La zone utilisable comme ville est ce rectangle où existe un terrain détaillé, et la caméra ne peut pas en sortir non plus. C'est tout pour les commandes de base. Appuyez sur « Suivant » pour terminer le tutoriel."
+      }
+    },
     "scenario2": {
       "title": "Configurons les quartiers",
       "description": "La ville veut exploiter un gisement, mais d'autres bâtiments pourraient occuper le terrain. Ce tutoriel vous permettra d'apprendre à repérer les ressources naturelles, à créer des quartiers et à limiter les types de bâtiments autorisés.",
@@ -304,6 +353,7 @@
     },
     "intro": {
       "basic": "Des familles aimeraient commencer une nouvelle vie dans cette ville, mais les logements manquent pour les accueillir. Ce tutoriel vous permettra d'apprendre à planifier des routes et des bâtiments, à faire avancer le temps et à mener leur construction jusqu'à son terme.",
+      "controls": "Vous venez de prendre vos fonctions de maire, et un vaste terrain s'étend devant vous. Avant de commencer à construire, mieux vaut savoir lire l'écran et maîtriser les commandes de base. Ce tutoriel vous permet de découvrir le rôle du cockpit et du panneau d'icônes, la façon dont les époques font avancer le temps, le déplacement de la caméra et les limites de la ville.",
       "scenario2": "Un gisement de minerai a été découvert dans un secteur de la ville. Sans protection, d'autres bâtiments risquent d'être construits dessus. Ce tutoriel vous permettra d'apprendre à repérer les ressources naturelles, à créer des quartiers et à limiter les types de bâtiments autorisés.",
       "scenario3": "Les habitants de cette ville vivent sans électricité. Ils voudraient allumer leurs lampes et utiliser leurs appareils, mais les installations pour produire et acheminer le courant manquent. Ce tutoriel vous permettra d'apprendre à construire une centrale et un poste de transformation, à les relier par des lignes électriques et à vérifier que le courant arrive aux foyers.",
       "scenario4": "Les habitants se rendent à pied dans une épicerie située dans un immeuble commercial éloigné pour travailler. Ils demandent un moyen de transport pour leurs trajets quotidiens. Ce tutoriel vous permettra d'apprendre à aménager des gares, des voies, un dépôt et des lignes électriques, à ouvrir une ligne ferroviaire et à vérifier sa fréquentation.",

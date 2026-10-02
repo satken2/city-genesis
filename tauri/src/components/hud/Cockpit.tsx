@@ -290,7 +290,7 @@ export function Cockpit() {
           {cityName || "—"}
         </button>
         <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
-        <div className="cockpit-date-weather">
+        <div className="cockpit-date-weather" data-guide="hud.date">
           <span className="cockpit-date">{formattedDate}</span>
           <WeatherStatus weather={weather} editable={templateMode} failed={weatherFailed} onSelect={selectWeather} />
         </div>

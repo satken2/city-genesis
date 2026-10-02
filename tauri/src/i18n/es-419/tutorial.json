@@ -24,6 +24,55 @@
         "description": "El edificio, igual que la calle, no se termina de inmediato. Todavía está en proyecto, así que avancemos el tiempo y esperemos a que se complete."
       }
     },
+    "controls": {
+      "title": "Controles básicos",
+      "description": "Conoce la cabina, el panel de visualización y el panel de iconos, cómo avanzan las épocas, cómo mover la cámara y dónde está el límite de la ciudad.",
+      "step1": {
+        "title": "Conoce la cabina",
+        "tools": "Veamos la cabina. Los botones resaltados son las herramientas de uso diario. «Visualización» abre el panel de visualización y «Mapa» abre un mapa de toda la ciudad. «Bulldozer» es un modo que elimina parcelas vacías y obras planeadas, y «Paseo» te permite recorrer la ciudad y mirar a tu alrededor. Cuando termines de leer, pulsa «Siguiente».",
+        "services": "Este es el medidor de servicios públicos. Indica si la capacidad de oferta alcanza para la demanda. La demanda crece junto con la ciudad, así que revísalo de vez en cuando. Pulsa «Siguiente».",
+        "status": "«Puntaje» es tu puntaje de gestión (por hogar, sobre 2.0). «Presupuesto» muestra el presupuesto previsto de este período y el efectivo disponible. Pulsa «Siguiente».",
+        "notifications": "Los sucesos de la ciudad llegan al botón de notificaciones. Aquí también se ven la fecha y el clima. Eso es todo sobre la cabina. Pulsa «Siguiente»."
+      },
+      "step2": {
+        "title": "Abre el panel de visualización",
+        "open": "Pulsa «Visualización» en la cabina para abrir el panel de visualización.",
+        "tabs": "Las pestañas verticales son capas de visualización. Úsalas para cambiar lo que quieres mirar. Pulsa «Siguiente».",
+        "modes": "Cada pestaña tiene botones que cambian la forma de mostrarla. Úsalos cuando quieras ver el estado de la ciudad de una manera concreta. Deja el panel abierto y pulsa «Siguiente»."
+      },
+      "step3": {
+        "title": "Conoce el panel de iconos",
+        "road": "Repasemos el panel de iconos, un icono a la vez. «Calles, ferrocarril e infraestructura» sirve para tender calles, vías, líneas eléctricas, tuberías de agua y otros trazados. Pulsa «Siguiente» para pasar al siguiente icono.",
+        "land": "«Parcelas» crea las parcelas donde se construyen los edificios.",
+        "grading": "«Movimiento de tierras» ajusta la altura del terreno para crear terreno llano y terrenos ganados al mar.",
+        "district": "«Distritos» agrupa parcelas en distritos y limita qué tipos de edificios se pueden construir.",
+        "construction": "«Construcción» sirve para planificar viviendas, comercios, fábricas, instalaciones públicas y otros edificios.",
+        "constructionProjects": "«Proyectos de construcción» muestra las obras planeadas y en curso, agrupadas por etiqueta.",
+        "transport": "«Transporte público» crea y administra líneas de autobús, ferrocarril y otras.",
+        "regulation": "«Normativas» configura los límites de velocidad, las normas de edificación iniciales de los distritos nuevos, las condiciones de inmigración, la seguridad social y las reparaciones.",
+        "city": "«Políticas» configura impuestos como el impuesto a la renta, el impuesto a las empresas y el impuesto al consumo.",
+        "finance": "«Política monetaria» configura la flexibilización cuantitativa y muestra la situación financiera: oferta monetaria, PIB, precios y más.",
+        "stat": "«Estadísticas» muestra en gráficos datos como la población y los desplazamientos al trabajo.",
+        "propPlacement": "«Colocación de props» coloca props decorativos (objetos pequeños) sobre el terreno. Con esto termina el panel de iconos. Pulsa «Siguiente»."
+      },
+      "step4": {
+        "title": "Avanza el tiempo con las épocas",
+        "flow": "En este juego el tiempo avanza en unidades llamadas épocas. Antes de cada época, distribuyes el presupuesto y haces planes de construcción. Cuando los planes estén listos, pulsa «Iniciar» para ejecutar la simulación.",
+        "execute": "La ciudad no cambia hasta que pulses «Iniciar», así que puedes planificar con calma. La ciudad solo se mueve mientras se ejecuta una época, y al terminar se muestran los resultados. No hace falta pulsarlo ahora; cuando termines de leer, pulsa «Siguiente»."
+      },
+      "step5": {
+        "title": "Mueve la cámara",
+        "description": "Así puedes mover la cámara: arrastra con el botón izquierdo para desplazar la vista, arrastra con el derecho para girar, usa W/A/S/D (o las flechas) para moverte, Q/E para girar, R/F para cambiar la altura y la rueda del ratón para acercar o alejar. Pruébalo con libertad y luego pulsa «Siguiente»."
+      },
+      "step6": {
+        "title": "Modo vuelo y modo cine",
+        "description": "La cámara tiene dos modos especiales. El «modo vuelo» se activa con Shift+F: avanza en la dirección de tu vista con W/A/S/D, mira alrededor con el ratón y sube o baja con R/F. Vuelve a pulsar Shift+F para salir. El «modo cine» se inicia con el botón de la esquina superior derecha de la pantalla y te permite rodear la ciudad. Shift alterna entre órbita y desplazamiento, Espacio pausa, Retroceso invierte y Esc sale. Cuando los hayas probado, sal de ambos modos y pulsa «Siguiente»."
+      },
+      "step7": {
+        "title": "Mira el límite de la ciudad",
+        "description": "Movimos la cámara al extremo este de la ciudad. El área que puedes usar como ciudad es este rectángulo donde existe terreno detallado, y la cámara tampoco puede salir de él. Eso es todo sobre los controles básicos. Pulsa «Siguiente» para terminar el tutorial."
+      }
+    },
     "scenario2": {
       "title": "Configuremos los distritos",
       "description": "El pueblo quiere aprovechar un yacimiento, pero otros edificios podrían ocupar el terreno. En este tutorial aprenderás a localizar recursos naturales, dividir el pueblo en distritos y limitar los tipos de edificios que pueden construirse.",
@@ -304,6 +353,7 @@
     },
     "intro": {
       "basic": "Hay personas que esperan empezar una nueva vida en este pueblo, pero faltan viviendas para recibirlas. En este tutorial aprenderás todo el proceso de planificar calles y edificios, avanzar el tiempo y completar su construcción.",
+      "controls": "Acabas de asumir como alcalde y frente a ti se extiende un amplio terreno. Antes de empezar a construir, conviene saber cómo leer la pantalla y manejar lo básico. En este tutorial aprenderás para qué sirven la cabina y el panel de iconos, cómo las épocas hacen avanzar el tiempo, cómo mover la cámara y dónde está el límite de la ciudad.",
       "scenario2": "Se encontró un yacimiento de mineral en un sector del pueblo. Si no se protege el terreno, podrían construirse otros edificios sobre él. En este tutorial aprenderás a localizar recursos naturales, dividir el pueblo en distritos y limitar los tipos de edificios que pueden construirse.",
       "scenario3": "Las familias de este pueblo viven sin electricidad. Quieren encender las luces y usar sus electrodomésticos, pero faltan las instalaciones para generar energía y llevarla a sus casas. En este tutorial aprenderás a construir una central eléctrica y una subestación, conectarlas con líneas de transmisión y comprobar que la electricidad llegue a los hogares.",
       "scenario4": "Los habitantes caminan desde sus casas hasta una tienda de alimentos en un edificio comercial lejano para trabajar. Han pedido un transporte que los ayude en sus viajes diarios. En este tutorial aprenderás a construir estaciones, vías, un depósito ferroviario y líneas eléctricas, abrir una ruta de tren y comprobar su uso por los pasajeros.",

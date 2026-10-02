@@ -81,6 +81,7 @@ export function ScoreMiniMeter({
     <button
       type="button"
       className="hud-mini-meter"
+      data-guide="hud.score"
       onClick={onOpen}
       title={t("taskbar.scoreMeterTooltip")}
     >

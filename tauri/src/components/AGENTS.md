@@ -90,7 +90,7 @@
 - BGM再生、3Dのオブジェクト選択受信、Unityの確認要求`remove_object:request_confirm`は`Cockpit`だけが受ける。確認結果は取消でも必ず`sendRemoveObjectConfirmResult`で返す(返さないとUnityが待ち続ける)。
 - ブルドーザは神モード(`useHudSession().templateMode`。シナリオ制作とチュートリアルでONになる)のとき、`STATE_REMOVE_OBJECTS`に`instant_remove: true`を付けて開始する。建物・道路を確認なしに即時削除させるモードで、ヒント(`hint.bulldozerInstant`)とツールチップ(`taskbar.bulldozerInstantOn/Off`)も専用の文言に切り替える。Unityは神モードかを知らないので、判断はこのUIが持つ。
 - 地区統合の確認は`IconPanel`が`edit_zone:request_merge`を受けて開く。
-- チュートリアルの定義(`../tutorial/definitions/*.json`)はHUDのボタンIDを操作名 `hud.<id>` として強調・許可に使う。アイコンのIDを変える/消す前に定義と `../tutorial/definitions.ts` の登録表を確認する(消えるとその段階でボタンを押せなくなる)。
+- チュートリアルの定義(`../tutorial/definitions/*.json`)はHUDのボタンIDを操作名 `hud.<id>` として強調・許可に使う。アイコンのIDを変える/消す前に定義と `../tutorial/definitions.ts` の登録表を確認する(消えるとその段階でボタンを押せなくなる)。ボタンでない要素(公共サービスのメーター・スコアメーター・日付と天気・表示パネルの縦タブと表示モード列)は `data-guide` を付けて操作名で指す。祖先に `data-guide` を付けると、その中のボタンは `hud.<id>` で解決されなくなる。
 
 ## 個別パネルの契約(知らないと壊すもの)
 

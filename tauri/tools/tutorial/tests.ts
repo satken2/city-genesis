@@ -322,4 +322,36 @@ if (process.env.TUTORIAL_API_TEST_URL) {
   status.land = true;
   check(await evaluate(land.complete!, projects), true, "finished reclaimed land passes");
 }
+{
+  const page = fake();
+  check(await evaluate({ type: "page", id: "x" }, page), false, "a page is unsent at first");
+  page.facts.pages = { x: true };
+  check(await evaluate({ type: "page", id: "x" }, page), true, "a sent page passes");
+  check(await evaluate({ type: "page", id: "y" }, page), false, "other pages stay unsent");
+  const cockpit = DEFINITIONS.controls.steps.find(s => s.id === "controls.cockpit")!, view = fake();
+  view.facts.pages = {};
+  check(await findPhase(cockpit, view), 0, "the cockpit tour starts at the first page");
+  view.facts.pages["cockpit.tools"] = true;
+  check(await findPhase(cockpit, view), 1, "a sent page moves to the next phase");
+  view.facts.pages["cockpit.services"] = true; view.facts.pages["cockpit.status"] = true;
+  check(await findPhase(cockpit, view), cockpit.phases.length - 1, "all pages sent stops at the last phase");
+  delete view.facts.pages["cockpit.services"];
+  check(await findPhase(cockpit, view), 1, "an unsent page holds the tour back");
+  const display = DEFINITIONS.controls.steps.find(s => s.id === "controls.display")!, panel = fake();
+  panel.facts.pages = { "display.tabs": true };
+  check(await findPhase(display, panel), 0, "the display tour waits for the panel to open");
+  panel.facts.windows.display = { window: "display_options", visible: true };
+  check(await findPhase(display, panel), 2, "the open panel with its page sent reaches the last phase");
+  const icons = DEFINITIONS.controls.steps.find(s => s.id === "controls.icons")!;
+  check(icons.phases.map(p => p.ui.highlight.length), icons.phases.map(() => 1), "each icon page highlights exactly one icon");
+  check(new Set(icons.phases.map(p => p.ui.highlight[0])).size, icons.phases.length, "icon pages highlight distinct icons");
+  check(DEFINITIONS.controls.steps.every(s => s.phases.every(p => p.ui.policy === "highlight" && p.world.mode === "observe")), true, "the controls tutorial only observes");
+  for (const mutate of [
+    (d: any) => { d.steps[0].phases[d.steps[0].phases.length - 1].until = { type: "page", id: "last" }; },
+    (d: any) => { d.steps[0].phases[1].until = d.steps[0].phases[0].until; },
+    (d: any) => { d.steps[0].complete = { type: "page", id: "done" }; },
+    (d: any) => { d.steps[0].phases[0].until = { type: "all", conditions: [{ type: "page", id: "a" }, { type: "ack" }] }; },
+    (d: any) => { d.steps[0].phases[0].until = { type: "page" }; },
+  ]) { const d = structuredClone(DEFINITIONS.controls); mutate(d); throws(() => validateDefinition(d), "invalid page usage rejected"); }
+}
 console.log(`PASS: ${checks} tutorial checks`);

@@ -18,6 +18,7 @@ import miningScenarioThumbnail from "../../assets/images/scenarios/mining.png";
 import tourismScenarioThumbnail from "../../assets/images/scenarios/tourism.png";
 import reclamationScenarioThumbnail from "../../assets/images/scenarios/reclamation.svg";
 import acquisitionScenarioThumbnail from "../../assets/images/scenarios/acquisition.svg";
+import controlsScenarioThumbnail from "../../assets/images/scenarios/controls.svg";
 import roadStepImage from "../../assets/images/tutorial/step2.png";
 import roadActiveStepImage from "../../assets/images/tutorial/step4.png";
 import parcelStepImage from "../../assets/images/tutorial/step5.png";
@@ -49,10 +50,11 @@ export interface TutorialScenario {
 }
 
 /** 一覧の並び順(学ぶ順) */
-const SCENARIO_ORDER = ["basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
+const SCENARIO_ORDER = ["basic", "controls", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
 
 const THUMBNAILS: Record<string, string> = {
   basic: basicScenarioThumbnail,
+  controls: controlsScenarioThumbnail,
   scenario2: scenario2Thumbnail,
   scenario3: scenario3Thumbnail,
   scenario4: scenario4Thumbnail,

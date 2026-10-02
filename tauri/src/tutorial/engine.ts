@@ -48,6 +48,7 @@ export async function evaluate(condition: Condition, env: Environment): Promise<
   env.assertCurrent();
   switch (condition.type) {
     case "ack": return true;
+    case "page": return env.facts.pages?.[condition.id] === true;
     case "all":
     case "any": {
       // allが途中で失敗したときに一部の束縛だけを残さない。
