@@ -100,22 +100,28 @@ export function ScenarioSignWindow({ apiBaseUrl, scenarioId, onClose }: {
     {entry && <h3>{scenarioDisplayTitle(entry, i18n.language)}</h3>}
     <p className="scenario-hint">{t("scenarios.signing.hint")}</p>
     {error && <p className="scenario-error" role="alert">{error}</p>}
-    <label className="scenario-sign-row"><span>{t("scenarios.signing.mode")}</span>
-      <select value={encrypt ? "pack" : "sign"} disabled={busy || !available || !!entry?.required_packs?.length}
-        onChange={e => { setEncrypt(e.target.value === "pack"); setResult(null); }}>
-        <option value="sign">{t("scenarios.signing.signOnly")}</option>
-        <option value="pack">{t("scenarios.signing.signAndEncrypt")}</option>
-      </select>
-    </label>
+    <fieldset className="scenario-sign-types" disabled={busy || !available || !!entry?.required_packs?.length}>
+      <legend>{t("scenarios.signing.scenarioType")}</legend>
+      {[false, true].map(encrypted => <label key={String(encrypted)}>
+        <input type="radio" name="scenario-type" value={encrypted ? "dlc" : "official"} checked={encrypt === encrypted}
+          onChange={() => { setEncrypt(encrypted); setResult(null); setError(""); }} />
+        {t(encrypted ? "scenarios.signing.dlc" : "scenarios.signing.official")}
+      </label>)}
+    </fieldset>
     {!!entry?.required_packs?.length && <p className="scenario-hint">{t("scenarios.signing.packsHint", { packs: entry.required_packs.join(", ") })}</p>}
-    {pathField("private_key_path", t("scenarios.signing.privateKey"))}
-    {textField("kid", t("scenarios.signing.keyId"))}
     {textField("scenario_id", t("scenarios.signing.scenarioId"))}
     {textField("content_revision", t("scenarios.signing.revision"), true)}
-    {encrypt && <>
+    <section className="scenario-group" aria-label={t("scenarios.signing.signature")}>
+      <h4 className="scenario-group-title">{t("scenarios.signing.signature")}</h4>
+      {pathField("private_key_path", t("scenarios.signing.privateKey"))}
+      {textField("kid", t("scenarios.signing.keyId"))}
+    </section>
+    {encrypt && <section className="scenario-group" aria-label={t("scenarios.signing.encryption")}>
+      <h4 className="scenario-group-title">{t("scenarios.signing.encryption")}</h4>
+      <p className="scenario-hint">{t("scenarios.signing.encryptionHint")}</p>
       {textField("pack_id", t("scenarios.signing.packId"))}
       {pathField("keyring_path", t("scenarios.signing.keyring"))}
-    </>}
+    </section>}
     {pathField("output_path", t("scenarios.signing.output"))}
     {result && <p className="scenario-status" role="status">{t("scenarios.signing.completed", { path: result.output_path })}</p>}
     <div className="scenario-import-actions">
