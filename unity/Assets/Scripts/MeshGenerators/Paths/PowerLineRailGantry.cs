@@ -7,6 +7,7 @@ using UnityEngine;
 public static class PowerLineRailGantry
 {
     public static Func<PathSummary, List<Vector3>> TrackPolyline;
+    public static Func<PathSummary, List<TrackNeighborInfo>> NeighborProvider;
     const float HalfDepth = 2.5f;
     const float TrussHeight = 1.2f;
     static float BeamHeight(PowerLinePath.Support s) => s.variant == Constants.PATH_VARIANT_GRID ? 14f : 11f;
@@ -39,7 +40,7 @@ public static class PowerLineRailGantry
         TrackPath.ResolvePlatformExtents(rail, platform, out float leftPlatform, out float rightPlatform);
         if (reverse) (leftPlatform,rightPlatform) = (rightPlatform,leftPlatform);
         float left = width * .5f + leftPlatform, right = width * .5f + rightPlatform;
-        var neighbors = TrackAdjacency.NeighborProvider?.Invoke(rail);
+        var neighbors = (NeighborProvider ?? TrackAdjacency.NeighborProvider)?.Invoke(rail);
         // 架構の前後にも同じ結合規則を適用し、分岐や曲線で柱が隣の道床へ入り込むのを避ける。
         var probes = new List<Vector3> { position - forward * HalfDepth, position, position + forward * HalfDepth };
         var corridor = TrackAdjacency.ComputeWithShifts(rail.path_id,probes,width,wall,leftPlatform,rightPlatform,neighbors,0,null,TrackAdjacency.IsProvisional(rail));

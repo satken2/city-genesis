@@ -466,6 +466,7 @@ public partial class PathManager : BaseApiDataManager
         };
         PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
         PowerLineRailGantry.TrackPolyline = GetPowerLineTrackPolyline;
+        PowerLineRailGantry.NeighborProvider = GetPowerLineTrackNeighbors;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
         TrackPath.LateralProfileProvider = GetTrackLateralProfile;
         LrtPlatformParts.PolylineProvider = GetLrtPlatformPolyline;
@@ -477,6 +478,7 @@ public partial class PathManager : BaseApiDataManager
         TryGetPathPolyline(pathId, out var points, trimIntersection) ? points : null;
 
     private List<Vector3> GetPowerLineTrackPolyline(PathSummary path) => CalculatePathPoints(path,false);
+    private List<TrackNeighborInfo> GetPowerLineTrackNeighbors(PathSummary path) => BuildAdjacentTrackNeighbors(path,false);
 
     private void Start()
     {
@@ -500,6 +502,8 @@ public partial class PathManager : BaseApiDataManager
             PowerLinePath.ConnectedPaths = null;
         if (PowerLineRailGantry.TrackPolyline == (Func<PathSummary, List<Vector3>>)GetPowerLineTrackPolyline)
             PowerLineRailGantry.TrackPolyline = null;
+        if (PowerLineRailGantry.NeighborProvider == (Func<PathSummary, List<TrackNeighborInfo>>)GetPowerLineTrackNeighbors)
+            PowerLineRailGantry.NeighborProvider = null;
         if (PillarClearance.NeighborProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetPillarObstacles)
             PillarClearance.NeighborProvider = null;
         if (LrtPlatformParts.PolylineProvider == (Func<int, bool, List<Vector3>>)GetLrtPlatformPolyline)
@@ -3337,7 +3341,9 @@ public partial class PathManager : BaseApiDataManager
     /// 建設中の線路は施工済みの区間だけを返す(桁が架かる前に完成側の高欄を外さないため)。
     /// 形状を編集中の計画は、そのプレビューと二重にならないよう返さない。
     /// </summary>
-    public List<TrackNeighborInfo> GetAdjacentTrackNeighbors(PathSummary path)
+    public List<TrackNeighborInfo> GetAdjacentTrackNeighbors(PathSummary path) => BuildAdjacentTrackNeighbors(path,true);
+
+    private List<TrackNeighborInfo> BuildAdjacentTrackNeighbors(PathSummary path, bool trimIntersection)
     {
         var result = new List<TrackNeighborInfo>();
         foreach (int id in CollectNearbyTrackPathIds(path))
@@ -3346,9 +3352,9 @@ public partial class PathManager : BaseApiDataManager
             if (!pathDataCache.TryGetValue(id, out PathSummary other)) continue;
 
             List<Vector3> points;
-            if (!pathPointsCache.TryGetValue(id, out points) || points == null || points.Count < 2)
+            if (!trimIntersection || !pathPointsCache.TryGetValue(id, out points) || points == null || points.Count < 2)
             {
-                points = CalculatePathPoints(other);
+                points = CalculatePathPoints(other,trimIntersection);
             }
             if (points == null || points.Count < 2) continue;
             if (other.status == Constants.STATUS_CONSTRUCTING)
@@ -4852,7 +4858,7 @@ public partial class PathManager : BaseApiDataManager
             bool added = pendingPillarRebuildIds.Add(id);
             pendingPillarRebuildSerials[id] = pathBuildSerialCounter;
             if (!added) continue;
-            if (!PowerLinePath.Handles(neighbor)) pendingPowerRebuildIds.Remove(id);
+            pendingPowerRebuildIds.Remove(id);
             InvalidateTerrainFollowPath(neighbor);
             geometryRevisions.TryGetValue(id, out int revision);
             geometryRevisions[id] = revision + 1;

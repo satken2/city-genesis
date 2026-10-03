@@ -153,6 +153,7 @@ public static class PowerLinesQA
             if(variant==411||variant==421)Set(master,"wire_spacing",35f);
             masters[variant]=master;
         }
+        T("MasterDataStore").GetField("<IsInitialized>k__BackingField",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(store,true);
         var provider = T("PowerLinePath").GetField("ConnectedPaths");
         provider.SetValue(null,typeof(PowerLinesQA).GetMethod("Neighbors").MakeGenericMethod(T("GeneratedModels.PathSummary")).CreateDelegate(provider.FieldType));
         var polyline = T("PowerLineRailGantry").GetField("TrackPolyline");
@@ -262,6 +263,13 @@ public static class PowerLinesQA
         paths[200]=parallel;Invoke("AddPathToNodeIndex",parallel);Invoke("RegisterPathCells",parallel);
         Invoke("EnqueuePowerNeighbors",parallel);
         Check(queued.Contains(10),"Parallel rail change schedules gantry feeder rebuild");
+        ((IDictionary)Private("pathPointsCache"))[200]=new List<Vector3>{new Vector3(6,0,20),new Vector3(6,0,100)};
+        var regular=(IList)T("PathManager").GetMethod("GetAdjacentTrackNeighbors").Invoke(manager,new[]{rail});
+        var untrimmed=(IList)Invoke("GetPowerLineTrackNeighbors",rail);
+        Check(((List<Vector3>)Field(regular[0],"Points"))[0].z==20,"Track neighbors retain intersection trim");
+        Check(((List<Vector3>)Field(untrimmed[0],"Points"))[0].z==-100,"Gantry neighbors include intersection interior");
+        var support=Call("PowerLinePath","Endpoint",main,1,Vector3.zero,Vector3.right);
+        Check((float)Field(support,"railRight")>=9.69f,$"Gantry spans rails even when cached drawing ends before node (right={Field(support,"railRight")}, origin={Field(support,"position")}, width={Field(untrimmed[0],"Width")})");
         UnityEngine.Object.DestroyImmediate(manager.gameObject);
     }
 

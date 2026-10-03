@@ -138,11 +138,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
             int bundles = large && !far ? 2 : 1;
             for (int circuit=0; circuit<circuits; circuit++) for (int bundle=0;bundle<bundles;bundle++)
             {
-                Vector3 Attach(Support support)
-                {
-                    return SupportAttachment(support,circuit,bundle,far);
-                }
-                Cable(wires,Attach(previous),Attach(s),far,large ? .045f : .032f);
+                Cable(wires,SupportAttachment(previous,circuit,bundle,far),SupportAttachment(s,circuit,bundle,far),far,large ? .045f : .032f);
             }
             Cable(wires,ShieldAttachment(previous),ShieldAttachment(s),far,.025f);
         }
