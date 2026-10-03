@@ -1361,7 +1361,7 @@ fn show_notification(
 ///
 /// フロントエンドの×ボタンから呼び出される。
 #[tauri::command]
-fn dismiss_notification(
+async fn dismiss_notification(
     app: tauri::AppHandle,
     state: tauri::State<'_, SharedState>,
 ) -> Result<(), String> {
@@ -1373,7 +1373,7 @@ fn dismiss_notification(
 /// 通知の文字量に応じて高さを可変にするため、フロントエンド側で実際のレンダリング高さを取得した後、
 /// このコマンドを呼び出してウィンドウを内容にフィットさせる。
 #[tauri::command]
-fn resize_notification_window(
+async fn resize_notification_window(
     app: tauri::AppHandle,
     state: tauri::State<'_, SharedState>,
     height: f64,
@@ -2032,6 +2032,7 @@ pub fn run() {
             .title("Notification")
             .decorations(false)
             .transparent(true)
+            .shadow(false)
             .always_on_top(true)
             .skip_taskbar(true)
             .resizable(false);

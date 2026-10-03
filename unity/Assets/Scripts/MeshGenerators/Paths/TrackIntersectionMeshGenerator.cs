@@ -306,11 +306,18 @@ public static class TrackIntersectionMeshGenerator
         specs.Add(new RailConnectorSpec(points, prefabSource.Path.path_variant, prefabSource.Path.path_type) {
             StartDirection = travelIn, EndDirection = travelOut, StartSlope = -from.Slope, EndSlope = to.Slope,
             EmbeddedLrt = embedded,
+            HasWire = HasOverheadWire(fromVariant) && HasOverheadWire(toVariant),
             StartRailBase = embedded ? LrtRoadParts.RailTopAboveSpline(fromVariant) - LrtRoadParts.EMBEDDED_RAIL_TOP : RoadPartHeights.BODY_ABOVE_SPLINE,
             EndRailBase = embedded ? LrtRoadParts.RailTopAboveSpline(toVariant) - LrtRoadParts.EMBEDDED_RAIL_TOP : RoadPartHeights.BODY_ABOVE_SPLINE,
             StartWireOffset = LrtRoadParts.IsEmbedded(fromVariant) ? 0 : -.28f,
             EndWireOffset = LrtRoadParts.IsEmbedded(toVariant) ? 0 : -.28f
         });
+    }
+
+    private static bool HasOverheadWire(int variant)
+    {
+        var spacing = MasterDataStore.Instance?.GetPathMaster(variant)?.wire_spacing;
+        return spacing.HasValue && spacing.Value > 0f;
     }
 
     /// <summary>

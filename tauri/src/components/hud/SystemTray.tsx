@@ -98,7 +98,7 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
           buildings: result.completed_buildings,
           remaining,
         }),
-        durationMs: 8000,
+        durationMs: 5000,
       });
     } catch (err) {
       await dismissNotification();
@@ -109,7 +109,7 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
       } else {
         message = t("templateTools.completeFailed");
       }
-      void showNotification({ message, durationMs: 8000 });
+      void showNotification({ message, durationMs: 5000 });
     } finally {
       await emit("epoch:executing", { executing: false });
       setCompleting(false);

@@ -1455,7 +1455,7 @@ const NOTIFICATION_WIDTH: f64 = 320.0;
 
 /// 通知ポップアップの最小高さ（論理ピクセル）。
 /// アイコンと本文が収まる最低限の高さを確保する。
-const NOTIFICATION_MIN_HEIGHT: f64 = 72.0;
+const NOTIFICATION_MIN_HEIGHT: f64 = 56.0;
 
 /// 通知ポップアップの最大高さ（論理ピクセル）。
 /// 本文が長い場合でもこの高さを超えないよう、フロントエンド側でスクロールまたは折り返しを行う。
@@ -1504,9 +1504,9 @@ pub fn enqueue_notification(app: &AppHandle, state: &SharedState, payload: Notif
 /// キューの先頭の通知を表示する。
 ///
 /// ウィンドウが未作成の場合は新規に生成し、既存の場合は `notification-show` イベントを送信して内容を上書きする。
-/// 一定時間で消えるように設定されている場合は、別スレッドでタイマーを開始する。
+/// 表示時間の指定がなければ5秒で閉じる。
 fn process_notification_queue(app: &AppHandle, state: &SharedState) -> Result<(), String> {
-    let payload = {
+    let (payload, generation) = {
         let mut guard = state.lock();
         if guard.notification_showing {
             return Ok(());
@@ -1514,8 +1514,9 @@ fn process_notification_queue(app: &AppHandle, state: &SharedState) -> Result<()
         let payload = guard.notification_queue.pop_front();
         if payload.is_some() {
             guard.notification_showing = true;
+            guard.notification_generation += 1;
         }
-        payload
+        (payload, guard.notification_generation)
     };
 
     let Some(payload) = payload else {
@@ -1527,20 +1528,17 @@ fn process_notification_queue(app: &AppHandle, state: &SharedState) -> Result<()
         None => create_notification_window(app, state)?,
     };
 
-    // フロントエンドに通知内容を送信してからウィンドウを表示する。
-    // これにより、フロントエンドが高さを測定・リサイズしてからスライドインできる。
+    // 最大高さの透明領域を表示しないよう、表示は本文の実測リサイズ後に行う。
     win.emit("notification-show", &payload)
         .map_err(|e| e.to_string())?;
-    win.show().map_err(|e| e.to_string())?;
 
-    if let Some(duration_ms) = payload.duration_ms {
-        let app = app.clone();
-        let state = state.clone();
-        std::thread::spawn(move || {
-            std::thread::sleep(Duration::from_millis(duration_ms));
-            let _ = dismiss_notification(&app, &state);
-        });
-    }
+    let duration_ms = payload.duration_ms.unwrap_or(5000);
+    let app = app.clone();
+    let state = state.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(duration_ms));
+        let _ = dismiss_notification_generation(&app, &state, Some(generation));
+    });
 
     Ok(())
 }
@@ -1581,9 +1579,19 @@ fn create_notification_window(app: &AppHandle, state: &SharedState) -> Result<ta
 ///
 /// ユーザーが×ボタンを押した場合や、一定時間経過後に Rust 側から呼び出される。
 pub fn dismiss_notification(app: &AppHandle, state: &SharedState) -> Result<(), String> {
+    dismiss_notification_generation(app, state, None)
+}
+
+fn dismiss_notification_generation(app: &AppHandle, state: &SharedState, generation: Option<u64>) -> Result<(), String> {
     {
         let mut guard = state.lock();
+        if generation.is_some_and(|generation| generation != guard.notification_generation)
+            || !guard.notification_showing
+        {
+            return Ok(());
+        }
         guard.notification_showing = false;
+        guard.notification_generation += 1;
     }
 
     if let Some(win) = app.get_webview_window("notification") {
@@ -1609,11 +1617,17 @@ pub fn dismiss_notification(app: &AppHandle, state: &SharedState) -> Result<(), 
 /// 通知の文字量に応じて高さが可変になるため、フロントエンドが実際のレンダリング高さを測定した後、
 /// このコマンドを呼び出してウィンドウをフィットさせる。
 pub fn resize_notification_window(app: &AppHandle, state: &SharedState, height: f64) -> Result<(), String> {
+    let monitor_index = {
+        let guard = state.lock();
+        if !guard.notification_showing {
+            return Ok(());
+        }
+        guard.current_monitor_index
+    };
     let win = app
         .get_webview_window("notification")
         .ok_or("notification window not found")?;
 
-    let monitor_index = state.lock().current_monitor_index;
     let monitors: Vec<_> = app
         .available_monitors()
         .unwrap_or_default()
@@ -1629,7 +1643,7 @@ pub fn resize_notification_window(app: &AppHandle, state: &SharedState, height: 
             .map_err(|e| e.to_string())?;
     }
 
-    Ok(())
+    win.show().map_err(|e| e.to_string())
 }
 
 /// Graphic(Unity) を起動する、または起動済みの場合は MMF 経由でリセット指示を送る

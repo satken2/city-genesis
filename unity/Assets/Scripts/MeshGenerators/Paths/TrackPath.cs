@@ -1652,11 +1652,13 @@ public class TrackPath : IPathMeshGenerator
 
         // レール専用パーツ（枕木なし）を優先し、無ければ通常の軌道パーツ（track）で代用する。
         // どちらも無ければスキップ（オプショナルパーツ。道床ハルだけが描かれる）。
+        string railPart = "rail";
         GameObject prefab = connector.EmbeddedLrt
             ? LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/lrt_track", null)
             : LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/rail", $"Models/Paths/p{connector.FallbackType}/rail");
         if (prefab == null)
         {
+            railPart = "track";
             prefab = LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/track", $"Models/Paths/p{connector.FallbackType}/track");
         }
 
@@ -1699,60 +1701,12 @@ public class TrackPath : IPathMeshGenerator
                 stretchToWidth: false);
             return;
         }
-        SplineMesh splineMesh = go.AddComponent<SplineMesh>();
-        splineMesh.spline = spline;
-        SplineMesh.Channel channel = splineMesh.AddChannel(prefabMf.sharedMesh, $"RailConnector_{index}");
-
-        // レールは実寸配置（ゲージが伸縮してはいけない）。
-        // ピボット補正のみ行い、bounds 中心をスプライン中心に合わせる。
-        channel.minScale = Vector3.one;
-        channel.maxScale = Vector3.one;
-        splineMesh.offset = new Vector3(-prefabMf.sharedMesh.bounds.center.x, 0f, 0f);
-
-        // 短い曲線でも滑らかに曲がるよう、タイル長の上限からタイル数を明示する
-        // （RoadPath.MAX_EXTRUDE_TILE_LENGTH と同じ弦誤差対策）。
-        float len = spline.CalculateLength();
-        float meshLenZ = Mathf.Max(0.001f, prefabMf.sharedMesh.bounds.size.z);
-        float tileLen = Mathf.Min(meshLenZ, RoadPath.MAX_EXTRUDE_TILE_LENGTH);
-        channel.autoCount = false;
-        channel.count = Mathf.Max(2, Mathf.RoundToInt(len / tileLen));
-
-        // 頂点数バジェットガード(RoadPath.CreateSplineMesh と同じ理由)。コネクタは通常軌道の
-        // 生成経路を通らないため、ここでもタイル数をクランプして16bitメッシュの上限超過を防ぐ。
-        int partVerts = prefabMf.sharedMesh.vertexCount;
-        if (partVerts > 0 && (long)partVerts * channel.count > RoadPath.SPLINE_MESH_VERTEX_BUDGET)
-        {
-            int clamped = Mathf.Max(1, RoadPath.SPLINE_MESH_VERTEX_BUDGET / partVerts);
-            Debug.LogWarning($"[TrackPath] レールコネクタのタイル数 {channel.count} は頂点数上限を超えるため {clamped} にクランプします(1個あたり頂点{partVerts})。");
-            channel.count = clamped;
-        }
-
-        // マテリアルは通常軌道とキャッシュを共有し、交差点内だけ色味が変わるのを防ぐ。
-        MeshRenderer prefabMr = prefab.GetComponent<MeshRenderer>();
-        MeshRenderer targetMr = go.GetComponent<MeshRenderer>();
-        if (targetMr == null) targetMr = go.AddComponent<MeshRenderer>();
-        if (prefabMr != null)
-        {
-            Material[] originalMaterials = prefabMr.sharedMaterials;
-            Material[] cachedMaterials = new Material[originalMaterials.Length];
-            for (int i = 0; i < originalMaterials.Length; i++)
-            {
-                cachedMaterials[i] = RoadPath.GetOrCreateRoadMaterial(originalMaterials[i]);
-            }
-            targetMr.sharedMaterials = cachedMaterials;
-        }
-
-        if (go.GetComponent<MeshFilter>() == null) go.AddComponent<MeshFilter>();
-        // 呼び出し元の交差点更新の中で構築し、計測外の次フレームの Update へ持ち越さない。
-        try
-        {
-            splineMesh.RebuildImmediate();
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[TrackPath] レールコネクタ Rebuild失敗 '{go.name}': {ex}");
-        }
-        RoadPath.SealSplineMesh(splineMesh);
+        // 枕木の太さと周期は本線と同じ著作長で保ち、頂点上限はタイル数を減らさず分割して守る。
+        RoadPath.CreateSplineMesh(go, spline, $"Models/Paths/p{connector.PrefabVariant}/{railPart}", 1f, 0f, 0f,
+            fallbackPrefabName: $"Models/Paths/p{connector.FallbackType}/{railPart}", stretchToWidth: false, maxTileLength: 0f);
+        if (connector.HasWire)
+            RoadPath.CreateSplineMesh(go, spline, $"Models/Paths/p{connector.PrefabVariant}/wire", 1f, 0f, 0f,
+                fallbackPrefabName: $"Models/Paths/p{connector.FallbackType}/wire", stretchToWidth: false);
     }
 
     /// <summary>

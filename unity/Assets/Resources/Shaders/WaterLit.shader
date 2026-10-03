@@ -4,9 +4,9 @@
 // Transparent キューの ForwardLit パスとして、URP のライティング系
 // キーワードを宣言して Water.hlsl を include する。
 //
-//  - さざ波(プロシージャル法線) + 深度による色 + 岸のフォーム + 屈折 +
+//  - さざ波(プロシージャル法線) + 水中の減衰 + 岸のフォーム + 屈折 +
 //    フレネル反射/太陽グレアを1パスで行う。詳細は Water.hlsl のヘッダ参照。
-//  - 屈折・深度色は URP の Depth/Opaque テクスチャに依存する
+//  - 屈折・水中の減衰は URP の Depth/Opaque テクスチャに依存する
 //    (PC_RPAsset で両方 Require 済み)。
 //  - Z-fighting 回避: 半透明かつ ZWrite Off なので水際は深度フェードで
 //    なじませる。旧不透明版と同様に Offset -1,-1 を残し、水面 Y=0 と
@@ -19,17 +19,14 @@ Shader "Custom/WaterLit"
 {
     Properties
     {
-        [Header(Water Body Colors)]
+        [Header(Water Body)]
         _DeepColor("Deep Color", Color) = (0.02, 0.09, 0.16, 1)
-        _ShallowColor("Shallow Color", Color) = (0.10, 0.32, 0.42, 1)
+        _Attenuation("Attenuation RGB (1/m)", Vector) = (0.8, 0.45, 0.4, 0)
         _FoamColor("Foam Color", Color) = (0.95, 0.98, 1.0, 1)
 
         [Header(Depth Response)]
-        _DepthColorDistance("Depth Color Attenuation Length (m)", Float) = 20.0
-        _MurkDistance("Transmission Attenuation Length (m)", Float) = 4.0
-        _MaxTransmission("Maximum Transmission", Range(0.0, 1.0)) = 0.45
         _FoamDistance("Foam Distance (m)", Float) = 3.0
-        _EdgeFadeDistance("Edge Fade Distance (m)", Float) = 0.08
+        _EdgeFadeDistance("Edge Fade Distance (m)", Float) = 0.6
 
         [Header(Foam)]
         _FoamNoiseScale("Foam Noise Scale (1/m)", Float) = 0.15
@@ -40,14 +37,11 @@ Shader "Custom/WaterLit"
 
         [Header(Surface)]
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.92
-        _EnvironmentIntensity("Environment Intensity", Range(0.0, 1.0)) = 1.0
-        _SurfacePatternScale("Surface Pattern Scale (m)", Float) = 500.0
-        _SurfacePatternStrength("Surface Pattern Strength", Range(0.0, 1.0)) = 0.2
 
         [Header(Ripples)]
         _RippleScale("Ripple Scale (1/m)", Float) = 0.08
         _RippleSpeed("Ripple Speed", Float) = 0.05
-        _RippleStrength("Ripple Strength", Range(0.0, 4.0)) = 0.6
+        _RippleStrength("Ripple Strength", Range(0.0, 4.0)) = 1.2
         _RippleDetail("Ripple Detail Scale", Float) = 3.0
 
         [Header(Flow (rivers))]

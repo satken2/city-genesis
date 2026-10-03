@@ -13,7 +13,7 @@ export interface ShowNotificationOptions {
   iconPath?: string;
   /**
    * 自動非表示までの時間（ミリ秒）。
-   * 未指定の場合はユーザーが×ボタンを押すまで表示され続ける。
+   * 未指定の場合は5秒で非表示になる。
    */
   durationMs?: number;
 }

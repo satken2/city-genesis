@@ -80,6 +80,8 @@ pub struct AppState {
     /// 通知ポップアップが現在表示中かどうか。
     /// true の間は新規通知をキューに積むだけで、表示は行わない。
     pub notification_showing: bool,
+    /// 手動で閉じた通知のタイマーが、次の通知を閉じないように識別する世代。
+    pub notification_generation: u64,
     /// 非表示(クローズ済み・再利用待ち)ポップアップウィンドウのラベル一覧。
     /// 末尾が最も最近に非表示にされたもの。open_window はこの中から再利用候補を探し、
     /// MAX_HIDDEN_WINDOWS を超えると先頭(最古)から本当に破棄する。
@@ -163,6 +165,7 @@ impl SharedState {
             parameter_setup_edit_mode: false,
             notification_queue: VecDeque::new(),
             notification_showing: false,
+            notification_generation: 0,
             hidden_lru: VecDeque::new(),
             backend_process: None,
             backend_launch_command,

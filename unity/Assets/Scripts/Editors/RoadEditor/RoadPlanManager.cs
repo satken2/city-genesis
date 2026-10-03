@@ -1292,11 +1292,17 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 手動になるのはXZだけで、高さはアンカーの縦断勾配から左右同じ勾配で決め直す
     /// (経路提案などで固定した高さも解除する)。ハンドルは平面の曲がりを調整する道具で、
     /// 高さを固定するとノードの高さを変えても勾配が変わらなくなるため。
+    /// 線路の接続端では本線の接線上へ射影し、接続方向を保って長さだけ調整する。
     /// </summary>
     private void MoveControlXZ(int index, bool controlIn, float x, float z)
     {
         var pt = points[index];
         Vector3 control = new Vector3(x, pt.position.y, z);
+        if (IsRailJunctionTarget && (index == 0 || index == points.Count - 1)
+            && TryGetRailHandleDirection(pt.position, control - pt.position, out Vector3 direction))
+        {
+            control = pt.position + direction * Vector3.Dot(control - pt.position, direction);
+        }
         if (controlIn)
         {
             pt.control_in = control;
@@ -1370,9 +1376,9 @@ public partial class RoadPlanManager : MonoBehaviour
     /// <summary>
     /// 道路の端点延長は「直線延長」吸着がONで、角度差が許容範囲内のときに整列する。
     /// 線路はこのフラグによらず、端点が接する本線の解析接線へ自動ハンドルを整列する。
-    /// 手動ハンドルは保持し、方向の不一致は /paths/validate の干渉判定で拒否する。
+    /// 線路の手動ハンドルも接線へ整列し、アンカーを移動しても接続方向を保つ。
     /// RecomputeAllControlPoints の自動計算結果を上書きする形で適用し、
-    /// 制御点の長さ（アンカーからの距離）は自動計算値を維持して向きだけを揃える。
+    /// 制御点の長さ（アンカーからの距離）は整列前の値を維持して向きだけを揃える。
     /// 確定送信される制御点にもこの結果が載るため、バックエンドに保存される形状と一致する。
     /// </summary>
     private void AlignEndpointControlsToExistingPaths()
@@ -1380,10 +1386,10 @@ public partial class RoadPlanManager : MonoBehaviour
         if ((!TerrainInputHandler.EnableStraightLineSnapping && !IsRailJunctionTarget) || SnappingSuppressed) return;
         if (points.Count < 2) return;
 
-        // 始点: control_out を延長方向へ吸着（手動調整済みならユーザーの向きを尊重）
+        // 道路の手動ハンドルは向きを保持し、線路は接続部の接線を優先する。
         {
             var pt = points[0];
-            if (pt.control_out.HasValue && !pt.control_out_manual)
+            if (pt.control_out.HasValue && (!pt.control_out_manual || IsRailJunctionTarget))
             {
                 Vector3 cur = pt.control_out.Value - pt.position;
                 cur.y = 0f;
@@ -1400,11 +1406,10 @@ public partial class RoadPlanManager : MonoBehaviour
             }
         }
 
-        // 終点: control_in を延長方向へ吸着（手動調整済みならユーザーの向きを尊重）
         {
             int last = points.Count - 1;
             var pt = points[last];
-            if (pt.control_in.HasValue && !pt.control_in_manual)
+            if (pt.control_in.HasValue && (!pt.control_in_manual || IsRailJunctionTarget))
             {
                 Vector3 cur = pt.control_in.Value - pt.position;
                 cur.y = 0f;

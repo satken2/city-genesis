@@ -75,6 +75,33 @@ half ComputeCliffMask(float3 normalWS, float3 positionWS)
 }
 
 /// <summary>
+/// 岩テクスチャの1投影面ぶんを、タイルの繰り返しが見えないようにサンプルする
+/// (Inigo Quilez "Texture Repetition" の technique 3)。
+/// 低周波ノイズで「同じテクスチャを別の位置へずらして貼った版」を16通りから選び、隣り合う版どうしを
+/// 両者の色差に沿って混ぜる。ずらすだけで回転しないので、法線マップの接空間はそのまま使える。
+/// 値ノイズは中央付近に偏るため、版が少ないと同じ版が1タイル以上続いて反復が残る。
+/// ノイズ周波数を上げると版の境目が曲線状の筋になるため、版の数で細かくする。
+/// ずらし量(R2低食い違い列)は版の境目で不連続なので、ミップ選択には元の座標の微分を渡す。
+/// </summary>
+void SampleCliffRockNoTile(float2 uv, float2 duvdx, float2 duvdy, out half3 albedo, out half3 normalTS)
+{
+    float index = TerrainMacroNoise(uv * 0.8) * 16.0;
+    float variant = floor(index);
+    float2 offsetA = frac(variant * float2(0.7548777, 0.5698403));
+    float2 offsetB = frac((variant + 1.0) * float2(0.7548777, 0.5698403));
+
+    half3 albedoA = SAMPLE_TEXTURE2D_GRAD(_CliffAlbedoMap, sampler_CliffAlbedoMap, uv + offsetA, duvdx, duvdy).rgb;
+    half3 albedoB = SAMPLE_TEXTURE2D_GRAD(_CliffAlbedoMap, sampler_CliffAlbedoMap, uv + offsetB, duvdx, duvdy).rgb;
+    half t = (half)smoothstep(0.2, 0.8, frac(index) - 0.1 * dot(albedoA - albedoB, half3(1, 1, 1)));
+
+    half3 normalA = UnpackNormalScale(SAMPLE_TEXTURE2D_GRAD(_CliffNormalMap, sampler_CliffAlbedoMap, uv + offsetA, duvdx, duvdy), _CliffNormalStrength);
+    half3 normalB = UnpackNormalScale(SAMPLE_TEXTURE2D_GRAD(_CliffNormalMap, sampler_CliffAlbedoMap, uv + offsetB, duvdx, duvdy), _CliffNormalStrength);
+
+    albedo = lerp(albedoA, albedoB, t);
+    normalTS = lerp(normalA, normalB, t);
+}
+
+/// <summary>
 /// アルベド・ワールド法線・スムースネスを傾斜に応じて岩へブレンドする。
 /// TerrainLitPasses.hlsl の UniversalFragmentPBR 呼び出し直前
 /// (=InitializeInputData 後)にフックされるため、_NORMALMAP の有無などの
@@ -98,8 +125,9 @@ void ApplyCliffRock(float3 positionWS, float3 geoNormalWS, inout float3 normalWS
     albedo = lerp(albedo, (half3)_ShoreSandColor.rgb, lowlandMask * shoreSand * (1 - mask));
 
     // 平地ピクセルはテクスチャタップ0で早期脱出する。
-    // 動的分岐内の暗黙微分(ミップ選択)は理論上未定義だが、分岐境界では
-    // mask≈0 でブレンド寄与もゼロに収束するため、仮にミップが乱れても視認できない。
+    // 動的分岐内の微分は未定義なので、ミップ選択に使う微分は分岐の前に求めておく。
+    float3 dpdx = ddx(positionWS) * _CliffUvScale;
+    float3 dpdy = ddy(positionWS) * _CliffUvScale;
     UNITY_BRANCH
     if (mask <= 0.001)
         return;
@@ -117,25 +145,19 @@ void ApplyCliffRock(float3 positionWS, float3 geoNormalWS, inout float3 normalWS
     half3 w = pow(abs((half3)geoNormalWS), 4.0);
     w /= (w.x + w.y + w.z);
 
-    float2 uvX = positionWS.zy * _CliffUvScale; // X軸投影(東西向きの崖面)
-    float2 uvY = positionWS.xz * _CliffUvScale; // Y軸投影(上面)
-    float2 uvZ = positionWS.xy * _CliffUvScale; // Z軸投影(南北向きの崖面)
+    float3 uvw = positionWS * _CliffUvScale;
+    half3 rockX, rockY, rockZ, tnX, tnY, tnZ;
+    SampleCliffRockNoTile(uvw.zy, dpdx.zy, dpdy.zy, rockX, tnX); // X軸投影(東西向きの崖面)
+    SampleCliffRockNoTile(uvw.xz, dpdx.xz, dpdy.xz, rockY, tnY); // Y軸投影(上面)
+    SampleCliffRockNoTile(uvw.xy, dpdx.xy, dpdy.xy, rockZ, tnZ); // Z軸投影(南北向きの崖面)
+    half3 rock = (rockX * w.x + rockY * w.y + rockZ * w.z) * (half3)_CliffRockTint.rgb;
 
-    // アルベド 3タップ
-    half3 rock = (SAMPLE_TEXTURE2D(_CliffAlbedoMap, sampler_CliffAlbedoMap, uvX).rgb * w.x
-               + SAMPLE_TEXTURE2D(_CliffAlbedoMap, sampler_CliffAlbedoMap, uvY).rgb * w.y
-               + SAMPLE_TEXTURE2D(_CliffAlbedoMap, sampler_CliffAlbedoMap, uvZ).rgb * w.z)
-               * (half3)_CliffRockTint.rgb;
-
-    // 法線 3タップ + Whiteoutブレンドでワールド空間へ再投影
+    // 法線はWhiteoutブレンドでワールド空間へ再投影する
     // (Ben Golus "Normal Mapping for a Triplanar Shader" の方式。
     //  各軸のタンジェント法線XYにジオメトリ法線の対応成分を加算し、
     //  Z成分はabsを取ってジオメトリ法線の軸成分を乗算することで、
     //  負方向を向いた崖面でも正しい向きの法線になる)
     half3 geoN = (half3)geoNormalWS;
-    half3 tnX = UnpackNormalScale(SAMPLE_TEXTURE2D(_CliffNormalMap, sampler_CliffAlbedoMap, uvX), _CliffNormalStrength);
-    half3 tnY = UnpackNormalScale(SAMPLE_TEXTURE2D(_CliffNormalMap, sampler_CliffAlbedoMap, uvY), _CliffNormalStrength);
-    half3 tnZ = UnpackNormalScale(SAMPLE_TEXTURE2D(_CliffNormalMap, sampler_CliffAlbedoMap, uvZ), _CliffNormalStrength);
     tnX = half3(tnX.xy + geoN.zy, abs(tnX.z) * geoN.x);
     tnY = half3(tnY.xy + geoN.xz, abs(tnY.z) * geoN.y);
     tnZ = half3(tnZ.xy + geoN.xy, abs(tnZ.z) * geoN.z);

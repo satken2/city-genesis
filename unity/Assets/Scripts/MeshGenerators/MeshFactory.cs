@@ -376,6 +376,8 @@ public class SidewalkConnectorSpec
 public class RailConnectorSpec
 {
     public bool EmbeddedLrt;
+    /// <summary>両端の線路が電化されている接続だけに架線を渡す。</summary>
+    public bool HasWire;
     public float StartRailBase;
     public float EndRailBase;
     public float StartWireOffset;

@@ -78,6 +78,7 @@ public static class PreviewQA
             CheckManager(asm, renderer);
             CheckAlignment(asm, item);
             CheckControlHeights(asm);
+            CheckRailControlDragging(asm);
             CheckElevatedTerrainIndependence(asm, item);
             CheckAlignmentLabels(asm);
             CheckAuthoritativeAlignment(asm);
@@ -360,6 +361,86 @@ public static class PreviewQA
         UnityEngine.Object.DestroyImmediate(terrain);
         UnityEngine.Object.DestroyImmediate(terrainData);
         asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null, null);
+    }
+
+    private static void CheckRailControlDragging(Assembly asm)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        var type = asm.GetType("RoadPlanManager");
+        var manager = new GameObject("RailControlManager").AddComponent(type);
+        var pathType = asm.GetType("GeneratedModels.PathSummary");
+        var pathManagerType = asm.GetType("PathManager");
+        var pathManager = new GameObject("RailControlPaths").AddComponent(pathManagerType);
+        var gridType = asm.GetType("SpatialHash`1").MakeGenericType(asm.GetType("PathSegment"));
+        pathManagerType.GetField("segmentGrid", flags).SetValue(pathManager, Activator.CreateInstance(gridType, 5f));
+        type.GetField("pathManager").SetValue(manager, pathManager);
+        type.GetField("Curved").SetValue(manager, true);
+        var pointType = asm.GetType("PathBuildPoint");
+        var roleType = asm.GetType("PathPointRole");
+        var anchors = (IList)type.GetField("points", flags).GetValue(manager);
+        object Call(string name, params object[] args) => type.GetMethod(name, flags).Invoke(manager, args);
+        void Add(Vector3 p, string role) => anchors.Add(Activator.CreateInstance(pointType, p, Enum.Parse(roleType, role)));
+        Vector3 Get(int i, string field) => (Vector3)pointType.GetField(field).GetValue(anchors[i]);
+        var snapType = asm.GetType("TerrainInputHandler");
+        var snapFlag = snapType.GetField("EnableStraightLineSnapping");
+        bool oldSnap = (bool)snapFlag.GetValue(null);
+        snapFlag.SetValue(null, false);
+        try
+        {
+            // 曲線の途中へ接続し、サンプル線分の向きではなく解析接線に拘束されることを確かめる。
+            Vector3 a = Vector3.zero, b = new Vector3(70, 0, 0);
+            Vector3 c = new Vector3(150, 0, 200), d = new Vector3(200, 0, 200);
+            Vector3 anchor = (a + 3 * b + 3 * c + d) / 8f;
+            Vector3 tangent = (b - a + 2 * (c - b) + d - c).normalized;
+            Vector3 normal = new Vector3(-tangent.z, 0, tangent.x);
+            foreach (int railType in new[] { 4, 5 })
+            {
+                var path = Activator.CreateInstance(pathType);
+                void SetPath(string field, object value) => pathType.GetField(field).SetValue(path, value);
+                List<object> Coords(Vector3 p) => new List<object> { p.x, p.y, p.z };
+                SetPath("path_id", railType);
+                SetPath("path_type", railType);
+                SetPath("curved", true);
+                SetPath("start_point", Coords(a));
+                SetPath("start_control", Coords(b));
+                SetPath("end_control", Coords(c));
+                SetPath("end_point", Coords(d));
+                SetPath("status", (int)asm.GetType("Constants").GetField("STATUS_ACTIVE").GetRawConstantValue());
+                pathManagerType.GetMethod("RegisterPathSegments", flags).Invoke(pathManager,
+                    new object[] { path, new List<Vector3> { a, anchor, d } });
+                type.GetField("PathType").SetValue(manager, railType);
+                foreach (bool end in new[] { false, true })
+                foreach (float offset in new[] { 0f, 5f })
+                {
+                    anchors.Clear();
+                    type.GetField("LateralOffsets").SetValue(manager, new[] { offset });
+                    Vector3 connection = anchor + normal * offset;
+                    Add(end ? connection - tangent * 100 : connection, "Start");
+                    Add(end ? connection : connection + tangent * 100, "End");
+                    int i = end ? 1 : 0;
+                    string field = end ? "control_in" : "control_out";
+                    Vector3 direction = end ? -tangent : tangent;
+                    Vector3 cursor = connection + direction * 30 + normal * 40;
+                    Call("MoveControlXZ", i, end, cursor.x, cursor.z);
+                    Require(Vector3.Distance(Get(i, field), connection + direction * 30) < .01f,
+                        $"Rail handle must project onto the tangent ({railType}, end={end}, offset={offset}): {Get(i, field)} expected {connection + direction * 30}");
+                    Require((bool)pointType.GetField(field + "_manual").GetValue(anchors[i]), "Rail length adjustment must remain manual");
+                    Vector3 movedConnection = d + Vector3.forward * offset;
+                    Call("MoveAnchorPosition", i, movedConnection);
+                    Require(Mathf.Abs(Get(i, field).z - movedConnection.z) < .01f, "Manual rail handle must follow the new connection tangent");
+                    Call("MoveAnchorPosition", i, connection + normal * 20);
+                    cursor = connection + normal * 20 + direction * 30 + normal * 10;
+                    Call("MoveControlXZ", i, end, cursor.x, cursor.z);
+                    Require(Vector3.Distance(Get(i, field), cursor) < .01f, "Disconnected rail handle must move freely");
+                }
+            }
+        }
+        finally
+        {
+            snapFlag.SetValue(null, oldSnap);
+            UnityEngine.Object.DestroyImmediate(manager.gameObject);
+            UnityEngine.Object.DestroyImmediate(pathManager.gameObject);
+        }
     }
 
     private static void CheckElevatedTerrainIndependence(Assembly asm, object master)

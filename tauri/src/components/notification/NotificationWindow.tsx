@@ -53,12 +53,8 @@ export function NotificationWindow() {
       return;
     }
 
-    // フロントエンドで実際にレンダリングされた高さを測定し、
-    // Rust 側のウィンドウサイズをその高さにフィットさせる。
-    // padding・margin を含めた高さを渡すことで、コンテンツが見切れないようにする。
-    const measuredHeight = contentRef.current.scrollHeight;
-    const padding = 24;
-    const targetHeight = measuredHeight + padding;
+    // ウィンドウいっぱいの外枠ではなく、余白を含む通知本体の高さを測る。
+    const targetHeight = Math.ceil(contentRef.current.getBoundingClientRect().height);
 
     invoke("resize_notification_window", { height: targetHeight }).catch((err) => {
       console.error("resize_notification_window failed:", err);
@@ -81,9 +77,8 @@ export function NotificationWindow() {
   return (
     <div
       className={`notification-container ${isVisible ? "is-visible" : ""}`}
-      ref={contentRef}
     >
-      <div className="notification-inner">
+      <div className="notification-inner" ref={contentRef}>
         <img
           className="notification-icon"
           src={iconSrc}

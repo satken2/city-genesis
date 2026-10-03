@@ -48,7 +48,6 @@ public sealed class WeatherController : MonoBehaviour
     private ReflectionProbe reflection;
     private WeatherPrecipitation precipitation;
 
-    private static readonly int WaterOvercastId = Shader.PropertyToID("_WaterOvercast");
     private static readonly Color LowSunZenith = Hex("696E9B"), LowSunHorizon = Hex("ECA68D"), LowSunLight = Hex("FFA477"), LowSunCloud = Hex("EDB7AB");
     private static readonly Color NightZenith = Hex("05070D"), NightHorizon = Hex("0B1019"), NightCloud = Hex("0C1018");
 
@@ -402,12 +401,6 @@ public sealed class WeatherController : MonoBehaviour
         sun.color = sunlight;
         sun.intensity = look.Intensity * lowSun * daylight;
         sun.shadowStrength = look.Shadow * daylight;
-        // 空の表示色だけでは曇天の白い雲も明るい光源になるため、反射の光量を天気に合わせる。
-        // 時刻による夕焼け・薄明の減光は空の色が担い、ここでは天気の光量だけを使う。
-        float weatherLight = Mathf.Clamp01(look.Intensity);
-        reflection.intensity = weatherLight;
-        // 水面はこの減光量から浅い視線角の反射と霞の合成量を調整する。
-        Shader.SetGlobalFloat(WaterOvercastId, 1f - weatherLight);
         sky.SetColor("_Zenith", zenith);
         sky.SetColor("_Horizon", horizon);
         sky.SetColor("_SunColor", sunlight * (1f - darkness));
@@ -595,7 +588,6 @@ public sealed class WeatherController : MonoBehaviour
         private readonly bool fog = RenderSettings.fog;
         private readonly FogMode fogMode = RenderSettings.fogMode;
         private readonly float fogStart = RenderSettings.fogStartDistance, fogEnd = RenderSettings.fogEndDistance;
-        private readonly float waterOvercast = Shader.GetGlobalFloat(WaterOvercastId);
         private readonly Quaternion rotation;
         private readonly Color color;
         private readonly float intensity, strength;
@@ -616,7 +608,6 @@ public sealed class WeatherController : MonoBehaviour
             RenderSettings.ambientProbe = ambientProbe;
             RenderSettings.fog = fog; RenderSettings.fogMode = fogMode; RenderSettings.fogColor = fogColor;
             RenderSettings.fogStartDistance = fogStart; RenderSettings.fogEndDistance = fogEnd;
-            Shader.SetGlobalFloat(WaterOvercastId, waterOvercast);
             if (light == null) return;
             light.transform.rotation = rotation; light.color = color; light.intensity = intensity;
             light.shadowStrength = strength; light.shadows = shadows; light.cookie = cookie;

@@ -30,7 +30,8 @@ public static class PlatformQA
             assembly = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
             CheckPlatformContinuation();
             bool endsOnly = args.Contains("-platformEndsOnly");
-            if (!endsOnly) CheckStationGrade();
+            bool connectorsOnly = args.Contains("-railConnectorsOnly");
+            if (!endsOnly && !connectorsOnly) CheckStationGrade();
             Type modelType = assembly.GetType("ModelManager");
             var model = new GameObject("Models").AddComponent(modelType);
             modelType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, model);
@@ -44,18 +45,28 @@ public static class PlatformQA
                 EditorApplication.Exit(0);
                 return;
             }
-            foreach (int variant in new[] { 401, 411, 451, 461 })
+            foreach (int variant in connectorsOnly ? new[] { 411 } : new[] { 401, 411, 451, 461 })
             {
                 string asset = $"Assets/Paths/p{variant}/track.fbx";
                 var importer = (ModelImporter)AssetImporter.GetAtPath(asset);
                 importer.isReadable = true;
                 importer.SaveAndReimport();
                 cache[$"Models/Paths/p{variant}/track"] = AssetDatabase.LoadAssetAtPath<GameObject>(asset);
-                CheckTrack(variant, 32f);
-                CheckTrack(variant, 256f);
+                if (!connectorsOnly)
+                {
+                    CheckTrack(variant, 32f);
+                    CheckTrack(variant, 256f);
+                }
             }
             foreach (string part in new[] { "buffer_stop", "platform_end" })
                 cache[$"Models/Paths/p4/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Paths/p4/{part}.fbx");
+            CheckRailConnectors(cache);
+            if (connectorsOnly)
+            {
+                File.WriteAllText(report, $"PASS rail connectors: {checks} checks; real FBX sleeper thickness, vertex budget, normal/close, Y junction wire endpoints and non-electrified branch");
+                EditorApplication.Exit(0);
+                return;
+            }
             CheckTerminations();
             foreach (int variant in new[] { 451, 461, 462 })
                 foreach (string part in new[] { "platform", "platform_wall" }) {
@@ -153,6 +164,128 @@ public static class PlatformQA
         for (int i=1; i<intervals.Count; i++) Require(Mathf.Abs(intervals[i].x-intervals[i-1].y) < .01f, "Track split gap");
         if (length > 200) Require(intervals.Count > 1, "Long track was not split");
         UnityEngine.Object.DestroyImmediate(parent);
+    }
+
+    static void CheckRailConnectors(IDictionary cache)
+    {
+        // 分岐器のtrack代用にも本線と同じ実FBXを使い、タイル圧縮と頂点上限による伸長を検出する。
+        foreach (string part in new[] { "track_close", "wire" })
+        {
+            string asset = $"Assets/Paths/p411/{part}.fbx";
+            var importer = (ModelImporter)AssetImporter.GetAtPath(asset);
+            importer.isReadable = true;
+            importer.SaveAndReimport();
+            cache[$"Models/Paths/p411/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>(asset);
+        }
+        var specType = assembly.GetType("RailConnectorSpec");
+        var create = assembly.GetType("TrackPath").GetMethod("CreateRailConnectorObject");
+        var context = assembly.GetType("PathDrawContext");
+        foreach (bool close in new[] { false, true })
+        foreach (float length in new[] { 7.7f, 32f, 256f })
+        foreach (bool wire in new[] { false, true })
+        {
+            var parent = new GameObject("RailConnectorPeriodQA");
+            parent.transform.position = new Vector3(12f, 6f, -15f);
+            var points = new List<Vector3> { Vector3.up * .12f, new Vector3(0, .12f, length) };
+            var spec = Activator.CreateInstance(specType, new object[] { points, 411, 4 });
+            specType.GetField("HasWire").SetValue(spec, wire);
+            var lod = Enum.Parse(assembly.GetType("DrawLod"), close ? "Close" : "Normal");
+            context.GetMethod("Begin").Invoke(null, new object[] { lod, 0.0, 1.0 });
+            context.GetProperty("SuppressDetailRange").SetValue(null, true);
+            try { create.Invoke(null, new object[] { parent.transform, spec, 0 }); }
+            finally { context.GetMethod("End").Invoke(null, null); }
+            var meshes = parent.GetComponentsInChildren<MeshFilter>();
+            var tracks = meshes.Where(f => f.name.EndsWith("/track") && f.sharedMesh != null).ToArray();
+            Require(tracks.Length > 0, "Connector track missing");
+            var source = ((GameObject)cache[$"Models/Paths/p411/track{(close ? "_close" : "")}"]).GetComponent<MeshFilter>().sharedMesh;
+            var original = source.vertices;
+            int first = Array.FindIndex(original, v => Mathf.Abs(v.y - .2f) < .002f && Mathf.Abs(v.x) > 1f);
+            int last = Array.FindIndex(original, v => first >= 0 && Mathf.Abs(v.x-original[first].x) < .002f
+                && Mathf.Abs(v.y-original[first].y) < .002f && Mathf.Abs(v.z-original[first].z) > .1f
+                && Mathf.Abs(v.z-original[first].z) < .3f);
+            Require(first >= 0 && last >= 0, "Sleeper thickness measurement missing");
+            foreach (var filter in tracks)
+            {
+                var mesh = filter.sharedMesh;
+                Require(mesh.vertexCount <= 60000, "Connector exceeds vertex budget");
+                var vertices = mesh.vertices;
+                for (int tile = 0; tile < vertices.Length / original.Length; tile++)
+                {
+                    float thickness = Vector3.Distance(vertices[tile*original.Length+first], vertices[tile*original.Length+last]);
+                    float expected = Mathf.Abs(original[last].z-original[first].z);
+                    Require(Mathf.Abs(thickness / expected - 1f) < .06f, "Connector sleeper thickness differs from authored size");
+                }
+            }
+            var all = tracks.SelectMany(f => f.sharedMesh.vertices.Select(v => parent.transform.InverseTransformPoint(f.transform.TransformPoint(v)))).ToArray();
+            Require(Mathf.Abs(all.Min(v => v.z)) < .01f && Mathf.Abs(all.Max(v => v.z)-length) < .01f, "Connector extent changed");
+            if ((long)source.vertexCount * Mathf.RoundToInt(length/source.bounds.size.z) > 60000)
+                Require(tracks.Length > 1, "Connector over vertex budget was not split");
+            var wires = meshes.Where(f => f.name.EndsWith("/wire") && f.sharedMesh != null).ToArray();
+            Require((wires.Length > 0) == wire, "Connector wire presence mismatch");
+            if (wire)
+            {
+                var wireSource = ((GameObject)cache["Models/Paths/p411/wire"]).GetComponent<MeshFilter>().sharedMesh;
+                var vertices = wires.SelectMany(f => f.sharedMesh.vertices.Select(v => parent.transform.InverseTransformPoint(f.transform.TransformPoint(v)))).ToArray();
+                Require(Mathf.Abs(vertices.Min(v => v.y)-wireSource.bounds.min.y-.12f) < .002f, "Wire height differs from main track");
+                Require(Mathf.Abs(vertices.Min(v => v.z)) < .01f && Mathf.Abs(vertices.Max(v => v.z)-length) < .01f, "Wire does not reach connector ends");
+            }
+            UnityEngine.Object.DestroyImmediate(parent);
+        }
+        CheckWireSpecs(cache);
+    }
+
+    static void CheckWireSpecs(IDictionary cache)
+    {
+        var summary = assembly.GetType("GeneratedModels.PathSummary");
+        var storeType = assembly.GetType("MasterDataStore");
+        var instance = storeType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic);
+        var store = new GameObject("WireMasterFixture").AddComponent(storeType);
+        instance.SetValue(null, store);
+        var masters = (IDictionary)storeType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(store);
+        foreach (int variant in new[] { 401, 411 })
+        {
+            var item = Activator.CreateInstance(assembly.GetType("PathMasterItem"));
+            item.GetType().GetField("width").SetValue(item, 5f);
+            item.GetType().GetField("lanes").SetValue(item, (int?)1);
+            item.GetType().GetField("wire_spacing").SetValue(item, variant == 411 ? (float?)35f : null);
+            masters[variant] = item;
+        }
+        try
+        {
+            foreach (int branchVariant in new[] { 411, 401 })
+            {
+                var paths = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(summary));
+                paths.Add(TrackData(summary, 1, 411, 1, 2, 0f, -32f));
+                paths.Add(TrackData(summary, 2, 411, 1, 3, 0f, 32f));
+                var branch = TrackData(summary, 3, branchVariant, 1, 4, 0f, 32f);
+                summary.GetField("end_point").SetValue(branch, new List<object> { 8f, 0f, 32f });
+                paths.Add(branch);
+                var cuts = new Dictionary<int, Vector2> { { 1, new Vector2(0,-8) }, { 2, new Vector2(0,8) }, { 3, new Vector2(2,8) } };
+                var specs = (IList)assembly.GetType("TrackIntersectionMeshGenerator").GetMethod("BuildRailConnectorSpecs")
+                    .Invoke(null, new object[] { 1, Vector3.zero, true, paths, cuts, null });
+                Require(specs != null && specs.Count == 2, "Y junction connectors missing");
+                int count = specs.Cast<object>().Count(s => (bool)s.GetType().GetField("HasWire").GetValue(s));
+                Require(count == (branchVariant == 411 ? 2 : 1), "Wire must connect electrified ends only");
+                var parent = new GameObject("YJunctionWireQA");
+                foreach (var spec in specs)
+                    assembly.GetType("TrackPath").GetMethod("CreateRailConnectorObject").Invoke(null, new object[] { parent.transform, spec, 0 });
+                var wires = parent.GetComponentsInChildren<MeshFilter>().Where(f => f.name.EndsWith("/wire") && f.sharedMesh != null).ToArray();
+                Require(wires.Length == count, "Y junction wire geometry missing");
+                var source = ((GameObject)cache["Models/Paths/p411/wire"]).GetComponent<MeshFilter>().sharedMesh;
+                foreach (var spec in specs.Cast<object>().Where(s => (bool)s.GetType().GetField("HasWire").GetValue(s)))
+                {
+                    var points = (List<Vector3>)spec.GetType().GetProperty("Points").GetValue(spec);
+                    foreach (var end in new[] { points[0], points[points.Count-1] })
+                    {
+                        var expected = end + Vector3.up * source.bounds.min.y;
+                        Require(wires.SelectMany(f => f.sharedMesh.vertices.Select(v => f.transform.TransformPoint(v)))
+                            .Min(v => Vector3.Distance(v, expected)) < .06f, "Wire does not reach curved junction endpoint");
+                    }
+                }
+                UnityEngine.Object.DestroyImmediate(parent);
+            }
+        }
+        finally { instance.SetValue(null, null); UnityEngine.Object.DestroyImmediate(store.gameObject); }
     }
 
     static readonly List<object> connected = new List<object>();

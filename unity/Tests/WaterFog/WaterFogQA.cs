@@ -77,12 +77,12 @@ public static class WaterFogQA
             report += $"sparklePeak={sparklePeak:F3}\n";
             passed &= sparklePeak > 1;
 
-            // 真上モードは正射影。透視投影との水深の一致と、水面が消えないことを確認する。
+            // 真上モードは正射影。透視投影と同じ水深になり、水面が透明に消えないことを確認する。
             sun.intensity = 0;
             material.SetFloat("_RippleStrength", 0);
-            material.SetFloat("_SurfacePatternStrength", 0);
             material.SetFloat("_RefractionStrength", 0);
             material.SetFloat("_FoamDistance", .01f);
+            material.SetFloat("_EdgeFadeDistance", .01f);
             camera.transform.position = Vector3.up * 60;
             camera.transform.rotation = Quaternion.Euler(90, 0, 0);
             camera.orthographicSize = 60 * Mathf.Tan(camera.fieldOfView * Mathf.Deg2Rad / 2);
@@ -98,86 +98,50 @@ public static class WaterFogQA
                 sea.SetActive(true);
                 double projectionError = Difference(perspective, orthographic);
                 double waterChange = Difference(orthographic, bareFloor);
-                // 水底の照明は同じ。投影方式による差を小さくし、海底そのままの描画を拒否する。
                 passed &= projectionError < .004 && waterChange > .01;
                 report += $"depth={depth}: projectionError={projectionError:F6} waterChange={waterChange:F6}\n";
             }
 
-            // 透過する取得色にはフォグが含まれる。黒い体色で透過成分を切り分け、
-            // 水面までのフォグを重ね掛けせず、取得色と一度だけ合成することを検査する。
+            // 水底の取得色はフォグを含む。体色を黒にして水底の成分だけを取り出し、
+            // 波長ごとの減衰率で一度だけ合成され、水面までのフォグを重ね掛けしないことを検査する。
             floor.transform.position = Vector3.down * .2f;
             material.SetColor("_DeepColor", Color.black);
-            material.SetColor("_ShallowColor", Color.black);
             RenderSettings.fog = true;
             RenderSettings.fogStartDistance = 0;
             RenderSettings.fogEndDistance = 120;
-            material.SetFloat("_MaxTransmission", 0);
+            Vector4 attenuation = material.GetVector("_Attenuation");
+            material.SetVector("_Attenuation", Vector4.one * 1000);
             var opaqueFog = Capture(camera, root + "/transmission-opaque-fog.png");
             sea.SetActive(false);
             var bottomFog = Capture(camera, root + "/transmission-bottom-fog.png");
             sea.SetActive(true);
-            material.SetFloat("_MaxTransmission", .45f);
+            material.SetVector("_Attenuation", attenuation);
             var transmittedFog = Capture(camera, root + "/transmission-fog.png");
-            float transmission = .45f * Mathf.Exp(-.2f / material.GetFloat("_MurkDistance")) * .98f;
-            var expectedFog = opaqueFog.Zip(bottomFog, (a, b) => Color.Lerp(a, b, transmission)).ToArray();
+            // 真上の正射影では下りと上りの距離がどちらも水深に等しく、フレネル反射は正面の2%。
+            Vector3 share = new Vector3(Mathf.Exp(-attenuation.x * .4f), Mathf.Exp(-attenuation.y * .4f), Mathf.Exp(-attenuation.z * .4f)) * .98f;
+            var expectedFog = opaqueFog.Zip(bottomFog, (a, b) => new Color(
+                Mathf.Lerp(a.r, b.r, share.x), Mathf.Lerp(a.g, b.g, share.y), Mathf.Lerp(a.b, b.b, share.z))).ToArray();
             double transmissionFogError = Difference(transmittedFog, expectedFog);
             passed &= transmissionFogError < .004;
             report += $"transmissionFogError={transmissionFogError:F6}\n";
 
-            // 曇天でも陸と海は同じ大気中にある。霧の終端では海も霧色へ収束する。
-            material.SetFloat("_MaxTransmission", 0);
-            floor.SetActive(false);
-            camera.orthographic = false;
-            camera.transform.rotation = Quaternion.Euler(45, 0, 0);
-            camera.transform.position = -camera.transform.forward * 3000;
-            RenderSettings.fogStartDistance = 60;
-            RenderSettings.fogEndDistance = 1200;
-            Shader.SetGlobalFloat("_WaterOvercast", .82f);
-            var overcastFog = Capture(camera, root + "/overcast-fog.png");
-            var fogReference = Enumerable.Repeat(RenderSettings.fogColor.linear, overcastFog.Length).ToArray();
-            double overcastFogError = Difference(overcastFog, fogReference);
-            passed &= overcastFogError < .004;
-            report += $"overcastFogError={overcastFogError:F6}\n";
-
-            // 遠景は陸地メッシュだけで、海底は常駐タイルにしか無い。
-            // 同じ水面の下へ海底を出し入れし、タイル由来の色・透過の切替を検査する。
+            // 遠景の海には水底の深度が無い。深い海底と同じく水底の見えない水として描かれ、
+            // 海底タイルの有無で色が変わらないことを透視・正射影の双方で検査する。
             RenderSettings.fog = false;
             material.SetColor("_DeepColor", new Color(.02f, .09f, .16f));
-            material.SetColor("_ShallowColor", new Color(.1f, .32f, .42f));
-            material.SetFloat("_MaxTransmission", .45f);
-            material.SetFloat("_FoamDistance", 3);
-            floor.GetComponent<Renderer>().sharedMaterial = new Material(Shader.Find("QA/WaterFloor"));
-            camera.transform.position = Vector3.up * 60;
-            camera.transform.rotation = Quaternion.Euler(90, 0, 0);
-            var nearUnloaded = Capture(camera, root + "/near-unloaded.png");
-            floor.transform.position = Vector3.down * .2f;
-            floor.SetActive(true);
-            var nearLoaded = Capture(camera, root + "/near-loaded.png");
-            double nearDepthChange = Difference(nearLoaded, nearUnloaded);
-            passed &= nearDepthChange > .01;
-            report += $"nearDepthChange={nearDepthChange:F6}\n";
-            floor.SetActive(false);
-            camera.transform.position = Vector3.up * 700;
-            camera.transform.rotation = Quaternion.Euler(90, 0, 0);
             foreach (bool orthographic in new[] { false, true })
             {
                 camera.orthographic = orthographic;
+                floor.SetActive(false);
                 var unloaded = Capture(camera, root + $"/unloaded-{orthographic}.png");
-                foreach (float depth in new[] { 0f, .2f, 3f, 30f })
-                {
-                    floor.transform.position = Vector3.down * depth;
-                    floor.SetActive(true);
-                    var loaded = Capture(camera, root + $"/loaded-{orthographic}-{depth}.png");
-                    double tileError = Difference(loaded, unloaded);
-                    passed &= tileError < .004;
-                    report += $"orthographic={orthographic} depth={depth}: tileError={tileError:F6}\n";
-                    floor.SetActive(false);
-                }
+                floor.SetActive(true);
+                floor.transform.position = Vector3.down * 30;
+                var deep = Capture(camera, root + $"/deep-{orthographic}.png");
+                double tileError = Difference(deep, unloaded);
+                passed &= tileError < .004;
+                report += $"orthographic={orthographic}: tileError={tileError:F6}\n";
             }
-
             foreach (var message in ShaderUtil.GetShaderMessages(material.shader))
-                if (message.severity.ToString() == "Error") throw new Exception(message.message);
-            foreach (var message in ShaderUtil.GetShaderMessages(floor.GetComponent<Renderer>().sharedMaterial.shader))
                 if (message.severity.ToString() == "Error") throw new Exception(message.message);
             File.WriteAllText(root + "/result.txt", (passed ? "PASS\n" : "FAIL\n") + report);
             EditorApplication.Exit(passed ? 0 : 1);
