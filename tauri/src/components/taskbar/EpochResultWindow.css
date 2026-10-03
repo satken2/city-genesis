@@ -768,6 +768,11 @@
   color: #ffffff;
 }
 
+.epoch-result-kind-badge-project {
+  background-color: #4a3f66;
+  color: #ffffff;
+}
+
 .epoch-result-name-text {
   flex: 1 1 auto;
   min-width: 0;
@@ -837,6 +842,22 @@
   font-weight: 600;
   background-color: var(--flat-warn);
   color: #0e1520;
+}
+
+/* ── プロジェクトのメンバー(道路・建物)のアイコン列。未完了は灰、完了は緑 */
+.epoch-result-project-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.epoch-result-member-icon {
+  flex: 0 0 auto;
+  color: #5c6b7c;
+}
+
+.epoch-result-member-icon-done {
+  color: var(--flat-good);
 }
 
 /* ── フッタ: 閉じるボタン(右寄せ) */

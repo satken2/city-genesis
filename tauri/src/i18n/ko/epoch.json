@@ -17,6 +17,7 @@
     "sectionConstruction": "건설 상황",
     "kindPath": "도로",
     "kindBuilding": "시설",
+    "kindProject": "프로젝트",
     "noItems": "대상 없음",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "완성",

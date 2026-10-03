@@ -17,6 +17,7 @@
     "sectionConstruction": "Under Construction",
     "kindPath": "Road",
     "kindBuilding": "Facility",
+    "kindProject": "Project",
     "noItems": "None",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "Completed",

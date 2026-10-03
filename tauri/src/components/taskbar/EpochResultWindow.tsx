@@ -19,7 +19,10 @@
  *   - 統計: 人口/GDP/物価/所得/失業率/医療・栄養・娯楽充足度/火災/交通事故/犯罪/為替レート。
  *   - 達成目標: 進行中の目標の説明・条件ごとの現在値と目標値・進捗と、達成・失敗した目標の一覧
  *     (GET /api/v1/quests)。左カラムの残りの高さを使い、溢れたらスクロールする。
- * - 右カラム: 建設状況(道路と公共施設を種別バッジ付きの単一リストにまとめたもの)
+ * - 右カラム: 建設状況(道路と公共施設を種別バッジ付きの単一リストにまとめたもの)。
+ *   タグ(建設プロジェクト)の付いた工事は個別の行にせず、タグごとの1行にまとめて先頭に並べる。
+ *   プロジェクトの行は、体積で按分した進捗バーの下に、メンバーの道路・建物を小さなアイコンで
+ *   並べる(未完了=灰 / 完了=緑)。道路の種別バッジはバリアントのカテゴリ名(街路・鉄道・電気 など)。
  *
  * 統計タイルは2種類の視覚効果を持つ。この2つは独立した軸である。
  * - 変動方向(矢印): バックエンドが返す指標ごとの履歴(`statistics.history`、直近
@@ -38,6 +41,7 @@ import { ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } f
 import { useTranslation } from "react-i18next";
 import { emit } from "@tauri-apps/api/event";
 import { EpochDate } from "../common/EpochDate";
+import { useMasterData } from "../../contexts/MasterDataContext";
 import { STATUS_STYLE_MAP } from "../../local-constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { formatCompactAmount } from "../../utils/money";
@@ -65,11 +69,23 @@ export type ConstructionProgressItem = {
   entity_type: "agent" | "path";
   id: number;
   name: string;
+  /** 現在のバリアント。道路の種別バッジをマスターのカテゴリから引くのに使う。 */
+  variant: number;
   before_pct: number;
   before_status: number;
   after_pct: number;
   after_status: number;
   completed: boolean;
+};
+
+/** タグ付き建設プロジェクト1件の進捗。進捗率はメンバーの建設体積で按分した平均。 */
+export type ConstructionProjectReport = {
+  tag: string;
+  before_pct: number;
+  after_pct: number;
+  /** 全メンバーが完了 */
+  completed: boolean;
+  members: { entity_type: "agent" | "path"; completed: boolean }[];
 };
 
 export type PopulationReport = {
@@ -127,6 +143,7 @@ type ScoreLatest = {
 
 export type EpochReport = {
   construction_progress: ConstructionProgressItem[];
+  construction_projects: ConstructionProjectReport[];
   population: PopulationReport;
   exchange_rate: ExchangeRateReport;
   statistics: StatisticsReport;
@@ -355,6 +372,7 @@ export function EpochResultWindow({
 
   // 建設状況は道路・公共施設を分けず、種別バッジ付きの単一リストとして表示する。
   const constructionItems = report.construction_progress;
+  const constructionProjects = report.construction_projects;
 
   // 人口増減(後-前)。表示の+/-色分けに使用する
   const populationDelta = report.population.after - report.population.before;
@@ -614,7 +632,7 @@ export function EpochResultWindow({
             <section className="epoch-result-block epoch-result-block--fill">
               <h3 className="epoch-result-section-title">{t("epochResult.sectionConstruction")}</h3>
               <div className="epoch-result-scroll epoch-result-panel">
-                <ConstructionList items={constructionItems} />
+                <ConstructionList projects={constructionProjects} items={constructionItems} />
               </div>
             </section>
           </div>{/* /.epoch-result-col-right */}
@@ -894,29 +912,53 @@ function StatTile({
 }
 
 /**
- * 建設進捗の一覧(道路・公共施設の統合リスト)。1件を2段で表示する。
- * 上段: 種別バッジ・名前・ステータス(after_status のバッジ)、下段: 進捗バー・前後の進捗率・完成の札。
- * 進捗バーは実行後までを淡く、実行前までをさらに淡く重ね、このエポックで進んだ区間を明るく見せる。
+ * 建設進捗の一覧。タグ付きのプロジェクト(先頭)と、タグの付いていない道路・公共施設の統合リスト。
+ * 1件を2段で表示する(プロジェクトはさらに下段へメンバーのアイコン列を足す)。
+ * 上段: 種別バッジ・名前・ステータス(after_status のバッジ。プロジェクトは持たない)、
+ * 下段: 進捗バー・前後の進捗率・完成の札。
  * リストが空の場合は「対象なし」メッセージを表示する。
  */
 function ConstructionList({
+  projects,
   items,
 }: {
+  projects: ConstructionProjectReport[];
   items: ConstructionProgressItem[];
 }): ReactNode {
   const { t } = useTranslation();
+  const masterData = useMasterData();
 
-  if (items.length === 0) {
+  if (projects.length === 0 && items.length === 0) {
     return <p className="epoch-result-empty">{t("epochResult.noItems")}</p>;
   }
 
   return (
     <ul className="epoch-result-construction-list">
+      {projects.map((project) => (
+        <li key={`project-${project.tag}`} className="epoch-result-construction-item">
+          <div className="epoch-result-construction-head">
+            <span className="epoch-result-kind-badge epoch-result-kind-badge-project">
+              {t("epochResult.kindProject")}
+            </span>
+            <span className="epoch-result-name-text" title={project.tag}>{project.tag}</span>
+          </div>
+          <ProgressRow before={project.before_pct} after={project.after_pct} completed={project.completed} />
+          <div className="epoch-result-project-members" aria-hidden={true}>
+            {project.members.map((member, index) => (
+              <ProjectMemberIcon key={index} kind={member.entity_type} completed={member.completed} />
+            ))}
+          </div>
+        </li>
+      ))}
       {items.map((item) => {
         const displayName = item.name || `#${item.id}`;
         const statusStyle = STATUS_STYLE_MAP[item.after_status] ?? { bg: "#6b7280", text: "#ffffff" };
+        // 道路はバリアントのカテゴリ名。マスター未取得などで引けないときだけ総称の「道路」にする
+        const pathType = masterData?.paths?.[item.variant]?.type;
         const kindLabel =
-          item.entity_type === "path" ? t("epochResult.kindPath") : t("epochResult.kindBuilding");
+          item.entity_type === "path"
+            ? t(`path_construction.category.${pathType}`, { defaultValue: t("epochResult.kindPath") })
+            : t("epochResult.kindBuilding");
         return (
           <li key={`${item.entity_type}-${item.id}`} className="epoch-result-construction-item">
             <div className="epoch-result-construction-head">
@@ -931,30 +973,84 @@ function ConstructionList({
                 {t(`status.${item.after_status}`)}
               </span>
             </div>
-            <div className="epoch-result-progress">
-              <div className="epoch-result-progress-bar" aria-hidden={true}>
-                <div
-                  className="epoch-result-progress-after"
-                  style={{ width: `${Math.min(100, Math.max(0, item.after_pct))}%` }}
-                />
-                <div
-                  className="epoch-result-progress-before"
-                  style={{ width: `${Math.min(100, Math.max(0, item.before_pct))}%` }}
-                />
-              </div>
-              <span className="epoch-result-progress-text">
-                {t("epochResult.progressFormat", {
-                  before: item.before_pct.toFixed(0),
-                  after: item.after_pct.toFixed(0),
-                })}
-              </span>
-              {item.completed && (
-                <span className="epoch-result-completed">{t("epochResult.completed")}</span>
-              )}
-            </div>
+            <ProgressRow before={item.before_pct} after={item.after_pct} completed={item.completed} />
           </li>
         );
       })}
     </ul>
+  );
+}
+
+/**
+ * 進捗バー・前後の進捗率・完成の札の1行。
+ * バーは実行後までを淡く、実行前までをさらに淡く重ね、このエポックで進んだ区間を明るく見せる。
+ */
+function ProgressRow({
+  before,
+  after,
+  completed,
+}: {
+  before: number;
+  after: number;
+  completed: boolean;
+}): ReactNode {
+  const { t } = useTranslation();
+  return (
+    <div className="epoch-result-progress">
+      <div className="epoch-result-progress-bar" aria-hidden={true}>
+        <div
+          className="epoch-result-progress-after"
+          style={{ width: `${Math.min(100, Math.max(0, after))}%` }}
+        />
+        <div
+          className="epoch-result-progress-before"
+          style={{ width: `${Math.min(100, Math.max(0, before))}%` }}
+        />
+      </div>
+      <span className="epoch-result-progress-text">
+        {t("epochResult.progressFormat", {
+          before: before.toFixed(0),
+          after: after.toFixed(0),
+        })}
+      </span>
+      {completed && <span className="epoch-result-completed">{t("epochResult.completed")}</span>}
+    </div>
+  );
+}
+
+/**
+ * プロジェクトのメンバー(道路・建物)1件を表す小さなアイコン。色は CSS クラス(currentColor)で、
+ * 未完了=灰・完了=緑。
+ */
+function ProjectMemberIcon({
+  kind,
+  completed,
+}: {
+  kind: "agent" | "path";
+  completed: boolean;
+}): ReactNode {
+  return (
+    <svg
+      className={`epoch-result-member-icon${completed ? " epoch-result-member-icon-done" : ""}`}
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+    >
+      {kind === "path" ? (
+        <g>
+          <polygon points="9,3 15,3 22,21 2,21" fill="currentColor" />
+          <line x1="12" y1="6" x2="12" y2="10" stroke="var(--flat-sunken)" strokeWidth="1.6" />
+          <line x1="12" y1="13" x2="12" y2="17" stroke="var(--flat-sunken)" strokeWidth="1.6" />
+        </g>
+      ) : (
+        <g fill="currentColor">
+          <rect x="5" y="3" width="14" height="18" />
+          <rect x="8" y="6" width="3" height="3" fill="var(--flat-sunken)" />
+          <rect x="13" y="6" width="3" height="3" fill="var(--flat-sunken)" />
+          <rect x="8" y="11" width="3" height="3" fill="var(--flat-sunken)" />
+          <rect x="13" y="11" width="3" height="3" fill="var(--flat-sunken)" />
+        </g>
+      )}
+    </svg>
   );
 }

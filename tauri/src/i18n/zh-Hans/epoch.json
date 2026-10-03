@@ -17,6 +17,7 @@
     "sectionConstruction": "建设状况",
     "kindPath": "道路",
     "kindBuilding": "设施",
+    "kindProject": "项目",
     "noItems": "无对象",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "完成",

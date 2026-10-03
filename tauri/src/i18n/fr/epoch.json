@@ -17,6 +17,7 @@
     "sectionConstruction": "État des chantiers",
     "kindPath": "Route",
     "kindBuilding": "Installation",
+    "kindProject": "Projet",
     "noItems": "Aucun élément",
     "progressFormat": "{{before}} % → {{after}} %",
     "completed": "Achevé",

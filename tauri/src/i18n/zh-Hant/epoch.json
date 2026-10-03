@@ -17,6 +17,7 @@
     "sectionConstruction": "建設狀況",
     "kindPath": "道路",
     "kindBuilding": "設施",
+    "kindProject": "專案",
     "noItems": "無對象",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "完成",

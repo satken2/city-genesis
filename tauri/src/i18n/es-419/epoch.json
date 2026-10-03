@@ -17,6 +17,7 @@
     "sectionConstruction": "Estado de las obras",
     "kindPath": "Calle",
     "kindBuilding": "Instalación",
+    "kindProject": "Proyecto",
     "noItems": "Sin elementos",
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "Terminado",
