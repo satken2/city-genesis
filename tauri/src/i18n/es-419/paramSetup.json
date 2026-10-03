@@ -363,6 +363,7 @@
     "daysOption": "{{days}} días",
     "startButton": "Iniciar",
     "backButton": "Volver",
+    "cleared": "Completado",
     "tutorialBadge": "Tutorial",
     "sectionTutorials": "Tutoriales",
     "sectionScenarios": "Escenarios",

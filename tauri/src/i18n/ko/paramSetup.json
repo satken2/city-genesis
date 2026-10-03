@@ -363,6 +363,7 @@
     "daysOption": "{{days}}일",
     "startButton": "시작",
     "backButton": "뒤로",
+    "cleared": "클리어",
     "tutorialBadge": "튜토리얼",
     "sectionTutorials": "튜토리얼",
     "sectionScenarios": "시나리오",

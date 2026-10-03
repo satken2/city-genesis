@@ -48,6 +48,8 @@ const deleteRequests: string[] = [];
 let rejectDelete = false;
 let listFetches = 0;
 let thumbnailUploads: { url: string; contentType: string | null; body: unknown }[] = [];
+/** GET /api/v1/profile の応答(クリアしたチュートリアルの教材IDとシナリオのID) */
+let profile = { version: 1, level: 1, tutorials_cleared: [] as string[], scenarios_cleared: [] as string[] };
 /** システムメニュー・セーブ一覧・シナリオとして保存が送った変更系の要求と、応答に使うセッション・セーブの一覧 */
 const saveRequests: { method: string; url: string; body: unknown }[] = [];
 let currentSaveId: string | null = null;
@@ -89,6 +91,7 @@ globalThis.fetch = async (input, init) => {
   const headers = new Headers(init?.headers);
   const saveMenu = saveMenuResponse(url, init);
   if (saveMenu) return saveMenu;
+  if (url.endsWith("/api/v1/profile")) return new Response(JSON.stringify(profile));
   if (url.includes("/validation?template=true")) return new Response(JSON.stringify(rejectLoad
     ? { code: "SAVE_CORRUPT", message: "corrupt" } : { compatibility: validation }), { status: rejectLoad ? 422 : 200 });
   if (url.includes("/thumbnail") && init?.method === "PUT") {
@@ -547,6 +550,7 @@ assert.ok(!container.textContent?.includes("newGame.fromTerrain"));
 assert.equal(container.querySelectorAll(".new-game-tile--tutorial").length > 0, true);
 const tile = (title: string) => [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")].find(value => value.title === title)!;
 assert.equal(container.querySelectorAll(".new-game-tile").length - container.querySelectorAll(".new-game-tile--tutorial").length, 4);
+assert.equal(container.querySelectorAll(".new-game-tile-cleared").length, 0, "nothing is marked cleared before a clear is recorded");
 await act(async () => { tile("My scenario").click(); });
 assert.ok(!button("newGame.startScenarioButton").disabled);
 // 事実欄(大きさ・地表・気候)はすべて一覧の要素(都市が持つ値)から引く。
@@ -648,6 +652,24 @@ await settle();
 const tutorialSession = lastCall("create_session");
 assert.deepEqual([tutorialSession.playMode, tutorialSession.tutorialId, tutorialSession.templateId], [PLAY_MODE_TUTORIAL, "basic", null]);
 assert.ok(!("terrainMapId" in tutorialSession), "no terrain is sent for tutorials");
+await act(async () => { root.unmount(); });
+
+// クリア済みの札: プロフィールの記録と照らし、タイルの右上と詳細に出す。チュートリアルは教材ID、シナリオは一覧のidで引く。
+profile = { ...profile, tutorials_cleared: ["basic"], scenarios_cleared: ["local~mine"] };
+root = createRoot(container);
+await act(async () => { root.render(<NewGameWindow apiBaseUrl="http://test" onClose={() => {}} />); });
+await settle();
+const clearedTiles = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")].filter(value => value.querySelector(".new-game-tile-cleared"));
+assert.deepEqual(clearedTiles.map(value => value.classList.contains("new-game-tile--tutorial") ? "tutorial" : value.title), ["tutorial", "My scenario"]);
+assert.equal(clearedTiles[0].querySelector(".new-game-tile-cleared")?.textContent, "newGame.cleared");
+await act(async () => { clearedTiles[1].click(); });
+assert.ok(container.querySelector(".new-game-detail-head .new-game-detail-cleared"), "the detail shows the cleared badge");
+const uncleared = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]
+  .find(value => value.textContent?.includes("scenarios.origin.workshop"))!;
+await act(async () => { uncleared.click(); });
+assert.ok(!container.querySelector(".new-game-detail-cleared"), "a scenario that is not cleared has no badge");
+await act(async () => { clearedTiles[0].click(); });
+assert.ok(container.querySelector(".new-game-detail-head .new-game-detail-cleared"), "a cleared tutorial shows the badge in its detail");
 await act(async () => { root.unmount(); });
 
 validation = { balance_changed: true, balance_core_version: "1.0.0", core_version: "1.1.0" };

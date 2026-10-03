@@ -275,6 +275,25 @@
   z-index: 2;
 }
 
+/* クリア済みの札。タイルでは右上(左上は保存元の札)、詳細パネルでは種別の札の隣に出す */
+.new-game-tile-cleared,
+.new-game-detail-cleared {
+  padding: 2px 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--flat-sunken);
+  white-space: nowrap;
+  background: var(--flat-good);
+}
+
+.new-game-tile-cleared {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
 /* 画像の無いシナリオ・チュートリアルは方眼の設計図のような面にする(シナリオ=選択色、チュートリアル=良好の色) */
 .new-game-tile-image--template,
 .new-game-detail-image--template,
@@ -334,6 +353,13 @@
   gap: 8px;
   margin-top: -4.4rem;
   padding: 0 26px;
+}
+
+.new-game-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
 }
 
 /* チュートリアルの札。シナリオの保存元の札(ScenarioOriginBadges)と同じ位置・大きさで出す */

@@ -39,11 +39,6 @@ const TUTORIAL_STORAGE_KEY_PREFIX = "tutorial_step_";
 /** 開始時の説明ウィンドウを閉じたことを記録するキーのプレフィックス(シナリオ・セーブID単位) */
 const TUTORIAL_INTRO_KEY_PREFIX = "tutorial_intro_seen_";
 
-/** localStorage にチュートリアル完了フラグを保存する際のキー。
- * セーブ ID に依存しないグローバルなフラグで、
- * ニューゲームウィンドウでシナリオ選択のロック解除判定に使用する。 */
-const TUTORIAL_CLEARED_KEY = "tutorial_cleared";
-
 /**
  * 指定されたセーブ ID に対応する localStorage キーを返す
  */
@@ -267,7 +262,6 @@ export function Tutorial() {
         if (nextStep >= totalSteps) {
           // 全ステップ完了 → 完了メッセージを表示する
           clearProgress(saveId, tutorialId);
-          localStorage.setItem(`${TUTORIAL_CLEARED_KEY}_${tutorialId}`, "true");
 
           // バックエンドのチュートリアル達成クエスト(強制完了型)を完了にする
           try {

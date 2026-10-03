@@ -10,6 +10,8 @@
  * シナリオにしてから遊ぶ。チュートリアルはコアが同梱の教材の都市から始める(チュートリアルIDだけを送る)。
  *
  * 一覧のタイルは画像を全面に敷き、名前と保存元の札だけを重ねる。説明・達成条件は右カラムに集約する。
+ * クリア済みのチュートリアル・シナリオには「クリア済み」の札を付ける(タイルの右上と詳細パネル)。クリアの記録は
+ * 都市と独立したプレイヤーのプロフィール(GET /api/v1/profile)から引く。
  * 右カラム(詳細パネル)はウィンドウの右端・上端・下端まで届く固定幅の面で、選んだ対象の画像を上端いっぱいに敷き、
  * 画像の下端にタイトルを重ねる。その下に説明・マップの事実欄(大きさ・地表・気候。シナリオだけ)・達成条件を並べ、
  * 下端に開始ボタンを置く。シナリオの説明文・達成条件は作者のフリーテキスト。事実欄の値はすべて一覧の要素(都市が持つ値)から引く。
@@ -58,6 +60,14 @@ type NewGameWindowProps = {
  */
 type TemplateEntry = SaveEntry;
 
+/** プレイヤーのプロフィール(GET /api/v1/profile)のうち、この画面が使う項目 */
+type ProfileEntry = {
+  /** クリアしたチュートリアルの教材ID(POST /api/v1/sessions の tutorial_id と同じ値) */
+  tutorials_cleared: string[];
+  /** クリアしたシナリオのID(シナリオ一覧の要素の id と同じ値) */
+  scenarios_cleared: string[];
+};
+
 type NewGameTab = "select" | "browse";
 
 /**
@@ -87,6 +97,7 @@ type DetailView = {
    * mapSize は「7 × 6 km」の形で、不明なら null。地表・気候は未指定・未知の値をゲームと同じ既定に正規化する。
    */
   terrain: { mapSize: string | null; groundCover: number; climate: number } | null;
+  cleared: boolean;
   /** 達成条件のフリーテキスト。未設定なら null で、詳細には節ごと出したうえで「達成条件なし」と書く(無いことも情報なので隠さない) */
   objective: string | null;
   /** 読み込めないシナリオは詳細で理由を見せ、開始だけ止める */
@@ -141,13 +152,20 @@ const AVAILABLE_LANGUAGES = SUPPORTED_LANGUAGES;
  */
 const SIMULATION_DAYS_OPTIONS = [7, 30] as const;
 
+/** クリア済みの札 */
+function ClearedBadge({ className }: { className: string }) {
+  const { t } = useTranslation();
+  return <span className={className}>{t("newGame.cleared")}</span>;
+}
+
 /**
  * 一覧のタイル。画像(children)を全面に敷き、下端に名前を重ねる。
  * index は一覧を開いたときにタイルを順に浮かび上がらせる時差に使う。
  */
-function ScenarioTile({ title, selected, disabled, className, index, onSelect, children }: {
+function ScenarioTile({ title, selected, cleared, disabled, className, index, onSelect, children }: {
   title: string;
   selected: boolean;
+  cleared: boolean;
   disabled: boolean;
   className?: string;
   index: number;
@@ -165,6 +183,7 @@ function ScenarioTile({ title, selected, disabled, className, index, onSelect, c
       aria-pressed={selected}
     >
       {children}
+      {cleared && <ClearedBadge className="new-game-tile-cleared" />}
       <span className="new-game-tile-name">{title}</span>
     </button>
   );
@@ -177,6 +196,7 @@ export function NewGameWindow({
   const { t, i18n } = useTranslation();
   const [templates, setTemplates] = useState<TemplateEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<ProfileEntry | null>(null);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState("");
   const [hasCurrentGame, setHasCurrentGame] = useState<boolean | null>(null);
@@ -234,6 +254,19 @@ export function NewGameWindow({
     const listener = listen("scenarios:changed", () => { void fetchTemplates().catch(() => {}); });
     return () => { active = false; void listener.then(unlisten => unlisten()); };
   }, [apiBaseUrl]);
+
+  /** ウィンドウ初期化時にクリアの記録を取得する。失敗したら札を出さない(始めるのには支障が無い) */
+  useEffect(() => {
+    if (!apiBaseUrl) return;
+    let active = true;
+    fetchApi<ProfileEntry>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/profile`, { cache: "reload" })
+      .then(data => { if (active) setProfile(data); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [apiBaseUrl]);
+
+  const isTutorialCleared = useCallback((id: string) => profile?.tutorials_cleared.includes(id) ?? false, [profile]);
+  const isScenarioCleared = useCallback((id: string) => profile?.scenarios_cleared.includes(id) ?? false, [profile]);
 
   /**
    * テンプレート（シナリオ）での開始。
@@ -304,6 +337,7 @@ export function NewGameWindow({
         title: t(scenario.titleKey),
         description: t(scenario.descriptionKey),
         terrain: null,
+        cleared: isTutorialCleared(scenario.id),
         objective: t("newGame.tutorialObjective"),
         startDisabled: false,
         onStart: () => void handleStartTutorial(scenario.id),
@@ -323,6 +357,7 @@ export function NewGameWindow({
         groundCover: normalizeGroundCover(template.ground_cover),
         climate: normalizeClimate(template.climate),
       },
+      cleared: isScenarioCleared(template.id),
       objective: resolveLocalizedText(template.scenario_objective, i18n.language) || null,
       startDisabled: template.compatibility?.loadable === false,
       onStart: () => void handleStartTemplate(template),
@@ -332,6 +367,8 @@ export function NewGameWindow({
     templates,
     t,
     i18n.language,
+    isTutorialCleared,
+    isScenarioCleared,
     handleStartTemplate,
     handleStartTutorial,
   ]);
@@ -438,6 +475,7 @@ export function NewGameWindow({
                   className="new-game-tile--tutorial"
                   title={t(scenario.titleKey)}
                   selected={isSelected("tutorial", scenario.id)}
+                  cleared={isTutorialCleared(scenario.id)}
                   disabled={busy}
                   index={index}
                   onSelect={() => setSelection({ kind: "tutorial", id: scenario.id })}
@@ -466,6 +504,7 @@ export function NewGameWindow({
                     key={tmpl.id}
                     title={scenarioDisplayTitle(tmpl, i18n.language)}
                     selected={isSelected("template", tmpl.id)}
+                    cleared={isScenarioCleared(tmpl.id)}
                     disabled={busy}
                     index={NEW_GAME_TUTORIAL_SCENARIOS.length + index}
                     onSelect={() => setSelection({ kind: "template", id: tmpl.id })}
@@ -505,9 +544,12 @@ export function NewGameWindow({
 
             {/* タイトルは画像の下端に重ねる */}
             <div className="new-game-detail-head">
-              {detail.template
-                ? <ScenarioOriginBadges entry={detail.template} />
-                : <span className="new-game-detail-kind">{t("newGame.tutorialBadge")}</span>}
+              <div className="new-game-detail-badges">
+                {detail.template
+                  ? <ScenarioOriginBadges entry={detail.template} />
+                  : <span className="new-game-detail-kind">{t("newGame.tutorialBadge")}</span>}
+                {detail.cleared && <ClearedBadge className="new-game-detail-cleared" />}
+              </div>
               <h2 className="new-game-detail-title">{detail.title}</h2>
             </div>
 

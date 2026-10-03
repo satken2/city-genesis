@@ -363,6 +363,7 @@
     "daysOption": "{{days}}天",
     "startButton": "开始",
     "backButton": "返回",
+    "cleared": "已通关",
     "tutorialBadge": "新手教程",
     "sectionTutorials": "新手教程",
     "sectionScenarios": "剧本",

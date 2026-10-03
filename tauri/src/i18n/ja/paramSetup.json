@@ -363,6 +363,7 @@
     "daysOption": "{{days}}日",
     "startButton": "開始",
     "backButton": "戻る",
+    "cleared": "クリア済み",
     "tutorialBadge": "チュートリアル",
     "sectionTutorials": "チュートリアル",
     "sectionScenarios": "シナリオ",
