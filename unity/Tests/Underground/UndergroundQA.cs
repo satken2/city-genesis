@@ -279,6 +279,7 @@ public static class UndergroundQA
             var surfacePath = MakePath(7,221,C("Constants","PATH_STREET"),-25,0);
             Set(surfacePath,"follow_terrain",1);
             var surfaceGO = Build(surfacePath);
+            CheckParcelSelection(input, proxy);
             Physics.SyncTransforms();
             hits = Physics.RaycastAll(new Ray(new Vector3(0,80,-25),Vector3.down),200).OrderBy(h=>h.distance).ToArray();
             pick = new object[] {hits,default(RaycastHit)};
@@ -544,6 +545,48 @@ public static class UndergroundQA
         Check(!station.GetComponentsInChildren<Transform>().Any(t=>t.name.StartsWith("pole(") || t.name.StartsWith("beam(")),"underground railway has no poles or beams");
         Check(station.GetComponentsInChildren<MeshFilter>().Any(f=>f.name.EndsWith("/wire")),"underground railway retains its catenary");
         UnityEngine.Object.DestroyImmediate(station);
+    }
+
+    private static void CheckParcelSelection(Component input, GameObject undergroundPath)
+    {
+        int parcelType = C("InputObjectType","PARCEL");
+        var manager = Add("ParcelManager");
+        Set(input,"cachedParcelManager",manager);
+        var parcel = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        parcel.tag = "ParcelObject";
+        parcel.transform.position = new Vector3(0,8,-25);
+        parcel.transform.localScale = new Vector3(30,1,30);
+        var summary = Activator.CreateInstance(T("GeneratedModels.ParcelSummary"));
+        Set(summary,"parcel_id",90001);
+        ((IDictionary)Field(manager,"parcelObjectsCache"))[90001] = parcel;
+        Call(manager,"RegisterParcelSpatialIndex",summary,new[]{new[]{-15f,-40f},new[]{15f,-40f},new[]{15f,-10f},new[]{-15f,-10f}},new[]{0f,-25f});
+        Physics.SyncTransforms();
+        var hits = Physics.RaycastAll(new Ray(new Vector3(0,80,-25),Vector3.down),200).OrderBy(h=>h.distance).ToArray();
+        Check(hits.Any(h=>h.collider.gameObject==parcel),"surface parcel collider lies in front of the underground path");
+        object[] pick = {hits,default(RaycastHit)};
+        Check((bool)Call(input,"TryGetObjectHit",pick) && ((RaycastHit)pick[1]).collider.gameObject==undergroundPath,
+            "underground path selection passes through a surface parcel");
+        object[] surfaceOnly = {hits.Where(h=>h.collider.gameObject!=undergroundPath).ToArray(),default(RaycastHit)};
+        Check((bool)Call(input,"TryGetObjectHit",surfaceOnly)
+            && (int)Call(input,"GetObjectType",((RaycastHit)surfaceOnly[1]).collider.gameObject)==C("InputObjectType","TERRAIN"),
+            "surface parcels cannot become fallback hover targets underground");
+        Vector3 point = new Vector3(0,0,-25);
+        Check((GameObject)Call(input,"GetSelectableParcelAtPoint",point)==null,
+            "terrain hit cannot be remapped to a surface parcel underground");
+        int clicks = 0;
+        Call(input,"SetClickEvent",new Action<int,Vector3>((_,__)=>clicks++));
+        Set(input,"rightClickEventCallback",new Action<int,Vector3>((_,__)=>clicks++));
+        Call(input,"HandleObjectClick",parcel,point,parcelType);
+        Call(input,"HandleObjectRightClick",parcel,point,parcelType);
+        Call(input,"StartDrag",parcel,point,parcelType);
+        Check(clicks==0 && !(bool)Field(input,"isDragging"),"queued parcel click and drag cannot fire underground");
+        Static("UndergroundView","SetActive",false);
+        Check((bool)Call(input,"CanSelectObject",parcel,point,parcelType)
+            && (GameObject)Call(input,"GetSelectableParcelAtPoint",point)==parcel,
+            "normal view restores parcel ray selection and terrain remapping");
+        Static("UndergroundView","SetActive",true);
+        parcel.SetActive(false);
+        Set(input,"rightClickEventCallback",null);
     }
 
     private static void BuildExterior(List<CombineInstance> parts, List<Material> materials, List<Mesh> temporary)

@@ -438,21 +438,15 @@ public class InputHandler : MonoBehaviour
         // 起伏地形では頂点間の地形の盛り上がりにコライダーが埋まり、レイキャストでは
         // 手前の地形が必ず勝って区画を選択できない。区画は概念的に「地面上の領域」なので、
         // 最初の有効ヒットが地形の場合はヒット点のXZがどの区画ポリゴンに含まれるかを
-        // 2D内外判定で解決し、含まれるならディスパッチ先をその区画に差し替える。
+        // 2D内外判定で解決し、選択可能な区画に含まれる場合だけディスパッチ先を差し替える。
         // 区画コライダーが地形より上に出ている場合は従来どおりレイキャストが先に区画を拾う。
-        if (validHitObjectType == InputObjectType.TERRAIN &&
-            GetModeForObjectType(InputObjectType.PARCEL) != InputMode.MODE_NONE &&
-            cachedParcelManager != null)
+        if (validHitObjectType == InputObjectType.TERRAIN)
         {
-            int parcelId = cachedParcelManager.GetParcelIdAtPoint(validHitPoint);
-            if (parcelId >= 0)
+            GameObject parcelObj = GetSelectableParcelAtPoint(validHitPoint);
+            if (parcelObj != null)
             {
-                GameObject parcelObj = cachedParcelManager.GetParcelObject(parcelId);
-                if (parcelObj != null && parcelObj.activeInHierarchy)
-                {
-                    validHitObject = parcelObj;
-                    validHitObjectType = InputObjectType.PARCEL;
-                }
+                validHitObject = parcelObj;
+                validHitObjectType = InputObjectType.PARCEL;
             }
         }
 
@@ -797,8 +791,18 @@ public class InputHandler : MonoBehaviour
         if (obj == null || GetModeForObjectType(objectType) == InputMode.MODE_NONE) return false;
         if (!UndergroundView.IsActive) return true;
         // 地上モデルは位置の案内として残すが、ホバー・クリック・保留中のドラッグには使わない。
-        if (objectType == InputObjectType.BUILDING) return false;
+        if (objectType == InputObjectType.BUILDING || objectType == InputObjectType.PARCEL) return false;
         return objectType != InputObjectType.PATH || IsUndergroundSelection(obj, point);
+    }
+
+    private GameObject GetSelectableParcelAtPoint(Vector3 point)
+    {
+        if (GetModeForObjectType(InputObjectType.PARCEL) == InputMode.MODE_NONE || cachedParcelManager == null) return null;
+        int parcelId = cachedParcelManager.GetParcelIdAtPoint(point);
+        if (parcelId < 0) return null;
+        GameObject parcel = cachedParcelManager.GetParcelObject(parcelId);
+        // 地形の内外判定から拾った区画にも、コライダーのヒットと同じ選択制限を適用する。
+        return parcel != null && parcel.activeInHierarchy && CanSelectObject(parcel, point, InputObjectType.PARCEL) ? parcel : null;
     }
 
     private bool TryGetUndergroundHit(RaycastHit[] hits, out RaycastHit selected)
