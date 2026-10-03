@@ -88,6 +88,16 @@ export type CreditEntry = {
  */
 export const CREDIT_ENTRIES: CreditEntry[] = [
   {
+    title: "Badge",
+    category: "image",
+    author: "Magnific",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/badge_3135728",
+    license: "Flaticon Free License",
+    requiredText: "Badge icon designed by Magnific from Flaticon",
+    note: "New game cleared badge (ui/badge.png). Source confirmed from the downloaded file's Zone.Identifier. License verified 2026-10-03.",
+  },
+  {
     title: "Explode001",
     category: "sfx",
     author: "mitchelk",

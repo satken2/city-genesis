@@ -96,6 +96,8 @@ namespace GeneratedModels
         public string name;
         /// <summary>所属地区ID</summary>
         public int zone_id;
+        /// <summary>立地する土地区画のID</summary>
+        public int parcel_id;
         /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
         public int version;
         /// <summary>経済主体の大分類（世帯・一般施設・公共施設など。TYPE_*）</summary>
@@ -590,6 +592,7 @@ namespace GeneratedModels
         public Dictionary<string, float> agent_multiplier;
         /// <summary>地区の法規制を区画側で上書きしているか（0/1）</summary>
         public bool restriction_override;
+        /// <summary>その土地区画を買収中かどうか</summary>
         public bool under_acquisition;
         /// <summary>建築可能な建物カテゴリのビットフラグ（bd_type値のOR）</summary>
         public int allowed_bd_mask;

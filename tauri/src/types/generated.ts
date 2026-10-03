@@ -83,6 +83,8 @@ export type AgentSummary = {
   name: string;
   /** 所属地区ID */
   zone_id: number;
+  /** 立地する土地区画のID */
+  parcel_id: number;
   /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
   version: number;
   /** 経済主体の大分類（世帯・一般施設・公共施設など。TYPE_*） */
@@ -567,6 +569,7 @@ export type ParcelData = {
   agent_multiplier: Record<string, number>;
   /** 地区の法規制を区画側で上書きしているか（0/1） */
   restriction_override: boolean;
+  /** その土地区画を買収中かどうか */
   under_acquisition: boolean;
   /** 建築可能な建物カテゴリのビットフラグ（bd_type値のOR） */
   allowed_bd_mask: number;

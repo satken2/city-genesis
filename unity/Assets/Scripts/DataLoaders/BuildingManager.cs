@@ -1499,8 +1499,8 @@ public class BuildingManager : BaseApiDataManager
 
     /// <summary>
     /// 敷地が特定できない建物のうち、地形標高が海面より下にあるものだけ、中心点を含む区画を
-    /// 座標から逆引きする。一括取得のスキーマ（multi_agent）は parcel_id を持たないため、
-    /// 海上構造物はこの経路でしか敷地に辿り着けず、放っておくと海底へ沈む。
+    /// 座標から逆引きする。区画IDが未設定、または区画キャッシュに存在しない場合でも、
+    /// 海上構造物を区画の基準標高へ置き、海底への沈み込みを防ぐ。
     /// 陸上の建物で無駄な逆引きをしないよう、海面より下のときだけ引く。
     /// </summary>
     private ParcelSummary ResolveParcelBelowSeaLevel(float cx, float cz)

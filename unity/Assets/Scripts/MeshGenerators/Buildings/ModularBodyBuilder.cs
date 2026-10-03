@@ -758,7 +758,8 @@ public static class ModularBodyBuilder
 
     /// <summary>
     /// パーツをロードする。位置フォールバック（w3→w1）とレベルフォールバック
-    /// （base→mid, top→mid, fence→mid）を壁(w)・角(c)共通で適用する。
+    /// （base→mid, top→mid）を壁(w)・角(c)共通で適用する。
+    /// フェンスは同じ fence レベルの位置1までを探し、建物の外壁・角には置き換えない。
     /// mid にも角パーツが無い建物では null を返し、角は描画されず、
     /// 張り出し量が 0 になるため壁パーツが辺の端まで敷き詰められる（角は建物単位のオプトイン）。
     /// </summary>
@@ -788,7 +789,7 @@ public static class ModularBodyBuilder
         }
 
         // 3. レベルフォールバック: mid を試す
-        if (level != "mid")
+        if (level == "base" || level == "top")
         {
             part = BuildingMeshUtils.GetPart(prefix, "mid", type, position, suffix, true);
             if (part != null)
@@ -811,10 +812,10 @@ public static class ModularBodyBuilder
             }
         }
 
-        // 角パーツはどこにも用意されていない構成が正常系（角なし＝壁を辺いっぱいに敷く）なので警告しない。
-        if (type == "c")
+        // 角とフェンスは任意パーツなので、未提供でも警告せず配置を省く。
+        if (type == "c" || level == "fence")
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB]   {desc} → 角パーツなし（角を描画せず壁を端まで敷く）");
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB]   {desc} → 任意パーツなし（配置を省略）");
         }
         else
         {

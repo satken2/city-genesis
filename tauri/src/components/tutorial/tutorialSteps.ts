@@ -50,7 +50,7 @@ export interface TutorialScenario {
 }
 
 /** 一覧の並び順(学ぶ順) */
-const SCENARIO_ORDER = ["basic", "controls", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
+const SCENARIO_ORDER = ["controls", "basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
 
 const THUMBNAILS: Record<string, string> = {
   basic: basicScenarioThumbnail,

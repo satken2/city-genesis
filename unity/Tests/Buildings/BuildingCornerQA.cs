@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEditor;
@@ -33,6 +35,62 @@ public static class BuildingCornerQA
         checks++;
         if (!value) throw new Exception(message);
     }
+    static void CheckFenceFallback()
+    {
+        var assembly = builder.Assembly;
+        var managerType = assembly.GetType("ModelManager");
+        var managerObject = new GameObject("FenceFallbackQA");
+        var manager = managerObject.AddComponent(managerType);
+        var cache = (IDictionary)managerType.GetField("_modelCache", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(manager);
+        var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        var corner = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        var fence = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        var closeFence = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        var meshes = new List<Mesh>();
+        var utils = assembly.GetType("BuildingMeshUtils");
+        var drawLod = utils.GetProperty("CurrentDrawLod");
+        var originalLod = drawLod.GetValue(null);
+        const string prefix = "__fence_qa";
+        string path = "Models/Buildings/" + prefix + "/0/";
+        var load = builder.GetMethod("LoadPartWithFallback", BindingFlags.NonPublic | BindingFlags.Static);
+        Func<string, string, int, GameObject> resolve = (level, type, position) =>
+            (GameObject)load.Invoke(null, new object[] { prefix, level, type, position, 0, null });
+        try
+        {
+            drawLod.SetValue(null, Enum.Parse(assembly.GetType("DrawLod"), "Normal"));
+            cache[path + "mid-w1"] = wall;
+            cache[path + "mid-c1"] = corner;
+            Require(resolve("fence", "w", 3) == null, "Missing fence wall resolves to a building wall");
+            Require(resolve("fence", "c", 3) == null, "Missing fence corner resolves to a building corner");
+            Require(resolve("base", "w", 3) == wall, "Base wall lost its mid fallback");
+            Require(resolve("top", "c", 3) == corner, "Top corner lost its mid fallback");
+            var combines = new List<CombineInstance>();
+            var materials = new List<Material>();
+            var polygon = new[] { Vector2.zero, new Vector2(20, 0), new Vector2(20, 20), new Vector2(0, 20) };
+            builder.GetMethod("GenerateSiteDecorations").Invoke(null, new object[] {
+                prefix, 0, polygon, null, null, null, Vector3.zero, false,
+                combines, materials, meshes, null, 0f
+            });
+            Require(combines.Count == 0, "A site without fence assets generated exterior walls");
+            cache[path + "fence-w1"] = fence;
+            Require(resolve("fence", "w", 3) == fence, "Fence position fallback missing");
+            Require(resolve("fence", "c", 3) == null, "Absent fence corner uses a building corner");
+            cache[path + "fence-w3"] = fence;
+            cache[path + "fence-w1"] = wall;
+            Require(resolve("fence", "w", 3) == fence, "Specified fence position lost priority");
+            cache.Remove(path + "fence-w3");
+            cache[path + "fence-w1"] = fence;
+            cache[path + "fence-w1_close"] = closeFence;
+            drawLod.SetValue(null, Enum.Parse(assembly.GetType("DrawLod"), "Close"));
+            Require(resolve("fence", "w", 3) == closeFence, "Close fence position fallback missing");
+        }
+        finally
+        {
+            drawLod.SetValue(null, originalLod);
+            foreach (var mesh in meshes) UnityEngine.Object.DestroyImmediate(mesh);
+            foreach (var go in new[] { wall, corner, fence, closeFence, managerObject }) UnityEngine.Object.DestroyImmediate(go);
+        }
+    }
     public static void Run()
     {
         if (!EditorApplication.isPlaying)
@@ -55,6 +113,7 @@ public static class BuildingCornerQA
                 return null;
             };
             builder = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll").GetType("ModularBodyBuilder");
+            CheckFenceFallback();
             foreach (string file in Directory.GetFiles("Assets/Buildings", "*-c1.fbx", SearchOption.AllDirectories))
             {
                 string path = file.Replace('\\', '/');

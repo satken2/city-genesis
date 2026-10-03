@@ -5,12 +5,12 @@
  * タイトルバーを持たないウィンドウ(レジストリの chromeless)で、閉じるのは左下の「閉じる」と Esc。
  *
  * 左カラムの上端はヒーローで、小見出しの下にタブ「シナリオを選択」と「シナリオを探す」(共有シナリオの閲覧。未提供なので無効)を
- * 見出しの大きさで並べる。その下が選択肢のタイル一覧で、チュートリアルミッション(常に表示)と、全保存元(自作・コミュニティ・DLC)の
+ * 見出しの大きさで並べる。その下が選択肢のタイル一覧で、開閉できるチュートリアルミッションと、全保存元(自作・コミュニティ・DLC)の
  * シナリオ(GET /api/v1/scenarios)を節に分けて並べる。地形から直接始める入口は無く、標高ファイルはシナリオ管理で
  * シナリオにしてから遊ぶ。チュートリアルはコアが同梱の教材の都市から始める(チュートリアルIDだけを送る)。
  *
  * 一覧のタイルは画像を全面に敷き、名前と保存元の札だけを重ねる。説明・達成条件は右カラムに集約する。
- * クリア済みのチュートリアル・シナリオには「クリア済み」の札を付ける(タイルの右上と詳細パネル)。クリアの記録は
+ * クリア済みのチュートリアル・シナリオにはバッジ画像を付ける(タイルの右上と詳細パネル)。クリアの記録は
  * 都市と独立したプレイヤーのプロフィール(GET /api/v1/profile)から引く。
  * 右カラム(詳細パネル)はウィンドウの右端・上端・下端まで届く固定幅の面で、選んだ対象の画像を上端いっぱいに敷き、
  * 画像の下端にタイトルを重ねる。その下に説明・マップの事実欄(大きさ・地表・気候。シナリオだけ)・達成条件を並べ、
@@ -43,6 +43,7 @@ import { TerrainFacts } from "../common/TerrainFacts";
 import { ScenarioOriginBadges } from "../common/ScenarioSource";
 import { SaveDialogButton } from "./SaveDialog";
 import { BackIcon, NewGameIcon, ScenarioIcon } from "./SaveIcons";
+import clearedBadgeImage from "../../assets/images/ui/badge.png";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
 import { SaveEntry, ScenarioStartOption, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
@@ -152,10 +153,10 @@ const AVAILABLE_LANGUAGES = SUPPORTED_LANGUAGES;
  */
 const SIMULATION_DAYS_OPTIONS = [7, 30] as const;
 
-/** クリア済みの札 */
+/** クリア済みのバッジ */
 function ClearedBadge({ className }: { className: string }) {
   const { t } = useTranslation();
-  return <span className={className}>{t("newGame.cleared")}</span>;
+  return <img className={className} src={clearedBadgeImage} alt={t("newGame.cleared")} title={t("newGame.cleared")} draggable={false} />;
 }
 
 /**
@@ -197,6 +198,7 @@ export function NewGameWindow({
   const [templates, setTemplates] = useState<TemplateEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileEntry | null>(null);
+  const [tutorialsExpanded, setTutorialsExpanded] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState("");
   const [hasCurrentGame, setHasCurrentGame] = useState<boolean | null>(null);
@@ -255,18 +257,20 @@ export function NewGameWindow({
     return () => { active = false; void listener.then(unlisten => unlisten()); };
   }, [apiBaseUrl]);
 
-  /** ウィンドウ初期化時にクリアの記録を取得する。失敗したら札を出さない(始めるのには支障が無い) */
+  /** ウィンドウ初期化時にクリアの記録を取得する。失敗しても教材は開いて選択できる。 */
   useEffect(() => {
     if (!apiBaseUrl) return;
     let active = true;
     fetchApi<ProfileEntry>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/profile`, { cache: "reload" })
       .then(data => { if (active) setProfile(data); })
-      .catch(() => {});
+      .catch(() => { if (active) setProfile({ tutorials_cleared: [], scenarios_cleared: [] }); });
     return () => { active = false; };
   }, [apiBaseUrl]);
 
   const isTutorialCleared = useCallback((id: string) => profile?.tutorials_cleared.includes(id) ?? false, [profile]);
   const isScenarioCleared = useCallback((id: string) => profile?.scenarios_cleared.includes(id) ?? false, [profile]);
+  // 全クリアのプレイヤーに一瞬一覧が開いて見えないよう、記録の取得中は閉じる。手動の開閉を優先する。
+  const tutorialsOpen = tutorialsExpanded ?? (profile !== null && !NEW_GAME_TUTORIAL_SCENARIOS.every(scenario => isTutorialCleared(scenario.id)));
 
   /**
    * テンプレート（シナリオ）での開始。
@@ -465,10 +469,20 @@ export function NewGameWindow({
         </header>
 
         <div className="new-game-list">
-          {/* チュートリアルミッション: 常に表示、常に選択可能 */}
           <section className="new-game-section">
-            <h3 className="new-game-section-title">{t("newGame.sectionTutorials")}</h3>
-            <div className="new-game-tiles">
+            <h3 className="new-game-section-title">
+              <button
+                className="new-game-section-toggle"
+                type="button"
+                aria-expanded={tutorialsOpen}
+                aria-controls="new-game-tutorials"
+                onClick={() => setTutorialsExpanded(!tutorialsOpen)}
+              >
+                <span>{t("newGame.sectionTutorials")}</span>
+                <span className="new-game-section-chevron" aria-hidden="true" />
+              </button>
+            </h3>
+            <div id="new-game-tutorials" className="new-game-tiles" hidden={!tutorialsOpen}>
               {NEW_GAME_TUTORIAL_SCENARIOS.map((scenario, index) => (
                 <ScenarioTile
                   key={scenario.id}

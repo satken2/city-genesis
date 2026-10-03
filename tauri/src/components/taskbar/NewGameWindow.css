@@ -149,6 +149,38 @@
   border-left: 3px solid var(--flat-accent);
 }
 
+.new-game-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.new-game-section-toggle:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: 3px;
+}
+
+.new-game-section-chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.3rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+.new-game-section-toggle[aria-expanded="true"] .new-game-section-chevron {
+  transform: rotate(45deg);
+}
+
 .new-game-empty {
   padding: 18px 12px;
   font-size: 1.08rem;
@@ -160,6 +192,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
   gap: 14px;
+}
+
+.new-game-tiles[hidden] {
+  display: none;
 }
 
 /* =========================================================================
@@ -275,16 +311,13 @@
   z-index: 2;
 }
 
-/* クリア済みの札。タイルでは右上(左上は保存元の札)、詳細パネルでは種別の札の隣に出す */
+/* タイルの右上と詳細パネルの種別の札の隣に、クリア済みのバッジを出す。 */
 .new-game-tile-cleared,
 .new-game-detail-cleared {
-  padding: 2px 8px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.4;
-  color: var(--flat-sunken);
-  white-space: nowrap;
-  background: var(--flat-good);
+  width: 1.75rem;
+  height: 1.75rem;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .new-game-tile-cleared {
@@ -292,6 +325,8 @@
   top: 8px;
   right: 8px;
   z-index: 2;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 /* 画像の無いシナリオ・チュートリアルは方眼の設計図のような面にする(シナリオ=選択色、チュートリアル=良好の色) */
