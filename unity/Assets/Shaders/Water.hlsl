@@ -18,6 +18,7 @@
 //  5. 反射/太陽:    水の正面反射率(約2%)で URP の UniversalFragmentPBR を呼び、
 //                   フレネルによる空の映り込みと太陽のグレアを物理ベースで得る。
 //                   日光のうち雲で広がった割合は空の広い範囲から来るので、鋭いグレアにしない。
+//                   空の映り込みは、細かい波の陰で浅い角度ほど減る粗い面の反射率にする。
 //
 // 水底の取得色は照明・大気フォグを含む描画済みの色なので、アルベドとして再照明せず、
 // PBR の結果へ「水面で反射されずに水中へ入り、戻ってきた割合」だけ足す。
@@ -56,7 +57,7 @@ CBUFFER_START(UnityPerMaterial)
     float  _FoamCutoff;         // 泡マスクの閾値(小さいほど泡が広がる)
     float  _RefractionStrength; // 屈折によるスクリーンUVのずらし量(画面比)
     float  _EdgeFadeDistance;   // 水際のソフトフェード距離(m)。0で不透明に立ち上がる
-    float  _Smoothness;         // 水面のスムースネス(高いほど鋭い反射・太陽グレア)
+    float  _Smoothness;         // 法線で表せない画素より細かい風浪の傾き。0.6≒風速5m/sの海面
     float  _RippleScale;        // さざ波ノイズの空間周期(1/m)
     float  _RippleSpeed;        // さざ波のスクロール速度
     float  _RippleStrength;     // 法線の傾き強度(0で完全に平ら)
@@ -118,6 +119,28 @@ half3 WaterScatteredSunSpecular(InputData inputData, SurfaceData surfaceData)
     half  sharpSpecular = sharp.specular.r * DirectBRDFSpecular(sharp, inputData.normalWS, mainLight.direction, inputData.viewDirectionWS);
     half  broadSpecular = broad.specular.r * DirectBRDFSpecular(broad, inputData.normalWS, mainLight.direction, inputData.viewDirectionWS);
     return saturate(_SunScatterFraction) * (broadSpecular - sharpSpecular) * radiance;
+}
+
+// URP の空の映り込みは lerp(F0, スムースネス+F0, (1-N・V)^4) の近似で、粗い面でも浅い角度で鏡に近い反射率になる。
+// 実際の粗い水面は細かい波の陰に隠れる分だけ浅い角度の反射が減る(水平線近くで約半分)ので、
+// 遮蔽を含むGGXの反射率の近似式(Karis 2014 "Physically Based Shading on Mobile")へ置き換える差分を返す。
+half3 WaterSkyReflectionCorrection(InputData inputData, SurfaceData surfaceData)
+{
+    BRDFData brdfData;
+    InitializeBRDFData(surfaceData, brdfData);
+    half NoV = saturate(dot(inputData.normalWS, inputData.viewDirectionWS));
+
+    const half4 c0 = half4(-1.0, -0.0275, -0.572, 0.022);
+    const half4 c1 = half4(1.0, 0.0425, 1.04, -0.04);
+    half4 r = brdfData.perceptualRoughness * c0 + c1;
+    half  a004 = min(r.x * r.x, exp2(-9.28 * NoV)) * r.x + r.y;
+    half2 scaleBias = half2(-1.04, 1.04) * a004 + r.zw;
+    half  roughReflectance = brdfData.specular.r * scaleBias.x + scaleBias.y;
+    half  urpReflectance = EnvironmentBRDFSpecular(brdfData, Pow4(1.0 - NoV)).r;
+
+    half3 reflectVector = reflect(-inputData.viewDirectionWS, inputData.normalWS);
+    half3 sky = GlossyEnvironmentReflection(reflectVector, inputData.positionWS, brdfData.perceptualRoughness, 1.0h, inputData.normalizedScreenSpaceUV);
+    return sky * (roughReflectance - urpReflectance);
 }
 
 // ---------------- 頂点/フラグメント ----------------
@@ -215,6 +238,7 @@ half4 WaterFragment(Varyings IN) : SV_Target
 
     half4 color = UniversalFragmentPBR(inputData, surfaceData);
     color.rgb += WaterScatteredSunSpecular(inputData, surfaceData);
+    color.rgb += WaterSkyReflectionCorrection(inputData, surfaceData);
 
     // --- 水底: 水面で反射されずに入り、減衰して戻ってきた割合だけ足す ---
     // 取得色は水底までの大気フォグを含むので、合成後に水面のフォグを重ねる分の霧色を差し引く。

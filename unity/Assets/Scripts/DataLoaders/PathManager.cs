@@ -465,6 +465,7 @@ public partial class PathManager : BaseApiDataManager
             return connections.TryGetValue(path.path_id, out var cut) && Vector3.Distance(cut, point) < 1f;
         };
         PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
+        PowerLineRailGantry.TrackPolyline = GetPowerLineTrackPolyline;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
         TrackPath.LateralProfileProvider = GetTrackLateralProfile;
         LrtPlatformParts.PolylineProvider = GetLrtPlatformPolyline;
@@ -474,6 +475,8 @@ public partial class PathManager : BaseApiDataManager
     /// <summary>LRT停留所のホームの範囲を、車両と同じ未切断点列と切断位置で解決するための点列。</summary>
     private List<Vector3> GetLrtPlatformPolyline(int pathId, bool trimIntersection) =>
         TryGetPathPolyline(pathId, out var points, trimIntersection) ? points : null;
+
+    private List<Vector3> GetPowerLineTrackPolyline(PathSummary path) => CalculatePathPoints(path,false);
 
     private void Start()
     {
@@ -495,6 +498,8 @@ public partial class PathManager : BaseApiDataManager
         lodCache.Clear();
         if (PowerLinePath.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
             PowerLinePath.ConnectedPaths = null;
+        if (PowerLineRailGantry.TrackPolyline == (Func<PathSummary, List<Vector3>>)GetPowerLineTrackPolyline)
+            PowerLineRailGantry.TrackPolyline = null;
         if (PillarClearance.NeighborProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetPillarObstacles)
             PillarClearance.NeighborProvider = null;
         if (LrtPlatformParts.PolylineProvider == (Func<int, bool, List<Vector3>>)GetLrtPlatformPolyline)
@@ -4847,7 +4852,7 @@ public partial class PathManager : BaseApiDataManager
             bool added = pendingPillarRebuildIds.Add(id);
             pendingPillarRebuildSerials[id] = pathBuildSerialCounter;
             if (!added) continue;
-            pendingPowerRebuildIds.Remove(id);
+            if (!PowerLinePath.Handles(neighbor)) pendingPowerRebuildIds.Remove(id);
             InvalidateTerrainFollowPath(neighbor);
             geometryRevisions.TryGetValue(id, out int revision);
             geometryRevisions[id] = revision + 1;
@@ -4993,8 +4998,16 @@ public partial class PathManager : BaseApiDataManager
 
     private void EnqueuePowerNeighbors(PathSummary path)
     {
-        if (!PowerLinePath.Handles(path)) return;
-        foreach (int node in new[] { path.start_node_id, path.end_node_id })
+        if (!PowerLinePath.Handles(path) && !IsTrackTypePath(path)) return;
+        var nodes = new HashSet<int> { path.start_node_id, path.end_node_id };
+        if (IsTrackTypePath(path))
+            foreach (int id in CollectNearbyTrackPathIds(path))
+                if (pathDataCache.TryGetValue(id,out var rail))
+                {
+                    nodes.Add(rail.start_node_id);
+                    nodes.Add(rail.end_node_id);
+                }
+        foreach (int node in nodes)
             foreach (var neighbor in GetPathsConnectedToNode(node))
             {
                 if (neighbor.path_id == path.path_id || !PowerLinePath.Handles(neighbor)) continue;

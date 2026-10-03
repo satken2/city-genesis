@@ -15,6 +15,9 @@ foreach($id in 1101,1102) {
         if(Test-Path "$file.meta"){Copy-Item "$file.meta" $dest -Force}
     }
 }
+$railDest="$qaRoot/Assets/Models/Paths/p421"
+New-Item -ItemType Directory -Force -Path $railDest | Out-Null
+Copy-Item "$unityRoot/Assets/Models/Paths/p421/*.fbx*" $railDest -Force
 [xml]$projectXml=Get-Content "$unityRoot/Assembly-CSharp.csproj" -Raw
 $coreReference=$projectXml.Project.ItemGroup.Reference | Where-Object {$_.Include -eq 'UnityEngine.CoreModule'}
 $editorRoot=$coreReference.HintPath -replace '[\\/]Data[\\/].*$',''

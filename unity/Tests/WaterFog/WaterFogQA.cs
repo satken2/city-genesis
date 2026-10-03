@@ -67,7 +67,7 @@ public static class WaterFogQA
                 // 近景は霧の開始距離より手前。遠景には霧が残り、どちらも分割数に依存しない。
                 passed &= meshError < .005 && (distance == 300 ? fogChange < .002 : fogChange > .01);
             }
-            sun.intensity = 2;
+            sun.intensity = 4;
             RenderSettings.fog = false;
             camera.transform.rotation = Quaternion.Euler(45, 0, 0);
             camera.transform.position = -camera.transform.forward * 300;

@@ -36,7 +36,7 @@ Shader "Custom/WaterLit"
         _RefractionStrength("Refraction Strength", Range(0.0, 0.2)) = 0.04
 
         [Header(Surface)]
-        _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.92
+        _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.6
 
         [Header(Ripples)]
         _RippleScale("Ripple Scale (1/m)", Float) = 0.08

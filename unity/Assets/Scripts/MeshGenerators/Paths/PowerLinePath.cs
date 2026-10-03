@@ -13,6 +13,8 @@ public sealed class PowerLinePath : IPathMeshGenerator
         public Vector3 position;
         public Quaternion rotation;
         public int variant, node;
+        public float railLeft, railRight, feedSide;
+        public bool IsRailGantry => railLeft > 0;
     }
 
     public static Vector3 Attachment(int variant, int circuit, int bundle = 0)
@@ -39,8 +41,9 @@ public sealed class PowerLinePath : IPathMeshGenerator
     public static Support Endpoint(PathSummary path, int node, Vector3 position, Vector3 forward)
     {
         PathSummary chosen = path;
-        if (node > 0 && ConnectedPaths != null)
-            foreach (var candidate in ConnectedPaths(node))
+        var connected = node > 0 ? ConnectedPaths?.Invoke(node) : null;
+        if (connected != null)
+            foreach (var candidate in connected)
                 if (Handles(candidate) && candidate.path_id != path.path_id && (candidate.path_variant < chosen.path_variant ||
                     candidate.path_variant == chosen.path_variant && candidate.path_id < chosen.path_id)) chosen = candidate;
         var a = chosen.GetStartPointList();
@@ -55,6 +58,11 @@ public sealed class PowerLinePath : IPathMeshGenerator
                 next = waypoints[start ? 0 : waypoints.Count - 1].GetAbsolutePosition();
             forward = Direction(next - position);
         }
+        PathSummary rail = null;
+        if (connected != null)
+            foreach (var candidate in connected)
+                if (PowerLineRailGantry.CanConnect(chosen, candidate) && (rail == null || candidate.path_id < rail.path_id)) rail = candidate;
+        if (rail != null && PowerLineRailGantry.TryPlan(rail, node, chosen.path_variant, forward, out var gantry)) return gantry;
         // 軸の符号を固定し、始端／終端が逆のパスでも左右の回路を交差させない。
         forward = Direction(forward);
         if (forward.z < -.0001f || Mathf.Abs(forward.z) < .0001f && forward.x < 0) forward = -forward;
@@ -119,28 +127,8 @@ public sealed class PowerLinePath : IPathMeshGenerator
             if (constructing && (float)(i+1)/supports.Count > ConstructionPathBuilder.PierProgress(progress)) continue;
             var holder = new GameObject("PowerSupport"); holder.transform.SetParent(root.transform,false);
             var visual = new GameObject("TowerVisual"); visual.transform.SetParent(holder.transform,false);
-            var prefab = far ? null : PathDrawContext.ResolvePrefab($"Models/Paths/p{s.variant}/pillar_cap",null,out _);
-            if (prefab != null)
-            {
-                var tower = UnityEngine.Object.Instantiate(prefab,visual.transform);
-                tower.transform.SetPositionAndRotation(s.position,s.rotation);
-                foreach (var renderer in tower.GetComponentsInChildren<MeshRenderer>())
-                {
-                    var mats = renderer.sharedMaterials;
-                    for (int k=0;k<mats.Length;k++) mats[k]=RoadPath.GetOrCreateRoadMaterial(mats[k]);
-                    renderer.sharedMaterials=mats;
-                }
-            }
-            else GenerateFarTower(visual,s,metal);
-            var foundation = new PathStructureMesh(visual,"TowerFoundations",new[] { metal });
-            float foot = s.variant == Constants.PATH_VARIANT_GRID ? 3.5f : .9f;
-            for (int x=-1;x<=1;x+=2) for(int z=-1;z<=1;z+=2)
-            {
-                var top=s.position+s.rotation*new Vector3(x*foot,0,z*foot);
-                var bottom=new Vector3(top.x,Utils.GetGroundHeight(top),top.z);
-                if(top.y>bottom.y+.1f) foundation.Bar(bottom,top,s.variant==Constants.PATH_VARIANT_GRID?.22f:.12f,sides:4);
-            }
-            foundation.Finish();
+            if (s.IsRailGantry) PowerLineRailGantry.Generate(visual,s,metal,lod);
+            else GenerateTower(visual,s,metal,far);
             if (s.node > 0) holder.AddComponent<PowerLineSupport>().Initialize(s.node,path.path_id,visual,lod);
             if (i == 0) continue;
             if (constructing && (float)i/(supports.Count-1) > ConstructionPathBuilder.DeckProgress(progress)) continue;
@@ -152,16 +140,52 @@ public sealed class PowerLinePath : IPathMeshGenerator
             {
                 Vector3 Attach(Support support)
                 {
-                    int c = support.variant == 1102 ? circuit % 3 : circuit;
-                    var local = Attachment(support.variant,c,bundle);
-                    if (far && support.variant == Constants.PATH_VARIANT_GRID) local.x += .22f;
-                    return support.position + support.rotation * local;
+                    return SupportAttachment(support,circuit,bundle,far);
                 }
                 Cable(wires,Attach(previous),Attach(s),far,large ? .045f : .032f);
             }
-            Cable(wires,previous.position + Vector3.up*(previous.variant==Constants.PATH_VARIANT_GRID?38:17),s.position+Vector3.up*(s.variant==Constants.PATH_VARIANT_GRID?38:17),far,.025f);
+            Cable(wires,ShieldAttachment(previous),ShieldAttachment(s),far,.025f);
         }
         wires.Finish();
+    }
+
+    public static Vector3 SupportAttachment(Support support, int circuit, int bundle = 0, bool far = false)
+    {
+        int c = support.variant == 1102 ? circuit % 3 : circuit;
+        if (support.IsRailGantry) return PowerLineRailGantry.Attachment(support,c,bundle,far);
+        var local = Attachment(support.variant,c,bundle);
+        if (far && support.variant == Constants.PATH_VARIANT_GRID) local.x += .22f;
+        return support.position + support.rotation * local;
+    }
+
+    public static Vector3 ShieldAttachment(Support support) => support.IsRailGantry
+        ? PowerLineRailGantry.ShieldAttachment(support)
+        : support.position + Vector3.up * (support.variant == Constants.PATH_VARIANT_GRID ? 38 : 17);
+
+    static void GenerateTower(GameObject visual, Support s, Material metal, bool far)
+    {
+        var prefab = far ? null : PathDrawContext.ResolvePrefab($"Models/Paths/p{s.variant}/pillar_cap",null,out _);
+        if (prefab != null)
+        {
+            var tower = UnityEngine.Object.Instantiate(prefab,visual.transform);
+            tower.transform.SetPositionAndRotation(s.position,s.rotation);
+            foreach (var renderer in tower.GetComponentsInChildren<MeshRenderer>())
+            {
+                var mats = renderer.sharedMaterials;
+                for (int k=0;k<mats.Length;k++) mats[k]=RoadPath.GetOrCreateRoadMaterial(mats[k]);
+                renderer.sharedMaterials=mats;
+            }
+        }
+        else GenerateFarTower(visual,s,metal);
+        var foundation = new PathStructureMesh(visual,"TowerFoundations",new[] { metal });
+        float foot = s.variant == Constants.PATH_VARIANT_GRID ? 3.5f : .9f;
+        for (int x=-1;x<=1;x+=2) for(int z=-1;z<=1;z+=2)
+        {
+            var top=s.position+s.rotation*new Vector3(x*foot,0,z*foot);
+            var bottom=new Vector3(top.x,Utils.GetGroundHeight(top),top.z);
+            if(top.y>bottom.y+.1f) foundation.Bar(bottom,top,s.variant==Constants.PATH_VARIANT_GRID?.22f:.12f,sides:4);
+        }
+        foundation.Finish();
     }
 
     public static float Sag(float length) => Mathf.Min(length * .045f, 6);

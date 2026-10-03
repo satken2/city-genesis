@@ -30,7 +30,7 @@ Material:
     - _FoamNoiseScale: 0.15
     - _FoamCutoff: 0.55
     - _RefractionStrength: 0.04
-    - _Smoothness: 0.92
+    - _Smoothness: 0.6
     - _RippleScale: 0.08
     - _RippleSpeed: 0.05
     - _RippleStrength: 1.2
