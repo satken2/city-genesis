@@ -1,6 +1,7 @@
 /* Custom style overrides to globally align the docs theme with city-genesis/tauri dark panel styling */
 
-:root {
+/* Materialのパレットはbodyに定義されるため、同じスコープでも色を指定する。 */
+:root, [data-md-color-scheme] {
   /* Primary color palette overrides */
   --md-primary-fg-color:        #101723;
   --md-primary-fg-color--light:  #182231;
