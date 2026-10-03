@@ -3,7 +3,7 @@ using GeneratedModels;
 
 public partial class RoadPlanManager
 {
-    // 背景オーバーレイ（既存パスの辺・ノード）。カメラ移動時のみ再構築する。
+    // 背景オーバーレイ（既存パスの辺・ノード）。カメラ移動・ノード更新・地下表示の切替で再構築する。
     private OverlayMeshRenderer backgroundRenderer;
     private GameObject backgroundMeshObj;
     private Vector3 lastBgCameraPos = Vector3.zero;
@@ -16,6 +16,7 @@ public partial class RoadPlanManager
     /// カウンタの変化を検知して背景（既存ノード表示）を再構築する。
     /// </summary>
     private int lastBgNodeDataVersion = -1;
+    private bool lastBgUndergroundView;
 
     // 距離フェード（ParcelManagerと同じ定数）
     private const float DISTANCE_START_FADE = 280f;
@@ -126,8 +127,8 @@ public partial class RoadPlanManager
 
     /// <summary>
     /// 背景オーバーレイ（既存パスの辺・ノード）を更新する。
-    /// カメラが閾値以上に移動した場合のみメッシュを再構築し、
-    /// 静止中は既存のメッシュをそのまま使い回す。
+    /// カメラが閾値以上に移動した場合、ノード更新時、地下表示の切替時にメッシュを再構築する。
+    /// それ以外は既存のメッシュをそのまま使い回す。
     /// </summary>
     private void UpdateBackgroundOverlay(Camera cam)
     {
@@ -136,13 +137,15 @@ public partial class RoadPlanManager
         Vector3 camPos = cam.transform.position;
         // ノードキャッシュの実変更（非同期ロードの到着・削除）も再構築条件に含める
         bool nodeDataChanged = pathManager != null && pathManager.NodeDataVersion != lastBgNodeDataVersion;
-        if (!bgDirty && !nodeDataChanged
+        bool undergroundChanged = lastBgUndergroundView != UndergroundView.IsActive;
+        if (!bgDirty && !nodeDataChanged && !undergroundChanged
             && (camPos - lastBgCameraPos).sqrMagnitude < BG_REBUILD_THRESHOLD_SQ)
             return;
 
         bgDirty = false;
         lastBgCameraPos = camPos;
         lastBgNodeDataVersion = pathManager != null ? pathManager.NodeDataVersion : -1;
+        lastBgUndergroundView = UndergroundView.IsActive;
 
         backgroundRenderer.BeginFrame();
         DrawExistingEdges(cam);
@@ -165,7 +168,7 @@ public partial class RoadPlanManager
 
         Vector3 camPos = cam.transform.position;
         Vector3 camFwd = cam.transform.forward;
-        var segments = pathManager.QueryNearbySegments(camPos, DISTANCE_INVISIBLE);
+        var segments = TerrainInputHandler.GetVisiblePathSnapSegments(pathManager.QueryNearbySegments(camPos, DISTANCE_INVISIBLE));
         if (segments == null) return;
 
         Color lineColor = Color.white;
@@ -221,6 +224,7 @@ public partial class RoadPlanManager
 
         foreach (var node in nodes)
         {
+            if (!TerrainInputHandler.IsNodeSnapVisible(node, pathManager)) continue;
             Vector3 worldPos = node.GetAbsolutePosition();
             float dist = Vector3.Distance(camPos, worldPos);
             float alpha = CalculateAlphaByDistance(dist);
@@ -295,6 +299,7 @@ public partial class RoadPlanManager
             if (BuildingManager.Instance == null
                 || !BuildingManager.Instance.TryGetInfraTerminalOwner(node.node_id, out _)) continue;
             if (!InfraNetworkUtil.IsNodeSnappable(node, PathSubtype, pathManager)) continue;
+            if (!TerrainInputHandler.IsNodeSnapVisible(node, pathManager)) continue;
 
             Vector3 worldPos = node.GetAbsolutePosition();
             float dist = Vector3.Distance(camPos, worldPos);

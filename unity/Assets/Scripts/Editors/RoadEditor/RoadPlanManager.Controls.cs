@@ -262,7 +262,7 @@ public partial class RoadPlanManager
         if (handleFlat.sqrMagnitude < 1e-8f) return false;
         handleFlat.Normalize();
 
-        var segs = pathManager.QueryNearbySegments(pos, snapThreshold);
+        var segs = TerrainInputHandler.GetVisiblePathSnapSegments(pathManager.QueryNearbySegments(pos, snapThreshold));
         if (segs == null) return false;
 
         float bestAngle = float.MaxValue;

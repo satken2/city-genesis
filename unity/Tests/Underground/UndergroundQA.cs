@@ -395,9 +395,122 @@ public static class UndergroundQA
             Check(forestMaterial.GetFloat("_UndergroundAlpha")==1 && forestMaterial.GetFloat("_ZWrite")==1 && forestMaterial.GetShaderPassEnabled("ShadowCaster"),"GPU forest depth and shadows return in normal view");
             Check((Material)Static("UndergroundMaterials","ForSurface",farOriginal)==farOriginal,"instanced props return to original material");
             Call(forest,"Dispose");
+            CheckRoadSnapping(camera);
             File.WriteAllText(report,"PASS\n"+checks+" checks\nScreenshot: underground.png");
             EditorApplication.Exit(0);
         }
         catch(Exception error) { File.WriteAllText(report,"FAIL\n"+checks+" checks\n"+error); EditorApplication.Exit(1); }
+    }
+
+    private static void CheckRoadSnapping(Camera camera)
+    {
+        var manager = Add("PathManager");
+        var editor = Add("RoadPlanManager");
+        Set(editor,"pathManager",manager); Set(editor,"gameCamera",camera);
+        Set(editor,"PathSubtype",221); Set(editor,"PathType",C("Constants","PATH_STREET"));
+        Set(editor,"phase",Enum.Parse(T("RoadEditorPhase"),"Placing"));
+        Call(editor,"EnsureOverlayRenderer");
+        var background = Field(editor,"backgroundRenderer");
+        float Ground(float x, float z) => (float)Static("Utils","GetGroundHeight",new Vector3(x,0,z));
+        object MakePath(int id, float z, float height, bool followsTerrain = true)
+        {
+            var path = Activator.CreateInstance(T("GeneratedModels.PathSummary"));
+            Set(path,"path_id",id); Set(path,"path_variant",221); Set(path,"path_type",C("Constants","PATH_STREET"));
+            Set(path,"status",C("Constants","STATUS_ACTIVE")); Set(path,"follow_terrain",followsTerrain ? 1 : 0);
+            Set(path,"start_node_id",id); Set(path,"start_point",new List<object>{-40d,(double)height,(double)z});
+            Set(path,"end_point",new List<object>{40d,(double)height,(double)z});
+            Call(manager,"SavePathToCache",path);
+            Call(manager,"RegisterPathSegments",path,Call(manager,"CalculatePathPoints",path,true));
+            var node = Activator.CreateInstance(T("NodeData"));
+            Set(node,"node_id",id); Set(node,"type",C("Constants","NODE_ROAD")); Set(node,"position",new[]{-40f,height,z});
+            ((IDictionary)Field(manager,"nodeDataCache"))[id] = node;
+            Call(Field(manager,"nodeGrid"),"Add",node,Call(node,"GetAbsolutePosition"));
+            return path;
+        }
+        var surface = MakePath(901,85,0);
+        var buried = MakePath(902,75,-15);
+        Vector3 surfaceStart = new Vector3(-40,Ground(-40,85),85);
+        Vector3 buriedStart = new Vector3(-40,Ground(-40,75),75);
+        object NearestNode(Vector3 position, int variant = 221)
+        {
+            object[] args = {position,5f,manager,default(Vector3),variant};
+            return Static("TerrainInputHandler","FindNearestNode",args);
+        }
+        object NearestEdge(Vector3 position, int variant = 221)
+        {
+            object[] args = {position,5f,manager,default(Vector3),null,-1,variant};
+            return (bool)Static("TerrainInputHandler","FindNearestPathSegment",args) ? args[4] : null;
+        }
+        bool NearestEndpoint(Vector3 position)
+        {
+            object[] args = {position,5f,manager,default(Vector3),0f,221};
+            return (bool)Static("TerrainInputHandler","FindNearestConstructionEndpoint",args);
+        }
+        Call(editor,"UpdateBackgroundOverlay",camera);
+        int normalLines = ((IList)Field(background,"frameLines")).Count;
+        Check(normalLines > 0 && ((IList)Field(background,"frameSquares")).Count == 2,"normal road editor shows existing nodes and edges");
+        Check(NearestNode(surfaceStart)!=null && NearestEdge(new Vector3(0,0,85))==surface,"normal road editor preserves surface snapping");
+        Static("UndergroundView","SetActive",true);
+        Call(editor,"UpdateBackgroundOverlay",camera);
+        Check(((IList)Field(background,"frameSquares")).Count==1 && ((IList)Field(background,"frameLines")).Count<normalLines,
+            "stationary camera removes surface nodes and edges when underground view starts");
+        Check(NearestNode(surfaceStart)==null && NearestEdge(new Vector3(0,0,85))==null,"underground editor excludes surface nodes and edges");
+        Check(NearestNode(buriedStart)!=null && NearestEdge(new Vector3(0,0,75))==buried,"underground editor retains buried nodes and edges");
+        Check(NearestNode(surfaceStart,-1)!=null && NearestEdge(new Vector3(0,0,85),-1)==surface,"generic terrain snapping keeps its existing scope");
+        Set(surface,"status",C("Constants","STATUS_PENDING")); Set(buried,"status",C("Constants","STATUS_PENDING"));
+        Check(!NearestEndpoint(surfaceStart) && !NearestEndpoint(new Vector3(40,0,85)) && NearestEndpoint(buriedStart),
+            "planned surface endpoints are excluded while buried endpoints remain snappable");
+
+        var mixed = Activator.CreateInstance(T("PathSegment"));
+        Set(mixed,"path",buried); Set(mixed,"segmentIndex",42);
+        Set(mixed,"a",new Vector3(-40,Ground(-40,75),75)); Set(mixed,"b",new Vector3(40,Ground(40,75)-15,75));
+        var segmentArray = Array.CreateInstance(T("PathSegment"),1); segmentArray.SetValue(mixed,0);
+        var clipped = ((IEnumerable)Static("TerrainInputHandler","GetVisiblePathSnapSegments",segmentArray)).Cast<object>().ToArray();
+        Check(clipped.Length>0 && clipped.All(s=>(int)Field(s,"segmentIndex")==42)
+            && clipped.Min(s=>((Vector3)Field(s,"a")).x)>-40,"mixed segments retain only the tunnel run and original segment identity");
+
+        foreach (string flag in new[]{"EnableNodeSnapping","EnablePathSnapping"}) T("TerrainInputHandler").GetField(flag).SetValue(null,true);
+        T("TerrainInputHandler").GetField("EnableNodeSnapping").SetValue(null,false);
+        Set(editor,"LateralOffsets",new[]{-2f,2f});
+        object[] offsetSurface = {new Vector3(0,0,83),default(Vector3),0f};
+        object[] offsetBuried = {new Vector3(0,0,77),default(Vector3),0f};
+        Check(!(bool)Call(editor,"TryOffsetAwareRailSnap",offsetSurface) && (bool)Call(editor,"TryOffsetAwareRailSnap",offsetBuried),
+            "offset rail snapping excludes surface paths and retains buried paths");
+        object[] surfaceDirection = {surfaceStart,Vector3.right,default(Vector3)};
+        object[] buriedDirection = {buriedStart,Vector3.right,default(Vector3)};
+        Check(!(bool)Call(editor,"TryGetExistingPathExtensionDir",surfaceDirection) && (bool)Call(editor,"TryGetExistingPathExtensionDir",buriedDirection),
+            "endpoint tangent references exclude surface paths");
+        foreach (object path in new[]{surface,buried}) Set(path,"path_type",C("Constants","PATH_TRACK"));
+        Set(editor,"PathType",C("Constants","PATH_TRACK"));
+        object[] surfaceRail = {new Vector3(0,0,85),1f,default(Vector3),default(Vector3),null,false};
+        object[] buriedRail = {new Vector3(0,0,75),1f,default(Vector3),default(Vector3),null,false};
+        Check(!(bool)Call(editor,"TryProjectRailTarget",surfaceRail) && (bool)Call(editor,"TryProjectRailTarget",buriedRail),
+            "analytic rail projection cannot reintroduce a surface snap target");
+
+        Call(manager,"UnregisterPathSegments",902);
+        Call(editor,"SetParallelSnapping",true); Call(editor,"SetEndAlignment",true);
+        object[] parallel = {new Vector3(-40,0,83),default(Vector3)};
+        Check(!(bool)Call(editor,"TryApplyParallelSnap",parallel),"parallel snapping has no surface reference underground");
+        Static("UndergroundView","SetActive",false);
+        Call(editor,"UpdateBackgroundOverlay",camera);
+        Check(((IList)Field(background,"frameSquares")).Count==2 && NearestNode(surfaceStart)!=null,
+            "stationary camera restores surface node candidates in normal view");
+        Check((bool)Call(editor,"TryApplyParallelSnap",parallel),"normal view restores surface parallel snapping");
+
+        // アンカーの相対高さ0でも、非追従線路は途中の丘に潜る。
+        var terrainData = Terrain.activeTerrain.terrainData;
+        var hillHeights = terrainData.GetHeights(0,0,65,65);
+        for (int z=0;z<65;z++) for (int x=0;x<65;x++)
+        {
+            float worldX = -100 + x*200f/64, worldZ = -100 + z*200f/64;
+            hillHeights[z,x] += .1f*Mathf.Max(0,1-Mathf.Abs(worldX)/20)*Mathf.Max(0,1-Mathf.Abs(worldZ-65)/10);
+        }
+        terrainData.SetHeights(0,0,hillHeights); Static("Utils","InvalidateHeightCache");
+        var hillRail = MakePath(903,65,0,false); Set(hillRail,"path_type",C("Constants","PATH_TRACK"));
+        Static("UndergroundView","SetActive",true);
+        Check(NearestEdge(new Vector3(0,0,65))==hillRail,"non-following path beneath a hill remains a visible edge snap target");
+        object[] hillProjection = {new Vector3(0,0,65),1f,default(Vector3),default(Vector3),null,false};
+        Check((bool)Call(editor,"TryProjectRailTarget",hillProjection),"analytic rail projection uses rendered tunnel depth beneath a hill");
+        Static("UndergroundView","SetActive",false);
     }
 }

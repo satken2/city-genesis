@@ -89,7 +89,7 @@ public partial class RoadPlanManager
             for (int search = 0; search < (anchor.HasValue ? 2 : 1); search++)
             {
                 Vector3 center = search == 0 ? raw : anchor.Value;
-                var segments = pathManager.QueryNearbySegments(center, parallelSearchRadius);
+                var segments = TerrainInputHandler.GetVisiblePathSnapSegments(pathManager.QueryNearbySegments(center, parallelSearchRadius));
                 foreach (var segment in segments)
                 {
                     var path = segment.path;

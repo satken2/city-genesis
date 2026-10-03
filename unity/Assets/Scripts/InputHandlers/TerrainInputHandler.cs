@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
@@ -757,6 +758,44 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         return basePosition;
     }
 
+    /// <summary>地下表示では、半透明の地上区間を敷設時の表示・吸着候補から除く。</summary>
+    public static bool IsPathSnapPointVisible(GeneratedModels.PathSummary path, Vector3 position)
+    {
+        return !UndergroundView.IsActive || (path != null && TunnelSectionUtil.IsTunnelPoint(position,
+            TunnelSectionUtil.GetClearanceHeight(path.path_variant)));
+    }
+
+    public static bool IsNodeSnapVisible(NodeData node, PathManager pathManager)
+    {
+        if (!UndergroundView.IsActive) return true;
+        var paths = pathManager.GetPathsConnectedToNode(node.node_id);
+        // 交差点の材質分類と同じ接続パスを使う。孤立した端子は深さだけで判定する。
+        float clearance = paths.Count > 0 ? TunnelSectionUtil.GetClearanceHeight(paths[0].path_variant) : 0f;
+        return TunnelSectionUtil.IsTunnelPoint(pathManager.GetNodeSnapPosition(node), clearance);
+    }
+
+    /// <summary>混在パスも描画と同じ境界で切り分け、地下区間だけを候補として返す。</summary>
+    public static IEnumerable<PathSegment> GetVisiblePathSnapSegments(IEnumerable<PathSegment> segments)
+    {
+        if (segments == null) yield break;
+        foreach (var segment in segments)
+        {
+            if (!UndergroundView.IsActive)
+            {
+                yield return segment;
+                continue;
+            }
+            if (segment.path == null) continue;
+            var runs = TunnelSectionUtil.CollectTunnelRuns(new List<Vector3> { segment.a, segment.b },
+                TunnelSectionUtil.GetClearanceHeight(segment.path.path_variant),
+                PathManager.GetPathFollowTerrain(segment.path));
+            foreach (var run in runs)
+                for (int i = 1; i < run.Count; i++)
+                    yield return new PathSegment { path = segment.path, segmentIndex = segment.segmentIndex,
+                        a = run[i - 1], b = run[i] };
+        }
+    }
+
     public static NodeData FindNearestNode(Vector3 basePos, float threshold, PathManager pathManager, out Vector3 snappedPos, int drawingPathVariant = -1)
     {
         if (pathManager == null)
@@ -777,6 +816,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         {
             // インフラ網の互換性フィルタ（道路×インフラ、別網インフラ同士は吸着しない）
             if (!InfraNetworkUtil.IsNodeSnappable(node, drawingPathVariant, pathManager)) continue;
+            if (drawingPathVariant >= 0 && !IsNodeSnapVisible(node, pathManager)) continue;
 
             Vector3 nodePos = pathManager.GetNodeSnapPosition(node);
 
@@ -803,7 +843,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             return false;
         }
 
-        var segments = pathManager.QueryNearbySegments(basePos, threshold);
+        IEnumerable<PathSegment> segments = pathManager.QueryNearbySegments(basePos, threshold);
+        if (drawingPathVariant >= 0) segments = GetVisiblePathSnapSegments(segments);
         float minDist = float.MaxValue;
         bool found = false;
 
@@ -911,7 +952,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 float sy = Utils.GetGroundHeight(new Vector3(sx, 0f, sz)) + sRel;
                 Vector3 startPos = new Vector3(sx, sy, sz);
                 float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(sx, sz));
-                if (dist < minDist && dist <= threshold)
+                if (dist < minDist && dist <= threshold
+                    && (drawingPathVariant < 0 || IsPathSnapPointVisible(path, startPos)))
                 {
                     minDist = dist;
                     snappedPos = startPos;
@@ -929,7 +971,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 float ey = Utils.GetGroundHeight(new Vector3(ex, 0f, ez)) + eRel;
                 Vector3 endPos = new Vector3(ex, ey, ez);
                 float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(ex, ez));
-                if (dist < minDist && dist <= threshold)
+                if (dist < minDist && dist <= threshold
+                    && (drawingPathVariant < 0 || IsPathSnapPointVisible(path, endPos)))
                 {
                     minDist = dist;
                     snappedPos = endPos;

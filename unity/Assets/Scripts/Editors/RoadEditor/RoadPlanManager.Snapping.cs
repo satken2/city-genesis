@@ -453,6 +453,7 @@ public partial class RoadPlanManager
                 foreach (var node in nodes)
                 {
                     if (!InfraNetworkUtil.IsNodeSnappable(node, PathSubtype, pathManager)) continue;
+                    if (!TerrainInputHandler.IsNodeSnapVisible(node, pathManager)) continue;
                     EvaluatePointTargetOffsetCandidates(basePos, pathManager.GetNodeSnapPosition(node), node.GetRelativeHeight(), ref bestDist, ref snapped, ref snapRelHeight, ref found);
                 }
             }
@@ -468,7 +469,7 @@ public partial class RoadPlanManager
         // パスセグメント(横オフセット分平行移動した線への射影として吸着)
         if (TerrainInputHandler.EnablePathSnapping)
         {
-            var segments = pathManager.QueryNearbySegments(basePos, searchRadius);
+            var segments = TerrainInputHandler.GetVisiblePathSnapSegments(pathManager.QueryNearbySegments(basePos, searchRadius));
             if (segments != null)
             {
                 var projectedRails = new HashSet<int>();
@@ -479,6 +480,7 @@ public partial class RoadPlanManager
                     if (IsRailJunctionTarget && seg.path != null
                         && RailJunctionGeometry.TryProject(seg.path, basePos, out Vector3 railPosition, out Vector3 railTangent))
                     {
+                        if (!IsRailSnapPointVisible(seg.path, railPosition)) continue;
                         EvaluateTangentOffsetCandidates(basePos, railPosition, railTangent,
                             seg.path.GetRelativeHeightAtPoint(railPosition.x, railPosition.z),
                             ref bestDist, ref snapped, ref snapRelHeight, ref found);
@@ -525,8 +527,7 @@ public partial class RoadPlanManager
     /// </summary>
     private void EvaluatePointTargetOffsetCandidates(Vector3 basePos, Vector3 targetPos, float targetRelHeight, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
     {
-        var segs = pathManager.QueryNearbySegments(targetPos, OFFSET_SNAP_TANGENT_SEARCH_RADIUS);
-        if (segs == null || segs.Count == 0) return;
+        var segs = TerrainInputHandler.GetVisiblePathSnapSegments(pathManager.QueryNearbySegments(targetPos, OFFSET_SNAP_TANGENT_SEARCH_RADIUS));
 
         // 標高はターゲット(ノード/端点)が保持する相対高さをそのまま引き継ぐ
         // (絶対Y−地形サンプルの逆算は高さ源の差がノイズとして乗る)
@@ -628,6 +629,7 @@ public partial class RoadPlanManager
         float rel = path.GetRelativeHeightAtPoint(x, z);
         if (Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(x, z)) > searchRadius) return;
         Vector3 endpoint = new Vector3(x, Utils.GetGroundHeight(new Vector3(x, 0f, z)) + rel, z);
+        if (!TerrainInputHandler.IsPathSnapPointVisible(path, endpoint)) return;
         EvaluatePointTargetOffsetCandidates(basePos, endpoint, rel, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
     }
 
@@ -650,7 +652,7 @@ public partial class RoadPlanManager
         segB = Vector3.zero;
         if (pathManager == null) return false;
 
-        var segs = pathManager.QueryNearbySegments(pos, snapThreshold * 2f);
+        var segs = TerrainInputHandler.GetVisiblePathSnapSegments(pathManager.QueryNearbySegments(pos, snapThreshold * 2f));
         if (segs == null) return false;
 
         foreach (var seg in segs)

@@ -24,6 +24,7 @@ public partial class RoadPlanManager
             var path = segment.path;
             if (path == null || path.path_id == pathId || path.path_type != PathType || !seen.Add(path.path_id)) continue;
             if (!RailJunctionGeometry.TryProject(path, position, out Vector3 projected, out Vector3 direction)) continue;
+            if (!IsRailSnapPointVisible(path, projected)) continue;
             var offsets = useOffsets && LateralOffsets != null && LateralOffsets.Length > 0 ? LateralOffsets : new[] { 0f };
             Vector3 normal = new Vector3(-direction.z, 0, direction.x);
             foreach (float offset in offsets)
@@ -39,6 +40,23 @@ public partial class RoadPlanManager
             }
         }
         return target != null;
+    }
+
+    private bool IsRailSnapPointVisible(GeneratedModels.PathSummary path, Vector3 position)
+    {
+        if (!UndergroundView.IsActive) return true;
+        // 解析射影のYは0なので、描画と共有する中心線で深さを判定する。
+        // 相対高さ0の非追従線路が丘に潜る場合も、アンカーの高さだけで地上と決めない。
+        if (!pathManager.TryGetUntrimmedPolylineShared(path.path_id, out var points)) return false;
+        float best = float.PositiveInfinity;
+        Vector3 closest = position;
+        for (int i = 1; i < points.Count; i++)
+        {
+            Vector3 candidate = PolylineUtils.ClosestPointOnSegmentXZ(position, points[i - 1], points[i]);
+            float distance = Utils.XZDistanceSquared(position, candidate);
+            if (distance < best) { best = distance; closest = candidate; }
+        }
+        return best < float.PositiveInfinity && TerrainInputHandler.IsPathSnapPointVisible(path, closest);
     }
 
     private bool TryGetRailHandleDirection(Vector3 position, Vector3 current, out Vector3 direction)
