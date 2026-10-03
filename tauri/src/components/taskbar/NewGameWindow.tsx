@@ -23,6 +23,8 @@
  * 違う言語を選ぶと、コアが都市内の名前を付け直す。シミュレーション日数・気候・地表・アセットの地域は、
  * 作者が固定した項目は表示だけ、固定していない項目はシナリオの値を初期値に選べる。
  */
+import { PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL } from "../../constants";
+
 
 import { useState, useEffect, useCallback, useMemo, type CSSProperties, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -104,7 +106,7 @@ type ConfirmSelection = {
   defaultCityName: string;
   defaultLanguage: string;
   defaultSimulationDays: number;
-  isTutorial: boolean;
+  playMode: number;
   tutorialId?: string | null;
 };
 
@@ -255,7 +257,7 @@ export function NewGameWindow({
         defaultCityName,
         defaultLanguage: defaultLang,
         defaultSimulationDays: defaultDays,
-        isTutorial: false,
+        playMode: PLAY_MODE_NORMAL,
         tutorialId: null,
       });
     },
@@ -280,7 +282,7 @@ export function NewGameWindow({
       defaultCityName: "",
       defaultLanguage: defaultLang,
       defaultSimulationDays: 30,
-      isTutorial: true,
+      playMode: PLAY_MODE_TUTORIAL,
       tutorialId,
     });
   }, [i18n]);
@@ -363,7 +365,7 @@ export function NewGameWindow({
         climate: chosen("climate", startOptions.climate),
         groundCover: chosen("ground_cover", startOptions.ground_cover),
         assetRegion: chosen("asset_region", startOptions.asset_region),
-        isTutorial: confirmSelection.isTutorial,
+        playMode: confirmSelection.playMode,
         tutorialId: confirmSelection.tutorialId || null,
       });
       onClose();

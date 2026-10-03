@@ -21,7 +21,7 @@ import "./ScenarioInfoSection.css";
 type ScenarioInfoSectionProps = {
   apiBaseUrl: string;
   /** テンプレート作成モードかどうか。true のときは紹介文の編集場所を案内する */
-  templateMode: boolean;
+  godMode: boolean;
 };
 
 /** GET /api/v1/city のうち、このセクションが使うプロパティ */
@@ -33,7 +33,7 @@ type CityScenarioFields = {
   };
 };
 
-export function ScenarioInfoSection({ apiBaseUrl, templateMode }: ScenarioInfoSectionProps) {
+export function ScenarioInfoSection({ apiBaseUrl, godMode }: ScenarioInfoSectionProps) {
   const { t, i18n } = useTranslation();
   const [texts, setTexts] = useState<CityScenarioFields["city"]>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -78,12 +78,12 @@ export function ScenarioInfoSection({ apiBaseUrl, templateMode }: ScenarioInfoSe
   const objective = resolveLocalizedText(texts.scenario_objective, i18n.language);
 
   // 紹介文が一切ないシナリオでは、通常プレイ中に空欄を出しても意味がない。
-  if (!templateMode && !title && !description && !objective) return null;
+  if (!godMode && !title && !description && !objective) return null;
 
   return (
     <div className="scenario-info">
       <h3 className="scenario-info__title">{t("achievements.scenarioSection")}</h3>
-      {templateMode && <p className="scenario-info__read-text scenario-info__hint">{t("achievements.scenarioEditHint")}</p>}
+      {godMode && <p className="scenario-info__read-text scenario-info__hint">{t("achievements.scenarioEditHint")}</p>}
       <div className="scenario-info__read">
         {imagePreview && (
           <img className="scenario-info__read-thumb" src={imagePreview} alt="" />

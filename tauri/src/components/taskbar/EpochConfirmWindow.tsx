@@ -33,6 +33,8 @@
  * エラーレスポンス時はさらに、その理由を通知ポップアップで表示する(コアの本文は英語固定なので、
  * 理由の分かる拒否は専用の翻訳文にする)。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
@@ -47,7 +49,7 @@ import { logInfoToFile } from "../../utils/log";
 import { showNotification } from "../../utils/notification";
 import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
-import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { useFontSize } from "../../contexts/FontSizeContext";
 import type { QuestNotification } from "../../types";
 import { SaveDialogButton } from "./SaveDialog";
@@ -121,9 +123,9 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
   const executingRef = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const [epochCount, setEpochCount] = useState(1);
-  const templateMode = useTemplateMode(apiBaseUrl);
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
   const { fontSize } = useFontSize();
-  const maxEpochCount = templateMode ? TEMPLATE_MAX_EPOCH_COUNT : MAX_EPOCH_COUNT;
+  const maxEpochCount = godMode ? TEMPLATE_MAX_EPOCH_COUNT : MAX_EPOCH_COUNT;
 
   /** 直接入力(テンプレートモード)。空欄や範囲外は1〜上限に丸める */
   function handleCountInput(raw: string) {
@@ -151,7 +153,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
     const height = Math.min(root.scrollHeight + border, window.screen.availHeight || Infinity);
     if (Math.abs(height - window.innerHeight) < 1) return;
     void getCurrentWindow().setSize(new LogicalSize(window.innerWidth, height)).catch(console.error);
-  }, [city, epochCount, templateMode, i18n.language, fontSize]);
+  }, [city, epochCount, godMode, i18n.language, fontSize]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -296,7 +298,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
             >
               <MinusIcon />
             </button>
-            {templateMode ? (
+            {godMode ? (
               <input
                 className="epoch-confirm-count epoch-confirm-count--input"
                 type="number"

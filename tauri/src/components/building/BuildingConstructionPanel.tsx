@@ -20,6 +20,9 @@
  * 市庁舎の詳細パネルの移転ボタンから開くと(relocateCityHall)、選択を市庁舎に固定した移転モードになる。
  * 操作と送信は新規の配置と同じで、配置済みの市庁舎を置き直すとバックエンドが無料・即時の移転として扱う。
  */
+import { PLAY_MODE_GOD, PLAY_MODE_NORMAL } from "../../constants";
+import { usePlayMode } from "../../hooks/usePlayMode";
+
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -215,8 +218,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   const [copyInvalidReason, setCopyInvalidReason] = useState<string | null>(null);
 
   const [cityHallPlaced, setCityHallPlaced] = useState<boolean>(true);
-  const [templateMode, setTemplateMode] = useState<boolean>(false);
-  const continueAfterConfirm = templateMode && editAgentId == null && !relocateCityHall;
+  const playMode = usePlayMode(apiBaseUrl);
+  const godMode = playMode === PLAY_MODE_GOD;
+  const continueAfterConfirm = godMode && editAgentId == null && !relocateCityHall;
 
   useEffect(() => {
     if (!apiBaseUrl) return;
@@ -226,22 +230,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       try {
         const baseUrl = apiBaseUrl.replace(/\/+$/, "");
         
-        // city と session を並行して取得
-        const [cityRes, sessionRes] = await Promise.all([
-          fetch(`${baseUrl}/api/v1/city`, { signal: controller.signal }),
-          fetch(`${baseUrl}/api/v1/sessions`, { signal: controller.signal }),
-        ]);
-
-        if (cityRes.ok && sessionRes.ok) {
-          const cityData = await cityRes.json();
-          const sessionData = await sessionRes.json();
-          
-          setCityHallPlaced(cityData.city?.city_hall_placed ?? false);
-          setTemplateMode(sessionData.template_mode ?? false);
-        }
+        const cityData = await fetchApi<{ city?: { city_hall_placed: boolean } }>(
+          `${baseUrl}/api/v1/city`, { signal: controller.signal },
+        );
+        if (!controller.signal.aborted) setCityHallPlaced(cityData.city?.city_hall_placed ?? false);
       } catch (err) {
         if (!controller.signal.aborted) {
-          console.error("[BuildingConstructionPanel] Failed to fetch city or session status:", err);
+          console.error("[BuildingConstructionPanel] Failed to fetch city status:", err);
         }
       }
     };
@@ -251,7 +246,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     return () => controller.abort();
   }, [apiBaseUrl]);
 
-  const isCityHallPlacedGateActive = !cityHallPlaced && !templateMode;
+  const isCityHallPlacedGateActive = !cityHallPlaced && playMode === PLAY_MODE_NORMAL;
   /**
    * 市庁舎だけを置くモード。都市創設前の配置と、詳細パネルからの移転がこれに当たり、選択を市庁舎に固定する。
    * 移転もバックエンドへの送信は配置と同じで、配置済みの市庁舎を置き直すとバックエンドが移転として扱う。
@@ -401,10 +396,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   const buildingVariants = useMemo(() => {
     if (!masterData) return [];
     return Object.entries(masterData.agents).filter(
-      ([id, entry]) => entry.building && (templateMode || !entry.template_only) && !isGradingVariant(Number(id))
+      ([id, entry]) => entry.building && (godMode || !entry.template_only) && !isGradingVariant(Number(id))
         && !(Number(id) === VARIANT_CITY && cityHallPlaced && !relocateCityHall)
     ) as [string, AgentMasterEntry][];
-  }, [masterData, templateMode, cityHallPlaced, relocateCityHall]);
+  }, [masterData, godMode, cityHallPlaced, relocateCityHall]);
 
   /** 分類タイルに並べる分類(ID順=並び順)。建設できる建物を1つも持たない分類は出さない。 */
   const availableCategories = useMemo(
@@ -1117,7 +1112,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         // 観光名所は都市に1基までの一点物なので、テンプレートモードでも複製できない。
         const isLandmarkVariant = Object.values(masterData.landmarks ?? {})
           .some((lm) => lm.agent_variant === p.variant);
-        if (isLandmarkVariant || (entry?.template_only && !templateMode)) {
+        if (isLandmarkVariant || (entry?.template_only && !godMode)) {
           void showNotification({
             message: t("building_construction.copySourceNotAllowed"),
             durationMs: 4000,
@@ -1148,7 +1143,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       .catch(console.error);
 
     return () => { unlisten?.(); };
-  }, [appWindow, masterData, templateMode, t]);
+  }, [appWindow, masterData, godMode, t]);
 
   /* ---- 土地区画データ取得 ---- */
 
@@ -1318,7 +1313,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
    * 効果範囲オーバーレイを明示的に消し(ウィンドウを閉じるとアンマウント時の
    * クリア送信が届かない可能性があるため)、Unity にセッションリロードを送って
    * 新しい建物を描画させる。
-   * 通常モード・既存建物の編集・市庁舎の移転では、先に STATE_NORMAL に戻してから表示モードを切り替える。
+   * 通常・チュートリアルモード・既存建物の編集・市庁舎の移転では、先に STATE_NORMAL に戻してから表示モードを切り替える。
    * STATE_NORMAL でないと view:change_view の変更が _normalStateMemory に記憶されず、
    * 後から Rust 側が STATE_NORMAL を送った際に default に戻ってしまうため。
    * 最後に、ユーザーが建設結果を確認できるよう計画中表示をONにしてパネルを閉じる。

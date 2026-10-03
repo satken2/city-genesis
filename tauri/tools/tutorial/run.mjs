@@ -22,6 +22,11 @@ await build({ entryPoints: ["tools/tutorial/component-tests.tsx"], outfile: comp
   plugin.onResolve({ filter: /\/?(tutorialSteps|useTutorialGuide|notification)$/ }, args => args.importer.replaceAll("\\", "/").endsWith("/src/components/tutorial/Tutorial.tsx") ? { path: mock } : undefined);
 } }] });
 await import(pathToFileURL(componentOutput).href + `?run=${Date.now()}`);
+const playModeOutput = resolve("node_modules/.cache/play-mode-tests.mjs");
+await build({ entryPoints: ["tools/tutorial/play-mode-tests.tsx"], outfile: playModeOutput, bundle: true,
+  platform: "node", format: "esm", packages: "external", loader: { ".css": "empty" },
+  alias: { "@tauri-apps/api/event": mock, "@tauri-apps/api/window": mock, "@tauri-apps/api/core": mock, "react-i18next": mock } });
+await import(pathToFileURL(playModeOutput).href + `?run=${Date.now()}`);
 const shapeOutput = resolve("node_modules/.cache/tutorial-shape-editor-tests.mjs");
 await build({ entryPoints: ["tools/tutorial/shape-editor-tests.tsx"], outfile: shapeOutput, bundle: true, platform: "node", format: "esm", packages: "external", loader: { ".css": "empty" }, define: { "import.meta.env.DEV": "false" }, alias: { "@tauri-apps/api/event": mock, "@tauri-apps/api/core": mock, "react-i18next": mock }, plugins: [{ name: "shape-editor-map-boundary", setup(plugin) {
   plugin.onResolve({ filter: /\/CityMapCanvas$/ }, () => ({ path: resolve("tools/tutorial/shape-map-mock.tsx") }));

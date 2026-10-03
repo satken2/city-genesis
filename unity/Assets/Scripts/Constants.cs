@@ -10,6 +10,9 @@ public static class Constants
     public const string STEAM_TICKET_IDENTITY = "city-genesis";
     public const int GAME_VERIFIED = 0;
     public const int GAME_UNVERIFIED = 1;
+    public const int PLAY_MODE_NORMAL = 0;
+    public const int PLAY_MODE_GOD = 1;
+    public const int PLAY_MODE_TUTORIAL = 2;
     public const string CITY_SCENARIO_DIR = "UrbanGenesis/scenarios";
     public const string CITY_SAVE_DIR = "UrbanGenesis/saves";
     public const int HISTORY_COUNT = 120;

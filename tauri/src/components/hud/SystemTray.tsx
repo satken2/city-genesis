@@ -11,6 +11,8 @@
  * ウィンドウ幅を合わせる(透明な余白がUnityへのクリックを吸わないようにするため。
  * アイコンパネルの高さと同じ仕組み)。
  */
+import { PLAY_MODE_GOD, PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL } from "../../constants";
+
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,7 +37,8 @@ type CompleteConstructionResult = {
 
 export function SystemTray({ backendConnected = true }: { backendConnected?: boolean }) {
   const { t } = useTranslation();
-  const { visible, apiBaseUrl, templateMode, debugExecution, epochExecuting } = useHudSession();
+  const { visible, apiBaseUrl, playMode, debugExecution, epochExecuting } = useHudSession();
+  const godMode = playMode === PLAY_MODE_GOD;
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [completing, setCompleting] = useState(false);
 
@@ -59,13 +62,13 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
   }, [visible]);
 
   /** テンプレートモード(製作者向けの編集モード)の切替。バックエンドのセッション設定を書き換える。 */
-  async function toggleTemplateMode() {
+  async function toggleGodMode() {
     if (!backendConnected) return;
     try {
       await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ template_mode: !templateMode }),
+        body: JSON.stringify({ play_mode: godMode ? PLAY_MODE_NORMAL : PLAY_MODE_GOD }),
       });
     } catch (error) {
       console.error("failed to toggle template mode", error);
@@ -126,24 +129,24 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
 
   return (
     <div ref={panelRef} className={`hud-panel system-tray ${epochExecuting ? "hud-disabled" : ""}`}>
-      {debugExecution && (
+      {debugExecution && playMode !== PLAY_MODE_TUTORIAL && (
         <button
           id="debug_template"
           className="hud-icon-btn system-tray-icon"
           type="button"
-          title={t(templateMode ? "taskbar.trayTemplateOn" : "taskbar.trayTemplateOff")}
+          title={t(godMode ? "taskbar.trayTemplateOn" : "taskbar.trayTemplateOff")}
           disabled={!backendConnected}
-          onClick={() => void toggleTemplateMode()}
+          onClick={() => void toggleGodMode()}
         >
           <img
-            src={iconUrl(templateMode ? "templat_on.png" : "templat_off.png")}
-            alt={t(templateMode ? "taskbar.trayTemplateOn" : "taskbar.trayTemplateOff")}
+            src={iconUrl(godMode ? "templat_on.png" : "templat_off.png")}
+            alt={t(godMode ? "taskbar.trayTemplateOn" : "taskbar.trayTemplateOff")}
             className="hud-icon-img"
             draggable={false}
           />
         </button>
       )}
-      {templateMode && (
+      {godMode && (
         <>
           <button
             id="template_complete"

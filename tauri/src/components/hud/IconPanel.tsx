@@ -12,6 +12,8 @@
  * Tauriコマンド `resize_icon_panel` で通知してウィンドウ丈を合わせる
  * (合わせないと透明な余白がクリックを吸ってUnityを操作できなくなる)。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 
 import { Fragment, useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
@@ -37,7 +39,8 @@ import "./IconPanel.css";
 
 export function IconPanel() {
   const { t } = useTranslation();
-  const { visible, templateMode, isLocked, epochExecuting } = useHudSession();
+  const { visible, playMode, isLocked, epochExecuting } = useHudSession();
+  const godMode = playMode === PLAY_MODE_GOD;
   const mode = useHudMode();
   const panelRef = useRef<HTMLElement | null>(null);
 
@@ -148,7 +151,7 @@ export function IconPanel() {
 
   if (!visible) return null;
 
-  const icons = MENU_ICONS.filter((icon) => templateMode || !icon.templateOnly);
+  const icons = MENU_ICONS.filter((icon) => godMode || !icon.templateOnly);
 
   return (
     <nav ref={panelRef} className={`icon-panel ${epochExecuting ? "hud-disabled" : ""}`}>

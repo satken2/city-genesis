@@ -8,13 +8,15 @@
  * 所属道路の割り当て変更はアイコンパネルの地区編集モード(3DビューのCtrlラジアルメニュー)で行うため、
  * このパネルでは扱わない。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { ZoneData, ZoneResponse, ZoneSlotStarvation } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { InfoHeader } from "../common/InfoHeader";
 import { DataList } from "../common/DataList";
 import { SpaceAmountChart } from "../common/SpaceAmountChart";
@@ -34,7 +36,7 @@ export function ZoneDetailPanel({
   initialEntityId,
 }: ZoneDetailPanelProps) {
   const { t } = useTranslation();
-  const templateMode = useTemplateMode(apiBaseUrl);
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
 
   const [zoneData, setZoneData] = useState<ZoneData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -349,7 +351,7 @@ export function ZoneDetailPanel({
         ) : null}
       </RestrictionFields>
 
-      {templateMode && (
+      {godMode && (
         <button
           className="god-edit-open-btn"
           type="button"

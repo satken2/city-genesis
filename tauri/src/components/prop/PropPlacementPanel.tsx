@@ -24,6 +24,9 @@
  * バックエンドへの送信は Tauri(UI)側が直接行い、成功後に edit_prop:finish で Unity の
  * 配置状態をリセットする。既存プロップの削除はコックピットのブルドーザで行う(本パネルは配置のみ)。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+import { usePlayMode } from "../../hooks/usePlayMode";
+
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -73,7 +76,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
   const { t } = useTranslation();
   const masterData = useMasterData();
 
-  const [templateMode, setTemplateMode] = useState<boolean>(false);
+  const godMode = usePlayMode(apiBaseUrl ?? "") === PLAY_MODE_GOD;
   const [mode, setMode] = useState<PlacementMode>("instance");
   const [selectedType, setSelectedType] = useState<number | null>(null);
 
@@ -128,7 +131,6 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
     let unlistenInstances: (() => void) | undefined;
     let unlistenShape: (() => void) | undefined;
     let unlistenSettings: (() => void) | undefined;
-    let unlistenSession: (() => void) | undefined;
 
     // 3D側の操作(中ボタン回転・PageUp/PageDown)で変わった設定をステッパーへ反映する。
     // Unity が権威なので change_settings でエコーしない(setter だけを呼ぶ)。
@@ -162,33 +164,23 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
       })
       .catch(console.error);
 
-    appWindow
-      .listen<{ session?: Record<string, unknown> }>("session-state", (event) => {
-        setTemplateMode((event.payload?.session?.template_mode as boolean) ?? false);
-      })
-      .then((fn) => {
-        unlistenSession = fn;
-      })
-      .catch(console.error);
-
     return () => {
       unlistenInstances?.();
       unlistenShape?.();
       unlistenSettings?.();
-      unlistenSession?.();
     };
   }, []);
 
   // テンプレートモードがオフのときは、強制的に個別(instance)モードにする。
   useEffect(() => {
-    if (!templateMode && mode === "scatter") {
+    if (!godMode && mode === "scatter") {
       setMode("instance");
       setInstances([]);
       setPolygon([]);
       setIsShapeFinalized(false);
       enterEditMode("instance", selectedType);
     }
-  }, [templateMode, mode, selectedType, enterEditMode]);
+  }, [godMode, mode, selectedType, enterEditMode]);
 
   /* ---- ヒントバー表示。パネルが閉じられたらクリアする ---- */
   useEffect(() => {
@@ -337,7 +329,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
       </div>
 
       {/* 配置モード切替(個別 / 範囲) */}
-      {templateMode && (
+      {godMode && (
         <div className="pc-section">
           <div className="pc-section-title">{t("prop_placement.modeLabel")}</div>
           <div className="pp-mode-toggle">

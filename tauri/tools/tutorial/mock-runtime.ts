@@ -12,7 +12,7 @@ export async function listen(name: string, fn: (event: { payload: any }) => void
 export async function sendTutorialGuide() {}
 export function useMasterData() { return master; }
 export const windowState = { hidden: false };
-const appWindow = { listen, hide: async () => { windowState.hidden = true; } };
+const appWindow = { listen, show: async () => { windowState.hidden = false; }, hide: async () => { windowState.hidden = true; } };
 export function getCurrentWindow() { return appWindow; }
 const t = (key: string) => key;
 export function useTranslation() { return { t }; }

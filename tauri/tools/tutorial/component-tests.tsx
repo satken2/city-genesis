@@ -1,3 +1,4 @@
+import { PLAY_MODE_NORMAL, PLAY_MODE_GOD, PLAY_MODE_TUTORIAL } from "../../src/constants";
 import assert from "node:assert/strict";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
@@ -43,13 +44,13 @@ try {
   assert.equal(button("tutorial.complete.button")!.disabled, true);
   await settle(() => button("tutorial.complete.button")!.click());
   assert.equal(patches().length, 1, "pending finish blocks duplicate requests");
-  assert.deepEqual(JSON.parse(patches()[0].body!), { template_mode: false }, "finish turns template mode off");
+  assert.deepEqual(JSON.parse(patches()[0].body!), { play_mode: PLAY_MODE_NORMAL }, "finish returns to normal mode");
   await settle(() => { finish(Response.json({ code: "FAILED" }, { status: 500 })); });
   assert.equal(notifications.at(-1), "tutorial.guide.finishFailed");
   assert.equal(button("tutorial.complete.button")!.disabled, false, "HTTP failure permits another finish attempt");
   windowState.hidden = false;
   await settle(() => button("tutorial.complete.button")!.click());
-  await settle(() => { finish(Response.json({ success: true, template_mode: false })); });
+  await settle(() => { finish(Response.json({ success: true, play_mode: PLAY_MODE_NORMAL })); });
   assert.equal(container.querySelector("button"), null, "finish hides the tutorial panel");
   assert.equal(windowState.hidden, true, "finish hides the tutorial window itself");
   windowState.hidden = false;
@@ -66,4 +67,4 @@ try {
   globalThis.fetch = originalFetch;
   await browser.happyDOM.close();
 }
-console.log("PASS: tutorial component next/finish buttons, template mode release and repeated sessions");
+console.log("PASS: tutorial component next/finish buttons, return to normal mode and repeated sessions");

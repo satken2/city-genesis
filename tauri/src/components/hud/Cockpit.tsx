@@ -12,7 +12,7 @@
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
  *   解除し忘れによる誤削除を防ぐため、ON の間はパネル全体を工事現場風の
  *   黄黒斜線(`cockpit--bulldozer`)にして常駐中であることを目立たせる。
- *   神モード(templateMode)では建物・道路をクリックで即時に削除する(確認も取り消しもない)。
+ *   神モード(godMode)では建物・道路をクリックで即時に削除する(確認も取り消しもない)。
  *   通常は空き地・計画中の建物/道路・地形プロップだけが対象。
  * - 公共サービス充足度: 電力・水道などの需要/供給キャパシティを縦棒で常時表示する。
  *   クリックで公共施設ウィンドウを開く。
@@ -25,6 +25,8 @@
  * BGMの再生と、3Dビューでのオブジェクト選択に応じたウィンドウ表示は、
  * HUDの中で常に1枚だけ存在するこのウィンドウが受け持つ(多重再生・多重オープンを避けるため)。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
@@ -68,8 +70,9 @@ const L1_NOTIFICATION_POLL_INTERVAL_MS = 30_000;
 
 export function Cockpit() {
   const { t, i18n } = useTranslation();
-  const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting, templateMode } = useHudSession();
-  const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, templateMode);
+  const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting, playMode } = useHudSession();
+  const godMode = playMode === PLAY_MODE_GOD;
+  const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, godMode);
   const mode = useHudMode();
   // ブルドーザの削除確認ダイアログでプロップ種別名を出すために参照する。
   const masterData = useMasterData();
@@ -220,7 +223,7 @@ export function Cockpit() {
   /**
    * ブルドーザ(オブジェクト削除)モードのトグル。
    * ON で Unity を STATE_REMOVE_OBJECTS にし、OFF で STATE_NORMAL に戻す。
-   * 神モード(templateMode)では instant_remove を付け、建物・道路をステータスを問わず確認なしで
+   * 神モード(godMode)では instant_remove を付け、建物・道路をステータスを問わず確認なしで
    * 即時に削除させる(Unity は神モードかを知らないので UI が伝える)。
    * windowType "bulldozer" は送信元ラベルであり、実ウィンドウは開かない。
    */
@@ -229,15 +232,15 @@ export function Cockpit() {
     try {
       await sendChangeState(
         next ? "STATE_REMOVE_OBJECTS" : "STATE_NORMAL",
-        next && templateMode ? { instant_remove: true } : undefined,
+        next && godMode ? { instant_remove: true } : undefined,
         "bulldozer",
       );
-      await setHintbarText(next ? t(templateMode ? "hint.bulldozerInstant" : "hint.bulldozer") : "");
+      await setHintbarText(next ? t(godMode ? "hint.bulldozerInstant" : "hint.bulldozer") : "");
       await setHudMode(next ? "bulldozer" : null);
     } catch (error) {
       console.error("failed to toggle bulldozer mode", error);
     }
-  }, [mode, t, templateMode]);
+  }, [mode, t, godMode]);
 
   const handleToolClick = useCallback(
     async (icon: HudIconDef) => {
@@ -277,7 +280,7 @@ export function Cockpit() {
       <div className="cockpit-tools">
         {TOOL_ICONS.map((icon) => {
           const active = icon.id === "bulldozer" && mode === "bulldozer";
-          const bulldozerTooltipKey = templateMode
+          const bulldozerTooltipKey = godMode
             ? (active ? "taskbar.bulldozerInstantOn" : "taskbar.bulldozerInstantOff")
             : (active ? "taskbar.bulldozerOn" : "taskbar.bulldozerOff");
           const tooltip = icon.id === "bulldozer" ? t(bulldozerTooltipKey) : t(icon.tooltipKey);
@@ -337,7 +340,7 @@ export function Cockpit() {
         <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
         <div className="cockpit-date-weather" data-guide="hud.date">
           <span className="cockpit-date">{formattedDate}</span>
-          <WeatherStatus weather={weather} editable={templateMode} failed={weatherFailed} onSelect={selectWeather} />
+          <WeatherStatus weather={weather} editable={godMode} failed={weatherFailed} onSelect={selectWeather} />
         </div>
         <BudgetMiniMeter
           apiBaseUrl={apiBaseUrl}

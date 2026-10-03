@@ -1,8 +1,9 @@
+import { PLAY_MODE_GOD } from "../../constants";
 import { useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { ScenarioInfoSection } from "./ScenarioInfoSection";
 import type { Quest, QuestClauseState } from "../../types";
 import { ResponsiveContainer, ComposedChart, Bar, Line, CartesianGrid, ReferenceLine, XAxis, YAxis, Tooltip } from "recharts";
@@ -75,7 +76,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const locale = resolveIntlLocale(i18n.language);
   const fmt = (value: number, digits = 1) => value.toLocaleString(locale, { maximumFractionDigits: digits });
   const [historyMode, setHistoryMode] = useState<"household" | "total">("household");
-  const templateMode = useTemplateMode(apiBaseUrl);
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
   const [quests, setQuests] = useState<Quest[]>([]);
   const [scoreData, setScoreData] = useState<ScoreResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,7 +124,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   /** クエストカードクリック時、編集モードで quest_edit ウィンドウを開く(テンプレートモード時のみ有効) */
   async function handleOpenEditQuest(questId: number) {
-    if (!templateMode) return;
+    if (!godMode) return;
     await invoke("open_registered_window", {
       windowType: "quest_edit",
       params: { extra: { editQuestId: questId } },
@@ -195,7 +196,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           <span className="achieve-dashboard__quest-count">
             {t("achievements.completedCount", { completed: quests.filter(isCompleted).length, total: quests.length })}
           </span>
-          {templateMode && (
+          {godMode && (
             <button
               className="achieve-dashboard__add-quest-btn"
               type="button"
@@ -207,7 +208,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         </h3>
 
         <p className="achieve-dashboard__hint">{t("achievements.goalsHint")}</p>
-        <ScenarioInfoSection apiBaseUrl={apiBaseUrl} templateMode={templateMode} />
+        <ScenarioInfoSection apiBaseUrl={apiBaseUrl} godMode={godMode} />
         <div className="achieve-dashboard__quest-grid">
           {quests.length === 0 ? (
             <div className="achieve-dashboard__empty-quests">{t("achievements.noQuests")}</div>
@@ -217,7 +218,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               const locked = quest.status === "locked";
               const failed = quest.status === "failed";
               // 隠しクエストは達成するまで名前・内容・条件を伏せる（テンプレートモードでは見せる）
-              const masked = quest.hidden && !completed && !templateMode;
+              const masked = quest.hidden && !completed && !godMode;
               const name = resolveLocalizedText(quest.name, i18n.language);
               const progress = completed ? 1 : Math.max(0, Math.min(1, quest.progress ?? 0));
               const barColor = completed ? "var(--flat-good)" : failed ? "var(--flat-danger)" : "var(--flat-accent)";
@@ -229,12 +230,12 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     completed ? "quest-grid-card--completed" : "",
                     locked ? "quest-grid-card--locked" : "",
                     failed ? "quest-grid-card--failed" : "",
-                    templateMode ? "quest-grid-card--editable" : "",
+                    godMode ? "quest-grid-card--editable" : "",
                   ].join(" ")}
-                  onClick={templateMode ? () => void handleOpenEditQuest(quest.id) : undefined}
-                  role={templateMode ? "button" : undefined}
-                  tabIndex={templateMode ? 0 : undefined}
-                  onKeyDown={templateMode ? (event) => {
+                  onClick={godMode ? () => void handleOpenEditQuest(quest.id) : undefined}
+                  role={godMode ? "button" : undefined}
+                  tabIndex={godMode ? 0 : undefined}
+                  onKeyDown={godMode ? (event) => {
                     if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
                       event.preventDefault();
                       void handleOpenEditQuest(quest.id);
@@ -262,7 +263,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                         {t(`achievements.tier.${quest.tier}`)}
                       </span>
                     )}
-                    {templateMode && (
+                    {godMode && (
                       <button
                         className="quest-grid-card__delete-btn"
                         type="button"

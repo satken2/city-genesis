@@ -14,6 +14,8 @@
  *
  * 都市の編集は create_session でポップアップをすべて閉じるので、確認文で地形エディタの未保存の編集に触れる。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
@@ -85,11 +87,11 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setBusy(true); setError(""); setStatus("");
     try { await operation(); return true; } catch (e) { setError(saveError(e, t)); return false; } finally { setBusy(false); }
   }
-  /** 都市を神モード(template_mode)で開く。自作は上書き、コミュニティ・DLC はコピーとして保存される。 */
+  /** 都市を神モード(play_mode=PLAY_MODE_GOD)で開く。自作は上書き、コミュニティ・DLC はコピーとして保存される。 */
   async function editCity(entry: SaveEntry, copy: boolean) {
     if (!await requestConfirm({ message: t(copy ? "scenarios.copyConfirm" : "scenarios.editConfirm") })) return;
     if (!await prepareSaveLoad(apiBaseUrl, entry.id, true, t)) return;
-    await invoke("create_session", { templateId: entry.id, templateMode: true, acceptBalanceChange: true });
+    await invoke("create_session", { templateId: entry.id, playMode: PLAY_MODE_GOD, acceptBalanceChange: true });
   }
   /**
    * シナリオの地形を作業フォルダへ書き出してから地形エディタを開く(セッションは使わない)。

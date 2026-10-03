@@ -1,3 +1,4 @@
+import { PLAY_MODE_NORMAL, PLAY_MODE_GOD, PLAY_MODE_TUTORIAL } from "../../src/constants";
 import assert from "node:assert/strict";
 import { Window } from "happy-dom";
 import { act } from "react";
@@ -233,10 +234,10 @@ delete state.errors.prepare_scenario_terrain_editor;
 
 await act(async () => { cardButton("local~mine", "scenarios.editCity").click(); });
 await settle();
-assert.deepEqual(lastCall("create_session"), { templateId: "local~mine", templateMode: true, acceptBalanceChange: true });
+assert.deepEqual(lastCall("create_session"), { templateId: "local~mine", playMode: PLAY_MODE_GOD, acceptBalanceChange: true });
 await act(async () => { cardButton("workshop~123~copy", "scenarios.editCopy").click(); });
 await settle();
-assert.deepEqual(lastCall("create_session"), { templateId: "workshop~123~copy", templateMode: true, acceptBalanceChange: true });
+assert.deepEqual(lastCall("create_session"), { templateId: "workshop~123~copy", playMode: PLAY_MODE_GOD, acceptBalanceChange: true });
 
 // 地形を取り込む: 画素数・形式は先頭のバイトから読み、マップの大きさはコアと同じく1km単位に切り上げる。
 assert.deepEqual([importedMapExtent(1001, 1), importedMapExtent(1002, 1), importedMapExtent(2, 0.5), importedMapExtent(3001, 10), importedMapExtent(11, 100)],
@@ -621,7 +622,7 @@ await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const session = lastCall("create_session");
 assert.equal(session.templateId, "local~mine");
-assert.equal(session.templateMode, undefined, "new games never start in template mode");
+assert.equal(session.playMode, PLAY_MODE_NORMAL, "new games start in normal mode");
 assert.deepEqual([session.language, session.cityName, session.climate, session.groundCover, session.assetRegion, session.simulationDays],
   ["fr", "Mine", null, 2, 1, 30]);
 delete state.results.load_app_settings;
@@ -645,7 +646,7 @@ assert.ok(button("newGame.startButton").classList.contains("save-dialog-button--
 await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const tutorialSession = lastCall("create_session");
-assert.deepEqual([tutorialSession.isTutorial, tutorialSession.tutorialId, tutorialSession.templateId], [true, "basic", null]);
+assert.deepEqual([tutorialSession.playMode, tutorialSession.tutorialId, tutorialSession.templateId], [PLAY_MODE_TUTORIAL, "basic", null]);
 assert.ok(!("terrainMapId" in tutorialSession), "no terrain is sent for tutorials");
 await act(async () => { root.unmount(); });
 

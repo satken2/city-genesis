@@ -21,6 +21,8 @@
  * nearby_zones が API レスポンスに含まれる場合、所属地区をドロップダウンで変更できる。
  * 隣接パスの所属地区のみ選択可能であり、地区の連続性要件を満たす。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -30,7 +32,7 @@ import type { NearbyZoneEntry, PathData } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { sendHighlightObjects, sendClearHighlights } from "../../utils/ipc";
 import type { PathInterferenceHighlight } from "../../utils/ipc";
-import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { resolvePathIcon } from "../../utils/pathIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { PATH_TYPES_WITH_ALIGNMENT } from "../../local-constants";
@@ -85,7 +87,7 @@ export function PathDetailPanel({
 }: PathDetailPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const templateMode = useTemplateMode(apiBaseUrl);
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
   const [pathData, setPathData] = useState<(PathData & PathRoadFields) | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -635,7 +637,7 @@ export function PathDetailPanel({
           <PathConstructionInfoPanel path={pathData} apiBaseUrl={apiBaseUrl} refreshKey={refreshKey} />
         </div>
       )}
-      {templateMode && (
+      {godMode && (
         <button
           className="god-edit-open-btn"
           type="button"

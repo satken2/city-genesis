@@ -3,10 +3,10 @@ import { listen } from "@tauri-apps/api/event";
 import { IPC_EVENT_WEATHER_STATE, queryWeather, setWeather, type WeatherState } from "../../utils/ipc";
 import { AmbienceVolumeSync } from "../../utils/weatherAudio";
 
-export function useWeather(visible: boolean, templateMode: boolean) {
+export function useWeather(visible: boolean, godMode: boolean) {
   const [weather, updateWeather] = useState<WeatherState | null>(null);
   const [failed, setFailed] = useState(false);
-  const previousTemplate = useRef(templateMode);
+  const previousGodMode = useRef(godMode);
 
   useEffect(() => {
     const sound = new AmbienceVolumeSync();
@@ -32,16 +32,16 @@ export function useWeather(visible: boolean, templateMode: boolean) {
   }, [visible]);
 
   useEffect(() => {
-    if (previousTemplate.current && !templateMode && visible)
+    if (previousGodMode.current && !godMode && visible)
       void setWeather(null).catch(() => setFailed(true));
-    previousTemplate.current = templateMode;
-  }, [templateMode, visible]);
+    previousGodMode.current = godMode;
+  }, [godMode, visible]);
 
   const select = useCallback(async (id: string | null) => {
-    if (!templateMode || !visible) return;
+    if (!godMode || !visible) return;
     setFailed(false);
     try { await setWeather(id); } catch { setFailed(true); }
-  }, [templateMode, visible]);
+  }, [godMode, visible]);
 
   return { weather, failed, select };
 }

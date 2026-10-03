@@ -247,9 +247,9 @@ Unityのグラフィックプログラムは、いくつかのステートを持
 
 設置済みの公共交通パス（`PATH_TRANSPORT`）は、`view:change_view` の `transit` レイヤーで路線種別ごとに表示ON/OFFできる（`sub_mode` に表示する `transit_path_id` のCSV文字列を渡す）。Unity は種別色の帯（オーバーレイ）として下地道路の上に描画する。
 
-`STATE_EDIT_PROP` は地形プロップ（森・岩・茂みなどの装飾）の配置モードで、プロップ配置パネル（`prop_placement`）で種別を選ぶと遷移する。`world:change_state` の params に `prop_type`・`placement_mode`（`"instance"` | `"scatter"`）・初期設定 `rotation`/`scale`（個別）・`density`/`seed`（範囲）を含める。配置には2モードある。**個別モード**は左クリックで1個ずつ配置（カーソル追従は半透明ゴースト、確定すると不透明の実モデル、右クリックで直近を取り消し）し、配置列を `edit_prop:update_instances` でUIへ送出する。**範囲モード**は左クリックで散布範囲のポリゴン頂点を置き（3頂点以上でseedベースの散布ゴーストを簡易プレビュー、右クリックで直近頂点を取り消し）、ポリゴンを `edit_prop:update_shape` でUIへ送出する。回転/スケール/密度/seed の変更は `edit_prop:change_settings` でプレビューに即反映する。個別モードでは3D側でも中ボタンドラッグで回転、PageUp/PageDown で高さを変えられ、結果は `edit_prop:placement_settings` でパネルへ書き戻す。確定送信（個別=`POST /api/v1/props/instances`、範囲=`POST /api/v1/props/scatters`）はUI側が直接行い、成功後に `edit_prop:finish` を送信してUnity側の配置状態をリセットする。既存プロップの削除は配置パネルではなく `STATE_REMOVE_OBJECTS`（ブルドーザ）で行い、範囲配置は `remove_object:request_confirm` / `remove_object:confirm_result` の確認を挟む。プロップはゼロコストの装飾のため `template_mode` ゲートはない。詳細な仕様は `genesis-docs/docs/geometries/M_地形プロップ.md` を参照。
+`STATE_EDIT_PROP` は地形プロップ（森・岩・茂みなどの装飾）の配置モードで、プロップ配置パネル（`prop_placement`）で種別を選ぶと遷移する。`world:change_state` の params に `prop_type`・`placement_mode`（`"instance"` | `"scatter"`）・初期設定 `rotation`/`scale`（個別）・`density`/`seed`（範囲）を含める。配置には2モードある。**個別モード**は左クリックで1個ずつ配置（カーソル追従は半透明ゴースト、確定すると不透明の実モデル、右クリックで直近を取り消し）し、配置列を `edit_prop:update_instances` でUIへ送出する。**範囲モード**は左クリックで散布範囲のポリゴン頂点を置き（3頂点以上でseedベースの散布ゴーストを簡易プレビュー、右クリックで直近頂点を取り消し）、ポリゴンを `edit_prop:update_shape` でUIへ送出する。回転/スケール/密度/seed の変更は `edit_prop:change_settings` でプレビューに即反映する。個別モードでは3D側でも中ボタンドラッグで回転、PageUp/PageDown で高さを変えられ、結果は `edit_prop:placement_settings` でパネルへ書き戻す。確定送信（個別=`POST /api/v1/props/instances`、範囲=`POST /api/v1/props/scatters`）はUI側が直接行い、成功後に `edit_prop:finish` を送信してUnity側の配置状態をリセットする。既存プロップの削除は配置パネルではなく `STATE_REMOVE_OBJECTS`（ブルドーザ）で行い、範囲配置は `remove_object:request_confirm` / `remove_object:confirm_result` の確認を挟む。プロップはゼロコストの装飾のため `play_mode == PLAY_MODE_GOD` ゲートはない。詳細な仕様は `genesis-docs/docs/geometries/M_地形プロップ.md` を参照。
 
-`STATE_REMOVE_OBJECTS` はブルドーザ（オブジェクト削除）モードで、コックピットのブルドーザボタンで遷移する（ウィンドウは開かず、再度押すと `STATE_NORMAL` へ戻す。遷移の発信元ラベルは `bulldozer`）。`world:change_state` の params は省略可能な `instant_remove`（bool、既定 false）だけで、UIがセッションの `template_mode`（神モード。シナリオ制作とチュートリアルを含む）のときに `true` を付ける。Unity は神モードかを知らず、この指定に従って削除対象を決める。通常は空き地区画・計画中の建物と道路・地形プロップだけが対象で、`instant_remove=true` では稼働中の建物と道路も対象になる（市政府・中央銀行・代理主体・国境検問所と、公共交通の区間パスは除く）。削除は Unity が `DELETE /api/v1/agents/{id}`・`/api/v1/paths/{id}`・`/api/v1/parcels/{id}` を直接叩き、バックエンドが神モードのときだけ稼働中の建物・道路を受け付ける。建物はテナントの経済主体と世帯の市民ごと消えて区画は空き地に戻り、道路は端点が孤立したノードも消える（地形は戻さない）。確認ダイアログも取り消しも無い。例外として範囲配置プロップだけは、このモードでも `remove_object:request_confirm` / `remove_object:confirm_result` の確認を挟んでから範囲ごと消す。詳細は [Unity入力制御](Unity入力制御.md) の「建物・道路・区画の削除(ブルドーザ)」を参照。
+`STATE_REMOVE_OBJECTS` はブルドーザ（オブジェクト削除）モードで、コックピットのブルドーザボタンで遷移する（ウィンドウは開かず、再度押すと `STATE_NORMAL` へ戻す。遷移の発信元ラベルは `bulldozer`）。`world:change_state` の params は省略可能な `instant_remove`（bool、既定 false）だけで、UIがセッションの `play_mode == PLAY_MODE_GOD`（神モード。シナリオ制作とチュートリアルを含む）のときに `true` を付ける。Unity は神モードかを知らず、この指定に従って削除対象を決める。通常は空き地区画・計画中の建物と道路・地形プロップだけが対象で、`instant_remove=true` では稼働中の建物と道路も対象になる（市政府・中央銀行・代理主体・国境検問所と、公共交通の区間パスは除く）。削除は Unity が `DELETE /api/v1/agents/{id}`・`/api/v1/paths/{id}`・`/api/v1/parcels/{id}` を直接叩き、バックエンドが神モードのときだけ稼働中の建物・道路を受け付ける。建物はテナントの経済主体と世帯の市民ごと消えて区画は空き地に戻り、道路は端点が孤立したノードも消える（地形は戻さない）。確認ダイアログも取り消しも無い。例外として範囲配置プロップだけは、このモードでも `remove_object:request_confirm` / `remove_object:confirm_result` の確認を挟んでから範囲ごと消す。詳細は [Unity入力制御](Unity入力制御.md) の「建物・道路・区画の削除(ブルドーザ)」を参照。
 
 `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` は既存パスの結合・分割の「対象選択モード」で、パス詳細パネル（`path_detail`）の操作パネルにある結合／分割ボタンで遷移する。`world:change_state` の params に操作対象の `path_id`（結合では結合後に残る側＝survivor、分割では分割元）を含める。どちらも稼働中（`STATUS_ACTIVE`）のパスにのみ表示される。
 
@@ -397,14 +397,14 @@ invoke("open_registered_window", { windowType: "new_game" })
   ↓
 最終の「開始」を押す(ここまでは現在の都市とUnityの表示を保持)
   ↓
-invoke("create_session", { templateId | isTutorial + tutorialId, cityName, language, ... })
+invoke("create_session", { templateId | playMode: PLAY_MODE_TUTORIAL + tutorialId, cityName, language, ... })
   ↓
 [Rust]
   1. コアの版・シナリオの互換性を検証
   2. prepare_graphic() → Unityの起動・session:resetとIPC契約の確認
   3. トップメニューとポップアップを隠す
   4. begin_initial_loading() → game:loadingで暗転・HUD非表示・Tips表示
-  5. POST /api/v1/sessions(template_id または is_tutorial・tutorial_id)
+  5. POST /api/v1/sessions(template_id または play_mode=2・tutorial_id)
   6. POST成功後、ポーリングからUnityにsession:reload + game:start {loading_id}を送信
   7. 同じloading_idのgame:loadedを受け、Tipsを開始ボタンに切り替える
   8. Tipsの開始ボタンでgame:revealを送り、HUDとヒントバーを表示

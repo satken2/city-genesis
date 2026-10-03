@@ -13,6 +13,11 @@ use std::sync::atomic::Ordering;
 use std::time::Duration;
 use tauri::{Emitter, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
+// HTTPのプレイモード。コアのconsts.pyと同じ値で送る。
+const PLAY_MODE_NORMAL: i32 = 0;
+const PLAY_MODE_GOD: i32 = 1;
+const PLAY_MODE_TUTORIAL: i32 = 2;
+
 fn load_registry() -> WindowRegistry {
     serde_json::from_str(include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
@@ -427,17 +432,20 @@ async fn create_session(
     city_name: Option<String>,
     language: Option<String>,
     simulation_days: Option<u32>,
-    is_tutorial: Option<bool>,
-    template_mode: Option<bool>,
+    play_mode: Option<i32>,
     tutorial_id: Option<String>,
     accept_balance_change: Option<bool>,
     climate: Option<i32>,
     ground_cover: Option<i32>,
     asset_region: Option<i32>,
 ) -> Result<(), String> {
+    let play_mode = play_mode.unwrap_or(PLAY_MODE_NORMAL);
+    if !matches!(play_mode, PLAY_MODE_NORMAL | PLAY_MODE_GOD | PLAY_MODE_TUTORIAL) {
+        return Err("不正なプレイモードです。".to_string());
+    }
     log::info!(
-        "[create_session] template_id={:?} city_name={:?} language={:?} simulation_days={:?} is_tutorial={:?} template_mode={:?} tutorial_id={:?} climate={:?} ground_cover={:?} asset_region={:?}",
-        template_id, city_name, language, simulation_days, is_tutorial, template_mode, tutorial_id,
+        "[create_session] template_id={:?} city_name={:?} language={:?} simulation_days={:?} play_mode={} tutorial_id={:?} climate={:?} ground_cover={:?} asset_region={:?}",
+        template_id, city_name, language, simulation_days, play_mode, tutorial_id,
         climate, ground_cover, asset_region
     );
 
@@ -457,12 +465,12 @@ async fn create_session(
     // 開いているポップアップを全て閉じる（NewGameWindow など）
     window::close_all_popup_windows(&app, state.inner());
 
-    begin_initial_loading(&app, state.inner(), template_id.is_none() && !template_mode.unwrap_or(false) && !is_tutorial.unwrap_or(false))?;
+    begin_initial_loading(&app, state.inner(), template_id.is_none() && play_mode == PLAY_MODE_NORMAL)?;
 
     {
         let mut guard = state.lock();
         guard.is_loading = true;
-        guard.tutorial_id = if is_tutorial.unwrap_or(false) {
+        guard.tutorial_id = if play_mode == PLAY_MODE_TUTORIAL {
             tutorial_id.clone().or_else(|| Some("basic".to_string()))
         } else {
             None
@@ -486,8 +494,7 @@ async fn create_session(
         city_name: Option<String>,
         language: Option<String>,
         simulation_days: Option<u32>,
-        is_tutorial: Option<bool>,
-        template_mode: Option<bool>,
+        play_mode: i32,
         tutorial_id: Option<String>,
         accept_balance_change: bool,
         climate: Option<i32>,
@@ -499,8 +506,7 @@ async fn create_session(
         city_name: city_name.clone(),
         language: language.clone(),
         simulation_days,
-        is_tutorial,
-        template_mode,
+        play_mode,
         tutorial_id: tutorial_id.clone(),
         accept_balance_change: accept_balance_change.unwrap_or(false),
         climate,
@@ -1802,6 +1808,15 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             {
                 let mut guard = state.lock();
                 guard.session_state = session_data.clone();
+                if !guard.is_loading
+                    && session_data
+                        .as_ref()
+                        .and_then(|session| session.get("play_mode"))
+                        .and_then(Value::as_i64)
+                        != Some(PLAY_MODE_TUTORIAL as i64)
+                {
+                    guard.tutorial_id = None;
+                }
             }
             // 復旧時はセッションの消失・切り替えを反映してから操作を解禁する。
             // 再接続先の都市へ古い画面から更新要求を送らないため、この順序を守る。

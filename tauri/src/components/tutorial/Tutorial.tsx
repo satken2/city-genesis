@@ -19,6 +19,8 @@
  * - session-state イベントは API URL とセーブ ID の取得にのみ利用し、
  *   ポーリングによる同一セーブ ID のイベントでは進捗を復元しない
  */
+import { PLAY_MODE_NORMAL } from "../../constants";
+
 
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -329,7 +331,7 @@ export function Tutorial() {
       await fetchApi(`${apiBaseUrl}/api/v1/sessions`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ template_mode: false }),
+        body: JSON.stringify({ play_mode: PLAY_MODE_NORMAL }),
       });
       setVisible(false);
       await appWindow.hide().catch(() => {});

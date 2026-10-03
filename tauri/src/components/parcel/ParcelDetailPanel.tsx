@@ -14,6 +14,8 @@
  * 規制関連フィールドは restriction_override=true の場合のみ有効になる。
  * 変更内容は「保存」ボタンで PATCH リクエストとして送信する。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,7 +25,7 @@ import type { ParcelData } from "../../types";
 import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
 import { showNotification } from "../../utils/notification";
 import { resolveParcelIcon } from "../../utils/parcelIcon";
-import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { InfoHeader } from "../common/InfoHeader";
 import { ZoneLink } from "../common/ZoneLink";
@@ -80,7 +82,7 @@ export function ParcelDetailPanel({
 }: ParcelDetailPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const templateMode = useTemplateMode(apiBaseUrl);
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
   const [parcelData, setParcelData] = useState<ParcelData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -647,7 +649,7 @@ export function ParcelDetailPanel({
         </div>
       </RestrictionFields>
 
-      {templateMode && (
+      {godMode && (
         <button
           className="god-edit-open-btn"
           type="button"

@@ -13,6 +13,8 @@
  * agent.type や agent.is_bd に応じて、基本情報より下の領域に
  * タイプ固有の詳細情報を追加することを想定している。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,7 +39,7 @@ import {
   MODEL_MASHUP
 } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { useConstructionBudgetRow } from "../../hooks/useConstructionBudgetRow";
 import { resolveAgentIcon } from "../../utils/agentIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
@@ -99,7 +101,7 @@ export function AgentDetailPanel({
 }: AgentDetailPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const templateMode = useTemplateMode(apiBaseUrl);
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
   const [entityHistory, setEntityHistory] = useState<string[]>([
     initialEntityId,
   ]);
@@ -717,7 +719,7 @@ export function AgentDetailPanel({
         </div>
       )}
 
-      {templateMode && (
+      {godMode && (
         <button
           className="god-edit-open-btn"
           type="button"

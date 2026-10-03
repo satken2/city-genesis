@@ -6,6 +6,8 @@
  * ネイティブウィンドウ自体の表示/非表示はRust側(`set_hud_visible`)が行うが、
  * 表示直後に前セッションの内容が一瞬見えるのを避けるため、React側でも `visible` で描画を止める。
  */
+import { PLAY_MODE_NORMAL } from "../../constants";
+
 
 import { useEffect, useMemo, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -23,11 +25,11 @@ export type HudSession = {
   /** セッション(プレイ中の都市)が存在し、HUDを描画してよいか */
   visible: boolean;
   apiBaseUrl: string;
-  /** テンプレート編集モード。資源編集・パラメータ編集など製作者向けの操作が増える */
-  templateMode: boolean;
+  /** 通常・神・チュートリアルのプレイモード */
+  playMode: number;
   /** 市庁舎が未設置(=都市創設前)のため、建設以外の操作をロックするか */
   isLocked: boolean;
-  /** デバッグ実行。テンプレートモードの切替ボタンをシステムトレイに出す */
+  /** デバッグ実行。通常・神モードの切替ボタンをシステムトレイに出す */
   debugExecution: boolean;
   cityName: string;
   /** 1800年1月1日からの経過日数。未取得のときは null */
@@ -40,7 +42,7 @@ export function useHudSession(): HudSession {
   const appWindow = useMemo(() => getCurrentWindow(), []);
   const [visible, setVisible] = useState(false);
   const [apiBaseUrl, setApiBaseUrl] = useState("");
-  const [templateMode, setTemplateMode] = useState(false);
+  const [playMode, setPlayMode] = useState<number>(PLAY_MODE_NORMAL);
   const [cityHallPlaced, setCityHallPlaced] = useState(true);
   const [debugExecution, setDebugExecution] = useState(false);
   const [cityName, setCityName] = useState("");
@@ -71,7 +73,7 @@ export function useHudSession(): HudSession {
       }
       setVisible(shouldShow);
       setApiBaseUrl(payload.apiBaseUrl);
-      setTemplateMode((payload.session?.template_mode as boolean) ?? false);
+      setPlayMode((payload.session?.play_mode as number) ?? PLAY_MODE_NORMAL);
       setDebugExecution((payload.session?.debug_execution as boolean) ?? false);
 
       const cityData = payload.city?.city as Record<string, unknown> | undefined;
@@ -115,8 +117,8 @@ export function useHudSession(): HudSession {
   return {
     visible,
     apiBaseUrl,
-    templateMode,
-    isLocked: !cityHallPlaced && !templateMode,
+    playMode,
+    isLocked: !cityHallPlaced && playMode === PLAY_MODE_NORMAL,
     debugExecution,
     cityName,
     currentDate,

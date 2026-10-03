@@ -12,6 +12,8 @@
  * グラフは API が返す新しい順の配列からゼロパディングをトリムしたうえで reverse() し、
  * 古い→新しいの時系列順で描画する。
  */
+import { PLAY_MODE_GOD } from "../../constants";
+
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,7 +21,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import type { ResourceData } from "../../types/generated";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { resolveResourceIcon } from "../../utils/resourceIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { TimeSeriesChart } from "../common/TimeSeriesChart";
@@ -54,7 +56,7 @@ export function ResourceDetailPanel({
 }: ResourceDetailPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const templateMode = useTemplateMode(apiBaseUrl);
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
   const [resourceData, setResourceData] = useState<ResourceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -291,7 +293,7 @@ export function ResourceDetailPanel({
         />
       </section>
 
-      {templateMode && (
+      {godMode && (
         <button
           className="god-edit-open-btn"
           type="button"
