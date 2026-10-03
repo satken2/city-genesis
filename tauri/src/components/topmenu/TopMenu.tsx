@@ -9,6 +9,7 @@ import exitIcon from "../../assets/images/exit.png";
 import githubIcon from "../../assets/images/github.png";
 import settingIcon from "../../assets/images/setting.png";
 import "./TopMenu.css";
+import { GAME_VERIFIED } from "../../constants";
 import { CoreVersion, frontendVersion } from "../../utils/version";
 
 type SessionStatePayload = {
@@ -40,6 +41,7 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
   }, [apiBaseUrl]);
   const [quitting, setQuitting] = useState(false);
   const [debugExecution, setDebugExecution] = useState(false);
+  const [verified, setVerified] = useState<boolean | null>(null); // セッションを取得できない間は null(表示しない)
 
   /**
    * Rust 側のセッションポーリングスレッドから配信される `session-state` イベントを受信し、
@@ -60,6 +62,8 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         setCoreVersion(payload.coreVersion);
         setBackendConnected(payload.backendConnected);
         setDebugExecution((payload.session?.debug_execution as boolean) ?? false);
+        const verificationStatus = payload.session?.verification_status;
+        setVerified(typeof verificationStatus === "number" ? verificationStatus === GAME_VERIFIED : null);
 
         // ローディング中はトップメニューを隠す。
         // Tips が前面に表示されており、トップメニューがその上に出てくるのを防ぐ。
@@ -220,6 +224,8 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
       <div className="topmenu-versions">
         <span>Core {coreAvailable ? `v${coreVersion}` : t("topmenu.coreConnectionFailed")}</span>
         <span>Graphic v{frontendVersion.frontend_version}</span>
+        {/* バージョン表記と同じく、言語に依らず英語で固定する。 */}
+        {verified !== null && <span>{verified ? "Verified: Steam" : "Unverified"}</span>}
       </div>
       {/**
        * オプションボタン。
