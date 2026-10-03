@@ -3807,20 +3807,7 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 完全埋設区間を持つパスを、表示区間ごとに共通生成器で描く。
-    ///
-    /// 点列をトンネル判定（深さ = 地形標高 − 道路Y がクリアランス高さを超えるか）で
-    /// 「描画する連続区間」に分割し、区間ごとに通常のメッシュ生成器を呼ぶ。
-    /// トンネル区間は地下表示のときだけ生成し、描画⇔トンネルの境界（坑口）に
-    /// portal パーツ（Models/Paths/p{variant}/portal、なければ p{type}/portal）を配置する。
-    ///
-    /// 深さは1本のパス内で連続的に変化するため、開削⇔トンネルの遷移は何度でも
-    /// 起こり得る（坑口は閾値を跨ぐすべての境界に配置される）。
-    /// コライダーは描画区間のストリップメッシュを結合したものになる
-    /// （通常表示ではトンネル区間をクリック対象にも含めない）。
-    /// </summary>
-    /// <summary>
-    /// パスをトンネル分割メッシュ（開削区間＋坑口、トンネル区間は非描画）で描くべきか。
+    /// パスの完全埋設区間を表示モードに応じて出し分ける必要があるか。
     /// 負の相対Yを持つ地下パスに加えて、実効非追従で丘に潜りトンネル区間が実在する
     /// パスも対象にする（谷を渡るだけの非追従橋は対象外＝通常メッシュで柱付き描画）。
     /// </summary>
@@ -3851,6 +3838,10 @@ public partial class PathManager : BaseApiDataManager
         return TunnelSectionUtil.HasTunnelSection(line, clearance, pathFollowsTerrain: false, sampleInterval: 20f);
     }
 
+    /// <summary>
+    /// 表示区間ごとに通常の生成器を呼び、地上／地下の境界へ坑口を配置する。
+    /// 地下表示では完全埋設区間も含め、描画した区間のメッシュを選択コライダーへ結合する。
+    /// </summary>
     private PathMeshResult GenerateSectionedPathMesh(PathSummary path, List<Vector3> points)
     {
         float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
@@ -6186,8 +6177,13 @@ public partial class PathManager : BaseApiDataManager
                 collider = targetGO.AddComponent<MeshCollider>();
             }
             collider.sharedMesh = mesh;
+            // 表示設定はベイク待ちの間にも変わるため、追加したコライダーへ現在の状態を適用する。
+            var visual = targetGO.GetComponent<VisualModeObject>();
             var info = targetGO.GetComponent<ObjectIdInfo>();
-            if (info != null) ObjectVisibilityFilter.ApplyToObject(targetGO, InputObjectType.PATH, info.id);
+            if (visual != null)
+                visual.ApplyVisualMode(VisualModeHandler.Instance?.GetMode(InputObjectType.PATH) ?? VisualMode.MODE_NORMAL);
+            else if (info != null)
+                ObjectVisibilityFilter.ApplyToObject(targetGO, InputObjectType.PATH, info.id);
         }
     }
 

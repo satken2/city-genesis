@@ -121,10 +121,10 @@ public static class UndergroundQA
                 Set(item, "width", variant == 1103 ? 3f : variant == 461 ? 5f : 8f);
                 Set(item, "type", variant == 1103 ? 11 : variant == 405 || variant == 461 ? 4 : 1);
                 Set(item, "lanes", variant == 461 ? 1 : 2);
-                if (variant == 461) { Set(item,"platform_width",3f); Set(item,"wire_spacing",35f); }
+                if (variant == 461) { Set(item,"platform_width",3f); Set(item,"wire_spacing",35f); Set(item,"wall_width",.2f); }
                 Set(item, "sidewalk_width", variant == 221 ? 1.5f : 0f);
-                Set(item, "side_width", variant == 221 ? .3f : 0f);
-                Set(item, "height", 3f); Set(item, "height_editable", true); Set(item, "follow_terrain", false);
+                Set(item, "side_width", variant == 221 ? .3f : variant == 461 ? .5f : 0f);
+                Set(item, "height", variant == 461 ? 7f : 3f); Set(item, "height_editable", true); Set(item, "follow_terrain", variant == 461);
                 masters[variant] = item;
             }
             var data = new TerrainData { heightmapResolution = 65, size = new Vector3(200,100,200) };
@@ -169,6 +169,7 @@ public static class UndergroundQA
             {
                 Call(pathManager,"CreateOrUpdatePath",path,false,true,lod ?? drawNormal,0d,1d);
                 var go = (GameObject)Call(pathManager,"GetPathObject",Field(path,"path_id"));
+                Call(go.GetComponent(T("VisualModeObject")),"Start");
                 var mesh = go.GetComponent<MeshFilter>().sharedMesh;
                 if (mesh != null) Drain((IEnumerator)Call(pathManager,"SetColliderAsync",go,mesh));
                 return go;
@@ -283,11 +284,15 @@ public static class UndergroundQA
             Check(!(bool)Call(input,"TryGetUndergroundHit",pick),"construction keeps terrain input");
 
             Static("ObjectVisibilityFilter","SetHidden",null,new[]{1});
+            UnityEngine.Object.DestroyImmediate(proxy.GetComponent<MeshCollider>());
+            Drain((IEnumerator)Call(pathManager,"SetColliderAsync",proxy,proxy.GetComponent<MeshFilter>().sharedMesh));
             Check(proxyRenderers.All(renderer=>!renderer.enabled) && !proxy.GetComponent<Collider>().enabled,"individual hidden filter affects underground geometry and picking");
             Static("ObjectVisibilityFilter","Clear");
-            Call(proxyVisual,"ApplyVisualMode",hidden);
-            Check(proxyRenderers.All(renderer=>!renderer.enabled),"hidden road layer stays hidden underground");
-            Call(proxyVisual,"ApplyVisualMode",normal);
+            Call(modes,"SetMode",pathType,hidden);
+            UnityEngine.Object.DestroyImmediate(proxy.GetComponent<MeshCollider>());
+            Drain((IEnumerator)Call(pathManager,"SetColliderAsync",proxy,proxy.GetComponent<MeshFilter>().sharedMesh));
+            Check(proxyRenderers.All(renderer=>!renderer.enabled) && !proxy.GetComponent<Collider>().enabled,"hidden road layer stays hidden after asynchronous collider creation");
+            Call(modes,"SetMode",pathType,normal);
             Call(visual,"ApplyVisualMode",hidden); Check(!blocker.GetComponent<Renderer>().enabled,"hidden surface building stays hidden");
             Call(visual,"ApplyVisualMode",normal);
 
@@ -337,12 +342,13 @@ public static class UndergroundQA
             var nodeResult=Activator.CreateInstance(T("NodeMeshResult"),new object[]{nodeMesh,roadMaterials[0],null,null,null,null});
             Call(pathManager,"UpdateNodeSlab",100,new Vector3(0,-14,-25),nodeResult,"");
             var nodeGO=(GameObject)((IDictionary)Field(pathManager,"nodeIntersectionMeshes"))[100];
+            Call(nodeGO.GetComponent(T("VisualModeObject")),"Start");
             Check(nodeGO.GetComponent<Renderer>().sharedMaterials.All(m=>m.shader.name!="CityGenesis/UndergroundGhost"),"underground junctions keep opaque original materials");
 
             var keep=(HashSet<Vector2Int>)Field(pathManager,"cellsToKeepVisible");
             var cellLods=(IDictionary)Field(pathManager,"cellPathLod");
             foreach (object path in paths.Values)
-                foreach (var cell in (List<Vector2Int>)Call(pathManager,"GetPathCoveredCellsCached",path))
+                foreach (var cell in (IEnumerable<Vector2Int>)Call(pathManager,"GetPathCoveredCellsCached",path))
                 { keep.Add(cell); cellLods[cell]=Enum.Parse(T("LodTier"),"Near"); }
             Call(pathManager,"ClearTerrainFollowQueue");
             var beforeNeighbor=(GameObject)Call(pathManager,"GetPathObject",2);
@@ -375,7 +381,8 @@ public static class UndergroundQA
                 Check(!ShaderUtil.ShaderHasError(Resources.Load<Shader>("Shaders/"+name)),"shader compile: "+name);
 
             Call(modes,"SetMode",terrainType,normal);
-            Check(!nodeGO.GetComponent<Renderer>().enabled,"tunnel junction hides on exit without waiting for regeneration");
+            Drain((IEnumerator)Call(modes,"NotifyObjectsBatched",pathType,normal));
+            Check(!nodeGO.GetComponent<Renderer>().enabled,"tunnel junction hides with common visual notification before regeneration");
             FinishUpdates();
             Call(terrainVisual,"ApplyVisualMode",normal); Call(seaVisual,"ApplyVisualMode",normal); Call(visual,"ApplyVisualMode",normal);
             Check(terrain.enabled && sea.GetComponent<Renderer>().enabled,"normal ground and sea are restored");

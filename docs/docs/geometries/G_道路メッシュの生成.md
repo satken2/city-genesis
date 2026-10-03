@@ -1,6 +1,6 @@
 # 道路メッシュの生成
 
-地下表示モードでは、通常描画で省略する完全埋設区間を `PathManager.Underground.cs` が地上と同じ `PathMeshFactory` で描く。区間分類は `TunnelSectionUtil.CollectTunnelRuns`、点列は既存の `CalculatePathPoints` を共用する。モデル・材質は元のままで、種類別の着色は行わない。モデルを持たない地下インフラだけ通常道路のフォールバック形状を使用する。ホバーは既存の青い `HighlightMaterial` に切り替え、解除すると元材質へ戻す。通常のパスメッシュ・坑口・工事進捗の生成は変更しない。地下モデルと選択コライダーの寿命・表示設定は [Unity表示モード](../programs/Unity表示モード.md#地下表示) を参照。
+地上・地下のパスは `PathManager` の同じ生成・更新・キャッシュ・LOD・セル退避経路を使う。地下表示は `TunnelSectionUtil.GetDrawSections` が返す表示区間に完全埋設区間を含める。点列は `CalculatePathPoints`、モデルは `PathMeshFactory` を共用し、描画物はワールド座標を保った `Paths` コンテナへ配置する。区間の `PathSection` は地上／地下の表示と材質の扱いを区別し、独立した更新や寿命を持たない。地下のモデル・材質は元のままで、ホバーは既存の青い `HighlightMaterial`、解除時は元材質へ戻る。モデルを持たない埋設インフラは共通ファクトリで通常道路のフォールバックを選ぶ。施工中も同じ進捗別生成器を使い、未施工の地下の土は設計標高に置く。表示切替・コライダーの扱いは [Unity表示モード](../programs/Unity表示モード.md#地下表示) を参照。
 
 ## 送電線の専用描画（1101・1102）
 

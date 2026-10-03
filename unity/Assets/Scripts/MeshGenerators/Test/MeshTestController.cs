@@ -1011,7 +1011,7 @@ public class MeshTestController : MonoBehaviour
 
     /// <summary>
     /// 地下トンネル入口。地表から滑らかに1回だけ潜って地下へ入るプロファイルを、
-    /// PathManager.GenerateUndergroundPathMesh と同じロジック
+    /// PathManager.GenerateSectionedPathMesh の通常表示と同じ区間分類を使う。
     /// (TunnelSectionUtil.SplitDrawableRuns による描画区間分割 + 坑口へのportal配置)で描く。
     /// トンネル区間(深さ&gt;クリアランス)はメッシュを描かず、境界の坑口に portal パーツを置く。
     ///
