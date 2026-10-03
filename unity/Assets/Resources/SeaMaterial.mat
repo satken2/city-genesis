@@ -25,18 +25,21 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _DepthColorDistance: 12
-    - _MurkDistance: 6
+    - _DepthColorDistance: 20
+    - _MurkDistance: 4
+    - _MaxTransmission: 0.45
     - _FoamDistance: 3
-    - _EdgeFadeDistance: 0.6
+    - _EdgeFadeDistance: 0.08
     - _FoamNoiseScale: 0.15
     - _FoamCutoff: 0.55
     - _RefractionStrength: 0.04
     - _Smoothness: 0.92
-    - _Metallic: 0
+    - _EnvironmentIntensity: 1
+    - _SurfacePatternScale: 500
+    - _SurfacePatternStrength: 0.2
     - _RippleScale: 0.08
     - _RippleSpeed: 0.05
-    - _RippleStrength: 1.2
+    - _RippleStrength: 0.6
     - _RippleDetail: 3
     m_Colors:
     - _DeepColor: {r: 0.02, g: 0.09, b: 0.16, a: 1}

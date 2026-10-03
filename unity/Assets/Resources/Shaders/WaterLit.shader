@@ -25,10 +25,11 @@ Shader "Custom/WaterLit"
         _FoamColor("Foam Color", Color) = (0.95, 0.98, 1.0, 1)
 
         [Header(Depth Response)]
-        _DepthColorDistance("Deep Color Distance (m)", Float) = 12.0
-        _MurkDistance("Murk Distance (m)", Float) = 6.0
+        _DepthColorDistance("Depth Color Attenuation Length (m)", Float) = 20.0
+        _MurkDistance("Transmission Attenuation Length (m)", Float) = 4.0
+        _MaxTransmission("Maximum Transmission", Range(0.0, 1.0)) = 0.45
         _FoamDistance("Foam Distance (m)", Float) = 3.0
-        _EdgeFadeDistance("Edge Fade Distance (m)", Float) = 0.6
+        _EdgeFadeDistance("Edge Fade Distance (m)", Float) = 0.08
 
         [Header(Foam)]
         _FoamNoiseScale("Foam Noise Scale (1/m)", Float) = 0.15
@@ -39,12 +40,14 @@ Shader "Custom/WaterLit"
 
         [Header(Surface)]
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.92
-        _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
+        _EnvironmentIntensity("Environment Intensity", Range(0.0, 1.0)) = 1.0
+        _SurfacePatternScale("Surface Pattern Scale (m)", Float) = 500.0
+        _SurfacePatternStrength("Surface Pattern Strength", Range(0.0, 1.0)) = 0.2
 
         [Header(Ripples)]
         _RippleScale("Ripple Scale (1/m)", Float) = 0.08
         _RippleSpeed("Ripple Speed", Float) = 0.05
-        _RippleStrength("Ripple Strength", Range(0.0, 4.0)) = 1.2
+        _RippleStrength("Ripple Strength", Range(0.0, 4.0)) = 0.6
         _RippleDetail("Ripple Detail Scale", Float) = 3.0
 
         [Header(Flow (rivers))]

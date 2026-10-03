@@ -401,6 +401,9 @@ public sealed class WeatherController : MonoBehaviour
         sun.color = sunlight;
         sun.intensity = look.Intensity * lowSun * daylight;
         sun.shadowStrength = look.Shadow * daylight;
+        // 空の表示色だけでは曇天の白い雲も明るい光源になるため、反射の光量を天気に合わせる。
+        // 時刻による夕焼け・薄明の減光は空の色が担い、ここでは天気の光量だけを使う。
+        reflection.intensity = Mathf.Clamp01(look.Intensity);
         sky.SetColor("_Zenith", zenith);
         sky.SetColor("_Horizon", horizon);
         sky.SetColor("_SunColor", sunlight * (1f - darkness));

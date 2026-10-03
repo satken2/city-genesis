@@ -76,6 +76,54 @@ public static class WaterFogQA
             float sparklePeak = sparkle.Max(p => Mathf.Max(p.r, Mathf.Max(p.g, p.b)));
             report += $"sparklePeak={sparklePeak:F3}\n";
             passed &= sparklePeak > 1;
+
+            // 真上モードは正射影。透視投影との水深の一致と、水面が消えないことを確認する。
+            sun.intensity = 0;
+            material.SetFloat("_RippleStrength", 0);
+            material.SetFloat("_SurfacePatternStrength", 0);
+            material.SetFloat("_RefractionStrength", 0);
+            material.SetFloat("_FoamDistance", .01f);
+            camera.transform.position = Vector3.up * 60;
+            camera.transform.rotation = Quaternion.Euler(90, 0, 0);
+            camera.orthographicSize = 60 * Mathf.Tan(camera.fieldOfView * Mathf.Deg2Rad / 2);
+            foreach (float depth in new[] { .2f, 3f, 30f })
+            {
+                floor.transform.position = Vector3.down * depth;
+                camera.orthographic = false;
+                var perspective = Capture(camera, root + $"/depth-{depth}-perspective.png");
+                camera.orthographic = true;
+                var orthographic = Capture(camera, root + $"/depth-{depth}-orthographic.png");
+                sea.SetActive(false);
+                var bareFloor = Capture(camera, root + $"/depth-{depth}-bare.png");
+                sea.SetActive(true);
+                double projectionError = Difference(perspective, orthographic);
+                double waterChange = Difference(orthographic, bareFloor);
+                // 水底の照明は同じ。投影方式による差を小さくし、海底そのままの描画を拒否する。
+                passed &= projectionError < .004 && waterChange > .01;
+                report += $"depth={depth}: projectionError={projectionError:F6} waterChange={waterChange:F6}\n";
+            }
+
+            // 透過する取得色にはフォグが含まれる。黒い体色で透過成分を切り分け、
+            // 水面までのフォグを重ね掛けせず、取得色と一度だけ合成することを検査する。
+            floor.transform.position = Vector3.down * .2f;
+            material.SetColor("_DeepColor", Color.black);
+            material.SetColor("_ShallowColor", Color.black);
+            RenderSettings.fog = true;
+            RenderSettings.fogStartDistance = 0;
+            RenderSettings.fogEndDistance = 120;
+            material.SetFloat("_MaxTransmission", 0);
+            var opaqueFog = Capture(camera, root + "/transmission-opaque-fog.png");
+            sea.SetActive(false);
+            var bottomFog = Capture(camera, root + "/transmission-bottom-fog.png");
+            sea.SetActive(true);
+            material.SetFloat("_MaxTransmission", .45f);
+            var transmittedFog = Capture(camera, root + "/transmission-fog.png");
+            float transmission = .45f * Mathf.Exp(-.2f / material.GetFloat("_MurkDistance")) * .98f;
+            var expectedFog = opaqueFog.Zip(bottomFog, (a, b) => Color.Lerp(a, b, transmission)).ToArray();
+            double transmissionFogError = Difference(transmittedFog, expectedFog);
+            passed &= transmissionFogError < .004;
+            report += $"transmissionFogError={transmissionFogError:F6}\n";
+
             foreach (var message in ShaderUtil.GetShaderMessages(material.shader))
                 if (message.severity.ToString() == "Error") throw new Exception(message.message);
             File.WriteAllText(root + "/result.txt", (passed ? "PASS\n" : "FAIL\n") + report);

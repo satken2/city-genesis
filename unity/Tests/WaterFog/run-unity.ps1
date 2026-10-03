@@ -7,6 +7,7 @@ foreach ($folder in @('Assets/Editor', 'Assets/Resources/Shaders', 'Assets/Shade
 Copy-Item "$PSScriptRoot/WaterFogQA.cs" "$qaRoot/Assets/Editor" -Force
 Copy-Item "$unityRoot/Assets/Resources/Shaders/WaterLit.shader" "$qaRoot/Assets/Resources/Shaders" -Force
 Copy-Item "$unityRoot/Assets/Shaders/Water.hlsl" "$qaRoot/Assets/Shaders" -Force
+Copy-Item "$unityRoot/Assets/Shaders/WaterNoise.hlsl" "$qaRoot/Assets/Shaders" -Force
 foreach ($name in @('PC_RPAsset.asset', 'PC_Renderer.asset', 'DefaultVolumeProfile.asset', 'UniversalRenderPipelineGlobalSettings.asset')) {
     Copy-Item "$unityRoot/Assets/Settings/$name*" "$qaRoot/Assets/Settings" -Force
 }
