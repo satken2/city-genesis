@@ -124,7 +124,60 @@ public static class WaterFogQA
             passed &= transmissionFogError < .004;
             report += $"transmissionFogError={transmissionFogError:F6}\n";
 
+            // 曇天でも陸と海は同じ大気中にある。霧の終端では海も霧色へ収束する。
+            material.SetFloat("_MaxTransmission", 0);
+            floor.SetActive(false);
+            camera.orthographic = false;
+            camera.transform.rotation = Quaternion.Euler(45, 0, 0);
+            camera.transform.position = -camera.transform.forward * 3000;
+            RenderSettings.fogStartDistance = 60;
+            RenderSettings.fogEndDistance = 1200;
+            Shader.SetGlobalFloat("_WaterOvercast", .82f);
+            var overcastFog = Capture(camera, root + "/overcast-fog.png");
+            var fogReference = Enumerable.Repeat(RenderSettings.fogColor.linear, overcastFog.Length).ToArray();
+            double overcastFogError = Difference(overcastFog, fogReference);
+            passed &= overcastFogError < .004;
+            report += $"overcastFogError={overcastFogError:F6}\n";
+
+            // 遠景は陸地メッシュだけで、海底は常駐タイルにしか無い。
+            // 同じ水面の下へ海底を出し入れし、タイル由来の色・透過の切替を検査する。
+            RenderSettings.fog = false;
+            material.SetColor("_DeepColor", new Color(.02f, .09f, .16f));
+            material.SetColor("_ShallowColor", new Color(.1f, .32f, .42f));
+            material.SetFloat("_MaxTransmission", .45f);
+            material.SetFloat("_FoamDistance", 3);
+            floor.GetComponent<Renderer>().sharedMaterial = new Material(Shader.Find("QA/WaterFloor"));
+            camera.transform.position = Vector3.up * 60;
+            camera.transform.rotation = Quaternion.Euler(90, 0, 0);
+            var nearUnloaded = Capture(camera, root + "/near-unloaded.png");
+            floor.transform.position = Vector3.down * .2f;
+            floor.SetActive(true);
+            var nearLoaded = Capture(camera, root + "/near-loaded.png");
+            double nearDepthChange = Difference(nearLoaded, nearUnloaded);
+            passed &= nearDepthChange > .01;
+            report += $"nearDepthChange={nearDepthChange:F6}\n";
+            floor.SetActive(false);
+            camera.transform.position = Vector3.up * 700;
+            camera.transform.rotation = Quaternion.Euler(90, 0, 0);
+            foreach (bool orthographic in new[] { false, true })
+            {
+                camera.orthographic = orthographic;
+                var unloaded = Capture(camera, root + $"/unloaded-{orthographic}.png");
+                foreach (float depth in new[] { 0f, .2f, 3f, 30f })
+                {
+                    floor.transform.position = Vector3.down * depth;
+                    floor.SetActive(true);
+                    var loaded = Capture(camera, root + $"/loaded-{orthographic}-{depth}.png");
+                    double tileError = Difference(loaded, unloaded);
+                    passed &= tileError < .004;
+                    report += $"orthographic={orthographic} depth={depth}: tileError={tileError:F6}\n";
+                    floor.SetActive(false);
+                }
+            }
+
             foreach (var message in ShaderUtil.GetShaderMessages(material.shader))
+                if (message.severity.ToString() == "Error") throw new Exception(message.message);
+            foreach (var message in ShaderUtil.GetShaderMessages(floor.GetComponent<Renderer>().sharedMaterial.shader))
                 if (message.severity.ToString() == "Error") throw new Exception(message.message);
             File.WriteAllText(root + "/result.txt", (passed ? "PASS\n" : "FAIL\n") + report);
             EditorApplication.Exit(passed ? 0 : 1);

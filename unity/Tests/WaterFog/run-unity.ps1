@@ -5,6 +5,7 @@ foreach ($folder in @('Assets/Editor', 'Assets/Resources/Shaders', 'Assets/Shade
     New-Item -ItemType Directory -Path (Join-Path $qaRoot $folder) -Force | Out-Null
 }
 Copy-Item "$PSScriptRoot/WaterFogQA.cs" "$qaRoot/Assets/Editor" -Force
+Copy-Item "$PSScriptRoot/WaterFloor.shader" "$qaRoot/Assets/Resources/Shaders" -Force
 Copy-Item "$unityRoot/Assets/Resources/Shaders/WaterLit.shader" "$qaRoot/Assets/Resources/Shaders" -Force
 Copy-Item "$unityRoot/Assets/Shaders/Water.hlsl" "$qaRoot/Assets/Shaders" -Force
 Copy-Item "$unityRoot/Assets/Shaders/WaterNoise.hlsl" "$qaRoot/Assets/Shaders" -Force

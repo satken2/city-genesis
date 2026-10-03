@@ -174,6 +174,9 @@ half4 WaterFragment(Varyings IN) : SV_Target
 
     float3 positionWS = IN.positionWS;
     float3 viewDirWS  = normalize(GetCameraPositionWS() - positionWS);
+    // 海底を持たない全景と常駐タイルの境界が水色へ現れないよう、
+    // 深度に依存する表現はカメラ近傍の常駐範囲(500m)より手前で滑らかに消す。
+    float depthDetailWeight = 1.0 - smoothstep(150.0, 450.0, distance(GetCameraPositionWS(), positionWS));
     // 川の流れ: ノイズの参照座標を流下方向へ時間比例でずらすと、さざ波・泡が下流へ動いて見える
     float2 flowOffset = IN.flowDir * (_Time.y * _FlowSpeed);
     float2 noiseXZ    = positionWS.xz - flowOffset;
@@ -226,16 +229,19 @@ half4 WaterFragment(Varyings IN) : SV_Target
     // 深海色と吸収を指数減衰でつなぎ、一定深度で突然黒くなる切り替えを避ける。
     // 水底が描かれていない場所は深海色・透過なしとし、空の深度を水底へ逆投影しない。
     float depthColorBlend = hasSceneDepth ? 1.0 - exp(-waterDepth / max(_DepthColorDistance, 0.01)) : 1.0;
+    depthColorBlend = lerp(1.0, depthColorBlend, depthDetailWeight);
     float3 waterTint = lerp(_ShallowColor.rgb, _DeepColor.rgb,
                             depthColorBlend);
     float fresnel = 0.02 + 0.98 * pow(1.0 - saturate(dot(normalWS, viewDirWS)), 5.0);
     float transmission = saturate(_MaxTransmission) * exp(-opticalPath / max(_MurkDistance, 0.01)) * (1.0 - fresnel);
     if (!hasRefractDepth) transmission = 0.0;
+    transmission *= depthDetailWeight;
 
     // --- 岸のフォーム: 水柱が薄いピクセルにアニメする泡ノイズを乗せる ---
     float  foamBand  = hasSceneDepth ? 1.0 - saturate(waterDepth / max(_FoamDistance, 0.01)) : 0.0;
     float  foamNoise = WaterFbm(noiseXZ * _FoamNoiseScale + _Time.y * 0.25);
     float  foamMask  = smoothstep(_FoamCutoff, 1.0, foamBand * foamNoise);
+    foamMask *= depthDetailWeight;
     transmission *= 1.0 - foamMask;
     float3 bodyColor = lerp(waterTint * (1.0 - transmission), _FoamColor.rgb, foamMask);
 
@@ -271,17 +277,16 @@ half4 WaterFragment(Varyings IN) : SV_Target
 
     // 水底の取得色には照明と大気フォグが含まれるため、PBRで再照明しない。
     // 水底が占める割合の霧色を差し引いて合成し、大気フォグの重ね掛けを避ける。
-    // 曇天では水面のフォグ合成量を抑え、海色を残しながら水平線へ穏やかにつなぐ。
-    // 霧色を黒へ変えず、最低12%の霞を残す。晴天は通常のフォグをそのまま使う。
-    half waterFogWeight = lerp(0.12, 1.0, weatherLight * weatherLight * weatherLight);
-    half3 fogColorContribution = MixFog(half3(0, 0, 0), inputData.fogCoord) * waterFogWeight;
-    color.rgb = lerp(color.rgb, MixFog(color.rgb, inputData.fogCoord), waterFogWeight)
+    // 陸地と同じ霧色・距離で合成し、天気による反射の減光を大気フォグへ掛けない。
+    half3 fogColorContribution = MixFog(half3(0, 0, 0), inputData.fogCoord);
+    color.rgb = MixFog(color.rgb, inputData.fogCoord)
               + transmission * (refracted - fogColorContribution);
 
     // --- 不透明度: 水際だけソフトにフェードさせて地形との境界をなじませる。
     //     屈折(背景)はシェーダー内で合成済みなので、それ以外は不透明にする。
     //     泡は境界でも残す。
     float edgeFade = hasSceneDepth ? saturate(waterDepth / max(_EdgeFadeDistance, 0.01)) : 1.0;
+    edgeFade = lerp(1.0, edgeFade, depthDetailWeight);
     color.a = max(edgeFade, foamMask);
     return color;
 }

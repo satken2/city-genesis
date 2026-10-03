@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type AnimationEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { getInitialLoadingReady, startGameFromTips } from "../../utils/ipc";
 import "./TipsWindow.css";
@@ -88,19 +88,36 @@ const TIPS_LIST: TipItem[] = [
 export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" }) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * TIPS_LIST.length));
+  const [fadePhase, setFadePhase] = useState<"visible" | "out" | "loading" | "in">("visible");
   const [ready, setReady] = useState(false);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(false);
 
-  const handleReload = () => {
-    if (TIPS_LIST.length <= 1) return;
-    setCurrentIndex((prev) => {
-      let next: number;
-      do {
-        next = Math.floor(Math.random() * TIPS_LIST.length);
-      } while (next === prev);
-      return next;
-    });
+  const handleReload = useCallback(() => {
+    if (TIPS_LIST.length <= 1 || document.hidden) return;
+    // 自動切り替えと連打が重なっても、進行中のフェードを中断しない。
+    setFadePhase((phase) => phase === "visible" ? "out" : phase);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(handleReload, 30_000);
+    return () => clearInterval(timer);
+  }, [handleReload]);
+
+  const handleFadeEnd = (event: AnimationEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (fadePhase === "out") {
+      const next = (currentIndex + 1 + Math.floor(Math.random() * (TIPS_LIST.length - 1))) % TIPS_LIST.length;
+      setCurrentIndex(next);
+      setFadePhase(TIPS_LIST[next].image ? "loading" : "in");
+    } else if (fadePhase === "in") {
+      setFadePhase("visible");
+    }
+  };
+
+  const handleImageReady = () => {
+    // 画像が未読込のままフェードインすると、途中で背景だけが突然現れる。
+    setFadePhase((phase) => phase === "loading" ? "in" : phase);
   };
 
   useEffect(() => {
@@ -144,13 +161,20 @@ export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" })
         </span>
       </div>
 
-      <div className="tips-content" data-tauri-drag-region>
+      <div
+        className={`tips-content tips-content--${fadePhase}`}
+        onAnimationEnd={handleFadeEnd}
+        data-tauri-drag-region
+      >
         {currentTip.image && (
           <img
+            key={currentTip.id}
             className="tips-image"
             src={currentTip.image}
             alt={currentTip.id}
             draggable={false}
+            onLoad={handleImageReady}
+            onError={handleImageReady}
           />
         )}
         <div className="tips-text-container" data-tauri-drag-region>
