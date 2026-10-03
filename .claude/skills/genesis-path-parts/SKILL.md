@@ -49,7 +49,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 
 - ロープウェイ602の`station_shell`も`CreateSplineMesh`を通り、`station_shell_close`へ切り替わる。ホーム451/461・462・502と602の接写設備は、非公開の制作ツール`genesis-gallery/pipeline/jobs/build_platform_close.py`が通常モデルから著作する。通常の各ジョブを再実行したら接写ジョブも後に実行する。8m周期・原点・bbox・材質を保持する。再生成・実Unity検証・ミラー同期は同ツールの`pipeline/jobs/platform_close.md`を参照。
 
-- スプラインに沿って敷く `body / line / sidewalk / wall / center`、線路の `track / wire / platform / platform_wall` が対象。高架用も `body_elevated_close` / `track_elevated_close` の命名で扱う。
+- スプラインに沿って敷く `body / line / sidewalk / wall / wall_underground / ceiling_underground / center`、線路の `track / wire / platform / platform_wall` が対象。高架用も `body_elevated_close` / `track_elevated_close` の命名で扱う。
 - 送電線1101/1102の`pillar_cap`は専用生成器がCloseへ切り替える。それ以外の`tree / pillar / pillar_cap / portal / pole / beam`などのInstantiate配置、道路の点設備、ノード内のコネクタ・終端部品は無印を使う。**`_close` を書き出すだけでは切り替わらない。** 対象外パーツの接写対応を求められた場合は `genesis-path-geometry` で読み込み経路を確認し、アセットだけで対応済みとしない。
 - 対象パーツのClose解決順は、バリアントの `_close` → バリアントの無印 → タイプの `_close` → タイプの無印。共通タイプにCloseを追加しても、専用バリアントの無印が優先される場合がある。
 
@@ -65,7 +65,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 
 **必須は `body` ただ1つ**(線路は `body`=道床 と `track`=軌道)。
 これが無いとスプラインに沿った白い板にフォールバックする。
-他はすべてオプションで、無ければそのパーツをスキップするだけで破綻しない。
+他はオプションで、無ければそのパーツをスキップする。地下の壁・天井だけは専用モデルが無くても既定のコンクリート形状を生成する。
 
 | ユーザーの要求に含まれる特徴 | 足すパーツ | 必要なマスター値 |
 |---|---|---|
@@ -74,6 +74,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 | 歩道 | `sidewalk` | `sidewalk_width` |
 | 中央分離帯 | `center` | `center_width`(無ければ `line` で代用される) |
 | 防音壁・ガードレール | `wall` | `wall_width` |
+| 地下トンネルの壁・天井の専用形状 | `wall_underground` / `ceiling_underground` | 壁幅は `wall_width`、高さはパスのクリアランス |
 | 街路樹 | `tree` | `tree_spacing` |
 | 高架にできる道路の柱 | `pillar` (+ `pillar_cap`) | `height_editable=true`, `pillar_spacing` |
 | 他パスをまたぐ門型橋脚 | `pillar_leg`（柱1本） / `pillar_crossbeam`（横梁） | 通常橋脚の干渉時に組み立てる。原点・伸縮方向・幅上限はG文書§8.7。現行は鉄道共通 `p4` に無印のみ |
@@ -233,8 +234,7 @@ p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 
   (道床だけ・軌道だけでも描画は成立する)。
 - `platform_panel` は**マテリアル参照専用**でメッシュは描画されない(ホーム上面は
   コードが動的生成する)。建物の `generic-wall` と同じ扱い。
-- 高架/地下は同じパーツを高さ違いで使う。`pillar` は `height_editable=true` の
-  バリアントのみ、かつ地下(負のY)には配置されない。
+- 地下の側壁・天井は `wall_underground` / `ceiling_underground` を使い、未定義ならコンクリートの既定形状になる(G §8.5)。天井は下向きの片面として著作する。ホーム上屋の分離規約は N §7.3 に従う。`pillar` は `height_editable=true` のバリアントのみ、かつ地下(負のY)には配置されない。
 - 道路設備は切断済み区間の端から3mを空け、設備ごとの開始位相と間隔で配置する(G §8.6)。
   点設備の接地原点はZ=0、街灯は右側配置を基準に-Xへ向ける。柵モデルに支柱を含めない。
   電柱の電線取付位置は接地面+7.6m。柱・鉄道架線柱の配置規則とは区別する。

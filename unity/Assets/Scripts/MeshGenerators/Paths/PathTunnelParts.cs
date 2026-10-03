@@ -4,12 +4,18 @@ using Dreamteck.Splines;
 using GeneratedModels;
 using UnityEngine;
 
-/// <summary>道路・線路の地下壁と、地上設備を省く区間を共通のトンネル判定から求める。</summary>
+/// <summary>道路・線路の地下壁・天井と、屋外設備やホーム上屋を省く区間を共通のトンネル判定から求める。</summary>
 public static class PathTunnelParts
 {
     public const string WallPart = "wall_underground";
+    public const string CeilingPart = "ceiling_underground";
     public const float DefaultWallWidth = 0.3f;
     private static readonly Dictionary<int, GameObject> DefaultWalls = new();
+    private static GameObject defaultCeiling;
+    private static readonly Dictionary<Mesh, Mesh> PlatformsWithoutRoof = new();
+
+    // ホーム床・ドアと上屋を分ける著作規約。上屋とその支柱は独立部材で、この高さを超える。
+    public const float PlatformRoofHeight = 3.2f;
 
     public static bool IsTunnel(PathSummary path, Vector3 position)
         => TunnelSectionUtil.IsTunnelPoint(position, TunnelSectionUtil.GetClearanceHeight(path.path_variant));
@@ -68,8 +74,117 @@ public static class PathTunnelParts
             }
     }
 
+    public static void GenerateCeiling(GameObject parent, SplineComputer spline, PathSummary path,
+        float leftExtent, float rightExtent, List<TrackCorridorInfo.PercentRange> tunnels)
+    {
+        foreach (var tunnel in tunnels)
+            RoadPath.CreateSplineMesh(parent, spline, $"Models/Paths/p{path.path_variant}/{CeilingPart}",
+                leftExtent + rightExtent, (rightExtent - leftExtent) * .5f,
+                TunnelSectionUtil.GetClearanceHeight(path.path_variant),
+                fallbackPrefabName: $"Models/Paths/p{path.path_type}/{CeilingPart}", clipFrom: tunnel.From, clipTo: tunnel.To);
+    }
+
+    /// <summary>ホームの床・ドアを保ち、上屋を含む独立部材だけ地下区間から除く。</summary>
+    public static GameObject GeneratePlatform(GameObject parent, SplineComputer spline, PathSummary path,
+        string variantBase, string typeBase, float trackOffset, bool mirror)
+    {
+        var tunnels = Ranges(spline, path);
+        var warp = PathDrawContext.Warp;
+        GameObject result = null;
+        void Draw(double from, double to)
+        {
+            result = RoadPath.CreateSplineMesh(parent, spline, variantBase + "/platform", 0f, trackOffset,
+                RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, mirror, typeBase + "/platform",
+                stretchToWidth: false, clipFrom: from, clipTo: to, compensatePivot: false, maxTileLength: 0f);
+        }
+        foreach (var ground in Outside(0, 1, tunnels)) Draw(ground.From, ground.To);
+        try
+        {
+            PathDrawContext.Warp = new PartWarp { Shift = warp?.Shift, Scale = warp?.Scale, SourceMesh = WithoutPlatformRoof };
+            foreach (var tunnel in tunnels) Draw(tunnel.From, tunnel.To);
+        }
+        finally { PathDrawContext.Warp = warp; }
+        return result;
+    }
+
+    public static Mesh WithoutPlatformRoof(Mesh source)
+    {
+        if (PlatformsWithoutRoof.TryGetValue(source, out var cached) && cached != null) return cached;
+        var vertices = source.vertices;
+        var parents = new int[vertices.Length];
+        int Root(int vertex)
+        {
+            while (parents[vertex] != vertex) { parents[vertex] = parents[parents[vertex]]; vertex = parents[vertex]; }
+            return vertex;
+        }
+        void Join(int a, int b) => parents[Root(a)] = Root(b);
+        var positions = new Dictionary<Vector3, int>();
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            parents[i] = i;
+            // FBXの法線・UV境界で分かれた同じ位置の頂点も、同じ部材として扱う。
+            if (positions.TryGetValue(vertices[i], out int other)) Join(i, other);
+            else positions[vertices[i]] = i;
+        }
+        var triangles = new int[source.subMeshCount][];
+        for (int sub = 0; sub < triangles.Length; sub++)
+        {
+            triangles[sub] = source.GetTriangles(sub);
+            var indices = triangles[sub];
+            for (int i = 0; i < indices.Length; i += 3) { Join(indices[i], indices[i + 1]); Join(indices[i], indices[i + 2]); }
+        }
+        var roof = new bool[vertices.Length];
+        for (int i = 0; i < vertices.Length; i++) if (vertices[i].y > PlatformRoofHeight) roof[Root(i)] = true;
+        var mesh = UnityEngine.Object.Instantiate(source);
+        mesh.name = source.name + "_WithoutRoof";
+        Bounds bounds = default;
+        bool hasBounds = false;
+        for (int sub = 0; sub < triangles.Length; sub++)
+        {
+            var remaining = new List<int>();
+            var indices = triangles[sub];
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                if (roof[Root(indices[i])]) continue;
+                for (int j = 0; j < 3; j++)
+                {
+                    int vertex = indices[i + j];
+                    remaining.Add(vertex);
+                    if (hasBounds) bounds.Encapsulate(vertices[vertex]);
+                    else { bounds = new Bounds(vertices[vertex], Vector3.zero); hasBounds = true; }
+                }
+            }
+            mesh.SetTriangles(remaining, sub, false);
+        }
+        mesh.bounds = bounds;
+        PlatformsWithoutRoof[source] = mesh;
+        return mesh;
+    }
+
+    public static GameObject ResolveDefaultPart(string name)
+    {
+        if (name != null && name.EndsWith("/" + CeilingPart, StringComparison.Ordinal))
+        {
+            if (defaultCeiling != null) return defaultCeiling;
+            var mesh = new Mesh { name = "DefaultTunnelCeiling" };
+            mesh.vertices = new[] { new Vector3(-.5f,0,-.5f), new Vector3(-.5f,0,.5f), new Vector3(.5f,0,.5f), new Vector3(.5f,0,-.5f) };
+            // 法線だけでなく表面の向きも下にそろえ、上からは裏面カリングで透けて見える。
+            mesh.triangles = new[] { 0,2,1,0,3,2 };
+            mesh.uv = new[] { Vector2.zero, Vector2.up, Vector2.one, Vector2.right };
+            mesh.RecalculateNormals(); mesh.RecalculateBounds();
+            defaultCeiling = new GameObject("DefaultTunnelCeiling");
+            defaultCeiling.hideFlags = HideFlags.HideAndDontSave;
+            defaultCeiling.SetActive(false);
+            defaultCeiling.AddComponent<MeshFilter>().sharedMesh = mesh;
+            defaultCeiling.AddComponent<MeshRenderer>().sharedMaterial = RoadPath.GetOrCreateRoadMaterialByName("PATH_CONCRETE");
+            defaultCeiling.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
+            return defaultCeiling;
+        }
+        return ResolveDefaultWall(name);
+    }
+
     /// <summary>
-    /// 専用モデルが無い場合もトンネル側面を保つ。高さはクリアランスまでで、左右をつなぐ天井を持たない。
+    /// 専用モデルが無い場合もトンネル側面を保つ。高さは天井を張るクリアランスまで。
     /// 共有の生成元メッシュはパスの破棄対象に含めず、通常パーツと同じスプライン・LOD経路へ渡す。
     /// </summary>
     public static GameObject ResolveDefaultWall(string name)

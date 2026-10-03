@@ -115,8 +115,7 @@ public class TrackPath : IPathMeshGenerator
     public static System.Func<PathSummary, TrackLateralProfile> LateralProfileProvider;
 
     /// <summary>
-    /// 生成中のパスの横位置(S字が無ければ null)。検証がリフレクションで引数の数まで合わせて呼ぶ部品の生成
-    /// (CreatePlatformSide・CreateTerminations・CreateIslandPlatformParts)へ、引数を足さずに渡すための生成1回分の値。
+    /// 生成中のパスの横位置(S字が無ければ null)。ホームと終端部品の生成へ横変形を共有する、生成1回分の値。
     /// </summary>
     private static TrackLateralSampler activeLateral;
 
@@ -645,11 +644,11 @@ public class TrackPath : IPathMeshGenerator
         // 島式ホームの駅は外側に張り出さず（platformLeft/Right=0）、軌道の間に淵2本とデッキ1枚を置く。
         if (!constructionOnly && (platformLeft > 0f || platformRight > 0f))
         {
-            CreatePlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, platformLeft, platformRight, variantBase, typeBase);
+            CreatePlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, platformLeft, platformRight, variantBase, typeBase, pathData);
         }
         else if (!constructionOnly && IsIslandPlatform(pathData))
         {
-            CreateIslandPlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, variantBase, typeBase);
+            CreateIslandPlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, variantBase, typeBase, pathData);
         }
 
         // 架線系（電化バリアントのみ: wire_spacing が設定されている場合）
@@ -710,6 +709,10 @@ public class TrackPath : IPathMeshGenerator
         WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.OuterShiftAtPercent(percent) } : null,
             () => PathTunnelParts.GenerateWall(container, spline, pathData, Mathf.Max(width * .5f + platformRight, lrtOuter),
                 wallWidth, false, tunnels, GetWallPercentRanges(corridor, false)));
+        float ceilingLeft = Mathf.Max(width * .5f + platformLeft, lrtOuter);
+        float ceilingRight = Mathf.Max(width * .5f + platformRight, lrtOuter);
+        WithWarp(lateral != null ? new PartWarp { Scale = percent => 1f + 2f * lateral.OuterShiftAtPercent(percent) / (ceilingLeft + ceilingRight) } : null,
+            () => PathTunnelParts.GenerateCeiling(container, spline, pathData, ceilingLeft, ceilingRight, tunnels));
 
         // 高架橋脚（道路と共通処理）。地下パスには配置しない（RoadPath側の理由コメント参照）。
         if (!constructionOnly && heightEditable && pillarSpacing.HasValue && pillarSpacing.Value > 0f
@@ -847,7 +850,7 @@ public class TrackPath : IPathMeshGenerator
     /// 未配置なら共通コンクリートへフォールバックする（ホームは駅の視認性の本体のため、
     /// 他のオプショナルパーツと違い「未配置＝スキップ」にはしない）。
     /// </summary>
-    private static void CreatePlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, int lanes, float centerWidth, float platformLeft, float platformRight, string variantBase, string typeBase)
+    private static void CreatePlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, int lanes, float centerWidth, float platformLeft, float platformRight, string variantBase, string typeBase, PathSummary path)
     {
         Material deckMaterial = ResolveDeckMaterial(variantBase, typeBase);
         ResolveDeckFrames(corridor, points, out Vector3[] rightDir, out float[] cumLength);
@@ -855,11 +858,11 @@ public class TrackPath : IPathMeshGenerator
         float halfWidth = width * 0.5f;
         if (platformLeft > 0f)
         {
-            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: true, PlatformTrackOffset(width, lanes, true, centerWidth), halfWidth, platformLeft, deckMaterial, variantBase, typeBase);
+            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: true, PlatformTrackOffset(width, lanes, true, centerWidth), halfWidth, platformLeft, deckMaterial, variantBase, typeBase, path);
         }
         if (platformRight > 0f)
         {
-            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: false, PlatformTrackOffset(width, lanes, false, centerWidth), halfWidth, platformRight, deckMaterial, variantBase, typeBase);
+            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: false, PlatformTrackOffset(width, lanes, false, centerWidth), halfWidth, platformRight, deckMaterial, variantBase, typeBase, path);
         }
     }
 
@@ -869,7 +872,7 @@ public class TrackPath : IPathMeshGenerator
     /// 両方とも中央を向ける。デッキは両側の淵ラインの間（±IslandEdgeDistance）に1枚張り、両縁は淵パーツが覆うので
     /// 側面の小口を張らない。外縁（platform_wall）と外壁の下部（platform_foundation）は島式には無い。
     /// </summary>
-    private static void CreateIslandPlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, int lanes, float centerWidth, string variantBase, string typeBase)
+    private static void CreateIslandPlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, int lanes, float centerWidth, string variantBase, string typeBase, PathSummary path)
     {
         int laneCount = Mathf.Max(1, lanes);
         int leftIndex = laneCount / 2 - 1, rightIndex = laneCount / 2;
@@ -878,9 +881,9 @@ public class TrackPath : IPathMeshGenerator
         // つなぎ目のS字では、両側の淵とデッキの両縁がそれぞれの軌道と一緒に動く(軌道が寄るとホームは細くなる)。
         TrackLateralSampler lateral = activeLateral;
         WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.ShiftAtPercent(leftIndex, percent) } : null, () =>
-            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, leftTrack, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, false, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f));
+            PathTunnelParts.GeneratePlatform(container, spline, path, variantBase, typeBase, leftTrack, false));
         WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.ShiftAtPercent(rightIndex, percent) } : null, () =>
-            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, rightTrack, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, true, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f));
+            PathTunnelParts.GeneratePlatform(container, spline, path, variantBase, typeBase, rightTrack, true));
 
         float edge = IslandEdgeDistance(width, laneCount, centerWidth);
         if (edge * 2f < PLATFORM_DECK_MIN_WIDTH || points == null || points.Count < 2) return;
@@ -983,7 +986,7 @@ public class TrackPath : IPathMeshGenerator
     /// 淵・外縁がデッキと食い違うため、モデルはこれらの値に合わせて作る。
     /// どちらも実寸配置（Xスケール・ピボット補正なし）で、未配置ならスキップ。
     /// </summary>
-    private static void CreatePlatformSide(GameObject container, SplineComputer spline, TrackCorridorInfo corridor, List<Vector3> points, Vector3[] rightDir, float[] cumLength, bool leftSide, float trackOffset, float halfWidth, float platformWidth, Material deckMaterial, string variantBase, string typeBase)
+    private static void CreatePlatformSide(GameObject container, SplineComputer spline, TrackCorridorInfo corridor, List<Vector3> points, Vector3[] rightDir, float[] cumLength, bool leftSide, float trackOffset, float halfWidth, float platformWidth, Material deckMaterial, string variantBase, string typeBase, PathSummary path)
     {
         string sideLabel = leftSide ? "左" : "右";
 
@@ -995,7 +998,7 @@ public class TrackPath : IPathMeshGenerator
         // 支柱・柵の周期を保つため著作タイル長で並べる。曲線追従用の分割はモデル内に持つ。
         // 淵（platform）: 原点を軌道の中心線に合わせ、設置面（線路面）で配置する。
         GameObject edge = null;
-        WithWarp(sideWarp, () => edge = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, trackOffset, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f));
+        WithWarp(sideWarp, () => edge = PathTunnelParts.GeneratePlatform(container, spline, path, variantBase, typeBase, trackOffset, leftSide));
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] platform 淵({sideLabel}): {(edge != null ? "生成成功" : "プレハブなし")}");
 
         // デッキ（ホーム上面）: 淵（軌道の中心線から PLATFORM_EDGE_OFFSET）から外縁

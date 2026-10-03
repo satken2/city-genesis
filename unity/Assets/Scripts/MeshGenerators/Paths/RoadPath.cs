@@ -385,6 +385,7 @@ public class RoadPath : IPathMeshGenerator
         {
              bool isBody = normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal);
              Mesh meshToUse = isBody ? GetBodySurfaceMesh(mf.sharedMesh) : GetRoadPartMesh(mf.sharedMesh, resolvedPrefabName);
+             if (warp?.SourceMesh != null) meshToUse = warp.SourceMesh(meshToUse);
              Bounds fittingBounds = isBody ? GetBodySurfaceBounds(meshToUse) : meshToUse.bounds;
              UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   メッシュ: '{mf.sharedMesh.name}', bounds={mf.sharedMesh.bounds.size}, vertexCount={mf.sharedMesh.vertexCount}");
 
@@ -1062,6 +1063,7 @@ public class RoadPath : IPathMeshGenerator
 
         PathTunnelParts.GenerateWall(container, spline, pathData, width * .5f, wallWidth, true, tunnels, WallRanges(corridor, true));
         PathTunnelParts.GenerateWall(container, spline, pathData, width * .5f, wallWidth, false, tunnels, WallRanges(corridor, false));
+        PathTunnelParts.GenerateCeiling(container, spline, pathData, width * .5f, width * .5f, tunnels);
 
         // 結合区間は一つの路面なので、路肩の設備を路面の中に立てない。
         RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing,

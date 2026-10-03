@@ -94,7 +94,7 @@ public static class PathDrawContext
 
     /// <summary>
     /// 接写LODなら `{prefab}_close` を優先して解決し、無ければ無印を返す。
-    /// 無印も無い地下壁は既定形状を使い、その他は null。Close のパーツは bbox・原点が無印と一致する規約。
+    /// 無印も無い地下壁・天井は既定形状を使い、その他は null。Close のパーツは bbox・原点が無印と一致する規約。
     /// </summary>
     public static GameObject ResolvePrefab(string prefabName, string fallbackPrefabName, out string resolvedName)
     {
@@ -131,7 +131,7 @@ public static class PathDrawContext
                 return prefab;
             }
         }
-        return PathTunnelParts.ResolveDefaultWall(prefabName);
+        return PathTunnelParts.ResolveDefaultPart(prefabName);
     }
 
     /// <summary>
@@ -224,10 +224,11 @@ public static class PathDrawContext
 
 /// <summary>
 /// パーツの変形。スプライン割合(0〜1)ごとの横ずれ(m。進行方向の右が正)と、横幅の倍率(1 で元の幅)。
-/// どちらも null なら変形しない。倍率はパーツの原点まわりに掛かり、原点の補正(ピボット補正)も倍率に合わせて動く。
+/// SourceMesh は共有の原本を保った描画用メッシュを選ぶ。倍率はパーツの原点まわりに掛かり、原点の補正も倍率に合わせて動く。
 /// </summary>
 public sealed class PartWarp
 {
     public System.Func<double, float> Shift;
     public System.Func<double, float> Scale;
+    public System.Func<Mesh, Mesh> SourceMesh;
 }

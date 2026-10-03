@@ -87,6 +87,7 @@ public static class FarPlatformPath
     sealed class Builder
     {
         readonly GameObject root;
+        readonly bool underground;
         readonly int variant;
         readonly List<Vector3> points;
         readonly Vector3[] right;
@@ -99,6 +100,7 @@ public static class FarPlatformPath
         public Builder(GameObject root, int variant, List<Vector3> points, float[] leftShift = null, float[] rightShift = null)
         {
             this.root = root; this.variant = variant; this.points = points;
+            underground = root.GetComponent<PathSection>()?.IsUnderground == true;
             this.leftShift = leftShift != null && leftShift.Length == points.Count ? leftShift : null;
             this.rightShift = rightShift != null && rightShift.Length == points.Count ? rightShift : null;
             right = new Vector3[points.Count];
@@ -186,25 +188,25 @@ public static class FarPlatformPath
             Box("PATH_YELLOW_BLOCK", type == 502 ? 1.79f : 2.1f, type == 502 ? 1.99f : 2.4f, 1.49f, 1.53f, side);
             if (type == 502)
             {
-                Prism("BD_WHITE_WALL", new[] { new Vector2(1.5f,4.92f), new Vector2(3.55f,5.08f), new Vector2(4.5f,4.82f), new Vector2(4.5f,4.96f), new Vector2(3.55f,5.22f), new Vector2(1.5f,5.06f) }, side);
+                if (!underground) Prism("BD_WHITE_WALL", new[] { new Vector2(1.5f,4.92f), new Vector2(3.55f,5.08f), new Vector2(4.5f,4.82f), new Vector2(4.5f,4.96f), new Vector2(3.55f,5.22f), new Vector2(1.5f,5.06f) }, side);
                 Box("BD_WHITE_WALL",4.3f,4.5f,1.48f,1.78f,side);
                 Box("BD_WINDOW",4.40f,4.45f,1.78f,4.82f,side);
                 Box("BD_WHITE_WALL",1.54f,1.78f,1.50f,1.94f,side);
                 Box("BD_WINDOW",1.62f,1.68f,1.94f,2.75f,side);
-                Posts(side,3.55f,1.48f,4.90f,"PATH_METAL");
+                if (!underground) Posts(side,3.55f,1.48f,4.90f,"PATH_METAL");
             }
             else if (type == 462)
             {
-                Prism("BD_CONCRETE",new[] { new Vector2(1.35f,5.62f),new Vector2(5.6f,5.43f),new Vector2(5.6f,5.64f),new Vector2(1.35f,5.83f) },side);
+                if (!underground) Prism("BD_CONCRETE",new[] { new Vector2(1.35f,5.62f),new Vector2(5.6f,5.43f),new Vector2(5.6f,5.64f),new Vector2(1.35f,5.83f) },side);
                 Box("BD_WHITE_WALL",5.36f,5.60f,0,2.8f,side);
                 Box("BD_WINDOW_LIGHT",5.43f,5.51f,2.8f,4.35f,side);
                 Box("BD_WHITE_WALL",5.36f,5.60f,4.35f,5.48f,side);
             }
             else
             {
-                Prism("BD_CONCRETE",new[] { new Vector2(1.55f,4.28f),new Vector2(3.6f,4.43f),new Vector2(5.6f,4.28f),new Vector2(5.6f,4.36f),new Vector2(3.6f,4.51f),new Vector2(1.55f,4.36f) },side);
+                if (!underground) Prism("BD_CONCRETE",new[] { new Vector2(1.55f,4.28f),new Vector2(3.6f,4.43f),new Vector2(5.6f,4.28f),new Vector2(5.6f,4.36f),new Vector2(3.6f,4.51f),new Vector2(1.55f,4.36f) },side);
                 if (!island) Box("PATH_METAL",5.44f,5.52f,2.60f,2.70f,side);
-                Posts(side,3.6f,1.48f,4.4f,"PATH_METAL");
+                if (!underground) Posts(side,3.6f,1.48f,4.4f,"PATH_METAL");
             }
         }
 

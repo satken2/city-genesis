@@ -84,10 +84,15 @@ public static class LrtQA
         var points = new List<Vector3> { new Vector3(0, -20, 0), new Vector3(0, -20, 80) };
         var generator = asm.GetType(id == 431 ? "TrackPath" : "RoadPath");
         var setback = Activator.CreateInstance(asm.GetType("SidewalkSetback"));
-        var result = generator.GetMethod("Generate").Invoke(Activator.CreateInstance(generator), new[] { path, points, setback, setback });
+        object result;
+        UseStops(Stop(.5f,22));
+        try { result = generator.GetMethod("Generate").Invoke(Activator.CreateInstance(generator), new[] { path, points, setback, setback }); }
+        finally { UseStops(); }
         var go = (GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
         Check(go.GetComponentsInChildren<MeshFilter>().Count(f => f.name.EndsWith("/wall_underground")) == 2, "underground LRT walls " + id);
         Check(!go.GetComponentsInChildren<Transform>().Any(t => t.name == "LrtPole" || t.name.StartsWith("pole(") || t.name.StartsWith("beam(")), "underground LRT has no poles " + id);
+        Check(!go.GetComponentsInChildren<Transform>().Any(t=>t.name=="LrtShelter"),"underground LRT has no platform shelter " + id);
+        Check(go.GetComponentsInChildren<MeshFilter>().Count(f=>f.name.EndsWith("/ceiling_underground"))==1,"underground LRT has a tunnel ceiling " + id);
         string track = id == 431 ? "/track" : "/lrt_track", wire = id == 431 ? "/wire" : "/lrt_wire";
         Check(go.GetComponentsInChildren<MeshFilter>().Count(f => f.name.EndsWith(track)) == 2
             && go.GetComponentsInChildren<MeshFilter>().Count(f => f.name.EndsWith(wire)) == 2, "underground LRT keeps tracks and wires " + id);

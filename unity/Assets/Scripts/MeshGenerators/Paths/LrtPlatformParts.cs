@@ -240,7 +240,11 @@ public static class LrtPlatformParts
                     if (longest == null || piece.Length > longest.Value.Length) longest = piece;
                 }
                 if (shelter != null && longest != null && longest.Value.Length >= LrtRoadParts.SHELTER_MIN_DECK_LENGTH)
-                    PlaceShelter(parent, shelter, spline, Percent(spline, (longest.Value.From + longest.Value.To) * .5f), side, outer - shelterBack, surface);
+                {
+                    double center = Percent(spline, (longest.Value.From + longest.Value.To) * .5f);
+                    if (!PathTunnelParts.IsTunnel(path, spline.EvaluatePosition(center)))
+                        PlaceShelter(parent, shelter, spline, center, side, outer - shelterBack, surface);
+                }
             }
     }
 

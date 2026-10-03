@@ -201,6 +201,7 @@ public static class ConstructionPathBuilder
                 }
                 PathTunnelParts.GenerateWall(complete, roadSpline, path, width * .5f, wallWidth, true, tunnels);
                 PathTunnelParts.GenerateWall(complete, roadSpline, path, width * .5f, wallWidth, false, tunnels);
+                PathTunnelParts.GenerateCeiling(complete, roadSpline, path, width * .5f, width * .5f, tunnels);
                 if (body == null) RoadPath.CreateFallbackRoadBody(complete, roadSpline, width);
             }
             var collision = RoadPath.BuildColliderMeshFromSpline(roadSpline, width);

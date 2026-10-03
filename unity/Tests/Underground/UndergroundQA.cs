@@ -251,7 +251,7 @@ public static class UndergroundQA
             var reference=Static("PathMeshFactory","GeneratePathMesh",road,new List<Vector3>{new Vector3(-70,0,-25),new Vector3(70,0,-25)},setback,setback);
             var referenceGO=(GameObject)reference.GetType().GetProperty("GeneratedObject").GetValue(reference);
             var referenceMaterials=referenceGO.GetComponentsInChildren<MeshRenderer>().SelectMany(renderer=>renderer.sharedMaterials).ToArray();
-            var undergroundSurfaceMaterials=proxyRenderers.Where(renderer=>!renderer.name.EndsWith("/wall_underground")).SelectMany(renderer=>renderer.sharedMaterials).ToArray();
+            var undergroundSurfaceMaterials=proxyRenderers.Where(renderer=>!renderer.name.EndsWith("/wall_underground") && !renderer.name.EndsWith("/ceiling_underground")).SelectMany(renderer=>renderer.sharedMaterials).ToArray();
             Check(undergroundSurfaceMaterials.Length==referenceMaterials.Length && undergroundSurfaceMaterials.SequenceEqual(referenceMaterials),"ground and underground road surfaces share exactly the same materials");
             CheckTunnelParts(masters, modelCache);
             referenceGO.SetActive(false); UnityEngine.Object.Destroy(referenceGO);
@@ -382,6 +382,7 @@ public static class UndergroundQA
             float maxBuiltX=completed.GetComponentsInChildren<MeshRenderer>().Max(r=>r.bounds.max.x);
             Check(maxBuiltX < -25f && maxBuiltX > -40f,"underground construction builds only the completed quarter");
             Check(completed.GetComponentsInChildren<MeshFilter>().Count(f=>f.name.EndsWith("/wall_underground"))==2,"completed tunnel construction has both walls");
+            Check(completed.GetComponentsInChildren<MeshFilter>().Count(f=>f.name.EndsWith("/ceiling_underground"))==1,"completed tunnel construction has its ceiling");
             var dirtMesh=constructionGO.GetComponentsInChildren<MeshFilter>().Single(f=>f.name=="ConstructionDirt").sharedMesh;
             Check(dirtMesh.bounds.center.y < -8f,"unfinished underground soil stays at tunnel elevation");
             Set(construction,"construction_progress",75f);
@@ -489,6 +490,7 @@ public static class UndergroundQA
         var below = new List<Vector3>{new Vector3(-40,-15,-70),new Vector3(40,-15,-70)};
         var above = new List<Vector3>{new Vector3(-40,5,-70),new Vector3(40,5,-70)};
         MeshFilter[] Walls(GameObject go) => go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/wall_underground")).ToArray();
+        MeshFilter[] Ceilings(GameObject go) => go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/ceiling_underground")).ToArray();
         bool Outdoor(GameObject go) => go.GetComponentsInChildren<Transform>().Any(t=>t.name.StartsWith("Equipment") || t.name.StartsWith("tree("));
 
         var road = MakePath(221,C("Constants","PATH_STREET"));
@@ -504,16 +506,25 @@ public static class UndergroundQA
             var walls = Walls(underground);
             Check(walls.Length==2,"roads without a ground wall get two underground walls");
             Check(!Outdoor(underground),"tunnels suppress lamps, street trees, utility poles and wires");
-            Check(walls.All(f=>f.sharedMesh.vertices.All(v=>Mathf.Abs(f.transform.TransformPoint(v).z+70)>=3.98f)),"tunnel wall meshes contain no roof across the road");
+            var ceilings = Ceilings(underground);
+            Check(ceilings.Length==1,"tunnels get a ceiling between both walls");
+            Check(ceilings.All(f=>f.sharedMesh.normals.All(n=>n.y<-.99f)),"ceiling normals face down");
+            Check(ceilings.All(f=>{
+                var v=f.sharedMesh.vertices; var t=f.sharedMesh.triangles;
+                return Enumerable.Range(0,t.Length/3).All(i=>Vector3.Cross(v[t[3*i+1]]-v[t[3*i]],v[t[3*i+2]]-v[t[3*i]]).y<0);
+            }),"ceiling winding faces down");
+            Check(ceilings.All(f=>Mathf.Abs(f.GetComponent<Renderer>().bounds.center.y-(-15+3))<.1f),"ceiling meets the clearance height");
+            CheckCeilingCulling(ceilings[0]);
             Check(walls.All(f=>Mathf.Abs(f.GetComponent<Renderer>().bounds.max.y-(-15+3))<.1f),"default walls reach the clearance height");
             Check(walls.All(f=>f.GetComponent<Renderer>().sharedMaterial.name=="PATH_CONCRETE"),"default walls use shared concrete");
             UnityEngine.Object.DestroyImmediate(underground);
             var ground = Generate(road,above);
-            Check(Walls(ground).Length==0 && Outdoor(ground),"ground keeps outdoor equipment and has no tunnel walls");
+            Check(Walls(ground).Length==0 && Ceilings(ground).Length==0 && Outdoor(ground),"ground keeps outdoor equipment and has no tunnel shell");
             UnityEngine.Object.DestroyImmediate(ground);
             var mixed = Generate(road,new List<Vector3>{new Vector3(-40,5,-70),new Vector3(0,-15,-70),new Vector3(40,-15,-70)});
             Check(Walls(mixed).Length==2 && Outdoor(mixed),"mixed paths retain ground equipment and draw tunnel walls");
             Check(Walls(mixed).All(f=>f.GetComponent<Renderer>().bounds.min.x>-40),"tunnel walls stop at the portal boundary");
+            Check(Ceilings(mixed).Length==1 && Ceilings(mixed)[0].GetComponent<Renderer>().bounds.min.x>-40,"ceiling stops at the portal boundary");
             UnityEngine.Object.DestroyImmediate(mixed);
 
             var authored = GameObject.CreatePrimitive(PrimitiveType.Cube); authored.SetActive(false);
@@ -544,7 +555,64 @@ public static class UndergroundQA
         Check(Walls(station).Any(f=>Mathf.Abs(f.GetComponent<Renderer>().bounds.center.z+70)>5.4f),"station walls sit outside the platform");
         Check(!station.GetComponentsInChildren<Transform>().Any(t=>t.name.StartsWith("pole(") || t.name.StartsWith("beam(")),"underground railway has no poles or beams");
         Check(station.GetComponentsInChildren<MeshFilter>().Any(f=>f.name.EndsWith("/wire")),"underground railway retains its catenary");
+        var stationWalls=Walls(station).Select(f=>f.GetComponent<Renderer>().bounds).ToArray();
+        var stationCeilings=Ceilings(station);
+        Check(stationCeilings.Length==1 && Mathf.Abs(stationCeilings[0].GetComponent<Renderer>().bounds.min.z-(stationWalls.Min(b=>b.center.z)+.1f))<.1f
+            && Mathf.Abs(stationCeilings[0].GetComponent<Renderer>().bounds.max.z-(stationWalls.Max(b=>b.center.z)-.1f))<.1f,"station ceiling covers the asymmetric platform width between both walls");
+        var edges = station.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/platform")).ToArray();
+        Check(edges.Length>0 && edges.All(f=>f.sharedMesh.triangles.All(i=>f.transform.TransformPoint(f.sharedMesh.vertices[i]).y<-15+3.31f)),"underground station keeps its platform without a canopy");
         UnityEngine.Object.DestroyImmediate(station);
+        var farStation=new GameObject("FarTunnelStation");
+        Set(farStation.AddComponent(T("PathSection")),"IsUnderground",true);
+        Static("FarPlatformPath","BuildInto",farStation,461,below,true,true);
+        Check(farStation.GetComponentsInChildren<MeshFilter>().All(f=>f.sharedMesh.triangles.All(i=>f.sharedMesh.vertices[i].y<-15+3.2f)),"far underground station omits its canopy and supports");
+        UnityEngine.Object.DestroyImmediate(farStation);
+        foreach (int variant in new[]{451,461,462,502})
+            foreach (string part in new[]{"platform","platform_close"})
+            {
+                var model=(GameObject)modelCache[$"Models/Paths/p{variant}/{part}"];
+                var source=model.GetComponent<MeshFilter>().sharedMesh;
+                var filtered=(Mesh)Static("PathTunnelParts","WithoutPlatformRoof",source);
+                var vertices=filtered.vertices;
+                Check(filtered.triangles.Length>0 && filtered.triangles.All(i=>vertices[i].y<=3.2f),$"{variant}/{part} removes canopy and roof supports");
+                Check(source.bounds.max.y>4 && filtered.bounds.max.y>1.4f,$"{variant}/{part} leaves the source and platform floor intact");
+                if (variant==502) Check(filtered.triangles.Any(i=>vertices[i].y>2.7f),"monorail platform doors remain underground");
+            }
+    }
+
+    private static void CheckCeilingCulling(MeshFilter ceiling)
+    {
+        var go=new GameObject("CeilingCullingCamera");
+        var camera=go.AddComponent<Camera>();
+        var target=new RenderTexture(64,64,24);
+        var pixels=new Texture2D(64,64,TextureFormat.RGBA32,false);
+        var oldTarget=RenderTexture.active;
+        int oldLayer=ceiling.gameObject.layer;
+        try
+        {
+            ceiling.gameObject.layer=31;
+            camera.cullingMask=1<<31; camera.orthographic=true; camera.orthographicSize=2;
+            camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=Color.magenta;
+            camera.nearClipPlane=.01f; camera.farClipPlane=10; camera.targetTexture=target;
+            Vector3 center=ceiling.GetComponent<Renderer>().bounds.center;
+            Color Render(float side)
+            {
+                camera.transform.position=center+Vector3.up*side*2;
+                camera.transform.rotation=Quaternion.LookRotation(Vector3.down*side,Vector3.forward);
+                camera.Render(); RenderTexture.active=target;
+                pixels.ReadPixels(new Rect(0,0,64,64),0,0); pixels.Apply();
+                return pixels.GetPixel(32,32);
+            }
+            Color top=Render(1), bottom=Render(-1);
+            Check(top.r>.9f && top.b>.9f && top.g<.1f,"ceiling is culled when viewed from above");
+            Check(bottom.r<.9f || bottom.b<.9f || bottom.g>.1f,"ceiling is visible when viewed from inside");
+        }
+        finally
+        {
+            ceiling.gameObject.layer=oldLayer; RenderTexture.active=oldTarget;
+            UnityEngine.Object.DestroyImmediate(go); UnityEngine.Object.DestroyImmediate(pixels);
+            target.Release(); UnityEngine.Object.DestroyImmediate(target);
+        }
     }
 
     private static void CheckParcelSelection(Component input, GameObject undergroundPath)
