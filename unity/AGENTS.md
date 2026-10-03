@@ -68,6 +68,8 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 
 - モデルは `Assets/Models` の FBX と `Assets/Resources/Models` のミラープレハブ(自動生成)。Read/Write Enabled が必須(無効だとパーツが無言で消える)、FBX の削除・移動後は `Tools/Model Prefabs/Delete Orphans`(`geometries/P_マテリアル共有とエクスポート.md` §3.4)。
 - 水面(`Assets/Shaders/Water.hlsl`)は深度をワールド座標へ逆投影して水深を求める。真上モードは正射影なので、透視投影専用の `LinearEyeDepth` とクリップWの差を使わない。水色・泡・水際は鉛直水深、透過は水中を通る距離で決める。取得した水底色には照明と霧が含まれるため、再照明やフォグの重ね掛けを避ける。水面自身のフォグはピクセルのワールド位置で計算する(頂点フォグは近景が白くなる)。
+- 水面は近景・遠景とも同じ材質。全景には海底が無いため、深度のクリア値を逆投影せず、深海色・透過なし・泡なし・不透明で扱う。HLSLの `_SURFACE_TYPE_TRANSPARENT` は必須。不透明な海底のSSAOやスクリーン空間の影を水面へ適用すると、常駐タイル境界で照明が変わる。
+- 水面はWeatherのグローバル `_WaterOvercast` に連動して浅い視線角の天空反射とフォグ合成量を抑える。体色の拡散環境光と直射光は保ち、霞は最低12%残す。霧色は共通の地平線色。未設定の0では通常の反射・フォグを使う。
 - 水の正面反射率は約2%。細波は画素の大きさでフィルタし、消えた凹凸を反射の粗さへ引き継ぐ。天空反射と拡散環境光は材質の `_EnvironmentIntensity`（既定1）、広域の波立ちの差は `_SurfacePatternScale` / `_SurfacePatternStrength` で調整する。曇天・雨天の天空反射の減光はWeatherが所有するプローブの強度で行う。透過率の上限は `_MaxTransmission`。直射光のHDR光沢は維持し、光沢を落としてフォグの不具合を隠さない。湖・川も同じ材質を共有する(`geometries/E_LOD処理.md` §海面)。
 
 ### ログ
