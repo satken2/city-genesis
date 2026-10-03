@@ -152,8 +152,9 @@ public sealed class ForestRenderer : IDisposable
     private static Material ApplyUnderground(Material material)
     {
         bool underground = UndergroundView.IsActive;
-        if (Mathf.Approximately(material.GetFloat("_UndergroundAlpha"), underground ? .22f : 1f)) return material;
-        material.SetFloat("_UndergroundAlpha", underground ? .22f : 1f);
+        float opacity = underground ? UndergroundMaterials.SurfaceOpacity : 1f;
+        if (Mathf.Approximately(material.GetFloat("_UndergroundAlpha"), opacity)) return material;
+        material.SetFloat("_UndergroundAlpha", opacity);
         material.SetFloat("_ZWrite", underground ? 0f : 1f);
         material.renderQueue = underground ? 3010 : 2000;
         material.SetShaderPassEnabled("DepthOnly", !underground);

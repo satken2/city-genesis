@@ -426,25 +426,11 @@ public class InputHandler : MonoBehaviour
         Vector3 validHitPoint = Vector3.zero;
         int validHitObjectType = -1;
 
-        if (TryGetUndergroundHit(hits, out var undergroundHit))
+        if (TryGetObjectHit(hits, out var selectedHit))
         {
-            validHitObject = undergroundHit.collider.gameObject;
-            validHitPoint = undergroundHit.point;
-            validHitObjectType = InputObjectType.PATH;
-        }
-        foreach (var hit in hits)
-        {
-            if (validHitObject != null) break;
-            int objectType = GetObjectType(hit.collider.gameObject);
-            int mode = GetModeForObjectType(objectType);
-
-            if (mode != InputMode.MODE_NONE)
-            {
-                validHitObject = hit.collider.gameObject;
-                validHitPoint = hit.point;
-                validHitObjectType = objectType;
-                break;
-            }
+            validHitObject = selectedHit.collider.gameObject;
+            validHitPoint = selectedHit.point;
+            validHitObjectType = GetObjectType(validHitObject);
         }
 
         // 地形ヒットの区画への差し替え:
@@ -475,7 +461,7 @@ public class InputHandler : MonoBehaviour
         if (GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_REMOVE && RemovalManager.Instance != null)
         {
             RemovalManager.Instance.UpdatePropHover(ray,
-                IsUndergroundSelection(validHitObject, validHitPoint) ? 0f :
+                UndergroundView.IsActive ? 0f :
                 validHitObject != null ? Vector3.Distance(ray.origin, validHitPoint) : rayDistance);
         }
 
@@ -691,7 +677,7 @@ public class InputHandler : MonoBehaviour
     private void HandleObjectClick(GameObject hitObject, Vector3 hitPoint, int objectType)
     {
         // マウスダウンからマウスアップまでの間にセルリロード等で対象が破棄されている可能性がある
-        if (hitObject == null) return;
+        if (!CanSelectObject(hitObject, hitPoint, objectType)) return;
 
         int currentMode = GetModeForObjectType(objectType);
         var handler = hitObject.GetComponent<IInputHandler>();
@@ -708,6 +694,7 @@ public class InputHandler : MonoBehaviour
     /// </summary>
     private bool TryRemovePropAtScreenPoint(Vector2 screenPos, float maxDistance)
     {
+        if (UndergroundView.IsActive) return false;
         if (GetModeForObjectType(InputObjectType.TERRAIN) != InputMode.MODE_REMOVE) return false;
         if (RemovalManager.Instance == null || Camera.main == null) return false;
         return RemovalManager.Instance.TryRemovePropAt(Camera.main.ScreenPointToRay(screenPos), maxDistance);
@@ -731,7 +718,7 @@ public class InputHandler : MonoBehaviour
     private void HandleObjectRightClick(GameObject hitObject, Vector3 hitPoint, int objectType)
     {
         // マウスダウンからマウスアップまでの間にセルリロード等で対象が破棄されている可能性がある
-        if (hitObject == null) return;
+        if (!CanSelectObject(hitObject, hitPoint, objectType)) return;
 
         int currentMode = GetModeForObjectType(objectType);
         var handler = hitObject.GetComponent<IInputHandler>();
@@ -791,6 +778,29 @@ public class InputHandler : MonoBehaviour
         return -1; // 不明なタイプ
     }
 
+    /// <summary>地形越しの地下パスを優先し、それ以外は選択可能な最初のヒットを返す。</summary>
+    private bool TryGetObjectHit(RaycastHit[] hits, out RaycastHit selected)
+    {
+        if (TryGetUndergroundHit(hits, out selected)) return true;
+        foreach (var hit in hits)
+        {
+            var obj = hit.collider.gameObject;
+            if (!CanSelectObject(obj, hit.point, GetObjectType(obj))) continue;
+            selected = hit;
+            return true;
+        }
+        return false;
+    }
+
+    private bool CanSelectObject(GameObject obj, Vector3 point, int objectType)
+    {
+        if (obj == null || GetModeForObjectType(objectType) == InputMode.MODE_NONE) return false;
+        if (!UndergroundView.IsActive) return true;
+        // 地上モデルは位置の案内として残すが、ホバー・クリック・保留中のドラッグには使わない。
+        if (objectType == InputObjectType.BUILDING) return false;
+        return objectType != InputObjectType.PATH || IsUndergroundSelection(obj, point);
+    }
+
     private bool TryGetUndergroundHit(RaycastHit[] hits, out RaycastHit selected)
     {
         selected = default;
@@ -834,7 +844,7 @@ public class InputHandler : MonoBehaviour
 
     private void StartDrag(GameObject hitObject, Vector3 hitPoint, int objectType)
     {
-        if (hitObject == null) return;
+        if (!CanSelectObject(hitObject, hitPoint, objectType)) return;
 
         int currentMode = GetModeForObjectType(objectType);
 

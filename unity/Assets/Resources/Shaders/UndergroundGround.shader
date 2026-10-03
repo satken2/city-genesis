@@ -28,7 +28,7 @@ Shader "CityGenesis/UndergroundGround"
                 float width = max(fwidth(elevation), .008);
                 float contour = 1 - smoothstep(width, width*2, abs(frac(elevation+.5)-.5));
                 half shade = .7 + .3 * saturate(normalize(input.normalWS).y);
-                return half4(lerp(half3(.64,.57,.44)*shade, half3(.85,.79,.65), contour), .16 + contour*.18);
+                return half4(lerp(half3(.64,.57,.44)*shade, half3(.85,.79,.65), contour), .06 + contour*.08);
             }
             ENDHLSL
         }

@@ -113,6 +113,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     public void InitializeMaterials()
     {
         CollectMaterials(false);
+        undergroundGhost?.Refresh();
     }
 
     /// <summary>追加パーツを取り込み、既存Rendererの元マテリアルを保持して現在の表示を適用する。</summary>

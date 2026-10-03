@@ -4,7 +4,7 @@ Shader "CityGenesis/UndergroundGhost"
     {
         [MainTexture] _BaseMap("Color", 2D) = "white" {}
         [MainColor] _BaseColor("Tint", Color) = (1,1,1,1)
-        _Opacity("Opacity", Range(0,1)) = 0.22
+        _Opacity("Opacity", Range(0,1)) = 0.08
     }
     SubShader
     {

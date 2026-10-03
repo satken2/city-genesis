@@ -84,7 +84,7 @@ public sealed class BuildingExteriorRenderer : MonoBehaviour
                     renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                     go.AddComponent<RenderCacheIdentity>().mesh = mesh;
                     mesh = null;
-                    GetComponent<VisualModeObject>()?.InitializeMaterials();
+                    GetComponent<VisualModeObject>()?.RefreshMaterials();
                 }
                 completed++;
             }

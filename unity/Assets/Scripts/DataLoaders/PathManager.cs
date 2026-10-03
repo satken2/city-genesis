@@ -5599,6 +5599,7 @@ public partial class PathManager : BaseApiDataManager
             var visualModeObject = meshGO.AddComponent<VisualModeObject>();
             visualModeObject.objectType = InputObjectType.PATH;
             visualModeObject.preventMaterialChange = true;
+            visualModeObject.useChildRenderers = true;
             visualModeObject.InitializeMaterials();
 
             nodeIntersectionMeshes[nodeId] = meshGO;
@@ -5633,12 +5634,14 @@ public partial class PathManager : BaseApiDataManager
             markingSurface.Configure(meshResult.Markings);
         }
         else if (markingSurface != null) Destroy(markingSurface);
-        meshGO.GetComponent<VisualModeObject>().InitializeMaterials();
         nodeMarkingSignatures[nodeId] = markingSignature;
 
         UpdateNodeSidewalkMesh(meshGO, meshResult);
         UpdateNodeRailMesh(meshGO, meshResult);
         TrafficSignalBuilder.Apply(meshGO, meshResult.TrafficSignals);
+        var visual = meshGO.GetComponent<VisualModeObject>();
+        visual.InitializeMaterials();
+        visual.ApplyVisualMode(VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetMode(InputObjectType.PATH) : VisualMode.MODE_NORMAL);
     }
 
     /// <summary>

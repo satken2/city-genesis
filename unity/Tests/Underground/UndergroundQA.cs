@@ -228,9 +228,9 @@ public static class UndergroundQA
             Set(farId,"status",C("Constants","STATUS_ACTIVE"));
             Call(modes,"SetFlags",buildingType,C("VisualFlag","SHOW_PLAN"));
             var forestMaterial=(Material)Call(forest,"MaterialFor",farOriginal);
-            Check(Mathf.Approximately(forestMaterial.GetFloat("_UndergroundAlpha"),.22f) && forestMaterial.GetFloat("_ZWrite")==0 && !forestMaterial.GetShaderPassEnabled("ShadowCaster"),"GPU forest fades without depth or shadow occlusion");
+            Check(Mathf.Approximately(forestMaterial.GetFloat("_UndergroundAlpha"),.08f) && forestMaterial.GetFloat("_ZWrite")==0 && !forestMaterial.GetShaderPassEnabled("ShadowCaster"),"GPU forest fades without depth or shadow occlusion");
             var propMaterial=(Material)Static("UndergroundMaterials","ForSurface",farOriginal);
-            Check(Mathf.Approximately(propMaterial.GetFloat("_Opacity"),.22f) && propMaterial.enableInstancing,"instanced props use the same opacity");
+            Check(Mathf.Approximately(propMaterial.GetFloat("_Opacity"),.08f) && propMaterial.enableInstancing,"instanced props use the same opacity");
             foreach(var path in new[]{road,rail,infra}) Build(path);
             var proxies = (IDictionary)Field(pathManager,"pathObjectsCache");
             Check(proxies.Count==3,"road, rail and model-less infrastructure are drawn");
@@ -274,6 +274,30 @@ public static class UndergroundQA
             object[] pick = {hits,default(RaycastHit)};
             Check((bool)Call(input,"TryGetUndergroundHit",pick),"underground path is selectable through terrain and building");
             Check(((RaycastHit)pick[1]).collider.gameObject==proxy,"selection reaches the intended underground path");
+            var surfacePath = MakePath(7,221,C("Constants","PATH_STREET"),-25,0);
+            Set(surfacePath,"follow_terrain",1);
+            var surfaceGO = Build(surfacePath);
+            Physics.SyncTransforms();
+            hits = Physics.RaycastAll(new Ray(new Vector3(0,80,-25),Vector3.down),200).OrderBy(h=>h.distance).ToArray();
+            pick = new object[] {hits,default(RaycastHit)};
+            Check((bool)Call(input,"TryGetObjectHit",pick) && ((RaycastHit)pick[1]).collider.gameObject==proxy,
+                "underground selection passes through a surface road and building");
+            object[] surfaceOnlyPick = {hits.Where(h=>h.collider.gameObject!=proxy).ToArray(),default(RaycastHit)};
+            Check((bool)Call(input,"TryGetObjectHit",surfaceOnlyPick)
+                && (int)Call(input,"GetObjectType",((RaycastHit)surfaceOnlyPick[1]).collider.gameObject)==terrainType,
+                "surface roads and buildings cannot become fallback hover targets when no tunnel is hit");
+            Check(!(bool)Call(input,"CanSelectObject",blocker,blocker.transform.position,buildingType)
+                && !(bool)Call(input,"CanSelectObject",surfaceGO,new Vector3(0,5,-25),pathType),
+                "surface object selection is disabled underground");
+            int clickCount = 0;
+            Call(input,"SetClickEvent",new Action<int,Vector3>((_,__)=>clickCount++));
+            Call(input,"HandleObjectClick",blocker,blocker.transform.position,buildingType);
+            Check(clickCount==0,"a queued surface click cannot fire after switching underground");
+            Static("UndergroundView","SetActive",false);
+            Check((bool)Call(input,"CanSelectObject",blocker,blocker.transform.position,buildingType)
+                && (bool)Call(input,"CanSelectObject",surfaceGO,new Vector3(0,5,-25),pathType),
+                "normal view restores surface selection");
+            Static("UndergroundView","SetActive",true);
             Call(input,"SetModePreset",C("InputModePreset","REMOVE_OBJECTS"));
             Check((bool)Call(input,"TryGetUndergroundHit",pick),"bulldozer can select an underground plan");
             var removal = Add("RemovalManager");
@@ -301,6 +325,28 @@ public static class UndergroundQA
             Set(visual,"useChildRenderers",true); Call(visual,"RefreshMaterials");
             Check(latePart.GetComponent<Renderer>().sharedMaterial!=lateOriginal,"late generated parts also fade");
 
+            var exterior = Add("BuildingExteriorRenderer", blocker);
+            var exteriorJobType = T("BuildingExteriorRenderer+Build");
+            var exteriorJobs = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(exteriorJobType));
+            exteriorJobs.Add(Delegate.CreateDelegate(exteriorJobType, typeof(UndergroundQA).GetMethod(nameof(BuildExterior), Flags)));
+            Call(exterior,"Configure",exteriorJobs);
+            Drain((IEnumerator)Call(exterior,"Generate"));
+            Check(blocker.GetComponentsInChildren<MeshRenderer>().All(r=>r.sharedMaterials.All(m=>m.shader.name=="CityGenesis/UndergroundGhost")),
+                "asynchronous exterior generation preserves opacity of the whole building without hovering");
+            Call(modes,"SetMode",buildingType,C("VisualModeBuilding","DURABILITY"));
+            Call(visual,"ApplyVisualMode",C("VisualModeBuilding","DURABILITY"));
+            Call(visual,"SetStatus",C("Constants","STATUS_PENDING"));
+            Call(visual,"RefreshMaterials");
+            Check(blocker.GetComponentsInChildren<MeshRenderer>().All(r=>r.sharedMaterials.All(m=>m.shader.name=="CityGenesis/UndergroundGhost")),
+                "material refresh preserves ghosting in data and planned color modes");
+            Call(visual,"SetStatus",C("Constants","STATUS_ACTIVE"));
+            Call(modes,"SetMode",buildingType,normal); Call(visual,"ApplyVisualMode",normal);
+            Check((Material)Static("UndergroundMaterials","Source",blocker.GetComponent<Renderer>().sharedMaterial)==originalMaterial,
+                "refresh does not record planned or data color as the original building material");
+            Call(visual,"InitializeMaterials");
+            Check(blocker.GetComponent<Renderer>().sharedMaterial.shader.name=="CityGenesis/UndergroundGhost",
+                "reinitializing source materials does not leave a surface model opaque");
+
             Set(road,"status",C("Constants","STATUS_ACTIVE"));
             proxy = Build(road,drawClose);
             Check(Field(proxy.GetComponent(T("DrawLodInfo")),"drawLod").Equals(drawClose),"underground paths use normal close LOD metadata");
@@ -320,6 +366,11 @@ public static class UndergroundQA
             Check(mixedSections.Any(s=>(bool)Field(s,"IsUnderground")) && mixedSections.Any(s=>!(bool)Field(s,"IsUnderground")),"one path retains both surface and tunnel sections");
             foreach (var section in mixedSections)
                 Check(section.GetComponentsInChildren<MeshRenderer>().All(r=>r.sharedMaterials.All(m=>(m.shader.name=="CityGenesis/UndergroundGhost") != (bool)Field(section,"IsUnderground"))),"section opacity follows depth classification");
+            var mixedPoints = (List<Vector3>)Call(pathManager,"CalculatePathPoints",mixed,true);
+            Call(input,"SetModePreset",C("InputModePreset","ALL_NORMAL"));
+            Check((bool)Call(input,"CanSelectObject",mixedGO,mixedPoints[0],pathType)
+                && !(bool)Call(input,"CanSelectObject",mixedGO,mixedPoints[mixedPoints.Count-1],pathType),
+                "mixed path selection accepts the tunnel portion and rejects the surface portion");
 
             var construction = MakePath(6,221,C("Constants","PATH_STREET"),-60,-15,"ConstructionPathSummary");
             Set(construction,"status",C("Constants","STATUS_CONSTRUCTING")); Set(construction,"construction_progress",25f);
@@ -344,6 +395,16 @@ public static class UndergroundQA
             var nodeGO=(GameObject)((IDictionary)Field(pathManager,"nodeIntersectionMeshes"))[100];
             Call(nodeGO.GetComponent(T("VisualModeObject")),"Start");
             Check(nodeGO.GetComponent<Renderer>().sharedMaterials.All(m=>m.shader.name!="CityGenesis/UndergroundGhost"),"underground junctions keep opaque original materials");
+            Vector3 surfaceNodePosition = new Vector3(0,(float)Static("Utils","GetGroundHeight",new Vector3(0,0,-25)),-25);
+            Call(pathManager,"UpdateNodeSlab",100,surfaceNodePosition,nodeResult,"");
+            var updatedNodeMaterial = new Material(roadMaterials[0]);
+            nodeResult=Activator.CreateInstance(T("NodeMeshResult"),new object[]{nodeMesh,updatedNodeMaterial,null,null,null,null});
+            Call(pathManager,"UpdateNodeSlab",100,surfaceNodePosition,nodeResult,"");
+            Check(nodeGO.GetComponent<Renderer>().sharedMaterial.shader.name=="CityGenesis/UndergroundGhost"
+                && (Material)Static("UndergroundMaterials","Source",nodeGO.GetComponent<Renderer>().sharedMaterial)==updatedNodeMaterial,
+                "surface junction updates retain the new source material and reapply transparency immediately");
+            Call(pathManager,"UpdateNodeSlab",100,new Vector3(0,-14,-25),nodeResult,"");
+            Check(nodeGO.GetComponent<Renderer>().sharedMaterial==updatedNodeMaterial,"junction depth changes remove only the ghost material");
 
             var keep=(HashSet<Vector2Int>)Field(pathManager,"cellsToKeepVisible");
             var cellLods=(IDictionary)Field(pathManager,"cellPathLod");
@@ -400,6 +461,17 @@ public static class UndergroundQA
             EditorApplication.Exit(0);
         }
         catch(Exception error) { File.WriteAllText(report,"FAIL\n"+checks+" checks\n"+error); EditorApplication.Exit(1); }
+    }
+
+    private static void BuildExterior(List<CombineInstance> parts, List<Material> materials, List<Mesh> temporary)
+    {
+        var mesh = new Mesh();
+        mesh.vertices = new[] { Vector3.zero, Vector3.right, Vector3.forward };
+        mesh.triangles = new[] { 0, 2, 1 };
+        mesh.RecalculateNormals();
+        parts.Add(new CombineInstance { mesh = mesh, transform = Matrix4x4.identity });
+        materials.Add(Resources.Load<Material>("BuildingMaterial"));
+        temporary.Add(mesh);
     }
 
     private static void CheckRoadSnapping(Camera camera)
