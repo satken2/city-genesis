@@ -1,49 +1,16 @@
 # VisualHandlers
 
-3D空間の建物・道路・土地区画・地形・海面の「見せ方」(表示/非表示・ハイライト・データ可視化)をオブジェクトタイプごとに一括で切り替える。仕様の正は公開 `programs/Unity表示モード.md`(docs パスは `city-genesis/docs/docs/` 起点)。作業は Skill genesis-visual-mode に従う。
+建物・パス・区画・地形などの表示、ハイライト、データ可視化を管理する。入力時の操作は InputHandlers が担当する。
 
-入力モード(`InputHandlers/`。クリック時に何が起きるか)とは別系統。編集モードでは `IpcViewCoordinator` が両方をセットで切り替え、`IpcStateCoordinator` の `ApplyState*` は `VisualModeHandler` を直接触らない(`programs/Unity入力制御.md` §9.1)。
+## 共通ルール
 
-## ファイル
+- 色モード・表示フラグ・個別フィルタを区別し、共通の表示状態を参照する。編集プリセットと通常表示の記憶は IPC の表示管理を通す。
+- 表示可否はステータス・レイヤー・個別フィルタを合わせた共通判定を使う。通常の個体と遠景・結合・インスタンス描画で結果を揃える。
+- 材質の上塗りと元材質の記憶を区別し、差し替え・復元・終了時に整合させる。共有材質を個体の色変更で書き換えない。
+- 非表示にした描画物はクリック対象としても残さない。表示専用の地形を接地や入力の基準へ流用しない。
+- 大量の表示更新は共通のバッチ処理を使う。後から生成・復元された描画物にも現在の表示設定を適用する。
+- 一時的な色・フィルタは明示的に解除し、セッションのリセット後へ持ち越さない。
 
-| ファイル | 役割 |
-| --- | --- |
-| `VisualModeHandler.cs` | シングルトン。タイプごとの色モード(`SetMode`)と表示フラグ(`SetFlags`)を保持し、登録された `IVisualModeHandler` へバッチ通知する。`VisualMode` / `VisualFlag` 定数もここ |
-| `VisualModeEx.cs` | データ可視化モードの定数。値域でカテゴリ分け(Path=100番台 / Parcel=200番台 / Building=300番台 / Terrain=400番台) |
-| `IVisualModeHandler.cs` | `ApplyVisualMode(mode)` の契約。個体(`VisualModeObject`・地形・水面・遠景建物)と、一括描画を持つ `ParcelManager` / `ZoneManager` が実装する |
-| `VisualModeObject.cs` | 個々の GameObject に付く実装。元材質の記憶・ステータス連動・ホバー・一時地区色・フィルタ非表示 |
-| `VisualBuildingObject.cs` / `VisualTerrainObject.cs` / `VisualSeaObject.cs` / `VisualParcelObject.cs` | タイプ別の派生・補助。区画個体は `VisualParcelStats` を渡すだけで登録しない |
-| `UndergroundView.cs` / `UndergroundTerrainSurface.cs` | 地下表示の背景・水際と、Terrainの半透明の地表 |
-| `UndergroundMaterials.cs` / `UndergroundGhostObject.cs` / `UndergroundPathMarker.cs` | 地上モデルの共有半透明材質・材質の退避と復元・地下パスの入力識別 |
-| `VisualPathStats.cs` / `VisualBuildingStats.cs` / `VisualParcelStats.cs` | 色決定に使う統計値。各 Manager が生成時に `InitFrom(summary)` で初期化 |
-| `ObjectVisibilityFilter.cs` | ID 単位の非表示(第3の系統)。状態の正は Unity で、UI からは全集合が届く |
-| `PublicFacilityGlowOverlay.cs` | 公共施設ハイライト(`VisualFlag.HIGHLIGHT_PUBLIC`)の常駐オーバーレイ |
-| `PathSpeedLimitOverlay.cs` | 制限速度標識(`VisualFlag.SPEED_LIMIT_SIGNS`) |
-| `RoadFocusOverlay.cs` | 名前付き道路の区間強調帯 |
-| `CityBoundaryOverlay.cs` | 都市範囲の境界破線(常時) |
+## 参照先
 
-## 知らないと事故ること
-
-- 地形の `TRANSPARENT` は地下表示の入口。`VisualModeHandler.SetMode` が `UndergroundView` と地上物の材質を同期する。地形を単に消すモードではない。`UndergroundTerrainSurface` は表示専用で、接地・入力には既存Terrainを使う。
-- `UndergroundMaterials` / `UndergroundGhostObject` は表示可否を変えず、地上のモデルだけを半透明にする。表示更新・元材質の収集前に半透明材質を復元し、更新後に再適用する。遠景結合バッチ・プロップのインスタンス描画・GPU森林も対象。元材質の個別複製や、非表示レイヤーの強制表示をしない。
-- `UndergroundPathMarker` を持つモデルは半透明化の対象外。通常生成器の元材質を使い、独自の種類別色分けはしない。ホバー時だけ既存の青い材質にする。パスの表示設定と個別フィルタに従い、隠すとコライダーも落ちる。生成・破棄は `PathManager.Underground.cs`、入力の優先判定は `InputHandler`。詳細と検証は公開 `Unity表示モード.md` の「地下表示」。
-
-- 色モードとフラグは直交する。フラグは `ApplyVisualMode` の引数に乗らず、必要な側が `GetFlags` をプル参照する。
-  - モード変更の通知は1フレーム `batchSize`(100)件ずつで、一括変更しても即座に全部は切り替わらない。数万件を即時に扱うオーバーレイは登録せず `Update` でポーリングする(`PublicFacilityGlowOverlay` の方式)。
-- `VisualModeObject` は `InitializeMaterials()` 時点の `sharedMaterials` を元材質として記憶する。メッシュ・材質を差し替えたら呼び直す。
-  - 非同期で子 Renderer を追加・復元するときは `RefreshMaterials()`。上塗り後に `InitializeMaterials()` を呼ぶと計画色を元材質として記録してしまう。基底材質そのものを置換する場合だけ、置換後に `InitializeMaterials()`。
-- `SetStatus` のステータスは色モードより優先される。建設中・解体中・倒壊は常に元材質(メッシュ自体が専用形状)、計画中3種は `SHOW_PLAN` が立っているときだけ表示。ステータス判定を他所で再実装せず `IsVisualVisible` を参照する。
-- 数値の色分けは `MaterialPropertyBlock`。`RoadMarkingSurface` 付き Renderer の復元では `RoadMarkingSurface.Restore` を呼ばないと路面標示が消える。
-- `ObjectVisibilityFilter` は `UpdateVisuals` の最優先分岐(クリックも拾わせない)。セッションリセットで必ずクリアする(`IpcStateCoordinator.HandleSessionReset`)。
-  - 遠景LODの建物は `VisualModeObject` を持たず、`FarBuildingMember.ApplyVisualMode` がレイヤーと個別フィルタを合わせて適用し、結合バッチへ通知する。差分ロードで後から生成されるオブジェクトには生成側(`BuildingManager` / `PathManager`)が `IsHidden` を引く。
-- 所属地区色分け(`ZONE_COLOR`)の色は `zone.color` を `ZoneManager.GetZoneColor` で変換する。地区編集中は道路だけ塗り、区画・建物は通常表示。
-  - 適用直後の一時色(`SetTempZoneId`)は `ZoneEditContext.ClearTempVisuals` が送信結果とモード終了で明示的に戻す。送信失敗時は version が変わらずリロードが再描画しないので、リロード任せにしない。
-- `PublicFacilityGlowOverlay` の敷地解決は `ParcelManager.GetParcelIdAtPoint`(`multi_agent` スキーマに `parcel_id` が無いため `BuildingSummary.parcel_id` は当てにしない)。`public_facility` が同スキーマに無い間は常に false で光らない。
-- 環境スコア(騒音・大気汚染・治安・日照)は区画レイヤーのモード。`ParcelSummary` に無く、`ParcelManager` が `/city/noise` 等から別途取得する。
-- `VisualPathStats` の速度は `PathSummary.base_speed`、歩行者量は `path_traffic["0"]`。存在しないフィールドをリフレクションで読むと0になり色分けが無反応になるので、フィールドは直接参照する。
-- 公共交通ハイライト(`DataLoaders/TransitOverlayManager`)は独立レイヤー。VisualMode の排他色モードや InputMode の編集プリセットを追加しない。
-
-## 参照
-
-- 仕様: `programs/Unity表示モード.md`。個別: `programs/建設プロジェクト管理.md`(表示フィルタ)、`programs/道路の詳細と道路名.md`(強調帯)、`geometries/D_地形形状.md`(都市境界線)、`geometries/E_LOD処理.md`(標識のLOD)、`programs/公共交通ハイライト.md`
-- 検証: `unity/Tests/SpeedLimitSigns/run.ps1`
+`docs/docs/programs/Unity表示モード.md`・`docs/docs/programs/建設プロジェクト管理.md`。作業手順は Skill `genesis-visual-mode`。
