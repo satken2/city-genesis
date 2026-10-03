@@ -204,6 +204,10 @@ public static class Constants
     public const int LEDGER_BUSINESS_TAX = 35;
     public const float MAX_CATEGORY_RATIO = 1.5f;
     public const float MAX_CONSTRUCTION_SPEED_FACTOR = 5.0f;
+    public const float RAIL_JUNCTION_POSITION_TOLERANCE = 0.05f;
+    public const float RAIL_JUNCTION_ANGLE_TOLERANCE_DEG = 0.1f;
+    public const float RAIL_JUNCTION_PLANE_LENGTH = 20.0f;
+    public const float RAIL_JUNCTION_PLANE_TOLERANCE = 0.01f;
     public const int VALUE_INIT = 0;
     public const int VALUE_EMPTY = 1;
     public const int VALUE_MAKING = 2;

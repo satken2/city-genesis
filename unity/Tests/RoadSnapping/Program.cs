@@ -19,6 +19,7 @@ internal static class Program
     private static void Main()
     {
         CheckSegmentProjection();
+        CheckRailProjection();
         // 平行移動・回転・方向反転でも、横間隔と高さが不変で両端が揃うことを検証する。
         foreach (float degrees in new[] { 0f, 17f, 45f, 90f, 179f, 270f })
         foreach (int sign in new[] { -1, 1 })
@@ -69,6 +70,23 @@ internal static class Program
         Check(!RoadParallelSnapGeometry.TrySnap(new Vector3(50, 0, 20), null, origin, far, origin, far, true, 5,
             out _, out _, out _), "first point away from both ends is free");
         Console.WriteLine($"Road snapping: {checks} checks passed.");
+    }
+
+    private static void CheckRailProjection()
+    {
+        Vector3 a = new Vector3(0, 0, 0), b = new Vector3(70, 0, 0);
+        Vector3 c = new Vector3(150, 0, 200), d = new Vector3(200, 0, 200);
+        foreach (float offset in new[] { 0f, 10000f, 100000f })
+        foreach (float t in new[] { 0f, .03123f, .371234f, .89123f, 1f })
+        {
+            Vector3 shift = new Vector3(offset, 0, -offset);
+            Vector3 expected = shift + PolylineUtils.CubicBezierPoint(a, b, c, d, t);
+            RailJunctionGeometry.ProjectCubic(a+shift, b+shift, c+shift, d+shift, expected, out Vector3 point, out Vector3 tangent);
+            Check(Utils.XZDistance(point, expected) < .03f, "Rail projection stays within connection tolerance at large coordinates");
+            float u = 1 - t;
+            Vector3 direction = 3 * (u * u * (b - a) + 2 * u * t * (c - b) + t * t * (d - c));
+            Check(Vector3.Dot(tangent, direction.normalized) > .999999f, "Rail tangent uses the cubic derivative");
+        }
     }
 
     private static void CheckSegmentProjection()

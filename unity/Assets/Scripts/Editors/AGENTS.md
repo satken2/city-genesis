@@ -36,6 +36,8 @@
 
 ## 必ず守る規約
 
+- `RoadEditor/RailJunctionGeometry.cs` は線路の元のベジエへの射影と解析接線を担当し、`RoadPlanManager.RailJunctions.cs` が単線/複線のハンドル整列で使用する。自動端点ハンドルは直線延長吸着の設定によらず整列し、手動ハンドルは保持する。分岐・合流は完成済み本線だけ、単純延長は未完成でも許可する。接線とポイントの共通平面は `/paths/validate` の干渉結果で検証する(N文書「敷設時の分岐・合流制約」)。
+
 - 新しいポリゴン編集・Ctrlメニュー・配置キー操作は上の共通基底/部品を使い、各マネージャに複製しない。
 - `PolygonAreaEditManager`の頂点ドラッグは`InputHandler`が地形との交点から求めた`worldPos`のXZを使い、地形高さを適用する。固定深度の`ScreenToWorldPoint`で逆投影すると斜め視点でカーソルからずれるため使わない。共通吸着は`UseDragSnapping`で制御し、`ParcelShapeEditManager`と`GradingAreaEditManager`は常にfalse。区画形状編集と造成範囲の作図は頂点の配置・移動・挿入とも吸着なし固定で、共有吸着フラグやグリッド表示には依存しない(造成は頂点が道路の中心線に吸い付くと範囲がパスに掛かり、発注で必ず拒否される)。
 - `PolygonAreaEditManager`のPlacingマーカーは、`TerrainInputHandler`が渡す`OnTerrainHover`の位置を`UpdateOverlay`でスクリーン座標の円(`pointCircleRadius`×1.2、`VertexColor`)として描く(`RoadPlanManager`のようなワールド描画ではない)。位置は`Utils.GetGroundHeight`へ射影するので海上は海底側に出る(頂点の円と同じ)。`InputHandler`は入力ゲート(UI上・カメラドラッグ・ラジアルメニュー等)で`onHoverEnd`を呼び、`TerrainInputHandler`がそれを`OnTerrainHoverEnd`へ中継して消す。`onHover`はレイが変わらない静止フレームには届かないので、フレーム番号での失効判定は使えない。Editingでは出さない。

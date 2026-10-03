@@ -1,5 +1,7 @@
 # 道路の並行・終端揃えスナップ検証
 
+`RailJunctionGeometry` は元のベジエ上の任意位置への射影と解析接線を検証する。ワールド座標10km・100kmへ平行移動しても接続位置の許容誤差内に収まることを確認する。線路の敷設可否はバックエンドの `/paths/validate` が判定する。
+
 `powershell -NoProfile -File Tests/RoadSnapping/run.ps1` をUnityディレクトリで実行する。
 本編のランタイムアセンブリをビルドし、実際の `RoadParallelSnapGeometry` を呼ぶ。
 回転・方向反転・左右の配置、標高の保持、両端揃え、始点配置、閾値外、縮退区間を検証する。

@@ -1368,19 +1368,16 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 始点・終点が既存パスの終端に接続している場合、その端点のベジエ制御点を
-    /// 既存パスの延長線方向へ吸着させ、接続部で道路が折れないようにする（フロント側の親切設計）。
-    /// 「直線延長」吸着フラグ(TerrainInputHandler.EnableStraightLineSnapping)がONのときのみ
-    /// 適用する（敷設開始時は常にOFF。ラジアルメニューでONにしない限り描いた方向がそのまま使われる）。
-    /// 自動計算された接線と延長線の角度差が PATH_TANGENT_ALIGN_MAX_ANGLE_DEG を超える場合は、
-    /// 明らかに別方向へ引いたものとみなして整列せずユーザーの方向を尊重する。
+    /// 道路の端点延長は「直線延長」吸着がONで、角度差が許容範囲内のときに整列する。
+    /// 線路はこのフラグによらず、端点が接する本線の解析接線へ自動ハンドルを整列する。
+    /// 手動ハンドルは保持し、方向の不一致は /paths/validate の干渉判定で拒否する。
     /// RecomputeAllControlPoints の自動計算結果を上書きする形で適用し、
     /// 制御点の長さ（アンカーからの距離）は自動計算値を維持して向きだけを揃える。
     /// 確定送信される制御点にもこの結果が載るため、バックエンドに保存される形状と一致する。
     /// </summary>
     private void AlignEndpointControlsToExistingPaths()
     {
-        if (!TerrainInputHandler.EnableStraightLineSnapping || SnappingSuppressed) return;
+        if ((!TerrainInputHandler.EnableStraightLineSnapping && !IsRailJunctionTarget) || SnappingSuppressed) return;
         if (points.Count < 2) return;
 
         // 始点: control_out を延長方向へ吸着（手動調整済みならユーザーの向きを尊重）
@@ -1392,7 +1389,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 cur.y = 0f;
                 float len = cur.magnitude;
                 if (len > 1e-4f
-                    && TryGetExistingPathExtensionDir(pt.position, cur, out Vector3 aligned))
+                    && TryGetEndpointAlignmentDirection(pt.position, cur, out Vector3 aligned))
                 {
                     // 平面方向の整列では縦断形状を変えない。
                     Vector3 newOut = pt.position + aligned * len;
@@ -1413,7 +1410,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 cur.y = 0f;
                 float len = cur.magnitude;
                 if (len > 1e-4f
-                    && TryGetExistingPathExtensionDir(pt.position, cur, out Vector3 aligned))
+                    && TryGetEndpointAlignmentDirection(pt.position, cur, out Vector3 aligned))
                 {
                     // 平面方向の整列では縦断形状を変えない。
                     Vector3 newIn = pt.position + aligned * len;
@@ -1484,6 +1481,13 @@ public partial class RoadPlanManager : MonoBehaviour
             }
         }
         return found;
+    }
+
+    private bool TryGetEndpointAlignmentDirection(Vector3 position, Vector3 current, out Vector3 aligned)
+    {
+        return IsRailJunctionTarget
+            ? TryGetRailHandleDirection(position, current, out aligned)
+            : TryGetExistingPathExtensionDir(position, current, out aligned);
     }
 
     // =====================================================================
@@ -1947,8 +1951,16 @@ public partial class RoadPlanManager : MonoBehaviour
             basePos = terrainInputHandler.ApplySnapping(basePos, PathSubtype, out lastSnapWasElevated, out lastSnapRelHeight, snapThreshold, skipGrid: ParallelSnapEnabled);
         }
 
+        if (!offsetSnapApplied && IsRailJunctionTarget && lastSnapWasElevated
+            && TryProjectRailTarget(basePos, snapThreshold, out Vector3 railPoint, out _, out var railTarget))
+        {
+            basePos.x = railPoint.x;
+            basePos.z = railPoint.z;
+            lastSnapRelHeight = railTarget.GetRelativeHeightAtPoint(basePos.x, basePos.z);
+        }
+
         // 並行モードでも接続先の位置と標高を優先し、角度補助では再変更しない。
-        if (lastSnapWasElevated && (PathType == Constants.PATH_TRACK || ParallelSnapEnabled))
+        if (lastSnapWasElevated && (IsRailJunctionTarget || ParallelSnapEnabled))
         {
             isStraightLineSnapActive = false;
             isRightAngleSnapActive = false;
@@ -2199,9 +2211,19 @@ public partial class RoadPlanManager : MonoBehaviour
             var segments = pathManager.QueryNearbySegments(basePos, searchRadius);
             if (segments != null)
             {
+                var projectedRails = new HashSet<int>();
                 foreach (var seg in segments)
                 {
                     if (seg.path != null && !InfraNetworkUtil.IsPathSnappable(seg.path.path_variant, PathSubtype)) continue;
+                    if (IsRailJunctionTarget && seg.path != null && !projectedRails.Add(seg.path.path_id)) continue;
+                    if (IsRailJunctionTarget && seg.path != null
+                        && RailJunctionGeometry.TryProject(seg.path, basePos, out Vector3 railPosition, out Vector3 railTangent))
+                    {
+                        EvaluateTangentOffsetCandidates(basePos, railPosition, railTangent,
+                            seg.path.GetRelativeHeightAtPoint(railPosition.x, railPosition.z),
+                            ref bestDist, ref snapped, ref snapRelHeight, ref found);
+                        continue;
+                    }
                     Vector3 dir = seg.b - seg.a;
                     dir.y = 0f;
                     if (dir.sqrMagnitude < 1e-6f) continue;
@@ -2258,6 +2280,9 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             if (seg.path != null && !InfraNetworkUtil.IsPathSnappable(seg.path.path_variant, PathSubtype)) continue;
             Vector3 dir = seg.b - seg.a;
+            if (IsRailJunctionTarget && seg.path != null
+                && RailJunctionGeometry.TryProject(seg.path, targetPos, out _, out Vector3 railTangent))
+                dir = railTangent;
             dir.y = 0f;
             if (dir.sqrMagnitude < 1e-6f) continue;
 
