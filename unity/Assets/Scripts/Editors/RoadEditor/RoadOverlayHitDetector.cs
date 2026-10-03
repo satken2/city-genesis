@@ -21,7 +21,7 @@ public struct RoadOverlayHit
 /// <summary>
 /// 2Dオーバーレイ上の配置ポイント・辺・制御点に対するスクリーン空間ヒット検出。
 /// GameObjectを使わず数学的に判定する。
-/// 各ポイントの control_in / control_out に対して独立してヒット判定を行う。
+/// 表示されている制御点だけをヒット判定の対象にする。
 /// </summary>
 public class RoadOverlayHitDetector
 {
@@ -43,13 +43,13 @@ public class RoadOverlayHitDetector
     public RoadOverlayHit TestHit(
         Vector2 mouseScreen,
         List<PathBuildPoint> points,
-        Camera cam)
+        Camera cam, bool includeControls)
     {
         if (points == null || points.Count == 0)
             return RoadOverlayHit.None;
 
         // 1. 制御点判定（各ポイントの control_in / control_out）
-        for (int i = 0; i < points.Count; i++)
+        for (int i = 0; includeControls && i < points.Count; i++)
         {
             if (points[i].control_out.HasValue)
             {

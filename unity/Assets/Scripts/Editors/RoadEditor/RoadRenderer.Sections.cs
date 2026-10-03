@@ -56,7 +56,7 @@ public partial class RoadRenderer
                 bool endHouse = (station || index == 2 || (moving == null && after == null))
                     && (houseEnds == "both" || houseEnds == "end");
                 string sectionEnds = startHouse ? (endHouse ? "both" : "start") : (endHouse ? "end" : "none");
-                section.UpdateRoadPreview(points, pathType, variant, curved, true,
+                section.UpdateRoadPreview(points, pathType, variant, curved,
                     platformSide, offsets, directions,
                     pathType == Constants.PATH_STATION_HOUSE ? sectionEnds : houseEnds, profiles, passageMode);
             }

@@ -142,9 +142,8 @@ public partial class RoadPlanManager
         points.Clear(); points.AddRange(replacement);
         Curved = true;
         SelectPoint(-1);
-        InvalidateShapeCache();
+        UpdateShapePreview();
         routeUndoRevision = routeRevision;
-        Update3DPreview();
         EmitShapeUpdate(finalized: true);
         EmitSelectNode();
     }
@@ -156,9 +155,7 @@ public partial class RoadPlanManager
         Curved = routeUndoCurved;
         routeUndoPoints = null;
         SelectPoint(-1);
-        InvalidateShapeCache();
-        Update3DPreview();
-        EmitShapeUpdate(finalized: true);
+        CommitShapeChange(finalized: true);
         EmitSelectNode();
     }
 }

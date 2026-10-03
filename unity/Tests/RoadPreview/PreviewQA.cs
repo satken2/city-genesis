@@ -78,6 +78,7 @@ public static class PreviewQA
             CheckManager(asm, renderer);
             CheckAlignment(asm, item);
             CheckControlHeights(asm);
+            CheckEditorGeometryConsistency(asm, item);
             CheckRailControlDragging(asm);
             CheckElevatedTerrainIndependence(asm, item);
             CheckAlignmentLabels(asm);
@@ -86,7 +87,7 @@ public static class PreviewQA
             CheckMaxSpan(asm, item);
             CheckSeaLakeCrossings(asm);
             CheckPowerLinePreview(asm, renderer);
-            File.WriteAllText(result, "PASS: 100 preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase; sea and lake crossings; base_height power line preview height and waypoint pass-through.");
+            File.WriteAllText(result, "PASS: 100 preview updates; shared render, elevation and saved geometry; hidden controls and endpoint snaps; height and embankment preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase; sea and lake crossings; base_height power line preview height and waypoint pass-through.");
             EditorApplication.Exit(0);
         }
         catch (Exception ex)
@@ -155,6 +156,8 @@ public static class PreviewQA
         Require(((List<Vector3>)cacheField.GetValue(sections.GetValue(0))).Count == 35, "Control drag range");
         Set("isDragging", false);
         Set("phase", Enum.Parse(phaseType, "Placing"));
+        Set("hoverWorldPosition", new Vector3(40, 0, 140));
+        Set("currentHeight", 10f);
         curveSamples.Add(new Vector3(40, 10, 140));
         update.Invoke(manager, new object[] { curveSamples });
         Require(((List<Vector3>)cacheField.GetValue(sections.GetValue(0))).Count == 86, "Hover tangent must include preceding span");
@@ -361,6 +364,145 @@ public static class PreviewQA
         UnityEngine.Object.DestroyImmediate(terrain);
         UnityEngine.Object.DestroyImmediate(terrainData);
         asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null, null);
+    }
+
+    private static void CheckEditorGeometryConsistency(Assembly asm, object master)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+        var data = new TerrainData { heightmapResolution = 33, size = new Vector3(240, 100, 240) };
+        var heights = new float[33, 33];
+        for (int z = 0; z < 33; z++)
+        for (int x = 0; x < 33; x++) heights[z, x] = 0.2f + 0.01f * x;
+        data.SetHeights(0, 0, heights);
+        var terrain = Terrain.CreateTerrainGameObject(data);
+        var utils = asm.GetType("Utils");
+        utils.GetMethod("InvalidateHeightCache").Invoke(null, null);
+        float Ground(Vector3 p) => (float)utils.GetMethod("GetGroundHeight", new[] { typeof(Vector3) }).Invoke(null, new object[] { p });
+        var type = asm.GetType("RoadPlanManager");
+        var manager = new GameObject("EditorConsistency").AddComponent(type);
+        var camera = new GameObject("EditorConsistencyCamera").AddComponent<Camera>();
+        camera.orthographic = true;
+        camera.orthographicSize = 150;
+        camera.pixelRect = new Rect(0, 0, 1000, 1000);
+        camera.transform.position = new Vector3(100, 300, 100);
+        camera.transform.LookAt(new Vector3(100, 0, 100));
+        var pt = asm.GetType("PathBuildPoint");
+        var role = asm.GetType("PathPointRole");
+        var anchors = (IList)type.GetField("points", flags).GetValue(manager);
+        object Call(string name, params object[] args) => type.GetMethod(name, flags).Invoke(manager, args);
+        void Set(string name, object value) => type.GetField(name, flags).SetValue(manager, value);
+        void Point(int i, string name, object value)
+        {
+            object point = anchors[i];
+            pt.GetField(name).SetValue(point, value);
+            anchors[i] = point;
+        }
+        void Add(Vector3 position, string name) => anchors.Add(Activator.CreateInstance(pt, position, Enum.Parse(role, name)));
+        Vector3 Position(int i) => (Vector3)pt.GetField("position").GetValue(anchors[i]);
+        float SegmentHeight(object segment, string name) => (float)segment.GetType().GetField(name).GetValue(segment);
+        List<object> Coordinates(Vector3 position) => new List<object> { position.x, position.y - Ground(position), position.z };
+        List<object> Control(int i, string name)
+        {
+            Vector3 value = (Vector3)pt.GetField(name).GetValue(anchors[i]);
+            return new List<object> { value.x, value.y - Ground(Position(i)), value.z };
+        }
+        object oldEditable = master.GetType().GetField("height_editable").GetValue(master);
+        try
+        {
+            Set("PathSubtype", 100);
+            Set("phase", Enum.Parse(asm.GetType("RoadEditorPhase"), "Editing"));
+            Set("Curved", true);
+            Add(new Vector3(0, 60, 30), "Start");
+            Add(new Vector3(100, 80, 70), "Waypoint");
+            Add(new Vector3(200, 65, 35), "End");
+            Point(0, "control_out", new Vector3(50, 93, 10));
+            Point(1, "control_in", new Vector3(70, 71, 100));
+            Point(1, "control_out", new Vector3(160, 48, 60));
+            Point(2, "control_in", new Vector3(185, 82, 50));
+            Call("InvalidateShapeCache");
+            var rendered = (List<Vector3>)Call("GetRenderPoints");
+            var elevation = (IList)Call("BuildEditingElevationSegments");
+            Require(elevation.Count == rendered.Count - 1, "Render and elevation span counts differ");
+            for (int i = 0; i < elevation.Count; i++)
+            {
+                Require(Mathf.Abs(SegmentHeight(elevation[i], "absYA") - rendered[i].y) < 0.001f, "Elevation lost an endpoint or waypoint control height (start)");
+                Require(Mathf.Abs(SegmentHeight(elevation[i], "absYB") - rendered[i + 1].y) < 0.001f, "Elevation lost an endpoint or waypoint control height (end)");
+            }
+            var summaryType = asm.GetType("GeneratedModels.PathSummary");
+            var saved = Activator.CreateInstance(summaryType);
+            void Saved(string name, object value) => summaryType.GetField(name).SetValue(saved, value);
+            Saved("path_variant", 100);
+            Saved("curved", true);
+            Saved("start_point", Coordinates(Position(0)));
+            Saved("end_point", Coordinates(Position(2)));
+            Saved("start_control", Control(0, "control_out"));
+            Saved("end_control", Control(2, "control_in"));
+            Saved("waypoints", new List<object> { new Dictionary<string, object> {
+                ["position"] = Coordinates(Position(1)), ["control_in"] = Control(1, "control_in"), ["control_out"] = Control(1, "control_out") } });
+            var restored = (IList)Call("BuildExistingElevationSegments", saved);
+            Require(restored.Count == elevation.Count, "Saved shape lost a waypoint");
+            for (int i = 0; i < restored.Count; i++)
+                Require(Mathf.Abs(SegmentHeight(restored[i], "absYB") - SegmentHeight(elevation[i], "absYB")) < 0.001f,
+                    "Saved and editing heights disagree over sloped terrain");
+            Point(0, "embankmentHeight", 3f);
+            Point(1, "embankmentHeight", -2f);
+            Point(2, "embankmentHeight", 4f);
+            Call("InvalidateShapeCache");
+            elevation = (IList)Call("BuildEditingElevationSegments");
+            rendered = (List<Vector3>)Call("GetRenderPoints");
+            for (int i = 0; i < elevation.Count; i++)
+                Require(Mathf.Abs(SegmentHeight(elevation[i], "absYB") - rendered[i + 1].y) < 0.001f, "Elevation omitted embankment");
+
+            // 直線モードでは、保存されている制御点の上でも操作を開始しない。
+            var detectorType = asm.GetType("RoadOverlayHitDetector");
+            Set("hitDetector", Activator.CreateInstance(detectorType));
+            Vector3 handle = new Vector3(50, 0, 10);
+            handle.y = Ground(handle);
+            Vector2 screen = camera.WorldToScreenPoint(handle);
+            Require((bool)Call("IsMouseOverEditHandle", screen, camera), "Visible curved handle cannot be hit");
+            Set("Curved", false);
+            Require(!(bool)Call("IsMouseOverEditHandle", screen, camera), "Invisible straight-mode control stole mouse input");
+            Require(!(bool)type.GetProperty("CanEditControls").GetValue(manager), "Straight mode still allows controls");
+
+            // 2点だけの道路は始点・終点とも、元の直線の延長へ吸着する。
+            anchors.Clear();
+            Add(new Vector3(0, 60, 30), "Start");
+            Add(new Vector3(100, 60, 30), "End");
+            for (int i = 0; i < 2; i++)
+            {
+                Set("selectedPointIndex", i);
+                float x = i == 0 ? -20 : 130;
+                var snapped = (Vector3)Call("ApplyEditingStraightLineSnap", new Vector3(x, 0, 32));
+                Require(Mathf.Abs(snapped.x - x) < 0.001f && Mathf.Abs(snapped.z - 30) < 0.001f, "Two-point endpoint extension snap is asymmetric");
+            }
+            Set("selectedPointIndex", -1);
+            Set("phase", Enum.Parse(asm.GetType("RoadEditorPhase"), "Placing"));
+            Set("hoverWorldPosition", new Vector3(150, 0, 30));
+            master.GetType().GetField("height_editable").SetValue(master, true);
+            Call("OnChangeNodeFromIpc", -1, 12f);
+            rendered = (List<Vector3>)Call("GetRenderPoints");
+            Require(Mathf.Abs(rendered[rendered.Count - 1].y - Ground(new Vector3(150, 0, 30)) - 12f) < 0.001f, "Height input left the hover preview stale");
+            Call("OnChangeEmbankmentFromIpc", -1, 3f);
+            rendered = (List<Vector3>)Call("GetRenderPoints");
+            Require(Mathf.Abs(rendered[rendered.Count - 1].y - Ground(new Vector3(150, 0, 30)) - 15f) < 0.001f, "Embankment input left the hover preview stale");
+            Set("Curved", true);
+            Call("RecomputeAllControlPoints", false);
+            Call("InvalidateShapeCache");
+            var preview = (List<Vector3>)Call("GetMovingPreviewPoints", Call("GetRenderPoints"), 0, 1, true);
+            elevation = (IList)Call("BuildEditingElevationSegments");
+            var last = elevation[elevation.Count - 1];
+            Require(Mathf.Abs(SegmentHeight(last, "absYB") - preview[preview.Count - 1].y) < 0.001f, "Placing elevation omitted the hover height");
+            Require(preview.Exists(p => p.x > 100 && p.x < 150 && p.y > 50), "Curved hover lost its provisional tangent height");
+        }
+        finally
+        {
+            master.GetType().GetField("height_editable").SetValue(master, oldEditable);
+            UnityEngine.Object.DestroyImmediate(manager.gameObject);
+            UnityEngine.Object.DestroyImmediate(camera.gameObject);
+            UnityEngine.Object.DestroyImmediate(terrain);
+            UnityEngine.Object.DestroyImmediate(data);
+            utils.GetMethod("InvalidateHeightCache").Invoke(null, null);
+        }
     }
 
     private static void CheckRailControlDragging(Assembly asm)

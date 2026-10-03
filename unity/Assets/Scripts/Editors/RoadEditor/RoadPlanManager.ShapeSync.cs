@@ -163,25 +163,21 @@ public partial class RoadPlanManager
                     newPos.y = Utils.GetGroundHeight(newPos) + relY;
                     SelectPoint(cmd.index);
                     MoveAnchorPosition(cmd.index, newPos);
-                    InvalidateShapeCache();
-                    Update3DPreview();
-                    EmitShapeUpdate();
+                    CommitShapeChange();
                     EmitSelectNode();
                 }
                 break;
 
             case "move_control":
                 {
-                    // 直線モードでは制御点を持たない(2Dにも表示しない)
-                    if (!Curved || cmd.index < 0 || cmd.index >= points.Count) return;
+                    // 直線モードでは制御点を表示せず、編集も受け付けない
+                    if (!CanEditControls || cmd.index < 0 || cmd.index >= points.Count) return;
                     bool moveIn = cmd.which == "in";
                     // 始点は control_in、終点は control_out を持たない
                     if (moveIn && cmd.index == 0) return;
                     if (!moveIn && cmd.index == points.Count - 1) return;
                     MoveControlXZ(cmd.index, moveIn, cmd.x, cmd.z);
-                    InvalidateShapeCache();
-                    Update3DPreview();
-                    EmitShapeUpdate();
+                    CommitShapeChange();
                 }
                 break;
 
@@ -271,26 +267,32 @@ public partial class RoadPlanManager
         int n = world.Count;
         if (n < 2) return null;
 
-        // 1mサンプルの累積距離(縦断面の横軸)
         var dists = new float[n];
-        for (int i = 1; i < n; i++)
-        {
-            float dx = world[i].x - world[i - 1].x, dz = world[i].z - world[i - 1].z;
-            dists[i] = dists[i - 1] + Mathf.Sqrt(dx * dx + dz * dz);
-        }
-        if (authoritativeAlignments != null)
-            for (int i = 0; i < n; i++) dists[i] = (float)authoritativeAlignments[0].preview.samples[i][4].Value;
-
-        int stride = authoritativeAlignments != null ? 1
-            : Mathf.Max(1, Mathf.RoundToInt(AlignmentSyncStrideM / AlignmentSampleStep));
         var samples = new List<List<object>>();
-        for (int i = 0; i < n; i += stride)
+        if (authoritativeAlignments != null)
         {
-            samples.Add(BuildAlignmentSample(world[i], cachedAlignmentRadius[i], cachedAlignmentGradePct[i], dists[i]));
+            // 検証時の地盤・距離・指標をそのまま送り、ローカル推定を挟まない。
+            var validated = authoritativeAlignments[0].preview.samples;
+            for (int i = 0; i < n; i++)
+            {
+                dists[i] = (float)validated[i][4].Value;
+                var row = new List<object>();
+                foreach (var value in validated[i]) row.Add(value.HasValue ? (object)value.Value : null);
+                samples.Add(row);
+            }
         }
-        if ((n - 1) % stride != 0)
+        else
         {
-            samples.Add(BuildAlignmentSample(world[n - 1], cachedAlignmentRadius[n - 1], cachedAlignmentGradePct[n - 1], dists[n - 1]));
+            for (int i = 1; i < n; i++)
+            {
+                float dx = world[i].x - world[i - 1].x, dz = world[i].z - world[i - 1].z;
+                dists[i] = dists[i - 1] + Mathf.Sqrt(dx * dx + dz * dz);
+            }
+            int stride = Mathf.Max(1, Mathf.RoundToInt(AlignmentSyncStrideM / AlignmentSampleStep));
+            for (int i = 0; i < n; i += stride)
+                samples.Add(BuildAlignmentSample(world[i], cachedAlignmentRadius[i], cachedAlignmentGradePct[i], dists[i]));
+            if ((n - 1) % stride != 0)
+                samples.Add(BuildAlignmentSample(world[n - 1], cachedAlignmentRadius[n - 1], cachedAlignmentGradePct[n - 1], dists[n - 1]));
         }
 
         // 各アンカーの縦断面上の位置 = XZで最も近い1mサンプルの距離。地盤高はアンカー直下の値。
@@ -329,14 +331,6 @@ public partial class RoadPlanManager
                 var line = new List<float[]>();
                 foreach (var p in run) line.Add(new[] { p.x, p.y, p.z });
                 warnings.Add(line);
-            }
-            // 地盤・距離・指標も検証時の値を保ち、Unityでの再サンプリングを挟まない。
-            samples.Clear();
-            foreach (var s in authoritativeAlignments[0].preview.samples)
-            {
-                var row = new List<object>();
-                foreach (var value in s) row.Add(value.HasValue ? (object)value.Value : null);
-                samples.Add(row);
             }
         }
 

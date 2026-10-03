@@ -38,7 +38,16 @@ public partial class RoadPlanManager
     public void RefreshSnapPreview()
     {
         if (hasRawSnapPosition && phase == RoadEditorPhase.Placing)
-            OnTerrainHover(lastRawSnapPosition);
+        {
+            RefreshHoverSnapping();
+            UpdateShapePreview();
+        }
+    }
+
+    private void RefreshHoverSnapping()
+    {
+        if (hasRawSnapPosition && phase == RoadEditorPhase.Placing)
+            UpdateHoverSnapping(lastRawSnapPosition);
     }
 
     private void ResetParallelSnap()

@@ -307,6 +307,26 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 
 `Editing` フェーズの操作はUIの2Dパス形状編集パネル（`path_shape_editor`）からも行える。パネルは `edit_path:shape_command`（ノード移動・制御点移動・辺への挿入・削除・選択。XZのみ、吸着なし）を送り、`RoadPlanManager.ApplyShapeCommand` が3Dと同じロジックで適用して `edit_path:update_shape` で全状態を返す。3Dでドラッグ中のコマンドは無視される。高架・地下では2Dパネルの縦断面ストリップから既存の `edit_path:change_node` で高さだけを変えられる。各ノードには1始まりの番号ラベル（IMGUI。選択中は強調）を3Dビューに出し、2Dパネルと同じ番号で対応付ける。
 
+制御点を表示・操作できるのは、`Editing`・曲線モード・アンカー2点以上をすべて満たす場合だけである。
+`RoadPlanManager.CanEditControls` を描画・3Dヒット判定・2Dコマンドで共有し、直線モードの内部に残る制御点はクリックやカメラ操作を奪わない。
+
+道路編集の実装は次の責務に分ける。各 `RoadPlanManager.*.cs` は同じ編集状態を参照する partial クラスで、形状そのものの計算は編集状態を持たない `RoadShapeGeometry` に置く。
+
+| ファイル | 責務 |
+| --- | --- |
+| `RoadPlanManager.cs` | フェーズ・選択・入力の適用、設定変更、更新の統括 |
+| `RoadPlanManager.Controls.cs` | 制御点の自動計算・手動位置の維持・端点接線の整列 |
+| `RoadPlanManager.Snapping.cs` / `.ParallelSnap.cs` | 接続・延長線・直角・並行の吸着とガイドの状態 |
+| `RoadPlanManager.Overlay.cs` | 編集ギズモと既存パスのオーバーレイ |
+| `RoadPlanManager.Preview.cs` / `RoadRenderer*` | 設計区間の組み立て、詳細メッシュの保持と操作中の帯 |
+| `RoadPlanManager.Alignment.cs` / `.AlignmentLabels.cs` | 距離・曲率・勾配の推定と警告ラベル |
+| `RoadPlanManager.Validation.cs` | 立体交差・水域・建物との干渉のローカル推定 |
+| `RoadPlanManager.ShapeSync.cs` | 2Dコマンドの適用と同期用の線形データ |
+
+描画・線形評価・立体交差・水域・建物の判定は同じ区間形状を使う。区間にはアンカーと制御点の絶対座標、盛土、地形追従の有無を含め、配置中は仮終点と直前区間の接線も反映する。保存・復元時の制御点の相対Yは所属アンカー直下の地盤を基準にする（[パス形状](../geometries/A_パス形状.md)）。描画の浮かせ量は検証や保存座標へ加えない。
+
+形状変更は、必要な制御点計算を終えてからキャッシュ無効化・3Dプレビュー更新・形状通知を一度ずつ行う。ホバーの吸着座標を更新する処理と描画の更新は分け、曲線切り替えでも再描画を重ねない。高さ・盛土はキーとIPCで同じ適用処理を使い、次回配置値の変更も静止中のプレビューへ即時反映する。サーバーの全線検証結果があるときは、その距離・地盤・指標を同期データに直接載せる。
+
 道路エディタは `InputHandler` から入力イベントを受け取るほか、独自の `Update` ループでホバー状態の更新と高さ入力を処理し、`LateUpdate` でオーバーレイの描画を行う。
 
 標高（PageUp/PageDown または 1/2 キー、±1m）と盛土（3/4 キー、±1m）はキーボードで変更する（標高は上記のY軸ドラッグでも変更できる）。

@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 道路エディタで配置するポイントのロール。
-/// デバッグ用HTML(path_build.html)の build.points[].role に対応する。
+/// 敷設点の役割。始点・経由点・終点を区別する。
 /// Start は先頭に常に1つ、End は末尾に常に1つ存在する。
 /// </summary>
 public enum PathPointRole

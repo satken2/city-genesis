@@ -4,7 +4,7 @@ using GeneratedModels;
 
 /// <summary>
 /// RoadRenderer: 道路エディタの3Dプレビューメッシュ生成のみを担当する。
-/// 2Dオーバーレイ描画は RoadEditorOverlayRenderer に移動済み。
+/// 2Dオーバーレイ描画は RoadPlanManager が担当する。
 /// </summary>
 public partial class RoadRenderer : MonoBehaviour
 {
@@ -20,7 +20,6 @@ public partial class RoadRenderer : MonoBehaviour
     private int lastPathType;
     private int lastPathSubtype;
     private bool lastCurved;
-    private bool lastIsValid;
     private int lastPlatformSide;
     private string lastHouseEnds;
     private string lastPassageMode;
@@ -53,12 +52,6 @@ public partial class RoadRenderer : MonoBehaviour
     private List<List<Vector3>> lastProfiles;
 
     /// <summary>
-    /// バリデーションエラー時（立体交差など）に使用する赤色のプレビューマテリアル。
-    /// null の場合は通常の previewMaterial を使用する。
-    /// </summary>
-    public Material errorPreviewMaterial;
-
-    /// <summary>
     /// プレビュー用メッシュコンポーネントの作成
     /// </summary>
     public void CreatePreviewMeshComponents(Material material)
@@ -84,8 +77,6 @@ public partial class RoadRenderer : MonoBehaviour
 
     /// <summary>
     /// 3Dプレビューメッシュを更新する。細分化済みの点群を受け取る。
-    /// isValid=false の場合は errorPreviewMaterial（未設定なら previewMaterial）を
-    /// 使用して赤色のエラープレビューを表示する。
     /// platformSide は駅パスのホーム設置側（Constants.PLATFORM_SIDE_*）。
     /// 駅バリアントのプレビューで、プラットフォームを設置側どおりに張り出させるために使う
     /// （TrackPath.ResolvePlatformExtents が仮 PathSummary の platform_side を読む）。
@@ -100,7 +91,7 @@ public partial class RoadRenderer : MonoBehaviour
     /// 線路のプレビューは RegisterPreviewTracks で仮の相手として登録され、既存の線路やプレビューの線どうしと
     /// 近接線路の結合(TrackAdjacency)・つなぎ目のS字(TrackEndTransition)でつながる。
     /// </summary>
-    public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, bool isValid = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null, int[] travelDirections = null, string houseEnds = "both", List<List<Vector3>> profiles = null, string passageMode = "elevated")
+    public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null, int[] travelDirections = null, string houseEnds = "both", List<List<Vector3>> profiles = null, string passageMode = "elevated")
     {
         if (previewMeshFilter == null || previewMeshRenderer == null) return;
 
@@ -113,7 +104,7 @@ public partial class RoadRenderer : MonoBehaviour
         // 形状・パラメータが前回と同一なら再生成しない（破棄→再生成のスラッシングを防ぐ）。
         if (hasPreviewState && lastProfiles == profiles &&
             lastPathType == pathType && lastPathSubtype == pathSubtype &&
-            lastCurved == curved && lastIsValid == isValid &&
+            lastCurved == curved &&
             lastPlatformSide == platformSide && lastHouseEnds == houseEnds && lastPassageMode == passageMode &&
             OffsetsApproximatelyEqual(lastLateralOffsets, lateralOffsets) &&
             IntArraysEqual(lastTravelDirections, travelDirections) &&
@@ -132,17 +123,10 @@ public partial class RoadRenderer : MonoBehaviour
         ReleaseOwnedMeshes();
         previewMeshFilter.mesh = null;
 
-        // バリデーション結果に応じたマテリアルを選択
-        Material activeMaterial = previewMaterial;
-        if (!isValid)
-        {
-            activeMaterial = errorPreviewMaterial != null ? errorPreviewMaterial : previewMaterial;
-        }
-
         if (lateralOffsets == null || lateralOffsets.Length == 0)
         {
             // 単一パス: 受け取った点列をそのまま中心線として1本生成する
-            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, activeMaterial, null, houseEnds, profiles != null, passageMode, 0);
+            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, previewMaterial, null, houseEnds, profiles != null, passageMode, 0);
         }
         else
         {
@@ -157,7 +141,7 @@ public partial class RoadRenderer : MonoBehaviour
                     ? profiles[i] : OffsetPolylineLateral(subdividePoints, lateralOffsets[i]);
                 int travelDirection = (travelDirections != null && i < travelDirections.Length)
                     ? travelDirections[i] : Constants.DIR_BOTH;
-                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, activeMaterial, container, houseEnds, profiles != null, passageMode, i);
+                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, previewMaterial, container, houseEnds, profiles != null, passageMode, i);
             }
         }
 
@@ -168,7 +152,6 @@ public partial class RoadRenderer : MonoBehaviour
         lastPathType = pathType;
         lastPathSubtype = pathSubtype;
         lastCurved = curved;
-        lastIsValid = isValid;
         lastPlatformSide = platformSide;
         lastHouseEnds = houseEnds;
         lastPassageMode = passageMode;
@@ -188,7 +171,7 @@ public partial class RoadRenderer : MonoBehaviour
     /// componentPoints は設計空間(地面+相対Y)の点列で、生成器へは base_height を引いた
     /// 描画用の点列を渡す(ToDrawPoints)。仮 PathSummary の始点・終点・ウェイポイントは設計値のまま。
     /// </summary>
-    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent, string houseEnds, bool designed = false, string passageMode = "elevated", int componentIndex = 0)
+    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material previewMaterial, GameObject parent, string houseEnds, bool designed = false, string passageMode = "elevated", int componentIndex = 0)
     {
         PathSummary tempPathData = BuildPreviewSummary(componentPoints, pathType, pathSubtype, curved, platformSide, travelDirection, houseEnds, designed, passageMode);
         // 線路は線ごとに一意な負の path_id を持たせ、仮の相手の登録(RegisterPreviewTracks)と同じ線として扱う。
@@ -208,12 +191,12 @@ public partial class RoadRenderer : MonoBehaviour
                 currentPreviewObject = obj;
             }
 
-            if (activeMaterial != null)
+            if (previewMaterial != null)
             {
                 Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
                 foreach (var rend in renderers)
                 {
-                    rend.sharedMaterial = activeMaterial;
+                    rend.sharedMaterial = previewMaterial;
                 }
             }
         }
@@ -224,13 +207,13 @@ public partial class RoadRenderer : MonoBehaviour
                 previewMesh = meshResult.Mesh;
                 previewMeshFilter.mesh = previewMesh;
 
-                if (activeMaterial != null)
+                if (previewMaterial != null)
                 {
                     int subMeshCount = previewMesh.subMeshCount;
                     Material[] mats = new Material[subMeshCount];
                     for (int i = 0; i < subMeshCount; i++)
                     {
-                        mats[i] = activeMaterial;
+                        mats[i] = previewMaterial;
                     }
                     previewMeshRenderer.sharedMaterials = mats;
                 }
@@ -244,13 +227,13 @@ public partial class RoadRenderer : MonoBehaviour
                 MeshFilter mf = fallbackObj.AddComponent<MeshFilter>();
                 MeshRenderer mr = fallbackObj.AddComponent<MeshRenderer>();
                 mf.mesh = meshResult.Mesh;
-                if (activeMaterial != null)
+                if (previewMaterial != null)
                 {
                     int subMeshCount = meshResult.Mesh.subMeshCount;
                     Material[] mats = new Material[subMeshCount];
                     for (int i = 0; i < subMeshCount; i++)
                     {
-                        mats[i] = activeMaterial;
+                        mats[i] = previewMaterial;
                     }
                     mr.sharedMaterials = mats;
                 }
