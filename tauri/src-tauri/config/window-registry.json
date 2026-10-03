@@ -411,8 +411,8 @@
   },
   "settings": {
     "title": "Settings",
-    "width": 560,
-    "height": 520,
+    "width": 800,
+    "height": 900,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,

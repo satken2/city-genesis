@@ -6,7 +6,13 @@
       "display": "画面",
       "sound": "声音",
       "system": "系统",
-      "about": "信息"
+      "about": "信息",
+      "developer": "开发者设置"
+    },
+    "swagger": {
+      "label": "Swagger（API 文档）",
+      "description": "在默认浏览器中查看当前连接的后端 API",
+      "action": "在浏览器中打开"
     },
     "fontSize": {
       "label": "字体大小",

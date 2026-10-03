@@ -17,6 +17,7 @@
 //                   ずらした先が水面より上(手前の物体・空)なら水中ではないので、ずらさない。
 //  5. 反射/太陽:    水の正面反射率(約2%)で URP の UniversalFragmentPBR を呼び、
 //                   フレネルによる空の映り込みと太陽のグレアを物理ベースで得る。
+//                   日光のうち雲で広がった割合は空の広い範囲から来るので、鋭いグレアにしない。
 //
 // 水底の取得色は照明・大気フォグを含む描画済みの色なので、アルベドとして再照明せず、
 // PBR の結果へ「水面で反射されずに水中へ入り、戻ってきた割合」だけ足す。
@@ -41,6 +42,9 @@
 
 #define WATER_REFLECTANCE 0.02
 #define WATER_IOR 1.33
+
+// 日光のうち雲で広がった割合(天気が毎フレーム送る)。未設定の0では日光をすべて点光源として扱う。
+float _SunScatterFraction;
 
 // --- マテリアルプロパティ(SRP Batcher 互換のため UnityPerMaterial にまとめる) ---
 CBUFFER_START(UnityPerMaterial)
@@ -96,6 +100,24 @@ float3 WaterScenePositionWS(float2 screenUV)
     float rawDepth = lerp(UNITY_NEAR_CLIP_VALUE, 1.0, SampleSceneDepth(screenUV));
 #endif
     return ComputeWorldSpacePosition(screenUV, rawDepth, UNITY_MATRIX_I_VP);
+}
+
+// URP は主光源を点光源として鋭い光沢を付ける。雲で広がった割合の日光は空の広い範囲から来るので、
+// その分の光沢を粗さ最大の広い光沢へ置き換える差分を返す。拡散光はどちらでも同じなので変えない。
+half3 WaterScatteredSunSpecular(InputData inputData, SurfaceData surfaceData)
+{
+    SurfaceData broadSurface = surfaceData;
+    broadSurface.smoothness = 0.0;
+    BRDFData sharp, broad;
+    InitializeBRDFData(surfaceData, sharp);
+    InitializeBRDFData(broadSurface, broad);
+
+    Light mainLight = GetMainLight(inputData.shadowCoord, inputData.positionWS, CalculateShadowMask(inputData));
+    half  NdotL     = saturate(dot(inputData.normalWS, mainLight.direction));
+    half3 radiance  = mainLight.color * (mainLight.distanceAttenuation * mainLight.shadowAttenuation * NdotL);
+    half  sharpSpecular = sharp.specular.r * DirectBRDFSpecular(sharp, inputData.normalWS, mainLight.direction, inputData.viewDirectionWS);
+    half  broadSpecular = broad.specular.r * DirectBRDFSpecular(broad, inputData.normalWS, mainLight.direction, inputData.viewDirectionWS);
+    return saturate(_SunScatterFraction) * (broadSpecular - sharpSpecular) * radiance;
 }
 
 // ---------------- 頂点/フラグメント ----------------
@@ -192,6 +214,7 @@ half4 WaterFragment(Varyings IN) : SV_Target
     inputData.shadowMask              = half4(1, 1, 1, 1);
 
     half4 color = UniversalFragmentPBR(inputData, surfaceData);
+    color.rgb += WaterScatteredSunSpecular(inputData, surfaceData);
 
     // --- 水底: 水面で反射されずに入り、減衰して戻ってきた割合だけ足す ---
     // 取得色は水底までの大気フォグを含むので、合成後に水面のフォグを重ねる分の霧色を差し引く。

@@ -76,6 +76,13 @@ public static class WaterFogQA
             float sparklePeak = sparkle.Max(p => Mathf.Max(p.r, Mathf.Max(p.g, p.b)));
             report += $"sparklePeak={sparklePeak:F3}\n";
             passed &= sparklePeak > 1;
+            // 雲で広がった日光は空の広い範囲から来るので、同じ光量でも鋭い光沢にならない。
+            Shader.SetGlobalFloat("_SunScatterFraction", 1);
+            var scattered = Capture(camera, root + "/sparkle-scattered.png");
+            float scatteredPeak = scattered.Max(p => Mathf.Max(p.r, Mathf.Max(p.g, p.b)));
+            Shader.SetGlobalFloat("_SunScatterFraction", 0);
+            report += $"scatteredPeak={scatteredPeak:F3}\n";
+            passed &= scatteredPeak < 1;
 
             // 真上モードは正射影。透視投影と同じ水深になり、水面が透明に消えないことを確認する。
             sun.intensity = 0;

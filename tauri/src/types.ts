@@ -845,6 +845,7 @@ export type NearbyZoneEntry = {
  * バックエンドの実装によって値が含まれない場合がある(null を許容)
  */
 export type PathData = {
+  travel_direction: number;
   house_ends: string;
   passage_mode: string;
   streetlight_type: number;

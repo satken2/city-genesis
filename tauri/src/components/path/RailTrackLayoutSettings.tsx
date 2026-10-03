@@ -19,13 +19,11 @@
  */
 
 import { useTranslation } from "react-i18next";
-import { PATH_CONVEYOR, DIR_FORWARD, DIR_BACKWARD } from "../../constants";
+import { PATH_CONVEYOR } from "../../constants";
 import type { PathMasterEntry } from "../../types";
 import { NumberStepper } from "../common/NumberStepper";
 import { MIN_TRACK_COUNT, MAX_TRACK_COUNT, isMultiTrackRailVariant, isRailType } from "./railBuild";
-import upArrowIcon from "../../assets/images/ui/up-arrow.png";
-import downArrowIcon from "../../assets/images/ui/down-arrow.png";
-import bothArrowIcon from "../../assets/images/ui/both-arrow.png";
+import { PathDirectionButton } from "./PathDirectionButton";
 
 type RailTrackLayoutSettingsProps = {
   /** 選択中のバリアント。複線一体の線路なら設定の代わりに注記を出す。 */
@@ -56,23 +54,6 @@ export function RailTrackLayoutSettings({
   disabled = false,
 }: RailTrackLayoutSettingsProps) {
   const { t } = useTranslation();
-
-  /** 進行方向を画像で表す。順方向=上矢印 / 逆方向=下矢印 / 両方向=両矢印。 */
-  const directionImage = (dir: number) => {
-    if (dir === DIR_FORWARD) {
-      return <img src={upArrowIcon} alt="" className="pc-track-arrow-img" draggable={false} />;
-    }
-    if (dir === DIR_BACKWARD) {
-      return <img src={downArrowIcon} alt="" className="pc-track-arrow-img" draggable={false} />;
-    }
-    // DIR_BOTH: 両方向
-    return <img src={bothArrowIcon} alt="" className="pc-track-arrow-img" draggable={false} />;
-  };
-  const directionTitle = (dir: number): string => {
-    if (dir === DIR_FORWARD) return t("path_construction.rail.dirForward", "順方向");
-    if (dir === DIR_BACKWARD) return t("path_construction.rail.dirBackward", "逆方向");
-    return t("path_construction.rail.dirBoth", "両方向");
-  };
 
   if (!variant || !isRailType(variant.type) || variant.type === PATH_CONVEYOR) return null;
 
@@ -116,16 +97,12 @@ export function RailTrackLayoutSettings({
         <span className="pc-settings-label" aria-hidden="true" />
         <div className="pc-track-direction-row">
           {trackDirections.map((dir, i) => (
-            <button
+            <PathDirectionButton
               key={i}
-              type="button"
-              className="pc-track-arrow"
+              direction={dir}
               disabled={disabled}
-              title={directionTitle(dir)}
               onClick={() => onCycleDirection(i)}
-            >
-              {directionImage(dir)}
-            </button>
+            />
           ))}
         </div>
       </div>

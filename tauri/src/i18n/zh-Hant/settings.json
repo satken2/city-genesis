@@ -6,7 +6,13 @@
       "display": "畫面",
       "sound": "聲音",
       "system": "系統",
-      "about": "資訊"
+      "about": "資訊",
+      "developer": "開發者設定"
+    },
+    "swagger": {
+      "label": "Swagger（API 文件）",
+      "description": "在預設瀏覽器中查看目前連線的後端 API",
+      "action": "在瀏覽器中開啟"
     },
     "fontSize": {
       "label": "文字大小",

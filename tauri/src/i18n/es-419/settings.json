@@ -6,7 +6,13 @@
       "display": "Pantalla",
       "sound": "Sonido",
       "system": "Sistema",
-      "about": "Información"
+      "about": "Información",
+      "developer": "Configuración para desarrolladores"
+    },
+    "swagger": {
+      "label": "Swagger (documentación de la API)",
+      "description": "Muestra la API del backend conectado en tu navegador predeterminado",
+      "action": "Abrir en el navegador"
     },
     "fontSize": {
       "label": "Tamaño de letra",

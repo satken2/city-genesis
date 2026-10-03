@@ -12,6 +12,12 @@
   gap: 12px;
 }
 
+.path-traffic-direction {
+  display: flex;
+  align-items: center;
+  gap: 0.67rem;
+}
+
 /* === 利用率・路上駐車量のドーナツ(横並び) === */
 
 .path-traffic-gauges {

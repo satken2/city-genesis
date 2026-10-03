@@ -5,7 +5,7 @@
  * ウィンドウのタイトルバーは App.tsx の titlebar コンポーネントが担当するため、
  * 本コンポーネント内にはタイトルや閉じるボタンを含めない。
  *
- * 設定項目は5つのグループに分けて並べる:
+ * 設定項目は6つのグループに分けて並べる:
  * - 一般: 言語（対応言語は utils/locale.ts の SUPPORTED_LANGUAGES）、
  *   文字サイズ（プリセット大・中・小またはカスタム入力 8〜32px）、ヒントバーの表示
  * - 画面: HUD(アイコンパネル・コックピット・システムトレイ)と3D画面(Unityのウィンドウ)をそれぞれ別のモニターに移動する、
@@ -14,6 +14,7 @@
  * - サウンド: マスターボリューム・BGM・サウンドエフェクトのスライダー（ダミー）
  * - システム: GPUアクセラレーションのCPU/GPU切り替え
  * - 情報: クレジット表示（素材・OSSの表記義務を果たすクレジットウィンドウを開く）
+ * - 開発者向け設定: 接続中のバックエンドのSwaggerを既定ブラウザで開く
  */
 
 import {
@@ -23,10 +24,11 @@ import {
   type CSSProperties,
 } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
 import { FONT_SIZE_PRESETS, useFontSize } from "../../contexts/FontSizeContext";
 import { loadAppSettings, saveAppSettings, type AppSettings } from "../../utils/settings";
-import { fetchApi, ApiError } from "../../utils/api";
+import { fetchApi, ApiError, buildApiUrl } from "../../utils/api";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { sendMoveGraphicDisplay } from "../../utils/ipc";
 import {
@@ -213,6 +215,14 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       await invoke("open_registered_window", { windowType: "credits" });
     } catch (error) {
       console.error("failed to open credits", error);
+    }
+  }
+
+  async function handleOpenSwagger() {
+    try {
+      await openUrl(buildApiUrl(apiBaseUrl, "/docs"));
+    } catch (error) {
+      console.error("failed to open Swagger", error);
     }
   }
 
@@ -589,6 +599,27 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               type="button"
             >
               {t("settings.credits.action")}
+            </button>
+          </SettingsRow>
+        </div>
+      </section>
+
+      <section className="settings-group">
+        <h3 className="settings-group-title">{t("settings.groups.developer")}</h3>
+        <div className="settings-card">
+          <SettingsRow
+            label={t("settings.swagger.label")}
+            description={t("settings.swagger.description")}
+          >
+            <button
+              className="settings-btn"
+              onClick={() => void handleOpenSwagger()}
+              type="button"
+              disabled={!apiBaseUrl}
+              title={apiBaseUrl ? buildApiUrl(apiBaseUrl, "/docs") : undefined}
+              data-guide="settings-open-swagger"
+            >
+              {t("settings.swagger.action")}
             </button>
           </SettingsRow>
         </div>

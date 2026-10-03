@@ -6,7 +6,13 @@
       "display": "화면",
       "sound": "사운드",
       "system": "시스템",
-      "about": "정보"
+      "about": "정보",
+      "developer": "개발자 설정"
+    },
+    "swagger": {
+      "label": "Swagger (API 문서)",
+      "description": "기본 브라우저에서 현재 연결된 백엔드 API를 표시합니다",
+      "action": "브라우저에서 열기"
     },
     "fontSize": {
       "label": "글자 크기",

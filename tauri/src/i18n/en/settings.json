@@ -6,7 +6,13 @@
       "display": "Display",
       "sound": "Sound",
       "system": "System",
-      "about": "About"
+      "about": "About",
+      "developer": "Developer Settings"
+    },
+    "swagger": {
+      "label": "Swagger (API Documentation)",
+      "description": "View the connected backend API in your default browser",
+      "action": "Open in Browser"
     },
     "fontSize": {
       "label": "Font Size",

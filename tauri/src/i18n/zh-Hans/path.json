@@ -23,6 +23,7 @@
     "saturationRatio": "{{label}}：饱和水平的{{percent}}%",
     "maxSpeed": "限速",
     "trafficSettings": "交通与速度设置",
+    "travelDirection": "通行方向",
     "citySpeedLimit": "城市限速",
     "roadSpeedLimit": "本道路限速",
     "roadSpeedLimitUnset": "未设置",

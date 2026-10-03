@@ -1,7 +1,8 @@
 /**
  * パスの交通・速度設定セクション
  *
- * パス詳細の基本情報タブに置く、制限速度と交通の状況をまとめたセクション。
+ * パス詳細の基本情報タブに置く、通行方向・制限速度と交通の状況をまとめたセクション。
+ * - 通行方向: 線路・モノレールの方向トグル。複線一体の線路は双方向固定
  * - 制限速度・通過速度: PathSpeedLimitEditor(道路標識+都市の値+この道路の入力欄。入力は自動で反映する)
  * - 利用率・路上駐車量: 横並びのドーナツ。どちらも容量に対する使用率(逼迫度)なので congestionColor で塗る。
  *   路上駐車は台数が容量を超えうる(建物の駐車場からあふれた車が停まる)ので実数を添え、
@@ -13,11 +14,13 @@
  * 表示する項目が1つも無ければセクションごと出さない。
  */
 
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { resolveIntlLocale } from "../../utils/locale";
 import { parkingUsage } from "../../utils/parking";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import {
   PATH_TYPES_WITH_BASE_SPEED,
   PATH_TYPES_WITH_SPEED_LIMIT,
@@ -40,7 +43,10 @@ import {
   VEHICLE_MONORAIL,
   VEHICLE_TO_TRAFFIC,
   VEHICLE_TRAM,
+  STATUS_ACTIVE,
 } from "../../constants";
+import { PathDirectionButton } from "./PathDirectionButton";
+import { cycleDirection, isMultiTrackRailVariant } from "./railBuild";
 import { PathSpeedLimitEditor } from "./PathSpeedLimitEditor";
 import { VehicleIcon } from "./VehicleIcon";
 import "./PathTrafficPanel.css";
@@ -99,6 +105,29 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
   const { t, i18n } = useTranslation();
   const masterData = useMasterData();
   const locale = resolveIntlLocale(i18n.language);
+  const [directionSaving, setDirectionSaving] = useState(false);
+  const [directionError, setDirectionError] = useState<string | null>(null);
+
+  const showDirection = path.path_type === PATH_TRACK || path.path_type === PATH_MONORAIL;
+  const directionFixed = !masterData || isMultiTrackRailVariant(masterData.paths[path.path_variant]);
+
+  const changeDirection = async () => {
+    if (directionSaving || directionFixed || path.status !== STATUS_ACTIVE) return;
+    setDirectionSaving(true);
+    setDirectionError(null);
+    try {
+      const updated = await fetchApi<PathData>(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(path.path_id)), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ travel_direction: cycleDirection(path.travel_direction) }),
+      });
+      onSaved(updated);
+    } catch (err) {
+      setDirectionError(err instanceof Error ? err.message : t("common.fetchError"));
+    } finally {
+      setDirectionSaving(false);
+    }
+  };
 
   const showSpeedLimit = PATH_TYPES_WITH_SPEED_LIMIT.includes(path.path_type);
   const showUtilization = path.utilization != null && PATH_TYPES_WITH_UTILIZATION.includes(path.path_type);
@@ -123,7 +152,7 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
     .map((vehicleType) => ({ vehicleType, count: trafficCounts[String(vehicleType)] ?? 0 }));
   const maxTraffic = Math.max(0, ...trafficRows.map((row) => row.count));
 
-  if (!showSpeedLimit && !showUtilization && !streetParking && trafficRows.length === 0) return null;
+  if (!showDirection && !showSpeedLimit && !showUtilization && !streetParking && trafficRows.length === 0) return null;
 
   const vehicleName = (vehicleType: number) =>
     t(`path.vehicles.${vehicleType}`, {
@@ -133,6 +162,16 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
   return (
     <section className="agent-detail-section path-traffic-section">
       <h3 className="agent-detail-section-title">{t("path.trafficSettings")}</h3>
+
+      {showDirection && (
+        <div className="path-traffic-direction">
+          <span className="agent-detail-label">{t("path.travelDirection")}</span>
+          <PathDirectionButton direction={path.travel_direction}
+            disabled={directionSaving || directionFixed || path.status !== STATUS_ACTIVE}
+            onClick={() => void changeDirection()} />
+        </div>
+      )}
+      {directionError && <div className="agent-detail-error" role="alert">{directionError}</div>}
 
       {showSpeedLimit && (
         <PathSpeedLimitEditor

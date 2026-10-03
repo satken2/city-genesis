@@ -23,6 +23,7 @@
     "saturationRatio": "{{label}} : {{percent}} % du niveau de saturation",
     "maxSpeed": "Limitation de vitesse",
     "trafficSettings": "Trafic et vitesse",
+    "travelDirection": "Sens de circulation",
     "citySpeedLimit": "Limitation de la ville",
     "roadSpeedLimit": "Limitation de cette voie",
     "roadSpeedLimitUnset": "Non défini",

@@ -6,7 +6,13 @@
       "display": "Affichage",
       "sound": "Son",
       "system": "Système",
-      "about": "Informations"
+      "about": "Informations",
+      "developer": "Paramètres pour les développeurs"
+    },
+    "swagger": {
+      "label": "Swagger (documentation API)",
+      "description": "Affiche l’API du serveur connecté dans votre navigateur par défaut",
+      "action": "Ouvrir dans le navigateur"
     },
     "fontSize": {
       "label": "Taille du texte",

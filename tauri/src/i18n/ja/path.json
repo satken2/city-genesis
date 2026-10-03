@@ -23,6 +23,7 @@
     "saturationRatio": "{{label}}：飽和水準の{{percent}}%",
     "maxSpeed": "制限速度",
     "trafficSettings": "交通・速度設定",
+    "travelDirection": "通行方向",
     "citySpeedLimit": "都市の制限速度",
     "roadSpeedLimit": "この道路の制限速度",
     "roadSpeedLimitUnset": "未設定",

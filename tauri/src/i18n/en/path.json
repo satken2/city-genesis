@@ -23,6 +23,7 @@
     "saturationRatio": "{{label}}: {{percent}}% of saturation level",
     "maxSpeed": "Speed Limit",
     "trafficSettings": "Traffic & Speed",
+    "travelDirection": "Travel direction",
     "citySpeedLimit": "City speed limit",
     "roadSpeedLimit": "This road's limit",
     "roadSpeedLimitUnset": "Not set",

@@ -23,6 +23,7 @@
     "saturationRatio": "{{label}}: 포화 수준의 {{percent}}%",
     "maxSpeed": "제한 속도",
     "trafficSettings": "교통·속도 설정",
+    "travelDirection": "통행 방향",
     "citySpeedLimit": "도시 제한 속도",
     "roadSpeedLimit": "이 도로의 제한 속도",
     "roadSpeedLimitUnset": "미설정",

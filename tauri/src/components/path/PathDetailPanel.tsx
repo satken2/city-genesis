@@ -10,7 +10,7 @@
  * - 基本情報タブ:
  *   - 基本情報セクション: 所属地区・地形追従・最小曲線半径・最大勾配と、
  *     耐久度・騒音・大気汚染の状態タイル(PathConditionPanel)
- *   - 交通・速度設定セクション(PathTrafficPanel): 制限速度の標識と入力欄・通過速度・
+ *   - 交通・速度設定セクション(PathTrafficPanel): 通行方向トグル・制限速度の標識と入力欄・通過速度・
  *     利用率と路上駐車量のドーナツ・車種別交通量
  * - 道路設備タブ: 街灯・柵・街路樹・配電方式
  * - 駅舎には駅情報、計画中・工事中には建設工事タブを表示する
@@ -612,6 +612,7 @@ export function PathDetailPanel({
               )}
 
               <PathTrafficPanel
+                key={pathData.path_id}
                 path={pathData}
                 apiBaseUrl={apiBaseUrl}
                 onSaved={setPathData}

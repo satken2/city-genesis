@@ -457,39 +457,6 @@
   flex-wrap: wrap;
 }
 
-.pc-track-arrow {
-  width: 28px;
-  height: 32px;
-  padding: 0;
-  border: 2px solid rgba(255, 255, 255, 0.14);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f6fbff;
-  font-size: 1.39rem;
-  line-height: 1;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.pc-track-arrow:hover:not(:disabled) {
-  background: rgba(78, 161, 255, 0.14);
-  border-color: #4ea1ff;
-}
-
-.pc-track-arrow:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* 進行方向ボタンの矢印画像(順方向=上矢印 / 逆方向=下矢印 / 両方向=両矢印) */
-.pc-track-arrow-img {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
-
 /* ---- Dev モックセクション ---- */
 .pc-dev-note {
   font-size: 0.76rem;

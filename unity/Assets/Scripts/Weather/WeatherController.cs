@@ -48,6 +48,7 @@ public sealed class WeatherController : MonoBehaviour
     private ReflectionProbe reflection;
     private WeatherPrecipitation precipitation;
 
+    private static readonly int SunScatterId = Shader.PropertyToID("_SunScatterFraction");
     private static readonly Color LowSunZenith = Hex("696E9B"), LowSunHorizon = Hex("ECA68D"), LowSunLight = Hex("FFA477"), LowSunCloud = Hex("EDB7AB");
     private static readonly Color NightZenith = Hex("05070D"), NightHorizon = Hex("0B1019"), NightCloud = Hex("0C1018");
 
@@ -117,6 +118,8 @@ public sealed class WeatherController : MonoBehaviour
         sun.shadows = LightShadows.Soft;
         sun.useColorTemperature = false;
         sunData.lightCookieSize = new Vector2(2600, 2600);
+        // 品質設定の Realtime Reflection Probes が無効だとこのプローブは使われず、
+        // シーン既定の環境反射(編集時の既定スカイボックス=青空)が天気に関係なく映る。
         var reflectionObject = new GameObject("Weather sky reflection");
         reflectionObject.transform.SetParent(transform, false);
         reflection = reflectionObject.AddComponent<ReflectionProbe>();
@@ -401,6 +404,8 @@ public sealed class WeatherController : MonoBehaviour
         sun.color = sunlight;
         sun.intensity = look.Intensity * lowSun * daylight;
         sun.shadowStrength = look.Shadow * daylight;
+        // 影の濃さ=日光のうち点として届く割合。残りは雲で広がった光で、水面はこれを鋭く反射しない。
+        Shader.SetGlobalFloat(SunScatterId, 1f - look.Shadow);
         sky.SetColor("_Zenith", zenith);
         sky.SetColor("_Horizon", horizon);
         sky.SetColor("_SunColor", sunlight * (1f - darkness));
@@ -588,6 +593,7 @@ public sealed class WeatherController : MonoBehaviour
         private readonly bool fog = RenderSettings.fog;
         private readonly FogMode fogMode = RenderSettings.fogMode;
         private readonly float fogStart = RenderSettings.fogStartDistance, fogEnd = RenderSettings.fogEndDistance;
+        private readonly float sunScatter = Shader.GetGlobalFloat(SunScatterId);
         private readonly Quaternion rotation;
         private readonly Color color;
         private readonly float intensity, strength;
@@ -608,6 +614,7 @@ public sealed class WeatherController : MonoBehaviour
             RenderSettings.ambientProbe = ambientProbe;
             RenderSettings.fog = fog; RenderSettings.fogMode = fogMode; RenderSettings.fogColor = fogColor;
             RenderSettings.fogStartDistance = fogStart; RenderSettings.fogEndDistance = fogEnd;
+            Shader.SetGlobalFloat(SunScatterId, sunScatter);
             if (light == null) return;
             light.transform.rotation = rotation; light.color = color; light.intensity = intensity;
             light.shadowStrength = strength; light.shadows = shadows; light.cookie = cookie;
