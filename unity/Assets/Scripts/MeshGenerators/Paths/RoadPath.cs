@@ -1038,6 +1038,7 @@ public class RoadPath : IPathMeshGenerator
         }
 
         // Wall (防音壁・ガードレール)
+        var tunnels = PathTunnelParts.Ranges(spline, pathData);
         if (wallWidth > 0f)
         {
             // 壁は道路の外側 [width/2, width/2 + wallWidth] に立てる。
@@ -1046,16 +1047,21 @@ public class RoadPath : IPathMeshGenerator
             // 高速道路の本線とランプの結合区間では、間の壁と相手の路面に掛かる壁を立てない。
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
             foreach (var range in WallRanges(corridor, left: true))
-                foreach (var remaining in access.Remaining(-1, range.From, range.To))
-                    CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: remaining.x, clipTo: remaining.y);
+                foreach (var ground in PathTunnelParts.Outside(range.From, range.To, tunnels))
+                    foreach (var remaining in access.Remaining(-1, ground.From, ground.To))
+                        CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: remaining.x, clipTo: remaining.y);
             foreach (var range in WallRanges(corridor, left: false))
-                foreach (var remaining in access.Remaining(1, range.From, range.To))
-                    CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: remaining.x, clipTo: remaining.y);
+                foreach (var ground in PathTunnelParts.Outside(range.From, range.To, tunnels))
+                    foreach (var remaining in access.Remaining(1, ground.From, ground.To))
+                        CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: remaining.x, clipTo: remaining.y);
         }
         else
         {
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] wallWidth <= 0: 壁なし");
         }
+
+        PathTunnelParts.GenerateWall(container, spline, pathData, width * .5f, wallWidth, true, tunnels, WallRanges(corridor, true));
+        PathTunnelParts.GenerateWall(container, spline, pathData, width * .5f, wallWidth, false, tunnels, WallRanges(corridor, false));
 
         // 結合区間は一つの路面なので、路肩の設備を路面の中に立てない。
         RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing,

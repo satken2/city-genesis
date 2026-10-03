@@ -21,6 +21,7 @@ public static class LrtQA
         var type = asm.GetType(name);
         var component = new GameObject(name).AddComponent(type);
         type.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, component);
+        if (name == "MasterDataStore") type.GetProperty("IsInitialized").SetValue(component, true);
         return (IDictionary)type.GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(component);
     }
     public static void Run()
@@ -53,6 +54,7 @@ public static class LrtQA
                 ModelDimensions(id);
                 foreach (float slope in new[] { 0f, .08f, -.08f }) Road(id, slope, false);
                 Road(id, 0, true);
+                Underground(id);
             }
             foreach (int a in new[] { 222, 242, 303, 431 })
                 foreach (int b in new[] { 222, 242, 303, 431 }) { Connections(a, b); Connections(a, b, true); }
@@ -76,6 +78,23 @@ public static class LrtQA
             Debug.LogException(e); EditorApplication.Exit(1);
         }
     }
+    static void Underground(int id)
+    {
+        var path = PathData(id);
+        var points = new List<Vector3> { new Vector3(0, -20, 0), new Vector3(0, -20, 80) };
+        var generator = asm.GetType(id == 431 ? "TrackPath" : "RoadPath");
+        var setback = Activator.CreateInstance(asm.GetType("SidewalkSetback"));
+        var result = generator.GetMethod("Generate").Invoke(Activator.CreateInstance(generator), new[] { path, points, setback, setback });
+        var go = (GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
+        Check(go.GetComponentsInChildren<MeshFilter>().Count(f => f.name.EndsWith("/wall_underground")) == 2, "underground LRT walls " + id);
+        Check(!go.GetComponentsInChildren<Transform>().Any(t => t.name == "LrtPole" || t.name.StartsWith("pole(") || t.name.StartsWith("beam(")), "underground LRT has no poles " + id);
+        string track = id == 431 ? "/track" : "/lrt_track", wire = id == 431 ? "/wire" : "/lrt_wire";
+        Check(go.GetComponentsInChildren<MeshFilter>().Count(f => f.name.EndsWith(track)) == 2
+            && go.GetComponentsInChildren<MeshFilter>().Count(f => f.name.EndsWith(wire)) == 2, "underground LRT keeps tracks and wires " + id);
+        UnityEngine.Object.DestroyImmediate(go);
+        UnityEngine.Object.DestroyImmediate((Mesh)result.GetType().GetProperty("Mesh").GetValue(result));
+    }
+
     // 仕様値。303・431とも軌道中心は±1.75m(間隔3.5m)、LRT車体の半幅は1.27m。
     const float MallOffset = 1.75f, TramHalfWidth = 1.27f;
     static float ExpectedOffset(int id) => id == 222 ? 2.5625f : id == 242 ? 2.541667f : MallOffset;
@@ -90,12 +109,14 @@ public static class LrtQA
         Set(m, "side_width", id < 300 ? .5f : 0f);
         Set(m, "center_width", id < 300 ? 1f : 0f);
         Set(m, "wire_spacing", 30f); Set(m, "follow_terrain", false);
+        Set(m, "height", 7f);
         masters[id] = m;
     }
     static object PathData(int id, int key = 1, bool start = true)
     {
         var p = Activator.CreateInstance(asm.GetType("GeneratedModels.PathSummary"));
         Set(p, "path_id", key); Set(p, "path_variant", id);
+        Set(p, "status", 1);
         Set(p, "path_type", id < 300 ? 1 : id == 303 ? 3 : 4);
         Set(p, "start_node_id", start ? 1 : key + 10); Set(p, "end_node_id", start ? key + 10 : 1);
         Set(p, "start_point", new List<object> { 0f, 0f, start ? 0f : -50f });
@@ -354,7 +375,7 @@ public static class LrtQA
         }
         foreach (string f in fields) Set(path, f, 0);
         var empty = new GameObject("NoEquipment");
-        asm.GetType("RoadEquipmentGenerator").GetMethod("Generate").Invoke(null, new object[] { empty, null, path, width, 0f, 24f, null });
+        asm.GetType("RoadEquipmentGenerator").GetMethod("Generate").Invoke(null, new object[] { empty, null, path, width, 0f, 24f, null, null });
         Check(empty.transform.childCount == 0, "all equipment disabled " + id);
         UnityEngine.Object.DestroyImmediate(empty);
     }
@@ -383,7 +404,15 @@ public static class LrtQA
         // デッキ長は両数×車長+両端1m。独立プロジェクトには車種表が無いので、LRT(1003→14)とバス(1→10)を差し込む。
         var types = asm.GetType("VehicleModelConfig").GetField("transitTypes", BindingFlags.Static | BindingFlags.NonPublic);
         object saved = types.GetValue(null);
-        types.SetValue(null, new Dictionary<string, int> { { "1", 10 }, { "1003", 14 } });
+        var definitions = (IDictionary)Activator.CreateInstance(types.FieldType);
+        var definitionType = types.FieldType.GetGenericArguments()[1];
+        foreach (var entry in new[] { (1, 10), (1003, 14) })
+        {
+            var definition = Activator.CreateInstance(definitionType, true);
+            Set(definition, "vehicle_type", entry.Item2);
+            definitions[entry.Item1] = definition;
+        }
+        types.SetValue(null, definitions);
         try
         {
             var summaryType = asm.GetType("GeneratedModels.TransitLineSummary");

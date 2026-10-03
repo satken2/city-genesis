@@ -125,6 +125,7 @@ public static class LrtRoadParts
             double percent = spline.Travel(0, distance, Spline.Direction.Forward);
             if (PathDrawContext.HasDetailRange && (percent < PathDrawContext.DetailFrom || percent > PathDrawContext.DetailTo)) continue;
             var sample = spline.Evaluate(percent);
+            if (PathTunnelParts.IsTunnel(path, sample.position)) continue;
             Vector3 forward = Vector3.ProjectOnPlane(sample.forward, Vector3.up);
             if (forward.sqrMagnitude < 1e-6f) continue;
             var placed = Object.Instantiate(pole, parent.transform);

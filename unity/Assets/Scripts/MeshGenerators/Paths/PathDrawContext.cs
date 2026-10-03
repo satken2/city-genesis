@@ -94,7 +94,7 @@ public static class PathDrawContext
 
     /// <summary>
     /// 接写LODなら `{prefab}_close` を優先して解決し、無ければ無印を返す。
-    /// 無印すら無ければ null。Close のパーツは bbox・原点が無印と一致する規約なので差し替えても配置は変わらない。
+    /// 無印も無い地下壁は既定形状を使い、その他は null。Close のパーツは bbox・原点が無印と一致する規約。
     /// </summary>
     public static GameObject ResolvePrefab(string prefabName, string fallbackPrefabName, out string resolvedName)
     {
@@ -131,7 +131,7 @@ public static class PathDrawContext
                 return prefab;
             }
         }
-        return null;
+        return PathTunnelParts.ResolveDefaultWall(prefabName);
     }
 
     /// <summary>

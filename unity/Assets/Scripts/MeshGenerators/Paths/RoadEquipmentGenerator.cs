@@ -33,6 +33,10 @@ public static class RoadEquipmentGenerator
         }
         float length = spline.CalculateLength();
         if (length <= EndClearance * 2f) return;
+        // 屋外の照明・植栽・配線はトンネル内に置かない。保存された設備選択は地上区間で使う。
+        var outdoorClear = keepClear != null ? new List<Vector2>(keepClear) : new List<Vector2>();
+        foreach (var tunnel in PathTunnelParts.Ranges(spline, path))
+            outdoorClear.Add(new Vector2((float)tunnel.From * length, (float)tunnel.To * length));
         var occupied = new Dictionary<Vector2Int, List<Vector3>>();
         float edge = width * 0.5f;
         float offset = sidewalkWidth > 0f ? edge - sidewalkWidth * 0.5f : Mathf.Max(0f, edge - 0.3f);
@@ -62,7 +66,7 @@ public static class RoadEquipmentGenerator
         {
             bool overhead = path.utility_mode == Constants.PATH_UTILITY_OVERHEAD;
             Vector3? previous = null;
-            foreach (float distance in Distances(length, overhead ? PoleSpacing : BoxSpacing, 0f, keepClear))
+            foreach (float distance in Distances(length, overhead ? PoleSpacing : BoxSpacing, 0f, outdoorClear))
             {
                 if (access?.Blocks(1, distance, 1f) == true) continue;
                 Pose pose = Sample(spline, distance, offset, surface);
@@ -88,7 +92,7 @@ public static class RoadEquipmentGenerator
         {
             // 狭い生活道路は始点から終点へ向かう右側だけで照明をまかなう。
             int firstSide = centralMall || path.path_variant == 211 || path.path_variant == 212 ? 1 : -1;
-            foreach (float distance in Distances(length, LampSpacing, LampSpacing * 0.25f, keepClear))
+            foreach (float distance in Distances(length, LampSpacing, LampSpacing * 0.25f, outdoorClear))
                 for (int side = firstSide; side <= 1; side += 2)
                 {
                     if (access?.Blocks(side, distance, 1f) == true) continue;
@@ -108,14 +112,14 @@ public static class RoadEquipmentGenerator
             if (centerTree != null && centerWidth > 0f && length > centerWidth + EndClearance * 2f)
             {
                 float centerSurface = SurfaceHeight(path, "center");
-                foreach (float distance in Distances(length, spacing, spacing * .5f, keepClear))
+                foreach (float distance in Distances(length, spacing, spacing * .5f, outdoorClear))
                 {
                     if (distance < centerWidth * .5f + EndClearance || distance > length - centerWidth * .5f - EndClearance) continue;
                     Pose pose = Sample(spline, distance, 0f, centerSurface);
                     if (Reserve(occupied, pose.position, 3f)) PlacePrefab(parent, centerTree, pose);
                 }
             }
-            foreach (float distance in Distances(length, spacing, spacing * 0.5f, keepClear))
+            foreach (float distance in Distances(length, spacing, spacing * 0.5f, outdoorClear))
                 for (int side = centralMall ? 1 : -1; side <= 1; side += 2)
                 {
                     if (access?.Blocks(side, distance, 1.5f) == true) continue;

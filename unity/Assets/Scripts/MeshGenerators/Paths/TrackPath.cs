@@ -662,7 +662,7 @@ public class TrackPath : IPathMeshGenerator
             }
             float lrtPoleOffset = lrtPlatformZones.Count > 0
                 ? LrtRoadParts.PlatformOuterOffset(pathData) + LrtRoadParts.PLATFORM_POLE_CLEARANCE : 0f;
-            GeneratePolesAndBeams(container, spline, wireSpacing.Value, width, variantBase, typeBase, corridor, platformLeft, platformRight, lrtPlatformZones, lrtPoleOffset);
+            GeneratePolesAndBeams(container, spline, wireSpacing.Value, width, variantBase, typeBase, corridor, platformLeft, platformRight, lrtPlatformZones, lrtPoleOffset, TunnelSectionUtil.GetClearanceHeight(pathData.path_variant));
         }
         else
         {
@@ -700,6 +700,16 @@ public class TrackPath : IPathMeshGenerator
                 });
             }
         }
+
+        // 地下壁は高欄の幅・ホーム側の有無とは独立し、ホームを含む通行空間の外へ置く。
+        var tunnels = PathTunnelParts.Ranges(spline, pathData);
+        float lrtOuter = lrtPlatforms != null && lrtPlatforms.Count > 0 ? LrtRoadParts.PlatformOuterOffset(pathData) : 0f;
+        WithWarp(lateral != null ? new PartWarp { Shift = percent => -lateral.OuterShiftAtPercent(percent) } : null,
+            () => PathTunnelParts.GenerateWall(container, spline, pathData, Mathf.Max(width * .5f + platformLeft, lrtOuter),
+                wallWidth, true, tunnels, GetWallPercentRanges(corridor, true)));
+        WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.OuterShiftAtPercent(percent) } : null,
+            () => PathTunnelParts.GenerateWall(container, spline, pathData, Mathf.Max(width * .5f + platformRight, lrtOuter),
+                wallWidth, false, tunnels, GetWallPercentRanges(corridor, false)));
 
         // 高架橋脚（道路と共通処理）。地下パスには配置しない（RoadPath側の理由コメント参照）。
         if (!constructionOnly && heightEditable && pillarSpacing.HasValue && pillarSpacing.Value > 0f
@@ -1292,7 +1302,7 @@ public class TrackPath : IPathMeshGenerator
     /// lrtPoleOffset(ホーム外縁+PLATFORM_POLE_CLEARANCE)以上離す。結合相手のLRTのホーム区間では、
     /// コリドーの張り出しが相手のホーム外縁まで広がっている(TrackAdjacency の Member.Reach)。
     /// </summary>
-    private static void GeneratePolesAndBeams(GameObject container, SplineComputer spline, float spacing, float width, string variantBase, string typeBase, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, List<Vector2> lrtPlatformZones = null, float lrtPoleOffset = 0f)
+    private static void GeneratePolesAndBeams(GameObject container, SplineComputer spline, float spacing, float width, string variantBase, string typeBase, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, List<Vector2> lrtPlatformZones = null, float lrtPoleOffset = 0f, float tunnelClearance = float.PositiveInfinity)
     {
         GameObject polePrefab = LoadPrefab($"{variantBase}/pole", $"{typeBase}/pole");
         GameObject beamPrefab = LoadPrefab($"{variantBase}/beam", $"{typeBase}/beam");
@@ -1329,7 +1339,7 @@ public class TrackPath : IPathMeshGenerator
 
         while (currentPercent <= endPercent && count < maxCount)
         {
-            bool place = true;
+            bool place = !TunnelSectionUtil.IsTunnelPoint(spline.EvaluatePosition(currentPercent), tunnelClearance);
             float leftHalf = ownHalfWidth;
             float rightHalf = ownHalfWidth;
             if (corridor != null)

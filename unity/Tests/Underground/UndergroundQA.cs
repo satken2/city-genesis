@@ -251,7 +251,9 @@ public static class UndergroundQA
             var reference=Static("PathMeshFactory","GeneratePathMesh",road,new List<Vector3>{new Vector3(-70,0,-25),new Vector3(70,0,-25)},setback,setback);
             var referenceGO=(GameObject)reference.GetType().GetProperty("GeneratedObject").GetValue(reference);
             var referenceMaterials=referenceGO.GetComponentsInChildren<MeshRenderer>().SelectMany(renderer=>renderer.sharedMaterials).ToArray();
-            Check(roadMaterials.Length==referenceMaterials.Length && roadMaterials.SequenceEqual(referenceMaterials),"ground and underground roads share exactly the same materials");
+            var undergroundSurfaceMaterials=proxyRenderers.Where(renderer=>!renderer.name.EndsWith("/wall_underground")).SelectMany(renderer=>renderer.sharedMaterials).ToArray();
+            Check(undergroundSurfaceMaterials.Length==referenceMaterials.Length && undergroundSurfaceMaterials.SequenceEqual(referenceMaterials),"ground and underground road surfaces share exactly the same materials");
+            CheckTunnelParts(masters, modelCache);
             referenceGO.SetActive(false); UnityEngine.Object.Destroy(referenceGO);
             UnityEngine.Object.Destroy((Mesh)reference.GetType().GetProperty("Mesh").GetValue(reference));
             var proxyVisual=proxy.GetComponent(T("VisualModeObject"));
@@ -378,6 +380,7 @@ public static class UndergroundQA
             var completed=constructionGO.GetComponentsInChildren<Transform>().Single(t=>t.name=="CompletedSurface");
             float maxBuiltX=completed.GetComponentsInChildren<MeshRenderer>().Max(r=>r.bounds.max.x);
             Check(maxBuiltX < -25f && maxBuiltX > -40f,"underground construction builds only the completed quarter");
+            Check(completed.GetComponentsInChildren<MeshFilter>().Count(f=>f.name.EndsWith("/wall_underground"))==2,"completed tunnel construction has both walls");
             var dirtMesh=constructionGO.GetComponentsInChildren<MeshFilter>().Single(f=>f.name=="ConstructionDirt").sharedMesh;
             Check(dirtMesh.bounds.center.y < -8f,"unfinished underground soil stays at tunnel elevation");
             Set(construction,"construction_progress",75f);
@@ -461,6 +464,86 @@ public static class UndergroundQA
             EditorApplication.Exit(0);
         }
         catch(Exception error) { File.WriteAllText(report,"FAIL\n"+checks+" checks\n"+error); EditorApplication.Exit(1); }
+    }
+
+    private static void CheckTunnelParts(IDictionary masters, IDictionary modelCache)
+    {
+        var setback = Activator.CreateInstance(T("SidewalkSetback"));
+        object MakePath(int variant, int type)
+        {
+            var path = Activator.CreateInstance(T("GeneratedModels.PathSummary"));
+            Set(path,"path_id",90000+variant); Set(path,"path_variant",variant); Set(path,"path_type",type);
+            Set(path,"status",C("Constants","STATUS_ACTIVE")); Set(path,"follow_terrain",0);
+            Set(path,"start_point",new List<object>{-40d,-15d,-70d}); Set(path,"end_point",new List<object>{40d,-15d,-70d});
+            return path;
+        }
+        GameObject Generate(object path, List<Vector3> points)
+        {
+            var result = Static("PathMeshFactory","GeneratePathMesh",path,points,setback,setback);
+            var go = (GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
+            var selection = (Mesh)result.GetType().GetProperty("Mesh").GetValue(result);
+            if (selection != null) UnityEngine.Object.DestroyImmediate(selection);
+            return go;
+        }
+        var below = new List<Vector3>{new Vector3(-40,-15,-70),new Vector3(40,-15,-70)};
+        var above = new List<Vector3>{new Vector3(-40,5,-70),new Vector3(40,5,-70)};
+        MeshFilter[] Walls(GameObject go) => go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/wall_underground")).ToArray();
+        bool Outdoor(GameObject go) => go.GetComponentsInChildren<Transform>().Any(t=>t.name.StartsWith("Equipment") || t.name.StartsWith("tree("));
+
+        var road = MakePath(221,C("Constants","PATH_STREET"));
+        var roadMaster = masters[221];
+        var saved = new Dictionary<string,object>();
+        foreach (string field in new[]{"streetlight_type_allowed","street_tree_type_allowed","utility_mode_allowed","wall_width"}) saved[field]=Field(roadMaster,field);
+        try
+        {
+            foreach (string field in new[]{"streetlight_type_allowed","street_tree_type_allowed","utility_mode_allowed"}) Set(roadMaster,field,true);
+            Set(roadMaster,"wall_width",null);
+            Set(road,"streetlight_type",1); Set(road,"street_tree_type",1); Set(road,"utility_mode",1);
+            var underground = Generate(road,below);
+            var walls = Walls(underground);
+            Check(walls.Length==2,"roads without a ground wall get two underground walls");
+            Check(!Outdoor(underground),"tunnels suppress lamps, street trees, utility poles and wires");
+            Check(walls.All(f=>f.sharedMesh.vertices.All(v=>Mathf.Abs(f.transform.TransformPoint(v).z+70)>=3.98f)),"tunnel wall meshes contain no roof across the road");
+            Check(walls.All(f=>Mathf.Abs(f.GetComponent<Renderer>().bounds.max.y-(-15+3))<.1f),"default walls reach the clearance height");
+            Check(walls.All(f=>f.GetComponent<Renderer>().sharedMaterial.name=="PATH_CONCRETE"),"default walls use shared concrete");
+            UnityEngine.Object.DestroyImmediate(underground);
+            var ground = Generate(road,above);
+            Check(Walls(ground).Length==0 && Outdoor(ground),"ground keeps outdoor equipment and has no tunnel walls");
+            UnityEngine.Object.DestroyImmediate(ground);
+            var mixed = Generate(road,new List<Vector3>{new Vector3(-40,5,-70),new Vector3(0,-15,-70),new Vector3(40,-15,-70)});
+            Check(Walls(mixed).Length==2 && Outdoor(mixed),"mixed paths retain ground equipment and draw tunnel walls");
+            Check(Walls(mixed).All(f=>f.GetComponent<Renderer>().bounds.min.x>-40),"tunnel walls stop at the portal boundary");
+            UnityEngine.Object.DestroyImmediate(mixed);
+
+            var authored = GameObject.CreatePrimitive(PrimitiveType.Cube); authored.SetActive(false);
+            modelCache["Models/Paths/p221/wall"] = authored;
+            Set(roadMaster,"wall_width",.3f);
+            ground = Generate(road,above);
+            Check(ground.GetComponentsInChildren<MeshFilter>().Count(f=>f.name.EndsWith("/wall"))==2,"ground retains the regular wall model");
+            UnityEngine.Object.DestroyImmediate(ground);
+            underground = Generate(road,below);
+            Check(Walls(underground).Length==2 && !underground.GetComponentsInChildren<MeshFilter>().Any(f=>f.name.EndsWith("/wall")),"tunnel wall replaces the regular wall");
+            UnityEngine.Object.DestroyImmediate(underground);
+            modelCache.Remove("Models/Paths/p221/wall");
+            modelCache["Models/Paths/p221/wall_underground"] = authored;
+            var close = GameObject.CreatePrimitive(PrimitiveType.Cube); close.SetActive(false);
+            modelCache["Models/Paths/p221/wall_underground_close"] = close;
+            object[] resolve = {"Models/Paths/p221/wall_underground","Models/Paths/p1/wall_underground",null};
+            Check(Static("PathDrawContext","ResolvePrefab",resolve)==authored,"authored underground wall overrides the default");
+            Static("PathDrawContext","Begin",Enum.Parse(T("DrawLod"),"Close"),0d,1d);
+            try { Check(Static("PathDrawContext","ResolvePrefab",resolve)==close,"close underground wall uses the existing resolution order"); }
+            finally { Static("PathDrawContext","End"); }
+            modelCache.Remove("Models/Paths/p221/wall_underground"); modelCache.Remove("Models/Paths/p221/wall_underground_close");
+            UnityEngine.Object.DestroyImmediate(authored); UnityEngine.Object.DestroyImmediate(close);
+        }
+        finally { foreach (var field in saved) Set(roadMaster,field.Key,field.Value); }
+
+        var station = Generate(MakePath(461,C("Constants","PATH_TRACK")),below);
+        Check(Walls(station).Length==2,"underground stations get walls on both sides");
+        Check(Walls(station).Any(f=>Mathf.Abs(f.GetComponent<Renderer>().bounds.center.z+70)>5.4f),"station walls sit outside the platform");
+        Check(!station.GetComponentsInChildren<Transform>().Any(t=>t.name.StartsWith("pole(") || t.name.StartsWith("beam(")),"underground railway has no poles or beams");
+        Check(station.GetComponentsInChildren<MeshFilter>().Any(f=>f.name.EndsWith("/wire")),"underground railway retains its catenary");
+        UnityEngine.Object.DestroyImmediate(station);
     }
 
     private static void BuildExterior(List<CombineInstance> parts, List<Material> materials, List<Mesh> temporary)

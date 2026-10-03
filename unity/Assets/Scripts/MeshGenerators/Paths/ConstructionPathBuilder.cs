@@ -190,13 +190,17 @@ public static class ConstructionPathBuilder
                             side * (width - sidewalk) * .5f, RoadPartHeights.SIDEWALK_ABOVE_SPLINE,
                             mirrorX: side > 0, fallbackPrefabName: type + "/sidewalk");
                 }
+                var tunnels = PathTunnelParts.Ranges(roadSpline, path);
                 if (wallWidth > 0f)
                 {
                     for (int side = -1; side <= 1; side += 2)
-                        RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/wall", wallWidth,
-                            side * (width + wallWidth) * .5f, RoadPartHeights.WALL_ABOVE_SPLINE,
-                            mirrorX: side < 0, fallbackPrefabName: type + "/wall");
+                        foreach (var range in PathTunnelParts.Outside(0, 1, tunnels))
+                            RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/wall", wallWidth,
+                                side * (width + wallWidth) * .5f, RoadPartHeights.WALL_ABOVE_SPLINE,
+                                mirrorX: side < 0, fallbackPrefabName: type + "/wall", clipFrom: range.From, clipTo: range.To);
                 }
+                PathTunnelParts.GenerateWall(complete, roadSpline, path, width * .5f, wallWidth, true, tunnels);
+                PathTunnelParts.GenerateWall(complete, roadSpline, path, width * .5f, wallWidth, false, tunnels);
                 if (body == null) RoadPath.CreateFallbackRoadBody(complete, roadSpline, width);
             }
             var collision = RoadPath.BuildColliderMeshFromSpline(roadSpline, width);
