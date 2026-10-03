@@ -295,8 +295,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     /// </summary>
     private void UpdateVisuals(int? modeOverride = null)
     {
-        bool surfaceObject = (objectType == InputObjectType.BUILDING || objectType == InputObjectType.PATH)
-            && GetComponent<UndergroundPathMarker>() == null;
+        bool surfaceObject = objectType == InputObjectType.BUILDING || objectType == InputObjectType.PATH;
         if (surfaceObject && UndergroundView.IsActive && undergroundGhost == null)
             undergroundGhost = gameObject.AddComponent<UndergroundGhostObject>();
         undergroundGhost?.RestoreMaterials();
@@ -685,7 +684,8 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         IsVisualVisible = enabled;
         foreach (var info in targetRenderers)
         {
-            if (info.renderer != null) info.renderer.enabled = enabled;
+            if (info.renderer != null)
+                info.renderer.enabled = enabled && (UndergroundView.IsActive || info.renderer.GetComponentInParent<PathSection>()?.IsUnderground != true);
         }
     }
 

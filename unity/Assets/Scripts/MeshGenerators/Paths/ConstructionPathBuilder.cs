@@ -70,14 +70,30 @@ public static class ConstructionPathBuilder
     /// <summary>遠景はパーツを読み込まず、土と施工済み面の帯だけで進捗を示す。</summary>
     public static void GenerateFar(GameObject root, PathSummary path, List<Vector3> points, float width, Material surface)
     {
-        bool elevated = IsElevated(path, points, false);
+        float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
+        bool underground = TunnelSectionUtil.IsUndergroundPath(path)
+            || TunnelSectionUtil.HasTunnelSection(points, clearance, PathManager.GetPathFollowTerrain(path));
+        bool elevated = IsElevated(path, points, underground);
         float built = elevated ? DeckProgress(Progress(path)) : Progress(path);
         var dirtLine = elevated ? new List<Vector3>() : PathDrawContext.SlicePolylineByFraction(points, built, 1);
-        AddMesh(root, "ConstructionDirt", ConstructionMeshUtil.BuildDirtStripMesh(dirtLine,
-            width + LocalConstants.CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH), RoadPath.GetOrCreateRoadMaterialByName("ConstructionPathDirt"));
-        AddMesh(root, "CompletedSurface", PathMeshFactory.BuildStripMesh(
-            PathDrawContext.SlicePolylineByFraction(points, 0, built), width), surface);
+        foreach (var section in DrawSections(dirtLine, path, underground))
+        {
+            var go = AddMesh(root, "ConstructionDirt", ConstructionMeshUtil.BuildDirtStripMesh(section.Points,
+                width + LocalConstants.CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH, !section.IsUnderground), RoadPath.GetOrCreateRoadMaterialByName("ConstructionPathDirt"));
+            if (go != null) go.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
+        }
+        foreach (var section in DrawSections(PathDrawContext.SlicePolylineByFraction(points, 0, built), path, underground))
+        {
+            var go = AddMesh(root, "CompletedSurface", PathMeshFactory.BuildStripMesh(section.Points, width), surface);
+            if (go != null) go.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
+        }
     }
+
+    private static List<TunnelSectionUtil.DrawSection> DrawSections(List<Vector3> points, PathSummary path, bool underground)
+        => points.Count < 2 ? new List<TunnelSectionUtil.DrawSection>() : underground
+            ? TunnelSectionUtil.GetDrawSections(points, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
+                PathManager.GetPathFollowTerrain(path), UndergroundView.IsActive)
+            : new List<TunnelSectionUtil.DrawSection> { new TunnelSectionUtil.DrawSection(points, false) };
 
     public static PathMeshResult Generate(PathSummary path, List<Vector3> points, bool underground,
         bool followTerrain, out List<TunnelSectionUtil.PortalInfo> portals)
@@ -123,20 +139,16 @@ public static class ConstructionPathBuilder
         }
 
         float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
-        List<List<Vector3>> Runs(List<Vector3> line, List<TunnelSectionUtil.PortalInfo> destinations)
-            => line.Count < 2 ? new List<List<Vector3>>() : underground
-                ? TunnelSectionUtil.SplitDrawableRuns(line, clearance, destinations, followTerrain)
-                : new List<List<Vector3>> { line };
-        if (underground) Runs(points, portals);
-        var completeRuns = Runs(PathDrawContext.SlicePolylineByFraction(points, 0, built), new List<TunnelSectionUtil.PortalInfo>());
+        if (underground) TunnelSectionUtil.SplitDrawableRuns(points, clearance, portals, followTerrain);
+        var completeRuns = DrawSections(PathDrawContext.SlicePolylineByFraction(points, 0, built), path, underground);
         if (elevated && singleSpan)
         {
             // 一体の桁モデルを複数スパンへ伸ばすと中間アンカーの折れ角を跨いでしまう。
             completeRuns.Clear();
             for (int i = 1; i < deckBoundaries.Count && deckBoundaries[i] <= built + .00001f; i++)
-                completeRuns.Add(PathDrawContext.SlicePolylineByFraction(points, deckBoundaries[i - 1], deckBoundaries[i]));
+                completeRuns.Add(new TunnelSectionUtil.DrawSection(PathDrawContext.SlicePolylineByFraction(points, deckBoundaries[i - 1], deckBoundaries[i]), false));
         }
-        var dirtRuns = elevated ? new List<List<Vector3>>() : Runs(PathDrawContext.SlicePolylineByFraction(points, built, 1), new List<TunnelSectionUtil.PortalInfo>());
+        var dirtRuns = elevated ? new List<TunnelSectionUtil.DrawSection>() : DrawSections(PathDrawContext.SlicePolylineByFraction(points, built, 1), path, underground);
         var colliderParts = new List<Mesh>();
         // 橋脚がまだ無い段階でも選択できるよう、設計面の当たり判定だけを保持する。
         if (elevated)
@@ -146,16 +158,19 @@ public static class ConstructionPathBuilder
         }
         Material dirt = RoadPath.GetOrCreateRoadMaterialByName("ConstructionPathDirt");
         if (dirt == null) dirt = RoadPath.GetOrCreateRoadMaterial(BuildingMeshBuilder.GetConstructionDirtMaterial());
-        foreach (var run in dirtRuns)
+        foreach (var section in dirtRuns)
         {
-            Mesh mesh = ConstructionMeshUtil.BuildDirtStripMesh(run, width + LocalConstants.CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH);
-            AddMesh(root, "ConstructionDirt", mesh, dirt);
+            Mesh mesh = ConstructionMeshUtil.BuildDirtStripMesh(section.Points, width + LocalConstants.CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH, !section.IsUnderground);
+            var go = AddMesh(root, "ConstructionDirt", mesh, dirt);
+            if (go != null) go.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
             if (mesh != null) colliderParts.Add(mesh);
         }
-        foreach (var run in completeRuns)
+        foreach (var section in completeRuns)
         {
+            var run = section.Points;
             var complete = new GameObject("CompletedSurface");
             complete.transform.SetParent(root.transform, false);
+            complete.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
             var roadSpline = RoadPath.BuildSpline(complete, run, false);
             bool track = PathMeshFactory.GetModelType(path) == "track";
             if (track)
@@ -205,14 +220,15 @@ public static class ConstructionPathBuilder
         return new PathMeshResult(collider, true, root);
     }
 
-    private static void AddMesh(GameObject root, string name, Mesh mesh, Material material)
+    private static GameObject AddMesh(GameObject root, string name, Mesh mesh, Material material)
     {
-        if (mesh == null) return;
+        if (mesh == null) return null;
         var go = new GameObject(name);
         go.transform.SetParent(root.transform, false);
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
         go.AddComponent<MeshRenderer>().sharedMaterial = material;
         go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
+        return go;
     }
 
     private static void PlaceVehicles(GameObject root, List<Vector3> points, float width, float front,
@@ -251,7 +267,8 @@ public static class ConstructionPathBuilder
             if (forward.sqrMagnitude < .0001f) continue;
             Quaternion rotation = Quaternion.LookRotation(forward);
             Vector3 position = sample[0];
-            if (Utils.GetGroundHeight(position) - position.y > tunnelClearance) continue;
+            bool inTunnel = TunnelSectionUtil.IsTunnelPoint(position, tunnelClearance);
+            if (inTunnel && !UndergroundView.IsActive) continue;
             if (onDeck)
             {
                 position += Vector3.up * RoadPartHeights.BODY_ABOVE_SPLINE - rotation * Vector3.up * bounds.min.y;
@@ -259,7 +276,7 @@ public static class ConstructionPathBuilder
             }
             else
             {
-                position.y = Utils.GetGroundHeight(position) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+                position.y = inTunnel ? sample[0].y : Utils.GetGroundHeight(position) + RoadPartHeights.ROAD_SPLINE_OFFSET;
                 if (!elevated && distance >= front * length)
                     position.y += LocalConstants.CONSTRUCTION_DIRT_THICKNESS + ConstructionMeshUtil.DirtNoise(position.x, position.z) * LocalConstants.CONSTRUCTION_DIRT_BUMP_AMPLITUDE;
                 else if (!elevated) position.y = sample[0].y + RoadPartHeights.BODY_ABOVE_SPLINE;
@@ -267,6 +284,7 @@ public static class ConstructionPathBuilder
             var vehicle = UnityEngine.Object.Instantiate(prefab, root.transform);
             vehicle.name = models[i];
             vehicle.transform.SetPositionAndRotation(position, rotation);
+            vehicle.AddComponent<PathSection>().IsUnderground = inTunnel;
             foreach (var renderer in vehicle.GetComponentsInChildren<MeshRenderer>())
             {
                 var materials = renderer.sharedMaterials;

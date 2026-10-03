@@ -20,7 +20,7 @@ foreach ($folder in @('Resources/Shaders','Shaders')) {
     Copy-Item -Path "$unityRoot/Assets/$folder/*" -Destination "$qaRoot/Assets/$folder" -Recurse -Force
 }
 Copy-Item -Path "$unityRoot/Assets/Resources/*.mat", "$unityRoot/Assets/Resources/*.mat.meta" -Destination "$qaRoot/Assets/Resources" -Force
-foreach ($type in @('p1','p4','p221','p405')) {
+foreach ($type in @('p1','p4','p221','p405','p461')) {
     foreach ($folder in @("Models/Paths/$type")) {
         if (Test-Path -LiteralPath "$unityRoot/Assets/$folder") {
             New-Item -ItemType Directory -Path "$qaRoot/Assets/$folder" -Force | Out-Null

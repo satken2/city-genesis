@@ -37,7 +37,6 @@ public partial class PathManager : BaseApiDataManager
     private void InvalidateTerrainFollowPath(PathSummary path)
     {
         if (path == null) return;
-        QueueUndergroundPath(path.path_id);
         pathLabelPositions.Remove(path.path_id);
         anchorPolylineCache.Remove(path.path_id);
         if (terrainFollowCompletedPaths.Remove(path.path_id))
@@ -61,7 +60,15 @@ public partial class PathManager : BaseApiDataManager
     {
         geometryRevisions.TryGetValue(path.path_id, out int revision);
         if (invalidate) geometryRevisions[path.path_id] = ++revision;
-        return path.path_id + ":" + path.version + ":" + path.status + ":" + revision + ":" + lod + ":" + ConstructionPathBuilder.Progress(path);
+        return path.path_id + ":" + path.version + ":" + path.status + ":" + revision + ":" + lod + ":" + ConstructionPathBuilder.Progress(path) + ":" + UndergroundView.IsActive;
+    }
+
+    private void OnUndergroundChanged()
+    {
+        // 表示区間が変わるパスだけを既存キューへ渡す。範囲外のパスは通常の再ロード時に生成する。
+        foreach (var path in pathDataCache.Values)
+            if (TunnelSectionUtil.IsUndergroundPath(path) || !GetPathFollowTerrain(path))
+                EnqueueTerrainFollowPath(path.path_id, pathBuildSerialCounter, TerrainFollowQueueReason.Other);
     }
 
     private bool RestorePathLod(PathSummary path, string key, DrawLod lod, bool updateIntersections)
@@ -441,7 +448,7 @@ public partial class PathManager : BaseApiDataManager
 
     private void Awake()
     {
-        InitializeUnderground();
+        UndergroundView.Changed += OnUndergroundChanged;
         if (GetComponent<PathSpeedLimitOverlay>() == null) gameObject.AddComponent<PathSpeedLimitOverlay>();
         nodeGrid = new SpatialHash<NodeData>(gridCellSize);
         provisionalEndGrid = new SpatialHash<ProvisionalTrackEnd>(gridCellSize);
@@ -489,7 +496,7 @@ public partial class PathManager : BaseApiDataManager
 
     private void OnDestroy()
     {
-        DisposeUnderground();
+        UndergroundView.Changed -= OnUndergroundChanged;
         BuildingRoadAccessIndex.Changed -= OnBuildingRoadAccessChanged;
         if (RoadMarkingRules.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
         {
@@ -1350,7 +1357,6 @@ public partial class PathManager : BaseApiDataManager
 
     public override void ClearAllCells()
     {
-        ClearUndergroundPaths();
         GetComponent<PathSpeedLimitOverlay>()?.Clear();
         RoadMarkingAtlas.Clear();
         ClearTerrainFollowProgress();
@@ -2439,12 +2445,12 @@ public partial class PathManager : BaseApiDataManager
         SavePathToCache(path);
         EnsureEndIntersectionsVisible(path);
 
-        // 地下パス、および丘を貫く非追従トンネルパスは遠景の簡易表示を行わない（非表示）。
+        // 通常表示では地下パス、および丘を貫く非追従トンネルパスの遠景を非表示にする。
         // 始点・終点を結ぶ直線ストリップは埋設区間を無視して地表を横切ってしまい、
         // トンネルなのに黒帯が地面に描かれてしまうため。遠距離では坑口・開削区間も
         // 視認できないので、非表示で問題ない。谷を渡るだけの非追従橋は直線ストリップを描く。
         // 既存オブジェクト（Near詳細）はプーリングの慣習に合わせて破棄せず非アクティブにして残す。
-        if (TunnelSectionUtil.IsUndergroundPath(path) || FarPathHasHiddenTunnel(path))
+        if (!UndergroundView.IsActive && (TunnelSectionUtil.IsUndergroundPath(path) || FarPathHasHiddenTunnel(path)))
         {
             if (pathObjectsCache.TryGetValue(path.path_id, out GameObject existingUnderground)
                 && existingUnderground != null && existingUnderground.activeSelf)
@@ -2547,12 +2553,32 @@ public partial class PathManager : BaseApiDataManager
             if (pathMaster != null) width = pathMaster.width;
         }
 
+        bool hasTunnel = UsesTunnelMesh(path, points);
+        if (hasTunnel) points = DecimatePolyline(CalculatePathPoints(path), FAR_STRIP_SAMPLE_INTERVAL);
         bool constructing = status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none";
         bool powerLine = PowerLinePath.Handles(path);
         bool farPlatform = !constructing && FarPlatformPath.Handles(path);
-        Mesh mesh = constructing || powerLine || farPlatform ? null : PathMeshFactory.BuildStripMesh(points, width);
+        Mesh mesh = constructing || powerLine || farPlatform || hasTunnel ? null : PathMeshFactory.BuildStripMesh(points, width);
         if (powerLine) PowerLinePath.GenerateInto(pathGO, path, CalculatePathPoints(path), DrawLod.Far);
         else if (constructing) ConstructionPathBuilder.GenerateFar(pathGO, path, points, width, GetRoadMaterial());
+        else if (hasTunnel)
+        {
+            foreach (var section in TunnelSectionUtil.GetDrawSections(points, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
+                GetPathFollowTerrain(path), UndergroundView.IsActive))
+            {
+                var sectionGO = new GameObject("PathSection");
+                sectionGO.transform.SetParent(pathGO.transform, false);
+                sectionGO.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
+                if (farPlatform) FarPlatformPath.GenerateInto(sectionGO, path, section.Points);
+                else
+                {
+                    Mesh strip = PathMeshFactory.BuildStripMesh(section.Points, width);
+                    sectionGO.AddComponent<MeshFilter>().sharedMesh = strip;
+                    sectionGO.AddComponent<MeshRenderer>().sharedMaterial = GetFarRoadDepthMaterial();
+                    sectionGO.AddComponent<RenderCacheIdentity>().mesh = strip;
+                }
+            }
+        }
         else if (farPlatform) FarPlatformPath.GenerateInto(pathGO, path, points);
         if (mesh != null)
         {
@@ -2571,6 +2597,7 @@ public partial class PathManager : BaseApiDataManager
         stats.InitFrom(path);
         var visual = pathGO.AddComponent<VisualModeObject>();
         visual.objectType = InputObjectType.PATH;
+        visual.useChildRenderers = true;
         visual.SetStatus(status);
         visual.SetFilterHidden(ObjectVisibilityFilter.IsHidden(InputObjectType.PATH, path.path_id));
 
@@ -2636,7 +2663,6 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     public void RefreshVisibilityFilter()
     {
-        RefreshUndergroundVisibility();
         foreach (var pair in pathObjectsCache)
         {
             ObjectVisibilityFilter.ApplyToObject(pair.Value, InputObjectType.PATH, pair.Key);
@@ -3650,9 +3676,8 @@ public partial class PathManager : BaseApiDataManager
 
         MeshFilter mf = pathGO.AddComponent<MeshFilter>();
 
-        // 地下パス（負の相対Yを持つ）や、実効非追従で丘に潜る区間を持つパスは、
-        // トンネル区間（深さ > クリアランス高さ）のメッシュ生成をスキップし、
-        // 描画区間ごとに分割して生成する。境界（坑口）には portal パーツを配置する。
+        // 地下区間を持つパスは表示区間ごとに同じ生成器へ渡す。
+        // 完全埋設区間は地下表示でだけ含め、境界（坑口）には portal パーツを配置する。
         // 工事中は進捗に応じた土工・橋脚・完成区間を組み立てる。
         // ただし model_type=none（公共交通の路線等、完成時も描画しないパス）は工事中も非表示のまま。
         // 描画LODと詳細区間は PathDrawContext 経由で生成器へ渡す。詳細区間はパス全長の割合なので、
@@ -3677,7 +3702,7 @@ public partial class PathManager : BaseApiDataManager
                 // トンネル区間を含むパスは描画区間分割の都合上、歩道セットバックは適用しない
                 // （地下道路の交差点エンドキャップは現状スコープ外）。
                 PathDrawContext.Begin(drawLod);
-                meshResult = GenerateUndergroundPathMesh(path, points);
+                meshResult = GenerateSectionedPathMesh(path, points);
             }
             else
             {
@@ -3782,17 +3807,17 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 地下パス（負の相対Yを持つパス）のメッシュを生成する。
+    /// 完全埋設区間を持つパスを、表示区間ごとに共通生成器で描く。
     ///
     /// 点列をトンネル判定（深さ = 地形標高 − 道路Y がクリアランス高さを超えるか）で
     /// 「描画する連続区間」に分割し、区間ごとに通常のメッシュ生成器を呼ぶ。
-    /// トンネル区間はメッシュを生成せず、描画⇔トンネルの境界（坑口）に
+    /// トンネル区間は地下表示のときだけ生成し、描画⇔トンネルの境界（坑口）に
     /// portal パーツ（Models/Paths/p{variant}/portal、なければ p{type}/portal）を配置する。
     ///
     /// 深さは1本のパス内で連続的に変化するため、開削⇔トンネルの遷移は何度でも
     /// 起こり得る（坑口は閾値を跨ぐすべての境界に配置される）。
     /// コライダーは描画区間のストリップメッシュを結合したものになる
-    /// （トンネル区間はクリック判定を持たない）。
+    /// （通常表示ではトンネル区間をクリック対象にも含めない）。
     /// </summary>
     /// <summary>
     /// パスをトンネル分割メッシュ（開削区間＋坑口、トンネル区間は非描画）で描くべきか。
@@ -3826,23 +3851,24 @@ public partial class PathManager : BaseApiDataManager
         return TunnelSectionUtil.HasTunnelSection(line, clearance, pathFollowsTerrain: false, sampleInterval: 20f);
     }
 
-    private PathMeshResult GenerateUndergroundPathMesh(PathSummary path, List<Vector3> points)
+    private PathMeshResult GenerateSectionedPathMesh(PathSummary path, List<Vector3> points)
     {
         float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
         var portals = new List<TunnelSectionUtil.PortalInfo>();
-        var runs = TunnelSectionUtil.SplitDrawableRuns(points, clearance, portals, GetPathFollowTerrain(path));
+        var sections = TunnelSectionUtil.GetDrawSections(points, clearance, GetPathFollowTerrain(path), UndergroundView.IsActive, portals);
 
-        GameObject container = new GameObject("UndergroundPath");
+        GameObject container = new GameObject("PathSections");
         var colliderCombine = new List<CombineInstance>();
 
-        foreach (var run in runs)
+        foreach (var section in sections)
         {
-            PathMeshResult runResult = PathMeshFactory.GeneratePathMesh(path, run);
+            PathMeshResult runResult = PathMeshFactory.GeneratePathMesh(path, section.Points);
             if (runResult == null) continue;
 
             if (runResult.GeneratedObject != null)
             {
                 runResult.GeneratedObject.transform.SetParent(container.transform, false);
+                runResult.GeneratedObject.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
             }
 
             if (runResult.Mesh != null)
@@ -3867,10 +3893,11 @@ public partial class PathManager : BaseApiDataManager
             colliderMesh = new Mesh();
             colliderMesh.CombineMeshes(colliderCombine.ToArray(), true, false);
             colliderMesh.RecalculateBounds();
+            foreach (var part in colliderCombine) Destroy(part.mesh);
         }
 
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD,
-            () => $"[PathManager] 地下パス {path.path_id}: 描画区間={runs.Count} 坑口={portals.Count} clearance={clearance}");
+            () => $"[PathManager] パス {path.path_id}: 描画区間={sections.Count} 坑口={portals.Count} clearance={clearance}");
 
         // 全区間がトンネルでメッシュが無い場合も、ModulesCreated=true として
         // 呼び出し側のフォールバックマテリアル適用（黒帯表示）を抑制する。
@@ -4973,7 +5000,6 @@ public partial class PathManager : BaseApiDataManager
             && untrimmedPointsCache.TryGetValue(path.path_id, out PointsEntry pointsEntry) && ReferenceEquals(pointsEntry.source, oldPath))
             pointsEntry.source = path;
         pathDataCache[path.path_id] = path;
-        if (changed) QueueUndergroundPath(path.path_id);
         AddPathToNodeIndex(path);
         IndexProvisionalTrackEnds(path);
         // 工事音の点列は新しい通過セルで地形署名を取るので、セル登録の後に同期する。
@@ -4988,7 +5014,6 @@ public partial class PathManager : BaseApiDataManager
 
     private void RemovePathFromCache(int pathId)
     {
-        RemoveUndergroundPath(pathId);
         if (pathDataCache.TryGetValue(pathId, out var path))
         {
             EnqueuePowerNeighbors(path);
@@ -5593,6 +5618,10 @@ public partial class PathManager : BaseApiDataManager
             if (!meshGO.activeSelf) meshGO.SetActive(true);
         }
 
+        var section = meshGO.GetComponent<PathSection>() ?? meshGO.AddComponent<PathSection>();
+        section.IsUnderground = TunnelSectionUtil.IsTunnelPoint(absolutePos,
+            TunnelSectionUtil.GetClearanceHeight(GetPathsConnectedToNode(nodeId)[0].path_variant));
+
         MeshFilter mf = meshGO.GetComponent<MeshFilter>();
         var owner = meshGO.GetComponent<IntersectionMeshOwner>();
         if (owner == null) owner = meshGO.AddComponent<IntersectionMeshOwner>();
@@ -6157,6 +6186,8 @@ public partial class PathManager : BaseApiDataManager
                 collider = targetGO.AddComponent<MeshCollider>();
             }
             collider.sharedMesh = mesh;
+            var info = targetGO.GetComponent<ObjectIdInfo>();
+            if (info != null) ObjectVisibilityFilter.ApplyToObject(targetGO, InputObjectType.PATH, info.id);
         }
     }
 

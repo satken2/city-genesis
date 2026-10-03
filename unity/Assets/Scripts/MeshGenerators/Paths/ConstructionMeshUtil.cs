@@ -14,9 +14,8 @@ using System.Collections.Generic;
 /// - 土の縁(幅)も低周波ノイズで左右独立に揺らし、直線的な輪郭を崩す
 /// - UVはワールドXZ座標ベースで、マテリアル側の模様が経路の伸縮で歪まない
 ///
-/// 高さは入力点のYを使わず、各点のXZ位置の地形標高 + ROAD_SPLINE_OFFSET を使う。
-/// 高架のパスでも「土は地表に盛られ、柱だけが立っている」工事現場の見た目にするため
-/// （柱の描画は RoadPath.GeneratePillars が担当し、このユーティリティの責務外）。
+/// 地上の土は地形標高 + ROAD_SPLINE_OFFSET に追従する。
+/// 完全埋設区間は followTerrain=false で設計面のYを保ち、地表へ浮き上がらせない。
 /// </summary>
 public static class ConstructionMeshUtil
 {
@@ -50,7 +49,7 @@ public static class ConstructionMeshUtil
     /// </summary>
     /// <param name="points">パスの点列（PathManager.CalculatePathPoints の出力、または描画区間分割後のrun）。Yは無視され地形標高に置き換えられる</param>
     /// <param name="width">土の基準全幅(m)。通常は「マスターの道路幅 + CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH」。実際の幅は縁ノイズで±揺れる</param>
-    public static Mesh BuildDirtStripMesh(List<Vector3> points, float width)
+    public static Mesh BuildDirtStripMesh(List<Vector3> points, float width, bool followTerrain = true)
     {
         if (points == null || points.Count < 2 || width <= 0f)
         {
@@ -69,8 +68,8 @@ public static class ConstructionMeshUtil
         float[] groundY = new float[pointCount];
         for (int i = 0; i < pointCount; i++)
         {
-            groundY[i] = Utils.GetGroundHeight(new Vector3(points[i].x, 1000f, points[i].z))
-                + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            groundY[i] = followTerrain ? Utils.GetGroundHeight(new Vector3(points[i].x, 1000f, points[i].z))
+                + RoadPartHeights.ROAD_SPLINE_OFFSET : points[i].y;
         }
 
         var vertices = new List<Vector3>(pointCount * 4);
@@ -108,10 +107,13 @@ public static class ConstructionMeshUtil
             Vector3 rightEdge = basePoint + binormal * halfWidthRight;
 
             // 横断勾配のある場所でも縁と路盤をそれぞれの地表へ追従させる。
-            leftEdge.y = Utils.GetGroundHeight(leftEdge) + .015f;
-            rightEdge.y = Utils.GetGroundHeight(rightEdge) + .015f;
-            leftCrestPos.y = Utils.GetGroundHeight(leftCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
-            rightCrestPos.y = Utils.GetGroundHeight(rightCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            if (followTerrain)
+            {
+                leftEdge.y = Utils.GetGroundHeight(leftEdge) + .015f;
+                rightEdge.y = Utils.GetGroundHeight(rightEdge) + .015f;
+                leftCrestPos.y = Utils.GetGroundHeight(leftCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+                rightCrestPos.y = Utils.GetGroundHeight(rightCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            }
 
             // 多オクターブの土ノイズ（建物の土マウンドと共通）
             float crestLeftY = thickness + DirtNoise(leftCrestPos.x, leftCrestPos.z) * bumpAmp;

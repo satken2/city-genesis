@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 
 // 本編の描画・物理・表示設定を独立プロジェクトで動かす。都市データや本編シーンには接続しない。
 [InitializeOnLoad]
@@ -29,6 +30,17 @@ public static class UndergroundQA
         return component;
     }
     private static void Check(bool condition, string message) { checks++; if (!condition) throw new Exception(message); }
+
+    private static void Drain(IEnumerator routine)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(20);
+        while (routine.MoveNext())
+        {
+            if (DateTime.UtcNow > deadline) throw new Exception("Coroutine timed out");
+            if (routine.Current is IEnumerator nested) Drain(nested);
+            else System.Threading.Thread.Yield();
+        }
+    }
 
     static UndergroundQA()
     {
@@ -102,13 +114,14 @@ public static class UndergroundQA
             }
             master.GetType().GetProperty("IsInitialized").SetValue(master, true);
             var masters = (IDictionary)Field(master, "pathMasterById");
-            foreach (int variant in new[] { 221, 405, 1103 })
+            foreach (int variant in new[] { 221, 405, 461, 1103 })
             {
                 object item = Activator.CreateInstance(masters.GetType().GetGenericArguments()[1]);
-                Set(item, "model_type", variant == 1103 ? "none" : variant == 405 ? "track" : "default");
-                Set(item, "width", variant == 1103 ? 3f : 8f);
-                Set(item, "type", variant == 1103 ? 11 : variant == 405 ? 4 : 1);
-                Set(item, "lanes", 2);
+                Set(item, "model_type", variant == 1103 ? "none" : variant == 405 || variant == 461 ? "track" : "default");
+                Set(item, "width", variant == 1103 ? 3f : variant == 461 ? 5f : 8f);
+                Set(item, "type", variant == 1103 ? 11 : variant == 405 || variant == 461 ? 4 : 1);
+                Set(item, "lanes", variant == 461 ? 1 : 2);
+                if (variant == 461) { Set(item,"platform_width",3f); Set(item,"wire_spacing",35f); }
                 Set(item, "sidewalk_width", variant == 221 ? 1.5f : 0f);
                 Set(item, "side_width", variant == 221 ? .3f : 0f);
                 Set(item, "height", 3f); Set(item, "height_editable", true); Set(item, "follow_terrain", false);
@@ -129,11 +142,18 @@ public static class UndergroundQA
             Static("Utils","InvalidateHeightCache");
             var terrainVisual = Add("VisualTerrainObject",terrainGO);
             var pathManager = Add("PathManager");
+            var managerParent = new GameObject("CellDataLoaderTransform");
+            managerParent.transform.position = new Vector3(16,32,-55);
+            pathManager.transform.SetParent(managerParent.transform, false);
+            pathManager.transform.localRotation = Quaternion.Euler(0,.13f,-.14f);
+            var scene = SceneManager.CreateScene("GameScene");
+            var pathContainer = new GameObject("Paths");
+            SceneManager.MoveGameObjectToScene(pathContainer, scene);
             var paths = (IDictionary)Field(pathManager,"pathDataCache");
             if (paths == null) throw new Exception("Path cache is null");
-            object MakePath(int id, int variant, int type, float z, float relativeY)
+            object MakePath(int id, int variant, int type, float z, float relativeY, string typeName = "GeneratedModels.PathSummary")
             {
-                object path = Activator.CreateInstance(T("GeneratedModels.PathSummary"));
+                object path = Activator.CreateInstance(T(typeName));
                 Set(path,"path_id",id); Set(path,"path_variant",variant); Set(path,"path_type",type);
                 Set(path,"status",C("Constants","STATUS_ACTIVE")); Set(path,"follow_terrain",0);
                 Set(path,"start_point",new List<object>{-70d,(double)relativeY,(double)z});
@@ -143,6 +163,26 @@ public static class UndergroundQA
             var road = MakePath(1,221,C("Constants","PATH_STREET"),-25,-14);
             var rail = MakePath(2,405,C("Constants","PATH_TRACK"),0,-20);
             var infra = MakePath(3,1103,C("Constants","PATH_ELECTRICITY"),25,-28);
+            object drawNormal = Enum.Parse(T("DrawLod"),"Normal");
+            object drawClose = Enum.Parse(T("DrawLod"),"Close");
+            GameObject Build(object path, object lod = null)
+            {
+                Call(pathManager,"CreateOrUpdatePath",path,false,true,lod ?? drawNormal,0d,1d);
+                var go = (GameObject)Call(pathManager,"GetPathObject",Field(path,"path_id"));
+                var mesh = go.GetComponent<MeshFilter>().sharedMesh;
+                if (mesh != null) Drain((IEnumerator)Call(pathManager,"SetColliderAsync",go,mesh));
+                return go;
+            }
+            void FinishUpdates()
+            {
+                var worker = (IEnumerator)Call(pathManager,"TerrainFollowRebuildWorker");
+                for (int i=0;i<200 && (int)pathManager.GetType().GetProperty("PendingTerrainRebuildCount").GetValue(pathManager)>0;i++)
+                {
+                    worker.MoveNext();
+                    if (worker.Current is IEnumerator nested) Drain(nested);
+                }
+                Check((int)pathManager.GetType().GetProperty("PendingTerrainRebuildCount").GetValue(pathManager)==0,"common rebuild queue finishes");
+            }
 
             var camera = new GameObject("Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
             camera.transform.position = new Vector3(155,120,-180); camera.transform.LookAt(new Vector3(0,-8,0));
@@ -190,10 +230,15 @@ public static class UndergroundQA
             Check(Mathf.Approximately(forestMaterial.GetFloat("_UndergroundAlpha"),.22f) && forestMaterial.GetFloat("_ZWrite")==0 && !forestMaterial.GetShaderPassEnabled("ShadowCaster"),"GPU forest fades without depth or shadow occlusion");
             var propMaterial=(Material)Static("UndergroundMaterials","ForSurface",farOriginal);
             Check(Mathf.Approximately(propMaterial.GetFloat("_Opacity"),.22f) && propMaterial.enableInstancing,"instanced props use the same opacity");
-            foreach(var path in new[]{road,rail,infra}) Call(pathManager,"BuildUndergroundPath",path);
-            var proxies = (IDictionary)Field(pathManager,"undergroundObjects");
+            foreach(var path in new[]{road,rail,infra}) Build(path);
+            var proxies = (IDictionary)Field(pathManager,"pathObjectsCache");
             Check(proxies.Count==3,"road, rail and model-less infrastructure are drawn");
             var proxy = (GameObject)proxies[1];
+            Check(proxy.transform.parent==pathContainer.transform && proxy.transform.position==Vector3.zero
+                && proxy.transform.rotation==Quaternion.identity,"manager translation and rotation do not move path geometry");
+            var expected = (List<Vector3>)Call(pathManager,"CalculatePathPoints",road,true);
+            Check(Vector3.Distance(proxy.GetComponent<MeshCollider>().bounds.center,
+                (expected[0]+expected[expected.Count-1])*.5f)<.2f,"world collider matches path coordinates");
             var proxyRenderers = proxy.GetComponentsInChildren<MeshRenderer>();
             Check(proxyRenderers.Length>1,"underground road uses real body and sidewalk models");
             Check(((GameObject)proxies[2]).GetComponentsInChildren<MeshFilter>().Any(filter=>filter.gameObject.name.EndsWith("/track")),"underground rail uses the existing track model");
@@ -250,6 +295,76 @@ public static class UndergroundQA
             var lateOriginal=latePart.GetComponent<Renderer>().sharedMaterial;
             Set(visual,"useChildRenderers",true); Call(visual,"RefreshMaterials");
             Check(latePart.GetComponent<Renderer>().sharedMaterial!=lateOriginal,"late generated parts also fade");
+
+            Set(road,"status",C("Constants","STATUS_ACTIVE"));
+            proxy = Build(road,drawClose);
+            Check(Field(proxy.GetComponent(T("DrawLodInfo")),"drawLod").Equals(drawClose),"underground paths use normal close LOD metadata");
+            Call(pathManager,"CreateOrUpdateFarPath",road,true);
+            var farPath = (GameObject)Call(pathManager,"GetPathObject",1);
+            Check(Field(farPath.GetComponent(T("DrawLodInfo")),"drawLod").ToString()=="Far"
+                && farPath.GetComponentsInChildren<MeshRenderer>().Length>0,"underground paths use normal far LOD generation");
+            Check(farPath.GetComponentsInChildren<MeshRenderer>().All(r=>r.sharedMaterials.All(m=>m.shader.name!="CityGenesis/UndergroundGhost")),"far tunnel sections remain opaque");
+            Call(pathManager,"HideUnloadedPath",1,farPath,new List<int>());
+            Check(!farPath.activeSelf,"normal cell retirement hides underground paths");
+            proxy = Build(road);
+
+            var mixed = MakePath(5,221,C("Constants","PATH_STREET"),60,-14);
+            Set(mixed,"end_point",new List<object>{70d,0d,60d});
+            var mixedGO = Build(mixed);
+            var mixedSections=mixedGO.GetComponentsInChildren(T("PathSection"));
+            Check(mixedSections.Any(s=>(bool)Field(s,"IsUnderground")) && mixedSections.Any(s=>!(bool)Field(s,"IsUnderground")),"one path retains both surface and tunnel sections");
+            foreach (var section in mixedSections)
+                Check(section.GetComponentsInChildren<MeshRenderer>().All(r=>r.sharedMaterials.All(m=>(m.shader.name=="CityGenesis/UndergroundGhost") != (bool)Field(section,"IsUnderground"))),"section opacity follows depth classification");
+
+            var construction = MakePath(6,221,C("Constants","PATH_STREET"),-60,-15,"ConstructionPathSummary");
+            Set(construction,"status",C("Constants","STATUS_CONSTRUCTING")); Set(construction,"construction_progress",25f);
+            var constructionGO = Build(construction);
+            var completed=constructionGO.GetComponentsInChildren<Transform>().Single(t=>t.name=="CompletedSurface");
+            float maxBuiltX=completed.GetComponentsInChildren<MeshRenderer>().Max(r=>r.bounds.max.x);
+            Check(maxBuiltX < -25f && maxBuiltX > -40f,"underground construction builds only the completed quarter");
+            var dirtMesh=constructionGO.GetComponentsInChildren<MeshFilter>().Single(f=>f.name=="ConstructionDirt").sharedMesh;
+            Check(dirtMesh.bounds.center.y < -8f,"unfinished underground soil stays at tunnel elevation");
+            Set(construction,"construction_progress",75f);
+            constructionGO=Build(construction);
+            completed=constructionGO.GetComponentsInChildren<Transform>().Single(t=>t.name=="CompletedSurface");
+            Check(completed.GetComponentsInChildren<MeshRenderer>().Max(r=>r.bounds.max.x)>25f,"same-version construction progress updates the common path object");
+
+            var node=Activator.CreateInstance(T("NodeData")); Set(node,"node_id",100); Set(node,"position",new[]{0f,-14f,-25f});
+            ((IDictionary)Field(pathManager,"nodeDataCache"))[100]=node;
+            Set(road,"start_node_id",100); Set(rail,"start_node_id",100);
+            Call(pathManager,"SavePathToCache",road); Call(pathManager,"SavePathToCache",rail);
+            var nodeMesh=(Mesh)Static("PathMeshFactory","BuildStripMesh",new List<Vector3>{new Vector3(-2,0,0),new Vector3(2,0,0)},8f);
+            var nodeResult=Activator.CreateInstance(T("NodeMeshResult"),new object[]{nodeMesh,roadMaterials[0],null,null,null,null});
+            Call(pathManager,"UpdateNodeSlab",100,new Vector3(0,-14,-25),nodeResult,"");
+            var nodeGO=(GameObject)((IDictionary)Field(pathManager,"nodeIntersectionMeshes"))[100];
+            Check(nodeGO.GetComponent<Renderer>().sharedMaterials.All(m=>m.shader.name!="CityGenesis/UndergroundGhost"),"underground junctions keep opaque original materials");
+
+            var keep=(HashSet<Vector2Int>)Field(pathManager,"cellsToKeepVisible");
+            var cellLods=(IDictionary)Field(pathManager,"cellPathLod");
+            foreach (object path in paths.Values)
+                foreach (var cell in (List<Vector2Int>)Call(pathManager,"GetPathCoveredCellsCached",path))
+                { keep.Add(cell); cellLods[cell]=Enum.Parse(T("LodTier"),"Near"); }
+            Call(pathManager,"ClearTerrainFollowQueue");
+            var beforeNeighbor=(GameObject)Call(pathManager,"GetPathObject",2);
+            Call(pathManager,"QueueTrackNeighborRebuild",2);
+            Call(pathManager,"FlushPendingTrackNeighborRebuilds",new object[]{null});
+            FinishUpdates();
+            Check((GameObject)Call(pathManager,"GetPathObject",2)!=beforeNeighbor,"neighbor changes rebuild the underground model in the common registry");
+            var beforeCut=(GameObject)Call(pathManager,"GetPathObject",2);
+            Call(pathManager,"OnIntersectionCutChanged",rail,true);
+            FinishUpdates();
+            Check((GameObject)Call(pathManager,"GetPathObject",2)!=beforeCut,"junction cut changes rebuild the same underground model");
+
+            string snapshot=root+"/Temp/path576-underground.json";
+            if (File.Exists(snapshot))
+            {
+                var actual=Newtonsoft.Json.JsonConvert.DeserializeObject(File.ReadAllText(snapshot),T("GeneratedModels.PathSummary"));
+                var actualGO=Build(actual);
+                var actualPoints=(List<Vector3>)Call(pathManager,"CalculatePathPoints",actual,true);
+                Check(actualGO.transform.parent==pathContainer.transform && actualGO.transform.position==Vector3.zero,"path 576 uses the common world container");
+                Check(Vector3.Distance(actualGO.GetComponent<MeshCollider>().bounds.center,(actualPoints[0]+actualPoints[actualPoints.Count-1])*.5f)<2f,"path 576 platform and collider preserve saved XZ and Y");
+                actualGO.SetActive(false);
+            }
             Static("CoastlineStore","SetFromGeoJson",Newtonsoft.Json.Linq.JArray.Parse("[[[20,-100],[100,-100],[100,100],[20,100],[20,-100]]]"));
             var underground=UnityEngine.Object.FindAnyObjectByType(T("UndergroundView"));
             Call(underground,"LateUpdate");
@@ -260,11 +375,14 @@ public static class UndergroundQA
                 Check(!ShaderUtil.ShaderHasError(Resources.Load<Shader>("Shaders/"+name)),"shader compile: "+name);
 
             Call(modes,"SetMode",terrainType,normal);
+            Check(!nodeGO.GetComponent<Renderer>().enabled,"tunnel junction hides on exit without waiting for regeneration");
+            FinishUpdates();
             Call(terrainVisual,"ApplyVisualMode",normal); Call(seaVisual,"ApplyVisualMode",normal); Call(visual,"ApplyVisualMode",normal);
             Check(terrain.enabled && sea.GetComponent<Renderer>().enabled,"normal ground and sea are restored");
             Check(blocker.GetComponent<Renderer>().sharedMaterial==originalMaterial && latePart.GetComponent<Renderer>().sharedMaterial==lateOriginal,"original materials survive switching and late generation");
             Check(camera.backgroundColor==Color.gray,"camera background is restored");
-            Check(proxies.Count==0,"underground picking objects are removed on exit");
+            proxy=Build(road);
+            Check(proxy.GetComponentsInChildren<MeshRenderer>().Length==0 && proxy.GetComponent<MeshCollider>()==null,"normal view excludes tunnel meshes and colliders through common generation");
             Check(farRenderer.sharedMaterial==farOriginal,"far building original material is restored");
             forestMaterial=(Material)Call(forest,"MaterialFor",farOriginal);
             Check(forestMaterial.GetFloat("_UndergroundAlpha")==1 && forestMaterial.GetFloat("_ZWrite")==1 && forestMaterial.GetShaderPassEnabled("ShadowCaster"),"GPU forest depth and shadows return in normal view");

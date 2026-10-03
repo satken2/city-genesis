@@ -158,7 +158,7 @@ public static class PathMeshFactory
 
     /// <summary>
     /// path_master の model_type を取得する。
-    /// マスター未ロード・未知バリアントのときだけ "default"（道路メッシュ）を返す。
+    /// マスター未ロード・未知バリアントと、地下表示のモデルを持たない埋設インフラは "default"（道路メッシュ）を使う。
     /// PathManager が「工事中でも描画しないパス(model_type=none)」の判定にも使うため public。
     /// </summary>
     public static string GetModelType(GeneratedModels.PathSummary pathData)
@@ -169,6 +169,9 @@ public static class PathMeshFactory
 
         if (master != null && !string.IsNullOrEmpty(master.model_type))
         {
+            if (master.model_type == "none" && UndergroundView.IsActive && InfraNetworkUtil.IsInfraPathType(pathData.path_type)
+                && TunnelSectionUtil.IsUndergroundPath(pathData))
+                return "default";
             return master.model_type;
         }
         return "default";

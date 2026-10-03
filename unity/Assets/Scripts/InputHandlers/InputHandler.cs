@@ -201,6 +201,7 @@ public class InputHandler : MonoBehaviour
     private int hoveredZoneId = -1;
     private Ray lastRay;
     private bool lastUndergroundView;
+    private PathManager cachedPathManager;
 
     // キャッシュされたマネージャー参照
     private RoadPlanManager cachedRoadPlanManager;
@@ -474,7 +475,7 @@ public class InputHandler : MonoBehaviour
         if (GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_REMOVE && RemovalManager.Instance != null)
         {
             RemovalManager.Instance.UpdatePropHover(ray,
-                validHitObject != null && validHitObject.GetComponent<UndergroundPathMarker>() != null ? 0f :
+                IsUndergroundSelection(validHitObject, validHitPoint) ? 0f :
                 validHitObject != null ? Vector3.Distance(ray.origin, validHitPoint) : rayDistance);
         }
 
@@ -566,7 +567,7 @@ public class InputHandler : MonoBehaviour
             if (hasPendingClick)
             {
                 float hitDistance = Vector3.Distance(ray.origin, pendingClickPoint);
-                if ((pendingClickObject != null && pendingClickObject.GetComponent<UndergroundPathMarker>() != null)
+                if (IsUndergroundSelection(pendingClickObject, pendingClickPoint)
                     || !TryRemovePropAtScreenPoint(pendingClickScreenPos, hitDistance))
                 {
                     HandleObjectClick(pendingClickObject, pendingClickPoint, pendingClickObjectType);
@@ -797,10 +798,20 @@ public class InputHandler : MonoBehaviour
         // 地上の物体は位置の案内として半透明に残る。敷設などPATHが無効なモードは通常の地形レイを使う。
         foreach (var hit in hits)
         {
-            if (hit.collider.GetComponent<UndergroundPathMarker>() == null) continue;
+            if (!IsUndergroundSelection(hit.collider.gameObject, hit.point)) continue;
             if (selected.collider == null || hit.distance < selected.distance) selected = hit;
         }
         return selected.collider != null;
+    }
+
+    private bool IsUndergroundSelection(GameObject obj, Vector3 point)
+    {
+        if (!UndergroundView.IsActive || obj == null) return false;
+        var handler = obj.GetComponent<PathInputHandler>();
+        if (handler == null) return false;
+        if (cachedPathManager == null) cachedPathManager = FindAnyObjectByType<PathManager>();
+        var path = cachedPathManager?.GetPathData(handler.pathId);
+        return path != null && TunnelSectionUtil.IsTunnelPoint(point, TunnelSectionUtil.GetClearanceHeight(path.path_variant));
     }
 
     /// <summary>

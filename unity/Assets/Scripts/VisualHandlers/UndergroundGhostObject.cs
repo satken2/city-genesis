@@ -20,6 +20,7 @@ public sealed class UndergroundGhostObject : MonoBehaviour
         if (!UndergroundView.IsActive) { FarBuildingMember.RefreshObject(gameObject); return; }
         foreach (var renderer in GetComponentsInChildren<MeshRenderer>(true))
         {
+            if (renderer.GetComponentInParent<PathSection>()?.IsUnderground == true) continue;
             var materials = renderer.sharedMaterials;
             for (int i = 0; i < materials.Length; i++) materials[i] = UndergroundMaterials.Source(materials[i]);
             originals[renderer] = materials;

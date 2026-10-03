@@ -20,6 +20,28 @@ using UnityEngine;
 /// </summary>
 public static class TunnelSectionUtil
 {
+    public readonly struct DrawSection
+    {
+        public readonly List<Vector3> Points;
+        public readonly bool IsUnderground;
+        public DrawSection(List<Vector3> points, bool underground) { Points = points; IsUnderground = underground; }
+    }
+
+    /// <summary>通常・施工中・遠景で共用する表示区間。地下表示では埋設区間も同じ生成器へ渡す。</summary>
+    public static List<DrawSection> GetDrawSections(List<Vector3> points, float clearance,
+        bool followsTerrain, bool includeUnderground, List<PortalInfo> portals = null)
+    {
+        var sections = new List<DrawSection>();
+        foreach (var run in SplitDrawableRuns(points, clearance, portals, followsTerrain))
+            sections.Add(new DrawSection(run, false));
+        if (includeUnderground)
+            foreach (var run in CollectTunnelRuns(points, clearance, followsTerrain))
+                sections.Add(new DrawSection(run, true));
+        return sections;
+    }
+
+    public static bool IsTunnelPoint(Vector3 point, float clearance) => GetDepth(point) > clearance;
+
     /// <summary>相対Yがこの値より小さい（負側）のアンカーを持つパスを地下パスとみなす。</summary>
     public const float UNDERGROUND_REL_Y_EPS = 0.01f;
 
