@@ -1,10 +1,8 @@
 site_name: City Genesis Docs
-# TODO: site_url を Cloudflare Pages の実際のURLに更新してください
-# 例: https://city-genesis-docs.pages.dev/
 site_url: https://city-genesis-docs.pages.dev/
 site_description: City Genesis - 都市建造経済シミュレーションゲームの設計ドキュメント
-repo_url: https://github.com/satken2/genesis-docs
-edit_uri: edit/main/docs/
+repo_url: https://github.com/satken2/city-genesis
+edit_uri: edit/main/docs/docs/
 
 theme:
   name: material
@@ -41,6 +39,7 @@ nav:
   - ホーム: index.md
   - 経済シミュレーション:
     - 全体概要: economics/1_全体概要.md
+    - ゲーム内日付: economics/25_ゲーム内日付.md
     - 経済主体: economics/2_経済主体.md
     - 道路網: economics/3_道路網.md
     - 地区と土地区画: economics/4_地区と土地区画.md
@@ -92,7 +91,6 @@ nav:
     - バックエンドデータロード: geometries/H_バックエンドデータロード.md
     - 建物パーツ作成マニュアル: geometries/I_建物パーツ作成マニュアル.md
     - パスの交差処理: geometries/J_パスの交差処理.md
-    - Unity差分ロード整理: geometries/K_Unity差分ロード整理.md
     - 地形データ作成マニュアル: geometries/L_地形データ作成マニュアル.md
     - 地形プロップ: geometries/M_地形プロップ.md
     - 線路メッシュの生成: geometries/N_線路メッシュの生成.md
@@ -111,6 +109,8 @@ nav:
     - 市民の追跡: programs/市民の追跡.md
     - IPC連携: programs/IPC連携の整理.md
     - コンポーネント連携: programs/コンポーネント連携.md
+    - UI共通基盤: programs/UI共通基盤.md
+    - プレイモード: programs/プレイモード.md
     - バージョニングと互換性: programs/バージョニングと互換性.md
     - セーブデータ仕様: programs/セーブデータ仕様.md
     - シナリオ制作と配布: programs/シナリオ制作と配布.md
@@ -121,13 +121,11 @@ nav:
     - 公共交通ハイライト: programs/公共交通ハイライト.md
     - アラートフラグ管理: programs/アラートフラグ管理.md
     - 通知レベル管理: programs/通知レベル管理.md
-    - 供給状況と診断API: programs/診断ウィンドウ.md
     - ファイル配置: programs/ファイル配置.md
     - 素材クレジット管理: programs/素材クレジット管理.md
     - サウンドシステム: programs/サウンドシステム.md
     - 達成目標ウィンドウ: programs/達成目標ウィンドウ.md
     - 建設プロジェクト管理: programs/建設プロジェクト管理.md
-    - テンプレート作成支援: programs/テンプレート作成支援.md
   - API Reference: api/index.html
 
 # 既定のslugifyは非ASCII文字を落とすため、日本語見出しの本文をそのままアンカーにできるUnicode版を使う
@@ -159,6 +157,6 @@ extra_css:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/satken2/genesis-docs
+      link: https://github.com/satken2/city-genesis
       name: GitHub
 

@@ -1,4 +1,6 @@
-# 前提
+# IPC連携
+
+## 前提
 
 Unityのグラフィックプログラム(以下、`graphic`)と、TauriのUIプログラム(以下、`ui`)は、WindowsのMemoryMappedFile（MMF）2本でIPC連携を行う。
 
@@ -40,13 +42,13 @@ Offset  8: Ring buffer data (1048568 bytes)
 - 読み取り側はlengthが範囲外なら未読分を捨て（ReadPosをWritePosに合わせ）、以降の通信を続ける。
 - 受信側のプロセスが起動していない間の送信もバッファに溜まり、受信側は起動後にまとめて読む。空きが足りない書き込みは `MMF buffer full` で失敗する。このため一定周期で送り続けるメッセージは置かない。受信側の再起動後の再同期は、グラフィックが送る `system:graphic_ready` を起点にするか、グラフィック側が起動時に自分から状態を送る。
 
-# イベント種別
+## イベント種別
 
-## 命名規則
+### 命名規則
 
 イベント名は全レイヤー（Unity / Rust / フロントエンド）でコロン区切りで統一する（例: `edit_path:select_node`）。
 
-## イベントを追加・変更するときの変更箇所
+### イベントを追加・変更するときの変更箇所
 
 1つのイベントは Unity・Rust・フロントエンドの3箇所にまたがる。どこかが欠けても実行時エラーにはならず、単に届かない。
 
@@ -55,7 +57,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 - **graphic → UI**: Unity は `IpcClient.EmitXxx` で `event` 直下の名前として送る。Rust `ipc.rs` の受信 match に中継の分岐（全ウィンドウへの `emit`、常駐のコックピットだけが扱うものは `emit_to`）を追加しないと、どの WebView にも届かない。フロントエンドは同名の Tauri イベントを `listen` する。
 - 追加・変更したイベントは、このページの一覧と関連する機能のページに反映する。
 
-## 一覧
+### 一覧
 
 | イベント種類                          | コール方向            | 内容                                    |
 | ------------------------------- | ---------------- | ------------------------------------- |
@@ -158,7 +160,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_road:ended`               | `graphic -> ui`  | 道路の区間編集モードが終わった（`{road_id, session_id?}`）。完了・Esc・他のステートへの遷移・閉じたパネルの `edit_road:cancel`・セッションのリセットなど理由を問わず、モードを抜けるたびに1回だけ送る。道路詳細パネルは自分の道路なら何も送り返さずに編集中の表示を落とす。`session_id` は開始時の `STATE_EDIT_ROAD_MEMBERS` の `session_id` を Unity が型を変えずにそのまま返したもので、開始時に無かった（または整数でも文字列でもなかった）ときはキーごと省く。パネルは正の整数の `session_id` が含まれていれば開始時の値と一致するときだけ受け入れ（遅れて届いた前回の終了で新しい編集を落とさないため）、含まれていなければ道路IDだけで判断する。Rust は全ウィンドウへ中継する |
 | `world:roads_changed`           | `graphic -> ui`  | UI を通さずに道路（名前付き道路）の区間が消えたことを知らせる（`{}`）。送り手はブルドーザでのパスの削除で、削除したパスが道路の区間だったときだけ、削除の成功後、差分リロードのまとめ待ちが明けた時点で1回送る（続けて削除しても1通にまとまる。周期送信はしない）。区間が0本になった道路はバックエンドが削除するので、道路詳細パネルはこれを受けて取り直し、削除済みを表示できる。Rust は Tauri のグローバルイベント `roads:changed`（UI の道路の変更通知と同じもの。ペイロードはそのまま）として全ウィンドウへ流す。Unity は差分リロードで自分の道路一覧を取り直すので、`world:refresh_roads` は送り返さない |
 
-## `world:select_object` の選択対象
+### `world:select_object` の選択対象
 
 ペイロードは `{window_type, entity: {type, id}}`。UIは `window_type` のウィンドウを `entity.id` を対象に開く。`id` は文字列で送る。
 
@@ -176,9 +178,9 @@ Offset  8: Ring buffer data (1048568 bytes)
 
 インターチェンジ（IC/JCT）はバックエンドがランプから自動検出するもので（[道路網のインターチェンジとジャンクション](../economics/3_道路網.md#インターチェンジとジャンクション)）、Unityは道路の閲覧状態（道路・地形の入力モードがともに通常）のときだけ中心にラベルを出す。編集中はラベルを隠すので、このイベントが道路編集のクリックと競合することはない。`intersection_detail` は名前と種別、どの道路からどの道路へ行けるかの接続図を表示するパネルで、カメラ移動などのアクションは持たない。
 
-## 確定送信の責務分担
+### 確定送信の責務分担
 
-### 建物の爆破
+#### 建物の爆破
 
 `building:exploded`（UI → graphic、params: `{agent_id: 整数}`）は、`AgentOperationPanel` が確認ダイアログを経て `POST /api/v1/agents/{id}/explode` に成功した後だけ送る。爆破の確定はHTTP側で完了しており、IPCは描画更新の通知である。
 
@@ -188,7 +190,7 @@ Unityは `GET /buildings/{id}` の最新状態が `STATUS_COLLAPSED` である�
 
 この操作では `session:reload` を併送しない。全体リロードが行う海岸線・路線などの取得は不要で、対象1棟の更新と演出だけを同じハンドラで開始する。通常のエポック更新・保存データのロード・解体による状態変化では爆発音を鳴らさない。エフェクトの寿命と音源は [火災エフェクトの描画](../geometries/S_火災エフェクトの描画.md#爆破操作の単発エフェクト) を参照。
 
-### 建設・編集
+#### 建設・編集
 
 建設・編集の「確定」をバックエンドへ送信する責務は、**確定操作を所有する側**が持つ。
 
@@ -199,7 +201,7 @@ Unityは `GET /buildings/{id}` の最新状態が `STATUS_COLLAPSED` である�
 
 `edit_*:finish` 系を送ったパネル自身は、続けて `STATE_NORMAL` を送らない。ただし確定後にウィンドウを閉じるパネル（造成など）では、閉じる処理が×ボタンと同じ Rust の経路（`window.rs` の `close_window_by_label`）を通るので、そのウィンドウ種別が `EDIT_MODE_WINDOW_TYPES` に載っていれば Rust が `STATE_NORMAL` を送る。Unity は finish の中で既に通常ステートへ戻しており、`STATE_NORMAL` の処理は入力と表示の適用し直しだけで差分リロードを取り消さない（取り消すのは新しい再取得・カメラのセル移動・セッションの切り替え）。この `STATE_NORMAL` は冗長だが、再取得を妨げない。
 
-# グラフィックプログラムのステート
+## グラフィックプログラムのステート
 
 Unityのグラフィックプログラムは、いくつかのステートを持つ。各モードの実体はUnityのC#で定義された「表示モード（`VisualMode`）」「入力モード（`InputMode`）」のセットである。
 ステートごとに以下のようになる。空欄は何もしないという意味。
@@ -257,243 +259,15 @@ Unity は `PathTopologyEditManager` が対象選択を担う。**結合**では�
 
 選択結果は `edit_path:select_merge_target` / `edit_path:select_split_point` でUIへ返り、UIは同じエンドポイントの `dry_run=true` で結合後・分割後の長さを取得してパネルに表示する。プレイヤーが確定するとUIが `dry_run` なしで再送し、成功後に `edit_path:finish_topology_edit` を**1発だけ**送ってUnity側の後始末（着色・マーカーのクリア、消えたパスの破棄、通常モード復帰、再描画）をまとめて行わせる。キャンセル時のみ `STATE_NORMAL` を送る。長さを確認して確定するパネルを操作し続ける必要があるため、`STATE_EDIT_CONNECTOR` と同じくこのステートでは Unity ウィンドウを最前面化しない。
 
-`STATE_EDIT_CONNECTOR` は施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`。[[26_インフラ網]]の接続端子ノード参照）をドラッグで移動する編集モードで、経済主体詳細パネル（`agent_detail`）が接続端子ノードを持つ施設を表示すると、`edit_connector:show` に続けて送って遷移する（トグルボタンは無く、表示している間は常に編集できる）。`world:change_state` の params に `agent_id` / `infra_node_id` / `depot_node_id` を含める。Unity は `ConnectorEditManager` が対象ノードを強制表示・逆四角錐マーカーで強調し、入力プリセット `CONNECTOR_EDIT`（TERRAIN=`MODE_EDIT_CONNECTOR`、他=`MODE_NONE`）でマーカーを地形ドラッグとして掴んで移動する（マーカーはノード実体の上空に浮くため、ノードのコライダーへのレイキャストは使わない。[Unity入力制御](Unity入力制御.md) §5.3）。ドラッグ中のXZは施設が立地する土地区画の内側へクランプし、ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}`（position）を送る。**ノード位置の変更はパスが1本も接続されていない場合のみ許可され**、接続済みノードの移動はバックエンドが拒否し、Unity は元位置に自動で戻す（[[26_インフラ網]] §26.3 の端子位置移動制限）。`agent_detail` パネルを前面に残すため、このステートでは他の編集ステートと異なり Unity ウィンドウを最前面化しない。
+`STATE_EDIT_CONNECTOR` は施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`。[26_インフラ網](../economics/26_インフラ網.md)の接続端子ノード参照）をドラッグで移動する編集モードで、経済主体詳細パネル（`agent_detail`）が接続端子ノードを持つ施設を表示すると、`edit_connector:show` に続けて送って遷移する（トグルボタンは無く、表示している間は常に編集できる）。`world:change_state` の params に `agent_id` / `infra_node_id` / `depot_node_id` を含める。Unity は `ConnectorEditManager` が対象ノードを強制表示・逆四角錐マーカーで強調し、入力プリセット `CONNECTOR_EDIT`（TERRAIN=`MODE_EDIT_CONNECTOR`、他=`MODE_NONE`）でマーカーを地形ドラッグとして掴んで移動する（マーカーはノード実体の上空に浮くため、ノードのコライダーへのレイキャストは使わない。[Unity入力制御](Unity入力制御.md) §5.3）。ドラッグ中のXZは施設が立地する土地区画の内側へクランプし、ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}`（position）を送る。**ノード位置の変更はパスが1本も接続されていない場合のみ許可され**、接続済みノードの移動はバックエンドが拒否し、Unity は元位置に自動で戻す（[26_インフラ網](../economics/26_インフラ網.md) §26.3 の端子位置移動制限）。`agent_detail` パネルを前面に残すため、このステートでは他の編集ステートと異なり Unity ウィンドウを最前面化しない。
 
 `agent_detail` は編集ウィンドウ（`EDIT_MODE_WINDOW_TYPES`）と排他ではないので、接続点編集中に建物建設などを開くと、そちらのステートへ直接遷移する。このとき Unity は端子のドラッグ受付を終え、マーカーを読み取り専用ハイライトとして残す（`STATE_NORMAL` への復帰でも同じ）。パネルが別エージェントへ遷移したときと閉じられたときは `edit_connector:hide` だけを送り、`STATE_NORMAL` は送らない。Unity は接続点編集モード中のときだけ通常モードへ戻すので、後から開いた編集ウィンドウのステートを打ち切らない。
 
-# 起動フロー
+## 起動・再接続
 
-## ポートの動的割り当てと連携
+プロセスの起動順序と接続先の受け渡しは[コンポーネント連携](コンポーネント連携.md#起動順序)に従う。UnityとTauriはIPCの版を照合し、再接続時は `system:graphic_ready` を起点にセッション・表示・編集状態を同期する。[版照合](バージョニングと互換性.md#4-プログラム間の互換性)を通るまで編集イベントを扱わない。
 
-genesis-core は起動時にポート5000から順に空きポートを探し、最初に確保できたポートで FastAPI を起動する。ポートが占有されていた場合は5001、5002…と順次試行する。
-
-この動的に決定したポート番号は、以降の UI および Graphic プログラムに対して正しく伝達される必要がある。伝達の経路は以下の通り(詳細は[コンポーネント連携](コンポーネント連携.md)の「起動順序」)。
-
-1. **genesis-core → city-genesis/tauri**: 環境変数 `GENESIS_API_PORT`(ポート番号)・`GENESIS_GRAPHIC_EXTERNAL=true` を設定してから `config.toml` の `[ui] launch_command` を実行する。開発時に単独で起動した Tauri は、環境変数 `GENESIS_UI_API_BASE_URL` で接続先を上書きできる。
-2. **genesis-core → city-genesis/unity**: `config.toml` の `[graphic] launch_command` の末尾に `--api-base-url http://127.0.0.1:{ポート番号}/api/v1` を付けて Unity を起動する。バックエンドが Unity を起動しない構成(開発時)では、Tauri が `graphic-launch.json` の `launch_command` に `--api-base-url` を付けて起動し、Unity は Tauri の環境変数を引き継ぐ。
-3. **city-genesis/unity**: `AppRoot.Start()` でコマンドライン引数 `--api-base-url` をパースし、`ApiClient.BASE_URL` を上書きする。以降、全ての HTTP 通信はこの `BASE_URL` を参照する。
-
-## 各プログラムの起動シーケンス
-
-```
-genesis-core (main.py)
-  │
-  ├─ 空きポートを探す（5000→5001→5002…）
-  ├─ FastAPI を見つかったポートで起動（デーモンスレッド）
-  ├─ スプラッシュスクリーン表示（tkinter）
-  ├─ サーバー_ready をポーリング（500ms間隔）
-  │
-  └─ サーバー起動完了後:
-      ├─ スプラッシュ破棄
-      └─ config.toml の [ui] launch_command から city-genesis/tauri を起動
-         └─ 環境変数 GENESIS_API_PORT = {ポート}
-         （異常終了時は3秒後に自動再起動。正常終了(code 0)は監視終了）
-```
-
-```
-city-genesis/tauri (Tauri/Rust)
-  │
-  ├─ 環境変数 GENESIS_UI_API_BASE_URL(無ければ GENESIS_API_PORT)から API 通信先を決める
-  ├─ 設定読み込み: window-registry.json, window-mutex-groups.json, graphic-launch.json
-  ├─ ウィンドウ作成:
-  │   ├─ "main" ウィンドウ → 即座に非表示（常駐ホスト）
-  │   ├─ "topmenu" ウィンドウ → 画面中央に表示（800x600、最前面）
-  │   ├─ "taskbar" ウィンドウ → 画面下部に非表示
-  │   └─ "loading" ウィンドウ → 必要時に画面中央に生成（400x200）
-  ├─ MMF作成（CreateOrOpen）:
-  │   ├─ genesis-ipc-ui-to-graphic（ライター: Tauri、リーダー: Unity）
-  │   └─ genesis-ipc-graphic-to-ui（リーダー: Tauri、ライター: Unity）
-  ├─ system.ready を UI→Graphic MMF に書き込み
-  ├─ リーダースレッド起動（Graphic→UI MMF からUnityのメッセージを待機）
-  └─ セッションポーリングスレッド起動
-  │   ├─ 5秒ごとに GET /api/v1/sessions と /api/v1/city を取得
-  │   └─ 結果を `session-state` イベントとして全WebViewにブロードキャスト
-  │
-  └─ ゲーム開始/ロード時:
-      └─ launch_command の末尾に --api-base-url {URL} を付与して Unity を起動
-```
-
-```
-city-genesis/unity (Unity/C#)
-  │
-  ├─ AppRoot.Start():
-  │   ├─ コマンドライン引数 --api-base-url をパースし、ApiClient.BASE_URL を上書き
-  │   └─ IPC初期化:
-  │       ├─ MmfReader 起動（genesis-ipc-ui-to-graphic を読み取り、Tauriのメッセージを待機）
-  │       └─ MmfWriter 準備（genesis-ipc-graphic-to-ui に書き込み、Tauriにメッセージを送信）
-  │
-  └─ Tauriの system.ready を受信 → 双方向通信開始
-```
-
-### MMF接続の確立シーケンス
-
-#### 基本原則
-
-双方とも `CreateOrOpen` でMMFと同期オブジェクトを開く。接続の概念がなく、どちらが先に起動しても即座に通信可能。
-
-#### 起動順序
-
-1. **Tauri起動** — 2つのMMFをCreateOrOpen（新規作成）。UI→Graphic方向のMMFをリセットし、`system.ready` を書き込む。Graphic→UI方向のリーダースレッドを起動。
-2. **Unity起動** — 2つのMMFをCreateOrOpen（既存を開く）。リーダーを起動してTauriのメッセージを待機。ライター（Graphic→UI方向）のMMFをリセット。
-3. **Unityが `system.ready` を読み出す** — 双方向通信開始。Unityからの最初のメッセージがTauriのリーダースレッドに届き、`connected = true` となる。
-
-起動順序が逆（Unityが先）でも、UnityはMMFをCreateOrOpenしてリーダーを起動する。Tauriが後から起動すると、既存のMMFを開き、`system.ready` を書き込む。Unityがそれを読み出し、通信が開始される。
-
-#### ライターのバッファリセット
-
-各方向のライターは起動時にバッファをリセットする（WritePos = 0, ReadPos = 0）。これにより前回セッションの残骸を消去し、クリーンな状態で通信を開始する。
-
-- UI→Graphic方向: Tauriのライターがリセット
-- Graphic→UI方向: Unityのライターがリセット
-
-#### Tauri側（Rust）の送信メカニズム
-
-Tauri→Unity方向の送信は、MMFに直接書き込む。
-
-- Tauriコマンドハンドラ（メインスレッド）から `send_to_parent()` を呼ぶ
-- Mutexを取得 → リングバッファに書き込み → Mutex解放 → EventをSet
-- 書き込みはMutex取得〜解放までマイクロ秒レベルで完了するため、メインスレッドをブロックしない
-- 非同期チャンネル（mpsc）は使用しない
-
-### セッションポーリングとウィンドウ表示制御
-
-Tauri 側の常駐スレッドが 5 秒ごとにバックエンドをポーリングし、全 WebView ウィンドウに `session-state` イベントをブロードキャストする。各ウィンドウはこのイベントを受信して自らの表示/非表示を制御する。
-
-#### ポーリング内容
-
-- `GET /api/v1/sessions` — `current_save_id` の有無でセッション状態を判定(シナリオの地形編集などコアがセッションを使わずに都市を組み立てている間も `null` が返る)
-- `GET /api/v1/city` — 都市名・日付（Taskbar 表示用）
-
-#### 配信イベント: `session-state`
-
-```json
-{
-  "connected": true,
-  "current_save_id": "10376dfa-ec45-4cbb-bbb0-9e192aa4baae",
-  "session": { ... },
-  "city": { ... },
-  "apiBaseUrl": "http://localhost:5000"
-}
-```
-
-#### 各ウィンドウの表示条件
-
-| ウィンドウ | 表示条件 |
-|-----------|----------------|
-| topmenu | `current_save_id == null` |
-| taskbar | `current_save_id != null` |
-| loading | ゲーム開始/ロード処理中（Rust 側で制御） |
-
-### ゲーム開始フロー（新規）
-
-```
-[TopMenu / SaveLoadWindow] 「ニューゲーム」ボタン押下
-  ↓
-invoke("open_registered_window", { windowType: "new_game" })
-  ↓
-[NewGameWindow] シナリオ・チュートリアルを選び「このシナリオを始める」
-  ↓
-ゲーム設定の確認(プレイ中だけ未保存の変更が失われる警告を表示)
-  ↓
-最終の「開始」を押す(ここまでは現在の都市とUnityの表示を保持)
-  ↓
-invoke("create_session", { templateId | playMode: PLAY_MODE_TUTORIAL + tutorialId, cityName, language, ... })
-  ↓
-[Rust]
-  1. コアの版・シナリオの互換性を検証
-  2. prepare_graphic() → Unityの起動・session:resetとIPC契約の確認
-  3. トップメニューとポップアップを隠す
-  4. begin_initial_loading() → game:loadingで暗転・HUD非表示・Tips表示
-  5. POST /api/v1/sessions(template_id または play_mode=2・tutorial_id)
-  6. POST成功後、ポーリングからUnityにsession:reload + game:start {loading_id}を送信
-  7. 同じloading_idのgame:loadedを受け、Tipsを開始ボタンに切り替える
-  8. Tipsの開始ボタンでgame:revealを送り、HUDとヒントバーを表示
-```
-
-### ゲーム開始フロー（ロード）
-
-```
-[TopMenu] 「ロード」ボタン押下
-  ↓
-invoke("open_registered_window", { windowType: "save_list" })
-  ↓
-[SaveListWindow] セーブファイルを選択
-  ↓
-invoke("start_load_game", { saveId })
-  ↓
-[Rust]
-  1. launch_graphic() → Unity 起動
-  2. topmenu.hide()
-  3. loading.show()
-  4. POST /api/v1/sessions?save_id={saveId}
-  5. ポーリングスレッドが current_save_id の変化を検知
-  6. loading.hide()
-  7. taskbar.show()
-  8. Unity に session:reload + game:start を送信
-```
-
-### ゲーム終了フロー
-
-```
-ポーリングスレッドが current_save_id: non-null → null の変化を検知
-(初期ロード中は、バックエンドの準備完了を確認した後の null も含む)
-  ↓
-[Rust]
-  1. 全ポップアップを閉じ、HUD・ヒントバーを隠す
-  2. Tips・初期設定ウィンドウを閉じ、ロード状態を解除する
-  3. topmenu.show()
-  4. Unity に game:end を送信
-```
-
-## 敷設設定の継続
-
-新規敷設後の `STATE_EDIT_PATH` は `initial_height`（小数m）、`initial_embankment_height`、`initial_curved`、`initial_follow_terrain` を任意パラメータとして受け取る。UIの `continuePlacement` が敷設設定を明示送信し、Unityの `InitializeRoadPlacement` が最初の形状通知より前に適用する。線路間隔・進行方向・ホーム側は既存の各パラメータで引き継ぐ。座標・制御点と見積りだけをクリアする。未指定の新規開始は既定値、既存パス編集は保存値を使う。
-
-## 土地区画作成のモード契約
-
-`STATE_EDIT_PARCEL` の `parcel_creation_mode` は、新規作成では `along_path` / `block` / `random` / `empty_area` を使う。TauriのボタンとUnityのラジアルメニューはこの順で表示する。既存区画の分割モードは維持する。`block` は地点選択と従来のプレビューイベントを使い、UIからバックエンドへ探索範囲・間口・奥行き・ばらつきを送る。新規の任意ポリゴン作図は提供しない。既存区画の形状編集イベント（`edit_parcel:update_shape` と `edit_parcel:finish_shape_edit`）は引き続き使用する。
-
-## 建物直接配置の状態同期
-
-配置方法の初期値は `STATE_EDIT_BUILDING` の遷移パラメータ `placement_mode`（parcel/free/roadside。省略時はparcel）で指定する。既存建物編集・忠実コピーでは無視される。市庁舎の配置（都市創設時と移転）はUIが `free` を指定する。以後の切り替えはUnityのCtrlラジアルメニューが担い、UIは `placement_state` の `mode` に追従する。
-
-`edit_building:placement_command` (ui → graphic)のparams.commandには`variant`と変更したフィールドだけを渡す。任意フィールドは`width`/`depth`/`angle`、`reset=true`(位置選択のみ取消し)、`labels`(翻訳済みCtrlメニュー/HUD文言)。寸法を含まない呼び出しは状態問い合わせとなる。パネルは購読完了後に問い合わせ、初期化通知を取りこぼしても復元できる。
-
-`edit_building:placement_state` (graphic → ui)は`{variant, revision, mode, position, width, depth, angle, parcel_id}`を返す。modeはparcel/free/roadside、positionは`[x,0,z]`または未固定を示すnull、parcel_id=-1は区画未選択。キーボード寸法変更・Ctrl切替・位置固定・回転終了・Escも同じ状態通知を使う。ホバー移動では常時送信しない。UIはこの通知をパラメータ変更として再送しない。
-
-直接配置の`edit_building:update_shape`には要求元の`placement_revision`を付ける。Unityは現在の世代・階数・位置固定状態と一致する場合だけ描画する。パネルも要求キーで設置可否の鮮度を確認する。既存区画からの建設・編集は世代を付けない従来経路。
-
-`select_point`/`update_direct_angle`/`update_direct_params`は旧イベント定義として残るが、現行の建設パネルは直接配置にこれらを使用しない。配置方法を位置確定前から明示選択するため、以前の「区画外をクリックしたら直接配置へ入る」自動判定は行わない。
-
-パネルの寸法コマンドには`request_id`を付け、Unityは対応する`placement_state.request_id`にそのまま返す。パネルは最後に送った数値変更への応答が届くまで確定を待つ。これにより連続入力中に先の変更への応答だけで確定可能になることを防ぐ。
-
-## 駅舎の建屋配置端
-
-`edit_path:change_house_ends`（UI→Unity）のparamsは`house_ends`（both/start/end）。建設パネルが真実源で、IpcClient→IpcEventHandler→RoadPlanManager.SetHouseEnds→RoadRendererの仮PathSummaryへ伝える。初期値はSTATE_EDIT_PATHの同名params。既存形状編集は保存値をロードして使い、配置端の変更は駅詳細のPATCHから行う。Rustの汎用send_window_action転送を使うため専用Rust分岐は不要。
-
-## プロップ個別配置の高さ
-
-world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地面からの相対高さm）を受け取る。edit_prop:update_instancesの要素はx/y/z/rotation/scaleで、yにその配置時の相対高さを載せる。Tauriは各点のyをPOST /api/v1/props/instancesへ送り、GETでも同じyを受け取る。高さ指定は全種別共通、0は地表、負値は地中。描画では地形標高へ加算し、モデルの拡大率を掛けない。
-
-3D側のPageUp/PageDown（0.1m刻み、Shiftで1m）と中ボタンドラッグ回転で変わった値は、Unityがedit_prop:placement_settings（rotation/height）でパネルへ返す。UIはこれをchange_settingsへエコーせず、以後パネルのステッパーを操作したときだけchange_settingsを送る（UnityとUIの往復ループを作らない）。
-
-## 2Dパス形状編集パネルの同期
-
-`path_shape_editor` ウィンドウ（`PathShapeEditorPanel`）は、敷設中パスのノードとベジエ制御点を都市マップ（`CityMapCanvas`）の上で編集する。形状の真実源はUnity（`RoadPlanManager`）のままで、パネルは `edit_path:update_shape` を受けて描き、操作の結果だけを `edit_path:shape_command` で送る（コマンド入力・全状態出力。建物直接配置の `placement_command`/`placement_state` と同じ構図）。UIは受信値を再送しないためループしない。
-
-- 開く: `edit_path:update_shape` の `is_finalized && is_curved`（曲線モードでの右クリック確定）を受けた敷設パネル（`usePathConstruction`）が `open_registered_window("path_shape_editor")` で自動的に開く。直線モードや配置中は敷設パネルの「2Dで編集」ボタンで手動で開く。
-- 閉じる: 敷設パネルの確定ボタン（`close_registered_window("path_shape_editor")`）、パス建設パネル（`path_build`）のクローズ（Rust `window.rs` の後始末）、`update_shape` の `phase=inactive` 受信（パネルが自分を閉じる）。**2Dパネルを閉じても敷設セッションは続く**（Unityへは何も送らない）。
-- 編集できるのは `phase=editing` のときだけ。配置中（`placing`）は表示のみ。標高・盛土は2Dでは編集せず、ノード選択（`select_node`）で敷設パネルのステッパーの対象を切り替える。
-- 曲率・勾配はUnityのローカル推定（`alignment`）をそのまま色分け・区間ラベルに使う。権威値は従来どおり `/paths/construction-cost` を敷設パネルの費用カードが表示する。
-- 高架・地下（`height_editable`）のバリアントでは地図の下に**縦断面ストリップ**（`PathProfileStrip`）を出す。横軸は曲線を伸ばした始点からの距離、縦軸は標高で、`alignment.samples` の路面・地盤プロファイルと `alignment.nodes` のアンカー位置から描く（線形評価の対象外の種別では折れ線長と相対高さだけの相対表示）。ここではノードを**上下ドラッグで高さ（地面相対）だけ**変更し、ドラッグ終了時に既存の `edit_path:change_node` を1回送る（Unityが `min_height` でクランプして適用し `update_shape`／`select_node` で返す）。横方向には動かせない。勾配の区間ラベル（`labels` の勾配側）も同じ位置に描く。
-- ノード番号（1始まり）は地図・縦断面ストリップ・Unityの3Dビュー（`RoadPlanManager.NodeLabels` のIMGUIラベル。選択中は強調色）で共通にし、どのノードを指しているかを対応付ける。
-
-### パスの確定可否
-
-`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川・海・湖の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
-敷設パネルは `/paths/validate` の `alignment_violations` を保持し、線番号（1始まり）と各線の始点からの距離区間を添えて曲率・勾配違反を表示します。パス干渉・川横断・形状未確定・検証待ち・検証エラーを区別し、APIエラーの理由は省略せず再試行ボタンを出します。原因不明の拒否を赤い干渉と断定しません。送信直前の再検証でも同じ説明を使い、古い形状の結果は表示しません。2D表示はUnityの推定値なので、全線検証で拒否された区間を敷設パネルの案内で確認できます。費用欄は確定不可でも2点以上あれば表示します。
-
-# 天気の表示と選択
+## 天気の表示と選択
 
 `ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時とグラフィックの起動通知（`system:graphic_ready`）の受信時に送り、CameraAmbience（環境音）・ConstructionAmbience（工事音）・VehicleAmbience（走行音）・VisualEffectManager（完成・解体音）が所有するAudioSourceへ適用する。高度と天気の音響制御はUnity内で完結する。
 
@@ -512,23 +286,21 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 エポック演出は`utils/epochPresentation.ts`から`begin_epoch_presentation`を呼び、RustがIDを保持して開始を送る。HTTP実行は日没と並行し、`utils/epochFlow.ts`で暗転完了まで応答の表示を保留する。`set_epoch_tips_visible`は初期ロードと独立したTipsを開閉する。結果画面の`params.extra.epochPresentationId`を共通クローズ処理が読み、`finish_epoch_presentation`で演出を終了する。Tauri内の`epoch:executing`はHUDの無効化に使い、開始から結果画面のクローズまでtrueを維持する。詳細は[天気と環境光](../geometries/U_天気と環境光.md)を参照。
 
-
 `/paths/validate` の `alignments` は敷設する全線の設計後の線形指標で、費用カードと確定可否の表示に優先する。`/paths/earthwork-preview` の `path_profiles` は各線の `[x,絶対標高,z]` 配列で、Unityは形状確定後の3Dモデルに使用する。道路・地上線路は造成後、高架は設計縦断を表示する。操作中のHUD・2D線形はローカルの近似値である。
-
 
 造成の切土・盛土を示すオレンジ／青の半透明ボリュームと体積凡例は表示しない。RoadEarthworkPreviewは造成後のpath_profiles取得だけを担い、道路・線路モデル自体の標高へ反映する。
 
-## 経路提案
+### 経路提案
 
-経路提案はUnityの編集世代付き絶対座標をTauriから読み取り専用HTTP APIへ送り、成功した候補を既存shape_commandで一括反映する。イベント、固定条件、取消しの詳細は[経路提案](経路提案.md)を参照。
+経路提案はUnityの編集世代付き絶対座標をTauriから読み取り専用HTTP APIへ送り、成功した候補を既存shape_commandで一括反映する。イベント、固定条件、取消しの詳細は[経路提案](都市マップの検索と経路案内.md)を参照。
 
-### ノード間距離の上限警告
+#### ノード間距離の上限警告
 
 `edit_path:update_shape.max_span_violations` は `[{segment_index, distance, limit}]`。添字は区間の始点ノードの0始まり、距離と上限はm単位。Unityの赤線と同じ `max_span` 判定を使い、曲線長や高低差ではなく隣接アンカーのXZ直線距離を比較する。上限と等しい距離は許可する。違反解消時・制限なし・点不足では空配列を送る。
 
 違反があるとUnityの `can_confirm` はfalse。Tauriの形状編集パネルは対象区間の中央に、距離・上限を示す引出線付き吹き出しを描く。カーブ・勾配と同じ描画処理を使い、ドラッグ中は再評価前の警告を非表示にする。パス建設パネルの確定欄は「形状にエラーがあります」の簡潔な表示とし、パネル本文と同じ1remの文字サイズを使う。共通の `usePathConstruction` は違反を受けた時点で確定を禁止し、送信直前のガードにも反映する。
 
-## 線形警告と検証結果の共有
+### 線形警告と検証結果の共有
 
 パス建設パネルが確定送信と同じ全線を `/paths/validate` へ渡し、返された線形指標と描画用の違反区間をUnityへ共有する。形状編集パネルは独自に検証を問い合わせず、Unityから再配信された同じ結果を表示する。単線・複線とも、建設パネルと2Dの要約は全線の最悪値、3Dと2Dの吹き出しは各違反区間の最悪値となる。
 
@@ -540,20 +312,19 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 駅舎通路のpassage_mode（elevated/ground/underground）は `STATE_EDIT_PATH` の params と `edit_path:change_passage_mode` で渡す。プレビューと保存で同じ方式を使う。
 
-## ドライブの開始
+### ドライブの開始
 
 `drive:open`はCockpitのブルドーザー右隣からUnityへ送る。paramsは`src/i18n/<言語>/drive.json`の`drive`辞書（キー→表示文言）。`IpcClient`は`DriveMode.Ensure().Open`へ渡す。Unity側が車種/路線・開始位置・乗車HUDを保持し、表示中の再送は終了として扱う。転送には既存Rustの`send_window_action`を使い、新しいEnvelopeやバックエンドAPIは持たない。仕様は[車両の走行描画](../geometries/O_車両の走行描画.md#o12-ドライブモード)を参照。
 
-## 初期ロードの表示契約
+### 初期ロードの表示契約
 
 UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始し、表示パネルで選べる表示状態を既定へ戻して `view:current_state` で通知する([Unity入力制御](Unity入力制御.md) 9.1)。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、`game:loaded` を通知済みの世代だけを表示する。受信した瞬間の準備状態は再判定しない（Tipsは既に閉じているため、ここで捨てると黒画面から戻れなくなる）。
 
 `system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。
 
-
 開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityが接続中でない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。接続中かどうかは `system:graphic_ready`（接続）と `system:graphic_stopped`（正常終了・EditorのPlay停止）で追跡し、「一度でも接続したか」では判定しない（それだとPlayを止めた後の再ロードで永遠に待つ）。接続中は描画完了を待ち、待機中にUnityが停止した場合はその時点で開始ボタンへ切り替える。待機中にUnityが接続した場合は開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。
 
-## 道路・線路の制限速度標識
+### 道路・線路の制限速度標識
 
 表示設定の道路タブの「制限速度標識を表示」は独立したON/OFFボタンで、`view:change_view`の`layer=road`、`flags`の`speed_limit`を使う。既定はOFF。通常表示・交通量などの色分けと併用でき、状態照会と編集モード終了時の復元は他の表示トグルと同じ経路を使う。
 
@@ -565,7 +336,7 @@ Unityの`PathSpeedLimitOverlay`は、一覧APIの`PathSummary.max_speed`をkm/h�
 
 意匠は`SpeedLimitSignStyle`として、数値・位置・表示状態から分離している。現在は全言語で日本式を用い、言語別の意匠はStyle実装と`SetSignStyle`で差し替えられる。写真・画像アセットは使用しない。実装検証は`unity/Tests/SpeedLimitSigns/run.ps1`、APIの値の検証はコア側のスキーマ直列化テストで行う。
 
-## 道路の区間編集モード
+### 道路の区間編集モード
 
 `STATE_EDIT_ROAD_MEMBERS` は道路（名前付き道路。[道路網](../economics/3_道路網.md#35-道路名前付き道路)）の区間を3Dビューのクリックで付け外しするモードで、道路詳細パネル（`road_detail`）の設定タブの「区間を編集」で遷移する。`world:change_state` の params は `{state, road_id, color, path_ids, session_id}`（`path_ids` は開始時点の所属区間、`session_id` は開始のたびにパネルが採番する番号で、`edit_road:ended` の照合に使う）。
 
@@ -575,8 +346,60 @@ Unity は `RoadMemberEditManager` が担う。入力プリセット `ROAD_MEMBER
 
 道路詳細のウィンドウが閉じられたときは、Rust（`window.rs` の `close_window_by_label`）が閉じた道路の `road_id` を載せて `world:clear_road_focus` と `edit_road:cancel` を送る（ポップアップは非表示になるだけでアンマウント処理が走らないため。`edit_path:cancel_topology_edit` と同じ理由）。`road_detail` は `EDIT_MODE_WINDOW_TYPES` に入れない。パネル・3Dの強調帯・道路名ラベルを含む全体の仕様は[道路の詳細と道路名](道路の詳細と道路名.md)を参照。
 
-## 起動・再接続時の版照合
+### 起動・再接続時の版照合
 
 `system:graphic_ready` のペイロードは `frontend_version`、`ipc_contract_version`、`core_compatible`（Unityがコアの版と照合した結果）。UIは自身のIPC契約番号との一致と `core_compatible` を検査し、`system:ready` に自身の `frontend_version`・`ipc_contract_version` と `accepted` を返す。Envelope自体の `version: "1.0"` は変更しない。
 
 Unityはコアの版の照合とUIとのIPC契約が成立するまでマスター取得・ゲーム用操作・セッションポーリングによる開始を解禁しない。不一致のUnityを未接続として扱い、開発用の描画待ち省略に流さない。コアの版は各プロセスの起動時に照合し、周期的に取得しない。起動準備中の取得失敗は再試行できる。フロントのMAJORがコアより小さければ、Unityは終了する。詳細は[バージョニングと互換性](バージョニングと互換性.md)。
+
+## 編集の状態同期
+
+### 敷設設定の継続
+
+新規敷設後の `STATE_EDIT_PATH` は `initial_height`（小数m）、`initial_embankment_height`、`initial_curved`、`initial_follow_terrain` を任意パラメータとして受け取る。UIの `continuePlacement` が敷設設定を明示送信し、Unityの `InitializeRoadPlacement` が最初の形状通知より前に適用する。線路間隔・進行方向・ホーム側は既存の各パラメータで引き継ぐ。座標・制御点と見積りだけをクリアする。未指定の新規開始は既定値、既存パス編集は保存値を使う。
+
+### 土地区画作成のモード契約
+
+`STATE_EDIT_PARCEL` の `parcel_creation_mode` は、新規作成では `along_path` / `block` / `random` / `empty_area` を使う。TauriのボタンとUnityのラジアルメニューはこの順で表示する。既存区画の分割モードは維持する。`block` は地点選択と従来のプレビューイベントを使い、UIからバックエンドへ探索範囲・間口・奥行き・ばらつきを送る。新規の任意ポリゴン作図は提供しない。既存区画の形状編集イベント（`edit_parcel:update_shape` と `edit_parcel:finish_shape_edit`）は引き続き使用する。
+
+### 建物直接配置の状態同期
+
+配置方法の初期値は `STATE_EDIT_BUILDING` の遷移パラメータ `placement_mode`（parcel/free/roadside。省略時はparcel）で指定する。既存建物編集・忠実コピーでは無視される。市庁舎の配置（都市創設時と移転）はUIが `free` を指定する。以後の切り替えはUnityのCtrlラジアルメニューが担い、UIは `placement_state` の `mode` に追従する。
+
+`edit_building:placement_command` (ui → graphic)のparams.commandには`variant`と変更したフィールドだけを渡す。任意フィールドは`width`/`depth`/`angle`、`reset=true`(位置選択のみ取消し)、`labels`(翻訳済みCtrlメニュー/HUD文言)。寸法を含まない呼び出しは状態問い合わせとなる。パネルは購読完了後に問い合わせ、初期化通知を取りこぼしても復元できる。
+
+`edit_building:placement_state` (graphic → ui)は`{variant, revision, mode, position, width, depth, angle, parcel_id}`を返す。modeはparcel/free/roadside、positionは`[x,0,z]`または未固定を示すnull、parcel_id=-1は区画未選択。キーボード寸法変更・Ctrl切替・位置固定・回転終了・Escも同じ状態通知を使う。ホバー移動では常時送信しない。UIはこの通知をパラメータ変更として再送しない。
+
+直接配置の`edit_building:update_shape`には要求元の`placement_revision`を付ける。Unityは現在の世代・階数・位置固定状態と一致する場合だけ描画する。パネルも要求キーで設置可否の鮮度を確認する。既存区画からの建設・編集は世代を付けない従来経路。
+
+配置方法は位置確定前に明示的に選択する。
+
+パネルの寸法コマンドには`request_id`を付け、Unityは対応する`placement_state.request_id`にそのまま返す。パネルは最後に送った数値変更への応答が届くまで確定を待つ。これにより連続入力中に先の変更への応答だけで確定可能になることを防ぐ。
+
+### 駅舎の建屋配置端
+
+`edit_path:change_house_ends`（UI→Unity）のparamsは `house_ends`（both/start/end）。新規敷設の建設パネルが選択値を管理し、Unityのプレビューへ反映する。初期値は `STATE_EDIT_PATH` の同名paramsで渡す。既存の形状編集では保存値を使う。
+
+既存駅の詳細パネルに配置端の変更UIはない。APIでの変更は着工前に限られ、追加する建屋の用地を検証する。駅の概念は[駅と駅舎](../economics/29_駅と駅舎.md)、建屋の配置計算は[駅舎メッシュ](../geometries/Q_駅舎パスのメッシュ生成.md)を参照する。
+
+### プロップ個別配置の高さ
+
+world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地面からの相対高さm）を受け取る。edit_prop:update_instancesの要素はx/y/z/rotation/scaleで、yにその配置時の相対高さを載せる。Tauriは各点のyをPOST /api/v1/props/instancesへ送り、GETでも同じyを受け取る。高さ指定は全種別共通、0は地表、負値は地中。描画では地形標高へ加算し、モデルの拡大率を掛けない。
+
+3D側のPageUp/PageDown（0.1m刻み、Shiftで1m）と中ボタンドラッグ回転で変わった値は、Unityがedit_prop:placement_settings（rotation/height）でパネルへ返す。UIはこれをchange_settingsへエコーせず、以後パネルのステッパーを操作したときだけchange_settingsを送る（UnityとUIの往復ループを作らない）。
+
+### 2Dパス形状編集パネルの同期
+
+`path_shape_editor` ウィンドウ（`PathShapeEditorPanel`）は、敷設中パスのノードとベジエ制御点を都市マップ（`CityMapCanvas`）の上で編集する。形状の真実源はUnity（`RoadPlanManager`）のままで、パネルは `edit_path:update_shape` を受けて描き、操作の結果だけを `edit_path:shape_command` で送る（コマンド入力・全状態出力。建物直接配置の `placement_command`/`placement_state` と同じ構図）。UIは受信値を再送しないためループしない。
+
+- 開く: `edit_path:update_shape` の `is_finalized && is_curved`（曲線モードでの右クリック確定）を受けた敷設パネル（`usePathConstruction`）が `open_registered_window("path_shape_editor")` で自動的に開く。直線モードや配置中は敷設パネルの「2Dで編集」ボタンで手動で開く。
+- 閉じる: 敷設パネルの確定ボタン（`close_registered_window("path_shape_editor")`）、パス建設パネル（`path_build`）のクローズ（Rust `window.rs` の後始末）、`update_shape` の `phase=inactive` 受信（パネルが自分を閉じる）。**2Dパネルを閉じても敷設セッションは続く**（Unityへは何も送らない）。
+- 編集できるのは `phase=editing` のときだけ。配置中（`placing`）は表示のみ。標高・盛土は2Dでは編集せず、ノード選択（`select_node`）で敷設パネルのステッパーの対象を切り替える。
+- 曲率・勾配はUnityのローカル推定（`alignment`）をそのまま色分け・区間ラベルに使う。権威値は従来どおり `/paths/construction-cost` を敷設パネルの費用カードが表示する。
+- 高架・地下（`height_editable`）のバリアントでは地図の下に**縦断面ストリップ**（`PathProfileStrip`）を出す。横軸は曲線を伸ばした始点からの距離、縦軸は標高で、`alignment.samples` の路面・地盤プロファイルと `alignment.nodes` のアンカー位置から描く（線形評価の対象外の種別では折れ線長と相対高さだけの相対表示）。ここではノードを**上下ドラッグで高さ（地面相対）だけ**変更し、ドラッグ終了時に既存の `edit_path:change_node` を1回送る（Unityが `min_height` でクランプして適用し `update_shape`／`select_node` で返す）。横方向には動かせない。勾配の区間ラベル（`labels` の勾配側）も同じ位置に描く。
+- ノード番号（1始まり）は地図・縦断面ストリップ・Unityの3Dビュー（`RoadPlanManager.NodeLabels` のIMGUIラベル。選択中は強調色）で共通にし、どのノードを指しているかを対応付ける。
+
+#### パスの確定可否
+
+`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川・海・湖の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
+敷設パネルは `/paths/validate` の `alignment_violations` を保持し、線番号（1始まり）と各線の始点からの距離区間を添えて曲率・勾配違反を表示します。パス干渉・川横断・形状未確定・検証待ち・検証エラーを区別し、APIエラーの理由は省略せず再試行ボタンを出します。原因不明の拒否を赤い干渉と断定しません。送信直前の再検証でも同じ説明を使い、古い形状の結果は表示しません。2D表示はUnityの推定値なので、全線検証で拒否された区間を敷設パネルの案内で確認できます。費用欄は確定不可でも2点以上あれば表示します。
