@@ -123,7 +123,7 @@ export function ScenarioSignWindow({ apiBaseUrl, scenarioId, onClose }: {
       {pathField("keyring_path", t("scenarios.signing.keyring"))}
     </section>}
     {pathField("output_path", t("scenarios.signing.output"))}
-    {result && <p className="scenario-status" role="status">{t("scenarios.signing.completed", { path: result.output_path })}</p>}
+    {result && <p className="scenario-status" role="status">{t(result.encrypted ? "scenarios.signing.completedEncrypted" : "scenarios.signing.completed", { path: result.output_path })}</p>}
     <div className="scenario-import-actions">
       <button type="button" disabled={busy} onClick={onClose}>{t("scenarios.close")}</button>
       <button type="submit" disabled={busy || !ready}>{t(busy ? "scenarios.signing.processing" : "scenarios.signing.execute")}</button>
