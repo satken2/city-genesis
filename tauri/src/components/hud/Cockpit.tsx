@@ -25,7 +25,7 @@
  * BGMの再生と、3Dビューでのオブジェクト選択に応じたウィンドウ表示は、
  * HUDの中で常に1枚だけ存在するこのウィンドウが受け持つ(多重再生・多重オープンを避けるため)。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
 import { useCallback, useEffect, useState } from "react";
@@ -71,7 +71,7 @@ const L1_NOTIFICATION_POLL_INTERVAL_MS = 30_000;
 export function Cockpit() {
   const { t, i18n } = useTranslation();
   const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting, playMode } = useHudSession();
-  const godMode = playMode === PLAY_MODE_GOD;
+  const godMode = playMode === PLAY_MODE_SCEARIO;
   const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, godMode);
   const mode = useHudMode();
   // ブルドーザの削除確認ダイアログでプロップ種別名を出すために参照する。

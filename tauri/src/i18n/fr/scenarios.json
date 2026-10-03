@@ -63,7 +63,30 @@
     "startSettings": "Paramètres de départ",
     "startSettingsHint": "Les éléments dont la case « Modifiable » est cochée peuvent être modifiés au début de la partie.",
     "changeableOption": "Modifiable",
-    "englishRequired": "Le texte en anglais est requis. Le titre doit avoir de l'anglais, et tout autre champ rempli en a aussi besoin."
+    "englishRequired": "Le texte en anglais est requis. Le titre doit avoir de l'anglais, et tout autre champ rempli en a aussi besoin.",
+    "signing": {
+      "button": "Signer",
+      "hint": "Exporter un fichier .cg signé en conservant le scénario source. Utilisez un identifiant de clé dont la clé publique est enregistrée dans la version prévue.",
+      "mode": "Opération",
+      "signOnly": "Signer uniquement",
+      "signAndEncrypt": "Signer et chiffrer",
+      "privateKey": "Clé privée de signature",
+      "keyId": "Identifiant de clé",
+      "scenarioId": "Identifiant du scénario officiel",
+      "revision": "Révision du contenu",
+      "packId": "Identifiant du pack",
+      "keyring": "Trousseau de clés des packs",
+      "output": "Destination (.cg)",
+      "packsHint": "Packs requis : {{packs}}. Le chiffrement est conservé et les clés de tous les packs requis sont nécessaires.",
+      "execute": "Exporter",
+      "processing": "Signature en cours…",
+      "completed": "Fichier signé exporté : {{path}}",
+      "unavailable": "La signature est disponible uniquement lorsque le serveur fonctionne en mode débogage.",
+      "invalid": "Vérifiez les valeurs. Indiquez le chemin absolu vers un autre fichier .cg.",
+      "failed": "Échec de la signature. Vérifiez les fichiers de clés, les clés des packs et la destination.",
+      "keyMismatch": "La clé privée ne correspond pas à la clé publique enregistrée pour cet identifiant.",
+      "fileDialogFailed": "Impossible d’ouvrir la sélection de fichier."
+    }
   },
   "saveCompatibility": {
     "unknown": "Inconnue",

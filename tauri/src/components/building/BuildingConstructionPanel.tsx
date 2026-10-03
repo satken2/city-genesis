@@ -20,7 +20,7 @@
  * 市庁舎の詳細パネルの移転ボタンから開くと(relocateCityHall)、選択を市庁舎に固定した移転モードになる。
  * 操作と送信は新規の配置と同じで、配置済みの市庁舎を置き直すとバックエンドが無料・即時の移転として扱う。
  */
-import { PLAY_MODE_GOD, PLAY_MODE_NORMAL } from "../../constants";
+import { PLAY_MODE_SCEARIO, PLAY_MODE_NORMAL } from "../../constants";
 import { usePlayMode } from "../../hooks/usePlayMode";
 
 
@@ -219,7 +219,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
 
   const [cityHallPlaced, setCityHallPlaced] = useState<boolean>(true);
   const playMode = usePlayMode(apiBaseUrl);
-  const godMode = playMode === PLAY_MODE_GOD;
+  const godMode = playMode === PLAY_MODE_SCEARIO;
   const continueAfterConfirm = godMode && editAgentId == null && !relocateCityHall;
 
   useEffect(() => {

@@ -13,7 +13,7 @@
  * agent.type や agent.is_bd に応じて、基本情報より下の領域に
  * タイプ固有の詳細情報を追加することを想定している。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
 import { useEffect, useState } from "react";
@@ -101,7 +101,7 @@ export function AgentDetailPanel({
 }: AgentDetailPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCEARIO;
   const [entityHistory, setEntityHistory] = useState<string[]>([
     initialEntityId,
   ]);

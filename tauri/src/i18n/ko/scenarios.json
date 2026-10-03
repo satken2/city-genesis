@@ -63,7 +63,30 @@
     "startSettings": "시작 설정",
     "startSettingsHint": "‘변경 가능’ 체크박스를 켠 항목은 게임을 시작할 때 바꿀 수 있습니다.",
     "changeableOption": "변경 가능",
-    "englishRequired": "영어 입력이 필요합니다. 제목은 영어가 필수이며, 다른 항목을 쓸 때도 영어를 함께 써 주세요."
+    "englishRequired": "영어 입력이 필요합니다. 제목은 영어가 필수이며, 다른 항목을 쓸 때도 영어를 함께 써 주세요.",
+    "signing": {
+      "button": "서명",
+      "hint": "원본 시나리오를 보존하고 서명된 별도의 .cg 파일을 내보냅니다. 대상 빌드에 공개 키가 등록된 서명 키 ID를 사용하세요.",
+      "mode": "작업",
+      "signOnly": "서명만",
+      "signAndEncrypt": "서명 및 암호화",
+      "privateKey": "서명용 개인 키",
+      "keyId": "서명 키 ID",
+      "scenarioId": "공식 시나리오 ID",
+      "revision": "콘텐츠 버전",
+      "packId": "팩 ID",
+      "keyring": "팩 키링",
+      "output": "출력 경로 (.cg)",
+      "packsHint": "필요한 팩: {{packs}}. 암호화를 유지하며 필요한 모든 팩의 키를 사용합니다.",
+      "execute": "내보내기",
+      "processing": "서명 중…",
+      "completed": "서명된 파일을 내보냈습니다: {{path}}",
+      "unavailable": "서명은 백엔드가 디버그 모드로 실행될 때만 사용할 수 있습니다.",
+      "invalid": "입력을 확인하세요. 원본과 다른 .cg 파일의 절대 경로를 지정하세요.",
+      "failed": "서명에 실패했습니다. 키 파일, 팩 키 및 출력 경로를 확인하세요.",
+      "keyMismatch": "개인 키가 해당 서명 키 ID에 등록된 공개 키와 일치하지 않습니다.",
+      "fileDialogFailed": "파일 선택 창을 열 수 없습니다."
+    }
   },
   "saveCompatibility": {
     "unknown": "알 수 없음",

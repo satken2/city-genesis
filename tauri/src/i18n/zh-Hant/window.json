@@ -47,7 +47,8 @@
     "scenario_metadata": "介紹資訊",
     "tutorial_intro": "教學",
     "citizen_detail": "市民",
-    "citizen_tracking": "追蹤清單"
+    "citizen_tracking": "追蹤清單",
+    "scenario_sign": "場景簽署"
   },
   "cityMap": {
     "layers": {

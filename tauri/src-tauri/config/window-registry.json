@@ -591,5 +591,14 @@
     "policy": "single",
     "empty_shell": true,
     "actions": []
+  },
+  "scenario_sign": {
+    "title": "シナリオの署名",
+    "width": 680,
+    "height": 660,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
   }
 }

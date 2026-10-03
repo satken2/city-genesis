@@ -47,7 +47,8 @@
     "scenario_metadata": "紹介情報",
     "tutorial_intro": "チュートリアル",
     "citizen_detail": "市民",
-    "citizen_tracking": "追跡リスト"
+    "citizen_tracking": "追跡リスト",
+    "scenario_sign": "シナリオの署名"
   },
   "cityRename": {
     "label": "都市名",

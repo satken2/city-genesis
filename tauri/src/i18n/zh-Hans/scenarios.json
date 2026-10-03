@@ -63,7 +63,30 @@
     "startSettings": "开局设置",
     "startSettingsHint": "勾选了“可更改”的项目可以在开始游戏时更改。",
     "changeableOption": "可更改",
-    "englishRequired": "需要填写英文。标题必须有英文，填写其他项目时也需要英文。"
+    "englishRequired": "需要填写英文。标题必须有英文，填写其他项目时也需要英文。",
+    "signing": {
+      "button": "签名",
+      "hint": "保留原始场景，导出另一个已签名的 .cg 文件。请使用公钥已注册在目标构建中的签名密钥 ID。",
+      "mode": "操作",
+      "signOnly": "仅签名",
+      "signAndEncrypt": "签名并加密",
+      "privateKey": "签名私钥",
+      "keyId": "签名密钥 ID",
+      "scenarioId": "官方场景 ID",
+      "revision": "内容版本",
+      "packId": "包 ID",
+      "keyring": "包密钥环",
+      "output": "输出位置 (.cg)",
+      "packsHint": "所需包：{{packs}}。将保留加密，并使用所有必需包的密钥。",
+      "execute": "导出",
+      "processing": "正在签名…",
+      "completed": "已导出签名文件：{{path}}",
+      "unavailable": "仅在后端以调试模式运行时可以签名。",
+      "invalid": "请检查输入。请指定另一个 .cg 输出文件的绝对路径。",
+      "failed": "签名失败。请检查密钥文件、包密钥和输出位置。",
+      "keyMismatch": "私钥与此签名密钥 ID 注册的公钥不匹配。",
+      "fileDialogFailed": "无法打开文件选择窗口。"
+    }
   },
   "saveCompatibility": {
     "unknown": "未知",

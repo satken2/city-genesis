@@ -21,7 +21,7 @@
  * nearby_zones が API レスポンスに含まれる場合、所属地区をドロップダウンで変更できる。
  * 隣接パスの所属地区のみ選択可能であり、地区の連続性要件を満たす。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
 import { useCallback, useEffect, useState } from "react";
@@ -87,7 +87,7 @@ export function PathDetailPanel({
 }: PathDetailPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCEARIO;
   const [pathData, setPathData] = useState<(PathData & PathRoadFields) | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

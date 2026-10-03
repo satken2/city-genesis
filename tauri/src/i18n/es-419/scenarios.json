@@ -63,7 +63,30 @@
     "startSettings": "Configuración inicial",
     "startSettingsHint": "Los elementos con la casilla «Modificable» marcada se pueden cambiar al iniciar la partida.",
     "changeableOption": "Modificable",
-    "englishRequired": "Se requiere el texto en inglés. El título debe estar en inglés, y cualquier otro campo que completes también lo necesita."
+    "englishRequired": "Se requiere el texto en inglés. El título debe estar en inglés, y cualquier otro campo que completes también lo necesita.",
+    "signing": {
+      "button": "Firmar",
+      "hint": "Exporta un archivo .cg firmado y conserva el escenario original. Usa un ID de clave cuya clave pública esté registrada en la compilación prevista.",
+      "mode": "Operación",
+      "signOnly": "Solo firmar",
+      "signAndEncrypt": "Firmar y cifrar",
+      "privateKey": "Clave privada de firma",
+      "keyId": "ID de la clave de firma",
+      "scenarioId": "ID del escenario oficial",
+      "revision": "Revisión del contenido",
+      "packId": "ID del paquete",
+      "keyring": "Archivo de claves de paquetes",
+      "output": "Destino (.cg)",
+      "packsHint": "Paquetes necesarios: {{packs}}. Se conserva el cifrado y se necesitan las claves de todos los paquetes requeridos.",
+      "execute": "Exportar",
+      "processing": "Firmando…",
+      "completed": "Archivo firmado exportado: {{path}}",
+      "unavailable": "La firma solo está disponible cuando el backend se ejecuta en modo de depuración.",
+      "invalid": "Revisa los datos. Indica una ruta absoluta a otro archivo .cg.",
+      "failed": "No se pudo firmar. Revisa los archivos de claves, las claves de los paquetes y el destino.",
+      "keyMismatch": "La clave privada no coincide con la clave pública registrada para este ID.",
+      "fileDialogFailed": "No se pudo abrir el selector de archivos."
+    }
   },
   "saveCompatibility": {
     "unknown": "Desconocida",

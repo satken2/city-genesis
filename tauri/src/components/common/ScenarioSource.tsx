@@ -1,11 +1,11 @@
 import { useTranslation } from "react-i18next";
-import type { SaveEntry } from "../../utils/saves";
+import type { CommonSaveEntry, ScenarioEntry } from "../../utils/saves";
 import "./ScenarioSource.css";
 
 /** シナリオの保存元(自作/コミュニティ/DLC)と公式署名の札。 */
-export function ScenarioOriginBadges({ entry }: { entry: SaveEntry }) {
+export function ScenarioOriginBadges({ entry }: { entry: ScenarioEntry }) {
   const { t } = useTranslation();
-  const origin = entry.origin && entry.origin !== "save" ? entry.origin : null;
+  const origin = entry.origin;
   if (!origin && !entry.official) return null;
   return (
     <span className="scenario-badges">
@@ -19,7 +19,7 @@ export function ScenarioOriginBadges({ entry }: { entry: SaveEntry }) {
  * 都市に刻まれた必要パックと所有状況。読み込めるかの最終判定はコアの compatibility が正で、
  * ここは未所有のパックを名指しするための表示だけを担う。
  */
-export function RequiredPacks({ entry }: { entry: SaveEntry }) {
+export function RequiredPacks({ entry }: { entry: CommonSaveEntry }) {
   const { t } = useTranslation();
   if (!entry.required_packs?.length) return null;
   return (

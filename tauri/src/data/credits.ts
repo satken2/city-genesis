@@ -88,6 +88,16 @@ export type CreditEntry = {
  */
 export const CREDIT_ENTRIES: CreditEntry[] = [
   {
+    title: "Approved",
+    category: "image",
+    author: "Sea.icon",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/approved_10720847",
+    license: "Flaticon Free License",
+    requiredText: "Approved icon designed by Sea.icon from Flaticon",
+    note: "Scenario signing button (ui/approved.png). Source confirmed from the downloaded file's Zone.Identifier. License verified 2026-10-04.",
+  },
+  {
     title: "Badge",
     category: "image",
     author: "Magnific",

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { SaveEntry } from "../../utils/saves";
+import type { CommonSaveEntry } from "../../utils/saves";
 import { RequiredPacks } from "./ScenarioSource";
 import "./ScenarioSource.css";
 
@@ -9,7 +9,7 @@ import "./ScenarioSource.css";
  * 版は保存したコアのメジャー番号だけを「フォーマット vN」と出す。コアが読み込めるかを決めるのはメジャー番号の一致だけで、
  * マイナー・パッチの違いは読み込みに影響しないため(バランス変更の確認に使う完全な版はツールチップの履歴に残す)。
  */
-export function SaveVersionInfo({ entry }: { entry: SaveEntry }) {
+export function SaveVersionInfo({ entry }: { entry: CommonSaveEntry }) {
   const { t } = useTranslation();
   return <div className="save-version-info">
     <span title={t("saveCompatibility.history", {

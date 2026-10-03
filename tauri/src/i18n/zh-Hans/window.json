@@ -47,7 +47,8 @@
     "scenario_metadata": "介绍信息",
     "tutorial_intro": "教程",
     "citizen_detail": "市民",
-    "citizen_tracking": "追踪列表"
+    "citizen_tracking": "追踪列表",
+    "scenario_sign": "场景签名"
   },
   "cityMap": {
     "layers": {

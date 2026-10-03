@@ -12,7 +12,7 @@
  * グラフは API が返す新しい順の配列からゼロパディングをトリムしたうえで reverse() し、
  * 古い→新しいの時系列順で描画する。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
 import { useEffect, useMemo, useState, useRef } from "react";
@@ -56,7 +56,7 @@ export function ResourceDetailPanel({
 }: ResourceDetailPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCEARIO;
   const [resourceData, setResourceData] = useState<ResourceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

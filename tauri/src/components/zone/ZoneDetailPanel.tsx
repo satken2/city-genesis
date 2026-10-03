@@ -8,7 +8,7 @@
  * 所属道路の割り当て変更はアイコンパネルの地区編集モード(3DビューのCtrlラジアルメニュー)で行うため、
  * このパネルでは扱わない。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
 import { useEffect, useState } from "react";
@@ -36,7 +36,7 @@ export function ZoneDetailPanel({
   initialEntityId,
 }: ZoneDetailPanelProps) {
   const { t } = useTranslation();
-  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCEARIO;
 
   const [zoneData, setZoneData] = useState<ZoneData | null>(null);
   const [loading, setLoading] = useState(true);

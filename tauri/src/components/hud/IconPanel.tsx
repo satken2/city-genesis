@@ -2,8 +2,8 @@
  * アイコンパネル(画面左端に縦並びの常駐メニュー)
  *
  * 各種メニューウィンドウ(道路・建設・規制・統計…)を開くアイコンを縦一列に並べる。
- * 並び順・アイコン画像・開くウィンドウはすべて `hudCommon.ts` の `MENU_ICONS` が正で、
- * ここはその定義どおりに描くだけ(アイコンの追加はMENU_ICONSに1行足せば済む)。
+ * 並び順・開くウィンドウはすべて `hudCommon.ts` の `MENU_ICONS` が正で、
+ * アイコン画像は `assets/images/panel` 配下の画像を優先して描く(未定義時はMENU_ICONSの画像へフォールバック)。
  * 地区編集だけはウィンドウを開かず、Unityを地区編集ステートにする常駐モードのトグル
  * (ブルドーザと排他。状態は `hudMode` でコックピットと共有する)。
  *
@@ -12,7 +12,7 @@
  * Tauriコマンド `resize_icon_panel` で通知してウィンドウ丈を合わせる
  * (合わせないと透明な余白がクリックを吸ってUnityを操作できなくなる)。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
 import { Fragment, useCallback, useEffect, useRef } from "react";
@@ -37,10 +37,22 @@ import { useHudSession } from "./useHudSession";
 import "./hud.css";
 import "./IconPanel.css";
 
+const panelIconModules = import.meta.glob<{ default: string }>(
+  "../../assets/images/panel/*.png",
+  { eager: true }
+);
+
+function resolveIconSrc(icon: HudIconDef): string {
+  return (
+    panelIconModules[`../../assets/images/panel/${icon.id}.png`]?.default ??
+    iconUrl(icon.src)
+  );
+}
+
 export function IconPanel() {
   const { t } = useTranslation();
   const { visible, playMode, isLocked, epochExecuting } = useHudSession();
-  const godMode = playMode === PLAY_MODE_GOD;
+  const godMode = playMode === PLAY_MODE_SCEARIO;
   const mode = useHudMode();
   const panelRef = useRef<HTMLElement | null>(null);
 
@@ -171,7 +183,7 @@ export function IconPanel() {
               disabled={isLocked && !icon.enabledWhenLocked}
               onClick={() => void handleIconClick(icon)}
             >
-              <img src={iconUrl(icon.src)} alt={t(icon.tooltipKey)} className="hud-icon-img" draggable={false} />
+              <img src={resolveIconSrc(icon)} alt={t(icon.tooltipKey)} className="hud-icon-img" draggable={false} />
             </button>
           </Fragment>
         );

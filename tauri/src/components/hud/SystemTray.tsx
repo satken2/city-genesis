@@ -11,7 +11,7 @@
  * ウィンドウ幅を合わせる(透明な余白がUnityへのクリックを吸わないようにするため。
  * アイコンパネルの高さと同じ仕組み)。
  */
-import { PLAY_MODE_GOD, PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL } from "../../constants";
+import { PLAY_MODE_SCEARIO, PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL } from "../../constants";
 
 
 import { useEffect, useRef, useState } from "react";
@@ -38,7 +38,7 @@ type CompleteConstructionResult = {
 export function SystemTray({ backendConnected = true }: { backendConnected?: boolean }) {
   const { t } = useTranslation();
   const { visible, apiBaseUrl, playMode, debugExecution, epochExecuting } = useHudSession();
-  const godMode = playMode === PLAY_MODE_GOD;
+  const godMode = playMode === PLAY_MODE_SCEARIO;
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [completing, setCompleting] = useState(false);
 
@@ -68,7 +68,7 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
       await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ play_mode: godMode ? PLAY_MODE_NORMAL : PLAY_MODE_GOD }),
+        body: JSON.stringify({ play_mode: godMode ? PLAY_MODE_NORMAL : PLAY_MODE_SCEARIO }),
       });
     } catch (error) {
       console.error("failed to toggle template mode", error);

@@ -1,4 +1,4 @@
-import { PLAY_MODE_NORMAL, PLAY_MODE_GOD, PLAY_MODE_TUTORIAL } from "../../src/constants";
+import { PLAY_MODE_NORMAL, PLAY_MODE_SCEARIO, PLAY_MODE_TUTORIAL } from "../../src/constants";
 import assert from "node:assert/strict";
 import { Window } from "happy-dom";
 import { act } from "react";
@@ -21,10 +21,10 @@ import jaTerrainEditor from "../../src/i18n/ja/terrainEditor.json";
 const window = ((globalThis as { window?: Window }).window ?? new Window()) as Window;
 Object.assign(globalThis, { window, document: window.document, HTMLElement: window.HTMLElement,
   IS_REACT_ACT_ENVIRONMENT: true });
-const entry = { id: "local~mine", city_name: "City", scenario_title: { en: "My scenario" } as Record<string, string>, author: "Author",
+const entry = { id: "local~mine", is_scenario: true, saved_at: "20261003_215934", scenario_title: { en: "My scenario" } as Record<string, string>, author: "Author",
   scenario_description: { en: "Description", ja: "説明" }, scenario_objective: { en: "Objective" }, language: "ja",
   scenario_city_name: { ja: "見本市", en: "Sample Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, asset_region: 1,
-  terrain_source: "flat.png", map_width: 2000, map_height: 1000, ground_cover: 4 as number | undefined, climate: 7 as number | undefined,
+  map_width: 2000, map_height: 1000, ground_cover: 4 as number | undefined, climate: 7 as number | undefined,
   saved_core_version: "1.0.0", created_core_version: "1.0.0", compatibility: { loadable: true }, origin: "local",
   read_only: false, encrypted: false, required_packs: [], pack_status: {}, official: false };
 const entries = [entry,
@@ -56,7 +56,7 @@ let currentSaveId: string | null = null;
 let savedGames: Record<string, object> = {};
 const saveEntry = { id: "", city_name: "港町", save_name: "", population: 1234, current_date: 400, epoch: 3, simulation_days: 30,
   saved_at: "20260930_120000", is_scenario: false, language: "ja", saved_core_version: "1.0.0", created_core_version: "1.0.0",
-  compatibility: { loadable: true }, origin: "save", required_packs: [], pack_status: {} };
+  compatibility: { loadable: true }, required_packs: [], pack_status: {} };
 const playingCity = { name: "港町", scenario_title: { en: "Port" }, scenario_description: {}, scenario_objective: {},
   scenario_city_name: { en: "Port Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, climate: 2, ground_cover: 1, asset_region: 1 };
 /** 変更系の要求(保存・シナリオ作成・画像の保留)だけを拾う。一覧・詳細の取得はほかの分岐が返す */
@@ -237,10 +237,10 @@ delete state.errors.prepare_scenario_terrain_editor;
 
 await act(async () => { cardButton("local~mine", "scenarios.editCity").click(); });
 await settle();
-assert.deepEqual(lastCall("create_session"), { templateId: "local~mine", playMode: PLAY_MODE_GOD, acceptBalanceChange: true });
+assert.deepEqual(lastCall("create_session"), { templateId: "local~mine", playMode: PLAY_MODE_SCEARIO, acceptBalanceChange: true });
 await act(async () => { cardButton("workshop~123~copy", "scenarios.editCopy").click(); });
 await settle();
-assert.deepEqual(lastCall("create_session"), { templateId: "workshop~123~copy", playMode: PLAY_MODE_GOD, acceptBalanceChange: true });
+assert.deepEqual(lastCall("create_session"), { templateId: "workshop~123~copy", playMode: PLAY_MODE_SCEARIO, acceptBalanceChange: true });
 
 // 地形を取り込む: 画素数・形式は先頭のバイトから読み、マップの大きさはコアと同じく1km単位に切り上げる。
 assert.deepEqual([importedMapExtent(1001, 1), importedMapExtent(1002, 1), importedMapExtent(2, 0.5), importedMapExtent(3001, 10), importedMapExtent(11, 100)],

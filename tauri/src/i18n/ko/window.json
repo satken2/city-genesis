@@ -47,7 +47,8 @@
     "scenario_metadata": "소개 정보",
     "tutorial_intro": "튜토리얼",
     "citizen_detail": "시민",
-    "citizen_tracking": "추적 목록"
+    "citizen_tracking": "추적 목록",
+    "scenario_sign": "시나리오 서명"
   },
   "cityMap": {
     "layers": {

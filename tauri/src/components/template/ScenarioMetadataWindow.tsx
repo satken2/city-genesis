@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import { emit } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { SaveEntry, ScenarioStartOption, captureSaveThumbnail, saveError, uploadScenarioThumbnail } from "../../utils/saves";
+import { ScenarioEntry, ScenarioStartOption, captureSaveThumbnail, saveError, uploadScenarioThumbnail } from "../../utils/saves";
 import { compactLocalizedText, missingEnglish, type LocalizedText } from "../../utils/locale";
 import { ASSET_REGION_STANDARD, ASSET_REGION_TYPES, CLIMATE_TYPES, GROUND_COVER_TYPES, SIMULATION_DAYS_CHOICES } from "../../constants";
 import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
@@ -31,7 +31,7 @@ const TEXT_KEYS = ["scenario_title", "scenario_description", "scenario_objective
 const START_OPTIONS: ScenarioStartOption[] = ["simulation_days", "climate", "ground_cover", "asset_region"];
 
 /** フォームの初期値の元。編集では保存済みのシナリオ、作成ではプレイ中の都市(GET /api/v1/city/)と都市の言語 */
-type ScenarioSource = Pick<SaveEntry, (typeof TEXT_KEYS)[number] | "scenario_fixed_options" | "author" | "language"
+type ScenarioSource = Pick<ScenarioEntry, (typeof TEXT_KEYS)[number] | "scenario_fixed_options" | "author" | "language"
   | "simulation_days" | "climate" | "ground_cover" | "asset_region">;
 
 function startOptionsOf(source: ScenarioSource): Options {
@@ -47,7 +47,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
   apiBaseUrl: string; scenarioId: string; create?: boolean; onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const [entry, setEntry] = useState<SaveEntry | null>(null);
+  const [entry, setEntry] = useState<ScenarioEntry | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
   const [texts, setTexts] = useState<Texts>({});
   const [author, setAuthor] = useState("");
@@ -71,7 +71,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
         fetchApi<{ city: Omit<ScenarioSource, "author" | "language"> }>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), { signal }),
         fetchApi<{ language: string }>(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), { signal, cache: "reload" }),
       ]).then(([{ city }, session]) => apply({ ...city, language: session.language }))
-      : fetchApi<{ save: SaveEntry }>(buildApiUrl(apiBaseUrl, `/api/v1/saves/${encodeURIComponent(scenarioId)}?template=true`), { signal, cache: "reload" })
+      : fetchApi<{ save: ScenarioEntry }>(buildApiUrl(apiBaseUrl, `/api/v1/saves/${encodeURIComponent(scenarioId)}?template=true`), { signal, cache: "reload" })
         .then(({ save }) => { setEntry(save); apply(save); });
     load.catch(e => { if (!signal.aborted) setError(saveError(e, t)); });
     return () => controller.abort();

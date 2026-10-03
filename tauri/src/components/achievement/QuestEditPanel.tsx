@@ -2,7 +2,7 @@
  * 達成クエスト編集パネル
  *
  * window_type="quest_edit" のポップアップウィンドウで表示する専用パネル。
- * テンプレート作成モード(play_mode=PLAY_MODE_GOD)でのみ、達成クエストの新規作成・編集・削除を行う。
+ * テンプレート作成モード(play_mode=PLAY_MODE_SCEARIO)でのみ、達成クエストの新規作成・編集・削除を行う。
  *
  * - editQuestId が未指定の場合: 新規作成モード。確定ボタンで POST /api/v1/quests を呼ぶ。
  * - editQuestId が指定されている場合: 編集モード。マウント時に GET /api/v1/quests/{id} で

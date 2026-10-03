@@ -314,8 +314,8 @@
 /* タイルの右上と詳細パネルの種別の札の隣に、クリア済みのバッジを出す。 */
 .new-game-tile-cleared,
 .new-game-detail-cleared {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.1rem;
+  height: 2.1rem;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -325,8 +325,8 @@
   top: 8px;
   right: 8px;
   z-index: 2;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
 }
 
 /* 画像の無いシナリオ・チュートリアルは方眼の設計図のような面にする(シナリオ=選択色、チュートリアル=良好の色) */

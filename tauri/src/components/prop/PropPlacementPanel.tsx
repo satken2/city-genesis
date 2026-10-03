@@ -24,7 +24,7 @@
  * バックエンドへの送信は Tauri(UI)側が直接行い、成功後に edit_prop:finish で Unity の
  * 配置状態をリセットする。既存プロップの削除はコックピットのブルドーザで行う(本パネルは配置のみ)。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 import { usePlayMode } from "../../hooks/usePlayMode";
 
 
@@ -76,7 +76,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
   const { t } = useTranslation();
   const masterData = useMasterData();
 
-  const godMode = usePlayMode(apiBaseUrl ?? "") === PLAY_MODE_GOD;
+  const godMode = usePlayMode(apiBaseUrl ?? "") === PLAY_MODE_SCEARIO;
   const [mode, setMode] = useState<PlacementMode>("instance");
   const [selectedType, setSelectedType] = useState<number | null>(null);
 

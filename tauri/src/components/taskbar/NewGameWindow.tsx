@@ -46,7 +46,7 @@ import { BackIcon, NewGameIcon, ScenarioIcon } from "./SaveIcons";
 import clearedBadgeImage from "../../assets/images/ui/badge.png";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
-import { SaveEntry, ScenarioStartOption, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
+import { ScenarioEntry, ScenarioStartOption, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { ASSET_REGION_STANDARD, ASSET_REGION_TYPES, CLIMATE_TYPES, GROUND_COVER_TYPES } from "../../constants";
 import { SaveVersionInfo } from "../common/SaveVersionInfo";
 
@@ -59,7 +59,7 @@ type NewGameWindowProps = {
  * シナリオ一覧(GET /api/v1/scenarios)の要素。
  * scenario_* は紹介用の項目で、紹介文は任意。読み込み可否はコアの検証結果に従う。
  */
-type TemplateEntry = SaveEntry;
+type TemplateEntry = ScenarioEntry;
 
 /** プレイヤーのプロフィール(GET /api/v1/profile)のうち、この画面が使う項目 */
 type ProfileEntry = {
@@ -129,9 +129,9 @@ const EXTRA_START_OPTIONS: { key: Exclude<ScenarioStartOption, "simulation_days"
   { key: "asset_region", values: ASSET_REGION_TYPES, labelKey: "assetRegion" },
 ];
 
-/** 初期の都市名。選んだ都市の言語 → 英語の順に引き、無ければ保存済みの都市名 */
+/** 初期の都市名。選んだ都市の言語 → 英語の順に引く */
 function defaultCityNameOf(template: TemplateEntry, language: string): string {
-  return resolveLocalizedText(template.scenario_city_name, language) || template.city_name || "";
+  return resolveLocalizedText(template.scenario_city_name, language);
 }
 
 function startOptionValuesOf(template: TemplateEntry | null): Record<Exclude<ScenarioStartOption, "simulation_days">, number> {

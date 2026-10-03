@@ -33,7 +33,7 @@
  * エラーレスポンス時はさらに、その理由を通知ポップアップで表示する(コアの本文は英語固定なので、
  * 理由の分かる拒否は専用の翻訳文にする)。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -123,7 +123,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
   const executingRef = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const [epochCount, setEpochCount] = useState(1);
-  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCEARIO;
   const { fontSize } = useFontSize();
   const maxEpochCount = godMode ? TEMPLATE_MAX_EPOCH_COUNT : MAX_EPOCH_COUNT;
 

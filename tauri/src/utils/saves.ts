@@ -16,33 +16,44 @@ export type SaveCompatibility = {
 export type ScenarioOrigin = "local" | "workshop" | "dlc";
 /** 必要パックの所有状況。unverified は本番でSteam検証もそのキャッシュもまだ無い状態。 */
 export type PackStatus = "owned" | "not_owned" | "unverified";
-export type SaveEntry = {
-  id: string; city_name: string; population: number; current_date: number;
-  epoch: number; simulation_days: number; saved_at: string; is_scenario: boolean; language: string;
-  /** 通常セーブの名前(別名セーブで付ける)。無ければ見出しは都市名 */
-  save_name?: string;
+/** 保存種別に共通する一覧情報。互換性と所有状況はAPIが実行環境から計算する。 */
+export type CommonSaveEntry = {
+  id: string; simulation_days: number; saved_at: string; language: string;
+  /** 通常セーブ一覧でも、元シナリオのタイトルを表示する */
+  scenario_title?: LocalizedText;
   has_thumbnail?: boolean;
   saved_core_version?: string; created_core_version?: string; last_simulated_core_version?: string | null;
   compatibility: SaveCompatibility;
-  /** 通常セーブの一覧では "save" */
-  origin?: ScenarioOrigin | "save";
-  read_only?: boolean;
   /** DLC由来の都市はパック鍵で暗号化して保存される */
   encrypted?: boolean;
   /** 出自として都市に刻まれた必要パック(昇順)。通常セーブにも付く */
   required_packs?: string[];
   pack_status?: Record<string, PackStatus>;
+};
+
+/** 通常セーブの一覧情報。プレイ中の都市名は1つの文字列。 */
+export type SaveEntry = CommonSaveEntry & {
+  is_scenario: false;
+  city_name: string; population: number; current_date: number; epoch: number;
+  /** 別名セーブで付ける一覧の見出し。無ければ都市名を使う */
+  save_name?: string;
+  autosave?: boolean;
+};
+
+/** シナリオの一覧情報。都市名は開始時の多言語初期値だけを持つ。 */
+export type ScenarioEntry = CommonSaveEntry & {
+  is_scenario: true;
+  origin?: ScenarioOrigin;
+  read_only?: boolean;
   /** 公式署名が有効か */
   official?: boolean;
   /** 紹介文と初期の都市名。作者が書く多言語テキストで、表示は `resolveLocalizedText` で言語を選ぶ */
-  scenario_title?: LocalizedText; scenario_description?: LocalizedText; scenario_objective?: LocalizedText;
+  scenario_description?: LocalizedText; scenario_objective?: LocalizedText;
   scenario_city_name?: LocalizedText;
   /** 作者が固定した開始設定の項目。固定しない項目はゲーム開始時にプレイヤーが選べる */
   scenario_fixed_options?: ScenarioStartOption[];
   author?: string;
   content_revision?: number;
-  /** 地形の出どころ(取り込んだ標高ファイルの名前、またはチュートリアルの舞台の名前)。表示用の情報で、判定には使わない */
-  terrain_source?: string;
   /** マップの大きさ(m)。地形エディタでも変わらない */
   map_width?: number; map_height?: number;
   /** 都市が持つ地表・気候(`GROUND_COVER_*` / `CLIMATE_*`)。地形エディタ・紹介情報で変わる */
@@ -54,9 +65,9 @@ export type SaveEntry = {
 /** 作者が「固定」にできる開始設定の項目(コアの `SCENARIO_START_OPTIONS`)。言語は常にプレイヤーが選べるので含まない */
 export type ScenarioStartOption = "simulation_days" | "climate" | "ground_cover" | "asset_region";
 
-/** シナリオの見出し。タイトル(表示言語 → 英語)、無ければ都市名、それも無ければIDの先頭 */
-export function scenarioDisplayTitle(entry: SaveEntry, language: string | undefined): string {
-  return resolveLocalizedText(entry.scenario_title, language) || entry.city_name || entry.id.slice(0, 8);
+/** シナリオの見出し。タイトル、初期の都市名、IDの先頭の順に使う */
+export function scenarioDisplayTitle(entry: ScenarioEntry, language: string | undefined): string {
+  return resolveLocalizedText(entry.scenario_title, language) || resolveLocalizedText(entry.scenario_city_name, language) || entry.id.slice(0, 8);
 }
 
 /** 通常セーブの見出し。名前、無ければ都市名、それも無ければIDの先頭 */

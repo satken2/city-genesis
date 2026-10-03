@@ -46,6 +46,7 @@ const CreditsWindow = lazy(() => import("./components/taskbar/CreditsWindow").th
 const SaveLoadWindow = lazy(() => import("./components/taskbar/SaveLoadWindow").then(m => ({ default: m.SaveLoadWindow })));
 const ScenarioManagerWindow = lazy(() => import("./components/template/ScenarioManagerWindow").then(m => ({ default: m.ScenarioManagerWindow })));
 const ScenarioMetadataWindow = lazy(() => import("./components/template/ScenarioMetadataWindow").then(m => ({ default: m.ScenarioMetadataWindow })));
+const ScenarioSignWindow = lazy(() => import("./components/template/ScenarioSignWindow").then(m => ({ default: m.ScenarioSignWindow })));
 const SaveListWindow = lazy(() => import("./components/taskbar/SaveListWindow").then(m => ({ default: m.SaveListWindow })));
 const NewGameWindow = lazy(() => import("./components/taskbar/NewGameWindow").then(m => ({ default: m.NewGameWindow })));
 const CityRenameWindow = lazy(() => import("./components/taskbar/CityRenameWindow").then(m => ({ default: m.CityRenameWindow })));
@@ -96,7 +97,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_metadata", "new_game", "city_rename", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_sign", "scenario_metadata", "new_game", "city_rename", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -534,6 +535,9 @@ function App() {
               <SaveLoadWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "scenario_manager" ? (
               <ScenarioManagerWindow apiBaseUrl={context.api_base_url} />
+            ) : context.window_type === "scenario_sign" ? (
+              <ScenarioSignWindow key={`${windowExtra(context)?.scenarioId ?? ""}:${windowExtra(context)?.openedAt ?? ""}`}
+                apiBaseUrl={context.api_base_url} scenarioId={String(windowExtra(context)?.scenarioId ?? "")} onClose={closeWindow} />
             ) : context.window_type === "scenario_metadata" ? (
               <ScenarioMetadataWindow key={windowExtra(context)?.create === true ? "create" : String(windowExtra(context)?.scenarioId ?? "")}
                 apiBaseUrl={context.api_base_url} scenarioId={String(windowExtra(context)?.scenarioId ?? "")}

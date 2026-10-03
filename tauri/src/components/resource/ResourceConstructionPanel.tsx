@@ -2,8 +2,8 @@
  * 資源編集パネル
  *
  * window_type="resource_edit" のポップアップウィンドウで表示する専用パネル。
- * テンプレート作成モード(play_mode=PLAY_MODE_GOD)専用の機能で、アイコンパネルのボタンも
- * play_mode が PLAY_MODE_GOD のときのみ表示される(hud/IconPanel.tsx参照)。
+ * テンプレート作成モード(play_mode=PLAY_MODE_SCEARIO)専用の機能で、アイコンパネルのボタンも
+ * play_mode が PLAY_MODE_SCEARIO のときのみ表示される(hud/IconPanel.tsx参照)。
  * PathConstructionPanel と同じ単列レイアウト。
  *
  * 操作フロー:

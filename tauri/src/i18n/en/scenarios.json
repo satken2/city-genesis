@@ -63,7 +63,30 @@
     "startSettings": "Start settings",
     "startSettingsHint": "Items with the “Changeable” checkbox on can be changed when starting a game.",
     "changeableOption": "Changeable",
-    "englishRequired": "English text is required. The title must have English, and any other item you fill in also needs English."
+    "englishRequired": "English text is required. The title must have English, and any other item you fill in also needs English.",
+    "signing": {
+      "button": "Sign",
+      "hint": "Export a signed .cg file while keeping the source scenario. Use a signing key ID whose public key is registered in the intended build.",
+      "mode": "Operation",
+      "signOnly": "Sign only",
+      "signAndEncrypt": "Sign and encrypt",
+      "privateKey": "Signing private key",
+      "keyId": "Signing key ID",
+      "scenarioId": "Official scenario ID",
+      "revision": "Content revision",
+      "packId": "Pack ID",
+      "keyring": "Pack keyring",
+      "output": "Output (.cg)",
+      "packsHint": "Required packs: {{packs}}. Encryption is preserved and keys for every required pack are needed.",
+      "execute": "Export",
+      "processing": "Signing…",
+      "completed": "Signed file exported: {{path}}",
+      "unavailable": "Signing is available only when the backend runs in debug mode.",
+      "invalid": "Check the inputs. Choose an absolute path to a different .cg output file.",
+      "failed": "Signing failed. Check the key files, pack keys and output path.",
+      "keyMismatch": "The private key does not match the public key registered for this signing key ID.",
+      "fileDialogFailed": "Could not open the file dialog."
+    }
   },
   "saveCompatibility": {
     "unknown": "Unknown",

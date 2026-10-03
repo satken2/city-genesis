@@ -1,4 +1,4 @@
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 import { useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -76,7 +76,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const locale = resolveIntlLocale(i18n.language);
   const fmt = (value: number, digits = 1) => value.toLocaleString(locale, { maximumFractionDigits: digits });
   const [historyMode, setHistoryMode] = useState<"household" | "total">("household");
-  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCEARIO;
   const [quests, setQuests] = useState<Quest[]>([]);
   const [scoreData, setScoreData] = useState<ScoreResponse | null>(null);
   const [loading, setLoading] = useState(true);

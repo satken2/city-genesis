@@ -15,7 +15,7 @@ use tauri::{Emitter, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl,
 
 // HTTPのプレイモード。コアのconsts.pyと同じ値で送る。
 const PLAY_MODE_NORMAL: i32 = 0;
-const PLAY_MODE_GOD: i32 = 1;
+const PLAY_MODE_SCEARIO: i32 = 1;
 const PLAY_MODE_TUTORIAL: i32 = 2;
 
 fn load_registry() -> WindowRegistry {
@@ -440,7 +440,7 @@ async fn create_session(
     asset_region: Option<i32>,
 ) -> Result<(), String> {
     let play_mode = play_mode.unwrap_or(PLAY_MODE_NORMAL);
-    if !matches!(play_mode, PLAY_MODE_NORMAL | PLAY_MODE_GOD | PLAY_MODE_TUTORIAL) {
+    if !matches!(play_mode, PLAY_MODE_NORMAL | PLAY_MODE_SCEARIO | PLAY_MODE_TUTORIAL) {
         return Err("不正なプレイモードです。".to_string());
     }
     log::info!(

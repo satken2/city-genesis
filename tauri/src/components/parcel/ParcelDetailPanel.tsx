@@ -14,7 +14,7 @@
  * 規制関連フィールドは restriction_override=true の場合のみ有効になる。
  * 変更内容は「保存」ボタンで PATCH リクエストとして送信する。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
 import { useEffect, useRef, useState } from "react";
@@ -82,7 +82,7 @@ export function ParcelDetailPanel({
 }: ParcelDetailPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_GOD;
+  const godMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCEARIO;
   const [parcelData, setParcelData] = useState<ParcelData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

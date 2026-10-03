@@ -58,3 +58,11 @@
 .scenario-start-row { display: grid; grid-template-columns: 12rem minmax(0, 1fr) auto; align-items: center; gap: 10px; }
 .scenario-start-changeable { display: inline-flex; align-items: center; gap: 6px; color: var(--flat-text-label); }
 .scenario-start-value { padding: 0 8px; color: var(--flat-text); } /* 下の行の select と文字の開始位置を揃える */
+
+.scenario-sign h3, .scenario-sign p { margin: 0; overflow-wrap: anywhere; }
+.scenario-sign-row { display: grid; grid-template-columns: 10rem minmax(0, 1fr); align-items: center; gap: .75rem; }
+.scenario-sign-row > span, .scenario-sign-row > label { color: var(--flat-text-label); }
+.scenario-sign-row input { min-width: 0; width: 100%; box-sizing: border-box; border: 0; padding: .5rem; font: inherit; background: var(--flat-sunken); color: var(--flat-text); }
+.scenario-sign-file { display: flex; gap: .5rem; min-width: 0; }
+.scenario-sign-file button { flex-shrink: 0; }
+.scenario-sign .scenario-import-actions { gap: .75rem; margin-top: auto; }

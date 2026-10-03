@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { Window } from "happy-dom";
-import { PLAY_MODE_NORMAL, PLAY_MODE_GOD, PLAY_MODE_TUTORIAL } from "../../src/constants";
+import { PLAY_MODE_NORMAL, PLAY_MODE_SCEARIO, PLAY_MODE_TUTORIAL } from "../../src/constants";
 import { IconPanel } from "../../src/components/hud/IconPanel";
 import { SystemTray } from "../../src/components/hud/SystemTray";
 import { usePlayMode } from "../../src/hooks/usePlayMode";
@@ -33,7 +33,7 @@ try {
   await update(PLAY_MODE_NORMAL);
   const normalIcons = [...container.querySelectorAll(".icon-panel button")].map(button => button.id);
   assert.equal(container.querySelector<HTMLButtonElement>("#stat")!.disabled, true, "normal HUD locks before founding");
-  await update(PLAY_MODE_GOD);
+  await update(PLAY_MODE_SCEARIO);
   for (const id of ["resource_edit", "parameter_edit", "agent_creation", "template_complete", "template_street_grid", "debug_template"]) {
     assert.ok(container.querySelector(`#${id}`), `god mode exposes ${id}`);
   }

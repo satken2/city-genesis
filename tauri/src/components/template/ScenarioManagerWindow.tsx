@@ -14,14 +14,14 @@
  *
  * 都市の編集は create_session でポップアップをすべて閉じるので、確認文で地形エディタの未保存の編集に触れる。
  */
-import { PLAY_MODE_GOD } from "../../constants";
+import { PLAY_MODE_SCEARIO } from "../../constants";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { errorCode, prepareSaveLoad, SaveEntry, saveError, scenarioDisplayTitle } from "../../utils/saves";
+import { errorCode, prepareSaveLoad, ScenarioEntry, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { loadAppSettings } from "../../utils/settings";
 import { resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
@@ -41,9 +41,11 @@ import terrainIcon from "../../assets/images/ui/terrain.png";
 import repairIcon from "../../assets/images/ui/repair.png";
 import rocketIcon from "../../assets/images/ui/rocket.png";
 import trashIcon from "../../assets/images/ui/trash.png";
+import approvedIcon from "../../assets/images/ui/approved.png";
+import type { ScenarioCatalog } from "./ScenarioSignWindow";
 import "./Scenarios.css";
 
-type Catalog = { scenarios: Record<string, SaveEntry>; upload_available: boolean; upload_host: string | null };
+type Catalog = ScenarioCatalog;
 type Tab = "scenarios" | "terrains";
 
 /** アイコンだけの操作ボタン。説明は title(マウスオーバー)に出し、無効の理由があれば次の行に添える。 */
@@ -87,17 +89,17 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setBusy(true); setError(""); setStatus("");
     try { await operation(); return true; } catch (e) { setError(saveError(e, t)); return false; } finally { setBusy(false); }
   }
-  /** 都市を神モード(play_mode=PLAY_MODE_GOD)で開く。自作は上書き、コミュニティ・DLC はコピーとして保存される。 */
-  async function editCity(entry: SaveEntry, copy: boolean) {
+  /** 都市を神モード(play_mode=PLAY_MODE_SCEARIO)で開く。自作は上書き、コミュニティ・DLC はコピーとして保存される。 */
+  async function editCity(entry: ScenarioEntry, copy: boolean) {
     if (!await requestConfirm({ message: t(copy ? "scenarios.copyConfirm" : "scenarios.editConfirm") })) return;
     if (!await prepareSaveLoad(apiBaseUrl, entry.id, true, t)) return;
-    await invoke("create_session", { templateId: entry.id, playMode: PLAY_MODE_GOD, acceptBalanceChange: true });
+    await invoke("create_session", { templateId: entry.id, playMode: PLAY_MODE_SCEARIO, acceptBalanceChange: true });
   }
   /**
    * シナリオの地形を作業フォルダへ書き出してから地形エディタを開く(セッションは使わない)。
    * コアの理由コードはそのまま翻訳し、コードの無い Rust 側の失敗(本文が日本語固定)は汎用の文言にして本文はログに残す。
    */
-  async function editTerrain(entry: SaveEntry) {
+  async function editTerrain(entry: ScenarioEntry) {
     const editorId = await invoke<string>("prepare_scenario_terrain_editor", { scenarioId: entry.id }).catch((e: unknown) => {
       if (errorCode(e)) throw e;
       console.error("[ScenarioManager] failed to prepare the terrain editor", e);
@@ -106,7 +108,7 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     await invoke("open_registered_window", { windowType: "terrain_editor", entityId: editorId });
   }
   /** 自作シナリオのファイルを削除する(元に戻せない)。失敗しても一覧が古いままのことがあるので取り直す。 */
-  async function deleteScenario(entry: SaveEntry) {
+  async function deleteScenario(entry: ScenarioEntry) {
     const confirmed = await requestConfirm({
       message: t("scenarios.deleteConfirm", { title: scenarioDisplayTitle(entry, i18n.language) }), confirmLabel: t("common.delete"), tone: "danger",
     });
@@ -175,6 +177,10 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                       await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/scenarios/${encodeURIComponent(entry.id)}/upload`), { method: "POST" });
                       setStatus(t("scenarios.uploaded"));
                     })} />
+                  {catalog.signing_available && <ScenarioActionButton icon={approvedIcon} label={t("scenarios.signing.button")} disabled={busy || !loadable}
+                    onClick={() => void run(() => invoke("open_registered_window", {
+                      windowType: "scenario_sign", params: { extra: { scenarioId: entry.id, openedAt: Date.now() } },
+                    }))} />}
                   <ScenarioActionButton icon={trashIcon} label={t("common.delete")} className="scenario-icon-button--delete" disabled={busy}
                     onClick={() => void run(() => deleteScenario(entry))} />
                 </> : <button type="button" disabled={busy || !loadable} title={t("scenarios.readOnlyHint")}

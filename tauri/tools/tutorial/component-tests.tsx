@@ -1,4 +1,4 @@
-import { PLAY_MODE_NORMAL, PLAY_MODE_GOD, PLAY_MODE_TUTORIAL } from "../../src/constants";
+import { PLAY_MODE_NORMAL, PLAY_MODE_SCEARIO, PLAY_MODE_TUTORIAL } from "../../src/constants";
 import assert from "node:assert/strict";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";

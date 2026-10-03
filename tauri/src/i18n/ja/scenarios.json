@@ -63,7 +63,30 @@
     "startSettings": "開始設定",
     "startSettingsHint": "「変更可能」のチェックボックスをオンにした項目は、ゲーム開始時に変更できます。",
     "changeableOption": "変更可能",
-    "englishRequired": "英語の入力が必要です。タイトルは英語が必須で、ほかの項目も書くなら英語も書いてください。"
+    "englishRequired": "英語の入力が必要です。タイトルは英語が必須で、ほかの項目も書くなら英語も書いてください。",
+    "signing": {
+      "button": "署名",
+      "hint": "元のシナリオを残し、署名した別の .cg ファイルを書き出します。署名鍵IDには、使用するビルドに公開鍵が登録されているIDを指定してください。",
+      "mode": "処理",
+      "signOnly": "署名のみ",
+      "signAndEncrypt": "署名＋暗号化",
+      "privateKey": "署名用秘密鍵",
+      "keyId": "署名鍵ID",
+      "scenarioId": "公式シナリオID",
+      "revision": "内容の版",
+      "packId": "パックID",
+      "keyring": "パック鍵のキーリング",
+      "output": "出力先 (.cg)",
+      "packsHint": "必要パック: {{packs}}。暗号化を維持し、すべての必要パックの鍵を使います。",
+      "execute": "書き出す",
+      "processing": "署名しています…",
+      "completed": "署名したファイルを書き出しました: {{path}}",
+      "unavailable": "署名はバックエンドのデバッグ実行時だけ利用できます。",
+      "invalid": "入力内容を確認してください。出力先は別の .cg ファイルの絶対パスで指定してください。",
+      "failed": "署名に失敗しました。鍵ファイル、パック鍵、出力先を確認してください。",
+      "keyMismatch": "署名鍵IDに登録された公開鍵と秘密鍵が一致しません。",
+      "fileDialogFailed": "ファイル選択を開けませんでした。"
+    }
   },
   "saveCompatibility": {
     "unknown": "不明",

@@ -47,7 +47,8 @@
     "scenario_metadata": "Metadata",
     "tutorial_intro": "Tutorial",
     "citizen_detail": "Citizen",
-    "citizen_tracking": "Tracking list"
+    "citizen_tracking": "Tracking list",
+    "scenario_sign": "Scenario signing"
   },
   "cityMap": {
     "layers": {

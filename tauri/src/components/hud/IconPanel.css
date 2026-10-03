@@ -2,9 +2,9 @@
  * アイコンパネル(画面左端の縦並びメニュー)のスタイル
  *
  * パネル自体の背景は透明で、ボタン1個ずつが3Dビューの上に浮いて見える。
- * ボタンの面(角丸・落ち影)はCSSで描き、アイコン画像は内側にパディングを取って収める
+ * ボタンの面(角丸・枠線・落ち影)はCSSで描き、アイコン画像は内側にパディングを取って収める
  * (画像自体に枠や影を持たせないため、アイコン素材を差し替えても見た目が揃う)。
- * 面はグラデーションを使わず単色にする。アイコン素材が濃淡のあるカラーイラストなので、
+ * 面は共通トークンの紺色を使い、グラデーションを使わず単色にする。アイコン素材が濃淡のあるカラーイラストなので、
  * 面にも濃淡があると縦一列に並べたとき全体がぼやけて見えるため。
  *
  * 幅はウィンドウ側が固定で持つ(`window.rs` の `ICON_PANEL_WIDTH`)。ボタン寸法を変えたら
@@ -35,15 +35,18 @@
   flex-shrink: 0;
   padding: 3px;
   overflow: hidden;
-  border-radius: 5px;
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
-  transition: background 0.12s, box-shadow 0.12s, transform 0.12s;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: var(--flat-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  transition: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .hud-icon-btn.icon-panel-slot:hover {
-  background: #e6ebf2;
-  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.6);
+  background: var(--flat-raised-hover);
+  border-color: var(--flat-accent);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
 }
 
 /* 押下中は面を沈める(落ち影を弱めて1px下げる) */
@@ -52,14 +55,25 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* トグルON(地区編集)は橙の面色で示す */
+/* トグルON(地区編集)は橙の面色と枠線で示す */
 .hud-icon-btn.icon-panel-slot.hud-icon-btn--active {
   background: rgba(205, 70, 24, 0.64);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  border-color: #e95420;
 }
 
 .hud-icon-btn.icon-panel-slot.hud-icon-btn--active:hover {
   background: rgba(221, 85, 37, 0.74);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-icon-btn.icon-panel-slot {
+    transition: none;
+  }
+
+  .hud-icon-btn.icon-panel-slot:hover,
+  .hud-icon-btn.icon-panel-slot:active {
+    transform: none;
+  }
 }
 
 /* テンプレートモード専用アイコン群の区切り線 */
