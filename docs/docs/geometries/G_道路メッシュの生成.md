@@ -365,7 +365,7 @@ Models/Paths/p{path_variant}/{position}
 | 構成要素             | 値                                                    | 説明      |
 | ---------------- | ---------------------------------------------------- | ------- |
 | **path_variant** | `p{path_variant}`                                    | バリアント番号 |
-| **position**     | `body`, `line`, `sidewalk`, `tree`, `wall`, `center` | パーツの種類  |
+| **position**     | `body`, `line`, `sidewalk`, `tree`, `wall`, `wall_underground`, `center` | パーツの種類  |
 | **接写用サフィックス** | `{position}_close`                                | 描画LODが Close のときに優先される任意のモデル（例: `body_close`）。無印と同じフォルダに置き、bbox・原点・マテリアルを無印と一致させる |
 
 ### 6.2 命名例
@@ -397,7 +397,7 @@ Models/Paths/p100/sidewalk   バリアント100の歩道
 | `pillar_cap` | 柱のキャップ     | 任意    | 高架の柱の上部を保護または装飾するキャップパーツ。Y方向には拡大（スケール）されない。柱と同じ地点にだけ置く                |
 | `portal`     | 坑口         | 任意    | 地下パスの描画区間⇔トンネル区間の境界（坑口）に配置。プレハブはローカル+Zがトンネル内部を向く前提                    |
 
-`_close` の対象は `CreateSplineMesh` でスプラインに沿って敷くパーツ（`body` / `line` / `sidewalk` / `wall` / `center`。線路では `track` / `wire` / `platform` / `platform_wall` も）である。Instantiate 配置の `tree` / `pillar` / `pillar_cap` / `portal`、道路設備（§8.6）、交差点内のコネクタ・終端部品は描画LODに関わらず無印を使う。
+`_close` の対象は `CreateSplineMesh` でスプラインに沿って敷くパーツ（`body` / `line` / `sidewalk` / `wall` / `wall_underground` / `center`。線路では `track` / `wire` / `platform` / `platform_wall` も）である。Instantiate 配置の `tree` / `pillar` / `pillar_cap` / `portal`、道路設備（§8.6）、交差点内のコネクタ・終端部品は描画LODに関わらず無印を使う。
 
 ### 6.4 パーツプレハブのモデリング規約
 
@@ -1125,4 +1125,4 @@ ambientCGのPaving Stones 033（CC0）の色・NormalGL画像を使用する。P
 
 開口索引は建物の描画LODに依存しない。`PathManager` は建物更新の前後の開口に近い道路をデータのセル逆引きで抽出し、中心線との距離で絞ってから `geometryRevisions` を進め、既存の再生成キューへ送る。退避中の道路も古いLODキャッシュを復元しない。建物削除・解体開始では元の歩道へ戻り、全消去では索引を消す。
 
-実FBXによる接続形状・片側の歩道と樹木・曲線・道路方向反転・高架除外・LODと登録削除の回帰検証は `unity/Tests/BuildingAccess/run.ps1`。接続点の定義は [F_建物メッシュの生成](F_建物メッシュの生成.md) §16、モデルの著作は [I_建物パーツ作成マニュアル](I_建物パーツ作成マニュアル.md) §11。
+実FBXによる接続形状・片側の歩道と樹木・曲線・道路方向反転・高架除外・LODと登録削除の回帰検証は `unity/Tests/BuildingAccess/run.ps1`。接続点の定義は [F_建物メッシュの生成](F_建物メッシュの生成.md) §16、モデルの著作は [道路間口マーカー](I_建物パーツ作成マニュアル.md#8-既成建物の道路間口マーカー)。
