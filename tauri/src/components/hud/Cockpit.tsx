@@ -2,7 +2,7 @@
  * コックピット(画面下部中央の常駐パネル)
  *
  * プレイ中に最も頻繁に見る情報と操作を1枚に集約する。
- *   [追跡リスト] [常用ツール3種(2列のグリッド)] [公共サービス充足度] [都市名・施政スコア / 日付・予算メータ(2行2列)] [アラート] [エポック処理開始]
+ *   [追跡リスト] [常用ツール] [公共サービス充足度] [都市名・日付 / 確定気候 / スコア・予算] [アラート] [エポック処理開始]
  *
  * - 追跡リスト: 市民パネルの「追跡」で加えた市民の一覧を開く。一時停止中の3Dビューで車・歩行者を
  *   クリックしたときに市民を推定できなかった理由(`citizen:pick_failed`)は、常駐するこのウィンドウが通知で案内する。
@@ -70,7 +70,8 @@ const L1_NOTIFICATION_POLL_INTERVAL_MS = 30_000;
 
 export function Cockpit() {
   const { t, i18n } = useTranslation();
-  const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting, playMode } = useHudSession();
+  const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting, playMode,
+    epochTemperature, epochPrecipitation, epochSunlight } = useHudSession();
   const godMode = playMode === PLAY_MODE_SCEARIO;
   const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, godMode);
   const mode = useHudMode();
@@ -337,6 +338,28 @@ export function Cockpit() {
         >
           {cityName || "—"}
         </button>
+        <div className="cockpit-climate" aria-label={t("weather.epochClimate")}>
+          <span className="cockpit-climate-row" title={t("weather.temperature")}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M9 14.5V5a3 3 0 0 1 6 0v9.5a5 5 0 1 1-6 0Z" />
+              <path d="M12 8v9" /><circle cx="12" cy="18" r="1.5" />
+            </svg>
+            <span>{epochTemperature == null ? "—" : `${epochTemperature.toLocaleString(locale, { maximumFractionDigits: 1 })}°C`}</span>
+          </span>
+          <span className="cockpit-climate-row" title={t("weather.precipitation")}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M12 3s-7 8-7 12a7 7 0 0 0 14 0c0-4-7-12-7-12Z" />
+              <path d="M8 15a4 4 0 0 0 4 4" />
+            </svg>
+            <span>{epochPrecipitation == null ? "—" : `${epochPrecipitation.toLocaleString(locale, { maximumFractionDigits: 0 })}mm`}</span>
+          </span>
+          <span className="cockpit-climate-row" title={t("weather.sunlight")}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" /><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2" />
+            </svg>
+            <span>{epochSunlight == null ? "—" : `${epochSunlight.toLocaleString(locale, { maximumFractionDigits: 0 })}%`}</span>
+          </span>
+        </div>
         <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
         <div className="cockpit-date-weather" data-guide="hud.date">
           <span className="cockpit-date">{formattedDate}</span>

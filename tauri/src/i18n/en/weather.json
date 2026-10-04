@@ -20,6 +20,10 @@
       "light_snow": "Light snow",
       "snow": "Snow",
       "blizzard": "Blizzard"
-    }
+    },
+    "epochClimate": "Epoch climate",
+    "temperature": "Temperature",
+    "precipitation": "Precipitation (monthly equivalent)",
+    "sunlight": "Sunlight intensity"
   }
 }

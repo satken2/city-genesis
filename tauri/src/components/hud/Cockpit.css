@@ -1,7 +1,7 @@
 /**
  * コックピット(画面下部中央)のスタイル
  *
- * 左から [追跡リスト] [常用ツール2x2] [公共サービス充足度の縦棒] [都市名・施政スコア / 日付・予算メータ の2x2]
+ * 左から [追跡リスト] [常用ツール2x2] [公共サービス充足度] [都市名・日付 / 確定気候 / スコア・予算]
  * [アラート] [エポック処理開始] の横並び。
  * ウィンドウはこのパネルの実寸ぴったりで生成されるため、パネルは常にウィンドウいっぱいに広がる。
  * 充足度メーターのスタイルは PublicServiceGauges.css 側にある。
@@ -56,17 +56,17 @@
   border-radius: 4px;
 }
 
-/* ─── 都市名・施政スコア・日付・予算メータ(4分割) ─── */
+/* ─── 都市情報・確定気候・スコアと予算 ─── */
 
 /*
- * 左列=文字情報(上:都市名 / 下:日付)、右列=メータ(上:施政スコア / 下:予算)の2x2。
+ * 左列=都市名と日付、中央列=確定気候、右列=スコアと予算。
  * align-self: stretch で .cockpit の align-items:center を打ち消し、
  * 常用ツール列と同じ丈(パネルの上下いっぱい)にする。
  * 右列は auto 幅で、2つのメータのうち広い方に揃う(バーの右端が縦に揃う)。
  */
 .cockpit-status {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   grid-template-rows: 1fr 1fr;
   align-self: stretch;
   align-items: center;
@@ -74,6 +74,30 @@
   row-gap: 2px;
   flex: 1;
   min-width: 0;
+}
+
+.cockpit-climate {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #d8e5f2;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cockpit-climate-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.cockpit-climate-row svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 /* 都市名はクリックで変更ウィンドウを開くボタン。見た目はテキストのままにする */
