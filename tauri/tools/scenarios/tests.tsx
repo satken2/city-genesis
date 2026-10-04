@@ -16,19 +16,25 @@ import { encodeFloat16Array, uint8ToBase64 } from "../../src/components/terrain/
 import { emit, state } from "./mock-runtime";
 import jaScenarios from "../../src/i18n/ja/scenarios.json";
 import jaTerrainEditor from "../../src/i18n/ja/terrainEditor.json";
+import type { ClimateSettings } from "../../src/utils/climate";
+import { NEW_GAME_TUTORIAL_SCENARIOS } from "../../src/components/tutorial/tutorialSteps";
 
 // DOM は run.mjs が React より先に用意する(単体で読み込んだときだけここで作る)。
 const window = ((globalThis as { window?: Window }).window ?? new Window()) as Window;
+const climate = (name: string): ClimateSettings => ({ name, months: Array.from({ length: 12 }, () => ({
+  temperature: 20, precipitation: 100, sunlight: 70, weather: { clear: 100 },
+})) });
+const firstTutorial = NEW_GAME_TUTORIAL_SCENARIOS[0].id;
 Object.assign(globalThis, { window, document: window.document, HTMLElement: window.HTMLElement,
   IS_REACT_ACT_ENVIRONMENT: true });
 const entry = { id: "local~mine", is_scenario: true, saved_at: "20261003_215934", scenario_title: { en: "My scenario" } as Record<string, string>, author: "Author",
   scenario_description: { en: "Description", ja: "説明" }, scenario_objective: { en: "Objective" }, language: "ja",
   scenario_city_name: { ja: "見本市", en: "Sample Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, asset_region: 1,
-  map_width: 2000, map_height: 1000, ground_cover: 4 as number | undefined, climate: 7 as number | undefined,
+  map_width: 2000, map_height: 1000, ground_cover: 4 as number | undefined, climate: climate("島の気候"),
   saved_core_version: "1.0.0", created_core_version: "1.0.0", compatibility: { loadable: true }, origin: "local",
   read_only: false, encrypted: false, required_packs: [], pack_status: {}, official: false };
 const entries = [entry,
-  { ...entry, id: "workshop~123~copy", origin: "workshop", read_only: true, ground_cover: undefined, climate: undefined },
+  { ...entry, id: "workshop~123~copy", origin: "workshop", read_only: true, ground_cover: undefined, climate: climate("海岸の気候") },
   { ...entry, id: "dlc~pack~city", origin: "dlc", read_only: true, official: true, encrypted: true,
     required_packs: ["pack"], pack_status: { pack: "not_owned" }, compatibility: { loadable: false, code: "SCENARIO_PACK_NOT_OWNED" } },
   { ...entry, id: "local~future", compatibility: { loadable: false, code: "SAVE_VERSION_NEWER" } }];
@@ -53,19 +59,27 @@ let profile = { version: 1, level: 1, tutorials_cleared: [] as string[], scenari
 /** システムメニュー・セーブ一覧・シナリオとして保存が送った変更系の要求と、応答に使うセッション・セーブの一覧 */
 const saveRequests: { method: string; url: string; body: unknown }[] = [];
 let currentSaveId: string | null = null;
+/** 「都市を編集」で開いたシナリオか(GET /api/v1/sessions の current_save_is_scenario) */
+let editingScenario = false;
 let savedGames: Record<string, object> = {};
 const saveEntry = { id: "", city_name: "港町", save_name: "", population: 1234, current_date: 400, epoch: 3, simulation_days: 30,
   saved_at: "20260930_120000", is_scenario: false, language: "ja", saved_core_version: "1.0.0", created_core_version: "1.0.0",
   compatibility: { loadable: true }, required_packs: [], pack_status: {} };
 const playingCity = { name: "港町", scenario_title: { en: "Port" }, scenario_description: {}, scenario_objective: {},
-  scenario_city_name: { en: "Port Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, climate: 2, ground_cover: 1, asset_region: 1 };
+  scenario_city_name: { en: "Port Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, climate: climate("港の気候"), ground_cover: 1, asset_region: 1 };
 /** 変更系の要求(保存・シナリオ作成・画像の保留)だけを拾う。一覧・詳細の取得はほかの分岐が返す */
 function saveMenuResponse(url: string, init?: RequestInit): Response | null {
   const method = init?.method ?? "GET";
   const saveId = /\/api\/v1\/saves\/([^/?]+)$/.exec(url)?.[1];
+  const scenarioSaveId = /\/api\/v1\/saves\/([^/?]+)\?template=true$/.exec(url)?.[1];
   if (url.endsWith("/api/v1/city/")) return new Response(JSON.stringify({ city: playingCity }));
   if (url.endsWith("/api/v1/sessions") && method === "GET") {
-    return new Response(JSON.stringify({ current_save_id: currentSaveId, debug_execution: false, language: "ja" }));
+    return new Response(JSON.stringify({ current_save_id: currentSaveId, current_save_is_scenario: editingScenario, debug_execution: false, language: "ja" }));
+  }
+  if (editingScenario && scenarioSaveId && method === "GET") return new Response(JSON.stringify({ save: savedGames[decodeURIComponent(scenarioSaveId)] }));
+  if (scenarioSaveId && method === "PUT") {
+    saveRequests.push({ method, url, body: init?.body });
+    return new Response(JSON.stringify({ success: true, id: decodeURIComponent(scenarioSaveId) }));
   }
   if (url.endsWith("/api/v1/saves") && method === "GET") return new Response(JSON.stringify({ success: true, saves: savedGames }));
   if (url.includes("/validation?template=false")) return new Response(JSON.stringify({ compatibility: { balance_changed: false } }));
@@ -157,11 +171,9 @@ assert.equal(buttons("scenarios.refresh").length, 0, "the list refreshes itself,
 assert.ok(!container.textContent?.includes("scenarios.uploadUnconfigured"), "the unconfigured upload note is not shown on the page");
 assert.ok(button("scenarios.upload").disabled, "unconfigured upload must be disabled");
 assert.equal(buttons("scenarios.editTerrain").length, 2, "only own scenarios can edit terrain");
-assert.equal(buttons("scenarios.editCopy").length, 2, "workshop and DLC scenarios are copied before editing");
+assert.equal(buttons("scenarios.editCity").length, 2, "only own scenarios open for editing");
 assert.equal(buttons("scenarios.editMetadata").length, 2);
 assert.equal(buttons("common.delete").length, 2, "only own scenarios can be deleted");
-assert.ok(!cardButton("workshop~123~copy", "scenarios.editCopy").disabled);
-assert.ok(cardButton("dlc~pack~city", "scenarios.editCopy").disabled, "unowned DLC cannot be opened");
 assert.ok(card("workshop~123~copy").textContent?.includes("scenarios.origin.workshop"));
 assert.ok(card("dlc~pack~city").textContent?.includes("scenarios.official"));
 assert.ok(card("dlc~pack~city").querySelector(".required-pack--not_owned"), "pack ownership is shown");
@@ -176,7 +188,8 @@ assert.ok([...card("local~mine").querySelectorAll(".scenario-actions button")].e
 assert.ok(cardButton("local~mine", "common.delete").classList.contains("scenario-icon-button--delete"), "delete sits at the right end");
 assert.equal(cardButton("local~mine", "scenarios.editCity").title, "scenarios.editCity", "the description shows on mouse over");
 assert.equal(cardButton("local~mine", "scenarios.upload").title, "scenarios.upload\nscenarios.uploadUnconfigured", "a disabled reason follows the description");
-assert.deepEqual(actionLabels("workshop~123~copy"), [null], "read-only scenarios keep the text button only (no delete)");
+assert.equal(card("workshop~123~copy").querySelector(".scenario-actions"), null, "community and DLC scenarios can only be played, so they have no actions");
+assert.equal(card("dlc~pack~city").querySelector(".scenario-actions"), null);
 
 // 削除: 確認を断れば何もしない。確認すると(元に戻せない操作なので danger の確認)ファイルを消し、一覧から外して他のウィンドウへ知らせる。
 // 読み込めない(壊れた・新しすぎる)シナリオこそ片付けたいので、読み込めなくても削除は押せる。失敗しても一覧を取り直す。
@@ -238,9 +251,6 @@ delete state.errors.prepare_scenario_terrain_editor;
 await act(async () => { cardButton("local~mine", "scenarios.editCity").click(); });
 await settle();
 assert.deepEqual(lastCall("create_session"), { templateId: "local~mine", playMode: PLAY_MODE_SCEARIO, acceptBalanceChange: true });
-await act(async () => { cardButton("workshop~123~copy", "scenarios.editCopy").click(); });
-await settle();
-assert.deepEqual(lastCall("create_session"), { templateId: "workshop~123~copy", playMode: PLAY_MODE_SCEARIO, acceptBalanceChange: true });
 
 // 地形を取り込む: 画素数・形式は先頭のバイトから読み、マップの大きさはコアと同じく1km単位に切り上げる。
 assert.deepEqual([importedMapExtent(1001, 1), importedMapExtent(1002, 1), importedMapExtent(2, 0.5), importedMapExtent(3001, 10), importedMapExtent(11, 100)],
@@ -518,7 +528,7 @@ assert.deepEqual(metadataWritten.scenario_title, { en: "My scenario" });
 assert.deepEqual(metadataWritten.scenario_description, { ja: "説明", en: "Description" });
 assert.deepEqual(metadataWritten.scenario_city_name, { ja: "見本市", en: "Sample Town" });
 assert.deepEqual(metadataWritten.scenario_fixed_options, ["simulation_days", "climate"]);
-assert.deepEqual([metadataWritten.simulation_days, metadataWritten.climate, metadataWritten.ground_cover, metadataWritten.asset_region], [7, 7, 4, 1]);
+assert.deepEqual([metadataWritten.simulation_days, metadataWritten.climate, metadataWritten.ground_cover, metadataWritten.asset_region], [7, entry.climate, 4, 1]);
 assert.equal(metadataWritten.author, entry.author);
 assert.ok(!("language" in metadataWritten), "the city language is not editable here");
 assert.ok(closed);
@@ -556,14 +566,14 @@ assert.ok(!button("newGame.startScenarioButton").disabled);
 // 事実欄(大きさ・地表・気候)はすべて一覧の要素(都市が持つ値)から引く。
 const facts = () => container.querySelector(".new-game-detail .terrain-facts");
 assert.equal(facts()?.querySelector("title")?.textContent, "groundCover.4");
-assert.ok(facts()?.textContent?.includes("climate.7"));
+assert.ok(facts()?.textContent?.includes(entry.climate.name));
 assert.ok(facts()?.textContent?.includes("2 × 1 km"), "the map size comes from the entry");
 assert.ok(!container.querySelector(".new-game-detail")?.textContent?.includes("flat.png"), "the terrain source file name is not shown");
 const workshopTile = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]
   .find(value => value.textContent?.includes("scenarios.origin.workshop"))!;
 await act(async () => { workshopTile.click(); });
 assert.equal(facts()?.querySelector("title")?.textContent, "groundCover.1", "entries without values use the game's default ground cover");
-assert.ok(facts()?.textContent?.includes("climate.1"));
+assert.ok(facts()?.textContent?.includes("海岸の気候"));
 const unloadable = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]
   .filter(value => value.textContent?.includes("scenarios.origin.dlc"));
 assert.equal(unloadable.length, 1);
@@ -650,18 +660,18 @@ assert.ok(button("newGame.startButton").classList.contains("save-dialog-button--
 await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const tutorialSession = lastCall("create_session");
-assert.deepEqual([tutorialSession.playMode, tutorialSession.tutorialId, tutorialSession.templateId], [PLAY_MODE_TUTORIAL, "basic", null]);
+assert.deepEqual([tutorialSession.playMode, tutorialSession.tutorialId, tutorialSession.templateId], [PLAY_MODE_TUTORIAL, firstTutorial, null]);
 assert.ok(!("terrainMapId" in tutorialSession), "no terrain is sent for tutorials");
 await act(async () => { root.unmount(); });
 
 // クリア済みの札: プロフィールの記録と照らし、タイルの右上と詳細に出す。チュートリアルは教材ID、シナリオは一覧のidで引く。
-profile = { ...profile, tutorials_cleared: ["basic"], scenarios_cleared: ["local~mine"] };
+profile = { ...profile, tutorials_cleared: [firstTutorial], scenarios_cleared: ["local~mine"] };
 root = createRoot(container);
 await act(async () => { root.render(<NewGameWindow apiBaseUrl="http://test" onClose={() => {}} />); });
 await settle();
 const clearedTiles = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")].filter(value => value.querySelector(".new-game-tile-cleared"));
 assert.deepEqual(clearedTiles.map(value => value.classList.contains("new-game-tile--tutorial") ? "tutorial" : value.title), ["tutorial", "My scenario"]);
-assert.equal(clearedTiles[0].querySelector(".new-game-tile-cleared")?.textContent, "newGame.cleared");
+assert.equal(clearedTiles[0].querySelector(".new-game-tile-cleared")?.getAttribute("alt"), "newGame.cleared");
 await act(async () => { clearedTiles[1].click(); });
 assert.ok(container.querySelector(".new-game-detail-head .new-game-detail-cleared"), "the detail shows the cleared badge");
 const uncleared = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]
@@ -724,7 +734,7 @@ const createdScenario = saveRequests.find(request => request.url.endsWith("/api/
 assert.ok(createdScenario && createdScenario.method === "POST", "saving creates a new scenario");
 const createdBody = JSON.parse(String(createdScenario!.body));
 assert.deepEqual([createdBody.scenario_title, createdBody.scenario_city_name, createdBody.scenario_fixed_options, createdBody.climate],
-  [{ en: "Port" }, { en: "Port Town" }, ["climate"], 2], "the playing city's introduction is the starting point");
+  [{ en: "Port" }, { en: "Port Town" }, ["climate"], playingCity.climate], "the playing city's introduction is the starting point");
 assert.ok(lastCall("request_thumbnail_capture"), "without a chosen image the 3D view is captured first");
 assert.ok(state.emitted.includes("scenarios:changed"));
 await act(async () => { root.unmount(); });
@@ -782,6 +792,34 @@ assert.equal(saveRequests.length, 0);
 assert.equal(menuClosed, 3);
 await act(async () => { window.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" })); });
 assert.equal(menuClosed, 4, "Esc closes the menu");
+await act(async () => { root.unmount(); });
+
+// 「都市を編集」で開いたシナリオ: 項目は上書き保存と別のシナリオとして保存だけ。上書き保存はシナリオのタイトルを示して確認し、
+// 作者が選んだ画像を残すため3Dビューを撮らずにシナリオへ書く。
+saveRequests.length = 0;
+currentSaveId = "local~mine";
+editingScenario = true;
+savedGames = { "local~mine": entry };
+await renderMenu();
+assert.deepEqual([...container.querySelector(".save-menu-group")!.querySelectorAll(".save-menu-label")].map(label => label.textContent),
+  ["saveLoad.overwriteScenario", "saveLoad.saveAsNewScenario"]);
+assert.equal(menuItem("saveLoad.overwriteScenario").querySelector(".save-menu-detail")?.textContent, "My scenario");
+await act(async () => { menuItem("saveLoad.overwriteScenario").click(); });
+assert.equal(saveDialog()?.getAttribute("aria-label"), "saveLoad.overwriteScenario");
+assert.equal(saveRequests.length, 0, "overwriting the scenario waits for the confirmation");
+const capturesBeforeScenarioSave = state.calls.filter(call => call.command === "request_thumbnail_capture").length;
+state.emitted.length = 0;
+await submitDialog();
+await settle();
+assert.deepEqual(saveRequests.map(request => [request.method, request.url.replace("http://test", "")]), [["PUT", "/api/v1/saves/local~mine?template=true"]]);
+assert.equal(state.calls.filter(call => call.command === "request_thumbnail_capture").length, capturesBeforeScenarioSave, "the scenario keeps its image");
+assert.ok(state.emitted.includes("scenarios:changed"));
+await act(async () => { menuItem("saveLoad.saveAsNewScenario").click(); });
+await settle();
+assert.deepEqual(lastCall("open_registered_window"),
+  { windowType: "scenario_metadata", params: { extra: { create: true, titleKey: "saveLoad.saveAsNewScenario" } } });
+assert.equal(saveRequests.length, 1, "saving as another scenario waits for the introduction");
+editingScenario = false;
 await act(async () => { root.unmount(); });
 
 // プレイ中のニューゲーム入口は選択画面を開くだけ。確認・Unityリセットは最終の開始まで行わない。

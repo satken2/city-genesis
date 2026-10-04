@@ -15,11 +15,11 @@ import type { Condition, Definition } from "./model";
 import * as constants from "../constants";
 
 /** DOMの構造や翻訳文ではなく、登録済みの操作名だけを定義で指定する。 */
-export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "hud.grading", "hud.map", "hud.bulldozer", "hud.drive", "hud.notifications", "hud.budget", "hud.publicServices", "hud.score", "hud.date", "hud.construction_projects", "hud.regulation", "hud.city", "hud.finance", "hud.stat", "hud.prop_placement", "display.tabs", "display.modes", "agent.demolish", "path.type", "path.variant", "path.followTerrain", "path.platformSide", "path.back", "path.confirm", "path.cancel", "path.shapeEditor", "path.plan", "path.profile", "building.category", "building.variant", "building.back", "building.cancel", "building.confirm", "parcel.mode", "parcel.clear", "parcel.confirm", "transit.new", "transit.type", "transit.fare", "transit.headway", "transit.confirm", "transit.cancel", "window.path_build", "window.agent_detail"];
-/** 同じ名前の要素が並ぶ操作。`名前:値`(値はカテゴリ番号・バリアント番号・地形追従の設定値・ホーム設置側の値・区画の作成方法の名前)で1つだけを指せる。 */
-export const VALUE_TARGETS = ["path.type", "path.variant", "path.followTerrain", "path.platformSide", "building.category", "building.variant", "parcel.mode"];
+export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "hud.grading", "hud.map", "hud.bulldozer", "hud.drive", "hud.notifications", "hud.budget", "hud.publicServices", "hud.score", "hud.date", "hud.construction_projects", "hud.regulation", "hud.city", "hud.finance", "hud.stat", "hud.prop_placement", "display.tabs", "display.modes", "agent.demolish", "path.type", "path.variant", "path.followTerrain", "path.platformSide", "path.back", "path.confirm", "path.cancel", "path.shapeEditor", "path.plan", "path.profile", "building.category", "building.variant", "building.back", "building.cancel", "building.confirm", "parcel.mode", "parcel.clear", "parcel.confirm", "transit.new", "transit.type", "transit.fare", "transit.headway", "transit.confirm", "transit.cancel", "zone_edit.mode", "window.path_build", "window.agent_detail"];
+/** 同じ名前の要素が並ぶ操作。`名前:値`(値はカテゴリ番号・バリアント番号・地形追従の設定値・ホーム設置側の値・区画の作成方法の名前・地区の塗り方の名前)で1つだけを指せる。 */
+export const VALUE_TARGETS = ["path.type", "path.variant", "path.followTerrain", "path.platformSide", "building.category", "building.variant", "parcel.mode", "zone_edit.mode"];
 /** 値が番号でない操作の書式(それ以外の値は数字)。 */
-const VALUE_PATTERN: Record<string, RegExp> = { "parcel.mode": /^[a-z_]+$/ };
+const VALUE_PATTERN: Record<string, RegExp> = { "parcel.mode": /^[a-z_]+$/, "zone_edit.mode": /^[a-z_]+$/ };
 /** コアが初期配置した対象の名前。束縛はチュートリアル開始時にコアから受け取る。 */
 const CORE_TARGET = /^(support|lesson)\./;
 /** schema.json の検証。CSP で eval を許さないため、Ajv の事前生成コードを使う(npm run gen:tutorial-validator)。 */

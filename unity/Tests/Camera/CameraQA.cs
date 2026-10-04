@@ -13,9 +13,9 @@ public static class CameraQA
     private static Assembly source;
     private static Component controller, input;
     private static Camera camera;
-    private static Type inputSystem, keyType, keyboardState;
-    private static object keyboard;
-    private static MethodInfo queueState;
+    private static Type inputSystem, keyType, keyboardState, mouseState;
+    private static object keyboard, mouse;
+    private static MethodInfo queueState, queueMouse;
     private static int checks;
     private static object Get(object target, string name) => target.GetType().GetField(name, Flags).GetValue(target);
     private static void Set(object target, string name, object value) => target.GetType().GetField(name, Flags).SetValue(target, value);
@@ -49,6 +49,25 @@ public static class CameraQA
     {
         Keys(keys);
         Call(controller, "HandleCinematicMovement", seconds);
+    }
+    private static void Look(float dx, float dy)
+    {
+        object state = Activator.CreateInstance(mouseState);
+        mouseState.GetField("delta").SetValue(state, new Vector2(dx, dy));
+        queueMouse.Invoke(null, new[] { mouse, state, (object)(-1d) });
+        inputSystem.GetMethod("Update", Type.EmptyTypes).Invoke(null, null);
+        Call(controller, "HandleCinematicMovement", 0f);
+    }
+    private static void Frame(params string[] keys)
+    {
+        Keys(keys);
+        Call(controller, "Update");
+    }
+    private static bool WorldEscape() => (bool)source.GetType("InputUtil").GetProperty("WorldEscapeWasPressed").GetValue(null);
+    private static float LookOffset(Vector3 pivot)
+    {
+        Vector3 toPivot = pivot - camera.transform.position;
+        return Vector3.SignedAngle(new Vector3(toPivot.x, 0, toPivot.z), new Vector3(camera.transform.forward.x, 0, camera.transform.forward.z), Vector3.up);
     }
     private static void Tap(string key)
     {
@@ -116,6 +135,11 @@ public static class CameraQA
                 .Invoke(null, new object[] { "Keyboard", "CameraQA", null });
             queueState = inputSystem.GetMethods().Single(m => m.Name == "QueueStateEvent" && m.IsGenericMethodDefinition)
                 .MakeGenericMethod(keyboardState);
+            mouseState = inputAssembly.GetType("UnityEngine.InputSystem.LowLevel.MouseState");
+            mouse = inputSystem.GetMethod("AddDevice", new[] { typeof(string), typeof(string), typeof(string) })
+                .Invoke(null, new object[] { "Mouse", "CameraQA", null });
+            queueMouse = inputSystem.GetMethods().Single(m => m.Name == "QueueStateEvent" && m.IsGenericMethodDefinition)
+                .MakeGenericMethod(mouseState);
             input = Add("InputHandler");
             camera = new GameObject("MainCamera").AddComponent<Camera>();
             camera.tag = "MainCamera";
@@ -259,6 +283,40 @@ public static class CameraQA
             Step(1f);
             Check(Quaternion.Angle(camera.transform.rotation, Quaternion.Euler(90, 40, 0)) < .05f, "vertical orbit retains yaw");
             Call(controller, "StopCinematicMode");
+
+            View(new Vector3(0, 100, -100), Quaternion.Euler(45, 0, 0));
+            Call(controller, "ToggleCinematicMode");
+            Check((bool)Get(controller, "tauriUiHidden"), "filming hides the Tauri UI");
+            Vector3 lookPivot = (Vector3)Get(controller, "rotationPivot");
+            Look(100, 0);
+            Check(Mathf.Abs(LookOffset(lookPivot) - 10) < .01f, "mouse turns the filming view");
+            before = camera.transform.position;
+            Step(2f);
+            Check(Vector3.Distance(camera.transform.position, before) > 1f, "orbit continues while looking around");
+            Check(Mathf.Abs(LookOffset(lookPivot) - 10) < .01f, "orbit keeps the looked-around angle relative to the target");
+            Tap("LeftShift");
+            direction = (Vector3)Get(controller, "cinematicTravelDirection");
+            Look(-50, 30);
+            Check(Vector3.Angle((Vector3)Get(controller, "cinematicTravelDirection"), direction) < .001f, "looking around does not steer travel");
+            Check(Mathf.Abs(Mathf.Asin(-camera.transform.forward.y) * Mathf.Rad2Deg - 42f) < .01f, "mouse tilts the filming view");
+            Tap("Escape");
+            Check(!(bool)Get(controller, "tauriUiHidden"), "leaving filming restores the Tauri UI");
+
+            Frame();
+            Frame("LeftShift", "F");
+            Check(Property(controller, "IsFlyMode") && (bool)Get(controller, "tauriUiHidden"), "Shift+F enters fly mode and hides the Tauri UI");
+            Frame();
+            Frame("LeftShift", "F");
+            Check(Property(controller, "IsFlyMode"), "Shift+F does not leave fly mode");
+            Frame();
+            Frame("Escape");
+            Check(!Property(controller, "IsFlyMode") && !(bool)Get(controller, "tauriUiHidden"), "Escape leaves fly mode and restores the Tauri UI");
+            Check(Property(controller, "BlocksWorldInput") && !WorldEscape(), "the Escape that leaves fly mode is not passed to editors");
+            Frame();
+            Set(controller, "cameraModeExitFrame", -1);
+            Frame("Escape");
+            Check(WorldEscape(), "Escape outside camera modes reaches editors");
+            Frame();
             building.SetActive(false);
             var sea = Box("SeaObject", new Vector3(300, 10, 300), new Vector3(50, 1, 50));
             View(new Vector3(300, 100, 300), Quaternion.Euler(90, 0, 0));

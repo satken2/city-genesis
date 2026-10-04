@@ -56,8 +56,8 @@ pub struct AppState {
     /// 最後に取得したセッション情報
     pub session_state: Option<serde_json::Value>,
     pub backend_health: crate::backend_health::BackendHealth,
-    /// 最後に確認した current_save_id
-    pub last_save_id: Option<String>,
+    /// 最後に確認した都市の識別子(GET /api/v1/sessions の session_id。ゲーム未開始なら None)
+    pub last_session_id: Option<String>,
     /// ローディング中フラグ（ゲーム開始処理中）
     pub is_loading: bool,
     pub loading_id: u64,
@@ -153,7 +153,7 @@ impl SharedState {
             shutdown: Arc::new(AtomicBool::new(false)),
             session_state: None,
             backend_health: Default::default(),
-            last_save_id: None,
+            last_session_id: None,
             is_loading: false,
             loading_id: 0,
             backend_load_complete: false,

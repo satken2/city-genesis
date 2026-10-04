@@ -116,7 +116,7 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
         }
         UpdateOverlay();
 
-        if (CancelOnEscape && InputUtil.KeyWasPressedThisFrame(Key.Escape))
+        if (CancelOnEscape && InputUtil.WorldEscapeWasPressed)
         {
             CancelEditMode();
         }

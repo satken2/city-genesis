@@ -204,7 +204,7 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(ipc.Publishes > 0 && ipc.Presets.Length == presetCount, "complete authoritative options");
         ApiClient.Epoch = 5; ApiClient.Climate = profile; ApiClient.Date = Day(7, 15);
         ipc.Begin();
-        yield return Until(() => controller.Climate == profile.name, 5f, "session start reads the climate");
+        yield return Until(() => controller.Climate == profile.name && controller.Season == WeatherClimate.Summer, 5f, "session start reads the climate and date");
         Check(controller.Season == WeatherClimate.Summer, "season from the city date");
         Check(desertSummer[controller.CurrentIndex] > 0, "session starts with weather possible in the climate");
         Check(controller.Clock.Current == WeatherClock.Stage.Day && controller.Clock.Phase < WeatherClock.MorningPhase + 0.01f, "session starts in the morning");
@@ -458,7 +458,7 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(sun.intensity > 0f && sun.intensity < WeatherPreset.All[Index("clear")].Intensity, "low evening sun is weaker");
         Capture(camera, "t_evening");
         controller.Clock.Paused = false;
-        controller.Clock.Step(3f);
+        controller.Clock.Advance(WeatherClock.DaySeconds);
         yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Twilight && controller.Clock.Darkness > 0.45f, 30f, "twilight reached");
         Check(sun.intensity < 0.05f, "sun below the horizon casts no light");
         Capture(camera, "t_twilight");

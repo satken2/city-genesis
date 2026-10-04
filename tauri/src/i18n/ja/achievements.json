@@ -74,7 +74,7 @@
       "failed": "期限切れ"
     },
     "scenarioImageLabel": "画像（サムネイル）",
-    "scenarioEditHint": "紹介文は「シナリオとして保存」の画面か、シナリオ管理の「紹介情報を編集」で書きます。"
+    "scenarioEditHint": "紹介文は「別のシナリオとして保存」の画面か、シナリオ管理の「紹介情報を編集」で書きます。"
   },
   "achievementQuests": {
     "createTitle": "クエスト作成",

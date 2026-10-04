@@ -1,6 +1,8 @@
 {
   "zone": {
     "titleWithId": "Quartier n° {{id}}",
+    "color": "Couleur du district",
+    "colorUpdateFailed": "Échec de la mise à jour de la couleur du district",
     "basicInfo": "Informations générales",
     "area": "Superficie",
     "zonePopulation": "Population résidente",

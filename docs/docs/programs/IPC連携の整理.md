@@ -73,6 +73,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `view:object_filter_state`      | `graphic -> ui`  | `view:query_object_filter`への応答、およびフィルタ適用後の通知（`{hidden_building_ids, hidden_path_ids}`）。表示状態の正はUnity側にあり、複数のパネルがこれを受けて表示を揃える |
 | `view:set_grid`                 | `ui -> graphic`  | グリッドの表示有無や設定を切り替え。Unity側はグリッド表示とグリッド吸着を連動させる（表示ON=吸着ON） |
 | `view:grid_toggled`             | `graphic -> ui`  | 3Dビューのラジアルメニューでグリッド表示がトグルされた（`{ visible }`）。UI側はパス建設パネルのグリッド設定UIの表示状態を追従させる |
+| `view:ui_visibility`            | `graphic -> ui`  | フライ・撮影モードに入った・抜けたときに送る（`{ visible }`）。`visible: false` の間、UIはHUD・ポップアップを含む全ウィンドウをDWMのクローキングで隠す。表示状態（show/hide）は変えないので、隠している間の開閉は通常どおり行われ、戻すときにグラフィックからフォーカスを奪わない。グラフィックが隠したまま止まった場合に備え、`system:graphic_ready`・`system:graphic_stopped` を受けたときも戻す |
 | `camera:query_state`            | `ui -> graphic`  | 3Dカメラの現在位置と視線方位を問い合わせる。2D都市マップがカメラマーカーを描くために、開いたときと再読み込みのときに送る |
 | `camera:capture_thumbnail`      | `ui -> graphic`  | セーブ・シナリオ保存の直前に、3Dビューの撮影を頼む(`{ id }`)。グラフィックはメインカメラを16:9の小さな画像(480×270)へ直接描き(画面に重ねたUIは写らない)、PNGを `PUT /api/v1/sessions/thumbnail` でコアへ預ける(次の保存に入る画像)。UIはTauriコマンド `request_thumbnail_capture` で送り、グラフィックが接続していなければ送らずに撮影なしで保存する |
 | `camera:thumbnail_captured`     | `graphic -> ui`  | `camera:capture_thumbnail`への応答(`{ id, success }`)。撮れなくても送れなくても必ず返す。UIはこの応答か時間切れ(5秒)まで保存を待つ |
@@ -150,6 +151,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `building:exploded`             | `ui -> graphic`  | 爆破HTTP APIの成功通知（`{agent_id}`）。既存の個別取得経路で対象建物を瓦礫に更新し、炎・煙・爆発音を一度だけ再生する |
 | `world:set_road_focus`          | `ui -> graphic`  | 道路詳細パネル（`road_detail`）が開いている道路の区間を、3Dビューに道路色の帯で強調する（`{road_id, color, path_ids}`）。帯は区間の中心線に沿って最前面に、画面上で一定の幅で描く。送るたびに全置換する。干渉の警告用の `world:highlight_objects` とは別の仕組み。詳細は[道路の詳細と道路名](道路の詳細と道路名.md#強調帯) |
 | `world:clear_road_focus`        | `ui -> graphic`  | 道路の強調を消す（`{road_id?}`）。`road_id` があれば強調中の道路と同じときだけ消し（道路詳細は道路ごとに同時に開けるため、別のパネルの強調を消さない）、無ければ無条件に消す。道路詳細のウィンドウが閉じられたときは Rust（`window.rs`）が閉じた道路の `road_id` を載せて送る |
+| `zone:updated` | `ui -> graphic` | 地区詳細で名前・色・建築規制・管理状態の保存が成功した後の通知（`{zone_id}`）。Unityは対象地区だけを再取得し、キャッシュ・地区名・規制アイコン・枠線を更新する |
 | `world:refresh_roads`           | `ui -> graphic`  | 道路（名前付き道路）の作成・改名・所属変更・削除のあとに送り、Unity に道路一覧（`GET /api/v1/roads/`）を取り直させる（`{}`）。一覧の `version` が同じなら道路名ラベルは作り直さない |
 | `edit_road:set_members`         | `ui -> graphic`  | 道路の区間編集モード（`STATE_EDIT_ROAD_MEMBERS`）で、所属区間と追加候補の全集合を送る（`{road_id, path_ids, preview_path_ids}`）。差分ではなく毎回全集合。Unity は所属区間を道路色、候補を半透明の道路色の帯で示す。モード中でない・別の道路宛ての通知は無視する |
 | `edit_road:cancel`              | `ui -> graphic`  | 道路の区間編集モードを終える（`{road_id}`）。Unity はその道路の区間編集モード中のときだけ終了して通常モードへ戻し、モード外・別の道路の編集中・`road_id` の無い通知は無視する（`STATE_NORMAL` と違い、道路の敷設など他のモードを巻き込まない）。道路詳細パネルの「完了」と、そのウィンドウが閉じられたときの Rust（`window.rs`）が送る |

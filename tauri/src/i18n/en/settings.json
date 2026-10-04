@@ -104,9 +104,12 @@
     "cancel": "No",
     "debugInit": "Debug Init",
     "saveAsScenario": "Save as scenario",
+    "saveAsNewScenario": "Save as another scenario",
+    "overwriteScenario": "Overwrite Scenario",
     "backToGame": "Back to Game",
     "saveName": "Save name",
-    "confirmOverwrite": "Overwrite the save “{{name}}”?"
+    "confirmOverwrite": "Overwrite the save “{{name}}”?",
+    "confirmOverwriteScenario": "Overwrite the scenario “{{name}}”?"
   },
   "saveList": {
     "noSaves": "No save data found",

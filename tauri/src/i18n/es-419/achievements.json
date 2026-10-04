@@ -74,7 +74,7 @@
       "failed": "Vencido"
     },
     "scenarioImageLabel": "Imagen (Miniatura)",
-    "scenarioEditHint": "La presentación se escribe al elegir «Guardar como escenario» o, después, con «Editar información» en el gestor de escenarios."
+    "scenarioEditHint": "La presentación se escribe al elegir «Guardar como otro escenario» o, después, con «Editar información» en el gestor de escenarios."
   },
   "achievementQuests": {
     "createTitle": "Crear objetivo",

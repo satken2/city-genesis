@@ -6,6 +6,8 @@ export type FlatTab<T extends string> = {
   label: string;
   disabled?: boolean;
   icon?: ReactNode;
+  /** タブ内の選択肢と共通の操作名・値。許可された選択肢へ移るタブも操作できる。 */
+  guide?: { name: string; values: (string | number)[] };
   /** ラベルの右に添える札(未提供のタブの「Coming soon」など) */
   badge?: string;
 };
@@ -32,6 +34,8 @@ export function FlatTabs<T extends string>({ tabs, active, onChange, label, icon
           key={tab.id}
           type="button"
           role="tab"
+          data-guide={tab.guide?.name}
+          data-guide-values={tab.guide?.values.join(" ")}
           id={idPrefix ? `${idPrefix}-tab-${tab.id}` : undefined}
           aria-controls={idPrefix ? `${idPrefix}-panel-${tab.id}` : undefined}
           aria-label={iconOnly ? tab.label : undefined}
@@ -44,14 +48,14 @@ export function FlatTabs<T extends string>({ tabs, active, onChange, label, icon
           onKeyDown={event => {
             if (!iconOnly || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
             event.preventDefault();
-            const enabled = tabs.filter(item => !item.disabled);
+            const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]");
+            const enabled = tabs.filter((item, index) => !item.disabled && !buttons?.[index]?.inert);
             if (enabled.length === 0) return;
             const current = enabled.findIndex(item => item.id === tab.id);
             const index = event.key === "Home" ? 0 : event.key === "End" ? enabled.length - 1
               : (current + (event.key === "ArrowRight" ? 1 : -1) + enabled.length) % enabled.length;
             const next = enabled[index];
             onChange(next.id);
-            const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("[role=tab]");
             buttons?.[tabs.findIndex(item => item.id === next.id)]?.focus();
           }}
         >

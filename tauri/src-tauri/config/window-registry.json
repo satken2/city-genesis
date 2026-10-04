@@ -523,7 +523,7 @@
     "actions": []
   },
   "epoch_result": {
-    "title": "エポック実行結果",
+    "title": "都市運営の結果",
     "width": 1230,
     "height": 900,
     "resizable": true,

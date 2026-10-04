@@ -565,7 +565,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 地形タイルごとに付くため、条件は軽く保つこと。
         if (parcelEditorManager != null
             && parcelEditorManager.IsActive
-            && InputUtil.KeyWasPressedThisFrame(Key.Escape))
+            && InputUtil.WorldEscapeWasPressed)
         {
             HideMarker();
         }

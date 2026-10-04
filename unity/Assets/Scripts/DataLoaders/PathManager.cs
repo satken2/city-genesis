@@ -2195,8 +2195,7 @@ public partial class PathManager : BaseApiDataManager
                 {
                     foreach (var n in response.nodes)
                     {
-                        nodeDataCache[n.node_id] = n;
-                        IndexNodeCell(n.node_id);
+                        RegisterNodeData(n, out _);
                     }
                 }
             }
@@ -2422,26 +2421,26 @@ public partial class PathManager : BaseApiDataManager
             if (!nodeIdsByCell.TryGetValue(cell, out HashSet<int> ids)) continue;
             foreach (int nodeId in ids)
             {
-                if (receivedNodeIds.Contains(nodeId)) continue;
-                if (nodeObjectsCache.TryGetValue(nodeId, out GameObject obj) && obj != null) nodesToRemove.Add(nodeId);
+                if (!receivedNodeIds.Contains(nodeId)) nodesToRemove.Add(nodeId);
             }
         }
 
+        // 交差点用に個別取得したノードはGOを持たないので、GOの有無ではなくセル索引で判定する。
         foreach (var nodeId in nodesToRemove)
         {
             if (nodeObjectsCache.TryGetValue(nodeId, out GameObject obj))
             {
                 Destroy(obj);
                 nodeObjectsCache.Remove(nodeId);
-                // 空間ハッシュからも外す（残すと削除済みノードへ吸着してしまう）
-                if (nodeDataCache.TryGetValue(nodeId, out NodeData removedNode))
-                {
-                    nodeGrid?.Remove(removedNode, removedNode.GetAbsolutePosition());
-                }
-                nodeDataCache.Remove(nodeId);
-                UnindexNodeCell(nodeId);
-                RemoveNodeIntersectionMesh(nodeId);
             }
+            // 空間ハッシュからも外す（残すと削除済みノードへ吸着してしまう）
+            if (nodeDataCache.TryGetValue(nodeId, out NodeData removedNode))
+            {
+                nodeGrid?.Remove(removedNode, removedNode.GetAbsolutePosition());
+            }
+            nodeDataCache.Remove(nodeId);
+            UnindexNodeCell(nodeId);
+            RemoveNodeIntersectionMesh(nodeId);
         }
         if (nodesToRemove.Count > 0)
         {
@@ -3094,45 +3093,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     public void CreateOrUpdateNode(NodeData node)
     {
-        bool positionChanged = false;
-        if (nodeDataCache.TryGetValue(node.node_id, out NodeData cachedNode))
-        {
-            // 位置やタイプが変更された可能性があるため、これらが変更されていた場合はデータを更新する。
-            positionChanged = Vector3.Distance(cachedNode.GetAbsolutePosition(), node.GetAbsolutePosition()) > 0.001f;
-            if (positionChanged)
-            {
-                nodeGrid?.Remove(cachedNode, cachedNode.GetAbsolutePosition());
-
-                // position 配列を更新する
-                if (cachedNode.position != null && cachedNode.position.Length >= 3)
-                {
-                    cachedNode.position[0] = node.position[0];
-                    cachedNode.position[1] = node.position[1];
-                    cachedNode.position[2] = node.position[2];
-                }
-                else
-                {
-                    cachedNode.position = new float[] { node.position[0], node.position[1], node.position[2] };
-                }
-
-                nodeGrid?.Add(cachedNode, cachedNode.GetAbsolutePosition());
-            }
-            if (positionChanged || cachedNode.type != node.type || cachedNode.station_path_id != node.station_path_id)
-            {
-                NodeDataVersion++;
-            }
-            cachedNode.type = node.type;
-            cachedNode.station_path_id = node.station_path_id;
-            node = cachedNode;
-        }
-        else
-        {
-            nodeDataCache[node.node_id] = node;
-            Vector3 pos = node.GetAbsolutePosition();
-            nodeGrid?.Add(node, pos);
-            NodeDataVersion++;
-        }
-        IndexNodeCell(node.node_id);
+        node = RegisterNodeData(node, out bool positionChanged);
 
         GameObject existingNode = GetNodeObject(node.node_id);
         if (existingNode != null)
@@ -3184,6 +3145,56 @@ public partial class PathManager : BaseApiDataManager
         nodeObjectsCache[node.node_id] = nodeGO;
 
         UpdateOrDeferNodeIntersection(node.node_id);
+    }
+
+    /// <summary>
+    /// ノードデータを nodeDataCache・nodeGrid・セル索引へまとめて登録し、キャッシュ上のインスタンスを返す。
+    /// 吸着と既存ノードの候補表示は nodeGrid だけを引くので、ノードを受け取る経路
+    /// (セル範囲の取得と、表示範囲外にある道路端ノードの交差点用の個別取得)はすべてここを通す。
+    /// 登録済みのノードは同じインスタンスの位置・種別を更新する(nodeGrid は参照で削除するため差し替えない)。
+    /// </summary>
+    private NodeData RegisterNodeData(NodeData node, out bool positionChanged)
+    {
+        positionChanged = false;
+        if (nodeDataCache.TryGetValue(node.node_id, out NodeData cachedNode))
+        {
+            // 位置やタイプが変更された可能性があるため、これらが変更されていた場合はデータを更新する。
+            positionChanged = Vector3.Distance(cachedNode.GetAbsolutePosition(), node.GetAbsolutePosition()) > 0.001f;
+            if (positionChanged)
+            {
+                nodeGrid?.Remove(cachedNode, cachedNode.GetAbsolutePosition());
+
+                // position 配列を更新する
+                if (cachedNode.position != null && cachedNode.position.Length >= 3)
+                {
+                    cachedNode.position[0] = node.position[0];
+                    cachedNode.position[1] = node.position[1];
+                    cachedNode.position[2] = node.position[2];
+                }
+                else
+                {
+                    cachedNode.position = new float[] { node.position[0], node.position[1], node.position[2] };
+                }
+
+                nodeGrid?.Add(cachedNode, cachedNode.GetAbsolutePosition());
+            }
+            if (positionChanged || cachedNode.type != node.type || cachedNode.station_path_id != node.station_path_id)
+            {
+                NodeDataVersion++;
+            }
+            cachedNode.type = node.type;
+            cachedNode.station_path_id = node.station_path_id;
+            node = cachedNode;
+        }
+        else
+        {
+            nodeDataCache[node.node_id] = node;
+            Vector3 pos = node.GetAbsolutePosition();
+            nodeGrid?.Add(node, pos);
+            NodeDataVersion++;
+        }
+        IndexNodeCell(node.node_id);
+        return node;
     }
 
     /// <summary>
@@ -4553,12 +4564,14 @@ public partial class PathManager : BaseApiDataManager
         bool singleSpan = MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false;
         if ((!path.curved || singleSpan) && points.Count > 1)
         {
+            // 描画点列は縦断の設計値があると細分化されるため、次のアンカーは保存データの通過点から取る。
             var waypoints = path.GetWaypointList();
             if (waypoints != null && waypoints.Count > 0)
             {
-                int first = path.start_node_id == nodeId ? 0 : points.Count - 1;
-                int next = path.start_node_id == nodeId ? 1 : points.Count - 2;
-                limit = Mathf.Min(limit, Vector2.Distance(IntersectionPolygonUtil.XZ(points[first]), IntersectionPolygonUtil.XZ(points[next])) * 0.45f);
+                bool fromStart = path.start_node_id == nodeId;
+                Vector3 nodeAnchor = points[fromStart ? 0 : points.Count - 1];
+                Vector3 nextAnchor = waypoints[fromStart ? 0 : waypoints.Count - 1].GetAbsolutePosition();
+                limit = Mathf.Min(limit, Vector2.Distance(IntersectionPolygonUtil.XZ(nodeAnchor), IntersectionPolygonUtil.XZ(nextAnchor)) * 0.45f);
             }
         }
         return limit;
@@ -6095,8 +6108,7 @@ public partial class PathManager : BaseApiDataManager
                     if (node != null)
                     {
                         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} fetched successfully.");
-                        nodeDataCache[node.node_id] = node;
-                        IndexNodeCell(node.node_id);
+                        RegisterNodeData(node, out _);
                         UpdateNodeIntersectionMesh(node.node_id);
                     }
                     else

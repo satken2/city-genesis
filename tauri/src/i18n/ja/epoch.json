@@ -12,7 +12,7 @@
     "errorFailed": "エポックの実行に失敗しました: {{reason}}"
   },
   "epochResult": {
-    "epochCountSuffix": "({{count}} エポック実行)",
+    "epochCountSuffix": "({{count}} 期実行)",
     "exchangeRate": "為替レート",
     "sectionConstruction": "建設状況",
     "kindPath": "道路",

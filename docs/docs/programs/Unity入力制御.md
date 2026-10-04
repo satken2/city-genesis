@@ -126,7 +126,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 
 右クリックも同様に、マウスダウン時には発火しない。マウスアップまでの移動が閾値未満なら `onRightClick`、閾値以上なら右ドラッグ（カメラ回転）とみなして発火しない。`CameraController` 側の右回転も同じ閾値の保留方式（`isPendingRotate`）で始まる。`CameraController` は `[DefaultExecutionOrder(-100)]` で先に走るため、押下フレームで `IsMouseRotating` を見て判定すると右クリックが必ず回転に食われる。判定は移動量で行う。
 
-UI上にポインタがある間・カメラドラッグ中・フライ/撮影モード中（`CameraController.BlocksWorldInput`）・ドライブ中（`DriveMode.IsOpen`）・ラジアルメニュー表示中（10章）は、`InputHandler.Update` 先頭のゲートで入力処理全体を非破壊的に止める。入力プリセットは変えないので、抜ければ元の入力状態がそのまま復帰する。撮影を終了したフレームも遮断し、Escを背後の選択解除へ渡さない。
+UI上にポインタがある間・カメラドラッグ中・フライ/撮影モード中（`CameraController.BlocksWorldInput`）・ドライブ中（`DriveMode.IsOpen`）・ラジアルメニュー表示中（10章）は、`InputHandler.Update` 先頭のゲートで入力処理全体を非破壊的に止める。入力プリセットは変えないので、抜ければ元の入力状態がそのまま復帰する。フライ・撮影を終了したフレームも遮断し、Escを背後の選択解除へ渡さない。`InputHandler` を通らない編集側のEsc処理（選択のリセット・作図の取消しなど）は `InputUtil.WorldEscapeWasPressed` で判定し、同じ条件のEscを受け取らない。
 
 3Dに追従するクリック可能なラベル（地区名・天然資源名）もUIとして判定され、その矩形上ではこのゲートとカメラ操作が止まる。そのためラベルのクリック判定は文字列を囲む矩形に限り、ラベルの Canvas は入力モードが通常のときだけクリックを受ける（`Utils.SyncOverlayCanvasClickable`）。編集中はラベルを表示したまま、クリック・ホバー・ホイール操作を下の3Dへ通す。インターチェンジ名・道路名のラベルは編集中は非表示にする。
 
@@ -608,6 +608,7 @@ Cockpitから`drive:open`を受けると`DriveMode`が開始位置の選択と�
 | Shift（左右どちらでも） | モード1と2を切り替える。押下ごとに1回だけ切り替え、一時停止・反転は維持する |
 | Space | 自動運動の一時停止/再開 |
 | Backspace | 自動運動の向きを反転。カメラの視線を反転させる操作ではない |
+| マウス | 視線を回して見回す。周回中は周回した角度だけ視線も回るため、見回した向きを注視点に対して保つ |
 | Esc | 現在の位置・向きを保って通常操作へ戻る |
 
 **モード1（Orbit）**は開始時とモード2からの切替時に、画面中央のレイから回転中心を決める。
@@ -618,7 +619,7 @@ Cockpitから`drive:open`を受けると`DriveMode`が開始位置の選択と�
 通常の右ドラッグは地表だけを中心とし、撮影とは対象が異なる。軌道の計算は`InitializeOrbit`と`ApplyOrbitPosition`を共用し、撮影開始時には通常の右ドラッグ用ピッチ制限を掛けない。
 
 **モード2（Travel）**は切替時の視線をXZ平面に投影した方向へ毎秒5mで移動する。
-水平前方の取得は既存の`Utils.GetCameraHorizontalForward`を使う（真上・真下の場合は+Z）。カメラの向きは自動で変更しない。
+水平前方の取得は既存の`Utils.GetCameraHorizontalForward`を使う（真上・真下の場合は+Z）。カメラの向きは自動で変更せず、マウスで見回しても進行方向は変わらない。
 
 | モード2の操作 | 動作 |
 | --- | --- |
@@ -630,10 +631,13 @@ Cockpitから`drive:open`を受けると`DriveMode`が開始位置の選択と�
 4種類の速度はInspectorの「撮影モード設定」で調整する。経過時間は`Time.unscaledDeltaTime`を使い、ウィンドウ非フォーカス中は撮影操作と自動運動を止める。
 マップ範囲の制限は既存の`ClampPositionToCityBoundary`を共有する。
 
-撮影中は通常のWASD/QE・マウス操作・Shift+Fを処理しない。UIボタンの選択を解除し、Spaceや方向キーがSubmit/Navigationとして再実行されることを防ぐ。
+撮影中は通常のWASD/QE・ドラッグ・ホイール・Shift+Fを処理しない。UIボタンの選択を解除し、Spaceや方向キーがSubmit/Navigationとして再実行されることを防ぐ。
 撮影とドライブは`InputHandler.IsNormalMode`で編集との排他を判定し、撮影中に編集へ切り替わった場合も撮影を終了する。
 フライモードへ切替、ドライブの開始、`SetView`による視点配置、セッション切替、コンポーネント無効化でも撮影を終了する。
 開始・終了時は共通の`CancelCameraGestures`でドラッグ・慣性・フォーカスを打ち切り、通常操作に戻る高さを同期する。
 視点保存とセルロードは通常の`CameraController.LateUpdate`と`CameraCellChecker`を引き続き使用する。
+
+フライモード（Shift+Fで開始、Escで終了）と撮影モードは、マウスで視線を回す処理を共用する。仰俯角はマウスでは±89°より外へ傾けないが、真下を向いたまま始めた撮影はその角度を保つ。
+どちらのモードの間もカーソルをロック・非表示にし、3D画面だけを見せるためTauriのUIを全部隠す（`view:ui_visibility`、[IPC連携](IPC連携の整理.md)）。UIはEscで抜けたときにその場で戻る。セッション切替でも両モードを終える。
 
 回帰検証は`unity/Tests/Camera/run-unity.ps1`。独立したUnityで物理コライダーと実際のInput Systemのキー入力を使い、回転中心・姿勢・停止/反転・モード切替・入力の排他を確認する。

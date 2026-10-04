@@ -104,9 +104,12 @@
     "cancel": "No",
     "debugInit": "Debug Init",
     "saveAsScenario": "Guardar como escenario",
+    "saveAsNewScenario": "Guardar como otro escenario",
+    "overwriteScenario": "Sobrescribir escenario",
     "backToGame": "Volver al juego",
     "saveName": "Nombre de la partida",
-    "confirmOverwrite": "¿Sobrescribir la partida «{{name}}»?"
+    "confirmOverwrite": "¿Sobrescribir la partida «{{name}}»?",
+    "confirmOverwriteScenario": "¿Sobrescribir el escenario «{{name}}»?"
   },
   "saveList": {
     "noSaves": "No hay partidas guardadas",

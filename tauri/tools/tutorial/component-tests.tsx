@@ -4,11 +4,15 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { Window } from "happy-dom";
 import { Tutorial } from "../../src/components/tutorial/Tutorial";
+import { FlatTabs } from "../../src/components/common/FlatTabs";
+import { DEFINITIONS } from "../../src/tutorial/definitions";
+import { installUiGuide } from "../../src/tutorial/dom";
 import { emit, notifications, invocations, windowState } from "./mock-runtime";
 
 const browser = new Window();
 for (const name of ["window", "document", "navigator", "localStorage"]) Object.defineProperty(globalThis, name, { configurable: true, value: name === "window" ? browser : (browser as any)[name] });
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+for (const name of ["Element", "HTMLElement", "KeyboardEvent", "MutationObserver"]) Object.assign(globalThis, { [name]: (browser as any)[name] });
 const container = document.createElement("div");
 document.body.append(container);
 const root = createRoot(container);
@@ -62,9 +66,45 @@ try {
   assert.ok(button("tutorial.nextButton"), "next tutorial starts without remounting the window");
   await session(null); await session("second"); await show();
   assert.equal(introRequests(), 2, "a closed intro is not shown again for the same save");
+  // 採掘編の実際の許可リストで、貨物タブを開いてから指定カードを選べることを確認する。
+  let selected = 0;
+  function PlatformSelector() {
+    const [active, setActive] = React.useState("track");
+    return <>
+      <FlatTabs tabs={[
+        { id: "track", label: "Track", guide: { name: "path.variant", values: [411] } },
+        { id: "passenger", label: "Passenger", guide: { name: "path.variant", values: [462] } },
+        { id: "freight", label: "Freight", guide: { name: "path.variant", values: [463, 464] } },
+        { id: "busy", label: "Busy", disabled: true, guide: { name: "path.variant", values: [464] } },
+      ]} active={active} onChange={setActive} iconOnly idPrefix="platform" />
+      {active === "freight" && [463, 464].map(id => <button key={id} data-guide="path.variant" data-guide-value={id} onClick={() => { selected = id; }}>{id}</button>)}
+    </>;
+  }
+  await settle(() => root.render(<PlatformSelector />));
+  const ui = DEFINITIONS.mining.steps.find(step => step.id === "mining.platforms")!.phases.find(phase => phase.id === "variant")!.ui;
+  const release = installUiGuide(ui, "path_build");
+  try {
+    const freight = container.querySelector<HTMLButtonElement>("#platform-tab-freight")!;
+    assert.equal(freight.inert, false, "the tab containing the permitted platform stays usable");
+    assert.ok(freight.hasAttribute("data-tutorial-highlight"), "the prerequisite tab is highlighted");
+    for (const id of ["track", "passenger"]) assert.equal(container.querySelector<HTMLButtonElement>(`#platform-tab-${id}`)!.inert, true, "unrelated tabs stay blocked");
+    assert.equal(container.querySelector<HTMLButtonElement>("#platform-tab-busy")!.disabled, true, "native disabled is preserved");
+    await settle(() => freight.click());
+    assert.equal(freight.getAttribute("aria-selected"), "true", "clicking the tab reveals its cards");
+    await settle(() => button("463")!.click());
+    assert.equal(selected, 0, "another freight platform stays blocked");
+    await settle(() => button("464")!.click());
+    assert.equal(selected, 464, "the required ore platform can be selected");
+    for (const key of ["Home", "End", "ArrowLeft", "ArrowRight"]) {
+      await settle(() => { freight.dispatchEvent(new browser.KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }) as unknown as Event); });
+      assert.equal(freight.getAttribute("aria-selected"), "true", "keyboard navigation skips blocked and disabled tabs");
+    }
+  } finally { release(); }
+  assert.equal(container.querySelector<HTMLButtonElement>("#platform-tab-track")!.inert, false, "ending the guide releases tabs");
+  assert.equal(container.querySelector<HTMLButtonElement>("#platform-tab-busy")!.disabled, true, "ending the guide preserves native disabled");
 } finally {
   await settle(() => root.unmount());
   globalThis.fetch = originalFetch;
   await browser.happyDOM.close();
 }
-console.log("PASS: tutorial component next/finish buttons, return to normal mode and repeated sessions");
+console.log("PASS: tutorial component next/finish buttons, repeated sessions and mining platform tab/card restrictions");

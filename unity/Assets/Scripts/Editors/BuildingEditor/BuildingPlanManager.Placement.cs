@@ -200,7 +200,7 @@ public partial class BuildingPlanManager
             if (isMiddleDragging) { middleDrag.Cancel(); EmitPlacementState(); }
             return false;
         }
-        if (InputUtil.KeyWasPressedThisFrame(Key.Escape)) ResetPlacementSelection();
+        if (InputUtil.WorldEscapeWasPressed) ResetPlacementSelection();
         if (!IsDirectPlacement) return false;
         if (SizeEditable && !isMiddleDragging)
         {

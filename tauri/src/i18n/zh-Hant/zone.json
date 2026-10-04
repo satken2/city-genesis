@@ -1,6 +1,8 @@
 {
   "zone": {
     "titleWithId": "地區 #{{id}}",
+    "color": "地區顏色",
+    "colorUpdateFailed": "更新地區顏色失敗",
     "basicInfo": "基本資訊",
     "area": "面積",
     "zonePopulation": "居住人口",

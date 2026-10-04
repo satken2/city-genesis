@@ -66,7 +66,7 @@
       },
       "step6": {
         "title": "Modo vuelo y modo cine",
-        "description": "La cámara tiene dos modos especiales. El «modo vuelo» se activa con Shift+F: avanza en la dirección de tu vista con W/A/S/D, mira alrededor con el ratón y sube o baja con R/F. Vuelve a pulsar Shift+F para salir. El «modo cine» se inicia con el botón de la esquina superior derecha de la pantalla y te permite rodear la ciudad. Shift alterna entre órbita y desplazamiento, Espacio pausa, Retroceso invierte y Esc sale. Cuando los hayas probado, sal de ambos modos y pulsa «Siguiente»."
+        "description": "La cámara tiene dos modos especiales. El «modo vuelo» se activa con Shift+F: avanza en la dirección de tu vista con W/A/S/D, mira alrededor con el ratón y sube o baja con R/F. Pulsa Esc para salir. El «modo cine» se inicia con el botón de la esquina superior derecha de la pantalla y te permite rodear la ciudad. Mira alrededor con el ratón; Shift alterna entre órbita y desplazamiento, Espacio pausa, Retroceso invierte y Esc sale. Los paneles de la pantalla se ocultan mientras uno de los modos está activo y vuelven al pulsar Esc. Cuando los hayas probado, sal de ambos modos y pulsa «Siguiente»."
       },
       "step7": {
         "title": "Mira el límite de la ciudad",
@@ -78,12 +78,12 @@
       "description": "El pueblo quiere aprovechar un yacimiento, pero otros edificios podrían ocupar el terreno. En este tutorial aprenderás a localizar recursos naturales, dividir el pueblo en distritos y limitar los tipos de edificios que pueden construirse.",
       "step1": {
         "title": "Creemos un distrito",
-        "description": "El distrito divide la ciudad en zonas y se define sobre las calles. Pulsa el botón de distritos del panel de iconos para entrar en el modo de edición: verás que la red de calles en forma de H es un solo distrito.",
-        "create": "Con la herramienta de creación (estado inicial), haz clic en la calle del marcador amarillo para convertirla, con las parcelas que dan a ella, en un distrito nuevo."
+        "description": "El distrito divide la ciudad en zonas y se define a cada lado de las calles. Cada parcela pertenece al distrito del lado de la calle al que da. Pulsa el botón de distritos del panel de iconos para abrir la ventana Editar distritos: verás que la red de calles en forma de H es un solo distrito.",
+        "create": "Esta red no tiene manzanas rodeadas por calles, así que cambia el modo de pintura a «Lado de calle». Con la herramienta «Nuevo distrito», mantén pulsada la tecla Ctrl y arrastra sobre la calle superior derecha de la H. Los dos lados de la calle que pintes, con las parcelas que dan a ellos, pasarán a ser un distrito nuevo."
       },
       "step2": {
         "title": "El distrito quedó dividido",
-        "description": "Has separado una parte de la ciudad como distrito nuevo. Al crear distritos puedes consultar precios, población y otros datos por distrito, y definir normativa de construcción para todo el distrito. Para salir del modo de edición de distritos, vuelve a pulsar el botón de distritos."
+        "description": "Has separado una parte de la ciudad como distrito nuevo. Al crear distritos puedes consultar precios, población y otros datos por distrito, y definir normativa de construcción para todo el distrito. Cuando lo hayas comprobado, cierra la ventana Editar distritos."
       },
       "step3": {
         "title": "Mostremos los recursos naturales",

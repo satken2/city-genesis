@@ -1500,6 +1500,14 @@ public class IpcClient : MonoBehaviour
     }
 
     /// <summary>
+    /// view:ui_visibility を送る。フライ・撮影モードの間は3D画面だけを見せるため、Tauri の全ウィンドウを隠させる。
+    /// </summary>
+    public void EmitUiVisibility(bool visible)
+    {
+        SendEnvelope("view:ui_visibility", new Dictionary<string, object> { ["visible"] = visible });
+    }
+
+    /// <summary>
     /// citizen:pick_failed を送る。クリックした個体の市民の抽選や行程の取得ができなかった理由(コアの status)を UI が案内する。
     /// </summary>
     public void EmitCitizenPickFailed(string status)

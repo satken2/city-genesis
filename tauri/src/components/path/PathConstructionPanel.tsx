@@ -399,6 +399,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
                     label: t(tab.labelKey),
                     icon: <PathVariantTabIcon icon={tab.icon} />,
                     disabled: !tabAllowed(tab),
+                    guide: { name: "path.variant", values: tab.variants.map(variant => variant.id) },
                   }))}
                   active={activeVariantTab.id}
                   onChange={setSelectedVariantTab}

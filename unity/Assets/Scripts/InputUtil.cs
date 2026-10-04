@@ -22,6 +22,10 @@ public static class InputUtil
     public static bool KeyWasPressedThisFrame(Key key) =>
         !IsBlocked && Keyboard.current != null && Keyboard.current[key].wasPressedThisFrame;
 
+    // 編集・選択の取り消しに使う Esc。フライ・撮影モードの間とそれを抜けたフレームの Esc はカメラが使うので渡さない。
+    public static bool WorldEscapeWasPressed =>
+        KeyWasPressedThisFrame(Key.Escape) && !(CameraController.Instance != null && CameraController.Instance.BlocksWorldInput);
+
     public static bool LeftMouseWasPressedThisFrame =>
         !IsBlocked && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
 

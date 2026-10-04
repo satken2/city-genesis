@@ -231,6 +231,7 @@ export type AgentResponse = {
 export type ZoneData = {
   zone_id: number;
   name: string;
+  color: string;
   polygon: number[][];
   area: number;
   center_point: number[];

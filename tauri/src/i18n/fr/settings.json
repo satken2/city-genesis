@@ -104,9 +104,12 @@
     "cancel": "Non",
     "debugInit": "Debug Init",
     "saveAsScenario": "Enregistrer comme scénario",
+    "saveAsNewScenario": "Enregistrer comme un autre scénario",
+    "overwriteScenario": "Écraser le scénario",
     "backToGame": "Retour au jeu",
     "saveName": "Nom de la sauvegarde",
-    "confirmOverwrite": "Écraser la sauvegarde « {{name}} » ?"
+    "confirmOverwrite": "Écraser la sauvegarde « {{name}} » ?",
+    "confirmOverwriteScenario": "Écraser le scénario « {{name}} » ?"
   },
   "saveList": {
     "noSaves": "Aucune sauvegarde",

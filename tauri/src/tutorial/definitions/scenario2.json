@@ -30,8 +30,8 @@
             }
           },
           "until": {
-            "type": "hudMode",
-            "mode": "district"
+            "type": "window",
+            "window": "zone_edit"
           }
         },
         {
@@ -42,7 +42,9 @@
             "allow": [
               "hud.district"
             ],
-            "highlight": []
+            "highlight": [
+              "zone_edit.mode:road"
+            ]
           },
           "world": {
             "mode": "observe",

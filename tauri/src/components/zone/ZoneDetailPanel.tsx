@@ -2,13 +2,13 @@
  * 地区(Zone)詳細パネル
  *
  * window_type="zone_detail" のポップアップウィンドウで表示する専用パネル。
- * 基本情報の表示に加えて、管理状態(自動管理/確定)の切り替えと建築規制の編集を行う。
+ * 基本情報の表示に加えて、名前・識別色・管理状態(自動管理/確定)・建築規制を編集する。
  *
- * 建築規制の編集はバックエンド側で自動管理地区を確定地区へ昇格させる(auto_managed=0)。
- * 所属道路の割り当て変更はアイコンパネルの地区編集モード(3DビューのCtrlラジアルメニュー)で行うため、
+ * 名前・識別色・建築規制の編集はバックエンド側で自動管理地区を確定地区へ昇格させる(auto_managed=0)。
+ * 所属道路の割り当て変更はアイコンパネルから開く地区編集パネルの都市マップで行うため、
  * このパネルでは扱わない。
  */
-import { PLAY_MODE_SCEARIO } from "../../constants";
+import { PLAY_MODE_SCEARIO, ROAD_COLOR_PALETTE } from "../../constants";
 
 
 import { useEffect, useState } from "react";
@@ -17,7 +17,9 @@ import { invoke } from "@tauri-apps/api/core";
 import type { ZoneData, ZoneResponse, ZoneSlotStarvation } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { usePlayMode } from "../../hooks/usePlayMode";
+import { sendZoneUpdated } from "../../utils/ipc";
 import { InfoHeader } from "../common/InfoHeader";
+import { ColorSwatchPicker } from "../common/ColorSwatchPicker";
 import { DataList } from "../common/DataList";
 import { SpaceAmountChart } from "../common/SpaceAmountChart";
 import { RestrictionFields, type RestrictionValues } from "../parcel/RestrictionFields";
@@ -61,6 +63,37 @@ export function ZoneDetailPanel({
   const [restrictionSaving, setRestrictionSaving] = useState(false);
   const [restrictionSaveError, setRestrictionSaveError] = useState<string | null>(null);
 
+  const [colorSaving, setColorSaving] = useState(false);
+  const [colorSaveError, setColorSaveError] = useState(false);
+
+  // 保存成功後だけ地区の再取得を通知し、Unityのラベル・規制アイコン・枠線を同期する。
+  const patchZone = async (zoneId: number, changes: Partial<ZoneData>) => {
+    const data = await fetchApi<ZoneResponse>(
+      buildApiUrl(apiBaseUrl, "/api/v1/zones/{id}", String(zoneId)),
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(changes),
+      }
+    );
+    setZoneData(data.zone);
+    await sendZoneUpdated(data.zone.zone_id);
+    return data.zone;
+  };
+
+  const saveColor = async (color: string) => {
+    if (!zoneData || colorSaving || color === zoneData.color.toLowerCase()) return;
+    setColorSaving(true);
+    setColorSaveError(false);
+    try {
+      await patchZone(zoneData.zone_id, { color });
+    } catch {
+      setColorSaveError(true);
+    } finally {
+      setColorSaving(false);
+    }
+  };
+
   // 建築規制の保存。auto_managed を送らないため、バックエンド側で
   // 自動管理地区は確定地区へ昇格する(レスポンスの zone で管理状態バッジも更新される)。
   // 地区の規制は「未設定」を持てない(土地区画が引き継ぐ値の元になるため)ので、
@@ -80,21 +113,12 @@ export function ZoneDetailPanel({
     setRestrictionSaving(true);
     setRestrictionSaveError(null);
     try {
-      const data = await fetchApi<ZoneResponse>(
-        buildApiUrl(apiBaseUrl, "/api/v1/zones/{id}", String(zoneData.zone_id)),
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            allowed_bd_mask: restrictionValues.allowed_bd_mask,
-            limit_coverage_ratio: restrictionValues.limit_coverage_ratio,
-            limit_volume_ratio: restrictionValues.limit_volume_ratio,
-            limit_height: restrictionValues.limit_height,
-          }),
-        }
-      );
-      const zone = data.zone;
-      setZoneData(zone);
+      const zone = await patchZone(zoneData.zone_id, {
+        allowed_bd_mask: restrictionValues.allowed_bd_mask,
+        limit_coverage_ratio: restrictionValues.limit_coverage_ratio,
+        limit_volume_ratio: restrictionValues.limit_volume_ratio,
+        limit_height: restrictionValues.limit_height,
+      });
       setRestrictionValues({
         allowed_bd_mask: zone.allowed_bd_mask ?? 0,
         limit_coverage_ratio: zone.limit_coverage_ratio ?? null,
@@ -112,15 +136,7 @@ export function ZoneDetailPanel({
   // 名称の編集はバックエンド側で自動管理地区を確定地区へ昇格させる(規制の編集と同じ扱い)。
   const saveName = async (next: string) => {
     if (!zoneData) return;
-    const data = await fetchApi<ZoneResponse>(
-      buildApiUrl(apiBaseUrl, "/api/v1/zones/{id}", String(zoneData.zone_id)),
-      {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: next }),
-      }
-    );
-    setZoneData(data.zone);
+    await patchZone(zoneData.zone_id, { name: next });
   };
 
   // 地区のピン(確定)/ピン解除(自動管理へ戻す)。
@@ -131,15 +147,7 @@ export function ZoneDetailPanel({
     setManagementBusy(true);
     setManagementError(false);
     try {
-      const data = await fetchApi<ZoneResponse>(
-        buildApiUrl(apiBaseUrl, "/api/v1/zones/{id}", String(zoneData.zone_id)),
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ auto_managed: zoneData.auto_managed ? 0 : 1 }),
-        }
-      );
-      setZoneData(data.zone);
+      await patchZone(zoneData.zone_id, { auto_managed: !zoneData.auto_managed });
     } catch {
       setManagementError(true);
     } finally {
@@ -154,6 +162,7 @@ export function ZoneDetailPanel({
     const controller = new AbortController();
     setLoading(true);
     setError(null);
+    setColorSaveError(false);
 
     const url = buildApiUrl(apiBaseUrl, pathTemplate, initialEntityId);
 
@@ -268,6 +277,17 @@ export function ZoneDetailPanel({
       <section className="agent-detail-section">
         <h3 className="agent-detail-section-title">{t("zone.basicInfo", "基本情報")}</h3>
         <div className="agent-detail-grid">
+          <span className="agent-detail-label">{t("zone.color")}</span>
+          <span className="agent-detail-value zone-color-value">
+            <ColorSwatchPicker
+              value={zoneData.color.toLowerCase()}
+              presets={ROAD_COLOR_PALETTE}
+              disabled={colorSaving}
+              onChange={(color) => void saveColor(color)}
+            />
+            {colorSaveError && <p className="zone-mgmt-error" role="alert">{t("zone.colorUpdateFailed")}</p>}
+          </span>
+
           <span className="agent-detail-label">{t("zone.area", "面積")}</span>
           <span className="agent-detail-value">
             <div className="zone-area-meter">

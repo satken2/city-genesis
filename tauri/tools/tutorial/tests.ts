@@ -199,18 +199,19 @@ for (const mutate of [
     shown.facts.windows.panel.visible = false;
     check((await phase()).id, "open", `${id}: closing the panel rewinds`);
   }
-  // 地区編の step1: 地区編集モードに入るまでは全景でボタンを案内し、入ったらマーカーの道路へカメラが寄る。
-  const zoning = DEFINITIONS.scenario2.steps[0], hud = fake();
-  const now = async () => zoning.phases[await findPhase(zoning, hud)];
-  check((await now()).id, "enter", "district guide starts before the edit mode");
-  hud.facts.hudMode = "bulldozer";
-  check((await now()).id, "enter", "another HUD mode does not count");
-  hud.facts.hudMode = "district";
-  check([(await now()).id, (await now()).world.markers], ["create", [[60, 0, 120]]], "district edit mode moves on and shows the road marker");
+  // 地区編の step1: 地区編集ウィンドウを開くまでは全景でボタンを案内し、開いたらマーカーの道路へカメラが寄り、塗り方の「道路単位」を強調する。
+  const zoning = DEFINITIONS.scenario2.steps[0], editor = fake();
+  const now = async () => zoning.phases[await findPhase(zoning, editor)];
+  check((await now()).id, "enter", "district guide starts before the zone editor opens");
+  editor.facts.windows.detail = { visible: true, window: "zone_detail" };
+  check((await now()).id, "enter", "another window does not count");
+  editor.facts.windows.zone = { visible: true, window: "zone_edit" };
+  check([(await now()).id, (await now()).world.markers], ["create", [[60, 0, 120]]], "opening the zone editor moves on and shows the road marker");
   check((await now()).world.camera!.distance < zoning.phases[0].world.camera!.distance, true, "the camera approaches the marker");
-  delete hud.facts.hudMode;
-  check((await now()).id, "enter", "leaving the edit mode rewinds");
-  check(await evaluate({ type: "hudMode", mode: "district" }, hud), false, "hudMode is false in the normal state");
+  check((await now()).ui.highlight, ["zone_edit.mode:road"], "the street-side brush is highlighted");
+  editor.facts.windows.zone.visible = false;
+  check((await now()).id, "enter", "closing the zone editor rewinds");
+  check(await evaluate({ type: "hudMode", mode: "district" }, editor), false, "hudMode is false in the normal state");
   for (const target of ["parcel.mode:along_path", "parcel.confirm", "building.back", "building.cancel", "building.confirm"]) {
     const d = structuredClone(DEFINITIONS.basic); d.steps[0].phases[0].ui.highlight.push(target); validateDefinition(d); checks++;
   }

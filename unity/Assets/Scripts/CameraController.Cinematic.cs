@@ -18,12 +18,12 @@ public partial class CameraController
     private bool cinematicHasPivot;
     private float cinematicDirection = 1f;
     private Vector3 cinematicTravelDirection;
-    private int cinematicExitFrame = -1;
+    private int cameraModeExitFrame = -1;
 
     public bool IsCinematicMode => cinematicMode != CinematicMode.Off;
 
-    // Escで撮影を終えたフレームも遮断し、同じ押下を背後の選択解除へ渡さない。
-    public bool BlocksWorldInput => isFlyMode || IsCinematicMode || cinematicExitFrame == Time.frameCount;
+    // Escでフライ・撮影を終えたフレームも遮断し、同じ押下を背後の選択解除へ渡さない。
+    public bool BlocksWorldInput => isFlyMode || IsCinematicMode || cameraModeExitFrame == Time.frameCount;
 
     private bool CanStartCinematicMode()
     {
@@ -59,12 +59,12 @@ public partial class CameraController
     {
         if (!IsCinematicMode) return;
         cinematicMode = CinematicMode.Off;
-        cinematicExitFrame = Time.frameCount;
+        cameraModeExitFrame = Time.frameCount;
         cinematicHasPivot = false;
         cinematicPaused = false;
         currentHeight = transform.position.y;
         CancelCameraGestures();
-        RefreshCameraModeCaption();
+        RefreshCameraModePresentation();
     }
 
     private void CancelCameraGestures()
@@ -79,6 +79,7 @@ public partial class CameraController
     private void SetCinematicMode(CinematicMode mode)
     {
         cinematicMode = mode;
+        ResetLookAngles();
         if (mode == CinematicMode.Orbit)
         {
             cinematicHasPivot = TryGetRotationPivotPoint(out Vector3 pivot, true);
@@ -88,7 +89,7 @@ public partial class CameraController
         {
             cinematicTravelDirection = Utils.GetCameraHorizontalForward(cam);
         }
-        RefreshCameraModeCaption();
+        RefreshCameraModePresentation();
     }
 
     private void HandleCinematicMovement(float deltaTime)
@@ -108,19 +109,22 @@ public partial class CameraController
             if (cinematicMode == CinematicMode.Orbit && !cinematicHasPivot)
                 SetCinematicMode(CinematicMode.Orbit);
             else cinematicPaused = !cinematicPaused;
-            RefreshCameraModeCaption();
+            RefreshCameraModePresentation();
         }
         if (InputUtil.KeyWasPressedThisFrame(Key.Backspace))
         {
             cinematicDirection = -cinematicDirection;
-            RefreshCameraModeCaption();
+            RefreshCameraModePresentation();
         }
 
         if (cinematicMode == CinematicMode.Orbit)
         {
             if (!cinematicPaused && cinematicHasPivot)
             {
-                orbitYaw += cinematicOrbitSpeed * cinematicDirection * deltaTime;
+                // 周回した角度だけ視線も回し、マウスで見回した向きを注視点に対して保つ。
+                float step = cinematicOrbitSpeed * cinematicDirection * deltaTime;
+                orbitYaw += step;
+                lookYaw += step;
                 ApplyOrbitPosition();
             }
         }
@@ -148,6 +152,7 @@ public partial class CameraController
             if (height < 0f) position.y = Mathf.Max(0f, position.y);
             transform.position = position;
         }
+        ApplyMouseLook();
 
         // 撮影中のYは地形追従させない。境界制限と通常操作へ戻すための高度同期だけを行う。
         ClampPositionToCityBoundary();

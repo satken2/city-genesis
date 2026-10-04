@@ -74,7 +74,7 @@
       "failed": "Expiré"
     },
     "scenarioImageLabel": "Image (Miniature)",
-    "scenarioEditHint": "Rédigez la présentation au moment de « Enregistrer comme scénario », ou plus tard avec « Modifier la présentation » dans la gestion des scénarios."
+    "scenarioEditHint": "Rédigez la présentation au moment de « Enregistrer comme un autre scénario », ou plus tard avec « Modifier la présentation » dans la gestion des scénarios."
   },
   "achievementQuests": {
     "createTitle": "Créer un objectif",

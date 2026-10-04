@@ -12,7 +12,7 @@ const { Window } = await import("happy-dom");
 const window = new Window();
 Object.assign(globalThis, { window, document: window.document, HTMLElement: window.HTMLElement, IS_REACT_ACT_ENVIRONMENT: true });
 const selected = process.argv.slice(2);
-for (const name of selected.length ? selected : ["tests", "signing-tests"]) {
+for (const name of selected.length ? selected : ["tests", "signing-tests", "climate-tests"]) {
   const output = resolve(`node_modules/.cache/scenario-${name}.mjs`);
   await build({ entryPoints: [`tools/scenarios/${name}.tsx`], outfile: output, bundle: true,
     platform: "node", format: "esm", packages: "external", loader: { ".css": "empty", ".png": "empty", ".svg": "empty" },

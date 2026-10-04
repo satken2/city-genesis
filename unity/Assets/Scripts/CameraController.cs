@@ -86,8 +86,9 @@ public partial class CameraController : MonoBehaviour
     // フライモード中はカメラを固定高度に保つ通常モードのロジックを全てスキップし、
     // 「視線基準のWASD移動＋マウス視点回転」の専用処理だけを実行する（透視投影が前提）。
     private bool isFlyMode = false;
-    private float flyYaw;   // フライモードの水平視線角（ワールドY軸まわり、度）
-    private float flyPitch; // フライモードの仰俯角（度、[-89,89]でクランプしてジンバルロックを防ぐ）
+    private float lookYaw;   // フライ・撮影モードの水平視線角（ワールドY軸まわり、度）
+    private float lookPitch; // フライ・撮影モードの仰俯角（度）
+    private bool tauriUiHidden; // フライ・撮影モードのためにTauriのUIを隠すよう送った状態
 
     // マップ範囲（=標高マップの範囲）へのカメラクランプに使う TerrainManager 参照。
     // GetMapWidth / GetMapHeight はインスタンスメソッドのため保持する（初回に遅延取得）。
@@ -338,7 +339,9 @@ public partial class CameraController : MonoBehaviour
     /// </summary>
     public void SuspendCameraSync()
     {
+        // フライ・撮影中はTauriのUIを隠しているため、都市の切り替えやメニューへ戻る前に必ず抜ける。
         StopCinematicMode();
+        SetFlyMode(false);
         syncEnabled = false;
         syncDirty = false;
         if (applySessionCameraCoroutine != null)
@@ -469,12 +472,7 @@ public partial class CameraController : MonoBehaviour
 
         // フライモード中は視線角を内部変数で持っているため、置いた向きから再初期化する
         // (更新しないと次のマウス入力で以前の向きへ飛ぶ)。
-        if (isFlyMode)
-        {
-            Vector3 euler = rotation.eulerAngles;
-            flyYaw = euler.y;
-            flyPitch = NormalizePitchAngle(euler.x);
-        }
+        if (isFlyMode) ResetLookAngles();
 
         if (isTopDownMode && cam != null)
         {
@@ -508,11 +506,11 @@ public partial class CameraController : MonoBehaviour
 
         }
 
-        // Shift+F でフライモードをトグルする。
-        // トグルしたフレームは他のカメラ入力（F単押しによる高度下降など）を処理せず即抜けし、
+        // Shift+F でフライモードに入り、Esc で抜ける。
+        // 切り替えたフレームは他のカメラ入力（F単押しによる高度下降など）を処理せず即抜けし、
         // 切り替えの瞬間に通常モードの操作が混入しないようにする。
         bool shiftHeld = InputUtil.KeyPressed(Key.LeftShift) || InputUtil.KeyPressed(Key.RightShift);
-        if (shiftHeld && InputUtil.KeyWasPressedThisFrame(Key.F))
+        if (isFlyMode ? InputUtil.KeyWasPressedThisFrame(Key.Escape) : shiftHeld && InputUtil.KeyWasPressedThisFrame(Key.F))
         {
             ToggleFlyMode();
             ClampPositionToCityBoundary();
@@ -812,7 +810,7 @@ public partial class CameraController : MonoBehaviour
     /// <summary>
     /// フライモードの有効・無効を切り替える。
     /// フライモードは透視投影を前提とするため、真上（正射）モード中に有効化した場合はまず真上モードを解除する。
-    /// 有効化時は現在のカメラ向きから視線角を初期化し、連続したマウス視点入力を得るためカーソルをロック・非表示にする。
+    /// 有効化時は現在のカメラ向きから視線角を初期化する。
     /// </summary>
     public void SetFlyMode(bool enable)
     {
@@ -835,44 +833,41 @@ public partial class CameraController : MonoBehaviour
             CancelCameraGestures();
 
             // 現在のカメラ向きからヨー・ピッチを初期化し、切り替え時に視線が飛ばないようにする。
-            Vector3 euler = transform.rotation.eulerAngles;
-            flyYaw = euler.y;
-            flyPitch = NormalizePitchAngle(euler.x);
-
-            // 画面端に妨げられない連続したマウス視点入力を得るため、カーソルをロック・非表示にする。
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            ResetLookAngles();
 
             isFlyMode = true;
-
-            // ステートキャプションを STATE_FLY_MODE の案内に切り替える。
-            // （マウス入力の無効化自体は InputHandler が IsFlyMode を見て行う。）
-            RefreshCameraModeCaption();
         }
         else
         {
-            // ロックしたカーソルを元に戻す。
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-
             // 通常モードの高度維持ロジックが直後に働くため、現在の高さを記録して同期する。
             currentHeight = transform.position.y;
+            cameraModeExitFrame = Time.frameCount;
 
             isFlyMode = false;
-
-            // キャプションを直前のステートへ戻す。
-            RefreshCameraModeCaption();
         }
 
+        // （クリック等のワールド入力の遮断自体は InputHandler が BlocksWorldInput を見て行う。）
+        RefreshCameraModePresentation();
         UpdateUIButtons();
     }
 
     /// <summary>
-    /// カメラ専用モードに合わせてステートキャプション（ModeTextDisplay）を切り替える。
-    /// ModeTextDisplay が存在しないシーン（メッシュテスト等）では何もしない。
+    /// カメラ専用モード（フライ・撮影）の見せ方を現在のモードに合わせる。
+    /// モード中は画面端に妨げられない連続したマウス視点入力を得るためカーソルをロック・非表示にし、
+    /// 3D画面だけを見せるため Tauri の UI を隠す（UI へは変化したときだけ送る）。
+    /// ステートキャプション（ModeTextDisplay）が存在しないシーン（メッシュテスト等）ではキャプションを切り替えない。
     /// </summary>
-    private void RefreshCameraModeCaption()
+    private void RefreshCameraModePresentation()
     {
+        bool exclusive = isFlyMode || IsCinematicMode;
+        Cursor.lockState = exclusive ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !exclusive;
+        if (tauriUiHidden != exclusive)
+        {
+            tauriUiHidden = exclusive;
+            IpcClient.Instance?.EmitUiVisibility(!exclusive);
+        }
+
         if (modeTextDisplayRef == null)
         {
             if (modeTextDisplayLookupDone) return;
@@ -909,13 +904,7 @@ public partial class CameraController : MonoBehaviour
     /// </summary>
     private void HandleFlyModeMovement()
     {
-        // マウス移動で視線を変える。カーソルは Locked のため画面端に関係なく連続した delta が得られる。
-        Vector2 mouseDelta = Mouse.current != null ? Mouse.current.delta.ReadValue() : Vector2.zero;
-        flyYaw += mouseDelta.x * flyMouseSensitivity;
-        flyPitch -= mouseDelta.y * flyMouseSensitivity;
-        // 真上・真下付近でのジンバルロックを避けるため仰俯角を制限する。
-        flyPitch = Mathf.Clamp(flyPitch, -89f, 89f);
-        transform.rotation = Quaternion.Euler(flyPitch, flyYaw, 0f);
+        ApplyMouseLook();
 
         // 現在の視線を基準に WASD で移動する。前方ベクトルはピッチを含むため、視線方向へまっすぐ進む。
         float moveX = GetAxisRawHorizontal(); // A/D（左右ストレイフ）
@@ -925,17 +914,13 @@ public partial class CameraController : MonoBehaviour
         float moveSpeed = GetHeightAdjustedMoveSpeed() * flySpeedMultiplier;
         transform.position += moveDir * moveSpeed * Time.deltaTime;
 
-        // R/F でワールドY軸方向の上下移動。フライモード切り替えの Shift+F と競合しないよう Shift 非押下時のみ受け付ける。
-        bool shiftHeld = InputUtil.KeyPressed(Key.LeftShift) || InputUtil.KeyPressed(Key.RightShift);
-        if (!shiftHeld)
+        // R/F でワールドY軸方向の上下移動。
+        float vertical = 0f;
+        if (InputUtil.KeyPressed(Key.R)) vertical += 1f;
+        if (InputUtil.KeyPressed(Key.F)) vertical -= 1f;
+        if (vertical != 0f)
         {
-            float vertical = 0f;
-            if (InputUtil.KeyPressed(Key.R)) vertical += 1f;
-            if (InputUtil.KeyPressed(Key.F)) vertical -= 1f;
-            if (vertical != 0f)
-            {
-                transform.position += Vector3.up * (vertical * GetHeightAdjustedHeightSpeed() * flySpeedMultiplier * Time.deltaTime);
-            }
+            transform.position += Vector3.up * (vertical * GetHeightAdjustedHeightSpeed() * flySpeedMultiplier * Time.deltaTime);
         }
 
         // 地面貫通を防止する（地表より下へは潜らない）。
@@ -947,6 +932,28 @@ public partial class CameraController : MonoBehaviour
 
         // 高度連動の速度計算のため、現在の高さを同期しておく。
         currentHeight = transform.position.y;
+    }
+
+    /// <summary>
+    /// マウスの移動量で視線角を変え、カメラの向きへ反映する（フライ・撮影モードで共用）。
+    /// カーソルは Locked のため画面端に関係なく連続した delta が得られる。
+    /// 真上・真下を越えて裏返らないよう、マウスでは仰俯角を ±89° より外へ傾けない
+    /// （真下を向いたまま始めた撮影はその角度を保つ）。
+    /// </summary>
+    private void ApplyMouseLook()
+    {
+        Vector2 mouseDelta = Mouse.current != null ? Mouse.current.delta.ReadValue() : Vector2.zero;
+        lookYaw += mouseDelta.x * flyMouseSensitivity;
+        lookPitch = Mathf.Clamp(lookPitch - mouseDelta.y * flyMouseSensitivity,
+            Mathf.Min(-89f, lookPitch), Mathf.Max(89f, lookPitch));
+        transform.rotation = Quaternion.Euler(lookPitch, lookYaw, 0f);
+    }
+
+    private void ResetLookAngles()
+    {
+        Vector3 euler = transform.rotation.eulerAngles;
+        lookYaw = euler.y;
+        lookPitch = NormalizePitchAngle(euler.x);
     }
 
     /// <summary>

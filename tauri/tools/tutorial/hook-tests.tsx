@@ -46,14 +46,14 @@ assert.equal(guide!.failed, true); assert.equal(guide!.ready, false); assert.equ
 await settle(() => guide!.retry());
 assert.equal(guide!.failed, false); assert.equal(guide!.ready, true); assert.equal(fixture.actions, 2);
 assert.deepEqual(snapshot()?.world.camera, { target: [-1750, 0, 20], distance: 300, yaw: 0, pitch: 50 }, "phase camera reaches the snapshot");
-// 地区編集モードの切り替え(HUD間で共有されるグローバルイベント)で段階とカメラが動く。
+// 地区編集ウィンドウの開閉で段階とカメラが動く。
 await settle(() => root.render(<Harness scenario="scenario2" step={1} save="D" />));
 assert.equal(snapshot()?.phaseId, "enter");
 const overview = snapshot()!.world.camera;
-await settle(() => emit("hud:mode_changed", { mode: "district" }));
+await settle(() => emit("tutorial:window_visibility", { label: "zone", window: "zone_edit", visible: true }));
 assert.equal(snapshot()?.phaseId, "create");
-assert.ok(snapshot()!.world.camera!.distance < overview!.distance, "the camera moves closer once the edit mode starts");
-await settle(() => emit("hud:mode_changed", { mode: null }));
+assert.ok(snapshot()!.world.camera!.distance < overview!.distance, "the camera moves closer once the zone editor opens");
+await settle(() => emit("tutorial:window_visibility", { label: "zone", window: "zone_edit", visible: false }));
 assert.equal(snapshot()?.phaseId, "enter");
 // 建て終えてパネルが閉じても、達成条件を満たしていれば「次へ」で進める(案内は最終段階のまま)。
 localStorage.setItem("tutorial_runtime_v1:basic:E", JSON.stringify({ bindings: { "support.housing.building": { kind: "agents", id: 30 } }, setupDone: true }));

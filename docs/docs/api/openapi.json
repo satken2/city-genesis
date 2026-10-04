@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Urban Genesis API",
+    "title": "City Genesis API",
     "version": "1.0.0"
   },
   "paths": {
@@ -1796,7 +1796,7 @@
           "paths"
         ],
         "summary": "Batch Set Zone Endpoint",
-        "description": "指定したPATH_STREETパスにzone_idを一括設定する。\nパスは経路グラフ上で連続している必要があり、設定により他のPATH_STREETが孤立しないことを検証する。",
+        "description": "指定したPATH_STREETパスの面の地区を zone_id に一括設定する(地区の拡張)。\nsides は path_ids と同じ並びの面の指定(PATH_SIDE_*)で、省略すると両面。\n割り当て後の地区の道路が1つに繋がっていない場合は ZONE_CONTIGUITY_ERROR を返す。",
         "operationId": "batch_set_zone_endpoint_api_v1_paths_batch_zone_post",
         "requestBody": {
           "content": {
@@ -3047,7 +3047,7 @@
           "alerts"
         ],
         "summary": "Get Alerts Endpoint",
-        "description": "アラート対象の一覧を返す。\n\nエポック実行後に Unity の AlertManager が呼び出すことで、ビルボード形式の\nアラートアイコンを表示すべき建物・道路を特定する。alert は int16 のビット和で\n返り、各ビットの意味は consts.py の ALERT_AGENT_* / ALERT_PATH_* 定数に対応する。",
+        "description": "アラート対象と、L1由来の位置付き警告の一覧を返す。\n\nエポック実行後に Unity の AlertManager が呼び出すことで、ビルボード形式の\nアラートアイコンを表示すべき建物・道路を特定する。alert は int16 のビット和で\n返り、各ビットの意味は consts.py の ALERT_AGENT_* / ALERT_PATH_* 定数に対応する。",
         "operationId": "get_alerts_endpoint_api_v1_alerts__get",
         "parameters": [
           {
@@ -3121,7 +3121,7 @@
           "epochs"
         ],
         "summary": "Run Epochs",
-        "description": "シミュレーションを実行(countが未指定の場合は1エポック実行)\n\nレスポンスの epoch_report には以下が含まれる:\n- construction_progress: 実行開始時点で建設予定/建設中だった市政府建設物\n  (public_facility=1 の建物と全ての道路)の進捗遷移(before_pct → after_pct)\n- maintenance_items: エポック完了時点で修繕中(under_maintenance=1)の公共建物・道路の一覧。\n  プレイヤーはエポック結果ウィンドウで個別に修繕のキャンセルが可能。\n- rebuild_items: エポック完了時点で造り替え(バリアント変更)中の道路の一覧。\n  キャンセルは DELETE /api/v1/paths/{path_id}/rebuild で行う。\n- population: 実行による人口動態(出生/死亡/転入/転出の累計、および前後人口)\n- exchange_rate: 前後の為替レート\n- statistics: 統計タイル用の現在値と、指標ごとの直近 trend_window エポック分の履歴(history)\n\nエポック実行は直列化されており、別の実行の最中に来た要求は 409 EPOCH_ALREADY_RUNNING になる。",
+        "description": "シミュレーションを実行(countが未指定の場合は1エポック実行)\n\nレスポンスの epoch_report には以下が含まれる:\n- construction_progress: 実行開始時点で建設予定/建設中だった市政府建設物\n  (public_facility=1 の建物と全ての道路)のうち、タグの付いていないものの進捗遷移\n  (before_pct → after_pct)。variant は種別の表記(道路・線路・電力 など)に使う。\n- construction_projects: 上のうちタグの付いたものを、タグ(建設プロジェクト)ごとに\n  まとめた進捗遷移。進捗率は建設体積で按分した平均で、メンバー(同じタグの完了済みの\n  建物・道路も含む)は種別と完了状況だけを持つ。\n- maintenance_items: エポック完了時点で修繕中(under_maintenance=1)の公共建物・道路の一覧。\n  プレイヤーはエポック結果ウィンドウで個別に修繕のキャンセルが可能。\n- rebuild_items: エポック完了時点で造り替え(バリアント変更)中の道路の一覧。\n  キャンセルは DELETE /api/v1/paths/{path_id}/rebuild で行う。\n- population: 実行による人口動態(出生/死亡/転入/転出の累計、および前後人口)\n- exchange_rate: 前後の為替レート\n- statistics: 統計タイル用の現在値と、指標ごとの直近 trend_window エポック分の履歴(history)\n\nエポック実行は直列化されており、別の実行の最中に来た要求は 409 EPOCH_ALREADY_RUNNING になる。",
         "operationId": "run_epochs_api_v1_epochs_post",
         "parameters": [
           {
@@ -3288,7 +3288,7 @@
           "debug"
         ],
         "summary": "Import City Shape Endpoint",
-        "description": "書き出しておいた都市形状ファイルを読み込み、地区・道路・土地区画を復元する。\n\n実行中は template_mode を ON にしてバリデーションを回避する(終了時に元へ戻す)。\nそのため、書き出し元と異なる地形へ読み込むと海の中に道路ができるが、これは\n「地形の一致は利用者の責任」という割り切った仕様である。\n\n既存データは削除せず追加するため、まっさらな新規ゲームに対して実行すること。\n道路は通常の建設フロー(着工→竣工)を通るので、地形の平坦化・交差ノードの生成・\n交差点での分割まで再現される。経路探索は無効化されたままなので、即座に\n再計算したい場合は続けて GET /debug/route を呼ぶこと。\n\nリクエストボディ:\n  filename: outputs 配下のファイル名 ※必須",
+        "description": "書き出しておいた都市形状ファイルを読み込み、地区・道路・土地区画を復元する。\n\n実行中は play_mode を PLAY_MODE_SCEARIO にしてバリデーションを回避する(終了時に元へ戻す)。\nそのため、書き出し元と異なる地形へ読み込むと海の中に道路ができるが、これは\n「地形の一致は利用者の責任」という割り切った仕様である。\n\n既存データは削除せず追加するため、まっさらな新規ゲームに対して実行すること。\n道路は通常の建設フロー(着工→竣工)を通るので、地形の平坦化・交差ノードの生成・\n交差点での分割まで再現される。経路探索は無効化されたままなので、即座に\n再計算したい場合は続けて GET /debug/route を呼ぶこと。\n\nリクエストボディ:\n  filename: outputs 配下のファイル名 ※必須",
         "operationId": "import_city_shape_endpoint_api_v1_debug_city_shape_import_post",
         "requestBody": {
           "content": {
@@ -3456,6 +3456,46 @@
         }
       }
     },
+    "/api/v1/city/climate": {
+      "put": {
+        "tags": [
+          "city"
+        ],
+        "summary": "Put Climate",
+        "description": "シナリオ作成モードで気候名と12か月の設定を置き換える。確定済みのエポック気候は保持する。",
+        "operationId": "put_climate_api_v1_city_climate_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClimateSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/city/": {
       "get": {
         "tags": [
@@ -3596,6 +3636,154 @@
         }
       }
     },
+    "/api/v1/city/heatmaps/{kind}": {
+      "get": {
+        "tags": [
+          "city"
+        ],
+        "summary": "Get Environment Heatmap",
+        "description": "地図オーバーレイの原点・実寸・LOD一覧を取得する。未計算ならlevelsは空。",
+        "operationId": "get_environment_heatmap_api_v1_city_heatmaps__kind__get",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "noise",
+                "pollution",
+                "crime",
+                "sunshine"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/city/heatmaps/{kind}/{lod}": {
+      "get": {
+        "tags": [
+          "city"
+        ],
+        "summary": "Get Environment Heatmap Level",
+        "description": "選択LODのスコアを行優先のuint16 LEで返す。0=負荷なし、65535=最悪。",
+        "operationId": "get_environment_heatmap_level_api_v1_city_heatmaps__kind___lod__get",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "noise",
+                "pollution",
+                "crime",
+                "sunshine"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "lod",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Lod"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/city/environment-sources/{kind}": {
+      "get": {
+        "tags": [
+          "city"
+        ],
+        "summary": "Get Environment Source Strengths",
+        "description": "建物・パスの発生源強度を都市内の最大値に対するuint16値と実値レンジで取得する。",
+        "operationId": "get_environment_source_strengths_api_v1_city_environment_sources__kind__get",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "noise",
+                "pollution"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/city/taxes": {
       "get": {
         "tags": [
@@ -3682,7 +3870,7 @@
           "city"
         ],
         "summary": "Get Budgets",
-        "description": "予算設定と前エポック実績、および予算の維持優先度（Tier。1=最優先維持〜4=最初に削減）の設定を取得する。\n\n- budgets: 当エポックの予算配分（フル稼働必要額 × category_ratio から導出された円額）\n- prev_budgets: 前エポックの予算配分\n- total_expense: 前エポックのカテゴリ別実績支出\n- total_revenue: 前エポックのカテゴリ別収入\n- budget_tiers: 各カテゴリの維持優先度設定（1=最優先維持〜4=最初に削減）\n- history: 前回収入の時系列履歴リスト\n- category_ratio: プレイヤーが設定した「フル稼働必要額に対する比率」（0〜1.5、予算パネルの主入力）\n- effective_category_ratio: 資金不足の自動調整後の実効比率（budgets / 基準額）\n- prev_total_expense: 前エポック実績支出のスナップショット（「前実績」バーの表示用）\n- projected_required: カテゴリ別のフル稼働必要額（予算導出の基準額。比率スライダーの分母）\n- savings_target / savings: 貯蓄目標と、配分後に実際に貯蓄として残った額\n- budget_auto_adjusted: 直近の配分で資金不足による自動調整が発生したか（UIバナー表示用）\n- reserves_history: 市政府の現預金のエポック末推移（[{epoch, reserves}] の古い順リスト）\n- current_reserves: 現在（ユーザー操作フェーズ）の市政府の現預金",
+        "description": "予算設定と前エポック実績、および予算の維持優先度（Tier。1=最優先維持〜4=最初に削減）の設定を取得する。\n\n- budgets: 当エポックの予算配分（必要額 × category_ratio から導出された円額）\n- prev_budgets: 前エポックの予算配分\n- total_expense: 前エポックのカテゴリ別実績支出\n- total_revenue: 前エポックのカテゴリ別収入\n- budget_tiers: 各カテゴリの維持優先度設定（1=最優先維持〜4=最初に削減）\n- history: 前回収入の時系列履歴リスト\n- category_ratio: プレイヤーが設定した「必要額に対する比率」（0〜1.5、予算パネルの主入力）\n- effective_category_ratio: 資金不足の自動調整後の実効比率（budgets / 基準額）\n- prev_total_expense: 前エポック実績支出のスナップショット（「前実績」バーの表示用）\n- projected_required: カテゴリ別の必要額（予算導出の基準額。比率スライダーの分母）\n- savings_target / savings: 貯蓄目標と、配分後に実際に貯蓄として残った額\n- budget_auto_adjusted: 直近の配分で資金不足による自動調整が発生したか（UIバナー表示用）\n- reserves_history: 市政府の現預金のエポック末推移（[{epoch, reserves}] の古い順リスト）\n- current_reserves: 現在（ユーザー操作フェーズ）の市政府の現預金",
         "operationId": "get_budgets_api_v1_city_budgets_get",
         "responses": {
           "200": {
@@ -3700,7 +3888,7 @@
           "city"
         ],
         "summary": "Update Budgets",
-        "description": "予算の設定を更新する。プレイヤーは「フル稼働必要額に対する比率（category_ratio）」、\n貯蓄目標（savings_target）、維持優先度（budget_tiers）を設定する。実際の予算額（budgets）は\n比率 × フル稼働必要額（projected_required）から自動導出され、\n希望合計が現金を超える場合は維持優先度の低い Tier 4→1 の順に自動調整される\n（budget_auto_adjusted で通知）。\n\nリクエストボディには以下を含めることができる：\n- category_ratio: { \"カテゴリID\": 比率 } 形式の辞書（全カテゴリ 0〜1.5）。\n  100% = フル稼働に必要な満額。比率を下げると予算がキャップとなり、そのカテゴリの\n  公共施設は比率にほぼ比例した実効稼働率まで絞られる。基準額は実績を参照しないため、\n  設定はプレイヤーが変えるまで恒久的に有効（自動リセットはない）。\n- savings_target: 貯蓄目標額（配分前に現金から確保する）\n- budget_tiers: { \"カテゴリID\": 維持優先度(1=最優先維持〜4=最初に削減) } 形式の辞書\n- budgets: { \"カテゴリID\": 金額 } 形式の辞書（API直叩き用の直接上書き。UIからは使わない。\n  上書き額は次のエポック開始時の自動再導出を1回だけスキップさせ、そのエポック限り有効）\n存在しないカテゴリIDは無視され、範囲外の値はクランプされる。\n\n施設別の稼働率・建設スピードは各施設・道路の utilization_target（PATCH /agents・/paths）で\n設定する。「カテゴリ全体の稼働率」という概念は廃止済みで、実効稼働率＝施設別の\nutilization_target のみで決まる。\n\n比率/貯蓄/優先度の変更は即座に budgets へ再導出され、PlanStdPhase を再実行して\n公共施設の雇用枠（quota）を新しい予算に基づいて再計算する。これにより、変更が\n次エポックの労働マッチングに即座に反映される。",
+        "description": "予算の設定を更新する。プレイヤーは「必要額に対する比率（category_ratio）」、\n貯蓄目標（savings_target）、維持優先度（budget_tiers）を設定する。実際の予算額（budgets）は\n比率 × 必要額（projected_required）から自動導出され、\n希望合計が現金を超える場合は維持優先度の低い Tier 4→1 の順に自動調整される\n（budget_auto_adjusted で通知）。\n\nリクエストボディには以下を含めることができる：\n- category_ratio: { \"カテゴリID\": 比率 } 形式の辞書（全カテゴリ 0〜1.5）。\n  100% = 計画どおりの稼働に必要な満額。比率を下げると予算がキャップとなり、そのカテゴリの\n  公共施設は比率にほぼ比例した実効稼働率まで絞られる。基準額は実績を参照しないため、\n  設定はプレイヤーが変えるまで恒久的に有効（自動リセットはない）。\n- savings_target: 貯蓄目標額（配分前に現金から確保する）\n- budget_tiers: { \"カテゴリID\": 維持優先度(1=最優先維持〜4=最初に削減) } 形式の辞書\n- budgets: { \"カテゴリID\": 金額 } 形式の辞書（API直叩き用の直接上書き。UIからは使わない。\n  上書き額は次のエポック開始時の自動再導出を1回だけスキップさせ、そのエポック限り有効）\n存在しないカテゴリIDは無視され、範囲外の値はクランプされる。\n\n施設別の稼働率・建設スピードは各施設・道路の utilization_target（PATCH /agents・/paths）で\n設定する。「カテゴリ全体の稼働率」という概念は廃止済みで、実効稼働率＝施設別の\nutilization_target のみで決まる。\n\n比率/貯蓄/優先度の変更は即座に budgets へ再導出され、PlanStdPhase を再実行して\n公共施設の雇用枠（quota）を新しい予算に基づいて再計算する。これにより、変更が\n次エポックの労働マッチングに即座に反映される。",
         "operationId": "update_budgets_api_v1_city_budgets_patch",
         "requestBody": {
           "content": {
@@ -4562,6 +4750,26 @@
         }
       }
     },
+    "/api/v1/citizens/tracked/random": {
+      "post": {
+        "tags": [
+          "citizens"
+        ],
+        "summary": "Track Random Citizen",
+        "description": "未追跡の市民をランダムに1人加え、市民IDと一覧を返す。候補がいなければ市民IDはnull。",
+        "operationId": "track_random_citizen_api_v1_citizens_tracked_random_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/citizens/tracked/{citizen_id}": {
       "put": {
         "tags": [
@@ -4986,7 +5194,7 @@
           "sessions"
         ],
         "summary": "Get Session",
-        "description": "現在のゲームセッション状態を返す。\nGameData3のプロパティをそのままレスポンスとして返却する。\n\nシナリオの地形編集などでセッションを使わずに都市を組み立てている間(gd3.headless_job)は、\n内部で一時的に採番したIDがあっても current_save_id を null で返す。Tauri・Unity はこの値で\nゲームの開始を検知するため、ヘッドレスの処理をゲーム開始と誤認させない。",
+        "description": "現在のゲームセッション状態を返す。\nGameData3のプロパティをそのままレスポンスとして返却する。\n\nシナリオの地形編集などでセッションを使わずに都市を組み立てている間(gd3.headless_job)は、\n内部で一時的に採番したIDがあっても current_save_id を null で返す。Tauri・Unity はこの値で\nゲームの開始を検知するため、ヘッドレスの処理をゲーム開始と誤認させない。\ncurrent_save_id は上書き保存の先で、別名保存で新しいファイルのIDに変わる。session_id は読み込んでいる\n都市の識別子で、都市を作る・読み込むたびに変わり、保存では変わらない(別の都市への切り替えはこちらで判定する)。\ncurrent_save_is_scenario が true のとき、current_save_id は「都市を編集」で開いた自作シナリオの\nID(local~<id>)で、上書き保存は PUT /api/v1/saves/{id}?template=true でそのシナリオへ書く。",
         "operationId": "get_session_api_v1_sessions_get",
         "responses": {
           "200": {
@@ -5004,14 +5212,14 @@
           "sessions"
         ],
         "summary": "Update Session",
-        "description": "template_mode(神モード)を切り替える。\n\n有効化できるのは開発時だけ。本番でAPIから神モードに入れると一括完成・資金チェック免除などが\n誰でも使えてしまうため。無効化はいつでもできる(チュートリアル完了処理が使う)。\n本番で神モードに入る正規の経路は POST /sessions の template_mode・is_tutorial だけ。",
+        "description": "プレイモードを切り替える。\n\n本番では通常モードへの復帰だけを許可する。神・チュートリアルモードへの入口は\nPOST /sessions。チュートリアル完了時は都市を保ったまま通常モードへ移る。",
         "operationId": "update_session_api_v1_sessions_patch",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TemplateModeRequest"
+                "$ref": "#/components/schemas/PlayModeRequest"
               }
             }
           }
@@ -5042,7 +5250,7 @@
           "sessions"
         ],
         "summary": "Create Session",
-        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. is_tutorial … 同梱のチュートリアルの都市(tutorial~<tutorial_id>)をシナリオとして開始する\n  3. template_id … シナリオ（テンプレート）データをロードする\n  4. 何も指定しない … 既定の地形(平坦な海)で新規ゲームを開始する(開発用)\n\nチュートリアルはシナリオの開始と同じ手順(言語が違えば名前の付け直し・開始設定)で始め、\nその後で神モードにする(代行アクションの工期スキップなどに要る)。\n\nシナリオ・チュートリアルの都市の創設状態(city_hall_placed)は保存された値のまま始まる。\n市庁舎の無いシナリオ(地形だけのシナリオなど)は未創設で始まり、プレイヤーが市庁舎を置いて創設する。\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。シナリオで指定しない場合はシナリオの初期の都市名(都市の言語 → 英語の順)。\n  - language: 都市の言語。シナリオと違う言語なら、都市内の固有名詞を付け直す。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\nシナリオをプレイとして始めるとき(template_mode でない)は、作者が固定していない開始設定\n(simulation_days・climate・ground_cover・asset_region)を選べる。固定の項目にシナリオと違う値を\n送ると 422 SCENARIO_OPTION_FIXED、値域の外は 422 SCENARIO_OPTION_INVALID(どちらもロード前に断る)。\n言語を変えたときは応答の relocalized に {from, to, counts} を入れる。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
+        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. play_mode=PLAY_MODE_TUTORIAL … 同梱の教材の都市(tutorial~<tutorial_id>)を開始する\n  3. template_id … シナリオ（テンプレート）データをロードする\n  4. 何も指定しない … 既定の地形(平坦な海)で新規ゲームを開始する(開発用)\n\nチュートリアルも通常のシナリオと同じ開始設定の検証・適用を行う。\n\ntemplate_id に play_mode=PLAY_MODE_SCEARIO(神モード)を付けると、自作シナリオの原本を編集用に開く\n(「都市を編集」)。IDは振り直さず、current_save_id がそのシナリオのIDになり、上書き保存の先になる。\n自作以外(コミュニティ・DLC)はプレイだけができ、422 SCENARIO_READ_ONLY(都市を初期化する前に断る)。\n\nシナリオ・チュートリアルの都市の創設状態(city_hall_placed)は保存された値のまま始まる。\n市庁舎の無いシナリオ(地形だけのシナリオなど)は未創設で始まり、プレイヤーが市庁舎を置いて創設する。\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。シナリオで指定しない場合はシナリオの初期の都市名(都市の言語 → 英語の順)。\n  - language: 都市の言語。シナリオと違う言語なら、都市内の固有名詞を付け直す。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\n通常・チュートリアルモードでは、作者が固定していない開始設定\n(simulation_days・climate・ground_cover・asset_region)を選べる。固定の項目にシナリオと違う値を\n送ると 422 SCENARIO_OPTION_FIXED、値域の外は 422 SCENARIO_OPTION_INVALID(どちらもロード前に断る)。\n言語を変えたときは応答の relocalized に {from, to, counts} を入れる。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
         "operationId": "create_session_api_v1_sessions_post",
         "parameters": [
           {
@@ -5112,16 +5320,6 @@
             }
           },
           {
-            "name": "is_tutorial",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Is Tutorial"
-            }
-          },
-          {
             "name": "tutorial_id",
             "in": "query",
             "required": false,
@@ -5132,13 +5330,15 @@
             }
           },
           {
-            "name": "template_mode",
+            "name": "play_mode",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Template Mode"
+              "type": "integer",
+              "maximum": 2,
+              "minimum": 0,
+              "default": 0,
+              "title": "Play Mode"
             }
           },
           {
@@ -5331,7 +5531,7 @@
           "saves"
         ],
         "summary": "Overwrite Current Save",
-        "description": "指定した save_id の通常セーブを、現在のゲーム状態で上書き保存する。名前はファイルの名前を引き継ぐ。\n現在ロード中のセーブIDと一致しない場合は 409 Conflict を返す。\nシナリオは上書きせず、POST /api/v1/templates で常に新しいシナリオとして保存する。",
+        "description": "現在開いているファイルへ、現在のゲーム状態を上書き保存する。名前はファイルの名前を引き継ぐ。\nクエリパラメータ template=true は「都市を編集」で開いた自作シナリオの上書きで、紹介情報・画像・出自を\n引き継いで版を1つ上げる(GET /api/v1/sessions の current_save_is_scenario が true のとき)。\n現在開いているファイル(current_save_id とその種別)と一致しない場合は 409 Conflict を返す。",
         "operationId": "overwrite_current_save_api_v1_saves__save_id__put",
         "parameters": [
           {
@@ -6046,6 +6246,57 @@
         }
       }
     },
+    "/api/v1/scenarios/{scenario_id}/sign": {
+      "post": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "Sign Scenario",
+        "description": "開発時に自作シナリオを署名し、任意の別の .cg ファイルへ書き出す。\n\npack_idとkeyring_pathを指定するとパック暗号化する。鍵は指定されたローカルファイルから読む。\n配布ビルドは501 DEBUG_DISABLED、自作以外はSCENARIO_READ_ONLY。元シナリオは変更しない。",
+        "operationId": "sign_scenario_api_v1_scenarios__scenario_id__sign_post",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/parameters": {
       "get": {
         "tags": [
@@ -6112,7 +6363,7 @@
           "templates"
         ],
         "summary": "Create Template",
-        "description": "現在のゲーム状態を新しい自作シナリオとして保存する。既存のシナリオは上書きしない\n(シナリオから開いた都市でも常に新しいIDになる)。神モードでなくても保存できる。\n本文には紹介情報の更新(PATCH /api/v1/scenarios/{id})と同じ項目を任意で渡せ、\n新しいシナリオにだけ書く(プレイ中の都市の紹介情報は変えない)。\n出自(必要パック・元シナリオ)は引き継ぎ、必要パックがあれば暗号化して書く。",
+        "description": "現在のゲーム状態を新しい自作シナリオとして保存する。既存のシナリオは上書きしない\n(シナリオから開いた都市でも常に新しいIDになる)。神モードでなくても保存できる。\n本文には紹介情報の更新(PATCH /api/v1/scenarios/{id})と同じ項目を任意で渡せ、新しいシナリオに書く。\n出自(必要パック・元シナリオ)は引き継ぎ、必要パックがあれば暗号化して書く。\nプレイ中の都市から保存したときは、都市の紹介情報も current_save_id も変えない。\n「都市を編集」で開いたシナリオから保存したとき(別のシナリオとして保存)は、current_save_id を\n新しいシナリオに移して以後の上書き保存の先にし、本文の紹介情報を開いている都市にも反映する。",
         "operationId": "create_template_api_v1_templates_post",
         "requestBody": {
           "content": {
@@ -6229,13 +6480,33 @@
         }
       }
     },
+    "/api/v1/templates/privatize-facilities": {
+      "post": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Privatize Facilities Endpoint",
+        "description": "貸し建物と民間参入可能な一般施設の公共施設フラグを一括解除する。\n\nシナリオモード専用。TYPE_BUILDING の全施設と、非規制商品を供給し、インフラ網に\n参加せず、template_only でもない TYPE_STANDARD を対象にする。敷地の所有者・\n残高・ステータスは変更せず、変更件数を privatized_agents で返す。",
+        "operationId": "privatize_facilities_endpoint_api_v1_templates_privatize_facilities_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/templates/street-grid": {
       "post": {
         "tags": [
           "templates"
         ],
         "summary": "Street Grid Endpoint",
-        "description": "多角形の範囲内へ格子状の路地を計画中(SCHEDULED_CONSTRUCTION)で作成する\n(*テンプレート作成モードでのみ実行可能)。\n\nリクエストボディ:\n  points: 範囲多角形の頂点 [[x, z], ...](ワールド座標、3点以上。必須)\n  spacing: 格子間隔(m)。省略時80\n  path_variant: 路地のバリアント(街路に限る)。省略時212(1車線生活道路)\n  angle_deg: 格子の主軸角度(度)。省略時は最寄り街路の向きに揃える\n\n格子線は互いの交点と既存道路との交点で分割して1本ずつ登録するため、後の一括完成で\n交差ノード・T字接続が通常どおり作られる。海岸線外・急勾配・川の横断・既存道路との\n重複・建物のある区画への侵入は棄却し、理由別の本数を rejected で返す。",
+        "description": "多角形の範囲内へ選択した形状の路地を計画中(SCHEDULED_CONSTRUCTION)で作成する\n(*テンプレート作成モードでのみ実行可能)。\n\nリクエストボディ:\n  points: 範囲多角形の頂点 [[x, z], ...](ワールド座標、3点以上。必須)\n  spacing: 街路・分岐の間隔の目安(m)。省略時80\n  path_variant: 路地のバリアント(街路に限る)。省略時212(1車線生活道路)\n  angle_deg: 格子の主軸角度(度)。省略時は最寄り街路の向きに揃える\n  pattern: relaxed_grid(地形で曲がる格子) / contour(等高線優先) / organic(スプロール風)\n           block_grid(街区内の格子) / block_strips(短冊) / block_perimeter(外周追従)\n           省略時は固定格子を作る。成功応答の pattern に採用した方式を返す\n  parcel_size: 街区内3方式で用いる区画寸法の目安(m、15〜25。省略時20)\n\n街区内3方式は範囲に全体が含まれる地上の接道可能な道路の閉路を対象にし、\n1車線街路で埋める。spacing・angle_degは使わず、外周道路に沿って配置する。\n成功応答の blocks に生成対象の街区数を返す。土地区画そのものは作成しない。\n\n街路は互いの交点と既存道路との交点で分割して1本ずつ登録するため、後の一括完成で\n交差ノード・T字接続が通常どおり作られる。海岸線外・急勾配・川の横断・既存道路との\n重複・建物のある区画への侵入は棄却し、理由別の本数を rejected で返す。",
         "operationId": "street_grid_endpoint_api_v1_templates_street_grid_post",
         "requestBody": {
           "content": {
@@ -6321,6 +6592,44 @@
         "summary": "Get Score",
         "description": "都市施政スコアの最新値と過去履歴を取得する。",
         "operationId": "get_score_api_v1_score__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/master/climates": {
+      "get": {
+        "tags": [
+          "master"
+        ],
+        "summary": "climates マスターを取得",
+        "operationId": "get_master_climates_api_v1_master_climates_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/master/weather": {
+      "get": {
+        "tags": [
+          "master"
+        ],
+        "summary": "weather マスターを取得",
+        "operationId": "get_master_weather_api_v1_master_weather_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7256,7 +7565,7 @@
           "zones"
         ],
         "summary": "Create Zone Endpoint",
-        "description": "zoneを作成する。\nプレイヤーが直接指定するのは地区に所属させる道路のみであり、\n地区のポリゴンは後付けで所属する土地区画の形状から自動計算される。\n任意で name, color, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio を指定可能。\ncolor(\"#rrggbb\")は地区の識別色で、無指定・不正形式ならバックエンドがランダム生成する\n(地区編集モードのUnityは、作成前にカーソル脇へ提示した色をここで送ってくる)。",
+        "description": "zoneを作成する。\nプレイヤーが直接指定するのは地区に所属させる道路のみであり、\n地区のポリゴンは後付けで所属する土地区画の形状から自動計算される。\n任意で name, color, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio を指定可能。\ncolor(\"#rrggbb\")は地区の識別色で、無指定・不正形式ならバックエンドがランダム生成する\n(地区編集パネルは、作成前に提示した色をここで送ってくる)。\nsides は path_ids と同じ並びの面の指定(PATH_SIDE_*)で、省略すると道路の両面を新しい地区にする。\npath_ids の道路が1つに繋がっていない場合は ZONE_CONTIGUITY_ERROR を返す。",
         "operationId": "create_zone_endpoint_api_v1_zones__post",
         "requestBody": {
           "required": true,
@@ -7390,7 +7699,7 @@
           "zones"
         ],
         "summary": "Update Zone Endpoint",
-        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, auto_managed\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
+        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, color, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, auto_managed\ncolor は #rrggbb 形式の識別色。不正な値は更新せずエラーにする。\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / color / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
         "operationId": "update_zone_endpoint_api_v1_zones__zone_id__patch",
         "parameters": [
           {
@@ -7500,7 +7809,7 @@
           "quests"
         ],
         "summary": "Add Quest",
-        "description": "新しいクエスト（目標）を追加する。\nテンプレート作成モード(gd3.template_mode)でのみ実行可能。",
+        "description": "新しいクエスト（目標）を追加する。\nテンプレート作成モード(gd3.play_mode == PLAY_MODE_SCEARIO)でのみ実行可能。",
         "operationId": "add_quest_api_v1_quests__post",
         "requestBody": {
           "content": {
@@ -7560,7 +7869,7 @@
           "quests"
         ],
         "summary": "Add Quest",
-        "description": "新しいクエスト（目標）を追加する。\nテンプレート作成モード(gd3.template_mode)でのみ実行可能。",
+        "description": "新しいクエスト（目標）を追加する。\nテンプレート作成モード(gd3.play_mode == PLAY_MODE_SCEARIO)でのみ実行可能。",
         "operationId": "add_quest_api_v1_quests_post",
         "requestBody": {
           "content": {
@@ -7641,7 +7950,7 @@
           "quests"
         ],
         "summary": "Update Quest",
-        "description": "既存のクエストを更新する。\nテンプレート作成モード(gd3.template_mode)でのみ実行可能。",
+        "description": "既存のクエストを更新する。\nテンプレート作成モード(gd3.play_mode == PLAY_MODE_SCEARIO)でのみ実行可能。",
         "operationId": "update_quest_api_v1_quests__quest_id__patch",
         "parameters": [
           {
@@ -7692,7 +8001,7 @@
           "quests"
         ],
         "summary": "Delete Quest",
-        "description": "クエストを削除する。\nテンプレート作成モード(gd3.template_mode)でのみ実行可能。",
+        "description": "クエストを削除する。\nテンプレート作成モード(gd3.play_mode == PLAY_MODE_SCEARIO)でのみ実行可能。",
         "operationId": "delete_quest_api_v1_quests__quest_id__delete",
         "parameters": [
           {
@@ -8100,7 +8409,7 @@
           "resources"
         ],
         "summary": "Create Resource",
-        "description": "天然資源エリアを新規作成する(*テンプレート作成モード(gd3.template_mode)でのみ実行可能)。\n\nペイロード: polygon(必須, [[x, z], ...]) / resource_type(必須) /\nmax_amount(必須, 埋蔵上限量) / recovery_rate(任意, 埋蔵上限量に対する1日あたりの回復割合)。\n実際のバリデーション・登録処理は app.services.crud.crud_resources.add_resource が行う。",
+        "description": "天然資源エリアを新規作成する(*テンプレート作成モード(gd3.play_mode == PLAY_MODE_SCEARIO)でのみ実行可能)。\n\nペイロード: polygon(必須, [[x, z], ...]) / resource_type(必須) /\nmax_amount(必須, 埋蔵上限量) / recovery_rate(任意, 埋蔵上限量に対する1日あたりの回復割合)。\n実際のバリデーション・登録処理は app.services.crud.crud_resources.add_resource が行う。",
         "operationId": "create_resource_api_v1_resources_post",
         "requestBody": {
           "content": {
@@ -8181,7 +8490,7 @@
           "resources"
         ],
         "summary": "Update Resource Endpoint",
-        "description": "天然資源エリアを一部更新する(*テンプレート作成モード(gd3.template_mode)でのみ実行可能)。\n\n更新可能なプロパティ: resource_type / product_id / max_amount / current_amount /\nrecovery_rate / polygon。resource_id(主キー)・center_point(polygonからの派生値)・\nconsumption_amount(採取量履歴)は更新できない。\ncurrent_amount はライブのスカラー値で、GETが返す時系列リストは書き戻せない。\n実際のバリデーション・更新処理は app.services.crud.crud_resources.update_resource が行う。",
+        "description": "天然資源エリアを一部更新する(*テンプレート作成モード(gd3.play_mode == PLAY_MODE_SCEARIO)でのみ実行可能)。\n\n更新可能なプロパティ: resource_type / product_id / max_amount / current_amount /\nrecovery_rate / polygon。resource_id(主キー)・center_point(polygonからの派生値)・\nconsumption_amount(採取量履歴)は更新できない。\ncurrent_amount はライブのスカラー値で、GETが返す時系列リストは書き戻せない。\n実際のバリデーション・更新処理は app.services.crud.crud_resources.update_resource が行う。",
         "operationId": "update_resource_endpoint_api_v1_resources__resource_id__patch",
         "parameters": [
           {
@@ -8232,7 +8541,7 @@
           "resources"
         ],
         "summary": "Delete Resource Endpoint",
-        "description": "天然資源エリアを削除する(*テンプレート作成モード(gd3.template_mode)でのみ実行可能)。\n\n重なっていた土地区画の資源紐付け(parcel.resource_id)も併せて解除する。",
+        "description": "天然資源エリアを削除する(*テンプレート作成モード(gd3.play_mode == PLAY_MODE_SCEARIO)でのみ実行可能)。\n\n重なっていた土地区画の資源紐付け(parcel.resource_id)も併せて解除する。",
         "operationId": "delete_resource_endpoint_api_v1_resources__resource_id__delete",
         "parameters": [
           {
@@ -9735,6 +10044,28 @@
         }
       }
     },
+    "/api/v1/profile": {
+      "get": {
+        "tags": [
+          "profile"
+        ],
+        "summary": "Get Profile",
+        "description": "プレイヤーのプロフィール(都市やセーブとは独立した、プレイヤー単位の記録)を取得する。\nゲームを開始していなくても呼べる。\n\n- level: プレイヤーのレベル(現状は常に1)\n- tutorials_cleared: クリアしたチュートリアルの教材ID(POST /api/v1/sessions の `tutorial_id` と同じ値)\n- scenarios_cleared: クリアしたシナリオのID(`local~<id>` / `workshop~<item_id>~<stem>` / `dlc~<pack_id>~<stem>`)\n\nシナリオ・チュートリアルのクリアは、そのゲームの全クエストを達成した時点で記録する。",
+        "operationId": "get_profile_api_v1_profile_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "summary": "Healthz",
@@ -10637,6 +10968,11 @@
             "title": "Zone Id",
             "description": "所属地区ID"
           },
+          "parcel_id": {
+            "type": "integer",
+            "title": "Parcel Id",
+            "description": "立地する土地区画のID"
+          },
           "version": {
             "type": "integer",
             "title": "Version",
@@ -10838,6 +11174,7 @@
           "agent_id",
           "name",
           "zone_id",
+          "parcel_id",
           "version",
           "type",
           "variant",
@@ -10907,6 +11244,13 @@
             },
             "type": "array",
             "title": "Paths"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/SpatialWarningItem"
+            },
+            "type": "array",
+            "title": "Warnings"
           }
         },
         "type": "object",
@@ -10915,7 +11259,70 @@
           "paths"
         ],
         "title": "AlertsResponse",
-        "description": "アラート一覧レスポンス。建物と道路で分けて返す。"
+        "description": "建物・道路のアラートと、資源・建物・居住区画の空間警告。"
+      },
+      "ClimateMonth": {
+        "properties": {
+          "temperature": {
+            "type": "number",
+            "title": "Temperature"
+          },
+          "precipitation": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Precipitation"
+          },
+          "sunlight": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Sunlight"
+          },
+          "weather": {
+            "additionalProperties": {
+              "type": "integer",
+              "maximum": 100.0,
+              "minimum": 0.0
+            },
+            "type": "object",
+            "title": "Weather"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "temperature",
+          "precipitation",
+          "sunlight",
+          "weather"
+        ],
+        "title": "ClimateMonth"
+      },
+      "ClimateSettings": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "months": {
+            "items": {
+              "$ref": "#/components/schemas/ClimateMonth"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "minItems": 12,
+            "title": "Months"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "months"
+        ],
+        "title": "ClimateSettings"
       },
       "ConstructionProgressItem": {
         "properties": {
@@ -10930,6 +11337,10 @@
           "name": {
             "type": "string",
             "title": "Name"
+          },
+          "variant": {
+            "type": "integer",
+            "title": "Variant"
           },
           "before_pct": {
             "type": "number",
@@ -10957,6 +11368,7 @@
           "entity_type",
           "id",
           "name",
+          "variant",
           "before_pct",
           "before_status",
           "after_pct",
@@ -10964,7 +11376,63 @@
           "completed"
         ],
         "title": "ConstructionProgressItem",
-        "description": "エポック実行前後での建設対象1件の進捗率とステータス。"
+        "description": "エポック実行前後での建設対象1件の進捗率とステータス（タグの付いていないもの）。"
+      },
+      "ConstructionProjectMember": {
+        "properties": {
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type"
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_type",
+          "completed"
+        ],
+        "title": "ConstructionProjectMember",
+        "description": "建設プロジェクトに属する建物・道路1件の完了状況。"
+      },
+      "ConstructionProjectReport": {
+        "properties": {
+          "tag": {
+            "type": "string",
+            "title": "Tag"
+          },
+          "before_pct": {
+            "type": "number",
+            "title": "Before Pct"
+          },
+          "after_pct": {
+            "type": "number",
+            "title": "After Pct"
+          },
+          "completed": {
+            "type": "boolean",
+            "title": "Completed"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/ConstructionProjectMember"
+            },
+            "type": "array",
+            "title": "Members"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tag",
+          "before_pct",
+          "after_pct",
+          "completed",
+          "members"
+        ],
+        "title": "ConstructionProjectReport",
+        "description": "タグ付き建設プロジェクト1件の進捗。進捗率はメンバーの建設体積で按分した平均。"
       },
       "Endpoint": {
         "properties": {
@@ -11011,6 +11479,13 @@
             },
             "type": "array",
             "title": "Construction Progress"
+          },
+          "construction_projects": {
+            "items": {
+              "$ref": "#/components/schemas/ConstructionProjectReport"
+            },
+            "type": "array",
+            "title": "Construction Projects"
           },
           "maintenance_items": {
             "items": {
@@ -11617,6 +12092,22 @@
         ],
         "title": "PickRequest"
       },
+      "PlayModeRequest": {
+        "properties": {
+          "play_mode": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Play Mode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "play_mode"
+        ],
+        "title": "PlayModeRequest"
+      },
       "PopulationReport": {
         "properties": {
           "before": {
@@ -11675,6 +12166,40 @@
         ],
         "title": "PopulationReport",
         "description": "エポック実行に伴う人口動態集計。"
+      },
+      "ProfileResponse": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "tutorials_cleared": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tutorials Cleared"
+          },
+          "scenarios_cleared": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scenarios Cleared"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "level",
+          "tutorials_cleared",
+          "scenarios_cleared"
+        ],
+        "title": "ProfileResponse"
       },
       "QuestNotification": {
         "properties": {
@@ -11936,13 +12461,12 @@
           "climate": {
             "anyOf": [
               {
-                "type": "integer"
+                "$ref": "#/components/schemas/ClimateSettings"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Climate"
+            ]
           },
           "ground_cover": {
             "anyOf": [
@@ -12036,8 +12560,7 @@
             "title": "Ground Cover"
           },
           "climate": {
-            "type": "integer",
-            "title": "Climate"
+            "$ref": "#/components/schemas/ClimateSettings"
           }
         },
         "type": "object",
@@ -12078,6 +12601,72 @@
         ],
         "title": "ScoreData",
         "description": "エポック完了時点の施政スコア。simulation_manager.economic_simulation() が返す\nscore ブロックと1対1で対応する（累積スコアの概念は持たない。\ndocs/economics/24_施政スコア計算詳細ロジック.md 参照）。"
+      },
+      "SignRequest": {
+        "properties": {
+          "private_key_path": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Private Key Path"
+          },
+          "kid": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,128}$",
+            "title": "Kid"
+          },
+          "scenario_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,128}$",
+            "title": "Scenario Id"
+          },
+          "content_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Content Revision"
+          },
+          "output_path": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Output Path"
+          },
+          "pack_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,128}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pack Id"
+          },
+          "keyring_path": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyring Path"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "private_key_path",
+          "kid",
+          "scenario_id",
+          "content_revision",
+          "output_path"
+        ],
+        "title": "SignRequest"
       },
       "SimulationResult": {
         "properties": {
@@ -12134,6 +12723,38 @@
           "score"
         ],
         "title": "SimulationResult"
+      },
+      "SpatialWarningItem": {
+        "properties": {
+          "entity_type": {
+            "type": "string",
+            "title": "Entity Type"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "center_point": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Center Point"
+          },
+          "warning": {
+            "type": "integer",
+            "title": "Warning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entity_type",
+          "id",
+          "center_point",
+          "warning"
+        ],
+        "title": "SpatialWarningItem",
+        "description": "L1由来の位置付き警告。warningはALERT_DISPLAY_*_WARNINGのビット和。"
       },
       "StatisticsReport": {
         "properties": {
@@ -12529,19 +13150,6 @@
           "used_bytes"
         ],
         "title": "SystemVram"
-      },
-      "TemplateModeRequest": {
-        "properties": {
-          "template_mode": {
-            "type": "boolean",
-            "title": "Template Mode"
-          }
-        },
-        "type": "object",
-        "required": [
-          "template_mode"
-        ],
-        "title": "TemplateModeRequest"
       },
       "TutorialAction": {
         "properties": {

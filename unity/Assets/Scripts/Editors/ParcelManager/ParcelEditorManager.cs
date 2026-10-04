@@ -177,7 +177,7 @@ public class ParcelEditorManager : MonoBehaviour
         if (!isActive) return;
 
         // Escキーで選択をリセット(UI上でも有効)。モードからは抜けず、同じモードで選び直せる。
-        if (InputUtil.KeyWasPressedThisFrame(Key.Escape))
+        if (InputUtil.WorldEscapeWasPressed)
         {
             ResetSelection(notifyUi: true);
             return;

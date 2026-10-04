@@ -12,7 +12,7 @@ export type SaveCompatibility = {
   balance_core_version?: string;
   core_version?: string;
 };
-/** シナリオの保存元。workshop・dlc は読み取り専用で、編集は「コピーして編集」で自作として保存する。 */
+/** シナリオの保存元。workshop・dlc は読み取り専用でプレイだけができる。 */
 export type ScenarioOrigin = "local" | "workshop" | "dlc";
 /** 必要パックの所有状況。unverified は本番でSteam検証もそのキャッシュもまだ無い状態。 */
 export type PackStatus = "owned" | "not_owned" | "unverified";
@@ -56,7 +56,7 @@ export type ScenarioEntry = CommonSaveEntry & {
   content_revision?: number;
   /** マップの大きさ(m)。地形エディタでも変わらない */
   map_width?: number; map_height?: number;
-  /** 都市が持つ地表・気候(`GROUND_COVER_*` / `CLIMATE_*`)。地形エディタ・紹介情報で変わる */
+  /** 都市が持つ地表と月別気候。気候名は作者が保存したテキストを表示する。 */
   ground_cover?: number; climate?: import("./climate").ClimateSettings;
   /** 建物・道路アセットの地域(`ASSET_REGION_*`) */
   asset_region?: number;

@@ -414,6 +414,34 @@ pub fn reassert_topmost(app: &AppHandle) {
     }
 }
 
+/// Tauriの全ウィンドウを、表示状態(show/hide)を変えずにDWMのクローキングで隠す/戻す。
+///
+/// Unityのフライ・撮影モードの間、3D画面だけを見せるために使う。表示状態に触れないので、
+/// 隠している間の開閉は通常どおり行われ、戻したときにはその時点で開いているものだけが見える
+/// (隠した後に生成されたウィンドウは対象外)。
+/// show() は活性化を伴いUnityからキー入力を奪うため、戻す操作にも使わない。
+#[cfg(target_os = "windows")]
+pub fn set_ui_cloaked(app: &AppHandle, cloaked: bool) {
+    use windows_sys::Win32::Graphics::Dwm::{DwmSetWindowAttribute, DWMWA_CLOAK};
+
+    let value: i32 = cloaked.into();
+    for win in app.webview_windows().values() {
+        if let Ok(hwnd) = win.hwnd() {
+            unsafe {
+                DwmSetWindowAttribute(
+                    hwnd.0 as *mut core::ffi::c_void,
+                    DWMWA_CLOAK as u32,
+                    &value as *const i32 as *const core::ffi::c_void,
+                    std::mem::size_of::<i32>() as u32,
+                );
+            }
+        }
+    }
+    if !cloaked {
+        reassert_topmost(app);
+    }
+}
+
 /// アイコンパネルの高さをReact側の実測値に合わせる。
 /// アイコン数はテンプレートモードの有無で変わり、Rust側からは分からないため、
 /// 中身の高さが変わるたびにReactから通知させて透明な余白が出ないようにする。

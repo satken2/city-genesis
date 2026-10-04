@@ -1,6 +1,8 @@
 {
   "zone": {
     "titleWithId": "地区 #{{id}}",
+    "color": "地区の色",
+    "colorUpdateFailed": "地区の色の更新に失敗しました",
     "basicInfo": "基本情報",
     "area": "面積",
     "zonePopulation": "居住人口",

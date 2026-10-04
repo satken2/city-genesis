@@ -14,8 +14,8 @@ public class ModeTextDisplay : MonoBehaviour
         ("STATE_EDIT_ROAD_MEMBERS", "Road Segment Edit"),
         ("STATE_EDIT_GRADING", "Land Grading"),
         // フライモードはUI(Tauri)を経由しないUnityローカルのステート。
-        // 抜け方（Shift + F）をキャプションに含めて案内する。
-        ("STATE_FLY_MODE", "STATE_FLY_MODE (Shift + F to exit)"),
+        // モード中はTauriのUIが隠れるため、抜け方（Esc）をキャプションに含めて案内する。
+        ("STATE_FLY_MODE", "STATE_FLY_MODE (Esc to exit)"),
     };
 
     // 直近に適用されたステート。カメラ専用モード終了時に戻すために保持する。
@@ -100,7 +100,7 @@ public class ModeTextDisplay : MonoBehaviour
         string status = orbit && !hasPivot ? "No target (Space: retry)" : paused ? "Paused" : "Playing";
         string controls = orbit ? "" : "\nA/D: heading +/-5° | Arrows: move | R/F: height";
         modeText.text = $"Camera {(orbit ? "1: Orbit" : "2: Travel")} | {status}{(reversed ? " | Reversed" : "")}\n"
-            + "Shift: mode | Space: pause | Backspace: reverse | Esc: exit" + controls;
+            + "Mouse: look | Shift: mode | Space: pause | Backspace: reverse | Esc: exit" + controls;
     }
 
     private void RestoreCaptionLayout()

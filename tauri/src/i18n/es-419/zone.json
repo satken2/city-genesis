@@ -1,6 +1,8 @@
 {
   "zone": {
     "titleWithId": "Distrito n.º {{id}}",
+    "color": "Color del distrito",
+    "colorUpdateFailed": "No se pudo actualizar el color del distrito",
     "basicInfo": "Información básica",
     "area": "Superficie",
     "zonePopulation": "Población residente",

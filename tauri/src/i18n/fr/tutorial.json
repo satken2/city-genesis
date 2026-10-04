@@ -66,7 +66,7 @@
       },
       "step6": {
         "title": "Mode vol et mode cinéma",
-        "description": "La caméra dispose de deux modes spéciaux. Le « mode vol » s'active avec Maj+F : avancez dans la direction de votre regard avec W/A/S/D, regardez autour de vous avec la souris et montez ou descendez avec R/F. Appuyez de nouveau sur Maj+F pour en sortir. Le « mode cinéma » se lance depuis le bouton en haut à droite de l'écran et permet de tourner autour de la ville. Maj alterne entre orbite et déplacement, Espace met en pause, Retour arrière inverse et Échap quitte. Une fois les essais terminés, quittez les deux modes et appuyez sur « Suivant »."
+        "description": "La caméra dispose de deux modes spéciaux. Le « mode vol » s'active avec Maj+F : avancez dans la direction de votre regard avec W/A/S/D, regardez autour de vous avec la souris et montez ou descendez avec R/F. Appuyez sur Échap pour en sortir. Le « mode cinéma » se lance depuis le bouton en haut à droite de l'écran et permet de tourner autour de la ville. Regardez autour de vous avec la souris ; Maj alterne entre orbite et déplacement, Espace met en pause, Retour arrière inverse et Échap quitte. Les panneaux de l'écran sont masqués pendant ces deux modes et réapparaissent quand vous appuyez sur Échap. Une fois les essais terminés, quittez les deux modes et appuyez sur « Suivant »."
       },
       "step7": {
         "title": "Voir les limites de la ville",
@@ -78,12 +78,12 @@
       "description": "La ville veut exploiter un gisement, mais d'autres bâtiments pourraient occuper le terrain. Ce tutoriel vous permettra d'apprendre à repérer les ressources naturelles, à créer des quartiers et à limiter les types de bâtiments autorisés.",
       "step1": {
         "title": "Créons un quartier",
-        "description": "Le quartier découpe la ville en zones et se définit sur les routes. Appuyez sur le bouton des quartiers du panneau d'icônes pour entrer en mode d'édition : le réseau de routes en H forme un seul quartier.",
-        "create": "Avec l'outil de création (état initial), cliquez sur la route au repère jaune pour en faire, avec les parcelles qui la bordent, un nouveau quartier."
+        "description": "Le quartier découpe la ville en zones et se définit de chaque côté des routes. Une parcelle appartient au quartier du côté de la route qu'elle borde. Appuyez sur le bouton des quartiers du panneau d'icônes pour ouvrir la fenêtre Modifier les quartiers : le réseau de routes en H forme un seul quartier.",
+        "create": "Ce réseau n'a aucun îlot entouré de routes : passez donc le mode de peinture sur « Côté de rue ». Avec l'outil « Nouveau quartier », maintenez Ctrl et faites glisser le long de la route en haut à droite du H. Les deux côtés de la route peinte, avec les parcelles qui les bordent, deviennent un nouveau quartier."
       },
       "step2": {
         "title": "Le quartier est découpé",
-        "description": "Vous avez détaché une partie de la ville en un nouveau quartier. Créer des quartiers permet d'agréger les prix, la population et d'autres données par quartier, et de définir une réglementation de construction pour l'ensemble du quartier. Pour quitter le mode d'édition des quartiers, appuyez de nouveau sur le bouton des quartiers."
+        "description": "Vous avez détaché une partie de la ville en un nouveau quartier. Créer des quartiers permet d'agréger les prix, la population et d'autres données par quartier, et de définir une réglementation de construction pour l'ensemble du quartier. Une fois vérifié, fermez la fenêtre Modifier les quartiers."
       },
       "step3": {
         "title": "Affichons les ressources naturelles",

@@ -104,9 +104,12 @@
     "cancel": "いいえ",
     "debugInit": "Debug Init",
     "saveAsScenario": "シナリオとして保存",
+    "saveAsNewScenario": "別のシナリオとして保存",
+    "overwriteScenario": "上書き保存",
     "backToGame": "ゲームに戻る",
     "saveName": "セーブ名",
-    "confirmOverwrite": "「{{name}}」に上書きセーブしますか？"
+    "confirmOverwrite": "「{{name}}」に上書きセーブしますか？",
+    "confirmOverwriteScenario": "シナリオ「{{name}}」に上書き保存しますか？"
   },
   "saveList": {
     "noSaves": "セーブデータがありません",

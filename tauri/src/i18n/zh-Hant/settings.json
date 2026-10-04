@@ -104,9 +104,12 @@
     "cancel": "否",
     "debugInit": "Debug Init",
     "saveAsScenario": "另存為場景",
+    "saveAsNewScenario": "另存為新場景",
+    "overwriteScenario": "覆蓋場景",
     "backToGame": "返回遊戲",
     "saveName": "存檔名稱",
-    "confirmOverwrite": "要覆蓋存檔「{{name}}」嗎？"
+    "confirmOverwrite": "要覆蓋存檔「{{name}}」嗎？",
+    "confirmOverwriteScenario": "要覆蓋場景「{{name}}」嗎？"
   },
   "saveList": {
     "noSaves": "沒有存檔資料",

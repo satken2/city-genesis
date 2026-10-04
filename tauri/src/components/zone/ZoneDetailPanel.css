@@ -5,6 +5,11 @@
  * ここには地区固有のスタイルのみを定義する。
  */
 
+.zone-color-value {
+  grid-column: 2 / -1;
+  min-width: 0;
+}
+
 .zone-area-meter {
   position: relative;
   width: 100%;

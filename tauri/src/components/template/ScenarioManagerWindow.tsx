@@ -4,7 +4,7 @@
  * - シナリオタブ: 自作・コミュニティ(Workshop)・DLC のシナリオを1つの一覧に並べる。
  *   自作は都市・地形・紹介情報を編集でき、アップロードと削除もできる。操作はアイコンのボタンで、説明はマウスオーバーで出す。
  *   削除は読み込めない(壊れた・新しすぎる)シナリオを片付ける用途が主なので、読み込めるかに関わらず押せる。
- *   コミュニティ・DLC は読み取り専用なので「コピーして編集」だけを出す(保存すると自作になる)。
+ *   コミュニティ・DLC は読み取り専用でプレイ(ニューゲーム)しかできないので、操作のボタンを出さない。
  *   DLC 由来の暗号化された自作シナリオは地形を編集できない(作業コピーが平文でディスクに残るため、コアが
  *   SCENARIO_ENCRYPTED で断る)ので、「地形を編集」を無効にして理由をツールチップで示す。
  * - 地形を取り込むタブ: PC内のどこにある標高ファイル(グレースケールPNG・.npy)でも選び、新しい自作シナリオにする
@@ -89,9 +89,12 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setBusy(true); setError(""); setStatus("");
     try { await operation(); return true; } catch (e) { setError(saveError(e, t)); return false; } finally { setBusy(false); }
   }
-  /** 都市を神モード(play_mode=PLAY_MODE_SCEARIO)で開く。自作は上書き、コミュニティ・DLC はコピーとして保存される。 */
-  async function editCity(entry: ScenarioEntry, copy: boolean) {
-    if (!await requestConfirm({ message: t(copy ? "scenarios.copyConfirm" : "scenarios.editConfirm") })) return;
+  /**
+   * 自作シナリオの都市を神モード(play_mode=PLAY_MODE_SCEARIO)で開く。コアはIDを振り直さずにこのシナリオを開くので、
+   * システムメニューの上書き保存はこのシナリオへ書く。
+   */
+  async function editCity(entry: ScenarioEntry) {
+    if (!await requestConfirm({ message: t("scenarios.editConfirm") })) return;
     if (!await prepareSaveLoad(apiBaseUrl, entry.id, true, t)) return;
     await invoke("create_session", { templateId: entry.id, playMode: PLAY_MODE_SCEARIO, acceptBalanceChange: true });
   }
@@ -160,32 +163,29 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               {description && <p className="scenario-description">{description}</p>}
               {entry.author && <p>{t("scenarios.byAuthor", { author: entry.author })}</p>}
               <SaveVersionInfo entry={entry} />
-              <div className="scenario-actions">
-                {own ? <>
-                  <ScenarioActionButton icon={infoIcon} label={t("scenarios.editMetadata")} disabled={busy || !loadable}
-                    onClick={() => void run(() => invoke("open_registered_window", {
-                      windowType: "scenario_metadata", params: { extra: { scenarioId: entry.id } },
-                    }))} />
-                  <ScenarioActionButton icon={terrainIcon} label={t("scenarios.editTerrain")} disabled={busy || !loadable || !!entry.encrypted}
-                    reason={entry.encrypted ? t("scenarios.terrainEncryptedHint") : undefined} onClick={() => void run(() => editTerrain(entry))} />
-                  <ScenarioActionButton icon={repairIcon} label={t("scenarios.editCity")} disabled={busy || !loadable}
-                    onClick={() => void run(() => editCity(entry, false))} />
-                  <ScenarioActionButton icon={rocketIcon} label={t("scenarios.upload")} disabled={busy || !catalog.upload_available || !loadable}
-                    reason={!catalog.upload_available ? t("scenarios.uploadUnconfigured") : undefined}
-                    onClick={() => void run(async () => {
-                      if (!await requestConfirm({ message: t("scenarios.uploadConfirm", { host: catalog.upload_host }) })) return;
-                      await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/scenarios/${encodeURIComponent(entry.id)}/upload`), { method: "POST" });
-                      setStatus(t("scenarios.uploaded"));
-                    })} />
-                  {catalog.signing_available && <ScenarioActionButton icon={approvedIcon} label={t("scenarios.signing.button")} disabled={busy || !loadable}
-                    onClick={() => void run(() => invoke("open_registered_window", {
-                      windowType: "scenario_sign", params: { extra: { scenarioId: entry.id, openedAt: Date.now() } },
-                    }))} />}
-                  <ScenarioActionButton icon={trashIcon} label={t("common.delete")} className="scenario-icon-button--delete" disabled={busy}
-                    onClick={() => void run(() => deleteScenario(entry))} />
-                </> : <button type="button" disabled={busy || !loadable} title={t("scenarios.readOnlyHint")}
-                  onClick={() => void run(() => editCity(entry, true))}>{t("scenarios.editCopy")}</button>}
-              </div>
+              {own && <div className="scenario-actions">
+                <ScenarioActionButton icon={infoIcon} label={t("scenarios.editMetadata")} disabled={busy || !loadable}
+                  onClick={() => void run(() => invoke("open_registered_window", {
+                    windowType: "scenario_metadata", params: { extra: { scenarioId: entry.id } },
+                  }))} />
+                <ScenarioActionButton icon={terrainIcon} label={t("scenarios.editTerrain")} disabled={busy || !loadable || !!entry.encrypted}
+                  reason={entry.encrypted ? t("scenarios.terrainEncryptedHint") : undefined} onClick={() => void run(() => editTerrain(entry))} />
+                <ScenarioActionButton icon={repairIcon} label={t("scenarios.editCity")} disabled={busy || !loadable}
+                  onClick={() => void run(() => editCity(entry))} />
+                <ScenarioActionButton icon={rocketIcon} label={t("scenarios.upload")} disabled={busy || !catalog.upload_available || !loadable}
+                  reason={!catalog.upload_available ? t("scenarios.uploadUnconfigured") : undefined}
+                  onClick={() => void run(async () => {
+                    if (!await requestConfirm({ message: t("scenarios.uploadConfirm", { host: catalog.upload_host }) })) return;
+                    await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/scenarios/${encodeURIComponent(entry.id)}/upload`), { method: "POST" });
+                    setStatus(t("scenarios.uploaded"));
+                  })} />
+                {catalog.signing_available && <ScenarioActionButton icon={approvedIcon} label={t("scenarios.signing.button")} disabled={busy || !loadable}
+                  onClick={() => void run(() => invoke("open_registered_window", {
+                    windowType: "scenario_sign", params: { extra: { scenarioId: entry.id, openedAt: Date.now() } },
+                  }))} />}
+                <ScenarioActionButton icon={trashIcon} label={t("common.delete")} className="scenario-icon-button--delete" disabled={busy}
+                  onClick={() => void run(() => deleteScenario(entry))} />
+              </div>}
             </div>
           </article>;
         })}

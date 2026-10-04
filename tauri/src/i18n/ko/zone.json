@@ -1,6 +1,8 @@
 {
   "zone": {
     "titleWithId": "지구 #{{id}}",
+    "color": "지구 색상",
+    "colorUpdateFailed": "지구 색상 변경에 실패했습니다",
     "basicInfo": "기본 정보",
     "area": "면적",
     "zonePopulation": "거주 인구",

@@ -646,6 +646,11 @@ pub async fn handle_incoming_message(
             // camera:query_state への応答で、問い合わせ1回につき1回だけ流れる。
             let _ = app.emit("camera:state", envelope.payload);
         }
+        "view:ui_visibility" => {
+            // フライ・撮影モードの開始・終了。モード中は3D画面だけを見せるためUIを全部隠す。
+            let visible = envelope.payload.get("visible").and_then(|v| v.as_bool()).unwrap_or(true);
+            window::set_ui_cloaked(&app, !visible);
+        }
         "citizen:follow_state" => {
             // 市民の追従の開始・終了(Unity側のEscや編集モードへの移行を含む)を、市民パネルと追跡リストのカメラボタンへ中継する。
             let _ = app.emit("citizen:follow_state", envelope.payload);
@@ -681,6 +686,8 @@ pub async fn handle_incoming_message(
             }
         }
         "system:graphic_ready" => {
+            // 起動したばかりの Unity はフライ・撮影モードではないので、前の Unity が隠した UI を戻す。
+            window::set_ui_cloaked(&app, false);
             let expected = crate::version::definition();
             let compatible = envelope.payload["ipc_contract_version"] == expected["ipc_contract_version"]
                 && envelope.payload["core_compatible"] == true;
@@ -721,7 +728,7 @@ pub async fn handle_incoming_message(
             }
             let (loading, started, has_session) = {
                 let guard = state.lock();
-                (guard.is_loading, guard.loading_started, guard.last_save_id.is_some())
+                (guard.is_loading, guard.loading_started, guard.last_session_id.is_some())
             };
             if loading && started {
                 crate::send_game_start_ipc(&state, &app);
@@ -742,6 +749,8 @@ pub async fn handle_incoming_message(
             // Unity の正常終了(Editor の Play 停止を含む)。クラッシュでは届かない。
             // 開発時の Unity なし起動で描画完了を待っている最中に Unity が止まると
             // game:loaded は二度と来ないので、その場で Tips を開始ボタンへ切り替える。
+            // フライ・撮影モード中に止まると UI を戻す通知が来ないため、ここで戻す。
+            window::set_ui_cloaked(&app, false);
             let mut guard = state.lock();
             guard.graphic_connected = false;
             #[cfg(all(debug_assertions, dev))]

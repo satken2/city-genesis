@@ -1412,7 +1412,7 @@ fn abort_initial_loading(app: &tauri::AppHandle, state: &SharedState) {
         guard.graphic_load_ready = false;
         guard.needs_parameter_setup = false;
         // 既存セッションが残っていれば、次のポーリングで描画を作り直して復帰する。
-        guard.last_save_id = None;
+        guard.last_session_id = None;
     }
     window::close_tips_window(app);
     if let Some(topmenu) = app.get_webview_window("topmenu") { let _ = topmenu.show(); }
@@ -1531,7 +1531,7 @@ fn reset_window_geometries(app: tauri::AppHandle, state: tauri::State<'_, Shared
 fn return_to_topmenu(app: &tauri::AppHandle, state: &SharedState) {
     {
         let mut guard = state.lock();
-        guard.last_save_id = None;
+        guard.last_session_id = None;
         guard.session_state = None;
         guard.loading_id += 1;
         guard.is_loading = false;
@@ -1705,7 +1705,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 if !observe_backend(&app, &state, false) { break; }
                 let guard = state.lock();
                 // 瞬断では既存の都市情報を配信し直さず、各画面の表示内容を保持する。
-                if guard.last_save_id.is_none() && !guard.is_loading {
+                if guard.last_session_id.is_none() && !guard.is_loading {
                     let _ = app.emit("session-state", serde_json::json!({
                         "current_save_id": null,
                         "session": null,
@@ -1732,6 +1732,10 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 .as_ref()
                 .and_then(|d| d.get("current_save_id"))
                 .and_then(|v| v.as_str());
+            // ゲームの開始・終了は current_save_id の有無、別の都市への切り替えは session_id で判定する。
+            // 別名保存では current_save_id だけが新しいファイルのIDに変わるので、切り替えと取り違えて読み直さない。
+            let current_session_id = current_save_id.and(
+                session_data.as_ref().and_then(|d| d.get("session_id")).and_then(|v| v.as_str()));
 
             // 都市情報を取得（Taskbar の cityName / currentDate 用）
             // 失敗してもセッション情報には影響しない
@@ -1747,20 +1751,13 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                     }
                 });
 
-            let (prev_save_id, is_loading) = {
+            let (prev_session_id, is_loading) = {
                 let guard = state.lock();
-                (guard.last_save_id.clone(), guard.is_loading)
+                (guard.last_session_id.clone(), guard.is_loading)
             };
 
-            let save_id_changed = match (&prev_save_id, current_save_id) {
-                (None, Some(_)) => true,
-                (Some(a), Some(b)) => a != b,
-                (Some(_), None) => true,
-                (None, None) => false,
-            };
-
-            // current_save_id の変化はゲーム開始・終了の検知ログで通知するため、
-            // 変化がない場合は何も出力しない。
+            // 都市の変化はゲーム開始・終了の検知ログで通知するため、変化がない場合は何も出力しない。
+            let session_changed = prev_session_id.as_deref() != current_session_id;
 
             let load_completed = {
                 let mut guard = state.lock();
@@ -1769,27 +1766,27 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 if ready { guard.backend_load_complete = false; }
                 ready
             };
-            // ロード中の消失は通常のsave_id変化判定から外れるため別に拾う。拾わないとUnityは描画完了を
+            // ロード中の消失は通常の都市の変化判定から外れるため別に拾う。拾わないとUnityは描画完了を
             // 通知できず、閉じられないTipsや初期設定のまま操作不能になる。POST応答前は新セッションが
             // まだ無いのが正常なので、準備完了の確認後に送ったGETだけで判定する。
             let session_lost_while_loading = is_loading && current_save_id.is_none()
                 && (load_complete_before_poll || started_before_poll)
                 && state.lock().loading_id == polled_loading_id;
-            if (save_id_changed && !is_loading) || load_completed || session_lost_while_loading {
-                let new_save_id = current_save_id.map(|s| s.to_string());
+            if (session_changed && !is_loading) || load_completed || session_lost_while_loading {
+                let new_session_id = current_session_id.map(|s| s.to_string());
                 {
                     let mut guard = state.lock();
-                    guard.last_save_id = new_save_id.clone();
+                    guard.last_session_id = new_session_id.clone();
                 }
 
                 // non-null: ゲーム開始またはセッション切り替え
-                if new_save_id.is_some() {
+                if new_session_id.is_some() {
                     log::info!(
                         "[session-poll] current_save_id が設定されました。ゲーム開始を検知"
                     );
 
                     if !is_loading {
-                        if save_id_changed { window::close_all_popup_windows(&app, &state); }
+                        if session_changed { window::close_all_popup_windows(&app, &state); }
                         if let Err(error) = begin_initial_loading(&app, &state, false) {
                             log::error!("初期ロード画面を開けません: {error}");
                         }

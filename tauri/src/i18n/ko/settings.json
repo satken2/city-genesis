@@ -104,9 +104,12 @@
     "cancel": "아니오",
     "debugInit": "Debug Init",
     "saveAsScenario": "시나리오로 저장",
+    "saveAsNewScenario": "다른 시나리오로 저장",
+    "overwriteScenario": "시나리오 덮어쓰기",
     "backToGame": "게임으로 돌아가기",
     "saveName": "세이브 이름",
-    "confirmOverwrite": "“{{name}}”에 덮어쓰기 저장하시겠습니까?"
+    "confirmOverwrite": "“{{name}}”에 덮어쓰기 저장하시겠습니까?",
+    "confirmOverwriteScenario": "시나리오 “{{name}}”에 덮어쓰기 저장하시겠습니까?"
   },
   "saveList": {
     "noSaves": "세이브 데이터가 없습니다",

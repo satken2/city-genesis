@@ -15,7 +15,9 @@ export function installUiGuide(ui: Phase["ui"], windowType: string): () => void 
     const target = el?.closest<HTMLElement>("[data-guide]");
     if (target) {
       const name = target.dataset.guide ?? "", value = target.dataset.guideValue;
-      return value === undefined ? [name] : [name, `${name}:${value}`];
+      const values = target.dataset.guideValues?.split(/\s+/).filter(Boolean) ?? [];
+      if (value !== undefined) values.push(value);
+      return [name, ...values.map(value => `${name}:${value}`)];
     }
     const id = el?.closest<HTMLElement>("button[id]")?.id;
     return id ? [`hud.${id}`] : [];
@@ -50,7 +52,7 @@ export function installUiGuide(ui: Phase["ui"], windowType: string): () => void 
   const events = ["pointerdown", "mousedown", "click", "dblclick", "keydown", "submit", "change"];
   events.forEach(e => document.addEventListener(e, capture, true));
   const observer = new MutationObserver(update);
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-guide", "data-guide-value", "id", "disabled"] });
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-guide", "data-guide-value", "data-guide-values", "id", "disabled"] });
   update();
   return () => { observer.disconnect(); events.forEach(e => document.removeEventListener(e, capture, true)); reset(); };
 }

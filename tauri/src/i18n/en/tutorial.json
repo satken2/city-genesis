@@ -66,7 +66,7 @@
       },
       "step6": {
         "title": "Fly mode and cinema mode",
-        "description": "The camera has two special modes. \"Fly mode\" starts with Shift+F: move along your view with W/A/S/D, look around with the mouse, and go up or down with R/F. Press Shift+F again to leave it. \"Cinema mode\" starts from the button in the top-right corner of the screen and lets you circle around the city. Shift switches between orbiting and travelling, Space pauses, Backspace reverses, and Esc exits. When you've tried them, exit both modes and press \"Next\"."
+        "description": "The camera has two special modes. \"Fly mode\" starts with Shift+F: move along your view with W/A/S/D, look around with the mouse, and go up or down with R/F. Press Esc to leave it. \"Cinema mode\" starts from the button in the top-right corner of the screen and lets you circle around the city. Look around with the mouse; Shift switches between orbiting and travelling, Space pauses, Backspace reverses, and Esc exits. The on-screen panels are hidden while either mode is on and come back when you press Esc. When you've tried them, exit both modes and press \"Next\"."
       },
       "step7": {
         "title": "See the city boundary",
@@ -78,12 +78,12 @@
       "description": "The town wants to mine an ore deposit, but other buildings could occupy the land. In this tutorial, you'll learn how to locate natural resources, divide the town into districts, and restrict which types of buildings can be built.",
       "step1": {
         "title": "Create a District",
-        "description": "A district is a unit that divides the city into areas, and it is assigned to roads. Press the district button on the icon panel to enter district edit mode: you'll see that the H-shaped road network forms a single district.",
-        "create": "With the Create tool (the default), click the road with the yellow marker to turn that road and the parcels facing it into a new district."
+        "description": "A district is a unit that divides the city into areas, and it is assigned to each side of a road. A parcel belongs to the district on the side of the road it faces. Press the district button on the icon panel to open the Edit Districts window: you'll see that the H-shaped road network forms a single district.",
+        "create": "This road network has no blocks enclosed by roads, so switch the brush to \"Street Side\". Keeping the \"New District\" tool, hold Ctrl and drag along the upper-right road of the H. Both sides of the road you paint, along with the parcels facing them, become a new district."
       },
       "step2": {
         "title": "District Created",
-        "description": "You've split off part of the city as a new district. Districts let you aggregate figures such as prices and population per district, and apply building regulations to the district as a whole. Press the district button again to leave district edit mode."
+        "description": "You've split off part of the city as a new district. Districts let you aggregate figures such as prices and population per district, and apply building regulations to the district as a whole. Once you've checked it, close the Edit Districts window."
       },
       "step3": {
         "title": "Show Natural Resources",

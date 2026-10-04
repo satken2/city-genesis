@@ -1,6 +1,8 @@
 {
   "zone": {
     "titleWithId": "District #{{id}}",
+    "color": "District color",
+    "colorUpdateFailed": "Failed to update the district color",
     "basicInfo": "Basic Info",
     "area": "Area",
     "zonePopulation": "Population",

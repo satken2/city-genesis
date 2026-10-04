@@ -108,7 +108,7 @@ public class RoadMemberEditManager : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (!IsActive || !Application.isFocused || !InputUtil.KeyWasPressedThisFrame(Key.Escape)) return;
+        if (!IsActive || !Application.isFocused || !InputUtil.WorldEscapeWasPressed) return;
         FindAnyObjectByType<IpcStateCoordinator>()?.ExitRoadMemberEditToNormal();
     }
 
