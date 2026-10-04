@@ -27,10 +27,20 @@
     "edit": {
       "toolCreate": "Nouveau quartier",
       "toolExpand": "Agrandir un quartier",
+      "modeBlock": "Îlot entier",
+      "modeRoad": "Côté de rue",
       "newZone": "Nouveau quartier",
       "noTarget": "Survolez un quartier",
-      "hintCreate": "Maintenez Ctrl et faites glisser pour peindre des rues ; les rues peintes forment un nouveau quartier. Faites glisser pour déplacer la carte, molette pour zoomer.",
-      "hintExpand": "Survolez un quartier, puis maintenez Ctrl et faites glisser pour y peindre des rues. Faites glisser pour déplacer la carte, molette pour zoomer.",
+      "hint": {
+        "create": {
+          "block": "Maintenez Ctrl et faites glisser sur des îlots entourés de rues ; les îlots peints, avec leurs parcelles, forment un nouveau quartier. Faites glisser pour déplacer la carte, molette pour zoomer.",
+          "road": "Maintenez Ctrl et faites glisser sur un côté d'une rue (la moitié de la chaussée ou les parcelles qui la bordent) ; ce côté de la rue, avec ses parcelles, forme un nouveau quartier. Faites glisser pour déplacer la carte, molette pour zoomer."
+        },
+        "expand": {
+          "block": "Survolez un quartier, puis maintenez Ctrl et faites glisser sur des îlots pour les y ajouter avec leurs parcelles. Faites glisser pour déplacer la carte, molette pour zoomer.",
+          "road": "Survolez un quartier, puis maintenez Ctrl et faites glisser sur un côté d'une rue (la moitié de la chaussée ou les parcelles qui la bordent) pour y ajouter ce côté avec ses parcelles. Faites glisser pour déplacer la carte, molette pour zoomer."
+        }
+      },
       "failed": "Impossible de modifier le quartier."
     }
   }

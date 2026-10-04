@@ -27,10 +27,20 @@
     "edit": {
       "toolCreate": "New District",
       "toolExpand": "Expand District",
+      "modeBlock": "Whole Block",
+      "modeRoad": "Street Side",
       "newZone": "New district",
       "noTarget": "Hover over a district",
-      "hintCreate": "Hold Ctrl and drag to paint streets; the painted streets become a new district. Drag to pan, scroll to zoom.",
-      "hintExpand": "Hover over a district, then hold Ctrl and drag to paint streets into it. Drag to pan, scroll to zoom.",
+      "hint": {
+        "create": {
+          "block": "Hold Ctrl and drag over blocks enclosed by streets; the painted blocks, with their parcels, become a new district. Drag to pan, scroll to zoom.",
+          "road": "Hold Ctrl and drag over one side of a street (half of the roadway, or the parcels along it); that side of the street, with its parcels, becomes a new district. Drag to pan, scroll to zoom."
+        },
+        "expand": {
+          "block": "Hover over a district, then hold Ctrl and drag over blocks to add them, with their parcels, to that district. Drag to pan, scroll to zoom.",
+          "road": "Hover over a district, then hold Ctrl and drag over one side of a street (half of the roadway, or the parcels along it) to add that side, with its parcels, to that district. Drag to pan, scroll to zoom."
+        }
+      },
       "failed": "Could not change the district."
     }
   }

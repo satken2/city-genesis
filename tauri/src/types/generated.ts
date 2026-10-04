@@ -303,8 +303,12 @@ export type PathSummary = {
   path_type: number;
   /** パスの小分類（幅や規格を決めるバリアントID） */
   path_variant: number;
-  /** 所属地区ID */
+  /** 両面が同じ地区ならその地区ID。2地区の境界の道路と未所属は0 */
   zone_id: number;
+  /** 左の面（始点→終点の向き）の所属地区ID。0以下は未所属 */
+  left_zone_id: number;
+  /** 右の面の所属地区ID。0以下は未所属 */
+  right_zone_id: number;
   /** パスの占有ポリゴンの座標列 */
   polygon: any[];
   /** ステータス（計画中・建設中・稼働中など。STATUS_*） */
@@ -409,10 +413,14 @@ export type PathData = {
   platform_side: number;
   /** 地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従 */
   follow_terrain: number;
-  /** 所属地区ID */
+  /** 両面が同じ地区ならその地区ID。2地区の境界の道路と未所属は0 */
   zone_id: number;
-  /** 所属地区の名称（zone_idの参照解決） */
+  /** 所属地区の名称（zone_idの参照解決。境界の道路と未所属はnull） */
   zone_name?: string;
+  /** 左の面（始点→終点の向き）の所属地区ID。0以下は未所属 */
+  left_zone_id: number;
+  /** 右の面の所属地区ID。0以下は未所属 */
+  right_zone_id: number;
   /** インフラ財の当エポック流量（符号付き。正=start→end方向） */
   infra_flow: number;
   /** 騒音レベル */
@@ -512,6 +520,8 @@ export type ParcelSummary = {
   center_point: any[];
   /** 接道している街路のID */
   front_path_id: number;
+  /** 区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区 */
+  front_path_side: number;
   /** 土地価格 */
   land_price: number;
   /** 地区の法規制を区画側で上書きしているか（0/1） */
@@ -557,6 +567,8 @@ export type ParcelData = {
   front_path_id: number;
   /** 接道街路の名称（front_path_idの参照解決） */
   front_path_name?: string;
+  /** 区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区 */
+  front_path_side: number;
   /** 道路に面する辺のインデックス */
   facade_edge_index: number;
   /** 所有者エージェントのID（民間または市政府） */

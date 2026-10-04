@@ -27,10 +27,20 @@
     "edit": {
       "toolCreate": "Nuevo distrito",
       "toolExpand": "Ampliar distrito",
+      "modeBlock": "Manzana completa",
+      "modeRoad": "Lado de calle",
       "newZone": "Nuevo distrito",
       "noTarget": "Pasa el cursor sobre un distrito",
-      "hintCreate": "Mantén presionado Ctrl y arrastra para pintar calles; las calles pintadas forman un nuevo distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",
-      "hintExpand": "Pasa el cursor sobre un distrito y, con Ctrl presionado, arrastra para pintar calles y añadirlas a ese distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",
+      "hint": {
+        "create": {
+          "block": "Mantén presionado Ctrl y arrastra sobre manzanas rodeadas de calles; las manzanas pintadas, con sus parcelas, forman un nuevo distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",
+          "road": "Mantén presionado Ctrl y arrastra sobre un lado de una calle (la mitad de la calzada o las parcelas a lo largo de ella); ese lado de la calle, con sus parcelas, forma un nuevo distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar."
+        },
+        "expand": {
+          "block": "Pasa el cursor sobre un distrito y, con Ctrl presionado, arrastra sobre manzanas para añadirlas, con sus parcelas, a ese distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",
+          "road": "Pasa el cursor sobre un distrito y, con Ctrl presionado, arrastra sobre un lado de una calle (la mitad de la calzada o las parcelas a lo largo de ella) para añadir ese lado, con sus parcelas, a ese distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar."
+        }
+      },
       "failed": "No se pudo modificar el distrito."
     }
   }

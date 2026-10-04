@@ -320,8 +320,12 @@ namespace GeneratedModels
         public int path_type;
         /// <summary>パスの小分類（幅や規格を決めるバリアントID）</summary>
         public int path_variant;
-        /// <summary>所属地区ID</summary>
+        /// <summary>両面が同じ地区ならその地区ID。2地区の境界の道路と未所属は0</summary>
         public int zone_id;
+        /// <summary>左の面（始点→終点の向き）の所属地区ID。0以下は未所属</summary>
+        public int left_zone_id;
+        /// <summary>右の面の所属地区ID。0以下は未所属</summary>
+        public int right_zone_id;
         /// <summary>パスの占有ポリゴンの座標列</summary>
         public List<object> polygon;
         /// <summary>ステータス（計画中・建設中・稼働中など。STATUS_*）</summary>
@@ -428,10 +432,14 @@ namespace GeneratedModels
         public int platform_side;
         /// <summary>地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従</summary>
         public int follow_terrain;
-        /// <summary>所属地区ID</summary>
+        /// <summary>両面が同じ地区ならその地区ID。2地区の境界の道路と未所属は0</summary>
         public int zone_id;
-        /// <summary>所属地区の名称（zone_idの参照解決）</summary>
+        /// <summary>所属地区の名称（zone_idの参照解決。境界の道路と未所属はnull）</summary>
         public string zone_name;
+        /// <summary>左の面（始点→終点の向き）の所属地区ID。0以下は未所属</summary>
+        public int left_zone_id;
+        /// <summary>右の面の所属地区ID。0以下は未所属</summary>
+        public int right_zone_id;
         /// <summary>インフラ財の当エポック流量（符号付き。正=start→end方向）</summary>
         public float infra_flow;
         /// <summary>騒音レベル</summary>
@@ -533,6 +541,8 @@ namespace GeneratedModels
         public List<object> center_point;
         /// <summary>接道している街路のID</summary>
         public int front_path_id;
+        /// <summary>区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区</summary>
+        public int front_path_side;
         /// <summary>土地価格</summary>
         public float land_price;
         /// <summary>地区の法規制を区画側で上書きしているか（0/1）</summary>
@@ -580,6 +590,8 @@ namespace GeneratedModels
         public int front_path_id;
         /// <summary>接道街路の名称（front_path_idの参照解決）</summary>
         public string front_path_name;
+        /// <summary>区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区</summary>
+        public int front_path_side;
         /// <summary>道路に面する辺のインデックス</summary>
         public int facade_edge_index;
         /// <summary>所有者エージェントのID（民間または市政府）</summary>

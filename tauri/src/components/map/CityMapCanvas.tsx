@@ -243,6 +243,7 @@ export type CityMapCanvasHandle = {
 export type CityMapVectors = {
   paths: CityMapPathItem[];
   zones: CityMapPolygonItem[];
+  parcels: CityMapPolygonItem[];
 };
 
 export type CityMapCanvasProps = {
@@ -336,7 +337,7 @@ export type CityMapCanvasProps = {
   onZoomChange?: (zoom: number) => void;
   /**
    * ベクターの取得完了通知。地図に描いているのと同じデータを上位の当たり判定などに使える。
-   * 地区は zoneBorders レイヤーがONのときだけ取得される。
+   * 地区は zoneBorders レイヤー、土地区画は parcels レイヤーがONのときだけ取得される。
    */
   onVectorsLoaded?: (vectors: CityMapVectors) => void;
   className?: string;
@@ -365,12 +366,17 @@ type ApiPathItem = {
   curved?: boolean | number;
   /** パスの占有ポリゴン [[x,z],...](ワールド座標)。駅の凸包描画に使う */
   polygon?: [number, number][] | null;
+  /** 幅(m) */
+  width?: number;
   /** 所属する駅舎パスのID。プラットフォームのみ有効で、未所属・非プラットフォームは0以下 */
   house_path_id?: number;
   /** 所属する道路のID。未所属は VALUE_NONE(-1)。幹線道路の判定に使う */
   road_id?: number | null;
-  /** 所属する地区のID。未所属は0以下 */
+  /** 両面が同じ地区ならその地区のID。2地区の境界の道路と未所属は0以下 */
   zone_id?: number;
+  /** 左の面(始点→終点の向き)・右の面の所属地区のID。未所属は0以下 */
+  left_zone_id?: number;
+  right_zone_id?: number;
   status?: number;
 };
 
@@ -387,6 +393,9 @@ type ApiPolygonItem = {
   auto_managed?: boolean | number;
   /** 土地区画のみ: 区画ID。ヒートマップ値との突き合わせに使う */
   parcel_id?: number;
+  /** 土地区画のみ: 接道のパスID(接道なしは0以下)と、区画がその道路のどちらの面にあるか(PATH_SIDE_*。決まっていなければ-1) */
+  front_path_id?: number;
+  front_path_side?: number;
   /** 地区のみ: 地区ID。地区の値塗りとの突き合わせに使う */
   zone_id?: number;
   /** 地区のみ: 識別色("#rrggbb") */
@@ -2317,7 +2326,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           vec.fetchedBounds = bounds;
           if (!disposed) {
             draw();
-            vectorsCbRef.current?.({ paths: vec.paths, zones: vec.zones });
+            vectorsCbRef.current?.({ paths: vec.paths, zones: vec.zones, parcels: vec.parcels });
           }
         } catch (err) {
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load vector data:", err);

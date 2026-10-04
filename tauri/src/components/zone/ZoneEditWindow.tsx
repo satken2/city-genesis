@@ -1,21 +1,23 @@
 /**
  * 地区編集ウィンドウ (window_type="zone_edit")。
  *
- * 都市マップ(CityMapCanvas)の上でブラシを使い、なぞった街路を地区へ割り当てる。
- * 地区は街路の集合で、区画は接道する街路の地区に従うので、ブラシが拾うのは街路だけ。
+ * 都市マップ(CityMapCanvas)の上でブラシを使い、なぞったところの道路の面を地区へ割り当てる。
+ * 道路は左右の面ごとに地区を持ち、土地区画は接道のうち区画がある側の面の地区に従うので、
+ * ブラシが拾うのは道路の面(zoneBrushTargets.ts)。
  *
- * ツール:
- *   - 新規地区: なぞった街路で新しい地区を作る(POST /api/v1/zones/)。続けて塗り足せるよう、
+ * ツール(塗った面の行き先):
+ *   - 新規地区: 拾った面で新しい地区を作る(POST /api/v1/zones/)。続けて塗り足せるよう、
  *     作成後は拡張ツールに切り替える。
- *   - 既存地区の拡張: マウスを重ねた地区を強調し、そこからなぞり始めた街路をその地区へ取り込む
+ *   - 既存地区の拡張: マウスを重ねた地区を強調し、そこからなぞり始めて拾った面をその地区へ取り込む
  *     (POST /api/v1/paths/batch-zone)。
+ * 塗り方(ブラシが拾う面):
+ *   - ブロック一括: 生活道路に囲まれたブロックに触れたら、境界の道路のブロック側の面をすべて拾う。
+ *   - 道路単位: 道路の片側の半分の帯か、その面に接道する土地区画の集まりに触れたら、その面を拾う。
  * 操作: Ctrl+左ドラッグ=なぞる(離した時点で送信) / 左ドラッグ=パン / ホイール=ズーム。
  *
- * ブラシは画面上で一定の半径で、街路の中心線の中点(道のりの半分の位置)を円が覆ったら拾う。
- * 円が街路に触れただけで拾うと、交差点を通るたびにそこから伸びる横道まで拾い、塗った範囲の縁から
- * 1本ずつはみ出すため。ズームすれば塗れる範囲が変わるので、大きさの設定は持たない。
- * 都市の矩形の外の街路(都市外地区)は所属を変えられないので拾わない。
- * 割り当て後の地区の街路が繋がっているかはコアが検証し(ZONE_CONTIGUITY_ERROR)、ここでは結果を出すだけ。
+ * ブラシは画面上で一定の半径なので、ズームすれば塗れる範囲が変わり、大きさの設定は持たない。
+ * 都市の矩形の外の道路(都市外地区)は所属を変えられないので、その面は拾わない。
+ * 割り当て後の地区の道路が繋がっているかはコアが検証し(ZONE_CONTIGUITY_ERROR)、ここでは結果を出すだけ。
  * 成功したら地図のベクターと3D(session:reload)を取り直す。
  *
  * 地区の色塗りはデータが変わったときだけ描けばよいので overlayDraw に、カーソルに追従する
@@ -37,23 +39,39 @@ import {
 } from "../map/CityMapCanvas";
 import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
 import { sendSessionReload } from "../../utils/ipc";
-import { PATH_STREET } from "../../constants";
+import { PATH_SIDE_LEFT, PATH_SIDE_RIGHT, PATH_STREET } from "../../constants";
+import {
+  buildBlocks,
+  buildFrontages,
+  circleTouches,
+  faceKey,
+  parseFaceKey,
+  pointInRing,
+  signedArea,
+  type Block,
+  type FaceKey,
+  type Frontage,
+  type Ring,
+  type StreetEdge,
+} from "./zoneBrushTargets";
 import "./ZoneEditWindow.css";
 
 type Tool = "create" | "expand";
+type PaintMode = "block" | "road";
 type WorldPoint = { x: number; z: number };
-type Ring = [number, number][];
 
-type Street = { pathId: number; zoneId: number; polygon: Ring; mid: WorldPoint };
-type ZoneShape = { zoneId: number; name: string; color: string; polygon: Ring };
+type ZoneShape = { zoneId: number; name: string; color: string; polygon: Ring; area: number };
 
-/** 1回のなぞり。zoneId=null は新規地区。半径は押した時点のズームで決めて、なぞり終えるまで変えない */
+/** 1回のなぞり。zoneId=null は新規地区。半径と塗り方は押した時点で決めて、なぞり終えるまで変えない */
 type Stroke = {
   zoneId: number | null;
   color: string;
   radius: number;
+  mode: PaintMode;
   points: WorldPoint[];
-  pathIds: Set<number>;
+  /** 触れたブロック・沿道の区画の集まり(強調に使う) */
+  picked: Set<Block | Frontage>;
+  faces: Set<FaceKey>;
   /** 送信に成功し、地図の取り直しを待っている */
   committed: boolean;
 };
@@ -64,25 +82,18 @@ const BRUSH_RADIUS_PX = 20;
 const ZONE_FILL_ALPHA = 0.3;
 const TARGET_FILL_ALPHA = 0.35;
 const STROKE_TRAIL_ALPHA = 0.25;
-const PICKED_STREET_ALPHA = 0.9;
+const PICKED_FILL_ALPHA = 0.5;
 const FALLBACK_ZONE_COLOR = "#888888";
 const BRUSH_EDGE = "rgba(30, 30, 46, 0.85)";
+
+const TOOL_LABELS: Record<Tool, string> = { create: "zone.edit.toolCreate", expand: "zone.edit.toolExpand" };
+const MODE_LABELS: Record<PaintMode, string> = { block: "zone.edit.modeBlock", road: "zone.edit.modeRoad" };
 
 const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
   ...DEFAULT_CITY_MAP_LAYERS,
   zoneBorders: true,
   parcels: true,
 };
-
-function pointInRing(x: number, z: number, ring: Ring): boolean {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const [xi, zi] = ring[i];
-    const [xj, zj] = ring[j];
-    if (zi > z !== zj > z && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
-  }
-  return inside;
-}
 
 /** 折れ線の道のりの半分の位置 */
 function polylineMidpoint(points: [number, number][]): WorldPoint | null {
@@ -120,11 +131,39 @@ function fillRing(ctx: CanvasRenderingContext2D, ring: Ring): void {
   ctx.closePath();
 }
 
+/**
+ * 地区の形は外周だけで穴を持たないので、飛び地を囲む地区の形は飛び地も覆う。地区を塗るときは
+ * 作業用のキャンバスに不透明で塗り重ねてから半透明で写し、重なりの色が混ざらないようにする。
+ */
+function paintThroughScratch(
+  ctx: CanvasRenderingContext2D,
+  scratch: HTMLCanvasElement,
+  alpha: number,
+  paint: (s: CanvasRenderingContext2D) => void
+): void {
+  if (scratch.width !== ctx.canvas.width || scratch.height !== ctx.canvas.height) {
+    scratch.width = ctx.canvas.width;
+    scratch.height = ctx.canvas.height;
+  }
+  const s = scratch.getContext("2d")!;
+  s.setTransform(1, 0, 0, 1, 0, 0);
+  s.globalCompositeOperation = "source-over";
+  s.clearRect(0, 0, scratch.width, scratch.height);
+  s.setTransform(ctx.getTransform());
+  paint(s);
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(scratch, 0, 0);
+  ctx.restore();
+}
+
 export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const mapRef = useRef<CityMapCanvasHandle>(null);
 
   const [tool, setTool] = useState<Tool>("create");
+  const [mode, setMode] = useState<PaintMode>("block");
   const [previewColor, setPreviewColor] = useState(randomZoneColor);
   const [hoverZoneId, setHoverZoneId] = useState<number | null>(null);
   const [zones, setZones] = useState<ZoneShape[]>([]);
@@ -135,6 +174,8 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   // ポインタ・描画コールバックは CityMapCanvas 側で ref ミラーされるため、最新値は ref で読む。
   const toolRef = useRef(tool);
   toolRef.current = tool;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
   const previewColorRef = useRef(previewColor);
   previewColorRef.current = previewColor;
   const busyRef = useRef(busy);
@@ -143,9 +184,16 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   hoverZoneIdRef.current = hoverZoneId;
   const zonesRef = useRef(zones);
   zonesRef.current = zones;
-  const streetsRef = useRef<Street[]>([]);
+  const blocksRef = useRef<Block[]>([]);
+  const frontagesRef = useRef<Frontage[]>([]);
+  /** 面ごとの所属地区(未所属は0以下)。拡張で取り込み先に属している面を送らないために使う */
+  const faceZonesRef = useRef(new Map<FaceKey, number>());
+  /** 生活道路の中心線の中点。都市の矩形の外の道路を見分けるのに使う */
+  const streetMidsRef = useRef(new Map<number, WorldPoint>());
   const strokeRef = useRef<Stroke | null>(null);
   const cursorRef = useRef<WorldPoint | null>(null);
+  const zoneScratchRef = useRef<HTMLCanvasElement | null>(null);
+  const targetScratchRef = useRef<HTMLCanvasElement | null>(null);
   /** 都市の矩形の半幅・半高(m)。地形設定の取得前は null で、その間は範囲で絞らない */
   const cityHalfRef = useRef<{ w: number; h: number } | null>(null);
 
@@ -162,14 +210,28 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   zonesByIdRef.current = zonesById;
 
   const handleVectorsLoaded = useCallback((vectors: CityMapVectors) => {
-    const streets: Street[] = [];
+    const streets: StreetEdge[] = [];
+    const faceZones = new Map<FaceKey, number>();
+    const mids = new Map<number, WorldPoint>();
     for (const path of vectors.paths) {
-      const ring = path.polygon;
-      if (path.path_type !== PATH_STREET || !ring || ring.length < 3) continue;
-      const mid = polylineMidpoint(pathCenterline(path));
-      if (mid) streets.push({ pathId: path.path_id, zoneId: path.zone_id ?? 0, polygon: ring, mid });
+      if (path.path_type !== PATH_STREET) continue;
+      const centerline = pathCenterline(path);
+      const mid = polylineMidpoint(centerline);
+      if (mid) mids.set(path.path_id, mid);
+      faceZones.set(faceKey(path.path_id, PATH_SIDE_LEFT), path.left_zone_id ?? 0);
+      faceZones.set(faceKey(path.path_id, PATH_SIDE_RIGHT), path.right_zone_id ?? 0);
+      streets.push({
+        pathId: path.path_id,
+        startNodeId: path.start_node_id ?? 0,
+        endNodeId: path.end_node_id ?? 0,
+        centerline,
+        width: path.width ?? 0,
+      });
     }
-    streetsRef.current = streets;
+    blocksRef.current = buildBlocks(streets);
+    frontagesRef.current = buildFrontages(streets, vectors.parcels);
+    faceZonesRef.current = faceZones;
+    streetMidsRef.current = mids;
     setZones(
       vectors.zones
         .filter((zone) => (zone.zone_id ?? 0) > 0 && (zone.polygon?.length ?? 0) >= 3)
@@ -178,17 +240,22 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           name: zone.name ?? "",
           color: zone.color || FALLBACK_ZONE_COLOR,
           polygon: zone.polygon!,
+          area: Math.abs(signedArea(zone.polygon!)),
         }))
+        // 大きい順。塗り重ねたときに飛び地(内側の小さい地区)が上になる
+        .sort((a, b) => b.area - a.area)
     );
     if (strokeRef.current?.committed) strokeRef.current = null;
     setOverlayVersion((v) => v + 1);
   }, []);
 
+  /** 点を含む地区。外周が飛び地も覆う地区があるので、含む地区のうち最も小さい(内側の)ものを返す */
   const zoneAt = useCallback((p: WorldPoint): number | null => {
+    let found: ZoneShape | null = null;
     for (const zone of zonesRef.current) {
-      if (pointInRing(p.x, p.z, zone.polygon)) return zone.zoneId;
+      if (pointInRing(p.x, p.z, zone.polygon) && (!found || zone.area < found.area)) found = zone;
     }
-    return null;
+    return found?.zoneId ?? null;
   }, []);
 
   const handleCursor = useCallback(
@@ -209,19 +276,38 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     if (next === "create") setPreviewColor(randomZoneColor());
   }, []);
 
-  /* ---- なぞる ---- */
-
-  /** 円の中心 p で中点を覆った街路を拾う */
-  const stampAt = useCallback((stroke: Stroke, p: WorldPoint) => {
-    const half = cityHalfRef.current;
-    for (const { pathId, mid } of streetsRef.current) {
-      if (stroke.pathIds.has(pathId) || Math.hypot(mid.x - p.x, mid.z - p.z) > stroke.radius) continue;
-      if (half && (Math.abs(mid.x) > half.w || Math.abs(mid.z) > half.h)) continue;
-      stroke.pathIds.add(pathId);
-    }
+  const selectMode = useCallback((next: PaintMode) => {
+    setMode(next);
+    setError(null);
   }, []);
 
-  /** 直前の点から p までを半径の半分の間隔で拾い、速く動かしても途中の街路を取りこぼさない */
+  /* ---- なぞる ---- */
+
+  /** 都市の矩形の内側の道路の面か */
+  const isInsideCity = useCallback((face: FaceKey): boolean => {
+    const half = cityHalfRef.current;
+    const mid = streetMidsRef.current.get(parseFaceKey(face).pathId);
+    return !half || !mid || (Math.abs(mid.x) <= half.w && Math.abs(mid.z) <= half.h);
+  }, []);
+
+  /** 円の中心 p で触れたブロック・沿道の区画の集まりの面を拾う */
+  const stampAt = useCallback(
+    (stroke: Stroke, p: WorldPoint) => {
+      const targets: (Block | Frontage)[] = stroke.mode === "block" ? blocksRef.current : frontagesRef.current;
+      for (const target of targets) {
+        if (stroke.picked.has(target)) continue;
+        const rings = "ring" in target ? [target.ring] : target.rings;
+        if (!circleTouches(p.x, p.z, stroke.radius, rings, target.bounds)) continue;
+        stroke.picked.add(target);
+        for (const face of "faces" in target ? target.faces : [target.face]) {
+          if (isInsideCity(face)) stroke.faces.add(face);
+        }
+      }
+    },
+    [isInsideCity]
+  );
+
+  /** 直前の点から p までを半径の半分の間隔で拾い、速く動かしても途中を取りこぼさない */
   const extendStroke = useCallback(
     (stroke: Stroke, p: WorldPoint) => {
       const last = stroke.points[stroke.points.length - 1];
@@ -249,8 +335,10 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         zoneId,
         color,
         radius: BRUSH_RADIUS_PX / e.view.zoom,
+        mode: modeRef.current,
         points: [e.world],
-        pathIds: new Set(),
+        picked: new Set(),
+        faces: new Set(),
         committed: false,
       };
       stampAt(stroke, e.world);
@@ -280,26 +368,28 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const handlePointerUp = useCallback(async () => {
     const stroke = strokeRef.current;
     if (!stroke || stroke.committed) return;
-    const zoneOf = new Map(streetsRef.current.map((street) => [street.pathId, street.zoneId]));
-    const pathIds = [...stroke.pathIds].filter((id) => stroke.zoneId === null || zoneOf.get(id) !== stroke.zoneId);
-    if (pathIds.length === 0) {
+    const faces = [...stroke.faces]
+      .filter((face) => stroke.zoneId === null || faceZonesRef.current.get(face) !== stroke.zoneId)
+      .map(parseFaceKey);
+    if (faces.length === 0) {
       strokeRef.current = null;
       return;
     }
+    const assignment = { path_ids: faces.map((face) => face.pathId), sides: faces.map((face) => face.side) };
     setBusy(true);
     try {
       if (stroke.zoneId === null) {
         await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/zones/"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ path_ids: pathIds, color: stroke.color }),
+          body: JSON.stringify({ ...assignment, color: stroke.color }),
         });
         setTool("expand");
       } else {
         await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/paths/batch-zone"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ path_ids: pathIds, zone_id: stroke.zoneId }),
+          body: JSON.stringify({ ...assignment, zone_id: stroke.zoneId }),
         });
       }
       // 地図を取り直すまで、なぞった結果を描いたまま残す(handleVectorsLoaded で消える)
@@ -317,14 +407,14 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   /* ---- 描画 ---- */
 
   const drawZones = useCallback((ctx: CanvasRenderingContext2D) => {
-    ctx.save();
-    ctx.globalAlpha = ZONE_FILL_ALPHA;
-    for (const zone of zonesRef.current) {
-      fillRing(ctx, zone.polygon);
-      ctx.fillStyle = zone.color;
-      ctx.fill();
-    }
-    ctx.restore();
+    zoneScratchRef.current ??= document.createElement("canvas");
+    paintThroughScratch(ctx, zoneScratchRef.current, ZONE_FILL_ALPHA, (s) => {
+      for (const zone of zonesRef.current) {
+        fillRing(s, zone.polygon);
+        s.fillStyle = zone.color;
+        s.fill();
+      }
+    });
   }, []);
 
   const drawLive = useCallback((ctx: CanvasRenderingContext2D, view: CityMapViewState) => {
@@ -332,13 +422,24 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     const stroke = strokeRef.current;
     const targetZoneId = stroke ? stroke.zoneId : toolRef.current === "expand" ? hoverZoneIdRef.current : null;
     const target = targetZoneId !== null ? zonesByIdRef.current.get(targetZoneId) : undefined;
+    if (target) {
+      targetScratchRef.current ??= document.createElement("canvas");
+      paintThroughScratch(ctx, targetScratchRef.current, TARGET_FILL_ALPHA, (s) => {
+        fillRing(s, target.polygon);
+        s.fillStyle = target.color;
+        s.fill();
+        // 外周の内側にある飛び地は強調しない
+        s.globalCompositeOperation = "destination-out";
+        for (const zone of zonesRef.current) {
+          if (zone.area >= target.area) continue;
+          fillRing(s, zone.polygon);
+          s.fill();
+        }
+      });
+    }
     ctx.save();
     if (target) {
       fillRing(ctx, target.polygon);
-      ctx.globalAlpha = TARGET_FILL_ALPHA;
-      ctx.fillStyle = target.color;
-      ctx.fill();
-      ctx.globalAlpha = 1;
       ctx.strokeStyle = target.color;
       ctx.lineWidth = px(3);
       ctx.stroke();
@@ -354,11 +455,12 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       ctx.moveTo(stroke.points[0].x, stroke.points[0].z);
       for (const p of stroke.points) ctx.lineTo(p.x, p.z);
       ctx.stroke();
-      ctx.globalAlpha = PICKED_STREET_ALPHA;
-      for (const street of streetsRef.current) {
-        if (!stroke.pathIds.has(street.pathId)) continue;
-        fillRing(ctx, street.polygon);
-        ctx.fill();
+      ctx.globalAlpha = PICKED_FILL_ALPHA;
+      for (const picked of stroke.picked) {
+        for (const ring of "ring" in picked ? [picked.ring] : picked.rings) {
+          fillRing(ctx, ring);
+          ctx.fill();
+        }
       }
     }
     const cursor = cursorRef.current;
@@ -389,7 +491,22 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               data-guide-value={key}
               onClick={() => selectTool(key)}
             >
-              {t(key === "create" ? "zone.edit.toolCreate" : "zone.edit.toolExpand")}
+              {t(TOOL_LABELS[key])}
+            </button>
+          ))}
+        </div>
+        <div className="zone-edit__tools" role="group">
+          {(["block", "road"] as const).map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={`zone-edit__tool${mode === key ? " zone-edit__tool--active" : ""}`}
+              aria-pressed={mode === key}
+              data-guide="zone_edit.mode"
+              data-guide-value={key}
+              onClick={() => selectMode(key)}
+            >
+              {t(MODE_LABELS[key])}
             </button>
           ))}
         </div>
@@ -397,7 +514,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           <span className="zone-edit__chip" style={{ background: target?.color ?? "transparent" }} />
           <span>{target?.name ?? t("zone.edit.noTarget")}</span>
         </div>
-        <div className="zone-edit__hint">{t(tool === "create" ? "zone.edit.hintCreate" : "zone.edit.hintExpand")}</div>
+        <div className="zone-edit__hint">{t(`zone.edit.hint.${tool}.${mode}`)}</div>
       </div>
       <div className="zone-edit__map">
         <CityMapCanvas
