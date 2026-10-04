@@ -4,8 +4,6 @@
  * 各種メニューウィンドウ(道路・建設・規制・統計…)を開くアイコンを縦一列に並べる。
  * 並び順・開くウィンドウはすべて `hudCommon.ts` の `MENU_ICONS` が正で、
  * アイコン画像は `assets/images/panel` 配下の画像を優先して描く(未定義時はMENU_ICONSの画像へフォールバック)。
- * 地区編集だけはウィンドウを開かず、Unityを地区編集ステートにする常駐モードのトグル
- * (ブルドーザと排他。状態は `hudMode` でコックピットと共有する)。
  *
  * ウィンドウ自体は `icon-panel` ラベルの専用ウィンドウで、Rust側が画面左端の上下中央に置く。
  * アイコン数はテンプレートモードの有無で変わるため、実測した高さを
@@ -20,11 +18,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 
-import {
-  IPC_EVENT_EDIT_ZONE_REQUEST_MERGE,
-  sendChangeState,
-  sendSessionReload,
-} from "../../utils/ipc";
+import { IPC_EVENT_EDIT_ZONE_REQUEST_MERGE } from "../../utils/ipc";
 import { setHintbarText } from "../../utils/hintbar";
 import {
   MENU_ICONS,
@@ -32,7 +26,6 @@ import {
   openRegisteredWindow,
   type HudIconDef,
 } from "./hudCommon";
-import { setHudMode, useHudMode } from "./hudMode";
 import { useHudSession } from "./useHudSession";
 import "./hud.css";
 import "./IconPanel.css";
@@ -53,7 +46,6 @@ export function IconPanel() {
   const { t } = useTranslation();
   const { visible, playMode, isLocked, epochExecuting } = useHudSession();
   const godMode = playMode === PLAY_MODE_SCEARIO;
-  const mode = useHudMode();
   const panelRef = useRef<HTMLElement | null>(null);
 
   /**
@@ -78,8 +70,9 @@ export function IconPanel() {
   }, [visible]);
 
   /**
-   * 地区編集モードの「地区の統合」で、統合元・統合先が決まったときにUnityから届く要求を受け、
-   * 確定ウィンドウ(`zone_merge`)を開く。
+   * 3Dビューの地区編集モード(Unity)の「地区の統合」で、統合元・統合先が決まったときにUnityから届く要求を受け、
+   * 確定ウィンドウ(`zone_merge`)を開く。現在はUIから地区編集モードへ入る入口が無いが、Unity側の
+   * 地区編集モードと対で残している。
    *
    * 地区編集モードは自前のウィンドウを持たない常駐モードなので、Unityからは直接ウィンドウを
    * 開けない。常駐しているこのアイコンパネルが中継役になる。イベントを受けてからウィンドウを
@@ -114,39 +107,8 @@ export function IconPanel() {
     };
   }, []);
 
-  /**
-   * 地区編集モードのトグル。ウィンドウを開かない常駐モード
-   * (windowType "district" は送信元ラベルで実ウィンドウは無い)。
-   * ON で Unity を STATE_EDIT_ZONE にし、ヒントバーに操作説明を出す。
-   * OFF で STATE_NORMAL に戻してからセッションをリロードする
-   * (地区の割当・拡張は3Dジェスチャで即時反映されるため、抜ける際に最新状態を確実に反映する)。
-   * 地区編集中の表示(道路の地区色分け・地区枠線・セル・区画)はUnity側のステート別
-   * プリセットが適用し、OFFで元の表示へ戻すのもUnity側なので、ここからは表示を触らない。
-   * 3Dビュー内のツール切替(作成/拡張)・操作は Unity 側の Ctrl ラジアルメニューが担う。
-   */
-  const toggleDistrict = useCallback(async () => {
-    const next = mode !== "district";
-    try {
-      if (next) {
-        await setHintbarText(t("hint.districtEdit"));
-        await sendChangeState("STATE_EDIT_ZONE", undefined, "district");
-      } else {
-        await sendChangeState("STATE_NORMAL", undefined, "district");
-        await setHintbarText("");
-        await sendSessionReload();
-      }
-      await setHudMode(next ? "district" : null);
-    } catch (error) {
-      console.error("failed to toggle district edit mode", error);
-    }
-  }, [mode, t]);
-
   const handleIconClick = useCallback(
     async (icon: HudIconDef) => {
-      if (icon.id === "district") {
-        await toggleDistrict();
-        return;
-      }
       // Tauriコマンド直呼びのアイコンは Unity の状態に触れないため、
       // 常駐モードもヒントバーもそのまま維持する。
       if (icon.command) {
@@ -158,7 +120,7 @@ export function IconPanel() {
       await setHintbarText(icon.hintKey ? t(icon.hintKey) : "");
       await openRegisteredWindow(icon.windowType);
     },
-    [toggleDistrict, t],
+    [t],
   );
 
   if (!visible) return null;
@@ -168,7 +130,6 @@ export function IconPanel() {
   return (
     <nav ref={panelRef} className={`icon-panel ${epochExecuting ? "hud-disabled" : ""}`}>
       {icons.map((icon, index) => {
-        const active = icon.id === "district" && mode === "district";
         // 製作者向け操作の先頭に区切り線を入れて、通常プレイのメニューと見た目で分ける。
         const startsTemplateGroup = icon.templateOnly && !icons[index - 1]?.templateOnly;
         return (
@@ -176,10 +137,9 @@ export function IconPanel() {
             {startsTemplateGroup && <div className="icon-panel-divider" />}
             <button
               id={icon.id}
-              className={`hud-icon-btn icon-panel-slot${active ? " hud-icon-btn--active" : ""}`}
+              className="hud-icon-btn icon-panel-slot"
               type="button"
               title={t(icon.tooltipKey)}
-              aria-pressed={icon.id === "district" ? active : undefined}
               disabled={isLocked && !icon.enabledWhenLocked}
               onClick={() => void handleIconClick(icon)}
             >

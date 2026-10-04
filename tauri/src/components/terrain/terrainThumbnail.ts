@@ -1,4 +1,5 @@
-import { computePixelRGB, landElevationRange } from "./terrainData";
+import { landElevationRange } from "./terrainData";
+import { buildTerrainHillshade, terrainReliefColor } from "./terrainRelief";
 
 export type TerrainThumbnailInput = {
   elev: Float32Array;
@@ -7,7 +8,6 @@ export type TerrainThumbnailInput = {
   mapWidth: number;
   mapHeight: number;
   spacing: number;
-  groundCover?: number;
 };
 
 const THUMBNAIL_LONG_EDGE = 512;
@@ -16,10 +16,11 @@ const SAMPLES_PER_AXIS = 2;
 /**
  * 標高から作るシナリオ画像(シナリオ管理の「地形を取り込む」が作成直後に登録する)の平面図。DOM・WebGLには依存しない。
  * 格子の行0は南端なので画像の行順を反転し、北を上・東を右にする。
+ * 元の格子間隔で求めた陰影と標高色を都市マップと共有し、縮小後も起伏を見せる。
  * 海岸の各画素を4点で評価し、陸地の被覆率をアルファにすることで海の色が縁に混ざるのを防ぐ。
  */
 export function renderTerrainThumbnail(input: TerrainThumbnailInput) {
-  const { elev, rows, cols, mapWidth, mapHeight, spacing, groundCover } = input;
+  const { elev, rows, cols, mapWidth, mapHeight, spacing } = input;
   if (!Number.isInteger(rows) || !Number.isInteger(cols) || rows < 2 || cols < 2 || elev.length !== rows * cols
     || ![mapWidth, mapHeight, spacing].every((v) => Number.isFinite(v) && v > 0)) {
     throw new Error("Invalid terrain thumbnail grid");
@@ -29,6 +30,7 @@ export function renderTerrainThumbnail(input: TerrainThumbnailInput) {
   const height = Math.max(1, Math.round(mapHeight * scale));
   const pixels = new Uint8ClampedArray(width * height * 4);
   const { minLand, maxLand } = landElevationRange(elev);
+  const hillshade = buildTerrainHillshade(elev, rows, cols, spacing);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -46,7 +48,10 @@ export function renderTerrainThumbnail(input: TerrainThumbnailInput) {
           const north = elev[i + cols] * (1 - fx) + elev[i + cols + 1] * fx;
           const e = south * (1 - fy) + north * fy;
           if (!(e > 0) || !Number.isFinite(e)) continue;
-          const rgb = computePixelRGB(e, minLand, maxLand, groundCover);
+          const southShade = hillshade[i] * (1 - fx) + hillshade[i + 1] * fx;
+          const northShade = hillshade[i + cols] * (1 - fx) + hillshade[i + cols + 1] * fx;
+          const shade = southShade * (1 - fy) + northShade * fy;
+          const rgb = terrainReliefColor(e, minLand, maxLand, shade);
           red += rgb[0]; green += rgb[1]; blue += rgb[2];
           landSamples++;
         }

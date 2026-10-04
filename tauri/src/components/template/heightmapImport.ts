@@ -9,7 +9,7 @@
  */
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { uploadScenarioThumbnail } from "../../utils/saves";
-import { base64ToUint8, decodeFloat16Array, normalizeGroundCover } from "../terrain/terrainData";
+import { base64ToUint8, decodeFloat16Array } from "../terrain/terrainData";
 import { renderTerrainThumbnail } from "../terrain/terrainThumbnail";
 
 export type HeightmapFormat = "png" | "npy";
@@ -161,7 +161,6 @@ export async function fetchHeightmapPreview(
 type ScenarioTerrainResponse = {
   settings: { map_width: number; map_height: number; near_spacing: number; grid_rows: number; grid_cols: number };
   near_base64: string;
-  ground_cover?: number | null;
 };
 
 /** シナリオの地形から平面図(北が上・海は透過)を描き、シナリオ画像として登録する */
@@ -174,7 +173,7 @@ export async function registerTerrainThumbnail(apiBaseUrl: string, scenarioId: s
   if (bytes.length !== grid_rows * grid_cols * 2) throw new Error(`Elevation size does not match the grid (${grid_cols}×${grid_rows})`);
   const image = renderTerrainThumbnail({
     elev: decodeFloat16Array(bytes, grid_rows * grid_cols), rows: grid_rows, cols: grid_cols,
-    mapWidth: map_width, mapHeight: map_height, spacing: near_spacing, groundCover: normalizeGroundCover(terrain.ground_cover),
+    mapWidth: map_width, mapHeight: map_height, spacing: near_spacing,
   });
   await uploadScenarioThumbnail(apiBaseUrl, scenarioId, await encodePng(image));
 }

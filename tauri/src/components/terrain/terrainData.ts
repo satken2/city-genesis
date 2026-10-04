@@ -333,8 +333,8 @@ export function landElevationRange(elev: Float32Array): { minLand: number; maxLa
 
 /**
  * 地表種別(GROUND_COVER_*)ごとの標高カラーランプ。低地・中腹・高地の3色を線形補間する。
- * Unity の地表の配色(GroundCoverPalette)を2D表示向けに要約したもので、地形エディタ・3Dプレビュー・
- * サムネイル・都市マップで同じマップを同じ系統の色で見せる。草原は低地=緑→高地=茶のランプ。
+ * Unity の地表の配色(GroundCoverPalette)を2D表示向けに要約したもので、地形エディタ・3Dプレビューで
+ * 同じマップを同じ系統の色で見せる。草原は低地=緑→高地=茶のランプ。
  */
 const GROUND_COVER_RAMPS: Record<number, [Rgb, Rgb, Rgb]> = {
   [GROUND_COVER_GRASSLAND]: [[45, 106, 79], [140, 160, 60], [160, 100, 30]],

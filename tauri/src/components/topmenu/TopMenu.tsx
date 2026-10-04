@@ -242,7 +242,7 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         <span>Core {coreAvailable ? `v${coreVersion}` : t("topmenu.coreConnectionFailed")}</span>
         <span>Graphic v{frontendVersion.frontend_version}</span>
         {/* バージョン表記と同じく、言語に依らず英語で固定する。 */}
-        {verified !== null && <span>{verified ? `Verified: ${debugExecution ? "Debug" : "Steam"}` : "Unverified"}</span>}
+        {verified !== null && <span>{verified ? `Verified by ${debugExecution ? "Debug" : "Steam"}` : "Unverified"}</span>}
       </div>
       {/**
        * オプションボタン。

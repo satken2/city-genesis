@@ -73,7 +73,8 @@
     "INSUFFICIENT_FUNDS": "Insufficient funds to place this order.",
     "GRADING_VALIDATION_ERROR": "This area cannot be developed. Check the reasons shown in the earthworks window.",
     "CREATEPATH_SEA_LAKE_CROSSING": "A path cannot run over the sea or a lake at ground level. Make it a bridge well above the water, or run it underground.",
-    "CREATEPATH_QUAY_BAND_CROSSING": "A path cannot cross the quay of reclaimed land at ground level. Run it elevated or underground, and keep its end points and waypoints off the quay top."
+    "CREATEPATH_QUAY_BAND_CROSSING": "A path cannot cross the quay of reclaimed land at ground level. Run it elevated or underground, and keep its end points and waypoints off the quay top.",
+    "ZONE_CONTIGUITY_ERROR": "The painted streets would not form one connected district, so they cannot be assigned. Paint connected streets."
   },
   "localizedText": {
     "languages": "Input language",

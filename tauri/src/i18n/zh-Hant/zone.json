@@ -23,6 +23,15 @@
     "mergeConfirm": "將把「{{source}}」合併到「{{target}}」。合併來源地區將消失，其法規設定也會一併遺失。",
     "mergeAction": "合併",
     "mergeFailed": "地區合併失敗（不相鄰的地區無法合併）",
-    "mergeNoRequest": "尚未選擇要合併的地區"
+    "mergeNoRequest": "尚未選擇要合併的地區",
+    "edit": {
+      "toolCreate": "新建地區",
+      "toolExpand": "擴展現有地區",
+      "newZone": "新地區",
+      "noTarget": "請將滑鼠移到地區上",
+      "hintCreate": "按住 Ctrl 拖曳塗抹道路，塗抹的道路將成為新地區。拖曳可移動地圖，滾輪可縮放。",
+      "hintExpand": "將滑鼠移到地區上，按住 Ctrl 拖曳塗抹道路，即可將其併入該地區。拖曳可移動地圖，滾輪可縮放。",
+      "failed": "無法變更地區。"
+    }
   }
 }

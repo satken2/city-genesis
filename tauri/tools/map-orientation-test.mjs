@@ -84,12 +84,13 @@ function load(path) {
     exports, require: (name) => { assert.ok(name in imports, name); return imports[name]; },
     window: windowMock, document: { createElement: canvas }, console, AbortController,
     ResizeObserver: class { observe() {} disconnect() {} },
-    Path2D: class { moveTo() {} lineTo() {} closePath() {} addPath() {} bezierCurveTo() {} },
+    Path2D: class { rect() {} moveTo() {} lineTo() {} closePath() {} addPath() {} bezierCurveTo() {} },
     fetch: async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(12) }),
   });
   return exports;
 }
 imports["./roadSurface"] = load("../src/components/map/roadSurface.ts");
+imports["../terrain/terrainRelief"] = load("../src/components/terrain/terrainRelief.ts");
 imports["./mapSymbols"] = load("../src/components/map/mapSymbols.ts");
 imports["./mapLabels"] = load("../src/components/map/mapLabels.ts");
 imports["@tauri-apps/api/event"] = { listen: async () => () => {}, emit: async () => {} };

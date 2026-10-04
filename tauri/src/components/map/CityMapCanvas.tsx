@@ -92,6 +92,7 @@ import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { InterchangeListResponse, InterchangeSummary, MasterData } from "../../types";
 import { decodeFloat16Array } from "../terrain/terrainData";
+import { ELEVATION_RAMP, buildTerrainHillshade, terrainReliefColor } from "../terrain/terrainRelief";
 import {
   PATH_MOTORWAY,
   PATH_STREET,
@@ -506,18 +507,6 @@ type TerrainState = {
 const BG_COLOR = "#a8d7ed";
 const COLOR_LAND_RGB = [211, 248, 226] as const;
 const COLOR_LAND = `rgb(${COLOR_LAND_RGB.join(",")})`;
-/** 地表種別によらず標高を読み取れるよう、低地をベージュ、高地を緑で表す。 */
-const ELEVATION_RAMP: [number, number, number][] = [
-  [225, 220, 193], [203, 209, 160], [165, 183, 120], [117, 135, 85],
-];
-/** 北西(ワールド-X・+Z)から高度50度で照らし、標高を2倍に強調して起伏を見せる。 */
-const HILLSHADE_ALTITUDE = 50 * Math.PI / 180;
-const HILLSHADE_LIGHT = [
-  -Math.cos(HILLSHADE_ALTITUDE) / Math.SQRT2,
-  Math.sin(HILLSHADE_ALTITUDE),
-  Math.cos(HILLSHADE_ALTITUDE) / Math.SQRT2,
-] as const;
-const HILLSHADE_VERTICAL_EXAGGERATION = 2;
 const COLOR_PARK = "#a8dab5";
 const COLOR_BUILDING_BORDER = "#cfd4dc";
 
@@ -672,40 +661,6 @@ export function getZoneFillRampStops(ramp?: [number, number, number][]): string[
   return (ramp ?? ZONE_FILL_DEFAULT_RAMP).map(([r, g, b]) => `rgb(${r}, ${g}, ${b})`);
 }
 
-/** 陸地の明暗を0〜1へ伸ばす。平坦な地形は中立の0.5として標高色をそのまま残す。 */
-function buildTerrainHillshade(elev: Float32Array, rows: number, cols: number, spacing: number): Float32Array {
-  const shade = new Float32Array(rows * cols);
-  const [lx, ly, lz] = HILLSHADE_LIGHT;
-  let min = Infinity;
-  let max = -Infinity;
-  for (let r = 0; r < rows; r++) {
-    const south = Math.max(0, r - 1);
-    const north = Math.min(rows - 1, r + 1);
-    for (let c = 0; c < cols; c++) {
-      const i = r * cols + c;
-      if (elev[i] <= 0) continue;
-      const west = Math.max(0, c - 1);
-      const east = Math.min(cols - 1, c + 1);
-      const dx = (elev[r * cols + east] - elev[r * cols + west]) / (Math.max(1, east - west) * spacing);
-      const dz = (elev[north * cols + c] - elev[south * cols + c]) / (Math.max(1, north - south) * spacing);
-      const nx = -dx * HILLSHADE_VERTICAL_EXAGGERATION;
-      const nz = -dz * HILLSHADE_VERTICAL_EXAGGERATION;
-      // 配列の行は南→北なので、画面のY軸ではなくワールド+Zの勾配を法線に使う。
-      const intensity = Math.max(0, (nx * lx + ly + nz * lz) / Math.hypot(nx, 1, nz));
-      shade[i] = intensity;
-      min = Math.min(min, intensity);
-      max = Math.max(max, intensity);
-    }
-  }
-  const range = max - min;
-  if (range > 1e-6) {
-    for (let i = 0; i < shade.length; i++) shade[i] = Math.max(0, Math.min(1, (shade[i] - min) / range));
-  } else {
-    shade.fill(0.5);
-  }
-  return shade;
-}
-
 /** 標高色へソフトライトで陰影を重ね、パン・ズームで再計算しない画像として保持する。 */
 function buildTerrainCanvas(
   elev: Float32Array,
@@ -726,17 +681,7 @@ function buildTerrainCanvas(
   for (let i = 0; i < rows * cols; i++) {
     let rgb: readonly number[] = elev[i] <= 0 ? [168, 215, 237] : COLOR_LAND_RGB;
     if (shade && elev[i] > 0) {
-      const t = Math.max(0, Math.min(1, (elev[i] - minLand) / (maxLand - minLand)));
-      const segment = t * (ELEVATION_RAMP.length - 1);
-      const index = Math.min(ELEVATION_RAMP.length - 2, Math.floor(segment));
-      const from = ELEVATION_RAMP[index];
-      const to = ELEVATION_RAMP[index + 1];
-      const f = segment - index;
-      const light = 2 * shade[i] - 1;
-      rgb = from.map((channel, k) => {
-        const color = channel + (to[k] - channel) * f;
-        return color + light * color * (1 - color / 255);
-      });
+      rgb = terrainReliefColor(elev[i], minLand, maxLand, shade[i]);
     }
     d[i * 4 + 0] = rgb[0];
     d[i * 4 + 1] = rgb[1];
@@ -988,6 +933,19 @@ function appendSmoothPolyline(
       next[1]
     );
   }
+}
+
+/**
+ * パスの中心線を折れ線で返す。曲線パスは地図に描くのと同じベジエを平坦化する。
+ * 地図の外(地区編集のブラシの当たり判定など)で道路の形をたどるために公開している。
+ */
+export function pathCenterline(item: ApiPathItem): [number, number][] {
+  const controls: AnchorControls[] = [];
+  const pts = collectPathPoints(item, controls);
+  const centerline = new RoadCenterline();
+  if (item.curved) appendSmoothPolyline(centerline, pts, controls);
+  else appendPolyline(centerline, pts);
+  return centerline.points;
 }
 
 /**

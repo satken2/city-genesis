@@ -23,6 +23,15 @@
     "mergeConfirm": "将把「{{source}}」合并到「{{target}}」。合并来源地区将消失，其法规设置也会一并丢失。",
     "mergeAction": "合并",
     "mergeFailed": "地区合并失败（不相邻的地区无法合并）",
-    "mergeNoRequest": "尚未选择要合并的地区"
+    "mergeNoRequest": "尚未选择要合并的地区",
+    "edit": {
+      "toolCreate": "新建地区",
+      "toolExpand": "扩展现有地区",
+      "newZone": "新地区",
+      "noTarget": "请将鼠标移到地区上",
+      "hintCreate": "按住 Ctrl 拖动涂抹道路，涂抹的道路将成为新地区。拖动可移动地图，滚轮可缩放。",
+      "hintExpand": "将鼠标移到地区上，按住 Ctrl 拖动涂抹道路，即可将其并入该地区。拖动可移动地图，滚轮可缩放。",
+      "failed": "无法更改地区。"
+    }
   }
 }

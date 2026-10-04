@@ -23,6 +23,15 @@
     "mergeConfirm": "« {{source}} » sera fusionné dans « {{target}} ». Le quartier d'origine disparaîtra, ainsi que sa réglementation.",
     "mergeAction": "Fusionner",
     "mergeFailed": "Échec de la fusion des quartiers (des quartiers non adjacents ne peuvent pas être fusionnés)",
-    "mergeNoRequest": "Aucun quartier sélectionné pour la fusion"
+    "mergeNoRequest": "Aucun quartier sélectionné pour la fusion",
+    "edit": {
+      "toolCreate": "Nouveau quartier",
+      "toolExpand": "Agrandir un quartier",
+      "newZone": "Nouveau quartier",
+      "noTarget": "Survolez un quartier",
+      "hintCreate": "Maintenez Ctrl et faites glisser pour peindre des rues ; les rues peintes forment un nouveau quartier. Faites glisser pour déplacer la carte, molette pour zoomer.",
+      "hintExpand": "Survolez un quartier, puis maintenez Ctrl et faites glisser pour y peindre des rues. Faites glisser pour déplacer la carte, molette pour zoomer.",
+      "failed": "Impossible de modifier le quartier."
+    }
   }
 }

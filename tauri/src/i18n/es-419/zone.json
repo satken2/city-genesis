@@ -23,6 +23,15 @@
     "mergeConfirm": "Se fusionará «{{source}}» en «{{target}}». El distrito de origen desaparecerá junto con su normativa.",
     "mergeAction": "Fusionar",
     "mergeFailed": "No se pudieron fusionar los distritos (los distritos no colindantes no pueden fusionarse)",
-    "mergeNoRequest": "No se ha seleccionado un distrito para fusionar"
+    "mergeNoRequest": "No se ha seleccionado un distrito para fusionar",
+    "edit": {
+      "toolCreate": "Nuevo distrito",
+      "toolExpand": "Ampliar distrito",
+      "newZone": "Nuevo distrito",
+      "noTarget": "Pasa el cursor sobre un distrito",
+      "hintCreate": "Mantén presionado Ctrl y arrastra para pintar calles; las calles pintadas forman un nuevo distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",
+      "hintExpand": "Pasa el cursor sobre un distrito y, con Ctrl presionado, arrastra para pintar calles y añadirlas a ese distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",
+      "failed": "No se pudo modificar el distrito."
+    }
   }
 }

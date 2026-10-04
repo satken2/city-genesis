@@ -23,6 +23,15 @@
     "mergeConfirm": "Merge \"{{source}}\" into \"{{target}}\". The source district disappears along with its regulation settings.",
     "mergeAction": "Merge",
     "mergeFailed": "Failed to merge districts (districts that are not adjacent cannot be merged)",
-    "mergeNoRequest": "No district selected to merge"
+    "mergeNoRequest": "No district selected to merge",
+    "edit": {
+      "toolCreate": "New District",
+      "toolExpand": "Expand District",
+      "newZone": "New district",
+      "noTarget": "Hover over a district",
+      "hintCreate": "Hold Ctrl and drag to paint streets; the painted streets become a new district. Drag to pan, scroll to zoom.",
+      "hintExpand": "Hover over a district, then hold Ctrl and drag to paint streets into it. Drag to pan, scroll to zoom.",
+      "failed": "Could not change the district."
+    }
   }
 }
