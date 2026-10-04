@@ -82,7 +82,7 @@ function rowKey(a: BudgetAgent): string {
 }
 
 /**
- * 予算比率スライダーの上限(%)。全カテゴリ共通でフル稼働必要額の150%まで
+ * 予算比率スライダーの上限(%)。全カテゴリ共通で必要額の150%まで
  * (100%超は見積もり誤差やエポック中の価格・賃金変動へのヘッドルーム)。
  */
 const RATIO_MAX_PERCENT = 150;
@@ -114,12 +114,12 @@ type BudgetData = {
   total_expense: Record<string, number>;
   total_revenue: Record<string, number>;
   budget_tiers?: Record<string, number>;
-  // 予算はプレイヤーが「フル稼働必要額に対する比率」で設定し、以下から導出される。
+  // 予算はプレイヤーが「必要額に対する比率」で設定し、以下から導出される。
   category_ratio?: Record<string, number>;
   effective_category_ratio?: Record<string, number>;
   // 前エポック実績支出のスナップショット(「前実績」バーの表示用。予算の基準ではない)。
   prev_total_expense?: Record<string, number>;
-  // カテゴリ別のフル稼働必要額(予算導出の基準額。比率スライダーの分母)。
+  // カテゴリ別の必要額(予算導出の基準額。比率スライダーの分母)。
   // カテゴリ稼働率100%の前提で、各施設が自身の稼働率目標どおり稼働した場合の
   // 1エポック見込み費用。建設(8)はポーズ中の新規発注も含めてバックエンドが毎回見積もる。
   projected_required?: Record<string, number>;
@@ -226,7 +226,7 @@ function computeBaseAmounts(
 }
 
 /**
- * プレイヤーが設定した「フル稼働必要額に対する比率(％)」と基準額(computeBaseAmounts)から
+ * プレイヤーが設定した「必要額に対する比率(％)」と基準額(computeBaseAmounts)から
  * 実際に配分される予算額(円)を導出する。バックエンドの City.maintain_and_scale_budget を
  * 忠実に反映したプレビュー計算：desired = 基準額 × 比率(0〜150%)、希望合計が配分可能額
  * (現金)を超える場合は維持優先度の低い Tier 4→1 の順に削減して収める
@@ -452,7 +452,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [currentEpoch, setCurrentEpoch] = useState<number>(0);
   const [currentDate, setCurrentDate] = useState<number>(0);
   const [simulationDays, setSimulationDays] = useState<number>(30);
-  // プレイヤーの主入力：カテゴリ別「フル稼働必要額に対する比率(％整数、0〜150)」。
+  // プレイヤーの主入力：カテゴリ別「必要額に対する比率(％整数、0〜150)」。
   const [pendingRatios, setPendingRatios] = useState<Record<string, number>>({});
   const [budgetAgents, setBudgetAgents] = useState<BudgetAgent[] | null>(null);
   const [activeCategoryId, setActiveCategoryId] = useState<number>(0);
@@ -584,7 +584,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     let ok = false;
     try {
       // 比率(％)を 0〜1.5 の割合に変換して送信する。
-      // 実際の予算額と自動調整はバックエンドがフル稼働必要額から導出する。
+      // 実際の予算額と自動調整はバックエンドが必要額から導出する。
       // 維持優先度（budget_tiers）は現状UIから編集できないため送信しない
       // （バックエンドの既定値/既存設定がそのまま維持される）。
       const ratioFractions: Record<string, number> = {};
@@ -673,7 +673,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   // 左ペインのグループ分けと、資金不足時の自動調整プレビュー（deriveBudgets）に使う。
   const tiers = useMemo(() => budgetData?.budget_tiers ?? {}, [budgetData]);
 
-  // 予算導出の基準額（フル稼働必要額）。予算パネルの施設別リストと
+  // 予算導出の基準額（必要額）。予算パネルの施設別リストと
   // 同一の per施設値の合計として求めるため、施設一覧の合計と常に一致する。
   const baseAmounts = useMemo(
     () => computeBaseAmounts(budgetAgents),
@@ -941,12 +941,12 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                             <span className="budget-category-card__amount">
                               <Money value={pendingBudgets[catKey] ?? 0} unit />
                             </span>
-                            {/* 予算スライダー: フル稼働必要額に対する比率(0〜150%) */}
+                            {/* 予算スライダー: 必要額に対する比率(0〜150%) */}
                             {isEditingRatios && (
                               <div
                                 className="budget-category-card__slider-row"
                                 title={t("budget.ratioSliderHint", {
-                                  defaultValue: "フル稼働時の見込み費用に対する割合(%)。100%で全施設が稼働率目標どおり稼働できる予算になる",
+                                  defaultValue: "各施設が生産計画どおり稼働したときの見込み費用に対する割合(%)。100%で全施設が計画どおり稼働できる予算になる",
                                 })}
                               >
                                 <input

@@ -14,7 +14,7 @@
     "noFacilities": "Aucun équipement public dans cette catégorie",
     "breakdown": "Détail du budget",
     "autoAdjustedNotice": "Le budget a été ajusté automatiquement faute de fonds",
-    "ratioSliderHint": "Part du coût prévu à pleine activité (%). À 100 %, chaque équipement atteint son taux d'utilisation visé. Toute baisse réduit le taux d'utilisation effectif à peu près proportionnellement, et le réglage reste actif jusqu'à modification.",
+    "ratioSliderHint": "Part du coût prévu si chaque équipement fonctionne selon son plan de production (%). À 100 %, chaque équipement peut suivre son plan. Toute baisse réduit le taux d'utilisation effectif à peu près proportionnellement, et le réglage reste actif jusqu'à modification.",
     "details": "Détail",
     "agentName": "Agent",
     "nextProjected": "Prévision suivante",

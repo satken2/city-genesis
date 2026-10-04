@@ -14,7 +14,7 @@
     "noFacilities": "No public facilities in this category",
     "breakdown": "Budget Breakdown",
     "autoAdjustedNotice": "Budget was automatically adjusted due to insufficient funds",
-    "ratioSliderHint": "Share of the projected full-operation cost (%). 100% funds every facility at its utilization target. Lower values throttle effective utilization roughly in proportion, and the setting persists until changed.",
+    "ratioSliderHint": "Share of the projected cost of running every facility as planned (%). 100% funds every facility to run its plan. Lower values throttle effective utilization roughly in proportion, and the setting persists until changed.",
     "details": "Details",
     "agentName": "Agent",
     "nextProjected": "Next Projected",

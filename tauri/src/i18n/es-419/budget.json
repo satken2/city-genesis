@@ -14,7 +14,7 @@
     "noFacilities": "No hay servicios públicos en esta categoría",
     "breakdown": "Desglose del presupuesto",
     "autoAdjustedNotice": "El presupuesto se ajustó automáticamente por falta de fondos",
-    "ratioSliderHint": "Porcentaje respecto al costo previsto a plena operación. Con 100 % todas las instalaciones alcanzan su utilización objetivo. Al reducirlo, la utilización efectiva baja casi en proporción, y el ajuste se mantiene hasta que lo cambies.",
+    "ratioSliderHint": "Porcentaje respecto al costo previsto si cada instalación opera según su plan de producción. Con 100 % todas las instalaciones pueden cumplir su plan. Al reducirlo, la utilización efectiva baja casi en proporción, y el ajuste se mantiene hasta que lo cambies.",
     "details": "Detalle",
     "agentName": "Agente",
     "nextProjected": "Próxima previsión",
