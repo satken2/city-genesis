@@ -3,13 +3,25 @@ import { loadAppSettings, type AppSettings } from "./settings";
 import { parseDaysSinceEpoch } from "./date";
 
 import bgmDefault from "../assets/sounds/bgm-default.opus";
+import bgm01 from "../assets/sounds/bgm-01.opus";
 import bgm04 from "../assets/sounds/bgm-04.opus";
+import bgm05 from "../assets/sounds/bgm-05.opus";
+import bgm07 from "../assets/sounds/bgm-07.opus";
+import bgm09 from "../assets/sounds/bgm-09.opus";
+import bgm10 from "../assets/sounds/bgm-10.opus";
+import bgm12 from "../assets/sounds/bgm-12.opus";
 import bgmResult from "../assets/sounds/bgm-result.opus";
 
 const BGM_TRACKS: Record<string, string> = {
   default: bgmDefault,
   result: bgmResult,
+  "01": bgm01,
   "04": bgm04,
+  "05": bgm05,
+  "07": bgm07,
+  "09": bgm09,
+  "10": bgm10,
+  "12": bgm12,
 };
 
 export type BgmRequest = {

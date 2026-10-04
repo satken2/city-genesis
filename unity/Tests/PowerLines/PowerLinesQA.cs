@@ -171,7 +171,7 @@ public static class PowerLinesQA
         neighbors = new ArrayList {branch,rail,main};
         object Endpoint(object path)=>Call("PowerLinePath","Endpoint",path,1,new Vector3(0,-20,0),Vector3.right);
         var support = Endpoint(main);
-        Check((bool)support.GetType().GetProperty("IsRailGantry").GetValue(support),"Electrical rail uses gantry");
+        Check((bool)support.GetType().GetProperty("IsGantry").GetValue(support),"Electrical rail uses gantry");
         Check(((Vector3)Field(support,"position")).y==0,"Gantry uses rail height, without power base_height subtraction");
         Check(Vector3.Angle((Quaternion)Field(support,"rotation")*Vector3.forward,Vector3.forward)<.01f,"Gantry follows rail instead of incoming power line");
         var branchSupport = Endpoint(branch);
@@ -187,9 +187,10 @@ public static class PowerLinesQA
             Check(count>previous,"Gantry increases detail at "+lod);previous=count;
             Check(gantry.All(f=>f.sharedMesh.vertexCount<=60000),"Gantry mesh budget");
             var vertices=gantry.SelectMany(f=>f.sharedMesh.vertices).ToArray();
-            Check(vertices.Where(v=>v.y<7f).All(v=>Mathf.Abs(v.x)>2.5f),"Rail running space stays open");
+            Check(vertices.Where(v=>v.y<6.6f).All(v=>Mathf.Abs(v.x)>2.5f),"Rail running space stays open");
+            Check(Mathf.Abs(vertices.Max(v=>v.y)-9.54f)<.1f,"Large rail gantry height is three fifths");
             var conductors=line.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="PowerConductors").SelectMany(f=>f.sharedMesh.vertices).ToArray();
-            Check(conductors.Min(v=>v.y)>9f,"Feeder wires stay above rail catenary");
+            Check(conductors.Min(v=>v.y)>6.6f,"Feeder wires stay above rail catenary");
             for(int circuit=0;circuit<6;circuit++)
             {
                 var point=(Vector3)Call("PowerLinePath","SupportAttachment",support,circuit,0,lod=="Far");
@@ -214,7 +215,15 @@ public static class PowerLinesQA
         neighbors=new ArrayList{rail,branch};
         var small=Endpoint(branch);
         Check((int)Field(small,"variant")==1102,"Small feeder uses small gantry");
-        Check(Mathf.Abs(((Vector3)Call("PowerLinePath","SupportAttachment",small,2,0,false)).y-9.6f)<.001f,"Small gantry attachment height");
+        Check(Mathf.Abs(((Vector3)Call("PowerLinePath","SupportAttachment",small,2,0,false)).y-7.16f)<.001f,"Small rail gantry retains catenary clearance");
+        foreach(string lod in new[]{"Far","Normal","Close"})
+        {
+            var line=Generate(branch,lod,new List<Vector3>{new Vector3(80,0,0),Vector3.zero});
+            var vertices=line.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="RailPowerGantry").SelectMany(f=>f.sharedMesh.vertices).ToArray();
+            Check(Mathf.Abs(vertices.Max(v=>v.y)-9.14f)<.1f,"Small rail gantry keeps minimum height at "+lod);
+            Check(vertices.Where(v=>Mathf.Abs(v.x)<2.5f).Min(v=>v.y)>6.6f,"Small rail gantry clears catenary at "+lod);
+            UnityEngine.Object.DestroyImmediate(line);
+        }
         neighbors=new ArrayList{rail,main,branch};
         Set(rail,"path_variant",421);
         Check((float)Field(Endpoint(main),"railRight")>=6.2f,"Gantry spans bundled double track");
@@ -230,17 +239,100 @@ public static class PowerLinesQA
         trackPoints[100]=new List<Vector3>{new Vector3(0,0,100),Vector3.zero};Set(rail,"start_node_id",101);Set(rail,"end_node_id",1);
         Check(Quaternion.Angle((Quaternion)Field(Endpoint(main),"rotation"),Quaternion.identity)<.01f,"Reversed rail retains gantry direction");
         Set(rail,"path_variant",401);
-        Check(!(bool)Endpoint(main).GetType().GetProperty("IsRailGantry").GetValue(Endpoint(main)),"Non-electrical rail keeps regular support");
+        Check(!(bool)Endpoint(main).GetType().GetProperty("IsGantry").GetValue(Endpoint(main)),"Non-electrical rail keeps regular support");
         Set(rail,"path_variant",501);Set(rail,"path_type",5);
-        Check((bool)Endpoint(main).GetType().GetProperty("IsRailGantry").GetValue(Endpoint(main)),"Electrical monorail uses gantry");
+        Check((bool)Endpoint(main).GetType().GetProperty("IsGantry").GetValue(Endpoint(main)),"Electrical monorail uses gantry");
         Set(rail,"path_variant",421);Set(rail,"path_type",4);Set(rail,"start_node_id",1);Set(rail,"end_node_id",101);
         trackPoints[100]=new List<Vector3>{Vector3.zero,new Vector3(0,0,100)};
-        Check(!(bool)Call("PowerLinePath","Endpoint",main,0,Vector3.zero,Vector3.forward).GetType().GetProperty("IsRailGantry").GetValue(Call("PowerLinePath","Endpoint",main,0,Vector3.zero,Vector3.forward)),"Unconnected crossing has no gantry");
+        Check(!(bool)Call("PowerLinePath","Endpoint",main,0,Vector3.zero,Vector3.forward).GetType().GetProperty("IsGantry").GetValue(Call("PowerLinePath","Endpoint",main,0,Vector3.zero,Vector3.forward)),"Unconnected crossing has no gantry");
         neighbors=new ArrayList{rail,main};
         CaptureGantry(main,rail,modelCache);
         VerifyGantryRebuilds(main,rail);
+        VerifyFacilityGantries(store);
         provider.SetValue(null,null);polyline.SetValue(null,null);adjacent.SetValue(null,null);
         UnityEngine.Object.DestroyImmediate(store.gameObject);
+    }
+
+    static void VerifyFacilityGantries(Component store)
+    {
+        var facilityMaster=Activator.CreateInstance(T("MasterDataStore+AgentMasterItem"));
+        Set(facilityMaster,"model_type",T("Constants").GetField("MODEL_MODULAR_FLAT").GetValue(null));
+        var agents=(IDictionary)T("MasterDataStore").GetField("agentMasterById",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(store);
+        agents[0]=facilityMaster;
+        var buildings=new GameObject("QA_Facilities").AddComponent(T("BuildingManager"));
+        var manager=new GameObject("QA_FacilityPaths").AddComponent(T("PathManager"));
+        var nodes=(IDictionary)T("PathManager").GetField("nodeDataCache",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(manager);
+        var register=T("BuildingManager").GetMethod("RegisterBuildingDataToCache",BindingFlags.NonPublic|BindingFlags.Instance);
+        foreach(int id in new[]{1,2,3})
+        {
+            var node=Activator.CreateInstance(T("NodeData"));
+            Set(node,"node_id",id);Set(node,"type",32);Set(node,"position",new[]{10f,2f,30f+(id-1)*120f});
+            // 端子位置の供給を検証するため、独立QAではノードの表示物を生成せずデータだけ登録する。
+            nodes[id]=node;
+            var building=Activator.CreateInstance(T("GeneratedModels.BuildingSummary"));
+            Set(building,"agent_id",id);
+            Set(building,id==3?"depot_node_id":"infra_node_id",id);
+            Set(building,"status",T("Constants").GetField("STATUS_ACTIVE").GetValue(null));
+            register.Invoke(buildings,new[]{building});
+        }
+        object FacilityPath(int variant,int id=10,int end=2)
+        {
+            var path=PathData(variant,id,1,end);
+            float baseHeight=variant==1101?20:10;
+            Set(path,"start_point",new List<object>{10f,baseHeight+7,30f});
+            Set(path,"end_point",new List<object>{10f,baseHeight+7,30f+(end-1)*120f});
+            return path;
+        }
+        bool IsGantry(object support)=>(bool)support.GetType().GetProperty("IsGantry").GetValue(support);
+        var points=new List<Vector3>{new Vector3(10,7,30),new Vector3(10,7,150)};
+        foreach(int variant in new[]{1101,1102})
+        {
+            var path=FacilityPath(variant);
+            var support=Call("PowerLinePath","Endpoint",path,1,points[0],Vector3.forward);
+            Check(IsGantry(support),"Facility terminal uses gantry for "+variant);
+            Check(Vector3.Distance((Vector3)Field(support,"position"),new Vector3(10,2,30))<.001f,"Facility gantry uses node height independently of feeder height");
+            float attachment=variant==1101?7.56f:5.76f, top=variant==1101?9.54f:7.74f;
+            var shield=(Vector3)Call("PowerLinePath","ShieldAttachment",support);
+            Check(Mathf.Abs(shield.y-(2+top))<.001f,"Facility shield is at reduced gantry top");
+            foreach(string lod in new[]{"Far","Normal","Close"})
+            {
+                var line=Generate(path,lod,points);
+                var gantries=line.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="RailPowerGantry").ToArray();
+                Check(gantries.Length==2,"Both facility endpoints use gantries at "+lod);
+                Check(gantries.All(f=>f.sharedMesh.vertexCount<=60000),"Facility gantry mesh budget");
+                var vertices=gantries.SelectMany(f=>f.sharedMesh.vertices).ToArray();
+                Check(Mathf.Abs(vertices.Max(v=>v.y)-(2+top))<.1f,"Facility gantry height is three fifths at "+lod);
+                Check(vertices.Min(v=>v.y)<.1f,"Facility gantry legs reach ground");
+                var conductors=line.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="PowerConductors").SelectMany(f=>f.sharedMesh.vertices).ToArray();
+                for(int circuit=0;circuit<(variant==1101?6:3);circuit++)
+                {
+                    var terminal=(Vector3)Call("PowerLinePath","SupportAttachment",support,circuit,0,lod=="Far");
+                    Check(Mathf.Abs(terminal.y-(2+attachment))<.001f,"Facility conductor attachment height");
+                    Check(conductors.Any(v=>Vector3.Distance(v,terminal)<.06f),"Conductor reaches facility gantry");
+                }
+                Check(conductors.Any(v=>Vector3.Distance(v,shield)<.06f),"Shield wire reaches facility gantry");
+                UnityEngine.Object.DestroyImmediate(line);
+            }
+        }
+        var main=FacilityPath(1101);
+        var branch=FacilityPath(1102,20,3);
+        var paths=(IDictionary)T("PathManager").GetField("pathDataCache",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(manager);
+        var index=T("PathManager").GetMethod("AddPathToNodeIndex",BindingFlags.NonPublic|BindingFlags.Instance);
+        foreach(var path in new[]{main,branch}){paths[Field(path,"path_id")]=path;index.Invoke(manager,new[]{path});}
+        var mainSupport=Call("PowerLinePath","Endpoint",main,1,points[0],Vector3.forward);
+        var branchSupport=Call("PowerLinePath","Endpoint",branch,1,points[0],Vector3.forward);
+        Check((int)Field(branchSupport,"variant")==1101,"Mixed facility feeders choose large gantry");
+        Check(Vector3.Distance((Vector3)Call("PowerLinePath","SupportAttachment",mainSupport,0,0,false),(Vector3)Call("PowerLinePath","SupportAttachment",branchSupport,0,0,false))<.001f,"Mixed facility feeders share attachments");
+        Check(!IsGantry(Call("PowerLinePath","Endpoint",branch,3,new Vector3(10,7,270),Vector3.forward)),"Electricity node bit and depot terminal alone do not select facility gantry");
+        Check(!IsGantry(Call("PowerLinePath","Endpoint",main,0,points[0],Vector3.forward)),"Unconnected preview keeps regular tower");
+        var mainLine=Generate(main,"Normal",points);
+        var branchLine=Generate(branch,"Close",new List<Vector3>{points[0],new Vector3(10,7,270)});
+        int Gantries(GameObject line)=>line.GetComponentsInChildren<MeshFilter>().Count(f=>f.name=="RailPowerGantry");
+        Check(Gantries(mainLine)+Gantries(branchLine)==2,"Shared facility endpoint displays one gantry");
+        branchLine.SetActive(false);Check(Gantries(mainLine)==2,"Facility gantry ownership transfers on unload");
+        UnityEngine.Object.DestroyImmediate(branchLine);UnityEngine.Object.DestroyImmediate(mainLine);
+        UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(buildings.gameObject);
+        Check(T("PowerLinePath").GetField("FacilityTerminalPosition").GetValue(null)==null,"Facility position provider is released with path manager");
     }
 
     static void VerifyGantryRebuilds(object main,object rail)

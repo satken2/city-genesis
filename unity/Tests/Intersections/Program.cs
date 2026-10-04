@@ -97,7 +97,8 @@ internal static class Program
         int merges = CheckMotorwayMerges();
         int junctions = CheckTrackJunctions();
         string surfaces = CheckSlopedSurfaces(factory);
-        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, {mixedWidths} mixed-width corners, original curve preservation, input-order invariance, {merges} motorway merge checks, {junctions} track junction checks, sloped surfaces [{surfaces}].");
+        int stationGrades = StationGradeQA.Run();
+        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, {mixedWidths} mixed-width corners, original curve preservation, input-order invariance, {merges} motorway merge checks, {junctions} track junction checks, sloped surfaces [{surfaces}], {stationGrades} station grade checks.");
     }
 
     private static int CheckMixedWidthCorners(GeometryFactory factory)
