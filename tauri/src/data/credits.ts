@@ -88,6 +88,16 @@ export type CreditEntry = {
  */
 export const CREDIT_ENTRIES: CreditEntry[] = [
   {
+    title: "Adjust",
+    category: "image",
+    author: "Magnific",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/adjust_1522137",
+    license: "Flaticon Free License",
+    requiredText: "Adjust icon designed by Magnific from Flaticon",
+    note: "HUD icon panel parameter edit button (panel/adjust.png). Source confirmed from the downloaded file's Zone.Identifier. License verified 2026-10-04.",
+  },
+  {
     title: "Approved",
     category: "image",
     author: "Sea.icon",

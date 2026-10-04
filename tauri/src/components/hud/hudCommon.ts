@@ -32,6 +32,8 @@ export type HudIconDef = {
   id: string;
   src: string;
   tooltipKey: string;
+  /** panelディレクトリ内の画像ファイル名(拡張子除く)。未指定時は id と同名 */
+  panelIcon?: string;
   /** アイコン画像の内側余白。画像を枠いっぱいに描く箇所(アイコンパネル)では指定しない */
   padding?: string;
   /** クリックで開くウィンドウタイプ(未設定ならクリック無効、またはコンポーネント側で個別処理) */
@@ -48,31 +50,29 @@ export type HudIconDef = {
 
 /**
  * アイコンパネル(画面左端)に縦並びで置くメニューアイコン。この順にそのまま縦に並ぶ。
- * 上から機能グループ順(建設系 → 交通系 → 市政系 → 情報系)に並べ、
- * 末尾に `templateOnly` の製作者向け操作を置く(通常プレイでは表示されず、区切り線で分ける)。
+ * 上から通常プレイの操作群を並べ、末尾に `templateOnly` の製作者向け操作を置く
+ * (通常プレイでは表示されず、区切り線で分ける)。
  *
  * 予算(`city_budget`)・公共施設(`public_facilities`)・達成目標(`achievements`)はここに置かない。
  * いずれもコックピットのメータ(予算ミニメータ・公共サービス充足度・スコアミニメータ)が
  * 常時その状況を表示しており、そのままクリックで開くため、入口を二重に持たせない。
  */
 export const MENU_ICONS: HudIconDef[] = [
+  { id: "grading", src: "menu_grading.png", tooltipKey: "taskbar.menuGrading", windowType: "grading", hintKey: "hint.grading" },
   { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", windowType: "path_build" }, // 道路・鉄道・インフラのパスをまとめて敷く
   { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", windowType: "parcel_creation" },
-  { id: "grading", src: "menu_grading.png", tooltipKey: "taskbar.menuGrading", windowType: "grading", hintKey: "hint.grading" },
   { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict", windowType: "zone_edit" },
   { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", windowType: "building_construction", enabledWhenLocked: true },
-  // 建設プロジェクト(タグ単位の工事一覧)。専用アイコンが未用意のため建設と同じ画像を仮当てしている。
-  { id: "construction_projects", src: "menu_construction.png", tooltipKey: "taskbar.menuConstructionProjects", windowType: "construction_projects" },
   { id: "transport", src: "menu_transport.png", tooltipKey: "taskbar.menuTransport", windowType: "transit_management" },
+  { id: "prop_placement", src: "menu_prop.png", tooltipKey: "taskbar.menuPropPlacement", windowType: "prop_placement", hintKey: "prop_placement.hint" },
+  { id: "construction_projects", src: "menu_construction.png", tooltipKey: "taskbar.menuConstructionProjects", windowType: "construction_projects" },
   { id: "regulation", src: "menu_regulation.png", tooltipKey: "taskbar.menuRegulation", windowType: "city_regulation" },
   { id: "city", src: "menu_city.png", tooltipKey: "taskbar.menuCity", windowType: "city_hall" },
   { id: "finance", src: "menu_finance.png", tooltipKey: "taskbar.menuFinance", windowType: "financial_policy" },
   { id: "stat", src: "menu_stat.png", tooltipKey: "taskbar.menuStat", windowType: "city_statistics" },
-  { id: "prop_placement", src: "menu_prop.png", tooltipKey: "taskbar.menuPropPlacement", windowType: "prop_placement", hintKey: "prop_placement.hint" },
-  { id: "resource_edit", src: "menu_resource.png", tooltipKey: "taskbar.menuResourceEdit", windowType: "resource_edit", hintKey: "hint.resourceEdit", templateOnly: true },
-  { id: "parameter_edit", src: "tray_settings.png", tooltipKey: "taskbar.menuParameterEdit", command: "open_parameter_edit_window", templateOnly: true },
-  // 経済主体の作成(建物ではない施設を既存建物へ入居済みで置く)。専用アイコンが未用意のため建設と同じ画像を仮当てしている。
-  { id: "agent_creation", src: "menu_construction.png", tooltipKey: "taskbar.menuAgentCreation", windowType: "agent_creation", templateOnly: true },
+  { id: "resource_edit", src: "menu_resource.png", panelIcon: "resources", tooltipKey: "taskbar.menuResourceEdit", windowType: "resource_edit", hintKey: "hint.resourceEdit", templateOnly: true },
+  { id: "agent_creation", src: "menu_construction.png", panelIcon: "agents", tooltipKey: "taskbar.menuAgentCreation", windowType: "agent_creation", templateOnly: true },
+  { id: "parameter_edit", src: "tray_settings.png", panelIcon: "adjust", tooltipKey: "taskbar.menuParameterEdit", command: "open_parameter_edit_window", templateOnly: true },
 ];
 
 /**

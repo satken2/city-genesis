@@ -36,8 +36,9 @@ const panelIconModules = import.meta.glob<{ default: string }>(
 );
 
 function resolveIconSrc(icon: HudIconDef): string {
+  const fileKey = icon.panelIcon ?? icon.id;
   return (
-    panelIconModules[`../../assets/images/panel/${icon.id}.png`]?.default ??
+    panelIconModules[`../../assets/images/panel/${fileKey}.png`]?.default ??
     iconUrl(icon.src)
   );
 }
