@@ -1451,6 +1451,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
         const z = view.zoom;
         const px = (w: number) => w / z; // 画面ピクセル単位の線幅をワールド単位へ
+        // 細部の形状は読み取れる縮尺でだけ描く。施設記号・名前は別のズーム基準で表示する。
+        const showMinorRoads = L.allRoads && z > 0.3;
+        const showBuildingShapes = L.buildings && z > 0.7;
+        const showParcels = L.parcels && z > 1;
 
         // 都市外の陸地。都市の矩形を1px縮めた外側に塗り、境界の画素を都市の陸地の下に潜らせて
         // 両者の間に水色の継ぎ目を出さない。
@@ -1493,7 +1497,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.fillStyle = COLOR_LAND;
           ctx.fill(coastPath, "evenodd");
         }
-        if (L.buildings && vec.parkPath) {
+        if (showBuildingShapes && vec.parkPath) {
           ctx.fillStyle = COLOR_PARK;
           ctx.fill(vec.parkPath);
         }
@@ -1574,7 +1578,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         }
 
         // 土地区画(枠線のみ)
-        if (L.parcels && vec.parcelPath) {
+        if (showParcels && vec.parcelPath) {
           ctx.strokeStyle = COLOR_PARCEL;
           ctx.lineWidth = px(1);
           ctx.stroke(vec.parcelPath);
@@ -1594,7 +1598,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         }
 
         // 建物の底面形状(淡灰色の面 + 細い枠線)
-        if (L.buildings && vec.buildingPath) {
+        if (showBuildingShapes && vec.buildingPath) {
           ctx.globalAlpha = 1;
           ctx.fillStyle = COLOR_BUILDING;
           ctx.fill(vec.buildingPath);
@@ -1613,7 +1617,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const dimmed = focus.focusDimOthers && (vec.focusPath !== null || vec.previewPath !== null);
         if (dimmed) ctx.globalAlpha = FOCUS_DIM_ALPHA;
         for (const band of vec.roadBands) {
-          if (!(band.trunk ? L.trunkRoads : L.allRoads)) continue;
+          if (!(band.trunk ? L.trunkRoads : showMinorRoads)) continue;
           const color = band.kind === "motorway" ? COLOR_MOTORWAY
             : band.trunk ? COLOR_STREET_TRUNK : COLOR_STREET;
           ctx.fillStyle = color;
