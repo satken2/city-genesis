@@ -214,3 +214,40 @@
 }
 
 .city-map-window__heatmap { flex-wrap: wrap; }
+
+.city-map-window__source-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: 0.5rem;
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
+.city-map-source-switch {
+  width: 2.5rem;
+  height: 1.4rem;
+  padding: 0.15rem;
+  border: 1px solid #4f6ba8;
+  border-radius: 1rem;
+  background: #1b2135;
+  cursor: pointer;
+}
+
+.city-map-source-switch span {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: #93a9c0;
+  transition: transform 120ms;
+}
+
+.city-map-source-switch[aria-checked="true"] {
+  background: #315475;
+}
+
+.city-map-source-switch[aria-checked="true"] span {
+  transform: translateX(1rem);
+  background: #ffffff;
+}

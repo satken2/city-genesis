@@ -51,10 +51,9 @@
  *   どこまでを都市として使えるかを示す。
  *
  * ヒートマップ(heatmap propで1種別だけ選ぶ排他表示):
- *   騒音・大気汚染・治安・日照の環境スコアを土地区画の塗り分けで表現する。APIが返すのは
- *   区画中心でサンプリング済みの区画単位スコアなので、塗る単位も区画になる
- *   (発生源の広がりを面で見せる都市全体のビットマップは公開されていない)。
- *   2種を重ねると色が混ざって読めなくなるため、複数ONにできるレイヤーとは分ける。
+ *   環境スコアを格子画像として地図へ重ねる。負荷ゼロは透明で、値に比例して濃くする。
+ *   表示用LODはエポック中に生成され、ズームに合う画像だけを取得・色付けする。
+ *   heatmapMode="sources"では騒音・汚染の発生源を建物・道路の色で示す。
  *
  * 地区の値塗り(zoneFill propで地区ごとの値を渡す):
  *   満足度などの地区単位の指標を地区ポリゴンの塗り分けで表現する。塗りは地区枠線より
@@ -107,6 +106,13 @@ import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
 import { interchangeDisplayName } from "../intersection/interchangeName";
 import { fetchRoadList, hasRoad, ROADS_CHANGED_EVENT } from "../road/roadApi";
 import type { RoadSummary } from "../road/roadTypes";
+import {
+  HEATMAP_RAMPS, effectiveHeatmapMode, heatmapPixels, pickHeatmapLod,
+  type CityMapHeatmapKind, type CityMapHeatmapActiveKind, type CityMapHeatmapMode,
+  type HeatmapGrid, type HeatmapSources,
+} from "./mapHeatmap";
+export { getHeatmapRampStops } from "./mapHeatmap";
+export type { CityMapHeatmapKind, CityMapHeatmapActiveKind, CityMapHeatmapMode } from "./mapHeatmap";
 
 /* ============================================================================
  * 公開型
@@ -162,27 +168,14 @@ export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
   grid: false,
 };
 
-/**
- * ヒートマップの種別。土地区画を環境スコアで塗り分ける。
- * 2種を重ねると色が混ざって読めなくなるため、レイヤーとは別の排他選択とする。
- */
-export type CityMapHeatmapKind = "none" | "noise" | "pollution" | "crime" | "sunshine";
-
-/** ヒートマップの実データを持つ種別(noneを除く) */
-export type CityMapHeatmapActiveKind = Exclude<CityMapHeatmapKind, "none">;
-
 /** ヒートマップの凡例に必要な情報。上位コンポーネントへonHeatmapStatsで通知する */
 export type CityMapHeatmapStats = {
   kind: CityMapHeatmapActiveKind;
-  /**
-   * 悪さスコアの実値レンジ(0=最良〜1=最悪)。
-   * noise/pollution/crimeの塗り色はこのレンジを両端いっぱいに引き伸ばした相対値
-   * なので、色の濃さをエポック間で比較するにはこのレンジを併せて見る必要がある。
-   * sunshineは常にmin=0/max=1の固定スケール(絶対値)で返る。
-   */
+  mode: CityMapHeatmapMode;
+  /** オーバーレイは悪さスコア0〜1、発生源表示は都市全体の強度レンジ。 */
   min: number;
   max: number;
-  /** 値を持つ区画数。0ならヒートマップ未計算(エポック未実行) */
+  /** 値を持つ画素数または発生源の件数。0ならデータなし。 */
   count: number;
 };
 
@@ -252,6 +245,8 @@ export type CityMapCanvasProps = {
   layers?: Partial<CityMapLayerVisibility>;
   /** 表示するヒートマップの種別(省略時は"none"=非表示) */
   heatmap?: CityMapHeatmapKind;
+  /** 日照・治安には発生源表示を適用せず、オーバーレイを維持する。 */
+  heatmapMode?: CityMapHeatmapMode;
   /**
    * 公共交通路線レイヤーで主役にする路線の line_agent_id。指定するとその路線を最前面に
    * 始点=緑・終点=赤のリング付きで描き、他の路線は薄くする(路線詳細の路線地図用)。
@@ -391,7 +386,7 @@ type ApiPolygonItem = {
   center_point?: number[] | null;
   /** 地区のみ: 1/true=自動管理地区、0/false=確定地区。枠線の実線/破線の描き分けに使う */
   auto_managed?: boolean | number;
-  /** 土地区画のみ: 区画ID。ヒートマップ値との突き合わせに使う */
+  /** 土地区画のみ: 区画ID。選択や呼び出し側の値との対応に使う */
   parcel_id?: number;
   /** 土地区画のみ: 接道のパスID(接道なしは0以下)と、区画がその道路のどちらの面にあるか(PATH_SIDE_*。決まっていなければ-1) */
   front_path_id?: number;
@@ -405,27 +400,13 @@ type ApiPolygonItem = {
 export type CityMapPathItem = ApiPathItem;
 export type CityMapPolygonItem = ApiPolygonItem;
 
-/**
- * ヒートマップAPI(GET /api/v1/city/noise, /pollution, /crime, /sunshine)のレスポンス。
- * valuesはmin〜maxを0〜65535へ線形正規化したuint16で、parcel_idsと同じ並び。
- * noise/pollution/crimeはそのエポックのmin〜maxへの相対正規化、sunshineは
- * min=0/max=1の固定スケール(絶対値。影時間割合ベース)で返る。
- * ヒートマップ未計算(エポック未実行)のときは両配列が空でmin/maxも返らない。
- */
-type ApiHeatmap = {
-  parcel_ids?: number[];
-  values?: number[];
-  min?: number;
-  max?: number;
-};
-
 /** 道路の描画区分。streetは歩道(PATH_WALKWAY)も含む */
 type RoadBandKind = "street" | "motorway";
 
 /**
  * 同じ描画スタイルの道路面と、遠景の最小線幅に使う中心線をまとめた描画単位。
  */
-type RoadBand = { kind: RoadBandKind; trunk: boolean; width: number; path: Path2D; surface: Path2D };
+type RoadBand = { kind: RoadBandKind; trunk: boolean; width: number; path: Path2D; surface: Path2D; color?: string };
 
 /** 取得済みベクターデータとPath2Dキャッシュ */
 type VectorState = {
@@ -437,6 +418,8 @@ type VectorState = {
   /** Path2Dキャッシュ(データ取得後・マスターデータ変更後に構築) */
   roadBands: RoadBand[];
   railPath: Path2D | null;
+  railSourceBands: { path: Path2D; color: string }[];
+  buildingSourceBands: { path: Path2D; color: string }[];
   parcelPath: Path2D | null;
   buildingPath: Path2D | null;
   parkPath: Path2D | null;
@@ -466,20 +449,20 @@ type VectorState = {
 
 type VectorKind = "paths" | "parcels" | "buildings" | "zones" | "transit" | "interchanges" | "roads";
 
-/** 取得済みヒートマップと色ビンごとのPath2Dキャッシュ */
+/** 選択中の環境画像または発生源の強度。画像はLOD単位でキャッシュする。 */
 type HeatmapState = {
-  /** 保持しているデータの種別。"none"=未取得 */
   loadedKind: CityMapHeatmapKind;
-  /** 取得を要求した種別。応答が返った時点で切り替わっていれば結果を捨てる */
-  requestedKind: CityMapHeatmapKind;
-  /** parcel_id → 0〜1へ戻した相対値 */
-  values: Map<number, number>;
-  /** 悪さスコアの実値レンジ(凡例用) */
+  mode: CityMapHeatmapMode;
+  requestKey: string;
+  generation: number;
+  grid: HeatmapGrid | null;
+  images: Map<number, HTMLCanvasElement>;
+  loadingLevels: Set<number>;
+  pathValues: Map<number, number>;
+  buildingValues: Map<number, number>;
   min: number;
   max: number;
-  /** 色ビンごとの区画ポリゴン(添字=ビン番号)。値を持つ区画が無ければnull */
-  binPaths: Path2D[] | null;
-  /** ビン番号に対応する塗り色 */
+  count: number;
   binColors: string[];
 };
 
@@ -553,26 +536,10 @@ const COLOR_GRID = "rgba(75,99,110,0.12)";
 const COLOR_GRID_CELL = "rgba(75,99,110,0.3)";
 
 /**
- * ヒートマップの色ビン数。区画は数千件になるため1件ずつfillすると重い。
- * 値をこの段数へ量子化し、同じ色の区画を1つのPath2Dへまとめて描画回数を畳む。
+ * 発生源表示の色ビン数。建物・道路の強度を量子化して同じ色の形状をまとめ、
+ * 都市規模が大きくなっても描画回数を抑える。
  */
 const HEATMAP_BIN_COUNT = 12;
-
-/** ヒートマップ塗りの不透明度。下の地形・上の道路の双方を潰さない濃さにする */
-const HEATMAP_ALPHA = 0.5;
-
-/**
- * 種別ごとのカラーランプ(低い=悪さが小さい → 高い=悪さが大きい)。
- * 騒音=橙、大気汚染=紫、治安=赤、日照=薄黄(日向)→青灰(影)と色相を分け、
- * どれを表示中か色だけで判別できるようにする。
- * 両端の色は表示パネルの区画色分け(騒音/大気汚染/治安/日照)の凡例と一致させる。
- */
-const HEATMAP_RAMPS: Record<CityMapHeatmapActiveKind, [number, number, number][]> = {
-  noise: [[253, 230, 138], [251, 146, 60], [230, 81, 0]],
-  pollution: [[209, 231, 221], [149, 82, 191], [74, 20, 140]],
-  crime: [[255, 205, 210], [229, 87, 87], [183, 28, 28]],
-  sunshine: [[255, 245, 157], [144, 164, 174], [55, 71, 79]],
-};
 
 /**
  * 地区の値塗りの既定ランプ(低→高)。赤→黄→緑で「高いほど良い」指標を表す。
@@ -585,14 +552,6 @@ const ZONE_FILL_DEFAULT_RAMP: [number, number, number][] = [
 
 /** 地区塗りの不透明度。地区は面積が大きいため、ヒートマップより薄くして地物を残す */
 const ZONE_FILL_ALPHA = 0.45;
-
-/** ヒートマップ種別ごとの取得先エンドポイント */
-const HEATMAP_ENDPOINT: Record<CityMapHeatmapActiveKind, string> = {
-  noise: "/api/v1/city/noise",
-  pollution: "/api/v1/city/pollution",
-  crime: "/api/v1/city/crime",
-  sunshine: "/api/v1/city/sunshine",
-};
 
 /** グリッドの間隔(m)。セル境界はterrain設定のcell_sizeを使う */
 const GRID_MINOR_INTERVAL = 100;
@@ -652,14 +611,6 @@ function buildHeatmapBinColors(kind: CityMapHeatmapActiveKind): string[] {
   return Array.from({ length: HEATMAP_BIN_COUNT }, (_, i) =>
     rampColor(stops, (i + 0.5) / HEATMAP_BIN_COUNT)
   );
-}
-
-/**
- * ヒートマップのカラーランプのストップ色(低→高)をCSS文字列で返す。
- * 凡例のグラデーションを地図の塗りと同じ色で描くために公開している。
- */
-export function getHeatmapRampStops(kind: CityMapHeatmapActiveKind): string[] {
-  return HEATMAP_RAMPS[kind].map(([r, g, b]) => `rgb(${r}, ${g}, ${b})`);
 }
 
 /**
@@ -1203,6 +1154,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       apiBaseUrl,
       layers,
       heatmap = "none",
+      heatmapMode = "overlay",
       transitFocusLineId = null,
       focusPathIds = null,
       focusColor = null,
@@ -1241,6 +1193,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     // 常に最新値を参照できるようrefにミラーする(ハンドラの張り直しを避けるため)。
     const layersRef = useRef<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS, ...layers });
     const heatmapRef = useRef<CityMapHeatmapKind>(heatmap);
+    const heatmapModeRef = useRef<CityMapHeatmapMode>(heatmapMode);
     const zoneFillRef = useRef<CityMapZoneFill | undefined>(zoneFill);
     const transitFocusRef = useRef<number | null>(transitFocusLineId);
     const roadFocusRef = useRef({ focusPathIds, previewPathIds, focusColor, focusDimOthers });
@@ -1315,13 +1268,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       engineRef.current?.draw();
     }, [focusKey, previewKey, focusColor, focusDimOthers]);
 
-    /* ---- ヒートマップ種別の変更: 未取得なら取得し、区画データも揃えて再描画する ---- */
+    /* ---- 環境種別・表示方式の変更 ---- */
     useEffect(() => {
       heatmapRef.current = heatmap;
+      heatmapModeRef.current = heatmapMode;
       engineRef.current?.ensureVectors();
       engineRef.current?.ensureHeatmap();
       engineRef.current?.draw();
-    }, [heatmap]);
+    }, [heatmap, heatmapMode]);
 
     /* ---- 地区の値塗りの変更: 地区データを揃えてPath2Dを作り直し再描画する ---- */
     useEffect(() => {
@@ -1402,6 +1356,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         zones: [],
         roadBands: [],
         railPath: null,
+        railSourceBands: [],
+        buildingSourceBands: [],
         parcelPath: null,
         buildingPath: null,
         parkPath: null,
@@ -1420,13 +1376,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       };
 
       const heat: HeatmapState = {
-        loadedKind: "none",
-        requestedKind: "none",
-        values: new Map(),
-        min: 0,
-        max: 0,
-        binPaths: null,
-        binColors: [],
+        loadedKind: "none", mode: "overlay", requestKey: "", generation: 0,
+        grid: null, images: new Map(), loadingLevels: new Set(),
+        pathValues: new Map(), buildingValues: new Map(),
+        min: 0, max: 0, count: 0, binColors: [],
       };
 
       let vectorTimer: number | null = null;
@@ -1505,8 +1458,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const z = view.zoom;
         const px = (w: number) => w / z; // 画面ピクセル単位の線幅をワールド単位へ
         // 細部の形状は読み取れる縮尺でだけ描く。施設記号・名前は別のズーム基準で表示する。
-        const showMinorRoads = L.allRoads && z > 0.3;
-        const showBuildingShapes = L.buildings && z > 0.7;
+        const showMinorRoads = L.allRoads && (z > 0.3 || heat.mode === "sources");
+        const showBuildingShapes = L.buildings && (z > 0.7 || heat.mode === "sources");
         const showParcels = L.parcels && z > 1;
 
         // 都市外の陸地。都市の矩形を1px縮めた外側に塗り、境界の画素を都市の陸地の下に潜らせて
@@ -1583,16 +1536,23 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           }
         }
 
-        // ヒートマップ(騒音・大気汚染・治安・日照)。土地区画を環境スコアで塗り分ける。
-        // 地形の上・道路や建物の下に敷くことで、都市インフラの読み取りを妨げずに
-        // 「どのあたりが悪いか」を面で見せる。
-        if (heat.binPaths) {
-          ctx.globalAlpha = HEATMAP_ALPHA;
-          for (let i = 0; i < heat.binPaths.length; i++) {
-            ctx.fillStyle = heat.binColors[i];
-            ctx.fill(heat.binPaths[i]);
+        // 行0は南端なので、地形と同じワールド座標変換で画像を張る。
+        if (heat.grid && heat.mode === "overlay" && heat.grid.levels.length > 0) {
+          const lod = pickHeatmapLod(heat.grid.levels, z);
+          void loadHeatmapLevel(lod);
+          const cached = heat.images.has(lod) ? lod : [...heat.images.keys()].sort((a, b) => Math.abs(a - lod) - Math.abs(b - lod))[0];
+          const image = heat.images.get(cached);
+          if (image) {
+            ctx.save();
+            if (settings) {
+              ctx.beginPath();
+              ctx.rect(-settings.map_width / 2, -settings.map_height / 2, settings.map_width, settings.map_height);
+              ctx.clip();
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.drawImage(image, heat.grid.origin_x, heat.grid.origin_z, heat.grid.width_m, heat.grid.height_m);
+            ctx.restore();
           }
-          ctx.globalAlpha = 1.0;
         }
 
         // 地区の値塗り。地区枠線より先に敷くことで、枠線・道路・建物を潰さずに
@@ -1655,6 +1615,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.globalAlpha = 1;
           ctx.fillStyle = COLOR_BUILDING;
           ctx.fill(vec.buildingPath);
+          for (const band of vec.buildingSourceBands) {
+            ctx.fillStyle = band.color;
+            ctx.fill(band.path);
+          }
           ctx.globalAlpha = 1.0;
           ctx.strokeStyle = COLOR_BUILDING_BORDER;
           ctx.lineWidth = px(1);
@@ -1671,8 +1635,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         if (dimmed) ctx.globalAlpha = FOCUS_DIM_ALPHA;
         for (const band of vec.roadBands) {
           if (!(band.trunk ? L.trunkRoads : showMinorRoads)) continue;
-          const color = band.kind === "motorway" ? COLOR_MOTORWAY
-            : band.trunk ? COLOR_STREET_TRUNK : COLOR_STREET;
+          const color = band.color ?? (band.kind === "motorway" ? COLOR_MOTORWAY
+            : band.trunk ? COLOR_STREET_TRUNK : COLOR_STREET);
           ctx.fillStyle = color;
           ctx.fill(band.surface);
           if (band.width * z < 1) {
@@ -1686,6 +1650,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.lineWidth = px(1.6);
           ctx.setLineDash([]);
           ctx.stroke(vec.railPath);
+          for (const band of vec.railSourceBands) {
+            ctx.strokeStyle = band.color;
+            ctx.stroke(band.path);
+          }
         }
         ctx.globalAlpha = 1.0;
 
@@ -1941,51 +1909,41 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         }
       };
 
-      /* ---- ヒートマップ(騒音・大気汚染) ---- */
+      /* ---- 環境オーバーレイ・発生源 ---- */
 
-      /** 凡例に必要な実値レンジ・件数を上位へ通知する */
       const notifyHeatmapStats = () => {
-        const cb = heatmapStatsCbRef.current;
-        if (!cb) return;
-        cb(
-          heat.loadedKind === "none"
-            ? null
-            : {
-                kind: heat.loadedKind,
-                min: heat.min,
-                max: heat.max,
-                count: heat.values.size,
-              }
-        );
+        heatmapStatsCbRef.current?.(heat.loadedKind === "none" ? null : {
+          kind: heat.loadedKind, mode: heat.mode, min: heat.min, max: heat.max, count: heat.count,
+        });
       };
 
-      /**
-       * 取得済みの区画ポリゴンとヒートマップ値から、色ビンごとのPath2Dを構築する。
-       * 区画データはビューポートのbboxで入れ替わるため、区画取得のたびに呼び直す。
-       */
-      const rebuildHeatmapPaths = () => {
-        if (heat.loadedKind === "none" || heat.values.size === 0) {
-          heat.binPaths = null;
-          return;
+      /** 選択LODだけを色付けし、パン・ズーム時は画像を拡縮する。 */
+      const loadHeatmapLevel = async (lod: number) => {
+        if (!heat.grid || heat.loadedKind === "none" || heat.images.has(lod) || heat.loadingLevels.has(lod)) return;
+        const generation = heat.generation;
+        const kind = heat.loadedKind;
+        const level = heat.grid.levels[lod];
+        heat.loadingLevels.add(lod);
+        try {
+          const response = await fetch(buildApiUrl(apiBaseUrl, `/api/v1/city/heatmaps/${kind}/${lod}`), { signal: abort.signal });
+          if (!response.ok) throw new Error(`heatmap: HTTP ${response.status}`);
+          const buffer = await response.arrayBuffer();
+          if (disposed || heat.generation !== generation) return;
+          if (buffer.byteLength !== level.rows * level.cols * 2) throw new Error("heatmap grid size mismatch");
+          const image = document.createElement("canvas");
+          image.width = level.cols;
+          image.height = level.rows;
+          const imageContext = image.getContext("2d")!;
+          const pixels = imageContext.createImageData(level.cols, level.rows);
+          pixels.data.set(heatmapPixels(new Uint16Array(buffer), kind));
+          imageContext.putImageData(pixels, 0, 0);
+          heat.images.set(lod, image);
+        } catch (err) {
+          if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load heatmap LOD:", err);
+        } finally {
+          if (heat.generation === generation) heat.loadingLevels.delete(lod);
         }
-        const bins: Path2D[] = Array.from({ length: HEATMAP_BIN_COUNT }, () => new Path2D());
-        let hasAny = false;
-        for (const parcel of vec.parcels) {
-          const poly = parcel.polygon;
-          if (!poly || poly.length < 3 || parcel.parcel_id === undefined) continue;
-          const value = heat.values.get(parcel.parcel_id);
-          if (value === undefined) continue;
-          const bin = Math.min(
-            HEATMAP_BIN_COUNT - 1,
-            Math.max(0, Math.floor(value * HEATMAP_BIN_COUNT))
-          );
-          const path = bins[bin];
-          path.moveTo(poly[0][0], poly[0][1]);
-          for (let i = 1; i < poly.length; i++) path.lineTo(poly[i][0], poly[i][1]);
-          path.closePath();
-          hasAny = true;
-        }
-        heat.binPaths = hasAny ? bins : null;
+        if (!disposed && heat.generation === generation && heat.images.has(lod)) draw();
       };
 
       /**
@@ -2014,52 +1972,53 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         vec.zoneFillBands = bands.length ? bands : null;
       };
 
-      /**
-       * 指定種別のヒートマップを取得する。
-       * 値は都市全体の区画分がまとめて返るため、ビューポートに関係なく種別ごとに
-       * 1回だけ取得すればよい(ベクターデータのようなbbox再取得は不要)。
-       * 応答が返った時点で別の種別へ切り替わっていた場合は結果を捨てる。
-       */
+      /** 種別・方式・再読み込みの世代が変わった後の古い応答は適用しない。 */
       const loadHeatmap = async (kind: CityMapHeatmapKind) => {
-        heat.requestedKind = kind;
-        if (kind === "none") {
-          heat.loadedKind = "none";
-          heat.values.clear();
-          heat.binPaths = null;
-          notifyHeatmapStats();
-          return;
-        }
-        if (heat.loadedKind === kind) return;
+        const mode = effectiveHeatmapMode(kind, heatmapModeRef.current);
+        const key = `${kind}:${mode}`;
+        if (heat.requestKey === key) return;
+        heat.requestKey = key;
+        const generation = ++heat.generation;
+        heat.loadedKind = "none";
+        heat.mode = mode;
+        heat.grid = null;
+        heat.images.clear();
+        heat.loadingLevels.clear();
+        heat.pathValues.clear();
+        heat.buildingValues.clear();
+        rebuildPathClassification();
+        notifyHeatmapStats();
+        draw();
+        if (kind === "none") return;
         try {
-          const data = await fetchApi<ApiHeatmap>(
-            buildApiUrl(apiBaseUrl, HEATMAP_ENDPOINT[kind]),
-            { signal: abort.signal }
-          );
-          if (disposed || heat.requestedKind !== kind) return;
-
-          const ids = data.parcel_ids ?? [];
-          const values = data.values ?? [];
-          heat.values.clear();
-          const count = Math.min(ids.length, values.length);
-          for (let i = 0; i < count; i++) {
-            heat.values.set(ids[i], values[i] / 65535);
+          if (mode === "sources") {
+            const data = await fetchApi<HeatmapSources>(buildApiUrl(apiBaseUrl, `/api/v1/city/environment-sources/${kind}`), { signal: abort.signal });
+            if (disposed || generation !== heat.generation) return;
+            data.path_ids.forEach((id, i) => heat.pathValues.set(id, data.path_values[i] / 65535));
+            data.building_ids.forEach((id, i) => heat.buildingValues.set(id, data.building_values[i] / 65535));
+            heat.min = data.min;
+            heat.max = data.max;
+            heat.count = data.path_ids.length + data.building_ids.length;
+          } else {
+            const data = await fetchApi<HeatmapGrid>(buildApiUrl(apiBaseUrl, `/api/v1/city/heatmaps/${kind}`), { signal: abort.signal });
+            if (disposed || generation !== heat.generation) return;
+            heat.grid = data.levels.length > 0 ? data : null;
+            heat.min = data.min ?? 0;
+            heat.max = data.max ?? 1;
+            heat.count = data.levels.length > 0 ? data.levels[0].rows * data.levels[0].cols : 0;
           }
-          heat.min = typeof data.min === "number" ? data.min : 0;
-          heat.max = typeof data.max === "number" ? data.max : 0;
           heat.loadedKind = kind;
           heat.binColors = buildHeatmapBinColors(kind);
-          rebuildHeatmapPaths();
+          rebuildPathClassification();
           notifyHeatmapStats();
           draw();
         } catch (err) {
+          if (heat.generation === generation) heat.requestKey = "";
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load heatmap:", err);
         }
       };
 
-      /** ヒートマップ種別の変更effectから呼ばれる。未取得なら取得する */
-      const ensureHeatmap = () => {
-        void loadHeatmap(heatmapRef.current);
-      };
+      const ensureHeatmap = () => { void loadHeatmap(heatmapRef.current); };
 
       /* ---- ベクターデータ(パス・土地区画・建物・地区) ---- */
 
@@ -2070,8 +2029,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const focus = roadFocusRef.current;
         if (L.trunkRoads || L.allRoads || L.railways || L.stations
           || (focus.focusPathIds?.length ?? 0) > 0 || (focus.previewPathIds?.length ?? 0) > 0) kinds.push("paths");
-        // ヒートマップは区画ポリゴンを塗り分けるため、区画レイヤーがOFFでも区画が要る
-        if (L.parcels || heatmapRef.current !== "none") kinds.push("parcels");
+        if (L.parcels) kinds.push("parcels");
         if (L.buildings) kinds.push("buildings");
         // 地区名は境界線の表示と独立して常時表示する。
         kinds.push("zones");
@@ -2133,6 +2091,18 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           && md?.agents?.[building.variant]?.model_type === MODEL_PARK;
         vec.buildingPath = buildPolygonPath(vec.buildings.filter((b) => !isPark(b)), true);
         vec.parkPath = buildPolygonPath(vec.buildings.filter(isPark), true);
+        const sourceBin = (value: number | undefined) => heat.mode === "sources" && value && value > 0
+          ? Math.min(HEATMAP_BIN_COUNT - 1, Math.floor(value * HEATMAP_BIN_COUNT)) : -1;
+        const buildingBins = new Map<number, ApiPolygonItem[]>();
+        for (const building of vec.buildings) {
+          const bin = sourceBin(heat.buildingValues.get(building.agent_id ?? 0));
+          if (bin < 0) continue;
+          const items = buildingBins.get(bin) ?? [];
+          items.push(building);
+          buildingBins.set(bin, items);
+        }
+        vec.buildingSourceBands = [...buildingBins].map(([bin, items]) => ({ path: buildPolygonPath(items, true), color: heat.binColors[bin] }));
+        const railBins = new Map<number, Path2D>();
         const bands = new Map<string, RoadBand>();
         const roadTypes = [PATH_STREET, PATH_MOTORWAY, PATH_WALKWAY];
         const widthOf = (p: ApiPathItem) => md?.paths?.[p.path_variant]?.width ?? FALLBACK_ROAD_WIDTH[p.path_type] ?? 8;
@@ -2183,8 +2153,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           const append = p.curved
             ? (target: Pick<Path2D, "moveTo" | "lineTo" | "bezierCurveTo">, ap: [number, number][]) => appendSmoothPolyline(target, ap, controls)
             : appendPolyline;
+          const bin = sourceBin(heat.pathValues.get(p.path_id));
           if (p.path_type === PATH_TRACK) {
             append(rail, pts);
+            if (bin >= 0) {
+              const sourcePath = railBins.get(bin) ?? new Path2D();
+              append(sourcePath, pts);
+              railBins.set(bin, sourcePath);
+            }
             hasRail = true;
           } else if (
             p.path_type === PATH_STREET ||
@@ -2196,10 +2172,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             const trunk = p.path_type === PATH_MOTORWAY || hasRoad(p.road_id);
             const kind: RoadBandKind = p.path_type === PATH_MOTORWAY ? "motorway" : "street";
             const width = master?.width ?? FALLBACK_ROAD_WIDTH[p.path_type] ?? 8;
-            const key = `${kind}:${trunk ? 1 : 0}:${width}`;
+            const key = `${kind}:${trunk ? 1 : 0}:${width}:${bin}`;
             let band = bands.get(key);
             if (!band) {
-              band = { kind, trunk, width, path: new Path2D(), surface: new Path2D() };
+              band = { kind, trunk, width, path: new Path2D(), surface: new Path2D(), color: bin >= 0 ? heat.binColors[bin] : undefined };
               bands.set(key, band);
             }
             append(band.path, pts);
@@ -2219,6 +2195,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const rank = (b: RoadBand) => (b.kind === "motorway" ? 2 : b.trunk ? 1 : 0);
         vec.roadBands = [...bands.values()].sort((a, b) => rank(a) - rank(b));
         vec.railPath = hasRail ? rail : null;
+        vec.railSourceBands = [...railBins].map(([bin, path]) => ({ path, color: heat.binColors[bin] }));
         // 駅(駅舎ごとにまとめたプラットフォーム群の凸包)。platform_width判定に
         // マスターデータが要るため、道路分類と同じタイミングで再構築する。
         vec.stationHullPath = buildStationHullPath(vec.paths, md);
@@ -2312,8 +2289,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
                 const data = await fetchApi<{ parcels: ApiPolygonItem[] }>(url, { signal: abort.signal });
                 vec.parcels = data.parcels ?? [];
                 vec.parcelPath = buildPolygonPath(vec.parcels, false);
-                // ヒートマップの塗りは区画ポリゴンそのものなので、区画の入れ替えに追従させる
-                rebuildHeatmapPaths();
+
               } else {
                 const data = await fetchApi<{ buildings: ApiPolygonItem[] }>(url, { signal: abort.signal });
                 vec.buildings = data.buildings ?? [];
@@ -2554,8 +2530,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         vec.fetchedKinds.clear();
         vec.fetchedBounds = null;
         // 取得済み種別をクリアしてヒートマップも取り直す(エポック実行で値が変わるため)
-        heat.loadedKind = "none";
-        heat.binPaths = null;
+        heat.requestKey = "";
+        heat.generation++;
         void (async () => {
           await Promise.all([loadTerrain(), loadCoastline(), loadBackgroundLand(), loadReclaimedLands()]);
           if (disposed) return;

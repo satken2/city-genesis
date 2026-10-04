@@ -5,6 +5,9 @@
     "follow": "Seguir con la cámara",
     "unfollow": "Dejar de seguir",
     "track": "Agregar a la lista de seguimiento",
+    "trackRandom": "Seguir a un ciudadano al azar",
+    "noUntrackedCitizens": "No hay ciudadanos sin seguimiento disponibles.",
+    "trackRandomError": "No se pudo seguir a un ciudadano.",
     "untrack": "Quitar de la lista de seguimiento",
     "home": "Vivienda",
     "mobility": "Desplazamiento",
@@ -35,7 +38,7 @@
       "missing": "Este ciudadano ya no vive en la ciudad.",
       "error": "No se pudo cargar."
     },
-    "empty": "No hay ciudadanos en seguimiento. Agrégalos con el botón de seguimiento del panel del ciudadano.",
+    "empty": "No hay ciudadanos en seguimiento.",
     "pickFailed": {
       "not_ready": "Ejecuta la simulación para hacer clic en autos y peatones y ver quiénes son.",
       "busy": "No se pueden mostrar ciudadanos mientras se ejecuta la simulación.",

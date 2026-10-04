@@ -33,7 +33,7 @@ UIからは `view:change_view {layer, mode, sub_mode, flags}` で届く([IPC連�
 | `VisualModeBuilding` | 300番台 | 人口・家賃・耐久度・フロア種別・所属地区色分け | `VisualBuildingObject` |
 | `VisualModeTerrain` | 400番台 | 地下表示(`TRANSPARENT`)・標高色分け | `VisualTerrainObject` / `UndergroundView` |
 
-環境スコアは区画レイヤーのモードである。バックエンドが公開するのは区画中心でサンプリング済みの区画単位スコアで([環境](../economics/19_環境.md))、面として塗るための都市全体のビットマップは公開されない。
+Unityの環境スコア表示は区画レイヤーのモードである。区画単位の評価スコアを使う([環境](../economics/19_環境.md))。2Dの都市マップでは別の表示用格子APIから[環境オーバーレイ](都市マップの検索と経路案内.md#環境オーバーレイと発生源)を描く。
 
 そのため地形ではなく区画の塗り分けで表現する。値は `ParcelSummary` に含まれないので、`ParcelManager` が `GET /api/v1/city/noise` 等から別途取得する。
 

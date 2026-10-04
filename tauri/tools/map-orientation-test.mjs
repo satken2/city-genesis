@@ -14,6 +14,11 @@ let clicked;
 const texts = [];
 const paints = [];
 let pathsResponse = { paths: [] };
+let buildingsResponse = { buildings: [] };
+const heatmapRequests = [];
+const images = [];
+const grid = { origin_x: -500, origin_z: -500, width_m: 1000, height_m: 1000, min: 0, max: 1,
+  levels: [{ rows: 200, cols: 200, spacing: 5 }, { rows: 50, cols: 50, spacing: 20 }, { rows: 12, cols: 12, spacing: 1000 / 12 }] };
 const handle = {};
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 function eventTarget() {
@@ -36,6 +41,8 @@ function context() {
     point: (x, z) => ({ x: matrix[0] * x + matrix[4], y: matrix[3] * z + matrix[5] }),
     fillText: (text, x, y) => texts.push({ text, x: matrix[0] * x + matrix[4], y: matrix[3] * y + matrix[5], upright: matrix[3] > 0 }),
     createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+    putImageData: function (image) { this.imageData = image; },
+    drawImage: function (image, x, z, width, height) { images.push({ image, x, z, width, height, south: this.point(x, z), north: this.point(x, z + height) }); },
     measureText: (text) => ({ width: text.length * 8 }),
     fill: function () { paints.push({ op: "fill", style: this.fillStyle, alpha: this.globalAlpha ?? 1 }); },
     stroke: function () { paints.push({ op: "stroke", style: this.strokeStyle, alpha: this.globalAlpha ?? 1 }); },
@@ -43,7 +50,7 @@ function context() {
 }
 function canvas() {
   const ctx = context();
-  return { ...eventTarget(), style: {}, getContext: () => ctx,
+  return { ...eventTarget(), style: {}, ctx, getContext: () => ctx,
     getBoundingClientRect: () => ({ left: 0, top: 0, right: 800, bottom: 600 }) };
 }
 function jsx(type, props) {
@@ -64,9 +71,14 @@ const imports = {
   "../../contexts/MasterDataContext": { useMasterData: () => null },
   "../../utils/api": {
     buildApiUrl: (_, path) => path,
-    fetchApi: async (url) => url.endsWith("settings")
+    fetchApi: async (url) => url.startsWith("/api/v1/city/")
+      ? (heatmapRequests.push(url), url.includes("environment-sources")
+        ? { path_ids: [1, 2], path_values: [0, 65535], building_ids: [10], building_values: [32768], min: 0, max: 100 }
+        : grid)
+      : url.endsWith("settings")
       ? { map_width: 100, map_height: 200, near_map_spacing: 100, cell_size: 100 }
       : url.startsWith("/api/v1/paths") ? pathsResponse
+      : url.startsWith("/api/v1/buildings") ? buildingsResponse
       : { type: "Polygon", coordinates: [] },
   },
   "../terrain/terrainData": { computePixelRGB: () => [0, 0, 0], decodeFloat16Array: () => new Float32Array(6), normalizeGroundCover: () => 1 },
@@ -85,11 +97,21 @@ function load(path) {
     window: windowMock, document: { createElement: canvas }, console, AbortController,
     ResizeObserver: class { observe() {} disconnect() {} },
     Path2D: class { rect() {} moveTo() {} lineTo() {} closePath() {} addPath() {} bezierCurveTo() {} },
-    fetch: async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(12) }),
+    fetch: async (url) => {
+      if (url.startsWith("/api/v1/city/heatmaps/")) {
+        heatmapRequests.push(url);
+        const level = grid.levels[Number(url.split("/").at(-1))];
+        const values = new Uint16Array(level.rows * level.cols);
+        values[values.length - 1] = 65535;
+        return { ok: true, arrayBuffer: async () => values.buffer };
+      }
+      return { ok: true, arrayBuffer: async () => new ArrayBuffer(12) };
+    },
   });
   return exports;
 }
 imports["./roadSurface"] = load("../src/components/map/roadSurface.ts");
+imports["./mapHeatmap"] = load("../src/components/map/mapHeatmap.ts");
 imports["../terrain/terrainRelief"] = load("../src/components/terrain/terrainRelief.ts");
 imports["./mapSymbols"] = load("../src/components/map/mapSymbols.ts");
 imports["./mapLabels"] = load("../src/components/map/mapLabels.ts");
@@ -182,4 +204,35 @@ paints.length = 0;
 await renderMap({ focusPathIds: [2], focusColor: "#E4572E", focusDimOthers: true });
 assert.ok(paints.some((p) => p.op === "stroke" && p.style === "#E4572E" && p.alpha === 1), "the focused section is drawn in the road color");
 assert.ok(paints.some((p) => p.op === "fill" && p.style === "#aab7c1" && p.alpha < 1), "other roads are dimmed while focusing");
+
+// 遠景では低解像度だけを取得し、南から北の行順を画像にも適用する。
+heatmapRequests.length = 0;
+images.length = 0;
+await renderMap({ heatmap: "noise", initialBounds: { x1: -10000, z1: -10000, x2: 10000, z2: 10000 } });
+assert.ok(heatmapRequests.includes("/api/v1/city/heatmaps/noise/1"));
+assert.ok(!heatmapRequests.includes("/api/v1/city/heatmaps/noise/0"), "far view does not fetch the detailed image");
+const overlay = images.find((image) => image.width === 1000);
+assert.ok(overlay && overlay.north.y < overlay.south.y, "overlay rows run from south to north");
+assert.equal(overlay.image.ctx.imageData.data[3], 0);
+assert.ok(overlay.image.ctx.imageData.data.at(-1) > 0);
+
+buildingsResponse = { buildings: [{ agent_id: 10, variant: 20, polygon: [[-2, -2], [2, -2], [2, 2], [-2, 2]], center_point: [0, 0] }] };
+heatmapRequests.length = 0;
+paints.length = 0;
+let stats;
+await renderMap({ heatmap: "noise", heatmapMode: "sources", onHeatmapStats: (value) => { stats = value; } }, { allRoads: true, buildings: true });
+assert.ok(heatmapRequests.includes("/api/v1/city/environment-sources/noise"));
+assert.ok(!heatmapRequests.some((url) => url.includes("/heatmaps/")), "sources do not request a raster");
+assert.ok(paints.some((paint) => paint.op === "fill" && paint.style?.startsWith("rgb(")), "sources color road and building surfaces");
+assert.equal(stats.mode, "sources");
+assert.equal(stats.max, 100);
+
+for (const kind of ["crime", "sunshine"]) {
+  heatmapRequests.length = 0;
+  await renderMap({ heatmap: kind, heatmapMode: "sources", onHeatmapStats: (value) => { stats = value; } });
+  assert.ok(heatmapRequests.includes(`/api/v1/city/heatmaps/${kind}`));
+  assert.ok(!heatmapRequests.some((url) => url.includes("environment-sources")));
+  assert.equal(stats.mode, "overlay");
+}
+console.log("PASS: overlay orientation and alpha, far LOD fetching, source surface colors, sunshine/crime fallback");
 console.log("PASS: north-up, upright labels, click coordinates, path editor coordinates, pan, cursor zoom, fitBounds, animated overlay (DPR=2), trunk roads = motorways + road members, road focus band");

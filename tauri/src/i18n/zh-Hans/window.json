@@ -68,6 +68,7 @@
       "grid": "网格"
     },
     "heatmap": {
+      "sources": "排放源",
       "title": "热力图",
       "none": "无",
       "noise": "噪音",

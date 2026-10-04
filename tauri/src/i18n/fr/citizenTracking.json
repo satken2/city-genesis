@@ -5,6 +5,9 @@
     "follow": "Suivre avec la caméra",
     "unfollow": "Arrêter de suivre",
     "track": "Ajouter à la liste de suivi",
+    "trackRandom": "Suivre un citoyen au hasard",
+    "noUntrackedCitizens": "Aucun citoyen non suivi n'est disponible.",
+    "trackRandomError": "Impossible de suivre un citoyen.",
     "untrack": "Retirer de la liste de suivi",
     "home": "Logement",
     "mobility": "Déplacements",
@@ -35,7 +38,7 @@
       "missing": "Ce citoyen n'habite plus dans la ville.",
       "error": "Chargement impossible."
     },
-    "empty": "Aucun citoyen suivi. Ajoutez-en avec le bouton de suivi du panneau d'un citoyen.",
+    "empty": "Aucun citoyen suivi.",
     "pickFailed": {
       "not_ready": "Exécutez la simulation pour cliquer sur les voitures et les piétons et voir qui ils sont.",
       "busy": "Impossible d'afficher les citoyens pendant la simulation.",

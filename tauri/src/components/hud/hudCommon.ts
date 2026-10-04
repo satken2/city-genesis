@@ -18,6 +18,7 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
+import citizenTrackingIcon from "../../assets/images/menu/citizen-tracking.svg";
 
 /** メニューアイコン画像のURLを解決する */
 export function iconUrl(filename: string): string {
@@ -75,23 +76,15 @@ export const MENU_ICONS: HudIconDef[] = [
 ];
 
 /**
- * コックピット左側に2列のグリッドで置く常用ツール。
- * 表示切替・マップ・ブルドーザという、
- * 他のメニューを開いている最中でも押したくなる操作をまとめている。
+ * コックピット左側の3列グリッドに行順で置く常用ツール。画像の参照先は解決済みURL。
+ * 末尾にCockpit側のドライブボタンを続け、右下は空ける。
  */
 export const TOOL_ICONS: HudIconDef[] = [
-  { id: "visibility", src: "visibility.png", tooltipKey: "taskbar.menuView", padding: "4px", windowType: "display_options" },
-  { id: "map", src: "map.png", tooltipKey: "taskbar.menuMap", padding: "4px", windowType: "city_map" },
-  { id: "bulldozer", src: "bulldozer.png", tooltipKey: "taskbar.bulldozerOff", padding: "3px" },
+  { id: "visibility", src: iconUrl("visibility.png"), tooltipKey: "taskbar.menuView", padding: "4px", windowType: "display_options" },
+  { id: "map", src: iconUrl("map.png"), tooltipKey: "taskbar.menuMap", padding: "4px", windowType: "city_map" },
+  { id: "citizen_tracking", src: citizenTrackingIcon, tooltipKey: "taskbar.menuCitizenTracking", padding: "3px", windowType: "citizen_tracking" },
+  { id: "bulldozer", src: iconUrl("bulldozer.png"), tooltipKey: "taskbar.bulldozerOff", padding: "3px" },
 ];
-
-/**
- * コックピットの常用ツールのさらに左に置く追跡リスト(市民パネルの「追跡」で加えた市民の一覧)。
- * 専用アイコンが未用意のため検索の画像を仮当てしている。
- */
-export const CITIZEN_TRACKING_ICON: HudIconDef = {
-  id: "citizen_tracking", src: "search.png", tooltipKey: "taskbar.menuCitizenTracking", padding: "4px", windowType: "citizen_tracking",
-};
 
 /**
  * システムトレイ(画面右下)に置くアイコン。

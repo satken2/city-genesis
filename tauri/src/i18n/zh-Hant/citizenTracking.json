@@ -5,6 +5,9 @@
     "follow": "用鏡頭跟隨",
     "unfollow": "停止跟隨",
     "track": "加入追蹤清單",
+    "trackRandom": "隨機追蹤一位市民",
+    "noUntrackedCitizens": "沒有可追蹤的未追蹤市民。",
+    "trackRandomError": "無法追蹤市民。",
     "untrack": "從追蹤清單移除",
     "home": "住所",
     "mobility": "出行方式",
@@ -35,7 +38,7 @@
       "missing": "該市民已不在城市中。",
       "error": "無法取得。"
     },
-    "empty": "沒有正在追蹤的市民。可在市民面板中用追蹤按鈕加入。",
+    "empty": "沒有正在追蹤的市民。",
     "pickFailed": {
       "not_ready": "執行模擬後，即可點擊車輛和行人查看市民。",
       "busy": "模擬執行中無法顯示市民。",

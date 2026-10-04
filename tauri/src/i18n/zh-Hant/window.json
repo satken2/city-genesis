@@ -68,6 +68,7 @@
       "grid": "格線"
     },
     "heatmap": {
+      "sources": "排放源",
       "title": "熱力圖",
       "none": "無",
       "noise": "噪音",

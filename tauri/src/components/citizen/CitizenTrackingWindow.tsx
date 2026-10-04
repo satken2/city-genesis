@@ -1,8 +1,8 @@
 /**
  * 追跡リストウィンドウ
  *
- * 市民パネルの「追跡」で加えた市民の一覧(GET /api/v1/citizens/tracked。追加した順で、セーブに残る)。
- * 入口はコックピットの左端のアイコン。各行から市民パネルを開き、カメラで追いかけ、一覧から外せる。
+ * 市民パネルの「追跡」または右上のランダム追跡で加えた市民の一覧(追加した順で、セーブに残る)。
+ * 入口はコックピットの追跡リストアイコン。各行から市民パネルを開き、カメラで追いかけ、一覧から外せる。
  * 亡くなった市民などはコアが一覧に出さない。
  *
  * 他のウィンドウでの追加・解除(`tracking:changed`)と、エポックの実行(年齢・勤務先が変わる)に追従して取り直す。
@@ -18,6 +18,7 @@ import { sendCitizenFollow, sendCitizenUnfollow, sendFocusGraphic } from "../../
 import {
   TRACKED_CITIZENS_CHANGED_EVENT,
   fetchTrackedCitizens,
+  trackRandomCitizen,
   untrackCitizen,
   useFollowedCitizen,
   type TrackedCitizen,
@@ -37,6 +38,8 @@ export function CitizenTrackingWindow({ apiBaseUrl }: CitizenTrackingWindowProps
   const { t } = useTranslation();
   const [citizens, setCitizens] = useState<TrackedCitizen[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [addMessage, setAddMessage] = useState<string | null>(null);
   const followed = useFollowedCitizen();
 
   const reload = useCallback(async (signal?: AbortSignal) => {
@@ -94,60 +97,97 @@ export function CitizenTrackingWindow({ apiBaseUrl }: CitizenTrackingWindowProps
     }
   }
 
+  async function addRandom() {
+    setAdding(true);
+    setAddMessage(null);
+    try {
+      const result = await trackRandomCitizen(apiBaseUrl);
+      setCitizens(result.citizens);
+      setLoadFailed(false);
+      if (result.citizen_id === null) {
+        setAddMessage("citizenTracking.noUntrackedCitizens");
+      } else {
+        await emit(TRACKED_CITIZENS_CHANGED_EVENT, { citizen_id: result.citizen_id });
+      }
+    } catch (err) {
+      console.error("failed to track random citizen", err);
+      setAddMessage("citizenTracking.trackRandomError");
+    } finally {
+      setAdding(false);
+    }
+  }
+
   function openAgent(agentId: number) {
     void invoke("open_registered_window", { windowType: "agent_detail", entityId: String(agentId) });
   }
 
-  if (loadFailed) return <p className="agent-detail-muted">{t("common.fetchError")}</p>;
-  if (!citizens) return <p className="agent-detail-muted">{t("common.loading")}</p>;
-  if (citizens.length === 0) return <p className="agent-detail-muted">{t("citizenTracking.empty")}</p>;
-
   return (
-    <ul className="citizen-tracking-list">
-      {citizens.map((citizen) => {
-        const workplaceId = citizen.employer_agent_id ?? citizen.school_agent_id;
-        const workplaceName = citizen.employer_agent_name ?? citizen.school_agent_name;
-        const following = followed === citizen.id;
-        return (
-          <li key={citizen.id} className={`citizen-tracking-row${following ? " citizen-tracking-row--following" : ""}`}>
-            <div className="citizen-tracking-main">
-              <CitizenLink citizenId={citizen.id} citizenName={citizen.name} />
-              <span className="citizen-tracking-meta">
-                {t("citizen.ageValue", { age: citizen.age })}
-                {citizen.zone_name ? ` · ${citizen.zone_name}` : ""}
-              </span>
-              <span className="citizen-tracking-meta">
-                {workplaceId && workplaceName ? (
-                  <button className="entity-link" type="button" onClick={() => openAgent(workplaceId)}>
-                    {workplaceName}
+    <div>
+      <div className="citizen-tracking-toolbar">
+        <button
+          type="button"
+          data-guide="track-random-citizen"
+          disabled={adding || !apiBaseUrl}
+          onClick={() => void addRandom()}
+        >
+          {t("citizenTracking.trackRandom")}
+        </button>
+      </div>
+      {addMessage && <p className="agent-detail-muted" role="status">{t(addMessage)}</p>}
+      {loadFailed ? (
+        <p className="agent-detail-muted">{t("common.fetchError")}</p>
+      ) : !citizens ? (
+        <p className="agent-detail-muted">{t("common.loading")}</p>
+      ) : citizens.length === 0 ? (
+        <p className="agent-detail-muted">{t("citizenTracking.empty")}</p>
+      ) : (
+        <ul className="citizen-tracking-list">
+          {citizens.map((citizen) => {
+            const workplaceId = citizen.employer_agent_id ?? citizen.school_agent_id;
+            const workplaceName = citizen.employer_agent_name ?? citizen.school_agent_name;
+            const following = followed === citizen.id;
+            return (
+              <li key={citizen.id} className={`citizen-tracking-row${following ? " citizen-tracking-row--following" : ""}`}>
+                <div className="citizen-tracking-main">
+                  <CitizenLink citizenId={citizen.id} citizenName={citizen.name} />
+                  <span className="citizen-tracking-meta">
+                    {t("citizen.ageValue", { age: citizen.age })}
+                    {citizen.zone_name ? ` · ${citizen.zone_name}` : ""}
+                  </span>
+                  <span className="citizen-tracking-meta">
+                    {workplaceId && workplaceName ? (
+                      <button className="entity-link" type="button" onClick={() => openAgent(workplaceId)}>
+                        {workplaceName}
+                      </button>
+                    ) : (
+                      t("citizen.unemployed")
+                    )}
+                  </span>
+                </div>
+                <div className="operation-panel">
+                  <button
+                    className={`operation-btn${following ? " operation-btn--active" : ""}`}
+                    type="button"
+                    title={t(following ? "citizenTracking.unfollow" : "citizenTracking.follow")}
+                    aria-pressed={following}
+                    onClick={() => void toggleFollow(citizen.id)}
+                  >
+                    <CameraIcon />
                   </button>
-                ) : (
-                  t("citizen.unemployed")
-                )}
-              </span>
-            </div>
-            <div className="operation-panel">
-              <button
-                className={`operation-btn${following ? " operation-btn--active" : ""}`}
-                type="button"
-                title={t(following ? "citizenTracking.unfollow" : "citizenTracking.follow")}
-                aria-pressed={following}
-                onClick={() => void toggleFollow(citizen.id)}
-              >
-                <CameraIcon />
-              </button>
-              <button
-                className="operation-btn"
-                type="button"
-                title={t("citizenTracking.untrack")}
-                onClick={() => void remove(citizen.id)}
-              >
-                <RemoveIcon />
-              </button>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+                  <button
+                    className="operation-btn"
+                    type="button"
+                    title={t("citizenTracking.untrack")}
+                    onClick={() => void remove(citizen.id)}
+                  >
+                    <RemoveIcon />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }

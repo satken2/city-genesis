@@ -5,6 +5,9 @@
     "follow": "用镜头跟随",
     "unfollow": "停止跟随",
     "track": "加入追踪列表",
+    "trackRandom": "随机追踪一位市民",
+    "noUntrackedCitizens": "没有可追踪的未追踪市民。",
+    "trackRandomError": "无法追踪市民。",
     "untrack": "从追踪列表移除",
     "home": "住所",
     "mobility": "出行方式",
@@ -35,7 +38,7 @@
       "missing": "该市民已不在城市中。",
       "error": "无法获取。"
     },
-    "empty": "没有正在追踪的市民。可在市民面板中用追踪按钮加入。",
+    "empty": "没有正在追踪的市民。",
     "pickFailed": {
       "not_ready": "运行模拟后，即可点击车辆和行人查看市民。",
       "busy": "模拟运行中无法显示市民。",

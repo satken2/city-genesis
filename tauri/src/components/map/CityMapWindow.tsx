@@ -20,6 +20,7 @@ import {
   getHeatmapRampStops,
   type CityMapCanvasHandle,
   type CityMapHeatmapKind,
+  type CityMapHeatmapMode,
   type CityMapHeatmapStats,
   type CityMapLayerVisibility,
   type CityMapViewState,
@@ -94,6 +95,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   const [layers, setLayers] = useState<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS });
   const [heatmap, setHeatmap] = useState<CityMapHeatmapKind>("none");
+  const [heatmapMode, setHeatmapMode] = useState<CityMapHeatmapMode>("overlay");
   const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);
   const [camera, setCamera] = useState<CameraMarker | null>(null);
 
@@ -231,6 +233,20 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               <MapIcon name={kind} />
             </button>
           ))}
+          <label className="city-map-window__source-toggle">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={heatmapMode === "sources"}
+              aria-label={t("cityMap.heatmap.sources")}
+              title={t("cityMap.heatmap.sources")}
+              className="city-map-source-switch"
+              onClick={() => setHeatmapMode((mode) => mode === "overlay" ? "sources" : "overlay")}
+            >
+              <span />
+            </button>
+            <span>{t("cityMap.heatmap.sources")}</span>
+          </label>
         </div>
         <div className="city-map-window__actions">
           <button
@@ -261,6 +277,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           apiBaseUrl={apiBaseUrl}
           layers={layers}
           heatmap={heatmap}
+          heatmapMode={heatmapMode}
           interactive
           onCursorWorldPos={handleCursor}
           onZoomChange={handleZoom}
@@ -272,8 +289,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           focusPathIds={navigation.roadFocus?.pathIds ?? null}
           focusColor={navigation.roadFocus?.color ?? null}
         />
-        {/* ヒートマップの凡例。塗り色はエポックごとのmin〜maxを両端まで
-            引き伸ばした相対値なので、実値レンジを併記して絶対水準を伝える */}
+        {/* 発生源は都市全体の強度レンジ、オーバーレイは固定の悪さスコアを示す。 */}
         {heatmapStats && (
           <div className="city-map-window__legend">
             {heatmapStats.count === 0 ? (
@@ -284,6 +300,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               <>
                 <span className="city-map-window__legend-title">
                   {t(`cityMap.heatmap.${heatmapStats.kind}`)}
+                  {heatmapStats.mode === "sources" && ` · ${t("cityMap.heatmap.sources")}`}
                 </span>
                 <span className="city-map-window__legend-value">
                   {heatmapStats.min.toFixed(2)}
@@ -292,7 +309,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                   className="city-map-window__legend-bar"
                   style={{
                     background: `linear-gradient(to right, ${getHeatmapRampStops(
-                      heatmapStats.kind
+                      heatmapStats.kind, heatmapStats.mode
                     ).join(", ")})`,
                   }}
                 />

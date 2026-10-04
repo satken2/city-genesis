@@ -68,6 +68,7 @@
       "grid": "Cuadrícula"
     },
     "heatmap": {
+      "sources": "Fuentes",
       "title": "Mapa de calor",
       "none": "Ninguno",
       "noise": "Ruido",

@@ -1,3 +1,9 @@
+.citizen-tracking-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.67rem;
+}
+
 /* 追跡リスト。1行に名前・年齢と地区・勤務先(学校)を縦に並べ、右端にカメラと解除のボタンを置く。 */
 .citizen-tracking-list {
   list-style: none;

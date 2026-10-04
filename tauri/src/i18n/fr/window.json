@@ -68,6 +68,7 @@
       "grid": "Grille"
     },
     "heatmap": {
+      "sources": "Sources",
       "title": "Carte thermique",
       "none": "Aucune",
       "noise": "Bruit",

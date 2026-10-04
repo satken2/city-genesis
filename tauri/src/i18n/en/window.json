@@ -68,6 +68,7 @@
       "grid": "Grid"
     },
     "heatmap": {
+      "sources": "Sources",
       "title": "Heatmap",
       "none": "Off",
       "noise": "Noise",

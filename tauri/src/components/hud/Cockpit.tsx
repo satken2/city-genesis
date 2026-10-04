@@ -2,12 +2,12 @@
  * コックピット(画面下部中央の常駐パネル)
  *
  * プレイ中に最も頻繁に見る情報と操作を1枚に集約する。
- *   [追跡リスト] [常用ツール] [公共サービス充足度] [都市名・日付 / 確定気候 / スコア・予算] [アラート] [エポック処理開始]
+ *   [常用ツール] [公共サービス充足度] [都市名・日付 / 確定気候 / スコア・予算] [アラート] [エポック処理開始]
  *
  * - 追跡リスト: 市民パネルの「追跡」で加えた市民の一覧を開く。一時停止中の3Dビューで車・歩行者を
  *   クリックしたときに市民を推定できなかった理由(`citizen:pick_failed`)は、常駐するこのウィンドウが通知で案内する。
  *
- * - 常用ツール: 表示切替・都市マップ・ブルドーザ。
+ * - 常用ツール: 上段に表示切替・都市マップ・追跡リスト、下段にブルドーザ・ドライブを置く。
  *   ブルドーザはウィンドウを開かずUnityの削除ステートに入る常駐モードで、
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
  *   解除し忘れによる誤削除を防ぐため、ON の間はパネル全体を工事現場風の
@@ -57,7 +57,7 @@ import {
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
 import { PublicServiceGauges } from "./PublicServiceGauges";
 import { ScoreMiniMeter } from "./ScoreMiniMeter";
-import { CITIZEN_TRACKING_ICON, TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
+import { TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
 import { setHudMode, useHudMode } from "./hudMode";
 import { useHudSession } from "./useHudSession";
 import { useWeather } from "./useWeather";
@@ -267,17 +267,6 @@ export function Cockpit() {
     <div
       className={`hud-panel cockpit ${mode === "bulldozer" ? "cockpit--bulldozer" : ""} ${epochExecuting ? "hud-disabled" : ""}`}
     >
-      <button
-        id={CITIZEN_TRACKING_ICON.id}
-        className="hud-icon-btn cockpit-tool cockpit-tracking"
-        type="button"
-        title={t(CITIZEN_TRACKING_ICON.tooltipKey)}
-        style={{ padding: CITIZEN_TRACKING_ICON.padding }}
-        onClick={() => void openRegisteredWindow(CITIZEN_TRACKING_ICON.windowType!)}
-      >
-        <img src={iconUrl(CITIZEN_TRACKING_ICON.src)} alt={t(CITIZEN_TRACKING_ICON.tooltipKey)} className="hud-icon-img" draggable={false} />
-      </button>
-
       <div className="cockpit-tools">
         {TOOL_ICONS.map((icon) => {
           const active = icon.id === "bulldozer" && mode === "bulldozer";
@@ -296,7 +285,7 @@ export function Cockpit() {
               style={{ padding: icon.padding }}
               onClick={() => void handleToolClick(icon)}
             >
-              <img src={iconUrl(icon.src)} alt={tooltip} className="hud-icon-img" draggable={false} />
+              <img src={icon.src} alt={tooltip} className="hud-icon-img" draggable={false} />
             </button>
           );
         })}

@@ -1,7 +1,7 @@
 /**
  * 市民の追跡(訪問先と経路・追跡中の一覧・追従の状態)の共通処理
  *
- * 行程と追跡中の一覧はコアが保存されない推定値を手書きのJSONで返すので(endpoints.yaml に載らない)、型はここで定義する。
+ * 行程と追跡リストの応答は手書きのJSONで返され、endpoints.yaml に載らないため、型はここで定義する。
  * 追従そのものはUnityが行い、開始・終了は `citizen:follow_state` で全ウィンドウに届く。
  */
 
@@ -79,6 +79,10 @@ export async function fetchTrackedCitizens(apiBaseUrl: string, signal?: AbortSig
 
 export async function trackCitizen(apiBaseUrl: string, citizenId: number): Promise<void> {
   await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/citizens/tracked/${citizenId}`), { method: "PUT" });
+}
+
+export async function trackRandomCitizen(apiBaseUrl: string): Promise<{ citizen_id: number | null; citizens: TrackedCitizen[] }> {
+  return fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/citizens/tracked/random"), { method: "POST" });
 }
 
 export async function untrackCitizen(apiBaseUrl: string, citizenId: number): Promise<void> {

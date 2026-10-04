@@ -58,6 +58,7 @@
     "resizable": true,
     "policy": "single_per_entity",
     "entity_type": "citizen",
+    "layout": "right_panel",
     "fetch": {
       "method": "GET",
       "path_template": "/api/v1/citizens/{id}"

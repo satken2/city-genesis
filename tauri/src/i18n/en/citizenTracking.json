@@ -5,6 +5,9 @@
     "follow": "Follow with camera",
     "unfollow": "Stop following",
     "track": "Add to tracking list",
+    "trackRandom": "Track a random citizen",
+    "noUntrackedCitizens": "There are no untracked citizens available.",
+    "trackRandomError": "Could not track a citizen.",
     "untrack": "Remove from tracking list",
     "home": "Residence",
     "mobility": "Getting around",
@@ -35,7 +38,7 @@
       "missing": "This citizen no longer lives in the city.",
       "error": "Could not load."
     },
-    "empty": "No citizens are being tracked. Add one with the track button in a citizen's panel.",
+    "empty": "No citizens are being tracked.",
     "pickFailed": {
       "not_ready": "Run the simulation to click cars and pedestrians and see who they are.",
       "busy": "Citizens can't be shown while the simulation is running.",
