@@ -106,7 +106,6 @@ function App() {
   const [context, setContext] = useState<WindowContext | null>(null);
   const [apiBaseUrl, setApiBaseUrl] = useState<string>("");
   const [backendConnected, setConnection] = useState(true);
-  const [openWindowCount, setOpenWindowCount] = useState<number>(0);
   const [queryState, setQueryState] = useState<QueryState>({ status: "idle" });
   const [actionState, setActionState] = useState<string>("");
   const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "topmenu" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
@@ -154,7 +153,6 @@ function App() {
       const status = await invoke<{ api_base_url: string; open_window_count: number; backend_connected: boolean }>("get_connection_status");
       if (!disposed) {
         setApiBaseUrl(status.api_base_url);
-        setOpenWindowCount(status.open_window_count);
         if (!receivedConnectionEvent) applyConnection(status.backend_connected);
       }
 
@@ -678,20 +676,10 @@ function App() {
         </main>
       ) : (
         <main className="host-shell">
-          <section className="host-panel">
-          <h1>Genesis UI Host</h1>
-          <p>Empty window</p>
-          <dl className="status-grid">
-            <div>
-              <dt>Core API</dt>
-              <dd>{apiBaseUrl || "loading..."}</dd>
-            </div>
-            <div>
-              <dt>Open windows</dt>
-              <dd>{openWindowCount}</dd>
-            </div>
-          </dl>
-        </section>
+          <section className="host-panel" role="status">
+            <h1>CITY GENESIS</h1>
+            <p>{t("common.loading")}</p>
+          </section>
         </main>
       )}
       </div>

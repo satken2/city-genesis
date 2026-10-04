@@ -160,6 +160,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     {
         if (r is SpriteRenderer) return true;
         if (r.GetComponent<TextMeshPro>() != null) return true;
+        if (r.GetComponent<OverlayMeshRenderer>() != null) return true;
         // 一方通行線路の進行方向矢印はオーバーレイ表示なので、ホバーハイライトや
         // 計画中の青塗りで色を上書きせず固有色を維持する（表示/非表示は本体側の制御に従う）。
         if (r.GetComponent<TrackDirectionArrows>() != null) return true;

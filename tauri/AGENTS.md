@@ -16,7 +16,7 @@ Unity に重ねて表示する Tauri・React・TypeScript のUI。React は各�
 
 ## 参照先
 
-- アプリ構成・多言語・共通スタイル: `docs/docs/programs/コンポーネント連携.md`。
+- アプリ構成: `docs/docs/programs/コンポーネント連携.md`。ウィンドウ・多言語・共通スタイル: `docs/docs/programs/UI共通基盤.md`。
 - IPC: `docs/docs/programs/IPC連携の整理.md`。素材: `docs/docs/programs/素材クレジット管理.md`。
 - 配下の規約: `tauri/src/components/AGENTS.md`・`tauri/src-tauri/AGENTS.md`・`tauri/src/tutorial/AGENTS.md`。
 - 開発は `npm run tauri dev`、配布ビルドは `npm run tauri build`。翻訳の整合性は `tools/check_i18n_parity.py` で確認する。

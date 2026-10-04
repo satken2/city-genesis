@@ -137,9 +137,39 @@ button:hover {
   height: 100%;
   display: grid;
   place-items: center;
-  padding: 24px;
-  background: #0d1320;
-  color: #dbe8f4;
+  padding: min(2rem, 4vw, 4vh);
+  overflow: hidden;
+  background: var(--flat-sunken);
+  color: var(--flat-text);
+}
+
+.host-panel {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: min(1rem, 3vh);
+  text-align: center;
+}
+
+.host-panel::before {
+  content: "";
+  width: 2.5rem;
+  height: 2px;
+  background: var(--flat-accent);
+}
+
+.host-panel h1 {
+  margin: 0;
+  font-size: clamp(0.65rem, 5vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+}
+
+.host-panel p {
+  margin: 0;
+  color: var(--flat-text-label);
+  font-size: clamp(0.65rem, 3vw, 1rem);
 }
 
 .titlebar {
@@ -338,16 +368,11 @@ button:hover {
   display: block;
 }
 
-.panel,
-.host-panel {
+.panel {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 10px;
-}
-
-.host-panel {
-  width: min(720px, 100%);
 }
 
 .panel-header {
@@ -357,30 +382,22 @@ button:hover {
   margin-bottom: 8px;
 }
 
-.panel-header h2,
-.host-panel h1 {
+.panel-header h2 {
   margin: 0;
   font-size: 1.19rem;
 }
 
-.status-grid,
 .meta-grid {
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 6px 10px;
 }
 
-.status-grid div {
-  display: contents;
-}
-
-.status-grid dt,
 .meta-label {
   color: #93a9c0;
   font-weight: 600;
 }
 
-.status-grid dd,
 .meta-value {
   margin: 0;
   word-break: break-all;

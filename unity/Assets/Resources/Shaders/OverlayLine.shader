@@ -34,6 +34,7 @@ Shader "Custom/OverlayLine"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_local _ OVERLAY_GPU_BILLBOARD
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
@@ -46,12 +47,19 @@ Shader "Custom/OverlayLine"
             {
                 float4 positionOS : POSITION;
                 float4 color : COLOR;
+                #if defined(OVERLAY_GPU_BILLBOARD)
+                    float3 otherEndOS : NORMAL;
+                    float4 billboard : TEXCOORD0;
+                #endif
             };
 
             struct Varyings
             {
                 float4 positionHCS : SV_POSITION;
                 float4 color : COLOR;
+                #if defined(OVERLAY_GPU_BILLBOARD)
+                    float3 shape : TEXCOORD0;
+                #endif
             };
 
             Varyings vert(Attributes input)
@@ -59,12 +67,34 @@ Shader "Custom/OverlayLine"
                 Varyings output;
                 output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
                 output.color = input.color;
+                #if defined(OVERLAY_GPU_BILLBOARD)
+                {
+                    output.shape = float3(input.billboard.xy, input.billboard.w);
+                    float2 offset = input.billboard.xy;
+                    if (input.billboard.w < .5)
+                    {
+                        float4 other = TransformObjectToHClip(input.otherEndOS);
+                        float2 delta = (other.xy / (max(abs(other.w), .0001) * (other.w < 0 ? -1 : 1))
+                            - output.positionHCS.xy / (max(abs(output.positionHCS.w), .0001) * (output.positionHCS.w < 0 ? -1 : 1))) * _ScreenParams.xy;
+                        offset = float2(-delta.y, delta.x) * rsqrt(max(dot(delta, delta), .0001)) * input.billboard.x;
+                    }
+                    output.positionHCS.xy += offset * input.billboard.z * 2 / _ScreenParams.xy * output.positionHCS.w;
+                }
+                #endif
                 return output;
             }
 
             half4 frag(Varyings input) : SV_Target
             {
-                return input.color * _Tint;
+                half4 color = input.color * _Tint;
+                #if defined(OVERLAY_GPU_BILLBOARD)
+                if (input.shape.z > .5)
+                {
+                    float radius = length(input.shape.xy);
+                    color.a *= saturate((1 - radius) / max(fwidth(radius), .001));
+                }
+                #endif
+                return color;
             }
             ENDHLSL
         }

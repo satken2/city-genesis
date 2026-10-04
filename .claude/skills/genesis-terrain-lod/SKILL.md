@@ -10,7 +10,7 @@ description: City Genesisの地形/LOD/セル分割まわり(heightmap、LODテ�
 ## 読むべきドキュメント(概念、公開)
 - `city-genesis/docs/docs/geometries/D_地形形状.md`(オリジナル地形とシナリオの地形の区別・シナリオの地形APIは §D.14)
 - `city-genesis/docs/docs/geometries/E_LOD処理.md`
-- `city-genesis/docs/docs/geometries/K_Unity差分ロード整理.md`
+- `city-genesis/docs/docs/geometries/H_バックエンドデータロード.md`
 - `city-genesis/docs/docs/geometries/L_地形データ作成マニュアル.md`(地形エディタとオリジナル地形の登録手順)
 
 ## 地形エディタの位置づけ
@@ -24,7 +24,7 @@ description: City Genesisの地形/LOD/セル分割まわり(heightmap、LODテ�
 
 ## 読むべきAGENTS.md
 - `city-genesis/unity/AGENTS.md` (ルートのデータロード全体像・座標系変換の要点)
-- `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` (地形の節: 知らないと事故る順序制約と規約。ティア表・海岸線・超遠景メッシュ・Z-fighting対策の仕様は D / E / K 文書。海岸線は埋立の完了で広がり `session:reload` のたびに取り直す。埋立地の岸壁・帯・天端と帯の中の接地 max(地形, 天端) は D 文書の §D.17)
+- `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` (地形の節: 知らないと事故る順序制約と規約。ティア表・海岸線・超遠景メッシュ・Z-fighting対策の仕様は D / E / H 文書。海岸線は埋立の完了で広がり `session:reload` のたびに取り直す。埋立地の岸壁・帯・天端と帯の中の接地 max(地形, 天端) は D 文書の §D.17)
 - `genesis-core/app/services/AGENTS.md` (`terrain_registry.py`)
 
 ## 編集対象になりやすいディレクトリ/ファイル

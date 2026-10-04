@@ -313,6 +313,7 @@ public class RoadPath : IPathMeshGenerator
         }
         // 線路のつなぎ目のS字などの変形。区間LODの遅延生成・頂点上限での分割にも同じ変形を引き継ぐ。
         PartWarp warp = PathDrawContext.Warp;
+        var partCreated = PathDrawContext.PartCreated;
 
         // プレハブのロード。描画LODが接写なら `_close` を優先し、バリアント→タイプの順で解決する
         // (PathDrawContext.ResolvePrefab)。接写パーツは無印と bbox・原点が一致する規約なので配置計算は共通。
@@ -350,6 +351,7 @@ public class RoadPath : IPathMeshGenerator
                     PathDrawContext.Begin(lod, from, to);
                     PathDrawContext.SetAdaptiveTileLength(adaptive);
                     PathDrawContext.Warp = warp;
+                    PathDrawContext.PartCreated = partCreated;
                     try
                     {
                         return CreateSplineMesh(group, spline, prefabName, width, centerOffsetX, offsetY,
@@ -629,6 +631,8 @@ public class RoadPath : IPathMeshGenerator
         if (normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal))
             parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
 
+        if (mf != null && mf.sharedMesh != null)
+            partCreated?.Invoke(go, spline, mf.sharedMesh, clipFrom, clipTo);
         return go;
     }
 

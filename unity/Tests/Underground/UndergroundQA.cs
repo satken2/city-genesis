@@ -79,7 +79,7 @@ public static class UndergroundQA
                 return null;
             };
             runtime = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
-            foreach (string name in new[] { "UndergroundGhost", "UndergroundGround", "UndergroundSoil", "UndergroundShore", "Forest" })
+            foreach (string name in new[] { "UndergroundGhost", "UndergroundGround", "UndergroundSoil", "UndergroundShore", "Forest", "OverlayLine" })
             {
                 var shader = Resources.Load<Shader>("Shaders/" + name);
                 string errors = shader == null ? "missing" : string.Join("; ", Array.ConvertAll(ShaderUtil.GetShaderMessages(shader), message => message.message));
@@ -240,7 +240,28 @@ public static class UndergroundQA
             var expected = (List<Vector3>)Call(pathManager,"CalculatePathPoints",road,true);
             Check(Vector3.Distance(proxy.GetComponent<MeshCollider>().bounds.center,
                 (expected[0]+expected[expected.Count-1])*.5f)<.2f,"world collider matches path coordinates");
-            var proxyRenderers = proxy.GetComponentsInChildren<MeshRenderer>();
+            var proxyRenderers = proxy.GetComponentsInChildren<MeshRenderer>().Where(r=>r.GetComponent(T("OverlayMeshRenderer"))==null).ToArray();
+            var markers = proxy.GetComponentsInChildren(T("OverlayMeshRenderer"));
+            Check(markers.Length==1,"depth markers share the generated ceiling part");
+            var markerMesh = markers[0].GetComponent<MeshFilter>().sharedMesh;
+            var markerMaterial = markers[0].GetComponent<Renderer>().sharedMaterial;
+            Check(markerMesh.vertexCount>0 && markerMesh.vertexCount%12==0 && markerMesh.triangles.Length==markerMesh.vertexCount/12*18,
+                "each depth anchor uses twelve vertices and six triangles");
+            Check(markerMaterial.IsKeywordEnabled("OVERLAY_GPU_BILLBOARD") && (int)markerMaterial.GetFloat("_ZTest")==4,"markers use depth-tested GPU billboards");
+            var markerVertices = markerMesh.vertices;
+            var ceiling = markers[0].transform.parent.GetComponent<MeshFilter>();
+            for (int i=0;i<markerVertices.Length/12;i++)
+            {
+                Vector3 top=markers[0].transform.TransformPoint(markerVertices[i*4]);
+                Vector3 ground=markers[0].transform.TransformPoint(markerVertices[i*4+2]);
+                float ceilingHeight=MeshHeightAt(ceiling,top);
+                Check(Mathf.Abs(top.y-ceilingHeight)<.15f,"anchor attaches to the rendered ceiling upper surface");
+                Check(Vector2.Distance(new Vector2(top.x,top.z),new Vector2(ground.x,ground.z))<.001f
+                    && Mathf.Abs(ground.y-(terrain.SampleHeight(ground)+terrain.transform.position.y))<.01f,
+                    "anchor reaches the actual terrain vertically: top="+top+" ground="+ground+" expected="+(terrain.SampleHeight(ground)+terrain.transform.position.y));
+            }
+            Check(((GameObject)proxies[2]).GetComponentsInChildren(T("OverlayMeshRenderer")).All(c=>c.GetComponent<Renderer>().sharedMaterial==markerMaterial),
+                "road and railway markers share a material");
             Check(proxyRenderers.Length>1,"underground road uses real body and sidewalk models");
             Check(((GameObject)proxies[2]).GetComponentsInChildren<MeshFilter>().Any(filter=>filter.gameObject.name.EndsWith("/track")),"underground rail uses the existing track model");
             Check(proxy.GetComponent<Collider>()!=null,"underground selection collider exists");
@@ -260,6 +281,7 @@ public static class UndergroundQA
             Call(proxyVisual,"SetHover",true);
             var blue=Resources.Load<Material>("HighlightMaterial");
             Check(blue!=null && proxyRenderers.All(renderer=>renderer.sharedMaterials.All(material=>material==blue)),"hover replaces underground models with existing blue material");
+            Check(markers[0].GetComponent<Renderer>().sharedMaterial==markerMaterial,"hover preserves depth marker colors and shared material");
             Call(proxyVisual,"SetHover",false);
             Check(proxyRenderers.SelectMany(renderer=>renderer.sharedMaterials).SequenceEqual(roadMaterials),"leaving hover restores original model materials");
 
@@ -314,11 +336,13 @@ public static class UndergroundQA
             UnityEngine.Object.DestroyImmediate(proxy.GetComponent<MeshCollider>());
             Drain((IEnumerator)Call(pathManager,"SetColliderAsync",proxy,proxy.GetComponent<MeshFilter>().sharedMesh));
             Check(proxyRenderers.All(renderer=>!renderer.enabled) && !proxy.GetComponent<Collider>().enabled,"individual hidden filter affects underground geometry and picking");
+            Check(markers.All(c=>!c.GetComponent<Renderer>().enabled),"individual hidden filter also hides depth markers");
             Static("ObjectVisibilityFilter","Clear");
             Call(modes,"SetMode",pathType,hidden);
             UnityEngine.Object.DestroyImmediate(proxy.GetComponent<MeshCollider>());
             Drain((IEnumerator)Call(pathManager,"SetColliderAsync",proxy,proxy.GetComponent<MeshFilter>().sharedMesh));
             Check(proxyRenderers.All(renderer=>!renderer.enabled) && !proxy.GetComponent<Collider>().enabled,"hidden road layer stays hidden after asynchronous collider creation");
+            Check(markers.All(c=>!c.GetComponent<Renderer>().enabled),"hidden road layer hides depth markers through the common renderer update");
             Call(modes,"SetMode",pathType,normal);
             Call(visual,"ApplyVisualMode",hidden); Check(!blocker.GetComponent<Renderer>().enabled,"hidden surface building stays hidden");
             Call(visual,"ApplyVisualMode",normal);
@@ -357,10 +381,16 @@ public static class UndergroundQA
             var farPath = (GameObject)Call(pathManager,"GetPathObject",1);
             Check(Field(farPath.GetComponent(T("DrawLodInfo")),"drawLod").ToString()=="Far"
                 && farPath.GetComponentsInChildren<MeshRenderer>().Length>0,"underground paths use normal far LOD generation");
+            Check(farPath.GetComponentsInChildren(T("OverlayMeshRenderer")).Length==0,"whole-path far LOD omits depth markers");
             Check(farPath.GetComponentsInChildren<MeshRenderer>().All(r=>r.sharedMaterials.All(m=>m.shader.name!="CityGenesis/UndergroundGhost")),"far tunnel sections remain opaque");
             Call(pathManager,"HideUnloadedPath",1,farPath,new List<int>());
             Check(!farPath.activeSelf,"normal cell retirement hides underground paths");
             proxy = Build(road);
+            CheckStaticOverlay(root);
+            var longPath=MakePath(10,221,C("Constants","PATH_STREET"),80,-15);
+            Set(longPath,"start_point",new List<object>{-160d,-15d,80d});
+            Set(longPath,"end_point",new List<object>{160d,-15d,80d});
+            CheckDepthMarkerLod(pathManager,Build(longPath),longPath,camera);
 
             var mixed = MakePath(5,221,C("Constants","PATH_STREET"),60,-14);
             Set(mixed,"end_point",new List<object>{70d,0d,60d});
@@ -443,11 +473,16 @@ public static class UndergroundQA
             Check(((Mesh)Field(underground,"shoreMesh")).vertexCount>0,"waterline outline exists");
             File.WriteAllText(root+"/Temp/UndergroundQA/materials.txt",string.Join("\n",proxies.Values.Cast<GameObject>().SelectMany(go=>go.GetComponentsInChildren<MeshRenderer>()).SelectMany(renderer=>renderer.sharedMaterials).Distinct().Select(material=>material.name+": "+material.shader.name+" base="+material.color+" errors="+string.Join("; ",ShaderUtil.GetShaderMessages(material.shader).Select(message=>message.message)))));
             File.WriteAllBytes(root+"/Temp/UndergroundQA/underground.png",(byte[])Static("CameraCaptureUtil","CapturePng",camera,1200,750));
-            foreach (string name in new[] { "UndergroundGhost", "UndergroundGround", "UndergroundSoil", "UndergroundShore", "Forest" })
+            foreach (string name in new[] { "UndergroundGhost", "UndergroundGround", "UndergroundSoil", "UndergroundShore", "Forest", "OverlayLine" })
                 Check(!ShaderUtil.ShaderHasError(Resources.Load<Shader>("Shaders/"+name)),"shader compile: "+name);
 
+            // 同期ハーネス内の再生成にも、次フレームにUnityが呼ぶ登録処理を適用する。
+            foreach(var current in proxies.Values.Cast<GameObject>())
+                Call(current.GetComponent(T("VisualModeObject")),"Start");
             Call(modes,"SetMode",terrainType,normal);
             Drain((IEnumerator)Call(modes,"NotifyObjectsBatched",pathType,normal));
+            Check(proxies.Values.Cast<GameObject>().SelectMany(go=>go.GetComponentsInChildren(T("OverlayMeshRenderer"))).All(c=>!c.GetComponent<Renderer>().enabled),
+                "normal view hides depth markers through the common visual notification");
             Check(!nodeGO.GetComponent<Renderer>().enabled,"tunnel junction hides with common visual notification before regeneration");
             FinishUpdates();
             Call(terrainVisual,"ApplyVisualMode",normal); Call(seaVisual,"ApplyVisualMode",normal); Call(visual,"ApplyVisualMode",normal);
@@ -466,6 +501,119 @@ public static class UndergroundQA
             EditorApplication.Exit(0);
         }
         catch(Exception error) { File.WriteAllText(report,"FAIL\n"+checks+" checks\n"+error); EditorApplication.Exit(1); }
+    }
+
+    private static float MeshHeightAt(MeshFilter filter, Vector3 point)
+    {
+        var vertices=filter.sharedMesh.vertices; var triangles=filter.sharedMesh.triangles;
+        float height=float.NegativeInfinity;
+        for(int i=0;i<triangles.Length;i+=3)
+        {
+            Vector3 a=filter.transform.TransformPoint(vertices[triangles[i]]), b=filter.transform.TransformPoint(vertices[triangles[i+1]]), c=filter.transform.TransformPoint(vertices[triangles[i+2]]);
+            float denominator=(b.z-c.z)*(a.x-c.x)+(c.x-b.x)*(a.z-c.z);
+            if(Mathf.Abs(denominator)<.000001f) continue;
+            float u=((b.z-c.z)*(point.x-c.x)+(c.x-b.x)*(point.z-c.z))/denominator;
+            float v=((c.z-a.z)*(point.x-c.x)+(a.x-c.x)*(point.z-c.z))/denominator;
+            if(u>=-.001f && v>=-.001f && u+v<=1.001f) height=Mathf.Max(height,u*a.y+v*b.y+(1-u-v)*c.y);
+        }
+        return height;
+    }
+
+    private static void CheckStaticOverlay(string root)
+    {
+        var overlay=(Component)Static("OverlayMeshRenderer","CreateStatic","StaticOverlayQA",true,null);
+        var camera=new GameObject("StaticOverlayCamera").AddComponent<Camera>();
+        var target=new RenderTexture(128,128,24);
+        var pixels=new Texture2D(128,128,TextureFormat.RGBA32,false);
+        var prior=RenderTexture.active;
+        try
+        {
+            overlay.gameObject.layer=31;
+            camera.cullingMask=1<<31; camera.targetTexture=target;
+            camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=Color.black;
+            camera.nearClipPlane=.01f; camera.farClipPlane=50; camera.orthographicSize=2;
+            Vector3 a=new Vector3(-.4f,-.6f,0), b=new Vector3(-.4f,.6f,0);
+            Call(overlay,"AddSolidLine",a,b,Color.white,1.5f);
+            Call(overlay,"AddCircle",a,3f,Color.white); Call(overlay,"AddCircle",b,3f,Color.white);
+            Call(overlay,"EndStaticFrame");
+            var mesh=overlay.GetComponent<MeshFilter>().sharedMesh;
+            var original=mesh.vertices;
+            foreach(bool orthographic in new[]{false,true})
+            {
+                camera.orthographic=orthographic;
+                camera.transform.position=orthographic ? new Vector3(2,1,-5) : new Vector3(0,0,-5);
+                camera.transform.LookAt(Vector3.zero);
+                camera.Render(); RenderTexture.active=target;
+                pixels.ReadPixels(new Rect(0,0,128,128),0,0); pixels.Apply();
+                foreach(Vector3 point in new[]{a,b,(a+b)*.5f})
+                {
+                    Vector3 screen=camera.WorldToViewportPoint(point)*128;
+                    bool white=false;
+                    for(int y=-1;y<=1;y++) for(int x=-1;x<=1;x++)
+                        white|=pixels.GetPixel(Mathf.RoundToInt(screen.x)+x,Mathf.RoundToInt(screen.y)+y).r>.4f;
+                    Check(white,"GPU overlay follows camera projection: "+orthographic+" "+point);
+                }
+                Check(mesh.vertices.SequenceEqual(original),"camera movement leaves static overlay CPU vertices unchanged");
+                File.WriteAllBytes(root+"/Temp/UndergroundQA/depth-markers-"+(orthographic ? "orthographic" : "perspective")+".png",pixels.EncodeToPNG());
+            }
+        }
+        finally
+        {
+            RenderTexture.active=prior; camera.targetTexture=null;
+            UnityEngine.Object.DestroyImmediate(overlay.gameObject); UnityEngine.Object.DestroyImmediate(camera.gameObject);
+            UnityEngine.Object.DestroyImmediate(target); UnityEngine.Object.DestroyImmediate(pixels);
+        }
+    }
+
+    private static void CheckDepthMarkerLod(Component manager, GameObject pathGO, object path, Camera camera)
+    {
+        Vector3 position=camera.transform.position;
+        var parts=pathGO.GetComponentsInChildren(T("SplinePartLod"),true);
+        void Finish(Component part)
+        {
+            Call(part,"OnDisable");
+            T("SplinePartLod").GetField("tickFrame",Flags).SetValue(null,-1);
+            var worker=(IEnumerator)Call(part,"Worker");
+            for(int i=0;i<100;i++)
+            {
+                worker.MoveNext();
+                if(worker.Current is WaitUntil) break;
+            }
+            Check((bool)part.GetType().GetProperty("IsInitialRenderReady").GetValue(part),"fixed-section LOD finishes through the existing worker");
+        }
+        try
+        {
+            foreach(var part in parts) Finish(part);
+            var markers=pathGO.GetComponentsInChildren(T("OverlayMeshRenderer"));
+            Check(markers.Length>1,"long tunnel markers belong to the existing fixed LOD sections");
+            var original=markers.Select(c=>c.GetComponent<MeshFilter>().sharedMesh.GetInstanceID()).OrderBy(id=>id).ToArray();
+            var anchors=markers.SelectMany(c=>{
+                var mesh=c.GetComponent<MeshFilter>().sharedMesh; var vertices=mesh.vertices;
+                return Enumerable.Range(0,mesh.vertexCount/12).Select(i=>c.transform.TransformPoint(vertices[i*4]));
+            }).OrderBy(p=>p.x).ToArray();
+            Check(anchors.Length==11 && anchors.Select(p=>Mathf.RoundToInt(p.x)).Distinct().Count()==11,"fixed-section boundaries neither duplicate nor omit regular anchors");
+            pathGO.SetActive(false);
+            Check(markers.All(c=>!c.gameObject.activeInHierarchy),"path retirement hides attached depth markers");
+            pathGO.SetActive(true);
+            camera.transform.position=new Vector3(10000,3000,10000);
+            foreach(var part in parts) Finish(part);
+            Check(pathGO.GetComponentsInChildren(T("OverlayMeshRenderer")).Length==0,"fixed-section far LOD parks depth markers with the ceiling");
+            camera.transform.position=position;
+            foreach(var part in parts) Finish(part);
+            Check(pathGO.GetComponentsInChildren(T("OverlayMeshRenderer")).Select(c=>c.GetComponent<MeshFilter>().sharedMesh.GetInstanceID()).OrderBy(id=>id).SequenceEqual(original),
+                "fixed-section cache restores the same marker meshes");
+            Set(path,"version",1);
+            Set(path,"start_point",new List<object>{-160d,-25d,80d}); Set(path,"end_point",new List<object>{160d,-25d,80d});
+            Call(manager,"CreateOrUpdatePath",path,false,false,Enum.Parse(T("DrawLod"),"Normal"),0d,1d);
+            var updated=(GameObject)Call(manager,"GetPathObject",Field(path,"path_id"));
+            Check(updated!=pathGO,"data version changes rebuild the path through the common cache key");
+            foreach(var part in updated.GetComponentsInChildren(T("SplinePartLod"),true)) Finish(part);
+            var next=updated.GetComponentsInChildren(T("OverlayMeshRenderer"));
+            Check(next.Length>0 && next.All(c=>c.transform.TransformPoint(c.GetComponent<MeshFilter>().sharedMesh.vertices[0]).y<-20),
+                "updated path geometry regenerates the marker attachment heights");
+            Check(T("PathDrawContext").GetProperty("PartCreated").GetValue(null)==null,"deferred part generation restores the common draw context");
+        }
+        finally { camera.transform.position=position; }
     }
 
     private static void CheckTunnelParts(IDictionary masters, IDictionary modelCache)

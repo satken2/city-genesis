@@ -19,9 +19,12 @@ public class OverlayMeshRenderer : MonoBehaviour
     private MeshRenderer meshRenderer;
     private Mesh mesh;
 
-    private List<Vector3> verts = new List<Vector3>(4096);
-    private List<Color> colors = new List<Color>(4096);
-    private List<int> indices = new List<int>(8192);
+    private List<Vector3> verts = new List<Vector3>();
+    private List<Color> colors = new List<Color>();
+    private List<int> indices = new List<int>();
+    private bool sharedBillboardMaterial;
+    private static readonly Material[] billboardMaterials = new Material[2];
+    private static int billboardUsers;
 
     private struct LineEntry
     {
@@ -85,13 +88,13 @@ public class OverlayMeshRenderer : MonoBehaviour
         public List<Color> vertexColors;
     }
 
-    private List<LineEntry> frameLines = new List<LineEntry>(512);
-    private List<DashedEntry> frameDashed = new List<DashedEntry>(128);
-    private List<WorldDashedEntry> frameWorldDashed = new List<WorldDashedEntry>(128);
-    private List<CircleEntry> frameCircles = new List<CircleEntry>(128);
-    private List<SquareEntry> frameSquares = new List<SquareEntry>(128);
-    private List<PolygonEntry> framePolygons = new List<PolygonEntry>(16);
-    private List<PreTriangulatedEntry> framePreTriangulated = new List<PreTriangulatedEntry>(32);
+    private List<LineEntry> frameLines = new List<LineEntry>();
+    private List<DashedEntry> frameDashed = new List<DashedEntry>();
+    private List<WorldDashedEntry> frameWorldDashed = new List<WorldDashedEntry>();
+    private List<CircleEntry> frameCircles = new List<CircleEntry>();
+    private List<SquareEntry> frameSquares = new List<SquareEntry>();
+    private List<PolygonEntry> framePolygons = new List<PolygonEntry>();
+    private List<PreTriangulatedEntry> framePreTriangulated = new List<PreTriangulatedEntry>();
 
     /// <summary>OverlayLine シェーダーの参照。Shader.Find は名前検索なので一度だけ引いて使い回す。</summary>
     private static Shader overlayLineShader;
@@ -107,12 +110,36 @@ public class OverlayMeshRenderer : MonoBehaviour
     /// </summary>
     public static OverlayMeshRenderer Create(string name, bool alwaysOnTop, Transform parent = null, bool persistent = false)
     {
+        var renderer = CreateObject(name, parent, persistent);
+        renderer.Initialize(CreateOverlayLineMaterial(alwaysOnTop));
+        return renderer;
+    }
+
+    /// <summary>
+    /// 固定座標の線・丸をGPUでカメラへ向ける一括描画。材質を共有し、カメラ移動中もCPUで頂点を更新しない。
+    /// AddSolidLine / AddCircle の後に EndStaticFrame で確定する。共有材質の設定は変更しないこと。
+    /// </summary>
+    public static OverlayMeshRenderer CreateStatic(string name, bool alwaysOnTop, Transform parent = null)
+    {
+        int index = alwaysOnTop ? 1 : 0;
+        if (billboardMaterials[index] == null)
+        {
+            billboardMaterials[index] = CreateOverlayLineMaterial(alwaysOnTop);
+            billboardMaterials[index].EnableKeyword("OVERLAY_GPU_BILLBOARD");
+        }
+        var renderer = CreateObject(name, parent, false);
+        renderer.sharedBillboardMaterial = true;
+        billboardUsers++;
+        renderer.Initialize(billboardMaterials[index]);
+        return renderer;
+    }
+
+    private static OverlayMeshRenderer CreateObject(string name, Transform parent, bool persistent)
+    {
         var go = new GameObject(name);
         if (parent != null) go.transform.SetParent(parent, true);
         if (persistent) DontDestroyOnLoad(go);
-        var renderer = go.AddComponent<OverlayMeshRenderer>();
-        renderer.Initialize(CreateOverlayLineMaterial(alwaysOnTop));
-        return renderer;
+        return go.AddComponent<OverlayMeshRenderer>();
     }
 
     /// <summary>OverlayLine シェーダーのマテリアルを新規生成する。深度テストの扱いは <see cref="Create"/> と同じ。</summary>
@@ -125,20 +152,19 @@ public class OverlayMeshRenderer : MonoBehaviour
     }
 
     /// <summary>
-    /// このレンダラー専用のマテリアル。各レンダラーは Initialize で渡された自分だけのマテリアルを持つので、
-    /// 複製せずそのまま返す(プロパティ変更は即座に描画へ反映される)。
+    /// 描画材質。Create は専有、CreateStatic は共有するため、後者の設定は書き換えないこと。
     /// </summary>
     public Material Material => meshRenderer != null ? meshRenderer.sharedMaterial : null;
 
     /// <summary>
     /// 指定のマテリアルで初期化する。MeshFilter/MeshRenderer を自動生成する。
-    /// マテリアルの所有権はこのレンダラーに移り、破棄時にメッシュと一緒に解放する。
+    /// 専用材質はメッシュと一緒に解放する。CreateStatic の共有材質は最後の利用者の破棄時に解放する。
     /// </summary>
     public void Initialize(Material material)
     {
         meshFilter = gameObject.AddComponent<MeshFilter>();
         meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = material;
+        meshRenderer.sharedMaterial = material;
         meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         meshRenderer.receiveShadows = false;
 
@@ -146,14 +172,29 @@ public class OverlayMeshRenderer : MonoBehaviour
         // 効果範囲フィルのような広域のセル敷き詰めでは頂点数が16bitインデックスの
         // 上限(65535)を超え得るため、32bitインデックスで頂点数の制限を外す。
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.MarkDynamic();
+        if (!sharedBillboardMaterial)
+        {
+            mesh.MarkDynamic();
+            verts.Capacity = 4096; colors.Capacity = 4096; indices.Capacity = 8192;
+            frameLines.Capacity = 512; frameDashed.Capacity = 128; frameWorldDashed.Capacity = 128;
+            frameCircles.Capacity = 128; frameSquares.Capacity = 128;
+            framePolygons.Capacity = 16; framePreTriangulated.Capacity = 32;
+        }
         meshFilter.mesh = mesh;
     }
 
     private void OnDestroy()
     {
         if (mesh != null) Destroy(mesh);
-        if (meshRenderer != null && meshRenderer.sharedMaterial != null) Destroy(meshRenderer.sharedMaterial);
+        if (sharedBillboardMaterial)
+        {
+            if (--billboardUsers == 0)
+                for (int i = 0; i < billboardMaterials.Length; i++)
+                {
+                    Destroy(billboardMaterials[i]); billboardMaterials[i] = null;
+                }
+        }
+        else if (meshRenderer != null && meshRenderer.sharedMaterial != null) Destroy(meshRenderer.sharedMaterial);
     }
 
     /// <summary>
@@ -305,6 +346,51 @@ public class OverlayMeshRenderer : MonoBehaviour
             mesh.SetColors(colors);
             mesh.SetTriangles(indices, 0);
         }
+    }
+
+    /// <summary>
+    /// 固定の実線と丸を各4頂点で確定する。NORMALには線の反対端、UVには方向・ピクセル寸法・形状を保存し、
+    /// 共通シェーダーで画面投影後に展開する。カメラの姿勢・透視／正射影でCPU側の再構築は不要。
+    /// </summary>
+    public void EndStaticFrame()
+    {
+        verts.Clear(); colors.Clear(); indices.Clear();
+        var ends = new List<Vector3>();
+        var parameters = new List<Vector4>();
+        foreach (var line in frameLines)
+        {
+            int start = verts.Count;
+            for (int i = 0; i < 4; i++)
+            {
+                verts.Add(i < 2 ? line.a : line.b);
+                ends.Add(i < 2 ? line.b : line.a);
+                colors.Add(line.color);
+                parameters.Add(new Vector4(i % 2 == 0 ? -1f : 1f, 0f, line.pixelThickness * .5f, 0f));
+            }
+            AddQuadIndices(start);
+        }
+        foreach (var circle in frameCircles)
+        {
+            int start = verts.Count;
+            for (int i = 0; i < 4; i++)
+            {
+                verts.Add(circle.pos); ends.Add(Vector3.zero); colors.Add(circle.color);
+                parameters.Add(new Vector4(i < 2 ? -1f : 1f, i == 0 || i == 3 ? -1f : 1f, circle.pixelRadius, 1f));
+            }
+            AddQuadIndices(start);
+        }
+        mesh.Clear();
+        mesh.SetVertices(verts); mesh.SetNormals(ends); mesh.SetColors(colors);
+        mesh.SetUVs(0, parameters); mesh.SetTriangles(indices, 0);
+        // GPUで広げる記号が視錐台の縁で欠けないよう、描画範囲だけに余白を持たせる。
+        Bounds bounds = mesh.bounds; bounds.Expand(16f); mesh.bounds = bounds;
+        BeginFrame();
+    }
+
+    private void AddQuadIndices(int start)
+    {
+        indices.Add(start); indices.Add(start + 1); indices.Add(start + 2);
+        indices.Add(start); indices.Add(start + 2); indices.Add(start + 3);
     }
 
     /// <summary>

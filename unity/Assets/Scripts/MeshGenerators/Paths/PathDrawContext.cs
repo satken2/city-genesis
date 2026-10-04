@@ -38,6 +38,12 @@ public static class PathDrawContext
     /// </summary>
     public static PartWarp Warp { get; set; }
 
+    /// <summary>
+    /// 確定した区間パーツに付随する描画物を生成する。遅延LOD・頂点予算による分割にも同じ処理を渡し、
+    /// 付随物の更新と寿命を元パーツへ揃える。引数は生成物・スプライン・原本メッシュ・クリップ範囲。
+    /// </summary>
+    public static System.Action<GameObject, SplineComputer, Mesh, double, double> PartCreated { get; set; }
+
     public static bool HasDetailRange => !SuppressDetailRange && (DetailFrom > 0.0001 || DetailTo < 0.9999);
 
     /// <summary>接写用パーツ名のサフィックス(例: Models/Paths/p411/body_close)。</summary>
@@ -62,6 +68,7 @@ public static class PathDrawContext
         SuppressDetailRange = false;
         AdaptiveTileLength = 0f;
         Warp = null;
+        PartCreated = null;
     }
 
     public static void End()
@@ -72,6 +79,7 @@ public static class PathDrawContext
         SuppressDetailRange = false;
         AdaptiveTileLength = 0f;
         Warp = null;
+        PartCreated = null;
     }
 
     public static void SetAdaptiveTileLength(float length)

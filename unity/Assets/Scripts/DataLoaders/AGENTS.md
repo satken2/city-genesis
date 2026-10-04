@@ -14,6 +14,5 @@
 
 ## 参照先
 
-- 更新トリガー: `docs/docs/geometries/H_バックエンドデータロード.md`。
-- 差分・版・完了判定: `docs/docs/geometries/K_Unity差分ロード整理.md`。
+- 更新トリガー・差分・版・完了判定: `docs/docs/geometries/H_バックエンドデータロード.md`。
 - 常駐と生成予算: `docs/docs/geometries/E_LOD処理.md`。地形: `docs/docs/geometries/D_地形形状.md`。

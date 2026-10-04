@@ -77,11 +77,20 @@ public static class PathTunnelParts
     public static void GenerateCeiling(GameObject parent, SplineComputer spline, PathSummary path,
         float leftExtent, float rightExtent, List<TrackCorridorInfo.PercentRange> tunnels)
     {
-        foreach (var tunnel in tunnels)
-            RoadPath.CreateSplineMesh(parent, spline, $"Models/Paths/p{path.path_variant}/{CeilingPart}",
-                leftExtent + rightExtent, (rightExtent - leftExtent) * .5f,
-                TunnelSectionUtil.GetClearanceHeight(path.path_variant),
-                fallbackPrefabName: $"Models/Paths/p{path.path_type}/{CeilingPart}", clipFrom: tunnel.From, clipTo: tunnel.To);
+        float height = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
+        float lateral = (rightExtent - leftExtent) * .5f;
+        var previous = PathDrawContext.PartCreated;
+        var warp = PathDrawContext.Warp;
+        PathDrawContext.PartCreated = (part, source, mesh, from, to) =>
+            TunnelDepthMarkers.Create(part, source, height + mesh.bounds.max.y, lateral, warp, from, to);
+        try
+        {
+            foreach (var tunnel in tunnels)
+                RoadPath.CreateSplineMesh(parent, spline, $"Models/Paths/p{path.path_variant}/{CeilingPart}",
+                    leftExtent + rightExtent, lateral, height,
+                    fallbackPrefabName: $"Models/Paths/p{path.path_type}/{CeilingPart}", clipFrom: tunnel.From, clipTo: tunnel.To);
+        }
+        finally { PathDrawContext.PartCreated = previous; }
     }
 
     /// <summary>ホームの床・ドアを保ち、上屋を含む独立部材だけ地下区間から除く。</summary>
