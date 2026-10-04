@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using GeneratedModels;
 using UnityEngine;
 
-/// <summary>送電線の線路接続点を、走行空間の外に四本の格子柱を持つ受電架構として描く。</summary>
+/// <summary>送電線の線路・施設接続点を、四本の格子柱を持つ受電架構として描く。</summary>
 public static class PowerLineRailGantry
 {
     public static Func<PathSummary, List<Vector3>> TrackPolyline;
     public static Func<PathSummary, List<TrackNeighborInfo>> NeighborProvider;
     const float HalfDepth = 2.5f;
-    const float TrussHeight = 1.2f;
-    static float BeamHeight(PowerLinePath.Support s) => s.variant == Constants.PATH_VARIANT_GRID ? 14f : 11f;
+    const float HeightScale = .6f;
+    const float TrussHeight = 1.2f * HeightScale;
+    const float InsulatorLength = 1.4f * HeightScale;
+    const float JumperSag = .65f * HeightScale;
+    static float BeamHeight(PowerLinePath.Support s) => Mathf.Max((s.variant == Constants.PATH_VARIANT_GRID ? 14f : 11f) * HeightScale,s.minimumBeamHeight);
     static int Circuits(PowerLinePath.Support s) => s.variant == Constants.PATH_VARIANT_GRID ? 6 : 3;
+    public static float MinimumHalfWidth(int variant) => variant == Constants.PATH_VARIANT_GRID ? 5f : 4f;
     static Vector3 World(PowerLinePath.Support s, Vector3 p) => s.position + s.rotation * p;
 
     public static bool CanConnect(PathSummary power, PathSummary rail)
@@ -50,12 +54,14 @@ public static class PowerLineRailGantry
                 left = Mathf.Max(left,corridor.LeftExtent[i]);
                 right = Mathf.Max(right,corridor.RightExtent[i]);
             }
-        float minimum = variant == Constants.PATH_VARIANT_GRID ? 5f : 4f;
+        float minimum = MinimumHalfWidth(variant);
+        // ジャンパ線の最下点を鉄道の門型梁下弦（6.27m）より0.5m上へ保つ。
         support = new PowerLinePath.Support
         {
             position = position, rotation = Quaternion.LookRotation(forward), variant = variant, node = node,
             railLeft = Mathf.Max(minimum,left + 1.2f), railRight = Mathf.Max(minimum,right + 1.2f),
-            feedSide = Vector3.Dot(incoming,forward) >= 0 ? 1f : -1f
+            feedSide = Vector3.Dot(incoming,forward) >= 0 ? 1f : -1f,
+            minimumBeamHeight = 6.27f + .5f + InsulatorLength + JumperSag
         };
         return true;
     }
@@ -70,11 +76,11 @@ public static class PowerLineRailGantry
     public static Vector3 Attachment(PowerLinePath.Support s, int circuit, int bundle, bool far)
     {
         float offset = s.variant == Constants.PATH_VARIANT_GRID && !far ? (bundle == 0 ? -.22f : .22f) : 0;
-        return World(s,new Vector3(TerminalX(s,circuit) + offset,BeamHeight(s) - 1.4f,s.feedSide * HalfDepth));
+        return World(s,new Vector3(TerminalX(s,circuit) + offset,BeamHeight(s) - InsulatorLength,s.feedSide * HalfDepth));
     }
 
     public static Vector3 ShieldAttachment(PowerLinePath.Support s) =>
-        World(s,new Vector3((s.railRight - s.railLeft) * .5f,BeamHeight(s) + TrussHeight + .7f,s.feedSide * HalfDepth));
+        World(s,new Vector3((s.railRight - s.railLeft) * .5f,BeamHeight(s) + TrussHeight + .7f * HeightScale,s.feedSide * HalfDepth));
 
     public static void Generate(GameObject parent, PowerLinePath.Support s, Material metal, DrawLod lod)
     {
@@ -131,26 +137,26 @@ public static class PowerLineRailGantry
             float x = TerminalX(s,circuit);
             foreach (float z in new[] { -HalfDepth,HalfDepth })
             {
-                Bar(P(x,height,z),P(x,height-1.4f,z),.065f);
+                Bar(P(x,height,z),P(x,height-InsulatorLength,z),.065f);
                 if (!far)
                 {
                     int discs = close ? 9 : 5;
                     for (int i = 0; i < discs; i++)
                     {
-                        float y = height - .2f - i * 1.05f/(discs-1);
-                        Bar(P(x,y-.035f,z),P(x,y+.035f,z),.16f);
+                        float y = height - (.2f + i * 1.05f/(discs-1)) * HeightScale;
+                        Bar(P(x,y-.035f*HeightScale,z),P(x,y+.035f*HeightScale,z),.16f);
                     }
                 }
                 if (s.variant == Constants.PATH_VARIANT_GRID && !far)
-                    Bar(P(x-.22f,height-1.4f,z),P(x+.22f,height-1.4f,z),.045f);
+                    Bar(P(x-.22f,height-InsulatorLength,z),P(x+.22f,height-InsulatorLength,z),.045f);
             }
             // 前後の梁を結ぶジャンパ線は、通常の鉄道架線より上に留める。
             int steps = far ? 4 : 12;
-            Vector3 previous = P(x,height-1.4f,-HalfDepth);
+            Vector3 previous = P(x,height-InsulatorLength,-HalfDepth);
             for (int i = 1; i <= steps; i++)
             {
                 float t = (float)i/steps;
-                Vector3 next = P(x,height-1.4f-.65f*4*t*(1-t),Mathf.Lerp(-HalfDepth,HalfDepth,t));
+                Vector3 next = P(x,height-InsulatorLength-JumperSag*4*t*(1-t),Mathf.Lerp(-HalfDepth,HalfDepth,t));
                 Bar(previous,next,.032f); previous = next;
             }
         }

@@ -7,14 +7,15 @@ using UnityEngine;
 public sealed class PowerLinePath : IPathMeshGenerator
 {
     public static Func<int, List<PathSummary>> ConnectedPaths;
+    public static Func<int, Vector3?> FacilityTerminalPosition;
     public static bool Handles(PathSummary path) => path != null && (path.path_variant == Constants.PATH_VARIANT_GRID || path.path_variant == 1102);
     public struct Support
     {
         public Vector3 position;
         public Quaternion rotation;
         public int variant, node;
-        public float railLeft, railRight, feedSide;
-        public bool IsRailGantry => railLeft > 0;
+        public float railLeft, railRight, feedSide, minimumBeamHeight;
+        public bool IsGantry => railLeft > 0;
     }
 
     public static Vector3 Attachment(int variant, int circuit, int bundle = 0)
@@ -64,9 +65,18 @@ public sealed class PowerLinePath : IPathMeshGenerator
                 if (PowerLineRailGantry.CanConnect(chosen, candidate) && (rail == null || candidate.path_id < rail.path_id)) rail = candidate;
         if (rail != null && PowerLineRailGantry.TryPlan(rail, node, chosen.path_variant, forward, out var gantry)) return gantry;
         // 軸の符号を固定し、始端／終端が逆のパスでも左右の回路を交差させない。
+        Vector3 incoming = forward;
         forward = Direction(forward);
         if (forward.z < -.0001f || Mathf.Abs(forward.z) < .0001f && forward.x < 0) forward = -forward;
-        return new Support { position = position, rotation = Quaternion.LookRotation(forward), variant = chosen.path_variant, node = node };
+        var support = new Support { position = position, rotation = Quaternion.LookRotation(forward), variant = chosen.path_variant, node = node };
+        if (node > 0 && FacilityTerminalPosition?.Invoke(node) is Vector3 terminal)
+        {
+            // 施設端子の高さは送電線の敷設高さと独立しているため、base_height を差し引かない。
+            support.position = terminal;
+            support.railLeft = support.railRight = PowerLineRailGantry.MinimumHalfWidth(chosen.path_variant);
+            support.feedSide = Vector3.Dot(incoming,forward) >= 0 ? 1f : -1f;
+        }
+        return support;
     }
 
     public static List<Support> Plan(PathSummary path, List<Vector3> points)
@@ -127,7 +137,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
             if (constructing && (float)(i+1)/supports.Count > ConstructionPathBuilder.PierProgress(progress)) continue;
             var holder = new GameObject("PowerSupport"); holder.transform.SetParent(root.transform,false);
             var visual = new GameObject("TowerVisual"); visual.transform.SetParent(holder.transform,false);
-            if (s.IsRailGantry) PowerLineRailGantry.Generate(visual,s,metal,lod);
+            if (s.IsGantry) PowerLineRailGantry.Generate(visual,s,metal,lod);
             else GenerateTower(visual,s,metal,far);
             if (s.node > 0) holder.AddComponent<PowerLineSupport>().Initialize(s.node,path.path_id,visual,lod);
             if (i == 0) continue;
@@ -148,13 +158,13 @@ public sealed class PowerLinePath : IPathMeshGenerator
     public static Vector3 SupportAttachment(Support support, int circuit, int bundle = 0, bool far = false)
     {
         int c = support.variant == 1102 ? circuit % 3 : circuit;
-        if (support.IsRailGantry) return PowerLineRailGantry.Attachment(support,c,bundle,far);
+        if (support.IsGantry) return PowerLineRailGantry.Attachment(support,c,bundle,far);
         var local = Attachment(support.variant,c,bundle);
         if (far && support.variant == Constants.PATH_VARIANT_GRID) local.x += .22f;
         return support.position + support.rotation * local;
     }
 
-    public static Vector3 ShieldAttachment(Support support) => support.IsRailGantry
+    public static Vector3 ShieldAttachment(Support support) => support.IsGantry
         ? PowerLineRailGantry.ShieldAttachment(support)
         : support.position + Vector3.up * (support.variant == Constants.PATH_VARIANT_GRID ? 38 : 17);
 

@@ -248,6 +248,17 @@ public static class GeneratedModelUtils
 /// </summary>
 public static class PathSummaryExtensions
 {
+    // 変換済みの保存設計標高。受信のたびに別のリストになるので、元のリストに紐づけて1回だけ変換する。
+    // 点列は1m間隔で数千点になり、高さを引くたびに変換し直すと立体交差判定や吸着で秒単位に膨らむ。
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<List<object>, List<List<float>>> stationGradeProfiles = new();
+
+    /// <summary>同じ受信点列の型変換を描画・吸着で共有する。更新時は新しい点列から変換する。</summary>
+    public static List<List<float>> GetStationGradeProfile(this GeneratedModels.PathSummary p)
+    {
+        return stationGradeProfiles.GetValue(p.station_grade_profile,
+            source => Newtonsoft.Json.Linq.JArray.FromObject(source).ToObject<List<List<float>>>());
+    }
+
     /// <summary>
     /// start_point を List&lt;float&gt; に変換する。
     /// </summary>
@@ -286,7 +297,7 @@ public static class PathSummaryExtensions
     {
         if (p.station_grade_profile != null && p.station_grade_profile.Count >= 2)
         {
-            var profile = Newtonsoft.Json.Linq.JArray.FromObject(p.station_grade_profile).ToObject<List<List<float>>>();
+            var profile = p.GetStationGradeProfile();
             return PathManager.EvaluateStationGrade(profile, new Vector3(x, 0f, z)) - Utils.GetGroundHeight(new Vector3(x, 0f, z));
         }
 

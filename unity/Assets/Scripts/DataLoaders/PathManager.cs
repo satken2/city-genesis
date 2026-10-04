@@ -472,6 +472,7 @@ public partial class PathManager : BaseApiDataManager
             return connections.TryGetValue(path.path_id, out var cut) && Vector3.Distance(cut, point) < 1f;
         };
         PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
+        PowerLinePath.FacilityTerminalPosition = GetPowerLineFacilityTerminalPosition;
         PowerLineRailGantry.TrackPolyline = GetPowerLineTrackPolyline;
         PowerLineRailGantry.NeighborProvider = GetPowerLineTrackNeighbors;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
@@ -486,6 +487,12 @@ public partial class PathManager : BaseApiDataManager
 
     private List<Vector3> GetPowerLineTrackPolyline(PathSummary path) => CalculatePathPoints(path,false);
     private List<TrackNeighborInfo> GetPowerLineTrackNeighbors(PathSummary path) => BuildAdjacentTrackNeighbors(path,false);
+
+    private Vector3? GetPowerLineFacilityTerminalPosition(int nodeId)
+    {
+        if (BuildingManager.Instance == null || !BuildingManager.Instance.TryGetInfraTerminalOwner(nodeId, out _)) return null;
+        return GetNodeData(nodeId)?.GetAbsolutePosition();
+    }
 
     private void Start()
     {
@@ -507,6 +514,8 @@ public partial class PathManager : BaseApiDataManager
         lodCache.Clear();
         if (PowerLinePath.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
             PowerLinePath.ConnectedPaths = null;
+        if (PowerLinePath.FacilityTerminalPosition == (Func<int, Vector3?>)GetPowerLineFacilityTerminalPosition)
+            PowerLinePath.FacilityTerminalPosition = null;
         if (PowerLineRailGantry.TrackPolyline == (Func<PathSummary, List<Vector3>>)GetPowerLineTrackPolyline)
             PowerLineRailGantry.TrackPolyline = null;
         if (PowerLineRailGantry.NeighborProvider == (Func<PathSummary, List<TrackNeighborInfo>>)GetPowerLineTrackNeighbors)
@@ -4067,12 +4076,12 @@ public partial class PathManager : BaseApiDataManager
     public static void ApplyStationGrade(PathSummary path, List<Vector3> points)
     {
         if (path?.station_grade_profile == null || path.station_grade_profile.Count < 2) return;
-        var profile = Newtonsoft.Json.Linq.JArray.FromObject(path.station_grade_profile).ToObject<List<List<float>>>();
+        var sampler = StationGradeSampler.Get(path.GetStationGradeProfile());
         float offset = RoadPartHeights.ROAD_SPLINE_OFFSET - GetPathBaseHeight(path.path_variant);
         for (int i = 0; i < points.Count; i++)
         {
             Vector3 point = points[i];
-            point.y = EvaluateStationGrade(profile, point) + offset;
+            point.y = sampler.Evaluate(point) + offset;
             points[i] = point;
         }
     }
@@ -4080,17 +4089,7 @@ public partial class PathManager : BaseApiDataManager
     /// <summary>基準線へのXZ射影を使い、曲線の内外・逆向きの線路でも同じ断面の高さを返す。</summary>
     public static float EvaluateStationGrade(List<List<float>> profile, Vector3 point)
     {
-        float best = float.PositiveInfinity, height = 0f;
-        for (int i = 1; i < profile.Count; i++)
-        {
-            var a = profile[i - 1]; var b = profile[i];
-            Vector2 start = new Vector2(a[0], a[2]);
-            Vector2 end = new Vector2(b[0], b[2]);
-            float t = PolylineUtils.ProjectOnSegment(new Vector2(point.x, point.z), start, end);
-            float distance = (new Vector2(point.x, point.z) - Vector2.Lerp(start, end, t)).sqrMagnitude;
-            if (distance < best) { best = distance; height = Mathf.Lerp(a[1], b[1], t); }
-        }
-        return height;
+        return StationGradeSampler.Get(profile).Evaluate(point);
     }
 
     /// <summary>
