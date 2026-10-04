@@ -363,6 +363,10 @@ export const ALERT_PATH_ACCIDENT: number = 2;
 export const ALERT_PATH_NO_STATION_HOUSE: number = 4;
 export const ALERT_PATH_MASK_SHIFT: number = 8;
 export const ALERT_DISPLAY_RUIN: number = 65536;
+export const ALERT_DISPLAY_RESOURCE_WARNING: number = 131072;
+export const ALERT_DISPLAY_FACILITY_WARNING: number = 262144;
+export const ALERT_DISPLAY_SANITATION_WARNING: number = 524288;
+export const ALERT_DISPLAY_INFRA_WARNING: number = 1048576;
 export const ALERT_BUDGET_CAPPED_SCALE_THRESHOLD: number = 0.5;
 export const PATH_EQUIPMENT_NONE: number = 0;
 export const PATH_EQUIPMENT_STANDARD: number = 1;
@@ -400,6 +404,14 @@ export const STATUS_NAME_MAP: Record<number, string> = {
   11: "着工保留中",
 };
 
+export const ALERT_WARNING_FILTER_MAP: Record<string, number> = {
+  "resource_runway": 131072,
+  "resource_depleted": 131072,
+  "facility_inoperative": 262144,
+  "sanitation": 524288,
+  "infra_facility_down": 1048576,
+};
+
 export const OFF_MARKET_GOODS_TYPES: number[] = [4, 5];
 
 export const GRADING_VARIANTS: number[] = [3006, 3007];
@@ -429,6 +441,8 @@ export const PATH_TYPES_NAMED_ROAD: number[] = [1, 2];
 export const ROAD_COLOR_PALETTE: string[] = ["#7F77DD", "#E4572E", "#1D9E75", "#D4537E", "#2E86DE", "#BA7517", "#0F6E56", "#993C1D"];
 
 export const TENANT_TYPES: number[] = [2, 4, 8, 16, 64];
+
+export const ALERT_WARNING_DISPLAY_BITS: number[] = [131072, 262144, 524288, 1048576];
 
 export const ALERT_AGENT_ICON_BITS: number[] = [1, 8, 16, 32];
 

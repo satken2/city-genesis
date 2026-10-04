@@ -366,6 +366,16 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Stat icon: tourism (stats/tourism.png)",
   },
   {
+    title: "Sand clock",
+    category: "image",
+    author: "Pixel perfect",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/sand-clock_726210",
+    license: "Flaticon Free License",
+    requiredText: "Sand clock icon designed by Pixel perfect from Flaticon",
+    note: "Resource depletion warning (alerts/resource-warning.png, Unity Assets/Images/sand-clock.png). License verified 2026-10-04.",
+  },
+  {
     title: "Virus",
     category: "image",
     author: "Magnific",
@@ -373,7 +383,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     url: "https://www.flaticon.com/free-icon/virus_7691073",
     license: "Flaticon Free License",
     requiredText: "Virus icon designed by Magnific from Flaticon",
-    note: "Stat icon: sanitation (stats/sanitation.png)",
+    note: "Sanitation statistics and spatial warning (stats/sanitation.png, alerts/sanitation.png, Unity Assets/Images/sanitation.png).",
   },
   {
     title: "Party popper",
@@ -517,7 +527,6 @@ export const FLATICON_PENDING_SLUGS: string[] = [
   "reload_9311549",
   "road-intersection_2062607",
   "rocket_1195017",
-  "sand-clock_726210",
   "search_3031293",
   "setting_3019014",
   "settings_2099058",

@@ -368,6 +368,10 @@ public static class Constants
     public const int ALERT_PATH_NO_STATION_HOUSE = 4;
     public const int ALERT_PATH_MASK_SHIFT = 8;
     public const int ALERT_DISPLAY_RUIN = 65536;
+    public const int ALERT_DISPLAY_RESOURCE_WARNING = 131072;
+    public const int ALERT_DISPLAY_FACILITY_WARNING = 262144;
+    public const int ALERT_DISPLAY_SANITATION_WARNING = 524288;
+    public const int ALERT_DISPLAY_INFRA_WARNING = 1048576;
     public const float ALERT_BUDGET_CAPPED_SCALE_THRESHOLD = 0.5f;
     public const int PATH_EQUIPMENT_NONE = 0;
     public const int PATH_EQUIPMENT_STANDARD = 1;
@@ -407,6 +411,15 @@ public static class Constants
         { STATUS_PENDING, "着工保留中" }
     };
 
+    public static readonly Dictionary<string, int> ALERT_WARNING_FILTER_MAP = new Dictionary<string, int>
+    {
+        { "resource_runway", ALERT_DISPLAY_RESOURCE_WARNING },
+        { "resource_depleted", ALERT_DISPLAY_RESOURCE_WARNING },
+        { "facility_inoperative", ALERT_DISPLAY_FACILITY_WARNING },
+        { "sanitation", ALERT_DISPLAY_SANITATION_WARNING },
+        { "infra_facility_down", ALERT_DISPLAY_INFRA_WARNING }
+    };
+
     public static readonly int[] OFF_MARKET_GOODS_TYPES = new int[] { GOODS_INFRASTRUCTURE, GOODS_TRANSIT };
 
     public static readonly int[] GRADING_VARIANTS = new int[] { VARIANT_GRADING_LAND, VARIANT_GRADING_SHORE };
@@ -436,6 +449,8 @@ public static class Constants
     public static readonly string[] ROAD_COLOR_PALETTE = new string[] { "#7F77DD", "#E4572E", "#1D9E75", "#D4537E", "#2E86DE", "#BA7517", "#0F6E56", "#993C1D" };
 
     public static readonly int[] TENANT_TYPES = new int[] { SPACE_RESIDENCE, SPACE_RETAIL, SPACE_FACTORY, SPACE_OFFICE, SPACE_LODGING };
+
+    public static readonly int[] ALERT_WARNING_DISPLAY_BITS = new int[] { ALERT_DISPLAY_RESOURCE_WARNING, ALERT_DISPLAY_FACILITY_WARNING, ALERT_DISPLAY_SANITATION_WARNING, ALERT_DISPLAY_INFRA_WARNING };
 
     public static readonly int[] ALERT_AGENT_ICON_BITS = new int[] { ALERT_AGENT_CONSTRUCTION_SHORTAGE, ALERT_AGENT_CRIME, ALERT_AGENT_CRIME_SIGN, ALERT_AGENT_INFRA_DISCONNECTED };
 

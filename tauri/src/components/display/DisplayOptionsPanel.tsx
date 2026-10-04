@@ -20,6 +20,10 @@ import {
   ALERT_PATH_ICON_BITS,
   ALERT_PATH_MASK_SHIFT,
   ALERT_DISPLAY_RUIN,
+  ALERT_DISPLAY_RESOURCE_WARNING,
+  ALERT_DISPLAY_FACILITY_WARNING,
+  ALERT_DISPLAY_SANITATION_WARNING,
+  ALERT_DISPLAY_INFRA_WARNING,
 } from "../../constants";
 import { resolveTransitIcon } from "../../utils/pathIcon";
 import { playSound } from "../../utils/playSound";
@@ -263,10 +267,10 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
  * ビットはここには出さない。
  * 建物(agent)と道路(path)はビット値が重複するため、フィルタマスク上では道路ビットを
  * ALERT_PATH_MASK_SHIFT だけ上位へずらして名前空間を分ける(Unity の AlertManager と同じ規約)。
- * 末尾の ALERT_DISPLAY_RUIN だけは alert ビットではなく status(廃墟)由来のアイコンの表示可否で、
- * 建物・道路の両方に効く。
+ * ALERT_DISPLAY_RUIN は status(廃墟)由来、ALERT_DISPLAY_*_WARNING はL1由来の空間警告で、
+ * エンティティのalertとは別の表示専用領域を使う。
  */
-const ALERT_CARDS = [
+const ALERT_CARDS: { bit: number; icon: string; labelKey: string; iconFilter?: string }[] = [
   ...[
     { bit: ALERT_AGENT_CONSTRUCTION_SHORTAGE, icon: "alerts/bribery.png", labelKey: "display.alertAgentConstructionShortage" },
     { bit: ALERT_AGENT_ON_FIRE, icon: "alerts/fire.png", labelKey: "display.alertAgentOnFire" },
@@ -283,6 +287,10 @@ const ALERT_CARDS = [
     .filter((card) => ALERT_PATH_ICON_BITS.includes(card.bit))
     .map((card) => ({ ...card, bit: card.bit << ALERT_PATH_MASK_SHIFT })),
   { bit: ALERT_DISPLAY_RUIN, icon: "alerts/rubble.png", labelKey: "display.alertDisplayRuin" },
+  { bit: ALERT_DISPLAY_RESOURCE_WARNING, icon: "alerts/resource-warning.png", labelKey: "display.alertResourceWarning", iconFilter: "invert(1)" },
+  { bit: ALERT_DISPLAY_FACILITY_WARNING, icon: "alerts/bribery.png", labelKey: "display.alertFacilityWarning" },
+  { bit: ALERT_DISPLAY_SANITATION_WARNING, icon: "alerts/sanitation.png", labelKey: "display.alertSanitationWarning" },
+  { bit: ALERT_DISPLAY_INFRA_WARNING, icon: "alerts/electricity.png", labelKey: "display.alertInfraWarning" },
 ];
 
 /** 全種別ONのマスク。subMode 未設定時の既定値で、Unity 側の既定値と一致させる。 */
@@ -318,6 +326,7 @@ function AlertSection({
               src={resolveDisplayIcon(card.icon)}
               alt=""
               className="do-alert-card-icon"
+              style={card.iconFilter ? { filter: card.iconFilter } : undefined}
               draggable={false}
             />
             <span className="do-alert-card-text">{t(card.labelKey)}</span>

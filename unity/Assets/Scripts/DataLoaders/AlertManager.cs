@@ -12,6 +12,8 @@ using UnityEngine.UI;
 /// バックエンドの GET /api/v1/alerts から、alert ビットフラグが立っている
 /// 建物(agent)・道路(path)の一覧を取得し、それぞれの center_point 上に
 /// ビット種別ごとのアラートアイコンを表示する。
+/// 同じAPIの warnings はL1由来の空間警告で、資源・建物・居住区画に表示する。
+/// 資源・区画の描画オブジェクトや表示状態には依存せず、アラートのフィルタだけに従う。
 ///
 /// alert は version 管理外のプロパティ(VERSION_TRIGGER_PROPS に含まれない)のため、
 /// BuildingManager / PathManager の version 差分ロード対象外となっており、
@@ -46,6 +48,7 @@ using UnityEngine.UI;
 /// UI(表示パネルのアラートタブ)から view:change_view の sub_mode でビットマスクが届く。
 /// ALERT_AGENT_* と ALERT_PATH_* は同じビット値を使うため、マスク上では path 側を
 /// Constants.ALERT_PATH_MASK_SHIFT だけ上位へずらして名前空間を分ける。
+/// L1由来の警告は ALERT_DISPLAY_*_WARNING の表示専用領域を使う。
 ///
 /// リフレッシュタイミング
 /// --------------------
@@ -96,6 +99,7 @@ public class AlertManager : MonoBehaviour
         foreach (int bit in AGENT_ALERT_BITS) mask |= bit;
         foreach (int bit in AGENT_VFX_BITS) mask |= bit;
         foreach (int bit in PATH_ALERT_BITS) mask |= bit << Constants.ALERT_PATH_MASK_SHIFT;
+        foreach (int bit in Constants.ALERT_WARNING_DISPLAY_BITS) mask |= bit;
         return mask;
     }
 
@@ -191,6 +195,7 @@ public class AlertManager : MonoBehaviour
     {
         public readonly List<RectTransform> icons = new();
         public int bits;         // 表示中のアラートビット(フィルタ適用後)。構成が同じなら GameObject を使い回す。
+        public int warningBits;  // L1由来の空間警告。エンティティのalertとは別の名前空間。
         public bool ruin;        // 廃墟アイコンを表示中か
         public Vector3 world;
         public Vector2 screen;
@@ -201,6 +206,7 @@ public class AlertManager : MonoBehaviour
 
     private readonly Dictionary<string, AlertIcon> _entries = new();
     private readonly HashSet<string> _seenKeys = new();
+    private readonly Dictionary<string, int> _warningMasks = new();
     private readonly List<string> _staleKeys = new();
 
     private bool _isRefreshing;
@@ -386,13 +392,24 @@ public class AlertManager : MonoBehaviour
         }
 
         _seenKeys.Clear();
+        _warningMasks.Clear();
+        if (response.warnings != null)
+        {
+            foreach (var item in response.warnings)
+            {
+                string key = MakeKey(item.entity_type, item.id);
+                _warningMasks.TryGetValue(key, out int current);
+                _warningMasks[key] = current | item.warning;
+            }
+        }
         if (response.agents != null)
         {
             foreach (var item in response.agents)
             {
                 string key = MakeKey("agent", item.id);
                 _seenKeys.Add(key);
-                UpdateIcons(key, item, "agent");
+                _warningMasks.TryGetValue(key, out int warnings);
+                UpdateIcons(key, item, "agent", warnings);
             }
         }
         if (response.paths != null)
@@ -404,6 +421,20 @@ public class AlertManager : MonoBehaviour
                 UpdateIcons(key, item, "path");
             }
         }
+
+        // 建物の既存アラートとは同じ列へ統合する。資源・区画は描画オブジェクトを
+        // 要求せず、APIが返した位置だけで表示するため、各レイヤーを隠しても警告は残る。
+        if (response.warnings != null)
+        {
+            foreach (var item in response.warnings)
+            {
+                string key = MakeKey(item.entity_type, item.id);
+                if (!_seenKeys.Add(key)) continue;
+                var target = new AlertItem { id = item.id, center_point = item.center_point };
+                UpdateIcons(key, target, item.entity_type, _warningMasks[key]);
+            }
+        }
+        _warningMasks.Clear();
 
         // 不要になったアイコン(アラートが解消された対象)を破棄
         _staleKeys.Clear();
@@ -438,19 +469,20 @@ public class AlertManager : MonoBehaviour
         entry.icons.Clear();
     }
 
-    private void UpdateIcons(string key, AlertItem item, string entityType)
+    private void UpdateIcons(string key, AlertItem item, string entityType, int warningMask = 0)
     {
         if (item.center_point == null || item.center_point.Count < 2) return;
 
         // 廃墟(倒壊)アイコンは alert ビットではなく status 由来。撤去するまで出続けるため、
         // 表示フィルタの専用ビット ALERT_DISPLAY_RUIN で agent/path まとめてON/OFFできる。
-        bool isRuin = item.status == Constants.STATUS_COLLAPSED;
+        bool isRuin = (entityType == "agent" || entityType == "path") && item.status == Constants.STATUS_COLLAPSED;
         bool showRuin = isRuin && (_filterMask & Constants.ALERT_DISPLAY_RUIN) != 0;
-        int[] targetBits = entityType == "agent" ? AGENT_ALERT_BITS : PATH_ALERT_BITS;
+        int[] targetBits = AlertBitsFor(entityType);
         int bits = ActiveBitMask(item.alert, entityType);
+        int warningBits = warningMask & _filterMask;
 
         // 表示対象が1つも無ければ(フィルタで全て落ちた場合を含む)、残っているアイコンを破棄して終了する。
-        if (!showRuin && bits == 0)
+        if (!showRuin && bits == 0 && warningBits == 0)
         {
             DestroyIcons(key);
             return;
@@ -480,7 +512,7 @@ public class AlertManager : MonoBehaviour
 
         if (_entries.TryGetValue(key, out var entry))
         {
-            if (entry.bits == bits && entry.ruin == showRuin && entry.icons.Count > 0)
+            if (entry.bits == bits && entry.warningBits == warningBits && entry.ruin == showRuin && entry.icons.Count > 0)
             {
                 entry.world = worldPos;
                 return;
@@ -495,6 +527,7 @@ public class AlertManager : MonoBehaviour
         }
 
         entry.bits = bits;
+        entry.warningBits = warningBits;
         entry.ruin = showRuin;
         entry.world = worldPos;
         entry.scale = 1f;
@@ -522,6 +555,14 @@ public class AlertManager : MonoBehaviour
             entry.icons.Add(CreateIconObject($"Alert_{entityType}_{item.id}_bit{bit}", sprite));
         }
 
+        foreach (int bit in Constants.ALERT_WARNING_DISPLAY_BITS)
+        {
+            if ((warningBits & bit) == 0) continue;
+            Sprite sprite = AlertIconFactory.Instance.GetIconForWarning(bit);
+            if (sprite != null)
+                entry.icons.Add(CreateIconObject($"Warning_{entityType}_{item.id}_bit{bit}", sprite, isWarning: true));
+        }
+
         if (entry.icons.Count == 0)
         {
             // 全ビットのSpriteが未設定等でアイコンが1つも無かった場合、エントリごと削除。
@@ -532,7 +573,7 @@ public class AlertManager : MonoBehaviour
     /// <summary>
     /// アイコンGameObjectを生成してCanvasにアタッチする。
     /// </summary>
-    private RectTransform CreateIconObject(string name, Sprite sprite)
+    private RectTransform CreateIconObject(string name, Sprite sprite, bool isWarning = false)
     {
         var iconGO = new GameObject(name);
         iconGO.transform.SetParent(_uiCanvasRect, false);
@@ -540,6 +581,13 @@ public class AlertManager : MonoBehaviour
         var image = iconGO.AddComponent<Image>();
         image.sprite = sprite;
         image.raycastTarget = false; // InputHandler の RaycastAll に干渉させない
+        if (isWarning)
+        {
+            // 黒い資源アイコンも暗い地形の上で読めるよう、輪郭に白を添える。
+            var outline = iconGO.AddComponent<Outline>();
+            outline.effectColor = Color.white;
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
+        }
 
         var rt = image.rectTransform;
         rt.anchorMin = Vector2.zero;
@@ -558,7 +606,7 @@ public class AlertManager : MonoBehaviour
     private int ActiveBitMask(int alert, string entityType)
     {
         bool isAgent = entityType == "agent";
-        int[] targetBits = isAgent ? AGENT_ALERT_BITS : PATH_ALERT_BITS;
+        int[] targetBits = AlertBitsFor(entityType);
         int filter = isAgent ? _filterMask : (_filterMask >> Constants.ALERT_PATH_MASK_SHIFT);
 
         int bits = 0;
@@ -567,6 +615,12 @@ public class AlertManager : MonoBehaviour
             if ((alert & bit) != 0 && (filter & bit) != 0) bits |= bit;
         }
         return bits;
+    }
+
+    private static int[] AlertBitsFor(string entityType)
+    {
+        return entityType == "agent" ? AGENT_ALERT_BITS
+            : entityType == "path" ? PATH_ALERT_BITS : Array.Empty<int>();
     }
 
     private void Update()
@@ -703,4 +757,15 @@ public class AlertsResponse
 {
     public List<AlertItem> agents;
     public List<AlertItem> paths;
+    public List<SpatialWarningItem> warnings;
+}
+
+/// <summary>L1由来の空間警告。位置は[x,z]で、warningは表示フィルタ専用のビット和。</summary>
+[Serializable]
+public class SpatialWarningItem
+{
+    public string entity_type;
+    public int id;
+    public List<float> center_point;
+    public int warning;
 }

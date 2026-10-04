@@ -54,8 +54,15 @@ public class AlertIconFactory : MonoBehaviour
     [Tooltip("ALERT_PATH_NO_STATION_HOUSE ビット用アイコン。どの駅舎パスにも属していない駅ホームに表示。")]
     [SerializeField] private Sprite pathNoStationHouseIcon;
 
+    [Header("Spatial Warning Icons (L1)")]
+    [SerializeField] private Sprite resourceWarningIcon;
+    [SerializeField] private Sprite facilityWarningIcon;
+    [SerializeField] private Sprite sanitationWarningIcon;
+    [SerializeField] private Sprite infraWarningIcon;
+
     // (entityType, bit) → Sprite。entityType は "agent" または "path"。
     private Dictionary<(string, int), Sprite> _alertIcons;
+    private Dictionary<int, Sprite> _warningIcons;
 
     private void Awake()
     {
@@ -76,6 +83,13 @@ public class AlertIconFactory : MonoBehaviour
     private void InitializeAlertIcons()
     {
         _alertIcons = new Dictionary<(string, int), Sprite>();
+        _warningIcons = new Dictionary<int, Sprite>
+        {
+            [Constants.ALERT_DISPLAY_RESOURCE_WARNING] = resourceWarningIcon,
+            [Constants.ALERT_DISPLAY_FACILITY_WARNING] = facilityWarningIcon,
+            [Constants.ALERT_DISPLAY_SANITATION_WARNING] = sanitationWarningIcon,
+            [Constants.ALERT_DISPLAY_INFRA_WARNING] = infraWarningIcon,
+        };
 
         try
         {
@@ -120,6 +134,11 @@ public class AlertIconFactory : MonoBehaviour
     public Sprite GetIconForPath(int bit)
     {
         return GetIcon("path", bit);
+    }
+
+    public Sprite GetIconForWarning(int bit)
+    {
+        return _warningIcons != null && _warningIcons.TryGetValue(bit, out var sprite) ? sprite : null;
     }
 
     private Sprite GetIcon(string entityType, int bit)
