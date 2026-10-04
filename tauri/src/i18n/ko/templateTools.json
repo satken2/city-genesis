@@ -1,15 +1,19 @@
 {
   "templateTools": {
     "trayComplete": "일괄 완성(계획 중·건설 중인 도로와 건물을 즉시 준공)",
-    "trayStreetGrid": "골목길 생성(범위를 지정해 격자형 골목길 계획)",
+    "trayStreetGrid": "골목길 생성(범위와 생성 패턴을 선택해 계획)",
     "completing": "일괄 완성 실행 중...",
     "completed": "일괄 완성: 도로 {{paths}}개, 건물 {{buildings}}동 준공",
     "completedWithRemaining": "일괄 완성: 도로 {{paths}}개, 건물 {{buildings}}동 준공(착공 불가 {{remaining}}건 남음)",
     "completeFailed": "일괄 완성에 실패했습니다",
+    "trayPrivatize": "민간 시설로 일괄 변경(임대 건물 및 민간 운영이 가능한 일반 시설)",
+    "privatizing": "민간 시설로 일괄 변경 중...",
+    "privatized": "시설 {{count}}개를 민간 시설로 변경했습니다",
+    "privatizeFailed": "민간 시설로 일괄 변경하지 못했습니다",
     "hintAddVertices": "지도를 왼쪽 클릭해 범위의 꼭짓점을 3개 이상 지정하세요(오른쪽 클릭으로 하나 되돌리기)",
-    "hintReady": "범위가 확정되었습니다. \"생성\"으로 격자형 골목길을 계획합니다",
+    "hintReady": "범위가 지정되었습니다. 선택한 패턴으로 골목길을 계획하려면 생성을 누르세요.",
     "vertexCount": "꼭짓점: {{count}}",
-    "spacing": "격자 간격",
+    "spacing": "거리 간격",
     "variant": "골목길 종류",
     "angle": "방향",
     "angleAuto": "가장 가까운 도로에 맞춤",
@@ -59,6 +63,20 @@
       "creating": "생성 중…",
       "created": "{{name}}을(를) 생성했습니다({{area}} m² · {{floors}}층분)",
       "createFailed": "경제 주체 생성에 실패했습니다"
-    }
+    },
+    "pattern": "생성 패턴",
+    "patterns": {
+      "relaxed_grid": "지형을 따르는 격자",
+      "contour": "등고선 우선",
+      "organic": "자연 발생형 확장",
+      "block_grid": "a: 블록 내부 격자",
+      "block_strips": "b: 평행 띠",
+      "block_perimeter": "c: 외곽선 따라 배치"
+    },
+    "terrainPatterns": "지형을 따르는 도로",
+    "blockPatterns": "블록 내부 골목",
+    "parcelSize": "필지 크기 기준",
+    "blockHint": "도로로 둘러싸인 블록 전체를 범위에 포함하세요. 필지가 도로에 접하도록 1차로 도로를 계획합니다.",
+    "noBlocks": "도로를 추가할 공간이 있는 폐쇄된 블록이 없습니다. 선택 범위에 블록 전체를 포함하세요."
   }
 }

@@ -125,6 +125,7 @@
     "menuCitizenTracking": "Liste de suivi"
   },
   "topmenu": {
+    "minimize": "Réduire",
     "coreConnectionFailed": "Échec de connexion",
     "newGame": "Nouvelle partie",
     "load": "Charger",

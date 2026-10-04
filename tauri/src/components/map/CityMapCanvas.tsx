@@ -18,7 +18,8 @@
  * 上下逆に見えるため、その描画に限りY方向を打ち消す(mapLabels.tsのdrawMapLabels等)。
  *
  * レイヤー(propsのlayersでON/OFF):
- *   - elevation : 標高に応じた色分け(近景標高マップを最大解像度で色付け。地形エディタと同方式)。
+ *   - elevation : 低地のベージュから高地の緑への色分けと、北西から照らした地形の陰影。
+ *     近景標高マップを最大解像度で色付けし、実距離で求めた勾配から陰影を作る。
  *     近景標高マップは初期地形なので、埋立地(GET /api/v1/terrain/reclaimed-lands)は海の色にならないよう
  *     陸の最低標高の色で塗る(天端の高さは保存されない派生値なので、実際の標高の色にはしない)。
  *     レイヤーOFFの陸色は海岸線ポリゴンの塗りで、埋立で海岸線が広がれば自動で陸色になる。
@@ -90,7 +91,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { InterchangeListResponse, InterchangeSummary, MasterData } from "../../types";
-import { computePixelRGB, decodeFloat16Array, normalizeGroundCover, terrainColor } from "../terrain/terrainData";
+import { decodeFloat16Array } from "../terrain/terrainData";
 import {
   PATH_MOTORWAY,
   PATH_STREET,
@@ -132,7 +133,7 @@ export type CityMapLayerVisibility = {
   interchanges: boolean;
   /** 地区の枠線 */
   zoneBorders: boolean;
-  /** 標高に応じた色分け */
+  /** 標高に応じた色分けと地形の陰影 */
   elevation: boolean;
   /** 等高線 */
   contours: boolean;
@@ -229,6 +230,18 @@ export type CityMapCanvasHandle = {
    * 敷設中の道路プレビューのように、範囲が頻繁に変わる埋め込み用途で使う。
    */
   fitBounds: (bounds: CityMapBounds) => void;
+  /**
+   * 取得済みの範囲でベクター(パス・区画・建物・地区など)だけを取り直す。
+   * reload と違って地形・海岸線は取り直さないので、地区編集のように操作のたびに
+   * 所属が変わるデータを追従させる用途で使う。
+   */
+  reloadVectors: () => void;
+};
+
+/** onVectorsLoaded に渡す取得済みのベクター。表示範囲(bbox)で取得したものに限る(地区は全件) */
+export type CityMapVectors = {
+  paths: CityMapPathItem[];
+  zones: CityMapPolygonItem[];
 };
 
 export type CityMapCanvasProps = {
@@ -320,6 +333,11 @@ export type CityMapCanvasProps = {
   cursor?: string;
   /** ズーム倍率の変更通知 */
   onZoomChange?: (zoom: number) => void;
+  /**
+   * ベクターの取得完了通知。地図に描いているのと同じデータを上位の当たり判定などに使える。
+   * 地区は zoneBorders レイヤーがONのときだけ取得される。
+   */
+  onVectorsLoaded?: (vectors: CityMapVectors) => void;
   className?: string;
 };
 
@@ -327,7 +345,7 @@ export type CityMapCanvasProps = {
  * 内部型・定数
  * ========================================================================== */
 
-/** GET /api/v1/paths のレスポンス要素(描画に必要なフィールドのみ) */
+/** GET /api/v1/paths のレスポンス要素(描画と上位の当たり判定に必要なフィールドのみ) */
 type ApiPathItem = {
   path_id: number;
   name?: string | null;
@@ -350,6 +368,9 @@ type ApiPathItem = {
   house_path_id?: number;
   /** 所属する道路のID。未所属は VALUE_NONE(-1)。幹線道路の判定に使う */
   road_id?: number | null;
+  /** 所属する地区のID。未所属は0以下 */
+  zone_id?: number;
+  status?: number;
 };
 
 /** polygonを持つエンティティ(土地区画・地区・建物)の共通形 */
@@ -367,7 +388,12 @@ type ApiPolygonItem = {
   parcel_id?: number;
   /** 地区のみ: 地区ID。地区の値塗りとの突き合わせに使う */
   zone_id?: number;
+  /** 地区のみ: 識別色("#rrggbb") */
+  color?: string | null;
 };
+
+export type CityMapPathItem = ApiPathItem;
+export type CityMapPolygonItem = ApiPolygonItem;
 
 /**
  * ヒートマップAPI(GET /api/v1/city/noise, /pollution, /crime, /sunshine)のレスポンス。
@@ -480,6 +506,18 @@ type TerrainState = {
 const BG_COLOR = "#a8d7ed";
 const COLOR_LAND_RGB = [211, 248, 226] as const;
 const COLOR_LAND = `rgb(${COLOR_LAND_RGB.join(",")})`;
+/** 地表種別によらず標高を読み取れるよう、低地をベージュ、高地を緑で表す。 */
+const ELEVATION_RAMP: [number, number, number][] = [
+  [225, 220, 193], [203, 209, 160], [165, 183, 120], [117, 135, 85],
+];
+/** 北西(ワールド-X・+Z)から高度50度で照らし、標高を2倍に強調して起伏を見せる。 */
+const HILLSHADE_ALTITUDE = 50 * Math.PI / 180;
+const HILLSHADE_LIGHT = [
+  -Math.cos(HILLSHADE_ALTITUDE) / Math.SQRT2,
+  Math.sin(HILLSHADE_ALTITUDE),
+  Math.cos(HILLSHADE_ALTITUDE) / Math.SQRT2,
+] as const;
+const HILLSHADE_VERTICAL_EXAGGERATION = 2;
 const COLOR_PARK = "#a8dab5";
 const COLOR_BUILDING_BORDER = "#cfd4dc";
 
@@ -634,18 +672,49 @@ export function getZoneFillRampStops(ramp?: [number, number, number][]): string[
   return (ramp ?? ZONE_FILL_DEFAULT_RAMP).map(([r, g, b]) => `rgb(${r}, ${g}, ${b})`);
 }
 
-/**
- * 標高配列を色付けしたオフスクリーンCanvasを生成する。
- * 色は地形エディタと同じ computePixelRGB(都市の地表種別のランプ。海面=背景色)を使う。
- */
+/** 陸地の明暗を0〜1へ伸ばす。平坦な地形は中立の0.5として標高色をそのまま残す。 */
+function buildTerrainHillshade(elev: Float32Array, rows: number, cols: number, spacing: number): Float32Array {
+  const shade = new Float32Array(rows * cols);
+  const [lx, ly, lz] = HILLSHADE_LIGHT;
+  let min = Infinity;
+  let max = -Infinity;
+  for (let r = 0; r < rows; r++) {
+    const south = Math.max(0, r - 1);
+    const north = Math.min(rows - 1, r + 1);
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c;
+      if (elev[i] <= 0) continue;
+      const west = Math.max(0, c - 1);
+      const east = Math.min(cols - 1, c + 1);
+      const dx = (elev[r * cols + east] - elev[r * cols + west]) / (Math.max(1, east - west) * spacing);
+      const dz = (elev[north * cols + c] - elev[south * cols + c]) / (Math.max(1, north - south) * spacing);
+      const nx = -dx * HILLSHADE_VERTICAL_EXAGGERATION;
+      const nz = -dz * HILLSHADE_VERTICAL_EXAGGERATION;
+      // 配列の行は南→北なので、画面のY軸ではなくワールド+Zの勾配を法線に使う。
+      const intensity = Math.max(0, (nx * lx + ly + nz * lz) / Math.hypot(nx, 1, nz));
+      shade[i] = intensity;
+      min = Math.min(min, intensity);
+      max = Math.max(max, intensity);
+    }
+  }
+  const range = max - min;
+  if (range > 1e-6) {
+    for (let i = 0; i < shade.length; i++) shade[i] = Math.max(0, Math.min(1, (shade[i] - min) / range));
+  } else {
+    shade.fill(0.5);
+  }
+  return shade;
+}
+
+/** 標高色へソフトライトで陰影を重ね、パン・ズームで再計算しない画像として保持する。 */
 function buildTerrainCanvas(
   elev: Float32Array,
   rows: number,
   cols: number,
   minLand: number,
   maxLand: number,
-  elevation: boolean,
-  groundCover: number
+  spacing: number,
+  elevation: boolean
 ): HTMLCanvasElement {
   const cv = document.createElement("canvas");
   cv.width = cols;
@@ -653,12 +722,25 @@ function buildTerrainCanvas(
   const ctx = cv.getContext("2d")!;
   const img = ctx.createImageData(cols, rows);
   const d = img.data;
+  const shade = elevation ? buildTerrainHillshade(elev, rows, cols, spacing) : null;
   for (let i = 0; i < rows * cols; i++) {
-    const [r, g, b] = elev[i] <= 0 ? [168, 215, 237]
-      : elevation ? computePixelRGB(elev[i], minLand, maxLand, groundCover) : COLOR_LAND_RGB;
-    d[i * 4 + 0] = r;
-    d[i * 4 + 1] = g;
-    d[i * 4 + 2] = b;
+    let rgb: readonly number[] = elev[i] <= 0 ? [168, 215, 237] : COLOR_LAND_RGB;
+    if (shade && elev[i] > 0) {
+      const t = Math.max(0, Math.min(1, (elev[i] - minLand) / (maxLand - minLand)));
+      const segment = t * (ELEVATION_RAMP.length - 1);
+      const index = Math.min(ELEVATION_RAMP.length - 2, Math.floor(segment));
+      const from = ELEVATION_RAMP[index];
+      const to = ELEVATION_RAMP[index + 1];
+      const f = segment - index;
+      const light = 2 * shade[i] - 1;
+      rgb = from.map((channel, k) => {
+        const color = channel + (to[k] - channel) * f;
+        return color + light * color * (1 - color / 255);
+      });
+    }
+    d[i * 4 + 0] = rgb[0];
+    d[i * 4 + 1] = rgb[1];
+    d[i * 4 + 2] = rgb[2];
     d[i * 4 + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
@@ -1174,6 +1256,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       cursor,
       onZoomChange,
       onHeatmapStats,
+      onVectorsLoaded,
       zoneFill,
       className,
     },
@@ -1201,6 +1284,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const pointerCbRef = useRef({ onPointerDown, onPointerMove, onPointerUp, onContextMenu, onMapClick });
     const zoomCbRef = useRef<CityMapCanvasProps["onZoomChange"]>(onZoomChange);
     const heatmapStatsCbRef = useRef<CityMapCanvasProps["onHeatmapStats"]>(onHeatmapStats);
+    const vectorsCbRef = useRef<CityMapCanvasProps["onVectorsLoaded"]>(onVectorsLoaded);
     const masterDataRef = useRef<MasterData | null>(masterData);
     // インターチェンジの未命名時の表示名は描画時に翻訳するため、言語切替にも追従させる
     const { t } = useTranslation();
@@ -1212,6 +1296,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     pointerCbRef.current = { onPointerDown, onPointerMove, onPointerUp, onContextMenu, onMapClick };
     zoomCbRef.current = onZoomChange;
     heatmapStatsCbRef.current = onHeatmapStats;
+    vectorsCbRef.current = onVectorsLoaded;
 
     // 描画エンジンの操作関数。初期化effect内で構築し、他のeffect(レイヤー変更等)や
     // useImperativeHandleから呼び出す。
@@ -1221,6 +1306,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       resetView: () => void;
       reload: () => void;
       fitBounds: (bounds: CityMapBounds) => void;
+      reloadVectors: () => void;
       ensureVectors: () => void;
       ensureHeatmap: () => void;
       rebuildPathClassification: () => void;
@@ -1737,18 +1823,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
        */
       const loadTerrain = async () => {
         try {
-          // 地表種別は標高の配色だけに使う。取れなくても地図は草原の配色で描く。
-          const [loadedSettings, groundCover] = await Promise.all([
-            fetchApi<TerrainSettings>(
-              buildApiUrl(apiBaseUrl, "/api/v1/terrain/settings"),
-              { signal: abort.signal }
-            ),
-            fetchApi<{ city?: { ground_cover?: number } }>(
-              buildApiUrl(apiBaseUrl, "/api/v1/city"),
-              { signal: abort.signal }
-            ).then((res) => normalizeGroundCover(res.city?.ground_cover), () => normalizeGroundCover(undefined)),
-          ]);
-          settings = loadedSettings;
+          settings = await fetchApi<TerrainSettings>(
+            buildApiUrl(apiBaseUrl, "/api/v1/terrain/settings"),
+            { signal: abort.signal }
+          );
 
           // グリッドPath2Dを構築(100m + セル境界)
           gridMinor = buildGridPath(settings.map_width, settings.map_height, GRID_MINOR_INTERVAL);
@@ -1793,15 +1871,15 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           if (maxLand - minLand < 1) maxLand = minLand + 1;
 
           terrain = {
-            canvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand, true, groundCover),
-            baseCanvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand, false, groundCover),
+            canvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand, spacing, true),
+            baseCanvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand, spacing, false),
             elev,
             rows,
             cols,
             spacing,
             minLand,
             maxLand,
-            lowestLandColor: `rgb(${terrainColor(0, groundCover).join(",")})`,
+            lowestLandColor: rampColor(ELEVATION_RAMP, 0),
           };
 
           // 等高線を基準間隔で構築する。基準ズームは初期ビュー確定後に設定され、
@@ -2279,7 +2357,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           );
           for (const k of kinds) vec.fetchedKinds.add(k);
           vec.fetchedBounds = bounds;
-          if (!disposed) draw();
+          if (!disposed) {
+            draw();
+            vectorsCbRef.current?.({ paths: vec.paths, zones: vec.zones });
+          }
         } catch (err) {
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load vector data:", err);
         } finally {
@@ -2602,6 +2683,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           setViewToBounds(bounds);
           draw();
         },
+        reloadVectors: () => refreshKinds(neededKinds()),
         ensureVectors,
         ensureHeatmap,
         rebuildPathClassification,
@@ -2657,6 +2739,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       resetView: () => engineRef.current?.resetView(),
       reload: () => engineRef.current?.reload(),
       fitBounds: (bounds: CityMapBounds) => engineRef.current?.fitBounds(bounds),
+      reloadVectors: () => engineRef.current?.reloadVectors(),
     }));
 
     return (

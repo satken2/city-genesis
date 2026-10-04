@@ -1,15 +1,19 @@
 {
   "templateTools": {
     "trayComplete": "Tout achever (termine immédiatement les routes et bâtiments planifiés ou en chantier)",
-    "trayStreetGrid": "Créer des ruelles (planifier un quadrillage dans une zone tracée)",
+    "trayStreetGrid": "Créer des ruelles (choisir une zone et un motif)",
     "completing": "Achèvement en cours...",
     "completed": "Achevé : {{paths}} routes et {{buildings}} bâtiments",
     "completedWithRemaining": "Achevé : {{paths}} routes et {{buildings}} bâtiments ({{remaining}} n'ont pas pu démarrer)",
     "completeFailed": "Échec de l'achèvement",
+    "trayPrivatize": "Passer les installations en gestion privée (bâtiments locatifs et entreprises admissibles)",
+    "privatizing": "Passage des installations en gestion privée...",
+    "privatized": "{{count}} installations sont passées en gestion privée",
+    "privatizeFailed": "Échec du passage des installations en gestion privée",
     "hintAddVertices": "Clic gauche sur la carte pour placer au moins 3 sommets de la zone (clic droit pour annuler le dernier)",
-    "hintReady": "Zone définie. « Créer » planifie le quadrillage",
+    "hintReady": "Zone définie. Créez les ruelles selon le motif sélectionné.",
     "vertexCount": "Sommets : {{count}}",
-    "spacing": "Espacement",
+    "spacing": "Espacement des rues",
     "variant": "Type de rue",
     "angle": "Orientation",
     "angleAuto": "Aligner sur la route la plus proche",
@@ -59,6 +63,20 @@
       "creating": "Création…",
       "created": "{{name}} créé ({{area}} m², {{floors}} étages)",
       "createFailed": "Échec de la création de l’agent économique"
-    }
+    },
+    "pattern": "Motif",
+    "patterns": {
+      "relaxed_grid": "Quadrillage adapté au relief",
+      "contour": "Suivre les courbes de niveau",
+      "organic": "Étalement organique",
+      "block_grid": "a : Grille dans l’îlot",
+      "block_strips": "b : Bandes parallèles",
+      "block_perimeter": "c : Suivre le périmètre"
+    },
+    "terrainPatterns": "Rues suivant le terrain",
+    "blockPatterns": "Rues à l’intérieur des îlots",
+    "parcelSize": "Dimension cible des parcelles",
+    "blockHint": "Incluez des îlots entiers entourés de routes. Des rues à une voie sont planifiées pour desservir les parcelles.",
+    "noBlocks": "Aucun îlot fermé avec de la place pour de nouvelles rues. Incluez des îlots entiers dans la zone sélectionnée."
   }
 }

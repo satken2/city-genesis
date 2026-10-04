@@ -1,15 +1,19 @@
 {
   "templateTools": {
     "trayComplete": "一键竣工（立即完成计划中和建设中的道路与建筑）",
-    "trayStreetGrid": "创建小巷（指定范围规划网格状小巷）",
+    "trayStreetGrid": "创建小巷（选择范围和生成模式）",
     "completing": "正在执行一键竣工...",
     "completed": "一键竣工：道路 {{paths}} 条、建筑 {{buildings}} 栋已竣工",
     "completedWithRemaining": "一键竣工：道路 {{paths}} 条、建筑 {{buildings}} 栋已竣工（{{remaining}} 项无法开工）",
     "completeFailed": "一键竣工失败",
+    "trayPrivatize": "一键转为民间设施（出租建筑及允许民间经营的一般设施）",
+    "privatizing": "正在将设施转为民间设施...",
+    "privatized": "已将 {{count}} 个设施转为民间设施",
+    "privatizeFailed": "转为民间设施失败",
     "hintAddVertices": "在地图上左键点击，指定至少3个范围顶点（右键撤销一个）",
-    "hintReady": "范围已确定。点击“创建”规划网格状小巷",
+    "hintReady": "范围已确定。点击创建，按所选模式规划小巷。",
     "vertexCount": "顶点：{{count}}",
-    "spacing": "网格间距",
+    "spacing": "街道间距",
     "variant": "小巷类型",
     "angle": "方向",
     "angleAuto": "对齐最近道路",
@@ -59,6 +63,20 @@
       "creating": "创建中…",
       "created": "已创建 {{name}}（{{area}} m² · {{floors}}层）",
       "createFailed": "创建经济主体失败"
-    }
+    },
+    "pattern": "生成模式",
+    "patterns": {
+      "relaxed_grid": "顺应地形的网格",
+      "contour": "优先沿等高线",
+      "organic": "自然蔓延式",
+      "block_grid": "a：街区网格",
+      "block_strips": "b：平行条带",
+      "block_perimeter": "c：沿外周布局"
+    },
+    "terrainPatterns": "顺应地形的街道",
+    "blockPatterns": "街区内部小路",
+    "parcelSize": "目标地块尺寸",
+    "blockHint": "请将道路围合的整个街区纳入范围。规划单车道街道，为地块提供临街面。",
+    "noBlocks": "范围内没有可增设街道的封闭街区。请将整个街区纳入所选范围。"
   }
 }

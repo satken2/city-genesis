@@ -3,9 +3,10 @@
  *
  * ゲームプレイそのものではなくアプリの操作(システム統計・設定・セーブ/ロード・再読み込み)を集めた小パネル。
  * デバッグ実行時のみ、テンプレートモードの切替ボタンが先頭に増える。
- * テンプレートモード中はさらに、シナリオ制作者向けの都市開発支援ボタンが2つ増える。
+ * テンプレートモード中はさらに、シナリオ制作者向けの都市開発支援ボタンが3つ増える。
  *   - 一括完成 … 計画中・建設中の全パス/建物を即時竣工させる(POST /api/v1/templates/complete-construction)
- *   - 路地作成 … 2D地図上で範囲を指定して格子状の路地を計画中で作る(street_grid ウィンドウ)
+ *   - 路地作成 … 2D地図上で範囲と生成パターンを指定して路地を計画中で作る(street_grid ウィンドウ)
+ *   - 民間化 … 貸し建物と民間参入可能な一般施設の公共施設フラグを一括解除する
  *
  * ボタン数で横幅が変わるため、実測幅をTauriコマンド `resize_system_tray` で通知して
  * ウィンドウ幅を合わせる(透明な余白がUnityへのクリックを吸わないようにするため。
@@ -35,12 +36,17 @@ type CompleteConstructionResult = {
   remaining_buildings: number;
 };
 
+type PrivatizeFacilitiesResult = {
+  privatized_agents: number;
+};
+
 export function SystemTray({ backendConnected = true }: { backendConnected?: boolean }) {
   const { t } = useTranslation();
   const { visible, apiBaseUrl, playMode, debugExecution, epochExecuting } = useHudSession();
   const godMode = playMode === PLAY_MODE_SCEARIO;
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [completing, setCompleting] = useState(false);
+  const [privatizing, setPrivatizing] = useState(false);
 
   /**
    * パネルの実測幅をウィンドウ幅として通知する。同じ幅の再送はしない
@@ -80,7 +86,7 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
    * セッション再読み込みを送る(地形の平坦化・交差点の分割が起きるため差分ではなく再読み込み)。
    */
   async function completeConstruction() {
-    if (completing || !backendConnected) return;
+    if (completing || privatizing || epochExecuting || !backendConnected) return;
     setCompleting(true);
     await emit("epoch:executing", { executing: true });
     await showNotification({ message: t("templateTools.completing") });
@@ -113,6 +119,34 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
     } finally {
       await emit("epoch:executing", { executing: false });
       setCompleting(false);
+    }
+  }
+
+  async function privatizeFacilities() {
+    if (privatizing || completing || epochExecuting || !backendConnected || !godMode) return;
+    setPrivatizing(true);
+    try {
+      await emit("epoch:executing", { executing: true });
+      await showNotification({ message: t("templateTools.privatizing") });
+      const result = await fetchApi<PrivatizeFacilitiesResult>(
+        buildApiUrl(apiBaseUrl, "/api/v1/templates/privatize-facilities"),
+        { method: "POST" }
+      );
+      await sendSessionReload();
+      await dismissNotification();
+      void showNotification({
+        message: t("templateTools.privatized", { count: result.privatized_agents }),
+        durationMs: 5000,
+      });
+    } catch (err) {
+      await dismissNotification();
+      const message = err instanceof ApiError
+        ? t(`errors.${err.code}`, { defaultValue: err.message })
+        : t("templateTools.privatizeFailed");
+      void showNotification({ message, durationMs: 5000 });
+    } finally {
+      setPrivatizing(false);
+      await emit("epoch:executing", { executing: false });
     }
   }
 
@@ -153,10 +187,20 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
             className="hud-icon-btn system-tray-icon"
             type="button"
             title={t("templateTools.trayComplete")}
-            disabled={completing || !backendConnected}
+            disabled={completing || privatizing || !backendConnected}
             onClick={() => void completeConstruction()}
           >
             <img src={iconUrl("tray_complete.png")} alt={t("templateTools.trayComplete")} className="hud-icon-img" draggable={false} />
+          </button>
+          <button
+            id="template_privatize"
+            className="hud-icon-btn system-tray-icon"
+            type="button"
+            title={t("templateTools.trayPrivatize")}
+            disabled={privatizing || completing || epochExecuting || !backendConnected}
+            onClick={() => void privatizeFacilities()}
+          >
+            <img src={iconUrl("menu_construction.png")} alt={t("templateTools.trayPrivatize")} className="hud-icon-img" draggable={false} />
           </button>
           <button
             id="template_street_grid"

@@ -1,15 +1,19 @@
 {
   "templateTools": {
     "trayComplete": "Completar toda la construcción (termina al instante calles y edificios planificados o en obra)",
-    "trayStreetGrid": "Crear calles secundarias (planificar una cuadrícula dentro de un área dibujada)",
+    "trayStreetGrid": "Crear calles secundarias (seleccionar un área y un patrón)",
     "completing": "Completando toda la construcción...",
     "completed": "Completado: {{paths}} calles y {{buildings}} edificios",
     "completedWithRemaining": "Completado: {{paths}} calles y {{buildings}} edificios ({{remaining}} no pudieron iniciar obra)",
     "completeFailed": "No se pudo completar la construcción",
+    "trayPrivatize": "Convertir instalaciones a privadas (edificios de alquiler y negocios aptos para gestión privada)",
+    "privatizing": "Convirtiendo instalaciones a gestión privada...",
+    "privatized": "Se convirtieron {{count}} instalaciones a gestión privada",
+    "privatizeFailed": "No se pudieron convertir las instalaciones a gestión privada",
     "hintAddVertices": "Haz clic izquierdo en el mapa para colocar al menos 3 vértices del área (clic derecho deshace uno)",
-    "hintReady": "Área definida. Pulsa \"Crear\" para planificar la cuadrícula",
+    "hintReady": "Área lista. Crea calles secundarias con el patrón seleccionado.",
     "vertexCount": "Vértices: {{count}}",
-    "spacing": "Separación",
+    "spacing": "Separación de calles",
     "variant": "Tipo de calle",
     "angle": "Orientación",
     "angleAuto": "Alinear con la calle más cercana",
@@ -59,6 +63,20 @@
       "creating": "Creando…",
       "created": "Se creó {{name}} ({{area}} m², {{floors}} pisos)",
       "createFailed": "No se pudo crear el agente económico"
-    }
+    },
+    "pattern": "Patrón",
+    "patterns": {
+      "relaxed_grid": "Cuadrícula adaptada al terreno",
+      "contour": "Seguir curvas de nivel",
+      "organic": "Expansión orgánica",
+      "block_grid": "a: Cuadrícula de manzana",
+      "block_strips": "b: Franjas paralelas",
+      "block_perimeter": "c: Seguir el perímetro"
+    },
+    "terrainPatterns": "Calles adaptadas al terreno",
+    "blockPatterns": "Calles dentro de manzanas",
+    "parcelSize": "Tamaño objetivo del lote",
+    "blockHint": "Incluye manzanas completas rodeadas de calles. Se planifican calles de un carril para dar frente vial a los lotes.",
+    "noBlocks": "No hay manzanas cerradas con espacio para más calles. Incluye manzanas completas en el área seleccionada."
   }
 }

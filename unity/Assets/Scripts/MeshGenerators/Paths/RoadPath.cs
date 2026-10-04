@@ -344,8 +344,11 @@ public class RoadPath : IPathMeshGenerator
             var group = new GameObject(prefabName + "_LOD");
             group.transform.SetParent(parent.transform, false);
             float adaptive = PathDrawContext.AdaptiveTileLength;
+            bool isBody = prefabName.EndsWith("/body", StringComparison.Ordinal);
+            Material summaryMaterial = (isBody ? PathDrawContext.SummaryBodyMaterial : null)
+                ?? GetOrCreateRoadMaterial(prefab.GetComponent<MeshRenderer>()?.sharedMaterial);
             group.AddComponent<SplinePartLod>().Configure(spline, width, centerOffsetX, offsetY,
-                prefabName.EndsWith("/body", StringComparison.Ordinal), GetOrCreateRoadMaterial(prefab.GetComponent<MeshRenderer>()?.sharedMaterial), clipFrom, clipTo,
+                isBody, summaryMaterial, clipFrom, clipTo,
                 (lod, from, to) =>
                 {
                     PathDrawContext.Begin(lod, from, to);
@@ -913,7 +916,15 @@ public class RoadPath : IPathMeshGenerator
         // base_height を持つバリアント（送電線）はスプラインが地表に置かれ、モデル自体が電線の地上高を
         // 持つ規約なので、上面をY=0へ揃える補正を掛けると電線が地面に落ちる。
         bool ropeway = IsRopewayVariant(pathData.path_variant);
-        GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, normalizeBodySurface: baseHeight <= 0f);
+        Material bodyMaterial = ResolveBodyMaterial(pathData, variantBase, typeBase);
+        Material previousSummaryMaterial = PathDrawContext.SummaryBodyMaterial;
+        GameObject roadBody;
+        PathDrawContext.SummaryBodyMaterial = bodyMaterial;
+        try
+        {
+            roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, normalizeBodySurface: baseHeight <= 0f);
+        }
+        finally { PathDrawContext.SummaryBodyMaterial = previousSummaryMaterial; }
         if (ropeway)
             CreateSplineMesh(container, spline, $"{variantBase}/station_shell", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
                 stretchToWidth: false, maxTileLength: 0, normalizeBodySurface: false);
@@ -926,8 +937,8 @@ public class RoadPath : IPathMeshGenerator
             markingContext?.Apply(roadBody);
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] body: モデルなしのため白い板にフォールバック");
         }
-        if (corridor != null && !ramp) CreateMergeFillers(container, corridor, width * 0.5f, ResolveBodyMaterial(pathData, variantBase, typeBase));
-        access.GenerateSurface(container, ResolveBodyMaterial(pathData, variantBase, typeBase) ?? roadBody.GetComponent<MeshRenderer>()?.sharedMaterial);
+        if (corridor != null && !ramp) CreateMergeFillers(container, corridor, width * 0.5f, bodyMaterial);
+        access.GenerateSurface(container, bodyMaterial ?? roadBody.GetComponent<MeshRenderer>()?.sharedMaterial);
 
         // 併用軌道(222/242/303)と停留所のホーム。303 はホーム区間に沿道設備を置かない(下の RoadEquipmentGenerator)。
         List<LrtPlatformParts.Span> lrtPlatforms = segmentPlatformZones == null

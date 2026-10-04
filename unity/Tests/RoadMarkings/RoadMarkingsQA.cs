@@ -381,8 +381,18 @@ public static class RoadMarkingsQA
     static void CheckLod()
     {
         Type("RoadMarkingRules").GetField("ConnectedPaths").SetValue(null,null);
+        var master=Property("MasterDataStore","Instance");
+        var dictionary=(IDictionary)master.GetType().GetField("pathMasterById",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(master);
+        var item=Activator.CreateInstance(Type("PathMasterItem"));
+        foreach(var field in new[]{("width",(object)24f),("sidewalk_width",(object)3f),("side_width",(object).5f),("lanes",(object)4),("follow_terrain",(object)false),("body_material",(object)"PATH_ASPHALT")}) item.GetType().GetField(field.Item1).SetValue(item,field.Item2);
+        dictionary.Add(231,item);
+        var model=Property("ModelManager","Instance");
+        var models=(IDictionary)model.GetType().GetField("_modelCache",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(model);
+        foreach(string part in new[]{"body","sidewalk"}) models.Add("Models/Paths/p1/"+part,models["Models/Paths/p101/"+part]);
+        var prefab=(GameObject)models["Models/Paths/p1/body"];
+        Require(prefab.GetComponent<Renderer>().sharedMaterial.name=="PATH_CONCRETE","Real street FBX has concrete as its first material");
         var path=Activator.CreateInstance(Type("GeneratedModels.PathSummary"));
-        foreach(var field in new[]{("path_id",900),("path_variant",101),("path_type",1),("start_node_id",901),("end_node_id",902)}) path.GetType().GetField(field.Item1).SetValue(path,field.Item2);
+        foreach(var field in new[]{("path_id",900),("path_variant",231),("path_type",1),("start_node_id",901),("end_node_id",902)}) path.GetType().GetField(field.Item1).SetValue(path,field.Item2);
         path.GetType().GetField("start_point").SetValue(path,new List<object>{0f,0f,0f});
         path.GetType().GetField("end_point").SetValue(path,new List<object>{0f,20f,400f});
         var setback=Activator.CreateInstance(Type("SidewalkSetback"));
@@ -405,6 +415,30 @@ public static class RoadMarkingsQA
         var far=(GameObject)lod.GetType().GetMethod("BuildStrip",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(lod,new[]{segments[0]});
         var block=new MaterialPropertyBlock();far.GetComponent<Renderer>().GetPropertyBlock(block);
         Require(block.GetFloat("_RoadPaintEnabled")==0,"Far strip omits markings");
+        Material FarMaterial(Component part)
+        {
+            var sections=(IList)part.GetType().GetField("segments",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(part);
+            var strip=(GameObject)part.GetType().GetMethod("BuildStrip",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(part,new[]{sections[0]});
+            return strip.GetComponent<Renderer>().sharedMaterial;
+        }
+        Color ColorOf(string name)=>((Material)Call("RoadPath","GetOrCreateRoadMaterialByName",name)).GetColor("_BaseColor");
+        Require(far.GetComponent<Renderer>().sharedMaterial.GetColor("_BaseColor")==ColorOf("PATH_ASPHALT"),"Four-lane Far road uses master asphalt rather than first FBX material");
+        foreach(var detail in new[]{close,normal})
+            Require(detail.GetComponent<Renderer>().sharedMaterials.Select(m=>m.name).SequenceEqual(new[]{"PATH_CONCRETE","PATH_ASPHALT"}.Select(n=>n+" (road surface)")),"Close/Normal preserve both FBX submesh materials");
+        foreach(string name in new[]{"PATH_CONCRETE",null,"MISSING_ROAD_MATERIAL"})
+        {
+            item.GetType().GetField("body_material").SetValue(item,name);
+            var alternate=Method(Activator.CreateInstance(Type("RoadPath")),"Generate",path,new List<Vector3>{Vector3.zero,new Vector3(0,20,400)},setback,setback);
+            var alternateRoad=(GameObject)alternate.GetType().GetProperty("GeneratedObject").GetValue(alternate);
+            var alternateLod=alternateRoad.GetComponentsInChildren(Type("SplinePartLod")).First(c=>(bool)c.GetType().GetProperty("IsBody").GetValue(c));
+            Require(FarMaterial(alternateLod).GetColor("_BaseColor")==ColorOf("PATH_CONCRETE"),"Master concrete and absent/unresolved master material follow the common resolution rule");
+            Require(Property("PathDrawContext","SummaryBodyMaterial")==null,"Body summary material does not leak to the next path");
+            alternateRoad.SetActive(false);
+        }
+        foreach(var renderer in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None)) renderer.enabled=renderer.gameObject==far;
+        camera.transform.position=new Vector3(0,90,50);camera.transform.rotation=Quaternion.Euler(90,0,0);camera.orthographicSize=60;
+        Capture("four-lane-far-asphalt.png");
+        report.Add("PASS: four-lane Far asphalt, configurable concrete, missing-material fallback and unchanged detail materials");
         report.Add("PASS: 400m graded road, Close/Normal coordinate continuity, fixed LOD boundary, Far omission");
     }
 

@@ -125,6 +125,7 @@
     "menuCitizenTracking": "Tracking list"
   },
   "topmenu": {
+    "minimize": "Minimize",
     "coreConnectionFailed": "Connection failed",
     "newGame": "New Game",
     "load": "Load",

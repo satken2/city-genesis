@@ -1,9 +1,9 @@
 /**
  * 路地作成ウィンドウ (window_type="street_grid")。テンプレートモード専用。
  *
- * 都市マップ(CityMapCanvas)の上で範囲の多角形を頂点指定し、その内側へ格子状の路地を
+ * 都市マップ(CityMapCanvas)の上で範囲の多角形を頂点指定し、その内側へ選択した形状の路地を
  * 計画中(STATUS_SCHEDULED_CONSTRUCTION)で作成する。作成そのものはバックエンドの
- * POST /api/v1/templates/street-grid が行う(格子の割り付け・既存道路との接続・地形の検証)。
+ * POST /api/v1/templates/street-grid が行う(地形に沿う成長・街区内の割付・接続と線形の検証)。
  * 作成後は3Dで確認して不要な路地を消し、システムトレイの「一括完成」で竣工させる運用。
  *
  * 操作:
@@ -35,6 +35,9 @@ import { PATH_STREET } from "../../constants";
 import "./StreetGridWindow.css";
 
 type WorldPoint = { x: number; z: number };
+const STREET_PATTERNS = ["relaxed_grid", "contour", "organic"] as const;
+const BLOCK_PATTERNS = ["block_grid", "block_strips", "block_perimeter"] as const;
+type StreetPattern = (typeof STREET_PATTERNS)[number] | (typeof BLOCK_PATTERNS)[number];
 
 /** バックエンド create_street_grid の戻り値 */
 type StreetGridResult = {
@@ -43,6 +46,8 @@ type StreetGridResult = {
   candidates: number;
   rejected: Record<string, number>;
   axis_angle_deg: number;
+  pattern: StreetPattern | "fixed_grid";
+  blocks?: number;
 };
 
 /** 3Dカメラの状態(camera:state)。位置だけ使う */
@@ -54,7 +59,7 @@ const CLICK_THRESHOLD_PX = 4;
 /** カメラ位置を中心に地図を寄せるときの半径(m) */
 const CAMERA_HALF_EXTENT_M = 600;
 
-/** 既定の格子間隔(m)。バックエンドの DEFAULT_STREET_GRID_SPACING と同じ値 */
+/** 既定の街路間隔(m)。バックエンドの DEFAULT_STREET_GRID_SPACING と同じ値 */
 const DEFAULT_SPACING_M = 80;
 const SPACING_MIN_M = 20;
 const SPACING_MAX_M = 500;
@@ -84,12 +89,15 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   const [vertices, setVertices] = useState<WorldPoint[]>([]);
   const [spacing, setSpacing] = useState(DEFAULT_SPACING_M);
+  const [pattern, setPattern] = useState<StreetPattern>("relaxed_grid");
+  const [parcelSize, setParcelSize] = useState(20);
   const [variant, setVariant] = useState<number | null>(null);
   const [angleAuto, setAngleAuto] = useState(true);
   const [angleDeg, setAngleDeg] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
+  const blockMode = BLOCK_PATTERNS.some((key) => key === pattern);
 
   // ポインタハンドラは CityMapCanvas 側で ref ミラーされるため、頂点列とホバー位置は
   // ハンドラを作り直さずに参照できるよう ref にも持つ。
@@ -108,12 +116,13 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     return Object.entries(masterData.paths)
       .map(([id, entry]) => ({ id: Number(id), entry }))
       .filter(({ entry }) => entry.type === PATH_STREET && !entry.height_editable && entry.frontage_allowed)
+      .filter(({ entry }) => !blockMode || entry.lanes === 1)
       .sort((a, b) => a.id - b.id)
       .map(({ id, entry }) => ({ id, name: entry.display_name }));
-  }, [masterData]);
+  }, [masterData, blockMode]);
 
   useEffect(() => {
-    if (variant !== null || streetVariants.length === 0) return;
+    if (streetVariants.length === 0 || streetVariants.some((v) => v.id === variant)) return;
     const preferred = streetVariants.find((v) => v.id === DEFAULT_VARIANT) ?? streetVariants[0];
     setVariant(preferred.id);
   }, [streetVariants, variant]);
@@ -255,9 +264,11 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           points: vertices.map((p) => [p.x, p.z]),
-          spacing,
+          spacing: blockMode ? undefined : spacing,
+          parcel_size: blockMode ? parcelSize : undefined,
+          pattern,
           path_variant: variant,
-          angle_deg: angleAuto ? null : angleDeg,
+          angle_deg: blockMode || angleAuto ? null : angleDeg,
         }),
       });
       const rejectedTotal = Object.values(result.rejected).reduce((a, b) => a + b, 0);
@@ -266,7 +277,9 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         .map(([key, n]) => `${t(`templateTools.reject.${key}`, { defaultValue: key })}: ${n}`)
         .join(" / ");
       setMessage(
-        t("templateTools.gridCreated", { created: result.created, rejected: rejectedTotal }) +
+        (blockMode && result.blocks === 0
+          ? t("templateTools.noBlocks")
+          : t("templateTools.gridCreated", { created: result.created, rejected: rejectedTotal })) +
           (reasons ? ` (${reasons})` : "")
       );
       setVertices([]);
@@ -296,17 +309,35 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         </div>
         <div className="street-grid__controls">
           <label className="street-grid__field">
-            <span>{t("templateTools.spacing")}</span>
+            <span>{t("templateTools.pattern")}</span>
+            <select value={pattern} disabled={busy} onChange={(e) => setPattern(e.target.value as StreetPattern)}>
+              <optgroup label={t("templateTools.terrainPatterns")}>
+                {STREET_PATTERNS.map((key) => (
+                  <option key={key} value={key}>{t(`templateTools.patterns.${key}`)}</option>
+                ))}
+              </optgroup>
+              <optgroup label={t("templateTools.blockPatterns")}>
+                {BLOCK_PATTERNS.map((key) => (
+                  <option key={key} value={key}>{t(`templateTools.patterns.${key}`)}</option>
+                ))}
+              </optgroup>
+            </select>
+          </label>
+          <label className="street-grid__field">
+            <span>{t(blockMode ? "templateTools.parcelSize" : "templateTools.spacing")}</span>
             <input
               type="number"
-              min={SPACING_MIN_M}
-              max={SPACING_MAX_M}
-              step={10}
-              value={spacing}
+              min={blockMode ? 15 : SPACING_MIN_M}
+              max={blockMode ? 25 : SPACING_MAX_M}
+              step={blockMode ? 1 : 10}
+              value={blockMode ? parcelSize : spacing}
               disabled={busy}
               onChange={(e) => {
                 const v = Number.parseInt(e.target.value, 10);
-                if (!Number.isNaN(v)) setSpacing(Math.max(SPACING_MIN_M, Math.min(SPACING_MAX_M, v)));
+                if (!Number.isNaN(v)) {
+                  if (blockMode) setParcelSize(Math.max(15, Math.min(25, v)));
+                  else setSpacing(Math.max(SPACING_MIN_M, Math.min(SPACING_MAX_M, v)));
+                }
               }}
             />
             <span className="street-grid__unit">m</span>
@@ -321,7 +352,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               ))}
             </select>
           </label>
-          <label className="street-grid__field">
+          {!blockMode && <label className="street-grid__field">
             <span>{t("templateTools.angle")}</span>
             <select value={angleAuto ? "auto" : "manual"} disabled={busy} onChange={(e) => setAngleAuto(e.target.value === "auto")}>
               <option value="auto">{t("templateTools.angleAuto")}</option>
@@ -341,7 +372,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                 }}
               />
             )}
-          </label>
+          </label>}
         </div>
         <div className="street-grid__actions">
           <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={removeLastVertex}>
@@ -354,6 +385,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             {busy ? t("templateTools.creating") : t("templateTools.create")}
           </button>
         </div>
+        {blockMode && <div className="street-grid__block-hint">{t("templateTools.blockHint")}</div>}
       </div>
       <div className="street-grid__map">
         <CityMapCanvas

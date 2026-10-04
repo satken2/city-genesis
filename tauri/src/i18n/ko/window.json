@@ -125,6 +125,7 @@
     "menuCitizenTracking": "추적 목록"
   },
   "topmenu": {
+    "minimize": "최소화",
     "coreConnectionFailed": "연결 실패",
     "newGame": "새 게임",
     "load": "불러오기",

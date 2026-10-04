@@ -125,6 +125,7 @@
     "menuCitizenTracking": "追蹤清單"
   },
   "topmenu": {
+    "minimize": "最小化",
     "coreConnectionFailed": "連線失敗",
     "newGame": "新遊戲",
     "load": "讀檔",

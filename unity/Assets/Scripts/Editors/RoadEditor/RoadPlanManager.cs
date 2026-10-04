@@ -757,6 +757,7 @@ public partial class RoadPlanManager : MonoBehaviour
     public void OnTerrainLeftClick(Vector3 worldPos)
     {
         if (!TutorialRuntime.AllowRoadClick(worldPos, points.Count, false, PathSubtype, phase == RoadEditorPhase.Placing)) return;
+        var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [フリーズ調査] 調査後に削除
         if (phase == RoadEditorPhase.Placing)
         {
             Vector3 snapped = ApplySnapping(worldPos);
@@ -788,6 +789,7 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             HandleEditingClick(worldPos);
         }
+        Debug.Log($"[フリーズ調査] 左クリック処理 {freezeProbe.Elapsed.TotalMilliseconds:F1}ms (点数={points.Count}, 曲線={Curved})"); // 調査後に削除
     }
 
     /// <summary>

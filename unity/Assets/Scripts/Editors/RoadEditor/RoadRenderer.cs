@@ -113,6 +113,8 @@ public partial class RoadRenderer : MonoBehaviour
             return;
         }
 
+        var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [フリーズ調査] 調査後に削除
+
         // 前回のプレビューオブジェクトを削除
         if (currentPreviewObject != null)
         {
@@ -159,6 +161,7 @@ public partial class RoadRenderer : MonoBehaviour
         lastTravelDirections = travelDirections != null ? (int[])travelDirections.Clone() : null;
         lastProfiles = profiles;
         hasPreviewState = true;
+        Debug.Log($"[フリーズ調査] 詳細プレビュー生成 {freezeProbe.Elapsed.TotalMilliseconds:F1}ms (点数={subdividePoints.Count})");
     }
 
     /// <summary>

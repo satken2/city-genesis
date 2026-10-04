@@ -125,6 +125,7 @@
     "menuCitizenTracking": "追跡リスト"
   },
   "topmenu": {
+    "minimize": "最小化",
     "coreConnectionFailed": "接続失敗",
     "newGame": "ニューゲーム",
     "load": "ロード",

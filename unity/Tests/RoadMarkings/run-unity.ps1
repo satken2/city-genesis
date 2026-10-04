@@ -11,6 +11,9 @@ Copy-Item -LiteralPath "$PSScriptRoot/RoadMarkingsQA.cs" -Destination "$qaRoot/A
 foreach ($name in @('RoadSurface.shader','RoadMarkingBake.shader','DepthOffsetLit.shader')) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/$name" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 }
+foreach ($name in @('PATH_ASPHALT','PATH_CONCRETE')) {
+    Copy-Item -LiteralPath "$unityRoot/Assets/Resources/$name.mat", "$unityRoot/Assets/Resources/$name.mat.meta" -Destination "$qaRoot/Assets/Resources" -Force
+}
 Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/RoadSurface.hlsl" -Destination "$qaRoot/Assets/Shaders" -Force
 foreach ($name in @('PC_RPAsset.asset','PC_Renderer.asset','DefaultVolumeProfile.asset','UniversalRenderPipelineGlobalSettings.asset')) {
     Copy-Item "$unityRoot/Assets/Settings/$name*" "$qaRoot/Assets/Settings" -Force

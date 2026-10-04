@@ -130,6 +130,14 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }
 
+  async function handleMinimize() {
+    try {
+      await appWindow.minimize();
+    } catch (error) {
+      console.error("[TopMenu] failed to minimize window", error);
+    }
+  }
+
   /**
    * デバッグ初期化ボタン押下時の処理。
    *
@@ -167,6 +175,15 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   return (
     <div className="topmenu" data-tauri-drag-region style={{ backgroundImage: `url(${splashImage})` }}>
+      <button
+        className="topmenu-minimize"
+        onClick={handleMinimize}
+        type="button"
+        aria-label={t("topmenu.minimize")}
+        title={t("topmenu.minimize")}
+      >
+        <span aria-hidden="true" />
+      </button>
       {/**
        * メインボタン群。
        * スプラッシュ画面上部から 45% の位置に、左右中央揃え、幅は画面全体の 35% で配置する。

@@ -35,6 +35,12 @@
   color: #6c7a94;
 }
 
+.street-grid__block-hint {
+  flex-basis: 100%;
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
 .street-grid__controls {
   display: flex;
   align-items: center;

@@ -1,15 +1,19 @@
 {
   "templateTools": {
     "trayComplete": "一括完成（計画中・建設中の道路と建物を即時竣工）",
-    "trayStreetGrid": "路地作成（範囲を指定して格子状の路地を計画）",
+    "trayStreetGrid": "路地作成（範囲と生成パターンを指定して路地を計画）",
     "completing": "一括完成を実行中...",
     "completed": "一括完成: 道路 {{paths}} 本・建物 {{buildings}} 棟を竣工しました",
     "completedWithRemaining": "一括完成: 道路 {{paths}} 本・建物 {{buildings}} 棟を竣工しました（着工できないものが {{remaining}} 件残っています）",
     "completeFailed": "一括完成に失敗しました",
+    "trayPrivatize": "民間施設に一括変更（貸し建物と民間参入可能な一般施設）",
+    "privatizing": "民間施設への一括変更を実行中...",
+    "privatized": "{{count}} 件の施設を民間施設に変更しました",
+    "privatizeFailed": "民間施設への一括変更に失敗しました",
     "hintAddVertices": "地図を左クリックして範囲の頂点を3点以上指定してください（右クリックで1つ戻す）",
-    "hintReady": "範囲が確定しました。「作成」で格子状の路地を計画します",
+    "hintReady": "範囲が確定しました。「作成」で選択したパターンの路地を計画します",
     "vertexCount": "頂点: {{count}}",
-    "spacing": "格子間隔",
+    "spacing": "街路間隔",
     "variant": "路地の種類",
     "angle": "向き",
     "angleAuto": "最寄りの道路に揃える",
@@ -59,6 +63,20 @@
       "creating": "作成中…",
       "created": "{{name}} を作成しました（{{area}} m²・{{floors}}階分）",
       "createFailed": "経済主体の作成に失敗しました"
-    }
+    },
+    "pattern": "生成パターン",
+    "patterns": {
+      "relaxed_grid": "地形で曲がる格子",
+      "contour": "等高線を優先",
+      "organic": "スプロール風",
+      "block_grid": "a：街区内の格子",
+      "block_strips": "b：短冊",
+      "block_perimeter": "c：外周追従"
+    },
+    "terrainPatterns": "地形に沿う街路",
+    "blockPatterns": "街区内の細街路",
+    "parcelSize": "区画寸法の目安",
+    "blockHint": "幹線に囲まれた街区全体を範囲に含めてください。接道区画を想定した1車線街路を計画します。",
+    "noBlocks": "範囲内に街路を追加できる閉じた街区がありません。街区全体を範囲に含めてください。"
   }
 }

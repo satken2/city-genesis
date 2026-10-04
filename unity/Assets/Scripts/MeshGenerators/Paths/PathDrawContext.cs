@@ -44,6 +44,9 @@ public static class PathDrawContext
     /// </summary>
     public static System.Action<GameObject, SplineComputer, Mesh, double, double> PartCreated { get; set; }
 
+    /// <summary>路面の固定区間LODへ渡す代表材質。詳細モデルのサブメッシュ材質は上書きしない。</summary>
+    public static Material SummaryBodyMaterial { get; set; }
+
     public static bool HasDetailRange => !SuppressDetailRange && (DetailFrom > 0.0001 || DetailTo < 0.9999);
 
     /// <summary>接写用パーツ名のサフィックス(例: Models/Paths/p411/body_close)。</summary>
@@ -69,6 +72,7 @@ public static class PathDrawContext
         AdaptiveTileLength = 0f;
         Warp = null;
         PartCreated = null;
+        SummaryBodyMaterial = null;
     }
 
     public static void End()
@@ -80,6 +84,7 @@ public static class PathDrawContext
         AdaptiveTileLength = 0f;
         Warp = null;
         PartCreated = null;
+        SummaryBodyMaterial = null;
     }
 
     public static void SetAdaptiveTileLength(float length)

@@ -267,6 +267,8 @@ public partial class RoadPlanManager
         // path_has_non_follow_span と同一の判定）。
         bool editingNonFollow = HasNonFollowSegment(mySegments);
 
+        var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [フリーズ調査] 調査後に削除
+        int freezeProbeBuilt = 0; // [フリーズ調査] 調査後に削除
         HashSet<int> candidatePathIds = new HashSet<int>();
         for (int i = 0; i < mySegments.Count; i++)
         {
@@ -298,6 +300,7 @@ public partial class RoadPlanManager
             {
                 exSegments = BuildExistingElevationSegments(exPath);
                 existingElevSegCache[otherPathId] = exSegments;
+                freezeProbeBuilt++; // [フリーズ調査] 調査後に削除
             }
 
             float otherHeight = GetPathHeightFromMaster(exPath.path_variant);
@@ -344,6 +347,9 @@ public partial class RoadPlanManager
                 }
             }
         }
+
+        // [フリーズ調査] 既存パスの形状を新しく作ったフレームだけ出す(毎フレーム出さない)。調査後に削除
+        if (freezeProbeBuilt > 0) Debug.Log($"[フリーズ調査] 立体交差チェック {freezeProbe.Elapsed.TotalMilliseconds:F1}ms (候補パス{candidatePathIds.Count}件・形状を新規作成{freezeProbeBuilt}件)");
 
         cachedElevationViolations = violations;
         return cachedElevationViolations;

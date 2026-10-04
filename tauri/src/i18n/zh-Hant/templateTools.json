@@ -1,15 +1,19 @@
 {
   "templateTools": {
     "trayComplete": "一鍵竣工（立即完成計畫中與建設中的道路與建築）",
-    "trayStreetGrid": "建立巷道（指定範圍規劃格狀巷道）",
+    "trayStreetGrid": "建立巷道（選擇範圍和生成模式）",
     "completing": "正在執行一鍵竣工...",
     "completed": "一鍵竣工：道路 {{paths}} 條、建築 {{buildings}} 棟已竣工",
     "completedWithRemaining": "一鍵竣工：道路 {{paths}} 條、建築 {{buildings}} 棟已竣工（{{remaining}} 項無法開工）",
     "completeFailed": "一鍵竣工失敗",
+    "trayPrivatize": "一鍵轉為民間設施（出租建築及允許民間經營的一般設施）",
+    "privatizing": "正在將設施轉為民間設施...",
+    "privatized": "已將 {{count}} 個設施轉為民間設施",
+    "privatizeFailed": "轉為民間設施失敗",
     "hintAddVertices": "在地圖上左鍵點擊，指定至少3個範圍頂點（右鍵撤銷一個）",
-    "hintReady": "範圍已確定。按「建立」規劃格狀巷道",
+    "hintReady": "範圍已確定。按一下建立，依所選模式規劃巷道。",
     "vertexCount": "頂點：{{count}}",
-    "spacing": "格線間距",
+    "spacing": "街道間距",
     "variant": "巷道類型",
     "angle": "方向",
     "angleAuto": "對齊最近道路",
@@ -59,6 +63,20 @@
       "creating": "建立中…",
       "created": "已建立 {{name}}（{{area}} m² · {{floors}}層）",
       "createFailed": "建立經濟主體失敗"
-    }
+    },
+    "pattern": "生成模式",
+    "patterns": {
+      "relaxed_grid": "順應地形的網格",
+      "contour": "優先沿等高線",
+      "organic": "自然蔓延式",
+      "block_grid": "a：街區網格",
+      "block_strips": "b：平行條帶",
+      "block_perimeter": "c：沿外周佈局"
+    },
+    "terrainPatterns": "順應地形的街道",
+    "blockPatterns": "街區內部小路",
+    "parcelSize": "目標地塊尺寸",
+    "blockHint": "請將道路圍合的整個街區納入範圍。規劃單車道街道，為地塊提供臨街面。",
+    "noBlocks": "範圍內沒有可增設街道的封閉街區。請將整個街區納入所選範圍。"
   }
 }

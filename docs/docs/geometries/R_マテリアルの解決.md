@@ -78,6 +78,7 @@ source（プレハブの sharedMaterial 等）
 | 道路本体・区画線・歩道・防音壁・中央分離帯・街路樹・柱・坑口 | パーツプレハブのマテリアル → `GetOrCreateRoadMaterial` |
 | パス本体のプレハブが無いとき（明灰色の板フォールバック）・パーツの材質配列が空のとき | URP対応の `Resources/BuildingMaterial` → `GetOrCreateRoadMaterialByName` の共有プール |
 | 交差点アスファルト | 代表バリアントのマスターの `body_material`（§2.3）→ 代表バリアントの `body` プレハブ → `Resources/PATH_ASPHALT` → `Resources/NodeMaterial` |
+| 道路の固定区間LODの簡易路面・沿道アクセスの路面・高速道路の結合部の埋め面 | マスターの `body_material`（§2.3）→ `body` プレハブの代表材質 |
 | 交差点の歩道コネクタ・エンドキャップ | 通常道路と同じ `sidewalk` プレハブ → `GetOrCreateRoadMaterial` |
 | 駅ホームのデッキ | `platform_panel` プレハブのマテリアル → `GetOrCreateRoadMaterial`。プレハブが無いときは共通コンクリート（§3.4） |
 | LRT停留所のホームの簡易スラブ（`lrt_platform` パーツが無いときの代替） | 共通コンクリート（§3.4） |
@@ -95,10 +96,11 @@ source（プレハブの sharedMaterial 等）
 （キャッシュ → `Resources.Load` → 複製 → `renderQueue` +1）で、Resources に同名の `.mat` が
 無ければ null を返し、呼び出し側がプレハブ経由の解決へフォールバックする。
 
-現在の用途は交差点アスファルトだけである。交差点はプレハブを持たないプロシージャルな面なので、
-「どの路面に見せたいか」をアセットの中身ではなくマスターデータで宣言できるようにしてある
-（舗装路 `PATH_ASPHALT` / 未舗装路 `PATH_SAND`）。道路本体そのものは従来どおり
-body プレハブのマテリアルで描かれる（`body_material` は body の見た目を上書きしない）。
+交差点、道路の固定区間LODの簡易路面、沿道アクセスの路面、高速道路の結合部の埋め面で使う。
+これらの生成面が代表する路面材質を、マスターデータで宣言する（舗装路 `PATH_ASPHALT` /
+未舗装路 `PATH_SAND` など）。固定区間LODの簡易路面は、この設定を生成時に解決して保持する。
+通常・接写の道路本体は body プレハブのサブメッシュごとの材質で描くため、路面と側面などの
+材質の区別を保つ（`body_material` は詳細モデルの見た目を上書きしない）。
 
 ---
 
