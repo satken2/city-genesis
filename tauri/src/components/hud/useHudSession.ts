@@ -34,6 +34,10 @@ export type HudSession = {
   cityName: string;
   /** 1800年1月1日からの経過日数。未取得のときは null */
   currentDate: number | null;
+  /** 最後に開始したエポックの確定気候。未実行・未取得は null。 */
+  epochTemperature: number | null;
+  epochSunlight: number | null;
+  epochPrecipitation: number | null;
   /** エポック実行中。実行中はHUDの全ボタンを無効化する */
   epochExecuting: boolean;
 };
@@ -47,6 +51,9 @@ export function useHudSession(): HudSession {
   const [debugExecution, setDebugExecution] = useState(false);
   const [cityName, setCityName] = useState("");
   const [currentDate, setCurrentDate] = useState<number | null>(null);
+  const [epochTemperature, setEpochTemperature] = useState<number | null>(null);
+  const [epochSunlight, setEpochSunlight] = useState<number | null>(null);
+  const [epochPrecipitation, setEpochPrecipitation] = useState<number | null>(null);
   const [epochExecuting, setEpochExecuting] = useState(false);
 
   useEffect(() => {
@@ -79,6 +86,9 @@ export function useHudSession(): HudSession {
       const cityData = payload.city?.city as Record<string, unknown> | undefined;
       setCityName((cityData?.name as string) ?? "");
       setCurrentDate((cityData?.current_date as number) ?? null);
+      setEpochTemperature((cityData?.epoch_temperature as number) ?? null);
+      setEpochSunlight((cityData?.epoch_sunlight as number) ?? null);
+      setEpochPrecipitation((cityData?.epoch_precipitation as number) ?? null);
       setCityHallPlaced((cityData?.city_hall_placed as boolean) ?? false);
     })
       .then((fn) => {
@@ -122,6 +132,9 @@ export function useHudSession(): HudSession {
     debugExecution,
     cityName,
     currentDate,
+    epochTemperature,
+    epochSunlight,
+    epochPrecipitation,
     epochExecuting,
   };
 }

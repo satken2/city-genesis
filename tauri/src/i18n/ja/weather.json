@@ -20,6 +20,10 @@
       "light_snow": "小雪",
       "snow": "雪",
       "blizzard": "吹雪"
-    }
+    },
+    "epochClimate": "確定気候",
+    "temperature": "気温",
+    "precipitation": "降水量（月相当）",
+    "sunlight": "日照強度"
   }
 }

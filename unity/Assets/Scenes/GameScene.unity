@@ -1038,7 +1038,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4b46837be49e1f4690df987d81fa840, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  errorPreviewMaterial: {fileID: 0}
 --- !u!114 &492978768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1055,7 +1054,6 @@ MonoBehaviour:
   pathManager: {fileID: 1206205195}
   gameCamera: {fileID: 357067995}
   previewMaterial: {fileID: 2100000, guid: 933f0648ae24a204a87b9e42a12ddc61, type: 2}
-  errorPreviewMaterial: {fileID: 0}
   roadRenderer: {fileID: 492978767}
   snapThreshold: 5
   PathType: 1

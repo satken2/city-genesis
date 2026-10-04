@@ -22,6 +22,7 @@ City Genesis の公開リポジトリ。Unity の3D描画、Tauri の操作UI、
 - フロントの版の正は `version.json`。配布設定への同期は `tauri/` の `npm run sync:version` を使う。
 - 素材の追加・差し替えは Skill `asset-credits` に従い、出所・利用条件の確認とクレジット更新をセットで行う。
 - ソースを変えたら関連する `docs/docs/` の仕様も更新する。非公開コアの内部アルゴリズム・認証情報・運用情報を公開文書へ載せない。
+- 仕様・概念を説明するMarkdownの作成・更新・整理は、ソース変更に伴う文書更新も含め、Skill [genesis-docs](.claude/skills/genesis-docs/SKILL.md)に従う。
 - コメントは日本語で簡潔に、現在の仕様と隠れた意図を書く。変更経緯やコードから分かる説明、リストの行間へのコメントを書かない。
 - 全文検索は `tauri/src`・`tauri/src-tauri`・`unity/Assets/Scripts` の範囲に絞る。
 

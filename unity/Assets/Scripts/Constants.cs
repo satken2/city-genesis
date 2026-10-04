@@ -297,6 +297,10 @@ public static class Constants
     public const int CLIMATE_STEPPE = 5;
     public const int CLIMATE_DESERT = 6;
     public const int CLIMATE_SUBARCTIC = 7;
+    public const float CLIMATE_TEMPERATURE_VARIATION = 3.0f;
+    public const float CLIMATE_SUNLIGHT_VARIATION = 15.0f;
+    public const float CLIMATE_PRECIPITATION_VARIATION = 30.0f;
+    public const float CLIMATE_TEMPERATURE_FADE = 10.0f;
     public const int ASSET_REGION_STANDARD = 1;
     public const int INTERCHANGE_KIND_IC = 1;
     public const int INTERCHANGE_KIND_JCT = 2;
