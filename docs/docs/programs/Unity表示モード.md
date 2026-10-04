@@ -97,11 +97,6 @@ Unityの環境スコア表示は区画レイヤーのモードである。区画
 
 道路は `VisualPathStats.zone_id`、建物は `VisualBuildingStats.zone_id` から所属地区を取り、区画は `ParcelSummary` に `zone_id` が無いため `ZoneManager.GetZoneIdAtPoint(区画中心)` で空間的に判定する。
 
-- 地区編集モードでは道路だけを `ZONE_COLOR` にし、区画・建物は通常表示のまま。区画・建物まで塗ると画面が地区色で埋まり、道路の所属変化が読めない(地区の広がりは `ZoneManager` の枠線が示す)。
-- 新規地区のプレビュー(`ZoneEditContext.PREVIEW_SENTINEL`)は地区がまだ無いため `ZoneEditContext.PreviewColor` で塗る。
-- 適用直後の一時色: 地区編集で道路をクリックした瞬間、バックエンドの応答を待たずに適用先の地区色を先行表示する(`VisualModeObject.SetTempZoneId`。`ZONE_COLOR` 時は `tempZoneId` を最優先)。
-    - 対象は `ZoneEditContext.tempColoredPathIds` で追跡し、送信結果(成功・失敗の両方)とモード終了で `ClearTempVisuals` が `ClearTempZoneId` を呼んで明示的に戻す。送信失敗時は version が変わらずリロードが再描画しないため、リロード任せにしない。
-
 ## 公共施設ハイライト(PublicFacilityGlowOverlay)
 
 `VisualFlag.HIGHLIGHT_PUBLIC` の描画専任の常駐オーバーレイ。`BuildingManager.Awake` の `PublicFacilityGlowOverlay.Ensure()` で自動生成する(シーンへの配置不要・多重生成なし)。建物の材質は触らず、敷地の土地区画形状に光を描くので、色モード(地区色分け・耐久度色分け等)と同時に成立する。
@@ -146,7 +141,6 @@ Unityの環境スコア表示は区画レイヤーのモードである。区画
 |---|---|
 | `STATE_EDIT_PATH` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_ROAD_MEMBERS` / `STATE_EDIT_GRADING` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置、道路の区間編集、造成範囲の作図） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
 | `STATE_EDIT_PARCEL`（土地区画編集） | 区画・地区を表示、計画中の道路と建物を表示 |
-| `STATE_EDIT_ZONE`（地区編集） | 区画・地区を表示、道路のみ地区色分け、計画中表示と公共施設ハイライトはOFF |
 | `STATE_EDIT_TRANSIT` ＋ プリセット `transit`（公共交通の一覧・新設） | 公共交通路線を全種別表示、計画中の道路と建物を表示 |
 | プリセット `parcel_detail`（土地区画詳細） | 土地区画の境界線を表示 |
 | `STATE_REMOVE_OBJECTS`（ブルドーザ） | 区画の境界線・計画中の道路と建物を表示、地区は非表示（プロップは削除対象なので消さない） |

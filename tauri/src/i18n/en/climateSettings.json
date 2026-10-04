@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Climate settings",
+    "name": "Climate name",
+    "probabilities": "Monthly weather probabilities",
+    "probabilityHint": "Drag the color boundaries horizontally. Use the fields below to edit weather at 0% as well.",
+    "month": "Month {{month}}",
+    "preset": "Climate preset",
+    "current": "Current settings",
+    "chartHint": "Select a series in the legend, then drag its monthly points vertically.",
+    "averageHint": "Temperature, precipitation and sunlight are monthly averages. Actual values vary each epoch around these averages.",
+    "apply": "Apply",
+    "chart": "Monthly climate chart"
+  }
+}

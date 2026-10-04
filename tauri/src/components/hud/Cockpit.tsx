@@ -327,7 +327,11 @@ export function Cockpit() {
         >
           {cityName || "—"}
         </button>
-        <div className="cockpit-climate" aria-label={t("weather.epochClimate")}>
+        <button type="button" className={`cockpit-climate${godMode ? " cockpit-climate-editable" : ""}`}
+          disabled={!godMode || isLocked || epochExecuting} data-guide="hud.climate"
+          aria-label={t(godMode ? "climateSettings.title" : "weather.epochClimate")}
+          title={godMode ? t("climateSettings.title") : t("weather.epochClimate")}
+          onClick={() => void openRegisteredWindow("climate_settings")}>
           <span className="cockpit-climate-row" title={t("weather.temperature")}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
               <path d="M9 14.5V5a3 3 0 0 1 6 0v9.5a5 5 0 1 1-6 0Z" />
@@ -348,7 +352,7 @@ export function Cockpit() {
             </svg>
             <span>{epochSunlight == null ? "—" : `${epochSunlight.toLocaleString(locale, { maximumFractionDigits: 0 })}%`}</span>
           </span>
-        </div>
+        </button>
         <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
         <div className="cockpit-date-weather" data-guide="hud.date">
           <span className="cockpit-date">{formattedDate}</span>

@@ -49,7 +49,8 @@
     "tutorial_intro": "Tutoriel",
     "citizen_detail": "Citoyen",
     "citizen_tracking": "Liste de suivi",
-    "scenario_sign": "Signature du scénario"
+    "scenario_sign": "Signature du scénario",
+    "climate_settings": "Paramètres climatiques"
   },
   "cityMap": {
     "layers": {

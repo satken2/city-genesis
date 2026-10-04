@@ -1,7 +1,6 @@
 import type { LocalizedText } from "../../utils/locale";
+import type { ClimateSettings } from "../../utils/climate";
 import {
-  CLIMATE_TEMPERATE,
-  CLIMATE_TYPES,
   GROUND_COVER_DESERT,
   GROUND_COVER_GRASSLAND,
   GROUND_COVER_LUSH,
@@ -151,7 +150,7 @@ export type TerrainEditorData = {
   /** 地表種別(GROUND_COVER_*)。未設定なら null(草原として扱う)。 */
   ground_cover: number | null;
   /** 気候区分(CLIMATE_*)。未設定なら null(温暖湿潤として扱う)。 */
-  climate: number | null;
+  climate: ClimateSettings;
 };
 
 /**
@@ -180,7 +179,7 @@ export type ScenarioTerrainContent = {
   props: TerrainProps;
   camera: TerrainCameraPayload | null;
   groundCover: number;
-  climate: number;
+  climate: ClimateSettings;
 };
 
 /**
@@ -350,11 +349,6 @@ export const SEA_RGB: Rgb = [0x0d, 0x0d, 0x14];
 /** 未設定・未知の値を草原に丸めた地表種別。 */
 export function normalizeGroundCover(value: unknown): number {
   return typeof value === "number" && GROUND_COVER_TYPES.includes(value) ? value : GROUND_COVER_GRASSLAND;
-}
-
-/** 未設定・未知の値を温暖湿潤に丸めた気候区分。 */
-export function normalizeClimate(value: unknown): number {
-  return typeof value === "number" && CLIMATE_TYPES.includes(value) ? value : CLIMATE_TEMPERATE;
 }
 
 /** 地表種別の標高カラーランプ([低地, 中腹, 高地])。地形エディタのシェーダーも同じ3色で塗る。 */

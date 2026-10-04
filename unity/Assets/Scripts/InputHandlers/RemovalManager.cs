@@ -16,7 +16,7 @@ using GeneratedModels;
 ///   このとき建物・道路はステータスを問わず確認なしで即時に削除する(保護対象を除く。IsRemovable 参照)。
 ///   テナント・市民の道連れ削除や孤立ノードの片付けはバックエンドの DELETE 分岐が担う。
 /// - 削除は Unity が直接バックエンドの DELETE エンドポイントを叩く
-///   (ZoneEditContext / NodeInputHandler と同じ直接REST方式)。
+///   (NodeInputHandler と同じ直接REST方式)。
 /// - 同じオブジェクトへ何度も DELETE を出さないよう、(type, id) の組で重複排除する。
 /// - 削除クリック時に trash 効果音を鳴らす(クリップは IpcStateCoordinator から渡される)。
 /// - 削除成功後は差分リロード(CellDataLoader.ReloadAllData)を短時間デバウンスして

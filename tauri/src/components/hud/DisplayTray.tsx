@@ -16,10 +16,13 @@ import { useTranslation } from "react-i18next";
 
 import { sendViewQueryState } from "../../utils/ipc";
 import { useDisplayOptions } from "../display/useDisplayOptions";
-import { iconUrl } from "./hudCommon";
 import { useHudSession } from "./useHudSession";
-import buildingIcon from "../../assets/images/buildings/bd_1.png";
-import contourIcon from "../../assets/images/visual/heatmap.png";
+import buildingIcon from "../../assets/images/menu/display-building.svg";
+import roadIcon from "../../assets/images/menu/display-road.svg";
+import propIcon from "../../assets/images/menu/display-prop.svg";
+import parcelIcon from "../../assets/images/menu/display-parcel.svg";
+import terrainIcon from "../../assets/images/menu/display-terrain.svg";
+import districtIcon from "../../assets/images/menu/display-district.svg";
 import "./hud.css";
 import "./DisplayTray.css";
 
@@ -44,7 +47,6 @@ type DisplayTrayItem = {
  *
  * 地形だけはON/OFFではなく「通常表示 / 等高線表示」の切替で、色モードではなく
  * サブモード(`contour_on` / `contour_off`)を差し替える(表示オプションパネルと同じ仕組み)。
- * 地形と建物には専用のアイコン画像が未用意のため、標高色分け・集合住宅のアイコンを仮当てしている。
  */
 const TRAY_ITEMS: DisplayTrayItem[] = [
   {
@@ -57,7 +59,7 @@ const TRAY_ITEMS: DisplayTrayItem[] = [
   },
   {
     layerId: "road",
-    icon: iconUrl("menu_road.png"),
+    icon: roadIcon,
     labelKey: "display.layerRoad",
     visibleMode: "default",
     onStateKey: "display.trayStateVisible",
@@ -65,7 +67,7 @@ const TRAY_ITEMS: DisplayTrayItem[] = [
   },
   {
     layerId: "prop",
-    icon: iconUrl("menu_prop.png"),
+    icon: propIcon,
     labelKey: "display.layerProp",
     visibleMode: "visible",
     onStateKey: "display.trayStateVisible",
@@ -73,7 +75,7 @@ const TRAY_ITEMS: DisplayTrayItem[] = [
   },
   {
     layerId: "parcel",
-    icon: iconUrl("menu_land.png"),
+    icon: parcelIcon,
     labelKey: "display.layerParcel",
     visibleMode: "border",
     onStateKey: "display.trayStateVisible",
@@ -81,7 +83,7 @@ const TRAY_ITEMS: DisplayTrayItem[] = [
   },
   {
     layerId: "terrain",
-    icon: contourIcon,
+    icon: terrainIcon,
     labelKey: "display.layerTerrain",
     visibleMode: "default",
     onStateKey: "display.trayStateContour",
@@ -89,7 +91,7 @@ const TRAY_ITEMS: DisplayTrayItem[] = [
   },
   {
     layerId: "district",
-    icon: iconUrl("menu_district.png"),
+    icon: districtIcon,
     labelKey: "display.layerDistrict",
     visibleMode: "border_icon",
     onStateKey: "display.trayStateVisible",

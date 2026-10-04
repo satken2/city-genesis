@@ -54,7 +54,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { NumberStepper } from "../common/NumberStepper";
 import { errorCode, saveError } from "../../utils/saves";
-import { CLIMATE_TEMPERATE, CLIMATE_TYPES, GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
+import { GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
+import { useMasterData } from "../../contexts/MasterDataContext";
+import { copyClimatePreset, type ClimateSettings } from "../../utils/climate";
 import {
   type TerrainEditorData,
   type TerrainEditorLocks,
@@ -77,7 +79,6 @@ import {
   uint8ToBase64,
   groundCoverRamp,
   landElevationRange,
-  normalizeClimate,
   normalizeGroundCover,
   normalizeTerrainEditorLocks,
   scenarioTerrainSaveArgs,
@@ -1109,6 +1110,7 @@ function strokeRiverControlPoints(ctx: CanvasRenderingContext2D, cps: ReadonlyAr
 }
 
 export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
+  const master = useMasterData();
   const { t, i18n } = useTranslation();
   // 地図は3枚のキャンバスを重ねて描く(renderFrame 参照)。下から地形層(WebGL2)、ベクター層
   // (Canvas2D。マウス操作もここで受ける)、カーソル層(Canvas2D)。
@@ -1532,7 +1534,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   // === 気候区分 ===
   // シナリオへの保存の対象。ゲーム内の天気の出方だけを決め、エディタの描画には使わない。
-  const [climate, setClimate] = useState<number>(CLIMATE_TEMPERATE);
+  const [climate, setClimate] = useState<ClimateSettings | null>(null);
 
   /** 範囲指定方法をポリゴン以外に切り替えたら、未確定の頂点をクリアする */
   useEffect(() => {
@@ -3093,7 +3095,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   async function handleSaveToScenario() {
     const elev = elevRef.current;
     const untouched = untouchedContentRef.current;
-    if (!elev || !untouched) return;
+    if (!elev || !untouched || !climate) return;
     const version = editVersionRef.current;
     setSaveStatus("saving");
     setSaveErrorMsg("");
@@ -3149,7 +3151,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         const data = await invoke<TerrainEditorData>("load_terrain_editor_data", { editorId: mapId });
         if (cancelled) return;
         applyGroundCover(data.ground_cover, false);
-        setClimate(normalizeClimate(data.climate));
+        setClimate(data.climate);
 
         const bytes = base64ToUint8(data.data_base64);
         const count = data.grid_rows * data.grid_cols;
@@ -3529,15 +3531,18 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                   <span className="terrain-editor-param-label">{t("climate.label")}</span>
                   <select
                     className="terrain-editor-select"
-                    value={climate}
+                    value=""
                     onChange={(e) => {
-                      setClimate(normalizeClimate(Number(e.target.value)));
+                      const preset = master?.climates[Number(e.target.value)];
+                      if (!preset) return;
+                      setClimate(copyClimatePreset(preset));
                       markDirty();
                     }}
                     disabled={status !== "ready"}
                   >
-                    {CLIMATE_TYPES.map((type) => (
-                      <option key={type} value={type}>{t(`climate.${type}`)}</option>
+                    <option value="">{climate?.name}</option>
+                    {Object.entries(master?.climates ?? {}).map(([id, preset]) => (
+                      <option key={id} value={id}>{preset.display_name}</option>
                     ))}
                   </select>
                 </div>

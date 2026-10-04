@@ -13,7 +13,7 @@
   },
   "climate": {
     "label": "Climate",
-    "hint": "Sets how the weather behaves in each season (how often it is sunny, rainy, or snowy). It does not affect the simulation.",
+    "hint": "Copies monthly temperature, precipitation, sunlight and weather probabilities from a preset. Edit the details in Climate settings in scenario creation mode.",
     "1": "Humid temperate",
     "2": "Subtropical",
     "3": "Humid continental",

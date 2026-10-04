@@ -31,7 +31,6 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditParcelStartShapeEdit += HandleEditParcelStartShapeEdit;
             IpcClient.Instance.OnEditParcelCancelShapeEdit += HandleEditParcelCancelShapeEdit;
             IpcClient.Instance.OnEditParcelFinishShapeEdit += HandleEditParcelFinishShapeEdit;
-            IpcClient.Instance.OnEditZoneFinishMerge += HandleEditZoneFinishMerge;
             IpcClient.Instance.OnSessionReset += HandleSessionReset;
             IpcClient.Instance.OnSessionReload += HandleSessionReload;
             IpcClient.Instance.OnSessionForceReload += HandleSessionForceReload;
@@ -58,7 +57,6 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditParcelStartShapeEdit -= HandleEditParcelStartShapeEdit;
             IpcClient.Instance.OnEditParcelCancelShapeEdit -= HandleEditParcelCancelShapeEdit;
             IpcClient.Instance.OnEditParcelFinishShapeEdit -= HandleEditParcelFinishShapeEdit;
-            IpcClient.Instance.OnEditZoneFinishMerge -= HandleEditZoneFinishMerge;
             IpcClient.Instance.OnSessionReset -= HandleSessionReset;
             IpcClient.Instance.OnSessionReload -= HandleSessionReload;
             IpcClient.Instance.OnSessionForceReload -= HandleSessionForceReload;
@@ -110,16 +108,6 @@ public class IpcStateCoordinator : MonoBehaviour
         if (state != "STATE_SET_GRID" && GridSetManager.Instance != null)
         {
             GridSetManager.Instance.CancelGridSetting();
-        }
-
-        // 地区編集モードから他ステートへ直接遷移した場合にも地区編集の状態を確実に片付ける。
-        // 地区編集はタスクバーの常駐トグル(ウィンドウを開かない)であり、他の編集モードのように
-        // ウィンドウクローズ経由の STATE_NORMAL が発生しない。そのため STATE_NORMAL を経由せず
-        // 別の編集モードへ移った場合、Exit() が呼ばれないと ZoneEditControlMenu(Ctrlラジアル/HUD)や
-        // ホバーフィルが取り残される。STATE_NORMAL は ApplyStateNormal 内でも Exit するが冪等なので問題ない。
-        if (state != "STATE_EDIT_ZONE" && ZoneEditContext.Instance != null && ZoneEditContext.Instance.IsActive)
-        {
-            ZoneEditContext.Instance.Exit();
         }
 
         // 土地区画作成モードから他ステートへ直接遷移した場合にも作成モードを終了させる。
@@ -178,11 +166,6 @@ public class IpcStateCoordinator : MonoBehaviour
 
             case "STATE_EDIT_BUILDING":
                 ApplyStateEditBuilding(ipcParams);
-                WindowUtil.BringToForeground();
-                break;
-
-            case "STATE_EDIT_ZONE":
-                ApplyStateEditZone(ipcParams);
                 WindowUtil.BringToForeground();
                 break;
 
@@ -303,13 +286,6 @@ public class IpcStateCoordinator : MonoBehaviour
         // ここでは行わない。理由: この時点では IpcViewCoordinator の _layerModes が
         // まだ編集モードの値のままであり、記憶された通常状態を復元する前に適用してしまうと、
         // 編集モードの表示状態がそのまま残ってしまうため。
-
-        // 地区編集モードを終了
-        var zoneEditCtx = ZoneEditContext.Instance;
-        if (zoneEditCtx != null)
-        {
-            zoneEditCtx.Exit();
-        }
 
         // 道路エディタを終了状態に戻す
         var roadPlanManager = FindAnyObjectByType<RoadPlanManager>();
@@ -746,54 +722,6 @@ public class IpcStateCoordinator : MonoBehaviour
     }
 
     /// <summary>
-    /// STATE_EDIT_ZONE: 地区編集モード
-    /// ipcParams に zone_id が含まれる場合は既存地区編集、含まれない場合は新規作成モードとする。
-    /// </summary>
-    private void ApplyStateEditZone(Dictionary<string, object> ipcParams)
-    {
-        int? zoneId = null;
-        if (ipcParams != null && ipcParams.TryGetValue("zone_id", out var val))
-        {
-            if (val is long l) zoneId = (int)l;
-            else if (val is int i) zoneId = i;
-        }
-
-        var ctx = ZoneEditContext.Instance;
-        if (ctx == null)
-        {
-            var go = new GameObject("ZoneEditContext");
-            ctx = go.AddComponent<ZoneEditContext>();
-        }
-
-        if (zoneId.HasValue)
-        {
-            ctx.EnterEditMode(zoneId.Value);
-        }
-        else
-        {
-            ctx.EnterCreateMode();
-        }
-
-        // ツール切替のCtrlラジアルメニュー+カーソルHUDのドライバを ctx と同じGameObjectに常駐させる
-        // (RoadPlanManager における RoadEditControlMenu と同じ構成。ドライバは ctx.IsActive を
-        //  ポーリングして自律的に開閉するため、ここでは初期化のみ行えばよい)。
-        var controlMenu = ctx.GetComponent<ZoneEditControlMenu>();
-        if (controlMenu == null)
-        {
-            controlMenu = ctx.gameObject.AddComponent<ZoneEditControlMenu>();
-        }
-        controlMenu.Initialize(ctx);
-
-        // InputMode: 地区編集プリセット
-        if (InputSystemManager.Instance != null)
-        {
-            InputSystemManager.Instance.SetModePreset(InputModePreset.ZONE_EDIT);
-        }
-
-        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
-    }
-
-    /// <summary>
     /// STATE_EDIT_PARCEL: 土地区画作成モード
     /// ipcParams には UI側で選択された parcel_creation_mode が含まれる(省略時は既定モード)。
     /// 以後の作成方法の切り替えは3DビューのCtrlラジアルメニュー(ParcelEditControlMenu)が行い、
@@ -821,8 +749,7 @@ public class IpcStateCoordinator : MonoBehaviour
         parcelEditorManager.EnterCreationMode(creationMode);
 
         // 作成モード切替のCtrlラジアルメニュー+カーソルHUDのドライバを同じGameObjectに常駐させる
-        // (地区編集の ZoneEditControlMenu と同じ構成。ドライバは IsActive をポーリングして
-        //  自律的に開閉するため、ここでは初期化のみ行えばよい)。
+        // (ドライバは IsActive をポーリングして自律的に開閉するため、ここでは初期化のみ行えばよい)。
         var controlMenu = parcelEditorManager.GetComponent<ParcelEditControlMenu>();
         if (controlMenu == null)
         {
@@ -1298,17 +1225,6 @@ public class IpcStateCoordinator : MonoBehaviour
             shapeEditManager.CompleteEditMode();
         }
         ApplyStateNormal();
-    }
-
-    /// <summary>
-    /// edit_zone:finish_merge: UI側の地区統合の確定/取消の結果通知。
-    /// merged=true なら UI が POST /zones/{id}/merge を送信済みなので、地区・道路を再取得する
-    /// (地区編集モードはそのまま継続する。統合はモードを抜ける操作ではないため)。
-    /// </summary>
-    private void HandleEditZoneFinishMerge(bool merged)
-    {
-        Debug.Log($"IpcStateCoordinator: 地区統合の結果を受信 merged={merged}");
-        ZoneEditContext.Instance?.OnMergeFinished(merged);
     }
 
     /// <summary>

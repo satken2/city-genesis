@@ -49,7 +49,8 @@
     "tutorial_intro": "チュートリアル",
     "citizen_detail": "市民",
     "citizen_tracking": "追跡リスト",
-    "scenario_sign": "シナリオの署名"
+    "scenario_sign": "シナリオの署名",
+    "climate_settings": "気候設定"
   },
   "cityRename": {
     "label": "都市名",

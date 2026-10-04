@@ -493,7 +493,6 @@
     "height": 520,
     "resizable": true,
     "policy": "single",
-    "layout": "right_panel",
     "actions": []
   },
   "system_stats": {
@@ -599,6 +598,15 @@
     "title": "シナリオの紹介情報",
     "width": 600,
     "height": 780,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
+  },
+  "climate_settings": {
+    "title": "気候設定",
+    "width": 1100,
+    "height": 760,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,

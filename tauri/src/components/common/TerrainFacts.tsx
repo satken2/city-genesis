@@ -4,15 +4,14 @@ import "./TerrainFacts.css";
 
 /**
  * マップの大きさ・地表・気候を並べる事実欄(ニューゲームのシナリオの詳細)。
- * 地表は GroundCoverIcon の自作SVG、気候は `climate.<値>` で表示する。
+ * 地表は GroundCoverIcon の自作SVG、気候はシナリオに保存した名称で表示する。
  */
 export function TerrainFacts({ mapSize, groundCover, climate }: {
   /** 「7 × 6 km」の形(utils/mapSize の formatMapSize)。不明なら null(「不明」と表示する) */
   mapSize: string | null;
   /** normalizeGroundCover 済みの地表種別 */
   groundCover: number;
-  /** normalizeClimate 済みの気候区分 */
-  climate: number;
+  climate: string;
 }) {
   const { t } = useTranslation();
   return (
@@ -27,7 +26,7 @@ export function TerrainFacts({ mapSize, groundCover, climate }: {
       </div>
       <div className="terrain-fact">
         <dt>{t("climate.label")}</dt>
-        <dd>{t(`climate.${climate}`)}</dd>
+        <dd>{climate || t("newGame.detailUnknown")}</dd>
       </div>
     </dl>
   );

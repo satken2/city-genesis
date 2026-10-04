@@ -342,7 +342,7 @@ public class RadialMenuController : MonoBehaviour
 
     /// <summary>
     /// 中央ラベル・代替テキスト用の日本語対応フォントを返す。
-    /// 項目ラベルに日本語(地区編集の「新規地区の作成」等)を使うため、組み込みの LegacyRuntime.ttf
+    /// 項目ラベルに日本語を使うため、組み込みの LegacyRuntime.ttf
     /// (日本語グリフ非対応)ではなくOSの多言語フォントを優先する(`UiFontProvider`)。
     /// ASCIIラベル(道路編集)でも問題なく描画できるため既存の利用にも影響しない。
     /// </summary>

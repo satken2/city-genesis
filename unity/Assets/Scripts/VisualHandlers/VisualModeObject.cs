@@ -75,7 +75,6 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     // オブジェクト単位の表示フィルタ(ObjectVisibilityFilter)で隠されているか。
     // 色モード・表示フラグとは独立で、立っている間は何よりも優先して消す。
     private bool isFilterHidden = false;
-    private int tempZoneId = 0; // ドラッグ中の一時的な地区ID（ゾーン色分けプレビュー用）
     // パス干渉ハイライトの色。値があるとプレビュー以外の全表示に優先して塗る。
     // HighlightManager が計画中パスの干渉オブジェクト（建物・既存パス）へ設定する。
     private Color? interferenceColor = null;
@@ -255,32 +254,6 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         if (isHovered != hover)
         {
             isHovered = hover;
-            UpdateVisuals();
-        }
-    }
-
-    /// <summary>
-    /// 一時的な地区IDを設定する。ZONE_COLORモード時に、この値が優先されて表示される。
-    /// 地区編集モードで道路をクリックした直後、バックエンドの応答を待たずに
-    /// 適用先の地区色(新規作成なら ZoneEditContext.PREVIEW_SENTINEL)を先行表示するために使う。
-    /// </summary>
-    public void SetTempZoneId(int zoneId)
-    {
-        if (tempZoneId != zoneId)
-        {
-            tempZoneId = zoneId;
-            UpdateVisuals();
-        }
-    }
-
-    /// <summary>
-    /// 一時的な地区IDをクリアし、元の表示に戻す。
-    /// </summary>
-    public void ClearTempZoneId()
-    {
-        if (tempZoneId != 0)
-        {
-            tempZoneId = 0;
             UpdateVisuals();
         }
     }
@@ -840,18 +813,13 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     }
 
     /// <summary>
-    /// 「地区別色塗り」モードで使用する有効な地区IDを解決する。
-    /// ドラッグ中の一時地区ID(tempZoneId)が最優先。未設定の場合は
-    /// 道路(VisualPathStats)または建物(VisualBuildingStats)の zone_id を読む。
+    /// 「地区別色塗り」モードで使用する地区IDを、道路(VisualPathStats)または建物(VisualBuildingStats)の zone_id から読む。
     /// </summary>
     private int ResolveEffectiveZoneId()
     {
-        int zid = tempZoneId;
-        if (zid == 0)
-        {
-            var pathStats = GetComponent<VisualPathStats>();
-            if (pathStats != null) zid = pathStats.zone_id;
-        }
+        int zid = 0;
+        var pathStats = GetComponent<VisualPathStats>();
+        if (pathStats != null) zid = pathStats.zone_id;
         if (zid == 0)
         {
             var bldStats = GetComponent<VisualBuildingStats>();
@@ -862,21 +830,14 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
 
     /// <summary>
     /// 道路に地区識別色を適用する。
-    /// 通常時はバックエンドの zone.color を道路のベース白色マテリアル + PropertyBlock で塗る。
-    /// 地区編集中の新規地区プレビュー(PREVIEW_SENTINEL)はまだ地区が存在しないため、
-    /// 編集コンテキストがこれから作る地区に使う色(ZoneEditContext.PreviewColor)で塗る。
+    /// バックエンドの zone.color を道路のベース白色マテリアル + PropertyBlock で塗る。
     /// 所属地区がない道路はオリジナルマテリアルに戻す。
     /// </summary>
     private void ApplyZoneColorToPath()
     {
         int effectiveZoneId = ResolveEffectiveZoneId();
 
-        if (effectiveZoneId == ZoneEditContext.PREVIEW_SENTINEL)
-        {
-            var ctx = ZoneEditContext.Instance;
-            ApplyColorToRenderers(ctx != null ? ctx.PreviewColor : Color.cyan);
-        }
-        else if (effectiveZoneId > 0 && ZoneManager.Instance != null)
+        if (effectiveZoneId > 0 && ZoneManager.Instance != null)
         {
             Color zoneColor = ZoneManager.Instance.GetZoneColor(effectiveZoneId);
             ApplyColorToRenderers(zoneColor);

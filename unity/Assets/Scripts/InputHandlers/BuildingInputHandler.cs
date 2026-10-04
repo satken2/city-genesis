@@ -82,12 +82,6 @@ public class BuildingInputHandler : MonoBehaviour, IInputHandler
     public void onRightClick(int mode)
     {
         Debug.Log($"BuildingInputHandler: 建物右クリック時の処理: {mode}");
-        if (mode == InputMode.MODE_ZONE_EDIT)
-        {
-            var stats = GetComponent<VisualBuildingStats>();
-            int zoneId = stats != null ? stats.zone_id : 0;
-            ZoneEditContext.Instance?.SelectZone(zoneId);
-        }
     }
 
     public void onHover(int mode)

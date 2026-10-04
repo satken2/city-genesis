@@ -13,7 +13,7 @@
   },
   "climate": {
     "label": "Clima",
-    "hint": "Define cómo se comporta el tiempo en cada estación (con qué frecuencia hay sol, lluvia o nieve). No afecta la simulación.",
+    "hint": "Copia la temperatura, precipitación, luz solar y probabilidades del tiempo mensuales de un clima predefinido. Edita los detalles en Configuración del clima en el modo de creación de escenarios.",
     "1": "Templado húmedo",
     "2": "Subtropical",
     "3": "Continental húmedo",

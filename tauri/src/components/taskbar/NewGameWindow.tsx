@@ -36,7 +36,8 @@ import { loadAppSettings } from "../../utils/settings";
 import { SUPPORTED_LANGUAGES, resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
 import { NEW_GAME_TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
-import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
+import { normalizeGroundCover } from "../terrain/terrainData";
+import { useMasterData } from "../../contexts/MasterDataContext";
 import { formatMapSize } from "../../utils/mapSize";
 import { FlatTabs } from "../common/FlatTabs";
 import { TerrainFacts } from "../common/TerrainFacts";
@@ -97,7 +98,7 @@ type DetailView = {
    * マップの事実欄。チュートリアルは出さない(null)。
    * mapSize は「7 × 6 km」の形で、不明なら null。地表・気候は未指定・未知の値をゲームと同じ既定に正規化する。
    */
-  terrain: { mapSize: string | null; groundCover: number; climate: number } | null;
+  terrain: { mapSize: string | null; groundCover: number; climate: string } | null;
   cleared: boolean;
   /** 達成条件のフリーテキスト。未設定なら null で、詳細には節ごと出したうえで「達成条件なし」と書く(無いことも情報なので隠さない) */
   objective: string | null;
@@ -124,7 +125,7 @@ type ConfirmSelection = {
 
 /** シナリオの開始設定のうち、シミュレーション日数以外の選択肢(値の一覧と翻訳キーの接頭辞) */
 const EXTRA_START_OPTIONS: { key: Exclude<ScenarioStartOption, "simulation_days">; values: number[]; labelKey: string }[] = [
-  { key: "climate", values: CLIMATE_TYPES, labelKey: "climate" },
+  { key: "climate", values: [0, ...CLIMATE_TYPES], labelKey: "climate" },
   { key: "ground_cover", values: GROUND_COVER_TYPES, labelKey: "groundCover" },
   { key: "asset_region", values: ASSET_REGION_TYPES, labelKey: "assetRegion" },
 ];
@@ -136,7 +137,7 @@ function defaultCityNameOf(template: TemplateEntry, language: string): string {
 
 function startOptionValuesOf(template: TemplateEntry | null): Record<Exclude<ScenarioStartOption, "simulation_days">, number> {
   return {
-    climate: normalizeClimate(template?.climate),
+    climate: 0,
     ground_cover: normalizeGroundCover(template?.ground_cover),
     asset_region: template?.asset_region ?? ASSET_REGION_STANDARD,
   };
@@ -195,6 +196,7 @@ export function NewGameWindow({
   onClose,
 }: NewGameWindowProps) {
   const { t, i18n } = useTranslation();
+  const master = useMasterData();
   const [templates, setTemplates] = useState<TemplateEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileEntry | null>(null);
@@ -359,7 +361,7 @@ export function NewGameWindow({
       terrain: {
         mapSize: formatMapSize(template.map_width, template.map_height, i18n.language),
         groundCover: normalizeGroundCover(template.ground_cover),
-        climate: normalizeClimate(template.climate),
+        climate: template.climate?.name ?? "",
       },
       cleared: isScenarioCleared(template.id),
       objective: resolveLocalizedText(template.scenario_objective, i18n.language) || null,
@@ -403,7 +405,7 @@ export function NewGameWindow({
         cityName: cityName || null,
         language,
         simulationDays: fixed.has("simulation_days") ? null : simulationDays,
-        climate: chosen("climate", startOptions.climate),
+        climate: startOptions.climate === 0 ? null : chosen("climate", startOptions.climate),
         groundCover: chosen("ground_cover", startOptions.ground_cover),
         assetRegion: chosen("asset_region", startOptions.asset_region),
         playMode: confirmSelection.playMode,
@@ -702,7 +704,7 @@ export function NewGameWindow({
                   <label className="new-game-confirm-label">{t(`${labelKey}.label`)}</label>
                   {fixedOptions.has(key) ? (
                     <span className="new-game-confirm-fixed">
-                      {t(`${labelKey}.${startOptions[key]}`)}
+                      {key === "climate" ? confirmTemplate.climate!.name : t(`${labelKey}.${startOptions[key]}`)}
                       <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
                     </span>
                   ) : (
@@ -715,7 +717,9 @@ export function NewGameWindow({
                         disabled={busy}
                       >
                         {values.map((value) => (
-                          <option key={value} value={value}>{t(`${labelKey}.${value}`)}</option>
+                          <option key={value} value={value}>{key === "climate"
+                            ? value === 0 ? confirmTemplate.climate!.name : master?.climates[value]?.display_name
+                            : t(`${labelKey}.${value}`)}</option>
                         ))}
                       </select>
                     </div>

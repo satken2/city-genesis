@@ -57,7 +57,7 @@ export type ScenarioEntry = CommonSaveEntry & {
   /** マップの大きさ(m)。地形エディタでも変わらない */
   map_width?: number; map_height?: number;
   /** 都市が持つ地表・気候(`GROUND_COVER_*` / `CLIMATE_*`)。地形エディタ・紹介情報で変わる */
-  ground_cover?: number; climate?: number;
+  ground_cover?: number; climate?: import("./climate").ClimateSettings;
   /** 建物・道路アセットの地域(`ASSET_REGION_*`) */
   asset_region?: number;
 };

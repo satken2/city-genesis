@@ -17,7 +17,6 @@ public class RoadManager : MonoBehaviour
     private const int CANVAS_SORTING_ORDER = 61; // 地区ラベル(60)より前、インターチェンジ(62)より奥
     private const int LABEL_FONT_SIZE = 20;
     private const float LABEL_HEIGHT_OFFSET = 3f; // 路面からの高さ(m)
-    private const float LABEL_MAX_DISTANCE = 4000f; // これより遠いラベルは出さない(遠景で画面が文字で埋まるため)
     private const int LABEL_MAX_COUNT = 60;
     private const float LABEL_OVERLAP_PADDING = 6f; // 重なり判定で外接矩形に足す余白(px)
     private const float LABEL_PATH_SEARCH_RADIUS = 30f; // ラベル点の高さを所属区間から拾う探索半径(m)
@@ -359,7 +358,8 @@ public class RoadManager : MonoBehaviour
     {
         nextForcedLayout = float.PositiveInfinity;
         candidates.Clear();
-        float maxSqr = LABEL_MAX_DISTANCE * LABEL_MAX_DISTANCE;
+        float maxDistance = Utils.GetMapLabelMaxDistance(camPos);
+        float maxSqr = maxDistance * maxDistance;
         foreach (var label in labels)
         {
             if (label.rect == null) continue;

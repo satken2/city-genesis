@@ -49,7 +49,8 @@
     "tutorial_intro": "Tutorial",
     "citizen_detail": "Citizen",
     "citizen_tracking": "Tracking list",
-    "scenario_sign": "Scenario signing"
+    "scenario_sign": "Scenario signing",
+    "climate_settings": "Climate settings"
   },
   "cityMap": {
     "layers": {

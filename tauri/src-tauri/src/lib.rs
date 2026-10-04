@@ -1006,7 +1006,7 @@ async fn save_scenario_terrain(
     props: Value,
     camera: Option<Value>,
     ground_cover: i64,
-    climate: i64,
+    climate: Value,
 ) -> Result<ScenarioTerrainSaveResult, String> {
     require_backend(state.inner())?;
     let dir = terrain_editor_copy_dir(&editor_id)?;

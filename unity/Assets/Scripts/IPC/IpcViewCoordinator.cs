@@ -7,7 +7,7 @@ using UnityEngine;
 /// VisualModeHandler のモードを各レイヤーごとに切り替える。
 ///
 /// 表示状態の正はこのクラスの記憶(_layerModes / _layerSubModes / _layerFlags)で、
-/// 編集ステート(道路敷設・地区編集など)や表示プリセットが強制した表示も必ずここを通す。
+/// 編集ステート(道路敷設・土地区画編集など)や表示プリセットが強制した表示も必ずここを通す。
 /// ステートを抜けて STATE_NORMAL に戻ると、_normalStateMemory に記憶した
 /// 「ユーザーが通常モードで選んでいた表示」へ戻す。
 /// </summary>
@@ -340,15 +340,7 @@ public class IpcViewCoordinator : MonoBehaviour
             }
 
             case "STATE_EDIT_PARCEL":
-                ApplyLandEditPreset("default", "default", "plan");
-                break;
-
-            case "STATE_EDIT_ZONE":
-                // 地区編集の主役は「道路の地区色」と「地区の枠線」の2つだけにする。
-                // 建物まで地区色で塗ると画面が地区色で埋まって道路の所属変化が読み取れないため、
-                // 建物は通常表示のままにする(地区の広がりは枠線が示す)。
-                // 計画中表示・公共施設ハイライトは編集の邪魔になるためOFF。
-                ApplyLandEditPreset("zone_color", "default", "");
+                ApplyLandEditPreset();
                 break;
 
             case "STATE_EDIT_TRANSIT":
@@ -566,16 +558,14 @@ public class IpcViewCoordinator : MonoBehaviour
     }
 
     /// <summary>
-    /// 地区編集・土地区画編集中の表示。区画・地区を出して、
-    /// どの区画がどの地区に属するかを地表で確認できるようにする。
-    /// 道路・建物の色モードとフラグは呼び出し側が決める
-    /// (地区編集=道路だけ地区色分け+計画中OFF、区画編集=通常表示+計画中ON)。
+    /// 土地区画編集中の表示。区画・地区を出して、
+    /// どの区画がどの地区に属するかを地表で確認できるようにする。道路・建物は計画中も表示する。
     /// </summary>
-    private void ApplyLandEditPreset(string roadMode, string buildingMode, string flags)
+    private void ApplyLandEditPreset()
     {
         ForceLayer("parcel", "border");
-        ForceLayer("road", roadMode, null, flags);
-        ForceLayer("building", buildingMode, null, flags);
+        ForceLayer("road", "default", null, "plan");
+        ForceLayer("building", "default", null, "plan");
         ForceLayer("district", "border_icon");
     }
 

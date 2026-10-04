@@ -53,9 +53,6 @@ public class IpcClient : MonoBehaviour
     // 形状編集の終了通知。UI側が PATCH /parcels/{id} の保存に成功した後に送信される
     // (バックエンドへの送信自体はUI側が行う。edit_path:finish と同じ役割)。
     public event Action OnEditParcelFinishShapeEdit;
-    // 地区統合の確定/取消の通知(UI→Unity)。UI側が POST /zones/{id}/merge を送り終えた後、
-    // または確定パネルでキャンセルされたときに送られる。引数は統合が実行されたかどうか。
-    public event Action<bool> OnEditZoneFinishMerge;
     // オブジェクト単位の表示フィルタ(建設プロジェクトのタグ単位／個別の表示切替)。
     // 引数は「非表示にする建物ID配列」「非表示にするパスID配列」で、差分ではなく全置換。
     // 状態はUnityのセッション内にしか存在せず、バックエンドにもセーブにも残さない。
@@ -686,15 +683,6 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
-                case "edit_zone:finish_merge":
-                    {
-                        // UI側の地区統合の確定(送信済み)/取消の結果。
-                        bool merged = GetParamInt(payload, "merged") != 0;
-                        Debug.Log($"IpcClient: edit_zone:finish_merge -> merged={merged}");
-                        OnEditZoneFinishMerge?.Invoke(merged);
-                    }
-                    break;
-
                 case "parcel:show_front_path":
                     {
                         int parcelId = GetParamInt(payload, "parcel_id");
@@ -1315,40 +1303,6 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_parcel:select_path", payload);
-    }
-
-    /// <summary>
-    /// edit_zone:selected イベントを送信する。
-    /// 地区編集モードで選択中地区が変化したことをUIに通知する。
-    /// </summary>
-    public void EmitEditZoneSelected(int zoneId, string zoneName)
-    {
-        var payload = new Dictionary<string, object>
-        {
-            ["zone_id"] = zoneId,
-            ["zone_name"] = zoneName ?? ""
-        };
-
-        SendEnvelope("edit_zone:selected", payload);
-    }
-
-    /// <summary>
-    /// edit_zone:request_merge イベントを送信する。
-    /// 地区編集モードの統合ツールで「統合元」と「統合先」が決まったことをUIに通知する。
-    /// 統合は地区がひとつ消える不可逆操作のため、Unityは送信せずUIの確定ボタンを待つ
-    /// (実際の POST /zones/{id}/merge はUI側が行い、結果が edit_zone:finish_merge で戻る)。
-    /// </summary>
-    public void EmitEditZoneRequestMerge(int targetZoneId, string targetZoneName, int sourceZoneId, string sourceZoneName)
-    {
-        var payload = new Dictionary<string, object>
-        {
-            ["target_zone_id"] = targetZoneId,
-            ["target_zone_name"] = targetZoneName ?? "",
-            ["source_zone_id"] = sourceZoneId,
-            ["source_zone_name"] = sourceZoneName ?? ""
-        };
-
-        SendEnvelope("edit_zone:request_merge", payload);
     }
 
     /// <summary>

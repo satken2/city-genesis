@@ -6,27 +6,16 @@ using UnityEngine.UI;
 /// <summary>
 /// カーソル追従HUDに表示する1アイコン。
 /// active=false のアイコンは半透明表示になる(OFF状態の吸着など)。
-/// tint に色を指定すると、その色でアイコンを塗る(地区編集の「選択中地区の色チップ」など。
-/// 指定時は active による減光を行わず、指定色をそのまま出す)。
 /// </summary>
 public struct CursorHudIcon
 {
     public Sprite sprite;
     public bool active;
-    public Color? tint;
 
     public CursorHudIcon(Sprite sprite, bool active)
     {
         this.sprite = sprite;
         this.active = active;
-        this.tint = null;
-    }
-
-    public CursorHudIcon(Sprite sprite, Color tint)
-    {
-        this.sprite = sprite;
-        this.active = true;
-        this.tint = tint;
     }
 }
 
@@ -43,8 +32,7 @@ public struct CursorHudIcon
 ///   カーソルからのオフセットをツールチップ(+15,-15)とずらして重なりを避ける。
 /// - Canvas は TooltipManager と同型のコード生成。GraphicRaycaster は付けない
 ///   (InputHandler の EventSystem 判定に干渉させないため)。
-/// - テキストは `UiFontProvider` の多言語フォントで描くため日本語も表示できる
-///   (地区編集モードが選択中の地区名を出す)。
+/// - テキストは `UiFontProvider` の多言語フォントで描くため日本語も表示できる。
 /// - アイコンImageはプールし、毎フレームは sprite/色 の差し替えのみ行う(GC・Rebuild抑制)。
 /// - ラジアルメニュー表示中は同じ情報を大きく表示しているため自動で隠れる。
 /// </summary>
@@ -197,8 +185,7 @@ public class CursorStatusHud : MonoBehaviour
             {
                 iconPool[i].enabled = true;
                 iconPool[i].sprite = icons[i].sprite;
-                iconPool[i].color = icons[i].tint
-                    ?? (icons[i].active ? ICON_COLOR_ACTIVE : ICON_COLOR_INACTIVE);
+                iconPool[i].color = icons[i].active ? ICON_COLOR_ACTIVE : ICON_COLOR_INACTIVE;
             }
             else
             {

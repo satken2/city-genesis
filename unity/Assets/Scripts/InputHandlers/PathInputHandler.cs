@@ -47,9 +47,6 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             case InputMode.MODE_NORMAL:
                 HandleNormalClick();
                 break;
-            case InputMode.MODE_ZONE_EDIT:
-                HandleZoneEditClick();
-                break;
             case InputMode.MODE_PARCEL_CREATION_PATH:
                 HandleParcelCreationClick();
                 break;
@@ -150,12 +147,6 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             return;
         }
 
-        // 地区編集モードではツールに応じたツールチップを表示
-        if (mode == InputMode.MODE_ZONE_EDIT)
-        {
-            TooltipManager.Instance?.Show(BuildZoneEditTooltip());
-        }
-
         // ハイライト表示
         if (visualModeObject != null)
         {
@@ -170,7 +161,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             visualModeObject.SetHover(false);
         }
 
-        if (mode == InputMode.MODE_ZONE_EDIT || mode == InputMode.MODE_PATH_MERGE)
+        if (mode == InputMode.MODE_PATH_MERGE)
         {
             TooltipManager.Instance?.Hide();
         }
@@ -200,18 +191,6 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
 
             // 編集モードの場合は従来通り
             Debug.Log($"道路編集モードでパス {pathId} が右クリックされました");
-        }
-        // 地区編集モードでの右クリック: この道路が属する地区を操作対象(拡張先・統合先)に選ぶ
-        else if (mode == InputMode.MODE_ZONE_EDIT)
-        {
-            PathSummary pathData = pathManager?.GetPathData(pathId);
-            int zoneId = pathData?.zone_id ?? 0;
-            if (zoneId <= 0)
-            {
-                TooltipManager.Instance?.Show("この道路は地区に属していません");
-                return;
-            }
-            ZoneEditContext.Instance?.SelectZone(zoneId);
         }
     }
 
@@ -339,117 +318,6 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
         return parcelEditorManager != null &&
                parcelEditorManager.enabled &&
                parcelEditorManager.IsPathSelectionMode();
-    }
-
-    /// <summary>
-    /// 地区編集モードで街路にホバーしたときのツールチップ文言を組み立てる。
-    /// ツールと選択状態によって「次に何が起きるか」が変わるため、その場の操作結果を書く。
-    /// </summary>
-    private string BuildZoneEditTooltip()
-    {
-        var ctx = ZoneEditContext.Instance;
-        if (ctx == null) return "";
-
-        switch (ctx.CurrentTool)
-        {
-            case ZoneEditTool.Create:
-                return "左クリックで新規地区を作成 / 右クリックで地区を選択";
-            case ZoneEditTool.Expand:
-                if (ctx.SelectedZoneId <= 0)
-                {
-                    return "右クリックで拡張先の地区を選択";
-                }
-                return $"左クリックで「{ctx.GetSelectedZoneName()}」に追加 / 右クリックで拡張先を変更";
-            default:
-                if (ctx.SelectedZoneId <= 0)
-                {
-                    return "右クリックで統合先の地区を選択";
-                }
-                return $"左クリックでこの道路の地区を「{ctx.GetSelectedZoneName()}」へ統合";
-        }
-    }
-
-    /// <summary>
-    /// 地区編集モードでのパスクリック処理。ツールは Ctrlラジアルメニュー
-    /// (ZoneEditControlMenu)で切り替え、いずれも「右クリックで対象地区を選び、左クリックで適用」。
-    ///
-    /// - 作成ツール(Create): クリックした街路を含む新規地区を即座に作成する
-    /// - 拡張ツール(Expand): クリックした街路を選択中地区へ即座に取り込む
-    /// - 統合ツール(Merge): クリックした街路が属する地区を、選択中地区へ統合するようUIへ要求する
-    ///
-    /// 作成・拡張のバックエンド送信は ZoneEditContext が直接行う(3Dジェスチャで完結する操作のため、
-    /// パネル確定型のようにUI(Tauri)を経由しない)。統合だけは不可逆なのでUIの確定ボタンを挟む。
-    /// </summary>
-    private void HandleZoneEditClick()
-    {
-        var ctx = ZoneEditContext.Instance;
-        if (ctx == null) return;
-
-        PathSummary pathData = pathManager?.GetPathData(pathId);
-
-        // PATH_STREET以外は選択不可
-        if (pathData != null && pathData.path_type != Constants.PATH_STREET)
-        {
-            TooltipManager.Instance?.Show("この道路は選択できません");
-            return;
-        }
-
-        switch (ctx.CurrentTool)
-        {
-            case ZoneEditTool.Create:
-                ctx.CreateZone(pathId);
-                break;
-
-            case ZoneEditTool.Expand:
-                if (ctx.SelectedZoneId <= 0)
-                {
-                    TooltipManager.Instance?.Show("先に右クリックで拡張先の地区を選択してください");
-                    return;
-                }
-                if (pathData != null && pathData.zone_id == ctx.SelectedZoneId)
-                {
-                    TooltipManager.Instance?.Show("この道路はすでにこの地区に属しています");
-                    return;
-                }
-                // 飛び地の地区を作らないよう、選択中地区の道路と繋がっている街路だけ取り込む
-                // (バックエンドの batch-zone は1本だけの割当だと連続性を検証しないため、
-                //  ここで弾かないと離れた道路が地区に混ざる)。
-                if (!IsConnectedToZone(ctx.SelectedZoneId))
-                {
-                    TooltipManager.Instance?.Show("この道路は地区と繋がっていません");
-                    return;
-                }
-                ctx.ExpandZone(pathId);
-                break;
-
-            case ZoneEditTool.Merge:
-                if (ctx.SelectedZoneId <= 0)
-                {
-                    TooltipManager.Instance?.Show("先に右クリックで統合先の地区を選択してください");
-                    return;
-                }
-                int sourceZoneId = pathData?.zone_id ?? 0;
-                if (sourceZoneId <= 0)
-                {
-                    TooltipManager.Instance?.Show("この道路は地区に属していません");
-                    return;
-                }
-                ctx.RequestMerge(sourceZoneId);
-                break;
-        }
-    }
-
-    /// <summary>
-    /// このパスが、指定地区に所属する道路群とグラフ上で繋がっているかを判定する。
-    /// 判定対象はロード済みのパスキャッシュに限られるが、隣接の有無を見るだけなので
-    /// 対象地区の道路がカーソル周辺にロードされていれば十分に機能する。
-    /// </summary>
-    private bool IsConnectedToZone(int zoneId)
-    {
-        if (pathManager == null) return true;
-        var zonePathIds = pathManager.GetZonePathIds(zoneId);
-        if (zonePathIds.Count == 0) return true;
-        return pathManager.IsPathConnectedToSet(pathId, zonePathIds);
     }
 
     /// <summary>

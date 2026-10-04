@@ -51,6 +51,7 @@ const ScenarioSignWindow = lazy(() => import("./components/template/ScenarioSign
 const SaveListWindow = lazy(() => import("./components/taskbar/SaveListWindow").then(m => ({ default: m.SaveListWindow })));
 const NewGameWindow = lazy(() => import("./components/taskbar/NewGameWindow").then(m => ({ default: m.NewGameWindow })));
 const CityRenameWindow = lazy(() => import("./components/taskbar/CityRenameWindow").then(m => ({ default: m.CityRenameWindow })));
+const ClimateSettingsWindow = lazy(() => import("./components/climate/ClimateSettingsWindow").then(m => ({ default: m.ClimateSettingsWindow })));
 const SystemStatsWindow = lazy(() => import("./components/statistics/SystemStatsWindow").then(m => ({ default: m.SystemStatsWindow })));
 const ResourceDetailPanel = lazy(() => import("./components/resource/ResourceDetailPanel").then(m => ({ default: m.ResourceDetailPanel })));
 const ResourceConstructionPanel = lazy(() => import("./components/resource/ResourceConstructionPanel").then(m => ({ default: m.ResourceConstructionPanel })));
@@ -98,7 +99,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_sign", "scenario_metadata", "new_game", "city_rename", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_sign", "scenario_metadata", "new_game", "city_rename", "climate_settings", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -547,6 +548,8 @@ function App() {
               <NewGameWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "city_rename" ? (
               <CityRenameWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
+            ) : context.window_type === "climate_settings" ? (
+              <ClimateSettingsWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "citizen_tracking" ? (
               <CitizenTrackingWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "system_stats" ? (

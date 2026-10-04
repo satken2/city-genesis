@@ -1,0 +1,4202 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="City Genesis - 都市建造経済シミュレーションゲームの設計ドキュメント">
+      
+      
+      
+        <link rel="canonical" href="https://city-genesis-docs.pages.dev/economics/22_%E4%BA%88%E7%AE%97%E7%AE%A1%E7%90%86/">
+      
+      
+        <link rel="prev" href="../21_%E5%A4%A9%E7%84%B6%E8%B3%87%E6%BA%90/">
+      
+      
+        <link rel="next" href="../23_%E6%96%BD%E6%94%BF%E3%82%B9%E3%82%B3%E3%82%A2/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="ja">
+        
+          <link rel="alternate" href="../../en/economics/22_%E4%BA%88%E7%AE%97%E7%AE%A1%E7%90%86/" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>予算管理 - City Genesis Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+JP:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans JP";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#22-予算管理システム" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href="../.." title="City Genesis Docs" class="md-header__button md-logo" aria-label="City Genesis Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            City Genesis Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              予算管理
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="ダークモードに切り替え"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="ダークモードに切り替え" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="ライトモードに切り替え"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="ライトモードに切り替え" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="言語切り替え">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../en/economics/22_%E4%BA%88%E7%AE%97%E7%AE%A1%E7%90%86/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="検索" placeholder="検索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="検索">
+        
+        <button type="reset" class="md-search__icon md-icon" title="クリア" aria-label="クリア" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            検索を初期化
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/satken2/city-genesis" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="タブ" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  ホーム
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../1_%E5%85%A8%E4%BD%93%E6%A6%82%E8%A6%81/" class="md-tabs__link">
+          
+  
+  
+  経済シミュレーション
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../geometries/A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/" class="md-tabs__link">
+          
+  
+  
+  幾何・グラフィック
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../programs/%E9%83%BD%E5%B8%82%E3%83%9E%E3%83%83%E3%83%97%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E7%B5%8C%E8%B7%AF%E6%A1%88%E5%86%85/" class="md-tabs__link">
+          
+  
+  
+  プログラム連携
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="City Genesis Docs" class="md-nav__button md-logo" aria-label="City Genesis Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    City Genesis Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/satken2/city-genesis" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ホーム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経済シミュレーション
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    経済シミュレーション
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1_%E5%85%A8%E4%BD%93%E6%A6%82%E8%A6%81/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    全体概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25_%E3%82%B2%E3%83%BC%E3%83%A0%E5%86%85%E6%97%A5%E4%BB%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ゲーム内日付
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2_%E7%B5%8C%E6%B8%88%E4%B8%BB%E4%BD%93/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経済主体
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3_%E9%81%93%E8%B7%AF%E7%B6%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路網
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4_%E5%9C%B0%E5%8C%BA%E3%81%A8%E5%9C%9F%E5%9C%B0%E5%8C%BA%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地区と土地区画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../6_%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E6%A9%9F%E9%96%A2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    公共交通機関
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../7_%E9%87%91%E8%9E%8D%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    金融システム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../8_%E5%95%86%E5%93%81%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    商品市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../9_%E7%94%9F%E7%94%A3%E6%B4%BB%E5%8B%95/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    生産活動
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10_%E6%B6%88%E8%B2%BB%E6%B4%BB%E5%8B%95/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    消費活動
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12_%E5%BB%BA%E7%89%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25_%E5%BB%BA%E8%A8%AD%E4%BD%9C%E6%A5%AD%E9%87%8F%E3%81%A8%E6%96%BD%E5%B7%A5%E8%83%BD%E5%8A%9B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建設作業量と施工能力
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../34_%E9%80%A0%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    造成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13_%E4%B8%8D%E5%8B%95%E7%94%A3%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    不動産市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15_%E4%B8%96%E5%B8%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    世帯
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16_%E5%8A%B4%E5%83%8D%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    労働市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17_%E6%95%99%E8%82%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教育
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18_%E7%A7%BB%E6%B0%91/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    移民
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19_%E7%92%B0%E5%A2%83/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20_%E4%BA%8B%E6%95%85%E3%81%A8%E7%81%BD%E5%AE%B3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事故と災害
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21_%E5%A4%A9%E7%84%B6%E8%B3%87%E6%BA%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    天然資源
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    予算管理
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    予算管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#221-予算関連プロパティ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.1. 予算関連プロパティ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#222-予算のライフサイクル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.2. 予算のライフサイクル
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#223-歳入" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.3. 歳入
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="22.3. 歳入">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#税外収入" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        税外収入
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#224-歳出と予算配分" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.4. 歳出と予算配分
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="22.4. 歳出と予算配分">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#支出カテゴリ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        支出カテゴリ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#予算制御の仕組み" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        予算制御の仕組み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#支出カテゴリの判定" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        支出カテゴリの判定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#予算枠外の支出収用補償" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        予算枠外の支出（収用補償）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#225-予算の執行制御" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.5. 予算の執行制御
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="22.5. 予算の執行制御">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#継続的支出商品調達家賃賃金は執行時にカットしない" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        継続的支出（商品調達・家賃・賃金）は執行時にカットしない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#施設別の稼働率目標" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        施設別の稼働率目標
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#予算に基づく雇用枠の調整" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        予算に基づく雇用枠の調整
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#予算変更時の即時反映" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        予算変更時の即時反映
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#公共工事の発注時の資金審査" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        公共工事の発注時の資金審査
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#建設買収の可否判定" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        建設買収の可否判定
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#226-パス需要を肩代わりする代表エージェントの分割" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.6. パス需要を肩代わりする代表エージェントの分割
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#227-公共施設の会計統合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.7. 公共施設の会計統合
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#228-予算の維持と自動調整スケーリングルール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.8. 予算の維持と自動調整（スケーリング）ルール
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="22.8. 予算の維持と自動調整（スケーリング）ルール">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#導出と資金充足時" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        導出と資金充足時
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#資金不足時自動調整" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        資金不足時（自動調整）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="資金不足時（自動調整）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#削減の適用フロー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        削減の適用フロー：
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#優先度tierのカスタマイズ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        優先度（Tier）のカスタマイズ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23_%E6%96%BD%E6%94%BF%E3%82%B9%E3%82%B3%E3%82%A2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    施政スコア
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24_%E9%81%94%E6%88%90%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    達成クエスト
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26_%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E7%B6%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ網
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28_%E8%87%AA%E7%84%B6%E7%99%BA%E7%94%9F%E3%82%B9%E3%83%97%E3%83%AD%E3%83%BC%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    自然発生スプロール
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../29_%E9%A7%85%E3%81%A8%E9%A7%85%E8%88%8E/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    駅と駅舎
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../30_%E4%BA%BA%E5%93%A1%E6%90%AC%E9%80%81%E8%A8%AD%E5%82%99/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    人員搬送設備
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../31_%E8%A6%B3%E5%85%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    観光
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../33_%E8%B2%A8%E7%89%A9%E8%BC%B8%E9%80%81/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    貨物輸送
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    幾何・グラフィック
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    幾何・グラフィック
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    パス形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/B_%E5%9C%9F%E5%9C%B0%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    土地形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/C_%E5%BB%BA%E7%89%A9%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/D_%E5%9C%B0%E5%BD%A2%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/E_LOD%E5%87%A6%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LOD処理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    建物メッシュの生成
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F_%E5%BB%BA%E7%89%A9%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    共通仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    モジュラー建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地面アセット
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    既成建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    港湾岸壁
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    工事中建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マッシュアップ建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F7_%E8%A7%A3%E4%BD%93%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    解体中建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F8_%E5%80%92%E5%A3%8A%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    倒壊建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F9_%E8%BB%8A%E4%B8%A1%E5%9F%BA%E5%9C%B0%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両基地
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F10_%E3%82%AA%E3%83%BC%E3%83%97%E3%83%B3%E3%82%B9%E3%83%9A%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    オープンスペース
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    露天掘り
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/H_%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E3%83%87%E3%83%BC%E3%82%BF%E3%83%AD%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    バックエンドデータロード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物パーツ作成マニュアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/J_%E3%83%91%E3%82%B9%E3%81%AE%E4%BA%A4%E5%B7%AE%E5%87%A6%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    パスの交差処理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/L_%E5%9C%B0%E5%BD%A2%E3%83%87%E3%83%BC%E3%82%BF%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形データ作成マニュアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/M_%E5%9C%B0%E5%BD%A2%E3%83%97%E3%83%AD%E3%83%83%E3%83%97/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形プロップ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    線路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両の走行描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/T_%E4%BA%A4%E9%80%9A%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%A8%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB%E3%81%AE%E6%95%B4%E5%90%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交通シミュレーションと走行描画の整合
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/P_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E5%85%B1%E6%9C%89%E3%81%A8%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マテリアル共有とエクスポート
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/Q_%E9%A7%85%E8%88%8E%E3%83%91%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    駅舎パスのメッシュ生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/R_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E3%81%AE%E8%A7%A3%E6%B1%BA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マテリアルの解決
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/S_%E7%81%AB%E7%81%BD%E3%82%A8%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    火災エフェクトの描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/U_%E5%A4%A9%E6%B0%97%E3%81%A8%E7%92%B0%E5%A2%83%E5%85%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    天気と環境光
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/V_%E7%92%B0%E5%A2%83%E6%BC%94%E5%87%BA%E3%81%AE%E4%B9%97%E3%82%8A%E7%89%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境演出の乗り物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometries/W_%E6%AD%A9%E8%A1%8C%E8%80%85%E3%81%AE%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    歩行者の描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プログラム連携
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    プログラム連携
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%83%BD%E5%B8%82%E3%83%9E%E3%83%83%E3%83%97%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E7%B5%8C%E8%B7%AF%E6%A1%88%E5%86%85/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    都市マップの検索と経路案内
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%9C%B0%E5%8C%BA%E7%B7%A8%E9%9B%86%E3%83%91%E3%83%8D%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地区編集パネル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%81%93%E8%B7%AF%E3%81%AE%E8%A9%B3%E7%B4%B0%E3%81%A8%E9%81%93%E8%B7%AF%E5%90%8D/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路の詳細と道路名
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%B8%82%E6%B0%91%E3%81%AE%E8%BF%BD%E8%B7%A1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    市民の追跡
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/IPC%E9%80%A3%E6%90%BA%E3%81%AE%E6%95%B4%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPC連携
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E9%80%A3%E6%90%BA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コンポーネント連携
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/UI%E5%85%B1%E9%80%9A%E5%9F%BA%E7%9B%A4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI共通基盤
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%97%E3%83%AC%E3%82%A4%E3%83%A2%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プレイモード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%8B%E3%83%B3%E3%82%B0%E3%81%A8%E4%BA%92%E6%8F%9B%E6%80%A7/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    バージョニングと互換性
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%BB%E3%83%BC%E3%83%96%E3%83%87%E3%83%BC%E3%82%BF%E4%BB%95%E6%A7%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    セーブデータ仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B7%E3%83%8A%E3%83%AA%E3%82%AA%E5%88%B6%E4%BD%9C%E3%81%A8%E9%85%8D%E5%B8%83/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    シナリオ制作と配布
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB%E5%9F%BA%E7%9B%A4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    チュートリアル基盤
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%A2%E3%83%83%E3%82%AF%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    モックバックエンド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/Unity%E5%85%A5%E5%8A%9B%E5%88%B6%E5%BE%A1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity入力制御
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/Unity%E8%A1%A8%E7%A4%BA%E3%83%A2%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity表示モード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E3%83%8F%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    公共交通ハイライト
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%A2%E3%83%A9%E3%83%BC%E3%83%88%E3%83%95%E3%83%A9%E3%82%B0%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アラートフラグ管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%80%9A%E7%9F%A5%E3%83%AC%E3%83%99%E3%83%AB%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    通知レベル管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E9%85%8D%E7%BD%AE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ファイル配置
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E7%B4%A0%E6%9D%90%E3%82%AF%E3%83%AC%E3%82%B8%E3%83%83%E3%83%88%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    素材クレジット管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B5%E3%82%A6%E3%83%B3%E3%83%89%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    サウンドシステム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%81%94%E6%88%90%E7%9B%AE%E6%A8%99%E3%82%A6%E3%82%A3%E3%83%B3%E3%83%89%E3%82%A6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    達成目標ウィンドウ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%BB%BA%E8%A8%AD%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建設プロジェクト管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#221-予算関連プロパティ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.1. 予算関連プロパティ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#222-予算のライフサイクル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.2. 予算のライフサイクル
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#223-歳入" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.3. 歳入
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="22.3. 歳入">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#税外収入" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        税外収入
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#224-歳出と予算配分" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.4. 歳出と予算配分
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="22.4. 歳出と予算配分">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#支出カテゴリ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        支出カテゴリ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#予算制御の仕組み" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        予算制御の仕組み
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#支出カテゴリの判定" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        支出カテゴリの判定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#予算枠外の支出収用補償" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        予算枠外の支出（収用補償）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#225-予算の執行制御" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.5. 予算の執行制御
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="22.5. 予算の執行制御">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#継続的支出商品調達家賃賃金は執行時にカットしない" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        継続的支出（商品調達・家賃・賃金）は執行時にカットしない
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#施設別の稼働率目標" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        施設別の稼働率目標
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#予算に基づく雇用枠の調整" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        予算に基づく雇用枠の調整
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#予算変更時の即時反映" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        予算変更時の即時反映
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#公共工事の発注時の資金審査" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        公共工事の発注時の資金審査
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#建設買収の可否判定" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        建設買収の可否判定
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#226-パス需要を肩代わりする代表エージェントの分割" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.6. パス需要を肩代わりする代表エージェントの分割
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#227-公共施設の会計統合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.7. 公共施設の会計統合
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#228-予算の維持と自動調整スケーリングルール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        22.8. 予算の維持と自動調整（スケーリング）ルール
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="22.8. 予算の維持と自動調整（スケーリング）ルール">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#導出と資金充足時" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        導出と資金充足時
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#資金不足時自動調整" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        資金不足時（自動調整）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="資金不足時（自動調整）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#削減の適用フロー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        削減の適用フロー：
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#優先度tierのカスタマイズ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        優先度（Tier）のカスタマイズ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="22-予算管理システム">22. 予算管理システム</h1>
+<p>都市の財政運営を管理するシステムである。市政府（プレイヤー）の歳入・歳出の仕組みと、予算の配分・執行・制御のルールについて述べる。</p>
+<h2 id="221-予算関連プロパティ">22.1. 予算関連プロパティ</h2>
+<table>
+<thead>
+<tr>
+<th>プロパティ</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>city.category_ratio</code></td>
+<td>プレイヤーが設定するカテゴリ別「必要額に対する比率」。プレイヤーが入力するのは金額ではなくこの比率である。全カテゴリ共通で 0〜1.5。1.0 で生産計画どおりの運転に必要な満額の予算になる。基準額は前エポックの実績支出を参照しないため、<strong>設定はプレイヤーが変えるまで恒久的に有効</strong>（自動リセットはない）。比率を下げると予算がキャップとなり、そのカテゴリの公共施設は比率にほぼ比例した実効稼働率まで絞られる。余力運転する公共施設（<a href="../9_%E7%94%9F%E7%94%A3%E6%B4%BB%E5%8B%95/">9_生産活動</a>の余力倍率参照）では比率が生産計画への乗率として双方向に働き、100% 超に設定すると標準余力の上にさらに待機生産・雇用を上乗せできる。</td>
+</tr>
+<tr>
+<td><code>agent.utilization_target</code> / <code>path.utilization_target</code></td>
+<td>施設・道路ごとに設定する稼働率目標。公共施設の実効稼働率はこの施設別の値のみで決まる。稼働中の施設では 0〜1（稼働率）、建設中の建物・道路では 0〜5（建設スピード倍率。最大5倍速）。予算とは独立に効く（<a href="./#施設別の稼働率目標"></a>）。</td>
+</tr>
+<tr>
+<td><code>city.prev_total_expense</code></td>
+<td>前エポックの実績支出のスナップショット。「前実績」の表示に使える参考値であり、予算導出の基準ではない。エポック終了時に <code>city.total_expense</code> からコピーされる。</td>
+</tr>
+<tr>
+<td><code>city.projected_required</code></td>
+<td>カテゴリ別の「必要額」。各公共施設が生産計画どおり稼働した場合の1エポック見込み費用であり、予算導出の基準額になる。生産計画は需要・稼働率目標・雇用の状況・原材料の調達状況を織り込んでいるため、高度人材が揃わず稼働できない施設の原材料費のように、実際には支出されない費用は含まれない。</td>
+</tr>
+<tr>
+<td><code>city.savings_target</code></td>
+<td>貯蓄目標。配分前に現預金からこの額を確保する（実効的により保守的な運営になる）。</td>
+</tr>
+<tr>
+<td><code>city.budgets</code></td>
+<td>当エポックの予算配分（円額）。プレイヤーが直接入力するのではなく、<code>budgets[cat] = 必要量[cat] × category_ratio[cat]</code> として毎エポック導出される。希望合計が現預金を超える場合は Tier 順に自動調整される。</td>
+</tr>
+<tr>
+<td><code>city.budget_auto_adjusted</code></td>
+<td>直近の配分で資金不足による自動調整（比率の強制減）が発生したか。UI が「資金不足のため予算が自動調整されました」と通知するのに使う。</td>
+</tr>
+<tr>
+<td><code>city.effective_category_ratio</code></td>
+<td>自動調整後の実効比率（<code>budgets[cat] / base[cat]</code>）。表示・通知用。</td>
+</tr>
+<tr>
+<td><code>city.savings</code></td>
+<td>配分後に貯蓄として現預金に残った額（＝どのカテゴリにも割り当てなかった余剰現金）。</td>
+</tr>
+<tr>
+<td><code>city.prev_budgets</code></td>
+<td>前エポックの予算配分。エポック終了時に <code>city.budgets</code> からコピーされる。</td>
+</tr>
+<tr>
+<td><code>city.total_expense</code></td>
+<td>前エポックのカテゴリ別実績支出。エポック中のシミュレーション処理で加算され、次エポック開始時にリセットされる。各カテゴリは自身の予算枠内でのみ執行される（共有プールによる補填は廃止）。</td>
+</tr>
+<tr>
+<td><code>city.total_revenue</code></td>
+<td>前エポックのカテゴリ別収入。エポック中のシミュレーション処理で加算され、次エポック開始時にリセットされる。</td>
+</tr>
+<tr>
+<td><code>agent.reserves</code></td>
+<td>市政府の現預金。予算配分後の残額が貯蓄となる。</td>
+</tr>
+<tr>
+<td><code>city.city_reserves_history</code></td>
+<td>市政府の現預金のエポック末スナップショット（リングバッファ）。経済主体の <code>reserves</code> は現在値しか持たず過去を遡れないため、市政府ぶんだけを都市側で時系列として保持する。エポック終了時に確定し、<code>GET /api/v1/city/budgets</code> の <code>reserves_history</code>（<code>[{epoch, reserves}]</code> の古い順リスト）として予算ウィンドウの現金推移グラフに供給される。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="222-予算のライフサイクル">22.2. 予算のライフサイクル</h2>
+<p>1エポックにおける予算は、以下の段階を経て循環する。</p>
+<ol>
+<li><strong>比率の設定</strong> ... プレイヤーはユーザー操作フェーズで、各支出カテゴリの「必要額に対する比率」（<code>city.category_ratio</code>、0〜1.5）、貯蓄目標（<code>city.savings_target</code>）、削減優先度（<code>city.budget_tiers</code>）を設定する。金額そのものは入力しない。比率 1.0 = 生産計画どおりの稼働に必要な満額であり、都市が成長して施設が増えれば必要量も自動的に伸びるため、毎エポック調整し直す必要がない。設定はプレイヤーが変えるまで維持される。</li>
+<li><strong>予算の導出</strong> ... <code>budgets[cat] = 必要量[cat] × category_ratio[cat]</code> として予算額が導出される。必要量は「各公共施設が生産計画どおり稼働した場合の1エポック見込み費用」である。希望合計（Σ desired）が配分可能額（現預金 − 貯蓄目標）を超える場合は、Tier 順に比率を自動的に削減して収める（<a href="./#228-予算の維持と自動調整スケーリングルール"></a>）。導出はエポック開始時（シミュレーション処理の直前）に行われるため、ユーザー操作フェーズ中の操作（修繕の開始、建設の発注、稼働率目標の変更など）で変動した必要量・現預金は必ずそのエポックの配分に反映される。比率変更API（<code>PATCH /budgets</code>）でも即時に再導出される。</li>
+<li><strong>予算の執行</strong> ... シミュレーション処理の中で支出が行われ、執行額が <code>city.total_expense</code> に加算される。運営カテゴリ（1〜7・11）の支出（商品調達・賃金・家賃）は執行時に予算枠でカットされず、計画された支出は必ず全額実行される（予算は次項の生産計画への反映だけに効く。計画を超過した分は市の貯蓄の取り崩し、貯蓄が尽きれば市政府の債務になる）。建設・修繕・用地買収は残予算の枠内でのみ執行され、案件の実行ペースを予算で直接制御できる。使い残しは市の現預金に貯蓄として残る。</li>
+<li><strong>必要量の捕捉</strong> ... 同じエポックのシミュレーション処理の中で、次の予算導出に使う必要額が <code>city.projected_required</code> に記録される。</li>
+<li><strong>実績の確定</strong> ... エポック終了時に <code>city.budgets</code> が <code>city.prev_budgets</code> に、<code>city.total_expense</code> が <code>city.prev_total_expense</code> にコピーされ、そのときの市政府の現預金が <code>city.city_reserves_history</code> に記録される（履歴スナップショットのみで、ここでは予算の導出は行われない）。この記録はエポック終了時点の値なので、その後のユーザー操作フェーズでの現金変動（収用・建設発注など）は当エポックの点には含まれず、次エポック末の点に現れる。<code>city.total_expense</code>・<code>city.total_revenue</code>・<code>city.projected_required</code> は次エポック開始時にリセットされる。</li>
+</ol>
+<h2 id="223-歳入">22.3. 歳入</h2>
+<p>市政府の歳入は主に税収である。各税目はエポック内のシミュレーション処理で徴収され、<code>city.total_revenue</code> にカテゴリ別に蓄積される。</p>
+<table>
+<thead>
+<tr>
+<th>税目</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>消費税</td>
+<td>小売財（<code>GOODS_RETAIL</code>）の取引に対して外税として課税。</td>
+</tr>
+<tr>
+<td>輸入関税</td>
+<td>輸出入拠点からの輸入調達に対して商品単位で課税。</td>
+</tr>
+<tr>
+<td>所得税</td>
+<td>賃金支払い時に内税として控除される。</td>
+</tr>
+<tr>
+<td>法人税</td>
+<td>一般施設（<code>TYPE_STANDARD</code>）の利益（収入 − 支出）が正の場合に課税される。</td>
+</tr>
+</tbody>
+</table>
+<p>税率は <code>city</code> のプロパティとして保持され、フロントエンドから変更可能である。</p>
+<h3 id="税外収入">税外収入</h3>
+<p>税収以外にも、市政府には次の税外収入があり、いずれも <code>city.total_revenue</code> に計上される。</p>
+<table>
+<thead>
+<tr>
+<th>税外収入</th>
+<th>計上先のキー</th>
+<th>概要</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>公営事業収入</td>
+<td>施設のコストカテゴリ（<code>LEDGER_CITYHALL</code> 〜 <code>LEDGER_OTHER</code>）</td>
+<td>公営施設の事業収益（公共サービスの売上）と、公営住宅・公共ビルの家賃収入。支出側と同じ予算カテゴリで計上されるため、カテゴリごとに「その事業がどれだけ稼いだか」を歳出と対比できる。</td>
+</tr>
+</tbody>
+</table>
+<p>なお、市有地を民間の建物着工へ売却したときの土地代（払い下げ）は市政府ではなく中央銀行が受け取るため、市政府の収入には含まれない（<a href="../7_%E9%87%91%E8%9E%8D%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/">7_金融システム</a>・<a href="../12_%E5%BB%BA%E7%89%A9/">12_建物</a>）。</p>
+<h2 id="224-歳出と予算配分">22.4. 歳出と予算配分</h2>
+<h3 id="支出カテゴリ">支出カテゴリ</h3>
+<p>市政府の支出は、目的別に以下のカテゴリに分類される。各カテゴリは定数で識別される。</p>
+<table>
+<thead>
+<tr>
+<th>カテゴリ</th>
+<th>定数</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>市政</td>
+<td><code>LEDGER_CITYHALL</code></td>
+<td>市役所の運営費</td>
+</tr>
+<tr>
+<td>医療</td>
+<td><code>LEDGER_MEDICAL</code></td>
+<td>病院・診療所の運営費</td>
+</tr>
+<tr>
+<td>教育</td>
+<td><code>LEDGER_EDUCATION</code></td>
+<td>学校の運営費</td>
+</tr>
+<tr>
+<td>治安</td>
+<td><code>LEDGER_SECURITY</code></td>
+<td>警察署の運営費</td>
+</tr>
+<tr>
+<td>消防</td>
+<td><code>LEDGER_FIRE</code></td>
+<td>消防署の運営費</td>
+</tr>
+<tr>
+<td>インフラ</td>
+<td><code>LEDGER_INFRASTRUCTURE</code></td>
+<td>インフラ施設の運営費</td>
+</tr>
+<tr>
+<td>その他</td>
+<td><code>LEDGER_OTHER</code></td>
+<td>その他公共施設の運営費</td>
+</tr>
+<tr>
+<td>建設</td>
+<td><code>LEDGER_CONSTRUCTION</code></td>
+<td>新規建設（道路・建物）の資金</td>
+</tr>
+<tr>
+<td>修繕</td>
+<td><code>LEDGER_MAINTENANCE</code></td>
+<td>既存施設の修繕資金</td>
+</tr>
+<tr>
+<td>貯蓄</td>
+<td><code>LEDGER_RESERVE</code></td>
+<td>どのカテゴリにも配分しなかった余剰現金。支出カテゴリではなく、<code>savings_target</code> で意図的に積み増すこともできる。</td>
+</tr>
+<tr>
+<td>公共交通</td>
+<td><code>LEDGER_TRANSPORT</code></td>
+<td>公共交通（車両基地・路線）の運営費</td>
+</tr>
+<tr>
+<td>社会保障</td>
+<td><code>LEDGER_WELFARE</code></td>
+<td>世帯への現金給付（失業給付・年金・生活扶助）</td>
+</tr>
+<tr>
+<td>用地買収</td>
+<td><code>LEDGER_LAND_PURCHASE</code></td>
+<td>道路計画と重なる民間の土地区画の自動用地買収（<a href="../3_%E9%81%93%E8%B7%AF%E7%B6%B2/">3_道路網</a>）の買収金</td>
+</tr>
+</tbody>
+</table>
+<h3 id="予算制御の仕組み">予算制御の仕組み</h3>
+<p>支出は大きく3つの目的に分類され、それぞれ異なるタイミングで予算制御が適用される。</p>
+<p><strong>運営予算</strong>（<code>LEDGER_CITYHALL</code> 〜 <code>LEDGER_OTHER</code>）
+市が運営する公共施設のランニングコスト。商品調達・賃金支払い・家賃支払いのタイミングで支出される。各公共施設の variant に設定された <code>cost_category</code> により、どのカテゴリの予算から支出されるかが決まる。</p>
+<p><strong>建設予算</strong>（<code>LEDGER_CONSTRUCTION</code>）
+新規の道路や建物の建設資金。建設中の建物または建設代理エージェントが建設サービス財に支出する際に使用される。</p>
+<p><strong>修繕予算</strong>（<code>LEDGER_MAINTENANCE</code>）
+既存の道路や建物の修繕資金。稼働中の建物または修繕代理エージェントが建設サービス財に支出する際に使用される。</p>
+<p><strong>用地買収予算</strong>（<code>LEDGER_LAND_PURCHASE</code>）
+道路計画と重なる民間の土地区画の自動用地買収（<a href="../3_%E9%81%93%E8%B7%AF%E7%B6%B2/">3_道路網</a>の「民間区画の自動用地買収」）の買収金。必要額は買収交渉中の全区画の買収金見積の合計であり、比率 1.0 なら資金がある限り全交渉が成立できる。比率を下げると 1 エポックに成立する買収が予算内に絞られ（残りは持ち越し）、比率 0 で買収を停止できる。</p>
+<p><strong>社会保障予算</strong>（<code>LEDGER_WELFARE</code>）
+市政府から世帯への現金給付。給付は次の3種で、いずれも世帯単位で支払われる。</p>
+<ul>
+<li><strong>失業給付</strong>: 就労可能年齢以上・退職年齢未満で、雇用主も就学先もない市民1人あたり「所属地区の標準賃金 × 失業給付率 × エポック日数」。</li>
+<li><strong>年金</strong>: 退職年齢以上の市民1人あたり「所属地区の標準賃金 × 年金給付率 × エポック日数」。</li>
+<li><strong>生活扶助</strong>: 世帯の現金残高に失業給付・年金を加えても最低生活費（必需品の最低需要と家賃）に届かない世帯への差額補填。借金（負の残高）は補填しない。</li>
+</ul>
+<p>必要額は当エポックの給付必要額そのものであり、都市の失業・高齢化・困窮が増えれば自動的に増え、好況で減れば自動的に減る（歳出側の自動安定化装置）。比率を下げると全給付が同率で按分され、比率 0 で給付を停止できる。退職年齢と各給付率（<code>retirement_age</code>、<code>unemployment_benefit_ratio</code>、<code>pension_benefit_ratio</code>、<code>livelihood_assistance_ratio</code>）はプレイヤーが設定する都市の政策で、規制設定（<code>/api/v1/city/regulations</code>）の一部として保持・変更される。</p>
+<p><strong>貯蓄</strong>（<code>LEDGER_RESERVE</code>）
+支出カテゴリではなく、どのカテゴリにも配分しなかった余剰現金を指す。予算は「必要額 × 比率」で
+導出されるため、比率を満額（1.0）にしても現預金に余りがあればその分が貯蓄として残る。
+<code>savings_target</code> を設定すると、配分前に現預金からその額を確保でき、意図的に貯蓄を積み増せる
+（その分だけ配分可能額が減り、より保守的な運営になる）。</p>
+<h3 id="支出カテゴリの判定">支出カテゴリの判定</h3>
+<p>公共施設が支出を行う際、その支出がどのカテゴリに計上されるかは、支出元の公共施設の variant に設定された <code>cost_category</code> により一意的に決まる。</p>
+<p>社会保障の給付は実体のある施設を持たない。予算パネルの施設一覧では給付種別（失業給付・年金・生活扶助）の3行として示され、行の合計がカテゴリの必要額と一致する。</p>
+<p>建設・修繕のカテゴリ判定は、需要を処理する代表エージェントの種類によって決まる。建設代理エージェント（<code>VARIANT_ZONE_CONSTRUCTION</code>）の支出は建設カテゴリ、修繕代理エージェント（<code>VARIANT_ZONE_CONSTRUCTION_MAINTENANCE</code>）の支出は修繕カテゴリとして扱われる。</p>
+<h3 id="予算枠外の支出収用補償">予算枠外の支出（収用補償）</h3>
+<p>上記の予算カテゴリとは別に、市が民間所有の土地区画を収用したとき、所有者へ支払う土地代（収用補償。市 → 所有者）が <code>LEDGER_LAND_ACQUISITION</code> のキーで <code>city.total_expense</code> に計上される。これは歳出側にのみ現れる台帳キーであり、予算カテゴリではないため予算の配分・制御には関与しない。収用補償は予算枠であらかじめ計画する支出ではなく、実際に収用が発生したときに実支出として事後記録される。</p>
+<h2 id="225-予算の執行制御">22.5. 予算の執行制御</h2>
+<p>予算がどう支出を制御するかは、運営カテゴリと建設系カテゴリで異なる。</p>
+<h3 id="継続的支出商品調達家賃賃金は執行時にカットしない">継続的支出（商品調達・家賃・賃金）は執行時にカットしない</h3>
+<p>商品調達・家賃・賃金は、公共施設の運営に不可欠な継続的支出である。これらは執行時に予算枠でカットされず、生産計画（雇用枠・生産目標・調達量）が立った支出は必ず全額実行される。予算の制御は生産計画への事前反映（後述の「予算に基づく雇用枠の調整」）だけに効かせる方式であり、これにより「計画上は稼働できるはずの施設が、執行時の予算切れで一部の資材だけ調達できず稼働不能になる」事態は起きない。</p>
+<p>計画を超過した支出（物価上昇による資材費の期中変動など）は市の貯蓄の取り崩しとして吸収され、貯蓄が尽きれば市政府の債務（現預金のマイナス）になる。債務超過に陥ると次のエポックの予算導出で全カテゴリの予算が 0 になり、生産計画が全面縮小されて雇用・調達が止まる。つまり借金はできるが、その代償は翌エポック以降の公共サービスの縮小として払うことになる。</p>
+<p>建設は残予算の枠内で執行され、「建設サービス財の部分発注 → 工期が延びる」形で1エポックあたりの支出が減る（総額は不変）ため、予算比率を下げるだけでも建設を減速できる。</p>
+<p>社会保障も残予算の枠内で執行される。必要額が枠を超える場合は全世帯への給付が同率で按分され、枠が 0（比率 0 または債務超過）なら給付されない。</p>
+<h3 id="施設別の稼働率目標">施設別の稼働率目標</h3>
+<p>公共施設の実効稼働率は、施設・道路ごとに設定する稼働率目標（<code>utilization_target</code>）のみで決まる。稼働率目標は予算とは独立に効くため、予算が潤沢でも特定の施設を低稼働で運転して支出を抑える、といった操作ができる。</p>
+<ul>
+<li><strong>稼働中の施設</strong> ... 稼働率目標（0〜1、標準1.0）が生産計画に反映され、その施設の雇用枠・生産目標・資材需要が比率に応じて絞られる。</li>
+<li><strong>建設中の建物・道路</strong> ... 稼働率目標が「建設スピード倍率」（0〜5、標準1.0、最大5倍速）として働き、1エポックあたりの建設サービス財需要に乗算される。スピードを下げると1エポックの支出が減る分だけ工期が延びる（総建設費は不変）。</li>
+<li><strong>修繕</strong> ... 稼働率目標による調整はない。修繕のペースを落としたい場合は修繕予算の比率を下げる。建設サービス財の部分発注により修繕完了までのエポック数が延びる形で1エポックあたりの支出が減る（総修繕体積は不変）。</li>
+</ul>
+<h3 id="予算に基づく雇用枠の調整">予算に基づく雇用枠の調整</h3>
+<p>公共施設の雇用枠（<code>quota</code>）は、生産計画（<a href="../9_%E7%94%9F%E7%94%A3%E6%B4%BB%E5%8B%95/">9_生産活動</a>）で市場需要に基づいて計算された後、「<strong>次エポックに配分される予算の見込み額</strong>」（必要額 × 実効比率 <code>effective_category_ratio</code>）と照合される。照合先が当エポック予算の使い残しではないのは、この計画が実行されるのは次エポックであり、次エポックには「必要量 × 比率」で新しい予算が配分されるためである。実効比率を使うため、資金不足による自動調整や債務超過（全予算 0）は、この照合を通じて計画の縮小として反映される。各カテゴリの計画支出がこの見込み額を超過する場合、そのカテゴリに属する全公共施設の以下の計画値が追加で等比縮小される。</p>
+<ul>
+<li><code>quota</code>（雇用枠）</li>
+<li><code>supply_target_amount</code>（生産目標）</li>
+<li><code>demand_amount</code>（原材料・投資財の需要量）</li>
+</ul>
+<p>縮小の際、現雇用者への賃金・現占有面積の家賃のように計画を縮小しても直ちには減らない「確定分」は温存され、追加採用や調達予定のような「変動分」が優先的に削られる。予算見込みが確定分にも満たない場合は計画値が 0 まで縮小される。運営支出は執行時にカットされないため、この計画キャップが運営カテゴリの支出を抑える唯一の制御点であり、確定分と実支出のズレは市の貯蓄・債務が吸収する。</p>
+<p>これにより、比率を満額（1.0）にしていれば雇用枠・生産目標・調達量は市場需要どおりに維持され、比率を下げるとそれらが比率にほぼ比例して縮小されて、次エポックの労働マッチングフェーズで過剰人員の解雇が自然に発生する。余力運転する公共施設では比率を 1.0 超に上げると雇用枠・生産目標・調達量が同率で拡大され（生産目標は施設の生産能力が上限）、標準余力を超える待機体制を予算で購入できる。</p>
+<h3 id="予算変更時の即時反映">予算変更時の即時反映</h3>
+<p>プレイヤーがユーザー操作フェーズで予算を変更した場合、変更直後に生産計画が再計算される。これにより、予算増額に伴う雇用枠の回復や、予算削減に伴う雇用枠の縮小が次エポックの開始までに確定し、プレイヤーの予算操作と実際の雇用調整の間にラグが生じない。</p>
+<p>予算の読み書きは <code>GET /api/v1/city/budgets</code> と <code>PATCH /api/v1/city/budgets</code> で行う。PATCH で設定できるのは比率（<code>category_ratio</code>）・貯蓄目標（<code>savings_target</code>）・維持優先度（<code>budget_tiers</code>）で、存在しないカテゴリIDは無視され、範囲外の値はクランプされる。変更は即座に予算額へ再導出され、上記の生産計画の再計算を伴うため軽い処理ではない。応答は GET と同じ形で再導出後の値を返す。</p>
+<p>予算の対象一覧 <code>GET /api/v1/city/budgets/agents</code>（<code>category_id</code> で絞り込み可）は、カテゴリに寄与する対象ごとの前エポック実績（<code>actual_expense</code>）と次エポック見込み（<code>projected_expense</code>）を返す。行の <code>kind</code> は <code>agent</code>（公共施設）・<code>path</code>（道路等の建設・修繕）・<code>parcel</code>（用地買収）に加えて、実体のエンティティを持たない <code>welfare</code>（社会保障の給付種別。<code>welfare_kind</code>=<code>unemployment</code>/<code>pension</code>/<code>livelihood</code>）がある。社会保障の前実績は給付種別に分けて記録されないため、カテゴリ合計が失業給付の行にまとめて載る。</p>
+<h3 id="公共工事の発注時の資金審査">公共工事の発注時の資金審査</h3>
+<p>市政府が発注する公共工事（公共建物の新設、道路などパスの新設、パスの造り替え）は、発注の時点で事業費の全額を「未拘束の現金」で賄える場合にだけ受理される。自治体が事業費を歳出予算に全額計上してから着工するのと同じ考え方で、資金が無いまま発注して永遠に進まない案件を最初から作らせない。</p>
+<pre><code>未拘束の現金 = 市政府の現預金 − 貯蓄目標 − 既存案件の拘束額
+受理条件     = 新規案件の推定総額 ≤ 未拘束の現金
+</code></pre>
+<ul>
+<li><strong>拘束額</strong>は、発注済み・計画中（確定前の計画を含む）・建設中の公共建物と、計画中・発注済み・建設中・造り替え中のパスの「残り事業費（残り体積 × 建設サービス財の地区平均価格。パスは面ごとに半分ずつ、その面の地区の平均価格）」に、買収交渉中の土地区画の買収金見積を加えたもの。確定前の計画も含めるため、同じ現金を1回の計画フェーズ中に複数の工事へ二重に当てることはできない。</li>
+<li><strong>推定総額</strong>は建設サービス財の費用に、直接配置で民間区画の自動買収を伴う場合はその買収金見積を加えたもの。</li>
+<li><strong>対象外</strong>: 体積0の工事（未舗装路など建設コスト係数0のパス）は資金に関わらず受理される。取り壊しは審査しない（資金不足で止めると土地が永久に塞がるため）。修繕は自動開始のため対象外で、民間建物はプレイヤーが発注しないため対象外（与信枠で制御される）。テンプレート作成モードでも審査しない。</li>
+<li>市政府が債務超過（現預金が0以下）の間は、未舗装路以外の公共工事は発注できない。</li>
+<li>審査は発注時点の地区平均価格で行うため、着工後に価格が上がれば調達不足は起こり得る。それは建設サービス不足のアラートが受け持つ。</li>
+</ul>
+<p>資金不足の発注はAPIがエラーコード <code>INSUFFICIENT_FUNDS</code> で拒否し、必要額・利用可能額・不足額を併せて返す。建物・パスのコストプレビューAPIも同じ判定結果（<code>affordable</code> / <code>required_total</code> / <code>available_funds</code> / <code>funds_shortfall</code>、審査なしのときは <code>unlimited: true</code> で <code>available_funds</code> は null）を返すため、UIは確定前に不足を表示できる。パスの造り替えの <code>dry_run</code> も同じ項目を返す。</p>
+<p>さらに、形状を描く前の目安として、バリアント（規格・施設）ごとの<strong>基準費用</strong>と現在の利用可能額での可否をまとめて返すAPI（<code>GET /api/v1/paths/variant-affordability</code>・<code>GET /api/v1/buildings/variant-affordability</code>）がある。基準費用はパスなら「平地・標高ゼロ・基準延長（100m）」の建設費、建物なら「既定の底面（<code>default_width</code> × <code>default_height</code>）・最小階数（<code>min_floors</code>）・平地・最も安い許可構造」の建設費で、これを賄えない規格・施設は建設パネルの選択肢から選べなくなる。あくまで先回りの目安であり、実際の受理可否は発注時に形状の総額で審査される。</p>
+<h3 id="建設買収の可否判定">建設買収の可否判定</h3>
+<p>建設時の土地買収は一括的な支出であり、按分による部分実行が意味を持たない。そのため、予算が不足する場合は買収自体が失敗し、着工がスキップされる。</p>
+<h2 id="226-パス需要を肩代わりする代表エージェントの分割">22.6. パス需要を肩代わりする代表エージェントの分割</h2>
+<p>道路は経済主体ではないため、市場での需給処理には直接参加できない。そこで、道路の建設・修繕需要は事前に地区の代表エージェントに付け替えられる。道路は左右の面ごとに地区を持つ（<a href="../4_%E5%9C%B0%E5%8C%BA%E3%81%A8%E5%9C%9F%E5%9C%B0%E5%8C%BA%E7%94%BB/">4_地区と土地区画</a>）ので、需要は面ごとに半分ずつその面の地区の代表エージェントが受け持つ（2地区の境界の道路は両側の地区が半分ずつ）。</p>
+<p>パス需要を肩代わりする代表エージェントは、需要の種類によって2種類に分かれている。</p>
+<ul>
+<li><strong>建設代理エージェント</strong>（<code>VARIANT_ZONE_CONSTRUCTION</code>）... 新規建設・解体の需要を処理する。建設中・解体中パスの需要がこのエージェントに移管される。</li>
+<li><strong>修繕代理エージェント</strong>（<code>VARIANT_ZONE_CONSTRUCTION_MAINTENANCE</code>）... 修繕の需要を処理する。既存パスの修繕需要がこのエージェントに移管される。</li>
+</ul>
+<p>両エージェントとも <code>public_facility</code> 属性を持ち、マスターデータの <code>cost_category</code> によって建設予算・修繕予算の制御対象となる。なお、転居時の一時入居先は独立した<strong>転居補助エージェント</strong>（<code>VARIANT_ZONE_RELOCATE</code>）が担い、こちらは予算制御には関与しない（<a href="../4_%E5%9C%B0%E5%8C%BA%E3%81%A8%E5%9C%9F%E5%9C%B0%E5%8C%BA%E7%94%BB/">4_地区と土地区画</a> 参照）。</p>
+<h2 id="227-公共施設の会計統合">22.7. 公共施設の会計統合</h2>
+<p>公共施設は市政府の下部組織として位置づけられ、その収支は市政府の収支に統合される。エポック末尾の処理で、全公共施設の <code>reserves</code>（現金残高）が市政府に付け替えられ、公共施設側はゼロにリセットされる。黒字は市政府が吸収し、赤字（<code>reserves</code> が負）は市政府が肩代わりする。運営支出は執行時に予算枠でカットされないため、公共施設は一時的に赤字残高で支払いを続けられ、その赤字はこの統合を通じて市政府の現預金（場合によっては債務）に反映される。</p>
+<p>付け替えは施設のステータスを問わない。建設中・解体中・停止中の施設も対象で、建設・解体の工事費は支払ったエポックのうちに市政府の現預金へ反映される（発注時の資金審査が、支払い済みの工事費を使える現金と見誤らない）。公共施設が削除されるとき（着工前・建設途中での取りやめ、取り壊し後の清算）に残っていた残高も、中央銀行ではなく市政府へ移る。民間の主体の清算とは異なり、公共施設の支出を中央銀行経由で経済全体に肩代わりさせることはない（<a href="../7_%E9%87%91%E8%9E%8D%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/">7_金融システム</a>）。</p>
+<p>この処理により、公共施設が独自に資金を蓄積することはなく、すべての収支が市政府に一元化される。この付け替えは会計上の内部整理であり、支出や収入の記録には影響しない。</p>
+<p>ただし、<strong>輸出入拠点はこの会計統合の対象外</strong>である。拠点の現金残高は都市の貿易収支を表現する台帳であり（<a href="../7_%E9%87%91%E8%9E%8D%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/">7_金融システム</a> 7.2）、市財政に統合すると輸入代金がそのまま市の収入になってしまう。拠点の残高は市政府へは付け替えられず、拠点間の均等リバランスのみが行われる。</p>
+<h2 id="228-予算の維持と自動調整スケーリングルール">22.8. 予算の維持と自動調整（スケーリング）ルール</h2>
+<p>予算はプレイヤーの比率（<code>category_ratio</code>）と、カテゴリ別の必要額から導出される（エポック開始時、および比率変更API）。</p>
+<h3 id="導出と資金充足時">導出と資金充足時</h3>
+<ol>
+<li>カテゴリごとの基準額（必要量）を求める。必要量は「各公共施設が生産計画どおり稼働した場合の1エポック見込み費用」である:<ul>
+<li><strong>運営(1〜7・11)</strong>: 生産計画どおりの賃金・物資・投資財・テナント家賃。賃金は現在の雇用者と雇用枠の多い方（採用予定の分を含む）で、物資は現在の雇用者で生産できる量の原材料費で見積もる（高度人材が不足して生産が止まっている施設は原材料費 0）。生産能力いっぱいの費用ではないため、稼働できない施設や需要に比べて大きすぎる施設が他カテゴリの予算を圧迫することはない。教育機関など一般施設以外の公共雇用主の運営費も含まれる。</li>
+<li><strong>建設(8)</strong>: 全建設案件（発注済み・建設中・解体中・造り替え中の建物と道路）を現在の建設スピード設定で進めた場合の1エポック支出。基準には施設別の建設スピード（<code>utilization_target</code>、0〜5）が含まれるため、「比率100% = 設定した建設スピードに必要な額」となる。</li>
+<li><strong>修繕(9)</strong>: 修繕中の公共建物・道路の1エポック修繕需要（設定済みの修繕需要どおり進めた場合の見込み額）。</li>
+<li><strong>社会保障(12)</strong>: 当エポックの失業給付・年金・生活扶助の必要額の合計。</li>
+<li><strong>用地買収(14)</strong>: 買収交渉中の土地区画の買収金見積の合計。</li>
+</ul>
+</li>
+<li>カテゴリごとの希望額を <code>desired[cat] = 必要量[cat] × category_ratio[cat]</code>（比率は 0〜1.5 にクランプ）で求める。基準額は実績を参照しないため縮小スパイラルは構造的に発生せず、比率はプレイヤーが変えるまで恒久的に有効である。</li>
+<li>配分可能額 <code>available = reserves − savings_target</code>（0 未満は 0）。</li>
+<li><code>Σ desired ≤ available</code> の場合は希望どおり全額を <code>budgets</code> に配分する。配分しなかった余剰現金（<code>available − Σ desired</code> と貯蓄目標分）はどのカテゴリにも積まず現預金に残し、貯蓄（<code>city.savings</code>）とする。</li>
+<li>まだ必要量が捕捉・検出されていない初回エポック等（<code>Σ base ≈ 0</code>）は、全カテゴリに現預金を均等配分してブートストラップする。</li>
+</ol>
+<h3 id="資金不足時自動調整">資金不足時（自動調整）</h3>
+<p><code>Σ desired &gt; available</code> の場合は、<code>budget_auto_adjusted</code> を立て、設定された維持優先度（Tier）の低い順に希望額を削減して <code>available</code> に収める。<strong>Tier は数字が小さいほど優先的に維持され、数字が大きいほど先に削減される</strong>（削減は Tier 4 → 1 の順）。既定の割り当ては以下のとおり。</p>
+<ul>
+<li><strong>Tier 1（最優先維持）:</strong> 市政 (<code>LEDGER_CITYHALL</code>), 医療 (<code>LEDGER_MEDICAL</code>), インフラ (<code>LEDGER_INFRASTRUCTURE</code>), 修繕 (<code>LEDGER_MAINTENANCE</code>), 社会保障 (<code>LEDGER_WELFARE</code>)</li>
+<li><strong>Tier 2:</strong> 教育 (<code>LEDGER_EDUCATION</code>), 治安維持 (<code>LEDGER_SECURITY</code>), その他 (<code>LEDGER_OTHER</code>), 消防 (<code>LEDGER_FIRE</code>)</li>
+<li><strong>Tier 3:</strong> 建設 (<code>LEDGER_CONSTRUCTION</code>)</li>
+<li><strong>Tier 4（最初に削減）:</strong> 貯蓄 (<code>LEDGER_RESERVE</code>)（希望0のため実質は Tier 3 から削減される）</li>
+</ul>
+<h4 id="削減の適用フロー">削減の適用フロー：</h4>
+<ol>
+<li>不足額（Deficit = Σ desired − available）を解消するため、まず最も維持優先度の低い Tier 4 のカテゴリから削減する。</li>
+<li>特定の Tier に属する全カテゴリを 0 にしても不足額が残る場合は、1つ上の Tier へ削減処理が移行する。</li>
+<li>特定の Tier 内で不足額をカバーできる場合は、その Tier に属する各カテゴリを元の比率を維持したまま均等（比率均等）に削減する。</li>
+<li>市政府が債務超過（<code>reserves</code> &lt;= 0）となった場合は、すべての予算が <code>0.0</code> に設定される。実効比率が 0 になるため生産計画（雇用・調達）が全面縮小される。現雇用者への賃金など確定分の支出はすぐには消えないため、債務は数エポックかけて拡大が止まり、収入の回復とともに返済される。</li>
+</ol>
+<p>これにより、資金が潤沢なら比率どおり満額を配分して余りを貯蓄し、資金が逼迫すると建設 → 低優先の運営サービスの順に自動的に絞られ、医療・市政・インフラなどの必須サービス（Tier 1）は最後まで維持される。プレイヤーは金額を毎エポック調整する必要がなく、優先度と比率を一度設定すれば都市が成長しても機能し続ける。なお、API で <code>budgets</code> を直接上書きして自動導出を回避することもできる（上書き額は次のエポック開始時の再導出を1回だけスキップさせ、そのエポック限り有効）。</p>
+<h3 id="優先度tierのカスタマイズ">優先度（Tier）のカスタマイズ</h3>
+<p>これらの維持優先度（Tier 1 〜 Tier 4）は、各カテゴリについてプレイヤーがいつでも自由に変更可能である。設定は <code>city.budget_tiers</code> に保存され、API（<code>/api/v1/city/budgets</code>）を介して永続化される。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  ページトップへ戻る
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="フッター" >
+        
+          
+          <a href="../21_%E5%A4%A9%E7%84%B6%E8%B3%87%E6%BA%90/" class="md-footer__link md-footer__link--prev" aria-label="前: 天然資源">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                前
+              </span>
+              <div class="md-ellipsis">
+                天然資源
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../23_%E6%96%BD%E6%94%BF%E3%82%B9%E3%82%B3%E3%82%A2/" class="md-footer__link md-footer__link--next" aria-label="次: 施政スコア">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                次
+              </span>
+              <div class="md-ellipsis">
+                施政スコア
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/satken2/city-genesis" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

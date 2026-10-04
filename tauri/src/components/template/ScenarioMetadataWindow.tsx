@@ -17,15 +17,16 @@ import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { ScenarioEntry, ScenarioStartOption, captureSaveThumbnail, saveError, uploadScenarioThumbnail } from "../../utils/saves";
 import { compactLocalizedText, missingEnglish, type LocalizedText } from "../../utils/locale";
-import { ASSET_REGION_STANDARD, ASSET_REGION_TYPES, CLIMATE_TYPES, GROUND_COVER_TYPES, SIMULATION_DAYS_CHOICES } from "../../constants";
-import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
+import { ASSET_REGION_STANDARD, ASSET_REGION_TYPES, GROUND_COVER_TYPES, SIMULATION_DAYS_CHOICES } from "../../constants";
+import { normalizeGroundCover } from "../terrain/terrainData";
+import type { ClimateSettings } from "../../utils/climate";
 import { LocalizedTextFields } from "../common/LocalizedTextFields";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { SaveVersionInfo } from "../common/SaveVersionInfo";
 import "./Scenarios.css";
 
 type Texts = Record<string, LocalizedText | undefined>;
-type Options = Record<ScenarioStartOption, number>;
+type Options = Record<Exclude<ScenarioStartOption, "climate">, number> & { climate: ClimateSettings };
 
 const TEXT_KEYS = ["scenario_title", "scenario_description", "scenario_objective", "scenario_city_name"] as const;
 const START_OPTIONS: ScenarioStartOption[] = ["simulation_days", "climate", "ground_cover", "asset_region"];
@@ -37,7 +38,7 @@ type ScenarioSource = Pick<ScenarioEntry, (typeof TEXT_KEYS)[number] | "scenario
 function startOptionsOf(source: ScenarioSource): Options {
   return {
     simulation_days: source.simulation_days || 30,
-    climate: normalizeClimate(source.climate),
+    climate: source.climate!,
     ground_cover: normalizeGroundCover(source.ground_cover),
     asset_region: source.asset_region ?? ASSET_REGION_STANDARD,
   };
@@ -77,9 +78,8 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
     return () => controller.abort();
   }, [apiBaseUrl, create, scenarioId, t]);
 
-  const choices: Record<ScenarioStartOption, { values: number[]; label: (value: number) => string }> = {
+  const choices: Record<Exclude<ScenarioStartOption, "climate">, { values: number[]; label: (value: number) => string }> = {
     simulation_days: { values: SIMULATION_DAYS_CHOICES, label: days => t("newGame.daysOption", { days }) },
-    climate: { values: CLIMATE_TYPES, label: value => t(`climate.${value}`) },
     ground_cover: { values: GROUND_COVER_TYPES, label: value => t(`groundCover.${value}`) },
     asset_region: { values: ASSET_REGION_TYPES, label: value => t(`assetRegion.${value}`) },
   };
@@ -147,10 +147,10 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
         </div>
         {START_OPTIONS.map(option => <div className="scenario-start-row" key={option} data-option={option}>
           <span>{optionLabels[option]}</span>
-          <select value={options[option]} disabled={busy} aria-label={optionLabels[option]}
+          {option === "climate" ? <span className="scenario-start-value">{options.climate.name}</span> : <select value={options[option]} disabled={busy} aria-label={optionLabels[option]}
             onChange={e => setOptions({ ...options, [option]: Number(e.target.value) })}>
             {choices[option].values.map(value => <option key={value} value={value}>{choices[option].label(value)}</option>)}
-          </select>
+          </select>}
           <label className="scenario-start-changeable">
             <input type="checkbox" checked={!fixed.includes(option)} disabled={busy}
               onChange={e => setFixed(e.target.checked ? fixed.filter(value => value !== option) : [...fixed, option])} />

@@ -72,6 +72,16 @@ public static class Utils
         return groundHeight;
     }
 
+    /// <summary>
+    /// 地区名・道路名の表示距離(m)を、カメラ直下の地表からの高さで決める。
+    /// 地上近くでは近隣だけを読み、高い視点では広い範囲を見渡せるようにする。
+    /// </summary>
+    public static float GetMapLabelMaxDistance(Vector3 cameraPosition)
+    {
+        float heightAboveGround = cameraPosition.y - GetGroundHeight(cameraPosition);
+        return Mathf.Lerp(100f, 4000f, heightAboveGround / 1000f);
+    }
+
     private static float ComputeGroundHeight(Vector3 position)
     {
         float height = ComputeTerrainHeight(position);

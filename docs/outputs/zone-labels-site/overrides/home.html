@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+
+{% block container %}
+{% if config.theme.language == 'en' %}
+  {% set t_nav_docs = "Documentation" %}
+  {% set t_hero = "Not a diorama maker, not a traffic simulator—a true city simulation game." %}
+  {% set t_features_title = "Features" %}
+  {% set t_f1_title = "Autonomous Economic Simulation" %}
+  {% set t_f1_desc = "Hundreds of thousands of citizens and shops autonomously consume, produce, and invest, building an organic city economy." %}
+  {% set t_f2_title = "Zero-Sum Financial System" %}
+  {% set t_f2_desc = "Simulates credit creation, foreign exchange, and tax systems. The player's monetary policies shape the city's destiny." %}
+  {% set t_f3_title = "Fluid Traffic Model" %}
+  {% set t_f3_desc = "Realistic traffic flow based on economic activity directly influences storefront sales and daytime population density." %}
+  {% set t_f4_title = "Supply Chain" %}
+  {% set t_f4_desc = "From raw materials to processing and retail, the balance of supply and demand determines all prices." %}
+  {% set t_f5_title = "Real Estate Market" %}
+  {% set t_f5_desc = "Land prices and rents vary by location, and dynamic urban landscapes emerge based on real estate demand." %}
+  {% set t_f6_title = "Open Source" %}
+  {% set t_f6_desc = "The Unity frontend and Tauri UI are open source. Completely transparent game mechanics." %}
+  {% set t_docs_title = "Documentation" %}
+  {% set t_d1_title = "Economic Simulation" %}
+  {% set t_d1_desc = "Full specifications of economic agents, markets, finance, production, consumption, labor, education, and trade." %}
+  {% set t_d2_title = "Game Logic" %}
+  {% set t_d2_desc = "Calculation rules for game behavior, including district processing and road logical length." %}
+  {% set t_d3_title = "Geometries" %}
+  {% set t_d3_desc = "Shape specifications for paths, land, buildings, and terrain." %}
+  {% set t_d4_title = "API Reference" %}
+  {% set t_d4_desc = "Full endpoint specifications for the backend REST API." %}
+{% else %}
+  {% set t_nav_docs = "ドキュメント" %}
+  {% set t_hero = "ジオラマメーカーでも渋滞シミュレーターでもない、本物の都市シミュレーション" %}
+  {% set t_features_title = "特徴" %}
+  {% set t_f1_title = "自律経済シミュレーション" %}
+  {% set t_f1_desc = "数十万の市民や店舗が消費・生産・投資を自律的に行い、有機的な都市経済を構築します。" %}
+  {% set t_f2_title = "ゼロサム金融システム" %}
+  {% set t_f2_desc = "信用創造・為替・税制までをシミュレート。プレイヤーの金融政策が都市の命運を左右します。" %}
+  {% set t_f3_title = "流体交通モデル" %}
+  {% set t_f3_desc = "都市の経済活動に応じたリアルな交通フローは、沿線店舗の売上や昼間人口の集積に直結。" %}
+  {% set t_f4_title = "サプライチェーン" %}
+  {% set t_f4_desc = "原材料から加工・小売まで、需要と供給のバランスがすべての価格を決定します。" %}
+  {% set t_f5_title = "不動産市場" %}
+  {% set t_f5_desc = "立地に応じた地価や家賃の変動や、不動産需要に応じたダイナミックな都市景観を形成。" %}
+  {% set t_f6_title = "オープンソース" %}
+  {% set t_f6_desc = "UnityフロントエンドとTauri UIはオープンソース。ゲームの仕組みを完全に透明化。" %}
+  {% set t_docs_title = "ドキュメント" %}
+  {% set t_d1_title = "経済シミュレーション" %}
+  {% set t_d1_desc = "経済主体・市場・金融・生産・消費・労働・教育・貿易の全仕様" %}
+  {% set t_d2_title = "ゲームロジック" %}
+  {% set t_d2_desc = "地区処理・道路の論理長など、ゲーム内挙動の計算ルール" %}
+  {% set t_d3_title = "幾何データ" %}
+  {% set t_d3_desc = "パス・土地・建物・地形の形状仕様" %}
+  {% set t_d4_title = "API リファレンス" %}
+  {% set t_d4_desc = "バックエンド REST API の全エンドポイント仕様" %}
+{% endif %}
+
+<style>
+  body, html, .md-container, .md-main, .md-main__inner, .md-content, .md-content__inner, .md-typeset {
+    background-color: #0d1320 !important;
+    color: #e5eef9 !important;
+  }
+
+  .md-header {
+    display: none !important;
+  }
+  .md-tabs {
+    display: none !important;
+  }
+  .md-sidebar {
+    display: none !important;
+  }
+  .md-footer {
+    display: none !important;
+  }
+  .md-container {
+    padding-top: 0 !important;
+  }
+  .md-main__inner {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  .md-content__inner {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  .md-content__inner > .md-typeset {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .landing-page-container {
+    position: relative;
+    width: 100%;
+    background-color: #0d1320;
+    color: #e5eef9;
+    min-height: 100vh;
+    zoom: 0.67;
+  }
+
+  .hero {
+    background-color: #020b10;
+    color: #e5eef9;
+    padding: 2.2rem 1.5rem;
+    text-align: center;
+    position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .hero-logo {
+    max-width: 520px;
+    width: 100%;
+    height: auto;
+    margin: 0 auto 0.6rem;
+    display: block;
+  }
+  .hero p {
+    font-size: 1.05rem;
+    color: #93a9c0;
+    max-width: 38rem;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .top-header {
+    background-color: #020b10;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0.8rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .top-header-inner {
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  .header-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .header-logo img {
+    height: 24px;
+    width: auto;
+    display: block;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+  }
+  .header-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #93a9c0 !important;
+    font-size: 0.85rem;
+    font-weight: normal;
+    text-decoration: none !important;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    padding: 0.2rem 0;
+    cursor: pointer;
+  }
+  .header-link:hover {
+    color: #e5eef9 !important;
+  }
+  .header-link img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    filter: brightness(0.8);
+    transition: filter 0.2s;
+  }
+  .header-link:hover img {
+    filter: brightness(1);
+  }
+  
+  .header-lang {
+    display: flex;
+    align-items: center;
+  }
+  .lang-switch-link {
+    background: none !important;
+    border: none !important;
+    color: #93a9c0;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.78rem;
+    font-weight: normal;
+    text-decoration: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    transition: color 0.2s;
+    user-select: none;
+    font-family: inherit;
+  }
+  .lang-switch-link:hover {
+    color: #e5eef9;
+  }
+  .lang-label {
+    transition: color 0.2s;
+  }
+  .lang-label.active {
+    color: #4ea1ff;
+    pointer-events: none;
+  }
+  .lang-separator {
+    opacity: 0.3;
+    font-weight: normal;
+    color: #93a9c0;
+  }
+
+  @media (max-width: 768px) {
+    .header-left {
+      gap: 1rem;
+    }
+    .header-nav {
+      gap: 0.8rem;
+    }
+    .header-link span {
+      display: none;
+    }
+  }
+
+  .features, .doc-section {
+    padding: 1.8rem 1.5rem;
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+  .features h2, .doc-section h2 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-top: 0;
+    margin-bottom: 1.8rem;
+    font-weight: 700;
+    color: #e5eef9;
+    letter-spacing: -0.01em;
+  }
+  .feature-list, .doc-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+  }
+  
+  @media (max-width: 768px) {
+    .feature-list, .doc-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .feature-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 1.4rem;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
+    text-align: left;
+  }
+  .feature-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+  .feature-card .icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(78, 161, 255, 0.08);
+    border: 1px solid rgba(78, 161, 255, 0.15);
+    border-radius: 6px;
+    color: #4ea1ff;
+  }
+  .feature-card .text-content {
+    flex: 1;
+  }
+  .feature-card h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e5eef9;
+  }
+  .feature-card p {
+    margin: 0;
+    color: #93a9c0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .doc-card {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 1.4rem;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
+    text-align: left;
+  }
+  .doc-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+  .doc-card .doc-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(78, 161, 255, 0.08);
+    border: 1px solid rgba(78, 161, 255, 0.15);
+    border-radius: 6px;
+    color: #4ea1ff;
+  }
+  .doc-card .doc-info {
+    flex: 1;
+  }
+  .doc-card h4 {
+    margin: 0 0 0.3rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e5eef9;
+  }
+  .doc-card p {
+    margin: 0;
+    color: #93a9c0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .home-footer {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.15);
+    color: #93a9c0;
+    font-size: 0.8rem;
+  }
+</style>
+
+<div class="landing-page-container">
+  <header class="top-header">
+    <div class="top-header-inner">
+      <div class="header-left">
+        <a href="./" class="header-logo">
+          <img src="assets/images/logo.png" alt="City Genesis">
+        </a>
+        <nav class="header-nav">
+          <a href="economics/1_全体概要/" class="header-link">{{ t_nav_docs }}</a>
+          <a href="https://github.com/satken2/city-genesis/tauri" class="header-link" target="_blank" rel="noopener">
+            <img src="assets/images/github_logo.png" alt="GitHub">
+            <span>GitHub</span>
+          </a>
+          <a href="#" class="header-link">
+            <img src="assets/images/steam_logo.svg" alt="Steam">
+            <span>Steam</span>
+          </a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-lang">
+          {% if config.theme.language == 'en' %}
+          <a href="../" class="lang-switch-link">JA</a>
+          <span class="lang-separator">/</span>
+          <span class="lang-label active">EN</span>
+          {% else %}
+          <span class="lang-label active">JA</span>
+          <span class="lang-separator">/</span>
+          <a href="en/" class="lang-switch-link">EN</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <img src="assets/images/logo.png" alt="City Genesis" class="hero-logo">
+    <p>{{ t_hero }}</p>
+  </div>
+
+  <div class="features">
+    <h2>{{ t_features_title }}</h2>
+    <div class="feature-list">
+      <div class="feature-card">
+        <div class="icon">&#x1F3D9;</div>
+        <div class="text-content">
+          <h3>{{ t_f1_title }}</h3>
+          <p>{{ t_f1_desc }}</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F4B0;</div>
+        <div class="text-content">
+          <h3>{{ t_f2_title }}</h3>
+          <p>{{ t_f2_desc }}</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F697;</div>
+        <div class="text-content">
+          <h3>{{ t_f3_title }}</h3>
+          <p>{{ t_f3_desc }}</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F3ED;</div>
+        <div class="text-content">
+          <h3>{{ t_f4_title }}</h3>
+          <p>{{ t_f4_desc }}</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F3E0;</div>
+        <div class="text-content">
+          <h3>{{ t_f5_title }}</h3>
+          <p>{{ t_f5_desc }}</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F30D;</div>
+        <div class="text-content">
+          <h3>{{ t_f6_title }}</h3>
+          <p>{{ t_f6_desc }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-section">
+    <h2>{{ t_docs_title }}</h2>
+    <div class="doc-list">
+      <a href="economics/0_目次/" class="doc-card">
+        <div class="doc-icon">&#x1F4CA;</div>
+        <div class="doc-info">
+          <h4>{{ t_d1_title }}</h4>
+          <p>{{ t_d1_desc }}</p>
+        </div>
+      </a>
+      <a href="game-logic/地区の処理ロジック/" class="doc-card">
+        <div class="doc-icon">&#x2699;</div>
+        <div class="doc-info">
+          <h4>{{ t_d2_title }}</h4>
+          <p>{{ t_d2_desc }}</p>
+        </div>
+      </a>
+      <a href="geometries/A_パス形状/" class="doc-card">
+        <div class="doc-icon">&#x1F4D0;</div>
+        <div class="doc-info">
+          <h4>{{ t_d3_title }}</h4>
+          <p>{{ t_d3_desc }}</p>
+        </div>
+      </a>
+      <a href="api/index.html" class="doc-card">
+        <div class="doc-icon">&#x1F310;</div>
+        <div class="doc-info">
+          <h4>{{ t_d4_title }}</h4>
+          <p>{{ t_d4_desc }}</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="home-footer">
+    <p>&copy; 2024-2026 City Genesis Project</p>
+  </div>
+</div>
+{% endblock %}

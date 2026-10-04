@@ -43,7 +43,9 @@ const MasterDataContext = createContext<MasterDataContextValue>({
  * バックエンドのマスターデータAPIエンドポイント定義
  * キーがMasterDataのプロパティ名、値がAPIパス
  */
-const MASTER_ENDPOINTS: { key: keyof MasterData; path: string }[] = [
+const MASTER_ENDPOINTS: { key: keyof MasterData; path: string; numericKeys?: boolean }[] = [
+  { key: "climates", path: "/api/v1/master/climates" },
+  { key: "weather", path: "/api/v1/master/weather", numericKeys: false },
   { key: "bd_types", path: "/api/v1/master/bd_types" },
   { key: "skills", path: "/api/v1/master/skills" },
   { key: "vehicle_types", path: "/api/v1/master/vehicle_types" },
@@ -86,22 +88,23 @@ function toNumericKeys<T>(
 }
 
 /**
- * 単一マスターエンドポイントをフェッチし、数値キーのRecordとして返す
+ * 単一マスターを取得し、数値IDのマスターだけキーを数値に変換する。
  *
  * バックエンドのレスポンス形式:
  * { "endpoint_name": { "0": {...}, "1": {...} } }
  *
  * 1階層目はエンドポイント名のラッパーで、2階層目がID→エントリのマッピング。
- * 1階層目を剥がして数値キーに変換したものを返す。
+ * 天気のような文字列IDは、そのまま保持する。
  */
 async function fetchMasterEndpoint<T>(
   baseUrl: string,
-  path: string
-): Promise<Record<number, T>> {
+  path: string,
+  numericKeys = true,
+): Promise<Record<string, T>> {
   type ApiResponse = Record<string, Record<string, T>>;
   const response = await fetchApi<ApiResponse>(`${baseUrl}${path}`);
   const inner = Object.values(response)[0];
-  return toNumericKeys(inner);
+  return numericKeys ? toNumericKeys(inner) : inner;
 }
 
 /**
@@ -153,8 +156,8 @@ export function MasterDataProvider({
     setIsLoading(true);
     try {
       const results = await Promise.all(
-        MASTER_ENDPOINTS.map(async ({ key, path }) => {
-          const entries = await fetchMasterEndpoint(base, path);
+        MASTER_ENDPOINTS.map(async ({ key, path, numericKeys }) => {
+          const entries = await fetchMasterEndpoint(base, path, numericKeys);
           return [key, entries] as const;
         })
       );

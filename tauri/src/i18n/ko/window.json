@@ -49,7 +49,8 @@
     "tutorial_intro": "튜토리얼",
     "citizen_detail": "시민",
     "citizen_tracking": "추적 목록",
-    "scenario_sign": "시나리오 서명"
+    "scenario_sign": "시나리오 서명",
+    "climate_settings": "기후 설정"
   },
   "cityMap": {
     "layers": {

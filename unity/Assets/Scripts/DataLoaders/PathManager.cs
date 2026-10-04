@@ -2803,46 +2803,6 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 指定した道路が、targetPathIds内のいずれかの道路とノードを共有しているかを判定する。
-    /// 地区編集において、選択道路との接続性を確認するために使用する。
-    /// 両端のノードID（start_node_id, end_node_id）のいずれかが
-    /// 対象道路のノードと一致すれば接続されているとみなす。
-    /// </summary>
-    public bool IsPathConnectedToSet(int pathId, HashSet<int> targetPathIds)
-    {
-        PathSummary path = GetPathData(pathId);
-        if (path == null) return false;
-
-        foreach (int id in targetPathIds)
-        {
-            PathSummary other = GetPathData(id);
-            if (other == null) continue;
-            if (path.start_node_id == other.start_node_id ||
-                path.start_node_id == other.end_node_id ||
-                path.end_node_id == other.start_node_id ||
-                path.end_node_id == other.end_node_id)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /// <summary>
-    /// 指定したzone_idに所属する全道路のIDセットを返す。
-    /// ドラッグによる地区拡張時に、接続先候補となる既存地区の道路を取得するために使用する。
-    /// </summary>
-    public HashSet<int> GetZonePathIds(int zoneId)
-    {
-        var result = new HashSet<int>();
-        foreach (var kvp in pathDataCache)
-        {
-            if (kvp.Value.zone_id == zoneId) result.Add(kvp.Key);
-        }
-        return result;
-    }
-
-    /// <summary>
     /// 道路の計画中アイコンを作成・更新・削除する。
     /// 保留中(status=11)の道路に対して、center_pointの位置（地形高さを考慮）に2Dアイコンを表示する。
     /// アイコンは道路オブジェクトの子として管理され、道路と同じタイミングで表示/非表示が切り替わる。

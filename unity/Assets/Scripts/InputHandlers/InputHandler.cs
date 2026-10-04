@@ -48,7 +48,6 @@ public static class InputMode
     public const int MODE_PARCEL_CREATION_PATH = 5;
     public const int MODE_PARCEL_CREATION_SPLIT = 6;
     public const int MODE_EDIT = 7;
-    public const int MODE_ZONE_EDIT = 8;
     public const int MODE_PARCEL_SHAPE_EDIT = 10;
     public const int MODE_SET_GRID = 11;
     public const int MODE_EDIT_RESOURCE = 12;
@@ -90,7 +89,6 @@ public static class InputModePreset
     public const int PARCEL_CREATION_POINT = 4;
     public const int PARCEL_CREATION_PATH = 5;
     public const int PARCEL_CREATION_SPLIT = 6;
-    public const int ZONE_EDIT = 7;
     public const int PARCEL_SHAPE_EDIT = 9;
     public const int SET_GRID = 10;
     public const int EDIT_RESOURCE = 11;
@@ -192,13 +190,6 @@ public class InputHandler : MonoBehaviour
     private bool hasPendingTerrainRightClick = false;
     private Vector3 pendingRightClickScreenPos;
 
-    /// <summary>
-    /// 地区編集モード中に、カーソルが内側にある地区のID(なければ -1)。
-    /// 毎フレームの地区ポリゴン内外判定は地区編集モード中のみ行う(通常プレイでは常に -1)。
-    /// 地形クリックからカーソル下の地区を解決する `TerrainInputHandler` が参照する。
-    /// </summary>
-    public int HoveredZoneId => hoveredZoneId;
-    private int hoveredZoneId = -1;
     private Ray lastRay;
     private bool lastUndergroundView;
     private PathManager cachedPathManager;
@@ -332,15 +323,6 @@ public class InputHandler : MonoBehaviour
         }
         else { CitizenPickSelection.Cancel(); TransitSelection.Cancel(); }
 
-        // 地区編集モード中の Esc は選択中地区(拡張先・統合先)の選択だけを解除する
-        // (モード自体の終了は従来どおりUI起点の STATE_NORMAL に委ねる)。
-        // レイ不変フレームでも押下は拾いたいため、下の早期リターンより先に処理する。
-        if (GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_ZONE_EDIT
-            && InputUtil.KeyWasPressedThisFrame(Key.Escape))
-        {
-            ZoneEditContext.Instance?.SelectZone(0);
-        }
-
         // カメラからマウス位置へRayを飛ばす
         Vector3 mousePosition = InputUtil.MousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
@@ -366,56 +348,6 @@ public class InputHandler : MonoBehaviour
 
         // まずは地形との交点を計算してposX, posZを更新
         UpdateTerrainPosition(ray);
-
-        // 地区ポリゴン内判定
-        // 通常プレイ時の無駄な毎フレーム内外判定を排除するため、地区編集モード中のみ実行する。
-        int prevHoveredZoneId = hoveredZoneId;
-        var zoneEditCtx = ZoneEditContext.Instance;
-        bool isZoneEditActive = zoneEditCtx != null && zoneEditCtx.IsActive;
-        bool isZoneEditMode = GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_ZONE_EDIT;
-
-        if (isZoneEditActive || isZoneEditMode)
-        {
-            Vector3 mouseWorldPos = new Vector3(posX, 0, posZ);
-            mouseWorldPos.y = Utils.GetGroundHeight(mouseWorldPos);
-            hoveredZoneId = ZoneManager.Instance?.GetZoneIdAtPoint(mouseWorldPos) ?? -1;
-
-            // ホバー中の既存地区を半透明フィルでハイライトする(ホバー地区が変わった時のみ再生成)。
-            ZoneManager.Instance?.SetHoverFillZone(hoveredZoneId);
-
-            // 地区内部のツールチップ(パスホバー優先のため、パスがホバー中でない場合のみ)。
-            // 地区の面をクリックして意味があるのは統合ツールだけなので、それ以外は地区名だけ出す。
-            if (hoveredZoneId >= 0 && hoveredZoneId != prevHoveredZoneId && currentHoveredObjectType != InputObjectType.PATH)
-            {
-                if (hoveredZoneId > 0)
-                {
-                    string zoneName = ZoneManager.Instance?.GetZoneName(hoveredZoneId) ?? "";
-                    bool isMergeTool = zoneEditCtx != null && zoneEditCtx.CurrentTool == ZoneEditTool.Merge;
-                    string action = isMergeTool
-                        ? "左クリックで統合 / 右クリックで統合先に選択"
-                        : "右クリックでこの地区を選択";
-                    TooltipManager.Instance?.Show($"{zoneName}\n{action}");
-                }
-                else
-                {
-                    TooltipManager.Instance?.Hide();
-                }
-            }
-            else if (hoveredZoneId < 0 && prevHoveredZoneId >= 0 && currentHoveredObjectType != InputObjectType.PATH)
-            {
-                TooltipManager.Instance?.Hide();
-            }
-        }
-        else
-        {
-            hoveredZoneId = -1;
-            // 地区編集モードを抜けたらホバーフィルを消す
-            ZoneManager.Instance?.SetHoverFillZone(-1);
-            if (prevHoveredZoneId >= 0 && currentHoveredObjectType != InputObjectType.PATH)
-            {
-                TooltipManager.Instance?.Hide();
-            }
-        }
 
         // オブジェクトとの当たり判定
         // MODE_NONEのオブジェクトを貫通するためにRaycastAllを使用
@@ -852,14 +784,12 @@ public class InputHandler : MonoBehaviour
 
         int currentMode = GetModeForObjectType(objectType);
 
-        // ブルドーザ(削除)・パス結合/分割の選択・道路の区間編集・地区編集はクリックのみ対応。ドラッグは
-        // 無効化し、誤って RoadPlanManager 等のドラッグ処理へフォールバックしないよう即座に return する
-        // (地区編集の左ドラッグはカメラパンに任せる)。
+        // ブルドーザ(削除)・パス結合/分割の選択・道路の区間編集はクリックのみ対応。ドラッグは
+        // 無効化し、誤って RoadPlanManager 等のドラッグ処理へフォールバックしないよう即座に return する。
         if (currentMode == InputMode.MODE_REMOVE
             || currentMode == InputMode.MODE_PATH_MERGE
             || currentMode == InputMode.MODE_PATH_SPLIT
-            || currentMode == InputMode.MODE_EDIT_ROAD_MEMBERS
-            || currentMode == InputMode.MODE_ZONE_EDIT)
+            || currentMode == InputMode.MODE_EDIT_ROAD_MEMBERS)
         {
             return;
         }
@@ -881,10 +811,9 @@ public class InputHandler : MonoBehaviour
     {
         int currentMode = GetModeForObjectType(InputObjectType.TERRAIN);
 
-        // ブルドーザ(削除)・パス分割の分割点選択・地区編集はクリックのみ対応。地形ドラッグは開始しない。
+        // ブルドーザ(削除)・パス分割の分割点選択はクリックのみ対応。地形ドラッグは開始しない。
         if (currentMode == InputMode.MODE_REMOVE
-            || currentMode == InputMode.MODE_PATH_SPLIT
-            || currentMode == InputMode.MODE_ZONE_EDIT)
+            || currentMode == InputMode.MODE_PATH_SPLIT)
         {
             return;
         }
@@ -1240,16 +1169,6 @@ public class InputHandler : MonoBehaviour
                 Debug.Log("InputHandler: 土地区画分割モードプリセットを設定しました");
                 break;
 
-            case InputModePreset.ZONE_EDIT:
-                SetMode(InputObjectType.PATH, InputMode.MODE_ZONE_EDIT);
-                SetMode(InputObjectType.ZONE, InputMode.MODE_ZONE_EDIT);
-                SetMode(InputObjectType.TERRAIN, InputMode.MODE_ZONE_EDIT);
-                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
-                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
-                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
-                Debug.Log("InputHandler: 地区編集モードプリセットを設定しました");
-                break;
-
             case InputModePreset.PARCEL_SHAPE_EDIT:
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_PARCEL_SHAPE_EDIT);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
@@ -1431,7 +1350,6 @@ public class InputHandler : MonoBehaviour
             case InputMode.MODE_PARCEL_CREATION_PATH: return "土地区画作成（パス選択）";
             case InputMode.MODE_PARCEL_CREATION_SPLIT: return "土地区画分割";
             case InputMode.MODE_EDIT: return "編集";
-            case InputMode.MODE_ZONE_EDIT: return "地区編集";
             case InputMode.MODE_PARCEL_SHAPE_EDIT: return "土地区画形状編集";
             case InputMode.MODE_SET_GRID: return "グリッド角度設定";
             case InputMode.MODE_EDIT_RESOURCE: return "資源エリア編集";

@@ -13,7 +13,7 @@
   },
   "climate": {
     "label": "Climat",
-    "hint": "Définit la météo de chaque saison (fréquence du soleil, de la pluie et de la neige). N'affecte pas la simulation.",
+    "hint": "Copie la température, les précipitations, l'ensoleillement et les probabilités météo mensuels d'un préréglage. Modifiez les détails dans les paramètres climatiques du mode de création de scénarios.",
     "1": "Tempéré humide",
     "2": "Subtropical",
     "3": "Continental humide",

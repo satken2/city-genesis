@@ -47,7 +47,21 @@ public class GameStateManager : MonoBehaviour
 }
 public static class ApiClient
 {
-    public static int Epoch, Reads, Climate = Constants.CLIMATE_TEMPERATE, Date = 82530;
+    public static int Epoch, Reads, Date = 82530;
+    public static WeatherClimateSettings Climate = Profile();
+    public static WeatherClimateSettings Profile()
+    {
+        var months = new WeatherClimateMonth[12];
+        for (int month = 0; month < 12; month++)
+        {
+            var weather = new System.Collections.Generic.Dictionary<string, int>();
+            foreach (var preset in WeatherPreset.All) weather[preset.Id] = 0;
+            weather[month == 0 ? "drizzle" : "clear"] = 50;
+            weather["blizzard"] = 50;
+            months[month] = new WeatherClimateMonth { weather = weather, temperature = month, precipitation = month * 10, sunlight = 50 };
+        }
+        return new WeatherClimateSettings { name = "検証用の気候", months = months };
+    }
     public static bool Fail;
     public static IEnumerator Get<T>(string path, Action<T> success, Action<string> error)
     {
@@ -55,7 +69,7 @@ public static class ApiClient
         yield return null;
         if (Fail) { error("test failure"); yield break; }
         success(Newtonsoft.Json.JsonConvert.DeserializeObject<T>(
-            "{\"city\":{\"epoch\":" + Epoch + ",\"climate\":" + Climate + ",\"current_date\":" + Date + "}}"));
+            Newtonsoft.Json.JsonConvert.SerializeObject(new { city = new { epoch = Epoch, climate = Climate, current_date = Date } })));
     }
 }
 public static class Utils
@@ -114,69 +128,31 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(tracker.Observe(2) == 0, "older save baseline");
         tracker.Reset(); Check(tracker.Observe(20) == 0, "session reset");
 
-        // 気候と季節の表
+        // 月別データと、0%で隣接経路が分断された気候の抽選。
         int presetCount = WeatherPreset.All.Count;
-        Check(WeatherClimate.ClimateCount == Constants.CLIMATE_TYPES.Length, "one row block per climate");
-        foreach (int climate in Constants.CLIMATE_TYPES)
-            for (int season = 0; season < 4; season++)
-            {
-                var weights = WeatherClimate.Weights(climate, season);
-                Check(weights.Count == presetCount, "weights cover every preset");
-                int total = 0;
-                foreach (int weight in weights) { Check(weight >= 0, "no negative weight"); total += weight; }
-                Check(total == 100, $"climate {climate} season {season} sums to 100");
-                Check(WeatherChain.Connected(weights), $"climate {climate} season {season} reachable through neighbours");
-            }
-        for (int season = 0; season < 4; season++)
-        {
-            Check(WeatherClimate.Weights(Constants.CLIMATE_DESERT, season)[Index("heavy_rain")] == 0, "no heavy rain in the desert");
-            foreach (string snowy in new[] { "light_snow", "snow", "blizzard" })
-            {
-                Check(WeatherClimate.Weights(Constants.CLIMATE_SUBTROPICAL, season)[Index(snowy)] == 0, "no snow in the subtropics");
-                Check(WeatherClimate.Weights(Constants.CLIMATE_DESERT, season)[Index(snowy)] == 0, "no snow in the desert");
-                if (season != WeatherClimate.Winter)
-                    Check(WeatherClimate.Weights(Constants.CLIMATE_CONTINENTAL, season)[Index(snowy)] == 0, "continental snow only in winter");
-            }
-        }
-        Check(WeatherClimate.Weights(Constants.CLIMATE_CONTINENTAL, WeatherClimate.Winter)[Index("snow")] > 0, "continental winter snows");
-        Check(WeatherClimate.Weights(Constants.CLIMATE_SUBARCTIC, WeatherClimate.Winter)[Index("rain")] == 0, "subarctic winter precipitation is snow");
-        Check(WeatherClimate.Weights(Constants.CLIMATE_DESERT, WeatherClimate.Summer)[Index("rain")] == 0, "desert summer is dry");
+        var profile = ApiClient.Profile();
+        Check(WeatherClimate.MonthOf(359) == 11 && WeatherClimate.MonthOf(360) == 0, "month wraps at the game year");
+        var springWeights = WeatherClimate.Weights(profile, Day(4, 1));
+        var desertSummer = WeatherClimate.Weights(profile, Day(7, 15));
+        Check(springWeights[Index("clear")] == 50 && springWeights[Index("blizzard")] == 50, "Core weather identifiers map to render presets");
+        Check(WeatherClimate.Weights(profile, Day(1, 1))[Index("drizzle")] == 50, "each month has its own probabilities");
         Check(WeatherClimate.SeasonOf(Day(4, 1)) == WeatherClimate.Spring && WeatherClimate.SeasonOf(Day(3, 1)) == WeatherClimate.Spring, "march to may is spring");
         Check(WeatherClimate.SeasonOf(Day(7, 15)) == WeatherClimate.Summer && WeatherClimate.SeasonOf(Day(10, 1)) == WeatherClimate.Autumn, "summer and autumn");
         Check(WeatherClimate.SeasonOf(Day(12, 30)) == WeatherClimate.Winter && WeatherClimate.SeasonOf(Day(2, 30)) == WeatherClimate.Winter, "december to february is winter");
-        Check(WeatherClimate.Normalize(99) == Constants.CLIMATE_TEMPERATE && WeatherClimate.Normalize(Constants.CLIMATE_DESERT) == Constants.CLIMATE_DESERT, "unknown climate is temperate");
-
-        // 天気の移り変わり
-        for (int i = 0; i < presetCount; i++)
-        {
-            Check(WeatherChain.Neighbors[i].Count > 0, "every weather has a neighbour");
-            foreach (int next in WeatherChain.Neighbors[i]) Check(System.Linq.Enumerable.Contains(WeatherChain.Neighbors[next], i), "neighbours are mutual");
-        }
         var random = new System.Random(412);
-        foreach (var (climate, season) in new[] { (Constants.CLIMATE_TEMPERATE, WeatherClimate.Summer), (Constants.CLIMATE_CONTINENTAL, WeatherClimate.Winter), (Constants.CLIMATE_DESERT, WeatherClimate.Summer) })
+        double[] time = new double[presetCount];
+        double total = 0;
+        int current = WeatherChain.Sample(random, springWeights);
+        for (int step = 0; step < 400000; step++)
         {
-            var weights = WeatherClimate.Weights(climate, season);
-            double[] time = new double[presetCount];
-            double total = 0;
-            int current = WeatherChain.Sample(random, weights);
-            bool impossible = false;
-            for (int step = 0; step < 400000; step++)
-            {
-                double dwell = WeatherChain.Dwell(random, current);
-                impossible |= weights[current] <= 0;
-                time[current] += dwell; total += dwell;
-                current = WeatherChain.Step(random, current, weights);
-            }
-            Check(!impossible, "chain never enters an impossible weather");
-            for (int i = 0; i < presetCount; i++)
-                Check(Math.Abs(time[i] / total - weights[i] / 100.0) < 0.02, $"long-run share of {WeatherPreset.All[i].Id} matches climate {climate}");
+            Check(springWeights[current] > 0, "chain never enters zero probability weather");
+            double dwell = WeatherChain.Dwell(random, current);
+            time[current] += dwell; total += dwell;
+            current = WeatherChain.Step(random, current, springWeights);
         }
-        var desertSummer = WeatherClimate.Weights(Constants.CLIMATE_DESERT, WeatherClimate.Summer);
-        Check(desertSummer[WeatherChain.Step(random, Index("blizzard"), desertSummer)] > 0, "impossible weather leaves at once");
-        int[] draws = new int[presetCount];
-        var springWeights = WeatherClimate.Weights(Constants.CLIMATE_TEMPERATE, WeatherClimate.Spring);
-        for (int i = 0; i < 100000; i++) draws[WeatherChain.Sample(random, springWeights)]++;
-        for (int i = 0; i < presetCount; i++) Check(Mathf.Abs(draws[i] / 1000f - springWeights[i]) < 0.7f, "fresh draw frequency matches weight");
+        for (int i = 0; i < presetCount; i++)
+            Check(Math.Abs(time[i] / total - springWeights[i] / 100.0) < 0.02, "disconnected weather still follows the monthly proportions");
+        Check(desertSummer[WeatherChain.Step(random, Index("rain"), desertSummer)] > 0, "zero probability weather leaves at once");
 
         // 時刻
         var clock = new WeatherClock();
@@ -226,9 +202,9 @@ public sealed class WeatherQaHost : MonoBehaviour
         controller.TransitionSeconds = 0.3f;
         yield return Frames(4);
         Check(ipc.Publishes > 0 && ipc.Presets.Length == presetCount, "complete authoritative options");
-        ApiClient.Epoch = 5; ApiClient.Climate = Constants.CLIMATE_DESERT; ApiClient.Date = Day(7, 15);
+        ApiClient.Epoch = 5; ApiClient.Climate = profile; ApiClient.Date = Day(7, 15);
         ipc.Begin();
-        yield return Until(() => controller.Climate == Constants.CLIMATE_DESERT, 5f, "session start reads the climate");
+        yield return Until(() => controller.Climate == profile.name, 5f, "session start reads the climate");
         Check(controller.Season == WeatherClimate.Summer, "season from the city date");
         Check(desertSummer[controller.CurrentIndex] > 0, "session starts with weather possible in the climate");
         Check(controller.Clock.Current == WeatherClock.Stage.Day && controller.Clock.Phase < WeatherClock.MorningPhase + 0.01f, "session starts in the morning");
@@ -236,6 +212,12 @@ public sealed class WeatherQaHost : MonoBehaviour
         ipc.Reload();
         yield return Frames(4);
         Check(ApiClient.Reads > reads && !controller.Clock.IsDarkening, "editing reload reads the city without passing a night");
+        int beforeEdit = controller.CurrentIndex;
+        ApiClient.Climate.name = "月別設定を編集";
+        ApiClient.Climate.months[6].weather["clear"] = 70;
+        ApiClient.Climate.months[6].weather["blizzard"] = 30;
+        ipc.Reload(); yield return Frames(4);
+        Check(controller.Climate == ApiClient.Climate.name && controller.CurrentIndex == beforeEdit && !controller.Clock.IsDarkening, "climate edits refresh probabilities without advancing weather or time");
 
         ipc.PrepareEpoch("result-hold");
         ApiClient.Epoch = 6; ApiClient.Date = Day(1, 10);
@@ -249,7 +231,7 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(ipc.DarkenedCount == 1 && controller.Clock.Current == WeatherClock.Stage.Night, "duplicate prepare does not replay sunset");
         ipc.Executing(false);
         yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "epoch end brings the morning");
-        var desertWinter = WeatherClimate.Weights(Constants.CLIMATE_DESERT, WeatherClimate.Winter);
+        var desertWinter = WeatherClimate.Weights(profile, Day(1, 10));
         Check(controller.Season == WeatherClimate.Winter && desertWinter[controller.CurrentIndex] > 0, "new day uses the new season");
 
         ipc.Executing(true);
@@ -293,9 +275,9 @@ public sealed class WeatherQaHost : MonoBehaviour
         ipc.Executing(true);
         yield return null;
         Check(!controller.Clock.IsDarkening, "no night effect outside a session");
-        ApiClient.Epoch = 30; ApiClient.Climate = Constants.CLIMATE_TEMPERATE; ApiClient.Date = Day(4, 1);
+        ApiClient.Epoch = 30; ApiClient.Climate = ApiClient.Profile(); ApiClient.Date = Day(4, 1);
         ipc.Begin();
-        yield return Until(() => controller.Climate == Constants.CLIMATE_TEMPERATE, 5f, "next session reads its climate");
+        yield return Until(() => controller.Climate == ApiClient.Climate.name, 5f, "next session reads its climate");
         controller.enabled = false;
         Check(RenderSettings.skybox == originalSky && Mathf.Approximately(sun.intensity,1.1f), "environment restored on disable");
         controller.enabled = true;

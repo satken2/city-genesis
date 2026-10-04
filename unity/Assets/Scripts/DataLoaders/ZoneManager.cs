@@ -109,12 +109,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     private const float LINE_THICKNESS = 5f;
 
-    /// <summary>地区編集モード中の枠線の太さ。通常表示より太くして境界を主役にする。</summary>
-    private const float EDIT_LINE_THICKNESS = 8f;
-
-    /// <summary>地区編集モード中、選択中(拡張先・統合先)の地区の枠線の太さ。</summary>
-    private const float SELECTED_LINE_THICKNESS = 13f;
-
     /// <summary>
     /// 枠線を地区の内側へ寄せる量(メートル)。
     /// 隣り合う地区は境界の街路を共有するためポリゴンの辺がぴったり重なり、
@@ -129,16 +123,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// </summary>
     private const float OUTLINE_MITER_LIMIT = 4.0f;
 
-    /// <summary>
-    /// 地区編集モード中かどうか(SetEditOutlineMode で切り替える)。
-    /// ONの間は枠線を太くし、マテリアルの _ZTest=Always で地形・建物に隠れないようにする。
-    /// 通常プレイ中は深度テストを残す(全マップの枠線が山や建物を透けて見えると煩雑なため)。
-    /// </summary>
-    private bool editOutlineMode = false;
-
-    /// <summary>地区編集モードで選択中(拡張先・統合先)の地区ID。0 は未選択。</summary>
-    private int selectedZoneId = 0;
-
     private GameObject uiCanvasRoot;
     private Canvas uiCanvas;
     private RectTransform uiCanvasRect;
@@ -146,25 +130,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     private GameObject overlayMeshObj;
     private OverlayMeshRenderer overlayRenderer;
-
-    /// <summary>
-
-    /// <summary>
-    /// 地区編集モードで既存地区にホバーした際の半透明フィル描画用レンダラ。
-    /// 枠線用の overlayRenderer とは別インスタンスにし、マテリアルの _ZTest=Always で
-    /// 地形・建物に隠れず常に手前に塗る（ParcelManager のデータ可視化と同じ採用済みトレードオフ）。
-    /// ホバー地区が変わったフレームだけメッシュを作り直し、それ以外は既存メッシュをそのまま描く
-    /// （OverlayMeshRenderer は次の BeginFrame まで前フレームのメッシュを保持するため毎フレームコストは無い）。
-    /// </summary>
-    private GameObject hoverFillMeshObj;
-    private OverlayMeshRenderer hoverFillRenderer;
-    private int hoverFillZoneId = -1;
-    /// <summary>ホバーフィルの三角形頂点バッファ（GC回避のため使い回す）。</summary>
-    private readonly List<Vector3> hoverFillTriVerts = new List<Vector3>(256);
-    /// <summary>ホバーフィルの不透明度。</summary>
-    private const float HOVER_FILL_ALPHA = 0.25f;
-    /// <summary>ホバーフィルを地形から浮かせるオフセット（メートル）。</summary>
-    private const float HOVER_FILL_HEIGHT_OFFSET = 0.08f;
 
     private TerrainManager terrainManager;
 
@@ -188,18 +153,14 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// </summary>
     private bool zoneRefreshQueued = false;
 
-    /// <summary>
-    /// 予約した追加リロードを version 差分なしの全再描画にするか(ロード中の ReloadAllZonesForced)。
-    /// 進行中のロードは地区を複数フレームに分けて適用するため、途中でキャッシュを空にしても
-    /// 適用済みの地区は描き直されず、応答も編集前の可能性があるので、完了後に取り直す。
-    /// </summary>
-    private bool zoneForcedReloadQueued = false;
-
     // カメラ変化検知によるUI位置更新間引き用
     private Vector3 lastCamPos = Vector3.negativeInfinity;
     private Quaternion lastCamRot = Quaternion.identity;
     private const float CAMERA_POS_THRESHOLD = 1.0f;
     private const float CAMERA_ROT_THRESHOLD = 2.0f;
+
+    private const float ZONE_UI_SCALE = 2f / 3f;
+    private const int ICONS_PER_ROW = 5;
 
     private bool IsOverlayVisible => uiCanvasRoot != null && uiCanvasRoot.activeSelf;
 
@@ -230,19 +191,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             }
         }
         return -1;
-    }
-
-    /// <summary>
-    /// 地区IDから地区名を取得する。
-    /// 存在しない場合は空文字を返す。
-    /// </summary>
-    public string GetZoneName(int zoneId)
-    {
-        if (zoneCache.TryGetValue(zoneId, out var zone))
-        {
-            return zone.name ?? "";
-        }
-        return "";
     }
 
     private void Awake()
@@ -310,7 +258,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         StopZoneLoad();
         StopZoneLineHeightRefresh();
         zoneRefreshQueued = false;
-        zoneForcedReloadQueued = false;
         zoneHeightDirtyIds.Clear();
         zoneHeightTileCells.Clear();
 
@@ -340,9 +287,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         zoneVersionCache.Clear();
         loadedCells.Clear();
         areZonesLoaded = false;
-
-        // ホバーフィルもクリアする（残存すると存在しない地区の塗りが残るため）
-        ClearHoverFill();
     }
 
     /// <summary>
@@ -361,25 +305,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             zoneRefreshQueued = true;
             return;
         }
-        StartZoneLoad();
-    }
-
-    /// <summary>
-    /// version 差分をバイパスして全地区を再取得・再描画する。
-    /// 地区編集の確定後(道路の地区割り当て変更後)に呼ぶ。地区の拡張では侵食された側の地区や、
-    /// 空になって消滅した地区も含めて複数地区のポリゴンが同時に変わるため、version 差分に頼らず
-    /// 全地区を再描画する(消滅した地区の枠線・ラベルは UpdateZone / SyncZones が消す)。
-    /// </summary>
-    public void ReloadAllZonesForced()
-    {
-        if (isZoneLoadInProgress)
-        {
-            zoneRefreshQueued = true;
-            zoneForcedReloadQueued = true;
-            return;
-        }
-        // 全地区を再描画対象にする(version が同じでも UpdateZone が走るようにする)。
-        zoneVersionCache.Clear();
         StartZoneLoad();
     }
 
@@ -453,11 +378,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         if (zoneRefreshQueued)
         {
             zoneRefreshQueued = false;
-            if (zoneForcedReloadQueued)
-            {
-                zoneForcedReloadQueued = false;
-                zoneVersionCache.Clear();
-            }
             StartZoneLoad();
         }
     }
@@ -550,128 +470,8 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     {
         if (overlayMeshObj != null) return;
 
-        overlayRenderer = OverlayMeshRenderer.Create("ZoneOverlayMesh", alwaysOnTop: editOutlineMode, persistent: true);
+        overlayRenderer = OverlayMeshRenderer.Create("ZoneOverlayMesh", alwaysOnTop: false, persistent: true);
         overlayMeshObj = overlayRenderer.gameObject;
-    }
-
-    /// <summary>
-    /// 枠線マテリアルの深度テストを、現在のモードに合わせて設定する。
-    /// 地区編集中は Always(8) にして地形・建物に埋もれず常に手前へ描き、
-    /// 通常プレイ中は既定の LEqual(4) に戻す。
-    /// </summary>
-    private void ApplyOutlineDepthTest()
-    {
-        if (overlayRenderer == null) return;
-        overlayRenderer.Material.SetFloat(
-            "_ZTest",
-            (float)(editOutlineMode
-                ? UnityEngine.Rendering.CompareFunction.Always
-                : UnityEngine.Rendering.CompareFunction.LessEqual));
-    }
-
-    /// <summary>
-    /// 地区編集モードの枠線表示(太線＋深度テスト無効)を切り替える。
-    /// ZoneEditContext の EnterCreateMode / EnterEditMode / Exit から呼ばれる。
-    /// </summary>
-    public void SetEditOutlineMode(bool enabled)
-    {
-        if (editOutlineMode == enabled) return;
-        editOutlineMode = enabled;
-        ApplyOutlineDepthTest();
-        // 太さが変わるためオーバーレイを次のUpdateで必ず描き直す
-        lastCamPos = Vector3.negativeInfinity;
-    }
-
-    /// <summary>
-    /// 地区編集モードで選択中(拡張先・統合先)の地区を設定する。
-    /// 選択中の地区は枠線をさらに太く描き、カーソルHUDの色チップと合わせて
-    /// 「いまどの地区に対して操作しているか」を3Dビュー上で示す。0 で選択解除。
-    /// </summary>
-    public void SetSelectedZone(int zoneId)
-    {
-        if (selectedZoneId == zoneId) return;
-        selectedZoneId = zoneId;
-        lastCamPos = Vector3.negativeInfinity;
-    }
-
-    /// <summary>
-    /// ホバーフィル用のレンダラを生成する(枠線用とは別インスタンス・別マテリアル。
-    /// 枠線と違いモードに依らず常に手前に塗る)。
-    /// </summary>
-    private void EnsureHoverFillRenderer()
-    {
-        if (hoverFillMeshObj != null) return;
-
-        hoverFillRenderer = OverlayMeshRenderer.Create("ZoneHoverFillMesh", alwaysOnTop: true, persistent: true);
-        hoverFillMeshObj = hoverFillRenderer.gameObject;
-    }
-
-    /// <summary>
-    /// 既存地区にホバーした際の半透明フィルを描画する。
-    /// 地区編集モードの InputHandler がホバー地区の変化時にのみ呼ぶ（毎フレームは呼ばない）。
-    /// zoneId が現在の描画と同じなら何もしない。zoneId <= 0 でクリア。
-    /// 地区ポリゴンを耳切り分割（BuildingMeshBuilder.TriangulateOrFan。凹地区に対応）し、
-    /// 各頂点Yを地形高さに追従させて一度だけメッシュ化する。
-    /// </summary>
-    public void SetHoverFillZone(int zoneId)
-    {
-        if (zoneId == hoverFillZoneId) return;
-        hoverFillZoneId = zoneId;
-
-        if (zoneId <= 0)
-        {
-            hoverFillRenderer?.ClearMesh();
-            return;
-        }
-
-        if (!zoneCache.ContainsKey(zoneId)) return;
-        zonePolygonCache.TryGetValue(zoneId, out float[][] poly);
-        if (poly == null || poly.Length < 3)
-        {
-            hoverFillRenderer?.ClearMesh();
-            return;
-        }
-
-        // ポリゴンを Vector2[] に変換して三角形分割する（[i][0]=X, [i][1]=Z）。
-        Vector2[] poly2D = new Vector2[poly.Length];
-        for (int i = 0; i < poly.Length; i++)
-        {
-            float[] v = poly[i];
-            poly2D[i] = (v != null && v.Length >= 2) ? new Vector2(v[0], v[1]) : Vector2.zero;
-        }
-
-        List<int> tris = BuildingMeshBuilder.TriangulateOrFan(poly2D);
-        if (tris.Count < 3)
-        {
-            hoverFillRenderer?.ClearMesh();
-            return;
-        }
-
-        // 分割インデックスを「3頂点/三角形」のフラット頂点列へ展開し、各頂点を地形高さに追従させる。
-        hoverFillTriVerts.Clear();
-        for (int i = 0; i + 2 < tris.Count; i += 3)
-        {
-            for (int k = 0; k < 3; k++)
-            {
-                Vector2 p = poly2D[tris[i + k]];
-                float y = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.y)) + HOVER_FILL_HEIGHT_OFFSET;
-                hoverFillTriVerts.Add(new Vector3(p.x, y, p.y));
-            }
-        }
-
-        EnsureHoverFillRenderer();
-        Color fillColor = GetZoneColor(zoneId, HOVER_FILL_ALPHA);
-        hoverFillRenderer.BeginFrame();
-        hoverFillRenderer.AddPreTriangulated(hoverFillTriVerts, fillColor);
-        hoverFillRenderer.EndFrame(Camera.main);
-    }
-
-    /// <summary>
-    /// ホバーフィルを消す（地区編集モード終了・全クリア時）。
-    /// </summary>
-    public void ClearHoverFill()
-    {
-        SetHoverFillZone(-1);
     }
 
     /// <summary>
@@ -702,6 +502,8 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     public void UpdateZone(ZoneData zone)
     {
         ZoneRevision++;
+        // カメラが静止していても、地区の再生成後は表示距離と位置を再評価する。
+        lastCamPos = Vector3.negativeInfinity;
         float[] centerPoint = zone.GetCenterPointArray();
         zoneCache[zone.zone_id] = zone;
 
@@ -801,6 +603,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         rt.anchorMax = Vector2.zero;
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.sizeDelta = new Vector2(text.preferredWidth, text.preferredHeight);
+        rt.localScale = Vector3.one * ZONE_UI_SCALE;
 
         // クリック可能にして、クリック時に地区詳細ウィンドウを開く
         Button button = labelGO.AddComponent<Button>();
@@ -831,7 +634,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         }
 
         var icons = new List<RectTransform>();
-        const float iconSize = 60f;
+        const float iconSize = 60f * ZONE_UI_SCALE;
 
         for (int i = 0; i < allowedBuildingTypes.Count; i++)
         {
@@ -1065,21 +868,15 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             overlayRenderer.BeginFrame();
             GeometryUtility.CalculateFrustumPlanes(cam, frustumPlanes);
 
-            // 枠線を描画。地区編集中は太く(選択中の地区はさらに太く)して境界を主役にする。
             foreach (var kvp in zoneLinesByZone)
             {
                 int zoneId = kvp.Key;
                 var entries = kvp.Value;
                 Color outlineColor = GetZoneColor(zoneId, 1f); // 100% 不透明度
-                float thickness = LINE_THICKNESS;
-                if (editOutlineMode)
-                {
-                    thickness = (zoneId == selectedZoneId) ? SELECTED_LINE_THICKNESS : EDIT_LINE_THICKNESS;
-                }
 
                 if (!zoneLineChunks.TryGetValue(zoneId, out List<ZoneLineChunk> chunks))
                 {
-                    AddZoneLines(entries, 0, entries.Count, nearPlane, outlineColor, thickness);
+                    AddZoneLines(entries, 0, entries.Count, nearPlane, outlineColor);
                     continue;
                 }
                 for (int c = 0; c < chunks.Count; c++)
@@ -1089,7 +886,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
                     float sweep = (Vector3.Distance(currentCamPos, cullBounds.center) + chunk.radius) * ZONE_CULL_SWEEP_PER_METER;
                     cullBounds.Expand(sweep * 2f);
                     if (!GeometryUtility.TestPlanesAABB(frustumPlanes, cullBounds)) continue;
-                    AddZoneLines(entries, chunk.start, chunk.start + chunk.count, nearPlane, outlineColor, thickness);
+                    AddZoneLines(entries, chunk.start, chunk.start + chunk.count, nearPlane, outlineColor);
                 }
             }
 
@@ -1097,11 +894,14 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         }
 
         // 2. 地区名ラベルとアイコンの位置更新
+        float maxDistance = Utils.GetMapLabelMaxDistance(currentCamPos);
+        float maxDistanceSqr = maxDistance * maxDistance;
         foreach (var kvp in zoneLabelAnchors)
         {
             int zoneId = kvp.Key;
             Vector3 screenPos = cam.WorldToScreenPoint(kvp.Value);
-            bool visible = screenPos.z >= 0;
+            bool visible = screenPos.z >= 0
+                && (kvp.Value - currentCamPos).sqrMagnitude <= maxDistanceSqr;
 
             // ラベル
             if (zoneLabelUIs.TryGetValue(zoneId, out RectTransform label) && label != null)
@@ -1123,8 +923,13 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
                     SetUiActive(icon, visible);
                     if (visible)
                     {
-                        float offsetX = (i - (iconList.Count - 1) / 2f) * 70f;
-                        icon.anchoredPosition = new Vector2(screenPos.x + offsetX, screenPos.y - 62.5f);
+                        int row = i / ICONS_PER_ROW;
+                        int column = i % ICONS_PER_ROW;
+                        int rowCount = Mathf.Min(ICONS_PER_ROW, iconList.Count - row * ICONS_PER_ROW);
+                        float spacing = 70f * ZONE_UI_SCALE;
+                        float offsetX = (column - (rowCount - 1) / 2f) * spacing;
+                        float offsetY = 62.5f * ZONE_UI_SCALE + row * spacing;
+                        icon.anchoredPosition = new Vector2(screenPos.x + offsetX, screenPos.y - offsetY);
                     }
                 }
             }
@@ -1135,7 +940,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// entries[start..end) をニアクリップ面で切ってオーバーレイへ積む。
     /// カメラ背面へ抜ける線分は、画面外へ裏返って描かれないよう手前側だけ残す。
     /// </summary>
-    private void AddZoneLines(List<ZoneLineEntry> entries, int start, int end, Plane nearPlane, Color color, float thickness)
+    private void AddZoneLines(List<ZoneLineEntry> entries, int start, int end, Plane nearPlane, Color color)
     {
         end = Mathf.Min(end, entries.Count);
         for (int i = start; i < end; i++)
@@ -1159,7 +964,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
                 if (da < 0f) ca = p; else cb = p;
             }
 
-            overlayRenderer.AddSolidLine(ca, cb, color, thickness);
+            overlayRenderer.AddSolidLine(ca, cb, color, LINE_THICKNESS);
         }
     }
 

@@ -111,6 +111,7 @@ nav:
     - IPC連携: programs/IPC連携の整理.md
     - コンポーネント連携: programs/コンポーネント連携.md
     - UI共通基盤: programs/UI共通基盤.md
+    - 気候設定: programs/気候設定.md
     - プレイモード: programs/プレイモード.md
     - バージョニングと互換性: programs/バージョニングと互換性.md
     - セーブデータ仕様: programs/セーブデータ仕様.md

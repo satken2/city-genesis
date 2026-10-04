@@ -1,0 +1,7496 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="City Genesis - 都市建造経済シミュレーションゲームの設計ドキュメント">
+      
+      
+      
+        <link rel="canonical" href="https://city-genesis-docs.pages.dev/geometries/G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">
+      
+      
+        <link rel="prev" href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">
+      
+      
+        <link rel="next" href="../H_%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E3%83%87%E3%83%BC%E3%82%BF%E3%83%AD%E3%83%BC%E3%83%89/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="ja">
+        
+          <link rel="alternate" href="../../en/geometries/G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>道路メッシュの生成 - City Genesis Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+JP:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans JP";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#道路メッシュの生成" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href="../.." title="City Genesis Docs" class="md-header__button md-logo" aria-label="City Genesis Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            City Genesis Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              道路メッシュの生成
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="ダークモードに切り替え"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="ダークモードに切り替え" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="ライトモードに切り替え"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="ライトモードに切り替え" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="言語切り替え">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../en/geometries/G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="検索" placeholder="検索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="検索">
+        
+        <button type="reset" class="md-search__icon md-icon" title="クリア" aria-label="クリア" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            検索を初期化
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/satken2/city-genesis" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="タブ" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  ホーム
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../economics/1_%E5%85%A8%E4%BD%93%E6%A6%82%E8%A6%81/" class="md-tabs__link">
+          
+  
+  
+  経済シミュレーション
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/" class="md-tabs__link">
+          
+  
+  
+  幾何・グラフィック
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../programs/%E9%83%BD%E5%B8%82%E3%83%9E%E3%83%83%E3%83%97%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E7%B5%8C%E8%B7%AF%E6%A1%88%E5%86%85/" class="md-tabs__link">
+          
+  
+  
+  プログラム連携
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="City Genesis Docs" class="md-nav__button md-logo" aria-label="City Genesis Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    City Genesis Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/satken2/city-genesis" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ホーム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経済シミュレーション
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    経済シミュレーション
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/1_%E5%85%A8%E4%BD%93%E6%A6%82%E8%A6%81/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    全体概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/25_%E3%82%B2%E3%83%BC%E3%83%A0%E5%86%85%E6%97%A5%E4%BB%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ゲーム内日付
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/2_%E7%B5%8C%E6%B8%88%E4%B8%BB%E4%BD%93/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経済主体
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/3_%E9%81%93%E8%B7%AF%E7%B6%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路網
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/4_%E5%9C%B0%E5%8C%BA%E3%81%A8%E5%9C%9F%E5%9C%B0%E5%8C%BA%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地区と土地区画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/6_%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E6%A9%9F%E9%96%A2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    公共交通機関
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/7_%E9%87%91%E8%9E%8D%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    金融システム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/8_%E5%95%86%E5%93%81%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    商品市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/9_%E7%94%9F%E7%94%A3%E6%B4%BB%E5%8B%95/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    生産活動
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/10_%E6%B6%88%E8%B2%BB%E6%B4%BB%E5%8B%95/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    消費活動
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/12_%E5%BB%BA%E7%89%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/25_%E5%BB%BA%E8%A8%AD%E4%BD%9C%E6%A5%AD%E9%87%8F%E3%81%A8%E6%96%BD%E5%B7%A5%E8%83%BD%E5%8A%9B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建設作業量と施工能力
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/34_%E9%80%A0%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    造成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/13_%E4%B8%8D%E5%8B%95%E7%94%A3%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    不動産市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/15_%E4%B8%96%E5%B8%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    世帯
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/16_%E5%8A%B4%E5%83%8D%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    労働市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/17_%E6%95%99%E8%82%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教育
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/18_%E7%A7%BB%E6%B0%91/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    移民
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/19_%E7%92%B0%E5%A2%83/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/20_%E4%BA%8B%E6%95%85%E3%81%A8%E7%81%BD%E5%AE%B3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事故と災害
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/21_%E5%A4%A9%E7%84%B6%E8%B3%87%E6%BA%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    天然資源
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/22_%E4%BA%88%E7%AE%97%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    予算管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/23_%E6%96%BD%E6%94%BF%E3%82%B9%E3%82%B3%E3%82%A2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    施政スコア
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/24_%E9%81%94%E6%88%90%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    達成クエスト
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/26_%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E7%B6%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ網
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/28_%E8%87%AA%E7%84%B6%E7%99%BA%E7%94%9F%E3%82%B9%E3%83%97%E3%83%AD%E3%83%BC%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    自然発生スプロール
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/29_%E9%A7%85%E3%81%A8%E9%A7%85%E8%88%8E/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    駅と駅舎
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/30_%E4%BA%BA%E5%93%A1%E6%90%AC%E9%80%81%E8%A8%AD%E5%82%99/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    人員搬送設備
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/31_%E8%A6%B3%E5%85%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    観光
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/33_%E8%B2%A8%E7%89%A9%E8%BC%B8%E9%80%81/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    貨物輸送
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    幾何・グラフィック
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    幾何・グラフィック
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    パス形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../B_%E5%9C%9F%E5%9C%B0%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    土地形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../C_%E5%BB%BA%E7%89%A9%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../D_%E5%9C%B0%E5%BD%A2%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../E_LOD%E5%87%A6%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LOD処理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    建物メッシュの生成
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F_%E5%BB%BA%E7%89%A9%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    共通仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    モジュラー建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地面アセット
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    既成建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    港湾岸壁
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    工事中建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マッシュアップ建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F7_%E8%A7%A3%E4%BD%93%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    解体中建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F8_%E5%80%92%E5%A3%8A%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    倒壊建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F9_%E8%BB%8A%E4%B8%A1%E5%9F%BA%E5%9C%B0%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両基地
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F10_%E3%82%AA%E3%83%BC%E3%83%97%E3%83%B3%E3%82%B9%E3%83%9A%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    オープンスペース
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    露天掘り
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#送電線の専用描画11011102" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        送電線の専用描画（1101・1102）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lrt付き道路222242歩行者道303" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LRT付き道路222・242・歩行者道303
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LRT付き道路222・242・歩行者道303">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lrt停留所のホーム" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LRT停留所のホーム
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#植栽中央分離帯と道路吊り橋" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        植栽中央分離帯と道路吊り橋
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ロープウェイ601ロープウェイ駅602のモデル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ロープウェイ601・ロープウェイ駅602のモデル
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#概要" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概要
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="概要">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#パスの種類とジェネレータの対応" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パスの種類とジェネレータの対応
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-データフロー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. データフロー
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-三次ベジエ曲線による点群生成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 三次ベジエ曲線による点群生成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 三次ベジエ曲線による点群生成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-アンカー点と制御点" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 アンカー点と制御点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-セグメント構成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 セグメント構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-サンプリングと地形追従" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 サンプリングと地形追従
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-lodlevel-of-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. LOD（Level of Detail）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-スプラインによる道路形状の定義roadpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. スプラインによる道路形状の定義（RoadPath）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. スプラインによる道路形状の定義（RoadPath）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-描画点列と補間" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 描画点列と補間
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-スプラインの構築" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 スプラインの構築
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-splinemesh-によるパーツの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 SplineMesh によるパーツの配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-スケールとオフセット" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 スケールとオフセット
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 スケールとオフセット">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#高さの層構造roadpartheights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高さの層構造（RoadPartHeights）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-マスターデータと寸法パラメータ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. マスターデータと寸法パラメータ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. マスターデータと寸法パラメータ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-寸法の取得" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 寸法の取得
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-オフセットの計算" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 オフセットの計算
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 オフセットの計算">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#左右非対称パーツのミラーリング規約" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        左右非対称パーツのミラーリング規約
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-歩道付き道路橋p223" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 歩道付き道路橋（p223）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-歩行者専用道路301歩行者吊り橋302" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 歩行者専用道路301・歩行者吊り橋302
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-歩行者モール303304305" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 歩行者モール303・304・305
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-アセットの命名規則とフォルダ構成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. アセットの命名規則とフォルダ構成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. アセットの命名規則とフォルダ構成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#海底インフラ11041301" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        海底インフラ1104・1301
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#61-リソースパスの構成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 リソースパスの構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-命名例" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 命名例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-パーツの種類" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 パーツの種類
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-パーツプレハブのモデリング規約" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 パーツプレハブのモデリング規約
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-フォールバック機能" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. フォールバック機能
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. フォールバック機能">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-基本考え方" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 基本考え方
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-フォールバック階層" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 フォールバック階層
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2 フォールバック階層">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#中央分離帯centerの特別なフォールバック" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        中央分離帯（center）の特別なフォールバック
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-各パーツの生成詳細" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 各パーツの生成詳細
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. 各パーツの生成詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-道路本体body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 道路本体（body）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.1 道路本体（body）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single_span-モードsingle_span--true" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        single_span モード（single_span = true）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-中央分離帯center" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 中央分離帯（center）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-路面標示" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 路面標示
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.3 路面標示">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#車線境界と車線中心の共有定義" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        車線境界と車線中心の共有定義
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#交差点の進入部" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        交差点の進入部
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#画像の保持と検証" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        画像の保持と検証
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-歩道sidewalk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 歩道（sidewalk）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.4 歩道（sidewalk）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#歩道のミラーリング" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        歩道のミラーリング
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-防音壁ガードレールwall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 防音壁・ガードレール（wall）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.5 防音壁・ガードレール（wall）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#地下専用の側壁wall_underground" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        地下専用の側壁（wall_underground）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#86-道路ごとの付帯設備" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.6 道路ごとの付帯設備
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.6 道路ごとの付帯設備">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#設備モデルの収録範囲" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設備モデルの収録範囲
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#87-柱pillarとキャップpillar_cap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.7 柱（pillar）とキャップ（pillar_cap）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.7 柱（pillar）とキャップ（pillar_cap）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#配置間隔" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置間隔
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#他の道路線路との干渉回避" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        他の道路・線路との干渉回避
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#門型橋脚の組み立て" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        門型橋脚の組み立て
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#柱とキャップの配置とスケール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        柱とキャップの配置とスケール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#プレハブの著作規約yスケールの帰結" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プレハブの著作規約（Yスケールの帰結）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#base_height3d描画用の高さオフセット" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        base_height（3D描画用の高さオフセット）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#88-地下パストンネルの描画区間分割" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.8 地下パス（トンネル）の描画区間分割
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-マテリアルの割り当て" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. マテリアルの割り当て
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-コライダーメッシュの生成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. コライダーメッシュの生成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. コライダーメッシュの生成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-目的" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 目的
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-roadpath-の場合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 RoadPath の場合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-buildstripmesh-のアルゴリズム" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 BuildStripMesh のアルゴリズム
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-返却" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 返却
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-交差点と断面の接合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 交差点と断面の接合
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. 交差点と断面の接合">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-共通の切断断面" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 共通の切断断面
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-外周と路面" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 外周と路面
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-歩道壁中央分離帯" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 歩道・壁・中央分離帯
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-線路と踏切" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 線路と踏切
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-接合距離と縮退配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 接合距離と縮退配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#116-材質と検証" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.6 材質と検証
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#117-高速道路の本線とランプ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.7 高速道路の本線とランプ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.7 高速道路の本線とランプ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#結合区間" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        結合区間
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ランプの描画高さ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ランプの描画高さ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#合流ノード" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        合流ノード
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#車両" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        車両
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#検証" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        検証
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#118-交通信号機" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.8 交通信号機
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.8 交通信号機">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#設置条件" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設置条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#モデルと描画" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        モデルと描画
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-線路モノレールtrackpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. 線路・モノレール（TrackPath）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-パラメータ一覧" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. パラメータ一覧
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. パラメータ一覧">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-pathsummary-の主要フィールド" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 PathSummary の主要フィールド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-pathmasteritem-の主要フィールド" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 PathMasterItem の主要フィールド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-pathwaypoint-のフィールド" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 PathWaypoint のフィールド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#134-pathmeshresult-のプロパティ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.4 PathMeshResult のプロパティ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-max_span-バリデーション" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. max_span バリデーション
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. max_span バリデーション">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-概要" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 概要
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-計算方法" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 計算方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-フロントエンドunity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 フロントエンド（Unity）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#144-バックエンドpython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.4 バックエンド（Python）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-工事中status_constructingのパス表示" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. 工事中（STATUS_CONSTRUCTING）のパス表示
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. 工事中（STATUS_CONSTRUCTING）のパス表示">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-地上道路線路" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.1 地上道路・線路
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#152-高架道路高架線路" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.2 高架道路・高架線路
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#153-土の形状と材質" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.3 土の形状と材質
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#154-トンネル遠景クリック" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.4 トンネル・遠景・クリック
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#155-進捗の取得とキャッシュ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.5 進捗の取得とキャッシュ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#156-工事車両の制作と検証" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.6 工事車両の制作と検証
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-未舗装路の路面表現custompathdirt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. 未舗装路の路面表現（Custom/PathDirt）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="16. 未舗装路の路面表現（Custom/PathDirt）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-3つの層" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.1 3つの層
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162-頂点カラーの規約モデル側の契約" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.2 頂点カラーの規約（モデル側の契約）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#163-アルファブレンドではなくクリップである理由" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.3 アルファブレンドではなくクリップである理由
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#164-パス構成と切り抜きの一貫性" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.4 パス構成と切り抜きの一貫性
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#165-遠景でのチラつき対策" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.5 遠景でのチラつき対策
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#166-適用範囲の制限" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.6 適用範囲の制限
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#計画表示と非同期区間生成の同期" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        計画表示と非同期区間生成の同期
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="計画表示と非同期区間生成の同期">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#敷設形状編集時のプレビュー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        敷設・形状編集時のプレビュー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#301の石畳テクスチャ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        301の石畳テクスチャ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ケーブル接続部の描画" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ケーブル接続部の描画
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#施設への接続" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        施設への接続
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../H_%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E3%83%87%E3%83%BC%E3%82%BF%E3%83%AD%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    バックエンドデータロード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物パーツ作成マニュアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../J_%E3%83%91%E3%82%B9%E3%81%AE%E4%BA%A4%E5%B7%AE%E5%87%A6%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    パスの交差処理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../L_%E5%9C%B0%E5%BD%A2%E3%83%87%E3%83%BC%E3%82%BF%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形データ作成マニュアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../M_%E5%9C%B0%E5%BD%A2%E3%83%97%E3%83%AD%E3%83%83%E3%83%97/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形プロップ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    線路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両の走行描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../T_%E4%BA%A4%E9%80%9A%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%A8%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB%E3%81%AE%E6%95%B4%E5%90%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交通シミュレーションと走行描画の整合
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../P_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E5%85%B1%E6%9C%89%E3%81%A8%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マテリアル共有とエクスポート
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Q_%E9%A7%85%E8%88%8E%E3%83%91%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    駅舎パスのメッシュ生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../R_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E3%81%AE%E8%A7%A3%E6%B1%BA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マテリアルの解決
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S_%E7%81%AB%E7%81%BD%E3%82%A8%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    火災エフェクトの描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../U_%E5%A4%A9%E6%B0%97%E3%81%A8%E7%92%B0%E5%A2%83%E5%85%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    天気と環境光
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../V_%E7%92%B0%E5%A2%83%E6%BC%94%E5%87%BA%E3%81%AE%E4%B9%97%E3%82%8A%E7%89%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境演出の乗り物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../W_%E6%AD%A9%E8%A1%8C%E8%80%85%E3%81%AE%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    歩行者の描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プログラム連携
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    プログラム連携
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%83%BD%E5%B8%82%E3%83%9E%E3%83%83%E3%83%97%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E7%B5%8C%E8%B7%AF%E6%A1%88%E5%86%85/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    都市マップの検索と経路案内
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%9C%B0%E5%8C%BA%E7%B7%A8%E9%9B%86%E3%83%91%E3%83%8D%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地区編集パネル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%81%93%E8%B7%AF%E3%81%AE%E8%A9%B3%E7%B4%B0%E3%81%A8%E9%81%93%E8%B7%AF%E5%90%8D/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路の詳細と道路名
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%B8%82%E6%B0%91%E3%81%AE%E8%BF%BD%E8%B7%A1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    市民の追跡
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/IPC%E9%80%A3%E6%90%BA%E3%81%AE%E6%95%B4%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPC連携
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E9%80%A3%E6%90%BA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コンポーネント連携
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/UI%E5%85%B1%E9%80%9A%E5%9F%BA%E7%9B%A4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI共通基盤
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%97%E3%83%AC%E3%82%A4%E3%83%A2%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プレイモード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%8B%E3%83%B3%E3%82%B0%E3%81%A8%E4%BA%92%E6%8F%9B%E6%80%A7/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    バージョニングと互換性
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%BB%E3%83%BC%E3%83%96%E3%83%87%E3%83%BC%E3%82%BF%E4%BB%95%E6%A7%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    セーブデータ仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B7%E3%83%8A%E3%83%AA%E3%82%AA%E5%88%B6%E4%BD%9C%E3%81%A8%E9%85%8D%E5%B8%83/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    シナリオ制作と配布
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB%E5%9F%BA%E7%9B%A4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    チュートリアル基盤
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%A2%E3%83%83%E3%82%AF%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    モックバックエンド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/Unity%E5%85%A5%E5%8A%9B%E5%88%B6%E5%BE%A1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity入力制御
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/Unity%E8%A1%A8%E7%A4%BA%E3%83%A2%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity表示モード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E3%83%8F%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    公共交通ハイライト
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%A2%E3%83%A9%E3%83%BC%E3%83%88%E3%83%95%E3%83%A9%E3%82%B0%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アラートフラグ管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%80%9A%E7%9F%A5%E3%83%AC%E3%83%99%E3%83%AB%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    通知レベル管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E9%85%8D%E7%BD%AE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ファイル配置
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E7%B4%A0%E6%9D%90%E3%82%AF%E3%83%AC%E3%82%B8%E3%83%83%E3%83%88%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    素材クレジット管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B5%E3%82%A6%E3%83%B3%E3%83%89%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    サウンドシステム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%81%94%E6%88%90%E7%9B%AE%E6%A8%99%E3%82%A6%E3%82%A3%E3%83%B3%E3%83%89%E3%82%A6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    達成目標ウィンドウ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%BB%BA%E8%A8%AD%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建設プロジェクト管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#送電線の専用描画11011102" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        送電線の専用描画（1101・1102）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lrt付き道路222242歩行者道303" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LRT付き道路222・242・歩行者道303
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LRT付き道路222・242・歩行者道303">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lrt停留所のホーム" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LRT停留所のホーム
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#植栽中央分離帯と道路吊り橋" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        植栽中央分離帯と道路吊り橋
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ロープウェイ601ロープウェイ駅602のモデル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ロープウェイ601・ロープウェイ駅602のモデル
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#概要" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概要
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="概要">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#パスの種類とジェネレータの対応" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        パスの種類とジェネレータの対応
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-データフロー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. データフロー
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-三次ベジエ曲線による点群生成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 三次ベジエ曲線による点群生成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 三次ベジエ曲線による点群生成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-アンカー点と制御点" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 アンカー点と制御点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-セグメント構成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 セグメント構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-サンプリングと地形追従" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 サンプリングと地形追従
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-lodlevel-of-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. LOD（Level of Detail）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-スプラインによる道路形状の定義roadpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. スプラインによる道路形状の定義（RoadPath）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. スプラインによる道路形状の定義（RoadPath）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-描画点列と補間" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 描画点列と補間
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-スプラインの構築" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 スプラインの構築
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-splinemesh-によるパーツの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 SplineMesh によるパーツの配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-スケールとオフセット" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 スケールとオフセット
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 スケールとオフセット">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#高さの層構造roadpartheights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高さの層構造（RoadPartHeights）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-マスターデータと寸法パラメータ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. マスターデータと寸法パラメータ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. マスターデータと寸法パラメータ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-寸法の取得" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 寸法の取得
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-オフセットの計算" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 オフセットの計算
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 オフセットの計算">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#左右非対称パーツのミラーリング規約" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        左右非対称パーツのミラーリング規約
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-歩道付き道路橋p223" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 歩道付き道路橋（p223）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-歩行者専用道路301歩行者吊り橋302" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 歩行者専用道路301・歩行者吊り橋302
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-歩行者モール303304305" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 歩行者モール303・304・305
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-アセットの命名規則とフォルダ構成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. アセットの命名規則とフォルダ構成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. アセットの命名規則とフォルダ構成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#海底インフラ11041301" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        海底インフラ1104・1301
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#61-リソースパスの構成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 リソースパスの構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-命名例" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 命名例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-パーツの種類" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 パーツの種類
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-パーツプレハブのモデリング規約" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 パーツプレハブのモデリング規約
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-フォールバック機能" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. フォールバック機能
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. フォールバック機能">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-基本考え方" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 基本考え方
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-フォールバック階層" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 フォールバック階層
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2 フォールバック階層">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#中央分離帯centerの特別なフォールバック" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        中央分離帯（center）の特別なフォールバック
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-各パーツの生成詳細" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 各パーツの生成詳細
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. 各パーツの生成詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-道路本体body" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 道路本体（body）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.1 道路本体（body）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single_span-モードsingle_span--true" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        single_span モード（single_span = true）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-中央分離帯center" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 中央分離帯（center）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-路面標示" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 路面標示
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.3 路面標示">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#車線境界と車線中心の共有定義" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        車線境界と車線中心の共有定義
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#交差点の進入部" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        交差点の進入部
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#画像の保持と検証" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        画像の保持と検証
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-歩道sidewalk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 歩道（sidewalk）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.4 歩道（sidewalk）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#歩道のミラーリング" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        歩道のミラーリング
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-防音壁ガードレールwall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 防音壁・ガードレール（wall）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.5 防音壁・ガードレール（wall）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#地下専用の側壁wall_underground" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        地下専用の側壁（wall_underground）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#86-道路ごとの付帯設備" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.6 道路ごとの付帯設備
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.6 道路ごとの付帯設備">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#設備モデルの収録範囲" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設備モデルの収録範囲
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#87-柱pillarとキャップpillar_cap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.7 柱（pillar）とキャップ（pillar_cap）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8.7 柱（pillar）とキャップ（pillar_cap）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#配置間隔" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置間隔
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#他の道路線路との干渉回避" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        他の道路・線路との干渉回避
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#門型橋脚の組み立て" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        門型橋脚の組み立て
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#柱とキャップの配置とスケール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        柱とキャップの配置とスケール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#プレハブの著作規約yスケールの帰結" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プレハブの著作規約（Yスケールの帰結）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#base_height3d描画用の高さオフセット" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        base_height（3D描画用の高さオフセット）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#88-地下パストンネルの描画区間分割" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.8 地下パス（トンネル）の描画区間分割
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-マテリアルの割り当て" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. マテリアルの割り当て
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-コライダーメッシュの生成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. コライダーメッシュの生成
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. コライダーメッシュの生成">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-目的" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 目的
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-roadpath-の場合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 RoadPath の場合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-buildstripmesh-のアルゴリズム" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 BuildStripMesh のアルゴリズム
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-返却" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 返却
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-交差点と断面の接合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 交差点と断面の接合
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. 交差点と断面の接合">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-共通の切断断面" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 共通の切断断面
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-外周と路面" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 外周と路面
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-歩道壁中央分離帯" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 歩道・壁・中央分離帯
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-線路と踏切" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 線路と踏切
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-接合距離と縮退配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 接合距離と縮退配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#116-材質と検証" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.6 材質と検証
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#117-高速道路の本線とランプ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.7 高速道路の本線とランプ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.7 高速道路の本線とランプ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#結合区間" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        結合区間
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ランプの描画高さ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ランプの描画高さ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#合流ノード" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        合流ノード
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#車両" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        車両
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#検証" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        検証
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#118-交通信号機" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.8 交通信号機
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.8 交通信号機">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#設置条件" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設置条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#モデルと描画" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        モデルと描画
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-線路モノレールtrackpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. 線路・モノレール（TrackPath）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-パラメータ一覧" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. パラメータ一覧
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. パラメータ一覧">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-pathsummary-の主要フィールド" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 PathSummary の主要フィールド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-pathmasteritem-の主要フィールド" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 PathMasterItem の主要フィールド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-pathwaypoint-のフィールド" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 PathWaypoint のフィールド
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#134-pathmeshresult-のプロパティ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.4 PathMeshResult のプロパティ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-max_span-バリデーション" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. max_span バリデーション
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. max_span バリデーション">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-概要" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 概要
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-計算方法" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 計算方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-フロントエンドunity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 フロントエンド（Unity）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#144-バックエンドpython" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.4 バックエンド（Python）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-工事中status_constructingのパス表示" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. 工事中（STATUS_CONSTRUCTING）のパス表示
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. 工事中（STATUS_CONSTRUCTING）のパス表示">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-地上道路線路" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.1 地上道路・線路
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#152-高架道路高架線路" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.2 高架道路・高架線路
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#153-土の形状と材質" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.3 土の形状と材質
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#154-トンネル遠景クリック" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.4 トンネル・遠景・クリック
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#155-進捗の取得とキャッシュ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.5 進捗の取得とキャッシュ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#156-工事車両の制作と検証" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.6 工事車両の制作と検証
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-未舗装路の路面表現custompathdirt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. 未舗装路の路面表現（Custom/PathDirt）
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="16. 未舗装路の路面表現（Custom/PathDirt）">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#161-3つの層" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.1 3つの層
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#162-頂点カラーの規約モデル側の契約" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.2 頂点カラーの規約（モデル側の契約）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#163-アルファブレンドではなくクリップである理由" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.3 アルファブレンドではなくクリップである理由
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#164-パス構成と切り抜きの一貫性" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.4 パス構成と切り抜きの一貫性
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#165-遠景でのチラつき対策" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.5 遠景でのチラつき対策
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#166-適用範囲の制限" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16.6 適用範囲の制限
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#計画表示と非同期区間生成の同期" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        計画表示と非同期区間生成の同期
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="計画表示と非同期区間生成の同期">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#敷設形状編集時のプレビュー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        敷設・形状編集時のプレビュー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#301の石畳テクスチャ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        301の石畳テクスチャ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ケーブル接続部の描画" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ケーブル接続部の描画
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#施設への接続" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        施設への接続
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="道路メッシュの生成">道路メッシュの生成</h1>
+<p>地上・地下のパスは <code>PathManager</code> の同じ生成・更新・キャッシュ・LOD・セル退避経路を使う。地下表示は <code>TunnelSectionUtil.GetDrawSections</code> が返す表示区間に完全埋設区間を含める。点列は <code>CalculatePathPoints</code>、モデルは <code>PathMeshFactory</code> を共用し、描画物はワールド座標を保った <code>Paths</code> コンテナへ配置する。区間の <code>PathSection</code> は地上／地下の表示と材質の扱いを区別し、独立した更新や寿命を持たない。地下のモデル・材質は元のままで、ホバーは既存の青い <code>HighlightMaterial</code>、解除時は元材質へ戻る。モデルを持たない埋設インフラは共通ファクトリで通常道路のフォールバックを選ぶ。施工中も同じ進捗別生成器を使い、未施工の地下の土は設計標高に置く。表示切替・コライダーの扱いは <a href="../../programs/Unity%E8%A1%A8%E7%A4%BA%E3%83%A2%E3%83%BC%E3%83%89/#地下表示">Unity表示モード</a> を参照。</p>
+<h2 id="送電線の専用描画11011102">送電線の専用描画（1101・1102）</h2>
+<p>送電線は <code>PowerLinePath</code> がバリアント固有生成器として描画する。道路用のbody反復・柱の両端配置を使わず、アンカー間を <code>pillar_spacing</code> 以下へ均等分割し、鉄塔と同じ支持点から電線を張る。各径間の電線は両端を保持する放物線で、中央たるみを径間長の4.5%（最大6m）とする。モデルは実寸配置し、シミュレーション用の帯幅へ縮小しない。<code>base_height</code> を引いた描画基準と、バックエンドの標高・幅・接続判定は従来どおり分離する。</p>
+<p>大型1101は高さ38m、3段の腕と懸垂碍子、2回線6組の二導体と頂部の架空地線。小型1102は高さ17mの細身格子柱と3相・架空地線。通常は <code>pillar_cap</code>、接写は <code>PathDrawContext.ResolvePrefab</code> により <code>pillar_cap_close</code> を選ぶ。Farは主脚・腕・粗い斜材と簡略電線をコード生成し、地面の道路帯へ置換しない。<code>body</code> のFBXは制作見本で、専用生成器では使わない。</p>
+<p>共有ノードの姿勢・高さ・型は接続パスの逆引きから決める（大型優先、同型はpath_id順）。すべての接続電線が同じ取付点を参照する。<code>PowerLineSupport</code> は表示中の候補から最も詳細な支持構造を1基だけ表示し、所有パスのアンロード・LOD交換・破棄では残る候補へ引き継ぐ。ノード未確定のプレビューや中間支柱はパス固有。接続変更時は隣接する送電線を再生成する。</p>
+<p>電化線路・モノレールとの共有ノードと、発電所・変電所などのインフラ施設の接続端子は、大型1101・小型1102とも通常の鉄塔に代えて <code>PowerLineRailGantry</code> が四本の格子柱と四辺の格子梁を持つ受電架構（かご型）を生成する。施設端子は <code>BuildingManager.TryGetInfraTerminalOwner</code> の逆引きで識別し、ノードのインフラ財ビットだけでは判定しない。施設では端子ノードの絶対標高と共有送電線の水平接線を使い、柱の横位置は中心から大型5m、小型4mとする。</p>
+<p>線路接続の対象は送電線と同じ <code>infra_products</code> を流せる軌道パスで、単なる立体交差には配置しない。接続線路の最小path_idを基準に、未切断の中心線の高さと水平接線を使う。施設端子と線路接続が重なる場合は線路の配置を優先する。施設・線路の高さには送電線の <code>base_height</code> を差し引かない。</p>
+<p>線路接続の柱は道床・ホームの外縁から1.2m外側（中心線から最低でも大型5m、小型4m）に立て、前後の柱間を5mとする。近接線路の結合幅は線路と同じ <code>TrackAdjacency</code> の規則で架構の中央と前後を調べ、並走する線路の外側まで広げる。隣接候補も未切断の中心線を使い、交差点内の幅を含める。</p>
+<p>格子梁の下弦は基準面から大型8.4m、小型6.6m、梁の高さは0.72m。懸垂碍子の取付点は下弦から0.84m下で、前後の梁をたるみ0.39mのジャンパ線で結ぶ。線路接続ではジャンパ線を鉄道の門型梁下弦より0.5m以上上に保つため、下弦高さを最低8mとする。架空地線の取付点までの高さは大型9.54m、小型は施設7.74m・線路9.14mとなる。送電線の各導体と架空地線は架構の取付点へ張り、柱は各足元の地盤まで伸ばす。通常・接写・遠景で配置と取付点を揃え、格子と碍子の詳細度だけを変える。材質は既存の送電鉄塔と共有する。</p>
+<p>接続線路や近接線路の追加・幅や高さの変更・撤去でも、ノードの逆引きと既存の近接セル索引で関係する送電線を再生成キューへ積み、架構と電線の取付点を更新する。遠景も同じ再生成の対象である。</p>
+<p>施工中は橋脚期間に相当する最初の25%で鉄塔を順に表示し、その後の進捗に応じて径間単位で電線を張る。Normal・Close・Farで同じ配置計画を使う。検証は <code>unity/Tests/PowerLines/run.ps1</code>。</p>
+<h2 id="lrt付き道路222242歩行者道303">LRT付き道路222・242・歩行者道303</h2>
+<p>LRTの線路（道路上の222・242・303と専用軌道431）は、1本のパスが上下線2本の軌道を持つ左右対称の複線である。通常鉄道の軌道数2の複線（まとめた複線。<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">線路メッシュの生成</a> §1.1）と同じ方式で、往路と復路が同じパスの左右の軌道を走る（通常鉄道は一方通行の単線2本を並べても複線を作れる。同 §8）。431の通行方向は双方向に固定される（<a href="../../economics/3_%E9%81%93%E8%B7%AF%E7%B6%B2/#通行方向">通行方向</a>）。軌道の横位置・レール踏面の高さ・停留所ホームの寸法は<code>LrtRoadParts</code>を唯一の正とし、車両（<a href="../O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/#lrtの軌道位置">車両の走行描画</a>）・交差点のレールコネクタ・沿道設備・歩行者の帯（<a href="../W_%E6%AD%A9%E8%A1%8C%E8%80%85%E3%81%AE%E6%8F%8F%E7%94%BB/">歩行者の描画</a>）もここを参照する。</p>
+<p>222は幅24m・合計4車線、242は幅32m・合計6車線で、両側歩道各3m・中央分離帯1mを持つ。中央寄りの左右1車線は自動車とLRTの共用であり、車線数に別の専用軌道を加算しない（<code>lanes</code>は車線数で、軌道数ではない）。軌道中心は双方向の<code>RoadLaneLayout</code>の最内車線中心（222は±2.5625m、242は±2.541667m）とする。一方通行へ変更しても軌道の物理位置は変えない。</p>
+<p>303は幅12mのトランジットモールで、中心から±1.75m（軌道中心間隔3.5m。431と同じ）に複線を埋め込む。舗装は段差のない平坦な帯で、中心から左右に、石畳の軌道帯（0〜3.25m。車体が通る範囲は3.02mまで）、白い境界帯（3.25〜3.45m）、暖色レンガの歩行帯（3.45〜5.8m）、縁（5.8〜6.0m）が並ぶ。架線柱は両側の歩行帯（±5.4m）に立てる。</p>
+<p><code>LrtRoadParts</code>が通常のRoadPathへ以下の実寸パーツを追加する。<code>lrt_track</code>と<code>lrt_wire</code>は2軌道それぞれの中心へ敷く。道路幅に合わせて軌間や支柱を拡縮しない。連続面は共通の曲率適応タイルとLODを使用する。</p>
+<table>
+<thead>
+<tr>
+<th>パーツ</th>
+<th>著作・配置基準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lrt_track</code></td>
+<td>1軌道分。幅3mの白いPATH_CONCRETE、レール中心±0.7175m、踏面は路面原点+0.025m（スプライン+0.125m）。暗い溝と銀色の踏面を持ち、枕木は露出しない</td>
+</tr>
+<tr>
+<td><code>lrt_wire</code></td>
+<td>原点は路面。トロリ線中心+5.30m。軌道中心へ実寸で敷く</td>
+</tr>
+<tr>
+<td><code>lrt_pole</code></td>
+<td>原点は路面の道路中心。222/242は中央に立つT字柱で、左右の腕金・碍子が各軌道の上へ出る。303は±5.4mの両側2本柱で、各腕は近い方の軌道（±1.75m）へ出る。横位置は造形が保持する</td>
+</tr>
+</tbody>
+</table>
+<p>架線と柱は<code>wire_spacing</code>が正のときだけ配置する（222/242/303は30m）。柱は切断済み区間の両端から min(間隔/2, 5m) を空けて間隔ごとに置き（<code>LrtRoadParts.PoleDistances</code>。303の設備が柱の足元を避ける予約と共有）、Yaw回転だけで直立させる。10m未満の区間には柱を置かず、架線を敷く。中央分離帯の上面は路面+0.14mで、柱の基礎がその中に埋まる。</p>
+<p>交差点でレールがつながる組は<code>TrackIntersectionMeshGenerator.RailsConnect</code>で決まる。LRTどうし（222/242/303/431。種別が違ってもよい）はつながり、LRTと通常鉄道、軌道のない道路とはつながらない（LRT以外の線路は同じpath_typeどうし）。道路上のLRTは右左折でき、431同士だけは通常線路の転回角制約を使う。LRTはどれも2軌道で、つなぐ軌道端は通常の線路と同じく進む向きで決まる（進む向きに対して通行区分の側の軌道。<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">線路メッシュの生成</a> §4.3）。双方向どうしでは結果として左は左、右は右へ1対1でつながり、一方通行のLRT付き道路では向きの軌道だけがつながる（入れない向きの軌道にはレールが無い）。埋め込み側を含むコネクタには<code>lrt_track</code>と<code>lrt_wire</code>を使い、431との接続ではレール踏面の高さ差を滑らかに補間する。専用軌道のトロリ線はスプライン+5.47mなので、架線用スプラインも独立に端点を合わせる。交差点内には架線柱を立てない。</p>
+<p>制作原本は<code>blender/paths.blend</code>。既存材質と自作形状のみを使用し、外部素材の新規取り込みはない。実FBX・直線・カーブ・勾配・接続・停留所ホーム・プレハブ参照の検証は<code>unity/Tests/Lrt/run.ps1</code>。</p>
+<p><code>curved=false</code>でウェイポイントを持つ道路の曲がり角でも、<code>RoadPath.GenerateLinearPathWithCorners</code> が角の生成結果の <code>RailConnectors</code> を描画する。実ノードと同じ <code>TrackPath.CreateRailConnectorObject</code> を使い、角で切断した各直線区間の間を上下線2本の軌道と架線でつなぐ。コネクタの点列は角のローカル座標なので、角の子オブジェクト <code>Rail</code> の下に配置する。</p>
+<p><code>CreateSplineMesh</code> で連続押し出しする <code>body</code>・<code>sidewalk</code>・<code>lrt_track</code> は、部品の繰り返し境界に重なる内部端面を <code>RemoveInternalTileCaps</code> で除く。内部端面が残ると、低い太陽のシャドウマップで路面や軌道上に周期的な縞が生じる。元部品の前後端とタイルの頂点番号から判定するため、曲線・勾配でも適用できる。敷設区間の最初と最後の端面、路面・側面・底面は保持する。単一スパンと独立した点線部品は対象外。</p>
+<h3 id="lrt停留所のホーム">LRT停留所のホーム</h3>
+<p>LRT路線（車種が<code>VEHICLE_TRAM</code>の路線。Unityは路線種別から車種を<code>Resources/Config/transit_vehicle_models.json</code>の対応で引く。<a href="../O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/">車両の走行描画</a> O.10）の停留所には、各軌道の外側に1面ずつ、両側固定の相対式ホームを自動で描く。プレイヤーの操作や保存データは不要で、描画は下地パスのメッシュ生成の一部である（222/242/303は<code>RoadPath</code>→<code>LrtRoadParts.Generate</code>、431は<code>TrackPath</code>。実装は<code>LrtPlatformParts</code>）。Far LODと工事中の描画には出ない。コアはホームのデータを持たないので、ホームは土地区画・建物・パスの配置判定、パスの敷地・クリック判定のコライダーに含まれない。</p>
+<p><strong>停留所の索引と再生成</strong>: <code>LrtStopPlatforms</code>が<code>TransitDataStore</code>の路線一覧（<code>GET /api/v1/transit/lines</code>）から、車種が<code>VEHICLE_TRAM</code>の路線の<code>stop_points</code>（<a href="../../economics/6_%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E6%A9%9F%E9%96%A2/">公共交通機関</a> 6.8）を下地パスごとに集め、{停止中心の割合, デッキ長}を<code>LrtPlatformParts.StopProvider</code>で生成器へ渡す。停留所の範囲が変わった下地パスだけを<code>PathManager.RequestLrtPlatformRebuild</code>で作り直させる（431では結合コリドーの架線柱の位置が相手のホームで変わるので、近接する線路も一緒に作り直す）。<code>stop_points</code>は運休中の路線も返すので、運休でホームは消えない。下地パスを解決できなかった停留所（<code>station_path_id</code>・<code>fraction</code>が<code>null</code>）は描かない。都市の切り替えで索引をクリアする。</p>
+<p><strong>前後の範囲</strong>:</p>
+<ol>
+<li>停止中心 = <code>fraction</code> × 下地パスの未切断3D点列長（<code>PathManager.TryGetPathPolyline</code>の未切断点列）。車両の停止位置（<code>TransitRouteGeometry</code>）と同じ写像なので、停車した編成とホームの中心が揃う。</li>
+<li>デッキ長 = 編成長（<code>cars_per_train</code> × <code>length_per_vehicle</code>）+ 前後1.0mずつ。同じパス上で重なるデッキと、隙間が2m未満のデッキは1本に併合する（複数路線が同じ場所に停まる場合など）。</li>
+<li>デッキを交差点で切った区間（切断済み区間）へ収め、4m未満になったら描かない。停車した編成を覆うことを優先するので、デッキは切断端まで使い、スロープ長ぶん内側へは寄せない。</li>
+<li>トンネルで分割した描画区間では、その区間に入る部分だけを描く。</li>
+</ol>
+<p><strong>断面</strong>: 内縁は軌道中心から外向きに1.35m（LRT車体の半幅1.27m+0.08m）、上面はレール踏面+0.30m（スプラインから、埋め込み軌道で0.425m、431で0.775m）。幅は222/242が1.2m（外側車線の車両と干渉しない安全地帯）、303/431が2.0m。中心線からの範囲は222が±3.9125〜5.1125m、242が±3.891667〜5.091667m、303/431が±3.1〜5.1m。</p>
+<p><strong>パーツ</strong>（<code>Models/Paths/p{variant}/</code>。バリアント→タイプの順で解決し、無ければスキップする。p242はp222と同じ形状）:</p>
+<table>
+<thead>
+<tr>
+<th>パーツ</th>
+<th>著作・配置基準</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lrt_platform</code></td>
+<td>デッキ。原点=軌道中心線・レール踏面の右側用（+Xが軌道から外向き）で、左側はXミラー。著作長4mを実寸で反復して敷き（<code>maxTileLength: 0</code>。長手1mごとの分割で曲線へ追従）、区間LODには載せず、スロープ・上屋と同じ親のLODで描く。上面はPATH_PAVING_STONE、内縁に白い縁石、その外に黄色の点状ブロック、側面はPATH_CONCRETE。222/242/431は外縁に高さ1.1mの柵を持ち、303は柵を持たない。側面の下端は222/242/303が踏面−0.15m、431が踏面−0.9mで、どちらも地面へ埋まる。無いときだけ共通コンクリートの簡易スラブ（内縁〜外縁、上面=踏面+0.30m、下端=スプライン−0.3m）で代替する</td>
+</tr>
+<tr>
+<td><code>lrt_platform_end</code></td>
+<td>デッキ両端の外側に置くスロープ。原点=デッキ端の断面中央（軌道中心+1.35m+幅/2）・踏面で、+Zがデッキから外向き。左右対称なのでミラーせず、反対の端は向きを180°変えて置き、デッキ端の勾配に沿わせる。長さは222/242/303が3.0m、431が6.0m。先端の上面は222/242/303がレール踏面+0.01m（路面+0.035m）で、ホームの下を通る車線境界線の破線（路面+0.025〜+0.033m）を先端まで覆う。431はスプライン面（踏面−0.475m）</td>
+</tr>
+<tr>
+<td><code>lrt_shelter</code></td>
+<td>上屋（全バリアント同じ造形）。原点=デッキ上面・足跡の中心、足跡はX±0.45m×Z±2.0m、開放面は−X（軌道側）でベンチと背面パネルを持つ。背面（モデルの<code>bounds.max.x</code>）を外縁に付け、左側はY軸180°回転で置く</td>
+</tr>
+</tbody>
+</table>
+<p><strong>スロープと上屋の配置</strong>: スロープはデッキ端の外側に置くので、デッキが切断端まで届くと、切断済み区間の外（交差点ハル上や行き止まり端の先）へはみ出す。交差点メッシュはスロープを避けない。トンネルの描画区間で切れた端にはスロープを置かない（交差点・行き止まりの切断端には置く）。上屋は、各デッキの各側で最も長く残った部分（431で他の線路に掛かる区間を除いた後）が8m以上なら、その中央に1基置く。配置点が完全埋設区間なら上屋を省く。</p>
+<p><strong>設備との関係</strong>: ホーム区間（デッキ±(スロープ長+余裕)。収めた後のデッキから求めるので、切断端のデッキでは区間がスプラインの外まで伸びる）では、303は点設備（電柱・街灯・樹木・ベンチ・ごみ箱・プランター・広告）を置かない（余裕1m。§5.5）。柵は舗装端にあってホームと重ならないので対象外。222/242の中央T字柱と303の両側柱（±5.4m）はホームと干渉しないので動かさない。431の架線柱の移設と高欄の省略は<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/#431の停留所ホーム">線路メッシュの生成</a>を参照。</p>
+<p><strong>角のある直線道路</strong>: <code>curved=false</code>でウェイポイントを持つ222/242/303では、ホームを角ごとのセグメントで分けず、各セグメントの点列と角の頂点をつないだパス全体の折れ線スプライン1本（子<code>LrtPlatforms</code>）の上に描く。角をまたぐ停留所でもデッキは途切れず、スロープは本来の両端だけ、上屋は各側1基になる。角の上は折れたまま押し出す簡易表現である。303の設備抑止区間もパス全体で求め、各セグメントの始点からの距離へ写して適用する。</p>
+<p><code>unity/Tests/Lrt/run.ps1</code>は、索引の収集、範囲の計算（併合・切断済み区間へのクランプ・トンネルの描画区間・他の線路で除く区間）、実FBXの寸法（内縁・幅・上面・スロープ先端の高さ）、4バリアントのデッキ・スロープ・上屋の配置、角のある道路、431の柱移設と高欄の省略、303の設備抑止を検証する。</p>
+<h2 id="植栽中央分離帯と道路吊り橋">植栽中央分離帯と道路吊り橋</h2>
+<table>
+<thead>
+<tr>
+<th>バリアント</th>
+<th>名称</th>
+<th>全幅</th>
+<th>歩道幅（片側）</th>
+<th>車線数</th>
+<th>建設費係数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>241</td>
+<td>6車線生活道路（中央分離帯付き）</td>
+<td>32m</td>
+<td>3m</td>
+<td>6</td>
+<td>1.2</td>
+</tr>
+<tr>
+<td>251</td>
+<td>1車線道路吊り橋</td>
+<td>7m</td>
+<td>1.5m</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>252</td>
+<td>2車線道路吊り橋</td>
+<td>12m</td>
+<td>2.5m</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>254</td>
+<td>4車線道路吊り橋</td>
+<td>22m</td>
+<td>2.5m</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>256</td>
+<td>6車線道路吊り橋</td>
+<td>32m</td>
+<td>2.5m</td>
+<td>6</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>241は接道可能な生活道路で、中央分離帯幅は3m。<code>center</code>の植栽面は路面から0.20m、外周の縁石は0.25mの高さを持つ。車線の境界と走行位置は既存の<code>RoadLaneLayout</code>が、この分離帯幅と歩道幅を除いて算出する。</p>
+<p><code>center_start</code>と<code>center_end</code>が両方存在すると、切断済みスプラインの両端から分離帯幅の半分だけ中心帯を後退させ、その区間へ半円キャップを1個ずつ敷く。交差点の切断面・道路終端・折れ線の切断区間に適用する。半円の直径側を中心帯へつなぎ、先端は切断面までに収める。始端用はUnityの-Z、終端用は+Zへ膨らむ。短い区間（分離帯幅+0.1m以下）では立体分離帯を省き、ラインの代替表示にする。LOD境界で新たな端部を作らず、実際のパス端にあるキャップだけを表示する。</p>
+<p><code>center_tree</code>は中心帯用の点設備で、既存の<code>tree</code>と同じく接地原点・実寸で著作する。<code>street_tree_type</code>が標準かつマスターが街路樹を許可するときだけ配置し、「なし」で歩道と中央の両方を消す。中心帯の植栽面へ直立させ、丸い端部からさらに3mの余白を確保する。専用モデルがなければ中央には木を置かない。241の既定は標準街路樹である。</p>
+<p>道路吊り橋は<code>model_type=default</code>、<code>single_span=true</code>、<code>curve_allowed=false</code>。アンカー間を直線の1径間として扱い、ウェイポイントがあれば径間ごとに組み立てる。接道不可・地形非追従・高さ編集可能、通常の中間橋脚は配置しない。マスターの最大スパンは1200m。</p>
+<p>1車線の桁厚は1.1m、2車線は1.3m（舗装を含む）。4・6車線は厚さ0.8mの床版の下へ<code>truss</code>を持ち、路面から下端までをそれぞれ3.2m・4.2mとする。両側の上下弦材・交差斜材・横桁を8m周期で著作し、<code>maxTileLength: 0</code>の反復配置を使う。bodyのような径間全体への1枚引き伸ばしを適用しない。橋長の端数は整数パネルへ均等配分され、斜材だけが長大化しない。</p>
+<p>主ケーブルは直径0.50m・12角断面、鉛直の吊材は直径0.07m。太さは橋長に依存しない。主塔や路面へ接続する位置はケーブルの中心線で定義する。</p>
+<p>4・6車線の吊り橋（254/256）は幅0.8m・高さ0.9mのコンクリート中央分離帯を常設する。断面は下幅0.8m・上幅0.32mの台形で、既存のPATH_CONCRETEを共有する。マスターのcenter_widthは0.8m。RoadLaneLayoutがこの幅を除いて片側の車線を等分するため、中央線は省略され、車線境界と車両位置も分離帯に合わせて移る。</p>
+<p>トラスは路面への簡易帯化に適さないため、通常道路用の区間LODを適用せず、橋全体のLODに従う。長い橋でも頂点予算に応じた整数タイル単位のメッシュ分割は維持する。</p>
+<p><code>SuspensionBridgeGenerator</code>は<code>tower</code>を持つ道路に主塔と主ケーブルを追加する。主塔は径間長の20%・80%に置き、幅12mの2車線橋を基準に、道路幅÷12（最低1）の倍率で主塔を高く太くする。塔高は径間長の12%を8〜80mへ制限してから、この幅倍率を掛ける。柱の幅・奥行き、基礎と地盤までの脚の太さも幅倍率に比例する。柱中心は道路端から0.8m×幅倍率だけ外へ置き、太い柱の道路側への張り出しを避ける。主ケーブルも同じ柱中心と塔頂を通る。主塔モデルの塔頂は原点から12m。脚は地盤まで下ろす。8m未満の短い径間では桁と高欄のみを描く。</p>
+<p>主径間のケーブルは塔頂間の放物線で、中央の高さは塔高の25%。側径間は桁端の定着点と塔頂を結び、吊材は約3m間隔で垂直に配置する。塔頂を必ずサンプリング点に含めるため、橋の長さを変えても接続が外れない。ケーブル径や主塔の奥行きを道路長とともに引き伸ばさない。構造メッシュは<code>PathStructureMesh</code>が60,000頂点ごとに分割し、共有パスマテリアルと<code>IntersectionMeshOwner</code>による解放を使う。</p>
+<p>実FBXによる端部・接地・塔位置の検証は<code>Tests/Intersections/run-unity.ps1 -LandmarkPaths</code>。ギャラリーの吊り橋見本は160m、街路見本は30mであり、ゲームの敷設長を固定するものではない。</p>
+<h2 id="ロープウェイ601ロープウェイ駅602のモデル">ロープウェイ601・ロープウェイ駅602のモデル</h2>
+<p>601/602はRoadPathで描く。マスター幅8mは判定帯として維持し、bodyの往復ケーブルは中心間隔4.2m（左右±2.1m）の実寸で配置する。CreateSplineMeshはこの2バリアントのbodyについて幅伸縮と路面上面への高さ補正を無効にし、施工時も同じ位置を保つ。bodyはsingle_spanでアンカー間へ伸ばす。</p>
+<p>pillarは天端0・下端-8m。601は鋼管柱、602は左右の白い角柱で中央通路を空ける。pillar_capは実寸の横梁・左右各4輪の滑車・保守足場、601は梯子上部も持つ。ケーブル下面は配置補正後にスプライン+0.02mで滑車上端と一致する。cap下端は601が-1.65m、602が-4.05m。支柱間隔は100m／40m、アンカーにも柱を置く。滑車列は水平保持し勾配に応じた回転は行わない。</p>
+<p>602はstation_shellで白い床版・柱・腰壁、両側のガラス壁、濃い青灰色の曲面屋根と天窓を描く。前後は開放する。床版は幅8m、屋根は約8.5m、長手8m。実配置の床上面はスプライン-3.3m、床版下面-3.6mで受け梁へ接続する。ケーブル原点を保つため屋根を路面として扱わない。shellは実寸幅・maxTileLength=0・normalizeBodySurface=falseで反復し、区間の長さに合う整数タイル数へ合わせる。道路用の区間LODは適用しない。鉄道用platform_widthは使用しない。</p>
+<p>既存のPATH系およびBD_WHITE_WALL・BD_WINDOW・BD_DARK_METALを共有する。ガラスは不透明な窓材で表現する。完成した駅間には、<code>RopewayCabinManager</code>がかご・U字ケーブル・終端ローターを追加する（<a href="../O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/#ロープウェイの循環描画">循環描画の仕様</a>）。動的なたるみ・階段は含まない。床が地形へ埋まらない高さで敷設する。Unity取り込み後の実寸・接点・床版の接合・自動プレハブ生成はunity/Tests/Ropeway/run.ps1で検証する。</p>
+<h2 id="概要">概要</h2>
+<p>路上駐車の車両は道路メッシュへ結合せず、<code>ParkedVehicleManager</code> が既存車両モデルを別途描く。道路と共通の交差点切断済み中心線、マスターの全幅・歩道幅・中央分離帯幅、<code>RoadPartHeights.BODY_ABOVE_SPLINE</code> を使い、エポックによる台数の増減だけで道路本体を再生成しない。配置と表示上限は <a href="../O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/#路上駐車の描画">車両の走行描画</a> を参照する。</p>
+<p>バックエンドの Path データから、道路の外観メッシュを組み立てて配置する仕様。</p>
+<p>道路の経路は始点・終点・ウェイポイントというアンカー点と、それらの間を結ぶ三次ベジエ曲線で定義される。フロントエンドではこのベジエ曲線を多数の点にサンプリングし、その点群をもとにメッシュを生成する。</p>
+<p>カーブを含む道路の描画には <strong>Dreamteck Splines</strong> ライブラリを使用し、サンプリング点群からスプラインを構築してメッシュパーツを配置する。</p>
+<h3 id="パスの種類とジェネレータの対応">パスの種類とジェネレータの対応</h3>
+<p><code>PathMeshFactory</code> がジェネレータの振り分けを行う。ジェネレータの選択は <strong><code>path_master</code> の <code>model_type</code></strong> で決まる（<code>path_type</code> ではない）。まず <code>path_variant</code> に固有のジェネレータがあれば最優先し、なければ <code>model_type</code> で切り替える。</p>
+<table>
+<thead>
+<tr>
+<th>model_type</th>
+<th>ジェネレータ</th>
+<th>生成方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default</code></td>
+<td>RoadPath</td>
+<td>スプライン + SplineMesh</td>
+</tr>
+<tr>
+<td><code>track</code></td>
+<td>TrackPath</td>
+<td>スプライン + SplineMesh（線路構成）</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>（なし）</td>
+<td>メッシュ生成なし（経路探索専用パス・公共交通の路線等）</td>
+</tr>
+</tbody>
+</table>
+<p><code>model_type</code> が未指定の場合は、鉄道・モノレールを <code>track</code>、その他を <code>default</code> として扱う。</p>
+<p>本ドキュメントでは主に <strong>RoadPath</strong>（道路のスプライン方式）の詳細を説明する。線路・モノレール向けの <strong>TrackPath</strong> は同じ仕組みの上に線路固有のパーツ構成を持ち、<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">N_線路メッシュの生成</a> で説明する。</p>
+<hr />
+<h2 id="1-データフロー">1. データフロー</h2>
+<p><code>PathSummary</code> の始点・終点・ウェイポイントと制御点から描画用点列を作り、地形追従を適用する。<code>PathMeshFactory</code> はバリアント固有・model_typeの順に生成器を選び、<code>RoadPath</code> が寸法・部品・材質を解決してスプラインに沿って配置する。描画メッシュとは別にクリック用コライダーを作る。</p>
+<p><code>polygon</code> は占有領域で、描画には直接使わない。形状データの意味は<a href="../A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/">パス形状</a>、取得と描画の更新は<a href="../H_%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E3%83%87%E3%83%BC%E3%82%BF%E3%83%AD%E3%83%BC%E3%83%89/">データロード</a>に定義する。</p>
+<h2 id="2-三次ベジエ曲線による点群生成">2. 三次ベジエ曲線による点群生成</h2>
+<h3 id="21-アンカー点と制御点">2.1 アンカー点と制御点</h3>
+<p>パスの形状はアンカー点と制御点の組で定義される。アンカー点は曲線が必ず通過する点であり、制御点は曲線の入り・出りの方向と張りを制御する。</p>
+<p>各セグメントは三次ベジエ曲線 B(t) = (1-t)³·P0 + 3(1-t)²·t·P1 + 3(1-t)·t²·P2 + t³·P3 で表現される：</p>
+<ul>
+<li>P0 = セグメント始点の位置</li>
+<li>P1 = セグメント始点の出口制御点（<code>control_out</code> または自動計算）</li>
+<li>P2 = セグメント終点の入口制御点（<code>control_in</code> または自動計算）</li>
+<li>P3 = セグメント終点の位置</li>
+</ul>
+<p>制御点が未指定の場合は自動計算する。ウェイポイントのないパスは始点と終点を 1/3・2/3 に内分した位置（実質的に直線）、ウェイポイントを挟むアンカーは Catmull-Rom スプラインの接線（<code>T_i = P_{i+1} − P_{i-1}</code>、テンション 1/6、端点は片側接線）から計算する。これはバックエンドの制御点自動補完（<code>A_パス形状.md</code> の「制御点の自動補完」参照）と同一ロジックであり、バックエンドが永続化したウェイポイントの制御点（<code>control_in</code> / <code>control_out</code>）が API に含まれる場合はそれを優先使用する。</p>
+<h3 id="22-セグメント構成">2.2 セグメント構成</h3>
+<p>ウェイポイントがない場合は始点→終点の単一セグメント、ウェイポイントがN個の場合はN+1セグメントになる。</p>
+<pre><code>始点 → ウェイポイント0 → ウェイポイント1 → ... → 終点
+  セグメント0    セグメント1       ...      セグメントN
+</code></pre>
+<h3 id="23-サンプリングと地形追従">2.3 サンプリングと地形追従</h3>
+<p><code>PathManager.CalculatePathPoints()</code> は各セグメントを約1m間隔（<code>TERRAIN_SAMPLE_INTERVAL</code>）でサンプリングする。相対Y=0のアンカーで挟まれた区間では、サンプリングされた各点のY座標を地形標高＋<code>RoadPartHeights.ROAD_SPLINE_OFFSET</code>（0.1m）に追従させる。これにより、道路の中心線が地形の起伏に沿うようになる。相対Y≠0（高架・地下）の区間は地形追従せず、アンカーと制御点のY座標をそのままベジエ補間する。</p>
+<p>中心線サンプリングは1m間隔を基準とし、Extrudeタイル長は曲率適応（§4.3。急カーブ・起伏では1mまで詰まる）で、Dynamic地形の格子間の小さな尾根を長い弦でまたぐことによる埋没を抑える。これは描画用近似の密度であり、保存されたアンカー・制御点や相対高さの意味は変更しない。高架・地下・<code>single_span</code>の追従除外規則も維持する。</p>
+<p>地形の高さキャッシュは同一XZ座標のみを共有する。1m単位に座標を丸めて別地点の高さを使い回すと、傾斜地で問い合わせ順によって路面が変わるため行わない。道路全幅の横断方向の造成はバックエンドが担い、描画側で縁石や断面を地形へ個別に吸着させることはしない。</p>
+<hr />
+<h2 id="3-lodlevel-of-detail">3. LOD（Level of Detail）</h2>
+<p>道路中心線までの距離でClose / Normal / Farを選ぶ。Normalは無印、Closeは存在する <code>_close</code> パーツ、Farは簡易帯である。生成済みルートはデータ版・形状revision・LODをキーにLRUへ退避する。</p>
+<p>長さ256m以上の通常道路は、連続するスプラインパーツを <code>SplinePartLod</code> で区間化する。区間数は全長÷128mの切り上げ、境界は全体の固定パラメータ比率とし、カメラで動かさない。曲線上の実長は各区間で多少異なる。各区間が距離でLODを選び、戻ったときは生成済みGOを再使用する。Farの路面は同じ曲線を17点でサンプルした帯、細部パーツは非表示になる。区間のLODは、全区間で共有するカメラ移動の世代(4m以上の移動で進む)が変わるまで再評価しない。静止中の区間ワーカーは予算外のネイティブ待機で眠るので、共通予算を消費しない。路面本体を区間化した道路は、親を通常LODに固定して区間だけを切り替える(<a href="../E_LOD%E5%87%A6%E7%90%86/">E_LOD処理</a>「道路」)。</p>
+<p>保存された道路・経路探索・編集単位は分割しない。single-span、破線、折り返しなど独自の配置規則があるパーツはこの分割対象外。モデルがない場合の既存フォールバックを先に判定する。SplineMeshの生成は即時Rebuildとして共通生成予算へ計上する。</p>
+<p>遠景の帯・詳細区間外の残り帯・ノードの円柱は、Z-fighting 防止用の <code>DepthOffsetLit</code> シェーダーに差し替えた共有マテリアルを使う(<code>Renderer.materials</code> で個別に複製すると誰も解放せずに蓄積するため)。色の上書きは <code>VisualModeObject</code> がマテリアルの差し替えとプロパティブロックで行うので、共有しても他の道路へ波及しない。</p>
+<p>生成スケジューラー、区間ごとの8MiBキャッシュと全体512MiB上限は <a href="../E_LOD%E5%87%A6%E7%90%86/">E_LOD処理</a> を参照する。</p>
+<h2 id="4-スプラインによる道路形状の定義roadpath">4. スプラインによる道路形状の定義（RoadPath）</h2>
+<h3 id="41-描画点列と補間">4.1 描画点列と補間</h3>
+<p><code>CalculatePathPoints</code> が保存された三次ベジエをサンプリングする。交差点の切断は、この点列上の経路距離で行う。保存されたアンカー・制御点を移動して曲線を作り直すことはしない。</p>
+<h3 id="42-スプラインの構築">4.2 スプラインの構築</h3>
+<p><code>RoadPath.BuildSpline</code> は曲線の点列を明示的な三次ベジエハンドルで補間する。内部はCatmull-Rom相当の接線、両端は残存点列の最初・最後の区間方向を使う。交差点も同じ区間方向を参照するため、別々の再補間による入口の回転を防げる。折れ線はLinearを使う。Dreamteck の Linear スプラインは各点の方向を前後の区間の平均で決める(<code>linearAverageDirection</code>)ため、角を含む折れ線を1本のスプラインに載せると角の後ろの区間全体の向きがずれる。<code>GenerateLinearPathWithCorners</code> がセグメントごとに独立したスプラインを作るのはこのためである。<code>single_span</code> は交差点計算でもアンカー間の直線として評価する。</p>
+<p>点列はワールド座標で渡し、<code>Uniform</code>サンプリングと<code>RebuildImmediate</code>で直後の長さ・位置評価を確定する。この補間は描画用の近似であり、バックエンドの保存曲線や占有ポリゴンを変更しない。構築後の <code>SplineComputer</code> は無効化して返す(点を後から変えない前提。<code>Evaluate</code>・<code>Project</code>・<code>CalculateLength</code> は無効でも使える)。無効なので、生成後にスプラインの点やコンテナのワールド座標を変えても自動では再構築・再サンプルされない。形を変えるときは作り直す。</p>
+<h3 id="43-splinemesh-によるパーツの配置">4.3 SplineMesh によるパーツの配置</h3>
+<p>スプラインが構築できたら、各パーツ（道路本体、区画線、歩道）をスプラインに沿って配置する。これには Dreamteck Splines の <strong>SplineMesh</strong> コンポーネントを使用する。</p>
+<p><code>SplineMesh</code> も <code>RebuildImmediate</code> で構築した後に <code>RoadPath.SealSplineMesh</code> で無効化し、生成メッシュを <code>IntersectionMeshOwner</code> に所有させて GameObject の破棄と一緒に解放する(Dreamteck は生成メッシュを自分では破棄しない)。無効化により毎フレームの更新処理が走らない。</p>
+<p>SplineMesh の考え方は以下の通り：</p>
+<ul>
+<li><strong>メッシュパーツをスプラインに沿って並べる</strong> という基本的なアプローチ</li>
+<li>パーツはスプラインの形状に合わせて自動的に変形（曲げ）される</li>
+<li>1つのパーツが短すぎてスプライン全体を覆えない場合、<strong>タイリング（繰り返し配置）</strong> される</li>
+<li>SplineMesh はタイル内の頂点Z位置でしかスプラインを評価しないため、Z方向の分割が粗いパーツはタイルが弦（直線）近似になる。縦カーブ（尾根・谷）でパーツ同士が上下にずれて貫通・浮きが起きないよう、<strong>タイル長に上限を設けてタイル数を明示的に決める</strong>（メッシュ実寸ベースの <code>autoCount</code> は使わない）。</li>
+<li><strong>曲率適応タイル長</strong>: 上限は一律ではなく、スプラインの最大曲率（水平・縦断とも。1m間隔のサンプルから折れ角÷区間長で推定）から、弦誤差 ≈ κL²/8 が許容値 0.02m（<code>PathDrawContext.CHORD_ERROR_TOLERANCE</code>）以下になるタイル長 L を選ぶ（<code>PathDrawContext.ComputeAdaptiveTileLength</code>。生成器が <code>BuildSpline</code> 直後に <code>SetAdaptiveTileLength</code> で設定する）。直線・平坦なら最大8m（<code>ADAPTIVE_TILE_MAX</code>。地形の微小起伏の取りこぼしを抑えるため無限には伸ばさない）、急カーブや起伏の大きい地形追従では <code>MAX_EXTRUDE_TILE_LENGTH</code>（1m）まで詰まる。一律1mだと直線道路でも著作長の数倍の頂点を敷き、道床のような密なパーツで頂点上限に当たるため。<code>CreateSplineMesh</code> の <code>maxTileLength</code> を既定（<code>MAX_EXTRUDE_TILE_LENGTH</code>）のまま呼んだパーツだけが適応値に置き換わり、明示的に <code>0</code>（上限なし＝著作長のまま）を渡すパーツ（軌道・ホーム・駅舎の桁）には適用されない。</li>
+<li><strong>頂点予算</strong>: SplineMesh 1個の生成頂点数は「パーツの頂点数 × タイル数」で決まり、Unity標準メッシュの上限（65535）を超えると Dreamteck が毎フレームエラーを出し続ける。<code>RoadPath.SPLINE_MESH_VERTEX_BUDGET</code>（60000、public const）を上限に、上限なし（著作長）のパーツは整数タイル単位で複数の SplineMesh（<code>{パーツ名}_Sections</code>）へ分割し、それ以外はタイル数をクランプする。パーツ1個で超える場合は生成を中止してエラーを出す。線路ノードのレールコネクタ（<code>TrackPath.CreateRailConnectorObject</code>）も同じ予算でタイル数をクランプする。</li>
+</ul>
+<h3 id="44-スケールとオフセット">4.4 スケールとオフセット</h3>
+<p>SplineMesh に渡すパーツは、元のメッシュの寸法と道路の設計寸法が異なるため、適切にスケールを調整する必要がある。</p>
+<ul>
+<li><strong>X 方向のスケール</strong>: <code>設計幅 / メッシュの元の幅</code> を計算する。body は最上面から2mm以内の頂点の横幅と中心を使い、下部の桁やスカートの張り出しを除く（<code>GetBodySurfaceBounds</code>）。他パーツは全体の bounds を使う。body の上面は生成用の共有メッシュで Y=0 に補正するため、FBX の微小な原点誤差も接合に持ち込まない。ただし <code>base_height</code> を持つバリアント（送電線）はスプラインが地表に置かれ、モデル自体が電線の地上高を持つ規約なので、この補正を掛けず（<code>normalizeBodySurface: false</code>）全体 bounds で幅を測る（補正すると電線が地面に落ちる）。歩道とラインも、実際に採用したモデル系列のbody上面Yを引く（<code>GetRoadPartMesh</code>）。p2のように路面高0.5mが付属パーツにも含まれるモデルで、路面だけが下がって付属パーツが浮くことを防ぐ。フォールバック時は採用したパーツ側の系列を参照する。</li>
+<li><strong>横方向オフセット</strong>: スプラインの中心線から左右にどれだけずらすかを、<strong>パーツの中心の位置</strong>として指定する。プレハブのピボットが中心にない場合（縁石原点の歩道など）は、メッシュ bounds の中心が指定位置に一致するよう生成側（<code>RoadPath.CreateSplineMesh</code>）が自動補正する。このため、プレハブのピボット位置が配置結果に影響することはない</li>
+<li><strong>Y 方向オフセット</strong>: スプラインからの高さ。値は <code>RoadPartHeights</code> の定数に集約されている（下表）</li>
+</ul>
+<h4 id="高さの層構造roadpartheights">高さの層構造（RoadPartHeights）</h4>
+<p>道路は「スプライン点（地形+0.1m）」の上に各パーツをオフセットで重ねる2層構造で描画される。</p>
+<table>
+<thead>
+<tr>
+<th>定数</th>
+<th>値</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ROAD_SPLINE_OFFSET</code></td>
+<td>0.1m</td>
+<td>地形追従スプライン点の地形からの浮かせ量（地形メッシュへの埋没回避）</td>
+</tr>
+<tr>
+<td><code>BODY_ABOVE_SPLINE</code></td>
+<td>0.1m</td>
+<td>道路本体のスプラインからの高さ。<strong>bodyプレハブの上面＝ピボット平面</strong>の規約なので、路面上面はこの平面（地表道路なら地形+0.2m）になる</td>
+</tr>
+<tr>
+<td><code>LINE_ABOVE_SPLINE</code></td>
+<td>0.12m</td>
+<td>区画線・センターラインの高さ（body上面の2cm上）</td>
+</tr>
+<tr>
+<td><code>CENTER_LINE_EXTRA</code></td>
+<td>0.005m</td>
+<td>中央の線を側線よりさらに浮かせる量</td>
+</tr>
+<tr>
+<td><code>SIDEWALK_ABOVE_SPLINE</code></td>
+<td>0.1m</td>
+<td>歩道の下端の高さ（body上面と同一平面。縁石の立ち上がりはプレハブ形状）</td>
+</tr>
+<tr>
+<td><code>WALL_ABOVE_SPLINE</code></td>
+<td>0.1m</td>
+<td>防音壁・ガードレールの下端の高さ</td>
+</tr>
+</tbody>
+</table>
+<p>交差点メッシュもこの体系に従う（<a href="#11-交差点と断面の接合">§11</a>）。</p>
+<hr />
+<h2 id="5-マスターデータと寸法パラメータ">5. マスターデータと寸法パラメータ</h2>
+<h3 id="51-寸法の取得">5.1 寸法の取得</h3>
+<p>道路の寸法は <code>MasterDataStore</code> のパスマスターデータ（<code>PathMasterItem</code>）から取得する。<code>path_variant</code> をキーにしてマスターデータを検索し、以下のパラメータを得る。</p>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>フィールド</th>
+<th>単位</th>
+<th>デフォルト</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>道路幅</td>
+<td><code>width</code></td>
+<td>m</td>
+<td>4.0</td>
+</tr>
+<tr>
+<td>歩道幅</td>
+<td><code>sidewalk_width</code></td>
+<td>m</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>区画線幅</td>
+<td><code>side_width</code></td>
+<td>m</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>防音壁・ガードレール幅</td>
+<td><code>wall_width</code></td>
+<td>m</td>
+<td>null（配置なし）</td>
+</tr>
+<tr>
+<td>中央分離帯幅</td>
+<td><code>center_width</code></td>
+<td>m</td>
+<td>null（配置なし）</td>
+</tr>
+<tr>
+<td>街路樹の標準間隔</td>
+<td><code>tree_spacing</code></td>
+<td>m</td>
+<td>null/0なら20m（設置有無はPathの選択）</td>
+</tr>
+</tbody>
+</table>
+<p>歩道幅・区画線幅・防音壁幅・中央分離帯幅・街路樹間隔は null 許容であり、null の場合はデフォルト値を使用するか、その機能をスキップする。街路樹の有無は間隔とは独立し、Pathの保存値で決まる（§8.6）。</p>
+<h3 id="52-オフセットの計算">5.2 オフセットの計算</h3>
+<p>道路は中心線に対して左右対称に構成される。各パーツの配置位置は以下の考え方で計算する。</p>
+<p><code>width</code> は<strong>道路全体の幅</strong>である。歩道は道路の端に覆いかぶさるように配置する（歩道幅を道路幅に足すのではなく、道路幅の中に歩道が含まれる）。</p>
+<pre><code>中心線
+    │
+    ├──────────── width ────────────┤
+    │                               │
+    区画線  歩道    道路本体    歩道  区画線
+</code></pre>
+<p>各パーツのオフセット（中心線からパーツ中心までの距離）：</p>
+<table>
+<thead>
+<tr>
+<th>パーツ</th>
+<th>オフセット計算</th>
+<th>値の例 (width=4, sidewalk=0.5, side=0.5, wall=0.3, center=0.6)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>道路本体</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>中央分離帯</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>歩道</td>
+<td><code>(width/2) - (sidewalkWidth/2)</code></td>
+<td>1.75</td>
+</tr>
+<tr>
+<td>区画線</td>
+<td><code>(width/2) - sidewalkWidth - (sideWidth/2)</code></td>
+<td>1.25</td>
+</tr>
+<tr>
+<td>防音壁・ガードレール</td>
+<td><code>(width/2) + (wallWidth/2)</code></td>
+<td>2.15</td>
+</tr>
+</tbody>
+</table>
+<p>オフセットは絶対値で計算し、左右それぞれに +オフセット と -オフセット で配置する。オフセットは常に<strong>パーツの中心</strong>の位置を表す（プレハブのピボットが端にあっても生成側で bounds 中心基準に補正される）。</p>
+<h4 id="左右非対称パーツのミラーリング規約">左右非対称パーツのミラーリング規約</h4>
+<p><strong>歩道は左側用</strong>（縁石＝道路中心側が +X）で、左側が原型・右側がXミラー。<strong>壁は右側用</strong>（道路中心側が -X）で、右側が原型・左側がXミラー。交差点内でもこの向きを維持する。</p>
+<hr />
+<h3 id="53-歩道付き道路橋p223">5.3 歩道付き道路橋（p223）</h3>
+<p>幅12m、両側歩道各2.5mの2車線コンクリート桁橋。<code>model_type=default</code> の <code>RoadPath</code> で組み立て、<code>single_span=false</code> として曲線を維持する。<code>height_editable=true</code>、<code>follow_terrain=false</code> が既定で、橋脚間隔は40m。接道可否は <code>frontage_allowed=false</code> とし、地表に置いても沿道区画生成や接道指定の対象にはしない。Unityはマスターの同属性を参照し、沿道生成モードのクリック・ホバー対象から除外する。</p>
+<table>
+<thead>
+<tr>
+<th>パーツ</th>
+<th>構成・著作寸法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>body</code></td>
+<td>幅12mの舗装・床版と4本の縦桁。路面上面が原点、最下部は-1.05m</td>
+</tr>
+<tr>
+<td><code>sidewalk</code></td>
+<td>幅2.5m、歩道上面0.20m、車道側縁石0.23m。左側用（中心側+X）</td>
+</tr>
+<tr>
+<td><code>line</code></td>
+<td>幅0.5mの区画線。既存街路の区画線マテリアルを共有</td>
+</tr>
+<tr>
+<td><code>wall</code></td>
+<td>幅0.3mの地覆と金属製高欄。路面から約1.3m、右側用</td>
+</tr>
+<tr>
+<td><code>pillar</code></td>
+<td>左右2本のコンクリート柱。天端0mから下へ4mの一様断面で、地盤まで高さ倍率を掛ける</td>
+</tr>
+<tr>
+<td><code>pillar_cap</code></td>
+<td>幅10mの受け梁。路面原点から下へ1.9mまで、実寸のまま配置</td>
+</tr>
+</tbody>
+</table>
+<p>連続パーツは進行方向2.5mのタイルとし、既存の <code>PATH_ASPHALT</code>・<code>PATH_CONCRETE</code>・<code>PATH_METAL</code> を共有する。道路設備（街路樹・街灯・柵・電柱）の個別設定は許可しない。高欄は道路設備の柵ではなく、常設の <code>wall</code> パーツである。</p>
+<p>制作元は <code>blender/paths.blend</code> の <code>p223/*</code> コレクション。Unityのミラープレハブは通常の自動生成に従う。</p>
+<h3 id="54-歩行者専用道路301歩行者吊り橋302">5.4 歩行者専用道路301・歩行者吊り橋302</h3>
+<p>301にはランタン型街灯と3本横桟の柵を用意し、新設時は両方を標準で有効にする。道路詳細の設備設定で個別に「なし」へ変更できる。既設道路の保存済み設備値は自動変更しない。柵は専用のfenceパネルで、支柱は描画時に生成する。独立した歩道のない301では舗装端から内側0.12m、街灯は内側0.3mに置く。</p>
+<p>両方とも幅4m、type=3の歩行者専用パスで、車道の区画線や追加の歩道は持たない。301の路面代表材質はPATH_PAVING_STONE、302はPATH_CONCRETE。301は地形追従する舗装道で、既存のランタン型街灯を個別設定で選べる。bodyは厚さ0.2mの箱で、body_closeも同じ12三角形。石と目地はテクスチャで表現し、個別の石のポリゴンは持たない。</p>
+<p>302は高さ編集可能・非地形追従の直線吊り橋で、single_spanによりアンカー間を床版1枚で結ぶ。最大径間300m、最大勾配15%、建設費係数3を初期値とする。bodyはコンクリート床版と2本の金属縦桁、wallは常設の高欄でwall_width=0.2m。設備としての柵や街灯とは独立し、個別設備は許可しない。接道による沿道区画は生成しない。</p>
+<p>主塔は専用towerパーツで、柱中心は±2.8m、著作時の塔頂は12m。既存のSuspensionBridgeGeneratorが各径間の20%・80%に配置し、高さを径間長へ合わせる。ケーブル・吊材・地盤までの脚は同生成器の共通寸法で生成する。8m未満の短い区間には主塔とケーブルを置かない。</p>
+<p>舗装は通常・接写とも12三角形、302の高欄はNormalで40頂点/m以内に収める。近景では同じboundsのbody_close・wall_closeへ切り替える。302のbodyは長手方向の横目地を持たず、single_spanによる伸長でも大きな目地模様にならない。Unityのプレハブは通常の自動生成に従う。</p>
+<h3 id="55-歩行者モール303304305">5.5 歩行者モール303・304・305</h3>
+<table>
+<thead>
+<tr>
+<th>バリアント</th>
+<th>全幅</th>
+<th>舗装・設備の配置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>303 歩行者専用道路(LRT付き)</td>
+<td>12m</td>
+<td>中央の石畳の軌道帯（中心から±3.25m）に複線のLRT軌道（±1.75m）を持ち、両側の暖色舗装帯の道路端から0.9m内側（±5.1m）に小型設備を置く。設備の列は複線の車体が通る範囲（±3.02m）の外にある。街路樹は高さ4.4m・幅1.6m</td>
+</tr>
+<tr>
+<td>304 歩行者専用道路(モール)</td>
+<td>12m</td>
+<td>中央3mの暖色舗装帯に設備を点在させる。ベンチは中心から左右0.95mで外向き、樹木・花壇・広告・街灯は中心線上。両端は店舗前の通行空間</td>
+</tr>
+<tr>
+<td>305 歩行者専用道路(大通りモール)</td>
+<td>20m</td>
+<td>中央通路の左右4mに設備を2列配置。幅1.6mの赤茶色舗装帯を2本持ち、中央通路と店舗前の通路を残す。ベンチは中央通路へ向く</td>
+</tr>
+</tbody>
+</table>
+<p>路面は石畳・レンガ色・白い縁の平坦な帯を組み合わせ、段差を設けない。幅はマスターの道路全幅で、設備帯はこの内側に含まれる。304/305にLRT軌道はなく、自動車は通らない。301の幅4mの通路と302の吊り橋は別の用途として残す。</p>
+<p><code>bench</code>（木製ベンチ）・<code>bin</code>（ゴミ箱）・<code>planter</code>（花付き植え込み）・<code>advert</code>（両面の架空広告）は、streetlight/treeと同じ独立した接地原点のFBX。配置時に伸縮せず、バリアント→タイプの順でモデルを解決する。既存材質・既存の石畳画像を共有し、広告の図柄は色面と立体形状による自作である。</p>
+<p>道路ごとの保存値<code>bench_type</code>・<code>bin_type</code>・<code>planter_type</code>・<code>advert_type</code>は、それぞれ0=なし、1=標準。同名の<code>*_allowed</code>と<code>default_*</code>をマスターに持つ。303/304/305の新設時は4設備・街路樹・街灯を標準、柵をなしとする。道路詳細の設備欄で各項目を独立して変更できる。「標準」の外観はバリアントに対応する。未配置のモデルはスキップする。設備は描画専用で経済計算には用いない。</p>
+<p>RoadEquipmentGeneratorは切断後の道路端から3mを空け、距離基準の位相と間隔で点設備を配置する。街灯24m/位相6m、樹木24m/位相12m、ベンチ24m/位相0m、ゴミ箱24m/位相3m、花壇24m/位相17m、広告48m/位相21m。位相は端の余白に加算する。配置済み設備の近傍を空間ハッシュで確認し、衝突候補は省略する。303は両側の架線柱（±5.4m。柱と同じ<code>LrtRoadParts.PoleDistances</code>の距離列）の足元を半径2mで予約する。303のLRT停留所のホーム区間（デッキ±(スロープ3m+1m)）には点設備を置かない（<a href="#lrt停留所のホーム">LRT停留所のホーム</a>）。設備は勾配上でも直立させ、Farでは配置しない。交差点内部には置かないため、横断できる切れ目が残る。</p>
+<p>実FBXとランタイムでの寸法・直線/曲線/勾配・中央の通行余白・設備なし設定・プレハブ参照の検証は<code>unity/Tests/Lrt/run.ps1</code>。ギャラリーの30m見本も同じ配置位相と衝突距離で既定設備を組み立てる。</p>
+<h2 id="6-アセットの命名規則とフォルダ構成">6. アセットの命名規則とフォルダ構成</h2>
+<h3 id="海底インフラ11041301">海底インフラ1104・1301</h3>
+<p>海底送電線1104と海底石油パイプライン1301は <code>model_type=default</code> の連続bodyを使う。
+1104は幅5mの3本のケーブルと保護板、1301は幅2.5mの単管。10mの著作長を径間へ伸長し、
+<code>single_span</code> の直線配置を維持する。通常は8角断面、接写は12角断面で、全bboxと原点は同じ。
+1104の保護板は天端幅を5mに揃え、道路共通の天端幅補正による過大な横伸長を防ぐ。
+代表材質は <code>PATH_METAL</code>。Farは既存の簡易帯生成を使い、専用Far FBXは作らない。
+鉄塔1101/1102のPowerLinePathには入らない。原本は <code>blender/paths.blend</code>、
+非公開制作ツールの <code>build_offshore.py</code> が著作し、<code>import_offshore.ps1</code> が実FBXを検証する。</p>
+<h3 id="61-リソースパスの構成">6.1 リソースパスの構成</h3>
+<p>道路パーツはプレハブとして <code>Assets/Resources/Models/Paths/</code> に配置する。<code>ModelManager</code> が glTF ファイル（<code>persistentDataPath</code>）を優先的に探し、なければ <code>Resources.Load</code> でプレハブを読み込む。</p>
+<pre><code>Models/Paths/p{path_variant}/{position}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>構成要素</th>
+<th>値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>path_variant</strong></td>
+<td><code>p{path_variant}</code></td>
+<td>バリアント番号</td>
+</tr>
+<tr>
+<td><strong>position</strong></td>
+<td><code>body</code>, <code>line</code>, <code>sidewalk</code>, <code>tree</code>, <code>wall</code>, <code>wall_underground</code>, <code>ceiling_underground</code>, <code>center</code></td>
+<td>パーツの種類</td>
+</tr>
+<tr>
+<td><strong>接写用サフィックス</strong></td>
+<td><code>{position}_close</code></td>
+<td>描画LODが Close のときに優先される任意のモデル（例: <code>body_close</code>）。無印と同じフォルダに置き、bbox・原点・マテリアルを無印と一致させる</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-命名例">6.2 命名例</h3>
+<pre><code>Models/Paths/p1/body         タイプ1（街路）の道路ボディ
+Models/Paths/p1/line         タイプ1（街路）の区画線
+Models/Paths/p1/sidewalk     タイプ1（街路）の歩道
+Models/Paths/p1/tree         タイプ1（街路）の街路樹
+Models/Paths/p2/wall         タイプ2（高速道路）の防音壁・ガードレール
+Models/Paths/p2/center       タイプ2（高速道路）の中央分離帯
+Models/Paths/p1/body_close   タイプ1の道路ボディの接写用（任意。描画LODが Close のときだけ使われる）
+Models/Paths/p100/body       バリアント100の道路ボディ
+Models/Paths/p100/sidewalk   バリアント100の歩道
+</code></pre>
+<h3 id="63-パーツの種類">6.3 パーツの種類</h3>
+<table>
+<thead>
+<tr>
+<th>position</th>
+<th>役割</th>
+<th>配置数</th>
+<th>備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>body</code></td>
+<td>道路本体</td>
+<td>1</td>
+<td>スプライン中心に配置</td>
+</tr>
+<tr>
+<td><code>center</code></td>
+<td>中央分離帯</td>
+<td>1</td>
+<td>スプライン中心に配置。パーツがない場合は <code>line</code> にフォールバック</td>
+</tr>
+<tr>
+<td><code>line</code></td>
+<td>区画線</td>
+<td>2（左右）</td>
+<td>道路端、歩道の内側に配置</td>
+</tr>
+<tr>
+<td><code>sidewalk</code></td>
+<td>歩道</td>
+<td>2（左右）</td>
+<td>道路端に配置。右側は左右反転</td>
+</tr>
+<tr>
+<td><code>wall</code></td>
+<td>防音壁・ガードレール</td>
+<td>2（左右）</td>
+<td>道路の左右端に配置。右側は左右反転</td>
+</tr>
+<tr>
+<td><code>wall_underground</code></td>
+<td>トンネル側壁</td>
+<td>2（左右）</td>
+<td>完全埋設区間だけに配置。地上壁の有無とは独立し、左側をXミラーする。天井は持たない</td>
+</tr>
+<tr>
+<td><code>ceiling_underground</code></td>
+<td>トンネル天井</td>
+<td>1</td>
+<td>地下壁の内面間へ張る片面。法線と三角形の表向きは下向き</td>
+</tr>
+<tr>
+<td><code>tree</code></td>
+<td>街路樹</td>
+<td>任意</td>
+<td>歩道に沿って一定間隔で配置</td>
+</tr>
+<tr>
+<td><code>pillar</code></td>
+<td>柱</td>
+<td>任意</td>
+<td>高架道路等の路面支持用。height_editable=true のバリアントに対してのみ配置。地表に張り付いた地点と地下パス（負の相対Yを持つ）には配置しない</td>
+</tr>
+<tr>
+<td><code>pillar_cap</code></td>
+<td>柱のキャップ</td>
+<td>任意</td>
+<td>高架の柱の上部を保護または装飾するキャップパーツ。Y方向には拡大（スケール）されない。柱と同じ地点にだけ置く</td>
+</tr>
+<tr>
+<td><code>portal</code></td>
+<td>坑口</td>
+<td>任意</td>
+<td>地下パスの描画区間⇔トンネル区間の境界（坑口）に配置。プレハブはローカル+Zがトンネル内部を向く前提</td>
+</tr>
+</tbody>
+</table>
+<p><code>_close</code> の対象は <code>CreateSplineMesh</code> でスプラインに沿って敷くパーツ（<code>body</code> / <code>line</code> / <code>sidewalk</code> / <code>wall</code> / <code>wall_underground</code> / <code>ceiling_underground</code> / <code>center</code>。線路では <code>track</code> / <code>wire</code> / <code>platform</code> / <code>platform_wall</code> も）である。Instantiate 配置の <code>tree</code> / <code>pillar</code> / <code>pillar_cap</code> / <code>portal</code>、道路設備（§8.6）、交差点内のコネクタ・終端部品は描画LODに関わらず無印を使う。</p>
+<h3 id="64-パーツプレハブのモデリング規約">6.4 パーツプレハブのモデリング規約</h3>
+<p>ロープウェイ乗り場602と鉄道・モノレール駅451/461・462・502の完成時Farは、共通の道路帯に代えて<code>FarPlatformPath</code>が簡易立体を生成する。通常モデルの材質と屋根・壁の輪郭を保ち、小物を省く。詳細は<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">N文書</a>のLOD節を参照。</p>
+<p>ロープウェイ乗り場602の<code>station_shell</code>も<code>CreateSplineMesh</code>の接写解決に対応し、<code>station_shell_close</code>で中央のベンチ・ごみ箱、壁付き照明、配管、ガラスの金具を表示する。通常版とbbox・原点・材質構成・8m周期を共通にし、中央設備は幅1m内へ収める。黄線と搬器の通過空間を空け、ケーブル・滑車・橋脚には通常版を使う。</p>
+<p>生成側はプレハブメッシュの bounds を実測して配置を補正するため、横方向のピボット位置は自由だが、以下の規約は守る必要がある。</p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>規約</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bodyの高さ方向ピボット</td>
+<td><strong>路面の上面</strong>（厚みは下方向に伸ばす）</td>
+<td>区画線のオフセット（body上面+2cm）や交差点アスファルトの高さがこの前提で決まる</td>
+</tr>
+<tr>
+<td>line/sidewalk/wallの高さ方向ピボット</td>
+<td><strong>下端</strong>（上方向に伸ばす）</td>
+<td>パーツの下端が配置面（<code>RoadPartHeights</code> の各オフセット）に接する</td>
+</tr>
+<tr>
+<td>左右非対称パーツ（sidewalk/wall）の向き</td>
+<td>歩道は左側用（中心側+X）、壁は右側用（中心側-X）</td>
+<td>歩道は右側、壁は左側をXミラーで配置する</td>
+</tr>
+<tr>
+<td>Z方向（進行方向）の長さ</td>
+<td>1タイルとして繰り返される単位。10m程度でよい</td>
+<td>タイル長は生成側が曲率適応（1〜8m。§4.3）で分割するため、Z方向の細かい分割は必須ではない</td>
+</tr>
+<tr>
+<td><code>_close</code> 版</td>
+<td>無印と同じ bbox・原点・マテリアル構成</td>
+<td>生成側は配置計算を変えずにプレハブだけ差し替える（§6.1）</td>
+</tr>
+<tr>
+<td>tree/pillar/pillar_cap/portal</td>
+<td>Instantiate配置のため原点＝接地点（pillar/pillar_capは路面原点）</td>
+<td>スケール・回転が原点基準で適用される</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-フォールバック機能">7. フォールバック機能</h2>
+<h3 id="71-基本考え方">7.1 基本考え方</h3>
+<p>建物のフォールバックと同様に、まずバリアント固有のパーツを探し、見つからなければタイプのパーツにフォールバックする。</p>
+<p>交差点のbody厚さ参照と歩道コネクタも同じ順序で解決する。バリアント固有パーツの不在だけでは警告せず、タイプ側へのフォールバックも失敗した場合にモデル不足を警告する。</p>
+<h3 id="72-フォールバック階層">7.2 フォールバック階層</h3>
+<p>パーツごとに以下の順序で検索し、最初に見つかったものを使用する。</p>
+<pre><code>1. バリアント固有パーツ: Models/Paths/p{path_variant}/{position}
+   （描画LODが Close なら同フォルダの {position}_close を先に試し、無ければ無印）
+       ↓ ない場合
+2. タイプパーツ: Models/Paths/p{path_type}/{position}
+   （同じく Close なら {position}_close → 無印）
+       ↓ ない場合
+3. そのパーツをスキップ（道路本体以外）
+</code></pre>
+<p>ここで、<code>path_type</code> は <code>PathMasterItem.type</code> から取得する。この解決は <code>PathDrawContext.ResolvePrefab</code> に集約されており、順序は close → 無印（バリアント）→ close → 無印（タイプ）である。バリアントに <code>_close</code> が無くても無印のバリアントパーツがあればそれを使い、タイプ側の <code>_close</code> へは進まない（バリアントの外観を優先する）。</p>
+<p>道路本体（body）が見つからない場合は、道路形状（スプライン）に沿った白い板（ストリップメッシュ）を動的生成して描画し、ゲームプレイが継続できるようにフォールバックする。その他のパーツはオプショナルであり、パーツがなくても道路本体（または白い板）だけでも機能する。</p>
+<h4 id="中央分離帯centerの特別なフォールバック">中央分離帯（center）の特別なフォールバック</h4>
+<p>中央分離帯のパーツ（<code>center</code>）が見つからない場合、センターラインのパーツ（<code>line</code>）を代わりに使用する。これにより、中央分離帯の3Dモデルを用意しなくても、区画線で中央の分離を表現できる。</p>
+<hr />
+<h2 id="8-各パーツの生成詳細">8. 各パーツの生成詳細</h2>
+<h3 id="81-道路本体body">8.1 道路本体（body）</h3>
+<p>スプラインの中心線に沿って、道路全体の幅で配置する。</p>
+<ul>
+<li><strong>リソースパス</strong>: <code>Models/Paths/p{variant}/body</code>（フォールバックあり）</li>
+<li><strong>幅</strong>: マスターデータの <code>width</code></li>
+<li><strong>オフセット</strong>: なし（中心）</li>
+<li><strong>高さオフセット</strong>: <code>BODY_ABOVE_SPLINE</code>（0.1m）。bodyプレハブはピボット＝路面上面の規約なので、路面上面がスプライン+0.1m（地表道路なら地形+0.2m）になる</li>
+<li><strong>SplineMesh の設定</strong>:</li>
+<li>X スケール = <code>width / メッシュの元の幅</code></li>
+<li>タイル数 = <code>クリップ後のスプライン長 / min(メッシュZ長, 曲率適応タイル長)</code>（§4.3。縦カーブの弦誤差を抑えるため明示指定）</li>
+</ul>
+<h4 id="single_span-モードsingle_span--true">single_span モード（<code>single_span = true</code>）</h4>
+<p><code>single_span</code> が true のバリアントでは、body の配置方法が変わる。地形追従で曲率適応タイルごとに細分化配置するのではなく、<strong>柱（アンカー点）間を1枚のbody引き延ばしで接ぐ</strong>。高架橋や桁橋のように、路面が地形の起伏に関わらず支柱間で水平に架かる構造物を表現するために使う。</p>
+<ul>
+<li><strong>スプラインの構築</strong>: アンカー点（始点・ウェイポイント・終点）のみでスプラインを構築し、地形追従の細分化（<code>SubdividePointsWithTerrain</code>）を行わない。曲線パス（<code>curved=true</code>）も <code>single_span</code> の場合は直線セグメント化して扱う（ベジエ曲線の水平形状は無視され、アンカー点間の直線になる）。</li>
+<li><strong>body のタイル数</strong>: <code>count = 1</code>。SplineMesh はメッシュのZ頂点をスプライン始点・終点に写像するため、body は両端を結ぶ弦（直線スパン）になる。Z方向の分割を持たないプレハブ（bodyは10mの箱）では、アンカー点間の直線的な床板として描画される。</li>
+<li><strong>その他のパーツ</strong>（line / sidewalk / wall 等）: body と同じスプライン（アンカー点のみ）に沿って配置されるため、body と一貫して地形に追従しない。タイル数は通常通り曲率適応タイル長に基づく。</li>
+<li><strong>ウェイポイントがある場合</strong>: セグメントごとに独立したスプラインが作られ（<code>GenerateLinearPathWithCorners</code> と同じフロー）、各セグメントの body が <code>count = 1</code> で柱間を接ぐ。</li>
+</ul>
+<h3 id="82-中央分離帯center">8.2 中央分離帯（center）</h3>
+<p>道路の中央に配置する分離帯。中央分離帯がある場合、センターラインは省略され、代わりに中央分離帯と側線の間にレーン境界の点線が配置される。</p>
+<ul>
+<li><strong>リソースパス</strong>: <code>Models/Paths/p{variant}/center</code>（フォールバックあり。パーツがない場合は <code>line</code> を代用）</li>
+<li><strong>幅</strong>: マスターデータの <code>center_width</code></li>
+<li><strong>オフセット</strong>: なし（中心）</li>
+<li><strong>高さオフセット</strong>: 0.1m</li>
+<li><strong>レーン境界線</strong>: 中央分離帯の端から側線までの距離を片側レーン数で等分し、各境界に点線を配置する。例えば4車線なら片側2レーンなので1本、6車線なら片側3レーンなので2本の点線を配置する。</li>
+</ul>
+<h3 id="83-路面標示">8.3 路面標示</h3>
+<p><code>PATH_STREET</code> / <code>PATH_MOTORWAY</code> かつ <code>side_width &gt; 0</code> の道路は、<code>Custom/RoadSurface</code> がbodyの上面へ標示を合成する。白線用の板・SplineMesh・Rendererを追加しないので、路面と標示の深度競合や勾配上の浮きは生じない。元の路面の色・テクスチャ・法線・ライティングを使い、標示部分の色と粗さを変更する。<code>line</code> FBXとその高さ定数は他の生成経路の互換用に残すが、対象道路では読み込まない。</p>
+<p><code>RoadMarkingContext</code> はスプラインごとに距離座標<code>s</code>と横断座標<code>t</code>を保持する。bodyの生成時にUVチャンネル3へ<code>(s,t,上面フラグ,0)</code>を設定し、元の材質のUVは維持する。側面・底面には標示を描かない。交差点ではノード原点からのXZを使用し、上面と追加した桁殻を区別する。</p>
+<p><code>Custom/RoadSurface</code> の色描画パスは <code>Offset 0, -1</code> で一定量だけ深度を補正する。傾きに比例する補正は使わない。bodyは端面を持つ部品の反復なので、縦面の深度まで傾きに応じて手前へ出すと、内部の端面が舗装を覆って横筋になる。路面の頂点や部品の端面は変更しない。</p>
+<ul>
+<li>側線・中央線・車線境界線はシェーダーで距離から計算する。幅は<code>max(0.1m, side_width * 0.3)</code>、側線の位置は<code>±((width/2) - sidewalkWidth - sideWidth/2)</code>。</li>
+<li>点線は2m描画・4m周期。画面微分による被覆率で縁をなじませ、周期が画素より細かくなると平均の被覆率へ移行する。</li>
+<li>横断歩道・停止線・方向矢印・幅移行の線は<code>RoadMarkingPlan</code>の二次元三角形群から画像へ焼き込む。このメッシュは生成用であり、シーン上の道路には重ねない。</li>
+<li>線ごとに描く距離の範囲（<code>_RoadBandSpans</code>）を持ち、路側線を区間ごとに描き分けられる。高速道路の本線とランプの結合区間（§11.7）では、本線のランプ側の路側線をその区間だけ点線にし、ランプの本線側の路側線をその区間だけ描かない。描き分けは body の生成時にシェーダーへ渡すので、body より先に決める。</li>
+<li><code>side_width == 0</code> の道路には標示を生成しない。</li>
+</ul>
+<p>舗装路と未舗装路・石畳が混在し、交差点の代表材質に<code>Custom/PathDirt</code> / <code>Custom/PathPaving</code>が選ばれた場合、交差点内部はその専用描画を維持して標示を省く。接続する舗装道路の標示は通常どおり描く。</p>
+<h4 id="車線境界と車線中心の共有定義">車線境界と車線中心の共有定義</h4>
+<p><code>RoadLaneLayout</code>（RoadPath.cs）は、歩道と側線を除いた走行帯の外側境界を計算し、区画線と車両描画の両方へ供給する。道路全幅を車線数で割る方式は使わない。車線中心の詳細は<a href="../O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/">車両の走行描画</a> §O.4 を参照。</p>
+<ul>
+<li>双方向の1車線道路には中央線を引かない。</li>
+<li>双方向の2車線道路は中央に点線、偶数4車線以上は中央に実線と片側の車線境界に点線を引く。</li>
+<li>中央分離帯がある場合は中央線を省き、分離帯と側線の間を等分した境界に点線を引く。分離帯モデルの取得成否で車線位置を変更しない。</li>
+<li>奇数3車線以上の双方向道路は中央の転回用帯を確保し、その両端と通常車線の境界に点線を引く。</li>
+<li>一方通行は走行帯全幅を全車線で等分し、各境界へ点線を引く。</li>
+</ul>
+<h4 id="交差点の進入部">交差点の進入部</h4>
+<p><code>RoadMarkingRules</code> は完成済み道路の接続、一方通行、左右通行から進行可能な方向を求める。完成済み道路が3本以上接続する街路で、描画区間が16m以上あれば停止線を配置する。接続先にも歩道付き街路がある場合は、切断端から1〜3.5mに横断歩道を置き、中央分離帯を避ける。停止線は横断歩道ありで5m、なしで1.5m。交差点手前の最大18m（区間長の40%まで）の車線境界を実線へ変え、横断歩道内の内部線を省く。</p>
+<p>25m以上の区間には切断端から10mに方向矢印を置く。左右通行に応じ、外側車線を近い側への転回、内側車線を対向車線を横切る転回へ割り当てる。片方向2車線では外側を直進兼用、3車線以上では中間を直進用にする。該当方向がない車線には可能な方向を割り当てる。一方通行の退出側には停止線と矢印を描かない。短い区間やトンネルの描画用分割端・折れ線の内部端には進入部を追加しない。</p>
+<p>矢印の基準点に対し、直進の先端は前方1.65m、左右の先端は前方0.35m・横1.05mに置く（狭い車線では全体を縮小）。左右の枝は基準点の手前0.2mから分岐し、先端三角形の底辺中央へ短い横向きの軸で接続する。直進と左右の先端を離して、兼用矢印の内側に閉じた穴を作らない。直進を許可しない矢印の中央軸は分岐点で止め、方向指定なしでは図形を生成しない。</p>
+<p>これは既存の車線への進行方向の割り当てであり、交差点手前の道路を拡幅して車線を増やす処理ではない。信号の現示・優先道路の判定や任意の交差点全体への誘導線生成は行わない（交差点の信号機は装飾として置く。§11.8）。一般車とバスは同じ方向割り当てを参照する（<a href="../O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/">車両描画</a>）。</p>
+<p><code>PathManager</code> は接続道路ID・種別・バリアント・完成状態・通行方向・接線・左右通行の署名を比較する。切断位置が変わらない接続変更でも隣接道路を再生成し、古い矢印を残さない。標示画像は内容署名で再利用し、都市全域を焼き直さない。</p>
+<h4 id="画像の保持と検証">画像の保持と検証</h4>
+<p><code>RoadMarkingSurface</code> が既存Rendererの共有材質とMaterialPropertyBlockを管理し、<code>RoadMarkingAtlas</code> が32m四方のページを保持する。解像度・メモリ・固定区間LODとの関係は <a href="../E_LOD%E5%87%A6%E7%90%86/#路面標示のlodと画像予算">LOD処理</a> を参照。標示画像が未生成・容量不足の間も側線などの解析的な線は表示する。</p>
+<p><code>unity/Tests/RoadMarkings/run-unity.ps1</code> は独立したURPプロジェクトで実FBXの道路・交差点・勾配を描画する。真上・斜め・低い視点の道路を、内部端面だけを除いた参照画像と比較して横筋を検出する。矢印は全7種の方向組み合わせの描画画像から、先端と軸の連結、閉じた穴の不在、転回専用の中央軸を検査する。シェーダー、表示モード復元、キャッシュ再利用、容量超過時の縮退、長い道路の距離座標、セッション終了時の解放も検証する。</p>
+<h3 id="84-歩道sidewalk">8.4 歩道（sidewalk）</h3>
+<p>道路の端に配置する。歩道は左右で形状を対称にするため、右側はメッシュを X 軸で反転させる。</p>
+<ul>
+<li><strong>リソースパス</strong>: <code>Models/Paths/p{variant}/sidewalk</code>（フォールバックあり）</li>
+<li><strong>幅</strong>: マスターデータの <code>sidewalk_width</code></li>
+<li><strong>左側オフセット</strong>: <code>-(width/2) + (sidewalkWidth/2)</code> = <code>-(width/2 - sidewalkWidth/2)</code></li>
+<li><strong>右側オフセット</strong>: <code>+(width/2 - sidewalkWidth/2)</code></li>
+<li><strong>高さオフセット</strong>: <code>SIDEWALK_ABOVE_SPLINE</code>（0.1m）。下端がbody上面と同一平面に接し、縁石の立ち上がりはプレハブ形状で表現する</li>
+</ul>
+<h4 id="歩道のミラーリング">歩道のミラーリング</h4>
+<p>歩道パーツは<strong>左側用</strong>（縁石＝道路中心側の面が +X 側）として作り、左側はそのまま、右側は X 軸で反転（ミラー）して配置する。壁の右側用規約とは異なる。</p>
+<p>ミラーリングの処理内容：
+1. <strong>頂点の反転</strong>: 全頂点の X 座標を -1 倍する
+2. <strong>法線の反転</strong>: 全法線の X 成分を -1 倍する（面の向きを正しく保つ）
+3. <strong>三角形の反転</strong>: 三角形インデックスの順序を反転させる（カリング方向を修正する）</p>
+<p>この3つの処理を組み合わせることで、反転後も面が正しい向きを向く。頂点反転で裏返った面を、三角形反転で元に戻すという考え方である。</p>
+<h3 id="85-防音壁ガードレールwall">8.5 防音壁・ガードレール（wall）</h3>
+<p>地上・開削区間の左右端に配置する壁または柵。歩道の外側に設置される。</p>
+<ul>
+<li><strong>リソースパス</strong>: <code>Models/Paths/p{variant}/wall</code>（フォールバックあり）</li>
+<li><strong>幅</strong>: マスターデータの <code>wall_width</code></li>
+<li><strong>オフセット</strong>: <code>±((width/2) + (wallWidth/2))</code></li>
+<li><strong>高さオフセット</strong>: <code>WALL_ABOVE_SPLINE</code>（0.1m）</li>
+<li><strong>左右対称</strong>: 右側用パーツの規約。右側はそのまま、左側は X 軸で反転（ミラー）して配置する</li>
+<li><strong>オプショナル</strong>: <code>wall_width</code> が未設定（0以下）の場合は描画しない</li>
+</ul>
+<h4 id="地下専用の側壁wall_underground">地下専用の側壁（wall_underground）</h4>
+<p>完全埋設区間では地上用の <code>wall</code> を省き、<code>wall_underground</code> を道路の両外側へ敷く。区間は <code>PathTunnelParts</code> が坑口と同じ <code>TunnelSectionUtil</code> の深さ・地形追従規則から求める。地上で壁を持たない道路も対象とし、壁幅は正の <code>wall_width</code>、未設定なら0.3mを使う。</p>
+<p>専用モデルは <code>Models/Paths/p{variant}/wall_underground</code> → <code>p{type}/wall_underground</code> の順で解決し、接写は通常の <code>_close</code> 規約を使う。モデルは下端を原点とする右側用の壁だけを持ち、高さをパスのクリアランスに合わせる。通常用の <code>wall</code> へは戻さない。未定義なら既存の <code>PATH_CONCRETE</code> 材質で、路面からクリアランス高さまでのコンクリート壁を生成する。壁の内面を道路外縁に合わせ、左側をXミラーする。連続パーツの曲率適応・頂点数予算・LODは他の壁と共通である。</p>
+<p>本線とランプ・並走線路の結合部では、通行口をふさがないよう既存の側別の壁省略区間を使う。駅ではホーム外縁より外側へ置く。施工済み区間にも同じ地下壁を敷き、未施工部分の土には壁を加えない。</p>
+<p><code>ceiling_underground</code> は同じ区間のクリアランス高さで、ホームを含む左右の壁の内面間へ張る。原点高さ0の片面モデルとし、法線と三角形の表向きを下へそろえる。材質は裏面をカリングするので、見下ろしでは内部が見え、トンネル内からは天井が見える。解決順と接写規約は地下壁と共通で、専用モデルが無ければ <code>PATH_CONCRETE</code> の下向きの面を生成する。</p>
+<p>地下壁の高さ・天井の上下からの描画・地上壁との切り替え・屋外設備の省略は <code>unity/Tests/Underground/run.ps1</code>、LRT各種の地下壁・軌道・架線柱・ホーム上屋の省略は <code>unity/Tests/Lrt/run.ps1</code> で検証する。</p>
+<h3 id="86-道路ごとの付帯設備">8.6 道路ごとの付帯設備</h3>
+<p>完全埋設区間には街路樹（中央分離帯を含む）・街灯・電柱とその配線・地上機器ボックスを置かない。保存済みの設備選択は維持し、地上・開削区間だけで使用する。LRTの架線柱も同じ深さ規則で省き、軌道と架線は残す。</p>
+<p>付帯設備は <code>Path</code> の <code>streetlight_type</code>（街灯）、<code>fence_type</code>（歩車道境界の柵）、<code>street_tree_type</code>（街路樹）、<code>utility_mode</code>（配線方式）で選択する。各値は保存対象で、0は明示的な「なし」。種類は現在0/1（なし/標準）、配線方式だけ0/1/2（なし/架空/地中）を持つ。費用・治安・電力供給への効果はまだ持たない。</p>
+<p>道路マスターは各項目の <code>*_allowed</code> と <code>default_*</code> を持つ。未舗装路201は街灯を設置不可とし、設備値が残っていても描画しない。配線方式は選択可能で、架空配線では電柱と電線を描画する。地中配線でも地上ボックスは配置しない。初期値は新設時にエンティティへ確定保存し、以後のマスター初期値変更で既存道路の設備は変わらない。<code>tree_spacing</code> は有無ではなく標準の配置間隔で、未設定または0なら20mを使う。基本断面（歩道幅など）と外側の構造壁 <code>wall</code> は従来どおり道路マスターで決まる。</p>
+<p><code>RoadEquipmentGenerator</code> は切断済みスプラインの両端から3mを空け、距離に基づいて配置する。街灯は24m間隔・開始位相6mで、極小路地211と1車線生活道路212は右側のみ、それ以外は両側、電柱は32m間隔で右側、地上機器ボックスは64m間隔で右側、街路樹は標準間隔の半分だけ開始位相をずらして両側に配置する。ここでの右側はパスの始点→終点を基準とする。個別の左右指定は持たず、向きを反転して結合した場合は再配置される。</p>
+<p>電柱/ボックス→街灯→街路樹の順に位置を確定する。3mグリッドの近傍検索で既存設備から2m（街路樹は3m）未満の候補を省略する。歩道がある道路では歩道中央、なければ道路端から0.3m内側に置き、接地高さは路面原点へ補正済みの床メッシュを使い、設置する横位置で三角形の上面を求める。bodyの未補正bounds上面や、歩道全体の最高点（縁石）を使ってはいけない。歩道の原点補正は採用モデルと同系列のbodyで行い、道路本体と同じ <code>GetRoadPartMesh</code> を使う。スプラインからの高さオフセットはワールド上方向、歩道の立ち上がりは断面法線方向に加える。設備は道路の勾配によらずワールド上方向へ直立する。長さ6m以下の描画区間には配置しない。</p>
+<p>柵は歩道に含めず、歩道がある場合は歩車道境界から歩道側へ0.12m、歩道がない場合は舗装端から内側へ0.12mの位置に独立生成する。設置可否はfence_type_allowedで決め、歩道の有無だけでは制限しない。支柱は最大2m間隔で直立し、横桟は支柱間を結ぶ。支柱(0.07m角)は中心位置の歩道上面へ接地するので、歩道幅へ伸縮した後の縁石と歩行面の段差が歩車道境界から0.085〜0.155mの範囲に来ると支柱の片側が浮く。歩道パーツの段差位置はこの範囲を避けて著作する(p222/p242は歩道3mで0.16m)。終端では支柱と桟を閉じ、交差点内部の歩道コネクタへは接続しない。交差点・折れ線の角・地下道の描画区間分割では、それぞれの描画区間に端部余白を設ける。既存の外側 <code>wall</code> の交差点接続は変わらない。</p>
+<p>モデルは <code>Models/Paths/p{variant}/{part}</code> → <code>p{type}/{part}</code> の順で解決する。点配置パーツは <code>streetlight</code> / <code>utility_pole</code> / <code>utility_box</code> / <code>tree</code>。点設備は接地面を原点に実寸で著作する。Blenderでは右側用として灯具を-Xへ向けるが、FBXの軸変換でUnityのX符号が変わるため、配置時は読み込み後のbounds中心Xから張り出し側を判定し、道路内側へ向ける。左側はさらにヨー180度回転する。旧共通モデルの原点ずれも考慮し、点設備のメッシュ下端を床へ合わせる。<code>fence</code> は支柱を含まない横桟/パネルで、高さ・横幅を保持しZ方向だけ支柱間長へ合わせる。標準支柱はコード生成される。</p>
+<p>モデルがない設備は簡易形状で表示する。簡易形状は道路・材質ごとに結合し、生成Meshは <code>IntersectionMeshOwner</code> が解放する。専用マテリアルは <code>PATH_EQUIPMENT_METAL</code> / <code>CONCRETE</code> / <code>LAMP</code> / <code>LEAVES</code>（いずれも接頭辞 <code>PATH_EQUIPMENT_</code>）で差し替え可能。設備にクリック用Colliderやリアルタイム光源は追加しない。遠景は従来の簡易道路表示のみ。</p>
+<p>架空配線の電線は同一描画区間内で隣接する実配置電柱の接地点+7.6mを結び、中央で0.4m垂らす。専用電柱もこの接続高さに合わせる。交差点を跨ぐ接続、建物への引き込み線、地中配線との接続設備は生成しない。地中配線では電柱と電線を省き、ボックスだけを別間隔で置く。</p>
+<p>道路詳細パネルの「道路設備」タブで選択し、「適用」でPATCH後に差分リロードする。変更は設備選択のみに作用し、道路の基本断面・経済値を変えない。分割時は両側に設定を継承し、異なる設備設定の結合は拒否する。造り替え先に設置できない設備がある場合は、先に設備を外す必要がある。</p>
+<p>道路詳細は経済主体詳細と共通のタブ表示を使う。「基本情報」に所属地区・線形指標・状態(耐久度・騒音・大気汚染)と交通・速度設定(制限速度・利用率・路上駐車量・交通量)を、「道路設備」に設備設定をまとめる。設備非対応で既設設備もないパスでは設備タブを表示しない。駅舎には「駅情報」、計画中・建設中・解体中には「建設工事」を追加する。着工前は基本情報・設備を省略し、着工前・建設中の初期選択は建設工事とする。タブ切り替えだけでは設備の未保存の入力と制限速度の反映待ちの入力を破棄しない。基本情報タブの表示内容は<a href="../../economics/3_%E9%81%93%E8%B7%AF%E7%B6%B2/">3_道路網</a>の「パス詳細での表示」を参照。</p>
+<h4 id="設備モデルの収録範囲">設備モデルの収録範囲</h4>
+<p>以下の専用FBXを <code>Assets/Models/Paths/p{variant}</code> に収録する。</p>
+<table>
+<thead>
+<tr>
+<th>パーツ</th>
+<th>バリアント</th>
+<th>外観</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>streetlight</code></td>
+<td>100 / 101 / 201 / 211 / 212 / 221 / 222 / 231 / 301</td>
+<td>高速道路は大型照明、細い道路は短いアーム、歩行者専用道路は低いランタン型</td>
+</tr>
+<tr>
+<td><code>utility_pole</code> / <code>utility_box</code></td>
+<td>201 / 211 / 212 / 221 / 222 / 231</td>
+<td>木柱・コンクリート柱、碍子、変圧器、扉・通風口付き地上機器</td>
+</tr>
+<tr>
+<td><code>fence</code> / <code>tree</code></td>
+<td>221 / 222 / 231</td>
+<td>横桟または縦格子のパネル、成木サイズの広葉樹</td>
+</tr>
+<tr>
+<td><code>fence</code></td>
+<td>301</td>
+<td>歩行者道の3本横桟パネル。支柱はコード生成</td>
+</tr>
+</tbody>
+</table>
+<p>合計28点。201の電柱は架空配線時に使う。街灯はマスターで設置不可、地上ボックスは未舗装路の描画規則で省略し、本編・組み立て見本とも表示しない。柵パネルは長さ2m、高さ1m以下で、支柱は含まない。点設備は接地面を原点にした1メッシュで、道路本体のin-place高さオフセットを焼き込まない。
+専用街路樹は221が高さ8m・樹冠幅3.2m、222が高さ9m・樹冠幅3m、231が高さ10m・樹冠幅4m。根元の幹直径はそれぞれ0.68/0.60/0.80m。幹は高さ3mまで緩やかに先細りし、上端半径は根元の65%とする。樹冠は下端2mから天端へ伸び、樹冠高の下から22%付近が最も広い。下部に丸みを持たせ、上へ細くなる炎形にする。スムーズ法線を使い、実寸で配置する。
+葉は森林の広葉樹の色むらを低彩度・低明度に調整した専用 <code>PATH_STREET_LEAVES</code>、幹は <code>PATH_STREET_BARK</code> を使う。Unityの同名Resources材質はURP/Lit、Smoothness 0.05、非金属、鏡面ハイライト・環境反射OFFとし、鮮やかな単色や面ごとの強い反射を避ける。森林プロップの形状・材質は変更しない。
+既存の共通街路樹 <code>p1/tree</code> / <code>p2/tree</code> はフォールバック用として保持する。
+モデルの存在だけで設備は有効にならず、描画は個別道路の設備設定に従う。
+FBXのインポート時に <code>ModelPrefabGenerator</code> がResources側のプレハブを生成する。</p>
+<h3 id="87-柱pillarとキャップpillar_cap">8.7 柱（pillar）とキャップ（pillar_cap）</h3>
+<p>高架道路など、路面が地面から離れているパスに対して、路面を支持する柱（およびキャップ）を配置する。これらは <code>height_editable=true</code> のバリアントに対してのみ配置される。</p>
+<ul>
+<li><strong>リソースパス</strong>: </li>
+<li>柱: <code>Models/Paths/p{variant}/pillar</code>（フォールバックあり）</li>
+<li>キャップ: <code>Models/Paths/p{variant}/pillar_cap</code>（フォールバックあり）</li>
+<li><strong>配置対象</strong>: <code>height_editable=true</code> かつ <code>pillar_spacing</code> が設定されているバリアント。地下パスには配置しない。「路面と地表の差 + <code>base_height</code>」が0.1m以下の地点（地上区間・切り通し）には柱もキャップも置かない。<code>base_height</code> を持つ送電線はスプラインが地表にあってもキャップ（鉄塔）を置く。</li>
+</ul>
+<h4 id="配置間隔">配置間隔</h4>
+<p>スプラインに沿って配置する。各セグメント（始点→ウェイポイント、ウェイポイント→ウェイポイント、ウェイポイント→終点）について以下のルールで配置する。</p>
+<ul>
+<li><strong>パス全体の開始点と、各セグメントの終点に配置する（これにより、開始点・中間アンカー点・終了点のすべてに配置される）</strong></li>
+<li>セグメントのスプライン上の長さが <code>pillar_spacing</code> を超える場合は、その間隔で追加配置する</li>
+</ul>
+<h4 id="他の道路線路との干渉回避">他の道路・線路との干渉回避</h4>
+<p>配置候補の柱本体または上部キャップが他の道路・線路の通行空間に重なる場合、通常橋脚を置かず、門型用の柱と横梁があれば門型橋脚で通行帯をまたぐ。門型パーツが無い場合や門型も干渉する場合は、その候補を省く。進行方向の配置位置と間隔は変えず、始終点・中間アンカーも同じ判定に従う。省略により <code>pillar_spacing</code> より長い無柱区間が生じることは許容する。道路・線路・工事中の柱は共通の <code>RoadPath.GeneratePillars</code> の内部処理を使う。</p>
+<p><code>PillarClearance</code> は、子メッシュの変換と配置時の回転・スケールを反映した柱／キャップの bounds を別々に評価する。水平面は外接円、道路側は中心線＋半幅の帯として近似し、水平距離に0.25mの余裕を加える。高さは道路の描画路面からマスターの <code>height</code> までを通行空間とし、柱／キャップの高さ範囲との重複を調べる。斜路は線分上で高さが重なる区間だけ距離を評価する。低い道路の上方にあるキャップだけの張り出しや、十分深いトンネル、橋脚より上の道路では省略しない。同じ高さで接続する道路の路面はキャップ上端より上にあるため、接続だけを理由に柱を省略しない。</p>
+<p><code>PathManager.GetPillarObstacles</code> が通過セルと隣接セルから候補を絞り、最新データの切断前中心線から通行空間を作る。道路幅は歩道込みの全幅、駅はホームの左右張り出しの大きい方を両側に加えた保守的な幅を使う。自分自身、インフラや描画なしのパスは対象外。計画・工事中の道路もデータが登録されていれば対象になる。描画用点列キャッシュやコライダーには依存せず、相手が未描画・Farでも判定する。</p>
+<p>新規登録・版／状態変更・削除時は、変更前後の近隣にある橋脚付きパスの描画revisionを無効化し、同一フレームのデータ更新とLODバッチの終了後に既存の再生成キューへ送る。下の道路の追加で柱が消え、移動・撤去で柱が戻る。通過セルの登録は描画前のデータ登録時に済ませ、曲線はアンカー間の直線ではなく既存の平面ベジエ点列から求める。</p>
+<p>この判定は描画上の近似であり、パスの保存形状・接続・建設可否は変更しない。外接円・ホーム幅の近似により、実メッシュが触れていなくても近接する柱が省かれる場合がある。検証は <code>unity/Tests/Pillars/run.ps1</code> と <code>run-unity.ps1</code>。</p>
+<h4 id="門型橋脚の組み立て">門型橋脚の組み立て</h4>
+<p><code>PortalPillar</code> は通常橋脚が干渉したときだけ、<code>pillar_leg</code>（柱1本）を左右に1個ずつ、<code>pillar_crossbeam</code>（横梁）を1個配置する。各パーツはバリアント→タイプの順で解決し、両方がそろったときに有効になる。現行モデルでは鉄道共通の <code>p4</code> に用意する。道路やモノレールのタイプ既定には用意していない。レンガアーチ高架は専用生成器を使うため、この置き換えを行わない。</p>
+<ul>
+<li>柱1本は1.5m幅・1.8m奥行き・著作高さ8mの一様断面で、天端を原点にする。横幅・奥行きは保ち、各柱の設置位置の地面まで高さだけを伸縮する。</li>
+<li>横梁は著作長12m・奥行き2m・厚さ1.2mの一様断面で、上面を原点にする。横方向だけ柱の外端間へ伸ばし、厚さ・奥行きは保つ。門型全体の一様拡大や実行時の形状生成は行わない。無印のみを使う。</li>
+<li>横梁の上面は、通常の <code>pillar_cap</code> の最上部（配置倍率込み）へ合わせる。キャップが無ければスプライン高さに置く。通常の柱とキャップを置き換えるので、二重に重ねない。</li>
+<li>左右の柱は通常キャップの幅を支えられる位置を初期値にし、通行空間を抜ける方向へそれぞれ外へ移す。移動量は左右で異なってよい。横梁の中心は柱間の中央になり、片側へずれた道路も支える。</li>
+<li><code>PillarClearance.FindPortalOffsets</code> は、柱の外接円と0.25mの余裕で通行帯を広げ、線分を柱の高さ範囲と横断面の前後範囲で切って、横方向へ投影する。重なる帯を順に抜け、離れた道路まで一つの梁でまたがない。歩道込みの道路幅・駅のホーム幅・斜路の高さは通常橋脚と同じ通行空間から取得する。</li>
+<li>横梁と左右の柱を、配置後の bounds で個別に再検査する。一つでも通行空間に干渉する場合、柱を地面から立てる高さが無い場合、柱の外端間が <code>PortalPillar.MaxSpan</code>（描画上の上限40m）を超える場合は、一式とも置かない。低い高架の梁を通行空間へ押し込まない。</li>
+</ul>
+<p>完成時と施工中は同じ門型を使い、施工中は左右の柱と梁の3パーツで1つの施工単位になる。下の道路の追加・変更・撤去による既存の再生成通知が、通常橋脚と門型の切り替えにも働く。保存形状・建設可否・通行容量には影響しない。モデル原本は <code>blender/paths.blend</code>、実FBX・幅8/24/32m・低い高架・長すぎる梁・左右で異なる地面高・施工単位の検証は <code>unity/Tests/Pillars/run-unity.ps1</code>。</p>
+<h4 id="柱とキャップの配置とスケール">柱とキャップの配置とスケール</h4>
+<ul>
+<li><strong>垂直保持</strong>: 柱・キャップとも地形の傾斜に追従して斜めに立たず、<strong>常にワールド上方向に対して垂直に立つ</strong>。回転は進行方向の水平成分から導出したYawのみ（ピッチ・ロールは0）とする。</li>
+<li><strong>キャップ（pillar_cap）の配置</strong>:</li>
+<li>プレハブが存在する場合、スプライン上の路面位置（<code>sample.position</code>）にYスケールを変更せずにそのまま配置する。</li>
+<li>原点（ピボット）は路面原点（上端）とし、モデルは <code>-Y</code> 方向に厚みを持つものとする。</li>
+<li>キャップの厚み <code>capThickness</code> は、プレハブの <code>MeshFilter</code> の <code>bounds</code> から <code>-bounds.min.y</code> として動的に計算される。</li>
+<li><strong>柱（pillar）の配置</strong>:</li>
+<li>プレハブが存在する場合、キャップがあるときは <code>capThickness</code> 分だけ下方向（常に <code>Vector3.down</code>）にオフセットした位置に配置する。</li>
+<li>柱の原点（ピボット）も路面原点（上端）とする。</li>
+<li>Yaw-only 回転でローカルY軸がワールド上方向と一致するため、Yスケールにオフセット後の位置からその位置の地面標高までの高さをそのまま適用し、柱の下端が地面に接するようにする。</li>
+<li>残りの高さ（柱を配置すべき高さ＝路面と地表の差。<code>base_height</code> は含めない）が <code>0.1m</code> 以下の場合は、柱（pillar）本体は配置せず、キャップのみを配置する。</li>
+</ul>
+<h4 id="プレハブの著作規約yスケールの帰結">プレハブの著作規約（Yスケールの帰結）</h4>
+<p>Yスケールは「柱を配置すべき高さ（m）」<strong>そのもの</strong>を倍率として掛ける。著作寸法がそのまま倍率になるため、モデル側は次の作法で作る必要がある。</p>
+<ul>
+<li><strong>柱（pillar）の天端は必ず原点（ローカル Y=0）に置く。</strong> 天端を原点より下に著作すると、そのオフセットにも倍率が掛かって沈むため、<code>天端Y × 高さ &lt; −高さ</code> が常に成り立ち、<strong>どんな高さの高架でも橋脚が丸ごと地面より下に潜って一切描画されなくなる</strong>。</li>
+<li><strong>柱の下端は、想定する最大の高架高さぶん（既存アセットは 2〜8m）だけ下方向へ伸ばしておけばよい。</strong> 倍率で伸びすぎたぶんは地中に隠れるだけで実害が無い。柱は一様断面（またはゆるいテーパー）にしておくと、倍率が変わっても見た目が破綻しない。</li>
+<li><strong>Yスケールを掛けたくない造形（橋脚梁・パイルキャップ・ハンチ・門型ラーメンの横梁）は <code>pillar_cap</code> 側へ分ける。</strong> キャップは実寸のまま路面位置に置かれ、その厚みぶん柱が下げられるので、キャップの最深部と柱の天端（Y=0）が自動的に噛み合う。</li>
+</ul>
+<h4 id="base_height3d描画用の高さオフセット">base_height（3D描画用の高さオフセット）</h4>
+<p><code>base_height</code> は<strong>3D描画用の高さオフセット(m)</strong> で、経路探索・交差判定には影響しない。バックエンドで唯一これを参照するのは建設コストの高さ倍率で、描画と同じ <code>relY - base_height</code> を実効高さとして評価する（<a href="../../economics/12_%E5%BB%BA%E7%89%A9/">12_建物</a> 12.10）。</p>
+<p>パスの相対高さ(relY)から <code>base_height</code> を引いた値を「3D描画用の実効高さ」として扱い、<code>CalculatePathPoints</code> が返す全サンプル点のY座標から <code>base_height</code> を引く。これにより、スプライン・メッシュ・柱がすべて <code>relY - base_height</code> の高さで描画される。</p>
+<pre><code>3D描画用の実効高さ = relY - base_height
+</code></pre>
+<ul>
+<li><code>base_height = 0</code>（既定）: シフトなし。従来動作。</li>
+<li><code>base_height = 20</code>（例: 高圧送電線）: <code>relY=20</code> で敷いたパスは3D上は高さ0m（地面）として描画される。プレハブモデル自体が20mの高さを持つことで、送電線が地上を這わずに適切な高さに見える。<code>relY=25</code> にすれば3D上は5mの高さとして描画され、柱が5m分伸びる。</li>
+</ul>
+<p><code>base_height</code> を持つバリアントのモデルは「スプライン＝地表」を前提に地上高を持つ。このため body には上面を Y=0 へ揃える補正（§5）を掛けず、<code>pillar_cap</code> は鉄塔本体（原点＝接地、上方向へ実寸）として著作し、<code>pillar</code> は <code>relY &gt; base_height</code> のときだけ路面と地表の隙間を埋める部材になる。柱・キャップの置く／置かないの判定（§8.7 配置対象）も <code>base_height</code> を足した構造物の高さで行う（p1102: body は電線 y=8.3〜10.4m、pillar_cap は鉄塔 y=0〜10.5m、pillar は天端原点の角柱）。</p>
+<p>バックエンドの経路探索・交差判定は <code>CalculatePathPoints</code> を使わず、パスデータの <code>relY</code> をそのまま使用するため、<code>base_height</code> の影響を受けない。建設コストの高さ倍率だけは描画と同じ <code>relY - base_height</code> 基準で評価する。</p>
+<hr />
+<h2 id="88-地下パストンネルの描画区間分割">8.8 地下パス（トンネル）の描画区間分割</h2>
+<p>負の相対Yを持つアンカーがあるパス（地下パス）は、点列をそのまま1本のスプラインにせず、サンプル点ごとのトンネル判定で「描画する連続区間」に分割してから、区間ごとに通常のメッシュ生成器（RoadPath / TrackPath）を呼ぶ（<code>PathManager.GenerateUndergroundPathMesh</code> / <code>TunnelSectionUtil</code>）。</p>
+<ul>
+<li><strong>トンネル判定</strong>: サンプル点で <code>現在の地形標高 − 道路Y &gt; クリアランス高さ（マスターの height）</code> ならトンネル区間。両端点がともに地表に張り付いている（|地形−Y| ≤ 0.5m）区間は地形追従区間とみなし、深さ0（描画対象）として扱う。</li>
+<li><strong>開削区間との整合</strong>: バックエンドは着工時に開削区間（深さ ≤ height）の地形を道路標高まで掘削する。掘削後の地形ではその区間の深さが約0になるため、Unity側の判定は自動的に「開削区間＝描画、トンネル区間＝非描画」となり、バックエンドの区間分類（<a href="../../economics/3_%E9%81%93%E8%B7%AF%E7%B6%B2/">3_道路網</a>参照）と整合する。建設前（PENDING・プレビュー）は元地形に対する判定となり、これもバックエンドの分類と一致する。</li>
+<li><strong>境界と坑口</strong>: 区間の境界は深さがちょうど height になる位置を隣接サンプル間の線形補間で求める。各境界には <code>portal</code> パーツ（バリアント→タイプのフォールバック）を、トンネル内部方向を向けて配置する。プレハブ未整備時はスキップされる（オプショナルパーツ）。</li>
+<li><strong>コライダー</strong>: 描画区間のストリップメッシュを結合したものになる。トンネル区間はクリック判定を持たない。</li>
+<li><strong>描画LOD=Far（遠景の帯）</strong>: 地下パスは遠景の帯を描かない。帯は埋設区間を無視して地表を横切ってしまうため、遠景では非表示とする（丘を貫く非追従パスも同様）。</li>
+<li><strong>柱（pillar）</strong>: 地下パスには配置しない。</li>
+</ul>
+<hr />
+<h2 id="9-マテリアルの割り当て">9. マテリアルの割り当て</h2>
+<p>SplineMesh でパーツを配置する際、プレハブに設定されたマテリアル情報を引き継ぐ。ただし、FBX からインポートされたマテリアルは Unity 内のマテリアルアセットと対応が取れない場合があるため、以下の再割り当てロジックを使用する。</p>
+<ol>
+<li>プレハブの <code>MeshRenderer.sharedMaterials</code> から元のマテリアル配列を取得する</li>
+<li>各マテリアルについて、その名前で <code>Resources.Load&lt;Material&gt;()</code> を試みる</li>
+<li>Resources に同名のマテリアルがあればそちらを使用し、なければ FBX 由来のマテリアルをそのまま使用する</li>
+</ol>
+<p>これにより、Blender 等の DCC ツールで設定したマテリアル名と同名の Unity プロジェクト内マテリアルが自動的に対応付けられる。<strong>Resources 側にマテリアルを置くことが、コードを変更せずに路面の見た目（シェーダーを含む）を差し替える唯一の口</strong>である（未舗装路の <code>PATH_SAND</code> はこの仕組みで専用シェーダーを当てている。§16 参照）。</p>
+<hr />
+<h2 id="10-コライダーメッシュの生成">10. コライダーメッシュの生成</h2>
+<h3 id="101-目的">10.1 目的</h3>
+<p>SplineMesh は子オブジェクトとして生成されるため、親オブジェクトの <code>MeshCollider</code> には自動的には反映されない。クリック判定等の物理用途のために、道路全体を覆う簡易的なコライダーメッシュを別途生成する。</p>
+<h3 id="102-roadpath-の場合">10.2 RoadPath の場合</h3>
+<ol>
+<li>構築済みの <code>SplineComputer</code> に沿って等間隔（1m間隔）でサンプリングし、<code>List&lt;Vector3&gt;</code> を得る</li>
+<li><code>PathMeshFactory.BuildStripMesh()</code> にサンプリング点と道路幅を渡してストリップメッシュを生成する</li>
+</ol>
+<h3 id="103-buildstripmesh-のアルゴリズム">10.3 BuildStripMesh のアルゴリズム</h3>
+<p>ポイント列を折れ線とみなし、各点で進行方向に垂直な方向に左右 <code>width/2</code> ずつ頂点を置いてストリップ状のメッシュを構築する。各点での方向ベクトルは、前後の点とのベクトルを平均してスムージングする。UV座標は累積距離に基づいて割り当てる。</p>
+<h3 id="104-返却">10.4 返却</h3>
+<p>生成されたコライダーメッシュは <code>PathMeshResult.Mesh</code> として返される。<code>PathMeshResult.ModulesCreated</code> は <code>true</code>（SplineMesh が視覚的メッシュを担当しているため親の MeshRenderer は不要）、<code>GeneratedObject</code> は道路のルートコンテナである。<code>PathManager.CreateOrUpdatePath()</code> で <code>MeshCollider</code> コンポーネントにこのメッシュが設定される。</p>
+<hr />
+<h2 id="11-交差点と断面の接合">11. 交差点と断面の接合</h2>
+<h3 id="111-共通の切断断面">11.1 共通の切断断面</h3>
+<p><code>PathManager</code> は交差点の影響を受けない描画点列を <code>CalculatePathPoints(path, false)</code> で生成し、<code>NodeMeshFactory</code> に渡す。<code>IntersectionPolygonUtil</code> はこの点列上に <code>PathEndSection</code>（ワールド位置、外向き接線、法線、全幅、切断距離）を作る。点列が供給されないテストや仮想ノードでは <code>SamplePlan</code> が端点制御点・ウェイポイントを評価する。</p>
+<p><code>ConnectionPoints</code> はこの断面の中心を返す。本線は <code>Trim</code> によって元の点列の必要区間だけを保持する。車道・歩道・壁・レールは同じ切断断面を参照し、保存データの端点を移動しない。</p>
+<p>ウェイポイントのない直線も、地形追従のサンプリングを切断前に行う。描画時に切断後の長さでサンプリングし直さない。折れ線道路の角は前後のアンカーから仮想入口を作り、各スパンの45%を上限に接合する。歩道がない場合も壁・中央分離帯のコネクタを生成する。</p>
+<h3 id="112-外周と路面">11.2 外周と路面</h3>
+<p>入口断面を外向き方向の角度順に並べ、隣接する入口の外縁を結ぶ。両側の道路の縁を交差点へ延ばした直線が入口より内側で交わる場合は、その交点から両側へ同じ距離だけ戻して角を丸め、入口から丸め始める点までは直線を保つ。丸め半径は最大道路幅の1/4を基準に、両側の入口までの距離に収まるように縮める。丸め部分は円弧を近似する端部接線付きの三次ベジエとする。四車線道路と一車線道路のように幅が違っても、太い道路の直線の縁を細い道路へ引き込まず、角で逆向きに曲がるくびれを作らない。直線の交点が得られない幅移行部などは入口間を端部接線付きの三次ベジエで結ぶ。</p>
+<p><code>IntersectionCorner</code> の点列・方向を路面、歩道、壁が共用する。凸包で外周を塗り潰さないため、曲がった壁の外に余分な舗装が残らない。</p>
+<p>一直線の2本でも移行区間を生成する。異幅の入口間では外周が滑らかに変化し、幅変更を1点の段差にしない。三角形化は耳切り法で行い、失敗時に凹多角形をファンで埋めることはしない。耳切りが作る細い三角形の扇は、内部の辺をDelaunay条件で張り替えて解消する。入口の高さが揃わない、または縦断勾配を持つ交差点では、外周から1m以上内側に2m間隔（<code>LocalConstants.INTERSECTION_SURFACE_VERTEX_SPACING</code>）の正三角形格子の頂点を加え、間隔の2倍より長い外周の辺（入口断面など）も分割する。外周の頂点だけでは勾配のある路面を大きな三角形の平面でしか近似できず、三角形の対角線が折れ線として見えるためである。全ての入口が同じ高さで勾配の無い交差点は路面が平面なので、内部頂点を置かない。</p>
+<p>路面高さは本線の切断断面を境界条件として補間する。入口では本線と同じワールド上方向の <code>BODY_ABOVE_SPLINE</code> を適用し、坂道でも境界を合わせる。モデル自体の厚みは断面法線方向に向ける。bodyプレハブの全高から底面・外周の小口も作る。これは汎用の厚み補間であり、橋桁の内部構造を再現するものではない。</p>
+<p>補間は、各入口の本線の縦断勾配を交差点の内側へ延ばした高さを、入口断面までの距離の2乗に反比例する重みで混ぜる。延ばした高さは入口断面からの距離に応じて変わり、断面の横方向には変えない（本線の横断が水平なため）。入口では高さも勾配も本線と一致するので路面が折れず、一様な斜面に沿う道路どうしの交差点はほぼその斜面になる。延長は入口からノードまでの距離の2倍を尺度に滑らかに頭打ちにし、遠い入口の勾配で山や谷を作らない。路面の法線はこの高さの曲面から求め、三角形の向きを平均しない。陰影が三角形の形によらず、入口では本線の断面法線と一致する。高速道路の本線（§11.7）を持つノードでは、本線の路面の上を本線の縦断そのものの高さにし、外側だけを本線の路面の縁と他の枝の口から補間する。</p>
+<h3 id="113-歩道壁中央分離帯">11.3 歩道・壁・中央分離帯</h3>
+<p>幾何情報は互換性のため <code>SidewalkConnectorSpec</code> に集約し、<code>Part</code> が <code>sidewalk</code> / <code>wall</code> / <code>center</code> / <code>line</code> を区別する。<code>RoadPath.CreateSidewalkConnectorObject</code> は通常道路と同じプレハブを細かいタイルとして変形して生成する。</p>
+<ul>
+<li>歩道は共通外周の内側、壁は外側に配置する。幅を滑らかに補間し、端の向きは本線の断面に合わせる。</li>
+<li>歩道幅の補間はX方向だけに適用する。<code>SplinePoint.size</code>で縁石の高さまで拡大縮小しない。</li>
+<li>歩道が途切れる場合は、切断面の道路外縁を中心に、半径＝歩道幅の四分円の扇形を作る。縁石を道路外側へ90度回し、幅をゼロに絞った尖端にはしない。本線の歩道を別距離で後退させない。壁・中央分離帯の片側終端は先細りとする。</li>
+<li>異なるプレハブ間では開始側の形状を使用し、高さを相手側のbounds高さへ補間する。異なる装飾や断面トポロジーの完全な形状モーフィングは行わない。</li>
+<li>ほぼ対向する2本道路の中央分離帯は接続し、多叉交差点では各入口で先細り終端にする。</li>
+<li>2本道路の移行部では側線を接続する。中央分離帯が無い場合は車線境界の横位置を対応付け、車線数の変化を表現する。</li>
+<li>駅ホーム側の壁は生成しない。交差点内のレール通路に干渉する壁コネクタも除外する。</li>
+</ul>
+<p>生成メッシュは <code>IntersectionMeshOwner</code> が所有し、オブジェクト削除・再生成時に解放する。</p>
+<h3 id="114-線路と踏切">11.4 線路と踏切</h3>
+<p>レールの配置位置も共通断面から求める。軌道数が異なる場合は、横位置順を保つ多対一対応で実際の各軌道端へ接続する。中心線1本への置き換えは行わない。曲線端部には本線の方向と勾配を適用し、軌間は伸縮しない。</p>
+<p>転回可否は保存された論理端点の接線で判定し、切断後の描画接線とは区別する。曲線は端点制御点を優先し、折れ線は隣接アンカー方向を使う（バックエンド <code>path_end_tangent</code> と同じ）。線路とモノレールの間、LRT（222/242/303/431）と通常鉄道の間にレール接続は作らない（<code>TrackIntersectionMeshGenerator.RailsConnect</code>。<a href="#lrt付き道路222242歩行者道303">LRT付き道路</a>）。道路×線路では道路の路面材質を優先し、その上に通行可能な線路ペアのレールを配置する。線路だけのノードでの板なしの直進接続と、軌道の位置が違う線路のつなぎ目のS字は <a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">N_線路メッシュの生成</a> §4.6・§4.7 に従う。</p>
+<h3 id="115-接合距離と縮退配置">11.5 接合距離と縮退配置</h3>
+<p>切断距離は幅・進入角度・外周の移行余裕から求める。反対側にも交差点があるパスでは、各端に全長の45%までを予約して切断区間の逆転を防ぐ。反対側が終端なら95%まで使用できる。折れ線・single_spanでは次のアンカーを越えない。</p>
+<p>この範囲に入口断面が収まらず外周が自己交差する場合、<code>RequiresMoreSpace</code> として接合を見送る。無効なポリゴン修復で入口を欠落させず、古い切断情報を解除して本線を元のノードまで描く。幅に対して極端に短い枝や同方向の重複パスではパーツ同士の重なりが残り得る。</p>
+<h3 id="116-材質と検証">11.6 材質と検証</h3>
+<p>材質は道路を線路より優先し、同分類では最大variantの <code>body_material</code>、bodyプレハブ、共通路面の順に解決する。交差点を複数材質へ領域分割する処理はない。UVに依存する路面テクスチャには従来の制限が残る。頂点カラーは白（α=1）を明示する。</p>
+<p><code>unity/Tests/Intersections/run.ps1</code> はUnity生成csprojで本体をビルドしてから、実際の幾何計算を.NET上で検証する。幅・角度・枝数・長さの組合せ、入口の境界一致、入力順への非依存性、切断による内部点の保持、保存制御点の優先順位、空間不足時の安全な失敗を確認する。幅24mと3mの十字路・T字路では、回転・遠方座標・保存方向の反転を含め、太い道路の外縁の直線部分と角の接線の単調な回転を検査する。</p>
+<p><code>run-unity.ps1</code> は独立した検証用Unityで実際の描画コードとFBXを使い、傾斜三叉路の路面・付属パーツの端を本線の頂点と比較する。幅24mと3mの十字路も生成し、路面端の一致と真上からの描画画像を確認する。道路と線路の混在、複線→単線、歩道なしの折れ点の壁も検査する。全モデル・全地形・全LODを網羅するものではない。実行条件と出力先は同ディレクトリのREADMEを参照する。</p>
+<h3 id="117-高速道路の本線とランプ">11.7 高速道路の本線とランプ</h3>
+<p>高速道路（<code>PATH_MOTORWAY</code>）では本線を優先して描く。本線はランプ（<code>path_master.ramp</code>）でない高速道路、ランプは <code>ramp</code> が真のバリアントである。IC/JCTの凸包や名前ラベルには依存しない。一般道路どうしの交差点・並走には適用しない。すべて描画専用で、保存中心線・制御点・縦断・接続ノード・道路占有ポリゴン・交通容量・経路探索は変えない。</p>
+<h4 id="結合区間">結合区間</h4>
+<p>本線とランプが近接して並走・合流する区間は、一つの路面として描く（<code>RoadAdjacency</code>）。複線の線路の結合描画（§12）と同じく、各道路が自分の点列に沿って相手を探して判定する。結合する点の条件は次のとおり。</p>
+<ul>
+<li>路面の縁どうしの隙間が2m以内（<code>ROAD_MERGE_MAX_EDGE_GAP</code>。路面が重なる場合は負の隙間）</li>
+<li>向きの差が30度以内（<code>ROAD_MERGE_MAX_ANGLE_DEG</code>）</li>
+<li>高さの差が、路面が重ならず隣り合う点では1m以内、路面が重なる点では4m以内（<code>ROAD_MERGE_MAX_DY</code> / <code>ROAD_MERGE_OVERLAP_MAX_DY</code>）。重なるのはノードで接続するランプの取り付け部で、ランプの保存縦断が本線から離れていても同じ路面として扱う。</li>
+</ul>
+<p>本線は、ランプの路面が縁に隣り合う・一部重なる区間を結合区間とする。ランプの路面が本線の縁の内側へ入りきった区間は本線の路面そのものなので、本線の描画を変えない。ランプは本線の路面の内側へ入った区間も結合区間とする。</p>
+<p>結合区間では次のように描く。</p>
+<ul>
+<li>両者の間の壁（<code>wall</code>）を立てない。相手の路面が壁の位置に掛かる区間も立てない。1m未満に残る壁の断片は省く。</li>
+<li>路面の隙間は本線が舗装する（<code>RoadMergeFiller_*</code>。二重に作らないよう本線だけが生成する）。舗装は本線の路面より <code>ROAD_MERGE_SINK</code> の2倍（4cm）下げ、両側の路面の下へ0.3m潜らせる。bodyの材質を使い、標示は描かない。</li>
+<li>本線のランプ側の路側線は、結合区間だけ合流車線との境界を表す点線にする。ランプの本線側の路側線は結合区間では描かない（§8.3の区間ごとの描き分け）。</li>
+<li>路肩の設備（街灯など）は結合区間に置かない。</li>
+</ul>
+<h4 id="ランプの描画高さ">ランプの描画高さ</h4>
+<p>ランプは、結合区間の高さを本線の路面へ寄せて描く。本線は自分の縦断を保つ。<code>PathManager</code> が切断前の点列を作るとき、ランプの点列を本線と照合し、結合区間の点を「本線の路面の高さ − <code>ROAD_MERGE_SINK</code>（2cm）」に置く。本線と重なるランプの路面を本線の下へ隠し、深度の競合を避けるためである。結合区間の外は、寄せた量を滑らかに0へ戻してランプ本来の縦断へつなぐ。戻す長さは高さの差に比例させ、加わる勾配が最大4%（<code>ROAD_MERGE_MAX_ADDED_GRADE</code>）になるようにする（20〜120m）。戻しきれない短い区間は、両側の寄せ量を補間するか、道路の端で0になるよう縮める。</p>
+<p>寄せた点列は、路面・橋脚・交差点の切断断面・車両の走行位置・遠景の帯が共通に使う。寄せ先の本線が追加・変更・削除されたときは、近くのランプの点列を捨てて作り直し、ランプの両端の交差点も計算し直す。本線とランプの結合区間の描画も、相手側のデータ変更で作り直す。</p>
+<h4 id="合流ノード">合流ノード</h4>
+<p>ノードでは <code>MotorwayMergeLayout</code> が本線を判定する。稼働中の本線のうち、ノードから最も一直線に続く2本（外向き方向の内積が−0.8未満）が本線である。本線がノードで2度以内（<code>ROAD_MERGE_MAX_MAIN_BEND_DEG</code>）の折れで同じ幅に続き、本線以外の枝がすべて取り込めるランプなら、交差点の板を作らない。取り込めるランプは次をすべて満たす。</p>
+<ul>
+<li>稼働中で、近い方の本線との向きの差が30度以内</li>
+<li>本線より幅が狭い</li>
+<li>ノードからたどると、ランプの路面の外縁が本線の縁を越える位置が切断距離の上限内にある</li>
+<li>その区間で本線との高さの差が4m以内</li>
+</ul>
+<p>板を作らないノードでは、本線の2本をノードまで描いてつなぐ（切断しない）。つなぐ端では中央分離帯の端を丸めず、つなぎ目の橋脚はpath_idの小さい方だけが立てる。ランプは路面の外縁が本線の縁を越える位置で切る。そこから先のランプは本線の路面の下にあるので描かない。ランプの外縁の路側線と壁は切断位置まで続き、本線の縁の路側線・壁へ合流する。</p>
+<p>浅い角度で接続したランプは、本線との角度に応じた長さで路面が本線の縁へ絞られる。ランプを本線に沿って並走させてから接続すると、並走区間が結合区間になって合流車線の見た目になる。並走距離や絞りの長さはプレイヤーが引いたランプの形状で決まり、描画側で車線を追加しない。</p>
+<p>条件を満たさないノード（本線が折れる、角度の大きい枝・一般道路・工事中の道路が残るなど）は、全ての枝で通常の交差点の板を作る。本線があれば板の高さを本線優先にする。本線の路面の上は本線の縦断そのものの高さとし、本線の口は補間に使わない。外側は、本線の路面の縁（縁からの水平距離）と他の枝の口から補間する（§11.2）。本線が無い高速道路のノード（ランプどうしなど）は通常どおり全ての口から補間する。</p>
+<h4 id="車両">車両</h4>
+<p>取り込まれたランプから本線へ入る車両は、ランプの側に最も近い本線の車線へ入る。左右は通行側と独立に、ランプの切断位置が本線の進行方向のどちら側にあるかで決める。ランプの走行点列は切断位置で終わり、そこから本線の車線への移動は通常の交差点と同じ接続曲線で描く。一般車・乗車中の車・バスの描画だけを調整し、シミュレーターの経路探索や移動時間は変更しない。</p>
+<h4 id="検証">検証</h4>
+<p><code>unity/Tests/Intersections/run.ps1</code> は結合区間の判定（並走・離れた並走・高さの異なる隣接・重なり）、ランプの高さの寄せと戻し、合流ノードの板の有無とランプの切断位置、本線優先の板の高さを.NET上で検査する。<code>run-unity.ps1</code> は実FBXと本編生成器で、板を作らない合流ノードと切断位置、進入車線、本線優先の板、並走してから合流するランプの壁・隙間の舗装・路側線の描き分けを検査し、描画例 <code>merge-top.png</code> / <code>merge-perspective.png</code> を出力する。</p>
+<h3 id="118-交通信号機">11.8 交通信号機</h3>
+<p>交差点の信号機は描画専用の装飾で、経済・経路探索・車両や歩行者の走行には影響しない。灯火は点灯状態（現示）を持たず、車両の信号待ちもない。</p>
+<h4 id="設置条件">設置条件</h4>
+<p>ノードに接続する完成済みの道路（<code>PATH_STREET</code> / <code>PATH_MOTORWAY</code>）の腕が3本以上あり、そのうち2本以上がセンターライン（または中央分離帯）で上下線の分かれた双方向の街路であるとき、一律に設置する。センターラインの有無は §8.3 の <code>RoadLaneLayout</code> と同じ定義で、双方向・<code>lanes</code> 2以上・片側の走行帯を持つ道路が該当する（2車線道路221以上）。センターラインの無い1車線道路どうしの交差点、センターラインのある道路が1本だけで他が細街路の交差点、2本だけのつなぎ目、一方通行ばかりの交差点には置かない。工事中の腕は数えない。</p>
+<h4 id="配置">配置</h4>
+<p>車両が流入できる完成済みの道路の腕ごとに1基を置く。配置は日本式で、灯器は交差点の向こう側・通行側（左側通行なら左、右側通行なら右）に置く。</p>
+<ul>
+<li><strong>直進先の腕がある流入路</strong>: 流入方向から45度以内で最も向きの近い腕（線路は除く）を直進先とする。直進先の腕の切断面から0.5m外側の、流出方向を向いて通行側の歩道に柱を立てる。柱の軸は縁石から0.5m（歩道幅の半分が0.5m未満なら歩道の中央）で、歩道の無い腕では路端から0.5m外側の地表に立てる。アームは道路の中心側へ伸ばし、灯器を流出する向きの車線群の中央の上に吊る（双方向なら通行側の走行帯の外側境界と中央境界の中間、流出する一方通行なら道路の中央、1車線の双方向・流入専用の一方通行なら通行側の半分の中央）。</li>
+<li><strong>直進先の腕が無い流入路</strong>（T字路の突き当たりなど）: 流入車線群の中央線を延ばした先にある角の外周（§11.2）の歩道に柱を立て、灯器を流入車線群の正面に置く。アームは通行側と反対へ最短長だけ伸ばす。正面に角が無い変形交差点では、流入方向へ90度未満で最も近い腕を直進先として扱う。</li>
+<li>灯器は流入路の外向き方向（流入してくる車の側）を向く。柱の軸から灯器までは最短0.9m（灯器の半幅と柱の取付バンドの半径に余裕を足した値）。</li>
+<li>柱がいずれかの腕の車道（切断面の外側・縁石の内側）に入る配置は省く。1m未満に近い柱は1本にまとめてアームを足し、1m未満に近い灯器は重ねて描かない。</li>
+<li>柱は立てる横位置の歩道の上面（縁石ではなく歩行面）に接地する。歩道が無ければ地表に立て、高架の交差点で歩道が無ければ置かない。</li>
+</ul>
+<h4 id="モデルと描画">モデルと描画</h4>
+<p>モデルは固定名のプロップ <code>Models/Props/traffic_signal_{様式}_{pole|arm|head}</code>（<a href="../M_%E5%9C%B0%E5%BD%A2%E3%83%97%E3%83%AD%E3%83%83%E3%83%97/">地形プロップ</a> §M.5.1 の固定名モデル）で、3部品とも原点を柱の接地面の高さに揃え、取付高さはモデルが持つ。</p>
+<table>
+<thead>
+<tr>
+<th>部品</th>
+<th>規約</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pole</code></td>
+<td>柱。接地点が原点で地中へ1m延ばす。回転対称。アームの高さに取付バンドを持つ</td>
+</tr>
+<tr>
+<td><code>arm</code></td>
+<td>アーム。柱の軸（ローカルZ=-0.5）から先端（+0.5）までの単位長で、配置時に長手だけを伸縮する</td>
+</tr>
+<tr>
+<td><code>head</code></td>
+<td>灯器。吊り金具の真下の地面が原点で、表示面はローカル+Z。下端は接地面から4.5m以上</td>
+</tr>
+</tbody>
+</table>
+<p>様式は <code>TrafficSignalStyle</code> が持ち、現在は日本式（<code>jp</code>。横型3灯を左から青・黄・赤、片持ちアーム）に固定している。アームは柱の軸から灯器の外側の端まで伸ばす。</p>
+<p><code>TrafficSignalLayout</code> は交差点メッシュの生成（<code>RoadIntersectionMeshGenerator</code>）と同じ切断断面・外周・歩道のセットバックから配置を求め、<code>NodeMeshResult.TrafficSignals</code> で返す。<code>PathManager</code> は交差点の板の更新時に <code>TrafficSignalBuilder</code> で <code>NodeMesh_*</code> の子 <code>Signals</code> を作り直す。全信号機の部品を材質ごとのサブメッシュへ焼き込んだ1メッシュで、1基ごとのGameObjectやColliderは作らない。交差点の再生成・非表示・破棄に従い、入力は交差点の入力署名（接続道路の版・状態、左右通行、地形）に含まれる。材質は <code>RoadPath.GetOrCreateRoadMaterial</code> の共有プールを使う。遠景では道路の付帯設備と同じく省き、LODGroupで交差点の信号機群の投影比が建物の遠景降格と同じ0.03を下回ると描かない。</p>
+<p><code>unity/Tests/TrafficSignals/run.ps1</code> は独立したUnityで実FBXと本編生成器を使い、設置条件（置く11配置・置かない5配置）、左右通行、灯器の車線上の位置と向き、柱の接地と車道外への設置、灯器の下端高さ、結合メッシュの頂点数・材質・LODを検査し、交差点の俯瞰と運転席視点の画像を出力する。</p>
+<hr />
+<h2 id="12-線路モノレールtrackpath">12. 線路・モノレール（TrackPath）</h2>
+<p>線路（PATH_TRACK）とモノレール（PATH_MONORAIL）は、RoadPath と同じスプライン + SplineMesh + プレハブパーツ方式の専用ジェネレータ <strong>TrackPath</strong> で生成される。パーツ構成（道床・軌道・架線・架線柱など）、軌道オフセットの導出、ポイント（分岐器）の表現は <a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">N_線路メッシュの生成</a> を参照。</p>
+<hr />
+<h2 id="13-パラメータ一覧">13. パラメータ一覧</h2>
+<h3 id="131-pathsummary-の主要フィールド">13.1 PathSummary の主要フィールド</h3>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path_id</code></td>
+<td>int</td>
+<td>パスの一意識別子</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>パスの名称</td>
+</tr>
+<tr>
+<td><code>path_type</code></td>
+<td>int</td>
+<td>パスの種類（0: 仮想, 1: 街路, 2: 高速道路, 3: 歩道, 4: 線路, 5: モノレール, 6: 人員搬送（ロープウェイ等）, 10: 公共交通, 11: 送電線, 12: 導水管, 20: 駅舎）</td>
+</tr>
+<tr>
+<td><code>path_variant</code></td>
+<td>int</td>
+<td>パスのバリアント</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>int</td>
+<td>パスの状態</td>
+</tr>
+<tr>
+<td><code>start_point</code></td>
+<td>List\&lt;object&gt;</td>
+<td>始点座標</td>
+</tr>
+<tr>
+<td><code>end_point</code></td>
+<td>List\&lt;object&gt;</td>
+<td>終点座標</td>
+</tr>
+<tr>
+<td><code>waypoints</code></td>
+<td>List\&lt;object&gt;</td>
+<td>ウェイポイント配列（position, control_in, control_out を持つ）</td>
+</tr>
+<tr>
+<td><code>polygon</code></td>
+<td>List\&lt;object&gt;</td>
+<td>道路の占有ポリゴン（衝突判定用）</td>
+</tr>
+<tr>
+<td><code>center_point</code></td>
+<td>List\&lt;object&gt;</td>
+<td>パスの代表点</td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td>float</td>
+<td>道路幅（マスターデータで上書き可能）</td>
+</tr>
+<tr>
+<td><code>start_node_id</code></td>
+<td>int</td>
+<td>始点側のノードID</td>
+</tr>
+<tr>
+<td><code>end_node_id</code></td>
+<td>int</td>
+<td>終点側のノードID</td>
+</tr>
+<tr>
+<td><code>noise</code></td>
+<td>float</td>
+<td>騒音値</td>
+</tr>
+<tr>
+<td><code>durability</code></td>
+<td>float</td>
+<td>耐久度</td>
+</tr>
+</tbody>
+</table>
+<h3 id="132-pathmasteritem-の主要フィールド">13.2 PathMasterItem の主要フィールド</h3>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>int</td>
+<td>バリアント識別子</td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td>float</td>
+<td>道路の全幅（m）</td>
+</tr>
+<tr>
+<td><code>sidewalk_width</code></td>
+<td>float?</td>
+<td>歩道の幅（m）。null の場合はデフォルト値</td>
+</tr>
+<tr>
+<td><code>side_width</code></td>
+<td>float?</td>
+<td>区画線の幅（m）。null の場合はデフォルト値</td>
+</tr>
+<tr>
+<td><code>tree_spacing</code></td>
+<td>float?</td>
+<td>街路樹の標準間隔（m）。null/0なら20m。設置有無はPathのstreet_tree_type</td>
+</tr>
+<tr>
+<td><code>wall_width</code></td>
+<td>float?</td>
+<td>防音壁・ガードレールの幅（m）。null の場合は配置なし</td>
+</tr>
+<tr>
+<td><code>center_width</code></td>
+<td>float?</td>
+<td>中央分離帯の幅（m）。null の場合は配置なし</td>
+</tr>
+<tr>
+<td><code>pillar_spacing</code></td>
+<td>float?</td>
+<td>柱の配置間隔（m）。null の場合は配置なし</td>
+</tr>
+<tr>
+<td><code>lanes</code></td>
+<td>int?</td>
+<td>車線数。線路・モノレールでは1本のパスが持つ軌道数を意味する（通常の線路は1で、複線は単線パスを並べる。LRT専用軌道431は2）。LRT付き道路222/242では車線数のままで、軌道は内側の車線に埋め込まれる</td>
+</tr>
+<tr>
+<td><code>wire_spacing</code></td>
+<td>float?</td>
+<td>線路の架線柱の設置間隔（m）。null の場合は非電化（架線・架線柱なし）</td>
+</tr>
+<tr>
+<td><code>max_span</code></td>
+<td>float?</td>
+<td>1区画の最大長（m）。null の場合は制限なし</td>
+</tr>
+<tr>
+<td><code>height_editable</code></td>
+<td>bool?</td>
+<td>高さが編集可能か。true の場合は柱を配置する。地上/高架/地下はバリアントではなくアンカーの相対Yで決まる</td>
+</tr>
+<tr>
+<td><code>min_height</code></td>
+<td>float?</td>
+<td>許容最小高さ（m）。負の値を持つバリアントだけが地下（相対Y&lt;0）に建設できる。null は 0（地下禁止）扱い</td>
+</tr>
+<tr>
+<td><code>base_height</code></td>
+<td>float?</td>
+<td>3D描画用の高さオフセット(m)。パスのrelYからこの値を引いた高さで3Dメッシュを描画する。バックエンドロジック・交差判定には影響しない。null は 0m 扱い</td>
+</tr>
+<tr>
+<td><code>single_span</code></td>
+<td>bool?</td>
+<td>bodyを地形追従で曲率適応タイルごとに細分化配置せず、アンカー点(柱)間を1枚のbody引き延ばしで接ぐか。高架高架橋や桁橋のように路面が地形の起伏に関わらず支柱間で水平に架かる構造物で使う。true の場合、bodyはアンカー点間の直線スパンになる（地形に追従しない）。null は false 扱い（従来の地形追従細分化配置）</td>
+</tr>
+<tr>
+<td><code>follow_terrain</code></td>
+<td>bool?</td>
+<td>スパン（アンカー間区間）が地形追従するか。false のバリアント（桁橋など）は relY=0 のスパンでも地形に吸着せず、アンカー絶対標高のみからの補間で水平デッキを構成する。バックエンドの交差判定（絶対標高比較のトリガー）も同じフラグを参照する。<code>height_editable: true</code> のバリアントにのみ設定すること。null は true（従来の地形追従）扱い。詳細は<a href="../J_%E3%83%91%E3%82%B9%E3%81%AE%E4%BA%A4%E5%B7%AE%E5%87%A6%E7%90%86/">J_パスの交差処理</a></td>
+</tr>
+<tr>
+<td><code>model_type</code></td>
+<td>string</td>
+<td>メッシュ生成器の種別。<code>"default"</code> → RoadPath、<code>"track"</code> → TrackPath、<code>"none"</code> → メッシュ生成なし。未設定は <code>"default"</code> 扱い</td>
+</tr>
+<tr>
+<td><code>body_material</code></td>
+<td>string</td>
+<td>路面を代表するマテリアル名（<code>Assets/Resources/</code> 直下の <code>.mat</code> 名）。交差点アスファルトが接続道路の路面に合わせて代表材質を決めるために参照する（§11.6）。null は指定なし扱いで、body プレハブのマテリアルから解決する</td>
+</tr>
+<tr>
+<td><code>curve_allowed</code></td>
+<td>bool?</td>
+<td>カーブ（曲線）敷設を許可するか。false の場合、UI で直線/曲線トグルが非表示になり直線のみになる。null は true（カーブ可）扱い</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>int</td>
+<td>バリアントが属するパスタイプ。フォールバック先の決定に使用</td>
+</tr>
+<tr>
+<td><code>display_name</code></td>
+<td>string</td>
+<td>表示名称</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>説明文</td>
+</tr>
+</tbody>
+</table>
+<h3 id="133-pathwaypoint-のフィールド">13.3 PathWaypoint のフィールド</h3>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>position</code></td>
+<td>float[]</td>
+<td>アンカー点の座標 [x, y, z]</td>
+</tr>
+<tr>
+<td><code>control_in</code></td>
+<td>float[]</td>
+<td>入口制御点（アンカー点に向かう方向の制御点）</td>
+</tr>
+<tr>
+<td><code>control_out</code></td>
+<td>float[]</td>
+<td>出口制御点（アンカー点から出る方向の制御点）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="134-pathmeshresult-のプロパティ">13.4 PathMeshResult のプロパティ</h3>
+<table>
+<thead>
+<tr>
+<th>プロパティ</th>
+<th>型</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Mesh</code></td>
+<td>Mesh</td>
+<td>コライダー用のストリップメッシュ</td>
+</tr>
+<tr>
+<td><code>ModulesCreated</code></td>
+<td>bool</td>
+<td>SplineMesh による視覚パーツが生成されたか</td>
+</tr>
+<tr>
+<td><code>GeneratedObject</code></td>
+<td>GameObject</td>
+<td>生成された道路パーツのルートコンテナ</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-max_span-バリデーション">14. max_span バリデーション</h2>
+<h3 id="141-概要">14.1 概要</h3>
+<p>始点・終点・ウェイポイント間の1区画のうち、<strong>非追従スパン</strong>（両端の相対Yがともに0ではない区画、または実効非追従パスの全区画）の長さが <code>max_span</code> を超えないように制限する。これは柱（pillar）や桁で支える構造上の制約であり、地形に張り付く地表スパンには掛からない。</p>
+<h3 id="142-計算方法">14.2 計算方法</h3>
+<p>バリデーションでは<strong>水平距離（XZ平面）</strong>を計算する。高さ方向（Y軸）の差分は距離計算に含めない。曲線の長さは考慮せず、アンカー点間の直線距離で判定する。</p>
+<h3 id="143-フロントエンドunity">14.3 フロントエンド（Unity）</h3>
+<p>道路エディタ（<code>RoadPlanManager</code>）では、ユーザーがポイントを移動した時点でリアルタイムに <code>max_span</code> をチェックする。<code>max_span</code> を超えるセグメントが存在する場合は以下のフィードバックを行う。</p>
+<ul>
+<li><strong>視覚的フィードバック</strong>: 違反セグメントを赤色の太線でハイライトする</li>
+<li><strong>テキスト警告</strong>: 画面上部に「セグメントの長さが制限を超えています（最大 {max_span}m）」という赤色のテキストを表示する</li>
+</ul>
+<h3 id="144-バックエンドpython">14.4 バックエンド（Python）</h3>
+<p>パスの作成（<code>POST /api/v1/paths</code>）と更新（<code>PATCH /api/v1/paths/{path_id}</code>）時に <code>max_span</code> バリデーションを行う（<code>crud_paths._validate_max_span</code>。非追従スパンのみ）。</p>
+<p>バリデーションに失敗した場合は <code>ValidationError</code> を発生させ、エラーメッセージには超過しているセグメントのインデックスと長さを含める。</p>
+<hr />
+<h2 id="15-工事中status_constructingのパス表示">15. 工事中（STATUS_CONSTRUCTING）のパス表示</h2>
+<p><code>PathManager.GenerateConstructingPathMesh</code> は <code>ConstructionPathBuilder</code> に施工表示を委譲する。道路・線路は、取得済みの建設進捗に応じて始点から終点へ施工が進む。交通の通行方向やカメラの向きには依存しない。<code>model_type=none</code> は工事中も描画しない。</p>
+<h3 id="151-地上道路線路">15.1 地上道路・線路</h3>
+<p>全長の累積距離に進捗率を掛けた位置を施工先端とする。先端までには完成モデルのbodyと歩道、線路なら道床と実寸軌道を敷き、先端より先だけに土を残す。点列の途中で境界を補間するので、アンカー数やセグメント長が不均一でも施工速度は長さ基準で一定になる。施工済み区間には道路・線路とも完成時の配置条件に従って<code>wall</code>も置く。線路は<code>TrackPath.CreateConstructionParts</code>を通し、完成時と共通の区間判定で地表の<code>body</code>/<code>track</code>と高架の<code>body_elevated</code>/<code>track_elevated</code>（未配置なら無印へフォールバック）を使い分ける。線路のwallは高架区間のみとし、隣接線路との結合側・ホーム側の省略条件も完成時と共通にする。区画線・中央分離帯・街路樹・架線などの仕上げ設備は、稼働状態へ移ったときに通常生成器が配置する。</p>
+<p>舗装機は先端側、ローラーは施工済み側、ショベルはその先の土工側へ実寸で配置する。車両は毎フレーム動かさず、進捗を取得した時点の位置に固定する。短い経路では端へ押し込んで車両を重ねず、収まる車両だけを置く。狭幅の経路とFar表示には車両を置かない。</p>
+<h3 id="152-高架道路高架線路">15.2 高架道路・高架線路</h3>
+<p><code>height_editable</code> と正の <code>pillar_spacing</code> を持ち、相対高さが正の区間を含む経路が対象。地形追従する地上道路を、描画上の浮かせ量だけで高架と判定しない。高架と地上をつなぐランプを含む1本のパスは、高架側の施工段階に従う。</p>
+<table>
+<thead>
+<tr>
+<th>進捗</th>
+<th>表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0〜25%</td>
+<td>始点から順に橋脚を建てる。施工中の1本は接地位置を固定して高さを伸ばす。0%では何も表示しない</td>
+</tr>
+<tr>
+<td>25〜90%</td>
+<td>橋脚は完成状態で、始点から橋脚間の桁を順番に載せる</td>
+</tr>
+<tr>
+<td>90〜100%</td>
+<td>仕上げ期間。橋脚・橋桁・工事車両の見た目と配置を固定する</td>
+</tr>
+</tbody>
+</table>
+<p>橋脚モデルの著作高さでスケールを正規化し、柱の下端を地表に合わせる。1mとは限らない実寸モデルを、そのまま必要高さ倍して地中へ突き抜けさせない。橋脚候補、完成高さ、キャップ、周辺道路との干渉判定は完成時の <code>RoadPath.GeneratePillars</code> と同じ内部処理を使う。干渉で除外された位置には施工中も柱を置かない。進捗を柱の本数へ割り当てるため、候補を進行順に並べ、未着手の施工単位は非アクティブにする。高架の下には施工用の土を生成しない。</p>
+<p>桁は有効な橋脚と両端の橋台を区切りとした単位で架設し、区間の途中に桁端を浮かせない。single_spanの一体モデルも支持点間ごとに生成し、複数のアンカー区間を1枚に引き伸ばさない。橋脚の施工中はショベルをパス中心線上の地表に置く。架設段階は移動式クレーンとショベルを架設済みの路面上へ置き、路面の高さと勾配に合わせる。配置基準は連続的な進捗位置ではなく、橋脚間の施工単位で確定した桁端とする。車両の実寸に基づいて桁端と先行車両から余白を確保し、架設済み区間や道路幅に収まらない車両は表示しない。桁がまだ無い場合も車両は表示しない。道路幅の外への横オフセットは加えない。90%以降は配置を固定し、稼働状態へ移った際に撤去する。</p>
+<h3 id="153-土の形状と材質">15.3 土の形状と材質</h3>
+<p><code>ConstructionMeshUtil.BuildDirtStripMesh</code> は、幅に1mの余白を加え、左右別の低周波ノイズで輪郭を揺らす。断面は地表の外縁と内側の盛り土からなる台形で、横断方向の各頂点で地形標高を取得する。地形の横断勾配があっても片側の縁が浮かない。多オクターブの <code>DirtNoise</code> で高さを変え、共有頂点から法線を計算する。</p>
+<p>道路工事専用の <code>Resources/ConstructionPathDirt.mat</code> は、既存の <code>Custom/PathDirt</code> を使う。茶色の土の色むら、砂利、粗い表面の微細法線をワールドXZ座標から生成し、頂点カラーのα（中核1・外端0）で縁だけを侵食する。ForwardLit・ShadowCaster・DepthOnly・DepthNormalsは同じ切り抜きを共有する。既存の建物用土マテリアルは変更しない。</p>
+<h3 id="154-トンネル遠景クリック">15.4 トンネル・遠景・クリック</h3>
+<p>地下区間の除外と坑口は完成時の <code>TunnelSectionUtil</code> と共通。進捗は地下部分を含む経路全体で計算し、施工済み区間と土工区間をそれぞれ可視区間へ切り分ける。深いトンネル内部やその地上には車両を置かない。</p>
+<p>クリック用メッシュは土と施工済み面を結合する。高架は0%でも選択できるよう、非表示の設計面の当たり判定を保持する。全長が深いトンネルで見える面が無い場合は空の表示を返す。Farはモデルを読み込まず、施工済み面と土の帯だけで進捗を示す。高架のFarでは橋脚と桁単位の離散化を省き、25〜90%の間に帯を連続的に伸ばし、90%以降は固定する。高架のFarにも土は生成しない。地下パスのFar非表示は完成時と同じ。</p>
+<p>交差点自体の生成は通常のままで、工事中でも交差点の舗装が見える。施工の段階表示はパス本線に適用する。</p>
+<h3 id="155-進捗の取得とキャッシュ">15.5 進捗の取得とキャッシュ</h3>
+<p><code>GET /paths/</code> の各項目に <code>construction_progress</code>（0〜100、未設定はnull）を描画拡張として付ける。計算式は詳細画面と共通の取得済み建設体積÷必要体積。Unityの独自 <code>ConstructionPathSummary</code> が自動生成型を継承して受け取る。生成済みスキーマやマスターデータを手で編集しない。</p>
+<p><code>PathManager</code> は一覧取得前後の進捗も比較し、形状versionが同じでも施工表示を再生成する。再利用キーにも進捗を含め、地形追従の再開記録を無効化する。単体の <code>FetchPath</code> も同じ拡張型を使う。進捗は0〜1へ正規化し、null・非数は0、不正な範囲はクランプする。statusが稼働へ変わると通常の完成メッシュへ戻る。</p>
+<h3 id="156-工事車両の制作と検証">15.6 工事車両の制作と検証</h3>
+<p>コレクションとFBXの名前は <code>construction_paver</code> / <code>construction_roller</code> / <code>construction_excavator</code> / <code>construction_crane</code>。配置原点は接地0・水平中心、Unityの+Zが前方。既存の車両用材質と黄色塗装を共有する。施工表示は固定名で読むが、飾りとして自由に置けるよう数値ID 201〜204 の別名FBX(メッシュ共有)も <code>prop_master</code> に登録している(<a href="../M_%E5%9C%B0%E5%BD%A2%E3%83%97%E3%83%AD%E3%83%83%E3%83%97/">地形プロップ</a> §M.7.2)。</p>
+<p><code>library.py export --category props --only construction_</code> で書き出し、Propsバリデータと <code>build_gallery.py --only construction_</code> を実行する。Unityへのミラーは <code>ModelPrefabGenerator</code> が生成する。<code>unity/Tests/ConstructionPaths/run-unity.ps1</code> は実FBXとURP材質で0・12.5・25・57.5・90・99・100%の描画、曲線、地下、クリック面、進捗の受信とキャッシュキーを検証する。橋脚の干渉回帰は <code>unity/Tests/Pillars/run-unity.ps1</code>。</p>
+<hr />
+<h2 id="16-未舗装路の路面表現custompathdirt">16. 未舗装路の路面表現（Custom/PathDirt）</h2>
+<p>未舗装路（<code>path_variant</code> 201）の body は、舗装路のような「端までベタ塗りの帯」ではなく、<strong>地面に踏み固められた土の道</strong>として描く。テクスチャは使わず、ワールドXZ座標の手続きノイズと頂点カラーだけで表現する。</p>
+<ul>
+<li>シェーダー定義: <code>Assets/Resources/Shaders/PathDirt.shader</code>（パス構成）</li>
+<li>本体: <code>Assets/Shaders/PathDirt.hlsl</code>（シェーディング）</li>
+<li>マテリアル: <code>Assets/Resources/PATH_SAND.mat</code></li>
+</ul>
+<h3 id="161-3つの層">16.1 3つの層</h3>
+<table>
+<thead>
+<tr>
+<th>層</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>土の色ムラ</td>
+<td>大スケールの fbm で主色↔副色を混ぜ、細スケールの fbm で明るい砂利の斑を散らす</td>
+</tr>
+<tr>
+<td>細かい凹凸</td>
+<td>同じ細スケールノイズの勾配で法線を微小に傾け、平面のノッペリ感を消す</td>
+</tr>
+<tr>
+<td>縁の侵食</td>
+<td>頂点カラーのアルファを縁マスクとして、ワールド座標のノイズでアルファクリップし、路肩をギザギザに溶かす</td>
+</tr>
+</tbody>
+</table>
+<p>ノイズの入力はすべてワールドXZ座標なので、<strong>UV・タイリング・頂点密度に依存しない</strong>。SplineMesh の Extrude はタイル（曲率適応、1〜8m。§4.3）ごとに UV を繰り返すため、UV ベースの模様だとタイル周期の反復が目に見える。</p>
+<h3 id="162-頂点カラーの規約モデル側の契約">16.2 頂点カラーの規約（モデル側の契約）</h3>
+<p>body プレハブは、路面の外側に<strong>下向きに垂れる「なじませスカート」</strong>を持ち、その頂点にアルファを塗る。</p>
+<table>
+<thead>
+<tr>
+<th>頂点カラーのα</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>路面の中核。絶対に抜けない</td>
+</tr>
+<tr>
+<td>0.0</td>
+<td>スカートの外端。ほぼ完全に抜ける</td>
+</tr>
+<tr>
+<td>中間</td>
+<td>スカートを横断する線形グラデーション</td>
+</tr>
+</tbody>
+</table>
+<p>路面上面は地形+0.2m（§4.4 / <code>RoadPartHeights</code>）にあるため、スカートの外端をローカルY −0.3m 程度まで垂らすと平地でも確実に地形へ潜る。これにより<strong>見える境界が「スカートと地形の交線」</strong>になって直線でなくなり、その上にノイズの侵食が乗って砂利が草に食われるような縁になる。</p>
+<p>Dreamteck の SplineMesh は元メッシュの頂点カラーをそのまま出力へ透過するため（<code>SplineMesh.cs</code> のチャンネル書き込み）、Extrude されたタイル列でも規約が保たれる。</p>
+<p>body の公称幅は最上面の幅（§4.4）であり、下向きのスカートや桁の張り出しは含めない。スカートを広げても路面幅は変わらない。</p>
+<h3 id="163-アルファブレンドではなくクリップである理由">16.3 アルファブレンドではなくクリップである理由</h3>
+<p>路面は地形から浮いた板なので、半透明にすると板の下の隙間が透ける。クリップ（cutout）なら抜けた部分は地形がそのまま見えるだけで済み、<strong>不透明キューのままなので <code>GetOrCreateRoadMaterial</code> の renderQueue 補正や ZWrite の前提も壊れない</strong>。キューは <code>AlphaTest</code>（RenderType は <code>TransparentCutout</code>）。</p>
+<h3 id="164-パス構成と切り抜きの一貫性">16.4 パス構成と切り抜きの一貫性</h3>
+<p>ForwardLit / ShadowCaster / DepthOnly / <strong>DepthNormals</strong> の4パス構成。DepthNormals は <code>PC_Renderer</code> の SSAO（Source = DepthNormals）が前段パスとして要求するため必須で、省くと未舗装路だけ SSAO と深度テクスチャから抜け落ちる（水面シェーダーの深度参照にも影響する）。</p>
+<p><strong>全パスが同じ切り抜き関数（<code>PathDirtClip</code>）を通る。</strong> パスごとに輪郭が食い違うと、抜けたはずの路肩が影や SSAO に残る。</p>
+<h3 id="165-遠景でのチラつき対策">16.5 遠景でのチラつき対策</h3>
+<p>プロジェクトは MSAA 無効（<code>PC_RPAsset</code>）のため、クリップ境界はアンチエイリアスされない。遠景ではノイズの粒がピクセル以下になってチラつくので、カメラ距離に応じて<strong>ノイズを平均値（0.5）へ寄せて</strong>縁を滑らかな線に戻す（<code>_EdgeDetailFadeDistance</code>）。侵食量そのものを0へ戻すのではなく平均へ寄せるため、<strong>縁の平均位置が変わらず、遠近で道路幅が太った／痩せたように見えるポップが起きない</strong>。</p>
+<h3 id="166-適用範囲の制限">16.6 適用範囲の制限</h3>
+<p><strong>このシェーダーは規約どおりに頂点カラーを持つメッシュ専用</strong>で、他の道路 body へ流用してはいけない（頂点カラーのない body に適用すると縁マスクが不定になる）。</p>
+<p>交差点ポリゴン（§11）はこのマテリアルを共有しうる（未舗装路と舗装路が接続するノードでは variant 番号が大きい未舗装路側が代表に選ばれ、そのマスターの <code>body_material</code>＝<code>PATH_SAND</code> が交差点にも適用される）。<code>ConvertGeometryToMesh</code> は依存を明示するため<strong>白（α=1＝侵食なし）を明示設定する</strong>。既定値に依存すると交差点が丸ごと切り抜かれて消える事故になりうる。</p>
+<p>maxTileLengthを0以下にして著作周期を保つ連続パーツは、頂点数上限時に整数タイル単位で別SplineMeshへ分割する。区間全体のタイル数を減らして造形を引き伸ばさない。通常の道路用タイル上限やsingle_spanにはこの分割を適用しない。</p>
+<h3 id="計画表示と非同期区間生成の同期">計画表示と非同期区間生成の同期</h3>
+<h4 id="敷設形状編集時のプレビュー">敷設・形状編集時のプレビュー</h4>
+<p>敷設中は、配置済みアンカーまでを詳細メッシュで保持し、最後のアンカーからカーソルまでを軽量な帯で表示する。曲線モードではホバーを仮終点としてCatmull-Rom接線を計算し、直前の1区間とホバー区間をベジエ曲線の帯で表示する。それより前の詳細区間はホバー移動だけでは再生成しない。打点時にも自動制御点を更新するため、配置済み区間が折れ線へ戻ることはない。打点によって形状が更新された詳細区間は、本番と同じ生成器で作り直す。</p>
+<p>形状編集のドラッグ中は、変更の影響を受ける区間だけを帯にする。直線のアンカーと曲線の制御点は両隣、曲線アンカーは隣接アンカーの自動接線まで変わるため前後2区間を対象とする。影響範囲の前後は詳細表示を保持し、ドラッグ終了時に全体の詳細表示へ戻す。</p>
+<p><code>RoadRenderer.Sections.cs</code> が3つの表示を独立して管理する。帯のMeshと出力バッファを再利用し、道路幅・複線オフセット・ホームの設置側と高さを表示する。柱・柵・架線などの細部は詳細表示で確認する。地形追従する直線とホバー区間は約2m間隔で標高と盛土を反映し、高架・非追従区間は設計高さを補間する。曲線区間は制御点から再標本化し、制御多角形長を基準に約2m間隔・最低16分割・最大4096分割で帯を構築する。手動制御点は維持し、ホバー用の制御点は保存データへ書き込まない。これらは表示専用の処理であり、保存するアンカー・制御点と干渉判定の形状を変更しない。</p>
+<p>プレビューの点列は設計空間（地面＋設計相対高さ＋盛土）で保持し、<code>base_height</code> を持つパス（送電線）は生成器へ渡す直前と帯の頂点で <code>base_height</code> を引く。確定後の描画と同じ位置に出るため、送電線は地面の鉄塔として表示される。地形追従区間の判定も、設計相対高さが標準の敷設高さ（<code>base_height</code>）に一致するかで行う。ウェイポイントは確定後のパス要約と同じ <code>{position: [x, 相対Y, z]}</code> の辞書で詰める。素の配列は読み取られず捨てられるため、アンカーから経路を組む送電線が始点と終点を結ぶ直線になってしまう。</p>
+<p>線路のプレビューは、確定済みの形（敷設中は仮終点を除いたアンカーまで）を完成前の仮の相手として既存線路の描画に参加させ、既存線路は一時的に形を変えてプレビューとつながる（<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">N_線路メッシュの生成</a> §8.5）。登録は詳細表示を作る前に行い、ドラッグ中は更新しない。</p>
+<p>詳細化は打点・ドラッグ終了時に同期的に行うため、長い計画の詳細生成時には負荷が残る。保持・解除・復帰の回帰検証は <code>unity/Tests/RoadPreview/run-unity.ps1</code> で実行できる。送電線のプレビューが地面に載り、置いたウェイポイントすべてに鉄塔が立つことも同じ検証に含む。</p>
+<p>設置後のパスは、Renderer収集と統計値の設定を済ませてからステータス表示を適用する。<code>SplinePartLod</code> が後から生成・復元する区間にも、表示するフレームで <code>VisualModeObject.RefreshMaterials()</code> を適用する。既存Rendererの元マテリアルを保持し、白い計画表示を復元用の材質として再記録しない。</p>
+<p>パスの再利用キーにはstatusを含め、一覧のversionが同じでも表示中オブジェクトとstatusが異なれば再生成する。エポック後のデータ取得で着工・完成を検出した際も、カメラ移動なしで更新する。固定区間は共通フレーム予算内で生成を進め、完成した新パスへ旧表示から一括で切り替える。通信・メッシュ生成に必要な時間はかかるが、区間ごとに固定の1フレーム待ちは入れない。</p>
+<p>区間の切り出し（PathDrawContext.SlicePolylineByFraction）は、境界の重複頂点と浮動小数点誤差による0.1mm未満の連続点を統合する。ゼロ長の終端接線でSplineMeshの断面が回転し、施工先端から舗装が張り出すことを防ぐ。</p>
+<h3 id="301の石畳テクスチャ">301の石畳テクスチャ</h3>
+<p>ambientCGのPaving Stones 033（CC0）の色・NormalGL画像を使用する。PATH_PAVING_STONEとCustom/PathPavingが上面を描画し、石の形状やディスプレイスメントは生成しない。ワールドXZへ2m周期で投影するため、道路タイルの伸縮・回転・分割で石の大きさが変わらない。石の配列方向はワールド方向に固定され、道路に沿って回転しない。通常・接写は同じ単純なメッシュである。ForwardLitとDepthNormalsのUV・接線を揃え、標準のShadowCaster・DepthOnlyを併用する。色画像はsRGB、法線画像はNormalMap、Repeatとミップマップを有効にし最大1024px・異方性4で取り込む。Tests/Paving/run-unity.ps1が回転前後の画素一致、法線マップの効果、FBXの12三角形、各描画パスを検証する。素材の出所はゲーム内クレジットとAssets/Models/Paths/Textures/PAVING_STONE_SOURCE.mdに記録する。</p>
+<h2 id="ケーブル接続部の描画">ケーブル接続部の描画</h2>
+<p>ロープウェイ（PATH_CONVEYOR）とインフラパス（送電線 PATH_ELECTRICITY・導水管 PATH_WATER・パイプライン PATH_PIPELINE）は路面を持たないため、道路交差点の充填メッシュと切断断面の生成対象から除外する。ウェイポイントの折れ点と駅を含む実ノードの接続点の両方で適用し、ケーブルのスパンは元のアンカー位置まで描画する。支柱・ケーブル・駅設備のモデルは通常のパス生成で配置する。</p>
+<h2 id="施設への接続">施設への接続</h2>
+<p><code>RoadAccessPlan</code> は <code>BuildingRoadAccessIndex</code> に登録された施設側の開口を、道路の左右別の弧長区間へ変換する。道路の生成が先でも、後から届いた建物の登録通知で再生成する。一般道路（PATH_STREET）の稼働中の区間が対象で、車線・中央分離帯・交通グラフは維持する。</p>
+<p>間口から敷地外向きに投影し、幅全体が同じ側の道路外縁に6m以内で届く場合に接続する。約1m刻みで、道路に向き合うこと、投影が折り返さないこと、舗装高の差が−0.03〜0.8mに収まることを検査する。交差点用に切断済みの道路を使い、道路端をまたぐ開口・交差点内部の開口は作らない。高速道路・線路や、大きな高低差のある道路へは接続しない。</p>
+<p>接続側の歩道・壁・旧式の路側線メッシュを区間で分割し、手続き路側線にも同じ非表示区間を渡す。交差点の歩道セットバックと開口の両方を適用する。街路樹・街灯・電柱・設備箱・ベンチ等は占有幅を考慮して省き、柵は開口をまたぐパネルも省く。反対側の歩道や設備、中央の樹木は残る。</p>
+<p>歩道を除いた部分の路面には既存のbodyを使う。追加の <code>BuildingAccessSurface</code> は道路外縁から間口までと、敷地内2mまでのすり付け部分だけを描く。ロータリーでは敷地内の実舗装形状でクリップし、既成建物と港の施設モジュールではモデルの間口の内側を使う。路面高から施設本来の舗装高へ補間する。施設より道路が低い段差は、既存施設の舗装の下へ潜るため許容値を超えると接続しない。接続面は描画専用で、選択コライダーは追加しない。</p>
+<p>開口索引は建物の描画LODに依存しない。<code>PathManager</code> は建物更新の前後の開口に近い道路をデータのセル逆引きで抽出し、中心線との距離で絞ってから <code>geometryRevisions</code> を進め、既存の再生成キューへ送る。退避中の道路も古いLODキャッシュを復元しない。建物削除・解体開始では元の歩道へ戻り、全消去では索引を消す。</p>
+<p>実FBXによる接続形状・片側の歩道と樹木・曲線・道路方向反転・高架除外・LODと登録削除の回帰検証は <code>unity/Tests/BuildingAccess/run.ps1</code>。接続点の定義は <a href="../F_%E5%BB%BA%E7%89%A9%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">F_建物メッシュの生成</a> §16、モデルの著作は <a href="../I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/#8-既成建物の道路間口マーカー">道路間口マーカー</a>。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  ページトップへ戻る
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="フッター" >
+        
+          
+          <a href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-footer__link md-footer__link--prev" aria-label="前: 露天掘り">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                前
+              </span>
+              <div class="md-ellipsis">
+                露天掘り
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../H_%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E3%83%87%E3%83%BC%E3%82%BF%E3%83%AD%E3%83%BC%E3%83%89/" class="md-footer__link md-footer__link--next" aria-label="次: バックエンドデータロード">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                次
+              </span>
+              <div class="md-ellipsis">
+                バックエンドデータロード
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/satken2/city-genesis" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

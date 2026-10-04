@@ -1,0 +1,5308 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="City Genesis - 都市建造経済シミュレーションゲームの設計ドキュメント">
+      
+      
+      
+        <link rel="canonical" href="https://city-genesis-docs.pages.dev/geometries/F_%E5%BB%BA%E7%89%A9%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">
+      
+      
+        <link rel="prev" href="../E_LOD%E5%87%A6%E7%90%86/">
+      
+      
+        <link rel="next" href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="ja">
+        
+          <link rel="alternate" href="../../en/geometries/F_%E5%BB%BA%E7%89%A9%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>共通仕様 - City Genesis Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+JP:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans JP";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#建物メッシュの生成" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href="../.." title="City Genesis Docs" class="md-header__button md-logo" aria-label="City Genesis Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            City Genesis Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              共通仕様
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="ダークモードに切り替え"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="ダークモードに切り替え" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="ライトモードに切り替え"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="ライトモードに切り替え" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="言語切り替え">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../en/geometries/F_%E5%BB%BA%E7%89%A9%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="検索" placeholder="検索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="検索">
+        
+        <button type="reset" class="md-search__icon md-icon" title="クリア" aria-label="クリア" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            検索を初期化
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/satken2/city-genesis" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="タブ" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  ホーム
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../economics/1_%E5%85%A8%E4%BD%93%E6%A6%82%E8%A6%81/" class="md-tabs__link">
+          
+  
+  
+  経済シミュレーション
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/" class="md-tabs__link">
+          
+  
+  
+  幾何・グラフィック
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../programs/%E9%83%BD%E5%B8%82%E3%83%9E%E3%83%83%E3%83%97%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E7%B5%8C%E8%B7%AF%E6%A1%88%E5%86%85/" class="md-tabs__link">
+          
+  
+  
+  プログラム連携
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="City Genesis Docs" class="md-nav__button md-logo" aria-label="City Genesis Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    City Genesis Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/satken2/city-genesis" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ホーム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経済シミュレーション
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    経済シミュレーション
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/1_%E5%85%A8%E4%BD%93%E6%A6%82%E8%A6%81/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    全体概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/25_%E3%82%B2%E3%83%BC%E3%83%A0%E5%86%85%E6%97%A5%E4%BB%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ゲーム内日付
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/2_%E7%B5%8C%E6%B8%88%E4%B8%BB%E4%BD%93/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経済主体
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/3_%E9%81%93%E8%B7%AF%E7%B6%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路網
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/4_%E5%9C%B0%E5%8C%BA%E3%81%A8%E5%9C%9F%E5%9C%B0%E5%8C%BA%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地区と土地区画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/6_%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E6%A9%9F%E9%96%A2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    公共交通機関
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/7_%E9%87%91%E8%9E%8D%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    金融システム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/8_%E5%95%86%E5%93%81%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    商品市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/9_%E7%94%9F%E7%94%A3%E6%B4%BB%E5%8B%95/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    生産活動
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/10_%E6%B6%88%E8%B2%BB%E6%B4%BB%E5%8B%95/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    消費活動
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/12_%E5%BB%BA%E7%89%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/25_%E5%BB%BA%E8%A8%AD%E4%BD%9C%E6%A5%AD%E9%87%8F%E3%81%A8%E6%96%BD%E5%B7%A5%E8%83%BD%E5%8A%9B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建設作業量と施工能力
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/34_%E9%80%A0%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    造成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/13_%E4%B8%8D%E5%8B%95%E7%94%A3%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    不動産市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/15_%E4%B8%96%E5%B8%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    世帯
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/16_%E5%8A%B4%E5%83%8D%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    労働市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/17_%E6%95%99%E8%82%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教育
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/18_%E7%A7%BB%E6%B0%91/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    移民
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/19_%E7%92%B0%E5%A2%83/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/20_%E4%BA%8B%E6%95%85%E3%81%A8%E7%81%BD%E5%AE%B3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事故と災害
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/21_%E5%A4%A9%E7%84%B6%E8%B3%87%E6%BA%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    天然資源
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/22_%E4%BA%88%E7%AE%97%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    予算管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/23_%E6%96%BD%E6%94%BF%E3%82%B9%E3%82%B3%E3%82%A2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    施政スコア
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/24_%E9%81%94%E6%88%90%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    達成クエスト
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/26_%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E7%B6%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ網
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/28_%E8%87%AA%E7%84%B6%E7%99%BA%E7%94%9F%E3%82%B9%E3%83%97%E3%83%AD%E3%83%BC%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    自然発生スプロール
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/29_%E9%A7%85%E3%81%A8%E9%A7%85%E8%88%8E/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    駅と駅舎
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/30_%E4%BA%BA%E5%93%A1%E6%90%AC%E9%80%81%E8%A8%AD%E5%82%99/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    人員搬送設備
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/31_%E8%A6%B3%E5%85%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    観光
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/33_%E8%B2%A8%E7%89%A9%E8%BC%B8%E9%80%81/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    貨物輸送
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    幾何・グラフィック
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    幾何・グラフィック
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    パス形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../B_%E5%9C%9F%E5%9C%B0%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    土地形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../C_%E5%BB%BA%E7%89%A9%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../D_%E5%9C%B0%E5%BD%A2%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../E_LOD%E5%87%A6%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LOD処理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    建物メッシュの生成
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    共通仕様
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    共通仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#概要" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#描画lodと生成物の寿命" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        描画LODと生成物の寿命
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-データフロー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. データフロー
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-底面形状" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 底面形状
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 底面形状">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-polygon-データ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 polygon データ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-頂点の並び順と縮退頂点の間引き" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 頂点の並び順と縮退頂点の間引き
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-壁角の番号付け" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 壁・角の番号付け
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-ワールド配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 ワールド配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-パーツの配置と命名規則" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. パーツの配置と命名規則
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. パーツの配置と命名規則">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-フォルダ構成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 フォルダ構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-パスの構成要素" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 パスの構成要素
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-命名例" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 命名例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-接写用パーツ_close" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 接写用パーツ（_close）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-外観バリアントの選択" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 外観バリアントの選択
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 外観バリアントの選択">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-バリアント番号の計算" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 バリアント番号の計算
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-閾値フォルダの選択ルール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 閾値フォルダの選択ルール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-レベル間のバリアント整合性" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 レベル間のバリアント整合性
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-位置番号のフォールバック" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 位置番号のフォールバック
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-フォールバック階層" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. フォールバック階層
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-壁パーツの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 壁パーツの配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 壁パーツの配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-基本考え方" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 基本考え方
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-パーツの座標系と寸法" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 パーツの座標系と寸法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-スケールと配置の方針" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 スケールと配置の方針
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-階の配置位置と躯体の高さ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 階の配置位置と躯体の高さ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-角パーツの配置と変形" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 角パーツの配置と変形
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. 角パーツの配置と変形">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-基本考え方" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 基本考え方
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-内角の計算" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 内角の計算
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-向きの決定" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 向きの決定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-ボーン変形skinnedmeshrenderer-がある場合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 ボーン変形（SkinnedMeshRenderer がある場合）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#75-静的メッシュボーンなしの場合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5 静的メッシュ（ボーンなし）の場合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#76-スケールと辺への張り出し量" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6 スケールと、辺への張り出し量
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-地面パネルと基盤" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 地面パネルと基盤
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. 地面パネルと基盤">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-地面パネル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 地面パネル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-基盤コンクリート基盤" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 基盤（コンクリート基盤）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-フェンスfenceの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. フェンス（fence）の配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. フェンス（fence）の配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-配置対象ポリゴン" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 配置対象ポリゴン
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-レベル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 レベル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-スケール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 スケール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-地形追従" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 地形追従
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-塔屋roofpropの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 塔屋（roofprop）の配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. 塔屋（roofprop）の配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-配置条件" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 配置条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-位置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 位置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-角度" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 角度
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-高さ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 高さ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-エントランスentranceの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. エントランス（entrance）の配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. エントランス（entrance）の配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-配置条件" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 配置条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-位置と向き" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 位置と向き
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-スケール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 スケール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-外階段階間スロープ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 外階段・階間スロープ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-メッシュの結合とベイク" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. メッシュの結合とベイク
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. メッシュの結合とベイク">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-プレハブ単位の事前結合と頂点の詰め直し" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 プレハブ単位の事前結合と頂点の詰め直し
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-コライダー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. コライダー
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-1階あたりの高さ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. 1階あたりの高さ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-実装の入口" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. 実装の入口
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-道路への接続点と間口" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. 道路への接続点と間口
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    モジュラー建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地面アセット
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    既成建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    港湾岸壁
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    工事中建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マッシュアップ建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F7_%E8%A7%A3%E4%BD%93%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    解体中建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F8_%E5%80%92%E5%A3%8A%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    倒壊建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F9_%E8%BB%8A%E4%B8%A1%E5%9F%BA%E5%9C%B0%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両基地
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F10_%E3%82%AA%E3%83%BC%E3%83%97%E3%83%B3%E3%82%B9%E3%83%9A%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    オープンスペース
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    露天掘り
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../H_%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E3%83%87%E3%83%BC%E3%82%BF%E3%83%AD%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    バックエンドデータロード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物パーツ作成マニュアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../J_%E3%83%91%E3%82%B9%E3%81%AE%E4%BA%A4%E5%B7%AE%E5%87%A6%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    パスの交差処理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../L_%E5%9C%B0%E5%BD%A2%E3%83%87%E3%83%BC%E3%82%BF%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形データ作成マニュアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../M_%E5%9C%B0%E5%BD%A2%E3%83%97%E3%83%AD%E3%83%83%E3%83%97/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形プロップ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    線路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両の走行描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../T_%E4%BA%A4%E9%80%9A%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%A8%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB%E3%81%AE%E6%95%B4%E5%90%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交通シミュレーションと走行描画の整合
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../P_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E5%85%B1%E6%9C%89%E3%81%A8%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マテリアル共有とエクスポート
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Q_%E9%A7%85%E8%88%8E%E3%83%91%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    駅舎パスのメッシュ生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../R_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E3%81%AE%E8%A7%A3%E6%B1%BA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マテリアルの解決
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S_%E7%81%AB%E7%81%BD%E3%82%A8%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    火災エフェクトの描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../U_%E5%A4%A9%E6%B0%97%E3%81%A8%E7%92%B0%E5%A2%83%E5%85%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    天気と環境光
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../V_%E7%92%B0%E5%A2%83%E6%BC%94%E5%87%BA%E3%81%AE%E4%B9%97%E3%82%8A%E7%89%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境演出の乗り物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../W_%E6%AD%A9%E8%A1%8C%E8%80%85%E3%81%AE%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    歩行者の描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プログラム連携
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    プログラム連携
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%83%BD%E5%B8%82%E3%83%9E%E3%83%83%E3%83%97%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E7%B5%8C%E8%B7%AF%E6%A1%88%E5%86%85/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    都市マップの検索と経路案内
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%9C%B0%E5%8C%BA%E7%B7%A8%E9%9B%86%E3%83%91%E3%83%8D%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地区編集パネル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%81%93%E8%B7%AF%E3%81%AE%E8%A9%B3%E7%B4%B0%E3%81%A8%E9%81%93%E8%B7%AF%E5%90%8D/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路の詳細と道路名
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%B8%82%E6%B0%91%E3%81%AE%E8%BF%BD%E8%B7%A1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    市民の追跡
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/IPC%E9%80%A3%E6%90%BA%E3%81%AE%E6%95%B4%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPC連携
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E9%80%A3%E6%90%BA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コンポーネント連携
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/UI%E5%85%B1%E9%80%9A%E5%9F%BA%E7%9B%A4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI共通基盤
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%97%E3%83%AC%E3%82%A4%E3%83%A2%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プレイモード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%8B%E3%83%B3%E3%82%B0%E3%81%A8%E4%BA%92%E6%8F%9B%E6%80%A7/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    バージョニングと互換性
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%BB%E3%83%BC%E3%83%96%E3%83%87%E3%83%BC%E3%82%BF%E4%BB%95%E6%A7%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    セーブデータ仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B7%E3%83%8A%E3%83%AA%E3%82%AA%E5%88%B6%E4%BD%9C%E3%81%A8%E9%85%8D%E5%B8%83/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    シナリオ制作と配布
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB%E5%9F%BA%E7%9B%A4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    チュートリアル基盤
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%A2%E3%83%83%E3%82%AF%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    モックバックエンド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/Unity%E5%85%A5%E5%8A%9B%E5%88%B6%E5%BE%A1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity入力制御
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/Unity%E8%A1%A8%E7%A4%BA%E3%83%A2%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity表示モード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E3%83%8F%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    公共交通ハイライト
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%A2%E3%83%A9%E3%83%BC%E3%83%88%E3%83%95%E3%83%A9%E3%82%B0%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アラートフラグ管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%80%9A%E7%9F%A5%E3%83%AC%E3%83%99%E3%83%AB%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    通知レベル管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E9%85%8D%E7%BD%AE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ファイル配置
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E7%B4%A0%E6%9D%90%E3%82%AF%E3%83%AC%E3%82%B8%E3%83%83%E3%83%88%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    素材クレジット管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B5%E3%82%A6%E3%83%B3%E3%83%89%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    サウンドシステム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%81%94%E6%88%90%E7%9B%AE%E6%A8%99%E3%82%A6%E3%82%A3%E3%83%B3%E3%83%89%E3%82%A6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    達成目標ウィンドウ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%BB%BA%E8%A8%AD%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建設プロジェクト管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#概要" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#描画lodと生成物の寿命" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        描画LODと生成物の寿命
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-データフロー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. データフロー
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-底面形状" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 底面形状
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 底面形状">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-polygon-データ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 polygon データ
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-頂点の並び順と縮退頂点の間引き" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 頂点の並び順と縮退頂点の間引き
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-壁角の番号付け" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 壁・角の番号付け
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-ワールド配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 ワールド配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-パーツの配置と命名規則" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. パーツの配置と命名規則
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. パーツの配置と命名規則">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-フォルダ構成" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 フォルダ構成
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-パスの構成要素" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 パスの構成要素
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-命名例" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 命名例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-接写用パーツ_close" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 接写用パーツ（_close）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-外観バリアントの選択" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 外観バリアントの選択
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 外観バリアントの選択">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-バリアント番号の計算" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 バリアント番号の計算
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-閾値フォルダの選択ルール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 閾値フォルダの選択ルール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-レベル間のバリアント整合性" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 レベル間のバリアント整合性
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-位置番号のフォールバック" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 位置番号のフォールバック
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-フォールバック階層" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. フォールバック階層
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-壁パーツの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 壁パーツの配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 壁パーツの配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-基本考え方" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 基本考え方
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-パーツの座標系と寸法" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 パーツの座標系と寸法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-スケールと配置の方針" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 スケールと配置の方針
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-階の配置位置と躯体の高さ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 階の配置位置と躯体の高さ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-角パーツの配置と変形" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 角パーツの配置と変形
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. 角パーツの配置と変形">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-基本考え方" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 基本考え方
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-内角の計算" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 内角の計算
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-向きの決定" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 向きの決定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-ボーン変形skinnedmeshrenderer-がある場合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 ボーン変形（SkinnedMeshRenderer がある場合）
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#75-静的メッシュボーンなしの場合" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5 静的メッシュ（ボーンなし）の場合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#76-スケールと辺への張り出し量" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6 スケールと、辺への張り出し量
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-地面パネルと基盤" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 地面パネルと基盤
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. 地面パネルと基盤">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-地面パネル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 地面パネル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-基盤コンクリート基盤" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 基盤（コンクリート基盤）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-フェンスfenceの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. フェンス（fence）の配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. フェンス（fence）の配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-配置対象ポリゴン" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 配置対象ポリゴン
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-レベル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 レベル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-スケール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 スケール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-地形追従" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 地形追従
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-塔屋roofpropの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 塔屋（roofprop）の配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. 塔屋（roofprop）の配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-配置条件" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 配置条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-位置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 位置
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-角度" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 角度
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-高さ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 高さ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-エントランスentranceの配置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. エントランス（entrance）の配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. エントランス（entrance）の配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-配置条件" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 配置条件
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-位置と向き" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 位置と向き
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-スケール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 スケール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-外階段階間スロープ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 外階段・階間スロープ
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-メッシュの結合とベイク" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. メッシュの結合とベイク
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. メッシュの結合とベイク">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-プレハブ単位の事前結合と頂点の詰め直し" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 プレハブ単位の事前結合と頂点の詰め直し
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-コライダー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. コライダー
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-1階あたりの高さ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. 1階あたりの高さ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-実装の入口" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. 実装の入口
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-道路への接続点と間口" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. 道路への接続点と間口
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="建物メッシュの生成">建物メッシュの生成</h1>
+<p>遠景の部品選択と状態別の表示は<a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/#遠景モデル">既成建物の遠景</a>に定義する。</p>
+<p><code>MODEL_PARKING=10</code> / <code>MODEL_ROTARY=11</code> / <code>MODEL_PARK=12</code> は <code>OpenSpaceBuildingMeshBuilder</code> が区画内の配置計画から面と実寸装飾を組み立てる。底面はSHAPE_FULL、接地は中心位置の地形標高。<code>site_*</code> パーツは独立した閾値走査で解決し、<code>mid-w1</code> は不要。遠景モデル未提供時のFarは0.3m板。3003舗装広場はGROUNDでfloorのみを描く。詳細は <a href="../F10_%E3%82%AA%E3%83%BC%E3%83%97%E3%83%B3%E3%82%B9%E3%83%9A%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F10_オープンスペースのメッシュ生成</a>。</p>
+<p><code>MODEL_OPEN_PIT=13</code>（露天掘り）は、コアシミュレータが区画の奥を掘り下げた地形そのものを穴とし、接道側の前庭に並ぶ設備だけをマッシュアップ建物と同じ規則で組み立てる。中心位置の高さに置く形は穴に蓋をするので、遠景は描かず、コライダー・工事中・倒壊の表現もマッシュアップ建物と異なる。詳細は <a href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F11_露天掘りのメッシュ生成</a>。</p>
+<h2 id="概要">概要</h2>
+<p>バックエンドの Agent データから、建物の外装メッシュを組み立てて配置する仕様。</p>
+<p>建物の3Dモデル生成方法は、<code>agent_master</code> に定義された <strong><code>model_type</code></strong> によって分かれる。<code>model_type</code> は3Dモデルの組み立て方式を表すものであり、建物の底面ポリゴンの形状（<a href="../C_%E5%BB%BA%E7%89%A9%E5%BD%A2%E7%8A%B6/">C_建物形状</a>）とは全く別軸の話である。</p>
+<p>本ドキュメントには<strong>すべての生成方式に共通する仕様</strong>（データフロー、底面形状、パーツの命名規則とフォールバック、壁・角の配置、地面パネル・基盤・フェンス、塔屋・エントランス、結合とコライダー）を記述する。方式ごとの固有ロジックは別ドキュメントに分ける。</p>
+<table>
+<thead>
+<tr>
+<th>model_type</th>
+<th>生成方式</th>
+<th>詳細</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MODEL_MODULAR_FLAT</strong></td>
+<td>モジュラーパーツ組み立て + 平屋根</td>
+<td><a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F1_モジュラー建物のメッシュ生成</a> §1</td>
+</tr>
+<tr>
+<td><strong>MODEL_MODULAR_HOUSE</strong></td>
+<td>モジュラーパーツ組み立て + 住宅風三角屋根</td>
+<td><a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F1_モジュラー建物のメッシュ生成</a> §2</td>
+</tr>
+<tr>
+<td><strong>MODEL_MODULAR_GABLE</strong></td>
+<td>モジュラーパーツ組み立て + 切妻屋根</td>
+<td><a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F1_モジュラー建物のメッシュ生成</a> §3</td>
+</tr>
+<tr>
+<td><strong>MODEL_MODULAR_SHED</strong></td>
+<td>モジュラーパーツ組み立て + 片流れ屋根</td>
+<td><a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F1_モジュラー建物のメッシュ生成</a> §4。粗末な小屋・仮設物置など、トタン板1枚を一方向に傾けた粗末な屋根の建物用</td>
+</tr>
+<tr>
+<td><strong>MODEL_MODULAR_GROUND</strong></td>
+<td>モジュラーパーツ組み立て（地面用途）</td>
+<td><a href="../F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F2_地面アセットのメッシュ生成</a>。建物本体は描画せず、フェンス・地面パネル・タイルオブジェクトを土地区画の形状に沿って配置する</td>
+</tr>
+<tr>
+<td><strong>MODEL_PREBUILT</strong></td>
+<td>既成パーツ組み立て</td>
+<td><a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F3_既成建物のメッシュ生成</a>。電波塔やオブジェ、銅像、観覧車など、通常の建物とは全く異なる形状の建物に適用する</td>
+</tr>
+<tr>
+<td><strong>MODEL_PORT</strong></td>
+<td>厚みのある板（岸壁）をプロシージャル生成し、水際・道路側・ヤードに実寸パーツを配置</td>
+<td><a href="../F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F4_港湾岸壁のメッシュ生成</a>。海岸土地区画（PARCEL_SHORE）の港用。モジュラーの壁・角パーツは使わない</td>
+</tr>
+<tr>
+<td><strong>MODEL_MASHUP</strong></td>
+<td>複数のサブ建物を既成パーツで配置</td>
+<td><a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F6_マッシュアップ建物のメッシュ生成</a>。学校（校舎＋体育館）のような複数棟の複合施設用。バックエンドが土地区画を8m×8mセルに分割して決めた配置計画（<code>sub_buildings</code>）に従い、各棟を既成パーツと同じ規則で積み上げる</td>
+</tr>
+<tr>
+<td><strong>MODEL_OPEN_PIT</strong></td>
+<td>前庭の設備を既成パーツで配置（穴は地形）</td>
+<td><a href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F11_露天掘りのメッシュ生成</a>。鉱山用。区画の奥はコアシミュレータが掘り下げた地形で、設備は <code>sub_buildings</code> としてマッシュアップ建物と同じ規則で組み立てる</td>
+</tr>
+<tr>
+<td><strong>MODEL_RAIL_YARD</strong></td>
+<td>線路ユニットをプロシージャル配置</td>
+<td><a href="../F9_%E8%BB%8A%E4%B8%A1%E5%9F%BA%E5%9C%B0%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F9_車両基地のメッシュ生成</a>。鉄道車両基地用。並行線路・架線・車止め・検修庫を敷地に並べ、集約線路を接続端子ノード（<code>depot_node_id</code>）の位置へ曲線で収束させる</td>
+</tr>
+</tbody>
+</table>
+<p>model_type とは別軸で、status が <code>STATUS_CONSTRUCTING</code> の建物はすべて「工事現場」メッシュに差し替わる（<a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F5_工事中建物のメッシュ生成</a>）。分岐は model_type 分岐より先にある。</p>
+<hr />
+<h2 id="描画lodと生成物の寿命">描画LODと生成物の寿命</h2>
+<p>建物の描画LODは投影サイズとヒステリシスで選ぶ。生成済みClose / Normal / FarのGOをLRUへ退避して再利用する。再利用キーには形状・外観・建設状態・区画・接地先の地形版を含める。セル離脱時も建物GOは破棄せず退避し、再入場時にキーで復元する。</p>
+<p>BuildingManagerは対応するモジュラー建物とprebuiltの敷地装飾を <code>BuildingExteriorRenderer</code> の後続ジョブへ分離する。本体を先に表示し、地面・フェンスなどを共通予算で生成する。地面用途・特殊施設の専用生成は従来の経路を使う。生成した外構Meshは独立所有し、退避からの復帰では未完了ジョブを再開する。敷地装飾のジョブは建物GOではなく共通のホスト(<code>BuildingExteriorWork</code>)で実行し、建物GOの無効化(退避)で止める。地形変更時は版付きキーで更新するため、本体まで含むキャッシュの無効化が起きる。</p>
+<p>Far建物は256m区画・親・マテリアル別に最大64個を結合する。元のID付きオブジェクトは残し、Rendererだけを抑止する。削除や変化を受けた建物を含む集約だけを直ちに解除し、再結合までは個別描画へ戻す。専用MaterialPropertyBlockを持つものは結合対象外。遠景は共有マテリアル1つで描くので、複数サブメッシュを持つ遠景メッシュ(prebuilt_far)は生成時に単一サブメッシュへ畳む。</p>
+<p>詳細建物の Z-fighting 防止用 <code>DepthOffsetLit</code> マテリアルは、元マテリアルごとに1つを全建物で共有する。建物ごとの色替えは <code>VisualModeObject</code> のマテリアル差し替えとプロパティブロックで行うので、建物レンダラーのマテリアルを個別に書き換えない。</p>
+<p>地面パネルは地形へ追従するメッシュ方式を使う。高さの正を別途複製せず、実Terrainサンプルを使う。生成MeshとColliderの所有・解放は <code>RenderCacheIdentity</code> が担い、共有FBXは破棄しない。詳細は <a href="../E_LOD%E5%87%A6%E7%90%86/">E_LOD処理</a>。</p>
+<h2 id="1-データフロー">1. データフロー</h2>
+<p><code>BuildingSummary</code> の底面・中心・階数・外観・敷地を入力として、<code>BuildingMeshBuilder</code> が状態・描画LOD・model_typeに応じた生成器を選ぶ。生成器は本体と装飾を配置し、Mesh・Material・Colliderを返す。形状データは<a href="../C_%E5%BB%BA%E7%89%A9%E5%BD%A2%E7%8A%B6/">建物形状</a>、取得と生成物の寿命は<a href="../H_%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E3%83%87%E3%83%BC%E3%82%BF%E3%83%AD%E3%83%BC%E3%83%89/">データロード</a>に定義する。</p>
+<h2 id="2-底面形状">2. 底面形状</h2>
+<h3 id="21-polygon-データ">2.1 polygon データ</h3>
+<p>バックエンドの Agent データに含まれる <code>polygon</code> を使用する。
+これは <code>float[][]</code>（頂点の配列）で、各頂点は Agent の <code>center_point</code> からの相対座標 <code>[x, y]</code> である。</p>
+<h3 id="22-頂点の並び順と縮退頂点の間引き">2.2 頂点の並び順と縮退頂点の間引き</h3>
+<p>polygon の頂点は <strong>反時計回り（CCW）</strong> に正規化する。
+符号付き面積が負の場合は配列を反転させる。</p>
+<p>バックエンドのポリゴンは「閉じた輪」の契約（<a href="../B_%E5%9C%9F%E5%9C%B0%E5%BD%A2%E7%8A%B6/">B_土地形状</a>）であり、末尾=先頭の閉環重複点や、
+ほぼ一直線上に並ぶ中間頂点を含むことがある（区画全面を使う建物では底面=土地区画ポリゴンなので、
+建物の polygon にも同じ縮退が入る）。壁・角は1頂点=1角パーツで配置するため、縮退頂点を
+そのまま使うと角パーツの向き・ボーン変形が破綻する（ゼロ長辺では内角が求まらず角がX字に折れ、
+内角180°付近では角が開ききって壁の線を横切る）。そのため、ポリゴンの取り込み時に
+<strong>頂点の間引き</strong>を行う。</p>
+<ul>
+<li>縮退辺（辺長 0.01m 未満。閉環重複点を含む）の頂点を除去する</li>
+<li>共線頂点を除去する。判定は「最後に残した頂点からの方向」と「次辺の方向」の差が 5° 未満
+  （各頂点単独の方向変化で判定すると、緩いカーブ上に並ぶ頂点が全滅して弧が弦に潰れるため、
+  累積の方向変化が閾値を超えた時点で頂点を残す）</li>
+<li>間引き後も<strong>元の頂点順を保つ</strong>（頂点0=前面の辺の規約（§10.3・§11.2）と壁・角の位置番号を守るため）</li>
+<li>間引き後に3頂点未満になった場合は間引きを適用しない（建物底面）／ポリゴンなしとして扱う（土地区画）</li>
+</ul>
+<p>この間引きは建物底面（<code>GetFootprint</code>）と土地区画（<code>ResolveParcelContext</code>）の両方の取り込みで行われる。</p>
+<p>建物一覧・単体取得APIは <code>parcel_id</code> を返す。敷地装飾はこのIDから <code>ParcelManager</code> の区画ポリゴンを取得し、建物の <code>center_point</code> 基準へ変換して使う。建物の <code>polygon</code> は建蔽率に応じた底面であり、敷地全体とは区別する。区画を取得できない場合に限り、地面パネルは建物底面へフォールバックする。</p>
+<h3 id="23-壁角の番号付け">2.3 壁・角の番号付け</h3>
+<p>底面ポリゴンの頂点インデックスをそのまま壁・角の位置番号に対応させる。
+頂点 0 = 位置 1、頂点 1 = 位置 2、… とする。</p>
+<p>N辺ポリゴンのとき：</p>
+<table>
+<thead>
+<tr>
+<th>位置番号</th>
+<th>壁（辺）</th>
+<th>角（頂点）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>辺 0（頂点0 → 頂点1）</td>
+<td>頂点 0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>辺 1（頂点1 → 頂点2）</td>
+<td>頂点 1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>辺 2（頂点2 → 頂点3）</td>
+<td>頂点 2</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+<p>壁の位置 n に対応する辺は <code>edge_index = n − 1</code>。
+角の位置 n に対応する頂点は <code>vertex_index = n − 1</code>。</p>
+<h3 id="24-ワールド配置">2.4 ワールド配置</h3>
+<p>生成されたメッシュの頂点座標はすべて <code>center_point</code> 基準の相対座標とする。
+配置時に <code>center_point</code> のワールド座標と接地高を足して最終位置とする。</p>
+<p>接地高（建物の接地面の標高）は model_type によらず <strong><code>center_point</code> 位置の地形標高</strong>である。</p>
+<ul>
+<li>MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED は傾斜地でも建物が水平面に接地し、谷側にできる地形との隙間は基盤（§8.2）が埋める。</li>
+<li>MODEL_MASHUP では、さらに各サブ建物が自分の配置座標の地形標高へ個別に接地する（<a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F6_マッシュアップ建物のメッシュ生成</a> §4）。</li>
+<li>MODEL_OPEN_PIT も各設備が個別に接地する。中心位置は掘った穴の中にあるので、建物のGameObjectは穴の底の高さに置かれる（<a href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F11_露天掘りのメッシュ生成</a> §4）。</li>
+</ul>
+<p>土地区画の基準標高（<code>parcel.altitude</code>）は接道の路面標高（接道なしは区画中心の地形標高）を表す値で（<a href="../B_%E5%9C%9F%E5%9C%B0%E5%BD%A2%E7%8A%B6/">B_土地形状</a> B.2）、陸上の建物の接地には使わない。建物は区画を参照せずに接地高が決まるので、区画を持たない一括取得のデータでもプレビューでも同じ高さに置かれる。</p>
+<p>ただし<strong>海上区画（<code>PARCEL_WATER</code>）に立地する建物は、model_type によらず区画の基準標高（<code>parcel.altitude</code>）を使う</strong>。海上区画の基準標高は海面の <code>0.0</code>（<a href="../B_%E5%9C%9F%E5%9C%B0%E5%BD%A2%E7%8A%B6/">B_土地形状</a> B.5）であるのに対し、その地点の地形標高は海底（ワールドYが負）なので、地形を参照すると洋上風力発電所などが海面下へ沈んでしまう。一括取得の建物データは区画IDを持たないため、中心の地形標高が海面より低い建物だけ、中心点を含む区画を座標から引いて海上区画かどうかを判定する。</p>
+<p>区画自身の上面メッシュも同じ基準で置く。陸地では頂点ごとに地形標高をサンプルして起伏に沿わせるが、海上区画では全頂点が基準標高の水平面に載る。さらに海面板はワールドYのごく近く（約1mm上）にあるため、Zファイティング回避用の微小オフセットでは足りず、海上区画の上面・枠線は海面板を確実に上回る量だけ持ち上げる。</p>
+<hr />
+<h2 id="3-パーツの配置と命名規則">3. パーツの配置と命名規則</h2>
+<h3 id="31-フォルダ構成">3.1 フォルダ構成</h3>
+<p>FBXは <code>Assets/Models/Buildings/{prefix}/{threshold}/{part}.fbx</code>、対応するプレハブは <code>Assets/Resources/Models/Buildings/</code> の同じ相対パスに置く。prefixの選択は次節、thresholdの選択は§4に定義する。共通パーツは <code>Buildings/common/</code> に置く。</p>
+<p><code>ModelManager</code> はリソースパスをキーにモデルをキャッシュする。プレハブの生成と材質は<a href="../P_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E5%85%B1%E6%9C%89%E3%81%A8%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88/#fbxとラッパープレハブ">取り込み規約</a>に従う。</p>
+<h3 id="32-パスの構成要素">3.2 パスの構成要素</h3>
+<p>建物パーツのリソースパス：</p>
+<pre><code>Models/Buildings/{prefix}/{threshold}/{partName}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>構成要素</th>
+<th>値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>prefix</strong></td>
+<td><code>landmark-{model_prefix}</code> / <code>a{variant}</code> / <code>b{bd_type}</code></td>
+<td>観光名所 <code>landmark</code>（0=観光名所ではない）のフォルダを最優先する。解決順は <code>landmark-{model_prefix}</code> → <code>a{variant}</code>（<code>AgentModelConfig</code> に定義がある場合） → <code>b{bd_type}</code></td>
+</tr>
+<tr>
+<td><strong>threshold</strong></td>
+<td><code>0</code>, <code>250</code>, <code>500</code>, <code>750</code> …</td>
+<td>外観バリアントの閾値フォルダ</td>
+</tr>
+<tr>
+<td><strong>partName</strong></td>
+<td><code>base-w1</code>, <code>mid-c2</code> 等</td>
+<td>レベル・種類・位置番号をハイフン結合</td>
+</tr>
+</tbody>
+</table>
+<p>partName の構成：</p>
+<table>
+<thead>
+<tr>
+<th>構成要素</th>
+<th>値</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>level</strong></td>
+<td><code>base</code> / <code>mid</code> / <code>top</code> / <code>fence</code></td>
+<td>1階・中層・屋上・フェンス</td>
+</tr>
+<tr>
+<td><strong>type</strong></td>
+<td><code>w</code> / <code>c</code> / <code>stair</code></td>
+<td>壁（wall）・角（corner）・外階段（§11.4）</td>
+</tr>
+<tr>
+<td><strong>position</strong></td>
+<td><code>1</code>, <code>2</code>, <code>3</code>, <code>4</code> …</td>
+<td>ポリゴン頂点インデックス + 1。外階段は頂点 i → i+1 の辺に <code>i+1</code></td>
+</tr>
+</tbody>
+</table>
+<p>位置番号を持たないパーツ：</p>
+<pre><code>roofprop         塔屋（§10）
+interior-floor   各階床の厚み・材質参照（任意。F1の各階の床）
+entrance         エントランス（前面の辺の中央・地面レベル。§11）
+ceil             屋上マテリアル用
+floor            地面マテリアル用
+generic-wall     無地の壁マテリアル用（切妻屋根の妻壁。[F1_モジュラー建物のメッシュ生成](F1_モジュラー建物のメッシュ生成.md) §3）
+tile             タイルオブジェクト（[F2_地面アセットのメッシュ生成](F2_地面アセットのメッシュ生成.md) 専用）
+port_crane       荷役クレーン（[F4_港湾岸壁のメッシュ生成](F4_港湾岸壁のメッシュ生成.md) §6 専用。水際に実寸スケールなしで並べる）
+yard_track       線路タイル（[F9_車両基地のメッシュ生成](F9_車両基地のメッシュ生成.md) 専用。以下 yard_* も同様）
+yard_wire        架線タイル
+yard_pole        架線柱（「右側用」著作。反対側はヨー180°配置）
+yard_beam        門型梁（唯一Xスケールされるパーツ。著作幅6m→柱間）
+yard_stop        車止め
+yard_shed        検修庫
+scaffold-wall    足場の辺パーツ（工事中表示専用。[F5_工事中建物のメッシュ生成](F5_工事中建物のメッシュ生成.md) §4）
+scaffold-corner  足場の角パーツ（工事中表示専用。[F5_工事中建物のメッシュ生成](F5_工事中建物のメッシュ生成.md) §4）
+crane-base       クレーン最下段（工事中表示専用。[F5_工事中建物のメッシュ生成](F5_工事中建物のメッシュ生成.md) §5）
+crane-mid        クレーンの繰り返しセグメント（工事中表示専用）
+crane-top        クレーン頂部（工事中表示専用・実寸スケールなし）
+</code></pre>
+<p>工事中表示専用パーツ（scaffold-* / crane-*）は、通常の prefix（<code>a{variant}</code> / <code>b{bd_type}</code>）に加えて、
+全建物共通の<strong>標準パーツ置き場 <code>Models/Buildings/common/</code></strong> へのフォールバックを持つ（<a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F5_工事中建物のメッシュ生成</a> §2）。</p>
+<p>観光名所フォルダ（<code>landmark-{model_prefix}</code>）は、東京タワーや自由の女神のような一点物の観光施設を
+名所ごとに作り分けるためのもので、<code>model_prefix</code> は <code>landmark_master</code> の値（英小文字の識別子）を使う。
+観光名所は用途バリアントを1つ（<code>agent_master</code> の「観光名所」）しか持たず <code>a{variant}</code> では名所同士を
+区別できないため、このフォルダが prefix の解決順の<strong>先頭</strong>に来る。中身の構成・命名は無印のフォルダと
+同じで、名所は <code>MODEL_PREBUILT</code> なので実際に使われるのは <code>*-prebuilt</code> と敷地装飾のパーツである。
+どのフォルダが存在するかは <code>agent_model_config.yaml</code> の <code>landmark_prefixes</code> に列挙され
+（<code>generate_agent_model_config.py</code> が実在フォルダから生成する）、<code>AgentModelConfig.HasLandmarkPrefix</code>
+が参照する。フォルダを追加したら必ず生成器を再実行すること。</p>
+<p>マッシュアップ建物（MODEL_MASHUP）のサブ建物パーツは、<code>subbuilding_master</code> の <code>model_prefix</code> を
+名前に埋め込んだ <code>mashup-{model_prefix}-{base|mid|top}-prebuilt</code> という動的な命名を用いる
+（<a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F6_マッシュアップ建物のメッシュ生成</a> §2）。</p>
+<p>道路パーツのリソースパス：</p>
+<pre><code>Models/Paths/p{path_variant}/{partName}
+</code></pre>
+<p>partName: <code>body</code>, <code>line</code>, <code>sidewalk</code>, <code>tree</code></p>
+<h3 id="33-命名例">3.3 命名例</h3>
+<pre><code>Models/Buildings/b16/500/base-w1       1階壁1、閾値 500
+Models/Buildings/b16/500/base-c1       1階角1
+Models/Buildings/b16/0/mid-w1          中層壁1、閾値 0
+Models/Buildings/b16/0/mid-c1          中層角1
+Models/Buildings/b16/0/top-w1          屋上壁1
+Models/Buildings/b16/0/top-c1          屋上角1
+Models/Buildings/b16/500/roofprop      塔屋
+Models/Buildings/b16/500/ceil          屋上マテリアル用
+Models/Buildings/a2101/0/base-prebuilt  既成建物ベース
+Models/Buildings/b16/0/tile             タイルオブジェクト（MODEL_MODULAR_GROUND 専用）
+Models/Paths/p1/body                   道路ボディ
+</code></pre>
+<h3 id="35-接写用パーツ_close">3.5 接写用パーツ（<code>_close</code>）</h3>
+<p>Closeでは同じ閾値フォルダの <code>{part}_close</code> を先に試し、無ければ無印を使う。閾値選択と存在判定は無印を基準にするため、接写ファイルだけを置いても選ばれない。壁・角・天面・地面・玄関・塔屋・prebuilt・サブ建物・commonパーツが対象になる。</p>
+<p>生成器は配置計算を維持してプレハブを差し替える。モデルの原点と追加張り出しは<a href="../I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/#7-接写遠景モデルの制作規約">制作規約</a>、描画LODの判定は<a href="../E_LOD%E5%87%A6%E7%90%86/#物体の描画lod">LOD処理</a>、Farの組み立ては<a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/#遠景モデル">遠景モデル</a>を参照する。</p>
+<h2 id="4-外観バリアントの選択">4. 外観バリアントの選択</h2>
+<h3 id="41-バリアント番号の計算">4.1 バリアント番号の計算</h3>
+<p><code>visual_variant</code>（0.0〜1.0）を 1000 倍して整数化する。</p>
+<pre><code>variant_number = floor(visual_variant × 1000)     → 0 〜 1000
+</code></pre>
+<h3 id="42-閾値フォルダの選択ルール">4.2 閾値フォルダの選択ルール</h3>
+<p>閾値フォルダ名（<code>0</code>, <code>250</code>, <code>500</code>, <code>750</code> 等）は閾値を表す。
+自身の <code>variant_number</code> 以下で最も大きい閾値フォルダを選ぶ。
+閾値 <code>0</code> のフォルダは必ず用意する。</p>
+<p>選択方法：標準閾値候補（0, 100, 200, ..., 1000）の中から <code>mid-w1</code> パーツが存在するものを探し、<code>variant_number</code> 以下で最大のものを選ぶ。</p>
+<p><strong>例：</strong> <code>variant_number = 600</code>、フォルダ <code>0</code>, <code>250</code>, <code>500</code>, <code>750</code> が存在 → <strong>500</strong> を選択。</p>
+<p><code>MODEL_PORT</code> は <code>mid-w1</code> を持たないので、パーツごとに同じ候補から <code>variant_number</code> 以下で最大の閾値のフォルダを探す（<a href="../F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F4_港湾岸壁のメッシュ生成</a> §6）。</p>
+<p><code>MODEL_MASHUP</code> は建物本体の壁パーツ（mid-w1）を持たないため、この共通ルールではなく
+<strong>サブ建物パーツごとに独立して</strong>同じ閾値走査（variant_number 以下で存在する最大閾値）を行う
+（<a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F6_マッシュアップ建物のメッシュ生成</a> §2）。</p>
+<h3 id="43-レベル間のバリアント整合性">4.3 レベル間のバリアント整合性</h3>
+<p>閾値フォルダが決まると、建物全体（1階・中層・屋上）で同じフォルダからパーツを取得するため、レベル間の閾値は自動的に一致する。</p>
+<ol>
+<li>中層壁1（<code>mid-w1</code>）が存在する閾値フォルダを確定 → これが建物全体の閾値になる</li>
+<li>該当フォルダに <code>mid-w1</code> が存在しない場合：</li>
+<li><code>MODEL_MODULAR_GROUND</code> 以外 → <strong>白い箱フォールバック</strong></li>
+<li><code>MODEL_MODULAR_GROUND</code> → suffix を <code>0</code> とし、敷地装飾の描画を継続する（<a href="../F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F2_地面アセットのメッシュ生成</a> §1）</li>
+</ol>
+<h3 id="44-位置番号のフォールバック">4.4 位置番号のフォールバック</h3>
+<p>指定位置のパーツがない場合は <strong>位置1</strong> にフォールバック。
+壁3（<code>w3</code>）がない → 壁1（<code>w1</code>）を使う。
+外階段（<code>stair</code>）だけは位置のフォールバックをせず、その位置のパーツが無い辺には何も置かない（§11.4）。</p>
+<hr />
+<h2 id="5-フォールバック階層">5. フォールバック階層</h2>
+<p>すべて同一の閾値フォルダ内でフォールバックする。
+建物本体の壁パーツ（w）と角パーツ（c）は同じ階層で base / top から mid へフォールバックする。
+最終フォールバック先だけが異なる。
+描画LODが Close のときは、各段で <code>{パーツ名}_close</code> → 無印の順に試す（§3.5）。次の段へ進むのは無印も無いときだけである。</p>
+<p><strong>壁パーツ（w）</strong></p>
+<pre><code>指定レベル・指定位置のパーツ（例: top-w3）
+    ↓ ない場合
+位置1のパーツ（同じレベル）: top-w1
+    ↓ ない場合
+中層レベルの同じ位置のパーツ: mid-w3
+    ↓ ない場合
+中層レベルの位置1のパーツ: mid-w1
+    ↓ ない場合
+白い箱（底面ポリゴンを高さまで押し出した直方体）
+</code></pre>
+<p><strong>角パーツ（c）</strong></p>
+<pre><code>指定レベル・指定位置のパーツ（例: top-c3）
+    ↓ ない場合
+位置1のパーツ（同じレベル）: top-c1
+    ↓ ない場合
+中層レベルの同じ位置のパーツ: mid-c3
+    ↓ ない場合
+中層レベルの位置1のパーツ: mid-c1
+    ↓ ない場合
+角を描画しない（壁パーツが辺いっぱいに敷かれる）
+</code></pre>
+<p>角は建物単位のオプトインである。mid にも角パーツを用意していない建物では角を描画せず、
+壁パーツを辺の端まで敷き詰める（角の張り出し量が 0 になる。§6.3・§7.6）。
+mid-c1 だけを用意すれば、全レベル・全位置の角がそれで描画される。</p>
+<p><strong>外階段パーツ（stair）</strong></p>
+<pre><code>指定レベル・指定位置のパーツ（例: top-stair3）
+    ↓ ない場合
+中層レベルの同じ位置のパーツ: mid-stair3
+</code></pre>
+<p>外階段は辺ごとのオプトインで、<code>mid-stair{n}</code> がその辺の有効化スイッチを兼ねる。
+<code>mid-stair{n}</code> が無い辺には、base/top があっても外階段を置かない。位置1へもフォールバックしない（§11.4）。</p>
+<hr />
+<h2 id="6-壁パーツの配置">6. 壁パーツの配置</h2>
+<h3 id="61-基本考え方">6.1 基本考え方</h3>
+<p>壁パーツは辺に沿って並べる。1つの辺に複数パーツが並ぶとき、隙間ができないように X 方向（辺の長さ方向）に引き伸ばして埋める。</p>
+<h3 id="62-パーツの座標系と寸法">6.2 パーツの座標系と寸法</h3>
+<p>壁パーツは以下を仮定する：</p>
+<ul>
+<li>ローカル X 軸 = 辺の長さ方向、Y 軸 = 高さ方向、Z 軸 = 外壁の奥行き</li>
+<li>原点 = 片端の下端角</li>
+</ul>
+<p>パーツのメッシュバウンディングボックスから元の寸法を取得する。</p>
+<h3 id="63-スケールと配置の方針">6.3 スケールと配置の方針</h3>
+<p>壁パーツの奥行き（Z）はスケールせず、モデリング時の実寸（メートル単位）のまま使用する。幅（X）は下記の敷き詰め調整のぶんだけ伸縮する。</p>
+<p>高さ（Y）は<strong>階のレベルによって扱いが分かれる</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>階のレベル</th>
+<th>Yスケール</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1階（base）</td>
+<td><strong>なし（著作高さのまま）</strong></td>
+</tr>
+<tr>
+<td>中層（mid）</td>
+<td>階高（<code>height_per_floor</code>）に合わせて<strong>Y方向のみ</strong>スケール</td>
+</tr>
+<tr>
+<td>最上階（top）</td>
+<td><strong>なし（著作高さのまま）</strong></td>
+</tr>
+</tbody>
+</table>
+<p>1階と最上階はパーツの著作高さがそのまま描画高さになる。階高が 4m でもパーツが 15m で著作されていれば <strong>15m の高さで描画される</strong>。中層だけは、積む枚数で建物の高さを調整する「詰めもの」の役割を持つため階高にそろえる。</p>
+<p><strong>この判定は「階のレベル」で行う。</strong> 1階に <code>base-w1</code> が無く <code>mid-w1</code> へフォールバックした場合（§5）でも、その階は1階なのでスケールされない。最上階も同様である。</p>
+<p><strong>スケールしないのはパーツの形状だけで、配置位置は変わらない</strong>（§6.4）。1階のパーツが 1m しかなければ2階との間に 3m の隙間が空き、逆に 10m あれば2階のパーツに埋もれる。これは仕様であり、プログラムは補正しない。</p>
+<p>敷き詰めの手順は次のとおり。</p>
+<ol>
+<li><strong>有効長を求める</strong> — 辺の全長から、両端の角パーツがその辺へ実際に張り出す長さ（§7.6）を差し引く。壁は<strong>手前の角パーツが終わったところから始まり、次の角パーツが始まるところで終わる</strong>。</li>
+<li><strong>枚数を決める</strong> — 有効長をパーツの著作幅で割り、<strong>四捨五入</strong>して敷き詰め枚数とする（最低1枚）。切り捨てにすると端数を必ず引き伸ばす方向にしか吸収できず、最大で 2 倍近くまで間延びしてしまうため、縮小側も使って歪みを抑える。</li>
+<li><strong>スロットへ合わせ込む</strong> — 有効長を枚数でちょうど割った幅を1スロットとし、X 方向スケールでパーツをスロット幅に合わせる。合計は常に有効長と厳密に一致するため、<strong>はみ出しも隙間も生じない</strong>。</li>
+<li><strong>原点のずれを補正する</strong> — 各ユニットは「メッシュの X 範囲がスロットに一致する」ように置く。幅の中央に原点があるパーツ（規格どおりのパーツ）ではスロットの中央に原点が来る。</li>
+</ol>
+<p>ただし、辺の長さが両端の角パーツの張り出し合計以下の場合は、有効長が存在しないため壁パーツは配置しない。この場合、両端の角パーツのみを配置して隙間を埋める。</p>
+<p><strong>寸法の警告</strong>: XZ実寸が 0.3m 未満の壁・角パーツは、cm単位や 1×1 の単位スケールでエクスポートされた疑いが強いため警告ログを出す。パーツはスケールされないので、この場合そのまま極小サイズで描画される。実寸（1 Blenderユニット = 1m）で再エクスポートすること（<a href="../I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/">I_建物パーツ作成マニュアル</a>）。</p>
+<p>各壁ユニットは、変換行列（位置・回転・スケール）をメッシュの全頂点に適用して配置する。
+回転はモデルの X 軸を辺の方向に向ける。</p>
+<h3 id="64-階の配置位置と躯体の高さ">6.4 階の配置位置と躯体の高さ</h3>
+<p><strong>パーツの配置位置は常に階高グリッドに乗る。</strong> パーツの著作高さは配置に影響しない。</p>
+<pre><code>床面Y(n階) = n × height_per_floor
+躯体の高さ  = floors × height_per_floor
+</code></pre>
+<p>屋根・塔屋の配置Yとコライダーの高さは、この躯体の高さを使う。</p>
+<p>したがって、スケールしない1階・最上階（§6.3）では、パーツの著作高さと階高のズレがそのまま見た目に出る。</p>
+<ul>
+<li><strong>パーツが階高より低い</strong> — 上の階との間に隙間が空く（階高 4m・<code>base-w1</code> が 1m なら 3m の隙間）</li>
+<li><strong>パーツが階高より高い</strong> — 上の階のパーツに埋もれる（階高 4m・<code>base-w1</code> が 10m なら、2階のパーツは 4m の位置から始まるので1階のパーツと重なる）</li>
+</ul>
+<p>いずれもプログラムは補正しない。パーツを階高に合わせるか、意図した見た目になるよう著作側で調整する。</p>
+<p>1階・最上階で位置ごとに違う高さのパーツを置いた場合（<code>base-w1</code> が 4m、<code>base-w3</code> が 6m 等）も同様に、パーツはスケールされないため壁面の高さが揃わない。</p>
+<hr />
+<h2 id="7-角パーツの配置と変形">7. 角パーツの配置と変形</h2>
+<h3 id="71-基本考え方">7.1 基本考え方</h3>
+<p>角パーツは各頂点に1つ配置する。2つの辺ベクトルから内角を計算し、その角度に合わせてパーツを向ける。</p>
+<p>角パーツは建物単位のオプションである（§5）。mid にも角パーツが用意されていない場合は
+角を描画せず、壁パーツが辺の端まで敷き詰められる（§7.6）。</p>
+<h3 id="72-内角の計算">7.2 内角の計算</h3>
+<p>角の頂点とその前後の頂点から2つの辺ベクトルを作り、符号付き角度から内角を求める。
+CCW ポリゴンでは凸頂点の内角は 0°〜180°。
+L字の凹頂点では内角を270°などの180°超として扱い、同じボーン変形で接続する。</p>
+<h3 id="73-向きの決定">7.3 向きの決定</h3>
+<p><strong>内角側の二等分線（bisector）</strong>方向に角パーツの正面を向ける。
+CCWの送り辺（当該頂点→次の頂点）を内角の半分だけ反時計回りに回して求める。
+辺の単位ベクトルの和は凹頂点では外側の小さい角を二等分するため使用しない。
+L字の270°角でも両アームが対応する辺へ向き、180°の前後でも配置方向が連続する。
+壁の張り出し量の計測も、この内角側の二等分線を共有する。</p>
+<h3 id="74-ボーン変形skinnedmeshrenderer-がある場合">7.4 ボーン変形（SkinnedMeshRenderer がある場合）</h3>
+<p>角パーツがボーンを2本持つ場合、90° を基準に作成されたモデルを任意の角度に変形できる。</p>
+<p>ボーン構造：
+- <code>Bone</code>（bones[0]）：送り側。標準FBXでは Blender +X / Unityメッシュ −X
+- <code>Bone.001</code>（bones[1]）：受け側。標準FBXでは Blender +Y / Unityメッシュ −Z</p>
+<p>変形の考え方：
+- 90° からのズレ（angleDiff = 内角 − 90°）を求める
+- 各ボーンを angleDiff の半分ずつ Y 軸周りに回転させる
+- 0番ボーンは +halfDiff、1番ボーンは −halfDiff
+- ボーンの開き角が内角と一致するように調整される</p>
+<p>ボーン変形後のメッシュは <code>SkinnedMeshRenderer.BakeMesh()</code> でジオメトリを確定させる。
+これは最終的なメッシュ結合（ベイク）とは別の、ジオメトリ準備の段階である。</p>
+<h3 id="75-静的メッシュボーンなしの場合">7.5 静的メッシュ（ボーンなし）の場合</h3>
+<p>ボーンがない角パーツは 90° 専用。凸角では内角が90°から離れていても変形せず、そのまま配置する。
+<strong>凹角（180°超）では、2本のボーンで開閉できない角パーツは配置しない。</strong>
+この頂点の壁オフセットも0にし、隣接する壁を頂点まで敷き詰める。
+静的な90°角を凹角へ置いて壁を突き出させることを防ぐためであり、凹角の装飾も必要な場合はボーンを持つパーツを用意する。</p>
+<p>特に敷地外周の <code>fence-c*</code> は直角を保証できないため、制作時に2本のボーンを付ける
+（<a href="../I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/">I_建物パーツ作成マニュアル</a> §4.1）。角の張り出し量だけを測っても、静的な角の
+接続端は辺の方向へ向かないので、壁との隙間を防げない。</p>
+<h3 id="76-スケールと辺への張り出し量">7.6 スケールと、辺への張り出し量</h3>
+<p>角パーツは壁パーツと同じ規則でスケールする。アーム長（XZ）は常にモデリング時の実寸のまま使用し、高さ（Y）は中層（mid）の階だけ階高に合わせてY方向スケールする。1階・最上階の角パーツは著作高さのまま描画される（§6.3）。</p>
+<p>壁パーツの配置開始・終了オフセット（§6.3 の「有効長」）は、<strong>角パーツを実際に配置したときに、その辺の方向へどれだけ張り出すか</strong>を測って決める。ローカル X/Z 軸のバウンディングボックスを見るのではなく、実配置と同じ回転・スケールを掛けた角パーツの全頂点を辺方向へ射影し、その最大値を採る。これにより</p>
+<ul>
+<li>アームがどちらのローカル軸向きで著作されていても正しい値になる</li>
+<li>庇や胴差しのような、辺方向へ伸びる造作も張り出しに含まれる</li>
+<li>角パーツが存在しない建物では張り出しが 0 になり、壁が辺いっぱいに敷かれる</li>
+</ul>
+<p>ため、壁が角パーツにめり込んだり、角パーツから離れて隙間ができたりしない。</p>
+<p>ボーン変形（§7.4）で角を開閉する場合も、アームは辺と一緒に回転するため張り出し量は変わらない。射影先には<strong>バインドポーズ（内角90°）での辺の向き</strong>（二等分線から ±45°）を使うことで、変形後の実際の張り出し量と一致する。</p>
+<hr />
+<h2 id="8-地面パネルと基盤">8. 地面パネルと基盤</h2>
+<h3 id="81-地面パネル">8.1 地面パネル</h3>
+<p>地面パネルは高さほぼ 0 の位置に配置する（Zファイティング回避で微小量だけ浮かせる）。</p>
+<p><strong>地面パネルはマスターデータの <code>draw_floor=yes</code> の建物でのみ描画する（オプトイン。未設定は描画しない）。</strong>
+描画時のマテリアルは <code>floor</code> パーツから取得し、解決順は <strong><code>a{variant}</code> → <code>b{bd_type}</code> → <code>common</code></strong> の
+フォールバックチェーン（工事系パーツと同じ規約。<code>common</code> は suffix フォルダを挟まず
+<code>Models/Buildings/common/floor</code>）。<strong>どこにも <code>floor</code> パーツが無ければ地面パネルは描画しない</strong>
+（既定建物マテリアルにはフォールバックしない）。これにより、地面パネルが不要な地面アセット
+（例: <code>tile</code> パーツのみのソーラー発電所）に意図しないスラブが敷かれることを防ぐ。
+この仕様はモジュラー建物・既成建物（プレビルド）で共通。車両基地（MODEL_RAIL_YARD）だけは <code>a{variant}</code> 自身の
+<code>floor</code> パーツに限り、<code>b{bd_type}</code>・<code>common</code> へフォールバックしない（共通の舗装が線路の下に敷かれないため。
+<a href="../F9_%E8%BB%8A%E4%B8%A1%E5%9F%BA%E5%9C%B0%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F9_車両基地のメッシュ生成</a> §6）。</p>
+<p>地面パネルは<strong>土地区画のポリゴン全体</strong>に対して生成する（建物底面だけに張ると、パネルが建物本体の
+真下に隠れて見えないため）。土地区画が取得できない場合は建物の底面ポリゴン（<code>footprint</code>）に
+フォールバックする。この対象ポリゴンの規則はすべての model_type で共通である
+（<a href="../F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F2_地面アセットのメッシュ生成</a> §2・<a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F3_既成建物のメッシュ生成</a> §3・
+<a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F6_マッシュアップ建物のメッシュ生成</a> §5）。
+通常の常駐描画ではパネルを実地形の傾斜に沿って生成する（§9.4参照）。
+なお、この地面パネルの生成ロジック（対象ポリゴン・地形追従・<code>floor</code> パーツをマテリアル供給元として扱い
+パーツが無ければ描かない規則）は建物専用ではなく、駅舎パスの専有エリア
+（<a href="../Q_%E9%A7%85%E8%88%8E%E3%83%91%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">Q_駅舎パスのメッシュ生成</a> §1）でも共有している。
+地形追従時は、敷地ポリゴンを耳切りで三角形に分け、それぞれを描画タイルの格子三角形で切り抜く（<code>BuildingMeshBuilder.GenerateTerrainSurfaceMesh</code>）。格子の対角線はXZの最小点から最大点へ結び、切り抜いた境界頂点も同じ三角形上の高さで補間する。頂点だけを接地させる独立した三角形分割では面の内部で地形が突き抜けるため、分割そのものを共有する。</p>
+<p>格子頂点の高さは実タイルから取得し、floorはその面から <code>GROUND_OFFSET</code>（5mm）浮かせる。交点はローカル座標の0.1mm単位で溶接し、隣接面の法線の継ぎ目を抑える。全タイルが共通解像度で格子を共有するためセル境界でも同じ分割になる。タイル未ロード時のみ最大辺長6mの暫定分割を使い、地形到着後に再生成する。</p>
+<h3 id="82-基盤コンクリート基盤">8.2 基盤（コンクリート基盤）</h3>
+<p>傾斜地では建物が <code>center_point</code> 位置の地形標高（§2.4）の水平面に接地するため、谷側では底面と地形の間に
+隙間ができて建物が浮いて見える。この隙間を埋めるため、建物の底面ポリゴン（<code>footprint</code>）を
+Y方向に押し出した柱状のコンクリート基盤を生成する。</p>
+<ul>
+<li><strong>対象</strong> — MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED のみ。
+  MODEL_MODULAR_GROUND・MODEL_PREBUILT・MODEL_PORT・MODEL_MASHUP・MODEL_OPEN_PIT は基盤を生成しない
+  （土地区画の形状を押し出すこともしない）。</li>
+<li><strong>形状</strong> — 上面 = 建物の接地面（ローカルY=0。地面パネルのわずかに下）、
+  下面 = 底面頂点でサンプリングした最低地形標高の5m下（最低でも接地面の10m下）。
+  頂点間で地形が局所的に落ち込んでも突き抜けないよう、下面には余裕を持たせている。</li>
+<li><strong>UV</strong> — 上面・側面ともワールドスケール（10mで1タイル）。側面のUは外周に沿った累積距離で、
+  辺をまたいでもタイリングが連続する。</li>
+<li><strong>マテリアル</strong> — 全建物共通のコンクリートマテリアル <code>Resources/COMMON_CONCRETE</code>
+  （未配置時は警告を出してデフォルト建物マテリアルにフォールバック）。</li>
+<li>工事中（<a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F5_工事中建物のメッシュ生成</a> §3）は同じ形状を土マテリアルで生成する。</li>
+</ul>
+<hr />
+<h2 id="9-フェンスfenceの配置">9. フェンス（fence）の配置</h2>
+<p><code>GenerateSiteDecorations</code> は省略可能な <code>fenceOpeningCenter</code> と <code>fenceOpeningRadius</code> を受け取る。指定した円が外周辺と交わる区間は壁を分割して空け、円内の角パーツも省く。既定値では開口なし。車両基地は引き込み線の境界通過位置にこの開口を設ける（F9 §6）。</p>
+<h3 id="91-配置対象ポリゴン">9.1 配置対象ポリゴン</h3>
+<p>フェンスは建物の底面ポリゴンではなく、<strong>土地区画（parcel）のポリゴン</strong>の形状に沿って配置する。
+土地区画の頂点列を <code>fenceFootprint</code> とする。</p>
+<p>土地区画のポリゴンにも縮退頂点の間引き（§2.2）を適用する。間引きは敷地コンテキストの解決
+（<code>BuildingMeshUtils.ResolveParcelContext</code>）で一括して行われるため、フェンスに限らず、
+区画ポリゴンを使うすべての敷地装飾（地面パネル・タイル）とコライダーに適用される。
+間引き後に3頂点未満になった場合は区画ポリゴンなしとして扱う（建物底面へフォールバック）。</p>
+<h3 id="92-レベル">9.2 レベル</h3>
+<p>フェンスは <code>fence-w*</code>（壁）と <code>fence-c*</code>（角）のパーツを使用する。
+配置ロジック・角の変形は建物本体と共通である。パーツは同じ閾値フォルダの指定位置を探し、無ければ <code>fence-w1</code> / <code>fence-c1</code> へフォールバックする。それも無ければ、その壁・角は描画しない。建物本体の <code>mid-w*</code> / <code>mid-c*</code> はフェンスの代わりに使わない。接写では各候補の <code>_close</code> を優先する（§3.5）。</p>
+<h3 id="93-スケール">9.3 スケール</h3>
+<p>フェンスは<strong>Y方向にはスケールしない</strong>（建物の1階・最上階の壁・角と同じ扱い）。元のメッシュサイズのまま配置する。
+X方向（辺の長さ方向）については、建物の壁と同じ敷き詰めロジック（§6.3）を使う。すなわち、両端のフェンス角パーツが辺へ張り出す長さ（§7.6 と同じ射影による計測。フェンス角は無スケールなので実寸がそのまま張り出し量になる）を差し引いた有効長に、四捨五入で決めた枚数を隙間なく敷き詰める。</p>
+<h3 id="94-地形追従">9.4 地形追従</h3>
+<p>通常の常駐描画では、フェンスと地面パネルとタイルオブジェクトを配置場所の地形に沿って曲げる。この地形追従は<strong>すべての model_type の敷地装飾</strong>が対象である。傾斜地対応の建物（MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED）は建物本体こそ接地高（§2.4）の水平面に接地しコンクリート基盤（§8.2）で谷側を埋めるが、その敷地装飾（フェンス・タイル・地面パネル）は地形に追従させる。追従の基準高さは <code>center_point</code> 位置の地形標高で、陸上の建物GameObjectの配置高さ（§2.4）と一致する。車両基地（MODEL_RAIL_YARD）は敷地装飾に加えて、構内の線路・架線・検修庫などの設備も同じ基準で頂点ごとに地形へ沿わせる（<a href="../F9_%E8%BB%8A%E4%B8%A1%E5%9F%BA%E5%9C%B0%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F9_車両基地のメッシュ生成</a> §6.1）。</p>
+<p>生成器は地形ティア表を参照しない。BuildingManagerは通常の詳細描画で <code>isDynamic=true</code> を渡し、対応するモデルの敷地装飾を別ジョブへ分ける。Far輪郭は敷地装飾の生成自体を省略する。</p>
+<p>各メッシュの頂点に対し、その頂点の水平位置（XZ座標）での地形標高を <code>Utils.GetGroundHeight</code>（建物GameObjectの配置高さと同じ取得経路）で取得し、頂点のY座標をその標高に合わせる。基準高さは建物の <code>center_point</code> 位置の地形標高であり、建物GameObjectがこの高さに配置されることを前提として、各頂点のローカルY座標を「頂点位置の地形標高 − center_point位置の地形標高」を基準にローカル座標化する。</p>
+<p>フェンスの場合、元のメッシュ頂点の相対的な高さ関係（上端が下端より高い状態）は維持する。つまり、頂点位置の地形高さに元のローカルY（スケール適用後）を加算した値を新しいY座標とする。</p>
+<p>地面パネルの場合、§8.1の地形格子による切り抜きを使い、center_point位置の高さを基準にローカル座標化する。高さの補間だけでなく地形と同じ三角形分割を使うことで、区画内部の起伏にも面として追従する。Terrain自身の描画LODによる形状差は、描画誤差設定と深度オフセットで抑える（<a href="../E_LOD%E5%87%A6%E7%90%86/">E_LOD処理</a>）。</p>
+<p>タイルオブジェクトの場合、まずすべてのタイルを平面上に配置してから、各タイルメッシュの頂点をフェンスと同様に地形に合わせて変形する（元のメッシュ頂点の相対的な高さ関係を維持したまま、頂点位置の地形高さを加算する）。</p>
+<p>初回は地形と区画の取得後に建物を生成する。地形編集時は変更した常駐セルの詳細建物を更新し、Far輪郭は配置高さを合わせ直す。接地先の版が変わった古いLODキャッシュは再利用しない（<a href="../E_LOD%E5%87%A6%E7%90%86/">E_LOD処理</a>参照）。</p>
+<hr />
+<h2 id="10-塔屋roofpropの配置">10. 塔屋（roofprop）の配置</h2>
+<h3 id="101-配置条件">10.1 配置条件</h3>
+<p>パーツ <code>roofprop</code> が存在する場合のみ配置。なければ配置しない。</p>
+<h3 id="102-位置">10.2 位置</h3>
+<p><code>visual_variant2</code> をシード値として、屋上面上の位置を決定する。
+屋上面の重心を中心に、シードから角度と距離を計算してオフセットした位置に置く。</p>
+<h3 id="103-角度">10.3 角度</h3>
+<p>塔屋の向きは底面ポリゴンの最初の辺（頂点0 → 頂点1）の方向に合わせる。</p>
+<h3 id="104-高さ">10.4 高さ</h3>
+<p>屋上パネルと同じ高さ（躯体の高さ <code>floors × height_per_floor</code>。§6.4）に配置する。最上階のパーツが背高で塔屋を突き抜けても補正はしない。</p>
+<p><code>MODEL_PORT</code> は位置・角度・高さをヤードと水際から決めるため、この規則ではなく専用ルールで配置する（<a href="../F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F4_港湾岸壁のメッシュ生成</a> §5.4）。</p>
+<p><code>MODEL_MASHUP</code> は塔屋を配置しない（各サブ建物が完成モデルとして頂部まで含む前提のため）。</p>
+<hr />
+<h2 id="11-エントランスentranceの配置">11. エントランス（entrance）の配置</h2>
+<h3 id="111-配置条件">11.1 配置条件</h3>
+<p>パーツ <code>entrance</code> が存在する場合のみ、建物1棟につき1つ配置する。なければ配置しない。
+対象は MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED（MODEL_MODULAR_GROUND は建物本体を持たないため対象外）。
+<code>building_shape = SHAPE_FULL</code> の建物は最上階のみを描画する（<a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F1_モジュラー建物のメッシュ生成</a> §4）ため、地上に壁が存在する1階建ての場合に限って配置する。</p>
+<h3 id="112-位置と向き">11.2 位置と向き</h3>
+<p>前面の辺は、底面ポリゴンの<strong>最初の辺（頂点0 → 頂点1、位置1の壁の辺）</strong>とする（塔屋の向き決定 §10.3 と同じ規約）。</p>
+<p>その辺の中央、<strong>地面レベル（ローカルY=0）</strong>に配置する。原点は壁のアライメントライン（前面の辺の直線上）に一致し、回転は壁パーツと同じ規約（辺方向へ向けてY軸まわりに180°反転。§6）を用いる。すなわち、壁パーツと同じ座標系で著作したモデルがそのまま前面の壁面に重なる。</p>
+<h3 id="113-スケール">11.3 スケール</h3>
+<p>一切スケールしない（実寸）。庇や階段などの造作が階高・辺長に引き伸ばされるのを防ぐため。</p>
+<hr />
+<h3 id="114-外階段階間スロープ">11.4 外階段・階間スロープ</h3>
+<p>外階段は辺ごとに置くパーツで、頂点 i → i+1 の辺（位置番号 <code>i+1</code>。壁 <code>w{i+1}</code> と同じ辺）の外階段は
+<code>base-stair{i+1}</code> / <code>mid-stair{i+1}</code> / <code>top-stair{i+1}</code> である。複数の辺に別々の外階段を同時に置ける。
+形は階段に限らず、各階に1個ずつ積む付属物なら何でもよい（正面 <code>stair1</code> のガラス張りのエレベーターシャフト、背面 <code>stair3</code> の鉄骨階段など）。</p>
+<p>外階段を持つ通常のモジュラー建物は、元のフットプリントを本体と外階段の合計占有範囲として使う。
+<code>ExteriorStairBuilder</code> が描画専用の本体輪郭を作り、外階段のある辺の全体を、その辺のパーツの最大奥行きだけ内側へ平行移動する。
+隣の辺（そちらにも外階段があれば、その後退線）との交点で頂点を更新し、壁・床・屋根・基盤・塔屋・エントランスに同じ輪郭を渡す。
+保存polygon、経済上の面積、クリック用の占有コライダーは元のまま。階段部分だけが突き出す輪郭は生成しない。</p>
+<ul>
+<li>パーツは同じ外観閾値のもの。<code>mid-stair{n}</code> がその辺の有効化スイッチで、base/top欠落時は同じ辺のmidを使う。1階建ては壁と同じくbaseを優先する。</li>
+<li><strong>位置番号のフォールバックはしない。</strong> <code>mid-stair{n}</code> が無い辺には外階段を置かない（壁・角のように位置1へ戻らない）。</li>
+<li><strong>原点は後退前のその辺の終点（頂点 i+1）・各階の床面</strong>。水平方向の再基準化・伸縮・敷き詰めはせず、各階に1個だけ配置する。頂点は0始まり。</li>
+<li>結合済みUnityパーツの+Xを頂点 i+1 → i、−Zを建物内側へ向ける。Blenderでの規約は <a href="../I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/">I_建物パーツ作成マニュアル</a> §4.11。</li>
+<li>各階の配置Yは <code>階 × height_per_floor</code>。base/topは実寸、中層だけ <code>height_per_floor / mid-w1の著作高さ</code> でYスケールする。
+  手すりや床厚が接続高さを変えないよう、階段のbbox高さは倍率に使わない。階段の1段の高低差は壁の著作階高にそろえる。</li>
+<li>その辺の3レベルのパーツを包む水平範囲から奥行きと開口を求める。後退した本体の同じ辺の壁をその幅だけ省略し、開口端に重なる角も省略する。
+  開口部の手すり・扉・踊り場は階段モデルが持つ。屋根・各階床は後退した本体だけを覆う。</li>
+<li>採否は頂点0の辺から順に決める。パーツが元の輪郭に収まらない、本体が潰れる、辺の反転・自己交差が起きる、
+  先に採用した外階段や本体と重なる場合は、その辺の外階段とセットバックを省略する（採用済みの辺はそのまま残る）。
+  L字などでも対象はパーツの位置番号の辺で、別の辺を探索し直さない。<code>SHAPE_FULL</code>、GROUND、PREBUILTには適用しない。</li>
+<li>エントランス（§11.2）と塔屋の向き（§10.3）は後退後の本体輪郭の頂点0→1の辺を使う。<code>stair1</code> を置くと、エントランスは外階段の奥の本体正面に付く。</li>
+<li>Closeは同じ原点・bboxで差し替え、Farは既存の遠景経路を使う。外階段が1つも無い建物の輪郭は変えない。</li>
+</ul>
+<h2 id="12-メッシュの結合とベイク">12. メッシュの結合とベイク</h2>
+<p>壁・角・屋上・地面・塔屋のすべてのパーツの配置が完了した後、<strong>一括で</strong>メッシュを結合する。</p>
+<p>工事中クレーンの頂部は、本編のClose / Normalで旋回させるため結合対象から分離し、接続点を原点とする子オブジェクトにする。生成側の指定と描画側の所有・アニメーションは <a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F5_工事中建物のメッシュ生成</a> §5 を参照。</p>
+<ol>
+<li>各パーツを <code>CombineInstance</code> に変換（サブメッシュごとに個別のインスタンス）</li>
+<li><code>Mesh.CombineMeshes()</code> でサブメッシュ構造を維持したまま結合</li>
+<li>法線とバウンディングボックスを再計算</li>
+<li>結合後、同じマテリアルのサブメッシュを統合してドローコールを最小化</li>
+<li>一時メッシュを解放</li>
+</ol>
+<p>角パーツのボーン変形（BakeMesh）はあくまで個別パーツのジオメトリ準備であり、この最終的な結合ベイクとは別物である。</p>
+<h3 id="121-プレハブ単位の事前結合と頂点の詰め直し">12.1 プレハブ単位の事前結合と頂点の詰め直し</h3>
+<p>既成建物・マッシュアップの各段、外階段、工事中のクレーン（旋回する頂部を含む）と重機、倒壊片、港湾クレーン、車両基地の素材パーツ、オープンスペースの小物は、配置の前に <code>BuildingMeshUtils.CombineModuleMeshes</code> でプレハブ配下の全メッシュを1つにまとめる（ノードのTransform込み。SkinnedMeshRenderer はバインドポーズでベイクする）。</p>
+<p><code>Mesh.CombineMeshes()</code> はサブメッシュ単位の <code>CombineInstance</code> でも、そのサブメッシュのインデックスの最小〜最大の範囲にある頂点を丸ごと写す。FBX取り込みの頂点溶接は位置・法線・UVが同じ頂点を材質をまたいで1つにするため、同じ向きで面一に接する別材質の面（実寸キューブ投影UVでは頂点が一致する）を持つパーツでは、後のサブメッシュの範囲が前のサブメッシュの区画まで伸び、参照されない頂点まで写される。これを避けるため、<code>CombineModuleMeshes</code> の結果は次の形にそろえる。</p>
+<ul>
+<li>頂点はサブメッシュごとの連続区画に並び、各区画はそのサブメッシュが参照する頂点だけを持つ。区画内は元の頂点順を保つ。</li>
+<li>複数のサブメッシュが参照する（溶接された）頂点は、サブメッシュごとに1つずつ持つ。</li>
+<li>サブメッシュとマテリアルの順序、三角形の並び、頂点属性とその形式は元のパーツのまま変えない。</li>
+</ul>
+<p>この形なので、各ビルダーが結果を再びサブメッシュ単位で結合しても頂点は増えない。壁・角（工事中の足場を含む）・エントランス・塔屋・フェンス・タイルは元のメッシュを直接サブメッシュ単位で積むので、この詰め直しを通らない。</p>
+<hr />
+<h2 id="13-コライダー">13. コライダー</h2>
+<p>クリック判定のため、底面ポリゴンを建物高さまで押し出した形状の <code>MeshCollider</code> を生成する。</p>
+<ul>
+<li><strong>下面</strong>：CCW の三角形ファン（法線下向き）</li>
+<li><strong>上面</strong>：CW の三角形ファン（法線上向き）</li>
+<li><strong>側面</strong>：各辺について、上下の頂点4点で構成する四角形を2つの三角形に分割</li>
+</ul>
+<p>高さは躯体の高さ <code>floors × height_per_floor</code>（§6.4）である。1階・最上階のパーツがこれをはみ出して著作されていても、コライダーは伸ばさない。</p>
+<p>押し出すポリゴンと高さは model_type によって異なる。</p>
+<table>
+<thead>
+<tr>
+<th>model_type</th>
+<th>ポリゴン</th>
+<th>高さ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED</td>
+<td>建物底面</td>
+<td>躯体の高さ（<code>floors × height_per_floor</code>）</td>
+</tr>
+<tr>
+<td>MODEL_MODULAR_GROUND</td>
+<td>土地区画</td>
+<td><code>floorHeight</code>（<a href="../F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F2_地面アセットのメッシュ生成</a> §4）</td>
+</tr>
+<tr>
+<td>MODEL_PREBUILT</td>
+<td>建物底面</td>
+<td>描画された実高さ（<a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F3_既成建物のメッシュ生成</a> §4）</td>
+</tr>
+<tr>
+<td>MODEL_PORT</td>
+<td>ヤード（岸壁フットプリント、または埋立地の上の港では区画の陸の部分）</td>
+<td>岸壁上面・天端の高さ（<a href="../F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F4_港湾岸壁のメッシュ生成</a> §7）</td>
+</tr>
+<tr>
+<td>MODEL_MASHUP</td>
+<td>土地区画</td>
+<td>描画された最も高いサブ建物の天端（<a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F6_マッシュアップ建物のメッシュ生成</a> §6）</td>
+</tr>
+<tr>
+<td>MODEL_OPEN_PIT</td>
+<td>押し出さない。地形に沿う土地区画の面＋設備ごとの外接箱</td>
+<td>設備の天端（<a href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F11_露天掘りのメッシュ生成</a> §4）</td>
+</tr>
+<tr>
+<td>MODEL_RAIL_YARD</td>
+<td>建物底面</td>
+<td>固定 7m（架線柱の天端相当。<a href="../F9_%E8%BB%8A%E4%B8%A1%E5%9F%BA%E5%9C%B0%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F9_車両基地のメッシュ生成</a> §7）</td>
+</tr>
+<tr>
+<td>工事中（STATUS_CONSTRUCTING）</td>
+<td>建物底面</td>
+<td>施工済み階の高さ（<a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F5_工事中建物のメッシュ生成</a> §7）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-1階あたりの高さ">14. 1階あたりの高さ</h2>
+<p>マスターデータの <code>height_per_floor</code> を使用する。
+設定されていなければ <code>LocalConstants.FLOOR_HEIGHT</code>（デフォルト: 4.0）を使う。</p>
+<p><strong>すべてのパーツの配置位置（各階の床面Y）と躯体の高さはこの値で決まる</strong>（§6.4）。一方、この値でパーツが<strong>スケール</strong>されるのは中層（mid）だけで、1階（base）・最上階（top）の壁・角と prebuilt の base / top は著作実寸で描画される（§6.3・§7.6・<a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F3_既成建物のメッシュ生成</a>）。用途は次のとおり。</p>
+<ul>
+<li>各階の床面Y（<code>階 × height_per_floor</code>）と躯体の高さ（<code>floors × height_per_floor</code>）（§6.4）</li>
+<li>中層の壁・角・<code>mid-prebuilt</code> のYスケール目標高さ（§6.3・<a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F3_既成建物のメッシュ生成</a> §1）</li>
+<li>住宅風三角屋根・切妻屋根の棟の高さ、片流れ屋根の立ち上がり（<a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F1_モジュラー建物のメッシュ生成</a> §2〜§4）。
+  いずれも<strong>建物高さではなく階高</strong>に比例させ、階数の多い建物だけ屋根が巨大にならないようにする</li>
+<li>白い箱フォールバックの高さ（<code>floors × height_per_floor</code>）</li>
+<li><code>MODEL_MODULAR_GROUND</code> のコライダー高さ（<a href="../F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F2_地面アセットのメッシュ生成</a> §4）</li>
+<li>工事中の足場・クレーンの1段の高さ（<a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F5_工事中建物のメッシュ生成</a>）</li>
+</ul>
+<hr />
+<h2 id="15-実装の入口">15. 実装の入口</h2>
+<p><code>MeshGenerators/Buildings/BuildingMeshBuilder.cs</code> が振り分け、<code>BuildingMeshUtils</code> が部品の解決・共有処理を担当する。方式ごとの生成器は概要の対応表を参照する。</p>
+<h2 id="16-道路への接続点と間口">16. 道路への接続点と間口</h2>
+<p>施設側の開口を <code>BuildingRoadOpening</code> で表す。<code>A</code>・<code>B</code> は建物中心から見た舗装端の両端、<code>Position</code> は中点、<code>Width</code> は両端間の距離、<code>Outward</code> は敷地から道路への方向である。1施設に複数持てる。<code>Flow</code> は <code>entry</code>・<code>exit</code>・<code>both</code>、<code>Apron</code> は敷地内のすり付け舗装の輪郭である。プレイヤーの指定や乱数の再抽選を必要としない。</p>
+<ul>
+<li>駅前ロータリー3002は、形状生成に使う最終アスファルト面と接道辺の交線から得る。すみ切りを含む実際の開口幅になる（<a href="../F10_%E3%82%AA%E3%83%BC%E3%83%97%E3%83%B3%E3%82%B9%E3%83%9A%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F10_オープンスペースのメッシュ生成</a>）。</li>
+<li>既成建物は通常モデル内の非描画マーカーから得る（<a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F3_既成建物のメッシュ生成</a> §6）。現在の著作済みモデルは国境貨物駅1081で、入口45m・出口10mを持つ。</li>
+<li>港は施設モジュール（<code>port_building</code>）のマーカーを、区画の辺0に揃えたモジュールの置き方で移して得る。舗装高は開口の地面に追従し、海面+2mを下限にする（<a href="../F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/">F4_港湾岸壁のメッシュ生成</a> §10）。</li>
+<li>その他の生成方式やマーカーのないモデルは開口を返さない。</li>
+</ul>
+<p>稼働中・停止中・解体予定の建物が対象で、工事中・解体中・倒壊・建設予定の表示には開口を作らない。開口は建物の描画GOから独立して保持するため、建物がFar表示・視野外になっても位置と幅は変わらない。</p>
+<p><code>BuildingManager</code> がデータ登録・更新・削除と索引を同期し、<code>PathManager</code> が該当する道路の描画版を進めて再生成を予約する。道路側は間口を片側の距離区間へ変換し、歩道・沿道設備を除き、道路外縁から敷地内へ舗装をすり付ける（<a href="../G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">G_道路メッシュの生成</a>「施設への接続」）。交通グラフやシミュレーションの接続ノードには変換しない。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  ページトップへ戻る
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="フッター" >
+        
+          
+          <a href="../E_LOD%E5%87%A6%E7%90%86/" class="md-footer__link md-footer__link--prev" aria-label="前: LOD処理">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                前
+              </span>
+              <div class="md-ellipsis">
+                LOD処理
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-footer__link md-footer__link--next" aria-label="次: モジュラー建物">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                次
+              </span>
+              <div class="md-ellipsis">
+                モジュラー建物
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/satken2/city-genesis" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

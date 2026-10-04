@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 天気1種類ぶんの空・雲・光・降水の見た目。太陽の向きと夕焼けの色は時刻(WeatherClock)が決めるので、
-/// ここにあるのは太陽が十分高い昼間の見た目である。出現割合は気候と季節(WeatherClimate)が決める。
+/// ここにあるのは太陽が十分高い昼間の見た目である。出現割合はCoreから取得する都市の月別設定が決める。
 /// </summary>
 public sealed class WeatherPreset
 {

@@ -901,6 +901,8 @@ export type PathData = {
  * JSON仕様上キーは文字列として直列化されるが、フェッチ時に数値へ変換している
  */
 export type MasterData = {
+  climates: Record<number, import("./utils/climate").ClimatePreset>;
+  weather: Record<string, import("./utils/climate").WeatherMasterEntry>;
   bd_types: Record<number, BdTypeEntry>;
   skills: Record<number, SkillEntry>;
   vehicle_types: Record<number, VehicleTypeEntry>;

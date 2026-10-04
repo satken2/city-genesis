@@ -1,0 +1,4469 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="City Genesis - 都市建造経済シミュレーションゲームの設計ドキュメント">
+      
+      
+      
+        <link rel="canonical" href="https://city-genesis-docs.pages.dev/en/geometries/O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/">
+      
+      
+        <link rel="prev" href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">
+      
+      
+        <link rel="next" href="../T_%E4%BA%A4%E9%80%9A%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%A8%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB%E3%81%AE%E6%95%B4%E5%90%88/">
+      
+      
+        
+          <link rel="alternate" href="../../../geometries/O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/" hreflang="ja">
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>車両の走行描画 - City Genesis Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+JP:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans JP";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#o-車両の走行描画" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../" title="City Genesis Docs" class="md-header__button md-logo" aria-label="City Genesis Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            City Genesis Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              車両の走行描画
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="ダークモードに切り替え"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="ダークモードに切り替え" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="ライトモードに切り替え"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="ライトモードに切り替え" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../../geometries/O_%E8%BB%8A%E4%B8%A1%E3%81%AE%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB/" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/satken2/city-genesis" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  ホーム
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../economics/1_%E5%85%A8%E4%BD%93%E6%A6%82%E8%A6%81/" class="md-tabs__link">
+          
+  
+  
+  経済シミュレーション
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/" class="md-tabs__link">
+          
+  
+  
+  幾何・グラフィック
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../programs/%E9%83%BD%E5%B8%82%E3%83%9E%E3%83%83%E3%83%97%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E7%B5%8C%E8%B7%AF%E6%A1%88%E5%86%85/" class="md-tabs__link">
+          
+  
+  
+  プログラム連携
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../api/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../" title="City Genesis Docs" class="md-nav__button md-logo" aria-label="City Genesis Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    City Genesis Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/satken2/city-genesis" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ホーム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経済シミュレーション
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    経済シミュレーション
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/1_%E5%85%A8%E4%BD%93%E6%A6%82%E8%A6%81/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    全体概要
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/25_%E3%82%B2%E3%83%BC%E3%83%A0%E5%86%85%E6%97%A5%E4%BB%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ゲーム内日付
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/2_%E7%B5%8C%E6%B8%88%E4%B8%BB%E4%BD%93/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    経済主体
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/3_%E9%81%93%E8%B7%AF%E7%B6%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路網
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/4_%E5%9C%B0%E5%8C%BA%E3%81%A8%E5%9C%9F%E5%9C%B0%E5%8C%BA%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地区と土地区画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/6_%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E6%A9%9F%E9%96%A2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    公共交通機関
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/7_%E9%87%91%E8%9E%8D%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    金融システム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/8_%E5%95%86%E5%93%81%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    商品市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/9_%E7%94%9F%E7%94%A3%E6%B4%BB%E5%8B%95/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    生産活動
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/10_%E6%B6%88%E8%B2%BB%E6%B4%BB%E5%8B%95/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    消費活動
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/12_%E5%BB%BA%E7%89%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/25_%E5%BB%BA%E8%A8%AD%E4%BD%9C%E6%A5%AD%E9%87%8F%E3%81%A8%E6%96%BD%E5%B7%A5%E8%83%BD%E5%8A%9B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建設作業量と施工能力
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/34_%E9%80%A0%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    造成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/13_%E4%B8%8D%E5%8B%95%E7%94%A3%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    不動産市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/15_%E4%B8%96%E5%B8%AF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    世帯
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/16_%E5%8A%B4%E5%83%8D%E5%B8%82%E5%A0%B4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    労働市場
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/17_%E6%95%99%E8%82%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教育
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/18_%E7%A7%BB%E6%B0%91/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    移民
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/19_%E7%92%B0%E5%A2%83/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/20_%E4%BA%8B%E6%95%85%E3%81%A8%E7%81%BD%E5%AE%B3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    事故と災害
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/21_%E5%A4%A9%E7%84%B6%E8%B3%87%E6%BA%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    天然資源
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/22_%E4%BA%88%E7%AE%97%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    予算管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/23_%E6%96%BD%E6%94%BF%E3%82%B9%E3%82%B3%E3%82%A2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    施政スコア
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/24_%E9%81%94%E6%88%90%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    達成クエスト
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/26_%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%E7%B6%B2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    インフラ網
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/28_%E8%87%AA%E7%84%B6%E7%99%BA%E7%94%9F%E3%82%B9%E3%83%97%E3%83%AD%E3%83%BC%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    自然発生スプロール
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/29_%E9%A7%85%E3%81%A8%E9%A7%85%E8%88%8E/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    駅と駅舎
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/30_%E4%BA%BA%E5%93%A1%E6%90%AC%E9%80%81%E8%A8%AD%E5%82%99/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    人員搬送設備
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/31_%E8%A6%B3%E5%85%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    観光
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../economics/33_%E8%B2%A8%E7%89%A9%E8%BC%B8%E9%80%81/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    貨物輸送
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    幾何・グラフィック
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    幾何・グラフィック
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../A_%E3%83%91%E3%82%B9%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    パス形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../B_%E5%9C%9F%E5%9C%B0%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    土地形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../C_%E5%BB%BA%E7%89%A9%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../D_%E5%9C%B0%E5%BD%A2%E5%BD%A2%E7%8A%B6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形形状
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../E_LOD%E5%87%A6%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LOD処理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    建物メッシュの生成
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F_%E5%BB%BA%E7%89%A9%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    共通仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F1_%E3%83%A2%E3%82%B8%E3%83%A5%E3%83%A9%E3%83%BC%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    モジュラー建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F2_%E5%9C%B0%E9%9D%A2%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地面アセット
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F3_%E6%97%A2%E6%88%90%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    既成建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F4_%E6%B8%AF%E6%B9%BE%E5%B2%B8%E5%A3%81%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    港湾岸壁
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F5_%E5%B7%A5%E4%BA%8B%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    工事中建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F6_%E3%83%9E%E3%83%83%E3%82%B7%E3%83%A5%E3%82%A2%E3%83%83%E3%83%97%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マッシュアップ建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F7_%E8%A7%A3%E4%BD%93%E4%B8%AD%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    解体中建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F8_%E5%80%92%E5%A3%8A%E5%BB%BA%E7%89%A9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    倒壊建物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F9_%E8%BB%8A%E4%B8%A1%E5%9F%BA%E5%9C%B0%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両基地
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F10_%E3%82%AA%E3%83%BC%E3%83%97%E3%83%B3%E3%82%B9%E3%83%9A%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    オープンスペース
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../F11_%E9%9C%B2%E5%A4%A9%E6%8E%98%E3%82%8A%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    露天掘り
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../H_%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E3%83%87%E3%83%BC%E3%82%BF%E3%83%AD%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    バックエンドデータロード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../I_%E5%BB%BA%E7%89%A9%E3%83%91%E3%83%BC%E3%83%84%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建物パーツ作成マニュアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../J_%E3%83%91%E3%82%B9%E3%81%AE%E4%BA%A4%E5%B7%AE%E5%87%A6%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    パスの交差処理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../L_%E5%9C%B0%E5%BD%A2%E3%83%87%E3%83%BC%E3%82%BF%E4%BD%9C%E6%88%90%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形データ作成マニュアル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../M_%E5%9C%B0%E5%BD%A2%E3%83%97%E3%83%AD%E3%83%83%E3%83%97/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地形プロップ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    線路メッシュの生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両の走行描画
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    車両の走行描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#o1-概要" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.1. 概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o2-入力データ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.2. 入力データ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o3-管理範囲と道路スナップショット" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.3. 管理範囲と道路スナップショット
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o4-道路の区画線と共通の車線モデル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.4. 道路の区画線と共通の車線モデル
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o5-交通量と台数の安定" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.5. 交通量と台数の安定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="O.5. 交通量と台数の安定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#道路別の期待台数" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        道路別の期待台数
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#全体の台数枠" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全体の台数枠
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#不足補充と道路間の偏りの調整" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        不足補充と道路間の偏りの調整
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o6-交差点での分岐と通過" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.6. 交差点での分岐と通過
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o7-沿道到着フェードプール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.7. 沿道到着・フェード・プール
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="O.7. 沿道到着・フェード・プール">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#入口退出経路のキャッシュと負荷" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        入口・退出経路のキャッシュと負荷
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#路上駐車の描画" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        路上駐車の描画
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o8-コンポーネントと調整値" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.8. コンポーネントと調整値
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o9-検証と制限" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.9. 検証と制限
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o10-路線に所属する車両" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10. 路線に所属する車両
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="O.10. 路線に所属する車両">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#o101-車両アセット" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10.1. 車両アセット
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#o102-鉄道車両の接写表示" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10.2. 鉄道車両の接写表示
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#o103-道路車両の接写遠景" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10.3. 道路車両の接写・遠景
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#o104-路線カラーの塗装" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10.4. 路線カラーの塗装
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o11-走行音" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.11. 走行音
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lrtの軌道位置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LRTの軌道位置
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o12-ドライブモード" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.12. ドライブモード
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o13-一時停止と市民の追従" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.13. 一時停止と市民の追従
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ロープウェイの循環描画" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ロープウェイの循環描画
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ロープウェイの循環描画">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#完成した駅間の抽出" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        完成した駅間の抽出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ケーブルと折り返し設備" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ケーブルと折り返し設備
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#時間描画後始末" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        時間・描画・後始末
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#交差点の路面標示との共有規則" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        交差点の路面標示との共有規則
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../T_%E4%BA%A4%E9%80%9A%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%A8%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB%E3%81%AE%E6%95%B4%E5%90%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    交通シミュレーションと走行描画の整合
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../P_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E5%85%B1%E6%9C%89%E3%81%A8%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%9D%E3%83%BC%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マテリアル共有とエクスポート
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Q_%E9%A7%85%E8%88%8E%E3%83%91%E3%82%B9%E3%81%AE%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E7%94%9F%E6%88%90/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    駅舎パスのメッシュ生成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../R_%E3%83%9E%E3%83%86%E3%83%AA%E3%82%A2%E3%83%AB%E3%81%AE%E8%A7%A3%E6%B1%BA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    マテリアルの解決
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../S_%E7%81%AB%E7%81%BD%E3%82%A8%E3%83%95%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    火災エフェクトの描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../U_%E5%A4%A9%E6%B0%97%E3%81%A8%E7%92%B0%E5%A2%83%E5%85%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    天気と環境光
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../V_%E7%92%B0%E5%A2%83%E6%BC%94%E5%87%BA%E3%81%AE%E4%B9%97%E3%82%8A%E7%89%A9/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    環境演出の乗り物
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../W_%E6%AD%A9%E8%A1%8C%E8%80%85%E3%81%AE%E6%8F%8F%E7%94%BB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    歩行者の描画
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プログラム連携
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    プログラム連携
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%83%BD%E5%B8%82%E3%83%9E%E3%83%83%E3%83%97%E3%81%AE%E6%A4%9C%E7%B4%A2%E3%81%A8%E7%B5%8C%E8%B7%AF%E6%A1%88%E5%86%85/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    都市マップの検索と経路案内
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%9C%B0%E5%8C%BA%E7%B7%A8%E9%9B%86%E3%83%91%E3%83%8D%E3%83%AB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地区編集パネル
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%81%93%E8%B7%AF%E3%81%AE%E8%A9%B3%E7%B4%B0%E3%81%A8%E9%81%93%E8%B7%AF%E5%90%8D/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    道路の詳細と道路名
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%B8%82%E6%B0%91%E3%81%AE%E8%BF%BD%E8%B7%A1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    市民の追跡
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/IPC%E9%80%A3%E6%90%BA%E3%81%AE%E6%95%B4%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPC連携
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88%E9%80%A3%E6%90%BA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    コンポーネント連携
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/UI%E5%85%B1%E9%80%9A%E5%9F%BA%E7%9B%A4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UI共通基盤
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%97%E3%83%AC%E3%82%A4%E3%83%A2%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    プレイモード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%8B%E3%83%B3%E3%82%B0%E3%81%A8%E4%BA%92%E6%8F%9B%E6%80%A7/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    バージョニングと互換性
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%BB%E3%83%BC%E3%83%96%E3%83%87%E3%83%BC%E3%82%BF%E4%BB%95%E6%A7%98/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    セーブデータ仕様
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B7%E3%83%8A%E3%83%AA%E3%82%AA%E5%88%B6%E4%BD%9C%E3%81%A8%E9%85%8D%E5%B8%83/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    シナリオ制作と配布
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB%E5%9F%BA%E7%9B%A4/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    チュートリアル基盤
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%A2%E3%83%83%E3%82%AF%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    モックバックエンド
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/Unity%E5%85%A5%E5%8A%9B%E5%88%B6%E5%BE%A1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity入力制御
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/Unity%E8%A1%A8%E7%A4%BA%E3%83%A2%E3%83%BC%E3%83%89/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unity表示モード
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%85%AC%E5%85%B1%E4%BA%A4%E9%80%9A%E3%83%8F%E3%82%A4%E3%83%A9%E3%82%A4%E3%83%88/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    公共交通ハイライト
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%A2%E3%83%A9%E3%83%BC%E3%83%88%E3%83%95%E3%83%A9%E3%82%B0%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    アラートフラグ管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%80%9A%E7%9F%A5%E3%83%AC%E3%83%99%E3%83%AB%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    通知レベル管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E9%85%8D%E7%BD%AE/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ファイル配置
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E7%B4%A0%E6%9D%90%E3%82%AF%E3%83%AC%E3%82%B8%E3%83%83%E3%83%88%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    素材クレジット管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E3%82%B5%E3%82%A6%E3%83%B3%E3%83%89%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    サウンドシステム
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E9%81%94%E6%88%90%E7%9B%AE%E6%A8%99%E3%82%A6%E3%82%A3%E3%83%B3%E3%83%89%E3%82%A6/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    達成目標ウィンドウ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../programs/%E5%BB%BA%E8%A8%AD%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E7%AE%A1%E7%90%86/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    建設プロジェクト管理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#o1-概要" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.1. 概要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o2-入力データ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.2. 入力データ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o3-管理範囲と道路スナップショット" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.3. 管理範囲と道路スナップショット
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o4-道路の区画線と共通の車線モデル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.4. 道路の区画線と共通の車線モデル
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o5-交通量と台数の安定" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.5. 交通量と台数の安定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="O.5. 交通量と台数の安定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#道路別の期待台数" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        道路別の期待台数
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#全体の台数枠" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全体の台数枠
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#不足補充と道路間の偏りの調整" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        不足補充と道路間の偏りの調整
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o6-交差点での分岐と通過" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.6. 交差点での分岐と通過
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o7-沿道到着フェードプール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.7. 沿道到着・フェード・プール
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="O.7. 沿道到着・フェード・プール">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#入口退出経路のキャッシュと負荷" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        入口・退出経路のキャッシュと負荷
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#路上駐車の描画" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        路上駐車の描画
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o8-コンポーネントと調整値" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.8. コンポーネントと調整値
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o9-検証と制限" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.9. 検証と制限
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o10-路線に所属する車両" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10. 路線に所属する車両
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="O.10. 路線に所属する車両">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#o101-車両アセット" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10.1. 車両アセット
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#o102-鉄道車両の接写表示" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10.2. 鉄道車両の接写表示
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#o103-道路車両の接写遠景" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10.3. 道路車両の接写・遠景
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#o104-路線カラーの塗装" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.10.4. 路線カラーの塗装
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o11-走行音" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.11. 走行音
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lrtの軌道位置" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LRTの軌道位置
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o12-ドライブモード" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.12. ドライブモード
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#o13-一時停止と市民の追従" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        O.13. 一時停止と市民の追従
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ロープウェイの循環描画" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ロープウェイの循環描画
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ロープウェイの循環描画">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#完成した駅間の抽出" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        完成した駅間の抽出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ケーブルと折り返し設備" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ケーブルと折り返し設備
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#時間描画後始末" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        時間・描画・後始末
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#交差点の路面標示との共有規則" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        交差点の路面標示との共有規則
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="o-車両の走行描画">O. 車両の走行描画</h1>
+<h2 id="o1-概要">O.1. 概要</h2>
+<p>車両はUnity側だけで生成する描画用オブジェクトである。バックエンドの車種別日次交通量 <code>path_traffic</code> に応じた台数をカメラ周辺に配置し、道路の車線と交差点の通過曲線を連続して走らせる。経済シミュレーションやサーバーの永続エンティティには影響しない。</p>
+<p><strong>走行と台数調整は別の処理である。</strong> 交差点への到達時には、移動先の台数超過を理由に車を消さない。不足道路への発生と、過剰な車の沿道到着を一定間隔で調整する。到着予約を持つ車は、建物のある接道街路まで走り、入口から敷地へ入ってから消える。高速道路や空き地では沿道到着しない。</p>
+<p>目標は、静止したカメラで見続けたときに交通量相応の水準を保つことである。常に同じ台数を表示するものではない。退出できる建物も管理範囲外への経路もない閉じた道路網では、既存車を残して補充を止めるため、交通量が減っても目標台数まで減らない場合がある。期待台数が1台未満の場合は、車がいる時間といない時間で表現する。道路の分割ごとに最低1台を割り当てない。</p>
+<p>一般車は同じ道路・方向・車線の前車との間隔に応じて減速・停止する。交差点の競合予約、信号待ち、追い越し、右折待ちは扱わないため、合流や交差する車両が重なる場合はある。発生・到着は沿道への出入りを表す演出であり、区画の道路に面した辺に描画用の入口を設定する。FBXの玄関や駐車場入口の位置そのものは使わない。</p>
+<h2 id="o2-入力データ">O.2. 入力データ</h2>
+<p>既にロードされている <code>PathManager</code> の道路データを使う。時間は <code>POST /api/v1/paths/motion</code> に周辺のパスIDを渡して2秒周期で取得する。応答は自由走行秒数・混雑込み秒数・論理長・活動時間を含む。論理長 <code>length_m</code> は道路の中心線に沿った水平の長さで、2つの秒数と同じ道のりを表す。曲線の道路でも端点間の直線距離ではない。新しい都市への切り替え後は古い応答を破棄する。</p>
+<table>
+<thead>
+<tr>
+<th>入力</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>path_traffic</code></td>
+<td>車種別の日次通過トリップ数。目標台数と分岐の重み</td>
+</tr>
+<tr>
+<td><code>travel_direction</code></td>
+<td><code>DIR_BOTH</code> / <code>DIR_FORWARD</code> / <code>DIR_BACKWARD</code> による進入方向制限</td>
+</tr>
+<tr>
+<td>始終点ノードID</td>
+<td>同一ノードに接続する次の道路の取得</td>
+</tr>
+<tr>
+<td><code>path_type</code>・<code>status</code></td>
+<td><code>PATH_STREET</code> / <code>PATH_MOTORWAY</code> かつ <code>STATUS_ACTIVE</code> の選別</td>
+</tr>
+<tr>
+<td>パスマスターの道路幅・歩道幅・側線幅・中央分離帯幅・車線数</td>
+<td>道路の区画線と共通の車線配置</td>
+</tr>
+<tr>
+<td><code>CityInfoStore.TrafficHand</code></td>
+<td>都市の左側通行・右側通行</td>
+</tr>
+</tbody>
+</table>
+<p><code>path_traffic</code> は <code>PathSummary</code> の型付きフィールドを直接読む。未設定・非有限値・負値は交通量0として扱う。単位の異なる <code>utilization</code> を交通量の代用にはしない。</p>
+<p>交通量は車種別の道路合計であり、方向別・右左折別の内訳を含まない。双方向道路の発生方向は等確率とし、分岐は接続道路の交通量による確率的な演出とする。集計値だけから個々の車の目的地を復元することはできない。</p>
+<h2 id="o3-管理範囲と道路スナップショット">O.3. 管理範囲と道路スナップショット</h2>
+<p>中心は <code>CameraCellChecker.CurrentWorldPosition</code>（注視点のy=0平面との交点）を、カメラ位置から水平 <code>maxCenterLead</code>(300m)以内に寄せた点とする。乗車中は乗車位置、市民の追従中は追従対象の位置を使う(<code>VehicleManager.ResolveTrafficCenter</code>)。浅い俯角では注視点が数km先へ飛び、見えない遠方を管理し続けるうえ、ピッチを少し変えただけで中心が大きく跳ぶためである。ロードの中心そのものは変えない。管理半径は <code>renderRadius + despawnMargin</code>（既定400m + 80m）とする。<strong>目標台数、発生位置、範囲外デスポーンは同じ管理円を使う。</strong> 余白の車だけを台数に含め、対応する目標を含めない状態は作らない。</p>
+<p>0.5秒ごとに <code>PathManager.GetPathsNearCircle</code> がセル逆引きから道路候補を取得する。全都市の道路について毎回中心線を再計算しない。候補の中心線を <code>TryGetPathPolyline</code> で取得し、累積距離付きの <code>VehiclePolyline</code> として範囲内の車で共有する。地形追従済み・交差点切断済みの点列なので、道路メッシュと同じ基準で走行できる。</p>
+<p>スナップショットは <code>RenderWorkScheduler</code> のワーカー(<code>vehicleRoads</code>)で共通予算内に分割して構築し、完成後に一括交換する(途中の集合を車に見せない)。<code>PathManager.GetPathGeometryRevision</code> とパスデータが前回と同じ道路は点列を取得し直さない。版が不明(-1)なら点列の完全一致(<code>VehiclePolyline.SameSource</code>)で比べて <code>VehiclePolyline</code> を使い回す。中心・半径も同じなら道路ごと再利用する。乗車開始だけは、その場で道路を得てから車を置く必要があるので同期版で作る。</p>
+<p>中心線の各線分とXZ平面の円との交点を解き、円内区間を距離の区間列として保持する。両端点が円外でも途中で円を横切れば検出する。複数回出入りする場合も円外区間を足し込まない。初期配置は各区間の長さに比例して選ぶ。初期の台数枠を満たした後の補充は、有効な建物入口か、進入方向に対応する管理円の境界付近に限る。高速道路の途中や建物のない街路上へ通常補充は行わない。</p>
+<p>道路・地形の更新時は、旧点列上の位置を新点列の元の進捗付近(±(長さの差+10m))へ射影して、道路上の車を移す(<code>VehiclePolyline.RemapFrom</code>)。点列のインスタンスが同じなら移さない。交差点通過中の曲線は完走し、その後のスキャンで最新形状へ追従する。削除・非稼働化・進行方向の禁止を検出した車は除去する。</p>
+<p>1フレームで <code>renderRadius</code> を超えて管理中心が移動した場合は、全消去せずに中心を移し直す。新しい管理円の中にいる車はそのまま走らせ、円外の車は通常のデスポーンに任せる。道路の集合は新しい走査が確定するまで保持し、発生候補を空にしてすぐに再走査し、確定後に初期充填へ戻す。入口の計算結果は区画と形状の署名で有効性を判定しているので保持する。通行方向の変更とゲーム開始前の状態へ戻ったときは全消去して台帳をリセットする。管理円は画面の表示領域そのものではないため、広い俯瞰では管理円の境界が見える場合がある。</p>
+<h2 id="o4-道路の区画線と共通の車線モデル">O.4. 道路の区画線と共通の車線モデル</h2>
+<p>一般車とバスの車線位置は、<code>VehiclePolyline.SampleOffset</code>で頂点ごとの平均進行方向から横オフセットを求め、隣接するオフセット済み頂点を補間する。発生・到着の路肩寄せやバスの交差点前の車線寄せも、この断面上の横位置として補間するため、点列の線分境界で車体位置が跳ばない。</p>
+<p>一般車の道路上の姿勢は、標準車長4.5mの前後点を結ぶ方向から求める(<code>SampleOffsetPose</code>)。短い地形追従線分の傾きをそのまま車体へ適用せず、頂点をまたいでもピッチ・ヨーを連続させる。中心の位置と走行距離は変えず、道路端では前後点を点列内へ収める。</p>
+<p>1車線の高速道路流入ランプでは、<code>PathManager.GetMotorwayMerge</code> が返す描画専用の合流計画を使う。下流側の接合区間の前半は一定幅の車線を並走し、後半でランプに隣接する本線車線へ寄せる。本線を直進する車も同じ本線点列を参照する。<code>MotorwayMergeLayout</code> は区画線と走行位置を共有し、接続ごとの点列をキャッシュする。一般車・ドライブモードは <code>VehicleManager</code>、路線バスとハイライトは <code>TransitRouteGeometry</code> を経由する。2車線ランプや流出など、対象外の接続は従来の汎用曲線を使う。合流優先権や車両どうしの競合予約を追加するものではない。形状の詳細は<a href="../G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">G_道路メッシュの生成</a> §11.7。</p>
+<p><code>RoadPath.cs</code> の <code>RoadLaneLayout</code> が区画線境界と車線中心の唯一の定義である。<a href="../G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/">道路メッシュの生成</a> §8.3 も同じ計算を使う。</p>
+<p>道路幅を W、片側歩道幅を SW、側線幅を SL、中央分離帯幅を CW、車線数を L とする。走行帯の外側は <code>Rout = max(0, W/2 − SW − max(0, SL)/2)</code>。道路幅は歩道を含む。</p>
+<table>
+<thead>
+<tr>
+<th>道路</th>
+<th>車線の割り当て</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>双方向・L≦1</td>
+<td>中心線上を走る。対向車も同じ車線を使う</td>
+</tr>
+<tr>
+<td>双方向・偶数L</td>
+<td>片側L/2車線。中央分離帯の外側CW/2からRoutまで等分</td>
+</tr>
+<tr>
+<td>双方向・奇数L≧3</td>
+<td>片側floor(L/2)車線。内側境界をmax(CW/2, Rout/L)として中央の転回用帯を空ける</td>
+</tr>
+<tr>
+<td>一方通行</td>
+<td>−Routから+RoutまでをL車線に等分。中央分離帯付きの一方通行は想定しない</td>
+</tr>
+<tr>
+<td>有効な走行帯がない寸法</td>
+<td>中心線上の1車線にフォールバック</td>
+</tr>
+</tbody>
+</table>
+<p>車線番号は進行方向の通行側の路肩を0とする。車線中心は左側通行なら進行方向の左へ、右側通行なら右へ配置する。一方通行では全車線を使うため、中央を超えた車線の符号は反転する。</p>
+<p>発生時は利用可能な車線をランダムに選ぶ。トラック・バスは70%の確率で路肩側を選び、それ以外は全車線から抽選する。抽選した車線から順に試し、同じ道路・方向・車線の前後8m以内に車がいれば別の車線へ回す。全車線が塞がっていれば、その制御周期では発生しない。交差点を渡るときは路肩からの車線番号を維持し、移動先の車線数でクランプする。車線の横位置の変化は通過曲線で接続する。</p>
+<p>発生時は路肩から15mかけて車線中心へ寄る。途中で交差点に入る場合は、その時点の横位置から通過曲線を作る。通常走行中の車線変更は行わない。</p>
+<h2 id="o5-交通量と台数の安定">O.5. 交通量と台数の安定</h2>
+<h3 id="道路別の期待台数">道路別の期待台数</h3>
+<p>道路×車種ごとの期待台数は、日次交通量から流量と通過時間を求めて計算する。</p>
+<p><strong>期待台数 = 日次交通量 ÷ (活動時間[h] × 3600) × 管理円内の中心線長[m] ÷ コアの平均速度[m/s] × 表示標本率</strong></p>
+<p>平均速度は論理長を混雑込み通過時間で割る。通常の車速には同じ平均時間を目標とする制御を使い、個体別のランダム速度倍率は加えない。時間データ未取得時だけ基準速度と車種係数を使う。<code>renderFraction</code> は0〜1の表示標本率で、交通量を増幅して架空の渋滞を作らない。バスは路線専用の管理へ移り、一般車の台数枠には含めない。</p>
+<p><code>RoadMotionControl</code> は残り距離÷目標残り秒数を要求速度とし、コアの自由走行平均速度を上限にする。前車との車体間隔は標準車長4.5mで近似し、2mの余白と減速度3m/s²、加速度1.5m/s²で追従する。車が遅れた場合も上限を超えて帳尻を合わせず、超過時間を許す。停止車を最低速度で前進させない。一般車のカーブ位置ごとの速度プロファイルや実車長による占有判定は未対応であり、区間全体の平均を合わせる近似である。</p>
+<p>期待台数の合計が <code>maxActiveVehicles</code> を超える場合は、<strong>全道路の期待台数に同じ縮小倍率</strong>を掛ける。道路の走査順に上限を取り合わない。</p>
+<h3 id="全体の台数枠">全体の台数枠</h3>
+<p><code>VehiclePopulationBudget</code> が全道路の期待台数を合計してから整数化する。整数部分は常時の枠、端数は12秒の時間窓ごとに繰り越す。例えば合計0.2台なら、概ね5窓に1窓だけ1台分の枠を持つ。発生・到着の遅れで生じた台秒の差分も端数へ繰り越し、低交通量で到着待ちの車が平均を押し上げ続けないようにする。</p>
+<p>期待台数が増えれば整数部分の枠は即座に増やす。減った場合も次の時間窓を待たず上限を下げる。既存車の除去は到着演出を通すため、実台数は枠の変化へ遅れて追従する。絶対上限 <code>maxActiveVehicles</code> に達した状態では新規発生させない。</p>
+<p><strong>道路1本ごとに期待台数を切り上げない。</strong> 同じ長さ・交通量の道路を内部的に分割しても、合計した期待台数は同じである。ただし交差点切断で道路長が変わる場合や、通過曲線・右左折の減速時間は別の影響を持つ。</p>
+<h3 id="不足補充と道路間の偏りの調整">不足補充と道路間の偏りの調整</h3>
+<p>0.25秒の固定周期で、道路×車種の現在台数を実在する車から数え直す。交差点通過中は移動先の道路へ1回だけ計上する。到着予約中・フェード中の車も、消えるまでは実台数と全体枠に含む。</p>
+<p>全体枠が不足している場合、初期配置中または補充地点を持つ道路を対象に、道路ごとの「現在台数の不足」と「8秒の指数移動平均の不足」を重みにして発生先を選ぶ。発生は枠の不足量に応じて数回の制御周期で充填する。</p>
+<p>全体枠を超えた場合は、共有の退出経路表で出口へ到達可能と判定された車のうち、最低走行時間を満たす車から、平均密度の超過が大きい道路の車を優先して沿道到着を予約する。既に予約済みの車は超過解消予定として扱い、二重に予約しない。入口へ到達するまで時間がかかっても、途中で消して帳尻を合わせない。端数枠はこの到着待ち時間も台秒で繰り越す。</p>
+<p>総台数が枠と合っていても、2秒ごとに道路間の偏りを確認する。平均台数が期待値を <code>max(0.5台, 期待値の25%)</code> 以上超えた道路があれば、最大1台の到着を予約する。その車が消えた後、不足道路へ補充する。小さな瞬間的超過のたびに車を入れ替えないための許容幅である。</p>
+<p>道路別の密度はこの許容幅と走行によって変動する。特に1台未満の道路では瞬間値の一致を要求しない。総数の安定と、車が複数の道路を続けて走ることを優先する。</p>
+<h2 id="o6-交差点での分岐と通過">O.6. 交差点での分岐と通過</h2>
+<p><code>GetPathsConnectedToNode</code> の接続インデックスから、管理範囲内の稼働道路を選ぶ。現在の道路を除外し、ノードからの進入方向が <code>travel_direction</code> で許される道路だけを候補にする。</p>
+<p>通常の車は同じ車種の <code>path_traffic</code> を重みにした抽選で次の道路を決める。到着予定の車は、退出先への共有逆探索表で段数が最も小さい進入可能な道路を優先する。交通量0の候補は、正の交通量を持つ候補がない場合だけ均等抽選で使う。描画範囲外やまだスナップショットにない道路には進入しない。</p>
+<p>道路端は<a href="../J_%E3%83%91%E3%82%B9%E3%81%AE%E4%BA%A4%E5%B7%AE%E5%87%A6%E7%90%86/">交差点ハルの切断点</a>まで切り詰められているため、車線端同士を通過曲線で結ぶ。</p>
+<ul>
+<li>退出点P0・進入点P1は、それぞれ道路端に車線の横位置を加えた点。</li>
+<li>接線T0・T1は、各道路端での走行方向。</li>
+<li>三次ベジエの制御点はP0、P0+T0×d、P1−T1×d、P1。dは端点間距離×張り出し係数。</li>
+<li>曲線を32区間に分割して累積距離を持ち、距離に沿って進む。高さも制御点の接線に従う。</li>
+<li>接続曲線でも時間制御で求めた速度を使う。コアの加減速込み時間に独立した交差点減速倍率を重ねない。</li>
+<li>同じ車を維持して「道路→交差点→次の道路」へ状態遷移する。車線端が一致する直進ではゼロ長の接続を即座に通過する。</li>
+<li>フレーム内に区間の端へ到達した場合、未消費時間を次の区間へ渡す。極端なデータで1フレームに128回を超えて道路遷移する車は除去し、無限ループを防ぐ。</li>
+</ul>
+<p>候補がない場合、逆方向が許可された街路ではUターンする。高速道路ではUターンしない。進めない車は終端で実寸のまま待機し、接続先がロード・新設されれば走行を再開する。入口のない場所での退出やフェードには切り替えない。信号待ちや他車との交差判定は行わない。</p>
+<h2 id="o7-沿道到着フェードプール">O.7. 沿道到着・フェード・プール</h2>
+<p>発生後6秒間は密度調整による到着対象にしない。到着予約は交差点通過中にも保持するが、路肩寄せとフェードは道路上で始める。</p>
+<p>退出地点は、進行方向の先にある有効な建物入口から選ぶ。入口が今のパスにない場合は、予約を保持して交差点を通過する。入口の前で路肩へ寄せながら減速し、0.5秒かけて敷地側へ向きを変え、実寸のまま3m/sで敷地内の退出点へ進む。退出点に到着してから0.4秒で縮小する。左右は都市の通行側にある区画だけを使い、対向車線を横切って反対側の敷地へ入らない。</p>
+<p>入口の幾何(接道辺→敷地内の点)は <code>RoadsideAccess</code> が求め、<a href="../W_%E6%AD%A9%E8%A1%8C%E8%80%85%E3%81%AE%E6%8F%8F%E7%94%BB/">歩行者の描画</a>と共有する。車はパス幾何に対する左右を通行側と走行方向へ読み替える。入口は <code>PATH_STREET</code> かつ <code>frontage_allowed=true</code> の道路に限定する。<code>GetParcelIdsByFrontPath</code> と <code>GetBuildingIdsByParcel</code> の逆引きで、接道区画に実建物（<code>is_bd=true</code>、<code>STATUS_ACTIVE</code>）があることを確認する。区画も稼働中であることを要求する。接道IDは離れた区画にも付くため、それだけで入口とはしない。</p>
+<p>区画辺の中点を道路中心線へ射影し、道路端から3m以上、道路外縁との差が−1〜4m、高低差が2m以内、辺と道路の方向がほぼ平行（内積の絶対値0.8以上）のものを候補にする。区画辺から道路と反対へ3m進んだ点が実際にその敷地内にあることも確認する。狭すぎる敷地や高架・トンネルとの不自然な接続は採用しない。入口は仮の描画位置であり、実際の玄関・駐車場、歩道の切り下げ、敷地内障害物を探索するものではない。</p>
+<p>退出を始める直前にも、建物・区画・接道・接道許可が有効か確認する。未ロードや撤去で条件を満たさなくなった入口へは退出しない。</p>
+<p>発生時は0.4秒でスケールを0から1へ立ち上げる。モデルのマテリアルは交換しない。描画範囲外、削除された道路、禁止された走行方向の車は直ちにプールへ戻す。ただし道路脇へ退出中は管理円を出ても退出・フェードを完了させる。退出中の車も消えるまでは全体枠を占める。</p>
+<p>実体は車種と外観(バリアント)単位でプールし、取得時にスケールを戻す。外観の在庫が無ければ同じ車種の在庫で代替し、車の外観番号を実際に使った外観へ書き換える。デスポーンした車はスケール0で即座に隠し、<code>SetActive(false)</code> は1フレーム <code>deactivationBudgetMs</code>(0.3ms、最低4件)の予算で遅らせて行う。補充は <code>spawnBudgetMs</code>(1ms)の予算で打ち切り(1台目は必ず試みる)、超えた分は制御周期の無いフレームで繰り越して消化する。ゲーム開始後、モデルが使えるようになったら環境交通(バス・LRTを除く)の各外観を1台ずつ <code>vehicleWarmup</code> ワーカーで事前生成し、走行中に初めての外観を生成するスパイクを避ける。モデル解決は <code>VehicleModelResolver</code> が <code>ModelManager.GetModel</code> を通して以下の順で行う。</p>
+<ol>
+<li><code>Models/Vehicles/{車種}/{バリアント}</code></li>
+<li><code>Models/Vehicles/{車種}</code></li>
+<li><code>Models/Vehicles/{VEHICLE_STANDARD}</code></li>
+<li>車種別に色分けした箱</li>
+</ol>
+<p>バリアントは <code>Resources/Config/vehicle_model_config.yaml</code> の設定から選ぶ。FBXと設定の実データがなくても箱で動作する。一般車モデルは実寸で置き、道路幅に合わせて縮めない。著作原点と長手軸は読み込みラッパー内で接地中心・+Zへ揃える。公共交通はマスターの公称車長とホーム制約に合わせ、車体の長手方向だけを公称車長へ補正する。</p>
+<h3 id="入口退出経路のキャッシュと負荷">入口・退出経路のキャッシュと負荷</h3>
+<p>道路スナップショット更新後、入口更新用コルーチンが周辺の接道候補を点検する。道路中心線・幅・走行方向、区画version、稼働建物の集合から変更を検出し、変更した区画だけ距離・高低差・敷地内判定を再計算する。入口や道路接続、管理円外へ抜ける端点が変わっていなければ経路表は再構築しない。</p>
+<p>経路表は「道路ID＋走行方向」の状態を持つ。建物入口と管理範囲外への出口を始点に、逆グラフを幅優先探索して出口までの段数を全車で共有する。一方通行と街路の行き止まりでの折り返しを反映する。車は交差点で接続道路の段数を比較するだけで、独立した経路探索を行わない。</p>
+<p>入口の探索も車が道路へ入ったとき、または共有表の世代が変わったときに限る。選んだ入口への距離を通常の走行で消費するため、毎フレーム建物を走査しない。入口表の更新は <code>RenderWorkScheduler</code> の共通予算(<code>PerformanceConfig.SliceBudgetMs</code>)で協調中断し(カテゴリ <code>vehicleAccess</code>)、完成した入口表と経路表を一括交換する。道路形状の署名には、点列ごとに一度だけ計算する <code>VehiclePolyline.ShapeHash</code> を使う。単一の区画処理や初回JIT等は予算を超える場合があり、厳密なフレーム時間上限ではない。</p>
+<p>入口表の再公開で同じ入口(同じ区画・距離差0.5m未満)を選び直したときは、路肩への寄せの進み具合を保つ。入口を失ったときや別の入口へ替わるときは、寄せ量を発生時の寄せへ移し、現在の横位置から走行距離に応じて車線へ戻す。</p>
+<h2 id="路上駐車の描画">路上駐車の描画</h2>
+<p>路上駐車は走行車両とは別に <code>ParkedVehicleManager</code> が表示する。パスの <code>parked_cars</code> はその道路に同時に停まっている台数であり、日次交通量から走行台数を求める換算は行わない。道路の一覧・単体取得で受け取り、エポック後は道路メッシュのversionが変わらなくても最新値を反映する。稼働中の生活道路のうち <code>street_parking_capacity</code> が正のものだけを対象とする。建物内・敷地内の駐車はこの表示には含めない。</p>
+<p>既存の乗用車10外観・商用車2外観・トラック4外観を、それぞれ60%・30%・10%の抽選比率で混ぜる。道路IDと候補番号で外観・候補の優先順位を固定するため、カメラの移動や再ロードで車が入れ替わらない。台数が増えると未使用候補が埋まり、減ると優先順位の低い候補から消える。小数台数は道路IDに固定した確率で丸め、道路ごとの切り上げによる過大表示を避ける。</p>
+<p>配置に使うのは道路本体と共通の地形追従・交差点切断済み中心線である。両側の歩道を除いた車道端から0.2m内側へ車体外縁を寄せ、道路端・交差点の切断面から5mを空ける。候補間隔は実モデルの全長に1.2mを足して決める。向きは都市の左右通行に合わせ、一方通行では両側とも許可された向きを向く。高さは中心線に <code>RoadPartHeights.BODY_ABOVE_SPLINE</code> を加え、姿勢は道路の勾配に合わせる。</p>
+<p>車幅が片側の車道に収まらない場合や、カーブで車体の四隅が歩道・中央分離帯へ張り出す場合はその候補を使わない。内カーブなどで隣の車体に重なる候補も省く。満杯になった後の路駐超過分は表示を頭打ちにし、二重駐車は描かない。シミュレーションの台数はクリップしないため、表示上限と経済上の容量は別である。走行車両・歩行者との衝突回避には組み込んでいない。</p>
+<p>管理中心(走行車と同じ <code>ResolveTrafficCenter</code>。カメラから水平300m以内に寄せた注視点、乗車中は乗車位置)から480m以内を表示し、0.5秒間隔でセル逆引きから対象道路を取得する。形状が同じなら配置候補を再利用する。形状の比較は <code>PathManager.GetPathGeometryRevision</code> とデータの参照が一致するかで行い、一致すれば点列を取得しない(版が不明なら点列の完全一致で比較する)。管理中心が480mを超えて跳んでも配置候補と描画バッチは捨てず、新しいバッチができるまで旧表示を残す。生成と描画行列の更新は共通フレーム予算で分割し、通常モデルをメッシュ・材質別に511件以下のGPUインスタンシングで描く。モデルのロードと接地原点・前方軸の正規化は走行車両の <code>VehicleModelResolver</code>、材質抽出は <code>PropRenderModel</code> と共有する。個体ごとのGameObject・コライダー・走行音は持たない。道路の非表示指定、アンロード、都市切替では表示も解除する。</p>
+<p><code>unity/Tests/Vehicles/run.ps1 -ParkingOnly</code> で実FBX、車種比率、台数と端数、左右通行・一方通行、路面高さ、端部余白、狭い道路、曲線・勾配・車体重複を検証する。</p>
+<h2 id="o8-コンポーネントと調整値">O.8. コンポーネントと調整値</h2>
+<table>
+<thead>
+<tr>
+<th>コンポーネント</th>
+<th>責務</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VehicleManager</code></td>
+<td>範囲更新、分岐、密度調整、配置、プール</td>
+</tr>
+<tr>
+<td><code>Vehicle</code></td>
+<td>車1台の道路・交差点・到着状態、残り時間を返す移動</td>
+</tr>
+<tr>
+<td><code>VehiclePolyline</code>（Vehicle.cs）</td>
+<td>距離補間、円内区間、交差点曲線</td>
+</tr>
+<tr>
+<td><code>VehiclePopulationBudget</code>（VehicleManager.cs）</td>
+<td>全体の整数枠、端数と到着遅れの繰り越し</td>
+</tr>
+<tr>
+<td><code>RoadLaneLayout</code>（RoadPath.cs）</td>
+<td>車線中心と区画線境界の共有計算</td>
+</tr>
+<tr>
+<td><code>RoadsideAccess</code></td>
+<td>建物入口の幾何と有効性検査。歩行者と共有</td>
+</tr>
+<tr>
+<td><code>PathManager</code></td>
+<td>セル逆引き、接続道路、地形追従・切断済み中心線</td>
+</tr>
+<tr>
+<td><code>CityInfoStore</code></td>
+<td>通行方向の共通取得</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>パラメータ</th>
+<th>既定</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>renderRadius</code> / <code>despawnMargin</code></td>
+<td>400m / 80m</td>
+<td>合計が管理半径</td>
+</tr>
+<tr>
+<td><code>renderFraction</code></td>
+<td>1</td>
+<td>0〜1の表示標本率</td>
+</tr>
+<tr>
+<td><code>activeHoursPerDay</code></td>
+<td><code>LocalConstants.VEHICLE_ACTIVE_HOURS_PER_DAY</code></td>
+<td>日次交通量を流量へ変換する活動時間</td>
+</tr>
+<tr>
+<td><code>maxActiveVehicles</code></td>
+<td>300</td>
+<td>実在する車の絶対上限</td>
+</tr>
+<tr>
+<td><code>rangeScanInterval</code></td>
+<td>0.5秒</td>
+<td>道路スナップショットの更新間隔</td>
+</tr>
+<tr>
+<td><code>spawnFillRate</code></td>
+<td>1/秒</td>
+<td>全体枠への充填速度。制御周期ごとに最低1台分を処理</td>
+</tr>
+<tr>
+<td><code>minimumJourneyTime</code></td>
+<td>6秒</td>
+<td>密度調整による到着を許可する最低走行時間</td>
+</tr>
+<tr>
+<td><code>baseSpeed</code></td>
+<td>12m/s</td>
+<td>車種係数・個体差を掛ける基準速度</td>
+</tr>
+<tr>
+<td><code>intersectionCurveTension</code></td>
+<td>0.4</td>
+<td>曲線制御点の張り出し。0.1〜0.6へ制限</td>
+</tr>
+<tr>
+<td><code>heavyVehicleOuterLaneBias</code></td>
+<td>0.7</td>
+<td>大型車が路肩車線を優先する確率</td>
+</tr>
+<tr>
+<td><code>fadeDuration</code></td>
+<td>0.4秒</td>
+<td>発生・到着のスケール補間時間</td>
+</tr>
+<tr>
+<td><code>maxCenterLead</code></td>
+<td>300m</td>
+<td>管理中心をカメラから水平にこの距離以内へ寄せる。0以下で無制限</td>
+</tr>
+<tr>
+<td><code>spawnBudgetMs</code></td>
+<td>1ms</td>
+<td>1フレームの補充に使う時間。超えた分は次のフレームへ繰り越す</td>
+</tr>
+<tr>
+<td><code>deactivationBudgetMs</code></td>
+<td>0.3ms</td>
+<td>プールへ戻した車体の <code>SetActive(false)</code> に使う時間(最低4件)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="o9-検証と制限">O.9. 検証と制限</h2>
+<p><code>unity/Tests/Vehicles/run.ps1</code> は独立したUnityプロジェクトで本編のビルド済みアセンブリを使い、円との交差・再進入、車線位置、一方通行、通過曲線、残り移動時間、端数枠、環状道路の長時間走行を検証する。本編のシーンや都市データは書き換えない。</p>
+<p>道路の細分化で総台数が膨らまないこと、車が繰り返しパスを跨ぐこと、退出先がある場合は交通量0で残留車も到着し、退出先のない閉路では車が維持されることを確認する。テストの道路スナップショットは人工的なものであり、実際の全交差点形状・地形・ロード順を網羅するものではない。</p>
+<p>右左折内訳・目的地の再現、信号・衝突、FBXの玄関・駐車場位置との一致は対象外である。鉄道編成の検証はO.10に記載する。鋭角・極端な異幅交差点では、通過曲線が路面内に収まることを別途確認する必要がある。</p>
+<h2 id="o10-路線に所属する車両">O.10. 路線に所属する車両</h2>
+<p><code>TransitDataStore</code> は <code>GET /api/v1/transit/lines</code> を5秒周期と明示的な更新通知で取得し、色帯と車両で共有する。色帯の表示トグルは車両に影響しない。セッション世代を照合し、古いHTTP応答で新しい都市のデータを上書きしない。</p>
+<p><code>TransitVehicleManager</code> は稼働中かつ調達両数から1編成以上組める路線を表示する。<code>train_count</code> は必要編成数なので表示数には使わず、調達両数÷<code>cars_per_train</code> の整数部分を使う。<code>TransitMotionClock</code> がコアの等加速度区間と停車時間を時刻から参照し、編成を実効運行間隔（<code>max(目標運行間隔, 1周の時間 ÷ 編成数)</code>。コアの <code>transit_capacity.effective_headway</code> と同じ式）ずつずらして発車させる。1周を終えた編成は、周期（編成数 × 実効運行間隔）の残りを先頭の停留所で停車して待つ（<code>TransitMotionClock.Schedule</code>）。区間ごとの <code>reversed</code>（編成の向きが先頭区間と逆か）で運転台と車両の並びを反転する。1周の継ぎ目（先頭の停留所）で折り返さない路線（環状運転など）は <code>Closed</code> になり、<code>TransitRouteGeometry.BuildRuns</code> が1周の前後に1周ずらした走行区間の写し（<code>Run.Wrapped</code>）を並べて、継ぎ目を跨ぐ編成の車端も隣の区間として解く。写しは経路そのものの描画（路線色帯）には使わない。画面外でも同じ時計が進み、毎フレームの距離積分によるずれは蓄積しない。表示上限は300両。極端に編成数が多い場合は候補を決定的に間引き、全編成を毎フレーム列挙しない。上限を超える1編成は表示しない。</p>
+<p>鉄道は <code>TransitRouteGeometry.SampleConsist</code> が停止中心を基準に前後へ車体を並べる。偶数編成は中央の連結位置、奇数編成は中央車の前後端の経路距離の中点を時計の位置へ合わせる。各車の前後端のワールド座標間距離が公称車長になるよう経路上を探索し、隣接車は同じ車端位置を共有する。時計の論理距離に車長をそのまま足さないため、曲線長・軌道の横位置・接続区間の距離倍率が異なっても連結間隔が伸びない。</p>
+<p>車体は前後端の中点へ置き、その弦方向へ向ける。短い地形追従線分の接線を直接車体のピッチに使わず、車長全体で傾きを求める。フレーム履歴や回転の遅延補間を持たず、同じ経路位置は停車・再表示・折り返しでも同じ姿勢になる。これは車端を基準にした剛体の描画近似で、台車の独立旋回・連結器メッシュの変形・車体幅による急曲線の衝突判定は行わない。公称車長を置けない曲線や不足した経路は表示しない。</p>
+<p>駅・停留所の停止位置は編成中心として扱い、鉄道とLRT（走行網に線路・モノレールを含む路線種別）では、編成が停留所の乗るパス（駅のホーム、LRTでは交差点で区切られた道路・軌道の1区間）からはみ出さない範囲へコアが中心を寄せる。バスは停留所の位置に止まる。折り返す停留所では停車時間を終えてから逆向きに動き、車体の前後と個体は維持する。路線が停留所を置いた駅のホーム（<code>platform_width</code> を持つバリアント）の上だけはパスの通行方向によらず両方向に走れるものとして扱い、止まらないホームでは通行方向を守る（コアの下地経路と同じ規則。停留所のパスは <code>TransitRouteGeometry.BuildRuns</code> が停留所間の区間の境目から集めた <code>Route.StopPaths</code>）。単線の両端に同じ長さの編成を置き、両停止中心が同一点になる場合は走行距離0となり、運行能力は発生しない。</p>
+<p><code>PathManager.TryGetPathPolyline</code> の未切断点列でパス内の距離割合を解決する。接続部では切断区間を補い、鉄道は描画済みレールのSplineComputerをサンプリングする。別パスとの接続が未ロード・未描画なら編成を表示しない。欠けた経路を直線でつないではならない。地形・道路の再生成は0.5秒周期の周辺形状更新で反映する。LRT・鉄道の交差点レールコネクタは、<code>PathManager.GetNodeIntersectionObject</code> が返す交差点メッシュ(<code>NodeMesh_*</code>)の子 <code>Rail</code> から読む。</p>
+<p>道路車両・鉄道・LRTの横オフセットは、共通の <code>VehiclePolyline.SampleOffset</code> で頂点ごとの平均進行方向から求め、隣接するオフセット済み頂点を補間する。線分境界で横位置が飛ばないようにし、レール接続の端部も本線のサンプル位置へ合わせる。路線ハイライトと公共交通車両は同じ走行位置を参照する（下記の折り返しの渡り線を除く）。</p>
+<p>バスは <code>TransitRouteGeometry.SampleBus</code> で停止中心の位置を保ち、鉄道と同じ公称車長の車端探索から車体の姿勢を求める。論理距離と描画長の倍率が違っても、車端間のワールド距離で車長を満たす。バスの停留所は道路端にも置けるため、車端が経路外や未ロード部分にかかって解けない場合は、現在の道路内の前後点から姿勢を求める。中心の経路が未ロードなら表示しない。前後点から求める姿勢は描画時計・停止位置・走行時間を変えない。</p>
+<p>軌道数2以上のパス（LRTの線路、1本のパスで上下線を持つ鉄道・モノレールの複線）では、パスと進む向きで走る軌道が1つに決まる。進行方向に対して都市の通行側で最も外側の軌道で、線路メッシュのレール接続・車止めと同じ規則（<code>TrackPath.TrackIndexForTravel</code>）である。軌道数1のパスは向きによらずその1本を走る。軌道の横位置は線路メッシュと同じ導出（<code>TrackPath.GetTrackCenterOffset</code>。島式ホームの駅の中央の間隔を含む。<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/#軌道中心の計算">N文書</a>）である。軌道の位置が違うパスどうしが真っすぐつながるノードの前後では、線路メッシュと同じ横位置の形（<code>TrackLateralProfile</code>。PathManager の <code>GetTrackLateralProfile</code>）を読み、軌道のS字（<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/#47-軌道の位置が違う線路の接続">N文書 §4.7</a>）に沿って横位置を移し、接線にも横位置の傾きを足す。交差点の板を作らずにつながるノード（<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/#46-板なしの直進接続">N文書 §4.6</a>）にはレール接続が無いので、両パスの軌道の端どうしで次のパスへ移る。</p>
+<p>同じパスの上で停留所に止まって向きを反転すると、走る軌道が入れ替わるので、編成は渡り線で移る。島式ホームの駅（<a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/#島式ホームの駅中央の間隔を持つ軌道数2の駅">N文書</a>）で折り返したときは、軌道の間のホームを車体が横切らないよう、駅のパスを出るまで到着した軌道のまま走り、渡り線はそのパスを出た位置から始める。<code>BuildRuns</code> は、直前に動いた走行区間と同じパスを逆向きに出発する走行区間に <code>Run.Turnback</code> を付ける（1周の継ぎ目で折り返す路線の先頭の区間は、1周の最後の区間と比べる）。停車中と、停車していた編成の先頭（出発方向）の位置までは到着した軌道のまま描き、そこから <code>TransitRouteGeometry.CrossoverLength</code>（50m）の区間で出発する軌道へ横位置を移す。停車していた編成の先頭は停止中心から編成の全長（<code>Route.ConsistLength</code>＝両数×公称車長）の半分先で、この区間の位置は時計の距離（コアの水平延長）をmとみなして測る。横位置は到着した軌道と出発する軌道の位置をsmoothstepの割合で補間し、接線にも横移動の傾きを含めるので車体の向きも連続に変わる。各車は自分の車端の位置で補間するので、編成は先頭から順に渡り線を通り、連結は <code>SampleConsist</code> の剛体配置のまま保たれる。</p>
+<p>渡り線の区間がパスの端を越える場合は、次のパスの上でも同じ割合で補間する。到着した軌道の側は、各パスの逆向きの通行側の軌道と、それらをつなぐ描画済みのレール接続（折り返す前に到着したときに通った接続）である。次のパスが単線なら、両側のレール接続はノードで同じ線路へ合流する。到着した軌道の側のレール接続が無いノード（一方通行の線路へ分かれる所など）では、出発する軌道のレール接続を到着した軌道の端へ寄せたものを到着した軌道の側とみなす。出発する軌道のレール接続が無ければ、ほかの接続と同じく編成を表示しない。</p>
+<p>渡り線は横位置だけの描画の補間で、時計の距離・停止位置・走行時間には影響しない。バスは停車時間の最後の最大5秒で転回して前向きに走るので、渡り線を持たない。路線色帯（公共交通ハイライト）と経路編集のプレビューは編成を持たない（<code>ConsistLength</code>＝0）ので渡り線を描かず、走行区間の向きで決まる軌道を示す。</p>
+<p>車体の接地高さは、軌道パーツの原点（スプライン+<code>RoadPartHeights.TRACK_ABOVE_SPLINE</code>）に走行面までの高さを足した位置とする。鉄道はレール頭頂の0.2m上、跨座式モノレール（<code>PATH_MONORAIL</code>）は軌道桁の天端が軌道パーツの原点なので0mで、車両の原点（走行タイヤの接地面）を桁の天端に置く。交差点のレール接続も同じ高さを使う。</p>
+<p><code>unity/Tests/Vehicles/run.ps1 -TransitOnly</code> は実アセンブリで、1・2・3・6両編成、曲線と細かな高低差、論理距離と描画長の倍率差、異なるパスの接続、車端の一致・位置と姿勢の連続性・折り返し・未ロード時の非補完を検証する。実都市の描画負荷や全線路形状を保証する検証ではない。</p>
+<p>モデル対応は <code>Resources/Config/transit_vehicle_models.json</code> に置く。1001=バス、1002=メトロ、1003=LRT（車種14）、1004=モノレール（車種24）、1005=中距離鉄道、1006〜1008=国際貨物・鉱石・石油の貨物路線（貨物列車。車種22）。外観は路線ごとにプレイヤーが選んだ <code>vehicle_model</code>（路線サマリの項目。描画専用で性能には影響しない）を全編成で使い、<code>vehicle_model_config.yaml</code> の候補に無い値（未設定の-1・モデル未導入の番号）のときだけ候補から路線IDと編成番号で固定する。旅客列車の先頭・後尾は外観番号の数値名(<code>0</code>・<code>1</code>…)、中間車は外観0が <code>middle</code>、それ以外が <code>middle_{外観番号}</code> を使う。全車で外観を揃え、折り返し・再表示でも維持する。中間車の該当外観がなければ <code>middle</code> を使う。プールは車種と実体モデル名の組で分ける。外観の変更は路線一覧の次の取得で反映し、表示キーに外観を含めるため旧外観の車体はプールへ戻る。UIの車両選択のカタログ（<code>tauri/src/data/transitVehicleModels.json</code>）は路線種別ごとに同じ候補番号を並べる。車体の在庫が無い外観の編成は、1フレームに1編成だけ新しく生成する(乗車中の編成と、一部が表示中の編成は除く)。路線一覧を更新するたびに、運行中の実体モデルごとに1両ずつ、共通予算の中で事前生成する(<code>transitWarmup</code>)。旅客列車の後尾の先頭車は反対向きに置く。バスは停車時間の最後の最大5秒を使って折り返し、復路も前向きに走る。メトロと中距離列車のFBX、バスのFBXを既存のModelManagerで読む。未登録種別は表示対象にしない。</p>
+<p>貨物は機関車1両と、残りすべてを同種の貨車で構成する。<code>cars_per_train</code> は機関車を含む総両数で、4両なら機関車1両と貨車3両になる。<code>transit_vehicle_models.json</code> は路線種別ごとに <code>vehicle_type</code> と任意の <code>wagon</code> を持ち、1006は <code>wagon</code>（コンテナ）、1007は <code>wagon_1</code>（鉱石用ホッパ）、1008は <code>wagon_2</code>（タンク）を使う。機関車の外観0/1/2とは独立した対応である。</p>
+<p>各車の実体モデル・塗装対象・後尾の反転は <code>VehicleModelConfig.GetTransitCarModel</code> が決め、描画と事前生成が共用する。貨物では固定個体番号0が機関車で、折り返しても同じ車体と向きを維持し、帰路は機関車が後方から押す。乗車視点もこの機関車を追う。貨車にも既存の <code>SampleConsist</code>・モデル原点補正・3段階のLODを使い、同じモデルの貨車は機関車の外観や路線をまたいでプールを共有する。貨車モデルが欠落した場合は代替箱を使い、機関車へ置き換えない。</p>
+<p>貨物のFBXはすべて20mだが、配置とホーム長判定は路線サマリの <code>length_per_vehicle</code> が正である。現行マスターの国際貨物は20m、鉱石・石油は15mなので、後者は機関車も貨車も <code>FitTransitLength</code> で15mへ調整する。</p>
+<p>UI側のカタログ <code>tauri/src/data/transitVehicleModels.json</code> は、路線種別(transit_masterの <code>transit_path_id</code>)をキーに <code>{variant, prop, key}</code> の列を持つ。<code>variant</code> は <code>vehicle_model_config.yaml</code> にある車種の候補番号、<code>prop</code> はその外観の先頭車を写した自由配置別名のプロップ種別IDで、UIはそのサムネイルを見本画像に使う(未生成なら文言で代替する)。表示名は各言語の <code>transit.json</code> の <code>transit.vehicleModels.&lt;key&gt;</code>。Unity側で外観を増減したら、このカタログ・<code>vehicle_model_config.yaml</code>・表示名の3つを揃える。バックエンドは候補一覧を持たず0以上の整数かだけを検証する。貨物3路線はいずれも0=JR貨物風（見本380）、1=アメリカ風（381）、2=インド国鉄風（394）を選べる。新設・詳細の両パネルはマスターの <code>freight</code> で最低両数を2にし、機関車を含む総両数であることを表示する。カタログに候補の無い種別では選択UIを出さない。見本画像は元の塗装で写したもので、実際の車体の帯は路線カラーで塗られる。</p>
+<p>公共交通の列車同士の閉塞・単線交換・路線バスと一般車の相互追従は未対応。運行計画に無い待ち時間をUnityだけで追加しない。設計上の理由と時間・流量の契約は <a href="../T_%E4%BA%A4%E9%80%9A%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%A8%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB%E3%81%AE%E6%95%B4%E5%90%88/">交通シミュレーションと走行描画の整合</a> を参照する。</p>
+<h3 id="o101-車両アセット">O.10.1. 車両アセット</h3>
+<p>モデルは <code>Assets/Models/Vehicles/{車種}/{モデル名}.fbx</code> に実寸で置く。原本は <code>blender/vehicles.blend</code>。Blender Xが幅、-Yが前、Zが高さで、原点は接地面の車体中心。共通材質とラッパープレハブを使う。</p>
+<table>
+<thead>
+<tr>
+<th>車種</th>
+<th>外観番号</th>
+<th>モデル</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10 / VEHICLE_STANDARD</td>
+<td>0〜9</td>
+<td>セダン、SUV、軽ハッチバック、軽トールワゴン、コンパクトハッチバック、ステーションワゴン、クロスオーバー、ミニバン、スポーツクーペ、大型セダン</td>
+</tr>
+<tr>
+<td>11 / VEHICLE_TRUCK</td>
+<td>0〜3</td>
+<td>中型箱型トラック、大型箱型トラック、タンクローリー、ダンプカー</td>
+</tr>
+<tr>
+<td>12 / VEHICLE_BUS</td>
+<td>0・1</td>
+<td>路線バス、高速バス</td>
+</tr>
+<tr>
+<td>13 / VEHICLE_COMMERCIAL</td>
+<td>0・1</td>
+<td>小型バン、大型ハイルーフバン</td>
+</tr>
+<tr>
+<td>20 / VEHICLE_METRO_TRAIN</td>
+<td>0・1・2</td>
+<td>メトロのスタンダード、近未来、レトロ</td>
+</tr>
+<tr>
+<td>21 / VEHICLE_PASSANGER_TRAIN</td>
+<td>0・1・2</td>
+<td>中距離列車のスタンダード、近未来、レトロ</td>
+</tr>
+<tr>
+<td>22 / VEHICLE_FREIGHT_TRAIN</td>
+<td>0・1・2</td>
+<td>JR貨物風・アメリカ風・インド国鉄風の貨物機関車</td>
+</tr>
+<tr>
+<td>23 / VEHICLE_HIGH_SPEED_TRAIN</td>
+<td>0・1・2</td>
+<td>高速鉄道のスタンダード、近未来、レトロ</td>
+</tr>
+<tr>
+<td>24 / VEHICLE_MONORAIL</td>
+<td>0</td>
+<td>跨座式モノレール</td>
+</tr>
+</tbody>
+</table>
+<p>中間車は <code>middle</code> / <code>middle_1</code> / <code>middle_2</code>、貨車は <code>wagon</code> / <code>wagon_1</code> / <code>wagon_2</code> とし、補助モデルを数値名の先頭車候補へ混ぜない。機関車の外観番号と貨車の種類は独立する。貨物の連結面は±10m、連結器中心は高さ0.88mで揃える。</p>
+<p>LRTは <code>14/0</code> を先頭・後尾に、<code>14/middle</code> を中間に使い、公称長は10m。モノレール24は手動配置プロップ308・309と同じモデルで、連結端間・公称車長とも14m。貨物は路線1006〜1008に対応し、高速鉄道には公共交通の路線種別がない。</p>
+<p>自由配置用の数値ID別名は<a href="../M_%E5%9C%B0%E5%BD%A2%E3%83%97%E3%83%AD%E3%83%83%E3%83%97/">地形プロップ</a>として扱い、公共交通の車両数へ算入しない。<code>vehicle_model_config.yaml</code> は車種ごとの外観候補を定義する。</p>
+<h3 id="o102-鉄道車両の接写表示">O.10.2. 鉄道車両の接写表示</h3>
+<p>メトロ20・中距離21・高速鉄道23・トラム14・モノレール24は先頭・中間車と全外観に、貨物22は機関車3外観と貨車3種に<code>_close.fbx</code>を持つ。無印は通常モデルとして保持する。モノレール24の接写は308/309の接写版と同じFBXである。20/21/23の接写は通常と同じ寸法表から作り、曲面の分割を細かくして窓枠・扉の目地・台車や屋上機器の細部を足す。22の接写も同じ寸法表から作り、鎧戸の羽根板・碍子の笠・台車のばねと軸箱・コンテナの波板と隅金具・石炭の塊・手すりや梯子を足す。トラム14は通常の車体を曲面で張り直して窓枠・扉取手・台車・空調ファンを足す。原点・向き・寸法は通常版に合わせ、bbox差は各軸0.05m以内。既存材質を共有し、外部画像は使わない。</p>
+<p><code>VehicleModelResolver</code>は通常版と接写版を同じルートに置き、Unityの<code>LODGroup</code>で画面高に対する投影サイズ25%以上を接写にする。接写版がないモデルは無印を使う。公称車長への伸縮は両方に同じ倍率を適用する。通常版の最終閾値は0で、遠方の表示終了は車両マネージャーの表示範囲に従う。描画LODは経済状態・走行時計・編成位置を変えない。</p>
+<p>自由配置用の370〜395にも接写版を同期し、既存プロップの投影LODで切り替える。モノレール308/309は手動配置モデルとして同様に接写版を持つ。著作元は各Blender原本、再生成ジョブは非公開制作ツールの<code>build_rail_close.py</code>。接写は約3,300〜12,100三角形、推定頂点予算16,000。実都市での同時描画性能は別途計測する。</p>
+<h3 id="o103-道路車両の接写遠景">O.10.3. 道路車両の接写・遠景</h3>
+<p>乗用車10・トラック11・バス12・商用バン13の全18外観は <code>{外観}_close.fbx</code> と <code>{外観}_far.fbx</code> を持ち、通常と同じ寸法表から作る。<code>VehicleModelResolver.CreateInstance</code> は車種別の無印を解決できたとき、鉄道と同じ <code>LODGroup</code>(画面高に対する投影サイズ25%以上で接写、3.5%未満で遠景)を組む。公共交通のバスは公称車長への伸縮を全段階に同じ倍率で適用する。</p>
+<p>接写は窓を黒い縁取りの内側へ貼り直したガラス、扉・ボンネット・トランクの目地、取手、ワイパー、レンズの厚みと灯室・プロジェクター・デイライトを持つ前照灯、後退灯・方向指示器を持つ尾灯、スポーク・ナット・ブレーキディスクの見えるホイール、枠付きのナンバー、鏡と方向指示器付きのミラーを持つ。トラックは格子の横桟・後扉の錠棒と蝶番・組み合わせ灯、バスは扉のガラス・行先表示・冷房装置の送風口を加える(8,168〜13,952三角形、推定頂点の予算16,000)。遠景は車体の側面形の角柱・窓の台形・車輪の黒い帯だけで、材質は車体・ガラス・タイヤの3〜4種(24〜36三角形)。</p>
+<p>接写は通常と原点・配置寸法を各軸5cm以内で一致させる。遠景は原点と水平範囲を通常の0.3m以内に保ち、高さは通常の範囲内に収める。路上駐車(<code>ParkedVehicleManager</code>)は通常モデルだけを描く。自由配置の別名350〜367も同じ接写・遠景を同期し、既存プロップの投影LODで切り替える。原本は <code>blender/vehicles.blend</code>、生成ジョブは非公開制作ツールの <code>build_vehicles.py --road-only</code>(<code>road_vehicles.py</code>・<code>road_buses.py</code>・<code>road_trucks.py</code>)。外部画像・ロゴは使わない。</p>
+<h3 id="o104-路線カラーの塗装">O.10.4. 路線カラーの塗装</h3>
+<p>路線に所属する車両は、車体の帯などを路線カラー（路線サマリの <code>line_color</code>）で塗る。対象は路線の全編成の先頭・中間・後尾の全車で、外観の選択（<code>vehicle_model</code>）とは独立に常に適用する。<code>line_color</code> が空・不正な値のときは元の塗装のまま描く。路線カラーを変えると、路線一覧の次の取得で走行中の車両にも反映される。</p>
+<p>塗る部位は <code>Resources/Config/transit_vehicle_livery.json</code> の「車種 → 外観番号 → 材質名」で決める。車両のFBXは帯を専用の材質で塗り分けて著作してあり、その材質を使う部分メッシュだけを塗り替える。</p>
+<table>
+<thead>
+<tr>
+<th>車種</th>
+<th>外観</th>
+<th>路線カラーにする部位（材質）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>12 バス</td>
+<td>0 路線バス</td>
+<td>側面の帯（<code>PROP_Body_Blue</code>）</td>
+</tr>
+<tr>
+<td></td>
+<td>1 高速バス</td>
+<td>側面の帯（<code>PROP_ExpCrimson</code>）</td>
+</tr>
+<tr>
+<td>14 LRT</td>
+<td>0</td>
+<td>側面の帯・上部の細線・前面の帯（<code>PROP_Body_Red</code>）</td>
+</tr>
+<tr>
+<td>20 メトロ</td>
+<td>0 スタンダード</td>
+<td>側面の帯（<code>PROP_MetroBlue</code>）</td>
+</tr>
+<tr>
+<td></td>
+<td>1 近未来</td>
+<td>発光線（<code>PROP_MetroCyan</code>）</td>
+</tr>
+<tr>
+<td></td>
+<td>2 レトロ</td>
+<td>側面の帯（<code>PROP_ExpCrimson</code>）</td>
+</tr>
+<tr>
+<td>21 中距離</td>
+<td>0 スタンダード</td>
+<td>ティールの帯（<code>PROP_IcTeal</code>）。橙の細線は元の色のまま</td>
+</tr>
+<tr>
+<td></td>
+<td>1 近未来</td>
+<td>金の細線（<code>PROP_IcGold</code>）</td>
+</tr>
+<tr>
+<td></td>
+<td>2 レトロ</td>
+<td>窓まわりと裾（<code>PROP_ExpCrimson</code>）</td>
+</tr>
+<tr>
+<td>24 モノレール</td>
+<td>0</td>
+<td>側面の帯と前面の側縁（<code>PROP_ShinkBlue</code>）</td>
+</tr>
+<tr>
+<td>22 貨物機関車</td>
+<td>0 JR貨物風</td>
+<td>車体の青（<code>PROP_FrJrBlue</code>）。灰色の裾・黄色の細線・前面の白い帯は元の色のまま</td>
+</tr>
+<tr>
+<td></td>
+<td>1 アメリカ風</td>
+<td>車体のオレンジ（<code>PROP_FrUsOrange</code>）。濃緑の屋根・黄色の細線は元の色のまま</td>
+</tr>
+<tr>
+<td></td>
+<td>2 インド国鉄風</td>
+<td>赤の帯（<code>PROP_FrInRed</code>）。白い車体・橙の細線は元の色のまま</td>
+</tr>
+</tbody>
+</table>
+<p><code>TransitLivery</code> が車体の生成時（<code>VehicleModelResolver.CreateTransitCar</code>）に接写・通常・遠景の全LODから該当スロットを記録し、<code>TransitVehicleManager</code> が配置のたびに路線色を渡す。車体のプールは路線をまたいで共有するので、前回と色が違うときだけ塗り直す。材質はFBXごとに埋め込まれているため、同じ名前の材質を持つ乗用車・自由配置の車両・駐車車両には影響しない。SRP Batcher の対象から外さないよう <code>MaterialPropertyBlock</code> は使わず、「元の材質×色」の複製を共有してスロットを差し替える。複製は地の色（<code>_BaseColor</code> / <code>_Color</code>）を路線色にし、発光する帯は元の発光の強さを保ったまま発光色も路線色にする。都市の切り替えで全車体を元の塗装へ戻し、複製を破棄する。</p>
+<p>貨物22は機関車3外観だけを塗装の対象とする。走行する機関車の帯は路線カラーで塗り、貨車は塗装スロットへ登録せず元の色を保つ。自由配置の車両には適用しない。</p>
+<p>遠景モデルの多くは帯を省いた簡略形なので、遠くでは路線色が見えない場合がある。車体の地色に近い路線色では帯が目立たなくなるが、補正しない。UIの外観選択の見本画像は元の塗装のまま写したものである。新しい外観を追加するときは、路線色にしたい部位を専用の材質で塗り分け、この表と <code>transit_vehicle_livery.json</code> に登録する。<code>Tests/Vehicles/run.ps1 -TransitOnly</code> が、登録した材質が各外観の接写・通常モデルにあり、塗り替えと元の塗装への復帰がそのスロットだけに効くことを確かめる。</p>
+<h2 id="o11-走行音">O.11. 走行音</h2>
+<p>車両はAudioSourceを持たない。<code>VehicleManager</code>は配置のたびに、<code>TransitVehicleManager</code>は描画した編成ごとに、位置と速度を<code>VehicleAmbience</code>へ通知するだけで、音源の選択・距離減衰・速度に応じたピッチとゲインは<a href="../../programs/%E3%82%B5%E3%82%A6%E3%83%B3%E3%83%89%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0/">サウンドシステム</a>の側で決まる。通知が1秒途切れた車両は自動的に鳴り止むため、描画範囲外への退出やプール復帰で音を個別に止める処理は持たない。</p>
+<p>鉄道音は開発者の自録音とモーター音を重ねる。走行音は音程を固定したテンポ違いのループを速度に応じて混ぜ、停車時は消す。モーター音は加速すると再生速度・音程が上がり、停車時は小さく残る。</p>
+<h2 id="lrtの軌道位置">LRTの軌道位置</h2>
+<p><code>TransitRouteGeometry.Route.VehicleType</code>でLRTとバスの走行位置を区別する。LRTの線路(222/242/303/431)は1本のパスで上下線を持つ左右対称の複線で、車両は通行側の軌道を走り、車両と路線ハイライトが同じ経路を共有する(折り返しの渡り線を除く)。軌道中心の横位置の正は<code>LrtRoadParts.Offset</code>で、222/242は双方向時の最内車線中心(±2.5625m/±2.541667m。内部でRoadLaneLayoutを利用し、一方通行へ変えても動かさない)、303と431は±1.75m。<code>VehiclePolyline.SampleOffset</code>へ渡す符号(正=進行方向右)と都市の通行側から往路・復路の軌道が決まるので、同じパス上で折り返すと往路と復路の軌道が左右で入れ替わり、発車後に編成が渡り線で反対側の軌道へ移る(O.10の折り返しの渡り線)。高さはスプラインからのレール踏面<code>LrtRoadParts.RailTopAboveSpline</code>(埋め込み軌道0.125m=路面+0.025m、431は0.475m=軌道原点+0.355m)。停留所のホームは停止位置と同じ「割合×未切断3D点列長」で中心を決めるので、停車した編成とホームの前後位置は揃う(<a href="../G_%E9%81%93%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/#lrt停留所のホーム">LRT停留所のホーム</a>)。ただしホームは交差点で切った区間の中に収めるので、交差点に近い停留所では、編成の端がホームの端から交差点側へ出ることがある。交差点では描画済みレールコネクタを使い、未生成なら車体を直線で補完しない。バスは最も路肩側の車線を使う。</p>
+<h2 id="o12-ドライブモード">O.12. ドライブモード</h2>
+<p>コックピットのブルドーザー右隣のステアリングボタンから開始する。選択画面と走行HUDはUnity側の<code>DriveMode</code>が表示する。Tauriは現在言語の文言を<code>drive:open</code>で渡し、追加のネイティブウィンドウは生成しない。</p>
+<ul>
+<li>自動車: 乗用車・商用車・トラックから選び、稼働中の道路上をクリックする。開始位置と矢印を確認し、必要なら方向を反転して出発する。一方通行に逆行する向きでは開始できない。</li>
+<li>鉄道: 稼働中で必要な車両が揃っている路線を選び、その路線の線路上をクリックする。往路/復路のうち選択した進行方向の時計位相から既存の第1編成へ乗車する。バスはこの選択一覧に含めない。停車・折り返し・走行速度は路線の既存データを使い、分岐を手動選択しない。</li>
+<li>Spaceを押している間は一般車と公共交通が5倍速になる。離すかUnityがフォーカスを失うと等倍へ戻る。経済エポック・天気・歩行者・APIのポーリング周期・Unity全体の<code>Time.timeScale</code>には影響しない。</li>
+<li>Escまたは終了ボタンで元のカメラ位置・角度・投影方式・ズームへ戻る。</li>
+</ul>
+<p>自動車は既存の<code>Vehicle</code>を通常の車両一覧へ1台追加する。NPCと同じ車線配置・道路速度・前車追従・交差点通過曲線を使い、乗車中だけ沿道到着予約と管理円外のデスポーンを免除する。走行は1/30秒以下の刻みで追従間隔を再評価するため、早送り中も停止した前車を飛び越えない。信号・交差する車両との衝突回避は通常NPCと同じく扱わない。</p>
+<p>交差点手前で進入可能な道路を進行方向に対する角度順に表示する。左右キーで候補を順送りし、上キーで最も直進に近い道を選ぶ。HUDの候補をクリックしてもよい。何も選ばなければ最も直進に近い候補へ進み、交差点進入時に確定して予約を解除する。同じ方向の候補が複数ある場合も別々に選択できる。行き止まりは通常NPCと同じ条件で折り返し、進入可能な接続がなければ待機する。</p>
+<p>鉄道の開始位置は<code>TransitMotionClock</code>のパスID・向き・パス内比率から等加速度区間の時刻へ逆算する。乗車編成を描画予算で優先し、折り返しでも同じ車両(identity=0)を追う。未ロードのパス・レールコネクタに当たった場合は乗車編成の時計を進めず、最後の編成位置でロードを待つ。失われた路線や車両不足は乗車を解除する。</p>
+<p>カメラは車体上から進行方向を見る。自動車の視点高さは車体のRenderer境界から決め、トラックの屋根へ埋まらないようにする。鉄道は接地位置から5m上。位置は遅延させず、回転だけ平滑化する。周辺ロードと交通演出の管理中心はカメラの地面交点ではなく乗車位置にする。開始位置選択中は地図をドラッグ・ズームできるが、通常のオブジェクト選択は停止する。</p>
+<p>通常の編集と乗車は同時に行わない。ブルドーザー/地区の常駐モードは入口で解除し、建設パネル等で編集中なら編集終了を促す。選択UI表示中はカメラ保存を止める。別の編集ステートへの遷移・リロードで終了し、都市切替では旧都市の視点を復元しない。乗車情報はバックエンドやセーブに残さない。</p>
+<p>検証は<code>unity/Tests/Vehicles/run.ps1</code>。進路予約・直進既定値・一方通行の除外・到着予約の免除、鉄道時計の往復位置、折り返しの視点連続性、線路未ロード時の待機、終了時のカメラ復元と入力解除を本編アセンブリで確認する。</p>
+<p>鉄道の専用遠景は14/20/21/22/23の全26モデルとモノレール308/309（走行用の24は同じFBX）にある。非公開制作ツールの<code>build_rail_far.py</code>が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨物22は機関車・貨車の側面形の柱（運転台・フード・コンテナ・タンクの外形）と台枠の帯で作る。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。12〜42三角形（モノレールは64三角形以内）、既存材質を共有する。<code>build_vehicle_props.py</code>は370〜395の遠景別名も同期する。走行版は画面比率3.5%未満で<code>_far</code>を選び、25%以上では存在する<code>_close</code>を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。</p>
+<h2 id="o13-一時停止と市民の追従">O.13. 一時停止と市民の追従</h2>
+<p>画面右上の一時停止ボタンで、一般車・公共交通・索道・航空機と船を止める(歩行者も止まる)。<code>Time.timeScale</code> は使わず、交通演出の時計 <code>TrafficClock</code> の <code>Scale</code> を経過時間に掛ける。一般車は移動・発生・沿道到着・台数調整がすべて止まり、車体はその場に残る。公共交通は路線時計を進めず、索道は循環の時計を進めない。航空機と船は移動と発生を止め、飛行機雲・航跡の寿命と入港船の停泊・船の寿命は止めている間は進まない <code>TrafficClock.Time</code> で数える。走行音は通知が途絶えて自然に消える。天気・時刻・水面・火災・クレーンは止めない。</p>
+<p>一時停止中は自家用車と歩行者をクリックして市民を選べ、選んだ市民をカメラで追いかけられる(<a href="../../programs/%E5%B8%82%E6%B0%91%E3%81%AE%E8%BF%BD%E8%B7%A1/">市民の追跡</a>)。追従では、指名した1台(<code>VehicleManager.FollowedVehicle</code>)を NPC と同じ車線配置・道路速度・前車追従・交差点通過曲線で走らせ、分岐だけを行程のパスの列(<code>FollowRun</code>)に従わせる。次のパスは候補の抽選ではなく道路スナップショットから直接取り、経路から外れないよう路面標示の進行方向の制約は掛けない。道路がまだ走査されていなければ届くまで待ち、同じパスで向きを変える経路はパスの端で折り返す。区間の最後のパスでは行き先の建物の最寄りの地点を到着点にして敷地へ入り(建物がパスから60mより遠ければ入らない)、パスの列の終わりではフェードして消える。指名した車は沿道到着予約と管理円外のデスポーンを免除する。出発は建物の最寄りの地点から路肩寄せで出る。指名を解くと NPC に戻る。</p>
+<p>直前に通ってきた2本のパス(<code>Vehicle.previousPath</code> / <code>previousPath2</code>)は分岐のたびに記録し、クリックした車の市民の抽選に渡す。</p>
+<h2 id="ロープウェイの循環描画">ロープウェイの循環描画</h2>
+<p><code>RopewayCabinManager</code>はシーンロード後に自己生成し、601の索道と602の駅の完成済み区間へ小型の搬器を循環させる。運行間隔・路線・車両調達の設定は持たず、交通量や経済エポックとは独立したグラフィック演出である。乗降・停車・運賃・輸送能力を変更しない。</p>
+<h3 id="完成した駅間の抽出">完成した駅間の抽出</h3>
+<p><code>RopewayNetworkStore</code>が既存の<code>/paths/</code>を<code>path_type=PATH_CONVEYOR</code>で絞り、500件ずつ全ページを5秒周期で取得する。全ページが成功した時だけ一覧を公開し、途中の通信失敗では前の一覧を維持する。都市切替は<code>TransitDataStore.Session</code>と取得世代で管理し、遅れて届いた旧都市の応答を捨てる。画面外の駅も判定できるため、セルのロード境界を終点にしない。</p>
+<p><code>RopewayNetwork</code>はACTIVEの601/602をノードIDで接続する。連続する602は一つの駅領域として扱い、二つ以上の駅領域がある成分だけを採用する。開いた路線では最初と最後の駅の外側にある枝先を除く。工事中・撤去・断線で二駅を結べなくなった区間は対象外。次数3以上の不正な分岐は推測で接続せず、その成分を除外する。閉路は左右のケーブルそれぞれを独立した周回として扱い、横へ飛び移らない。</p>
+<h3 id="ケーブルと折り返し設備">ケーブルと折り返し設備</h3>
+<p><code>RopewayGeometry</code>は<code>PathManager.CalculatePathPoints(path, false)</code>による既存の座標・地形高さ・single_spanの処理を使う。距離補間・射影は<code>VehiclePolyline</code>を共有する。左右±2.1m、中心高さは<code>RoadPartHeights.BODY_ABOVE_SPLINE - 0.04m</code>。接続点の水平オフセットを共通の断面へ合わせ、同じ点列から表示ケーブルと搬器の吊り点を求める。点列が欠けたり接点が0.2m以上離れたりした場合は直線で補わない。</p>
+<p>開いた路線の両終端では、駅外端から内側へ<code>min(4m, 駅領域の長さ/2)</code>の位置を滑車中心とする。半径2.1mの水平半円で往復のケーブルをつなぐ。短い駅でも径を縮めず、駅端からの張り出しを許す。駅の建設条件は変更しない。中間駅では折り返さず通過し、閉路には終端設備を置かない。</p>
+<p>端部の模型は<code>p602/terminal_rotor</code>（水平輪・ハブ・スポーク）と<code>p602/terminal_support</code>（台座・駆動部・梯子）。輪だけをケーブル速度÷半径で回転させ、台座は固定する。搬器の<code>p601/cabin</code>は吊り点原点で、既存の支持滑車・横梁を避けるよう外側へ0.65mずらしたヨークと吊り金具を持つ。車体は鉛直を保ち、進行方向の水平成分にだけ向ける。</p>
+<p>搬器は丸みのある黄土色の腰板・薄い白い屋根・大きな青い窓を持ち、曲面に沿う二重窓枠、扉の合わせ目と取手、隅の保護材、屋根上の支持ヨーク、湾曲した吊り腕、握索部を一体のメッシュで表す。客室の外寸は幅1.96m・奥行き2.32m・高さ2.15m（車底-3.17m〜屋根-1.02m）、腰板は約0.68m。床8cm・天井12cmを見込んだ設計上の室内高は約1.95mとする。客室中心は外側へ0.22m、ヨークは外側へ0.65mとし、客室は駅の柱間へ、吊り機構は横梁の外側へ収める。屋根は窓枠に沿う約0.12m厚の蓋で、庇のような張り出しを持たない。前後の窓枠は角の曲面まで左右へ広がる。ガラスは既存の不透明な<code>BD_WINDOW</code>を共有し、内装は持たない。7,224三角形でNormal/Close共通、Farでは非表示。原本は<code>blender/paths.blend</code>の<code>p601/cabin</code>で、握索部の上端は吊り点から+0.165m。Unity座標の水平範囲はX=-0.75999〜1.19999m、Z=±1.16mで、道路幅への伸縮は行わない。制作ジョブは非公開制作ツールの<code>build_ropeway_cabins.py</code>と<code>ropeway_cabin_surfaces.py</code>。</p>
+<h3 id="時間描画後始末">時間・描画・後始末</h3>
+<p>搬器は4m/s、目安40m間隔で等間隔に並ぶ。開いた路線は最低2台、閉路は各側最低1台。時計はdoubleの非スケール時間で、画面外でも進む。形状更新時は元の先頭搬器位置を新形状へ射影して位相を引き継ぐ。地形の詳細化ではversionが変わらないため、0.5秒周期の周辺走査で元の点列も比較する。</p>
+<p>Normal/Closeの完成済みパスに限り、視点または乗車位置から480m以内の搬器・設備を描画する。Farでは搬器・終端設備を描かず、既存の遠景パスへ戻す。オブジェクト非表示、パス全体の非表示、生成待ちにも追従する。置き換えケーブルは<code>PathStructureMesh</code>で作り、元のbody Rendererを一時抑制する。<code>PathPresentation.SetRendererForceOff</code>を介して生成待ちと復元を調停し、解除・アンロード・都市切替で元の値を復元する。</p>
+<p>搬器個体のGameObject、物理、保存データは作らない。<code>ModelManager</code>と<code>PropRenderModel(GameObject)</code>から著作原点を保ってモデルを取り出し、511件以下のGPUインスタンシングで描く。可視区間に入る搬器番号だけを距離から求め、都市全域の搬器を毎フレーム列挙しない。形状生成は<code>RenderWorkScheduler</code>へ譲り、破棄時には生成メッシュ・専有材質を解放する。</p>
+<p>原本は<code>blender/paths.blend</code>。通常と接写は同じ搬器・端部モデルを使う。写真は構造の参考だけに使用し、画像・外部モデルを取り込まない。</p>
+<p>検証は<code>unity/Tests/Ropeway/animation.ps1</code>。本編アセンブリを独立Unityで読み込み、駅数・枝先・逆方向のパス・断線・閉路、短い駅、勾配、循環境界、長時間経過、描画位置・遠景除外、ページ取得の失敗と都市切替、実FBXと正規生成プレハブを確認する。<code>Temp/RopewayAnimationQA/terminal.png</code>に組み立て見本を出力する。既存のケーブル・支柱の寸法検証は<code>Tests/Ropeway/run.ps1</code>。</p>
+<h2 id="交差点の路面標示との共有規則">交差点の路面標示との共有規則</h2>
+<p>舗装された街路の3本以上の交差点では、RoadMarkingRulesが左右通行・一方通行・完成済みの接続道路から車線ごとの進行可能方向を求める。矢印を置ける25m以上の道路で、一般車と乗車中の車は現在の車線で許可された方向から次の道路を選ぶ。標示と車線中心はRoadLaneLayoutを共有する。シミュレーターの経路探索・輸送量・所要時間を変更する規則ではない。</p>
+<p>バスは確定した路線の次の道路を参照し、許可された車線へ交差点手前で滑らかに寄る。寄せる区間は最大30m（区間長の40%まで）、切断端の12m手前で完了する。鉄道・LRTの軌道位置は変更しない。短い道路や方向指定のない交差点は従来の車線を使う。路面の停止線は表示であり、信号待ち・停止による独立した時間を追加しない。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../N_%E7%B7%9A%E8%B7%AF%E3%83%A1%E3%83%83%E3%82%B7%E3%83%A5%E3%81%AE%E7%94%9F%E6%88%90/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 線路メッシュの生成">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                線路メッシュの生成
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../T_%E4%BA%A4%E9%80%9A%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%A8%E8%B5%B0%E8%A1%8C%E6%8F%8F%E7%94%BB%E3%81%AE%E6%95%B4%E5%90%88/" class="md-footer__link md-footer__link--next" aria-label="Next: 交通シミュレーションと走行描画の整合">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                交通シミュレーションと走行描画の整合
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/satken2/city-genesis" target="_blank" rel="noopener" title="GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.footer", "search.suggest", "search.highlight", "toc.follow"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

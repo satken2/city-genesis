@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Paramètres climatiques",
+    "name": "Nom du climat",
+    "probabilities": "Probabilités météo mensuelles",
+    "probabilityHint": "Faites glisser les limites des couleurs horizontalement. Les champs ci-dessous permettent aussi de régler les conditions à 0 %.",
+    "month": "Mois {{month}}",
+    "preset": "Préréglage climatique",
+    "current": "Paramètres actuels",
+    "chartHint": "Sélectionnez une série dans la légende, puis faites glisser ses points mensuels verticalement.",
+    "averageHint": "La température, les précipitations et l'ensoleillement sont des moyennes mensuelles. Les valeurs réelles varient autour de ces moyennes à chaque époque.",
+    "apply": "Appliquer",
+    "chart": "Diagramme climatique mensuel"
+  }
+}

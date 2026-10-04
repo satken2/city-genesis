@@ -55,19 +55,18 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_PARCEL_CREATION_PATH` | 5 | 土地区画作成（道路選択）モード |
 | `MODE_PARCEL_CREATION_SPLIT` | 6 | 土地区画分割モード |
 | `MODE_EDIT` | 7 | 既存オブジェクトの編集モード |
-| `MODE_ZONE_EDIT` | 8 | 地区編集モード |
 | `MODE_PARCEL_SHAPE_EDIT` | 10 | 土地区画形状編集モード |
 | `MODE_SET_GRID` | 11 | グリッド角度設定モード |
 | `MODE_EDIT_RESOURCE` | 12 | 資源エリア編集モード |
 | `MODE_EDIT_TRANSIT` | 13 | 公共交通設置モード |
 | `MODE_EDIT_PROP` | 14 | プロップ配置モード（個別配置・範囲散布） |
-| `MODE_EDIT_CONNECTOR` | 15 | 施設の接続端子ノードの移動編集モード。TERRAIN に適用し、端子マーカーを地形ドラッグとして掴む（§5.3） |
+| `MODE_EDIT_CONNECTOR` | 15 | 施設の接続端子ノードの移動編集モード。TERRAIN に適用し、端子マーカーを地形ドラッグとして掴む（§5.2） |
 | `MODE_REMOVE` | 17 | ブルドーザ（空き地区画・計画中の建物と道路・地形プロップの削除。神モードでは稼働中の建物・道路も即時削除）。実処理は `RemovalManager` |
 | `MODE_PATH_MERGE` | 18 | パス結合の相手選択。候補パスのクリックだけを受け付ける |
 | `MODE_PATH_SPLIT` | 19 | パス分割の分割点選択。PATH と TERRAIN に適用し、どちらのクリックも対象パスの中心線へ射影する |
 | `MODE_PICK_BUILDING` | 20 | 既存建物のコピー建設・経済主体作成の入居先の選択。建物だけをクリック可能にする |
 | `MODE_EDIT_ROAD_MEMBERS` | 22 | 道路（名前付き道路）の区間編集モード。街路・高速道路の区間のクリックをUIへ通知する |
-| `MODE_EDIT_GRADING` | 23 | 造成（整地・埋立）の範囲の作図モード。TERRAIN に適用し、資源エリアの作図と同じ地形クリック・頂点ドラッグで範囲を描く。共通吸着を通さない（§10） |
+| `MODE_EDIT_GRADING` | 23 | 造成（整地・埋立）の範囲の作図モード。TERRAIN に適用し、資源エリアの作図と同じ地形クリック・頂点ドラッグで範囲を描く。共通吸着を通さない（§9） |
 
 接続点編集（`STATE_EDIT_CONNECTOR`）の端子マーカー（逆四角錐）はノード実体の上空に浮くオーバーレイで、ノードのコライダーとは位置がずれる。そのためノードへのレイキャストではなく TERRAIN の `MODE_EDIT_CONNECTOR` の地形ドラッグとして受け、`ConnectorEditManager` がスクリーン座標のマーカー当たり判定で掴む対象を決める（NODE は `MODE_NONE` で貫通させる）。
 
@@ -84,7 +83,6 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `PARCEL_CREATION_POINT` | PARCEL_CREATION_POINT | NONE | — | NONE | NONE | — |
 | `PARCEL_CREATION_PATH` | — | PARCEL_CREATION_PATH | — | NONE | NONE | — |
 | `PARCEL_CREATION_SPLIT` | — | NONE | — | PARCEL_CREATION_SPLIT | NONE | — |
-| `ZONE_EDIT` | ZONE_EDIT | ZONE_EDIT | NONE | NONE | NONE | ZONE_EDIT |
 | `PARCEL_SHAPE_EDIT` | PARCEL_SHAPE_EDIT | NONE | NONE | NONE | NONE | NONE |
 | `SET_GRID` | SET_GRID | NONE | NONE | NONE | NONE | NONE |
 | `EDIT_RESOURCE` | EDIT_RESOURCE | NONE | NONE | NONE | NONE | NONE |
@@ -106,7 +104,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 
 `ROAD_MEMBER_EDIT` は `STATE_EDIT_ROAD_MEMBERS`（道路の区間編集）で適用され、PATH だけを `MODE_EDIT_ROAD_MEMBERS` にして他のオブジェクトタイプはクリックを無効化する（パス結合の相手選択と同型）。`IpcStateCoordinator.ApplyStateEditRoadMembers` が `RoadMemberEditManager` を生成して開始し、区間のクリックは `RoadMemberEditManager.OnPathClicked` が `edit_road:toggle_path` として UI へ送る。所属の付け外しは UI が API で行うので、Unity は所属を書き換えない。詳細は[道路の詳細と道路名の区間編集モード](道路の詳細と道路名.md#区間編集モード)を参照。
 
-`EDIT_GRADING` は `STATE_EDIT_GRADING`（造成範囲の作図）で適用され、TERRAIN だけを `MODE_EDIT_GRADING` にして他のオブジェクトタイプを貫通させる（資源エリアの作図 `EDIT_RESOURCE` と同型）。区画・道路・建物の上でも、その下の地面（埋立地の岸壁の天端を含む）に頂点を置ける。`IpcStateCoordinator.ApplyStateEditGrading` が `GradingAreaEditManager`（任意ポリゴン編集の共通基底 `PolygonAreaEditManager` の派生。§8）を生成し、Placing から作図を始める。Placing 中は次の左クリックで頂点が置かれる位置にポインタマーカーを描く（§12「土地区画の形状編集」）。範囲の変化は `edit_grading:update_shape` でUIへ送るだけで、見積もりと発注はUIとバックエンドが行う。資源エリアの作図と違い、頂点は吸着せず（§10）、Esc でもモードから抜けない（`CancelOnEscape=false`）。共通基底の Esc は入力プリセットを `ALL_NORMAL` に戻すだけでステート遷移もUIへの通知も伴わず、ウィンドウが開いたまま編集用の表示も残るためである。抜けるのはウィンドウを閉じたとき（Rust が `STATE_NORMAL` を送る）と確定後の `edit_grading:finish` だけ（[IPC連携の整理](IPC連携の整理.md)）。
+`EDIT_GRADING` は `STATE_EDIT_GRADING`（造成範囲の作図）で適用され、TERRAIN だけを `MODE_EDIT_GRADING` にして他のオブジェクトタイプを貫通させる（資源エリアの作図 `EDIT_RESOURCE` と同型）。区画・道路・建物の上でも、その下の地面（埋立地の岸壁の天端を含む）に頂点を置ける。`IpcStateCoordinator.ApplyStateEditGrading` が `GradingAreaEditManager`（任意ポリゴン編集の共通基底 `PolygonAreaEditManager` の派生。§7）を生成し、Placing から作図を始める。Placing 中は次の左クリックで頂点が置かれる位置にポインタマーカーを描く（§11「土地区画の形状編集」）。範囲の変化は `edit_grading:update_shape` でUIへ送るだけで、見積もりと発注はUIとバックエンドが行う。資源エリアの作図と違い、頂点は吸着せず（§9）、Esc でもモードから抜けない（`CancelOnEscape=false`）。共通基底の Esc は入力プリセットを `ALL_NORMAL` に戻すだけでステート遷移もUIへの通知も伴わず、ウィンドウが開いたまま編集用の表示も残るためである。抜けるのはウィンドウを閉じたとき（Rust が `STATE_NORMAL` を送る）と確定後の `edit_grading:finish` だけ（[IPC連携の整理](IPC連携の整理.md)）。
 
 ## 3. 入力フロー
 
@@ -128,17 +126,16 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 
 右クリックも同様に、マウスダウン時には発火しない。マウスアップまでの移動が閾値未満なら `onRightClick`、閾値以上なら右ドラッグ（カメラ回転）とみなして発火しない。`CameraController` 側の右回転も同じ閾値の保留方式（`isPendingRotate`）で始まる。`CameraController` は `[DefaultExecutionOrder(-100)]` で先に走るため、押下フレームで `IsMouseRotating` を見て判定すると右クリックが必ず回転に食われる。判定は移動量で行う。
 
-UI上にポインタがある間・カメラドラッグ中・フライ/撮影モード中（`CameraController.BlocksWorldInput`）・ドライブ中（`DriveMode.IsOpen`）・ラジアルメニュー表示中（11章）は、`InputHandler.Update` 先頭のゲートで入力処理全体を非破壊的に止める。入力プリセットは変えないので、抜ければ元の入力状態がそのまま復帰する。撮影を終了したフレームも遮断し、Escを背後の選択解除へ渡さない。
+UI上にポインタがある間・カメラドラッグ中・フライ/撮影モード中（`CameraController.BlocksWorldInput`）・ドライブ中（`DriveMode.IsOpen`）・ラジアルメニュー表示中（10章）は、`InputHandler.Update` 先頭のゲートで入力処理全体を非破壊的に止める。入力プリセットは変えないので、抜ければ元の入力状態がそのまま復帰する。撮影を終了したフレームも遮断し、Escを背後の選択解除へ渡さない。
 
 3Dに追従するクリック可能なラベル（地区名・天然資源名）もUIとして判定され、その矩形上ではこのゲートとカメラ操作が止まる。そのためラベルのクリック判定は文字列を囲む矩形に限り、ラベルの Canvas は入力モードが通常のときだけクリックを受ける（`Utils.SyncOverlayCanvasClickable`）。編集中はラベルを表示したまま、クリック・ホバー・ホイール操作を下の3Dへ通す。インターチェンジ名・道路名のラベルは編集中は非表示にする。
 
 ### 3.3. ドラッグを持たないモード
 
-ブルドーザ（`MODE_REMOVE`）、パス結合・分割の対象選択（`MODE_PATH_MERGE` / `MODE_PATH_SPLIT`）、道路の区間編集（`MODE_EDIT_ROAD_MEMBERS`）、地区編集（`MODE_ZONE_EDIT`）はクリックのみで操作する。
+ブルドーザ（`MODE_REMOVE`）、パス結合・分割の対象選択（`MODE_PATH_MERGE` / `MODE_PATH_SPLIT`）、道路の区間編集（`MODE_EDIT_ROAD_MEMBERS`）はクリックのみで操作する。
 ブルドーザ中のクリックは、レイキャストのヒット物へ配送する前に地形プロップを判定する（`InputHandler.TryRemovePropAtScreenPoint` → `RemovalManager.TryRemovePropAt`。プロップはColliderを持たないため `PropManager.TryPick` のAABB判定で、ヒット物より手前にある最も近い1本を選ぶ）。プロップを拾えた場合は背後の建物・区画へは配送しない。ホバーも同様に `RemovalManager.UpdatePropHover` で赤い枠を出す。
 これらのモードでは `StartDrag` / `StartTerrainDrag` の冒頭で即座に return し、ドラッグ状態に入らない
 （入らないと既定の経路で道路エディタのドラッグ処理へフォールバックしてしまう）。
-地区編集の左ドラッグは通常どおりカメラの移動になる。
 
 ### 3.4. 起伏地形での土地区画選択（地形ヒットの区画への差し替え）
 
@@ -157,7 +154,7 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 - 中ボタンの入力は `InputUtil` のヘルパ（`MiddleMouseWasPressedThisFrame` / `MiddleMouseIsPressed` / `MiddleMouseWasReleasedThisFrame`。いずれも新Input Systemの `Mouse.current.middleButton`）で取得する。
 - 回転の処理は `BuildingPlanManager.Update()` が担う。押下時にマウスX座標を記録し、ドラッグ中は水平移動量（px）×感度（`MiddleDragDegreesPerPixel`、既定0.5°/px）を1度単位に量子化して回転角へ加算し、ローカルで矩形を即時再描画する（バックエンド往復なし）。端数は次フレームへ持ち越す。
 - 回転は地点確定の**前後どちらでも**有効。ドラッグ中はバックエンドへ問い合わせず、ボタンリリース時に確定角度を `edit_building:update_direct_angle` でUIへ1回だけ通知する（UIは回転ステッパーを更新し、確定後=フェーズBでは `preview-direct` を再取得して権威プレビューを更新する）。
-- 中ボタンは他モード・カメラ操作では未使用のため競合しない（カメラは左ドラッグ=移動／右ドラッグ=回転、§5.4 参照）。
+- 中ボタンは他モード・カメラ操作では未使用のため競合しない（カメラは左ドラッグ=移動／右ドラッグ=回転、§5.3 参照）。
 - 回転中はホバーによるゴースト中心の追従を止め、その場で回転する（`OnTerrainHoverDirect` が `isMiddleDragging` 中は中心を更新しない）。
 
 ### 3.6. 地下表示の選択
@@ -180,7 +177,6 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 |-------|-----------|-----------|-------|
 | `MODE_NORMAL` | ログ出力 | — | スナップ位置計算・マウス位置上書き |
 | `MODE_ROAD_CONSTRUCTION` | `RoadPlanManager.OnTerrainLeftClick` に委譲 | 同右 | `RoadPlanManager.OnTerrainHover` に委譲 |
-| `MODE_ZONE_EDIT` | Mergeツールのときだけカーソル下の地区を統合元にする（7章） | カーソル下の地区を選択（地区外なら選択解除） | カーソル下の地区の半透明フィル表示 |
 | `MODE_BUILDING_CONSTRUCTION` | `BuildingPlanManager.OnTerrainClickDirect` に委譲（直接配置=区画外地点の確定） | — | `BuildingPlanManager.OnTerrainHoverDirect` に委譲（直接配置=カーソル追従の矩形ゴースト表示）。ホバー離脱時 `HideDirectGhost` |
 | `MODE_PARCEL_CREATION_POINT` | 土地区画エディタに点を通知 | — | 配置マーカー表示 |
 | `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲（常に Editing なのでポインタマーカーは出ない。頂点・辺のホバー判定は毎フレームの更新で行う）。離脱時 `OnTerrainHoverEnd`。共通吸着なし |
@@ -199,7 +195,6 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 | モード | 左クリック | 右クリック | ホバー |
 |-------|-----------|-----------|-------|
 | `MODE_NORMAL` | 道路詳細パネルをIPC通知 | — | ハイライト表示 |
-| `MODE_ZONE_EDIT` | 現在ツールの適用（Create=その街路で新規地区を作成／Expand=選択中地区へ追加／Merge=統合の要求。7章） | 対象地区の選択（その道路の `zone_id`） | 操作案内ツールチップ表示 |
 | `MODE_PARCEL_CREATION_PATH` | 土地区画エディタに道路選択を通知 | — | 選択可能な道路のみハイライト |
 | `MODE_ROAD_CONSTRUCTION` | 地形クリックとして処理 | 同右 | ハイライトをスキップ |
 | `MODE_EDIT_ROAD_MEMBERS` | `RoadMemberEditManager.OnPathClicked` に委譲（街路・高速道路なら `edit_road:toggle_path` をUIへ送る。それ以外の種別はツールチップで拒否） | — | 街路・高速道路の区間だけハイライトし、操作案内のツールチップを出す（それ以外の種別は拒否のツールチップのみ） |
@@ -239,11 +234,7 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 
 `InputHandler` はドラッグの種類を以下の優先度で判定する。
 
-### 5.1. 地区編集にドラッグは無い
-
-地区編集（`MODE_ZONE_EDIT`）はクリックだけで操作し（7章）、左ドラッグは通常どおりカメラの移動になる（§3.3）。
-
-### 5.2. ノードドラッグ
+### 5.1. ノードドラッグ
 
 条件：ノードオブジェクト上でドラッグ開始。
 
@@ -251,7 +242,7 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 2. ドラッグ中、`InputHandler.UpdateDrag()` で `NodeInputHandler.onDragUpdate` を呼び出し
 3. ドラッグ終了時、`InputHandler.EndDrag()` で `NodeInputHandler.onDragEnd` を呼び出し
 
-### 5.3. 地形ドラッグ
+### 5.2. 地形ドラッグ
 
 条件：地形上でドラッグ開始、かつ地形モードがドラッグを許可するモード。
 
@@ -274,7 +265,7 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 
 造成範囲の作図（`MODE_EDIT_GRADING`）は遅延グラブを使わず、`InputHandler.StartDrag()` がドラッグ開始の時点でマウスが頂点の上か（`GradingAreaEditManager.IsMouseOverVertex`。Editing のときだけ真）を調べ、頂点の上なら `GradingAreaEditManager.StartDrag` で掴む。造成範囲の頂点は `CameraController.IsMouseOverEditHandle` の判定にも含まれ、頂点のドラッグがカメラのパンに奪われない。
 
-### 5.4. カメラドラッグ
+### 5.3. カメラドラッグ
 
 `CameraController.HandleMouseDragPan` が地形を左ドラッグでカメラ移動を行う。
 以下の条件ではカメラドラッグを開始しない。
@@ -307,7 +298,7 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 制御点の高さはドラッグでは固定されず、ポイントの縦断勾配から決める（規則と例外は「高架の制御点と縦断形状」）。
 既存パスの編集再開では、保存済みの制御点と自動計算値の平面位置が一定以上（0.05m）ずれている制御点だけを手動調整済みとして復元する。確定送信には自動計算値も明示的に載るため、保存値をすべて手動扱いにすると、再開後にポイントを動かしても制御点が一切追従しなくなる。高さが縦断勾配の規則から0.05m以上ずれる制御点（経路提案の結果など）は、そのポイントの制御点の高さを固定して保存値を再現する。
 
-端点が既存パスの端点に接続していて直線延長吸着（10章）がONのときは、端点の制御点を既存パスの延長線方向へ整列させ、接続部で道路が折れないようにする。整列は自動接線との角度差が `PATH_TANGENT_ALIGN_MAX_ANGLE_DEG`（20°。`consts.py` から同期）以内のときだけ行い、明らかに別方向へ引いた曲線は尊重する。交差点接続など候補が複数あるときは角度差が最小のものを採り、手動調整済みの端点制御点は整列しない。バックエンドも制御点が省略された登録に同じ整列を行うが、UIは整列済みの制御点を明示送信するため二重には適用されない。
+端点が既存パスの端点に接続していて直線延長吸着（9章）がONのときは、端点の制御点を既存パスの延長線方向へ整列させ、接続部で道路が折れないようにする。整列は自動接線との角度差が `PATH_TANGENT_ALIGN_MAX_ANGLE_DEG`（20°。`consts.py` から同期）以内のときだけ行い、明らかに別方向へ引いた曲線は尊重する。交差点接続など候補が複数あるときは角度差が最小のものを採り、手動調整済みの端点制御点は整列しない。バックエンドも制御点が省略された登録に同じ整列を行うが、UIは整列済みの制御点を明示送信するため二重には適用されない。
 
 鉄道・モノレールでは、接続端が既存の同種線路のベジエ上に位置する場合、始点の出口制御点・終点の入口制御点をその位置の解析接線へ整列する。直線延長吸着のON/OFFや手動調整済みフラグによらず適用し、分岐・合流と端点同士の延長で同じ規則を使う。制御点のドラッグは指定したXZをアンカーを通る接線上へ射影するため、接線方向の長さだけを調整できる。アンカーを動かした場合も接続先の接線へ整列し、接続先から離れると通常の自由な制御点編集へ戻る。2Dパネルの制御点移動も同じ処理を通る。複線の横オフセットを含む接続位置の許容誤差は `RAIL_JUNCTION_POSITION_TOLERANCE` を使い、高さは既存の縦断勾配規則で決める。接続可否の最終判定は `/paths/validate` が行う（[パスの交差処理](../geometries/J_パスの交差処理.md)）。
 
@@ -331,49 +322,13 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 「次に配置するノード」に適用される値（`currentHeight` / `currentEmbankmentHeight`）を変更する。
 標高・盛土はパス建設パネルのステッパーからも変更でき（`edit_path:change_node` / `edit_path:change_embankment`）、
 既存ノードを選んで数値で微調整する用途に使う。キー操作・選択で変わった値は `edit_path:select_node` で
-パネルへ返り、双方向に同期する。曲線/直線と吸着の切り替えはCtrlラジアルメニュー（後述の11章）で行う。
+パネルへ返り、双方向に同期する。曲線/直線と吸着の切り替えはCtrlラジアルメニュー（後述の10章）で行う。
 
-## 7. 地区編集の状態管理
-
-`ZoneEditContext` は地区編集モードの状態を管理するシングルトンである。
-UIからこのモードへ入る入口は無く、地区の作成・拡張は [地区編集パネル](地区編集パネル.md) で行う。
-ツールは3つあり、Ctrlラジアルメニュー（`ZoneEditControlMenu`。後述の11章と同じ仕組み）で切り替える。
-
-| ツール | 右クリック | 左クリック |
-|-------|-----------|-----------|
-| 新規地区の作成（`Create`） | 対象地区を選択（拡張ツールへ切替） | クリックした街路を含む新規地区を作成する |
-| 既存地区の拡張（`Expand`） | 拡張先の地区を選択 | クリックした街路を選択中の地区へ取り込む |
-| 地区の統合（`Merge`） | 統合先の地区を選択 | クリックした地区を選択中の地区へ統合する（UIの確定を挟む） |
-
-**3ツール共通で「右クリックで対象地区を選ぶ → 左クリックで適用」**という操作モデルになっている。
-右クリックの対象は道路（その道路の `zone_id`）と地区の面（カーソル下の地区ポリゴン）の両方で、
-地区の外で右クリックするか Esc を押すと選択が解除される。
-
-選択中の地区は次の2か所で常に示される。
-
-- **カーソル脇のHUD**（`CursorStatusHud`）: 現在ツールのアイコン＋選択中地区の識別色チップ＋地区名。
-  新規作成ツールのときは「これから作る地区の色」を表示する（色はツールを選び直すたびに引き直される）。
-- **3Dビューの枠線**: 地区編集中は地区枠線を太く・地形や建物に隠れないように描き、選択中の地区はさらに太くする。
-
-新規作成の識別色はUnityが決めて `POST /api/v1/zones/` の `color` として送るため、
-カーソル脇に提示した色がそのまま作られる地区の色になる。
-
-作成と拡張はUnityが直接バックエンドへ送信する（3Dジェスチャで完結する操作）。
-統合だけは地区がひとつ消える不可逆操作のため、Unityは `edit_zone:request_merge` をUIへ送るだけにし、
-確定専用の小ウィンドウ（`zone_merge`）の確定ボタンでUI側が `POST /api/v1/zones/{id}/merge` を送る
-（結果は `edit_zone:finish_merge` で戻る）。
-
-Unity側の実装で守る点は次の3つ。
-
-- **拡張の連続性はフロントで確認する。** `POST /api/v1/paths/batch-zone` は選択が1本だけだと連続性を検証しないため、そのまま送ると離れた道路が地区に混ざる。`PathInputHandler.IsConnectedToZone` が選択中地区の道路網と繋がっている街路だけを送る。
-- **適用直後の先行着色は明示的に戻す。** 応答を待たずにクリックした街路へ適用先の色（新規作成はプレビュー色）を仮に乗せ、送信結果（成功・失敗とも）とモード終了で `ZoneEditContext.ClearTempVisuals` が戻す。失敗時はデータの版が変わらずリロードが再描画しないため、リロード任せにはできない。
-- **既存地区のホバーフィル。** 地区編集中にカーソルが既存地区の領域に入ると `ZoneManager.SetHoverFillZone` が半透明フィルを描く。判定結果は `InputHandler.HoveredZoneId` として公開され、地形のクリック・右クリックからカーソル下の地区を解決するのに使う。地区のホバー判定は地区編集モード中だけ行う（通常プレイの毎フレーム負荷を避ける）。
-
-## 8. 土地区画形状編集のドラッグ処理
+## 7. 土地区画形状編集のドラッグ処理
 
 既存区画は `ParcelShapeEditManager` が保存済み形状から編集を始める。頂点・辺の入力と描画は、資源・造成範囲と共通の `PolygonAreaEditManager` が担当する。入力座標・吸着・操作状態は[土地区画の形状編集](#土地区画の形状編集)に定義する。頂点ハンドル上ではカメラドラッグを開始しない。
 
-## 9. 入力状態の遷移とIPC連携
+## 8. 入力状態の遷移とIPC連携
 
 `IpcStateCoordinator` はTauri UIプロセスからの `world.change_state` イベントを受け取り、対応するモードプリセットを適用する。
 
@@ -382,7 +337,6 @@ Unity側の実装で守る点は次の3つ。
 | `STATE_NORMAL` | `ALL_NORMAL` | 各エディタの終了処理 |
 | `STATE_EDIT_PATH` | `ROAD_CONSTRUCTION` | `RoadPlanManager.InitializeRoadPlacement` |
 | `STATE_EDIT_BUILDING` | `BUILDING_CONSTRUCTION` | `BuildingPlanManager` の初期化 |
-| `STATE_EDIT_ZONE` | `ZONE_EDIT` | `ZoneEditContext.EnterCreateMode` または `EnterEditMode`（道路のみ地区色分け表示にし、地区枠線を強調） |
 | `STATE_EDIT_PARCEL` | 作成方法に応じて切替 | `ParcelEditorManager.EnterCreationMode`（作成方法の切り替えはUnity側のCtrlラジアルメニュー`ParcelEditControlMenu`が担い、プリセットも同メソッドが切り替える） |
 | `STATE_EDIT_PARCEL_SHAPE` | `PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.InitializeEditMode` |
 | `STATE_EDIT_PROP` | `PROP_PLACEMENT` | `PropPlacementManager` の初期化（個別配置／範囲散布） |
@@ -393,13 +347,13 @@ Unity側の実装で守る点は次の3つ。
 | `STATE_EDIT_TRANSIT` | `TRANSIT_CONSTRUCTION` | `TransitPlanManager` を動的生成して `InitializeTransitPlacement`（`points` があれば経路編集として Editing から開始） |
 | `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` | `PATH_MERGE` / `PATH_SPLIT` | `PathTopologyEditManager.BeginMergeMode` / `BeginSplitMode`（Unity ウィンドウは最前面化しない） |
 | `STATE_REMOVE_OBJECTS` | `REMOVE_OBJECTS` | ブルドーザ（`RemovalManager.BeginRemovalMode`。`instant_remove` を渡すと建物・道路を状態で絞らない即時削除モード） |
-| `STATE_SET_GRID` | `SET_GRID` | `GridSetManager`（吸着フラグを退避して「ノード吸着のみON」にする。10章） |
+| `STATE_SET_GRID` | `SET_GRID` | `GridSetManager`（吸着フラグを退避して「ノード吸着のみON」にする。9章） |
 
-### 9.1. ステート別の表示プリセット
+### 8.1. ステート別の表示プリセット
 
 入力モードと各エディタの初期化は `IpcStateCoordinator`、表示の退避・切り替え・復帰は `IpcViewCoordinator` が担当する。強制するレイヤーと復帰規則は[Unity表示モード](Unity表示モード.md#編集ステートの表示プリセット)に定義する。
 
-## 10. スナップ
+## 9. スナップ
 
 `TerrainInputHandler.ApplySnapping` はマウス位置に対して以下の優先度でスナップを適用する。
 スナップが有効な場合、`InputHandler` の `posX` / `posZ` がスナップ後の座標で上書きされる。
@@ -420,7 +374,7 @@ Unity側の実装で守る点は次の3つ。
 `RoadPlanManager` は TerrainInputHandler の共通スナップに加えて、直角スナップを独自に実装している。
 直角スナップは、ノードまたは道路セグメント上に配置されたポイントから既存の道路に直角に交わる方向へのスナップを提供する。
 
-共通吸着は `TerrainInputHandler.onClick/onRightClick/onHover` の冒頭で全モードに掛かる（既定半径10m・バリアントフィルタ無し）が、次のモードは通さない。道路・線路の建設（`MODE_ROAD_CONSTRUCTION`）は `RoadPlanManager` が自前の吸着半径 `snapThreshold` と網互換フィルタで一度だけ吸着する（共通吸着も掛けると二重吸着になり、`snapThreshold` を変えても吸着範囲が変わらない）。接続点編集（`MODE_EDIT_CONNECTOR`）はドラッグ中の端子が自分の旧位置へ吸着し続けるのを防ぐため、パス分割（`MODE_PATH_SPLIT`）は端点へ引き寄せられると常に「端点に近すぎる」分割になるため、プロップ配置（`MODE_EDIT_PROP`）は任意の地点に置くため、土地区画の形状編集（`MODE_PARCEL_SHAPE_EDIT`）と造成範囲の作図（`MODE_EDIT_GRADING`）は頂点を吸着なしで置くため（§12）、それぞれ通さない。造成範囲の頂点が道路の中心線へ吸い付くと範囲がパスに掛かり、発注で必ず拒否される。
+共通吸着は `TerrainInputHandler.onClick/onRightClick/onHover` の冒頭で全モードに掛かる（既定半径10m・バリアントフィルタ無し）が、次のモードは通さない。道路・線路の建設（`MODE_ROAD_CONSTRUCTION`）は `RoadPlanManager` が自前の吸着半径 `snapThreshold` と網互換フィルタで一度だけ吸着する（共通吸着も掛けると二重吸着になり、`snapThreshold` を変えても吸着範囲が変わらない）。接続点編集（`MODE_EDIT_CONNECTOR`）はドラッグ中の端子が自分の旧位置へ吸着し続けるのを防ぐため、パス分割（`MODE_PATH_SPLIT`）は端点へ引き寄せられると常に「端点に近すぎる」分割になるため、プロップ配置（`MODE_EDIT_PROP`）は任意の地点に置くため、土地区画の形状編集（`MODE_PARCEL_SHAPE_EDIT`）と造成範囲の作図（`MODE_EDIT_GRADING`）は頂点を吸着なしで置くため（§11）、それぞれ通さない。造成範囲の頂点が道路の中心線へ吸い付くと範囲がパスに掛かり、発注で必ず拒否される。
 
 吸着で引き継ぐ相対高さは、バックエンドが保存している相対Yから取る（ノード＝ノードの相対高さ、パス区間＝アンカー相対YのXZ最近傍区間での線形補間、建設中の端点＝その端点の相対Y。保存設計標高のある線路だけは基準線の絶対標高から地形を引いて求める）。描画用点列の絶対Yから逆算してはならない。描画点列には地形起伏・描画オフセット・高さ源の違いによる残差が乗るため、地面のパスへ吸着しただけで端点が地下／空中扱いになり、見た目は繋がっているのにインフラのT字タップがバックエンドの高さ判定で成立しない「幽霊接続」になる。
 
@@ -445,7 +399,7 @@ Unity側の実装で守る点は次の3つ。
 ため、吸着すると端点が線路上に乗って建屋が線路を避けきれなくなる。グリッド吸着だけは
 プレイヤーが明示的に出したグリッドへの整列なので有効なまま。
 
-### 10.1. 並行スナップと終端揃え
+### 9.1. 並行スナップと終端揃え
 
 道路編集の直線モードでは、Ctrlメニューの **Parallel** で近隣パスとの並行補助を有効にできる。
 配置済みの直前の点を通り、基準パスの区間と同じ方向の直線へカーソルを射影する。
@@ -475,7 +429,7 @@ Unity側の実装で守る点は次の3つ。
 生のホバー座標から再計算するため、静止Rayを省略する入力最適化があってもプレビューが切り替わる。
 幾何計算の回帰検証はUnityディレクトリの `Tests/RoadSnapping/run.ps1`。
 
-## 11. Ctrlラジアルメニューとカーソル設定HUD
+## 10. Ctrlラジアルメニューとカーソル設定HUD
 
 パス敷設中（`RoadPlanManager` のセッション中）の設定操作は、3Dビュー内で完結する。
 
@@ -500,9 +454,9 @@ Unity側の実装で守る点は次の3つ。
 
 起動役のポーリング・HUD登録/解除・Ctrl検知でのメニュー開閉・自分が開いたメニューの後始末は
 共通基底 `Editors/EditControlMenuBase` にあり、各起動役は「アクティブ判定」「メニュー項目」「HUDの内容」だけを与える。
-同じ仕組みを地区編集（`ZoneEditControlMenu`。7章）と土地区画作成（`ParcelEditControlMenu`。12章）でも使う。
+同じ仕組みを土地区画作成（`ParcelEditControlMenu`。11章）でも使う。
 
-## 12. 土地区画作成の操作モデル
+## 11. 土地区画作成の操作モデル
 
 土地区画作成モード（`STATE_EDIT_PARCEL`）は「作成方法の切り替えは3Dビュー、数値と確定はパネル」という分担になっている。
 作成方法の真実源は `ParcelEditorManager.CurrentMode` で、`ParcelEditControlMenu`（Ctrlラジアル）で切り替える。
@@ -548,7 +502,7 @@ Unity側の実装で守る点は次の3つ。
 
 線路の保存設計標高がある場合、吸着位置の絶対標高はその基準線から評価する。地上線路でも小数の相対高さを引き継ぎ、ドラッグ時にも接続先の高さを優先する。複線の中心線へ横移動するときは絶対標高を保ち、移動先の地形との差から相対高さを算出する。接続先に吸着できた鉄道は直線・直角補助で再移動しない。描画点列のYは高さ源にしない。高さ編集可能なバリアントの数値入力は小数対応で、ステッパーは0.1m刻み。
 
-## 13. 建物の配置方法と配置前の寸法調整
+## 12. 建物の配置方法と配置前の寸法調整
 
 建物はCtrlラジアルメニューで配置方法を選ぶ。
 

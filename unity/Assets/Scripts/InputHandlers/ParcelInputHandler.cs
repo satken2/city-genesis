@@ -1,6 +1,5 @@
 
 using UnityEngine;
-using System;
 using GeneratedModels;
 
 /// <summary>
@@ -72,30 +71,6 @@ public class ParcelInputHandler : MonoBehaviour, IInputHandler
     public void onRightClick(int mode)
     {
         Debug.Log($"ParcelInputHandler: 土地区画右クリック時の処理: {mode}");
-        if (mode == InputMode.MODE_ZONE_EDIT)
-        {
-            int zoneId = 0;
-            var parcelManager = FindAnyObjectByType<ParcelManager>();
-            var zoneManager = FindAnyObjectByType<ZoneManager>();
-            if (parcelManager != null && zoneManager != null)
-            {
-                var summary = parcelManager.GetParcelSummary(parcelId);
-                if (summary != null)
-                {
-                    var center = summary.center_point;
-                    if (center != null && center.Count >= 2)
-                    {
-                        Vector3 centerPos = new Vector3(
-                            Convert.ToSingle(center[0]), 
-                            summary.altitude, 
-                            Convert.ToSingle(center[1])
-                        );
-                        zoneId = zoneManager.GetZoneIdAtPoint(centerPos);
-                    }
-                }
-            }
-            ZoneEditContext.Instance?.SelectZone(zoneId);
-        }
     }
 
     public void onHover(int mode)

@@ -1,0 +1,38 @@
+.climate-settings { display: flex; flex-direction: column; height: 100%; min-height: 0; background: var(--flat-surface); color: var(--flat-text-body); }
+.climate-settings-columns { display: grid; grid-template-columns: minmax(23rem, 2fr) minmax(34rem, 3fr); flex: 1; min-height: 0; gap: 1.5rem; padding: 1.5rem; overflow: auto; }
+.climate-settings-left, .climate-settings-right { min-width: 0; }
+.climate-settings-left { border-right: 1px solid var(--flat-raised-hover); padding-right: 1.5rem; }
+.climate-settings h3 { margin: 1.25rem 0 0.6rem; font-size: 1.08rem; font-weight: 600; color: var(--flat-text); }
+.climate-settings-field { display: flex; flex-direction: column; gap: 0.5rem; color: var(--flat-text-label); }
+.climate-settings-field input, .climate-settings-field select { width: 100%; min-width: 0; text-align: left; font: inherit; }
+.climate-settings .climate-settings-name { width: 100%; text-align: left; padding: 0.65rem; }
+.climate-settings-hint { color: var(--flat-text-label); font-size: 0.92rem; margin: 0.5rem 0 0.9rem; }
+.climate-weather-months { display: flex; flex-direction: column; gap: 0.3rem; }
+.climate-weather-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.22rem; }
+.climate-weather-row.is-selected { background: var(--flat-raised-hover); }
+.climate-month-button { padding: 0.2rem 0.3rem; width: 3.5rem; border: 0; border-radius: 0; background: transparent; flex-shrink: 0; text-align: right; font: inherit; }
+.climate-weather-bar { display: flex; position: relative; height: 1.45rem; flex: 1; min-width: 0; background: var(--flat-sunken); cursor: pointer; }
+.climate-weather-bar > span { height: 100%; }
+.climate-weather-boundary { position: absolute; top: 0; bottom: 0; width: 0.5rem; transform: translateX(-50%); padding: 0; border: 0; border-radius: 0; background: transparent; cursor: ew-resize; touch-action: none; }
+.climate-weather-boundary:hover, .climate-weather-boundary:focus-visible { background: rgba(255, 255, 255, 0.6); outline: 1px solid var(--flat-text); }
+.climate-weather-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem 0.9rem; }
+.climate-weather-values label { display: flex; align-items: center; gap: 0.3rem; min-width: 0; }
+.climate-weather-values label > span:first-child { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.climate-weather-values input { width: 4rem; padding: 0.3rem; font: inherit; text-align: right; color: var(--flat-text); background: var(--flat-sunken); border: 0; }
+.climate-weather-values i, .climate-chart-legend i { display: inline-block; width: 0.75rem; height: 0.75rem; margin-right: 0.4rem; }
+.climate-chart-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.3rem 0 0.7rem; }
+.climate-chart-legend button { font: inherit; border-radius: 0; border: 0; padding: 0.55rem 0.75rem; background: var(--flat-raised); }
+.climate-chart-legend button.is-selected { background: var(--flat-selected); }
+.climate-chart { display: block; width: 100%; aspect-ratio: 720 / 340; background: var(--flat-sunken); touch-action: none; }
+.climate-chart-selection { fill: var(--flat-selected); opacity: 0.25; }
+.climate-chart-axis line { stroke: var(--flat-raised-hover); }
+.climate-chart-axis text, .climate-chart-unit text, .climate-chart-month { font-size: 13px; }
+.climate-chart-month { fill: var(--flat-text-label); }
+.climate-chart-handle { cursor: ns-resize; stroke: var(--flat-sunken); stroke-width: 2; }
+.climate-chart-handle:hover, .climate-chart-handle:focus-visible { stroke: var(--flat-text); outline: none; }
+.climate-metric-values { display: flex; flex-direction: column; gap: 0.6rem; }
+.climate-metric-values label { display: grid; grid-template-columns: minmax(9rem, 1fr) 8rem 3rem; align-items: center; gap: 0.75rem; }
+.climate-metric-values .settings-number { width: 100%; font: inherit; }
+.climate-settings-footer { display: flex; flex-shrink: 0; justify-content: flex-end; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; border-top: 1px solid var(--flat-raised-hover); }
+.climate-settings-error { flex: 1; color: var(--flat-danger); margin: 0; }
+.climate-settings-footer .climate-settings-apply { background: var(--flat-selected); }

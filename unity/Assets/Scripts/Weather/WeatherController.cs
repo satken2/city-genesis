@@ -9,7 +9,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 天気・時刻・気候から、Unity内の空・照明・霧・降水を管理する。経済・マスター・セーブには書き込まない。
 /// 天気はエポックと無関係に隣り合う天気へゆっくり移り変わり(WeatherChain)、時刻は WeatherClock が進める。
-/// 気候と季節は GET /api/v1/city の climate と current_date から読み、天気の出現割合(WeatherClimate)を決める。
+/// 気候名と月別の出現割合は GET /api/v1/city の climate と current_date から読む。
 /// </summary>
 public sealed class WeatherController : MonoBehaviour
 {
@@ -17,7 +17,7 @@ public sealed class WeatherController : MonoBehaviour
     public int CurrentIndex { get; private set; }
     public bool Locked { get; private set; }
     public float TransitionSeconds = 45f;
-    public int Climate { get; private set; } = Constants.CLIMATE_TEMPERATE;
+    public string Climate { get; private set; } = "";
     public int Season { get; private set; } = WeatherClimate.Spring;
     public WeatherClock Clock { get; } = new WeatherClock();
 
@@ -42,7 +42,7 @@ public sealed class WeatherController : MonoBehaviour
     private Look fromLook, toLook;
     private float blend = 1f, blendSeconds = 1f;
     private float cloudSeed, cookieCoverage = -1f, cookieThickness = -1f;
-    private IReadOnlyList<int> weights = WeatherClimate.Weights(Constants.CLIMATE_TEMPERATE, WeatherClimate.Spring);
+    private IReadOnlyList<int> weights = WeatherClimate.InitialWeights();
     private EnvironmentSnapshot original;
     private GUIStyle panelStyle;
     private ReflectionProbe reflection;
@@ -53,7 +53,7 @@ public sealed class WeatherController : MonoBehaviour
     private static readonly Color NightZenith = Hex("05070D"), NightHorizon = Hex("0B1019"), NightCloud = Hex("0C1018");
 
     private sealed class CityResponse { public CityState city; }
-    private sealed class CityState { public int? epoch; public int? climate; public int? current_date; }
+    private sealed class CityState { public int? epoch; public WeatherClimateSettings climate; public int? current_date; }
 
     /// <summary>天気の見た目。移り変わりの途中は前後の天気の間を補間する。</summary>
     private struct Look
@@ -276,10 +276,12 @@ public sealed class WeatherController : MonoBehaviour
     {
         bool sessionStart = !epochs.Epoch.HasValue;
         int advanced = epochs.Observe(city.epoch.Value);
-        Climate = WeatherClimate.Normalize(city.climate ?? Constants.CLIMATE_TEMPERATE);
+        if (city.climate?.months?.Length != 12) return;
+        Climate = city.climate.name;
         if (city.current_date.HasValue) Season = WeatherClimate.SeasonOf(city.current_date.Value);
-        var next = WeatherClimate.Weights(Climate, Season);
-        bool changed = !ReferenceEquals(next, weights);
+        var next = WeatherClimate.Weights(city.climate, city.current_date ?? 0);
+        bool changed = false;
+        for (int i = 0; i < next.Count; i++) changed |= next[i] != weights[i];
         weights = next;
         if (sessionStart)
         {
@@ -493,7 +495,7 @@ public sealed class WeatherController : MonoBehaviour
         int hour = Mathf.FloorToInt(hours), minute = Mathf.FloorToInt((hours - hour) * 60f);
         GUI.Box(new Rect(20, 70, 560, 176),
             $"天気 / Weather   {CurrentIndex + 1:00}/{WeatherPreset.All.Count}  {WeatherPreset.All[CurrentIndex].Name}   {(Locked ? "固定 / Locked" : "自動 / Auto")}\n" +
-            $"気候 / Climate   {WeatherClimate.Name(Climate)}   {WeatherClimate.SeasonName(Season)}\n" +
+            $"気候 / Climate   {Climate}   {WeatherClimate.SeasonName(Season)}\n" +
             $"時刻 / Time   {hour:00}:{minute:00}{(Clock.Paused ? "   停止 / Paused" : "")}\n" +
             "F6/F7 天気   F10 固定   F11 再抽選\nF3/F4 時刻を1時間戻す/進める   F5 時刻の停止\nF9 パネルを閉じる（撮影前に非表示）", panelStyle);
     }
