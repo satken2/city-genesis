@@ -72,6 +72,6 @@ Platformsは32m/256mと、実FBXの頂点数・著作長から60,000頂点を超
 
 レンガ高架は交差するアーチの全体省略・幅広道路・上側道路・同標高・深いトンネル・移動/削除後の復帰と道床維持も検査する。近傍再生成の通知はTests/Pillars/run-unity.ps1で検査する。
 
-RailYardは1064モノレール車庫も検査する。実FBXの架線不在・端子へのリード・細い単桁の曲線合流部の連続性を確認し、monorail-yard-preview.pngとmonorail-yard-throat.pngを出力する。
+RailYardは1064モノレール車庫も検査する。実FBXの架線不在・端子への接続・細い単桁の曲線合流部の連続性を確認し、monorail-yard-preview.pngとmonorail-yard-throat.pngを出力する。両基地で端子を移動した実メッシュを確認し、端に寄った入口の画像もrail-yard-edge-preview.pngとmonorail-yard-edge-preview.pngへ出力する。配置計画では左右の集約線が端子位置（0m）から分岐し、複線の2本目も端子の軌道位置から曲がることを検査する。
 
 `-StationHouse` は全6駅舎×3通路方式×3長さ×2方向×3配置端の324ケースを検証する。地下は通路メッシュ・帯コライダーなし、他方式は実FBXの高さとクリック面の一致を検査する。共通通路の新規導入時は独立QA環境で `StationHouseQA.SyncPassagePrefabs` を明示実行できる（`-intersectionSourceRoot` で本編を指定）。既存ModelPrefabGeneratorを使い、GUID衝突時は停止する。

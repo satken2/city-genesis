@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 都市の範囲(詳細地形の矩形)の境界に、地表と海面に沿った半透明の太い破線を常時描く。
+/// 都市の範囲(詳細地形の矩形)の境界に、地表と海面に沿った半透明の太い破線を近距離で描く。
+/// さらに近づくと、境界から立ち上がる水色の格子壁を表示する。
 /// 都市外の背景地形は地続きに見えても建設できない(テンプレートモードを除く)ため、プレイヤーに範囲を示す。
 ///
 /// 線の太さは画面上のピクセルで一定にする。破線の周期はチャンクごとにカメラ距離から2の累乗メートルへ丸め、
@@ -20,19 +21,30 @@ public sealed class CityBoundaryOverlay : MonoBehaviour
     private const float MIN_DASH_PERIOD = 2f;      // 接写時の破線周期の下限(m)
     private const float MIN_SEGMENT_PIXELS = 6f;   // 画面上でこれより細かい起伏には追従させない(px)
     private const float CULL_MARGIN = 20f;         // チャンクのAABBに足す余白(m)
+    private const float FULL_VISIBILITY_DISTANCE = 600f;
+    private const float HIDDEN_DISTANCE = 1000f;
+    private const float WALL_HEIGHT = 1000f;
+    private const float WALL_GRID_SPACING = 20f;
+    private const float WALL_LINE_PIXELS = 1.5f;
+    private const float WALL_FULL_VISIBILITY_DISTANCE = 100f;
+    private const float WALL_HIDDEN_DISTANCE = 300f;
     private const float CAMERA_POS_THRESHOLD = 0.5f;
     private const float CAMERA_ROT_THRESHOLD = 0.5f;
     private static readonly Color LINE_COLOR = new Color(1f, 1f, 1f, 0.55f);
+    private static readonly Color WALL_COLOR = new Color(0.1f, 0.85f, 1f, 0.7f);
 
     private struct Chunk
     {
         public int start;
         public int end;
         public Bounds bounds;
+        public Bounds wallBounds;
     }
 
     private TerrainManager terrain;
     private OverlayMeshRenderer overlay;
+    private OverlayMeshRenderer wallOverlay;
+    private readonly List<Vector3> wallTriangles = new List<Vector3>();
     // 境界を1周する折れ線。末尾は先頭と同じ点で閉じる。arc は XZ 平面での累積距離。
     private readonly List<Vector3> points = new List<Vector3>();
     private readonly List<float> arc = new List<float>();
@@ -56,6 +68,14 @@ public sealed class CityBoundaryOverlay : MonoBehaviour
     {
         terrain = GetComponent<TerrainManager>();
         overlay = OverlayMeshRenderer.Create("CityBoundaryOverlay", alwaysOnTop: false, parent: transform);
+        // 線の各位置からカメラまでの距離でフェードさせ、チャンクの継ぎ目や微小移動でも濃さを滑らかに保つ。
+        overlay.Material.EnableKeyword("OVERLAY_DISTANCE_FADE");
+        overlay.Material.SetVector("_DistanceFadeRange", new Vector4(FULL_VISIBILITY_DISTANCE, HIDDEN_DISTANCE, 0f, 0f));
+        wallOverlay = OverlayMeshRenderer.Create("CityBoundaryWall", alwaysOnTop: false, parent: transform);
+        wallOverlay.Material.EnableKeyword("OVERLAY_DISTANCE_FADE");
+        wallOverlay.Material.EnableKeyword("OVERLAY_WORLD_GRID");
+        wallOverlay.Material.SetVector("_DistanceFadeRange", new Vector4(WALL_FULL_VISIBILITY_DISTANCE, WALL_HIDDEN_DISTANCE, 0f, 0f));
+        wallOverlay.Material.SetVector("_WorldGrid", new Vector4(WALL_GRID_SPACING, WALL_LINE_PIXELS, 0f, 0f));
         if (terrain != null) terrain.OnAllTerrainLodLoaded += OnTerrainLoaded;
     }
 
@@ -67,13 +87,17 @@ public sealed class CityBoundaryOverlay : MonoBehaviour
     private void LateUpdate()
     {
         Camera cam = Camera.main;
-        bool visible = overlay != null && terrain != null && terrain.HasTerrainSettings && cam != null
+        bool visible = overlay != null && wallOverlay != null && terrain != null && terrain.HasTerrainSettings && cam != null
             && GameStateManager.Instance != null && GameStateManager.Instance.IsWorldVisible;
         if (!visible)
         {
             // セッション切り替え中は地形設定が消えるので、次の都市で境界を作り直す。
             if (terrain == null || !terrain.HasTerrainSettings) points.Clear();
-            if (!meshCleared && overlay != null) overlay.ClearMesh();
+            if (!meshCleared)
+            {
+                if (overlay != null) overlay.ClearMesh();
+                if (wallOverlay != null) wallOverlay.ClearMesh();
+            }
             meshCleared = true;
             return;
         }
@@ -197,6 +221,10 @@ public sealed class CityBoundaryOverlay : MonoBehaviour
             chunk.bounds = new Bounds();
             chunk.bounds.SetMinMax(min, max);
             chunk.bounds.Expand(CULL_MARGIN * 2f);
+            // 壁の上部だけが見える視点でも、地表の破線とは独立にカリングする。
+            chunk.wallBounds = new Bounds();
+            chunk.wallBounds.SetMinMax(min, max + Vector3.up * WALL_HEIGHT);
+            chunk.wallBounds.Expand(CULL_MARGIN * 2f);
             chunks[c] = chunk;
         }
     }
@@ -213,6 +241,7 @@ public sealed class CityBoundaryOverlay : MonoBehaviour
         {
             if (!GeometryUtility.TestPlanesAABB(frustumPlanes, chunk.bounds)) continue;
             float distance = Mathf.Max(Vector3.Distance(camPos, chunk.bounds.ClosestPoint(camPos)), cam.nearClipPlane);
+            if (distance >= HIDDEN_DISTANCE) continue;
             float worldPerPixel = cam.orthographic ? cam.orthographicSize * 2f / Screen.height : distance * worldPerPixelAtUnit;
             float period = Mathf.Pow(2f, Mathf.Round(Mathf.Log(Mathf.Max(DASH_PERIOD_PIXELS * worldPerPixel, MIN_DASH_PERIOD), 2f)));
             int stride = Mathf.Max(1, Mathf.FloorToInt(MIN_SEGMENT_PIXELS * worldPerPixel / SAMPLE_SPACING));
@@ -224,6 +253,28 @@ public sealed class CityBoundaryOverlay : MonoBehaviour
             }
         }
         overlay.EndFrame(cam);
+
+        wallOverlay.BeginFrame();
+        wallTriangles.Clear();
+        foreach (Chunk chunk in chunks)
+        {
+            if (!GeometryUtility.TestPlanesAABB(frustumPlanes, chunk.wallBounds)) continue;
+            if ((camPos - chunk.wallBounds.ClosestPoint(camPos)).sqrMagnitude >= WALL_HIDDEN_DISTANCE * WALL_HIDDEN_DISTANCE) continue;
+            AddWallChunk(chunk);
+        }
+        wallOverlay.AddPreTriangulated(wallTriangles, WALL_COLOR);
+        wallOverlay.EndFrame(cam);
+    }
+
+    private void AddWallChunk(Chunk chunk)
+    {
+        for (int i = chunk.start; i < chunk.end; i++)
+        {
+            Vector3 a = points[i], b = points[i + 1];
+            Vector3 topA = a + Vector3.up * WALL_HEIGHT, topB = b + Vector3.up * WALL_HEIGHT;
+            wallTriangles.Add(a); wallTriangles.Add(topA); wallTriangles.Add(topB);
+            wallTriangles.Add(a); wallTriangles.Add(topB); wallTriangles.Add(b);
+        }
     }
 
     /// <summary>累積距離 a〜b の区間を、stride サンプルおき(隅は必ず通す)に折れ線で描く。</summary>

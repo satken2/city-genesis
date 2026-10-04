@@ -311,13 +311,13 @@ public static class QuayQA
     }
 
     /// <summary>
-    /// 完了時の書き込み規則の鏡写し: 埋立地の中(境界を含む)で岸壁区間からの距離が keep を超える 1m 格子点を天端の高さにし、
-    /// ほかは元の高さのまま残す。
+    /// 完了時の書き込み規則の鏡写し: 埋立地の中(境界を含む)で岸壁区間からの距離が keep を超える 1m 格子点のうち、
+    /// 天端より低い点を天端の高さに上げ、ほかは元の高さのまま残す。
     /// </summary>
     static double NodeValue(LeakCase c, int x, int z, double keep, bool edited)
     {
         int n = c.Node(x, z);
-        return edited && c.Inside[n] && c.QuayDistance[n] > keep ? seaTop : c.Original[n];
+        return edited && c.Inside[n] && c.QuayDistance[n] > keep ? Math.Max(seaTop, c.Original[n]) : c.Original[n];
     }
 
     /// <summary>

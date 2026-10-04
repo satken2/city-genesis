@@ -47,11 +47,6 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>並行線路の本数上限。巨大な敷地でドローコールが膨らむのを防ぐ。</summary>
     private const int MAX_TRACKS = 10;
 
-    /// <summary>端子ノード手前の直線リード線の長さ(m)。曲線はこの始点へ収束する。</summary>
-    private const float LEAD_LENGTH = 6f;
-
-    /// <summary>複線の引き込み線の2本目で、端子から渡り線の始点までの直線長(m)。</summary>
-    private const float SECOND_LEAD_STRAIGHT = 3f;
     /// <summary>2本目が集約線へ合流する渡り線の走行長(m)。軌道中心間隔3.5mで最小曲線半径が約17mになる。</summary>
     private const float SECOND_LEAD_RUN = 16f;
 
@@ -170,7 +165,6 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         Vector2 nodeUV = new Vector2(Vector2.Dot(nodeLocal - centroid, u2), Vector2.Dot(nodeLocal - centroid, v2));
         // 複線の引き込み線では、端子の片側の軌道位置へ構内の線路を集約する（単線は端子そのもの）。
         Vector2 trunkNode = nodeUV - new Vector2(0f, profile.LeadHalfSpacing);
-        float leadStartU = trunkNode.x - LEAD_LENGTH;
 
         // 並行線路の行割り（敷地の横幅から本数を決め、中央寄せで並べる）
         float usable = (vMax - vMin) - SIDE_MARGIN * 2f;
@@ -268,21 +262,13 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
                 trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
                 ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, true);
         }
-        Vector2 lead = new Vector2(leadStartU, trunkNode.y);
-        PlaceTilesAlongBezier(lead, lead + Vector2.right * 2f, trunkNode - Vector2.right * 2f, trunkNode,
-            trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
-            ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
-
-        // 複線の2本目: 端子から直線で入り、渡り線で集約線へ合流する（合流側の支持材は集約線の外縁で切る）。
+        // 複線の2本目も端子から直接曲げ、渡り線で集約線へ合流する。
         float secondMergeU = float.NaN;
         if (profile.LeadHalfSpacing > 0f
-            && TryPlanSecondLead(uv, rows, nodeUV, trunkNode, out Vector2 secondEnd, out Vector2 secondStart, out Vector2 secondMerge))
+            && TryPlanSecondLead(uv, rows, nodeUV, trunkNode, out Vector2 secondEnd, out Vector2 secondMerge))
         {
-            PlaceTilesAlongBezier(secondStart, secondStart + Vector2.right, secondEnd - Vector2.right, secondEnd,
-                trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
-                ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
             Vector2 handle = Vector2.right * (SECOND_LEAD_RUN * .4f);
-            PlaceTilesAlongBezier(secondStart, secondStart - handle, secondMerge + handle, secondMerge,
+            PlaceTilesAlongBezier(secondEnd, secondEnd - handle, secondMerge + handle, secondMerge,
                 trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
                 ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, true);
             secondMergeU = secondMerge.x;
@@ -650,24 +636,22 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 複線の引き込み線の2本目を計画する。端子の反対側の軌道位置から SECOND_LEAD_STRAIGHT だけ直進し、
+    /// 複線の引き込み線の2本目を計画する。端子の反対側の軌道位置から直接曲げ、
     /// SECOND_LEAD_RUN の渡り線で集約線の直線区間へ合流する。合流点が集約線の直線区間に無い、
     /// または線路が敷地に収まらない場合は false（集約線の1本だけで端子へ入る）。
     /// </summary>
     private static bool TryPlanSecondLead(Vector2[] uv, List<TrackRow> rows, Vector2 node, Vector2 trunkNode,
-        out Vector2 end, out Vector2 start, out Vector2 merge)
+        out Vector2 end, out Vector2 merge)
     {
         end = node + (node - trunkNode);
-        start = end - Vector2.right * SECOND_LEAD_STRAIGHT;
-        merge = new Vector2(start.x - SECOND_LEAD_RUN, trunkNode.y);
+        merge = new Vector2(end.x - SECOND_LEAD_RUN, trunkNode.y);
         int trunk = rows.FindIndex(row => row.Side == 0);
         if (trunk < 0 || merge.x < rows[trunk].StraightStart) return false;
         Vector2 handle = Vector2.right * (SECOND_LEAD_RUN * .4f);
         for (int k = 0; k <= 64; k++)
         {
             float t = k / 64f;
-            if (!PolygonUtils.Contains(uv, Vector2.Lerp(start, end, t), BOUNDARY_TOLERANCE)
-                || !PolygonUtils.Contains(uv, PolylineUtils.CubicBezierPoint(start, start - handle, merge + handle, merge, t), BOUNDARY_TOLERANCE))
+            if (!PolygonUtils.Contains(uv, PolylineUtils.CubicBezierPoint(end, end - handle, merge + handle, merge, t), BOUNDARY_TOLERANCE))
                 return false;
         }
         return true;
@@ -680,11 +664,10 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     private static List<TrackRow> PlanRows(Vector2[] uv, Vector2 node, float center, int count)
     {
         var rows = new List<TrackRow>();
-        Vector2 lead = node - Vector2.right * LEAD_LENGTH;
-        if (!TryGetRowStart(uv, node.y, lead.x, out float mainStart)) return rows;
-        if (lead.x - mainStart < .5f) return rows;
-        rows.Add(new TrackRow { V=node.y, StraightStart=mainStart, StraightEnd=lead.x,
-            Target=lead, Direction=Vector2.right, Side=0 });
+        if (!TryGetRowStart(uv, node.y, node.x, out float mainStart)) return rows;
+        if (node.x - mainStart < .5f) return rows;
+        rows.Add(new TrackRow { V=node.y, StraightStart=mainStart, StraightEnd=node.x,
+            Target=node, Direction=Vector2.right, Side=0 });
         float minV=float.MaxValue, maxV=float.MinValue;
         foreach (Vector2 point in uv) { minV=Mathf.Min(minV,point.y); maxV=Mathf.Max(maxV,point.y); }
         for (int rank=1; rank<MAX_TRACKS && rows.Count<count; rank++)
@@ -694,15 +677,14 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
                 if (rows.Count>=count) break;
                 float v=node.y+side*rank*TRACK_SPACING;
                 if (v<minV+SIDE_MARGIN || v>maxV-SIDE_MARGIN) continue;
-                // 左右が同じ一点へ同時合流する三方分岐を避ける。
-                Vector2 merge=lead-Vector2.right*(side<0 ? 6f : 18f);
+                // 左右とも端子を分岐の起点にし、敷地内に収まる線だけを採用する。
+                Vector2 merge=node;
                 Vector2 spineEnd=merge+new Vector2(-8f,side*2f);
                 float distance=rank*TRACK_SPACING-ENTRY_OVERLAP/LADDER_RUN_PER_LATERAL;
                 Vector2 target=spineEnd+new Vector2(-(distance-2f)*LADDER_RUN_PER_LATERAL,side*(distance-2f));
                 Vector2 direction=new Vector2(LADDER_RUN_PER_LATERAL,-side).normalized;
                 float end=target.x-ENTRY_OVERLAP-ENTRY_APPROACH;
                 if (!TryGetRowStart(uv,v,end,out float start) || end-start<MIN_STRAIGHT_LENGTH) continue;
-                if (merge.x<mainStart || merge.x>lead.x) continue;
                 Vector2 p0=new Vector2(end,v);
                 bool fits=true;
                 for (int k=0; k<=64; k++)

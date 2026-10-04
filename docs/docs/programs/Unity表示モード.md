@@ -120,7 +120,7 @@ UIからは `view:change_view {layer, mode, sub_mode, flags}` で届く([IPC連�
 | クラス | 役割 | 仕様 |
 | --- | --- | --- |
 | `ObjectVisibilityFilter` | 建物・道路をID単位で非表示にする第3の系統。`UpdateVisuals` の最優先分岐で Renderer とコライダーを落とす | [建設プロジェクト管理](建設プロジェクト管理.md) |
-| `CityBoundaryOverlay` | 都市範囲の境界の破線を常時描く | [地形形状](../geometries/D_地形形状.md#都市外の背景地形) |
+| `CityBoundaryOverlay` | カメラが近づいた都市境界の破線・格子壁を距離に応じてフェード表示 | [地形形状](../geometries/D_地形形状.md#都市外の背景地形) |
 | `RoadFocusOverlay` | 名前付き道路の区間を道路色の帯で強調 | [道路の詳細と道路名](道路の詳細と道路名.md) |
 | `PathSpeedLimitOverlay` | 道路・線路の制限速度標識(`VisualFlag.SPEED_LIMIT_SIGNS`) | 下記 |
 | `TransitOverlayManager`(DataLoaders) | 公共交通の路線帯・停留所・名前。独立レイヤーで、色モードやプリセットを追加しない | [公共交通ハイライト](公共交通ハイライト.md) |

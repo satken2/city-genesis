@@ -30,6 +30,7 @@ public static class RailYardQA
             var assembly = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
             Type yard = assembly.GetType("RailYardBuildingMeshBuilder");
             CheckPlan(yard);
+            CheckSecondLead(yard);
             CheckTerminalFallback(yard);
             Type modelType = assembly.GetType("ModelManager");
             var model = new GameObject("Models").AddComponent(modelType);
@@ -58,7 +59,7 @@ public static class RailYardQA
             Require(mesh.vertices.Any(v=>Mathf.Abs(v.x)>18.8f && v.y>2.1f && v.y<2.3f), "Boundary fence missing");
             Require(!mesh.vertices.Any(v=>Mathf.Abs(v.x)<2.9f && v.z>79.7f && v.y>.5f && v.y<2.3f), "Fence blocks terminal opening");
             Require(Covers(mesh, new Vector2(0f, 77f)), "Missing terminal lead");
-            CheckMovedMeshes(assembly,yard,summary,building);
+            CheckMovedMeshes(assembly,yard,summary,building,root,"rail-yard-edge");
             Render(root, mesh, materials);
             CheckMonorail(root, yard, summary, building, cache);
             File.WriteAllText(report, $"PASS rail yard: {checks} checks; {mesh.vertexCount} vertices\n");
@@ -97,7 +98,8 @@ public static class RailYardQA
             var p3=(Vector2)type.GetField("Target").GetValue(row);
             var direction=(Vector2)type.GetField("Direction").GetValue(row);
             var p1=p0+Vector2.right*((p3.x-p0.x)*.4f);
-            var p2=p3-direction*4;
+            float overlap=(float)yard.GetField("ENTRY_OVERLAP",PrivateStatic).GetRawConstantValue();
+            var p2=p3-direction*overlap;
             for(int i=48;i<=96;i++)
             {
                 float t=i/96f, a=1-t;
@@ -107,6 +109,18 @@ public static class RailYardQA
         }
         var old=GameObject.Find("RailYard"); if(old!=null) UnityEngine.Object.DestroyImmediate(old);
         Render(root,mesh,materials,"monorail-yard");
+        CheckMovedMeshes(yard.Assembly,yard,summary,building,root,"monorail-yard-edge");
+    }
+
+    static void CheckSecondLead(Type yard)
+    {
+        var polygon=new[] {new Vector2(-80,-19),new Vector2(80,-19),new Vector2(80,19),new Vector2(-80,19)};
+        var node=new Vector2(80,0);
+        var trunk=new Vector2(80,-1.75f);
+        var rows=yard.GetMethod("PlanRows",PrivateStatic).Invoke(null,new object[] {polygon,trunk,0f,7});
+        var args=new object[] {polygon,rows,node,trunk,null,null};
+        Require((bool)yard.GetMethod("TryPlanSecondLead",PrivateStatic).Invoke(null,args),"Second lead does not fit standard yard");
+        Require(Vector2.Distance((Vector2)args[4],new Vector2(80,1.75f))<.001f,"Second lead does not start at terminal track end");
     }
 
     static void CheckPlan(Type yard)
@@ -122,7 +136,7 @@ public static class RailYardQA
             Func<object,int> side=row=>(int)row.GetType().GetField("Side").GetValue(row);
             var main=rows.Single(row=>side(row)==0);
             Require(Mathf.Abs(scalar(main,"V")-node.y)<.001f,"Central track misses terminal");
-            Require(Mathf.Abs(scalar(main,"StraightEnd")-(node.x-6f))<.001f,"Central track is not straight up to lead");
+            Require(Mathf.Abs(scalar(main,"StraightEnd")-node.x)<.001f,"Central track does not reach terminal");
             if (v==0f) Require(rows.Any(row=>side(row)<0)&&rows.Any(row=>side(row)>0),"Centered terminal lacks two-sided collection");
             foreach (int direction in new[] { -1,1 })
             {
@@ -135,6 +149,7 @@ public static class RailYardQA
                     var target=(Vector2)row.GetType().GetField("Target").GetValue(row);
                     var merge=(Vector2)row.GetType().GetField("MergePoint").GetValue(row);
                     var tangent=(Vector2)row.GetType().GetField("Direction").GetValue(row);
+                    Require(Vector2.Distance(merge,node)<.001f,"Collector branches after a straight approach instead of at terminal");
                     var delta=target-first;
                     Require(Mathf.Abs(delta.x*tangent.y-delta.y*tangent.x)<.001f,"Merge points are off collector");
                     Require((scalar(row,"V")-node.y)*direction>=(target.y-node.y)*direction
@@ -161,7 +176,7 @@ public static class RailYardQA
         Require(midpoint(new[] { new Vector2(0,0),new Vector2(60,0),new Vector2(60,20),new Vector2(30,20),new Vector2(30,40),new Vector2(0,40) })==null,"L-shape treated as rectangle");
     }
 
-    static void CheckMovedMeshes(Assembly assembly,Type yard,Type summary,object building)
+    static void CheckMovedMeshes(Assembly assembly,Type yard,Type summary,object building,string root,string previewPrefix)
     {
         var managerType=assembly.GetType("PathManager");
         var go=new GameObject("TerminalMoveQA");
@@ -169,7 +184,7 @@ public static class RailYardQA
         var cache=(IDictionary)managerType.GetField("nodeDataCache",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(manager);
         var nodeType=assembly.GetType("NodeData");
         summary.GetField("depot_node_id").SetValue(building,1);
-        foreach (var pos in new[] { new Vector3(.5f,0,80),new Vector3(-.5f,0,79),new Vector3(8,0,75),new Vector3(-17,0,70),new Vector3(0,0,-75) })
+        foreach (var pos in new[] { new Vector3(.5f,0,80),new Vector3(-.5f,0,79),new Vector3(8,0,75),new Vector3(-17,0,70),new Vector3(0,0,-75),new Vector3(-17,0,80) })
         {
             var node=Activator.CreateInstance(nodeType);
             nodeType.GetField("node_id").SetValue(node,1);
@@ -179,7 +194,9 @@ public static class RailYardQA
             var mesh=(Mesh)result.GetType().GetProperty("Mesh").GetValue(result);
             Require(mesh.vertexCount>5000,"Moved terminal produced a white box: "+pos);
             float direction=pos.z<0 ? -1f:1f;
-            Require(Covers(mesh,new Vector2(pos.x,pos.z-direction*2f)),"Moved terminal has no straight lead: "+pos);
+            Require(Covers(mesh,new Vector2(pos.x,pos.z-direction*.05f)),"Moved terminal has no track immediately inside entrance: "+pos);
+            if (pos.x==-17f && pos.z==80f)
+                Render(root,mesh,(Material[])result.GetType().GetProperty("Materials").GetValue(result),previewPrefix);
             UnityEngine.Object.DestroyImmediate(mesh);
             UnityEngine.Object.DestroyImmediate((Mesh)result.GetType().GetProperty("ColliderMesh").GetValue(result));
         }
@@ -218,6 +235,10 @@ public static class RailYardQA
         camera.orthographicSize=40;
         camera.transform.position=new Vector3(45,80,110); camera.transform.LookAt(new Vector3(0,0,35));
         Save(camera,root+"/Temp/IntersectionUnityQA/"+prefix+"-throat.png");
+        foreach (var material in go.GetComponent<MeshRenderer>().sharedMaterials) UnityEngine.Object.DestroyImmediate(material);
+        UnityEngine.Object.DestroyImmediate(go);
+        UnityEngine.Object.DestroyImmediate(light.gameObject);
+        UnityEngine.Object.DestroyImmediate(camera.gameObject);
     }
 
     static void Save(Camera camera, string path)
