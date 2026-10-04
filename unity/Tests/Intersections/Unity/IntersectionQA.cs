@@ -33,6 +33,7 @@ public static class IntersectionQA
    masterType.GetField("<Instance>k__BackingField",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,master);
    Type itemType=asm.GetType("PathMasterItem");
    var dict=(IDictionary)masterType.GetField("pathMasterById",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(master);
+   masterType.GetProperty("IsInitialized").SetValue(master,true);
    var modelType=asm.GetType("ModelManager"); var model=new GameObject("Models").AddComponent(modelType);
    modelType.GetField("<Instance>k__BackingField",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,model);
    var cache=(IDictionary)modelType.GetField("_modelCache",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(model);
@@ -40,7 +41,9 @@ public static class IntersectionQA
     var p=Activator.CreateInstance(pathType); pathType.GetField("path_id").SetValue(p,i+1); pathType.GetField("start_node_id").SetValue(p,1); pathType.GetField("end_node_id").SetValue(p,100+i);pathType.GetField("path_variant").SetValue(p,100+i);pathType.GetField("path_type").SetValue(p,1);pathType.GetField("curved").SetValue(p,false);
     float angle=i*120*Mathf.Deg2Rad;var end=new Vector3(Mathf.Cos(angle)*80,i==0?16f:i==1?-8f:0f,Mathf.Sin(angle)*80);points[i+1]=new List<Vector3>{Vector3.zero,end};
     pathType.GetField("start_point").SetValue(p,new List<object>{0f,0f,0f});pathType.GetField("end_point").SetValue(p,new List<object>{end.x,end.y,end.z});paths.Add(p);
-    var item=Activator.CreateInstance(itemType);itemType.GetField("width").SetValue(item,i==0?16f:8f);itemType.GetField("sidewalk_width").SetValue(item,i==2?0f:2f);itemType.GetField("wall_width").SetValue(item,0.4f);itemType.GetField("center_width").SetValue(item,0.6f);itemType.GetField("lanes").SetValue(item,2);itemType.GetField("follow_terrain").SetValue(item,false);itemType.GetField("side_width").SetValue(item,0.5f);dict.Add(100+i,item);
+    var item=Activator.CreateInstance(itemType);itemType.GetField("width").SetValue(item,i==0?16f:8f);itemType.GetField("sidewalk_width").SetValue(item,i==2?0f:2f);itemType.GetField("wall_width").SetValue(item,0.4f);itemType.GetField("center_width").SetValue(item,0.6f);itemType.GetField("lanes").SetValue(item,2);itemType.GetField("follow_terrain").SetValue(item,false);itemType.GetField("side_width").SetValue(item,0.5f);
+    // 接合検査の下り坂（深さ8m）では、側壁を省略するトンネル区間へ入らないクリアランスを使う。
+    itemType.GetField("height").SetValue(item,10f);dict.Add(100+i,item);
     foreach(string part in new[]{"body","sidewalk","wall","center","line"}) {var go=GameObject.CreatePrimitive(PrimitiveType.Cube);go.name=part;go.transform.position=Vector3.down*1000; var mesh=UnityEngine.Object.Instantiate(go.GetComponent<MeshFilter>().sharedMesh);var v=mesh.vertices;for(int j=0;j<v.Length;j++){v[j].y=part=="body"?v[j].y*.1f-.05f:(v[j].y+.5f)*(part=="wall"?2f:part=="sidewalk"?.2f:.1f);}mesh.vertices=v;mesh.RecalculateBounds();go.GetComponent<MeshFilter>().sharedMesh=mesh;var actual=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Paths/p"+(Array.IndexOf(Environment.GetCommandLineArgs(),"-pavedModels")>=0?2:1)+"/"+part+".fbx");cache.Add("Models/Paths/p"+(100+i)+"/"+part,actual!=null?actual:go);}
    }
    var provider=Delegate.CreateDelegate(typeof(Func<,>).MakeGenericType(pathType,typeof(List<Vector3>)),typeof(IntersectionQA).GetMethod("Samples",BindingFlags.Static|BindingFlags.NonPublic).MakeGenericMethod(pathType));

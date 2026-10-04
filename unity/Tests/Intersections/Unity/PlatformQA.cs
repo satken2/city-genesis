@@ -56,6 +56,8 @@ public static class PlatformQA
                 {
                     CheckTrack(variant, 32f);
                     CheckTrack(variant, 256f);
+                    var source = ((GameObject)cache[$"Models/Paths/p{variant}/track"]).GetComponent<MeshFilter>().sharedMesh;
+                    CheckTrack(variant, source.bounds.size.z * (60000 / source.vertexCount + 1));
                 }
             }
             foreach (string part in new[] { "buffer_stop", "platform_end" })
@@ -80,7 +82,7 @@ public static class PlatformQA
                     foreach (float direction in new[] { 1f, -1f })
                         Check(variant, left, direction);
             RenderEnds(root, cache);
-            File.WriteAllText(report, $"PASS platforms: {checks} checks across 12 station sides; canopy 4m, fence 1.6m");
+            File.WriteAllText(report, $"PASS platforms: {checks} checks across 12 station sides; authored part spacing, track sections and vertex-budget splits");
             EditorApplication.Exit(0);
         }
         catch (Exception e) { File.WriteAllText(report, e.ToString()); Debug.LogException(e); EditorApplication.Exit(1); }
@@ -94,7 +96,8 @@ public static class PlatformQA
         var material = new Material(Shader.Find("Standard"));
         assembly.GetType("TrackPath").GetMethod("CreatePlatformSide", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] {
             parent, spline, null, points, new[] { Vector3.right * direction, Vector3.right * direction },
-            new[] { 0f, 64f }, left, 0f, 2.5f, 3f, material, $"Models/Paths/p{variant}", "Models/Paths/p4"
+            new[] { 0f, 64f }, left, 0f, 2.5f, 3f, material, $"Models/Paths/p{variant}", "Models/Paths/p4",
+            TrackData(assembly.GetType("GeneratedModels.PathSummary"), 1, variant, 1, 2, 0f, direction * 64f)
         });
         foreach (var component in parent.GetComponentsInChildren<Component>()) {
             if (component == null || component.GetType().Name != "SplineMesh") continue;
@@ -108,20 +111,18 @@ public static class PlatformQA
             if (filter.name.EndsWith("/platform") || filter.name.EndsWith("/platform_wall")) {
                 Require(vertices.All(v => v.x * side > 1.25f && v.x * side < 5.65f), $"p{variant} wrong side {left}/{direction}");
                 bool wall = filter.name.EndsWith("/platform_wall");
-                // 柱断面の端だけを拾い、長手分割で増えた同位置の頂点はまとめる。
-                var locations = vertices.Where(v => wall
-                    ? Mathf.Abs(v.y - 1.68f) < .001f && Mathf.Abs(v.x * side - 5.45f) < .001f
-                    : Mathf.Abs(v.y - 4.34f) < .001f && Mathf.Abs(v.x * side - 3.585f) < .001f)
-                    .Select(v => v.z * direction).OrderBy(z => z).ToList();
-                var groups = new List<List<float>>();
-                foreach (float z in locations) {
-                    if (groups.Count == 0 || z - groups.Last().Last() > .25f) groups.Add(new List<float>());
-                    groups.Last().Add(z);
-                }
-                float period = wall ? 1.6f : 4f;
-                Require(groups.Count == (wall ? 40 : 16), $"p{variant} {filter.name} count={groups.Count}");
-                var centers = groups.Select(g => (g.Min() + g.Max()) / 2).ToArray();
-                for (int i = 1; i < centers.Length; i++) Require(Mathf.Abs(centers[i] - centers[i-1] - period) < .005f, "Compressed pillar spacing");
+                var source = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Paths/p{variant}/{(wall ? "platform_wall" : "platform")}.fbx").GetComponent<MeshFilter>().sharedMesh;
+                // 最も長い垂直辺から柱の断面を選び、上屋の高さ・支柱位置が異なるモデルにも同じ測定規則を使う。
+                Vector3 columnTop = ColumnTop(source);
+                var locations = vertices.Where(v => Mathf.Abs(v.y - columnTop.y) < .001f && Mathf.Abs(v.x * side - columnTop.x) < .001f)
+                    .Select(v => v.z * direction);
+                var authored = source.vertices.Where(v => Mathf.Abs(v.y - columnTop.y) < .001f && Mathf.Abs(v.x - columnTop.x) < .001f).ToArray();
+                // 著作タイルを実寸で64mに並べた位置と比較し、支柱・壁の構造ごとの周期を保つことを検査する。
+                var expected = ClusterCenters(Enumerable.Range(0, Mathf.RoundToInt(64f / source.bounds.size.z))
+                    .SelectMany(tile => authored.Select(v => tile * source.bounds.size.z + v.z - source.bounds.min.z)));
+                var centers = ClusterCenters(locations);
+                Require(centers.Length == expected.Length, $"p{variant} {filter.name} count={centers.Length}, expected={expected.Length}");
+                for (int i = 0; i < centers.Length; i++) Require(Mathf.Abs(centers[i] - expected[i]) < .005f, "Compressed or shifted pillar spacing");
             }
             else if (filter.name.StartsWith("PlatformDeck"))
                 Require(vertices.All(v => v.x * side >= 1.499f && v.x * side <= 5.501f), "Deck side mismatch");
@@ -131,15 +132,52 @@ public static class PlatformQA
     }
     static void Require(bool valid, string message) { if (!valid) throw new Exception(message); checks++; }
 
+    static float[] ClusterCenters(IEnumerable<float> locations)
+    {
+        var groups = new List<List<float>>();
+        foreach (float z in locations.OrderBy(z => z))
+        {
+            if (groups.Count == 0 || z - groups.Last().Last() > .25f) groups.Add(new List<float>());
+            groups.Last().Add(z);
+        }
+        return groups.Select(g => (g.Min() + g.Max()) * .5f).ToArray();
+    }
+
+    static Vector3 ColumnTop(Mesh source)
+    {
+        var vertices = source.vertices;
+        var triangles = source.triangles;
+        Vector3 top = default;
+        float height = 0f;
+        for (int i = 0; i < triangles.Length; i += 3)
+            for (int edge = 0; edge < 3; edge++)
+            {
+                Vector3 a = vertices[triangles[i + edge]], b = vertices[triangles[i + (edge + 1) % 3]];
+                if (Mathf.Abs(a.x - b.x) > .001f || Mathf.Abs(a.z - b.z) > .001f || Mathf.Abs(a.y - b.y) <= height) continue;
+                height = Mathf.Abs(a.y - b.y);
+                top = a.y > b.y ? a : b;
+            }
+        Require(height > .5f, "Platform column measurement missing");
+        return top;
+    }
+
     static void CheckTrack(int variant, float length)
     {
         var parent = new GameObject("TrackPeriodQA");
         var road = assembly.GetType("RoadPath");
         object spline = road.GetMethod("BuildSpline").Invoke(null, new object[] {
             parent, new List<Vector3> { Vector3.zero, new Vector3(0,0,length) }, false });
-        road.GetMethod("CreateSplineMesh").Invoke(null, new object[] {
-            parent, spline, $"Models/Paths/p{variant}/track", 5f, 0f, .12f, false, null,
-            false, false, 0.0, 1.0, false, true, 0f, true });
+        // 寸法の検査はカメラに依存させず、256m以上でも詳細メッシュを全区間に生成する。
+        var context = assembly.GetType("PathDrawContext");
+        context.GetMethod("Begin").Invoke(null, new object[] { Enum.Parse(assembly.GetType("DrawLod"), "Normal"), 0.0, 1.0 });
+        context.GetProperty("SuppressDetailRange").SetValue(null, true);
+        try
+        {
+            road.GetMethod("CreateSplineMesh").Invoke(null, new object[] {
+                parent, spline, $"Models/Paths/p{variant}/track", 5f, 0f, .12f, false, null,
+                false, false, 0.0, 1.0, false, true, 0f, true });
+        }
+        finally { context.GetMethod("End").Invoke(null, null); }
         var intervals = new List<Vector2>();
         foreach (var component in parent.GetComponentsInChildren<Component>())
         {
@@ -160,9 +198,15 @@ public static class PlatformQA
             intervals.Add(new Vector2(mesh.bounds.min.z, mesh.bounds.max.z));
         }
         intervals.Sort((a,b) => a.x.CompareTo(b.x));
+        Require(intervals.Count > 0, $"p{variant} track mesh missing on {length}m path");
         Require(Mathf.Abs(intervals[0].x) < .01f && Mathf.Abs(intervals.Last().y-length) < .01f, "Track extent changed");
         for (int i=1; i<intervals.Count; i++) Require(Mathf.Abs(intervals[i].x-intervals[i-1].y) < .01f, "Track split gap");
-        if (length > 200) Require(intervals.Count > 1, "Long track was not split");
+        var modelType = assembly.GetType("ModelManager");
+        var model = modelType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+        var cache = (IDictionary)modelType.GetField("_modelCache", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(model);
+        var source = ((GameObject)cache[$"Models/Paths/p{variant}/track"]).GetComponent<MeshFilter>().sharedMesh;
+        if ((long)source.vertexCount * Mathf.RoundToInt(length / source.bounds.size.z) > 60000)
+            Require(intervals.Count > 1, "Track over vertex budget was not split");
         UnityEngine.Object.DestroyImmediate(parent);
     }
 
@@ -323,7 +367,7 @@ public static class PlatformQA
         var material = new Material(Shader.Find("Standard")) { color = new Color(.28f,.3f,.32f) };
         track.GetMethod("CreatePlatformSide", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
             parent, spline, null, points, new[] { Vector3.right, Vector3.right }, new[] { 0f,32f }, false, 0f, 2.5f, 3f,
-            material, "Models/Paths/p461", "Models/Paths/p4" });
+            material, "Models/Paths/p461", "Models/Paths/p4", path });
         track.GetMethod("CreateTerminations", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
             parent, points, null, path, 5f, 1, 0f, 3f, "Models/Paths/p461", "Models/Paths/p4" });
         foreach (var comp in parent.GetComponentsInChildren<Component>()) {
@@ -497,7 +541,7 @@ public static class PlatformQA
                 var material = new Material(Shader.Find("Standard"));
                 track.GetMethod("CreatePlatformSide", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
                     parent, spline, null, line, new[] { Vector3.right, Vector3.right }, new[] { 0f, 64f }, left, left ? -2.5f : 2.5f, 5f, 3f,
-                    material, "Models/Paths/p461", "Models/Paths/p4" });
+                    material, "Models/Paths/p461", "Models/Paths/p4", TrackData(summary, 1, 461, 1, 2, 0f, 64f) });
                 foreach (var component in parent.GetComponentsInChildren<Component>()) {
                     if (component == null || component.GetType().Name != "SplineMesh") continue;
                     MethodInfo rebuild = component.GetType().GetMethod("RebuildImmediate");
@@ -545,7 +589,7 @@ public static class PlatformQA
         var line = new List<Vector3> { Vector3.zero, new Vector3(0, 0, 64) };
         object spline = assembly.GetType("RoadPath").GetMethod("BuildSpline").Invoke(null, new object[] { parent, line, true });
         track.GetMethod("CreateIslandPlatformParts", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
-            parent, spline, line, null, 16f, 2, 6f, "Models/Paths/p461", "Models/Paths/p4" });
+            parent, spline, line, null, 16f, 2, 6f, "Models/Paths/p461", "Models/Paths/p4", TrackData(summary, 1, 472, 1, 2, 0f, 64f) });
         foreach (var component in parent.GetComponentsInChildren<Component>()) {
             if (component == null || component.GetType().Name != "SplineMesh") continue;
             MethodInfo rebuild = component.GetType().GetMethod("RebuildImmediate");
@@ -670,23 +714,39 @@ public static class PlatformQA
             var tracks = filters.Where(f => f.name.EndsWith("/track")).ToArray();
             var bodies = filters.Where(f => f.name.EndsWith("/body")).ToArray();
             Require(tracks.Length >= 2 && bodies.Length >= 1, "Transition track or body missing");
-            // 断面(z の範囲)の頂点の、片側(sign)の横位置の最小・最大。
-            Vector2 LateralRange(MeshFilter[] parts, float sign, float from, float to)
+            // Z平面と三角形辺の交点で断面を測る。頂点の配置間隔や砕石の裾野で軌道中心・道床天端を変えない。
+            Vector2 LateralRange(MeshFilter[] parts, float sign, float z, float surfaceHeight)
             {
-                var xs = parts.SelectMany(f => f.sharedMesh.vertices.Select(v => f.transform.TransformPoint(v)))
-                    .Where(v => v.z >= from && v.z <= to && v.x * sign > 0f).Select(v => v.x * sign).ToArray();
-                Require(xs.Length > 0, "No vertices in the measured section");
+                var xs = new List<float>();
+                foreach (var part in parts)
+                {
+                    var vertices = part.sharedMesh.vertices.Select(v => part.transform.TransformPoint(v)).ToArray();
+                    var triangles = part.sharedMesh.triangles;
+                    for (int i = 0; i < triangles.Length; i += 3)
+                        for (int edge = 0; edge < 3; edge++)
+                        {
+                            Vector3 a = vertices[triangles[i + edge]], b = vertices[triangles[i + (edge + 1) % 3]];
+                            if (Mathf.Abs(b.z - a.z) < .00001f || z < Mathf.Min(a.z, b.z) || z > Mathf.Max(a.z, b.z)) continue;
+                            Vector3 at = Vector3.Lerp(a, b, (z - a.z) / (b.z - a.z));
+                            if (Mathf.Abs(at.y - surfaceHeight) < .002f && at.x * sign > 0f) xs.Add(at.x * sign);
+                        }
+                }
+                Require(xs.Count > 0, $"No surface at z={z}, height={surfaceHeight}");
                 return new Vector2(xs.Min(), xs.Max());
             }
+            var trackSource = ((GameObject)cache["Models/Paths/p421/track"]).GetComponent<MeshFilter>().sharedMesh;
+            var heights = assembly.GetType("RoadPartHeights");
+            float railTop = trackSource.bounds.max.y + (float)heights.GetField("TRACK_ABOVE_SPLINE").GetRawConstantValue();
+            float bodyTop = (float)heights.GetField("BODY_ABOVE_SPLINE").GetRawConstantValue();
             float nodeShift = 3f * Smootherstep((own - .7f) / (2f * own));
             foreach (float sign in new[] { -1f, 1f })
             {
-                Vector2 nearTrack = LateralRange(tracks, sign, -1.2f, -.2f), farTrack = LateralRange(tracks, sign, -60f, -50f);
+                Vector2 nearTrack = LateralRange(tracks, sign, -.7f, railTop), farTrack = LateralRange(tracks, sign, -55f, railTop);
                 float nearCenter = (nearTrack.x + nearTrack.y) * .5f, farCenter = (farTrack.x + farTrack.y) * .5f;
                 Require(Mathf.Abs(nearCenter - (2.5f + nodeShift)) < .12f, $"Track does not follow the transition near the node ({nearCenter})");
                 Require(Mathf.Abs(farCenter - 2.5f) < .05f, $"Track moved outside the transition ({farCenter})");
-                Require(Mathf.Abs(LateralRange(bodies, sign, -1.2f, -.2f).y - (5f + nodeShift)) < .15f, "Ballast does not widen with the tracks");
-                Require(Mathf.Abs(LateralRange(bodies, sign, -60f, -50f).y - 5f) < .05f, "Ballast widened outside the transition");
+                Require(Mathf.Abs(LateralRange(bodies, sign, -.7f, bodyTop).y - (5f + nodeShift)) < .15f, "Ballast does not widen with the tracks");
+                Require(Mathf.Abs(LateralRange(bodies, sign, -55f, bodyTop).y - 5f) < .05f, "Ballast widened outside the transition");
             }
             Require(!container.GetComponentsInChildren<Transform>().Any(t => t.name == "TrackBufferStop" && t.position.z > -32f), "Buffer stop on the track joined to the island station");
         }
