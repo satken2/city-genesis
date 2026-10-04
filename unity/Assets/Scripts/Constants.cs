@@ -267,6 +267,8 @@ public static class Constants
     public const int PLATFORM_SIDE_OUTSIDE = 0;
     public const int PLATFORM_SIDE_INSIDE = 1;
     public const int PLATFORM_SIDE_BOTH = 2;
+    public const int PATH_SIDE_LEFT = 0;
+    public const int PATH_SIDE_RIGHT = 1;
     public const float STATION_HOUSE_DEFAULT_WIDTH = 24.0f;
     public const float STATION_HOUSE_DEFAULT_DEPTH = 16.0f;
     public const float STATION_HOUSE_TRACK_CLEARANCE_MARGIN = 0.1f;
