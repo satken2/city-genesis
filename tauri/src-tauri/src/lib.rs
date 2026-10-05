@@ -5,8 +5,12 @@ mod state;
 mod window;
 mod version;
 mod backend_health;
+mod process;
+mod client_stats;
+#[cfg(feature = "steam")]
+mod steam;
 
-use messages::{BackendLaunchConfig, EntityRef, GraphicLaunchConfig, MutexGroups, WindowRegistry};
+use messages::{EntityRef, MutexGroups, WindowRegistry};
 use serde_json::Value;
 use state::SharedState;
 use std::sync::atomic::Ordering;
@@ -32,62 +36,6 @@ fn load_mutex_groups() -> MutexGroups {
         "/config/window-mutex-groups.json"
     )))
     .expect("failed to parse window-mutex-groups.json")
-}
-
-fn api_base_url() -> String {
-    // 開発用の明示オーバーライドが最優先
-    if let Ok(url) = std::env::var("GENESIS_UI_API_BASE_URL") {
-        return url;
-    }
-    // genesis.py(スーパーバイザ)経由で起動された場合は GENESIS_API_PORT が渡される。
-    // find_free_port により 5000 以外のポートになることがあるため必ずこれを読む。
-    let port = std::env::var("GENESIS_API_PORT")
-        .ok()
-        .and_then(|p| p.parse::<u16>().ok())
-        .unwrap_or(5000);
-    format!("http://localhost:{port}")
-}
-
-/// 実行ファイルと同じディレクトリにある graphic-launch.toml を読み込む。
-/// ファイルが存在しない場合は環境変数 GENESIS_GRAPHIC_COMMAND をフォールバックとして使う。
-/// どちらも設定されていなければ空文字を返す（フロントエンドでエラー表示される）。
-fn load_graphic_launch_command() -> String {
-    if let Ok(exe_path) = std::env::current_exe() {
-        let config_path = exe_path.parent().map(|p| p.join("graphic-launch.toml"));
-        if let Some(path) = config_path {
-            if path.exists() {
-                if let Ok(data) = std::fs::read_to_string(&path) {
-                    if let Ok(config) = toml::from_str::<GraphicLaunchConfig>(&data) {
-                        return config.launch_command;
-                    }
-                    eprintln!("graphic-launch.toml のパースに失敗しました: {}", path.display());
-                }
-            }
-        }
-    }
-
-    std::env::var("GENESIS_GRAPHIC_COMMAND").unwrap_or_default()
-}
-
-/// 実行ファイルと同じディレクトリにある backend-launch.toml を読み込む。
-/// ファイルが存在しない場合は環境変数 GENESIS_BACKEND_COMMAND をフォールバックとして使う。
-/// どちらも設定されていなければ空文字を返す（バックエンドプロセス管理が無効になる）。
-fn load_backend_launch_command() -> String {
-    if let Ok(exe_path) = std::env::current_exe() {
-        let config_path = exe_path.parent().map(|p| p.join("backend-launch.toml"));
-        if let Some(path) = config_path {
-            if path.exists() {
-                if let Ok(data) = std::fs::read_to_string(&path) {
-                    if let Ok(config) = toml::from_str::<BackendLaunchConfig>(&data) {
-                        return config.launch_command;
-                    }
-                    eprintln!("backend-launch.toml のパースに失敗しました: {}", path.display());
-                }
-            }
-        }
-    }
-
-    std::env::var("GENESIS_BACKEND_COMMAND").unwrap_or_default()
 }
 
 /// トップメニューのサイズ
@@ -180,7 +128,7 @@ fn observe_backend(app: &tauri::AppHandle, state: &SharedState, success: bool) -
     match action {
         backend_health::HealthAction::Exit => {
             log::warn!("[session-poll] 通信確認が2回連続で失敗したため終了します");
-            request_app_exit(app, state);
+            process::request_app_exit(app, state);
             false
         }
         backend_health::HealthAction::ReturnToMenu => {
@@ -411,14 +359,8 @@ fn close_registered_window(
     Ok(())
 }
 
-/// Graphic(Unity) を起動する、または起動済みの場合はパイプ経由でリセット指示を送る
-#[tauri::command]
-fn launch_graphic(state: tauri::State<'_, SharedState>) -> Result<String, String> {
-    window::launch_graphic(state.inner())
-}
-
 /// 新規ゲームセッションを作成する（シナリオまたはチュートリアルの選択後に呼び出される）。
-/// Unity を起動し、topmenu と現在のポップアップを隠して Tipsを表示した後、
+/// Unity に前の都市の表示を片付けさせ、topmenu と現在のポップアップを隠して Tipsを表示した後、
 /// バックエンドに POST /api/v1/sessions を送信する。
 ///
 /// 追加パラメータ（都市名・言語・シミュレーション日数・気候・地表・アセットの地域）はクエリパラメータとして
@@ -454,7 +396,6 @@ async fn create_session(
         version::validate_load(state.inner(), id, true, accept_balance_change.unwrap_or(false)).await?;
     }
 
-    // Unity が起動していなければ起動する
     version::prepare_graphic(state.inner()).await?;
     require_backend(state.inner())?;
 
@@ -546,7 +487,7 @@ async fn create_session(
 }
 
 /// セーブデータをロードしてゲームセッションを開始する。
-/// Unity を起動し、topmenu を隠して Tipsを表示した後、
+/// Unity に前の都市の表示を片付けさせ、topmenu を隠して Tipsを表示した後、
 /// バックエンドにロードリクエストを送信する。
 #[tauri::command]
 async fn start_load_game(
@@ -1162,7 +1103,7 @@ mod terrain_editor_tests {
 }
 
 /// デバッグ初期化を実行してゲームセッションを開始する。
-/// Unity を起動し、topmenu を隠して Tipsを表示した後、
+/// Unity に前の都市の表示を片付けさせ、topmenu を隠して Tipsを表示した後、
 /// バックエンドに POST /api/v1/system/debug-init を送信する。
 #[tauri::command]
 async fn start_debug_init(
@@ -1219,121 +1160,13 @@ async fn start_debug_init(
     Ok(())
 }
 
-/// バックエンドプロセスを起動する。
-/// 既に起動している場合は何もしない。
-/// api_base_url からポート番号を抽出し、環境変数 GENESIS_API_PORT に設定して起動する。
-#[tauri::command]
-fn start_backend(state: tauri::State<'_, SharedState>) -> Result<Value, String> {
-    let (launch_cmd, api_base_url) = {
-        let guard = state.lock();
-        (guard.backend_launch_command.clone(), guard.api_base_url.clone())
-    };
-
-    if launch_cmd.is_empty() {
-        return Err("バックエンド起動コマンドが設定されていません".to_string());
-    }
-
-    {
-        let guard = state.lock();
-        if guard.backend_process.is_some() {
-            return Ok(serde_json::json!({"status": "already_running"}));
-        }
-    }
-
-    let port = api_base_url
-        .rsplit(':')
-        .next()
-        .and_then(|s| s.trim_end_matches('/').parse::<u16>().ok())
-        .unwrap_or(5000);
-
-    let command = launch_cmd.replace("{port}", &port.to_string());
-
-    log::info!("[start_backend] バックエンドを起動します: {}", command);
-
-    let child = std::process::Command::new("cmd")
-        .args(["/C", &command])
-        .env("GENESIS_API_PORT", port.to_string())
-        .spawn()
-        .map_err(|e| format!("バックエンドの起動に失敗しました: {e}"))?;
-
-    {
-        let mut guard = state.lock();
-        guard.backend_process = Some(child);
-    }
-
-    Ok(serde_json::json!({"status": "started", "port": port}))
-}
-
-/// バックエンドプロセスを強制終了する。
-#[tauri::command]
-fn stop_backend(state: tauri::State<'_, SharedState>) -> Result<Value, String> {
-    let mut guard = state.lock();
-    if let Some(ref mut child) = guard.backend_process {
-        let _ = child.kill();
-        let _ = child.wait();
-        guard.backend_process = None;
-        log::info!("[stop_backend] バックエンドプロセスを終了しました");
-        Ok(serde_json::json!({"status": "stopped"}))
-    } else {
-        Ok(serde_json::json!({"status": "not_running"}))
-    }
-}
-
-/// バックエンドを再起動する。
-/// GPU設定変更後に呼び出される。既存プロセスを終了してから新しいプロセスを起動する。
-#[tauri::command]
-fn restart_backend(state: tauri::State<'_, SharedState>) -> Result<Value, String> {
-    stop_backend(state.clone())?;
-    std::thread::sleep(Duration::from_millis(500));
-    start_backend(state)
-}
-
-/// アプリ全体の終了シーケンス。終了要求の発生源(終了ボタン・ウィンドウの×・
-/// バックエンド発の shutting_down 検知)によらず、必ずこの関数に合流させる。
-///
-/// 1. Unity へ system:shutdown IPC を送る(未接続・送信失敗は無視)
-/// 2. バックエンドへ POST /system/shutdown?mode=app を送る。
-///    genesis.py スーパーバイザ監視下では、これが緊急オートセーブと
-///    全プロセスの後始末を統括する(レスポンスは即座に返る)
-/// 3. UI 自身を終了する
-///
-/// バックエンドが既に死んでいる場合もタイムアウト(2秒)で必ず 3 に到達する。
-fn request_app_exit(app: &tauri::AppHandle, state: &SharedState) {
-    // 1. Unity へ終了通知(Unity 側は ui:action の system:shutdown で Application.Quit する)
-    let _ = ipc::send_ui_action(
-        state,
-        String::new(),
-        None,
-        "system:shutdown".to_string(),
-        serde_json::json!({}),
-    );
-
-    // 2. バックエンドへ統括シャットダウンを要求
-    let base = {
-        let guard = state.lock();
-        guard.api_base_url.trim_end_matches('/').to_string()
-    };
-    if !base.is_empty() {
-        let client = reqwest::blocking::Client::builder()
-            .timeout(Duration::from_secs(2))
-            .build()
-            .unwrap_or_default();
-        let _ = client
-            .post(format!("{}/api/v1/system/shutdown?mode=app", base))
-            .send();
-    }
-
-    // 3. UI 自身を終了
-    app.exit(0);
-}
-
 /// アプリケーション全体を終了する（トップメニューの「終了」ボタン用）
 #[tauri::command]
 fn exit_app(app: tauri::AppHandle, state: tauri::State<'_, SharedState>) -> Result<(), String> {
     let state = state.inner().clone();
-    // HTTP 送信を含むため UI スレッドをブロックしないよう別スレッドで実行する
+    // 子プロセスの終了を待つため、UI スレッドをブロックしないよう別スレッドで実行する
     std::thread::spawn(move || {
-        request_app_exit(&app, &state);
+        process::request_app_exit(&app, &state);
     });
     Ok(())
 }
@@ -1556,6 +1389,20 @@ fn return_to_topmenu(app: &tauri::AppHandle, state: &SharedState) {
     let _ = ipc::send_ui_action(state, "".into(), None, "game:end".into(), serde_json::json!({}));
 }
 
+/// コアに接続できない間の session-state。トップメニューはこれを受けて表示され、接続失敗を示す。
+fn disconnected_session_state(api_base_url: &str, core_version: &Value) -> Value {
+    serde_json::json!({
+        "current_save_id": null,
+        "session": null,
+        "city": null,
+        "apiBaseUrl": api_base_url,
+        "isLoading": false,
+        "tutorialId": null,
+        "coreVersion": core_version,
+        "backendConnected": false,
+    })
+}
+
 /// セッション状態を定期的にポーリングし、全ウィンドウに配信するスレッドを起動する。
 ///
 /// 5秒ごとにバックエンドの `/api/v1/sessions` と `/api/v1/city` を取得し、
@@ -1587,6 +1434,8 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 Err(error) => {
                     log::warn!("[startup] コアの版情報を取得できません: {}", error);
                     if !observe_backend(&app, &state, false) { return; }
+                    let api_base_url = state.lock().api_base_url.clone();
+                    let _ = app.emit("session-state", disconnected_session_state(&api_base_url, &Value::Null));
                     std::thread::sleep(Duration::from_secs(5));
                 }
             }
@@ -1594,7 +1443,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
         // フロントのMAJORがコアのMAJOR未満なら、起動できない。待っても版は変わらないので再試行せず終了する。
         if let Err(error) = version::check_frontend_version(&core) {
             log::error!("[startup] {error}。終了します");
-            request_app_exit(&app, &state);
+            process::request_app_exit(&app, &state);
             return;
         }
 
@@ -1678,44 +1527,12 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 }
             };
 
-            // バックエンド発の統括シャットダウン検知。
-            // genesis.py スーパーバイザがシャットダウンを開始すると /sessions に
-            // shutting_down: true が立つ(Unity ウィンドウの×・クラッシュループ等)。
-            // これがコア→UI 方向の唯一の終了通知経路(ポーリング便乗)なので、
-            // 検知したら Unity へ終了を転送して自発終了する。
-            let shutting_down = session_data
-                .as_ref()
-                .and_then(|d| d.get("shutting_down"))
-                .and_then(|v| v.as_bool())
-                .unwrap_or(false);
-            if shutting_down {
-                log::info!("[session-poll] バックエンドのシャットダウンを検知しました。UIを終了します");
-                let _ = ipc::send_ui_action(
-                    &state,
-                    String::new(),
-                    None,
-                    "system:shutdown".to_string(),
-                    serde_json::json!({}),
-                );
-                app.exit(0);
-                break;
-            }
-
             if session_data.is_none() {
                 if !observe_backend(&app, &state, false) { break; }
                 let guard = state.lock();
                 // 瞬断では既存の都市情報を配信し直さず、各画面の表示内容を保持する。
                 if guard.last_session_id.is_none() && !guard.is_loading {
-                    let _ = app.emit("session-state", serde_json::json!({
-                        "current_save_id": null,
-                        "session": null,
-                        "city": null,
-                        "apiBaseUrl": api_base_url,
-                        "isLoading": false,
-                        "tutorialId": null,
-                        "coreVersion": core["core_version"],
-                        "backendConnected": false,
-                    }));
+                    let _ = app.emit("session-state", disconnected_session_state(&api_base_url, &core["core_version"]));
                 }
                 drop(guard);
                 std::thread::sleep(Duration::from_secs(5));
@@ -1901,13 +1718,12 @@ fn log_frontend_info(message: String) {
 pub fn run() {
     setup_logging().unwrap_or_else(|e| eprintln!("ログ初期化に失敗しました: {}", e));
 
-    let shared_state = SharedState::new(
-        load_registry(),
-        load_mutex_groups(),
-        api_base_url(),
-        load_graphic_launch_command(),
-        load_backend_launch_command(),
-    );
+    // ストア連携は子プロセスより先に初期化し、ストアが管理するフォルダをコアへ渡す。
+    #[allow(unused_mut)]
+    let mut launch = process::Launch::resolve();
+    #[cfg(feature = "steam")]
+    launch.core_env.extend(steam::init());
+    let shared_state = SharedState::new(load_registry(), load_mutex_groups(), launch);
     let setup_state = shared_state.clone();
     let event_state = shared_state.clone();
 
@@ -1959,7 +1775,8 @@ pub fn run() {
             let target_monitor = target_monitor.as_ref();
 
             // トップメニューウィンドウを target_monitor（設定ファイルの monitor_index に対応するモニター、
-            // またはプライマリモニター）の中央に生成する
+            // またはプライマリモニター）の中央に生成する。最初の session-state で表示されるので、
+            // コアの起動を待つ間は何も出さない。
             let topmenu_builder = WebviewWindowBuilder::new(
                 app,
                 "topmenu",
@@ -1973,7 +1790,7 @@ pub fn run() {
             window::build_placed(
                 topmenu_builder,
                 window::centered_on_monitor(target_monitor, TOPMENU_WIDTH, TOPMENU_HEIGHT),
-                true,
+                false,
             )
                 .expect("failed to create topmenu window");
 
@@ -1984,7 +1801,7 @@ pub fn run() {
                 .expect("failed to create HUD windows");
 
             // ヒントバーウィンドウを target_monitor の上部中央に生成する。
-            // 初期状態では表示。セッション未ロード時に session-state イベントで非表示となる。
+            // 初期状態では非表示で、ゲームの開始時に設定に従って表示される。
             let hintbar_builder = WebviewWindowBuilder::new(
                 app,
                 "hintbar",
@@ -1997,7 +1814,7 @@ pub fn run() {
             .always_on_top(true)
             .skip_taskbar(true)
             .resizable(false);
-            let hintbar = window::build_placed(hintbar_builder, hintbar_placement(target_monitor), true)
+            let hintbar = window::build_placed(hintbar_builder, hintbar_placement(target_monitor), false)
                 .expect("failed to create hintbar window");
             let _ = hintbar.set_ignore_cursor_events(true);
 
@@ -2040,7 +1857,19 @@ pub fn run() {
             )
             .expect("failed to create notification window");
 
-            start_session_polling(setup_state.clone(), app.handle().clone());
+            // コアとグラフィックを起動し、コアの準備ができてから認証とセッション監視を始める。
+            // このスレッドはその後、アプリが終わるまで子プロセスを見張る。
+            let app_handle = app.handle().clone();
+            let state = setup_state.clone();
+            std::thread::spawn(move || {
+                if !process::start_children(&app_handle, &state) {
+                    return;
+                }
+                #[cfg(feature = "steam")]
+                steam::start_verification(state.lock().api_base_url.clone());
+                start_session_polling(state.clone(), app_handle.clone());
+                process::watch_children(&app_handle, &state);
+            });
             Ok(())
         })
         .on_window_event({
@@ -2049,7 +1878,7 @@ pub fn run() {
                     // ウィンドウの×ボタン(Alt+F4含む)。
                     // - main/topmenu/HUD各枚 はアプリの主要サーフェスなので、
                     //   閉じる操作を「アプリ全体の終了要求」として扱い、
-                    //   終了シーケンス(Unity通知→バックエンド統括shutdown→自終了)に合流させる。
+                    //   終了シーケンス(Unity通知→コアの保存と終了を待つ→自終了)に合流させる。
                     // - open_windows 管理下のポップアップは既存の hide+LRU 再利用
                     //   セマンティクスを維持するため close_from_frontend に委譲する。
                     // - その他の専用ウィンドウ(notification/hintbar/tutorial等)は素通しする。
@@ -2065,7 +1894,7 @@ pub fn run() {
                                 let app = window.app_handle().clone();
                                 let state = event_state.clone();
                                 std::thread::spawn(move || {
-                                    request_app_exit(&app, &state);
+                                    process::request_app_exit(&app, &state);
                                 });
                             }
                             "parameter-setup" if event_state.lock().awaiting_parameter_setup => { api.prevent_close(); }
@@ -2139,15 +1968,11 @@ pub fn run() {
             switch_popup_monitor,
             open_registered_window,
             close_registered_window,
-            launch_graphic,
             start_load_game,
             version::get_frontend_status,
             version::get_core_version,
             start_debug_init,
             create_session,
-            start_backend,
-            stop_backend,
-            restart_backend,
             exit_app,
             load_app_settings,
             save_app_settings,
@@ -2167,6 +1992,7 @@ pub fn run() {
             load_terrain_editor_data,
             save_scenario_terrain,
             open_save_directory,
+            client_stats::get_client_system_stats,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

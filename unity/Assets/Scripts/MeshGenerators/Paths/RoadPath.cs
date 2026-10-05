@@ -345,10 +345,8 @@ public class RoadPath : IPathMeshGenerator
             group.transform.SetParent(parent.transform, false);
             float adaptive = PathDrawContext.AdaptiveTileLength;
             bool isBody = prefabName.EndsWith("/body", StringComparison.Ordinal);
-            Material summaryMaterial = (isBody ? PathDrawContext.SummaryBodyMaterial : null)
-                ?? GetOrCreateRoadMaterial(prefab.GetComponent<MeshRenderer>()?.sharedMaterial);
             group.AddComponent<SplinePartLod>().Configure(spline, width, centerOffsetX, offsetY,
-                isBody, summaryMaterial, clipFrom, clipTo,
+                isBody, isBody ? PathDrawContext.PathVariant : 0, clipFrom, clipTo,
                 (lod, from, to) =>
                 {
                     PathDrawContext.Begin(lod, from, to);
@@ -515,7 +513,7 @@ public class RoadPath : IPathMeshGenerator
                 channel.maxScale = new Vector3(scaleX, 1f, 1f);
 
                 // 描画LODの詳細描画区間(PathDrawContext)と呼び出し側のクリップ区間の共通部分だけに敷く。
-                // 区間外は PathManager が遠景の帯で埋める。single_span(桁橋のスパン)は1枚で
+                // 区間外は PathManager が遠景モデルで埋める。single_span(桁橋のスパン)は1枚で
                 // 両端を結ぶ造形なので区間で切らない。
                 if (!singleSpan)
                 {
@@ -916,15 +914,8 @@ public class RoadPath : IPathMeshGenerator
         // base_height を持つバリアント（送電線）はスプラインが地表に置かれ、モデル自体が電線の地上高を
         // 持つ規約なので、上面をY=0へ揃える補正を掛けると電線が地面に落ちる。
         bool ropeway = IsRopewayVariant(pathData.path_variant);
-        Material bodyMaterial = ResolveBodyMaterial(pathData, variantBase, typeBase);
-        Material previousSummaryMaterial = PathDrawContext.SummaryBodyMaterial;
-        GameObject roadBody;
-        PathDrawContext.SummaryBodyMaterial = bodyMaterial;
-        try
-        {
-            roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, normalizeBodySurface: baseHeight <= 0f);
-        }
-        finally { PathDrawContext.SummaryBodyMaterial = previousSummaryMaterial; }
+        Material bodyMaterial = ResolveBodyMaterial(pathData.path_variant, pathData.path_type);
+        GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, normalizeBodySurface: baseHeight <= 0f);
         if (ropeway)
             CreateSplineMesh(container, spline, $"{variantBase}/station_shell", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
                 stretchToWidth: false, maxTileLength: 0, normalizeBodySurface: false);
@@ -1186,12 +1177,12 @@ public class RoadPath : IPathMeshGenerator
             : new List<TrackCorridorInfo.PercentRange> { new TrackCorridorInfo.PercentRange { From = 0.0, To = 1.0 } };
 
     /// <summary>交差点の路面(RoadIntersectionMeshGenerator)と同じく、マスターの body_material を路面の材質の正とする。</summary>
-    private static Material ResolveBodyMaterial(PathSummary pathData, string variantBase, string typeBase)
+    public static Material ResolveBodyMaterial(int variant, int type)
     {
-        var master = MasterDataStore.Instance?.GetPathMaster(pathData.path_variant);
+        var master = MasterDataStore.Instance?.GetPathMaster(variant);
         Material named = master != null ? GetOrCreateRoadMaterialByName(master.body_material) : null;
         if (named != null) return named;
-        GameObject prefab = PathDrawContext.ResolvePrefab($"{variantBase}/body", $"{typeBase}/body", out _);
+        GameObject prefab = PathDrawContext.ResolvePrefab($"Models/Paths/p{variant}/body", $"Models/Paths/p{type}/body", out _);
         Material source = prefab != null ? prefab.GetComponent<MeshRenderer>()?.sharedMaterial : null;
         return source != null ? GetOrCreateRoadMaterial(source) : null;
     }

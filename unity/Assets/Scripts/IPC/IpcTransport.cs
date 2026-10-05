@@ -9,7 +9,7 @@ using UnityEngine;
 /// 名前付きMutexの取得ヘルパー。
 /// 前の所有プロセス(クラッシュしたUnity等)がMutexを解放せずに死んだ場合、
 /// WaitOne は AbandonedMutexException を投げるが、その時点で所有権自体は
-/// 取得できているため、警告を出して続行してよい(スーパーバイザによる
+/// 取得できているため、警告を出して続行してよい(Tauri による
 /// Unity 自動再起動後の再アタッチで発生しうる)。
 /// </summary>
 internal static class IpcMutexUtil

@@ -175,16 +175,3 @@ pub struct NotificationPayload {
     pub icon_path: String,
     pub duration_ms: Option<u64>,
 }
-
-/// graphic-launch.toml のデシリアライズ用構造体
-/// 実行ファイルと同じディレクトリに配置され、Graphic(Unity) の起動コマンドを定義する
-#[derive(Debug, Clone, Deserialize)]
-pub struct GraphicLaunchConfig {
-    pub launch_command: String,
-}
-
-/// 実行ファイルと同じディレクトリに配置され、バックエンド（genesis-core）の起動コマンドを定義する
-#[derive(Debug, Clone, Deserialize)]
-pub struct BackendLaunchConfig {
-    pub launch_command: String,
-}

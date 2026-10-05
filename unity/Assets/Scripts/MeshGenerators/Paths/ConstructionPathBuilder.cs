@@ -67,28 +67,6 @@ public static class ConstructionPathBuilder
         return points[points.Count - 1];
     }
 
-    /// <summary>遠景はパーツを読み込まず、土と施工済み面の帯だけで進捗を示す。</summary>
-    public static void GenerateFar(GameObject root, PathSummary path, List<Vector3> points, float width, Material surface)
-    {
-        float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
-        bool underground = TunnelSectionUtil.IsUndergroundPath(path)
-            || TunnelSectionUtil.HasTunnelSection(points, clearance, PathManager.GetPathFollowTerrain(path));
-        bool elevated = IsElevated(path, points, underground);
-        float built = elevated ? DeckProgress(Progress(path)) : Progress(path);
-        var dirtLine = elevated ? new List<Vector3>() : PathDrawContext.SlicePolylineByFraction(points, built, 1);
-        foreach (var section in DrawSections(dirtLine, path, underground))
-        {
-            var go = AddMesh(root, "ConstructionDirt", ConstructionMeshUtil.BuildDirtStripMesh(section.Points,
-                width + LocalConstants.CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH, !section.IsUnderground), RoadPath.GetOrCreateRoadMaterialByName("ConstructionPathDirt"));
-            if (go != null) go.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
-        }
-        foreach (var section in DrawSections(PathDrawContext.SlicePolylineByFraction(points, 0, built), path, underground))
-        {
-            var go = AddMesh(root, "CompletedSurface", PathMeshFactory.BuildStripMesh(section.Points, width), surface);
-            if (go != null) go.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
-        }
-    }
-
     private static List<TunnelSectionUtil.DrawSection> DrawSections(List<Vector3> points, PathSummary path, bool underground)
         => points.Count < 2 ? new List<TunnelSectionUtil.DrawSection>() : underground
             ? TunnelSectionUtil.GetDrawSections(points, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
@@ -207,7 +185,7 @@ public static class ConstructionPathBuilder
             var collision = RoadPath.BuildColliderMeshFromSpline(roadSpline, width);
             if (collision != null) colliderParts.Add(collision);
         }
-        if ((elevated ? progress > 0f : progress < 1f) && PathDrawContext.CurrentDrawLod != DrawLod.Far)
+        if (elevated ? progress > 0f : progress < 1f)
             PlaceVehicles(root, points, width, elevated && progress >= .25f ? built : FrontFraction(progress, elevated), elevated, PathMeshFactory.GetModelType(path) == "track", underground ? clearance : float.PositiveInfinity, progress >= .25f);
 
         Mesh collider = null;

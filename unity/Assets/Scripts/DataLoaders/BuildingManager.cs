@@ -501,7 +501,7 @@ public class BuildingManager : BaseApiDataManager
 
         // ティアが実際に変更されたセルを特定する。
         // 建物のversionが変わっていなくても、ティアがFar→Near/Dynamicに変化した場合は
-        // 白い箱(_far)からフル詳細への再生成が必要。
+        // 遠景からフル詳細への再生成が必要。
         var tierChangedBuildingCells = new HashSet<Vector2Int>();
         foreach (var kvp in lodUpdates)
         {
@@ -1771,8 +1771,8 @@ public class BuildingManager : BaseApiDataManager
     /// 描画物の再利用キー。形状・外観・状態・サブ建物・区画・形状版・描画LOD・接地範囲の地形版・埋立地の版(港の詳細だけ)・
     /// 引き込み線の軌道間隔(車両基地の詳細だけ)を区別し、version だけの変化では変わらない。
     /// 同じデータからは常に同じキーになる(テストがキーを外から計算して照合する)。
-    /// 港は区画が埋立地の岸壁に面するかで岸壁・配置が変わる(遠景も同じ組み立て)ので <see cref="ReclaimedLandStore.ContentVersion"/> を混ぜる。
-    /// 港以外は埋立地に依存しないので "-"(埋立のたびに作り直さない)。
+    /// 港の詳細は区画が埋立地の岸壁に面するかで岸壁・配置が変わるので <see cref="ReclaimedLandStore.ContentVersion"/> を混ぜる。
+    /// 港の遠景と港以外は埋立地に依存しないので "-"(埋立のたびに作り直さない)。
     /// 車両基地は端子へつながる線路の軌道数で引き込み線が単線・複線に変わる(遠景の箱は変わらない)。
     /// </summary>
     private string BuildingRenderKey(BuildingSummary data, DrawLod lod)
@@ -1782,7 +1782,7 @@ public class BuildingManager : BaseApiDataManager
         string surface = terrain != null ? terrain.GetSurfaceStamp(GetBuildingTerrainBounds(data, parcel)) : "none";
         buildingGeometryRevisions.TryGetValue(data.agent_id, out int revision);
         int modelType = BuildingMeshBuilder.GetModelType(data);
-        string reclaimed = modelType == Constants.MODEL_PORT
+        string reclaimed = modelType == Constants.MODEL_PORT && lod != DrawLod.Far
             ? ReclaimedLandStore.ContentVersion.ToString(CultureInfo.InvariantCulture) : "-";
         string yardLead = modelType == Constants.MODEL_RAIL_YARD && lod != DrawLod.Far
             ? RailYardBuildingMeshBuilder.ResolveLeadHalfSpacing(data).ToString("R", CultureInfo.InvariantCulture) : "-";
@@ -1880,13 +1880,12 @@ public class BuildingManager : BaseApiDataManager
         MeshFilter mf = buildingGO.AddComponent<MeshFilter>();
         MeshRenderer mr = buildingGO.AddComponent<MeshRenderer>();
 
-        // 遠景は `_far` パーツだけで組み立て、無ければフットプリント押し出しの箱(GenerateFarBuilding)。フル詳細と同じ組み立てを走らせない。
+        // 遠景は遠景モデルを外形へ引き伸ばすか箱(GenerateFarBuilding)。フル詳細と同じ組み立てを走らせない。
         var farWatch = System.Diagnostics.Stopwatch.StartNew();
         BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, false, DrawLod.Far);
         // 遠景GOはコライダーを持たないので、生成されたコライダー用メッシュはここで解放する。
         if (meshResult?.ColliderMesh != null && meshResult.ColliderMesh != meshResult.Mesh)
             MeshBakeService.Release(meshResult.ColliderMesh);
-        if (meshResult?.Mesh != null) CollapseToSingleSubMesh(meshResult.Mesh);
         var renderIdentity = buildingGO.AddComponent<RenderCacheIdentity>();
         renderIdentity.key = renderKey;
         renderIdentity.mesh = meshResult?.Mesh;
@@ -2168,7 +2167,7 @@ public class BuildingManager : BaseApiDataManager
     /// 埋立地の中身（<see cref="ReclaimedLandStore.ContentVersion"/>）が変わったときに
     /// <see cref="ReclaimedLandManager.OnContentChanged"/> から呼ばれる。港（MODEL_PORT）は区画が埋立地の岸壁に面するかで
     /// 形が変わるが、埋立で港自身の version は変わらないので、表示中の港をここで作り直す。
-    /// 遠景は即時(港は数が少なく、遠景の組み立ては軽い)、詳細は視野内なら即時・視野外なら遅延キューへ積む。
+    /// 遠景は埋立地によらないので作り直さず、詳細は視野内なら即時・視野外なら遅延キューへ積む。
     /// 退避中・未生成の港は再利用キーに版が入っているので次の生成で新しい形になる。
     /// </summary>
     public void OnReclaimedLandsChanged()
@@ -2186,11 +2185,7 @@ public class BuildingManager : BaseApiDataManager
             // 1棟の生成失敗で残りの港の作り直しを止めない。
             try
             {
-                if (lod == DrawLod.Far)
-                {
-                    CreateFarBuildingObject(building);
-                    continue;
-                }
+                if (lod == DrawLod.Far) continue;
                 bool isDynamic = IsBuildingInDynamicCell(building);
                 if (cam == null || IsPositionInGenerationView(obj.transform.position, camPos, camFwd))
                     CreateOrUpdateBuildingObject(building, isDynamic, forceRebuild: true, drawLod: lod);
@@ -2366,28 +2361,6 @@ public class BuildingManager : BaseApiDataManager
             result[i] = shared;
         }
         return result;
-    }
-
-    private static readonly List<int> collapseTriangles = new List<int>();
-    private static readonly List<int> collapseSubMeshTriangles = new List<int>();
-
-    /// <summary>
-    /// 遠景は共有マテリアル1つで描くため、prebuilt_far のように複数サブメッシュを持つメッシュを1サブメッシュに畳む。
-    /// マテリアル数を超えるサブメッシュは Unity が描かないので、畳まないと先頭以外が消える。
-    /// </summary>
-    private static void CollapseToSingleSubMesh(Mesh mesh)
-    {
-        if (mesh.subMeshCount <= 1) return;
-        collapseTriangles.Clear();
-        for (int i = 0; i < mesh.subMeshCount; i++)
-        {
-            mesh.GetTriangles(collapseSubMeshTriangles, i);
-            collapseTriangles.AddRange(collapseSubMeshTriangles);
-        }
-        mesh.subMeshCount = 1;
-        mesh.SetTriangles(collapseTriangles, 0);
-        collapseTriangles.Clear();
-        collapseSubMeshTriangles.Clear();
     }
 
     private static Material farBuildingMaterial;

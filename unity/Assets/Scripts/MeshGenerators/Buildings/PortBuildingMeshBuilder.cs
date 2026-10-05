@@ -20,7 +20,7 @@ using NetTopologySuite.Geometries;
 ///   厚みのある板（岸壁スラブ）を押し出す。水際=カット直線上の辺、ヤード=スラブの範囲。
 ///
 /// visual_variant(1) は他の建物と同じく外観バリアントの閾値フォルダ（F_建物メッシュの生成 §4）、visual_variant2 はヤードの荷の
-/// 配置の乱数の種に使う。接写は `_close`、遠景は `_far` のパーツで同じ配置を描き、遠景のコンテナは山ごとの箱にする。
+/// 配置の乱数の種に使う。接写は `_close` のパーツで同じ配置を描く。遠景は他の建物と同じ遠景モデルか箱で、この生成器は通らない。
 ///
 /// 詳細仕様は city-genesis/docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md を参照。
 /// </summary>
@@ -97,7 +97,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         Vector2[] footprint = BuildingMeshUtils.GetFootprint(buildingData);
         string prefix = BuildingMeshUtils.ResolveModelNaming(buildingData).Prefix;
         int variantNumber = BuildingMeshUtils.ComputeVariantNumber(buildingData.visual_variant);
-        bool far = BuildingMeshUtils.CurrentDrawLod == DrawLod.Far;
 
         // center_point のワールド座標（バックエンド座標）と地形高さ。
         // ModularBuildingMeshBuilder と同じ取得経路（Utils.GetGroundHeight）を使い、
@@ -115,7 +114,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         List<Material> materials = new List<Material>();
         List<Mesh> temporaryMeshes = new List<Mesh>();
         string[] prefixes = PartPrefixes(buildingData, prefix);
-        Material floorMaterial = far ? null : BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
+        Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
 
         // 1. 水際・ヤード・地面の高さ（ヤードの地面は下のクレーン・施設・荷の接地に使う）。
         Vector2[] yard;
@@ -170,7 +169,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             return Mathf.Max(terrain, yardFloorLocalY);
         }
 
-        // 2. 配置計画。寸法は描画LODによらず通常モデルで測り、遠景・接写でも同じ位置に置く。
+        // 2. 配置計画。寸法は描画LODによらず通常モデルで測り、接写でも同じ位置に置く。
         GameObject moduleModel = LayoutPart(prefix, "port_building", variantNumber);
         GameObject craneModel = LayoutPart(prefix, "port_crane", variantNumber);
         GameObject roofpropModel = LayoutPart(prefix, "roofprop", variantNumber);
@@ -226,19 +225,12 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 combineInstances, materials, temporaryMeshes);
         }
 
-        // 6. ヤードの荷。コンテナは通常・接写ではパーツを段に積み、遠景は山ごとの箱。
-        //    地面に置く荷は描画LODのパーツ（接写は `_close` 優先、遠景は `_far` だけ）を置き場ごとに1個置く。
+        // 6. ヤードの荷。コンテナはパーツを段に積み、地面に置く荷は描画LODのパーツ（接写は `_close` 優先）を置き場ごとに1個置く。
         if (plan.Stacks.Count > 0)
         {
             if (!stacked)
             {
                 AppendGroundCargo(plan.Stacks, plan.Cargo, cargoParts, variantNumber, Ground, combineInstances, materials, temporaryMeshes);
-            }
-            else if (far)
-            {
-                Mesh boxes = BuildContainerBoxes(plan.Stacks, Ground);
-                AppendMesh(boxes, new Material[] { null }, combineInstances, materials);
-                temporaryMeshes.Add(boxes);
             }
             else
             {
@@ -253,17 +245,14 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         // 7. 敷地の装飾（フェンス・タイル・地面パネル）。モジュラー/prebuilt と共通の処理で、
         //    地面パネルは draw_floor=yes のときヤードに描き、岸壁上面と同一の floor マテリアルで床続きになる。
         //    区画の海の部分（岸壁より先）には描かない。ヤードは海岸線をまたいで高さが変わる（埋立地の天端と元の陸、
-        //    スラブの下の浜）ので、距離によらず地形に追従させる。遠景では描かない（既成建物と同じ）。
-        if (!far)
-        {
-            Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(buildingData, out _, out _);
-            ModularBodyBuilder.GenerateSiteDecorations(
-                prefix, 0,
-                fenceFootprint, yard, yard,
-                floorMaterial,
-                centerPointWorld, deformToTerrain: true,
-                combineInstances, materials, temporaryMeshes);
-        }
+        //    スラブの下の浜）ので、距離によらず地形に追従させる。
+        Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(buildingData, out _, out _);
+        ModularBodyBuilder.GenerateSiteDecorations(
+            prefix, 0,
+            fenceFootprint, yard, yard,
+            floorMaterial,
+            centerPointWorld, deformToTerrain: true,
+            combineInstances, materials, temporaryMeshes);
 
         // 埋立地の岸壁に面する港はスラブが無いので、パーツが1つも解決できないと空のメッシュになる。
         if (combineInstances.Count == 0)
@@ -338,7 +327,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         return result;
     }
 
-    /// <summary>配置の寸法に使う通常モデル（無印）を閾値フォルダの走査で解決する。描画LODの `_close`/`_far` は見ない。</summary>
+    /// <summary>配置の寸法に使う通常モデル（無印）を閾値フォルダの走査で解決する。描画LODの `_close` は見ない。</summary>
     private static GameObject LayoutPart(string prefix, string partName, int variantNumber)
     {
         DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
@@ -353,7 +342,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         }
     }
 
-    /// <summary>描画に使うパーツ（接写なら `_close` 優先、遠景なら `_far` だけ）を閾値フォルダの走査で解決する。</summary>
+    /// <summary>描画に使うパーツ（接写なら `_close` 優先）を閾値フォルダの走査で解決する。</summary>
     private static GameObject DrawPart(string prefix, string partName, int variantNumber)
     {
         return BuildingMeshUtils.GetPartBySuffixScan(prefix, partName, variantNumber);
@@ -400,7 +389,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     /// ヤードの荷の種類違いのパーツの列。フォルダ（a{variant} → b{bd_type}）の順に、地面に置く荷 port_cargo1, 2, … →
     /// 段積みするコンテナ port_container1, 2, … を1から連番で探し、最初に見つかった1組だけを使う（stacked はコンテナの組か）。
     /// 港の種類ごとに荷が違う（バルク港は野積みの山、タンカー埠頭は油槽）ので、荷は各港の a{variant} に置く。
-    /// 有無は通常モデルで判定する（遠景でも同じ配置にするため）。
+    /// 有無は通常モデルで判定する（接写でも同じ配置にするため）。
     /// </summary>
     private static List<(string prefix, string name)> YardCargoParts(string[] prefixes, int variantNumber, out bool stacked)
     {
@@ -457,7 +446,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// 地面に置く荷を置き場ごとに1個置く。種類は <see cref="PortLayout.CargoKind"/>（ブロックの1列で同じ）で選び、
     /// 底は置き場の4隅の地面の最も低い高さ。パーツは原点が底面の中心で、ローカル+Z を水際に沿わせる。
-    /// 描画LODのパーツが無い種類（遠景を持たない小物など）は描かない。
     /// </summary>
     private static void AppendGroundCargo(List<PortLayout.Stack> stacks, PortLayout.CargoSpec spec,
         List<(string prefix, string name)> parts, int variantNumber, System.Func<Vector2, float> ground,
@@ -514,47 +502,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                     combineInstances, materials);
             }
         }
-    }
-
-    /// <summary>遠景のコンテナ。山ごとに底面 コンテナ1個分・高さ 段数分の箱（底面は張らない）を1つのメッシュにまとめる。</summary>
-    private static Mesh BuildContainerBoxes(List<PortLayout.Stack> stacks, System.Func<Vector2, float> ground)
-    {
-        var vertices = new List<Vector3>(stacks.Count * 20);
-        var triangles = new List<int>(stacks.Count * 30);
-        foreach (PortLayout.Stack stack in stacks)
-        {
-            float y0 = StackBase(stack, PortLayout.CONTAINER_LENGTH, PortLayout.CONTAINER_WIDTH, ground);
-            float y1 = y0 + stack.Tiers * PortLayout.CONTAINER_TIER_PITCH;
-            Vector2 u = stack.Along * (PortLayout.CONTAINER_LENGTH * 0.5f);
-            Vector2 v = new Vector2(-stack.Along.y, stack.Along.x) * (PortLayout.CONTAINER_WIDTH * 0.5f);
-            Vector2[] c = { stack.Center - u - v, stack.Center + u - v, stack.Center + u + v, stack.Center - u + v };
-            for (int i = 0; i < 4; i++)
-            {
-                Vector2 a = c[i];
-                Vector2 b = c[(i + 1) % 4];
-                int s = vertices.Count;
-                vertices.Add(new Vector3(a.x, y0, a.y));
-                vertices.Add(new Vector3(b.x, y0, b.y));
-                vertices.Add(new Vector3(a.x, y1, a.y));
-                vertices.Add(new Vector3(b.x, y1, b.y));
-                // 四隅は CCW なので、辺ごとの面は GenerateSimpleBuilding と同じ巻きで外向きになる。
-                triangles.Add(s); triangles.Add(s + 2); triangles.Add(s + 1);
-                triangles.Add(s + 1); triangles.Add(s + 2); triangles.Add(s + 3);
-            }
-            int top = vertices.Count;
-            for (int i = 0; i < 4; i++)
-            {
-                vertices.Add(new Vector3(c[i].x, y1, c[i].y));
-            }
-            triangles.Add(top); triangles.Add(top + 2); triangles.Add(top + 1);
-            triangles.Add(top); triangles.Add(top + 3); triangles.Add(top + 2);
-        }
-        var mesh = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(triangles, 0);
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
-        return mesh;
     }
 
     /// <summary>山の底のローカルY。長さ length・幅 width の置き場の4隅の地面の最も低い高さ。</summary>

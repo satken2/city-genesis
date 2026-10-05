@@ -2,7 +2,8 @@
  * システム統計ウィンドウ
  *
  * window_type="system_stats" のポップアップ。システムトレイから開く。
- * `GET /api/v1/stats/system` の内容を左右2列に並べる(タブは持たない)。
+ * コアの `GET /api/v1/stats/system` と、Tauri が自分のPCで測る値(`get_client_system_stats`)を合わせて
+ * 左右2列に並べる(タブは持たない)。コアは別のマシンで動くこともあるので、3DとPC全体の値はコアに頼まない。
  *   - 計算負荷 … 直近エポックの計算時間を大きな処理ごとに色分けした1本の積み上げ棒と、その内訳の表
  *   - エンティティ数 … プレイで増えるエンティティの数
  *   - システムステータス … ハードウェア情報、コアと3Dのメモリ使用量、PC全体と本ゲームのRAM/VRAM使用量の横棒
@@ -15,6 +16,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 
 import { buildApiUrl, fetchApi } from "../../utils/api";
@@ -33,7 +35,8 @@ type EpochGroup = {
   terms: Record<string, number>;
 };
 
-type SystemStatsResponse = {
+/** コアの `GET /api/v1/stats/system`。メモリはコアのプロセスの値。 */
+type CoreSystemStats = {
   epoch: { number: number; simulation_days: number; total_ms: number; groups: EpochGroup[] } | null;
   entities: {
     agents: number;
@@ -43,22 +46,27 @@ type SystemStatsResponse = {
     paths: number;
     nodes: number;
   };
+  memory: { current_bytes: number | null; peak_bytes: number | null };
+  environment: { cpu_count: number | null; os: string; device: string };
+};
+
+/** Tauri の `get_client_system_stats`。Windows 以外では各値が null。 */
+type ClientSystemStats = {
   memory: {
-    current_bytes: number | null;
-    peak_bytes: number | null;
     system_total_bytes: number | null;
-    used_bytes?: number | null;
-    graphic?: { current_bytes: number; peak_bytes: number | null } | null;
+    used_bytes: number | null;
+    graphic: { current_bytes: number; peak_bytes: number | null } | null;
   };
-  vram?: { used_bytes: number; graphic_bytes: number | null } | null;
-  environment: {
-    cpu_name: string | null;
-    cpu_count: number | null;
-    gpu_name?: string | null;
-    gpu_memory_bytes?: number | null;
-    os: string;
-    device: string;
-  };
+  vram: { used_bytes: number; graphic_bytes: number | null } | null;
+  environment: { cpu_name: string | null; gpu_name: string | null; gpu_memory_bytes: number | null };
+};
+
+type SystemStats = {
+  epoch: CoreSystemStats["epoch"];
+  entities: CoreSystemStats["entities"];
+  memory: CoreSystemStats["memory"] & ClientSystemStats["memory"];
+  vram: ClientSystemStats["vram"];
+  environment: CoreSystemStats["environment"] & ClientSystemStats["environment"];
 };
 
 /**
@@ -85,13 +93,23 @@ type SystemStatsWindowProps = {
 
 export function SystemStatsWindow({ apiBaseUrl }: SystemStatsWindowProps) {
   const { t, i18n } = useTranslation();
-  const [stats, setStats] = useState<SystemStatsResponse | null>(null);
+  const [stats, setStats] = useState<SystemStats | null>(null);
   const [error, setError] = useState(false);
 
   const reload = useCallback(async (signal?: AbortSignal) => {
     try {
-      const res = await fetchApi<SystemStatsResponse>(buildApiUrl(apiBaseUrl, "/api/v1/stats/system"), { signal });
-      setStats(res);
+      const [core, client] = await Promise.all([
+        fetchApi<CoreSystemStats>(buildApiUrl(apiBaseUrl, "/api/v1/stats/system"), { signal }),
+        invoke<ClientSystemStats>("get_client_system_stats"),
+      ]);
+      if (signal?.aborted) return;
+      setStats({
+        epoch: core.epoch,
+        entities: core.entities,
+        memory: { ...core.memory, ...client.memory },
+        vram: client.vram,
+        environment: { ...core.environment, ...client.environment },
+      });
       setError(false);
     } catch (err) {
       if (signal?.aborted) return;
@@ -162,7 +180,7 @@ type Formatters = {
 };
 
 type SectionProps = {
-  stats: SystemStatsResponse;
+  stats: SystemStats;
   formatters: Formatters;
 };
 

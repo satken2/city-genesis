@@ -89,7 +89,7 @@ public static class PowerLinesQA
                     }
                 }
                 int previous=0;
-                foreach(string lod in new[]{"Far","Normal","Close"})
+                foreach(string lod in new[]{"Normal","Close"})
                 {
                     var line=Generate(PathData(variant),lod);
                     var filters=line.GetComponentsInChildren<MeshFilter>();
@@ -176,9 +176,9 @@ public static class PowerLinesQA
         Check(Vector3.Angle((Quaternion)Field(support,"rotation")*Vector3.forward,Vector3.forward)<.01f,"Gantry follows rail instead of incoming power line");
         var branchSupport = Endpoint(branch);
         for(int circuit=0;circuit<3;circuit++)
-            Check(Vector3.Distance((Vector3)Call("PowerLinePath","SupportAttachment",support,circuit,0,false),(Vector3)Call("PowerLinePath","SupportAttachment",branchSupport,circuit,0,false))<.001f,"Mixed feeders share gantry attachments");
+            Check(Vector3.Distance((Vector3)Call("PowerLinePath","SupportAttachment",support,circuit,0),(Vector3)Call("PowerLinePath","SupportAttachment",branchSupport,circuit,0))<.001f,"Mixed feeders share gantry attachments");
         int previous=0;
-        foreach(string lod in new[]{"Far","Normal","Close"})
+        foreach(string lod in new[]{"Normal","Close"})
         {
             var line=Generate(main,lod,new List<Vector3>{new Vector3(-80,0,-60),Vector3.zero});
             var gantry=line.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="RailPowerGantry").ToArray();
@@ -193,7 +193,7 @@ public static class PowerLinesQA
             Check(conductors.Min(v=>v.y)>6.6f,"Feeder wires stay above rail catenary");
             for(int circuit=0;circuit<6;circuit++)
             {
-                var point=(Vector3)Call("PowerLinePath","SupportAttachment",support,circuit,0,lod=="Far");
+                var point=(Vector3)Call("PowerLinePath","SupportAttachment",support,circuit,0);
                 Check(conductors.Any(v=>Vector3.Distance(v,point)<.06f),"Conductor reaches gantry insulator");
             }
             UnityEngine.Object.DestroyImmediate(line);
@@ -215,8 +215,8 @@ public static class PowerLinesQA
         neighbors=new ArrayList{rail,branch};
         var small=Endpoint(branch);
         Check((int)Field(small,"variant")==1102,"Small feeder uses small gantry");
-        Check(Mathf.Abs(((Vector3)Call("PowerLinePath","SupportAttachment",small,2,0,false)).y-7.16f)<.001f,"Small rail gantry retains catenary clearance");
-        foreach(string lod in new[]{"Far","Normal","Close"})
+        Check(Mathf.Abs(((Vector3)Call("PowerLinePath","SupportAttachment",small,2,0)).y-7.16f)<.001f,"Small rail gantry retains catenary clearance");
+        foreach(string lod in new[]{"Normal","Close"})
         {
             var line=Generate(branch,lod,new List<Vector3>{new Vector3(80,0,0),Vector3.zero});
             var vertices=line.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="RailPowerGantry").SelectMany(f=>f.sharedMesh.vertices).ToArray();
@@ -294,7 +294,7 @@ public static class PowerLinesQA
             float attachment=variant==1101?7.56f:5.76f, top=variant==1101?9.54f:7.74f;
             var shield=(Vector3)Call("PowerLinePath","ShieldAttachment",support);
             Check(Mathf.Abs(shield.y-(2+top))<.001f,"Facility shield is at reduced gantry top");
-            foreach(string lod in new[]{"Far","Normal","Close"})
+            foreach(string lod in new[]{"Normal","Close"})
             {
                 var line=Generate(path,lod,points);
                 var gantries=line.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="RailPowerGantry").ToArray();
@@ -306,7 +306,7 @@ public static class PowerLinesQA
                 var conductors=line.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="PowerConductors").SelectMany(f=>f.sharedMesh.vertices).ToArray();
                 for(int circuit=0;circuit<(variant==1101?6:3);circuit++)
                 {
-                    var terminal=(Vector3)Call("PowerLinePath","SupportAttachment",support,circuit,0,lod=="Far");
+                    var terminal=(Vector3)Call("PowerLinePath","SupportAttachment",support,circuit,0);
                     Check(Mathf.Abs(terminal.y-(2+attachment))<.001f,"Facility conductor attachment height");
                     Check(conductors.Any(v=>Vector3.Distance(v,terminal)<.06f),"Conductor reaches facility gantry");
                 }
@@ -322,7 +322,7 @@ public static class PowerLinesQA
         var mainSupport=Call("PowerLinePath","Endpoint",main,1,points[0],Vector3.forward);
         var branchSupport=Call("PowerLinePath","Endpoint",branch,1,points[0],Vector3.forward);
         Check((int)Field(branchSupport,"variant")==1101,"Mixed facility feeders choose large gantry");
-        Check(Vector3.Distance((Vector3)Call("PowerLinePath","SupportAttachment",mainSupport,0,0,false),(Vector3)Call("PowerLinePath","SupportAttachment",branchSupport,0,0,false))<.001f,"Mixed facility feeders share attachments");
+        Check(Vector3.Distance((Vector3)Call("PowerLinePath","SupportAttachment",mainSupport,0,0),(Vector3)Call("PowerLinePath","SupportAttachment",branchSupport,0,0))<.001f,"Mixed facility feeders share attachments");
         Check(!IsGantry(Call("PowerLinePath","Endpoint",branch,3,new Vector3(10,7,270),Vector3.forward)),"Electricity node bit and depot terminal alone do not select facility gantry");
         Check(!IsGantry(Call("PowerLinePath","Endpoint",main,0,points[0],Vector3.forward)),"Unconnected preview keeps regular tower");
         var mainLine=Generate(main,"Normal",points);
@@ -345,7 +345,7 @@ public static class PowerLinesQA
         Invoke("RegisterPathCells",main);Invoke("RegisterPathCells",rail);
         var queued=(HashSet<int>)Private("pendingPowerRebuildIds");
         Invoke("EnqueuePowerNeighbors",rail);
-        Check(queued.Contains(10),"Rail change schedules feeder rebuild including Far LOD");
+        Check(queued.Contains(10),"Rail change schedules feeder rebuild");
         var cells=Invoke("GetPathCoveredCellsCached",rail);
         Invoke("EnqueuePillarNeighborRebuilds",rail,cells);
         Check(queued.Contains(10),"Pillar notification preserves full feeder rebuild");

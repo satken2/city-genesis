@@ -707,8 +707,8 @@ pub async fn handle_incoming_message(
             let connected = state.lock().backend_health.connected;
             crate::publish_backend_connection(&app, &state, connected);
 
-            // Unity の起動完了通知。初回起動と、クラッシュ後にスーパーバイザ
-            // (genesis.py)が Unity を自動再起動した場合の両方で送られてくる。
+            // Unity の起動完了通知。初回起動と、クラッシュ後に Tauri が Unity を
+            // 自動再起動した場合の両方で送られてくる。
             // ポップアップの一掃は2回目以降(=クラッシュ後の再起動)に限る。
             // 再起動時は前セッションの編集モードや選択対象に依存するポップアップが
             // 無効になっているため一掃が必要だが、初回起動時に一掃すると、

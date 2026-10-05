@@ -28,7 +28,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
 import { FONT_SIZE_PRESETS, useFontSize } from "../../contexts/FontSizeContext";
 import { loadAppSettings, saveAppSettings, type AppSettings } from "../../utils/settings";
-import { fetchApi, ApiError, buildApiUrl } from "../../utils/api";
+import { fetchApi, buildApiUrl } from "../../utils/api";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { sendMoveGraphicDisplay } from "../../utils/ipc";
 import {
@@ -313,26 +313,9 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled: enableGpu }),
       });
-
-      try {
-        // backend_only を明示する。genesis.py スーパーバイザ監視下(本番)では
-        // バックエンドは genesis.py 内のスレッドで単独再起動できないため 409 が返る。
-        // その場合は設定のみ保存済み(次回起動時に反映)としてユーザーに通知する。
-        await fetchApi(`${baseUrl}/api/v1/system/shutdown?mode=backend_only`, { method: "POST" });
-      } catch (err) {
-        if (err instanceof ApiError && err.status === 409) {
-          setGpuEnabled(enableGpu);
-          alert(t("settings.compute.restartUnavailable"));
-          return;
-        }
-        throw err;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      await invoke("restart_backend");
+      // 演算デバイスはコアの起動時に決まるので、設定の保存だけを行い、次回起動時に反映する。
       setGpuEnabled(enableGpu);
-      setGpuActive(enableGpu);
+      alert(t("settings.compute.restartUnavailable"));
     } catch (err) {
       console.error("GPU toggle failed", err);
       alert(t("settings.compute.restartFailed"));

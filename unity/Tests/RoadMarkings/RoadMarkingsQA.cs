@@ -384,7 +384,7 @@ public static class RoadMarkingsQA
         var master=Property("MasterDataStore","Instance");
         var dictionary=(IDictionary)master.GetType().GetField("pathMasterById",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(master);
         var item=Activator.CreateInstance(Type("PathMasterItem"));
-        foreach(var field in new[]{("width",(object)24f),("sidewalk_width",(object)3f),("side_width",(object).5f),("lanes",(object)4),("follow_terrain",(object)false),("body_material",(object)"PATH_ASPHALT")}) item.GetType().GetField(field.Item1).SetValue(item,field.Item2);
+        foreach(var field in new[]{("width",(object)24f),("sidewalk_width",(object)3f),("side_width",(object).5f),("lanes",(object)4),("follow_terrain",(object)false),("body_material",(object)"PATH_ASPHALT"),("type",(object)1)}) item.GetType().GetField(field.Item1).SetValue(item,field.Item2);
         dictionary.Add(231,item);
         var model=Property("ModelManager","Instance");
         var models=(IDictionary)model.GetType().GetField("_modelCache",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(model);
@@ -396,6 +396,7 @@ public static class RoadMarkingsQA
         path.GetType().GetField("start_point").SetValue(path,new List<object>{0f,0f,0f});
         path.GetType().GetField("end_point").SetValue(path,new List<object>{0f,20f,400f});
         var setback=Activator.CreateInstance(Type("SidewalkSetback"));
+        Type("PathDrawContext").GetProperty("PathVariant").SetValue(null,231);
         var result=Method(Activator.CreateInstance(Type("RoadPath")),"Generate",path,new List<Vector3>{Vector3.zero,new Vector3(0,20,400)},setback,setback);
         var road=(GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
         var lod=road.GetComponentsInChildren(Type("SplinePartLod")).First(c=>(bool)c.GetType().GetField("body",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(c));
@@ -412,14 +413,14 @@ public static class RoadMarkingsQA
         var second=(GameObject)factory.DynamicInvoke(Enum.Parse(Type("DrawLod"),"Normal"),.25d,.5d);
         Require(Math.Abs(Range(normal).y-Range(second).x)<.01f,"Fixed LOD boundary has continuous dash distance");
         var segments=(IList)lod.GetType().GetField("segments",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(lod);
-        var far=(GameObject)lod.GetType().GetMethod("BuildStrip",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(lod,new[]{segments[0]});
-        var block=new MaterialPropertyBlock();far.GetComponent<Renderer>().GetPropertyBlock(block);
-        Require(block.GetFloat("_RoadPaintEnabled")==0,"Far strip omits markings");
+        var far=(GameObject)lod.GetType().GetMethod("BuildFar",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(lod,new[]{segments[0]});
+        Require(far.GetComponent(Type("RoadMarkingSurface"))==null,"Far segment omits markings");
         Material FarMaterial(Component part)
         {
+            ((IDictionary)Type("PathFarModel").GetField("tiles",BindingFlags.NonPublic|BindingFlags.Static).GetValue(null)).Clear();
             var sections=(IList)part.GetType().GetField("segments",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(part);
-            var strip=(GameObject)part.GetType().GetMethod("BuildStrip",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(part,new[]{sections[0]});
-            return strip.GetComponent<Renderer>().sharedMaterial;
+            var segment=(GameObject)part.GetType().GetMethod("BuildFar",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(part,new[]{sections[0]});
+            return segment.GetComponent<Renderer>().sharedMaterial;
         }
         Color ColorOf(string name)=>((Material)Call("RoadPath","GetOrCreateRoadMaterialByName",name)).GetColor("_BaseColor");
         Require(far.GetComponent<Renderer>().sharedMaterial.GetColor("_BaseColor")==ColorOf("PATH_ASPHALT"),"Four-lane Far road uses master asphalt rather than first FBX material");
@@ -432,9 +433,9 @@ public static class RoadMarkingsQA
             var alternateRoad=(GameObject)alternate.GetType().GetProperty("GeneratedObject").GetValue(alternate);
             var alternateLod=alternateRoad.GetComponentsInChildren(Type("SplinePartLod")).First(c=>(bool)c.GetType().GetProperty("IsBody").GetValue(c));
             Require(FarMaterial(alternateLod).GetColor("_BaseColor")==ColorOf("PATH_CONCRETE"),"Master concrete and absent/unresolved master material follow the common resolution rule");
-            Require(Property("PathDrawContext","SummaryBodyMaterial")==null,"Body summary material does not leak to the next path");
             alternateRoad.SetActive(false);
         }
+        Type("PathDrawContext").GetProperty("PathVariant").SetValue(null,0);
         foreach(var renderer in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None)) renderer.enabled=renderer.gameObject==far;
         camera.transform.position=new Vector3(0,90,50);camera.transform.rotation=Quaternion.Euler(90,0,0);camera.orthographicSize=60;
         Capture("four-lane-far-asphalt.png");
