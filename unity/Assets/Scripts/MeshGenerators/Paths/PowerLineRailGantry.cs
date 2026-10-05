@@ -73,9 +73,9 @@ public static class PowerLineRailGantry
         return Mathf.Lerp(-s.railLeft + .9f,s.railRight - .9f,(float)index / (count - 1));
     }
 
-    public static Vector3 Attachment(PowerLinePath.Support s, int circuit, int bundle, bool far)
+    public static Vector3 Attachment(PowerLinePath.Support s, int circuit, int bundle)
     {
-        float offset = s.variant == Constants.PATH_VARIANT_GRID && !far ? (bundle == 0 ? -.22f : .22f) : 0;
+        float offset = s.variant == Constants.PATH_VARIANT_GRID ? (bundle == 0 ? -.22f : .22f) : 0;
         return World(s,new Vector3(TerminalX(s,circuit) + offset,BeamHeight(s) - InsulatorLength,s.feedSide * HalfDepth));
     }
 
@@ -84,7 +84,7 @@ public static class PowerLineRailGantry
 
     public static void Generate(GameObject parent, PowerLinePath.Support s, Material metal, DrawLod lod)
     {
-        bool far = lod == DrawLod.Far, close = lod == DrawLod.Close;
+        bool close = lod == DrawLod.Close;
         var mesh = new PathStructureMesh(parent,"RailPowerGantry",new[] { metal });
         float height = BeamHeight(s);
         int sides = close ? 6 : 4;
@@ -99,7 +99,7 @@ public static class PowerLineRailGantry
                 const float half = .32f;
                 for (int a = -1; a <= 1; a += 2) for (int b = -1; b <= 1; b += 2)
                     Bar(P(x+a*half,bottom,z+b*half),P(x+a*half,top,z+b*half),.075f);
-                int levels = Mathf.Max(1,Mathf.CeilToInt((top-bottom)/(far?5f:2f)));
+                int levels = Mathf.Max(1,Mathf.CeilToInt((top-bottom)/2f));
                 for (int i = 0; i < levels; i++)
                 {
                     float y0 = Mathf.Lerp(bottom,top,(float)i/levels), y1 = Mathf.Lerp(bottom,top,(float)(i+1)/levels);
@@ -120,7 +120,7 @@ public static class PowerLineRailGantry
                 Vector3 lowA = a + across * side, lowB = b + across * side;
                 Vector3 highA = lowA + Vector3.up * TrussHeight, highB = lowB + Vector3.up * TrussHeight;
                 Bar(lowA,lowB,.08f); Bar(highA,highB,.08f);
-                int bays = Mathf.Max(1,Mathf.CeilToInt(Vector3.Distance(a,b)/(far?4f:1.4f)));
+                int bays = Mathf.Max(1,Mathf.CeilToInt(Vector3.Distance(a,b)/1.4f));
                 for (int i = 0; i < bays; i++)
                 {
                     float t0 = (float)i/bays, t1 = (float)(i+1)/bays;
@@ -138,20 +138,17 @@ public static class PowerLineRailGantry
             foreach (float z in new[] { -HalfDepth,HalfDepth })
             {
                 Bar(P(x,height,z),P(x,height-InsulatorLength,z),.065f);
-                if (!far)
+                int discs = close ? 9 : 5;
+                for (int i = 0; i < discs; i++)
                 {
-                    int discs = close ? 9 : 5;
-                    for (int i = 0; i < discs; i++)
-                    {
-                        float y = height - (.2f + i * 1.05f/(discs-1)) * HeightScale;
-                        Bar(P(x,y-.035f*HeightScale,z),P(x,y+.035f*HeightScale,z),.16f);
-                    }
+                    float y = height - (.2f + i * 1.05f/(discs-1)) * HeightScale;
+                    Bar(P(x,y-.035f*HeightScale,z),P(x,y+.035f*HeightScale,z),.16f);
                 }
-                if (s.variant == Constants.PATH_VARIANT_GRID && !far)
+                if (s.variant == Constants.PATH_VARIANT_GRID)
                     Bar(P(x-.22f,height-InsulatorLength,z),P(x+.22f,height-InsulatorLength,z),.045f);
             }
             // 前後の梁を結ぶジャンパ線は、通常の鉄道架線より上に留める。
-            int steps = far ? 4 : 12;
+            int steps = 12;
             Vector3 previous = P(x,height-InsulatorLength,-HalfDepth);
             for (int i = 1; i <= steps; i++)
             {

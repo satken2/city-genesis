@@ -210,7 +210,7 @@ public sealed class RoadMarkingContext : MonoBehaviour
         return Vector3.Lerp(points[lo], points[hi], t) + Vector3.Cross(Vector3.up, tangent).normalized * coordinate.y;
     }
 
-    public void Apply(GameObject body, bool far = false)
+    public void Apply(GameObject body)
     {
         var filter = body.GetComponent<MeshFilter>(); var renderer = body.GetComponent<MeshRenderer>();
         if (filter == null || filter.sharedMesh == null || renderer == null) return;
@@ -221,7 +221,7 @@ public sealed class RoadMarkingContext : MonoBehaviour
         mesh.SetUVs(3, uv);
         var surface = body.GetComponent<RoadMarkingSurface>();
         if (surface == null) surface = body.AddComponent<RoadMarkingSurface>();
-        surface.Configure(Plan, this, far);
+        surface.Configure(Plan, this);
     }
 
     private void OnDestroy() { Plan?.ReleaseMesh(); }

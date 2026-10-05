@@ -56,7 +56,7 @@ public static class ConstructionPathQA
             SetupView();
             foreach(int variant in new[]{2,221,401}) foreach(float progress in new[]{0f,12.5f,25f,57.5f,90f,99f,100f}) Verify(variant,progress);
             VerifyStructuralParts(table);
-            VerifyCurve(); VerifyTunnel(); VerifyProgressContract(); VerifySingleSpan(table); VerifyFar(); VerifyDeckVehicles();
+            VerifyCurve(); VerifyTunnel(); VerifyProgressContract(); VerifySingleSpan(table); VerifyDeckVehicles();
             foreach(var message in ShaderUtil.GetShaderMessages(Shader.Find("Custom/PathDirt")))
                 Check(message.severity.ToString()!="Error",message.message);
             File.WriteAllText(output+"/result.txt","PASS: "+checks+" checks; actual FBX, URP dirt, staged piers/decks, ground/rail, curves, tunnel, progress decode/cache key.");
@@ -221,19 +221,6 @@ public static class ConstructionPathQA
         Check(root.GetComponentsInChildren<Transform>().Count(t=>t.name=="CompletedSurface")==2,"Single-span decks must use one object per supported span");
         UnityEngine.Object.DestroyImmediate(root);UnityEngine.Object.DestroyImmediate((Mesh)Field(result,"Mesh"));
         Set(table[221],"single_span",false);
-    }
-    static void VerifyFar()
-    {
-        foreach(int variant in new[]{221,2})foreach(float progress in new[]{0f,35f,80f,100f}) {
-            var path=PathData(variant,progress,variant==221?10:0);var root=new GameObject("FarConstruction");
-            var material=new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            builder.GetMethod("GenerateFar").Invoke(null,new object[]{root,path,Line(variant==221?10:0),8f,material});
-            Check(root.GetComponentsInChildren<Transform>().All(t=>!t.name.StartsWith("construction_") && t.name!="ConstructionSupport"),"Far must not instantiate models");
-            bool hasSurface=root.GetComponentsInChildren<Transform>().Any(t=>t.name=="CompletedSurface");
-            if(variant==221)Check(root.GetComponentsInChildren<Transform>().All(t=>t.name!="ConstructionDirt"),"Far elevated dirt");
-            Check(hasSurface==(variant==221?progress>25:progress>0),"Far progress surface");
-            UnityEngine.Object.DestroyImmediate(root);UnityEngine.Object.DestroyImmediate(material);
-        }
     }
     static void SetupView()
     {

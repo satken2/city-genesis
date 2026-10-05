@@ -710,11 +710,6 @@ public static class UndergroundQA
         var edges = station.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/platform")).ToArray();
         Check(edges.Length>0 && edges.All(f=>f.sharedMesh.triangles.All(i=>f.transform.TransformPoint(f.sharedMesh.vertices[i]).y<-15+3.31f)),"underground station keeps its platform without a canopy");
         UnityEngine.Object.DestroyImmediate(station);
-        var farStation=new GameObject("FarTunnelStation");
-        Set(farStation.AddComponent(T("PathSection")),"IsUnderground",true);
-        Static("FarPlatformPath","BuildInto",farStation,461,below,true,true);
-        Check(farStation.GetComponentsInChildren<MeshFilter>().All(f=>f.sharedMesh.triangles.All(i=>f.sharedMesh.vertices[i].y<-15+3.2f)),"far underground station omits its canopy and supports");
-        UnityEngine.Object.DestroyImmediate(farStation);
         foreach (int variant in new[]{451,461,462,502})
             foreach (string part in new[]{"platform","platform_close"})
             {

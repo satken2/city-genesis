@@ -200,7 +200,6 @@ public partial class PathManager : BaseApiDataManager
     // ==== マテリアルキャッシュ ====
     private static Material cachedNodeMaterial;
     private static Material cachedWaypointMaterial;
-    private static Material cachedRoadMaterial;
 
     /// <summary>
     /// Resources.Loadによるマテリアル取得をキャッシュして呼び出しコストを削減する。
@@ -219,28 +218,14 @@ public partial class PathManager : BaseApiDataManager
         return cachedWaypointMaterial;
     }
 
-    /// <summary>
-    /// 遠景（Far）ティアの道路描画に使用する黒色マテリアル。
-    /// </summary>
-    private static Material GetRoadMaterial()
-    {
-        if (cachedRoadMaterial == null)
-            cachedRoadMaterial = Resources.Load<Material>("Road");
-        return cachedRoadMaterial;
-    }
-
-    private static Material farRoadDepthMaterial;
     private static Material nodeDepthMaterial;
-
-    /// <summary>遠景の帯(Far道路・詳細区間外の残り帯)に使う、Road の DepthOffsetLit 版の共有マテリアル。</summary>
-    private static Material GetFarRoadDepthMaterial() => GetDepthOffsetMaterial(GetRoadMaterial(), ref farRoadDepthMaterial);
 
     /// <summary>ノードの円柱に使う、NodeMaterial の DepthOffsetLit 版の共有マテリアル。</summary>
     private static Material GetNodeDepthMaterial() => GetDepthOffsetMaterial(GetNodeMaterial(), ref nodeDepthMaterial);
 
     /// <summary>
     /// シェーダーを Z-fighting 防止用の Custom/DepthOffsetLit に差し替えた共有マテリアルを1度だけ作る。
-    /// Renderer.materials で個別に複製すると誰も解放せず蓄積するため、パス・ノード間で共有する。
+    /// Renderer.materials で個別に複製すると誰も解放せず蓄積するため、全ノードで共有する。
     /// 色の上書きは VisualModeObject がマテリアル差し替えとプロパティブロックで行うので、共有しても他へ波及しない。
     /// シェーダーが無ければ元の共有マテリアルをそのまま使う。
     /// </summary>
@@ -945,7 +930,7 @@ public partial class PathManager : BaseApiDataManager
 
         // 路面本体を SplinePartLod の固定区間で描く道路は親を通常LODに固定し、Close/Normal の切替を区間に任せる
         // (親を作り直すと全区間・設備・橋脚を再生成するため)。区間化は交差点で切った描画長・工事中・トンネル分割で
-        // 決まるので、生成済みなら実物を見る。遠景の帯は区間を持たないため、初回と同じく推定で決める。
+        // 決まるので、生成済みなら実物を見る。遠景は区間を持たないため、初回と同じく推定で決める。
         if (existing != null && current != DrawLod.Far) return HasBodySegments(existing) ? DrawLod.Normal : DrawLod.Close;
         return length >= 256f && IsSegmentedLongRoad(path) ? DrawLod.Normal : DrawLod.Close;
     }
@@ -1116,27 +1101,13 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 詳細区間の外側に遠景の帯を敷く。詳細パーツを敷かない区間(PathDrawContext)を、
-    /// 描画点列を割合で切り出した曲線どおりの帯で埋める。
+    /// 詳細区間の外側を遠景で埋める。詳細パーツを敷かない区間(PathDrawContext)に、
+    /// 描画点列を割合で切り出した曲線どおりに遠景モデルを並べる。
     /// </summary>
-    private void AddFarRemainderStrips(GameObject pathGO, List<Vector3> points, float width, double detailFrom, double detailTo)
+    private void AddFarRemainders(GameObject pathGO, PathSummary path, List<Vector3> points, double detailFrom, double detailTo)
     {
-        void AddStrip(double from, double to, string name)
-        {
-            if (to - from <= 1e-4) return;
-            List<Vector3> slice = PathDrawContext.SlicePolylineByFraction(points, from, to);
-            Mesh mesh = PathMeshFactory.BuildStripMesh(slice, width);
-            if (mesh == null) return;
-            GameObject go = new GameObject(name);
-            go.transform.SetParent(pathGO.transform, false);
-            go.AddComponent<MeshFilter>().sharedMesh = mesh;
-            go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
-            MeshRenderer mr = go.AddComponent<MeshRenderer>();
-            Material mat = GetFarRoadDepthMaterial();
-            if (mat != null) mr.sharedMaterial = mat;
-        }
-        AddStrip(0.0, detailFrom, "FarRemainder_Start");
-        AddStrip(detailTo, 1.0, "FarRemainder_End");
+        if (detailFrom > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_Start", path.path_variant, PathDrawContext.SlicePolylineByFraction(points, 0.0, detailFrom));
+        if (1.0 - detailTo > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_End", path.path_variant, PathDrawContext.SlicePolylineByFraction(points, detailTo, 1.0));
     }
 
     /// <summary>
@@ -2264,7 +2235,7 @@ public partial class PathManager : BaseApiDataManager
             return false;
         }
 
-        // データティアが Near/Dynamic でも、カメラから遠く小さく見えるパスは帯(Far)で描く。
+        // データティアが Near/Dynamic でも、カメラから遠く小さく見えるパスは遠景(Far)で描く。
         Camera drawCam = Camera.main;
         Vector3 drawCamPos = drawCam != null ? drawCam.transform.position : Vector3.zero;
         DrawLod drawLod = DeterminePathDrawLod(path, tier, drawCamPos, out double detailFrom, out double detailTo);
@@ -2454,9 +2425,8 @@ public partial class PathManager : BaseApiDataManager
         EnsureEndIntersectionsVisible(path);
 
         // 通常表示では地下パス、および丘を貫く非追従トンネルパスの遠景を非表示にする。
-        // 始点・終点を結ぶ直線ストリップは埋設区間を無視して地表を横切ってしまい、
-        // トンネルなのに黒帯が地面に描かれてしまうため。遠距離では坑口・開削区間も
-        // 視認できないので、非表示で問題ない。谷を渡るだけの非追従橋は直線ストリップを描く。
+        // 始点・終点を結ぶ直線に並べる遠景は埋設区間を無視して地表を横切ってしまうため。
+        // 遠距離では坑口・開削区間も視認できないので、非表示で問題ない。谷を渡るだけの非追従橋は遠景を描く。
         // 既存オブジェクト（Near詳細）はプーリングの慣習に合わせて破棄せず非アクティブにして残す。
         if (!UndergroundView.IsActive && (TunnelSectionUtil.IsUndergroundPath(path) || FarPathHasHiddenTunnel(path)))
         {
@@ -2550,51 +2520,31 @@ public partial class PathManager : BaseApiDataManager
             List<Vector3> curvePoints = CalculatePathPoints(path);
             if (curvePoints.Count >= 2)
             {
-                points = DecimatePolyline(curvePoints, FAR_STRIP_SAMPLE_INTERVAL);
+                points = DecimatePolyline(curvePoints, FAR_SAMPLE_INTERVAL);
             }
         }
-        float width = 6f;
-        var masterData = MasterDataStore.Instance;
-        if (masterData != null)
+        // 遠景はバリアントの遠景モデルを点列に沿って並べる(PathFarModel)。種類・状態によらず同じ。
+        Mesh mesh = null;
+        if (UsesTunnelMesh(path, points))
         {
-            var pathMaster = masterData.GetPathMaster(path.path_variant);
-            if (pathMaster != null) width = pathMaster.width;
-        }
-
-        bool hasTunnel = UsesTunnelMesh(path, points);
-        if (hasTunnel) points = DecimatePolyline(CalculatePathPoints(path), FAR_STRIP_SAMPLE_INTERVAL);
-        bool constructing = status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none";
-        bool powerLine = PowerLinePath.Handles(path);
-        bool farPlatform = !constructing && FarPlatformPath.Handles(path);
-        Mesh mesh = constructing || powerLine || farPlatform || hasTunnel ? null : PathMeshFactory.BuildStripMesh(points, width);
-        if (powerLine) PowerLinePath.GenerateInto(pathGO, path, CalculatePathPoints(path), DrawLod.Far);
-        else if (constructing) ConstructionPathBuilder.GenerateFar(pathGO, path, points, width, GetRoadMaterial());
-        else if (hasTunnel)
-        {
+            points = DecimatePolyline(CalculatePathPoints(path), FAR_SAMPLE_INTERVAL);
             foreach (var section in TunnelSectionUtil.GetDrawSections(points, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
                 GetPathFollowTerrain(path), UndergroundView.IsActive))
             {
-                var sectionGO = new GameObject("PathSection");
-                sectionGO.transform.SetParent(pathGO.transform, false);
-                sectionGO.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
-                if (farPlatform) FarPlatformPath.GenerateInto(sectionGO, path, section.Points);
-                else
-                {
-                    Mesh strip = PathMeshFactory.BuildStripMesh(section.Points, width);
-                    sectionGO.AddComponent<MeshFilter>().sharedMesh = strip;
-                    sectionGO.AddComponent<MeshRenderer>().sharedMaterial = GetFarRoadDepthMaterial();
-                    sectionGO.AddComponent<RenderCacheIdentity>().mesh = strip;
-                }
+                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, section.Points);
+                if (sectionGO != null) sectionGO.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
             }
         }
-        else if (farPlatform) FarPlatformPath.GenerateInto(pathGO, path, points);
-        if (mesh != null)
+        else
         {
-            MeshFilter mf = pathGO.AddComponent<MeshFilter>();
-            mf.mesh = mesh;
-            MeshRenderer mr = pathGO.AddComponent<MeshRenderer>();
-            Material mat = GetFarRoadDepthMaterial();
-            if (mat != null) mr.sharedMaterial = mat;
+            mesh = PathFarModel.Build(path.path_variant, points, out Material[] farMaterials);
+            if (mesh != null)
+            {
+                pathGO.AddComponent<MeshFilter>().mesh = mesh;
+                MeshRenderer mr = pathGO.AddComponent<MeshRenderer>();
+                mr.sharedMaterials = farMaterials;
+                mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
         }
 
         var identity = pathGO.AddComponent<RenderCacheIdentity>();
@@ -3581,7 +3531,7 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <param name="drawLod">描画LOD(Normal / Close)。Far は CreateOrUpdateFarPath が担当する。</param>
-    /// <param name="detailFrom">詳細パーツを敷く区間の始点(全長に対する割合)。区間外は遠景の帯で埋める。</param>
+    /// <param name="detailFrom">詳細パーツを敷く区間の始点(全長に対する割合)。区間外は遠景モデルで埋める。</param>
     /// <param name="detailTo">詳細パーツを敷く区間の終点。</param>
     public void CreateOrUpdatePath(PathSummary path, bool updateIntersections = true, bool forceRebuild = false, DrawLod drawLod = DrawLod.Normal, double detailFrom = 0.0, double detailTo = 1.0)
     {
@@ -3670,11 +3620,13 @@ public partial class PathManager : BaseApiDataManager
             if (PowerLinePath.Handles(path))
             {
                 PathDrawContext.Begin(drawLod);
+                PathDrawContext.PathVariant = path.path_variant;
                 meshResult = PathMeshFactory.GeneratePathMesh(path, points);
             }
             else if (status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none")
             {
                 PathDrawContext.Begin(drawLod);
+                PathDrawContext.PathVariant = path.path_variant;
                 meshResult = GenerateConstructingPathMesh(path, points);
             }
             else if (UsesTunnelMesh(path, points))
@@ -3682,11 +3634,13 @@ public partial class PathManager : BaseApiDataManager
                 // トンネル区間を含むパスは描画区間分割の都合上、歩道セットバックは適用しない
                 // （地下道路の交差点エンドキャップは現状スコープ外）。
                 PathDrawContext.Begin(drawLod);
+                PathDrawContext.PathVariant = path.path_variant;
                 meshResult = GenerateSectionedPathMesh(path, points);
             }
             else
             {
                 PathDrawContext.Begin(drawLod, detailFrom, detailTo);
+                PathDrawContext.PathVariant = path.path_variant;
                 pathStartSidewalkSetbacks.TryGetValue(path.path_id, out SidewalkSetback startSetback);
                 pathEndSidewalkSetbacks.TryGetValue(path.path_id, out SidewalkSetback endSetback);
                 meshResult = PathMeshFactory.GeneratePathMesh(path, points, startSetback, endSetback);
@@ -3714,7 +3668,7 @@ public partial class PathManager : BaseApiDataManager
         drawInfo.detailTo = usePartialRange ? (float)detailTo : 1f;
         if (usePartialRange)
         {
-            AddFarRemainderStrips(pathGO, points, GetRoadWidth(path.path_variant), detailFrom, detailTo);
+            AddFarRemainders(pathGO, path, points, detailFrom, detailTo);
         }
         if (drawLod == DrawLod.Close) closePathIds.Add(path.path_id);
         else closePathIds.Remove(path.path_id);
@@ -3763,8 +3717,8 @@ public partial class PathManager : BaseApiDataManager
         ReevaluateAwaitingIntersectionsForPath(path);
     }
 
-    /// <summary>遠景の帯の頂点間隔(m)。曲線の形を保ちつつ頂点を抑える。</summary>
-    private const float FAR_STRIP_SAMPLE_INTERVAL = 15f;
+    /// <summary>遠景の点列の間隔(m)。曲線の形を保ちつつ点を抑える。</summary>
+    private const float FAR_SAMPLE_INTERVAL = 15f;
 
     /// <summary>点列を距離間隔で間引く(始点・終点は必ず残す)。</summary>
     private static List<Vector3> DecimatePolyline(List<Vector3> points, float interval)
@@ -3805,7 +3759,7 @@ public partial class PathManager : BaseApiDataManager
 
     /// <summary>
     /// Farティアで非表示にすべきトンネルパスか。端点を結ぶ直線がトンネル区間を持つ
-    /// 非追従パス（丘を貫くパス）のみ非表示にし、谷を渡るだけの非追従橋は直線ストリップを描く。
+    /// 非追従パス（丘を貫くパス）のみ非表示にし、谷を渡るだけの非追従橋は遠景を描く。
     /// </summary>
     private bool FarPathHasHiddenTunnel(PathSummary path)
     {

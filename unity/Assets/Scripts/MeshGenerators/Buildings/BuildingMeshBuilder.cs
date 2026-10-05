@@ -32,7 +32,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 描画LOD付きの生成。Far は遠景用prebuiltを優先し、無ければフットプリント押し出しの箱(<see cref="GenerateFarBuilding"/>)、
+    /// 描画LOD付きの生成。Far は遠景モデルを外形へ引き伸ばすか箱(<see cref="GenerateFarBuilding"/>)、
     /// Close は同じ組み立てで `_close` パーツを優先解決する(BuildingMeshUtils.CurrentDrawLod)。
     /// isDynamicは互換引数。地形追従の要否を表し、描画LODとは独立する。
     /// animateCrane=true の呼び出し側は、返されたCraneTopを表示モード初期化前にAttachする。
@@ -70,55 +70,16 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 遠景(Far)用の建物メッシュ。建物種別によらず専用prebuiltを優先し、無ければ階数×階高の箱。
+    /// 遠景(Far)用の建物メッシュ。建物種別によらず遠景モデルを外形へ引き伸ばして置き(<see cref="FarBuildingMeshBuilder"/>)、
+    /// 無ければ底面を階数×階高まで押し出した箱にする。
     /// 遠景は数が最も多いので、フル詳細と同じ組み立てを走らせてマテリアルだけ差し替える方式は使わない。
-    /// 港は例外で、区画が海へはみ出しているので底面の箱では海に箱が立つ。岸壁と `_far` パーツを同じ配置で組み立てる(F4)。
-    /// マッシュアップも例外で、棟の配置が区画ごとに違うので、棟ごとの `_far` パーツを通常と同じ配置で組み立てる(F6)。
-    /// 遠景パーツで描ける棟が1つも無ければ箱にする。
-    /// 工事中・解体中は箱の高さを1階分にして「まだ建っていない」ことを遠目にも保ち、
+    /// 工事中・解体中は遠景モデルを使わず箱の高さを1階分にして「まだ建っていない」ことを遠目にも保ち、
     /// 倒壊は瓦礫の高さ(0.5階分)にする。
-    /// 露天掘りは何も描かない。穴は地形そのもので、中心位置の高さに置く箱や板は穴に蓋をしてしまう。
     /// </summary>
     public static BuildingMeshResult GenerateFarBuilding(BuildingSummary buildingData)
     {
-        if (GetModelType(buildingData) == Constants.MODEL_OPEN_PIT)
-        {
-            return new BuildingMeshResult(new Mesh(), null);
-        }
-        if (buildingData.status != Constants.STATUS_CONSTRUCTING
-            && buildingData.status != Constants.STATUS_DEMOLISHING
-            && buildingData.status != Constants.STATUS_COLLAPSED)
-        {
-            string prefix = BuildingMeshUtils.GetGlbPrefix1(buildingData);
-            DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
-            var previousCapture = BuildingExteriorRenderer.Capture;
-            BuildingMeshUtils.CurrentDrawLod = DrawLod.Far;
-            BuildingExteriorRenderer.Capture = null;
-            try
-            {
-                // 通常の生成方式と遠景の著作形式は独立する。モジュラー建物も遠景を完成モデルで提供できる。
-                if (BuildingMeshUtils.GetPartNoPosition(prefix, "base-prebuilt", 0, true) != null
-                    || BuildingMeshUtils.GetPartNoPosition(prefix, "mid-prebuilt", 0, true) != null
-                    || BuildingMeshUtils.GetPartNoPosition(prefix, "top-prebuilt", 0, true) != null)
-                    return prebuiltGenerator.Generate(buildingData, false);
-                if (GetModelType(buildingData) == Constants.MODEL_MASHUP)
-                {
-                    BuildingMeshResult mashupFar = MashupBuildingMeshBuilder.GenerateFar(buildingData);
-                    if (mashupFar != null) return mashupFar;
-                }
-                if (GetModelType(buildingData) == Constants.MODEL_PORT)
-                    return portGenerator.Generate(buildingData, false);
-            }
-            finally
-            {
-                BuildingMeshUtils.CurrentDrawLod = previous;
-                BuildingExteriorRenderer.Capture = previousCapture;
-            }
-        }
-        Vector2[] footprint = BuildingMeshUtils.GetFootprint(buildingData);
         float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
-        int floors = Mathf.Max(1, buildingData.floors ?? 1);
-        float height = floors * floorHeight;
+        float height = Mathf.Max(1, buildingData.floors ?? 1) * floorHeight;
         if (buildingData.status == Constants.STATUS_CONSTRUCTING || buildingData.status == Constants.STATUS_DEMOLISHING)
         {
             height = floorHeight;
@@ -127,13 +88,12 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         {
             height = floorHeight * 0.5f;
         }
-        int modelType = GetModelType(buildingData);
-        if (modelType == Constants.MODEL_MODULAR_GROUND || IsOpenSpaceModel(modelType))
+        else
         {
-            // 地面アセット(畑・太陽光等)は高さを持たないので、薄い板にする。
-            height = 0.3f;
+            BuildingMeshResult far = FarBuildingMeshBuilder.Generate(buildingData);
+            if (far != null) return far;
         }
-        return GenerateSimpleBuildingWithHeight(footprint, height);
+        return GenerateSimpleBuildingWithHeight(BuildingMeshUtils.GetFootprint(buildingData), height);
     }
 
     public static bool IsOpenSpaceModel(int modelType) => modelType == Constants.MODEL_PARKING

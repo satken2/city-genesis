@@ -78,13 +78,14 @@ source（プレハブの sharedMaterial 等）
 | 道路本体・区画線・歩道・防音壁・中央分離帯・街路樹・柱・坑口 | パーツプレハブのマテリアル → `GetOrCreateRoadMaterial` |
 | パス本体のプレハブが無いとき（明灰色の板フォールバック）・パーツの材質配列が空のとき | URP対応の `Resources/BuildingMaterial` → `GetOrCreateRoadMaterialByName` の共有プール |
 | 交差点アスファルト | 代表バリアントのマスターの `body_material`（§2.3）→ 代表バリアントの `body` プレハブ → `Resources/PATH_ASPHALT` → `Resources/NodeMaterial` |
-| 道路の固定区間LODの簡易路面・沿道アクセスの路面・高速道路の結合部の埋め面 | マスターの `body_material`（§2.3）→ `body` プレハブの代表材質 |
+| 遠景モデル（`far`） | パーツプレハブのマテリアル → `GetOrCreateRoadMaterial` の `DepthOffsetLit` 版（元マテリアルごとに共有） |
+| 遠景モデルの無いパスの遠景の板・沿道アクセスの路面・高速道路の結合部の埋め面 | マスターの `body_material`（§2.3）→ `body` プレハブの代表材質。遠景の板はどちらも無ければ `Resources/Road` で、`DepthOffsetLit` 版を使う |
 | 交差点の歩道コネクタ・エンドキャップ | 通常道路と同じ `sidewalk` プレハブ → `GetOrCreateRoadMaterial` |
 | 駅ホームのデッキ | `platform_panel` プレハブのマテリアル → `GetOrCreateRoadMaterial`。プレハブが無いときは共通コンクリート（§3.4） |
 | LRT停留所のホームの簡易スラブ（`lrt_platform` パーツが無いときの代替） | 共通コンクリート（§3.4） |
 | 工事中パスの土ストリップ | 建物と共通の土マテリアル（§3.4）→ `GetOrCreateRoadMaterial` |
 | 一方通行線路の進行方向矢印 | `Resources/PathColorMaterial` の複製に色を焼き込んだ専用マテリアル（静的キャッシュ） |
-| ノードマーカー・遠景（Far）の簡易パス | `Resources/NodeMaterial` |
+| ノードマーカー | `Resources/NodeMaterial` |
 
 交差点の代表バリアント選択（踏切では道路側を優先）は [G_道路メッシュの生成](G_道路メッシュの生成.md) §11.5 を参照。
 
@@ -96,9 +97,9 @@ source（プレハブの sharedMaterial 等）
 （キャッシュ → `Resources.Load` → 複製 → `renderQueue` +1）で、Resources に同名の `.mat` が
 無ければ null を返し、呼び出し側がプレハブ経由の解決へフォールバックする。
 
-交差点、道路の固定区間LODの簡易路面、沿道アクセスの路面、高速道路の結合部の埋め面で使う。
+交差点、遠景モデルの無いパスの遠景の板、沿道アクセスの路面、高速道路の結合部の埋め面で使う。
 これらの生成面が代表する路面材質を、マスターデータで宣言する（舗装路 `PATH_ASPHALT` /
-未舗装路 `PATH_SAND` など）。固定区間LODの簡易路面は、この設定を生成時に解決して保持する。
+未舗装路 `PATH_SAND` など）。遠景の板は、この設定をバリアントごとに1度解決して保持する。
 通常・接写の道路本体は body プレハブのサブメッシュごとの材質で描くため、路面と側面などの
 材質の区別を保つ（`body_material` は詳細モデルの見た目を上書きしない）。
 
@@ -158,7 +159,7 @@ null → 地面パネルを描画しない（既定マテリアルへはフォ�
 
 | 用途 | 解決順 |
 | --- | --- |
-| 既定の建物マテリアル（白い箱・遠景の箱・全フォールバックの終着点） | `Resources/BuildingMaterial` |
+| 既定の建物マテリアル（白い箱・遠景の建物・全フォールバックの終着点） | `Resources/BuildingMaterial` |
 | 共通コンクリート（`BuildingMeshBuilder.GetCommonConcreteMaterial`） | `Resources/COMMON_CONCRETE` → `Resources/BuildingMaterial`（`.mat` が無いときは警告を出す） |
 | 工事現場の土（建物の土マウンド／パスの土ストリップ共用） | `Resources/ConstructionDirt` → `Resources/ConstructionMaterial` → `Resources/BuildingMaterial` |
 

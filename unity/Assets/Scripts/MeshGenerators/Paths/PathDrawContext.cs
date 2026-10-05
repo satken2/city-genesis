@@ -16,7 +16,7 @@ public static class PathDrawContext
     public static DrawLod CurrentDrawLod { get; private set; } = DrawLod.Normal;
 
     /// <summary>
-    /// 詳細パーツを敷く区間(スプライン割合)。区間外は呼び出し側が遠景の帯で埋める。
+    /// 詳細パーツを敷く区間(スプライン割合)。区間外は呼び出し側が遠景モデルで埋める。
     /// 全長なら 0〜1。折れ角付き道路のようにセグメントごとに別スプラインを持つ生成では、
     /// 割合の基準が一致しないため <see cref="SuppressDetailRange"/> で無効化する。
     /// </summary>
@@ -44,8 +44,8 @@ public static class PathDrawContext
     /// </summary>
     public static System.Action<GameObject, SplineComputer, Mesh, double, double> PartCreated { get; set; }
 
-    /// <summary>路面の固定区間LODへ渡す代表材質。詳細モデルのサブメッシュ材質は上書きしない。</summary>
-    public static Material SummaryBodyMaterial { get; set; }
+    /// <summary>生成中のパスのバリアント。路面の固定区間LODが遠景区間に並べる遠景モデルを選ぶ。0 は不明で、遠景区間を描かない。</summary>
+    public static int PathVariant { get; set; }
 
     public static bool HasDetailRange => !SuppressDetailRange && (DetailFrom > 0.0001 || DetailTo < 0.9999);
 
@@ -72,7 +72,7 @@ public static class PathDrawContext
         AdaptiveTileLength = 0f;
         Warp = null;
         PartCreated = null;
-        SummaryBodyMaterial = null;
+        PathVariant = 0;
     }
 
     public static void End()
@@ -84,7 +84,7 @@ public static class PathDrawContext
         AdaptiveTileLength = 0f;
         Warp = null;
         PartCreated = null;
-        SummaryBodyMaterial = null;
+        PathVariant = 0;
     }
 
     public static void SetAdaptiveTileLength(float length)
@@ -186,7 +186,7 @@ public static class PathDrawContext
 
     /// <summary>
     /// 点列の累積距離割合が [from, to] に入る部分点列を返す(区間端は補間して切る)。
-    /// 遠景の帯を詳細区間の外側にだけ敷くために使う。
+    /// 遠景モデルを詳細区間の外側にだけ並べるために使う。
     /// </summary>
     public static List<Vector3> SlicePolylineByFraction(List<Vector3> points, double from, double to)
     {

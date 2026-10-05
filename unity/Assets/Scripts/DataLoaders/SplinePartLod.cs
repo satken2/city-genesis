@@ -26,7 +26,7 @@ public sealed class SplinePartLod : MonoBehaviour
     private SplineComputer spline;
     private float width, lateral, height;
     private bool body;
-    private Material material;
+    private int farVariant;
     private Coroutine worker;
     private Vector3? queriedPosition;
     private Segment queriedSegment;
@@ -71,12 +71,13 @@ public sealed class SplinePartLod : MonoBehaviour
             ? queriedSegment.lod : DrawLod.Hidden;
     }
 
+    /// <param name="pathVariant">遠景区間に並べる遠景モデルのバリアント(PathFarModel)。0 なら遠景区間を描かない。</param>
     public void Configure(SplineComputer source, float partWidth, float offset, float offsetY, bool isBody,
-        Material summaryMaterial, double from, double to, Func<DrawLod, double, double, GameObject> factory)
+        int pathVariant, double from, double to, Func<DrawLod, double, double, GameObject> factory)
     {
         spline = source; width = partWidth; lateral = offset; height = offsetY; body = isBody; build = factory;
         queriedPosition = null;
-        material = summaryMaterial;
+        farVariant = pathVariant;
         int count = Mathf.Max(1, Mathf.CeilToInt(spline.CalculateLength() / SegmentLength));
         for (int i = 0; i < count; i++)
         {
@@ -137,10 +138,10 @@ public sealed class SplinePartLod : MonoBehaviour
                 string key = segment.from.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + ":" + desired;
                 GameObject next = cache.Take(key);
                 if (next != null) RenderWorkScheduler.CountEvent("roadSegment.reuseCached");
-                if (next == null && (desired != DrawLod.Far || body))
+                if (next == null && (desired != DrawLod.Far || farVariant > 0))
                 {
                     RenderWorkScheduler.CountEvent("roadSegment.buildRequested");
-                    next = desired == DrawLod.Far ? BuildStrip(segment) : build(desired, segment.from, segment.to);
+                    next = desired == DrawLod.Far ? BuildFar(segment) : build(desired, segment.from, segment.to);
                     if (next != null)
                     {
                         var identity = next.GetComponent<RenderCacheIdentity>();
@@ -166,7 +167,7 @@ public sealed class SplinePartLod : MonoBehaviour
         }
     }
 
-    private GameObject BuildStrip(Segment segment)
+    private GameObject BuildFar(Segment segment)
     {
         var points = new List<Vector3>();
         for (int i = 0; i <= 16; i++)
@@ -175,16 +176,7 @@ public sealed class SplinePartLod : MonoBehaviour
             Vector3 right = Vector3.Cross(Vector3.up, sample.forward).normalized;
             points.Add(transform.InverseTransformPoint(sample.position + right*lateral + Vector3.up*height));
         }
-        var go = new GameObject("RoadSummary");
-        go.transform.SetParent(transform, false);
-        Mesh mesh = PathMeshFactory.BuildStripMesh(points, width);
-        go.AddComponent<MeshFilter>().sharedMesh = mesh;
-        var renderer = go.AddComponent<MeshRenderer>();
-        renderer.sharedMaterial = material;
-        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        go.AddComponent<RenderCacheIdentity>().mesh = mesh;
-        GetComponentInParent<RoadMarkingContext>()?.Apply(go, true);
-        return go;
+        return PathFarModel.Create(gameObject, "RoadSummary", farVariant, points);
     }
 
     private void OnDestroy() { cache.Clear(); }

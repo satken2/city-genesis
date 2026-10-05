@@ -39,9 +39,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 |---|---|
 | Normal（無印、必須） | `p{variant}/{part}.fbx`。走行面、縁、軌道、構造の輪郭を保ち、細かな金物・溝・面取りを抑える。大量反復されるので単品の面数だけで判断しない |
 | Close（必要な部品のみ） | 同じフォルダの `{part}_close.fbx`。留め具、レール締結部、手すりの細い桟、厚みや面取りなど、近距離で見える構造上妥当な細部を加える |
-| Far | Unityの遠景生成を使う。パス用の `_far` は著作しない |
-
-ホーム451/461・462・471・472・502と乗り場602のFarは`FarPlatformPath.cs`の簡易断面生成(471は相対式、472は島式で、軌道の横位置はマスターの `width`・`lanes`・`center_width` から決まる)。通常と同じ共有材質で大きな屋根・壁・床を保つ。通常モデルの外形・材質を変えた場合は、この遠景断面との整合も確認する。通常・接写の8m反復とは別に、間引き済みのパス点列を使う。
+| Far（任意） | 同じフォルダの `far.fbx` 1体。路面・柱・鉄塔・電線などをまとめ、パーツに分けない。進行方向の長さが1タイルで、Unityが点列に沿って並べて長さ方向だけ伸ばす（幅・高さは実寸）。原点はパスの描画基準（路面。送電線は地表）。無ければマスターの `width` の板（G §3.1） |
 
 ### `_close` が実際に使われる対象
 
@@ -271,7 +269,7 @@ Unityが停留所の下地パスへ相対式ホーム（各軌道の外側）を
 
 ## 送電線1101・1102
 
-鉄塔pillar_capは通常と_closeを著作し、PowerLinePathがPathDrawContext.ResolvePrefab経由で選択する（Instantiate配置の例外）。大型は38m・3段二導体、小型は17m・3相。Farは同じ支持点からUnityが簡略鉄塔と電線を生成するため、_farは作らない。bodyは120m径間の制作見本で、実行時のたるみは支持点間に生成する。道路幅へ横縮小しない。共有ノードはPowerLineSupportが1基だけ表示する。著作・寸法・再生成は非公開制作ツールgenesis-galleryのpipeline/jobs/power_lines.mdとbuild_power_lines.py、実FBXのLOD・共有所有権の検証はcity-genesis/unity/Tests/PowerLines/run.ps1。
+鉄塔pillar_capは通常と_closeを著作し、PowerLinePathがPathDrawContext.ResolvePrefab経由で選択する（Instantiate配置の例外）。大型は38m・3段二導体、小型は17m・3相。Farは鉄塔1基と1径間（120m）のたわんだ電線をまとめた`far`で、他のパスと同じく並べる。bodyは120m径間の制作見本で、実行時のたるみは支持点間に生成する。道路幅へ横縮小しない。共有ノードはPowerLineSupportが1基だけ表示する。著作・寸法・再生成は非公開制作ツールgenesis-galleryのpipeline/jobs/power_lines.mdとbuild_power_lines.py、実FBXのLOD・共有所有権の検証はcity-genesis/unity/Tests/PowerLines/run.ps1。
 
 ## 貨物PF（463・464・465）
 
@@ -279,6 +277,6 @@ Unityが停留所の下地パスへ相対式ホーム（各軌道の外側）を
 
 - 電化線路の門型梁はホームをまたいで下弦がスプライン+6.27mを通るので、デッキ上の造形は6.1m以下に収める（コンテナは2段に積めない）。
 - 島式結合で外縁（platform_wall）が省略されても残したい線路際の荷役設備（コンベヤ・シュート・積込架台）はplatformに、デッキ上の貨物はplatform_wallに置く。
-- 道床・軌道・架線・高架用部品は461とメッシュ共有なので、461を作り直したら貨物PFのジョブも再実行する。遠景は`FarPlatformPath`の品目別断面で、通常の外形を変えたら合わせる。
+- 道床・軌道・架線・高架用部品は461とメッシュ共有なので、461を作り直したら貨物PFのジョブも再実行する。
 - 接写は同じジョブが`freight_platforms.CLOSE_PARTS`の`{part}_close`を著作し、通常とbbox（0.05m以内）・材質の組を揃える（ジョブがassert）。463は`platform_wall_close`だけで、`platform`は通常を使う。`build_platform_close.py`の対象ではない。
 - 著作・寸法・再生成は非公開制作ツールgenesis-galleryの`pipeline/jobs/freight_facilities.md`と`build_freight_platforms.py`、実FBX・ホーム生成（通常・接写の解決）・架線とのクリアランスの検証は`pipeline/import_freight.ps1`。

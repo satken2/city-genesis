@@ -19,7 +19,6 @@ public sealed class RoadMarkingSurface : MonoBehaviour
     public readonly List<Tile> Tiles = new();
     public Renderer Renderer { get; private set; }
     public RoadMarkingContext Context { get; private set; }
-    public bool Far { get; private set; }
     public bool Initialized { get; private set; }
     private Texture2D table;
     private Color[] values;
@@ -28,17 +27,17 @@ public sealed class RoadMarkingSurface : MonoBehaviour
     private static readonly Dictionary<Material, Material> materials = new();
     private static Shader shader;
 
-    public void Configure(RoadMarkingPlan plan, RoadMarkingContext context = null, bool far = false)
+    public void Configure(RoadMarkingPlan plan, RoadMarkingContext context = null)
     {
         if (Context == null && Plan != plan) Plan?.ReleaseMesh();
         ReleaseTable();
-        Plan = plan; Context = context; Far = far;
+        Plan = plan; Context = context;
         Renderer = GetComponent<Renderer>();
         var sources = Renderer.sharedMaterials;
         for (int i = 0; i < sources.Length; i++) sources[i] = SurfaceMaterial(sources[i]);
         Renderer.sharedMaterials = sources;
         Initialized = true;
-        if (isActiveAndEnabled && !Far) RoadMarkingAtlas.Register(this);
+        if (isActiveAndEnabled) RoadMarkingAtlas.Register(this);
         ApplyProperties();
     }
 
@@ -55,7 +54,7 @@ public sealed class RoadMarkingSurface : MonoBehaviour
 
     public void EnsureTable()
     {
-        if (table != null || Far || Plan == null || Plan.Empty) return;
+        if (table != null || Plan == null || Plan.Empty) return;
         var mesh = GetComponent<MeshFilter>()?.sharedMesh;
         if (mesh == null) return;
         var uv = new List<Vector4>(); mesh.GetUVs(3, uv);
@@ -107,8 +106,8 @@ public sealed class RoadMarkingSurface : MonoBehaviour
         if (Renderer == null || !Initialized) return;
         properties ??= new MaterialPropertyBlock();
         Renderer.GetPropertyBlock(properties);
-        properties.SetFloat("_RoadPaintEnabled", Far ? 0 : 1);
-        properties.SetFloat("_RoadBandCount", Context != null && !Far ? Context.BandCount : 0);
+        properties.SetFloat("_RoadPaintEnabled", 1);
+        properties.SetFloat("_RoadBandCount", Context != null ? Context.BandCount : 0);
         if (Context != null)
         {
             properties.SetVectorArray("_RoadBands", Context.Bands);
@@ -123,7 +122,7 @@ public sealed class RoadMarkingSurface : MonoBehaviour
 
     public static void Restore(Renderer renderer) => renderer.GetComponent<RoadMarkingSurface>()?.ApplyProperties();
 
-    private void OnEnable() { if (Initialized && !Far) RoadMarkingAtlas.Register(this); }
+    private void OnEnable() { if (Initialized) RoadMarkingAtlas.Register(this); }
     private void OnDisable() { RoadMarkingAtlas.Unregister(this); ReleaseTable(); }
     private void OnDestroy() { ReleaseTable(); if (Context == null) Plan?.ReleaseMesh(); }
 

@@ -119,8 +119,8 @@ public class MasterDataStore : MonoBehaviour
 	/// <summary>
 	/// サブ建物マスター(subbuilding_master)の1棟分。
 	/// マッシュアップ建物(MODEL_MASHUP)の施設バリアントを構成する付属棟の定義。
-	/// 実ゲームでは配置計画も model_prefix の解決もバックエンドが行うため本編コードは
-	/// 参照しないが、メッシュテストシーンが配置計画を自前生成するために使う。
+	/// 実ゲームでは配置計画も model_prefix の解決もバックエンドが行う。本編は遠景で棟の占有セル(width×height)を引くだけで、
+	/// メッシュテストシーンは配置計画を自前生成するために使う。
 	/// </summary>
 	[Serializable]
 	public class SubBuildingMasterItem
@@ -533,6 +533,13 @@ public class MasterDataStore : MonoBehaviour
 		}
 		result.Sort((a, b) => a.Key.CompareTo(b.Key));
 		return result;
+	}
+
+	/// <summary>サブ建物の定義を返す(未定義なら null)。</summary>
+	public SubBuildingMasterItem GetSubBuildingMaster(int subbuildingId)
+	{
+		subBuildingMasterById.TryGetValue(subbuildingId, out var item);
+		return item;
 	}
 
 	/// <summary>

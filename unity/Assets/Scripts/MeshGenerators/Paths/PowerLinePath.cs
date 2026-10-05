@@ -128,7 +128,6 @@ public sealed class PowerLinePath : IPathMeshGenerator
                         metal = RoadPath.GetOrCreateRoadMaterial(material);
         metal ??= RoadPath.GetOrCreateRoadMaterialByName("BuildingMaterial");
         var wires = new PathStructureMesh(root,"PowerConductors",new[] { metal });
-        bool far = lod == DrawLod.Far;
         bool constructing = path.status == Constants.STATUS_CONSTRUCTING;
         float progress = constructing ? ConstructionPathBuilder.Progress(path) : 1;
         for (int i = 0; i < supports.Count; i++)
@@ -138,39 +137,37 @@ public sealed class PowerLinePath : IPathMeshGenerator
             var holder = new GameObject("PowerSupport"); holder.transform.SetParent(root.transform,false);
             var visual = new GameObject("TowerVisual"); visual.transform.SetParent(holder.transform,false);
             if (s.IsGantry) PowerLineRailGantry.Generate(visual,s,metal,lod);
-            else GenerateTower(visual,s,metal,far);
+            else GenerateTower(visual,s,metal);
             if (s.node > 0) holder.AddComponent<PowerLineSupport>().Initialize(s.node,path.path_id,visual,lod);
             if (i == 0) continue;
             if (constructing && (float)i/(supports.Count-1) > ConstructionPathBuilder.DeckProgress(progress)) continue;
             var previous = supports[i-1];
             bool large = path.path_variant == Constants.PATH_VARIANT_GRID;
             int circuits = large ? 6 : 3;
-            int bundles = large && !far ? 2 : 1;
+            int bundles = large ? 2 : 1;
             for (int circuit=0; circuit<circuits; circuit++) for (int bundle=0;bundle<bundles;bundle++)
             {
-                Cable(wires,SupportAttachment(previous,circuit,bundle,far),SupportAttachment(s,circuit,bundle,far),far,large ? .045f : .032f);
+                Cable(wires,SupportAttachment(previous,circuit,bundle),SupportAttachment(s,circuit,bundle),large ? .045f : .032f);
             }
-            Cable(wires,ShieldAttachment(previous),ShieldAttachment(s),far,.025f);
+            Cable(wires,ShieldAttachment(previous),ShieldAttachment(s),.025f);
         }
         wires.Finish();
     }
 
-    public static Vector3 SupportAttachment(Support support, int circuit, int bundle = 0, bool far = false)
+    public static Vector3 SupportAttachment(Support support, int circuit, int bundle = 0)
     {
         int c = support.variant == 1102 ? circuit % 3 : circuit;
-        if (support.IsGantry) return PowerLineRailGantry.Attachment(support,c,bundle,far);
-        var local = Attachment(support.variant,c,bundle);
-        if (far && support.variant == Constants.PATH_VARIANT_GRID) local.x += .22f;
-        return support.position + support.rotation * local;
+        if (support.IsGantry) return PowerLineRailGantry.Attachment(support,c,bundle);
+        return support.position + support.rotation * Attachment(support.variant,c,bundle);
     }
 
     public static Vector3 ShieldAttachment(Support support) => support.IsGantry
         ? PowerLineRailGantry.ShieldAttachment(support)
         : support.position + Vector3.up * (support.variant == Constants.PATH_VARIANT_GRID ? 38 : 17);
 
-    static void GenerateTower(GameObject visual, Support s, Material metal, bool far)
+    static void GenerateTower(GameObject visual, Support s, Material metal)
     {
-        var prefab = far ? null : PathDrawContext.ResolvePrefab($"Models/Paths/p{s.variant}/pillar_cap",null,out _);
+        var prefab = PathDrawContext.ResolvePrefab($"Models/Paths/p{s.variant}/pillar_cap",null,out _);
         if (prefab != null)
         {
             var tower = UnityEngine.Object.Instantiate(prefab,visual.transform);
@@ -182,7 +179,6 @@ public sealed class PowerLinePath : IPathMeshGenerator
                 renderer.sharedMaterials=mats;
             }
         }
-        else GenerateFarTower(visual,s,metal);
         var foundation = new PathStructureMesh(visual,"TowerFoundations",new[] { metal });
         float foot = s.variant == Constants.PATH_VARIANT_GRID ? 3.5f : .9f;
         for (int x=-1;x<=1;x+=2) for(int z=-1;z<=1;z+=2)
@@ -195,43 +191,17 @@ public sealed class PowerLinePath : IPathMeshGenerator
     }
 
     public static float Sag(float length) => Mathf.Min(length * .045f, 6);
-    static void Cable(PathStructureMesh mesh, Vector3 a, Vector3 b, bool far, float radius)
+    static void Cable(PathStructureMesh mesh, Vector3 a, Vector3 b, float radius)
     {
         float length=Vector3.Distance(a,b);
-        int steps=Mathf.Clamp(Mathf.CeilToInt(length/(far?18:5)),4,80);
+        int steps=Mathf.Clamp(Mathf.CeilToInt(length/5),4,80);
         Vector3 previous=a;
         for (int i=1;i<=steps;i++)
         {
             float t=(float)i/steps;
             Vector3 p=Vector3.Lerp(a,b,t)-Vector3.up*(Sag(length)*4*t*(1-t));
-            mesh.Bar(previous,p,radius,sides:far?3:6);
+            mesh.Bar(previous,p,radius,sides:6);
             previous=p;
         }
-    }
-
-    static void GenerateFarTower(GameObject parent, Support s, Material material)
-    {
-        var mesh=new PathStructureMesh(parent,"FarPowerTower",new[] {material});
-        bool large=s.variant==Constants.PATH_VARIANT_GRID;
-        float width=large?3.5f:.9f, height=large?38:17;
-        Vector3 P(float x,float y,float z)=>s.position+s.rotation*new Vector3(x,y,z);
-        for(int x=-1;x<=1;x+=2) for(int z=-1;z<=1;z+=2)
-            mesh.Bar(P(x*width,0,z*width),P(x*.35f,height,z*.35f),large?.16f:.08f,sides:4);
-        int levels=large?3:2;
-        for(int i=0;i<levels;i++)
-        {
-            float y=large?25+5*i:i==0?13.8f:16, reach=large?6.8f-.7f*i:i==0?2.7f:2.3f;
-            mesh.Bar(P(-reach,y,0),P(reach,y,0),.12f,sides:4);
-            if(large || i==0)
-                foreach(int side in new[]{-1,1}) mesh.Bar(P(side*reach,y,0),P(side*reach,y-(large?2:1),0),.12f,sides:4);
-        }
-        for(int i=0;i<(large?5:3);i++)
-        {
-            float a=height*i/(large?5:3), b=height*(i+1)/(large?5:3);
-            float wa=Mathf.Lerp(width,.35f,a/height),wb=Mathf.Lerp(width,.35f,b/height);
-            mesh.Bar(P(-wa,a,0),P(wb,b,0),.075f,sides:3);
-            mesh.Bar(P(wa,a,0),P(-wb,b,0),.075f,sides:3);
-        }
-        mesh.Finish();
     }
 }

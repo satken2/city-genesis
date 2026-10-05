@@ -57,7 +57,7 @@ public static class RoadAccessQA
     static void ModelMarkers()
     {
         string expected = null;
-        foreach (string suffix in new[] { "", "_close", "_far" })
+        foreach (string suffix in new[] { "", "_close" })
         {
             var model = (GameObject)models["Models/Buildings/a1081/0/top-prebuilt" + suffix];
             Check(model != null, "FBX missing " + suffix);
@@ -180,7 +180,7 @@ public static class RoadAccessQA
             var result=T(variant==3002?"OpenSpaceBuildingMeshBuilder":"PreBuiltBuildingMeshBuilder").GetMethod("Generate").Invoke(New(variant==3002?"OpenSpaceBuildingMeshBuilder":"PreBuiltBuildingMeshBuilder"),new[]{building,(object)true});
             var facility=new GameObject("Facility");facility.transform.position=new Vector3(0,0,variant==1081?30:0);facility.AddComponent<MeshFilter>().sharedMesh=(Mesh)Get(result,"Mesh");facility.AddComponent<MeshRenderer>().sharedMaterials=(Material[])Get(result,"Materials");
             Render(new[]{road,facility},output+"/a"+variant+".png",variant==1081?100:62);
-            foreach(string lod in new[]{"Normal","Close","Far"})
+            foreach(string lod in new[]{"Normal","Close"})
             {
                 T("BuildingMeshUtils").GetProperty("CurrentDrawLod").SetValue(null,Enum.Parse(T("DrawLod"),lod));
                 var mouths=(IList)Call("BuildingRoadAccess","Resolve",building);
