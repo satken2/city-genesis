@@ -9,28 +9,25 @@ fn main() {
     assert_eq!(version["frontend_version"].as_str().unwrap(), env::var("CARGO_PKG_VERSION").unwrap(), "Run npm run sync:version");
     tauri_build::build();
 
-    // 実行ファイルと同じディレクトリに配置する設定ファイルを、
-    // 開発時・本番ビルド時の両方で target/{profile} へ自動コピーする。
-    // これにより、current_exe() の親ディレクトリから読み込むロジックが
-    // cargo run / tauri dev / cargo build --release のいずれでも正しく動作する。
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR")
-        .map(PathBuf::from)
-        .expect("CARGO_MANIFEST_DIR が設定されていません");
-    let profile = env::var("PROFILE").expect("PROFILE が設定されていません");
-
-    let target_dir = env::var("CARGO_TARGET_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| manifest_dir.join("target"));
-    let target_profile_dir = target_dir.join(&profile);
-
-    let source = manifest_dir.parent().unwrap().join("graphic-launch.toml");
-    let dest = target_profile_dir.join("graphic-launch.toml");
-
-    if source.exists() {
-        // コピー先ディレクトリがまだ存在しない場合（特に初回ビルド時）は作成する。
-        if let Some(parent) = dest.parent() {
-            fs::create_dir_all(parent).expect("コピー先ディレクトリの作成に失敗しました");
+    // Steam 版は、チケットの identity と認証済みの状態値をコアと揃える。正はコアの consts.py で、
+    // 同期済みの src/constants.ts から読んで埋め込む(Rust 向けの同期先は持たない)。
+    if env::var_os("CARGO_FEATURE_STEAM").is_some() {
+        let source = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("../src/constants.ts");
+        println!("cargo:rerun-if-changed={}", source.display());
+        let constants = fs::read_to_string(&source).unwrap();
+        for name in ["STEAM_TICKET_IDENTITY", "GAME_VERIFIED"] {
+            println!("cargo:rustc-env=CG_{name}={}", shared_constant(&constants, name));
         }
-        fs::copy(&source, &dest).expect("graphic-launch.toml のコピーに失敗しました");
     }
+}
+
+/// constants.ts の `export const NAME: type = value;` から値を取り出す(文字列は引用符を外す)。
+fn shared_constant(constants: &str, name: &str) -> String {
+    let prefix = format!("export const {name}:");
+    let line = constants
+        .lines()
+        .find(|line| line.starts_with(&prefix))
+        .unwrap_or_else(|| panic!("src/constants.ts に {name} がありません"));
+    let (_, value) = line.split_once(" = ").expect("constants.ts の定数の形式が想定と違います");
+    value.trim().trim_end_matches(';').trim_matches('"').to_string()
 }

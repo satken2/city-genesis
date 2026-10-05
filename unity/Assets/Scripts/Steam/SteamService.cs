@@ -6,16 +6,18 @@ using Steamworks;
 /// <summary>
 /// SteamAPI のライフサイクルを管理するシングルトン。
 ///
+/// Unity が SteamAPI を初期化するのは、3D を描くこのプロセスで Steam オーバーレイ
+/// (Shift+Tab)やスクリーンショットを効かせるためだけである。認証チケットの取得と
+/// 検証の依頼は、Steam の起動対象である Tauri が行う。
+///
 /// 初期化に失敗した場合(Steam クライアント未起動・非 Steam 環境・DLL 欠落)でも
-/// ゲームは続行する。その場合はチケット検証が行われず、バックエンドの
-/// 未検証エポック制限(10ターン)が適用されるだけで、致命的ではない。
+/// ゲームは続行する。オーバーレイが出ないだけで、致命的ではない。
 ///
 /// 注意: SteamAPI.RestartAppIfNecessary は意図的に呼ばない。
-/// Steam の起動対象は genesis.exe(親プロセス)であり、子プロセスである Unity が
-/// これを呼ぶと「Steam 経由での再起動」= genesis.exe の二重起動と既存プロセスツリー
-/// (Python/Tauri/Unity)の破壊を招く。Steam 経由起動の担保は、親から継承した
-/// SteamAppId 環境変数(または開発時の steam_appid.txt)による Init と、
-/// SteamAuthClient のチケット検証で行う。同梱の標準 SteamManager.cs は
+/// Steam の起動対象は Tauri(親プロセス)であり、子プロセスである Unity が
+/// これを呼ぶと「Steam 経由での再起動」= Tauri の二重起動と既存プロセスツリーの
+/// 破壊を招く。Init は親から継承した SteamAppId 環境変数(または開発時の
+/// steam_appid.txt)で通る。同梱の標準 SteamManager.cs は
 /// RestartAppIfNecessary を呼ぶため使用せず、本クラスで代替する。
 /// </summary>
 public class SteamService : MonoBehaviour
@@ -55,14 +57,13 @@ public class SteamService : MonoBehaviour
             else
             {
                 Debug.LogWarning(
-                    "SteamService: SteamAPI.Init に失敗しました。Steam 連携なしで続行します" +
-                    "(Steam クライアント未起動、または SteamAppId/steam_appid.txt 未設定。" +
-                    "チケット未検証のためエポック制限が適用されます)");
+                    "SteamService: SteamAPI.Init に失敗しました。Steam オーバーレイなしで続行します" +
+                    "(Steam クライアント未起動、または SteamAppId/steam_appid.txt 未設定)");
             }
         }
         catch (System.DllNotFoundException e)
         {
-            Debug.LogWarning($"SteamService: steam_api64.dll をロードできません。Steam 連携なしで続行します: {e.Message}");
+            Debug.LogWarning($"SteamService: steam_api64.dll をロードできません。Steam オーバーレイなしで続行します: {e.Message}");
             Initialized = false;
         }
 #else

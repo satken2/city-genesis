@@ -2,7 +2,6 @@ use crate::ipc::MmfChannel;
 use crate::messages::{MutexGroups, NotificationPayload, WindowContextDto, WindowRegistry};
 use serde_json::Value;
 use std::collections::{HashMap, VecDeque};
-use std::process::Child;
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 
@@ -49,8 +48,8 @@ pub struct AppState {
     pub popup_monitor_index: usize,
     /// 親プロセスから通知されたゲーム内時間情報
     pub game_time: Option<Value>,
-    /// Graphic(Unity) プロセスの起動コマンド
-    pub graphic_launch_command: String,
+    /// 起動したコア・グラフィックの子プロセスと、アプリ全体の終了処理の状態。
+    pub processes: crate::process::Processes,
     /// リーダースレッドの終了フラグ
     pub shutdown: Arc<AtomicBool>,
     /// 最後に取得したセッション情報
@@ -86,12 +85,6 @@ pub struct AppState {
     /// 末尾が最も最近に非表示にされたもの。open_window はこの中から再利用候補を探し、
     /// MAX_HIDDEN_WINDOWS を超えると先頭(最古)から本当に破棄する。
     pub hidden_lru: VecDeque<String>,
-    /// バックエンドプロセス（genesis-core）。city-genesis/tauri から起動した場合に保持する。
-    /// genesis.py 経由で起動された場合は None。
-    pub backend_process: Option<Child>,
-    /// バックエンドの起動コマンド。backend-launch.toml から読み込む。
-    /// {port} プレースホルダーを含む場合、実際のポート番号で置換して起動する。
-    pub backend_launch_command: String,
     /// Graphic(Unity) から system:graphic_ready を一度でも受信したかどうか。
     /// 2回目以降の受信は「クラッシュ後の自動再起動」を意味し、前セッションに
     /// 依存するポップアップの一掃が必要になる。初回受信(通常起動)では、
@@ -100,7 +93,7 @@ pub struct AppState {
     pub graphic_ready_seen: bool,
     /// Graphic(Unity) が現在接続中かどうか。system:graphic_ready で立ち、
     /// system:graphic_stopped(正常終了・Editor の Play 停止)で下りる。クラッシュでは
-    /// 下りないが、スーパーバイザが再起動した Unity の graphic_ready で整合する。
+    /// 下りないが、Tauri が再起動した Unity の graphic_ready で整合する。
     /// 開発時の「Unity なし起動」で描画待ちを省略するかの判定に使う
     /// (graphic_ready_seen は再接続判定用で、一度立ったら戻さない)。
     pub graphic_connected: bool,
@@ -130,26 +123,20 @@ pub struct OpenWindowState {
 }
 
 impl SharedState {
-    pub fn new(
-        registry: WindowRegistry,
-        mutex_groups: MutexGroups,
-        api_base_url: String,
-        graphic_launch_command: String,
-        backend_launch_command: String,
-    ) -> Self {
+    pub fn new(registry: WindowRegistry, mutex_groups: MutexGroups, launch: crate::process::Launch) -> Self {
         Self(Arc::new(Mutex::new(AppState {
             registry,
             mutex_groups,
             open_windows: HashMap::new(),
             saved_geometries: HashMap::new(),
             writer_channel: None,
-            api_base_url,
+            api_base_url: launch.api_base_url.clone(),
             core_info: Arc::new(tokio::sync::OnceCell::new()),
             current_monitor_index: 0,
             multi_display: false,
             popup_monitor_index: 0,
             game_time: None,
-            graphic_launch_command,
+            processes: crate::process::Processes::new(launch),
             shutdown: Arc::new(AtomicBool::new(false)),
             session_state: None,
             backend_health: Default::default(),
@@ -167,8 +154,6 @@ impl SharedState {
             notification_showing: false,
             notification_generation: 0,
             hidden_lru: VecDeque::new(),
-            backend_process: None,
-            backend_launch_command,
             graphic_ready_seen: false,
             graphic_connected: false,
             graphic_contract_error: None,

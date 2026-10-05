@@ -29,3 +29,9 @@ Tauriのメインウィンドウは仕様上 非表示 で起動します（taur
 ```
 npm run tauri build
 ```
+
+Steam 版の配布ビルドはストア連携を有効にする(`build.ps1`)。インストール先での配置は `docs/docs/programs/コンポーネント連携.md` の「起動順序」に従い、`steam_api64.dll`(ビルドで `src-tauri/target/release/build/steamworks-sys-*/out/` にできる)を実行ファイルの隣に置く。
+
+```
+npm run tauri build -- --features steam
+```

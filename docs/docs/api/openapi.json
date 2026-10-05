@@ -5092,7 +5092,7 @@
           "system"
         ],
         "summary": "Verify Ticket",
-        "description": "Steam認証チケットを検証するエンドポイント。\n\nUnity(Steamworks.NET)が GetAuthTicketForWebApi で取得したチケットを hex 文字列で送り、\nコアが検証サーバーへ転送して、署名付きの応答を検証する。申告された app_id は\ntrust_anchors.STEAM_APP_ID と一致しなければ失敗にする。\n\nステータスコード:\n    200: 検証成功(開発環境のダミー成功を含む)\n    401: 失敗(チケット無効・応答不正・App ID 不一致。クライアントは再送しない)\n    502: 検証サーバーに到達不能/一時障害(クライアントは新しいチケットで再送してよい)",
+        "description": "Steam認証チケットを検証するエンドポイント。\n\nクライアント(Steam 版の Tauri)が GetAuthTicketForWebApi で取得したチケットを hex 文字列で送り、\nコアが検証サーバーへ転送して、署名付きの応答を検証する。申告された app_id は\ntrust_anchors.STEAM_APP_ID と一致しなければ失敗にする。\n\nステータスコード:\n    200: 検証成功(開発環境のダミー成功を含む)\n    401: 失敗(チケット無効・応答不正・App ID 不一致。クライアントは再送しない)\n    502: 検証サーバーに到達不能/一時障害(クライアントは新しいチケットで再送してよい)",
         "operationId": "verify_ticket_api_v1_system_verify_post",
         "requestBody": {
           "content": {
@@ -5104,48 +5104,6 @@
           },
           "required": true
         },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/system/shutdown": {
-      "post": {
-        "tags": [
-          "system"
-        ],
-        "summary": "Shutdown",
-        "description": "終了要求エンドポイント。\n\nmode=app (デフォルト): アプリ全体の統括シャットダウンを要求する。\n  genesis.py スーパーバイザ監視下では lifecycle.request_shutdown() に合流し、\n  スーパーバイザが緊急オートセーブ→子プロセスの終了→自プロセス終了を統括する\n  (レスポンスは即座に返り、クライアントは受信後に自発終了してよい)。\n\nmode=backend_only: バックエンドプロセスのみを終了する。\n  GPU設定切替に伴う city-genesis/tauri 主導のバックエンド再起動(restart_backend)用。\n  スーパーバイザ監視下では FastAPI は genesis.py プロセス内のスレッドであり\n  単独再起動が不可能(os._exit はアプリ全体を巻き込む)なため 409 で拒否する。\n  スーパーバイザ非監視時(uvicorn 直接起動などの開発時)のみ実行される。",
-        "operationId": "shutdown_api_v1_system_shutdown_post",
-        "parameters": [
-          {
-            "name": "mode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "app",
-              "title": "Mode"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -7459,7 +7417,7 @@
           "stats"
         ],
         "summary": "Get System Stats",
-        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの総数(描画の可否や種別で除外せず、テーブルの件数をそのまま返す)。種別ごとの内訳は含めない\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)、3D(Unity)のプロセスの同じ値、PC全体の使用中メモリ、搭載RAM。取得できなければ各値が null\n- vram: 3Dが使っているGPUの専用ビデオメモリ使用量(GPU全体と3Dのプロセス分、現在値のみ)。容量は environment.gpu_memory_bytes\n- environment: CPU・GPU名と専用メモリ容量・OS・演算デバイス。GPU情報が取得できなければ null",
+        "description": "システム統計ウィンドウの内容を取得する。\n\n- epoch: 直近エポックの計算時間を大きな処理の区分ごとに分けたもの(残りは other)と、区分ごとの問題規模の目安。\n  計測値はセーブに含めないので、ロード直後やエポック未実行のときは null\n- entities: プレイで増えるエンティティの総数(描画の可否や種別で除外せず、テーブルの件数をそのまま返す)。種別ごとの内訳は含めない\n- memory: コアのプロセスのメモリ使用量(現在・起動以降の最大)。取得できなければ各値が null\n- environment: コアが動いているマシンのCPU数・OSと、演算デバイス\n\n3D(Unity)のプロセスのメモリ・ビデオメモリ、PC全体のメモリ、CPU・GPUの名前は返さない。\nコアはクライアントと別のマシンで動くこともあるので、それらはクライアントが自分のPCで測る。",
         "operationId": "get_system_stats_api_v1_stats_system_get",
         "responses": {
           "200": {
@@ -12877,17 +12835,6 @@
       },
       "SystemEnvironment": {
         "properties": {
-          "cpu_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cpu Name"
-          },
           "cpu_count": {
             "anyOf": [
               {
@@ -12898,28 +12845,6 @@
               }
             ],
             "title": "Cpu Count"
-          },
-          "gpu_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gpu Name"
-          },
-          "gpu_memory_bytes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gpu Memory Bytes"
           },
           "os": {
             "type": "string",
@@ -13003,30 +12928,6 @@
         ],
         "title": "SystemEpochStats"
       },
-      "SystemGraphicMemory": {
-        "properties": {
-          "current_bytes": {
-            "type": "integer",
-            "title": "Current Bytes"
-          },
-          "peak_bytes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Peak Bytes"
-          }
-        },
-        "type": "object",
-        "required": [
-          "current_bytes"
-        ],
-        "title": "SystemGraphicMemory"
-      },
       "SystemMemory": {
         "properties": {
           "current_bytes": {
@@ -13050,38 +12951,6 @@
               }
             ],
             "title": "Peak Bytes"
-          },
-          "system_total_bytes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "System Total Bytes"
-          },
-          "used_bytes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Used Bytes"
-          },
-          "graphic": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SystemGraphicMemory"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
@@ -13105,16 +12974,6 @@
           "memory": {
             "$ref": "#/components/schemas/SystemMemory"
           },
-          "vram": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SystemVram"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "environment": {
             "$ref": "#/components/schemas/SystemEnvironment"
           }
@@ -13126,30 +12985,6 @@
           "environment"
         ],
         "title": "SystemStatsResponse"
-      },
-      "SystemVram": {
-        "properties": {
-          "used_bytes": {
-            "type": "integer",
-            "title": "Used Bytes"
-          },
-          "graphic_bytes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Graphic Bytes"
-          }
-        },
-        "type": "object",
-        "required": [
-          "used_bytes"
-        ],
-        "title": "SystemVram"
       },
       "TutorialAction": {
         "properties": {

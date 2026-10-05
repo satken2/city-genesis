@@ -87,8 +87,11 @@ pub async fn get_core_version(state: tauri::State<'_, SharedState>) -> Result<Va
     core_info(state.inner()).await
 }
 
+/// 都市を開く前に、グラフィックに前の表示を片付けさせ(session:reset)、接続していなければ接続を待つ。
+/// グラフィックはアプリの起動時に起動済み(開発時の Unity Editor は手で起動する)で、ここでは起動しない。
+/// 届く前の指示は IPC の共有メモリに溜まり、グラフィックが起動後に読む。
 pub async fn prepare_graphic(state: &SharedState) -> Result<(), String> {
-    crate::window::launch_graphic(state)?;
+    crate::ipc::send_ui_action(state, String::new(), None, "session:reset".to_string(), json!({}))?;
     for _ in 0..150 {
         {
             let guard = state.lock();
@@ -151,7 +154,7 @@ mod tests {
         });
         let state = SharedState::new(
             serde_json::from_str("{}").unwrap(), serde_json::from_str("{}").unwrap(),
-            base, String::new(), String::new(),
+            crate::process::Launch::connect_only(base),
         );
         state.lock().backend_health.observe(true, true);
         (state, server)

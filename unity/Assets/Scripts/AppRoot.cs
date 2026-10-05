@@ -40,15 +40,13 @@ public class AppRoot : MonoBehaviour
             }
         }
 
-        // Steam 連携(Steamworks.NET)。SteamAuthClient がバックエンドへチケットを
-        // POST するため、BASE_URL 確定後に生成する必要がある。
+        // Steam オーバーレイのための SteamAPI の初期化。認証は Tauri が行う。
         // Steam 不在時も SteamService が警告を出すだけでゲームは続行する。
         if (SteamService.Instance == null)
         {
             var steamGO = new GameObject("Steam");
             DontDestroyOnLoad(steamGO);
             steamGO.AddComponent<SteamService>();
-            steamGO.AddComponent<SteamAuthClient>();
         }
 
         // IPC はアプリケーション全体で1組だけ存在すればよい。
@@ -72,8 +70,8 @@ public class AppRoot : MonoBehaviour
         // EditorとDevelopment Buildはバックエンドを再起動して開発を続けられる。
         if (!Application.isEditor && !Debug.isDebugBuild) StartCoroutine(BackendHealthPolling());
 
-        // Tauri へ起動完了を通知する。初回起動と、クラッシュ後にスーパーバイザ
-        // (genesis.py)が Unity を自動再起動した場合の両方で毎回送信する。
+        // Tauri へ起動完了を通知する。初回起動と、クラッシュ後に Tauri が
+        // Unity を自動再起動した場合の両方で毎回送信する。
         // Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを
         // 一掃する。初回はユーザーが操作中のロード画面などを閉じないため何もしない。
         do {
@@ -112,7 +110,7 @@ public class AppRoot : MonoBehaviour
     ///
     /// 主な役割:
     /// - Tauri より後から起動して IPC の game:start を取りこぼした場合の保険
-    /// - Unity がクラッシュしてスーパーバイザ(genesis.py)に自動再起動された場合に、
+    /// - Unity がクラッシュして Tauri に自動再起動された場合に、
     ///   進行中のセッションを検知してゲームへ復帰する経路
     ///
     /// ゲーム開始済みになった時点でループを終了する(IPC 経由で開始された場合も含む)。
@@ -173,11 +171,6 @@ public class AppRoot : MonoBehaviour
                     {
                         var session = Newtonsoft.Json.Linq.JObject.Parse(call.Web.downloadHandler.text);
                         success = session.ContainsKey("current_save_id");
-                        if (session.Value<bool>("shutting_down"))
-                        {
-                            Application.Quit();
-                            yield break;
-                        }
                     }
                     catch (Exception error) { Debug.LogWarning($"AppRoot: セッション確認の応答が不正です: {error.Message}"); }
                 }
