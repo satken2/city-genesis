@@ -270,7 +270,7 @@
     },
     "infrastructure": {
       "title": "基礎設施網",
-      "supply": "供給庫存",
+      "production": "產量",
       "delivered": "配送量",
       "demand": "需求量",
       "fulfillment": "充足率",

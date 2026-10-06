@@ -270,7 +270,7 @@
     },
     "infrastructure": {
       "title": "基础设施网",
-      "supply": "供给库存",
+      "production": "产量",
       "delivered": "配送量",
       "demand": "需求量",
       "fulfillment": "充足率",
