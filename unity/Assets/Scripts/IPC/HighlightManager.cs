@@ -7,7 +7,8 @@ using UnityEngine;
 ///
 /// - 区画: ParcelManager の2Dオーバーレイに分類色（blocking=赤/removable=橙/shavable=黄、
 ///   exempt=なし）で塗りつぶしを設定する。
-/// - 建物・既存パス: 半透明の占有箱(OccupancyVolumeUtil)で示す。
+/// - 建物: 半透明の占有箱(OccupancyVolumeUtil.BuildingVolumes)で、公共施設は赤・民間は橙で示す。
+/// - 既存パス: 半透明の占有筒(OccupancyVolumeUtil.AddTube)で示す。
 /// - 川: 地表レベルで横切っている川の範囲を、同じ警告色の占有箱(RiverStore.AddOccupancyBox)で示す。
 ///
 /// ハイライトは発信元(source。敷設="path_build" / 詳細パネル="path_detail")ごとに独立
@@ -70,10 +71,11 @@ public class HighlightManager
 
         GetParcelManager()?.SetInterferenceParcels(parcelColors);
 
-        var triangles = new List<Vector3>();
+        var buildings = new OccupancyVolumeUtil.BuildingVolumes();
         if (BuildingManager.Instance != null)
             foreach (int id in buildingIds)
-                OccupancyVolumeUtil.AddBuilding(triangles, BuildingManager.Instance.GetBuildingSummary(id));
+                buildings.Add(BuildingManager.Instance.GetBuildingSummary(id));
+        var triangles = new List<Vector3>();
         var pm = GetPathManager();
         if (pm != null)
             foreach (int id in pathIds)
@@ -83,14 +85,16 @@ public class HighlightManager
         foreach (string id in riverIds)
             RiverStore.AddOccupancyBox(triangles, RiverStore.FindById(id), null, 0f);
         // 占有箱は深度テストあり(建物や地形に自然に隠れる立体表現)。
-        if (occupancyOverlay == null && triangles.Count > 0)
+        bool hasVolume = triangles.Count > 0 || !buildings.IsEmpty;
+        if (occupancyOverlay == null && hasVolume)
             occupancyOverlay = OverlayMeshRenderer.Create("InterferenceOccupancy", alwaysOnTop: false);
         if (occupancyOverlay != null)
         {
             occupancyOverlay.BeginFrame();
             occupancyOverlay.AddPreTriangulated(triangles, OccupancyVolumeUtil.WarningColor);
+            buildings.Draw(occupancyOverlay);
             occupancyOverlay.EndFrame(Camera.main);
-            occupancyOverlay.gameObject.SetActive(triangles.Count > 0);
+            occupancyOverlay.gameObject.SetActive(hasVolume);
         }
     }
 

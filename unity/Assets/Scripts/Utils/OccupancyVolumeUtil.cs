@@ -6,6 +6,33 @@ using GeneratedModels;
 public static class OccupancyVolumeUtil
 {
     public static readonly Color WarningColor = new Color(1f, 0.12f, 0.12f, 0.1f);
+    // 自動買収で市が取り壊す民間建物の色。区画の「削除で着工可」と同じ橙系
+    public static readonly Color AcquiredBuildingColor = new Color(1f, 0.55f, 0.1f, 0.1f);
+
+    /// <summary>
+    /// 干渉建物の占有箱を、取り壊しの扱いで色分けして溜める。
+    /// 公共施設は敷地が市有地で自動買収の対象外のため、プレイヤーが取り壊すまで着工できない(赤)。
+    /// 民間の建物は用地の自動買収が成立すると市が取り壊す(橙)。
+    /// </summary>
+    public sealed class BuildingVolumes
+    {
+        private readonly List<Vector3> publicFacilities = new List<Vector3>();
+        private readonly List<Vector3> privateBuildings = new List<Vector3>();
+
+        public bool IsEmpty => publicFacilities.Count == 0 && privateBuildings.Count == 0;
+
+        public void Add(BuildingSummary building)
+        {
+            if (building == null) return;
+            AddBuilding(building.public_facility ? publicFacilities : privateBuildings, building);
+        }
+
+        public void Draw(OverlayMeshRenderer renderer)
+        {
+            renderer.AddPreTriangulated(publicFacilities, WarningColor);
+            renderer.AddPreTriangulated(privateBuildings, AcquiredBuildingColor);
+        }
+    }
 
     /// <summary>
     /// パスの中心線に沿った占有筒(底面・上面・左右側面)を追加する。進行方向を横切る面は持たない。
@@ -51,7 +78,7 @@ public static class OccupancyVolumeUtil
         triangles.Add(a); triangles.Add(c); triangles.Add(d);
     }
 
-    public static void AddBuilding(List<Vector3> triangles, BuildingSummary building)
+    private static void AddBuilding(List<Vector3> triangles, BuildingSummary building)
     {
         var polygon = building?.polygonArray;
         var center = building?.centerPointArray;

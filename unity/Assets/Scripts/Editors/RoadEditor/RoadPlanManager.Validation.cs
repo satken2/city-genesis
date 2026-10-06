@@ -17,7 +17,7 @@ public partial class RoadPlanManager
     // 川の占有箱を出す範囲: 違反サンプル点からこの半径(m)以内のセルだけを赤く示す。
     private const float RiverOccupancyBoxRadius = 40f;
     private List<Vector3> cachedCollisionVolume;
-    private List<Vector3> cachedBuildingVolume;
+    private OccupancyVolumeUtil.BuildingVolumes cachedBuildingVolume;
     // 敷設中パスと干渉する建物のフットプリント（ワールドXZポリゴン）のローカル推定キャッシュ。
     private List<List<Vector3>> cachedBuildingInterference;
 
@@ -536,7 +536,7 @@ public partial class RoadPlanManager
 
         var result = new List<List<Vector3>>();
         cachedBuildingInterference = result;
-        cachedBuildingVolume = new List<Vector3>();
+        cachedBuildingVolume = new OccupancyVolumeUtil.BuildingVolumes();
 
         if (BuildingManager.Instance == null || pathManager == null) return result;
 
@@ -620,7 +620,7 @@ public partial class RoadPlanManager
                     worldPoly.Add(new Vector3(f.x, 0f, f.y));
                 }
                 result.Add(worldPoly);
-                OccupancyVolumeUtil.AddBuilding(cachedBuildingVolume, summary);
+                cachedBuildingVolume.Add(summary);
             }
         }
 
@@ -674,15 +674,14 @@ public partial class RoadPlanManager
     }
 
     /// <summary>
-    /// ローカル推定した干渉建物の占有箱を半透明で表示する。
-    /// バックエンドの権威結果が来ると HighlightManager 側の色分けで上書きされる。
+    /// ローカル推定した干渉建物の占有箱を、公共施設は赤・民間は橙の半透明で表示する。
+    /// バックエンドの権威結果が来ると HighlightManager 側の表示が重なる。
     /// </summary>
     private void DrawBuildingInterference(Camera cam)
     {
         if (overlayRenderer == null) return;
 
         CheckBuildingInterference();
-        if (cachedBuildingVolume != null)
-            overlayRenderer.AddPreTriangulated(cachedBuildingVolume, OccupancyVolumeUtil.WarningColor);
+        cachedBuildingVolume?.Draw(overlayRenderer);
     }
 }
