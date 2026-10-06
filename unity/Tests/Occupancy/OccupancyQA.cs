@@ -22,17 +22,20 @@ public static class OccupancyQA
                 return null;
             };
             var assembly = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
-            var add = assembly.GetType("OccupancyVolumeUtil").GetMethod("AddSegment");
+            var util = assembly.GetType("OccupancyVolumeUtil");
+            var addTube = util.GetMethod("AddTube");
+            var addBox = util.GetMethod("AddBox");
             var triangles = new List<Vector3>();
-            add.Invoke(null, new object[] { triangles, new Vector3(-14, 0, 0), new Vector3(14, 0, 0), 5f, 5f });
-            if (triangles.Count != 36 || triangles.Max(p => p.y) != 5f || triangles.Min(p => p.z) != -2.5f)
+            addTube.Invoke(null, new object[] { triangles, new List<Vector3> { new Vector3(-14, 0, 0), new Vector3(14, 0, 0) }, 5f, 5f });
+            if (triangles.Count != 24 || triangles.Max(p => p.y) != 5f || triangles.Min(p => p.z) != -2.5f)
                 throw new Exception("Occupancy dimensions differ from the road clearance");
-            add.Invoke(null, new object[] { triangles, new Vector3(0, 2, -14), new Vector3(0, 2, 14), 4f, 5f });
-            add.Invoke(null, new object[] { triangles, new Vector3(9, 0, 6), new Vector3(9, 0, 12), 6f, 9f });
+            addTube.Invoke(null, new object[] { triangles, new List<Vector3> { new Vector3(0, 2, -14), new Vector3(0, 2, 0), new Vector3(0, 2, 14) }, 4f, 5f });
+            if (triangles.Count != 72) throw new Exception("Tube must have no faces across the path");
+            addBox.Invoke(null, new object[] { triangles, new Vector3(9, 0, 6), new Vector3(9, 0, 12), 6f, 9f });
             if (triangles.Count != 108) throw new Exception("Missing box faces");
             var mesh = new Mesh { vertices = triangles.ToArray(), triangles = Enumerable.Range(0, triangles.Count).ToArray() };
             var material = new Material(Shader.Find("Hidden/Internal-Colored"));
-            material.SetColor("_Color", new Color(1, .12f, .12f, .22f));
+            material.SetColor("_Color", new Color(1, .12f, .12f, .1f));
             material.SetInt("_SrcBlend", 5); material.SetInt("_DstBlend", 10);
             material.SetInt("_Cull", 0); material.SetInt("_ZWrite", 0); material.renderQueue = 3000;
             var go = new GameObject("Occupancy");
@@ -50,7 +53,7 @@ public static class OccupancyQA
             var image = new Texture2D(1000, 800, TextureFormat.RGB24, false);
             image.ReadPixels(new Rect(0, 0, 1000, 800), 0, 0); image.Apply();
             File.WriteAllBytes(output + "/preview.png", image.EncodeToPNG());
-            File.WriteAllText(output + "/result.txt", "PASS: road width, clearance height, complete prism faces; rendered preview.png");
+            File.WriteAllText(output + "/result.txt", "PASS: road width, clearance height, open tube and closed box faces; rendered preview.png");
             EditorApplication.Exit(0);
         }
         catch (Exception e) { File.WriteAllText(output + "/result.txt", e.ToString()); EditorApplication.Exit(1); }

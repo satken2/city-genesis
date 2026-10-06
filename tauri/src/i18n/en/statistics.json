@@ -270,7 +270,7 @@
     },
     "infrastructure": {
       "title": "Infrastructure Network",
-      "supply": "Supply Stock",
+      "production": "Production",
       "delivered": "Delivered",
       "demand": "Demand",
       "fulfillment": "Fulfillment",

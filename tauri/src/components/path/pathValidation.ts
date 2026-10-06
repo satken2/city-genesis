@@ -1,4 +1,5 @@
-import type { PathInterferenceHighlight } from "../../utils/ipc";
+import { RAIL_JUNCTION_PLANE_LENGTH } from "../../constants";
+import type { PathInterferenceHighlight, PathJunctionLabel } from "../../utils/ipc";
 
 import type { PathAlignmentResponse } from "./usePathConstruction";
 import type { PathMaxSpanViolation, PathShapeUpdatePayload } from "./pathBuildConstants";
@@ -17,6 +18,7 @@ export type PathValidationResult = PathInterferenceHighlight & {
   colliding_sea_lake_ids?: string[]; // 海は "sea"、湖は water_surfaces の id
   colliding_quay_band_ids?: number[]; // reclaimed_land_id
   colliding_grading_site_ids?: number[]; // 工事中の造成の区画の parcel_id
+  junction_violations?: Array<{ code: string; position: number[] }>; // 線路の分岐・合流の違反。position は接点の [x, 路面の絶対標高, z]
   alignments?: PathAlignmentResponse[];
   alignment_violations?: Array<{
     index: number;
@@ -26,6 +28,15 @@ export type PathValidationResult = PathInterferenceHighlight & {
 };
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
+
+function describeJunction(code: string, t: Translate): string {
+  return t(`path_construction.railJunction.${code}`, { length: RAIL_JUNCTION_PLANE_LENGTH });
+}
+
+/** 線路の分岐・合流の違反を、Unityが接点に出す吹き出しにする。文言は建設パネルの理由と同じ。 */
+export function describeJunctionLabels(result: PathValidationResult, t: Translate): PathJunctionLabel[] {
+  return (result.junction_violations ?? []).map(({ code, position }) => ({ position, text: describeJunction(code, t) }));
+}
 
 /** 形状編集と建設パネルでUnityの赤線の理由を共通表示する。 */
 export function describeMaxSpanViolations(violations: PathMaxSpanViolation[] | undefined, t: Translate): string[] {
@@ -61,6 +72,9 @@ export function describePathValidation(result: PathValidationResult, t: Translat
         }
       }
     }
+  }
+  for (const code of new Set((result.junction_violations ?? []).map((violation) => violation.code))) {
+    messages.push(describeJunction(code, t));
   }
   if (result.colliding_path_ids.length) messages.push(t("path_construction.validationPathCollision"));
   if (result.colliding_river_ids?.length) messages.push(t("path_construction.validationRiverCollision"));

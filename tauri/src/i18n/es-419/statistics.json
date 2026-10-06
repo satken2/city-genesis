@@ -270,7 +270,7 @@
     },
     "infrastructure": {
       "title": "Red de infraestructura",
-      "supply": "Inventario disponible",
+      "production": "Producción",
       "delivered": "Volumen entregado",
       "demand": "Demanda",
       "fulfillment": "Cobertura",

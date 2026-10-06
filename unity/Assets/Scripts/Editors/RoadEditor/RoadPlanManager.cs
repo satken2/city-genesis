@@ -172,7 +172,6 @@ public partial class RoadPlanManager : MonoBehaviour
     {
         routeRevision = System.Guid.NewGuid().ToString("N");
         authoritativeAlignments = null;
-        authoritativeCollision = false;
         cachedRenderPoints = null;
         cachedEditingElevationSegments = null;
         cachedElevationViolations = null;
@@ -184,12 +183,7 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedBuildingInterference = null;
         cachedAlignmentViolations = null;
         alignmentLabels.Clear();
-    }
-
-    public void SetAuthoritativeCollision(bool value)
-    {
-        authoritativeCollision = value;
-        cachedCollisionVolume = null;
+        junctionLabels.Clear();
     }
 
     public bool IsEditMode => phase == RoadEditorPhase.Editing;
@@ -781,6 +775,7 @@ public partial class RoadPlanManager : MonoBehaviour
             }
 
             SyncTutorialPlacementHeight();
+            ConstrainJunctionPlaneHeights();
             if (Curved) RecomputeAllControlPoints();
             CommitShapeChange();
             PlaySound(placePointSound);
@@ -1040,6 +1035,7 @@ public partial class RoadPlanManager : MonoBehaviour
         anchorDragAxis = AnchorDragAxis.XZ;
         hoveredEdgeIndex = -1;
 
+        ConstrainJunctionPlaneHeights();
         RecomputeAllControlPoints();
         // finalized=true で送り、UI側に権威あるバックエンド干渉問い合わせを促す。
         CommitShapeChange(finalized: true);
@@ -1137,6 +1133,7 @@ public partial class RoadPlanManager : MonoBehaviour
         if (selectedPointIndex > edgeIndex) selectedPointIndex++;
 
         ReleaseControlHeights(edgeIndex, edgeIndex + 2);
+        ConstrainJunctionPlaneHeights();
         RecomputeAllControlPoints();
         CommitShapeChange();
         Debug.Log($"RoadPlanManager: 辺{edgeIndex}にウェイポイント挿入 (total: {points.Count})");
@@ -1180,6 +1177,7 @@ public partial class RoadPlanManager : MonoBehaviour
         else if (selectedPointIndex > index) selectedPointIndex--;
 
         ReleaseControlHeights(index - 1, index);
+        ConstrainJunctionPlaneHeights();
         RecomputeAllControlPoints();
         CommitShapeChange();
         Debug.Log($"RoadPlanManager: ポイント{index}を削除 (残り: {points.Count})");

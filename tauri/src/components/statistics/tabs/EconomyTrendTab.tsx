@@ -398,10 +398,10 @@ function SupplyDemandTrendCard({
  * 「不足」は出力合計が入力合計を上回った場合(需要超過)に入力ノードとして現れる。
  * これによりSankeyのフローが常にバランスする。
  *
- * なお total_production は供給量(supply_left + 当エポック生産)であり、
+ * なお total_production は当エポックの生産量であり、
  * total_imports / total_exports は取引実績であるため、厳密な意味での
  * 「当エポック純生産・純取引」とは一致しない。特に工業原料(GOODS_MATERIAL)では
- * 繰越在庫分が「売れ残り」ノードに混入する点に注意。
+ * 繰越在庫からの販売分が「不足」ノードに現れる点に注意。
  */
 function buildSankeyData(
   production: number,

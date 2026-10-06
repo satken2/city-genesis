@@ -43,7 +43,8 @@ type InfraProducerItem = {
   center_point: number[] | null;
   /** 接続端子ノードの座標。パスの端点はここに溶接されるので描画はこちらを優先する */
   node_point: number[] | null;
-  supply: number;
+  /** 当エポックの生産量(配送の直前に作った量) */
+  production: number;
   shipped: number;
   connected: boolean;
 };
@@ -70,7 +71,7 @@ type InfraPathItem = {
 
 type InfraProductStats = {
   product_id: number;
-  supply_total: number;
+  production_total: number;
   shipped_total: number;
   demand_total: number;
   received_total: number;
@@ -407,9 +408,9 @@ export function InfrastructureTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               </h3>
               <dl className="infra-summary">
                 <div className="infra-summary__row">
-                  <dt>{t("statistics.infrastructure.supply")}</dt>
+                  <dt>{t("statistics.infrastructure.production")}</dt>
                   <dd>
-                    {selected.supply_total.toFixed(1)} {unit}
+                    {selected.production_total.toFixed(1)} {unit}
                   </dd>
                 </div>
                 <div className="infra-summary__row">

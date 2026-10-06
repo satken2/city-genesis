@@ -114,6 +114,16 @@
     "validationPathCollision": "道路或軌道的占用範圍重疊。請檢查紅色占用範圍。",
     "validationRiverCollision": "路線在地表橫穿河流。請調整高度或路線。",
     "validationGradingSite": "路徑不能穿過土方工程的施工範圍，高架或地下也不行。請在工程完成前避開該範圍。",
+    "railJunction": {
+      "main_unfinished": "無法從未完工或改建中的軌道分岔或併入。",
+      "reverse_merge": "既有軌道無法併入未完工軌道的中間。",
+      "height_mismatch": "連接位置的高度與所連接的軌道不一致。",
+      "tangent_mismatch": "連接位置的方向與所連接的軌道不一致。",
+      "tangent_unavailable": "無法確定連接位置的方向。",
+      "degenerate": "連接部分過短，無法判定。",
+      "points_not_planar": "分岔起始的 {{length}} 公尺未與正線位於同一坡度的平面上。",
+      "extension_not_planar": "延伸部分未與既有分岔起始的 {{length}} 公尺位於同一坡度的平面上。"
+    },
     "validationRejected": "不符合建設條件。請檢查形狀和設定。",
     "validationFailed": "建設條件驗證失敗：{{reason}}",
     "validationUnavailable": "未設定伺服器連線，無法驗證建設條件。",

@@ -270,7 +270,7 @@
     },
     "infrastructure": {
       "title": "Réseaux d'infrastructure",
-      "supply": "Stock disponible",
+      "production": "Production",
       "delivered": "Volume acheminé",
       "demand": "Demande",
       "fulfillment": "Taux de couverture",

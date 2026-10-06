@@ -303,7 +303,7 @@ Unity は `PathTopologyEditManager` が対象選択を担う。**結合**では�
 
 パス建設パネルが確定送信と同じ全線を `/paths/validate` へ渡し、返された線形指標と描画用の違反区間をUnityへ共有する。形状編集パネルは独自に検証を問い合わせず、Unityから再配信された同じ結果を表示する。単線・複線とも、建設パネルと2Dの要約は全線の最悪値、3Dと2Dの吹き出しは各違反区間の最悪値となる。
 
-`edit_path:update_shape` の `revision` は形状・設定変更で更新される。建設パネルは検証時の世代を付けた `edit_path:shape_command`（`op=apply_alignment`、`alignment_json` に `alignments` のJSON）を送り、Unityは世代が一致する編集状態でだけ採用する。nullは検証待ちへの切替を表す。応答待ちの操作・取消し・別セッションへの切替後に、以前の検証を採用しない。
+`edit_path:update_shape` の `revision` は形状・設定変更で更新される。建設パネルは検証時の世代を付けた `edit_path:shape_command`（`op=apply_alignment`、`alignment_json` に `alignments` のJSON、`junction_json` に線路の接続違反の吹き出し（接点のワールド座標 `position` と翻訳済みの `text`）の配列）を送り、Unityは世代が一致する編集状態でだけ採用する。nullは検証待ちへの切替を表す。応答待ちの操作・取消し・別セッションへの切替後に、以前の検証を採用しない。
 
 再配信の `alignment` は `authoritative=true`、バックエンドと同じ違反フラグ `curve_violated` / `grade_violated`、全線の警告折れ線群 `warnings` を含む。各点は `[x, 絶対標高, z]`。`samples` は先頭線の縦断表示用で、警告位置と区間の最悪値は間引き前の評価から作る。上限付近の数値誤差の扱いもサーバーに従う。
 
@@ -400,5 +400,5 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 #### パスの確定可否
 
-`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川・海・湖の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
+`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川・海・湖の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有筒（パス）・占有箱（建物）として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
 敷設パネルは `/paths/validate` の `alignment_violations` を保持し、線番号（1始まり）と各線の始点からの距離区間を添えて曲率・勾配違反を表示します。パス干渉・川横断・形状未確定・検証待ち・検証エラーを区別し、APIエラーの理由は省略せず再試行ボタンを出します。原因不明の拒否を赤い干渉と断定しません。送信直前の再検証でも同じ説明を使い、古い形状の結果は表示しません。2D表示はUnityの推定値なので、全線検証で拒否された区間を敷設パネルの案内で確認できます。費用欄は確定不可でも2点以上あれば表示します。

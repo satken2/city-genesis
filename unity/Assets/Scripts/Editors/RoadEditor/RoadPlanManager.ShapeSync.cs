@@ -29,6 +29,7 @@ public partial class RoadPlanManager
         public string revision;
         public string routeJson;
         public string alignmentJson;
+        public string junctionJson;
     }
 
     /// <summary>2Dへ送る線形サンプルの間隔(m)。1m推定を間引いて edit_path:update_shape の肥大化を防ぐ。</summary>
@@ -70,14 +71,37 @@ public partial class RoadPlanManager
         public float[][] points;
     }
 
+    /// <summary>線路の接続違反の吹き出し。text はTauriが翻訳した理由、position は接点のワールド座標。</summary>
+    private sealed class JunctionLabel
+    {
+        public float[] position;
+        public string text;
+    }
+
     private ValidatedAlignment[] authoritativeAlignments;
 
     /// <summary>全線検証と同じ世代だけ採用する。再通知は形状を変更せず、再検証も要求しない。</summary>
-    private void ApplyAuthoritativeAlignments(string revision, string json)
+    private void ApplyAuthoritativeAlignments(string revision, string json, string junctionJson)
     {
         if (revision != routeRevision) return;
-        try { authoritativeAlignments = JsonConvert.DeserializeObject<ValidatedAlignment[]>(json ?? "null"); }
+        ValidatedAlignment[] alignments;
+        JunctionLabel[] junctions;
+        try
+        {
+            alignments = JsonConvert.DeserializeObject<ValidatedAlignment[]>(json ?? "null");
+            junctions = JsonConvert.DeserializeObject<JunctionLabel[]>(junctionJson ?? "null");
+        }
         catch (JsonException) { return; }
+        authoritativeAlignments = alignments;
+        junctionLabels.Clear();
+        foreach (var junction in junctions ?? System.Array.Empty<JunctionLabel>())
+        {
+            if (junction?.position == null || junction.position.Length < 3) continue;
+            junctionLabels.Add(new AlignmentLabel {
+                junction = true, text = junction.text,
+                position = new Vector3(junction.position[0], junction.position[1], junction.position[2]),
+            });
+        }
         cachedAlignmentViolations = null;
         EmitShapeUpdate();
     }
@@ -133,7 +157,7 @@ public partial class RoadPlanManager
         // 掴んだだけで形状が変わっていない場合も検証応答を受け取る。移動した時点で世代が変わる。
         if (cmd.op == "apply_alignment")
         {
-            ApplyAuthoritativeAlignments(cmd.revision, cmd.alignmentJson);
+            ApplyAuthoritativeAlignments(cmd.revision, cmd.alignmentJson, cmd.junctionJson);
             return;
         }
         if (isDragging) return;

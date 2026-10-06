@@ -270,7 +270,7 @@
     },
     "infrastructure": {
       "title": "인프라망",
-      "supply": "공급 재고",
+      "production": "생산량",
       "delivered": "배송량",
       "demand": "수요량",
       "fulfillment": "충족률",
