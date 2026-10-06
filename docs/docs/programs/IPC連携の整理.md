@@ -303,7 +303,7 @@ Unity は `PathTopologyEditManager` が対象選択を担う。**結合**では�
 
 パス建設パネルが確定送信と同じ全線を `/paths/validate` へ渡し、返された線形指標と描画用の違反区間をUnityへ共有する。形状編集パネルは独自に検証を問い合わせず、Unityから再配信された同じ結果を表示する。単線・複線とも、建設パネルと2Dの要約は全線の最悪値、3Dと2Dの吹き出しは各違反区間の最悪値となる。
 
-`edit_path:update_shape` の `revision` は形状・設定変更で更新される。建設パネルは検証時の世代を付けた `edit_path:shape_command`（`op=apply_alignment`、`alignment_json` に `alignments` のJSON）を送り、Unityは世代が一致する編集状態でだけ採用する。nullは検証待ちへの切替を表す。応答待ちの操作・取消し・別セッションへの切替後に、以前の検証を採用しない。
+`edit_path:update_shape` の `revision` は形状・設定変更で更新される。建設パネルは検証時の世代を付けた `edit_path:shape_command`（`op=apply_alignment`、`alignment_json` に `alignments` のJSON、`junction_json` に線路の接続違反の吹き出し（接点のワールド座標 `position` と翻訳済みの `text`）の配列）を送り、Unityは世代が一致する編集状態でだけ採用する。nullは検証待ちへの切替を表す。応答待ちの操作・取消し・別セッションへの切替後に、以前の検証を採用しない。
 
 再配信の `alignment` は `authoritative=true`、バックエンドと同じ違反フラグ `curve_violated` / `grade_violated`、全線の警告折れ線群 `warnings` を含む。各点は `[x, 絶対標高, z]`。`samples` は先頭線の縦断表示用で、警告位置と区間の最悪値は間引き前の評価から作る。上限付近の数値誤差の扱いもサーバーに従う。
 

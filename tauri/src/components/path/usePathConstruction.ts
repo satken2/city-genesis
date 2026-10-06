@@ -54,7 +54,7 @@ import {
   IPC_EVENT_EDIT_PATH_SELECT_NODE,
   IPC_EVENT_EDIT_PATH_UPDATE_SHAPE,
 } from "../../utils/ipc";
-import { describeMaxSpanViolations, describePathValidation, pathValidationShapeKey, type PathValidationResult } from "./pathValidation";
+import { describeJunctionLabels, describeMaxSpanViolations, describePathValidation, pathValidationShapeKey, type PathValidationResult } from "./pathValidation";
 import { fetchApi } from "../../utils/api";
 import { allowsPathBody, GUIDE_QUERY, observe, snapshot } from "../../tutorial/bus";
 import { useGuideSnapshot } from "../../tutorial/TutorialLayer";
@@ -789,7 +789,7 @@ export function usePathConstruction(
         );
         if (!cancelled && currentValidationKey.current === validationKey && currentShapeRevision.current === shapeRevision) {
           setValidation({ key: validationKey, result });
-          if (shapeRevision) void sendEditPathAlignment(shapeRevision, result.alignments).catch(console.error);
+          if (shapeRevision) void sendEditPathAlignment(shapeRevision, result.alignments, describeJunctionLabels(result, t)).catch(console.error);
           void sendHighlightObjects(result, "path_build").catch(console.error);
         }
       } catch (error) {
@@ -799,7 +799,7 @@ export function usePathConstruction(
       }
     }, 150);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [apiBaseUrl, shapePhase, shapeRevision, localCanConfirm, validationKey, validationAttempt]);
+  }, [apiBaseUrl, shapePhase, shapeRevision, localCanConfirm, validationKey, validationAttempt, t]);
 
   /**
    * 確定送信。新規作成のときは extraFields を各パスへ足して送り(道路建設パネルの所属道路 road_id など。
@@ -829,7 +829,7 @@ export function usePathConstruction(
       throw new Error(t("path_construction.collisionChecking"));
     }
     setValidation({ key: validationKey, result: checked });
-    if (shapeRevision) void sendEditPathAlignment(shapeRevision, checked.alignments).catch(console.error);
+    if (shapeRevision) void sendEditPathAlignment(shapeRevision, checked.alignments, describeJunctionLabels(checked, t)).catch(console.error);
     void sendHighlightObjects(checked, "path_build").catch(console.error);
     if (!checked.is_valid) {
       throw new Error(describePathValidation(checked, t).join("\n"));

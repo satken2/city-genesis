@@ -854,7 +854,7 @@ export async function sendEditPathChangeLateralOffsets(
  * - remove_node: index
  */
 export type PathShapeCommand =
-  | { op: "apply_alignment"; revision: string; alignment_json: string }
+  | { op: "apply_alignment"; revision: string; alignment_json: string; junction_json: string }
   | { op: "apply_route"; revision: string; route_json: string }
   | { op: "undo_route"; revision: string }
   | { op: "select_node"; index: number }
@@ -879,9 +879,17 @@ export async function sendEditPathShapeCommand(command: PathShapeCommand): Promi
   });
 }
 
-/** 建設パネルの全線検証結果を、検証時のUnity編集世代とともに共有する。 */
-export async function sendEditPathAlignment(revision: string, alignments: unknown): Promise<void> {
-  await sendEditPathShapeCommand({ op: "apply_alignment", revision, alignment_json: JSON.stringify(alignments ?? null) });
+/** Unityが3D上の位置(ワールド座標)に出す吹き出し。文言はTauri側で翻訳済み。 */
+export type PathJunctionLabel = { position: number[]; text: string };
+
+/** 建設パネルの全線検証結果(線形と、線路の接続違反の吹き出し)を、検証時のUnity編集世代とともに共有する。 */
+export async function sendEditPathAlignment(revision: string, alignments: unknown, junctions: PathJunctionLabel[] = []): Promise<void> {
+  await sendEditPathShapeCommand({
+    op: "apply_alignment",
+    revision,
+    alignment_json: JSON.stringify(alignments ?? null),
+    junction_json: JSON.stringify(junctions),
+  });
 }
 
 /**

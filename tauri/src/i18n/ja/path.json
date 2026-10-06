@@ -114,6 +114,16 @@
     "validationPathCollision": "道路・線路の占有範囲が干渉しています。赤い占有範囲を確認してください。",
     "validationRiverCollision": "川を地表で横断しています。高さや経路を調整してください。",
     "validationGradingSite": "造成工事の範囲には、高架や地下を含めてパスを通せません。工事が終わるまで範囲を避けてください。",
+    "railJunction": {
+      "main_unfinished": "未完成・造り替え中の線路には分岐・合流できません。",
+      "reverse_merge": "未完成の線路の途中へは既存の線路を合流できません。",
+      "height_mismatch": "接続位置の高さが接続先の線路と合っていません。",
+      "tangent_mismatch": "接続位置の向きが接続先の線路と合っていません。",
+      "tangent_unavailable": "接続位置の向きを求められません。",
+      "degenerate": "接続位置の形状が短すぎて判定できません。",
+      "points_not_planar": "分岐の付け根{{length}}mが本線と同じ傾きの面に乗っていません。",
+      "extension_not_planar": "延長部が既存の分岐の付け根{{length}}mと同じ傾きの面に乗っていません。"
+    },
     "validationRejected": "敷設条件を満たしていません。形状や設定を確認してください。",
     "validationFailed": "敷設条件の検証に失敗しました：{{reason}}",
     "validationUnavailable": "接続先が未設定のため敷設条件を検証できません。",

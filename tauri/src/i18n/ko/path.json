@@ -114,6 +114,16 @@
     "validationPathCollision": "도로 또는 선로의 점유 범위가 겹칩니다. 빨간 점유 범위를 확인하세요.",
     "validationRiverCollision": "지표에서 강을 가로지릅니다. 높이나 경로를 조정하세요.",
     "validationGradingSite": "부지 조성 공사 범위에는 고가나 지하를 포함해 경로를 통과시킬 수 없습니다. 공사가 끝날 때까지 범위를 피하세요.",
+    "railJunction": {
+      "main_unfinished": "미완성이거나 재건설 중인 선로에서는 분기·합류할 수 없습니다.",
+      "reverse_merge": "미완성 선로의 중간에는 기존 선로를 합류시킬 수 없습니다.",
+      "height_mismatch": "접속 위치의 높이가 접속 대상 선로와 맞지 않습니다.",
+      "tangent_mismatch": "접속 위치의 방향이 접속 대상 선로와 맞지 않습니다.",
+      "tangent_unavailable": "접속 위치의 방향을 구할 수 없습니다.",
+      "degenerate": "접속 위치의 형상이 너무 짧아 판정할 수 없습니다.",
+      "points_not_planar": "분기 시작부 {{length}}m가 본선과 같은 기울기의 평면에 놓여 있지 않습니다.",
+      "extension_not_planar": "연장부가 기존 분기 시작부 {{length}}m와 같은 기울기의 평면에 놓여 있지 않습니다."
+    },
     "validationRejected": "건설 조건을 충족하지 않습니다. 형태와 설정을 확인하세요.",
     "validationFailed": "건설 조건 검증 실패: {{reason}}",
     "validationUnavailable": "서버 연결 설정이 없어 건설 조건을 검증할 수 없습니다.",

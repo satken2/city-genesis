@@ -114,6 +114,16 @@
     "validationPathCollision": "Los volúmenes de carreteras o vías se superponen. Revisa los volúmenes rojos.",
     "validationRiverCollision": "El trazado cruza un río al nivel del suelo. Ajusta la altura o la ruta.",
     "validationGradingSite": "Un trazado no puede atravesar una obra de movimiento de tierras, ni siquiera en elevado o bajo tierra. Evita la zona hasta que termine la obra.",
+    "railJunction": {
+      "main_unfinished": "No se puede bifurcar desde una vía inconclusa o en reconstrucción, ni unirse a ella.",
+      "reverse_merge": "Una vía existente no puede unirse a la mitad de una vía inconclusa.",
+      "height_mismatch": "La altura en la conexión no coincide con la vía conectada.",
+      "tangent_mismatch": "La dirección en la conexión no coincide con la vía conectada.",
+      "tangent_unavailable": "No se puede determinar la dirección en la conexión.",
+      "degenerate": "La conexión es demasiado corta para evaluarla.",
+      "points_not_planar": "Los primeros {{length}} m del ramal no están en el mismo plano que la vía principal.",
+      "extension_not_planar": "La extensión no está en el mismo plano que los primeros {{length}} m de un ramal existente."
+    },
     "validationRejected": "No se cumplen las condiciones de construcción. Revisa el trazado y la configuración.",
     "validationFailed": "Falló la validación: {{reason}}",
     "validationUnavailable": "No se puede validar sin configurar la conexión al servidor.",

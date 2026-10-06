@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public partial class RoadPlanManager
@@ -10,9 +11,12 @@ public partial class RoadPlanManager
         public float value;
         public float limit;
         public string text;
+        public bool junction; // 線路の分岐・合流の違反。全線検証の理由をそのまま出す
     }
 
     private readonly List<AlignmentLabel> alignmentLabels = new List<AlignmentLabel>();
+    // 全線検証が返した線路の接続違反の吹き出し。ローカル推定を持たないので、形状が変わると次の検証まで消える。
+    private readonly List<AlignmentLabel> junctionLabels = new List<AlignmentLabel>();
     private readonly List<Rect> alignmentLabelRects = new List<Rect>();
     private GUIStyle alignmentLabelStyle;
 
@@ -54,7 +58,8 @@ public partial class RoadPlanManager
         // ノード番号(RoadPlanManager.NodeLabels)は違反の有無にかかわらず常に描く
         DrawNodeNumberLabels(cam);
         CheckAlignmentViolations();
-        if (alignmentLabels.Count == 0) return;
+        int labelCount = alignmentLabels.Count + junctionLabels.Count;
+        if (labelCount == 0) return;
         if (alignmentLabelStyle == null)
             alignmentLabelStyle = new GUIStyle(GUI.skin.label) {
                 font = UiFontProvider.GetFont(13), fontSize = 13, alignment = TextAnchor.MiddleLeft,
@@ -62,7 +67,7 @@ public partial class RoadPlanManager
             };
         alignmentLabelRects.Clear();
         Color oldColor = GUI.color;
-        foreach (var label in alignmentLabels)
+        foreach (var label in alignmentLabels.Concat(junctionLabels))
         {
             Vector3 projected = cam.WorldToScreenPoint(label.position + Vector3.up * 0.3f);
             if (projected.z <= 0 || projected.x < 0 || projected.x > Screen.width || projected.y < 0 || projected.y > Screen.height) continue;
@@ -72,7 +77,7 @@ public partial class RoadPlanManager
                 Mathf.Clamp(anchor.y - 52, 4, Mathf.Max(4, Screen.height - 48)), width, 44);
             // 投影位置が重なる区間は左右・上下へずらし、引出線で元の違反位置を示す。
             Rect initial = box;
-            for (int attempt = 0; attempt < alignmentLabels.Count * 4; attempt++)
+            for (int attempt = 0; attempt < labelCount * 4; attempt++)
             {
                 bool overlaps = alignmentLabelRects.Exists(r => r.Overlaps(box));
                 if (!overlaps) break;
@@ -86,7 +91,8 @@ public partial class RoadPlanManager
                 box.y = y;
             }
             alignmentLabelRects.Add(box);
-            Color accent = label.curve ? new Color(1f, 0.55f, 0.25f) : new Color(1f, 0.8f, 0.2f);
+            Color accent = label.junction ? new Color(1f, 0.35f, 0.35f)
+                : label.curve ? new Color(1f, 0.55f, 0.25f) : new Color(1f, 0.8f, 0.2f);
             GUI.color = accent;
             DrawAlignmentGuiLine(anchor, new Vector2(Mathf.Clamp(anchor.x, box.xMin, box.xMax), Mathf.Clamp(anchor.y, box.yMin, box.yMax)), 1.5f);
             GUI.DrawTexture(new Rect(anchor.x - 3, anchor.y - 3, 6, 6), Texture2D.whiteTexture);
@@ -95,7 +101,13 @@ public partial class RoadPlanManager
             GUI.color = accent;
             GUI.DrawTexture(new Rect(box.x, box.y, 3, box.height), Texture2D.whiteTexture);
             Vector2 icon = new Vector2(box.x + 11, box.y + 12);
-            if (label.curve)
+            if (label.junction)
+            {
+                // 分岐器: 本線と、そこから斜めに分かれる側線
+                DrawAlignmentGuiLine(icon + new Vector2(0, 16), icon + new Vector2(20, 16), 2.5f);
+                DrawAlignmentGuiLine(icon + new Vector2(4, 16), icon + new Vector2(20, 4), 2.5f);
+            }
+            else if (label.curve)
             {
                 Vector2 previous = icon + new Vector2(0, 20);
                 for (int i = 1; i <= 10; i++)

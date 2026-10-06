@@ -89,7 +89,8 @@ public partial class RoadPlanManager
     /// 手動調整済みの制御点はアンカーからの相対位置(XZ)を保ったまま平行移動し、
     /// 高さは RecomputeAllControlPoints が移動後の縦断勾配から決め直す。
     /// 未調整の制御点は移動後の頂点列から RecomputeAllControlPoints で再計算する。
-    /// ドラッグ移動・標高変更(キー/IPC)の全経路がここを通る。
+    /// ドラッグ移動・標高変更(キー/IPC)の全経路がここを通る。線路の分岐端の面に拘束されるアンカーは、
+    /// 指定した高さによらず面の高さになる(ConstrainJunctionPlaneHeights)。
     /// </summary>
     private void MoveAnchorPosition(int index, Vector3 newPosition)
     {
@@ -107,6 +108,7 @@ public partial class RoadPlanManager
 
         // 自動接線が変わるのは両隣。動かしたアンカー自身も、経路提案で固定した勾配より新しい配置の勾配を優先する。
         ReleaseControlHeights(index - 1, index + 1);
+        ConstrainJunctionPlaneHeights();
         RecomputeAllControlPoints();
     }
 

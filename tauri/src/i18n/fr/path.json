@@ -114,6 +114,16 @@
     "validationPathCollision": "Les volumes occupés des routes ou voies se chevauchent. Vérifiez les volumes rouges.",
     "validationRiverCollision": "Le tracé traverse une rivière au niveau du sol. Ajustez la hauteur ou le tracé.",
     "validationGradingSite": "Un tracé ne peut pas traverser un chantier de terrassement, même en viaduc ou en souterrain. Contournez la zone jusqu'à la fin des travaux.",
+    "railJunction": {
+      "main_unfinished": "Impossible de bifurquer depuis une voie inachevée ou en reconstruction, ni de la rejoindre.",
+      "reverse_merge": "Une voie existante ne peut pas rejoindre le milieu d'une voie inachevée.",
+      "height_mismatch": "La hauteur au raccordement ne correspond pas à la voie raccordée.",
+      "tangent_mismatch": "La direction au raccordement ne correspond pas à la voie raccordée.",
+      "tangent_unavailable": "Impossible de déterminer la direction au raccordement.",
+      "degenerate": "Le raccordement est trop court pour être évalué.",
+      "points_not_planar": "Les {{length}} premiers mètres de l'embranchement ne sont pas dans le même plan que la voie principale.",
+      "extension_not_planar": "Le prolongement n'est pas dans le même plan que les {{length}} premiers mètres d'un embranchement existant."
+    },
     "validationRejected": "Les conditions de construction ne sont pas remplies. Vérifiez le tracé et les paramètres.",
     "validationFailed": "Échec de la validation : {{reason}}",
     "validationUnavailable": "Impossible de valider sans configuration de connexion au serveur.",
