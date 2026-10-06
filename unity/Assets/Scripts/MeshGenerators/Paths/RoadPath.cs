@@ -200,7 +200,8 @@ public class RoadPath : IPathMeshGenerator
             isCurved = false;
         }
 
-        if (!isCurved && hasWaypoints)
+        // 角の処理はアンカー列にだけ行う。区間分割後や縦断の設計値で細分化された点列は、描画済みの中心線として1本のスプラインにする。
+        if (!isCurved && hasWaypoints && PathManager.IsAnchorPolyline(pathData, points))
         {
             return GenerateLinearPathWithCorners(pathData, points, startSidewalkSetback, endSidewalkSetback, singleSpan);
         }
@@ -1466,13 +1467,8 @@ public class RoadPath : IPathMeshGenerator
             }
             else
             {
-                float relYA = GetSegmentStartRelY(pathData, i);
-                float relYB = GetSegmentEndRelY(pathData, i, segmentStarts.Length);
-                bool followTerrain = PathManager.GetPathFollowTerrain(pathData)
-                    && relYA == 0f && relYB == 0f;
-
                 List<Vector3> anchorPoints = new List<Vector3> { segStart, segEnd };
-                splinePoints = PathManager.SubdividePointsWithTerrain(anchorPoints, PathManager.TERRAIN_SAMPLE_INTERVAL, followTerrain);
+                splinePoints = PathManager.SubdividePointsWithTerrain(anchorPoints, PathManager.TERRAIN_SAMPLE_INTERVAL, PathManager.LinearSpanFollowsTerrain(pathData, i));
             }
             allSubdividedPoints.AddRange(splinePoints);
             segmentPoints[i] = splinePoints;
@@ -1659,42 +1655,6 @@ public class RoadPath : IPathMeshGenerator
         if (t >= 1f - 1e-5f && connector.EndDirection.sqrMagnitude > 0f) forward = connector.EndDirection;
         width = connector.Widths != null ? Mathf.Lerp(connector.Widths[index], connector.Widths[index + 1], fraction) : 0.5f;
     }
-    /// <summary>
-    /// 指定セグメントの始点側のrelativeYをPathSummaryから取得する。
-    /// </summary>
-    private float GetSegmentStartRelY(PathSummary pathData, int segmentIndex)
-    {
-        var startList = pathData.GetStartPointList();
-        if (segmentIndex == 0)
-            return (startList != null && startList.Count >= 3) ? startList[1] : 0f;
-
-        var waypointList = pathData.GetWaypointList();
-        if (waypointList != null && segmentIndex - 1 < waypointList.Count)
-        {
-            var wp = waypointList[segmentIndex - 1];
-            return (wp.position != null && wp.position.Length >= 3) ? wp.position[1] : 0f;
-        }
-        return 0f;
-    }
-
-    /// <summary>
-    /// 指定セグメントの終点側のrelativeYをPathSummaryから取得する。
-    /// </summary>
-    private float GetSegmentEndRelY(PathSummary pathData, int segmentIndex, int totalSegments)
-    {
-        var endList = pathData.GetEndPointList();
-        if (segmentIndex == totalSegments - 1)
-            return (endList != null && endList.Count >= 3) ? endList[1] : 0f;
-
-        var waypointList = pathData.GetWaypointList();
-        if (waypointList != null && segmentIndex < waypointList.Count)
-        {
-            var wp = waypointList[segmentIndex];
-            return (wp.position != null && wp.position.Length >= 3) ? wp.position[1] : 0f;
-        }
-        return 0f;
-    }
-
     /// <summary>
     /// セグメントごとに独立した帯状メッシュを生成し、結合してコライダー用メッシュとする。
     /// </summary>

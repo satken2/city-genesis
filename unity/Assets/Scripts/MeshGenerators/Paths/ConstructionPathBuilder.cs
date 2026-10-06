@@ -70,11 +70,12 @@ public static class ConstructionPathBuilder
     private static List<TunnelSectionUtil.DrawSection> DrawSections(List<Vector3> points, PathSummary path, bool underground)
         => points.Count < 2 ? new List<TunnelSectionUtil.DrawSection>() : underground
             ? TunnelSectionUtil.GetDrawSections(points, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
-                PathManager.GetPathFollowTerrain(path), UndergroundView.IsActive)
+                UndergroundView.IsActive)
             : new List<TunnelSectionUtil.DrawSection> { new TunnelSectionUtil.DrawSection(points, false) };
 
+    /// <param name="points">地下パス(underground)では描画どおりの中心線(PathManager.CalculateSectionCenterline)。</param>
     public static PathMeshResult Generate(PathSummary path, List<Vector3> points, bool underground,
-        bool followTerrain, out List<TunnelSectionUtil.PortalInfo> portals)
+        out List<TunnelSectionUtil.PortalInfo> portals)
     {
         var root = new GameObject("ConstructingPath");
         portals = new List<TunnelSectionUtil.PortalInfo>();
@@ -117,7 +118,7 @@ public static class ConstructionPathBuilder
         }
 
         float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
-        if (underground) TunnelSectionUtil.SplitDrawableRuns(points, clearance, portals, followTerrain);
+        if (underground) TunnelSectionUtil.SplitDrawableRuns(points, clearance, portals);
         var completeRuns = DrawSections(PathDrawContext.SlicePolylineByFraction(points, 0, built), path, underground);
         if (elevated && singleSpan)
         {

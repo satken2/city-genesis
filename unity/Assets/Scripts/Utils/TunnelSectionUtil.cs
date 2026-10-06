@@ -28,15 +28,18 @@ public static class TunnelSectionUtil
         public DrawSection(List<Vector3> points, bool underground) { Points = points; IsUnderground = underground; }
     }
 
-    /// <summary>通常・施工中・遠景で共用する表示区間。地下表示では埋設区間も同じ生成器へ渡す。</summary>
+    /// <summary>
+    /// 通常・施工中・遠景で共用する表示区間。地下表示では埋設区間も同じ生成器へ渡す。
+    /// points は描画どおりの中心線(PathManager.CalculateSectionCenterline)。
+    /// </summary>
     public static List<DrawSection> GetDrawSections(List<Vector3> points, float clearance,
-        bool followsTerrain, bool includeUnderground, List<PortalInfo> portals = null)
+        bool includeUnderground, List<PortalInfo> portals = null)
     {
         var sections = new List<DrawSection>();
-        foreach (var run in SplitDrawableRuns(points, clearance, portals, followsTerrain))
+        foreach (var run in SplitDrawableRuns(points, clearance, portals))
             sections.Add(new DrawSection(run, false));
         if (includeUnderground)
-            foreach (var run in CollectTunnelRuns(points, clearance, followsTerrain))
+            foreach (var run in SplitRuns(points, clearance, keepTunnel: true, portals: null, pathFollowsTerrain: false))
                 sections.Add(new DrawSection(run, true));
         return sections;
     }
@@ -113,21 +116,17 @@ public static class TunnelSectionUtil
     /// トンネル区間（深さ > clearance）の点は除外され、境界には深さがちょうど
     /// clearance になる補間点が追加される。境界の坑口情報は portals に格納される。
     ///
-    /// 点列の各ペア間は SAMPLE_INTERVAL でサブサンプリングして判定する。
-    /// ただし両端点がともに地表に張り付いている（|地形−Y| ≤ GROUND_SNAP_EPSILON）
-    /// 区間は地形追従区間とみなし、深さ0（＝描画対象）として扱う。
-    /// これは CalculatePathPoints の followTerrain 分岐と同じ考え方で、
-    /// 地表区間のY線形補間による誤ったトンネル判定を防ぐ。
+    /// 判定は点の深さだけで行う。地形に沿うかはパスの設定とアンカーの相対Yで決まり、
+    /// 沿うスパンの点は中心線を作る段階で地表の上に置かれているので、ここでは推定しない。
     /// </summary>
-    /// <param name="points">CalculatePathPoints が返したワールド座標の点列</param>
+    /// <param name="points">描画どおりの中心線(PathManager.CalculateSectionCenterline)</param>
     /// <param name="clearance">クリアランス高さ(m)</param>
     /// <param name="portals">坑口の位置・向きの出力先（null可）</param>
     /// <returns>描画区間ごとの点リスト。全埋設の場合は空リスト。</returns>
     public static List<List<Vector3>> SplitDrawableRuns(
-        List<Vector3> points, float clearance, List<PortalInfo> portals,
-        bool pathFollowsTerrain = true)
+        List<Vector3> points, float clearance, List<PortalInfo> portals)
     {
-        return SplitRuns(points, clearance, keepTunnel: false, portals, pathFollowsTerrain);
+        return SplitRuns(points, clearance, keepTunnel: false, portals, pathFollowsTerrain: false);
     }
 
     /// <summary>
@@ -164,9 +163,9 @@ public static class TunnelSectionUtil
     }
 
     /// <summary>
-    /// 点列からトンネル区間（深さ > clearance）の連続区間だけを取り出す。
-    /// 道路建設エディタのプレビューで、地形に隠れるトンネル区間を
-    /// オーバーレイ表示するために使う。区間の両端には境界の補間点を含む。
+    /// 点列からトンネル区間（深さ > clearance）の連続区間だけを取り出す。区間の両端には境界の補間点を含む。
+    /// スパンの情報を持たない点列(描いたスプラインの標本・編集中の点・吸着用の線分)に使う。
+    /// pathFollowsTerrain が真なら、両端点がともに地表から GROUND_SNAP_EPSILON 以内の区間を地表として扱う。
     /// </summary>
     public static List<List<Vector3>> CollectTunnelRuns(
         List<Vector3> points, float clearance, bool pathFollowsTerrain = true)

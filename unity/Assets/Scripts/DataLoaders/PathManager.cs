@@ -2240,10 +2240,21 @@ public partial class PathManager : BaseApiDataManager
         Vector3 drawCamPos = drawCam != null ? drawCam.transform.position : Vector3.zero;
         DrawLod drawLod = DeterminePathDrawLod(path, tier, drawCamPos, out double detailFrom, out double detailTo);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"PathManager: 再描画 path{path.path_id} tier={tier} draw={drawLod} range=({detailFrom:F2}〜{detailTo:F2}) reason={reason}");
+        var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [カメラフリーズ調査] 調査後に削除
+        int freezeProbeWarnings = FreezeProbe.WarningCount; // [カメラフリーズ調査] 調査後に削除
+        string freezeProbePrevious = pathObjectsCache.TryGetValue(path.path_id, out GameObject freezeProbeOld) && freezeProbeOld != null ? DrawLodInfo.GetDrawLod(freezeProbeOld, DrawLod.Normal).ToString() : "なし"; // [カメラフリーズ調査] 調査後に削除
         if (drawLod == DrawLod.Far)
             CreateOrUpdateFarPath(path, forceRebuild);
         else
             CreateOrUpdatePath(path, updateIntersections, forceRebuild, drawLod, detailFrom, detailTo);
+        // [カメラフリーズ調査] 調査後に削除
+        if (freezeProbe.Elapsed.TotalMilliseconds > 30)
+        {
+            GetAnchorPolyline(path, out float probeLength);
+            int probeMeshes = pathObjectsCache.TryGetValue(path.path_id, out GameObject probeGo) && probeGo != null ? probeGo.GetComponentsInChildren<MeshFilter>(true).Length : -1;
+            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "[カメラフリーズ調査] パス再生成 {0:F0}ms path{1} variant={2} LOD={3}→{4} tier={5} 長さ={6:F0}m 経由点={7} メッシュ={8}個 警告ログ={9}件 reason={10}",
+                freezeProbe.Elapsed.TotalMilliseconds, path.path_id, path.path_variant, freezeProbePrevious, drawLod, tier, probeLength, path.waypoints?.Count ?? 0, probeMeshes, FreezeProbe.WarningCount - freezeProbeWarnings, reason);
+        }
 
         // API受信やキュー投入を描画完了として扱わない。中断時は同じ版でも再生成する。
         if (HasPathRepresentation(path)) pathVersionCache[path.path_id] = path.version;
@@ -2527,11 +2538,12 @@ public partial class PathManager : BaseApiDataManager
         Mesh mesh = null;
         if (UsesTunnelMesh(path, points))
         {
-            points = DecimatePolyline(CalculatePathPoints(path), FAR_SAMPLE_INTERVAL);
-            foreach (var section in TunnelSectionUtil.GetDrawSections(points, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
-                GetPathFollowTerrain(path), UndergroundView.IsActive))
+            // 間引いた点の間は直線補間になり地形から外れるので、間引く前の中心線で切り分けてから区間ごとに間引く。
+            List<Vector3> centerline = CalculateSectionCenterline(path, CalculatePathPoints(path));
+            foreach (var section in TunnelSectionUtil.GetDrawSections(centerline, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
+                UndergroundView.IsActive))
             {
-                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, section.Points);
+                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, DecimatePolyline(section.Points, FAR_SAMPLE_INTERVAL));
                 if (sectionGO != null) sectionGO.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
             }
         }
@@ -3758,6 +3770,60 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
+    /// 区間分割(TunnelSectionUtil.GetDrawSections)へ渡す描画中心線。区間分割は点の深さだけで判定するので、
+    /// 地形に沿うスパンの点が地表の上にある点列を渡す。折れ線パスの点列はアンカーだけ(角の処理を RoadPath に任せるため)なので、
+    /// RoadPath の折れ線と同じ規則でスパンごとに細分化する。それ以外の点列はスパンごとの規則で標本化済み。
+    /// </summary>
+    private static List<Vector3> CalculateSectionCenterline(PathSummary path, List<Vector3> points)
+    {
+        if (!IsAnchorPolyline(path, points)) return points;
+        var result = new List<Vector3>();
+        for (int i = 0; i < points.Count - 1; i++)
+        {
+            var span = SubdividePointsWithTerrain(new List<Vector3> { points[i], points[i + 1] }, TERRAIN_SAMPLE_INTERVAL, LinearSpanFollowsTerrain(path, i));
+            result.AddRange(i == 0 ? span : span.GetRange(1, span.Count - 1));
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 点列が折れ線パスのアンカー列(始点・経由点・終点)か。両端は交差点で切断されて動くので、経由点の平面位置で確かめる。
+    /// RoadPath の角の処理はこの点列にだけ行い、区間分割後の点列は描画済みの中心線として1本のスプラインにする。
+    /// </summary>
+    public static bool IsAnchorPolyline(PathSummary path, List<Vector3> points)
+    {
+        var waypoints = path.GetWaypointList();
+        if (waypoints == null || waypoints.Count == 0 || points == null || points.Count != waypoints.Count + 2) return false;
+        for (int i = 0; i < waypoints.Count; i++)
+        {
+            Vector3 anchor = waypoints[i].GetAbsolutePosition();
+            if (Mathf.Abs(points[i + 1].x - anchor.x) > 1e-3f || Mathf.Abs(points[i + 1].z - anchor.z) > 1e-3f) return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 折れ線パスのスパン(アンカー span → span+1)が地形に沿うか。実効 follow_terrain が真で、両端アンカーの相対Yが
+    /// どちらも0のときだけ沿い、それ以外はアンカー標高を直線で結ぶ(コア geo_path_depth のスパン規則と同じ)。
+    /// </summary>
+    public static bool LinearSpanFollowsTerrain(PathSummary path, int span)
+        => GetPathFollowTerrain(path) && AnchorRelativeY(path, span) == 0f && AnchorRelativeY(path, span + 1) == 0f;
+
+    /// <summary>アンカー(0=始点、1〜=経由点、末尾=終点)の相対Y。</summary>
+    private static float AnchorRelativeY(PathSummary path, int index)
+    {
+        var waypoints = path.GetWaypointList();
+        int waypointCount = waypoints?.Count ?? 0;
+        if (index == 0 || index > waypointCount)
+        {
+            var point = index == 0 ? path.GetStartPointList() : path.GetEndPointList();
+            return point != null && point.Count >= 3 ? point[1] : 0f;
+        }
+        var position = waypoints[index - 1].position;
+        return position != null && position.Length >= 3 ? position[1] : 0f;
+    }
+
+    /// <summary>
     /// Farティアで非表示にすべきトンネルパスか。端点を結ぶ直線がトンネル区間を持つ
     /// 非追従パス（丘を貫くパス）のみ非表示にし、谷を渡るだけの非追従橋は遠景を描く。
     /// </summary>
@@ -3780,7 +3846,7 @@ public partial class PathManager : BaseApiDataManager
     {
         float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
         var portals = new List<TunnelSectionUtil.PortalInfo>();
-        var sections = TunnelSectionUtil.GetDrawSections(points, clearance, GetPathFollowTerrain(path), UndergroundView.IsActive, portals);
+        var sections = TunnelSectionUtil.GetDrawSections(CalculateSectionCenterline(path, points), clearance, UndergroundView.IsActive, portals);
 
         GameObject container = new GameObject("PathSections");
         var colliderCombine = new List<CombineInstance>();
@@ -3832,7 +3898,8 @@ public partial class PathManager : BaseApiDataManager
     /// <summary>進捗別の土工・橋脚・路面と、完成時と共通の坑口を組み立てる。</summary>
     private PathMeshResult GenerateConstructingPathMesh(PathSummary path, List<Vector3> points)
     {
-        var result = ConstructionPathBuilder.Generate(path, points, UsesTunnelMesh(path, points), GetPathFollowTerrain(path), out var portals);
+        bool underground = UsesTunnelMesh(path, points);
+        var result = ConstructionPathBuilder.Generate(path, underground ? CalculateSectionCenterline(path, points) : points, underground, out var portals);
         PlaceTunnelPortals(result.GeneratedObject, path, portals);
         return result;
     }

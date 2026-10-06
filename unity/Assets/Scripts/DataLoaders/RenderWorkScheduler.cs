@@ -267,6 +267,7 @@ public static class RenderWorkScheduler
             MaximumStepMs = Math.Max(MaximumStepMs, elapsed);
             categoryMs[operation.category] = GetCategoryMilliseconds(operation.category) + elapsed;
             Steps++;
+            if (elapsed > 50) UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "[カメラフリーズ調査] 長い1ステップ {0:F0}ms {1} ({2})", elapsed, current.GetType().FullName, operation.category); // 調査後に削除
             if (sample != null)
             {
                 sample.cpuMs += elapsed;
@@ -304,6 +305,74 @@ public sealed class RenderWorkPump : MonoBehaviour
     {
         RenderWorkScheduler.Pump();
         RenderWorkScheduler.ReportTimings();
+        FreezeProbe.Check(); // [カメラフリーズ調査] 調査後に削除
+    }
+}
+
+/// <summary>
+/// [カメラフリーズ調査] 長いフレームの内訳をプロファイラのマーカーから出す一時計測。調査後にクラスごと削除する。
+/// LateUpdateで見るLastValue・unscaledDeltaTime・LastFrameMsはどれも直前のフレームの値。
+/// </summary>
+internal static class FreezeProbe
+{
+    private const float HitchSeconds = 0.2f;
+    private static readonly List<(string name, Unity.Profiling.ProfilerRecorder recorder)> recorders = new();
+    private static readonly HashSet<string> recordedNames = new();
+    private static readonly List<Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle> handles = new();
+    private static readonly string[] phasePrefixes = { "Initialization.", "EarlyUpdate.", "FixedUpdate.", "PreUpdate.", "Update.", "PreLateUpdate.", "PostLateUpdate." };
+    private static readonly HashSet<string> categories = new() { "Scripts", "Physics", "GC", "Loading" };
+    private static int refreshedFrame = -100000, lastGcCount, lastWarningCount;
+    private static bool subscribed;
+    public static int WarningCount;
+
+    internal static void Check()
+    {
+        if (!subscribed)
+        {
+            Application.logMessageReceived += (condition, stack, type) => { if (type == LogType.Warning) WarningCount++; };
+            subscribed = true;
+        }
+        // 実行されて初めて登録されるマーカーがあるため、対象の一覧を定期的に取り直す。
+        if (Time.frameCount - refreshedFrame >= 300) Refresh();
+        int gc = GC.CollectionCount(0), warnings = WarningCount;
+        float dt = Time.unscaledDeltaTime;
+        if (dt >= HitchSeconds)
+        {
+            var top = new List<(string name, double ms)>();
+            foreach (var (name, recorder) in recorders)
+            {
+                if (!recorder.Valid) continue;
+                double ms = recorder.LastValue * 1e-6;
+                if (ms >= 5) top.Add((name, ms));
+            }
+            top.Sort((a, b) => b.ms.CompareTo(a.ms));
+            var message = new System.Text.StringBuilder();
+            message.Append($"[カメラフリーズ調査] 長いフレーム {dt * 1000:F0}ms 共通予算の使用={RenderWorkScheduler.LastFrameMs:F0}ms GC={gc - lastGcCount}回 警告ログ={warnings - lastWarningCount}件 frame={Time.frameCount - 1}");
+            for (int i = 0; i < top.Count && i < 25; i++) message.Append($"\n  {top[i].name}={top[i].ms:F1}ms");
+            UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message.ToString());
+        }
+        lastGcCount = gc;
+        lastWarningCount = warnings;
+    }
+
+    private static void Refresh()
+    {
+        refreshedFrame = Time.frameCount;
+        handles.Clear();
+        Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle.GetAvailable(handles);
+        foreach (var handle in handles)
+        {
+            var description = Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle.GetDescription(handle);
+            if (description.UnitType != Unity.Profiling.ProfilerMarkerDataUnit.TimeNanoseconds) continue;
+            string name = description.Name;
+            if (string.IsNullOrEmpty(name) || recordedNames.Contains(name)) continue;
+            bool wanted = name == "PlayerLoop" || name == "EditorLoop" || categories.Contains(description.Category.Name);
+            foreach (var prefix in phasePrefixes) wanted |= name.StartsWith(prefix, StringComparison.Ordinal);
+            if (!wanted) continue;
+            recordedNames.Add(name);
+            recorders.Add((name, new Unity.Profiling.ProfilerRecorder(handle, 1,
+                Unity.Profiling.ProfilerRecorderOptions.Default | Unity.Profiling.ProfilerRecorderOptions.StartImmediately)));
+        }
     }
 }
 
