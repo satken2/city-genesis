@@ -526,7 +526,7 @@ public partial class RoadPlanManager
     /// バックエンドへ問い合わせず BuildingManager の空間インデックス + 建物フットプリント
     /// (BuildingSummary.polygonArray は center_point 相対のローカルXZ座標。
     /// center_point を加算してワールドXZへ変換してから判定する)で幾何判定するため、
-    /// ドラッグ追従でリアルタイムに使える。所有権・収用可否は判別せず、幾何的な重なりの
+    /// ドラッグ追従でリアルタイムに使える。区画の所有と収用可否は判別せず、幾何的な重なりの
     /// 推定にとどまる(権威判定は確定時のバックエンド問い合わせ)。編集中はキャッシュする。
     /// </summary>
     private List<List<Vector3>> CheckBuildingInterference()
@@ -588,6 +588,10 @@ public partial class RoadPlanManager
                     continue;
                 }
             }
+
+            // 公共施設の敷地は市有地で、インフラパスは区画を残したまま通れる(コアの
+            // classify_parcel_overlaps と同じ免除)。取り壊されない建物なので干渉として示さない。
+            if (summary.public_facility && InfraNetworkUtil.IsInfraPathType(PathType)) continue;
 
             // polygonArray は center_point 相対(ミニマップ・メッシュ生成と同じ規約)のため、
             // center_point を加算してワールドXZへ変換する。center_point 欠損時は位置を

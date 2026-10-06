@@ -2257,7 +2257,7 @@
           "paths"
         ],
         "summary": "Get Planned Path Interference",
-        "description": "計画中パスが干渉する区画・建物・既存パスを返す（dry-run。DBを変更しない）。\n\nフロントは敷設中の形状確定時・確定ボタン押下時にこのエンドポイントを叩き、\nバックエンドの権威判定（classify_parcel_overlaps + 立体交差判定）で\n区画・建物・パスをハイライトする。ドラッグ中のリアルタイム表示は\nフロント側のローカル推定で行い、ここは呼ばない。\n\nリクエストボディ（construction-cost と同じ生ジオメトリ）:\n  path_variant / start_point / end_point ※必須\n  waypoints / curved / start_control / end_control /\n  embankment_heights / follow_terrain（任意。立体交差判定の精度向上に使う）\n\nレスポンス（compute_path_interference と同形）:\n  parcels: {blocking, removable, shavable, exempt} — 区画IDのリスト\n  building_ids: 上記区画に立地する建物の agent_id\n  colliding_path_ids: 立体交差する既存パスの path_id",
+        "description": "計画中パスが干渉する区画・建物・既存パスを返す（dry-run。DBを変更しない）。\n\nフロントは敷設中の形状確定時・確定ボタン押下時にこのエンドポイントを叩き、\nバックエンドの権威判定（classify_parcel_overlaps + 立体交差判定）で\n区画・建物・パスをハイライトする。ドラッグ中のリアルタイム表示は\nフロント側のローカル推定で行い、ここは呼ばない。\n\nリクエストボディ（construction-cost と同じ生ジオメトリ）:\n  path_variant / start_point / end_point ※必須\n  waypoints / curved / start_control / end_control /\n  embankment_heights / follow_terrain（任意。立体交差判定の精度向上に使う）\n\nレスポンス（compute_path_interference と同形）:\n  parcels: {blocking, removable, shavable, exempt} — 区画IDのリスト\n  building_ids: blocking 区画に立地する建物（取り壊さない限り着工できない建物）の agent_id\n  colliding_path_ids: 立体交差する既存パスの path_id",
         "operationId": "get_planned_path_interference_api_v1_paths_interference_post",
         "requestBody": {
           "content": {
@@ -4519,7 +4519,7 @@
           "agents"
         ],
         "summary": "Get Agent Cargo",
-        "description": "輸出入拠点(TYPE_TRADE)の荷役情報を取得する。\n\n品目別の割当枠・実績は SoA(demand_amount/received_amount)と row-store(multi_supply)に\n分散しており、endpoints.yaml(自動生成)の single_agent スキーマでは表現できないため、\nアラート・統計系と同方針の手書きレスポンス(プレーンJSON)で返す。\n\nレスポンス:\n- capacity_per_epoch: 方向別スループット(t。capacity_per_space × 床面積 × エポック日数。\n  原材料を持つ拠点は、当エポックに受け取った原材料で取り扱える量との小さい方)。\n  輸入と輸出は別枠でそれぞれこの量を使える。品目別の固定枠は持たず、\n  方向内の全品目が1単位の重さで換算した量でこのキャパシティを分け合う。\n- area_capacity_per_epoch: 床面積だけで決まるスループット(t/エポック)。\n- material_capacity_per_epoch: 当エポックに受け取った原材料で取り扱える量(t)。国際貨物駅では\n  国際貨物輸送路線から受け取った枠。原材料を持たない拠点(港など)は null。\n- import_handled_tons / export_handled_tons: 方向別の取扱実績の合計(t)。品目ごとの単位が\n  違うため、能力と比べられる合計はトンで返す。\n- imports / exports: 品目ごとの荷役実績のリスト(マスターの品目順)。\n  - allocation: 当エポックの割当量(需給シグナルに基づく前方視配分の結果)\n  - handled: 当エポックの取扱実績(輸入=都市への販売量、輸出=都市からの買取量)\n  - price: 単価(輸入=販売価格、輸出=買取上限価格。いずれも域外価格×為替の自国通貨建て)\n  - lost: 機会損失(輸入のみ。割当在庫の不足で売り逃した量)",
+        "description": "輸出入拠点(TYPE_TRADE)の荷役情報を取得する。\n\n品目別の割当枠・実績は SoA(demand_amount/received_amount)と extra の multi_supply に\n分散しており、endpoints.yaml(自動生成)の single_agent スキーマでは表現できないため、\nアラート・統計系と同方針の手書きレスポンス(プレーンJSON)で返す。\n\nレスポンス:\n- capacity_per_epoch: 方向別スループット(t。capacity_per_space × 床面積 × エポック日数。\n  原材料を持つ拠点は、当エポックに受け取った原材料で取り扱える量との小さい方)。\n  輸入と輸出は別枠でそれぞれこの量を使える。品目別の固定枠は持たず、\n  方向内の全品目が1単位の重さで換算した量でこのキャパシティを分け合う。\n- area_capacity_per_epoch: 床面積だけで決まるスループット(t/エポック)。\n- material_capacity_per_epoch: 当エポックに受け取った原材料で取り扱える量(t)。国際貨物駅では\n  国際貨物輸送路線から受け取った枠。原材料を持たない拠点(港など)は null。\n- import_handled_tons / export_handled_tons: 方向別の取扱実績の合計(t)。品目ごとの単位が\n  違うため、能力と比べられる合計はトンで返す。\n- imports / exports: 品目ごとの荷役実績のリスト(マスターの品目順)。\n  - allocation: 当エポックの割当量(需給シグナルに基づく前方視配分の結果)\n  - handled: 当エポックの取扱実績(輸入=都市への販売量、輸出=都市からの買取量)\n  - price: 単価(輸入=販売価格、輸出=買取上限価格。いずれも域外価格×為替の自国通貨建て)\n  - lost: 機会損失(輸入のみ。割当在庫の不足で売り逃した量)",
         "operationId": "get_agent_cargo_api_v1_agents__agent_id__cargo_get",
         "parameters": [
           {
