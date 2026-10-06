@@ -400,5 +400,5 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 #### パスの確定可否
 
-`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川・海・湖の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
+`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川・海・湖の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有筒（パス）・占有箱（建物）として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
 敷設パネルは `/paths/validate` の `alignment_violations` を保持し、線番号（1始まり）と各線の始点からの距離区間を添えて曲率・勾配違反を表示します。パス干渉・川横断・形状未確定・検証待ち・検証エラーを区別し、APIエラーの理由は省略せず再試行ボタンを出します。原因不明の拒否を赤い干渉と断定しません。送信直前の再検証でも同じ説明を使い、古い形状の結果は表示しません。2D表示はUnityの推定値なので、全線検証で拒否された区間を敷設パネルの案内で確認できます。費用欄は確定不可でも2点以上あれば表示します。

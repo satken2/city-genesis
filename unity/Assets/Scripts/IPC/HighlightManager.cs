@@ -40,8 +40,6 @@ public class HighlightManager
         if (string.IsNullOrEmpty(source)) source = "default";
         if (interference == null || interference.IsEmpty) bySource.Remove(source);
         else bySource[source] = interference;
-        if (source == "path_build")
-            Object.FindAnyObjectByType<RoadPlanManager>()?.SetAuthoritativeCollision(interference != null && interference.CollidingPathIds.Count > 0);
         Recompose();
     }
 
@@ -49,7 +47,6 @@ public class HighlightManager
     public void Clear(string source)
     {
         if (string.IsNullOrEmpty(source)) source = "default";
-        if (source == "path_build") Object.FindAnyObjectByType<RoadPlanManager>()?.SetAuthoritativeCollision(false);
         if (bySource.Remove(source)) Recompose();
     }
 

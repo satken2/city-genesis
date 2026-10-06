@@ -17,7 +17,6 @@ public partial class RoadPlanManager
     // 川の占有箱を出す範囲: 違反サンプル点からこの半径(m)以内のセルだけを赤く示す。
     private const float RiverOccupancyBoxRadius = 40f;
     private List<Vector3> cachedCollisionVolume;
-    private bool authoritativeCollision;
     private List<Vector3> cachedBuildingVolume;
     // 敷設中パスと干渉する建物のフットプリント（ワールドXZポリゴン）のローカル推定キャッシュ。
     private List<List<Vector3>> cachedBuildingInterference;
@@ -356,8 +355,10 @@ public partial class RoadPlanManager
     }
 
     /// <summary>
-    /// 衝突する道路区間の幅と占有高さ、地表レベルで横切っている川の範囲(横断付近)、
-    /// および地表レベルで海・湖の上を通っている道路区間を半透明の箱で示す。
+    /// 衝突相手のパス区間の幅と占有高さ、地表レベルで横切っている川の範囲(横断付近)、
+    /// および地表レベルで海・湖の上を通っている道路区間を半透明の占有筒・箱で示す。
+    /// パス同士の衝突は相手側の区間だけに被せ、敷設中のプレビューメッシュを覆わない
+    /// (自己交差では後ろ側の区間が相手になる)。
     /// </summary>
     private void DrawElevationIntersections(Camera cam)
     {
@@ -366,32 +367,12 @@ public partial class RoadPlanManager
         if (cachedCollisionVolume == null)
         {
             cachedCollisionVolume = new List<Vector3>();
-            var segments = BuildEditingElevationSegments();
-            if (authoritativeCollision)
+            var drawn = new HashSet<(Vector3, Vector3)>();
+            foreach (var (_, other) in CheckElevationIntersections())
             {
-                var renderPoints = GetRenderPoints();
-                var offsets = LateralOffsets != null && LateralOffsets.Length > 0 ? LateralOffsets : new float[] { 0f };
-                foreach (float offset in offsets)
-                {
-                    var line = RoadRenderer.OffsetPolylineLateral(renderPoints, offset);
-                    for (int i = 1; i < line.Count; i++)
-                        OccupancyVolumeUtil.AddSegment(cachedCollisionVolume, line[i - 1], line[i],
-                            pathManager.GetRoadWidth(PathSubtype), GetPathHeightFromMaster(PathSubtype));
-                }
-            }
-            var drawn = new HashSet<int>();
-            foreach (var (index, other) in CheckElevationIntersections())
-            {
-                if (index < 0 || index >= segments.Count) continue;
-                if (drawn.Add(index))
-                {
-                    var seg = segments[index];
-                    OccupancyVolumeUtil.AddSegment(cachedCollisionVolume,
-                        new Vector3(seg.a.x, seg.absYA, seg.a.z), new Vector3(seg.b.x, seg.absYB, seg.b.z),
-                        pathManager.GetRoadWidth(PathSubtype), GetPathHeightFromMaster(PathSubtype));
-                }
+                if (!drawn.Add((other.a, other.b))) continue;
                 int variant = other.path != null ? other.path.path_variant : PathSubtype;
-                OccupancyVolumeUtil.AddSegment(cachedCollisionVolume, other.a, other.b,
+                OccupancyVolumeUtil.AddTube(cachedCollisionVolume, new List<Vector3> { other.a, other.b },
                     pathManager.GetRoadWidth(variant), GetPathHeightFromMaster(variant));
             }
             // 地表レベルで横切っている川は、横断付近の範囲を同じ警告色の占有箱で示す
@@ -399,10 +380,10 @@ public partial class RoadPlanManager
             {
                 RiverStore.AddOccupancyBox(cachedCollisionVolume, river, violationPoints, RiverOccupancyBoxRadius);
             }
-            // 海・湖は川と違って範囲の格子を持たないため、水の上を通っている道路区間そのものを占有箱で示す
+            // 海・湖は川と違って範囲の格子を持たないため、水の上を通っている道路区間そのものを占有筒で示す
             foreach (var (a, b) in CheckSeaLakeCrossings())
             {
-                OccupancyVolumeUtil.AddSegment(cachedCollisionVolume, a, b,
+                OccupancyVolumeUtil.AddTube(cachedCollisionVolume, new List<Vector3> { a, b },
                     pathManager.GetRoadWidth(PathSubtype), GetPathHeightFromMaster(PathSubtype));
             }
         }

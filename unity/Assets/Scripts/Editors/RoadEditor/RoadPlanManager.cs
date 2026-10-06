@@ -172,7 +172,6 @@ public partial class RoadPlanManager : MonoBehaviour
     {
         routeRevision = System.Guid.NewGuid().ToString("N");
         authoritativeAlignments = null;
-        authoritativeCollision = false;
         cachedRenderPoints = null;
         cachedEditingElevationSegments = null;
         cachedElevationViolations = null;
@@ -184,12 +183,6 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedBuildingInterference = null;
         cachedAlignmentViolations = null;
         alignmentLabels.Clear();
-    }
-
-    public void SetAuthoritativeCollision(bool value)
-    {
-        authoritativeCollision = value;
-        cachedCollisionVolume = null;
     }
 
     public bool IsEditMode => phase == RoadEditorPhase.Editing;

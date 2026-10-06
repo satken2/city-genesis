@@ -352,7 +352,7 @@ public static class RiverStore
     /// 川の範囲を示す半透明の占有箱(上面=水面+ε、底面=水面-OCCUPANCY_BOX_DEPTH、外周に側壁)を
     /// 三角形リストへ追加する。nearPoints を渡すと、そのいずれかから radius 以内のセルだけを
     /// 箱にする(敷設中パスが横切っている付近だけを示す)。null なら川全体。
-    /// 道路の占有箱(OccupancyVolumeUtil.AddSegment)と同じ警告色で描く前提。
+    /// 道路の占有筒(OccupancyVolumeUtil.AddTube)と同じ警告色で描く前提。
     /// </summary>
     public static void AddOccupancyBox(List<Vector3> triangles, RiverRecord river, List<Vector3> nearPoints, float radius)
     {
