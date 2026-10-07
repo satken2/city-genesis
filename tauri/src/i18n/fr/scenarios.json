@@ -19,7 +19,8 @@
     "origin": {
       "local": "Mes créations",
       "workshop": "Communauté",
-      "dlc": "DLC"
+      "dlc": "DLC",
+      "debug": "Débogage"
     },
     "official": "Officiel",
     "editTerrain": "Modifier le terrain",

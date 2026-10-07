@@ -134,8 +134,7 @@
     "load": "불러오기",
     "options": "옵션",
     "quit": "종료",
-    "quitting": "종료 중...",
-    "debugInit": "Debug Init"
+    "quitting": "종료 중..."
   },
   "display": {
     "layerTerrain": "지형",

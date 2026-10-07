@@ -12,8 +12,8 @@ export type SaveCompatibility = {
   balance_core_version?: string;
   core_version?: string;
 };
-/** シナリオの保存元。workshop・dlc は読み取り専用でプレイだけができる。 */
-export type ScenarioOrigin = "local" | "workshop" | "dlc";
+/** シナリオの保存元。local 以外は読み取り専用でプレイだけができる。debug はコアがデバッグ起動のときだけ返す開発用の都市。 */
+export type ScenarioOrigin = "local" | "workshop" | "dlc" | "debug";
 /** 必要パックの所有状況。unverified は本番でSteam検証もそのキャッシュもまだ無い状態。 */
 export type PackStatus = "owned" | "not_owned" | "unverified";
 /** 保存種別に共通する一覧情報。互換性と所有状況はAPIが実行環境から計算する。 */

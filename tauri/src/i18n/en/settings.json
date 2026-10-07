@@ -102,7 +102,6 @@
     "confirmReturnToTop": "Return to the top menu? Unsaved progress will be lost.",
     "confirm": "Yes",
     "cancel": "No",
-    "debugInit": "Debug Init",
     "saveAsScenario": "Save as scenario",
     "saveAsNewScenario": "Save as another scenario",
     "overwriteScenario": "Overwrite Scenario",

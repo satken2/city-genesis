@@ -139,20 +139,6 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
   }
 
   /**
-   * デバッグ初期化ボタン押下時の処理。
-   *
-   * Rust 側の start_debug_init を呼び出し、Unity 起動 → Tips 表示 →
-   * バックエンド POST → ポーリング待機 → HUD 表示 の一連のフローを実行する。
-   */
-  async function handleDebugInit() {
-    try {
-      await invoke("start_debug_init");
-    } catch (error) {
-      console.error("[TopMenu] handleDebugInit error:", error);
-    }
-  }
-
-  /**
    * ゲーム終了処理。
    *
    * 終了シーケンス(Unityへの通知 → バックエンドの統括シャットダウン → UI終了)は
@@ -205,23 +191,6 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
           {t("scenarios.manage")}
         </button>
       </div>
-
-      {/**
-       * デバッグ初期化ボタン。
-       * デバッグ実行時のみ設定ボタンの左に表示する。
-       */}
-      {debugExecution && (
-        <button
-          className="topmenu-btn topmenu-btn-debug"
-          onClick={handleDebugInit}
-          disabled={!coreAvailable}
-          title={t("topmenu.debugInit")}
-          aria-label={t("topmenu.debugInit")}
-          type="button"
-        >
-          D
-        </button>
-      )}
 
       {/**
        * GitHub ボタン。

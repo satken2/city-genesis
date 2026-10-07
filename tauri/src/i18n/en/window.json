@@ -134,8 +134,7 @@
     "load": "Load",
     "options": "Options",
     "quit": "Quit",
-    "quitting": "Quitting...",
-    "debugInit": "Debug Init"
+    "quitting": "Quitting..."
   },
   "display": {
     "layerTerrain": "Terrain",

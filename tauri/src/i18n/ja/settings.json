@@ -102,7 +102,6 @@
     "confirmReturnToTop": "トップメニューに戻りますか？現在の進行状況は自動保存されません。",
     "confirm": "はい",
     "cancel": "いいえ",
-    "debugInit": "Debug Init",
     "saveAsScenario": "シナリオとして保存",
     "saveAsNewScenario": "別のシナリオとして保存",
     "overwriteScenario": "上書き保存",

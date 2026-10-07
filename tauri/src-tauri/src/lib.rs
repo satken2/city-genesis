@@ -1102,64 +1102,6 @@ mod terrain_editor_tests {
     }
 }
 
-/// デバッグ初期化を実行してゲームセッションを開始する。
-/// Unity に前の都市の表示を片付けさせ、topmenu を隠して Tipsを表示した後、
-/// バックエンドに POST /api/v1/system/debug-init を送信する。
-#[tauri::command]
-async fn start_debug_init(
-    app: tauri::AppHandle,
-    state: tauri::State<'_, SharedState>,
-) -> Result<(), String> {
-    log::info!("[start_debug_init] デバッグ初期化を開始");
-
-    version::verify_core(state.inner()).await?;
-    version::prepare_graphic(state.inner()).await?;
-    require_backend(state.inner())?;
-
-    if let Some(topmenu) = app.get_webview_window("topmenu") {
-        let _ = topmenu.hide();
-    }
-
-    // ゲーム開始の確定に伴い、開いているポップアップを全て閉じる
-    window::close_all_popup_windows(&app, state.inner());
-
-    begin_initial_loading(&app, state.inner(), false)?;
-
-
-    let api_base_url = {
-        let guard = state.lock();
-        guard.api_base_url.clone()
-    };
-    let url = format!("{}/api/v1/system/debug-init", api_base_url.trim_end_matches('/'));
-
-    let client = reqwest::Client::new();
-    let res = client
-        .post(&url)
-        .timeout(Duration::from_secs(60))
-        .send()
-        .await
-        .map_err(|e| { abort_initial_loading(&app, state.inner()); format!("セッション作成リクエストに失敗しました: {e}") })?;
-
-    if !res.status().is_success() {
-        let status = res.status();
-        let body = res.text().await.unwrap_or_default();
-        log::error!("[start_debug_init] セッション作成失敗: {} {}", status, body);
-        abort_initial_loading(&app, state.inner());
-        if let Some(topmenu) = app.get_webview_window("topmenu") {
-            let _ = topmenu.show();
-        }
-        {
-            let mut guard = state.lock();
-            guard.is_loading = false;
-        }
-        return Err(format!("セッション作成に失敗しました: {status} {body}"));
-    }
-
-    log::info!("[start_debug_init] セッション作成リクエスト成功。ポーリング待機に委譲");
-    state.lock().backend_load_complete = true;
-    Ok(())
-}
-
 /// アプリケーション全体を終了する（トップメニューの「終了」ボタン用）
 #[tauri::command]
 fn exit_app(app: tauri::AppHandle, state: tauri::State<'_, SharedState>) -> Result<(), String> {
@@ -1968,7 +1910,6 @@ pub fn run() {
             start_load_game,
             version::get_frontend_status,
             version::get_core_version,
-            start_debug_init,
             create_session,
             exit_app,
             load_app_settings,

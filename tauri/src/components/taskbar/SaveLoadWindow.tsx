@@ -19,13 +19,13 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { sendSessionReset, sendSessionReload } from "../../utils/ipc";
+import { sendSessionReset } from "../../utils/ipc";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import {
   captureSaveThumbnail, errorCode, saveDisplayName, scenarioDisplayTitle, type SaveEntry, type ScenarioEntry,
 } from "../../utils/saves";
 import { SaveDialog, SaveDialogButton } from "./SaveDialog";
-import { BackIcon, DebugIcon, HomeIcon, LoadIcon, NewGameIcon, PowerIcon, SaveAsIcon, SaveIcon, ScenarioIcon } from "./SaveIcons";
+import { BackIcon, HomeIcon, LoadIcon, NewGameIcon, PowerIcon, SaveAsIcon, SaveIcon, ScenarioIcon } from "./SaveIcons";
 import "./SaveLoadWindow.css";
 
 type SaveLoadWindowProps = {
@@ -33,11 +33,10 @@ type SaveLoadWindowProps = {
   onClose: () => void;
 };
 
-/** GET /api/v1/sessions のうち使う項目。debug_execution のときだけデバッグ初期化を出す */
+/** GET /api/v1/sessions のうち使う項目 */
 type SessionInfo = {
   current_save_id: string | null;
   current_save_is_scenario: boolean;
-  debug_execution: boolean;
 };
 
 type ConfirmAction = "returnToTop" | "quitGame";
@@ -45,8 +44,7 @@ type ConfirmAction = "returnToTop" | "quitGame";
 type Dialog =
   | { kind: "overwrite" }
   | { kind: "saveAs" }
-  | { kind: "confirm"; action: ConfirmAction }
-  | { kind: "error"; message: string };
+  | { kind: "confirm"; action: ConfirmAction };
 
 const SAVE_NAME_MAX_LENGTH = 120; // コアの POST /api/v1/saves の name の上限
 
@@ -81,7 +79,6 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
   const [editingScenario, setEditingScenario] = useState(false);
   const [currentSave, setCurrentSave] = useState<SaveEntry | ScenarioEntry | null>(null);
   const [cityName, setCityName] = useState("");
-  const [debugExecution, setDebugExecution] = useState(false);
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const [saveName, setSaveName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -98,7 +95,6 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
         fetchApi<{ city: { name?: string } }>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), { signal }).catch(() => null),
       ]);
       const scenario = session.current_save_is_scenario ?? false;
-      setDebugExecution(session.debug_execution ?? false);
       setEditingScenario(scenario);
       setCityName(city?.city.name ?? "");
       if (!session.current_save_id) return;
@@ -213,19 +209,6 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
     }
   }, [apiBaseUrl, onClose, t]);
 
-  const debugInit = useCallback(async () => {
-    setBusy(true);
-    try {
-      await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/system/debug-init"), { method: "POST" });
-      await sendSessionReload().catch(() => {});
-      onClose();
-    } catch (error) {
-      openDialog({ kind: "error", message: failureText(error, t, t("saveLoad.loadFailed")) });
-    } finally {
-      setBusy(false);
-    }
-  }, [apiBaseUrl, onClose, openDialog, t]);
-
   const overwriteLabel = t(editingScenario ? "saveLoad.overwriteScenario" : "saveLoad.overwriteSave");
 
   function renderDialog(current: Dialog) {
@@ -276,13 +259,6 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
           </SaveDialog>
         );
       }
-      case "error":
-        return (
-          <SaveDialog icon={<DebugIcon />} title={t("saveLoad.debugInit")} tone="danger" onDismiss={dismissDialog}
-            actions={<SaveDialogButton kind="primary" onClick={dismissDialog}>{t("common.ok")}</SaveDialogButton>}>
-            <p className="save-dialog-error" role="alert">{current.message}</p>
-          </SaveDialog>
-        );
     }
   }
 
@@ -310,9 +286,6 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
             onClick={() => openDialog({ kind: "confirm", action: "returnToTop" })} />
           <MenuItem icon={<PowerIcon />} label={t("saveLoad.quitGame")} danger disabled={busy}
             onClick={() => openDialog({ kind: "confirm", action: "quitGame" })} />
-          {debugExecution && (
-            <MenuItem icon={<DebugIcon />} label={t("saveLoad.debugInit")} danger disabled={busy} onClick={() => void debugInit()} />
-          )}
         </div>
       </nav>
       <MenuItem className="save-menu-back" icon={<BackIcon />} label={t("saveLoad.backToGame")} disabled={busy} onClick={onClose} />

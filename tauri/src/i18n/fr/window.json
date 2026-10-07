@@ -134,8 +134,7 @@
     "load": "Charger",
     "options": "Options",
     "quit": "Quitter",
-    "quitting": "Fermeture...",
-    "debugInit": "Debug Init"
+    "quitting": "Fermeture..."
   },
   "display": {
     "layerTerrain": "Terrain",

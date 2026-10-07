@@ -134,8 +134,7 @@
     "load": "讀檔",
     "options": "選項",
     "quit": "結束",
-    "quitting": "結束中...",
-    "debugInit": "Debug Init"
+    "quitting": "結束中..."
   },
   "display": {
     "layerTerrain": "地形",

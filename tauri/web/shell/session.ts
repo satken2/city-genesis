@@ -362,17 +362,6 @@ export async function startLoadGame(args: { saveId: string; acceptBalanceChange?
   await postSessionStart(`${apiBase()}/api/v1/sessions?${query}`, "ロード");
 }
 
-/** デバッグ初期化でゲームを始める(`start_debug_init`)。 */
-export async function startDebugInit(): Promise<void> {
-  await verifyCore();
-  await prepareGraphic();
-  requireBackend();
-  host.hide("topmenu");
-  closeAllPopupWindows();
-  beginInitialLoading(false);
-  await postSessionStart(`${apiBase()}/api/v1/system/debug-init`, "セッション作成");
-}
-
 /** 開始の要求を送る。成功したら完了の判定をセッション監視に任せ、失敗したらトップメニューへ戻す。 */
 async function postSessionStart(url: string, what: string): Promise<void> {
   let response: Response;

@@ -75,14 +75,6 @@ export function BackIcon(props: IconProps) {
   </Icon>;
 }
 
-export function DebugIcon(props: IconProps) {
-  return <Icon {...props}>
-    <path d="M8 11a4 4 0 0 1 8 0v4a4 4 0 0 1-8 0z" />
-    <path d="M9.5 7.5a2.5 2.5 0 0 1 5 0" />
-    <path d="M4 13h4M16 13h4M5 8.5l3 1.5M19 8.5l-3 1.5M5 18.5l3-1.5M19 18.5l-3-1.5" />
-  </Icon>;
-}
-
 export function TrashIcon(props: IconProps) {
   return <Icon {...props}>
     <path d="M4 7h16" />

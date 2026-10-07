@@ -134,8 +134,7 @@
     "load": "ロード",
     "options": "オプション",
     "quit": "終了",
-    "quitting": "終了中...",
-    "debugInit": "Debug Init"
+    "quitting": "終了中..."
   },
   "display": {
     "layerTerrain": "地形",

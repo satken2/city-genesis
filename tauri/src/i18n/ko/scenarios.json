@@ -19,7 +19,8 @@
     "origin": {
       "local": "내 작품",
       "workshop": "커뮤니티",
-      "dlc": "DLC"
+      "dlc": "DLC",
+      "debug": "디버그"
     },
     "official": "공식",
     "editTerrain": "지형 편집",

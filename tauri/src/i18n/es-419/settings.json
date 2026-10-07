@@ -102,7 +102,6 @@
     "confirmReturnToTop": "¿Volver al menú principal? El progreso actual no se guarda automáticamente.",
     "confirm": "Sí",
     "cancel": "No",
-    "debugInit": "Debug Init",
     "saveAsScenario": "Guardar como escenario",
     "saveAsNewScenario": "Guardar como otro escenario",
     "overwriteScenario": "Sobrescribir escenario",

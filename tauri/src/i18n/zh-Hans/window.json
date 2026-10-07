@@ -134,8 +134,7 @@
     "load": "读档",
     "options": "选项",
     "quit": "退出",
-    "quitting": "正在退出...",
-    "debugInit": "Debug Init"
+    "quitting": "正在退出..."
   },
   "display": {
     "layerTerrain": "地形",

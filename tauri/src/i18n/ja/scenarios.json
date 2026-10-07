@@ -19,7 +19,8 @@
     "origin": {
       "local": "自作",
       "workshop": "コミュニティ",
-      "dlc": "DLC"
+      "dlc": "DLC",
+      "debug": "デバッグ"
     },
     "official": "公式",
     "editTerrain": "地形を編集",

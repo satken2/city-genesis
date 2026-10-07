@@ -19,7 +19,8 @@
     "origin": {
       "local": "我的作品",
       "workshop": "社区",
-      "dlc": "DLC"
+      "dlc": "DLC",
+      "debug": "调试"
     },
     "official": "官方",
     "editTerrain": "编辑地形",

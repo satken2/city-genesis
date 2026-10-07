@@ -6,7 +6,8 @@
  *
  * 左カラムの上端はヒーローで、小見出しの下にタブ「シナリオを選択」と「シナリオを探す」(共有シナリオの閲覧。未提供なので無効)を
  * 見出しの大きさで並べる。その下が選択肢のタイル一覧で、開閉できるチュートリアルミッションと、全保存元(自作・コミュニティ・DLC)の
- * シナリオ(GET /api/v1/scenarios)を節に分けて並べる。地形から直接始める入口は無く、標高ファイルはシナリオ管理で
+ * シナリオ(GET /api/v1/scenarios)を節に分けて並べる。コアがデバッグ起動(非Nuitka)のときだけ一覧に含める開発用のデバッグ都市
+ * (保存元 debug)は、チュートリアルの上の「デバッグ」節に分けて並べ、シナリオと同じように始める。地形から直接始める入口は無く、標高ファイルはシナリオ管理で
  * シナリオにしてから遊ぶ。チュートリアルはコアが同梱の教材の都市から始める(チュートリアルIDだけを送る)。
  *
  * 一覧のタイルは画像を全面に敷き、名前と保存元の札だけを重ねる。説明・達成条件は右カラムに集約する。
@@ -457,6 +458,23 @@ export function NewGameWindow({
     />
   );
 
+  const debugCities = templates.filter((tmpl) => tmpl.origin === "debug");
+  const scenarios = templates.filter((tmpl) => tmpl.origin !== "debug");
+  const templateTile = (tmpl: TemplateEntry, index: number) => (
+    <ScenarioTile
+      key={tmpl.id}
+      title={scenarioDisplayTitle(tmpl, i18n.language)}
+      selected={isSelected("template", tmpl.id)}
+      cleared={isScenarioCleared(tmpl.id)}
+      disabled={busy}
+      index={index}
+      onSelect={() => setSelection({ kind: "template", id: tmpl.id })}
+    >
+      <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={tmpl.id} revision={tmpl.content_revision} />
+      <ScenarioOriginBadges entry={tmpl} />
+    </ScenarioTile>
+  );
+
   const confirmTemplate = confirmSelection?.template ?? null;
   const fixedOptions = new Set<ScenarioStartOption>(confirmTemplate?.scenario_fixed_options ?? []);
   const isSelected = (kind: Selection["kind"], id: string) => selection?.kind === kind && selection.id === id;
@@ -471,6 +489,13 @@ export function NewGameWindow({
         </header>
 
         <div className="new-game-list">
+          {debugCities.length > 0 && (
+            <section className="new-game-section">
+              <h3 className="new-game-section-title">{t("newGame.sectionDebug")}</h3>
+              <div className="new-game-tiles">{debugCities.map(templateTile)}</div>
+            </section>
+          )}
+
           <section className="new-game-section">
             <h3 className="new-game-section-title">
               <button
@@ -493,7 +518,7 @@ export function NewGameWindow({
                   selected={isSelected("tutorial", scenario.id)}
                   cleared={isTutorialCleared(scenario.id)}
                   disabled={busy}
-                  index={index}
+                  index={debugCities.length + index}
                   onSelect={() => setSelection({ kind: "tutorial", id: scenario.id })}
                 >
                   {scenario.image ? (
@@ -510,25 +535,12 @@ export function NewGameWindow({
             <h3 className="new-game-section-title">{t("newGame.sectionScenarios")}</h3>
             {loading ? (
               <div className="new-game-empty">{t("newGame.loading")}</div>
-            ) : templates.length === 0 ? (
+            ) : scenarios.length === 0 ? (
               <div className="new-game-empty">{t("newGame.noTemplates")}</div>
             ) : (
               <div className="new-game-tiles">
                 {/* 読み込めない作品も選択し、詳細で理由を確認できる。 */}
-                {templates.map((tmpl, index) => (
-                  <ScenarioTile
-                    key={tmpl.id}
-                    title={scenarioDisplayTitle(tmpl, i18n.language)}
-                    selected={isSelected("template", tmpl.id)}
-                    cleared={isScenarioCleared(tmpl.id)}
-                    disabled={busy}
-                    index={NEW_GAME_TUTORIAL_SCENARIOS.length + index}
-                    onSelect={() => setSelection({ kind: "template", id: tmpl.id })}
-                  >
-                    <ScenarioThumbnail apiBaseUrl={apiBaseUrl} templateId={tmpl.id} revision={tmpl.content_revision} />
-                    <ScenarioOriginBadges entry={tmpl} />
-                  </ScenarioTile>
-                ))}
+                {scenarios.map((tmpl, index) => templateTile(tmpl, debugCities.length + NEW_GAME_TUTORIAL_SCENARIOS.length + index))}
               </div>
             )}
           </section>

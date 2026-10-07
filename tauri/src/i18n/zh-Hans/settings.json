@@ -102,7 +102,6 @@
     "confirmReturnToTop": "确定返回主菜单吗？当前进度不会自动保存。",
     "confirm": "是",
     "cancel": "否",
-    "debugInit": "Debug Init",
     "saveAsScenario": "另存为场景",
     "saveAsNewScenario": "另存为新场景",
     "overwriteScenario": "覆盖场景",

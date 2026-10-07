@@ -10,7 +10,6 @@ import {
   createSession,
   finishParameterSetup,
   requireBackend,
-  startDebugInit,
   startLoadGame,
 } from "./session";
 import { loadSettings, saveSettings } from "./settings";
@@ -121,7 +120,6 @@ const commands: Record<string, Command> = {
     startLoadGame({ saveId: stringArg(args, "saveId", "start_load_game"), acceptBalanceChange: args.acceptBalanceChange as boolean | null }),
   get_frontend_status: () => getFrontendStatus(),
   get_core_version: () => coreInfo(),
-  start_debug_init: () => startDebugInit(),
   create_session: (_caller, args) => createSession(args),
   exit_app: () => {
     setTimeout(requestAppExit, 0);
