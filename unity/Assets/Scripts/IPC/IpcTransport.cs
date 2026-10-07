@@ -6,6 +6,64 @@ using System.Threading;
 using UnityEngine;
 
 /// <summary>
+/// UI との IPC の送受信路。Windows は MMF、Web ビルドは同じページで動く UI と jslib で受け渡す。
+/// 運ぶメッセージ(Envelope の JSON)はどちらも同じで、IpcClient は実装を選ばずにこれを通す。
+/// </summary>
+public interface IIpcTransport : IDisposable
+{
+    event Action<string> OnMessageReceived;
+    void Send(string json);
+    /// <summary>受信済みのメッセージをメインスレッドで配る(IpcClient.Update から呼ぶ)。</summary>
+    void ProcessReceivedMessages();
+}
+
+public static class IpcTransports
+{
+    /// <summary>このプラットフォームの送受信路を開く。IPC の無いプラットフォームでは null。</summary>
+    public static IIpcTransport Open()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        return new WebIpcTransport();
+#elif UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        return new MmfIpcTransport();
+#else
+        return null;
+#endif
+    }
+}
+
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+/// <summary>
+/// MMF の送受信路。受信は MmfReader、送信は MmfWriter が受け持つ。
+/// 共有メモリと同期オブジェクトの名前は tauri 側 src-tauri/src/ipc.rs と一致させること。
+/// </summary>
+internal sealed class MmfIpcTransport : IIpcTransport
+{
+    private readonly MmfReader _reader;
+    private readonly MmfWriter _writer;
+
+    public event Action<string> OnMessageReceived;
+
+    public MmfIpcTransport()
+    {
+        _reader = new MmfReader("genesis-ipc-ui-to-graphic", "genesis-ipc-mutex-utg", "genesis-ipc-event-utg");
+        _reader.OnMessageReceived += message => OnMessageReceived?.Invoke(message);
+        _reader.Start();
+        _writer = new MmfWriter("genesis-ipc-graphic-to-ui", "genesis-ipc-mutex-gtu", "genesis-ipc-event-gtu");
+    }
+
+    public void Send(string json) => _writer.Send(json);
+
+    public void ProcessReceivedMessages() => _reader.ProcessReceivedMessages();
+
+    public void Dispose()
+    {
+        _reader.Dispose();
+        _writer.Dispose();
+    }
+}
+
+/// <summary>
 /// 名前付きMutexの取得ヘルパー。
 /// 前の所有プロセス(クラッシュしたUnity等)がMutexを解放せずに死んだ場合、
 /// WaitOne は AbandonedMutexException を投げるが、その時点で所有権自体は
@@ -280,3 +338,4 @@ public class MmfWriter : IDisposable
         _event?.Dispose();
     }
 }
+#endif

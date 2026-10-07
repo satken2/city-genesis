@@ -151,7 +151,7 @@ public sealed partial class AmbientVehicleManager
             float width = terrain.GetMapWidth(), height = terrain.GetMapHeight();
             float cell = Mathf.Max(RouteCellMin, Mathf.Max(width, height) / RouteCellsMax);
             // 距離場とダイクストラは格子の点数に比例して重いので、バックグラウンドで求める。
-            var task = Task.Run(() =>
+            var task = BackgroundWork.Run(() =>
             {
                 var grid = new SeaRoute.Grid(-width * .5f, -height * .5f, width * .5f, height * .5f, cell, RouteMaxDistance);
                 var routes = new Vector2[requests.Length][];

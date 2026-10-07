@@ -907,7 +907,7 @@ public partial class TerrainManager : BaseApiDataManager
             float below = SeaFloorDepthSpan;
             float[,] heights = buffer = RentHeightBuffer();
             // float32 の受信列を多次元配列へ直接写し、その場で正規化する(中間の1次元配列を作らない)。
-            normalizeTask = Task.Run(() =>
+            normalizeTask = BackgroundWork.Run(() =>
             {
                 if (bytes.Length != TILE_RESOLUTION * TILE_RESOLUTION * sizeof(float)) throw new InvalidOperationException("地形配列のサイズが不正です");
                 Buffer.BlockCopy(bytes, 0, heights, 0, bytes.Length);
@@ -1337,7 +1337,7 @@ public partial class TerrainManager : BaseApiDataManager
         float gridStep = ultraFarGridStep;
         float heightOffset = ultraFarHeightOffset;
 
-        Task<UltraFarLandMeshBuilder.MeshData> task = Task.Run(() =>
+        Task<UltraFarLandMeshBuilder.MeshData> task = BackgroundWork.Run(() =>
             UltraFarLandMeshBuilder.Build(mapWidth, mapHeight, gridStep, heightOffset, sampleHeight));
         yield return Utils.WaitTask(task);
         if (batch.IsCanceled || epoch != clearEpoch || task.IsFaulted || task.IsCanceled || task.Result.vertices == null) yield break;
@@ -1922,7 +1922,7 @@ public partial class TerrainManager : BaseApiDataManager
         float verticalSpan = terrainSize.y;
         float belowSeaSpan = SeaFloorDepthSpan;
 
-        return Task.Run(() =>
+        return BackgroundWork.Run(() =>
         {
             float[,] heights = ConvertFloat16BinaryToHeights(rawBytes, gridRows, gridCols, verticalSpan, belowSeaSpan);
             return (gridRows == targetResolution && gridCols == targetResolution)

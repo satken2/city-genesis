@@ -13,9 +13,14 @@ using UnityEngine;
 ///
 /// Windows の SetForegroundWindow は呼び出し側がフォアグラウンドでないと失敗する場合がある。
 /// これを緩和するため、AllowSetForegroundWindow(ASFW_ANY) を事前に呼び出す。
+/// Web ビルドでは 3D 画面はページの canvas なので、前面化は canvas にフォーカスを移すことに当たる。
 /// </summary>
 public static class WindowUtil
 {
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")]
+    private static extern void GenesisWeb_FocusCanvas();
+#else
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
@@ -29,6 +34,7 @@ public static class WindowUtil
     /// すべてのプロセスに対して SetForegroundWindow の呼び出しを許可する定数。
     /// </summary>
     private const uint ASFW_ANY = unchecked((uint)-1);
+#endif
 
     /// <summary>
     /// 現在の Unity ウィンドウを OS のフォアグラウンドに持ってくる。
@@ -39,6 +45,9 @@ public static class WindowUtil
     /// </summary>
     public static void BringToForeground()
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        GenesisWeb_FocusCanvas();
+#else
         AllowSetForegroundWindow(ASFW_ANY);
 
         IntPtr hWnd = GetActiveWindow();
@@ -53,6 +62,7 @@ public static class WindowUtil
         {
             Debug.LogWarning("[WindowUtil] SetForegroundWindow が失敗しました。ウィンドウが既に前面か、OS制約により拒否された可能性があります。");
         }
+#endif
     }
 
     /// <summary>

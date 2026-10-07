@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// IPC通信の高レベルクライアント。
-/// MmfReader（Tauriからの受信）とMmfWriter（Tauriへの送信）を管理し、
+/// UIとの送受信路(IIpcTransport。Windows は MMF、Web ビルドはページの JS)を管理し、
 /// 型付きのemit/subscribe APIを提供する。
 /// MonoBehaviourとして動作し、Updateでメインスレッド上にイベントをディスパッチする。
 /// </summary>
@@ -12,15 +12,7 @@ public class IpcClient : MonoBehaviour
 {
     public static IpcClient Instance { get; private set; }
 
-    /// <summary>
-    /// Tauri→Unity方向のMMFリーダー。
-    /// </summary>
-    private MmfReader _reader;
-
-    /// <summary>
-    /// Unity→Tauri方向のMMFライター。
-    /// </summary>
-    private MmfWriter _writer;
+    private IIpcTransport _transport;
 
     // ---- 受信イベント（ui -> graphic）----
     public event Action<string, Dictionary<string, object>> OnWorldChangeState;
@@ -179,32 +171,18 @@ public class IpcClient : MonoBehaviour
     }
 
     /// <summary>
-    /// IPCトランスポートを初期化する。
-    /// MMFと同期オブジェクトをCreateOrOpenで開き、リーダーを起動する。
+    /// IPCトランスポートを開く。受信は Update でメインスレッドへ配る。
     /// </summary>
     public void Initialize()
     {
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        // Tauriからのメッセージを受信するリーダーを起動
-        _reader = new MmfReader(
-            "genesis-ipc-ui-to-graphic",
-            "genesis-ipc-mutex-utg",
-            "genesis-ipc-event-utg"
-        );
-        _reader.OnMessageReceived += HandleIncomingMessage;
-        _reader.Start();
-
-        // Unity→Tauri方向のライターを準備
-        _writer = new MmfWriter(
-            "genesis-ipc-graphic-to-ui",
-            "genesis-ipc-mutex-gtu",
-            "genesis-ipc-event-gtu"
-        );
-
-        Debug.Log("IpcClient: MmfReader を起動し、MmfWriter を準備しました");
-#else
-        Debug.LogWarning("IpcClient: このプラットフォームではIPCはサポートされていません");
-#endif
+        _transport = IpcTransports.Open();
+        if (_transport == null)
+        {
+            Debug.LogWarning("IpcClient: このプラットフォームではIPCはサポートされていません");
+            return;
+        }
+        _transport.OnMessageReceived += HandleIncomingMessage;
+        Debug.Log("IpcClient: IPCの送受信路を開きました");
     }
 
     /// <summary>
@@ -216,15 +194,12 @@ public class IpcClient : MonoBehaviour
     {
         EmitGraphicStopped();
 
-        if (_reader != null)
+        if (_transport != null)
         {
-            _reader.OnMessageReceived -= HandleIncomingMessage;
-            _reader.Dispose();
-            _reader = null;
+            _transport.OnMessageReceived -= HandleIncomingMessage;
+            _transport.Dispose();
+            _transport = null;
         }
-
-        _writer?.Dispose();
-        _writer = null;
         IsConnected = false;
 
         Debug.Log("IpcClient: IPC接続を切断しました");
@@ -232,7 +207,7 @@ public class IpcClient : MonoBehaviour
 
     private void Update()
     {
-        _reader?.ProcessReceivedMessages();
+        _transport?.ProcessReceivedMessages();
     }
 
     /// <summary>
@@ -1658,13 +1633,13 @@ public class IpcClient : MonoBehaviour
 
     private void SendEnvelope(string eventName, object payload)
     {
-        if (_writer == null) return;
+        if (_transport == null) return;
 
         IpcEnvelope envelope = IpcEnvelope.CreateOutgoing(eventName, payload);
         string json = envelope.ToJson();
         try
         {
-            _writer.Send(json);
+            _transport.Send(json);
         }
         catch (Exception e)
         {

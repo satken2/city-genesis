@@ -1,6 +1,6 @@
 # unity
 
-City Genesis の3D描画と入力を担当する Unity プロジェクト。都市データはコアから HTTP で取得し、Tauri のUIとは MMF で連携する。作業対象のサブディレクトリに AGENTS.md がある場合はそちらも読む。
+City Genesis の3D描画と入力を担当する Unity プロジェクト。都市データはコアから HTTP で取得し、Tauri のUIとは MMF で連携する。同じプロジェクトからブラウザ版の Web ビルド(WebGPU。`Assets/Editor/WebBuild.cs`)も作り、そのときUIとはページの JS で連携する。作業対象のサブディレクトリに AGENTS.md がある場合はそちらも読む。
 
 ## Assets/Scripts の領域
 
@@ -24,6 +24,8 @@ City Genesis の3D描画と入力を担当する Unity プロジェクト。都�
 - 実体の識別は `ObjectIdInfo` を使い、GameObject 名を解析しない。クリック対象のコライダー・タグ・入力ハンドラを整合させる。
 - 大量の生成・更新は共通フレーム予算と既存の逆引き・空間索引を使う。毎フレームの全件走査を増やさない。
 - Unity API はメインスレッドで扱う。生成したメッシュ・材質の所有と解放を明確にし、共有アセットを破棄しない。
+- 別スレッドに逃がす重い計算は `Task.Run` ではなく `Utils/BackgroundWork` を通す(Web ビルドにはスレッドが無いため)。
+- Windows と Web ビルドの違い(スレッド・Win32・IPC の運び方)は `BackgroundWork`・`WindowUtil`・`IpcTransport` の中だけで切り替える。呼び出し側に `#if UNITY_WEBGL` を書かない。
 - モデルの原本は `blender/`、FBX は書き出し物、Resources のミラープレハブは生成物。モデルを移動・削除したら対応するミラーも整合させる。
 - 冗長ログは `UnityLog.If` の共通フラグを使う。ホットパスで無条件に出力せず、起動引数や認証情報をログへ載せない。
 

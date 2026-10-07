@@ -263,7 +263,7 @@ public class PropManager : BaseApiDataManager
         overviewCancel?.Dispose();
         overviewCancel = new System.Threading.CancellationTokenSource();
         var token = overviewCancel.Token;
-        var task = System.Threading.Tasks.Task.Run(() => ForestOverview.Build(response, token), token);
+        var task = BackgroundWork.Run(() => ForestOverview.Build(response, token), token);
         while (!task.IsCompleted) yield return null;
         if (task.IsFaulted) Debug.LogException(task.Exception);
         else if (!task.IsCanceled && revision == overviewRevision && visible)

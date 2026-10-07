@@ -2,6 +2,8 @@
 
 Unity に重ねて表示する Tauri・React・TypeScript のUI。React は各ウィンドウの内容、Rust はウィンドウとプロセスの管理を担当する。Tauri はストアの起動対象で、コアと Unity を子プロセスとして起動・監視する。画面は `src/components/`、共通処理は `src/hooks/`・`src/utils/`、翻訳は `src/i18n/` に置く。
 
+`web/` はブラウザ版のページ。同じ `src/` を各ウィンドウの iframe で動かし、Rust の役割は Web シェル(`web/shell/`)が受け持つ。Tauri の API は Web ビルドだけ `web/tauri-shim/` に差し替わる。
+
 ## 共通ルール
 
 - バックエンドへの HTTP は `fetchApi`、Unity への送信は `utils/ipc.ts` を通す。通信監視・版確認・マスター取得を各画面へ複製しない。
@@ -13,6 +15,8 @@ Unity に重ねて表示する Tauri・React・TypeScript のUI。React は各�
 - 確認は `requestConfirm` を使い、`window.confirm` に依存しない。共通部品・フック・整形処理を新設前に確認する。
 - 共通スタイルは `App.css` のトークンを使う。文字サイズと連動する寸法は rem を基本とし、固定寸法の例外は公開の共通スタイル仕様に従う。
 - WebView の CSP は `eval` を許可しない。実行時にコード生成を必要とする依存を持ち込まない。
+- `src/` から新しい Tauri の API(関数・メソッド・プラグイン)を使うときは、`web/tauri-shim/` にも実装を足す。足りない名前は Web ビルドが失敗する。
+- Rust のウィンドウ管理・起動とセッション監視・IPC の中継・コマンドを変えたら、`web/shell/` の同じ処理も揃える。ブラウザ版だけの違いは Web シェルと差し替えモジュールの中に閉じ、`src/` に環境の判定を書かない。
 
 ## 参照先
 
@@ -20,3 +24,4 @@ Unity に重ねて表示する Tauri・React・TypeScript のUI。React は各�
 - IPC: `docs/docs/programs/IPC連携の整理.md`。素材: `docs/docs/programs/素材クレジット管理.md`。
 - 配下の規約: `tauri/src/components/AGENTS.md`・`tauri/src-tauri/AGENTS.md`・`tauri/src/tutorial/AGENTS.md`。
 - 開発は `npm run tauri dev`、配布ビルドは `npm run tauri build`(Steam 版は `npm run tauri build -- --features steam`)。翻訳の整合性は `tools/check_i18n_parity.py` で確認する。
+- ブラウザ版は `npm run dev:web`(開発サーバー)・`npm run build:web`(`dist-web/` へ出力)。構成は `docs/docs/programs/コンポーネント連携.md` の「ブラウザ版」。

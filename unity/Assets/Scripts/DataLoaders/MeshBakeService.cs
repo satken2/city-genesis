@@ -21,7 +21,7 @@ public sealed class MeshBakeService : MonoBehaviour
         }
         if (instance.tasks.TryGetValue(mesh, out var pending)) return pending;
         int id = mesh.GetInstanceID();
-        var task = Task.Run(async () =>
+        var task = BackgroundWork.Run(async () =>
         {
             await bakeSlots.WaitAsync();
             try { Physics.BakeMesh(id, false); }

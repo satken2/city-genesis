@@ -1,3 +1,7 @@
+// Steamworks.NET が動くスタンドアロン以外(Web ビルドなど)では無効にする。条件は Steamworks.NET の各ファイルと同じ。
+#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
+#define DISABLESTEAMWORKS
+#endif
 using UnityEngine;
 #if !DISABLESTEAMWORKS
 using Steamworks;

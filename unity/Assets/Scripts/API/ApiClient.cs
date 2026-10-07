@@ -91,7 +91,7 @@ public static class ApiClient
     /// - Accept ヘッダで MessagePack を要求し、対応エンドポイントではバイナリで受信する
     ///   (JSONテキストのパースより高速。デコードは MsgPackDecoder)。未対応エンドポイント
     ///   にはJSONで応答されるため、呼び出し側はどちらか意識しなくてよい。
-    /// - デシリアライズを Task.Run でバックグラウンドスレッドに逃がし、
+    /// - デシリアライズを BackgroundWork でバックグラウンドスレッドに逃がし、
     ///   数百KB級のレスポンスでもメインスレッドをブロックしない(フレームヒッチ防止)
     /// - timeout と Cache-Control: no-cache を標準で設定する
     /// - UNITY_LOG_TIMING 有効時に network / deserialize を分離計測してログ出力する
@@ -141,7 +141,7 @@ public static class ApiClient
             UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] ApiClient  network/{label}: {swNet.ElapsedMilliseconds}ms ({byteLength} bytes, {format})");
 
             var swDeser = System.Diagnostics.Stopwatch.StartNew();
-            Task<T> deserializeTask = Task.Run(() => isMsgPack
+            Task<T> deserializeTask = BackgroundWork.Run(() => isMsgPack
                 ? MsgPackDecoder.Deserialize<T>(rawData)
                 : JsonConvert.DeserializeObject<T>(json));
             yield return Utils.WaitTask(deserializeTask);

@@ -26,7 +26,7 @@ using System.Text;
 ///   (例: path_traffic の {1: 0.5} → キー "1")。
 /// - POCOへのマッピングはpublicフィールドの名前一致(Newtonsoftと同じ規約)。
 ///   数値の相互変換(long→int/float等)もNewtonsoftと同等に寛容にする。
-/// - 静的キャッシュは ConcurrentDictionary を使い、Task.Run のバックグラウンド
+/// - 静的キャッシュは ConcurrentDictionary を使い、BackgroundWork のバックグラウンド
 ///   スレッドから並行に呼ばれても安全にする。
 /// </summary>
 public static class MsgPackDecoder

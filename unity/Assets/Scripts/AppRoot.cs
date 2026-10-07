@@ -19,6 +19,12 @@ public class AppRoot : MonoBehaviour
         // targetFrameRate による上限を必ず有効にする。
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // Web ビルドはページの canvas で動く。キー入力は canvas にフォーカスがあるときだけ受け(UI の入力欄で文字を打てるように)、
+        // フレームの間隔はブラウザの描画周期に任せる(targetFrameRate を固定すると setTimeout で回ることになる)。
+        WebGLInput.captureAllKeyboardInput = false;
+        Application.targetFrameRate = -1;
+#endif
         DontDestroyOnLoad(gameObject); 
     }
 

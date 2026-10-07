@@ -4,6 +4,8 @@
 
 Unityのグラフィックプログラム(以下、`graphic`)と、TauriのUIプログラム(以下、`ui`)は、WindowsのMemoryMappedFile（MMF）2本でIPC連携を行う。
 
+[ブラウザ版](コンポーネント連携.md#ブラウザ版)では両者が同じページで動くので、MMFの代わりにページのJSで受け渡す(Unity側は `IpcTransport` の窓口、UI側はWebシェルの `__genesisGraphicBridge`)。運ぶEnvelopeとイベント、Unityが受信を始める前の送信を溜めておくことはMMFと同じで、「イベント種別」以降の契約はそのまま当てはまる。
+
 ## MMF構成
 
 | MMF名 | 方向 | 書き込み | 読み取り |
