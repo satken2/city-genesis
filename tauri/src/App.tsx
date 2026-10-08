@@ -87,6 +87,7 @@ import { Cockpit } from "./components/hud/Cockpit";
 import { SystemTray } from "./components/hud/SystemTray";
 import { DisplayTray } from "./components/hud/DisplayTray";
 import { TopMenu } from "./components/topmenu/TopMenu";
+import { extraWindow } from "./extraWindows";
 import { ParameterSetupWindow } from "./components/parameter-setup/ParameterSetupWindow";
 import { NotificationWindow } from "./components/notification/NotificationWindow";
 import { TipsWindow } from "./components/tips/TipsWindow";
@@ -110,7 +111,7 @@ function App() {
   const [backendConnected, setConnection] = useState(true);
   const [queryState, setQueryState] = useState<QueryState>({ status: "idle" });
   const [actionState, setActionState] = useState<string>("");
-  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "topmenu" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
+  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "extra" | "topmenu" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
 
   useEffect(() => {
     let disposed = false;
@@ -149,6 +150,8 @@ function App() {
       } else if (label === "tips") {
         console.log("[App] tips window detected, setting windowKind");
         setWindowKind("tips");
+      } else if (extraWindow(label)) {
+        setWindowKind("extra");
       } else if (label !== "main") {
         setWindowKind("popup");
       }
@@ -159,12 +162,12 @@ function App() {
       }
 
       // window-registry のポップアップ以外(HUD各枚・トップメニュー・通知・Tips・ヒントバー・
-      // チュートリアル・初期設定)は Rust 側が直接生成するウィンドウで、context を持たない
+      // チュートリアル・初期設定・入口が登録したウィンドウ)はシェルが直接生成するウィンドウで、context を持たない
       const contextlessLabels = [
         "main", "icon-panel", "cockpit", "system-tray", "display-tray", "topmenu",
         "notification", "tips", "hintbar", "tutorial", "parameter-setup",
       ];
-      if (!contextlessLabels.includes(label)) {
+      if (!contextlessLabels.includes(label) && !extraWindow(label)) {
         const initialContext = await invoke<WindowContext>("get_window_context");
         if (!disposed) {
           setContext(initialContext);
@@ -324,6 +327,7 @@ function App() {
   }
 
   configureBackendRequests(apiBaseUrl);
+  const ExtraWindow = extraWindow(appWindow.label);
   const connectionBlocked = !backendConnected && windowKind !== "topmenu" && windowKind !== "system-tray"
     && !["settings", "credits"].includes(context?.window_type ?? "");
 
@@ -341,6 +345,8 @@ function App() {
         <SystemTray backendConnected={backendConnected} />
       ) : windowKind === "display-tray" ? (
         <DisplayTray />
+      ) : windowKind === "extra" && ExtraWindow ? (
+        <ExtraWindow apiBaseUrl={apiBaseUrl} />
       ) : windowKind === "hintbar" ? (
         <Hintbar />
       ) : windowKind === "tutorial" ? (

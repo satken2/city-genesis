@@ -31,10 +31,15 @@ declare global {
 let unityInstance: UnityInstance | null = null;
 let resolveGraphicLoaded: () => void = () => {};
 
-/** Unity の読み込みが終わった(失敗・ビルドが無い場合も含む)。exe で Unity のプロセスが起動し終えたことに当たる。 */
+/** グラフィックの読み込みが終わった(失敗・ビルドが無い場合も含む)。exe で Unity のプロセスが起動し終えたことに当たる。 */
 export const graphicLoaded = new Promise<void>((resolve) => {
   resolveGraphicLoaded = resolve;
 });
+
+/** Unity の代わりのグラフィック(開発用の地図ページの地図)が、読み込みの終わりを知らせる。 */
+export function markGraphicLoaded(): void {
+  resolveGraphicLoaded();
+}
 
 export async function startGraphic(canvas: HTMLCanvasElement): Promise<void> {
   try {

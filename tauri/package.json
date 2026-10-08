@@ -14,6 +14,8 @@
     "prebuild:web": "npm run sync:version && npm run gen:tutorial-validator",
     "dev:web": "vite --config vite.web.config.ts",
     "build:web": "tsc -p tsconfig.web.json && vite build --config vite.web.config.ts",
+    "prebuild:web:core": "npm run sync:version && npm run gen:tutorial-validator",
+    "build:web:core": "tsc -p tsconfig.web.json && vite build --config vite.web.config.ts --mode core",
     "preview": "vite preview",
     "tauri": "tauri",
     "mock-parent": "node tools/mock-parent/server.mjs",

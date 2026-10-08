@@ -237,6 +237,8 @@ export type CityMapVectors = {
   paths: CityMapPathItem[];
   zones: CityMapPolygonItem[];
   parcels: CityMapPolygonItem[];
+  /** polygon は center_point からのローカル座標 */
+  buildings: CityMapPolygonItem[];
 };
 
 export type CityMapCanvasProps = {
@@ -277,7 +279,7 @@ export type CityMapCanvasProps = {
   zoneFill?: CityMapZoneFill;
   /** 初期表示範囲(ワールド座標)。省略時はマップ全体にフィットする */
   initialBounds?: CityMapBounds;
-  /** マウスによるパン・ズーム操作を許可するか(埋め込みプレビューではfalse推奨) */
+  /** マウス・タッチによるパン・ズーム操作を許可するか(埋め込みプレビューではfalse推奨) */
   interactive?: boolean;
   /**
    * 方位コンパスを右上に重ねるか。省略時はinteractiveに追従する
@@ -318,11 +320,11 @@ export type CityMapCanvasProps = {
    * false/未指定なら従来どおりパン開始する。
    */
   onPointerDown?: (e: CityMapPointerEvent) => boolean;
-  /** マウス移動のフック(ウィンドウ全体で受ける。ドラッグ中のカーソル追従に使う) */
+  /** ポインタ移動のフック(ウィンドウ全体で受ける。ドラッグ中のカーソル追従に使う。ピンチ中は呼ばない) */
   onPointerMove?: (e: CityMapPointerEvent) => void;
   /** onPointerDown が true を返したドラッグの終了通知 */
   onPointerUp?: (e: CityMapPointerEvent) => void;
-  /** パンの移動量が5px未満の左クリック。既存のドラッグ操作とは独立して通知する。 */
+  /** パンの移動量が5px未満の左クリック・タップ。既存のドラッグ操作とは独立して通知する。 */
   onMapClick?: (e: CityMapPointerEvent) => void;
   /** 右クリック(contextmenu)のフック。既定のコンテキストメニューは常に抑止する */
   onContextMenu?: (e: CityMapPointerEvent) => void;
@@ -332,7 +334,7 @@ export type CityMapCanvasProps = {
   onZoomChange?: (zoom: number) => void;
   /**
    * ベクターの取得完了通知。地図に描いているのと同じデータを上位の当たり判定などに使える。
-   * 地区は zoneBorders レイヤー、土地区画は parcels レイヤーがONのときだけ取得される。
+   * 地区は zoneBorders レイヤー、土地区画は parcels レイヤー、建物は buildings レイヤーがONのときだけ取得される。
    */
   onVectorsLoaded?: (vectors: CityMapVectors) => void;
   className?: string;
@@ -2302,7 +2304,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           vec.fetchedBounds = bounds;
           if (!disposed) {
             draw();
-            vectorsCbRef.current?.({ paths: vec.paths, zones: vec.zones, parcels: vec.parcels });
+            vectorsCbRef.current?.({ paths: vec.paths, zones: vec.zones, parcels: vec.parcels, buildings: vec.buildings });
           }
         } catch (err) {
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load vector data:", err);
@@ -2414,7 +2416,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       const resizeObserver = new ResizeObserver(() => resizeCanvas());
       resizeObserver.observe(wrap);
 
-      /* ---- マウス操作(interactive時のみ) ---- */
+      /* ---- ポインタ操作(interactive時のみ) ----
+       * マウスとタッチを Pointer Events で同じに扱う。1本のポインタはパン(または上位のドラッグ操作)、
+       * 2本指はピンチで、指の中点の下の地点を固定したままズームと移動をする。
+       * ピンチに入った操作は、指が全部離れるまでパンにもクリックにも戻さない。 */
+      const pointers = new Map<number, { x: number; y: number }>();
       let dragging = false;
       let dragStartX = 0;
       let dragStartY = 0;
@@ -2423,8 +2429,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       // 上位の onPointerDown が true を返したドラッグ(ノード移動など)。パンはしない。
       let customDrag = false;
       let moved = false;
+      let pinch: { distance: number; zoom: number; world: [number, number] } | null = null;
 
-      /** マウスイベントを上位コールバック用のポインタ情報へ変換する */
+      /** ポインタのイベントを上位コールバック用のポインタ情報へ変換する */
       const toPointerEvent = (e: MouseEvent): CityMapPointerEvent => {
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
@@ -2439,8 +2446,23 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         };
       };
 
-      const onMouseDown = (e: MouseEvent) => {
-        if (e.button !== 0) return;
+      /** 2本指の中点(キャンバス座標)と指の間隔 */
+      const pinchState = () => {
+        const [a, b] = [...pointers.values()];
+        const rect = canvas.getBoundingClientRect();
+        return { x: (a.x + b.x) / 2 - rect.left, y: (a.y + b.y) / 2 - rect.top, distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)) };
+      };
+
+      const onPointerDownEvent = (e: PointerEvent) => {
+        if (e.button !== 0 || customDrag) return;
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pointers.size === 2) {
+          const p = pinchState();
+          pinch = { distance: p.distance, zoom: view.zoom, world: screenToWorld(p.x, p.y) };
+          dragging = false;
+          return;
+        }
+        if (pointers.size > 1) return;
         const down = pointerCbRef.current.onPointerDown;
         if (down && down(toPointerEvent(e))) {
           customDrag = true;
@@ -2454,7 +2476,19 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         dragOffsetY = view.offsetY;
       };
 
-      const onMouseMove = (e: MouseEvent) => {
+      const onPointerMoveEvent = (e: PointerEvent) => {
+        if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pinch) {
+          if (pointers.size < 2) return;
+          const p = pinchState();
+          view.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, (pinch.zoom * p.distance) / pinch.distance));
+          const [wx, wz] = screenToWorld(p.x, p.y);
+          view.offsetX += pinch.world[0] - wx;
+          view.offsetY += pinch.world[1] - wz;
+          zoomCbRef.current?.(view.zoom);
+          draw();
+          return;
+        }
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
@@ -2475,10 +2509,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         draw();
       };
 
-      const onMouseUp = (e: MouseEvent) => {
-        if (e.button !== 0) return;
+      const onPointerUpEvent = (e: PointerEvent) => {
+        if (!pointers.delete(e.pointerId)) return;
+        if (pinch) {
+          if (pointers.size === 0) pinch = null;
+          return;
+        }
         const rect = canvas.getBoundingClientRect();
-        if (dragging && !moved && Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) < 5
+        if (e.type === "pointerup" && dragging && !moved && Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) < 5
           && e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
           pointerCbRef.current.onMapClick?.(toPointerEvent(e));
         }
@@ -2495,7 +2533,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         pointerCbRef.current.onContextMenu?.(toPointerEvent(e));
       };
 
-      const onMouseLeave = () => {
+      const onPointerLeave = () => {
         cursorCbRef.current?.(null);
       };
 
@@ -2517,10 +2555,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       };
 
       if (interactive) {
-        canvas.addEventListener("mousedown", onMouseDown);
-        window.addEventListener("mousemove", onMouseMove);
-        window.addEventListener("mouseup", onMouseUp);
-        canvas.addEventListener("mouseleave", onMouseLeave);
+        canvas.addEventListener("pointerdown", onPointerDownEvent);
+        window.addEventListener("pointermove", onPointerMoveEvent);
+        window.addEventListener("pointerup", onPointerUpEvent);
+        window.addEventListener("pointercancel", onPointerUpEvent);
+        canvas.addEventListener("pointerleave", onPointerLeave);
         canvas.addEventListener("wheel", onWheel, { passive: false });
         canvas.addEventListener("contextmenu", onContextMenu);
       }
@@ -2646,10 +2685,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         if (vectorTimer !== null) window.clearTimeout(vectorTimer);
         if (contourTimer !== null) window.clearTimeout(contourTimer);
         if (interactive) {
-          canvas.removeEventListener("mousedown", onMouseDown);
-          window.removeEventListener("mousemove", onMouseMove);
-          window.removeEventListener("mouseup", onMouseUp);
-          canvas.removeEventListener("mouseleave", onMouseLeave);
+          canvas.removeEventListener("pointerdown", onPointerDownEvent);
+          window.removeEventListener("pointermove", onPointerMoveEvent);
+          window.removeEventListener("pointerup", onPointerUpEvent);
+          window.removeEventListener("pointercancel", onPointerUpEvent);
+          canvas.removeEventListener("pointerleave", onPointerLeave);
           canvas.removeEventListener("wheel", onWheel);
           canvas.removeEventListener("contextmenu", onContextMenu);
         }
@@ -2691,7 +2731,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         className={className}
         style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
       >
-        <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, display: "block" }} />
+        {/* タッチのパン・ピンチを地図で受けるため、操作できる地図ではブラウザのスクロール・拡大を止める */}
+        <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, display: "block", touchAction: interactive ? "none" : undefined }} />
         {/* アニメーションオーバーレイ(animatedOverlayDraw)専用の第2キャンバス。
             マウス操作は下のベースキャンバスに透過させる */}
         <canvas

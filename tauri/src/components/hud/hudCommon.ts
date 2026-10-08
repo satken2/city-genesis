@@ -20,9 +20,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import citizenTrackingIcon from "../../assets/images/menu/citizen-tracking.svg";
 
-/** メニューアイコン画像のURLを解決する */
+/** メニューアイコン画像のURLを解決する(ブラウザ版はページの置き場所からの相対になる) */
 export function iconUrl(filename: string): string {
-  return `/images/menu/${filename}`;
+  return `${import.meta.env.BASE_URL}images/menu/${filename}`;
 }
 
 /**

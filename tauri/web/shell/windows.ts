@@ -24,7 +24,6 @@ export const LABEL_ICON_PANEL = "icon-panel";
 export const LABEL_COCKPIT = "cockpit";
 export const LABEL_SYSTEM_TRAY = "system-tray";
 export const LABEL_DISPLAY_TRAY = "display-tray";
-export const HUD_WINDOW_LABELS = [LABEL_ICON_PANEL, LABEL_COCKPIT, LABEL_SYSTEM_TRAY, LABEL_DISPLAY_TRAY];
 
 const HUD_MARGIN = 8;
 const ICON_PANEL_WIDTH = 58;
@@ -69,6 +68,26 @@ const EDIT_MODE_WINDOW_TYPES = [
 
 let nextWindowId = 1;
 
+/** 常駐 HUD のウィンドウ。表示・非表示はまとめて切り替える。 */
+export interface HudWindowSpec {
+  label: string;
+  title: string;
+  width: number;
+  height: number;
+  /** iframe が読むページ。省略時は各ウィンドウ共通のページ */
+  page?: string;
+}
+
+/** exe と同じ HUD の組(`lib.rs` の setup)。 */
+export const DESKTOP_HUD: HudWindowSpec[] = [
+  { label: LABEL_ICON_PANEL, title: "Genesis Icon Panel", width: ICON_PANEL_WIDTH, height: ICON_PANEL_DEFAULT_HEIGHT },
+  { label: LABEL_COCKPIT, title: "Genesis Cockpit", width: COCKPIT_WIDTH, height: COCKPIT_HEIGHT },
+  { label: LABEL_SYSTEM_TRAY, title: "Genesis System Tray", width: SYSTEM_TRAY_WIDTH, height: SYSTEM_TRAY_HEIGHT },
+  { label: LABEL_DISPLAY_TRAY, title: "Genesis Display Tray", width: DISPLAY_TRAY_WIDTH, height: DISPLAY_TRAY_HEIGHT },
+];
+
+let hudLabels: string[] = [];
+
 function appUrl(query = ""): string {
   return `${APP_PAGE}${query}`;
 }
@@ -101,20 +120,24 @@ function notificationPlacement(height: number): Placement {
   };
 }
 
-/** 起動時に作る常駐ウィンドウ(`lib.rs` の setup)。どれも非表示で作り、必要になったときに表示する。 */
-export function createStartupWindows(): void {
+/**
+ * 起動時に作る常駐ウィンドウ(`lib.rs` の setup)。どれも非表示で作り、必要になったときに表示する。
+ * HUD の組とヒントバーの有無はページの入口が決める(開発用の地図ページはコックピットの代わりに上部バーを置き、
+ * 3D 画面の操作を案内するヒントバーは置かない)。
+ */
+export function createStartupWindows(hud: HudWindowSpec[] = DESKTOP_HUD, hintbar = true): void {
   host.createWindow("topmenu", {
     url: appUrl(),
     placement: centeredOnMonitor(TOPMENU_WIDTH, TOPMENU_HEIGHT),
     visible: false,
     title: "City Genesis",
   });
-  for (const label of HUD_WINDOW_LABELS) {
-    const [title, width, height] = hudWindowSpec(label);
-    host.createWindow(label, { url: appUrl(), placement: { x: 0, y: 0, width, height }, visible: false, title });
+  hudLabels = hud.map((spec) => spec.label);
+  for (const { label, title, width, height, page } of hud) {
+    host.createWindow(label, { url: page ?? appUrl(), placement: { x: 0, y: 0, width, height }, visible: false, title });
   }
   layoutHudWindows(null, null);
-  host.createWindow("hintbar", { url: appUrl(), placement: hintbarPlacement(), visible: false, title: "Hintbar", clickThrough: true });
+  if (hintbar) host.createWindow("hintbar", { url: appUrl(), placement: hintbarPlacement(), visible: false, title: "Hintbar", clickThrough: true });
   host.createWindow("tutorial", { url: appUrl(), placement: tutorialPlacement(), visible: false, title: "Tutorial" });
   host.createWindow("notification", {
     url: appUrl(),
@@ -135,19 +158,6 @@ export function relayoutForViewport(): void {
   const notification = host.rect("notification");
   if (notification) host.place("notification", notificationPlacement(notification.height));
   host.refitMaximized();
-}
-
-function hudWindowSpec(label: string): [string, number, number] {
-  switch (label) {
-    case LABEL_ICON_PANEL:
-      return ["Genesis Icon Panel", ICON_PANEL_WIDTH, ICON_PANEL_DEFAULT_HEIGHT];
-    case LABEL_COCKPIT:
-      return ["Genesis Cockpit", COCKPIT_WIDTH, COCKPIT_HEIGHT];
-    case LABEL_DISPLAY_TRAY:
-      return ["Genesis Display Tray", DISPLAY_TRAY_WIDTH, DISPLAY_TRAY_HEIGHT];
-    default:
-      return ["Genesis System Tray", SYSTEM_TRAY_WIDTH, SYSTEM_TRAY_HEIGHT];
-  }
 }
 
 /**
@@ -192,7 +202,7 @@ export function layoutHudWindows(iconPanelHeight: number | null, systemTrayWidth
 }
 
 export function setHudVisible(visible: boolean): void {
-  for (const label of HUD_WINDOW_LABELS) {
+  for (const label of hudLabels) {
     if (visible) host.show(label);
     else host.hide(label);
   }

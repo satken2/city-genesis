@@ -37,6 +37,22 @@
   gap: 6px;
 }
 
+/* 狭いウィンドウでは、地図を広く取るためツールバーを横スクロールの1段にする */
+@media (max-width: 600px) {
+  .city-map-window__toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 6px 8px;
+  }
+
+  .city-map-window__layer-toggles,
+  .city-map-window__heatmap,
+  .city-map-window__actions {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+}
+
 /* レイヤー切り替えのチップ型トグル */
 .city-map-toggle {
   display: inline-flex;

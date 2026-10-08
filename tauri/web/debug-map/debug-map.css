@@ -1,0 +1,13 @@
+/* 開発用の地図ページ。地図(Unity の canvas の代わり)を上部バーの下に敷き、ウィンドウは定位置から動かさない */
+
+.debug-map-frame {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  border: 0;
+}
+
+.shell-window__resize {
+  display: none;
+}

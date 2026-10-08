@@ -2,6 +2,7 @@
  * ウィンドウ(iframe)の置き場。exe の OS ウィンドウ1枚を、ページ内の枠1つと iframe 1枚で表す。
  * 座標とサイズはページの CSS ピクセルで、表示領域全体をモニター1枚として扱う。
  * どのウィンドウをどこに置くかの規則は windows.ts が持ち、ここは置く・見せる・動かすだけを行う。
+ * 開発用の地図ページは置き方を差し替え(setArrangement)、求められた位置ではなく種類ごとの定位置へ置く。
  */
 import { WINDOW_LABEL_ATTRIBUTE } from "../shared/shellApi";
 
@@ -26,10 +27,16 @@ interface HostWindow {
   label: string;
   box: HTMLDivElement;
   frame: HTMLIFrameElement;
+  /** 実際に置いている位置とサイズ */
   rect: Placement;
+  /** ウィンドウの規則・操作が求めた位置とサイズ。置き方の差し替えが無ければ rect と同じ */
+  requested: Placement;
   visible: boolean;
   maximized: boolean;
 }
+
+/** 求められた位置とサイズから、実際に置く位置とサイズを決める。 */
+export type Arrangement = (label: string, requested: Placement) => Placement;
 
 interface HostHooks {
   /** 枠を破棄した(Tauri の WindowEvent::Destroyed)。 */
@@ -47,6 +54,7 @@ const windows = new Map<string, HostWindow>();
 let layer: HTMLElement;
 let hooks: HostHooks;
 let zOrder = 0;
+let arrangement: Arrangement | null = null;
 
 /**
  * iframe は1枚ずつ読み込む。ブラウザは1ページの同時リクエスト数に上限があり、開発サーバーでは iframe ごとに
@@ -80,6 +88,18 @@ export function initHost(element: HTMLElement, callbacks: HostHooks): void {
   hooks = callbacks;
 }
 
+/**
+ * ウィンドウの置き方を差し替える。開発用の地図ページは、ウィンドウの規則や操作が求めた位置によらず種類ごとの定位置へ置く。
+ * 差し替えた置き方は表示領域の大きさで決まるので、表示領域が変わったら rearrange で置き直す。
+ */
+export function setArrangement(arrange: Arrangement): void {
+  arrangement = arrange;
+}
+
+export function rearrange(): void {
+  for (const entry of windows.values()) setRect(entry, entry.requested);
+}
+
 /** 表示領域。exe のモニター1枚に当たる。 */
 export function monitor(): Placement {
   return { x: 0, y: 0, width: layer.clientWidth || window.innerWidth, height: layer.clientHeight || window.innerHeight };
@@ -93,9 +113,9 @@ export function createWindow(label: string, options: CreateOptions): void {
   frame.setAttribute(WINDOW_LABEL_ATTRIBUTE, label);
   frame.title = options.title ?? label;
   box.appendChild(frame);
-  const entry: HostWindow = { label, box, frame, rect: options.placement, visible: options.visible, maximized: false };
+  const entry: HostWindow = { label, box, frame, rect: options.placement, requested: options.placement, visible: options.visible, maximized: false };
   windows.set(label, entry);
-  applyRect(entry);
+  setRect(entry, options.placement);
   box.style.display = options.visible ? "" : "none";
   if (options.visible) raise(label);
   layer.appendChild(box);
@@ -139,22 +159,20 @@ export function rect(label: string): Placement | null {
 export function place(label: string, placement: Placement): void {
   const entry = windows.get(label);
   if (!entry) return;
-  const moved = entry.rect.x !== placement.x || entry.rect.y !== placement.y;
-  entry.rect = { ...placement };
-  applyRect(entry);
-  hooks.geometryChanged(label, moved);
+  const { x, y } = entry.rect;
+  setRect(entry, placement);
+  hooks.geometryChanged(label, entry.rect.x !== x || entry.rect.y !== y);
 }
 
 export function setSize(label: string, width: number, height: number): void {
   const entry = windows.get(label);
-  if (entry) place(label, { x: entry.rect.x, y: entry.rect.y, width, height });
+  if (entry) place(label, { x: entry.requested.x, y: entry.requested.y, width, height });
 }
 
 export function moveBy(label: string, dx: number, dy: number): void {
   const entry = windows.get(label);
   if (!entry || entry.maximized) return;
-  entry.rect = { ...entry.rect, x: entry.rect.x + dx, y: entry.rect.y + dy };
-  applyRect(entry);
+  setRect(entry, { ...entry.requested, x: entry.requested.x + dx, y: entry.requested.y + dy });
 }
 
 /** ドラッグでの移動を終えたときに、位置の変化を一度だけ知らせる。 */
@@ -200,8 +218,7 @@ export function maximize(label: string): void {
   const entry = windows.get(label);
   if (!entry) return;
   entry.maximized = true;
-  entry.rect = monitor();
-  applyRect(entry);
+  setRect(entry, monitor());
 }
 
 export function unmaximize(label: string): void {
@@ -212,9 +229,7 @@ export function unmaximize(label: string): void {
 /** 表示領域が変わったら、最大化中のウィンドウを合わせ直す。 */
 export function refitMaximized(): void {
   for (const entry of windows.values()) {
-    if (!entry.maximized) continue;
-    entry.rect = monitor();
-    applyRect(entry);
+    if (entry.maximized) setRect(entry, monitor());
   }
 }
 
@@ -263,8 +278,7 @@ function startResize(entry: HostWindow, edge: (typeof RESIZE_EDGES)[number], eve
       next.height = Math.max(MIN_HEIGHT, start.height - dy);
       next.y = start.y + start.height - next.height;
     }
-    entry.rect = next;
-    applyRect(entry);
+    setRect(entry, next);
   };
   const end = () => {
     handle.removeEventListener("pointermove", move);
@@ -277,7 +291,9 @@ function startResize(entry: HostWindow, edge: (typeof RESIZE_EDGES)[number], eve
   handle.addEventListener("pointercancel", end);
 }
 
-function applyRect(entry: HostWindow): void {
+function setRect(entry: HostWindow, requested: Placement): void {
+  entry.requested = { ...requested };
+  entry.rect = arrangement ? arrangement(entry.label, entry.requested) : { ...requested };
   const { x, y, width, height } = entry.rect;
   entry.box.style.left = `${x}px`;
   entry.box.style.top = `${y}px`;

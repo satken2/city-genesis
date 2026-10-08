@@ -352,6 +352,23 @@
  * 詳細パネル(右カラム・固定幅)
  * ========================================================================= */
 
+/* 2カラムの入らない狭いウィンドウでは、一覧の下に詳細を置く */
+@media (max-width: 600px) {
+  .new-game {
+    flex-direction: column;
+  }
+
+  .new-game-main {
+    flex: 1 1 45%;
+    min-height: 0;
+  }
+
+  .new-game-detail {
+    flex: 1 1 55%;
+    width: auto;
+  }
+}
+
 .new-game-detail {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,9 @@
 /**
  * ブラウザ版のビルド設定。exe 用の vite.config.ts とは別に持ち、こちらにだけ Tauri の API の差し替えを置く。
  * `web/index.html` が Web シェル(ページ本体)、`web/app.html` が各ウィンドウの iframe の中身(exe と同じ `src/main.tsx`)。
+ * どこに置いても動くよう、ページから読むファイルは相対パスにする(base)。
+ * モード core はコアが配る開発用の版(`web/.env.core`)で、別の出力先に作る。開発用の地図ページ(`web/debug-map.html` と
+ * そのウィンドウの中身 `web/debug-map-frame.html`)はこの版にだけ入れ、製品のビルドには含めない。
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -49,8 +52,9 @@ function graphicBuild(): Plugin {
   };
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   root: webDir,
+  base: "./",
   publicDir: path.join(tauriDir, "public"),
   plugins: [react(), graphicBuild()],
   resolve: {
@@ -71,13 +75,16 @@ export default defineConfig({
     watch: { ignored: ["**/src-tauri/target/**"] },
   },
   build: {
-    outDir: path.join(tauriDir, "dist-web"),
+    outDir: path.join(tauriDir, mode === "core" ? "dist-web-core" : "dist-web"),
     emptyOutDir: true,
     rollupOptions: {
       input: {
         index: path.join(webDir, "index.html"),
         app: path.join(webDir, "app.html"),
+        ...(mode === "core"
+          ? { debugMap: path.join(webDir, "debug-map.html"), debugMapFrame: path.join(webDir, "debug-map-frame.html") }
+          : {}),
       },
     },
   },
-});
+}));

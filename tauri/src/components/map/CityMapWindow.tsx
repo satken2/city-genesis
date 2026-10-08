@@ -2,8 +2,7 @@
  * 都市マップウィンドウ (window_type="city_map")
  *
  * 共通地図コンポーネント(CityMapCanvas)をウィンドウとして表示し、
- * その上部にレイヤー表示切り替えのツールバーを配置する。
- * レイヤーのON/OFF・全体表示・再読み込みはすべてこのウィンドウのUIであり、
+ * その上部にレイヤー表示切り替えのツールバー(CityMapControls)を配置する。
  * 地図描画そのものはCityMapCanvasに委譲している。
  *
  * 3Dビューのカメラ位置・向きもマーカーとして重ねて描く(下記「カメラマーカー」)。
@@ -12,51 +11,16 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
 import {
   CityMapCanvas,
-  DEFAULT_CITY_MAP_LAYERS,
-  getHeatmapRampStops,
   type CityMapCanvasHandle,
-  type CityMapHeatmapKind,
-  type CityMapHeatmapMode,
-  type CityMapHeatmapStats,
-  type CityMapLayerVisibility,
   type CityMapViewState,
 } from "./CityMapCanvas";
 import { IPC_EVENT_CAMERA_STATE, sendCameraQueryState } from "../../utils/ipc";
 import "./CityMapWindow.css";
-import { MAP_SYMBOLS, type MapSymbol } from "./mapSymbols";
-
-function MapIcon({ name }: { name: MapSymbol }) {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={MAP_SYMBOLS[name]} /></svg>;
-}
+import { useCityMapControls } from "./CityMapControls";
 import { useMapNavigation } from "./CityMapNavigation";
-
-/** レイヤーキーとツールバー記号の対応。記号名が単数形のものだけ読み替える */
-const layerSymbol = (key: keyof CityMapLayerVisibility): MapSymbol =>
-  key === "stations" ? "station" : key === "interchanges" ? "interchange" : key;
-
-/** ツールバーに並べるレイヤーの表示順 */
-const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
-  "elevation",
-  "contours",
-  "grid",
-  "coastline",
-  "zoneBorders",
-  "parcels",
-  "buildings",
-  "stations",
-  "interchanges",
-  "allRoads",
-  "trunkRoads",
-  "railways",
-  "transitLines",
-];
-
-/** ヒートマップ切り替えの表示順。複数レイヤーと違い1つだけ選ぶ排他選択 */
-const HEATMAP_ORDER: CityMapHeatmapKind[] = ["none", "noise", "pollution", "crime", "sunshine"];
 
 /* ---- カメラマーカー ----
  * 3Dビューのカメラがどこを向いているかを地図上の矢印マーカーで示す。
@@ -87,21 +51,11 @@ const CAMERA_MARKER_HALF_WIDTH_PX = 8;
 const CAMERA_MARKER_RADIUS_PX = 4;
 
 export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
   const mapRef = useRef<CityMapCanvasHandle>(null);
   const coordRef = useRef<HTMLSpanElement | null>(null);
   const zoomRef = useRef<HTMLSpanElement | null>(null);
   const navigation = useMapNavigation(apiBaseUrl, mapRef);
-
-  const [layers, setLayers] = useState<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS });
-  const [heatmap, setHeatmap] = useState<CityMapHeatmapKind>("none");
-  const [heatmapMode, setHeatmapMode] = useState<CityMapHeatmapMode>("overlay");
-  const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);
   const [camera, setCamera] = useState<CameraMarker | null>(null);
-
-  const toggleLayer = useCallback((key: keyof CityMapLayerVisibility) => {
-    setLayers((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
 
   /**
    * カーソル座標・ズーム率の表示はマウス移動のたびに更新されるため、
@@ -151,6 +105,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     navigation.reload();
     void sendCameraQueryState().catch(console.error);
   }, [navigation.reload]);
+  const controls = useCityMapControls(mapRef, handleReload);
 
   /**
    * カメラ位置マーカーの重ね描き。ctxにはワールド座標系のビュー変換が適用済みなので、
@@ -197,91 +152,20 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       {navigation.sidebar}
       <div className="city-map-window__main">
       {/* ツールバー: レイヤー表示切り替えと操作ボタン */}
-      <div className="city-map-window__toolbar">
-        <div className="city-map-window__layer-toggles">
-          {LAYER_ORDER.map((key) => (
-            <button
-              key={key}
-              type="button"
-              className={`city-map-toggle ${layers[key] ? "city-map-toggle--on" : ""}`}
-              aria-pressed={layers[key]}
-              aria-label={t(`cityMap.layers.${key}`)}
-              title={t(`cityMap.layers.${key}`)}
-              onClick={() => toggleLayer(key)}
-            >
-              <MapIcon name={layerSymbol(key)} />
-            </button>
-          ))}
-        </div>
-        {/* ヒートマップ。2種を重ねると色が混ざって読めないため排他選択にする */}
-        <div className="city-map-window__heatmap">
-          <span className="city-map-window__heatmap-label">
-            {t("cityMap.heatmap.title")}
-          </span>
-          {HEATMAP_ORDER.map((kind) => (
-            <button
-              key={kind}
-              type="button"
-              className={`city-map-heatmap-btn ${
-                heatmap === kind ? "city-map-heatmap-btn--on" : ""
-              }`}
-              aria-pressed={heatmap === kind}
-              aria-label={`${t("cityMap.heatmap.title")}: ${t(`cityMap.heatmap.${kind}`)}`}
-              title={`${t("cityMap.heatmap.title")}: ${t(`cityMap.heatmap.${kind}`)}`}
-              onClick={() => setHeatmap(kind)}
-            >
-              <MapIcon name={kind} />
-            </button>
-          ))}
-          <label className="city-map-window__source-toggle">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={heatmapMode === "sources"}
-              aria-label={t("cityMap.heatmap.sources")}
-              title={t("cityMap.heatmap.sources")}
-              className="city-map-source-switch"
-              onClick={() => setHeatmapMode((mode) => mode === "overlay" ? "sources" : "overlay")}
-            >
-              <span />
-            </button>
-            <span>{t("cityMap.heatmap.sources")}</span>
-          </label>
-        </div>
-        <div className="city-map-window__actions">
-          <button
-            type="button"
-            className="city-map-window__btn"
-            title={t("cityMap.fitView")}
-            aria-label={t("cityMap.fitView")}
-            onClick={() => mapRef.current?.resetView()}
-          >
-            <MapIcon name="fit" />
-          </button>
-          <button
-            type="button"
-            className="city-map-window__btn"
-            title={t("cityMap.reload")}
-            aria-label={t("cityMap.reload")}
-            onClick={handleReload}
-          >
-            <MapIcon name="reload" />
-          </button>
-        </div>
-      </div>
+      {controls.toolbar}
 
       {/* 地図本体 */}
       <div className="city-map-window__map">
         <CityMapCanvas
           ref={mapRef}
           apiBaseUrl={apiBaseUrl}
-          layers={layers}
-          heatmap={heatmap}
-          heatmapMode={heatmapMode}
+          layers={controls.layers}
+          heatmap={controls.heatmap}
+          heatmapMode={controls.heatmapMode}
           interactive
           onCursorWorldPos={handleCursor}
           onZoomChange={handleZoom}
-          onHeatmapStats={setHeatmapStats}
+          onHeatmapStats={controls.onHeatmapStats}
           overlayDraw={drawCameraMarker}
           overlayVersion={(camera?.seq ?? 0) + navigation.overlayVersion}
           onMapClick={navigation.onMapClick}
@@ -289,37 +173,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           focusPathIds={navigation.roadFocus?.pathIds ?? null}
           focusColor={navigation.roadFocus?.color ?? null}
         />
-        {/* 発生源は都市全体の強度レンジ、オーバーレイは固定の悪さスコアを示す。 */}
-        {heatmapStats && (
-          <div className="city-map-window__legend">
-            {heatmapStats.count === 0 ? (
-              <span className="city-map-window__legend-empty">
-                {t("cityMap.heatmap.noData")}
-              </span>
-            ) : (
-              <>
-                <span className="city-map-window__legend-title">
-                  {t(`cityMap.heatmap.${heatmapStats.kind}`)}
-                  {heatmapStats.mode === "sources" && ` · ${t("cityMap.heatmap.sources")}`}
-                </span>
-                <span className="city-map-window__legend-value">
-                  {heatmapStats.min.toFixed(2)}
-                </span>
-                <span
-                  className="city-map-window__legend-bar"
-                  style={{
-                    background: `linear-gradient(to right, ${getHeatmapRampStops(
-                      heatmapStats.kind, heatmapStats.mode
-                    ).join(", ")})`,
-                  }}
-                />
-                <span className="city-map-window__legend-value">
-                  {heatmapStats.max.toFixed(2)}
-                </span>
-              </>
-            )}
-          </div>
-        )}
+        {controls.legend}
         {/* ステータスオーバーレイ(カーソルのワールド座標とズーム率) */}
         <div className="city-map-window__status">
           <span ref={coordRef}>---, ---</span>

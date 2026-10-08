@@ -113,6 +113,17 @@
   box-shadow: inset 3px 0 0 var(--flat-accent);
 }
 
+/* 3列の入らない狭いウィンドウでは、ボタンと保存日時の列を本文の下へ回す */
+@media (max-width: 600px) {
+  .save-card {
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+
+  .save-card-side {
+    grid-column: 1 / -1;
+  }
+}
+
 /* 現在読み込み中のデータ。左端の実線ブロックは inset の影で描き、枠線を使わない */
 .save-card--current {
   background: color-mix(in srgb, var(--flat-selected) 42%, transparent);

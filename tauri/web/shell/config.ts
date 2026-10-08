@@ -1,5 +1,10 @@
-/** ブラウザ版が接続するコアの URL。値は `web/.env` の VITE_CORE_API_URL(手元だけの変更は `web/.env.local`)。 */
-export const CORE_API_URL: string = (import.meta.env.VITE_CORE_API_URL ?? "").replace(/\/+$/, "");
+const configuredCoreUrl: string = import.meta.env.VITE_CORE_API_URL ?? "";
+
+/**
+ * ブラウザ版が接続するコアの URL。値は `web/.env` の VITE_CORE_API_URL(手元だけの変更は `web/.env.local`)。
+ * 相対 URL はページの場所から解決する(コアがページを配る版は、ページの場所でコアの URL が決まるため)。
+ */
+export const CORE_API_URL: string = (configuredCoreUrl ? new URL(configuredCoreUrl, location.href).href : "").replace(/\/+$/, "");
 
 /** Rust の開発ビルド(`cfg!(all(debug_assertions, dev))`)に当たる。開発サーバーで動かしているときだけ真。 */
 export const DEVELOPMENT: boolean = import.meta.env.DEV;
