@@ -217,6 +217,10 @@
         "label": "Coeficiente de penalización por altura",
         "desc": "Coeficiente de la penalización por construir en altura. Cuanto mayor, menor es la penalización."
       },
+      "BUILDING_ASPECT_RATIO_MAX": {
+        "label": "Esbeltez máxima",
+        "desc": "Límite de altura ÷ √superficie en planta. Evita torres tipo aguja en lotes pequeños. 0 = sin límite."
+      },
       "DEMOLITION_RATE": {
         "label": "Eficiencia relativa de la demolición",
         "desc": "Cuánto más eficiente es demoler que construir de nuevo (multiplicador)."

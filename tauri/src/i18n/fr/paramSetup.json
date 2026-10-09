@@ -217,6 +217,10 @@
         "label": "Coefficient de pénalité d'étage",
         "desc": "Coefficient de la pénalité de coût en hauteur. Plus il est élevé, plus la pénalité est faible."
       },
+      "BUILDING_ASPECT_RATIO_MAX": {
+        "label": "Élancement maximal",
+        "desc": "Limite de la hauteur ÷ √surface au sol. Empêche les tours filiformes sur de petites parcelles. 0 = pas de limite."
+      },
       "DEMOLITION_RATE": {
         "label": "Efficacité relative de la démolition",
         "desc": "À quel point démolir est plus efficace que construire à neuf (multiplicateur)."
