@@ -1447,7 +1447,7 @@ export const IPC_EVENT_EDIT_TRANSIT_UPDATE_POINTS = "edit_transit:update_points"
 
 /**
  * プロップ配置(個別モード)において、配置済みインスタンス列が変更された(Unity → UI)。
- * ペイロードは { instances: [{x, z, rotation, scale}] }。
+ * ペイロードは { instances: [{prop_type, x, y, z, rotation, scale}] }。種別変更前の仮配置も含む。
  * PropPlacementPanel がこれを受けて配置数の表示と POST 用のインスタンス列を更新する。
  */
 export const IPC_EVENT_EDIT_PROP_UPDATE_INSTANCES = "edit_prop:update_instances";

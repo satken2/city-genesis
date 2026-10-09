@@ -12,7 +12,8 @@
  *
  * 操作フロー:
  *   1. モード(個別/範囲)を選ぶ
- *   2. カテゴリで絞り込み、プロップのタイルを選択 → IPC で Unity を配置モード(STATE_EDIT_PROP)にする
+ *   2. カテゴリで絞り込み、プロップのタイルを選択 → IPC で Unity を配置モード(STATE_EDIT_PROP)にする。
+ *      個別モードでは種類を切り替えても仮配置を保持し、複数種類をまとめて確定できる
  *   3. 個別: 3Dビューをクリックして配置(配置済みは不透明、カーソル追従は半透明ゴースト)
  *      範囲: 3Dビューをクリックして頂点を置きポリゴンを描く(散布は半透明でプレビュー)
  *   4. 設定(回転/スケール/高さ、または密度/seed)を調整する(Unity のプレビューに即反映)。
@@ -60,6 +61,7 @@ type PlacementMode = "instance" | "scatter";
 
 /** Unity から受け取る個別配置インスタンス。 */
 type PropInstance = {
+  prop_type: number;
   x: number;
   y: number;
   z: number;
@@ -103,7 +105,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
 
   /**
    * 現在のモードと設定で Unity を STATE_EDIT_PROP にする。
-   * 種別未選択なら何もしない。モード/種別を切り替えたときは配置済みデータをリセットする。
+   * 種別未選択なら何もしない。個別モード内の種別変更では仮配置を保持する。
    */
   const enterEditMode = useCallback(
     (nextMode: PlacementMode, typeId: number | null) => {
@@ -213,9 +215,10 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
     (typeId: number) => {
       if (typeId === selectedType || isConfirming) return;
       setSelectedType(typeId);
-      setInstances([]);
-      setPolygon([]);
-      setIsShapeFinalized(false);
+      if (mode === "scatter") {
+        setPolygon([]);
+        setIsShapeFinalized(false);
+      }
       enterEditMode(mode, typeId);
     },
     [mode, enterEditMode, selectedType, isConfirming],
@@ -272,7 +275,6 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            prop_type: selectedType,
             instances,
           }),
         });

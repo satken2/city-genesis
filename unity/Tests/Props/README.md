@@ -4,6 +4,8 @@
 
 駅階段の検証は実FBX 101〜104を読み、標準のModelImportSettings・ModelPrefabGeneratorでRead/Write設定とミラープレハブを生成する。個別配置の高さ設定の即時反映、打点済み高さの保持、正負の保存高さ、version更新、地形標高20mでの相対高さ維持を検査する。station-stair-props.pngは開口のない高さ1.5mの床上へ4種類を手動配置した見本。101・102だけが壁と屋根付きで、103・104は柵と黒い内部のみ。画像にシェーダーエラーのマゼンタが混ざらないことも検査する。
 
+個別配置は、種類変更時の仮配置保持とゴースト切替、配置時の種類・回転・スケール・高さの保持、種類をまたいだ右クリック取り消し、リセット・モード切替・終了時の破棄も実 `PropPlacementManager` で検査する。
+
 `pwsh -NoProfile -File Tests/Props/run.ps1` をUnityディレクトリから実行する。PowerShell 7、ローカルのUnity生成済み`Assembly-CSharp.csproj`、対応Unity Editor、dotnetが必要。生成されたcsprojは変更せず、本編アセンブリをビルドし、`Temp/PropsUnityQA`に独立した検証プロジェクトを作る。本編の開いているシーンには触れない。
 
 確認対象は固定座標散布、境界の重複防止、穴と複数パート、分割数変更時の位置不変、障害物追加時の局所更新、撤去時の同位置復元、LoadBatchのキャンセル、地形高さ追従、実FBXの専用Farと高頂点モデルの自動Far生成、カメラからの実距離によるHidden(区画の手前1,800mで描画0・全小区画hidden、戻すと同じ本数へ復元)、プレビュー透過設定、ビルド時のinstancing保持である。バックエンド側は`genesis-core`で`.venv/Scripts/python.exe -m pytest tests/test_props.py -q`を実行する。

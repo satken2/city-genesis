@@ -124,7 +124,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_transit:update_points`    | `graphic -> ui`  | 公共交通の路線設置モードにおいて、配置中の巡回点（停留所・経由点を巡回順に並べたもの）が変更された（`{ points: [{ kind: "stop" | "waypoint", position: [x,y,z] }, ...] }`。公共交通パスは相対Y=0のため y は0）。新設・経路編集パネルが停留所・経由点の数の表示と確定で送る巡回点を更新する |
 | `edit_transit:finish`           | `ui -> graphic`  | 公共交通の路線設置モードを終了する。UI側が `POST /api/v1/transit/lines`（新設）または `PUT /api/v1/transit/lines/{id}/route`（経路編集）の送信に成功した後に送信され、Unity側の巡回点の配置状態をリセットしてデータをリロードする（`edit_resource:finish` と同じ役割） |
 | `edit_prop:change_settings`     | `ui -> graphic`  | プロップ配置モードにおいて、回転角/スケール(個別)・密度/seed(範囲)を変更する（送られてきたキーのみを含む `{ rotation?, scale?, density?, seed? }`）。Unity は配置中のゴースト/散布プレビューに即反映する |
-| `edit_prop:update_instances`    | `graphic -> ui`  | プロップ配置(個別モード)において、配置済みインスタンス列が変更された（`{ instances: [{x, z, rotation, scale}, ...] }`）。配置パネルが配置数の表示とPOST用のインスタンス列を更新する |
+| `edit_prop:update_instances`    | `graphic -> ui`  | プロップ配置(個別モード)において、全種類の仮配置が配置順で通知される（`{ instances: [{prop_type, x, y, z, rotation, scale}, ...] }`）。`prop_type` は配置時の種類、`y` は地面からの相対高さ(m)。配置パネルがPOST用のインスタンス列を更新する |
 | `edit_prop:update_shape`        | `graphic -> ui`  | プロップ配置(範囲モード)において、散布範囲ポリゴンが変更された（`{ polygon: [[x,z], ...] }`。`edit_resource:update_shape` と同形） |
 | `edit_prop:finish`              | `ui -> graphic`  | プロップ配置モードを終了する。UI側が `POST /api/v1/props/instances`(個別) または `POST /api/v1/props/scatters`(範囲) の送信に成功した後に送信され、Unity側の配置状態をリセットしてデータをリロードする（`edit_transit:finish` と同じ役割） |
 | `edit_prop:placement_settings`  | `graphic -> ui`  | プロップ配置(個別モード)において、3D側の操作（中ボタンドラッグ回転・PageUp/PageDown の高さ変更）で次に置くゴーストの設定が変わった（`{ rotation, height }`。回転は0〜360度）。配置パネルはステッパー表示を追従させるだけで `edit_prop:change_settings` へエコーしない（`edit_building:update_direct_angle` と同じ扱い） |
@@ -386,9 +386,11 @@ Unityはコアの版の照合とUIとのIPC契約が成立するまでマスタ�
 
 既存駅の詳細パネルに配置端の変更UIはない。APIでの変更は着工前に限られ、追加する建屋の用地を検証する。駅の概念は[駅と駅舎](../economics/29_駅と駅舎.md)、建屋の配置計算は[駅舎メッシュ](../geometries/Q_駅舎パスのメッシュ生成.md)を参照する。
 
-### プロップ個別配置の高さ
+### プロップ個別配置の種類と高さ
 
-world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地面からの相対高さm）を受け取る。edit_prop:update_instancesの要素はx/y/z/rotation/scaleで、yにその配置時の相対高さを載せる。Tauriは各点のyをPOST /api/v1/props/instancesへ送り、GETでも同じyを受け取る。高さ指定は全種別共通、0は地表、負値は地中。描画では地形標高へ加算し、モデルの拡大率を掛けない。
+個別モード内で種類を切り替えると、Unityはカーソルに追従するゴーストだけを切り替え、打点済みの仮配置を保持する。各点は配置時の種類・回転・スケール・高さを持ち、右クリックは種類をまたいで直近の1個を取り消す。Tauriは「確定」で全種類を1回の `POST /api/v1/props/instances`（`{instances: [...]}`）にまとめ、成功後に配置モードを終了してパネルを閉じる。リセット・取消し・配置モード（個別/範囲）の切替では仮配置を破棄する。範囲モードの種類変更も作図を初期化する。
+
+world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地面からの相対高さm）を受け取る。edit_prop:update_instancesの要素はprop_type/x/y/z/rotation/scaleで、yにその配置時の相対高さを載せる。Tauriは各点のprop_typeとyをPOST /api/v1/props/instancesへ送り、GETでも同じ値を受け取る。高さ指定は全種別共通、0は地表、負値は地中。描画では地形標高へ加算し、モデルの拡大率を掛けない。
 
 3D側のPageUp/PageDown（0.1m刻み、Shiftで1m）と中ボタンドラッグ回転で変わった値は、Unityがedit_prop:placement_settings（rotation/height）でパネルへ返す。UIはこれをchange_settingsへエコーせず、以後パネルのステッパーを操作したときだけchange_settingsを送る（UnityとUIの往復ループを作らない）。
 

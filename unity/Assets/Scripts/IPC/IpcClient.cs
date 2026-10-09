@@ -1360,7 +1360,7 @@ public class IpcClient : MonoBehaviour
     /// <summary>
     /// edit_prop:update_instances イベントを送信する。
     /// プロップ配置(個別モード)において、配置済みインスタンス列が変更されたことをUIに通知する。
-    /// 各要素は { x, z, rotation, scale }。PropPlacementPanel がこれを受けて配置数の表示と
+    /// 各要素は { prop_type, x, y, z, rotation, scale }。PropPlacementPanel がこれを受けて配置数の表示と
     /// POST用のインスタンス列を更新する。
     /// </summary>
     public void EmitEditPropUpdateInstances(List<Dictionary<string, object>> instances)

@@ -13,6 +13,7 @@ using UnityEngine.InputSystem;
 ///     3D側でも建物の直接配置と同じく中ボタンドラッグで回転、PageUp/PageDown で高さを変えられ、
 ///     その結果は edit_prop:placement_settings でパネルのステッパーへ書き戻す(次に置くゴーストの設定を
 ///     変えるだけで、打点済みの仮配置は動かさない)。
+///     種別を切り替えても仮配置を保持し、各インスタンスに配置時の種別を記録する。
 ///
 ///   範囲モード(scatter): 左クリックで散布範囲のポリゴン頂点を置く(PropScatter)。頂点が3つ以上に
 ///     なると seed ベースの散布点を生成し、prefab を半透明ゴーストで簡易プレビューする。密度・seed の
@@ -61,10 +62,10 @@ public class PropPlacementManager : MonoBehaviour
     private Transform container;
 
     // ---- 個別モード ----
-    // 確定済みインスタンス(不透明)。GameObject と配置データを対で保持する。
+    // 仮配置のインスタンス(不透明)。GameObject と配置データを対で保持する。
     private readonly List<GameObject> placedObjects = new List<GameObject>();
-    private readonly List<(float x, float y, float z, float rotation, float scale)> placedInstances
-        = new List<(float, float, float, float, float)>();
+    private readonly List<(int propType, float x, float y, float z, float rotation, float scale)> placedInstances
+        = new List<(int, float, float, float, float, float)>();
     // カーソル追従の半透明ゴースト(個別モードのみ)。
     private GameObject hoverGhost;
     private bool hoverValid = false;
@@ -188,8 +189,10 @@ public class PropPlacementManager : MonoBehaviour
             if (sourceMaterial != null) previewMaterial = CreatePreviewMaterial(sourceMaterial);
         }
 
-        // モード切替・種別変更のたびに既存の配置状態をクリアしてやり直す。
-        ClearAll();
+        // 個別モード内の種別変更は打点済みの配置を保持し、次に置くゴーストだけを作り直す。
+        bool preserveInstances = active && mode == Mode.Instance && placementMode == "instance";
+        if (preserveInstances) ClearHoverGhost();
+        else ClearAll();
 
         mode = (placementMode == "scatter") ? Mode.Scatter : Mode.Instance;
         this.propType = propType;
@@ -201,7 +204,7 @@ public class PropPlacementManager : MonoBehaviour
         this.shapeFinalized = false;
         active = true;
 
-        // 初期状態を UI に通知する(配置数=0 / 頂点数=0)。
+        // 種別切替後も全種類を含む仮配置を UI に通知する。
         if (mode == Mode.Instance) EmitInstances();
         else EmitShape();
 
@@ -291,7 +294,7 @@ public class PropPlacementManager : MonoBehaviour
             {
                 placedObjects.Add(go);
                 Vector3 offset = PropManager.Instance != null ? PropManager.Instance.SceneOffset : Vector3.zero;
-                placedInstances.Add((worldPos.x - offset.x, height, worldPos.z - offset.z, rotation, scale));
+                placedInstances.Add((propType, worldPos.x - offset.x, height, worldPos.z - offset.z, rotation, scale));
                 EmitInstances();
             }
         }
@@ -483,16 +486,20 @@ public class PropPlacementManager : MonoBehaviour
     // クリーンアップ
     // =====================================================================
 
-    private void ClearAll()
+    private void ClearHoverGhost()
     {
         middleDrag.Cancel();
+        if (hoverGhost != null) { Destroy(hoverGhost); hoverGhost = null; }
+        hoverValid = false;
+    }
 
-        // 個別モードの確定済み・ホバーゴースト。
+    private void ClearAll()
+    {
+        ClearHoverGhost();
+        // 個別モードの仮配置。
         foreach (var go in placedObjects) if (go != null) Destroy(go);
         placedObjects.Clear();
         placedInstances.Clear();
-        if (hoverGhost != null) { Destroy(hoverGhost); hoverGhost = null; }
-        hoverValid = false;
 
         // 範囲モードの頂点・散布ゴースト。
         scatterVertices.Clear();
@@ -524,7 +531,7 @@ public class PropPlacementManager : MonoBehaviour
     // IPC 送出
     // =====================================================================
 
-    /// <summary>配置済みインスタンス列を UI に通知する({x, z, rotation, scale} の配列)。</summary>
+    /// <summary>全種類の仮配置を配置順で UI に通知する({prop_type, x, y, z, rotation, scale} の配列)。</summary>
     private void EmitInstances()
     {
         if (IpcClient.Instance == null) return;
@@ -533,6 +540,7 @@ public class PropPlacementManager : MonoBehaviour
         {
             list.Add(new Dictionary<string, object>
             {
+                ["prop_type"] = inst.propType,
                 ["x"] = inst.x,
                 ["y"] = inst.y,
                 ["z"] = inst.z,

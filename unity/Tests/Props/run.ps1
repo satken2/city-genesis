@@ -24,6 +24,7 @@ foreach ($name in @('TerrainSurfaceAppearance.hlsl', 'DepthOffsetTerrainLitMacro
     Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/$name" -Destination "$qaRoot/Assets/Shaders" -Force
 }
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/DepthOffsetTerrainLit.shader" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
+Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/OverlayLine.shader" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/Forest.shader", "$unityRoot/Assets/Resources/Shaders/ForestPlacement.compute" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 $missingCluster = (Get-Content -LiteralPath "$unityRoot/Assets/Resources/Shaders/Forest.shader" -Raw).Replace('CityGenesis/Forest', 'CityGenesis/ForestWithoutCluster').Replace('#pragma multi_compile _ _CLUSTER_LIGHT_LOOP', '')
 Set-Content -LiteralPath "$qaRoot/Assets/Resources/Shaders/ForestWithoutCluster.shader" -Value $missingCluster
