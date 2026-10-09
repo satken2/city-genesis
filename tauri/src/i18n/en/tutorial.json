@@ -354,7 +354,7 @@
         "title": "Supply power to the depot"
       },
       "step9": {
-        "description": "In \"Public Transport\", press \"+ New line\" and choose \"International Freight Line\" as the line type. Place stops on the platforms of the international freight station and the border freight station, and open the line. Once confirmed, the city's import gateway switches from the port to the international freight station.",
+        "description": "In \"Public Transport\", press \"+ New line\" and choose \"International Freight Line\" as the line type. Place stops on the platforms of the international freight station and the border freight station, and open the line. Trains cannot pass each other on single track, so set the target headway to 45 minutes so that one train can make the round trip. Once confirmed, the city's import gateway switches from the port to the international freight station.",
         "title": "Open the international freight line"
       },
       "step10": {
@@ -432,7 +432,7 @@
         "title": "Supply power to the depot"
       },
       "step11": {
-        "description": "Create an Ore transport line, place stops on both ore freight platforms, and click the first stop to close the return loop.",
+        "description": "Create an Ore transport line, place stops on both ore freight platforms, and click the first stop to close the return loop. Trains cannot pass each other on single track, so set the target headway to 45 minutes so that one train can make the round trip, then confirm.",
         "title": "Open the ore freight line"
       },
       "step12": {

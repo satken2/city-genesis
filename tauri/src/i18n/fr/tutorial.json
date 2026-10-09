@@ -354,7 +354,7 @@
         "title": "Alimenter le dépôt en électricité"
       },
       "step9": {
-        "description": "Dans « Transports publics », appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de fret internationale » comme type de ligne. Placez des arrêts sur les quais de la gare de fret internationale et de la gare de fret frontalière, puis mettez la ligne en service. Après confirmation, le point d'entrée des importations passe du port à la gare de fret internationale.",
+        "description": "Dans « Transports publics », appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de fret internationale » comme type de ligne. Placez des arrêts sur les quais de la gare de fret internationale et de la gare de fret frontalière, puis mettez la ligne en service. Les trains ne pouvant pas se croiser sur une voie unique, réglez l'intervalle cible sur 45 minutes pour qu'un seul train fasse l'aller-retour. Après confirmation, le point d'entrée des importations passe du port à la gare de fret internationale.",
         "title": "Mettre en service la ligne de fret internationale"
       },
       "step10": {
@@ -432,7 +432,7 @@
         "title": "Alimenter le dépôt en électricité"
       },
       "step11": {
-        "description": "Créez une ligne de transport de minerai, posez des arrêts sur les deux quais puis cliquez sur le premier pour fermer le retour.",
+        "description": "Créez une ligne de transport de minerai, posez des arrêts sur les deux quais puis cliquez sur le premier pour fermer le retour. Les trains ne pouvant pas se croiser sur une voie unique, réglez l'intervalle cible sur 45 minutes pour qu'un seul train fasse l'aller-retour, puis confirmez.",
         "title": "Mettre en service la ligne de transport de minerai"
       },
       "step12": {

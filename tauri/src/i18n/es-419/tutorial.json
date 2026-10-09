@@ -354,7 +354,7 @@
         "title": "Llevar electricidad al depósito"
       },
       "step9": {
-        "description": "En «Transporte público», pulsa «＋ Nueva línea» y elige «Línea internacional de carga» como tipo de línea. Coloca paradas sobre los andenes de la estación internacional de carga y de la estación fronteriza de carga, e inaugura la línea. Al confirmar, la entrada de las importaciones pasará del puerto a la estación internacional de carga.",
+        "description": "En «Transporte público», pulsa «＋ Nueva línea» y elige «Línea internacional de carga» como tipo de línea. Coloca paradas sobre los andenes de la estación internacional de carga y de la estación fronteriza de carga, e inaugura la línea. Como los trenes no pueden cruzarse en vía única, fija el intervalo objetivo en 45 minutos para que un solo tren haga el viaje de ida y vuelta. Al confirmar, la entrada de las importaciones pasará del puerto a la estación internacional de carga.",
         "title": "Inaugurar la línea internacional de carga"
       },
       "step10": {
@@ -432,7 +432,7 @@
         "title": "Llevar electricidad al depósito"
       },
       "step11": {
-        "description": "Crea una línea de transporte de mineral, coloca paradas en ambos andenes y haz clic en la primera para cerrar el regreso.",
+        "description": "Crea una línea de transporte de mineral, coloca paradas en ambos andenes y haz clic en la primera para cerrar el regreso. Como los trenes no pueden cruzarse en vía única, fija el intervalo objetivo en 45 minutos para que un solo tren haga el viaje de ida y vuelta, y confirma.",
         "title": "Inaugurar la línea de transporte de mineral"
       },
       "step12": {
