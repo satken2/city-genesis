@@ -123,6 +123,7 @@ for (const [id, expected] of [[-1, false], [0, false], [null, false], [undefined
   assert.equal(roadApi.hasRoad(id), expected, `hasRoad(${id})`);
 }
 imports["./transitLineDraw"] = { drawTransitLines() {} };
+imports["./infraOverlay"] = { buildCoverageRender() {}, buildNetworkRender() {}, drawCoverageFill() {}, drawCoverageOutlines() {}, drawNetwork() {} };
 imports["../intersection/interchangeName"] = load("../src/components/intersection/interchangeName.ts");
 const { CityMapCanvas, DEFAULT_CITY_MAP_LAYERS } = load("../src/components/map/CityMapCanvas.tsx");
 assert.deepEqual(Object.keys(DEFAULT_CITY_MAP_LAYERS).filter((key) => DEFAULT_CITY_MAP_LAYERS[key]).sort(),

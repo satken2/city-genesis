@@ -78,6 +78,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     // パス干渉ハイライトの色。値があるとプレビュー以外の全表示に優先して塗る。
     // HighlightManager が計画中パスの干渉オブジェクト（建物・既存パス）へ設定する。
     private Color? interferenceColor = null;
+    private ObjectIdInfo idInfo;
 
     private void Awake()
     {
@@ -378,6 +379,24 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         // (PublicFacilityGlowOverlay)が担当するため、どの色モードとも共存する。
         EnableCollider(true);
 
+        // 効果範囲の表示中は、建物の色モードより範囲内・範囲外の色を優先する(非表示モードは除く)。
+        if (objectType == InputObjectType.BUILDING && currentMode != VisualMode.MODE_HIDDEN && TryGetCoverageColor(out Color coverageColor))
+        {
+            SetRenderersEnabled(true);
+            if (!preventMaterialChange)
+            {
+                if (isHovered)
+                {
+                    ApplyMaterialToAllSubmeshes(highlightMaterial);
+                }
+                else
+                {
+                    ApplyBuildingColorOverlay(coverageColor);
+                }
+            }
+            return;
+        }
+
         switch (currentMode)
         {
             case VisualMode.MODE_HIDDEN:
@@ -652,6 +671,13 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 }
                 break;
         }
+    }
+
+    private bool TryGetCoverageColor(out Color color)
+    {
+        color = default;
+        if (idInfo == null) idInfo = GetComponent<ObjectIdInfo>();
+        return idInfo != null && ServiceCoverageOverlay.TryGetBuildingColor(idInfo.id, out color);
     }
 
     private void SetRenderersEnabled(bool enabled)

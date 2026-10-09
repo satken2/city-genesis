@@ -1388,6 +1388,7 @@ public class IpcStateCoordinator : MonoBehaviour
         // 道路の強調・区間編集もパスIDの集合なので、別の都市では別の区間を指してしまう。
         RoadMemberEditManager.Instance?.End();
         RoadFocusOverlay.Instance?.ClearAll();
+        ServiceCoverageOverlay.Instance?.Clear();
 
         // カメラ状態のバックエンド送信を止める。新しい都市の準備中に前の視点を PATCH すると、
         // ロード後に適用するはずの保存視点を上書きしてしまうため(game:start で再開する)。
@@ -1431,6 +1432,9 @@ public class IpcStateCoordinator : MonoBehaviour
         // 経路(route_path_ids)は毎エポック再計算される。session:reload ごとに路線一覧を取り直し、
         // 再ルート/一時停止など再計算結果を公共交通オーバーレイへ反映する。
         TransitOverlayManager.Instance?.RefreshLines();
+
+        // 施設の竣工・新設や建物の増減を効果範囲の表示へ反映する。
+        ServiceCoverageOverlay.Instance?.Refresh();
     }
 
     private System.Collections.IEnumerator FetchCoastlineThenReload(TerrainManager terrainManager)

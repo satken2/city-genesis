@@ -47,7 +47,7 @@ export function DebugMap({ apiBaseUrl }: { apiBaseUrl: string }) {
   const mapRef = useRef<CityMapCanvasHandle>(null);
   const vectorsRef = useRef<CityMapVectors | null>(null);
   const handleReload = useCallback(() => mapRef.current?.reload(), []);
-  const controls = useCityMapControls(mapRef, handleReload);
+  const controls = useCityMapControls(apiBaseUrl, mapRef, handleReload);
 
   useEffect(() => {
     const unlisten = listen("session:reload", handleReload);
@@ -95,6 +95,7 @@ export function DebugMap({ apiBaseUrl }: { apiBaseUrl: string }) {
             layers={controls.layers}
             heatmap={controls.heatmap}
             heatmapMode={controls.heatmapMode}
+            infraProductId={controls.infraProductId}
             interactive
             onHeatmapStats={controls.onHeatmapStats}
             onVectorsLoaded={handleVectorsLoaded}

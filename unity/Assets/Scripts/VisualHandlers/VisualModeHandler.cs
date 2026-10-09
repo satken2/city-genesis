@@ -156,8 +156,8 @@ public class VisualModeHandler : MonoBehaviour
             UndergroundView.SetActive(mode == VisualModeTerrain.TRANSPARENT);
             if (changed)
             {
-                RefreshSurfaceObjects(InputObjectType.BUILDING);
-                RefreshSurfaceObjects(InputObjectType.PATH);
+                RefreshObjects(InputObjectType.BUILDING);
+                RefreshObjects(InputObjectType.PATH);
             }
         }
 
@@ -187,7 +187,11 @@ public class VisualModeHandler : MonoBehaviour
         }
     }
 
-    private void RefreshSurfaceObjects(int objectType)
+    /// <summary>
+    /// 色モードを変えずに、登録済みの全オブジェクトへ現在のモードを分散処理で通知し直す。
+    /// 色モード以外の表示の入力(地下表示・効果範囲など)が変わったときに使う。
+    /// </summary>
+    public void RefreshObjects(int objectType)
     {
         if (activeUpdateCoroutines.TryGetValue(objectType, out var routine) && routine != null) StopCoroutine(routine);
         activeUpdateCoroutines[objectType] = StartCoroutine(NotifyObjectsBatched(objectType, GetMode(objectType)));

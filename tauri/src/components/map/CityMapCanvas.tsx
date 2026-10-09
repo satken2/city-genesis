@@ -55,6 +55,13 @@
  *   表示用LODはエポック中に生成され、ズームに合う画像だけを取得・色付けする。
  *   heatmapMode="sources"では騒音・汚染の発生源を建物・道路の色で示す。
  *
+ * インフラ表示(infraProductId propで1つの財を選ぶ):
+ *   インフラ財は網の利用率と流れ(アニメーション用の第2キャンバスに描く)、効果範囲を持つサービス財は
+ *   稼働中の施設の範囲の塗り・施設ごとの輪郭・建物の範囲内/範囲外の塗り分けを描く。取得と描画は
+ *   infraOverlay.ts。建物の塗り分けは建物レイヤーに従い、発生源表示と同じく縮尺によらず形状を出す。
+ *   ヒートマップと同じく地図を塗る表示なので、呼び出し側はヒートマップと同時に選ばせない。
+ *   取得したデータは onInfraLoaded で通知する(統計タブのサマリーなどに使う)。
+ *
  * 地区の値塗り(zoneFill propで地区ごとの値を渡す):
  *   満足度などの地区単位の指標を地区ポリゴンの塗り分けで表現する。塗りは地区枠線より
  *   下に敷くので、枠線レイヤーと併用しても境界が残る。正規化と実値レンジの保持は
@@ -99,10 +106,18 @@ import {
   PATH_TRACK,
   MODEL_PARK,
   ROAD_COLOR_PALETTE,
+  GOODS_INFRASTRUCTURE,
+  GOODS_SERVICE,
 } from "../../constants";
 import { drawMapLabels, facilitySymbol, type MapPlace, type MapRoadLabel } from "./mapLabels";
 import { RoadCenterline, roadSurface } from "./roadSurface";
 import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
+import {
+  buildCoverageRender, buildNetworkRender, drawCoverageFill, drawCoverageOutlines, drawNetwork,
+  COVERAGE_IN_RANGE_COLOR, COVERAGE_OUT_OF_RANGE_COLOR,
+  type CityMapInfraData, type InfraCoverageRender, type InfraNetworkRender,
+  type InfrastructureStats, type ServiceCoverageData,
+} from "./infraOverlay";
 import { interchangeDisplayName } from "../intersection/interchangeName";
 import { fetchRoadList, hasRoad, ROADS_CHANGED_EVENT } from "../road/roadApi";
 import type { RoadSummary } from "../road/roadTypes";
@@ -277,6 +292,13 @@ export type CityMapCanvasProps = {
    * 併用すると色が混ざって読めなくなる。
    */
   zoneFill?: CityMapZoneFill;
+  /**
+   * インフラ表示する財の製品ID(省略・nullで非表示)。インフラ財なら網、効果範囲を持つサービス財なら
+   * 効果範囲と建物の塗り分けを描く。ヒートマップとは同時に使わない。
+   */
+  infraProductId?: number | null;
+  /** インフラ表示のデータの取得完了通知。非表示・取得失敗では null が渡る */
+  onInfraLoaded?: (data: CityMapInfraData | null) => void;
   /** 初期表示範囲(ワールド座標)。省略時はマップ全体にフィットする */
   initialBounds?: CityMapBounds;
   /** マウス・タッチによるパン・ズーム操作を許可するか(埋め込みプレビューではfalse推奨) */
@@ -422,6 +444,8 @@ type VectorState = {
   railPath: Path2D | null;
   railSourceBands: { path: Path2D; color: string }[];
   buildingSourceBands: { path: Path2D; color: string }[];
+  /** 効果範囲の表示中に、範囲内・範囲外の建物を塗る面 */
+  buildingCoverageBands: { path: Path2D; color: string }[];
   parcelPath: Path2D | null;
   buildingPath: Path2D | null;
   parkPath: Path2D | null;
@@ -1179,6 +1203,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       onHeatmapStats,
       onVectorsLoaded,
       zoneFill,
+      infraProductId = null,
+      onInfraLoaded,
       className,
     },
     ref
@@ -1207,6 +1233,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const zoomCbRef = useRef<CityMapCanvasProps["onZoomChange"]>(onZoomChange);
     const heatmapStatsCbRef = useRef<CityMapCanvasProps["onHeatmapStats"]>(onHeatmapStats);
     const vectorsCbRef = useRef<CityMapCanvasProps["onVectorsLoaded"]>(onVectorsLoaded);
+    const infraProductRef = useRef<number | null>(infraProductId);
+    const infraCbRef = useRef<CityMapCanvasProps["onInfraLoaded"]>(onInfraLoaded);
     const masterDataRef = useRef<MasterData | null>(masterData);
     // インターチェンジの未命名時の表示名は描画時に翻訳するため、言語切替にも追従させる
     const { t } = useTranslation();
@@ -1219,6 +1247,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     zoomCbRef.current = onZoomChange;
     heatmapStatsCbRef.current = onHeatmapStats;
     vectorsCbRef.current = onVectorsLoaded;
+    infraCbRef.current = onInfraLoaded;
 
     // 描画エンジンの操作関数。初期化effect内で構築し、他のeffect(レイヤー変更等)や
     // useImperativeHandleから呼び出す。
@@ -1231,6 +1260,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       reloadVectors: () => void;
       ensureVectors: () => void;
       ensureHeatmap: () => void;
+      ensureInfra: () => void;
       rebuildPathClassification: () => void;
       rebuildZoneFill: () => void;
       rebuildRoadFocus: () => void;
@@ -1279,6 +1309,12 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       engineRef.current?.draw();
     }, [heatmap, heatmapMode]);
 
+    /* ---- インフラ表示の財の変更: 種類に応じたデータを取り直して再描画する ---- */
+    useEffect(() => {
+      infraProductRef.current = infraProductId;
+      engineRef.current?.ensureInfra();
+    }, [infraProductId]);
+
     /* ---- 地区の値塗りの変更: 地区データを揃えてPath2Dを作り直し再描画する ---- */
     useEffect(() => {
       zoneFillRef.current = zoneFill;
@@ -1291,6 +1327,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     useEffect(() => {
       masterDataRef.current = masterData;
       engineRef.current?.rebuildPathClassification();
+      // インフラ表示は財の種類をマスターで決めるので、マスターの到着後に取得する
+      engineRef.current?.ensureInfra();
       engineRef.current?.draw();
     }, [masterData]);
 
@@ -1360,6 +1398,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         railPath: null,
         railSourceBands: [],
         buildingSourceBands: [],
+        buildingCoverageBands: [],
         parcelPath: null,
         buildingPath: null,
         parkPath: null,
@@ -1383,6 +1422,15 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         pathValues: new Map(), buildingValues: new Map(),
         min: 0, max: 0, count: 0, binColors: [],
       };
+
+      /** インフラ表示。requestKey は種類と財で、同じ財の取得を重ねないため */
+      const infra: {
+        requestKey: string;
+        generation: number;
+        network: InfraNetworkRender | null;
+        coverage: InfraCoverageRender | null;
+      } = { requestKey: "", generation: 0, network: null, coverage: null };
+      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 
       let vectorTimer: number | null = null;
       let contourTimer: number | null = null;
@@ -1461,7 +1509,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const px = (w: number) => w / z; // 画面ピクセル単位の線幅をワールド単位へ
         // 細部の形状は読み取れる縮尺でだけ描く。施設記号・名前は別のズーム基準で表示する。
         const showMinorRoads = L.allRoads && (z > 0.3 || heat.mode === "sources");
-        const showBuildingShapes = L.buildings && (z > 0.7 || heat.mode === "sources");
+        const showBuildingShapes = L.buildings && (z > 0.7 || heat.mode === "sources" || infra.coverage !== null);
         const showParcels = L.parcels && z > 1;
 
         // 都市外の陸地。都市の矩形を1px縮めた外側に塗り、境界の画素を都市の陸地の下に潜らせて
@@ -1568,6 +1616,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.globalAlpha = 1.0;
         }
 
+        // 効果範囲の塗り。道路・建物・枠線を潰さないよう、それらより先に敷く。
+        if (infra.coverage) drawCoverageFill(ctx, infra.coverage);
+
         // 海岸線
         if (L.coastline && coastPath) {
           ctx.strokeStyle = COLOR_COASTLINE;
@@ -1617,7 +1668,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.globalAlpha = 1;
           ctx.fillStyle = COLOR_BUILDING;
           ctx.fill(vec.buildingPath);
-          for (const band of vec.buildingSourceBands) {
+          for (const band of [...vec.buildingSourceBands, ...vec.buildingCoverageBands]) {
             ctx.fillStyle = band.color;
             ctx.fill(band.path);
           }
@@ -1663,6 +1714,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         if (L.transitLines && vec.transitLines.length > 0) {
           drawTransitLines(ctx, { ...view }, vec.transitLines, transitFocusRef.current);
         }
+
+        // 施設ごとの効果範囲の輪郭。道路・建物の上に重ねて境界を読めるようにする
+        if (infra.coverage) drawCoverageOutlines(ctx, view, infra.coverage);
 
         // 道路の強調。白い縁取りの上に道路色の帯を重ね、候補は同じ色の破線で示す
         const focusColorValue = focus.focusColor || ROAD_COLOR_PALETTE[0];
@@ -1740,14 +1794,16 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
 
         const cb = animatedOverlayDrawRef.current;
-        if (!cb) return;
+        if (!cb && !infra.network) return;
 
         const dpr = window.devicePixelRatio || 1;
         animCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
         animCtx.save();
         animCtx.translate(-view.offsetX * view.zoom, view.offsetY * view.zoom);
         animCtx.scale(view.zoom, -view.zoom);
-        cb(animCtx, { ...view }, timeMs);
+        // 動きの抑制が求められている環境では、網の縞を時刻0で止める
+        if (infra.network) drawNetwork(animCtx, view, infra.network, reducedMotion ? 0 : timeMs);
+        cb?.(animCtx, { ...view }, timeMs);
         animCtx.restore();
       };
 
@@ -2022,6 +2078,51 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
       const ensureHeatmap = () => { void loadHeatmap(heatmapRef.current); };
 
+      /**
+       * インフラ表示のデータを取得する。財の種類はマスターの商品種別で決めるので、マスターが未着なら
+       * 何もしない(到着時に呼び直される)。種類・財・再読み込みの世代が変わった後の古い応答は適用しない。
+       */
+      const loadInfra = async () => {
+        const productId = infraProductRef.current;
+        const productType = productId != null ? masterDataRef.current?.products?.[productId]?.type : undefined;
+        const kind = productType === GOODS_INFRASTRUCTURE ? "network" : productType === GOODS_SERVICE ? "coverage" : null;
+        const key = kind ? `${kind}:${productId}` : "";
+        if (infra.requestKey === key) return;
+        infra.requestKey = key;
+        const generation = ++infra.generation;
+        infra.network = null;
+        infra.coverage = null;
+        rebuildPathClassification();
+        infraCbRef.current?.(null);
+        draw();
+        if (!kind || productId == null) return;
+        try {
+          let data: CityMapInfraData;
+          if (kind === "network") {
+            const stats = await fetchApi<InfrastructureStats>(
+              buildApiUrl(apiBaseUrl, "/api/v1/stats/infrastructure"), { signal: abort.signal });
+            if (disposed || generation !== infra.generation) return;
+            const product = stats.products.find((p) => p.product_id === productId);
+            if (!product) return;
+            const simulationDays = stats.simulation_days || 1;
+            infra.network = buildNetworkRender(product, simulationDays);
+            data = { kind, product, simulationDays };
+          } else {
+            const coverage = await fetchApi<ServiceCoverageData>(
+              buildApiUrl(apiBaseUrl, `/api/v1/buildings/service-coverage/${productId}`), { signal: abort.signal });
+            if (disposed || generation !== infra.generation) return;
+            infra.coverage = buildCoverageRender(coverage);
+            data = { kind, coverage };
+          }
+          rebuildPathClassification();
+          infraCbRef.current?.(data);
+          draw();
+        } catch (err) {
+          if (infra.generation === generation) infra.requestKey = "";
+          if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load infra overlay:", err);
+        }
+      };
+
       /* ---- ベクターデータ(パス・土地区画・建物・地区) ---- */
 
       /** 現在のレイヤー設定で必要なデータ種別を返す */
@@ -2104,6 +2205,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           buildingBins.set(bin, items);
         }
         vec.buildingSourceBands = [...buildingBins].map(([bin, items]) => ({ path: buildPolygonPath(items, true), color: heat.binColors[bin] }));
+        const coverage = infra.coverage;
+        vec.buildingCoverageBands = coverage ? [
+          { path: buildPolygonPath(vec.buildings.filter((b) => coverage.covered.has(b.agent_id ?? 0)), true), color: COVERAGE_IN_RANGE_COLOR },
+          { path: buildPolygonPath(vec.buildings.filter((b) => coverage.uncovered.has(b.agent_id ?? 0)), true), color: COVERAGE_OUT_OF_RANGE_COLOR },
+        ] : [];
         const railBins = new Map<number, Path2D>();
         const bands = new Map<string, RoadBand>();
         const roadTypes = [PATH_STREET, PATH_MOTORWAY, PATH_WALKWAY];
@@ -2568,14 +2674,17 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       const reload = () => {
         vec.fetchedKinds.clear();
         vec.fetchedBounds = null;
-        // 取得済み種別をクリアしてヒートマップも取り直す(エポック実行で値が変わるため)
+        // 取得済み種別をクリアしてヒートマップ・インフラ表示も取り直す(エポック実行で値が変わるため)
         heat.requestKey = "";
         heat.generation++;
+        infra.requestKey = "";
+        infra.generation++;
         void (async () => {
           await Promise.all([loadTerrain(), loadCoastline(), loadBackgroundLand(), loadReclaimedLands()]);
           if (disposed) return;
           fetchVectorsForViewport();
           void loadHeatmap(heatmapRef.current);
+          void loadInfra();
           draw();
         })();
       };
@@ -2650,6 +2759,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         contourBaseZoom = view.zoom;
         fetchVectorsForViewport();
         void loadHeatmap(heatmapRef.current);
+        void loadInfra();
         draw();
       })();
 
@@ -2668,6 +2778,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         reloadVectors: () => refreshKinds(neededKinds()),
         ensureVectors,
         ensureHeatmap,
+        ensureInfra: () => { void loadInfra(); },
         rebuildPathClassification,
         rebuildZoneFill,
         rebuildRoadFocus,
@@ -2699,10 +2810,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     }, [apiBaseUrl, interactive, boundsKey]);
 
     /* ---- アニメーションオーバーレイのrAFループ ----
-     * animatedOverlayDrawが指定されている間だけ回す(コールバックの中身の差し替えは
-     * refミラーが吸収するため、有無のbooleanだけを依存にしてループを張り直さない)。
-     * エンジン未初期化のフレームは何もせず次フレームを待つ。 */
-    const hasAnimatedOverlay = animatedOverlayDraw != null;
+     * animatedOverlayDrawが指定されている間と、インフラ財の網を表示している間だけ回す
+     * (コールバックの中身の差し替えはrefミラーが吸収するため、有無のbooleanだけを依存にして
+     * ループを張り直さない)。エンジン未初期化のフレームは何もせず次フレームを待つ。 */
+    const hasAnimatedOverlay = animatedOverlayDraw != null
+      || (infraProductId != null && masterData?.products?.[infraProductId]?.type === GOODS_INFRASTRUCTURE);
     useEffect(() => {
       if (!hasAnimatedOverlay) return;
       let rafId = 0;

@@ -47,6 +47,7 @@
 
   .city-map-window__layer-toggles,
   .city-map-window__heatmap,
+  .city-map-window__infra,
   .city-map-window__actions {
     flex-wrap: nowrap;
     flex-shrink: 0;
@@ -113,6 +114,29 @@
   background: #26324f;
   border-color: #4f6ba8;
   color: #cdd6f4;
+}
+
+/* ---- インフラ表示の財の選択 ---- */
+
+.city-map-window__infra {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.city-map-window__infra-select {
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid #2a3149;
+  border-radius: 9px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 1.04rem;
+}
+
+.city-map-window__infra-select:focus-visible {
+  outline: 2px solid #a6d7fa;
+  outline-offset: 2px;
 }
 
 .city-map-window__actions {

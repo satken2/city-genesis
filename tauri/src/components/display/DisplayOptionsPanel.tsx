@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { resolveDisplayIcon, DISPLAY_LAYERS } from "./displayConstants";
 import type { DisplayLayer, DisplayMode } from "./displayConstants";
 import type { DisplaySelection } from "./useDisplayOptions";
@@ -26,6 +27,12 @@ import {
   ALERT_DISPLAY_INFRA_WARNING,
 } from "../../constants";
 import { resolveTransitIcon } from "../../utils/pathIcon";
+import { resolveAgentVariantIcon } from "../../utils/agentIcon";
+import {
+  useInfraProducts,
+  COVERAGE_IN_RANGE_COLOR,
+  COVERAGE_OUT_OF_RANGE_COLOR,
+} from "../map/infraOverlay";
 import { playSound } from "../../utils/playSound";
 import clickSrc from "../../assets/sounds/click.opus";
 import "./DisplayOptionsPanel.css";
@@ -36,7 +43,7 @@ type DisplayOptionsPanelProps = {
 
 /**
  * 表示パネルの縦タブ順序。
- * UI上は「建物→道路→区画→地区→資源→公共交通→プロップ→地形→アラート」の順で並べる。
+ * UI上は「建物→道路→区画→地区→資源→公共交通→効果範囲→プロップ→地形→アラート」の順で並べる。
  */
 const TAB_ORDER = [
   "building",
@@ -45,6 +52,7 @@ const TAB_ORDER = [
   "district",
   "resource",
   "transit",
+  "coverage",
   "prop",
   "terrain",
   "alert",
@@ -75,7 +83,18 @@ type LegendInfo = {
  * レイヤーIDとモードIDから凡例情報を解決する。
  * 凡例が未定義のモードはすべて "none" として扱い、ダミーの説明文を返す。
  */
-function getLegendInfo(layerId: string, modeId: string): LegendInfo {
+function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInfo {
+  if (layerId === "coverage") {
+    return {
+      type: "color",
+      description: t("display.coverageDescription"),
+      items: [
+        { color: COVERAGE_IN_RANGE_COLOR, label: t("display.coverageInRange") },
+        { color: COVERAGE_OUT_OF_RANGE_COLOR, label: t("display.coverageOutOfRange") },
+      ],
+    };
+  }
+
   if (layerId === "road") {
     switch (modeId) {
       case "traffic_color":
@@ -419,7 +438,71 @@ function TransitSection({
   );
 }
 
-export function DisplayOptionsPanel({ apiBaseUrl: _apiBaseUrl }: DisplayOptionsPanelProps) {
+/**
+ * 効果範囲レイヤーのセクション。効果範囲を持つサービス財(電力・水道など)を1つだけ選ぶ。
+ * 選んだ財の製品IDを subMode として送り、Unity が施設ごとの範囲の輪郭と、建物の範囲内・範囲外の色を描く。
+ * 財の一覧と範囲内外の判定はコアが持つ。アイコンは財を供給する施設のもの。
+ */
+function CoverageSection({
+  apiBaseUrl,
+  selection,
+  onSelect,
+}: {
+  apiBaseUrl: string;
+  selection: DisplaySelection;
+  onSelect: (layerId: string, mode: string, subMode?: string) => void;
+}) {
+  const { t } = useTranslation();
+  const masterData = useMasterData();
+  const products = useInfraProducts(apiBaseUrl).filter((p) => p.kind === "coverage");
+  const selected = selection.mode === "hidden" ? null : Number(selection.subMode);
+
+  const choose = (productId: number | null) => {
+    playSound(clickSrc);
+    if (productId === null) {
+      onSelect("coverage", "hidden");
+    } else {
+      onSelect("coverage", "default", String(productId));
+    }
+  };
+
+  return (
+    <div className="do-alert-list">
+      <button
+        type="button"
+        className={`do-alert-card ${selected === null ? "enabled" : ""}`}
+        aria-pressed={selected === null}
+        onClick={() => choose(null)}
+      >
+        <img src={resolveDisplayIcon("visual/invisible.png")} alt="" className="do-alert-card-icon" draggable={false} />
+        <span className="do-alert-card-text">{t("display.coverageNone")}</span>
+        <div className="do-alert-card-toggle" />
+      </button>
+      {products.map((product) => (
+        <button
+          key={product.productId}
+          type="button"
+          className={`do-alert-card ${selected === product.productId ? "enabled" : ""}`}
+          aria-pressed={selected === product.productId}
+          onClick={() => choose(product.productId)}
+        >
+          <img
+            src={resolveAgentVariantIcon(product.supplierVariants[0])}
+            alt=""
+            className="do-alert-card-icon"
+            draggable={false}
+          />
+          <span className="do-alert-card-text">
+            {masterData?.products[product.productId]?.display_name ?? product.productId}
+          </span>
+          <div className="do-alert-card-toggle" />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function DisplayOptionsPanel({ apiBaseUrl }: DisplayOptionsPanelProps) {
   const { selections, selectMode, toggleFlag } = useDisplayOptions();
   const [activeTabId, setActiveTabId] = useState<string>(TAB_ORDER[0]);
   const { t } = useTranslation();
@@ -472,6 +555,12 @@ export function DisplayOptionsPanel({ apiBaseUrl: _apiBaseUrl }: DisplayOptionsP
                 />
               ) : activeLayer.id === "transit" ? (
                 <TransitSection
+                  selection={activeSelection}
+                  onSelect={selectMode}
+                />
+              ) : activeLayer.id === "coverage" ? (
+                <CoverageSection
+                  apiBaseUrl={apiBaseUrl}
                   selection={activeSelection}
                   onSelect={selectMode}
                 />
@@ -659,7 +748,7 @@ function LegendArea({
   modeId: string;
 }) {
   const { t } = useTranslation();
-  const info = getLegendInfo(layerId, modeId);
+  const info = getLegendInfo(layerId, modeId, t);
 
   return (
     <div className="do-legend-root">

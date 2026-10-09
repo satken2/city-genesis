@@ -105,12 +105,14 @@ public class EffectRangeOverlay : MonoBehaviour
         if (region.type == "circle")
         {
             BuildCircleFill(region, fillColor);
-            BuildCircleOutline(region, boundaryColor);
         }
         else
         {
             BuildPolygonFill(region, fillColor);
-            BuildPolygonOutline(region, boundaryColor);
+        }
+        foreach (var ring in region.Rings())
+        {
+            DrawWorldRing(lineRenderer, ring, boundaryColor, 1.6f, 6f);
         }
     }
 
@@ -171,37 +173,6 @@ public class EffectRangeOverlay : MonoBehaviour
                 quad.Add(GroundPoint(x + step, z + step));
                 quad.Add(GroundPoint(x, z + step));
                 fillRenderer.AddPolygon(quad, fillColor);
-            }
-        }
-    }
-
-    // =====================================================================
-    // 境界アウトライン
-    // =====================================================================
-
-    private void BuildCircleOutline(EffectRangeRegionData region, Color boundaryColor)
-    {
-        float r = region.radius;
-        if (r <= 0f) return;
-        Vector2 c = region.center;
-        int segments = Mathf.Clamp(Mathf.CeilToInt(r / 4f), 24, 160);
-        var ring = new List<Vector2>(segments);
-        for (int i = 0; i < segments; i++)
-        {
-            float a = (float)i / segments * Mathf.PI * 2f;
-            ring.Add(new Vector2(c.x + Mathf.Cos(a) * r, c.y + Mathf.Sin(a) * r));
-        }
-        DrawWorldRing(lineRenderer, ring, boundaryColor, 1.6f, 6f);
-    }
-
-    private void BuildPolygonOutline(EffectRangeRegionData region, Color boundaryColor)
-    {
-        foreach (var poly in region.polygons)
-        {
-            DrawWorldRing(lineRenderer, poly.exterior, boundaryColor, 1.6f, 8f);
-            foreach (var hole in poly.holes)
-            {
-                DrawWorldRing(lineRenderer, hole, boundaryColor, 1.6f, 8f);
             }
         }
     }
@@ -272,50 +243,36 @@ public class EffectRangeRegionData
     public Vector2 center;                               // circle
     public float radius;                                 // circle
     public List<EffectRangePolygonData> polygons = new List<EffectRangePolygonData>(); // polygon
-}
-
-/// <summary>不定形領域の1ポリゴン(外周 + 穴)。座標はワールド XZ。</summary>
-public class EffectRangePolygonData
-{
-    public List<Vector2> exterior = new List<Vector2>();
-    public List<List<Vector2>> holes = new List<List<Vector2>>();
-}
-
-/// <summary>edit_building:update_effect_range のペイロード。</summary>
-public class EffectRangePayload
-{
-    public EffectRangeRegionData region;   // プレビュー領域。null なら「プレビュー無し」
-    // 既存施設のカバー済み領域の一覧。空なら「既存表示無し」。
-    public List<EffectRangeRegionData> existing = new List<EffectRangeRegionData>();
-
-    /// <summary>プレビュー領域・既存領域のどちらも無い(=クリア指示)か。</summary>
-    public bool IsClear => !HasPreviewRegion && existing.Count == 0;
-
-    /// <summary>描画対象のプレビュー領域を持つか。</summary>
-    public bool HasPreviewRegion => region != null && !string.IsNullOrEmpty(region.type);
 
     /// <summary>
-    /// IPC の region トークン(JObject or null)と existing トークン(JArray or null)から
-    /// ペイロードを組み立てる。
+    /// 境界の閉じたリング(ワールドXZ)を列挙する。円は半径に応じた多角形、ポリゴンは外周と穴。
     /// </summary>
-    public static EffectRangePayload FromJson(JToken regionToken, JToken existingToken = null)
+    public List<List<Vector2>> Rings()
     {
-        var payload = new EffectRangePayload();
-        payload.region = ParseRegion(regionToken);
-        var existingArr = existingToken as JArray;
-        if (existingArr != null)
+        var rings = new List<List<Vector2>>();
+        if (type == "circle")
         {
-            foreach (var item in existingArr)
+            if (radius <= 0f) return rings;
+            int segments = Mathf.Clamp(Mathf.CeilToInt(radius / 4f), 24, 160);
+            var ring = new List<Vector2>(segments);
+            for (int i = 0; i < segments; i++)
             {
-                var r = ParseRegion(item);
-                if (r != null) payload.existing.Add(r);
+                float a = (float)i / segments * Mathf.PI * 2f;
+                ring.Add(new Vector2(center.x + Mathf.Cos(a) * radius, center.y + Mathf.Sin(a) * radius));
             }
+            rings.Add(ring);
+            return rings;
         }
-        return payload;
+        foreach (var poly in polygons)
+        {
+            rings.Add(poly.exterior);
+            rings.AddRange(poly.holes);
+        }
+        return rings;
     }
 
-    /// <summary>1領域ぶんの JObject をパースする。null や不正な形式なら null を返す。</summary>
-    private static EffectRangeRegionData ParseRegion(JToken regionToken)
+    /// <summary>コアが返す領域1つぶんの JObject をパースする。null や不正な形式なら null を返す。</summary>
+    public static EffectRangeRegionData Parse(JToken regionToken)
     {
         if (regionToken == null || regionToken.Type == JTokenType.Null) return null;
         var obj = regionToken as JObject;
@@ -356,5 +313,45 @@ public class EffectRangePayload
         }
         return region;
     }
+}
 
+/// <summary>不定形領域の1ポリゴン(外周 + 穴)。座標はワールド XZ。</summary>
+public class EffectRangePolygonData
+{
+    public List<Vector2> exterior = new List<Vector2>();
+    public List<List<Vector2>> holes = new List<List<Vector2>>();
+}
+
+/// <summary>edit_building:update_effect_range のペイロード。</summary>
+public class EffectRangePayload
+{
+    public EffectRangeRegionData region;   // プレビュー領域。null なら「プレビュー無し」
+    // 既存施設のカバー済み領域の一覧。空なら「既存表示無し」。
+    public List<EffectRangeRegionData> existing = new List<EffectRangeRegionData>();
+
+    /// <summary>プレビュー領域・既存領域のどちらも無い(=クリア指示)か。</summary>
+    public bool IsClear => !HasPreviewRegion && existing.Count == 0;
+
+    /// <summary>描画対象のプレビュー領域を持つか。</summary>
+    public bool HasPreviewRegion => region != null && !string.IsNullOrEmpty(region.type);
+
+    /// <summary>
+    /// IPC の region トークン(JObject or null)と existing トークン(JArray or null)から
+    /// ペイロードを組み立てる。
+    /// </summary>
+    public static EffectRangePayload FromJson(JToken regionToken, JToken existingToken = null)
+    {
+        var payload = new EffectRangePayload();
+        payload.region = EffectRangeRegionData.Parse(regionToken);
+        var existingArr = existingToken as JArray;
+        if (existingArr != null)
+        {
+            foreach (var item in existingArr)
+            {
+                var r = EffectRangeRegionData.Parse(item);
+                if (r != null) payload.existing.Add(r);
+            }
+        }
+        return payload;
+    }
 }

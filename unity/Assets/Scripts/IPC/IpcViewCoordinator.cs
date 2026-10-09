@@ -68,6 +68,7 @@ public class IpcViewCoordinator : MonoBehaviour
         { "transit", ("hidden", null, null) },
         { "resource", ("hidden", null, null) },
         { "alert", ("visible", null, null) },
+        { "coverage", ("hidden", null, null) },
     };
 
     /// <summary>
@@ -269,6 +270,10 @@ public class IpcViewCoordinator : MonoBehaviour
                 ApplyPropMode(mode);
                 break;
 
+            case "coverage":
+                ApplyCoverageMode(mode, subMode);
+                break;
+
             default:
                 Debug.LogWarning($"IpcViewCoordinator: 未知のレイヤー: {layer}");
                 break;
@@ -294,6 +299,12 @@ public class IpcViewCoordinator : MonoBehaviour
     public void SyncFromState(string state, Dictionary<string, object> ipcParams = null)
     {
         _currentState = state;
+
+        // 編集ステートでは建物の色を作業用の表示に任せ、効果範囲は出さない(建設パネルは自前で効果範囲を出す)。
+        if (state != "STATE_NORMAL")
+        {
+            ForceLayer("coverage", "hidden");
+        }
 
         switch (state)
         {
@@ -689,6 +700,7 @@ public class IpcViewCoordinator : MonoBehaviour
             case "resource": ApplyResourceMode(mode); break;
             case "transit": ApplyTransitMode(mode, subMode); break;
             case "prop": ApplyPropMode(mode); break;
+            case "coverage": ApplyCoverageMode(mode, subMode); break;
         }
     }
 
@@ -909,6 +921,17 @@ public class IpcViewCoordinator : MonoBehaviour
                 VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
                 break;
         }
+    }
+
+    /// <summary>
+    /// 効果範囲レイヤーの表示を切り替える。subMode は表示するサービス財の製品ID。
+    /// 同じ財のままでも取り直すので、編集ステートから戻ったときに新しい施設の範囲が反映される。
+    /// </summary>
+    private void ApplyCoverageMode(string mode, string subMode)
+    {
+        int productId = mode != "hidden" && int.TryParse(subMode, out int id) ? id : 0;
+        ServiceCoverageOverlay.Ensure();
+        ServiceCoverageOverlay.Instance.SetProduct(productId);
     }
 
     private void ApplyResourceMode(string mode)

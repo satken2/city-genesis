@@ -78,6 +78,19 @@
       "sunshine": "일조",
       "noData": "히트맵 미계산(에포크 미실행)"
     },
+    "infra": {
+      "title": "인프라",
+      "none": "없음",
+      "legendUtilization": "경로 이용률(낮음→높음)",
+      "legendFlow": "줄무늬의 흐름＝배송 방향(빠를수록 유량이 많음)",
+      "legendProducers": "생산 시설",
+      "legendConsumers": "소비 시설",
+      "legendDisconnected": "미연결",
+      "legendInRange": "범위 안의 건물",
+      "legendOutOfRange": "범위 밖의 건물",
+      "legendRange": "시설의 효과 범위",
+      "legendInactiveRange": "가동하지 않는 시설의 범위"
+    },
     "compass": {
       "north": "북",
       "east": "동",
@@ -150,6 +163,12 @@
     "transitHighlightDescription": "건물과 지형 앞에 노선과 정류장 이름을 표시합니다. 지하 노선도 표시됩니다. 노선이나 차량을 클릭하면 노선 상세 정보를 엽니다.",
     "transitHighlight": "대중교통 강조",
     "transitNoTypes": "대중교통 종류가 없습니다.",
+    "layerCoverage": "효과 범위",
+    "modeCoverageDefault": "효과 범위 표시",
+    "coverageNone": "표시 안 함",
+    "coverageDescription": "전력·수도 등 서비스를 공급하는 시설의 효과 범위를 윤곽선으로 표시하고, 가동 중인 건물을 범위 안과 밖으로 구분해 색칠합니다. 건설 중 등 가동하지 않는 시설의 범위는 점선으로 표시하며 색칠에 포함하지 않습니다. 표시 중에는 건물 색상 구분보다 우선합니다.",
+    "coverageInRange": "범위 안의 건물",
+    "coverageOutOfRange": "범위 밖의 건물",
     "modeTerrainDefault": "일반 표시",
     "modeTerrainTransparent": "투과 표시",
     "modeTerrainElevation": "표고 색상 구분",

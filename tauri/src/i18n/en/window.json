@@ -78,6 +78,19 @@
       "sunshine": "Sunlight",
       "noData": "Heatmap not computed (no epoch run yet)"
     },
+    "infra": {
+      "title": "Infrastructure",
+      "none": "Off",
+      "legendUtilization": "Path utilization (low → high)",
+      "legendFlow": "Stripe flow = delivery direction (faster = more flow)",
+      "legendProducers": "Producers",
+      "legendConsumers": "Consumers",
+      "legendDisconnected": "Disconnected",
+      "legendInRange": "Buildings in range",
+      "legendOutOfRange": "Buildings out of range",
+      "legendRange": "Facility effect range",
+      "legendInactiveRange": "Range of facilities not operating"
+    },
     "compass": {
       "north": "N",
       "east": "E",
@@ -150,6 +163,12 @@
     "transitHighlightDescription": "Show routes and stop names in front of buildings and terrain, including underground routes. Click a route or vehicle to open its details.",
     "transitHighlight": "Public transport highlight",
     "transitNoTypes": "No transit line types available.",
+    "layerCoverage": "Effect Range",
+    "modeCoverageDefault": "Show effect range",
+    "coverageNone": "Off",
+    "coverageDescription": "Outlines the effect range of facilities that deliver services such as electricity and water, and colors operating buildings by whether they are inside or outside the range. Ranges of facilities that are not operating, such as those under construction, are dashed and not counted. While shown, this takes precedence over building color modes.",
+    "coverageInRange": "Buildings in range",
+    "coverageOutOfRange": "Buildings out of range",
     "modeTerrainDefault": "Default View",
     "modeTerrainTransparent": "Transparent",
     "modeTerrainElevation": "Elevation Coloring",

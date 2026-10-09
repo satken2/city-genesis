@@ -1,8 +1,10 @@
 /**
- * 都市地図の表示切り替え(レイヤー・ヒートマップ・全体表示・再読み込み)のツールバーと、ヒートマップの凡例。
+ * 都市地図の表示切り替え(レイヤー・ヒートマップ・インフラ表示・全体表示・再読み込み)のツールバーと、
+ * ヒートマップ・インフラ表示の凡例。
  *
  * 都市マップウィンドウ(CityMapWindow)と、ブラウザ版の開発用の地図ページ(`web/debug-map/`)が同じツールバーを使う。
  * 表示状態はこのフックが持ち、地図本体(CityMapCanvas)へは呼び出し側が渡す。
+ * ヒートマップとインフラ表示はどちらも地図を塗るので、片方を選ぶともう片方を外す。
  */
 
 import { useCallback, useState, type ReactNode, type RefObject } from "react";
@@ -18,6 +20,9 @@ import {
 } from "./CityMapCanvas";
 import "./CityMapWindow.css";
 import { MAP_SYMBOLS, type MapSymbol } from "./mapSymbols";
+import { useInfraProducts } from "./infraOverlay";
+import { InfraMapLegend } from "./InfraMapLegend";
+import { useMasterData } from "../../contexts/MasterDataContext";
 
 export function MapIcon({ name }: { name: MapSymbol }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={MAP_SYMBOLS[name]} /></svg>;
@@ -51,19 +56,39 @@ export type CityMapControls = {
   layers: CityMapLayerVisibility;
   heatmap: CityMapHeatmapKind;
   heatmapMode: CityMapHeatmapMode;
+  /** CityMapCanvas の infraProductId に渡す */
+  infraProductId: number | null;
   /** CityMapCanvas の onHeatmapStats に渡す */
   onHeatmapStats: (stats: CityMapHeatmapStats | null) => void;
   toolbar: ReactNode;
-  /** 地図の上に重ねる凡例。ヒートマップを表示していないときは null */
+  /** 地図の上に重ねる凡例。ヒートマップもインフラ表示もしていないときは null */
   legend: ReactNode;
 };
 
-export function useCityMapControls(mapRef: RefObject<CityMapCanvasHandle | null>, onReload: () => void): CityMapControls {
+export function useCityMapControls(
+  apiBaseUrl: string,
+  mapRef: RefObject<CityMapCanvasHandle | null>,
+  onReload: () => void
+): CityMapControls {
   const { t } = useTranslation();
+  const masterData = useMasterData();
+  const infraProducts = useInfraProducts(apiBaseUrl);
   const [layers, setLayers] = useState<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS });
   const [heatmap, setHeatmap] = useState<CityMapHeatmapKind>("none");
   const [heatmapMode, setHeatmapMode] = useState<CityMapHeatmapMode>("overlay");
   const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);
+  const [infraProductId, setInfraProductId] = useState<number | null>(null);
+  const infraKind = infraProducts.find((p) => p.productId === infraProductId)?.kind ?? null;
+
+  const selectHeatmap = useCallback((kind: CityMapHeatmapKind) => {
+    setHeatmap(kind);
+    if (kind !== "none") setInfraProductId(null);
+  }, []);
+
+  const selectInfraProduct = useCallback((productId: number | null) => {
+    setInfraProductId(productId);
+    if (productId !== null) setHeatmap("none");
+  }, []);
 
   const toggleLayer = useCallback((key: keyof CityMapLayerVisibility) => {
     setLayers((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -101,7 +126,7 @@ export function useCityMapControls(mapRef: RefObject<CityMapCanvasHandle | null>
             aria-pressed={heatmap === kind}
             aria-label={`${t("cityMap.heatmap.title")}: ${t(`cityMap.heatmap.${kind}`)}`}
             title={`${t("cityMap.heatmap.title")}: ${t(`cityMap.heatmap.${kind}`)}`}
-            onClick={() => setHeatmap(kind)}
+            onClick={() => selectHeatmap(kind)}
           >
             <MapIcon name={kind} />
           </button>
@@ -121,6 +146,21 @@ export function useCityMapControls(mapRef: RefObject<CityMapCanvasHandle | null>
           <span>{t("cityMap.heatmap.sources")}</span>
         </label>
       </div>
+      <label className="city-map-window__infra">
+        <span className="city-map-window__heatmap-label">{t("cityMap.infra.title")}</span>
+        <select
+          className="city-map-window__infra-select"
+          value={infraProductId ?? ""}
+          onChange={(e) => selectInfraProduct(e.target.value === "" ? null : Number(e.target.value))}
+        >
+          <option value="">{t("cityMap.infra.none")}</option>
+          {infraProducts.map((p) => (
+            <option key={p.productId} value={p.productId}>
+              {masterData?.products[p.productId]?.display_name ?? String(p.productId)}
+            </option>
+          ))}
+        </select>
+      </label>
       <div className="city-map-window__actions">
         <button
           type="button"
@@ -145,7 +185,11 @@ export function useCityMapControls(mapRef: RefObject<CityMapCanvasHandle | null>
   );
 
   // 発生源は都市全体の強度レンジ、オーバーレイは固定の悪さスコアを示す。
-  const legend = heatmapStats && (
+  const legend = infraKind ? (
+    <div className="city-map-window__legend">
+      <InfraMapLegend kind={infraKind} />
+    </div>
+  ) : heatmapStats && (
     <div className="city-map-window__legend">
       {heatmapStats.count === 0 ? (
         <span className="city-map-window__legend-empty">
@@ -176,5 +220,5 @@ export function useCityMapControls(mapRef: RefObject<CityMapCanvasHandle | null>
     </div>
   );
 
-  return { layers, heatmap, heatmapMode, onHeatmapStats: setHeatmapStats, toolbar, legend };
+  return { layers, heatmap, heatmapMode, infraProductId, onHeatmapStats: setHeatmapStats, toolbar, legend };
 }

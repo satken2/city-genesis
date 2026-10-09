@@ -222,6 +222,17 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     ],
   },
   {
+    // 効果範囲レイヤー。表示するサービス財は DisplayOptionsPanel の CoverageSection が
+    // subMode(製品ID)として管理する。建物を範囲内・範囲外で塗り分けるので、選べる財は1つだけ。
+    id: "coverage",
+    titleKey: "display.layerCoverage",
+    defaultMode: "hidden",
+    modes: [
+      { id: "hidden", tooltipKey: "display.modeHidden", icon: "visual/invisible.png" },
+      { id: "default", tooltipKey: "display.modeCoverageDefault", icon: "alerts/electricity.png" },
+    ],
+  },
+  {
     id: "prop",
     titleKey: "display.layerProp",
     defaultMode: "visible",

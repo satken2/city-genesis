@@ -82,6 +82,19 @@
       "sunshine": "日照",
       "noData": "ヒートマップ未計算(エポック未実行)"
     },
+    "infra": {
+      "title": "インフラ",
+      "none": "なし",
+      "legendUtilization": "パス利用率（低→高）",
+      "legendFlow": "縞の流れ＝配送方向（速いほど流量が多い）",
+      "legendProducers": "生産施設",
+      "legendConsumers": "消費施設",
+      "legendDisconnected": "未接続",
+      "legendInRange": "範囲内の建物",
+      "legendOutOfRange": "範囲外の建物",
+      "legendRange": "施設の効果範囲",
+      "legendInactiveRange": "稼働していない施設の範囲"
+    },
     "compass": {
       "north": "北",
       "east": "東",
@@ -150,6 +163,12 @@
     "transitHighlightDescription": "路線と停留所名を建物・地形の手前に表示します。地下の路線も表示されます。路線や車両をクリックすると路線詳細を開きます。",
     "transitHighlight": "公共交通ハイライト",
     "transitNoTypes": "公共交通の種別がありません。",
+    "layerCoverage": "効果範囲",
+    "modeCoverageDefault": "効果範囲を表示",
+    "coverageNone": "表示しない",
+    "coverageDescription": "電力・水道などを届ける施設の効果範囲を輪郭で示し、稼働中の建物を範囲内と範囲外で塗り分けます。建設中など稼働していない施設の範囲は破線で示し、塗り分けには含めません。表示中は建物の色分けより優先します。",
+    "coverageInRange": "範囲内の建物",
+    "coverageOutOfRange": "範囲外の建物",
     "modeTerrainDefault": "通常表示",
     "modeTerrainTransparent": "透過表示",
     "modeTerrainElevation": "標高色分け",

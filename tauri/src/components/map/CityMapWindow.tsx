@@ -105,7 +105,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     navigation.reload();
     void sendCameraQueryState().catch(console.error);
   }, [navigation.reload]);
-  const controls = useCityMapControls(mapRef, handleReload);
+  const controls = useCityMapControls(apiBaseUrl, mapRef, handleReload);
 
   /**
    * カメラ位置マーカーの重ね描き。ctxにはワールド座標系のビュー変換が適用済みなので、
@@ -162,6 +162,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           layers={controls.layers}
           heatmap={controls.heatmap}
           heatmapMode={controls.heatmapMode}
+          infraProductId={controls.infraProductId}
           interactive
           onCursorWorldPos={handleCursor}
           onZoomChange={handleZoom}

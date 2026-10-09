@@ -78,6 +78,19 @@
       "sunshine": "Asoleamiento",
       "noData": "Mapa de calor sin calcular (aún no se ejecuta una época)"
     },
+    "infra": {
+      "title": "Infraestructura",
+      "none": "Ninguno",
+      "legendUtilization": "Uso de la vía (bajo → alto)",
+      "legendFlow": "El flujo de las franjas indica el sentido de entrega (más rápido = mayor caudal)",
+      "legendProducers": "Instalaciones productoras",
+      "legendConsumers": "Instalaciones consumidoras",
+      "legendDisconnected": "Sin conexión",
+      "legendInRange": "Edificios dentro del área",
+      "legendOutOfRange": "Edificios fuera del área",
+      "legendRange": "Área de influencia de la instalación",
+      "legendInactiveRange": "Área de instalaciones sin funcionar"
+    },
     "compass": {
       "north": "N",
       "east": "E",
@@ -150,6 +163,12 @@
     "transitHighlightDescription": "Muestra las rutas y los nombres de las paradas delante de los edificios y el terreno, incluidas las rutas subterráneas. Haz clic en una ruta o vehículo para ver sus detalles.",
     "transitHighlight": "Resaltar transporte público",
     "transitNoTypes": "No hay tipos de línea de transporte disponibles.",
+    "layerCoverage": "Área de influencia",
+    "modeCoverageDefault": "Mostrar área de influencia",
+    "coverageNone": "Ninguno",
+    "coverageDescription": "Muestra el contorno del área de influencia de las instalaciones que suministran servicios como electricidad y agua, y colorea los edificios en funcionamiento según estén dentro o fuera del área. Las áreas de las instalaciones que no están en funcionamiento, como las que están en construcción, se muestran con línea discontinua y no se cuentan. Mientras se muestra, tiene prioridad sobre los modos de color de los edificios.",
+    "coverageInRange": "Edificios dentro del área",
+    "coverageOutOfRange": "Edificios fuera del área",
     "modeTerrainDefault": "Vista normal",
     "modeTerrainTransparent": "Vista transparente",
     "modeTerrainElevation": "Color por altitud",

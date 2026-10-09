@@ -245,6 +245,11 @@
   background: #ef4444;
 }
 
+/* 稼働していない供給施設(建設中など) */
+.infra-facility-list__dot--inactive {
+  background: #6b7280;
+}
+
 /* 施設名(可変幅・省略) */
 .infra-facility-list__name {
   flex: 1 1 auto;
@@ -262,74 +267,10 @@
   letter-spacing: 0.04em;
 }
 
-/* 凡例 */
-.infra-legend {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+/* 凡例(InfraMapLegend)。文字の大きさと色はここで決める */
+.infra-tab__legend {
   font-size: 1.02rem;
   color: #8ba3bb;
-  align-items: center;
-}
-
-.infra-legend__item {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.infra-legend__gradient {
-  display: inline-block;
-  width: 44px;
-  height: 8px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, hsl(190, 85%, 55%), hsl(95, 85%, 55%), hsl(0, 85%, 55%));
-}
-
-/* 流れの縞模様(地図上のアニメーションと同じ向き・雰囲気のスウォッチ。
-   prefers-reduced-motion では静止する) */
-.infra-legend__stripes {
-  display: inline-block;
-  width: 44px;
-  height: 8px;
-  border-radius: 4px;
-  background: repeating-linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.85) 0 5px,
-    hsl(190, 85%, 35%) 5px 12px
-  );
-  background-size: 12px 100%;
-  animation: infra-legend-stripes-flow 6.5s linear infinite;
-}
-
-@keyframes infra-legend-stripes-flow {
-  from {
-    background-position-x: 0;
-  }
-  to {
-    background-position-x: 12px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .infra-legend__stripes {
-    animation: none;
-  }
-}
-
-.infra-legend__marker {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border: 1px solid #0b0f19;
-}
-
-.infra-legend__marker--circle {
-  border-radius: 50%;
-}
-
-.infra-legend__marker--diamond {
-  transform: rotate(45deg);
 }
 
 /* ローディング・エラー状態 */

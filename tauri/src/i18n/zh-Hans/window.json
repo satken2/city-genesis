@@ -78,6 +78,19 @@
       "sunshine": "日照",
       "noData": "热力图未计算（尚未执行纪元）"
     },
+    "infra": {
+      "title": "基础设施",
+      "none": "无",
+      "legendUtilization": "路径利用率（低→高）",
+      "legendFlow": "条纹流动＝配送方向（越快表示流量越大）",
+      "legendProducers": "生产设施",
+      "legendConsumers": "消费设施",
+      "legendDisconnected": "未连接",
+      "legendInRange": "范围内的建筑",
+      "legendOutOfRange": "范围外的建筑",
+      "legendRange": "设施的效果范围",
+      "legendInactiveRange": "未运营设施的范围"
+    },
     "compass": {
       "north": "北",
       "east": "东",
@@ -150,6 +163,12 @@
     "transitHighlightDescription": "在建筑和地形前方显示线路和站点名称，包括地下线路。点击线路或车辆可打开线路详情。",
     "transitHighlight": "公共交通高亮",
     "transitNoTypes": "没有可用的公共交通线路类型。",
+    "layerCoverage": "效果范围",
+    "modeCoverageDefault": "显示效果范围",
+    "coverageNone": "不显示",
+    "coverageDescription": "以轮廓显示供电、供水等服务设施的效果范围，并按范围内外为运营中的建筑着色。施工中等未运营设施的范围以虚线显示，不计入着色。显示期间优先于建筑的着色模式。",
+    "coverageInRange": "范围内的建筑",
+    "coverageOutOfRange": "范围外的建筑",
     "modeTerrainDefault": "普通显示",
     "modeTerrainTransparent": "透明显示",
     "modeTerrainElevation": "海拔配色",

@@ -78,6 +78,19 @@
       "sunshine": "Ensoleillement",
       "noData": "Carte thermique non calculée (aucune époque exécutée)"
     },
+    "infra": {
+      "title": "Infrastructures",
+      "none": "Aucune",
+      "legendUtilization": "Utilisation de la voie (faible → forte)",
+      "legendFlow": "Le défilement des bandes indique le sens d'acheminement (plus c'est rapide, plus le débit est élevé)",
+      "legendProducers": "Installations productrices",
+      "legendConsumers": "Installations consommatrices",
+      "legendDisconnected": "Non raccordé",
+      "legendInRange": "Bâtiments dans la zone",
+      "legendOutOfRange": "Bâtiments hors zone",
+      "legendRange": "Zone d'influence de l'installation",
+      "legendInactiveRange": "Zone des installations hors service"
+    },
     "compass": {
       "north": "N",
       "east": "E",
@@ -150,6 +163,12 @@
     "transitHighlightDescription": "Affiche les lignes et les noms des arrêts devant les bâtiments et le terrain, y compris les lignes souterraines. Cliquez sur une ligne ou un véhicule pour ouvrir ses détails.",
     "transitHighlight": "Surbrillance des transports publics",
     "transitNoTypes": "Aucun type de ligne de transport disponible.",
+    "layerCoverage": "Zone d'influence",
+    "modeCoverageDefault": "Afficher la zone d'influence",
+    "coverageNone": "Aucun",
+    "coverageDescription": "Trace le contour de la zone d'influence des installations qui fournissent des services comme l'électricité et l'eau, et colore les bâtiments en service selon qu'ils sont dans la zone ou en dehors. Les zones des installations qui ne sont pas en service, par exemple en construction, sont en pointillés et ne sont pas prises en compte. Pendant l'affichage, ce mode prime sur les modes de couleur des bâtiments.",
+    "coverageInRange": "Bâtiments dans la zone",
+    "coverageOutOfRange": "Bâtiments hors zone",
     "modeTerrainDefault": "Affichage normal",
     "modeTerrainTransparent": "Affichage transparent",
     "modeTerrainElevation": "Coloration par altitude",
