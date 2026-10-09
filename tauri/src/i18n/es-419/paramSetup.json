@@ -291,9 +291,9 @@
         "label": "Umbral de ruido peatonal",
         "desc": "Solo la parte del flujo peatonal que supera este valor contribuye al ruido."
       },
-      "NOISE_BLUR_SIGMA_M": {
-        "label": "Alcance de dispersión del ruido (m)",
-        "desc": "Radio del desenfoque gaussiano del mapa de calor de ruido. Cuanto mayor, más amplia la dispersión."
+      "NOISE_ATTENUATION_M": {
+        "label": "Distancia de atenuación del ruido (m)",
+        "desc": "El ruido se debilita con el cuadrado de la distancia y además cae a 1/e cada vez que se recorre esta distancia (apantallamiento de los edificios, absorción del aire y del suelo). Cuanto menor, más cerca de la fuente se queda."
       },
       "NOISE_SATURATION_LEVEL": {
         "label": "Nivel de saturación de ruido",
@@ -303,9 +303,9 @@
         "label": "Coeficiente de contaminación del tránsito vial",
         "desc": "Coeficiente con que el tránsito vial alimenta el mapa de calor de contaminación del aire."
       },
-      "POLLUTION_BLUR_SIGMA_M": {
-        "label": "Alcance de dispersión de la contaminación (m)",
-        "desc": "Radio del desenfoque gaussiano del mapa de calor de contaminación del aire."
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Distancia de atenuación de la contaminación (m)",
+        "desc": "La contaminación del aire y los olores se debilitan con el cuadrado de la distancia y además caen a 1/e cada vez que se recorre esta distancia (dispersión y deposición). Cuanto menor, más cerca de la fuente se quedan."
       },
       "POLLUTION_SATURATION_LEVEL": {
         "label": "Nivel de saturación de contaminación",

@@ -291,9 +291,9 @@
         "label": "行人噪音产生阈值",
         "desc": "行人交通量超过该值的部分才会贡献噪音。"
       },
-      "NOISE_BLUR_SIGMA_M": {
-        "label": "噪音扩散范围（m）",
-        "desc": "噪音热力图的高斯模糊半径。数值越大扩散范围越广。"
+      "NOISE_ATTENUATION_M": {
+        "label": "噪音衰减距离（m）",
+        "desc": "噪音随距离的平方减弱，并且每经过这一距离再衰减到1/e（建筑遮挡、空气和地面吸收）。数值越小越集中在声源附近。"
       },
       "NOISE_SATURATION_LEVEL": {
         "label": "噪音饱和水平",
@@ -303,9 +303,9 @@
         "label": "道路交通大气污染系数",
         "desc": "道路交通量对大气污染热力图的影响系数。"
       },
-      "POLLUTION_BLUR_SIGMA_M": {
-        "label": "大气污染扩散范围（m）",
-        "desc": "大气污染热力图的高斯模糊半径。"
+      "POLLUTION_ATTENUATION_M": {
+        "label": "大气污染衰减距离（m）",
+        "desc": "大气污染和恶臭随距离的平方减弱，并且每经过这一距离再衰减到1/e（扩散和沉降）。数值越小越集中在污染源附近。"
       },
       "POLLUTION_SATURATION_LEVEL": {
         "label": "大气污染饱和水平",

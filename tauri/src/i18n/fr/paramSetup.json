@@ -291,9 +291,9 @@
         "label": "Seuil de bruit piéton",
         "desc": "Seule la part du flux piéton dépassant cette valeur contribue au bruit."
       },
-      "NOISE_BLUR_SIGMA_M": {
-        "label": "Portée de diffusion du bruit (m)",
-        "desc": "Rayon du flou gaussien de la carte thermique du bruit. Plus il est élevé, plus la diffusion est large."
+      "NOISE_ATTENUATION_M": {
+        "label": "Distance d'atténuation du bruit (m)",
+        "desc": "Le bruit s'affaiblit avec le carré de la distance, puis encore d'un facteur 1/e à chaque fois qu'on s'éloigne de cette distance (écran des bâtiments, absorption par l'air et le sol). Plus la valeur est faible, plus il reste près de la source."
       },
       "NOISE_SATURATION_LEVEL": {
         "label": "Niveau de saturation du bruit",
@@ -303,9 +303,9 @@
         "label": "Coefficient de pollution du trafic routier",
         "desc": "Coefficient par lequel le trafic routier alimente la carte thermique de pollution de l'air."
       },
-      "POLLUTION_BLUR_SIGMA_M": {
-        "label": "Portée de diffusion de la pollution (m)",
-        "desc": "Rayon du flou gaussien de la carte thermique de pollution de l'air."
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Distance d'atténuation de la pollution (m)",
+        "desc": "La pollution de l'air et les odeurs s'affaiblissent avec le carré de la distance, puis encore d'un facteur 1/e à chaque fois qu'on s'éloigne de cette distance (dispersion et dépôt). Plus la valeur est faible, plus elles restent près de la source."
       },
       "POLLUTION_SATURATION_LEVEL": {
         "label": "Niveau de saturation de la pollution",

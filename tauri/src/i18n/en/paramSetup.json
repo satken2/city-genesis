@@ -291,9 +291,9 @@
         "label": "Pedestrian Noise Threshold",
         "desc": "Pedestrian traffic above this value contributes to noise."
       },
-      "NOISE_BLUR_SIGMA_M": {
-        "label": "Noise Spread Radius (m)",
-        "desc": "Gaussian blur radius for the noise heatmap. Higher = wider spread."
+      "NOISE_ATTENUATION_M": {
+        "label": "Noise Attenuation Distance (m)",
+        "desc": "Noise weakens with the square of distance and also drops to 1/e over every this many meters (building shielding, air and ground absorption). Lower = stays closer to the source."
       },
       "NOISE_SATURATION_LEVEL": {
         "label": "Noise Saturation Level",
@@ -303,9 +303,9 @@
         "label": "Road Traffic Air Pollution Coefficient",
         "desc": "How much road traffic contributes to the air pollution heatmap."
       },
-      "POLLUTION_BLUR_SIGMA_M": {
-        "label": "Air Pollution Spread Radius (m)",
-        "desc": "Gaussian blur radius for the air pollution heatmap."
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Air Pollution Attenuation Distance (m)",
+        "desc": "Air pollution and odor weaken with the square of distance and also drop to 1/e over every this many meters (dispersion and deposition). Lower = stays closer to the source."
       },
       "POLLUTION_SATURATION_LEVEL": {
         "label": "Air Pollution Saturation Level",

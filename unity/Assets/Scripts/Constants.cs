@@ -285,6 +285,8 @@ public static class Constants
     public const float GRADING_MAX_AREA = 4000000.0f;
     public const float GRADING_HEIGHT_OFFSET_LIMIT = 100.0f;
     public const float GRADING_MIN_LAND_OVERLAP = 1.0f;
+    public const float ENV_SOURCE_CORE_RADIUS_M = 10.0f;
+    public const float ENV_DECAY_CUTOFF_RATIO = 4.0f;
     public const int GROUND_COVER_GRASSLAND = 1;
     public const int GROUND_COVER_DESERT = 2;
     public const int GROUND_COVER_LUSH = 3;
