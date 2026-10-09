@@ -677,6 +677,14 @@
       "tip36": {
         "title": "Sociedad de vigilancia",
         "description": "Haz clic en peatones o vehículos para añadir ciudadanos a tu lista de seguimiento. Echa un vistazo a la vida cotidiana de los habitantes de tu ciudad."
+      },
+      "tip37": {
+        "title": "Energía de carga base",
+        "description": "La energía solar y la eólica son económicas de generar, pero su producción depende del clima. Asegúrate de combinarlas con fuentes estables de carga base, como centrales térmicas o nucleares."
+      },
+      "tip38": {
+        "title": "Espacio para construir",
+        "description": "Hay edificios que no caben en parcelas demasiado pequeñas. Planifica parcelas con el tamaño adecuado para los edificios que deseas construir."
       }
     }
   },

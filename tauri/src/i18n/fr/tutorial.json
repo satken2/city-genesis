@@ -677,6 +677,14 @@
       "tip36": {
         "title": "Société de surveillance",
         "description": "Cliquez sur des piétons ou des véhicules pour ajouter des citoyens à votre liste de suivi. Observez quel genre de vie mènent les habitants de votre ville."
+      },
+      "tip37": {
+        "title": "Énergie de base",
+        "description": "L'énergie solaire et éolienne est peu coûteuse à produire, mais son rendement dépend des conditions météo. Pensez à les compléter par des sources d'énergie stables comme le thermique ou le nucléaire."
+      },
+      "tip38": {
+        "title": "De l'espace pour bâtir",
+        "description": "Certains bâtiments ne peuvent pas être construits sur des parcelles trop étroites. Aménagez des parcelles adaptées aux dimensions des bâtiments souhaités."
       }
     }
   },

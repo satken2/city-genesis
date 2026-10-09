@@ -677,6 +677,14 @@
       "tip36": {
         "title": "Surveillance Society",
         "description": "Click on pedestrians or vehicles to add citizens to your watchlist. Take a look at the daily lives of your city's residents."
+      },
+      "tip37": {
+        "title": "Baseload Power",
+        "description": "Solar and wind power are cheap to operate, but their output depends heavily on the weather. Be sure to back them up with stable baseload sources like thermal or nuclear power."
+      },
+      "tip38": {
+        "title": "Room to Build",
+        "description": "Some buildings simply won't fit on smaller parcels. Create adequately sized parcels to accommodate the buildings you want to build."
       }
     }
   },
