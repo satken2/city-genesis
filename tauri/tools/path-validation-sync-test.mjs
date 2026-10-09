@@ -1,12 +1,11 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import ts from "typescript";
+import { fileURLToPath } from "node:url";
+import { build } from "esbuild";
 
-const source = readFileSync(new URL("../src/components/path/pathValidation.ts", import.meta.url), "utf8");
-const { outputText } = ts.transpileModule(source, {
-  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 },
-});
-const { pathValidationShapeKey } = await import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
+const output = new URL("../node_modules/.cache/path-validation-sync-test.mjs", import.meta.url);
+await build({ entryPoints: [fileURLToPath(new URL("../src/components/path/pathValidation.ts", import.meta.url))],
+  outfile: fileURLToPath(output), bundle: true, platform: "node", format: "esm", packages: "external" });
+const { pathValidationShapeKey } = await import(output.href);
 const shape = {
   revision: "first", phase: "editing", can_confirm: true, unsent_paths_count: 0,
   path_type: 1, is_curved: false, selected_points: [[0, 0, 0], [100, 0, 0]],

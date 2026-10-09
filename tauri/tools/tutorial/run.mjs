@@ -24,8 +24,11 @@ await build({ entryPoints: ["tools/tutorial/component-tests.tsx"], outfile: comp
 await import(pathToFileURL(componentOutput).href + `?run=${Date.now()}`);
 const playModeOutput = resolve("node_modules/.cache/play-mode-tests.mjs");
 await build({ entryPoints: ["tools/tutorial/play-mode-tests.tsx"], outfile: playModeOutput, bundle: true,
-  platform: "node", format: "esm", packages: "external", loader: { ".css": "empty" },
+  platform: "node", format: "esm", packages: "external", loader: { ".css": "empty", ".svg": "empty" },
+  define: { "import.meta.glob": "globalThis.testImageGlob", "import.meta.env.BASE_URL": "\"/\"" },
   alias: { "@tauri-apps/api/event": mock, "@tauri-apps/api/window": mock, "@tauri-apps/api/core": mock, "react-i18next": mock } });
+// パネル画像の一覧(import.meta.glob)は空にして、アイコンはメニュー画像の URL に倒す。
+globalThis.testImageGlob = () => ({});
 await import(pathToFileURL(playModeOutput).href + `?run=${Date.now()}`);
 const shapeOutput = resolve("node_modules/.cache/tutorial-shape-editor-tests.mjs");
 await build({ entryPoints: ["tools/tutorial/shape-editor-tests.tsx"], outfile: shapeOutput, bundle: true, platform: "node", format: "esm", packages: "external", loader: { ".css": "empty" }, define: { "import.meta.env.DEV": "false" }, alias: { "@tauri-apps/api/event": mock, "@tauri-apps/api/core": mock, "react-i18next": mock }, plugins: [{ name: "shape-editor-map-boundary", setup(plugin) {

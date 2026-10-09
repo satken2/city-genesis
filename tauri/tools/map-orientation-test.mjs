@@ -26,7 +26,7 @@ function eventTarget() {
   return {
     addEventListener: (name, fn) => events.set(name, fn),
     removeEventListener: (name) => events.delete(name),
-    dispatch: (name, e) => events.get(name)?.({ button: 0, preventDefault() {}, ...e }),
+    dispatch: (name, e) => events.get(name)?.({ type: name, button: 0, pointerId: 1, preventDefault() {}, ...e }),
   };
 }
 function context() {
@@ -144,8 +144,8 @@ await new Promise((resolve) => setImmediate(resolve));
 const base = canvases[0];
 const screenNorth = () => ({ x: drawn.north.x / 2, y: drawn.north.y / 2 });
 const click = (p) => {
-  base.dispatch("mousedown", { clientX: p.x, clientY: p.y });
-  windowMock.dispatch("mouseup", { clientX: p.x, clientY: p.y });
+  base.dispatch("pointerdown", { clientX: p.x, clientY: p.y });
+  windowMock.dispatch("pointerup", { clientX: p.x, clientY: p.y });
 };
 assert.ok(drawn.north.y < drawn.south.y, "North (+Z) must be above south (-Z)");
 click(screenNorth()); near(clicked.x, 0); near(clicked.z, 50);
@@ -158,9 +158,9 @@ near(point.x, screenNorth().x); near(point.y, screenNorth().y);
 near(screenToWorld(drawn.view, point).z, 50);
 
 const before = screenNorth();
-base.dispatch("mousedown", { clientX: before.x, clientY: before.y });
-windowMock.dispatch("mousemove", { clientX: before.x + 30, clientY: before.y + 40 });
-windowMock.dispatch("mouseup", { clientX: before.x + 30, clientY: before.y + 40 });
+base.dispatch("pointerdown", { clientX: before.x, clientY: before.y });
+windowMock.dispatch("pointermove", { clientX: before.x + 30, clientY: before.y + 40 });
+windowMock.dispatch("pointerup", { clientX: before.x + 30, clientY: before.y + 40 });
 near(screenNorth().x, before.x + 30); near(screenNorth().y, before.y + 40);
 const anchor = screenNorth();
 base.dispatch("wheel", { clientX: anchor.x, clientY: anchor.y, deltaY: -1 });
