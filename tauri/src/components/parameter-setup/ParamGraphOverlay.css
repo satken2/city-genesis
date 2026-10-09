@@ -1,0 +1,76 @@
+.param-graph-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 14, 24, 0.85);
+}
+
+/* 窓が低いときはグラフだけを縮め、題・スライダー・ボタンは残す */
+.param-graph-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-height: 100%;
+  padding: 18px 20px 16px;
+  box-sizing: border-box;
+  background: var(--flat-surface);
+  box-shadow: inset 0 3px 0 var(--flat-accent), 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.param-graph-title {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--flat-text);
+}
+
+.param-graph-axis-label {
+  font-size: 0.93rem;
+  color: var(--flat-text-label);
+}
+
+.param-graph-axis-label--x {
+  text-align: right;
+}
+
+.param-graph-chart {
+  flex: 1 1 auto;
+  height: 15rem;
+  min-height: 8rem;
+}
+
+.param-graph-tooltip {
+  padding: 4px 8px;
+  font-size: 0.93rem;
+  color: var(--flat-text);
+  background: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+}
+
+.param-graph-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.param-graph-slider {
+  flex: 1;
+  accent-color: var(--flat-accent);
+}
+
+.param-graph-control .param-setup-input {
+  width: 7rem;
+}
+
+.param-graph-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}

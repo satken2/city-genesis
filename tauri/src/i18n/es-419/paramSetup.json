@@ -71,7 +71,9 @@
       },
       "LIFESPAN_FACTOR": {
         "label": "Coeficiente de esperanza de vida",
-        "desc": "Coeficiente aplicado a la vida máxima de los ciudadanos. Con 1.08 el tope es de unos 100 años; con 1.06, de 150."
+        "desc": "Coeficiente aplicado a la vida máxima de los ciudadanos. Con 1.08 el tope es de unos 100 años; con 1.06, de 150.",
+        "graphX": "Edad",
+        "graphY": "Probabilidad anual de muerte (salud 1)"
       },
       "SPACE_SINGLE": {
         "label": "Espacio habitable de un hogar unipersonal (m²)",
@@ -211,11 +213,15 @@
       },
       "BUILDING_FLOOR_LIMIT": {
         "label": "Umbral de encarecimiento en altura (pisos)",
-        "desc": "A partir de este número de pisos el costo de construcción se dispara. Frena la construcción de rascacielos."
+        "desc": "A partir de este número de pisos el costo de construcción se dispara. Frena la construcción de rascacielos.",
+        "graphX": "Pisos",
+        "graphY": "Multiplicador del costo de construcción"
       },
       "FLOOR_PENALTY_FACTOR": {
         "label": "Coeficiente de penalización por altura",
-        "desc": "Coeficiente de la penalización por construir en altura. Cuanto mayor, menor es la penalización."
+        "desc": "Coeficiente de la penalización por construir en altura. Cuanto mayor, menor es la penalización.",
+        "graphX": "Pisos",
+        "graphY": "Multiplicador del costo de construcción"
       },
       "DEMOLITION_RATE": {
         "label": "Eficiencia relativa de la demolición",

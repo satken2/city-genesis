@@ -71,7 +71,9 @@
       },
       "LIFESPAN_FACTOR": {
         "label": "Lifespan Factor",
-        "desc": "Multiplier for maximum citizen lifespan. 1.08 ≈ 100 years, 1.06 ≈ 150 years."
+        "desc": "Multiplier for maximum citizen lifespan. 1.08 ≈ 100 years, 1.06 ≈ 150 years.",
+        "graphX": "Age",
+        "graphY": "Annual death probability (health 1)"
       },
       "SPACE_SINGLE": {
         "label": "Single Household Living Space (m²)",
@@ -211,11 +213,15 @@
       },
       "BUILDING_FLOOR_LIMIT": {
         "label": "High-Rise Cost Surge Threshold (floors)",
-        "desc": "Construction costs rise sharply above this floor count. Limits skyscrapers."
+        "desc": "Construction costs rise sharply above this floor count. Limits skyscrapers.",
+        "graphX": "Floors",
+        "graphY": "Construction cost multiplier"
       },
       "FLOOR_PENALTY_FACTOR": {
         "label": "Floor Penalty Factor",
-        "desc": "Coefficient for the high-rise cost penalty. Higher = smaller penalty for tall buildings."
+        "desc": "Coefficient for the high-rise cost penalty. Higher = smaller penalty for tall buildings.",
+        "graphX": "Floors",
+        "graphY": "Construction cost multiplier"
       },
       "DEMOLITION_RATE": {
         "label": "Demolition Efficiency Ratio",

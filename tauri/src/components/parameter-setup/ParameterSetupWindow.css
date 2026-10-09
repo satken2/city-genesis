@@ -1,4 +1,5 @@
 .param-setup-window {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -143,6 +144,28 @@
   padding: 0;
   accent-color: #4ea1ff;
   flex: none;
+}
+
+/* グラフ編集を開くボタン。値はテキストボックスと同じ位置・書式で見せる */
+.param-setup-graph-btn {
+  width: auto;
+  min-width: 88px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.param-setup-graph-btn svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--flat-accent);
+}
+
+.param-setup-graph-btn:hover:not(:disabled) {
+  border-color: rgba(78, 161, 255, 0.4);
 }
 
 .param-setup-input--readonly {

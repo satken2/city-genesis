@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
+import { ParamGraphOverlay, type ParamGraph } from "./ParamGraphOverlay";
 import "./ParameterSetupWindow.css";
 
 type ParameterSetupWindowProps = {
@@ -18,6 +19,9 @@ type RawParams = {
   // general_params.yaml 経由で届く。i18n に個別訳(paramSetup.param.{キー})が無いパラメータは
   // これを表示するので、シートに1行足すだけで新パラメータがUIに出せる。
   GENERAL_PARAMS_DISPLAY: Record<string, ParamDisplay>;
+  // GENERAL_PARAMS のキー → グラフ編集の定義。ここにあるパラメータはテキストボックスの代わりに
+  // グラフ編集を開くボタンで表示する。
+  GENERAL_PARAMS_GRAPHS: Record<string, ParamGraph>;
   // パラメータを変更できる状態か（都市創設前 or テンプレート作成モード）。
   can_edit: boolean;
 };
@@ -35,6 +39,7 @@ type ApiResponse = {
     GENERAL_PARAMS: Record<string, unknown>;
     GENERAL_PARAMS_CATEGORIES?: Record<string, string>;
     GENERAL_PARAMS_DISPLAY?: Record<string, ParamDisplay>;
+    GENERAL_PARAMS_GRAPHS?: Record<string, ParamGraph>;
   };
   can_edit: boolean;
 };
@@ -136,6 +141,10 @@ function defaultStep(value: number): number {
   return Math.pow(10, Math.floor(Math.log10(abs))) / 10;
 }
 
+function stepFor(key: string, value: unknown): number {
+  return PARAM_STEPS[key] ?? defaultStep(typeof value === "number" ? value : 0);
+}
+
 // カテゴリマップ(キー→カテゴリ名)からタブ定義を組み立てる。
 // タブ順はカテゴリの初出順、タブ内のパラメータ順はマップのキー順(=シートの行順)。
 function buildCategories(map: Record<string, string>): CategoryDef[] {
@@ -167,6 +176,8 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
   // 初期セットアップ（新規ゲーム開始）では false。編集モードでは完了しても game:start を
   // 送らず、ウィンドウを閉じるだけにする。
   const [editMode, setEditMode] = useState(false);
+  // グラフ編集を開いているパラメータ。null なら閉じている。
+  const [graphKey, setGraphKey] = useState<string | null>(null);
 
   useEffect(() => {
     // 起動時にどのモードで開かれたかを Rust 側へ問い合わせる。
@@ -188,6 +199,7 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
           GENERAL_PARAMS: data.parameters.GENERAL_PARAMS,
           GENERAL_PARAMS_CATEGORIES: data.parameters.GENERAL_PARAMS_CATEGORIES ?? {},
           GENERAL_PARAMS_DISPLAY: data.parameters.GENERAL_PARAMS_DISPLAY ?? {},
+          GENERAL_PARAMS_GRAPHS: data.parameters.GENERAL_PARAMS_GRAPHS ?? {},
           can_edit: data.can_edit,
         });
         setFetching(false);
@@ -217,6 +229,15 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
     },
     [edited, rawParams]
   );
+
+  // グラフの式に渡す数値パラメータの現在値(このウィンドウで編集中の値を含む)。
+  const numericValues = useMemo(() => {
+    const vars: Record<string, number> = {};
+    for (const [key, val] of Object.entries({ ...rawParams?.GENERAL_PARAMS, ...edited.GENERAL_PARAMS })) {
+      if (typeof val === "number") vars[key] = val;
+    }
+    return vars;
+  }, [rawParams, edited]);
 
   const setValue = useCallback((key: string, val: number | boolean) => {
     setEdited((prev) => ({
@@ -275,6 +296,10 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
   // activeCategory が未選択(初期状態)や構成変更で消えた場合は先頭タブへフォールバックする。
   const activeCat = categories.find((c) => c.id === activeCategory) ?? categories[0];
 
+  // i18n未登録ならシート由来の表示名、それも無ければキー名を出す。
+  const labelOf = (key: string) =>
+    t(`paramSetup.param.${key}.label`, { defaultValue: rawParams?.GENERAL_PARAMS_DISPLAY[key]?.label || key });
+
   return (
     <div className="param-setup-window">
       <div className="param-setup-header" data-tauri-drag-region>
@@ -313,15 +338,12 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
           <div className="param-setup-params">
             {(activeCat?.keys ?? []).map((key) => {
               const val = getValue(key);
-              const step = PARAM_STEPS[key] ?? defaultStep(typeof val === "number" ? val : 0);
+              const step = stepFor(key, val);
               const display = rawParams.GENERAL_PARAMS_DISPLAY[key] ?? {};
               return (
                 <div key={key} className="param-setup-row">
                   <div className="param-setup-label-block">
-                    <span className="param-setup-label">
-                      {/* i18n未登録ならシート由来の表示名、それも無ければキー名を出す */}
-                      {t(`paramSetup.param.${key}.label`, { defaultValue: display.label || key })}
-                    </span>
+                    <span className="param-setup-label">{labelOf(key)}</span>
                     <span className="param-setup-desc-text">
                       {t(`paramSetup.param.${key}.desc`, { defaultValue: display.desc ?? "" })}
                     </span>
@@ -334,6 +356,18 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
                       onChange={(e) => setValue(key, e.target.checked)}
                       disabled={busy}
                     />
+                  ) : typeof val === "number" && rawParams.GENERAL_PARAMS_GRAPHS[key] ? (
+                    <button
+                      className="param-setup-input param-setup-graph-btn"
+                      type="button"
+                      onClick={() => setGraphKey(key)}
+                      disabled={busy}
+                    >
+                      <svg viewBox="0 0 16 16" aria-hidden="true">
+                        <polyline points="1,14 6,9 9,11 15,3" fill="none" stroke="currentColor" strokeWidth="1.6" />
+                      </svg>
+                      {String(val)}
+                    </button>
                   ) : typeof val === "number" ? (
                     <input
                       className="param-setup-input"
@@ -395,6 +429,22 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
           {editMode ? t("paramSetup.apply") : t("paramSetup.start")}
         </button>
       </div>
+
+      {graphKey && rawParams?.GENERAL_PARAMS_GRAPHS[graphKey] && (
+        <ParamGraphOverlay
+          paramKey={graphKey}
+          label={labelOf(graphKey)}
+          graph={rawParams.GENERAL_PARAMS_GRAPHS[graphKey]}
+          vars={numericValues}
+          initialValue={numericValues[graphKey]}
+          step={stepFor(graphKey, numericValues[graphKey])}
+          onApply={(value) => {
+            setValue(graphKey, value);
+            setGraphKey(null);
+          }}
+          onClose={() => setGraphKey(null)}
+        />
+      )}
     </div>
   );
 }

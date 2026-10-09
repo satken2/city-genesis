@@ -71,7 +71,9 @@
       },
       "LIFESPAN_FACTOR": {
         "label": "Coefficient de longévité",
-        "desc": "Coefficient appliqué à la longévité maximale des habitants. À 1,08 le plafond est d'environ 100 ans ; à 1,06, de 150 ans."
+        "desc": "Coefficient appliqué à la longévité maximale des habitants. À 1,08 le plafond est d'environ 100 ans ; à 1,06, de 150 ans.",
+        "graphX": "Âge",
+        "graphY": "Probabilité annuelle de décès (santé 1)"
       },
       "SPACE_SINGLE": {
         "label": "Surface habitable d'un ménage d'une personne (m²)",
@@ -211,11 +213,15 @@
       },
       "BUILDING_FLOOR_LIMIT": {
         "label": "Seuil d'envolée du coût en hauteur (étages)",
-        "desc": "Au-delà de ce nombre d'étages, le coût de construction s'envole. Cela freine la construction de gratte-ciel."
+        "desc": "Au-delà de ce nombre d'étages, le coût de construction s'envole. Cela freine la construction de gratte-ciel.",
+        "graphX": "Étages",
+        "graphY": "Multiplicateur du coût de construction"
       },
       "FLOOR_PENALTY_FACTOR": {
         "label": "Coefficient de pénalité d'étage",
-        "desc": "Coefficient de la pénalité de coût en hauteur. Plus il est élevé, plus la pénalité est faible."
+        "desc": "Coefficient de la pénalité de coût en hauteur. Plus il est élevé, plus la pénalité est faible.",
+        "graphX": "Étages",
+        "graphY": "Multiplicateur du coût de construction"
       },
       "DEMOLITION_RATE": {
         "label": "Efficacité relative de la démolition",
