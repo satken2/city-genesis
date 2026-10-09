@@ -2,10 +2,12 @@
  * 建設プロジェクトウィンドウ
  *
  * 建物・道路に付けたタグ(=建設プロジェクト)ごとに、構成する工事を表にまとめ、
- * 建設費の見込み額合計と工期(残りエポックの最大値)を出す。
+ * 建設費の見込み額合計と工期(残りエポック数の最大値)を出す。
  *
  * - データ源は GET /api/v1/tags/projects。集計(残り事業費・残り工期)はバックエンドが行い、
  *   ここでは並べて表示するだけ(建設費の算式をUI側に二重実装しない)。
+ * - 工期はエポック数で届くが、エポックはプレイヤーに見せない内部の単位なので、
+ *   1エポックの日数(`simulation_days`)を掛けて日数にし、1ヶ月=30日で割った月数で表示する。
  * - タグは建設パネルで設置するときに選ぶか、着工前・建設中の詳細パネル(`common/TagSelect`)で
  *   付け外しする。竣工した工事もタグは残り、竣工済みの行として表に並ぶ。
  *   ここは閲覧と表示・非表示の切り替え・タグの削除に徹する。
@@ -18,8 +20,10 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
+import { DAYS_PER_MONTH } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { useObjectVisibility } from "../../hooks/useObjectVisibility";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import {
   TAGS_CHANGED_EVENT,
   deleteTag,
@@ -45,15 +49,21 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
   const masterData = useMasterData();
   const locale = resolveIntlLocale(i18n.language);
   const [projects, setProjects] = useState<TagProject[] | null>(null);
+  const [simulationDays, setSimulationDays] = useState(0);
   const [loadFailed, setLoadFailed] = useState(false);
   const visibility = useObjectVisibility(WINDOW_TYPE);
 
   const reload = useCallback(
     async (signal?: AbortSignal) => {
       try {
-        const list = await fetchTagProjects(apiBaseUrl, signal);
+        // ポップアップは都市が替わっても残ることがあるので、エポックの日数も一覧と一緒に取り直す。
+        const [list, cityRes] = await Promise.all([
+          fetchTagProjects(apiBaseUrl, signal),
+          fetchApi<{ city: { simulation_days: number } }>(buildApiUrl(apiBaseUrl, "/api/v1/city"), { signal }),
+        ]);
         if (signal?.aborted) return;
         setProjects(list);
+        setSimulationDays(cityRes.city.simulation_days);
         setLoadFailed(false);
       } catch (err) {
         if (!signal?.aborted) {
@@ -126,10 +136,11 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
     return (entry as { display_name?: string } | undefined)?.display_name ?? "";
   }
 
-  /** 残りエポック数の表示。null=このままでは終わらない工事。 */
-  function formatEpochs(value: number | null): string {
-    if (value === null) return t("constructionProjects.stalled");
-    return t("constructionProjects.epochsValue", { value: value.toFixed(1) });
+  /** 残りエポック数を月数にして表示する。null=このままでは終わらない工事。 */
+  function formatRemaining(epochs: number | null): string {
+    if (epochs === null) return t("constructionProjects.stalled");
+    const months = (epochs * simulationDays) / DAYS_PER_MONTH;
+    return t("constructionProjects.monthsValue", { value: months.toFixed(1) });
   }
 
   function renderProject(project: TagProject) {
@@ -158,7 +169,7 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
             </div>
             <div className="cp-summary-item">
               <dt>{t("constructionProjects.duration")}</dt>
-              <dd>{formatEpochs(project.in_progress_count > 0 ? project.max_remaining_epochs : 0)}</dd>
+              <dd>{formatRemaining(project.in_progress_count > 0 ? project.max_remaining_epochs : 0)}</dd>
             </div>
             <div className="cp-summary-item">
               <dt>{t("constructionProjects.progress")}</dt>
@@ -231,7 +242,7 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
                     {item.completed ? "-" : formatCompactAmount(item.remaining_cost, locale, true)}
                   </td>
                   <td className="cp-col-epochs">
-                    {item.completed ? t("constructionProjects.done") : formatEpochs(item.remaining_epochs)}
+                    {item.completed ? t("constructionProjects.done") : formatRemaining(item.remaining_epochs)}
                   </td>
                 </tr>
               );
@@ -244,14 +255,13 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
 
   return (
     <div className="cp-root">
-      <div className="cp-toolbar">
-        <p className="cp-description">{t("constructionProjects.description")}</p>
-        {visibility.hiddenCount > 0 && (
+      {visibility.hiddenCount > 0 && (
+        <div className="cp-toolbar">
           <button type="button" className="cp-showall-btn" onClick={visibility.showAll}>
             {t("constructionProjects.showAll", { count: visibility.hiddenCount })}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {projects === null ? (
         <p className="cp-empty">{loadFailed ? t("constructionProjects.loadFailed") : "…"}</p>

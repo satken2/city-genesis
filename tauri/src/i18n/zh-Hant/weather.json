@@ -24,6 +24,7 @@
     "epochClimate": "週期氣候",
     "temperature": "氣溫",
     "precipitation": "降水量（折合每月）",
-    "sunlight": "日照強度"
+    "sunlight": "日照強度",
+    "windSpeed": "風速"
   }
 }

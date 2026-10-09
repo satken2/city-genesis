@@ -3,7 +3,7 @@
  *
  * インフラ財(GOODS_INFRASTRUCTURE: 高圧電流・高圧水道など)の配送ネットワークと、効果範囲を持つ
  * サービス財(電力・水道など)の供給範囲を2Dマップで見せる。地図の描画は CityMapCanvas の
- * インフラ表示(infraProductId)に任せ、このタブは財の切り替え・サマリー・施設一覧を持つ。
+ * インフラ表示(infraSelection)に任せ、このタブは財の切り替え・サマリー・施設一覧を持つ。
  *
  * 画面構成:
  * - 上部: 財の切り替えボタン(インフラ財、効果範囲を持つサービス財の順)
@@ -72,11 +72,15 @@ export function InfrastructureTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const network = selectedKind === "network"
     ? data?.products.find((p) => p.product_id === selectedPid) ?? null
     : null;
+  const infraSelection = useMemo(() => selectedKind === null ? null : {
+    network: selectedKind === "network" ? selectedPid : null,
+    coverage: selectedKind === "coverage" ? selectedPid : null,
+  }, [selectedKind, selectedPid]);
 
   // サービス財のサマリーは、地図が取得した効果範囲をそのまま使う
   const [coverage, setCoverage] = useState<ServiceCoverageData | null>(null);
   const handleInfraLoaded = useCallback((loaded: CityMapInfraData | null) => {
-    setCoverage(loaded?.kind === "coverage" ? loaded.coverage : null);
+    setCoverage(loaded?.coverage ?? null);
   }, []);
 
   /** 製品の表示名と単位(マスターデータから解決) */
@@ -163,7 +167,7 @@ export function InfrastructureTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               apiBaseUrl={apiBaseUrl}
               interactive
               layers={layers}
-              infraProductId={selectedPid}
+              infraSelection={infraSelection}
               onInfraLoaded={handleInfraLoaded}
             />
           </div>

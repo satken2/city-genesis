@@ -54,11 +54,8 @@
   },
   "cityMap": {
     "layers": {
-      "coastline": "해안선",
       "trunkRoads": "간선도로",
       "allRoads": "모든 도로",
-      "railways": "선로",
-      "transitLines": "대중교통 노선",
       "parcels": "토지 구획",
       "buildings": "건물",
       "stations": "역",
@@ -68,10 +65,16 @@
       "contours": "등고선",
       "grid": "그리드"
     },
+    "overlay": {
+      "title": "오버레이",
+      "none": "없음",
+      "transit": "대중교통",
+      "transitAll": "전체",
+      "heatmap": "히트맵",
+      "infra": "인프라"
+    },
     "heatmap": {
       "sources": "발생원",
-      "title": "히트맵",
-      "none": "없음",
       "noise": "소음",
       "pollution": "대기 오염",
       "crime": "치안",
@@ -79,8 +82,6 @@
       "noData": "히트맵 미계산(에포크 미실행)"
     },
     "infra": {
-      "title": "인프라",
-      "none": "없음",
       "legendUtilization": "경로 이용률(낮음→높음)",
       "legendFlow": "줄무늬의 흐름＝배송 방향(빠를수록 유량이 많음)",
       "legendProducers": "생산 시설",

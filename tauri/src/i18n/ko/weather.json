@@ -24,6 +24,7 @@
     "epochClimate": "에포크 기후",
     "temperature": "기온",
     "precipitation": "강수량(월 환산)",
-    "sunlight": "일조 강도"
+    "sunlight": "일조 강도",
+    "windSpeed": "풍속"
   }
 }

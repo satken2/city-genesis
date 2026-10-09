@@ -95,7 +95,8 @@ export function DebugMap({ apiBaseUrl }: { apiBaseUrl: string }) {
             layers={controls.layers}
             heatmap={controls.heatmap}
             heatmapMode={controls.heatmapMode}
-            infraProductId={controls.infraProductId}
+            transitVariant={controls.transitVariant}
+            infraSelection={controls.infraSelection}
             interactive
             onHeatmapStats={controls.onHeatmapStats}
             onVectorsLoaded={handleVectorsLoaded}

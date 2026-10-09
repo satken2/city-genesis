@@ -1,18 +1,23 @@
 /**
- * 都市地図の表示切り替え(レイヤー・ヒートマップ・インフラ表示・全体表示・再読み込み)のツールバーと、
+ * 都市地図の表示切り替え(レイヤー・オーバーレイ・全体表示・再読み込み)のツールバーと、
  * ヒートマップ・インフラ表示の凡例。
  *
  * 都市マップウィンドウ(CityMapWindow)と、ブラウザ版の開発用の地図ページ(`web/debug-map/`)が同じツールバーを使う。
  * 表示状態はこのフックが持ち、地図本体(CityMapCanvas)へは呼び出し側が渡す。
- * ヒートマップとインフラ表示はどちらも地図を塗るので、片方を選ぶともう片方を外す。
+ *
+ * ツールバーは2段。1段目は重ねてONにできるレイヤーのボタンとオーバーレイの切り替え、2段目は選んだ
+ * オーバーレイの設定(公共交通の種別・ヒートマップの種類・インフラの財)で、設定の無いオーバーレイでは2段目を出さない。
+ * オーバーレイ(公共交通・ヒートマップ・インフラ)はどれも地図に色を重ねて読む表示なので、1つだけ選ぶ。
+ * インフラの選択肢は、供給施設がインフラ財を受け取るサービス財を網と組にしたもの(pairWithFeedNetwork)。
  */
 
-import { useCallback, useState, type ReactNode, type RefObject } from "react";
+import { useCallback, useMemo, useState, type ReactNode, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DEFAULT_CITY_MAP_LAYERS,
   getHeatmapRampStops,
   type CityMapCanvasHandle,
+  type CityMapHeatmapActiveKind,
   type CityMapHeatmapKind,
   type CityMapHeatmapMode,
   type CityMapHeatmapStats,
@@ -20,7 +25,7 @@ import {
 } from "./CityMapCanvas";
 import "./CityMapWindow.css";
 import { MAP_SYMBOLS, type MapSymbol } from "./mapSymbols";
-import { useInfraProducts } from "./infraOverlay";
+import { pairWithFeedNetwork, useInfraProducts, type InfraSelection } from "./infraOverlay";
 import { InfraMapLegend } from "./InfraMapLegend";
 import { useMasterData } from "../../contexts/MasterDataContext";
 
@@ -28,36 +33,37 @@ export function MapIcon({ name }: { name: MapSymbol }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={MAP_SYMBOLS[name]} /></svg>;
 }
 
-/** レイヤーキーとツールバー記号の対応。記号名が単数形のものだけ読み替える */
-const layerSymbol = (key: keyof CityMapLayerVisibility): MapSymbol =>
-  key === "stations" ? "station" : key === "interchanges" ? "interchange" : key;
-
-/** ツールバーに並べるレイヤーの表示順 */
-const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
-  "elevation",
-  "contours",
-  "grid",
-  "coastline",
-  "zoneBorders",
-  "parcels",
-  "buildings",
-  "stations",
-  "interchanges",
-  "allRoads",
-  "trunkRoads",
-  "railways",
-  "transitLines",
+/**
+ * ツールバーのレイヤーボタンの表示順と、各ボタンが切り替えるレイヤー。名前は先頭のレイヤーのもの。
+ * 線路は幹線道路と同じく街の骨格を見るためのものなので、1つのボタンで一緒に切り替える。
+ */
+const LAYER_BUTTONS: { symbol: MapSymbol; layers: (keyof CityMapLayerVisibility)[] }[] = [
+  { symbol: "elevation", layers: ["elevation"] },
+  { symbol: "contours", layers: ["contours"] },
+  { symbol: "grid", layers: ["grid"] },
+  { symbol: "zoneBorders", layers: ["zoneBorders"] },
+  { symbol: "parcels", layers: ["parcels"] },
+  { symbol: "buildings", layers: ["buildings"] },
+  { symbol: "station", layers: ["stations"] },
+  { symbol: "interchange", layers: ["interchanges"] },
+  { symbol: "allRoads", layers: ["allRoads"] },
+  { symbol: "trunkRoads", layers: ["trunkRoads", "railways"] },
 ];
 
-/** ヒートマップ切り替えの表示順。複数レイヤーと違い1つだけ選ぶ排他選択 */
-const HEATMAP_ORDER: CityMapHeatmapKind[] = ["none", "noise", "pollution", "crime", "sunshine"];
+type CityMapOverlay = "none" | "transit" | "heatmap" | "infra";
+const OVERLAYS: CityMapOverlay[] = ["none", "transit", "heatmap", "infra"];
+
+/** ヒートマップの種類の表示順 */
+const HEATMAP_KINDS: CityMapHeatmapActiveKind[] = ["noise", "pollution", "crime", "sunshine"];
 
 export type CityMapControls = {
   layers: CityMapLayerVisibility;
   heatmap: CityMapHeatmapKind;
   heatmapMode: CityMapHeatmapMode;
-  /** CityMapCanvas の infraProductId に渡す */
-  infraProductId: number | null;
+  /** CityMapCanvas の transitVariant に渡す */
+  transitVariant: number | null;
+  /** CityMapCanvas の infraSelection に渡す */
+  infraSelection: InfraSelection | null;
   /** CityMapCanvas の onHeatmapStats に渡す */
   onHeatmapStats: (stats: CityMapHeatmapStats | null) => void;
   toolbar: ReactNode;
@@ -73,123 +79,151 @@ export function useCityMapControls(
   const { t } = useTranslation();
   const masterData = useMasterData();
   const infraProducts = useInfraProducts(apiBaseUrl);
+  const infraOptions = useMemo(
+    () => pairWithFeedNetwork(infraProducts).sort((a, b) => a.productId - b.productId),
+    [infraProducts]
+  );
   const [layers, setLayers] = useState<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS });
-  const [heatmap, setHeatmap] = useState<CityMapHeatmapKind>("none");
+  const [overlay, setOverlay] = useState<CityMapOverlay>("none");
+  // 公共交通の種別・ヒートマップの種類・インフラの財は、オーバーレイを切り替えて戻ったときに前の選択へ戻すため別に持つ
+  const [transitVariant, setTransitVariant] = useState<number | null>(null);
+  const [heatmapKind, setHeatmapKind] = useState<CityMapHeatmapActiveKind>(HEATMAP_KINDS[0]);
   const [heatmapMode, setHeatmapMode] = useState<CityMapHeatmapMode>("overlay");
   const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);
   const [infraProductId, setInfraProductId] = useState<number | null>(null);
-  const infraKind = infraProducts.find((p) => p.productId === infraProductId)?.kind ?? null;
+  const infraOption = infraOptions.find((p) => p.productId === infraProductId) ?? infraOptions[0] ?? null;
 
-  const selectHeatmap = useCallback((kind: CityMapHeatmapKind) => {
-    setHeatmap(kind);
-    if (kind !== "none") setInfraProductId(null);
+  const toggleLayer = useCallback((keys: (keyof CityMapLayerVisibility)[]) => {
+    setLayers((prev) => {
+      const on = !prev[keys[0]];
+      return { ...prev, ...Object.fromEntries(keys.map((key) => [key, on])) };
+    });
   }, []);
 
-  const selectInfraProduct = useCallback((productId: number | null) => {
-    setInfraProductId(productId);
-    if (productId !== null) setHeatmap("none");
-  }, []);
+  const transitTypes = Object.values(masterData?.transit ?? {});
 
-  const toggleLayer = useCallback((key: keyof CityMapLayerVisibility) => {
-    setLayers((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+  const overlayContent = overlay === "transit" ? (
+    <select
+      className="city-map-window__select"
+      aria-label={t("cityMap.overlay.transit")}
+      value={transitVariant ?? ""}
+      onChange={(e) => setTransitVariant(e.target.value === "" ? null : Number(e.target.value))}
+    >
+      <option value="">{t("cityMap.overlay.transitAll")}</option>
+      {transitTypes.map((type) => (
+        <option key={type.transit_path_id} value={type.transit_path_id}>{type.display_name}</option>
+      ))}
+    </select>
+  ) : overlay === "heatmap" ? (
+    <div className="city-map-window__heatmap">
+      {HEATMAP_KINDS.map((kind) => (
+        <button
+          key={kind}
+          type="button"
+          className={`city-map-heatmap-btn ${heatmapKind === kind ? "city-map-heatmap-btn--on" : ""}`}
+          aria-pressed={heatmapKind === kind}
+          aria-label={t(`cityMap.heatmap.${kind}`)}
+          title={t(`cityMap.heatmap.${kind}`)}
+          onClick={() => setHeatmapKind(kind)}
+        >
+          <MapIcon name={kind} />
+        </button>
+      ))}
+      <label className="city-map-window__source-toggle">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={heatmapMode === "sources"}
+          aria-label={t("cityMap.heatmap.sources")}
+          title={t("cityMap.heatmap.sources")}
+          className="city-map-source-switch"
+          onClick={() => setHeatmapMode((mode) => mode === "overlay" ? "sources" : "overlay")}
+        >
+          <span />
+        </button>
+        <span>{t("cityMap.heatmap.sources")}</span>
+      </label>
+    </div>
+  ) : overlay === "infra" ? (
+    <select
+      className="city-map-window__select"
+      aria-label={t("cityMap.overlay.infra")}
+      value={infraOption?.productId ?? ""}
+      onChange={(e) => setInfraProductId(Number(e.target.value))}
+    >
+      {infraOptions.map((p) => (
+        <option key={p.productId} value={p.productId}>
+          {masterData?.products[p.productId]?.display_name ?? String(p.productId)}
+        </option>
+      ))}
+    </select>
+  ) : null;
 
   const toolbar = (
     <div className="city-map-window__toolbar">
-      <div className="city-map-window__layer-toggles">
-        {LAYER_ORDER.map((key) => (
-          <button
-            key={key}
-            type="button"
-            className={`city-map-toggle ${layers[key] ? "city-map-toggle--on" : ""}`}
-            aria-pressed={layers[key]}
-            aria-label={t(`cityMap.layers.${key}`)}
-            title={t(`cityMap.layers.${key}`)}
-            onClick={() => toggleLayer(key)}
-          >
-            <MapIcon name={layerSymbol(key)} />
-          </button>
-        ))}
-      </div>
-      {/* ヒートマップ。2種を重ねると色が混ざって読めないため排他選択にする */}
-      <div className="city-map-window__heatmap">
-        <span className="city-map-window__heatmap-label">
-          {t("cityMap.heatmap.title")}
-        </span>
-        {HEATMAP_ORDER.map((kind) => (
-          <button
-            key={kind}
-            type="button"
-            className={`city-map-heatmap-btn ${
-              heatmap === kind ? "city-map-heatmap-btn--on" : ""
-            }`}
-            aria-pressed={heatmap === kind}
-            aria-label={`${t("cityMap.heatmap.title")}: ${t(`cityMap.heatmap.${kind}`)}`}
-            title={`${t("cityMap.heatmap.title")}: ${t(`cityMap.heatmap.${kind}`)}`}
-            onClick={() => selectHeatmap(kind)}
-          >
-            <MapIcon name={kind} />
-          </button>
-        ))}
-        <label className="city-map-window__source-toggle">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={heatmapMode === "sources"}
-            aria-label={t("cityMap.heatmap.sources")}
-            title={t("cityMap.heatmap.sources")}
-            className="city-map-source-switch"
-            onClick={() => setHeatmapMode((mode) => mode === "overlay" ? "sources" : "overlay")}
-          >
-            <span />
-          </button>
-          <span>{t("cityMap.heatmap.sources")}</span>
-        </label>
-      </div>
-      <label className="city-map-window__infra">
-        <span className="city-map-window__heatmap-label">{t("cityMap.infra.title")}</span>
-        <select
-          className="city-map-window__infra-select"
-          value={infraProductId ?? ""}
-          onChange={(e) => selectInfraProduct(e.target.value === "" ? null : Number(e.target.value))}
-        >
-          <option value="">{t("cityMap.infra.none")}</option>
-          {infraProducts.map((p) => (
-            <option key={p.productId} value={p.productId}>
-              {masterData?.products[p.productId]?.display_name ?? String(p.productId)}
-            </option>
+      <div className="city-map-window__toolbar-row">
+        <div className="city-map-window__layer-toggles">
+          {LAYER_BUTTONS.map(({ symbol, layers: keys }) => (
+            <button
+              key={keys[0]}
+              type="button"
+              className={`city-map-toggle ${layers[keys[0]] ? "city-map-toggle--on" : ""}`}
+              aria-pressed={layers[keys[0]]}
+              aria-label={t(`cityMap.layers.${keys[0]}`)}
+              title={t(`cityMap.layers.${keys[0]}`)}
+              onClick={() => toggleLayer(keys)}
+            >
+              <MapIcon name={symbol} />
+            </button>
           ))}
-        </select>
-      </label>
-      <div className="city-map-window__actions">
-        <button
-          type="button"
-          className="city-map-window__btn"
-          title={t("cityMap.fitView")}
-          aria-label={t("cityMap.fitView")}
-          onClick={() => mapRef.current?.resetView()}
-        >
-          <MapIcon name="fit" />
-        </button>
-        <button
-          type="button"
-          className="city-map-window__btn"
-          title={t("cityMap.reload")}
-          aria-label={t("cityMap.reload")}
-          onClick={onReload}
-        >
-          <MapIcon name="reload" />
-        </button>
+        </div>
+        <label className="city-map-window__overlay">
+          <span className="city-map-window__overlay-label">{t("cityMap.overlay.title")}</span>
+          <select
+            className="city-map-window__select"
+            value={overlay}
+            onChange={(e) => setOverlay(e.target.value as CityMapOverlay)}
+          >
+            {OVERLAYS.map((mode) => (
+              <option key={mode} value={mode}>{t(`cityMap.overlay.${mode}`)}</option>
+            ))}
+          </select>
+        </label>
+        <div className="city-map-window__actions">
+          <button
+            type="button"
+            className="city-map-window__btn"
+            title={t("cityMap.fitView")}
+            aria-label={t("cityMap.fitView")}
+            onClick={() => mapRef.current?.resetView()}
+          >
+            <MapIcon name="fit" />
+          </button>
+          <button
+            type="button"
+            className="city-map-window__btn"
+            title={t("cityMap.reload")}
+            aria-label={t("cityMap.reload")}
+            onClick={onReload}
+          >
+            <MapIcon name="reload" />
+          </button>
+        </div>
       </div>
+      {overlayContent && <div className="city-map-window__toolbar-row">{overlayContent}</div>}
     </div>
   );
 
-  // 発生源は都市全体の強度レンジ、オーバーレイは固定の悪さスコアを示す。
-  const legend = infraKind ? (
-    <div className="city-map-window__legend">
-      <InfraMapLegend kind={infraKind} />
+  const canvasLayers = useMemo(() => ({ ...layers, transitLines: overlay === "transit" }), [layers, overlay]);
+  const infraSelection = overlay === "infra" ? infraOption?.selection ?? null : null;
+
+  // ヒートマップの凡例の値は、発生源表示では都市全体の強度レンジ、格子の表示では固定の悪さスコア。
+  const legend = infraSelection ? (
+    <div className="city-map-window__legend city-map-window__legend--infra">
+      {infraSelection.network !== null && <InfraMapLegend kind="network" />}
+      {infraSelection.coverage !== null && <InfraMapLegend kind="coverage" />}
     </div>
-  ) : heatmapStats && (
+  ) : overlay === "heatmap" && heatmapStats && (
     <div className="city-map-window__legend">
       {heatmapStats.count === 0 ? (
         <span className="city-map-window__legend-empty">
@@ -220,5 +254,14 @@ export function useCityMapControls(
     </div>
   );
 
-  return { layers, heatmap, heatmapMode, infraProductId, onHeatmapStats: setHeatmapStats, toolbar, legend };
+  return {
+    layers: canvasLayers,
+    heatmap: overlay === "heatmap" ? heatmapKind : "none",
+    heatmapMode,
+    transitVariant,
+    infraSelection,
+    onHeatmapStats: setHeatmapStats,
+    toolbar,
+    legend,
+  };
 }

@@ -17,7 +17,7 @@ const STORAGE_KEY = "city-genesis.settings";
 function defaults(): AppSettings {
   return {
     language: "ja",
-    font_size: 12,
+    font_size: 13,
     volumes: { master: 80, bgm: 60, sfx: 70 },
     monitor_index: 0,
     hintbar_visible: true,

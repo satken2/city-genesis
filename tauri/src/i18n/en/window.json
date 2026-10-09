@@ -54,11 +54,8 @@
   },
   "cityMap": {
     "layers": {
-      "coastline": "Coastline",
       "trunkRoads": "Trunk Roads",
       "allRoads": "All Roads",
-      "railways": "Railways",
-      "transitLines": "Transit lines",
       "parcels": "Parcels",
       "buildings": "Buildings",
       "stations": "Stations",
@@ -68,10 +65,16 @@
       "contours": "Contour Lines",
       "grid": "Grid"
     },
+    "overlay": {
+      "title": "Overlay",
+      "none": "Off",
+      "transit": "Public transit",
+      "transitAll": "All",
+      "heatmap": "Heatmap",
+      "infra": "Infrastructure"
+    },
     "heatmap": {
       "sources": "Sources",
-      "title": "Heatmap",
-      "none": "Off",
       "noise": "Noise",
       "pollution": "Air Pollution",
       "crime": "Crime",
@@ -79,8 +82,6 @@
       "noData": "Heatmap not computed (no epoch run yet)"
     },
     "infra": {
-      "title": "Infrastructure",
-      "none": "Off",
       "legendUtilization": "Path utilization (low → high)",
       "legendFlow": "Stripe flow = delivery direction (faster = more flow)",
       "legendProducers": "Producers",

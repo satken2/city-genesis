@@ -1,11 +1,11 @@
 /**
- * 都市地図のインフラ表示(CityMapCanvas の infraProductId)で使う型・財の一覧・描画。
+ * 都市地図のインフラ表示(CityMapCanvas の infraSelection)で使う型・財の一覧・描画。
  *
- * 選んだ財の種類で描くものが変わる。
- * - インフラ財(GOODS_INFRASTRUCTURE): GET /api/v1/stats/infrastructure の網。パスを流量/容量の利用率で
+ * 網と効果範囲を1つずつ同時に描ける。
+ * - 網(インフラ財 GOODS_INFRASTRUCTURE): GET /api/v1/stats/infrastructure の網。パスを流量/容量の利用率で
  *   色分けし(太さは容量)、流量のあるパスには流れの向きへ動く縞を重ね、生産施設(丸)・消費施設(菱形)を置く。
  *   未接続の施設は赤で描く。
- * - 効果範囲を持つサービス財: GET /api/v1/buildings/service-coverage/{product_id}。稼働中の施設の範囲を
+ * - 効果範囲(効果範囲を持つサービス財): GET /api/v1/buildings/service-coverage/{product_id}。稼働中の施設の範囲を
  *   重なりで濃くならないよう和集合で薄く塗り、施設ごとの輪郭を描く(稼働していない施設は破線)。
  *   建物は範囲内・範囲外で塗り分ける(建物の描画に組み込むため CityMapCanvas が行う)。
  *
@@ -18,6 +18,7 @@ import { buildApiUrl, fetchApi } from "../../utils/api";
 import { GOODS_INFRASTRUCTURE, STATUS_ACTIVE } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { EffectRangeRegion } from "../../utils/ipc";
+import type { MasterData } from "../../types";
 
 /* ============================================================================
  * インフラ網(GET /api/v1/stats/infrastructure)
@@ -340,17 +341,33 @@ export function drawCoverageOutlines(
 /** network = インフラ財の網、coverage = サービス財の効果範囲 */
 export type InfraProductKind = "network" | "coverage";
 
+/** 地図に重ねる財。網(インフラ財)と効果範囲(サービス財)をそれぞれ1つまで同時に描ける */
+export type InfraSelection = { network: number | null; coverage: number | null };
+
 /** CityMapCanvas が取得した表示中の財のデータ(onInfraLoaded で通知する) */
-export type CityMapInfraData =
-  | { kind: "network"; product: InfraProductStats; simulationDays: number }
-  | { kind: "coverage"; coverage: ServiceCoverageData };
+export type CityMapInfraData = {
+  network: { product: InfraProductStats; simulationDays: number } | null;
+  coverage: ServiceCoverageData | null;
+};
 
 export type InfraProductOption = {
   productId: number;
   kind: InfraProductKind;
   /** 効果範囲を持つ供給施設の variant(サービス財のみ。アイコンに使う) */
   supplierVariants: number[];
+  /** 効果範囲を持つ供給施設が材料として受け取るインフラ財(変電所の高圧電力など。サービス財のみ・無ければ null) */
+  feedProductId: number | null;
 };
+
+/** 供給施設のマスターの材料からインフラ財を探す */
+function findFeedProduct(supplierVariants: number[], masterData: MasterData | null): number | null {
+  for (const variant of supplierVariants) {
+    for (const id of Object.keys(masterData?.agents?.[variant]?.materials ?? {})) {
+      if (masterData?.products?.[Number(id)]?.type === GOODS_INFRASTRUCTURE) return Number(id);
+    }
+  }
+  return null;
+}
 
 /**
  * インフラ表示で選べる財。インフラ財はマスターの商品種別、効果範囲を持つサービス財はコアの一覧
@@ -358,7 +375,7 @@ export type InfraProductOption = {
  */
 export function useInfraProducts(apiBaseUrl: string): InfraProductOption[] {
   const masterData = useMasterData();
-  const [coverage, setCoverage] = useState<InfraProductOption[]>([]);
+  const [coverageProducts, setCoverageProducts] = useState<{ product_id: number; supplier_variants: number[] }[]>([]);
 
   useEffect(() => {
     if (!apiBaseUrl) return;
@@ -367,9 +384,7 @@ export function useInfraProducts(apiBaseUrl: string): InfraProductOption[] {
       buildApiUrl(apiBaseUrl, "/api/v1/buildings/service-coverage"),
       { signal: controller.signal }
     )
-      .then((data) => setCoverage((data.products ?? []).map((p) => ({
-        productId: p.product_id, kind: "coverage" as const, supplierVariants: p.supplier_variants ?? [],
-      }))))
+      .then((data) => setCoverageProducts(data.products ?? []))
       .catch((err) => {
         if (!controller.signal.aborted) console.warn("[infraOverlay] failed to load coverage products:", err);
       });
@@ -378,8 +393,35 @@ export function useInfraProducts(apiBaseUrl: string): InfraProductOption[] {
 
   const network = useMemo(() => Object.entries(masterData?.products ?? {})
     .filter(([, product]) => product.type === GOODS_INFRASTRUCTURE)
-    .map(([id]) => ({ productId: Number(id), kind: "network" as const, supplierVariants: [] as number[] }))
+    .map(([id]) => ({ productId: Number(id), kind: "network" as const, supplierVariants: [] as number[], feedProductId: null }))
     .sort((a, b) => a.productId - b.productId), [masterData]);
 
+  const coverage = useMemo(() => coverageProducts.map((p) => {
+    const supplierVariants = p.supplier_variants ?? [];
+    return {
+      productId: p.product_id,
+      kind: "coverage" as const,
+      supplierVariants,
+      feedProductId: findFeedProduct(supplierVariants, masterData),
+    };
+  }), [coverageProducts, masterData]);
+
   return useMemo(() => [...network, ...coverage], [network, coverage]);
+}
+
+/**
+ * 都市マップの選択肢。効果範囲の供給施設がインフラ財を受け取るサービス財(変電所の電力・水道ポンプの水道)は、
+ * 発電所などから建物に届くまでを1枚で見せるため、そのインフラ財の網と組にして1つの選択肢にする。
+ * 組になったインフラ財は単独では並べない。
+ */
+export function pairWithFeedNetwork(options: InfraProductOption[]): { productId: number; selection: InfraSelection }[] {
+  const feeds = new Set(options.map((p) => p.feedProductId).filter((id): id is number => id !== null));
+  return options
+    .filter((p) => !(p.kind === "network" && feeds.has(p.productId)))
+    .map((p) => ({
+      productId: p.productId,
+      selection: p.kind === "network"
+        ? { network: p.productId, coverage: null }
+        : { network: p.feedProductId, coverage: p.productId },
+    }));
 }

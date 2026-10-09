@@ -11,7 +11,7 @@ import type { BudgetCategoryEntry } from "../../types";
 import { formatEpochDateRange } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
 import { Money } from "../common/Money";
-import { formatCompactAmount, formatExactAmount } from "../../utils/money";
+import { formatCompactAmount } from "../../utils/money";
 import { hasRoad, roadDisplayName } from "../road/roadApi";
 import {
   ResponsiveContainer,
@@ -425,7 +425,7 @@ function ChartValueTooltip({
           />
           <span className="budget-chart-tooltip__name">{p.name}</span>
           <span className="budget-chart-tooltip__value">
-            {formatExactAmount(Number(p.value), locale, true)}
+            {formatCompactAmount(Number(p.value), locale, true)}
           </span>
         </div>
       ))}
@@ -433,7 +433,7 @@ function ChartValueTooltip({
         <div className="budget-chart-tooltip__row budget-chart-tooltip__row--total">
           <span className="budget-chart-tooltip__name">{totalLabel}</span>
           <span className="budget-chart-tooltip__value">
-            {formatExactAmount(total, locale, true)}
+            {formatCompactAmount(total, locale, true)}
           </span>
         </div>
       )}

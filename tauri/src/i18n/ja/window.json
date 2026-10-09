@@ -58,11 +58,8 @@
   },
   "cityMap": {
     "layers": {
-      "coastline": "海岸線",
       "trunkRoads": "幹線道路",
       "allRoads": "すべての道路",
-      "railways": "線路",
-      "transitLines": "公共交通路線",
       "parcels": "土地区画",
       "buildings": "建物",
       "stations": "駅",
@@ -72,10 +69,16 @@
       "contours": "等高線",
       "grid": "グリッド"
     },
+    "overlay": {
+      "title": "オーバーレイ",
+      "none": "なし",
+      "transit": "公共交通",
+      "transitAll": "すべて",
+      "heatmap": "ヒートマップ",
+      "infra": "インフラ"
+    },
     "heatmap": {
       "sources": "発生源",
-      "title": "ヒートマップ",
-      "none": "なし",
       "noise": "騒音",
       "pollution": "大気汚染",
       "crime": "治安",
@@ -83,8 +86,6 @@
       "noData": "ヒートマップ未計算(エポック未実行)"
     },
     "infra": {
-      "title": "インフラ",
-      "none": "なし",
       "legendUtilization": "パス利用率（低→高）",
       "legendFlow": "縞の流れ＝配送方向（速いほど流量が多い）",
       "legendProducers": "生産施設",

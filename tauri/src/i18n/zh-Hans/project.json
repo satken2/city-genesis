@@ -11,14 +11,13 @@
     "hideObject": "在3D视图中隐藏"
   },
   "constructionProjects": {
-    "description": "按建筑和道路上的标签汇总工程，并统计建设费用与工期。显示与隐藏仅在本次游戏期间有效，不会保存。",
     "empty": "还没有带标签的工程。请在建设面板中放置时选择标签，或在计划中、建设中的公共设施或道路的详情面板中添加标签。",
     "loadFailed": "建设项目加载失败",
     "totalCost": "预计建设费",
     "duration": "剩余工期",
     "progress": "进度",
     "progressValue": "已完成 {{done}} / {{total}}",
-    "epochsValue": "{{value}} 个纪元",
+    "monthsValue": "{{value}}个月",
     "stalled": "停滞",
     "stalledWarning": "有 {{count}} 项工程因建设速度为0而无法推进（已从工期统计中排除）。",
     "done": "已完成",

@@ -50,7 +50,7 @@ const container = document.createElement("div");
 document.body.append(container);
 let closed = 0;
 let root = createRoot(container);
-const render = () => <MasterDataProvider apiBaseUrl="http://test"><ClimateSettingsWindow apiBaseUrl="http://test" onClose={() => closed++} /></MasterDataProvider>;
+const render = () => <MasterDataProvider apiBaseUrl="http://test" connected><ClimateSettingsWindow apiBaseUrl="http://test" onClose={() => closed++} /></MasterDataProvider>;
 const settle = () => act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
 const button = (key: string) => [...container.querySelectorAll<HTMLButtonElement>("button")].find(element => element.textContent === key)!;
 const input = (selector: string) => container.querySelector<HTMLInputElement>(selector)!;

@@ -1,12 +1,12 @@
 /**
- * マスターデータをアプリケーション全体で参照可能にするReact Context
+ * マスターデータをウィンドウ内で共有するReact Context
  *
- * Tauri起動時にバックエンドのマスターAPIから全データを一括取得し、
- * 任意のコンポーネントから useMasterData() フックで参照できるようにする。
- * apiBaseUrl が渡されたタイミングでフェッチを開始する。
+ * WebViewはウィンドウごとに別のJS環境なので、取得もウィンドウごとに行う。
+ * 参照しないウィンドウ(トップメニュー・通知など)に取得させないため、
+ * useMasterData() を呼ぶコンポーネントがマウントされてから取得する。
  *
- * バックエンド未起動などによりフェッチに失敗した場合は、
- * 一定間隔(RETRY_INTERVAL_MS)を空けて自動的に再試行する。
+ * 取得はバックエンドとの通信を共通の監視が確認できている間だけ行う。
+ * 失敗しても独自に再試行せず、通信が回復した(connected が true に戻った)ときに取り直す。
  */
 
 import {
@@ -14,6 +14,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -24,19 +25,16 @@ import type { MasterData } from "../types";
 /**
  * Contextが提供する値
  * data: マスターデータ本体。未取得・取得失敗時はnull
- * isLoading: 現在フェッチ中かどうか。リトライの重複防止に使用する
- * refetch: マスターデータの再取得を要求する関数
+ * request: このウィンドウでマスターデータが必要であることを伝える
  */
 type MasterDataContextValue = {
   data: MasterData | null;
-  isLoading: boolean;
-  refetch: () => void;
+  request: () => void;
 };
 
 const MasterDataContext = createContext<MasterDataContextValue>({
   data: null,
-  isLoading: false,
-  refetch: () => {},
+  request: () => {},
 });
 
 /**
@@ -65,12 +63,6 @@ const MASTER_ENDPOINTS: { key: keyof MasterData; path: string; numericKeys?: boo
   { key: "resource_types", path: "/api/v1/master/resource_types" },
   { key: "prop_types", path: "/api/v1/master/prop_types" },
 ];
-
-/**
- * マスターデータ取得失敗時のリトライ間隔(ミリ秒)。
- * バックエンド未起動時に過剰な頻度でリクエストが繰り返されるのを防ぐ。
- */
-const RETRY_INTERVAL_MS = 3000;
 
 /**
  * APIレスポンスの文字列キーを数値キーに変換する
@@ -110,50 +102,30 @@ async function fetchMasterEndpoint<T>(
 /**
  * マスターデータを一括取得してContextで提供するプロバイダ
  *
- * apiBaseUrlが渡されると全エンドポイントを並列フェッチする。
- * apiBaseUrlがundefinedの間はフェッチを行わず、masterDataはnullのまま。
- * apiBaseUrlが変更された場合は再フェッチする。
- *
- * バックエンド未起動などでフェッチに失敗した場合は、
- * 一定間隔(RETRY_INTERVAL_MS)を空けて自動的に再試行する。
+ * 参照の要求があり、apiBaseUrl が決まり、通信が確認できているときに全エンドポイントを並列取得する。
+ * apiBaseUrl が変わったら取得済みのデータを捨てて取り直す。
  */
 export function MasterDataProvider({
   apiBaseUrl,
+  connected,
   children,
 }: {
   apiBaseUrl: string | undefined;
+  connected: boolean;
   children: ReactNode;
 }) {
   const [masterData, setMasterData] = useState<MasterData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const apiBaseUrlRef = useRef(apiBaseUrl);
-  apiBaseUrlRef.current = apiBaseUrl;
+  const [requested, setRequested] = useState(false);
   const prevBaseUrlRef = useRef<string | undefined>(undefined);
   const masterDataRef = useRef(masterData);
   masterDataRef.current = masterData;
   const inFlightRef = useRef(false);
-  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const disposedRef = useRef(false);
 
-  const clearRetryTimer = useCallback(() => {
-    if (retryTimerRef.current !== null) {
-      clearTimeout(retryTimerRef.current);
-      retryTimerRef.current = null;
-    }
-  }, []);
-
-  const fetchAll = useCallback(async () => {
-    clearRetryTimer();
-
-    if (masterDataRef.current !== null || inFlightRef.current) {
-      return;
-    }
-
-    const base = (apiBaseUrlRef.current ?? "").replace(/\/+$/, "");
-    if (!base) return;
+  const fetchAll = useCallback(async (base: string) => {
+    if (masterDataRef.current !== null || inFlightRef.current) return;
 
     inFlightRef.current = true;
-    setIsLoading(true);
     try {
       const results = await Promise.all(
         MASTER_ENDPOINTS.map(async ({ key, path, numericKeys }) => {
@@ -165,33 +137,19 @@ export function MasterDataProvider({
         setMasterData(Object.fromEntries(results) as unknown as MasterData);
       }
     } catch (error: unknown) {
-      console.error(`マスターデータの取得に失敗しました(${RETRY_INTERVAL_MS / 1000}秒後に再試行):`, error);
-      if (!disposedRef.current && masterDataRef.current === null) {
-        clearRetryTimer();
-        retryTimerRef.current = setTimeout(() => {
-          retryTimerRef.current = null;
-          void fetchAll();
-        }, RETRY_INTERVAL_MS);
-      }
+      console.error("マスターデータの取得に失敗しました(通信の回復後に取り直します):", error);
     } finally {
       inFlightRef.current = false;
-      if (!disposedRef.current) {
-        setIsLoading(false);
-      }
     }
-  }, [clearRetryTimer]);
+  }, []);
 
   useEffect(() => {
     disposedRef.current = false;
     return () => {
       disposedRef.current = true;
-      clearRetryTimer();
     };
-  }, [clearRetryTimer]);
+  }, []);
 
-  /**
-   * apiBaseUrlが設定・変更された時にフェッチを開始する
-   */
   useEffect(() => {
     if (!apiBaseUrl) return;
     if (prevBaseUrlRef.current !== undefined && prevBaseUrlRef.current !== apiBaseUrl) {
@@ -200,24 +158,16 @@ export function MasterDataProvider({
     }
     prevBaseUrlRef.current = apiBaseUrl;
 
-    void fetchAll();
-  }, [apiBaseUrl, fetchAll]);
+    if (requested && connected) {
+      void fetchAll(apiBaseUrl.replace(/\/+$/, ""));
+    }
+  }, [apiBaseUrl, connected, requested, fetchAll]);
 
-  const refetch = useCallback(() => {
-    setMasterData(null);
-    masterDataRef.current = null;
-    return fetchAll();
-  }, [fetchAll]);
-
-  const contextValue = useRef<MasterDataContextValue>({
-    data: null,
-    isLoading: false,
-    refetch,
-  });
-  contextValue.current = { data: masterData, isLoading, refetch };
+  const request = useCallback(() => setRequested(true), []);
+  const contextValue = useMemo(() => ({ data: masterData, request }), [masterData, request]);
 
   return (
-    <MasterDataContext.Provider value={contextValue.current}>
+    <MasterDataContext.Provider value={contextValue}>
       {children}
     </MasterDataContext.Provider>
   );
@@ -228,9 +178,10 @@ export function MasterDataProvider({
  * MasterDataProvider 配下のコンポーネントからのみ使用可能
  *
  * データが取得済みの場合は MasterData を返し、未取得の場合は null を返す。
- * バックエンド未起動などで未取得の場合は、MasterDataProvider 側で定期的に自動リトライされる。
+ * 呼び出したウィンドウで初めて取得が始まり、届いた時点で再描画される。
  */
 export function useMasterData(): MasterData | null {
-  const { data } = useContext(MasterDataContext);
+  const { data, request } = useContext(MasterDataContext);
+  useEffect(() => request(), [request]);
   return data;
 }

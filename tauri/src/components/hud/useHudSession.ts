@@ -38,6 +38,8 @@ export type HudSession = {
   epochTemperature: number | null;
   epochSunlight: number | null;
   epochPrecipitation: number | null;
+  /** m/s */
+  epochWindSpeed: number | null;
   /** エポック実行中。実行中はHUDの全ボタンを無効化する */
   epochExecuting: boolean;
 };
@@ -54,6 +56,7 @@ export function useHudSession(): HudSession {
   const [epochTemperature, setEpochTemperature] = useState<number | null>(null);
   const [epochSunlight, setEpochSunlight] = useState<number | null>(null);
   const [epochPrecipitation, setEpochPrecipitation] = useState<number | null>(null);
+  const [epochWindSpeed, setEpochWindSpeed] = useState<number | null>(null);
   const [epochExecuting, setEpochExecuting] = useState(false);
 
   useEffect(() => {
@@ -89,6 +92,7 @@ export function useHudSession(): HudSession {
       setEpochTemperature((cityData?.epoch_temperature as number) ?? null);
       setEpochSunlight((cityData?.epoch_sunlight as number) ?? null);
       setEpochPrecipitation((cityData?.epoch_precipitation as number) ?? null);
+      setEpochWindSpeed((cityData?.epoch_wind_speed as number) ?? null);
       setCityHallPlaced((cityData?.city_hall_placed as boolean) ?? false);
     })
       .then((fn) => {
@@ -135,6 +139,7 @@ export function useHudSession(): HudSession {
     epochTemperature,
     epochSunlight,
     epochPrecipitation,
+    epochWindSpeed,
     epochExecuting,
   };
 }

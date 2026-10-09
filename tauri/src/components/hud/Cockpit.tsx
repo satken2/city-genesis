@@ -16,6 +16,7 @@
  *   通常は空き地・計画中の建物/道路・地形プロップだけが対象。
  * - 公共サービス充足度: 電力・水道などの需要/供給キャパシティを縦棒で常時表示する。
  *   クリックで公共施設ウィンドウを開く。
+ * - 確定気候: 最後に開始したエポックの気温・降水量・日照・風速を2×2に並べる。
  * - アラート: L1通知は重要度2階調で表現する。warning(都市崩壊の差し迫った危機)が
  *   1件以上あると点滅+赤バッジ、caution(成長停止・緩慢な荒廃系)は点滅させず
  *   黄バッジのみ出す。緊急でない問題でアイコンが点滅し続けると、本当の危機の
@@ -73,7 +74,7 @@ const L1_NOTIFICATION_POLL_INTERVAL_MS = 30_000;
 export function Cockpit() {
   const { t, i18n } = useTranslation();
   const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting, playMode,
-    epochTemperature, epochPrecipitation, epochSunlight } = useHudSession();
+    epochTemperature, epochPrecipitation, epochSunlight, epochWindSpeed } = useHudSession();
   const godMode = playMode === PLAY_MODE_SCEARIO;
   const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, godMode);
   const mode = useHudMode();
@@ -360,6 +361,12 @@ export function Cockpit() {
               <circle cx="12" cy="12" r="4" /><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2" />
             </svg>
             <span>{epochSunlight == null ? "—" : `${epochSunlight.toLocaleString(locale, { maximumFractionDigits: 0 })}%`}</span>
+          </span>
+          <span className="cockpit-climate-row" title={t("weather.windSpeed")}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M3 8h10a3 3 0 1 0-3-3" /><path d="M3 12h15a3 3 0 1 1-3 3" /><path d="M3 16h6" />
+            </svg>
+            <span>{epochWindSpeed == null ? "—" : `${epochWindSpeed.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}m/s`}</span>
           </span>
         </button>
         <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />

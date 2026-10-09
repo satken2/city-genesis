@@ -54,11 +54,8 @@
   },
   "cityMap": {
     "layers": {
-      "coastline": "Línea costera",
       "trunkRoads": "Vías principales",
       "allRoads": "Todas las calles",
-      "railways": "Ferrocarriles",
-      "transitLines": "Líneas de transporte público",
       "parcels": "Parcelas",
       "buildings": "Edificios",
       "stations": "Estaciones",
@@ -68,10 +65,16 @@
       "contours": "Curvas de nivel",
       "grid": "Cuadrícula"
     },
+    "overlay": {
+      "title": "Superposición",
+      "none": "Ninguno",
+      "transit": "Transporte público",
+      "transitAll": "Todas",
+      "heatmap": "Mapa de calor",
+      "infra": "Infraestructura"
+    },
     "heatmap": {
       "sources": "Fuentes",
-      "title": "Mapa de calor",
-      "none": "Ninguno",
       "noise": "Ruido",
       "pollution": "Contaminación del aire",
       "crime": "Delincuencia",
@@ -79,8 +82,6 @@
       "noData": "Mapa de calor sin calcular (aún no se ejecuta una época)"
     },
     "infra": {
-      "title": "Infraestructura",
-      "none": "Ninguno",
       "legendUtilization": "Uso de la vía (bajo → alto)",
       "legendFlow": "El flujo de las franjas indica el sentido de entrega (más rápido = mayor caudal)",
       "legendProducers": "Instalaciones productoras",

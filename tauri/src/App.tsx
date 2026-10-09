@@ -332,7 +332,7 @@ function App() {
     && !["settings", "credits"].includes(context?.window_type ?? "");
 
   return (
-    <MasterDataProvider apiBaseUrl={apiBaseUrl}>
+    <MasterDataProvider apiBaseUrl={apiBaseUrl} connected={backendConnected}>
       <div className="connection-content" {...(connectionBlocked ? { inert: "" } : {})}>
       <TutorialLayer windowType={context?.window_type ?? windowKind} entity={context?.entity?.id} />
       {windowKind === "topmenu" ? (

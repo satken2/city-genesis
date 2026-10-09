@@ -11,14 +11,13 @@
     "hideObject": "Ocultar en la vista 3D"
   },
   "constructionProjects": {
-    "description": "Agrupa las obras según la etiqueta de edificios y calles, y suma su costo y su duración. Mostrar u ocultar solo dura esta sesión y no se guarda.",
     "empty": "Todavía no hay obras con etiqueta. Elige una al colocar desde un panel de construcción, o agrégala desde el panel de detalle de un edificio público o una calle planificados o en construcción.",
     "loadFailed": "No se pudieron cargar los proyectos de construcción",
     "totalCost": "Costo estimado",
     "duration": "Tiempo restante",
     "progress": "Avance",
     "progressValue": "{{done}} / {{total}} terminadas",
-    "epochsValue": "{{value}} épocas",
+    "monthsValue": "{{value}} meses",
     "stalled": "Detenida",
     "stalledWarning": "{{count}} obra(s) no avanzan porque su velocidad de construcción es 0 (se excluyen del total de duración).",
     "done": "Terminada",

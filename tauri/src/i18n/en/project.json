@@ -11,14 +11,13 @@
     "hideObject": "Hide in the 3D view"
   },
   "constructionProjects": {
-    "description": "Groups works by the tag given to buildings and roads, and totals their cost and duration. Show/hide settings last only for this session and are not saved.",
     "empty": "No tagged works yet. Choose a tag when placing from a construction panel, or add one from the detail panel of a public facility or road that is planned or under construction.",
     "loadFailed": "Failed to load construction projects",
     "totalCost": "Estimated cost",
     "duration": "Time left",
     "progress": "Progress",
     "progressValue": "{{done}} / {{total}} done",
-    "epochsValue": "{{value}} epochs",
+    "monthsValue": "{{value}} months",
     "stalled": "Stalled",
     "stalledWarning": "{{count}} work(s) will not progress because the construction speed is 0 (excluded from the duration total).",
     "done": "Done",

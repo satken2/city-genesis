@@ -54,11 +54,8 @@
   },
   "cityMap": {
     "layers": {
-      "coastline": "海岸线",
       "trunkRoads": "主干道",
       "allRoads": "所有道路",
-      "railways": "铁路",
-      "transitLines": "公共交通线路",
       "parcels": "地块",
       "buildings": "建筑",
       "stations": "车站",
@@ -68,10 +65,16 @@
       "contours": "等高线",
       "grid": "网格"
     },
+    "overlay": {
+      "title": "叠加层",
+      "none": "无",
+      "transit": "公共交通",
+      "transitAll": "全部",
+      "heatmap": "热力图",
+      "infra": "基础设施"
+    },
     "heatmap": {
       "sources": "排放源",
-      "title": "热力图",
-      "none": "无",
       "noise": "噪音",
       "pollution": "大气污染",
       "crime": "治安",
@@ -79,8 +82,6 @@
       "noData": "热力图未计算（尚未执行纪元）"
     },
     "infra": {
-      "title": "基础设施",
-      "none": "无",
       "legendUtilization": "路径利用率（低→高）",
       "legendFlow": "条纹流动＝配送方向（越快表示流量越大）",
       "legendProducers": "生产设施",

@@ -39,7 +39,7 @@ vm.runInNewContext(outputText, { exports, Path2D: RecordingPath, require: (name)
   assert.ok(name in modules, name);
   return modules[name];
 } });
-const { buildCoverageRender } = exports;
+const { buildCoverageRender, pairWithFeedNetwork } = exports;
 
 // 外周が時計回り・穴が反時計回りで届いても、外周は正、穴は負の向きに揃える(円は Canvas の既定で正)。
 const square = (x, z, h) => [[x - h, z - h], [x - h, z + h], [x + h, z + h], [x + h, z - h]];
@@ -64,3 +64,17 @@ assert.equal(render.inactiveOutline.subpaths.length, 1, "稼働していない�
 assert.deepEqual([...render.covered], [10, 11]);
 assert.deepEqual([...render.uncovered], [12]);
 console.log("PASS: coverage fill winding (union with holes), active/inactive outlines, building sets");
+
+// 供給施設がインフラ財を受け取るサービス財は網と組にし、組になったインフラ財は単独の選択肢から外す。
+const options = pairWithFeedNetwork([
+  { productId: 401, kind: "network", supplierVariants: [], feedProductId: null },
+  { productId: 403, kind: "network", supplierVariants: [], feedProductId: null },
+  { productId: 303, kind: "coverage", supplierVariants: [1062], feedProductId: 401 },
+  { productId: 306, kind: "coverage", supplierVariants: [1058], feedProductId: null },
+]);
+assert.deepEqual(JSON.parse(JSON.stringify(options)), [
+  { productId: 403, selection: { network: 403, coverage: null } },
+  { productId: 303, selection: { network: 401, coverage: 303 } },
+  { productId: 306, selection: { network: null, coverage: 306 } },
+]);
+console.log("PASS: service goods paired with the infrastructure network their suppliers receive");

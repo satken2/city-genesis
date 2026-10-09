@@ -31,13 +31,13 @@ const EVENT_FONT_SIZE_CHANGED = "font-size-changed";
 
 /**
  * プリセットフォントサイズの定義(本文の文字サイズ px)
- * keyはi18nの翻訳キーとしても使用する。中はWindows標準の本文(Segoe UI 9pt)に相当する。
+ * keyはi18nの翻訳キーとしても使用する。
  * 中は設定ファイルが無いときの既定値でもあり、Rust側 settings.rs の既定値と揃える。
  */
 export const FONT_SIZE_PRESETS: Record<string, number> = {
   small: 10,
-  medium: 12,
-  large: 14,
+  medium: 13,
+  large: 16,
 };
 
 type FontSizeContextValue = {

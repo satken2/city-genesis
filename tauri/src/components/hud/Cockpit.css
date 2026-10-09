@@ -53,7 +53,7 @@
 /* ─── 都市情報・確定気候・スコアと予算 ─── */
 
 /*
- * 左列=都市名と日付、中央列=確定気候、右列=スコアと予算。
+ * 左列=都市名と日付、中央列=確定気候(2×2)、右列=スコアと予算。
  * align-self: stretch で .cockpit の align-items:center を打ち消し、
  * 常用ツール列と同じ丈(パネルの上下いっぱい)にする。
  * 右列は auto 幅で、2つのメータのうち広い方に揃う(バーの右端が縦に揃う)。
@@ -79,9 +79,11 @@
   cursor: default;
   grid-column: 2;
   grid-row: 1 / span 2;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-content: center;
+  column-gap: 8px;
+  row-gap: 2px;
   color: #d8e5f2;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;

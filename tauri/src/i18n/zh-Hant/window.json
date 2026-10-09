@@ -54,11 +54,8 @@
   },
   "cityMap": {
     "layers": {
-      "coastline": "海岸線",
       "trunkRoads": "主幹道",
       "allRoads": "所有道路",
-      "railways": "鐵路",
-      "transitLines": "公共交通路線",
       "parcels": "地塊",
       "buildings": "建築",
       "stations": "車站",
@@ -68,10 +65,16 @@
       "contours": "等高線",
       "grid": "格線"
     },
+    "overlay": {
+      "title": "疊加層",
+      "none": "無",
+      "transit": "公共交通",
+      "transitAll": "全部",
+      "heatmap": "熱力圖",
+      "infra": "基礎設施"
+    },
     "heatmap": {
       "sources": "排放源",
-      "title": "熱力圖",
-      "none": "無",
       "noise": "噪音",
       "pollution": "空氣污染",
       "crime": "治安",
@@ -79,8 +82,6 @@
       "noData": "熱力圖尚未計算（尚未執行紀元）"
     },
     "infra": {
-      "title": "基礎設施",
-      "none": "無",
       "legendUtilization": "路徑使用率（低→高）",
       "legendFlow": "條紋流動＝配送方向（越快表示流量越大）",
       "legendProducers": "生產設施",

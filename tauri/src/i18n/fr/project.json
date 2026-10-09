@@ -11,14 +11,13 @@
     "hideObject": "Masquer dans la vue 3D"
   },
   "constructionProjects": {
-    "description": "Regroupe les travaux selon l'étiquette posée sur les bâtiments et les routes, et totalise leur coût et leur durée. L'affichage ne dure que cette session et n'est pas enregistré.",
     "empty": "Aucun chantier étiqueté pour l'instant. Choisissez une étiquette en plaçant depuis un panneau de construction, ou ajoutez-la depuis le panneau de détail d'un équipement public ou d'une route prévus ou en chantier.",
     "loadFailed": "Échec du chargement des projets de construction",
     "totalCost": "Coût estimé",
     "duration": "Durée restante",
     "progress": "Avancement",
     "progressValue": "{{done}} / {{total}} terminés",
-    "epochsValue": "{{value}} époques",
+    "monthsValue": "{{value}} mois",
     "stalled": "À l'arrêt",
     "stalledWarning": "{{count}} chantier(s) n'avancent pas car la vitesse de construction est à 0 (exclus du total de durée).",
     "done": "Terminé",
