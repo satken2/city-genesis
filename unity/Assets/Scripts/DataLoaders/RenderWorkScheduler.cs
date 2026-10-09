@@ -76,13 +76,14 @@ public static class RenderWorkScheduler
         public readonly Stack<IEnumerator> stack = new Stack<IEnumerator>();
         public LinkedListNode<Operation> ticket;
         public string category;
-        public int readyFrame, ownerId;
+        public int readyFrame;
+        public EntityId ownerId;
         public bool blocked, done, stepping;
         public Func<bool> hasPendingWork;
     }
     private static readonly Dictionary<Coroutine, Operation> operations = new Dictionary<Coroutine, Operation>();
     // GOの無効化・破棄時に該当operationだけを止めるための索引。キーは開始時のowner.gameObjectのinstanceID。
-    private static readonly Dictionary<int, List<Operation>> operationsByObject = new Dictionary<int, List<Operation>>();
+    private static readonly Dictionary<EntityId, List<Operation>> operationsByObject = new Dictionary<EntityId, List<Operation>>();
     private static RenderWorkPump pump;
     private static bool quitting;
     private static int pumpedFrame = -1;
@@ -135,7 +136,7 @@ public static class RenderWorkScheduler
     {
         EnsurePump();
         if (owner.GetComponent<RenderWorkLifetime>() == null) owner.gameObject.AddComponent<RenderWorkLifetime>();
-        var operation = new Operation { owner = owner, category = category, hasPendingWork = hasPendingWork, readyFrame = Time.frameCount + 1, ownerId = owner.gameObject.GetInstanceID() };
+        var operation = new Operation { owner = owner, category = category, hasPendingWork = hasPendingWork, readyFrame = Time.frameCount + 1, ownerId = owner.gameObject.GetEntityId() };
         operation.stack.Push(routine);
         operation.handle = owner.StartCoroutine(Lifetime(operation));
         if (operation.handle == null) { Finish(operation); return null; }
@@ -176,7 +177,7 @@ public static class RenderWorkScheduler
     /// <summary>ownerが破棄済みなら何もしない(破棄済みownerのoperationはPumpが掃除する)。</summary>
     public static void StopAll(MonoBehaviour owner)
     {
-        if (owner == null || !operationsByObject.TryGetValue(owner.gameObject.GetInstanceID(), out var list)) return;
+        if (owner == null || !operationsByObject.TryGetValue(owner.gameObject.GetEntityId(), out var list)) return;
         // 停止時のiteratorのfinallyがStart/Stopを再入して索引を書き換えても列挙が壊れないよう複製する。
         foreach (var operation in list.ToArray())
             if (ReferenceEquals(operation.owner, owner)) Stop(owner, operation.handle);
@@ -184,7 +185,7 @@ public static class RenderWorkScheduler
 
     internal static void StopGameObject(GameObject owner)
     {
-        if (!operationsByObject.TryGetValue(owner.GetInstanceID(), out var list)) return;
+        if (!operationsByObject.TryGetValue(owner.GetEntityId(), out var list)) return;
         foreach (var operation in list.ToArray()) Stop(operation.owner, operation.handle);
     }
 

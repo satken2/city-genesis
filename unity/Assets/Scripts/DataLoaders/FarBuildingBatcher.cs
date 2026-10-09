@@ -16,7 +16,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
     }
     private sealed class Group
     {
-        public (int, int, int, int) key;
+        public (int, int, EntityId, EntityId) key;
         public readonly HashSet<FarBuildingMember> members = new HashSet<FarBuildingMember>();
         public readonly List<Batch> batches = new List<Batch>();
         public bool queued;
@@ -25,7 +25,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
     /// <summary>これ未満のバッチは端数とみなし、端数同士や未結合の候補とまとめ直す(出入りでバッチが細切れになり続けるのを防ぐ)。</summary>
     private const int MergeBelow = 32;
     private static FarBuildingBatcher instance;
-    private readonly Dictionary<(int, int, int, int), Group> groups = new Dictionary<(int, int, int, int), Group>();
+    private readonly Dictionary<(int, int, EntityId, EntityId), Group> groups = new Dictionary<(int, int, EntityId, EntityId), Group>();
     private readonly Queue<Group> dirtyGroups = new Queue<Group>();
     private readonly List<FarBuildingMember> candidates = new List<FarBuildingMember>();
     private readonly List<FarBuildingMember> batchScratch = new List<FarBuildingMember>(MaxBatchMembers);
@@ -40,7 +40,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
         }
         var position = member.transform.position;
         member.groupKey = (Mathf.FloorToInt(position.x/256f), Mathf.FloorToInt(position.z/256f),
-            member.source.sharedMaterial.GetInstanceID(), member.transform.parent != null ? member.transform.parent.GetInstanceID() : 0);
+            member.source.sharedMaterial.GetEntityId(), member.transform.parent != null ? member.transform.parent.GetEntityId() : EntityId.None);
         if (!instance.groups.TryGetValue(member.groupKey, out var group))
             instance.groups.Add(member.groupKey, group = new Group { key = member.groupKey });
         group.members.Add(member);
@@ -205,7 +205,7 @@ public sealed class FarBuildingMember : MonoBehaviour, IVisualModeHandler
 {
     internal MeshRenderer source;
     internal Mesh mesh;
-    internal (int, int, int, int) groupKey;
+    internal (int, int, EntityId, EntityId) groupKey;
     internal FarBuildingBatcher.Batch batch;
     private bool registered, wasEnabled, hadPropertyBlock;
     private Matrix4x4 matrix;

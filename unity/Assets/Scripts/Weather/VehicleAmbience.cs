@@ -32,12 +32,12 @@ public sealed class VehicleAmbience : MonoBehaviour
         public float gain;
     }
 
-    private static readonly Dictionary<long, Emitter> emitters = new Dictionary<long, Emitter>();
+    private static readonly Dictionary<(Kind, long), Emitter> emitters = new Dictionary<(Kind, long), Emitter>();
     private static readonly string[] clipNames = { "vehicle-car", "vehicle-train", "vehicle-train-motor", "vehicle-train-slow", "vehicle-train-fast" };
     private readonly AudioClip[] clips = new AudioClip[5];
     private readonly Voice[] carVoices = new Voice[CarVoices], trainVoices = new Voice[TrainVoices];
     private readonly List<Emitter> candidates = new List<Emitter>();
-    private readonly List<long> stale = new List<long>();
+    private readonly List<(Kind, long)> stale = new List<(Kind, long)>();
     private IpcClient ipc;
     private float volume, nextRefresh;
     private bool running;
@@ -45,18 +45,18 @@ public sealed class VehicleAmbience : MonoBehaviour
     public static int EmitterCount => emitters.Count;
 
     /// <summary>毎フレーム呼ぶ。未登録なら登録し、登録済みなら位置と速度を更新する。</summary>
-    public static void Report(Kind kind, int id, Vector3 position, float speed)
+    public static void Report(Kind kind, long id, Vector3 position, float speed)
     {
-        long key = Key(kind, id);
+        var key = (kind, id);
         if (!emitters.TryGetValue(key, out var emitter)) emitters[key] = emitter = new Emitter { kind = kind };
         emitter.position = position;
         emitter.speed = float.IsNaN(speed) || float.IsInfinity(speed) ? 0f : Mathf.Max(0f, speed);
         emitter.reported = Time.unscaledTime;
     }
 
-    public static void Remove(Kind kind, int id)
+    public static void Remove(Kind kind, long id)
     {
-        long key = Key(kind, id);
+        var key = (kind, id);
         if (!emitters.TryGetValue(key, out var emitter)) return;
         emitter.removed = true;
         emitters.Remove(key);
@@ -64,9 +64,9 @@ public sealed class VehicleAmbience : MonoBehaviour
 
     public static void Clear(Kind kind)
     {
-        var keys = new List<long>();
+        var keys = new List<(Kind, long)>();
         foreach (var pair in emitters) if (pair.Value.kind == kind) { pair.Value.removed = true; keys.Add(pair.Key); }
-        foreach (long key in keys) emitters.Remove(key);
+        foreach (var key in keys) emitters.Remove(key);
     }
 
     /// <summary>エンジン音のピッチ。停止中はアイドル、20m/s以上で最高回転として扱う。</summary>
@@ -80,7 +80,6 @@ public sealed class VehicleAmbience : MonoBehaviour
     public static float TrainMotorPitch(float speed) => Mathf.Lerp(0.8f, 2f, Mathf.Clamp01(speed / 30f));
 
     private static bool IsTrain(Kind kind) => kind == Kind.Train;
-    private static long Key(Kind kind, int id) => ((long)kind << 32) | (uint)id;
 
     private void Awake()
     {
@@ -167,7 +166,7 @@ public sealed class VehicleAmbience : MonoBehaviour
     {
         stale.Clear();
         foreach (var pair in emitters) if (Time.unscaledTime - pair.Value.reported > StaleSeconds) stale.Add(pair.Key);
-        foreach (long key in stale) { emitters[key].removed = true; emitters.Remove(key); }
+        foreach (var key in stale) { emitters[key].removed = true; emitters.Remove(key); }
     }
 
     /// <summary>可聴範囲内の発音体をカメラに近い順に選び、空いている音源へ割り当てる。再生中の発音体は割り当てを保つ。</summary>

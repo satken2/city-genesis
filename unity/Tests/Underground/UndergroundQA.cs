@@ -586,7 +586,7 @@ public static class UndergroundQA
             foreach(var part in parts) Finish(part);
             var markers=pathGO.GetComponentsInChildren(T("OverlayMeshRenderer"));
             Check(markers.Length>1,"long tunnel markers belong to the existing fixed LOD sections");
-            var original=markers.Select(c=>c.GetComponent<MeshFilter>().sharedMesh.GetInstanceID()).OrderBy(id=>id).ToArray();
+            var original=markers.Select(c=>c.GetComponent<MeshFilter>().sharedMesh.GetEntityId()).OrderBy(id=>id).ToArray();
             var anchors=markers.SelectMany(c=>{
                 var mesh=c.GetComponent<MeshFilter>().sharedMesh; var vertices=mesh.vertices;
                 return Enumerable.Range(0,mesh.vertexCount/12).Select(i=>c.transform.TransformPoint(vertices[i*4]));
@@ -600,7 +600,7 @@ public static class UndergroundQA
             Check(pathGO.GetComponentsInChildren(T("OverlayMeshRenderer")).Length==0,"fixed-section far LOD parks depth markers with the ceiling");
             camera.transform.position=position;
             foreach(var part in parts) Finish(part);
-            Check(pathGO.GetComponentsInChildren(T("OverlayMeshRenderer")).Select(c=>c.GetComponent<MeshFilter>().sharedMesh.GetInstanceID()).OrderBy(id=>id).SequenceEqual(original),
+            Check(pathGO.GetComponentsInChildren(T("OverlayMeshRenderer")).Select(c=>c.GetComponent<MeshFilter>().sharedMesh.GetEntityId()).OrderBy(id=>id).SequenceEqual(original),
                 "fixed-section cache restores the same marker meshes");
             Set(path,"version",1);
             Set(path,"start_point",new List<object>{-160d,-25d,80d}); Set(path,"end_point",new List<object>{160d,-25d,80d});

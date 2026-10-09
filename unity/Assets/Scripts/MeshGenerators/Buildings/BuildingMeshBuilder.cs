@@ -218,8 +218,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
         Material[] materials = meshResult.Materials;
 
-        const long NullMaterialKey = long.MinValue;
-        Dictionary<long, int> materialKeyToIndex = new Dictionary<long, int>();
+        Dictionary<EntityId, int> materialKeyToIndex = new Dictionary<EntityId, int>();
         List<Material> mergedMaterials = new List<Material>();
         List<List<int>> mergedTriangles = new List<List<int>>();
 
@@ -229,7 +228,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
                 ? materials[subMeshIndex]
                 : null;
 
-            long materialKey = material != null ? material.GetEntityId() : NullMaterialKey;
+            EntityId materialKey = material != null ? material.GetEntityId() : EntityId.None;
             if (!materialKeyToIndex.TryGetValue(materialKey, out int mergedIndex))
             {
                 mergedIndex = mergedMaterials.Count;

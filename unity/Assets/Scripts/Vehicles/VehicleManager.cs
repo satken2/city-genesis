@@ -872,12 +872,13 @@ public partial class VehicleManager : MonoBehaviour
     {
         v.Sample(out Vector3 p, out Vector3 t);
         v.go.transform.SetPositionAndRotation(p, Quaternion.LookRotation(t, Vector3.up));
-        VehicleAmbience.Report(VehicleAmbience.Kind.Car, v.go.GetInstanceID(), p, v.speed);
+        VehicleAmbience.Report(VehicleAmbience.Kind.Car, AmbienceId(v.go), p, v.speed);
         float fade = v.fading ? 1 - v.fadeElapsed / Mathf.Max(.01f, fadeDuration) : v.ExitingRoad ? 1 : v.age / Mathf.Max(.01f, fadeDuration);
         v.go.transform.localScale = Vector3.one * Mathf.Clamp01(fade);
     }
 
     private static long PoolKey(int type, int variant) => ((long)type << 32) | (uint)variant;
+    private static long AmbienceId(GameObject go) => unchecked((long)EntityId.ToULong(go.GetEntityId()));
 
     /// <summary>
     /// プールから車体を取り出す。指定外観の在庫が無ければ同じ車種の在庫で代替し、variant を実際の外観へ書き換える
@@ -937,7 +938,7 @@ public partial class VehicleManager : MonoBehaviour
         if (v == FollowedVehicle) EndFollowRun();
         if (v.go != null)
         {
-            VehicleAmbience.Remove(VehicleAmbience.Kind.Car, v.go.GetInstanceID());
+            VehicleAmbience.Remove(VehicleAmbience.Kind.Car, AmbienceId(v.go));
             v.go.transform.localScale = Vector3.zero;
             Enqueue(PoolKey(v.vehicleType, v.variantId), v.go);
             pendingDeactivation.Add(v.go);

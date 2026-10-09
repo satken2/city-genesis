@@ -20,7 +20,7 @@ public sealed class MeshBakeService : MonoBehaviour
             DontDestroyOnLoad(instance.gameObject);
         }
         if (instance.tasks.TryGetValue(mesh, out var pending)) return pending;
-        int id = mesh.GetInstanceID();
+        EntityId id = mesh.GetEntityId();
         var task = BackgroundWork.Run(async () =>
         {
             await bakeSlots.WaitAsync();
