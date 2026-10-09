@@ -46,6 +46,8 @@ export type HudIconDef = {
   templateOnly?: boolean;
   /** 市庁舎未設置によるロック中でも押せる(=都市創設そのものに必要な操作) */
   enabledWhenLocked?: boolean;
+  /** 読み取り専用モード(公開サーバーで不特定多数に見せる都市)では出さない */
+  hiddenWhenReadOnly?: boolean;
 };
 
 /**
@@ -58,13 +60,13 @@ export type HudIconDef = {
  * 常時その状況を表示しており、そのままクリックで開くため、入口を二重に持たせない。
  */
 export const MENU_ICONS: HudIconDef[] = [
-  { id: "grading", src: "menu_grading.png", tooltipKey: "taskbar.menuGrading", windowType: "grading", hintKey: "hint.grading" },
-  { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", windowType: "path_build" }, // 道路・鉄道・インフラのパスをまとめて敷く
-  { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", windowType: "parcel_creation" },
-  { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict", windowType: "zone_edit" },
-  { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", windowType: "building_construction", enabledWhenLocked: true },
+  { id: "grading", src: "menu_grading.png", tooltipKey: "taskbar.menuGrading", windowType: "grading", hintKey: "hint.grading", hiddenWhenReadOnly: true },
+  { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", windowType: "path_build", hiddenWhenReadOnly: true }, // 道路・鉄道・インフラのパスをまとめて敷く
+  { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", windowType: "parcel_creation", hiddenWhenReadOnly: true },
+  { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict", windowType: "zone_edit", hiddenWhenReadOnly: true },
+  { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", windowType: "building_construction", enabledWhenLocked: true, hiddenWhenReadOnly: true },
   { id: "transport", src: "menu_transport.png", tooltipKey: "taskbar.menuTransport", windowType: "transit_management" },
-  { id: "prop_placement", src: "menu_prop.png", tooltipKey: "taskbar.menuPropPlacement", windowType: "prop_placement", hintKey: "prop_placement.hint" },
+  { id: "prop_placement", src: "menu_prop.png", tooltipKey: "taskbar.menuPropPlacement", windowType: "prop_placement", hintKey: "prop_placement.hint", hiddenWhenReadOnly: true },
   { id: "construction_projects", src: "menu_construction.png", tooltipKey: "taskbar.menuConstructionProjects", windowType: "construction_projects" },
   { id: "regulation", src: "menu_regulation.png", tooltipKey: "taskbar.menuRegulation", windowType: "city_regulation" },
   { id: "city", src: "menu_city.png", tooltipKey: "taskbar.menuCity", windowType: "city_hall" },
@@ -90,9 +92,9 @@ export const TOOL_ICONS: HudIconDef[] = [
  * システムトレイ(画面右下)に置くアイコン。
  */
 export const TRAY_ICONS: HudIconDef[] = [
-  { id: "system_stats", src: "tray_system_stats.png", tooltipKey: "taskbar.traySystemStats", padding: "4px", windowType: "system_stats" },
-  { id: "settings", src: "tray_settings.png", tooltipKey: "taskbar.traySettings", padding: "4px", windowType: "settings" },
-  { id: "save", src: "tray_save.png", tooltipKey: "taskbar.traySave", padding: "4px", windowType: "save_load" },
+  { id: "system_stats", src: "tray_system_stats.png", tooltipKey: "taskbar.traySystemStats", padding: "4px", windowType: "system_stats", hiddenWhenReadOnly: true },
+  { id: "settings", src: "tray_settings.png", tooltipKey: "taskbar.traySettings", padding: "4px", windowType: "settings", hiddenWhenReadOnly: true },
+  { id: "save", src: "tray_save.png", tooltipKey: "taskbar.traySave", padding: "4px", windowType: "save_load", hiddenWhenReadOnly: true },
   { id: "reload", src: "tray_reload.png", tooltipKey: "taskbar.trayReload", padding: "4px" },
 ];
 

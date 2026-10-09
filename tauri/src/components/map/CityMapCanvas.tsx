@@ -29,6 +29,10 @@
  *   - zoneBorders : 地区の枠線
  *   - parcels   : 土地区画の枠線
  *   - buildings : 建物の底面形状
+ *   - buildings3d : 建物を「階数×階高」だけ立ち上げた簡易3D(buildings がONのときだけ効く)。
+ *     画面中心の真上にある視点から見下ろしたとみなし、上面を底面と同じ形のまま
+ *     (建物の中心 − 画面中心) × 高さ / 視点の高さ だけ平行移動して、間を側面でつなぐ。
+ *     2Dの地図の上に立体を重ねる表示で、立体は道路・線路の上、路線・強調・ラベルの下に描く。
  *   - allRoads / trunkRoads / railways : パス(道路・幹線道路・線路)。
  *     道路は占有ポリゴンを面で描き、幅の異なる2本接続では中心線から幅遷移を作る。
  *     街路=淡灰、高速道路=濃灰、線路=灰色の実線。
@@ -147,6 +151,8 @@ export type CityMapLayerVisibility = {
   parcels: boolean;
   /** 建物の底面形状 */
   buildings: boolean;
+  /** 建物を階数ぶん立ち上げた簡易3Dで描く(buildings がOFFなら効果なし) */
+  buildings3d: boolean;
   /** 駅(同じ駅舎に所属するプラットフォーム群の凸包) */
   stations: boolean;
   /** インターチェンジ(IC/JCT)の記号と名前 */
@@ -173,6 +179,7 @@ export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
   transitLines: false,
   parcels: false,
   buildings: true,
+  buildings3d: false,
   stations: true,
   interchanges: true,
   zoneBorders: false,
@@ -411,6 +418,9 @@ type ApiPolygonItem = {
   variant?: number;
   polygon?: [number, number][] | null;
   center_point?: number[] | null;
+  /** 建物のみ: 階数と観光名所の種別(0=観光名所ではない)。簡易3Dの高さに使う */
+  floors?: number;
+  landmark?: number;
   /** 地区のみ: 1/true=自動管理地区、0/false=確定地区。枠線の実線/破線の描き分けに使う */
   auto_managed?: boolean | number;
   /** 土地区画のみ: 区画ID。選択や呼び出し側の値との対応に使う */
@@ -435,6 +445,24 @@ type RoadBandKind = "street" | "motorway";
  */
 type RoadBand = { kind: RoadBandKind; trunk: boolean; width: number; path: Path2D; surface: Path2D; color?: string };
 
+/** 簡易3Dで立ち上げる建物1棟。底面はワールド座標 */
+type BuildingSolid = {
+  ring: [number, number][];
+  cx: number;
+  cz: number;
+  /** 階数×階高(m) */
+  height: number;
+  /** 底面の頂点の回り方(反時計回り=1・時計回り=-1)。側面が画面中心を向くかの判定に使う */
+  winding: number;
+  minX: number;
+  minZ: number;
+  maxX: number;
+  maxZ: number;
+  /** 上面の色(2Dの底面と同じ)と側面の色 */
+  color: string;
+  wallColor: string;
+};
+
 /** 取得済みベクターデータとPath2Dキャッシュ */
 type VectorState = {
   paths: ApiPathItem[];
@@ -446,9 +474,10 @@ type VectorState = {
   roadBands: RoadBand[];
   railPath: Path2D | null;
   railSourceBands: { path: Path2D; color: string }[];
-  buildingSourceBands: { path: Path2D; color: string }[];
-  /** 効果範囲の表示中に、範囲内・範囲外の建物を塗る面 */
-  buildingCoverageBands: { path: Path2D; color: string }[];
+  /** 建物の底面を塗り色ごとにまとめた面(通常の淡灰・発生源の色・効果範囲の範囲内/範囲外) */
+  buildingBands: { path: Path2D; color: string }[];
+  /** 簡易3Dで立ち上げる建物(公園を除く) */
+  buildingSolids: BuildingSolid[];
   parcelPath: Path2D | null;
   buildingPath: Path2D | null;
   parkPath: Path2D | null;
@@ -536,6 +565,15 @@ const COLOR_COASTLINE = "#85bfd5";
 const COLOR_ZONE = "#839bad";
 const COLOR_PARCEL = "#d5dccf";
 const COLOR_BUILDING = "#e4e7ed";
+/**
+ * 簡易3Dの視点の画角(度)。視点の高さ = 画面の半対角 ÷ tan(画角/2) なので、
+ * 画面の隅にある建物は「画面上の高さ × tan(画角/2)」だけ外へ倒れる。
+ */
+const BUILDING_3D_FOV_DEG = 60;
+/** 簡易3Dの側面の明るさ(上面の色に掛ける倍率) */
+const BUILDING_WALL_SHADE = 0.85;
+/** マスターに階高が無い建物の階高(m)。コアの既定値と同じ */
+const DEFAULT_HEIGHT_PER_FLOOR = 3.5;
 /* 駅の凸包(同じ駅舎に所属するプラットフォーム群の外接凸包)。赤い半透明の面で
  * 「1つの駅」の範囲を示す */
 const COLOR_STATION = "#d76a66";
@@ -956,6 +994,33 @@ function buildPolygonPath(items: ApiPolygonItem[], localPolygon: boolean): Path2
     path.closePath();
   }
   return path;
+}
+
+/** 簡易3Dの側面の色。上面の色("#rrggbb" か "rgb(r, g, b)")を一律に暗くする */
+function wallColorOf(color: string): string {
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(color);
+  const rgb = hex ? hex.slice(1).map((h) => parseInt(h, 16)) : (color.match(/\d+/g) ?? []).slice(0, 3).map(Number);
+  return `rgb(${rgb.map((v) => Math.round(v * BUILDING_WALL_SHADE)).join(", ")})`;
+}
+
+/** 建物の底面(center_point からのローカル座標)をワールド座標の立体にする。面積の無い底面は null */
+function buildBuildingSolid(item: ApiPolygonItem, height: number, color: string, wallColor: string): BuildingSolid | null {
+  const poly = item.polygon;
+  const center = toXZ(item.center_point);
+  if (!poly || poly.length < 3 || !center) return null;
+  const ring = poly.map(([x, z]): [number, number] => [x + center[0], z + center[1]]);
+  let area = 0;
+  let minX = Infinity, minZ = Infinity, maxX = -Infinity, maxZ = -Infinity;
+  ring.forEach(([x, z], i) => {
+    const [nx, nz] = ring[(i + 1) % ring.length];
+    area += x * nz - nx * z;
+    minX = Math.min(minX, x);
+    minZ = Math.min(minZ, z);
+    maxX = Math.max(maxX, x);
+    maxZ = Math.max(maxZ, z);
+  });
+  if (area === 0) return null;
+  return { ring, cx: center[0], cz: center[1], height, winding: Math.sign(area), minX, minZ, maxX, maxZ, color, wallColor };
 }
 
 /**
@@ -1408,8 +1473,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         roadBands: [],
         railPath: null,
         railSourceBands: [],
-        buildingSourceBands: [],
-        buildingCoverageBands: [],
+        buildingBands: [],
+        buildingSolids: [],
         parcelPath: null,
         buildingPath: null,
         parkPath: null,
@@ -1496,6 +1561,59 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           view.offsetY = canvasH / 2;
           view.zoom = 1;
           zoomCbRef.current?.(view.zoom);
+        }
+      };
+
+      /**
+       * 建物を簡易3Dで描く(ctx はワールド座標のビュー変換済み)。
+       * 視点は画面中心の真上にあり、高さは画面の半対角を画角で割り戻した距離なので、拡大するほど低くなって
+       * 建物が大きく倒れる。上面は (建物の中心 − 画面中心) × 高さ / 視点の高さ だけ平行移動する。
+       * 側面は画面中心を向いた辺だけを描く(ほかの側面と底面は上面に隠れる)。中心寄りの建物ほど
+       * 外へ倒れて外側の建物にかぶさるため、画面中心から遠い順に描く。
+       */
+      const drawBuildingSolids = () => {
+        const [cx, cz] = screenToWorld(canvasW / 2, canvasH / 2);
+        const eyeHeight = Math.hypot(canvasW, canvasH) / 2 / view.zoom / Math.tan((BUILDING_3D_FOV_DEG / 2) * Math.PI / 180);
+        const b = getViewBounds();
+        const visible: { solid: BuildingSolid; dx: number; dz: number; distance: number }[] = [];
+        for (const solid of vec.buildingSolids) {
+          const lean = solid.height / eyeHeight;
+          const dx = (solid.cx - cx) * lean;
+          const dz = (solid.cz - cz) * lean;
+          if (solid.maxX + Math.max(0, dx) < b.x1 || solid.minX + Math.min(0, dx) > b.x2
+            || solid.maxZ + Math.max(0, dz) < b.z1 || solid.minZ + Math.min(0, dz) > b.z2) continue;
+          visible.push({ solid, dx, dz, distance: Math.hypot(solid.cx - cx, solid.cz - cz) });
+        }
+        visible.sort((p, q) => q.distance - p.distance);
+
+        ctx.strokeStyle = COLOR_BUILDING_BORDER;
+        ctx.lineWidth = 1 / view.zoom;
+        ctx.lineJoin = "round";
+        ctx.setLineDash([]);
+        for (const { solid, dx, dz } of visible) {
+          const { ring, winding } = solid;
+          const walls = new Path2D();
+          const roof = new Path2D();
+          for (let i = 0; i < ring.length; i++) {
+            const [ax, az] = ring[i];
+            const [bx, bz] = ring[(i + 1) % ring.length];
+            if (i === 0) roof.moveTo(ax + dx, az + dz);
+            else roof.lineTo(ax + dx, az + dz);
+            // 外向き法線(反時計回りなら辺の右側)が倒れる向きと逆を向く辺だけが見える
+            if (winding * ((bz - az) * dx - (bx - ax) * dz) >= 0) continue;
+            walls.moveTo(ax, az);
+            walls.lineTo(bx, bz);
+            walls.lineTo(bx + dx, bz + dz);
+            walls.lineTo(ax + dx, az + dz);
+            walls.closePath();
+          }
+          roof.closePath();
+          ctx.fillStyle = solid.wallColor;
+          ctx.fill(walls);
+          ctx.fillStyle = solid.color;
+          ctx.fill(roof);
+          walls.addPath(roof);
+          ctx.stroke(walls);
         }
       };
 
@@ -1674,16 +1792,12 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.stroke(vec.stationHullPath);
         }
 
-        // 建物の底面形状(淡灰色の面 + 細い枠線)
+        // 建物の底面形状(塗り色ごとの面 + 細い枠線)
         if (showBuildingShapes && vec.buildingPath) {
-          ctx.globalAlpha = 1;
-          ctx.fillStyle = COLOR_BUILDING;
-          ctx.fill(vec.buildingPath);
-          for (const band of [...vec.buildingSourceBands, ...vec.buildingCoverageBands]) {
+          for (const band of vec.buildingBands) {
             ctx.fillStyle = band.color;
             ctx.fill(band.path);
           }
-          ctx.globalAlpha = 1.0;
           ctx.strokeStyle = COLOR_BUILDING_BORDER;
           ctx.lineWidth = px(1);
           ctx.stroke(vec.buildingPath);
@@ -1720,6 +1834,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           }
         }
         ctx.globalAlpha = 1.0;
+
+        // 簡易3Dの建物。道路・線路に覆いかぶさるのでその後に、読むための重ね描き(路線・強調・ラベル)より前に描く
+        if (showBuildingShapes && L.buildings3d) drawBuildingSolids();
 
         // 公共交通路線(実際の道路・線路に沿った帯と停留所)。線路・道路の上、重ね描きの下
         const variant = transitVariantRef.current;
@@ -2204,20 +2321,40 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         vec.parkPath = buildPolygonPath(vec.buildings.filter(isPark), true);
         const sourceBin = (value: number | undefined) => heat.mode === "sources" && value && value > 0
           ? Math.min(HEATMAP_BIN_COUNT - 1, Math.floor(value * HEATMAP_BIN_COUNT)) : -1;
-        const buildingBins = new Map<number, ApiPolygonItem[]>();
-        for (const building of vec.buildings) {
-          const bin = sourceBin(heat.buildingValues.get(building.agent_id ?? 0));
-          if (bin < 0) continue;
-          const items = buildingBins.get(bin) ?? [];
-          items.push(building);
-          buildingBins.set(bin, items);
-        }
-        vec.buildingSourceBands = [...buildingBins].map(([bin, items]) => ({ path: buildPolygonPath(items, true), color: heat.binColors[bin] }));
         const coverage = infra.coverage;
-        vec.buildingCoverageBands = coverage ? [
-          { path: buildPolygonPath(vec.buildings.filter((b) => coverage.covered.has(b.agent_id ?? 0)), true), color: COVERAGE_IN_RANGE_COLOR },
-          { path: buildPolygonPath(vec.buildings.filter((b) => coverage.uncovered.has(b.agent_id ?? 0)), true), color: COVERAGE_OUT_OF_RANGE_COLOR },
-        ] : [];
+        // 建物の塗り色。2Dの底面も簡易3Dの上面もこの色で塗る。公園は効果範囲・発生源の色が付かなければ緑の面のまま
+        const buildingColor = (building: ApiPolygonItem): string | null => {
+          const id = building.agent_id ?? 0;
+          if (coverage?.covered.has(id)) return COVERAGE_IN_RANGE_COLOR;
+          if (coverage?.uncovered.has(id)) return COVERAGE_OUT_OF_RANGE_COLOR;
+          const bin = sourceBin(heat.buildingValues.get(id));
+          if (bin >= 0) return heat.binColors[bin];
+          return isPark(building) ? null : COLOR_BUILDING;
+        };
+        // 観光名所は名所ごとに階高が決まっているため、名所の値を優先する(建設パネルと同じ)
+        const heightOf = (building: ApiPolygonItem) => (building.floors ?? 0)
+          * (md?.landmarks?.[building.landmark ?? 0]?.height_per_floor
+            ?? (building.variant === undefined ? undefined : md?.agents?.[building.variant]?.height_per_floor)
+            ?? DEFAULT_HEIGHT_PER_FLOOR);
+        const colorGroups = new Map<string, ApiPolygonItem[]>();
+        const wallColors = new Map<string, string>();
+        vec.buildingSolids = [];
+        for (const building of vec.buildings) {
+          const color = buildingColor(building);
+          if (color === null) continue;
+          const items = colorGroups.get(color) ?? [];
+          items.push(building);
+          colorGroups.set(color, items);
+          if (isPark(building)) continue;
+          let wallColor = wallColors.get(color);
+          if (!wallColor) {
+            wallColor = wallColorOf(color);
+            wallColors.set(color, wallColor);
+          }
+          const solid = buildBuildingSolid(building, heightOf(building), color, wallColor);
+          if (solid) vec.buildingSolids.push(solid);
+        }
+        vec.buildingBands = [...colorGroups].map(([color, items]) => ({ path: buildPolygonPath(items, true), color }));
         const railBins = new Map<number, Path2D>();
         const bands = new Map<string, RoadBand>();
         const roadTypes = [PATH_STREET, PATH_MOTORWAY, PATH_WALKWAY];

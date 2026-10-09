@@ -214,9 +214,11 @@ public sealed class RoadMarkingAtlas : MonoBehaviour
         if (ReservedBytes + bytes + TableBytes > BudgetBytes || !SystemInfo.supports2DArrayTextures) return null;
         var format = r8 ? RenderTextureFormat.R8 : RenderTextureFormat.ARGB32;
         var pool = new Pool { Size = size, Pages = new Page[count] };
-        pool.Array = new RenderTexture(size, size, 0, format, RenderTextureReadWrite.Linear)
-        { dimension = TextureDimension.Tex2DArray, volumeDepth = count, useMipMap = true, autoGenerateMips = false,
-            filterMode = FilterMode.Trilinear, wrapMode = TextureWrapMode.Clamp, name = "Road markings " + size };
+        // 段数を既定(全段)にすると WebGPU では層数も辺と同じく数えられ、層数が辺より多い配列は作成に失敗する。焼き込み先と同じ段数を明示する。
+        int mipCount = Mathf.RoundToInt(Mathf.Log(size, 2)) + 1;
+        pool.Array = new RenderTexture(new RenderTextureDescriptor(size, size, format, 0, mipCount, RenderTextureReadWrite.Linear)
+        { dimension = TextureDimension.Tex2DArray, volumeDepth = count, useMipMap = true, autoGenerateMips = false })
+        { filterMode = FilterMode.Trilinear, wrapMode = TextureWrapMode.Clamp, name = "Road markings " + size };
         pool.Scratch = new RenderTexture(size, size, 0, format, RenderTextureReadWrite.Linear)
         { useMipMap = true, autoGenerateMips = false, filterMode = FilterMode.Trilinear, name = "Road marking bake " + size };
         if (!pool.Array.Create() || !pool.Scratch.Create())

@@ -7,8 +7,9 @@ using UnityEditor.Build.Reporting;
 using UnityEngine.Rendering;
 
 /// <summary>
-/// ブラウザ版のグラフィック(Unity の Web ビルド)を作る。メニューの Tools/Build/Web、
-/// またはバッチモードの `-executeMethod WebBuild.Build` で実行する。
+/// ブラウザ版のグラフィック(Unity の Web ビルド)を作る。エディタのプラットフォームを Web に切り替えてからメニューの Tools/Build/Web、
+/// またはバッチモードの `-buildTarget WebGL -executeMethod WebBuild.Build` で実行する。
+/// Web にしか無いモジュール(WebGLInput など)は、エディタのプラットフォームが Web のときしかスクリプトのコンパイルで参照されない。
 /// 変えるのは Web 向けのプレイヤー設定だけで、Windows 向けの設定には触れない。
 /// 出力は Builds/Web(git 管理外)。ブラウザ版のページ(tauri/web)が読み込むファイルの名前を build.json に書き出す。
 /// </summary>

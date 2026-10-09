@@ -13,14 +13,7 @@
   },
   "climate": {
     "label": "Clima",
-    "hint": "Copia la temperatura, precipitación, luz solar y probabilidades del tiempo mensuales de un clima predefinido. Edita los detalles en Configuración del clima en el modo de creación de escenarios.",
-    "1": "Templado húmedo",
-    "2": "Subtropical",
-    "3": "Continental húmedo",
-    "4": "Mediterráneo",
-    "5": "Estepa",
-    "6": "Desértico",
-    "7": "Subártico"
+    "hint": "Copia la temperatura, precipitación, luz solar y probabilidades del tiempo mensuales de un clima predefinido. Edita los detalles en Configuración del clima en el modo de creación de escenarios."
   },
   "assetRegion": {
     "label": "Región de recursos de edificios y calles",

@@ -4,8 +4,6 @@
 .map-nav button:hover { background: var(--flat-raised-hover); }
 .map-nav button:focus-visible, .map-nav input:focus-visible { outline: 2px solid var(--flat-accent); outline-offset: 2px; }
 .map-nav__header { display: flex; align-items: center; gap: 10px; padding: 18px 20px 12px; }
-.map-nav__brand { color: var(--flat-accent); font-size: 2.41rem; }
-.map-nav__header strong { font-size: 1.67rem; font-weight: 500; }
 .map-nav__back { margin-left: auto; padding: 6px; }
 .map-nav__fields { padding: 8px 16px 18px; background: var(--flat-raised); }
 .map-nav-search { position: relative; margin: 4px 0; }
@@ -31,8 +29,6 @@
 .map-nav__field-actions button { padding: 6px; font-size: 1rem; }
 .map-nav__content { flex: 1; min-height: 0; overflow-y: auto; }
 .map-nav__empty { padding: 50px 28px; text-align: center; color: var(--flat-text-label); }
-.map-nav__empty > span { color: var(--flat-accent); font-size: 5.56rem; }
-.map-nav__empty h2 { font-size: 1.76rem; font-weight: 500; color: var(--flat-text); }
 .map-nav__empty p, .map-nav__intro { line-height: 1.8; color: var(--flat-text-label); }
 .map-nav__intro { padding: 20px; }
 .map-nav__place { padding: 24px; }

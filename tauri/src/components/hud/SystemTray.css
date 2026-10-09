@@ -24,3 +24,11 @@
   height: 30px;
   flex-shrink: 0;
 }
+
+/* プレイモードの表示。押せないのでボタンの枠(ホバー時の背景)を持たず、画像の余白だけをボタンと揃える */
+.system-tray-mode {
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  box-sizing: border-box;
+}

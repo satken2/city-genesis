@@ -52,7 +52,7 @@ export async function startGraphic(canvas: HTMLCanvasElement): Promise<void> {
     await loadScript(GRAPHIC_BUILD_URL + manifest.loader);
     if (!window.createUnityInstance) throw new Error("createUnityInstance が見つかりません");
     unityInstance = await window.createUnityInstance(canvas, {
-      arguments: ["--api-base-url", state.apiBaseUrl],
+      arguments: ["--api-base-url", `${state.apiBaseUrl}/api/v1`],
       dataUrl: GRAPHIC_BUILD_URL + manifest.data,
       frameworkUrl: GRAPHIC_BUILD_URL + manifest.framework,
       codeUrl: GRAPHIC_BUILD_URL + manifest.code,

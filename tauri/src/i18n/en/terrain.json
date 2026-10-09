@@ -13,14 +13,7 @@
   },
   "climate": {
     "label": "Climate",
-    "hint": "Copies monthly temperature, precipitation, sunlight and weather probabilities from a preset. Edit the details in Climate settings in scenario creation mode.",
-    "1": "Humid temperate",
-    "2": "Subtropical",
-    "3": "Humid continental",
-    "4": "Mediterranean",
-    "5": "Steppe",
-    "6": "Desert",
-    "7": "Subarctic"
+    "hint": "Copies monthly temperature, precipitation, sunlight and weather probabilities from a preset. Edit the details in Climate settings in scenario creation mode."
   },
   "assetRegion": {
     "label": "Building and road asset region",

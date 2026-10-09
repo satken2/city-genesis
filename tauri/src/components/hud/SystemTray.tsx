@@ -2,7 +2,9 @@
  * システムトレイ(画面右下の常駐パネル)
  *
  * ゲームプレイそのものではなくアプリの操作(システム統計・設定・セーブ/ロード・再読み込み)を集めた小パネル。
- * デバッグ実行時のみ、テンプレートモードの切替ボタンが先頭に増える。
+ * 先頭はプレイモードの枠。チュートリアル・読み取り専用モードではモードを表すアイコン(押せない)を出す。
+ * それ以外のモードでは、デバッグ実行時のみテンプレートモードの切替ボタンを出す。
+ * 読み取り専用モードでは、アプリの操作のうち `hiddenWhenReadOnly` のアイコンを出さない。
  * テンプレートモード中はさらに、シナリオ制作者向けの都市開発支援ボタンが3つ増える。
  *   - 一括完成 … 計画中・建設中の全パス/建物を即時竣工させる(POST /api/v1/templates/complete-construction)
  *   - 路地作成 … 2D地図上で範囲と生成パターンを指定して路地を計画中で作る(street_grid ウィンドウ)
@@ -12,7 +14,7 @@
  * ウィンドウ幅を合わせる(透明な余白がUnityへのクリックを吸わないようにするため。
  * アイコンパネルの高さと同じ仕組み)。
  */
-import { PLAY_MODE_SCEARIO, PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL } from "../../constants";
+import { PLAY_MODE_SCEARIO, PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL, PLAY_MODE_READ_ONLY } from "../../constants";
 
 
 import { useEffect, useRef, useState } from "react";
@@ -40,10 +42,17 @@ type PrivatizeFacilitiesResult = {
   privatized_agents: number;
 };
 
+const MODE_INDICATORS: Record<number, { src: string; labelKey: string }> = {
+  [PLAY_MODE_TUTORIAL]: { src: "tray_tutorial.png", labelKey: "taskbar.trayTutorialMode" },
+  [PLAY_MODE_READ_ONLY]: { src: "tray_read_only.png", labelKey: "taskbar.trayReadOnlyMode" },
+};
+
 export function SystemTray({ backendConnected = true }: { backendConnected?: boolean }) {
   const { t } = useTranslation();
   const { visible, apiBaseUrl, playMode, debugExecution, epochExecuting } = useHudSession();
   const godMode = playMode === PLAY_MODE_SCEARIO;
+  const readOnly = playMode === PLAY_MODE_READ_ONLY;
+  const modeIndicator = MODE_INDICATORS[playMode];
   const panelRef = useRef<HTMLDivElement | null>(null);
   const [completing, setCompleting] = useState(false);
   const [privatizing, setPrivatizing] = useState(false);
@@ -163,7 +172,11 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
 
   return (
     <div ref={panelRef} className={`hud-panel system-tray ${epochExecuting ? "hud-disabled" : ""}`}>
-      {debugExecution && playMode !== PLAY_MODE_TUTORIAL && (
+      {modeIndicator ? (
+        <span className="system-tray-icon system-tray-mode" title={t(modeIndicator.labelKey)}>
+          <img src={iconUrl(modeIndicator.src)} alt={t(modeIndicator.labelKey)} className="hud-icon-img" draggable={false} />
+        </span>
+      ) : debugExecution && (
         <button
           id="debug_template"
           className="hud-icon-btn system-tray-icon"
@@ -214,7 +227,7 @@ export function SystemTray({ backendConnected = true }: { backendConnected?: boo
           </button>
         </>
       )}
-      {TRAY_ICONS.map((icon) => (
+      {TRAY_ICONS.filter((icon) => !(readOnly && icon.hiddenWhenReadOnly)).map((icon) => (
         <button
           key={icon.id}
           id={icon.id}

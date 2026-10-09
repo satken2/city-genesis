@@ -252,10 +252,9 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
       pickRequest.current?.abort(); setRoute(null); if (which === "origin") setOrigin(null); else setDestination(null);
     }} />;
   const sidebar = <aside className="map-nav" aria-label={t("mapNavigation.title")}>
-    <div className="map-nav__header"><span className="map-nav__brand">⌖</span><strong>{t("mapNavigation.title")}</strong>
-      {directions && <button type="button" className="map-nav__back" onClick={() => {
-        pickRequest.current?.abort(); setDirections(false); setPicking(null); setRoute(null);
-      }}>{t("mapNavigation.back")}</button>}</div>
+    {directions && <div className="map-nav__header"><button type="button" className="map-nav__back" onClick={() => {
+      pickRequest.current?.abort(); setDirections(false); setPicking(null); setRoute(null);
+    }}>{t("mapNavigation.back")}</button></div>}
     <div className="map-nav__fields">
       {directions && <><div className="map-nav__modes" role="group" aria-label={t("mapNavigation.mode")}>
         {(["pedestrian", "automobile"] as const).map(m => <button type="button" key={m} aria-pressed={mode === m}
@@ -279,7 +278,7 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
         <p>{t(`mapNavigation.kind.${destination.kind}`)}{destination.zone_name ? ` · ${destination.zone_name}` : ""}</p>
         <button type="button" className="map-nav__primary" onClick={() => { setDirections(true); setPicking(null); }}>
           ↱ {t("mapNavigation.directions")}</button>
-      </div> : <div className="map-nav__empty"><span aria-hidden="true">⌕</span><h2>{t("mapNavigation.explore")}</h2><p>{t("mapNavigation.intro")}</p></div>)}
+      </div> : <div className="map-nav__empty"><p>{t("mapNavigation.intro")}</p></div>)}
       {directions && <>
         {(statusError || status?.busy || (status && !status.ready)) && <p className="map-nav__hint" role="status">
           {t(`mapNavigation.${statusError ? "error" : status?.busy ? "busy" : "not_ready"}`)}</p>}

@@ -13,6 +13,7 @@ public static class Constants
     public const int PLAY_MODE_NORMAL = 0;
     public const int PLAY_MODE_SCEARIO = 1;
     public const int PLAY_MODE_TUTORIAL = 2;
+    public const int PLAY_MODE_READ_ONLY = 3;
     public const string CITY_SCENARIO_DIR = "UrbanGenesis/scenarios";
     public const string CITY_SAVE_DIR = "UrbanGenesis/saves";
     public const int HISTORY_COUNT = 120;
@@ -292,13 +293,27 @@ public static class Constants
     public const int GROUND_COVER_LUSH = 3;
     public const int GROUND_COVER_SNOW = 4;
     public const int GROUND_COVER_SEMI_ARID = 5;
-    public const int CLIMATE_TEMPERATE = 1;
-    public const int CLIMATE_SUBTROPICAL = 2;
-    public const int CLIMATE_CONTINENTAL = 3;
-    public const int CLIMATE_MEDITERRANEAN = 4;
-    public const int CLIMATE_STEPPE = 5;
-    public const int CLIMATE_DESERT = 6;
-    public const int CLIMATE_SUBARCTIC = 7;
+    public const int CLIMATE_AF = 1;
+    public const int CLIMATE_AM = 2;
+    public const int CLIMATE_AW = 3;
+    public const int CLIMATE_BWH = 4;
+    public const int CLIMATE_BWK = 5;
+    public const int CLIMATE_BSH = 6;
+    public const int CLIMATE_BSK = 7;
+    public const int CLIMATE_CSA = 8;
+    public const int CLIMATE_CSB = 9;
+    public const int CLIMATE_CFA = 10;
+    public const int CLIMATE_CWA = 11;
+    public const int CLIMATE_CFB = 12;
+    public const int CLIMATE_CFC = 13;
+    public const int CLIMATE_DFA = 14;
+    public const int CLIMATE_DFB = 15;
+    public const int CLIMATE_DFC = 16;
+    public const int CLIMATE_DFD = 17;
+    public const int CLIMATE_DWA = 18;
+    public const int CLIMATE_ET = 19;
+    public const int CLIMATE_EF = 20;
+    public const int CLIMATE_H = 21;
     public const float CLIMATE_TEMPERATURE_VARIATION = 3.0f;
     public const float CLIMATE_SUNLIGHT_VARIATION = 15.0f;
     public const float CLIMATE_PRECIPITATION_VARIATION = 30.0f;
@@ -446,7 +461,7 @@ public static class Constants
 
     public static readonly int[] GROUND_COVER_TYPES = new int[] { GROUND_COVER_GRASSLAND, GROUND_COVER_DESERT, GROUND_COVER_LUSH, GROUND_COVER_SNOW, GROUND_COVER_SEMI_ARID };
 
-    public static readonly int[] CLIMATE_TYPES = new int[] { CLIMATE_TEMPERATE, CLIMATE_SUBTROPICAL, CLIMATE_CONTINENTAL, CLIMATE_MEDITERRANEAN, CLIMATE_STEPPE, CLIMATE_DESERT, CLIMATE_SUBARCTIC };
+    public static readonly int[] CLIMATE_TYPES = new int[] { CLIMATE_AF, CLIMATE_AM, CLIMATE_AW, CLIMATE_BWH, CLIMATE_BWK, CLIMATE_BSH, CLIMATE_BSK, CLIMATE_CSA, CLIMATE_CSB, CLIMATE_CFA, CLIMATE_CWA, CLIMATE_CFB, CLIMATE_CFC, CLIMATE_DFA, CLIMATE_DFB, CLIMATE_DFC, CLIMATE_DFD, CLIMATE_DWA, CLIMATE_ET, CLIMATE_EF, CLIMATE_H };
 
     public static readonly int[] ASSET_REGION_TYPES = new int[] { ASSET_REGION_STANDARD };
 

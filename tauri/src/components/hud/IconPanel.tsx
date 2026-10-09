@@ -5,12 +5,14 @@
  * 並び順・開くウィンドウはすべて `hudCommon.ts` の `MENU_ICONS` が正で、
  * アイコン画像は `assets/images/panel` 配下の画像を優先して描く(未定義時はMENU_ICONSの画像へフォールバック)。
  *
+ * 読み取り専用モードでは、都市に物を作る操作(`hiddenWhenReadOnly`)を出さない。
+ *
  * ウィンドウ自体は `icon-panel` ラベルの専用ウィンドウで、Rust側が画面左端の上下中央に置く。
- * アイコン数はテンプレートモードの有無で変わるため、実測した高さを
+ * アイコン数はプレイモードで変わるため、実測した高さを
  * Tauriコマンド `resize_icon_panel` で通知してウィンドウ丈を合わせる
  * (合わせないと透明な余白がクリックを吸ってUnityを操作できなくなる)。
  */
-import { PLAY_MODE_SCEARIO } from "../../constants";
+import { PLAY_MODE_SCEARIO, PLAY_MODE_READ_ONLY } from "../../constants";
 
 
 import { Fragment, useCallback, useEffect, useRef } from "react";
@@ -47,11 +49,12 @@ export function IconPanel() {
   const { t } = useTranslation();
   const { visible, playMode, isLocked, epochExecuting } = useHudSession();
   const godMode = playMode === PLAY_MODE_SCEARIO;
+  const readOnly = playMode === PLAY_MODE_READ_ONLY;
   const panelRef = useRef<HTMLElement | null>(null);
 
   /**
    * パネルの実高さ(枠線込み)をウィンドウ側へ通知する。
-   * アイコンの増減(テンプレートモードの切替)でも呼ばれるよう ResizeObserver で監視する。
+   * アイコンの増減(プレイモードの切替)でも呼ばれるよう ResizeObserver で監視する。
    * 同じ高さの再送はしない。ウィンドウのリサイズがパネル高に跳ね返ることは無い設計だが、
    * 端数の揺れで送信が往復し続けるのを確実に防ぐため。
    */
@@ -126,7 +129,7 @@ export function IconPanel() {
 
   if (!visible) return null;
 
-  const icons = MENU_ICONS.filter((icon) => godMode || !icon.templateOnly);
+  const icons = MENU_ICONS.filter((icon) => (godMode || !icon.templateOnly) && !(readOnly && icon.hiddenWhenReadOnly));
 
   return (
     <nav ref={panelRef} className={`icon-panel ${epochExecuting ? "hud-disabled" : ""}`}>

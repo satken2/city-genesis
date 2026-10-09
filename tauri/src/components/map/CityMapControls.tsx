@@ -44,6 +44,7 @@ const LAYER_BUTTONS: { symbol: MapSymbol; layers: (keyof CityMapLayerVisibility)
   { symbol: "zoneBorders", layers: ["zoneBorders"] },
   { symbol: "parcels", layers: ["parcels"] },
   { symbol: "buildings", layers: ["buildings"] },
+  { symbol: "buildings3d", layers: ["buildings3d"] },
   { symbol: "station", layers: ["stations"] },
   { symbol: "interchange", layers: ["interchanges"] },
   { symbol: "allRoads", layers: ["allRoads"] },
