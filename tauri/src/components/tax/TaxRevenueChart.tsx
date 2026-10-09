@@ -44,7 +44,7 @@ const TOOLTIP_STYLE = {
   background: "rgba(15, 23, 42, 0.95)",
   border: "1px solid rgba(148, 163, 184, 0.2)",
   borderRadius: "6px",
-  fontSize: "1.02rem",
+  fontSize: "1rem",
 } as const;
 
 export function TaxRevenueChart({ data }: TaxRevenueChartProps) {

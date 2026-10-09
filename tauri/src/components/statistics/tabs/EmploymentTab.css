@@ -26,7 +26,7 @@
 }
 
 .scope-selector__label {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #94a3b8;
   font-weight: 500;
 }
@@ -36,7 +36,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   color: #f1f5f9;
-  font-size: 1.02rem;
+  font-size: 1rem;
   padding: 4px 8px;
   outline: none;
   cursor: pointer;
@@ -147,12 +147,12 @@
 }
 
 .emp-unemployed-label {
-  font-size: 0.93rem;
+  font-size: 1rem;
   color: #64748b;
 }
 
 .emp-unemployed-value {
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -172,7 +172,7 @@
   justify-content: center;
   height: 100%;
   color: #475569;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 /* ── ③ 賃金ティア別需給バランス（需要・供給の重ね合わせ） ── */
@@ -186,7 +186,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.93rem;
+  font-size: 1rem;
   color: #64748b;
 }
 
@@ -224,7 +224,7 @@
 
 .emp-tier-row__label {
   width: 68px;
-  font-size: 0.93rem;
+  font-size: 1rem;
   font-weight: 600;
   flex-shrink: 0;
   text-align: right;
@@ -271,7 +271,7 @@
   align-items: center;
   gap: 3px;
   flex-shrink: 0;
-  font-size: 0.93rem;
+  font-size: 1rem;
   white-space: nowrap;
 }
 
@@ -289,7 +289,7 @@
 
 .emp-tier-row__wage {
   width: 42px;
-  font-size: 0.83rem;
+  font-size: 1rem;
   color: #94a3b8;
   white-space: nowrap;
   text-align: right;
@@ -311,7 +311,7 @@
 
 .emp-skill-row__label {
   width: 36px;
-  font-size: 0.93rem;
+  font-size: 1rem;
   color: #94a3b8;
   font-weight: 600;
   flex-shrink: 0;
@@ -348,7 +348,7 @@
 
 .emp-skill-row__rate {
   width: 38px;
-  font-size: 0.93rem;
+  font-size: 1rem;
   font-weight: 700;
   text-align: right;
   flex-shrink: 0;
@@ -356,7 +356,7 @@
 
 .emp-skill-row__nums {
   width: 60px;
-  font-size: 0.83rem;
+  font-size: 1rem;
   color: #475569;
   text-align: right;
   flex-shrink: 0;
@@ -372,7 +372,7 @@
 .emp-industry-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .emp-industry-table__th {
@@ -380,7 +380,7 @@
   top: 0;
   background: #1e293b;
   color: #64748b;
-  font-size: 0.83rem;
+  font-size: 1rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -423,7 +423,7 @@
 .emp-industry-table__name {
   color: #e2e8f0;
   font-weight: 500;
-  font-size: 1.02rem;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -433,7 +433,7 @@
 
 .emp-industry-table__quota {
   color: #475569;
-  font-size: 0.83rem;
+  font-size: 1rem;
 }
 
 .emp-industry-table__td--num {
@@ -463,7 +463,7 @@
 }
 
 .emp-industry-bar-label {
-  font-size: 0.83rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -471,7 +471,7 @@
   text-align: center;
   color: #475569;
   padding: 20px;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 /* スクロールバー */
@@ -506,7 +506,7 @@
   height: 100%;
   width: 100%;
   color: #94a3b8;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .stats-tab-error {

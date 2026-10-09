@@ -74,7 +74,7 @@
   align-items: center;
   justify-content: center;
   color: #6b7280;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 /* リスト・棒グラフ関連 */
@@ -111,7 +111,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1.11rem;
+  font-size: 1rem;
   margin-bottom: 6px;
 }
 
@@ -122,7 +122,7 @@
 
 .trade-bar-item__values {
   font-family: monospace;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .trade-bar-item__val-actual {
@@ -196,7 +196,7 @@
   justify-content: center;
   height: 100%;
   color: #9ca3af;
-  font-size: 1.3rem;
+  font-size: 1rem;
 }
 
 .trade-tab__error {

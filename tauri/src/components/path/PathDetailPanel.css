@@ -12,7 +12,7 @@
 }
 
 .zone-change-select {
-  font-size: 1.11rem;
+  font-size: 1rem;
   line-height: 2.04rem;
   background: rgba(255, 255, 255, 0.08);
   color: #c5d4e3;
@@ -62,7 +62,7 @@
 }
 
 .pending-banner__text {
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #ffb03a;
   font-weight: 500;
 }
@@ -76,7 +76,7 @@
   border: none;
   border-radius: 4px;
   padding: 5px 10px;
-  font-size: 1.04rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;

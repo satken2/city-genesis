@@ -32,7 +32,7 @@
 }
 
 .health-tab__scope-label {
-  font-size: 1.08rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #94a3b8;
 }
@@ -43,7 +43,7 @@
   border-radius: 6px;
   color: #e2e8f0;
   font: inherit;
-  font-size: 1.14rem;
+  font-size: 1rem;
   padding: 6px 10px;
   cursor: pointer;
   min-width: 160px;
@@ -141,7 +141,7 @@
   place-items: center;
   height: 100%;
   color: #5a6f86;
-  font-size: 1.08rem;
+  font-size: 1rem;
 }
 
 /* ========== ローディング・エラー ========== */
@@ -152,7 +152,7 @@
   place-items: center;
   height: 200px;
   color: #9db0c5;
-  font-size: 1.18rem;
+  font-size: 1rem;
 }
 
 .health-tab__error {

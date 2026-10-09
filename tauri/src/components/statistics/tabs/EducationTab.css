@@ -22,7 +22,7 @@
 }
 
 .scope-selector__label {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #94a3b8;
   font-weight: 500;
 }
@@ -32,7 +32,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   color: #f1f5f9;
-  font-size: 1.02rem;
+  font-size: 1rem;
   padding: 4px 8px;
   outline: none;
   cursor: pointer;
@@ -149,7 +149,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .edu-legend__bullet {
@@ -196,7 +196,7 @@
 }
 
 .edu-schools-list__count {
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 400;
   color: #8ba3bb;
 }
@@ -217,13 +217,13 @@
   min-height: 60px;
   padding: 16px;
   color: #5a6f86;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .edu-schools-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .edu-schools-table thead {
@@ -240,7 +240,7 @@
   font-weight: 600;
   color: #94a3b8;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.93rem;
+  font-size: 1rem;
 }
 
 .edu-schools-table td {
@@ -263,7 +263,7 @@
 
 .edu-schools-table__cell--muted {
   color: #8ba3bb;
-  font-size: 0.93rem;
+  font-size: 1rem;
 }
 
 .edu-schools-table__cell--meter {
@@ -379,7 +379,7 @@
   height: 100%;
   width: 100%;
   color: #94a3b8;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .stats-tab-error {

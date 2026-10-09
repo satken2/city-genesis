@@ -22,7 +22,7 @@
   user-select: none;
   color: #e5eef9;
   font-family: "Segoe UI", sans-serif;
-  font-size: 13px;
+  font-size: 1rem;
 }
 
 /*
@@ -108,13 +108,13 @@
 
 .hud-mini-meter__label {
   font-weight: 600;
-  font-size: 12px;
+  font-size: 1rem;
   color: #e5eef9;
 }
 
 /* メーター横に添える数値(施政スコアの1世帯あたり値など)。等幅で桁揺れによる横伸びを防ぐ */
 .hud-mini-meter__value {
-  font-size: 12px;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: #e5eef9;
 }
@@ -127,6 +127,6 @@
 }
 
 .hud-mini-meter__placeholder {
-  font-size: 12px;
+  font-size: 1rem;
   color: #8ba3bb;
 }

@@ -44,7 +44,7 @@
 .econ-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1.11rem;
+  font-size: 1rem;
   text-align: left;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .econ-table__id {
-  font-size: 0.97rem;
+  font-size: 1rem;
   color: #5a6f86;
 }
 

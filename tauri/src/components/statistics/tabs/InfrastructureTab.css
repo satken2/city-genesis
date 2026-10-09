@@ -34,7 +34,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   color: #9ca3af;
-  font-size: 1.11rem;
+  font-size: 1rem;
   padding: 6px 14px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -119,14 +119,14 @@
   background: #ef4444;
   color: #ffffff;
   border-radius: 999px;
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 700;
   padding: 1px 8px;
 }
 
 .infra-card__empty {
   color: #6b7280;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 /* サマリー(ラベル+値) */
@@ -140,7 +140,7 @@
 .infra-summary__row {
   display: flex;
   justify-content: space-between;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .infra-summary__row dt {
@@ -174,7 +174,7 @@
   display: flex;
   justify-content: space-between;
   margin-top: 10px;
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #8ba3bb;
 }
 
@@ -206,7 +206,7 @@
   background: none;
   border: none;
   color: #d1d5db;
-  font-size: 1.11rem;
+  font-size: 1rem;
   padding: 5px 4px;
   cursor: pointer;
   border-radius: 4px;
@@ -269,7 +269,7 @@
 
 /* 凡例(InfraMapLegend)。文字の大きさと色はここで決める */
 .infra-tab__legend {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #8ba3bb;
 }
 
@@ -281,7 +281,7 @@
   justify-content: center;
   height: 100%;
   color: #9ca3af;
-  font-size: 1.3rem;
+  font-size: 1rem;
 }
 
 .infra-tab__error {

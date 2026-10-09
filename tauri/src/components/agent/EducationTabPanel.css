@@ -42,7 +42,7 @@
 .education-legend-item {
   display: flex;
   align-items: center;
-  font-size: 1.06rem;
+  font-size: 1rem;
   gap: 6px;
 }
 
@@ -124,7 +124,7 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
   color: inherit;
-  font-size: 1.11rem;
+  font-size: 1rem;
   padding: 4px 6px;
   text-align: right;
 }
@@ -135,7 +135,7 @@
 
 .education-settings-error {
   margin: 0;
-  font-size: 1.03rem;
+  font-size: 1rem;
   color: #f87171;
 }
 
@@ -145,7 +145,7 @@
   border: none;
   border-radius: 4px;
   color: #fff;
-  font-size: 1.08rem;
+  font-size: 1rem;
   font-weight: 600;
   padding: 6px 16px;
   cursor: pointer;
@@ -177,7 +177,7 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
   color: #9db0c5;
-  font-size: 1.03rem;
+  font-size: 1rem;
   padding: 4px 12px;
   cursor: pointer;
 }

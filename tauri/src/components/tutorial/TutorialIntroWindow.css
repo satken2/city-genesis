@@ -49,7 +49,7 @@
 
 .tutorial-intro-text {
   margin: 0;
-  font-size: 1.11rem;
+  font-size: 1rem;
   line-height: 1.7;
   color: var(--flat-text-body);
 }
@@ -59,7 +59,7 @@
   align-self: flex-end;
   margin-top: 8px;
   padding: 8px 28px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-weight: 600;
   background-color: var(--flat-selected);
   border: none;

@@ -94,7 +94,7 @@
 
 .path-traffic-row__count {
   text-align: right;
-  font-size: 1.08rem;
+  font-size: 1rem;
   color: #e2eaf2;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -117,12 +117,12 @@
 
 .path-save-error {
   color: #fc8181;
-  font-size: 1.06rem;
+  font-size: 1rem;
 }
 
 .path-save-btn {
   padding: 4px 14px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   border-radius: 6px;
   background: rgba(34, 197, 94, 0.18);
   border: 1px solid rgba(34, 197, 94, 0.4);

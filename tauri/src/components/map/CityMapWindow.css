@@ -63,7 +63,7 @@
   border: 1px solid #2a3149;
   border-radius: 12px;
   background: #1b2135;
-  font-size: 1.04rem;
+  font-size: 1rem;
   color: #93a9c0;
   cursor: pointer;
   user-select: none;
@@ -100,7 +100,7 @@
   border: 1px solid #2a3149;
   border-radius: 12px;
   background: #1b2135;
-  font-size: 1.04rem;
+  font-size: 1rem;
   color: #93a9c0;
   cursor: pointer;
   white-space: nowrap;
@@ -131,7 +131,7 @@
   border-radius: 9px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 1.04rem;
+  font-size: 1rem;
 }
 
 .city-map-window__infra-select:focus-visible {
@@ -150,7 +150,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 1.04rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 

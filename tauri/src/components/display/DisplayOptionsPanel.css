@@ -46,7 +46,7 @@
   background: transparent;
   color: #c5d4e3;
   font-family: "Segoe UI", sans-serif;
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
   text-align: left;
@@ -184,7 +184,7 @@
 .do-description {
   color: #e5eef9;
   font-family: "Segoe UI", sans-serif;
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1.6;
 }
 
@@ -201,7 +201,7 @@
 
 .do-legend-none {
   color: #8a9bb0;
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-family: "Segoe UI", sans-serif;
 }
 
@@ -218,7 +218,7 @@
   gap: 6px;
   color: #e5eef9;
   font-family: "Segoe UI", sans-serif;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .do-legend-color-box {
@@ -244,7 +244,7 @@
 .do-legend-meter-label {
   color: #e5eef9;
   font-family: "Segoe UI", sans-serif;
-  font-size: 1.11rem;
+  font-size: 1rem;
   text-align: center;
 }
 
@@ -266,7 +266,7 @@
   background: rgba(255, 255, 255, 0.04);
   color: #c5d4e3;
   font-family: "Segoe UI", sans-serif;
-  font-size: 1.2rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -349,7 +349,7 @@
   flex: 1;
   color: #e5eef9;
   font-family: "Segoe UI", sans-serif;
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1.4;
 }
 

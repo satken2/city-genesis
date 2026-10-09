@@ -8,7 +8,7 @@
 .space-amount-chart-legend {
   display: flex;
   gap: 16px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #9ca3af;
   margin-bottom: 4px;
 }
@@ -78,7 +78,7 @@
 }
 
 .space-amount-chart-value {
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #9ca3af;
   white-space: nowrap;
 }

@@ -9,14 +9,14 @@
 
 .cargo-description {
   margin: 0 0 10px;
-  font-size: 1.04rem;
+  font-size: 1rem;
   line-height: 1.5;
   color: #93a9c0;
 }
 
 .cargo-unit-suffix {
   margin-left: 2px;
-  font-size: 0.97rem;
+  font-size: 1rem;
   color: #93a9c0;
 }
 
@@ -32,7 +32,7 @@
   display: flex;
   gap: 12px;
   margin-bottom: 8px;
-  font-size: 0.97rem;
+  font-size: 1rem;
   color: #93a9c0;
 }
 

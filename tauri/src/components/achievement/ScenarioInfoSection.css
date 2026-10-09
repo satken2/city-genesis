@@ -42,7 +42,7 @@
 .scenario-info__input,
 .scenario-info__textarea {
   padding: 6px 8px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-family: inherit;
   line-height: 1.6;
   background-color: #10161f;
@@ -91,7 +91,7 @@
 /* 作成者が入力した改行をそのまま活かす */
 .scenario-info__read-text {
   margin: 0;
-  font-size: 1.11rem;
+  font-size: 1rem;
   line-height: 1.7;
   color: #c8d8e8;
   white-space: pre-wrap;

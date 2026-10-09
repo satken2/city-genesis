@@ -51,7 +51,7 @@
 }
 
 .transit-estimate__main {
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
@@ -104,7 +104,7 @@
   margin: 0;
   padding: 6px 8px;
   border-radius: 4px;
-  font-size: 0.97rem;
+  font-size: 1rem;
   line-height: 1.4;
   color: var(--flat-warn);
   background: var(--flat-warn-surface);

@@ -63,7 +63,7 @@
 
 .save-dialog-text {
   margin: 0;
-  font-size: 1.08rem;
+  font-size: 1rem;
   line-height: 1.6;
   color: var(--flat-text-body);
 }
@@ -91,7 +91,7 @@
 .save-dialog-input {
   padding: 10px 12px;
   font: inherit;
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: var(--flat-text);
   background: var(--flat-sunken);
   border: none;
@@ -125,7 +125,7 @@
   min-width: 6.5rem;
   padding: 9px 18px;
   font: inherit;
-  font-size: 1.08rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--flat-text-body);
   background: #2c3646;

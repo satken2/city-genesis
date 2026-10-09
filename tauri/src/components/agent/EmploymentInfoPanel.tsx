@@ -25,7 +25,7 @@ const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "1.02rem",
+  fontSize: "1rem",
 };
 
 export function EmploymentInfoPanel({ agent }: EmploymentInfoPanelProps) {

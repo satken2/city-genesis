@@ -99,7 +99,7 @@ export function TimeSeriesChart({
                 value: referenceLine.label,
                 position: "insideTopRight",
                 fill: referenceLine.color ?? "#f59e0b",
-                fontSize: "1.02rem",
+                fontSize: "1rem",
               }}
             />
           )}

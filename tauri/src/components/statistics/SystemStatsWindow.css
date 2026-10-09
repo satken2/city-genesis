@@ -175,7 +175,7 @@
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--flat-text-muted);
   color: var(--flat-text-label);
-  font-size: 0.92rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 .system-stats-table tbody tr { border-bottom: 1px solid var(--flat-raised); }
@@ -264,7 +264,7 @@
   padding: 1rem 0 1rem 1rem;
   border-left: 2px solid var(--flat-warn);
   color: var(--flat-warn);
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.65;
 }
 .system-stats-warning strong { font-weight: 500; }

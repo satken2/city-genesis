@@ -19,7 +19,7 @@
 
 .cp-description {
   margin: 0;
-  font-size: 1.03rem;
+  font-size: 1rem;
   color: #9fb3c8;
 }
 
@@ -42,7 +42,7 @@
 .cp-empty {
   margin: 24px 0;
   text-align: center;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #8195a9;
 }
 
@@ -113,7 +113,7 @@
 
 .cp-warning {
   margin: 8px 0 0;
-  font-size: 0.97rem;
+  font-size: 1rem;
   color: #ffc46b;
 }
 
@@ -121,13 +121,13 @@
   width: 100%;
   margin-top: 8px;
   border-collapse: collapse;
-  font-size: 1.06rem;
+  font-size: 1rem;
 }
 
 .cp-table th {
   text-align: left;
   font-weight: normal;
-  font-size: 0.92rem;
+  font-size: 1rem;
   color: #8195a9;
   padding: 2px 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -169,7 +169,7 @@
 
 .cp-variant {
   margin-left: 6px;
-  font-size: 0.92rem;
+  font-size: 1rem;
   color: #8195a9;
 }
 

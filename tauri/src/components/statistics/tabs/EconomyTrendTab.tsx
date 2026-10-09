@@ -74,7 +74,7 @@ const TOOLTIP_STYLE = {
   background: "#1a2230",
   border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: "4px",
-  fontSize: "1.02rem",
+  fontSize: "1rem",
 };
 
 /**
@@ -178,7 +178,7 @@ function TrendChartCard({
                 formatter={(value: any) => formatter(Number(value))}
               />
               {hasSecondary && (
-                <Legend wrapperStyle={{ fontSize: "1.02rem" }} iconType="plainline" />
+                <Legend wrapperStyle={{ fontSize: "1rem" }} iconType="plainline" />
               )}
               <Line
                 type="monotone"
@@ -325,7 +325,7 @@ function SupplyDemandTrendCard({
                 labelFormatter={(label) => `Epoch ${label}`}
                 formatter={(value: any) => formatter(Number(value))}
               />
-              <Legend wrapperStyle={{ fontSize: "1.02rem" }} iconType="plainline" />
+              <Legend wrapperStyle={{ fontSize: "1rem" }} iconType="plainline" />
               <Line
                 type="monotone"
                 dataKey="production"
@@ -569,7 +569,7 @@ function SankeyFlowCard({
                         y={props.y + props.height / 2}
                         dy=".35em"
                         fill="#cbd5e1"
-                        fontSize="1.02rem"
+                        fontSize="1rem"
                         textAnchor={textAnchor}
                       >
                         {props.payload?.name}

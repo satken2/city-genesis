@@ -20,7 +20,7 @@
   color: var(--flat-text-label);
   box-shadow: var(--flat-shadow-sm);
   font: inherit;
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
 }

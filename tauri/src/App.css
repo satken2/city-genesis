@@ -54,6 +54,13 @@ body {
   background: transparent;
 }
 
+/* 本文と入力文字は設定の基準サイズに揃え、見出し・補足の大小だけを個別に指定する。 */
+input,
+textarea {
+  font: inherit;
+  font-size: 1rem;
+}
+
 select {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 4px;
@@ -61,6 +68,7 @@ select {
   color: #f6fbff;
   padding: 0.56rem 0.83rem;
   font: inherit;
+  font-size: 1rem;
   cursor: pointer;
 }
 
@@ -77,6 +85,7 @@ button {
   padding: 0.56rem 1.11rem;
   cursor: pointer;
   font: inherit;
+  font-size: 1rem;
 }
 
 button:hover {
@@ -247,7 +256,7 @@ button:hover {
 
 .ghost-button {
   padding: 0.5rem 0.97rem;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .content {
@@ -289,7 +298,7 @@ button:hover {
 
 .agent-detail-muted {
   color: #9db0c5;
-  font-size: 1.06rem;
+  font-size: 1rem;
 }
 
 .agent-detail-error {
@@ -330,7 +339,7 @@ button:hover {
 .agent-detail-label {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 1.11rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   padding: 5px 12px 5px 0;
@@ -340,7 +349,7 @@ button:hover {
 }
 
 .agent-detail-value {
-  font-size: 1.11rem;
+  font-size: 1rem;
   word-break: break-all;
   display: flex;
   align-items: center;
@@ -416,7 +425,7 @@ button:hover {
   overflow: auto;
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .muted {
@@ -437,7 +446,7 @@ button:hover {
  */
 .entity-link {
   padding: 2px 6px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   border-radius: 5px;
   cursor: pointer;
   color: #4ea1ff;
@@ -460,7 +469,7 @@ button:hover {
   border-radius: 4px;
   background: rgba(245, 158, 11, 0.1);
   color: #f59e0b;
-  font-size: 1.14rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -481,5 +490,5 @@ button:hover {
   padding: 8px;
   background: rgba(16, 20, 28, 0.85);
   color: white;
-  font-size: 14px;
+  font-size: 1rem;
 }

@@ -15,7 +15,7 @@
   flex-wrap: wrap;
   gap: 4px 12px;
   padding: 0 2px 4px;
-  font-size: 1.03rem;
+  font-size: 1rem;
   color: #9db0c5;
 }
 
@@ -54,7 +54,7 @@
   width: 26px;
   flex-shrink: 0;
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 0.97rem;
+  font-size: 1rem;
   letter-spacing: 0.5px;
   color: #6b8299;
   text-align: right;
@@ -123,7 +123,7 @@
   margin-left: 8px;
   padding: 2px 6px;
   min-width: 0;
-  font-size: 1.19rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #e8f0f8;
   line-height: 1.25;
@@ -178,7 +178,7 @@
 }
 
 .tld__name--loop {
-  font-size: 1.03rem;
+  font-size: 1rem;
   font-weight: 500;
   color: #9db0c5;
 }

@@ -54,7 +54,7 @@
 }
 
 .pc-variant-name {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: inherit;
   line-height: 1.2;
   width: 100%;
@@ -92,7 +92,7 @@
 }
 
 .pc-input-label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #c5d4e3;
   text-transform: uppercase;
@@ -150,7 +150,7 @@
 }
 
 .pc-preview-message {
-  font-size: 1.06rem;
+  font-size: 1rem;
   color: #93a9c0;
   text-align: center;
   padding: 8px;
@@ -220,7 +220,7 @@
 }
 
 .pc-dev-title {
-  font-size: 0.9rem;
+  font-size: 1.18rem;
   font-weight: 600;
   color: #c5d4e3;
   margin-bottom: 4px;
@@ -241,7 +241,7 @@
 }
 
 .pc-section-title {
-  font-size: 0.9rem;
+  font-size: 1.18rem;
   font-weight: 600;
   color: #93a9c0;
   text-transform: uppercase;

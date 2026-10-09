@@ -109,7 +109,7 @@
 }
 
 .save-menu-label {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -117,7 +117,7 @@
 /* 上書きセーブの対象(現在のセーブの名前) */
 .save-menu-detail {
   overflow: hidden;
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.3;
   color: var(--flat-text-muted);
   white-space: nowrap;

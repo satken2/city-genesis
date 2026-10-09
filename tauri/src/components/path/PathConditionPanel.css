@@ -21,7 +21,7 @@
   color: #000;
   padding: 4px 12px;
   font-weight: 700;
-  font-size: 1.11rem;
+  font-size: 1rem;
   text-align: center;
   border: 3px solid;
   border-image: repeating-linear-gradient(
@@ -54,7 +54,7 @@
 .path-condition-tile__label {
   color: #93a9c0;
   font-weight: 600;
-  font-size: 1.03rem;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -67,7 +67,7 @@
 
 .path-condition-tile__value {
   color: #e2eaf2;
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

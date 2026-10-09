@@ -26,7 +26,7 @@
 .climate-chart { display: block; width: 100%; aspect-ratio: 720 / 340; background: var(--flat-sunken); touch-action: none; }
 .climate-chart-selection { fill: var(--flat-selected); opacity: 0.25; }
 .climate-chart-axis line { stroke: var(--flat-raised-hover); }
-.climate-chart-axis text, .climate-chart-unit text, .climate-chart-month { font-size: 13px; }
+.climate-chart-axis text, .climate-chart-unit text, .climate-chart-month { font-size: 1rem; }
 .climate-chart-month { fill: var(--flat-text-label); }
 .climate-chart-handle { cursor: ns-resize; stroke: var(--flat-sunken); stroke-width: 2; }
 .climate-chart-handle:hover, .climate-chart-handle:focus-visible { stroke: var(--flat-text); outline: none; }

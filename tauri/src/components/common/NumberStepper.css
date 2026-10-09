@@ -12,7 +12,7 @@
 }
 
 .number-stepper__label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #a6adc8;
   font-weight: 600;
   letter-spacing: 0.3px;
@@ -63,7 +63,7 @@
   border-left: 1px solid #45475a;
   border-right: 1px solid #45475a;
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 1.11rem;
+  font-size: 1rem;
   outline: none;
   -moz-appearance: textfield;
 }

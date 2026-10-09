@@ -64,7 +64,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 1.04rem;
+  font-size: 1rem;
 }
 
 .street-grid__field input[type="number"] {
@@ -88,7 +88,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 1.04rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 
@@ -126,7 +126,7 @@
   padding: 4px 10px;
   border-radius: 4px;
   background: rgba(15, 20, 32, 0.85);
-  font-size: 1.04rem;
+  font-size: 1rem;
   color: #cdd6f4;
   pointer-events: none;
 }

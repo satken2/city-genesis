@@ -133,7 +133,7 @@
 }
 
 .epoch-result-date-sub {
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: var(--flat-text-label);
 }
 
@@ -155,7 +155,7 @@
 }
 
 .epoch-result-score-label {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: var(--flat-text-label);
   white-space: nowrap;
 }
@@ -170,13 +170,13 @@
 }
 
 .epoch-result-score-unit {
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: var(--flat-text-label);
 }
 
 .epoch-result-score-per-household {
   margin-left: auto;
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text-label);
   white-space: nowrap;
@@ -192,7 +192,7 @@
 }
 
 .epoch-result-score-row-label {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: var(--flat-text-label);
   white-space: nowrap;
 }
@@ -227,7 +227,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text-body);
 }
@@ -267,7 +267,7 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px 6px 14px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   background-color: var(--epoch-result-pane);
   max-width: 320px;
 }
@@ -314,7 +314,7 @@
 
 .epoch-result-quest-chip-label {
   color: var(--flat-text-muted);
-  font-size: 1.02rem;
+  font-size: 1rem;
   white-space: nowrap;
 }
 
@@ -335,7 +335,7 @@
 
 .epoch-result-quest-chip-pct {
   color: var(--flat-text-muted);
-  font-size: 1.02rem;
+  font-size: 1rem;
   flex-shrink: 0;
 }
 
@@ -410,7 +410,7 @@
 .epoch-result-empty {
   margin: 0;
   padding: 4px 0;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: var(--flat-text-muted);
 }
 
@@ -496,7 +496,7 @@
 .epoch-result-stat-label {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 1.02rem;
+  font-size: 1rem;
   line-height: 1.3;
   color: var(--flat-text-label);
   white-space: nowrap;
@@ -533,7 +533,7 @@
 
 /* 値に添える補助テキスト(人口増減・為替レートの変動幅など) */
 .epoch-result-stat-sub {
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text-muted);
   white-space: nowrap;
@@ -605,7 +605,7 @@
 .epoch-result-quest-name {
   flex: 0 1 auto;
   min-width: 0;
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--flat-text);
   white-space: nowrap;
@@ -641,7 +641,7 @@
 .epoch-result-quest-pct {
   flex: 0 0 auto;
   margin-left: auto;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
@@ -662,7 +662,7 @@
 
 .epoch-result-quest-state {
   flex: 0 0 auto;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--flat-text-muted);
 }
 
@@ -711,7 +711,7 @@
 .epoch-result-quest-mode {
   flex: 0 0 auto;
   padding: 1px 6px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--flat-text-label);
   background-color: color-mix(in srgb, var(--flat-sunken) 70%, transparent);
   white-space: nowrap;
@@ -776,7 +776,7 @@
 .epoch-result-name-text {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: var(--flat-text-body);
   white-space: nowrap;
   overflow: hidden;
@@ -829,7 +829,7 @@
 
 .epoch-result-progress-text {
   flex: 0 0 auto;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text-label);
   white-space: nowrap;
@@ -838,7 +838,7 @@
 .epoch-result-completed {
   flex: 0 0 auto;
   padding: 1px 5px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   background-color: var(--flat-warn);
   color: #0e1520;

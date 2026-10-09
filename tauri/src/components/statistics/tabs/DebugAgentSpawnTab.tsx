@@ -333,7 +333,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     <XAxis dataKey="date" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
                     <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={remPx(3.7)} allowDecimals={false} />
                     <Tooltip contentStyle={TOOLTIP_STYLE} />
-                    <Legend wrapperStyle={{ fontSize: "1.02rem" }} />
+                    <Legend wrapperStyle={{ fontSize: "1rem" }} />
                     {BLOCKER_SERIES.map((s) => (
                       <Bar
                         key={s.key}
@@ -412,7 +412,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                           : formatCompact(Number(value));
                       }}
                     />
-                    <Legend wrapperStyle={{ fontSize: "1.02rem" }} />
+                    <Legend wrapperStyle={{ fontSize: "1rem" }} />
                     {visibleMetricSeries.map((s) => (
                       <Line
                         key={s.key}

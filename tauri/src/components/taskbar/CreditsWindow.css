@@ -23,14 +23,14 @@
 
 .credits-lead {
   margin: 0;
-  font-size: 1.02rem;
+  font-size: 1rem;
   line-height: 1.6;
   color: var(--flat-text-muted);
 }
 
 .credits-empty {
   margin: 0;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: var(--flat-text-muted);
 }
 
@@ -108,12 +108,12 @@
 }
 
 .credits-attribution {
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: var(--flat-text-body);
 }
 
 .credits-note {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: var(--flat-text-muted);
 }
 
@@ -136,7 +136,7 @@
 
 .credits-required-body {
   font-family: "Consolas", "Courier New", monospace;
-  font-size: 1.02rem;
+  font-size: 1rem;
   line-height: 1.6;
   color: var(--flat-text);
   white-space: pre-wrap;

@@ -32,7 +32,7 @@
   flex: 1;
   min-width: 0;
   color: #fcd34d;
-  font-size: 1.08rem;
+  font-size: 1rem;
   line-height: 1.4;
 }
 
@@ -51,7 +51,7 @@
 /* 値に添える単位・補足 */
 .transit-detail__unit {
   margin-left: 4px;
-  font-size: 0.97rem;
+  font-size: 1rem;
   color: #93a9c0;
 }
 
@@ -74,7 +74,7 @@
 .transit-detail__meter-value {
   flex-shrink: 0;
   min-width: 32px;
-  font-size: 1.03rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   text-align: right;
   color: var(--flat-text-body);
@@ -99,7 +99,7 @@
 }
 
 .transit-detail__tile-label {
-  font-size: 0.94rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--flat-text-label);
   white-space: nowrap;
@@ -204,7 +204,7 @@
 }
 
 .transit-detail__dirty {
-  font-size: 0.97rem;
+  font-size: 1rem;
   color: #6b8299;
   white-space: nowrap;
   overflow: hidden;
@@ -243,7 +243,7 @@
   padding: 5px 12px;
   border: none;
   border-radius: 5px;
-  font-size: 1.03rem;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1.2;
   white-space: nowrap;

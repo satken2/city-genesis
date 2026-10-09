@@ -12,7 +12,7 @@
   flex-direction: column;
   height: 100%;
   color: #e2e8f0;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 /* 本体: 上下左右の2×2グリッド。各クアドラントは min-height/width:0 で
@@ -81,7 +81,7 @@
   align-items: center;
   justify-content: center;
   color: #64748b;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 /* 右下: 財政Sankey(参考表示)。 */
@@ -109,7 +109,7 @@
   justify-content: center;
   height: 100%;
   color: #64748b;
-  font-size: 1.11rem;
+  font-size: 1rem;
   text-align: center;
   padding: 24px;
 }
@@ -121,7 +121,7 @@
   justify-content: center;
   padding: 40px;
   color: #94a3b8;
-  font-size: 1.18rem;
+  font-size: 1rem;
 }
 
 .tax-window__error {
@@ -131,7 +131,7 @@
 .tax-window__error-inline {
   padding: 6px 12px;
   color: #f87171;
-  font-size: 1.04rem;
+  font-size: 1rem;
   background: rgba(239, 68, 68, 0.1);
   border-top: 1px solid rgba(239, 68, 68, 0.2);
 }
@@ -151,7 +151,7 @@
   color: #ffffff;
   border: none;
   border-radius: 6px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -218,7 +218,7 @@
 
 .tax-toggle-btn {
   padding: 3px 10px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   border: none;
   background: transparent;
@@ -295,7 +295,7 @@
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 4px;
   color: #e2e8f0;
-  font-size: 1.04rem;
+  font-size: 1rem;
   font-family: monospace;
   text-align: right;
   outline: none;
@@ -316,7 +316,7 @@
 
 .tax-unit {
   color: #64748b;
-  font-size: 0.97rem;
+  font-size: 1rem;
 }
 
 /* ---- 商品別税率リスト ---- */
@@ -345,7 +345,7 @@
 .tax-product-row__name {
   width: 120px;
   min-width: 80px;
-  font-size: 1.04rem;
+  font-size: 1rem;
   color: #94a3b8;
   overflow: hidden;
   text-overflow: ellipsis;

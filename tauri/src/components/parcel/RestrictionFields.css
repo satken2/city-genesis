@@ -24,7 +24,7 @@
 }
 
 .restriction-input-unit {
-  font-size: 1.08rem;
+  font-size: 1rem;
   color: #93a9c0;
   white-space: nowrap;
   line-height: 2.04rem;
@@ -35,7 +35,7 @@
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 4px;
   color: #e2eaf2;
-  font-size: 1.11rem;
+  font-size: 1rem;
   padding: 2px 4px;
   line-height: 1.67rem;
 }
@@ -81,12 +81,12 @@
 
 .restriction-save-error {
   color: #fc8181;
-  font-size: 1.06rem;
+  font-size: 1rem;
 }
 
 .restriction-save-btn {
   padding: 4px 14px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   border-radius: 6px;
   background: rgba(34, 197, 94, 0.18);
   border: 1px solid rgba(34, 197, 94, 0.4);

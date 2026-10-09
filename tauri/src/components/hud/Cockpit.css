@@ -83,7 +83,7 @@
   flex-direction: column;
   gap: 2px;
   color: #d8e5f2;
-  font-size: 11px;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -114,7 +114,7 @@
   border-radius: 4px;
   background: transparent;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 1rem;
   color: #e5eef9;
   white-space: nowrap;
   overflow: hidden;
@@ -128,13 +128,13 @@
 }
 
 .cockpit-date {
-  font-size: 12px;
+  font-size: 1rem;
   color: #8ba3bb;
   white-space: nowrap;
 }
 
 .cockpit-date-weather { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.cockpit-weather { font-size: 12px; color: #d8e5f2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cockpit-weather { font-size: 1rem; color: #d8e5f2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cockpit-weather-select { min-width: 0; width: 150px; border: 1px solid #52677e; border-radius: 4px; padding: 3px 4px; background: #172638; color-scheme: dark; cursor: pointer; }
 .cockpit-weather-select:focus-visible { outline: 2px solid #9bcef9; outline-offset: 1px; }
 .cockpit-weather--error { border-color: #ff9b87; }
@@ -180,7 +180,7 @@
   border-radius: 7px;
   background: #ef4444;
   color: #fff;
-  font-size: 10px;
+  font-size: 0.9rem;
   font-weight: 700;
   line-height: 14px;
   text-align: center;
@@ -213,7 +213,7 @@
   border-radius: 8px;
   background: linear-gradient(135deg, #1a5fb4, #1c71d8);
   color: #f6fbff;
-  font-size: 13px;
+  font-size: 1rem;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s, transform 0.1s;

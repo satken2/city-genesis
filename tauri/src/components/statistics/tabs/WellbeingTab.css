@@ -20,15 +20,15 @@
 
 .wellbeing-tab__description {
   margin: 0;
-  font-size: 1.02rem;
+  font-size: 1rem;
   line-height: 1.5;
   color: #8ba3bb;
 }
 
-.wellbeing-scope { display: flex; align-items: center; gap: 8px; flex-shrink: 0; font-size: 1.02rem; color: #8ba3bb; }
+.wellbeing-scope { display: flex; align-items: center; gap: 8px; flex-shrink: 0; font-size: 1rem; color: #8ba3bb; }
 .wellbeing-scope select { background: #1e293b; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 4px 8px; max-width: 300px; }
 /* 範囲切替中の表示。数値は前の範囲のままなので、追いついていないことを明示する */
-.wellbeing-scope__pending { color: #64748b; font-size: 0.93rem; }
+.wellbeing-scope__pending { color: #64748b; font-size: 1rem; }
 
 /* ========== 中段: KPIカード列 ========== */
 
@@ -170,7 +170,7 @@
   border-radius: 6px;
   color: #9ca3af;
   font: inherit;
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
@@ -217,7 +217,7 @@
   justify-content: space-between;
   gap: 8px;
   margin-top: 6px;
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #94a3b8;
 }
 
@@ -292,7 +292,7 @@
   place-items: center;
   height: 200px;
   color: #9db0c5;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .wellbeing-tab__error {

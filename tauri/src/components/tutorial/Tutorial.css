@@ -81,14 +81,14 @@
 }
 
 .tutorial-step-number {
-  font-size: 11px;
+  font-size: 0.9rem;
   color: #9db0c5;
   font-family: "Segoe UI", sans-serif;
   letter-spacing: 0.5px;
 }
 
 .tutorial-step-title {
-  font-size: 15px;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #e5eef9;
   font-family: "Segoe UI", sans-serif;
@@ -96,7 +96,7 @@
 }
 
 .tutorial-step-description {
-  font-size: 13px;
+  font-size: 1rem;
   color: #93a9c0;
   font-family: "Segoe UI", sans-serif;
   line-height: 1.5;
@@ -121,7 +121,7 @@
   border-radius: 8px;
   background: linear-gradient(135deg, rgba(26, 95, 180, 0.6), rgba(28, 113, 216, 0.6));
   color: #e5eef9;
-  font-size: 13px;
+  font-size: 1rem;
   font-weight: 500;
   font-family: "Segoe UI", sans-serif;
   cursor: pointer;
@@ -140,7 +140,7 @@
 }
 
 .tutorial-status {
-  font-size: 12px;
+  font-size: 1rem;
   color: #9db0c5;
   font-family: "Segoe UI", sans-serif;
 }
@@ -189,14 +189,14 @@
 }
 
 .tutorial-completed-text {
-  font-size: 16px;
+  font-size: 1.33rem;
   font-weight: 600;
   color: #22c55e;
   font-family: "Segoe UI", sans-serif;
 }
 
 .tutorial-completed-sub {
-  font-size: 13px;
+  font-size: 0.9rem;
   color: #93a9c0;
   font-family: "Segoe UI", sans-serif;
 }

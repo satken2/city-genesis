@@ -29,7 +29,7 @@
 .road-detail__preview-text {
   flex: 1;
   min-width: 0;
-  font-size: 1.06rem;
+  font-size: 1rem;
   line-height: 1.4;
   color: #d8e3ee;
 }
@@ -71,13 +71,13 @@
 /* ---- 削除済み ---- */
 .road-detail__deleted {
   padding: 12px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #d8e3ee;
 }
 
 .road-detail__deleted p {
   margin: 6px 0 0;
-  font-size: 1.03rem;
+  font-size: 1rem;
   color: #93a9c0;
 }
 
@@ -142,7 +142,7 @@
   border-radius: 10px;
   background: transparent;
   color: #d8e3ee;
-  font-size: 0.97rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 

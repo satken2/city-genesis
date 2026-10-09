@@ -1,4 +1,4 @@
-.map-nav { width: 350px; min-width: 280px; max-width: 38%; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; background: var(--flat-surface); color: var(--flat-text); box-shadow: var(--flat-shadow-sm); z-index: 2; font-size: 1.3rem; }
+.map-nav { width: 350px; min-width: 280px; max-width: 38%; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; background: var(--flat-surface); color: var(--flat-text); box-shadow: var(--flat-shadow-sm); z-index: 2; font-size: 1rem; }
 .map-nav button, .map-nav input { font: inherit; box-sizing: border-box; }
 .map-nav button { cursor: pointer; background: transparent; color: var(--flat-accent); border: 0; border-radius: 0; box-shadow: none; }
 .map-nav button:hover { background: var(--flat-raised-hover); }
@@ -26,9 +26,9 @@
 .map-nav__modes button { flex: 1; background: var(--flat-surface); padding: 10px 6px; color: var(--flat-text-label); border-radius: 0; }
 .map-nav__modes button.is-active { background: var(--flat-selected); color: var(--flat-text); }
 .map-nav__modes button.is-active:hover { background: var(--flat-selected-hover); }
-.map-nav__pick { padding: 8px 14px; font-size: 1.11rem !important; }
+.map-nav__pick { padding: 8px 14px; font-size: 1rem !important; }
 .map-nav__field-actions { display: flex; justify-content: space-between; margin-top: 8px; }
-.map-nav__field-actions button { padding: 6px; font-size: 1.11rem; }
+.map-nav__field-actions button { padding: 6px; font-size: 1rem; }
 .map-nav__content { flex: 1; min-height: 0; overflow-y: auto; }
 .map-nav__empty { padding: 50px 28px; text-align: center; color: var(--flat-text-label); }
 .map-nav__empty > span { color: var(--flat-accent); font-size: 5.56rem; }
@@ -46,8 +46,8 @@
 .map-nav__summary { padding: 24px 20px 8px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; }
 .map-nav__summary strong { font-size: 2.31rem; font-weight: 500; color: var(--flat-good); }
 .map-nav__summary > span { color: var(--flat-text-label); }
-.map-nav__summary button { font-size: 1.11rem; padding: 4px 0; }
-.map-nav__snapshot { margin: 8px 20px 20px; font-size: 1.11rem; color: var(--flat-text-label); line-height: 1.6; }
+.map-nav__summary button { font-size: 1rem; padding: 4px 0; }
+.map-nav__snapshot { margin: 8px 20px 20px; font-size: 1rem; color: var(--flat-text-label); line-height: 1.6; }
 .map-nav__legs { list-style: none; padding: 0; margin: 0 0 20px; }
 .map-nav__legs li > button { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px 20px; border-radius: 0; color: var(--flat-text); }
 .map-nav__legs strong { display: block; font-weight: 500; }

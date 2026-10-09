@@ -139,7 +139,7 @@
 .terrain-editor-toggle-btn {
   flex: 1 1 0;
   padding: 5px 6px;
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #c8c8d0;
   background-color: #1c1c24;
   border: 1px solid #30303c;
@@ -173,7 +173,7 @@
 }
 
 .terrain-editor-param-label {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #b0b0bc;
   flex: 1 1 auto;
 }
@@ -187,7 +187,7 @@
   border: 1px solid #30303c;
   border-radius: 4px;
   padding: 4px 6px;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .terrain-editor-hint {
@@ -207,7 +207,7 @@
 
 .terrain-editor-param-value {
   flex: 0 0 auto;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .terrain-editor-unsaved {
@@ -221,12 +221,12 @@
 }
 
 .terrain-editor-polygon-count {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #a0c8ff;
 }
 
 .terrain-editor-selection-status {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #a0c8ff;
   font-weight: 600;
 }
@@ -246,7 +246,7 @@
 .terrain-editor-btn {
   flex: 1 1 0;
   padding: 6px 6px;
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #e0e0e0;
   background-color: #23232d;
   border: 1px solid #383846;
@@ -313,7 +313,7 @@
   background-color: rgba(20, 20, 28, 0.9);
   border: 1px solid #333;
   border-radius: 8px;
-  font-size: 1.3rem;
+  font-size: 1rem;
   color: #ccc;
   z-index: 5;
   pointer-events: none;
@@ -334,7 +334,7 @@
   background-color: rgba(0, 0, 0, 0.55);
   border-radius: 4px;
   font-family: Consolas, Menlo, monospace;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #c0c0c0;
   pointer-events: none;
   z-index: 5;
@@ -349,7 +349,7 @@
   background-color: rgba(0, 0, 0, 0.55);
   border-radius: 4px;
   font-family: Consolas, Menlo, monospace;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #c0c0c0;
   pointer-events: none;
   z-index: 5;
@@ -367,7 +367,7 @@
 }
 
 .terrain-editor-tabs-label {
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #9aa0b0;
   flex: 0 0 auto;
@@ -378,7 +378,7 @@
   flex: 1 1 auto;
   min-width: 0;
   padding: 6px 8px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-weight: 600;
   background-color: #2a3a52;
   border-color: #5a8fd6;

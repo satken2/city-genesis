@@ -22,7 +22,7 @@
 }
 
 .pc-section-title {
-  font-size: 0.9rem;
+  font-size: 1.18rem;
   font-weight: 600;
   color: #c5d4e3;
   text-transform: uppercase;
@@ -90,7 +90,7 @@
 .pc-select {
   width: 100%;
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 1.11rem;
+  font-size: 1rem;
   background: rgba(255, 255, 255, 0.08);
   color: #f6fbff;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -176,7 +176,7 @@
 
 .pc-spec-value {
   font-family: "Consolas", "Menlo", monospace;
-  font-size: 0.97rem;
+  font-size: 1rem;
   color: #c5d4e3;
 }
 
@@ -296,7 +296,7 @@
 /* ---- ローディング/empty ---- */
 .pc-muted {
   color: #9db0c5;
-  font-size: 1.06rem;
+  font-size: 1rem;
   text-align: center;
   padding: 8px;
 }

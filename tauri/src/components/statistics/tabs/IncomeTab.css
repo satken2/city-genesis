@@ -29,7 +29,7 @@
 }
 
 .scope-selector__label {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #8ba3bb;
   font-weight: 500;
 }
@@ -39,7 +39,7 @@
   border: 1px solid #2a3b50;
   border-radius: 4px;
   color: #e2e8f0;
-  font-size: 1.02rem;
+  font-size: 1rem;
   padding: 4px 24px 4px 8px;
   cursor: pointer;
   outline: none;
@@ -166,7 +166,7 @@
 .pie-legend-item {
   display: flex;
   align-items: center;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .pie-legend-item__dot {
@@ -201,7 +201,7 @@
 
 .income-tooltip__bin,
 .income-tooltip__tier {
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #f1f5f9;
   margin: 0 0 6px 0;
@@ -209,7 +209,7 @@
 
 .income-tooltip__item,
 .income-tooltip__val {
-  font-size: 0.93rem;
+  font-size: 1rem;
   margin: 4px 0 0 0;
   color: #c1c9d2;
 }
@@ -223,7 +223,7 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #8ba3bb;
 }
 

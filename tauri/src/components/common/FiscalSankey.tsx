@@ -286,7 +286,7 @@ export function FiscalSankey({
                     y={props.y + props.height / 2}
                     dy=".35em"
                     fill="#cbd5e1"
-                    fontSize="1.02rem"
+                    fontSize="1rem"
                     textAnchor={textAnchor}
                   >
                     {props.payload?.name}

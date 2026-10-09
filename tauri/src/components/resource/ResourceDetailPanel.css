@@ -16,7 +16,7 @@
 
 .resource-detail__loading {
   color: #9db0c5;
-  font-size: 1.06rem;
+  font-size: 1rem;
 }
 
 .resource-detail__error {
@@ -51,7 +51,7 @@
 }
 
 .resource-detail__card-name {
-  font-size: 1.11rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #f6fbff;
   margin-bottom: 6px;

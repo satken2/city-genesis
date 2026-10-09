@@ -80,7 +80,7 @@
 .pp-type-tile:disabled { opacity: 0.5; cursor: default; }
 .pp-thumbnail { position: relative; flex: 1 1 0; min-height: 0; display: grid; place-items: center; }
 .pp-thumbnail img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.pp-thumbnail-missing { color: #93a9c0; font-size: 0.9rem; }
+.pp-thumbnail-missing { color: #93a9c0; font-size: 1rem; }
 
 /* 名前は2行まで。1行の名前でも2行分の高さを確保し、見本画像の大きさをタイル間で揃える。
  * 切れた名前は title(ツールチップ)と「選択中」の行で全文を確認できる */
@@ -91,7 +91,7 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  font-size: 0.97rem;
+  font-size: 1rem;
   line-height: 1.3;
   overflow-wrap: anywhere;
   text-align: center;

@@ -12,7 +12,7 @@
   overflow-y: auto;
   background: #0f1420;
   color: #cdd6f4;
-  font-size: 1.08rem;
+  font-size: 1rem;
 }
 
 .agent-creation__hint {
@@ -55,7 +55,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 1.08rem;
+  font-size: 1rem;
 }
 
 .agent-creation__select {
@@ -86,7 +86,7 @@
   border: none;
   background: #1b2135;
   color: #93a9c0;
-  font-size: 1.04rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 
@@ -131,7 +131,7 @@
   border-radius: 4px;
   background: #1b2135;
   color: #cdd6f4;
-  font-size: 1.04rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 

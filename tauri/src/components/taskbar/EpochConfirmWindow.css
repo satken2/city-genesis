@@ -72,7 +72,7 @@
 
 .epoch-confirm-message {
   margin: 0;
-  font-size: 1.08rem;
+  font-size: 1rem;
   line-height: 1.6;
   color: var(--flat-text-body);
 }
@@ -148,7 +148,7 @@
 }
 
 .epoch-confirm-label {
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.3;
   color: var(--flat-text-muted);
 }
@@ -181,7 +181,7 @@
 }
 
 .epoch-confirm-step--count .epoch-confirm-label {
-  font-size: 1.08rem;
+  font-size: 1rem;
   color: var(--flat-text-label);
 }
 

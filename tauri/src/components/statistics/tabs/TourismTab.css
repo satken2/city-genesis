@@ -43,7 +43,7 @@
 }
 
 .tourism-tile__label {
-  font-size: 1.02rem;
+  font-size: 1rem;
   color: #9ca3af;
   white-space: nowrap;
   overflow: hidden;
@@ -118,7 +118,7 @@
   justify-content: center;
   min-height: 60px;
   color: #6b7280;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .tourism-card__no-data {
@@ -130,7 +130,7 @@
 .tourism-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .tourism-table th {
@@ -165,7 +165,7 @@
 .tourism-table__muted,
 .tourism-table__facility {
   display: block;
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 400;
   color: #8ba3bb;
 }
@@ -190,7 +190,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 6px 14px;
-  font-size: 1.11rem;
+  font-size: 1rem;
   margin-bottom: 8px;
 }
 
@@ -207,7 +207,7 @@
 .tourism-kv__note {
   margin-left: 8px;
   color: #8ba3bb;
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-family: inherit;
 }
 
@@ -239,7 +239,7 @@
   grid-template-columns: 110px 1fr 44px;
   align-items: center;
   gap: 8px;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .tourism-meter__label {
@@ -291,7 +291,7 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 1.11rem;
+  font-size: 1rem;
   margin-bottom: 4px;
 }
 
@@ -302,7 +302,7 @@
 
 .tourism-bar-item__values {
   font-family: monospace;
-  font-size: 1.02rem;
+  font-size: 1rem;
 }
 
 .tourism-bar-item__value {
@@ -339,7 +339,7 @@
   justify-content: center;
   height: 100%;
   color: #9ca3af;
-  font-size: 1.3rem;
+  font-size: 1rem;
 }
 
 .tourism-tab__error {

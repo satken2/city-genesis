@@ -43,6 +43,6 @@
 
 .city-rename-error {
   margin: 0 0 8px;
-  font-size: 12px;
+  font-size: 1rem;
   color: var(--flat-danger);
 }

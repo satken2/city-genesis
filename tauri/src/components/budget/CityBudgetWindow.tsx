@@ -1154,7 +1154,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_LINE} vertical={false} />
                     <XAxis
                       dataKey="name"
-                      tick={{ fontSize: "1.02rem", fill: CHART_AXIS_TEXT }}
+                      tick={{ fontSize: "1rem", fill: CHART_AXIS_TEXT }}
                       tickLine={false}
                       stroke={CHART_AXIS_LINE}
                     />

@@ -201,7 +201,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                           : formatCompact(Number(value))
                       }
                     />
-                    <Legend wrapperStyle={{ fontSize: "1.02rem" }} />
+                    <Legend wrapperStyle={{ fontSize: "1rem" }} />
                     {/* スコア0 = 建設が成立するライン */}
                     <ReferenceLine
                       yAxisId="score"
@@ -212,7 +212,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         value: t("statistics.debugSpawnZeroLine"),
                         position: "insideTopRight",
                         fill: "#f59e0b",
-                        fontSize: "1.02rem",
+                        fontSize: "1rem",
                       }}
                     />
                     <Bar

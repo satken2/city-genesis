@@ -44,7 +44,7 @@
   min-width: 4.5rem;
   padding: 1px 6px;
   border-radius: 4px;
-  font-size: 0.86rem;
+  font-size: 1rem;
   text-align: center;
   background: rgba(255, 255, 255, 0.1);
   color: #c5d4e3;
@@ -64,6 +64,6 @@
 .citizen-visit-detail {
   margin-top: 2px;
   padding-left: calc(4.5rem + 20px);
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #9fb3c8;
 }

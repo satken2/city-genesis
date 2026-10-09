@@ -79,7 +79,7 @@
 .realestate-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1.11rem;
+  font-size: 1rem;
 }
 
 .realestate-table th {
@@ -149,7 +149,7 @@
   display: inline-block;
   padding: 0.21rem 0.56rem;
   border-radius: 4px;
-  font-size: 1.04rem;
+  font-size: 1rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   background-color: #1a2a3a;
@@ -184,7 +184,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  font-size: 1.11rem;
+  font-size: 1rem;
   color: #5c6b7a;
 }
 
@@ -194,7 +194,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  font-size: 1.25rem;
+  font-size: 1rem;
 }
 
 .realestate-tab__error {
