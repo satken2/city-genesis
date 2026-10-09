@@ -76,11 +76,13 @@ for (const early of [true, false]) {
     let stateIndex = 0, queries = 0, starts = 0;
     const effects = [], exports = {};
     vm.runInNewContext(code, {
-      exports, console, setTimeout: () => 1, clearTimeout: () => {},
+      exports, console, setTimeout: () => 1, clearTimeout: () => {}, setInterval: () => 1, clearInterval: () => {},
       require: (name) => {
+        // TipsWindow の3番目の useState(ready)だけを true にして、準備完了の画面を描く。
         if (name === "react") return {
-          useState: (initial) => [stateIndex++ === 1 ? true : typeof initial === "function" ? initial() : initial, () => {}],
+          useState: (initial) => [stateIndex++ === 2 ? true : typeof initial === "function" ? initial() : initial, () => {}],
           useEffect: (effect) => effects.push(effect),
+          useCallback: (callback) => callback,
         };
         if (name === "react/jsx-runtime") return require(name);
         if (name === "react-i18next") return { useTranslation: () => ({ t: (key) => key }) };

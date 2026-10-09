@@ -140,9 +140,9 @@ Cockpitは幅800px・高さ76pxの独立したWebViewウィンドウである。
 
 ## 検証
 
-`node tools/check_epoch_flow.mjs`（tauri起点）で、HTTPの即時開始、暗転前の結果保留、早い完了時のTips省略、遅い完了・Tips生成途中の完了・失敗時の自動クローズ、Tipsの初期ロード/エポック切り替え、演出IDの照合と通知待ちの解除を検証する。Unity QAは結果画面を閉じるまでの黒幕保持、描画反映後の完了通知、日没1.5秒・フェード0.5秒と復帰の所要時間を検査する。`Captures/t_blackout.png`では黒幕込みのオフスクリーン描画を検査し、全画素が黒であることを確認する。
+`node tools/epoch-flow-test.mjs`（tauri起点）で、HTTPの即時開始、暗転前の結果保留、早い完了時のTips省略、遅い完了・Tips生成途中の完了・失敗時の自動クローズ、Tipsの初期ロード/エポック切り替え、演出IDの照合と通知待ちの解除を検証する。Unity QAは結果画面を閉じるまでの黒幕保持、描画反映後の完了通知、日没1.5秒・フェード0.5秒と復帰の所要時間を検査する。`Captures/t_blackout.png`では黒幕込みのオフスクリーン描画を検査し、全画素が黒であることを確認する。
 
-Tauri側は`node tools/check_weather_audio.mjs`で音量設定の同期を確認する。型検査は`npx tsc --noEmit -p tsconfig.json`、配布アセットの生成は`npx vite build`。実際のWebView2での音量バランスと画面下端のselect操作は本編で確認する。
+Tauri側は`node tools/weather-audio-test.mjs`で音量設定の同期を確認する。型検査は`npx tsc --noEmit -p tsconfig.json`、配布アセットの生成は`npx vite build`。実際のWebView2での音量バランスと画面下端のselect操作は本編で確認する。
 
 `unity/Tests/Weather/run-unity.ps1` は本編のC#をビルドし、`Temp/WeatherUnityQA` の独立したUnityプロジェクトで検証を開始する。本編シーンや実行中の都市は変更しない。完了時の `result.txt` と `qa.log` を確認する。
 

@@ -24,4 +24,5 @@ Unity に重ねて表示する Tauri・React・TypeScript のUI。React は各�
 - IPC: `docs/docs/programs/IPC連携の整理.md`。素材: `docs/docs/programs/素材クレジット管理.md`。
 - 配下の規約: `tauri/src/components/AGENTS.md`・`tauri/src-tauri/AGENTS.md`・`tauri/src/tutorial/AGENTS.md`。
 - 開発は `npm run tauri dev`、配布ビルドは `npm run tauri build`(Steam 版は `npm run tauri build -- --features steam`)。翻訳の整合性は `tools/check_i18n_parity.py` で確認する。
+- テストは `npm test` ですべて実行する。複数のファイルからなるテストは `tools/<名前>/run.mjs` を入口にし、単独のテストは `tools/*-test.mjs`・`tools/*-test.ts` の名前で置く(どちらも `npm test` が拾う)。
 - ブラウザ版は `npm run dev:web`(開発サーバー)・`npm run build:web`(`dist-web/` へ出力)。構成は `docs/docs/programs/コンポーネント連携.md` の「ブラウザ版」。

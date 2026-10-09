@@ -47,3 +47,10 @@ Steam 版の配布ビルドはストア連携を有効にする(`build.ps1`)。�
 ```
 npm run tauri build -- --features steam
 ```
+# テスト
+
+```
+npm test
+```
+
+`tools/` 配下のテストをすべて実行する。1つのグループだけなら `npm run test:tutorial` などを使う。
