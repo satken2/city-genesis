@@ -137,7 +137,6 @@ type CityData = {
     epoch: number;
     current_date: number;
     simulation_days: number;
-    is_early_game?: boolean;
   };
 };
 
