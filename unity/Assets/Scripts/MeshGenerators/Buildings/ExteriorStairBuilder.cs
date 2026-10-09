@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 辺ごとの外階段 {base|mid|top}-stair{辺index+1} を元の占有輪郭内に確保し、その辺の終点を原点として各階へ配置する。
+/// 本体の外側に付く部材（辺ごとの外階段 {base|mid|top}-stair{辺index+1} と前面のエントランス）を元の占有輪郭内に確保し、
+/// 部材のある辺を後退させた本体輪郭を作る。外階段はその辺の終点を基準に各階へ配置する。
 /// 壁・角と違い位置番号のフォールバックはしない。mid-stair{n} が無い辺には外階段を置かない。
 /// </summary>
 public static class ExteriorStairBuilder
@@ -30,6 +31,7 @@ public static class ExteriorStairBuilder
     {
         public Vector2[] Body;
         public float MidScale;
+        public Bounds? Entrance; // 採用したエントランスの範囲（無印と接写を包む）。null ならエントランスを置かない
         public readonly List<Stair> Stairs = new List<Stair>();
 
         /// <summary>Append せずに捨てるときに、読み込んだパーツのメッシュを解放する。</summary>
@@ -85,16 +87,34 @@ public static class ExteriorStairBuilder
         }
     }
 
-    public static Layout Create(Vector2[] footprint, string prefix, int suffix, float floorHeight)
+    /// <summary>
+    /// エントランスを先に採否し、続けて外階段を頂点0の辺から順に採否する。先に採用した部材と両立しない部材は省略する。
+    /// 部材が1つも採用されなければ null（本体輪郭は元のまま）。
+    /// </summary>
+    /// <param name="withStairs">外階段を置くか。最上階しか描かない SHAPE_FULL では置かない</param>
+    /// <param name="entrance">エントランスの範囲（無印と接写を包む）。置かない建物・パーツの無い建物は null</param>
+    public static Layout Create(Vector2[] footprint, string prefix, int suffix, float floorHeight, bool withStairs, Bounds? entrance)
     {
         if (footprint == null || footprint.Length < 3 || suffix < 0) return null;
+        var layout = new Layout();
+        if (entrance.HasValue && TryLayout(footprint, layout.Stairs, entrance, out var body))
+        {
+            layout.Body = body;
+            layout.Entrance = entrance;
+        }
+        if (withStairs) AddStairs(layout, footprint, prefix, suffix, floorHeight);
+        return layout.Body != null ? layout : null;
+    }
+
+    static void AddStairs(Layout layout, Vector2[] footprint, string prefix, int suffix, float floorHeight)
+    {
         var candidates = new List<Stair>();
         for (int edge = 0; edge < footprint.Length; edge++)
         {
             var stair = Load(prefix, edge, suffix);
             if (stair != null) candidates.Add(stair);
         }
-        if (candidates.Count == 0) return null;
+        if (candidates.Count == 0) return;
         // 手すり・床厚を含む階段のbbox高さではなく、同じ建物の中層壁の著作階高で倍率を決める。
         var wall = BuildingMeshUtils.GetPart(prefix, "mid", "w", 1, suffix, true);
         Mesh reference = BuildingMeshUtils.CombineModuleMeshes(wall, out _);
@@ -103,19 +123,17 @@ public static class ExteriorStairBuilder
         if (authoredHeight <= .01f)
         {
             foreach (var stair in candidates) stair.Release();
-            return null;
+            return;
         }
-        var layout = new Layout { MidScale = floorHeight / authoredHeight };
-        // 頂点0の辺から順に採否を決め、先に採用した外階段と両立しない辺の外階段は省略する。
+        layout.MidScale = floorHeight / authoredHeight;
         // 成立した試行は採用済み全件の配置を書き直すので、開口は常に最終の本体輪郭で測られている。
         foreach (var stair in candidates)
         {
             layout.Stairs.Add(stair);
-            if (TryLayout(footprint, layout.Stairs, out var body)) { layout.Body = body; continue; }
+            if (TryLayout(footprint, layout.Stairs, layout.Entrance, out var body)) { layout.Body = body; continue; }
             layout.Stairs.RemoveAt(layout.Stairs.Count - 1);
             stair.Release();
         }
-        return layout.Stairs.Count > 0 ? layout : null;
     }
 
     static Stair Load(string prefix, int edge, int suffix)
@@ -136,11 +154,12 @@ public static class ExteriorStairBuilder
     }
 
     /// <summary>
-    /// 外階段のある辺を奥行きだけ内側へ平行移動し、隣の辺（後退していればその後退線）との交点で本体輪郭を作る。
+    /// 部材のある辺を、その辺の部材の最大奥行きだけ内側へ平行移動し、隣の辺（後退していればその後退線）との交点で本体輪郭を作る。
+    /// 外階段は内側の面、エントランスは壁のアライメントラインを、後退した本体の面に合わせる。
     /// 辺の反転・自己交差・元の輪郭からのはみ出し・階段どうしや本体との重なりが起きる配置は成立させない。
     /// 成立したときだけ各外階段の原点・向き・開口を書き込む。
     /// </summary>
-    public static bool TryLayout(Vector2[] polygon, IReadOnlyList<Stair> stairs, out Vector2[] body)
+    public static bool TryLayout(Vector2[] polygon, IReadOnlyList<Stair> stairs, Bounds? entrance, out Vector2[] body)
     {
         body = null;
         int n = polygon?.Length ?? 0;
@@ -154,6 +173,8 @@ public static class ExteriorStairBuilder
                 || -bounds.min.z < .1f || bounds.min.x < -.01f || bounds.max.z > .01f) return false;
             depths[stair.Edge] = -bounds.min.z;
         }
+        // エントランスの奥行きは屋外側(+Z)への張り出し。壁へ食い込む側(-Z)は本体と重なってよい。
+        if (entrance.HasValue) depths[0] = Mathf.Max(depths[0], entrance.Value.max.z);
         var result = new Vector2[n];
         for (int i = 0; i < n; i++)
         {
@@ -170,6 +191,13 @@ public static class ExteriorStairBuilder
             if (Vector2.Dot(result[next] - result[i], along) < (depths[i] > 0 ? .1f : .01f)) return false;
         }
         if (!SimpleInside(result, polygon) || PolygonUtils.SignedArea(result) < .1f) return false;
+        // エントランスは後退後の前面の辺の中央に置かれる（BuildingMeshBuilder.GenerateEntrance）。
+        // 外階段との重なりは判定しない。
+        if (entrance.HasValue)
+        {
+            Vector2 middle = (result[0] + result[1]) * .5f;
+            if (!SimpleInside(Rectangle(entrance.Value, new Vector3(middle.x, 0, middle.y), Facing(polygon, 0)), polygon)) return false;
+        }
 
         var origins = new Vector3[stairs.Count];
         var rotations = new Quaternion[stairs.Count];
@@ -179,18 +207,12 @@ public static class ExteriorStairBuilder
         {
             int start = stairs[k].Edge, end = (start + 1) % n;
             Vector2 along = (polygon[end] - polygon[start]).normalized;
-            Vector2 inward = Inward(polygon, start);
-            origins[k] = new Vector3(polygon[end].x, 0, polygon[end].y);
-            rotations[k] = Quaternion.LookRotation(new Vector3(-inward.x, 0, -inward.y));
             Bounds bounds = stairs[k].Bounds;
-            var corners = new Vector2[4];
-            int index = 0;
-            foreach (var local in new[] {new Vector2(bounds.min.x,bounds.min.z),new Vector2(bounds.max.x,bounds.min.z),
-                new Vector2(bounds.max.x,bounds.max.z),new Vector2(bounds.min.x,bounds.max.z)})
-            {
-                Vector3 p = origins[k] + rotations[k] * new Vector3(local.x, 0, local.y);
-                corners[index++] = new Vector2(p.x, p.z);
-            }
+            // 内側の面を本体の面に合わせる。その辺の後退量を外階段自身が決めていれば後退前の辺の終点そのもの。
+            Vector2 origin = polygon[end] + Inward(polygon, start) * (depths[start] + bounds.min.z);
+            origins[k] = new Vector3(origin.x, 0, origin.y);
+            rotations[k] = Facing(polygon, start);
+            var corners = Rectangle(bounds, origins[k], rotations[k]);
             if (!SimpleInside(corners, polygon) || Overlaps(corners, result)) return false;
             for (int j = 0; j < k; j++) if (Overlaps(corners, footprints[j])) return false;
             footprints[k] = corners;
@@ -219,6 +241,27 @@ public static class ExteriorStairBuilder
     {
         Vector2 along = (polygon[(edge + 1) % polygon.Length] - polygon[edge]).normalized;
         return new Vector2(-along.y, along.x);
+    }
+
+    /// <summary>ローカル+Zを辺 edge の屋外側へ向ける回転。壁パーツの配置（辺方向へ向けてY軸180°反転）と同じ向きになる。</summary>
+    static Quaternion Facing(Vector2[] polygon, int edge)
+    {
+        Vector2 inward = Inward(polygon, edge);
+        return Quaternion.LookRotation(new Vector3(-inward.x, 0, -inward.y));
+    }
+
+    /// <summary>パーツの水平範囲を配置したときの4隅。</summary>
+    static Vector2[] Rectangle(Bounds bounds, Vector3 origin, Quaternion rotation)
+    {
+        var corners = new Vector2[4];
+        int index = 0;
+        foreach (var local in new[] {new Vector2(bounds.min.x,bounds.min.z),new Vector2(bounds.max.x,bounds.min.z),
+            new Vector2(bounds.max.x,bounds.max.z),new Vector2(bounds.min.x,bounds.max.z)})
+        {
+            Vector3 p = origin + rotation * new Vector3(local.x, 0, local.y);
+            corners[index++] = new Vector2(p.x, p.z);
+        }
+        return corners;
     }
 
     static float Cross(Vector2 a, Vector2 b) => a.x * b.y - a.y * b.x;

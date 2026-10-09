@@ -558,10 +558,36 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
+    /// エントランスの範囲(GenerateEntrance が配置するメッシュのローカル座標)。無印と接写 `_close` の両方を包む。無印が無ければ false。
+    /// 本体の後退と収まりの判定(ExteriorStairBuilder)をこの範囲で行うので、描画LODによらず同じ本体輪郭になり、
+    /// 接写の前方への追加張り出しも元の底面に収まる。
+    /// </summary>
+    public static bool TryGetEntranceBounds(string prefix, int suffix, out Bounds bounds)
+    {
+        bounds = default;
+        if (ModelManager.Instance == null) return false;
+        string path = $"Models/Buildings/{prefix}/{suffix}/entrance";
+        Mesh plain = EntranceMesh(ModelManager.Instance.GetModel(path, true));
+        if (plain == null) return false;
+        bounds = plain.bounds;
+        Mesh close = EntranceMesh(ModelManager.Instance.GetModel(path + BuildingMeshUtils.CLOSE_SUFFIX, true));
+        if (close != null) bounds.Encapsulate(close.bounds);
+        return true;
+    }
+
+    /// <summary>エントランスとして配置するメッシュ。最初の MeshFilter のメッシュだけを使う。</summary>
+    static Mesh EntranceMesh(GameObject module)
+    {
+        MeshFilter mf = module != null ? module.GetComponentInChildren<MeshFilter>() : null;
+        return mf != null ? mf.sharedMesh : null;
+    }
+
+    /// <summary>
     /// エントランス(entrance)を建物前面の辺の中央・地面レベルに配置する。
     /// パーツ {prefix}/{suffix}/entrance が存在する場合のみ配置する(オプショナル)。
     ///
-    /// - 前面の辺は底面ポリゴンの最初の辺(頂点0 → 頂点1)とする(塔屋の向き決定 §12.3 と同じ規約)。
+    /// - 前面の辺は底面ポリゴンの最初の辺(頂点0 → 頂点1)とする(塔屋の向き決定 §10.3 と同じ規約)。
+    ///   渡す底面は、屋外側への張り出しが元の占有輪郭に収まるよう前面の辺を後退させた本体輪郭(ExteriorStairBuilder)。
     /// - 原点は地面(ローカルY=0)かつ壁のアライメント面(前面の辺の直線上)。
     ///   壁パーツと同じ場所・同じ回転規約(辺方向へ向けてY軸180°反転。GenerateWallSegments参照)で
     ///   配置するため、壁パーツと同じ座標系で著作すれば壁面に重なる。
@@ -581,8 +607,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             return;
         }
 
-        MeshFilter mf = entranceModule.GetComponentInChildren<MeshFilter>();
-        if (mf == null || mf.sharedMesh == null) return;
+        Mesh sourceMesh = EntranceMesh(entranceModule);
+        if (sourceMesh == null) return;
 
         Vector2 p0 = footprint[0];
         Vector2 p1 = footprint[1];
@@ -595,7 +621,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         float angle = Mathf.Atan2(edge.y, edge.x) * Mathf.Rad2Deg;
         Quaternion rotation = Quaternion.Euler(0, -angle + 180f, 0);
 
-        Mesh meshInstance = Object.Instantiate(mf.sharedMesh);
+        Mesh meshInstance = Object.Instantiate(sourceMesh);
         Vector3[] vertices = meshInstance.vertices;
         Matrix4x4 matrix = Matrix4x4.TRS(position3D, rotation, Vector3.one);
         for (int v = 0; v < vertices.Length; v++)

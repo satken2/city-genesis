@@ -76,21 +76,27 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
     {
         bool isGroundModel = modelType == Constants.MODEL_MODULAR_GROUND;
 
+        // 外階段とエントランスは元の底面の内側に収め、そのぶん後退させた本体輪郭で壁・屋根・床・基盤・塔屋を作る。
+        // SHAPE_FULL は最上階のみを描画するため、外階段は置かず、エントランスは地上に壁が存在する1階建てに限る。
         Vector2[] occupiedFootprint = footprint;
-        int stairSuffix = ModularBodyBuilder.ResolveBuildingVariant(prefix, BuildingMeshUtils.ComputeVariantNumber(visual_variant));
-        var stairs = !isGroundModel && buildingShape != Constants.SHAPE_FULL
-            ? ExteriorStairBuilder.Create(footprint, prefix, stairSuffix, floorHeight) : null;
-        if (stairs != null) footprint = stairs.Body;
+        int partSuffix = ModularBodyBuilder.ResolveBuildingVariant(prefix, BuildingMeshUtils.ComputeVariantNumber(visual_variant));
+        Bounds? entrance = null;
+        if ((buildingShape != Constants.SHAPE_FULL || floors == 1)
+            && BuildingMeshBuilder.TryGetEntranceBounds(prefix, partSuffix, out Bounds entranceBounds))
+            entrance = entranceBounds;
+        var layout = isGroundModel ? null : ExteriorStairBuilder.Create(
+            footprint, prefix, partSuffix, floorHeight, buildingShape != Constants.SHAPE_FULL, entrance);
+        if (layout != null) footprint = layout.Body;
 
         // 1. 壁・地面・フェンス生成
         var bodyData = ModularBodyBuilder.GenerateBody(
             footprint, floors, prefix, floorHeight, visual_variant, buildingShape,
-            modelType, fenceFootprint, centerPointWorld, isDynamic, floorMaterial, stairs);
+            modelType, fenceFootprint, centerPointWorld, isDynamic, floorMaterial, layout);
 
         var combineInstances = bodyData.CombineInstances;
         var allMaterials = bodyData.Materials;
         var temporaryMeshes = bodyData.TemporaryMeshes;
-        stairs?.Append(floors, floorHeight, combineInstances, allMaterials, temporaryMeshes);
+        layout?.Append(floors, floorHeight, combineInstances, allMaterials, temporaryMeshes);
         int resolvedSuffix = bodyData.ResolvedSuffix;
         // 屋根面は階高グリッドに置く。topパーツが持つパラペットや照明で屋根を持ち上げない。
         float buildingHeight = bodyData.BuildingHeight > 0f ? bodyData.BuildingHeight : floors * floorHeight;
@@ -172,9 +178,8 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
 
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBMB-DEBUG] After roofprop. combineInstances.Count={combineInstances.Count}");
 
-            // 4. エントランス
-            // SHAPE_FULL は最上階のみを描画するため、地上に壁が存在する場合(1階建て)に限って配置する。
-            if (buildingShape != Constants.SHAPE_FULL || floors == 1)
+            // 4. エントランス（元の底面に収まらず採用されなかった場合は置かない）
+            if (layout?.Entrance != null)
             {
                 BuildingMeshBuilder.GenerateEntrance(
                     prefix, resolvedSuffix, footprint,
