@@ -19,17 +19,10 @@
     },
     "heightOffset": "高度（与基准的差）",
     "baseNote": {
-      "beforeClosed": "闭合范围后即可确定基准高度",
       "frontage": "0 为所临道路的路面高度（{{value}} m）",
       "terrain_mean": "0 为范围当前的平均高度（{{value}} m）"
     },
     "shoreHeightLocked": "无法指定填海的高度",
-    "guide": {
-      "lead": "点击3D视图中的地形，绘制要施工的范围。",
-      "step1": "左键点击地形放置顶点",
-      "step2": "右键闭合范围（显示估算）",
-      "step3": "指定高度并下达建设指令"
-    },
     "reasons": {
       "invalid_polygon": "范围的形状无效。请画成各边互不相交的形状。",
       "outside_city": "范围超出了城市。",

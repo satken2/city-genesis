@@ -19,17 +19,10 @@
     },
     "heightOffset": "Height (offset from base)",
     "baseNote": {
-      "beforeClosed": "The base height is set once you close the area",
       "frontage": "0 is the surface of the road it faces ({{value}} m)",
       "terrain_mean": "0 is the current average height of the area ({{value}} m)"
     },
     "shoreHeightLocked": "The height of reclaimed land cannot be specified",
-    "guide": {
-      "lead": "Click the terrain in the 3D view to draw the area to develop.",
-      "step1": "Left-click the terrain to place vertices",
-      "step2": "Right-click to close the area (an estimate appears)",
-      "step3": "Set the height and place the order"
-    },
     "reasons": {
       "invalid_polygon": "The area shape is invalid. Draw it without crossing edges.",
       "outside_city": "The area extends outside the city.",

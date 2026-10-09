@@ -19,17 +19,10 @@
     },
     "heightOffset": "높이(기준과의 차)",
     "baseNote": {
-      "beforeClosed": "범위를 닫으면 기준 높이가 정해집니다",
       "frontage": "0은 접한 도로의 노면 높이({{value}} m)",
       "terrain_mean": "0은 범위의 현재 평균 높이({{value}} m)"
     },
     "shoreHeightLocked": "매립의 높이는 지정할 수 없습니다",
-    "guide": {
-      "lead": "3D 뷰의 지형을 클릭하여 조성할 범위를 그립니다.",
-      "step1": "지형을 좌클릭해 정점을 놓기",
-      "step2": "우클릭으로 범위 닫기(견적이 표시됩니다)",
-      "step3": "높이를 지정하고 발주하기"
-    },
     "reasons": {
       "invalid_polygon": "범위의 형태가 올바르지 않습니다. 변이 교차하지 않도록 그려 주세요.",
       "outside_city": "범위가 도시 밖으로 벗어났습니다.",

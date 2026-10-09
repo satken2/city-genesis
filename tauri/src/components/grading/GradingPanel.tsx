@@ -65,8 +65,6 @@ const EMPTY_SHAPE: GradingShape = { polygon: [], finalized: false };
 
 const HEIGHT_OFFSET_STEP = 0.1;
 
-const GUIDE_STEPS = [1, 2, 3] as const;
-
 export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
   const { t } = useTranslation();
   const [shape, setShape] = useState<GradingShape>(EMPTY_SHAPE);
@@ -166,11 +164,8 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
   const baseNote = isShore
     ? t("grading.shoreHeightLocked")
     : requestBody === null
-      ? t("grading.baseNote.beforeClosed")
+      ? null
       : gradingBaseNote(t, shownEstimate) ?? (isLoading ? t("common.loading") : null);
-
-  // 手順ガイドの現在位置。頂点が3つ未満=①、3つ以上で未確定=②、確定後=③
-  const guideStep = requestBody !== null ? 3 : shape.polygon.length < 3 ? 1 : 2;
 
   const handleCancel = useCallback(() => {
     setShape(EMPTY_SHAPE);
@@ -218,22 +213,6 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
 
   return (
     <div className="grading-layout">
-      <div className="grading-section grading-guide">
-        <p className="grading-guide-lead">{t("grading.guide.lead")}</p>
-        <ol className="grading-guide-steps">
-          {GUIDE_STEPS.map((n) => (
-            <li
-              key={n}
-              className={n === guideStep ? "grading-guide-step grading-guide-step-current" : "grading-guide-step"}
-              aria-current={n === guideStep ? "step" : undefined}
-            >
-              <span className="grading-guide-num">{n}</span>
-              {t(`grading.guide.step${n}`)}
-            </li>
-          ))}
-        </ol>
-      </div>
-
       <div className="grading-section">
         <div className="grading-height">
           <div className="pc-settings-row">

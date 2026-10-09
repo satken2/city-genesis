@@ -692,6 +692,6 @@
     "bulldozerInstant": "Bulldozer mode. Left-click to instantly delete buildings, roads, empty parcels, and terrain props with no confirmation. Buildings are removed together with their tenants and residents, and terrain is not restored (the city hall, the border checkpoint, and public transit segments cannot be deleted; scattered props are still removed as a whole area after confirmation). Press the button again to exit.",
     "cityBudget": "Decide how to allocate the funds earned from taxes and business operations for the next period. When the government purchases materials for road construction or public facility operations, it can only do so within the budget decided here. If the budget is insufficient, employees of public facilities may be dismissed. As a general rule, plan to use up all the cash you earn rather than saving it, and give it back to the city.",
     "resourceEdit": "Create a natural resource area. Select a resource type, then click on the terrain. Left-click to add a vertex, click an edge to insert a vertex, and right-click to remove a vertex. Drag a vertex to reposition it.",
-    "grading": "Left-click the terrain to place vertices, then right-click to close the area. After closing, drag a vertex to move it, click an edge to add a vertex, and right-click a vertex to remove it."
+    "grading": "Left-click to place vertices, then right-click to confirm the area."
   }
 }

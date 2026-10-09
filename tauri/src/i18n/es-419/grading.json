@@ -19,17 +19,10 @@
     },
     "heightOffset": "Altura (diferencia con la base)",
     "baseNote": {
-      "beforeClosed": "La altura base se fija al cerrar el área",
       "frontage": "0 es la altura de la calzada a la que da ({{value}} m)",
       "terrain_mean": "0 es la altura media actual del área ({{value}} m)"
     },
     "shoreHeightLocked": "La altura del relleno costero no se puede especificar",
-    "guide": {
-      "lead": "Haz clic en el terreno de la vista 3D para dibujar el área que quieres acondicionar.",
-      "step1": "Haz clic izquierdo en el terreno para colocar vértices",
-      "step2": "Haz clic derecho para cerrar el área (aparece el presupuesto)",
-      "step3": "Indica la altura y realiza el pedido"
-    },
     "reasons": {
       "invalid_polygon": "La forma del área no es válida. Dibújala sin que los lados se crucen.",
       "outside_city": "El área se sale de la ciudad.",

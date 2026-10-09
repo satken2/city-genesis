@@ -692,6 +692,6 @@
     "bulldozerInstant": "Modo bulldozer. Con el clic izquierdo eliminas al instante y sin confirmación edificios, calles, parcelas baldías y props del terreno. Los edificios se eliminan junto con sus inquilinos y habitantes, y el terreno no se restaura (no se pueden eliminar el palacio municipal, el puesto fronterizo ni los tramos de transporte público; los props dispersos se eliminan por área completa tras confirmar). Pulsa de nuevo el botón para salir.",
     "cityBudget": "Decide cómo repartir en el siguiente periodo los fondos obtenidos por impuestos y actividades. Cuando el gobierno compra insumos para obra vial o para operar servicios públicos, solo puede hacerlo dentro del presupuesto definido aquí. Además, si el presupuesto no alcanza, puede haber despidos de personal en los servicios públicos.",
     "resourceEdit": "Crea áreas de recursos naturales. Elige el tipo de recurso y haz clic en el terreno. El clic izquierdo añade vértices, al hacer clic en una arista se inserta un vértice y con el clic derecho se elimina. Arrastrando puedes mover la posición de los vértices.",
-    "grading": "Haz clic izquierdo en el terreno para colocar vértices y clic derecho para cerrar el área. Después de cerrarla, arrastra un vértice para moverlo, haz clic en una arista para agregar un vértice y clic derecho sobre un vértice para eliminarlo."
+    "grading": "Haz clic izquierdo para colocar vértices y clic derecho para confirmar el área."
   }
 }

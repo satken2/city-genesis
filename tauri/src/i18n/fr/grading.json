@@ -19,17 +19,10 @@
     },
     "heightOffset": "Hauteur (écart à la base)",
     "baseNote": {
-      "beforeClosed": "La hauteur de base est fixée une fois la zone fermée",
       "frontage": "0 correspond à la chaussée de la route qui borde la zone ({{value}} m)",
       "terrain_mean": "0 correspond à la hauteur moyenne actuelle de la zone ({{value}} m)"
     },
     "shoreHeightLocked": "La hauteur d'un remblai sur la mer ne peut pas être définie",
-    "guide": {
-      "lead": "Cliquez sur le terrain dans la vue 3D pour tracer la zone à aménager.",
-      "step1": "Clic gauche sur le terrain pour placer les sommets",
-      "step2": "Clic droit pour fermer la zone (l'estimation s'affiche)",
-      "step3": "Définissez la hauteur et passez la commande"
-    },
     "reasons": {
       "invalid_polygon": "La forme de la zone n'est pas valide. Tracez-la sans que les côtés se croisent.",
       "outside_city": "La zone dépasse les limites de la ville.",
