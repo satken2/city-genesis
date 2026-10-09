@@ -3,6 +3,7 @@
     "title": "Drive",
     "car": "Car",
     "rail": "Rail routes",
+    "running": "Running vehicles",
     "standard": "Passenger car",
     "commercial": "Commercial vehicle",
     "truck": "Truck",
@@ -10,6 +11,7 @@
     "noLines": "No operating rail routes are available to ride.",
     "pickRail": "Click a track on the selected route.",
     "pickRoad": "Click an active road.",
+    "pickVehicle": "Click a moving car, bus or train (drag to pan).",
     "clickStart": "Select a starting position (drag to pan).",
     "startSelected": "Start selected. Depart in the arrow's direction.",
     "reverse": "Reverse direction",
@@ -17,11 +19,16 @@
     "back": "Back",
     "close": "Exit (Esc)",
     "invalidStart": "Cannot start here. Select a drivable road or a track on your route.",
+    "invalidVehicle": "No vehicle selected. Click a moving car, bus or train.",
     "notReady": "This direction is unavailable or nearby tracks are loading. Change direction or position, or wait and retry.",
-    "controls": "Hold Space: 5× speed / Esc: exit",
+    "controls": "Hold Space: 5× speed / V: switch view / Esc: exit",
+    "chaseControls": "Wheel: distance / Right-drag: angle",
+    "viewFirst": "View: first-person (V)",
+    "viewThird": "View: third-person (V)",
     "turnControls": "← →: choose exit / ↑: nearest to straight",
     "loading": "Loading tracks…",
     "onRoute": "Following the route; stops and turnarounds are automatic.",
+    "watching": "Driven by its NPC driver.",
     "waiting": "Dead end or waiting for a connection (turns back if allowed)."
   }
 }

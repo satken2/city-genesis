@@ -12,12 +12,12 @@ public partial class VehicleManager
     private FollowRun followRun;
     private readonly Dictionary<GameObject, Renderer[]> pickRenderers = new();
 
-    /// <summary>画面内の自家用車。一時停止中は動かないので、クリックの瞬間に集めて当たり判定に使う。</summary>
+    /// <summary>画面内の走行中の車(全車種)。押した瞬間に集めて当たり判定に使い、車種の絞り込みは呼び出し側が行う。</summary>
     public void CollectPickTargets(List<Vehicle> result, Plane[] frustum)
     {
         foreach (var v in active)
         {
-            if (v.vehicleType != Constants.VEHICLE_STANDARD || v == DrivenVehicle || v.fading || v.ExitingRoad
+            if (v == DrivenVehicle || v.fading || v.ExitingRoad
                 || v.go == null || !v.go.activeInHierarchy) continue;
             foreach (var renderer in PickRenderers(v.go))
                 if (renderer.enabled && GeometryUtility.TestPlanesAABB(frustum, renderer.bounds)) { result.Add(v); break; }

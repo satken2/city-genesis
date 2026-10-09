@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using GeneratedModels;
 using UnityEngine;
 
-/// <summary>既存路線の第1編成へ乗車する。停車・折り返し・各車の配置は通常描画と共通。</summary>
+/// <summary>
+/// 選んだ位置から路線の第1編成へ乗車するか、描画中の編成を選んでそのまま眺める。停車・折り返し・各車の配置は通常描画と共通。
+/// </summary>
 public sealed partial class TransitVehicleManager
 {
     public int DrivenLineId { get; private set; } = -1;
     public Vector3 DrivePosition { get; private set; }
     public Vector3 DriveDirection { get; private set; } = Vector3.forward;
+    public float DriveCarLength { get; private set; }
     public bool DriveWaiting { get; private set; }
+    private int drivenTrain;
     private double driveOffset;
     private float driveDelta;
 
@@ -28,18 +32,40 @@ public sealed partial class TransitVehicleManager
         float fraction = polyline.Project(point) / Mathf.Max(.001f, polyline.Length);
         if (!TryFindDriveTime(line.motion, path, fraction, forward, out double time)) return false;
         RefreshGeometry(point);
+        if (!PoseDrive(line, time)) return false;
+        DrivenLineId = lineId; drivenTrain = 0;
+        driveOffset = time - clock;
+        return true;
+    }
+
+    /// <summary>描画中の編成(バスを含む)をそのまま眺める。時計をずらさないので位置は飛ばない。</summary>
+    public bool Watch(int lineId, int train)
+    {
+        var line = lines.Find(item => item.data.line_agent_id == lineId);
+        if (line == null || routeGeometry == null) return false;
+        int trains = Trains(line);
+        if (train < 0 || train >= trains) return false;
+        double headway = Headway(line, trains);
+        if (!PoseDrive(line, line.motion.Schedule(clock + headway * train, headway * trains))) return false;
+        DrivenLineId = lineId; drivenTrain = train;
+        driveOffset = 0;
+        return true;
+    }
+
+    /// <summary>乗車を始めた瞬間の先頭の車両の位置と向き。以後は DrawLine が毎フレーム更新する。</summary>
+    private bool PoseDrive(Line line, double time)
+    {
         int step = line.motion.AtTime(time, out double distance, out _);
         if (step < 0) return false;
+        bool forward = line.motion.Steps[step].to_fraction > line.motion.Steps[step].from_fraction;
         float spacing = CarLength(line);
-        for (int car = 0; car < line.positions.Length; car++)
-        {
-            double offset = ((line.positions.Length - 1) * .5 - car) * spacing;
-            if (!routeGeometry.Sample(line, distance + offset, distance, forward, out line.positions[car], out line.directions[car])) return false;
-        }
-        DrivenLineId = lineId;
-        driveOffset = time - clock;
-        int cab = line.motion.Reversed[step] ? line.positions.Length - 1 : 0;
-        DrivePosition = line.positions[cab]; DriveDirection = line.directions[cab]; DriveWaiting = false;
+        double front = (line.positions.Length - 1) * .5 * spacing;
+        Vector3 position, direction;
+        bool sampled = line.type == Constants.VEHICLE_BUS
+            ? routeGeometry.SampleBus(line, distance + front, distance, forward, spacing, out position, out direction)
+            : routeGeometry.Sample(line, distance + front, distance, forward, out position, out direction);
+        if (!sampled) return false;
+        DrivePosition = position; DriveDirection = direction; DriveCarLength = spacing; DriveWaiting = false;
         return true;
     }
 
@@ -72,6 +98,6 @@ public sealed partial class TransitVehicleManager
 
     public void StopDrive()
     {
-        DrivenLineId = -1; driveOffset = 0; DriveWaiting = false;
+        DrivenLineId = -1; drivenTrain = 0; driveOffset = 0; DriveWaiting = false;
     }
 }

@@ -48,7 +48,7 @@ public static class CitizenPickSelection
         {
             cars.CollectPickTargets(carTargets, frustum);
             foreach (var v in carTargets)
-                if (cars.RayHit(v, ray, out float d) && d < nearest) { nearest = d; best = v; }
+                if (v.vehicleType == Constants.VEHICLE_STANDARD && cars.RayHit(v, ray, out float d) && d < nearest) { nearest = d; best = v; }
         }
         if (people != null)
         {

@@ -63,7 +63,7 @@ public static partial class VehicleQA
             if (Array.IndexOf(args,"-driveOnly")>=0)
             {
                 Geometry(); Junction(); MotionContract(); TransitPlacement(); DriveCamera();
-                File.WriteAllText(result,"PASS\nDrive: branch selection, one-way restrictions, protected lifetime, transit start/turnback/loading, camera restore and input cleanup");
+                File.WriteAllText(result,"PASS\nDrive: branch selection, one-way restrictions, protected lifetime, watched NPC car/train, transit start/turnback/loading, first/third-person camera, camera restore and input cleanup");
                 EditorApplication.Exit(0); return;
             }
             StreetParking();
@@ -193,14 +193,26 @@ public static partial class VehicleQA
         manager.GetType().GetProperty("DrivenLineId").SetValue(manager,123);
         Set(manager,"clock",49.999); Call(manager,"DrawLine",lines[0],Vector3.zero);
         Vector3 cab=(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager);
+        Vector3 heading=(Vector3)manager.GetType().GetProperty("DriveDirection").GetValue(manager);
         Set(manager,"clock",50.0); Call(manager,"DrawLine",lines[0],Vector3.zero);
-        Near(Vector3.Distance(cab,(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager)),0,.02f,"Ride teleports to opposite cab at turnback");
+        Near(Vector3.Distance(cab,(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager)),20,.02f,"Ride does not move to the new leading car at turnback");
+        Check(Vector3.Dot(heading,(Vector3)manager.GetType().GetProperty("DriveDirection").GetValue(manager))<0,"Ride keeps the old heading after turnback");
+        cab=(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager);
         ((IDictionary)Get(routeGeometry,"geometry")).Clear();
         Set(manager,"driveDelta",.5f); Set(manager,"clock",50.5); Call(manager,"DrawLine",lines[0],Vector3.zero);
         Check((bool)manager.GetType().GetProperty("DriveWaiting").GetValue(manager),"Ride does not wait for missing track geometry");
         Near(Convert.ToSingle(Get(manager,"driveOffset")),-.5f,.001f,"Ride clock runs through unloaded track");
         Near(Vector3.Distance(cab,(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager)),0,.02f,"Missing geometry moves the ride camera");
         ((IDictionary)Get(routeGeometry,"geometry")).Add(1,g);
+        Call(manager,"StopDrive");
+        Set(manager,"clock",25.0);
+        Check(!(bool)Call(manager,"Watch",123,1),"Watching accepts a train the line does not run");
+        Check((bool)Call(manager,"Watch",123,0),"Running train cannot be watched");
+        Near(Convert.ToSingle(Get(manager,"driveOffset")),0,.0001f,"Watching shifts the train clock");
+        Vector3 watchStart=(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager);
+        Call(manager,"DrawLine",lines[0],Vector3.zero);
+        Near(Vector3.Distance(watchStart,(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager)),0,.02f,"Watched train jumps when the ride starts");
+        Near(Property(manager,"DriveCarLength"),20,.001f,"Ride does not know the leading car length");
         Call(manager,"StopDrive");
         // ハイライトも同じ補間を使い、パス途中の停止中心と曲線の高さを維持する。
         var curved=Line(Vector3.zero,new Vector3(100,25,100),new Vector3(0,50,300),Vector3.forward*500);
@@ -235,6 +247,8 @@ public static partial class VehicleQA
         Physics.SyncTransforms();
         object[] pickArgs={ray,0};
         Check((bool)Call(manager,"TryPick",pickArgs) && (int)pickArgs[1]==123,"Vehicle selection loses line identity when overlay is absent");
+        object[] trainArgs={ray,0,0,0f};
+        Check((bool)Call(manager,"TryPickTrain",trainArgs) && (int)trainArgs[1]==123 && (int)trainArgs[2]==0,"Vehicle selection loses the train within its line");
         var blocker=GameObject.CreatePrimitive(PrimitiveType.Cube);
         blocker.transform.position=bounds.center+Vector3.up*20; blocker.transform.localScale=Vector3.one*10;
         Physics.SyncTransforms();
@@ -591,6 +605,18 @@ public static partial class VehicleQA
             Check(((IList)Get(manager,"active")).Count==0,"Driven car remains after exit");
             ((IDictionary)Get(manager,"exitRanks")).Clear();
         }
+        var watched=New("Vehicle"); Set(watched,"vehicleType",10); Set(watched,"speed",12f); Set(watched,"age",100f);
+        var watchedLine=Get(inbound,"line"); Call(watched,"SetPath",1,watchedLine,true,Property(watchedLine,"Length")*.5f); Call(manager,"SetLane",watched,inbound,false);
+        ((IList)Get(manager,"active")).Add(watched);
+        ((IDictionary)Get(manager,"exitRanks")).Add(3L,0);
+        Check((bool)Call(manager,"Watch",watched),"Running car cannot be watched");
+        Check((bool)Call(manager,"ReserveArrival",false) && (bool)Get(watched,"arrivalPending"),"Watched car is exempted from NPC arrivals");
+        Call(manager,"StopDrive");
+        Check(((IList)Get(manager,"active")).Contains(watched) && manager.GetType().GetProperty("WatchedVehicle").GetValue(manager)==null,"Watched car does not keep driving as NPC after exit");
+        Check((bool)Call(manager,"Watch",watched),"Running car cannot be watched again");
+        Call(manager,"Despawn",((IList)Get(manager,"active")).IndexOf(watched));
+        Check(manager.GetType().GetProperty("WatchedVehicle").GetValue(manager)==null,"Despawned car stays watched");
+        ((IDictionary)Get(manager,"exitRanks")).Clear();
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(paths.gameObject);UnityEngine.Object.DestroyImmediate(master.gameObject);
     }
 
@@ -610,6 +636,13 @@ public static partial class VehicleQA
         object[] args={null};
         Check((bool)Call(drive,"TryGetLoadCenter",args),"Ride did not override the ground-ray load center");
         Near(Vector3.Distance((Vector3)args[0],new Vector3(500,20,800)),0,.001f,"Load center is not the ridden vehicle");
+        // 地形の無い検証シーンでは地表の高さが0になる。地下の位置で、一人称は制限なく追い、三人称は地表から2m未満へ下げない。
+        Set(drive,"position",new Vector3(500,-30,800)); Set(drive,"direction",Vector3.forward); Set(drive,"halfLength",2f); Set(drive,"eyeHeight",1.5f);
+        Call(drive,"ApplyCamera",true);
+        Near(Vector3.Distance(camera.transform.position,new Vector3(500,-28.5f,803)),0,.001f,"First-person camera is not just ahead of the leading car");
+        Set(drive,"thirdPerson",true); Call(drive,"ApplyCamera",true);
+        Check(camera.transform.position.y>=2-.001f,"Third-person camera goes below the ground clearance");
+        Set(drive,"thirdPerson",false);
         Call(drive,"Close",true);
         Near(Vector3.Distance(camera.transform.position,original),0,.001f,"Drive exit did not restore camera position");
         Near(Quaternion.Angle(camera.transform.rotation,rotation),0,.001f,"Drive exit did not restore camera angle");

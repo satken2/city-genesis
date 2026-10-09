@@ -4,7 +4,11 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-/// <summary>描画専用の乗車モード。都市の状態・経済時間は変えず、既存の交通演出を追従する。</summary>
+/// <summary>
+/// 描画専用の乗車モード。都市の状態・経済時間は変えず、既存の交通演出を追従する。
+/// 選んだ位置から出発するほか、走行中の車・バス・列車を選んで、その運転をそのまま眺められる。
+/// 視点は一人称(先頭の車両の少し前)と三人称(<see cref="ChaseCamera"/>)を切り替える。
+/// </summary>
 [DefaultExecutionOrder(100)]
 public sealed class DriveMode : MonoBehaviour
 {
@@ -13,7 +17,7 @@ public sealed class DriveMode : MonoBehaviour
     public static bool IsRiding => Instance != null && Instance.riding;
     public static float SpeedMultiplier => IsRiding && Application.isFocused && InputUtil.KeyPressed(Key.Space) ? 5f : 1f;
     public static bool BlocksCamera => IsRiding || (IsOpen && Instance.PanelRect.Contains(Instance.GuiMouse));
-    private bool open, picking, riding, rail, forward = true, saved;
+    private bool open, picking, riding, rail, watch, forward = true, saved, thirdPerson;
     private int vehicleType = Constants.VEHICLE_STANDARD, lineId = -1, pickedPath = -1;
     private Vector3 pickedPoint, position, direction = Vector3.forward, savedPosition;
     private Quaternion savedRotation;
@@ -26,18 +30,23 @@ public sealed class DriveMode : MonoBehaviour
     private IpcClient ipc;
     private string message = "";
     private float noticeUntil, nextBranches;
-    private float eyeHeight;
+    private float eyeHeight, halfLength;
     private int branchPath = -1;
     private Vector2 scroll, mouseDown;
     private bool pendingClick;
     private VehiclePolyline pickedPolyline;
+    private Vehicle pressedCar;
+    private int pressedLine = -1, pressedTrain;
+    private readonly ChaseCamera chase = new();
+    private readonly List<Vehicle> carTargets = new();
     private readonly Dictionary<string, string> labels = new();
     private readonly List<TransitLineSummary> lines = new();
     private readonly List<VehicleManager.DriveBranch> branches = new();
     private GUIStyle boxStyle, labelStyle, buttonStyle;
     private Vector2 GuiMouse => new(InputUtil.MousePosition.x, Screen.height - InputUtil.MousePosition.y);
     private Rect PanelRect => new(Mathf.Max(8, (Screen.width - 520) * .5f), 20, Mathf.Min(520, Screen.width - 16),
-        riding ? 230 : picking ? 280 : Mathf.Min(410, Screen.height - 120));
+        riding || picking ? 280 : Mathf.Min(410, Screen.height - 120));
+    private Vehicle RiddenCar => cars == null ? null : cars.DrivenVehicle ?? cars.WatchedVehicle;
 
     public static DriveMode Ensure()
     {
@@ -136,9 +145,10 @@ public sealed class DriveMode : MonoBehaviour
         if (InputUtil.KeyWasPressedThisFrame(Key.Escape)) { Close(true); return; }
         if (riding)
         {
-            if ((rail && (trains == null || trains.DrivenLineId < 0)) || (!rail && (cars == null || cars.DrivenVehicle == null)))
+            if ((rail && (trains == null || trains.DrivenLineId < 0)) || (!rail && RiddenCar == null))
             { Close(true); return; }
-            if (!rail) UpdateBranches();
+            if (InputUtil.KeyWasPressedThisFrame(Key.V)) ToggleView();
+            if (!rail && cars.DrivenVehicle != null) UpdateBranches();
         }
         else if (picking) PickStart();
     }
@@ -147,10 +157,16 @@ public sealed class DriveMode : MonoBehaviour
     {
         if (PanelRect.Contains(GuiMouse) || (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()))
         { pendingClick = false; return; }
-        if (InputUtil.LeftMouseWasPressedThisFrame) { pendingClick = true; mouseDown = InputUtil.MousePosition; }
+        if (InputUtil.LeftMouseWasPressedThisFrame)
+        {
+            pendingClick = true; mouseDown = InputUtil.MousePosition;
+            // 走行中の車両は離すまでに動くので、押した瞬間に当たった個体を選ぶ。
+            if (watch) PickVehicle(cameraRef.ScreenPointToRay(mouseDown));
+        }
         if (pendingClick && ((Vector2)InputUtil.MousePosition - mouseDown).sqrMagnitude > 25) pendingClick = false;
         if (!pendingClick || !InputUtil.LeftMouseWasReleasedThisFrame) return;
         pendingClick = false;
+        if (watch) { StartWatch(); return; }
         if (!Physics.Raycast(cameraRef.ScreenPointToRay(InputUtil.MousePosition), out var hit, 100000, ~0, QueryTriggerInteraction.Ignore)) return;
         var info = hit.collider.GetComponentInParent<ObjectIdInfo>();
         if (info == null || !info.CompareTag("PathObject")) { message = L("invalidStart"); return; }
@@ -181,26 +197,63 @@ public sealed class DriveMode : MonoBehaviour
         pickedPath = info.id; pickedPoint = hit.point; pickedPolyline = new VehiclePolyline(points); message = "";
     }
 
+    /// <summary>車と編成のうちレイが当たる最も手前のもの。手前を建物・地形が遮っていれば選ばない。</summary>
+    private void PickVehicle(Ray ray)
+    {
+        pressedCar = null; pressedLine = -1;
+        float nearest = float.PositiveInfinity;
+        if (cars != null)
+        {
+            carTargets.Clear();
+            cars.CollectPickTargets(carTargets, GeometryUtility.CalculateFrustumPlanes(cameraRef));
+            foreach (var v in carTargets)
+                if (cars.RayHit(v, ray, out float d) && d < nearest) { nearest = d; pressedCar = v; }
+        }
+        if (trains != null && trains.TryPickTrain(ray, out int line, out int train, out float distance) && distance < nearest)
+        { nearest = distance; pressedCar = null; pressedLine = line; pressedTrain = train; }
+        if (!float.IsPositiveInfinity(nearest) && Physics.Raycast(ray, out _, Mathf.Max(0, nearest - .05f), ~0, QueryTriggerInteraction.Ignore))
+        { pressedCar = null; pressedLine = -1; }
+    }
+
+    private void StartWatch()
+    {
+        bool car = pressedCar != null;
+        bool started = car ? cars.Watch(pressedCar) : pressedLine >= 0 && trains.Watch(pressedLine, pressedTrain);
+        pressedCar = null; pressedLine = -1;
+        if (!started) { message = L("invalidVehicle"); return; }
+        rail = !car;
+        BeginRide();
+    }
+
     private void StartRide()
     {
         bool started = rail ? trains != null && trains.StartDrive(lineId, pickedPath, pickedPoint, forward)
             : cars != null && cars.StartDrive(pickedPath, pickedPoint, forward, vehicleType);
         if (!started) { message = L("notReady"); return; }
+        BeginRide();
+    }
+
+    private void BeginRide()
+    {
         riding = true; picking = false; message = ""; nextBranches = 0;
         cameraRef.orthographic = false; cameraRef.fieldOfView = 65; cameraRef.nearClipPlane = .1f;
         ReadPose();
         eyeHeight = rail ? 5f : 2f;
-        if (!rail && cars.DrivenVehicle?.go != null)
-            foreach (var renderer in cars.DrivenVehicle.go.GetComponentsInChildren<Renderer>())
+        var car = rail ? null : RiddenCar;
+        halfLength = car == null ? trains.DriveCarLength * .5f : VehicleModelResolver.ModelBounds(car.go.transform).max.z;
+        if (car != null)
+            foreach (var renderer in car.go.GetComponentsInChildren<Renderer>())
                 eyeHeight = Mathf.Max(eyeHeight, renderer.bounds.max.y - position.y + .5f);
+        chase.Reset();
         ApplyCamera(true);
         CameraCellChecker.Instance?.ResetViewState();
     }
 
     private void ReadPose()
     {
+        var car = RiddenCar;
         if (rail) { position = trains.DrivePosition; direction = trains.DriveDirection; }
-        else if (cars.DrivenVehicle != null) cars.DrivenVehicle.Sample(out position, out direction);
+        else if (car != null) car.Sample(out position, out direction);
     }
     private void LateUpdate()
     {
@@ -209,11 +262,19 @@ public sealed class DriveMode : MonoBehaviour
     }
     private void ApplyCamera(bool immediate)
     {
-        Vector3 eye = position + Vector3.up * eyeHeight;
+        if (thirdPerson) { chase.Apply(cameraRef, position, direction, Time.unscaledDeltaTime * SpeedMultiplier); return; }
+        // 一人称は先頭の車両の前端より少し前に置き、車体を視界に入れない。地形・構造物による制限は掛けない。
+        Vector3 eye = position + direction * (halfLength + 1f) + Vector3.up * eyeHeight;
         Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up) * Quaternion.Euler(5, 0, 0);
         // 位置の遅延は高速走行時の車体へのめり込みを招くため、回転だけを平滑化する。
         cameraRef.transform.SetPositionAndRotation(eye, immediate ? rotation : Quaternion.Slerp(cameraRef.transform.rotation, rotation,
             1 - Mathf.Exp(-8 * Time.unscaledDeltaTime * SpeedMultiplier)));
+    }
+
+    private void ToggleView()
+    {
+        thirdPerson = !thirdPerson;
+        if (thirdPerson) chase.Reset();
     }
 
     private void UpdateBranches()
@@ -259,6 +320,7 @@ public sealed class DriveMode : MonoBehaviour
         GUILayout.BeginHorizontal();
         if (GUILayout.Button(L("car"), buttonStyle)) { rail = false; message = ""; }
         if (GUILayout.Button(L("rail"), buttonStyle)) { rail = true; RefreshLines(); message = ""; }
+        if (GUILayout.Button(L("running"), buttonStyle)) { watch = true; picking = true; pickedPath = -1; message = ""; }
         GUILayout.EndHorizontal();
         scroll = GUILayout.BeginScrollView(scroll);
         if (!rail)
@@ -273,21 +335,24 @@ public sealed class DriveMode : MonoBehaviour
             if (lines.Count == 0) GUILayout.Label(L("noLines"), labelStyle);
             foreach (var line in lines)
                 if (GUILayout.Button(string.IsNullOrEmpty(line.name) ? "#" + line.line_agent_id : line.name, buttonStyle))
-                { lineId = line.line_agent_id; picking = true; pickedPath = -1; }
+                { lineId = line.line_agent_id; watch = false; picking = true; pickedPath = -1; }
         }
         GUILayout.EndScrollView();
         if (GUILayout.Button(L("close"), buttonStyle)) Close(true);
     }
-    private void SelectCar(int type) { vehicleType = type; picking = true; pickedPath = -1; }
+    private void SelectCar(int type) { vehicleType = type; watch = false; picking = true; pickedPath = -1; }
     private void DrawPickHud()
     {
-        GUILayout.Label(L(rail ? "pickRail" : "pickRoad"), labelStyle);
-        GUILayout.Label(pickedPath >= 0 ? L("startSelected") : L("clickStart"), labelStyle);
+        GUILayout.Label(L(watch ? "pickVehicle" : rail ? "pickRail" : "pickRoad"), labelStyle);
+        if (!watch) GUILayout.Label(pickedPath >= 0 ? L("startSelected") : L("clickStart"), labelStyle);
         GUILayout.BeginHorizontal();
-        if (GUILayout.Button(L("reverse"), buttonStyle)) forward = !forward;
-        GUI.enabled = pickedPath >= 0;
-        if (GUILayout.Button(L("start"), buttonStyle)) StartRide();
-        GUI.enabled = true;
+        if (!watch)
+        {
+            if (GUILayout.Button(L("reverse"), buttonStyle)) forward = !forward;
+            GUI.enabled = pickedPath >= 0;
+            if (GUILayout.Button(L("start"), buttonStyle)) StartRide();
+            GUI.enabled = true;
+        }
         if (GUILayout.Button(L("back"), buttonStyle)) { picking = false; pickedPath = -1; message = ""; }
         if (GUILayout.Button(L("close"), buttonStyle)) Close(true);
         GUILayout.EndHorizontal();
@@ -296,7 +361,9 @@ public sealed class DriveMode : MonoBehaviour
     private void DrawRideHud()
     {
         GUILayout.Label(L("controls") + (SpeedMultiplier > 1 ? "  ×5" : "  ×1"), labelStyle);
+        if (thirdPerson) GUILayout.Label(L("chaseControls"), labelStyle);
         if (rail) GUILayout.Label(L(trains.DriveWaiting ? "loading" : "onRoute"), labelStyle);
+        else if (cars.DrivenVehicle == null) GUILayout.Label(L("watching"), labelStyle);
         else
         {
             var vehicle = cars.DrivenVehicle;
@@ -313,7 +380,10 @@ public sealed class DriveMode : MonoBehaviour
                 GUILayout.EndHorizontal();
             }
         }
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button(L(thirdPerson ? "viewThird" : "viewFirst"), buttonStyle)) ToggleView();
         if (GUILayout.Button(L("close"), buttonStyle)) Close(true);
+        GUILayout.EndHorizontal();
     }
     private void DrawStartMarker()
     {

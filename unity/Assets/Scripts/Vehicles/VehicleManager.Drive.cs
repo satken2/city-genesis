@@ -1,10 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>観光用の1台もNPCと同じ車線・速度・追従を使い、退出と分岐の選択だけを変える。</summary>
+/// <summary>
+/// 観光用の1台もNPCと同じ車線・速度・追従を使い、退出と分岐の選択だけを変える。
+/// 走行中の車を選んで眺める場合(<see cref="WatchedVehicle"/>)は NPC の運転をそのまま見せるので、何も免除しない。
+/// </summary>
 public partial class VehicleManager
 {
     public Vehicle DrivenVehicle { get; private set; }
+    public Vehicle WatchedVehicle { get; private set; }
     public int RequestedDrivePath { get; set; } = -1;
     public readonly struct DriveBranch
     {
@@ -36,6 +40,16 @@ public partial class VehicleManager
         return true;
     }
 
+    /// <summary>走行中の車を眺める対象にする。車は NPC のまま走り、到着して消えれば外れる。</summary>
+    public bool Watch(Vehicle v)
+    {
+        if (!IsActive(v) || v == DrivenVehicle) return false;
+        StopDrive();
+        WatchedVehicle = v;
+        return true;
+    }
+
+    /// <summary>乗車用に出した車は消し、眺めていた車は NPC のまま走らせる。</summary>
     public void StopDrive()
     {
         if (DrivenVehicle != null)
@@ -43,7 +57,7 @@ public partial class VehicleManager
             int index = active.IndexOf(DrivenVehicle);
             if (index >= 0) Despawn(index);
         }
-        DrivenVehicle = null;
+        DrivenVehicle = null; WatchedVehicle = null;
         RequestedDrivePath = -1;
     }
 

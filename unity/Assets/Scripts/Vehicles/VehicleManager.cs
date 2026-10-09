@@ -933,6 +933,7 @@ public partial class VehicleManager : MonoBehaviour
     {
         var v = active[index];
         if (v == DrivenVehicle) DrivenVehicle = null;
+        if (v == WatchedVehicle) WatchedVehicle = null;
         if (v == FollowedVehicle) EndFollowRun();
         if (v.go != null)
         {

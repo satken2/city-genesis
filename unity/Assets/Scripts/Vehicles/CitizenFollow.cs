@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using GeneratedModels;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 /// <summary>
@@ -51,9 +50,8 @@ public sealed class CitizenFollow : MonoBehaviour
     private int visitAgent = -1, destinationAgent = -1;
     private float stayUntil, segmentStarted, lastMove;
     private Vector3 lastPosition, focus, heading = Vector3.forward;
-    private bool hasFocus, yawInitialized;
-    private float distance = 40f, pitch = 35f, yawOffset, yaw;
-    private Vector2 lastMouse;
+    private bool hasFocus;
+    private readonly ChaseCamera chase = new();
     private Camera cam;
     private VehicleManager cars;
     private PedestrianManager people;
@@ -149,7 +147,7 @@ public sealed class CitizenFollow : MonoBehaviour
         cars = FindAnyObjectByType<VehicleManager>();
         people = FindAnyObjectByType<PedestrianManager>();
         paths = FindAnyObjectByType<PathManager>();
-        citizenId = id; hasFocus = false; yawInitialized = false; yawOffset = 0;
+        citizenId = id; hasFocus = false; chase.Reset();
         IpcClient.Instance?.EmitCitizenFollowState(id, true);
         StartCoroutine(Load(id, ++request, true));
     }
@@ -502,41 +500,12 @@ public sealed class CitizenFollow : MonoBehaviour
     // カメラ
     // ------------------------------------------------------------------
 
-    /// <summary>対象の後方上空から追う。ホイールで距離、右ドラッグで向きと俯角を変える。対象の向きの変化には遅れて追従する。</summary>
     private void LateUpdate()
     {
         if (!IsFollowing || !hasFocus) return;
         if (cam == null) cam = Camera.main;
         if (cam == null) return;
-        float dt = Time.unscaledDeltaTime;
-        HandleCameraInput();
-        var flat = new Vector3(heading.x, 0, heading.z);
-        float targetYaw = flat.sqrMagnitude > .0001f ? Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg : yaw;
-        yaw = yawInitialized ? Mathf.LerpAngle(yaw, targetYaw, 1 - Mathf.Exp(-2f * dt)) : targetYaw;
-        yawInitialized = true;
-        Vector3 target = focus + Vector3.up * 1.5f;
-        Vector3 desired = target + Quaternion.Euler(pitch, yaw + yawOffset, 0) * (Vector3.back * distance);
-        desired.y = Mathf.Max(desired.y, Utils.GetGroundHeight(desired) + 2f);
-        Vector3 position = Vector3.Lerp(cam.transform.position, desired, 1 - Mathf.Exp(-4f * dt));
-        cam.transform.SetPositionAndRotation(position, Quaternion.LookRotation(target - position, Vector3.up));
-    }
-
-    private void HandleCameraInput()
-    {
-        Vector2 mouse = InputUtil.MousePosition;
-        bool overUi = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-        if (Application.isFocused && !overUi)
-        {
-            float scroll = InputUtil.ScrollY;
-            if (Mathf.Abs(scroll) > .001f) distance = Mathf.Clamp(distance * Mathf.Pow(.85f, scroll), 8f, 500f);
-            if (InputUtil.RightMouseIsPressed && !InputUtil.RightMouseWasPressedThisFrame)
-            {
-                Vector2 delta = mouse - lastMouse;
-                yawOffset += delta.x * .25f;
-                pitch = Mathf.Clamp(pitch - delta.y * .2f, 5f, 85f);
-            }
-        }
-        lastMouse = mouse;
+        chase.Apply(cam, focus, heading, Time.unscaledDeltaTime);
     }
 
     // ------------------------------------------------------------------

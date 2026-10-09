@@ -9,7 +9,7 @@ using GeneratedModels;
 public sealed partial class TransitVehicleManager : MonoBehaviour
 {
     public static TransitVehicleManager Instance { get; private set; }
-    private readonly Dictionary<GameObject, int> lineByVehicle = new();
+    private readonly Dictionary<GameObject, (int line, int train)> trainByVehicle = new();
     private readonly Dictionary<GameObject, Renderer[]> pickRenderers = new();
     private void Awake() { Instance = this; }
     private void OnDestroy() { if (Instance == this) Instance = null; }
@@ -19,11 +19,19 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
     /// <summary>描画中の車体だけを選ぶ。建物・地形の背後の車両は通常表示から選択できない。</summary>
     public bool TryPick(Ray ray, out int lineId)
     {
-        lineId = -1;
-        float nearest = 5000;
+        if (!TryPickTrain(ray, out lineId, out _, out float nearest)) return false;
+        if (Physics.Raycast(ray, out _, Mathf.Max(0, nearest - .05f), ~0, QueryTriggerInteraction.Ignore)) return false;
+        return true;
+    }
+
+    /// <summary>レイが当たる描画中の編成のうち最も手前のもの。手前の建物・地形による遮蔽は呼び出し側が判定する。</summary>
+    public bool TryPickTrain(Ray ray, out int lineId, out int train, out float nearest)
+    {
+        lineId = -1; train = -1;
+        nearest = 5000;
         foreach (var go in visible.Values)
         {
-            if (!go.activeInHierarchy || !lineByVehicle.TryGetValue(go, out int id)) continue;
+            if (!go.activeInHierarchy || !trainByVehicle.TryGetValue(go, out var owner)) continue;
             if (!pickRenderers.TryGetValue(go, out var renderers))
             { renderers = go.GetComponentsInChildren<Renderer>(); pickRenderers[go] = renderers; }
             foreach (var renderer in renderers)
@@ -34,12 +42,10 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 if (!renderer.localBounds.IntersectRay(localRay, out float localDistance)) continue;
                 Vector3 hit = renderer.transform.TransformPoint(localRay.GetPoint(localDistance));
                 float distance = Vector3.Dot(hit-ray.origin, ray.direction);
-                if (distance >= 0 && distance < nearest) { nearest = distance; lineId = id; }
+                if (distance >= 0 && distance < nearest) { nearest = distance; (lineId, train) = owner; }
             }
         }
-        if (lineId < 0) return false;
-        if (Physics.Raycast(ray, out _, Mathf.Max(0, nearest - .05f), ~0, QueryTriggerInteraction.Ignore)) return false;
-        return true;
+        return lineId >= 0;
     }
     [SerializeField] private float renderRadius = 480;
     [SerializeField] private int maxVisibleCars = 300;
@@ -131,8 +137,14 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             foreach (var run in line.runs) routePaths.Add(run.path);
         }
         scanTimer = 0;
-        if (DrivenLineId >= 0 && !lines.Exists(line => line.data.line_agent_id == DrivenLineId)) StopDrive();
+        var driven = lines.Find(line => line.data.line_agent_id == DrivenLineId);
+        if (DrivenLineId >= 0 && (driven == null || drivenTrain >= Trains(driven))) StopDrive();
     }
+
+    private static int Trains(Line line) => line.data.vehicle_count / Math.Max(1, line.data.cars_per_train);
+
+    /// <summary>編成の発車間隔(s)。編成は実効運行間隔(コアの transit_capacity.effective_headway と同じ式)ずつずらして発車する。</summary>
+    private static double Headway(Line line, int trains) => Math.Max(line.data.target_headway * 60.0, line.motion.Duration / trains);
 
     /// <summary>1両の公称車長(m)。路線サマリに車長が無い種別はモデルの長さを使う。</summary>
     private static float CarLength(Line line)
@@ -154,18 +166,18 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
     private void DrawLine(Line line, Vector3 center)
     {
         if (creationFrame != Time.frameCount) { creationFrame = Time.frameCount; trainCreationsThisFrame = 0; }
-        int cars = Math.Max(1,line.data.cars_per_train), trains = line.data.vehicle_count/cars;
+        int cars = Math.Max(1,line.data.cars_per_train), trains = Trains(line);
         if (line.keys == null || line.keys.Length != cars) { line.keys = new string[cars]; line.modelKeys = new string[cars]; }
         float spacing = CarLength(line);
         int stride = Math.Max(1,(int)Math.Ceiling((double)trains / Math.Max(1,maxVisibleCars/cars*4)));
-        // 編成は実効運行間隔(コアの transit_capacity.effective_headway と同じ式)ずつずらして発車する。
-        double headway = Math.Max(line.data.target_headway * 60.0, line.motion.Duration / trains);
+        double headway = Headway(line, trains);
         double cycle = headway * trains;
-        for (int train = 0; train < trains; train += stride)
+        for (int train = 0; train < trains; train++)
         {
+            bool driven = line.data.line_agent_id == DrivenLineId && train == drivenTrain;
+            if (!driven && train % stride != 0) continue;
             // 路線の選択外観を全編成で使い、候補外のときだけ路線IDと編成番号で固定する。往復・プール復帰でも全車を揃える。
             int variant = VehicleModelResolver.PickTransitVariantId(line.type, line.data.vehicle_model, unchecked(line.data.line_agent_id * 397 + train));
-            bool driven = line.data.line_agent_id == DrivenLineId && train == 0;
             double trainTime = clock + headway*train + (driven ? driveOffset : 0);
             double runTime = line.motion.Schedule(trainTime, cycle);
             int step = line.motion.AtTime(runTime, out double distance, out bool stopped);
@@ -202,12 +214,12 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 {
                     // 未ロードの接続を越えて時計だけ進めない。最後の編成と視点を保ってロードを待つ。
                     driveOffset -= driveDelta;
-                    string prefix = line.data.line_agent_id + ":0:";
+                    string prefix = line.data.line_agent_id + ":" + train + ":";
                     foreach (var entry in visible) if (entry.Key.StartsWith(prefix, StringComparison.Ordinal)) used.Add(entry.Key);
                     continue;
                 }
-                int cab = reversed ? cars - 1 : 0;
-                DrivePosition = positions[cab]; DriveDirection = directions[cab];
+                // 視点は進行方向の先頭の車両に置く。折り返して発車すると反対側の先頭へ移る。
+                DrivePosition = positions[0]; DriveDirection = directions[0];
             }
             if (!ready || (!driven && !near) || used.Count+cars > maxVisibleCars) continue;
             bool anyVisible = false, needsCreation = false;
@@ -239,7 +251,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 }
                 if (!nominalLengths.TryGetValue(go,out float fitted) || fitted != spacing)
                 { VehicleModelResolver.FitTransitLength(go,spacing); nominalLengths[go]=spacing; }
-                lineByVehicle[go] = line.data.line_agent_id;
+                trainByVehicle[go] = (line.data.line_agent_id, train);
                 TransitLivery.Apply(go, line.livery);
                 Vector3 bodyForward = directions[car] * (reversed && line.type != Constants.VEHICLE_BUS ? -1 : 1);
                 if (model.ReverseBody) bodyForward = -bodyForward;

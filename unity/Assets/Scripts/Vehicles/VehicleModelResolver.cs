@@ -102,7 +102,8 @@ public static class VehicleModelResolver
         model.localPosition-=new Vector3(bounds.center.x,bounds.min.y,bounds.center.z);
     }
 
-    private static Bounds ModelBounds(Transform root)
+    /// <summary>root のローカル座標での全メッシュの境界。非表示の LOD も含み、root の拡大縮小の影響を受けない。</summary>
+    public static Bounds ModelBounds(Transform root)
     {
         Bounds bounds=default;bool any=false;
         foreach(var filter in root.GetComponentsInChildren<MeshFilter>(true))
