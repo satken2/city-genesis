@@ -45,6 +45,7 @@ public partial class CameraController : MonoBehaviour
     [SerializeField] private Button trafficPauseButton;  // 交通演出(車・歩行者など)の一時停止ボタン。停止中だけ車と人をクリックで選べる
     [SerializeField] private Sprite trafficPauseIcon;    // 動いているとき(押すと止まる)のアイコン
     [SerializeField] private Sprite trafficResumeIcon;   // 止まっているとき(押すと動き出す)のアイコン
+    [SerializeField] private Button driveModeButton;     // ドライブの開始・終了ボタン
 
     [Header("フライモード設定")]
     // フライモード時のマウス感度（度/ピクセル）。マウスの移動量にこの値を掛けて視線角を変化させる。
@@ -88,7 +89,7 @@ public partial class CameraController : MonoBehaviour
     private bool isFlyMode = false;
     private float lookYaw;   // フライ・撮影モードの水平視線角（ワールドY軸まわり、度）
     private float lookPitch; // フライ・撮影モードの仰俯角（度）
-    private bool tauriUiHidden; // フライ・撮影モードのためにTauriのUIを隠すよう送った状態
+    private bool tauriUiHidden; // フライ・撮影モード・ドライブの乗車中のためにTauriのUIを隠すよう送った状態
 
     // マップ範囲（=標高マップの範囲）へのカメラクランプに使う TerrainManager 参照。
     // GetMapWidth / GetMapHeight はインスタンスメソッドのため保持する（初回に遅延取得）。
@@ -247,6 +248,10 @@ public partial class CameraController : MonoBehaviour
         if (trafficPauseButton != null)
         {
             trafficPauseButton.onClick.AddListener(ToggleTrafficPause);
+        }
+        if (driveModeButton != null)
+        {
+            driveModeButton.onClick.AddListener(DriveMode.RequestToggle);
         }
         TrafficClock.PausedChanged += HandleTrafficPausedChanged;
         UpdateUIButtons();
@@ -852,20 +857,22 @@ public partial class CameraController : MonoBehaviour
     }
 
     /// <summary>
-    /// カメラ専用モード（フライ・撮影）の見せ方を現在のモードに合わせる。
-    /// モード中は画面端に妨げられない連続したマウス視点入力を得るためカーソルをロック・非表示にし、
-    /// 3D画面だけを見せるため Tauri の UI を隠す（UI へは変化したときだけ送る）。
+    /// カメラ専用モード（フライ・撮影・ドライブの乗車中）の見せ方を現在のモードに合わせる。
+    /// 3D画面だけを見せるため Tauri の UI を隠し（UI へは変化したときだけ送る）、操作案内はキャプションに出す。
+    /// フライ・撮影は画面端に妨げられない連続したマウス視点入力を得るためカーソルをロック・非表示にする
+    /// （ドライブの三人称はカーソル位置の右ドラッグで向きを変えるのでロックしない）。
     /// ステートキャプション（ModeTextDisplay）が存在しないシーン（メッシュテスト等）ではキャプションを切り替えない。
     /// </summary>
-    private void RefreshCameraModePresentation()
+    public void RefreshCameraModePresentation()
     {
         bool exclusive = isFlyMode || IsCinematicMode;
         Cursor.lockState = exclusive ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !exclusive;
-        if (tauriUiHidden != exclusive)
+        bool hideUi = exclusive || DriveMode.IsRiding;
+        if (tauriUiHidden != hideUi)
         {
-            tauriUiHidden = exclusive;
-            IpcClient.Instance?.EmitUiVisibility(!exclusive);
+            tauriUiHidden = hideUi;
+            IpcClient.Instance?.EmitUiVisibility(!hideUi);
         }
 
         if (modeTextDisplayRef == null)
@@ -884,6 +891,10 @@ public partial class CameraController : MonoBehaviour
         else if (isFlyMode)
         {
             modeTextDisplayRef.ShowFlyMode();
+        }
+        else if (DriveMode.IsRiding)
+        {
+            modeTextDisplayRef.ShowDriveMode(DriveMode.RideCaption);
         }
         else
         {

@@ -75,7 +75,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `view:object_filter_state`      | `graphic -> ui`  | `view:query_object_filter`への応答、およびフィルタ適用後の通知（`{hidden_building_ids, hidden_path_ids}`）。表示状態の正はUnity側にあり、複数のパネルがこれを受けて表示を揃える |
 | `view:set_grid`                 | `ui -> graphic`  | グリッドの表示有無や設定を切り替え。Unity側はグリッド表示とグリッド吸着を連動させる（表示ON=吸着ON） |
 | `view:grid_toggled`             | `graphic -> ui`  | 3Dビューのラジアルメニューでグリッド表示がトグルされた（`{ visible }`）。UI側はパス建設パネルのグリッド設定UIの表示状態を追従させる |
-| `view:ui_visibility`            | `graphic -> ui`  | フライ・撮影モードに入った・抜けたときに送る（`{ visible }`）。`visible: false` の間、UIはHUD・ポップアップを含む全ウィンドウをDWMのクローキングで隠す。表示状態（show/hide）は変えないので、隠している間の開閉は通常どおり行われ、戻すときにグラフィックからフォーカスを奪わない。グラフィックが隠したまま止まった場合に備え、`system:graphic_ready`・`system:graphic_stopped` を受けたときも戻す |
+| `view:ui_visibility`            | `graphic -> ui`  | フライ・撮影モードとドライブの乗車に入った・抜けたときに送る（`{ visible }`）。`visible: false` の間、UIはHUD・ポップアップを含む全ウィンドウをDWMのクローキングで隠す。表示状態（show/hide）は変えないので、隠している間の開閉は通常どおり行われ、戻すときにグラフィックからフォーカスを奪わない。グラフィックが隠したまま止まった場合に備え、`system:graphic_ready`・`system:graphic_stopped` を受けたときも戻す |
 | `camera:query_state`            | `ui -> graphic`  | 3Dカメラの現在位置と視線方位を問い合わせる。2D都市マップがカメラマーカーを描くために、開いたときと再読み込みのときに送る |
 | `camera:capture_thumbnail`      | `ui -> graphic`  | セーブ・シナリオ保存の直前に、3Dビューの撮影を頼む(`{ id }`)。グラフィックはメインカメラを16:9の小さな画像(480×270)へ直接描き(画面に重ねたUIは写らない)、PNGを `PUT /api/v1/sessions/thumbnail` でコアへ預ける(次の保存に入る画像)。UIはTauriコマンド `request_thumbnail_capture` で送り、グラフィックが接続していなければ送らずに撮影なしで保存する |
 | `camera:thumbnail_captured`     | `graphic -> ui`  | `camera:capture_thumbnail`への応答(`{ id, success }`)。撮れなくても送れなくても必ず返す。UIはこの応答か時間切れ(5秒)まで保存を待つ |
@@ -136,6 +136,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `citizen:unfollow`              | `ui -> graphic`  | 市民の追従をやめる（`{citizen_id}`）。指名した個体は通常の交通に戻り、カメラはその場から通常操作に戻る。追従していなければ、その市民の `citizen:follow_state`（`following: false`）を返し直す（UIが終了の通知を取りこぼしていてもボタンを戻せるように） |
 | `citizen:follow_state`          | `graphic -> ui`  | 追従の開始・終了（`{citizen_id, following}`）。UI の要求のほか、Esc・WASD・編集モードやドライブ・撮影の開始・セッションの終了など Unity 側の理由で終わったときも送る。Rust は全ウィンドウへ中継し、市民パネルと追跡リストがカメラボタンの表示を合わせる |
 | `citizen:pick_failed`           | `graphic -> ui`  | 一時停止中にクリックした車・歩行者の市民を推定できなかった、または追従の行程を取れなかった理由（`{status}`。コアの `not_ready` / `busy` / `none` / `missing` / `no_home`、通信の失敗は `error`）。Rust は常駐する `cockpit` だけへ中継し、コックピットが通知で案内する |
+| `drive:request`                 | `graphic -> ui`  | 3D画面のドライブボタンが押された（`{}`）。Rust は常駐する `cockpit` だけへ中継し、コックピットはブルドーザ等の常駐モードを解いてから `drive:open` で開始を返す（[ドライブの開始](#ドライブの開始)） |
 | `game:time_update`              | `graphic -> ui`  | ゲーム内時間（エポック・日付）の更新通知                  |
 | `system:backend_connection`     | `ui -> graphic`  | `{connected: boolean}`。Tauriが確認したコアの接続・互換状態。状態変更時と `system:graphic_ready` の応答時に送り、Unityは都市表示を保持したまま入力とHTTP更新要求を止める。周期送信はしない。IPC契約2から必須 |
 | `system:shutdown`               | `ui -> graphic`  | グラフィックプログラムを終了する                      |
@@ -317,7 +318,7 @@ Unity は `PathTopologyEditManager` が対象選択を担う。**結合**では�
 
 ### ドライブの開始
 
-`drive:open`はCockpitのブルドーザー右隣からUnityへ送る。paramsは`src/i18n/<言語>/drive.json`の`drive`辞書（キー→表示文言）。`IpcClient`は`DriveMode.Ensure().Open`へ渡す。Unity側が車種/路線・開始位置・乗車HUDを保持し、表示中の再送は終了として扱う。転送には既存Rustの`send_window_action`を使い、新しいEnvelopeやバックエンドAPIは持たない。仕様は[車両の走行描画](../geometries/O_車両の走行描画.md#o12-ドライブモード)を参照。
+ドライブの入口は3D画面のドライブボタンで、選択画面の文言はUIの現在の言語で持つ。そのためボタンは`drive:request`でコックピットに開始を頼み、コックピットが`drive:open`を返して始める。`drive:open`のparamsは`src/i18n/<言語>/drive.json`の`drive`辞書（キー→表示文言）。`IpcClient`は`DriveMode.Ensure().Open`へ渡す。Unity側が車種/路線・開始位置・乗車状態を保持し、表示中の再送は終了として扱う。`drive:open`は既存Rustの`send_window_action`で転送し、新しいEnvelopeやバックエンドAPIは持たない。仕様は[車両の走行描画](../geometries/O_車両の走行描画.md#o12-ドライブモード)を参照。
 
 ### 初期ロードの表示契約
 

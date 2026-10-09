@@ -29,7 +29,7 @@
       "description": "Découvrez le cockpit, le panneau d'affichage et le panneau d'icônes, le fonctionnement des époques, le déplacement de la caméra et les limites de la ville.",
       "step1": {
         "title": "Découvrir le cockpit",
-        "tools": "Découvrons le cockpit. Les boutons en surbrillance sont les outils du quotidien. « Affichage » ouvre le panneau d'affichage et « Carte » ouvre la carte de toute la ville. « Bulldozer » est un mode qui supprime les terrains vides ainsi que les bâtiments et routes en projet, et « Balade » permet de parcourir la ville pour l'observer. Une fois la lecture terminée, appuyez sur « Suivant ».",
+        "tools": "Découvrons le cockpit. Les boutons en surbrillance sont les outils du quotidien. « Affichage » ouvre le panneau d'affichage et « Carte » ouvre la carte de toute la ville. « Bulldozer » est un mode qui supprime les terrains vides ainsi que les bâtiments et routes en projet. Une fois la lecture terminée, appuyez sur « Suivant ».",
         "services": "Voici la jauge des services publics. Elle indique si la capacité d'offre suffit à répondre à la demande. La demande augmente avec la ville, alors vérifiez-la de temps en temps. Appuyez sur « Suivant ».",
         "status": "« Score » est votre score de gouvernance (par foyer, sur 2,0). « Budget » indique le budget prévu pour cette période et la trésorerie disponible. Appuyez sur « Suivant ».",
         "notifications": "Les événements de la ville arrivent sur le bouton des notifications. La date et la météo s'affichent aussi ici. Voilà pour le cockpit. Appuyez sur « Suivant »."

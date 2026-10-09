@@ -1492,6 +1492,15 @@ public class IpcClient : MonoBehaviour
     }
 
     /// <summary>
+    /// drive:request を送る。ドライブの選択画面の文言は UI の現在の言語で受け取るため、
+    /// 開始は常駐するコックピットに頼み、返ってくる drive:open で始める。
+    /// </summary>
+    public void EmitDriveRequest()
+    {
+        SendEnvelope("drive:request", new Dictionary<string, object>());
+    }
+
+    /// <summary>
     /// camera:state イベントを送信する(camera:query_state への応答)。
     /// 3Dカメラの現在位置と視線の方位を2D都市マップへ通知する。
     /// yaw は北(ワールド+Z)を0とする時計回りの度。真下を向いているときは視線の水平成分が

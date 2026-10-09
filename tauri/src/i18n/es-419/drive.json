@@ -20,15 +20,6 @@
     "close": "Salir (Esc)",
     "invalidStart": "No se puede empezar aquí. Elige una calle transitable o una vía de la ruta.",
     "invalidVehicle": "No se seleccionó ningún vehículo. Haz clic en un automóvil, autobús o tren en circulación.",
-    "notReady": "Esta dirección no está disponible o las vías cercanas se están cargando. Cambia de dirección o posición, o espera y vuelve a intentar.",
-    "controls": "Mantén Espacio: velocidad ×5 / V: cambiar vista / Esc: salir",
-    "chaseControls": "Rueda: distancia / Arrastrar con clic derecho: ángulo",
-    "viewFirst": "Vista: primera persona (V)",
-    "viewThird": "Vista: tercera persona (V)",
-    "turnControls": "← →: elegir salida / ↑: la más recta",
-    "loading": "Cargando vías…",
-    "onRoute": "Sigue la ruta; las paradas y los retornos son automáticos.",
-    "watching": "Lo conduce su conductor NPC.",
-    "waiting": "Fin de vía o esperando conexión (retorno si se permite)."
+    "notReady": "Esta dirección no está disponible o las vías cercanas se están cargando. Cambia de dirección o posición, o espera y vuelve a intentar."
   }
 }

@@ -12,6 +12,8 @@ public sealed partial class TransitVehicleManager
     public Vector3 DrivePosition { get; private set; }
     public Vector3 DriveDirection { get; private set; } = Vector3.forward;
     public float DriveCarLength { get; private set; }
+    /// <summary>乗車中の編成の進行方向の先頭の車体。乗車を始めたフレームはまだ描画されておらず null。</summary>
+    public GameObject DriveBody { get; private set; }
     public bool DriveWaiting { get; private set; }
     private int drivenTrain;
     private double driveOffset;
@@ -65,7 +67,7 @@ public sealed partial class TransitVehicleManager
             ? routeGeometry.SampleBus(line, distance + front, distance, forward, spacing, out position, out direction)
             : routeGeometry.Sample(line, distance + front, distance, forward, out position, out direction);
         if (!sampled) return false;
-        DrivePosition = position; DriveDirection = direction; DriveCarLength = spacing; DriveWaiting = false;
+        DrivePosition = position; DriveDirection = direction; DriveCarLength = spacing; DriveWaiting = false; DriveBody = null;
         return true;
     }
 
@@ -98,6 +100,6 @@ public sealed partial class TransitVehicleManager
 
     public void StopDrive()
     {
-        DrivenLineId = -1; drivenTrain = 0; driveOffset = 0; DriveWaiting = false;
+        DrivenLineId = -1; drivenTrain = 0; driveOffset = 0; DriveWaiting = false; DriveBody = null;
     }
 }

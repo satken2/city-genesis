@@ -256,6 +256,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 Vector3 bodyForward = directions[car] * (reversed && line.type != Constants.VEHICLE_BUS ? -1 : 1);
                 if (model.ReverseBody) bodyForward = -bodyForward;
                 go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(bodyForward,Vector3.up));
+                if (driven && car == 0) DriveBody = go;
             }
             if (created) trainCreationsThisFrame++;
         }

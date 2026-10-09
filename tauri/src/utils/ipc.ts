@@ -16,7 +16,9 @@ export async function sendTutorialGuide(state: import("../tutorial/model").Snaps
 }
 
 export const IPC_EVENT_WEATHER_STATE = "weather:state";
-/** 乗車選択と走行HUDはUnityが表示する。文言はUIの現在言語で一括して渡す。 */
+/** 3D画面のドライブボタンが押された。文言を現在の言語で持つコックピットが `openDriveMode` で開始を返す。 */
+export const IPC_EVENT_DRIVE_REQUEST = "drive:request";
+/** 乗車の選択画面はUnityが表示する。文言はUIの現在言語で一括して渡す。 */
 export async function openDriveMode(labels: Record<string, string>): Promise<void> {
   await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "drive:open", params: labels });
 }

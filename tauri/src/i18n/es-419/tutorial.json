@@ -29,7 +29,7 @@
       "description": "Conoce la cabina, el panel de visualización y el panel de iconos, cómo avanzan las épocas, cómo mover la cámara y dónde está el límite de la ciudad.",
       "step1": {
         "title": "Conoce la cabina",
-        "tools": "Veamos la cabina. Los botones resaltados son las herramientas de uso diario. «Visualización» abre el panel de visualización y «Mapa» abre un mapa de toda la ciudad. «Bulldozer» es un modo que elimina parcelas vacías y obras planeadas, y «Paseo» te permite recorrer la ciudad y mirar a tu alrededor. Cuando termines de leer, pulsa «Siguiente».",
+        "tools": "Veamos la cabina. Los botones resaltados son las herramientas de uso diario. «Visualización» abre el panel de visualización y «Mapa» abre un mapa de toda la ciudad. «Bulldozer» es un modo que elimina parcelas vacías y obras planeadas. Cuando termines de leer, pulsa «Siguiente».",
         "services": "Este es el medidor de servicios públicos. Indica si la capacidad de oferta alcanza para la demanda. La demanda crece junto con la ciudad, así que revísalo de vez en cuando. Pulsa «Siguiente».",
         "status": "«Puntaje» es tu puntaje de gestión (por hogar, sobre 2.0). «Presupuesto» muestra el presupuesto previsto de este período y el efectivo disponible. Pulsa «Siguiente».",
         "notifications": "Los sucesos de la ciudad llegan al botón de notificaciones. Aquí también se ven la fecha y el clima. Eso es todo sobre la cabina. Pulsa «Siguiente»."

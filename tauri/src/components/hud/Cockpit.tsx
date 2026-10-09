@@ -7,7 +7,7 @@
  * - 追跡リスト: 市民パネルの「追跡」で加えた市民の一覧を開く。一時停止中の3Dビューで車・歩行者を
  *   クリックしたときに市民を推定できなかった理由(`citizen:pick_failed`)は、常駐するこのウィンドウが通知で案内する。
  *
- * - 常用ツール: 上段に表示切替・都市マップ・追跡リスト、下段にブルドーザ・ドライブを置く。
+ * - 常用ツール: 2×2に、上段は表示切替・都市マップ、下段は追跡リスト・ブルドーザを置く。
  *   ブルドーザはウィンドウを開かずUnityの削除ステートに入る常駐モードで、
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
  *   解除し忘れによる誤削除を防ぐため、ON の間はパネル全体を工事現場風の
@@ -24,6 +24,7 @@
  *
  * BGMの再生と、3Dビューでのオブジェクト選択に応じたウィンドウ表示は、
  * HUDの中で常に1枚だけ存在するこのウィンドウが受け持つ(多重再生・多重オープンを避けるため)。
+ * 3D画面のドライブボタンの開始依頼(`drive:request`)も、選択画面の文言を現在の言語で渡すためにここが受ける。
  */
 import { PLAY_MODE_SCEARIO } from "../../constants";
 
@@ -40,6 +41,7 @@ import {
   IPC_EVENT_REMOVE_OBJECT_REQUEST_CONFIRM,
   IPC_EVENT_WORLD_SELECT_OBJECT,
   IPC_EVENT_CITIZEN_PICK_FAILED,
+  IPC_EVENT_DRIVE_REQUEST,
 } from "../../utils/ipc";
 import { clearFollowedCitizen, listenFollowState } from "../../utils/citizenTracking";
 import { showNotification } from "../../utils/notification";
@@ -183,6 +185,34 @@ export function Cockpit() {
     };
   }, [t]);
 
+  /**
+   * 3D画面のドライブボタンからの開始依頼。ブルドーザ・地区編集の常駐モードを解いてから、
+   * 選択画面の文言を現在の言語で渡して開始する。市庁舎を置くまでは受け付けない。
+   */
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    let unlisten: (() => void) | undefined;
+    appWindow
+      .listen(IPC_EVENT_DRIVE_REQUEST, () => {
+        if (isLocked) return;
+        void (async () => {
+          if (mode !== null) {
+            await sendChangeState("STATE_NORMAL", undefined, "cockpit");
+            await setHudMode(null);
+            await setHintbarText("");
+          }
+          await openDriveMode(t("drive", { returnObjects: true }) as Record<string, string>);
+        })().catch(console.error);
+      })
+      .then((fn) => {
+        unlisten = fn;
+      })
+      .catch(console.error);
+    return () => {
+      unlisten?.();
+    };
+  }, [isLocked, mode, t]);
+
   // セッションが切れたら通知一覧を空にし、別の都市をロードし直したときに
   // 前の都市の件数バッジが残らないようにする。
   useEffect(() => {
@@ -289,27 +319,6 @@ export function Cockpit() {
             </button>
           );
         })}
-        <button
-          id="drive"
-          className="hud-icon-btn cockpit-tool cockpit-drive"
-          type="button"
-          title={t("drive.title")}
-          aria-label={t("drive.title")}
-          disabled={isLocked}
-          onClick={() => void (async () => {
-            if (mode !== null) {
-              await sendChangeState("STATE_NORMAL", undefined, "cockpit");
-              await setHudMode(null);
-              await setHintbarText("");
-            }
-            await openDriveMode(t("drive", { returnObjects: true }) as Record<string, string>);
-          })().catch(console.error)}
-        >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="2" />
-            <path d="M3 10h7m4 0h7M10 14l-2 6m6-6 2 6" />
-          </svg>
-        </button>
       </div>
 
       <PublicServiceGauges

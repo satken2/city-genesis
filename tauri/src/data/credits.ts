@@ -500,6 +500,16 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Stat icon: unemployment (stats/unemployment.png)",
   },
   {
+    title: "Steering wheel",
+    category: "image",
+    author: "Magnific",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/steering-wheel_3190249",
+    license: "Flaticon Free License",
+    requiredText: "Steering wheel icon designed by Magnific from Flaticon",
+    note: "Drive mode button (Unity Assets/Images/steering-wheel.png). Source given by the developer. License verified 2026-10-09.",
+  },
+  {
     title: "Rock051 (崖の岩肌テクスチャ)",
     category: "texture",
     source: "ambientCG",

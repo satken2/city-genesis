@@ -659,6 +659,10 @@ pub async fn handle_incoming_message(
             // クリックした車・歩行者の市民を推定できなかった理由。常駐するコックピットが通知で案内する。
             let _ = app.emit_to(window::LABEL_COCKPIT, "citizen:pick_failed", envelope.payload);
         }
+        "drive:request" => {
+            // 3D画面のドライブボタン。選択画面の文言を現在の言語で持つコックピットが drive:open で開始を返す。
+            let _ = app.emit_to(window::LABEL_COCKPIT, "drive:request", envelope.payload);
+        }
         "camera:thumbnail_captured" => {
             // camera:capture_thumbnail(保存直前の撮影)への応答。頼んだウィンドウが id で自分の要求を見分ける。
             let _ = app.emit("camera:thumbnail_captured", envelope.payload);

@@ -15,8 +15,7 @@
             "highlight": [
               "hud.visibility",
               "hud.map",
-              "hud.bulldozer",
-              "hud.drive"
+              "hud.bulldozer"
             ]
           },
           "world": {

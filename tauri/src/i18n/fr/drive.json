@@ -20,15 +20,6 @@
     "close": "Quitter (Échap)",
     "invalidStart": "Départ impossible ici. Choisissez une route praticable ou une voie de votre ligne.",
     "invalidVehicle": "Aucun véhicule sélectionné. Cliquez sur une voiture, un bus ou un train en circulation.",
-    "notReady": "Ce sens est indisponible ou les voies sont en cours de chargement. Changez de sens ou de position, ou réessayez plus tard.",
-    "controls": "Maintenir Espace : vitesse ×5 / V : changer de vue / Échap : quitter",
-    "chaseControls": "Molette : distance / Glisser clic droit : angle",
-    "viewFirst": "Vue : première personne (V)",
-    "viewThird": "Vue : troisième personne (V)",
-    "turnControls": "← → : choisir une sortie / ↑ : la plus droite",
-    "loading": "Chargement des voies…",
-    "onRoute": "Suit la ligne avec arrêts et demi-tours automatiques.",
-    "watching": "Conduit par son conducteur PNJ.",
-    "waiting": "Impasse ou attente de connexion (demi-tour si autorisé)."
+    "notReady": "Ce sens est indisponible ou les voies sont en cours de chargement. Changez de sens ou de position, ou réessayez plus tard."
   }
 }

@@ -8,29 +8,34 @@ using UnityEngine.InputSystem;
 /// 描画専用の乗車モード。都市の状態・経済時間は変えず、既存の交通演出を追従する。
 /// 選んだ位置から出発するほか、走行中の車・バス・列車を選んで、その運転をそのまま眺められる。
 /// 視点は一人称(先頭の車両の少し前)と三人称(<see cref="ChaseCamera"/>)を切り替える。
+/// 乗車中は撮影モードと同じく、Tauri の UI と選択パネルを隠し、状態と操作案内をモード表示欄に出す。
 /// </summary>
 [DefaultExecutionOrder(100)]
 public sealed class DriveMode : MonoBehaviour
 {
+    /// <summary>運転席の目の高さの、車体の高さに対する比。乗用車・バス・トラック・電車とも運転席の目はおおむね車高の3/4にある。</summary>
+    private const float EyeHeightRatio = .75f;
+
     public static DriveMode Instance { get; private set; }
     public static bool IsOpen => Instance != null && Instance.open;
     public static bool IsRiding => Instance != null && Instance.riding;
     public static float SpeedMultiplier => IsRiding && Application.isFocused && InputUtil.KeyPressed(Key.Space) ? 5f : 1f;
     public static bool BlocksCamera => IsRiding || (IsOpen && Instance.PanelRect.Contains(Instance.GuiMouse));
-    private bool open, picking, riding, rail, watch, forward = true, saved, thirdPerson;
+    public static string RideCaption => IsRiding ? Instance.rideCaption : "";
+    private bool open, picking, riding, rail, watch, forward = true, thirdPerson;
     private int vehicleType = Constants.VEHICLE_STANDARD, lineId = -1, pickedPath = -1;
-    private Vector3 pickedPoint, position, direction = Vector3.forward, savedPosition;
-    private Quaternion savedRotation;
-    private bool savedOrthographic;
-    private float savedSize, savedFov, savedNear;
+    private Vector3 pickedPoint, position, direction = Vector3.forward;
+    private float savedFov, savedNear;
     private Camera cameraRef;
     private VehicleManager cars;
     private TransitVehicleManager trains;
     private PathManager paths;
     private IpcClient ipc;
-    private string message = "";
+    private string message = "", rideCaption = "";
     private float noticeUntil, nextBranches;
     private float eyeHeight, halfLength;
+    private GameObject eyeBody;
+    private bool placedView;
     private int branchPath = -1;
     private Vector2 scroll, mouseDown;
     private bool pendingClick;
@@ -45,7 +50,7 @@ public sealed class DriveMode : MonoBehaviour
     private GUIStyle boxStyle, labelStyle, buttonStyle;
     private Vector2 GuiMouse => new(InputUtil.MousePosition.x, Screen.height - InputUtil.MousePosition.y);
     private Rect PanelRect => new(Mathf.Max(8, (Screen.width - 520) * .5f), 20, Mathf.Min(520, Screen.width - 16),
-        riding || picking ? 280 : Mathf.Min(410, Screen.height - 120));
+        picking ? 280 : Mathf.Min(410, Screen.height - 120));
     private Vehicle RiddenCar => cars == null ? null : cars.DrivenVehicle ?? cars.WatchedVehicle;
 
     public static DriveMode Ensure()
@@ -54,6 +59,17 @@ public sealed class DriveMode : MonoBehaviour
         return Instance;
     }
     private void Awake() { Instance = this; }
+
+    /// <summary>
+    /// 3D画面右上のドライブボタン。選択画面の文言は UI の現在の言語で受け取るので、開始はコックピットに頼み、
+    /// 返ってくる drive:open で <see cref="Open"/> する。開いている間に押すと終了する。
+    /// </summary>
+    public static void RequestToggle()
+    {
+        EventSystem.current?.SetSelectedGameObject(null);
+        if (IsOpen) Instance.Close(true);
+        else IpcClient.Instance?.EmitDriveRequest();
+    }
 
     public static bool TryGetLoadCenter(out Vector3 center)
     {
@@ -80,10 +96,7 @@ public sealed class DriveMode : MonoBehaviour
         CitizenFollow.Instance?.Stop(true);
         CameraController.Instance?.SetFlyMode(false);
         RadialMenuController.Instance?.CloseAndCancel();
-        savedPosition = cameraRef.transform.position; savedRotation = cameraRef.transform.rotation;
-        savedOrthographic = cameraRef.orthographic; savedSize = cameraRef.orthographicSize;
-        savedFov = cameraRef.fieldOfView; savedNear = cameraRef.nearClipPlane; saved = true;
-        CameraController.Instance?.SetView(savedPosition, savedRotation);
+        CameraController.Instance?.SetView(cameraRef.transform.position, cameraRef.transform.rotation);
         open = true; picking = riding = false; pickedPath = -1; message = ""; pendingClick = false;
         TransitDataStore.Ensure().Refresh();
         RefreshLines();
@@ -116,24 +129,28 @@ public sealed class DriveMode : MonoBehaviour
     private void OnDisable() { Close(true); UnbindEvents(); ipc = null; }
     private void OnDestroy() { if (Instance == this) Instance = null; }
 
-    public void Close(bool restoreCamera)
+    /// <summary>
+    /// ドライブを終える。乗車中だった場合は画角を乗車前に戻し、handOverView ならその場の視点を
+    /// 通常のカメラ操作へ引き継ぐ(地下を走っていたときは地表まで上げる)。都市の切り替えでは旧都市の視点を引き継がない。
+    /// </summary>
+    public void Close(bool handOverView)
     {
         if (!open) return;
+        bool wasRiding = riding;
         open = picking = riding = pendingClick = false;
         cars?.StopDrive(); trains?.StopDrive(); branches.Clear();
-        if (saved && restoreCamera && cameraRef != null)
+        rideCaption = ""; eyeBody = null; message = "";
+        if (wasRiding && cameraRef != null)
         {
-            cameraRef.orthographic = savedOrthographic; cameraRef.orthographicSize = savedSize;
             cameraRef.fieldOfView = savedFov; cameraRef.nearClipPlane = savedNear;
-            CameraController.Instance?.SetView(savedPosition, savedRotation);
-            cameraRef.orthographicSize = savedSize;
+            if (handOverView && CameraController.Instance != null)
+            {
+                Vector3 view = cameraRef.transform.position;
+                view.y = Mathf.Max(view.y, Utils.GetGroundHeight(view));
+                CameraController.Instance.SetView(view, cameraRef.transform.rotation);
+            }
         }
-        else if (saved && cameraRef != null)
-        {
-            cameraRef.orthographic = savedOrthographic; cameraRef.orthographicSize = savedSize;
-            cameraRef.fieldOfView = savedFov; cameraRef.nearClipPlane = savedNear;
-        }
-        saved = false; message = "";
+        if (wasRiding && CameraController.Instance != null) CameraController.Instance.RefreshCameraModePresentation();
         CameraCellChecker.Instance?.ResetViewState();
     }
 
@@ -149,6 +166,7 @@ public sealed class DriveMode : MonoBehaviour
             { Close(true); return; }
             if (InputUtil.KeyWasPressedThisFrame(Key.V)) ToggleView();
             if (!rail && cars.DrivenVehicle != null) UpdateBranches();
+            RefreshRideCaption();
         }
         else if (picking) PickStart();
     }
@@ -236,39 +254,51 @@ public sealed class DriveMode : MonoBehaviour
     private void BeginRide()
     {
         riding = true; picking = false; message = ""; nextBranches = 0;
+        // 降りたときにその場の視点を通常操作へ引き継ぐので、見下ろし(正射)モードは乗車の時点で解く。
+        CameraController.Instance?.SetTopDownMode(false);
+        savedFov = cameraRef.fieldOfView; savedNear = cameraRef.nearClipPlane;
         cameraRef.orthographic = false; cameraRef.fieldOfView = 65; cameraRef.nearClipPlane = .1f;
+        eyeBody = null; placedView = false;
         ReadPose();
-        eyeHeight = rail ? 5f : 2f;
         var car = rail ? null : RiddenCar;
         halfLength = car == null ? trains.DriveCarLength * .5f : VehicleModelResolver.ModelBounds(car.go.transform).max.z;
-        if (car != null)
-            foreach (var renderer in car.go.GetComponentsInChildren<Renderer>())
-                eyeHeight = Mathf.Max(eyeHeight, renderer.bounds.max.y - position.y + .5f);
         chase.Reset();
-        ApplyCamera(true);
+        ApplyCamera();
         CameraCellChecker.Instance?.ResetViewState();
+        RefreshRideCaption();
     }
 
     private void ReadPose()
     {
-        var car = RiddenCar;
-        if (rail) { position = trains.DrivePosition; direction = trains.DriveDirection; }
-        else if (car != null) car.Sample(out position, out direction);
+        GameObject body;
+        if (rail) { position = trains.DrivePosition; direction = trains.DriveDirection; body = trains.DriveBody; }
+        else
+        {
+            var car = RiddenCar;
+            if (car == null) return;
+            car.Sample(out position, out direction); body = car.go;
+        }
+        // 目の高さは先頭の車体のモデルの高さから決める。折り返しで先頭の車両が替わったときは測り直す。
+        if (body != null && body != eyeBody)
+        { eyeBody = body; eyeHeight = EyeHeightRatio * VehicleModelResolver.ModelBounds(body.transform).max.y; }
     }
     private void LateUpdate()
     {
         if (!riding || cameraRef == null) return;
-        ReadPose(); ApplyCamera(false);
+        ReadPose(); ApplyCamera();
     }
-    private void ApplyCamera(bool immediate)
+    private void ApplyCamera()
     {
         if (thirdPerson) { chase.Apply(cameraRef, position, direction, Time.unscaledDeltaTime * SpeedMultiplier); return; }
+        // 編成は乗車を始めた次のフレームに描かれるので、先頭の車体を測れるまで視点を置かない。
+        if (eyeBody == null) return;
         // 一人称は先頭の車両の前端より少し前に置き、車体を視界に入れない。地形・構造物による制限は掛けない。
         Vector3 eye = position + direction * (halfLength + 1f) + Vector3.up * eyeHeight;
         Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up) * Quaternion.Euler(5, 0, 0);
-        // 位置の遅延は高速走行時の車体へのめり込みを招くため、回転だけを平滑化する。
-        cameraRef.transform.SetPositionAndRotation(eye, immediate ? rotation : Quaternion.Slerp(cameraRef.transform.rotation, rotation,
+        // 位置の遅延は高速走行時の車体へのめり込みを招くため、回転だけを平滑化する。初めて置くときは乗車前の向きから回さない。
+        cameraRef.transform.SetPositionAndRotation(eye, !placedView ? rotation : Quaternion.Slerp(cameraRef.transform.rotation, rotation,
             1 - Mathf.Exp(-8 * Time.unscaledDeltaTime * SpeedMultiplier)));
+        placedView = true;
     }
 
     private void ToggleView()
@@ -282,7 +312,7 @@ public sealed class DriveMode : MonoBehaviour
         var vehicle = cars.DrivenVehicle;
         if (branchPath != vehicle.pathId || Time.unscaledTime >= nextBranches)
         { cars.GetDriveBranches(branches); nextBranches = Time.unscaledTime + .15f; branchPath = vehicle.pathId; }
-        if (vehicle.InIntersection || vehicle.Remaining > Mathf.Max(70, vehicle.speed * SpeedMultiplier * 5) || branches.Count == 0) return;
+        if (!AtJunction(vehicle) || branches.Count == 0) return;
         int selected = branches.FindIndex(branch => branch.Path == cars.RequestedDrivePath);
         if (InputUtil.KeyWasPressedThisFrame(Key.LeftArrow)) selected = (selected - 1 + branches.Count) % branches.Count;
         if (InputUtil.KeyWasPressedThisFrame(Key.RightArrow)) selected = (selected + 1) % branches.Count;
@@ -294,11 +324,45 @@ public sealed class DriveMode : MonoBehaviour
         if (selected >= 0) cars.RequestedDrivePath = branches[selected].Path;
     }
 
+    /// <summary>分岐を選べる区間。交差点の手前、5秒で届く距離(最低70m)から交差点に入るまで。</summary>
+    private static bool AtJunction(Vehicle vehicle)
+        => !vehicle.InIntersection && vehicle.Remaining <= Mathf.Max(70, vehicle.speed * SpeedMultiplier * 5);
+
+    /// <summary>
+    /// 乗車中の状態と操作案内を撮影モードと同じモード表示欄へ出す(変わったときだけ)。表示欄のフォントは欧文だけなので英語で書く。
+    /// 分岐の候補は進行方向に対する向きの矢印で並べ、選んだ候補を [ ] で囲む。
+    /// </summary>
+    private void RefreshRideCaption()
+    {
+        var vehicle = rail ? null : cars.DrivenVehicle;
+        string status = rail ? (trains.DriveWaiting ? "Loading track" : "On route")
+            : vehicle == null ? "NPC driving"
+            : AtJunction(vehicle) ? RouteCaption()
+            : "";
+        string caption = $"Drive {(thirdPerson ? "3rd person" : "1st person")} | x{SpeedMultiplier:0}{(status.Length > 0 ? " | " + status : "")}\n"
+            + "Hold Space: x5 | V: view | Esc: exit"
+            + (vehicle != null ? " | ←/→: next road | ↑: straightest" : "")
+            + (thirdPerson ? "\nWheel: distance | Right-drag: angle" : "");
+        if (caption == rideCaption) return;
+        rideCaption = caption;
+        if (CameraController.Instance != null) CameraController.Instance.RefreshCameraModePresentation();
+    }
+
+    private string RouteCaption()
+    {
+        if (branches.Count == 0) return "Dead end / waiting";
+        string text = "Next road:";
+        foreach (var branch in branches)
+        {
+            string arrow = Mathf.Abs(branch.Angle) > 150 ? "↓" : branch.Angle < -25 ? "←" : branch.Angle > 25 ? "→" : "↑";
+            text += cars.RequestedDrivePath == branch.Path ? " [" + arrow + "]" : " " + arrow;
+        }
+        return text;
+    }
+
     private void OnGUI()
     {
-        if (!open && Time.unscaledTime >= noticeUntil) return;
-        // Spaceによる早送りを、直前に押した終了ボタンのキーボード操作として解釈させない。
-        if (riding) GUIUtility.keyboardControl = 0;
+        if (riding || (!open && Time.unscaledTime >= noticeUntil)) return;
         if (boxStyle == null)
         {
             boxStyle = new GUIStyle(GUI.skin.box) { padding = new RectOffset(16, 16, 12, 12) };
@@ -308,7 +372,6 @@ public sealed class DriveMode : MonoBehaviour
         GUILayout.BeginArea(PanelRect, boxStyle);
         GUILayout.Label(L("title"), labelStyle);
         if (!open) GUILayout.Label(message, labelStyle);
-        else if (riding) DrawRideHud();
         else if (picking) DrawPickHud();
         else DrawMenu();
         GUILayout.EndArea();
@@ -357,33 +420,6 @@ public sealed class DriveMode : MonoBehaviour
         if (GUILayout.Button(L("close"), buttonStyle)) Close(true);
         GUILayout.EndHorizontal();
         if (message.Length > 0) GUILayout.Label(message, labelStyle);
-    }
-    private void DrawRideHud()
-    {
-        GUILayout.Label(L("controls") + (SpeedMultiplier > 1 ? "  ×5" : "  ×1"), labelStyle);
-        if (thirdPerson) GUILayout.Label(L("chaseControls"), labelStyle);
-        if (rail) GUILayout.Label(L(trains.DriveWaiting ? "loading" : "onRoute"), labelStyle);
-        else if (cars.DrivenVehicle == null) GUILayout.Label(L("watching"), labelStyle);
-        else
-        {
-            var vehicle = cars.DrivenVehicle;
-            if (vehicle != null && !vehicle.InIntersection && vehicle.Remaining <= Mathf.Max(70, vehicle.speed * SpeedMultiplier * 5))
-            {
-                GUILayout.Label(branches.Count == 0 ? L("waiting") : L("turnControls"), labelStyle);
-                GUILayout.BeginHorizontal();
-                foreach (var branch in branches)
-                {
-                    string arrow = Mathf.Abs(branch.Angle) > 150 ? "↓" : branch.Angle < -25 ? "←" : branch.Angle > 25 ? "→" : "↑";
-                    string text = arrow + " " + (cars.RequestedDrivePath == branch.Path ? "●" : "○");
-                    if (GUILayout.Button(text, buttonStyle)) cars.RequestedDrivePath = branch.Path;
-                }
-                GUILayout.EndHorizontal();
-            }
-        }
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button(L(thirdPerson ? "viewThird" : "viewFirst"), buttonStyle)) ToggleView();
-        if (GUILayout.Button(L("close"), buttonStyle)) Close(true);
-        GUILayout.EndHorizontal();
     }
     private void DrawStartMarker()
     {

@@ -63,7 +63,7 @@ public static partial class VehicleQA
             if (Array.IndexOf(args,"-driveOnly")>=0)
             {
                 Geometry(); Junction(); MotionContract(); TransitPlacement(); DriveCamera();
-                File.WriteAllText(result,"PASS\nDrive: branch selection, one-way restrictions, protected lifetime, watched NPC car/train, transit start/turnback/loading, first/third-person camera, camera restore and input cleanup");
+                File.WriteAllText(result,"PASS\nDrive: branch selection, one-way restrictions, protected lifetime, watched NPC car/train, transit start/turnback/loading, first/third-person camera, view handover and input cleanup");
                 EditorApplication.Exit(0); return;
             }
             StreetParking();
@@ -627,27 +627,29 @@ public static partial class VehicleQA
         game.GetType("CameraController").GetProperty("Instance").SetValue(null,controller);
         var drive=new GameObject("DriveModeQA").AddComponent(game.GetType("DriveMode"));
         game.GetType("DriveMode").GetProperty("Instance").SetValue(null,drive);
-        Set(drive,"open",true); Set(drive,"riding",true); Set(drive,"saved",true); Set(drive,"cameraRef",camera);
+        Set(drive,"open",true); Set(drive,"riding",true); Set(drive,"cameraRef",camera);
         Set(drive,"position",new Vector3(500,20,800));
-        var original=new Vector3(10,250,30); var rotation=Quaternion.Euler(70,35,0);
-        Set(drive,"savedPosition",original); Set(drive,"savedRotation",rotation);
-        Set(drive,"savedOrthographic",true); Set(drive,"savedSize",230f); Set(drive,"savedFov",55f); Set(drive,"savedNear",.8f);
+        Set(drive,"savedFov",55f); Set(drive,"savedNear",.8f);
         Set(controller,"isMouseDragging",true); Set(controller,"dragVelocity",Vector3.one*100);
         object[] args={null};
         Check((bool)Call(drive,"TryGetLoadCenter",args),"Ride did not override the ground-ray load center");
         Near(Vector3.Distance((Vector3)args[0],new Vector3(500,20,800)),0,.001f,"Load center is not the ridden vehicle");
         // 地形の無い検証シーンでは地表の高さが0になる。地下の位置で、一人称は制限なく追い、三人称は地表から2m未満へ下げない。
         Set(drive,"position",new Vector3(500,-30,800)); Set(drive,"direction",Vector3.forward); Set(drive,"halfLength",2f); Set(drive,"eyeHeight",1.5f);
-        Call(drive,"ApplyCamera",true);
+        var unplaced=camera.transform.position; Call(drive,"ApplyCamera");
+        Near(Vector3.Distance(camera.transform.position,unplaced),0,.001f,"First-person camera moved before the leading car was measured");
+        Set(drive,"eyeBody",go); Call(drive,"ApplyCamera");
         Near(Vector3.Distance(camera.transform.position,new Vector3(500,-28.5f,803)),0,.001f,"First-person camera is not just ahead of the leading car");
-        Set(drive,"thirdPerson",true); Call(drive,"ApplyCamera",true);
+        Set(drive,"thirdPerson",true); Call(drive,"ApplyCamera");
         Check(camera.transform.position.y>=2-.001f,"Third-person camera goes below the ground clearance");
-        Set(drive,"thirdPerson",false);
+        // 降りるとその場の視点を通常操作へ引き継ぐ。地下を走っていたときは地表まで上げる。
+        Set(drive,"thirdPerson",false); Call(drive,"ApplyCamera");
+        var view=camera.transform.rotation; var handedOver=camera.transform.position; handedOver.y=0;
         Call(drive,"Close",true);
-        Near(Vector3.Distance(camera.transform.position,original),0,.001f,"Drive exit did not restore camera position");
-        Near(Quaternion.Angle(camera.transform.rotation,rotation),0,.001f,"Drive exit did not restore camera angle");
-        Check(camera.orthographic,"Drive exit lost orthographic projection");
-        Near(camera.orthographicSize,230,.001f,"Drive exit lost zoom"); Near(camera.nearClipPlane,.8f,.001f,"Drive exit lost clipping plane");
+        Near(Vector3.Distance(camera.transform.position,handedOver),0,.001f,"Drive exit did not hand over the current view above the ground");
+        Near(Quaternion.Angle(camera.transform.rotation,view),0,.001f,"Drive exit changed the view direction");
+        Check(!camera.orthographic,"Drive exit switched to orthographic projection");
+        Near(camera.fieldOfView,55,.001f,"Drive exit lost field of view"); Near(camera.nearClipPlane,.8f,.001f,"Drive exit lost clipping plane");
         Check(!(bool)Get(controller,"isMouseDragging") && ((Vector3)Get(controller,"dragVelocity")).sqrMagnitude==0,"Camera resumes stale dragging after drive");
         Check(!(bool)Call(drive,"TryGetLoadCenter",args),"Drive load center leaked after exit");
         Near(Property(drive,"SpeedMultiplier"),1,.001f,"Fast-forward leaked after exit");

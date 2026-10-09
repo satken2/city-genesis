@@ -20,7 +20,7 @@ public class ModeTextDisplay : MonoBehaviour
 
     // 直近に適用されたステート。カメラ専用モード終了時に戻すために保持する。
     private string lastState = "STATE_NORMAL";
-    private RectTransform cinematicCaptionPanel;
+    private RectTransform expandedCaptionPanel;
     private Vector2 savedCaptionSize;
     private Vector2 savedCaptionPosition;
 
@@ -41,8 +41,8 @@ public class ModeTextDisplay : MonoBehaviour
     {
         // カメラ専用モード中も直近のステートを記録し、終了時に正しい表示へ復帰させる。
         lastState = state;
-        if (CameraController.Instance != null &&
-            (CameraController.Instance.IsFlyMode || CameraController.Instance.IsCinematicMode)) return;
+        if (DriveMode.IsRiding || (CameraController.Instance != null &&
+            (CameraController.Instance.IsFlyMode || CameraController.Instance.IsCinematicMode))) return;
         ApplyStateText(state);
     }
 
@@ -86,10 +86,22 @@ public class ModeTextDisplay : MonoBehaviour
 
     public void ShowCinematicMode(bool orbit, bool paused, bool hasPivot, bool reversed)
     {
+        string status = orbit && !hasPivot ? "No target (Space: retry)" : paused ? "Paused" : "Playing";
+        string controls = orbit ? "" : "\nA/D: heading +/-5° | Arrows: move | R/F: height";
+        ShowMultilineCaption($"Camera {(orbit ? "1: Orbit" : "2: Travel")} | {status}{(reversed ? " | Reversed" : "")}\n"
+            + "Mouse: look | Shift: mode | Space: pause | Backspace: reverse | Esc: exit" + controls);
+    }
+
+    /// <summary>ドライブの乗車中の状態と操作案内。文面は <see cref="DriveMode.RideCaption"/> が作る。</summary>
+    public void ShowDriveMode(string caption) => ShowMultilineCaption(caption);
+
+    /// <summary>撮影・ドライブの数行の案内を出す。表示枠は案内の間だけ高さを広げ、RestoreCaptionLayout で戻す。</summary>
+    private void ShowMultilineCaption(string text)
+    {
         if (modeText == null) return;
-        if (cinematicCaptionPanel == null && modeText.transform.parent is RectTransform panel)
+        if (expandedCaptionPanel == null && modeText.transform.parent is RectTransform panel)
         {
-            cinematicCaptionPanel = panel;
+            expandedCaptionPanel = panel;
             savedCaptionSize = panel.sizeDelta;
             savedCaptionPosition = panel.anchoredPosition;
             float height = Mathf.Max(72f, panel.rect.height);
@@ -97,17 +109,14 @@ public class ModeTextDisplay : MonoBehaviour
             panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
             panel.anchoredPosition -= Vector2.up * (increase * (1f - panel.pivot.y));
         }
-        string status = orbit && !hasPivot ? "No target (Space: retry)" : paused ? "Paused" : "Playing";
-        string controls = orbit ? "" : "\nA/D: heading +/-5° | Arrows: move | R/F: height";
-        modeText.text = $"Camera {(orbit ? "1: Orbit" : "2: Travel")} | {status}{(reversed ? " | Reversed" : "")}\n"
-            + "Mouse: look | Shift: mode | Space: pause | Backspace: reverse | Esc: exit" + controls;
+        modeText.text = text;
     }
 
     private void RestoreCaptionLayout()
     {
-        if (cinematicCaptionPanel == null) return;
-        cinematicCaptionPanel.sizeDelta = savedCaptionSize;
-        cinematicCaptionPanel.anchoredPosition = savedCaptionPosition;
-        cinematicCaptionPanel = null;
+        if (expandedCaptionPanel == null) return;
+        expandedCaptionPanel.sizeDelta = savedCaptionSize;
+        expandedCaptionPanel.anchoredPosition = savedCaptionPosition;
+        expandedCaptionPanel = null;
     }
 }

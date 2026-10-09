@@ -29,7 +29,7 @@
       "description": "Learn the cockpit, the display panel and the icon panel, how epochs advance time, how to move the camera, and where the city boundary is.",
       "step1": {
         "title": "Look at the cockpit",
-        "tools": "Let's look at the cockpit. The highlighted buttons are the everyday tools. \"View\" opens the display panel and \"Map\" opens a map of the whole city. \"Bulldozer\" is a mode that removes empty parcels and planned buildings and roads, and \"Drive\" lets you travel through the city and look around. When you've read this, press \"Next\".",
+        "tools": "Let's look at the cockpit. The highlighted buttons are the everyday tools. \"View\" opens the display panel and \"Map\" opens a map of the whole city. \"Bulldozer\" is a mode that removes empty parcels and planned buildings and roads. When you've read this, press \"Next\".",
         "services": "This is the public service gauge. It shows whether supply capacity is keeping up with demand. Demand grows as the city grows, so check it from time to time. Press \"Next\".",
         "status": "\"Score\" is your governance score (per household, out of 2.0). \"Budget\" shows the expected budget for this period and your cash on hand. Press \"Next\".",
         "notifications": "Events in the city arrive at the \"Notifications\" button. The date and weather are shown here too. That's the cockpit. Press \"Next\"."
