@@ -223,6 +223,10 @@
         "graphX": "Floors",
         "graphY": "Construction cost multiplier"
       },
+      "BUILDING_ASPECT_RATIO_MAX": {
+        "label": "Max Slenderness Ratio",
+        "desc": "Upper limit of building height ÷ √footprint area. Prevents needle-like towers on tiny lots. 0 = no limit."
+      },
       "DEMOLITION_RATE": {
         "label": "Demolition Efficiency Ratio",
         "desc": "How much more efficient demolition is compared to new construction (multiplier)."

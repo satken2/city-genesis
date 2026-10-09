@@ -223,6 +223,10 @@
         "graphX": "层数",
         "graphY": "建设费倍率"
       },
+      "BUILDING_ASPECT_RATIO_MAX": {
+        "label": "塔状比上限",
+        "desc": "建筑高度÷√建筑面积的上限。防止在小地块上自动建起细长的高楼。0为不限制。"
+      },
       "DEMOLITION_RATE": {
         "label": "拆除效率比",
         "desc": "拆除相较于新建的效率倍率。"
