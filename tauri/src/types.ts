@@ -798,8 +798,18 @@ export type TransitLineEstimate = {
   break_even_load_factor: number | null;
   /** 路線の走行網につながった稼働中の車両基地があるか(試算できないときは null) */
   depot_connected: boolean | null;
-  /** この設定を確定すると容量を超える線路(作成・更新の事前検証と同じ判定)。load・capacity は軌道1本あたりの便数/日 */
-  track_overloads: { path_id: number; load: number; capacity: number }[];
+  /**
+   * この設定を確定すると容量を超える線路(作成・更新の事前検証と同じ判定)。
+   * 軌道の超過は load・capacity が軌道1本あたりの便数/日。単線区間の超過(single_track)は load・capacity が
+   * 1日の占有時間・運行時間(分)で、min_headway はこの路線に要る最短の運行間隔(分。他の路線だけで埋まっていれば null)。
+   */
+  track_overloads: {
+    path_id: number;
+    load: number;
+    capacity: number;
+    single_track: boolean;
+    min_headway?: number | null;
+  }[];
 };
 
 /**

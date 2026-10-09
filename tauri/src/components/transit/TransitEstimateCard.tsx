@@ -59,9 +59,10 @@ export function TransitEstimateCard({ estimate, loading, error, placeholder }: T
   const loadPercent = formatPercent(estimate.load_factor, locale);
   const balance = estimate.balance;
   const breakEven = estimate.break_even_load_factor;
-  // 超過線路が複数あっても、最も混む1本だけを示せば「間隔を延ばす/線路を増やす」判断には足りる。
+  // 超過線路が複数あっても、負荷率が最も高い1本だけを示せば「間隔を延ばす/線路を増やす」判断には足りる。
+  // 軌道の超過(便数)と単線区間の超過(占有時間)は単位が違うので、容量に対する比で比べる。
   const worstOverload = estimate.track_overloads.reduce<TransitLineEstimate["track_overloads"][number] | null>(
-    (worst, o) => (worst === null || o.load > worst.load ? o : worst),
+    (worst, o) => (worst === null || o.load / o.capacity > worst.load / worst.capacity ? o : worst),
     null,
   );
 
@@ -121,10 +122,16 @@ export function TransitEstimateCard({ estimate, loading, error, placeholder }: T
       )}
       {worstOverload && (
         <p className="transit-estimate__warning">
-          {t("transit.estimate.trackOverload", {
-            load: number(Math.round(worstOverload.load)),
-            capacity: number(Math.round(worstOverload.capacity)),
-          })}
+          {!worstOverload.single_track
+            ? t("transit.estimate.trackOverload", {
+                load: number(Math.round(worstOverload.load)),
+                capacity: number(Math.round(worstOverload.capacity)),
+              })
+            : worstOverload.min_headway != null
+              ? t("transit.estimate.singleTrackOverload", {
+                  minutes: number(Math.ceil(worstOverload.min_headway * 10) / 10, 1),
+                })
+              : t("transit.estimate.singleTrackFull")}
         </p>
       )}
       <p className="transit-estimate__note">

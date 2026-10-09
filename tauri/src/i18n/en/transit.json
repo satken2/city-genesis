@@ -107,6 +107,8 @@
       "estimatedLeaseNote": "No depot has a vehicle price yet, so the price is estimated from a depot's production cost.",
       "noDepot": "No operating depot is connected to this line's network. As is, the line cannot get vehicles and will not run.",
       "trackOverload": "Exceeds track capacity (planned {{load}} trains/day > {{capacity}} trains/day per track). Lengthen the headway or add tracks.",
+      "singleTrackOverload": "Trains cannot pass each other on the single-track section, so set the headway to at least {{minutes}} min. Adding a double-track station or stretch along the way lets you shorten it.",
+      "singleTrackFull": "The single-track section is already filled by trains of other lines, so this line cannot run. Lengthen the other lines' headways or add a double-track station or stretch along the way.",
       "unavailable": {
         "insufficientStops": "Place at least two stops to get an estimate.",
         "invalidStop": "Some stops or waypoints are in places where they cannot be placed, so no estimate is available.",
