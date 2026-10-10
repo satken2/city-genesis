@@ -25,8 +25,8 @@ using GeneratedModels;
 ///   完成された3Dモデルなので、上から見える面はモデル側で閉じておくこと。
 ///
 /// 敷地の装飾: モジュラー建物と共通の処理（ModularBodyBuilder.GenerateSiteDecorations）で、
-/// 土地区画の外周フェンス（fence-w / fence-c）・敷地内のタイル（tile）・地面パネル（floor）を
-/// 配置する。いずれも該当パーツが存在する場合のみ描画されるオプション要素
+/// 土地区画の外周フェンス（fence-w / fence-c）・敷地内のタイル（tile）・底面の外側の散布パーツ（scatter）・
+/// 地面パネル（floor）を配置する。いずれも該当パーツが存在する場合のみ描画されるオプション要素
 /// （地面パネルは floor パーツがあるときだけ。デフォルトマテリアルへのフォールバックはしない）。
 ///
 /// 傾斜地対応（IsApplicableModelType）の対象外: 建物は中心位置の地形標高に接地し
@@ -113,9 +113,9 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
             maxDrawnTop = Mathf.Max(maxDrawnTop, stackY + drawn);
         }
 
-        // --- 敷地の装飾（フェンス・タイル・地面パネル）---
-        // モジュラー建物と共通の処理で、土地区画の外周にフェンス、敷地内にタイル・地面パネルを配置する。
-        // フェンス・タイルは a{variant}（またはフォールバック先 b{bd_type}）に該当パーツがある場合のみ描画。
+        // --- 敷地の装飾（フェンス・タイル・散布パーツ・地面パネル）---
+        // モジュラー建物と共通の処理で、土地区画の外周にフェンス、敷地内にタイル・地面パネル、底面の外側に散布パーツを配置する。
+        // フェンス・タイル・散布パーツは a{variant}（またはフォールバック先 b{bd_type}）に該当パーツがある場合のみ描画。
         // 地面パネルは master の draw_floor=yes の建物だけ描画し、マテリアルは floor パーツを
         // a{variant}→b{bd_type}→common でフォールバック解決する（floorMaterial が非nullのときだけ描く）。
         // prebuilt は建物中心位置の地形標高に接地する（傾斜地対応の対象外）ため、
@@ -129,7 +129,8 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
             fenceFootprint, sitePolygon, sitePolygon,
             floorMaterial,
             centerPointWorld, deformToTerrain: isDynamic,
-            combineInstances, materials, temporaryMeshes);
+            combineInstances, materials, temporaryMeshes,
+            scatterFootprint: footprint, scatterSeed: buildingData.visual_variant2);
 
         if (combineInstances.Count == 0)
         {

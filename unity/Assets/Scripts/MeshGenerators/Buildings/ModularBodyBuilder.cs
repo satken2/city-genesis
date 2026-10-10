@@ -93,6 +93,8 @@ public static class ModularBodyBuilder
     /// <param name="fenceFootprint">フェンスを配置する土地区画の頂点列（CCW・center_point 基準のローカルXZ座標。footprint と同じ規約）。null の場合は fence を描画しない。</param>
     /// <param name="centerPointWorld">建物の center_point に対応するワールド座標。地形追従時の高さサンプリングに使用する。</param>
     /// <param name="floorMaterial">地面パネル用マテリアル。呼び出し側が master の draw_floor と floor パーツ（a→b→common）から解決済み。null なら地面パネルを描画しない。</param>
+    /// <param name="occupiedFootprint">エントランス・外階段で後退させる前の底面。散布パーツはこの外側に置く。null なら footprint を使う。</param>
+    /// <param name="visual_variant2">散布パーツの配置の乱数の種。</param>
     public static BodyMeshData GenerateBody(
         Vector2[] footprint,
         int floors,
@@ -105,7 +107,9 @@ public static class ModularBodyBuilder
         Vector3 centerPointWorld = default,
         bool isDynamic = false,
         Material floorMaterial = null,
-        ExteriorStairBuilder.Layout stairs = null)
+        ExteriorStairBuilder.Layout stairs = null,
+        Vector2[] occupiedFootprint = null,
+        float visual_variant2 = 0f)
     {
         int variantNumber = BuildingMeshUtils.ComputeVariantNumber(visual_variant);
         bool isGroundModel = modelType == Constants.MODEL_MODULAR_GROUND;
@@ -238,8 +242,8 @@ public static class ModularBodyBuilder
             return DefaultBodyBuilder.GenerateBody(footprint, floors, floorHeight);
         }
 
-        // --- 敷地の装飾（フェンス・タイル・地面パネル）---
-        // フェンスは全 modelType で描画を試行し、タイルは MODEL_MODULAR_GROUND のみ。
+        // --- 敷地の装飾（フェンス・タイル・散布パーツ・地面パネル）---
+        // フェンス・散布パーツは全 modelType で描画を試行し、タイルは MODEL_MODULAR_GROUND のみ。
         // 地面パネルは master の draw_floor=yes の建物のみ（floorMaterial が非nullのときだけ）描画する。
         // タイル・地面パネルの対象は土地区画ポリゴン(fenceFootprint)全体。建物底面だけに張ると
         // パネルが建物本体の真下に隠れて見えないため。区画が取得できない場合は建物底面へフォールバックする。
@@ -257,7 +261,8 @@ public static class ModularBodyBuilder
             sitePolygon,
             floorMaterial,
             centerPointWorld, deformToTerrain,
-            combineInstances, allMaterials, temporaryMeshes);
+            combineInstances, allMaterials, temporaryMeshes,
+            scatterFootprint: occupiedFootprint ?? footprint, scatterSeed: visual_variant2);
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] 壁・角・地面完了: {combineInstances.Count}インスタンス, {allMaterials.Count}マテリアル");
 
@@ -282,6 +287,8 @@ public static class ModularBodyBuilder
     ///   開口中心と半径が指定された場合は、その円内の壁・角を省いて通路を確保する。
     /// - タイル: tilePolygon の内部に tile パーツを敷き詰める（GenerateTiles）。tile パーツが
     ///   無ければ何もしない。null でタイルなし。
+    /// - 散布パーツ: floorPolygon のうち建物の底面 scatterFootprint の外側の空き地に scatter パーツを
+    ///   置く（GenerateScatter）。scatterSeed が配置の乱数の種。scatterFootprint が null なら置かない。
     /// - 地面パネル: floorPolygon 形状の水平パネルを GROUND_OFFSET の高さに張る。
     ///   描画するかどうかとマテリアルは呼び出し側が master の draw_floor フラグと
     ///   floor パーツ（a{variant}→b{bd_type}→common）から解決済みの floorMaterial で決まる。
@@ -296,13 +303,15 @@ public static class ModularBodyBuilder
         Vector2[] fenceFootprint, Vector2[] tilePolygon, Vector2[] floorPolygon, Material floorMaterial,
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
-        Vector2? fenceOpeningCenter = null, float fenceOpeningRadius = 0f)
+        Vector2? fenceOpeningCenter = null, float fenceOpeningRadius = 0f,
+        Vector2[] scatterFootprint = null, float scatterSeed = 0f)
     {
         if (BuildingExteriorRenderer.Capture != null)
         {
             BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) => GenerateSiteDecorations(
                 prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, floorMaterial, centerPointWorld,
-                deformToTerrain, meshes, materials, temporary, fenceOpeningCenter, fenceOpeningRadius));
+                deformToTerrain, meshes, materials, temporary, fenceOpeningCenter, fenceOpeningRadius,
+                scatterFootprint, scatterSeed));
             return;
         }
         // --- フェンス部分（fence）---
@@ -383,6 +392,13 @@ public static class ModularBodyBuilder
         {
             GenerateTiles(tilePolygon, prefix, suffix, centerPointWorld, deformToTerrain,
                           combineInstances, allMaterials, temporaryMeshes);
+        }
+
+        // --- 散布パーツ ---
+        if (scatterFootprint != null && floorPolygon != null && floorPolygon.Length >= 3)
+        {
+            GenerateScatter(prefix, suffix, floorPolygon, scatterFootprint, scatterSeed, centerPointWorld, deformToTerrain,
+                            combineInstances, allMaterials, temporaryMeshes);
         }
 
         // --- 地面パネル ---
@@ -724,6 +740,70 @@ public static class ModularBodyBuilder
         }
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, () => $"[MBB] タイル: {tileCount}個配置 ({prefix}/{suffix}/tile)");
+    }
+
+    /// <summary>散布パーツ（scatter1, 2, …）を探す上限。</summary>
+    private const int MAX_SCATTER_PARTS = 16;
+
+    /// <summary>
+    /// 散布パーツ scatter1, 2, … を1から連番で探し（欠番で打ち切る）、<see cref="ScatterLayout"/> の置き場へ実寸で置く。
+    /// パーツはノード変換込みで1つに結合し、原点を置き場の地面に合わせる。地形追従時の地面は外接箱の4隅の地面の
+    /// 最も低い高さで、斜面で浮かないよう高い側を地面へ沈める（港のヤードの荷と同じ）。パーツが無ければ何もしない。
+    /// </summary>
+    private static void GenerateScatter(
+        string prefix, int suffix, Vector2[] site, Vector2[] footprint, float seed,
+        Vector3 centerPointWorld, bool deformToTerrain,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        var meshes = new List<Mesh>();
+        var meshMaterials = new List<Material[]>();
+        var kinds = new List<Bounds>();
+        for (int n = 1; n <= MAX_SCATTER_PARTS; n++)
+        {
+            GameObject part = BuildingMeshUtils.GetPartNoPosition(prefix, $"scatter{n}", suffix, true);
+            if (part == null)
+            {
+                break;
+            }
+            Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(part, out Material[] materials);
+            if (mesh == null)
+            {
+                continue;
+            }
+            temporaryMeshes.Add(mesh);
+            meshes.Add(mesh);
+            meshMaterials.Add(materials);
+            kinds.Add(mesh.bounds);
+        }
+        if (kinds.Count == 0)
+        {
+            return;
+        }
+
+        List<ScatterLayout.Item> items = ScatterLayout.Plan(site, footprint, kinds, Mathf.FloorToInt(Mathf.Clamp01(seed) * 1000000f));
+        foreach (ScatterLayout.Item item in items)
+        {
+            float baseY = 0f;
+            if (deformToTerrain)
+            {
+                baseY = float.MaxValue;
+                foreach (Vector2 corner in item.Corners)
+                {
+                    float ground = Utils.GetGroundHeight(new Vector3(corner.x + centerPointWorld.x, 1000f, corner.y + centerPointWorld.z));
+                    baseY = Mathf.Min(baseY, ground - centerPointWorld.y);
+                }
+            }
+            Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(item.Position.x, baseY, item.Position.y), item.Rotation, Vector3.one);
+            Mesh mesh = meshes[item.Kind];
+            Material[] materials = meshMaterials[item.Kind];
+            for (int subMeshIndex = 0; subMeshIndex < mesh.subMeshCount; subMeshIndex++)
+            {
+                combineInstances.Add(new CombineInstance { mesh = mesh, subMeshIndex = subMeshIndex, transform = matrix });
+                allMaterials.Add(materials != null && subMeshIndex < materials.Length ? materials[subMeshIndex] : null);
+            }
+        }
+
+        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, () => $"[MBB] 散布パーツ: {items.Count}個配置 ({prefix}/{suffix}/scatter*)");
     }
 
     /// <summary>

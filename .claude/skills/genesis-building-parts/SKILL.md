@@ -112,6 +112,7 @@ LOD制作は**同じ建物を距離に応じて表現する作業**である。�
 | 屋上に塔屋・設備・看板 | `roofprop` |
 | 敷地の地面を描きたい | `floor`(マスターが `draw_floor=yes` の建物のみ描画される) |
 | 敷地を塀・柵で囲みたい | `fence-w1`(角も要るなら `fence-c1`) |
+| 敷地の空き地に車両・資材を散らしたい | `scatter1`, `scatter2`, …(I文書§4.12。既存のプロップ・車両は `genesis-gallery/pipeline/jobs/scatter_parts.py` で写す。接道側に空き地をまとめるならマスターの `building_shape=setback`) |
 | 切妻/片流れ屋根の妻壁の材質 | `generic-wall` |
 | 畑・庭など地面アセット(MODEL_MODULAR_GROUND) | `tile`(建物本体は一切描かない) |
 

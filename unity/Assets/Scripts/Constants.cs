@@ -248,6 +248,7 @@ public static class Constants
     public const int SHAPE_OFFICE = 2;
     public const int SHAPE_COMMERCIAL = 3;
     public const int SHAPE_FULL = 4;
+    public const int SHAPE_SETBACK = 5;
     public const int PATH_DEFAULT = 0;
     public const int PATH_STREET = 1;
     public const int PATH_MOTORWAY = 2;

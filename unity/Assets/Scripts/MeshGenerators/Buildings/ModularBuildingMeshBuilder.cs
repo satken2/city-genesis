@@ -88,10 +88,11 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
             footprint, prefix, partSuffix, floorHeight, buildingShape != Constants.SHAPE_FULL, entrance);
         if (layout != null) footprint = layout.Body;
 
-        // 1. 壁・地面・フェンス生成
+        // 1. 壁・地面・フェンス・散布パーツ生成
         var bodyData = ModularBodyBuilder.GenerateBody(
             footprint, floors, prefix, floorHeight, visual_variant, buildingShape,
-            modelType, fenceFootprint, centerPointWorld, isDynamic, floorMaterial, layout);
+            modelType, fenceFootprint, centerPointWorld, isDynamic, floorMaterial, layout,
+            occupiedFootprint, visual_variant2);
 
         var combineInstances = bodyData.CombineInstances;
         var allMaterials = bodyData.Materials;

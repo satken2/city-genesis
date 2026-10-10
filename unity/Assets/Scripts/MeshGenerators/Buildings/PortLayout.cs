@@ -484,7 +484,7 @@ public static class PortLayout
         return corners;
     }
 
-    private static Polygon ToPolygon(GeometryFactory gf, IReadOnlyList<Vector2> ring)
+    internal static Polygon ToPolygon(GeometryFactory gf, IReadOnlyList<Vector2> ring)
     {
         var coords = new Coordinate[ring.Count + 1];
         for (int i = 0; i < ring.Count; i++)

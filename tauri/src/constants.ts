@@ -243,6 +243,7 @@ export const SHAPE_HOUSE: number = 1;
 export const SHAPE_OFFICE: number = 2;
 export const SHAPE_COMMERCIAL: number = 3;
 export const SHAPE_FULL: number = 4;
+export const SHAPE_SETBACK: number = 5;
 export const PATH_DEFAULT: number = 0;
 export const PATH_STREET: number = 1;
 export const PATH_MOTORWAY: number = 2;
