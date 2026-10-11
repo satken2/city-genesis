@@ -440,7 +440,6 @@ public static class Constants
     public static readonly Dictionary<string, int> ALERT_WARNING_FILTER_MAP = new Dictionary<string, int>
     {
         { "resource_runway", ALERT_DISPLAY_RESOURCE_WARNING },
-        { "resource_depleted", ALERT_DISPLAY_RESOURCE_WARNING },
         { "facility_inoperative", ALERT_DISPLAY_FACILITY_WARNING },
         { "sanitation", ALERT_DISPLAY_SANITATION_WARNING },
         { "infra_facility_down", ALERT_DISPLAY_INFRA_WARNING }

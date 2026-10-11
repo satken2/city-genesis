@@ -1,7 +1,6 @@
 {
   "notifications": {
     "trayTooltip": "都市の通知",
-    "description": "都市の危機（警告）と、放置すると成長が滞る問題（注意）の一覧です。行をクリックすると対象の詳細を開きます。",
     "empty": "現在、対処が必要な問題はありません",
     "loadFailed": "通知の取得に失敗しました",
     "sections": {

@@ -1,7 +1,6 @@
 {
   "notifications": {
     "trayTooltip": "城市通知",
-    "description": "城市危機（警告）與放任不管會阻礙發展的問題（注意）的清單。點擊列可開啟對應的詳情。",
     "empty": "目前沒有需要處理的問題",
     "loadFailed": "通知取得失敗",
     "sections": {

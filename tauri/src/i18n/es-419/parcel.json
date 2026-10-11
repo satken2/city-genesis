@@ -23,6 +23,8 @@
     "frontPathSaveError": "No se pudo cambiar la vía de acceso",
     "owner": "Propietario",
     "shapeEditFailed": "No se pudo guardar la forma",
+    "expandNoCandidates": "No hay parcelas contiguas que se puedan unir",
+    "expandFailed": "No se pudieron unir las parcelas",
     "crossingPathTitle": "Hay una vía por debajo o por encima",
     "crossingPathBody": "Una vía (infraestructura enterrada, túnel, viaducto, etc.) cruza por debajo o por encima de esta parcela. No se construirán edificios privados (los servicios públicos sí pueden construirse).",
     "restrictionOverride": "Anular individualmente la normativa del distrito",
@@ -47,6 +49,10 @@
       "editShape": "Editar la forma",
       "confirmShape": "Confirmar",
       "cancelShape": "Cancelar",
+      "expand": "Ampliar la parcela",
+      "nextExpand": "Siguiente parcela contigua",
+      "confirmExpand": "Confirmar la unión",
+      "cancelExpand": "Cancelar",
       "disabledInUse": "No se puede realizar esta acción porque la parcela está en uso",
       "disabledNotCityOwnedOrInUse": "Solo se pueden editar los terrenos baldíos propiedad del municipio"
     }

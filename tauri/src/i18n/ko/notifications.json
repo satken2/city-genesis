@@ -1,7 +1,6 @@
 {
   "notifications": {
     "trayTooltip": "도시 알림",
-    "description": "도시의 위기(경고)와 방치하면 성장이 정체되는 문제(주의)의 목록입니다. 행을 클릭하면 대상의 상세 정보가 열립니다.",
     "empty": "현재 대응이 필요한 문제가 없습니다",
     "loadFailed": "알림을 가져오지 못했습니다",
     "sections": {

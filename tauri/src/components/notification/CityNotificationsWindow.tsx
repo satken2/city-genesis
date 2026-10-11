@@ -6,8 +6,8 @@
  * NotificationPhase が毎エポック再構築したリストをそのまま表示する。
  *
  * 通知は重要度2階調でセクション分けして表示する:
- *   - 警告(warning): 築いた都市が崩壊する差し迫った危機。赤系の行
- *   - 注意(caution): 放置しても壊れないが成長が止まる・徐々に荒廃する問題。黄系の行
+ *   - 警告(warning): 都市の機能が損なわれつつあり、今打てる手がある問題。赤系の行
+ *   - 注意(caution): すぐには解決できない、または壊れるのが成長・余力に留まる問題。黄系の行
  *
  * - 各行は「アイコン + 文言化したメッセージ + 発生日」で構成する
  * - 対象エンティティを持つ通知は行クリックで対応する詳細ウィンドウ
@@ -121,8 +121,6 @@ export function CityNotificationsWindow({ apiBaseUrl }: CityNotificationsWindowP
 
   return (
     <div className="city-notifications-root">
-      <p className="city-notifications-description">{t("notifications.description")}</p>
-
       {notifications === null ? (
         <p className="city-notifications-empty">
           {loadFailed ? t("notifications.loadFailed") : "…"}

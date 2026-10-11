@@ -403,7 +403,8 @@ public partial class CameraController : MonoBehaviour
     private void LateUpdate()
     {
         if (DriveMode.IsOpen) return;
-        if (!syncEnabled) return;
+        // 観察専用の画面の視点は保存しない(セーブに残す視点は作業側のもの)。
+        if (!syncEnabled || ViewerSession.Enabled) return;
         if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameStarted()) return;
 
         bool moved = (transform.position - syncLastPosition).sqrMagnitude >= SYNC_MOVE_THRESHOLD_M * SYNC_MOVE_THRESHOLD_M

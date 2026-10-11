@@ -10,12 +10,6 @@
   overflow-y: auto;
 }
 
-.city-notifications-description {
-  margin: 0;
-  font-size: 1rem;
-  color: #8ba3bb;
-}
-
 /* 通知なし・読み込み失敗時のプレースホルダー */
 .city-notifications-empty {
   margin: 24px 0;

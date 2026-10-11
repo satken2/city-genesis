@@ -19,13 +19,16 @@ public interface IIpcTransport : IDisposable
 
 public static class IpcTransports
 {
-    /// <summary>このプラットフォームの送受信路を開く。IPC の無いプラットフォームでは null。</summary>
+    /// <summary>
+    /// このプラットフォームの送受信路を開く。IPC の無いプラットフォームでは null。
+    /// 観察専用の起動(ViewerSession)は MMF を開かず、同じプロセスの相手役とつなぐ。
+    /// </summary>
     public static IIpcTransport Open()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         return new WebIpcTransport();
 #elif UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        return new MmfIpcTransport();
+        return ViewerSession.Enabled ? ViewerSession.OpenTransport() : new MmfIpcTransport();
 #else
         return null;
 #endif

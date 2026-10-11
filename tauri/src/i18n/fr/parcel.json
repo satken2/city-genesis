@@ -23,6 +23,8 @@
     "frontPathSaveError": "Échec du changement de voie de desserte",
     "owner": "Propriétaire",
     "shapeEditFailed": "Échec de l'enregistrement de la forme",
+    "expandNoCandidates": "Aucune parcelle adjacente ne peut être fusionnée",
+    "expandFailed": "Échec de la fusion des parcelles",
     "crossingPathTitle": "Voie en sous-sol ou en hauteur",
     "crossingPathBody": "Une voie (réseau enterré, tunnel, viaduc, etc.) traverse sous ou au-dessus de cette parcelle. Aucun bâtiment privé n'y sera construit (les équipements publics restent possibles).",
     "restrictionOverride": "Déroger individuellement à la réglementation du quartier",
@@ -47,6 +49,10 @@
       "editShape": "Modifier la forme",
       "confirmShape": "Valider",
       "cancelShape": "Annuler",
+      "expand": "Agrandir la parcelle",
+      "nextExpand": "Parcelle adjacente suivante",
+      "confirmExpand": "Valider la fusion",
+      "cancelExpand": "Annuler",
       "disabledInUse": "Action indisponible : la parcelle est occupée",
       "disabledNotCityOwnedOrInUse": "Seuls les terrains vacants appartenant à la ville sont modifiables"
     }

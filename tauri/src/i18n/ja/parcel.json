@@ -23,6 +23,8 @@
     "frontPathSaveError": "接道の変更に失敗しました",
     "owner": "所有者",
     "shapeEditFailed": "形状の保存に失敗しました",
+    "expandNoCandidates": "結合できる隣接区画がありません",
+    "expandFailed": "区画の結合に失敗しました",
     "crossingPathTitle": "地下/上空にパスあり",
     "crossingPathBody": "この区画の地下または上空をパス（埋設インフラ・トンネル・高架など）が横断しています。民間の建物は建ちません（公共施設は建設できます）。",
     "restrictionOverride": "地区規制を個別にオーバーライド",
@@ -47,6 +49,10 @@
       "editShape": "形状の編集",
       "confirmShape": "確定",
       "cancelShape": "キャンセル",
+      "expand": "区画の拡張",
+      "nextExpand": "次の隣接区画",
+      "confirmExpand": "結合を確定",
+      "cancelExpand": "キャンセル",
       "disabledInUse": "区画が使用中のため、この操作はできません",
       "disabledNotCityOwnedOrInUse": "市政府所有の空き地のみ編集できます"
     }

@@ -1,7 +1,6 @@
 {
   "notifications": {
     "trayTooltip": "City Notifications",
-    "description": "Critical threats to the city (warnings) and issues that stall its growth (cautions). Click a row to open its details.",
     "empty": "No problems require attention right now",
     "loadFailed": "Failed to load notifications",
     "sections": {

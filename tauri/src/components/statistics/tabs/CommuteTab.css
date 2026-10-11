@@ -51,6 +51,38 @@
   box-sizing: border-box;
 }
 
+/* 見出し + 集計範囲のプルダウン */
+.commute-distribution__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.commute-distribution__header .commute-panel-title {
+  margin-bottom: 0;
+}
+
+.commute-distribution__scope {
+  min-width: 0;
+  max-width: 60%;
+  background: #141c28;
+  border: 1px solid #2a3b50;
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  padding: 4px 24px 4px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.commute-distribution__scope:hover,
+.commute-distribution__scope:focus {
+  border-color: #228be6;
+}
+
 .commute-distribution__chart {
   flex: 1;
   width: 100%;

@@ -5,12 +5,13 @@
  * 取得して表示する (同APIが返す地区別の昼夜間人口は人口タブが使う)。
  *
  * レイアウト (左右2:3分割):
- * - 左上 (1/3 高さ): 通勤・通学時間分布 (横向き積み上げ棒グラフ)
+ * - 左上 (1/3 高さ): 通勤・通学時間分布 (横向き積み上げ棒グラフ)。集計範囲 (都市全体／各地区) を
+ *   パネル見出しのプルダウンで選ぶ。地区は市民の居住地区で、このパネルだけに効く
  * - 左下 (2/3 高さ): 地区別の自動車保有率の色分け地図
  * - 右 (全高): 地区間人口移動 (Recharts Sankey ダイアグラム)
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BarChart,
@@ -46,6 +47,13 @@ type TimeDistPoint = {
   students: number;
 };
 
+/** 通勤・通学時間分布の集計範囲。都市全体は zone_id・name とも null */
+type CommuteTimeScope = {
+  zone_id: number | null;
+  name: string | null;
+  distribution: TimeDistPoint[];
+};
+
 /** 地区別の自動車保有。母集団の住民世帯が0の地区は率が定義できないので null(欠測) */
 type CarOwnershipZone = {
   zone_id: number;
@@ -77,7 +85,7 @@ type ODPoint = {
 type CommuteStats = {
   epoch: number;
   summary: Summary;
-  commute_time_distribution: TimeDistPoint[];
+  commute_time_scopes: CommuteTimeScope[];
   od_traffic: ODPoint[];
   car_ownership: CarOwnership;
 };
@@ -111,6 +119,13 @@ const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
 function formatRate(rate: number | null | undefined): string {
   return rate == null ? "—" : `${(rate * 100).toFixed(1)}%`;
 }
+
+function scopeKey(scope: CommuteTimeScope): string {
+  return scope.zone_id == null ? "city" : String(scope.zone_id);
+}
+
+/** Sankey のノード。地区内の移動が自己ループになると描けないため、同じ地区でも居住側(左)と目的地側(右)は別ノードにする */
+type SankeyNode = { name: string; isSource: boolean };
 
 /**
  * 地区別の自動車保有率の色分け地図。
@@ -201,38 +216,38 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     "/api/v1/stats/commute"
   );
 
+  const [selectedKey, setSelectedKey] = useState<string>("city");
+
+  const timeScope = useMemo<CommuteTimeScope | null>(() => {
+    const scopes = data?.commute_time_scopes ?? [];
+    return scopes.find((s) => scopeKey(s) === selectedKey) ?? scopes[0] ?? null;
+  }, [data, selectedKey]);
+
   // --- Sankey 用データの構築 ---
   const sankeyData = useMemo(() => {
     if (!data || !data.od_traffic || data.od_traffic.length === 0) {
       return { nodes: [], links: [] };
     }
 
-    const nodes: { name: string }[] = [];
+    const nodes: SankeyNode[] = [];
     const nodeMap = new Map<string, number>();
     const links: { source: number; target: number; value: number }[] = [];
 
-    // 移動先の重なりや循環を防ぐため、出発地と目的地で別のサフィックスをつける
+    const nodeIndex = (zoneId: number, name: string, isSource: boolean): number => {
+      const key = `${isSource ? "src" : "dst"}:${zoneId}`;
+      let index = nodeMap.get(key);
+      if (index === undefined) {
+        index = nodes.length;
+        nodeMap.set(key, index);
+        nodes.push({ name, isSource });
+      }
+      return index;
+    };
+
     data.od_traffic.forEach((item) => {
-      // 地区名が取得できていない場合の代替
-      const fromName = item.from_name || `Zone #${item.from_zone_id}`;
-      const toName = item.to_name || `Zone #${item.to_zone_id}`;
-
-      const srcName = `${fromName} (居住)`;
-      const dstName = `${toName} (目的地)`;
-
-      if (!nodeMap.has(srcName)) {
-        nodeMap.set(srcName, nodes.length);
-        nodes.push({ name: srcName });
-      }
-
-      if (!nodeMap.has(dstName)) {
-        nodeMap.set(dstName, nodes.length);
-        nodes.push({ name: dstName });
-      }
-
       links.push({
-        source: nodeMap.get(srcName)!,
-        target: nodeMap.get(dstName)!,
+        source: nodeIndex(item.from_zone_id, item.from_name, true),
+        target: nodeIndex(item.to_zone_id, item.to_name, false),
         value: item.count,
       });
     });
@@ -252,13 +267,13 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     );
   }
 
-  const { commute_time_distribution } = data;
+  const peopleValue = (label: string, n: number) =>
+    t("statistics.commutePeopleValue", { label, n });
 
   // --- Sankey のカスタムノード描画 ---
   const renderSankeyNode = ({ x, y, width, height, index, payload }: any) => {
     // 居住（左側）か目的地（右側）かでテキストの位置を切り替える
-    const isSource = payload.name.endsWith("(居住)");
-    const cleanName = payload.name.replace(" (居住)", "").replace(" (目的地)", "");
+    const isSource = (payload as SankeyNode).isSource;
 
     return (
       <g key={`node-${index}`}>
@@ -279,7 +294,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           fontSize="0.93rem"
           fill="#c1c9d2"
         >
-          {cleanName}
+          {payload.name}
         </text>
       </g>
     );
@@ -288,25 +303,23 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   // --- Sankey のカスタムツールチップ ---
   const CustomSankeyTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const p = payload[0].payload;
-      if (p.source && p.target) {
+      // Recharts は対象を {name, value, payload} に包んで渡す。内側の payload がリンクまたはノード本体
+      const { value, payload: item } = payload[0].payload;
+      if (item.source && item.target) {
         // リンクホバー
-        const srcName = p.source.name.replace(" (居住)", "");
-        const dstName = p.target.name.replace(" (目的地)", "");
         return (
           <div className="commute-tooltip">
-            <p className="commute-tooltip__route">{`${srcName} ➔ ${dstName}`}</p>
-            <p className="commute-tooltip__val">{`移動者数: ${p.value} 人`}</p>
+            <p className="commute-tooltip__route">{`${item.source.name} ➔ ${item.target.name}`}</p>
+            <p className="commute-tooltip__val">{peopleValue(t("statistics.commuteFlowMovers"), value)}</p>
           </div>
         );
-      } else if (p.name) {
+      } else if (item.name) {
         // ノードホバー
-        const nodeName = p.name.replace(" (居住)", "").replace(" (目的地)", "");
-        const role = p.name.endsWith("(居住)") ? "出発地" : "目的地";
+        const role = t((item as SankeyNode).isSource ? "statistics.commuteFlowOrigin" : "statistics.commuteFlowDestination");
         return (
           <div className="commute-tooltip">
-            <p className="commute-tooltip__route">{`${nodeName} (${role})`}</p>
-            <p className="commute-tooltip__val">{`総移動人数: ${p.value} 人`}</p>
+            <p className="commute-tooltip__route">{`${item.name} (${role})`}</p>
+            <p className="commute-tooltip__val">{peopleValue(t("statistics.commuteFlowTotalMovers"), value)}</p>
           </div>
         );
       }
@@ -321,16 +334,16 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       const s = payload[1]?.value || 0;
       return (
         <div className="commute-tooltip">
-          <p className="commute-tooltip__time">{`${label} 分`}</p>
+          <p className="commute-tooltip__time">{t("statistics.commuteMinutesRange", { range: label })}</p>
           <p className="commute-tooltip__item" style={{ color: COLOR_WORKER }}>
-            {`通勤者: ${w} 人`}
+            {peopleValue(t("statistics.commuteWorkers"), w)}
           </p>
           <p className="commute-tooltip__item" style={{ color: COLOR_STUDENT }}>
-            {`通学者: ${s} 人`}
+            {peopleValue(t("statistics.commuteStudents"), s)}
           </p>
           <div className="commute-tooltip__divider" />
           <p className="commute-tooltip__total">
-            {`合計: ${w + s} 人`}
+            {peopleValue(t("statistics.commuteTotal"), w + s)}
           </p>
         </div>
       );
@@ -344,11 +357,25 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       <div className="commute-tab__left">
         {/* 左上: 通勤通学時間分布 (1/3 高さ) */}
         <div className="commute-distribution">
-          <div className="commute-panel-title">通勤・通学時間</div>
+          <div className="commute-distribution__header">
+            <div className="commute-panel-title">{t("statistics.commuteTimeTitle")}</div>
+            <select
+              className="commute-distribution__scope"
+              aria-label={t("statistics.scopeLabel")}
+              value={selectedKey}
+              onChange={(e) => setSelectedKey(e.target.value)}
+            >
+              {data.commute_time_scopes.map((s) => (
+                <option key={scopeKey(s)} value={scopeKey(s)}>
+                  {s.zone_id == null ? t("statistics.cityWide") : s.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="commute-distribution__chart">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={commute_time_distribution}
+                data={timeScope?.distribution ?? []}
                 layout="vertical"
                 margin={{ top: 5, right: 15, left: 5, bottom: 5 }}
               >
@@ -356,8 +383,8 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 <XAxis type="number" stroke="#8ba3bb" fontSize="0.83rem" />
                 <YAxis dataKey="bucket" type="category" stroke="#8ba3bb" fontSize="0.83rem" width={remPx(3.7)} />
                 <Tooltip content={<CustomBarTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
-                <Bar dataKey="workers" stackId="a" fill={COLOR_WORKER} radius={[0, 0, 0, 0]} name="通勤者" />
-                <Bar dataKey="students" stackId="a" fill={COLOR_STUDENT} radius={[0, 2, 2, 0]} name="通学者" />
+                <Bar dataKey="workers" stackId="a" fill={COLOR_WORKER} radius={[0, 0, 0, 0]} name={t("statistics.commuteWorkers")} />
+                <Bar dataKey="students" stackId="a" fill={COLOR_STUDENT} radius={[0, 2, 2, 0]} name={t("statistics.commuteStudents")} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -371,10 +398,10 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       <div className="commute-tab__right">
         {/* 右側全体: 地区間人口移動 */}
         <div className="commute-flow">
-          <div className="commute-panel-title">地区間の人口移動</div>
+          <div className="commute-panel-title">{t("statistics.commuteFlowTitle")}</div>
           <div className="commute-flow__chart">
             {sankeyData.nodes.length === 0 ? (
-              <div className="commute-flow__empty">移動データが存在しません（通勤・通学ペアがありません）。</div>
+              <div className="commute-flow__empty">{t("statistics.commuteFlowEmpty")}</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <Sankey

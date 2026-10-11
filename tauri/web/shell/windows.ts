@@ -504,6 +504,7 @@ export function closeWindowByLabel(label: string): void {
     sendQuietly(windowType, "edit_zone:finish_merge", { merged: 0 });
   } else if (windowType === "parcel_detail") {
     sendQuietly(windowType, "parcel:hide_front_path", {});
+    sendQuietly(windowType, "edit_parcel:update_preview", { mode: "merge", preview_polygons: [], original_polygon: null });
     sendQuietly(windowType, "view:restore_preset", { preset: "parcel_detail" });
   } else if (windowType === "road_detail") {
     const params = entityId !== null ? { road_id: entityId } : {};

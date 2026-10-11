@@ -1,7 +1,6 @@
 {
   "notifications": {
     "trayTooltip": "Notifications de la ville",
-    "description": "Menaces critiques pour la ville (alertes) et problèmes qui freinent sa croissance (points de vigilance). Cliquez sur une ligne pour ouvrir le détail concerné.",
     "empty": "Aucun problème ne nécessite d'action pour le moment",
     "loadFailed": "Échec de la récupération des alertes",
     "sections": {

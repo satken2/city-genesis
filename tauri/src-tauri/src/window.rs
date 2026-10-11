@@ -1114,13 +1114,21 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 json!({ "merged": 0 }),
             );
         } else if wt == "parcel_detail" {
-            // 土地区画詳細パネルが閉じられたとき、接道表示をクリアし、土地区画枠線の表示プリセットを解除する。
+            // 土地区画詳細パネルが閉じられたとき、接道表示と区画の拡張のプレビューをクリアし、
+            // 土地区画枠線の表示プリセットを解除する。
             let _ = ipc::send_ui_action(
                 state,
                 wt.clone(),
                 None,
                 "parcel:hide_front_path".to_string(),
                 json!({}),
+            );
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "edit_parcel:update_preview".to_string(),
+                json!({ "mode": "merge", "preview_polygons": [], "original_polygon": null }),
             );
             let _ = ipc::send_ui_action(
                 state,

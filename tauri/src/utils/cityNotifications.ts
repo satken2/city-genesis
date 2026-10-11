@@ -28,8 +28,9 @@ export type L1Notification = {
   params: Record<string, unknown>;
   entity: L1NotificationEntity | null;
   /**
-   * 重要度。warning=築いた都市が崩壊する差し迫った危機(アイコン点滅+赤バッジ) /
-   * caution=放置しても壊れないが成長が止まる・徐々に荒廃する問題(点滅なしの黄バッジ)。
+   * 重要度。warning=都市の機能が損なわれつつあり、プレイヤーが数エポック内に打てる手が
+   * ある問題(アイコン点滅+赤バッジ) / caution=手がない・年単位かかる、または壊れるのが
+   * 成長・余力に留まる問題(点滅なしの黄バッジ)。
    */
   severity: "warning" | "caution";
 };

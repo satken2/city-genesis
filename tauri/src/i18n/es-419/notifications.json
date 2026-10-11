@@ -1,7 +1,6 @@
 {
   "notifications": {
     "trayTooltip": "Notificaciones de la ciudad",
-    "description": "Amenazas críticas para la ciudad (alertas) y problemas que frenan su crecimiento (avisos). Haz clic en una fila para abrir el detalle correspondiente.",
     "empty": "Por ahora no hay problemas que atender",
     "loadFailed": "No se pudieron obtener las alertas",
     "sections": {

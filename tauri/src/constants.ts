@@ -432,7 +432,6 @@ export const STATUS_NAME_MAP: Record<number, string> = {
 
 export const ALERT_WARNING_FILTER_MAP: Record<string, number> = {
   "resource_runway": 131072,
-  "resource_depleted": 131072,
   "facility_inoperative": 262144,
   "sanitation": 524288,
   "infra_facility_down": 1048576,

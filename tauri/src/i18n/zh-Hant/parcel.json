@@ -23,6 +23,8 @@
     "frontPathSaveError": "臨街道路變更失敗",
     "owner": "所有者",
     "shapeEditFailed": "形狀儲存失敗",
+    "expandNoCandidates": "沒有可合併的相鄰地塊",
+    "expandFailed": "地塊合併失敗",
     "crossingPathTitle": "地下／上空存在路徑",
     "crossingPathBody": "此地塊的地下或上空有路徑（埋設基礎設施、隧道、高架等）穿越。無法建造民間建築（公共設施仍可建設）。",
     "restrictionOverride": "個別覆寫地區法規",
@@ -47,6 +49,10 @@
       "editShape": "編輯形狀",
       "confirmShape": "確定",
       "cancelShape": "取消",
+      "expand": "擴展地塊",
+      "nextExpand": "下一個相鄰地塊",
+      "confirmExpand": "確定合併",
+      "cancelExpand": "取消",
       "disabledInUse": "地塊使用中，無法執行此操作",
       "disabledNotCityOwnedOrInUse": "僅可編輯市政府所有的空地"
     }

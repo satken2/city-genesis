@@ -23,6 +23,8 @@
     "frontPathSaveError": "접도 변경에 실패했습니다",
     "owner": "소유자",
     "shapeEditFailed": "형상 저장에 실패했습니다",
+    "expandNoCandidates": "결합할 수 있는 인접 구획이 없습니다",
+    "expandFailed": "구획 결합에 실패했습니다",
     "crossingPathTitle": "지하/상공에 경로 있음",
     "crossingPathBody": "이 구획의 지하 또는 상공을 경로(매설 인프라・터널・고가 등)가 가로지릅니다. 민간 건물은 지어지지 않습니다(공공시설은 건설할 수 있습니다).",
     "restrictionOverride": "지구 규제를 개별적으로 재정의",
@@ -47,6 +49,10 @@
       "editShape": "형상 편집",
       "confirmShape": "확정",
       "cancelShape": "취소",
+      "expand": "구획 확장",
+      "nextExpand": "다음 인접 구획",
+      "confirmExpand": "결합 확정",
+      "cancelExpand": "취소",
       "disabledInUse": "구획이 사용 중이므로 이 작업을 할 수 없습니다",
       "disabledNotCityOwnedOrInUse": "시정부 소유의 빈 땅만 편집할 수 있습니다"
     }

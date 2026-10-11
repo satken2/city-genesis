@@ -23,6 +23,8 @@
     "frontPathSaveError": "Failed to change the front road",
     "owner": "Owner",
     "shapeEditFailed": "Failed to save the parcel shape",
+    "expandNoCandidates": "There are no adjacent parcels that can be merged",
+    "expandFailed": "Failed to merge the parcels",
     "crossingPathTitle": "Path crossing below/above",
     "crossingPathBody": "A path (buried utility, tunnel, elevated road, etc.) crosses under or above this parcel. Private buildings will not be built here (public facilities can still be constructed).",
     "restrictionOverride": "Override district regulations",
@@ -47,6 +49,10 @@
       "editShape": "Edit Shape",
       "confirmShape": "Confirm",
       "cancelShape": "Cancel",
+      "expand": "Expand Parcel",
+      "nextExpand": "Next Adjacent Parcel",
+      "confirmExpand": "Confirm Merge",
+      "cancelExpand": "Cancel",
       "disabledInUse": "This action is not available because the parcel is in use.",
       "disabledNotCityOwnedOrInUse": "Only vacant city-owned parcels can be edited."
     }
