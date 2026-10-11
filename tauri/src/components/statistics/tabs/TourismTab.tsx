@@ -6,7 +6,7 @@
  * レイアウト:
  * - 最上段: サマリータイル(滞在客数 / 受入可能人数と充足率 / 到着・帰国 / 応募 / 観光収入 / 平均満足度)
  * - 左右分割
- *   - 左カラム: 推移グラフ3枚(滞在客数 vs 受入可能人数、到着・帰国・応募、観光収入 vs 為替レート)
+ *   - 左カラム: 推移グラフ3枚(滞在客数 vs 受入可能人数、到着・帰国・応募、観光収入)
  *   - 右カラム: ボトルネック表(観光地 vs 玄関口)、宿泊需給カード、満足度カード(平均+分布)、観光消費リスト
  *
  * 人流の内訳(訪問先)と地区別集計は持たない(バックエンドが集計していない)。
@@ -40,7 +40,6 @@ type HistoryPoint = {
   departures: number;
   applicants: number;
   tourism_revenue: number;
-  exchange_rate: number;
 };
 
 type FacilityCount = {
@@ -80,7 +79,6 @@ type DistributionPoint = {
 type TourismStats = {
   epoch: number;
   party_size: number;
-  exchange_rate: number;
   summary: {
     tourist_count: number;
     tourist_household_count: number;
@@ -89,8 +87,7 @@ type TourismStats = {
     arrivals: number;
     departures: number;
     applicants: number;
-    tourism_revenue_foreign: number;
-    tourism_revenue_domestic: number;
+    tourism_revenue: number;
   };
   history: HistoryPoint[];
   bottleneck: BottleneckRow[];
@@ -133,7 +130,6 @@ const COLOR_ARRIVALS = "#10b981";
 const COLOR_DEPARTURES = "#ef4444";
 const COLOR_APPLICANTS = "#f59e0b";
 const COLOR_REVENUE = "#a78bfa";
-const COLOR_EXCHANGE_RATE = "#06b6d4";
 const COLOR_ENTERTAINMENT = "#f59e0b";
 const COLOR_TOURISM = "#ec4899";
 const COLOR_QOL = "#60a5fa";
@@ -214,8 +210,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     {
       key: "revenue",
       label: t("statistics.tourism.tileRevenue"),
-      value: t("common.currency", { value: Math.round(summary.tourism_revenue_domestic) }),
-      sub: `${t("statistics.tourism.foreign")} ${fmt(summary.tourism_revenue_foreign)}`,
+      value: t("common.currency", { value: Math.round(summary.tourism_revenue) }),
     },
     {
       key: "qol",
@@ -227,7 +222,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     },
   ];
 
-  const renderHistoryChart = (children: React.ReactNode, rightAxis?: boolean) => (
+  const renderHistoryChart = (children: React.ReactNode) => (
     <div className="tourism-card__chart-container">
       {hasHistory ? (
         <ResponsiveContainer width="100%" height="100%">
@@ -235,24 +230,12 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
             <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
             <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
             <YAxis
-              yAxisId="left"
               width={remPx(Y_AXIS_WIDTH_REM)}
               tick={AXIS_TICK}
               tickLine={false}
               axisLine={{ stroke: "#253246" }}
               allowDecimals={false}
             />
-            {rightAxis && (
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                width={remPx(Y_AXIS_WIDTH_REM)}
-                tick={AXIS_TICK}
-                tickLine={false}
-                axisLine={{ stroke: "#253246" }}
-                domain={["auto", "auto"]}
-              />
-            )}
             <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} />
             <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconSize={8} />
             {children}
@@ -286,8 +269,8 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
             <h3 className="tourism-card__title">{t("statistics.tourism.chartCountHistory")}</h3>
             {renderHistoryChart(
               <>
-                <Line yAxisId="left" type="monotone" dataKey="tourist_count" name={t("statistics.tourism.seriesCount")} stroke={COLOR_COUNT} strokeWidth={2} dot={{ r: 2 }} />
-                <Line yAxisId="left" type="monotone" dataKey="tourist_capacity" name={t("statistics.tourism.seriesCapacity")} stroke={COLOR_CAPACITY} strokeWidth={2} strokeDasharray="5 3" dot={false} />
+                <Line type="monotone" dataKey="tourist_count" name={t("statistics.tourism.seriesCount")} stroke={COLOR_COUNT} strokeWidth={2} dot={{ r: 2 }} />
+                <Line type="monotone" dataKey="tourist_capacity" name={t("statistics.tourism.seriesCapacity")} stroke={COLOR_CAPACITY} strokeWidth={2} strokeDasharray="5 3" dot={false} />
               </>
             )}
           </div>
@@ -296,9 +279,9 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
             <h3 className="tourism-card__title">{t("statistics.tourism.chartFlowHistory")}</h3>
             {renderHistoryChart(
               <>
-                <Line yAxisId="left" type="monotone" dataKey="arrivals" name={t("statistics.tourism.seriesArrivals")} stroke={COLOR_ARRIVALS} strokeWidth={2} dot={{ r: 2 }} />
-                <Line yAxisId="left" type="monotone" dataKey="departures" name={t("statistics.tourism.seriesDepartures")} stroke={COLOR_DEPARTURES} strokeWidth={2} dot={{ r: 2 }} />
-                <Line yAxisId="left" type="monotone" dataKey="applicants" name={t("statistics.tourism.seriesApplicants")} stroke={COLOR_APPLICANTS} strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
+                <Line type="monotone" dataKey="arrivals" name={t("statistics.tourism.seriesArrivals")} stroke={COLOR_ARRIVALS} strokeWidth={2} dot={{ r: 2 }} />
+                <Line type="monotone" dataKey="departures" name={t("statistics.tourism.seriesDepartures")} stroke={COLOR_DEPARTURES} strokeWidth={2} dot={{ r: 2 }} />
+                <Line type="monotone" dataKey="applicants" name={t("statistics.tourism.seriesApplicants")} stroke={COLOR_APPLICANTS} strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
               </>
             )}
           </div>
@@ -306,11 +289,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           <div className="tourism-card">
             <h3 className="tourism-card__title">{t("statistics.tourism.chartRevenueHistory")}</h3>
             {renderHistoryChart(
-              <>
-                <Line yAxisId="left" type="monotone" dataKey="tourism_revenue" name={t("statistics.tourism.seriesRevenue")} stroke={COLOR_REVENUE} strokeWidth={2} dot={{ r: 2 }} />
-                <Line yAxisId="right" type="monotone" dataKey="exchange_rate" name={t("statistics.exchangeRate")} stroke={COLOR_EXCHANGE_RATE} strokeWidth={1.5} strokeDasharray="5 3" dot={false} />
-              </>,
-              true
+              <Line type="monotone" dataKey="tourism_revenue" name={t("statistics.tourism.seriesRevenue")} stroke={COLOR_REVENUE} strokeWidth={2} dot={{ r: 2 }} />
             )}
           </div>
         </div>

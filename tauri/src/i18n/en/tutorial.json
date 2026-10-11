@@ -51,7 +51,7 @@
         "transport": "\"Public Transport\" creates and manages bus, rail and other lines.",
         "regulation": "\"Regulations\" sets speed limits, the initial building regulations for new districts, immigration conditions, social security and repair settings.",
         "city": "\"Policies\" sets taxes such as income tax, business tax and consumption tax.",
-        "finance": "\"Financial Policy\" sets quantitative easing and shows the financial state: money supply, GDP, prices and more.",
+        "finance": "\"Financial Policy\" shows the financial state: GDP, prices, central bank debt and more.",
         "stat": "\"Statistics\" shows statistics such as population and commuting as charts.",
         "propPlacement": "\"Prop Placement\" places scenic props (small objects) on the terrain. That's the end of the icon panel. Press \"Next\"."
       },
@@ -545,10 +545,6 @@
       "tip3": {
         "title": "Road Connections & Parcels",
         "description": "Parcels belong to districts based on the road they face. Buildings cannot be constructed on unconnected parcels, preventing any economic activity."
-      },
-      "tip4": {
-        "title": "Citizen Needs & QOL",
-        "description": "Citizens live by consuming products like food, healthcare, and entertainment. When these are supplied sufficiently, their Quality of Life (QOL) improves."
       },
       "tip5": {
         "title": "Approximate Simulation",

@@ -13,7 +13,6 @@
   },
   "epochResult": {
     "epochCountSuffix": "({{count}} Epochs)",
-    "exchangeRate": "Exchange Rate",
     "sectionConstruction": "Under Construction",
     "kindPath": "Road",
     "kindBuilding": "Facility",

@@ -13,7 +13,6 @@
   },
   "epochResult": {
     "epochCountSuffix": "（执行了{{count}}个纪元）",
-    "exchangeRate": "汇率",
     "sectionConstruction": "建设状况",
     "kindPath": "道路",
     "kindBuilding": "设施",

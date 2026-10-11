@@ -13,7 +13,6 @@
   },
   "epochResult": {
     "epochCountSuffix": "({{count}}에포크 실행)",
-    "exchangeRate": "환율",
     "sectionConstruction": "건설 상황",
     "kindPath": "도로",
     "kindBuilding": "시설",

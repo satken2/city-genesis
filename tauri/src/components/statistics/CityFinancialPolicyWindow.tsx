@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   LineChart,
@@ -11,7 +11,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useEpochCachedStats } from "./useEpochCache";
-import { fetchApi, buildApiUrl } from "../../utils/api";
 import "./CityFinancialPolicyWindow.css";
 import { useRemPx } from "../../hooks/useRemPx";
 
@@ -19,11 +18,9 @@ type FinanceStats = {
   epoch: number;
   epochs: number[];
   current: {
-    money_supply: number;
     gdp: number;
     real_gdp: number;
-    price_index: number;
-    quantitative_easing_per_day: number;
+    price_index: number; // GDP デフレーター(1.0 = 基準)
     central_bank_reserves: number;
     central_bank_collections: number;
   };
@@ -32,7 +29,6 @@ type FinanceStats = {
     gdp: number[];
     real_gdp: number[];
     price_index: number[];
-    quantitative_easing_per_day: number[];
     central_bank_reserves: number[];
     central_bank_collections: number[];
   };
@@ -55,71 +51,10 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
     "/api/v1/stats/finance"
   );
 
-  // 量的緩和のローカル設定値
-  const [currentQe, setCurrentQe] = useState<number>(0);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-
-  // APIデータ取得完了時に初期値を設定
-  useEffect(() => {
-    if (data?.current) {
-      setCurrentQe(data.current.quantitative_easing_per_day);
-    }
-  }, [data]);
-
-  // 設定保存処理
-  const saveQeSetting = async (value: number) => {
-    if (isSaving) return;
-    setIsSaving(true);
-    try {
-      await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quantitative_easing_per_day: value }),
-      });
-    } catch (err) {
-      console.error("Failed to save QE setting:", err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    setCurrentQe(val);
-  };
-
-  const handleSliderRelease = () => {
-    void saveQeSetting(currentQe);
-  };
-
-  const handleNumberInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    setCurrentQe(Math.max(0, val));
-  };
-
-  const handleNumberInputBlur = () => {
-    void saveQeSetting(currentQe);
-  };
-
-  const handleNumberInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      void saveQeSetting(currentQe);
-      e.currentTarget.blur();
-    }
-  };
-
   // グラフ用時系列データの整形
   const hasHistory = useMemo(() => {
     return data && data.history && data.history.epochs.length > 0;
   }, [data]);
-
-  const qeChartData = useMemo(() => {
-    if (!hasHistory || !data) return [];
-    return data.history.epochs.map((epoch, idx) => ({
-      epoch,
-      qe: data.history.quantitative_easing_per_day[idx] ?? 0,
-    }));
-  }, [data, hasHistory]);
 
   const gdpChartData = useMemo(() => {
     if (!hasHistory || !data) return [];
@@ -169,7 +104,7 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
     );
   }
 
-  const { money_supply, gdp, real_gdp, price_index } = data.current;
+  const { gdp, real_gdp, price_index } = data.current;
 
   // フォーマット用
   const formatCurrency = (v: number) => `¥${v.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
@@ -177,15 +112,11 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
 
   return (
     <div className="finance-window">
-      {/* 左ペイン: サマリとポリシー設定 */}
+      {/* 左ペイン: サマリ */}
       <div className="finance-window__left-pane">
         <div className="finance-card">
           <h3 className="finance-card__title">{t("financialPolicy.summaryCard")}</h3>
           <dl className="finance-summary-list">
-            <div className="finance-summary-item">
-              <dt>{t("financialPolicy.moneySupply")}</dt>
-              <dd className="finance-summary-value">{formatCurrency(money_supply)}</dd>
-            </div>
             <div className="finance-summary-item">
               <dt>{t("financialPolicy.nominalGdp")}</dt>
               <dd className="finance-summary-value">{formatCurrency(gdp)}</dd>
@@ -201,39 +132,6 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
           </dl>
         </div>
 
-        <div className="finance-card">
-          <h3 className="finance-card__title">{t("financialPolicy.qeSlider")}</h3>
-          <div className="finance-control-group">
-            <div className="finance-slider-container">
-              <input
-                type="range"
-                className="finance-slider"
-                min="0"
-                max="50000"
-                step="100"
-                value={currentQe}
-                onChange={handleSliderChange}
-                onMouseUp={handleSliderRelease}
-                onTouchEnd={handleSliderRelease}
-              />
-            </div>
-            <div className="finance-input-container">
-              <input
-                type="number"
-                className="finance-number-input"
-                min="0"
-                max="1000000"
-                value={currentQe}
-                onChange={handleNumberInputChange}
-                onBlur={handleNumberInputBlur}
-                onKeyDown={handleNumberInputKeyDown}
-              />
-              <span className="finance-input-unit">¥ / {t("statistics.days")}</span>
-            </div>
-          </div>
-          {isSaving && <div className="finance-status-saving">{t("common.saving")}</div>}
-        </div>
-        
         {/* 左下は空白 */}
         <div className="finance-window__left-bottom-space" />
       </div>
@@ -242,23 +140,7 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
       <div className="finance-window__right-pane">
         {hasHistory ? (
           <div className="finance-charts-container">
-            {/* 上段: 量的緩和 */}
-            <div className="finance-chart-card">
-              <h4 className="finance-chart-card__title">{t("financialPolicy.qeChart")}</h4>
-              <div className="finance-chart-card__graph">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={qeChartData} margin={CHART_MARGIN}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
-                    <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} />
-                    <YAxis tick={AXIS_TICK} tickLine={false} axisLine={{ stroke: "#253246" }} width={remPx(5.56)} tickFormatter={(v) => `¥${v.toLocaleString()}`} />
-                    <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} formatter={(value: any) => `¥${Number(value).toLocaleString()}`} />
-                    <Line type="monotone" dataKey="qe" stroke="#fbbf24" strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* 中段: GDP */}
+            {/* GDP */}
             <div className="finance-chart-card">
               <h4 className="finance-chart-card__title">{t("financialPolicy.gdpChart")}</h4>
               <div className="finance-chart-card__graph">
@@ -276,7 +158,7 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
               </div>
             </div>
 
-            {/* 下段: 物価 */}
+            {/* 物価(GDPデフレーター) */}
             <div className="finance-chart-card">
               <h4 className="finance-chart-card__title">{t("financialPolicy.priceChart")}</h4>
               <div className="finance-chart-card__graph">
@@ -323,9 +205,6 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
                 </ResponsiveContainer>
               </div>
             </div>
-
-            {/* 右下の空セル */}
-            <div className="finance-chart-card--empty" />
           </div>
         ) : (
           <div className="finance-charts-empty">

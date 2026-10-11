@@ -87,14 +87,11 @@
   },
   "financialPolicy": {
     "summaryCard": "Synthèse financière",
-    "moneySupply": "Masse monétaire totale",
     "nominalGdp": "PIB nominal",
     "realGdp": "PIB réel",
-    "priceIndex": "Niveau des prix (taux de change)",
-    "qeSlider": "Assouplissement quantitatif (QE / jour)",
-    "qeChart": "Historique du niveau d'assouplissement quantitatif",
+    "priceIndex": "Niveau des prix (déflateur du PIB)",
     "gdpChart": "Évolution du PIB (réel et nominal)",
-    "priceChart": "Évolution des prix (taux de change)",
+    "priceChart": "Évolution des prix (déflateur du PIB)",
     "centralBankDebtChart": "Historique de la dette de la banque centrale",
     "collectionsChart": "Historique des prélèvements sur les agents économiques (positif = prélèvement / négatif = versement)",
     "noData": "Les graphiques d'historique s'afficheront après l'exécution de la simulation"

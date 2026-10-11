@@ -144,8 +144,8 @@
         "desc": "Tope de días de la bonificación que obtienen las empresas por operar de forma prolongada."
       },
       "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
-        "label": "Proporción que anula la competitividad exportadora",
-        "desc": "Si el precio supera al de fuera de la región en esta proporción, la competitividad exportadora se vuelve nula. Con 0.5, +50 % la elimina."
+        "label": "Margen de precio que detiene la exportación",
+        "desc": "Cuánto puede superar el precio de oferta al límite de cobro de exportación (precio de fuera de la región ÷ (1 + proporción de transporte)) antes de que los centros de comercio exterior dejen de comprar. Las compras bajan en línea recta desde el límite hasta cero en este margen."
       },
       "SPAWN_LABOR_CAP_RATIO": {
         "label": "Tope de mano de obra consumida al aparecer",

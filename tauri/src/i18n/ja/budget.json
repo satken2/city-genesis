@@ -87,14 +87,11 @@
   },
   "financialPolicy": {
     "summaryCard": "金融サマリ",
-    "moneySupply": "マネーサプライ合計",
     "nominalGdp": "名目GDP",
     "realGdp": "実質GDP",
-    "priceIndex": "物価 (為替レート)",
-    "qeSlider": "量的緩和 (QE / 日)",
-    "qeChart": "量的緩和水準の履歴",
+    "priceIndex": "物価 (GDPデフレーター)",
     "gdpChart": "GDP推移 (実質・名目)",
-    "priceChart": "物価推移 (為替レート)",
+    "priceChart": "物価推移 (GDPデフレーター)",
     "centralBankDebtChart": "中央銀行の負債履歴",
     "collectionsChart": "各経済主体からの徴収額履歴 (正=徴収/負=払い出し)",
     "noData": "シミュレーション実行後に履歷グラフが表示されます"

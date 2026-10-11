@@ -87,14 +87,11 @@
   },
   "financialPolicy": {
     "summaryCard": "Financial Summary",
-    "moneySupply": "Total Money Supply",
     "nominalGdp": "Nominal GDP",
     "realGdp": "Real GDP",
-    "priceIndex": "Price Index (Exchange Rate)",
-    "qeSlider": "Quantitative Easing (QE / day)",
-    "qeChart": "QE Level History",
+    "priceIndex": "Price Level (GDP Deflator)",
     "gdpChart": "GDP Trend (Real/Nominal)",
-    "priceChart": "Price Index Trend",
+    "priceChart": "Price Level Trend (GDP Deflator)",
     "centralBankDebtChart": "Central Bank Debt History",
     "collectionsChart": "Collections from Economic Agents History (positive=collection / negative=distribution)",
     "noData": "History graphs will be displayed after simulation runs"

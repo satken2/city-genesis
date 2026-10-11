@@ -16,7 +16,7 @@
  *   達成間近は GET /api/v1/quests のサーバ計算 progress を使う。
  * - 左(主役): 統計タイル / 達成目標 を縦に並べる。左カラムの各ブロックは
  *   カード(枠)を持たない。中身のタイルがカードなので、入れ子にすると二重枠になるため。
- *   - 統計: 人口/GDP/物価/所得/失業率/医療・栄養・娯楽充足度/火災/交通事故/犯罪/為替レート。
+ *   - 統計: 人口/GDP/物価/所得/失業率/医療・栄養・娯楽充足度/火災/交通事故/犯罪。
  *   - 達成目標: 進行中の目標の説明・条件ごとの現在値と目標値・進捗と、達成・失敗した目標の一覧
  *     (GET /api/v1/quests)。左カラムの残りの高さを使い、溢れたらスクロールする。
  * - 右カラム: 建設状況(道路と公共施設を種別バッジ付きの単一リストにまとめたもの)。
@@ -61,7 +61,6 @@ import entertainmentIcon from "../../assets/images/stats/entertainment.png";
 import fireIcon from "../../assets/images/stats/fire.png";
 import trafficIcon from "../../assets/images/stats/traffic_accident.png";
 import crimeIcon from "../../assets/images/stats/crime.png";
-import exchangeIcon from "../../assets/images/stats/exchange_rate.png";
 import placeholderIcon from "../../assets/images/ui/help.png";
 import "./EpochResultWindow.css";
 
@@ -102,11 +101,6 @@ export type PopulationReport = {
   tourist_count?: number;
 };
 
-export type ExchangeRateReport = {
-  before: number;
-  after: number;
-};
-
 /** エポック実行完了時点の都市統計。統計タイルに表示する。 */
 export type StatisticsReport = {
   price: number;                   // 小売財(GOODS_RETAIL)の平均価格
@@ -145,7 +139,6 @@ export type EpochReport = {
   construction_progress: ConstructionProgressItem[];
   construction_projects: ConstructionProjectReport[];
   population: PopulationReport;
-  exchange_rate: ExchangeRateReport;
   statistics: StatisticsReport;
 };
 
@@ -206,7 +199,6 @@ const STAT_ICONS: Record<string, string> = {
   fire_count: fireIcon,
   traffic_accident_count: trafficIcon,
   crime_count: crimeIcon,
-  exchange_rate: exchangeIcon,
 };
 
 /** タイルの水準評価。normal=通常 / warn=注意(橙) / danger=危険(赤) */
@@ -377,9 +369,6 @@ export function EpochResultWindow({
   // 人口増減(後-前)。表示の+/-色分けに使用する
   const populationDelta = report.population.after - report.population.before;
 
-  // 為替レート増減(後-前)。通貨安(レート上昇)で正、通貨高(レート下落)で負。
-  const fxDelta = report.exchange_rate.after - report.exchange_rate.before;
-
   const stats = report.statistics;
   const trendWindow = stats.trend_window ?? 0;
 
@@ -499,15 +488,6 @@ export function EpochResultWindow({
         tone: toneAbove(stats.crime_count, incidentWarn, incidentDanger),
         polarity: "up-bad",
       },
-      {
-        // 為替レートは実行前後の変動幅を補助表示する。通貨安(レート上昇)を bad とする。
-        key: "exchange_rate",
-        label: t("epochResult.exchangeRate"),
-        value: report.exchange_rate.after.toFixed(4),
-        sub: `${fxDelta >= 0 ? "+" : ""}${fxDelta.toFixed(4)}`,
-        tone: "normal",
-        polarity: "up-bad",
-      },
     ];
 
     return specs.map((spec) => {
@@ -519,7 +499,7 @@ export function EpochResultWindow({
         trendLabel: t(`epochResult.trend.${direction}`),
       };
     });
-  }, [stats, report.population.after, report.exchange_rate.after, populationDelta, fxDelta, epochCount, locale, t]);
+  }, [stats, report.population.after, populationDelta, epochCount, locale, t]);
 
   const seasonImage = seasonImageUrl(currentDate);
 
@@ -870,7 +850,7 @@ function StatSparkline({ series, tone }: { series?: (number | null)[]; tone: Tre
 /**
  * 統計タイル1枚。上段に[アイコン][ラベル][変動矢印]、下段に値を大きく出し、背景に推移を薄く描く。
  * tone は現在値の絶対基準による水準評価で、warn/danger のときタイル全体を着色する。
- * sub を渡すと値の右に補助テキストを添える(人口の増減、為替レートの変動幅など)。
+ * sub を渡すと値の右に補助テキストを添える(人口の増減など)。
  */
 function StatTile({
   icon,

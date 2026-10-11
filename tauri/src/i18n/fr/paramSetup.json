@@ -144,8 +144,8 @@
         "desc": "Plafond, en jours, du bonus obtenu par une entreprise qui fonctionne durablement."
       },
       "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
-        "label": "Écart annulant la compétitivité à l'export",
-        "desc": "Si le prix dépasse celui de l'extérieur de cette proportion, la compétitivité à l'export devient nulle. À 0,5, +50 % l'annule."
+        "label": "Écart de prix arrêtant l'export",
+        "desc": "De combien le prix de l'offre peut dépasser le plafond de recette à l'export (prix extérieur ÷ (1 + taux de transport)) avant que les plateformes d’import-export cessent d'acheter. Les achats baissent linéairement du plafond jusqu'à zéro à cet écart."
       },
       "SPAWN_LABOR_CAP_RATIO": {
         "label": "Plafond de main-d'œuvre consommée à l'apparition",

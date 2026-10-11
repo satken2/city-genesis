@@ -87,14 +87,11 @@
   },
   "financialPolicy": {
     "summaryCard": "金融摘要",
-    "moneySupply": "貨幣供給總量",
     "nominalGdp": "名目GDP",
     "realGdp": "實質GDP",
-    "priceIndex": "物價（匯率）",
-    "qeSlider": "量化寬鬆（QE / 日）",
-    "qeChart": "量化寬鬆水準歷史",
+    "priceIndex": "物價（GDP平減指數）",
     "gdpChart": "GDP走勢（實質・名目）",
-    "priceChart": "物價走勢（匯率）",
+    "priceChart": "物價走勢（GDP平減指數）",
     "centralBankDebtChart": "中央銀行負債歷史",
     "collectionsChart": "向各經濟主體徵收金額的歷史（正＝徵收／負＝支付）",
     "noData": "執行模擬後將顯示歷史圖表"

@@ -6,7 +6,6 @@ import "./TipsWindow.css";
 import tip1 from "../../assets/images/tips/tip_1.jpg";
 import tip2 from "../../assets/images/tips/tip_2.jpg";
 import tip3 from "../../assets/images/tips/tip_3.jpg";
-import tip4 from "../../assets/images/tips/tip_4.jpg";
 import tip5 from "../../assets/images/tips/tip_5.jpg";
 import tip6 from "../../assets/images/tips/tip_6.jpg";
 import tip7 from "../../assets/images/tips/tip_7.jpg";
@@ -50,7 +49,6 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip1", image: tip1 },
   { id: "tip2", image: tip2 },
   { id: "tip3", image: tip3 },
-  { id: "tip4", image: tip4 },
   { id: "tip5", image: tip5 },
   { id: "tip6", image: tip6 },
   { id: "tip7", image: tip7 },

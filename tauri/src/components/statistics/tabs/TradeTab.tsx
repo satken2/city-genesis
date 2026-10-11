@@ -3,6 +3,10 @@ import { useTranslation } from "react-i18next";
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
+  Cell,
+  ReferenceLine,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -15,9 +19,9 @@ import { useRemPx } from "../../../hooks/useRemPx";
 
 type HistoryPoint = {
   epoch: number;
-  exchange_rate: number;
   import_value: number;
   export_value: number;
+  trade_balance: number; // 輸出額 − 輸入額。正=都市へお金が入る、負=出ていく
 };
 
 type TradeProductCapacity = {
@@ -34,7 +38,6 @@ type TradeStats = {
   export_capacities: TradeProductCapacity[];
 };
 
-const COLOR_EXCHANGE_RATE = "#06b6d4"; // 為替レート: シアン
 const COLOR_EXPORT = "#10b981";        // 輸出: エメラルドグリーン
 const COLOR_IMPORT = "#ef4444";        // 輸入: ローズレッド
 
@@ -107,15 +110,15 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       <div className="trade-tab__grid">
         {/* 左半分: 履歴推移グラフ */}
         <div className="trade-tab__col-left">
-          {/* 為替レート推移 */}
+          {/* 貿易収支推移。黒字は輸出、赤字は輸入と同じ色で塗る */}
           <div className="trade-card">
             <h3 className="trade-card__title">
-              {t("statistics.exchangeRateHistory")}
+              {t("statistics.tradeBalanceHistory")}
             </h3>
             <div className="trade-card__chart-container">
               {hasHistory ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={history} margin={CHART_MARGIN}>
+                  <BarChart data={history} margin={CHART_MARGIN}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#253246" />
                     <XAxis
                       dataKey="epoch"
@@ -128,22 +131,25 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
-                      domain={["auto", "auto"]}
                     />
                     <Tooltip
                       contentStyle={TOOLTIP_STYLE}
                       labelFormatter={(label) => `Epoch ${label}`}
+                      cursor={{ fill: "rgba(255,255,255,0.05)" }}
                     />
-                    <Line
-                      type="monotone"
-                      dataKey="exchange_rate"
-                      name={t("statistics.exchangeRate")}
-                      stroke={COLOR_EXCHANGE_RATE}
-                      strokeWidth={2}
-                      dot={{ r: 2 }}
-                      activeDot={{ r: 4 }}
-                    />
-                  </LineChart>
+                    <ReferenceLine y={0} stroke="#8ba3bb" />
+                    <Bar
+                      dataKey="trade_balance"
+                      name={t("statistics.tradeBalance")}
+                    >
+                      {history.map((point) => (
+                        <Cell
+                          key={point.epoch}
+                          fill={point.trade_balance >= 0 ? COLOR_EXPORT : COLOR_IMPORT}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="trade-card__no-data">

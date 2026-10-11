@@ -144,8 +144,8 @@
         "desc": "Maximum days of long-term operation bonus a business can accrue."
       },
       "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
-        "label": "Export Competitiveness Zero Ratio",
-        "desc": "How much higher than the external price before export competitiveness hits zero. 0.5 = +50%."
+        "label": "Export Cutoff Price Margin",
+        "desc": "How far the supply price may exceed the export price ceiling (external price ÷ (1 + transport ratio)) before trade hubs stop buying. Purchases fall linearly from the ceiling to zero at this margin."
       },
       "SPAWN_LABOR_CAP_RATIO": {
         "label": "Spawn Labor Consumption Cap",

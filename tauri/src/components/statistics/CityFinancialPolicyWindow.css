@@ -90,82 +90,6 @@
   margin: 0;
 }
 
-/* スライダー & 入力 */
-.finance-control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.finance-slider-container {
-  width: 100%;
-}
-
-.finance-slider {
-  width: 100%;
-  height: 6px;
-  background: #1e293b;
-  border-radius: 3px;
-  outline: none;
-  -webkit-appearance: none;
-  cursor: pointer;
-}
-
-.finance-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #fbbf24;
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-
-.finance-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-.finance-input-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 4px 8px;
-}
-
-.finance-number-input {
-  flex-grow: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: #f8fafc;
-  font-size: 1rem;
-  font-weight: 700;
-  text-align: right;
-  width: 100%;
-}
-
-.finance-number-input::-webkit-outer-spin-button,
-.finance-number-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.finance-input-unit {
-  font-size: 1rem;
-  color: #64748b;
-  flex-shrink: 0;
-}
-
-.finance-status-saving {
-  font-size: 1rem;
-  color: #10b981;
-  text-align: right;
-  margin-top: 4px;
-}
-
 /* 右ペイン */
 .finance-window__right-pane {
   flex-grow: 1;
@@ -177,7 +101,7 @@
 .finance-charts-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   gap: 12px;
   height: 100%;
 }
@@ -189,11 +113,6 @@
   padding: 10px 14px;
   display: flex;
   flex-direction: column;
-}
-
-.finance-chart-card--empty {
-  background: transparent;
-  border: none;
 }
 
 .finance-chart-card__title {

@@ -51,7 +51,7 @@
         "transport": "« Transports publics » permet de créer et de gérer des lignes de bus, de train et autres.",
         "regulation": "« Réglementations » règle les limitations de vitesse, les règles de construction initiales des nouveaux quartiers, les conditions d'immigration, la protection sociale et les réparations.",
         "city": "« Politiques » règle les impôts, comme l'impôt sur le revenu, l'impôt sur les entreprises et la taxe de consommation.",
-        "finance": "« Politique monétaire » règle l'assouplissement quantitatif et montre la situation financière : masse monétaire, PIB, prix, etc.",
+        "finance": "« Politique monétaire » montre la situation financière : PIB, prix, dette de la banque centrale, etc.",
         "stat": "« Statistiques » présente sous forme de graphiques des données comme la population et les trajets domicile-travail.",
         "propPlacement": "« Placement de décors » place des décors (petits objets) sur le terrain. C'est tout pour le panneau d'icônes. Appuyez sur « Suivant »."
       },
@@ -545,10 +545,6 @@
       "tip3": {
         "title": "Laissez passer",
         "description": "Si les véhicules de secours arrivent en retard, les dégâts s'aggravent. Veillez à ce que les routes qu'ils empruntent souvent ne soient pas embouteillées."
-      },
-      "tip4": {
-        "title": "Faites tourner la planche à billets",
-        "description": "L'argent manque ? Votre autorité de maire vous permet d'en imprimer autant que vous voulez. Attention toutefois à l'inflation : la hausse des prix dégrade le moral des habitants."
       },
       "tip5": {
         "title": "Un chemin escarpé",

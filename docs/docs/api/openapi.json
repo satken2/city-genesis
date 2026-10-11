@@ -1184,6 +1184,67 @@
         }
       }
     },
+    "/api/v1/buildings/service-coverage": {
+      "get": {
+        "tags": [
+          "buildings"
+        ],
+        "summary": "Get Service Coverage Products",
+        "description": "効果範囲の制限を持つサービス財（電力・水道など）の一覧を返す。\n\n表示パネルの効果範囲タブ・都市マップ・統計のインフラ網タブが、選べる財を並べるために使う。\n手書きプレーンJSON（endpoints.yaml 不使用）。\n\n返却値:\n  - products: [{product_id, supplier_variants}] の配列（製品ID順）。supplier_variants は\n    その財を供給する効果範囲付きの施設の variant 一覧。",
+        "operationId": "get_service_coverage_products_api_v1_buildings_service_coverage_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/buildings/service-coverage/{product_id}": {
+      "get": {
+        "tags": [
+          "buildings"
+        ],
+        "summary": "Get Service Coverage",
+        "description": "サービス財1品目の効果範囲と、範囲内・範囲外の建物を返す。\n\n表示パネルの効果範囲タブ・都市マップ・統計のインフラ網タブが、施設ごとの範囲と建物の\n塗り分けを描くために使う。手書きプレーンJSON（endpoints.yaml 不使用）。\n\n返却値:\n  - product_id: 製品ID。\n  - suppliers: その財を供給する施設すべて（状態を問わない）の\n    [{agent_id, name, variant, status, center_point, region}]。region の形式は\n    preview-effect-range と同一（circle / polygon）。\n  - covered_building_ids / uncovered_building_ids: 稼働中の建物のうち、敷地の土地区画が\n    稼働中の施設の効果範囲に入るもの / 入らないもの。建設中などの施設の範囲は判定に含めない。",
+        "operationId": "get_service_coverage_api_v1_buildings_service_coverage__product_id__get",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/buildings/{agent_id}": {
       "get": {
         "tags": [
@@ -3121,7 +3182,7 @@
           "epochs"
         ],
         "summary": "Run Epochs",
-        "description": "シミュレーションを実行(countが未指定の場合は1エポック実行)\n\nレスポンスの epoch_report には以下が含まれる:\n- construction_progress: 実行開始時点で建設予定/建設中だった市政府建設物\n  (public_facility=1 の建物と全ての道路)のうち、タグの付いていないものの進捗遷移\n  (before_pct → after_pct)。variant は種別の表記(道路・線路・電力 など)に使う。\n- construction_projects: 上のうちタグの付いたものを、タグ(建設プロジェクト)ごとに\n  まとめた進捗遷移。進捗率は建設体積で按分した平均で、メンバー(同じタグの完了済みの\n  建物・道路も含む)は種別と完了状況だけを持つ。\n- maintenance_items: エポック完了時点で修繕中(under_maintenance=1)の公共建物・道路の一覧。\n  プレイヤーはエポック結果ウィンドウで個別に修繕のキャンセルが可能。\n- rebuild_items: エポック完了時点で造り替え(バリアント変更)中の道路の一覧。\n  キャンセルは DELETE /api/v1/paths/{path_id}/rebuild で行う。\n- population: 実行による人口動態(出生/死亡/転入/転出の累計、および前後人口)\n- exchange_rate: 前後の為替レート\n- statistics: 統計タイル用の現在値と、指標ごとの直近 trend_window エポック分の履歴(history)\n\nエポック実行は直列化されており、別の実行の最中に来た要求は 409 EPOCH_ALREADY_RUNNING になる。",
+        "description": "シミュレーションを実行(countが未指定の場合は1エポック実行)\n\nレスポンスの epoch_report には以下が含まれる:\n- construction_progress: 実行開始時点で建設予定/建設中だった市政府建設物\n  (public_facility=1 の建物と全ての道路)のうち、タグの付いていないものの進捗遷移\n  (before_pct → after_pct)。variant は種別の表記(道路・線路・電力 など)に使う。\n- construction_projects: 上のうちタグの付いたものを、タグ(建設プロジェクト)ごとに\n  まとめた進捗遷移。進捗率は建設体積で按分した平均で、メンバー(同じタグの完了済みの\n  建物・道路も含む)は種別と完了状況だけを持つ。\n- maintenance_items: エポック完了時点で修繕中(under_maintenance=1)の公共建物・道路の一覧。\n  プレイヤーはエポック結果ウィンドウで個別に修繕のキャンセルが可能。\n- rebuild_items: エポック完了時点で造り替え(バリアント変更)中の道路の一覧。\n  キャンセルは DELETE /api/v1/paths/{path_id}/rebuild で行う。\n- population: 実行による人口動態(出生/死亡/転入/転出の累計、および前後人口)\n- statistics: 統計タイル用の現在値と、指標ごとの直近 trend_window エポック分の履歴(history)\n\nエポック実行は直列化されており、別の実行の最中に来た要求は 409 EPOCH_ALREADY_RUNNING になる。",
         "operationId": "run_epochs_api_v1_epochs_post",
         "parameters": [
           {
@@ -4519,7 +4580,7 @@
           "agents"
         ],
         "summary": "Get Agent Cargo",
-        "description": "輸出入拠点(TYPE_TRADE)の荷役情報を取得する。\n\n品目別の割当枠・実績は SoA(demand_amount/received_amount)と extra の multi_supply に\n分散しており、endpoints.yaml(自動生成)の single_agent スキーマでは表現できないため、\nアラート・統計系と同方針の手書きレスポンス(プレーンJSON)で返す。\n\nレスポンス:\n- capacity_per_epoch: 方向別スループット(t。capacity_per_space × 床面積 × エポック日数。\n  原材料を持つ拠点は、当エポックに受け取った原材料で取り扱える量との小さい方)。\n  輸入と輸出は別枠でそれぞれこの量を使える。品目別の固定枠は持たず、\n  方向内の全品目が1単位の重さで換算した量でこのキャパシティを分け合う。\n- area_capacity_per_epoch: 床面積だけで決まるスループット(t/エポック)。\n- material_capacity_per_epoch: 当エポックに受け取った原材料で取り扱える量(t)。国際貨物駅では\n  国際貨物輸送路線から受け取った枠。原材料を持たない拠点(港など)は null。\n- import_handled_tons / export_handled_tons: 方向別の取扱実績の合計(t)。品目ごとの単位が\n  違うため、能力と比べられる合計はトンで返す。\n- imports / exports: 品目ごとの荷役実績のリスト(マスターの品目順)。\n  - allocation: 当エポックの割当量(需給シグナルに基づく前方視配分の結果)\n  - handled: 当エポックの取扱実績(輸入=都市への販売量、輸出=都市からの買取量)\n  - price: 単価(輸入=販売価格、輸出=買取上限価格。いずれも域外価格×為替の自国通貨建て)\n  - lost: 機会損失(輸入のみ。割当在庫の不足で売り逃した量)",
+        "description": "輸出入拠点(TYPE_TRADE)の荷役情報を取得する。\n\n品目別の割当枠・実績は SoA(demand_amount/received_amount)と extra の multi_supply に\n分散しており、endpoints.yaml(自動生成)の single_agent スキーマでは表現できないため、\nアラート・統計系と同方針の手書きレスポンス(プレーンJSON)で返す。\n\nレスポンス:\n- capacity_per_epoch: 方向別スループット(t。capacity_per_space × 床面積 × エポック日数。\n  原材料を持つ拠点は、当エポックに受け取った原材料で取り扱える量との小さい方)。\n  輸入と輸出は別枠でそれぞれこの量を使える。品目別の固定枠は持たず、\n  方向内の全品目が1単位の重さで換算した量でこのキャパシティを分け合う。\n- area_capacity_per_epoch: 床面積だけで決まるスループット(t/エポック)。\n- material_capacity_per_epoch: 当エポックに受け取った原材料で取り扱える量(t)。国際貨物駅では\n  国際貨物輸送路線から受け取った枠。原材料を持たない拠点(港など)は null。\n- import_handled_tons / export_handled_tons: 方向別の取扱実績の合計(t)。品目ごとの単位が\n  違うため、能力と比べられる合計はトンで返す。\n- imports / exports: 品目ごとの荷役実績のリスト(マスターの品目順)。\n  - allocation: 当エポックの割当量(需給シグナルに基づく前方視配分の結果)\n  - handled: 当エポックの取扱実績(輸入=都市への販売量、輸出=都市からの買取量)\n  - price: 単価(輸入=販売価格=域外価格×(1+輸送費率)、輸出=買取上限価格=域外価格÷(1+輸送費率))\n  - lost: 機会損失(輸入のみ。割当在庫の不足で売り逃した量)",
         "operationId": "get_agent_cargo_api_v1_agents__agent_id__cargo_get",
         "parameters": [
           {
@@ -5046,28 +5107,6 @@
         }
       }
     },
-    "/api/v1/system/debug-init": {
-      "post": {
-        "tags": [
-          "system"
-        ],
-        "summary": "App Debug Init",
-        "description": "デバッグ用のシミュレーション初期化を行うエンドポイント。\n\n保存操作のロックで直列化するので、シナリオのヘッドレス処理(読み込み→編集→保存)の途中で\n都市が作り直されることはない(処理が終わってセッションなしに戻ってから実行される)。\n\n与論島の地形(チュートリアルの舞台から読む)に、テスト用の建物・道路・ゾーンなどの臨時データを作成する。\n\n開発環境(生 Python 実行)専用。Nuitka ビルド(製品版・モック版とも)では\nis_debug_enabled() が常に False であり、501 を返す。テストデータ投入の実装\n(app.services.debug)もビルドには含まれないため、遅延 import で参照する。",
-        "operationId": "app_debug_init_api_v1_system_debug_init_post",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/system/verify": {
       "get": {
         "tags": [
@@ -5170,7 +5209,7 @@
           "sessions"
         ],
         "summary": "Update Session",
-        "description": "プレイモードを切り替える。\n\n本番では通常モードへの復帰だけを許可する。神・チュートリアルモードへの入口は\nPOST /sessions。チュートリアル完了時は都市を保ったまま通常モードへ移る。",
+        "description": "プレイモードを切り替える。\n\n読み取り専用モードへは、管理者の秘密(ヘッダー X-Admin-Secret)を示した要求だけが入れる。\n読み取り専用中は書き込み全般に秘密が要るので、抜けるときも秘密が要る。都市を開き直すと\n(POST /sessions)プレイモードはその要求で決まり、読み取り専用は外れる。\nそれ以外は、本番では通常モードへの復帰だけを許可する。神・チュートリアルモードへの入口は\nPOST /sessions。チュートリアル完了時は都市を保ったまま通常モードへ移る。",
         "operationId": "update_session_api_v1_sessions_patch",
         "requestBody": {
           "required": true,
@@ -6261,7 +6300,7 @@
           "parameters"
         ],
         "summary": "Get Parameters",
-        "description": "現在のゲームパラメータを取得する。\nGENERAL_PARAMS / RATIO_PARAMS と、GENERAL_PARAMS のUI用表示メタデータ\n(GENERAL_PARAMS_CATEGORIES: キー→カテゴリ名、GENERAL_PARAMS_DISPLAY:\nキー→{label, desc}。ともに general_params.yaml 由来)を返す。\n表示メタデータはパラメータ設定ウィンドウ(city-genesis/tauri の ParameterSetupWindow)が\nタブ構成とラベルを動的に組み立てるためのもので、カテゴリのマップに含まれないキーは\nプレイヤー向けUIに表示されない内部パラメータを意味する。\ncan_edit が False の場合、パラメータは変更不可（都市創設済みかつ非テンプレート作成モード）。\n返される値は都市濃縮度（CITY_CONDENSATION_FACTOR）適用後の実効値。",
+        "description": "現在のゲームパラメータを取得する。\nGENERAL_PARAMS / RATIO_PARAMS と、GENERAL_PARAMS のUI用表示メタデータ\n(GENERAL_PARAMS_CATEGORIES: キー→カテゴリ名、GENERAL_PARAMS_DISPLAY:\nキー→{label, desc}、GENERAL_PARAMS_GRAPHS: キー→グラフ編集の式・軸・スライダー範囲。\nいずれも general_params.yaml 由来)を返す。\n表示メタデータはパラメータ設定ウィンドウ(city-genesis/tauri の ParameterSetupWindow)が\nタブ構成とラベルを動的に組み立てるためのもので、カテゴリのマップに含まれないキーは\nプレイヤー向けUIに表示されない内部パラメータを意味する。\ncan_edit が False の場合、パラメータは変更不可（都市創設済みかつ非テンプレート作成モード）。\n返される値は都市濃縮度（CITY_CONDENSATION_FACTOR）適用後の実効値。",
         "operationId": "get_parameters_api_v1_parameters_get",
         "responses": {
           "200": {
@@ -7096,7 +7135,7 @@
           "stats"
         ],
         "summary": "Get Trade Statistics",
-        "description": "貿易統計データ（為替推移、輸出入推移、商品別キャパシティ及び実績取扱量）を取得する。",
+        "description": "貿易統計データ（輸出入額と貿易収支の推移、商品別キャパシティ及び実績取扱量）を取得する。\n\n``history`` の各要素は ``epoch`` / ``import_value`` / ``export_value`` / ``trade_balance``。\n金額は国内通貨額で、``trade_balance`` = ``export_value`` − ``import_value`` は\n貿易で都市に入ったお金と出ていったお金の差。",
         "operationId": "get_trade_statistics_api_v1_stats_trade_get",
         "responses": {
           "200": {
@@ -7255,7 +7294,7 @@
           "stats"
         ],
         "summary": "Get Finance Statistics",
-        "description": "金融統計データ（マネーサプライ、GDP、物価、量的緩和の時系列履歴）を取得する。",
+        "description": "金融統計データ（GDP、物価指数、中央銀行の時系列履歴）を取得する。\n\n``price_index`` は GDP デフレーター。計算できないエポックは 1.0 とする。",
         "operationId": "get_finance_statistics_api_v1_stats_finance_get",
         "responses": {
           "200": {
@@ -7375,7 +7414,7 @@
           "stats"
         ],
         "summary": "Get Infrastructure Statistics",
-        "description": "インフラ網統計を取得する。\n\nインフラ財の製品ごとに以下を返す:\n- producers: 生産施設の一覧(位置・供給在庫・当エポック出荷量・接続状態)\n- consumers: 消費施設の一覧(位置・残需要・当エポック受領量・接続状態)。\n  需要ゼロの施設も接続状態を見せるため、抽出は需要ではなく\n  「variant がこの製品を授受するか」で行う。\n- paths: この製品を流せるインフラパスの一覧(折れ線ジオメトリ・当エポック流量・\n  エポックあたり容量)。建設中パスも含めて返し、UI 側で描き分ける。\n\n接続状態(connected)は「接続端子ノードが、この製品を流せる稼働中キャリアパスの\n端点ノード集合に含まれるか」で判定する(ConstructionProgressPhase の\nALERT_AGENT_INFRA_DISCONNECTED と同じ集合を build_infra_node_sets で共有)。\nキャリアパスは infra_products のみで抽出し path_type では絞らないため、\n電化線路(infra_products を持つ線路・駅パス)も電力タブに含まれる。\nインフラ施設・キャリアパスは都市全体でも高々数千のため、位置・ジオメトリの取得は\nPython オブジェクト参照のハイブリッド方式で行う(alert.py と同じ設計)。",
+        "description": "インフラ網統計を取得する。\n\nインフラ財の製品ごとに以下を返す:\n- producers: 生産施設の一覧(位置・当エポック生産量・当エポック出荷量・接続状態)\n- consumers: 消費施設の一覧(位置・残需要・当エポック受領量・接続状態)。\n  需要ゼロの施設も接続状態を見せるため、抽出は需要ではなく\n  「variant がこの製品を授受するか」で行う。\n- paths: この製品を流せるインフラパスの一覧(折れ線ジオメトリ・当エポック流量・\n  エポックあたり容量)。建設中パスも含めて返し、UI 側で描き分ける。\n\n接続状態(connected)は「接続端子ノードが、この製品を流せる稼働中キャリアパスの\n端点ノード集合に含まれるか」で判定する(ConstructionProgressPhase の\nALERT_AGENT_INFRA_DISCONNECTED と同じ集合を build_infra_node_sets で共有)。\nキャリアパスは infra_products のみで抽出し path_type では絞らないため、\n電化線路(infra_products を持つ線路・駅パス)も電力タブに含まれる。\nインフラ施設・キャリアパスは都市全体でも高々数千のため、位置・ジオメトリの取得は\nPython オブジェクト参照のハイブリッド方式で行う(alert.py と同じ設計)。",
         "operationId": "get_infrastructure_statistics_api_v1_stats_infrastructure_get",
         "responses": {
           "200": {
@@ -7397,7 +7436,7 @@
           "stats"
         ],
         "summary": "Get Tourism Statistics",
-        "description": "観光統計を取得する。統計ウィンドウ「観光」タブが参照する。\n\n- summary: エポック末の滞在観光客数・受入可能人数・当エポックの到着/帰国/応募・観光収入\n- history: Cityのリングバッファ（tourist_count / tourist_capacity / tourist_arrivals /\n  tourist_departures / tourist_applicants / tourism_revenue / exchange_rate）の時系列\n- bottleneck: 観光地（観光体験財）と玄関口（都市間旅客輸送財）の施設数・供給能力・実供給・\n  受入換算人数。受入可能人数を決めている側に is_constraint を立てる\n- lodging: 宿泊フロアの容量・占有・空室率、宿泊先を待つ観光客、宿泊費と支払意思額、ホテル棟数\n- satisfaction: 滞在客の平均充足度と帰国候補割合、充足度の分布（10分割ヒストグラム）\n- consumption: 滞在客が当エポックに調達した財の量と金額（財別）\n\n人流の内訳（訪問先）と地区別集計は持たない。",
+        "description": "観光統計を取得する。統計ウィンドウ「観光」タブが参照する。\n\n- summary: エポック末の滞在観光客数・受入可能人数・当エポックの到着/帰国/応募・観光収入\n- history: Cityのリングバッファ（tourist_count / tourist_capacity / tourist_arrivals /\n  tourist_departures / tourist_applicants / tourism_revenue）の時系列\n- bottleneck: 観光地（観光体験財）と玄関口（都市間旅客輸送財）の施設数・供給能力・実供給・\n  受入換算人数。受入可能人数を決めている側に is_constraint を立てる\n- lodging: 宿泊フロアの容量・占有・空室率、宿泊先を待つ観光客、宿泊費と支払意思額、ホテル棟数\n- satisfaction: 滞在客の平均充足度と帰国候補割合、充足度の分布（10分割ヒストグラム）\n- consumption: 滞在客が当エポックに調達した財の量と金額（財別）\n\n人流の内訳（訪問先）と地区別集計は持たない。",
         "operationId": "get_tourism_statistics_api_v1_stats_tourism_get",
         "responses": {
           "200": {
@@ -11462,9 +11501,6 @@
           "population": {
             "$ref": "#/components/schemas/PopulationReport"
           },
-          "exchange_rate": {
-            "$ref": "#/components/schemas/ExchangeRateReport"
-          },
           "statistics": {
             "$ref": "#/components/schemas/StatisticsReport"
           }
@@ -11472,30 +11508,10 @@
         "type": "object",
         "required": [
           "population",
-          "exchange_rate",
           "statistics"
         ],
         "title": "EpochReport",
         "description": "エポック実行結果レポート。UIの実行結果ウィンドウに表示される内容。"
-      },
-      "ExchangeRateReport": {
-        "properties": {
-          "before": {
-            "type": "number",
-            "title": "Before"
-          },
-          "after": {
-            "type": "number",
-            "title": "After"
-          }
-        },
-        "type": "object",
-        "required": [
-          "before",
-          "after"
-        ],
-        "title": "ExchangeRateReport",
-        "description": "エポック実行前後の為替レート。"
       },
       "GDPData": {
         "properties": {
@@ -11666,9 +11682,9 @@
             ],
             "title": "Node Point"
           },
-          "supply": {
+          "production": {
             "type": "number",
-            "title": "Supply"
+            "title": "Production"
           },
           "shipped": {
             "type": "number",
@@ -11683,7 +11699,7 @@
         "required": [
           "agent_id",
           "name",
-          "supply",
+          "production",
           "shipped",
           "connected"
         ],
@@ -11696,9 +11712,9 @@
             "type": "integer",
             "title": "Product Id"
           },
-          "supply_total": {
+          "production_total": {
             "type": "number",
-            "title": "Supply Total"
+            "title": "Production Total"
           },
           "shipped_total": {
             "type": "number",
@@ -11741,7 +11757,7 @@
         "type": "object",
         "required": [
           "product_id",
-          "supply_total",
+          "production_total",
           "shipped_total",
           "demand_total",
           "received_total",
@@ -11812,19 +11828,6 @@
         ],
         "title": "MaintenanceItem",
         "description": "修繕中の建物・道路1件分の情報。"
-      },
-      "MessageResponse": {
-        "properties": {
-          "message": {
-            "type": "string",
-            "title": "Message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "MessageResponse"
       },
       "NewSaveRequest": {
         "properties": {
@@ -12054,7 +12057,7 @@
         "properties": {
           "play_mode": {
             "type": "integer",
-            "maximum": 2.0,
+            "maximum": 3.0,
             "minimum": 0.0,
             "title": "Play Mode"
           }

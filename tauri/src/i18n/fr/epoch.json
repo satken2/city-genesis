@@ -13,7 +13,6 @@
   },
   "epochResult": {
     "epochCountSuffix": "({{count}} époques exécutées)",
-    "exchangeRate": "Taux de change",
     "sectionConstruction": "État des chantiers",
     "kindPath": "Route",
     "kindBuilding": "Installation",

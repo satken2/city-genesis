@@ -51,7 +51,7 @@
         "transport": "«Transporte público» crea y administra líneas de autobús, ferrocarril y otras.",
         "regulation": "«Normativas» configura los límites de velocidad, las normas de edificación iniciales de los distritos nuevos, las condiciones de inmigración, la seguridad social y las reparaciones.",
         "city": "«Políticas» configura impuestos como el impuesto a la renta, el impuesto a las empresas y el impuesto al consumo.",
-        "finance": "«Política monetaria» configura la flexibilización cuantitativa y muestra la situación financiera: oferta monetaria, PIB, precios y más.",
+        "finance": "«Política monetaria» muestra la situación financiera: PIB, precios, deuda del banco central y más.",
         "stat": "«Estadísticas» muestra en gráficos datos como la población y los desplazamientos al trabajo.",
         "propPlacement": "«Colocación de props» coloca props decorativos (objetos pequeños) sobre el terreno. Con esto termina el panel de iconos. Pulsa «Siguiente»."
       },
@@ -545,10 +545,6 @@
       "tip3": {
         "title": "Abran paso",
         "description": "Si los vehículos de emergencia llegan tarde, los daños son mayores. Cuida que las calles por donde suelen circular no se congestionen."
-      },
-      "tip4": {
-        "title": "Imprime dinero",
-        "description": "¿Falta dinero? Con tu autoridad de alcalde puedes imprimir todo el que quieras. Pero cuidado con la inflación: la subida de precios empeora el ánimo de la gente."
       },
       "tip5": {
         "title": "Un camino escarpado",

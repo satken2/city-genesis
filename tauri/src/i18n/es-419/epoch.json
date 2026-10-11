@@ -13,7 +13,6 @@
   },
   "epochResult": {
     "epochCountSuffix": "({{count}} épocas ejecutadas)",
-    "exchangeRate": "Tipo de cambio",
     "sectionConstruction": "Estado de las obras",
     "kindPath": "Calle",
     "kindBuilding": "Instalación",

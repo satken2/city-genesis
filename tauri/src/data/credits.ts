@@ -480,16 +480,6 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Stat icon: GDP (stats/gdp.png)",
   },
   {
-    title: "Money",
-    category: "image",
-    author: "vectorsmarket15",
-    source: "Flaticon",
-    url: "https://www.flaticon.com/free-icon/money_12740855",
-    license: "Flaticon Free License",
-    requiredText: "Money icon designed by vectorsmarket15 from Flaticon",
-    note: "Stat icon: exchange rate (stats/exchange_rate.png)",
-  },
-  {
     title: "Briefcase",
     category: "image",
     author: "Magnific",

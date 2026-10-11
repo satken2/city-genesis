@@ -13,7 +13,6 @@
   },
   "epochResult": {
     "epochCountSuffix": "({{count}} 期実行)",
-    "exchangeRate": "為替レート",
     "sectionConstruction": "建設状況",
     "kindPath": "道路",
     "kindBuilding": "施設",

@@ -87,14 +87,11 @@
   },
   "financialPolicy": {
     "summaryCard": "금융 요약",
-    "moneySupply": "통화 공급량 합계",
     "nominalGdp": "명목 GDP",
     "realGdp": "실질 GDP",
-    "priceIndex": "물가(환율)",
-    "qeSlider": "양적 완화(QE / 일)",
-    "qeChart": "양적 완화 수준 이력",
+    "priceIndex": "물가(GDP 디플레이터)",
     "gdpChart": "GDP 추이(실질・명목)",
-    "priceChart": "물가 추이(환율)",
+    "priceChart": "물가 추이(GDP 디플레이터)",
     "centralBankDebtChart": "중앙은행 부채 이력",
     "collectionsChart": "각 경제 주체로부터의 징수액 이력(양=징수 / 음=지급)",
     "noData": "시뮬레이션 실행 후 이력 그래프가 표시됩니다"

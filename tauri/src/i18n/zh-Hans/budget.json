@@ -87,14 +87,11 @@
   },
   "financialPolicy": {
     "summaryCard": "金融概要",
-    "moneySupply": "货币供应量合计",
     "nominalGdp": "名义GDP",
     "realGdp": "实际GDP",
-    "priceIndex": "物价（汇率）",
-    "qeSlider": "量化宽松（QE / 日）",
-    "qeChart": "量化宽松水平历史",
+    "priceIndex": "物价（GDP平减指数）",
     "gdpChart": "GDP走势（实际・名义）",
-    "priceChart": "物价走势（汇率）",
+    "priceChart": "物价走势（GDP平减指数）",
     "centralBankDebtChart": "中央银行负债历史",
     "collectionsChart": "向各经济主体征收金额的历史（正=征收／负=支付）",
     "noData": "执行模拟后将显示历史图表"

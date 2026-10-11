@@ -13,7 +13,6 @@
   },
   "epochResult": {
     "epochCountSuffix": "（執行了{{count}}個紀元）",
-    "exchangeRate": "匯率",
     "sectionConstruction": "建設狀況",
     "kindPath": "道路",
     "kindBuilding": "設施",
