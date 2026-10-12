@@ -88,22 +88,17 @@ import {
   PATH_STATION_HOUSE,
   PRODUCT_WATER_SUPPLY,
   PRODUCT_ELECTRICITY,
-  PRODUCT_HIGH_ELECTRICITY,
-  PRODUCT_HIGH_WATER,
 } from "./constants";
 
 /**
  * コックピットの公共サービス充足度メーター(hud/PublicServiceGauges)に並べる製品と、その並び順。
  * バックエンドの GET /api/v1/city/public-service-supply は regulated 製品を全件返すため、
  * 「常時見えるべき公共サービスはどれか」というUI側の判断をここに持つ。
- * 棒を増やしたいときはこの配列に製品IDを足すだけでよい(表示名の i18n キーは
- * publicServiceGauge.services.<製品ID> なので、そちらも ja/en 両方に足すこと)。
+ * 高圧財はサービス側の供給上限に含め、独立した棒にはしない。
  */
 export const COCKPIT_PUBLIC_SERVICE_PRODUCTS: readonly number[] = [
   PRODUCT_ELECTRICITY,
   PRODUCT_WATER_SUPPLY,
-  PRODUCT_HIGH_ELECTRICITY,
-  PRODUCT_HIGH_WATER,
 ];
 
 /**

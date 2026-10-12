@@ -37,7 +37,7 @@
 
 /*
  * グラフエリア。この枠の高さがそのまま供給キャパシティを表すため、
- * 4本とも同じ高さで固定する(サービスごとに単位が違い、絶対量の横比較には意味が無い)。
+ * 2本とも同じ高さで固定する(サービスごとに単位が違い、絶対量の横比較には意味が無い)。
  */
 .psg-track {
   position: relative;
@@ -48,12 +48,13 @@
   overflow: hidden;
 }
 
-/* 需要量。下端から伸ばす。色(逼迫度)はコンポーネント側でインライン指定する */
+/* 需要量は緑の塗りで下端から伸ばす。 */
 .psg-fill {
   position: absolute;
   left: 0;
   bottom: 0;
   width: 100%;
+  background: var(--flat-good);
   transition: height 0.2s;
 }
 

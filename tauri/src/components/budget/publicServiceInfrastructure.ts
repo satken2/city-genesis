@@ -18,6 +18,14 @@ export function getPublicServiceInfrastructure(productId: number) {
   return INFRASTRUCTURE_BY_SERVICE[productId];
 }
 
+/** サービス側の単位に揃えた容量のうち、小さい方を供給上限として比較する。 */
+export function getPublicServiceCapacity(productId: number, supplies: Record<number, PublicServiceSupply>): number {
+  const capacity = supplies[productId]?.supply_capacity ?? 0;
+  const infrastructure = getPublicServiceInfrastructure(productId);
+  if (!infrastructure) return capacity;
+  return Math.min(capacity, (supplies[infrastructure.productId]?.supply_capacity ?? 0) * infrastructure.quantityScale);
+}
+
 /** 一覧の容量もグラフと同じサービス側の単位に揃え、取得データ自体は変更しない。 */
 export function getPublicServiceFacilities(productId: number, supplies: Record<number, PublicServiceSupply>): PublicFacilityAgent[] {
   const facilities = supplies[productId]?.facilities ?? [];
