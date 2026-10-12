@@ -8,15 +8,15 @@
     "priceMode": "가격 방식",
     "modeFixed": "고정 가격",
     "modeCostRatio": "원가 비율",
-    "value": "가격 / 비율",
-    "effectivePrice": "실효 가격",
     "price": "공공 서비스 가격",
     "unitCost": "제조 원가",
     "supplyCapacity": "공급 용량",
-    "maxDemand": "예상 최대 수요",
     "demand": "수요량",
     "production": "생산량",
-    "supplyStatus": "수급과 용량"
+    "supplyStatus": "수급과 용량",
+    "currencyUnit": "엔",
+    "costRatioPrefix": "제조 원가의",
+    "costRatioSuffix": "배"
   },
   "publicServiceGauge": {
     "tooltip": "공공 서비스의 충족도(수요 / 공급 용량)",
@@ -69,5 +69,28 @@
     "repairThresholdPath": "도로 보수 임계값",
     "unsavedChanges": "저장되지 않은 변경 사항이 있습니다",
     "immigrationEnabled": "이민 허용"
+  },
+  "publicServiceTrend": {
+    "forecast": "수요 전망",
+    "currentCapacity": "현재 시설 용량",
+    "current": "현재",
+    "chartLabel": "수요·생산 실적과 수요 전망 ({{unit}})",
+    "atCapacity": "현재 수요가 시설 용량에 도달했습니다",
+    "capacityIn": "이 추세라면 약 {{time}} 후에 용량에 도달할 전망입니다",
+    "noCapacityCrossing": "향후 {{years}}년 동안 용량에 도달할 전망은 없습니다",
+    "insufficientHistory": "수요 전망을 계산하기에 실적이 부족합니다",
+    "yearsAxis": "현재 기준 연수",
+    "months": "{{amount}}개월",
+    "years": "{{amount}}년",
+    "past": "{{time}} 전",
+    "future": "{{time}} 후",
+    "months_one": "{{amount}}개월",
+    "months_other": "{{amount}}개월",
+    "years_one": "{{amount}}년",
+    "years_other": "{{amount}}년",
+    "substationCapacity": "변전소 용량",
+    "powerPlantCapacity": "발전소 용량",
+    "waterDistributionCapacity": "배수 시설 용량",
+    "waterIntakeCapacity": "취수 시설 용량"
   }
 }

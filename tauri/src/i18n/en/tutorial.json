@@ -681,6 +681,10 @@
       "tip38": {
         "title": "Room to Build",
         "description": "Some buildings simply won't fit on smaller parcels. Create adequately sized parcels to accommodate the buildings you want to build."
+      },
+      "tip39": {
+        "title": "That Service Isn't Free",
+        "description": "Public services such as sewage treatment, waste disposal, telecommunications, and healthcare may be free by default. You can set their prices freely. Whether you keep them affordable for citizens or put a hefty price tag on them is up to you, Mayor."
       }
     }
   },

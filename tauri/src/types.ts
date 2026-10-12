@@ -937,7 +937,7 @@ export type MasterData = {
 
 /**
  * 公共サービスを供給する施設の概要情報
- * バックエンド GET /api/v1/city/budgets/public-facilities の各施設エントリ
+ * バックエンド GET /api/v1/city/public-service-supply?include_facilities=true の各施設エントリ
  */
 export type PublicFacilityAgent = {
   agent_id: number;
@@ -1014,6 +1014,8 @@ export type PublicServiceSupply = {
   supply_capacity: number;
   demand: number;
   production: number;
+  /** include_facilities=true で取得したときだけ含まれる供給施設の一覧。 */
+  facilities?: PublicFacilityAgent[];
 };
 
 export type PublicServiceSupplyData = {

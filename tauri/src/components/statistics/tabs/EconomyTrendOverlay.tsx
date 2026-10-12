@@ -1,21 +1,23 @@
 /**
- * 経済推移タブコンポーネント
+ * 財別の経済推移オーバーレイ
  *
- * 統計ウィンドウの「経済推移」タブの中身。
+ * 統計ウィンドウ「経済」タブの表で行をクリックすると、タブの上に重ねて開く。
  * GET /api/v1/stats/market_price から財別の時系列データ(平均価格・生産量・消費量・
- * 輸出量・輸入量・注文量)を取得し、選択中の財について4分割グリッドで推移グラフ等を描画する。
+ * 輸出量・輸入量・注文量)を取得し、クリックした財について4分割グリッドで推移グラフ等を描画する。
  *
  * レイアウト(2列x2行):
- *   - 上段左: 左右2分割(左=財・スコープ選択プルダウン, 右=直近エポックの数値表示)
+ *   - 上段左: 左右2分割(左=スコープ選択プルダウン, 右=直近エポックの数値表示)
  *   - 上段右: 平均価格推移
  *   - 下段左: Sankeyダイアグラム(最新エポックの物資フロー)
  *   - 下段右: 需給推移(生産量・消費量・輸出量・輸入量 + 注文量(点線) を1グラフに統合)
  *
  * 現状は「都市全体」のみ対応。地区別時系列は将来拡張枠としてプルダウンのみ用意し、
  * 地区を選んだ場合は都市全体と同じデータを表示する(未実装である旨を表示)。
+ * 幕(ボックスの外側)を押すか、閉じるボタンで閉じる。
  */
 
-import { useMemo, useState } from "react";import { useTranslation } from "react-i18next";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   LineChart,
   Line,
@@ -28,8 +30,7 @@ import {
   Sankey,
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
-import { GOODS_RESOURCE } from "../../../constants";
-import "./EconomyTrendTab.css";
+import "./EconomyTrendOverlay.css";
 import { useRemPx } from "../../../hooks/useRemPx";
 
 /** /api/v1/stats/market_price の商品別推移データ */
@@ -76,21 +77,6 @@ const TOOLTIP_STYLE = {
   borderRadius: "4px",
   fontSize: "1rem",
 };
-
-/**
- * 財に実績（生産・消費・輸出・輸入のいずれか）があるかを判定する。
- * 4種類の時系列のいずれかに1つでも非ゼロ値が含まれていれば「実績あり」とみなす。
- * 価格だけが記録されている未取引の財は実績無しと扱い、プルダウンの候補から除外する。
- */
-function hasActualResults(p: MarketPriceProduct): boolean {
-  return (
-    p.total_production.some((v) => v !== 0) ||
-    p.total_consumption.some((v) => v !== 0) ||
-    p.total_exports.some((v) => v !== 0) ||
-    p.total_imports.some((v) => v !== 0) ||
-    p.total_self_supply.some((v) => v !== 0)
-  );
-}
 
 /**
  * エポック番号の配列と値の配列を recharts 用のデータポイント配列に変換する。
@@ -602,41 +588,79 @@ function SankeyFlowCard({
   );
 }
 
-export function EconomyTrendTab({ apiBaseUrl }: { apiBaseUrl: string }) {
+export function EconomyTrendOverlay({
+  apiBaseUrl,
+  productId,
+  productName,
+  onClose,
+}: {
+  apiBaseUrl: string;
+  productId: number;
+  productName: string;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
   const { data, loading, error } = useEpochCachedStats<MarketPriceStats>(
     apiBaseUrl,
     "/api/v1/stats/market_price"
   );
 
-  // 選択中の財の product_id。未選択時は先頭候補をフォールバック表示する。
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  return (
+    <div className="economy-trend-overlay" onMouseDown={onClose}>
+      <div
+        className="economy-trend-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="economy-trend-title"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="economy-trend-dialog__header">
+          <h2 id="economy-trend-title" className="economy-trend-dialog__title">
+            {productName}
+          </h2>
+          <button
+            type="button"
+            className="economy-trend-dialog__close"
+            aria-label={t("common.close")}
+            title={t("common.close")}
+            onClick={onClose}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+        {loading ? (
+          <div className="economy-trend-dialog__status">{t("common.loading")}</div>
+        ) : error || !data ? (
+          <div className="economy-trend-dialog__status economy-trend-dialog__status--error">
+            {t("common.fetchError")}{error ? `: ${error}` : ""}
+          </div>
+        ) : (
+          <EconomyTrendGrid
+            epochs={data.epochs}
+            product={data.products.find((p) => p.product_id === productId) ?? null}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** 選択中の財の推移を4分割グリッドで描く。統計に財が無いときは各カードを「データなし」にする。 */
+function EconomyTrendGrid({
+  epochs,
+  product: selectedProduct,
+}: {
+  epochs: number[];
+  product: MarketPriceProduct | null;
+}) {
+  const { t } = useTranslation();
   // スコープ選択(都市全体=city / 地区=zone)。現状は都市全体のみ実装。
   const [scopeMode, setScopeMode] = useState<"city" | "zone">("city");
 
-  // プルダウン候補: 市場取引を伴わない天然資源(GOODS_RESOURCE)は除外。
-  // さらに、生産・消費・輸出・輸入のいずれも全エポックでゼロ(実績なし)の財は選択肢から
-  // 外す。価格だけが記録されているような未取引の財はグラフに表示しても意味が無いため。
-  const availableProducts = useMemo(() => {
-    if (!data) return [];
-    return data.products.filter(
-      (p) => p.type !== GOODS_RESOURCE && hasActualResults(p)
-    );
-  }, [data]);
-
-  // 実効的な選択 product_id。未選択時は先頭候補でフォールバックする。
-  // derived state パターンにより、レンダリング中の setState を避ける。
-  const effectiveProductId = selectedProductId ?? availableProducts[0]?.product_id ?? null;
-
-  const selectedProduct = useMemo(() => {
-    if (effectiveProductId === null) return null;
-    return availableProducts.find((p) => p.product_id === effectiveProductId) ?? null;
-  }, [availableProducts, effectiveProductId]);
-
   // Sankeyダイアグラム用: 選択中の財の最新エポックの値を取得する。
   // 時系列配列の最後の要素が最新エポック(直近の完了エポック)に対応する。
-  // 早期リターン(loading/error)の前に呼ばないとReactフック数がレンダー間で変わって
-  // エラーになるため、ここで宣言する。
   const sankeyData = useMemo(() => {
     if (!selectedProduct) return { data: null, isShortage: false };
     const len = selectedProduct.total_production.length;
@@ -663,19 +687,6 @@ export function EconomyTrendTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     return { data: built, isShortage };
   }, [selectedProduct, t]);
 
-  if (loading) {
-    return <div className="economy-trend-tab__loading">{t("common.loading")}</div>;
-  }
-
-  if (error || !data) {
-    return (
-      <div className="economy-trend-tab__error">
-        {t("common.fetchError")}{error ? `: ${error}` : ""}
-      </div>
-    );
-  }
-
-  const epochs = data.epochs;
   const unit = selectedProduct?.unit ?? "";
 
   // 通貨フォーマット(価格用)
@@ -712,123 +723,103 @@ export function EconomyTrendTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const hasLatest = !!selectedProduct && lastIdx >= 0;
 
   return (
-    <div className="economy-trend-tab">
-      <h2 className="economy-trend-tab__title">{t("statistics.economyTrendTitle")}</h2>
-
-      <div className="economy-trend-grid">
-        {/*
-         * 上段左: 左右2分割。
-         * 左=財・スコープ選択プルダウン、右=直近エポックの数値(価格・生産・消費・輸入・輸出)。
-         */}
-        <div className="economy-trend-card economy-trend-card--top-left">
-          <div className="economy-trend-topleft">
-            <div className="economy-trend-topleft__controls">
-              <div className="economy-trend-control">
-                <label className="economy-trend-control__label">
-                  {t("statistics.economyTrendSelectProduct")}
-                </label>
-                <select
-                  className="economy-trend-control__select"
-                  value={effectiveProductId ?? ""}
-                  onChange={(e) => setSelectedProductId(Number(e.target.value))}
-                >
-                  {availableProducts.map((p) => (
-                    <option key={p.product_id} value={p.product_id}>
-                      {p.product_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="economy-trend-control">
-                <label className="economy-trend-control__label">
-                  {t("statistics.economyTrendScope")}
-                </label>
-                <select
-                  className="economy-trend-control__select"
-                  value={scopeMode}
-                  onChange={(e) => setScopeMode(e.target.value as "city" | "zone")}
-                >
-                  <option value="city">{t("statistics.economyTrendWholeCity")}</option>
-                  <option value="zone">{t("statistics.economyTrendByZone")}</option>
-                </select>
-              </div>
-              {scopeMode === "zone" && (
-                <div className="economy-trend-control__note">
-                  {t("statistics.economyTrendZoneNotImplemented")}
-                </div>
-              )}
+    <div className="economy-trend-grid">
+      {/*
+       * 上段左: 左右2分割。
+       * 左=スコープ選択プルダウン、右=直近エポックの数値(価格・生産・消費・輸入・輸出)。
+       */}
+      <div className="economy-trend-card economy-trend-card--top-left">
+        <div className="economy-trend-topleft">
+          <div className="economy-trend-topleft__controls">
+            <div className="economy-trend-control">
+              <label className="economy-trend-control__label">
+                {t("statistics.economyTrendScope")}
+              </label>
+              <select
+                className="economy-trend-control__select"
+                value={scopeMode}
+                onChange={(e) => setScopeMode(e.target.value as "city" | "zone")}
+              >
+                <option value="city">{t("statistics.economyTrendWholeCity")}</option>
+                <option value="zone">{t("statistics.economyTrendByZone")}</option>
+              </select>
             </div>
+            {scopeMode === "zone" && (
+              <div className="economy-trend-control__note">
+                {t("statistics.economyTrendZoneNotImplemented")}
+              </div>
+            )}
+          </div>
 
-            <div className="economy-trend-topleft__stats">
-              <h3 className="economy-trend-card__title">
-                {t("statistics.economyTrendLatest")}
-              </h3>
-              <dl className="economy-trend-stats">
-                <div className="economy-trend-stat">
-                  <dt>{t("statistics.colPrice")}</dt>
-                  <dd>{hasLatest ? priceFormatter(latestPrice) : "-"}</dd>
-                </div>
-                <div className="economy-trend-stat">
-                  <dt>{t("statistics.colProduction")}</dt>
-                  <dd>{hasLatest ? amountFormatter(latestProduction) : "-"}</dd>
-                </div>
-                <div className="economy-trend-stat">
-                  <dt>{t("statistics.colConsumption")}</dt>
-                  <dd>{hasLatest ? amountFormatter(latestConsumption) : "-"}</dd>
-                </div>
-                <div className="economy-trend-stat">
-                  <dt>{t("statistics.colImport")}</dt>
-                  <dd>{hasLatest ? amountFormatter(latestImport) : "-"}</dd>
-                </div>
-                <div className="economy-trend-stat">
-                  <dt>{t("statistics.colExport")}</dt>
-                  <dd>{hasLatest ? amountFormatter(latestExport) : "-"}</dd>
-                </div>
-              </dl>
-            </div>
+          <div className="economy-trend-topleft__stats">
+            <h3 className="economy-trend-card__title">
+              {t("statistics.economyTrendLatest")}
+            </h3>
+            <dl className="economy-trend-stats">
+              <div className="economy-trend-stat">
+                <dt>{t("statistics.colPrice")}</dt>
+                <dd>{hasLatest ? priceFormatter(latestPrice) : "-"}</dd>
+              </div>
+              <div className="economy-trend-stat">
+                <dt>{t("statistics.colProduction")}</dt>
+                <dd>{hasLatest ? amountFormatter(latestProduction) : "-"}</dd>
+              </div>
+              <div className="economy-trend-stat">
+                <dt>{t("statistics.colConsumption")}</dt>
+                <dd>{hasLatest ? amountFormatter(latestConsumption) : "-"}</dd>
+              </div>
+              <div className="economy-trend-stat">
+                <dt>{t("statistics.colImport")}</dt>
+                <dd>{hasLatest ? amountFormatter(latestImport) : "-"}</dd>
+              </div>
+              <div className="economy-trend-stat">
+                <dt>{t("statistics.colExport")}</dt>
+                <dd>{hasLatest ? amountFormatter(latestExport) : "-"}</dd>
+              </div>
+            </dl>
           </div>
         </div>
-
-        {/* 上段右: 平均価格推移 */}
-        <TrendChartCard
-          title={t("statistics.economyTrendPrice")}
-          data={selectedProduct ? zipToChartData(epochs, selectedProduct.average_prices) : []}
-          color={COLOR_PRICE}
-          formatter={priceFormatter}
-          noDataLabel={t("statistics.economyTrendNoData")}
-        />
-
-        {/* 下段左: 物資フローSankey(最新エポック) */}
-        <SankeyFlowCard
-          title={t("statistics.economyTrendSankey")}
-          sankeyData={sankeyData.data}
-          isShortage={sankeyData.isShortage}
-          noDataLabel={t("statistics.economyTrendNoData")}
-        />
-
-        {/*
-         * 下段右: 需給推移。
-         * 生産量・消費量・輸出量・輸入量を実線で、注文量を点線で1グラフに統合描画する。
-         */}
-        <SupplyDemandTrendCard
-          title={t("statistics.economyTrendSupplyDemand")}
-          epochs={epochs}
-          production={selectedProduct?.total_production ?? []}
-          consumption={selectedProduct?.total_consumption ?? []}
-          exports={selectedProduct?.total_exports ?? []}
-          imports={selectedProduct?.total_imports ?? []}
-          order={selectedProduct?.total_order ?? []}
-          formatter={amountFormatter}
-          noDataLabel={t("statistics.economyTrendNoData")}
-          labels={{
-            production: t("statistics.economyTrendProductionLegend"),
-            consumption: t("statistics.economyTrendConsumptionLegend"),
-            export: t("statistics.economyTrendExportLegend"),
-            import: t("statistics.economyTrendImportLegend"),
-            order: t("statistics.economyTrendOrderLegend"),
-          }}
-        />
       </div>
+
+      {/* 上段右: 平均価格推移 */}
+      <TrendChartCard
+        title={t("statistics.economyTrendPrice")}
+        data={selectedProduct ? zipToChartData(epochs, selectedProduct.average_prices) : []}
+        color={COLOR_PRICE}
+        formatter={priceFormatter}
+        noDataLabel={t("statistics.economyTrendNoData")}
+      />
+
+      {/* 下段左: 物資フローSankey(最新エポック) */}
+      <SankeyFlowCard
+        title={t("statistics.economyTrendSankey")}
+        sankeyData={sankeyData.data}
+        isShortage={sankeyData.isShortage}
+        noDataLabel={t("statistics.economyTrendNoData")}
+      />
+
+      {/*
+       * 下段右: 需給推移。
+       * 生産量・消費量・輸出量・輸入量を実線で、注文量を点線で1グラフに統合描画する。
+       */}
+      <SupplyDemandTrendCard
+        title={t("statistics.economyTrendSupplyDemand")}
+        epochs={epochs}
+        production={selectedProduct?.total_production ?? []}
+        consumption={selectedProduct?.total_consumption ?? []}
+        exports={selectedProduct?.total_exports ?? []}
+        imports={selectedProduct?.total_imports ?? []}
+        order={selectedProduct?.total_order ?? []}
+        formatter={amountFormatter}
+        noDataLabel={t("statistics.economyTrendNoData")}
+        labels={{
+          production: t("statistics.economyTrendProductionLegend"),
+          consumption: t("statistics.economyTrendConsumptionLegend"),
+          export: t("statistics.economyTrendExportLegend"),
+          import: t("statistics.economyTrendImportLegend"),
+          order: t("statistics.economyTrendOrderLegend"),
+        }}
+      />
     </div>
   );
 }

@@ -3,11 +3,11 @@
  *
  * 公共サービス（products_master の public_service が真の製品）ごとのタブ構成。
  *
- * 各タブの中身は縦2分割。
- * - 上: 公共サービスの価格統制カード。価格方式（固定価格 / 原価比率）の切替・設定値
- *       （固定価格または原価への乗率）の入力・製造原価・想定最大需要・需給ドーナツを表示する。
+ * 各タブの中身は左右2分割。
+ * - 左: 公共サービスの価格統制カード。価格方式（固定価格 / 原価比率）の切替・設定値
+ *       （固定価格または原価への乗率）の入力・製造原価と、実績・需要見込み・現在の施設容量のグラフを表示する。
  *       市場変動は無く、必ず固定価格か原価比率のいずれかで統制される。
- * - 下: その公共サービスを供給する施設の一覧テーブル。
+ * - 右: その公共サービスと関連する高圧財を供給する施設の一覧テーブル。
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -23,11 +23,11 @@ import type {
   PublicServiceSupply,
   PublicServiceSupplyData,
 } from "../../types";
+import { useEpochCachedStats } from "../statistics/useEpochCache";
+import { PublicServiceTrendChart } from "./PublicServiceTrendChart";
+import type { PublicServiceHistoryData, PublicServiceProductHistory } from "./publicServiceTrend";
+import { getPublicServiceFacilities, getPublicServiceInfrastructure } from "./publicServiceInfrastructure";
 import "./PublicFacilitiesWindow.css";
-
-type PublicFacilitiesData = {
-  facilities: Record<string, PublicFacilityAgent[]>;
-};
 
 type PublicServicePricesData = {
   prices: PublicServicePrice[];
@@ -69,10 +69,10 @@ function pct(v?: number): string {
 
 /**
  * 施設一覧テーブルの列定義。
- * 価格・生産量・売却量は上の価格統制カードが都市全体で示すため、
+ * 価格・生産量・売却量は左の価格統制カードが都市全体で示すため、
  * ここでは施設ごとの供給余力（生産キャパシティ）と経営指標だけを並べる。
  */
-function buildColumns(t: TFn2): SortableAgentColumn<PublicFacilityAgent>[] {
+function buildColumns(t: TFn2, unit: string): SortableAgentColumn<PublicFacilityAgent>[] {
   return [
     {
       key: "status",
@@ -89,7 +89,7 @@ function buildColumns(t: TFn2): SortableAgentColumn<PublicFacilityAgent>[] {
     },
     {
       key: "production_capacity",
-      label: t("publicFacilities.productionCapacity"),
+      label: `${t("publicFacilities.productionCapacity")} (${unit})`,
       align: "right",
       render: (a) => num(a.production_capacity, 0), // null = スペース制約なし（生産上限が定まらない）施設
       sortValue: (a) => a.production_capacity ?? 0,
@@ -111,143 +111,16 @@ function buildColumns(t: TFn2): SortableAgentColumn<PublicFacilityAgent>[] {
   ];
 }
 
-// 需給ドーナツの寸法（viewBox 0 0 100 100 のユーザー単位）。
-// 外周リング=生産量、内周リング=需要量で、リング1周が供給キャパシティに相当する。
-const DONUT_OUTER_R = 40;
-const DONUT_INNER_R = 27;
-const DONUT_OUTER_W = 11;
-const DONUT_INNER_W = 9;
-
-/** キャパシティに対する比率を 0〜1 に丸める。キャパシティ 0 なら 0 扱い。 */
-function capacityRatio(value: number, capacity: number): number {
-  if (capacity <= 0) return 0;
-  return Math.min(1, value / capacity);
-}
-
-/** ドーナツ中央の数値。桁が大きくても収まるよう短縮表記にする。 */
-const compactFormat = new Intl.NumberFormat(undefined, {
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
-
-type SupplyDonutProps = {
-  production: number;
-  demand: number;
-  capacity: number;
-  /** 製品の単位。中央の数値の添え字に使う */
-  unit: string;
-};
-
-/**
- * 需給とキャパシティのドーナツ表示。
- * 二重リングの1周が供給キャパシティで、外周が生産量・内周が需要量の占有率を示す。
- * 需要がキャパシティを超えた場合はリングを1周で止め、色を赤に変えて溢れを示す
- * （正確な超過量は凡例のパーセントで読む）。
- * 合成比率ではなく上限つきゲージのため recharts の Pie ではなく素の SVG で描く。
- */
-function SupplyDonut({ production, demand, capacity, unit }: SupplyDonutProps) {
-  const { t } = useTranslation();
-
-  const outerCirc = 2 * Math.PI * DONUT_OUTER_R;
-  const innerCirc = 2 * Math.PI * DONUT_INNER_R;
-  const prodRatio = capacityRatio(production, capacity);
-  const demandRatio = capacityRatio(demand, capacity);
-  const isOverCapacity = capacity > 0 && demand > capacity;
-
-  const legend: { key: string; label: string; value: number; ratio: number | null }[] = [
-    {
-      key: "production",
-      label: t("publicServicePrices.production"),
-      value: production,
-      ratio: capacity > 0 ? production / capacity : null,
-    },
-    {
-      key: "demand",
-      label: t("publicServicePrices.demand"),
-      value: demand,
-      ratio: capacity > 0 ? demand / capacity : null,
-    },
-    {
-      key: "capacity",
-      label: t("publicServicePrices.supplyCapacity"),
-      value: capacity,
-      ratio: null,
-    },
-  ];
-
-  return (
-    <div className="psp-donut">
-      <svg className="psp-donut__chart" viewBox="0 0 100 100" role="img">
-        {/* 12時始まりにするためリングだけ反時計回りに90度戻す */}
-        <g transform="rotate(-90 50 50)" fill="none">
-          <circle
-            className="psp-donut__track"
-            cx="50"
-            cy="50"
-            r={DONUT_OUTER_R}
-            strokeWidth={DONUT_OUTER_W}
-          />
-          <circle
-            className="psp-donut__arc psp-donut__arc--production"
-            cx="50"
-            cy="50"
-            r={DONUT_OUTER_R}
-            strokeWidth={DONUT_OUTER_W}
-            strokeDasharray={`${outerCirc * prodRatio} ${outerCirc}`}
-          />
-          <circle
-            className="psp-donut__track"
-            cx="50"
-            cy="50"
-            r={DONUT_INNER_R}
-            strokeWidth={DONUT_INNER_W}
-          />
-          <circle
-            className={`psp-donut__arc psp-donut__arc--demand ${
-              isOverCapacity ? "psp-donut__arc--over" : ""
-            }`}
-            cx="50"
-            cy="50"
-            r={DONUT_INNER_R}
-            strokeWidth={DONUT_INNER_W}
-            strokeDasharray={`${innerCirc * demandRatio} ${innerCirc}`}
-          />
-        </g>
-        <text className="psp-donut__center-value" x="50" y="50">
-          {compactFormat.format(Math.round(capacity))}
-        </text>
-        <text className="psp-donut__center-unit" x="50" y="61">
-          {unit}
-        </text>
-      </svg>
-
-      <ul className="psp-donut__legend">
-        {legend.map((item) => (
-          <li
-            key={item.key}
-            className={`psp-donut__legend-item psp-donut__legend-item--${item.key}`}
-          >
-            <span className="psp-donut__legend-swatch" />
-            <span className="psp-donut__legend-label">{item.label}</span>
-            <span className="psp-donut__legend-value">
-              {Math.round(item.value).toLocaleString()}
-              {item.ratio != null && (
-                <span className="psp-donut__legend-ratio">
-                  {Math.round(item.ratio * 100)}%
-                </span>
-              )}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 type ServicePriceCardProps = {
   product: PublicServiceProduct;
   row?: PublicServicePrice;
   supply?: PublicServiceSupply;
+  infrastructureCapacity?: { label: string; value: number };
+  capacityLabel?: string;
+  epochs: number[];
+  history?: PublicServiceProductHistory;
+  currentEpoch: number;
+  simulationDays: number;
   /** 価格/比率入力の編集途中の文字列。未編集なら undefined */
   draft?: string;
   onDraftChange: (value: string) => void;
@@ -257,12 +130,18 @@ type ServicePriceCardProps = {
 
 /**
  * 製品ひとつぶんの価格統制カード。
- * 価格方式・設定値・製造原価・想定最大需要と、需給ドーナツ（生産量 / 需要量 / 供給キャパシティ）を並べる。
+ * 価格方式・設定値・製造原価と、公共サービスの需給推移を表示する。
  */
 function ServicePriceCard({
   product,
   row,
   supply,
+  infrastructureCapacity,
+  capacityLabel,
+  epochs,
+  history,
+  currentEpoch,
+  simulationDays,
   draft,
   onDraftChange,
   onModeChange,
@@ -281,8 +160,6 @@ function ServicePriceCard({
           ? String(row.value)
           : String(roundPrice(row.value))
         : "";
-  // 原価比率モードでの実効価格 = 製造原価 × 比率。固定価格モードでは value がそのまま価格。
-  const effectivePrice = row ? (isRatio ? row.unit_cost * row.value : row.value) : 0;
 
   return (
     <div className="psp-card">
@@ -306,71 +183,49 @@ function ServicePriceCard({
             </select>
           </div>
 
-          <div className="psp-field">
-            <span className="psp-field__label">
-              {t("publicServicePrices.value")}
-            </span>
-            <div className="psp-field__control">
-              {isRatio && <span className="psp-row__times">×</span>}
-              <input
-                type="number"
-                className="psp-row__input"
-                value={valueText}
-                min={0}
-                step={isRatio ? 0.05 : "any"}
-                onChange={(e) => onDraftChange(e.target.value)}
-                onBlur={onCommit}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    onCommit();
-                    (e.target as HTMLInputElement).blur();
-                  }
-                }}
-              />
-              {isRatio && (
-                <span
-                  className="psp-row__effective"
-                  title={t("publicServicePrices.effectivePrice")}
-                >
-                  = {price(effectivePrice)}
-                </span>
-              )}
-            </div>
+          <div className="psp-field__control">
+            {isRatio && <span>{t("publicServicePrices.costRatioPrefix")}</span>}
+            <input
+              type="number"
+              className="psp-row__input"
+              aria-label={t(isRatio ? "publicServicePrices.modeCostRatio" : "publicServicePrices.modeFixed")}
+              value={valueText}
+              min={0}
+              step={isRatio ? 0.05 : "any"}
+              onChange={(e) => onDraftChange(e.target.value)}
+              onBlur={onCommit}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onCommit();
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
+            />
+            <span>{t(isRatio ? "publicServicePrices.costRatioSuffix" : "publicServicePrices.currencyUnit")}</span>
           </div>
 
-          <div className="psp-field">
+          <div className="psp-card__cost">
             <span className="psp-field__label">
               {t("publicServicePrices.unitCost")}
             </span>
             <span className="psp-field__num">
               {price(row.unit_cost)}
-              <span className="psp-row__unit">/{product.unit}</span>
-            </span>
-          </div>
-
-          <div className="psp-field">
-            <span className="psp-field__label">
-              {t("publicServicePrices.maxDemand")}
-            </span>
-            <span className="psp-field__num">
-              {Math.round(row.max_demand).toLocaleString()}
-              <span className="psp-row__unit">{product.unit}</span>
+              <span className="psp-row__unit">{t("publicServicePrices.currencyUnit")}/{product.unit}</span>
             </span>
           </div>
         </div>
       )}
 
-      <div className="psp-card__gauge">
-        <span className="psp-field__label">
-          {t("publicServicePrices.supplyStatus")}
-        </span>
-        <SupplyDonut
-          production={supply?.production ?? 0}
-          demand={supply?.demand ?? 0}
-          capacity={supply?.supply_capacity ?? 0}
-          unit={product.unit}
-        />
-      </div>
+      <PublicServiceTrendChart
+        epochs={epochs}
+        history={history}
+        currentEpoch={currentEpoch}
+        supply={supply}
+        infrastructureCapacity={infrastructureCapacity}
+        capacityLabel={capacityLabel}
+        simulationDays={simulationDays}
+        unit={product.unit}
+      />
     </div>
   );
 }
@@ -382,8 +237,9 @@ export function PublicFacilitiesWindow({
 }) {
   const { t } = useTranslation();
   const masterData = useMasterData();
+  const marketHistory = useEpochCachedStats<PublicServiceHistoryData>(apiBaseUrl, "/api/v1/stats/market_price");
+  const [simulationDays, setSimulationDays] = useState(30);
 
-  const [facilities, setFacilities] = useState<PublicFacilitiesData | null>(null);
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -392,7 +248,7 @@ export function PublicFacilitiesWindow({
   const [servicePrices, setServicePrices] = useState<
     Record<number, PublicServicePrice>
   >({});
-  // 公共サービスの需給（需給ドーナツの唯一の元データ）。
+  // 公共サービスの最新需給と、グラフの水平線に使う現在の施設容量。
   const [serviceSupplies, setServiceSupplies] = useState<
     Record<number, PublicServiceSupply>
   >({});
@@ -405,21 +261,22 @@ export function PublicFacilitiesWindow({
 
     async function loadData() {
       try {
-        const [facilitiesRes, pricesRes, supplyRes] = await Promise.all([
-          fetchApi<PublicFacilitiesData>(
-            buildApiUrl(apiBaseUrl, "/api/v1/city/budgets/public-facilities"),
-            { signal: controller.signal },
-          ),
+        const [pricesRes, supplyRes, cityRes] = await Promise.all([
           fetchApi<PublicServicePricesData>(
             buildApiUrl(apiBaseUrl, "/api/v1/city/public-service-prices"),
             { signal: controller.signal },
           ),
           fetchApi<PublicServiceSupplyData>(
-            buildApiUrl(apiBaseUrl, "/api/v1/city/public-service-supply"),
+            buildApiUrl(apiBaseUrl, "/api/v1/city/public-service-supply?include_facilities=true"),
+            { signal: controller.signal },
+          ),
+          fetchApi<{ city: { simulation_days: number } }>(
+            buildApiUrl(apiBaseUrl, "/api/v1/city"),
             { signal: controller.signal },
           ),
         ]);
-        setFacilities(facilitiesRes);
+        if (controller.signal.aborted) return;
+        setSimulationDays(cityRes.city.simulation_days);
         const priceMap: Record<number, PublicServicePrice> = {};
         for (const row of pricesRes.prices) {
           priceMap[row.product_id] = row;
@@ -539,24 +396,28 @@ export function PublicFacilitiesWindow({
     }
   }, [activeTab, publicServiceProducts]);
 
-  const activeFacilities =
-    activeTab !== null && facilities
-      ? facilities.facilities[activeTab] ?? []
-      : [];
-
   const activeProduct = useMemo(
     () => publicServiceProducts.find((p) => String(p.id) === activeTab) ?? null,
     [publicServiceProducts, activeTab],
   );
 
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const activeFacilities = useMemo(() => activeProduct ? getPublicServiceFacilities(activeProduct.id, serviceSupplies) : [],
+    [activeProduct, serviceSupplies]);
+  const infrastructure = activeProduct ? getPublicServiceInfrastructure(activeProduct.id) : undefined;
+  const infrastructureSupply = infrastructure ? serviceSupplies[infrastructure.productId] : undefined;
+  const infrastructureCapacity = infrastructure && infrastructureSupply ? {
+    label: t(`publicServiceTrend.${infrastructure.infrastructureCapacityLabel}`),
+    value: infrastructureSupply.supply_capacity * infrastructure.quantityScale,
+  } : undefined;
+  const columns = useMemo(() => buildColumns(t, activeProduct?.unit ?? ""), [t, activeProduct?.unit]);
 
-  if (loading) {
+  if (loading || marketHistory.loading) {
     return <div className="pf-window__loading">{t("common.loading")}</div>;
   }
 
-  if (error) {
-    return <div className="pf-window__error">{error}</div>;
+  const loadError = error ?? marketHistory.error;
+  if (loadError) {
+    return <div className="pf-window__error">{loadError}</div>;
   }
 
   return (
@@ -579,30 +440,36 @@ export function PublicFacilitiesWindow({
         ))}
       </nav>
 
-      {/* 上半分: 公共サービスの価格統制 */}
-      {activeProduct && (
-        <div className="pf-window__top">
-          <ServicePriceCard
-            product={activeProduct}
-            row={servicePrices[activeProduct.id]}
-            supply={serviceSupplies[activeProduct.id]}
-            draft={valueDrafts[activeProduct.id]}
-            onDraftChange={(value) =>
-              setValueDrafts((prev) => ({ ...prev, [activeProduct.id]: value }))
-            }
-            onModeChange={(mode) => handleModeChange(activeProduct.id, mode)}
-            onCommit={() => handleValueCommit(activeProduct.id)}
+      <div className="pf-window__content">
+        {activeProduct && (
+          <div className="pf-window__service">
+            <ServicePriceCard
+              product={activeProduct}
+              row={servicePrices[activeProduct.id]}
+              supply={serviceSupplies[activeProduct.id]}
+              infrastructureCapacity={infrastructureCapacity}
+              capacityLabel={infrastructure ? t(`publicServiceTrend.${infrastructure.capacityLabel}`) : undefined}
+              epochs={marketHistory.data?.epochs ?? []}
+              history={marketHistory.data?.products.find((row) => row.product_id === activeProduct.id)}
+              currentEpoch={marketHistory.data?.epoch ?? 0}
+              simulationDays={simulationDays}
+              draft={valueDrafts[activeProduct.id]}
+              onDraftChange={(value) =>
+                setValueDrafts((prev) => ({ ...prev, [activeProduct.id]: value }))
+              }
+              onModeChange={(mode) => handleModeChange(activeProduct.id, mode)}
+              onCommit={() => handleValueCommit(activeProduct.id)}
+            />
+          </div>
+        )}
+
+        <div className="pf-window__facilities">
+          <SortableAgentTable
+            columns={columns}
+            rows={activeFacilities}
+            emptyText={t("budget.noFacilities")}
           />
         </div>
-      )}
-
-      {/* 下半分: 供給施設の一覧テーブル */}
-      <div className="pf-window__bottom">
-        <SortableAgentTable
-          columns={columns}
-          rows={activeFacilities}
-          emptyText={t("budget.noFacilities")}
-        />
       </div>
     </div>
   );

@@ -110,6 +110,18 @@
       "budgetCapped": {
         "title": "Budget insuffisant",
         "description": "Le budget alloué est très inférieur au montant nécessaire, l'activité a été réduite. Revoyez la répartition budgétaire."
+      },
+      "facilityWarning": {
+        "title": "Équipement public hors service",
+        "description": "Cet équipement fournit bien moins de services que prévu. Vérifiez ses besoins en main-d’œuvre et en matières premières."
+      },
+      "sanitationWarning": {
+        "title": "Grave dégradation de l’état sanitaire",
+        "description": "L’état sanitaire de la parcelle de ce bâtiment s’est gravement dégradé et affecte les ménages qui y vivent. Améliorez l’offre de traitement des eaux usées et des déchets."
+      },
+      "infraWarning": {
+        "title": "Infrastructure arrêtée ou effondrée",
+        "description": "Cette infrastructure est à l’arrêt ou s’est effondrée, ce qui perturbe l’approvisionnement. Vérifiez son état et ses raccordements."
       }
     },
     "infra": {

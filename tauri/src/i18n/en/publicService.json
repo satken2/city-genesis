@@ -8,15 +8,15 @@
     "priceMode": "Pricing",
     "modeFixed": "Fixed",
     "modeCostRatio": "Cost ratio",
-    "value": "Price / Ratio",
-    "effectivePrice": "Effective price",
     "price": "Service price",
     "unitCost": "Unit cost",
     "supplyCapacity": "Supply cap.",
-    "maxDemand": "Est. max demand",
     "demand": "Demand",
     "production": "Production",
-    "supplyStatus": "Supply & Demand"
+    "supplyStatus": "Supply & Demand",
+    "currencyUnit": "yen",
+    "costRatioPrefix": "Production cost ×",
+    "costRatioSuffix": ""
   },
   "publicServiceGauge": {
     "tooltip": "Public service adequacy (demand / supply capacity)",
@@ -69,5 +69,28 @@
     "repairThresholdPath": "Road Threshold",
     "unsavedChanges": "You have unsaved changes",
     "immigrationEnabled": "Allow immigration"
+  },
+  "publicServiceTrend": {
+    "forecast": "Demand forecast",
+    "currentCapacity": "Current facility capacity",
+    "current": "Now",
+    "chartLabel": "Demand, production and demand forecast ({{unit}})",
+    "atCapacity": "Current demand has reached facility capacity",
+    "capacityIn": "At this rate, capacity will be reached in about {{time}}",
+    "noCapacityCrossing": "Capacity is not expected to be reached within the next {{years}} years",
+    "insufficientHistory": "Not enough history to estimate demand",
+    "yearsAxis": "Years from now",
+    "months": "{{amount}} months",
+    "years": "{{amount}} years",
+    "past": "{{time}} ago",
+    "future": "In {{time}}",
+    "months_one": "{{amount}} month",
+    "months_other": "{{amount}} months",
+    "years_one": "{{amount}} year",
+    "years_other": "{{amount}} years",
+    "substationCapacity": "Substation capacity",
+    "powerPlantCapacity": "Power plant capacity",
+    "waterDistributionCapacity": "Water distribution capacity",
+    "waterIntakeCapacity": "Water intake capacity"
   }
 }

@@ -15,7 +15,6 @@ import { WellbeingTab } from "./tabs/WellbeingTab";
 import { PopulationTab } from "./tabs/PopulationTab";
 import { IncomeTab } from "./tabs/IncomeTab";
 import { EconomyTab } from "./tabs/EconomyTab";
-import { EconomyTrendTab } from "./tabs/EconomyTrendTab";
 import { HealthTab } from "./tabs/HealthTab";
 import { EducationTab } from "./tabs/EducationTab";
 import { EmploymentTab } from "./tabs/EmploymentTab";
@@ -44,7 +43,6 @@ const TABS: TabDef[] = [
   { id: "health", icon: "health", labelKey: "statistics.tabHealth" },
   { id: "income", icon: "income", labelKey: "statistics.tabIncome" },
   { id: "economy", icon: "economy", labelKey: "statistics.tabEconomy" },
-  { id: "economyTrend", icon: "economyTrend", labelKey: "statistics.tabEconomyTrend" },
   { id: "education", icon: "education", labelKey: "statistics.tabEducation" },
   { id: "employment", icon: "employment", labelKey: "statistics.tabEmployment" },
   { id: "trade", icon: "trade", labelKey: "statistics.tabTrade" },
@@ -123,13 +121,6 @@ function TabIcon({ icon, className }: { icon: string; className?: string }) {
     return (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 11l9-8 9 8M5 10v11h14V10M9 21v-7h6v7" />
-      </svg>
-    );
-  }
-  if (icon === "economyTrend") {
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 3v18h18M6 16l5-6 4 3 6-8" />
       </svg>
     );
   }
@@ -339,7 +330,6 @@ export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {activeTab === "population" && <PopulationTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "income" && <IncomeTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "economy" && <EconomyTab apiBaseUrl={apiBaseUrl} />}
-        {activeTab === "economyTrend" && <EconomyTrendTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "health" && <HealthTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "education" && <EducationTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "employment" && <EmploymentTab apiBaseUrl={apiBaseUrl} />}

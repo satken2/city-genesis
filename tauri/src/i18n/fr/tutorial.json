@@ -681,6 +681,10 @@
       "tip38": {
         "title": "De l'espace pour bâtir",
         "description": "Certains bâtiments ne peuvent pas être construits sur des parcelles trop étroites. Aménagez des parcelles adaptées aux dimensions des bâtiments souhaités."
+      },
+      "tip39": {
+        "title": "Ce service est payant",
+        "description": "Les services publics comme le traitement des eaux usées, la gestion des déchets, les télécommunications et les soins de santé peuvent être gratuits par défaut. Vous pouvez fixer librement leurs tarifs. À vous de choisir, en tant que maire, entre des prix abordables pour les citoyens et une facture salée."
       }
     }
   },

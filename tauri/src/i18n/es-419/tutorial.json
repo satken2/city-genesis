@@ -681,6 +681,10 @@
       "tip38": {
         "title": "Espacio para construir",
         "description": "Hay edificios que no caben en parcelas demasiado pequeñas. Planifica parcelas con el tamaño adecuado para los edificios que deseas construir."
+      },
+      "tip39": {
+        "title": "Ese servicio se cobra",
+        "description": "Los servicios públicos, como el tratamiento de aguas residuales, la gestión de residuos, las telecomunicaciones y la atención médica, pueden ser gratuitos por defecto. Puedes fijar sus tarifas libremente. Como alcalde, tú decides si ofrecer precios accesibles para los ciudadanos o ponerles una tarifa bien alta."
       }
     }
   },

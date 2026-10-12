@@ -8,15 +8,15 @@
     "priceMode": "価格方式",
     "modeFixed": "固定価格",
     "modeCostRatio": "原価比率",
-    "value": "価格 / 比率",
-    "effectivePrice": "実効価格",
     "price": "公共サービス価格",
     "unitCost": "製造原価",
     "supplyCapacity": "供給キャパシティ",
-    "maxDemand": "想定最大需要",
     "demand": "需要量",
     "production": "生産量",
-    "supplyStatus": "需給とキャパシティ"
+    "supplyStatus": "需給とキャパシティ",
+    "currencyUnit": "円",
+    "costRatioPrefix": "製造原価の",
+    "costRatioSuffix": "倍"
   },
   "publicServiceGauge": {
     "tooltip": "公共サービスの充足度(需要 / 供給キャパシティ)",
@@ -69,5 +69,28 @@
     "repairThresholdPath": "道路 補修閾値",
     "unsavedChanges": "未保存の変更があります",
     "immigrationEnabled": "移民の受け入れを許可"
+  },
+  "publicServiceTrend": {
+    "forecast": "需要見込み",
+    "currentCapacity": "現在の施設容量",
+    "current": "現在",
+    "chartLabel": "需要・生産実績と需要見込み（{{unit}}）",
+    "atCapacity": "現在の需要は施設容量に到達しています",
+    "capacityIn": "この傾向なら約{{time}}後に容量に到達する見込み",
+    "noCapacityCrossing": "今後{{years}}年は容量に到達する見込みなし",
+    "insufficientHistory": "需要の見込みを出すには実績が不足しています",
+    "yearsAxis": "現在からの年数",
+    "months": "{{amount}}か月",
+    "years": "{{amount}}年",
+    "past": "{{time}}前",
+    "future": "{{time}}後",
+    "months_one": "{{amount}}か月",
+    "months_other": "{{amount}}か月",
+    "years_one": "{{amount}}年",
+    "years_other": "{{amount}}年",
+    "substationCapacity": "変電所キャパシティ",
+    "powerPlantCapacity": "発電所キャパシティ",
+    "waterDistributionCapacity": "配水所キャパシティ",
+    "waterIntakeCapacity": "取水施設キャパシティ"
   }
 }

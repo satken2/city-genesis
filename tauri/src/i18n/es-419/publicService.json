@@ -8,15 +8,15 @@
     "priceMode": "Método de precio",
     "modeFixed": "Precio fijo",
     "modeCostRatio": "Proporción del costo",
-    "value": "Precio / proporción",
-    "effectivePrice": "Precio efectivo",
     "price": "Precio del servicio público",
     "unitCost": "Costo de producción",
     "supplyCapacity": "Capacidad de suministro",
-    "maxDemand": "Demanda máxima estimada",
     "demand": "Demanda",
     "production": "Producción",
-    "supplyStatus": "Oferta, demanda y capacidad"
+    "supplyStatus": "Oferta, demanda y capacidad",
+    "currencyUnit": "yenes",
+    "costRatioPrefix": "Costo de producción ×",
+    "costRatioSuffix": ""
   },
   "publicServiceGauge": {
     "tooltip": "Cobertura del servicio público (demanda / capacidad de suministro)",
@@ -69,5 +69,28 @@
     "repairThresholdPath": "Umbral de calles",
     "unsavedChanges": "Hay cambios sin guardar",
     "immigrationEnabled": "Permitir inmigración"
+  },
+  "publicServiceTrend": {
+    "forecast": "Demanda prevista",
+    "currentCapacity": "Capacidad actual de las instalaciones",
+    "current": "Ahora",
+    "chartLabel": "Demanda, producción y demanda prevista ({{unit}})",
+    "atCapacity": "La demanda actual ya alcanzó la capacidad de las instalaciones",
+    "capacityIn": "A este ritmo, la capacidad se alcanzará en unos {{time}}",
+    "noCapacityCrossing": "No se prevé alcanzar la capacidad durante los próximos {{years}} años",
+    "insufficientHistory": "No hay suficientes datos para estimar la demanda",
+    "yearsAxis": "Años desde el presente",
+    "months": "{{amount}} meses",
+    "years": "{{amount}} años",
+    "past": "Hace {{time}}",
+    "future": "Dentro de {{time}}",
+    "months_one": "{{amount}} mes",
+    "months_other": "{{amount}} meses",
+    "years_one": "{{amount}} año",
+    "years_other": "{{amount}} años",
+    "substationCapacity": "Capacidad de subestaciones",
+    "powerPlantCapacity": "Capacidad de centrales eléctricas",
+    "waterDistributionCapacity": "Capacidad de distribución de agua",
+    "waterIntakeCapacity": "Capacidad de captación de agua"
   }
 }

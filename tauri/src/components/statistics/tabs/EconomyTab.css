@@ -6,11 +6,25 @@
  * 棒グラフのバーは列ごとに異なる濃いカラーを適用する。
  */
 
+/* 経済推移オーバーレイの幕がタブ全体を覆えるよう、表はタブの高さに収めて表の枠の中でスクロールする */
 .econ-tab {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
   width: 100%;
+  height: 100%;
+}
+
+.econ-tab__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.econ-tab__body .flat-tabs {
+  padding: 0;
 }
 
 .econ-tab__title {
@@ -35,8 +49,9 @@
 /* ========== テーブルレイアウト ========== */
 
 .econ-tab__table-container {
-  overflow-x: auto;
-  border-radius: 10px;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 0 10px 10px 10px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.15);
 }
@@ -63,6 +78,7 @@
 
 .econ-table__row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
   transition: background 0.12s ease;
 }
 

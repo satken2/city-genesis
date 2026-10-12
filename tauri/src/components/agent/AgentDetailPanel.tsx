@@ -39,6 +39,7 @@ import {
   MODEL_MASHUP
 } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
+import { buildingWarningMask, fetchSpatialWarnings, type SpatialWarning } from "../../utils/agentAlerts";
 import { usePlayMode } from "../../hooks/usePlayMode";
 import { useConstructionBudgetRow } from "../../hooks/useConstructionBudgetRow";
 import { resolveAgentIcon } from "../../utils/agentIcon";
@@ -106,6 +107,7 @@ export function AgentDetailPanel({
     initialEntityId,
   ]);
   const [agentData, setAgentData] = useState<AgentData | null>(null);
+  const [spatialWarnings, setSpatialWarnings] = useState<SpatialWarning[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -226,13 +228,18 @@ export function AgentDetailPanel({
     const controller = new AbortController();
     setLoading(true);
     setError(null);
+    setSpatialWarnings([]);
 
     const url = buildApiUrl(apiBaseUrl, pathTemplate, currentEntityId);
 
     fetchApi<AgentResponse>(url, { signal: controller.signal })
-      .then((response) => {
+      .then(async (response) => {
+        const warnings = response.economic_agent.is_bd
+          ? await fetchSpatialWarnings(apiBaseUrl, controller.signal)
+          : [];
         if (!controller.signal.aborted) {
           setAgentData(response.economic_agent);
+          setSpatialWarnings(warnings);
           setLoading(false);
         }
       })
@@ -495,7 +502,10 @@ export function AgentDetailPanel({
         onNameSave={agentData.public_facility ? handleNameSave : undefined}
       />
 
-      <AgentAlertsPanel alert={agentData.alert} />
+      <AgentAlertsPanel
+        alert={agentData.alert}
+        warning={buildingWarningMask(agentData, spatialWarnings)}
+      />
 
       {/* 建設プロジェクトのタグと、この建物だけを3Dビューで隠す切り替え。
           タグを付け替えられるのは着工前・建設中の公共施設だけなので、その間だけ行を出す

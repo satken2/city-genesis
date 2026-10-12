@@ -110,6 +110,18 @@
       "budgetCapped": {
         "title": "Presupuesto insuficiente",
         "description": "El presupuesto asignado está muy por debajo de lo requerido y la operación se ha reducido. Revisa la asignación presupuestal."
+      },
+      "facilityWarning": {
+        "title": "Instalación pública inoperativa",
+        "description": "Esta instalación presta mucho menos servicio de lo previsto. Revisa la disponibilidad de trabajadores y materias primas."
+      },
+      "sanitationWarning": {
+        "title": "Problemas graves de saneamiento",
+        "description": "El saneamiento de la parcela de este edificio se ha deteriorado gravemente y afecta a los hogares residentes. Mejora la oferta de tratamiento de aguas residuales y residuos."
+      },
+      "infraWarning": {
+        "title": "Instalación de infraestructura detenida o colapsada",
+        "description": "Esta instalación dejó de funcionar o colapsó, lo que afecta el suministro de infraestructura. Revisa su estado y sus conexiones de suministro."
       }
     },
     "infra": {

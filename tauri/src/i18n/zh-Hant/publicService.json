@@ -8,15 +8,15 @@
     "priceMode": "定價方式",
     "modeFixed": "固定價格",
     "modeCostRatio": "成本比率",
-    "value": "價格 / 比率",
-    "effectivePrice": "實際價格",
     "price": "公共服務價格",
     "unitCost": "生產成本",
     "supplyCapacity": "供給容量",
-    "maxDemand": "預估最大需求",
     "demand": "需求量",
     "production": "產量",
-    "supplyStatus": "供需與容量"
+    "supplyStatus": "供需與容量",
+    "currencyUnit": "日圓",
+    "costRatioPrefix": "製造成本的",
+    "costRatioSuffix": "倍"
   },
   "publicServiceGauge": {
     "tooltip": "公共服務的充足度（需求 / 供給容量）",
@@ -69,5 +69,28 @@
     "repairThresholdPath": "道路維修閾值",
     "unsavedChanges": "有未儲存的變更",
     "immigrationEnabled": "允許移民遷入"
+  },
+  "publicServiceTrend": {
+    "forecast": "需求預測",
+    "currentCapacity": "目前設施容量",
+    "current": "目前",
+    "chartLabel": "需求、生產實績與需求預測（{{unit}}）",
+    "atCapacity": "目前需求已達到設施容量",
+    "capacityIn": "依此趨勢，預計約{{time}}後達到容量上限",
+    "noCapacityCrossing": "預計未來{{years}}年內不會達到容量上限",
+    "insufficientHistory": "歷史資料不足，無法預測需求",
+    "yearsAxis": "相對目前的年數",
+    "months": "{{amount}}個月",
+    "years": "{{amount}}年",
+    "past": "{{time}}前",
+    "future": "{{time}}後",
+    "months_one": "{{amount}}個月",
+    "months_other": "{{amount}}個月",
+    "years_one": "{{amount}}年",
+    "years_other": "{{amount}}年",
+    "substationCapacity": "變電站容量",
+    "powerPlantCapacity": "發電廠容量",
+    "waterDistributionCapacity": "配水設施容量",
+    "waterIntakeCapacity": "取水設施容量"
   }
 }

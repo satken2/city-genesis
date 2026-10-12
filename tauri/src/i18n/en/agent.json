@@ -110,6 +110,18 @@
       "budgetCapped": {
         "title": "Budget Shortfall",
         "description": "The allocated budget is far below the required amount, so operations have been scaled down. Review the budget allocation."
+      },
+      "facilityWarning": {
+        "title": "Public Facility Inoperative",
+        "description": "This facility is providing far less service than planned. Check its labor and material procurement."
+      },
+      "sanitationWarning": {
+        "title": "Severe Sanitation Problems",
+        "description": "Sanitation on this building’s parcel has severely deteriorated, affecting resident households. Improve sewage and waste treatment supply."
+      },
+      "infraWarning": {
+        "title": "Infrastructure Facility Stopped or Collapsed",
+        "description": "This facility has stopped operating or collapsed, affecting infrastructure supply. Check its status and supply connections."
       }
     },
     "infra": {

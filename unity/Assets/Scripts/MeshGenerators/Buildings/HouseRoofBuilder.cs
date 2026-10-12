@@ -270,24 +270,9 @@ public static class HouseRoofBuilder
         int iNext = (ic + 1) % n;
         int iNextNext = (ic + 2) % n;
 
-        Vector2 concave = footprint[ic];
-        float maxDist2 = -1f;
-        int farIndex = -1;
-        for (int i = 0; i < n; i++)
-        {
-            if (i == ic) continue;
-            float d2 = (footprint[i] - concave).sqrMagnitude;
-            if (d2 > maxDist2)
-            {
-                maxDist2 = d2;
-                farIndex = i;
-            }
-        }
-        if (farIndex < 0)
-            return false;
-
-        Vector2 opposite = footprint[farIndex];
-        corner = (concave + opposite) * 0.5f;
+        // L字の6頂点では、凹頂点の対角の凸頂点は並び順で常に3つ先にある。
+        // 距離で探すと、翼の薄いL字では2つ先の頂点の方が遠くなり取り違える。
+        corner = (footprint[ic] + footprint[(ic + 3) % n]) * 0.5f;
 
         end0 = (footprint[iPrevPrev] + footprint[iPrev]) * 0.5f;
         end1 = (footprint[iNext] + footprint[iNextNext]) * 0.5f;
@@ -375,24 +360,8 @@ public static class HouseRoofBuilder
         int iNext = (ic + 1) % n;
         int iNextNext = (ic + 2) % n;
 
-        float maxDist2 = -1f;
-        int oppositeIndex = -1;
-        Vector2 concave = footprint[ic];
-
-        for (int i = 0; i < n; i++)
-        {
-            if (i == ic || i == iPrev || i == iNext)
-                continue;
-
-            float d2 = (footprint[i] - concave).sqrMagnitude;
-            if (d2 > maxDist2)
-            {
-                maxDist2 = d2;
-                oppositeIndex = i;
-            }
-        }
-        if (oppositeIndex < 0)
-            return false;
+        // 対角の頂点は TryResolveLShapeAxis と同じく3つ先。6頂点すべてに棟の位置が入る。
+        int oppositeIndex = (ic + 3) % n;
 
         Vector3 ridgeEnd0 = new Vector3(axisPoints[0].x, roofTopHeight, axisPoints[0].y);
         Vector3 ridgeCorner = new Vector3(axisPoints[1].x, roofTopHeight, axisPoints[1].y);

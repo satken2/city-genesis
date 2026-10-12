@@ -3,7 +3,7 @@
  *
  * 左=税収(歳入ソース) → 中央=資金プール → 右=支出(歳出カテゴリ) の資金フローを
  * 2段階Sankeyで可視化する。中央にプールノードを挟むことで、入力と出力のペアワイズ
- * フロー量が不明でも合計値だけで描画できる(EconomyTrendTab の SankeyFlowCard と同じ手法)。
+ * フロー量が不明でも合計値だけで描画できる(EconomyTrendOverlay の SankeyFlowCard と同じ手法)。
  *
  * 総税収と総支出の差は residual ノードで埋めてフローをバランスさせる:
  *   - 黒字(税収 > 支出): 「繰越」ノードが出力側(プールの右)に現れる
@@ -227,7 +227,7 @@ export function buildFiscalSankeyData(
  * 財政Sankeyの描画コンポーネント。
  *
  * buildFiscalSankeyData の出力をそのまま渡す。カスタム node/link render props で
- * 色分けした矩形ノード・曲線リンクを描く(EconomyTrendTab の SankeyFlowCard を汎用化したもの)。
+ * 色分けした矩形ノード・曲線リンクを描く(EconomyTrendOverlay の SankeyFlowCard を汎用化したもの)。
  */
 export function FiscalSankey({
   chart,

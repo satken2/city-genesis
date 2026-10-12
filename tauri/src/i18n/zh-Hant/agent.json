@@ -110,6 +110,18 @@
       "budgetCapped": {
         "title": "預算不足",
         "description": "分配的預算遠低於所需金額，已縮減營運規模。請重新檢視預算分配。"
+      },
+      "facilityWarning": {
+        "title": "公共設施無法營運",
+        "description": "該設施的服務供給遠低於計畫。請檢查勞動力與原材料的採購情況。"
+      },
+      "sanitationWarning": {
+        "title": "衛生狀況嚴重惡化",
+        "description": "該建築所在區塊的衛生狀況已嚴重惡化，影響了居住家庭。請改善污水與垃圾處理服務的供給。"
+      },
+      "infraWarning": {
+        "title": "基礎設施停止營運或倒塌",
+        "description": "該設施已停止營運或倒塌，影響了基礎設施供給。請檢查設施狀態與供給連接。"
       }
     },
     "infra": {
