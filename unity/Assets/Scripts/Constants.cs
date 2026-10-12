@@ -336,7 +336,6 @@ public static class Constants
     public const int PAYMENT_TRANSIT = 5;
     public const int PAYMENT_ACQUISITION = 6;
     public const int PAYMENT_TRANSFER = 7;
-    public const int PAYMENT_INTEREST = 8;
     public const int NODE_ROAD = 1;
     public const int NODE_RAIL = 2;
     public const int NODE_MONORAIL = 4;

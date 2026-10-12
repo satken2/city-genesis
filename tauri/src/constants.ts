@@ -331,7 +331,6 @@ export const PAYMENT_REALESTATE: number = 4;
 export const PAYMENT_TRANSIT: number = 5;
 export const PAYMENT_ACQUISITION: number = 6;
 export const PAYMENT_TRANSFER: number = 7;
-export const PAYMENT_INTEREST: number = 8;
 export const NODE_ROAD: number = 1;
 export const NODE_RAIL: number = 2;
 export const NODE_MONORAIL: number = 4;
