@@ -1,23 +1,8 @@
 {
   "publicFacilities": {
-    "tabRealEstate": "부동산",
-    "tabPublicStandard": "공영 시설",
-    "tabOpenSpace": "오픈 스페이스",
-    "tabEducation": "교육 기관",
-    "tabPort": "항만 시설",
-    "tabCity": "시정부",
-    "production": "생산량",
     "productionCapacity": "생산 용량",
-    "soldAmount": "판매량",
-    "price": "가격",
     "balance": "수지",
-    "utilizationRate": "가동률",
-    "supplyFloor": "공급 층면적",
-    "occupancyRate": "입주율",
-    "rent": "임대료",
-    "capacity": "용량",
-    "importHandling": "수입 취급량",
-    "exportHandling": "수출 취급량"
+    "utilizationRate": "가동률"
   },
   "publicServicePrices": {
     "priceMode": "가격 방식",
@@ -31,8 +16,7 @@
     "maxDemand": "예상 최대 수요",
     "demand": "수요량",
     "production": "생산량",
-    "supplyStatus": "수급과 용량",
-    "noPriceInfra": "인프라 재화는 시장 밖에서 배송되고 금전 수수도 없으므로 가격 개념이 없습니다."
+    "supplyStatus": "수급과 용량"
   },
   "publicServiceGauge": {
     "tooltip": "공공 서비스의 충족도(수요 / 공급 용량)",

@@ -1,23 +1,8 @@
 {
   "publicFacilities": {
-    "tabRealEstate": "Real estate",
-    "tabPublicStandard": "Public facilities",
-    "tabOpenSpace": "Open Spaces",
-    "tabEducation": "Education",
-    "tabPort": "Port",
-    "tabCity": "City gov.",
-    "production": "Production",
     "productionCapacity": "Production capacity",
-    "soldAmount": "Sold",
-    "price": "Price",
     "balance": "Balance",
-    "utilizationRate": "Utilization",
-    "supplyFloor": "Supply floor",
-    "occupancyRate": "Occupancy",
-    "rent": "Rent",
-    "capacity": "Capacity",
-    "importHandling": "Import Handling",
-    "exportHandling": "Export Handling"
+    "utilizationRate": "Utilization"
   },
   "publicServicePrices": {
     "priceMode": "Pricing",
@@ -31,8 +16,7 @@
     "maxDemand": "Est. max demand",
     "demand": "Demand",
     "production": "Production",
-    "supplyStatus": "Supply & Demand",
-    "noPriceInfra": "Infrastructure goods are delivered outside the market with no money changing hands, so they have no price."
+    "supplyStatus": "Supply & Demand"
   },
   "publicServiceGauge": {
     "tooltip": "Public service adequacy (demand / supply capacity)",

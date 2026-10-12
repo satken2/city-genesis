@@ -1,23 +1,8 @@
 {
   "publicFacilities": {
-    "tabRealEstate": "Inmuebles",
-    "tabPublicStandard": "Instalaciones públicas",
-    "tabOpenSpace": "Espacios abiertos",
-    "tabEducation": "Educación",
-    "tabPort": "Puerto",
-    "tabCity": "Gobierno municipal",
-    "production": "Producción",
     "productionCapacity": "Capacidad de producción",
-    "soldAmount": "Cantidad vendida",
-    "price": "Precio",
     "balance": "Balance",
-    "utilizationRate": "Utilización",
-    "supplyFloor": "Superficie ofrecida",
-    "occupancyRate": "Ocupación",
-    "rent": "Alquiler",
-    "capacity": "Capacidad",
-    "importHandling": "Volumen importado",
-    "exportHandling": "Volumen exportado"
+    "utilizationRate": "Utilización"
   },
   "publicServicePrices": {
     "priceMode": "Método de precio",
@@ -31,8 +16,7 @@
     "maxDemand": "Demanda máxima estimada",
     "demand": "Demanda",
     "production": "Producción",
-    "supplyStatus": "Oferta, demanda y capacidad",
-    "noPriceInfra": "Los bienes de infraestructura se distribuyen fuera del mercado y sin intercambio de dinero, por lo que no tienen precio."
+    "supplyStatus": "Oferta, demanda y capacidad"
   },
   "publicServiceGauge": {
     "tooltip": "Cobertura del servicio público (demanda / capacidad de suministro)",

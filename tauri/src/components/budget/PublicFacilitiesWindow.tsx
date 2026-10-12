@@ -1,17 +1,13 @@
 /**
- * 公共施設ウィンドウコンポーネント
+ * 公共サービスウィンドウコンポーネント
  *
- * ページ全体がカテゴリタブ構成。タブは regulated（価格統制対象）な製品ごとのタブに続けて、
- * 不動産・公営施設・教育機関・港湾施設・市政府の各タブを並べる。
+ * 公共サービス（products_master の public_service が真の製品）ごとのタブ構成。
  *
  * 各タブの中身は縦2分割。
  * - 上: 公共サービスの価格統制カード。価格方式（固定価格 / 原価比率）の切替・設定値
  *       （固定価格または原価への乗率）の入力・製造原価・想定最大需要・需給ドーナツを表示する。
  *       市場変動は無く、必ず固定価格か原価比率のいずれかで統制される。
- *       公共サービスを持たないタブ（製品別タブ以外）ではこのカードは出さず、下の一覧だけになる。
- *       インフラ財（高圧電力・高圧水道）は市場外で配送され価格の概念を持たないため、
- *       価格の入力欄は出さず注記に置き換え、需給ドーナツだけを描く。
- * - 下: そのカテゴリに属する施設の一覧テーブル。列ヘッダのクリックでフロントエンド側ソートを行い、
+ * - 下: その公共サービスを供給する施設の一覧テーブル。列ヘッダのクリックでフロントエンド側ソートを行い、
  *       行クリックで経済主体詳細ウィンドウを開く。
  */
 
@@ -38,38 +34,8 @@ type PublicServicePricesData = {
   prices: PublicServicePrice[];
 };
 
-// 製品別タブの後ろに並ぶ、type 軸の特別タブ。
-// key はバックエンドの get_public_facilities が返すグループキーと一致させる。
-const SPECIAL_TABS: { key: string; labelKey: string }[] = [
-  { key: "real_estate", labelKey: "publicFacilities.tabRealEstate" },
-  { key: "public_standard", labelKey: "publicFacilities.tabPublicStandard" },
-  { key: "open_space", labelKey: "publicFacilities.tabOpenSpace" },
-  { key: "education", labelKey: "publicFacilities.tabEducation" },
-  { key: "port", labelKey: "publicFacilities.tabPort" },
-  { key: "city", labelKey: "publicFacilities.tabCity" },
-];
-
-// 施設一覧テーブルの表示バリアント。アクティブタブ（グループキー）によって出し分ける。
-//   - public_service: regulated 製品別タブ（タブキーが製品IDの数値）
-//   - service:        公営施設タブ
-//   - real_estate:    不動産タブ
-//   - port:           港湾施設タブ
-//   - basic:          教育機関・市政府・オープンスペースタブ（メトリクス無し、基本情報のみ）
-type CardVariant = "public_service" | "service" | "real_estate" | "port" | "basic";
-
-// メトリクスを持たない（基本情報のみの）タブキー。
-const BASIC_TAB_KEYS = new Set(["education", "city", "open_space"]);
-
-function resolveCardVariant(tabKey: string): CardVariant {
-  if (tabKey === "real_estate") return "real_estate";
-  if (tabKey === "port") return "port";
-  if (BASIC_TAB_KEYS.has(tabKey)) return "basic";
-  if (tabKey === "public_standard") return "service";
-  return "public_service";
-}
-
-/** regulated 製品のタブ。タブキーが製品IDの数値文字列かどうかで判別する。 */
-type RegulatedProduct = {
+/** 公共サービスのタブ。タブキーは製品IDの文字列。 */
+type PublicServiceProduct = {
   id: number;
   display_name: string;
   unit: string;
@@ -109,22 +75,18 @@ function price(v: number): string {
   return roundPrice(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
-/** 重さ(t)を桁区切りと単位つきで表示する(港湾の取扱能力・取扱量) */
-function tons(v?: number | null): string {
-  return v == null ? "—" : `${num(v, 0)} t`;
-}
-
 /** 割合をパーセント表記にする */
 function pct(v?: number): string {
   return v == null ? "—" : `${Math.round(v * 100)}%`;
 }
 
 /**
- * タブの種類に応じて表示する列定義を返す。
- * 全タブ共通でステータス・名前を表示し、バリアントに応じて追加のメトリクス列を並べる。
+ * 施設一覧テーブルの列定義。
+ * 価格・生産量・売却量は上の価格統制カードが都市全体で示すため、
+ * ここでは施設ごとの供給余力（生産キャパシティ）と経営指標だけを並べる。
  */
-function buildColumns(variant: CardVariant, t: TFn2): ColumnDef[] {
-  const base: ColumnDef[] = [
+function buildColumns(t: TFn2): ColumnDef[] {
+  return [
     {
       key: "status",
       label: t("agentList.colStatus"),
@@ -138,151 +100,28 @@ function buildColumns(variant: CardVariant, t: TFn2): ColumnDef[] {
       render: (a) => a.name,
       sortValue: (a) => a.name,
     },
+    {
+      key: "production_capacity",
+      label: t("publicFacilities.productionCapacity"),
+      align: "right",
+      render: (a) => num(a.production_capacity, 0), // null = スペース制約なし（生産上限が定まらない）施設
+      sortValue: (a) => a.production_capacity ?? 0,
+    },
+    {
+      key: "balance",
+      label: t("publicFacilities.balance"),
+      align: "right",
+      render: (a) => num(a.balance, 0),
+      sortValue: (a) => a.balance,
+    },
+    {
+      key: "utilization_rate",
+      label: t("publicFacilities.utilizationRate"),
+      align: "right",
+      render: (a) => pct(a.utilization_rate),
+      sortValue: (a) => a.utilization_rate,
+    },
   ];
-
-  switch (variant) {
-    case "public_service":
-      // 公共サービスの供給施設。価格・生産量・売却量は上の価格統制カードが都市全体で示すため、
-      // ここでは施設ごとの供給余力（生産キャパシティ）と経営指標だけを並べる。
-      return [
-        ...base,
-        {
-          key: "production_capacity",
-          label: t("publicFacilities.productionCapacity"),
-          align: "right" as const,
-          // null = スペース制約なし（生産上限が定まらない）施設。
-          render: (a: PublicFacilityAgent) => num(a.production_capacity, 0),
-          sortValue: (a: PublicFacilityAgent) => a.production_capacity ?? 0,
-        },
-        {
-          key: "balance",
-          label: t("publicFacilities.balance"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.balance, 0),
-          sortValue: (a: PublicFacilityAgent) => a.balance ?? 0,
-        },
-        {
-          key: "utilization_rate",
-          label: t("publicFacilities.utilizationRate"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => pct(a.utilization_rate),
-          sortValue: (a: PublicFacilityAgent) => a.utilization_rate ?? 0,
-        },
-      ];
-    case "service":
-      return [
-        ...base,
-        {
-          key: "production",
-          label: t("publicFacilities.production"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.production, 1),
-          sortValue: (a: PublicFacilityAgent) => a.production ?? 0,
-        },
-        {
-          key: "sold_amount",
-          label: t("publicFacilities.soldAmount"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.sold_amount, 1),
-          sortValue: (a: PublicFacilityAgent) => a.sold_amount ?? 0,
-        },
-        {
-          key: "price",
-          label: t("publicFacilities.price"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.price, 1),
-          sortValue: (a: PublicFacilityAgent) => a.price ?? 0,
-        },
-        {
-          key: "balance",
-          label: t("publicFacilities.balance"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.balance, 0),
-          sortValue: (a: PublicFacilityAgent) => a.balance ?? 0,
-        },
-        {
-          key: "utilization_rate",
-          label: t("publicFacilities.utilizationRate"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => pct(a.utilization_rate),
-          sortValue: (a: PublicFacilityAgent) => a.utilization_rate ?? 0,
-        },
-      ];
-    case "real_estate":
-      return [
-        ...base,
-        {
-          key: "supply_floor",
-          label: t("publicFacilities.supplyFloor"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.supply_floor, 0),
-          sortValue: (a: PublicFacilityAgent) => a.supply_floor ?? 0,
-        },
-        {
-          key: "occupancy_rate",
-          label: t("publicFacilities.occupancyRate"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => pct(a.occupancy_rate),
-          sortValue: (a: PublicFacilityAgent) => a.occupancy_rate ?? 0,
-        },
-        {
-          key: "rent",
-          label: t("publicFacilities.rent"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.rent, 0),
-          sortValue: (a: PublicFacilityAgent) => a.rent ?? 0,
-        },
-        {
-          key: "balance",
-          label: t("publicFacilities.balance"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.balance, 0),
-          sortValue: (a: PublicFacilityAgent) => a.balance ?? 0,
-        },
-        {
-          key: "utilization_rate",
-          label: t("publicFacilities.utilizationRate"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => pct(a.utilization_rate),
-          sortValue: (a: PublicFacilityAgent) => a.utilization_rate ?? 0,
-        },
-      ];
-    case "port":
-      return [
-        ...base,
-        {
-          key: "capacity",
-          label: t("publicFacilities.capacity"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => tons(a.capacity),
-          sortValue: (a: PublicFacilityAgent) => a.capacity ?? 0,
-        },
-        {
-          key: "import_handling",
-          label: t("publicFacilities.importHandling"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => tons(a.import_handling),
-          sortValue: (a: PublicFacilityAgent) => a.import_handling ?? 0,
-        },
-        {
-          key: "export_handling",
-          label: t("publicFacilities.exportHandling"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => tons(a.export_handling),
-          sortValue: (a: PublicFacilityAgent) => a.export_handling ?? 0,
-        },
-        {
-          key: "utilization_rate",
-          label: t("publicFacilities.utilizationRate"),
-          align: "right" as const,
-          render: (a: PublicFacilityAgent) => pct(a.utilization_rate),
-          sortValue: (a: PublicFacilityAgent) => a.utilization_rate ?? 0,
-        },
-      ];
-    default:
-      // basic: 基本情報のみ（ステータス・名前）
-      return base;
-  }
 }
 
 // 需給ドーナツの寸法（viewBox 0 0 100 100 のユーザー単位）。
@@ -419,9 +258,8 @@ function SupplyDonut({ production, demand, capacity, unit }: SupplyDonutProps) {
 }
 
 type ServicePriceCardProps = {
-  product: RegulatedProduct;
+  product: PublicServiceProduct;
   row?: PublicServicePrice;
-  /** 需給とキャパシティ。価格を持たないインフラ財を含む全 regulated 製品に存在する */
   supply?: PublicServiceSupply;
   /** 価格/比率入力の編集途中の文字列。未編集なら undefined */
   draft?: string;
@@ -433,10 +271,6 @@ type ServicePriceCardProps = {
 /**
  * 製品ひとつぶんの価格統制カード。
  * 価格方式・設定値・製造原価・想定最大需要と、需給ドーナツ（生産量 / 需要量 / 供給キャパシティ）を並べる。
- *
- * 価格行（row）を持たない製品はインフラ財（高圧電力・高圧水道）で、市場外で配送され
- * 金銭授受も無いため価格の概念を持たない。この場合は左半分を注記に差し替え、
- * 設定しても反映されない入力欄を出さない。需給ドーナツはどちらでも描く。
  */
 function ServicePriceCard({
   product,
@@ -465,7 +299,7 @@ function ServicePriceCard({
 
   return (
     <div className="psp-card">
-      {row ? (
+      {row && (
         <div className="psp-card__fields">
           <div className="psp-field">
             <span className="psp-field__label">
@@ -537,8 +371,6 @@ function ServicePriceCard({
             </span>
           </div>
         </div>
-      ) : (
-        <p className="psp-card__note">{t("publicServicePrices.noPriceInfra")}</p>
       )}
 
       <div className="psp-card__gauge">
@@ -573,7 +405,7 @@ export function PublicFacilitiesWindow({
   const [servicePrices, setServicePrices] = useState<
     Record<number, PublicServicePrice>
   >({});
-  // 公共サービスの需給（需給ドーナツの唯一の元データ）。価格を持たないインフラ財も含む。
+  // 公共サービスの需給（需給ドーナツの唯一の元データ）。
   const [serviceSupplies, setServiceSupplies] = useState<
     Record<number, PublicServiceSupply>
   >({});
@@ -704,11 +536,11 @@ export function PublicFacilitiesWindow({
     [valueDrafts, servicePrices, patchServicePrice],
   );
 
-  // regulated（価格統制対象）な製品の一覧。マスタから抽出する。
-  const regulatedProducts = useMemo<RegulatedProduct[]>(() => {
+  // 公共サービスの製品一覧。マスタの public_service から抽出し、そのままタブになる。
+  const publicServiceProducts = useMemo<PublicServiceProduct[]>(() => {
     if (!masterData?.products) return [];
     return Object.entries(masterData.products)
-      .filter(([, entry]) => entry.regulated)
+      .filter(([, entry]) => entry.public_service)
       .map(([id, entry]) => ({
         id: Number(id),
         display_name: entry.display_name,
@@ -717,25 +549,12 @@ export function PublicFacilitiesWindow({
       .sort((a, b) => a.id - b.id);
   }, [masterData?.products]);
 
-  // ページ全体のタブ一覧。先頭に製品別タブ（regulated 製品）、続けて type 軸の特別タブを並べる。
-  const facilityTabs = useMemo(() => {
-    const productTabs = regulatedProducts.map((p) => ({
-      key: String(p.id),
-      label: p.display_name,
-    }));
-    const specialTabs = SPECIAL_TABS.map((tab) => ({
-      key: tab.key,
-      label: t(tab.labelKey),
-    }));
-    return [...productTabs, ...specialTabs];
-  }, [regulatedProducts, t]);
-
   // データ読み込み後、未選択なら先頭タブを自動選択する。
   useEffect(() => {
-    if (activeTab === null && facilityTabs.length > 0) {
-      setActiveTab(facilityTabs[0].key);
+    if (activeTab === null && publicServiceProducts.length > 0) {
+      setActiveTab(String(publicServiceProducts[0].id));
     }
-  }, [activeTab, facilityTabs]);
+  }, [activeTab, publicServiceProducts]);
 
   // 行クリックで経済主体詳細ウィンドウを新規に開く。
   const openAgentDetail = useCallback((agentId: number) => {
@@ -750,19 +569,12 @@ export function PublicFacilitiesWindow({
       ? facilities.facilities[activeTab] ?? []
       : [];
 
-  const cardVariant = activeTab !== null ? resolveCardVariant(activeTab) : "basic";
-
-  // アクティブタブが製品別タブなら、その製品。特別タブでは null（価格カードを出さない）。
   const activeProduct = useMemo(
-    () => regulatedProducts.find((p) => String(p.id) === activeTab) ?? null,
-    [regulatedProducts, activeTab],
+    () => publicServiceProducts.find((p) => String(p.id) === activeTab) ?? null,
+    [publicServiceProducts, activeTab],
   );
 
-  // タブ種類に応じた列定義。
-  const columns = useMemo(
-    () => buildColumns(cardVariant, t),
-    [cardVariant, t],
-  );
+  const columns = useMemo(() => buildColumns(t), [t]);
 
   // ソート適用後の表示行。
   const rows = useMemo(() => {
@@ -803,24 +615,24 @@ export function PublicFacilitiesWindow({
   return (
     <div className="pf-window">
       <nav className="pf-tabs">
-        {facilityTabs.map((tab) => (
+        {publicServiceProducts.map((product) => (
           <button
-            key={tab.key}
+            key={product.id}
             type="button"
             className={[
               "pf-tabs__tab",
-              activeTab === tab.key && "pf-tabs__tab--active",
+              activeTab === String(product.id) && "pf-tabs__tab--active",
             ]
               .filter(Boolean)
               .join(" ")}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => setActiveTab(String(product.id))}
           >
-            {tab.label}
+            {product.display_name}
           </button>
         ))}
       </nav>
 
-      {/* 上半分: 公共サービスの価格統制（製品別タブのみ） */}
+      {/* 上半分: 公共サービスの価格統制 */}
       {activeProduct && (
         <div className="pf-window__top">
           <ServicePriceCard
@@ -837,7 +649,7 @@ export function PublicFacilitiesWindow({
         </div>
       )}
 
-      {/* 下半分: 公共施設一覧テーブル */}
+      {/* 下半分: 供給施設の一覧テーブル */}
       <div className="pf-window__bottom">
         <div className="pf-list">
           {activeFacilities.length > 0 ? (

@@ -1,23 +1,8 @@
 {
   "publicFacilities": {
-    "tabRealEstate": "不動産",
-    "tabPublicStandard": "公営施設",
-    "tabOpenSpace": "オープンスペース",
-    "tabEducation": "教育機関",
-    "tabPort": "港湾施設",
-    "tabCity": "市政府",
-    "production": "生産量",
     "productionCapacity": "生産キャパシティ",
-    "soldAmount": "売却量",
-    "price": "価格",
     "balance": "収支",
-    "utilizationRate": "稼働率",
-    "supplyFloor": "供給フロア",
-    "occupancyRate": "入居率",
-    "rent": "家賃",
-    "capacity": "キャパシティ",
-    "importHandling": "輸入取扱量",
-    "exportHandling": "輸出取扱量"
+    "utilizationRate": "稼働率"
   },
   "publicServicePrices": {
     "priceMode": "価格方式",
@@ -31,8 +16,7 @@
     "maxDemand": "想定最大需要",
     "demand": "需要量",
     "production": "生産量",
-    "supplyStatus": "需給とキャパシティ",
-    "noPriceInfra": "インフラ財は市場外で配送され金銭授受も無いため、価格の概念を持ちません。"
+    "supplyStatus": "需給とキャパシティ"
   },
   "publicServiceGauge": {
     "tooltip": "公共サービスの充足度(需要 / 供給キャパシティ)",

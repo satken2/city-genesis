@@ -1,23 +1,8 @@
 {
   "publicFacilities": {
-    "tabRealEstate": "不動產",
-    "tabPublicStandard": "公營設施",
-    "tabOpenSpace": "開放空間",
-    "tabEducation": "教育機構",
-    "tabPort": "港口設施",
-    "tabCity": "市政府",
-    "production": "產量",
     "productionCapacity": "生產容量",
-    "soldAmount": "售出量",
-    "price": "價格",
     "balance": "收支",
-    "utilizationRate": "使用率",
-    "supplyFloor": "供給樓地板",
-    "occupancyRate": "進駐率",
-    "rent": "房租",
-    "capacity": "容量",
-    "importHandling": "進口處理量",
-    "exportHandling": "出口處理量"
+    "utilizationRate": "使用率"
   },
   "publicServicePrices": {
     "priceMode": "定價方式",
@@ -31,8 +16,7 @@
     "maxDemand": "預估最大需求",
     "demand": "需求量",
     "production": "產量",
-    "supplyStatus": "供需與容量",
-    "noPriceInfra": "基礎設施財貨在市場之外配送且不發生金錢往來，因此沒有價格概念。"
+    "supplyStatus": "供需與容量"
   },
   "publicServiceGauge": {
     "tooltip": "公共服務的充足度（需求 / 供給容量）",

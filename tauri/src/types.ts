@@ -571,6 +571,7 @@ export type ProductMasterEntry = {
   unit: string;
   type: number;
   regulated: boolean;
+  public_service: boolean;
   trade: boolean;
   self_sustain: number;
   transport_amount: number;
@@ -935,16 +936,8 @@ export type MasterData = {
 };
 
 /**
- * 公共施設エージェントの概要情報
+ * 公共サービスを供給する施設の概要情報
  * バックエンド GET /api/v1/city/budgets/public-facilities の各施設エントリ
- *
- * 基本情報は全施設が持つ。メトリクス項目は施設の種類（グループ）によって
- * 付与されるフィールドが異なり、未設定の場合は undefined になる。
- *   - 不動産（TYPE_BUILDING）: supply_floor / occupancy_rate / rent / balance / utilization_rate
- *   - 港湾（TYPE_TRADE）: capacity / import_handling / export_handling（いずれもt） / utilization_rate
- *   - サービス・公営（TYPE_STANDARD）: production_capacity / production / sold_amount / price
- *                                     / balance / utilization_rate
- *   - 市政府・教育: メトリクスなし（基本情報のみ）
  */
 export type PublicFacilityAgent = {
   agent_id: number;
@@ -952,23 +945,9 @@ export type PublicFacilityAgent = {
   variant: number;
   status: number;
   reserves: number;
-  // サービス・公営系メトリクス
-  // production_capacity はスペース制約なし（space_need<=0）の施設で null になる。
-  production_capacity?: number | null;
-  production?: number;
-  sold_amount?: number;
-  price?: number;
-  // 不動産系メトリクス
-  supply_floor?: number;
-  occupancy_rate?: number;
-  rent?: number;
-  // 港湾系メトリクス（取扱量は輸入・輸出それぞれ。能力・取扱量とも重さ t）
-  capacity?: number;
-  import_handling?: number;
-  export_handling?: number;
-  // 共通メトリクス（複数グループで使用）
-  balance?: number;
-  utilization_rate?: number;
+  production_capacity: number | null; // null = スペース制約なし（space_need<=0）の施設
+  balance: number;
+  utilization_rate: number;
 };
 
 /** 公共サービス価格モード。固定価格 or 原価比率のいずれかで統制する（市場変動は無し）。 */
