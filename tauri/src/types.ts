@@ -950,6 +950,33 @@ export type PublicFacilityAgent = {
   utilization_rate: number;
 };
 
+/**
+ * 市政府ウィンドウに並べる公的な経済主体
+ * バックエンド GET /api/v1/city/government-agents の各エントリ
+ *
+ * メトリクスは経済主体の種類によって付く項目が異なり、付かない項目は undefined になる。
+ *   - 不動産: supply_floor / occupancy_rate / rent / balance / utilization_rate
+ *   - 輸出入拠点: capacity / import_handling / export_handling（いずれもt） / utilization_rate
+ *   - 事業所: production / sold_amount / price / balance / utilization_rate
+ *   - それ以外: なし
+ */
+export type GovernmentAgent = {
+  agent_id: number;
+  name: string;
+  status: number;
+  supply_floor?: number;
+  occupancy_rate?: number;
+  rent?: number;
+  capacity?: number;
+  import_handling?: number;
+  export_handling?: number;
+  production?: number;
+  sold_amount?: number;
+  price?: number;
+  balance?: number;
+  utilization_rate?: number;
+};
+
 /** 公共サービス価格モード。固定価格 or 原価比率のいずれかで統制する（市場変動は無し）。 */
 export type PublicServicePriceMode = "fixed" | "cost_ratio";
 

@@ -7,16 +7,15 @@
  * - 上: 公共サービスの価格統制カード。価格方式（固定価格 / 原価比率）の切替・設定値
  *       （固定価格または原価への乗率）の入力・製造原価・想定最大需要・需給ドーナツを表示する。
  *       市場変動は無く、必ず固定価格か原価比率のいずれかで統制される。
- * - 下: その公共サービスを供給する施設の一覧テーブル。列ヘッダのクリックでフロントエンド側ソートを行い、
- *       行クリックで経済主体詳細ウィンドウを開く。
+ * - 下: その公共サービスを供給する施設の一覧テーブル。
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { StatusBadge } from "../common/StatusBadge";
+import { SortableAgentTable, type SortableAgentColumn } from "../common/SortableAgentTable";
 import type {
   PublicFacilityAgent,
   PublicServicePrice,
@@ -41,19 +40,7 @@ type PublicServiceProduct = {
   unit: string;
 };
 
-// --- 施設一覧テーブルの列定義 ---
-
 type TFn2 = ReturnType<typeof useTranslation>["t"];
-
-type CellAlign = "left" | "right" | "center";
-
-type ColumnDef = {
-  key: string;
-  label: string;
-  align?: CellAlign;
-  render: (item: PublicFacilityAgent) => React.ReactNode;
-  sortValue?: (item: PublicFacilityAgent) => number | string;
-};
 
 /** 数値を桁区切りで表示する */
 function num(v?: number | null, digits = 0): string {
@@ -85,7 +72,7 @@ function pct(v?: number): string {
  * 価格・生産量・売却量は上の価格統制カードが都市全体で示すため、
  * ここでは施設ごとの供給余力（生産キャパシティ）と経営指標だけを並べる。
  */
-function buildColumns(t: TFn2): ColumnDef[] {
+function buildColumns(t: TFn2): SortableAgentColumn<PublicFacilityAgent>[] {
   return [
     {
       key: "status",
@@ -413,10 +400,6 @@ export function PublicFacilitiesWindow({
   // fixed モードでは固定価格、cost_ratio モードでは原価への乗率の編集途中の文字列を保持する。
   const [valueDrafts, setValueDrafts] = useState<Record<number, string>>({});
 
-  // 施設一覧テーブルのソート状態。
-  const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-
   useEffect(() => {
     const controller = new AbortController();
 
@@ -556,14 +539,6 @@ export function PublicFacilitiesWindow({
     }
   }, [activeTab, publicServiceProducts]);
 
-  // 行クリックで経済主体詳細ウィンドウを新規に開く。
-  const openAgentDetail = useCallback((agentId: number) => {
-    void invoke("open_registered_window", {
-      windowType: "agent_detail",
-      entityId: String(agentId),
-    });
-  }, []);
-
   const activeFacilities =
     activeTab !== null && facilities
       ? facilities.facilities[activeTab] ?? []
@@ -575,34 +550,6 @@ export function PublicFacilitiesWindow({
   );
 
   const columns = useMemo(() => buildColumns(t), [t]);
-
-  // ソート適用後の表示行。
-  const rows = useMemo(() => {
-    if (sortKey == null) return activeFacilities;
-    const col = columns.find((c) => c.key === sortKey);
-    if (!col?.sortValue) return activeFacilities;
-    const accessor = col.sortValue;
-    const sorted = [...activeFacilities].sort((a, b) => {
-      const va = accessor(a);
-      const vb = accessor(b);
-      if (typeof va === "string" || typeof vb === "string") {
-        return String(va).localeCompare(String(vb));
-      }
-      return va - vb;
-    });
-    if (sortDir === "desc") sorted.reverse();
-    return sorted;
-  }, [activeFacilities, columns, sortKey, sortDir]);
-
-  function toggleSort(col: ColumnDef) {
-    if (!col.sortValue) return;
-    if (sortKey === col.key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(col.key);
-      setSortDir("asc");
-    }
-  }
 
   if (loading) {
     return <div className="pf-window__loading">{t("common.loading")}</div>;
@@ -651,62 +598,11 @@ export function PublicFacilitiesWindow({
 
       {/* 下半分: 供給施設の一覧テーブル */}
       <div className="pf-window__bottom">
-        <div className="pf-list">
-          {activeFacilities.length > 0 ? (
-            <table className="pf-table">
-              <thead>
-                <tr>
-                  {columns.map((col) => {
-                    const sortable = !!col.sortValue;
-                    const active = sortKey === col.key;
-                    return (
-                      <th
-                        key={col.key}
-                        className={[
-                          col.align ? `pf-th--${col.align}` : "",
-                          sortable ? "pf-th--sortable" : "",
-                          active ? "pf-th--active" : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                        onClick={() => toggleSort(col)}
-                      >
-                        {col.label}
-                        {sortable && (
-                          <span className="pf-th__arrow">
-                            {active ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
-                          </span>
-                        )}
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((agent) => (
-                  <tr
-                    key={agent.agent_id}
-                    className="pf-row"
-                    onClick={() => openAgentDetail(agent.agent_id)}
-                  >
-                    {columns.map((col) => (
-                      <td
-                        key={col.key}
-                        className={col.align ? `pf-td--${col.align}` : ""}
-                      >
-                        {col.render(agent)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="pf-list__empty">
-              {t("budget.noFacilities")}
-            </div>
-          )}
-        </div>
+        <SortableAgentTable
+          columns={columns}
+          rows={activeFacilities}
+          emptyText={t("budget.noFacilities")}
+        />
       </div>
     </div>
   );

@@ -236,7 +236,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 else if (!pool.TryGetValue(modelKey, out var stock) || stock.Count == 0) needsCreation = true;
             }
             if (!driven && needsCreation && !anyVisible && trainCreationsThisFrame > 0) continue;
-            ReportSound(line, train, trainTime, distance, positions[cars/2]);
+            ReportSound(line, train, variant, trainTime, distance, positions[cars/2]);
             bool created = false;
             for (int car = 0; car < cars; car++)
             {
@@ -305,15 +305,19 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         }
     }
 
-    /// <summary>描画した編成を走行音の発音体として通知する。速度は路線時計の距離差分で、周回の折り返しで飛ぶ値は上限で丸める。</summary>
-    private void ReportSound(Line line, int train, double time, double distance, Vector3 position)
+    /// <summary>
+    /// 描画した編成を走行音の発音体として通知する。音は編成の外観ごとに引く。
+    /// 速度は路線時計の距離差分で、周回の折り返しで飛ぶ値は上限で丸める。
+    /// </summary>
+    private void ReportSound(Line line, int train, int variant, double time, double distance, Vector3 position)
     {
         int id = unchecked(line.data.line_agent_id * 1000003 + train);
         float speed = 0;
         if (soundTrack.TryGetValue(id, out var last) && time > last.time)
             speed = (float)Math.Min(60, Math.Abs(distance - last.distance) / (time - last.time));
         soundTrack[id] = (distance, time);
-        VehicleAmbience.Report(line.type == Constants.VEHICLE_BUS ? VehicleAmbience.Kind.Bus : VehicleAmbience.Kind.Train, id, position, speed);
+        VehicleAmbience.Report(line.type == Constants.VEHICLE_BUS ? VehicleAmbience.Kind.Bus : VehicleAmbience.Kind.Train, id, position, speed,
+            VehicleModelConfig.GetTransitSound(line.type, variant));
     }
 
     private void BusTurnaround(Line line,int index,double time,ref Vector3 position,ref Vector3 direction)

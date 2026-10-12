@@ -23,7 +23,7 @@
     },
     "epochClimate": "Epoch climate",
     "temperature": "Temperature",
-    "precipitation": "Precipitation (monthly equivalent)",
+    "precipitation": "Precipitation",
     "sunlight": "Sunlight intensity",
     "windSpeed": "Wind speed"
   }

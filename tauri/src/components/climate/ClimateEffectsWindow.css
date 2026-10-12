@@ -1,0 +1,18 @@
+.climate-effects { height: 100%; min-height: 0; overflow: auto; padding: 1rem 1.5rem; background: var(--flat-surface); color: var(--flat-text-body); }
+.climate-effects-message { padding: 1.5rem; color: var(--flat-text-label); background: var(--flat-surface); height: 100%; }
+.climate-effects h3 { margin: 1.25rem 0 0.6rem; font-size: 1.08rem; font-weight: 600; color: var(--flat-text); }
+.climate-effects-card { padding: 0.9rem 1.1rem; background: var(--flat-raised); }
+.climate-effects-card h3 { margin: 0 0 0.75rem; }
+.climate-effects-values { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.climate-effects-value { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.climate-effects-value svg { width: 1.6rem; height: 1.6rem; flex-shrink: 0; color: var(--flat-text-label); }
+.climate-effects-value > div { display: flex; flex-direction: column; min-width: 0; }
+.climate-effects-value-label { color: var(--flat-text-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.climate-effects-value-number { font-size: 1.3rem; font-weight: 600; color: var(--flat-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.climate-effects-table { width: 100%; border-collapse: collapse; font-size: 1rem; }
+.climate-effects-table th { padding: 0.55rem 0.75rem; text-align: left; vertical-align: bottom; font-weight: 600; color: var(--flat-text-label); border-bottom: 1px solid var(--flat-raised-hover); }
+.climate-effects-table td { padding: 0.5rem 0.75rem; white-space: nowrap; border-bottom: 1px solid var(--flat-raised); }
+.climate-effects-table .climate-effects-number { text-align: right; font-variant-numeric: tabular-nums; }
+.climate-effects-total { display: flex; align-items: center; gap: 0.5rem; }
+.climate-effects-total .meter { width: 6rem; }
+.climate-effects-total > span { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--flat-text); }

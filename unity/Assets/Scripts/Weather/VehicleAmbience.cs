@@ -11,13 +11,22 @@ public sealed class VehicleAmbience : MonoBehaviour
     /// <summary>Car と Bus は同じ音源(エンジン音)で、通知元が違うだけ。</summary>
     public enum Kind { Car = 0, Bus = 1, Train = 2 }
 
+    /// <summary>鉄道編成の音の組。値は Resources/Audio/Vehicles のクリップ名で、空のレイヤーは鳴らさない。</summary>
+    public sealed class TrainSound
+    {
+        public string wheel; // 車輪音。テンポ違いの {wheel}-slow・{wheel}-fast も併せて使う
+        public string motor;
+    }
+
     public const int CarVoices = 6, TrainVoices = 3;
     public const float CarMinDistance = 5f, CarMaxDistance = 120f, TrainMinDistance = 10f, TrainMaxDistance = 400f;
     public const float RefreshSeconds = 0.25f, FadeSeconds = 0.3f, StaleSeconds = 1f;
+    private const string CarClip = "vehicle-car";
 
     private sealed class Emitter
     {
         public Kind kind;
+        public TrainSound sound;
         public Vector3 position;
         public float speed, reported, distance;
         public bool removed;
@@ -33,8 +42,7 @@ public sealed class VehicleAmbience : MonoBehaviour
     }
 
     private static readonly Dictionary<(Kind, long), Emitter> emitters = new Dictionary<(Kind, long), Emitter>();
-    private static readonly string[] clipNames = { "vehicle-car", "vehicle-train", "vehicle-train-motor", "vehicle-train-slow", "vehicle-train-fast" };
-    private readonly AudioClip[] clips = new AudioClip[5];
+    private readonly Dictionary<string, AudioClip> clips = new Dictionary<string, AudioClip>();
     private readonly Voice[] carVoices = new Voice[CarVoices], trainVoices = new Voice[TrainVoices];
     private readonly List<Emitter> candidates = new List<Emitter>();
     private readonly List<(Kind, long)> stale = new List<(Kind, long)>();
@@ -44,11 +52,18 @@ public sealed class VehicleAmbience : MonoBehaviour
 
     public static int EmitterCount => emitters.Count;
 
-    /// <summary>毎フレーム呼ぶ。未登録なら登録し、登録済みなら位置と速度を更新する。</summary>
-    public static void Report(Kind kind, long id, Vector3 position, float speed)
+    /// <summary>
+    /// 毎フレーム呼ぶ。未登録なら登録し、登録済みなら位置と速度を更新する。sound は Train だけが使う。
+    /// 音の組が変わった発音体は別の発音体として登録し直し、鳴っている音をフェードで入れ替える。
+    /// </summary>
+    public static void Report(Kind kind, long id, Vector3 position, float speed, TrainSound sound = null)
     {
         var key = (kind, id);
-        if (!emitters.TryGetValue(key, out var emitter)) emitters[key] = emitter = new Emitter { kind = kind };
+        if (!emitters.TryGetValue(key, out var emitter) || emitter.sound != sound)
+        {
+            if (emitter != null) emitter.removed = true;
+            emitters[key] = emitter = new Emitter { kind = kind, sound = sound };
+        }
         emitter.position = position;
         emitter.speed = float.IsNaN(speed) || float.IsInfinity(speed) ? 0f : Mathf.Max(0f, speed);
         emitter.reported = Time.unscaledTime;
@@ -83,11 +98,6 @@ public sealed class VehicleAmbience : MonoBehaviour
 
     private void Awake()
     {
-        for (int i = 0; i < clips.Length; i++)
-        {
-            clips[i] = Resources.Load<AudioClip>("Audio/Vehicles/" + clipNames[i]);
-            if (clips[i] == null) Debug.LogError("VehicleAmbience: 音源がありません: " + clipNames[i]);
-        }
         for (int i = 0; i < carVoices.Length; i++) carVoices[i] = CreateVoice("Vehicle voice car " + i, false);
         for (int i = 0; i < trainVoices.Length; i++)
         {
@@ -186,8 +196,6 @@ public sealed class VehicleAmbience : MonoBehaviour
             var emitter = voice.emitter;
             if (emitter != null && !emitter.removed && !candidates.Contains(emitter)) emitter.distance = float.PositiveInfinity;
         }
-        var clip = clips[train ? 1 : 0];
-        if (clip == null) return;
         foreach (var emitter in candidates)
         {
             if (HasVoice(voices, emitter)) continue;
@@ -195,28 +203,30 @@ public sealed class VehicleAmbience : MonoBehaviour
             if (voice == null) return;
             voice.emitter = emitter;
             voice.gain = 0f;
-            voice.source.clip = clip;
-            voice.source.transform.position = emitter.position;
-            voice.source.volume = 0f;
             voice.tempo = TrainTempo(emitter.speed);
-            voice.source.pitch = train ? 1f : CarPitch(emitter.speed);
-            voice.source.time = Random.value * clip.length * 0.95f; // 近接する車両同士が同期して聞こえないよう開始位置を散らす。
-            voice.source.Play();
-            if (train)
-            {
-                StartRollingLayer(voice.slow, clips[3], voice.source);
-                StartRollingLayer(voice.fast, clips[4], voice.source);
-            }
-            if (voice.motor != null && clips[2] != null)
-            {
-                voice.motor.clip = clips[2];
-                voice.motor.transform.position = emitter.position;
-                voice.motor.volume = 0f;
-                voice.motor.pitch = TrainMotorPitch(emitter.speed);
-                voice.motor.time = Random.value * clips[2].length * 0.95f;
-                voice.motor.Play();
-            }
+            // 近接する車両同士が同期して聞こえないよう開始位置を散らす。テンポ違いの車輪音は同じ位相から始めて混ぜる。
+            float phase = Random.value * 0.95f;
+            if (!train) { StartLayer(voice.source, Clip(CarClip), emitter.position, CarPitch(emitter.speed), phase); continue; }
+            string wheel = emitter.sound?.wheel;
+            bool hasWheel = !string.IsNullOrEmpty(wheel);
+            StartLayer(voice.source, hasWheel ? Clip(wheel) : null, emitter.position, 1f, phase);
+            StartLayer(voice.slow, hasWheel ? Clip(wheel + "-slow") : null, emitter.position, 1f, phase);
+            StartLayer(voice.fast, hasWheel ? Clip(wheel + "-fast") : null, emitter.position, 1f, phase);
+            StartLayer(voice.motor, Clip(emitter.sound?.motor), emitter.position, TrainMotorPitch(emitter.speed), Random.value * 0.95f);
         }
+    }
+
+    /// <summary>名前のクリップを読み込む。空の名前は無音のレイヤーを表す。</summary>
+    private AudioClip Clip(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return null;
+        if (!clips.TryGetValue(name, out var clip))
+        {
+            clip = Resources.Load<AudioClip>("Audio/Vehicles/" + name);
+            if (clip == null) Debug.LogError("VehicleAmbience: 音源がありません: " + name);
+            clips[name] = clip;
+        }
+        return clip;
     }
 
     /// <summary>毎フレーム、音源を発音体へ追従させ、速度に応じたピッチ・ゲインとフェードを適用する。</summary>
@@ -244,14 +254,15 @@ public sealed class VehicleAmbience : MonoBehaviour
         }
     }
 
-    private static void StartRollingLayer(AudioSource layer, AudioClip clip, AudioSource reference)
+    /// <summary>phase はクリップ長に対する開始位置の割合。</summary>
+    private static void StartLayer(AudioSource layer, AudioClip clip, Vector3 position, float pitch, float phase)
     {
-        if (clip == null) return;
+        if (layer == null || clip == null) return;
         layer.clip = clip;
-        layer.transform.position = reference.transform.position;
-        layer.pitch = 1f;
+        layer.transform.position = position;
+        layer.pitch = pitch;
         layer.volume = 0f;
-        layer.time = reference.time / reference.clip.length * clip.length;
+        layer.time = phase * clip.length;
         layer.Play();
     }
 
@@ -299,10 +310,18 @@ public sealed class VehicleAmbience : MonoBehaviour
         get
         {
             int n = 0;
-            foreach (var voice in carVoices) if (voice.emitter != null && voice.source.isPlaying) n++;
-            foreach (var voice in trainVoices) if (voice.emitter != null && voice.source.isPlaying) n++;
+            foreach (var voice in carVoices) if (IsPlaying(voice)) n++;
+            foreach (var voice in trainVoices) if (IsPlaying(voice)) n++;
             return n;
         }
+    }
+
+    private static bool IsPlaying(Voice voice)
+    {
+        if (voice.emitter == null) return false;
+        foreach (var layer in new[] { voice.source, voice.slow, voice.fast, voice.motor })
+            if (layer != null && layer.isPlaying) return true;
+        return false;
     }
 
     private void StopAudio()

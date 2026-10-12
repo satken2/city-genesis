@@ -98,6 +98,8 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
             Check(clip != null && clip.length > 2f && clip.channels == 1, "mono clip import: " + name);
             Check(clip.loadType == AudioClipLoadType.CompressedInMemory, "compressed clip: " + name);
         }
+        var train = new VehicleAmbience.TrainSound { wheel = "vehicle-train", motor = "vehicle-train-motor" };
+        var motorOnly = new VehicleAmbience.TrainSound { wheel = "", motor = "vehicle-train-motor" };
         AudioSource rolling = null, motor = null;
         var rollingLayers = new System.Collections.Generic.List<AudioSource>();
         for (int phase = 0; phase < 3; phase++)
@@ -106,8 +108,8 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
             float until = Time.unscaledTime + 2f;
             while (Time.unscaledTime < until)
             {
-                VehicleAmbience.Report(VehicleAmbience.Kind.Train, 1, new Vector3(0, 0, 30), speed);
-                VehicleAmbience.Report(VehicleAmbience.Kind.Train, 2, new Vector3(0, 0, 900), speed);
+                VehicleAmbience.Report(VehicleAmbience.Kind.Train, 1, new Vector3(0, 0, 30), speed, train);
+                VehicleAmbience.Report(VehicleAmbience.Kind.Train, 2, new Vector3(0, 0, 900), speed, train);
                 yield return null;
             }
             int playing = 0;
@@ -142,6 +144,27 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
         yield return new WaitForSecondsRealtime(1.7f);
         foreach (var layer in rollingLayers) Check(!layer.isPlaying, "stale train stops every rolling loop");
         Check(!motor.isPlaying, "stale train stops motor");
+        // 車輪音が空の音の組(モノレール)はモーター音だけを鳴らし、同じ編成の音の組を変えると鳴る音も入れ替わる。
+        foreach (var sound in new[] { motorOnly, train })
+        {
+            float soundUntil = Time.unscaledTime + 1f;
+            while (Time.unscaledTime < soundUntil)
+            {
+                VehicleAmbience.Report(VehicleAmbience.Kind.Train, 4, new Vector3(0, 0, 30), 30f, sound);
+                yield return null;
+            }
+            int layers = 0;
+            bool motorPlaying = false;
+            foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+            {
+                if (!source.isPlaying) continue;
+                layers++;
+                motorPlaying |= source.clip.name == "vehicle-train-motor";
+            }
+            Check(motorPlaying && layers == (sound == motorOnly ? 1 : 4), "train layers follow the reported sound set");
+            Check(ambience.PlayingCount == 1, "a motor-only train counts as playing");
+        }
+        yield return new WaitForSecondsRealtime(1.7f);
         // 音源プールを遠景で再使用し、リスナーの移動で範囲外・近景へ切り替える。
         foreach (float cameraZ in new[] { -100f, -VehicleAmbience.TrainMaxDistance, 190f })
         {
@@ -149,7 +172,7 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
             float until = Time.unscaledTime + 0.9f;
             while (Time.unscaledTime < until)
             {
-                VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, new Vector3(0f, 0f, 200f), 15f);
+                VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, new Vector3(0f, 0f, 200f), 15f, train);
                 yield return null;
             }
             Check(ambience.PlayingCount == (cameraZ == -VehicleAmbience.TrainMaxDistance ? 0 : 1), "listener movement updates audible train selection");
@@ -157,7 +180,7 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
                 if (source.isPlaying) CheckDistanceResponse(source);
         }
         camera.transform.position = Vector3.zero;
-        VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, Vector3.zero, 10f);
+        VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, Vector3.zero, 10f, train);
         yield return new WaitForSecondsRealtime(0.4f);
         ambience.enabled = false;
         foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
@@ -170,7 +193,7 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
         float shutdownTestUntil = Time.unscaledTime + 0.7f;
         while (Time.unscaledTime < shutdownTestUntil)
         {
-            VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, Vector3.zero, 10f);
+            VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, Vector3.zero, 10f, train);
             yield return null;
         }
         Check(ambience.PlayingCount > 0 && construction.PlayingCount > 0, "shutdown starts with active vehicle and construction sounds");

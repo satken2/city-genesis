@@ -1,0 +1,31 @@
+{
+  "cityGovernment": {
+    "tooltip": "クリックして市政府を開く",
+    "categories": "カテゴリ",
+    "population": "人口",
+    "unitPeople": "人",
+    "unemploymentRate": "失業率",
+    "averageWage": "平均賃金",
+    "unitPerPersonDay": "/人・日",
+    "averageRent": "平均家賃",
+    "unitPerAreaDay": "/m²・日",
+    "cityScore": "都市スコア",
+    "tabRealEstate": "不動産",
+    "tabPublicStandard": "公営施設",
+    "tabOpenSpace": "オープンスペース",
+    "tabEducation": "教育機関",
+    "tabPort": "港湾施設",
+    "tabIntercity": "都市間輸送",
+    "tabCity": "市政府",
+    "supplyFloor": "供給フロア",
+    "occupancyRate": "入居率",
+    "rent": "家賃",
+    "capacity": "キャパシティ",
+    "importHandling": "輸入取扱量",
+    "exportHandling": "輸出取扱量",
+    "production": "生産量",
+    "soldAmount": "売却量",
+    "price": "価格",
+    "empty": "該当する経済主体はありません"
+  }
+}

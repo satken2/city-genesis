@@ -21,7 +21,7 @@
     "save_load": "Sauvegarder / Charger",
     "save_list": "Liste des sauvegardes",
     "new_game": "Nouvelle partie",
-    "city_rename": "Renommer la ville",
+    "city_government": "Municipalité",
     "system_stats": "Statistiques système",
     "resource_detail": "Détail de la ressource",
     "achievements": "Succès",
@@ -50,7 +50,8 @@
     "citizen_detail": "Citoyen",
     "citizen_tracking": "Liste de suivi",
     "scenario_sign": "Signature du scénario",
-    "climate_settings": "Paramètres climatiques"
+    "climate_settings": "Paramètres climatiques",
+    "climate_effects": "Climat"
   },
   "cityMap": {
     "layers": {
@@ -101,10 +102,6 @@
     },
     "fitView": "Vue d'ensemble",
     "reload": "Recharger"
-  },
-  "cityRename": {
-    "label": "Nom de la ville",
-    "tooltip": "Cliquez pour renommer la ville"
   },
   "taskbar": {
     "menuMap": "Carte",

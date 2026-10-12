@@ -478,11 +478,13 @@
     "chromeless": true,
     "actions": []
   },
-  "city_rename": {
-    "title": "都市名の変更",
-    "width": 460,
-    "height": 210,
-    "resizable": false,
+  "city_government": {
+    "title": "市政府",
+    "width": 1100,
+    "height": 720,
+    "width_ratio": 0.75,
+    "height_ratio": 0.85,
+    "resizable": true,
     "policy": "single",
     "empty_shell": true,
     "actions": []
@@ -607,6 +609,15 @@
     "title": "気候設定",
     "width": 1100,
     "height": 760,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
+  },
+  "climate_effects": {
+    "title": "気候",
+    "width": 800,
+    "height": 540,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,

@@ -1,0 +1,8 @@
+{
+  "climateEffects": {
+    "currentClimate": "이번 달 평균 기후",
+    "title": "기후에 따른 시설 생산 효율",
+    "facility": "시설",
+    "factor": "생산 효율"
+  }
+}

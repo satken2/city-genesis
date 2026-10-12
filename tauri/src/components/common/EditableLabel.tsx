@@ -22,6 +22,8 @@ type EditableLabelProps = {
   textClassName?: string;
   /** 空文字での保存を許可するかどうか(既定は不可) */
   allowEmpty?: boolean;
+  /** 入力欄の最大文字数 */
+  maxLength?: number;
   /** 保存処理。失敗時は例外を投げること(呼び出し元でのエラー表示は不要) */
   onSave: (next: string) => Promise<void> | void;
 };
@@ -31,6 +33,7 @@ export function EditableLabel({
   displayText,
   textClassName,
   allowEmpty = false,
+  maxLength,
   onSave,
 }: EditableLabelProps) {
   const { t } = useTranslation();
@@ -90,10 +93,12 @@ export function EditableLabel({
         className="editable-label__input"
         type="text"
         value={input}
+        maxLength={maxLength}
         autoFocus
         disabled={saving}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
+          if (e.nativeEvent.isComposing) return; // IMEの変換確定のEnter・Escapeで保存・取消しない
           if (e.key === "Enter") void commit();
           else if (e.key === "Escape") setEditing(false);
         }}

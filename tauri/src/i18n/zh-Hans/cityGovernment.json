@@ -1,0 +1,31 @@
+{
+  "cityGovernment": {
+    "tooltip": "点击打开市政府",
+    "categories": "类别",
+    "population": "人口",
+    "unitPeople": "人",
+    "unemploymentRate": "失业率",
+    "averageWage": "平均工资",
+    "unitPerPersonDay": "/人·日",
+    "averageRent": "平均房租",
+    "unitPerAreaDay": "/m²·日",
+    "cityScore": "城市评分",
+    "tabRealEstate": "不动产",
+    "tabPublicStandard": "公营设施",
+    "tabOpenSpace": "开放空间",
+    "tabEducation": "教育机构",
+    "tabPort": "港口设施",
+    "tabIntercity": "城际运输",
+    "tabCity": "市政府",
+    "supplyFloor": "供给楼面",
+    "occupancyRate": "入驻率",
+    "rent": "房租",
+    "capacity": "容量",
+    "importHandling": "进口处理量",
+    "exportHandling": "出口处理量",
+    "production": "产量",
+    "soldAmount": "售出量",
+    "price": "价格",
+    "empty": "没有符合条件的经济主体。"
+  }
+}

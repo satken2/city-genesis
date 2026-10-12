@@ -90,9 +90,9 @@
 }
 
 .cockpit-climate:disabled { opacity: 1; }
-.cockpit-climate-editable:not(:disabled) { cursor: pointer; }
-.cockpit-climate-editable:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
-.cockpit-climate-editable:focus-visible { outline: 2px solid #9bcef9; }
+.cockpit-climate:not(:disabled) { cursor: pointer; }
+.cockpit-climate:hover:not(:disabled) { background: rgba(255, 255, 255, 0.08); }
+.cockpit-climate:focus-visible { outline: 2px solid #9bcef9; }
 
 .cockpit-climate-row {
   display: flex;

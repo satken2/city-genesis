@@ -2,7 +2,7 @@
  * 公共交通の車両外観セレクタ
  *
  * 路線ごとにプレイヤーが選ぶ車両の外観(API の vehicle_model)を、見本画像付きのタイルで選ばせる。
- * 外観は Unity の描画だけが使う値で、定員・費用・速度は変わらない。
+ * 外観は Unity の描画と走行音だけが使う値で、定員・費用・速度は変わらない。
  *
  * 候補の正は data/transitVehicleModels.json(路線種別=区間パスのバリアント → 外観の候補列)。
  * variant は Unity の vehicle_model_config.yaml にある車種の候補番号、prop はその外観の先頭車を写した

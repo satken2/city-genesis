@@ -24,6 +24,7 @@ public static class VehicleModelConfig
     private static readonly Dictionary<int, List<int>> variantsByType = new();
     private static bool isLoaded;
     private static Dictionary<int, TransitDefinition> transitTypes;
+    private static Dictionary<int, Dictionary<int, VehicleAmbience.TrainSound>> transitSounds;
 
     private sealed class TransitDefinition
     {
@@ -52,6 +53,20 @@ public static class VehicleModelConfig
     }
 
     public static int GetTransitVehicleType(int pathVariant) => GetTransitDefinition(pathVariant)?.vehicle_type ?? 0;
+
+    /// <summary>
+    /// 公共交通の外観(車種と候補番号)ごとの走行音。Resources/Config/transit_vehicle_sounds.json が正で、
+    /// 未登録の外観は null(無音)。音は描画専用で、外観を変えても経済には影響しない。
+    /// </summary>
+    public static VehicleAmbience.TrainSound GetTransitSound(int vehicleType, int variant)
+    {
+        if (transitSounds == null)
+        {
+            var asset = Resources.Load<TextAsset>("Config/transit_vehicle_sounds");
+            transitSounds = asset != null ? JsonConvert.DeserializeObject<Dictionary<int, Dictionary<int, VehicleAmbience.TrainSound>>>(asset.text) : new();
+        }
+        return transitSounds.TryGetValue(vehicleType, out var variants) && variants.TryGetValue(variant, out var sound) ? sound : null;
+    }
 
     /// <summary>identity は折り返しても変わらない車両番号。貨物は0が機関車、それ以外が路線種別の貨車。</summary>
     public static TransitCarModel GetTransitCarModel(int pathVariant, int variant, int identity, int cars)

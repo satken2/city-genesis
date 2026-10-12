@@ -21,7 +21,7 @@
     "save_load": "세이브・로드",
     "save_list": "세이브 데이터 목록",
     "new_game": "새 게임",
-    "city_rename": "도시 이름 변경",
+    "city_government": "시정부",
     "system_stats": "시스템 통계",
     "resource_detail": "천연자원 상세",
     "achievements": "업적",
@@ -50,7 +50,8 @@
     "citizen_detail": "시민",
     "citizen_tracking": "추적 목록",
     "scenario_sign": "시나리오 서명",
-    "climate_settings": "기후 설정"
+    "climate_settings": "기후 설정",
+    "climate_effects": "기후"
   },
   "cityMap": {
     "layers": {
@@ -101,10 +102,6 @@
     },
     "fitView": "전체 보기",
     "reload": "다시 불러오기"
-  },
-  "cityRename": {
-    "label": "도시 이름",
-    "tooltip": "클릭하여 도시 이름 변경"
   },
   "taskbar": {
     "menuMap": "지도",

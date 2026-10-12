@@ -21,7 +21,7 @@
     "save_load": "Guardar / Cargar",
     "save_list": "Lista de partidas guardadas",
     "new_game": "Partida nueva",
-    "city_rename": "Cambiar el nombre de la ciudad",
+    "city_government": "Gobierno municipal",
     "system_stats": "Estadísticas del sistema",
     "resource_detail": "Detalle del recurso",
     "achievements": "Logros",
@@ -50,7 +50,8 @@
     "citizen_detail": "Ciudadano",
     "citizen_tracking": "Lista de seguimiento",
     "scenario_sign": "Firma de escenarios",
-    "climate_settings": "Configuración del clima"
+    "climate_settings": "Configuración del clima",
+    "climate_effects": "Clima"
   },
   "cityMap": {
     "layers": {
@@ -101,10 +102,6 @@
     },
     "fitView": "Ajustar vista",
     "reload": "Recargar"
-  },
-  "cityRename": {
-    "label": "Nombre de la ciudad",
-    "tooltip": "Haz clic para cambiar el nombre de la ciudad"
   },
   "taskbar": {
     "menuMap": "Mapa",

@@ -1,0 +1,31 @@
+{
+  "cityGovernment": {
+    "tooltip": "點擊開啟市政府",
+    "categories": "類別",
+    "population": "人口",
+    "unitPeople": "人",
+    "unemploymentRate": "失業率",
+    "averageWage": "平均薪資",
+    "unitPerPersonDay": "/人·日",
+    "averageRent": "平均房租",
+    "unitPerAreaDay": "/m²·日",
+    "cityScore": "城市評分",
+    "tabRealEstate": "不動產",
+    "tabPublicStandard": "公營設施",
+    "tabOpenSpace": "開放空間",
+    "tabEducation": "教育機構",
+    "tabPort": "港口設施",
+    "tabIntercity": "城際運輸",
+    "tabCity": "市政府",
+    "supplyFloor": "供給樓地板",
+    "occupancyRate": "進駐率",
+    "rent": "房租",
+    "capacity": "容量",
+    "importHandling": "進口處理量",
+    "exportHandling": "出口處理量",
+    "production": "產量",
+    "soldAmount": "售出量",
+    "price": "價格",
+    "empty": "沒有符合條件的經濟主體。"
+  }
+}

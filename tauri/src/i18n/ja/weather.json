@@ -23,7 +23,7 @@
     },
     "epochClimate": "確定気候",
     "temperature": "気温",
-    "precipitation": "降水量（月相当）",
+    "precipitation": "降水量",
     "sunlight": "日照強度",
     "windSpeed": "風速"
   }

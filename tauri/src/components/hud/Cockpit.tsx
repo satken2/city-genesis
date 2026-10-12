@@ -17,6 +17,7 @@
  * - 公共サービス充足度: 電力・水道などの需要/供給キャパシティを縦棒で常時表示する。
  *   クリックで公共施設ウィンドウを開く。
  * - 確定気候: 最後に開始したエポックの気温・降水量・日照・風速を2×2に並べる。
+ *   クリックで、シナリオ作成モードでは気候設定、それ以外では気候ウィンドウを開く。
  * - アラート: L1通知は重要度2階調で表現する。warning(都市の機能が損なわれつつあり、
  *   今打てる手がある問題)が1件以上あると点滅+赤バッジ、caution(すぐには解決できない、
  *   または壊れるのが成長・余力に留まる問題)は点滅させず黄バッジのみ出す。急ぎでない
@@ -65,6 +66,7 @@ import { setHudMode, useHudMode } from "./hudMode";
 import { useHudSession } from "./useHudSession";
 import { useWeather } from "./useWeather";
 import { WeatherStatus } from "./WeatherStatus";
+import { CLIMATE_ELEMENTS, ClimateIcon, formatClimateValue, type ClimateValues } from "../climate/climateDisplay";
 import "./hud.css";
 import "./Cockpit.css";
 
@@ -289,6 +291,9 @@ export function Cockpit() {
 
   const locale = resolveIntlLocale(i18n.language);
   const formattedDate = currentDate != null ? formatEpochDate(currentDate, locale) : "—";
+  const epochClimate: ClimateValues = {
+    temperature: epochTemperature, precipitation: epochPrecipitation, sunlight: epochSunlight, wind_speed: epochWindSpeed,
+  };
   // warning(今打てる手がある危機)だけが点滅+赤バッジを駆動する。caution(すぐには
   // 解決できない・成長に留まる問題)は点滅しない黄バッジのみで、警告のシグナルを薄めない。
   const cautionCount = l1Notifications.filter(isCautionNotification).length;
@@ -332,42 +337,20 @@ export function Cockpit() {
         <button
           className="cockpit-city"
           type="button"
-          title={t("cityRename.tooltip")}
-          onClick={() => void openRegisteredWindow("city_rename")}
+          title={t("cityGovernment.tooltip")}
+          onClick={() => void openRegisteredWindow("city_government")}
         >
           {cityName || "—"}
         </button>
-        <button type="button" className={`cockpit-climate${godMode ? " cockpit-climate-editable" : ""}`}
-          disabled={!godMode || isLocked || epochExecuting} data-guide="hud.climate"
-          aria-label={t(godMode ? "climateSettings.title" : "weather.epochClimate")}
-          title={godMode ? t("climateSettings.title") : t("weather.epochClimate")}
-          onClick={() => void openRegisteredWindow("climate_settings")}>
-          <span className="cockpit-climate-row" title={t("weather.temperature")}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M9 14.5V5a3 3 0 0 1 6 0v9.5a5 5 0 1 1-6 0Z" />
-              <path d="M12 8v9" /><circle cx="12" cy="18" r="1.5" />
-            </svg>
-            <span>{epochTemperature == null ? "—" : `${epochTemperature.toLocaleString(locale, { maximumFractionDigits: 1 })}°C`}</span>
-          </span>
-          <span className="cockpit-climate-row" title={t("weather.precipitation")}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M12 3s-7 8-7 12a7 7 0 0 0 14 0c0-4-7-12-7-12Z" />
-              <path d="M8 15a4 4 0 0 0 4 4" />
-            </svg>
-            <span>{epochPrecipitation == null ? "—" : `${epochPrecipitation.toLocaleString(locale, { maximumFractionDigits: 0 })}mm`}</span>
-          </span>
-          <span className="cockpit-climate-row" title={t("weather.sunlight")}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <circle cx="12" cy="12" r="4" /><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2" />
-            </svg>
-            <span>{epochSunlight == null ? "—" : `${epochSunlight.toLocaleString(locale, { maximumFractionDigits: 0 })}%`}</span>
-          </span>
-          <span className="cockpit-climate-row" title={t("weather.windSpeed")}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              <path d="M3 8h10a3 3 0 1 0-3-3" /><path d="M3 12h15a3 3 0 1 1-3 3" /><path d="M3 16h6" />
-            </svg>
-            <span>{epochWindSpeed == null ? "—" : `${epochWindSpeed.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}m/s`}</span>
-          </span>
+        <button type="button" className="cockpit-climate"
+          disabled={isLocked || epochExecuting} data-guide="hud.climate"
+          aria-label={t(godMode ? "climateSettings.title" : "windowType.climate_effects")}
+          title={t(godMode ? "climateSettings.title" : "windowType.climate_effects")}
+          onClick={() => void openRegisteredWindow(godMode ? "climate_settings" : "climate_effects")}>
+          {CLIMATE_ELEMENTS.map(({ key, label }) => <span key={key} className="cockpit-climate-row" title={t(label)}>
+            <ClimateIcon element={key} />
+            <span>{formatClimateValue(key, epochClimate[key], locale)}</span>
+          </span>)}
         </button>
         <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
         <div className="cockpit-date-weather" data-guide="hud.date">

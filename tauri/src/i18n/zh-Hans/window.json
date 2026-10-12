@@ -21,7 +21,7 @@
     "save_load": "存档・读档",
     "save_list": "存档列表",
     "new_game": "新游戏",
-    "city_rename": "更改城市名称",
+    "city_government": "市政府",
     "system_stats": "系统统计",
     "resource_detail": "资源详情",
     "achievements": "成就",
@@ -50,7 +50,8 @@
     "citizen_detail": "市民",
     "citizen_tracking": "追踪列表",
     "scenario_sign": "场景签名",
-    "climate_settings": "气候设置"
+    "climate_settings": "气候设置",
+    "climate_effects": "气候"
   },
   "cityMap": {
     "layers": {
@@ -101,10 +102,6 @@
     },
     "fitView": "全图显示",
     "reload": "重新载入"
-  },
-  "cityRename": {
-    "label": "城市名称",
-    "tooltip": "点击更改城市名称"
   },
   "taskbar": {
     "menuMap": "地图",

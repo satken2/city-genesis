@@ -1,0 +1,23 @@
+{
+  "14": {
+    "0": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" }
+  },
+  "20": {
+    "0": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" },
+    "1": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" },
+    "2": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" }
+  },
+  "21": {
+    "0": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" },
+    "1": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" },
+    "2": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" }
+  },
+  "22": {
+    "0": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" },
+    "1": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" },
+    "2": { "wheel": "vehicle-train", "motor": "vehicle-train-motor" }
+  },
+  "24": {
+    "0": { "wheel": "", "motor": "vehicle-train-motor" }
+  }
+}

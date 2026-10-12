@@ -1,0 +1,31 @@
+{
+  "cityGovernment": {
+    "tooltip": "클릭하여 시정부 열기",
+    "categories": "분류",
+    "population": "인구",
+    "unitPeople": "명",
+    "unemploymentRate": "실업률",
+    "averageWage": "평균 임금",
+    "unitPerPersonDay": "/인·일",
+    "averageRent": "평균 임대료",
+    "unitPerAreaDay": "/m²·일",
+    "cityScore": "도시 점수",
+    "tabRealEstate": "부동산",
+    "tabPublicStandard": "공영 시설",
+    "tabOpenSpace": "오픈 스페이스",
+    "tabEducation": "교육 기관",
+    "tabPort": "항만 시설",
+    "tabIntercity": "도시 간 수송",
+    "tabCity": "시정부",
+    "supplyFloor": "공급 층면적",
+    "occupancyRate": "입주율",
+    "rent": "임대료",
+    "capacity": "용량",
+    "importHandling": "수입 취급량",
+    "exportHandling": "수출 취급량",
+    "production": "생산량",
+    "soldAmount": "판매량",
+    "price": "가격",
+    "empty": "해당하는 경제 주체가 없습니다."
+  }
+}

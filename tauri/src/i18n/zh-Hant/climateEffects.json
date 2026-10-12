@@ -1,0 +1,8 @@
+{
+  "climateEffects": {
+    "currentClimate": "本月平均氣候",
+    "title": "氣候影響下的設施生產效率",
+    "facility": "設施",
+    "factor": "生產效率"
+  }
+}

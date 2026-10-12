@@ -21,7 +21,7 @@
     "save_load": "Save / Load",
     "save_list": "Save Data List",
     "new_game": "New Game",
-    "city_rename": "Rename City",
+    "city_government": "City Government",
     "system_stats": "System Statistics",
     "resource_detail": "Resource Details",
     "achievements": "Achievements",
@@ -50,7 +50,8 @@
     "citizen_detail": "Citizen",
     "citizen_tracking": "Tracking list",
     "scenario_sign": "Scenario signing",
-    "climate_settings": "Climate settings"
+    "climate_settings": "Climate settings",
+    "climate_effects": "Climate"
   },
   "cityMap": {
     "layers": {
@@ -101,10 +102,6 @@
     },
     "fitView": "Fit View",
     "reload": "Reload"
-  },
-  "cityRename": {
-    "label": "City name",
-    "tooltip": "Click to rename the city"
   },
   "taskbar": {
     "menuMap": "Map",

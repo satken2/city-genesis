@@ -101,7 +101,7 @@ export function useHudSession(): HudSession {
       .catch(console.error);
 
     // 都市名の変更。セッションポーリングの次の周回を待たずに表示へ反映する
-    // (送信元は city_rename ウィンドウ = CityRenameWindow.tsx)。
+    // (送信元は city_government ウィンドウ = CityGovernmentWindow.tsx)。
     listen<{ name: string }>("city:renamed", (event) => {
       setCityName(event.payload.name);
     })

@@ -23,7 +23,7 @@
     },
     "epochClimate": "周期气候",
     "temperature": "气温",
-    "precipitation": "降水量（折合每月）",
+    "precipitation": "降水量",
     "sunlight": "日照强度",
     "windSpeed": "风速"
   }
