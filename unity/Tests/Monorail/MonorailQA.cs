@@ -41,9 +41,10 @@ public static class MonorailQA
             AssetDatabase.Refresh();
             foreach (int id in new[] {501, 502})
             {
+                // 軌道パーツの原点はスプライン+0.12m。天端はスプライン+1.2m、下端はスプライン-0.3m(地上0mでも埋まらない)。
                 var track = Vertices($"Paths/p{id}/track");
-                Near(track.Max(v => v.y), 0, "Guideway top");
-                Near(track.Min(v => v.y), -1.2f, "Guideway bottom");
+                Near(track.Max(v => v.y), 1.08f, "Guideway top");
+                Near(track.Min(v => v.y), -.42f, "Guideway bottom");
                 Near(track.Max(v => v.x), .425f, "Guideway half width including power strip");
                 var rail = Vertices($"Paths/p{id}/rail");
                 Check(track.SequenceEqual(rail), "Connector cross section differs");
@@ -64,43 +65,44 @@ public static class MonorailQA
             Near(platform.Where(v => Mathf.Abs(v.x - 1.5f) < .001f && v.y < 2f).Max(v => v.y), 1.5f, "Boarding edge");
             Near(platform.Max(v => v.y), 5.22f, "Canopy ridge");
             Check(platform.Any(v => Mathf.Abs(v.x - 1.5f) < .001f && v.y > 4.8f), "Canopy must cover boarding edge");
-            Check(platform.Where(v => v.y > 1.51f && v.y < 4.7f).All(v => v.x > 3.4f), "Canopy columns must clear boarding area");
+            // 乗降縁の上はホームドア(X=1.54〜1.79m)だけ。上屋の柱は乗降の空間を空ける。
+            Check(platform.Where(v => v.y > 1.51f && v.y < 4.7f && v.x > 1.8f).All(v => v.x > 3.4f), "Canopy columns must clear boarding area");
+            Near(platform.Min(v => v.y), -.62f, "Platform slab hangs from the raised guideway");
             Near(platform.Max(v => v.z) - platform.Min(v => v.z), 8, "Platform tile length");
             var wall = Vertices("Paths/p502/platform_wall");
             Check(wall.All(v => v.x >= 4.299f && v.x <= 4.501f), "Outer wall location");
             Near(wall.Max(v => v.y), 4.82f, "Full height side wall meets canopy");
             Vertices("Paths/p502/platform_panel");
+            // 車両の原点は桁の天端。床下カバーは全長で天端の0.38m下、台車部で0.90m下まで桁の両脇へ下がる。
+            float beamDepth = Vertices("Paths/p501/track").Max(v => v.y) - Vertices("Paths/p501/track").Min(v => v.y);
             foreach (int id in new[] {308, 309})
             {
                 var car = Vertices($"Props/{id}");
                 var close = Vertices($"Props/{id}_close");
+                var far = Vertices($"Props/{id}_far");
                 for(int axis=0;axis<3;axis++)
                 {
                     int a=axis;
                     Check(Mathf.Abs(car.Min(v=>v[a])-close.Min(v=>v[a]))<.05f && Mathf.Abs(car.Max(v=>v[a])-close.Max(v=>v[a]))<.05f,"Close bounds differ");
                 }
                 Check(close.Length>car.Length,"Close detail missing");
-                Check(close.Where(v=>v.y<0).All(v=>Mathf.Abs(v.x)>=.509f),"Close skirt intrudes into guideway");
-                Near(close.Where(v=>Mathf.Abs(v.x)<.4f).Min(v=>v.y),0,"Close tire contact");
-                Near(car.Min(v => v.y), -.25f, "Short bogie cover below guideway top");
-                Near(close.Min(v => v.y), -.25f, "Close short bogie cover");
+                Near(far.Min(v => v.y), car.Min(v => v.y), "Far keeps the bogie cover depth");
                 foreach (var detail in new[] {car, close})
                 {
-                    Near(detail.Where(v => Mathf.Abs(v.z) <= 2.61f).Min(v => v.y), .57f, "Raised central cover");
-                    Check(detail.Where(v => v.y < 0).All(v => Mathf.Abs(v.z) > 2.6f), "Deep cover confined to bogies");
+                    Check(detail.Where(v => v.y < 0).All(v => Mathf.Abs(v.x) >= .509f), "Skirt must clear guideway and power strips");
+                    Near(detail.Where(v => Mathf.Abs(v.x) < .4f).Min(v => v.y), 0, "Tire contact remains at guideway top");
+                    Near(detail.Min(v => v.y), -.90f, "Bogie cover straddles the guideway");
+                    Check(detail.Min(v => v.y) > -beamDepth + .3f, "Bogie cover must stay above the guideway bottom");
+                    Near(detail.Where(v => Mathf.Abs(v.z) <= 2.7f).Min(v => v.y), -.38f, "Full-length skirt between bogies");
+                    Check(detail.Where(v => v.y < -.39f).All(v => Mathf.Abs(v.z) >= 2.64f), "Deep cover confined to bogies");
                 }
-                Near(car.Max(v => v.y), 3.85f, "Vehicle height");
+                Near(car.Max(v => v.y), 2.80f, "Vehicle height");
                 Near(car.Max(v => v.z), 7, "Forward coupling limit");
                 Near(car.Min(v => v.z), -7, "Rear coupling limit");
                 Near(car.Max(v => v.x) + car.Min(v => v.x), 0, "Vehicle centered");
                 Check(car.Max(v => Mathf.Abs(v.x)) < 1.5f, "Vehicle must clear boarding edge");
-                Check(car.Where(v => v.y < 0).All(v => Mathf.Abs(v.x) >= .509f), "Skirt must clear guideway and power strips");
-                Near(car.Where(v => Mathf.Abs(v.x) < .4f).Min(v => v.y), 0, "Tire contact remains at guideway top");
                 if (id == 308)
-                {
-                    Near(car.Where(v => v.y < -.249f).Max(v => v.z), 5.60f, "Leading skirt lower edge setback");
-                    Check(car.Any(v => Mathf.Abs(v.y-1.24f)<.001f && Mathf.Abs(v.z-6.55f)<.001f), "Leading skirt upper edge");
-                }
+                    Check(car.Where(v => v.z > 6.55f).All(v => v.y > -.05f), "Leading fairing rises under the nose");
             }
             // 検証用ラッパーは本編の生成器で再作成し、以前のGUIDに依存させない。
             foreach (string guid in AssetDatabase.FindAssets("t:Model", new[] {"Assets/Models"}))

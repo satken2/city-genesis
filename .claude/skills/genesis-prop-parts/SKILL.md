@@ -146,7 +146,7 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 
 ## 道路・鉄道を走る車両モデル
 
-鉄道の接写版は14（トラム）・20（メトロ）・21（中距離）・22（貨物）・23（高速鉄道）の全外観と中間車・貨車、およびモノレール308/309にある。非公開制作ツールの`pipeline/jobs/build_rail_close.py`が、トラム14は通常の車体断面から曲面外板と細部を著作し、20/21/22/23は外観モジュールが通常と同じ寸法表から作る。通常FBXは保持する。再生成・比較・専用頂点予算は同ディレクトリの`rail_close.md`を参照する。走行版はVehicleModelResolverのLODGroup、自由配置別名はPropRenderModelで接写を選ぶ。`build_vehicle_props.py`は接写も同期する。
+鉄道の接写版は14（トラム）・20（メトロ）・21（中距離）・22（貨物）・23（高速鉄道）の全外観と中間車・貨車、およびモノレール308/309にある。非公開制作ツールの`pipeline/jobs/build_rail_close.py`が、トラム14は通常の車体断面から曲面外板と細部を著作し、20/21/22/23は外観モジュールが、モノレール308/309は`monorail_vehicles.py`が通常と同じ寸法表から作る。通常FBXは保持する。再生成・比較・専用頂点予算は同ディレクトリの`rail_close.md`を参照する。走行版はVehicleModelResolverのLODGroup、自由配置別名はPropRenderModelで接写を選ぶ。`build_vehicle_props.py`は接写も同期する。
 
 道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。走行用の全44モデルは自由配置用の数値ID 350〜367・370〜395でも `prop_master` に登録する。制作前に公開 `geometries/O_車両の走行描画.md` の O.10.1 と `unity/Assets/Scripts/Vehicles/AGENTS.md` を読む。
 
@@ -156,7 +156,7 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 - exportのカテゴリは `vehicles`、検証対象は `Assets/Models/Vehicles/{車種}`、ギャラリーは `Vehicles`。Unity回帰は `Tests/Vehicles/run.ps1 -TransitOnly`。自動生成されたResourcesラッパーとFBXのGUIDが対応することを確認する。
 - 再生成ジョブは非公開制作ツール `genesis-gallery/pipeline/jobs/vehicles.md`、LRTは同ディレクトリの `lrt_vehicles.md` を参照する。
 
-手動配置用モノレール308/309は `props.blend` の例外的な車両プロップ。原点は走行タイヤと桁上面の接点で、スカートは前後の台車部で高さ-0.25mまで桁の両脇へ下がり、中央部の下端は+0.57mへ上がる。bbox底面を原点に揃え直さない。負の高さでは左右0.51mの桁用離隔を維持し、`Tests/Monorail/run.ps1`で確認する。
+手動配置用モノレール308/309は `props.blend` の例外的な車両プロップ。原点は走行タイヤと桁上面の接点で、床面は原点の0.30m上(桁の天端スプライン+1.2mに置くとホーム面に揃う)。床下カバーは全長で高さ-0.38m、前後の台車部で-0.90mまで桁の両脇へ下がって桁をまたぐ。bbox底面を原点に揃え直さない。負の高さでは左右0.51mの桁用離隔を維持し、`Tests/Monorail/run.ps1`で確認する。形状は非公開制作ツールの`pipeline/jobs/monorail_vehicles.py`が通常・接写・遠景を同じ寸法表から作る(寸法・再生成は同じ場所の`monorail.md`)。
 
 
 走行車両の自由配置別名は、非公開制作ツール `genesis-gallery/pipeline/jobs/vehicle_prop_catalog.py` が対応表を持つ。`build_vehicle_props.py -- --blend <props.blend>` は隣のvehicles.blendから全モデルの形状・UV・材質を同期する。道路車両は `build_vehicles.py --road-only` で18外観（10種/4種/2種/2種）の通常・接写・遠景を同じ寸法表から一度に再生成し(外観は `road_vehicles.py`・`road_buses.py`・`road_trucks.py`、形状の道具は `road_shapes.py`)、その後に別名も同期する。同期は折った稜線も写す(写さないと別名だけUnity取り込み後の頂点数が変わる)。道路車両のLODと制作規約は公開O文書§O.10.3、制作記録・再生成手順は非公開制作ツールの `pipeline/jobs/vehicles.md`。車両のプレビューは裏面を描かない材質で確認する(Blenderの既定表示は裏返った面も描くが、UnityのURPは描かない)。鉄道/LRTを再著作した場合も同期が必要。書き出しはvehiclesとpropsの両カテゴリへ行い、Unityの `Tests/Vehicles/run.ps1 -TransitOnly` で別名も確認する。詳細は公開M文書§M.7.6とO文書§O.10.1。
@@ -166,4 +166,4 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 貨物22は機関車3外観(0=JR貨物風・1=アメリカ風・2=インド国鉄風)と貨車3種(`wagon`=2段積みコンテナ車・`wagon_1`=石炭ホッパ車・`wagon_2`=タンク車)。貨車は機関車の外観と独立に選ぶ前提で、middle系の名前を持たず、機関車の路線色の材質を使わない。非公開制作ツールの外観モジュール`freight_vehicles.py`が通常・接写・遠景を同じ寸法表から著作する(各ジョブの`--freight-only`)。全モデルの連結面は±10m・連結器の中心高さ0.88mで揃え、天端は架線のトロリ線(レール面上約5.1m)より低く保つ(2段積みのコンテナは背高でない高さで5.05m)。路線色の部位は機関車の車体の青・オレンジとインドの赤の帯(`PROP_FrJrBlue`・`PROP_FrUsOrange`・`PROP_FrInRed`)で、`transit_vehicle_livery.json`に登録してある。自由配置別名は機関車380・381・394、貨車382・383・395。試作は`render_freight_vehicles.py`がライブラリへ保存せずに外観モジュールを組み立てて撮る。仕様・再生成・制作記録は非公開制作ツールの`pipeline/jobs/freight_vehicles.md`。
 
 
-鉄道の専用遠景は14/20/21/22/23の全26モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨物22は外観モジュールが運転台・フード・コンテナ・タンクの側面形の柱と台枠の帯で作る。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。鉄道12〜42三角形・モノレール62三角形、既存材質を共有する。`build_vehicle_props.py`は370〜395の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。
+鉄道の専用遠景は14/20/21/22/23の全26モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨物22は外観モジュールが運転台・フード・コンテナ・タンクの側面形の柱と台枠の帯で作る。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。鉄道12〜42三角形・モノレール64三角形以内、既存材質を共有する。`build_vehicle_props.py`は370〜395の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。

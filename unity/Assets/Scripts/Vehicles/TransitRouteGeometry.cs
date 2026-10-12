@@ -409,8 +409,8 @@ public sealed class TransitRouteGeometry
             : g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + RunningSurface(g) : RoadPartHeights.BODY_ABOVE_SPLINE;
     }
 
-    /// <summary>軌道パーツの原点から車輪の接地面までの高さ。鉄道はレール頭頂、跨座式モノレールは軌道桁の天端が原点なので0。</summary>
-    private static float RunningSurface(Geometry g) => g.data.path_type == Constants.PATH_MONORAIL ? 0f : .2f;
+    /// <summary>軌道パーツの原点から車輪の接地面までの高さ。鉄道はレール頭頂、跨座式モノレールは軌道桁の天端。</summary>
+    private static float RunningSurface(Geometry g) => g.data.path_type == Constants.PATH_MONORAIL ? RoadPartHeights.MONORAIL_BEAM_TOP_ABOVE_TRACK : .2f;
 
     private void SampleRun(Route route, int index, float s, bool tram, bool arrivalTrack, out Vector3 position, out Vector3 tangent)
     {

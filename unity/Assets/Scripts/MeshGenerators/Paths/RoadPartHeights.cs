@@ -62,6 +62,14 @@ public static class RoadPartHeights
     public const float TRACK_ABOVE_SPLINE = 0.12f;
 
     /// <summary>
+    /// モノレールの軌道パーツ（track / rail。軌道桁）の天端の、軌道パーツの原点（スプライン + TRACK_ABOVE_SPLINE）からの高さ。
+    /// 桁の天端はスプライン+1.2m、下端はスプライン-0.3mで、相対高さ0mの線路でも桁が地面に埋まらない。
+    /// 車両は原点（走行タイヤの接地面）をこの面に置き、桁天端+0.3mの床面がホーム面（PLATFORM_SURFACE_ABOVE_SPLINE）に揃う。
+    /// 鉄道のレール踏面と同じく、天端までの立ち上がりはプレハブ形状が持つ。
+    /// </summary>
+    public const float MONORAIL_BEAM_TOP_ABOVE_TRACK = 1.08f;
+
+    /// <summary>
     /// 架線（wire）・架線柱（pole）・架線ビーム（beam）の基準面のスプラインからの高さ。
     /// 軌道パーツと同じ面を基準にする。
     /// プレハブのピボット規約: いずれも「軌道下端と同じ基準面」がピボットで、

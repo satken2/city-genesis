@@ -222,10 +222,12 @@ public static partial class VehicleQA
         Sample(curved,Property(curved,"Length")*.5f,true,out var expected,out _);
         expected.y+=(float)game.GetType("RoadPartHeights").GetField("TRACK_ABOVE_SPLINE").GetRawConstantValue()+.2f;
         Near(Vector3.Distance((Vector3)sampleArgs[4],expected),0,.01f,"Highlight cuts across curved/elevated track");
-        // 跨座式モノレールの車両は軌道桁の天端(軌道パーツの原点)に接地し、鉄道のレール頭頂の分だけ浮かない。
+        // 跨座式モノレールの車両は、鉄道のレール頭頂の代わりに軌道桁の天端(軌道パーツの原点から1.08m)に接地する。
         Set(path,"path_type",(int)game.GetType("Constants").GetField("PATH_MONORAIL").GetRawConstantValue());
         Check((bool)Call(routeGeometry,"Sample",sampleArgs),"Monorail route rejects loaded curve");
-        Near(((Vector3)sampleArgs[4]).y,expected.y-.2f,.01f,"Monorail car is not on the guideway top");
+        float beamTop=(float)game.GetType("RoadPartHeights").GetField("MONORAIL_BEAM_TOP_ABOVE_TRACK").GetRawConstantValue();
+        Near(beamTop,1.08f,.001f,"Monorail guideway top moved away from the model");
+        Near(((Vector3)sampleArgs[4]).y,expected.y-.2f+beamTop,.01f,"Monorail car is not on the guideway top");
         Set(path,"path_type",0);
         Set(manager,"clock",23.0); Call(manager,"DrawLine",lines[0],expected);
         CheckCouplings((Vector3[])Get(lines[0],"positions"),(Vector3[])Get(lines[0],"directions"),20);

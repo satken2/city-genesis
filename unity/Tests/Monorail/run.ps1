@@ -14,6 +14,7 @@ foreach ($id in @(501,502)) {
 foreach ($id in @(308,309)) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Models/Props/$id.fbx" -Destination "$qaRoot/Assets/Models/Props" -Force
     Copy-Item -LiteralPath "$unityRoot/Assets/Models/Props/${id}_close.fbx" -Destination "$qaRoot/Assets/Models/Props" -Force
+    Copy-Item -LiteralPath "$unityRoot/Assets/Models/Props/${id}_far.fbx" -Destination "$qaRoot/Assets/Models/Props" -Force
 }
 Set-Content -LiteralPath "$qaRoot/Packages/manifest.json" -Value '{"dependencies":{}}'
 Set-Content -LiteralPath "$qaRoot/result.txt" -Value 'RUNNING'
