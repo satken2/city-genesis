@@ -340,7 +340,7 @@
     "debugSpawnColCapitalNeed": "最低初始资本",
     "debugSpawnColAssumedQty": "评估规模",
     "debugSpawnCreditLimit": "授信集中限额",
-    "debugSpawnPrivateDeposits": "民间存款总额",
+    "debugSpawnAnnualGdp": "年度名义GDP",
     "debugSpawnColNpv": "NPV",
     "debugSpawnColCost": "成本合计",
     "debugSpawnBestNpv": "NPV（最优模式）",

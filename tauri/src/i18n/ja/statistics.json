@@ -340,7 +340,7 @@
     "debugSpawnColCapitalNeed": "最低初期資本",
     "debugSpawnColAssumedQty": "評価規模",
     "debugSpawnCreditLimit": "与信集中限度",
-    "debugSpawnPrivateDeposits": "民間預金総額",
+    "debugSpawnAnnualGdp": "年間名目GDP",
     "debugSpawnColNpv": "NPV",
     "debugSpawnColCost": "コスト計",
     "debugSpawnBestNpv": "NPV（最良パターン）",

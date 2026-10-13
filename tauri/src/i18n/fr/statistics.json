@@ -340,7 +340,7 @@
     "debugSpawnColCapitalNeed": "Capital initial minimal",
     "debugSpawnColAssumedQty": "Échelle évaluée",
     "debugSpawnCreditLimit": "Plafond de concentration du crédit",
-    "debugSpawnPrivateDeposits": "Total des dépôts privés",
+    "debugSpawnAnnualGdp": "PIB nominal annuel",
     "debugSpawnColNpv": "VAN",
     "debugSpawnColCost": "Coût total",
     "debugSpawnBestNpv": "VAN (meilleur schéma)",

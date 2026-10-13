@@ -444,8 +444,8 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               {t("statistics.debugSpawnAgentLatestTable")}
             </h3>
             {/* 資本調達の関門。業種共通の判定線なので表の外に1行で示す。
-                与信集中限度 = max(民間預金総額 × 集中限度率, 床値) であり、
-                床値が効いている創設期は限度が預金比では読めないため両方を出す。 */}
+                与信集中限度 = max(年間名目GDP × 集中限度率, 床値) であり、
+                床値が効いている創設期は限度がGDP比では読めないため両方を出す。 */}
             {latestRecord && (
               <div className="debug-spawn-note">
                 <span className="debug-spawn-note__item">
@@ -455,9 +455,9 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   </span>
                 </span>
                 <span className="debug-spawn-note__item">
-                  {t("statistics.debugSpawnPrivateDeposits")}:{" "}
+                  {t("statistics.debugSpawnAnnualGdp")}:{" "}
                   <span className="debug-spawn-note__value">
-                    {formatCompact(latestRecord.private_deposits)}
+                    {formatCompact(latestRecord.annual_gdp)}
                   </span>
                 </span>
               </div>

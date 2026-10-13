@@ -340,7 +340,7 @@
     "debugSpawnColCapitalNeed": "최저 초기 자본",
     "debugSpawnColAssumedQty": "평가 규모",
     "debugSpawnCreditLimit": "여신 집중 한도",
-    "debugSpawnPrivateDeposits": "민간 예금 총액",
+    "debugSpawnAnnualGdp": "연간 명목 GDP",
     "debugSpawnColNpv": "NPV",
     "debugSpawnColCost": "비용 합계",
     "debugSpawnBestNpv": "NPV(최선 패턴)",

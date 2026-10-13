@@ -340,7 +340,7 @@
     "debugSpawnColCapitalNeed": "Capital inicial mínimo",
     "debugSpawnColAssumedQty": "Escala evaluada",
     "debugSpawnCreditLimit": "Límite de concentración crediticia",
-    "debugSpawnPrivateDeposits": "Depósitos privados totales",
+    "debugSpawnAnnualGdp": "PIB nominal anual",
     "debugSpawnColNpv": "VPN",
     "debugSpawnColCost": "Costo total",
     "debugSpawnBestNpv": "VPN (mejor patrón)",

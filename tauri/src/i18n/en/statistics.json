@@ -340,7 +340,7 @@
     "debugSpawnColCapitalNeed": "Min. capital",
     "debugSpawnColAssumedQty": "Scale",
     "debugSpawnCreditLimit": "Credit limit per project",
-    "debugSpawnPrivateDeposits": "Private deposits",
+    "debugSpawnAnnualGdp": "Annual nominal GDP",
     "debugSpawnColNpv": "NPV",
     "debugSpawnColCost": "Total cost",
     "debugSpawnBestNpv": "NPV (best pattern)",
