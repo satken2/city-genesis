@@ -42,6 +42,7 @@
     "streetParkingUsage": "{{parked}} / {{capacity}}台",
     "trafficByVehicle": "交通量(1日あたり)",
     "trafficUnitPerDay": "/日",
+    "trafficAtLeast": "{{count}}以上",
     "vehicles": {
       "0": "徒歩",
       "10": "自動車",

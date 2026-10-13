@@ -42,6 +42,7 @@
     "streetParkingUsage": "{{parked}} / {{capacity}} autos",
     "trafficByVehicle": "Tránsito (por día)",
     "trafficUnitPerDay": "/día",
+    "trafficAtLeast": "{{count}} o más",
     "vehicles": {
       "0": "Peatones",
       "10": "Automóviles",

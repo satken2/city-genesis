@@ -42,6 +42,7 @@
     "streetParkingUsage": "{{parked}} / {{capacity}}辆",
     "trafficByVehicle": "交通量（每日）",
     "trafficUnitPerDay": "/日",
+    "trafficAtLeast": "{{count}}及以上",
     "vehicles": {
       "0": "步行",
       "10": "汽车",

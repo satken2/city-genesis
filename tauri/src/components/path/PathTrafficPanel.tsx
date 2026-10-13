@@ -51,6 +51,9 @@ import { PathSpeedLimitEditor } from "./PathSpeedLimitEditor";
 import { VehicleIcon } from "./VehicleIcon";
 import "./PathTrafficPanel.css";
 
+// APIは桁溢れした交通量をfloat16の上限で返すため、上限では下限値として表示する。
+const TRAFFIC_DISPLAY_LIMIT = 65504;
+
 /**
  * 交通量リストに常に並べる車種(交通量が0でも行を出し、道路どうしで見比べやすくする)。
  * ここに無い車種は交通量があるときだけ出す。LRTは一部のバリアント(LRT線路付きの街路・
@@ -227,7 +230,9 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
                   </span>
                   {/* 交通量は日次の実数(端数あり)なので小数1桁で丸めて単位を付ける */}
                   <span className="path-traffic-row__count">
-                    {count.toLocaleString(locale, { maximumFractionDigits: 1 })}
+                    {count >= TRAFFIC_DISPLAY_LIMIT
+                      ? t("path.trafficAtLeast", { count: TRAFFIC_DISPLAY_LIMIT.toLocaleString(locale) })
+                      : count.toLocaleString(locale, { maximumFractionDigits: 1 })}
                     {t("path.trafficUnitPerDay")}
                   </span>
                 </li>

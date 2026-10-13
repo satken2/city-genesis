@@ -42,6 +42,7 @@
     "streetParkingUsage": "{{parked}} / {{capacity}}대",
     "trafficByVehicle": "교통량(1일당)",
     "trafficUnitPerDay": "/일",
+    "trafficAtLeast": "{{count}} 이상",
     "vehicles": {
       "0": "도보",
       "10": "자동차",
