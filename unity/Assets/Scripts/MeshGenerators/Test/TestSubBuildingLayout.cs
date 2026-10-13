@@ -50,7 +50,8 @@ public static class TestSubBuildingLayout
     /// 充填率が FILL_RATIO に達するまで weight(棟数比)÷(配置済み棟数+1) が最大の棟を
     /// 1棟ずつ追加する(D'Hondt方式。max_count 超過・収まらない棟は候補から外れる)。
     /// 棟数の構成は決定論で、位置だけがランダム。同じ棟種の2棟目以降は
-    /// 既存の同種棟に隣接する位置を優先する(クラスタリング)。
+    /// 既存の同種棟に隣接する位置を優先し(クラスタリング)、その中で敷地の縁と配置済みの棟に
+    /// 最も多く接する位置を選ぶ。
     /// 棟の階数は親建物の floors を棟定義の min_floors〜max_floors でクランプして導出する
     /// (バックエンドでは配信時の _attach_sub_buildings が同じ導出を行う)。
     ///
@@ -214,7 +215,8 @@ public static class TestSubBuildingLayout
     /// <summary>
     /// 指定の棟を1つ配置する。収まる場所が無ければ false。
     /// preferFront=true では前面辺に最も近い候補(同距離はグリッド座標で決定論的に解決)、
-    /// false では同種棟への隣接候補(クラスタリング)を優先した上でランダムな候補を選ぶ。
+    /// false では同種棟への隣接候補(クラスタリング)を優先し、敷地の縁と配置済みの棟に最も多く接する
+    /// 候補の中からランダムに選ぶ。
     /// 向きはグリッド沿いと90°回転の両方を試す。
     /// </summary>
     private static bool TryPlace(
@@ -253,7 +255,14 @@ public static class TestSubBuildingLayout
         }
         else
         {
+            // 敷地の縁と配置済みの棟に最も多く接する候補から選び、空きを1つのまとまりに残す。
             var narrowed = ClusterCandidates(sub.Key, candidates, state);
+            int bestContact = -1;
+            foreach (var candidate in narrowed)
+            {
+                bestContact = Mathf.Max(bestContact, Contact(candidate, state));
+            }
+            narrowed = narrowed.FindAll(c => Contact(c, state) == bestContact);
             chosen = narrowed[Random.Range(0, narrowed.Count)];
         }
 
@@ -330,6 +339,30 @@ public static class TestSubBuildingLayout
 
         var aligned = adjacent.FindAll(c => c.rotated == state.FirstRotated[subbuildingId]);
         return aligned.Count > 0 ? aligned : adjacent;
+    }
+
+    /// <summary>ブロックの外周のセル辺のうち、敷地の縁(セルの無い側)か配置済みの棟に接する数。</summary>
+    private static int Contact(((int i, int j) anchor, int w, int h, bool rotated) candidate, LayoutState state)
+    {
+        int count = 0;
+        void Check(int ci, int cj)
+        {
+            if (!state.Grid.Cells.Contains((ci, cj)) || state.Occupied.Contains((ci, cj)))
+            {
+                count++;
+            }
+        }
+        for (int a = 0; a < candidate.w; a++)
+        {
+            Check(candidate.anchor.i + a, candidate.anchor.j - 1);
+            Check(candidate.anchor.i + a, candidate.anchor.j + candidate.h);
+        }
+        for (int b = 0; b < candidate.h; b++)
+        {
+            Check(candidate.anchor.i - 1, candidate.anchor.j + b);
+            Check(candidate.anchor.i + candidate.w, candidate.anchor.j + b);
+        }
+        return count;
     }
 
     /// <summary>顔の棟の前面寄せ判定キー。(前面辺への距離, j, i, 回転) の昇順比較で決定論的に選ぶ。</summary>
