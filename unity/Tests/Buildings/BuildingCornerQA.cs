@@ -11,6 +11,8 @@ public static class BuildingCornerQA
 {
     static Type builder;
     static int checks, parts, staticParts;
+    static readonly Dictionary<GameObject, object> cornerSources = new Dictionary<GameObject, object>();
+    static readonly List<Mesh> temporary = new List<Mesh>();
     [InitializeOnLoadMethod]
     static void ResumeInPlayMode()
     {
@@ -27,7 +29,30 @@ public static class BuildingCornerQA
         Vector2 next = Direction(heading), previous = Direction(heading + angle);
         object result = builder.GetMethod("GenerateCornerSegment").Invoke(null,
             new object[] { previous, Vector2.zero, next, 0f, prefab, new Material[0], 0f });
-        return (Mesh)result.GetType().GetField("Mesh").GetValue(result);
+        Mesh reference = (Mesh)result.GetType().GetField("Mesh").GetValue(result);
+        var placement = builder.GetMethod("CreateCornerPlacement", BindingFlags.NonPublic | BindingFlags.Static);
+        if (!cornerSources.TryGetValue(prefab, out object cache))
+        {
+            cache = Activator.CreateInstance(placement.GetParameters()[7].ParameterType);
+            cornerSources.Add(prefab, cache);
+        }
+        object shared = placement.Invoke(null, new object[] { previous, Vector2.zero, next, 0f, prefab, new Material[0], 0f, cache, temporary });
+        Type type = shared.GetType();
+        Mesh mesh = (Mesh)type.GetField("Mesh").GetValue(shared);
+        Require((mesh == null) == (reference == null), "Shared corner changed omission rules");
+        if (mesh != null)
+        {
+            Matrix4x4 matrix = (Matrix4x4)type.GetField("Transform").GetValue(shared);
+            Vector3[] expected = reference.vertices, actual = mesh.vertices;
+            Require(expected.Length == actual.Length, "Shared corner vertex count changed");
+            for (int i = 0; i < actual.Length; i++)
+                Require(Vector3.Distance(expected[i], matrix.MultiplyPoint3x4(actual[i])) < .002f, "Shared corner geometry changed");
+            int owned = temporary.Count;
+            object upper = placement.Invoke(null, new object[] { previous, Vector2.zero, next, 3f, prefab, new Material[0], 4f, cache, temporary });
+            Require(ReferenceEquals(mesh, type.GetField("Mesh").GetValue(upper)) && owned == temporary.Count,
+                "Equal corner angle rebaked at another floor/height");
+        }
+        return reference;
     }
     static Vector2 Direction(float angle) => new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
     static void Require(bool value, string message)
@@ -69,7 +94,7 @@ public static class BuildingCornerQA
             var polygon = new[] { Vector2.zero, new Vector2(20, 0), new Vector2(20, 20), new Vector2(0, 20) };
             builder.GetMethod("GenerateSiteDecorations").Invoke(null, new object[] {
                 prefix, 0, polygon, null, null, null, Vector3.zero, false,
-                combines, materials, meshes, null, 0f
+                combines, materials, meshes, null, 0f, null, 0f
             });
             Require(combines.Count == 0, "A site without fence assets generated exterior walls");
             cache[path + "fence-w1"] = fence;
@@ -176,6 +201,7 @@ public static class BuildingCornerQA
                 UnityEngine.Object.DestroyImmediate(baseline);
             }
             Require(parts > 0, "No rigged corner FBX tested");
+            foreach (Mesh mesh in temporary) UnityEngine.Object.DestroyImmediate(mesh);
             File.WriteAllText(report, $"PASS: {checks} checks, {parts} rigged FBX corners (9 angles x 3 headings), {staticParts} static FBX corners");
             EditorApplication.Exit(0);
         }

@@ -28,8 +28,17 @@ public static class LodQA
         while (filled.Count < parameters.Length && parameters[filled.Count].IsOptional) filled.Add(parameters[filled.Count].DefaultValue);
         return method.Invoke(target, filled.ToArray());
     }
-    static object Field(object target, string name) => target.GetType().GetField(name, Instance).GetValue(target);
-    static void Set(object target, string name, object value) => target.GetType().GetField(name, Instance).SetValue(target, value);
+    static FieldInfo FindField(System.Type type, string name)
+    {
+        for (var current = type; current != null; current = current.BaseType)
+        {
+            var field = current.GetField(name, Instance | BindingFlags.DeclaredOnly);
+            if (field != null) return field;
+        }
+        throw new MissingFieldException(type.FullName, name);
+    }
+    static object Field(object target, string name) => FindField(target.GetType(), name).GetValue(target);
+    static void Set(object target, string name, object value) => FindField(target.GetType(), name).SetValue(target, value);
     static void Check(bool pass, string message) { checks++; if (!pass) throw new Exception(message); }
     static object Lod(int value) => Enum.ToObject(Type("DrawLod"), value);
 
@@ -86,6 +95,7 @@ public static class LodQA
         LargeMapCameraRange();
         yield return OverviewSessionSwitch();
         yield return CacheLifetime();
+        yield return BuildingCameraRoundTrip();
         yield return PendingRenderWork();
         yield return InterruptedPathResponse();
         yield return TerrainFollowResume();
@@ -474,6 +484,156 @@ public static class LodQA
         Check((long)Type("RenderObjectCache").GetProperty("TotalBytes").GetValue(null) == 0,"Global cache accounting leaked");
         results.Add("Cache: exact reuse, LRU eviction, destruction and global byte accounting passed");
     }
+    static IEnumerator BuildingCameraRoundTrip()
+    {
+        foreach (var existing in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)) Object.DestroyImmediate(existing.gameObject);
+        var camera = new GameObject("BuildingReturnCamera").AddComponent<Camera>(); camera.tag = "MainCamera";
+        camera.transform.position = new Vector3(250, 80, -600);
+        var go = new GameObject("BuildingReturnQA"); go.SetActive(false);
+        var manager = go.AddComponent(Type("BuildingManager"));
+        var terrain = go.AddComponent(Type("TerrainManager"));
+        Static("Utils", "RegisterTerrainManager", terrain);
+        var terrainData = new TerrainData { heightmapResolution = 33, size = new Vector3(500, 100, 500) };
+        var tileObject = Terrain.CreateTerrainGameObject(terrainData);
+        var tile = tileObject.GetComponent<Terrain>();
+        var tiles = (IDictionary)Field(terrain, "terrainTiles");
+        var attached = (IDictionary)Field(terrain, "dynamicCellVersions");
+        var versions = new Dictionary<Vector2Int, int> { [Vector2Int.zero] = 7 };
+        Set(terrain, "cachedCellVersions", versions); Set(terrain, "cellVersionsDirty", false);
+        tiles[Vector2Int.zero] = tile; attached[Vector2Int.zero] = 7;
+        var loaded = (HashSet<Vector2Int>)Field(manager, "loadedCells");
+        loaded.Add(Vector2Int.zero);
+        var active = (IDictionary)Field(manager, "buildingObjectsCache");
+        var pending = (IDictionary)Field(manager, "deferredDetailBuildings");
+        var material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        var summaries = new List<object>();
+        var details = new List<GameObject>();
+        var meshes = new List<Mesh>();
+        object Summary(int id, int floors = 12, int version = 1)
+        {
+            var data = Activator.CreateInstance(Type("GeneratedModels.BuildingSummary"));
+            Set(data, "agent_id", id); Set(data, "version", version); Set(data, "floors", floors); Set(data, "status", 1); Set(data, "variant", 2001);
+            Set(data, "center_point", new List<object> { 120f + (id % 16) * 14f, 120f + (id % 8) * 14f });
+            Set(data, "polygon", new List<object> { new List<object> { -12f,-12f }, new List<object> { 12f,-12f }, new List<object> { 12f,12f }, new List<object> { -12f,12f } });
+            return data;
+        }
+        try
+        {
+            for (int i = 0; i < 128; i++)
+            {
+                int id = 81000 + i;
+                var data = Summary(id); summaries.Add(data);
+                Call(manager, "RegisterBuildingDataToCache", data);
+                ((IDictionary)Field(manager, "buildingBoundsRadius"))[id] = 50f;
+                var detail = new GameObject("CachedDetail" + id); details.Add(detail);
+                var cp = (List<object>)Field(data, "center_point");
+                detail.transform.position = new Vector3((float)cp[0], .01f, (float)cp[1]);
+                var mesh = new Mesh(); meshes.Add(mesh);
+                mesh.vertices = new[] { Vector3.zero, Vector3.right, Vector3.up };
+                mesh.triangles = new[] { 0,1,2 }; mesh.RecalculateNormals();
+                detail.AddComponent<MeshFilter>().sharedMesh = mesh;
+                detail.AddComponent<MeshRenderer>().sharedMaterial = material;
+                var info = detail.AddComponent(Type("ObjectIdInfo")); Set(info, "id", id); Set(info, "status", 1);
+                Set(Static("DrawLodInfo", "Ensure", detail), "drawLod", Lod(2));
+                var identity = detail.AddComponent(Type("RenderCacheIdentity"));
+                Set(identity, "key", Call(manager, "BuildingRenderKey", data, Lod(2))); Set(identity, "mesh", mesh);
+                Call(manager, "RegisterBuildingCell", id, detail.transform.position);
+                active[id] = detail;
+                long before = (long)Static("RenderObjectCache", "EstimateMeshBytes", mesh);
+                var result = Activator.CreateInstance(Type("BuildingMeshResult"), mesh, new[] { material }, null);
+                Static("BuildingManager", "ReleaseBuildingCpuCopy", result);
+                Check(!mesh.isReadable && (long)Static("RenderObjectCache", "EstimateMeshBytes", mesh) * 2 == before,
+                    "Finished display mesh retained its CPU copy or became unaccountable");
+            }
+            string originalKey = (string)Call(manager, "BuildingRenderKey", summaries[0], Lod(2));
+            for (int round = 0; round < 3; round++)
+            {
+                camera.transform.rotation = Quaternion.Euler(0, 180, 0);
+                loaded.Remove(Vector2Int.zero); tiles.Remove(Vector2Int.zero); attached.Remove(Vector2Int.zero); tileObject.SetActive(false);
+                Check((string)Call(manager, "BuildingRenderKey", summaries[0], Lod(2)) == originalKey,
+                    "Unchanged terrain changed the building's content key on camera departure");
+                Check((string)Call(manager, "BuildingGenerationKey", summaries[0], Lod(2), originalKey) != originalKey,
+                    "Overview-sampled generation was registered as complete terrain geometry");
+                Call(manager, "UnloadCell", Vector2Int.zero);
+                Call(manager, "EvictDetailedBuilding", 81000);
+                Check(active.Contains(81000) && (int)Static("DrawLodInfo", "GetDrawLod", (GameObject)active[81000], Lod(0)) == 1,
+                    "Detail cap eviction during unload lost the nearby building preview");
+                var worker = (Coroutine)Static("RenderWorkScheduler", "Start", host, Call(manager, "CellUnloadWorker"), "QA.BuildingReturn");
+                for (int frame = 0; frame < 180 && ((IDictionary)Field(manager, "pendingUnloadCells")).Count > 0; frame++) yield return null;
+                Static("RenderWorkScheduler", "Stop", host, worker);
+                Check(active.Count == 128 && pending.Count == 0, "Departure lost known building representations");
+                for (int i = 0; i < 128; i++)
+                {
+                    var preview = (GameObject)active[81000 + i];
+                    Check(preview != null && preview.activeSelf && (int)Static("DrawLodInfo", "GetDrawLod", preview, Lod(0)) == 1,
+                        "Building vanished instead of retaining a preview");
+                }
+                camera.transform.rotation = Quaternion.identity;
+                Call(manager, "PrepareBuildingRepresentation", summaries[0], true, Lod(2));
+                Check(ReferenceEquals(active[81000], details[0]) && Mathf.Abs(details[0].transform.position.y - .01f) < .0001f,
+                    "Complete cached geometry was lost or moved to coarse height before terrain returned");
+                tileObject.SetActive(true); tiles[Vector2Int.zero] = tile; attached[Vector2Int.zero] = 7; loaded.Add(Vector2Int.zero);
+                Check((string)Call(manager, "BuildingGenerationKey", summaries[0], Lod(2), originalKey) == originalKey,
+                    "Complete terrain did not use the reusable content key");
+                var timer = Stopwatch.StartNew();
+                for (int i = 0; i < 128; i++)
+                {
+                    Call(manager, "PrepareBuildingRepresentation", summaries[i], true, Lod(2));
+                    Check(ReferenceEquals(active[81000 + i], details[i]) && details[i].GetComponent<MeshFilter>().sharedMesh == meshes[i],
+                        "Return rebuilt or lost the already-generated detail");
+                }
+                Check(pending.Count == 0, "Cache return entered the heavy generation queue");
+                results.Add($"Building return {round + 1}: 128 previews preserved; 128 exact mesh/object restores, 0 detailed rebuild requests; CPU={timer.Elapsed.TotalMilliseconds:F2}ms");
+            }
+            object statisticsOnly = Summary(81000, 12, 99);
+            Call(manager, "PrepareBuildingRepresentation", statisticsOnly, true, Lod(2));
+            Check(ReferenceEquals(active[81000], details[0]) && pending.Count == 0, "Statistics-only version change rebuilt geometry");
+            versions[Vector2Int.zero] = 8;
+            Check((string)Call(manager, "BuildingRenderKey", statisticsOnly, Lod(2)) != originalKey, "Real terrain edit did not invalidate the key");
+            Call(manager, "PrepareBuildingRepresentation", statisticsOnly, true, Lod(2));
+            Check(!ReferenceEquals(active[81000], details[0]) && pending.Count == 1, "Terrain edit reused invalid detail instead of a preview");
+            versions[Vector2Int.zero] = 7;
+            object changedShape = Summary(81001, 13, 2);
+            Call(manager, "PrepareBuildingRepresentation", changedShape, true, Lod(2));
+            Check(!ReferenceEquals(active[81001], details[1]) && pending.Count == 2, "Building shape change reused invalid detail");
+            pending.Clear();
+            Call(manager, "QueueDeferredDetail", 81002, summaries[2], true, Lod(3));
+            var visible = (GameObject)active[81002];
+            Call(manager, "CreateFarBuildingObject", summaries[2]);
+            Call(manager, "QueueDeferredDetail", 81002, summaries[2], true, Lod(3));
+            Call(manager, "PrepareBuildingRepresentation", summaries[2], true, Lod(3));
+            Check(ReferenceEquals(active[81002], visible) && pending.Count == 1, "Missing close mesh failed to display cached normal detail first");
+            Call(manager, "PrepareBuildingRepresentation", summaries[2], true, Lod(3));
+            Check(ReferenceEquals(active[81002], visible) && pending.Count == 1, "Repeated close request replaced available normal detail with a box");
+            var unrelated = Summary(81999);
+            Call(manager, "PrepareBuildingRepresentation", unrelated, true, Lod(2));
+            Check(active.Contains(81999) && pending.Contains(81999), "First visit did not show a preview while detail was queued");
+            Call(manager, "CreateFarBuildingObject", summaries[3]);
+            Call(manager, "QueueDeferredDetail", 81003, summaries[3], true, Lod(2));
+            yield return Call(manager, "RestoreDeferredBuildingRepresentations");
+            Check(ReferenceEquals(active[81003], details[3]) && !pending.Contains(81003) && pending.Contains(81999),
+                "Cached detail waited behind a new building's generation");
+            var physicsMesh = new Mesh(); physicsMesh.vertices = new[] { Vector3.zero, Vector3.right, Vector3.up }; physicsMesh.triangles = new[] { 0,1,2 };
+            var physicsResult = Activator.CreateInstance(Type("BuildingMeshResult"), physicsMesh, new[] { material }, physicsMesh);
+            Static("BuildingManager", "ReleaseBuildingCpuCopy", physicsResult);
+            Check(physicsMesh.isReadable, "CPU-copy release broke a mesh used by physics");
+            Object.Destroy(physicsMesh);
+            camera.transform.position = new Vector3(20000, 80, 0); loaded.Remove(Vector2Int.zero);
+            Call(manager, "ParkUnloadedBuilding", 81999, Vector2Int.zero);
+            Check(!active.Contains(81999), "Preview outside its bounded radius remained active");
+            results.Add("Building cache: tile residency independent key; real terrain/shape edits invalidate; statistics preserve geometry; normal detail before close; first-visit previews; bounded preview range and CPU-copy ownership passed");
+        }
+        finally
+        {
+            Call(manager, "ClearAllCells");
+            Static("Utils", "RegisterTerrainManager", (object)null);
+            var batcher = (Component)Type("FarBuildingBatcher").GetField("instance", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+            if (batcher != null) Object.Destroy(batcher.gameObject);
+            Object.Destroy(tileObject); Object.Destroy(terrainData); Object.Destroy(go); Object.Destroy(camera.gameObject); Object.Destroy(material);
+        }
+        yield return null;
+    }
+
     static IEnumerator PendingRenderWork()
     {
         var go = new GameObject("PendingBuildingQA"); go.SetActive(false);

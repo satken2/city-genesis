@@ -6,6 +6,15 @@ using UnityEngine;
 /// </summary>
 public static class PerformanceConfig
 {
+    /// <summary>完成描画物の退避予算。PCメモリの一部だけを使い、大きなPCでも上限を設ける。</summary>
+    private static int cacheMemoryMiB = -1;
+    private static int CacheMemoryMiB => cacheMemoryMiB >= 0 ? cacheMemoryMiB : cacheMemoryMiB = SystemInfo.systemMemorySize;
+    public static long BuildingCacheBytes => CacheBudget(CacheMemoryMiB, 16, 256, 2048);
+    public static long RenderCacheBytes => CacheBudget(CacheMemoryMiB, 12, 512, 3072);
+
+    private static long CacheBudget(int memoryMiB, int divisor, int minimumMiB, int maximumMiB)
+        => (long)System.Math.Max(minimumMiB, System.Math.Min(maximumMiB, memoryMiB / divisor)) * 1024 * 1024;
+
     /// <summary>一つの生成器が共通予算を独占しないための協調中断間隔。</summary>
     public static float SliceBudgetMs => Mathf.Max(0.05f, Mathf.Min(0.5f, FrameBudgetMs - (float)RenderWorkScheduler.UsedMs));
     /// <summary>

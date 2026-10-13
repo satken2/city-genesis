@@ -75,6 +75,9 @@ public static class ModularBodyBuilder
     {
         public Mesh Mesh;
         public Material[] Materials;
+        // 配置済みの個別Meshは行列不要。共有形状は結合時に配置し、所有台帳へ重複登録しない。
+        public Matrix4x4? Transform;
+        public bool Shared;
 
         public bool IsValid => Mesh != null && Mesh.vertexCount > 0 && Mesh.subMeshCount > 0;
     }
@@ -136,6 +139,8 @@ public static class ModularBodyBuilder
         List<CombineInstance> combineInstances = new List<CombineInstance>();
         List<Material> allMaterials = new List<Material>();
         List<Mesh> temporaryMeshes = new List<Mesh>();
+        var wallSources = new Dictionary<GameObject, Mesh>();
+        var cornerSources = new Dictionary<(GameObject module, float angle), Mesh>();
 
         // 躯体の高さは常に階高グリッドで決まる（各階の床面Y = 階 × 階高）。
         // パーツをスケールしない1階・最上階では、パーツの著作高さが階高と食い違うぶん
@@ -161,11 +166,22 @@ public static class ModularBodyBuilder
 
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] 階範囲: {floorStart}〜{floorEnd - 1} (全{floorEnd - floorStart}階), 頂点数={n}");
 
+            int midStart = -1, midCount = 0;
+            float midY = 0f;
+
             for (int floor = floorStart; floor < floorEnd; floor++)
             {
                 float floorY = floor * floorHeight;
 
                 string level = (floor == 0) ? "base" : (floor == floors - 1) ? "top" : "mid";
+
+                // 中層の部材・開口・階高は同じなので、初回の配置をY方向へ移して使う。
+                if (level == "mid" && midStart >= 0)
+                {
+                    AppendTranslatedFloor(midStart, midCount, floorY - midY, combineInstances, allMaterials);
+                    continue;
+                }
+                int floorPartStart = combineInstances.Count;
 
                 // 中層の階だけ階高へYスケールし、1階・最上階は著作高さのまま描画する。
                 // 判定は「階のレベル」で行うので、base/top のパーツが無くて mid-w1 等へ
@@ -207,11 +223,11 @@ public static class ModularBodyBuilder
                             float to = Mathf.Clamp(openingEnd, startOffset, length-endOffset);
                             wallSegments = new List<SegmentMeshData>();
                             if (from > startOffset + .01f)
-                                wallSegments.AddRange(GenerateWallSegments(p1,p1+direction*from,floorY,wallModule,wallMaterials,targetHeight,startOffset,0));
+                                wallSegments.AddRange(BuildWallRun(p1,p1+direction*from,floorY,wallModule,wallMaterials,targetHeight,startOffset,0,wallSources,temporaryMeshes));
                             if (to < length-endOffset-.01f)
-                                wallSegments.AddRange(GenerateWallSegments(p1+direction*to,p2,floorY,wallModule,wallMaterials,targetHeight,0,endOffset));
+                                wallSegments.AddRange(BuildWallRun(p1+direction*to,p2,floorY,wallModule,wallMaterials,targetHeight,0,endOffset,wallSources,temporaryMeshes));
                         }
-                        else wallSegments = GenerateWallSegments(p1, p2, floorY, wallModule, wallMaterials, targetHeight, startOffset, endOffset);
+                        else wallSegments = BuildWallRun(p1, p2, floorY, wallModule, wallMaterials, targetHeight, startOffset, endOffset, wallSources, temporaryMeshes);
                         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] F{floor} 壁 pos{position}: {wallSegments.Count}セグメント, materials={FormatMaterials(wallMaterials)}");
                         foreach (var wallSegment in wallSegments)
                         {
@@ -224,13 +240,19 @@ public static class ModularBodyBuilder
 
                     if (cornerModule != null)
                     {
-                        SegmentMeshData cornerSegment = GenerateCornerSegment(p0, p1, p2, floorY, cornerModule, cornerMaterials, targetHeight);
+                        SegmentMeshData cornerSegment = CreateCornerPlacement(p0, p1, p2, floorY, cornerModule, cornerMaterials, targetHeight, cornerSources, temporaryMeshes);
                         if (cornerSegment.IsValid)
                         {
                             AddSegmentToCombineList(cornerSegment, combineInstances, allMaterials, temporaryMeshes);
                             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] F{floor} 角 pos{position}: OK, materials={FormatMaterials(cornerMaterials)}");
                         }
                     }
+                }
+                if (level == "mid")
+                {
+                    midStart = floorPartStart;
+                    midCount = combineInstances.Count - midStart;
+                    midY = floorY;
                 }
             }
         }
@@ -917,7 +939,7 @@ public static class ModularBodyBuilder
             {
                 mesh = segment.Mesh,
                 subMeshIndex = subMeshIndex,
-                transform = Matrix4x4.identity
+                transform = segment.Transform ?? Matrix4x4.identity
             };
             combineInstances.Add(ci);
 
@@ -929,7 +951,21 @@ public static class ModularBodyBuilder
             }
             allMaterials.Add(material);
         }
-        temporaryMeshes.Add(segment.Mesh);
+        if (!segment.Shared) temporaryMeshes.Add(segment.Mesh);
+    }
+
+    private static void AppendTranslatedFloor(int start, int count, float y,
+        List<CombineInstance> instances, List<Material> materials)
+    {
+        for (int i = start; i < start + count; i++)
+        {
+            var part = instances[i];
+            var transform = part.transform;
+            transform.m13 += y;
+            part.transform = transform;
+            instances.Add(part);
+            materials.Add(materials[i]);
+        }
     }
 
     /// <summary>
@@ -1086,7 +1122,8 @@ public static class ModularBodyBuilder
         Vector2 p0, Vector2 p1, float baseY,
         GameObject wallModule, Material[] sharedMaterials,
         float targetHeight,
-        float startOffset, float endOffset)
+        float startOffset, float endOffset,
+        Dictionary<GameObject, Mesh> sharedSources = null, List<Mesh> temporaryMeshes = null)
     {
         List<SegmentMeshData> segments = new List<SegmentMeshData>();
 
@@ -1166,8 +1203,28 @@ public static class ModularBodyBuilder
             $"[MBB-WALL]   finalScale=({scale.x:F4},{scale.y:F4},{scale.z:F4}) pivotShift={pivotShift:F4}"
         );
 
+        // 本体・足場は結合時の行列で配置する。スキン壁のベイクも1棟内で1パーツ1回にする。
+        Mesh sharedSource = sourceMesh;
+        if (sharedSources != null && smr != null)
+        {
+            if (!sharedSources.TryGetValue(wallModule, out sharedSource))
+            {
+                sharedSource = new Mesh();
+                smr.BakeMesh(sharedSource);
+                sharedSources.Add(wallModule, sharedSource);
+                temporaryMeshes.Add(sharedSource);
+            }
+        }
         for (int i = 0; i < numUnits; i++)
         {
+            Vector3 unitPos = start + direction * (clampedStart + i * slotLength + pivotShift);
+            Matrix4x4 matrix = Matrix4x4.TRS(unitPos, rotation, scale);
+            if (sharedSources != null)
+            {
+                segments.Add(new SegmentMeshData { Mesh = sharedSource, Materials = sharedMaterials, Transform = matrix, Shared = true });
+                continue;
+            }
+
             Mesh meshInstance;
             if (smr != null)
             {
@@ -1181,9 +1238,6 @@ public static class ModularBodyBuilder
                 meshInstance = Object.Instantiate(sourceMesh);
             }
             Vector3[] vertices = meshInstance.vertices;
-
-            Vector3 unitPos = start + direction * (clampedStart + i * slotLength + pivotShift);
-            Matrix4x4 matrix = Matrix4x4.TRS(unitPos, rotation, scale);
 
             for (int v = 0; v < vertices.Length; v++)
             {
@@ -1235,10 +1289,18 @@ public static class ModularBodyBuilder
     {
         if (footprint == null || footprint.Length < 3 || wallModule == null) return;
         int n = footprint.Length;
+        var wallSources = new Dictionary<GameObject, Mesh>();
+        var cornerSources = new Dictionary<(GameObject module, float angle), Mesh>();
+        int floorStart = combineInstances.Count, floorCount = 0;
 
         for (int level = 0; level < builtFloors; level++)
         {
             float floorY = level * floorHeight;
+            if (level > 0)
+            {
+                AppendTranslatedFloor(floorStart, floorCount, floorY, combineInstances, allMaterials);
+                continue;
+            }
 
             for (int i = 0; i < n; i++)
             {
@@ -1253,8 +1315,8 @@ public static class ModularBodyBuilder
                 float endOffset = MeasureCornerExtentAlongEdge(cornerModule, p1, p2, p3, floorHeight, false);
 
                 // 壁: p1 → p2（通常建物と同じ GenerateWallSegments。両端を角の張り出しぶん空ける）
-                List<SegmentMeshData> wallSegments = GenerateWallSegments(
-                    p1, p2, floorY, wallModule, wallMaterials, floorHeight, startOffset, endOffset);
+                List<SegmentMeshData> wallSegments = BuildWallRun(
+                    p1, p2, floorY, wallModule, wallMaterials, floorHeight, startOffset, endOffset, wallSources, temporaryMeshes);
                 foreach (var seg in wallSegments)
                 {
                     if (seg.IsValid) AddSegmentToCombineList(seg, combineInstances, allMaterials, temporaryMeshes);
@@ -1264,11 +1326,48 @@ public static class ModularBodyBuilder
                 //     （通常建物と同じ GenerateCornerSegment。内角に応じたボーン変形もそのまま効く）
                 if (cornerModule != null)
                 {
-                    SegmentMeshData corner = GenerateCornerSegment(p0, p1, p2, floorY, cornerModule, cornerMaterials, floorHeight);
+                    SegmentMeshData corner = CreateCornerPlacement(p0, p1, p2, floorY, cornerModule, cornerMaterials, floorHeight, cornerSources, temporaryMeshes);
                     if (corner.IsValid) AddSegmentToCombineList(corner, combineInstances, allMaterials, temporaryMeshes);
                 }
             }
+            floorCount = combineInstances.Count - floorStart;
         }
+    }
+
+    /// <summary>角は原点で曲げた形を1棟内で共有し、位置・向き・高さは結合時に適用する。</summary>
+    private static SegmentMeshData CreateCornerPlacement(
+        Vector2 p0, Vector2 p1, Vector2 p2, float floorY,
+        GameObject module, Material[] materials, float targetHeight,
+        Dictionary<(GameObject module, float angle), Mesh> sources, List<Mesh> temporary)
+    {
+        if (module == null) return default;
+        Quaternion rotation = ComputeCornerRotation(p0, p1, p2, out _, out float angle);
+        if (IsUnsupportedConcaveCorner(module, angle)) return default;
+        Mesh source = GetPartSourceMesh(module);
+        if (source == null) return default;
+        var smr = module.GetComponentInChildren<SkinnedMeshRenderer>();
+        Mesh mesh = source;
+        if (smr != null)
+        {
+            var key = (module, angle);
+            if (!sources.TryGetValue(key, out mesh))
+            {
+                var instance = Object.Instantiate(module);
+                try
+                {
+                    mesh = GenerateSkinnedCorner(Vector3.zero, Quaternion.identity, angle,
+                        instance.GetComponentInChildren<SkinnedMeshRenderer>(), Vector3.one);
+                    if (mesh == null) return default;
+                    sources.Add(key, mesh);
+                    temporary.Add(mesh);
+                }
+                finally { Object.Destroy(instance); }
+            }
+        }
+        return new SegmentMeshData {
+            Mesh = mesh, Materials = materials, Shared = true,
+            Transform = Matrix4x4.TRS(new Vector3(p1.x, floorY, p1.y), rotation, DetermineCornerScale(source, targetHeight))
+        };
     }
 
     /// <summary>

@@ -1170,6 +1170,37 @@ public partial class TerrainManager : BaseApiDataManager
 
     public bool HasSurfaceTile(Vector2Int cell) => terrainTiles.TryGetValue(cell, out var tile) && tile != null;
 
+    /// <summary>地形の実データ版。カメラによるタイルの出入りでは変わらない。</summary>
+    public string GetContentStamp(Rect area)
+    {
+        if (cachedCellVersions == null || cellVersionsDirty)
+            return "unverified:" + cellVersionsGeneration + ":" + GetSurfaceStamp(area);
+        var key = new System.Text.StringBuilder();
+        key.Append(clearEpoch);
+        WorldRectToCellRange(area.xMin, area.yMin, area.xMax, area.yMax, out Vector2Int minCell, out Vector2Int maxCell);
+        for (int z = minCell.y; z <= maxCell.y; z++) for (int x = minCell.x; x <= maxCell.x; x++)
+        {
+            var cell = new Vector2Int(x, z);
+            key.Append(':').Append(x).Append(',').Append(z).Append('=').Append(cachedCellVersions.TryGetValue(cell, out int version) ? version : 0);
+        }
+        return key.ToString();
+    }
+
+    /// <summary>範囲の接地を全景への代用なしで計算できるか。完成した地形依存メッシュの登録時に使う。</summary>
+    public bool HasCurrentSurface(Rect area)
+    {
+        if (cachedCellVersions == null || cellVersionsDirty) return false;
+        WorldRectToCellRange(area.xMin, area.yMin, area.xMax, area.yMax, out Vector2Int minCell, out Vector2Int maxCell);
+        for (int z = minCell.y; z <= maxCell.y; z++) for (int x = minCell.x; x <= maxCell.x; x++)
+        {
+            var cell = new Vector2Int(x, z);
+            if (terrainSettings != null && !IsCityCell(cell)) continue;
+            int required = cachedCellVersions.TryGetValue(cell, out int version) ? version : 0;
+            if (GetAttachedTerrainVersion(cell) != required) return false;
+        }
+        return true;
+    }
+
     public string GetSurfaceStamp(Rect area)
     {
         var key = new System.Text.StringBuilder();

@@ -12,19 +12,20 @@ public sealed class RenderObjectCache
         public RenderObjectCache owner;
         public LinkedListNode<Entry> local, global;
     }
-    public const long GlobalLimit = 512L * 1024 * 1024;
+    public static long GlobalLimit => PerformanceConfig.RenderCacheBytes;
     private static readonly LinkedList<Entry> globalLru = new LinkedList<Entry>();
     private static readonly List<MeshFilter> filterScratch = new List<MeshFilter>();
     private static readonly List<MeshCollider> colliderScratch = new List<MeshCollider>();
     private static readonly HashSet<Mesh> meshScratch = new HashSet<Mesh>();
     public static long TotalBytes { get; private set; }
-    private readonly long limit;
+    private readonly System.Func<long> limit;
     private readonly Dictionary<string, Entry> entries = new Dictionary<string, Entry>();
     private readonly LinkedList<Entry> lru = new LinkedList<Entry>();
     public long Bytes { get; private set; }
     public long Hits { get; private set; }
 
-    public RenderObjectCache(long byteLimit) { limit = byteLimit; }
+    public RenderObjectCache(long byteLimit) : this(() => byteLimit) { }
+    public RenderObjectCache(System.Func<long> byteLimit) { limit = byteLimit; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void Reset()
@@ -75,7 +76,7 @@ public sealed class RenderObjectCache
         entries.Add(entry.key, entry);
         Bytes += bytes;
         TotalBytes += bytes;
-        while (Bytes > limit && lru.Count > 0)
+        while (Bytes > limit() && lru.Count > 0)
         {
             RenderWorkScheduler.CountEvent("renderCache.localEvicted");
             Remove(lru.First.Value, true);
