@@ -52,8 +52,7 @@ export type HudIconDef = {
 
 /**
  * アイコンパネル(画面左端)に縦並びで置くメニューアイコン。この順にそのまま縦に並ぶ。
- * 上から通常プレイの操作群を並べ、末尾に `templateOnly` の製作者向け操作を置く
- * (通常プレイでは表示されず、区切り線で分ける)。
+ * シナリオ専用操作は、システムトレイから開くシナリオ編集ウィンドウに置く。
  *
  * 予算(`city_budget`)・公共施設(`public_facilities`)・達成目標(`achievements`)はここに置かない。
  * いずれもコックピットのメータ(予算ミニメータ・公共サービス充足度・スコアミニメータ)が
@@ -72,9 +71,6 @@ export const MENU_ICONS: HudIconDef[] = [
   { id: "city", src: "menu_city.png", tooltipKey: "taskbar.menuCity", windowType: "city_hall" },
   { id: "finance", src: "menu_finance.png", tooltipKey: "taskbar.menuFinance", windowType: "financial_policy" },
   { id: "stat", src: "menu_stat.png", tooltipKey: "taskbar.menuStat", windowType: "city_statistics" },
-  { id: "resource_edit", src: "menu_resource.png", panelIcon: "resources", tooltipKey: "taskbar.menuResourceEdit", windowType: "resource_edit", hintKey: "hint.resourceEdit", templateOnly: true },
-  { id: "agent_creation", src: "menu_construction.png", panelIcon: "agents", tooltipKey: "taskbar.menuAgentCreation", windowType: "agent_creation", templateOnly: true },
-  { id: "parameter_edit", src: "tray_settings.png", panelIcon: "adjust", tooltipKey: "taskbar.menuParameterEdit", command: "open_parameter_edit_window", templateOnly: true },
 ];
 
 /**

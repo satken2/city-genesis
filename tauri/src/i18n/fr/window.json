@@ -51,7 +51,8 @@
     "citizen_tracking": "Liste de suivi",
     "scenario_sign": "Signature du scénario",
     "climate_settings": "Paramètres climatiques",
-    "climate_effects": "Climat"
+    "climate_effects": "Climat",
+    "scenario_tools": "Édition du scénario"
   },
   "cityMap": {
     "layers": {

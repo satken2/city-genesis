@@ -76,6 +76,7 @@ const Terrain3DPreviewCanvas = lazy(() => import("./components/terrain/Terrain3D
 const CityMapWindow = lazy(() => import("./components/map/CityMapWindow").then(m => ({ default: m.CityMapWindow })));
 const GodEditPanel = lazy(() => import("./components/debug/GodEditPanel").then(m => ({ default: m.GodEditPanel })));
 const StreetGridWindow = lazy(() => import("./components/template/StreetGridWindow").then(m => ({ default: m.StreetGridWindow })));
+const ScenarioToolsWindow = lazy(() => import("./components/template/ScenarioToolsWindow").then(m => ({ default: m.ScenarioToolsWindow })));
 const AgentCreationPanel = lazy(() => import("./components/template/AgentCreationPanel").then(m => ({ default: m.AgentCreationPanel })));
 // EpochReport は型のみ参照するため、実体をバンドルに含めない type-only import で取得する
 import type { EpochReport } from "./components/taskbar/EpochResultWindow";
@@ -101,7 +102,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -645,6 +646,8 @@ function App() {
               <CityMapWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "zone_edit" ? (
               <ZoneEditWindow apiBaseUrl={context.api_base_url} />
+            ) : context.window_type === "scenario_tools" ? (
+              <ScenarioToolsWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "street_grid" ? (
               // テンプレートモード専用。2D地図で範囲を指定して格子状の路地を計画中で作る
               <StreetGridWindow apiBaseUrl={context.api_base_url} />

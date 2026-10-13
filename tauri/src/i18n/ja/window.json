@@ -51,7 +51,8 @@
     "citizen_tracking": "追跡リスト",
     "scenario_sign": "シナリオの署名",
     "climate_settings": "気候設定",
-    "climate_effects": "気候"
+    "climate_effects": "気候",
+    "scenario_tools": "シナリオ編集"
   },
   "cityMap": {
     "layers": {

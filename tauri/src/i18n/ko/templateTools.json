@@ -77,6 +77,30 @@
     "blockPatterns": "블록 내부 골목",
     "parcelSize": "필지 크기 기준",
     "blockHint": "도로로 둘러싸인 블록 전체를 범위에 포함하세요. 필지가 도로에 접하도록 1차로 도로를 계획합니다.",
-    "noBlocks": "도로를 추가할 공간이 있는 폐쇄된 블록이 없습니다. 선택 범위에 블록 전체를 포함하세요."
+    "noBlocks": "도로를 추가할 공간이 있는 폐쇄된 블록이 없습니다. 선택 범위에 블록 전체를 포함하세요.",
+    "editor": {
+      "cityTab": "도시 편집",
+      "skillsTab": "시민 기술",
+      "scenarioOnly": "시나리오 모드에서만 사용할 수 있습니다.",
+      "complete": "도로와 건물 일괄 완공",
+      "privatize": "민간 시설로 일괄 변경",
+      "streetGrid": "골목 자동 생성",
+      "skillHelp": "정착한 {{age}}세 이상 비재학 주민이 대상입니다. 전공 비율은 전체 고급 인재에 대한 비율입니다.",
+      "population": "대상 {{total}}명 / 현재 고급 인재 {{high}}명 ({{ratio}}%)",
+      "highRatio": "고급 인재 비율",
+      "major": "전문 분야",
+      "current": "현재",
+      "targetRatio": "목표 비율",
+      "targetCount": "적용 후 인원",
+      "currentMajor": "{{count}}명 ({{ratio}}%)",
+      "ratioSum": "전공 비율 합계: {{ratio}}% (100%여야 합니다)",
+      "applyHelp": "적용을 누르면 한 번만 변경합니다. 비율을 줄이면 기술이 낮아질 수 있으며 전공 변경 시 다른 고급 기술도 조정합니다. 고용 이동은 다음 에포크에 진행됩니다.",
+      "apply": "적용",
+      "applied": "{{count}}명의 기술을 변경했습니다",
+      "running": "실행 중…",
+      "failed": "시나리오 편집 작업에 실패했습니다",
+      "enterScenario": "시나리오 모드로 편집",
+      "exitScenario": "일반 모드로 돌아가기"
+    }
   }
 }

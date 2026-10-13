@@ -77,6 +77,30 @@
     "blockPatterns": "Rues à l’intérieur des îlots",
     "parcelSize": "Dimension cible des parcelles",
     "blockHint": "Incluez des îlots entiers entourés de routes. Des rues à une voie sont planifiées pour desservir les parcelles.",
-    "noBlocks": "Aucun îlot fermé avec de la place pour de nouvelles rues. Incluez des îlots entiers dans la zone sélectionnée."
+    "noBlocks": "Aucun îlot fermé avec de la place pour de nouvelles rues. Incluez des îlots entiers dans la zone sélectionnée.",
+    "editor": {
+      "cityTab": "Édition de la ville",
+      "skillsTab": "Compétences des citoyens",
+      "scenarioOnly": "Ces outils sont réservés au mode scénario.",
+      "complete": "Achever routes et bâtiments",
+      "privatize": "Passer les installations admissibles en gestion privée",
+      "streetGrid": "Générer des rues",
+      "skillHelp": "Concerne les résidents établis âgés de {{age}} ans ou plus et non scolarisés. Les parts des spécialités sont calculées parmi les résidents hautement qualifiés.",
+      "population": "{{total}} résidents admissibles / {{high}} hautement qualifiés ({{ratio}} %)",
+      "highRatio": "Part hautement qualifiée",
+      "major": "Spécialité",
+      "current": "Actuellement",
+      "targetRatio": "Part cible",
+      "targetCount": "Effectif cible",
+      "currentMajor": "{{count}} ({{ratio}} %)",
+      "ratioSum": "Total des spécialités : {{ratio}} % (doit être 100 %)",
+      "applyHelp": "Appliquer modifie les compétences une seule fois. Réduire une part peut diminuer les compétences ; changer de spécialité ajuste aussi les autres compétences élevées. Les emplois évoluent à la prochaine époque.",
+      "apply": "Appliquer",
+      "applied": "Compétences modifiées pour {{count}} résidents",
+      "running": "Exécution…",
+      "failed": "Échec de l’édition du scénario",
+      "enterScenario": "Éditer en mode scénario",
+      "exitScenario": "Revenir au mode normal"
+    }
   }
 }

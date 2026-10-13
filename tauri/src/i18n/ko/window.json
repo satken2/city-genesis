@@ -51,7 +51,8 @@
     "citizen_tracking": "추적 목록",
     "scenario_sign": "시나리오 서명",
     "climate_settings": "기후 설정",
-    "climate_effects": "기후"
+    "climate_effects": "기후",
+    "scenario_tools": "시나리오 편집"
   },
   "cityMap": {
     "layers": {

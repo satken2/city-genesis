@@ -623,6 +623,15 @@
     "empty_shell": true,
     "actions": []
   },
+  "scenario_tools": {
+    "title": "シナリオ編集",
+    "width": 740,
+    "height": 680,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
+  },
   "scenario_sign": {
     "title": "シナリオの署名",
     "width": 680,

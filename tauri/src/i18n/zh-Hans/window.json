@@ -51,7 +51,8 @@
     "citizen_tracking": "追踪列表",
     "scenario_sign": "场景签名",
     "climate_settings": "气候设置",
-    "climate_effects": "气候"
+    "climate_effects": "气候",
+    "scenario_tools": "场景编辑"
   },
   "cityMap": {
     "layers": {

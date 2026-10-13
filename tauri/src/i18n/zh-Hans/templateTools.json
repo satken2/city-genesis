@@ -77,6 +77,30 @@
     "blockPatterns": "街区内部小路",
     "parcelSize": "目标地块尺寸",
     "blockHint": "请将道路围合的整个街区纳入范围。规划单车道街道，为地块提供临街面。",
-    "noBlocks": "范围内没有可增设街道的封闭街区。请将整个街区纳入所选范围。"
+    "noBlocks": "范围内没有可增设街道的封闭街区。请将整个街区纳入所选范围。",
+    "editor": {
+      "cityTab": "城市编辑",
+      "skillsTab": "市民技能",
+      "scenarioOnly": "仅可在场景模式中使用。",
+      "complete": "批量完成道路与建筑",
+      "privatize": "批量转为民间设施",
+      "streetGrid": "自动生成街巷",
+      "skillHelp": "对象为已定居、年龄不低于{{age}}岁且未在校的居民。专业比例以全部高技能居民为基数。",
+      "population": "对象{{total}}人 / 当前高技能居民{{high}}人（{{ratio}}%）",
+      "highRatio": "高技能居民比例",
+      "major": "专业领域",
+      "current": "当前",
+      "targetRatio": "目标比例",
+      "targetCount": "应用后人数",
+      "currentMajor": "{{count}}人（{{ratio}}%）",
+      "ratioSum": "专业比例合计：{{ratio}}%（须为100%）",
+      "applyHelp": "点击应用后仅修改一次。降低比例可能降低技能，转换专业也会调整其他高技能。就业变动在下一轮模拟中进行。",
+      "apply": "应用",
+      "applied": "已修改{{count}}名居民的技能",
+      "running": "执行中…",
+      "failed": "场景编辑操作失败",
+      "enterScenario": "在场景模式中编辑",
+      "exitScenario": "返回普通模式"
+    }
   }
 }

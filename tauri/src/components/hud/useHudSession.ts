@@ -29,7 +29,7 @@ export type HudSession = {
   playMode: number;
   /** 市庁舎が未設置(=都市創設前)のため、建設以外の操作をロックするか */
   isLocked: boolean;
-  /** デバッグ実行。通常・神モードの切替ボタンをシステムトレイに出す */
+  /** デバッグ実行。通常モードにもシナリオ編集の入口を出す */
   debugExecution: boolean;
   cityName: string;
   /** 1800年1月1日からの経過日数。未取得のときは null */

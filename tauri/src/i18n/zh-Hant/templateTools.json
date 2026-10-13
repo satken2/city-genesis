@@ -77,6 +77,30 @@
     "blockPatterns": "街區內部小路",
     "parcelSize": "目標地塊尺寸",
     "blockHint": "請將道路圍合的整個街區納入範圍。規劃單車道街道，為地塊提供臨街面。",
-    "noBlocks": "範圍內沒有可增設街道的封閉街區。請將整個街區納入所選範圍。"
+    "noBlocks": "範圍內沒有可增設街道的封閉街區。請將整個街區納入所選範圍。",
+    "editor": {
+      "cityTab": "城市編輯",
+      "skillsTab": "市民技能",
+      "scenarioOnly": "僅可在情境模式中使用。",
+      "complete": "批次完成道路與建築",
+      "privatize": "批次轉為民間設施",
+      "streetGrid": "自動產生街巷",
+      "skillHelp": "對象為已定居、年齡不低於{{age}}歲且未在學的居民。專業比例以全部高技能居民為基數。",
+      "population": "對象{{total}}人 / 目前高技能居民{{high}}人（{{ratio}}%）",
+      "highRatio": "高技能居民比例",
+      "major": "專業領域",
+      "current": "目前",
+      "targetRatio": "目標比例",
+      "targetCount": "套用後人數",
+      "currentMajor": "{{count}}人（{{ratio}}%）",
+      "ratioSum": "專業比例合計：{{ratio}}%（須為100%）",
+      "applyHelp": "按下套用後僅修改一次。降低比例可能降低技能，轉換專業也會調整其他高技能。就業變動於下一輪模擬進行。",
+      "apply": "套用",
+      "applied": "已修改{{count}}名居民的技能",
+      "running": "執行中…",
+      "failed": "情境編輯操作失敗",
+      "enterScenario": "在情境模式中編輯",
+      "exitScenario": "返回一般模式"
+    }
   }
 }

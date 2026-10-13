@@ -1,4 +1,7 @@
 {
+  "scenario_tools": [
+    "scenario_tools"
+  ],
   "settings": [
     "settings"
   ],

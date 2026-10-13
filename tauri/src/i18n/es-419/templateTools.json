@@ -77,6 +77,30 @@
     "blockPatterns": "Calles dentro de manzanas",
     "parcelSize": "Tamaño objetivo del lote",
     "blockHint": "Incluye manzanas completas rodeadas de calles. Se planifican calles de un carril para dar frente vial a los lotes.",
-    "noBlocks": "No hay manzanas cerradas con espacio para más calles. Incluye manzanas completas en el área seleccionada."
+    "noBlocks": "No hay manzanas cerradas con espacio para más calles. Incluye manzanas completas en el área seleccionada.",
+    "editor": {
+      "cityTab": "Edición de la ciudad",
+      "skillsTab": "Habilidades de ciudadanos",
+      "scenarioOnly": "Estas herramientas solo están disponibles en el modo escenario.",
+      "complete": "Completar calles y edificios",
+      "privatize": "Convertir instalaciones elegibles a gestión privada",
+      "streetGrid": "Generar calles",
+      "skillHelp": "Incluye residentes establecidos de {{age}} años o más que no estén estudiando. Las especialidades se calculan sobre todos los residentes altamente capacitados.",
+      "population": "{{total}} residentes elegibles / {{high}} altamente capacitados ({{ratio}}%)",
+      "highRatio": "Proporción altamente capacitada",
+      "major": "Especialidad",
+      "current": "Actual",
+      "targetRatio": "Proporción objetivo",
+      "targetCount": "Residentes objetivo",
+      "currentMajor": "{{count}} ({{ratio}}%)",
+      "ratioSum": "Total de especialidades: {{ratio}}% (debe ser 100%)",
+      "applyHelp": "Aplicar modifica las habilidades una sola vez. Reducir una proporción puede bajar habilidades, y cambiar de especialidad ajusta otras habilidades altas. Los empleos cambian en la siguiente época.",
+      "apply": "Aplicar",
+      "applied": "Se modificaron las habilidades de {{count}} residentes",
+      "running": "Ejecutando…",
+      "failed": "Falló la edición del escenario",
+      "enterScenario": "Editar en modo escenario",
+      "exitScenario": "Volver al modo normal"
+    }
   }
 }

@@ -77,6 +77,30 @@
     "blockPatterns": "街区内の細街路",
     "parcelSize": "区画寸法の目安",
     "blockHint": "幹線に囲まれた街区全体を範囲に含めてください。接道区画を想定した1車線街路を計画します。",
-    "noBlocks": "範囲内に街路を追加できる閉じた街区がありません。街区全体を範囲に含めてください。"
+    "noBlocks": "範囲内に街路を追加できる閉じた街区がありません。街区全体を範囲に含めてください。",
+    "editor": {
+      "cityTab": "都市編集",
+      "skillsTab": "市民スキル",
+      "scenarioOnly": "シナリオモードでのみ操作できます。",
+      "complete": "道路・建物を一括完成",
+      "privatize": "民間施設に一括変更",
+      "streetGrid": "路地を自動作成",
+      "skillHelp": "{{age}}歳以上の定住済み・非在学の住民が対象です。内訳は高度人材全体に対する割合です。",
+      "population": "対象 {{total}}人／現在の高度人材 {{high}}人（{{ratio}}%）",
+      "highRatio": "高度人材の割合",
+      "major": "専門分野",
+      "current": "現在",
+      "targetRatio": "指定内訳",
+      "targetCount": "適用後人数",
+      "currentMajor": "{{count}}人（{{ratio}}%）",
+      "ratioSum": "内訳の合計: {{ratio}}%（100%にしてください）",
+      "applyHelp": "「適用」で一度だけ変更します。比率を下げる場合はスキルも下がり、専門を変更した人の他の高度スキルも調整します。雇用移動は次のエポックで行われます。",
+      "apply": "適用",
+      "applied": "{{count}}人のスキルを変更しました",
+      "running": "実行中…",
+      "failed": "シナリオ編集の操作に失敗しました",
+      "enterScenario": "シナリオモードで編集",
+      "exitScenario": "通常モードに戻る"
+    }
   }
 }

@@ -77,6 +77,30 @@
     "blockPatterns": "Streets inside blocks",
     "parcelSize": "Target lot size",
     "blockHint": "Include entire blocks enclosed by roads. Single-lane streets are planned to provide road frontage for lots.",
-    "noBlocks": "No enclosed blocks with room for more streets were found. Include entire blocks in the selected area."
+    "noBlocks": "No enclosed blocks with room for more streets were found. Include entire blocks in the selected area.",
+    "editor": {
+      "cityTab": "City editing",
+      "skillsTab": "Citizen skills",
+      "scenarioOnly": "These tools are available only in scenario mode.",
+      "complete": "Complete roads and buildings",
+      "privatize": "Convert eligible facilities to private operation",
+      "streetGrid": "Generate streets",
+      "skillHelp": "Targets settled residents aged {{age}} or older who are not enrolled in school. Major shares are percentages of all highly skilled residents.",
+      "population": "{{total}} eligible residents / {{high}} currently highly skilled ({{ratio}}%)",
+      "highRatio": "Highly skilled share",
+      "major": "Specialty",
+      "current": "Current",
+      "targetRatio": "Target share",
+      "targetCount": "Target residents",
+      "currentMajor": "{{count}} ({{ratio}}%)",
+      "ratioSum": "Total specialty share: {{ratio}}% (must be 100%)",
+      "applyHelp": "Apply changes skills once. Reducing a share can lower skills, and changing a specialty adjusts other high skills. Employment changes during the next epoch.",
+      "apply": "Apply",
+      "applied": "Updated skills for {{count}} residents",
+      "running": "Running…",
+      "failed": "Scenario editing failed",
+      "enterScenario": "Edit in scenario mode",
+      "exitScenario": "Return to normal mode"
+    }
   }
 }
