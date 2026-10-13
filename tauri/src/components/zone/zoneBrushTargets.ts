@@ -85,6 +85,24 @@ export function circleTouches(x: number, z: number, r: number, rings: Ring[], bo
   return false;
 }
 
+/** 輪郭のない地区も道路の面から選び、外周が別地区を覆う場所では実際の面所属を優先する。 */
+export function findZoneAt(
+  x: number, z: number,
+  zones: ReadonlyMap<number, { polygon: Ring; area: number }>,
+  frontages: Frontage[], faceZones: ReadonlyMap<FaceKey, number>
+): number | null {
+  for (const frontage of frontages) {
+    if (!circleTouches(x, z, 0, frontage.rings, frontage.bounds)) continue;
+    const zoneId = faceZones.get(frontage.face);
+    if (zoneId && zones.has(zoneId)) return zoneId;
+  }
+  let found: { id: number; area: number } | null = null;
+  for (const [id, zone] of zones) {
+    if (pointInRing(x, z, zone.polygon) && (!found || zone.area < found.area)) found = { id, area: zone.area };
+  }
+  return found?.id ?? null;
+}
+
 /** 点列の先頭から出ていく向き(x-z平面の角度) */
 function leavingAngle(points: Ring): number {
   const [x0, z0] = points[0];

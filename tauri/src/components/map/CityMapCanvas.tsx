@@ -421,8 +421,6 @@ type ApiPolygonItem = {
   /** 建物のみ: 階数と観光名所の種別(0=観光名所ではない)。簡易3Dの高さに使う */
   floors?: number;
   landmark?: number;
-  /** 地区のみ: 1/true=自動管理地区、0/false=確定地区。枠線の実線/破線の描き分けに使う */
-  auto_managed?: boolean | number;
   /** 土地区画のみ: 区画ID。選択や呼び出し側の値との対応に使う */
   parcel_id?: number;
   /** 土地区画のみ: 接道のパスID(接道なしは0以下)と、区画がその道路のどちらの面にあるか(PATH_SIDE_*。決まっていなければ-1) */
@@ -492,10 +490,8 @@ type VectorState = {
   /** 強調する区間・候補の区間の中心線 */
   focusPath: Path2D | null;
   previewPath: Path2D | null;
-  /** 確定地区(auto_managed=0)の枠線。実線で描く */
-  zonePathConfirmed: Path2D | null;
-  /** 自動管理地区(auto_managed=1)の枠線。破線で描き「まだ仮の区割り」であることを示す */
-  zonePathAuto: Path2D | null;
+  /** 地区の枠線。実線で描く */
+  zonePath: Path2D | null;
   /** 地区の値塗り。地区は高々100件なので量子化せず1地区=1fillで持つ */
   zoneFillBands: { path: Path2D; color: string }[] | null;
   /** bbox取得を要求した範囲。カバレッジ判定に使う */
@@ -1484,8 +1480,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         roads: [],
         focusPath: null,
         previewPath: null,
-        zonePathConfirmed: null,
-        zonePathAuto: null,
+        zonePath: null,
         zoneFillBands: null,
         fetchedBounds: null,
         fetchedKinds: new Set(),
@@ -1756,20 +1751,15 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.stroke(coastPath);
         }
 
-        // 地区の枠線。確定地区=実線、自動管理地区=破線で描き分ける
-        // (自動管理地区はシステムが統合しうる「仮の区割り」であることを視覚的に伝える)
+        // 地区の枠線はすべて実線で描く。
         if (L.zoneBorders) {
           ctx.strokeStyle = COLOR_ZONE;
           ctx.lineWidth = px(2);
-          if (vec.zonePathConfirmed) {
+          if (vec.zonePath) {
             ctx.setLineDash([]);
-            ctx.stroke(vec.zonePathConfirmed);
+            ctx.stroke(vec.zonePath);
           }
-          if (vec.zonePathAuto) {
-            ctx.setLineDash([px(8), px(6)]);
-            ctx.stroke(vec.zonePathAuto);
-            ctx.setLineDash([]);
-          }
+
         }
 
         // 土地区画(枠線のみ)
@@ -2518,14 +2508,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
                   { signal: abort.signal }
                 );
                 vec.zones = data.zones ?? [];
-                vec.zonePathConfirmed = buildPolygonPath(
-                  vec.zones.filter((zn) => !zn.auto_managed),
-                  false
-                );
-                vec.zonePathAuto = buildPolygonPath(
-                  vec.zones.filter((zn) => !!zn.auto_managed),
-                  false
-                );
+                vec.zonePath = buildPolygonPath(vec.zones, false);
                 // 値塗りは地区ポリゴンそのものなので、地区の入れ替えに追従させる
                 rebuildZoneFill();
                 return;

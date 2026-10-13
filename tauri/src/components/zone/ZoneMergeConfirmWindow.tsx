@@ -16,7 +16,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { buildApiUrl, fetchApi } from "../../utils/api";
+import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
 import { sendEditZoneFinishMerge } from "../../utils/ipc";
 import "./ZoneMergeConfirmWindow.css";
 
@@ -73,8 +73,10 @@ export function ZoneMergeConfirmWindow({
       );
       await sendEditZoneFinishMerge(true);
       onClose();
-    } catch {
-      setError(t("zone.mergeFailed", "地区の統合に失敗しました"));
+    } catch (err) {
+      setError(err instanceof ApiError
+        ? t(`errors.${err.code}`, { defaultValue: t("zone.mergeFailed") })
+        : t("zone.mergeFailed"));
       setBusy(false);
     }
   };

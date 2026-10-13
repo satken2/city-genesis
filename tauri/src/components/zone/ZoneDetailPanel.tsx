@@ -2,9 +2,8 @@
  * 地区(Zone)詳細パネル
  *
  * window_type="zone_detail" のポップアップウィンドウで表示する専用パネル。
- * 基本情報の表示に加えて、名前・識別色・管理状態(自動管理/確定)・建築規制を編集する。
+ * 基本情報の表示に加えて、名前・識別色・建築規制を編集する。
  *
- * 名前・識別色・建築規制の編集はバックエンド側で自動管理地区を確定地区へ昇格させる(auto_managed=0)。
  * 所属道路の割り当て変更はアイコンパネルから開く地区編集パネルの都市マップで行うため、
  * このパネルでは扱わない。
  */
@@ -55,10 +54,6 @@ export function ZoneDetailPanel({
     limit_height: null,
   });
 
-  // 管理状態(自動管理/確定)のトグル送信中フラグと失敗表示
-  const [managementBusy, setManagementBusy] = useState(false);
-  const [managementError, setManagementError] = useState(false);
-
   // 建築規制の保存中フラグと失敗表示
   const [restrictionSaving, setRestrictionSaving] = useState(false);
   const [restrictionSaveError, setRestrictionSaveError] = useState<string | null>(null);
@@ -94,8 +89,6 @@ export function ZoneDetailPanel({
     }
   };
 
-  // 建築規制の保存。auto_managed を送らないため、バックエンド側で
-  // 自動管理地区は確定地区へ昇格する(レスポンスの zone で管理状態バッジも更新される)。
   // 地区の規制は「未設定」を持てない(土地区画が引き継ぐ値の元になるため)ので、
   // 空欄のまま保存しようとした場合は送信前に弾く。
   const saveRestrictions = async () => {
@@ -133,26 +126,9 @@ export function ZoneDetailPanel({
   };
 
   // 地区名の変更。地区は市の行政区画なので常に変更できる。
-  // 名称の編集はバックエンド側で自動管理地区を確定地区へ昇格させる(規制の編集と同じ扱い)。
   const saveName = async (next: string) => {
     if (!zoneData) return;
     await patchZone(zoneData.zone_id, { name: next });
-  };
-
-  // 地区のピン(確定)/ピン解除(自動管理へ戻す)。
-  // auto_managed を明示指定した PATCH は、バックエンド側で名前・規制編集による
-  // 昇格処理を経由せず送信値がそのまま反映される(ピン操作の専用経路)。
-  const toggleAutoManaged = async () => {
-    if (!zoneData || managementBusy) return;
-    setManagementBusy(true);
-    setManagementError(false);
-    try {
-      await patchZone(zoneData.zone_id, { auto_managed: !zoneData.auto_managed });
-    } catch {
-      setManagementError(true);
-    } finally {
-      setManagementBusy(false);
-    }
   };
 
   // --- Data fetch ---
@@ -226,52 +202,6 @@ export function ZoneDetailPanel({
         onNameSave={saveName}
         nameValue={zoneData.name ?? ""}
       />
-
-      {/* Management state section (2状態モデル: 自動管理/確定) */}
-      <section className="agent-detail-section">
-        <h3 className="agent-detail-section-title">
-          {t("zone.managementState", "管理状態")}
-        </h3>
-        <div className="zone-mgmt-row">
-          <span
-            className={
-              zoneData.auto_managed
-                ? "zone-mgmt-badge zone-mgmt-badge-auto"
-                : "zone-mgmt-badge zone-mgmt-badge-confirmed"
-            }
-          >
-            {zoneData.auto_managed
-              ? t("zone.autoManaged", "自動管理")
-              : t("zone.confirmed", "確定済み")}
-          </span>
-          <button
-            className="zone-mgmt-toggle-btn"
-            type="button"
-            disabled={managementBusy}
-            onClick={() => void toggleAutoManaged()}
-          >
-            {zoneData.auto_managed
-              ? t("zone.pinAction", "この地区を確定する")
-              : t("zone.unpinAction", "自動管理に戻す")}
-          </button>
-        </div>
-        <p className="zone-mgmt-desc">
-          {zoneData.auto_managed
-            ? t(
-                "zone.autoManagedDesc",
-                "道路網の変化に合わせて、システムがこの地区の統合を自動で行うことがあります"
-              )
-            : t(
-                "zone.confirmedDesc",
-                "この地区の形状がシステムによって組み替えられることはありません（道路の追加による成長は行われます）"
-              )}
-        </p>
-        {managementError && (
-          <p className="zone-mgmt-error">
-            {t("zone.managementUpdateFailed", "管理状態の更新に失敗しました")}
-          </p>
-        )}
-      </section>
 
       {/* Basic info section */}
       <section className="agent-detail-section">
@@ -360,16 +290,7 @@ export function ZoneDetailPanel({
         onSave={() => void saveRestrictions()}
         saving={restrictionSaving}
         saveError={restrictionSaveError}
-      >
-        {zoneData.auto_managed ? (
-          <p className="zone-restriction-note">
-            {t(
-              "zone.restrictionPromoteNote",
-              "建築規制を変更して保存すると、この地区は確定済みになります"
-            )}
-          </p>
-        ) : null}
-      </RestrictionFields>
+      />
 
       {godMode && (
         <button

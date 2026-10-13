@@ -17,6 +17,8 @@ public static class Constants
     public const string CITY_SCENARIO_DIR = "UrbanGenesis/scenarios";
     public const string CITY_SAVE_DIR = "UrbanGenesis/saves";
     public const int HISTORY_COUNT = 120;
+    public const float ZONE_MAX_DIAMETER = 1000.0f;
+    public const float ZONE_MAX_TOTAL_STREET_LENGTH = 8000.0f;
     public const float DAYS_PER_YEAR = 365.0f;
     public const float DAYS_PER_MONTH = 30.0f;
     public const int STATUS_TEMPORARY = 0;

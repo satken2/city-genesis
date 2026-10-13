@@ -17,7 +17,7 @@
  *
  * ブラシは画面上で一定の半径なので、ズームすれば塗れる範囲が変わり、大きさの設定は持たない。
  * 都市の矩形の外の道路(都市外地区)は所属を変えられないので、その面は拾わない。
- * 割り当て後の地区の道路が繋がっているかはコアが検証し(ZONE_CONTIGUITY_ERROR)、ここでは結果を出すだけ。
+ * 地区の連結性とサイズはコアが検証し(ZONE_CONTIGUITY_ERROR / ZONE_SIZE_ERROR)、ここでは結果を出すだけ。
  * 成功したら地図のベクターと3D(session:reload)を取り直す。
  *
  * 地区の色塗りはデータが変わったときだけ描けばよいので overlayDraw に、カーソルに追従する
@@ -45,8 +45,8 @@ import {
   buildFrontages,
   circleTouches,
   faceKey,
+  findZoneAt,
   parseFaceKey,
-  pointInRing,
   signedArea,
   type Block,
   type FaceKey,
@@ -234,13 +234,13 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     streetMidsRef.current = mids;
     setZones(
       vectors.zones
-        .filter((zone) => (zone.zone_id ?? 0) > 0 && (zone.polygon?.length ?? 0) >= 3)
+        .filter((zone) => (zone.zone_id ?? 0) > 0)
         .map((zone) => ({
           zoneId: zone.zone_id!,
           name: zone.name ?? "",
           color: zone.color || FALLBACK_ZONE_COLOR,
-          polygon: zone.polygon!,
-          area: Math.abs(signedArea(zone.polygon!)),
+          polygon: zone.polygon ?? [],
+          area: Math.abs(signedArea(zone.polygon ?? [])),
         }))
         // 大きい順。塗り重ねたときに飛び地(内側の小さい地区)が上になる
         .sort((a, b) => b.area - a.area)
@@ -249,13 +249,9 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setOverlayVersion((v) => v + 1);
   }, []);
 
-  /** 点を含む地区。外周が飛び地も覆う地区があるので、含む地区のうち最も小さい(内側の)ものを返す */
+  /** 道路の面を優先し、輪郭で選ぶ場合は内側の小さい地区を返す */
   const zoneAt = useCallback((p: WorldPoint): number | null => {
-    let found: ZoneShape | null = null;
-    for (const zone of zonesRef.current) {
-      if (pointInRing(p.x, p.z, zone.polygon) && (!found || zone.area < found.area)) found = zone;
-    }
-    return found?.zoneId ?? null;
+    return findZoneAt(p.x, p.z, zonesByIdRef.current, frontagesRef.current, faceZonesRef.current);
   }, []);
 
   const handleCursor = useCallback(
