@@ -6,7 +6,7 @@
  * 操作フローは「3Dビュー主導・パネルは数値と確定」:
  *   ウィンドウを開くと即座に土地区画作成モード(STATE_EDIT_PARCEL)へ入り、
  *   **作成モードの切り替えはUnity側のCtrlラジアルメニュー**が行う(道路敷設・地区編集と同型)。
- *   パネルは幅・奥行き・平均面積などの数値入力とプレビュー、確定ボタンを担当する。
+ *   パネルは幅・奥行き・平均面積などの数値入力と確定ボタンを担当し、形状のプレビューは3Dビューに出す。
  *   確定してもモードから抜けず、選択だけリセットして連続作成できる。
  *
  * 作成モードの真実源はUnity側(`ParcelEditorManager.CurrentMode`)にあるため、パネルの
@@ -30,8 +30,6 @@ import {
   IPC_EVENT_EDIT_PARCEL_SET_MODE,
   IPC_EVENT_EDIT_PARCEL_UPDATE_ROTATION,
 } from "../../utils/ipc";
-import type { ParcelPreviewItem } from "./ParcelPreviewCanvas";
-import { ParcelPreviewCanvas } from "./ParcelPreviewCanvas";
 import { NumberStepper } from "../common/NumberStepper";
 import { showNotification } from "../../utils/notification";
 import { fetchApi, ApiError } from "../../utils/api";
@@ -44,6 +42,13 @@ type CreationMode =
   | "block"
   | "split_rectangle"
   | "split_random";
+
+/** POST /api/v1/parcels/preview が返す区画1件 */
+type ParcelPreviewItem = {
+  polygon: number[][];
+  center_point: number[];
+  area: number;
+};
 
 /** 地点選択で空き領域を探索するモード（Unity側は PARCEL_CREATION_POINT プリセット） */
 const POINT_MODES: CreationMode[] = ["empty_area", "random", "block"];
@@ -59,10 +64,12 @@ function isPointCreationMode(mode: CreationMode | null): boolean {
  * 区画そのものの寸法だが、random / block は周囲から複数区画を生成する
  * 「探索範囲」なので桁が1つ違う。モード切替時に必ず初期値へ戻し、前のモードの値が
  * レンジ外のまま残らないようにする。
+ * empty_area / along_path の上限は、最大の寸法プリセット(150×150)を縦横比 1:3 まで
+ * 振った寸法(約87×260m)が収まる値にしている。
  */
 const SIZE_INPUT_PRESETS: Record<string, { width: number; height: number; min: number; max: number; step: number }> = {
-  empty_area: { width: 10, height: 20, min: 1, max: 200, step: 1 },
-  along_path: { width: 20, height: 20, min: 1, max: 100, step: 1 },
+  empty_area: { width: 10, height: 20, min: 1, max: 300, step: 1 },
+  along_path: { width: 20, height: 20, min: 1, max: 300, step: 1 },
   random: { width: 200, height: 200, min: 1, max: 400, step: 10 },
   block: { width: 200, height: 200, min: 20, max: 400, step: 10 },
 };
@@ -77,6 +84,52 @@ const DEFAULT_SIZE_INPUT = SIZE_INPUT_PRESETS[DEFAULT_CREATION_MODE];
  * バックエンド側でも `geo_parcels.PATH_PARCEL_SPOT_MAX_COUNT` でクランプされる。
  */
 const ALONG_PATH_MAX_COUNT = 5;
+
+/**
+ * 区画の大きさのプリセット。用途ごとの典型的な1区画の 間口×奥行き(m)。
+ * どのモードでも同じプリセットを使い、書き込む欄だけを PRESET_FIELD で切り替える。
+ */
+const SIZE_PRESETS = [
+  { nameKey: "parcel_creation.presetSmallHouse", width: 10, depth: 10 },
+  { nameKey: "parcel_creation.presetHouseShop", width: 15, depth: 15 },
+  { nameKey: "parcel_creation.presetMidRise", width: 30, depth: 30 },
+  { nameKey: "parcel_creation.presetHighRise", width: 60, depth: 60 },
+  { nameKey: "parcel_creation.presetLargeFactory", width: 150, depth: 150 },
+];
+
+/**
+ * プリセットが書き込む欄。size=幅・奥行き、lot=間口・奥行き(ブロック一括)、area=平均面積。
+ * ランダムとブロック一括の幅・奥行きは探索範囲なので、プリセットの対象ではない。
+ * 縦横比スライダーは size のモードでだけ使える。
+ */
+type PresetField = "size" | "lot" | "area";
+
+const PRESET_FIELD: Record<CreationMode, PresetField> = {
+  empty_area: "size",
+  along_path: "size",
+  block: "lot",
+  random: "area",
+  split_rectangle: "area",
+  split_random: "area",
+};
+
+/**
+ * 縦横比スライダーの片側の段数。比(奥行き÷幅)は 3^(段/ASPECT_STEPS) で、
+ * 1:3〜3:1 を対数目盛で等分する(中央が 1:1)。面積はプリセットのまま保つ。
+ */
+const ASPECT_STEPS = 10;
+const ASPECT_MAX_RATIO = 3;
+
+function aspectRatioOf(step: number): number {
+  return ASPECT_MAX_RATIO ** (step / ASPECT_STEPS);
+}
+
+/** 短い辺を1とした「幅 : 奥行き」の表示 */
+function formatAspect(step: number): string {
+  const ratio = aspectRatioOf(step);
+  const longer = String(Math.round(Math.max(ratio, 1 / ratio) * 10) / 10);
+  return ratio >= 1 ? `1 : ${longer}` : `${longer} : 1`;
+}
 
 const CREATION_SECTIONS = [
   {
@@ -155,6 +208,10 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   // random / split_random / block 共通: 区画幅のゆらぎ(%)
   const [jitterPct, setJitterPct] = useState(25);
 
+  // 選択中の大きさのプリセット(SIZE_PRESETS の添字)。対象の欄を手入力すると外れる。
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
+  const [aspectStep, setAspectStep] = useState(0);
+
   const [pickedPosition, setPickedPosition] = useState<number[] | null>(null);
   const [selectedPathId, setSelectedPathId] = useState<number | null>(null);
   const [selectedParcelId, setSelectedParcelId] = useState<number | null>(null);
@@ -193,6 +250,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
    * 作成モードの切り替えをパネルの状態へ反映する（IPCは送らない）。
    * モードによって width/height の意味と桁が変わるため、モードが変わったときだけ
    * 入力値をそのモードの初期値へ戻す（同じモードでの「選び直し」では保持する）。
+   * プリセットもモードごとに書き込む欄が違うので、モードが変わったら選択を外す。
    */
   const applyModeSelection = useCallback(
     (mode: CreationMode) => {
@@ -207,6 +265,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
           setWidth(preset.width);
           setHeight(preset.height);
         }
+        setSelectedPreset(null);
       }
     },
     [clearSelectionState]
@@ -252,7 +311,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
    * プレビュー形状をUnityの3Dオーバーレイへ送る。
    *
    * MMFは1メッセージあたりの上限を持つため、区画数が多すぎると送信が失敗する。
-   * 握り潰すとパネル内の2Dプレビューだけが更新され「3Dだけ止まった」ように見えるので、
+   * 握り潰すと3Dビューのプレビューが古いまま確定ボタンだけ押せる状態になるので、
    * 失敗は必ず通知する。
    */
   const pushPreviewToUnity = useCallback(
@@ -536,6 +595,50 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   }
 
   /**
+   * プリセットの寸法を縦横比で振り、選択中のモードの欄へ書き込む。
+   * 幅と奥行きを √比 で逆向きに伸縮するので、面積はプリセットのまま保たれる。
+   */
+  function applyPreset(index: number, step: number) {
+    const preset = SIZE_PRESETS[index];
+    const scale = Math.sqrt(aspectRatioOf(step));
+    const w = Math.max(1, Math.round(preset.width / scale));
+    const d = Math.max(1, Math.round(preset.depth * scale));
+    const writers: Record<PresetField, () => void> = {
+      size: () => {
+        setWidth(w);
+        setHeight(d);
+      },
+      lot: () => {
+        setLotWidth(w);
+        setLotDepth(d);
+      },
+      area: () => setArea(w * d),
+    };
+    writers[PRESET_FIELD[selectedMode]]();
+  }
+
+  /** プリセットを押すと縦横比を 1:1 に戻し、ボタンの表記どおりの寸法にする */
+  function handlePresetClick(index: number) {
+    setSelectedPreset(index);
+    setAspectStep(0);
+    applyPreset(index, 0);
+  }
+
+  function handleAspectChange(step: number) {
+    if (selectedPreset === null) return;
+    setAspectStep(step);
+    applyPreset(selectedPreset, step);
+  }
+
+  /** プリセットが書き込む欄の手入力。その欄がいまのモードのプリセットの対象なら選択を外す。 */
+  function presetFieldInput(field: PresetField, set: (value: number) => void) {
+    return (value: number) => {
+      set(value);
+      if (PRESET_FIELD[selectedMode] === field) setSelectedPreset(null);
+    };
+  }
+
+  /**
    * 選択のリセット。3Dビュー側の選択・プレビュー・描きかけのポリゴンも
    * `edit_parcel:reset_selection` で同時に捨てて、同じモードのまま選び直せる状態に戻す。
    */
@@ -660,10 +763,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   const canConfirm = !previewLoading && !!previewData && previewData.length > 0;
 
-  const originalPolygonForPreview = useMemo(() => {
-    return null;
-  }, []);
-
   const sizeInput =
     (selectedMode && SIZE_INPUT_PRESETS[selectedMode]) || DEFAULT_SIZE_INPUT;
 
@@ -708,18 +807,49 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         ))}
       </div>
 
-      {/* 入力 + プレビュー */}
+      {/* 入力 + メッセージ */}
       {selectedMode && (
         <div className="pc-body">
           {/* 上: 入力欄 */}
           <div className="pc-input-section">
+            <div className="pc-preset-list">
+              {SIZE_PRESETS.map((preset, index) => (
+                <button
+                  key={preset.nameKey}
+                  type="button"
+                  className={`pc-preset-btn ${selectedPreset === index ? "selected" : ""}`}
+                  onClick={() => handlePresetClick(index)}
+                >
+                  {t("parcel_creation.presetLabel", {
+                    name: t(preset.nameKey),
+                    width: preset.width,
+                    depth: preset.depth,
+                  })}
+                </button>
+              ))}
+            </div>
+            <div className="pc-input-row">
+              <span className="pc-input-label">{t("parcel_creation.aspectRatio")}</span>
+              <input
+                type="range"
+                className="pc-aspect-slider"
+                min={-ASPECT_STEPS}
+                max={ASPECT_STEPS}
+                step={1}
+                value={aspectStep}
+                disabled={selectedPreset === null || PRESET_FIELD[selectedMode] !== "size"}
+                onChange={(e) => handleAspectChange(Number(e.target.value))}
+              />
+              <span className="pc-input-unit">{formatAspect(aspectStep)}</span>
+            </div>
+
             {(selectedMode === "empty_area" || selectedMode === "random") && (
               <>
                 <div className="pc-input-row">
                   <span className="pc-input-label">{t("parcel_creation.width")}</span>
                   <NumberStepper
                     value={width}
-                    onChange={setWidth}
+                    onChange={presetFieldInput("size", setWidth)}
                     min={sizeInput.min}
                     max={sizeInput.max}
                     step={sizeInput.step}
@@ -731,7 +861,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <span className="pc-input-label">{t("parcel_creation.height")}</span>
                   <NumberStepper
                     value={height}
-                    onChange={setHeight}
+                    onChange={presetFieldInput("size", setHeight)}
                     min={sizeInput.min}
                     max={sizeInput.max}
                     step={sizeInput.step}
@@ -784,9 +914,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <span className="pc-input-label">{t("parcel_creation.lotWidth")}</span>
                   <NumberStepper
                     value={lotWidth}
-                    onChange={setLotWidth}
+                    onChange={presetFieldInput("lot", setLotWidth)}
                     min={4}
-                    max={50}
+                    max={150}
                     step={1}
                     integerOnly={false}
                   />
@@ -796,9 +926,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <span className="pc-input-label">{t("parcel_creation.lotDepth")}</span>
                   <NumberStepper
                     value={lotDepth}
-                    onChange={setLotDepth}
+                    onChange={presetFieldInput("lot", setLotDepth)}
                     min={5}
-                    max={100}
+                    max={150}
                     step={1}
                     integerOnly={false}
                   />
@@ -813,7 +943,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <span className="pc-input-label">{t("parcel_creation.alongPathWidth")}</span>
                   <NumberStepper
                     value={width}
-                    onChange={setWidth}
+                    onChange={presetFieldInput("size", setWidth)}
                     min={sizeInput.min}
                     max={sizeInput.max}
                     step={sizeInput.step}
@@ -825,7 +955,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <span className="pc-input-label">{t("parcel_creation.alongPathDepth")}</span>
                   <NumberStepper
                     value={height}
-                    onChange={setHeight}
+                    onChange={presetFieldInput("size", setHeight)}
                     min={sizeInput.min}
                     max={sizeInput.max}
                     step={sizeInput.step}
@@ -901,9 +1031,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                 <span className="pc-input-label">{t("parcel_creation.area")}</span>
                 <NumberStepper
                   value={area}
-                  onChange={setArea}
+                  onChange={presetFieldInput("area", setArea)}
                   min={10}
-                  max={10000}
+                  max={30000}
                   step={10}
                   integerOnly={false}
                 />
@@ -950,28 +1080,22 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
             )}
           </div>
 
-          {/* 下: プレビュー */}
-          <div className="pc-preview-section">
-            {previewLoading ? (
-              <div className="pc-preview-message">
-                {t("parcel_creation.previewLoading")}
-              </div>
-            ) : previewData && previewData.length > 0 ? (
-              <ParcelPreviewCanvas
-                parcels={previewData}
-                originalPolygon={originalPolygonForPreview}
-                size={280}
-              />
-            ) : previewData?.length === 0 ? (
-              <div className="pc-preview-message">{t("parcel_creation.noParcels")}</div>
-            ) : (
+          {/* 下: プレビューの取得状況。形状そのものは3Dビューに出す */}
+          {previewLoading ? (
+            <div className="pc-preview-message">
+              {t("parcel_creation.previewLoading")}
+            </div>
+          ) : previewData?.length === 0 ? (
+            <div className="pc-preview-message">{t("parcel_creation.noParcels")}</div>
+          ) : (
+            !previewData && (
               <div className="pc-preview-message">
                 {isPointMode && t("parcel_creation.selectPoint")}
                 {selectedMode === "along_path" && t(alongPathSelectPromptKey)}
                 {(selectedMode === "split_rectangle" || selectedMode === "split_random") && t("parcel_creation.selectParcel")}
               </div>
-            )}
-          </div>
+            )
+          )}
         </div>
       )}
 

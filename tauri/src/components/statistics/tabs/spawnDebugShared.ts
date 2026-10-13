@@ -67,11 +67,11 @@ export type AgentSpawnRecord = {
   variants: Record<string, Record<string, number>>;
   metrics: Record<string, AgentSpawnMetrics>;
   /** 案件ごとの与信集中限度（円）。業種によらない都市共通のスカラーで、
-   *  max(民間預金総額 × SPAWN_CREDIT_CONCENTRATION_LIMIT, SPAWN_CREDIT_FLOOR) */
+   *  max(年間名目GDP × SPAWN_CREDIT_CONCENTRATION_LIMIT, SPAWN_CREDIT_FLOOR) */
   credit_limit: number;
-  /** 与信集中限度の分母である民間預金総額（円）。
-   *  一般施設・共有建物・世帯の正の現金残高の合計 */
-  private_deposits: number;
+  /** 与信集中限度の分母である年間名目GDP（円）。
+   *  直近1年に確定したエポックの名目GDPの平均を年額に換算した値 */
+  annual_gdp: number;
 };
 
 /** GET /api/v1/stats/spawn_debug のレスポンス全体 */

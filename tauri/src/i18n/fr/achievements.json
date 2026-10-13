@@ -17,7 +17,7 @@
     "households": "ménages",
     "avgNutrition": "Satisfaction alimentaire",
     "avgHealthcare": "Satisfaction sanitaire",
-    "avgEntertainment": "Satisfaction des loisirs",
+    "avgLeisure": "Loisirs",
     "avgEnv": "Score du cadre de vie",
     "scoreComposition": "Composition du score",
     "finalScore": "Score après déductions",
@@ -65,7 +65,7 @@
     "satisfactionHint": "Moyennes des ménages. Plus elles sont élevées, mieux les besoins sont satisfaits. Hors déductions pour effondrements.",
     "nutritionHint": "Satisfaction des besoins alimentaires et de restauration",
     "healthcareHint": "Satisfaction des besoins en médicaments et soins",
-    "entertainmentHint": "Satisfaction des besoins de loisirs et autres services de bien-être",
+    "leisureHint": "Satisfaction des besoins de loisirs et autres services de bien-être",
     "envHint": "Coût du logement et des trajets et qualité du lieu, par rapport à la référence du score",
     "status": {
       "active": "En cours",

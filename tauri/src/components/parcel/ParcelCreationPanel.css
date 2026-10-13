@@ -66,7 +66,7 @@
   overflow: hidden;
 }
 
-/* ---- メインボディ (入力 + プレビューの縦並び) ---- */
+/* ---- メインボディ (入力 + メッセージの縦並び) ---- */
 .pc-body {
   display: flex;
   flex-direction: column;
@@ -105,6 +105,39 @@
   color: #93a9c0;
 }
 
+/* 大きさのプリセット (ラジオボタンのように1つだけ選ぶ) */
+.pc-preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pc-preset-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  color: #f6fbff;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pc-preset-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pc-preset-btn.selected {
+  border-color: #4ea1ff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pc-aspect-slider {
+  flex: 1;
+  min-width: 0;
+}
+
 /* ラジオボタン */
 .pc-radio-group {
   display: flex;
@@ -138,17 +171,7 @@
   color: #93a9c0;
 }
 
-/* ---- プレビューセクション (下) ---- */
-.pc-preview-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  min-width: 0;
-}
-
+/* ---- プレビューの取得状況メッセージ (下) ---- */
 .pc-preview-message {
   font-size: 1rem;
   color: #93a9c0;

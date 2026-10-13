@@ -454,7 +454,7 @@ public partial class RoadPlanManager
                 {
                     if (!InfraNetworkUtil.IsNodeSnappable(node, PathSubtype, pathManager)) continue;
                     if (!TerrainInputHandler.IsNodeSnapVisible(node, pathManager)) continue;
-                    EvaluatePointTargetOffsetCandidates(basePos, pathManager.GetNodeSnapPosition(node), node.GetRelativeHeight(), ref bestDist, ref snapped, ref snapRelHeight, ref found);
+                    EvaluatePointTargetOffsetCandidates(basePos, pathManager.GetNodeSnapPosition(node), ref bestDist, ref snapped, ref snapRelHeight, ref found);
                 }
             }
 
@@ -481,8 +481,9 @@ public partial class RoadPlanManager
                         && RailJunctionGeometry.TryProject(seg.path, basePos, out Vector3 railPosition, out Vector3 railTangent))
                     {
                         if (!IsRailSnapPointVisible(seg.path, railPosition)) continue;
+                        // 解析射影の点はYを持たない(0)ので、路面の標高を与えてから候補を作る
+                        railPosition.y = RailSurfaceHeight(seg.path, railPosition);
                         EvaluateTangentOffsetCandidates(basePos, railPosition, railTangent,
-                            seg.path.GetRelativeHeightAtPoint(railPosition.x, railPosition.z),
                             ref bestDist, ref snapped, ref snapRelHeight, ref found);
                         continue;
                     }
@@ -525,13 +526,10 @@ public partial class RoadPlanManager
     /// 生カーソルに最も近い候補で最良値を更新する。接線はターゲットの近傍セグメントのうち
     /// 端点が一致するものを使い(交差点では全アームを試す)、無ければ最寄りセグメントで代用する。
     /// </summary>
-    private void EvaluatePointTargetOffsetCandidates(Vector3 basePos, Vector3 targetPos, float targetRelHeight, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
+    private void EvaluatePointTargetOffsetCandidates(Vector3 basePos, Vector3 targetPos, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
     {
         var segs = TerrainInputHandler.GetVisiblePathSnapSegments(pathManager.QueryNearbySegments(targetPos, OFFSET_SNAP_TANGENT_SEARCH_RADIUS));
 
-        // 標高はターゲット(ノード/端点)が保持する相対高さをそのまま引き継ぐ
-        // (絶対Y−地形サンプルの逆算は高さ源の差がノイズとして乗る)
-        float relHeight = targetRelHeight;
         Vector2 targetXZ = new Vector2(targetPos.x, targetPos.z);
 
         bool anyTouching = false;
@@ -552,7 +550,7 @@ public partial class RoadPlanManager
             if (Mathf.Min(distA, distB) <= OFFSET_SNAP_TOUCH_TOLERANCE)
             {
                 anyTouching = true;
-                EvaluateTangentOffsetCandidates(basePos, targetPos, dir, relHeight, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+                EvaluateTangentOffsetCandidates(basePos, targetPos, dir, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
             }
             else if (!anyTouching)
             {
@@ -567,15 +565,15 @@ public partial class RoadPlanManager
         }
         if (!anyTouching && fallbackDir.sqrMagnitude > 1e-6f)
         {
-            EvaluateTangentOffsetCandidates(basePos, targetPos, fallbackDir, relHeight, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+            EvaluateTangentOffsetCandidates(basePos, targetPos, fallbackDir, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
         }
     }
 
     /// <summary>
     /// 点ターゲットと接線方向1本に対する候補 C = ターゲット ± perp·オフセット を列挙し最良値を更新する。
-    /// 横移動してもターゲットの絶対標高を保ち、相対高さは移動先の地形から求める。
+    /// 横移動してもターゲットの絶対標高(targetPos.y)を保ち、相対高さは移動先の地形から求める。
     /// </summary>
-    private void EvaluateTangentOffsetCandidates(Vector3 basePos, Vector3 targetPos, Vector3 tangent, float relHeight, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
+    private void EvaluateTangentOffsetCandidates(Vector3 basePos, Vector3 targetPos, Vector3 tangent, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
     {
         Vector3 dir = tangent.normalized;
         Vector3 perp = new Vector3(-dir.z, 0f, dir.x);
@@ -630,7 +628,7 @@ public partial class RoadPlanManager
         if (Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(x, z)) > searchRadius) return;
         Vector3 endpoint = new Vector3(x, Utils.GetGroundHeight(new Vector3(x, 0f, z)) + rel, z);
         if (!TerrainInputHandler.IsPathSnapPointVisible(path, endpoint)) return;
-        EvaluatePointTargetOffsetCandidates(basePos, endpoint, rel, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+        EvaluatePointTargetOffsetCandidates(basePos, endpoint, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
     }
 
     /// <summary>

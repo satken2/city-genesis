@@ -46,7 +46,7 @@ type ScoreDetail = {
   city_score_household_count: number;
   city_score_avg_nutrition: number;
   city_score_avg_healthcare: number;
-  city_score_avg_entertainment: number;
+  city_score_avg_leisure: number;
   city_score_avg_env: number;
   collapse_events: CollapseEvent[];
 };
@@ -168,7 +168,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const satisfaction = latest ? [
     { key: "avgNutrition", hint: "nutritionHint", value: latest.city_score_avg_nutrition },
     { key: "avgHealthcare", hint: "healthcareHint", value: latest.city_score_avg_healthcare },
-    { key: "avgEntertainment", hint: "entertainmentHint", value: latest.city_score_avg_entertainment },
+    { key: "avgLeisure", hint: "leisureHint", value: latest.city_score_avg_leisure },
     { key: "avgEnv", hint: "envHint", value: latest.city_score_avg_env },
   ] : [];
   const overallSatisfaction = getSatisfactionAppearance((latest?.city_score_per_household ?? 0) / MAX_SCORE_PER_HOUSEHOLD);

@@ -71,7 +71,7 @@ type HotelCount = {
 
 type DistributionPoint = {
   bin: string;
-  entertainment: number;
+  leisure: number;
   tourism: number;
   qol: number;
 };
@@ -106,7 +106,7 @@ type TourismStats = {
   };
   satisfaction: {
     staying_parties: number;
-    avg_entertainment: number;
+    avg_leisure: number;
     avg_tourism: number;
     avg_env: number;
     avg_qol: number;
@@ -130,7 +130,7 @@ const COLOR_ARRIVALS = "#10b981";
 const COLOR_DEPARTURES = "#ef4444";
 const COLOR_APPLICANTS = "#f59e0b";
 const COLOR_REVENUE = "#a78bfa";
-const COLOR_ENTERTAINMENT = "#f59e0b";
+const COLOR_LEISURE = "#f59e0b";
 const COLOR_TOURISM = "#ec4899";
 const COLOR_QOL = "#60a5fa";
 
@@ -412,7 +412,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               <>
                 <div className="tourism-meters">
                   {[
-                    { key: "ent", label: t("statistics.tourism.avgEntertainment"), value: satisfaction.avg_entertainment, color: COLOR_ENTERTAINMENT },
+                    { key: "leisure", label: t("statistics.tourism.avgLeisure"), value: satisfaction.avg_leisure, color: COLOR_LEISURE },
                     { key: "tour", label: t("statistics.tourism.avgTourism"), value: satisfaction.avg_tourism, color: COLOR_TOURISM },
                     { key: "env", label: t("statistics.tourism.avgEnv"), value: Math.min(satisfaction.avg_env, 1), color: COLOR_CAPACITY, raw: satisfaction.avg_env },
                     { key: "qol", label: t("statistics.tourism.avgQol"), value: satisfaction.avg_qol, color: COLOR_QOL },
@@ -434,7 +434,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       <YAxis width={remPx(5.56)} tick={AXIS_TICK} tickLine={false} allowDecimals={false} />
                       <Tooltip contentStyle={TOOLTIP_STYLE} />
                       <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconSize={8} />
-                      <Bar dataKey="entertainment" name={t("statistics.tourism.avgEntertainment")} fill={COLOR_ENTERTAINMENT} />
+                      <Bar dataKey="leisure" name={t("statistics.tourism.avgLeisure")} fill={COLOR_LEISURE} />
                       <Bar dataKey="tourism" name={t("statistics.tourism.avgTourism")} fill={COLOR_TOURISM} />
                       <Bar dataKey="qol" name={t("statistics.tourism.avgQol")} fill={COLOR_QOL} />
                     </BarChart>

@@ -65,7 +65,7 @@ type AgentItem = {
   discretionary_income?: number | null;
   satis_nutrition?: number | null;
   satis_healthcare?: number | null;
-  satis_entertainment?: number | null;
+  satis_leisure?: number | null;
   satis_residential?: number | null;
   has_automobile?: boolean | null;
   // TYPE_EDUCATION
@@ -602,11 +602,11 @@ function buildColumns(
         sortValue: (a) => a.satis_healthcare ?? 0,
       },
       {
-        key: "satis_entertainment",
-        label: t("agentList.colSatisEntertainment"),
+        key: "satis_leisure",
+        label: t("agentList.colSatisLeisure"),
         align: "right",
-        render: (a) => pct(a.satis_entertainment),
-        sortValue: (a) => a.satis_entertainment ?? 0,
+        render: (a) => pct(a.satis_leisure),
+        sortValue: (a) => a.satis_leisure ?? 0,
       },
       {
         key: "satis_residential",

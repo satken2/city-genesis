@@ -17,7 +17,7 @@
     "households": "世帯",
     "avgNutrition": "栄養満足度",
     "avgHealthcare": "医療満足度",
-    "avgEntertainment": "娯楽満足度",
+    "avgLeisure": "娯楽・余暇",
     "avgEnv": "住環境スコア",
     "scoreComposition": "スコア構成",
     "finalScore": "減点後のスコア",
@@ -65,7 +65,7 @@
     "satisfactionHint": "全世帯の平均。高いほど満たされています。倒壊による減点は含みません。",
     "nutritionHint": "食料や飲食サービスの充足度",
     "healthcareHint": "医薬品や医療サービスの充足度",
-    "entertainmentHint": "娯楽など生活を豊かにするサービスの充足度",
+    "leisureHint": "娯楽など生活を豊かにするサービスの充足度",
     "envHint": "家賃・通勤負担と立地の良さを、評価基準に対して表示",
     "status": {
       "active": "進行中",

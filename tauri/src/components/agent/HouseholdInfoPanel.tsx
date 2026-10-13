@@ -7,8 +7,8 @@
  * 充足度(satis_*)は0.0〜1.0の割合値としてMeterコンポーネントで可視化する。
  * 世帯構成員はCitizenLinkとして表示し、クリックで市民詳細パネルへの遷移を想定している。
  *
- * 観光客世帯(VARIANT_TOURIST)は市民を持たず、旅の満足度は娯楽と観光体験で決まるため、
- * 世帯タイプの代わりに「観光客」と表示し、メーターは娯楽充足度と観光充足度だけを出す。
+ * 観光客世帯(VARIANT_TOURIST)は市民を持たず、旅の満足度は娯楽・余暇と観光体験で決まるため、
+ * 世帯タイプの代わりに「観光客」と表示し、メーターは娯楽・余暇と観光充足度だけを出す。
  */
 
 import { useTranslation } from "react-i18next";
@@ -101,10 +101,10 @@ export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
               value={agent.satis_healthcare}
             />
           )}
-          {agent.satis_entertainment != null && (
+          {agent.satis_leisure != null && (
             <Meter
-              label={t("household.satisEntertainment")}
-              value={agent.satis_entertainment}
+              label={t("household.satisLeisure")}
+              value={agent.satis_leisure}
             />
           )}
           {isTourist && agent.satis_tourism != null && (

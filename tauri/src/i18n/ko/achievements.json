@@ -17,7 +17,7 @@
     "households": "가구",
     "avgNutrition": "영양 만족도",
     "avgHealthcare": "의료 만족도",
-    "avgEntertainment": "여가 만족도",
+    "avgLeisure": "오락·여가",
     "avgEnv": "주거 환경 점수",
     "scoreComposition": "점수 구성",
     "finalScore": "감점 후 점수",
@@ -65,7 +65,7 @@
     "satisfactionHint": "전체 가구 평균입니다. 높을수록 좋습니다. 붕괴 감점은 포함하지 않습니다.",
     "nutritionHint": "식량과 외식 서비스 충족도",
     "healthcareHint": "의약품과 의료 서비스 충족도",
-    "entertainmentHint": "오락 등 삶의 질을 높이는 서비스 충족도",
+    "leisureHint": "오락 등 삶의 질을 높이는 서비스 충족도",
     "envHint": "임대료·통근 부담과 입지의 질을 평가 기준에 대비해 표시",
     "status": {
       "active": "진행 중",

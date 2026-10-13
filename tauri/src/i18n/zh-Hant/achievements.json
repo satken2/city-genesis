@@ -17,7 +17,7 @@
     "households": "戶",
     "avgNutrition": "營養滿意度",
     "avgHealthcare": "醫療滿意度",
-    "avgEntertainment": "娛樂滿意度",
+    "avgLeisure": "娛樂與休閒",
     "avgEnv": "居住環境評分",
     "scoreComposition": "評分組成",
     "finalScore": "扣分後評分",
@@ -65,7 +65,7 @@
     "satisfactionHint": "全體家庭平均值，越高越好。不含倒塌扣分。",
     "nutritionHint": "食物與餐飲服務的滿足程度",
     "healthcareHint": "藥品與醫療服務的滿足程度",
-    "entertainmentHint": "娛樂等改善生活品質的服務滿足程度",
+    "leisureHint": "娛樂等改善生活品質的服務滿足程度",
     "envHint": "租金、通勤負擔及區位品質相對於評分基準的水準",
     "status": {
       "active": "進行中",
