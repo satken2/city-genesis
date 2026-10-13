@@ -10515,7 +10515,7 @@
             "title": "Satis Healthcare",
             "description": "世帯の医療充足度（0.0〜1.0）"
           },
-          "satis_entertainment": {
+          "satis_leisure": {
             "anyOf": [
               {
                 "type": "number"
@@ -10524,8 +10524,8 @@
                 "type": "null"
               }
             ],
-            "title": "Satis Entertainment",
-            "description": "世帯の娯楽充足度（0.0〜1.0）"
+            "title": "Satis Leisure",
+            "description": "世帯の娯楽・余暇の充足度（0.0〜1.0）"
           },
           "satis_residential": {
             "anyOf": [
@@ -12739,9 +12739,9 @@
             "type": "number",
             "title": "Avg Nutrition"
           },
-          "avg_entertainment": {
+          "avg_leisure": {
             "type": "number",
-            "title": "Avg Entertainment"
+            "title": "Avg Leisure"
           },
           "gdp": {
             "type": "number",
@@ -12789,7 +12789,7 @@
           "unemployment_rate",
           "avg_healthcare",
           "avg_nutrition",
-          "avg_entertainment",
+          "avg_leisure",
           "gdp",
           "fire_count",
           "traffic_accident_count",

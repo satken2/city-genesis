@@ -16,7 +16,7 @@
  *   達成間近は GET /api/v1/quests のサーバ計算 progress を使う。
  * - 左(主役): 統計タイル / 達成目標 を縦に並べる。左カラムの各ブロックは
  *   カード(枠)を持たない。中身のタイルがカードなので、入れ子にすると二重枠になるため。
- *   - 統計: 人口/GDP/物価/所得/失業率/医療・栄養・娯楽充足度/火災/交通事故/犯罪。
+ *   - 統計: 人口/GDP/物価/所得/失業率/医療・栄養・娯楽余暇の充足度/火災/交通事故/犯罪。
  *   - 達成目標: 進行中の目標の説明・条件ごとの現在値と目標値・進捗と、達成・失敗した目標の一覧
  *     (GET /api/v1/quests)。左カラムの残りの高さを使い、溢れたらスクロールする。
  * - 右カラム: 建設状況(道路と公共施設を種別バッジ付きの単一リストにまとめたもの)。
@@ -57,7 +57,7 @@ import priceIcon from "../../assets/images/stats/price.png";
 import incomeIcon from "../../assets/images/stats/income.png";
 import unemploymentIcon from "../../assets/images/stats/unemployment.png";
 import healthcareIcon from "../../assets/images/stats/healthcare.png";
-import entertainmentIcon from "../../assets/images/stats/entertainment.png";
+import leisureIcon from "../../assets/images/stats/entertainment.png";
 import fireIcon from "../../assets/images/stats/fire.png";
 import trafficIcon from "../../assets/images/stats/traffic_accident.png";
 import crimeIcon from "../../assets/images/stats/crime.png";
@@ -108,7 +108,7 @@ export type StatisticsReport = {
   unemployment_rate: number;       // 失業率(0..1比率)
   avg_healthcare: number;          // 世帯平均の医療充足度(0..1)
   avg_nutrition: number;           // 世帯平均の栄養充足度(0..1)
-  avg_entertainment: number;       // 世帯平均の娯楽充足度(0..1)
+  avg_leisure: number;             // 世帯平均の娯楽・余暇の充足度(0..1)
   gdp: number;                     // 直近完了エポックの名目GDP
   fire_count: number;              // 実行エポック合計の火災件数
   traffic_accident_count: number;  // 実行エポック合計の交通事故件数
@@ -195,7 +195,7 @@ const STAT_ICONS: Record<string, string> = {
   unemployment_rate: unemploymentIcon,
   avg_healthcare: healthcareIcon,
   avg_nutrition: placeholderIcon,
-  avg_entertainment: entertainmentIcon,
+  avg_leisure: leisureIcon,
   fire_count: fireIcon,
   traffic_accident_count: trafficIcon,
   crime_count: crimeIcon,
@@ -461,10 +461,10 @@ export function EpochResultWindow({
         polarity: "up-good",
       },
       {
-        key: "avg_entertainment",
-        label: t("epochResult.statEntertainment"),
-        value: pct(stats.avg_entertainment),
-        tone: toneBelow(stats.avg_entertainment, STAT_SATISFACTION_WARN, STAT_SATISFACTION_DANGER),
+        key: "avg_leisure",
+        label: t("epochResult.statLeisure"),
+        value: pct(stats.avg_leisure),
+        tone: toneBelow(stats.avg_leisure, STAT_SATISFACTION_WARN, STAT_SATISFACTION_DANGER),
         polarity: "up-good",
       },
       {

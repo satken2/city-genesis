@@ -103,18 +103,6 @@
         "label": "Épocas hasta caer en situación de calle",
         "desc": "Épocas que transcurren desde la pérdida de la vivienda hasta quedar en situación de calle."
       },
-      "QOL_WEIGHT_NUTRITION": {
-        "label": "Peso de calidad de vida: nutrición",
-        "desc": "Peso de la cobertura nutricional al calcular el puntaje de nivel de vida (se normaliza automáticamente)."
-      },
-      "QOL_WEIGHT_HEALTHCARE": {
-        "label": "Peso de calidad de vida: salud",
-        "desc": "Peso de la cobertura sanitaria al calcular el puntaje de nivel de vida (se normaliza automáticamente)."
-      },
-      "QOL_WEIGHT_ENTERTAINMENT": {
-        "label": "Peso de calidad de vida: ocio",
-        "desc": "Peso de la cobertura de ocio al calcular el puntaje de nivel de vida (se normaliza automáticamente)."
-      },
       "AVERAGE_WAGE": {
         "label": "Salario promedio (valor de referencia)",
         "desc": "Salario promedio de referencia al iniciar la simulación."

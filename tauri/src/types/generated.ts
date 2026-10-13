@@ -224,8 +224,8 @@ export type AgentData = {
   satis_nutrition?: number;
   /** 世帯の医療充足度（0.0〜1.0） */
   satis_healthcare?: number;
-  /** 世帯の娯楽充足度（0.0〜1.0） */
-  satis_entertainment?: number;
+  /** 世帯の娯楽・余暇の充足度（0.0〜1.0） */
+  satis_leisure?: number;
   /** 世帯の住環境満足度（0.0〜1.0） */
   satis_residential?: number;
   /** 観光体験充足度（0.0〜1.0。観光客世帯の観光満足度の要素） */

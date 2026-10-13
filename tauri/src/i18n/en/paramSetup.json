@@ -103,18 +103,6 @@
         "label": "Epochs Before Homelessness",
         "desc": "Number of epochs without housing before a household becomes homeless."
       },
-      "QOL_WEIGHT_NUTRITION": {
-        "label": "QoL Weight: Nutrition",
-        "desc": "Weight of nutrition satisfaction in the quality-of-life score (auto-normalized)."
-      },
-      "QOL_WEIGHT_HEALTHCARE": {
-        "label": "QoL Weight: Healthcare",
-        "desc": "Weight of healthcare satisfaction in the quality-of-life score (auto-normalized)."
-      },
-      "QOL_WEIGHT_ENTERTAINMENT": {
-        "label": "QoL Weight: Entertainment",
-        "desc": "Weight of entertainment satisfaction in the quality-of-life score (auto-normalized)."
-      },
       "AVERAGE_WAGE": {
         "label": "Average Wage (baseline)",
         "desc": "Reference average wage at simulation start."

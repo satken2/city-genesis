@@ -239,8 +239,8 @@ namespace GeneratedModels
         public float? satis_nutrition;
         /// <summary>世帯の医療充足度（0.0〜1.0）</summary>
         public float? satis_healthcare;
-        /// <summary>世帯の娯楽充足度（0.0〜1.0）</summary>
-        public float? satis_entertainment;
+        /// <summary>世帯の娯楽・余暇の充足度（0.0〜1.0）</summary>
+        public float? satis_leisure;
         /// <summary>世帯の住環境満足度（0.0〜1.0）</summary>
         public float? satis_residential;
         /// <summary>観光体験充足度（0.0〜1.0。観光客世帯の観光満足度の要素）</summary>

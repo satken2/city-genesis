@@ -17,7 +17,7 @@
     "households": "户",
     "avgNutrition": "营养满意度",
     "avgHealthcare": "医疗满意度",
-    "avgEntertainment": "娱乐满意度",
+    "avgLeisure": "娱乐与休闲",
     "avgEnv": "居住环境评分",
     "scoreComposition": "评分构成",
     "finalScore": "扣分后评分",
@@ -65,7 +65,7 @@
     "satisfactionHint": "全体家庭平均值，越高越好。不含倒塌扣分。",
     "nutritionHint": "食物与餐饮服务的满足程度",
     "healthcareHint": "药品与医疗服务的满足程度",
-    "entertainmentHint": "娱乐等改善生活质量的服务满足程度",
+    "leisureHint": "娱乐等改善生活质量的服务满足程度",
     "envHint": "租金、通勤负担及区位质量相对于评分基准的水平",
     "status": {
       "active": "进行中",

@@ -103,18 +103,6 @@
         "label": "Époques avant de basculer sans domicile",
         "desc": "Nombre d'époques entre la perte du logement et l'état de sans-abri."
       },
-      "QOL_WEIGHT_NUTRITION": {
-        "label": "Pondération qualité de vie : alimentation",
-        "desc": "Poids de la couverture alimentaire dans le calcul du score de niveau de vie (normalisé automatiquement)."
-      },
-      "QOL_WEIGHT_HEALTHCARE": {
-        "label": "Pondération qualité de vie : santé",
-        "desc": "Poids de la couverture sanitaire dans le calcul du score de niveau de vie (normalisé automatiquement)."
-      },
-      "QOL_WEIGHT_ENTERTAINMENT": {
-        "label": "Pondération qualité de vie : loisirs",
-        "desc": "Poids de la couverture des loisirs dans le calcul du score de niveau de vie (normalisé automatiquement)."
-      },
       "AVERAGE_WAGE": {
         "label": "Salaire moyen (valeur de référence)",
         "desc": "Salaire moyen de référence au début de la simulation."

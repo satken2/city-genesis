@@ -17,7 +17,7 @@
     "households": "HHs",
     "avgNutrition": "Nutrition",
     "avgHealthcare": "Healthcare",
-    "avgEntertainment": "Entertainment",
+    "avgLeisure": "Leisure",
     "avgEnv": "Living Env Score",
     "scoreComposition": "Score Breakdown",
     "finalScore": "Score after deductions",
@@ -65,7 +65,7 @@
     "satisfactionHint": "Averages across households. Higher is better. Collapse deductions are excluded.",
     "nutritionHint": "Food and dining needs met",
     "healthcareHint": "Medicine and healthcare needs met",
-    "entertainmentHint": "Needs for entertainment and other quality-of-life services met",
+    "leisureHint": "Needs for entertainment and other quality-of-life services met",
     "envHint": "Housing and commuting affordability and location quality, relative to the scoring benchmark",
     "status": {
       "active": "In progress",

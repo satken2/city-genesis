@@ -17,7 +17,7 @@
     "households": "hogares",
     "avgNutrition": "Satisfacción nutricional",
     "avgHealthcare": "Satisfacción sanitaria",
-    "avgEntertainment": "Satisfacción de ocio",
+    "avgLeisure": "Ocio",
     "avgEnv": "Puntaje del entorno",
     "scoreComposition": "Composición del puntaje",
     "finalScore": "Puntaje tras deducciones",
@@ -65,7 +65,7 @@
     "satisfactionHint": "Promedios de los hogares. Más alto es mejor. No incluyen deducciones por derrumbes.",
     "nutritionHint": "Necesidades de alimentos y comidas cubiertas",
     "healthcareHint": "Necesidades de medicamentos y atención médica cubiertas",
-    "entertainmentHint": "Necesidades de entretenimiento y otros servicios de bienestar cubiertas",
+    "leisureHint": "Necesidades de entretenimiento y otros servicios de bienestar cubiertas",
     "envHint": "Costo de vivienda y traslado y calidad de ubicación, respecto al criterio de evaluación",
     "status": {
       "active": "En curso",

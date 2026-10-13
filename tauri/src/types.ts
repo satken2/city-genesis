@@ -124,7 +124,7 @@ export type AgentData = {
   utilization?: number[];
   satis_nutrition?: number;
   satis_healthcare?: number;
-  satis_entertainment?: number;
+  satis_leisure?: number;
   satis_residential?: number;
   /** 観光体験充足度。観光客世帯(VARIANT_TOURIST)の観光満足度の要素 */
   satis_tourism?: number;
