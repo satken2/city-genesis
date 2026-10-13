@@ -125,7 +125,9 @@ function randomZoneColor(): string {
 }
 
 function fillRing(ctx: CanvasRenderingContext2D, ring: Ring): void {
+  // 輪郭のない地区では、直前に描いた地区のパスも再利用しない。
   ctx.beginPath();
+  if (ring.length < 3) return;
   ctx.moveTo(ring[0][0], ring[0][1]);
   for (let i = 1; i < ring.length; i++) ctx.lineTo(ring[i][0], ring[i][1]);
   ctx.closePath();

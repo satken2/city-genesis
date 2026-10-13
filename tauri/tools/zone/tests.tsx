@@ -3,10 +3,12 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { ZoneDetailPanel } from "../../src/components/zone/ZoneDetailPanel";
 import { ZoneMergeConfirmWindow } from "../../src/components/zone/ZoneMergeConfirmWindow";
+import { ZoneEditWindow } from "../../src/components/zone/ZoneEditWindow";
 import { ROAD_COLOR_PALETTE, PLAY_MODE_NORMAL } from "../../src/constants";
 import { state } from "../scenarios/mock-runtime";
 import { buildFrontages, faceKey, findZoneAt, type Ring } from "../../src/components/zone/zoneBrushTargets";
-import { PATH_SIDE_LEFT, PATH_SIDE_RIGHT } from "../../src/constants";
+import { PATH_SIDE_LEFT, PATH_SIDE_RIGHT, PATH_STREET } from "../../src/constants";
+import { mapProps } from "./mock-map";
 
 const outlines = new Map([
   [10, { polygon: [] as Ring, area: 0 }],
@@ -20,6 +22,68 @@ assert.equal(findZoneAt(50, -2, outlines, frontages, faceZones), 20);
 assert.equal(findZoneAt(50, 80, outlines, frontages, faceZones), 20);
 assert.equal(findZoneAt(150, 80, outlines, frontages, faceZones), null);
 console.log("PASS: district expansion selects empty districts and the correct road side");
+
+// 輪郭のない地区を除外せず、静的描画・拡張先の強調・飛び地の除去を実際のコールバックで検査する。
+const paints: { style: string; points: number[][] }[] = [];
+const contexts = new WeakMap<HTMLCanvasElement, CanvasRenderingContext2D>();
+const originalGetContext = window.HTMLCanvasElement.prototype.getContext;
+window.HTMLCanvasElement.prototype.getContext = function () {
+  if (!contexts.has(this)) {
+    let points: number[][] = [];
+    const context = {
+      canvas: this, fillStyle: "", strokeStyle: "",
+      beginPath: () => { points = []; },
+      moveTo: (x: number, z: number) => { points.push([x, z]); },
+      lineTo: (x: number, z: number) => { points.push([x, z]); },
+      fill() { if (points.length) paints.push({ style: this.fillStyle, points: [...points] }); },
+      stroke() { if (points.length) paints.push({ style: this.strokeStyle, points: [...points] }); },
+      closePath() {}, setTransform() {}, getTransform: () => ({}), clearRect() {}, drawImage() {},
+      save() {}, restore() {}, arc() {},
+    };
+    contexts.set(this, context as unknown as CanvasRenderingContext2D);
+  }
+  return contexts.get(this)!;
+} as typeof window.HTMLCanvasElement.prototype.getContext;
+
+globalThis.fetch = async () => Response.json({ map_width: 1000, map_height: 1000 });
+const editContainer = document.createElement("div");
+document.body.append(editContainer);
+const editRoot = createRoot(editContainer);
+await act(async () => { editRoot.render(<ZoneEditWindow apiBaseUrl="http://test" />); });
+const view = { offsetX: 0, offsetY: 0, zoom: 1 };
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d")!;
+const outer = { zone_id: 20, name: "Outer", color: "#abcdef", polygon: outlines.get(20)!.polygon };
+for (const polygon of [null, undefined, [], [[0, 0]], [[0, 0], [1, 1]]] as const) {
+  await act(async () => {
+    mapProps.onVectorsLoaded!({
+      paths: [{ path_id: 1, path_type: PATH_STREET, width: 8,
+        start_point: [0, 0, 0], end_point: [100, 0, 0], left_zone_id: 10, right_zone_id: 20 }],
+      parcels: [], buildings: [],
+      zones: [outer, { zone_id: 10, name: "Empty", color: "#123456", polygon: polygon as Ring | null | undefined }],
+    });
+  });
+  paints.length = 0;
+  mapProps.overlayDraw!(ctx, view);
+  assert.equal(paints.length, 1);
+  assert.equal(paints[0].style, outer.color);
+
+  await act(async () => { editContainer.querySelector<HTMLButtonElement>('[data-guide-value="expand"]')!.click(); });
+  await act(async () => { mapProps.onCursorWorldPos!({ x: 50, z: 2 }); });
+  assert.ok(editContainer.querySelector(".zone-edit__target")!.textContent?.includes("Empty"));
+  paints.length = 0;
+  mapProps.animatedOverlayDraw!(ctx, view, 0);
+  assert.equal(paints.length, 0, "a district without a polygon must not paint a previous path");
+
+  await act(async () => { mapProps.onCursorWorldPos!({ x: 50, z: -2 }); });
+  paints.length = 0;
+  mapProps.animatedOverlayDraw!(ctx, view, 0);
+  assert.equal(paints.length, 2, "the valid target retains its fill and border");
+  assert.ok(paints.every(paint => paint.style === outer.color));
+}
+await act(async () => { editRoot.unmount(); });
+window.HTMLCanvasElement.prototype.getContext = originalGetContext;
+console.log("PASS: district editing renders only polygon outlines and still selects empty districts by road side");
 
 let zone = { zone_id: 7, name: "District", color: "#abcdef", auto_managed: true, area: 100,
   allowed_bd_mask: 0, limit_coverage_ratio: 0.6, limit_volume_ratio: 2, limit_height: 30 };
