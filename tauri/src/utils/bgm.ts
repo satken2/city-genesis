@@ -131,6 +131,24 @@ export class BgmManager {
         this.unlistenFns.push(unlisten);
       }
     }).catch(console.error);
+
+    // エポック実行の演出中(確定から結果ウィンドウを閉じるまで)はBGMを止める。
+    // 実行中もコアの日付は進むため、月の曲が演出の途中で切り替わらないようにする。
+    // 優先度を結果ウィンドウの要求(10)より低くし、結果ウィンドウの表示中は結果の曲を鳴らす。
+    listen<{ executing: boolean }>("epoch:executing", (event) => {
+      if (this.destroyed) return;
+      if (event.payload.executing) {
+        this.requestBgm("epoch_executing", "none", 5);
+      } else {
+        this.releaseBgm("epoch_executing");
+      }
+    }).then((unlisten) => {
+      if (this.destroyed) {
+        unlisten();
+      } else {
+        this.unlistenFns.push(unlisten);
+      }
+    }).catch(console.error);
   }
 
   private async loadVolumeSettings() {
