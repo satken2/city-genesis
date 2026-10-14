@@ -98,8 +98,7 @@ public static class LodQA
         yield return BuildingCameraRoundTrip();
         yield return PendingRenderWork();
         yield return InterruptedPathResponse();
-        yield return TerrainFollowResume();
-        yield return TerrainNotificationConsumption();
+        yield return TerrainFollowReuse();
         yield return MeshBakeLifetime();
         yield return Scheduler();
         yield return SchedulerThroughput();
@@ -746,17 +745,19 @@ public static class LodQA
         Check(server.IsCompleted && !server.IsFaulted,"Road fixture did not complete both requests");
         results.Add("Road HTTP regression: pending road received twice; interruption before generation leaves version uncommitted");
     }
-    static IEnumerator TerrainFollowResume()
+    static IEnumerator TerrainFollowReuse()
     {
         foreach (var existing in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)) Object.DestroyImmediate(existing.gameObject);
         var camera = new GameObject("FollowCamera").AddComponent<Camera>(); camera.tag = "MainCamera";
         camera.transform.position = new Vector3(0,5000,0);
         var go = new GameObject("FollowPaths"); go.SetActive(false);
         var manager = go.AddComponent(Type("PathManager"));
-        object Path(int id, float x, int version = 1)
+        var terrain = go.AddComponent(Type("TerrainManager"));
+        Static("Utils","RegisterTerrainManager",terrain);
+        object Path(int id, float x)
         {
             var p = Activator.CreateInstance(Type("GeneratedModels.PathSummary"));
-            Set(p,"path_id",id); Set(p,"version",version); Set(p,"follow_terrain",1);
+            Set(p,"path_id",id); Set(p,"version",1); Set(p,"follow_terrain",1);
             Set(p,"start_node_id",id+1000);
             var node = Activator.CreateInstance(Type("NodeData"));
             Set(node,"node_id",id+1000); Set(node,"position",new float[] {x,0f,10f});
@@ -772,72 +773,33 @@ public static class LodQA
         var firstPath = Path(74001,10f);
         var secondPath = Path(74002,size*10+10f);
         var cells = new List<Vector2Int> {Vector2Int.zero,new Vector2Int(10,0)};
-        var completed = (IDictionary)Field(manager,"terrainFollowCompletedPaths");
+        var tier = Enum.Parse(Type("LodTier"),"Dynamic");
+        Call(manager,"TryRebuildPathOnce",firstPath,tier,false,true,"QA",false);
+        Call(manager,"TryRebuildPathOnce",secondPath,tier,false,true,"QA",false);
         var revisions = (IDictionary)Field(manager,"geometryRevisions");
         var objects = (IDictionary)Field(manager,"pathObjectsCache");
-        var interrupted = (IEnumerator)Call(manager,"RebuildPathShapesForCellsCoroutine",cells);
-        Check(interrupted.MoveNext() && completed.Count == 1,"Follow-up did not checkpoint its first road before yielding");
         var first = objects[74001]; int revision = (int)revisions[74001];
-        (interrupted as IDisposable)?.Dispose();
-        yield return (IEnumerator)Call(manager,"RebuildPathShapesForCellsCoroutine",cells);
-        Check(completed.Count == 2,"Resumed follow-up lost its unfinished road");
-        Check(ReferenceEquals(first,objects[74001]) && (int)revisions[74001] == revision,"Resumed follow-up regenerated its completed road");
-        var completedNodes = (HashSet<int>)Field(manager,"terrainFollowCompletedNodes");
-        Check(completedNodes.Count == 2,"Resumed road phase lost its pending intersections");
-        yield return (IEnumerator)Call(manager,"RebuildPathShapesForCellsCoroutine",cells);
-        Check(completedNodes.Count == 2 && (int)revisions[74001] == revision,"Repeated resume failed to preserve completed intersections and roads");
-
+        Check((bool)Call(manager,"IsTerrainCurrent",firstPath),"A road built on the current terrain was not current");
         ((GameObject)first).SetActive(false);
+        Check((bool)Call(manager,"IsTerrainCurrent",firstPath),"Hiding a road on cell exit made re-entry rebuild it");
+
         var set = new HashSet<Vector2Int>(cells);
         yield return (IEnumerator)Call(manager,"RebuildCachedPathsForCells",cells,set,set,null);
         Check(ReferenceEquals(first,objects[74001]) && ((GameObject)first).activeSelf
             && (int)revisions[74001] == revision,"Cell re-entry invalidated an unchanged road's cached geometry");
 
-        Call(manager,"BeginDeferredTerrainTilePathRebuilds");
+        var queued = (HashSet<int>)Field(manager,"queuedTerrainFollowPathIds");
+        var queuedNodes = (HashSet<int>)Field(manager,"queuedTerrainFollowNodeIds");
+        Call(manager,"ClearTerrainFollowQueue");
         Call(manager,"OnTerrainTileReadyHandler",new Vector2Int(10,0),null);
-        Check(completed.Contains(74001) && !completed.Contains(74002),"New terrain invalidated unrelated progress or kept affected progress");
-        int secondRevision = (int)revisions[74002];
-        yield return (IEnumerator)Call(manager,"RebuildPathShapesForCellsCoroutine",cells);
-        Check((int)revisions[74002] > secondRevision && (int)revisions[74001] == revision,"Terrain change did not selectively rebuild affected roads");
-        Path(74002,size*10+10f,2);
-        Check(!completed.Contains(74002) && completed.Contains(74001),"Data change did not invalidate the affected road checkpoint");
-
-        var nodeProgress = (HashSet<int>)Field(manager,"terrainFollowCompletedNodes");
-        Set(firstPath,"start_node_id",75001); nodeProgress.Add(75001); nodeProgress.Add(75002);
-        Call(manager,"OnTerrainTileReadyHandler",new Vector2Int(1,0),null);
-        Check(!completed.Contains(74001) && !nodeProgress.Contains(75001) && nodeProgress.Contains(75002),"Neighbor terrain did not invalidate the related road and intersection only");
-        Call(manager,"ClearTerrainFollowProgress");
-        Check(completed.Count == 0 && nodeProgress.Count == 0,"Forced follow-up retained old checkpoints");
+        Check(queued.Contains(74002) && !queued.Contains(74001),"Terrain arrival queued an unrelated road or missed the affected far road");
+        Check(queuedNodes.Contains(75002) && !queuedNodes.Contains(75001),"Terrain arrival did not queue only the affected road's intersections");
+        Call(manager,"ClearTerrainFollowQueue");
         Call(manager,"ClearAllCells");
+        Static("Utils","RegisterTerrainManager",(object)null);
         Object.Destroy(go); Object.Destroy(camera.gameObject);
         yield return null;
-        results.Add("Terrain follow-up: partial cancellation resumes remaining roads; re-entry reuses geometry; new terrain/data selectively invalidates progress");
-    }
-
-    static IEnumerator TerrainNotificationConsumption()
-    {
-        var go = new GameObject("FollowNotificationQA"); go.SetActive(false);
-        var loader = go.AddComponent(Type("CellDataLoader"));
-        var paths = go.AddComponent(Type("PathManager"));
-        var buildings = go.AddComponent(Type("BuildingManager"));
-        Set(loader,"pathManager",paths); Set(loader,"buildingManager",buildings);
-        var cells = new List<Vector2Int> {Vector2Int.zero};
-        ((HashSet<Vector2Int>)Field(paths,"deferredTerrainReadyCells")).Add(Vector2Int.zero);
-        ((HashSet<Vector2Int>)Field(buildings,"deferredTerrainReadyCells")).Add(Vector2Int.zero);
-        var sets = Activator.CreateInstance(Type("LodCellSets"));
-        Set(sets,"farCells",cells); Set(sets,"nearCells",new List<Vector2Int>()); Set(sets,"dynamicCells",new List<Vector2Int>());
-        Set(loader,"pendingCellSets",sets);
-        Call(loader,"CollectDeferredTerrainNotifications");
-        Check(((HashSet<Vector2Int>)Field(loader,"pendingFollowUpCells")).Count == 1,"Duplicate manager notifications were not merged before follow-up");
-        Check((bool)Field(paths,"deferTerrainTilePathRebuilds") && (bool)Field(buildings,"deferTerrainTileBuildingRebuilds"),"Collecting notifications ended the terrain follow-up barrier");
-        yield return (IEnumerator)Call(loader,"TerrainFollowUpCoroutine");
-        Check(((HashSet<Vector2Int>)Field(loader,"pendingFollowUpCells")).Count == 0
-            && Field(loader,"terrainFollowUpCoroutine") == null,"Already consumed notifications scheduled a second follow-up pass");
-        Check(((HashSet<Vector2Int>)Call(paths,"EndDeferredTerrainTilePathRebuilds")).Count == 0
-            && ((HashSet<Vector2Int>)Call(buildings,"EndDeferredTerrainTileBuildingRebuilds")).Count == 0,"Processed notifications remained in managers");
-        Object.Destroy(go);
-        yield return null;
-        results.Add("Terrain notifications: duplicated path/building ready cells consumed before work; no second pass after completion");
+        results.Add("Terrain follow: hidden roads stay current on re-entry; tile arrival queues affected far roads and their intersections only");
     }
 
     static IEnumerator MeshBakeLifetime()

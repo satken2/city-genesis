@@ -383,21 +383,23 @@ public static class BuildingMeshUtils
     /// バックエンドも建物高さを名所行の階高で確定するため、ここを揃えないと
     /// 3Dの高さ・カリング半径・炎エフェクトの高さがデータ上の高さとズレる。
     /// </summary>
-    public static float GetFloorHeight(BuildingSummary buildingData)
+    public static float GetFloorHeight(BuildingSummary buildingData) => GetFloorHeight(buildingData.variant, buildingData.landmark);
+
+    public static float GetFloorHeight(int variant, int landmark)
     {
         float floorHeight = LocalConstants.FLOOR_HEIGHT;
         if (MasterDataStore.Instance != null && MasterDataStore.Instance.IsInitialized)
         {
-            if (buildingData.landmark > 0)
+            if (landmark > 0)
             {
-                var landmarkMaster = MasterDataStore.Instance.GetLandmarkMaster(buildingData.landmark);
+                var landmarkMaster = MasterDataStore.Instance.GetLandmarkMaster(landmark);
                 if (landmarkMaster != null && landmarkMaster.height_per_floor.HasValue)
                 {
                     return landmarkMaster.height_per_floor.Value;
                 }
             }
 
-            var agentMaster = MasterDataStore.Instance.GetAgentMaster(buildingData.variant);
+            var agentMaster = MasterDataStore.Instance.GetAgentMaster(variant);
             if (agentMaster != null && agentMaster.height_per_floor.HasValue)
             {
                 floorHeight = agentMaster.height_per_floor.Value;
@@ -686,7 +688,12 @@ public static class BuildingMeshUtils
         {
             footprint[i] = new Vector2(buildingData.polygonArray[i][0], buildingData.polygonArray[i][1]);
         }
+        return NormalizeFootprint(footprint);
+    }
 
+    /// <summary>底面の頂点列(中心基準)から縮退頂点を間引き、反時計回りに揃える。渡した配列を書き換えることがある。</summary>
+    public static Vector2[] NormalizeFootprint(Vector2[] footprint)
+    {
         // 区画全面を使う建物(農地など)はバックエンドが区画ポリゴンをそのまま底面に採用する
         // ため、建物ポリゴンにも区画由来の縮退頂点(共線・重複)が入り得る。壁・角の配置が
         // 破綻しないよう区画と同じ間引きを通す。間引きで3頂点未満になる場合は生データを使う。

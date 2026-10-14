@@ -244,6 +244,9 @@ public static class MsgPackDecoder
             return ToLong(raw) != 0;
         }
 
+        // bin(列をまとめたバイト列)は byte[] フィールドへそのまま渡す。
+        if (raw is byte[] bytes && targetType == typeof(byte[])) return bytes;
+
         if (raw is List<object> rawList)
         {
             // List<object> フィールドはそのまま(要素も中間表現のまま)

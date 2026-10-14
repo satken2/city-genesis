@@ -19,11 +19,15 @@ public partial class TerrainManager : BaseApiDataManager
 
     /// <summary>
     /// LoadLodCellsCoroutine が全セルのロードを完了した時に発火する。
-    /// CellDataLoaderがこのイベントを受けてBuilding/Path/Parcelのロードを開始する。
     /// 引数は「このロードバッチで実際に地形タイルが(再)生成・再縫合されたセル」の一覧。
-    /// 受信側はこのセルだけを対象に建物・道路の地形追従更新を行い、不要な全量再生成を避ける。
     /// </summary>
     public System.Action<IReadOnlyList<Vector2Int>> OnAllTerrainLodLoaded;
+
+    /// <summary>
+    /// ロードバッチで版一覧・全景・背景地形が揃い、常駐セルが確定した時点で発火する。
+    /// これ以降はタイルの無い場所でも全景の高さで接地できるので、CellDataLoader が建物・道路などのロードを始める。
+    /// </summary>
+    public System.Action OnTerrainOverviewReady;
 
     /// <summary>
     /// このロードバッチで実際にハイトマップが適用(ストリーミング完了)されたセルの集合。
@@ -306,17 +310,20 @@ public partial class TerrainManager : BaseApiDataManager
         /// <summary>強制再取得。LRU の同じ版のタイルを使わずに取り直す。</summary>
         public bool force;
         public bool canceled, done;
-        /// <summary>取得スロットを割り当て済みか。解放はジョブの finally だけが行う。</summary>
+        /// <summary>取得スロットを割り当て済みか。解放は ReleaseTileSlot だけが行う(公開の開始時か、ジョブの終了時)。</summary>
         public bool slotGranted;
     }
 
     /// <summary>セルごとの実行中タイルジョブ。完了・取消しで外す。</summary>
     private readonly Dictionary<Vector2Int, TileJob> tileJobs = new Dictionary<Vector2Int, TileJob>();
 
-    /// <summary>取得から公開までを進めているジョブ数。ClearAllCells では戻さず、各ジョブの finally だけが減らす。</summary>
+    /// <summary>取得枠を持つジョブ数(取得中と、受信済みで公開の順番待ち)。ClearAllCells では戻さず、枠の返却だけが減らす。</summary>
     private int activeTileDownloads;
 
-    /// <summary>同時に進めるタイルジョブの上限。HTTP 同時数と、受信済みで公開待ちの高さ配列のメモリを抑える。</summary>
+    /// <summary>
+    /// 取得枠の数。枠は公開ワーカーがそのタイルの公開を始めた時点で返すので、HTTP 同時数と、
+    /// 受信済みで公開待ちの高さ配列のメモリをこの数に抑えつつ、公開の間に次のタイルの取得が進む。
+    /// </summary>
     private const int MAX_PARALLEL_TILE_DOWNLOADS = 4;
 
     /// <summary>
@@ -451,8 +458,8 @@ public partial class TerrainManager : BaseApiDataManager
     private readonly Dictionary<Vector2Int, CachedTile> tileCache = new Dictionary<Vector2Int, CachedTile>();
     /// <summary>tileCache の追加順。先頭が最古で、容量超過時はここから破棄する。</summary>
     private readonly LinkedList<Vector2Int> tileCacheOrder = new LinkedList<Vector2Int>();
-    /// <summary>1枚あたり推定2〜4MB(高さ・GPU高さ・PhysX heightfield)。常駐81枚に対し約3割の余裕で回転の往復を吸収する。</summary>
-    private const int TILE_CACHE_CAPACITY = 24;
+    /// <summary>1枚あたり推定2〜4MB(高さ・GPU高さ・PhysX heightfield)。先読みで組み立てた近傍セルと、回転の往復で外れたセルを合わせて持つ。</summary>
+    private const int TILE_CACHE_CAPACITY = 48;
 
     /// <summary>
     /// 地形タイルのGameObjectを、TerrainDataアセットもろとも破棄する。
@@ -825,6 +832,15 @@ public partial class TerrainManager : BaseApiDataManager
         return true;
     }
 
+    /// <summary>ジョブの取得枠を返し、待機中のジョブへ割り当て直す。</summary>
+    private void ReleaseTileSlot(TileJob job)
+    {
+        if (job == null || !job.slotGranted) return;
+        job.slotGranted = false;
+        activeTileDownloads--;
+        GrantTileSlots();
+    }
+
     /// <summary>空いている取得スロットを、待機中のジョブへ視野優先の順(<see cref="ScoreStreamCell"/>)で割り当てる。取り消されたジョブは外す。</summary>
     private void GrantTileSlots()
     {
@@ -874,6 +890,13 @@ public partial class TerrainManager : BaseApiDataManager
                 // 保持中に破棄されたなどで戻せなかったときだけ、取得へ進む。
                 if (restoreRequest.succeeded || IsJobCanceled(job)) yield break;
             }
+            // 先読みで取得済みの高さがあれば、取得を省いて公開だけを依頼する。
+            if (!job.force && TryTakePrefetchedHeights(cell, job.requiredVersion, out float[,] prefetched, out int prefetchedVersion))
+            {
+                RenderWorkScheduler.CountEvent("terrain.prefetchHeightsHit");
+                yield return EnqueueAndWait(cell, new HeightStreamRequest { heights = prefetched, job = job, version = prefetchedVersion });
+                yield break;
+            }
 
             tileSlotWaiters.Add(job);
             GrantTileSlots();
@@ -906,19 +929,7 @@ public partial class TerrainManager : BaseApiDataManager
             float span = terrainSize.y;
             float below = SeaFloorDepthSpan;
             float[,] heights = buffer = RentHeightBuffer();
-            // float32 の受信列を多次元配列へ直接写し、その場で正規化する(中間の1次元配列を作らない)。
-            normalizeTask = BackgroundWork.Run(() =>
-            {
-                if (bytes.Length != TILE_RESOLUTION * TILE_RESOLUTION * sizeof(float)) throw new InvalidOperationException("地形配列のサイズが不正です");
-                Buffer.BlockCopy(bytes, 0, heights, 0, bytes.Length);
-                for (int z = 0; z < TILE_RESOLUTION; z++)
-                    for (int x = 0; x < TILE_RESOLUTION; x++)
-                    {
-                        float value = heights[z, x];
-                        if (float.IsNaN(value) || float.IsInfinity(value)) throw new InvalidOperationException("地形に非有限値があります");
-                        heights[z, x] = Mathf.Clamp01((value + below) / span);
-                    }
-            });
+            normalizeTask = BackgroundWork.Run(() => NormalizeTileHeights(bytes, heights, span, below));
             Task task = normalizeTask;
             yield return new WaitUntil(() => task.IsCompleted || IsJobCanceled(job));
             if (IsJobCanceled(job)) yield break;
@@ -936,15 +947,27 @@ public partial class TerrainManager : BaseApiDataManager
             // 正規化の Task がまだ書いている配列はプールへ返さず、GC に任せる。
             if (buffer != null && (normalizeTask == null || normalizeTask.IsCompleted)) ReturnHeightBuffer(buffer);
             job.done = true;
-            if (job.slotGranted)
-            {
-                job.slotGranted = false;
-                activeTileDownloads--;
-                GrantTileSlots();
-            }
+            if (job.slotGranted) ReleaseTileSlot(job);
             else tileSlotWaiters.Remove(job);
             if (tileJobs.TryGetValue(cell, out TileJob current) && current == job) tileJobs.Remove(cell);
         }
+    }
+
+    /// <summary>
+    /// 受信した float32 の標高列をタイルの高さ配列へ直接写し、その場で 0〜1 に正規化する(中間の1次元配列を作らない)。
+    /// 別スレッドで呼ぶので Unity API に触れない。
+    /// </summary>
+    private static void NormalizeTileHeights(byte[] bytes, float[,] heights, float span, float below)
+    {
+        if (bytes.Length != TILE_RESOLUTION * TILE_RESOLUTION * sizeof(float)) throw new InvalidOperationException("地形配列のサイズが不正です");
+        Buffer.BlockCopy(bytes, 0, heights, 0, bytes.Length);
+        for (int z = 0; z < TILE_RESOLUTION; z++)
+            for (int x = 0; x < TILE_RESOLUTION; x++)
+            {
+                float value = heights[z, x];
+                if (float.IsNaN(value) || float.IsInfinity(value)) throw new InvalidOperationException("地形に非有限値があります");
+                heights[z, x] = Mathf.Clamp01((value + below) / span);
+            }
     }
 
     // ================================================================
@@ -1038,6 +1061,9 @@ public partial class TerrainManager : BaseApiDataManager
         cellVersionsDirty = true;
         cellVersionsGeneration++;
 
+        residentTerrainCells.Clear();
+        ClearPrefetch();
+
         // 設定キャッシュをクリア（session.reset対応）
         terrainSettings = null;
         settingsLoaded = false;
@@ -1078,6 +1104,7 @@ public partial class TerrainManager : BaseApiDataManager
             foreach (var cell in jobCells)
                 if (!resident.Contains(cell)) CancelTileJob(cell);
         }
+        SetPrefetchCells(cellSets.prefetchCells);
 
         loadLodCellsCoroutine = RenderWorkScheduler.Start(this, LoadLodCellsCoroutine(cellSets, isForce, currentLoadBatch), "TerrainManager");
     }
@@ -1117,6 +1144,9 @@ public partial class TerrainManager : BaseApiDataManager
         if (batch.IsCanceled) yield break;
         var desired = new HashSet<Vector2Int>(cellSets.farCells);
         desired.RemoveWhere(cell => !IsCityCell(cell));
+        residentTerrainCells.Clear();
+        residentTerrainCells.UnionWith(desired);
+        OnTerrainOverviewReady?.Invoke();
         var remove = new List<Vector2Int>();
         foreach (var cell in loadedCells) if (!desired.Contains(cell)) remove.Add(cell);
         foreach (var cell in remove)
@@ -1184,6 +1214,39 @@ public partial class TerrainManager : BaseApiDataManager
             key.Append(':').Append(x).Append(',').Append(z).Append('=').Append(cachedCellVersions.TryGetValue(cell, out int version) ? version : 0);
         }
         return key.ToString();
+    }
+
+    /// <summary>直近のロードバッチの常駐セル(都市内)。詳細の生成を待たせる対象を決める。</summary>
+    private readonly HashSet<Vector2Int> residentTerrainCells = new HashSet<Vector2Int>();
+
+    /// <summary>
+    /// 範囲に重なる常駐セルが、すべてタイルを公開済みか(版一覧が確定していれば必要版以上)。常駐外のセルはタイルが届かないので問わない。
+    /// 建物・道路の詳細はこれが真になるまで遠景で描き、全景の高さで作った直後に作り直す二重の生成を避ける。
+    /// 版一覧の取り直し中は公開済みのタイルで判定する(古い版だったら、新しいタイルの公開の通知で作り直される)。
+    /// </summary>
+    public bool IsDetailTerrainReady(Rect area)
+    {
+        WorldRectToCellRange(area.xMin, area.yMin, area.xMax, area.yMax, out Vector2Int minCell, out Vector2Int maxCell);
+        for (int z = minCell.y; z <= maxCell.y; z++)
+            for (int x = minCell.x; x <= maxCell.x; x++)
+                if (!IsCellDetailReady(new Vector2Int(x, z))) return false;
+        return true;
+    }
+
+    /// <inheritdoc cref="IsDetailTerrainReady(Rect)"/>
+    public bool IsDetailTerrainReady(HashSet<Vector2Int> cells)
+    {
+        if (cells != null) foreach (var cell in cells) if (!IsCellDetailReady(cell)) return false;
+        return true;
+    }
+
+    private bool IsCellDetailReady(Vector2Int cell)
+    {
+        if (!residentTerrainCells.Contains(cell)) return true;
+        int attached = GetAttachedTerrainVersion(cell);
+        if (attached < 0) return false;
+        if (cachedCellVersions == null || cellVersionsDirty) return true;
+        return attached >= (cachedCellVersions.TryGetValue(cell, out int version) ? version : 0);
     }
 
     /// <summary>範囲の接地を全景への代用なしで計算できるか。完成した地形依存メッシュの登録時に使う。</summary>
@@ -1303,6 +1366,9 @@ public partial class TerrainManager : BaseApiDataManager
     // データ受信と描画完成を分け、中断後は受信済みデータから未完成メッシュを再生成する。
     private long overviewDataRevision = -1;
     private long overviewRevision = -1;
+
+    /// <summary>受信済みの全景の標高の版。全景の高さに置く描画物が作り直しの要否を判定する。未受信は -1。</summary>
+    public long OverviewDataRevision => farTerrainHeights != null ? overviewDataRevision : -1;
 
     private IEnumerator EnsureOverview(long revision, LoadBatch batch)
     {
@@ -1604,7 +1670,7 @@ public partial class TerrainManager : BaseApiDataManager
     {
         if (streamWorkerCoroutine == null)
         {
-            streamWorkerCoroutine = RenderWorkScheduler.Start(this, HeightStreamWorker(), "TerrainManager", () => pendingStreamRequests.Count > 0);
+            streamWorkerCoroutine = RenderWorkScheduler.Start(this, HeightStreamWorker(), "TerrainManager", () => pendingStreamRequests.Count > 0, priority: true);
         }
     }
 
@@ -1689,6 +1755,8 @@ public partial class TerrainManager : BaseApiDataManager
                 Vector2Int cell = PickBestStreamCell();
                 active = pendingStreamRequests[cell];
                 pendingStreamRequests.Remove(cell);
+                // 公開の順番が来た時点で取得枠を返し、公開している間に次のタイルの取得を進める。
+                ReleaseTileSlot(active.job);
                 int epoch = clearEpoch;
                 bool canceled = IsRequestCanceled(active, epoch);
                 Terrain published = null;
@@ -1786,7 +1854,7 @@ public partial class TerrainManager : BaseApiDataManager
     {
         pendingTileNotifications.Enqueue(notification);
         if (notifyWorkerCoroutine == null && isActiveAndEnabled)
-            notifyWorkerCoroutine = RenderWorkScheduler.Start(this, TileNotifyWorker(), "TerrainManager", () => pendingTileNotifications.Count > 0);
+            notifyWorkerCoroutine = RenderWorkScheduler.Start(this, TileNotifyWorker(), "TerrainManager", () => pendingTileNotifications.Count > 0, priority: true);
         if (notifyWorkerCoroutine == null)
             while (pendingTileNotifications.Count > 0) DispatchTileNotification(pendingTileNotifications.Dequeue());
     }
@@ -1855,9 +1923,45 @@ public partial class TerrainManager : BaseApiDataManager
     /// そのセルに旧タイルがあれば同一フレームで差し替え破棄する(チラつき防止)。
     /// タイル生成(TerrainCollider の初期ベイクを含む)は分割できず重いため、
     /// 呼び出し側(HeightStreamWorker)は共通予算の空きを待ってから呼ぶこと。
-    /// TerrainCollider.terrainData は Terrain.CreateTerrainGameObject が設定済みなので再代入しない。
     /// </summary>
     private void AttachTerrainTile(Vector2Int cellIndex, TerrainData tData)
+    {
+        Terrain terrainComp = CreateTerrainTile(cellIndex, tData);
+        GameObject terrainGO = terrainComp.gameObject;
+
+        // 旧→新タイルの差し替え(チラつき防止の要)。
+        // 登録と破棄を同一フレームで行い(この間に yield はない)、Unity の Destroy は当該フレームの
+        // 描画前に反映されるため、新旧タイルが同時に描画されるフレームも、
+        // タイルが1枚も無いフレームも存在しない。
+        terrainTiles.TryGetValue(cellIndex, out Terrain prevTerrain);
+        terrainTiles[cellIndex] = terrainComp;
+        loadedCellMaskDirty = true;
+        Utils.InvalidateHeightCache();
+
+        // 直前まで登録されていた旧タイルを破棄する(新タイルと同一GOでないことをガード)。
+        GameObject oldTerrainToDestroy = null;
+        if (prevTerrain != null && prevTerrain.gameObject != terrainGO)
+        {
+            oldTerrainToDestroy = prevTerrain.gameObject;
+        }
+        // LRU に同じセルの保持分があれば、新しく受信したデータを優先して破棄する。
+        DropCachedTile(cellIndex, oldTerrainToDestroy);
+        if (oldTerrainToDestroy != null)
+        {
+            DestroyTerrainTileObject(oldTerrainToDestroy);
+        }
+
+        // 新規タイルの登場で隣接タイルとのLOD継ぎ目を繋ぎ直す。
+        // 全タイルが同一解像度のため、SetNeighbors は常に全境界で機能する。
+        UpdateNeighbors(cellIndex);
+    }
+
+    /// <summary>
+    /// 完成したTerrainDataからセルのタイルのGameObjectを作り、表示・入力の設定を済ませる。表示への登録は呼び出し側が行う
+    /// (公開は <see cref="AttachTerrainTile"/>、先読みは非表示のまま LRU へ置く)。
+    /// TerrainCollider.terrainData は Terrain.CreateTerrainGameObject が設定済みなので再代入しない。
+    /// </summary>
+    private Terrain CreateTerrainTile(Vector2Int cellIndex, TerrainData tData)
     {
         GameObject terrainGO = Terrain.CreateTerrainGameObject(tData);
         Transform container = GetContainer("Terrains");
@@ -1885,15 +1989,6 @@ public partial class TerrainManager : BaseApiDataManager
         // 深度Offsetが遠方タイルに適用されなくなるため。
         terrainComp.basemapDistance = 100000f;
 
-        // 旧→新タイルの差し替え(チラつき防止の要)。
-        // 登録と破棄を同一フレームで行い(この間に yield はない)、Unity の Destroy は当該フレームの
-        // 描画前に反映されるため、新旧タイルが同時に描画されるフレームも、
-        // タイルが1枚も無いフレームも存在しない。
-        terrainTiles.TryGetValue(cellIndex, out Terrain prevTerrain);
-        terrainTiles[cellIndex] = terrainComp;
-        loadedCellMaskDirty = true;
-        Utils.InvalidateHeightCache();
-
         ApplyTerrainMaterial(terrainComp, tData);
 
         terrainGO.AddComponent<TerrainInputHandler>();
@@ -1901,23 +1996,7 @@ public partial class TerrainManager : BaseApiDataManager
         var vmo = terrainGO.AddComponent<VisualModeObject>();
         vmo.objectType = InputObjectType.TERRAIN;
         terrainGO.AddComponent<VisualTerrainObject>();
-
-        // 直前まで登録されていた旧タイルを破棄する(新タイルと同一GOでないことをガード)。
-        GameObject oldTerrainToDestroy = null;
-        if (prevTerrain != null && prevTerrain.gameObject != terrainGO)
-        {
-            oldTerrainToDestroy = prevTerrain.gameObject;
-        }
-        // LRU に同じセルの保持分があれば、新しく受信したデータを優先して破棄する。
-        DropCachedTile(cellIndex, oldTerrainToDestroy);
-        if (oldTerrainToDestroy != null)
-        {
-            DestroyTerrainTileObject(oldTerrainToDestroy);
-        }
-
-        // 新規タイルの登場で隣接タイルとのLOD継ぎ目を繋ぎ直す。
-        // 全タイルが同一解像度のため、SetNeighbors は常に全境界で機能する。
-        UpdateNeighbors(cellIndex);
+        return terrainComp;
     }
 
     /// <summary>

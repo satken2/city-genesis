@@ -32,10 +32,10 @@ public static class DrawLodConfig
     /// <summary>Close→Normal に降格する投影比(これ未満で接写解除)。</summary>
     public const float CLOSE_EXIT_RATIO = 0.18f;
     /// <summary>
-    /// 接写の距離上限(m)。大きな施設は遠くからでも投影比が大きくなるため、
-    /// 投影比だけだと数百m先の工場が接写扱いになる。
+    /// 接写の距離上限(m)。接写は組み立てが重いので、すぐ目の前のものだけに限る。
+    /// 大きな施設は遠くからでも投影比が大きくなるため、投影比だけでは決めない。
     /// </summary>
-    public const float CLOSE_MAX_DISTANCE = 150f;
+    public const float CLOSE_MAX_DISTANCE = 50f;
     /// <summary>Far→Normal に昇格する投影比。</summary>
     public const float NORMAL_ENTER_RATIO = 0.045f;
     /// <summary>Normal→Far に降格する投影比。</summary>
@@ -45,8 +45,8 @@ public static class DrawLodConfig
     /// パスは細長く境界球が意味を持たないため、パス中心線までの最近接距離(m)で判定する。
     /// 接写・通常の距離しきい値(昇格/降格)。
     /// </summary>
-    public const float PATH_CLOSE_ENTER_DISTANCE = 120f;
-    public const float PATH_CLOSE_EXIT_DISTANCE = 160f;
+    public const float PATH_CLOSE_ENTER_DISTANCE = 50f;
+    public const float PATH_CLOSE_EXIT_DISTANCE = 65f;
     public const float PATH_NORMAL_ENTER_DISTANCE = 450f;
     public const float PATH_NORMAL_EXIT_DISTANCE = 550f;
 
@@ -67,9 +67,9 @@ public static class DrawLodConfig
     public const float REEVALUATE_CAMERA_MOVE_DISTANCE = 4f;
 
     /// <summary>接写メッシュを同時に保持する建物の上限。超過分は昇格しない(降格は投影比が決める)。</summary>
-    public const int MAX_CLOSE_BUILDINGS = 300;
+    public const int MAX_CLOSE_BUILDINGS = 5;
     /// <summary>接写メッシュを同時に保持するパスの上限。</summary>
-    public const int MAX_CLOSE_PATHS = 120;
+    public const int MAX_CLOSE_PATHS = 5;
 }
 
 /// <summary>

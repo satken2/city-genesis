@@ -78,22 +78,23 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public static BuildingMeshResult GenerateFarBuilding(BuildingSummary buildingData)
     {
-        float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
-        float height = Mathf.Max(1, buildingData.floors ?? 1) * floorHeight;
-        if (buildingData.status == Constants.STATUS_CONSTRUCTING || buildingData.status == Constants.STATUS_DEMOLISHING)
-        {
-            height = floorHeight;
-        }
-        else if (buildingData.status == Constants.STATUS_COLLAPSED)
-        {
-            height = floorHeight * 0.5f;
-        }
-        else
+        int status = buildingData.status;
+        if (status != Constants.STATUS_CONSTRUCTING && status != Constants.STATUS_DEMOLISHING && status != Constants.STATUS_COLLAPSED)
         {
             BuildingMeshResult far = FarBuildingMeshBuilder.Generate(buildingData);
             if (far != null) return far;
         }
-        return GenerateSimpleBuildingWithHeight(BuildingMeshUtils.GetFootprint(buildingData), height);
+        return GenerateSimpleBuildingWithHeight(BuildingMeshUtils.GetFootprint(buildingData),
+            GetFarBoxHeight(buildingData.variant, buildingData.landmark, buildingData.floors ?? 1, status));
+    }
+
+    /// <summary>遠景の箱の高さ。工事中・解体中は1階分、倒壊は瓦礫の高さ(0.5階分)、それ以外は階数×階高。</summary>
+    public static float GetFarBoxHeight(int variant, int landmark, int floors, int status)
+    {
+        float floorHeight = BuildingMeshUtils.GetFloorHeight(variant, landmark);
+        if (status == Constants.STATUS_CONSTRUCTING || status == Constants.STATUS_DEMOLISHING) return floorHeight;
+        if (status == Constants.STATUS_COLLAPSED) return floorHeight * 0.5f;
+        return Mathf.Max(1, floors) * floorHeight;
     }
 
     public static bool IsOpenSpaceModel(int modelType) => modelType == Constants.MODEL_PARKING
@@ -368,24 +369,43 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             System.Array.Reverse(normalizedFootprint);
         }
 
-        List<int> polygonTriangles = TriangulateOrFan(normalizedFootprint);
-
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
+        AppendExtrudedFootprint(normalizedFootprint, buildingHeight, Vector3.zero, vertices, triangles);
 
-        AddHorizontalSurface(vertices, triangles, normalizedFootprint, polygonTriangles, 0f, false);
-        AddHorizontalSurface(vertices, triangles, normalizedFootprint, polygonTriangles, buildingHeight, true);
+        Mesh mesh = new Mesh();
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
 
-        int n = normalizedFootprint.Length;
+        Mesh colliderMesh = GenerateColliderMesh(normalizedFootprint, buildingHeight);
+
+        return new BuildingMeshResult(mesh, null, colliderMesh);
+    }
+
+    /// <summary>
+    /// 反時計回りの底面を高さまで押し出した箱(底面・天面・側面)を、offset だけずらして頂点・三角形の列へ足す。
+    /// 遠景の箱と、都市全域の超遠景をまとめた結合メッシュ(CityOverviewManager)が共用する。
+    /// </summary>
+    public static void AppendExtrudedFootprint(Vector2[] footprint, float buildingHeight, Vector3 offset, List<Vector3> vertices, List<int> triangles)
+    {
+        int first = vertices.Count;
+        List<int> polygonTriangles = TriangulateOrFan(footprint);
+
+        AddHorizontalSurface(vertices, triangles, footprint, polygonTriangles, 0f, false);
+        AddHorizontalSurface(vertices, triangles, footprint, polygonTriangles, buildingHeight, true);
+
+        int n = footprint.Length;
 
         // 側面
         for (int i = 0; i < n; i++)
         {
             int next = (i + 1) % n;
-            Vector3 v0 = new Vector3(normalizedFootprint[i].x, 0, normalizedFootprint[i].y);
-            Vector3 v1 = new Vector3(normalizedFootprint[next].x, 0, normalizedFootprint[next].y);
-            Vector3 v2 = new Vector3(normalizedFootprint[i].x, buildingHeight, normalizedFootprint[i].y);
-            Vector3 v3 = new Vector3(normalizedFootprint[next].x, buildingHeight, normalizedFootprint[next].y);
+            Vector3 v0 = new Vector3(footprint[i].x, 0, footprint[i].y);
+            Vector3 v1 = new Vector3(footprint[next].x, 0, footprint[next].y);
+            Vector3 v2 = new Vector3(footprint[i].x, buildingHeight, footprint[i].y);
+            Vector3 v3 = new Vector3(footprint[next].x, buildingHeight, footprint[next].y);
 
             vertices.Add(v0);
             vertices.Add(v1);
@@ -402,15 +422,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             triangles.Add(vertices.Count - 2);
         }
 
-        Mesh mesh = new Mesh();
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = triangles.ToArray();
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
-
-        Mesh colliderMesh = GenerateColliderMesh(normalizedFootprint, buildingHeight);
-
-        return new BuildingMeshResult(mesh, null, colliderMesh);
+        if (offset == Vector3.zero) return;
+        for (int i = first; i < vertices.Count; i++) vertices[i] += offset;
     }
 
     /// <summary>

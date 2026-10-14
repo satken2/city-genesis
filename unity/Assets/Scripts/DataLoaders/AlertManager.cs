@@ -59,6 +59,8 @@ using UnityEngine.UI;
 ///   ロード済みの地形・建物に合わせ直す。
 /// - 建物バッチの適用時: BuildingManager.ApplyLodCellChanges から RefreshPositions() を呼ぶ。カメラセル変更の
 ///   時点では新しい常駐セルの建物が未生成で、アイコンが地面の高さに残るため、生成後に高さを合わせ直す。
+/// - 常駐セルの地形タイルが揃ったとき: CellDataLoader から RefreshPositions() を呼ぶ。建物はタイルの到着を待たずに
+///   全景の高さで置かれるので、揃った地形の高さへ合わせ直す。
 /// - Refresh / RefreshPositions はクールダウン中・取得中の要求を捨てず、Update で後から1回にまとめて実行する。
 ///
 /// パフォーマンス設計

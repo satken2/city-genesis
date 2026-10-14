@@ -26,6 +26,9 @@ public static class ObjectVisibilityFilter
     /// <summary>非表示にしている道路の数。</summary>
     public static int HiddenPathCount => hiddenPaths.Count;
 
+    /// <summary>非表示集合を変えるたびに進む版。生成済みの結合メッシュ(都市全域の超遠景)が作り直しの要否を判定する。</summary>
+    public static int Revision { get; private set; }
+
     /// <summary>指定したオブジェクトがフィルタで非表示になっているか。</summary>
     public static bool IsHidden(int objectType, int id)
     {
@@ -45,6 +48,7 @@ public static class ObjectVisibilityFilter
         hiddenPaths.Clear();
         if (buildingIds != null) foreach (int id in buildingIds) hiddenBuildings.Add(id);
         if (pathIds != null) foreach (int id in pathIds) hiddenPaths.Add(id);
+        Revision++;
         ApplyToExistingObjects();
     }
 
@@ -54,6 +58,7 @@ public static class ObjectVisibilityFilter
         if (hiddenBuildings.Count == 0 && hiddenPaths.Count == 0) return;
         hiddenBuildings.Clear();
         hiddenPaths.Clear();
+        Revision++;
         ApplyToExistingObjects();
     }
 

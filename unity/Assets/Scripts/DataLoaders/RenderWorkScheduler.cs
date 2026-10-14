@@ -13,6 +13,8 @@ public static class RenderWorkScheduler
     private static int frame = -1;
     private static double usedMs;
     private static readonly LinkedList<Operation> waiting = new LinkedList<Operation>();
+    /// <summary>毎フレーム通常の仕事より先に進める仕事(地形タイルの公開)。物体の生成より先に地形を揃えるため。</summary>
+    private static readonly LinkedList<Operation> priorityWaiting = new LinkedList<Operation>();
     private static readonly Dictionary<string, double> categoryMs = new Dictionary<string, double>();
     private sealed class TimingSample
     {
@@ -47,7 +49,7 @@ public static class RenderWorkScheduler
         double now = Time.realtimeSinceStartupAsDouble;
         if (now - lastReportTime < 5) return;
         var message = new System.Text.StringBuilder();
-        message.Append($"[TIMING] Scheduler window={now - lastReportTime:F2}s frames={Time.frameCount - lastReportFrame} budget={PerformanceConfig.FrameBudgetMs:F2}ms active={operations.Count} waiting={waiting.Count}");
+        message.Append($"[TIMING] Scheduler window={now - lastReportTime:F2}s frames={Time.frameCount - lastReportFrame} budget={PerformanceConfig.FrameBudgetMs:F2}ms active={operations.Count} waiting={WaitingCount}");
         var loader = CellDataLoader.Instance;
         if (loader != null)
             message.Append($" buildingsPending={loader.buildingManager?.PendingDetailCount ?? 0} pathsPending={loader.pathManager?.PendingTerrainRebuildCount ?? 0} pathBatch={loader.pathManager?.IsLodBatchActive ?? false}");
@@ -90,7 +92,7 @@ public static class RenderWorkScheduler
     public static double LastFrameMs { get; private set; }
     public static double MaximumStepMs { get; private set; }
     public static long Steps { get; private set; }
-    public static int WaitingCount => waiting.Count;
+    public static int WaitingCount => waiting.Count + priorityWaiting.Count;
     public static bool HasPendingInitialWork
     {
         get
@@ -115,6 +117,7 @@ public static class RenderWorkScheduler
         usedMs = LastFrameMs = MaximumStepMs = 0;
         Steps = 0;
         waiting.Clear();
+        priorityWaiting.Clear();
         categoryMs.Clear();
         timingSamples.Clear();
         eventCounts.Clear();
@@ -132,7 +135,8 @@ public static class RenderWorkScheduler
 
     public static double GetCategoryMilliseconds(string category) => categoryMs.TryGetValue(category, out double ms) ? ms : 0;
 
-    public static Coroutine Start(MonoBehaviour owner, IEnumerator routine, string category, Func<bool> hasPendingWork = null)
+    /// <param name="priority">真なら毎フレーム通常の仕事より先に進める。</param>
+    public static Coroutine Start(MonoBehaviour owner, IEnumerator routine, string category, Func<bool> hasPendingWork = null, bool priority = false)
     {
         EnsurePump();
         if (owner.GetComponent<RenderWorkLifetime>() == null) owner.gameObject.AddComponent<RenderWorkLifetime>();
@@ -144,7 +148,7 @@ public static class RenderWorkScheduler
         if (!operationsByObject.TryGetValue(operation.ownerId, out var list))
             operationsByObject[operation.ownerId] = list = new List<Operation>();
         list.Add(operation);
-        operation.ticket = waiting.AddLast(operation);
+        operation.ticket = (priority ? priorityWaiting : waiting).AddLast(operation);
         return operation.handle;
     }
 
@@ -192,7 +196,7 @@ public static class RenderWorkScheduler
     private static void Finish(Operation operation)
     {
         operation.done = true;
-        if (operation.ticket?.List != null) waiting.Remove(operation.ticket);
+        if (operation.ticket?.List != null) operation.ticket.List.Remove(operation.ticket);
         operation.ticket = null;
         if (operation.handle != null) operations.Remove(operation.handle);
         // 索引に無いoperation(テストが辞書へ直接追加したもの・開始に失敗したもの)も許す。
@@ -222,33 +226,47 @@ public static class RenderWorkScheduler
         pumpedFrame = Time.frameCount;
         BeginFrame();
         long started = Stopwatch.GetTimestamp();
+        PumpQueue(priorityWaiting, started);
+        PumpQueue(waiting, started);
+        if (LocalConstants.UNITY_LOG_TIMING)
+        {
+            CountQueueFrames(priorityWaiting);
+            CountQueueFrames(waiting);
+        }
+    }
+
+    private static void PumpQueue(LinkedList<Operation> queue, long started)
+    {
         int skipped = 0;
         // 待機確認やiteratorの出入り自体も無制限に回さないよう、ポンプ全体の時間でも制限する。
-        while (waiting.Count > 0 && usedMs < PerformanceConfig.FrameBudgetMs &&
+        while (queue.Count > 0 && usedMs < PerformanceConfig.FrameBudgetMs &&
             (Stopwatch.GetTimestamp() - started) * 1000.0 / Stopwatch.Frequency < PerformanceConfig.FrameBudgetMs)
         {
-            Operation operation = waiting.First.Value;
-            waiting.Remove(operation.ticket);
-            waiting.AddLast(operation.ticket);
+            Operation operation = queue.First.Value;
+            queue.Remove(operation.ticket);
+            queue.AddLast(operation.ticket);
             // コンポーネントだけ破棄されたownerはUnityがコルーチンを止めるだけでfinallyを通らないため、ここで解放する。
             // ネイティブ待機も一緒に止まりblockedが解けないので、blockedの判定より前に確認する。
             if (operation.owner == null) { Finish(operation); continue; }
             if (operation.blocked || operation.readyFrame > Time.frameCount)
             {
-                if (++skipped >= waiting.Count) break;
+                if (++skipped >= queue.Count) break;
                 continue;
             }
             skipped = 0;
             Step(operation);
         }
-        if (LocalConstants.UNITY_LOG_TIMING)
-            foreach (var operation in waiting)
-                if (!operation.blocked && operation.readyFrame <= Time.frameCount)
-                {
-                    var sample = GetTimingSample(operation.stack.Peek());
-                    sample.queueFrames++;
-                    if (usedMs < PerformanceConfig.FrameBudgetMs) sample.underBudgetQueueFrames++;
-                }
+    }
+
+    private static void CountQueueFrames(LinkedList<Operation> queue)
+    {
+        foreach (var operation in queue)
+            if (!operation.blocked && operation.readyFrame <= Time.frameCount)
+            {
+                var sample = GetTimingSample(operation.stack.Peek());
+                sample.queueFrames++;
+                if (usedMs < PerformanceConfig.FrameBudgetMs) sample.underBudgetQueueFrames++;
+            }
     }
 
     private static void Step(Operation operation)
