@@ -642,6 +642,10 @@ public static partial class VehicleQA
         Near(Vector3.Distance(camera.transform.position,unplaced),0,.001f,"First-person camera moved before the leading car was measured");
         Set(drive,"eyeBody",go); Call(drive,"ApplyCamera");
         Near(Vector3.Distance(camera.transform.position,new Vector3(500,-28.5f,803)),0,.001f,"First-person camera is not just ahead of the leading car");
+        // 車窓は通行側(既定の左側通行なら左=-X)の車体の側面より少し外に置く。
+        Set(drive,"halfWidth",1.2f); Set(drive,"sideView",true); Call(drive,"ApplyCamera");
+        Near(Vector3.Distance(camera.transform.position,new Vector3(497.8f,-28.5f,800)),0,.001f,"Side-window camera is not just outside the curb side of the car");
+        Set(drive,"sideView",false);
         Set(drive,"thirdPerson",true); Call(drive,"ApplyCamera");
         Check(camera.transform.position.y>=2-.001f,"Third-person camera goes below the ground clearance");
         // 降りるとその場の視点を通常操作へ引き継ぐ。地下を走っていたときは地表まで上げる。

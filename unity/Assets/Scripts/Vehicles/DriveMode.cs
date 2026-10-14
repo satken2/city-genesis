@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// 描画専用の乗車モード。都市の状態・経済時間は変えず、既存の交通演出を追従する。
 /// 選んだ位置から出発するほか、走行中の車・バス・列車を選んで、その運転をそのまま眺められる。
-/// 視点は一人称(先頭の車両の少し前)と三人称(<see cref="ChaseCamera"/>)を切り替える。
+/// 視点は一人称(先頭の車両の少し前から前方、または車窓から横)と三人称(<see cref="ChaseCamera"/>)を切り替える。
 /// 乗車中は撮影モードと同じく、Tauri の UI と選択パネルを隠し、状態と操作案内をモード表示欄に出す。
 /// </summary>
 [DefaultExecutionOrder(100)]
@@ -22,7 +22,7 @@ public sealed class DriveMode : MonoBehaviour
     public static float SpeedMultiplier => IsRiding && Application.isFocused && InputUtil.KeyPressed(Key.Space) ? 5f : 1f;
     public static bool BlocksCamera => IsRiding || (IsOpen && Instance.PanelRect.Contains(Instance.GuiMouse));
     public static string RideCaption => IsRiding ? Instance.rideCaption : "";
-    private bool open, picking, riding, rail, watch, forward = true, thirdPerson;
+    private bool open, picking, riding, rail, watch, forward = true, thirdPerson, sideView;
     private int vehicleType = Constants.VEHICLE_STANDARD, lineId = -1, pickedPath = -1;
     private Vector3 pickedPoint, position, direction = Vector3.forward;
     private float savedFov, savedNear;
@@ -33,7 +33,7 @@ public sealed class DriveMode : MonoBehaviour
     private IpcClient ipc;
     private string message = "", rideCaption = "";
     private float noticeUntil, nextBranches;
-    private float eyeHeight, halfLength;
+    private float eyeHeight, halfLength, halfWidth;
     private GameObject eyeBody;
     private bool placedView;
     private int branchPath = -1;
@@ -165,6 +165,9 @@ public sealed class DriveMode : MonoBehaviour
             if ((rail && (trains == null || trains.DrivenLineId < 0)) || (!rail && RiddenCar == null))
             { Close(true); return; }
             if (InputUtil.KeyWasPressedThisFrame(Key.V)) ToggleView();
+            // S は車窓、F は前方の一人称にする。三人称から押しても一人称へ戻す。
+            if (InputUtil.KeyWasPressedThisFrame(Key.S)) { thirdPerson = false; sideView = true; }
+            if (InputUtil.KeyWasPressedThisFrame(Key.F)) { thirdPerson = false; sideView = false; }
             if (!rail && cars.DrivenVehicle != null) UpdateBranches();
             RefreshRideCaption();
         }
@@ -278,9 +281,12 @@ public sealed class DriveMode : MonoBehaviour
             if (car == null) return;
             car.Sample(out position, out direction); body = car.go;
         }
-        // 目の高さは先頭の車体のモデルの高さから決める。折り返しで先頭の車両が替わったときは測り直す。
+        // 目の高さと車窓の視点の横位置は先頭の車体のモデルから決める。折り返しで先頭の車両が替わったときは測り直す。
         if (body != null && body != eyeBody)
-        { eyeBody = body; eyeHeight = EyeHeightRatio * VehicleModelResolver.ModelBounds(body.transform).max.y; }
+        {
+            var bounds = VehicleModelResolver.ModelBounds(body.transform);
+            eyeBody = body; eyeHeight = EyeHeightRatio * bounds.max.y; halfWidth = bounds.max.x;
+        }
     }
     private void LateUpdate()
     {
@@ -292,13 +298,21 @@ public sealed class DriveMode : MonoBehaviour
         if (thirdPerson) { chase.Apply(cameraRef, position, direction, Time.unscaledDeltaTime * SpeedMultiplier); return; }
         // 編成は乗車を始めた次のフレームに描かれるので、先頭の車体を測れるまで視点を置かない。
         if (eyeBody == null) return;
-        // 一人称は先頭の車両の前端より少し前に置き、車体を視界に入れない。地形・構造物による制限は掛けない。
-        Vector3 eye = position + direction * (halfLength + 1f) + Vector3.up * eyeHeight;
-        Quaternion rotation = Quaternion.LookRotation(direction, Vector3.up) * Quaternion.Euler(5, 0, 0);
+        // 一人称は見る向き(前方か車窓側)の車体の端より少し外に置き、車体を視界に入れない。地形・構造物による制限は掛けない。
+        Vector3 look = sideView ? WindowSide(direction) : direction;
+        Vector3 eye = position + look * ((sideView ? halfWidth : halfLength) + 1f) + Vector3.up * eyeHeight;
+        Quaternion rotation = Quaternion.LookRotation(look, Vector3.up) * Quaternion.Euler(5, 0, 0);
         // 位置の遅延は高速走行時の車体へのめり込みを招くため、回転だけを平滑化する。初めて置くときは乗車前の向きから回さない。
         cameraRef.transform.SetPositionAndRotation(eye, !placedView ? rotation : Quaternion.Slerp(cameraRef.transform.rotation, rotation,
             1 - Mathf.Exp(-8 * Time.unscaledDeltaTime * SpeedMultiplier)));
         placedView = true;
+    }
+
+    /// <summary>車窓の視点が向く横方向。通行側(左側通行なら左)を向き、沿道や複線の外側を眺める。</summary>
+    private static Vector3 WindowSide(Vector3 heading)
+    {
+        Vector3 left = Vector3.Cross(heading, Vector3.up).normalized;
+        return CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? left : -left;
     }
 
     private void ToggleView()
@@ -339,8 +353,8 @@ public sealed class DriveMode : MonoBehaviour
             : vehicle == null ? "NPC driving"
             : AtJunction(vehicle) ? RouteCaption()
             : "";
-        string caption = $"Drive {(thirdPerson ? "3rd person" : "1st person")} | x{SpeedMultiplier:0}{(status.Length > 0 ? " | " + status : "")}\n"
-            + "Hold Space: x5 | V: view | Esc: exit"
+        string caption = $"Drive {(thirdPerson ? "3rd person" : sideView ? "side window" : "1st person")} | x{SpeedMultiplier:0}{(status.Length > 0 ? " | " + status : "")}\n"
+            + "Hold Space: x5 | V: view | S: side | F: front | Esc: exit"
             + (vehicle != null ? " | ←/→: next road | ↑: straightest" : "")
             + (thirdPerson ? "\nWheel: distance | Right-drag: angle" : "");
         if (caption == rideCaption) return;
