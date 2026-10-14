@@ -1,14 +1,16 @@
 /**
  * 移動統計タブコンポーネント
  *
- * GET /api/v1/stats/commute から通勤・通学時間、地区間流動、地区別の自動車保有率を
+ * GET /api/v1/stats/commute から通勤・通学時間、地区間の移動、地区別の自動車保有率を
  * 取得して表示する (同APIが返す地区別の昼夜間人口は人口タブが使う)。
  *
  * レイアウト (左右2:3分割):
  * - 左上 (1/3 高さ): 通勤・通学時間分布 (横向き積み上げ棒グラフ)。集計範囲 (都市全体／各地区) を
  *   パネル見出しのプルダウンで選ぶ。地区は市民の居住地区で、このパネルだけに効く
  * - 左下 (2/3 高さ): 地区別の自動車保有率の色分け地図
- * - 右 (全高): 地区間人口移動 (Recharts Sankey ダイアグラム)
+ * - 右 (全高): 地区間の移動 (Recharts Sankey ダイアグラム)。「合計」「通勤・通学」「買い物」のサブタブで切り替え、
+ *   サブタブごとに色を変える。値は1日あたりの往復回数(通勤・通学は市民1人が1日1往復)。買い物は直近エポックの
+ *   記録でセーブされないので、シミュレーション前とロード直後は「合計」「買い物」にデータが無い
  */
 
 import { useMemo, useState } from "react";
@@ -82,18 +84,32 @@ type ODPoint = {
   count: number;
 };
 
+/** 地区間の移動の種類。total と shopping は買い物の記録が無いあいだ null */
+type FlowKind = "total" | "commute" | "shopping";
+
 type CommuteStats = {
   epoch: number;
   summary: Summary;
   commute_time_scopes: CommuteTimeScope[];
-  od_traffic: ODPoint[];
+  od_flows: Record<FlowKind, ODPoint[] | null>;
   car_ownership: CarOwnership;
 };
 
 // --- 配色 ---
 const COLOR_WORKER = "#228be6";      // 通勤者: 濃い青
 const COLOR_STUDENT = "#a5d8ff";     // 通学者: 淡い青 (ユーザー要望の薄い色)
-const COLOR_LINK = "rgba(74, 158, 255, 0.4)"; // Sankey リンク色
+const FLOW_KINDS: FlowKind[] = ["total", "commute", "shopping"];
+const FLOW_TAB_KEYS: Record<FlowKind, string> = {
+  total: "statistics.flowTabTotal",
+  commute: "statistics.flowTabCommute",
+  shopping: "statistics.flowTabShopping",
+};
+/** Sankey の配色。出発地(左)のノードは濃く、目的地(右)のノードは淡く、リンクは半透明。サブタブの下線は出発地の色 */
+const FLOW_COLORS: Record<FlowKind, { source: string; target: string; link: string }> = {
+  total: { source: "#7048e8", target: "#b197fc", link: "rgba(151, 117, 250, 0.4)" },
+  commute: { source: "#1c7ed6", target: "#74c0fc", link: "rgba(74, 158, 255, 0.4)" },
+  shopping: { source: "#e8590c", target: "#ffa94d", link: "rgba(255, 146, 43, 0.4)" },
+};
 
 /**
  * 自動車保有率の地図レイヤー。自動車を持つかどうかは公共交通の充実度で決まるため、
@@ -217,6 +233,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   );
 
   const [selectedKey, setSelectedKey] = useState<string>("city");
+  const [flowKind, setFlowKind] = useState<FlowKind>("total");
 
   const timeScope = useMemo<CommuteTimeScope | null>(() => {
     const scopes = data?.commute_time_scopes ?? [];
@@ -224,8 +241,9 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   }, [data, selectedKey]);
 
   // --- Sankey 用データの構築 ---
+  const flows = data?.od_flows[flowKind] ?? null;
   const sankeyData = useMemo(() => {
-    if (!data || !data.od_traffic || data.od_traffic.length === 0) {
+    if (!flows || flows.length === 0) {
       return { nodes: [], links: [] };
     }
 
@@ -244,7 +262,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       return index;
     };
 
-    data.od_traffic.forEach((item) => {
+    flows.forEach((item) => {
       links.push({
         source: nodeIndex(item.from_zone_id, item.from_name, true),
         target: nodeIndex(item.to_zone_id, item.to_name, false),
@@ -253,7 +271,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     });
 
     return { nodes, links };
-  }, [data]);
+  }, [flows]);
 
   if (loading) {
     return <div className="commute-tab__loading">{t("common.loading")}</div>;
@@ -269,6 +287,12 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   const peopleValue = (label: string, n: number) =>
     t("statistics.commutePeopleValue", { label, n });
+  const tripsValue = (label: string, n: number) =>
+    t("statistics.flowTripsValue", { label, n: n.toLocaleString(undefined, { maximumFractionDigits: 1 }) });
+  const flowColors = FLOW_COLORS[flowKind];
+  const flowEmptyMessage = flows == null
+    ? t("statistics.flowNotSimulated")
+    : t(flowKind === "commute" ? "statistics.commuteFlowEmpty" : "statistics.flowEmpty");
 
   // --- Sankey のカスタムノード描画 ---
   const renderSankeyNode = ({ x, y, width, height, index, payload }: any) => {
@@ -282,7 +306,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           y={y}
           width={width}
           height={height}
-          fill={isSource ? "#1c7ed6" : "#74c0fc"}
+          fill={isSource ? flowColors.source : flowColors.target}
           fillOpacity={0.8}
           rx={2}
         />
@@ -310,7 +334,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
         return (
           <div className="commute-tooltip">
             <p className="commute-tooltip__route">{`${item.source.name} ➔ ${item.target.name}`}</p>
-            <p className="commute-tooltip__val">{peopleValue(t("statistics.commuteFlowMovers"), value)}</p>
+            <p className="commute-tooltip__val">{tripsValue(t("statistics.commuteFlowMovers"), value)}</p>
           </div>
         );
       } else if (item.name) {
@@ -319,7 +343,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
         return (
           <div className="commute-tooltip">
             <p className="commute-tooltip__route">{`${item.name} (${role})`}</p>
-            <p className="commute-tooltip__val">{peopleValue(t("statistics.commuteFlowTotalMovers"), value)}</p>
+            <p className="commute-tooltip__val">{tripsValue(t("statistics.commuteFlowTotalMovers"), value)}</p>
           </div>
         );
       }
@@ -396,18 +420,32 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
       {/* 右ペイン: 3/5 幅 */}
       <div className="commute-tab__right">
-        {/* 右側全体: 地区間人口移動 */}
+        {/* 右側全体: 地区間の移動 */}
         <div className="commute-flow">
           <div className="commute-panel-title">{t("statistics.commuteFlowTitle")}</div>
+          <nav className="commute-flow__tabs">
+            {FLOW_KINDS.map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                className={`commute-flow__tab${kind === flowKind ? " commute-flow__tab--active" : ""}`}
+                style={{ borderBottomColor: kind === flowKind ? FLOW_COLORS[kind].source : "transparent" }}
+                onClick={() => setFlowKind(kind)}
+              >
+                {t(FLOW_TAB_KEYS[kind])}
+              </button>
+            ))}
+          </nav>
           <div className="commute-flow__chart">
             {sankeyData.nodes.length === 0 ? (
-              <div className="commute-flow__empty">{t("statistics.commuteFlowEmpty")}</div>
+              <div className="commute-flow__empty">{flowEmptyMessage}</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <Sankey
+                  key={flowKind}
                   data={sankeyData}
                   node={renderSankeyNode}
-                  link={{ stroke: COLOR_LINK, fill: "none" }}
+                  link={{ stroke: flowColors.link, fill: "none" }}
                   nodePadding={12}
                   margin={{ top: 10, right: 80, bottom: 10, left: 80 }}
                 >

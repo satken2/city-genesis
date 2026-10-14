@@ -36,6 +36,11 @@
   font-weight: 700;
 }
 
+/* 各行右端の乗車回数の列見出し */
+.tld__summary-ridership {
+  margin-left: auto;
+}
+
 .tld__list {
   list-style: none;
   margin: 0;
@@ -146,6 +151,15 @@
 .tld__name--link:hover {
   background: rgba(78, 161, 255, 0.14);
   color: #4ea1ff;
+}
+
+/* 行の右端の乗車回数 */
+.tld__ridership {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #c5d4e3;
 }
 
 /* 環状運転などで途中の停留所が折り返し点になっていることを示す札 */

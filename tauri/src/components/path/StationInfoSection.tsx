@@ -3,7 +3,7 @@
  *
  * 駅は独立したエンティティではなく駅舎パスそのもの。駅名はパスの name であり、
  * 通常のパス更新(PATCH /api/v1/paths/{id} {name})で変更する。所属ホーム・発着路線・
- * 乗降統計は保存されない集計値で、GET /api/v1/paths/{id}/station-info から取得する。
+ * 停留所ごとの乗車回数は GET /api/v1/paths/{id}/station-info から取得する。
  * PathDetailPanel が path_master の type=PATH_STATION_HOUSE のバリアントのときだけ描画する。
  */
 
@@ -33,12 +33,21 @@ type StationLine = {
   status: number;
 };
 
+/** 駅舎のホームに乗る停留所。ridership は前エポックにそこから乗った回数で、記録の無い停留所は null。 */
+type StationStop = {
+  node_id: number;
+  line_agent_id: number;
+  platform_path_id: number;
+  ridership: number | null;
+};
+
 type StationInfo = {
   house_path_id: number;
   footprints: { center: [number, number]; rotation: number; width: number; depth: number }[];
   paths: StationPlatform[];
   lines: StationLine[];
-  /** 駅単位の乗降統計(路線の乗車回数を停留所数で按分した近似値) */
+  stops: StationStop[];
+  /** 駅に所属する停留所の乗車回数の合計 */
   ridership: number;
 };
 
@@ -121,6 +130,15 @@ export function StationInfoSection({
     return () => controller.abort();
   }, [apiBaseUrl, pathId, revision]);
 
+  const lineLabel = (lineAgentId: number) => {
+    const name = info?.lines.find((line) => line.line_agent_id === lineAgentId)?.name;
+    return name && name !== "" ? name : `#${lineAgentId}`;
+  };
+  const platformLabel = (pathId: number) => {
+    const variant = info?.paths.find((p) => p.path_id === pathId)?.path_variant;
+    return `${variant != null ? masterData?.paths[variant]?.display_name ?? "" : ""} #${pathId}`;
+  };
+
   /** 駅名(=パスの name)を PATCH で保存し、成功したら親にパス詳細を再取得させる。 */
   const handleRenameSave = useCallback(async (next: string) => {
     await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(pathId)), {
@@ -194,6 +212,29 @@ export function StationInfoSection({
         </div>
       ) : (
         <p className="agent-detail-muted">{t("station.noLines")}</p>
+      )}
+
+      {/* 停留所ごとの乗車回数 */}
+      <h4 className="station-info__subtitle">
+        {t("station.stops")}
+        {info && <span className="station-info__count">({info.stops.length})</span>}
+      </h4>
+      {info && info.stops.length > 0 ? (
+        <div className="agent-detail-grid">
+          {info.stops.map((stop) => (
+            <div className="station-info__row" key={stop.node_id}>
+              <span className="station-info__stop">
+                <TransitLineLink lineAgentId={stop.line_agent_id} label={lineLabel(stop.line_agent_id)} />
+                <PathLink pathId={stop.platform_path_id} pathName={platformLabel(stop.platform_path_id)} />
+              </span>
+              <span className="station-info__meta">
+                {stop.ridership == null ? "-" : Math.round(stop.ridership).toLocaleString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="agent-detail-muted">{t("station.noStops")}</p>
       )}
     </section>
   );

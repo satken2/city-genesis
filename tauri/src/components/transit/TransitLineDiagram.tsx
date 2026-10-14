@@ -19,6 +19,10 @@
  * 停留所名は GET /api/v1/transit/lines/{id} が下地パスから解決した name を使い、
  * 無名(バス停など)は「停留所 N」(N は stops の順番)で補う。駅舎に所属する停留所(house_path_id あり)は
  * 駅名をクリックで駅舎パスの詳細ウィンドウ(path_detail)を開く。
+ *
+ * 各行の右端には前エポックの乗車回数を出す。1行は駅を表すので、駅舎に所属する停留所は駅舎ごと、所属しない
+ * 停留所は停留所ごとに、この路線の停留所の乗車回数を合計する(往復運行で描かない帰りのホームの停留所も
+ * 同じ駅舎の行に入る)。記録の無い停留所だけの行は「-」。
  */
 
 import { useMemo, type CSSProperties } from "react";
@@ -41,6 +45,11 @@ type TransitLineDiagramProps = {
 /** 路線図の1行(停留所への1回の訪問) */
 type Visit = { nodeId: number; turnback: boolean };
 
+/** 行が表す駅のキー。駅舎に所属する停留所は駅舎、所属しない停留所は停留所そのもの。 */
+function stationKey(stop: TransitStop): string {
+  return stop.house_path_id ? `house:${stop.house_path_id}` : `stop:${stop.node_id}`;
+}
+
 export function TransitLineDiagram({ stops, routePoints, edges, color, running }: TransitLineDiagramProps) {
   const { t } = useTranslation();
 
@@ -52,6 +61,15 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
   }, [edges]);
 
   const stopIndex = useMemo(() => new Map(stops.map((s, i) => [s.node_id, i])), [stops]);
+
+  const ridershipByStation = useMemo(() => {
+    const m = new Map<string, number | null>();
+    for (const s of stops) {
+      const sum = m.get(stationKey(s)) ?? null;
+      m.set(stationKey(s), s.ridership == null ? sum : (sum ?? 0) + s.ridership);
+    }
+    return m;
+  }, [stops]);
 
   const visits: Visit[] = useMemo(
     () =>
@@ -107,6 +125,7 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
             {isRoundTrip ? stopLabel(rows[last]) : null}
           </span>
         )}
+        <span className="tld__summary-ridership">{t("transit.colRidership")}</span>
       </div>
 
       <ol className="tld__list">
@@ -116,6 +135,7 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
           const downActive = i < last ? legActive(v, rows[i + 1]) : loopActive;
           const { stop } = stopOf(v);
           const label = stopLabel(v);
+          const ridership = stop ? ridershipByStation.get(stationKey(stop)) ?? null : null;
           return (
             <li key={i} className="tld__row">
               <span className="tld__index">{String(i + 1).padStart(2, "0")}</span>
@@ -137,6 +157,7 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
                 <span className="tld__name">{label}</span>
               )}
               {!isRoundTrip && v.turnback && <span className="tld__badge">{t("transit.turnback")}</span>}
+              <span className="tld__ridership">{ridership == null ? "-" : Math.round(ridership).toLocaleString()}</span>
             </li>
           );
         })}

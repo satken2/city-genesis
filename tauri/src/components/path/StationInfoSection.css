@@ -11,6 +11,15 @@
   min-height: 26px;
 }
 
+/* 停留所の行の左側。路線とホームのリンクを並べる */
+.station-info__stop {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  min-width: 0;
+}
+
 .station-info__meta {
   color: #93a9c0;
   font-size: 1rem;

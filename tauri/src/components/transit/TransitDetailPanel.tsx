@@ -58,6 +58,8 @@ type TransitSegment = {
  * 1回ずつ並び、order はその順番。
  * name は停留所が乗る下地パスから解決した表示名(駅舎所属なら駅名、街路なら道路名)で、
  * 既定名のままの無名停留所は null(UI が連番で補う)。house_path_id は駅名の出所の駅舎パス。
+ * ridership は前エポックにその停留所から乗った回数で、まだ記録の無い停留所(初回シミュレーション前・
+ * 経路の編集で作り直した停留所)は null。
  */
 export type TransitStop = {
   node_id: number;
@@ -67,6 +69,7 @@ export type TransitStop = {
   name: string | null;
   station_path_id: number | null;
   house_path_id: number | null;
+  ridership: number | null;
 };
 
 /**

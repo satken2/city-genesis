@@ -201,10 +201,42 @@
   overflow: hidden;
 }
 
+/* 「合計」「通勤・通学」「買い物」のサブタブ。選択中の下線は Sankey の出発地の色(インラインで指定) */
+.commute-flow__tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  flex: 0 0 auto;
+  margin-bottom: 6px;
+}
+
+.commute-flow__tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 12px;
+  color: #9db0c5;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.commute-flow__tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6fbff;
+}
+
+.commute-flow__tab--active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
 .commute-flow__chart {
   flex: 1;
   width: 100%;
-  height: calc(100% - 22px);
+  min-height: 0;
   position: relative;
 }
 
