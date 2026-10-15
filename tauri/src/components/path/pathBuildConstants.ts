@@ -106,6 +106,7 @@ export type PathMaxSpanViolation = {
  * 制御点の相対高さは所属アンカー直下の地盤基準(Unity `ControlToRelativeList`)。
  */
 export type PathShapeUpdatePayload = {
+  /** Unityの編集世代。形状・設定が変わると更新され、全線検証の結果はこの世代を付けて返す(apply_alignment) */
   revision?: string;
   /** 編集対象の既存パスID(0=新規)。名前は歴史的経緯 */
   unsent_paths_count: number;
@@ -114,6 +115,7 @@ export type PathShapeUpdatePayload = {
   follow_terrain?: number;
   /** 右クリックで形状確定(Placing→Editing)した通知のときだけ true */
   is_finalized?: boolean;
+  /** Unity側で形状を確定済みで、ローカルの検査(立体交差・水面の横断・ノード間距離など)に通っているか。確定にはさらに同じ形状の /paths/validate の成功が要る */
   can_confirm?: boolean;
   max_span_violations?: PathMaxSpanViolation[];
   selected_points?: number[][];

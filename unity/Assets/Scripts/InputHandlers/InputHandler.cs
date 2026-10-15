@@ -16,7 +16,7 @@ public static class InputObjectType
     public const int NODE = 4;
     public const int TERRAIN = 5;
     public const int ZONE = 6;
-    public const int PROP = 7;
+    public const int PROP = 7; // コライダーを持たずレイキャストの分類には出ない。ブルドーザの削除済み集合のキーにだけ使う
 
     /// <summary>ログ・デバッグ表示用の日本語名。</summary>
     public static string GetName(int objectType)
@@ -620,7 +620,7 @@ public class InputHandler : MonoBehaviour
     /// </summary>
     private bool TryRemovePropAtScreenPoint(Vector2 screenPos, float maxDistance)
     {
-        if (UndergroundView.IsActive) return false;
+        if (UndergroundView.IsActive) return false; // 地下表示では手前の地上プロップに地下パスの選択を奪わせない
         if (GetModeForObjectType(InputObjectType.TERRAIN) != InputMode.MODE_REMOVE) return false;
         if (RemovalManager.Instance == null || Camera.main == null) return false;
         return RemovalManager.Instance.TryRemovePropAt(Camera.main.ScreenPointToRay(screenPos), maxDistance);
@@ -807,6 +807,10 @@ public class InputHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// レイが何にも当たらなかったときだけ呼ばれる。地形に当たったドラッグは StartDrag(TERRAIN) から始まりここを通らないので、
+    /// 地形ドラッグを受けるマネージャは、最初の ProcessMouseDrag のマウス位置から掴む対象を決める。
+    /// </summary>
     private void StartTerrainDrag()
     {
         int currentMode = GetModeForObjectType(InputObjectType.TERRAIN);

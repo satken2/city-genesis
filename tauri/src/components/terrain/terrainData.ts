@@ -48,7 +48,7 @@ export type WaterSurfacePayload = {
  * 川床を彫り込むときのスプライン(流路・幅・深さ)はエディタ内部の中間データであり、
  * 標高データに焼き込まれた時点で役目を終える。ゲーム側が知る必要があるのは
  * 「どの範囲が川で」「その範囲の各地点の水面が何mか」だけなので、それだけを保存する。
- * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.11。
+ * 仕様の正は city-genesis/docs/docs/geometries/D_地形形状.md の D.8。
  */
 export type RiverPayload = {
   id: string;
@@ -69,8 +69,8 @@ export type RiverPayload = {
  * 地形エディタの作業コピー(meta.json)とシナリオの地形 API で共通の契約。id は資源の DB ID の文字列で、
  * 保存時はコアが ID で差分適用する(送らなかった資源は削除される)。地形エディタは資源を編集せず、
  * 読み込んだ内容をそのまま送り返す。
- * 経済シミュレーション上の意味(埋蔵量・回復率・分配)は genesis-docs/docs/economics/21_天然資源.md、
- * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.12。
+ * 経済シミュレーション上の意味(埋蔵量・回復率・分配)は city-genesis/docs/docs/economics/21_天然資源.md、
+ * 仕様の正は city-genesis/docs/docs/geometries/D_地形形状.md の D.9。
  */
 export type ResourceAreaPayload = {
   id: string;
@@ -93,7 +93,7 @@ export type TerrainPropScatter = {
 /**
  * プロップの配置定義の保存契約(個別配置と範囲散布)。シナリオの地形 API で送受信し、保存では全置換。
  * y は地面からの相対高さ。地形エディタはプロップを編集せず、読み込んだ内容をそのまま送り返す。
- * 仕様の正は genesis-docs/docs/geometries/M_地形プロップ.md。
+ * 仕様の正は city-genesis/docs/docs/geometries/M_地形プロップ.md。
  */
 export type TerrainProps = { instances: TerrainPropInstance[]; scatters: TerrainPropScatter[] };
 
@@ -101,7 +101,7 @@ export type TerrainProps = { instances: TerrainPropInstance[]; scatters: Terrain
  * カメラ初期状態の保存契約。
  * 地形エディタの作業コピー(meta.json)・シナリオの地形 API の `camera`、バックエンドの City.camera
  * (GET/PATCH /api/v1/city)、Unity の CameraController.CameraStatePayload で共通の契約。
- * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.13。
+ * 仕様の正は city-genesis/docs/docs/geometries/D_地形形状.md の D.9。
  */
 export type TerrainCameraPayload = {
   /** カメラ位置のワールド座標(m)。x/z はマップ中心が(0,0)、y は絶対標高フレームの高さ */

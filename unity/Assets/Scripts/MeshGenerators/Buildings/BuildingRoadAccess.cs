@@ -20,13 +20,20 @@ public static class BuildingRoadAccess
 {
     public const float ApronDepth = 2f;
 
+    /// <summary>
+    /// 既成系のパーツ（既成建物の段・建物全体の遠景モデル・港の施設モジュール）の向き。これらはローカル+Zを
+    /// 正面の辺（頂点0→1）の向き、+Xを道路側（Blenderでは −Y と −X）へ向けて著作する前提で、壁系のパーツとは90°違う。
+    /// </summary>
     public static Quaternion PrebuiltRotation(Vector2[] footprint)
     {
         Vector2 edge = (footprint[1] - footprint[0]).normalized;
         return Quaternion.Euler(0, -Mathf.Atan2(edge.y, edge.x) * Mathf.Rad2Deg + 90f, 0);
     }
 
-    /// <summary>road_access_{both|entry|exit}_* の子 a/b/inside を使う。Blenderの同名サフィックスは無視する。</summary>
+    /// <summary>
+    /// road_access_{both|entry|exit}_* の子 a/b/inside を使う。Blenderの同名サフィックスは無視する。
+    /// a・b は舗装の端の両端（距離が間口の幅、中点が接続点）、inside は中点から敷地の内側に置いた点で、道路へ向かう向きを決める。
+    /// </summary>
     public static List<BuildingRoadOpening> ReadModel(GameObject model, Quaternion rotation)
     {
         var result = new List<BuildingRoadOpening>();

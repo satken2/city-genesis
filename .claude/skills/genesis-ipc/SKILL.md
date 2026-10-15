@@ -5,7 +5,7 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 
 > **パス表記の基準**: 本文中のパスはワークディレクトリ `S:/city/genesis`(`city-genesis` と `genesis-core` を並べた作業ツリー)を起点とする。`city-genesis` 単体で作業している場合は先頭の `city-genesis/` を読み替えること。`genesis-core/` 配下は非公開のコアシミュレータなので、手元に無ければその項目は読み飛ばしてよい。
 
-このSkillはコード本体を持たない「道しるべ」です。実際の仕様・ロジックは以下のドキュメントに書かれているので、実装前に必ず読むこと。
+このSkillはコード本体を持たない「道しるべ」です。全体の考え方は以下のドキュメントに、個別の仕様と意図はソースのコメントに書かれているので、実装前に必ず読むこと。
 
 ## 読むべきドキュメント(概念、公開)
 - `city-genesis/docs/docs/programs/IPC連携の整理.md`
@@ -30,7 +30,7 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 
 ## HTTPの契約(新しいクライアント・HTTP呼び出しを足すときに必ず守る)
 - APIに認証・Host検査は無く、サードパーティ製プログラムからも同じAPIで読み書きできることが仕様なので、アクセス制限を足さない。コアは `127.0.0.1` にだけ bind する。
-- ゲームのセッションが無い間(ゲーム開始前・シナリオの地形編集などのヘッドレス処理中)に通るのは system・sessions・saves・scenarios・parameters・templates・master と `/api/v1/terrain/maps` だけで、ほかは503 `NO_SAVE_LOADED`。トップメニューやシナリオ管理から呼ぶ新しいAPIは、この範囲に置くか、コアの `api.py` の許可一覧を見直す(契約は `コンポーネント連携.md` の「セッション状態の管理」)。
+- ゲームのセッションが無い間(ゲーム開始前・シナリオの地形編集などのヘッドレス処理中)に通るのは system・sessions・saves・scenarios・parameters・templates・master・profile だけで、ほかは503 `NO_SAVE_LOADED`。トップメニューやシナリオ管理から呼ぶ新しいAPIは、この範囲に置くか、コアの `api.py` の許可一覧を見直す(契約は `コンポーネント連携.md` の「セッション状態の管理」)。
 - ヘッダーは各モジュールの共通窓口が付けるので、窓口を通すことだけを守る。
   - UI(WebView): `fetchApi` か、`configureBackendRequests` が置き換えた `fetch`。APIの画像は `<img src>` で直接読まず `hooks/useApiImageUrl`(fetch→Blob URL。版ヘッダーを付けるため)。コアの版情報と照合結果は起動時にRust側で取得・共有し、WebViewごとの版取得や定期的な版確認は行わない。
   - UI(Rust): `version::client()` か、要求ごとの `.headers(version::headers())`。
@@ -41,4 +41,4 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 1. 公開ドキュメントで通信経路全体(HTTP/MMFのどちらを使うべきか)を把握する
 2. Envelope構造は`IPC/AGENTS.md`、イベント追加時の変更箇所は`IPC連携の整理.md`を必ず確認する(UnityとUI/バックエンドで構造が一致していないと通信が壊れるため)
 3. 実装ファイルを編集する(MMFの場合は送信側・受信側の両方を変更する)
-4. 仕様に影響する変更をしたら、対応するドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)
+4. 個別の仕様はソースのコメントに書く。全体の考え方やモジュール間の契約が変わる変更をしたときだけ、ドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)

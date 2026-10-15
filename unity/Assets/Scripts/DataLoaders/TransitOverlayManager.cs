@@ -178,6 +178,7 @@ public class TransitOverlayManager : MonoBehaviour
         foreach (var line in store.Lines)
         {
             if (!visibleVariants.Contains(line.path_variant) || line.line_agent_id == hiddenLineId) continue;
+            // 車種を渡し、帯を車両と同じ車線・軌道に置く(同じ道路を走るバスとLRTの帯を重ねない)。
             var route = new TransitRouteGeometry.Route { motion = new TransitMotionClock(line.journeys), VehicleType = VehicleModelConfig.GetTransitVehicleType(line.path_variant) };
             TransitRouteGeometry.BuildRuns(route);
             routes.Add((line, route));

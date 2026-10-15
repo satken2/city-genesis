@@ -18,7 +18,7 @@ using UnityEngine.Rendering;
 ///
 /// パーティクルはローカル空間シミュレーション(`ParticleSystemSimulationSpace.Local`)で組む。
 /// 発生源の建物は動かないため World 空間にする利点がなく、Local なら親のスケールが
-/// そのまま煙柱全体に効く。
+/// そのまま煙柱全体に効く。FloatingOrigin がワールドをずらしても、煙が元の位置に尾を引かない。
 /// </summary>
 public static class FireEffectFactory
 {

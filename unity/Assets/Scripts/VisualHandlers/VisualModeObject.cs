@@ -108,7 +108,9 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     }
 
     /// <summary>
-    /// マテリアル情報の初期化・再取得
+    /// マテリアル情報の初期化・再取得。今の sharedMaterials を元の材質として記録し、ハイライトの解除などでそこへ戻すので、
+    /// メッシュや材質を差し替えたら呼び直す。計画中の色などを上塗りした状態で呼ぶとそれを元の材質として残すため、
+    /// 生成後に Renderer を足すときは RefreshMaterials を使う。
     /// </summary>
     public void InitializeMaterials()
     {

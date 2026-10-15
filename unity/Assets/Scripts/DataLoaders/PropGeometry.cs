@@ -107,6 +107,10 @@ public static class PropGeometry
     }
     private static float Unit(uint value) => (Hash(value) & 0xffffff) / 16777216f;
 
+    /// <summary>
+    /// 世界格子 (x, z) の候補。Resources/Shaders/ForestPlacement.compute の Generate と同じ式なので、片方だけを変えると
+    /// GPUの森林と、散布プレビュー・ブルドーザの選択が再現するCPUの候補の位置がずれる。
+    /// </summary>
     public static Point Sample(int x, int z, float spacing, int seed)
     {
         unchecked

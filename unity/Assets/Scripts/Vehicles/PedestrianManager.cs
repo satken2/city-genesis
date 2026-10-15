@@ -756,6 +756,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
     /// Models/Props/pedestrian_{n} を0から順に読み、同じ番号の歩行姿勢 _right・_left も読む。
     /// 歩行姿勢が片方でも欠ける番号は両足を揃えた姿勢だけで描き、1つも無ければ人型の箱で描く(FBX未導入でも動作させる)。
     /// ModelManager が未生成のフレームでは判定を持ち越す。
+    /// 3つの姿勢は原点(両足の間の接地点)と胴・頭の位置が揃っている前提で、差し替えるときに位置を補正しない。
     /// </summary>
     private void EnsureModels()
     {

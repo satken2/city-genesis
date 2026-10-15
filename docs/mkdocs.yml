@@ -89,9 +89,7 @@ nav:
       - 露天掘り: geometries/F11_露天掘りのメッシュ生成.md
     - 道路メッシュの生成: geometries/G_道路メッシュの生成.md
     - バックエンドデータロード: geometries/H_バックエンドデータロード.md
-    - 建物パーツ作成マニュアル: geometries/I_建物パーツ作成マニュアル.md
     - パスの交差処理: geometries/J_パスの交差処理.md
-    - 地形データ作成マニュアル: geometries/L_地形データ作成マニュアル.md
     - 地形プロップ: geometries/M_地形プロップ.md
     - 線路メッシュの生成: geometries/N_線路メッシュの生成.md
     - 車両の走行描画: geometries/O_車両の走行描画.md

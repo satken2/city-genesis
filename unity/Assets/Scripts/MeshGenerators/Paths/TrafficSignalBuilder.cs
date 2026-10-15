@@ -64,6 +64,8 @@ public static class TrafficSignalBuilder
             float across = Mathf.Abs(Vector3.Dot(arm, headRotation * Vector3.right));
             float tip = model.HeadHalfWidth * across + model.HeadHalfDepth * Mathf.Sqrt(Mathf.Max(0f, 1f - across * across));
             float length = placement.Reach + tip;
+            // 部品は3つとも原点を柱の接地面の高さに置き、取付高さをモデル自身が持つ前提。柱は軸の足元、アームは長さ1(+Zが先端側)の
+            // 中央、灯器は吊り金具の真下(表示面が+Z)を原点にして作ってあり、アームだけを長手に伸縮する。
             if (placement.OwnsPole) Append(model.Pole, Matrix4x4.TRS(foot, armRotation, Vector3.one));
             Append(model.Arm, Matrix4x4.TRS(foot + arm * (length * 0.5f), armRotation, new Vector3(1f, 1f, length)));
             Append(model.Head, Matrix4x4.TRS(foot + arm * placement.Reach, headRotation, Vector3.one));

@@ -35,7 +35,7 @@ using GeneratedModels;
 /// このビルダーが再実行され、足場・建機が伸びていく（解体中も同一ロジック）。
 ///
 /// 既知の割り切り:
-/// - MODEL_MODULAR_GROUND（畑・庭）・MODEL_PORT（岸壁）・MODEL_OPEN_PIT（露天掘り）は土マウンドのみ（足場・建機なし）。
+/// - MODEL_MODULAR_GROUND（畑・庭）・オープンスペース・MODEL_PORT（岸壁）・MODEL_RAIL_YARD（車両基地）・MODEL_OPEN_PIT（露天掘り）は土マウンドのみ（足場・建機なし）。
 /// - MODEL_PORT では敷地が海岸線を含むため、土が海面上に描かれることがある。
 /// </summary>
 public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
@@ -228,7 +228,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// 施工済み階の天面を footprint 形状の水平パネルで塞ぐ（工事中の建物内部が上から見えないように）。
     /// マテリアルは ceil パーツ（a{variant}→b{bd_type}→common の順に解決）から取り、無ければ
-    /// デフォルト建物マテリアルにフォールバックする。prebuilt の積み上げ天面（§17）と同じ考え方。
+    /// デフォルト建物マテリアルにフォールバックする。
     /// </summary>
     private static void AddConstructionCeil(Vector2[] footprint, string prefix, float visualVariant, float height,
         string ceilPartName,

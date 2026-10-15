@@ -55,7 +55,10 @@ public static class PathTunnelParts
         if (cursor < to) yield return new TrackCorridorInfo.PercentRange { From = cursor, To = to };
     }
 
-    /// <summary>地上壁の有無とは独立して外縁に立てる。ホームや隣接線路の開口は呼び出し側の範囲を使う。</summary>
+    /// <summary>
+    /// 地上壁の有無とは独立して外縁に立てる。ホームや隣接線路の開口は呼び出し側の範囲を使う。
+    /// 専用モデルは下端を原点とする右側用(左はXミラー)で、高さは伸縮しないのでクリアランス(マスターの height)の高さで作る。
+    /// </summary>
     public static void GenerateWall(GameObject parent, SplineComputer spline, PathSummary path, float halfWidth,
         float wallWidth, bool left, List<TrackCorridorInfo.PercentRange> tunnels,
         IEnumerable<TrackCorridorInfo.PercentRange> allowed = null)
@@ -74,6 +77,7 @@ public static class PathTunnelParts
             }
     }
 
+    /// <summary>クリアランスの高さに天井を張る。専用モデルも既定の天井と同じく、原点の高さの片面で表を下へ向けて作る。</summary>
     public static void GenerateCeiling(GameObject parent, SplineComputer spline, PathSummary path,
         float leftExtent, float rightExtent, List<TrackCorridorInfo.PercentRange> tunnels)
     {

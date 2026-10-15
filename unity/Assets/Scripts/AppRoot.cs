@@ -41,6 +41,7 @@ public class AppRoot : MonoBehaviour
             if (args[i] == "--api-base-url")
             {
                 ApiClient.BASE_URL = args[i + 1];
+                // ログには採用した URL だけを出す。起動引数の全体は認証情報を含みうるので出さない。
                 UnityEngine.Debug.Log($"AppRoot: API ベース URL を {ApiClient.BASE_URL} に設定しました");
                 break;
             }

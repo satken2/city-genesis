@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 /// 川1本分の判定用データ。
 ///
 /// 川は「範囲ポリゴン(polygon。穴=中州)」と「水面標高のプロファイル線(profile)」で定義される
-/// (バックエンド GET /terrain/rivers。仕様の正は D_地形形状.md §D.11)。範囲内の任意地点の
+/// (バックエンド GET /terrain/rivers。仕様の正は D_地形形状.md §D.8)。範囲内の任意地点の
 /// 水面標高は「profile 折れ線上の最近点の y」で決まり、この規則は地形エディタ
 /// (riverGeometry.ts の RiverProfileSampler)・バックエンド(geo_rivers.py)と共通の契約。
 ///
@@ -45,7 +45,10 @@ public class RiverRecord
             | CornerMask[(j + 1) * GridW + i] | CornerMask[(j + 1) * GridW + i + 1]) != 0;
     }
 
-    /// <summary>描画専用の岸への埋め込み余白。占有判定や川床マスクは広げない。</summary>
+    /// <summary>
+    /// 描画専用の岸への埋め込み余白。占有判定や川床マスクは広げない。
+    /// 地形と水面は格子・三角形の分け方が違うので、岸線ぴったりで切ると曲線区間で水の板の端が見えるため。
+    /// </summary>
     public bool SurfaceCellIncluded(int i, int j)
     {
         for (int y = j - 1; y <= j + 1; y++)

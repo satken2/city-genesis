@@ -93,7 +93,10 @@ public static class VehicleModelResolver
         lod.RecalculateBounds();
     }
 
-    /// <summary>著作時の配置と長手軸をラッパー内で正規化し、走行側は+Z前方・接地中心原点に統一する。</summary>
+    /// <summary>
+    /// 著作時の配置と長手軸をラッパー内で正規化し、走行側は+Z前方・接地中心原点に統一する。
+    /// 前後の向きは形から判別しないので、モデルは前方を+Z(Blenderの-Y)にして書き出してある前提。
+    /// </summary>
     private static void NormalizeModel(Transform root,Transform model)
     {
         Bounds bounds = ModelBounds(root);
@@ -120,6 +123,10 @@ public static class VehicleModelResolver
         return bounds;
     }
 
+    /// <summary>
+    /// 車体の長手だけを公称の車長へ伸縮する。外接箱の前後の長さを1両の長さとみなすので、
+    /// 公共交通の車両モデルは車体の前後端(列車では連結面)を外接箱の前後端に揃えて作ってある前提。
+    /// </summary>
     public static void FitTransitLength(GameObject car,float nominalLength)
     {
         car.transform.localScale=Vector3.one;

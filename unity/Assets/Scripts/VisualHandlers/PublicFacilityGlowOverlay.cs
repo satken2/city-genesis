@@ -95,6 +95,8 @@ public class PublicFacilityGlowOverlay : MonoBehaviour
 
     private void Update()
     {
+        // VisualModeHandler には登録せず、毎フレーム状態を引く。登録すると、建物が多いときに
+        // 数フレームに分けた一括通知が届くまで切り替えが遅れるため。
         bool nextActive = ResolveActive();
 
         if (nextActive != isActive)

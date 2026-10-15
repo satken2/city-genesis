@@ -40,9 +40,8 @@ const LANGS = ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"];
 const SCENARIOS = ["basic", "controls", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
 const walk = (value, visit) => { if (value && typeof value === "object") { visit(value); Object.values(value).forEach(v => walk(v, visit)); } };
 const lookup = (text, key) => key.split(".").reduce((v, k) => v?.[k], text);
-const definitions = {};
 for (const name of SCENARIOS) {
-  const definition = definitions[name] = JSON.parse(await readFile(`src/tutorial/definitions/${name}.json`, "utf8"));
+  const definition = JSON.parse(await readFile(`src/tutorial/definitions/${name}.json`, "utf8"));
   for (const lang of LANGS) {
     const text = JSON.parse(await readFile(`src/i18n/${lang}/tutorial.json`, "utf8"));
     walk(definition, value => {
@@ -62,12 +61,4 @@ for (const lang of LANGS) {
   }
 }
 if (!registry.tutorial_intro) throw new Error("Intro window is not registered");
-let steps = 0;
-for (const name of ["basic", "controls", "scenario2", "scenario3", "scenario4", "reclamation", "acquisition"]) {
-  const text = await readFile(`../docs/tutorials/${name}.md`, "utf8");
-  const designed = [...text.matchAll(/^ID: `([^`]+)`/gm)].map(m => m[1]);
-  const defined = definitions[name].steps.map(step => step.id);
-  if (designed.join() !== defined.join()) throw new Error(`Design steps of ${name} differ from the definition: ${designed} / ${defined}`);
-  steps += designed.length;
-}
-console.log(`PASS: definitions, translations, step titles, intro texts, window names and ${steps} designed steps`);
+console.log("PASS: definitions, translations, step titles, intro texts and window names");

@@ -198,6 +198,7 @@ public class TrackPath : IPathMeshGenerator
         // 一定間隔で中間点を補間し、地形高さを反映させる。
         // ウェイポイントの角は Broken 点として維持する（道路のような角の切断・充填は行わない。
         // 線路は通常 curved=true で滑らかに敷設される想定で、折れ線線路の角は簡易表現とする）。
+        // 共通標高(station_grade_profile)を持つ線路の点列は PathManager が設計標高を当て済みなので、地形へ追従させ直さない。
         if (!isCurved && (pathData.station_grade_profile == null || pathData.station_grade_profile.Count < 2)
             && (points.Count == 2 || (pathData.GetWaypointList()?.Count ?? 0) > 0))
         {
@@ -563,6 +564,7 @@ public class TrackPath : IPathMeshGenerator
 
         // 道床（body）: 全幅に引き伸ばして配置。高さは道路の body と同じ体系で、
         // 交差点の道床ハル（基準面 + BODY_ABOVE_SPLINE）とも同一平面になる。
+        // body_elevated は body と違って上面の補正も最上面の幅合わせも受けないので、上面を原点の高さに、断面全体の幅をパスの幅にして作る。
         GameObject ballast = null;
         WithWarp(bodyWarp, () =>
         {
@@ -590,6 +592,7 @@ public class TrackPath : IPathMeshGenerator
         }
 
         // 軌道（track）: 各軌道の中心に実寸配置（stretchToWidth=false。ゲージ維持）。
+        // 枕木の太さと周期が変わらないよう、道路用の曲率適応タイルへ詰めず著作長のタイルで敷く（maxTileLength: 0）。
         // S字があるときは軌道ごとにずらしたスプラインへ敷き、枕木を軌道に直交させる。架線も同じスプラインを使う。
         var trackSplines = new SplineComputer[laneCount];
         int placedTracks = 0;
@@ -775,6 +778,7 @@ public class TrackPath : IPathMeshGenerator
             if (path.path_type == Constants.PATH_TRACK && atAnchor && connections != null && connections.Count > 0 && nodeId > 0 && !facilityContinues && lengths[points.Count - 1] >= 3f)
             {
                 var usedEnds = TrackIntersectionMeshGenerator.ResolveConnectedTrackEnds(nodeId, nodePaths);
+                // buffer_stop は軌道の中心・枕木の下面を原点にし、+Z を列車が来る側（線路の内側）へ向けて作る。
                 for (int lane = 0; lane < lanes; lane++)
                 {
                     if (usedEnds.Contains((path.path_id, lane))) continue;
@@ -815,6 +819,7 @@ public class TrackPath : IPathMeshGenerator
     /// <summary>
     /// ホーム端の妻壁を、横位置 from〜to（中心線からの符号付き距離）へ1.2m以下のパネルに等分して並べる。
     /// 端から12cm内側、デッキ上面の高さに置き、横方向だけをパネル幅へ伸縮する。
+    /// 横の倍率をそのままパネル幅にするので、部品は幅1mで、横の中央・デッキ上面を原点にして作る。
     /// </summary>
     private static void PlacePlatformEndPanels(GameObject container, GameObject prefab, Vector3 point, Vector3 right, Vector3 inward, float from, float to)
     {
@@ -1021,6 +1026,7 @@ public class TrackPath : IPathMeshGenerator
         // 外縁（platform_wall）: 原点を軌道の中心線に合わせ、設置面（線路面）で配置する
         // （外縁位置への横移動はプレハブ形状が持つ）。
         // 島式結合区間・他線路近接区間は percent 区間クリップで省略する。
+        // 省かれる区間があるので、常に見せる造形は platform_wall ではなく platform 側に作る。
         List<TrackCorridorInfo.PercentRange> ranges = corridor != null
             ? corridor.GetPlatformWallPercentIntervals(leftSide, MERGE_WALL_MIN_RUN_LENGTH)
             : new List<TrackCorridorInfo.PercentRange> { new TrackCorridorInfo.PercentRange { From = 0.0, To = 1.0 } };

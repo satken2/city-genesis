@@ -201,6 +201,8 @@ public class RoadPath : IPathMeshGenerator
         }
 
         // 角の処理はアンカー列にだけ行う。区間分割後や縦断の設計値で細分化された点列は、描画済みの中心線として1本のスプラインにする。
+        // Linear スプラインは各点の向きを前後の区間の平均にする(linearAverageDirection)ので、アンカー列を1本にすると
+        // 角の後ろの区間全体の向きがずれる。細分化済みの点列なら、ずれは角の直後の1区間に留まる。
         if (!isCurved && hasWaypoints && PathManager.IsAnchorPolyline(pathData, points))
         {
             return GenerateLinearPathWithCorners(pathData, points, startSidewalkSetback, endSidewalkSetback, singleSpan);
@@ -989,6 +991,7 @@ public class RoadPath : IPathMeshGenerator
             GameObject centerObj = fits ? CreateSplineMesh(container, spline, $"{variantBase}/center", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/center", clipFrom: from, clipTo: to) : null;
             if (rounded && fits)
             {
+                // 端の部品は区間 [0, from]・[to, 1] へ1枚で伸ばして置くので、半円の丸い側を center_start は −Z、center_end は +Z へ向けて作る。
                 if (roundStart && PathDrawContext.IntersectDetailRange(0, from, out _, out _))
                     CreateSplineMesh(container, spline, $"{variantBase}/center_start", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
                     fallbackPrefabName: $"{typeBase}/center_start", clipFrom: 0, clipTo: from, maxTileLength: 0, singleSpan: true);
@@ -1967,6 +1970,7 @@ public class RoadPath : IPathMeshGenerator
         bool needsPillar = pillarPrefab != null && height > 0.1f;
         Vector3 pillarScale = pillarPrefab != null ? pillarPrefab.transform.localScale : Vector3.one;
         // 橋脚モデルは実寸で著作され、種類ごとに高さが異なる。1mモデルとは限らない。
+        // 柱は天端を原点にして下へ伸ばして作る(原点をキャップの下端に置き、地面まで高さだけ伸縮する)。伸縮させたくない梁などは pillar_cap に分ける。
         pillarScale.y = height / Mathf.Max(0.001f, pillarBounds.GetValueOrDefault().size.y);
 
         // 通常橋脚を優先し、干渉する地点だけ独立した柱と横梁で通行帯をまたぐ。

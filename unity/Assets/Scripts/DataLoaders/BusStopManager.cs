@@ -130,6 +130,7 @@ public sealed class BusStopManager : MonoBehaviour
         float offset = sidewalk >= 2.4f ? width * .5f - 1.2f : width * .5f + 1.2f;
         position += side * offset;
         position.y += RoadPartHeights.BODY_ABOVE_SPLINE + (sidewalk >= 2.4f ? .2f : 0);
+        // モデルは原点を接地面の水平中心、ベンチの正面を+Z、Xを道路の長手にして作ってある前提で、正面を車道へ向ける。
         rotation = Quaternion.LookRotation(-side, Vector3.up);
         return true;
     }

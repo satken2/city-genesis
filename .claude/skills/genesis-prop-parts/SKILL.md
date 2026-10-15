@@ -14,9 +14,8 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 
 ## 鉄則(プロップ固有)
 
-1. **規約の正本**は `city-genesis/docs/docs/geometries/M_地形プロップ.md`。
-   制作前に §M.5(GPU描画とモデル)と **§M.5.1(モデル制作規約)** を必ず読む。
-   Unity側の実装メモは `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` の「地形プロップ」節。
+1. **規約の正本**は、プロップを描く Unity のコード(`city-genesis/unity/Assets/Scripts/DataLoaders/PropRenderModel.cs`・`PropGeometry.cs` など)のコメントとバリデータ。
+   制作前に、全体像として `city-genesis/docs/docs/geometries/M_地形プロップ.md` を読む。
 2. **1種別=1FBX。パーツ分割も閾値フォルダも無い。** `Assets/Models/Props/{prop_type}.fbx` だけで
    描画が成立する。`_close` / `_far` は任意のオプトイン。
 3. **原点=接地点、XZ中心=原点。** Unityは原点を地表に置き、原点まわりにY軸回転と0.8〜1.2倍の
@@ -52,14 +51,14 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 - 木2種は `pipeline/jobs/build_prop_trees.py` で原点に著作する。通常72/96三角形、専用Far14/20三角形（幹なしの八角錐/丸い葉塊）。
   広葉樹は4個の葉塊、針葉樹は細身の4段樹冠。両種の再生成は同ジョブを一度実行する。
   葉はスムーズ法線と粗さ0.9、共有256×256色画像（Props/Textures）を使う。画像は外部参照でFarも共有し、FBX拡散色は白にする。
-- **固定名モデル**: `construction_*`(工事車両。G文書§15)と `ambient_*`(空と海の環境演出の航空機・船舶。V文書)は
+- **固定名モデル**: `construction_*`(工事中のパスに置く工事車両)と `ambient_*`(空と海の環境演出の航空機・船舶。V文書)は
   同じ `props.blend` / `Props/` に置く。固定名のFBXは描画コードが直接読み、手動配置用には数値ID別名を `prop_master` に登録する。
   `ambient_*` は船が喫水線原点(船体は原点より下)なので、バリデータは接地検査をせず水平中心と専用予算だけを見る。
   船5種は通常・接写・遠景を持ち、非公開制作ツールの `pipeline/jobs/ambient_ships.py` が同じ寸法表から著作する(航空機は通常だけ)。
   Unityは専用の `_close` / `_far` を持つモデルだけを投影比で切り替える。検証は `city-genesis/unity/Tests/AmbientShips/run.ps1`。
   再生成は `pipeline/jobs/ambient_vehicles.md`。手動配置用の数値ID別名(201〜204・301〜307。船は `_close` / `_far` も)は
   `pipeline/jobs/build_prop_aliases.py` がメッシュ共有で作る。**元モデルを再著作したら別名も再実行して書き出す**。
-- **交差点の信号機** `traffic_signal_{様式}_{pole|arm|head}`(G文書§11.8)も固定名モデルで、`prop_master` に登録しない。
+- **交差点の信号機** `traffic_signal_{様式}_{pole|arm|head}`(`TrafficSignalBuilder.cs`)も固定名モデルで、`prop_master` に登録しない。
   Unityが交差点ごとに3部品を1メッシュへ結合するので、原点は3部品とも柱の接地面の高さに揃え、取付高さはモデルが持つ。
   アームはBlender Y+0.5(柱の軸)〜-0.5(先端)の単位長で長手だけ伸縮され、灯器は吊り金具の真下が原点で表示面をBlender -Yへ向ける。
   バリデータは柱の軸・アームの単位長・灯器の下端4.5m以上を検査し、アームと灯器には接地検査をしない。
@@ -82,7 +81,7 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 
 `_far` を著作するのは「自動集約で輪郭が崩れる目立つ種類」だけでよい。
 草（4）は`PropRenderPolicy`で近景専用に指定され、100mで非表示・90m未満で復帰する。通常モデルだけを著作し、遠景版は作らない。範囲散布は水平125m以内の小区画のみ生成・保持する。再生成は非公開制作ツールの`pipeline/jobs/build_prop_grass.py`。既存の葉材質・画像を共有する。
-建物・パスのFarは無印と対にしない`far`1体で、規約が別（I §7・G §3.1）。プロップと鉄道車両は専用`_far`を持てる。
+建物・パスのFarは無印と対にしない`far`1体で、規約が別（建物は `FarBuildingMeshBuilder.cs`、パスは `PathFarModel.cs` のコメント）。プロップと鉄道車両は専用`_far`を持てる。
 
 ### 造形の選び方と比較検証
 
@@ -148,7 +147,7 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 
 鉄道の接写版は14（トラム）・20（メトロ）・21（中距離）・22（貨物）・23（高速鉄道）の全外観と中間車・貨車、およびモノレール308/309にある。非公開制作ツールの`pipeline/jobs/build_rail_close.py`が、トラム14は通常の車体断面から曲面外板と細部を著作し、20/21/22/23は外観モジュールが、モノレール308/309は`monorail_vehicles.py`が通常と同じ寸法表から作る。通常FBXは保持する。再生成・比較・専用頂点予算は同ディレクトリの`rail_close.md`を参照する。走行版はVehicleModelResolverのLODGroup、自由配置別名はPropRenderModelで接写を選ぶ。`build_vehicle_props.py`は接写も同期する。
 
-道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。走行用の全44モデルは自由配置用の数値ID 350〜367・370〜395でも `prop_master` に登録する。制作前に公開 `geometries/O_車両の走行描画.md` の O.10.1 と `unity/Assets/Scripts/Vehicles/AGENTS.md` を読む。
+道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。走行用の全44モデルは自由配置用の数値ID 350〜367・370〜395でも `prop_master` に登録する。制作前に公開 `geometries/O_車両の走行描画.md` と `unity/Assets/Scripts/Vehicles/AGENTS.md`、モデルの前提を書いた `Vehicles/VehicleModelResolver.cs` のコメントを読む。
 
 - 原点は接地面・水平中心、Blender -Yが前方。1FBX=1メッシュで既存の車両用 `PROP_*` 材質を共有する。
 - 先頭・後尾は数値バリアント、中間は `middle` / `middle_1` / `middle_2`(外観0が `middle`)。LRT車種14は `0` と `middle` の1外観。貨物22の貨車は `wagon` / `wagon_1` / `wagon_2`。最後尾の反転はUnityが行う。
@@ -159,7 +158,7 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 手動配置用モノレール308/309は `props.blend` の例外的な車両プロップ。原点は走行タイヤと桁上面の接点で、床面は原点の0.30m上(桁の天端スプライン+1.2mに置くとホーム面に揃う)。床下カバーは全長で高さ-0.38m、前後の台車部で-0.90mまで桁の両脇へ下がって桁をまたぐ。bbox底面を原点に揃え直さない。負の高さでは左右0.51mの桁用離隔を維持し、`Tests/Monorail/run.ps1`で確認する。形状は非公開制作ツールの`pipeline/jobs/monorail_vehicles.py`が通常・接写・遠景を同じ寸法表から作る(寸法・再生成は同じ場所の`monorail.md`)。
 
 
-走行車両の自由配置別名は、非公開制作ツール `genesis-gallery/pipeline/jobs/vehicle_prop_catalog.py` が対応表を持つ。`build_vehicle_props.py -- --blend <props.blend>` は隣のvehicles.blendから全モデルの形状・UV・材質を同期する。道路車両は `build_vehicles.py --road-only` で18外観（10種/4種/2種/2種）の通常・接写・遠景を同じ寸法表から一度に再生成し(外観は `road_vehicles.py`・`road_buses.py`・`road_trucks.py`、形状の道具は `road_shapes.py`)、その後に別名も同期する。同期は折った稜線も写す(写さないと別名だけUnity取り込み後の頂点数が変わる)。道路車両のLODと制作規約は公開O文書§O.10.3、制作記録・再生成手順は非公開制作ツールの `pipeline/jobs/vehicles.md`。車両のプレビューは裏面を描かない材質で確認する(Blenderの既定表示は裏返った面も描くが、UnityのURPは描かない)。鉄道/LRTを再著作した場合も同期が必要。書き出しはvehiclesとpropsの両カテゴリへ行い、Unityの `Tests/Vehicles/run.ps1 -TransitOnly` で別名も確認する。詳細は公開M文書§M.7.6とO文書§O.10.1。
+走行車両の自由配置別名は、非公開制作ツール `genesis-gallery/pipeline/jobs/vehicle_prop_catalog.py` が対応表を持つ。`build_vehicle_props.py -- --blend <props.blend>` は隣のvehicles.blendから全モデルの形状・UV・材質を同期する。道路車両は `build_vehicles.py --road-only` で18外観（10種/4種/2種/2種）の通常・接写・遠景を同じ寸法表から一度に再生成し(外観は `road_vehicles.py`・`road_buses.py`・`road_trucks.py`、形状の道具は `road_shapes.py`)、その後に別名も同期する。同期は折った稜線も写す(写さないと別名だけUnity取り込み後の頂点数が変わる)。道路車両のLODと制作規約は `Vehicles/VehicleModelResolver.cs` のコメント、制作記録・再生成手順は非公開制作ツールの `pipeline/jobs/vehicles.md`。車両のプレビューは裏面を描かない材質で確認する(Blenderの既定表示は裏返った面も描くが、UnityのURPは描かない)。鉄道/LRTを再著作した場合も同期が必要。書き出しはvehiclesとpropsの両カテゴリへ行い、Unityの `Tests/Vehicles/run.ps1 -TransitOnly` で別名も確認する。
 
 メトロ20・中距離21・高速鉄道23は各3外観(0=スタンダード・1=近未来・2=レトロ、各1配色)。メトロと中距離は路線ごとにプレイヤーが選ぶ(API `vehicle_model`)。高速鉄道は公共交通の路線種別が無く、自由配置と候補だけを持つ。非公開制作ツールの外観モジュール`metro_vehicles.py`・`intercity_vehicles.py`・`high_speed_vehicles.py`が通常・接写・遠景を同じ寸法表から著作する(`build_vehicles.py`/`build_rail_close.py`/`build_rail_far.py`の`--metro-only`・`--intercity-only`・`--high-speed-only`)。共通の組み立て手順は`rail_design.py`(中距離・高速は断面を長手に並べるロフト外板の`LoftDesign`)、形状の道具は`rail_shapes.py`。外観を直すときは外観モジュールだけを編集し、旧来の車体を後から張り直す処理を足さない。自由配置別名はメトロ372〜375・388・389、中距離376〜379・390・391、高速384〜387・392・393。仕様・再生成・制作記録は非公開制作ツールの`pipeline/jobs/metro_vehicles.md`・`rail_designs.md`。外観を増やすときは、Unityの`vehicle_model_config.yaml`、UIの`transitVehicleModels.json`と7言語の表示名、`prop_master`、`vehicle_prop_catalog.py`、バリデータの別名範囲、`Tests/Vehicles`の候補数と別名IDを揃える。
 

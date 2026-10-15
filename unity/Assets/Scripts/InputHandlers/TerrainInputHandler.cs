@@ -352,6 +352,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         Vector3 basePosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
         basePosition.y = Utils.GetGroundHeight(basePosition);
 
+        // ホバーで吸着した位置はカーソル座標へ書き戻され、後続のクリック・ドラッグにも混入する。
+        // そのため吸着しないモードは、ドラッグ側だけでなくホバーでも吸着を省く。
         // 接続点編集モードでは吸着を適用しない。ノード吸着(半径10m)が有効なままだと、
         // ドラッグ中の端子ノードが「自分自身の移動前のキャッシュ位置」(nodeGridはPATCH完了まで
         // 旧位置を保持)へ吸着し続け、10m以内では動かず境界で飛ぶ壊れた挙動になるため。

@@ -4,7 +4,7 @@ using UnityEngine;
 public static class PropRenderPolicy
 {
     public const int Grass = 4;
-    public const float DetailResidentDistance = 125f;
+    public const float DetailResidentDistance = 125f;   // 表示距離より広く候補を先に作り、小区画の境界で生成待ちを見せない
     public const int DetailCandidateBudget = 65536;
 
     public static bool NearOnly(int type) => type == Grass;

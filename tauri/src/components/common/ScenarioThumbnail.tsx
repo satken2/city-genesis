@@ -11,6 +11,7 @@ import { useApiImageUrl } from "../../hooks/useApiImageUrl";
 type ScenarioThumbnailProps = {
   apiBaseUrl: string;
   templateId: string;
+  /** 作品リビジョン(content_revision)。画像はHTTPキャッシュされるので、作品が変わったときだけURLを変えるために付ける */
   revision?: number;
   /** 画像・プレースホルダ双方に付けるサイズ用クラス */
   className?: string;

@@ -1,3 +1,7 @@
+/**
+ * 市民のスキル構成(/api/v1/templates/citizen-skills)。対象は定住済み・就労可能年齢・非在学の住民。
+ * 比率は百分率で、high_skill_ratio は対象の住民に占める割合、majors の ratio は高度人材に占める割合。
+ */
 export type ScenarioSkillDistribution = {
   eligible_citizens: number;
   high_skill_citizens: number;

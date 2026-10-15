@@ -1076,7 +1076,7 @@ public static class BuildingMeshUtils
     /// prefix は呼び出し側で解決済みの建物プレフィックス（a{variant} または b{bd_type}）。
     /// モジュラー・既成建物の両方から共通で使う。
     /// ownPartOnly は b{bd_type}・common へフォールバックせず prefix 自身の floor パーツだけを使う
-    /// （車両基地。共通の舗装が線路の下に敷かれないようにする。F9 §6）。
+    /// （車両基地。共通の舗装が線路の下に敷かれないようにする）。
     /// </summary>
     public static Material ResolveFloorMaterialFromMaster(BuildingSummary buildingData, string prefix, bool ownPartOnly = false)
     {

@@ -529,6 +529,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
         Vector3 position3D = new Vector3(centroid.x + offsetX, buildingHeight, centroid.y + offsetZ);
 
+        // 向きは既成パーツと同じ（BuildingRoadAccess.PrebuiltRotation）で、原点を屋上面に置く前提で著作する。
         Vector2 firstEdge = footprint.Length >= 2 ? (footprint[1] - footprint[0]).normalized : Vector2.right;
         float edgeAngle = Mathf.Atan2(firstEdge.y, firstEdge.x) * Mathf.Rad2Deg;
         Quaternion rotation = Quaternion.Euler(0, -edgeAngle + 90, 0);
@@ -598,7 +599,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// エントランス(entrance)を建物前面の辺の中央・地面レベルに配置する。
     /// パーツ {prefix}/{suffix}/entrance が存在する場合のみ配置する(オプショナル)。
     ///
-    /// - 前面の辺は底面ポリゴンの最初の辺(頂点0 → 頂点1)とする(塔屋の向き決定 §10.3 と同じ規約)。
+    /// - 前面の辺は底面ポリゴンの最初の辺(頂点0 → 頂点1)とする(塔屋の向きと同じ規約)。
     ///   渡す底面は、屋外側への張り出しが元の占有輪郭に収まるよう前面の辺を後退させた本体輪郭(ExteriorStairBuilder)。
     /// - 原点は地面(ローカルY=0)かつ壁のアライメント面(前面の辺の直線上)。
     ///   壁パーツと同じ場所・同じ回転規約(辺方向へ向けてY軸180°反転。GenerateWallSegments参照)で

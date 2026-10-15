@@ -5,7 +5,8 @@
  * Tauriコマンド(invoke)経由でRustバックエンドの send_window_action に渡し、
  * パイプを通じてUnityに送信する。イベント名はコロン区切り（例: `view:change_view`）。
  *
- * イベントの定義は genesis-docs/programs/IPC連携の整理.md に基づく。
+ * 各イベントの意味とペイロードは、ここの送信関数と受信イベント名の定数のコメントが正。
+ * 運び方・Envelope・同期の原則は公開docsの programs/IPC連携の整理.md にある。
  */
 
 import { invoke } from "@tauri-apps/api/core";
@@ -35,6 +36,7 @@ export async function sendCitizenUnfollow(windowType: string, citizenId: number)
 }
 export const IPC_EVENT_CITIZEN_FOLLOW_STATE = "citizen:follow_state";
 export const IPC_EVENT_CITIZEN_PICK_FAILED = "citizen:pick_failed";
+/** Unity が鳴らす効果音・環境音の音量。volume は主音量×効果音量(0〜1)。 */
 export async function sendAmbienceVolume(volume: number): Promise<void> {
   await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "ambience:volume", params: { volume } });
 }
@@ -67,7 +69,7 @@ export async function sendMoveGraphicDisplay(direction: 1 | -1): Promise<void> {
 
 /**
  * グラフィックプログラムのステート種別
- * @see genesis-docs/programs/IPC連携の整理.md「グラフィックプログラムのステート」
+ * @see city-genesis/docs/docs/programs/IPC連携の整理.md「グラフィックプログラムのステート」
  */
 export type GraphicState =
   | "STATE_NORMAL"
@@ -92,8 +94,8 @@ export type GraphicState =
 /**
  * `view.change_view`
  * 表示オプションで選択した表示モードをグラフィックプログラムに通知する。
- * flags は色モードと独立した表示トグル("plan"=計画中表示, "public"=公共施設ハイライト)の
- * ID配列で、CSVに結合して送信する。省略(未指定)時は null を送り、
+ * flags は色モードと独立した表示トグル("plan"=計画中表示, "public"=公共施設ハイライト,
+ * "speed_limit"=制限速度標識)のID配列で、CSVに結合して送信する。省略(未指定)時は null を送り、
  * Unity側は「現在のフラグを維持」と解釈する(空配列は「全トグルOFF」の明示指定)。
  */
 export async function sendChangeDisplay(
@@ -195,6 +197,11 @@ export async function sendEditBuildingUpdateShape(
   });
 }
 
+/**
+ * `edit_building:placement_state`。配置の正はUnityで、パネルはこれを表示に反映するだけで送り返さない。
+ * position は固定した位置 [x, 0, z](未固定は null)、parcel_id=-1 は区画未選択。
+ * request_id は寸法の変更を指示したときの値をそのまま返したもので、パネルは最後の指示への応答が届くまで確定させない。
+ */
 export type BuildingPlacementState = {
   variant: number;
   revision: number;
@@ -794,6 +801,7 @@ export async function sendEditPathFinish(): Promise<void> {
   });
 }
 
+/** 駅舎の通路の方式(elevated/ground/underground)を敷設中のプレビューへ反映する。初期値は STATE_EDIT_PATH の passage_mode。 */
 export async function sendSetPassageMode(passageMode: string): Promise<void> {
   await invoke("send_window_action", {
     windowType: "path_build", entity: null,
@@ -801,6 +809,7 @@ export async function sendSetPassageMode(passageMode: string): Promise<void> {
   });
 }
 
+/** 駅舎の建屋を置く端(both/start/end)を敷設中のプレビューへ反映する。初期値は STATE_EDIT_PATH の house_ends。 */
 export async function sendSetHouseEnds(houseEnds: string): Promise<void> {
   await invoke("send_window_action", {
     windowType: "path_build", entity: null,
@@ -1447,7 +1456,7 @@ export const IPC_EVENT_EDIT_TRANSIT_UPDATE_POINTS = "edit_transit:update_points"
 
 /**
  * プロップ配置(個別モード)において、配置済みインスタンス列が変更された(Unity → UI)。
- * ペイロードは { instances: [{prop_type, x, y, z, rotation, scale}] }。種別変更前の仮配置も含む。
+ * ペイロードは { instances: [{prop_type, x, y, z, rotation, scale}] }。y は地面からの相対高さ(m)。種別変更前の仮配置も含む。
  * PropPlacementPanel がこれを受けて配置数の表示と POST 用のインスタンス列を更新する。
  */
 export const IPC_EVENT_EDIT_PROP_UPDATE_INSTANCES = "edit_prop:update_instances";

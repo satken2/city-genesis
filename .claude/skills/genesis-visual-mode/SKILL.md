@@ -5,10 +5,10 @@ description: City GenesisのUnity表示モード(VisualMode: ヒートマップ�
 
 > **パス表記の基準**: 本文中のパスはワークディレクトリ `S:/city/genesis`(`city-genesis` と `genesis-core` を並べた作業ツリー)を起点とする。`city-genesis` 単体で作業している場合は先頭の `city-genesis/` を読み替えること。`genesis-core/` 配下は非公開のコアシミュレータなので、手元に無ければその項目は読み飛ばしてよい。
 
-このSkillはコード本体を持たない「道しるべ」です。実際の仕様・ロジックは以下のドキュメントに書かれているので、実装前に必ず読むこと。
+このSkillはコード本体を持たない「道しるべ」です。全体の考え方は以下のドキュメントに、個別の仕様と意図はソースのコメントに書かれているので、実装前に必ず読むこと。
 
 ## 読むべきドキュメント(概念、公開)
-- `city-genesis/docs/docs/programs/Unity表示モード.md` (最重要。色モードと表示フラグ、モード定数の値域、`IVisualModeHandler`の2実装パターン、`VisualModeObject`のステータス連動、地区色分け、常駐オーバーレイ)
+- `city-genesis/docs/docs/programs/Unity表示モード.md` (最重要。レイヤー・色モード・表示フラグの考え方、個体の見え方の優先順位、編集ステートの表示の記憶と復帰。モード定数の値域や個別のモードの色分けは `VisualHandlers/` のコードのコメント)
 - `city-genesis/docs/docs/programs/Unity入力制御.md` (別系統である入力モードとの関係)
 
 ## 読むべきAGENTS.md
@@ -22,7 +22,7 @@ description: City GenesisのUnity表示モード(VisualMode: ヒートマップ�
 - UI側: `city-genesis/tauri/src/components/display/`配下
 
 ## 進め方
-1. `Unity表示モード.md`で`IVisualModeHandler`パターンとモード定数の値域を把握し、`VisualHandlers/AGENTS.md`で規約を確認する(新モード追加時は既存パターンに沿わせる)
+1. `Unity表示モード.md`で全体像を、`VisualHandlers/` のコードで`IVisualModeHandler`パターンとモード定数の値域を把握し、`VisualHandlers/AGENTS.md`で規約を確認する(新モード追加時は既存パターンに沿わせる)
 2. `unity/AGENTS.md`の「モード系は2系統」でInputModeとの違いを再確認する(取り違えるとバグの元)
 3. 実装ファイルを編集する
-4. 仕様に影響する変更をしたら、対応するドキュメント(`Unity表示モード.md`)の更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)
+4. 個別の仕様はソースのコメントに書く。全体の考え方やモジュール間の契約が変わる変更をしたときだけ、ドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)

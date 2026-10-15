@@ -157,6 +157,8 @@ public static class RoadEquipmentGenerator
         {
             // 独立した歩道を持たない歩行者道では、舗装端の内側に柵を置く。
             float fenceOffset = sidewalkWidth > 0f ? edge - sidewalkWidth + 0.12f : Mathf.Max(0f, edge - 0.12f);
+            // 支柱(0.07m角)は中心の横位置の歩道上面に接地させる。歩道幅へ伸縮した後の縁石と歩行面の段差が
+            // 歩車道境界から0.085〜0.155mにあると支柱の片側が浮くので、歩道モデルの段差はこの範囲を避けて著作する。
             float fenceSurface = sidewalkWidth > 0f
                 ? SurfaceHeight(path, "sidewalk", 0.5f - 0.12f / sidewalkWidth)
                 : SurfaceHeight(path, "body");

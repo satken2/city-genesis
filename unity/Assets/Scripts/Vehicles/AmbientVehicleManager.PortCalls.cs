@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 /// <summary>
 /// 入港船。稼働中のバルク港・タンカー埠頭・コンテナ埠頭・客船ターミナルごとにエポックに1回抽選し、当たった港へ
 /// 外洋の無作為な地点から向かう航路の途中の無作為な位置に船を置く。船は入港の速さで減速しながら進み、
-/// 岸壁の沖で止まってから横へ寄せて接岸し、実際の荷役・寄港に掛かる時間だけ留まる。仕様は公開 V 文書 §V.5。
+/// 岸壁の沖で止まってから横へ寄せて接岸し、実際の荷役・寄港に掛かる時間だけ留まる。
 /// </summary>
 public sealed partial class AmbientVehicleManager
 {
@@ -186,6 +186,7 @@ public sealed partial class AmbientVehicleManager
         }
         if (quayLength < 1f) return null;
 
+        // 外接箱を船体とみなす。船のモデルは船体より大きく張り出す部品を持たない前提。
         float beam = model.bounds.size.x, shipLength = model.bounds.size.z;
         Vector2 along = (quay.Q - quay.P) / quayLength, normal = quay.Normal.normalized;
         Vector2 middle = (quay.P + quay.Q) * .5f + normal * (beam * .5f + FenderGap);

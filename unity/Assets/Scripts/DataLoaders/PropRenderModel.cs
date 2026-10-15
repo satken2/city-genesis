@@ -22,6 +22,10 @@ public sealed class PropRenderModel : IDisposable
     public bool DedicatedFar { get; private set; }
     public Bounds bounds;
     public float Radius => bounds.extents.magnitude;
+    /// <summary>
+    /// 範囲散布で障害物から空ける距離。幹だけが障害物の外にあって樹冠が壁や道路に掛かるのを抑える。
+    /// 原点がXZの中心にある前提で、外接箱の半幅から求める。
+    /// </summary>
     public float Clearance(float scale) => Mathf.Min(8f, Mathf.Max(bounds.extents.x, bounds.extents.z) * 0.15f * scale);
     private readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
 
@@ -47,7 +51,11 @@ public sealed class PropRenderModel : IDisposable
         CalculateBounds();
     }
 
-    /// <summary>固定名のモデル(Props/ambient_* など)も同じ抽出で読む。distantTree は森林の最遠景樹冠を作るか。</summary>
+    /// <summary>
+    /// 固定名のモデル(Props/ambient_* など)も同じ抽出で読む。distantTree は森林の最遠景樹冠を作るか。
+    /// 地形プロップのモデルは原点を接地点(XZは外接箱の中心)にして作ってある前提で、原点の周りに回転・倍率を掛ける。
+    /// `_close` / `_far` も通常と同じ原点で作ってある前提で、同じ行列で描く。
+    /// </summary>
     public PropRenderModel(string name, bool distantTree = false)
     {
         var manager = ModelManager.Instance;
@@ -120,9 +128,12 @@ public sealed class PropRenderModel : IDisposable
                 if (source[i] == null) continue;
                 if (!materials.TryGetValue(source[i], out var mat))
                 {
+                    // 実行時に instancing を有効にするので、GraphicsSettings の Instancing Variants は Keep All にしておく
+                    // (Strip Unused だと、ビルドで必要なシェーダーバリアントが除かれて描画されない)。
                     mat = new Material(source[i]) { enableInstancing = true };
                     materials.Add(source[i], mat); owned.Add(mat);
                 }
+                // ルートの変換は打ち消し、子のローカル変換だけを残す。モデルの原点がそのまま配置点になる。
                 parts.Add(new Part { mesh = filter.sharedMesh, submesh = i, material = mat,
                     local = prefab.transform.worldToLocalMatrix * filter.transform.localToWorldMatrix });
             }

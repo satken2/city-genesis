@@ -18,6 +18,7 @@ public static class BrickArcadeGenerator
         Mesh source=filter.sharedMesh;
         if(source==null || source.vertexCount>RoadPath.SPLINE_MESH_VERTEX_BUDGET) return;
         var bounds=source.bounds;
+        // 部品は上端を原点の高さ（道床面）に、下端を原点より下に作る。横はパスの全幅へ、下端は各地点の地盤まで伸ばす。
         if(bounds.size.z<.01f || bounds.size.x<.01f || bounds.min.y>=0) return;
         float length=spline.CalculateLength();
         if(length<.1f) return;

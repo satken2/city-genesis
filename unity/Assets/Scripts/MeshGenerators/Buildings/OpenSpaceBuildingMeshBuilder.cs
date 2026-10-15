@@ -79,6 +79,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                     if(mesh==null)continue;
                     owned.Add(mesh);loaded[prop.Part]=mesh;loadedMaterials[prop.Part]=partMaterials;
                 }
+                // 小物は原点を接地面の水平の中心に置き、正面をローカル+Z（Blenderの −Y）へ向けて実寸で著作する前提。
                 Quaternion rotation=Quaternion.LookRotation(new Vector3(prop.Forward.x,0,prop.Forward.y));
                 Bounds b=mesh.bounds;
                 var rect=new Vector2[4];
