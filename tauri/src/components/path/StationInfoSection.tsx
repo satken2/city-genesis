@@ -33,7 +33,7 @@ type StationLine = {
   status: number;
 };
 
-/** 駅舎のホームに乗る停留所。ridership は前エポックにそこから乗った回数で、記録の無い停留所は null。 */
+/** 駅舎のホームに乗る停留所。ridership は前エポックにそこから乗った1日あたりの回数で、記録の無い停留所は null。 */
 type StationStop = {
   node_id: number;
   line_agent_id: number;

@@ -30,7 +30,7 @@ namespace GeneratedModels
         public float revenues;
         public float expenses;
         public float ridership;
-        public float avg_utilization;
+        public float max_utilization;
         public int path_count;
 
         /// <summary>

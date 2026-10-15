@@ -58,7 +58,7 @@ type TransitSegment = {
  * 1回ずつ並び、order はその順番。
  * name は停留所が乗る下地パスから解決した表示名(駅舎所属なら駅名、街路なら道路名)で、
  * 既定名のままの無名停留所は null(UI が連番で補う)。house_path_id は駅名の出所の駅舎パス。
- * ridership は前エポックにその停留所から乗った回数で、まだ記録の無い停留所(初回シミュレーション前・
+ * ridership は前エポックにその停留所から乗った1日あたりの回数で、まだ記録の無い停留所(初回シミュレーション前・
  * 経路の編集で作り直した停留所)は null。
  */
 export type TransitStop = {
@@ -114,8 +114,8 @@ type TransitLineDetail = {
   required_vehicle_count: number;
   revenues: number;
   expenses: number;
-  ridership: number;
-  avg_utilization: number;
+  ridership: number; // 1日あたりの乗車回数
+  max_utilization: number; // 混雑率(最も混む区間の利用率)
   path_count: number;
   // 運休理由コード(null / "route_disconnected" / "no_underlay" / "train_too_long")。
   pause_reason: string | null;
@@ -456,8 +456,8 @@ export function TransitDetailPanel({
                     共通メーターの polarity で色の対応を切り替える。 */}
                 <span className="agent-detail-label">{t("transit.colUtilization")}</span>
                 <span className="agent-detail-value transit-detail__meter">
-                  <Meter value={line.avg_utilization} polarity="negative" />
-                  <span className="transit-detail__meter-value">{formatPercent(line.avg_utilization)}</span>
+                  <Meter value={line.max_utilization} polarity="negative" />
+                  <span className="transit-detail__meter-value">{formatPercent(line.max_utilization)}</span>
                 </span>
                 <span className="agent-detail-label">{t("transit.vehicleProcurement")}</span>
                 <span className="agent-detail-value transit-detail__meter">

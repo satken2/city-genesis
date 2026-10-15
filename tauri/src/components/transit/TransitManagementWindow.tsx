@@ -49,8 +49,8 @@ type TransitLine = {
   required_vehicle_count: number;
   revenues: number;
   expenses: number;
-  ridership: number;
-  avg_utilization: number;
+  ridership: number; // 1日あたりの乗車回数
+  max_utilization: number; // 混雑率(最も混む区間の利用率)
   path_count: number;
   // 運休理由コード(null / "route_disconnected" / "return_leg_blocked" / "no_underlay" / "train_too_long")。
   pause_reason: string | null;
@@ -296,7 +296,7 @@ export function TransitManagementWindow({ apiBaseUrl }: { apiBaseUrl: string }) 
                     <td className="transit-table__num">{Math.round(line.ridership).toLocaleString(locale)}</td>
                     <td>
                       <div className="transit-table__meter">
-                        <UsageMeter usage_ratio={line.avg_utilization} />
+                        <UsageMeter usage_ratio={line.max_utilization} />
                       </div>
                     </td>
                     <td className="transit-table__num">
