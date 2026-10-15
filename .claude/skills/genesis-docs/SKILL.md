@@ -7,7 +7,7 @@ description: City Genesisの公開docs・非公開docs・README・AGENTS.mdを�
 
 説明は、公開docs・非公開docs・ソースのコメントの3か所に分けて書く。作業中に知ったことをすべて残すための文書にしない。
 
-パスは `city-genesis` と `genesis-core` を並べたワークディレクトリ起点。対象のAGENTS.mdを先に読み、非公開コアが手元にない場合は公開契約で確認できる範囲を扱う。このSkillは `city-genesis`・`genesis-core`・ワークディレクトリ直下に同じ内容で置く。変えるときは3か所を揃える。
+パスは `city-genesis` と `genesis-core` を並べたワークディレクトリ起点。対象のAGENTS.mdを先に読み、非公開コアが手元にない場合は公開契約で確認できる範囲を扱う。このSkillは `city-genesis` と `genesis-core` に同じ内容で置く(ワークディレクトリ直下の Skill はリポジトリの Skill へのリンク)。変えるときは両方を揃える。
 
 ## 書く場所の判断
 
