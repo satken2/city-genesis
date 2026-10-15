@@ -13,4 +13,4 @@
 
 ## 参照先
 
-公開契約は `docs/docs/programs/チュートリアル基盤.md`、教材の設計は `docs/tutorials/`。
+公開契約は `docs/docs/programs/チュートリアル基盤.md`。

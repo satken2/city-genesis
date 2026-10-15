@@ -12,6 +12,6 @@
 
 ## 参照先
 
-- ライブラリ構成: `blender/README.md`。制作仕様: `docs/docs/geometries/I_建物パーツ作成マニュアル.md`。
+- ライブラリ構成: `blender/README.md`。
 - 制作手順: Skill `genesis-building-parts`・`genesis-path-parts`・`genesis-prop-parts`。
 - モデルごとのジョブと制作記録: `genesis-gallery/pipeline/jobs/`（ワークディレクトリ起点・非公開）。
