@@ -14,4 +14,4 @@
 ## 参照先
 
 - 入力と状態: `docs/docs/programs/Unity入力制御.md`・`docs/docs/programs/IPC連携の整理.md`。
-- 形状の契約: `docs/docs/geometries/A_パス形状.md`。対象別のプレビューは `docs/docs/geometries/` を参照する。
+- 形状の契約: `docs/docs/geometries/A_パス形状.md`。対象別のプレビューの仕様は各エディタのソースのコメントにある。

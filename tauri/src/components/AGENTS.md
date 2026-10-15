@@ -17,4 +17,4 @@
 - ウィンドウと共通UI: `docs/docs/programs/コンポーネント連携.md`。
 - 編集・確定送信: `docs/docs/programs/IPC連携の整理.md`。
 - 操作名と案内: `docs/docs/programs/チュートリアル基盤.md`。
-- 個別パネルの仕様は対応するソースと `docs/docs/programs/`・`docs/docs/geometries/` を参照する。
+- 個別パネルの仕様は対応するソースのコメントにある。
