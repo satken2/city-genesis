@@ -33,6 +33,7 @@ $result = Get-Content "$qaRoot/result.txt" -Raw
 Write-Output $result
 if ($process.ExitCode -ne 0 -or !$result.StartsWith('PASS')) { throw 'Open space QA failed' }
 # 本編エディタが起動中でも、正規の生成器によるミラーを対象4件だけ同期できる。
+# 本編の既存のプレハブは手で直してあることがあるので、本編に無いファイルだけを写す。
 foreach ($id in 3001,3002,3003,3004) {
     foreach ($category in 'Models/Buildings','Resources/Models/Buildings') {
         $source = "$qaRoot/Assets/$category/a$id"

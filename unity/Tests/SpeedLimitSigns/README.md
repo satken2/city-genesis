@@ -1,12 +1,11 @@
 # 制限速度標識の検証
 
-`./run.ps1`で本編のC#アセンブリをコンパイルし、`Temp/SpeedLimitSignsQA`の独立したUnityを再生して検証する。本編シーンや都市データは変更しない。
+## 実行
 
-- 街路・高速道路・鉄道・モノレールの設定速度、公共交通区間などの除外、欠損・不正値
-- IPCの独立フラグ、通常表示・色分けとの併用、非表示と計画表示への追従
-- 高架・勾配の中心標高、静止した位置、同一versionでの速度変更
-- 道路削除・都市切り替え時の消去
-- 接写・通常のみ表示、遠景・Hidden・差し替え生成待ちでは非表示。長い道路は中心区間のLODに従い、カメラの離脱・再接近で消去・再表示
-- 本編の標識部品による数字・円の描画（画素も検査）
+```powershell
+./run.ps1
+```
 
-`result.txt`に結果、`signs.png`に二桁・三桁・小数と最小表示サイズの比較画像を出す。画像は専用Canvasで部品だけを撮影したもので、本編の都市画面ではない。
+Unity Editor・dotnet と、Unity が生成した `unity/Assembly-CSharp.csproj` が要る。
+
+結果は `unity/Temp/SpeedLimitSignsQA` に出る(`result.txt`・`qa.log`・標識の見本 `signs.png`)。

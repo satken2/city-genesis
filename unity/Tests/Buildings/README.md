@@ -1,17 +1,14 @@
-# 建物の角パーツの回帰検証
+# 建物の回帰検証
 
-`./run-generation.ps1` は独立Unityで実FBXの多層躯体を生成し、通常・接写、外観、階数、回転・凹形状、共有アセットの不変性と一時Meshの所有を検査する。生成時間と一時Mesh数は `Temp/BuildingGenerationQA/current/timings.csv` に出す。変更前の入力別スナップショットは `-OutputName baseline` で保存し、変更後に `-BaselineDirectory <baselineの絶対パス>` を渡すと頂点位置・UV・法線・三角形・材質スロットを比較できる。屋根・外構・本編の総ロード時間は計測に含まない。
+## 実行
 
-工事中クレーンの旋回は `./run-crane.ps1` で検証する。独立Unityで実FBXの3段階の高さ・静的結合と頂部分離の頂点一致・接続点・コライダー不在・頂部メッシュをプレハブ単位で共有し建物が所有しないこと・キャッシュ復帰と再生成時の姿勢一致を確認する。時間サンプルでは角速度上限・両方向の旋回・停止・建物間の個体差・Unity乱数状態の維持を確認する。結果は `Temp/ConstructionCraneQA/result.txt`。本編画面の見た目の検査は含まない。
+- `./run-unity.ps1`: 角パーツ(`*-c1.fbx`)がどの内角・向きでも両側の辺に沿うことと、フェンスのパーツの解決を、本編の `ModularBodyBuilder` で確かめる。
+- `./run-generation.ps1`: 実FBXの多層躯体の生成結果と、生成時間・一時Mesh数を確かめる。
+- `./run-crane.ps1`: 工事中クレーンの組み立てと旋回を確かめる。
+- `./run-open-space.ps1`: 駐車場・駅前ロータリーなどのオープンスペースの配置と描画を、さまざまな形の区画で確かめる。
 
-`./run-unity.ps1` で本編C#をビルドし、`Temp/BuildingCornerQA` の独立したUnityプロジェクトから実FBXと本編の `ModularBodyBuilder` を検査する。本編のEditorを閉じる必要はない。
+`run-generation.ps1` は `-OutputName baseline` で変更前の生成結果を保存し、変更後に `-BaselineDirectory <baseline の絶対パス>` を付けて実行すると生成メッシュの差を検査する。
 
-2本のボーンを持つ `*-c1.fbx` を対象に、60〜300度の9内角（L字の270度、180度の直前・直後を含む）と3方向を組み合わせる。各アームの単一ボーンに追従する頂点が、90度時の形を対応する辺へ回した位置に2mm以内で一致すること、壁の開始・終了オフセットが向きや凹凸で入れ替わらないことを確認する。
+PowerShell 7・Unity Editor・dotnet と、Unity が生成した `unity/Assembly-CSharp.csproj` が要る。Unity の場所は csproj から求め、`-UnityExe` で指定もできる。
 
-結合用の共有角メッシュも個別生成の角と比較し、別階・別高さでも同じ内角の変形結果を再利用することを確認する。
-
-静的な角パーツは270度で配置を省き、壁オフセットを0にすることと、90度では描画されることを検査する。
-
-フェンスのパーツ解決も検査する。フェンス未提供時に敷地外周へ外壁・建物の角を生成しないこと、フェンス内の位置1への補完と接写優先、本体のbase/topからmidへの補完を確認する。
-
-Unityのパスは生成済みcsprojから解決する。`-UnityExe` で明示指定も可能。独立プロジェクトのPlay Modeで実行し、結果は `Temp/BuildingCornerQA/result.txt`、ログは `qa.log` に出力する。Unityライセンスが必要。屋根、中央の混合ウェイトによる意匠の変形、全建物の画面表示は検査対象外。
+結果は `unity/Temp/` の `BuildingCornerQA`・`BuildingGenerationQA/<OutputName>`(既定は `current`)・`ConstructionCraneQA`・`OpenSpaceQA` に出る(どれも `result.txt`・`qa.log`。生成は `timings.csv`、オープンスペースは PNG の見本と配置 JSON も出す)。`run-open-space.ps1` は合格すると、配置 JSON を隣の `genesis-gallery` リポジトリの `pipeline/layouts` へ写し、本編に無い a3001〜a3004 のミラープレハブと meta を本編の `Assets` へ写す。

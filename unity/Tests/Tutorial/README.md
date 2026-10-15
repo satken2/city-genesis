@@ -1,11 +1,10 @@
 # チュートリアル基盤のUnity検証
 
-Unityルートで `./Tests/Tutorial/run-unity.ps1` を実行する。エディタの場所は生成csprojから取得し、必要なら `-UnityExe` で指定する。本編をコンパイルした後、`Temp/TutorialQA` の独立したUnityプロジェクトからそのアセンブリを読み込む。実行中のゲームやセーブへ接続しない。
+## 実行
 
-IPC形式の辞書を受信させ、通常時の素通り、始終点の左クリックと配置後の右クリック確定、範囲外、余分な頂点、曲線・盛土、実際のRoadPlanManagerの配置と編集状態(高架の始終点が点ごとの高さへ置かれること)、revision・runId、終了時の解除を検証する。確定の右クリックを円の外で行っても端点が動かないこと、終点を置く前の右クリックは受理しないことも確認する。マーカーのメッシュとCollider不在、解除時の非表示も確認する。
+- `./run-unity.ps1`: IPC で受けたチュートリアルの指示に従い、道路の配置入力を制限・案内することを確かめる。
+- `tauri/` で `npm run test:tutorial`: Tauri 側の条件判定・操作の制限・段階の進行を確かめる。
 
-`Temp/TutorialQA/result.txt` が結果、`qa.log` がログ、`markers.png` が描画画像。隔離環境は標準レンダーパイプラインなので、画像の検証では `OverlayQA.shader` による頂点色描画を使用する。本編のURP設定やTauriネイティブウィンドウを含む通しプレイの代用ではない。
+`run-unity.ps1` には Unity Editor・dotnet と、Unity が生成した `unity/Assembly-CSharp.csproj` が要る。Unity の場所は csproj から求め、`-UnityExe` で指定もできる。
 
-Tauri側は `cd tauri; npm run test:tutorial`。条件・アクション・DOM制限に加え、実際のReact hookをイベントバスのテストアダプタに接続し、段階の進行・閉鎖・再開・異なるセーブ・初期化再試行・解除を検証する。数値の `curved` を含むAPI応答で道路の完了判定を確認し、システムトレイと関連画面が操作可能であることも検証する。Tutorialコンポーネントは同じマウントのまま終了・再開始し、HTTP/通信エラー後の終了再試行を確認する。7言語と32ステップの設計件数も確認する。
-
-HTTP契約を実バックエンドで確認するときは、セーブIDが `tutorial-qa-isolated` の専用テストプロセスを用意し、`TUTORIAL_API_TEST_URL` を指定して同じコマンドを実行する。実プレイ中のバックエンドを指定しない。これは非公開コアがある環境での追加検証であり、OSS側の通常テストには不要。
+`run-unity.ps1` の結果は `unity/Temp/TutorialQA` に出る(`result.txt`・`qa.log`・マーカーの描画画像 `markers.png`)。`npm run test:tutorial` の結果はコンソールに出る。

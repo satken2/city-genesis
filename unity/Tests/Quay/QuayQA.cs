@@ -13,6 +13,7 @@ using UnityEngine;
 /// A: 造成の完了時の地形の書き込み規則(genesis-core の造成の完了処理。非公開)と地形タイルの再標本化
 ///    (genesis-core の terrain_surface.tile)を鏡写しにし、実 Terrain で岸壁の外への盛り上がり・天端の先の溝・
 ///    天端から突き出す地形を調べる。同じ鏡写しの計算で、影響がまったく漏れない最小の幅も求める。
+///    コア側の規則を変えたら、この鏡写しも合わせて直す。
 /// B: ReclaimedLandMeshBuilder(天端と垂直の面)の形。
 /// C: PortBuildingMeshBuilder.FindFacingReclaimedQuays(港が埋立地の岸壁に面しているかの判定)と、
 ///    面していない港の直線カット(BuildQuayFootprint)が隣の埋立地で斜めにならないこと。

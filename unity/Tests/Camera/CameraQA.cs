@@ -123,6 +123,7 @@ public static class CameraQA
             source = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
             var inputAssembly = Assembly.Load("Unity.InputSystem");
             inputSystem = inputAssembly.GetType("UnityEngine.InputSystem.InputSystem");
+            // 非表示のバッチ実行にはフォーカスが無いので、検証側だけ Input System のフォーカス制限を外してキーを届ける。
             Application.runInBackground = true;
             object settings = inputSystem.GetProperty("settings").GetValue(null);
             var background = settings.GetType().GetProperty("backgroundBehavior");

@@ -1,7 +1,11 @@
 # 空間警告の検証
 
-`./run.ps1` は本編アセンブリをビルドし、`Temp/AlertsQA` の独立したUnityプロジェクトの再生モードで既存の `AlertManager` を動かす。本編シーン・都市データは検証用に変更しない。
+## 実行
 
-実アイコンのインポートとシーン参照、資源描画オブジェクトがない状態の表示、資源・区画・建物のID分離、同一建物の既存アラート・複数警告・廃墟の併存、4種の表示フィルター、位置更新時のアイコン再利用、解消・セッション消去、警告フィールドのない応答を確認する。
+```powershell
+./run.ps1
+```
 
-結果は `Temp/AlertsQA/result.txt`、ログは同じディレクトリの `qa.log` に出力する。
+Unity Editor・dotnet と、Unity が生成した `unity/Assembly-CSharp.csproj` が要る。Unity の場所は csproj から求め、`-UnityExe` で指定もできる。
+
+結果は `unity/Temp/AlertsQA` に出る(`result.txt`・`qa.log`)。

@@ -34,6 +34,7 @@ public static class OccupancyQA
             addBox.Invoke(null, new object[] { triangles, new Vector3(9, 0, 6), new Vector3(9, 0, 12), 6f, 9f });
             if (triangles.Count != 108) throw new Exception("Missing box faces");
             var mesh = new Mesh { vertices = triangles.ToArray(), triangles = Enumerable.Range(0, triangles.Count).ToArray() };
+            // 独立プロジェクトには本編の Custom/OverlayLine が無いので、確認画像は組み込みシェーダーで描く。
             var material = new Material(Shader.Find("Hidden/Internal-Colored"));
             material.SetColor("_Color", new Color(1, .12f, .12f, .1f));
             material.SetInt("_SrcBlend", 5); material.SetInt("_DstBlend", 10);

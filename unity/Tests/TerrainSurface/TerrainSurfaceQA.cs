@@ -154,6 +154,7 @@ public static class TerrainSurfaceQA
     static void CheckFloorRendering(Terrain terrain, GameObject floorObject, Mesh floor, string root)
     {
         terrain.drawInstanced = false;
+        // 本編と同じ深度オフセット(地形 1,1・被覆物 -1,-1)だけを持つ単色で描き、被覆面の内側に地形の色が出ないかを見る。
         var earthMaterial = new Material(Shader.Find("Tests/SurfaceDepthQA")) { color = Color.green };
         earthMaterial.SetFloat("_Factor", 1);
         earthMaterial.SetFloat("_Units", 1);

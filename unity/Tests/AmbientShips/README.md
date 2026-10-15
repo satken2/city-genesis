@@ -1,27 +1,11 @@
 # 環境演出の船舶の検証
 
-`powershell -NoProfile -ExecutionPolicy Bypass -File Tests/AmbientShips/run.ps1` をUnityディレクトリから実行する。ローカルのUnity生成済み`Assembly-CSharp.csproj`、対応Unity Editor、dotnetが必要。`Tests/BuildRuntime.ps1`で本編アセンブリをビルドし、`Temp/AmbientShipsQA`(`-QaRoot`で変更可)に組み込みパイプラインの独立プロジェクトを作る。本編のシーン・モデルは変更しない。
+## 実行
 
-対象は `Assets/Models/Props` の船5種(`ambient_container_ship`・`ambient_tanker`・`ambient_bulk_carrier`・`ambient_cruise_ship`・`ambient_fishing_boat`)の通常・接写・遠景と、数値ID別名304〜307の3段階。
+```powershell
+./run.ps1
+```
 
-- 1ファイル1メッシュで材質が欠けていない。
-- 喫水線原点(船体が原点より下、上部構造が上)と水平中心、船首がUnity +Z(船首側の端の幅が船尾のトランサムの半分未満)。
-- 接写は無印と同じ外接箱(許容0.05m)、遠景は水平範囲と天端が無印と同じ(許容0.3m)。三角形数は遠景<通常<接写。
-- 別名は元モデルと頂点数・三角形数・外接箱が一致する。
-- 本編の`PropRenderModel`が船では専用の接写・遠景を読み(`DedicatedClose`/`DedicatedFar`)、専用モデルの無い旅客機では読まない。
-- 本編の`AmbientVehicleManager.SelectLod`で、縦画角60°のカメラが8kmから20mまで近づき、また離れるときの切り替え距離を測る。接写は150m以内、離脱のしきい値は接近より遠い(往復のちらつき防止)。旅客機は常に通常。
-- 各船の3段階を並べた画像と、接写の船首・船尾寄りの画像を撮り、シェーダーエラーの紫が無いことを見る。
+Unity Editor・dotnet と、Unity が生成した `unity/Assembly-CSharp.csproj` が要る。
 
-結果は `result.txt`(PASS/FAIL と計測値)、画像は `{モデル名}_lods.png`・`_close_bow.png`・`_close_aft.png`、ログは `qa.log`。組み込みパイプラインのStandardで撮るので、本編のURP・水面・天気の見え方とは異なる。発生・移動・入港は検証しない(公開V文書)。
-
-## 2026-09-28の計測記録
-
-211チェック通過。
-
-| モデル | 全長×幅 | 三角形 遠景/通常/接写 | Unity頂点 遠景/通常/接写 | 接近: 遠景→通常 / 通常→接写 | 離脱: 接写→通常 / 通常→遠景 |
-|---|---|---|---|---|---|
-| コンテナ船 | 172×27.7m | 654 / 3,873 / 10,921 | 974 / 4,608 / 12,587 | 3,448m / 150m | 174m / 5,174m |
-| 石油タンカー | 168×28.1m | 402 / 3,483 / 11,779 | 520 / 4,354 / 14,876 | 3,378m / 150m | 174m / 5,070m |
-| ばら積み船 | 170×27.1m | 670 / 3,309 / 11,107 | 1,046 / 4,322 / 14,346 | 3,408m / 150m | 174m / 5,114m |
-| クルーズ客船 | 160×26.1m | 400 / 3,653 / 11,179 | 574 / 4,426 / 12,946 | 3,224m / 150m | 174m / 4,840m |
-| 漁船 | 22×6.8m | 372 / 1,593 / 3,123 | 534 / 1,938 / 3,053 | 514m / 92m | 130m / 774m |
+結果は `unity/Temp/AmbientShipsQA`(`-QaRoot` で変えられる)に出る(`result.txt`・`qa.log`・船ごとの `<モデル名>_lods.png`・`_close_bow.png`・`_close_aft.png`)。

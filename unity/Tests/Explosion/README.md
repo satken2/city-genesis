@@ -1,5 +1,11 @@
 # 爆破エフェクトの検証
 
-`./run-unity.ps1` は本編のC#ランタイム全体をコンパイルし、`Temp/ExplosionQA` の独立したUnityで実際の `FireEffectFactory` / `VisualEffectManager` とシェーダー・音声を実行する。本編シーン・セーブ・HTTP APIには接続しない。
+## 実行
 
-`result.txt` に結果、`Captures` に炎・煙・消滅の画像を出す。音源のモノラル・長さ・先読み設定、有限バースト、音量と途中ミュート、timeScale=0での消滅、セッション全消去を検証する。テスト床面と瓦礫の代役は単純なプリミティブで、都市での建物差し替えそのものの結合試験ではない。
+```powershell
+./run-unity.ps1
+```
+
+Unity Editor・dotnet と、Unity が生成した `unity/Assembly-CSharp.csproj` が要る。Unity はスクリプトに固定した `C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe` を使う。
+
+スクリプトは Unity を起動してすぐ戻るので、Unity の終了を待って結果を見る。結果は `unity/Temp/ExplosionQA` に出る(`result.txt`・`qa.log`・`Captures/` の炎・煙・消滅の画像)。

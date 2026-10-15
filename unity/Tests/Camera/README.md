@@ -1,14 +1,11 @@
 # カメラ操作の回帰検証
 
-`./run-unity.ps1` は `Tests/BuildRuntime.ps1` で本編アセンブリをビルドし、
-`Temp/CameraQA` の独立したUnityプロジェクトへ読み込む。本編シーンやアセットは変更しない。
+## 実行
 
-地面・建物・海面のレイ判定、選択用コライダーの除外、通常の右ドラッグとの対象の違い、
-撮影の回転半径と注視点、真上の回転、水平移動、実際のInput Systemによるキー操作、
-一時停止・反転・モード切替・Esc、撮影中のマウスの見回し、フライモードの開始・Escでの終了、
-UIを隠す状態の切り替え、終了に使ったEscを編集側へ渡さないこと、編集・セッションとの排他、シーンのボタン参照を検証する。
-カーソルのロックは検証プロセス(バッチモード)では保持されないため対象外。
-結果は `Temp/CameraQA/result.txt`、Unityログは同ディレクトリの `qa.log` に出力される。
+```powershell
+./run-unity.ps1
+```
 
-非表示の検証プロセスでキーを配送するため、検証側だけでInput Systemのフォーカス制限を解除する。
-撮影本体の非フォーカス時の停止条件は変更しない。
+Unity Editor・dotnet と、Unity が生成した `unity/Assembly-CSharp.csproj` が要る。Unity の場所は csproj から求め、`-UnityExe` で指定もできる。
+
+結果は `unity/Temp/CameraQA` に出る(`result.txt`・`qa.log`)。

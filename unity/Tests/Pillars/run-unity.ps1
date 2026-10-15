@@ -33,6 +33,7 @@ if (!$process.WaitForExit(240000)) { Stop-Process -Id $process.Id; throw 'Pillar
 $result = Get-Content -LiteralPath $resultPath -Raw
 Write-Output $result
 if ($process.ExitCode -ne 0 -or !$result.StartsWith('PASS')) { exit 1 }
+# 正規の生成器が作った門型2部品の meta とミラーを本編へ写す。
 foreach ($part in @('pillar_leg', 'pillar_crossbeam')) {
     foreach ($entry in @("Assets/Models/Paths/p4/$part.fbx.meta", "Assets/Resources/Models/Paths/p4/$part.prefab", "Assets/Resources/Models/Paths/p4/$part.prefab.meta")) {
         Copy-Item -LiteralPath "$qaRoot/$entry" -Destination "$unityRoot/$entry" -Force

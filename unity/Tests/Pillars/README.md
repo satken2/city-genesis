@@ -1,8 +1,10 @@
 # 橋脚の干渉回避の検証
 
-- `./run.ps1`: 実ランタイムをビルドし、直角／斜め交差、斜路、並走、道路幅、深いトンネル、上側の道路、キャップの高さ、同じ高さの接続、曲線と、門型の柱を逃がす横位置（ずれた道路・重なる帯・回転・入力順）を検証する。
-- `./run-unity.ps1`: 独立した `Temp/PillarUnityQA` のUnityを使い、実際の `GeneratePillars` を合成プレハブで実行する。未描画の下道を追加すると中央の柱とキャップだけ消え、移動・削除すると復帰すること、旧位置の周辺通知と描画revisionの無効化、無変更時の再生成抑止を検証する。
+## 実行
 
-`run-unity.ps1` は `p4/pillar_leg`・`pillar_crossbeam` と `p421/pillar`・`pillar_cap` の実FBXも読み、幅8/24/32mの道路との完全並走、15度刻みの向き、低い高架、最大幅40m、左右の地面高が異なる柱の接地、施工単位、道路撤去後の通常橋脚への復帰を検証する。正規の `ModelImportSettings`・`ModelPrefabGenerator` が生成した門型2パーツの `.fbx.meta` とミラープレハブだけを本編へ同期する。描画見本は `Temp/PillarUnityQA/portal-preview.png`（橋脚は実FBX、道路・高架床・軌道は検証用の簡易形状）。
+- `./run.ps1`: 橋脚が下を通る道路を避ける判定と、門型の柱を逃がす位置の計算を .NET 上で確かめる。
+- `./run-unity.ps1`: 本編の `GeneratePillars` と実FBXで、下の道路の追加・移動・削除に応じた橋脚の作り直しと、門型橋脚の配置・接地を確かめる。
 
-ゲーム本編のシーン・マスター・既存モデルは変更しない。幾何判定は実メッシュ形状を完全に評価するものではなく、水平外接円と道路の通行空間による保守的な近似。
+Unity Editor・dotnet と、Unity が生成した `unity/Assembly-CSharp.csproj` が要る。`run-unity.ps1` は Unity の場所を csproj から求め、`-UnityExe` で指定もできる。
+
+`run.ps1` の結果はコンソールに、`run-unity.ps1` の結果は `unity/Temp/PillarUnityQA` に出る(`result.txt`・`qa.log`・描画見本 `portal-preview.png`)。`run-unity.ps1` は合格すると、門型橋脚の2部品(`p4/pillar_leg`・`pillar_crossbeam`)の FBX の meta とミラープレハブを本編の `Assets` へ写す。
