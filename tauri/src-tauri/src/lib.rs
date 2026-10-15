@@ -807,7 +807,7 @@ async fn prepare_scenario_terrain_editor(
 }
 
 /// load_terrain_editor_data の戻り値。作業コピーの meta.json に、near.bin を base64 にした標高を加えたもの。
-/// 水面・川・資源・プロップ・カメラの形式の正は公開docs `D_地形形状.md` §D.11〜D.13。
+/// 水面・川・資源・プロップ・カメラの形式の正は公開docs `D_地形形状.md` §D.7〜D.9(プロップは `M_地形プロップ.md`)。
 #[derive(serde::Serialize)]
 struct TerrainEditorData {
     scenario_id: String,

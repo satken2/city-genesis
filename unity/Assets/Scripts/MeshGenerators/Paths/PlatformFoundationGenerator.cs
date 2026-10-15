@@ -21,6 +21,7 @@ public static class PlatformFoundationGenerator
         Mesh source = filter != null ? filter.sharedMesh : null;
         if (source == null || renderer == null || source.vertexCount > RoadPath.SPLINE_MESH_VERTEX_BUDGET) return;
         var bounds = source.bounds;
+        // 部品は上端を原点の高さ（線路面）に、下端を原点より下に作る。下端の側を各地点の地盤まで伸ばす。
         if (bounds.min.y >= 0 || Mathf.Abs(bounds.max.y) > .001f || bounds.size.z < .01f) return;
         float length = spline.CalculateLength(from, to);
         if (length < .01f) return;

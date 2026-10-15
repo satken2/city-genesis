@@ -81,6 +81,7 @@ Shader "Custom/FireParticle"
                 half4 col = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv) * input.color;
 
                 // ソフトパーティクル。板ポリが建物や地形を貫いた断面の直線を隠す。
+                // _CameraDepthTexture を読むので、URPアセットの Depth Texture を有効にしておく。
                 float2 screenUV = input.screenPos.xy / max(input.screenPos.w, 1e-5);
                 float sceneDepth = LinearEyeDepth(SampleSceneDepth(screenUV), _ZBufferParams);
                 col.a *= saturate((sceneDepth - input.eyeDepth) / max(_SoftFadeDistance, 1e-3));

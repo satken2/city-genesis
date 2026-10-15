@@ -3793,7 +3793,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private static bool UsesTunnelMesh(PathSummary path, List<Vector3> points)
     {
-        // 駅舎パスは生成器が各アンカーを「地形標高 + マスター height」へ持ち上げて桁を架けるため、
+        // 駅舎パスの通路はスプラインが常に地表にあり、上空の形は通路モデルが持つため、
         // 点列(地表基準)での深さ判定は意味を持たない。区間分割すると分割数ぶん橋と建屋が
         // 二重生成されるので対象外にする。
         if (PathMeshFactory.GetModelType(path) == "station_house") return false;

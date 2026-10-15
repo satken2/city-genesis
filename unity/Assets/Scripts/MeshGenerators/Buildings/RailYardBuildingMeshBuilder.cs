@@ -31,7 +31,7 @@ using GeneratedModels;
 /// その水平位置の地形標高へ持ち上げる（center_point 位置の地形標高が基準。傾斜地でも線路が埋まらない）。
 /// 敷地全面は a{variant} 自身の floor パーツ（1060は道床と同じ PATH_ROADBED）で覆う。
 ///
-/// 詳細仕様は genesis-docs/docs/geometries/F9_車両基地のメッシュ生成.md を参照。
+/// 全体像は city-genesis/docs/docs/geometries/F9_車両基地のメッシュ生成.md を参照。
 /// </summary>
 public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
 {

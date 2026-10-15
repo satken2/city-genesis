@@ -94,6 +94,7 @@ public class VisualEffectManager : MonoBehaviour
     /// <summary>プレイヤーによる爆破だけに使う。通常の解体・ロード時の倒壊では発火しない。</summary>
     public void PlayExplosion(Vector3 position, float radius)
     {
+        // 建物の子にすると、直後の瓦礫への差し替えやLODの退避で余韻ごと消えるので、自分の子に置く。
         var effect = FireEffectFactory.CreateExplosion(radius, transform);
         Track(effect);
         effect.transform.position = position;

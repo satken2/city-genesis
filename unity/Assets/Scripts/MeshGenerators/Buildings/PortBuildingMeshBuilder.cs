@@ -19,10 +19,10 @@ using NetTopologySuite.Geometries;
 ///   区画の中の水際の両端を結ぶ弦を左右とも <see cref="QUAY_PROTRUSION"/> だけ海側へ平行に移した直線で底面をカットし、
 ///   厚みのある板（岸壁スラブ）を押し出す。水際=カット直線上の辺、ヤード=スラブの範囲。
 ///
-/// visual_variant(1) は他の建物と同じく外観バリアントの閾値フォルダ（F_建物メッシュの生成 §4）、visual_variant2 はヤードの荷の
+/// visual_variant(1) は他の建物と同じく外観バリアントの閾値フォルダ（F_建物メッシュの生成）、visual_variant2 はヤードの荷の
 /// 配置の乱数の種に使う。接写は `_close` のパーツで同じ配置を描く。遠景は他の建物と同じ遠景モデルか箱で、この生成器は通らない。
 ///
-/// 詳細仕様は city-genesis/docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md を参照。
+/// 全体像は city-genesis/docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md を参照。
 /// </summary>
 public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 {
@@ -158,7 +158,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             waterlines = EnumerateSeawardWaterlines(quayFootprint, seaward, topLocalY);
             yard = quayFootprint;
             yardFloorLocalY = topLocalY;
-            // クレーンのブームは海側へ張り出すがクリック対象には含めない（工事中のクレーン §19.7 と同じ割り切り）。
+            // クレーンのブームは海側へ張り出すがクリック対象には含めない（工事中のクレーンと同じ割り切り）。
             colliderHeight = Mathf.Max(0.1f, topLocalY);
         }
 

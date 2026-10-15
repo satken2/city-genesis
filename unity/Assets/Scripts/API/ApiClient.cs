@@ -20,6 +20,8 @@ public static class ApiClient
     /// </summary>
     public static string BASE_URL = "http://127.0.0.1:5000/api/v1";
 
+    // Tauri が確かめたコアとの接続・互換(system:backend_connection。Unity の起動時と変化したときだけ届く)と、Unity 自身の疎通確認。
+    // どちらかが切れている間は、表示を保ったまま入力と書き込みの要求を止める。
     public static bool UiBackendConnected { get; set; } = true;
     public static bool HealthBackendConnected { get; set; } = true;
     public static bool BackendConnected => UiBackendConnected && HealthBackendConnected;

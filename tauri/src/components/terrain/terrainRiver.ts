@@ -19,7 +19,7 @@
  *      カーブ外岸が深く急峻になる非対称断面と、低勾配・大流量区間の中州(網状化)を再現する。
  *
  * 保存契約(RiverPayload、terrainData.ts)への変換はエディタ本体側で行う。
- * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.11。
+ * 仕様の正は city-genesis/docs/docs/geometries/D_地形形状.md の D.8。
  */
 
 import type { WaterSurfacePayload, WaterPolygonGeoJson, GridRect } from "./terrainData";
@@ -984,7 +984,7 @@ function computeSmoothedCurvature(points: RiverPoint[], ds: number): Float64Arra
  *
  * 空間ハッシュで「パス距離は遠いのにユークリッド距離が近い」点対を探し、見つかったら
  * その間の点を取り除いて短絡させる(実河川の蛇行切断に相当)。切除されたループを
- * 三日月湖として残す処理はスコープ外(D_地形形状.md §D.11 参照)。
+ * 三日月湖として残す処理はスコープ外。
  * 1回の呼び出しで最初に見つかった1箇所だけを切る(イテレーションが十分多いため)。
  */
 function neckCutoff(points: RiverPoint[], ds: number): RiverPoint[] {

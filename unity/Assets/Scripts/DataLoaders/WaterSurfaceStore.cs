@@ -5,7 +5,7 @@ using UnityEngine;
 /// 湖など海面以外の水面1枚分の判定用データ(GET /terrain/water の1要素)。
 /// 水面は footprint(polygon)全体に水位 Level の水平面として描かれるが、footprint の内側でも
 /// 水位より高い地形は陸地であり、実際に水があるのは「footprint 内で地形が水位を下回る所」である
-/// (バックエンドはこの範囲を海岸線ポリゴンの穴にする。D_地形形状.md §D.10.3)。
+/// (バックエンドはこの範囲を海岸線ポリゴンの穴にする。D_地形形状.md §D.7)。
 /// </summary>
 public class WaterSurfaceRecord
 {

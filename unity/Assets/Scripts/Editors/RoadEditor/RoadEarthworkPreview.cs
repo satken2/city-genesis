@@ -8,6 +8,7 @@ public sealed class RoadEarthworkPreview : MonoBehaviour
 {
     public sealed class Result
     {
+        // 敷設する各線の中心線の [x, 絶対標高, z]。地上の道路・線路は造成後の路面、高架などは設計の縦断。地形を変えない種別の線は空。
         public List<List<List<float>>> path_profiles;
     }
     string desired, sent;

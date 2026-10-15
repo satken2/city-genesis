@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 /// 空と海の環境演出。高高度を横切る航空機と、沖合をゆっくり進む船舶を経済シミュレーションと無関係に流す。
 /// 稼働中の港へ向かう入港船は AmbientVehicleManager.PortCalls.cs。
 /// 乗り物は GameObject を持たず、保存座標(FloatingOrigin のずれを含まない)で状態を持ち、
-/// 毎フレーム Graphics.RenderMesh で描く。仕様は公開 V 文書(V_環境演出の乗り物.md)。
+/// 毎フレーム Graphics.RenderMesh で描く。全体像は公開 V 文書(V_環境演出の乗り物.md)。
 /// </summary>
 public sealed partial class AmbientVehicleManager : MonoBehaviour
 {
@@ -212,6 +212,7 @@ public sealed partial class AmbientVehicleManager : MonoBehaviour
         foreach (var v in vehicles)
         {
             if ((v.position - camera).sqrMagnitude > DrawDistance * DrawDistance) continue;
+            // モデルは前方を+Zにして作ってある前提。船は原点(喫水線)を海面の高さに置く。
             var matrix = Matrix4x4.TRS(v.position + offset, Quaternion.LookRotation(v.Direction, Vector3.up), Vector3.one);
             var bounds = Utils.TransformBounds(v.model.bounds, matrix);
             v.lod = view != null

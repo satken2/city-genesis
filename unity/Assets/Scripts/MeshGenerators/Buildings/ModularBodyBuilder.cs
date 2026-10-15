@@ -705,6 +705,7 @@ public static class ModularBodyBuilder
                     continue;
                 }
 
+                // 原点ではなく外接箱の最小の角を格子の隅と地面に合わせる。地中へ伸ばした造形があると、そのぶんタイル全体が浮く。
                 Vector3 offset = new Vector3(gx - meshMin.x, GROUND_OFFSET - meshMin.y, gz - meshMin.z);
 
                 if (canDeform)
@@ -1186,7 +1187,8 @@ public static class ModularBodyBuilder
         // Atan2 を用いて常に上向き（Y軸）を維持した水平回転を計算する。
         float angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
         // 壁系パーツ（base/mid/top-w・fence-w・scaffold-wall）は、著作モデルの向きに合わせて
-        // 辺方向へ向けたうえで Y 軸まわりに 180° 反転して配置する。
+        // 辺方向へ向けたうえで Y 軸まわりに 180° 反転して配置する。パーツはローカル+Z（Blenderの −Y）を屋外側、
+        // 原点の高さを床面として著作する前提で、反転によりローカル+Zが底面の外側を向く。
         // 角パーツ（*-c、GenerateCornerCore）は二等分線ベースの向き決定なので対象外。
         Quaternion rotation = Quaternion.Euler(0, -angle + 180f, 0);
 
@@ -1494,6 +1496,8 @@ public static class ModularBodyBuilder
         }
         else
         {
+            // 角パーツは内角90°で著作し、bones[0] を送り側（頂点→次の頂点の辺。Blenderの +X）の腕、
+            // bones[1] を受け側（Blenderの +Y）の腕に付ける前提。この順で開閉の向きを決めている。
             Transform bone0 = smr.bones[0];
             Transform bone1 = smr.bones[1];
 

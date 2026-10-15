@@ -12,7 +12,7 @@ using UnityEngine;
 /// 描画LODで変わらない（接写へ切り替えても建物や荷の位置がずれない）。
 /// 施設モジュールの置き方は区画と通常モデルだけから決め、海岸線・埋立地に依存させない。
 /// 間口の索引（<see cref="BuildingRoadAccess"/>）が建物データの登録時に同じ置き方を求めるため。
-/// 仕様は city-genesis/docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md。
+/// 全体像は city-genesis/docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md。
 /// </summary>
 public static class PortLayout
 {

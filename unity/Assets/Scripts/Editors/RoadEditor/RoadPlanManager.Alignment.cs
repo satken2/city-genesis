@@ -284,6 +284,10 @@ public partial class RoadPlanManager
         return samples;
     }
 
+    /// <summary>
+    /// 始点を原点とする相対座標で標本を作る。大きなワールド座標のまま float で補間して差を取ると、
+    /// 端部の約1mの窓で丸め誤差が増幅され、緩い曲線を急曲線と誤認するため。
+    /// </summary>
     private List<Vector3> BuildLocalAlignmentSamples(out Vector3 origin, List<bool> follows = null)
     {
         origin = points.Count > 0 ? points[0].position : Vector3.zero;

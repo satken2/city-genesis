@@ -98,7 +98,7 @@ public class IpcStateCoordinator : MonoBehaviour
 
     /// <summary>
     /// world.change_state イベントのハンドラ。
-    /// IPC連携ドキュメントのステート表に従って InputMode + VisualMode を一括変更する。
+    /// ステートごとに入力と表示をまとめて切り替える(表示の記憶とUIへの通知は IpcViewCoordinator.SyncFromState)。
     /// </summary>
     private void HandleChangeState(string state, Dictionary<string, object> ipcParams)
     {

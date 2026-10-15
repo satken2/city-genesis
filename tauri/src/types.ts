@@ -1026,7 +1026,7 @@ export type PublicServiceSupplyData = {
 // 達成クエスト（quest）
 // バックエンドの app/services/crud/crud_quests.py と対になる型定義。
 // 判定条件は「メトリクス解決 × 時間派生 × 論理合成」の3層で表現される。
-// 仕様の正は genesis-docs/docs/economics/24_達成クエスト.md。
+// 考え方は city-genesis/docs/docs/economics/24_達成クエスト.md。
 // ---------------------------------------------------------------------------
 
 /** クエスト条件のメトリクス参照。city オブジェクト上の数値の指定方法。 */

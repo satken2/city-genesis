@@ -167,6 +167,10 @@ public sealed class RopewayCabinManager : MonoBehaviour
         next.Phase = next.Geometry.Project(position) - clock * RopewayGeometry.Speed;
     }
 
+    /// <summary>
+    /// 搬器は原点をケーブルの吊り点に、終端の輪と台座は原点を滑車の中心に置いて作ってある前提で、その点へそのまま置く。
+    /// 輪だけを原点のY軸まわりに回す。
+    /// </summary>
     bool LoadModels()
     {
         if (ModelManager.Instance == null) return false;

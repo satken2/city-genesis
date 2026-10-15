@@ -127,10 +127,10 @@ public sealed class WeatherController : MonoBehaviour
         reflection.refreshMode = ReflectionProbeRefreshMode.ViaScripting;
         reflection.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
         reflection.clearFlags = ReflectionProbeClearFlags.Skybox;
-        reflection.cullingMask = 0;
+        reflection.cullingMask = 0;   // 空だけを描き、都市のメッシュを反射用に描き直さない
         reflection.resolution = 64;
         reflection.size = Vector3.one * 1000000f;
-        reflection.importance = 0;
+        reflection.importance = 0;    // シーンに置いたローカルな反射プローブを優先させる
         precipitation = gameObject.AddComponent<WeatherPrecipitation>();
         cloudSeed = NewSeed();
         StartWeather(WeatherChain.Sample(random, weights));

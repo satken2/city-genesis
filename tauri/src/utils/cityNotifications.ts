@@ -8,7 +8,7 @@
  * 通知メッセージの文言はバックエンドでは組み立てず、type と params だけが返る契約
  * なので、i18n キー notifications.types.<type> への差し込みはフロント側で行う。
  *
- * 通知レベル(L1/L2/L3)の考え方は genesis-docs/docs/programs/通知レベル管理.md を参照。
+ * 通知レベル(L1/L2/L3)の考え方は city-genesis/docs/docs/programs/通知レベル管理.md を参照。
  */
 
 import { buildApiUrl, fetchApi } from "./api";

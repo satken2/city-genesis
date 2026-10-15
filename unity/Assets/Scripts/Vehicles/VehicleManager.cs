@@ -585,6 +585,7 @@ public partial class VehicleManager : MonoBehaviour
             if (bucketByKey.TryGetValue(Key(v.pathId, v.vehicleType), out var b))
             {
                 surplus = b.average - b.target - b.pending;
+                // 偏りの調整は許容幅を超えた道路だけにし、小さな瞬間的超過のたびに車を入れ替えない。
                 if (redistribute && surplus < Mathf.Max(.5f, b.target * .25f)) continue;
             }
             else if (redistribute) continue;

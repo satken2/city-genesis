@@ -1476,7 +1476,7 @@ public class IpcClient : MonoBehaviour
     }
 
     /// <summary>
-    /// view:ui_visibility を送る。フライ・撮影モードの間は3D画面だけを見せるため、Tauri の全ウィンドウを隠させる。
+    /// view:ui_visibility を送る。フライ・撮影モードとドライブの乗車中は3D画面だけを見せるため、Tauri の全ウィンドウを隠させる。
     /// </summary>
     public void EmitUiVisibility(bool visible)
     {

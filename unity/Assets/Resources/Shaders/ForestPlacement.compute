@@ -74,6 +74,7 @@ void Generate(uint3 id : SV_DispatchThreadID)
     uint cell = _Count == _Grid.w ? id.x : (uint)floor((float)id.x * _Grid.w / _Count);
     int x = _Grid.x + (int)(cell % (uint)_Grid.z);
     int z = _Grid.y + (int)(cell / (uint)_Grid.z);
+    // 位置・回転・倍率は PropGeometry.Sample と同じ式で求め、CPUの候補と同じ個体にする。
     uint h = Hash((uint)x) ^ Hash((uint)z + 0x9e3779b9) ^ Hash((uint)_Seed);
     float2 p = (float2(x,z) + float2(Unit(h),Unit(h+1))) * _Spacing;
     float scale = .8 + Unit(h+3)*.4;
@@ -82,6 +83,7 @@ void Generate(uint3 id : SV_DispatchThreadID)
     float2 world = p + _Offset.xz;
     float2 grid = (world-_TileOrigin.xz)/_TileSize.xz * (_HeightResolution-1);
     float2 uv = (grid+.5)/_HeightResolution;
+    // Unity の heightmapTexture は高さを 0〜0.5 に詰めて格納しているので、2倍してから地形の高さに戻す。
     float height = _Heightmap.SampleLevel(linearClampSampler,uv,0).r * 2 * _TileSize.y + _TileOrigin.y;
     ForestPoint result;
     result.positionScale = float4(world.x,height,world.y,scale);
