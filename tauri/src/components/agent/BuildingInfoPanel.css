@@ -43,7 +43,6 @@
 /* === 駐車容量(昼間・夜間の2本) === */
 
 .building-parking {
-  margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;

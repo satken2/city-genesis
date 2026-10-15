@@ -1,5 +1,7 @@
 {
   "building": {
+    "floorConfiguration": "楼层构成",
+    "parking": "停车",
     "type": "建筑类型",
     "durability": "耐久度",
     "floors": "层数",

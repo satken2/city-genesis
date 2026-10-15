@@ -1,5 +1,7 @@
 {
   "building": {
+    "floorConfiguration": "층 구성",
+    "parking": "주차",
     "type": "건물 타입",
     "durability": "내구도",
     "floors": "층수",

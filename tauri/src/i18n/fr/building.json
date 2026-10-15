@@ -1,5 +1,7 @@
 {
   "building": {
+    "floorConfiguration": "Composition des étages",
+    "parking": "Stationnement",
     "type": "Type de bâtiment",
     "durability": "Durabilité",
     "floors": "Étages",
