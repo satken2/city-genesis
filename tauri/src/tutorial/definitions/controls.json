@@ -3,19 +3,71 @@
   "id": "controls",
   "steps": [
     {
-      "id": "controls.cockpit",
+      "id": "controls.welcome",
       "legacyStep": 1,
       "phases": [
         {
+          "id": "role",
+          "textKey": "tutorial.controls.step1.role",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "welcome.role"
+          }
+        },
+        {
+          "id": "goal",
+          "textKey": "tutorial.controls.step1.goal",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "welcome.goal"
+          }
+        },
+        {
+          "id": "epoch",
+          "textKey": "tutorial.controls.step1.epoch",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls.cockpit",
+      "legacyStep": 2,
+      "phases": [
+        {
           "id": "tools",
-          "textKey": "tutorial.controls.step1.tools",
+          "textKey": "tutorial.controls.step2.tools",
           "ui": {
             "policy": "highlight",
             "allow": [],
             "highlight": [
               "hud.visibility",
-              "hud.map",
-              "hud.bulldozer"
+              "hud.map"
             ]
           },
           "world": {
@@ -27,8 +79,44 @@
           }
         },
         {
+          "id": "tracking",
+          "textKey": "tutorial.controls.step2.tracking",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.citizen_tracking"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.tracking"
+          }
+        },
+        {
+          "id": "bulldozer",
+          "textKey": "tutorial.controls.step2.bulldozer",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.bulldozer"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.bulldozer"
+          }
+        },
+        {
           "id": "services",
-          "textKey": "tutorial.controls.step1.services",
+          "textKey": "tutorial.controls.step2.services",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -45,13 +133,30 @@
           }
         },
         {
-          "id": "status",
-          "textKey": "tutorial.controls.step1.status",
+          "id": "score",
+          "textKey": "tutorial.controls.step2.score",
           "ui": {
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.score",
+              "hud.score"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.score"
+          }
+        },
+        {
+          "id": "budget",
+          "textKey": "tutorial.controls.step2.budget",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
               "hud.budget"
             ]
           },
@@ -60,18 +165,125 @@
           },
           "until": {
             "type": "page",
-            "id": "cockpit.status"
+            "id": "cockpit.budget"
           }
         },
         {
-          "id": "notifications",
-          "textKey": "tutorial.controls.step1.notifications",
+          "id": "budgetChanges",
+          "textKey": "tutorial.controls.step2.budgetChanges",
           "ui": {
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.notifications",
+              "hud.budget"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.budgetChanges"
+          }
+        },
+        {
+          "id": "budgetPlanning",
+          "textKey": "tutorial.controls.step2.budgetPlanning",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.budget"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.budgetPlanning"
+          }
+        },
+        {
+          "id": "date",
+          "textKey": "tutorial.controls.step2.date",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
               "hud.date"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.date"
+          }
+        },
+        {
+          "id": "climate",
+          "textKey": "tutorial.controls.step2.climate",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.climate"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.climate"
+          }
+        },
+        {
+          "id": "climateEffects",
+          "textKey": "tutorial.controls.step2.climateEffects",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.climate"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.climateEffects"
+          }
+        },
+        {
+          "id": "notifications",
+          "textKey": "tutorial.controls.step2.notifications",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.notifications"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "cockpit.notifications"
+          }
+        },
+        {
+          "id": "notificationActions",
+          "textKey": "tutorial.controls.step2.notificationActions",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.notifications"
             ]
           },
           "world": {
@@ -85,11 +297,11 @@
     },
     {
       "id": "controls.display",
-      "legacyStep": 2,
+      "legacyStep": 3,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step2.open",
+          "textKey": "tutorial.controls.step3.open",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -107,7 +319,7 @@
         },
         {
           "id": "tabs",
-          "textKey": "tutorial.controls.step2.tabs",
+          "textKey": "tutorial.controls.step3.tabs",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -125,7 +337,7 @@
         },
         {
           "id": "modes",
-          "textKey": "tutorial.controls.step2.modes",
+          "textKey": "tutorial.controls.step3.modes",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -144,11 +356,29 @@
     },
     {
       "id": "controls.icons",
-      "legacyStep": 3,
+      "legacyStep": 4,
       "phases": [
         {
+          "id": "grading",
+          "textKey": "tutorial.controls.step4.grading",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.grading"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.grading"
+          }
+        },
+        {
           "id": "road",
-          "textKey": "tutorial.controls.step3.road",
+          "textKey": "tutorial.controls.step4.road",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -166,7 +396,7 @@
         },
         {
           "id": "land",
-          "textKey": "tutorial.controls.step3.land",
+          "textKey": "tutorial.controls.step4.land",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -183,13 +413,13 @@
           }
         },
         {
-          "id": "grading",
-          "textKey": "tutorial.controls.step3.grading",
+          "id": "landDevelopment",
+          "textKey": "tutorial.controls.step4.landDevelopment",
           "ui": {
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.grading"
+              "hud.land"
             ]
           },
           "world": {
@@ -197,12 +427,12 @@
           },
           "until": {
             "type": "page",
-            "id": "icons.grading"
+            "id": "icons.landDevelopment"
           }
         },
         {
           "id": "district",
-          "textKey": "tutorial.controls.step3.district",
+          "textKey": "tutorial.controls.step4.district",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -219,8 +449,26 @@
           }
         },
         {
+          "id": "districtRules",
+          "textKey": "tutorial.controls.step4.districtRules",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.district"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.districtRules"
+          }
+        },
+        {
           "id": "construction",
-          "textKey": "tutorial.controls.step3.construction",
+          "textKey": "tutorial.controls.step4.construction",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -237,26 +485,8 @@
           }
         },
         {
-          "id": "construction_projects",
-          "textKey": "tutorial.controls.step3.constructionProjects",
-          "ui": {
-            "policy": "highlight",
-            "allow": [],
-            "highlight": [
-              "hud.construction_projects"
-            ]
-          },
-          "world": {
-            "mode": "observe"
-          },
-          "until": {
-            "type": "page",
-            "id": "icons.construction_projects"
-          }
-        },
-        {
           "id": "transport",
-          "textKey": "tutorial.controls.step3.transport",
+          "textKey": "tutorial.controls.step4.transport",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -273,8 +503,44 @@
           }
         },
         {
+          "id": "propPlacement",
+          "textKey": "tutorial.controls.step4.propPlacement",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.prop_placement"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.propPlacement"
+          }
+        },
+        {
+          "id": "constructionProjects",
+          "textKey": "tutorial.controls.step4.constructionProjects",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction_projects"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.constructionProjects"
+          }
+        },
+        {
           "id": "regulation",
-          "textKey": "tutorial.controls.step3.regulation",
+          "textKey": "tutorial.controls.step4.regulation",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -292,7 +558,7 @@
         },
         {
           "id": "city",
-          "textKey": "tutorial.controls.step3.city",
+          "textKey": "tutorial.controls.step4.city",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -310,7 +576,7 @@
         },
         {
           "id": "finance",
-          "textKey": "tutorial.controls.step3.finance",
+          "textKey": "tutorial.controls.step4.finance",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -328,30 +594,12 @@
         },
         {
           "id": "stat",
-          "textKey": "tutorial.controls.step3.stat",
+          "textKey": "tutorial.controls.step4.stat",
           "ui": {
             "policy": "highlight",
             "allow": [],
             "highlight": [
               "hud.stat"
-            ]
-          },
-          "world": {
-            "mode": "observe"
-          },
-          "until": {
-            "type": "page",
-            "id": "icons.stat"
-          }
-        },
-        {
-          "id": "prop_placement",
-          "textKey": "tutorial.controls.step3.propPlacement",
-          "ui": {
-            "policy": "highlight",
-            "allow": [],
-            "highlight": [
-              "hud.prop_placement"
             ]
           },
           "world": {
@@ -365,11 +613,11 @@
     },
     {
       "id": "controls.epoch",
-      "legacyStep": 4,
+      "legacyStep": 5,
       "phases": [
         {
           "id": "flow",
-          "textKey": "tutorial.controls.step4.flow",
+          "textKey": "tutorial.controls.step5.flow",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -387,7 +635,7 @@
         },
         {
           "id": "execute",
-          "textKey": "tutorial.controls.step4.execute",
+          "textKey": "tutorial.controls.step5.execute",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -406,31 +654,10 @@
     },
     {
       "id": "controls.camera",
-      "legacyStep": 5,
-      "phases": [
-        {
-          "id": "move",
-          "textKey": "tutorial.controls.step5.description",
-          "ui": {
-            "policy": "highlight",
-            "allow": [],
-            "highlight": []
-          },
-          "world": {
-            "mode": "observe"
-          },
-          "until": {
-            "type": "ack"
-          }
-        }
-      ]
-    },
-    {
-      "id": "controls.viewmodes",
       "legacyStep": 6,
       "phases": [
         {
-          "id": "modes",
+          "id": "move",
           "textKey": "tutorial.controls.step6.description",
           "ui": {
             "policy": "highlight",
@@ -447,12 +674,33 @@
       ]
     },
     {
-      "id": "controls.boundary",
+      "id": "controls.viewmodes",
       "legacyStep": 7,
       "phases": [
         {
-          "id": "edge",
+          "id": "modes",
           "textKey": "tutorial.controls.step7.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    },
+    {
+      "id": "controls.boundary",
+      "legacyStep": 8,
+      "phases": [
+        {
+          "id": "edge",
+          "textKey": "tutorial.controls.step8.description",
           "ui": {
             "policy": "highlight",
             "allow": [],

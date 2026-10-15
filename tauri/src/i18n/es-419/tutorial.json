@@ -26,49 +26,66 @@
     },
     "controls": {
       "title": "Controles básicos",
-      "description": "Conoce la cabina, el panel de visualización y el panel de iconos, cómo avanzan las épocas, cómo mover la cámara y dónde está el límite de la ciudad.",
+      "description": "Conoce tus objetivos como alcalde y cómo planear antes de avanzar el tiempo por épocas. Aprende qué significa la información de la ciudad, qué puedes hacer con cada botón y cómo mover la cámara.",
       "step1": {
-        "title": "Conoce la cabina",
-        "tools": "Veamos la cabina. Los botones resaltados son las herramientas de uso diario. «Visualización» abre el panel de visualización y «Mapa» abre un mapa de toda la ciudad. «Bulldozer» es un modo que elimina parcelas vacías y obras planeadas. Cuando termines de leer, pulsa «Siguiente».",
-        "services": "Este es el medidor de servicios públicos. Indica si la capacidad de oferta alcanza para la demanda. La demanda crece junto con la ciudad, así que revísalo de vez en cuando. Pulsa «Siguiente».",
-        "status": "«Puntaje» es tu puntaje de gestión (por hogar, sobre 2.0). «Presupuesto» muestra el presupuesto previsto de este período y el efectivo disponible. Pulsa «Siguiente».",
-        "notifications": "Los sucesos de la ciudad llegan al botón de notificaciones. Aquí también se ven la fecha y el clima. Eso es todo sobre la cabina. Pulsa «Siguiente»."
+        "title": "Empieza a construir como alcalde",
+        "role": "En City Genesis desarrollas una ciudad como su alcalde. Planeas caminos e instalaciones, decides el uso del suelo, estableces impuestos y asignas recursos a los servicios públicos. Tu trabajo es crear un entorno que apoye a los habitantes y las empresas. Pulsa «Siguiente» para continuar.",
+        "goal": "Busca una ciudad donde los habitantes vivan con comodidad y seguridad. Ofrece viviendas, empleos, electricidad, agua y atención médica. Hacer crecer la ciudad también cuesta dinero. Considera tanto la vida de sus habitantes como las finanzas municipales al decidir qué mejorar.",
+        "epoch": "El tiempo avanza en unidades llamadas «épocas». Primero prepara presupuestos y planes de construcción; cuando estés listo, pulsa «Iniciar». Las obras y la actividad de la ciudad avanzan. Revisa los resultados antes de volver a planear. La fecha no cambia hasta que inicies, así que puedes pensar con calma."
       },
       "step2": {
-        "title": "Abre el panel de visualización",
-        "open": "Pulsa «Visualización» en la cabina para abrir el panel de visualización.",
-        "tabs": "Las pestañas verticales son capas de visualización. Úsalas para cambiar lo que quieres mirar. Pulsa «Siguiente».",
-        "modes": "Cada pestaña tiene botones que cambian la forma de mostrarla. Úsalos cuando quieras ver el estado de la ciudad de una manera concreta. Deja el panel abierto y pulsa «Siguiente»."
+        "title": "Conoce la ciudad desde el panel de mando",
+        "tools": "El panel de mando, abajo en la pantalla, te ayuda a evaluar la ciudad y decidir qué hacer. «Visualización» usa colores para localizar carencias y problemas. «Mapa» muestra dónde están los lugares de la ciudad y te ayuda a orientarte a medida que crece.",
+        "tracking": "«Lista de seguimiento» guarda habitantes que quieres volver a consultar. Añade a alguien desde sus detalles y usa este botón para revisar su información y sus desplazamientos. Conoce la vida individual detrás de las cifras de la ciudad.",
+        "bulldozer": "«Bulldozer» elimina parcelas vacías y cancela edificios y caminos planeados. Pulsa el botón y luego un objetivo en la vista 3D; vuelve a pulsarlo para salir. Para retirar un edificio o camino terminado, abre sus detalles y elige la demolición.",
+        "services": "Los medidores del rayo y la gota muestran el margen disponible en electricidad y agua. Cuanto más se llenan, más se acerca la demanda a la capacidad. Púlsalos para revisar las instalaciones públicas y ver si necesitas aumentar el suministro antes de ampliar la ciudad.",
+        "score": "«Puntuación» resume qué tan satisfechos están los habitantes con la vida en tu ciudad. Cuanto más alta, mejor. Viviendas, empleos, atención médica y un entorno agradable ayudan a mejorarla. Si baja, busca las dificultades de los habitantes.",
+        "budget": "«Presupuesto» muestra cuánto del dinero disponible usarán los gastos previstos de esta época. Un medidor casi lleno indica poco margen; el rojo indica que el costo previsto supera el efectivo disponible. Es una previsión: revísala antes de avanzar el tiempo.",
+        "budgetChanges": "Más obras, una mayor actividad de las instalaciones y una construcción más rápida aumentan el dinero necesario y suben el medidor. Reducir la actividad o la velocidad de las obras puede bajar los costos previstos. Cuando los impuestos y otros ingresos aumentan el efectivo, los mismos gastos ocupan menos del medidor.",
+        "budgetPlanning": "Un medidor bajo indica dinero disponible para la ciudad. Considera invertir en servicios que faltan o instalaciones que pronto necesitarás. Pulsa el medidor para asignar presupuestos y revisar ingresos y gastos. Si los gastos siguen superando los ingresos, el efectivo se reducirá.",
+        "date": "La fecha indica cuánto ha avanzado el tiempo de la ciudad. Úsala para seguir las obras y los cambios estacionales. No avanza mientras planeas; se actualiza al avanzar una época con «Iniciar».",
+        "climate": "El panel de temperatura, lluvia, luz solar y viento muestra el clima promedio de este mes. Estas condiciones afectan la agricultura y la producción eólica y solar. Si hay pocos cultivos o poca electricidad, revisa también el clima.",
+        "climateEffects": "Poca luz solar reduce la producción solar y poco viento reduce la eólica. La temperatura y la lluvia también afectan la agricultura. Pulsa el panel climático para ver cómo las condiciones del mes afectan la eficiencia de cada instalación. Prevé los cambios estacionales al preparar el suministro.",
+        "notifications": "El número de «Notificaciones» cuenta las advertencias y avisos que debes revisar. El número rojo y el parpadeo indican problemas que afectan el funcionamiento de la ciudad y requieren atención pronta. Los números amarillos indican límites al crecimiento o problemas que tardan en mejorar. Pulsa el botón para leerlos.",
+        "notificationActions": "Si un aviso identifica una instalación o distrito, pulsa su fila para ver los detalles. Atiende la causa: conecta líneas eléctricas que falten o consigue materiales para una instalación. Los avisos sobre problemas persistentes desaparecen cuando se resuelve la causa. Después de actuar, revisa los resultados de la siguiente época."
       },
       "step3": {
-        "title": "Conoce el panel de iconos",
-        "road": "Repasemos el panel de iconos, un icono a la vez. «Calles, ferrocarril e infraestructura» sirve para tender calles, vías, líneas eléctricas, tuberías de agua y otros trazados. Pulsa «Siguiente» para pasar al siguiente icono.",
-        "land": "«Parcelas» crea las parcelas donde se construyen los edificios.",
-        "grading": "«Movimiento de tierras» ajusta la altura del terreno para crear terreno llano y terrenos ganados al mar.",
-        "district": "«Distritos» agrupa parcelas en distritos y limita qué tipos de edificios se pueden construir.",
-        "construction": "«Construcción» sirve para planificar viviendas, comercios, fábricas, instalaciones públicas y otros edificios.",
-        "constructionProjects": "«Proyectos de construcción» muestra las obras planeadas y en curso, agrupadas por etiqueta.",
-        "transport": "«Transporte público» crea y administra líneas de autobús, ferrocarril y otras.",
-        "regulation": "«Normativas» configura los límites de velocidad, las normas de edificación iniciales de los distritos nuevos, las condiciones de inmigración, la seguridad social y las reparaciones.",
-        "city": "«Políticas» configura impuestos como el impuesto a la renta, el impuesto a las empresas y el impuesto al consumo.",
-        "finance": "«Política monetaria» muestra la situación financiera: PIB, precios, deuda del banco central y más.",
-        "stat": "«Estadísticas» muestra en gráficos datos como la población y los desplazamientos al trabajo.",
-        "propPlacement": "«Colocación de props» coloca props decorativos (objetos pequeños) sobre el terreno. Con esto termina el panel de iconos. Pulsa «Siguiente»."
+        "title": "Cambia la vista para encontrar problemas",
+        "open": "Las carencias y la congestión pueden ser difíciles de detectar a simple vista. Usa «Visualización» para mostrar la información necesaria sobre el mapa. Pulsa «Visualización» en el panel de mando para abrir el panel.",
+        "tabs": "Las pestañas verticales permiten elegir qué revisar: edificios, caminos, parcelas o distritos. También puedes ocultar elementos cuando la información superpuesta dificulte la lectura. Pulsa «Siguiente» para conocer las opciones de visualización.",
+        "modes": "Los botones de cada pestaña eligen qué información determina los colores. Localiza caminos congestionados o edificios con problemas para decidir cómo actuar. Pulsa un objeto en la vista 3D para ver sus detalles. Deja el panel abierto y pulsa «Siguiente»."
       },
       "step4": {
-        "title": "Avanza el tiempo con las épocas",
-        "flow": "En este juego el tiempo avanza en unidades llamadas épocas. Antes de cada época, distribuyes el presupuesto y haces planes de construcción. Cuando los planes estén listos, pulsa «Iniciar» para ejecutar la simulación.",
-        "execute": "La ciudad no cambia hasta que pulses «Iniciar», así que puedes planificar con calma. La ciudad solo se mueve mientras se ejecuta una época, y al terminar se muestran los resultados. No hace falta pulsarlo ahora; cuando termines de leer, pulsa «Siguiente»."
+        "title": "Conoce las herramientas para construir",
+        "grading": "Veamos los botones de la izquierda de arriba hacia abajo. «Movimiento de tierras» nivela pendientes o gana terreno al mar. Ofrece espacio para crecer cuando hacen falta más viviendas o empleos y hay poco terreno útil.",
+        "road": "«Calles, ferrocarril e infraestructura» crea rutas para personas, mercancías, electricidad y agua. Conecta viviendas y empleos con caminos, lugares distantes con vías e instalaciones con líneas eléctricas y tuberías. Estas redes apoyan los viajes, el comercio y los servicios básicos.",
+        "land": "«Parcelas» prepara terrenos para construir. Un terreno vacío por sí solo no es un solar listo para un edificio. Tanto las nuevas viviendas como las grandes instalaciones necesitan terrenos con suficiente espacio.",
+        "landDevelopment": "Las parcelas sirven tanto para obras municipales como para viviendas y empresas privadas. Los edificios privados se desarrollan según la demanda y las normas del distrito. Para aumentar las viviendas o los empleos, comprueba que haya suficientes parcelas vacías.",
+        "district": "«Distritos» permite gestionar zonas con distintas prioridades, como un barrio residencial o una zona industrial. Cada distrito puede limitar los tipos de edificios permitidos y dar una orientación adecuada al desarrollo de toda la zona.",
+        "districtRules": "En los detalles del distrito puedes decidir qué tipos de edificios se permiten. Por ejemplo, evita fábricas en un barrio residencial. También puedes comparar población y condiciones de vida entre distritos para decidir dónde hace falta apoyo.",
+        "construction": "«Construcción» permite planear los edificios que necesita la ciudad. Puedes construir viviendas, lugares de trabajo, hospitales, escuelas y centrales. Sirve para aumentar viviendas y empleos o cubrir carencias de salud, educación, electricidad y otros servicios.",
+        "transport": "«Transporte público» ayuda a los habitantes a moverse en autobús o tren. Puedes definir rutas y paradas y ajustar tarifas e intervalos. Conectar viviendas con empleos y escuelas reduce la carga de los desplazamientos diarios.",
+        "propPlacement": "«Colocación de props» añade árboles, rocas y otros elementos del paisaje. Úsalo para añadir vegetación a las calles o decorar el terreno.",
+        "constructionProjects": "«Proyectos de construcción» reúne las obras planeadas y en curso. Revisa su avance y sus costos para decidir cuáles impulsar.",
+        "regulation": "«Normativas» establece las reglas para vivir y trabajar en la ciudad: velocidad, jornada laboral, inmigración y seguridad social, entre otras. Ajústalas según tus prioridades de seguridad, tiempo libre y crecimiento urbano.",
+        "city": "«Políticas» permite establecer impuestos sobre ingresos, empresas y consumo. La recaudación financia caminos y servicios públicos; los impuestos también afectan a habitantes y empresas. Equilibra los ingresos que necesita la ciudad con su vida y actividad.",
+        "finance": "«Política monetaria» muestra el tamaño de la economía, los precios y la situación monetaria. Úsala para comprobar si la economía crece o los precios cambian.",
+        "stat": "«Estadísticas» ayuda a evaluar tus decisiones. Los gráficos muestran cambios en población, ingresos, desplazamientos y satisfacción. Después de cambiar políticas o instalaciones, comprueba si mejora la vida y qué falta. Estos son los botones de la izquierda."
       },
       "step5": {
+        "title": "Ejecuta tus planes y revisa los resultados",
+        "flow": "Después de revisar la ciudad y planear obras y presupuestos, usa «Iniciar» para avanzar una época. Las obras progresan, los habitantes trabajan, las empresas producen y las finanzas y la puntuación cambian. Algunos planes tardan varias épocas en mostrar sus efectos.",
+        "execute": "Al terminar una época, revisa los resultados y los avisos. Atiende los problemas en tus próximos planes y vuelve a avanzar. Desarrolla la ciudad repitiendo «planear, avanzar, revisar». Aquí no necesitas pulsar «Iniciar». Pulsa «Siguiente» para aprender los controles de cámara."
+      },
+      "step6": {
         "title": "Mueve la cámara",
         "description": "Así puedes mover la cámara: arrastra con el botón izquierdo para desplazar la vista, arrastra con el derecho para girar, usa W/A/S/D (o las flechas) para moverte, Q/E para girar, R/F para cambiar la altura y la rueda del ratón para acercar o alejar. Pruébalo con libertad y luego pulsa «Siguiente»."
       },
-      "step6": {
+      "step7": {
         "title": "Modo vuelo y modo cine",
         "description": "La cámara tiene dos modos especiales. El «modo vuelo» se activa con Shift+F: avanza en la dirección de tu vista con W/A/S/D, mira alrededor con el ratón y sube o baja con R/F. Pulsa Esc para salir. El «modo cine» se inicia con el botón de la esquina superior derecha de la pantalla y te permite rodear la ciudad. Mira alrededor con el ratón; Shift alterna entre órbita y desplazamiento, Espacio pausa, Retroceso invierte y Esc sale. Los paneles de la pantalla se ocultan mientras uno de los modos está activo y vuelven al pulsar Esc. Cuando los hayas probado, sal de ambos modos y pulsa «Siguiente»."
       },
-      "step7": {
+      "step8": {
         "title": "Mira el límite de la ciudad",
         "description": "Movimos la cámara al extremo este de la ciudad. El área que puedes usar como ciudad es este rectángulo donde existe terreno detallado, y la cámara tampoco puede salir de él. Eso es todo sobre los controles básicos. Pulsa «Siguiente» para terminar el tutorial."
       }
@@ -470,7 +487,7 @@
     },
     "intro": {
       "basic": "Hay personas que esperan empezar una nueva vida en este pueblo, pero faltan viviendas para recibirlas. En este tutorial aprenderás todo el proceso de planificar calles y edificios, avanzar el tiempo y completar su construcción.",
-      "controls": "Acabas de asumir como alcalde y frente a ti se extiende un amplio terreno. Antes de empezar a construir, conviene saber cómo leer la pantalla y manejar lo básico. En este tutorial aprenderás para qué sirven la cabina y el panel de iconos, cómo las épocas hacen avanzar el tiempo, cómo mover la cámara y dónde está el límite de la ciudad.",
+      "controls": "Como nuevo alcalde, ayuda a construir una ciudad donde los habitantes vivan bien y con seguridad. Prepara viviendas, empleos, servicios básicos y públicos, y decide cómo usar el dinero municipal. En este tutorial aprenderás tu papel como alcalde, el ciclo de épocas, cómo evaluar la ciudad y las herramientas y controles de cámara para desarrollarla.",
       "scenario2": "Se encontró un yacimiento de mineral en un sector del pueblo. Si no se protege el terreno, podrían construirse otros edificios sobre él. En este tutorial aprenderás a localizar recursos naturales, dividir el pueblo en distritos y limitar los tipos de edificios que pueden construirse.",
       "scenario3": "Las familias de este pueblo viven sin electricidad. Quieren encender las luces y usar sus electrodomésticos, pero faltan las instalaciones para generar energía y llevarla a sus casas. En este tutorial aprenderás a construir una central eléctrica y una subestación, conectarlas con líneas de transmisión y comprobar que la electricidad llegue a los hogares.",
       "scenario4": "MetroCity necesita un ferrocarril, pero hay edificios privados y un hospital público en su trazado. En este tutorial aprenderás adquisición y demolición, vías sobre avenidas, plataformas, estaciones, depósito, curvas y pendientes, electricidad y apertura de la línea.",

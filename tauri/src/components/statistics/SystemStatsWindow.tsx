@@ -30,6 +30,7 @@ type GroupKey =
 
 type EpochGroup = {
   key: GroupKey;
+  phase?: string | null; // コアのデバッグ機能が有効なときだけ、other をフェーズごとに分けたそのフェーズ名
   ms: number;
   workload: number | null;
   terms: Record<string, number>;
@@ -186,7 +187,7 @@ type SectionProps = {
 
 function EpochLoadSection({ stats, formatters }: SectionProps) {
   const { t } = useTranslation();
-  const [hovered, setHovered] = useState<GroupKey | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
   const epoch = stats.epoch;
 
   if (!epoch || epoch.total_ms <= 0) {
@@ -199,8 +200,10 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
   }
 
   const share = (ms: number) => ms / epoch.total_ms;
+  const rowId = (group: EpochGroup) => group.phase ?? group.key;
+  const label = (group: EpochGroup) => group.phase ?? t(`systemStats.group.${group.key}`);
   const describe = (group: EpochGroup) =>
-    `${t(`systemStats.group.${group.key}`)}: ${t("systemStats.load.ms", { value: formatters.ms.format(group.ms) })} (${formatters.percent.format(share(group.ms))})`;
+    `${label(group)}: ${t("systemStats.load.ms", { value: formatters.ms.format(group.ms) })} (${formatters.percent.format(share(group.ms))})`;
   const formula = (group: EpochGroup) => {
     const terms = Object.fromEntries(Object.entries(group.terms).map(([key, value]) => [key, formatters.count.format(value)]));
     return t(`systemStats.workload.${group.key}`, terms);
@@ -219,11 +222,11 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
       <div className="system-stats-bar" role="img" aria-label={epoch.groups.map(describe).join(", ")}>
         {epoch.groups.filter((group) => group.ms > 0).map((group) => (
           <div
-            key={group.key}
-            className={`system-stats-bar-segment${hovered && hovered !== group.key ? " is-dimmed" : ""}`}
+            key={rowId(group)}
+            className={`system-stats-bar-segment${hovered && hovered !== rowId(group) ? " is-dimmed" : ""}`}
             style={{ flexGrow: share(group.ms) * 100, backgroundColor: GROUP_COLORS[group.key] }}
             title={describe(group)}
-            onMouseEnter={() => setHovered(group.key)}
+            onMouseEnter={() => setHovered(rowId(group))}
             onMouseLeave={() => setHovered(null)}
           />
         ))}
@@ -240,14 +243,14 @@ function EpochLoadSection({ stats, formatters }: SectionProps) {
         <tbody>
           {epoch.groups.map((group) => (
             <tr
-              key={group.key}
-              className={hovered === group.key ? "is-hovered" : undefined}
-              onMouseEnter={() => setHovered(group.key)}
+              key={rowId(group)}
+              className={hovered === rowId(group) ? "is-hovered" : undefined}
+              onMouseEnter={() => setHovered(rowId(group))}
               onMouseLeave={() => setHovered(null)}
             >
               <td>
                 <span className="system-stats-swatch" style={{ backgroundColor: GROUP_COLORS[group.key] }} aria-hidden="true" />
-                {t(`systemStats.group.${group.key}`)}
+                {label(group)}
               </td>
               <td className="is-number">{t("systemStats.load.ms", { value: formatters.ms.format(group.ms) })}</td>
               <td className="is-number" title={group.workload != null ? formula(group) : undefined}>

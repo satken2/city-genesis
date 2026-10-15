@@ -102,14 +102,14 @@ assert.equal(snapshot()?.phaseId, "new");
 await settle(async () => { assert.equal(await guide!.check(), true); });
 // ページ送り: 「次へ」(advance)でフェーズが進み、最終ページでは false を返して達成確認(check)へ回る。
 await settle(() => root.render(<Harness scenario="controls" step={1} save="G" />));
-assert.equal(snapshot()?.phaseId, "tools");
+assert.equal(snapshot()?.phaseId, "role");
 await settle(async () => { assert.equal(await guide!.advance(), true); });
-assert.equal(snapshot()?.phaseId, "services");
-await settle(async () => { assert.equal(await guide!.advance(), true); assert.equal(await guide!.advance(), true); });
-assert.equal(snapshot()?.phaseId, "notifications");
+assert.equal(snapshot()?.phaseId, "goal");
+await settle(async () => { assert.equal(await guide!.advance(), true); });
+assert.equal(snapshot()?.phaseId, "epoch");
 await settle(async () => { assert.equal(await guide!.advance(), false); assert.equal(await guide!.check(), true); });
 // 表示パネルを閉じると先頭へ戻り、開き直したときにページを読み直せる。
-await settle(() => root.render(<Harness scenario="controls" step={2} save="H" />));
+await settle(() => root.render(<Harness scenario="controls" step={3} save="H" />));
 assert.equal(snapshot()?.phaseId, "open");
 await settle(async () => { assert.equal(await guide!.advance(), false); });
 await settle(() => emit("tutorial:window_visibility", { label: "display", window: "display_options", visible: true }));

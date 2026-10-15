@@ -26,49 +26,66 @@
     },
     "controls": {
       "title": "Basic Controls",
-      "description": "Learn the cockpit, the display panel and the icon panel, how epochs advance time, how to move the camera, and where the city boundary is.",
+      "description": "Learn your goals as mayor and how to plan before advancing time with epochs. Explore what the city’s information means, what each button lets you do, and how to move the camera.",
       "step1": {
-        "title": "Look at the cockpit",
-        "tools": "Let's look at the cockpit. The highlighted buttons are the everyday tools. \"View\" opens the display panel and \"Map\" opens a map of the whole city. \"Bulldozer\" is a mode that removes empty parcels and planned buildings and roads. When you've read this, press \"Next\".",
-        "services": "This is the public service gauge. It shows whether supply capacity is keeping up with demand. Demand grows as the city grows, so check it from time to time. Press \"Next\".",
-        "status": "\"Score\" is your governance score (per household, out of 2.0). \"Budget\" shows the expected budget for this period and your cash on hand. Press \"Next\".",
-        "notifications": "Events in the city arrive at the \"Notifications\" button. The date and weather are shown here too. That's the cockpit. Press \"Next\"."
+        "title": "Build a city as mayor",
+        "role": "In City Genesis, you grow a city as its mayor. You plan roads and facilities, decide how land is used, set taxes and allocate money to public services. Your job is to create the conditions that support residents and businesses. Press “Next” to continue.",
+        "goal": "Aim for a city where residents can live comfortably and safely. Provide homes and jobs, electricity, water and healthcare. Growing the city also takes money. Consider both people’s lives and the city’s finances when deciding what to improve.",
+        "epoch": "Time advances in units called “epochs”. First set budgets and construction plans, then press “Execute” when you are ready. Construction and everyday activity advance; review the results before making your next plans. The date stays still until you start, so take your time."
       },
       "step2": {
-        "title": "Open the display panel",
-        "open": "Press \"View\" in the cockpit to open the display panel.",
-        "tabs": "The vertical tabs are display layers. Use them to switch what you want to look at. Press \"Next\".",
-        "modes": "Each tab has buttons that switch how it is displayed. Use them when you want to see the state of the city in a particular way. Leave the panel open and press \"Next\"."
+        "title": "Read the city from the cockpit",
+        "tools": "The cockpit at the bottom of the screen helps you check the city and decide what to do next. “View” uses colors to help find shortages and problem areas. “Map” shows where places are across the city, helping you find your way as it grows.",
+        "tracking": "“Tracking list” keeps residents you want to revisit. Add someone to tracking from their citizen details, then use this button to return to their information and commutes. Explore individual lives behind the citywide figures.",
+        "bulldozer": "“Bulldozer” removes empty parcels and cancels planned buildings and roads. Press the button, then click a target in the 3D view; press it again to leave the mode. To remove a completed building or road, open its details and choose demolition.",
+        "services": "The lightning and water-drop gauges show how much room your electricity and water supplies have to grow. As they fill, demand is approaching capacity. Click them to review public facilities, and check whether you need more supply before expanding the city.",
+        "score": "“Score” summarizes how satisfied residents are with life in your city. Higher is better. Homes, jobs, healthcare and a pleasant living environment help improve it. If it falls, look for the difficulties residents are facing.",
+        "budget": "“Budget” shows how much of the city’s available cash this period’s expected expenses will use. A nearly full gauge means little cash remains to spare; red means the expected cost exceeds your cash. This is a forecast, so check it before advancing time.",
+        "budgetChanges": "More construction, higher facility operation and faster construction increase the money needed and raise the budget gauge. Lower operation or slower construction can reduce expected costs. When taxes and other income increase cash, the same expenses take up less of the gauge.",
+        "budgetPlanning": "A low gauge means you have money available for the city. Consider investing in missing services or facilities you will need soon. Click the gauge to allocate budgets and review income and spending. If spending keeps exceeding tax and other income, your cash will shrink.",
+        "date": "The date shows how far the city’s time has advanced. Use it to track construction progress and seasonal changes. It stays still while you plan and updates when you advance an epoch with “Execute”.",
+        "climate": "The temperature, rainfall, sunlight and wind panel shows this month’s average climate. These conditions affect farming, wind power and solar power. If crops or electricity production are low, check the climate too.",
+        "climateEffects": "Weak sunlight reduces solar output, and weak wind reduces wind output. Temperature and rainfall also affect farming. Click the climate panel to see how this month’s conditions affect each facility’s production efficiency. Plan facilities with seasonal changes in supply in mind.",
+        "notifications": "The number on “Notifications” counts warnings and cautions to review. A red number and flashing button mean city functions are being disrupted and need prompt attention. Yellow numbers indicate cautions, such as limits to growth or problems that take time to improve. Press the button to read them.",
+        "notificationActions": "When a notice identifies a facility or district, click its row to inspect it. Respond to the cause: connect missing power lines or arrange supplies for a facility short of materials. Notices about ongoing problems disappear when their cause is resolved. After taking action, check the next epoch’s results."
       },
       "step3": {
-        "title": "Look at the icon panel",
-        "road": "Let's go through the icon panel one icon at a time. \"Roads, Rail & Infrastructure\" lays roads, tracks, power lines, water pipes and other paths. Press \"Next\" to move on to the next icon.",
-        "land": "\"Land Parcels\" creates the parcels on which buildings are built.",
-        "grading": "\"Earthworks\" adjusts the ground height to create flat land and reclaimed land.",
-        "district": "\"District\" groups parcels into districts and restricts which kinds of buildings can be built.",
-        "construction": "\"Construction\" is where you plan homes, shops, factories, public facilities and other buildings.",
-        "constructionProjects": "\"Construction Projects\" lists planned and ongoing works, grouped by tag.",
-        "transport": "\"Public Transport\" creates and manages bus, rail and other lines.",
-        "regulation": "\"Regulations\" sets speed limits, the initial building regulations for new districts, immigration conditions, social security and repair settings.",
-        "city": "\"Policies\" sets taxes such as income tax, business tax and consumption tax.",
-        "finance": "\"Financial Policy\" shows the financial state: GDP, prices, central bank debt and more.",
-        "stat": "\"Statistics\" shows statistics such as population and commuting as charts.",
-        "propPlacement": "\"Prop Placement\" places scenic props (small objects) on the terrain. That's the end of the icon panel. Press \"Next\"."
+        "title": "Change the view to find problems",
+        "open": "Shortages and traffic congestion can be hard to spot from the city’s appearance. Use “View” to show the information you need on the map. Press “View” in the cockpit to open the panel.",
+        "tabs": "The vertical tabs let you choose what to inspect, such as buildings, roads, parcels or districts. You can also hide unwanted objects when overlapping information makes the view hard to read. Press “Next” to explore the display options.",
+        "modes": "The buttons in each tab choose which information colors the objects. Find busy roads or troubled buildings and use them as clues for your next action. Click an object in the 3D view to inspect it further. Leave the panel open and press “Next”."
       },
       "step4": {
-        "title": "Advance time with epochs",
-        "flow": "Time in this game advances in units called epochs. Before each epoch, you allocate the budget and make construction plans. When your plans are ready, press \"Start\" to run the simulation.",
-        "execute": "The city does not change until you press \"Start\", so you can take your time planning. The city moves only while an epoch runs, and the results are shown when it ends. You don't need to press it now; when you've finished reading, press \"Next\"."
+        "title": "Discover your city-building tools",
+        "grading": "Let’s explore the buttons on the left from top to bottom. “Earthworks” levels slopes for building or reclaims land from the sea. It creates room for growth when you need more homes or workplaces but have too little usable land.",
+        "road": "“Roads, Rail & Infrastructure” creates routes for people, goods, power and water. Connect homes and workplaces with roads, link distant places with rail, and connect facilities with power lines and pipes. These networks support travel, trade and utility supplies.",
+        "land": "“Land Parcels” prepares sites for buildings. Empty land alone is not a building site. More homes and large facilities both need sites with enough room for them.",
+        "landDevelopment": "Parcels provide space for city construction and for private homes and businesses to develop. Private buildings grow according to demand and district building rules. When you want more homes or jobs, check that enough vacant parcels are available.",
+        "district": "“District” lets you manage parts of the city with different priorities, such as a residential neighborhood or an industrial area. Each district can restrict the types of buildings allowed, giving the whole neighborhood a suitable direction for development.",
+        "districtRules": "District details let you choose which types of buildings are allowed. For example, keep factories out of a residential neighborhood. You can also compare population and living conditions between districts to decide where support is needed.",
+        "construction": "“Construction” plans buildings the city needs. You can build homes, workplaces, hospitals, schools and power plants. Use it to provide more housing and jobs or fill gaps in healthcare, education, electricity and other services.",
+        "transport": "“Public Transport” helps residents travel by bus or rail. You can set routes and stops, and adjust fares and service intervals. Linking homes with workplaces and schools helps reduce the burden of commuting.",
+        "propPlacement": "“Prop Placement” adds trees, rocks and other scenery. Use it to add greenery to streets or decorate the terrain.",
+        "constructionProjects": "“Construction Projects” gathers planned and ongoing works in one place. Review progress and costs to decide which works to advance.",
+        "regulation": "“Regulations” sets rules for living and working in the city, including speed limits, working hours, immigration and social security. Adjust them to suit your priorities for safety, time to enjoy life and city growth.",
+        "city": "“Policies” sets income, business and consumption taxes. Tax revenue funds roads and public services, while taxes also place a burden on residents and businesses. Balance the city’s need for income with their lives and activities.",
+        "finance": "“Financial Policy” shows the size of the economy, prices and the city’s monetary situation. Use it to see whether the overall economy is growing or prices are changing.",
+        "stat": "“Statistics” helps you evaluate your decisions. Charts show changes in population, income, commuting and resident satisfaction. After changing policies or facilities, check whether life is improving and what is still missing. That completes the buttons on the left."
       },
       "step5": {
+        "title": "Run your plans and review results",
+        "flow": "After checking the city and planning construction and budgets, use “Execute” in the cockpit to advance an epoch. Work progresses, residents work, businesses produce, and finances and scores change. Some plans need several epochs to show their effects.",
+        "execute": "When an epoch ends, review the results and notices. Address problems in your next plans, then advance time again. Grow the city by repeating “plan, advance, review”. You do not need to press “Execute” here. Press “Next” to learn the camera controls."
+      },
+      "step6": {
         "title": "Move the camera",
         "description": "You can move the camera like this: drag with the left button to move the view, drag with the right button to rotate, W/A/S/D (or the arrow keys) to move, Q/E to rotate, R/F to change the height, and the mouse wheel to zoom. Try it freely, then press \"Next\"."
       },
-      "step6": {
+      "step7": {
         "title": "Fly mode and cinema mode",
         "description": "The camera has two special modes. \"Fly mode\" starts with Shift+F: move along your view with W/A/S/D, look around with the mouse, and go up or down with R/F. Press Esc to leave it. \"Cinema mode\" starts from the button in the top-right corner of the screen and lets you circle around the city. Look around with the mouse; Shift switches between orbiting and travelling, Space pauses, Backspace reverses, and Esc exits. The on-screen panels are hidden while either mode is on and come back when you press Esc. When you've tried them, exit both modes and press \"Next\"."
       },
-      "step7": {
+      "step8": {
         "title": "See the city boundary",
         "description": "We moved the camera to the east edge of the city. The area you can use as a city is this rectangle where detailed terrain exists, and the camera cannot leave it either. That's all for the basic controls. Press \"Next\" to finish the tutorial."
       }
@@ -470,7 +487,7 @@
     },
     "intro": {
       "basic": "People are hoping to start a new life in this town, but there aren't enough homes to welcome them. In this tutorial, you'll learn the full process of planning roads and buildings, advancing time, and seeing construction through to completion.",
-      "controls": "You have just taken office as mayor, and a wide stretch of land lies ahead of you. Before you start building, it helps to know how to read the screen and how to operate the basics. In this tutorial, you'll learn what the cockpit and the icon panel do, how epochs advance time, how to move the camera, and where the city boundary is.",
+      "controls": "As the new mayor, help build a city where residents can live well and feel safe. Provide homes, workplaces, utilities and public services while deciding how to spend the city’s money. This tutorial teaches your role as mayor, the epoch cycle, how to read the city’s condition, and the buttons and camera controls used to build it.",
       "scenario2": "An ore deposit has been found in a corner of town. Unless the land is protected, other buildings could go up on top of it. In this tutorial, you'll learn how to locate natural resources, divide the town into districts, and restrict which types of buildings can be built.",
       "scenario3": "The people of this town live in homes without electricity. They want to turn on lights and use appliances, but the facilities to generate power and deliver it to their homes are missing. In this tutorial, you'll learn how to build a power plant and a substation, connect them with power lines, and check that electricity reaches homes.",
       "scenario4": "MetroCity needs a railway, but private buildings and a public hospital obstruct its route. In this tutorial you will learn land acquisition, explicit public demolition, elevated track above roads, platforms and stations, a depot, curve and grade adjustment, power connection and opening a service.",

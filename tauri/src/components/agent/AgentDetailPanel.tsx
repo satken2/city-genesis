@@ -54,6 +54,7 @@ import { AgentAlertsPanel } from "./AgentAlertsPanel";
 import { AgentBasicInfoPanel } from "./AgentBasicInfoPanel";
 import { BuildingInfo } from "./BuildingInfo";
 import { BuildingInfoPanel } from "./BuildingInfoPanel";
+import { ParkingInfoPanel } from "./ParkingInfoPanel";
 import { HouseholdInfoPanel } from "./HouseholdInfoPanel";
 import { DemandInfoPanel } from "./DemandInfoPanel";
 import { SupplyInfoPanel } from "./SupplyInfoPanel";
@@ -666,9 +667,8 @@ export function AgentDetailPanel({
           {activeTab === "building" && hasBuildingInfoTab && !isPreConstruction && (
             <>
               {showBuildingPanel && <BuildingInfoPanel agent={agentData} />}
-              {showBuildingDetails && (
-                <BuildingInfo agent={agentData} onNavigate={navigateToAgent} />
-              )}
+              <BuildingInfo agent={agentData} onNavigate={navigateToAgent} />
+              {showBuildingPanel && <ParkingInfoPanel agent={agentData} />}
               {isMashupBuilding && (
                 <button
                   className="god-edit-open-btn"

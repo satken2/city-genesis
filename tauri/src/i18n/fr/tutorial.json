@@ -26,49 +26,66 @@
     },
     "controls": {
       "title": "Commandes de base",
-      "description": "Découvrez le cockpit, le panneau d'affichage et le panneau d'icônes, le fonctionnement des époques, le déplacement de la caméra et les limites de la ville.",
+      "description": "Découvrez vos objectifs de maire et comment planifier avant de faire avancer le temps par époques. Apprenez le sens des informations de la ville, le rôle de chaque bouton et les commandes de caméra.",
       "step1": {
-        "title": "Découvrir le cockpit",
-        "tools": "Découvrons le cockpit. Les boutons en surbrillance sont les outils du quotidien. « Affichage » ouvre le panneau d'affichage et « Carte » ouvre la carte de toute la ville. « Bulldozer » est un mode qui supprime les terrains vides ainsi que les bâtiments et routes en projet. Une fois la lecture terminée, appuyez sur « Suivant ».",
-        "services": "Voici la jauge des services publics. Elle indique si la capacité d'offre suffit à répondre à la demande. La demande augmente avec la ville, alors vérifiez-la de temps en temps. Appuyez sur « Suivant ».",
-        "status": "« Score » est votre score de gouvernance (par foyer, sur 2,0). « Budget » indique le budget prévu pour cette période et la trésorerie disponible. Appuyez sur « Suivant ».",
-        "notifications": "Les événements de la ville arrivent sur le bouton des notifications. La date et la météo s'affichent aussi ici. Voilà pour le cockpit. Appuyez sur « Suivant »."
+        "title": "Commencez à bâtir en tant que maire",
+        "role": "Dans City Genesis, vous développez une ville en tant que maire. Vous planifiez routes et équipements, décidez de l’usage des terrains, fixez les impôts et attribuez les budgets des services publics. Votre rôle est de créer un environnement favorable aux habitants et aux entreprises. Appuyez sur « Suivant ».",
+        "goal": "Visez une ville où les habitants vivent confortablement et en sécurité. Fournissez logements, emplois, électricité, eau et soins. Développer la ville coûte aussi de l’argent. Tenez compte de la vie des habitants et des finances municipales pour choisir vos priorités.",
+        "epoch": "Le temps avance par unités appelées « époques ». Préparez d’abord budgets et projets, puis appuyez sur « Démarrer ». Les travaux et les activités avancent ; examinez les résultats avant de planifier à nouveau. La date reste fixe jusqu’au démarrage : prenez le temps de réfléchir."
       },
       "step2": {
-        "title": "Ouvrir le panneau d'affichage",
-        "open": "Appuyez sur « Affichage » dans le cockpit pour ouvrir le panneau d'affichage.",
-        "tabs": "Les onglets verticaux sont des couches d'affichage. Utilisez-les pour choisir ce que vous voulez observer. Appuyez sur « Suivant ».",
-        "modes": "Chaque onglet propose des boutons qui changent la manière de l'afficher. Utilisez-les pour voir l'état de la ville sous l'angle voulu. Laissez le panneau ouvert et appuyez sur « Suivant »."
+        "title": "Comprendre la ville depuis le cockpit",
+        "tools": "Le cockpit, en bas de l’écran, vous aide à examiner la ville et à choisir vos prochaines actions. « Affichage » utilise des couleurs pour repérer les pénuries et les problèmes. « Carte » montre la position des lieux et vous aide à vous orienter lorsque la ville grandit.",
+        "tracking": "« Liste de suivi » conserve les habitants que vous souhaitez revoir. Ajoutez une personne depuis ses détails, puis utilisez ce bouton pour retrouver ses informations et ses trajets. Découvrez les vies individuelles derrière les chiffres de la ville.",
+        "bulldozer": "« Bulldozer » supprime les parcelles vides et annule les bâtiments et routes en projet. Appuyez sur le bouton, puis sur une cible dans la vue 3D ; appuyez encore pour quitter le mode. Pour retirer un bâtiment ou une route achevés, ouvrez leurs détails et choisissez la démolition.",
+        "services": "Les jauges de l’éclair et de la goutte indiquent la marge de vos capacités en électricité et en eau. Plus elles se remplissent, plus la demande approche de la capacité. Cliquez dessus pour examiner les équipements publics et vérifier s’il faut renforcer l’offre avant d’agrandir la ville.",
+        "score": "Le « Score » résume la satisfaction des habitants envers la vie dans votre ville. Plus il est élevé, mieux c’est. Logements, emplois, soins et cadre de vie agréable contribuent à l’améliorer. S’il baisse, cherchez les difficultés des habitants.",
+        "budget": "Le « Budget » indique la part de votre trésorerie que les dépenses prévues pour cette époque utiliseront. Une jauge presque pleine laisse peu de marge ; le rouge indique un coût supérieur aux fonds disponibles. C’est une prévision : vérifiez-la avant de faire avancer le temps.",
+        "budgetChanges": "Davantage de travaux, une activité accrue des équipements ou des travaux plus rapides augmentent les besoins et la jauge. Réduire l’activité ou ralentir les travaux peut diminuer les coûts prévus. Lorsque les recettes augmentent la trésorerie, les mêmes dépenses occupent une part plus petite de la jauge.",
+        "budgetPlanning": "Une jauge basse signifie que vous avez de l’argent disponible pour la ville. Envisagez les services manquants ou les équipements bientôt nécessaires. Cliquez sur la jauge pour répartir les budgets et consulter recettes et dépenses. Si les dépenses dépassent durablement les recettes, votre trésorerie diminue.",
+        "date": "La date indique jusqu’où le temps de la ville a avancé. Elle aide à suivre les travaux et les changements de saison. Elle reste fixe pendant la planification et change lorsque vous avancez une époque avec « Démarrer ».",
+        "climate": "Le panneau de température, pluie, ensoleillement et vent indique le climat moyen du mois. Ces conditions influencent l’agriculture et les productions éolienne et solaire. Si les récoltes ou la production électrique sont faibles, vérifiez aussi le climat.",
+        "climateEffects": "Un faible ensoleillement réduit la production solaire ; un vent faible réduit la production éolienne. Température et pluie influencent aussi l’agriculture. Cliquez sur le panneau climatique pour voir l’effet du mois sur l’efficacité de chaque équipement. Préparez l’offre en tenant compte des saisons.",
+        "notifications": "Le nombre sur « Notifications » compte les avertissements et les points de vigilance à examiner. Un nombre rouge et un clignotement signalent une perturbation des fonctions de la ville à traiter rapidement. Les nombres jaunes signalent des limites à la croissance ou des problèmes longs à améliorer. Cliquez pour les lire.",
+        "notificationActions": "Lorsqu’un avis identifie un équipement ou un quartier, cliquez sur sa ligne pour l’examiner. Agissez sur la cause : raccordez les lignes électriques manquantes ou assurez les approvisionnements en matériaux. Les avis de problèmes persistants disparaissent lorsque leur cause est résolue. Vérifiez ensuite les résultats de l’époque suivante."
       },
       "step3": {
-        "title": "Découvrir le panneau d'icônes",
-        "road": "Passons en revue le panneau d'icônes, une icône à la fois. « Routes, voies ferrées et infrastructures » sert à tracer routes, voies, lignes électriques, canalisations d'eau et autres tracés. Appuyez sur « Suivant » pour passer à l'icône suivante.",
-        "land": "« Parcelles » crée les parcelles sur lesquelles on construit les bâtiments.",
-        "grading": "« Terrassement » ajuste la hauteur du terrain pour créer des terrains plats et des terres gagnées sur la mer.",
-        "district": "« Quartiers » regroupe des parcelles en quartiers et limite les types de bâtiments constructibles.",
-        "construction": "« Construction » permet de planifier logements, commerces, usines, équipements publics et autres bâtiments.",
-        "constructionProjects": "« Projets de construction » liste les chantiers prévus et en cours, regroupés par étiquette.",
-        "transport": "« Transports publics » permet de créer et de gérer des lignes de bus, de train et autres.",
-        "regulation": "« Réglementations » règle les limitations de vitesse, les règles de construction initiales des nouveaux quartiers, les conditions d'immigration, la protection sociale et les réparations.",
-        "city": "« Politiques » règle les impôts, comme l'impôt sur le revenu, l'impôt sur les entreprises et la taxe de consommation.",
-        "finance": "« Politique monétaire » montre la situation financière : PIB, prix, dette de la banque centrale, etc.",
-        "stat": "« Statistiques » présente sous forme de graphiques des données comme la population et les trajets domicile-travail.",
-        "propPlacement": "« Placement de décors » place des décors (petits objets) sur le terrain. C'est tout pour le panneau d'icônes. Appuyez sur « Suivant »."
+        "title": "Changer l’affichage pour repérer les problèmes",
+        "open": "Les pénuries et les embouteillages sont parfois difficiles à voir dans le paysage. Utilisez « Affichage » pour faire apparaître les informations utiles sur la carte. Appuyez sur « Affichage » dans le cockpit.",
+        "tabs": "Les onglets verticaux choisissent ce que vous examinez : bâtiments, routes, parcelles ou quartiers. Vous pouvez aussi masquer les éléments inutiles si les informations se chevauchent. Appuyez sur « Suivant » pour découvrir les modes d’affichage.",
+        "modes": "Les boutons de chaque onglet choisissent l’information utilisée pour colorer les objets. Repérez les routes encombrées ou les bâtiments en difficulté pour orienter vos actions. Cliquez sur un objet dans la vue 3D pour l’examiner. Gardez le panneau ouvert et appuyez sur « Suivant »."
       },
       "step4": {
-        "title": "Faire avancer le temps avec les époques",
-        "flow": "Dans ce jeu, le temps avance par unités appelées époques. Avant chaque époque, vous répartissez le budget et établissez vos plans de construction. Quand vos plans sont prêts, appuyez sur « Démarrer » pour lancer la simulation.",
-        "execute": "La ville ne change pas tant que vous n'appuyez pas sur « Démarrer » : vous pouvez donc planifier tranquillement. La ville n'évolue que pendant l'exécution d'une époque, et les résultats s'affichent à la fin. Inutile d'appuyer maintenant ; une fois la lecture terminée, appuyez sur « Suivant »."
+        "title": "Découvrir les outils de construction",
+        "grading": "Parcourons les boutons de gauche de haut en bas. « Terrassement » aplanit les pentes ou gagne du terrain sur la mer. Il offre de la place au développement lorsque logements et emplois manquent d’espace utilisable.",
+        "road": "« Routes, voies ferrées et infrastructures » crée les trajets des personnes, marchandises, de l’électricité et de l’eau. Routes, rails, lignes électriques et canalisations relient logements, emplois et équipements. Ces réseaux soutiennent les déplacements, le commerce et l’approvisionnement.",
+        "land": "« Parcelles » prépare les terrains destinés aux bâtiments. Un terrain vide ne suffit pas : il faut une parcelle. Les logements supplémentaires comme les grands équipements ont besoin d’un terrain assez vaste.",
+        "landDevelopment": "Les parcelles accueillent les constructions municipales ainsi que les logements et entreprises privés. Les bâtiments privés se développent selon la demande et les règles du quartier. Pour augmenter logements ou emplois, vérifiez qu’il reste assez de parcelles libres.",
+        "district": "« Quartiers » permet de gérer des parties de la ville selon leurs priorités, comme un secteur résidentiel ou industriel. Chaque quartier peut limiter les types de bâtiments autorisés et donner une orientation adaptée au développement de toute la zone.",
+        "districtRules": "Les détails du quartier permettent de choisir les types de bâtiments autorisés, par exemple pour éviter les usines dans un secteur résidentiel. Comparez aussi la population et les conditions de vie entre quartiers pour décider où apporter du soutien.",
+        "construction": "« Construction » planifie les bâtiments nécessaires à la ville. Vous pouvez construire logements, lieux de travail, hôpitaux, écoles et centrales. Elle permet de développer logements et emplois ou de répondre aux besoins en soins, éducation, électricité et autres services.",
+        "transport": "« Transports publics » aide les habitants à se déplacer en bus ou en train. Vous pouvez définir lignes et arrêts et ajuster tarifs et intervalles. Relier logements, emplois et écoles allège la charge des trajets quotidiens.",
+        "propPlacement": "« Placement de décors » ajoute arbres, rochers et autres éléments du paysage. Il permet de verdir les rues ou de décorer le terrain.",
+        "constructionProjects": "« Projets de construction » rassemble les travaux prévus et en cours. Examinez l’avancement et les coûts pour décider quels travaux poursuivre.",
+        "regulation": "« Réglementations » fixe les règles de vie et de travail : vitesse, horaires de travail, immigration ou protection sociale. Ajustez-les selon vos priorités de sécurité, de temps libre et de croissance.",
+        "city": "« Politiques » définit les impôts sur les revenus, les entreprises et la consommation. Les recettes financent routes et services publics ; les impôts pèsent aussi sur habitants et entreprises. Équilibrez les besoins municipaux avec leur vie et leur activité.",
+        "finance": "« Politique monétaire » présente la taille de l’économie, les prix et la situation monétaire. Consultez-la pour savoir si l’économie progresse ou si les prix évoluent.",
+        "stat": "« Statistiques » aide à évaluer vos décisions. Les graphiques montrent population, revenus, trajets et satisfaction. Après avoir changé politiques ou équipements, vérifiez si la vie s’améliore et ce qui manque encore. Voilà les boutons de gauche."
       },
       "step5": {
+        "title": "Exécuter les projets et examiner les résultats",
+        "flow": "Après avoir examiné la ville et préparé travaux et budgets, utilisez « Démarrer » pour avancer une époque. Les travaux progressent, les habitants travaillent, les entreprises produisent et finances et score évoluent. Certains projets prennent plusieurs époques pour porter leurs fruits.",
+        "execute": "À la fin d’une époque, consultez résultats et notifications. Traitez les difficultés dans vos prochains projets, puis avancez encore. Développez la ville en répétant « planifier, avancer, vérifier ». Ici, inutile d’appuyer sur « Démarrer ». Appuyez sur « Suivant » pour apprendre les commandes de caméra."
+      },
+      "step6": {
         "title": "Déplacer la caméra",
         "description": "Voici comment déplacer la caméra : faites glisser avec le bouton gauche pour déplacer la vue, avec le bouton droit pour la faire pivoter, utilisez W/A/S/D (ou les flèches) pour avancer, Q/E pour pivoter, R/F pour changer la hauteur et la molette de la souris pour zoomer. Essayez librement, puis appuyez sur « Suivant »."
       },
-      "step6": {
+      "step7": {
         "title": "Mode vol et mode cinéma",
         "description": "La caméra dispose de deux modes spéciaux. Le « mode vol » s'active avec Maj+F : avancez dans la direction de votre regard avec W/A/S/D, regardez autour de vous avec la souris et montez ou descendez avec R/F. Appuyez sur Échap pour en sortir. Le « mode cinéma » se lance depuis le bouton en haut à droite de l'écran et permet de tourner autour de la ville. Regardez autour de vous avec la souris ; Maj alterne entre orbite et déplacement, Espace met en pause, Retour arrière inverse et Échap quitte. Les panneaux de l'écran sont masqués pendant ces deux modes et réapparaissent quand vous appuyez sur Échap. Une fois les essais terminés, quittez les deux modes et appuyez sur « Suivant »."
       },
-      "step7": {
+      "step8": {
         "title": "Voir les limites de la ville",
         "description": "Nous avons déplacé la caméra vers le bord est de la ville. La zone utilisable comme ville est ce rectangle où existe un terrain détaillé, et la caméra ne peut pas en sortir non plus. C'est tout pour les commandes de base. Appuyez sur « Suivant » pour terminer le tutoriel."
       }
@@ -470,7 +487,7 @@
     },
     "intro": {
       "basic": "Des familles aimeraient commencer une nouvelle vie dans cette ville, mais les logements manquent pour les accueillir. Ce tutoriel vous permettra d'apprendre à planifier des routes et des bâtiments, à faire avancer le temps et à mener leur construction jusqu'à son terme.",
-      "controls": "Vous venez de prendre vos fonctions de maire, et un vaste terrain s'étend devant vous. Avant de commencer à construire, mieux vaut savoir lire l'écran et maîtriser les commandes de base. Ce tutoriel vous permet de découvrir le rôle du cockpit et du panneau d'icônes, la façon dont les époques font avancer le temps, le déplacement de la caméra et les limites de la ville.",
+      "controls": "Vous êtes le nouveau maire : bâtissez une ville où les habitants vivent bien et en sécurité. Préparez logements, emplois, réseaux et services publics tout en décidant comment dépenser l’argent municipal. Ce tutoriel présente votre rôle, le cycle des époques, la lecture de l’état de la ville et les outils et commandes de caméra pour la développer.",
       "scenario2": "Un gisement de minerai a été découvert dans un secteur de la ville. Sans protection, d'autres bâtiments risquent d'être construits dessus. Ce tutoriel vous permettra d'apprendre à repérer les ressources naturelles, à créer des quartiers et à limiter les types de bâtiments autorisés.",
       "scenario3": "Les habitants de cette ville vivent sans électricité. Ils voudraient allumer leurs lampes et utiliser leurs appareils, mais les installations pour produire et acheminer le courant manquent. Ce tutoriel vous permettra d'apprendre à construire une centrale et un poste de transformation, à les relier par des lignes électriques et à vérifier que le courant arrive aux foyers.",
       "scenario4": "MetroCity a besoin d’un chemin de fer, mais des bâtiments privés et un hôpital public occupent son tracé. Ce tutoriel enseigne acquisition et démolition, voies au-dessus des routes, quais, gares, dépôt, réglage des courbes et pentes, alimentation et ouverture du service.",

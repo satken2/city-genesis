@@ -409,7 +409,7 @@ export function Tutorial() {
             <div className="tutorial-step-title">
               {step ? t(step.titleKey) : ""}
             </div>
-            <div className="tutorial-step-description">
+            <div className="tutorial-step-description" key={guide.failed ? "failed" : guide.textKey || step?.descriptionKey}>
               {guide.failed ? t("tutorial.guide.failed") : guide.textKey ? t(guide.textKey) : step ? t(step.descriptionKey) : ""}
             </div>
             <div className="tutorial-actions">

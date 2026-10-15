@@ -78,6 +78,7 @@
   justify-content: center;
   gap: 6px;
   min-width: 0;
+  min-height: 0;
 }
 
 .tutorial-step-number {
@@ -100,10 +101,8 @@
   color: #93a9c0;
   font-family: "Segoe UI", sans-serif;
   line-height: 1.5;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 /* ボタンと進捗を含む下部エリア */
