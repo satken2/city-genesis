@@ -278,6 +278,9 @@ agents:
     prebuilt: false
     variants:
       - 0
+      - 200
+      - 500
+      - 700
   2006:
     model: true
     prebuilt: false
@@ -321,6 +324,9 @@ agents:
     prebuilt: false
     variants:
       - 0
+      - 200
+      - 500
+      - 700
   2014:
     model: true
     prebuilt: false
