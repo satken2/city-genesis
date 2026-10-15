@@ -137,7 +137,7 @@
     "menuPropPlacement": "프롭 배치",
     "menuExecute": "시작",
     "budgetMeterLabel": "예산",
-    "budgetMeterTooltip": "예산 전망 / 현금성 자산",
+    "budgetMeterTooltip": "예산 전망 / 최근 수입",
     "scoreMeterLabel": "점수",
     "scoreMeterTooltip": "시정 점수(1가구당 / 만점 2.0)",
     "menuCitizenTracking": "추적 목록"

@@ -97,6 +97,9 @@ export async function fetchApi<T>(
   url: string,
   options?: { method?: string; headers?: Record<string, string>; body?: BodyInit; responseType?: "blob"; signal?: AbortSignal; cache?: RequestCache }
 ): Promise<T> {
+  // 確定時の診断は既存のフロントエラーログへ残し、HTTP到達前の失敗と応答処理の失敗を区別する。
+  const diagnoseParcelCreation = import.meta.env?.DEV && options?.method === "POST"
+    && /\/api\/v1\/parcels\/?(?:\?|$)/.test(url);
   const response = await fetch(url, {
     method: options?.method ?? "GET",
     headers: {
@@ -107,6 +110,15 @@ export async function fetchApi<T>(
     signal: options?.signal,
     cache: options?.cache,
   });
+  if (diagnoseParcelCreation) {
+    console.error("[ParcelDiagnostic] HTTP response", {
+      requestedUrl: url,
+      responseUrl: response.url,
+      status: response.status,
+      redirected: response.redirected,
+      contentType: response.headers.get("content-type"),
+    });
+  }
   if (!response.ok) {
     const errorData: Partial<ApiErrorResponse> = await response
       .json()

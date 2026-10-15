@@ -1347,7 +1347,7 @@ fn disconnected_session_state(api_base_url: &str, core_version: &Value) -> Value
 
 /// セッション状態を定期的にポーリングし、全ウィンドウに配信するスレッドを起動する。
 ///
-/// 5秒ごとにバックエンドの `/api/v1/sessions` と、都市があれば `/api/v1/city` を取得し、
+/// 5秒ごとにバックエンドの `/api/v1/sessions` と、都市があれば `/api/v1/city/` を取得し、
 /// `session-state` イベントとして全 WebView ウィンドウにブロードキャストする。
 /// これにより TopMenu・HUD・Tips などが個別にポーリングする必要がなくなる。
 ///
@@ -1501,7 +1501,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             // 応答は成否によらず本文を読み切る。未読のまま捨てると切断が RST になり、Windows のコアでは
             // asyncio がそのソケットを閉じ損ねて残す(コアの終了も残った接続を待って止まる)。
             let city_data: Option<Value> = current_save_id.and_then(|_| {
-                let res = client.get(format!("{}/api/v1/city", base)).send().ok()?;
+                let res = client.get(format!("{}/api/v1/city/", base)).send().ok()?;
                 let ok = res.status().is_success();
                 let body = res.bytes().ok()?;
                 if ok { serde_json::from_slice(&body).ok() } else { None }

@@ -63,6 +63,7 @@ export default defineConfig(({ mode }) => ({
       { find: /^@tauri-apps\/api\/core$/, replacement: path.join(shimDir, "core.ts") },
       { find: /^@tauri-apps\/api\/event$/, replacement: path.join(shimDir, "event.ts") },
       { find: /^@tauri-apps\/api\/window$/, replacement: path.join(shimDir, "window.ts") },
+      { find: /^@tauri-apps\/api\/menu$/, replacement: path.join(shimDir, "menu.ts") },
       { find: /^@tauri-apps\/plugin-dialog$/, replacement: path.join(shimDir, "plugin-dialog.ts") },
       { find: /^@tauri-apps\/plugin-opener$/, replacement: path.join(shimDir, "plugin-opener.ts") },
     ],

@@ -17,6 +17,14 @@ export type ListenTarget = { kind: "Any" } | { kind: "Window"; label: string };
 /** コマンドの結果。Tauri のコマンドが Err を返したときは、その値で invoke が失敗する。 */
 export type InvokeReply = { ok: true; value: unknown } | { ok: false; error: unknown };
 
+/** iframe 内の論理座標を起点に開く、1階層の選択メニュー。 */
+export interface PopupMenuRequest {
+  id: string;
+  items: { id: string; text: string; checked?: boolean; enabled?: boolean }[];
+  at: { x: number; y: number };
+  fontSize: number;
+}
+
 export interface ShellApi {
   /** Tauri のコマンドを実行する。args と戻り値は JSON(戻り値は InvokeReply)。 */
   invoke(label: string, command: string, argsJson: string): Promise<string>;
@@ -27,6 +35,8 @@ export interface ShellApi {
   emit(event: string, payloadJson: string): void;
   /** 呼び出したウィンドウ自身の操作(表示・移動など)。引数と戻り値は JSON。 */
   windowOp(label: string, op: WindowOp, argsJson: string): Promise<string>;
+  popupMenu(label: string, requestJson: string, onSelect: (id: string) => void, onClose: () => void): Promise<string>;
+  closeMenu(label: string, id: string): void;
 }
 
 export type WindowOp =

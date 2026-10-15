@@ -59,7 +59,7 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
         // ポップアップは都市が替わっても残ることがあるので、エポックの日数も一覧と一緒に取り直す。
         const [list, cityRes] = await Promise.all([
           fetchTagProjects(apiBaseUrl, signal),
-          fetchApi<{ city: { simulation_days: number } }>(buildApiUrl(apiBaseUrl, "/api/v1/city"), { signal }),
+          fetchApi<{ city: { simulation_days: number } }>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), { signal }),
         ]);
         if (signal?.aborted) return;
         setProjects(list);

@@ -171,3 +171,5 @@ assert.equal(closed, false);
 assert.equal(state.calls.length, beforeMerge);
 await act(async () => { mergeRoot.unmount(); });
 console.log("PASS: oversized merge shows the size error without closing or reloading Unity");
+
+await import("./road-brush-tests");

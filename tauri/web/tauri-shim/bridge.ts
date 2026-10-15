@@ -7,6 +7,7 @@ import {
   WINDOW_LABEL_ATTRIBUTE,
   type InvokeReply,
   type ListenTarget,
+  type PopupMenuRequest,
   type ShellApi,
   type WindowOp,
 } from "../shared/shellApi";
@@ -43,6 +44,14 @@ export function emitEvent(event: string, payload: unknown): void {
 
 export async function windowOp(op: WindowOp, args: unknown = {}): Promise<unknown> {
   return unwrap(await shell().windowOp(currentLabel, op, JSON.stringify(args)));
+}
+
+export async function popupMenu(request: PopupMenuRequest, onSelect: (id: string) => void, onClose: () => void): Promise<void> {
+  unwrap(await shell().popupMenu(currentLabel, JSON.stringify(request), onSelect, onClose));
+}
+
+export function closeMenu(id: string): void {
+  shell().closeMenu(currentLabel, id);
 }
 
 // OS のウィンドウはクリックで前面に出る。iframe でも押した時点でシェルに前面化を頼む。

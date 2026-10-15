@@ -3,13 +3,14 @@
  * ページの入口(PC 向けの `main.ts`・開発用の地図ページの `debug-map/main.ts`)が、常駐ウィンドウの作り方と
  * グラフィック(全面に置く都市の表示)を渡す。
  */
-import { SHELL_GLOBAL, type InvokeReply, type ListenTarget, type ShellApi, type WindowOp } from "../shared/shellApi";
+import { SHELL_GLOBAL, type InvokeReply, type ListenTarget, type PopupMenuRequest, type ShellApi, type WindowOp } from "../shared/shellApi";
 import { runCommand } from "./commands";
 import { CORE_API_URL } from "./config";
 import { addListener, emit, removeListener, removeListenersOf } from "./events";
 import * as host from "./host";
 import { installGraphicBridge, makeEnvelope, sendToParent } from "./ipc";
 import { startSessionPolling } from "./session";
+import { closePopupMenu, showPopupMenu } from "./popupMenu";
 import { loadSettings } from "./settings";
 import { state } from "./state";
 import { definition } from "./version";
@@ -57,6 +58,13 @@ const shellApi: ShellApi = {
   unlisten: (id) => removeListener(id),
   emit: (event, payloadJson) => emit(event, JSON.parse(payloadJson)),
   windowOp: (label, op, argsJson) => reply(() => windowOperation(label, op, JSON.parse(argsJson) as Record<string, unknown>)),
+  popupMenu: (label, requestJson, onSelect, onClose) => reply(() => {
+    const rect = host.rect(label);
+    if (!rect || !host.isVisible(label)) throw new Error("メニューの呼び出し元が表示されていません");
+    const request = JSON.parse(requestJson) as PopupMenuRequest;
+    showPopupMenu(label, { ...request, at: { x: rect.x + request.at.x, y: rect.y + request.at.y } }, onSelect, onClose);
+  }),
+  closeMenu: closePopupMenu,
 };
 
 export function bootShell(options: { createWindows: () => void; startGraphic: () => Promise<void> }): void {

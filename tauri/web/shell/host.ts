@@ -5,6 +5,7 @@
  * 開発用の地図ページは置き方を差し替え(setArrangement)、求められた位置ではなく種類ごとの定位置へ置く。
  */
 import { WINDOW_LABEL_ATTRIBUTE } from "../shared/shellApi";
+import { closePopupMenu } from "./popupMenu";
 
 export interface Placement {
   x: number;
@@ -141,6 +142,7 @@ export function show(label: string): void {
 }
 
 export function hide(label: string): void {
+  closePopupMenu(label);
   const entry = windows.get(label);
   if (!entry) return;
   entry.visible = false;
@@ -194,6 +196,7 @@ export function focus(label: string): void {
 }
 
 export function destroy(label: string): void {
+  closePopupMenu(label);
   const entry = windows.get(label);
   if (!entry) return;
   windows.delete(label);

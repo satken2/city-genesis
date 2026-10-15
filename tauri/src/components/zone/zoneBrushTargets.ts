@@ -5,8 +5,8 @@
  * 土地区画は接道のうち区画がある側の面の地区に所属する。ブラシが塗るのは面で、拾い方は2つある。
  *   - ブロック: 生活道路の中心線で囲まれた領域。触れたブロックの境界の道路の、ブロック側の面を拾う
  *     (ブロックの中で行き止まる道路は両面がブロック側になる)。
- *   - 沿道: 道路の片側の半分の帯(中心線からその側の端まで)と、その面に接道する土地区画の集まり。
- *     触れたらその面を拾う。区画の無い面も帯で拾える。
+ *   - 沿道: 道路区間の片側を拾い、途中の分割点を越えて選択を広げない。
+ *     道路の半分の帯と接道区画のどちらでも選べる。選んだ面の間に1本だけ残った道路の面も補う。
  */
 
 import { PATH_SIDE_LEFT, PATH_SIDE_RIGHT } from "../../constants";
@@ -31,6 +31,7 @@ export type StreetEdge = { pathId: number; startNodeId: number; endNodeId: numbe
 
 export type Block = { ring: Ring; faces: FaceKey[]; bounds: Bounds };
 export type Frontage = { face: FaceKey; rings: Ring[]; bounds: Bounds };
+export type RoadTarget = { faces: FaceKey[]; rings: Ring[]; bounds: Bounds; neighbors: FaceKey[] };
 
 export function pointInRing(x: number, z: number, ring: Ring): boolean {
   let inside = false;
@@ -216,4 +217,58 @@ export function buildFrontages(
     add(faceKey(pathId, side), parcel.polygon);
   }
   return [...groups].map(([face, rings]) => ({ face, rings, bounds: ringBounds(rings) }));
+}
+
+/**
+ * 選択単位は道路区間の片側のままにし、1区間の補完に使う両端の隣接面を求める。
+ */
+export function buildRoadTargets(streets: StreetEdge[], frontages: Frontage[]): RoadTarget[] {
+  type Port = { pathId: number; atStart: boolean; angle: number };
+  const portsByNode = new Map<number, Port[]>();
+  for (const street of streets) {
+    if (street.centerline.length < 2) continue;
+    for (const atStart of [true, false]) {
+      const nodeId = atStart ? street.startNodeId : street.endNodeId;
+      if (nodeId <= 0) continue;
+      const ports = portsByNode.get(nodeId) ?? [];
+      ports.push({ pathId: street.pathId, atStart,
+        angle: leavingAngle(atStart ? street.centerline : [...street.centerline].reverse()) });
+      portsByNode.set(nodeId, ports);
+    }
+  }
+
+  const byFace = new Map(frontages.map((frontage) => [frontage.face, frontage]));
+  const neighbors = new Map<FaceKey, FaceKey[]>();
+  const connect = (a: FaceKey, b: FaceKey) => {
+    if (!byFace.has(a) || !byFace.has(b)) return;
+    neighbors.set(a, [...(neighbors.get(a) ?? []), b]);
+    neighbors.set(b, [...(neighbors.get(b) ?? []), a]);
+  };
+  for (const ports of portsByNode.values()) {
+    if (ports.length < 2) continue;
+    ports.sort((a, b) => a.angle - b.angle);
+    for (let i = 0; i < ports.length; i++) {
+      const a = ports[i];
+      const b = ports[(i + 1) % ports.length];
+      // ノードから見た左側と、反時計回りで隣の道路の右側が同じ街区側になる。
+      connect(
+        faceKey(a.pathId, a.atStart ? PATH_SIDE_LEFT : PATH_SIDE_RIGHT),
+        faceKey(b.pathId, b.atStart ? PATH_SIDE_RIGHT : PATH_SIDE_LEFT));
+    }
+  }
+
+  return frontages.map((frontage) => ({
+    faces: [frontage.face], rings: frontage.rings, bounds: frontage.bounds,
+    neighbors: neighbors.get(frontage.face) ?? [],
+  }));
+}
+
+/**
+ * 両端で直接なぞった面に挟まれる道路の面を補う。交差点の同じ街区側だけをつなぐ。
+ * 補完結果を次の判定に使わず、複数の道路を経由する遠回りへ選択を広げない。
+ */
+export function findSingleRoadGaps(targets: RoadTarget[], touched: ReadonlySet<{ faces: FaceKey[] }>): RoadTarget[] {
+  const faces = new Set([...touched].flatMap((target) => target.faces));
+  return targets.filter((target) => !touched.has(target)
+    && target.neighbors.length === 2 && target.neighbors.every((face) => faces.has(face)));
 }

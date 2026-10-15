@@ -12,7 +12,8 @@
  *     (POST /api/v1/paths/batch-zone)。
  * 塗り方(ブラシが拾う面):
  *   - ブロック一括: 生活道路に囲まれたブロックに触れたら、境界の道路のブロック側の面をすべて拾う。
- *   - 道路単位: 道路の片側の半分の帯か、その面に接道する土地区画の集まりに触れたら、その面を拾う。
+ *   - 道路単位: 道路区間の片側を拾う。接道区画をなぞっても選べる。
+ *     直接なぞった面に両端を挟まれた道路が1本だけあれば、その面も一緒に拾う。
  * 操作: Ctrl+左ドラッグ=なぞる(離した時点で送信) / 左ドラッグ=パン / ホイール=ズーム。
  *
  * ブラシは画面上で一定の半径なので、ズームすれば塗れる範囲が変わり、大きさの設定は持たない。
@@ -43,15 +44,18 @@ import { PATH_SIDE_LEFT, PATH_SIDE_RIGHT, PATH_STREET } from "../../constants";
 import {
   buildBlocks,
   buildFrontages,
+  buildRoadTargets,
   circleTouches,
   faceKey,
   findZoneAt,
+  findSingleRoadGaps,
   parseFaceKey,
   signedArea,
   type Block,
   type FaceKey,
   type Frontage,
   type Ring,
+  type RoadTarget,
   type StreetEdge,
 } from "./zoneBrushTargets";
 import "./ZoneEditWindow.css";
@@ -69,8 +73,9 @@ type Stroke = {
   radius: number;
   mode: PaintMode;
   points: WorldPoint[];
-  /** 触れたブロック・沿道の区画の集まり(強調に使う) */
-  picked: Set<Block | Frontage>;
+  touched: Set<Block | RoadTarget>;
+  /** 直接触れた範囲と、間の道路を補完した範囲。表示と送信で共有する */
+  picked: Set<Block | RoadTarget>;
   faces: Set<FaceKey>;
   /** 送信に成功し、地図の取り直しを待っている */
   committed: boolean;
@@ -188,6 +193,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   zonesRef.current = zones;
   const blocksRef = useRef<Block[]>([]);
   const frontagesRef = useRef<Frontage[]>([]);
+  const roadTargetsRef = useRef<RoadTarget[]>([]);
   /** 面ごとの所属地区(未所属は0以下)。拡張で取り込み先に属している面を送らないために使う */
   const faceZonesRef = useRef(new Map<FaceKey, number>());
   /** 生活道路の中心線の中点。都市の矩形の外の道路を見分けるのに使う */
@@ -232,6 +238,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
     blocksRef.current = buildBlocks(streets);
     frontagesRef.current = buildFrontages(streets, vectors.parcels);
+    roadTargetsRef.current = buildRoadTargets(streets, frontagesRef.current);
     faceZonesRef.current = faceZones;
     streetMidsRef.current = mids;
     setZones(
@@ -291,13 +298,22 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   /** 円の中心 p で触れたブロック・沿道の区画の集まりの面を拾う */
   const stampAt = useCallback(
     (stroke: Stroke, p: WorldPoint) => {
-      const targets: (Block | Frontage)[] = stroke.mode === "block" ? blocksRef.current : frontagesRef.current;
+      const targets = stroke.mode === "block" ? blocksRef.current : roadTargetsRef.current;
+      const previousCount = stroke.touched.size;
       for (const target of targets) {
-        if (stroke.picked.has(target)) continue;
+        if (stroke.touched.has(target)) continue;
         const rings = "ring" in target ? [target.ring] : target.rings;
         if (!circleTouches(p.x, p.z, stroke.radius, rings, target.bounds)) continue;
-        stroke.picked.add(target);
-        for (const face of "faces" in target ? target.faces : [target.face]) {
+        stroke.touched.add(target);
+      }
+      if (stroke.touched.size === previousCount) return;
+      stroke.picked = new Set(stroke.touched);
+      if (stroke.mode === "road") {
+        for (const target of findSingleRoadGaps(roadTargetsRef.current, stroke.touched)) stroke.picked.add(target);
+      }
+      stroke.faces.clear();
+      for (const target of stroke.picked) {
+        for (const face of target.faces) {
           if (isInsideCity(face)) stroke.faces.add(face);
         }
       }
@@ -335,6 +351,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         radius: BRUSH_RADIUS_PX / e.view.zoom,
         mode: modeRef.current,
         points: [e.world],
+        touched: new Set(),
         picked: new Set(),
         faces: new Set(),
         committed: false,

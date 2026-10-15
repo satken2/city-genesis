@@ -152,7 +152,7 @@ export function ResourceDetailPanel({
   const [simulationDays, setSimulationDays] = useState<number | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    fetchApi<{ city: { simulation_days: number } }>(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
+    fetchApi<{ city: { simulation_days: number } }>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), {
       signal: controller.signal,
     })
       .then((response) => {

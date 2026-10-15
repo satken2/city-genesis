@@ -303,6 +303,9 @@ public class NodeMeshResult
     public Dictionary<int, Vector3> ConnectionPoints { get; }
     public MotorwayMergeLayout MotorwayMerge { get; set; }
 
+    /// <summary>同種・同幅の道路の直進接続。板を作らず両方をノードまで描く。</summary>
+    public RoadContinuousJoin RoadJoin { get; set; }
+
     /// <summary>交差点の板なしで2本の線路をノードまでつなぐ直進接続(TrackIntersectionMeshGenerator.TryContinuousJoin)。無ければ null。</summary>
     public TrackContinuousJoin TrackJoin { get; set; }
 

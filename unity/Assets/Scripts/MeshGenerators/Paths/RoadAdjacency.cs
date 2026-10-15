@@ -14,13 +14,20 @@ public sealed class RoadNeighborInfo
     public float Width;
 }
 
-/// <summary>ノードで本線が交差点の板を挟まずに次の本線へ続く端の扱い。</summary>
+/// <summary>同じ断面の2本の道路を、交差点の板を挟まずノードでつなぐ組。</summary>
+public sealed class RoadContinuousJoin
+{
+    public int PathA;
+    public int PathB;
+}
+
+/// <summary>ノードで道路・線路が交差点の板を挟まずに続く端の扱い。</summary>
 public struct RoadEndJoin
 {
-    /// <summary>本線の続きへ直接つながる。中央分離帯の端を丸めない。</summary>
+    /// <summary>次のパスへ直接つながる。中央分離帯の端を丸めない。</summary>
     public bool Continuous;
 
-    /// <summary>つなぎ目の橋脚を立てる側。つながる本線の2本のうち片方だけが真になる。</summary>
+    /// <summary>つなぎ目の橋脚を立てる側。つながる2本のうち片方だけが真になる。</summary>
     public bool OwnsSupport;
 }
 

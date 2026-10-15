@@ -501,7 +501,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             { signal: controller.signal },
           ),
           fetchApi<CityData>(
-            buildApiUrl(apiBaseUrl, "/api/v1/city"),
+            buildApiUrl(apiBaseUrl, "/api/v1/city/"),
             { signal: controller.signal },
           ),
           fetchApi<{ agents: BudgetAgent[] }>(

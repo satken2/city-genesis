@@ -87,10 +87,71 @@ public static class IntersectionQA
    CheckRailCrossing(asm, pathType, itemType, dict, cache, gen);
    CheckLinearCorner(asm, pathType);
    CheckMixedWidthRoadCrossing(asm, pathType, itemType, dict, cache, gen);
+   CheckContinuousRoadJoin(asm, pathType, itemType, dict, cache, gen);
    int motorwayCases = MotorwayMergeQA.Run(asm, dict, cache, root);
-   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+" normal seam="+normalSeam+"; 24m/3m road crossing; mixed crossing and 2-to-1 rail endpoints; motorway merges="+motorwayCases);
+   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+" normal seam="+normalSeam+"; 24m/3m road crossing; mixed crossing and 2-to-1 rail endpoints; straight road body/sidewalk seams; motorway merges="+motorwayCases);
    EditorApplication.Exit(0);
   } catch(Exception ex){File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt",ex.ToString());Debug.LogException(ex);EditorApplication.Exit(1);}
+ }
+
+ static void CheckContinuousRoadJoin(Assembly asm, Type pathType, Type itemType, IDictionary masters, IDictionary models, object generator)
+ {
+  var master=Activator.CreateInstance(itemType);
+  foreach(var pair in new Dictionary<string,float>{{"width",12f},{"sidewalk_width",2.5f},{"side_width",.5f},{"height",5f}})
+   itemType.GetField(pair.Key).SetValue(master,pair.Value);
+  itemType.GetField("lanes").SetValue(master,2);
+  masters[221]=master;
+  foreach(string part in new[]{"body","sidewalk","wall","center","line"})
+   models["Models/Paths/p221/"+part]=models["Models/Paths/p100/"+part];
+  var paths=(IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(pathType));
+  foreach(int id in new[]{65,209})
+  {
+   var path=Activator.CreateInstance(pathType);
+   foreach(var pair in new Dictionary<string,int>{{"path_id",id},{"path_type",1},{"path_variant",221},{"start_node_id",id==65?5:184},{"end_node_id",id==65?184:183}})
+    pathType.GetField(pair.Key).SetValue(path,pair.Value);
+   pathType.GetField("width").SetValue(path,12f);
+   points[id]=id==65?new List<Vector3>{Vector3.forward*40f,Vector3.zero}:new List<Vector3>{Vector3.zero,Vector3.back*40f};
+   var from=points[id][0];var to=points[id][1];
+   pathType.GetField("start_point").SetValue(path,new List<object>{from.x,from.y,from.z});
+   pathType.GetField("end_point").SetValue(path,new List<object>{to.x,to.y,to.z});
+   paths.Add(path);
+  }
+  var provider=Delegate.CreateDelegate(typeof(Func<,>).MakeGenericType(pathType,typeof(List<Vector3>)),typeof(IntersectionQA).GetMethod("Samples",BindingFlags.Static|BindingFlags.NonPublic).MakeGenericMethod(pathType));
+  var result=generator.GetType().GetMethod("GenerateWithSections").Invoke(generator,new object[]{184,Vector3.zero,paths,0f,provider,null});
+  if(result==null||result.GetType().GetProperty("Mesh").GetValue(result)!=null||result.GetType().GetProperty("RoadJoin").GetValue(result)==null)
+   throw new Exception("Straight road join created an intersection slab");
+  var cuts=(IDictionary)result.GetType().GetProperty("ConnectionPoints").GetValue(result);
+  var roads=new List<GameObject>();
+  try
+  {
+   foreach(var path in paths)
+   {
+    int id=(int)pathType.GetField("path_id").GetValue(path);
+    if(Vector3.Distance((Vector3)cuts[id],Vector3.zero)>.001f)throw new Exception("Straight road end was cut back");
+    var road=Activator.CreateInstance(asm.GetType("RoadPath"));
+    var setback=Activator.CreateInstance(asm.GetType("SidewalkSetback"));
+    var generated=road.GetType().GetMethod("Generate").Invoke(road,new object[]{path,points[id],setback,setback});
+    var go=(GameObject)generated.GetType().GetProperty("GeneratedObject").GetValue(generated);
+    roads.Add(go);
+    foreach(var comp in go.GetComponentsInChildren<Component>())
+    {
+     if(comp==null||comp.GetType().Name!="SplineMesh")continue;
+     var rebuild=comp.GetType().GetMethod("RebuildImmediate");
+     rebuild.Invoke(comp,rebuild.GetParameters().Length==0?null:new object[]{true});
+    }
+   }
+   foreach(string part in new[]{"body","sidewalk"})
+   {
+    var ends=roads.Select(go=>go.GetComponentsInChildren<MeshFilter>()
+     .Where(f=>f.sharedMesh!=null&&f.name.EndsWith("/"+part))
+     .SelectMany(f=>f.sharedMesh.vertices.Select(v=>f.transform.TransformPoint(v))).Where(v=>Mathf.Abs(v.z)<.001f).ToList()).ToList();
+    if(ends.Any(e=>e.Count==0))throw new Exception("Straight road "+part+" does not reach the node");
+    foreach(int side in new[]{0,1})
+     if(ends[side].Max(v=>ends[1-side].Min(other=>Vector3.Distance(v,other)))>.002f)
+      throw new Exception("Straight road "+part+" seam does not match");
+   }
+  }
+  finally { foreach(var go in roads)UnityEngine.Object.DestroyImmediate(go); }
  }
 
  static void CheckMixedWidthRoadCrossing(Assembly asm, Type pathType, Type itemType, IDictionary masters, IDictionary cache, object generator)

@@ -53,7 +53,7 @@ export function ScoreMiniMeter({
     async function refresh() {
       try {
         const res = await fetchApi<ScoreResponse>(
-          buildApiUrl(apiBaseUrl, "/api/v1/score"),
+          buildApiUrl(apiBaseUrl, "/api/v1/score/"),
           { signal: controller.signal },
         );
         if (cancelled) return;

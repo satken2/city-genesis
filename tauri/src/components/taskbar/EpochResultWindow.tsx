@@ -329,7 +329,7 @@ export function EpochResultWindow({
     (async () => {
       try {
         const data = await fetchApi<{ latest: ScoreLatest }>(
-          buildApiUrl(apiBaseUrl, "/api/v1/score"),
+          buildApiUrl(apiBaseUrl, "/api/v1/score/"),
           { signal: controller.signal },
         );
         setScoreLatest(data.latest ?? null);

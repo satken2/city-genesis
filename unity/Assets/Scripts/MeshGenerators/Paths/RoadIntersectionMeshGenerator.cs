@@ -28,6 +28,12 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
         try
         {
+            var roadJoin = TryContinuousRoadJoin(nodeId, paths, pointResolver, out var roadJoinPoints);
+            if (roadJoin != null)
+            {
+                return new NodeMeshResult(null, null, roadJoinPoints) { RoadJoin = roadJoin };
+            }
+
             var gf = new GeometryFactory();
             Vector2 nodePos2D = new Vector2(nodePosition.x, nodePosition.z);
 
@@ -494,6 +500,40 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         if (ModelManager.Instance == null) return true;
         return ModelManager.Instance.GetModel($"Models/Paths/p{path.path_variant}/body", true) != null
             || ModelManager.Instance.GetModel($"Models/Paths/p{path.path_type}/body", true) != null;
+    }
+
+    /// <summary>
+    /// 同じバリアント・幅の道路が2本だけ直進するノードは、路面・歩道・分離帯を端まで描いてつなぐ。
+    /// 幅や位置の差は1cm、向きの差は単位ベクトルの差0.001までを数値誤差として扱い、角を板なしでつながない。
+    /// </summary>
+    public static RoadContinuousJoin TryContinuousRoadJoin(int nodeId, List<PathSummary> paths,
+        Func<PathSummary, List<Vector3>> pointResolver, out Dictionary<int, Vector3> connectionPoints)
+    {
+        connectionPoints = null;
+        if (paths == null || paths.Count != 2) return null;
+        var a = paths[0]; var b = paths[1];
+        if (!RoadMarkingRules.IsRoad(a) || !RoadMarkingRules.IsRoad(b)
+            || a.path_type != b.path_type || a.path_variant != b.path_variant) return null;
+        if (Mathf.Abs(ResolveRoadWidth(a) - ResolveRoadWidth(b)) > 0.01f) return null;
+
+        var ends = new List<PathEndSection>(2);
+        foreach (var path in paths)
+        {
+            bool start = path.start_node_id == nodeId, end = path.end_node_id == nodeId;
+            if (start == end) return null;
+            var source = pointResolver != null ? pointResolver(path) : IntersectionPolygonUtil.SamplePlan(path);
+            if (source == null || source.Count < 2) return null;
+            var points = new List<Vector3>(source);
+            if (end) points.Reverse();
+            if (IntersectionPolygonUtil.Length(points) < 1e-6f) return null;
+            var section = IntersectionPolygonUtil.AtDistance(points, 0f);
+            ends.Add(section);
+        }
+        if (Vector3.Distance(ends[0].Position, ends[1].Position) > 0.01f
+            || (ends[0].Direction + ends[1].Direction).sqrMagnitude > 1e-6f) return null;
+
+        connectionPoints = new Dictionary<int, Vector3> { { a.path_id, ends[0].Position }, { b.path_id, ends[1].Position } };
+        return new RoadContinuousJoin { PathA = a.path_id, PathB = b.path_id };
     }
 
     private static float ResolveRoadWidth(PathSummary path)

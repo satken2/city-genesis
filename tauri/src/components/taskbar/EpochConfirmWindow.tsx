@@ -100,7 +100,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
   }
 
   useEffect(() => {
-    fetchApi<{ city: CityData }>(buildApiUrl(apiBaseUrl, "/api/v1/city"))
+    fetchApi<{ city: CityData }>(buildApiUrl(apiBaseUrl, "/api/v1/city/"))
       .then((data) => setCity(data.city))
       .catch(console.error);
   }, [apiBaseUrl]);

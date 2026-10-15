@@ -122,7 +122,7 @@ export function CityRegulationWindow({
     async function loadCityData() {
       try {
         const [cityRes, regulationsRes] = await Promise.all([
-          fetchApi<CityData>(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
+          fetchApi<CityData>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), {
             signal: controller.signal,
           }),
           fetchApi<RegulationsData>(buildApiUrl(apiBaseUrl, "/api/v1/city/regulations"), {
@@ -345,7 +345,7 @@ export function CityRegulationWindow({
       }
 
       await Promise.all([
-        fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
+        fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/city/"), {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cityPatchPayload),

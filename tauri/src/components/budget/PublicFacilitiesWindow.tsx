@@ -271,7 +271,7 @@ export function PublicFacilitiesWindow({
             { signal: controller.signal },
           ),
           fetchApi<{ city: { simulation_days: number } }>(
-            buildApiUrl(apiBaseUrl, "/api/v1/city"),
+            buildApiUrl(apiBaseUrl, "/api/v1/city/"),
             { signal: controller.signal },
           ),
         ]);

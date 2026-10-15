@@ -84,11 +84,21 @@ type WellbeingZoneStats = {
 
 const AXES = ["wealth", "leisure", "health", "comfort"] as const;
 
-/** 表示ごとに折れ線で並べる系列。世帯満足度はどの表示でも末尾に重ねる */
+/** 表示ごとに折れ線で並べる系列。表示の総合指標(VIEW_TOTAL)は含めず、末尾に重ねる */
 const VIEW_KEYS: Record<View, string[]> = {
   satisfaction: AXES.map((axis) => `satis_${axis}`),
   leisure: ["leisure_hours", "work_hours", "satis_leisure"],
-  comfort: ["satis_residential", "quiet", "sunlight", "safety", "satis_comfort"],
+  comfort: ["satis_residential", "quiet", "sunlight", "safety"],
+};
+
+/**
+ * 表示ごとの総合指標。住環境は構成グラフの積み上げと同じ生活の快適さを総合にする
+ * (世帯満足度は住環境の4要素以外の軸も含むため、内訳と並べると総合に見えて紛らわしい)。
+ */
+const VIEW_TOTAL: Record<View, string> = {
+  satisfaction: "satisfaction",
+  leisure: "satisfaction",
+  comfort: "satis_comfort",
 };
 
 /**
@@ -391,11 +401,11 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
     const points = data?.history ?? [];
     return composition ? points.filter((p) => Number(p.households) > 0) : points;
   }, [data, composition]);
-  // 折れ線は表示指標に世帯満足度を重ねたもの。満足度表示では指標切替の選択肢も兼ねる。
-  const chartKeys = useMemo(() => [...keys, "satisfaction"], [keys]);
+  // 折れ線は表示指標に総合指標を重ねたもの。指標切替のある表示では選択肢も兼ねる。
+  const total = VIEW_TOTAL[view];
+  const chartKeys = useMemo(() => [...keys, total], [keys, total]);
   const [selectedIndicator, setIndicator] = useState<string>("satis_wealth");
-  // 表示を切り替えると系列の組が変わるため、選択が今の表示に無ければ先頭へ倒す
-  // (世帯満足度はどの表示にもあるので、総合を選んだままの移動は維持される)。
+  // 表示を切り替えると系列の組が変わるため、選択が今の表示に無ければ先頭へ倒す。
   const indicator = chartKeys.includes(selectedIndicator) ? selectedIndicator : chartKeys[0];
 
   // 横軸ラベルは日付にし、系列値は表示単位へ換算しておく。
@@ -462,7 +472,7 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
   /** 折れ線の太さ・濃さ。満足度表示では選択中の指標だけを主役にする */
   const lineStyle = (key: string) => {
     if (!withIndicator) {
-      return { strokeWidth: key === "satisfaction" ? 3 : 2, strokeOpacity: 1 };
+      return { strokeWidth: key === total ? 3 : 2, strokeOpacity: 1 };
     }
     return key === indicator
       ? { strokeWidth: 3, strokeOpacity: 1 }
@@ -503,10 +513,10 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
             />
           ))}
           <KpiCard
-            label={t("wellbeing.satisfaction")}
-            value={toDisplayValue("satisfaction", current.satisfaction)}
-            unit={t("wellbeing.points")}
-            color={SERIES_COLORS.satisfaction}
+            label={t(`wellbeing.${total}`)}
+            value={toDisplayValue(total, current[total])}
+            unit={unitOf(total)}
+            color={SERIES_COLORS[total]}
             emphasized
           />
         </div>

@@ -94,7 +94,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             { signal: controller.signal }
           ),
           fetchApi<ScoreResponse>(
-            buildApiUrl(apiBaseUrl, "/api/v1/score"),
+            buildApiUrl(apiBaseUrl, "/api/v1/score/"),
             { signal: controller.signal }
           ),
         ]);

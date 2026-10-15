@@ -5300,9 +5300,9 @@ public partial class PathManager : BaseApiDataManager
             absolutePos.y = nodePoints[0].y;
         }
         NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
-        // 高速道路の本線をノードでつなぎ、ランプを本線の路面へ取り込む合流(MotorwayMergeLayout)と、
-        // 軌道の位置がそろう線路の直進接続(TrackContinuousJoin)は板を持たない。
-        bool slabless = meshResult != null && meshResult.Mesh == null && (meshResult.MotorwayMerge != null || meshResult.TrackJoin != null);
+        // 同種・同幅の道路の直進接続、ランプを取り込む高速道路の合流、軌道の位置がそろう線路の直進接続は板を持たない。
+        bool slabless = meshResult != null && meshResult.Mesh == null
+            && (meshResult.RoadJoin != null || meshResult.MotorwayMerge != null || meshResult.TrackJoin != null);
         // 道床の無い線路だけのノードは板を持たず、レールのつなぎだけをノードの GO に付ける。
         bool railsOnly = meshResult != null && meshResult.Mesh == null && meshResult.RailsOnly;
         if (!slabless && !railsOnly && (meshResult == null || meshResult.Mesh == null))
@@ -5339,10 +5339,11 @@ public partial class PathManager : BaseApiDataManager
         if (meshResult.MotorwayMerge != null) motorwayMerges[nodeId] = meshResult.MotorwayMerge;
         else motorwayMerges.Remove(nodeId);
 
-        // 本線・線路をノードでつなぐ端は、分離帯の端を丸めず、つなぎ目の橋脚を片方だけが立てる。
+        // 道路・線路をノードでつなぐ端は、分離帯の端を丸めず、つなぎ目の橋脚を片方だけが立てる。
         var joinChanged = new HashSet<int>();
         int joinA = -1, joinB = -1;
-        if (slabless && meshResult.MotorwayMerge != null) { joinA = meshResult.MotorwayMerge.MainA; joinB = meshResult.MotorwayMerge.MainB; }
+        if (slabless && meshResult.RoadJoin != null) { joinA = meshResult.RoadJoin.PathA; joinB = meshResult.RoadJoin.PathB; }
+        else if (slabless && meshResult.MotorwayMerge != null) { joinA = meshResult.MotorwayMerge.MainA; joinB = meshResult.MotorwayMerge.MainB; }
         else if (slabless && meshResult.TrackJoin != null) { joinA = meshResult.TrackJoin.PathA; joinB = meshResult.TrackJoin.PathB; }
         foreach (var path in connectedPaths)
         {

@@ -295,7 +295,7 @@ async function fetchSession(base: string): Promise<Record<string, unknown> | nul
 /** 都市の情報(タスクバーの都市名・日付用)。失敗してもセッションの情報には影響させない。 */
 async function fetchCity(base: string): Promise<unknown> {
   try {
-    const response = await fetchWithTimeout(`${base}/api/v1/city`, 10000);
+    const response = await fetchWithTimeout(`${base}/api/v1/city/`, 10000);
     const body = await response.text();
     return response.ok ? (JSON.parse(body) as unknown) : null;
   } catch {

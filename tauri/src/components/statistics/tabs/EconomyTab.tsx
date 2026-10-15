@@ -50,7 +50,7 @@ export function EconomyTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     async function load() {
       try {
         const res = await fetchApi<CityResponse>(
-          buildApiUrl(apiBaseUrl, "/api/v1/city"),
+          buildApiUrl(apiBaseUrl, "/api/v1/city/"),
           { signal: controller.signal }
         );
         setCityData(res.city);

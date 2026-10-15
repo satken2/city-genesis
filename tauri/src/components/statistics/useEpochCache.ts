@@ -47,7 +47,7 @@ export function useEpochCachedStats<T>(
       try {
         // 現在のエポックを軽量に取得する。
         const cityRes = await fetchApi<CityEpochResponse>(
-          buildApiUrl(apiBaseUrl, "/api/v1/city"),
+          buildApiUrl(apiBaseUrl, "/api/v1/city/"),
           { signal: controller.signal }
         );
         const epoch = cityRes.city.epoch;

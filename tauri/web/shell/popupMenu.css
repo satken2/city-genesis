@@ -1,0 +1,41 @@
+.shell-popup-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 4px;
+  box-sizing: border-box;
+  min-width: min(150px, calc(100vw - 16px));
+  max-width: calc(100vw - 16px);
+  max-height: calc(100dvh - 16px);
+  overflow: auto;
+  border: 1px solid #52677e;
+  border-radius: 4px;
+  background: var(--flat-surface, #16202e);
+  color: var(--flat-text, #e0e0e0);
+  box-shadow: var(--flat-shadow, 0 4px 12px rgba(0, 0, 0, 0.5));
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.35;
+}
+
+.shell-popup-menu::backdrop { background: transparent; }
+
+.shell-popup-menu > button {
+  display: grid;
+  grid-template-columns: 1em minmax(0, 1fr);
+  gap: 0.5em;
+  width: 100%;
+  padding: 0.35em 0.6em;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shell-popup-menu > button::before { content: ""; }
+.shell-popup-menu > button[aria-checked="true"]::before { content: "✓"; }
+.shell-popup-menu > button:hover:not(:disabled),
+.shell-popup-menu > button:focus-visible { background: var(--flat-selected, #2c5687); outline: none; }
+.shell-popup-menu > button:disabled { opacity: 0.4; cursor: default; }

@@ -231,7 +231,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         const baseUrl = apiBaseUrl.replace(/\/+$/, "");
         
         const cityData = await fetchApi<{ city?: { city_hall_placed: boolean } }>(
-          `${baseUrl}/api/v1/city`, { signal: controller.signal },
+          `${baseUrl}/api/v1/city/`, { signal: controller.signal },
         );
         if (!controller.signal.aborted) setCityHallPlaced(cityData.city?.city_hall_placed ?? false);
       } catch (err) {

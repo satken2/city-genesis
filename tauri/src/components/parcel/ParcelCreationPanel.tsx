@@ -712,13 +712,30 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       }
     }
 
+    const diagnosticStarted = performance.now();
+    const diagnosticContext = {
+      attempt: Date.now(),
+      url: `${baseUrl}/api/v1/parcels`,
+      origin: window.location.origin,
+      payload,
+      previewCount: previewData?.length ?? null,
+      previewLoading,
+    };
+    if (import.meta.env.DEV) console.error("[ParcelDiagnostic] confirm begin", diagnosticContext);
     setStatusMessage(null);
     try {
-      await fetchApi<Record<string, unknown>>(`${baseUrl}/api/v1/parcels`, {
+      const result = await fetchApi<Record<string, unknown>>(`${baseUrl}/api/v1/parcels`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (import.meta.env.DEV) {
+        console.error("[ParcelDiagnostic] confirm accepted", {
+          attempt: diagnosticContext.attempt,
+          elapsedMs: Math.round(performance.now() - diagnosticStarted),
+          result,
+        });
+      }
       setStatusMessage("success");
 
       // 確定しても作成モードから抜けない。プレビューと選択だけ捨てて、
@@ -729,6 +746,16 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       clearSelectionState();
       void sendEditParcelResetSelection();
     } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("[ParcelDiagnostic] confirm failed", {
+          ...diagnosticContext,
+          elapsedMs: Math.round(performance.now() - diagnosticStarted),
+          errorName: err instanceof Error ? err.name : typeof err,
+          errorMessage: err instanceof Error ? err.message : String(err),
+          status: err instanceof ApiError ? err.status : null,
+          code: err instanceof ApiError ? err.code : null,
+        });
+      }
       console.error("Failed to create parcels:", err);
       setStatusMessage("error");
 

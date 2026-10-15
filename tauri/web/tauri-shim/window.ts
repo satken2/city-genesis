@@ -11,6 +11,12 @@ export class LogicalSize {
   ) {}
 }
 
+export class LogicalPosition {
+  readonly type = "Logical";
+
+  constructor(readonly x: number, readonly y: number) {}
+}
+
 class WebWindow {
   readonly label = currentLabel;
 
