@@ -5,7 +5,7 @@ description: City GenesisのUnity入力モード(InputMode: クリック/ドラ�
 
 > **パス表記の基準**: 本文中のパスはワークディレクトリ `S:/city/genesis`(`city-genesis` と `genesis-core` を並べた作業ツリー)を起点とする。`city-genesis` 単体で作業している場合は先頭の `city-genesis/` を読み替えること。`genesis-core/` 配下は非公開のコアシミュレータなので、手元に無ければその項目は読み飛ばしてよい。
 
-このSkillはコード本体を持たない「道しるべ」です。実際の仕様・ロジックは以下のドキュメントに書かれているので、実装前に必ず読むこと。
+このSkillはコード本体を持たない「道しるべ」です。全体の考え方は以下のドキュメントに、個別の仕様と意図はソースのコメントに書かれているので、実装前に必ず読むこと。
 
 ## 読むべきドキュメント(概念、公開)
 - `city-genesis/docs/docs/programs/Unity入力制御.md`
@@ -14,7 +14,7 @@ description: City GenesisのUnity入力モード(InputMode: クリック/ドラ�
 - 該当なし
 
 ## 読むべきAGENTS.md
-- `city-genesis/unity/Assets/Scripts/InputHandlers/AGENTS.md` (最重要。ハンドラ一覧、クリック/ドラッグ判定と入力ゲートの罠、海面クリックの特殊扱い、背景地形・埋立地の岸壁を地形として扱う判定。`InputMode`定数の値域とプリセットは公開ドキュメント `Unity入力制御.md` §2 が正で、新しいモード・プリセットの値はそこで空きを確かめる)
+- `city-genesis/unity/Assets/Scripts/InputHandlers/AGENTS.md` (最重要。ハンドラ一覧、クリック/ドラッグ判定と入力ゲートの罠、海面クリックの特殊扱い、背景地形・埋立地の岸壁を地形として扱う判定。`InputMode`定数の値域とプリセットは `InputHandlers/InputHandler.cs` の定義が正で、新しいモード・プリセットの値はそこで空きを確かめる)
 - `city-genesis/unity/Assets/Scripts/Editors/AGENTS.md` (入力モードから編集フローへの委譲の流れ)
 - `city-genesis/unity/AGENTS.md` (「モード系は2系統ある」の節でVisualModeとの区別を明記)
 
@@ -26,4 +26,4 @@ description: City GenesisのUnity入力モード(InputMode: クリック/ドラ�
 1. `InputHandlers/AGENTS.md`でハンドラ一覧と判定の罠を把握する。新規ハンドラは既存ハンドラ(`IInputHandler`実装。コライダーとタグが必須)のパターンを踏襲する
 2. `Editors/AGENTS.md`で入力モードから編集フローへの委譲の流れを確認する
 3. 実装ファイルを編集する
-4. 仕様に影響する変更をしたら、対応するドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)
+4. 個別の仕様はソースのコメントに書く。全体の考え方やモジュール間の契約が変わる変更をしたときだけ、ドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)

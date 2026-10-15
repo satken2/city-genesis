@@ -14,10 +14,9 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 
 ## 鉄則(パス固有)
 
-1. **規約の正本**は次のドキュメント。制作前に必ず読む:
-   - `city-genesis/docs/docs/geometries/G_道路メッシュの生成.md`
-     §5(マスターデータと寸法)・§6(命名とモデリング規約)・§7(フォールバック)・§8(各パーツの生成詳細)
-   - 線路・駅は `N_線路メッシュの生成.md` §1(パーツ構成)・§1.2(ピボット規約)・§2(電化)・§7(駅パス)
+1. **規約の正本**は、パーツを置く Unity のコードのコメントとバリデータ。制作前に必ず読む:
+   - 全体像: `city-genesis/docs/docs/geometries/G_道路メッシュの生成.md`(線路・駅は `N_線路メッシュの生成.md`)
+   - 原点・向き・寸法の前提: `city-genesis/unity/Assets/Scripts/MeshGenerators/Paths/` の `RoadPartHeights.cs`・`RoadPath.cs`・`TrackPath.cs`・`PathTunnelParts.cs` などのコメント
 2. **最小構成から始める**(下記)。パーツ種類は多いが全部作る前提ではない。
 3. **マテリアルは既存を流用する。** 道路系の接頭辞は `PATH_*`
    (`pipeline/materials.py --category Paths` で一覧・検索)。
@@ -33,13 +32,13 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 
 ## 通常・接写モデルの作り分け（制作時に必ず確認）
 
-**道路・線路の制作では、通常と接写で何を分けるかを必ず決める。** 既存モデルと組み立て外観を確認し、通常の形状・面数を基準にする。LOD追加だけを理由に道路の規格、軌間、ホーム形状、構造形式や設備配置を変更しない。規約の正本はG文書§6〜7、線路の適用対象はN文書§1。
+**道路・線路の制作では、通常と接写で何を分けるかを必ず決める。** 既存モデルと組み立て外観を確認し、通常の形状・面数を基準にする。LOD追加だけを理由に道路の規格、軌間、ホーム形状、構造形式や設備配置を変更しない。規約の正本は上の鉄則1のコード(パーツを置くコード)のコメント。
 
 | 詳細度 | 命名と制作方針 |
 |---|---|
 | Normal（無印、必須） | `p{variant}/{part}.fbx`。走行面、縁、軌道、構造の輪郭を保ち、細かな金物・溝・面取りを抑える。大量反復されるので単品の面数だけで判断しない |
 | Close（必要な部品のみ） | 同じフォルダの `{part}_close.fbx`。留め具、レール締結部、手すりの細い桟、厚みや面取りなど、近距離で見える構造上妥当な細部を加える |
-| Far（任意） | 同じフォルダの `far.fbx` 1体。路面・柱・鉄塔・電線などをまとめ、パーツに分けない。進行方向の長さが1タイルで、Unityが点列に沿って並べて長さ方向だけ伸ばす（幅・高さは実寸）。原点はパスの描画基準（路面。送電線は地表）。無ければマスターの `width` の板（G §3.1） |
+| Far（任意） | 同じフォルダの `far.fbx` 1体。路面・柱・鉄塔・電線などをまとめ、パーツに分けない。進行方向の長さが1タイルで、Unityが点列に沿って並べて長さ方向だけ伸ばす（幅・高さは実寸）。原点はパスの描画基準（路面。送電線は地表）。無ければマスターの `width` の板 |
 
 ### `_close` が実際に使われる対象
 
@@ -75,7 +74,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 | 地下トンネルの壁・天井の専用形状 | `wall_underground` / `ceiling_underground` | 壁幅は `wall_width`、高さはパスのクリアランス |
 | 街路樹 | `tree` | `tree_spacing` |
 | 高架にできる道路の柱 | `pillar` (+ `pillar_cap`) | `height_editable=true`, `pillar_spacing` |
-| 他パスをまたぐ門型橋脚 | `pillar_leg`（柱1本） / `pillar_crossbeam`（横梁） | 通常橋脚の干渉時に組み立てる。原点・伸縮方向・幅上限はG文書§8.7。現行は鉄道共通 `p4` に無印のみ |
+| 他パスをまたぐ門型橋脚 | `pillar_leg`（柱1本） / `pillar_crossbeam`（横梁） | 通常橋脚の干渉時に組み立てる。原点・伸縮方向・幅上限は `PortalPillar.cs` のコメント。現行は鉄道共通 `p4` に無印のみ |
 | 地下道の坑口 | `portal` | — |
 | **線路**: 軌道(レール+枕木) | `track` | `lanes` |
 | 分岐器のレールコネクタ | `rail` (無ければ `track` で代用) | — |
@@ -213,7 +212,7 @@ p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 
 | `wall` | **`wall_width`。null だと防音壁は一切描画されない** |
 | `center` | **`center_width`。null だと中央分離帯は描画されない** |
 | `tree` | `street_tree_type_allowed` / `default_street_tree_type`。個別Pathの `street_tree_type` で有無を選ぶ。`tree_spacing` がnull/0なら20m |
-| `streetlight` / `fence` / `utility_pole` / `utility_box` | `streetlight_type_allowed` / `fence_type_allowed` / `utility_mode_allowed` と各 `default_*`。描画は個別Pathの設備設定に従う(G §8.6) |
+| `streetlight` / `fence` / `utility_pole` / `utility_box` | `streetlight_type_allowed` / `fence_type_allowed` / `utility_mode_allowed` と各 `default_*`。描画は個別Pathの設備設定に従う(`RoadEquipmentGenerator.cs`) |
 | `pillar` / `pillar_cap` | `height_editable=true` と `pillar_spacing`(高架にできないバリアントでは柱は出ない) |
 | `pole` / `beam` | **`wire_spacing`。null は非電化を意味し架線・柱・梁を一切描画しない** |
 | `platform` / `platform_wall` / `platform_panel` | **`platform_width`。null はホームなし** |
@@ -221,7 +220,7 @@ p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 
 | 新しいバリアントを作った | `type`(フォールバック先のタイプ)・`model_type`・`body_material`・`curve_allowed`・`max_span` 等の行一式 |
 
 パーツの造形寸法とマスター値は**一致させる**こと(特にホームは
-`width` / `platform_width` とずれるとデッキと食い違う。N doc §7.3)。
+`width` / `platform_width` とずれるとデッキと食い違う)。
 
 ## 知らないと事故る仕様
 
@@ -232,14 +231,14 @@ p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 
   (道床だけ・軌道だけでも描画は成立する)。
 - `platform_panel` は**マテリアル参照専用**でメッシュは描画されない(ホーム上面は
   コードが動的生成する)。建物の `generic-wall` と同じ扱い。
-- 地下の側壁・天井は `wall_underground` / `ceiling_underground` を使い、未定義ならコンクリートの既定形状になる(G §8.5)。天井は下向きの片面として著作する。ホーム上屋の分離規約は N §7.3 に従う。`pillar` は `height_editable=true` のバリアントのみ、かつ地下(負のY)には配置されない。
-- 道路設備は切断済み区間の端から3mを空け、設備ごとの開始位相と間隔で配置する(G §8.6)。
+- 地下の側壁・天井は `wall_underground` / `ceiling_underground` を使い、未定義ならコンクリートの既定形状になる。天井は下向きの片面として著作する。ホーム上屋の分離規約は `PathTunnelParts.cs` のコメントに従う。`pillar` は `height_editable=true` のバリアントのみ、かつ地下(負のY)には配置されない。
+- 道路設備は切断済み区間の端から3mを空け、設備ごとの開始位相と間隔で配置する(`RoadEquipmentGenerator.cs`)。
   点設備の接地原点はZ=0、街灯は右側配置を基準に-Xへ向ける。柵モデルに支柱を含めない。
   電柱の電線取付位置は接地面+7.6m。柱・鉄道架線柱の配置規則とは区別する。
 
 ## LRTの併用軌道と専用軌道
 
-LRTの線路は1本のパスで複線(上下線)を表す。222（幅24m・4車線）／242（幅32m・6車線）は中央寄りの左右1車線を自動車と共用し、軌道中心は最内車線中心（±2.5625m／±2.541667m）。303（幅12m）は中心±1.75mの2軌道、431（幅7m・lanes 2）はTrackPathが±1.75mへ2軌道を敷く（軌道中心間隔3.5m）。道路の`lanes`を道路上の軌道数として扱わない。詳細は公開G文書「LRT付き道路222・242・歩行者道303」、専用軌道431はN文書を参照。
+LRTの線路は1本のパスで複線(上下線)を表す。222（幅24m・4車線）／242（幅32m・6車線）は中央寄りの左右1車線を自動車と共用し、軌道中心は最内車線中心（±2.5625m／±2.541667m）。303（幅12m）は中心±1.75mの2軌道、431（幅7m・lanes 2）はTrackPathが±1.75mへ2軌道を敷く（軌道中心間隔3.5m）。道路の`lanes`を道路上の軌道数として扱わない。寸法と配置の正は `LrtRoadParts.cs`・`LrtPlatformParts.cs` のコメント。
 
 - 道路用は`lrt_track`／`lrt_wire`／`lrt_pole`。RoadPathがLrtRoadPartsで追加配置する。通常鉄道のtrack/pole/beamと混ぜない。
 - lrt_trackは幅3m、レール中心±0.7175m、踏面Z=0.025m。lrt_wireの中心はZ=5.30m。原点はどちらも路面で、UnityはBODY_ABOVE_SPLINEを加える。
@@ -265,7 +264,7 @@ Unityが停留所の下地パスへ相対式ホーム（各軌道の外側）を
 
 ## 歩行者モールの点設備
 
-303/304/305の舗装・bench/bin/planter/advert/treeは非公開の制作ツール`genesis-gallery/pipeline/jobs/build_mall_paths.py`が著作する。304は幅12mの中央島、305は幅20mで中心から左右4mの2列、303は複線LRTの外側（±5.1m）に並べる小型設備。新設備は`bench_type`/`bin_type`/`planter_type`/`advert_type`の各`*_allowed`・`default_*`と個別Pathの0/1選択に従う。規約・位相・向きはG文書§5.5、検証はTests/Lrt/run.ps1。
+303/304/305の舗装・bench/bin/planter/advert/treeは非公開の制作ツール`genesis-gallery/pipeline/jobs/build_mall_paths.py`が著作する。304は幅12mの中央島、305は幅20mで中心から左右4mの2列、303は複線LRTの外側（±5.1m）に並べる小型設備。新設備は`bench_type`/`bin_type`/`planter_type`/`advert_type`の各`*_allowed`・`default_*`と個別Pathの0/1選択に従う。規約・位相・向きは `RoadEquipmentGenerator.cs` のコメント、検証はTests/Lrt/run.ps1。
 
 ## 送電線1101・1102
 
@@ -273,7 +272,7 @@ Unityが停留所の下地パスへ相対式ホーム（各軌道の外側）を
 
 ## 貨物PF（463・464・465）
 
-旅客のホームと同じ3パーツ構成（淵・動的デッキ・外縁）で、platform_widthは463=14・464=12・465=10m、16mタイル・長手1m分割。規約の正はN文書「貨物PF（463・464・465）」。
+旅客のホームと同じ3パーツ構成（淵・動的デッキ・外縁）で、platform_widthは463=14・464=12・465=10m、16mタイル・長手1m分割。規約の正は旅客のホームと同じく `TrackPath.cs` のホームの部品のコメント。
 
 - 電化線路の門型梁はホームをまたいで下弦がスプライン+6.27mを通るので、デッキ上の造形は6.1m以下に収める（コンテナは2段に積めない）。
 - 島式結合で外縁（platform_wall）が省略されても残したい線路際の荷役設備（コンベヤ・シュート・積込架台）はplatformに、デッキ上の貨物はplatform_wallに置く。
