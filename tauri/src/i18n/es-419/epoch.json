@@ -51,5 +51,27 @@
     "statCrime": "Delitos",
     "questCompleted": "¡Alcanzado!",
     "questFailed": "Plazo vencido"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Trazando rutas",
+      "prepare": "Preparando el período",
+      "transit": "Organizando el transporte",
+      "market": "Comerciando bienes",
+      "production": "Produciendo y consumiendo",
+      "commute": "Desplazamientos diarios",
+      "growth": "Los ciudadanos crecen",
+      "evaluate": "Evaluando la ciudad",
+      "immigration": "Recibiendo inmigrantes",
+      "labor": "Buscando empleo",
+      "spawn": "Abriendo nuevos negocios",
+      "relocate": "Hogares mudándose",
+      "construction": "Construyendo edificios",
+      "finance": "Ajustando las finanzas",
+      "plan": "Haciendo los planes",
+      "incident": "Atendiendo incidentes",
+      "finalize": "Recopilando estadísticas"
+    }
   }
 }

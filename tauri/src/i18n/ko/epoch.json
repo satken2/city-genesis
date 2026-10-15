@@ -51,5 +51,27 @@
     "statCrime": "범죄",
     "questCompleted": "달성!",
     "questFailed": "기한 초과"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "경로 탐색 중",
+      "prepare": "이번 기 준비 중",
+      "transit": "대중교통 준비 중",
+      "market": "상품 거래 중",
+      "production": "생산·소비 중",
+      "commute": "통근·통학 중",
+      "growth": "시민 성장 중",
+      "evaluate": "도시 평가 중",
+      "immigration": "이민 수용 중",
+      "labor": "구직 중",
+      "spawn": "새 가게·회사 개업 중",
+      "relocate": "이사 중",
+      "construction": "건물 건설 중",
+      "finance": "자금 흐름 정리 중",
+      "plan": "다음 계획 수립 중",
+      "incident": "화재·사고 대응 중",
+      "finalize": "통계 집계 중"
+    }
   }
 }

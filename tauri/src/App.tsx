@@ -357,7 +357,7 @@ function App() {
       ) : windowKind === "parameter-setup" ? (
         <ParameterSetupWindow apiBaseUrl={apiBaseUrl} />
       ) : windowKind === "tips" ? (
-        <TipsWindow mode={new URLSearchParams(window.location.search).get("tipsMode") === "epoch" ? "epoch" : "initial"} />
+        <TipsWindow apiBaseUrl={apiBaseUrl} mode={new URLSearchParams(window.location.search).get("tipsMode") === "epoch" ? "epoch" : "initial"} />
       ) : windowKind === "notification" ? (
         <NotificationWindow />
       ) : windowKind === "popup" && context ? (

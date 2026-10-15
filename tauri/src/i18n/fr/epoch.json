@@ -51,5 +51,27 @@
     "statCrime": "Délinquance",
     "questCompleted": "Atteint !",
     "questFailed": "Échéance dépassée"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Calcul des itinéraires",
+      "prepare": "Préparation de la période",
+      "transit": "Organisation des transports",
+      "market": "Échange de marchandises",
+      "production": "Production et consommation",
+      "commute": "Trajets quotidiens",
+      "growth": "Les citoyens grandissent",
+      "evaluate": "Évaluation de la ville",
+      "immigration": "Accueil des immigrants",
+      "labor": "Recherche d'emploi",
+      "spawn": "Ouverture d'entreprises",
+      "relocate": "Déménagements",
+      "construction": "Construction des bâtiments",
+      "finance": "Règlement des finances",
+      "plan": "Planification de la suite",
+      "incident": "Gestion des incidents",
+      "finalize": "Calcul des statistiques"
+    }
   }
 }

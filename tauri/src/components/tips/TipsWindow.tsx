@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type AnimationEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { getInitialLoadingReady, startGameFromTips } from "../../utils/ipc";
 import "./TipsWindow.css";
 
@@ -48,6 +49,13 @@ type TipItem = {
   image?: string;
 };
 
+/** エポック実行の進捗(GET /api/v1/epochs/progress)。step はコアが処理中の段で、段に入る前は空 */
+type EpochProgress = {
+  index: number;
+  count: number;
+  step: string;
+};
+
 const TIPS_LIST: TipItem[] = [
   { id: "tip1", image: tip1 },
   { id: "tip2", image: tip2 },
@@ -89,13 +97,14 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip39", image: tip39 },
 ];
 
-export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" }) {
+export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: string; mode?: "initial" | "epoch" }) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * TIPS_LIST.length));
   const [fadePhase, setFadePhase] = useState<"visible" | "out" | "loading" | "in">("visible");
   const [ready, setReady] = useState(false);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(false);
+  const [progress, setProgress] = useState<EpochProgress | null>(null);
 
   const handleReload = useCallback(() => {
     if (TIPS_LIST.length <= 1 || document.hidden) return;
@@ -124,14 +133,20 @@ export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" })
     setFadePhase((phase) => phase === "loading" ? "in" : phase);
   };
 
+  // 初期ロードは開始できるようになったかを、エポック実行中はコアが処理中の段を読み続ける。
   useEffect(() => {
-    if (mode === "epoch") return;
+    if (mode === "epoch" && !apiBaseUrl) return;
     let disposed = false;
     let timer: ReturnType<typeof setTimeout>;
     const refresh = async () => {
       try {
-        const value = await getInitialLoadingReady();
-        if (!disposed) setReady(value);
+        if (mode === "epoch") {
+          const value = await fetchApi<EpochProgress>(buildApiUrl(apiBaseUrl, "/api/v1/epochs/progress"));
+          if (!disposed) setProgress(value);
+        } else {
+          const value = await getInitialLoadingReady();
+          if (!disposed) setReady(value);
+        }
       } catch (e) {
         console.error("Failed to read loading state:", e);
       } finally {
@@ -140,7 +155,7 @@ export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" })
     };
     void refresh();
     return () => { disposed = true; clearTimeout(timer); };
-  }, [mode]);
+  }, [mode, apiBaseUrl]);
 
   const handleStart = async () => {
     if (mode !== "initial" || !ready || starting) return;
@@ -156,6 +171,12 @@ export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" })
   };
 
   const currentTip = TIPS_LIST[currentIndex];
+  const stepLabel = progress?.step ? t(`epochProgress.steps.${progress.step}`) : t("epochConfirm.executing");
+  const loadingLabel = mode === "initial"
+    ? t("tips.nowLoading")
+    : progress && progress.count > 1
+      ? t("epochProgress.counter", { step: stepLabel, index: progress.index, count: progress.count })
+      : stepLabel;
 
   return (
     <div className="tips-window" data-tauri-drag-region>
@@ -209,7 +230,7 @@ export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" })
           ) : (
             <span className="tips-loading" role="status" aria-live="polite">
               <span className="tips-loading-spinner" aria-hidden="true" />
-              <span className="tips-loading-text">{t(mode === "epoch" ? "epochConfirm.executing" : "tips.nowLoading")}</span>
+              <span className="tips-loading-text">{loadingLabel}</span>
             </span>
           )}
         </div>

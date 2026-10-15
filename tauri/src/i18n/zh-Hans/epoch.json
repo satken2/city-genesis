@@ -51,5 +51,27 @@
     "statCrime": "犯罪",
     "questCompleted": "达成！",
     "questFailed": "已超期"
+  },
+  "epochProgress": {
+    "counter": "{{step}}（{{index}}/{{count}}）",
+    "steps": {
+      "route": "正在规划路线",
+      "prepare": "正在准备本期",
+      "transit": "正在安排公共交通",
+      "market": "正在交易商品",
+      "production": "正在生产与消费",
+      "commute": "正在上班上学",
+      "growth": "市民正在成长",
+      "evaluate": "正在评估城市",
+      "immigration": "正在接纳移民",
+      "labor": "正在寻找工作",
+      "spawn": "新店铺和公司正在开业",
+      "relocate": "正在搬家",
+      "construction": "正在建造建筑",
+      "finance": "正在整理资金流向",
+      "plan": "正在制定下期计划",
+      "incident": "正在应对火灾和事故",
+      "finalize": "正在汇总统计"
+    }
   }
 }

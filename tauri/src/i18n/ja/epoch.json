@@ -51,5 +51,27 @@
     "statCrime": "犯罪",
     "questCompleted": "達成！",
     "questFailed": "期限切れ"
+  },
+  "epochProgress": {
+    "counter": "{{step}}({{index}}/{{count}})",
+    "steps": {
+      "route": "交通網を調べています",
+      "prepare": "今期の準備をしています",
+      "transit": "公共交通を手配しています",
+      "market": "商品を取引しています",
+      "production": "生産と消費をしています",
+      "commute": "通勤・通学をしています",
+      "growth": "市民が成長しています",
+      "evaluate": "街の評価を計算しています",
+      "immigration": "移民を受け入れています",
+      "labor": "仕事を探しています",
+      "spawn": "新しいお店や会社ができています",
+      "relocate": "転居をしています",
+      "construction": "建物を建設しています",
+      "finance": "お金の流れを整理しています",
+      "plan": "次の計画を立てています",
+      "incident": "火災や事故に対応しています",
+      "finalize": "統計をまとめています"
+    }
   }
 }

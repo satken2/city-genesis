@@ -51,5 +51,27 @@
     "statCrime": "Crime",
     "questCompleted": "Achieved!",
     "questFailed": "Deadline passed"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Mapping transport routes",
+      "prepare": "Preparing this term",
+      "transit": "Arranging public transit",
+      "market": "Trading goods",
+      "production": "Producing and consuming",
+      "commute": "Going to work and school",
+      "growth": "Citizens growing up",
+      "evaluate": "Evaluating the city",
+      "immigration": "Welcoming immigrants",
+      "labor": "Looking for jobs",
+      "spawn": "Opening new businesses",
+      "relocate": "Moving households",
+      "construction": "Constructing buildings",
+      "finance": "Settling finances",
+      "plan": "Planning the next term",
+      "incident": "Responding to incidents",
+      "finalize": "Compiling statistics"
+    }
   }
 }
