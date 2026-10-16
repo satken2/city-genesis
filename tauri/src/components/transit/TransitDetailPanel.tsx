@@ -73,11 +73,6 @@ export type TransitStop = {
 };
 
 /**
- * 路線の1区間(巡回順で隣り合う停留所を結ぶ PATH_TRANSPORT)。路線図上の「線」として描画する単位。
- * 区間パスは路線の進行方向の一方通行で、from_node_id → to_node_id が進む向き(travel_direction は
- * DIR_FORWARD)。下地の線路の通行方向とは別物。路線図は status(運休区間の破線)にだけ使う。
- */
-/**
  * 路線の巡回点(停留所・経由点を巡回順に並べたもの。最後の点の次は先頭の点)。
  * turnback は車両がその停留所で折り返すか(往復運行の端。運休中は false)。経由点の node_id は null。
  */
@@ -88,12 +83,19 @@ export type TransitRoutePointSummary = {
   turnback: boolean;
 };
 
+/**
+ * 路線の1区間(巡回順で隣り合う停留所を結ぶ PATH_TRANSPORT)。路線図上の「線」として描画する単位。
+ * 区間パスは路線の進行方向の一方通行で、from_node_id → to_node_id が進む向き(travel_direction は
+ * DIR_FORWARD)。下地の線路の通行方向とは別物。路線図は status(運休区間の破線)と utilization(区間の混雑率。
+ * 前エポックの値で 0〜1)を使う。
+ */
 export type TransitEdge = {
   path_id: number;
   from_node_id: number;
   to_node_id: number;
   travel_direction: number;
   status: number;
+  utilization: number;
 };
 
 type TransitLineDetail = {

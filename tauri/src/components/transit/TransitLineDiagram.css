@@ -54,6 +54,24 @@
   min-width: 0;
 }
 
+/* 左端の区間の混雑率。値は次の行との境目(区間の中ほど)の高さに置く */
+.tld__util {
+  position: relative;
+  width: 3.5rem;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.tld__util-value {
+  position: absolute;
+  right: 4px;
+  top: 100%;
+  transform: translateY(-50%);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #c5d4e3;
+}
+
 /* 左端の停留所番号。実際の駅ナンバリングを模した等幅の2桁 */
 .tld__index {
   width: 26px;

@@ -23,6 +23,9 @@
  * 各行の右端には前エポックの乗車回数を出す。1行は駅を表すので、駅舎に所属する停留所は駅舎ごと、所属しない
  * 停留所は停留所ごとに、この路線の停留所の乗車回数を合計する(往復運行で描かない帰りのホームの停留所も
  * 同じ駅舎の行に入る)。記録の無い停留所だけの行は「-」。
+ *
+ * 各行の左端には、その行から次の行への区間の混雑率を行の境目の高さに出す。乗車回数と同じ駅の単位で、2つの駅を
+ * 結ぶ区間パスのうち向きを問わず最も混む区間の値にする(往復運行で描かない帰りの区間も入る)。
  */
 
 import { useMemo, type CSSProperties } from "react";
@@ -50,6 +53,11 @@ function stationKey(stop: TransitStop): string {
   return stop.house_path_id ? `house:${stop.house_path_id}` : `stop:${stop.node_id}`;
 }
 
+/** 2つの駅を結ぶ区間のキー。向きを問わない。 */
+function sectionKey(a: TransitStop, b: TransitStop): string {
+  return [stationKey(a), stationKey(b)].sort().join("|");
+}
+
 export function TransitLineDiagram({ stops, routePoints, edges, color, running }: TransitLineDiagramProps) {
   const { t } = useTranslation();
 
@@ -61,6 +69,19 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
   }, [edges]);
 
   const stopIndex = useMemo(() => new Map(stops.map((s, i) => [s.node_id, i])), [stops]);
+
+  const utilizationBySection = useMemo(() => {
+    const byNode = new Map(stops.map((s) => [s.node_id, s]));
+    const m = new Map<string, number>();
+    for (const e of edges) {
+      const from = byNode.get(e.from_node_id);
+      const to = byNode.get(e.to_node_id);
+      if (!from || !to) continue;
+      const key = sectionKey(from, to);
+      m.set(key, Math.max(m.get(key) ?? 0, e.utilization));
+    }
+    return m;
+  }, [stops, edges]);
 
   const ridershipByStation = useMemo(() => {
     const m = new Map<string, number | null>();
@@ -100,6 +121,10 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
     const index = stopIndex.get(v.nodeId) ?? 0;
     return { stop: stops[index], index };
   };
+  const sectionUtilization = (a: Visit, b: Visit): string => {
+    const u = utilizationBySection.get(sectionKey(stopOf(a).stop, stopOf(b).stop));
+    return u == null ? "-" : `${Math.round(u * 100)}%`;
+  };
   const stopLabel = (v: Visit) => {
     const { stop, index } = stopOf(v);
     return stop?.name && stop.name !== "" ? stop.name : t("transit.stopFallbackName", { n: index + 1 });
@@ -117,6 +142,7 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
   return (
     <div className="tld" style={{ "--tld-color": color } as CSSProperties}>
       <div className="tld__summary">
+        <span>{t("transit.colUtilization")}</span>
         <span className="tld__summary-count">{t("transit.stopsCountValue", { count: stops.length })}</span>
         {rows.length >= 2 && (
           <span className="tld__summary-ends">
@@ -136,8 +162,12 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
           const { stop } = stopOf(v);
           const label = stopLabel(v);
           const ridership = stop ? ridershipByStation.get(stationKey(stop)) ?? null : null;
+          const next = i < last ? rows[i + 1] : loopBack ? rows[0] : null;
           return (
             <li key={i} className="tld__row">
+              <span className="tld__util">
+                {next && <span className="tld__util-value">{sectionUtilization(v, next)}</span>}
+              </span>
               <span className="tld__index">{String(i + 1).padStart(2, "0")}</span>
               <span className="tld__track" aria-hidden="true">
                 {i > 0 && <span className={`${segClass(upActive)} tld__seg--up`} />}
@@ -163,6 +193,7 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
         })}
         {loopBack && (
           <li className="tld__row tld__row--loop">
+            <span className="tld__util" />
             <span className="tld__index" />
             <span className="tld__track" aria-hidden="true">
               <span className={`${segClass(loopActive)} tld__seg--up`} />
