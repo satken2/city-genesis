@@ -1,7 +1,7 @@
 {
   "agent": {
     "back": "Retour",
-    "editSubBuildings": "Modifier la disposition des bâtiments",
+    "editAppearance": "Modifier l'apparence",
     "relocateCityHall": "Déménager l'hôtel de ville",
     "publicFacility": "Service public",
     "underAcquisition": "Acquisition du terrain en cours",

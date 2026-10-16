@@ -1,7 +1,7 @@
 {
   "agent": {
     "back": "返回",
-    "editSubBuildings": "编辑建筑布局",
+    "editAppearance": "更改外观",
     "relocateCityHall": "迁移市政厅",
     "publicFacility": "公共设施",
     "underAcquisition": "征地协商中",

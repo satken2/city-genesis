@@ -1,6 +1,6 @@
-/* マッシュアップ建物のサブ建物配置エディタ(MashupEditPanel)のスタイル */
+/* 建物の外観の変更(BuildingAppearancePanel)のスタイル */
 
-.me-layout {
+.ba-layout {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -8,37 +8,63 @@
   min-height: 0;
 }
 
-.me-muted {
+.ba-muted {
   color: #94a3b8;
   font-size: 1rem;
 }
 
-.me-error {
+.ba-error {
   color: #f87171;
   font-size: 1rem;
 }
 
-.me-header {
+.ba-header {
   display: flex;
   align-items: baseline;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.me-header-name {
+.ba-header-name {
   font-size: 1.39rem;
   font-weight: 700;
   color: #e5e7eb;
 }
 
-.me-header-hint {
+/* ---- 外観バリアントのスライダー ---- */
+
+.ba-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ba-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ba-slider-label {
   font-size: 1rem;
-  color: #94a3b8;
+  color: #e5e7eb;
+  white-space: nowrap;
+}
+
+.ba-slider {
+  flex: 1;
+  cursor: pointer;
 }
 
 /* ---- サブ建物カード一覧 ---- */
 
-.me-cards {
+.ba-hint {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.ba-cards {
   display: flex;
   gap: 10px;
   overflow-x: auto;
@@ -46,7 +72,7 @@
   flex-shrink: 0;
 }
 
-.me-card {
+.ba-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -61,13 +87,13 @@
   flex-shrink: 0;
 }
 
-.me-card:hover {
+.ba-card:hover {
   border-color: rgba(148, 163, 184, 0.6);
   background: rgba(148, 163, 184, 0.12);
 }
 
 /* 底面矩形のプレビュー枠。矩形自体は敷地キャンバスと同じ縮尺(実サイズ)で描く */
-.me-card-rect-frame {
+.ba-card-rect-frame {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -75,27 +101,27 @@
   min-height: 48px;
 }
 
-.me-card-rect {
+.ba-card-rect {
   border: 2px solid;
   border-radius: 2px;
   box-sizing: border-box;
 }
 
-.me-card-name {
+.ba-card-name {
   font-size: 1rem;
   font-weight: 600;
   color: #e5e7eb;
   white-space: nowrap;
 }
 
-.me-card-size {
+.ba-card-size {
   font-size: 1rem;
   color: #94a3b8;
 }
 
 /* ---- 敷地キャンバス ---- */
 
-.me-canvas-container {
+.ba-canvas-container {
   flex: 1;
   min-height: 200px;
   border: 1px solid rgba(148, 163, 184, 0.25);
@@ -104,24 +130,24 @@
   overflow: hidden;
 }
 
-.me-canvas {
+.ba-canvas {
   display: block;
   touch-action: none;
 }
 
 /* ---- アクションボタン ---- */
 
-.me-actions {
+.ba-actions {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
 }
 
-.me-actions-spacer {
+.ba-actions-spacer {
   flex: 1;
 }
 
-.me-btn {
+.ba-btn {
   padding: 8px 16px;
   border: 1px solid rgba(148, 163, 184, 0.4);
   border-radius: 4px;
@@ -133,21 +159,21 @@
   transition: background 0.15s;
 }
 
-.me-btn:hover:not(:disabled) {
+.ba-btn:hover:not(:disabled) {
   background: rgba(148, 163, 184, 0.2);
 }
 
-.me-btn:disabled {
+.ba-btn:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-.me-btn-confirm {
+.ba-btn-confirm {
   border-color: rgba(96, 165, 250, 0.5);
   background: rgba(96, 165, 250, 0.18);
   color: #93c5fd;
 }
 
-.me-btn-confirm:hover:not(:disabled) {
+.ba-btn-confirm:hover:not(:disabled) {
   background: rgba(96, 165, 250, 0.3);
 }

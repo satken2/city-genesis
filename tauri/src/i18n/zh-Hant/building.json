@@ -15,14 +15,13 @@
     "parkingNight": "夜間",
     "parkingUsage": "{{used}} / {{capacity}}輛"
   },
-  "mashup_edit": {
-    "hint": "將卡片拖到用地上配置 / 拖曳移動 / Shift+拖曳旋轉 / Delete鍵刪除",
+  "building_appearance": {
+    "variantLabel": "外觀 {{index}}",
+    "layoutHint": "將卡片拖到用地上配置 / 拖曳移動 / Shift+拖曳旋轉 / Delete鍵刪除",
     "sizeLabel": "{{width}}×{{height}}m",
     "deleteSelected": "刪除所選建築",
-    "cancel": "取消",
-    "save": "儲存",
-    "saveFailed": "附屬建築配置儲存失敗",
-    "noParcel": "此建築沒有對應的地塊",
+    "apply": "套用",
+    "saveFailed": "外觀儲存失敗",
     "noSubbuildings": "此建築類型沒有定義附屬建築"
   }
 }

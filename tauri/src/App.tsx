@@ -34,7 +34,7 @@ const PathConstructionPanel = lazy(() => import("./components/path/PathConstruct
 const PathShapeEditorPanel = lazy(() => import("./components/path/PathShapeEditorPanel").then(m => ({ default: m.PathShapeEditorPanel })));
 const PathDetailPanel = lazy(() => import("./components/path/PathDetailPanel").then(m => ({ default: m.PathDetailPanel })));
 const BuildingConstructionPanel = lazy(() => import("./components/building/BuildingConstructionPanel").then(m => ({ default: m.BuildingConstructionPanel })));
-const MashupEditPanel = lazy(() => import("./components/building/MashupEditPanel").then(m => ({ default: m.MashupEditPanel })));
+const BuildingAppearancePanel = lazy(() => import("./components/building/BuildingAppearancePanel").then(m => ({ default: m.BuildingAppearancePanel })));
 const ParcelCreationPanel = lazy(() => import("./components/parcel/ParcelCreationPanel").then(m => ({ default: m.ParcelCreationPanel })));
 const CityBudgetWindow = lazy(() => import("./components/budget/CityBudgetWindow").then(m => ({ default: m.CityBudgetWindow })));
 const PublicFacilitiesWindow = lazy(() => import("./components/budget/PublicFacilitiesWindow").then(m => ({ default: m.PublicFacilitiesWindow })));
@@ -102,7 +102,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -498,8 +498,8 @@ function App() {
                 editAgentId={windowExtra(context)?.editAgentId as number | undefined}
                 relocateCityHall={windowExtra(context)?.relocateCityHall === true}
               />
-            ) : context.window_type === "mashup_edit" ? (
-              <MashupEditPanel
+            ) : context.window_type === "building_appearance" ? (
+              <BuildingAppearancePanel
                 apiBaseUrl={context.api_base_url}
                 initialEntityId={context.entity?.id ?? ""}
                 onClose={closeWindow}

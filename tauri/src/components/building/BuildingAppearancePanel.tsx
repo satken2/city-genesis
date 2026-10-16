@@ -1,26 +1,26 @@
 /**
- * マッシュアップ建物のサブ建物配置エディタ
+ * 建物の外観の変更
  *
- * window_type="mashup_edit" のポップアップウィンドウで表示する専用パネル。
- * マッシュアップ建物(MODEL_MASHUP)を構成するサブ建物(校舎・体育館などの棟)の配置を
- * 2Dキャンバス上で編集する。経済状態に影響しない見た目の編集のため、建物の status を
- * 問わずいつでも開ける。棟の階数はここでは編集できない(親建物の floors を棟定義の
- * 階数範囲でクランプした値をバックエンドが配信時に導出する)。
+ * window_type="building_appearance" のポップアップウィンドウで表示する専用パネル。
+ * 外観バリアント(visual_variant1/2/3)と、マッシュアップ建物(MODEL_MASHUP)ならサブ建物(校舎・体育館などの棟)の
+ * 配置を編集する。どちらも経済シミュレーションが読まない値なので、建物の status を問わずいつでも変更できる。
+ * 棟の階数はここでは編集できない(親建物の floors を棟定義の階数範囲でクランプした値をバックエンドが配信時に導出する)。
  *
  * 画面構成:
- *   - 上部: 配置可能なサブ建物のカード一覧。底面矩形は敷地キャンバスと同じ縮尺(実サイズ)で描く
- *   - 下部: 敷地(土地区画ポリゴン)と配置済みサブ建物のキャンバス
+ *   - 上部: 外観バリアントのスライダー
+ *   - マッシュアップ建物のみ: 配置可能なサブ建物のカード一覧(底面矩形は敷地キャンバスと同じ縮尺で描く)と、
+ *     敷地(土地区画ポリゴン)と配置済みサブ建物のキャンバス
  *
- * 操作:
+ * サブ建物の操作:
  *   - カードを敷地へドラッグ: サブ建物を新規配置
  *   - 配置済みサブ建物をドラッグ: 移動
  *   - Shift を押しながらドラッグ: 回転(棟の中心を軸にカーソル方向へ回す)
  *   - クリックで選択、Delete キーまたは削除ボタンで撤去
  *   - 既存のサブ建物との重なりは許容する(バックエンドも検証しない)
  *
- * 保存フロー:
- *   [保存] で PUT /buildings/{id}/sub-buildings に配置リストを一括送信し、成功後に
- *   session:reload を送って Unity に建物を再描画させ、ウィンドウを閉じる。
+ * 適用フロー:
+ *   [適用] で PATCH /agents/{id} に外観バリアントを、マッシュアップ建物なら PUT /buildings/{id}/sub-buildings に
+ *   配置リストを送り、session:reload で Unity に建物を再描画させる。3Dの結果を見ながら試せるよう、ウィンドウは閉じない。
  *
  * 座標系:
  *   position は建物中心(=土地区画の center_point)基準の相対XZ座標、rotation は
@@ -34,11 +34,11 @@ import { fetchApi, ApiError } from "../../utils/api";
 import { sendSessionReload } from "../../utils/ipc";
 import { showNotification } from "../../utils/notification";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import { MASHUP_CELL_SIZE } from "../../constants";
-import "./MashupEditPanel.css";
+import { MASHUP_CELL_SIZE, MODEL_MASHUP } from "../../constants";
+import "./BuildingAppearancePanel.css";
 
 /**
- * サブ建物1棟分の配置エントリ(GET/PUT /buildings/{id}/sub-buildings の形式)。
+ * サブ建物1棟分の配置エントリ(GET /buildings/{id} の sub_buildings、PUT /buildings/{id}/sub-buildings の形式)。
  * 棟の階数は編集対象外(親建物の floors からバックエンドが配信時に導出する)。
  */
 type SubBuildingPlacement = {
@@ -64,7 +64,27 @@ type ViewTransform = {
   toWorld: (px: number, py: number) => [number, number];
 };
 
-type MashupEditPanelProps = {
+/**
+ * 外観バリアントのスライダー。目盛りは Unity が外観を選ぶ番号(値×1000 の切り捨て)と同じ 0〜1000 で、
+ * visual_variant は100ごとの閾値フォルダで外観を選ぶため、その段にだけ止める。
+ */
+const APPEARANCE_SLIDERS = [
+  { key: "visual_variant", step: 100 },
+  { key: "visual_variant2", step: 1 },
+  { key: "visual_variant3", step: 1 },
+] as const;
+
+type AppearanceKey = (typeof APPEARANCE_SLIDERS)[number]["key"];
+
+/** GET /buildings/{id} のうち、このパネルが使う項目 */
+type BuildingResponse = {
+  name: string;
+  variant: number;
+  parcel_id: number;
+  sub_buildings: SubBuildingPlacement[] | null;
+} & Record<AppearanceKey, number>;
+
+type BuildingAppearancePanelProps = {
   apiBaseUrl: string;
   initialEntityId: string;
   onClose: () => void;
@@ -139,7 +159,7 @@ function hitTestPlacement(
   return Math.abs(localU) <= width / 2 && Math.abs(localV) <= height / 2;
 }
 
-export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: MashupEditPanelProps) {
+export function BuildingAppearancePanel({ apiBaseUrl, initialEntityId, onClose }: BuildingAppearancePanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
 
@@ -148,6 +168,7 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
 
   const [variant, setVariant] = useState<number | null>(null);
   const [agentName, setAgentName] = useState<string>("");
+  const [appearance, setAppearance] = useState<Record<AppearanceKey, number> | null>(null);
   const [parcelPolygon, setParcelPolygon] = useState<number[][] | null>(null);
   const [centerPoint, setCenterPoint] = useState<number[] | null>(null);
   const [facadeEdgeIndex, setFacadeEdgeIndex] = useState<number[]>([]);
@@ -155,7 +176,6 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
@@ -165,8 +185,8 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
   /* ---- データ取得 ---- */
 
   /**
-   * 建物(variant / parcel_id)→ 土地区画(polygon / center_point)と現在の配置リストを取得する。
-   * 配置リストは編集用のローカルstateへコピーし、保存まではバックエンドに送信しない。
+   * 建物(外観バリアント・配置リスト・parcel_id)→ 土地区画(polygon / center_point)を取得する。
+   * 取得した値は編集用のローカルstateへコピーし、適用まではバックエンドに送信しない。
    */
   useEffect(() => {
     if (!baseUrl || !Number.isFinite(agentId)) return;
@@ -174,54 +194,47 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
 
     (async () => {
       try {
-        const agentRes = await fetchApi<{
-          economic_agent: { variant: number; parcel_id?: number; name: string };
-        }>(`${baseUrl}/api/v1/agents/${agentId}`, { signal: controller.signal });
-        const agent = agentRes.economic_agent;
-        if (!agent.parcel_id) {
-          setLoadError(t("mashup_edit.noParcel"));
-          return;
-        }
-
-        const [parcelRes, subRes] = await Promise.all([
-          fetchApi<{ polygon: number[][]; center_point: number[]; facade_edge_index: number[] | number }>(
-            `${baseUrl}/api/v1/parcels/${agent.parcel_id}`,
-            { signal: controller.signal },
-          ),
-          fetchApi<{ sub_buildings: SubBuildingPlacement[] }>(
-            `${baseUrl}/api/v1/buildings/${agentId}/sub-buildings`,
-            { signal: controller.signal },
-          ),
-        ]);
+        const building = await fetchApi<BuildingResponse>(
+          `${baseUrl}/api/v1/buildings/${agentId}`,
+          { signal: controller.signal },
+        );
+        const parcelRes = await fetchApi<{ polygon: number[][]; center_point: number[]; facade_edge_index: number[] | number }>(
+          `${baseUrl}/api/v1/parcels/${building.parcel_id}`,
+          { signal: controller.signal },
+        );
         if (controller.signal.aborted) return;
 
-        setVariant(agent.variant);
-        setAgentName(agent.name);
+        setVariant(building.variant);
+        setAgentName(building.name);
+        setAppearance(
+          Object.fromEntries(APPEARANCE_SLIDERS.map(({ key }) => [key, building[key]])) as Record<AppearanceKey, number>,
+        );
         setParcelPolygon(parcelRes.polygon);
         setCenterPoint(parcelRes.center_point);
         const facade = parcelRes.facade_edge_index;
         setFacadeEdgeIndex(Array.isArray(facade) ? facade : facade != null ? [facade] : []);
         // 配信エントリには model_prefix 等の解決済みフィールドが含まれるため、編集対象の3項目だけを持つ
         setPlacements(
-          (subRes.sub_buildings ?? []).map((p) => ({
+          (building.sub_buildings ?? []).map((p) => ({
             subbuilding_id: p.subbuilding_id,
             position: [p.position[0], p.position[1]],
             rotation: p.rotation ?? 0,
           })),
         );
-        setIsLoaded(true);
       } catch (err) {
         if (!controller.signal.aborted) {
-          console.error("[MashupEdit] Failed to load building data:", err);
+          console.error("[BuildingAppearance] Failed to load building data:", err);
           setLoadError(err instanceof Error ? err.message : String(err));
         }
       }
     })();
 
     return () => controller.abort();
-  }, [baseUrl, agentId, t]);
+  }, [baseUrl, agentId]);
 
   /* ---- マスターデータからの派生 ---- */
+
+  const isMashup = variant !== null && masterData?.agents[variant]?.model_type === MODEL_MASHUP;
 
   /** このバリアントに属するサブ建物マスターの一覧(カード表示用) */
   const subbuildingEntries = useMemo(() => {
@@ -553,32 +566,38 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [deleteSelected]);
 
-  /* ---- 保存 ---- */
+  /* ---- 適用 ---- */
 
   /**
-   * 配置リストを一括置換で送信し、Unity に session:reload で再描画を要求してから閉じる。
-   * バックエンド側で全エントリが検証されるため、失敗時は既存配置が変更されないままになる。
+   * 外観バリアントと(マッシュアップ建物なら)配置リストを保存し、Unity に session:reload で再描画を要求する。
+   * 配置リストはバックエンド側で全エントリが検証されるため、失敗時は既存配置が変更されないままになる。
    */
-  const handleSave = useCallback(async () => {
-    if (isSaving) return;
+  const handleApply = useCallback(async () => {
+    if (isSaving || !appearance) return;
     setIsSaving(true);
     try {
-      await fetchApi(`${baseUrl}/api/v1/buildings/${agentId}/sub-buildings`, {
-        method: "PUT",
+      await fetchApi(`${baseUrl}/api/v1/agents/${agentId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sub_buildings: placements.map((p) => ({
-            subbuilding_id: p.subbuilding_id,
-            position: p.position,
-            rotation: p.rotation,
-          })),
-        }),
+        body: JSON.stringify(appearance),
       });
+      if (isMashup) {
+        await fetchApi(`${baseUrl}/api/v1/buildings/${agentId}/sub-buildings`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sub_buildings: placements.map((p) => ({
+              subbuilding_id: p.subbuilding_id,
+              position: p.position,
+              rotation: p.rotation,
+            })),
+          }),
+        });
+      }
       await sendSessionReload();
-      onClose();
     } catch (err) {
-      console.error("[MashupEdit] Failed to save sub-building layout:", err);
-      let message = t("mashup_edit.saveFailed");
+      console.error("[BuildingAppearance] Failed to apply appearance:", err);
+      let message = t("building_appearance.saveFailed");
       if (err instanceof ApiError) {
         const i18nKey = err.code ? `errors.${err.code}` : null;
         message =
@@ -592,103 +611,133 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
     } finally {
       setIsSaving(false);
     }
-  }, [isSaving, baseUrl, agentId, placements, onClose, t]);
+  }, [isSaving, appearance, baseUrl, agentId, isMashup, placements, t]);
 
   /* ---- レンダリング ---- */
 
   if (loadError) {
     return (
-      <div className="me-error">
+      <div className="ba-error">
         <strong>{t("common.fetchError")}</strong>
         <p>{loadError}</p>
       </div>
     );
   }
 
-  if (!masterData || !isLoaded) {
-    return <p className="me-muted">{t("common.loading")}</p>;
+  if (!masterData || !appearance) {
+    return <p className="ba-muted">{t("common.loading")}</p>;
   }
 
   // カードの底面矩形は敷地キャンバスと同じ縮尺で描く(ビュー未確定の間は仮縮尺)
   const cardScale = view?.scale ?? 3;
 
   return (
-    <div className="me-layout">
-      <div className="me-header">
-        <span className="me-header-name">{agentName}</span>
-        <span className="me-header-hint">{t("mashup_edit.hint")}</span>
+    <div className="ba-layout">
+      <div className="ba-header">
+        <span className="ba-header-name">{agentName}</span>
       </div>
 
-      {/* サブ建物カード一覧 */}
-      {subbuildingEntries.length === 0 ? (
-        <div className="me-muted">{t("mashup_edit.noSubbuildings")}</div>
-      ) : (
-        <div className="me-cards">
-          {subbuildingEntries.map(([id, entry]) => {
-            const [width, height] = subbuildingSize(entry);
-            return (
-              <div
-                key={id}
-                className="me-card"
-                onPointerDown={(e) => {
-                  e.preventDefault();
-                  startNewDrag(id);
-                }}
-              >
-                <div className="me-card-rect-frame">
+      {/* 外観バリアント */}
+      <div className="ba-sliders">
+        {APPEARANCE_SLIDERS.map(({ key, step }, index) => (
+          <label key={key} className="ba-slider-row">
+            <span className="ba-slider-label">
+              {t("building_appearance.variantLabel", { index: index + 1 })}
+            </span>
+            <input
+              type="range"
+              className="ba-slider"
+              min={0}
+              max={1000}
+              step={step}
+              value={Math.floor(Math.floor(appearance[key] * 1000) / step) * step}
+              onChange={(e) => {
+                const value = Number(e.target.value) / 1000;
+                setAppearance((prev) => (prev ? { ...prev, [key]: value } : prev));
+              }}
+            />
+          </label>
+        ))}
+      </div>
+
+      {isMashup && (
+        <>
+          <span className="ba-hint">{t("building_appearance.layoutHint")}</span>
+
+          {/* サブ建物カード一覧 */}
+          {subbuildingEntries.length === 0 ? (
+            <div className="ba-muted">{t("building_appearance.noSubbuildings")}</div>
+          ) : (
+            <div className="ba-cards">
+              {subbuildingEntries.map(([id, entry]) => {
+                const [width, height] = subbuildingSize(entry);
+                return (
                   <div
-                    className="me-card-rect"
-                    style={{
-                      width: Math.max(width * cardScale, 6),
-                      height: Math.max(height * cardScale, 6),
-                      borderColor: colorForSubbuilding(id),
-                      background: `${colorForSubbuilding(id)}33`,
+                    key={id}
+                    className="ba-card"
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      startNewDrag(id);
                     }}
-                  />
-                </div>
-                <div className="me-card-name">{entry.display_name}</div>
-                <div className="me-card-size">
-                  {t("mashup_edit.sizeLabel", { width, height })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  >
+                    <div className="ba-card-rect-frame">
+                      <div
+                        className="ba-card-rect"
+                        style={{
+                          width: Math.max(width * cardScale, 6),
+                          height: Math.max(height * cardScale, 6),
+                          borderColor: colorForSubbuilding(id),
+                          background: `${colorForSubbuilding(id)}33`,
+                        }}
+                      />
+                    </div>
+                    <div className="ba-card-name">{entry.display_name}</div>
+                    <div className="ba-card-size">
+                      {t("building_appearance.sizeLabel", { width, height })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* 敷地キャンバス */}
+          <div className="ba-canvas-container" ref={setCanvasContainerRef}>
+            <canvas
+              ref={canvasRef}
+              className="ba-canvas"
+              style={{ width: canvasSize.width, height: canvasSize.height }}
+              onPointerDown={handleCanvasPointerDown}
+              onPointerMove={handleCanvasPointerMove}
+              onPointerUp={handleCanvasPointerUp}
+            />
+          </div>
+        </>
       )}
 
-      {/* 敷地キャンバス */}
-      <div className="me-canvas-container" ref={setCanvasContainerRef}>
-        <canvas
-          ref={canvasRef}
-          className="me-canvas"
-          style={{ width: canvasSize.width, height: canvasSize.height }}
-          onPointerDown={handleCanvasPointerDown}
-          onPointerMove={handleCanvasPointerMove}
-          onPointerUp={handleCanvasPointerUp}
-        />
-      </div>
-
       {/* アクションボタン */}
-      <div className="me-actions">
-        <button
-          className="me-btn"
-          type="button"
-          disabled={selectedIndex === null}
-          onClick={deleteSelected}
-        >
-          {t("mashup_edit.deleteSelected")}
+      <div className="ba-actions">
+        {isMashup && (
+          <button
+            className="ba-btn"
+            type="button"
+            disabled={selectedIndex === null}
+            onClick={deleteSelected}
+          >
+            {t("building_appearance.deleteSelected")}
+          </button>
+        )}
+        <div className="ba-actions-spacer" />
+        <button className="ba-btn" type="button" onClick={onClose}>
+          {t("common.close")}
         </button>
-        <div className="me-actions-spacer" />
-        <button className="me-btn" type="button" onClick={onClose}>
-          {t("mashup_edit.cancel")}
-        </button>
         <button
-          className="me-btn me-btn-confirm"
+          className="ba-btn ba-btn-confirm"
           type="button"
           disabled={isSaving}
-          onClick={() => void handleSave()}
+          onClick={() => void handleApply()}
         >
-          {t("mashup_edit.save")}
+          {t("building_appearance.apply")}
         </button>
       </div>
     </div>

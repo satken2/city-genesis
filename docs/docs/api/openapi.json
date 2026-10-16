@@ -4445,7 +4445,7 @@
           "agents"
         ],
         "summary": "Update Agent",
-        "description": "指定したIDのagentを一部更新する。\nステータスに応じて更新可能なプロパティが異なる:\n- PENDING/SCHEDULED_CONSTRUCTION: name, status, zone_id, variant, visual_variant, visual_variant2, visual_variant3, floors, center_point, polygon\n- ACTIVE: name, status, utilization_target, under_maintenance, education_type\n- その他: name, status\n\nunder_maintenance は修繕のキャンセル（0への設定）にのみ使用される。\nキャンセル時は建設サービス財の需要(demand_amount[124])と取得量(remain_amount[124])\nをクリアし、次エポック以降の修繕需要が残存しないようにする。",
+        "description": "指定したIDのagentを一部更新する。\nステータスに応じて更新可能なプロパティが異なる:\n- PENDING/SCHEDULED_CONSTRUCTION: name, status, zone_id, variant, floors, center_point, polygon\n- ACTIVE: name, status, utilization_target, under_maintenance, education_type\n- その他: name, status\n- visual_variant, visual_variant2, visual_variant3 はステータスを問わず変更できる\n\nunder_maintenance は修繕のキャンセル（0への設定）にのみ使用される。\nキャンセル時は建設サービス財の需要(demand_amount[124])と取得量(remain_amount[124])\nをクリアし、次エポック以降の修繕需要が残存しないようにする。",
         "operationId": "update_agent_api_v1_agents__agent_id__patch",
         "parameters": [
           {

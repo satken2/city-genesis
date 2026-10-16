@@ -15,14 +15,13 @@
     "parkingNight": "Nighttime",
     "parkingUsage": "{{used}} / {{capacity}} cars"
   },
-  "mashup_edit": {
-    "hint": "Drag a card onto the site to place / drag to move / Shift+drag to rotate / Delete key to remove",
+  "building_appearance": {
+    "variantLabel": "Appearance {{index}}",
+    "layoutHint": "Drag a card onto the site to place / drag to move / Shift+drag to rotate / Delete key to remove",
     "sizeLabel": "{{width}}×{{height}}m",
     "deleteSelected": "Remove Selected",
-    "cancel": "Cancel",
-    "save": "Save",
-    "saveFailed": "Failed to save the sub-building layout",
-    "noParcel": "This building has no land parcel",
+    "apply": "Apply",
+    "saveFailed": "Failed to save the appearance",
     "noSubbuildings": "No sub-buildings are defined for this building type"
   }
 }

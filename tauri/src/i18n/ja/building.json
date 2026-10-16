@@ -15,14 +15,13 @@
     "parkingNight": "夜間",
     "parkingUsage": "{{used}} / {{capacity}}台"
   },
-  "mashup_edit": {
-    "hint": "カードを敷地へドラッグで配置 / ドラッグで移動 / Shift+ドラッグで回転 / Deleteキーで削除",
+  "building_appearance": {
+    "variantLabel": "外観 {{index}}",
+    "layoutHint": "カードを敷地へドラッグで配置 / ドラッグで移動 / Shift+ドラッグで回転 / Deleteキーで削除",
     "sizeLabel": "{{width}}×{{height}}m",
     "deleteSelected": "選択した棟を削除",
-    "cancel": "キャンセル",
-    "save": "保存",
-    "saveFailed": "サブ建物配置の保存に失敗しました",
-    "noParcel": "この建物には土地区画がありません",
+    "apply": "適用",
+    "saveFailed": "外観の保存に失敗しました",
     "noSubbuildings": "この建物種別にはサブ建物が定義されていません"
   }
 }

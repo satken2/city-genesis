@@ -226,8 +226,8 @@
     "layout": "left_panel_narrow",
     "actions": []
   },
-  "mashup_edit": {
-    "title": "サブ建物の配置",
+  "building_appearance": {
+    "title": "建物の外観",
     "width": 860,
     "height": 680,
     "resizable": true,

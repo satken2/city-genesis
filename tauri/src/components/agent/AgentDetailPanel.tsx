@@ -36,7 +36,6 @@ import {
   STATUS_CONSTRUCTING,
   STATUS_PENDING,
   STATUS_DEMOLISHING,
-  MODEL_MASHUP
 } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { buildingWarningMask, fetchSpatialWarnings, type SpatialWarning } from "../../utils/agentAlerts";
@@ -385,19 +384,13 @@ export function AgentDetailPanel({
       : undefined) ?? masterData?.agents[agentData.variant]?.display_name;
 
   /**
-   * マッシュアップ建物(MODEL_MASHUP)かどうか。該当する建物には、サブ建物(校舎・体育館などの棟)の
-   * 配置を編集する専用ウィンドウ(mashup_edit)を開くボタンを表示する。
+   * 建物の形(敷地)を持つか。市政府は都市創設で市庁舎を配置するまで建物の形を持たない。
+   * 形のある建物には、status を問わず外観の変更ウィンドウ(building_appearance)を開くボタンを出す。
    */
-  const isMashupBuilding =
-    agentData.is_bd &&
-    masterData?.agents[agentData.variant]?.model_type === MODEL_MASHUP;
+  const hasBuildingBody = agentData.is_bd && (agentData.parcel_id ?? 0) > 0;
 
-  /**
-   * 移転できる市庁舎か。市政府は都市創設で市庁舎を配置するまで建物の形(敷地)を持たないので、
-   * 敷地があるときだけ移転ボタンを出す。
-   */
-  const isRelocatableCityHall =
-    agentData.type === TYPE_CITY && agentData.is_bd && (agentData.parcel_id ?? 0) > 0;
+  /** 移転できる市庁舎か。敷地があるときだけ移転ボタンを出す。 */
+  const isRelocatableCityHall = agentData.type === TYPE_CITY && hasBuildingBody;
 
   // 各詳細セクションの表示条件
   const showBasicInfo = !isImportOrExport;
@@ -669,20 +662,6 @@ export function AgentDetailPanel({
               {showBuildingPanel && <BuildingInfoPanel agent={agentData} />}
               <BuildingInfo agent={agentData} onNavigate={navigateToAgent} />
               {showBuildingPanel && <ParkingInfoPanel agent={agentData} />}
-              {isMashupBuilding && (
-                <button
-                  className="god-edit-open-btn"
-                  type="button"
-                  onClick={() => {
-                    void invoke("open_registered_window", {
-                      windowType: "mashup_edit",
-                      entityId: currentEntityId,
-                    });
-                  }}
-                >
-                  {t("agent.editSubBuildings")}
-                </button>
-              )}
             </>
           )}
 
@@ -727,6 +706,21 @@ export function AgentDetailPanel({
             )
           )}
         </div>
+      )}
+
+      {hasBuildingBody && (
+        <button
+          className="god-edit-open-btn"
+          type="button"
+          onClick={() => {
+            void invoke("open_registered_window", {
+              windowType: "building_appearance",
+              entityId: currentEntityId,
+            });
+          }}
+        >
+          {t("agent.editAppearance")}
+        </button>
       )}
 
       {godMode && (

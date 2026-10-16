@@ -15,14 +15,13 @@
     "parkingNight": "夜间",
     "parkingUsage": "{{used}} / {{capacity}}辆"
   },
-  "mashup_edit": {
-    "hint": "将卡片拖到用地上放置 / 拖动移动 / Shift+拖动旋转 / Delete键删除",
+  "building_appearance": {
+    "variantLabel": "外观 {{index}}",
+    "layoutHint": "将卡片拖到用地上放置 / 拖动移动 / Shift+拖动旋转 / Delete键删除",
     "sizeLabel": "{{width}}×{{height}}m",
     "deleteSelected": "删除所选建筑",
-    "cancel": "取消",
-    "save": "保存",
-    "saveFailed": "附属建筑布局保存失败",
-    "noParcel": "该建筑没有对应的地块",
+    "apply": "应用",
+    "saveFailed": "外观保存失败",
     "noSubbuildings": "该建筑类型没有定义附属建筑"
   }
 }

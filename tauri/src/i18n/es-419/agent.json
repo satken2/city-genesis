@@ -1,7 +1,7 @@
 {
   "agent": {
     "back": "Volver",
-    "editSubBuildings": "Editar distribución de edificios",
+    "editAppearance": "Cambiar apariencia",
     "relocateCityHall": "Trasladar el palacio municipal",
     "publicFacility": "Servicio público",
     "underAcquisition": "Negociando la compra del terreno",
