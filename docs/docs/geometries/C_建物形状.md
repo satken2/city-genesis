@@ -12,10 +12,8 @@
 
 | 値 | 底面 |
 | --- | --- |
-| `SHAPE_FULL` | 区画そのもの。区画いっぱいに建つ |
+| `SHAPE_FULL` | 区画そのもの |
 | `SHAPE_OFFICE` | 区画の向きに合わせた矩形 |
-| `SHAPE_HOUSE` | 接道辺から少し下がって建つ、正方形に近い矩形。ときに L字になる |
-| `SHAPE_COMMERCIAL` | 接道辺に沿った帯状の矩形。店先を道路に向ける |
-| `SHAPE_SETBACK` | 区画の奥に寄せ、接道側に駐車場や資材置き場になる空き地を残す |
-
-台形のような不整形の区画で矩形では面積が大きく足りないとき、`SHAPE_HOUSE`・`SHAPE_OFFICE`・`SHAPE_COMMERCIAL` の底面は区画に内接する凸四角形になり、不整形な区画に詰めて建つ旧市街の街並みを表す。マスターの `resizable` が無効な建物は、底面が `default_width`（間口）×`default_height`（奥行き）の固定の矩形で、区画の中央に接道辺へ向けて置かれる。
+| `SHAPE_HOUSE` | 接道辺から下がって建つ、正方形に近い矩形 |
+| `SHAPE_COMMERCIAL` | 接道辺に沿った帯状の矩形 |
+| `SHAPE_SETBACK` | 区画の奥に寄せ、接道側に空き地を残す |
