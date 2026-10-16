@@ -19,9 +19,9 @@ exe 版は、Windows の MemoryMappedFile(MMF)を方向ごとに1本ずつ使う
 
 ## Envelope
 
-メッセージは `version`・`request_id`・`timestamp`・`source`・`destination`・`event`・`payload` を持つ JSON(Envelope)で、Unity の `IpcEnvelope.cs`、Rust の `messages.rs`、Web シェルで同じ構造に保つ。解析できないメッセージは捨てる。`version` は `"1.0"` のまま変えず、互換性は IPC の契約番号で照合する([バージョニングと互換性](バージョニングと互換性.md))。
+メッセージは、送り手・宛先・イベント名・ペイロードを包む共通の JSON(Envelope)で、Unity の `IpcEnvelope.cs`、Rust の `messages.rs`、Web シェルで同じ構造に保つ。解析できないメッセージは捨てる。
 
-- ui → graphic は、接続の確立に使う `system:ready` などを除き、`event` を `ui:action` にして、`payload` の `action` にイベント名、`params` に引数、`window_type` に送ったウィンドウの種別を入れる。Rust はこれを汎用に転送するので、イベントを足しても Rust の変更は要らない。Unity は `action` で振り分ける。
+- ui → graphic は、接続の確立に使う `system:ready` などを除き、すべて `ui:action` という1つのイベントに包み、イベント名(`action`)と引数(`params`)をペイロードに入れる。Rust はこれを中身を見ずに転送するので、イベントを足しても Rust の変更は要らない。Unity はペイロードの中のイベント名で振り分ける。
 - graphic → ui は、`event` にイベント名をそのまま入れる。Rust が受け取り、多くは同名の Tauri イベントとして全ウィンドウへ流す(コックピットなど特定のウィンドウだけが扱うものは、そのウィンドウへだけ送る)。ウィンドウを開く・ui を隠す・ロードの進み具合を記録するなど、Rust 自身が処理するものもある。Rust に中継の分岐が無いイベントは、どの WebView にも届かない。
 
 ## イベントの命名と定義場所
