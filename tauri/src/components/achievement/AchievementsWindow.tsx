@@ -21,7 +21,7 @@ type QuestsResponse = {
 
 /**
  * 1世帯が都市スコアに貢献しうる最大値。
- * qol_score(最大1.0) + 正規化 env_score(最大1.0) の合計であり、スコア式から定まる固定値。
+ * 都市スコアは世帯満足度(最大1.0)の合計×2 なので、スコア式から定まる固定値。
  * 1世帯あたりスコアのグラフ軸の上限に使う（コックピットと同じ値）。
  */
 const MAX_SCORE_PER_HOUSEHOLD = 2.0;
@@ -40,7 +40,6 @@ type ScoreDetail = {
   epoch: number;
   city_score: number;
   city_score_qol: number;
-  city_score_env: number;
   city_score_per_household: number;
   city_score_collapse_penalty: number;
   city_score_household_count: number;
@@ -56,7 +55,6 @@ type ScoreHistoryItem = {
   city_score: number;
   city_score_per_household: number;
   city_score_qol: number;
-  city_score_env: number;
   city_score_collapse_penalty: number;
   city_score_household_count: number;
 };
@@ -180,7 +178,6 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     return {
       name: t("achievements.epochLabel", { epoch: item.epoch }),
       qol: divisor > 0 ? item.city_score_qol / divisor : 0,
-      env: divisor > 0 ? item.city_score_env / divisor : 0,
       penalty: divisor > 0 ? -item.city_score_collapse_penalty / divisor : 0,
       score: historyMode === "household" ? item.city_score_per_household : item.city_score,
     };
@@ -370,7 +367,6 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               <strong>{fmt(latest.city_score)} {t("achievements.points")}</strong>
               <dl>
                 <div><dt>{t("achievements.qolScore")}</dt><dd>+{fmt(latest.city_score_qol)}</dd></div>
-                <div><dt>{t("achievements.envScore")}</dt><dd>+{fmt(latest.city_score_env)}</dd></div>
                 <div className="resident-score-penalty"><dt>{t("achievements.collapsePenalty")}</dt><dd>{latest.city_score_collapse_penalty > 0 ? "−" : ""}{fmt(latest.city_score_collapse_penalty)}</dd></div>
               </dl>
             </div>
@@ -382,7 +378,6 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             </div>
             <div className="resident-score-legend">
               <span style={{ color: "var(--flat-accent)" }}>■ {t("achievements.qolScore")}</span>
-              <span style={{ color: "var(--flat-good)" }}>■ {t("achievements.envScore")}</span>
               <span style={{ color: "var(--flat-danger)" }}>■ {t("achievements.collapsePenalty")}</span>
               <span>━ {t("achievements.finalScore")}</span>
             </div>
@@ -395,7 +390,6 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                   <ReferenceLine y={0} stroke="#a4bccc" />
                   <Tooltip content={({ active, payload, label }) => active && payload?.length ? <div className="resident-score-tooltip"><strong>{label}</strong>{payload.map((entry) => <div key={String(entry.dataKey)}>{entry.name}: {fmt(Number(entry.value), 2)} {t("achievements.points")}</div>)}</div> : null} />
                   <Bar dataKey="qol" name={t("achievements.qolScore")} stackId="score" fill="#4ea1ff" maxBarSize={30} isAnimationActive={false} />
-                  <Bar dataKey="env" name={t("achievements.envScore")} stackId="score" fill="#6cd47f" maxBarSize={30} isAnimationActive={false} />
                   <Bar dataKey="penalty" name={t("achievements.collapsePenalty")} stackId="score" fill="#ff9a9a" maxBarSize={30} isAnimationActive={false} />
                   <Line dataKey="score" name={t("achievements.finalScore")} stroke="#e0e0e0" strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />
                 </ComposedChart>

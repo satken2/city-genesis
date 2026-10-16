@@ -130,7 +130,6 @@ export type StatisticsReport = {
 type ScoreLatest = {
   city_score: number;
   city_score_qol: number;
-  city_score_env: number;
   city_score_per_household: number;
   city_score_collapse_penalty: number;
 };
@@ -729,10 +728,8 @@ function ScoreBlock({ latest }: { latest: ScoreLatest | null }): ReactNode {
 
   const fmt = (v: number) => v.toLocaleString(undefined, { maximumFractionDigits: 1 });
   const qol = latest.city_score_qol;
-  const env = latest.city_score_env;
   const penalty = latest.city_score_collapse_penalty;
-  const gross = qol + env;
-  const pct = (v: number) => (gross > 0 ? Math.min(100, Math.max(0, (v / gross) * 100)) : 0);
+  const pct = (v: number) => (qol > 0 ? Math.min(100, Math.max(0, (v / qol) * 100)) : 0);
 
   return (
     <div className="epoch-result-score">
@@ -752,7 +749,6 @@ function ScoreBlock({ latest }: { latest: ScoreLatest | null }): ReactNode {
         <span className="epoch-result-score-row-label">{t("epochResult.scoreGain")}</span>
         <div className="epoch-result-score-bar">
           <span className="epoch-result-score-seg epoch-result-score-qol" style={{ width: `${pct(qol)}%` }} />
-          <span className="epoch-result-score-seg epoch-result-score-env" style={{ width: `${pct(env)}%` }} />
         </div>
 
         <span className="epoch-result-score-row-label">{t("epochResult.scoreLoss")}</span>
@@ -768,10 +764,6 @@ function ScoreBlock({ latest }: { latest: ScoreLatest | null }): ReactNode {
         <span className="epoch-result-score-legend-item">
           <span className="epoch-result-score-swatch epoch-result-score-qol" />
           {t("achievements.qolScore")} +{fmt(qol)}
-        </span>
-        <span className="epoch-result-score-legend-item">
-          <span className="epoch-result-score-swatch epoch-result-score-env" />
-          {t("achievements.envScore")} +{fmt(env)}
         </span>
         <span className="epoch-result-score-legend-item">
           <span className="epoch-result-score-swatch epoch-result-score-penalty" />

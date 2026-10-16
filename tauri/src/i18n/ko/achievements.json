@@ -7,7 +7,6 @@
     "perHouseholdScore": "가구당 만족도",
     "currentScore": "전체 가구 합계",
     "qolScore": "생활 수준",
-    "envScore": "주거 환경",
     "collapsePenalty": "사고·재해로 인한 감점",
     "householdCount": "집계 가구 수",
     "scoreHistory": "만족도 추이",
