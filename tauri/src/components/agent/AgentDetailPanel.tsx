@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { AgentData, AgentResponse } from "../../types";
 import {
+  sendCameraFocus,
   sendChangeState,
   sendEditConnectorShow,
   sendEditConnectorHide,
@@ -199,6 +200,12 @@ export function AgentDetailPanel({
     setAgentData(updated.economic_agent);
   };
 
+  /** 経済主体の詳細は形を持たないので、立地区画(テナントは入居先建物の区画)を映す */
+  const focusCamera = async (parcelId: number) => {
+    const parcel = await fetchApi<{ polygon: number[][] }>(buildApiUrl(apiBaseUrl, `/api/v1/parcels/${parcelId}`));
+    await sendCameraFocus("agent_detail", parcel.polygon);
+  };
+
   /** 着工と保留を切り替えるトグルハンドラ */
   const handleStatusToggle = async (checked: boolean) => {
     if (!agentData || statusSaving) return;
@@ -373,6 +380,8 @@ export function AgentDetailPanel({
   /** 立地する土地区画が道路建設などのために市政府と買収交渉中か */
   const underAcquisition = agentData.under_acquisition === true;
 
+  const parcelId = agentData.parcel_id ?? 0; // 0以下は立地区画を持たない
+
   /**
    * マスターデータからバリアントの表示名を取得する。
    * 観光名所(landmark>0)はバリアント名が「観光名所」で全個体共通になってしまうため、
@@ -494,6 +503,7 @@ export function AgentDetailPanel({
         }
         iconFrameColor={underAcquisition ? ACQUISITION_FRAME_COLOR : undefined}
         onNameSave={agentData.public_facility ? handleNameSave : undefined}
+        onFocusCamera={parcelId > 0 ? () => void focusCamera(parcelId).catch(console.error) : undefined}
       />
 
       <AgentAlertsPanel

@@ -1205,6 +1205,22 @@ export async function sendCameraQueryState(): Promise<void> {
 }
 
 /**
+ * `camera.focus`
+ * 3Dカメラを、平面形 [[x, z], ...] の外接矩形が画面に収まる位置へ今の方位のまま滑らかに動かす。
+ * Unity は常駐範囲の外の物体を持たないので、ID ではなく座標で渡す。市民の追跡中・ドライブの乗車中は無視される。
+ */
+export async function sendCameraFocus(windowType: string, polygon: number[][]): Promise<void> {
+  const xs = polygon.map((p) => p[0]);
+  const zs = polygon.map((p) => p[1]);
+  await invoke("send_window_action", {
+    windowType,
+    entity: null,
+    action: "camera:focus",
+    params: { min_x: Math.min(...xs), min_z: Math.min(...zs), max_x: Math.max(...xs), max_z: Math.max(...zs) },
+  });
+}
+
+/**
  * `view.query_state`
  * グラフィックプログラムに現在の表示状態を問い合わせる。
  */

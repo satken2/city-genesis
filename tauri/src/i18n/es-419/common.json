@@ -13,6 +13,7 @@
     "saving": "Guardando...",
     "rename": "Cambiar nombre",
     "renameFailed": "No se pudo cambiar el nombre",
+    "focusCamera": "Ver en la vista 3D",
     "minutes": "min",
     "processing": "Procesando...",
     "cancel": "Cancelar",

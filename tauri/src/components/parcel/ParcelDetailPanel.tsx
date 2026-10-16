@@ -36,6 +36,7 @@ import { RestrictionFields, type RestrictionValues } from "./RestrictionFields";
 import { ParcelOperationPanel } from "./ParcelOperationPanel";
 import { ParcelEnvironmentSection } from "./ParcelEnvironmentSection";
 import {
+  sendCameraFocus,
   sendEditParcelCancelShapeEdit,
   sendEditParcelFinishShapeEdit,
   sendShowParcelFrontPath,
@@ -385,6 +386,7 @@ export function ParcelDetailPanel({
         showStatus={false}
         variantName={variantName}
         name={displayName}
+        onFocusCamera={() => void sendCameraFocus("parcel_detail", parcelData.polygon).catch(console.error)}
       />
 
       <ParcelOperationPanel

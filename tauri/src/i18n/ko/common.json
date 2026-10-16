@@ -13,6 +13,7 @@
     "saving": "저장 중...",
     "rename": "이름 변경",
     "renameFailed": "이름 변경에 실패했습니다",
+    "focusCamera": "3D 뷰에서 보기",
     "minutes": "분",
     "processing": "처리 중...",
     "cancel": "취소",

@@ -13,6 +13,7 @@
     "saving": "保存中...",
     "rename": "名称を変更",
     "renameFailed": "名称の変更に失敗しました",
+    "focusCamera": "3Dビューで見る",
     "cancel": "キャンセル",
     "ok": "OK",
     "delete": "削除",

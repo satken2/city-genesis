@@ -13,6 +13,7 @@
     "saving": "Saving...",
     "rename": "Rename",
     "renameFailed": "Failed to rename",
+    "focusCamera": "Show in 3D view",
     "minutes": "mins",
     "processing": "Processing...",
     "cancel": "Cancel",

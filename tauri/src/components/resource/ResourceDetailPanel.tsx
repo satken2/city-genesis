@@ -25,7 +25,9 @@ import { usePlayMode } from "../../hooks/usePlayMode";
 import { resolveResourceIcon } from "../../utils/resourceIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { TimeSeriesChart } from "../common/TimeSeriesChart";
+import { CameraFocusButton } from "../common/CameraFocusButton";
 import {
+  sendCameraFocus,
   sendChangeDisplay,
   sendViewQueryState,
   IPC_EVENT_VIEW_CURRENT_STATE,
@@ -253,6 +255,9 @@ export function ResourceDetailPanel({
             </span>
           </div>
         </div>
+        <CameraFocusButton
+          onClick={() => void sendCameraFocus("resource_detail", resourceData.polygon).catch(console.error)}
+        />
       </div>
 
       {/* ===== 残量推移グラフ ===== */}

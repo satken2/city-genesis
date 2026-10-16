@@ -30,7 +30,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { NearbyZoneEntry, PathData } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { sendHighlightObjects, sendClearHighlights } from "../../utils/ipc";
+import { sendHighlightObjects, sendClearHighlights, sendCameraFocus } from "../../utils/ipc";
 import type { PathInterferenceHighlight } from "../../utils/ipc";
 import { usePlayMode } from "../../hooks/usePlayMode";
 import { resolvePathIcon } from "../../utils/pathIcon";
@@ -386,6 +386,7 @@ export function PathDetailPanel({
         constructionProgress={pathData.construction_progress ?? undefined}
         onNameSave={handleNameSave}
         nameValue={pathData.name}
+        onFocusCamera={() => void sendCameraFocus("path_detail", pathData.polygon).catch(console.error)}
       />
 
       {/* 建設プロジェクトのタグと、この道路だけを3Dビューで隠す切り替え。

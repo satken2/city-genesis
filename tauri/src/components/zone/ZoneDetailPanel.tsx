@@ -16,7 +16,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { ZoneData, ZoneResponse, ZoneSlotStarvation } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { usePlayMode } from "../../hooks/usePlayMode";
-import { sendZoneUpdated } from "../../utils/ipc";
+import { sendCameraFocus, sendZoneUpdated } from "../../utils/ipc";
 import { InfoHeader } from "../common/InfoHeader";
 import { ColorSwatchPicker } from "../common/ColorSwatchPicker";
 import { DataList } from "../common/DataList";
@@ -201,6 +201,11 @@ export function ZoneDetailPanel({
         showStatus={false}
         onNameSave={saveName}
         nameValue={zoneData.name ?? ""}
+        onFocusCamera={
+          zoneData.polygon.length > 0
+            ? () => void sendCameraFocus("zone_detail", zoneData.polygon).catch(console.error)
+            : undefined
+        }
       />
 
       {/* Basic info section */}

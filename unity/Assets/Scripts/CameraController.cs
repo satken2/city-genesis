@@ -12,7 +12,7 @@ public partial class CameraController : MonoBehaviour
     public float baseMoveSpeed = 150.0f;    // カメラの移動速度（バックエンド基準）
     public float rotationSpeed = 50f; // 回転速度（スケール無関係）
     public float baseHeightSpeed = 2000f;   // 上下移動速度（バックエンド基準）
-    public float baseFocusHeight = 100f;  // フォーカス時のカメラ高度（バックエンド基準）
+    public float baseFocusHeight = 100f;  // 範囲へのフォーカス(FocusOnArea)で寄る距離の下限（バックエンド基準）
     
     [Header("高度による速度調整設定（バックエンド基準）")]
     public float baseReferenceHeight = 150f; // 基準高度（この高度で等倍速度）
@@ -71,6 +71,7 @@ public partial class CameraController : MonoBehaviour
     private Quaternion focusTargetRotation;
     private float focusStartTime; // フォーカス開始時間
     private float focusActiveDuration; // 実行中のフォーカス移動にかける時間（秒）
+    private const float AreaFocusSeconds = 1.5f;
 
     // シングルトンインスタンス
     public static CameraController Instance { get; private set; }
@@ -1145,6 +1146,26 @@ public partial class CameraController : MonoBehaviour
         focusActiveDuration = Mathf.Max(duration, 0.01f);
         focusStartTime = Time.time;
         isFocusing = true;
+    }
+
+    /// <summary>
+    /// XZ の外接矩形(ワールド座標)が画面に収まる距離まで、今の方位のまま滑らかに移動する。
+    /// 俯角は通常モードの範囲に収める。市民の追跡中・ドライブの乗車中はそちらがカメラを動かしているので何もしない。
+    /// </summary>
+    public void FocusOnArea(float minX, float minZ, float maxX, float maxZ)
+    {
+        if (DriveMode.IsRiding || CitizenFollow.IsFollowing) return;
+        if (cam == null) cam = GetComponent<Camera>();
+
+        Vector3 pivot = new Vector3((minX + maxX) * 0.5f, 0f, (minZ + maxZ) * 0.5f);
+        pivot.y = Utils.GetGroundHeight(pivot);
+        float radius = new Vector2(maxX - minX, maxZ - minZ).magnitude * 0.5f;
+        float fov = Mathf.Min(cam.fieldOfView, Camera.VerticalToHorizontalFieldOfView(cam.fieldOfView, cam.aspect));
+        float distance = Mathf.Max(baseFocusHeight, radius / Mathf.Sin(fov * 0.5f * Mathf.Deg2Rad));
+
+        Vector3 euler = transform.rotation.eulerAngles;
+        float pitch = Mathf.Clamp(NormalizePitchAngle(euler.x), minOrbitPitch, maxOrbitPitch);
+        FocusOn(pivot, distance, euler.y, pitch, AreaFocusSeconds);
     }
 
     private void UpdateFocusMovement()

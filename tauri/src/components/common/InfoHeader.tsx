@@ -15,10 +15,14 @@
  * onNameSave を渡すと名称がトグル式の編集可能ラベル(EditableLabel)になる。
  * 名称を変更できるのはプレイヤーが管理する対象(公共施設・パス・地区)だけなので、
  * 変更可否の判断は呼び出し側が行い、ハンドラの有無で表現する。
+ *
+ * onFocusCamera を渡すと、右上(ステータスバーの右)に3Dビューのカメラを対象へ動かすボタンを出す。
+ * 映す位置を持たない対象では渡さない。
  */
 
 import { useTranslation } from "react-i18next";
 import { STATUS_STYLE_MAP } from "../../local-constants";
+import { CameraFocusButton } from "./CameraFocusButton";
 import { EditableLabel } from "./EditableLabel";
 import "./InfoHeader.css";
 
@@ -45,6 +49,8 @@ type InfoHeaderProps = {
   onNameSave?: (next: string) => Promise<void> | void;
   /** 名称編集時の初期値。name がID表記へのフォールバックの場合に生の名称を渡す */
   nameValue?: string;
+  /** 3Dビューのカメラを対象へ動かす処理。指定するとボタンを出す */
+  onFocusCamera?: () => void;
 };
 
 export function InfoHeader({
@@ -59,6 +65,7 @@ export function InfoHeader({
   iconFrameColor,
   onNameSave,
   nameValue,
+  onFocusCamera,
 }: InfoHeaderProps) {
   const { t } = useTranslation();
   const style = status !== undefined ? STATUS_STYLE_MAP[status] ?? { bg: "#6b7280", text: "#ffffff" } : { bg: "#6b7280", text: "#ffffff" };
@@ -86,44 +93,47 @@ export function InfoHeader({
       ) : (
         <img className="info-header-icon" src={iconSrc} alt={name} />
       )}
-      <div className="info-header-body">
-        {showStatus && status !== undefined && (
-          <div
-            className={
-              style.showProgress
-                ? "info-header-status info-header-status--progress"
-                : "info-header-status"
-            }
-            style={{ backgroundColor: style.bg, color: style.text }}
-          >
-            {style.showProgress ? (
-              <div className="info-header-progress-bar">
-                <div
-                  className="info-header-progress-fill"
-                  style={{ width: `${progress}%`, backgroundColor: style.bg }}
-                />
-                <span className="info-header-progress-label">
-                  {statusLabel} {progress.toFixed(0)}%
-                </span>
-              </div>
-            ) : (
-              <span>{statusLabel}</span>
-            )}
-          </div>
-        )}
-        {variantName && (
-          <span className="info-header-variant">{variantName}</span>
-        )}
-        {onNameSave ? (
-          <EditableLabel
-            value={nameValue ?? name}
-            displayText={name}
-            textClassName="info-header-name"
-            onSave={onNameSave}
-          />
-        ) : (
-          <span className="info-header-name">{name}</span>
-        )}
+      <div className="info-header-main">
+        <div className="info-header-body">
+          {showStatus && status !== undefined && (
+            <div
+              className={
+                style.showProgress
+                  ? "info-header-status info-header-status--progress"
+                  : "info-header-status"
+              }
+              style={{ backgroundColor: style.bg, color: style.text }}
+            >
+              {style.showProgress ? (
+                <div className="info-header-progress-bar">
+                  <div
+                    className="info-header-progress-fill"
+                    style={{ width: `${progress}%`, backgroundColor: style.bg }}
+                  />
+                  <span className="info-header-progress-label">
+                    {statusLabel} {progress.toFixed(0)}%
+                  </span>
+                </div>
+              ) : (
+                <span>{statusLabel}</span>
+              )}
+            </div>
+          )}
+          {variantName && (
+            <span className="info-header-variant">{variantName}</span>
+          )}
+          {onNameSave ? (
+            <EditableLabel
+              value={nameValue ?? name}
+              displayText={name}
+              textClassName="info-header-name"
+              onSave={onNameSave}
+            />
+          ) : (
+            <span className="info-header-name">{name}</span>
+          )}
+        </div>
+        {onFocusCamera && <CameraFocusButton onClick={onFocusCamera} />}
       </div>
     </div>
   );

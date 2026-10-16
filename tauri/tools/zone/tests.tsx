@@ -85,7 +85,7 @@ await act(async () => { editRoot.unmount(); });
 window.HTMLCanvasElement.prototype.getContext = originalGetContext;
 console.log("PASS: district editing renders only polygon outlines and still selects empty districts by road side");
 
-let zone = { zone_id: 7, name: "District", color: "#abcdef", auto_managed: true, area: 100,
+let zone = { zone_id: 7, name: "District", color: "#abcdef", auto_managed: true, area: 100, polygon: [] as Ring,
   allowed_bd_mask: 0, limit_coverage_ratio: 0.6, limit_volume_ratio: 2, limit_height: 30 };
 const updates: Record<string, unknown>[] = [];
 let failSave = false;

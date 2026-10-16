@@ -871,6 +871,12 @@ public class IpcClient : MonoBehaviour
                     EmitCameraState();
                     break;
 
+                case "camera:focus":
+                    CameraController.Instance?.FocusOnArea(
+                        GetParamFloat(payload, "min_x"), GetParamFloat(payload, "min_z"),
+                        GetParamFloat(payload, "max_x"), GetParamFloat(payload, "max_z"));
+                    break;
+
                 case "camera:capture_thumbnail":
                     Debug.Log("IpcClient: camera:capture_thumbnail");
                     OnCameraCaptureThumbnail?.Invoke(GetParamString(payload, "id"));

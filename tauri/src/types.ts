@@ -875,6 +875,7 @@ export type PathData = {
   path_variant: number;
   status: number;
   alert?: number;
+  polygon: number[][];
   under_maintenance: boolean | null;
   zone_id: number;
   zone_name: string | null;

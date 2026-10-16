@@ -44,6 +44,15 @@
   padding-top: 2px;
 }
 
+/* 本文とカメラのボタン。ボタンを本文の1行目(ステータスバーなど)の右に揃えるため、本文と上端を合わせる */
+.info-header-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
 .info-header-body {
   display: flex;
   flex-direction: column;

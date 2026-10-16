@@ -13,6 +13,7 @@
     "saving": "保存中...",
     "rename": "重命名",
     "renameFailed": "重命名失败",
+    "focusCamera": "在3D视图中查看",
     "minutes": "分钟",
     "processing": "处理中...",
     "cancel": "取消",
