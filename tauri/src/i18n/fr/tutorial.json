@@ -96,7 +96,7 @@
       "step1": {
         "title": "Créons un quartier",
         "description": "Le quartier découpe la ville en zones et se définit de chaque côté des routes. Une parcelle appartient au quartier du côté de la route qu'elle borde. Appuyez sur le bouton des quartiers du panneau d'icônes pour ouvrir la fenêtre Modifier les quartiers : le réseau de routes en H forme un seul quartier.",
-        "create": "Ce réseau n'a aucun îlot entouré de routes : passez donc le mode de peinture sur « Côté de rue ». Avec l'outil « Nouveau quartier », maintenez Ctrl et faites glisser le long de la route en haut à droite du H. Les deux côtés de la route peinte, avec les parcelles qui les bordent, deviennent un nouveau quartier."
+        "create": "Ce réseau n'a aucun îlot entouré de routes : utilisez donc le mode de peinture « Côté de rue ». Passez l'outil sur « Nouveau quartier », maintenez Ctrl et faites glisser le long de la route en haut à droite du H. Les deux côtés de la route peinte, avec les parcelles qui les bordent, deviennent un nouveau quartier."
       },
       "step2": {
         "title": "Le quartier est découpé",

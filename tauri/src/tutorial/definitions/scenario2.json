@@ -43,6 +43,7 @@
               "hud.district"
             ],
             "highlight": [
+              "zone_edit.tool:create",
               "zone_edit.mode:road"
             ]
           },

@@ -90,6 +90,7 @@ async function paint(streets: StreetEdge[], parcels: typeof parcel[], points: [n
         start_point: [path.centerline[0][0], 0, path.centerline[0][1]],
         end_point: [path.centerline[1][0], 0, path.centerline[1][1]] })) });
   });
+  await act(async () => { container.querySelector<HTMLButtonElement>('[data-guide-value="create"]')!.click(); });
   await act(async () => { container.querySelector<HTMLButtonElement>(`[data-guide-value="${mode}"]`)!.click(); });
   const event = ([x, z]: [number, number]) => ({ world: { x, z }, screen: { x: 0, y: 0 },
     view: { zoom: 40, offsetX: 0, offsetY: 0 }, event: { ctrlKey: true, button: 0 } as PointerEvent });

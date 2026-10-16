@@ -199,7 +199,7 @@ for (const mutate of [
     shown.facts.windows.panel.visible = false;
     check((await phase()).id, "open", `${id}: closing the panel rewinds`);
   }
-  // 地区編の step1: 地区編集ウィンドウを開くまでは全景でボタンを案内し、開いたらマーカーの道路へカメラが寄り、塗り方の「道路単位」を強調する。
+  // 地区編の step1: 地区編集ウィンドウを開くまでは全景でボタンを案内し、開いたらマーカーの道路へカメラが寄り、ツールの「新規地区」と塗り方の「道路単位」を強調する。
   const zoning = DEFINITIONS.scenario2.steps[0], editor = fake();
   const now = async () => zoning.phases[await findPhase(zoning, editor)];
   check((await now()).id, "enter", "district guide starts before the zone editor opens");
@@ -208,7 +208,7 @@ for (const mutate of [
   editor.facts.windows.zone = { visible: true, window: "zone_edit" };
   check([(await now()).id, (await now()).world.markers], ["create", [[60, 0, 120]]], "opening the zone editor moves on and shows the road marker");
   check((await now()).world.camera!.distance < zoning.phases[0].world.camera!.distance, true, "the camera approaches the marker");
-  check((await now()).ui.highlight, ["zone_edit.mode:road"], "the street-side brush is highlighted");
+  check((await now()).ui.highlight, ["zone_edit.tool:create", "zone_edit.mode:road"], "the new-district tool and the street-side brush are highlighted");
   editor.facts.windows.zone.visible = false;
   check((await now()).id, "enter", "closing the zone editor rewinds");
   check(await evaluate({ type: "hudMode", mode: "district" }, editor), false, "hudMode is false in the normal state");

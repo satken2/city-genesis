@@ -96,7 +96,7 @@
       "step1": {
         "title": "Create a District",
         "description": "A district is a unit that divides the city into areas, and it is assigned to each side of a road. A parcel belongs to the district on the side of the road it faces. Press the district button on the icon panel to open the Edit Districts window: you'll see that the H-shaped road network forms a single district.",
-        "create": "This road network has no blocks enclosed by roads, so switch the brush to \"Street Side\". Keeping the \"New District\" tool, hold Ctrl and drag along the upper-right road of the H. Both sides of the road you paint, along with the parcels facing them, become a new district."
+        "create": "This road network has no blocks enclosed by roads, so use the \"Street Side\" brush. Switch the tool to \"New District\", hold Ctrl and drag along the upper-right road of the H. Both sides of the road you paint, along with the parcels facing them, become a new district."
       },
       "step2": {
         "title": "District Created",

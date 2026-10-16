@@ -96,7 +96,7 @@
       "step1": {
         "title": "Creemos un distrito",
         "description": "El distrito divide la ciudad en zonas y se define a cada lado de las calles. Cada parcela pertenece al distrito del lado de la calle al que da. Pulsa el botón de distritos del panel de iconos para abrir la ventana Editar distritos: verás que la red de calles en forma de H es un solo distrito.",
-        "create": "Esta red no tiene manzanas rodeadas por calles, así que cambia el modo de pintura a «Lado de calle». Con la herramienta «Nuevo distrito», mantén pulsada la tecla Ctrl y arrastra sobre la calle superior derecha de la H. Los dos lados de la calle que pintes, con las parcelas que dan a ellos, pasarán a ser un distrito nuevo."
+        "create": "Esta red no tiene manzanas rodeadas por calles, así que usa el modo de pintura «Lado de calle». Cambia la herramienta a «Nuevo distrito», mantén pulsada la tecla Ctrl y arrastra sobre la calle superior derecha de la H. Los dos lados de la calle que pintes, con las parcelas que dan a ellos, pasarán a ser un distrito nuevo."
       },
       "step2": {
         "title": "El distrito quedó dividido",

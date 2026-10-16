@@ -14,6 +14,7 @@
  *   - ブロック一括: 生活道路に囲まれたブロックに触れたら、境界の道路のブロック側の面をすべて拾う。
  *   - 道路単位: 道路区間の片側を拾う。接道区画をなぞっても選べる。
  *     直接なぞった面に両端を挟まれた道路が1本だけあれば、その面も一緒に拾う。
+ * 開いたときの既定は「既存地区の拡張」と「道路単位」。
  * 操作: Ctrl+左ドラッグ=なぞる(離した時点で送信) / 左ドラッグ=パン / ホイール=ズーム。
  *
  * ブラシは画面上で一定の半径なので、ズームすれば塗れる範囲が変わり、大きさの設定は持たない。
@@ -169,8 +170,8 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const mapRef = useRef<CityMapCanvasHandle>(null);
 
-  const [tool, setTool] = useState<Tool>("create");
-  const [mode, setMode] = useState<PaintMode>("block");
+  const [tool, setTool] = useState<Tool>("expand");
+  const [mode, setMode] = useState<PaintMode>("road");
   const [previewColor, setPreviewColor] = useState(randomZoneColor);
   const [hoverZoneId, setHoverZoneId] = useState<number | null>(null);
   const [zones, setZones] = useState<ZoneShape[]>([]);
