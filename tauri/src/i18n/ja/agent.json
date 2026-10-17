@@ -40,6 +40,7 @@
     "tenants": "入居テナント",
     "tabBasicInfo": "基本情報",
     "utilizationTarget": "稼働率目標",
+    "currentUtilization": "現在の稼働率",
     "constructionSpeed": "建設スピード",
     "constructionCostPerEpoch": "1エポックの建設コスト",
     "remainingConstruction": "残り建設期間",

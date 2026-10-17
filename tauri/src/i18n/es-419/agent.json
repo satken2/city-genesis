@@ -40,6 +40,7 @@
     "tenants": "Inquilinos",
     "tabBasicInfo": "Información básica",
     "utilizationTarget": "Utilización objetivo",
+    "currentUtilization": "Utilización actual",
     "constructionSpeed": "Velocidad de construcción",
     "constructionCostPerEpoch": "Costo de obra por época",
     "remainingConstruction": "Duración restante",

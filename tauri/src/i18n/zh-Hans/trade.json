@@ -4,7 +4,8 @@
     "amount": "供给量",
     "price": "供给价格",
     "soldAmount": "售出量",
-    "profitRate": "利润率"
+    "profitRate": "利润率",
+    "utilization": "利用率"
   },
   "demand": {
     "product": "商品",

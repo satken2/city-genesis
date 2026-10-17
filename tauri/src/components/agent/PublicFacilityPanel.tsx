@@ -9,6 +9,8 @@
  *   停止と開始は同一ボタンでアイコンを切り替えるトグルとして実装する。
  * - 稼働率目標(建設中は「建設スピード」、定常生産施設は「稼働率目標」)。同じボタン列の
  *   右端に「アイコン+現在値」のボタンとして置き、押したときだけスライダーを展開する。
+ *   稼働率目標では現在値を「実稼働率 / 稼働率目標」で示し、スライダーの下にも実稼働率を出す
+ *   (建設スピードには対になる実績値がないため設定値だけを示す)。
  *
  * 放棄は維持を諦めた状態であり、放棄中は放棄解除以外の操作をすべて無効化する
  * (修繕・停止/開始・取り壊しはいずれも「維持している施設」への操作のため)。
@@ -230,6 +232,8 @@ export function PublicFacilityPanel({
   const isConstructing = status === STATUS_CONSTRUCTING;
   const showSlider = isConstructing || isHeadroomFacility;
   const sliderMax = isConstructing ? 500 : 100;
+  const actualUtilization = agent.utilization?.[0];
+  const actualUtilizationText = actualUtilization != null ? `${Math.round(actualUtilization * 100)}%` : "—";
 
   return (
     <div className="pf-panel">
@@ -398,7 +402,9 @@ export function PublicFacilityPanel({
           >
             <UtilizationIcon />
             <span className="operation-btn__util-value">
-              {utilizationTarget}%
+              {isConstructing
+                ? `${utilizationTarget}%`
+                : `${actualUtilizationText} / ${utilizationTarget}%`}
             </span>
           </button>
         )}
@@ -407,7 +413,7 @@ export function PublicFacilityPanel({
       {/* キャプションはスライダーを開いたときだけ出す(閉じている間はボタンの
           ツールチップが担う)。スライダーの左に置いて何のつまみかを示す。 */}
       {showSlider && sliderOpen && (
-        <div className="agent-detail-utilization-target-slider-container">
+        <div className="pf-panel__util-slider">
           <span className="agent-detail-utilization-target-title">
             {isConstructing
               ? t("agent.constructionSpeed", "建設スピード")
@@ -423,6 +429,14 @@ export function PublicFacilityPanel({
             onTouchEnd={onUtilizationCommit}
             className="agent-detail-utilization-target-slider"
           />
+          {!isConstructing && (
+            <>
+              <span className="agent-detail-utilization-target-title">
+                {t("agent.currentUtilization")}
+              </span>
+              <span className="pf-panel__util-current">{actualUtilizationText}</span>
+            </>
+          )}
         </div>
       )}
 

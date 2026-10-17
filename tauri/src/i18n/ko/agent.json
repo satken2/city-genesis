@@ -40,6 +40,7 @@
     "tenants": "입주 테넌트",
     "tabBasicInfo": "기본 정보",
     "utilizationTarget": "가동률 목표",
+    "currentUtilization": "현재 가동률",
     "constructionSpeed": "건설 속도",
     "constructionCostPerEpoch": "1에포크당 건설 비용",
     "remainingConstruction": "남은 공사 기간",

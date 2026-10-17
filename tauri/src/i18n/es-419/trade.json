@@ -4,7 +4,8 @@
     "amount": "Cantidad ofrecida",
     "price": "Precio de venta",
     "soldAmount": "Cantidad vendida",
-    "profitRate": "Margen de ganancia"
+    "profitRate": "Margen de ganancia",
+    "utilization": "Utilización"
   },
   "demand": {
     "product": "Producto",

@@ -40,6 +40,7 @@
     "tenants": "Occupants",
     "tabBasicInfo": "Informations générales",
     "utilizationTarget": "Taux d'utilisation visé",
+    "currentUtilization": "Taux d'utilisation actuel",
     "constructionSpeed": "Vitesse de construction",
     "constructionCostPerEpoch": "Coût de chantier par époque",
     "remainingConstruction": "Durée restante",

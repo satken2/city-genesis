@@ -51,6 +51,20 @@
   line-height: 1;
 }
 
+/* 展開したスライダーと、その下の実稼働率。2列のグリッドにしてキャプションの幅をそろえ、
+   実稼働率の数値をスライダーの左端に合わせる */
+.pf-panel__util-slider {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.pf-panel__util-current {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
 /* 削除ボタンの左側に隙間を空ける */
 .pf-panel .operation-btn--delete {
   margin-left: 12px;

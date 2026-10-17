@@ -1,0 +1,18 @@
+/* 供給情報コンポーネント(SupplyInfoPanel)のスタイル */
+
+/* 稼働率の行。共通メーターを値セルの幅いっぱいに伸ばし、右に百分率を添える */
+.supply-info-meter {
+  gap: 8px;
+}
+
+.supply-info-meter .meter {
+  flex: 1;
+  min-width: 0;
+}
+
+.supply-info-meter-value {
+  flex-shrink: 0;
+  min-width: 32px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

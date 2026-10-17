@@ -4,7 +4,8 @@
     "amount": "공급량",
     "price": "공급 가격",
     "soldAmount": "판매량",
-    "profitRate": "이익률"
+    "profitRate": "이익률",
+    "utilization": "가동률"
   },
   "demand": {
     "product": "상품",

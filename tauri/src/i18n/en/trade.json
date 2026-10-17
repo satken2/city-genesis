@@ -4,7 +4,8 @@
     "amount": "Supply Amount",
     "price": "Supply Price",
     "soldAmount": "Sold Amount",
-    "profitRate": "Profit Rate"
+    "profitRate": "Profit Rate",
+    "utilization": "Utilization"
   },
   "demand": {
     "product": "Product",

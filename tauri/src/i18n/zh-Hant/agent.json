@@ -40,6 +40,7 @@
     "tenants": "進駐租戶",
     "tabBasicInfo": "基本資訊",
     "utilizationTarget": "使用率目標",
+    "currentUtilization": "目前使用率",
     "constructionSpeed": "建設速度",
     "constructionCostPerEpoch": "每紀元建設成本",
     "remainingConstruction": "剩餘工期",

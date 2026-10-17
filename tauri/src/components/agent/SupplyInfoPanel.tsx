@@ -2,15 +2,18 @@
  * 供給情報コンポーネント
  *
  * 経済主体がTYPE_STANDARDの場合に表示される供給情報セクション。
- * 供給製品名・供給価格・供給量・販売量・利益率をグリッド形式で表示する。
+ * 供給製品名・供給価格・供給量・販売量・利益率・稼働率をグリッド形式で表示する。
  * 製品名と単位はマスターデータ(products)から取得する。
  * 販売量(supply_sold_amount)と利益率(profit_rates)はDataListで表示し、履歴推移を確認できる。
+ * 稼働率は直近エポックの値(utilization の先頭要素)を共通メーターと百分率で表示する。
  */
 
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { DataList } from "../common/DataList";
+import { Meter } from "../common/Meter";
+import "./SupplyInfoPanel.css";
 
 type SupplyInfoPanelProps = {
   agent: AgentData;
@@ -34,6 +37,7 @@ export function SupplyInfoPanel({ agent }: SupplyInfoPanelProps) {
   // profit_rates は (収益-費用)/収益 の比率(-1〜1)で届くため、表示時に百分率へ換算する
   const formatPercent = (value: number) => `${(value * 100).toFixed(2)}%`;
   const formatCurrency = (value: number) => t("common.currency", { value: value.toFixed(2) });
+  const utilization = agent.utilization?.[0];
 
   return (
     <section className="agent-detail-section">
@@ -97,6 +101,18 @@ export function SupplyInfoPanel({ agent }: SupplyInfoPanelProps) {
                 formatter={formatPercent}
                 clampRange={[-1, 1]}
               />
+            </span>
+          </>
+        )}
+
+        {utilization != null && (
+          <>
+            <span className="agent-detail-label">
+              {t("supply.utilization")}
+            </span>
+            <span className="agent-detail-value supply-info-meter">
+              <Meter value={utilization} />
+              <span className="supply-info-meter-value">{`${Math.round(utilization * 100)}%`}</span>
             </span>
           </>
         )}
