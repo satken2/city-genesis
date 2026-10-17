@@ -52,6 +52,8 @@ type BudgetAgent = {
   status: number;
   actual_expense: number;
   projected_expense: number;
+  /** 次エポックの支払見込み。在庫で賄う原材料を数えないので projected_expense(必要額)以下になる */
+  projected_payment: number;
   utilization_target?: number;
   construction_cost_per_epoch?: number;
   remaining_epochs?: number | null;
@@ -204,28 +206,29 @@ function getCategoryTier(key: string, tiers: Record<string, number>): number {
 const TIER_ORDER = [1, 2, 3, 4] as const;
 
 /**
- * 予算カテゴリごとの「必要金額」(＝比率スライダーの分母・カードの表示値)を、予算パネルの
- * 施設別リストと同一の per施設値(projected_expense)の単純合計として求める。これにより
+ * 予算パネルの施設別リストの per施設値をカテゴリ別に合計する。
+ * 「必要金額」(＝比率スライダーの分母・カードの表示値)は projected_expense の合計なので、
  * カードの必要金額とリストの「次見込み」合計が常に一致する。projected_expense は各施設が
  * 自身の utilization_target どおり稼働した場合の1エポック見込み費用であり、バックエンドの
  * estimate_projected_required と build_budget_rows が同一の算出元を共有するため両者は一致する。
  * 実効稼働率は施設別の utilization_target のみで決まる(カテゴリ全体の稼働率という概念は廃止済み)。
  */
-function computeBaseAmounts(
+function sumByCategory(
   budgetAgents: BudgetAgent[] | null,
+  field: "projected_expense" | "projected_payment",
 ): Record<string, number> {
-  const base: Record<string, number> = {};
-  if (!budgetAgents) return base;
+  const sums: Record<string, number> = {};
+  if (!budgetAgents) return sums;
   for (const agent of budgetAgents) {
     const catKey = String(agent.category_id);
     if (catKey === LEDGER_RESERVE_KEY) continue;
-    base[catKey] = (base[catKey] ?? 0) + agent.projected_expense;
+    sums[catKey] = (sums[catKey] ?? 0) + agent[field];
   }
-  return base;
+  return sums;
 }
 
 /**
- * プレイヤーが設定した「必要額に対する比率(％)」と基準額(computeBaseAmounts)から
+ * プレイヤーが設定した「必要額に対する比率(％)」と基準額(sumByCategory)から
  * 実際に配分される予算額(円)を導出する。バックエンドの City.maintain_and_scale_budget を
  * 忠実に反映したプレビュー計算：desired = 基準額 × 比率(0〜150%)、希望合計が配分可能額
  * (現金)を超える場合は維持優先度の低い Tier 4→1 の順に削減して収める
@@ -520,7 +523,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         setBudgetAgents(agentsRes.agents);
 
         // プレイヤーの比率入力（％）を初期化する。
-        // 基準額（必要金額）は施設別リスト（budgetAgents）から computeBaseAmounts で導出する。
+        // 基準額（必要金額）は施設別リスト（budgetAgents）から sumByCategory で導出する。
         const ratios: Record<string, number> = {};
         if (masterData?.budget_categories) {
           for (const catId of Object.keys(masterData.budget_categories)) {
@@ -675,7 +678,11 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   // 予算導出の基準額（必要額）。予算パネルの施設別リストと
   // 同一の per施設値の合計として求めるため、施設一覧の合計と常に一致する。
   const baseAmounts = useMemo(
-    () => computeBaseAmounts(budgetAgents),
+    () => sumByCategory(budgetAgents, "projected_expense"),
+    [budgetAgents],
+  );
+  const paymentAmounts = useMemo(
+    () => sumByCategory(budgetAgents, "projected_payment"),
     [budgetAgents],
   );
 
@@ -708,11 +715,12 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   /**
    * 収支バランスの積み上げ系列とデータ行。
    *
-   * X軸は「収入(前エポック実績)」「支出(次エポック予算)」の2本が基本で、現金不足で
-   * 希望額が削られている場合だけ「圧縮前(削減前の希望額)」の3本目が加わる。
-   * 収入側は税(TAX_REVENUE_META)＋公営事業収入(buildBusinessRevenueItems)、
-   * 支出側は編集中の予算枠(pendingBudgets)をカテゴリ別に積み上げる。支出側の色は
-   * 施設一覧・カテゴリカードと同じ spendCategoryColor で統一する。
+   * X軸は「収入(前エポック実績)」「支出(次エポックの支払見込み)」の2本が基本で、現金不足で
+   * 支出が削られる場合だけ「圧縮前(削減前の希望額での支出)」の3本目が加わる。
+   * 収入側は税(TAX_REVENUE_META)＋公営事業収入(buildBusinessRevenueItems)。
+   * 支出側はカテゴリごとに min(予算, 支払見込み) を積み上げる。予算は支出の上限で、それを
+   * 超える支出は計画の縮小や残予算での打ち切りで止まり、予算が余っても支払見込みより多くは出ていかない。
+   * 支出側の色は施設一覧・カテゴリカードと同じ spendCategoryColor で統一する。
    * 値が0の系列は凡例が無駄に長くなるだけなので、系列ごと落とす。
    */
   const balanceChart = useMemo(() => {
@@ -766,27 +774,28 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       revenueRow[key] = item.value;
     });
 
-    // --- 支出側: カテゴリ別の確定予算と、削減前の希望額 ---
+    // --- 支出側: カテゴリ別の確定予算での支出と、削減前の希望額での支出 ---
     const expenseSeries: BalanceSeries[] = [];
     const preSeries: BalanceSeries[] = [];
     let totalExpense = 0;
     let totalDesired = 0;
     for (const c of visibleCategories) {
       const catKey = String(c.id);
-      const budget = pendingBudgets[catKey] ?? 0;
-      const desired = desiredBudgets[catKey] ?? 0;
-      totalExpense += budget;
+      const payment = paymentAmounts[catKey] ?? 0;
+      const expense = Math.min(pendingBudgets[catKey] ?? 0, payment);
+      const desired = Math.min(desiredBudgets[catKey] ?? 0, payment);
+      totalExpense += expense;
       totalDesired += desired;
-      if (budget <= 0 && desired <= 0) continue;
+      if (expense <= 0 && desired <= 0) continue;
       const label = t(`budget.category.${c.id}`, { defaultValue: c.display_name });
       const color = spendCategoryColor(c.id);
       expenseSeries.push({ key: `exp_${catKey}`, label, color });
       preSeries.push({ key: `pre_${catKey}`, label, color });
-      expenseRow[`exp_${catKey}`] = budget;
+      expenseRow[`exp_${catKey}`] = expense;
       preRow[`pre_${catKey}`] = desired;
     }
 
-    // 希望額が確定予算を上回っている＝現金不足で支出が圧縮された状態。
+    // 希望額での支出が確定予算での支出を上回っている＝現金不足で支出が圧縮された状態。
     const compressed = totalDesired > totalExpense + 1;
     const rows = compressed
       ? [revenueRow, expenseRow, preRow]
@@ -801,7 +810,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       totalDesired,
       compressed,
     };
-  }, [budgetData, masterData, visibleCategories, pendingBudgets, desiredBudgets, t]);
+  }, [budgetData, masterData, visibleCategories, pendingBudgets, desiredBudgets, paymentAmounts, t]);
 
   const filteredAgents = useMemo(() => {
     if (!budgetAgents) return [];
@@ -1114,7 +1123,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               </div>
             </div>
 
-            {/* 下段右: 収支バランス。左の棒=収入(前エポック実績)、右の棒=支出(次エポック予算)。
+            {/* 下段右: 収支バランス。左の棒=収入(前エポック実績)、右の棒=支出(次エポックの支払見込み)。
                 現金不足で支出が圧縮された場合のみ、圧縮前の希望額を薄い3本目の棒で描く。 */}
             <div className="budget-window__balance-section">
               <div className="budget-window__balance-header">
@@ -1123,7 +1132,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                 </h3>
                 <span className="budget-window__balance-note">
                   {t("budget.balanceNote", {
-                    defaultValue: "収入=前エポック実績 / 支出=次エポック予算",
+                    defaultValue: "収入=前エポック実績 / 支出=次エポック支払見込み",
                   })}
                 </span>
               </div>

@@ -28,7 +28,7 @@
     "reservesForecast": "예측(최근 추세)",
     "reservesEpochLabel": "에포크 {{n}}",
     "balanceTitle": "수지 균형",
-    "balanceNote": "수입=이전 에포크 실적 / 지출=다음 에포크 예산",
+    "balanceNote": "수입=이전 에포크 실적 / 지출=다음 에포크 지급 전망",
     "balanceRevenue": "수입",
     "balanceExpense": "지출",
     "balancePreCompress": "압축 전",

@@ -28,7 +28,7 @@
     "reservesForecast": "予測(直近トレンド)",
     "reservesEpochLabel": "エポック {{n}}",
     "balanceTitle": "収支バランス",
-    "balanceNote": "収入=前エポック実績 / 支出=次エポック予算",
+    "balanceNote": "収入=前エポック実績 / 支出=次エポック支払見込み",
     "balanceRevenue": "収入",
     "balanceExpense": "支出",
     "balancePreCompress": "圧縮前",
