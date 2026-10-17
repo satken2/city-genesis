@@ -1,11 +1,10 @@
 /**
  * 予算ミニメーター（コックピット常駐）
  *
- * 直近1期の市の「収入」に対する「予算見込み額（必要額）」の割合を、常時コックピットに表示する
- * 小型メーター。市の収支を一目で示すためのもので、100% が収支トントン、超えれば赤字見込みを表す。
+ * 直近1期の市の「収入」に対する「予算見込み額（必要額）」の収支率（(収入 − 見込み) / 収入）を、
+ * 常時コックピットに表示する小型メーター。市の収支を一目で示すためのもので、BalanceMeter の中央が
+ * 収支トントン、左へ振れるほど赤字見込みを表す。
  *
- * - メーター全体の横幅 = 直近1期の収入、色塗り幅 = 予算見込み額（ratio = 見込み / 収入）
- * - ratio < 0.9: 緑 / 0.9〜1.0: 黄 / 1.0超（赤字見込み）: 赤 ＋ 枠線も赤
  * - 10秒に1回バックエンドをREST取得して最新化する
  * - クリックで CityBudgetWindow を開く
  *
@@ -18,7 +17,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LEDGER_RESERVE } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { Meter } from "../common/Meter";
+import { BalanceMeter } from "../common/BalanceMeter";
 import "./hud.css";
 
 /** バックエンドのポーリング間隔（ミリ秒） */
@@ -37,13 +36,6 @@ function sumProjected(projectedRequired: Record<string, number>): number {
     total += value;
   }
   return total;
-}
-
-/** ratio に応じた塗り色を返す。1.0超=赤（赤字見込み）、0.9以上=黄、それ未満=緑。 */
-function getFillColor(ratio: number): string {
-  if (ratio > 1) return "#ef4444";
-  if (ratio >= 0.9) return "#eab308";
-  return "#22c55e";
 }
 
 export function BudgetMiniMeter({
@@ -87,28 +79,26 @@ export function BudgetMiniMeter({
   }, [apiBaseUrl]);
 
   const hasData = revenue !== null && projected !== null;
-  // 収入<=0 のときは 0 除算を避ける。収入なしで支出するのは赤字なので見込みが正なら赤、見込み0なら緑。
-  const ratio =
+  // 収入<=0 のときは 0 除算を避ける。収入なしで支出するのは赤字なので見込みが正なら左端、見込み0なら中央。
+  const balance =
     hasData && revenue! > 0
-      ? projected! / revenue!
+      ? (revenue! - projected!) / revenue!
       : hasData && projected! > 0
-        ? Infinity
+        ? -Infinity
         : 0;
-  const over = ratio > 1;
-  const fillColor = getFillColor(ratio);
 
   return (
     <button
       type="button"
       id="budget"
-      className={`hud-mini-meter${over ? " hud-mini-meter--alert" : ""}`}
+      className="hud-mini-meter"
       onClick={onOpen}
       title={t("taskbar.budgetMeterTooltip")}
     >
       <span className="hud-mini-meter__label">{t("taskbar.budgetMeterLabel")}</span>
       <div className="hud-mini-meter__bar">
         {hasData ? (
-          <Meter value={ratio} color={fillColor} />
+          <BalanceMeter value={balance} />
         ) : (
           <span className="hud-mini-meter__placeholder">—</span>
         )}

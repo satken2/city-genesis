@@ -137,7 +137,7 @@
     "menuPropPlacement": "Colocación de props",
     "menuExecute": "Iniciar",
     "budgetMeterLabel": "Presupuesto",
-    "budgetMeterTooltip": "Presupuesto previsto / ingresos recientes",
+    "budgetMeterTooltip": "(Ingresos recientes − presupuesto previsto) / ingresos recientes",
     "scoreMeterLabel": "Puntaje",
     "scoreMeterTooltip": "Puntaje de gestión (por hogar, máximo 2.0)",
     "menuCitizenTracking": "Lista de seguimiento"

@@ -137,7 +137,7 @@
     "menuPropPlacement": "Prop Placement",
     "menuExecute": "Execute",
     "budgetMeterLabel": "Budget",
-    "budgetMeterTooltip": "Projected budget / recent revenue",
+    "budgetMeterTooltip": "(Recent revenue − projected budget) / recent revenue",
     "scoreMeterLabel": "Score",
     "scoreMeterTooltip": "Governance score (per household, max 2.0)",
     "menuCitizenTracking": "Tracking list"
