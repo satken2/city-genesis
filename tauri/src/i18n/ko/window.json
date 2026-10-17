@@ -66,7 +66,8 @@
       "zoneBorders": "지구 경계선",
       "elevation": "표고",
       "contours": "등고선",
-      "grid": "그리드"
+      "grid": "그리드",
+      "labels": "라벨"
     },
     "overlay": {
       "title": "오버레이",

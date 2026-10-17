@@ -267,23 +267,21 @@
   letter-spacing: 0.04em;
 }
 
-/* 凡例(InfraMapLegend)。文字の大きさと色はここで決める */
+/* 凡例(InfraMapLegend)。文字の大きさと色はここで決める。網と効果範囲を重ねる財では2段になる */
 .infra-tab__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   font-size: 1rem;
   color: #8ba3bb;
 }
 
-/* ローディング・エラー状態 */
-.infra-tab__loading,
-.infra-tab__error {
+/* 表示できる財が無いとき */
+.infra-tab__loading {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
   color: #9ca3af;
   font-size: 1rem;
-}
-
-.infra-tab__error {
-  color: #f87171;
 }

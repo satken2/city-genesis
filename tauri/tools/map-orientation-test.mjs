@@ -127,7 +127,7 @@ imports["./infraOverlay"] = { buildCoverageRender() {}, buildNetworkRender() {},
 imports["../intersection/interchangeName"] = load("../src/components/intersection/interchangeName.ts");
 const { CityMapCanvas, DEFAULT_CITY_MAP_LAYERS } = load("../src/components/map/CityMapCanvas.tsx");
 assert.deepEqual(Object.keys(DEFAULT_CITY_MAP_LAYERS).filter((key) => DEFAULT_CITY_MAP_LAYERS[key]).sort(),
-  ["allRoads", "buildings", "interchanges", "railways", "stations", "trunkRoads"]);
+  ["allRoads", "buildings", "interchanges", "labels", "railways", "stations", "trunkRoads"]);
 const { worldToScreen, screenToWorld } = load("../src/components/path/pathShapeOverlay.ts");
 const { drawMapLabels } = imports["./mapLabels"];
 CityMapCanvas({ apiBaseUrl: "test", showCompass: false,

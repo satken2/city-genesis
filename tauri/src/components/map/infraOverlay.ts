@@ -409,12 +409,15 @@ export function useInfraProducts(apiBaseUrl: string): InfraProductOption[] {
   return useMemo(() => [...network, ...coverage], [network, coverage]);
 }
 
+/** インフラ表示の選択肢1つ。productId は選択肢の名前に使う財 */
+export type InfraOverlayOption = { productId: number; selection: InfraSelection };
+
 /**
- * 都市マップの選択肢。効果範囲の供給施設がインフラ財を受け取るサービス財(変電所の電力・水道ポンプの水道)は、
+ * インフラ表示の選択肢。効果範囲の供給施設がインフラ財を受け取るサービス財(変電所の電力・水道ポンプの水道)は、
  * 発電所などから建物に届くまでを1枚で見せるため、そのインフラ財の網と組にして1つの選択肢にする。
  * 組になったインフラ財は単独では並べない。
  */
-export function pairWithFeedNetwork(options: InfraProductOption[]): { productId: number; selection: InfraSelection }[] {
+export function pairWithFeedNetwork(options: InfraProductOption[]): InfraOverlayOption[] {
   const feeds = new Set(options.map((p) => p.feedProductId).filter((id): id is number => id !== null));
   return options
     .filter((p) => !(p.kind === "network" && feeds.has(p.productId)))
@@ -424,4 +427,24 @@ export function pairWithFeedNetwork(options: InfraProductOption[]): { productId:
         ? { network: p.productId, coverage: null }
         : { network: p.feedProductId, coverage: p.productId },
     }));
+}
+
+export type InfraSelectionState = {
+  /** 財の番号順に並べた選択肢 */
+  options: InfraOverlayOption[];
+  /** 選択中の選択肢。未選択や選んだ財が選択肢から消えたときは先頭 */
+  option: InfraOverlayOption | null;
+  select: (productId: number) => void;
+};
+
+/** インフラ表示の選択肢と選択状態。都市マップのインフラオーバーレイと統計のインフラ網タブが共有する */
+export function useInfraSelection(apiBaseUrl: string): InfraSelectionState {
+  const products = useInfraProducts(apiBaseUrl);
+  const options = useMemo(
+    () => pairWithFeedNetwork(products).sort((a, b) => a.productId - b.productId),
+    [products]
+  );
+  const [productId, setProductId] = useState<number | null>(null);
+  const option = options.find((p) => p.productId === productId) ?? options[0] ?? null;
+  return { options, option, select: setProductId };
 }

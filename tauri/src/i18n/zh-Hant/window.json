@@ -66,7 +66,8 @@
       "zoneBorders": "地區邊界",
       "elevation": "海拔",
       "contours": "等高線",
-      "grid": "格線"
+      "grid": "格線",
+      "labels": "標籤"
     },
     "overlay": {
       "title": "疊加層",

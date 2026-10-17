@@ -1,31 +1,29 @@
 /**
  * 統計ウィンドウ「インフラ網」タブ
  *
- * インフラ財(GOODS_INFRASTRUCTURE: 高圧電流・高圧水道など)の配送ネットワークと、効果範囲を持つ
- * サービス財(電力・水道など)の供給範囲を2Dマップで見せる。地図の描画は CityMapCanvas の
- * インフラ表示(infraSelection)に任せ、このタブは財の切り替え・サマリー・施設一覧を持つ。
+ * 都市マップのインフラオーバーレイと同じ表示に、サマリーと施設のリストを並べる。財の選択肢と選択状態
+ * (useInfraSelection)、地図の描画(CityMapCanvas の infraSelection)、凡例(InfraMapLegend)は都市マップと共通で、
+ * 供給施設がインフラ財を受け取るサービス財(電力・水道など)は、そのインフラ財の網と効果範囲を重ねて描く。
  *
  * 画面構成:
- * - 上部: 財の切り替えボタン(インフラ財、効果範囲を持つサービス財の順)
- * - 左列: インフラ財は GET /api/v1/stats/infrastructure(エポック単位でキャッシュ)のサマリー
- *         (生産量・配送量・需要量・充足率)とインフラ施設のリスト(接続状態のドット付き)。
- *         サービス財は地図が取得した効果範囲から、稼働中の施設数・範囲内外の建物数と供給施設のリスト。
- *         リストの行をクリックすると経済主体詳細ウィンドウを開く。
- * - 右列: 地図と凡例。下敷きは海岸線と道路のみ(標高色分けはしない)。サービス財では建物を
+ * - 上部: 財の切り替えボタン
+ * - 左列: 地図が取得したデータ(onInfraLoaded)のサマリーと施設のリスト。網はインフラ財の生産量・配送量・需要量・
+ *         充足率とインフラ施設(接続状態のドット付き)、効果範囲は稼働中の施設数・範囲内外の建物数と供給施設。
+ *         網と効果範囲を重ねる財では両方を網から順に並べる。リストの行をクリックすると経済主体詳細ウィンドウを開く。
+ * - 右列: 地図と凡例。下敷きは海岸線と道路のみ(標高色分けはしない)。効果範囲では建物を
  *         範囲内・範囲外で塗り分けるため建物も描く。
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { STATUS_ACTIVE } from "../../../constants";
 import { useMasterData } from "../../../contexts/MasterDataContext";
-import { useEpochCachedStats } from "../useEpochCache";
 import { CityMapCanvas, type CityMapLayerVisibility } from "../../map/CityMapCanvas";
 import {
-  useInfraProducts,
+  useInfraSelection,
   type CityMapInfraData,
-  type InfrastructureStats,
+  type InfraProductStats,
   type ServiceCoverageData,
 } from "../../map/infraOverlay";
 import { InfraMapLegend } from "../../map/InfraMapLegend";
@@ -51,74 +49,36 @@ function rateGradient(percent: number): string {
 export function InfrastructureTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const { data, loading, error } = useEpochCachedStats<InfrastructureStats>(
-    apiBaseUrl,
-    "/api/v1/stats/infrastructure"
-  );
-  const productOptions = useInfraProducts(apiBaseUrl);
+  const infra = useInfraSelection(apiBaseUrl);
+  const infraSelection = infra.option?.selection ?? null;
+  const networkPid = infraSelection?.network ?? null;
+  const coveragePid = infraSelection?.coverage ?? null;
 
-  // 選択中の財。初期値はインフラ網のデータが入った最初の財(なければ先頭)。
-  const [selectedPid, setSelectedPid] = useState<number | null>(null);
-  useEffect(() => {
-    if (productOptions.length === 0) return;
-    if (selectedPid !== null && productOptions.some((p) => p.productId === selectedPid)) return;
-    const withData = data?.products.find(
-      (p) => p.producers.length > 0 || p.consumers.length > 0 || p.paths.length > 0
-    );
-    setSelectedPid(withData?.product_id ?? productOptions[0].productId);
-  }, [productOptions, data, selectedPid]);
+  // サマリーは地図が取得したデータをそのまま使う(財を切り替えると取得し直すまで null)
+  const [loaded, setLoaded] = useState<CityMapInfraData | null>(null);
 
-  const selectedKind = productOptions.find((p) => p.productId === selectedPid)?.kind ?? null;
-  const network = selectedKind === "network"
-    ? data?.products.find((p) => p.product_id === selectedPid) ?? null
-    : null;
-  const infraSelection = useMemo(() => selectedKind === null ? null : {
-    network: selectedKind === "network" ? selectedPid : null,
-    coverage: selectedKind === "coverage" ? selectedPid : null,
-  }, [selectedKind, selectedPid]);
-
-  // サービス財のサマリーは、地図が取得した効果範囲をそのまま使う
-  const [coverage, setCoverage] = useState<ServiceCoverageData | null>(null);
-  const handleInfraLoaded = useCallback((loaded: CityMapInfraData | null) => {
-    setCoverage(loaded?.coverage ?? null);
-  }, []);
-
-  /** 製品の表示名と単位(マスターデータから解決) */
+  /** 製品の表示名(マスターデータから解決) */
   const productLabel = useCallback(
     (pid: number) => masterData?.products[pid]?.display_name ?? String(pid),
     [masterData]
   );
-  const unit = selectedPid !== null ? masterData?.products[selectedPid]?.unit ?? "" : "";
 
-  // 下敷きは海岸線と道路のみ。サービス財は建物の塗り分けを見せるため建物も描く。
+  // 下敷きは海岸線と道路のみ。効果範囲は建物の塗り分けを見せるため建物も描く。
   const layers = useMemo<Partial<CityMapLayerVisibility>>(() => ({
     elevation: false,
     coastline: true,
     trunkRoads: true,
     allRoads: true,
     railways: false,
-    buildings: selectedKind === "coverage",
+    buildings: coveragePid !== null,
     stations: false,
     parcels: false,
     contours: false,
     grid: false,
     zoneBorders: false,
-  }), [selectedKind]);
+  }), [coveragePid]);
 
-  if (loading) {
-    return <div className="infra-tab__loading">{t("common.loading")}</div>;
-  }
-
-  if (error || !data) {
-    return (
-      <div className="infra-tab__error">
-        {t("common.fetchError")}
-        {error ? `: ${error}` : ""}
-      </div>
-    );
-  }
-
-  if (productOptions.length === 0) {
+  if (infra.options.length === 0) {
     return (
       <div className="infra-tab__loading">
         {t("statistics.infrastructure.noData")}
@@ -132,17 +92,17 @@ export function InfrastructureTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
       {/* 財の切り替え */}
       <div className="infra-tab__products">
-        {productOptions.map((p) => (
+        {infra.options.map((p) => (
           <button
             key={p.productId}
             type="button"
             className={[
               "infra-tab__product-btn",
-              p.productId === selectedPid && "infra-tab__product-btn--active",
+              p.productId === infra.option?.productId && "infra-tab__product-btn--active",
             ]
               .filter(Boolean)
               .join(" ")}
-            onClick={() => setSelectedPid(p.productId)}
+            onClick={() => infra.select(p.productId)}
           >
             {productLabel(p.productId)}
           </button>
@@ -151,13 +111,15 @@ export function InfrastructureTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
       <div className="infra-tab__grid">
         <div className="infra-tab__col-left">
-          {selectedKind === "coverage" ? (
-            <CoverageSummary
-              title={selectedPid !== null ? productLabel(selectedPid) : ""}
-              coverage={coverage}
+          {networkPid !== null && (
+            <NetworkSummary
+              title={productLabel(networkPid)}
+              unit={masterData?.products[networkPid]?.unit ?? ""}
+              network={loaded?.network?.product ?? null}
             />
-          ) : (
-            network && <NetworkSummary title={productLabel(network.product_id)} unit={unit} network={network} />
+          )}
+          {coveragePid !== null && (
+            <CoverageSummary title={productLabel(coveragePid)} coverage={loaded?.coverage ?? null} />
           )}
         </div>
 
@@ -168,12 +130,12 @@ export function InfrastructureTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               interactive
               layers={layers}
               infraSelection={infraSelection}
-              onInfraLoaded={handleInfraLoaded}
+              onInfraLoaded={setLoaded}
             />
           </div>
-          {selectedKind && (
+          {infraSelection && (
             <div className="infra-tab__legend">
-              <InfraMapLegend kind={selectedKind} />
+              <InfraMapLegend selection={infraSelection} />
             </div>
           )}
         </div>
@@ -190,9 +152,12 @@ function NetworkSummary({
 }: {
   title: string;
   unit: string;
-  network: InfrastructureStats["products"][number];
+  network: InfraProductStats | null;
 }) {
   const { t } = useTranslation();
+  if (!network) {
+    return <div className="infra-card infra-card__empty">{t("common.loading")}</div>;
+  }
   const facilities = [
     ...network.producers.map((p) => ({ agent_id: p.agent_id, name: p.name, connected: p.connected, kind: "producer" as const })),
     ...network.consumers.map((c) => ({ agent_id: c.agent_id, name: c.name, connected: c.connected, kind: "consumer" as const })),

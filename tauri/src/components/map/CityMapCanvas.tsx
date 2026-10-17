@@ -47,6 +47,8 @@
  *   - interchanges : インターチェンジ(IC/JCT)。GET /api/v1/interchanges/ を都市全体で取得し、
  *     中心に記号と名前を描く(未命名は種別の略号+ID)。件数が少ないため地区と同じく
  *     ベクター取得のたびに取り直し、エポック実行や道路編集による検出結果の変化に追従する。
+ *   - labels    : mapLabels.ts が描くもの全部(地区名、駅・インターチェンジ・施設の記号と名前、道路名)。
+ *     記号もラベルとして描くので、OFFにするとインターチェンジや施設の記号も消える。
  *
  * 都市外の陸地:
  *   背景地形を持つマップでは、遠景用海岸線(GET /api/v1/terrain/background/coastline。マップ作成時に
@@ -165,10 +167,12 @@ export type CityMapLayerVisibility = {
   contours: boolean;
   /** グリッド */
   grid: boolean;
+  /** 地区名・駅やインターチェンジや施設の記号と名前・道路名のラベル */
+  labels: boolean;
 };
 
 /**
- * レイヤー表示のデフォルト値(建物・駅・インターチェンジ・全道路・幹線道路・線路のみON)。
+ * レイヤー表示のデフォルト値(建物・駅・インターチェンジ・全道路・幹線道路・線路・ラベルのみON)。
  * 公共交通路線は都市全体の形状を別APIで取得するため、埋め込み地図では明示的にONにする。
  */
 export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
@@ -186,6 +190,7 @@ export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
   elevation: false,
   contours: false,
   grid: false,
+  labels: true,
 };
 
 /** ヒートマップの凡例に必要な情報。上位コンポーネントへonHeatmapStatsで通知する */
@@ -1872,24 +1877,26 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.restore();
         }
 
-        const places = vec.places.filter((place) => place.station ? L.stations : L.buildings);
-        if (L.interchanges) {
-          for (const ic of vec.interchanges) {
-            places.push({ id: ic.interchange_id, x: ic.center[0], z: ic.center[1],
-              name: interchangeDisplayName(ic, tRef.current), symbol: "interchange", interchange: true });
-          }
-        }
-        // 未命名の道路は「道路 #id」を補わずに空のまま渡し、drawMapLabels が省く(番号だけのラベルは
-        // 地区名・施設名の置き場を奪うだけで、Unity の3Dラベル・場所検索も未命名の道路を出さない)
-        const roadLabels: MapRoadLabel[] = [];
-        if (L.trunkRoads) {
-          for (const road of vec.roads) {
-            for (const point of road.label_points) {
-              roadLabels.push({ roadId: road.road_id, name: road.name, color: road.color, x: point.x, z: point.z, angleDeg: point.angle_deg });
+        if (L.labels) {
+          const places = vec.places.filter((place) => place.station ? L.stations : L.buildings);
+          if (L.interchanges) {
+            for (const ic of vec.interchanges) {
+              places.push({ id: ic.interchange_id, x: ic.center[0], z: ic.center[1],
+                name: interchangeDisplayName(ic, tRef.current), symbol: "interchange", interchange: true });
             }
           }
+          // 未命名の道路は「道路 #id」を補わずに空のまま渡し、drawMapLabels が省く(番号だけのラベルは
+          // 地区名・施設名の置き場を奪うだけで、Unity の3Dラベル・場所検索も未命名の道路を出さない)
+          const roadLabels: MapRoadLabel[] = [];
+          if (L.trunkRoads) {
+            for (const road of vec.roads) {
+              for (const point of road.label_points) {
+                roadLabels.push({ roadId: road.road_id, name: road.name, color: road.color, x: point.x, z: point.z, angleDeg: point.angle_deg });
+              }
+            }
+          }
+          drawMapLabels(ctx, view, canvasW, canvasH, vec.zones, places, roadLabels);
         }
-        drawMapLabels(ctx, view, canvasW, canvasH, vec.zones, places, roadLabels);
 
         // 上位コンポーネントの重ね描き(敷設中道路・路線図など)
         overlayDrawRef.current?.(ctx, { ...view });
@@ -2249,7 +2256,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           || (focus.focusPathIds?.length ?? 0) > 0 || (focus.previewPathIds?.length ?? 0) > 0) kinds.push("paths");
         if (L.parcels) kinds.push("parcels");
         if (L.buildings) kinds.push("buildings");
-        // 地区名は境界線の表示と独立して常時表示する。
+        // 地区名のラベルは境界線の表示と独立して出す。
         kinds.push("zones");
         if (L.transitLines) kinds.push("transit");
         if (L.interchanges) kinds.push("interchanges");

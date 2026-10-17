@@ -8,7 +8,7 @@
  * ツールバーは2段。1段目は重ねてONにできるレイヤーのボタンとオーバーレイの切り替え、2段目は選んだ
  * オーバーレイの設定(公共交通の種別・ヒートマップの種類・インフラの財)で、設定の無いオーバーレイでは2段目を出さない。
  * オーバーレイ(公共交通・ヒートマップ・インフラ)はどれも地図に色を重ねて読む表示なので、1つだけ選ぶ。
- * インフラの選択肢は、供給施設がインフラ財を受け取るサービス財を網と組にしたもの(pairWithFeedNetwork)。
+ * インフラの選択肢・選択状態(useInfraSelection)と凡例(InfraMapLegend)は統計のインフラ網タブと共通。
  */
 
 import { useCallback, useMemo, useState, type ReactNode, type RefObject } from "react";
@@ -25,7 +25,7 @@ import {
 } from "./CityMapCanvas";
 import "./CityMapWindow.css";
 import { MAP_SYMBOLS, type MapSymbol } from "./mapSymbols";
-import { pairWithFeedNetwork, useInfraProducts, type InfraSelection } from "./infraOverlay";
+import { useInfraSelection, type InfraSelection } from "./infraOverlay";
 import { InfraMapLegend } from "./InfraMapLegend";
 import { useMasterData } from "../../contexts/MasterDataContext";
 
@@ -49,6 +49,7 @@ const LAYER_BUTTONS: { symbol: MapSymbol; layers: (keyof CityMapLayerVisibility)
   { symbol: "interchange", layers: ["interchanges"] },
   { symbol: "allRoads", layers: ["allRoads"] },
   { symbol: "trunkRoads", layers: ["trunkRoads", "railways"] },
+  { symbol: "labels", layers: ["labels"] },
 ];
 
 type CityMapOverlay = "none" | "transit" | "heatmap" | "infra";
@@ -79,11 +80,7 @@ export function useCityMapControls(
 ): CityMapControls {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const infraProducts = useInfraProducts(apiBaseUrl);
-  const infraOptions = useMemo(
-    () => pairWithFeedNetwork(infraProducts).sort((a, b) => a.productId - b.productId),
-    [infraProducts]
-  );
+  const infra = useInfraSelection(apiBaseUrl);
   const [layers, setLayers] = useState<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS });
   const [overlay, setOverlay] = useState<CityMapOverlay>("none");
   // 公共交通の種別・ヒートマップの種類・インフラの財は、オーバーレイを切り替えて戻ったときに前の選択へ戻すため別に持つ
@@ -91,8 +88,6 @@ export function useCityMapControls(
   const [heatmapKind, setHeatmapKind] = useState<CityMapHeatmapActiveKind>(HEATMAP_KINDS[0]);
   const [heatmapMode, setHeatmapMode] = useState<CityMapHeatmapMode>("overlay");
   const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);
-  const [infraProductId, setInfraProductId] = useState<number | null>(null);
-  const infraOption = infraOptions.find((p) => p.productId === infraProductId) ?? infraOptions[0] ?? null;
 
   const toggleLayer = useCallback((keys: (keyof CityMapLayerVisibility)[]) => {
     setLayers((prev) => {
@@ -149,10 +144,10 @@ export function useCityMapControls(
     <select
       className="city-map-window__select"
       aria-label={t("cityMap.overlay.infra")}
-      value={infraOption?.productId ?? ""}
-      onChange={(e) => setInfraProductId(Number(e.target.value))}
+      value={infra.option?.productId ?? ""}
+      onChange={(e) => infra.select(Number(e.target.value))}
     >
-      {infraOptions.map((p) => (
+      {infra.options.map((p) => (
         <option key={p.productId} value={p.productId}>
           {masterData?.products[p.productId]?.display_name ?? String(p.productId)}
         </option>
@@ -216,13 +211,12 @@ export function useCityMapControls(
   );
 
   const canvasLayers = useMemo(() => ({ ...layers, transitLines: overlay === "transit" }), [layers, overlay]);
-  const infraSelection = overlay === "infra" ? infraOption?.selection ?? null : null;
+  const infraSelection = overlay === "infra" ? infra.option?.selection ?? null : null;
 
   // ヒートマップの凡例の値は、発生源表示では都市全体の強度レンジ、格子の表示では固定の悪さスコア。
   const legend = infraSelection ? (
     <div className="city-map-window__legend city-map-window__legend--infra">
-      {infraSelection.network !== null && <InfraMapLegend kind="network" />}
-      {infraSelection.coverage !== null && <InfraMapLegend kind="coverage" />}
+      <InfraMapLegend selection={infraSelection} />
     </div>
   ) : overlay === "heatmap" && heatmapStats && (
     <div className="city-map-window__legend">
