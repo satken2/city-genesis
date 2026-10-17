@@ -94,16 +94,11 @@
   background: rgba(255, 255, 255, 0.15);
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background 0.12s;
 }
 
 .hud-mini-meter:hover {
   background: rgba(255, 255, 255, 0.22);
-}
-
-/* 警告状態(予算オーバーなど)はウィジェット全体の枠線を赤くする */
-.hud-mini-meter--alert {
-  border-color: #ef4444;
 }
 
 .hud-mini-meter__label {
@@ -119,7 +114,7 @@
   color: #e5eef9;
 }
 
-/* Meter の .meter-bar は flex:1 / min-width:60px のため、幅を持つラッパで囲んで固定幅にする */
+/* Meter・BalanceMeter は flex:1 / min-width:60px のため、幅を持つラッパで囲んで固定幅にする */
 .hud-mini-meter__bar {
   width: 84px;
   display: flex;

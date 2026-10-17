@@ -28,7 +28,7 @@
     "reservesForecast": "预测（近期趋势）",
     "reservesEpochLabel": "纪元 {{n}}",
     "balanceTitle": "收支平衡",
-    "balanceNote": "收入=上一纪元实绩 / 支出=下一纪元预算",
+    "balanceNote": "收入=上一纪元实绩 / 支出=下一纪元预计支付",
     "balanceRevenue": "收入",
     "balanceExpense": "支出",
     "balancePreCompress": "压缩前",

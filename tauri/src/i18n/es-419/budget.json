@@ -28,7 +28,7 @@
     "reservesForecast": "Previsión (tendencia reciente)",
     "reservesEpochLabel": "Época {{n}}",
     "balanceTitle": "Balance fiscal",
-    "balanceNote": "Ingresos = época anterior / Gastos = presupuesto de la próxima época",
+    "balanceNote": "Ingresos = época anterior / Gastos = pagos previstos de la próxima época",
     "balanceRevenue": "Ingresos",
     "balanceExpense": "Gastos",
     "balancePreCompress": "Antes del recorte",

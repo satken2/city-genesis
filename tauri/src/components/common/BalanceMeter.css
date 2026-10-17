@@ -1,0 +1,26 @@
+.balance-meter {
+  position: relative;
+  flex: 1;
+  min-width: 60px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 2px solid;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.balance-meter__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #9aa5b1;
+  transition: left 0.3s ease, width 0.3s ease;
+}
+
+/* 帯の上下へはみ出させ、低い帯でも点線と読めるようにする */
+.balance-meter__center {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.85);
+}

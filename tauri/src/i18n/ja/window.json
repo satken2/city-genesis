@@ -138,7 +138,7 @@
     "menuPropPlacement": "プロップ配置",
     "menuExecute": "開始",
     "budgetMeterLabel": "予算",
-    "budgetMeterTooltip": "予算見込み / 直近の収入",
+    "budgetMeterTooltip": "(直近の収入 − 次エポック支払見込み) / 直近の収入",
     "scoreMeterLabel": "スコア",
     "scoreMeterTooltip": "施政スコア（1世帯あたり / 満点2.0）",
     "menuCitizenTracking": "追跡リスト"

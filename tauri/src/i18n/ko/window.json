@@ -138,7 +138,7 @@
     "menuPropPlacement": "프롭 배치",
     "menuExecute": "시작",
     "budgetMeterLabel": "예산",
-    "budgetMeterTooltip": "예산 전망 / 최근 수입",
+    "budgetMeterTooltip": "(최근 수입 − 다음 에포크 지급 전망) / 최근 수입",
     "scoreMeterLabel": "점수",
     "scoreMeterTooltip": "시정 점수(1가구당 / 만점 2.0)",
     "menuCitizenTracking": "추적 목록"

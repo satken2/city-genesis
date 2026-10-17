@@ -138,7 +138,7 @@
     "menuPropPlacement": "装饰物放置",
     "menuExecute": "开始",
     "budgetMeterLabel": "预算",
-    "budgetMeterTooltip": "预算预估 / 近期收入",
+    "budgetMeterTooltip": "(近期收入 − 下一纪元预计支付) / 近期收入",
     "scoreMeterLabel": "评分",
     "scoreMeterTooltip": "施政评分（每户，满分2.0）",
     "menuCitizenTracking": "追踪列表"

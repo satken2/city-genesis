@@ -5,12 +5,14 @@
  * 供給製品名・供給価格・供給量・販売量・利益率・稼働率をグリッド形式で表示する。
  * 製品名と単位はマスターデータ(products)から取得する。
  * 販売量(supply_sold_amount)と利益率(profit_rates)はDataListで表示し、履歴推移を確認できる。
+ * 利益率は収支率と同じ定義なので、最新値をBalanceMeterでも示す。
  * 稼働率は直近エポックの値(utilization の先頭要素)を共通メーターと百分率で表示する。
  */
 
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { BalanceMeter } from "../common/BalanceMeter";
 import { DataList } from "../common/DataList";
 import { Meter } from "../common/Meter";
 import "./SupplyInfoPanel.css";
@@ -93,7 +95,10 @@ export function SupplyInfoPanel({ agent }: SupplyInfoPanelProps) {
             <span className="agent-detail-label">
               {t("supply.profitRate")}
             </span>
-            <span className="agent-detail-value">
+            <span className="agent-detail-value supply-profit-rate">
+              {agent.profit_rates.length > 0 && (
+                <BalanceMeter value={agent.profit_rates[0]} />
+              )}
               {/* 利益率の意味域は±100%。過去セーブの履歴にはクランプ前の外れ値
                   (例: -895)が残り得るため、チャート描画のみクランプする */}
               <DataList
