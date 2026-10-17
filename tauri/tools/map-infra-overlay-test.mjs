@@ -43,7 +43,7 @@ const { buildCoverageRender, pairWithFeedNetwork } = exports;
 
 // 外周が時計回り・穴が反時計回りで届いても、外周は正、穴は負の向きに揃える(円は Canvas の既定で正)。
 const square = (x, z, h) => [[x - h, z - h], [x - h, z + h], [x + h, z + h], [x + h, z - h]];
-const render = buildCoverageRender({
+const coverageData = {
   product_id: 306,
   suppliers: [
     { agent_id: 1, name: "a", variant: 1058, status: 1, center_point: [0, 0],
@@ -55,7 +55,8 @@ const render = buildCoverageRender({
   ],
   covered_building_ids: [10, 11],
   uncovered_building_ids: [12],
-});
+};
+const render = buildCoverageRender(coverageData);
 assert.equal(render.fill.subpaths.length, 3, "塗りは稼働中の施設だけ(外周・穴・円)");
 const [exterior, hole, circle] = render.fill.subpaths.map(signedArea);
 assert.ok(exterior > 0 && circle > 0 && hole < 0, `外周と円は正、穴は負: ${exterior}, ${circle}, ${hole}`);
@@ -64,6 +65,12 @@ assert.equal(render.inactiveOutline.subpaths.length, 1, "稼働していない�
 assert.deepEqual([...render.covered], [10, 11]);
 assert.deepEqual([...render.uncovered], [12]);
 console.log("PASS: coverage fill winding (union with holes), active/inactive outlines, building sets");
+
+// 稼働率の円グラフは施設ごとに1つ。一緒に描く網に出る施設は網の記号の下に描くので、効果範囲の側には置かない。
+assert.deepEqual(render.pies.map((p) => p.x), [0, 150, -300], "網が無ければ全施設の中心に置く");
+const withNetwork = buildCoverageRender(coverageData, { producers: [], consumers: [{ agent_id: 2 }] });
+assert.deepEqual(withNetwork.pies.map((p) => p.x), [0, -300], "網にも出る施設は効果範囲の側で描かない");
+console.log("PASS: one utilization pie per facility (network markers take the facilities they show)");
 
 // 供給施設がインフラ財を受け取るサービス財は網と組にし、組になったインフラ財は単独の選択肢から外す。
 const options = pairWithFeedNetwork([

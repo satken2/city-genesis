@@ -63,7 +63,8 @@
  *
  * インフラ表示(infraSelection propで網と効果範囲の財を1つずつ選ぶ):
  *   網はインフラ財の利用率と流れ(アニメーション用の第2キャンバスに描く)、効果範囲はサービス財の
- *   稼働中の施設の範囲の塗り・施設ごとの輪郭・建物の範囲内/範囲外の塗り分けを描く。取得と描画は
+ *   稼働中の施設の範囲の塗り・施設ごとの輪郭・建物の範囲内/範囲外の塗り分けを描き、施設には稼働率の円グラフを
+ *   1つずつ置く。取得と描画は
  *   infraOverlay.ts。建物の塗り分けは建物レイヤーに従い、発生源表示と同じく縮尺によらず形状を出す。
  *   ヒートマップと同じく地図を塗る表示なので、呼び出し側はヒートマップと同時に選ばせない。
  *   取得したデータは onInfraLoaded で通知する(統計タブのサマリーなどに使う)。
@@ -2235,7 +2236,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           const product = stats?.products.find((p) => p.product_id === networkId) ?? null;
           const simulationDays = stats?.simulation_days || 1;
           infra.network = product ? buildNetworkRender(product, simulationDays) : null;
-          infra.coverage = coverage ? buildCoverageRender(coverage) : null;
+          infra.coverage = coverage ? buildCoverageRender(coverage, product) : null;
           rebuildPathClassification();
           infraCbRef.current?.({ network: product ? { product, simulationDays } : null, coverage });
           draw();
