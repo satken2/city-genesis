@@ -388,15 +388,16 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
    * TYPE_BUILDING(共有建物)だけでなく、building=trueのTYPE_STANDARD(一般施設)、
    * TYPE_EDUCATION(教育機関)、TYPE_TRADE(輸出入拠点)など、
    * 全ての建設可能エージェントを含む。分類(bd_category)ごとのタイルにまとめて表示する。
-   * template_only のバリアント(国境検問所・観光名所)はシナリオ制作専用なので、
-   * テンプレートモードでないときは候補から外す。
+   * template_only のバリアント(国境検問所・観光名所)はシナリオ制作専用、sprawl_only のバリアント
+   * (スラムの建物)はスプロールだけが建てるものなので、テンプレートモードでないときは候補から外す。
    * 造成工事は範囲を描いて発注する造成ウィンドウ専用なので、常に外す。
    * 市庁舎は都市に1つだけなので、配置済みなら候補から外す(移転は市庁舎の詳細パネルから開く)。
    */
   const buildingVariants = useMemo(() => {
     if (!masterData) return [];
     return Object.entries(masterData.agents).filter(
-      ([id, entry]) => entry.building && (godMode || !entry.template_only) && !isGradingVariant(Number(id))
+      ([id, entry]) => entry.building && (godMode || !(entry.template_only || entry.sprawl_only))
+        && !isGradingVariant(Number(id))
         && !(Number(id) === VARIANT_CITY && cityHallPlaced && !relocateCityHall)
     ) as [string, AgentMasterEntry][];
   }, [masterData, godMode, cityHallPlaced, relocateCityHall]);
@@ -1112,7 +1113,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         // 観光名所は都市に1基までの一点物なので、テンプレートモードでも複製できない。
         const isLandmarkVariant = Object.values(masterData.landmarks ?? {})
           .some((lm) => lm.agent_variant === p.variant);
-        if (isLandmarkVariant || (entry?.template_only && !godMode)) {
+        if (isLandmarkVariant || ((entry?.template_only || entry?.sprawl_only) && !godMode)) {
           void showNotification({
             message: t("building_construction.copySourceNotAllowed"),
             durationMs: 4000,
