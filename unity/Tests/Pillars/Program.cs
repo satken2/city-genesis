@@ -53,7 +53,37 @@ internal static class Program
         curve.Points.Reverse();
         Check(true, pillar, curve);
         CheckPortalOffsets();
+        CheckOverhead();
         Console.WriteLine($"PASS: {checks} pillar clearance cases");
+    }
+
+    private static void CheckOverhead()
+    {
+        void Covered(bool expected, float radius, params PillarClearance.Corridor[] corridors)
+        {
+            bool actual = PillarClearance.PassesAbove(Vector3.zero, radius, 2.5f, new List<PillarClearance.Corridor>(corridors));
+            if (actual != expected) throw new Exception($"Overhead case {checks}: expected {expected}, got {actual}");
+            checks++;
+        }
+        Covered(true, 2, Road(new Vector3(-30, 6, 0), new Vector3(30, 6, 0)));
+        Covered(true, 2, Road(new Vector3(-30, 60, 0), new Vector3(30, 60, 0)));
+        Covered(true, 2, Road(new Vector3(-30, 6, 6), new Vector3(30, 6, 6)));
+        Covered(false, 0, Road(new Vector3(-30, 6, 6), new Vector3(30, 6, 6)));
+        Covered(false, 2, Road(new Vector3(-30, 1, 6), new Vector3(30, 1, 6)));
+        Covered(false, 2, Road(new Vector3(-30, -8, 0), new Vector3(30, -8, 0)));
+        Covered(false, 2, Road(new Vector3(-30, -6, 0), new Vector3(30, 6, 0)));
+        Covered(true, 2, Road(new Vector3(-30, -6, 0), new Vector3(30, 18, 0)));
+        Covered(false, 2);
+
+        var viaduct = Road(new Vector3(-30, 8, 0), new Vector3(30, 8, 0));
+        var crossing = new List<Vector3>();
+        for (int z = -50; z <= 50; z++) crossing.Add(new Vector3(0, 0, z));
+        var parallel = new List<Vector3>();
+        for (int x = -50; x <= 50; x++) parallel.Add(new Vector3(x, 0, 20));
+        if (!PillarClearance.NearXZ(crossing, 12, viaduct)) throw new Exception("Crossing road must be near the viaduct");
+        if (PillarClearance.NearXZ(parallel, 12, viaduct)) throw new Exception("Distant road must not be near the viaduct");
+        if (!PillarClearance.NearXZ(parallel, 16, viaduct)) throw new Exception("Wide road must reach the viaduct");
+        checks += 3;
     }
 
     private static void CheckPortalOffsets()

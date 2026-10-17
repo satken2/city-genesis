@@ -15,6 +15,9 @@ public static class RoadEquipmentGenerator
     private const float BoxSpacing = 64f;
     private static readonly Dictionary<string, Material> Materials = new();
 
+    /// <summary>上を通り得る周辺パスの通行空間。PathManager が設定する。</summary>
+    public static System.Func<PathSummary, List<PillarClearance.Corridor>> OverheadProvider;
+
     /// <param name="keepClear">
     /// 点設備(電柱・街灯・樹木・ベンチ等)を置かないスプライン距離の区間(x=始端, y=終端)。303 のLRT停留所の
     /// ホーム区間を渡す。柵は舗装端にありホームと重ならないので対象外。
@@ -33,10 +36,20 @@ public static class RoadEquipmentGenerator
         }
         float length = spline.CalculateLength();
         if (length <= EndClearance * 2f) return;
-        // 屋外の照明・植栽・配線はトンネル内に置かない。保存された設備選択は地上区間で使う。
+        // 屋外の照明・植栽・配線はトンネル内と、他の道路・線路が上を通る地点には置かない。保存された設備選択は残りの区間で使う。
         var outdoorClear = keepClear != null ? new List<Vector2>(keepClear) : new List<Vector2>();
         foreach (var tunnel in PathTunnelParts.Ranges(spline, path))
             outdoorClear.Add(new Vector2((float)tunnel.From * length, (float)tunnel.To * length));
+        var above = OverheadProvider?.Invoke(path);
+        // 立体交差で上を通る相手は自分の占有高さ以上高いので、その半分をしきい値にして、地形の傾きで高低差のある隣の道路と分ける。
+        float rise = master.height.GetValueOrDefault() * .5f;
+        var radii = new Dictionary<string, float>();
+        bool Covered(string part, Pose pose)
+        {
+            if (above == null || above.Count == 0) return false;
+            if (!radii.TryGetValue(part, out float radius)) radii[part] = radius = HorizontalRadius(Prefab(part));
+            return PillarClearance.PassesAbove(pose.position, radius, rise, above);
+        }
         var occupied = new Dictionary<Vector2Int, List<Vector3>>();
         float edge = width * 0.5f;
         float offset = sidewalkWidth > 0f ? edge - sidewalkWidth * 0.5f : Mathf.Max(0f, edge - 0.3f);
@@ -65,13 +78,16 @@ public static class RoadEquipmentGenerator
             && !(path.path_variant == 201 && path.utility_mode == Constants.PATH_UTILITY_UNDERGROUND))
         {
             bool overhead = path.utility_mode == Constants.PATH_UTILITY_OVERHEAD;
+            string utilityPart = overhead ? "utility_pole" : "utility_box";
             Vector3? previous = null;
             foreach (float distance in Distances(length, overhead ? PoleSpacing : BoxSpacing, 0f, outdoorClear))
             {
                 if (access?.Blocks(1, distance, 1f) == true) continue;
                 Pose pose = Sample(spline, distance, offset, surface);
+                // 電線が上のパスを貫かないよう、省いた電柱の前後は結ばない。
+                if (Covered(utilityPart, pose)) { previous = null; continue; }
                 if (!Reserve(occupied, pose.position, 2f)) continue;
-                if (!PlacePrefab(parent, Prefab(overhead ? "utility_pole" : "utility_box"), pose))
+                if (!PlacePrefab(parent, Prefab(utilityPart), pose))
                 {
                     if (overhead)
                     {
@@ -97,7 +113,7 @@ public static class RoadEquipmentGenerator
                 {
                     if (access?.Blocks(side, distance, 1f) == true) continue;
                     Pose pose = Sample(spline, distance, offset * side, surface);
-                    if (!Reserve(occupied, pose.position, 2f)) continue;
+                    if (Covered("streetlight", pose) || !Reserve(occupied, pose.position, 2f)) continue;
                     if (PlacePrefab(parent, Prefab("streetlight"), pose, faceRoad: true)) continue;
                     metal.Box(pose, new Vector3(0f, 3f, 0f), new Vector3(0.12f, 6f, 0.12f));
                     metal.Box(pose, new Vector3(-0.65f, 6f, 0f), new Vector3(1.4f, 0.12f, 0.12f));
@@ -116,7 +132,7 @@ public static class RoadEquipmentGenerator
                 {
                     if (distance < centerWidth * .5f + EndClearance || distance > length - centerWidth * .5f - EndClearance) continue;
                     Pose pose = Sample(spline, distance, 0f, centerSurface);
-                    if (Reserve(occupied, pose.position, 3f)) PlacePrefab(parent, centerTree, pose);
+                    if (!Covered("center_tree", pose) && Reserve(occupied, pose.position, 3f)) PlacePrefab(parent, centerTree, pose);
                 }
             }
             foreach (float distance in Distances(length, spacing, spacing * 0.5f, outdoorClear))
@@ -124,7 +140,7 @@ public static class RoadEquipmentGenerator
                 {
                     if (access?.Blocks(side, distance, 1.5f) == true) continue;
                     Pose pose = Sample(spline, distance, offset * side, surface);
-                    if (!Reserve(occupied, pose.position, 3f)) continue;
+                    if (Covered("tree", pose) || !Reserve(occupied, pose.position, 3f)) continue;
                     if (PlacePrefab(parent, Prefab("tree"), pose)) continue;
                     concrete.Box(pose, new Vector3(0f, 1f, 0f), new Vector3(0.2f, 2f, 0.2f));
                     leaves.Box(pose, new Vector3(0f, 3f, 0f), new Vector3(1.8f, 2.5f, 1.8f));
@@ -244,6 +260,20 @@ public static class RoadEquipmentGenerator
                 top = Mathf.Max(top, u*a.y+v*b.y+(1f-u-v)*c.y);
         }
         return RoadPartHeights.SIDEWALK_ABOVE_SPLINE + (float.IsNegativeInfinity(top) ? 0f : top);
+    }
+
+    /// <summary>屋外の点設備(電柱・地上ボックス・街灯・街路樹)を選んでいるか。上を通るパスの変化で作り直す対象。</summary>
+    public static bool HasOutdoorEquipment(PathSummary path) =>
+        path.utility_mode != Constants.PATH_UTILITY_NONE || path.streetlight_type != Constants.PATH_EQUIPMENT_NONE
+        || path.street_tree_type != Constants.PATH_EQUIPMENT_NONE;
+
+    /// <summary>原点(足元)から外形までの水平の最大距離。配置の向きによらない。</summary>
+    private static float HorizontalRadius(GameObject prefab)
+    {
+        var bounds = PillarClearance.GetPrefabBounds(prefab);
+        if (!bounds.HasValue) return 0f;
+        Vector3 min = bounds.Value.min, max = bounds.Value.max, scale = prefab.transform.localScale;
+        return new Vector2(Mathf.Max(-min.x, max.x) * Mathf.Abs(scale.x), Mathf.Max(-min.z, max.z) * Mathf.Abs(scale.z)).magnitude;
     }
 
     private static GameObject Resolve(PathSummary path, string part) =>

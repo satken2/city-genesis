@@ -409,9 +409,10 @@ public partial class PathManager : BaseApiDataManager
 
         TerrainManager.OnTerrainTileReady += OnTerrainTileReadyHandler;
 
-        // 橋脚の干渉判定と近接線路の結合描画に、周辺パスの点列を供給する。
+        // 橋脚・沿道設備の干渉判定と近接線路の結合描画に、周辺パスの点列を供給する。
         // キャッシュ済みパスデータとセル空間インデックスが必要なためPathManagerが担う。
         PillarClearance.NeighborProvider = GetPillarObstacles;
+        RoadEquipmentGenerator.OverheadProvider = GetOverheadObstacles;
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
         RoadAdjacency.NeighborProvider = GetAdjacentRoadNeighbors;
         RoadAdjacency.EndJoinProvider = GetRoadEndJoin;
@@ -474,6 +475,8 @@ public partial class PathManager : BaseApiDataManager
             PowerLineRailGantry.NeighborProvider = null;
         if (PillarClearance.NeighborProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetPillarObstacles)
             PillarClearance.NeighborProvider = null;
+        if (RoadEquipmentGenerator.OverheadProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetOverheadObstacles)
+            RoadEquipmentGenerator.OverheadProvider = null;
         if (LrtPlatformParts.PolylineProvider == (Func<int, bool, List<Vector3>>)GetLrtPlatformPolyline)
             LrtPlatformParts.PolylineProvider = null;
         TerrainManager.OnTerrainTileReady -= OnTerrainTileReadyHandler;
@@ -782,7 +785,7 @@ public partial class PathManager : BaseApiDataManager
     private readonly HashSet<int> queuedTerrainFollowPathIds = new HashSet<int>();
     /// <summary>queuedTerrainFollowPathIds のうち、投入理由が地形タイル到着だけの項目。地形が生成時と同じなら省略できる。</summary>
     private readonly HashSet<int> terrainOnlyQueuedPathIds = new HashSet<int>();
-    /// <summary>queuedTerrainFollowPathIds のうち、投入理由が橋脚の周辺変化だけの項目。橋脚を描かない遠景なら省略できる。</summary>
+    /// <summary>queuedTerrainFollowPathIds のうち、投入理由が橋脚・沿道設備の周辺変化だけの項目。どちらも描かない遠景なら省略できる。</summary>
     private readonly HashSet<int> queuedPillarOnlyIds = new HashSet<int>();
     /// <summary>
     /// 投入時点の生成通し番号(投入が重なったときは最大値)。GOの PathBuildStamp.buildSerial がこれより大きければ、
@@ -1262,8 +1265,8 @@ public partial class PathManager : BaseApiDataManager
                         continue;
                     }
                 }
-                // 遠景は橋脚を描かない。revision は通知時に進めてあるので、次に通常LODで作るときは周辺の最新データで作られる。
-                if (pillarOnly && (currentGO == null || (currentGO.GetComponent<ObjectIdInfo>()?.isFarObject ?? false)))
+                // 遠景は橋脚も沿道設備も描かない。revision は通知時に進めてあるので、次に通常LODで作るときは周辺の最新データで作られる。
+                if (pillarOnly && !HasDetailedObject(bestId))
                 {
                     RenderWorkScheduler.CountEvent("path.queueRebuildSkipped");
                     continue;
@@ -4865,7 +4868,12 @@ public partial class PathManager : BaseApiDataManager
     /// メッシュの有無やLODを参照せず、最新データから通行空間を作る。橋脚候補ごとには再計算しない。
     /// 相手の点列は未切断点列のキャッシュを共有で渡し、路面の持ち上げは Corridor.YOffset で表す。
     /// </summary>
-    public List<PillarClearance.Corridor> GetPillarObstacles(PathSummary path)
+    public List<PillarClearance.Corridor> GetPillarObstacles(PathSummary path) => CollectObstacleCorridors(path, false);
+
+    /// <summary>RoadEquipmentGenerator.OverheadProvider の実体。地面を離れられるパスだけを返す。</summary>
+    public List<PillarClearance.Corridor> GetOverheadObstacles(PathSummary path) => CollectObstacleCorridors(path, true);
+
+    private List<PillarClearance.Corridor> CollectObstacleCorridors(PathSummary path, bool leavingGroundOnly)
     {
         var result = new List<PillarClearance.Corridor>();
         // 生成中の新データはまだ通過セルが登録されていないことがあるので、そのときだけ計算し直す。
@@ -4873,34 +4881,68 @@ public partial class PathManager : BaseApiDataManager
         foreach (int id in CollectPillarNeighborIds(registered ? GetPathCoveredCellsCached(path) : GetPathCoveredCells(path), path.path_id))
         {
             if (!pathDataCache.TryGetValue(id, out var other) || !IsPillarObstacle(other)) continue;
-            var master = MasterDataStore.Instance?.GetPathMaster(other.path_variant);
-            if (master?.model_type == "none") continue;
-            // 切断前の中心線を使い、交差点内にも通行空間を残す。描画用点列キャッシュは旧版の可能性がある。
-            var points = GetUntrimmedPoints(other, out _);
-            if (points == null || points.Count < 2) continue;
-            float platform = master?.platform_width ?? 0f;
-            float left = 0f, right = 0f;
-            if (IsTrackTypePath(other) && platform > 0f) TrackPath.ResolvePlatformExtents(other, platform, out left, out right);
-            result.Add(new PillarClearance.Corridor
-            {
-                Points = points,
-                YOffset = RoadPartHeights.BODY_ABOVE_SPLINE,
-                HalfWidth = Mathf.Max(other.width, GetRoadWidth(other.path_variant)) * 0.5f + Mathf.Max(left, right),
-                Height = TunnelSectionUtil.GetClearanceHeight(other.path_variant)
-            });
+            if (leavingGroundOnly && !CanLeaveGround(other)) continue;
+            var corridor = BuildObstacleCorridor(other);
+            if (corridor != null) result.Add(corridor);
         }
         return result;
     }
 
+    private PillarClearance.Corridor BuildObstacleCorridor(PathSummary path)
+    {
+        var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+        if (master?.model_type == "none") return null;
+        // 切断前の中心線を使い、交差点内にも通行空間を残す。描画用点列キャッシュは旧版の可能性がある。
+        var points = GetUntrimmedPoints(path, out _);
+        if (points == null || points.Count < 2) return null;
+        float platform = master?.platform_width ?? 0f;
+        float left = 0f, right = 0f;
+        if (IsTrackTypePath(path) && platform > 0f) TrackPath.ResolvePlatformExtents(path, platform, out left, out right);
+        return new PillarClearance.Corridor
+        {
+            Points = points,
+            YOffset = RoadPartHeights.BODY_ABOVE_SPLINE,
+            HalfWidth = Mathf.Max(path.width, GetRoadWidth(path.path_variant)) * 0.5f + Mathf.Max(left, right),
+            Height = TunnelSectionUtil.GetClearanceHeight(path.path_variant)
+        };
+    }
+
+    private bool HasDetailedObject(int pathId) =>
+        pathObjectsCache.TryGetValue(pathId, out GameObject go) && go != null && !(go.GetComponent<ObjectIdInfo>()?.isFarObject ?? false);
+
+    /// <summary>高さを編集できるか地形に沿わないバリアントか。それ以外は地表に沿うので、他のパスの上を通らない。</summary>
+    private static bool CanLeaveGround(PathSummary path)
+    {
+        var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+        return master != null && (master.height_editable == true || master.follow_terrain == false);
+    }
+
+    /// <summary>
+    /// path の追加・変更・削除の前後で、周辺の橋脚を持つパスと、path が上を通り得る屋外設備を持つ道路を作り直す。
+    /// 屋外設備はほぼ全ての街路にあるので、詳細に描いている道路は path に平面で近いものに絞る。
+    /// 詳細に描いていない道路は再生成キューで省かれ、revision だけが進む(退避中のGOを再利用させない)。
+    /// </summary>
     private void EnqueuePillarNeighborRebuilds(PathSummary path, IEnumerable<Vector2Int> cells)
     {
         if (!IsPillarObstacle(path)) return;
+        bool canPassAbove = CanLeaveGround(path);
+        PillarClearance.Corridor pathCorridor = null;
+        // 設備は道路の幅の中に立ち、外形は道路の半幅より張り出さないので、道路の中心線から道路の幅まで見る。
+        bool EquipmentNear(PathSummary road)
+        {
+            pathCorridor ??= BuildObstacleCorridor(path);
+            return pathCorridor != null
+                && PillarClearance.NearXZ(GetUntrimmedPoints(road, out _), GetRoadWidth(road.path_variant), pathCorridor);
+        }
         foreach (int id in CollectPillarNeighborIds(cells, path.path_id))
         {
             if (!pathDataCache.TryGetValue(id, out var neighbor)) continue;
             var master = MasterDataStore.Instance?.GetPathMaster(neighbor.path_variant);
-            if (!(master?.height_editable ?? false)
-                || ((master.pillar_spacing ?? 0f) <= 0f && !BrickArcadeGenerator.HasArcade(neighbor))) continue;
+            bool supported = (master?.height_editable ?? false)
+                && ((master.pillar_spacing ?? 0f) > 0f || BrickArcadeGenerator.HasArcade(neighbor));
+            bool equipped = canPassAbove && RoadEquipmentGenerator.HasOutdoorEquipment(neighbor)
+                && (!HasDetailedObject(id) || EquipmentNear(neighbor));
+            if (!supported && !equipped) continue;
             bool added = pendingPillarRebuildIds.Add(id);
             pendingPillarRebuildSerials[id] = pathBuildSerialCounter;
             if (!added) continue;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using GeneratedModels;
 
-/// <summary>道路・線路の通行空間に入る橋脚を、描画順に依存せず省くための幾何判定。</summary>
+/// <summary>他の道路・線路と干渉する橋脚・沿道設備を、描画順に依存せず省くための幾何判定。</summary>
 public static class PillarClearance
 {
     /// <summary>
@@ -129,36 +129,61 @@ public static class PillarClearance
         if (corridors == null) return false;
         float partRadius = new Vector2(part.extents.x, part.extents.z).magnitude;
         foreach (var corridor in corridors)
+            if (Reaches(corridor, part.center, partRadius, part.min.y - corridor.Height, part.max.y)) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// 足元 foot から rise 以上高い路面が、平面で foot から radius(設備の水平半径)+半幅以内を通るか。
+    /// 上を通る相手の下の設備を、相手の高さに関わらず省くために使う。
+    /// </summary>
+    public static bool PassesAbove(Vector3 foot, float radius, float rise, List<Corridor> corridors)
+    {
+        if (corridors == null) return false;
+        foreach (var corridor in corridors)
+            if (Reaches(corridor, foot, radius, foot.y + rise, double.PositiveInfinity)) return true;
+        return false;
+    }
+
+    /// <summary>平面で points のいずれかの点から radius+半幅以内を通るか(高さは問わない)。points は未切断の中心線のように細かく標本化した点列とする。</summary>
+    public static bool NearXZ(IReadOnlyList<Vector3> points, float radius, Corridor corridor)
+    {
+        if (points == null) return false;
+        for (int i = 0; i < points.Count; i++)
+            if (Reaches(corridor, points[i], radius, double.NegativeInfinity, double.PositiveInfinity)) return true;
+        return false;
+    }
+
+    /// <summary>中心線のうち高さが [minY, maxY] の部分が、平面で center から radius+半幅以内を通るか。</summary>
+    private static bool Reaches(Corridor corridor, Vector3 center, float radius, double minY, double maxY)
+    {
+        if (corridor.Points == null || corridor.Points.Count < 2) return false;
+        float reach = radius + corridor.HalfWidth + Margin;
+        if (corridor.IsOutsideXZ(center, reach)) return false;
+        Vector3 lift = new Vector3(0f, corridor.YOffset, 0f);
+        for (int i = 1; i < corridor.Points.Count; i++)
         {
-            if (corridor.Points == null || corridor.Points.Count < 2) continue;
-            float radius = partRadius + corridor.HalfWidth + Margin;
-            if (corridor.IsOutsideXZ(part.center, radius)) continue;
-            Vector3 lift = new Vector3(0f, corridor.YOffset, 0f);
-            for (int i = 1; i < corridor.Points.Count; i++)
+            Vector3 a = corridor.Points[i - 1] + lift, b = corridor.Points[i] + lift;
+            double lo = 0, hi = 1;
+            double dy = b.y - a.y;
+            if (Math.Abs(dy) < 1e-8)
             {
-                Vector3 a = corridor.Points[i - 1] + lift, b = corridor.Points[i] + lift;
-                double lo = 0, hi = 1;
-                double dy = b.y - a.y;
-                double minY = part.min.y - corridor.Height, maxY = part.max.y;
-                if (Math.Abs(dy) < 1e-8)
-                {
-                    if (a.y < minY || a.y > maxY) continue;
-                }
-                else
-                {
-                    double t0 = (minY - a.y) / dy, t1 = (maxY - a.y) / dy;
-                    lo = Math.Max(lo, Math.Min(t0, t1));
-                    hi = Math.Min(hi, Math.Max(t0, t1));
-                    if (lo > hi) continue;
-                }
-                double dx = b.x - a.x, dz = b.z - a.z;
-                double px = a.x - part.center.x, pz = a.z - part.center.z;
-                double lengthSquared = dx * dx + dz * dz;
-                double t = lengthSquared > 1e-8 ? -(px * dx + pz * dz) / lengthSquared : lo;
-                t = Math.Max(lo, Math.Min(hi, t));
-                double x = px + dx * t, z = pz + dz * t;
-                if (x * x + z * z <= radius * radius) return true;
+                if (a.y < minY || a.y > maxY) continue;
             }
+            else
+            {
+                double t0 = (minY - a.y) / dy, t1 = (maxY - a.y) / dy;
+                lo = Math.Max(lo, Math.Min(t0, t1));
+                hi = Math.Min(hi, Math.Max(t0, t1));
+                if (lo > hi) continue;
+            }
+            double dx = b.x - a.x, dz = b.z - a.z;
+            double px = a.x - center.x, pz = a.z - center.z;
+            double lengthSquared = dx * dx + dz * dz;
+            double t = lengthSquared > 1e-8 ? -(px * dx + pz * dz) / lengthSquared : lo;
+            t = Math.Max(lo, Math.Min(hi, t));
+            double x = px + dx * t, z = pz + dz * t;
+            if (x * x + z * z <= reach * reach) return true;
         }
         return false;
     }
