@@ -1,7 +1,7 @@
 /**
  * 予算ミニメーター（コックピット常駐）
  *
- * 直近1期の市の「収入」に対する「予算見込み額（必要額）」の収支率（(収入 − 見込み) / 収入）を、
+ * 直近1期の市の「収入」に対する「次エポックの支出見込み」の収支率（(収入 − 支出見込み) / 収入）を、
  * 常時コックピットに表示する小型メーター。市の収支を一目で示すためのもので、BalanceMeter の中央が
  * 収支トントン、左へ振れるほど赤字見込みを表す。
  *
@@ -9,14 +9,14 @@
  * - クリックで CityBudgetWindow を開く
  *
  * 収入は直前に完了したエポックの total_revenue の全キー合計（税と公営事業収入。借入は含まない）。
- * 見込み額は CityBudgetWindow の基準額と同じ算出元のカテゴリ別必要額（projected_required）の
- * 合計で、建設・修繕・用地買収も含める（貯蓄は支出ではないので除外）。
+ * 支出見込みは CityBudgetWindow の収支バランスの支出と同じ導出（utils/budgetForecast）で、
+ * 保存済みの比率で導いた予算と支払見込みから求める。収支差は予算ウィンドウと一致する。
  */
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LEDGER_RESERVE } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
+import { deriveBudgets, expectedSpending, ratioPercent } from "../../utils/budgetForecast";
 import { BalanceMeter } from "../common/BalanceMeter";
 import "./hud.css";
 
@@ -25,17 +25,26 @@ const POLL_INTERVAL_MS = 10_000;
 
 type BudgetsResponse = {
   projected_required: Record<string, number>;
+  projected_payment: Record<string, number>;
+  category_ratio?: Record<string, number>;
+  budget_tiers?: Record<string, number>;
+  current_reserves?: number;
   total_revenue: Record<string, number>;
 };
 
-/** 貯蓄カテゴリを除いたカテゴリ別必要額の合計を予算見込み額として求める。 */
-function sumProjected(projectedRequired: Record<string, number>): number {
-  let total = 0;
-  for (const [key, value] of Object.entries(projectedRequired)) {
-    if (Number(key) === LEDGER_RESERVE) continue;
-    total += value;
+/** 次エポックの支出見込みの合計。 */
+function sumExpectedSpending(res: BudgetsResponse): number {
+  const ratiosPct: Record<string, number> = {};
+  for (const key of Object.keys(res.projected_required)) {
+    ratiosPct[key] = ratioPercent(res.category_ratio?.[key]);
   }
-  return total;
+  const { budgets } = deriveBudgets(
+    ratiosPct,
+    res.projected_required,
+    res.budget_tiers ?? {},
+    res.current_reserves ?? 0,
+  );
+  return Object.values(expectedSpending(budgets, res.projected_payment)).reduce((sum, v) => sum + v, 0);
 }
 
 export function BudgetMiniMeter({
@@ -47,7 +56,7 @@ export function BudgetMiniMeter({
 }) {
   const { t } = useTranslation();
   const [revenue, setRevenue] = useState<number | null>(null);
-  const [projected, setProjected] = useState<number | null>(null);
+  const [spending, setSpending] = useState<number | null>(null);
 
   useEffect(() => {
     if (!apiBaseUrl) return;
@@ -63,7 +72,7 @@ export function BudgetMiniMeter({
         );
         if (cancelled) return;
         setRevenue(Object.values(res.total_revenue).reduce((sum, v) => sum + v, 0));
-        setProjected(sumProjected(res.projected_required));
+        setSpending(sumExpectedSpending(res));
       } catch {
         // 取得失敗（中断含む）は前回値を保持し、画面をちらつかせない。
       }
@@ -78,12 +87,12 @@ export function BudgetMiniMeter({
     };
   }, [apiBaseUrl]);
 
-  const hasData = revenue !== null && projected !== null;
+  const hasData = revenue !== null && spending !== null;
   // 収入<=0 のときは 0 除算を避ける。収入なしで支出するのは赤字なので見込みが正なら左端、見込み0なら中央。
   const balance =
     hasData && revenue! > 0
-      ? (revenue! - projected!) / revenue!
-      : hasData && projected! > 0
+      ? (revenue! - spending!) / revenue!
+      : hasData && spending! > 0
         ? -Infinity
         : 0;
 
