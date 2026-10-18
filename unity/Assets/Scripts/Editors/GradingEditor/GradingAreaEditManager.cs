@@ -18,12 +18,6 @@ public class GradingAreaEditManager : PolygonAreaEditManager
     protected override Color VertexColor => new Color(0.88f, 0.62f, 0.98f);
 
     /// <summary>
-    /// 共通吸着は既定で道路の中心線へ吸い付く。範囲がパスに掛かると発注で必ず拒否されるため掛けない
-    /// (頂点は道路の縁の外側に置く必要がある)。
-    /// </summary>
-    protected override bool UseDragSnapping => false;
-
-    /// <summary>
     /// Esc では抜けない。Unity だけが通常モードへ戻ると、ウィンドウは開いたまま表示プリセットも戻らない。
     /// 抜けるのはウィンドウを閉じたとき(Rust が STATE_NORMAL を送る)と確定時の edit_grading:finish だけ。
     /// </summary>

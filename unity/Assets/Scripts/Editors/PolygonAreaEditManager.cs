@@ -23,10 +23,13 @@ public enum PolygonEditPhase { Inactive, Placing, Editing }
 /// Editingから始める)が本クラスを継承して利用する。
 ///
 /// 派生クラスが差し替えるのは「完成したポリゴンをどのIPCイベントでUIへ通知するか
-/// (<see cref="EmitShape"/>)」と「オーバーレイの色・キャンバス名・ドラッグ時の吸着方針」、および
+/// (<see cref="EmitShape"/>)」と「オーバーレイの色・キャンバス名」、および
 /// 編集の開始/終了に伴う固有処理(<see cref="FinishEditMode"/> の上書き)だけである。
 /// 確定(バックエンドへのPOST/PATCH送信)はいずれのケースもUI(Tauri)側が直接行うため、
 /// このクラスはポリゴン形状の組み立てとUIへの逐次通知のみを担当する。
+///
+/// 範囲はパスやノードに合わせて引くものではないため、頂点は配置・ドラッグとも地形上のカーソル位置に
+/// そのまま置き、共通吸着(ノード・パス等)は掛けない。クリック・ホバー側の吸着も TerrainInputHandler が省く。
 /// </summary>
 public abstract class PolygonAreaEditManager : MonoBehaviour
 {
@@ -60,9 +63,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
     private Vector3 hoverWorldPosition;
     private bool hasHover;
 
-    // TerrainInputHandler への参照(ドラッグ中のスナップ処理の共通化用)
-    protected TerrainInputHandler terrainInputHandler;
-
     public bool IsEditMode => phase != PolygonEditPhase.Inactive;
     public bool IsEditingPhase => phase == PolygonEditPhase.Editing;
 
@@ -89,9 +89,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
     /// <summary>選択中の頂点の色(既定は緑)。</summary>
     protected virtual Color SelectedVertexColor => new Color(0.2f, 1f, 0.4f);
 
-    /// <summary>頂点ドラッグに共通吸着を適用するか。編集対象ごとの固定方針。</summary>
-    protected virtual bool UseDragSnapping => true;
-
     // =====================================================================
     // ライフサイクル
     // =====================================================================
@@ -99,11 +96,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
     protected virtual void Start()
     {
         EnsureOverlayCanvas();
-        terrainInputHandler = FindAnyObjectByType<TerrainInputHandler>();
-        if (terrainInputHandler == null)
-        {
-            Debug.LogError($"{GetType().Name}: TerrainInputHandlerが見つかりません");
-        }
     }
 
     protected virtual void Update()
@@ -383,11 +375,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
         // 固定深度で逆投影すると斜め視点で地面からずれるため、入力側が求めた地形交点のXZを使う。
         Vector3 newWorldPos = worldPos;
         newWorldPos.y = Utils.GetGroundHeight(newWorldPos);
-
-        if (UseDragSnapping && terrainInputHandler != null)
-        {
-            newWorldPos = terrainInputHandler.ApplySnapping(newWorldPos);
-        }
 
         if (dragVertexIndex >= 0 && dragVertexIndex < vertices.Count)
         {

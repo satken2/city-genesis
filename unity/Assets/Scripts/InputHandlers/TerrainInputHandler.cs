@@ -152,10 +152,12 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 掛けると二重吸着になり、RoadPlanManager 側の半径設定が一切効かなくなる。
         // パス分割の分割点選択も共通吸着を掛けない(端点ノードへ引き寄せられると常に
         // 端点近傍の分割になって拒否されるため。onHover 側と条件を揃える)。
-        // 造成範囲の作図も共通吸着を掛けない。頂点が道路の中心線に乗ると範囲がパスに掛かり、発注で必ず拒否されるため。
+        // 任意ポリゴンの作図(区画の形状・資源範囲・造成範囲)も共通吸着を掛けない。範囲はパスやノードに
+        // 合わせて引くものではなく、造成範囲は頂点が道路の中心線に乗ると範囲がパスに掛かって発注で必ず拒否されるため。
         if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT
             && mode != InputMode.MODE_BUILDING_CONSTRUCTION && mode != InputMode.MODE_EDIT_PROP
             && mode != InputMode.MODE_PARCEL_SHAPE_EDIT
+            && mode != InputMode.MODE_EDIT_RESOURCE
             && mode != InputMode.MODE_EDIT_GRADING)
         {
             clickPosition = ApplySnapping(clickPosition);
@@ -257,6 +259,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 道路/鉄道建設モードは RoadPlanManager が自前の吸着半径で吸着するため共通吸着はしない
         // (onClick と同じ理由。二重吸着で RoadPlanManager 側の半径が効かなくなるのを防ぐ)。
         if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PARCEL_SHAPE_EDIT
+            && mode != InputMode.MODE_EDIT_RESOURCE
             && mode != InputMode.MODE_EDIT_GRADING)
         {
             clickPosition = ApplySnapping(clickPosition);
@@ -365,6 +368,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // バックエンドに拒否されるため。分割点は中心線への射影(PathTopologyEditManager)で決める。
         bool skipSnap = mode == InputMode.MODE_EDIT_CONNECTOR
                      || mode == InputMode.MODE_PARCEL_SHAPE_EDIT
+                     || mode == InputMode.MODE_EDIT_RESOURCE
                      || mode == InputMode.MODE_EDIT_GRADING
                      || mode == InputMode.MODE_EDIT_PROP
                      || mode == InputMode.MODE_BUILDING_CONSTRUCTION
