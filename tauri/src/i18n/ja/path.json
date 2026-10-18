@@ -121,6 +121,17 @@
     }
   },
   "path_construction": {
+    "buildMethod": {
+      "title": "敷設方法",
+      "single": "単一",
+      "grid": "碁盤状"
+    },
+    "grid": {
+      "divisionsFirst": "1辺目の分割数",
+      "divisionsSecond": "2辺目の分割数"
+    },
+    "layoutEmpty": "作れる区間がありません。範囲や設定を変えてください。",
+    "gridHint": "碁盤状に道路を敷設します。左クリックで1点目と2点目を置いて1辺を決め、3点目で直角に広げて範囲を決めます。範囲は分割数に合わせて等分されます。",
     "shapeError": "形状にエラーがあります",
     "validationMaxSpan": "ノード{{start}}–{{end}}間の距離 {{distance}}m が上限 {{limit}}m を超えています。途中にノードを追加するか、距離を短くしてください。",
     "validationCurve": "線路{{track}}：始点から{{start}}〜{{end}}mの曲線半径が規格の下限を下回っています。",

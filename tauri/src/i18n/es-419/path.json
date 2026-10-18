@@ -121,6 +121,17 @@
     }
   },
   "path_construction": {
+    "buildMethod": {
+      "title": "Método de trazado",
+      "single": "Individual",
+      "grid": "Cuadrícula"
+    },
+    "grid": {
+      "divisionsFirst": "Divisiones del lado 1",
+      "divisionsSecond": "Divisiones del lado 2"
+    },
+    "layoutEmpty": "No hay tramos que se puedan construir. Cambia el área o la configuración.",
+    "gridHint": "Traza calles en cuadrícula. Haz clic izquierdo en un primer y un segundo punto para definir un lado, y en un tercer punto para extender el área en ángulo recto. El área se divide en partes iguales según el número de divisiones.",
     "shapeError": "La forma contiene errores.",
     "validationMaxSpan": "La distancia entre los nodos {{start}}–{{end}} es de {{distance}}m y supera el límite de {{limit}}m. Agrega un nodo intermedio o reduce la distancia.",
     "validationCurve": "Vía {{track}}: el radio es inferior al mínimo entre {{start}} y {{end}} m desde el inicio.",

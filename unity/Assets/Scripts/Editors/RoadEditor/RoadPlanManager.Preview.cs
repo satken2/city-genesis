@@ -63,6 +63,11 @@ public partial class RoadPlanManager
     /// </summary>
     private void Update3DPreview()
     {
+        if (IsGridBuild)
+        {
+            UpdateGridPreview();
+            return;
+        }
         UpdateEarthworkPreview();
         // 非同期に届いた完成予定の縦断でも、警告を同じ形状から再計算する。
         cachedAlignmentViolations = null;

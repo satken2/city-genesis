@@ -491,6 +491,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         phase = RoadEditorPhase.Placing;
         points.Clear();
+        gridLayoutLines = null;
         selectedPointIndex = -1;
         anchorDragAxis = AnchorDragAxis.XZ;
         hoveredEdgeIndex = -1;
@@ -713,6 +714,7 @@ public partial class RoadPlanManager : MonoBehaviour
         hasRawSnapPosition = false;
         phase = RoadEditorPhase.Inactive;
         points.Clear();
+        gridLayoutLines = null;
         selectedPointIndex = -1;
         anchorDragAxis = AnchorDragAxis.XZ;
         hoveredEdgeIndex = -1;
@@ -751,6 +753,11 @@ public partial class RoadPlanManager : MonoBehaviour
     public void OnTerrainLeftClick(Vector3 worldPos)
     {
         if (!TutorialRuntime.AllowRoadClick(worldPos, points.Count, false, PathSubtype, phase == RoadEditorPhase.Placing)) return;
+        if (IsGridBuild)
+        {
+            OnGridLeftClick(worldPos);
+            return;
+        }
         var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [フリーズ調査] 調査後に削除
         if (phase == RoadEditorPhase.Placing)
         {
@@ -795,6 +802,7 @@ public partial class RoadPlanManager : MonoBehaviour
     public void OnTerrainRightClick(Vector3 worldPos)
     {
         if (!TutorialRuntime.AllowRoadClick(worldPos, points.Count, true, PathSubtype, phase == RoadEditorPhase.Placing)) return;
+        if (IsGridBuild) return;
         if (phase == RoadEditorPhase.Placing)
         {
             FinalizePath(worldPos);
@@ -813,6 +821,7 @@ public partial class RoadPlanManager : MonoBehaviour
         if (phase == RoadEditorPhase.Placing)
         {
             UpdateHoverSnapping(worldPos);
+            if (IsGridBuild && points.Count == 2) hoverWorldPosition = ConstrainGridCorner(hoverWorldPosition);
             UpdateShapePreview();
         }
         else if (phase == RoadEditorPhase.Editing) hoverWorldPosition = worldPos;
@@ -835,7 +844,7 @@ public partial class RoadPlanManager : MonoBehaviour
     public void ProcessMouseDrag(Vector3 worldPos)
     {
         if (TutorialRuntime.PathRestricted || TutorialRuntime.BlocksWorldInput) return;
-        if (phase != RoadEditorPhase.Editing) return;
+        if (phase != RoadEditorPhase.Editing || IsGridBuild) return;
 
         // ドラッグ未開始の場合、現在のマウス位置でドラッグ対象を決定する。
         // InputHandler がマウスダウンとドラッグを区別するようになったため、
@@ -995,7 +1004,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     public bool IsMouseOverEditHandle(Vector2 screenPos, Camera cam)
     {
-        if (!IsEditMode || cam == null) return false;
+        if (!IsEditMode || IsGridBuild || cam == null) return false;
         RoadOverlayHit hit = hitDetector.TestHit(screenPos, points, cam, CanEditControls);
         return hit.type == HitTargetType.Point || hit.type == HitTargetType.ControlIn || hit.type == HitTargetType.ControlOut;
     }
@@ -1456,12 +1465,15 @@ public partial class RoadPlanManager : MonoBehaviour
 
         // 線形は地形・保存設計標高・複線展開を解決する /paths/validate の全線検証で確定する。
         // 描画用のローカル推定をゲートにすると、権威検証自体が呼ばれず誤判定から復帰できない。
+        // 碁盤状は置いた点が範囲の指定で、作るパスはコアが展開して検証するので、点を置き終えたかだけを見る。
+        bool canConfirm = IsGridBuild
+            ? phase == RoadEditorPhase.Editing && points.Count == 3
+            : phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
+                && CheckRiverCrossings().Count == 0 && CheckSeaLakeCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0
+                && (!RoadPath.IsRopewayVariant(PathSubtype) || !HasAlignmentViolation)
+                && TutorialRuntime.AcceptsPath(points, PathSubtype, Curved);
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
-            phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
-            && CheckRiverCrossings().Count == 0 && CheckSeaLakeCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0
-            && (!RoadPath.IsRopewayVariant(PathSubtype) || !HasAlignmentViolation)
-            && TutorialRuntime.AcceptsPath(points, PathSubtype, Curved),
-            BuildShapeSyncExtras());
+            canConfirm, BuildShapeSyncExtras());
     }
 
 }

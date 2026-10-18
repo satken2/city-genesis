@@ -2352,6 +2352,48 @@
         }
       }
     },
+    "/api/v1/paths/layout": {
+      "post": {
+        "tags": [
+          "paths"
+        ],
+        "summary": "Layout Planned Paths",
+        "description": "パス建設パネルの敷設方法に応じて、作るパスの一覧を返す(都市は変えない)。\n\nリクエストボディ:\n  build_method: 敷設方法(PATH_BUILD_METHOD_*)。単一(PATH_BUILD_METHOD_SINGLE)は対象外\n  path_variant: 敷くバリアント。敷設方法ごとに選べる種別が決まる(碁盤状は PATH_TYPES_GRID_BUILD)\n  points: 碁盤状では直角に折れる3点 [P1, P2, P3]([x, y, z])。P1→P2 を1辺、P2→P3 の直交成分をもう1辺とする矩形\n  divisions: 碁盤状では [1辺目(P1→P2)の分割数, 2辺目(P2→P3)の分割数](1〜PATH_GRID_BUILD_MAX_DIVISIONS)\n\nレスポンス:\n  paths: POST /paths の要素と同じ形のパス。碁盤状では、既存の道路と重なる区間と、\n    単独で敷いたら確定できない区間を除いた地表の直線パス",
+        "operationId": "layout_planned_paths_api_v1_paths_layout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/paths/interference": {
       "post": {
         "tags": [

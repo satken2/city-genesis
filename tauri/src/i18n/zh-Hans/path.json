@@ -121,6 +121,17 @@
     }
   },
   "path_construction": {
+    "buildMethod": {
+      "title": "铺设方式",
+      "single": "单条",
+      "grid": "棋盘式"
+    },
+    "grid": {
+      "divisionsFirst": "第1边分割数",
+      "divisionsSecond": "第2边分割数"
+    },
+    "layoutEmpty": "没有可以建造的路段。请调整范围或设置。",
+    "gridHint": "以棋盘式铺设道路。左键单击第1点和第2点确定一条边，再单击第3点沿直角方向扩展范围。范围会按分割数等分。",
     "shapeError": "形状存在错误",
     "validationMaxSpan": "节点{{start}}–{{end}}之间的距离为{{distance}}m，超过{{limit}}m的上限。请添加中间节点或缩短距离。",
     "validationCurve": "线路{{track}}：距起点{{start}}～{{end}}m处的曲线半径小于规定下限。",

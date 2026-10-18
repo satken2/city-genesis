@@ -117,8 +117,9 @@ export function PathBuildSections({
         標高・盛土は既存ノードを選んで数値で微調整する用途があるためステッパーを残す。
         ホーム設置側は建設時にしか指定できないためここに置く。
         高さ編集不可(街路)かつインフラでない場合でも盛土は使えるので、いずれかを持つとき表示する。
+        展開する敷設方法(碁盤状)は地表に敷くので出さない。
       */}
-      {pc.selectedVariant !== null &&
+      {pc.selectedVariant !== null && !pc.isLayoutBuild &&
         (pc.heightEditable || !pc.isInfrastructure || pc.hasPlatformSide) && (
         <div className="pc-section">
           <div className="pc-section-title">{t("path_construction.shape", "形状")}</div>
@@ -261,6 +262,8 @@ export function PathBuildSections({
               travel_directions: pc.railComponents
                 ? pc.railComponents.map((c) => c.travel_direction ?? DIR_BOTH)
                 : [],
+              build_method: pc.buildMethod,
+              grid_divisions: pc.gridDivisions,
             }}
             onStartSetAngleMode={onStartSetAngleMode}
             onEndSetAngleMode={onEndSetAngleMode}
@@ -320,9 +323,11 @@ export function PathBuildSections({
             </div>
           )}
           <div className="pc-actions">
-            <button data-guide="path.shapeEditor" className="pc-btn" type="button" onClick={handleOpenShapeEditor}>
-              {t("path_construction.openShapeEditor")}
-            </button>
+            {!pc.isLayoutBuild && (
+              <button data-guide="path.shapeEditor" className="pc-btn" type="button" onClick={handleOpenShapeEditor}>
+                {t("path_construction.openShapeEditor")}
+              </button>
+            )}
             <button data-guide="path.cancel" className="pc-btn" type="button" onClick={onCancel}>
               {t("path_construction.cancel")}
             </button>

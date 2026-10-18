@@ -121,6 +121,17 @@
     }
   },
   "path_construction": {
+    "buildMethod": {
+      "title": "鋪設方式",
+      "single": "單條",
+      "grid": "棋盤式"
+    },
+    "grid": {
+      "divisionsFirst": "第1邊分割數",
+      "divisionsSecond": "第2邊分割數"
+    },
+    "layoutEmpty": "沒有可以建造的路段。請調整範圍或設定。",
+    "gridHint": "以棋盤式鋪設道路。按左鍵點選第1點和第2點決定一條邊，再點選第3點沿直角方向擴展範圍。範圍會依分割數等分。",
     "shapeError": "形狀存在錯誤",
     "validationMaxSpan": "節點{{start}}–{{end}}之間的距離為{{distance}}m，超過{{limit}}m的上限。請新增中間節點或縮短距離。",
     "validationCurve": "路線{{track}}：距起點{{start}}～{{end}}m處的曲線半徑小於規定下限。",

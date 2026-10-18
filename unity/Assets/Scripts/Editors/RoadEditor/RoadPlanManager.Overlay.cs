@@ -33,6 +33,14 @@ public partial class RoadPlanManager
 
         overlayRenderer.BeginFrame();
 
+        // 碁盤状は置いた点が範囲の指定なので、折れ線の辺・制御点・ローカルの干渉推定は描かない。
+        if (IsGridBuild)
+        {
+            DrawGridOverlay(cam);
+            overlayRenderer.EndFrame(cam);
+            return;
+        }
+
         DrawPlacedEdges(cam);
 
         // インフラ敷設時の接続端子マーカー（回転＋ボビングのアニメーションを行うため

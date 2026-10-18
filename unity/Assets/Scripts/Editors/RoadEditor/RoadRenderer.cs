@@ -519,5 +519,6 @@ public partial class RoadRenderer : MonoBehaviour
         // 重複判定状態をリセットし、次回は確実に再生成されるようにする。
         hasPreviewState = false;
         lastPreviewPoints?.Clear();
+        lastStripLines = null;
     }
 }

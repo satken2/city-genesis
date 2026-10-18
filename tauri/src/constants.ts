@@ -327,6 +327,9 @@ export const INTERCHANGE_HULL_MARGIN_M: number = 10.0;
 export const INTERCHANGE_NAME_MAX_LENGTH: number = 64;
 export const ROAD_NAME_MAX_LENGTH: number = 64;
 export const ROAD_TRACE_MAX_DEFLECTION_DEG: number = 30.0;
+export const PATH_BUILD_METHOD_SINGLE: number = 0;
+export const PATH_BUILD_METHOD_GRID: number = 1;
+export const PATH_GRID_BUILD_MAX_DIVISIONS: number = 10;
 export const PAYMENT_MARKET: number = 0;
 export const PAYMENT_RENT: number = 1;
 export const PAYMENT_SALARY: number = 2;
@@ -467,6 +470,8 @@ export const SCENARIO_START_OPTIONS: string[] = ["simulation_days", "climate", "
 export const PATH_TYPES_NAMED_ROAD: number[] = [1, 2];
 
 export const ROAD_COLOR_PALETTE: string[] = ["#7F77DD", "#E4572E", "#1D9E75", "#D4537E", "#2E86DE", "#BA7517", "#0F6E56", "#993C1D"];
+
+export const PATH_TYPES_GRID_BUILD: number[] = [1];
 
 export const TENANT_TYPES: number[] = [2, 4, 8, 16, 64];
 

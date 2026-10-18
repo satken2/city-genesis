@@ -80,6 +80,8 @@ public class IpcClient : MonoBehaviour
     // 線路数・進行方向の変更を受けて、敷設中プレビューの平行本数・ホーム設置側・
     // 進行方向矢印を切り替えるために使用する。両配列はindex対応。空配列=単一パス。
     public event Action<float[], int[]> OnEditPathChangeLateralOffsets;
+    // 碁盤状の敷設の分割数 [1辺目, 2辺目] の変更。配置中の仮の格子を描き直すために使用する。
+    public event Action<int[]> OnEditPathChangeGridDivisions;
     // 2Dパス形状編集パネルからのノード・制御点操作(XZのみ。吸着なし)。
     // 形状の真実源は RoadPlanManager のままで、結果は edit_path:update_shape で全状態を返す。
     public event Action<RoadPlanManager.ShapeCommand> OnEditPathShapeCommand;
@@ -455,6 +457,14 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "edit_path:change_grid_divisions":
+                    {
+                        int[] gridDivisions = GetParamInt1D(payload, "grid_divisions");
+                        Debug.Log($"IpcClient: edit_path:change_grid_divisions -> {string.Join(",", gridDivisions ?? System.Array.Empty<int>())}");
+                        OnEditPathChangeGridDivisions?.Invoke(gridDivisions);
+                    }
+                    break;
+
                 case "edit_path:shape_command":
                     {
                         var cmd = new RoadPlanManager.ShapeCommand
@@ -464,6 +474,7 @@ public class IpcClient : MonoBehaviour
                             routeJson = GetParamString(payload, "route_json"),
                             alignmentJson = GetParamString(payload, "alignment_json"),
                             junctionJson = GetParamString(payload, "junction_json"),
+                            layoutJson = GetParamString(payload, "layout_json"),
                             index = GetParamInt(payload, "index"),
                             edgeIndex = GetParamInt(payload, "edge_index"),
                             which = GetParamString(payload, "which"),

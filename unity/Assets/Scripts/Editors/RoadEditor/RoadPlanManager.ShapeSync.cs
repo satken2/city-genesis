@@ -30,6 +30,8 @@ public partial class RoadPlanManager
         public string routeJson;
         public string alignmentJson;
         public string junctionJson;
+        /// <summary>apply_layout: 敷設方法の展開で作るパスの [始点, 終点] の列(JSON)</summary>
+        public string layoutJson;
     }
 
     /// <summary>2Dへ送る線形サンプルの間隔(m)。1m推定を間引いて edit_path:update_shape の肥大化を防ぐ。</summary>
@@ -83,7 +85,8 @@ public partial class RoadPlanManager
     /// <summary>全線検証と同じ世代だけ採用する。再通知は形状を変更せず、再検証も要求しない。</summary>
     private void ApplyAuthoritativeAlignments(string revision, string json, string junctionJson)
     {
-        if (revision != routeRevision) return;
+        // 碁盤状の検証は展開した多数のパスの線形で、置いた点の折れ線のものではないので使わない。
+        if (revision != routeRevision || IsGridBuild) return;
         ValidatedAlignment[] alignments;
         JunctionLabel[] junctions;
         try
@@ -160,8 +163,15 @@ public partial class RoadPlanManager
             ApplyAuthoritativeAlignments(cmd.revision, cmd.alignmentJson, cmd.junctionJson);
             return;
         }
+        if (cmd.op == "apply_layout")
+        {
+            ApplyGridLayout(cmd.revision, cmd.layoutJson);
+            return;
+        }
         if (isDragging) return;
         if (TutorialRuntime.PathRestricted || TutorialRuntime.BlocksWorldInput) return;
+        // 碁盤状は点の編集を受け付けない(置いた点が範囲の指定なので)
+        if (IsGridBuild) return;
 
         switch (cmd.op)
         {
@@ -250,7 +260,7 @@ public partial class RoadPlanManager
             ["route_proposal"] = BuildRouteProposalPayload(),
             ["max_span_violations"] = BuildMaxSpanViolationsPayload(),
         };
-        var alignment = BuildAlignmentPayload();
+        var alignment = IsGridBuild ? null : BuildAlignmentPayload();
         if (alignment != null) extras["alignment"] = alignment;
         return extras;
     }

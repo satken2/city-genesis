@@ -640,6 +640,13 @@ public class IpcStateCoordinator : MonoBehaviour
                 ? Convert.ToString(pm) : "elevated";
             roadPlanManager.LateralOffsets = lateralOffsets;
             roadPlanManager.TravelDirections = travelDirections;
+            // 敷設方法でクリック手順が変わる。指定が無ければ単一へ戻す(前回のセッションの方法を残さない)。
+            roadPlanManager.BuildMethod = ipcParams != null && ipcParams.TryGetValue("build_method", out var bm) && bm != null
+                ? Convert.ToInt32(bm) : Constants.PATH_BUILD_METHOD_SINGLE;
+            if (ipcParams != null && ipcParams.TryGetValue("grid_divisions", out var gd) && gd != null)
+            {
+                roadPlanManager.SetGridDivisions(ReadIntArray(gd));
+            }
 
             roadPlanManager.InitializeRoadPlacement(pathId,
                 ipcParams != null && ipcParams.TryGetValue("initial_height", out var ih) ? System.Convert.ToSingle(ih) : (float?)null,

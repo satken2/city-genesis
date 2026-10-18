@@ -121,6 +121,17 @@
     }
   },
   "path_construction": {
+    "buildMethod": {
+      "title": "Mode de tracé",
+      "single": "Simple",
+      "grid": "Quadrillage"
+    },
+    "grid": {
+      "divisionsFirst": "Divisions du côté 1",
+      "divisionsSecond": "Divisions du côté 2"
+    },
+    "layoutEmpty": "Aucun tronçon ne peut être construit. Modifiez la zone ou les réglages.",
+    "gridHint": "Tracez des routes en quadrillage. Faites un clic gauche sur un premier puis un deuxième point pour définir un côté, puis sur un troisième pour étendre la zone à angle droit. La zone est divisée en parts égales selon le nombre de divisions.",
     "shapeError": "La forme contient des erreurs.",
     "validationMaxSpan": "La distance entre les nœuds {{start}}–{{end}} est de {{distance}}m et dépasse la limite de {{limit}}m. Ajoutez un nœud intermédiaire ou réduisez la distance.",
     "validationCurve": "Voie {{track}} : rayon inférieur au minimum entre {{start}} et {{end}} m depuis le départ.",

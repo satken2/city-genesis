@@ -332,6 +332,9 @@ public static class Constants
     public const int INTERCHANGE_NAME_MAX_LENGTH = 64;
     public const int ROAD_NAME_MAX_LENGTH = 64;
     public const float ROAD_TRACE_MAX_DEFLECTION_DEG = 30.0f;
+    public const int PATH_BUILD_METHOD_SINGLE = 0;
+    public const int PATH_BUILD_METHOD_GRID = 1;
+    public const int PATH_GRID_BUILD_MAX_DIVISIONS = 10;
     public const int PAYMENT_MARKET = 0;
     public const int PAYMENT_RENT = 1;
     public const int PAYMENT_SALARY = 2;
@@ -475,6 +478,8 @@ public static class Constants
     public static readonly int[] PATH_TYPES_NAMED_ROAD = new int[] { PATH_STREET, PATH_MOTORWAY };
 
     public static readonly string[] ROAD_COLOR_PALETTE = new string[] { "#7F77DD", "#E4572E", "#1D9E75", "#D4537E", "#2E86DE", "#BA7517", "#0F6E56", "#993C1D" };
+
+    public static readonly int[] PATH_TYPES_GRID_BUILD = new int[] { PATH_STREET };
 
     public static readonly int[] TENANT_TYPES = new int[] { SPACE_RESIDENCE, SPACE_RETAIL, SPACE_FACTORY, SPACE_OFFICE, SPACE_LODGING };
 

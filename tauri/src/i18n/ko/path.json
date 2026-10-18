@@ -121,6 +121,17 @@
     }
   },
   "path_construction": {
+    "buildMethod": {
+      "title": "부설 방식",
+      "single": "단일",
+      "grid": "바둑판"
+    },
+    "grid": {
+      "divisionsFirst": "1변 분할 수",
+      "divisionsSecond": "2변 분할 수"
+    },
+    "layoutEmpty": "건설할 수 있는 구간이 없습니다. 범위나 설정을 바꾸세요.",
+    "gridHint": "도로를 바둑판 모양으로 부설합니다. 왼쪽 클릭으로 첫 번째와 두 번째 점을 찍어 한 변을 정하고, 세 번째 점으로 직각 방향으로 범위를 넓힙니다. 범위는 분할 수에 맞춰 균등하게 나뉩니다.",
     "shapeError": "형상에 오류가 있습니다.",
     "validationMaxSpan": "노드 {{start}}–{{end}} 사이 거리 {{distance}}m가 제한 {{limit}}m를 초과합니다. 중간 노드를 추가하거나 거리를 줄이세요.",
     "validationCurve": "선로 {{track}}: 시작점에서 {{start}}~{{end}}m 구간의 곡선 반경이 최소값보다 작습니다.",

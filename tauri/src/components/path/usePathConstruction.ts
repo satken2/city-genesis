@@ -15,6 +15,10 @@
  *     道路と同じ「両方向(DIR_BOTH)の単一パス1本」扱いで複線展開しない
  *     (判定は railBuild.isSingleRailPathVariant)。複線一体の線路の駅はホーム設置側を持たない。
  *
+ * 新規敷設では種別ごとに敷設方法(pathBuildMethods)を選べる。単一は上のとおり Unity の折れ線から送信形状を作り、
+ * それ以外の方法(碁盤状)は Unity が置いた点と設定をコアの展開(POST /paths/layout)へ渡し、返ったパス群を
+ * そのまま送信形状にする。展開の結果は編集世代とともに Unity へ返し、プレビューに使わせる。
+ *
  * 状態:
  *   selectedVariant: 敷設する単一(=軌道では中心線の代表)バリアントID
  *   curveMode: 描画モード (straight/curved)。真実源はUnity側(ラジアルメニューで切替)であり、
@@ -51,6 +55,8 @@ import {
   sendHighlightObjects,
   sendClearHighlights,
   sendEditPathAlignment,
+  sendEditPathChangeGridDivisions,
+  sendEditPathShapeCommand,
   IPC_EVENT_EDIT_PATH_SELECT_NODE,
   IPC_EVENT_EDIT_PATH_UPDATE_SHAPE,
 } from "../../utils/ipc";
@@ -62,11 +68,14 @@ import type { PathAlignmentSummary } from "../../types";
 import { notifyRoadsChanged } from "../road/roadApi";
 import {
   DIR_BOTH,
+  PATH_BUILD_METHOD_SINGLE,
+  PATH_GRID_BUILD_MAX_DIVISIONS,
   PATH_STATION_HOUSE,
   PATH_TRACK,
   PLATFORM_SIDE_OUTSIDE,
   TRAFFIC_HAND_LEFT,
 } from "../../constants";
+import { buildMethodsFor, DEFAULT_GRID_DIVISIONS } from "./pathBuildMethods";
 import { isInfraPathType } from "../../local-constants";
 import {
   computeAnchorOffsetDirs,
@@ -247,6 +256,23 @@ export function usePathConstruction(
   // 確定送信時に waypoints へ {position, control_in, control_out} 形式で含めることで、
   // ドラッグで調整した曲線形状がバックエンドに永続化される。
   const [rawWaypointControls, setRawWaypointControls] = useState<WaypointControls[]>([]);
+  // Unity の編集フェーズ(placing/editing/inactive)。update_shape の phase で同期する。
+  const [shapePhase, setShapePhase] = useState<string>();
+
+  /* ---- 敷設方法 ---- */
+  // 新規敷設の敷設方法(PATH_BUILD_METHOD_*)。既存パスの形状編集は常に単一。
+  const [buildMethod, setBuildMethod] = useState<number>(PATH_BUILD_METHOD_SINGLE);
+  const [gridDivisions, setGridDivisions] = useState<[number, number]>(DEFAULT_GRID_DIVISIONS);
+  // コアの展開結果。key は要求の本文で、今の形状・設定から作った要求と一致するときだけ使う。
+  const [layout, setLayout] = useState<{ key: string; paths?: Record<string, unknown>[]; error?: string } | null>(null);
+  const isLayoutBuild = pathId == null && buildMethod !== PATH_BUILD_METHOD_SINGLE;
+  // Unity はその方法の点を置き終えたときだけ editing へ進む。
+  const layoutRequest = isLayoutBuild && selectedVariant !== null && shapePhase === "editing"
+    ? JSON.stringify({ build_method: buildMethod, path_variant: selectedVariant, points: rawPoints, divisions: gridDivisions })
+    : "";
+  const currentLayout = layoutRequest !== "" && layout?.key === layoutRequest ? layout : null;
+  const isLayoutBuildRef = useRef(isLayoutBuild);
+  isLayoutBuildRef.current = isLayoutBuild;
 
   /* ---- 軌道(複線)敷設の設定 ---- */
   const [trackCount, setTrackCount] = useState<number>(1);
@@ -378,11 +404,17 @@ export function usePathConstruction(
   /**
    * 敷設中パス(中心線)の水平長(m)。ノードが2点未満なら null。
    * 建設費用セクションで長さを表示するために使う。曲線はベジエ弧長を近似する。
+   * 展開する敷設方法では、展開したパス(直線)の長さの合計。
    */
-  const pathLength = useMemo(
-    () => computePathLength(nodes, curveMode, startControl, endControl, rawWaypointControls),
-    [nodes, curveMode, startControl, endControl, rawWaypointControls],
-  );
+  const pathLength = useMemo(() => {
+    if (!isLayoutBuild) return computePathLength(nodes, curveMode, startControl, endControl, rawWaypointControls);
+    if (!currentLayout?.paths?.length) return null;
+    return currentLayout.paths.reduce((sum, path) => {
+      const [sx, , sz] = path.start_point as number[];
+      const [ex, , ez] = path.end_point as number[];
+      return sum + Math.hypot(ex - sx, ez - sz);
+    }, 0);
+  }, [isLayoutBuild, currentLayout, nodes, curveMode, startControl, endControl, rawWaypointControls]);
 
   /* ---- 選択・敷設モードの制御 ---- */
 
@@ -426,6 +458,10 @@ export function usePathConstruction(
   const selectVariant = useCallback((variantId: number) => {
     setSelectedVariant(variantId);
     const variantData = masterData?.paths?.[variantId];
+    // 選んだ種別で選べない敷設方法は単一へ戻す
+    const method = pathId == null && buildMethodsFor(variantData?.type).includes(buildMethod)
+      ? buildMethod : PATH_BUILD_METHOD_SINGLE;
+    setBuildMethod(method);
     sendChangeState("STATE_EDIT_PATH", {
       path_type: variantData?.type ?? null,
       path_variant: variantId,
@@ -440,10 +476,13 @@ export function usePathConstruction(
       // 以後の線路数・進行方向の変更は下の useEffect が edit_path:change_lateral_offsets で逐次反映する。
       lateral_offsets: lateralOffsetsForVariant(variantId),
       travel_directions: travelDirectionsForVariant(variantId),
+      // 敷設方法で Unity のクリック手順が変わる。以後の分割数の変更は edit_path:change_grid_divisions で反映する。
+      build_method: method,
+      grid_divisions: gridDivisions,
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState failed:", err);
     });
-  }, [masterData, pathId, houseEnds, passageMode, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant]);
+  }, [masterData, pathId, houseEnds, passageMode, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant, buildMethod, gridDivisions]);
 
   /** バリアントの選択と配置状態をクリアして Unity を通常状態へ戻す(パネルの戻るボタン)。 */
   const deselectVariant = useCallback(() => {
@@ -525,9 +564,10 @@ export function usePathConstruction(
   /**
    * 連続設置: 1本目のパス確定後に、選択中のバリアント・軌道設定を維持したまま
    * パス配置状態だけをクリアし、Unity を再び STATE_EDIT_PATH に戻す。
-   * 高さ・盛土・曲線・追従・線路間隔などの敷設設定は次の配置にも引き継ぐ。
+   * 高さ・盛土・曲線・追従・線路間隔・敷設方法などの敷設設定は次の配置にも引き継ぐ。
+   * 敷設方法を切り替えるときは、置いた点の意味が変わるので切り替え後の方法でやり直す。
    */
-  const continuePlacement = useCallback(() => {
+  const continuePlacement = useCallback((method: number = buildMethod) => {
     if (selectedVariant === null) return;
     const variantData = masterData?.paths?.[selectedVariant];
     setSelectedNodeIndex(-1);
@@ -557,10 +597,29 @@ export function usePathConstruction(
       initial_follow_terrain: followTerrain,
       lateral_offsets: lateralOffsetsForVariant(selectedVariant),
       travel_directions: travelDirectionsForVariant(selectedVariant),
+      build_method: method,
+      grid_divisions: gridDivisions,
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState (continue) failed:", err);
     });
-  }, [selectedVariant, masterData, pathId, houseEnds, passageMode, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant]);
+  }, [selectedVariant, masterData, pathId, houseEnds, passageMode, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant, buildMethod, gridDivisions]);
+
+  /** 敷設方法を切り替え、Unity の配置を切り替え後の方法でやり直させる。 */
+  const changeBuildMethod = useCallback((method: number) => {
+    if (method === buildMethod) return;
+    setBuildMethod(method);
+    continuePlacement(method);
+  }, [buildMethod, continuePlacement]);
+
+  /** 碁盤状の分割数(index 0=1辺目, 1=2辺目)を変え、Unity の仮の格子を描き直させる。 */
+  const changeGridDivision = useCallback((index: 0 | 1, value: number) => {
+    const next: [number, number] = [...gridDivisions];
+    next[index] = clampInt(value, 1, PATH_GRID_BUILD_MAX_DIVISIONS);
+    setGridDivisions(next);
+    sendEditPathChangeGridDivisions(next).catch((err) => {
+      console.error("[usePathConstruction] sendEditPathChangeGridDivisions failed:", err);
+    });
+  }, [gridDivisions]);
 
   /**
    * 現在のパス形状をバックエンドに送信して確定する。
@@ -574,6 +633,9 @@ export function usePathConstruction(
    */
   // 事前検証と確定が同じ全線・制御点を送るため、送信形状を一度だけ組み立てる。
   const constructionBody = useMemo(() => {
+    if (isLayoutBuild) {
+      return currentLayout?.paths?.length ? { paths: currentLayout.paths, align_station_tracks: false } : null;
+    }
     if (selectedVariant === null || rawPoints.length < 2) return null;
     const isCurved = curveMode !== "straight";
     if (railComponents) {
@@ -719,7 +781,7 @@ export function usePathConstruction(
     }
 
     return { paths: [pathData], align_station_tracks: false };
-  }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatformSide, houseEnds, passageMode, platformSide, followTerrain]);
+  }, [isLayoutBuild, currentLayout, selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatformSide, houseEnds, passageMode, platformSide, followTerrain]);
 
   const [localCanConfirm, setLocalCanConfirm] = useState(false);
   const [maxSpanViolations, setMaxSpanViolations] = useState<PathMaxSpanViolation[]>([]);
@@ -728,7 +790,6 @@ export function usePathConstruction(
     key: string; result?: PathValidationResult; error?: string;
   } | null>(null);
   const [validationAttempt, setValidationAttempt] = useState(0);
-  const [shapePhase, setShapePhase] = useState<string>();
   const [shapeRevision, setShapeRevision] = useState("");
   const currentShapeRevision = useRef("");
   const receivedShapeKey = useRef("");
@@ -736,6 +797,33 @@ export function usePathConstruction(
     setValidation(null);
     setValidationAttempt((value) => value + 1);
   }, []);
+
+  // 敷設方法の展開をコアへ問い合わせて送信形状にし、Unity へは問い合わせた形の編集世代を付けて返す。
+  // Unity は今の世代の結果だけを採用するので、形を変えない設定の変更で世代が進んだときも問い合わせ直す。
+  useEffect(() => {
+    if (!apiBaseUrl || layoutRequest === "") return;
+    const revision = shapeRevision;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const result = await fetchApi<{ paths: Record<string, unknown>[] }>(
+          `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/layout`,
+          { method: "POST", headers: { "Content-Type": "application/json" }, body: layoutRequest }
+        );
+        if (cancelled) return;
+        setLayout({ key: layoutRequest, paths: result.paths });
+        void sendEditPathShapeCommand({
+          op: "apply_layout",
+          revision,
+          layout_json: JSON.stringify(result.paths.map((p) => [p.start_point, p.end_point])),
+        }).catch(console.error);
+      } catch (error) {
+        if (!cancelled) setLayout({ key: layoutRequest, error: error instanceof Error ? error.message : String(error) });
+      }
+    }, 150);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [apiBaseUrl, layoutRequest, shapeRevision, validationAttempt]);
+
   const validationKey = JSON.stringify({ ...constructionBody, exclude_path_id: pathId ?? null });
   useEffect(() => {
     const win = getCurrentWindow();
@@ -751,12 +839,19 @@ export function usePathConstruction(
   currentValidationKey.current = validationKey;
   const canConfirm = localCanConfirm && constructionBody !== null
     && validation?.key === validationKey && validation.result?.is_valid === true && allowsPathBody(constructionBody);
+  // 展開の待ち・失敗と、作れる区間が無いことは、敷設条件の検証より先に出す。
+  const layoutMessage = layoutRequest === "" ? null
+    : currentLayout === null ? t("path_construction.collisionChecking")
+    : currentLayout.error !== undefined ? t("path_construction.validationFailed", { reason: currentLayout.error })
+    : currentLayout.paths?.length === 0 ? t("path_construction.layoutEmpty") : null;
   const validationMessages = maxSpanViolations.length > 0
     ? describeMaxSpanViolations(maxSpanViolations, t)
     : !localCanConfirm
     ? [t(shapePhase === "placing" ? "path_construction.shapeUnready" : "path_construction.collisionUnready")]
     : !apiBaseUrl
       ? [t("path_construction.validationUnavailable")]
+      : layoutMessage !== null
+        ? [layoutMessage]
       : validation?.key !== validationKey
         ? [t("path_construction.collisionChecking")]
         : validation.error !== undefined
@@ -774,7 +869,7 @@ export function usePathConstruction(
     ? summarizeAlignment(validation.result.alignments) : null;
   const displayAlignment = validatedAlignment ?? alignment;
   const canRetryValidation = localCanConfirm && !!apiBaseUrl
-    && validation?.key === validationKey && validation.error !== undefined;
+    && ((validation?.key === validationKey && validation.error !== undefined) || currentLayout?.error !== undefined);
 
   useEffect(() => {
     void sendClearHighlights("path_build");
@@ -974,7 +1069,8 @@ export function usePathConstruction(
 
         // 曲線モードで形状を確定(3Dビューの右クリック)したら、制御点を調整しやすい
         // 2Dパス形状編集パネルを自動で開く(直線モードはボタンから手動で開く)。
-        if (event.payload.is_finalized === true && isCurved) {
+        // 展開する敷設方法では置いた点が範囲の指定なので開かない。
+        if (event.payload.is_finalized === true && isCurved && !isLayoutBuildRef.current) {
           void invoke("open_registered_window", { windowType: "path_shape_editor" }).catch(console.error);
         }
 
@@ -1191,6 +1287,12 @@ export function usePathConstruction(
     setPlatformSide,
     followTerrain,
     setFollowTerrain,
+    // 敷設方法
+    buildMethod,
+    isLayoutBuild,
+    gridDivisions,
+    changeBuildMethod,
+    changeGridDivision,
     // 軌道(複線)設定
     trackCount,
     trackSpacing,

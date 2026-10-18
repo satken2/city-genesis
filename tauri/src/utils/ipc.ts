@@ -857,7 +857,22 @@ export async function sendEditPathChangeLateralOffsets(
 }
 
 /**
- * 2Dパス形状編集パネル(path_shape_editor)からの形状操作。op ごとに使うフィールドが違う。
+ * `edit_path.change_grid_divisions`
+ * 碁盤状の敷設で、矩形を等分する辺ごとの分割数([1辺目(1点目→2点目), 2辺目(2点目→3点目)])を変更する。
+ * Unity側は配置中の仮の格子を描き直す。初期値は STATE_EDIT_PATH の grid_divisions。
+ */
+export async function sendEditPathChangeGridDivisions(gridDivisions: [number, number]): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "path_build",
+    entity: null,
+    action: "edit_path:change_grid_divisions",
+    params: { grid_divisions: gridDivisions },
+  });
+}
+
+/**
+ * 2Dパス形状編集パネル(path_shape_editor)からの形状操作と、建設パネルが返すコアの結果。op ごとに使うフィールドが違う。
+ * - apply_layout: 敷設方法の展開(POST /paths/layout)で作るパスの [始点, 終点] の列(JSON)。もとにした編集世代と一致するときだけ採用される
  * - select_node: index
  * - move_node: index, x, z (XZのみ。地面相対の高さはUnity側が維持する)
  * - move_control: index, which("in"|"out"), x, z (制御点の絶対標高はUnity側が維持する)
@@ -867,6 +882,7 @@ export async function sendEditPathChangeLateralOffsets(
 export type PathShapeCommand =
   | { op: "apply_alignment"; revision: string; alignment_json: string; junction_json: string }
   | { op: "apply_route"; revision: string; route_json: string }
+  | { op: "apply_layout"; revision: string; layout_json: string }
   | { op: "undo_route"; revision: string }
   | { op: "select_node"; index: number }
   | { op: "move_node"; index: number; x: number; z: number }

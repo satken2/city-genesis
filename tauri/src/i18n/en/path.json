@@ -121,6 +121,17 @@
     }
   },
   "path_construction": {
+    "buildMethod": {
+      "title": "Layout method",
+      "single": "Single",
+      "grid": "Grid"
+    },
+    "grid": {
+      "divisionsFirst": "Divisions along side 1",
+      "divisionsSecond": "Divisions along side 2"
+    },
+    "layoutEmpty": "No sections can be built. Change the area or settings.",
+    "gridHint": "Lay roads in a grid. Left-click a first and second point to set one side, then a third point to extend the area at a right angle. The area is divided evenly by the division counts.",
     "shapeError": "The shape contains errors.",
     "validationMaxSpan": "The distance between nodes {{start}}–{{end}} is {{distance}}m, exceeding the {{limit}}m limit. Add an intermediate node or shorten the span.",
     "validationCurve": "Path {{track}}: curve radius is below the minimum from {{start}} to {{end}} m from the start.",

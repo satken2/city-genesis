@@ -27,6 +27,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathChangePassageMode += HandleEditPathChangePassageMode;
             IpcClient.Instance.OnEditPathSetFollowTerrain += HandleEditPathSetFollowTerrain;
             IpcClient.Instance.OnEditPathChangeLateralOffsets += HandleEditPathChangeLateralOffsets;
+            IpcClient.Instance.OnEditPathChangeGridDivisions += HandleEditPathChangeGridDivisions;
             IpcClient.Instance.OnEditPathShapeCommand += HandleEditPathShapeCommand;
             IpcClient.Instance.OnEditPathQueryShape += HandleEditPathQueryShape;
             IpcClient.Instance.OnEditResourceFinish += HandleEditResourceFinish;
@@ -67,6 +68,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathChangePassageMode -= HandleEditPathChangePassageMode;
             IpcClient.Instance.OnEditPathSetFollowTerrain -= HandleEditPathSetFollowTerrain;
             IpcClient.Instance.OnEditPathChangeLateralOffsets -= HandleEditPathChangeLateralOffsets;
+            IpcClient.Instance.OnEditPathChangeGridDivisions -= HandleEditPathChangeGridDivisions;
             IpcClient.Instance.OnEditPathShapeCommand -= HandleEditPathShapeCommand;
             IpcClient.Instance.OnEditPathQueryShape -= HandleEditPathQueryShape;
             IpcClient.Instance.OnEditResourceFinish -= HandleEditResourceFinish;
@@ -234,6 +236,19 @@ public class IpcEventHandler : MonoBehaviour
         if (rpm != null)
         {
             rpm.SetLateralOffsets(lateralOffsets, travelDirections);
+        }
+    }
+
+    /// <summary>
+    /// edit_path.change_grid_divisions → RoadPlanManager.SetGridDivisions()
+    /// 碁盤状の敷設の分割数の変更を受けて、配置中の仮の格子を描き直す。
+    /// </summary>
+    private void HandleEditPathChangeGridDivisions(int[] gridDivisions)
+    {
+        var rpm = GetRoadPlanManager();
+        if (rpm != null)
+        {
+            rpm.SetGridDivisions(gridDivisions);
         }
     }
 

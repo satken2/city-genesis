@@ -10,6 +10,8 @@ public partial class RoadRenderer
     private readonly List<Vector3> stripNormals = new List<Vector3>();
     private readonly List<int> stripTriangles = new List<int>();
     private bool isSection;
+    // UpdateLineStrips で描いた中心線のリスト。同じリストなら描き直さない。
+    private List<List<Vector3>> lastStripLines;
 
     /// <summary>
     /// 詳細な前後区間と、操作中の帯を独立した寿命で保持する。
@@ -63,8 +65,36 @@ public partial class RoadRenderer
         }
     }
 
+    /// <summary>
+    /// 互いに独立した複数の中心線(碁盤状の敷設で作るパス群)を、操作中と同じ軽量な帯でまとめて描く。
+    /// 本数に比例して重くなる詳細メッシュは作らない。同じリストで再び呼ばれたら描き直さない。
+    /// </summary>
+    public void UpdateLineStrips(List<List<Vector3>> lines, int variant)
+    {
+        if (previewMeshFilter == null || ReferenceEquals(lines, lastStripLines)) return;
+        ResetPreview();
+        lastStripLines = lines;
+        if (lines == null || lines.Count == 0) return;
+        stripVertices.Clear();
+        stripNormals.Clear();
+        stripTriangles.Clear();
+        foreach (var line in lines)
+            if (line != null && line.Count >= 2)
+                AppendStrips(line, variant, Constants.PLATFORM_SIDE_OUTSIDE, null, null);
+        FlushStrips();
+    }
+
     private void UpdateStrip(List<Vector3> points, int variant, int platformSide,
         float[] offsets, int[] directions)
+    {
+        stripVertices.Clear();
+        stripNormals.Clear();
+        stripTriangles.Clear();
+        AppendStrips(points, variant, platformSide, offsets, directions);
+        FlushStrips();
+    }
+
+    private void FlushStrips()
     {
         if (previewMesh == null)
         {
@@ -76,9 +106,18 @@ public partial class RoadRenderer
             previewMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             previewMeshRenderer.receiveShadows = false;
         }
-        stripVertices.Clear();
-        stripNormals.Clear();
-        stripTriangles.Clear();
+        previewMesh.Clear();
+        previewMesh.indexFormat = stripVertices.Count > 65535
+            ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
+        previewMesh.SetVertices(stripVertices);
+        previewMesh.SetNormals(stripNormals);
+        previewMesh.SetTriangles(stripTriangles, 0);
+        previewMesh.RecalculateBounds();
+    }
+
+    private void AppendStrips(List<Vector3> points, int variant, int platformSide,
+        float[] offsets, int[] directions)
+    {
         var master = MasterDataStore.Instance?.GetPathMaster(variant);
         // points は設計空間(地面+相対Y)。確定後の描画位置に合わせて base_height を引く
         float baseHeight = PathManager.GetPathBaseHeight(variant);
@@ -108,13 +147,6 @@ public partial class RoadRenderer
             if (islandEdge > 0f)
                 AddStrip(offset - islandEdge, offset + islandEdge, RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE);
         }
-        previewMesh.Clear();
-        previewMesh.indexFormat = stripVertices.Count > 65535
-            ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16;
-        previewMesh.SetVertices(stripVertices);
-        previewMesh.SetNormals(stripNormals);
-        previewMesh.SetTriangles(stripTriangles, 0);
-        previewMesh.RecalculateBounds();
 
         void AddStrip(float left, float right, float height)
         {

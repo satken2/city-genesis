@@ -39,7 +39,7 @@ import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { sendEditPathFinish, sendSetGrid, sendChangeDisplay, sendChangeState, sendFocusGraphic, IPC_EVENT_VIEW_GRID_TOGGLED } from "../../utils/ipc";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
-import { PATH_STATION_HOUSE } from "../../constants";
+import { PATH_BUILD_METHOD_GRID, PATH_STATION_HOUSE } from "../../constants";
 import { tutorialVariantAllowed } from "../../tutorial/TutorialLayer";
 import { buildCategoryGroups, buildCategoryVariants, buildCategoryVariantTabs } from "./pathBuildCategories";
 import { FlatTabs } from "../common/FlatTabs";
@@ -51,6 +51,7 @@ import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
 import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
 import { StationPassageModeSelect } from "./StationPassageModeSelect";
 import { PathBuildSections } from "./PathBuildSections";
+import { PathBuildMethodSection } from "./PathBuildMethodSection";
 import { PathTagSection } from "./PathTagSection";
 import { TAGS_CHANGED_EVENT } from "../../utils/constructionTags";
 import turnBackIcon from "../../assets/images/ui/turn-back.png";
@@ -321,6 +322,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
    */
   const hintKey = selectedPathType === PATH_STATION_HOUSE
     ? "path_construction.stationHouseHint"
+    : pathConstruction.buildMethod === PATH_BUILD_METHOD_GRID
+      ? "path_construction.gridHint"
     : pathConstruction.heightEditable
       ? "hint.pathConstructionElevated"
       : "hint.pathConstruction";
@@ -429,6 +432,17 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
         {isNewBuild && <BackButton onClick={pathConstruction.deselectVariant} />}
         <PathVariantCard entry={selectedVariantData} variantId={pathConstruction.selectedVariant ?? undefined} />
       </div>
+
+      {/* 敷設方法は新規敷設でだけ選ぶ(既存パスの形状編集は折れ線そのものを直す) */}
+      {isNewBuild && (
+        <PathBuildMethodSection
+          pathType={selectedPathType}
+          buildMethod={pathConstruction.buildMethod}
+          gridDivisions={pathConstruction.gridDivisions}
+          onChangeBuildMethod={pathConstruction.changeBuildMethod}
+          onChangeGridDivision={pathConstruction.changeGridDivision}
+        />
+      )}
 
       {/* 駅舎の建屋の配置端と通路方式は建設時に決める(配置端は着工後に変えられない) */}
       {isNewBuild && selectedPathType === PATH_STATION_HOUSE && (

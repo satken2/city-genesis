@@ -33,3 +33,5 @@
 ## 敷設前の検証
 
 可否はコアの検証が正で、Unity の判定は操作中の推定である。`POST /api/v1/paths/validate` は都市を変えずに、確定と同じ形を作成と同じ規則で検証して違反を種類ごとに返す（流れは[IPC連携の整理](../programs/IPC連携の整理.md)）。`colliding_sea_lake_ids` の海は `"sea"`・湖は水面の `id`、`colliding_quay_band_ids` は埋立地の `reclaimed_land_id`、`colliding_grading_site_ids` は造成の区画の `parcel_id` である。アンカーが陸にあるか、同じ相手との平面交差が1か所までかなどは作成のときに検証する。
+
+碁盤状などの敷設方法では、UI が置いた点と設定を `POST /api/v1/paths/layout` で作るパスの一覧へ展開してから、ほかの敷設と同じ検証と作成に渡す。展開は既存の道路と並走する区間と、単独では作成できない区間を除いて返すので、横切る既存の道路とは竣工時に交差点でつながる。
