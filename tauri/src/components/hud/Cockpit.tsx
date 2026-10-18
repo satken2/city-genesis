@@ -31,7 +31,7 @@
 import { PLAY_MODE_SCEARIO } from "../../constants";
 
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
@@ -80,11 +80,27 @@ export function Cockpit() {
   const godMode = playMode === PLAY_MODE_SCEARIO;
   const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, godMode);
   const mode = useHudMode();
+  const panelRef = useRef<HTMLDivElement | null>(null);
   // ブルドーザの削除確認ダイアログでプロップ種別名を出すために参照する。
   const masterData = useMasterData();
 
   // L1通知(今すぐ対処が必要な重大事象)の現在有効な一覧。件数バッジと点滅の判定に使う。
   const [l1Notifications, setL1Notifications] = useState<L1Notification[]>([]);
+
+  // 言語・日付・文字サイズによる内容幅の変化だけを通知し、透明な余白が3D画面の操作を遮らないようにする。
+  useEffect(() => {
+    const element = panelRef.current;
+    if (!element) return;
+    let lastSent = 0;
+    const observer = new ResizeObserver(() => {
+      const width = Math.ceil(element.getBoundingClientRect().width);
+      if (width <= 0 || width === lastSent) return;
+      lastSent = width;
+      void invoke("resize_cockpit", { width }).catch(console.error);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [visible]);
 
   // BGM管理クラスのライフサイクル管理
   useEffect(() => {
@@ -301,6 +317,7 @@ export function Cockpit() {
 
   return (
     <div
+      ref={panelRef}
       className={`hud-panel cockpit ${mode === "bulldozer" ? "cockpit--bulldozer" : ""} ${epochExecuting ? "hud-disabled" : ""}`}
     >
       <div className="cockpit-tools">

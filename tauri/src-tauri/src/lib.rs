@@ -215,6 +215,12 @@ fn resize_system_tray(app: tauri::AppHandle, state: tauri::State<'_, SharedState
     window::resize_system_tray(&app, state.inner(), width);
 }
 
+/// コックピットを言語・日付・文字サイズに応じた内容幅に合わせる。
+#[tauri::command]
+fn resize_cockpit(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, width: f64) {
+    window::resize_cockpit(&app, state.inner(), width);
+}
+
 /// トップメニューの初期状態を返す
 /// フロントエンドのTopMenuコンポーネントが初期化時に呼び出す
 #[tauri::command]
@@ -253,7 +259,7 @@ fn switch_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, d
     })?;
 
     let monitor = monitors.get(new_index).ok_or("monitor index out of range")?;
-    window::layout_hud_windows(&app, &monitors, new_index, None, None);
+    window::layout_hud_windows(&app, &monitors, new_index, None, None, None);
     if let Some(hintbar) = app.get_webview_window("hintbar") {
         hintbar_placement(Some(monitor)).apply(&hintbar);
     }
@@ -1901,6 +1907,7 @@ pub fn run() {
             get_connection_status,
             resize_icon_panel,
             resize_system_tray,
+            resize_cockpit,
             get_topmenu_state,
             switch_monitor,
             set_multi_display,

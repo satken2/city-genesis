@@ -161,10 +161,10 @@ export function relayoutForViewport(): void {
 }
 
 /**
- * HUD を定位置(左端中央・下部中央・右下・左下)へ置く。iconPanelHeight と systemTrayWidth は React が実測した寸法で、
+ * HUD を定位置(左端中央・下部中央・右下・左下)へ置く。引数はReactが実測した寸法で、
  * null なら今の寸法のまま位置だけ取り直す。
  */
-export function layoutHudWindows(iconPanelHeight: number | null, systemTrayWidth: number | null): void {
+export function layoutHudWindows(iconPanelHeight: number | null, systemTrayWidth: number | null, cockpitWidth: number | null = null): void {
   const m = host.monitor();
   const iconPanel = host.rect(LABEL_ICON_PANEL);
   if (iconPanel) {
@@ -172,11 +172,14 @@ export function layoutHudWindows(iconPanelHeight: number | null, systemTrayWidth
     const height = clamp(iconPanelHeight ?? current, 1, m.height - HUD_MARGIN * 2);
     host.place(LABEL_ICON_PANEL, { x: m.x + HUD_MARGIN, y: m.y + (m.height - height) / 2, width: ICON_PANEL_WIDTH, height });
   }
-  if (host.hasWindow(LABEL_COCKPIT)) {
+  const cockpit = host.rect(LABEL_COCKPIT);
+  if (cockpit) {
+    const current = cockpit.width > 1 ? cockpit.width : COCKPIT_WIDTH;
+    const width = clamp(cockpitWidth ?? current, 1, m.width - HUD_MARGIN * 2);
     host.place(LABEL_COCKPIT, {
-      x: m.x + (m.width - COCKPIT_WIDTH) / 2,
+      x: m.x + (m.width - width) / 2,
       y: m.y + m.height - COCKPIT_HEIGHT - HUD_MARGIN,
-      width: COCKPIT_WIDTH,
+      width,
       height: COCKPIT_HEIGHT,
     });
   }
@@ -222,6 +225,10 @@ export function resizeIconPanel(height: number): void {
 
 export function resizeSystemTray(width: number): void {
   layoutHudWindows(null, width);
+}
+
+export function resizeCockpit(width: number): void {
+  layoutHudWindows(null, null, width);
 }
 
 function isDockedLayout(definition: WindowDefinition): boolean {

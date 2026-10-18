@@ -36,7 +36,7 @@ pub const ICON_PANEL_WIDTH: f64 = 58.0;
 pub const ICON_PANEL_DEFAULT_HEIGHT: f64 = 660.0;
 
 /// コックピット(画面下部中央・追跡リスト/常用ツール/公共サービス充足度/都市名日付/予算メータ/アラート/エポック実行)のサイズ。
-/// ウィンドウはパネルの実寸ぴったりで作るため、中身を増やしたらこの幅も広げる必要がある。
+/// 幅は初期値で、React側の `resize_cockpit` が言語や日付に応じた実測幅へ合わせる。
 pub const COCKPIT_WIDTH: f64 = 908.0;
 pub const COCKPIT_HEIGHT: f64 = 76.0;
 
@@ -203,8 +203,7 @@ pub fn update_display_target(
 }
 
 /// HUDウィンドウのタイトルと初期サイズ。
-/// アイコンパネルの高さだけは中身のアイコン数で変わるため、ここでは既定値を返し、
-/// 実際の高さは React 側の実測値(`resize_icon_panel`)で上書きされる。
+/// 内容で変わる寸法はここでは既定値を返し、React側の実測値で上書きされる。
 fn hud_window_spec(label: &str) -> (&'static str, f64, f64) {
     match label {
         LABEL_ICON_PANEL => ("Genesis Icon Panel", ICON_PANEL_WIDTH, ICON_PANEL_DEFAULT_HEIGHT),
@@ -236,13 +235,13 @@ pub fn create_hud_windows(
             .build()
             .map_err(|e| format!("failed to create {label} window: {e}"))?;
     }
-    layout_hud_windows(app, monitors, monitor_index, None, None);
+    layout_hud_windows(app, monitors, monitor_index, None, None, None);
     Ok(())
 }
 
 /// HUD各ウィンドウを対象モニターの定位置(左端中央・下部中央・右下・左下)へ配置する。
 ///
-/// `icon_panel_height` はアイコンパネルの高さ、`system_tray_width` はシステムトレイの幅の
+/// `icon_panel_height` はアイコンパネルの高さ、`system_tray_width`・`cockpit_width` は各パネルの幅の
 /// 明示指定。None のときは現在のウィンドウ寸法(=React側が実測して通知済みの値)を
 /// 維持したまま位置だけ取り直す。
 pub fn layout_hud_windows(
@@ -251,6 +250,7 @@ pub fn layout_hud_windows(
     monitor_index: usize,
     icon_panel_height: Option<f64>,
     system_tray_width: Option<f64>,
+    cockpit_width: Option<f64>,
 ) {
     let Some(monitor) = monitors.get(monitor_index) else {
         return;
@@ -287,11 +287,18 @@ pub fn layout_hud_windows(
 
     // コックピット: 画面下部中央
     if let Some(win) = app.get_webview_window(LABEL_COCKPIT) {
+        let current = current_size(&win)
+            .map(|s| s.width)
+            .filter(|w| *w > 1.0)
+            .unwrap_or(COCKPIT_WIDTH);
+        let width = cockpit_width
+            .unwrap_or(current)
+            .clamp(1.0, m_size.width - HUD_MARGIN * 2.0);
         place(
             &win,
-            COCKPIT_WIDTH,
+            width,
             COCKPIT_HEIGHT,
-            m_pos.x + (m_size.width - COCKPIT_WIDTH) / 2.0,
+            m_pos.x + (m_size.width - width) / 2.0,
             m_pos.y + m_size.height - COCKPIT_HEIGHT - HUD_MARGIN,
         );
     }
@@ -455,7 +462,7 @@ pub fn resize_icon_panel(app: &AppHandle, state: &SharedState, height: f64) {
         .unwrap_or_default()
         .into_iter()
         .collect();
-    layout_hud_windows(app, &monitors, monitor_index, Some(height), None);
+    layout_hud_windows(app, &monitors, monitor_index, Some(height), None, None);
 }
 
 /// システムトレイの幅をReact側の実測値に合わせて更新し、右下へ寄せ直す。
@@ -469,7 +476,14 @@ pub fn resize_system_tray(app: &AppHandle, state: &SharedState, width: f64) {
         .unwrap_or_default()
         .into_iter()
         .collect();
-    layout_hud_windows(app, &monitors, monitor_index, None, Some(width));
+    layout_hud_windows(app, &monitors, monitor_index, None, Some(width), None);
+}
+
+/// コックピットの幅を内容の実測値に合わせ、画面下部中央へ寄せ直す。
+pub fn resize_cockpit(app: &AppHandle, state: &SharedState, width: f64) {
+    let monitor_index = state.lock().current_monitor_index;
+    let monitors = app.available_monitors().unwrap_or_default();
+    layout_hud_windows(app, &monitors, monitor_index, None, None, Some(width));
 }
 
 /// 指定レイアウトが画面端に固定されるドック配置かどうか。

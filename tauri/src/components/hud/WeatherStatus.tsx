@@ -10,6 +10,7 @@ const icons: Record<string, string> = {
   light_snow: "🌨️", snow: "❄️", blizzard: "🌬️",
 };
 
+/** 常駐表示の幅を天気名や言語に左右させないため、名前と自動選択の状態はツールチップとメニューに載せる。 */
 export function WeatherStatus({ weather, editable, failed, onSelect }: {
   weather: WeatherState | null;
   editable: boolean;
@@ -18,9 +19,11 @@ export function WeatherStatus({ weather, editable, failed, onSelect }: {
 }) {
   const { t } = useTranslation();
   const [menu, setMenu] = useState<Menu | null>(null);
-  const name = (id: string) => `${icons[id] ?? "🌡️"} ${t(`weather.names.${id}`, { defaultValue: t("weather.unknown") })}`;
+  const name = (id: string) => `${icons[id] ?? "-"} ${t(`weather.names.${id}`, { defaultValue: t("weather.unknown") })}`;
   const label = weather ? name(weather.id) : t("weather.loading");
-  const title = failed ? t("weather.failed") : editable ? t("weather.choose") : t("weather.label");
+  const icon = weather ? icons[weather.id] ?? "-" : "-";
+  const currentLabel = weather && editable && !weather.locked ? t("weather.automatic", { weather: label }) : label;
+  const title = failed ? `${currentLabel}\n${t("weather.failed")}` : currentLabel;
 
   useEffect(() => {
     if (!editable || !weather) return;
@@ -49,12 +52,12 @@ export function WeatherStatus({ weather, editable, failed, onSelect }: {
     };
   }, [editable, weather, onSelect, t]);
 
-  if (!editable) return <span className="cockpit-weather" title={title}>{label}</span>;
+  if (!editable) return <span className="cockpit-weather" role="img" aria-label={currentLabel} title={title}>{icon}</span>;
 
   return <button
     type="button"
     className={`cockpit-weather cockpit-weather-select${failed ? " cockpit-weather--error" : ""}`}
-    aria-label={t("weather.choose")}
+    aria-label={`${t("weather.choose")}: ${currentLabel}`}
     aria-haspopup="menu"
     title={title}
     disabled={!weather || !menu}
@@ -63,7 +66,7 @@ export function WeatherStatus({ weather, editable, failed, onSelect }: {
       void menu?.popup(new LogicalPosition(left, bottom)).catch(console.error);
     }}
   >
-    <span>{weather && !weather.locked ? t("weather.automatic", { weather: label }) : label}</span>
+    <span aria-hidden="true">{icon}</span>
     <span aria-hidden="true">▾</span>
   </button>;
 }
