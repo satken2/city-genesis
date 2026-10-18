@@ -102,15 +102,9 @@ public class EffectRangeOverlay : MonoBehaviour
     private void BuildRegion(EffectRangeRegionData region, Color fillColor, Color boundaryColor)
     {
         if (region == null || string.IsNullOrEmpty(region.type)) return;
-        if (region.type == "circle")
-        {
-            BuildCircleFill(region, fillColor);
-        }
-        else
-        {
-            BuildPolygonFill(region, fillColor);
-        }
-        foreach (var ring in region.Rings())
+        var rings = region.Rings();
+        FillRings(rings, fillColor);
+        foreach (var ring in rings)
         {
             DrawWorldRing(lineRenderer, ring, boundaryColor, 1.6f, 6f);
         }
@@ -120,22 +114,18 @@ public class EffectRangeOverlay : MonoBehaviour
     // 領域フィル(グリッド敷き詰め)
     // =====================================================================
 
-    private void BuildCircleFill(EffectRangeRegionData region, Color fillColor)
+    /// <summary>
+    /// リング群(外周と穴。円は境界線と同じ多角形)のAABBをグリッドに切り、中心が範囲内のセルを四角形で塗る。
+    /// 内外は行ごとにセル中心を通る水平線と全リングの交点を一度だけ求め、並べた交点の対の間を範囲内とする(偶奇則)。
+    /// 外周と穴を区別しなくても穴は抜ける。セルごとに全頂点を調べると、道路網に沿って広がる数千頂点の領域で数秒かかる。
+    /// セルは小さいので四隅の地形高さを個別にサンプルすれば起伏に追従する。
+    /// </summary>
+    private void FillRings(List<List<Vector2>> rings, Color fillColor)
     {
-        float r = region.radius;
-        if (r <= 0f) return;
-        Vector2 c = region.center;
-        FillGrid(c.x - r, c.y - r, c.x + r, c.y + r,
-            (x, z) => (x - c.x) * (x - c.x) + (z - c.y) * (z - c.y) <= r * r, fillColor);
-    }
-
-    private void BuildPolygonFill(EffectRangeRegionData region, Color fillColor)
-    {
-        if (region.polygons == null || region.polygons.Count == 0) return;
         float minX = float.MaxValue, minZ = float.MaxValue, maxX = float.MinValue, maxZ = float.MinValue;
-        foreach (var poly in region.polygons)
+        foreach (var ring in rings)
         {
-            foreach (var p in poly.exterior)
+            foreach (var p in ring)
             {
                 if (p.x < minX) minX = p.x;
                 if (p.x > maxX) maxX = p.x;
@@ -143,36 +133,38 @@ public class EffectRangeOverlay : MonoBehaviour
                 if (p.y > maxZ) maxZ = p.y;
             }
         }
-        if (minX > maxX) return;
-        FillGrid(minX, minZ, maxX, maxZ, (x, z) => PolygonRegionContains(region, x, z), fillColor);
-    }
-
-    /// <summary>
-    /// AABB(minX,minZ)-(maxX,maxZ)をグリッドに切り、中心が範囲内のセルを四角形で塗る。
-    /// セルは小さいので四隅の地形高さを個別にサンプルすれば起伏に追従する。
-    /// </summary>
-    private void FillGrid(float minX, float minZ, float maxX, float maxZ, System.Func<float, float, bool> inside, Color fillColor)
-    {
         float span = Mathf.Max(maxX - minX, maxZ - minZ);
         if (span <= 0f) return;
         // セル数が過大にならないよう、範囲に応じてステップを調整する(4m〜20m)。
         float step = Mathf.Clamp(span / 70f, 4f, 20f);
+        int columns = Mathf.CeilToInt((maxX - minX) / step);
+        int rows = Mathf.CeilToInt((maxZ - minZ) / step);
 
+        var crossings = new List<float>();
         var quad = new List<Vector3>(4);
-        for (float x = minX; x < maxX; x += step)
+        for (int row = 0; row < rows; row++)
         {
-            for (float z = minZ; z < maxZ; z += step)
+            float z = minZ + row * step;
+            crossings.Clear();
+            foreach (var ring in rings)
             {
-                float cx = x + step * 0.5f;
-                float cz = z + step * 0.5f;
-                if (!inside(cx, cz)) continue;
-
-                quad.Clear();
-                quad.Add(GroundPoint(x, z));
-                quad.Add(GroundPoint(x + step, z));
-                quad.Add(GroundPoint(x + step, z + step));
-                quad.Add(GroundPoint(x, z + step));
-                fillRenderer.AddPolygon(quad, fillColor);
+                PolygonUtils.AppendRayCrossings(ring, z + step * 0.5f, crossings);
+            }
+            crossings.Sort();
+            for (int i = 0; i + 1 < crossings.Count; i += 2)
+            {
+                int left = Mathf.Max(0, Mathf.CeilToInt((crossings[i] - minX) / step - 0.5f));
+                int right = Mathf.Min(columns - 1, Mathf.FloorToInt((crossings[i + 1] - minX) / step - 0.5f));
+                for (int col = left; col <= right; col++)
+                {
+                    float x = minX + col * step;
+                    quad.Clear();
+                    quad.Add(GroundPoint(x, z));
+                    quad.Add(GroundPoint(x + step, z));
+                    quad.Add(GroundPoint(x + step, z + step));
+                    quad.Add(GroundPoint(x, z + step));
+                    fillRenderer.AddPolygon(quad, fillColor);
+                }
             }
         }
     }
@@ -213,22 +205,6 @@ public class EffectRangeOverlay : MonoBehaviour
     {
         float y = Utils.GetGroundHeight(new Vector3(x, 1000f, z));
         return new Vector3(x, y + 0.05f, z);
-    }
-
-    /// <summary>ポリゴン領域(外周内かつ穴の外)に点が含まれるか。</summary>
-    private static bool PolygonRegionContains(EffectRangeRegionData region, float x, float z)
-    {
-        foreach (var poly in region.polygons)
-        {
-            if (!PolygonUtils.Contains(poly.exterior, new Vector2(x, z))) continue;
-            bool inHole = false;
-            foreach (var hole in poly.holes)
-            {
-                if (PolygonUtils.Contains(hole, new Vector2(x, z))) { inHole = true; break; }
-            }
-            if (!inHole) return true;
-        }
-        return false;
     }
 }
 
