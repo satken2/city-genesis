@@ -61,21 +61,6 @@ export type CitizenData = {
   potential_criminality: number;
 };
 
-export type AgentSearchItem = {
-  /** 経済主体の一意なID */
-  agent_id: number;
-  /** 経済主体名 */
-  name: string;
-  /** 経済主体の大分類（世帯・一般施設・公共施設など。consts.py の TYPE_* を参照） */
-  type: number;
-  /** 経済主体の小分類（agent_master のバリアントID） */
-  variant: number;
-  /** 公共施設かどうか（0=民間/1=公共） */
-  public_facility: boolean;
-  /** 所属地区の名称（zone_idの参照解決） */
-  zone_name?: string;
-};
-
 export type AgentSummary = {
   /** 経済主体の一意なID */
   agent_id: number;
@@ -677,10 +662,6 @@ export type CitizenListResponse = {
 
 export type CitizenResponse = {
   citizen: CitizenData;
-};
-
-export type AgentSearchItemListResponse = {
-  agents: AgentSearchItem[];
 };
 
 export type AgentListResponse = {

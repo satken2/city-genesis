@@ -71,23 +71,6 @@ namespace GeneratedModels
     }
 
     [Serializable]
-    public class AgentSearchItem
-    {
-        /// <summary>経済主体の一意なID</summary>
-        public int agent_id;
-        /// <summary>経済主体名</summary>
-        public string name;
-        /// <summary>経済主体の大分類（世帯・一般施設・公共施設など。consts.py の TYPE_* を参照）</summary>
-        public int type;
-        /// <summary>経済主体の小分類（agent_master のバリアントID）</summary>
-        public int variant;
-        /// <summary>公共施設かどうか（0=民間/1=公共）</summary>
-        public bool public_facility;
-        /// <summary>所属地区の名称（zone_idの参照解決）</summary>
-        public string zone_name;
-    }
-
-    [Serializable]
     public class AgentSummary
     {
         /// <summary>経済主体の一意なID</summary>
@@ -708,12 +691,6 @@ namespace GeneratedModels
     public class CitizenResponse
     {
         public CitizenData citizen;
-    }
-
-    [Serializable]
-    public class AgentSearchItemListResponse
-    {
-        public List<AgentSearchItem> agents;
     }
 
     [Serializable]
