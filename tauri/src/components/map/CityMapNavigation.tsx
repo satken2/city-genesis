@@ -4,6 +4,7 @@ import { buildApiUrl, fetchApi } from "../../utils/api";
 import { resolveIntlLocale } from "../../utils/locale";
 import { fetchRoadDetail } from "../road/roadApi";
 import type { CityMapCanvasHandle, CityMapPointerEvent, CityMapViewState } from "./CityMapCanvas";
+import { drawMapRoute, type MapRoute } from "./mapRoute";
 import "./CityMapNavigation.css";
 
 /** road は名前付き道路(id=road_id、x/z=道路名の最初の表示位置、polygon=[]) */
@@ -11,15 +12,6 @@ type Place = {
   kind: "agent" | "zone" | "stop" | "station" | "point" | "road";
   id: number; name: string; x: number; z: number;
   zone_id: number; zone_name: string; parcel_id: number | null; polygon: number[][];
-};
-type Leg = {
-  kind: string; points: number[][]; path_ids: number[]; line_id: number | null;
-  name: string; color: string | null; minutes: number; distance_m: number;
-  from_stop: string | null; to_stop: string | null;
-};
-type Route = {
-  status: string; legs?: Leg[]; minutes?: number; distance_m?: number;
-  fare?: number; epoch?: number; snapshot?: string;
 };
 type Status = { ready: boolean; busy: boolean; snapshot: string | null; session: string | null };
 type Field = "origin" | "destination";
@@ -101,7 +93,7 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
   const [directions, setDirections] = useState(false);
   const [mode, setMode] = useState<"pedestrian" | "automobile">("pedestrian");
   const [picking, setPicking] = useState<Field | null>(null);
-  const [route, setRoute] = useState<Route | null>(null);
+  const [route, setRoute] = useState<MapRoute | null>(null);
   const [busy, setBusy] = useState(false);
   const [pickError, setPickError] = useState(false);
   const [status, setStatus] = useState<Status | null>(null);
@@ -176,7 +168,7 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
     const endpoint = (p: Place) => p.kind === "road"
       ? { kind: "point", id: 0, x: p.x, z: p.z }
       : { kind: p.kind, id: p.id, x: p.x, z: p.z };
-    fetchApi<Route>(url("route"), { method: "POST", signal: controller.signal,
+    fetchApi<MapRoute>(url("route"), { method: "POST", signal: controller.signal,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ origin: endpoint(origin), destination: endpoint(destination), mode })
     }).then(result => {
@@ -213,18 +205,10 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
     // Canvasもサイドバーと同じゲーム共通の配色を使う。公共交通の路線色は個別設定を優先する。
     const style = getComputedStyle(document.documentElement);
     const color = (token: string) => style.getPropertyValue(`--flat-${token}`).trim();
-    const palette = { outline: color("sunken"), route: color("accent"), walk: color("text-label"), origin: color("good"), destination: color("warn") };
-    ctx.save(); ctx.lineJoin = "round"; ctx.lineCap = "round";
-    route?.legs?.forEach((leg, index) => {
-      if (!leg.points.length) return;
-      const walk = leg.kind === "walk" || leg.kind === "access";
-      ctx.beginPath(); leg.points.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-      ctx.globalAlpha = activeLeg !== null && activeLeg !== index ? 0.35 : 1;
-      ctx.setLineDash([]); ctx.strokeStyle = palette.outline; ctx.lineWidth = px(activeLeg === index ? 10 : 8); ctx.stroke();
-      ctx.setLineDash(walk ? [px(2), px(8)] : []);
-      ctx.strokeStyle = leg.color && /^#[0-9a-f]{6}$/i.test(leg.color) ? leg.color : walk ? palette.walk : palette.route;
-      ctx.lineWidth = px(activeLeg === index ? 7 : 5); ctx.stroke();
-    });
+    const palette = { outline: color("sunken"), origin: color("good"), destination: color("warn") };
+    drawMapRoute(ctx, view, route?.legs ?? [], activeLeg);
+    ctx.save();
+    ctx.lineJoin = "round"; ctx.lineCap = "round";
     ctx.globalAlpha = 1; ctx.setLineDash([]);
     const marker = (place: Place, color: string, label: string) => {
       if (place.polygon.length) {

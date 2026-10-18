@@ -68,6 +68,19 @@
       "merge": "与相邻路径合并",
       "split": "分割路径"
     },
+    "rebuild": {
+      "title": "更改变体",
+      "current": "当前变体",
+      "target": "目标变体",
+      "select": "选择目标变体",
+      "noVariants": "没有其他可用的变体。",
+      "unavailable": "仅可更改运营中的路径。",
+      "confirm": "开始改建",
+      "repairNotice": "开始改建将取消正在进行的修缮。",
+      "parcelNotice": "开工时将移除{{removed}}个市有空地块，并削减{{shaved}}个地块的部分面积。",
+      "accepted": "改建已开始。",
+      "refreshFailed": "工程已受理，但无法刷新显示。请重新打开窗口。"
+    },
     "topology": {
       "mergeTitle": "路径合并",
       "splitTitle": "路径分割",

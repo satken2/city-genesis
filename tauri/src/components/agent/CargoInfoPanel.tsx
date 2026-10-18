@@ -204,13 +204,6 @@ export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
     <section className="agent-detail-section cargo">
       <h3 className="agent-detail-section-title">{t("cargo.title", "荷役情報")}</h3>
 
-      <p className="cargo-description">
-        {t(
-          "cargo.description",
-          "この拠点は域外から商品を輸入して都市内の市場へ供給し、都市内の余剰生産物を買い取って域外へ輸出します。",
-        )}
-      </p>
-
       <div className="agent-detail-grid">
         <span className="agent-detail-label">{t("cargo.capacity", "取扱能力")}</span>
         <span className="agent-detail-value">

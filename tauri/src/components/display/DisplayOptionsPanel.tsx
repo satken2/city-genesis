@@ -9,9 +9,7 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 import {
   ALERT_AGENT_CONSTRUCTION_SHORTAGE,
   ALERT_AGENT_ON_FIRE,
-  ALERT_AGENT_ACCIDENTAL_FIRE,
   ALERT_AGENT_CRIME,
-  ALERT_AGENT_CRIME_SIGN,
   ALERT_AGENT_INFRA_DISCONNECTED,
   ALERT_AGENT_ICON_BITS,
   ALERT_AGENT_VFX_BITS,
@@ -293,9 +291,7 @@ const ALERT_CARDS: { bit: number; icon: string; labelKey: string; iconFilter?: s
   ...[
     { bit: ALERT_AGENT_CONSTRUCTION_SHORTAGE, icon: "alerts/bribery.png", labelKey: "display.alertAgentConstructionShortage" },
     { bit: ALERT_AGENT_ON_FIRE, icon: "alerts/fire.png", labelKey: "display.alertAgentOnFire" },
-    { bit: ALERT_AGENT_ACCIDENTAL_FIRE, icon: "alerts/smoke.png", labelKey: "display.alertAgentAccidentalFire" },
     { bit: ALERT_AGENT_CRIME, icon: "alerts/shooting.png", labelKey: "display.alertAgentCrime" },
-    { bit: ALERT_AGENT_CRIME_SIGN, icon: "alerts/siren.png", labelKey: "display.alertAgentCrimeSign" },
     { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: "alerts/electricity.png", labelKey: "display.alertAgentInfraDisconnected" },
   ].filter((card) => ALERT_AGENT_ICON_BITS.includes(card.bit) || ALERT_AGENT_VFX_BITS.includes(card.bit)),
   ...[

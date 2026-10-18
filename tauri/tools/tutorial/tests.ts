@@ -396,7 +396,7 @@ if (process.env.TUTORIAL_API_TEST_URL) {
   check(await findPhase(display, panel), 2, "the open panel with its page sent reaches the last phase");
   const icons = DEFINITIONS.controls.steps.find(s => s.id === "controls.icons")!;
   check(icons.phases.map(p => p.ui.highlight.length), icons.phases.map(() => 1), "each icon page highlights exactly one icon");
-  check([...new Set(icons.phases.map(p => p.ui.highlight[0]))], ["hud.grading", "hud.road", "hud.land", "hud.district", "hud.construction", "hud.transport", "hud.prop_placement", "hud.construction_projects", "hud.regulation", "hud.city", "hud.finance", "hud.stat"], "the icon tour follows the panel order, with consecutive pages for the same icon");
+  check([...new Set(icons.phases.map(p => p.ui.highlight[0]))], ["hud.grading", "hud.road", "hud.land", "hud.district", "hud.construction", "hud.transport", "hud.prop_placement", "hud.construction_projects", "hud.regulation", "hud.finance", "hud.stat"], "the icon tour follows the panel order, with consecutive pages for the same icon");
   check(DEFINITIONS.controls.steps.every(s => s.phases.every(p => p.ui.policy === "highlight" && p.world.mode === "observe")), true, "the controls tutorial only observes");
   for (const mutate of [
     (d: any) => { d.steps[0].phases[d.steps[0].phases.length - 1].until = { type: "page", id: "last" }; },

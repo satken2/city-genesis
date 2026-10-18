@@ -11,10 +11,12 @@
  * カードの中にさらにカードを入れる二重枠を避けるため、維持優先度(Tier)のグループは
  * 面を持たず、見出しの実線ブロックの色だけで段を区別する。
  *
- * レイアウト: ヘッダ(資金・計画期間) + [左: 予算配分] / [右: 現金推移 / 施設一覧 + 収支バランス]
+ * レイアウト: ヘッダ(資金・計画期間) + [左: 予算・税率のタブ] / [右: 税収推移 + 現金推移 / 収支バランス]
+ * カテゴリの明細と商品別税率は、ウィンドウ全体に重ねるオーバーレイ(.budget-overlay)で開く。
  */
 
 .budget-window {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -68,7 +70,7 @@
   box-shadow: inset 4px 0 0 var(--flat-warn), var(--flat-shadow-sm);
 }
 
-/* メイン 2分割レイアウト: 左1/3=予算スライダー / 右2/3=現金推移+施設一覧+収支バランス */
+/* メイン 2分割レイアウト: 左1/3=予算・税率のタブ / 右2/3=税収推移+現金推移、収支バランス */
 .budget-window__split-container {
   display: flex;
   gap: 10px;
@@ -86,17 +88,16 @@
   gap: 10px;
 }
 
-.budget-window__bottom-row {
-  flex: 1;
-  min-height: 0;
+/* 上段: 税収推移(左) と 現金推移(右) を半分ずつ */
+.budget-window__charts-row {
+  flex: 0 0 auto;
   display: flex;
   gap: 10px;
 }
 
 /* 4つのサブパネルに共通の面。中身のタイルより一段暗い。 */
 .budget-window__left-pane,
-.budget-window__reserves-section,
-.budget-window__agents-pane,
+.budget-window__chart-section,
 .budget-window__balance-section {
   display: flex;
   flex-direction: column;
@@ -107,19 +108,28 @@
   box-shadow: var(--flat-shadow);
 }
 
-/* 左カラム: 見出し+編集トグル(固定) と、維持優先度(Tier)別カテゴリカード(スクロール) */
+/* 左カラム: タブ+編集トグル(固定) と、タブの中身(スクロール) */
 .budget-window__left-pane {
   flex: 1;
   min-width: 240px;
 }
 
-/* 左ペインの見出し行: セクション名 + 予算スライダーの表示トグル */
+/* 左ペインの見出し行: 予算・税率のタブ + スライダーの表示トグル */
 .budget-window__pane-header {
   display: flex;
   align-items: center;
   gap: 8px;
   padding-bottom: 8px;
   flex-shrink: 0;
+}
+
+/* 見出し行に置くタブは、編集トグルと高さをそろえて詰める */
+.budget-window__pane-header .flat-tabs {
+  padding: 0;
+}
+
+.budget-window__pane-header .flat-tabs .flat-tab {
+  padding: 5px 16px;
 }
 
 /* 各サブパネルの見出し。左端の実線ブロックで段を示す(ニューゲームウィンドウと同じ規約) */
@@ -139,7 +149,7 @@
   color: var(--flat-text-muted);
 }
 
-/* 予算スライダーの表示トグル。OFFの間はワッペンの％だけを見る閲覧モードになる。 */
+/* スライダーの表示トグル(予算・税率共通)。OFFの間はワッペンの数値だけを見る閲覧モードになる。 */
 .budget-window__edit-btn {
   margin-left: auto;
   padding: 5px 14px;
@@ -170,14 +180,31 @@
   color: #ffffff;
 }
 
-/* Tierグループの縦積み。左ペインで縦スクロールするのはこの領域だけ。 */
-.budget-window__tier-list {
+/* タブの中身(予算=Tierグループの縦積み、税率=税のカード)。左ペインで縦スクロールするのはこの領域だけ。
+   選んでいないタブも状態を残すため、消さずに hidden で隠す。 */
+.budget-window__tab-panel {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.budget-window__tab-panel[hidden] {
+  display: none;
+}
+
+/* タブの中身の読み込み中・失敗の表示 */
+.budget-window__pane-status {
+  padding: 20px 8px;
+  font-size: 1rem;
+  text-align: center;
+  color: var(--flat-text-muted);
+}
+
+.budget-window__pane-status--error {
+  color: var(--flat-danger);
 }
 
 /* Tierグループは面を持たない(中のカテゴリカードが面なので、囲むと二重枠になる)。
@@ -231,14 +258,13 @@
   transition: background-color 0.15s ease;
 }
 
-.budget-category-card:hover:not(.budget-category-card--active) {
+.budget-category-card:hover:not(.budget-category-card--static) {
   background-color: var(--flat-raised-hover);
 }
 
-/* 施設一覧の表示対象。選択は左端の実線ブロックで示す。 */
-.budget-category-card--active {
-  background-color: var(--flat-selected);
-  box-shadow: inset 4px 0 0 var(--flat-accent), var(--flat-shadow-sm);
+/* 押しても開くものが無いカード(商品別税率を持たない税) */
+.budget-category-card--static {
+  cursor: default;
 }
 
 /* 左側のカテゴリアイコン(正方形の場所だけを確保する)。アイコン画像は背景が透過
@@ -294,11 +320,6 @@
   pointer-events: none;
 }
 
-.budget-category-card--active .budget-category-card__badge {
-  color: #ffffff;
-  background-color: var(--flat-accent);
-}
-
 /* 比率から導出された配分予算額。カテゴリ名の直下に小さく出す。 */
 .budget-category-card__amount {
   font-size: 1rem;
@@ -318,40 +339,27 @@
   accent-color: var(--flat-accent);
 }
 
-/* 上段: 市政府の現金(reserves)推移。チャート高さは固定で、残りの縦幅は下段に譲る。 */
-.budget-window__reserves-section {
-  flex: 0 0 auto;
+/* 上段のグラフ(税収推移・現金推移)。チャート高さは固定で、残りの縦幅は下段の収支バランスに譲る。 */
+.budget-window__chart-section {
+  flex: 1;
 }
 
-.budget-window__reserves-chart {
+.budget-window__chart {
   height: 200px;
 }
 
-/* 下段左: 選択カテゴリの施設一覧 / 下段右: 収支バランス */
-.budget-window__agents-pane,
-.budget-window__balance-section {
-  flex: 1;
-}
-
-/* 収支バランスの見出し行: タイトル + 期間の但し書き。
-   幅が足りないときは但し書きだけを折り返す(見出しは折らない)。 */
-.budget-window__balance-header {
+.budget-window__chart-empty {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  flex-shrink: 0;
-}
-
-.budget-window__balance-header .budget-window__section-title {
-  white-space: nowrap;
-}
-
-.budget-window__balance-note {
-  flex: 1;
-  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   font-size: 1rem;
   color: var(--flat-text-muted);
+}
+
+/* 下段: 収支バランス(横幅いっぱい) */
+.budget-window__balance-section {
+  flex: 1;
 }
 
 /* 収支差(収入 − 支出)のサマリ行 */
@@ -436,37 +444,90 @@
   color: var(--flat-text);
 }
 
-/* ── 施設一覧(選択カテゴリの明細) */
-.budget-agent-table-wrapper {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.budget-agent-title-row {
+/* ── オーバーレイ(カテゴリの明細・商品別税率)。幕はウィンドウ全体を覆い、ボックスを中央に重ねる。 */
+.budget-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 14, 24, 0.85);
+}
+
+/* 高さは中身で決まり、窓より高くなる分は本文の中でスクロールする */
+.budget-overlay__dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 46rem;
+  max-height: 100%;
+  padding: 14px 16px 16px;
+  box-sizing: border-box;
+  background: var(--flat-surface);
+  box-shadow: inset 0 3px 0 var(--flat-accent), 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.budget-overlay__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
   flex-shrink: 0;
 }
 
-.budget-agent-title {
-  margin: 0 0 10px 0;
-  padding: 2px 0 2px 10px;
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--flat-text);
-  box-shadow: inset 4px 0 0 var(--flat-accent);
+.budget-overlay__header .budget-window__section-title {
+  flex: 1;
+  min-width: 0;
 }
 
+.budget-overlay__close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  background: var(--flat-raised);
+  color: var(--flat-text-label);
+  cursor: pointer;
+}
+
+.budget-overlay__close:hover {
+  background: var(--flat-raised-hover);
+  color: var(--flat-text);
+}
+
+.budget-overlay__close svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* スクロールは中身(明細表の tbody・商品別税率の一覧)が受け持つ */
+.budget-overlay__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.budget-overlay__placeholder {
+  padding: 20px 8px;
+  font-size: 1rem;
+  text-align: center;
+  color: var(--flat-text-muted);
+}
+
+/* ── 施設一覧(カテゴリの明細) */
 /* 表の高さを可変にするため、thead/tbody を display 指定で分けてtbodyだけスクロールさせる */
 .budget-agent-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 1rem;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -559,6 +620,119 @@
   margin-top: 1px;
   font-size: 1rem;
   color: var(--flat-text-muted);
+}
+
+/* ── 税率タブ */
+
+/* 一括 / 個別の切り替え(編集中だけ出す) */
+.tax-mode-toggle {
+  display: flex;
+  align-self: flex-start;
+  box-shadow: var(--flat-shadow-sm);
+}
+
+.tax-mode-toggle__btn {
+  padding: 3px 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+  background-color: var(--flat-sunken);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tax-mode-toggle__btn:hover:not(.tax-mode-toggle__btn--active) {
+  color: var(--flat-text);
+  background-color: var(--flat-raised-hover);
+}
+
+.tax-mode-toggle__btn--active {
+  color: #ffffff;
+  background-color: var(--flat-selected);
+}
+
+/* 税率スライダー + 数値入力 */
+.tax-slider-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tax-slider-input__slider {
+  flex: 1;
+  min-width: 60px;
+  accent-color: var(--flat-accent);
+}
+
+.tax-slider-input__number {
+  width: 4.5rem;
+  padding: 3px 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--flat-text);
+  background-color: var(--flat-sunken);
+  border: none;
+  border-radius: 0;
+  outline: none;
+}
+
+.tax-slider-input__number:focus {
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+.tax-slider-input__slider:disabled,
+.tax-slider-input__number:disabled {
+  opacity: 0.4;
+}
+
+.tax-slider-input__unit {
+  font-size: 1rem;
+  color: var(--flat-text-label);
+}
+
+/* 商品別税率の一覧(オーバーレイの本文)。行の区切りは交互の面の色で示す。 */
+.tax-product-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tax-product-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 8px;
+}
+
+.tax-product-row:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.tax-product-row__name {
+  flex: 0 0 12rem;
+  min-width: 0;
+  font-size: 1rem;
+  color: var(--flat-text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tax-product-row .tax-slider-input {
+  flex: 1;
+}
+
+.tax-product-row__rate {
+  margin-left: auto;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
 }
 
 /* 読み込み/エラー状態 */

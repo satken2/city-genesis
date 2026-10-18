@@ -470,9 +470,9 @@ export const TENANT_TYPES: number[] = [2, 4, 8, 16, 64];
 
 export const ALERT_WARNING_DISPLAY_BITS: number[] = [131072, 262144, 524288, 1048576];
 
-export const ALERT_AGENT_ICON_BITS: number[] = [1, 8, 16, 32];
+export const ALERT_AGENT_ICON_BITS: number[] = [1, 8, 32];
 
-export const ALERT_AGENT_VFX_BITS: number[] = [2, 4];
+export const ALERT_AGENT_VFX_BITS: number[] = [2];
 
 export const ALERT_PATH_ICON_BITS: number[] = [1, 2, 4];
 

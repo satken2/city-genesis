@@ -72,18 +72,6 @@
   color: #c5d4e3;
 }
 
-/* 左端の停留所番号。実際の駅ナンバリングを模した等幅の2桁 */
-.tld__index {
-  width: 26px;
-  flex-shrink: 0;
-  font-family: "Consolas", "Menlo", monospace;
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-  color: #6b8299;
-  text-align: right;
-  padding-right: 10px;
-}
-
 /* 線と丸を重ねる列。行の高さいっぱいを使い、上下半分の線と中央の丸を絶対配置する */
 .tld__track {
   position: relative;

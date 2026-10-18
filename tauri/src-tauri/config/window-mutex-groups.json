@@ -13,6 +13,9 @@
     "path_detail",
     "zone_detail"
   ],
+  "path_rebuild": [
+    "path_rebuild"
+  ],
   "intersection_detail": [
     "intersection_detail"
   ],
@@ -56,9 +59,6 @@
   "city_budget": [
     "city_budget"
   ],
-  "city_tax": [
-    "city_tax"
-  ],
   "city_regulation": [
     "city_regulation"
   ],
@@ -78,9 +78,6 @@
   ],
   "natural_resources": [
     "natural_resources"
-  ],
-  "city_hall": [
-    "city_hall"
   ],
   "display_options": [
     "display_options"

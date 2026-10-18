@@ -68,6 +68,19 @@
       "merge": "與相鄰路徑合併",
       "split": "分割路徑"
     },
+    "rebuild": {
+      "title": "變更變體",
+      "current": "目前變體",
+      "target": "目標變體",
+      "select": "選擇目標變體",
+      "noVariants": "沒有其他可用的變體。",
+      "unavailable": "僅可變更營運中的路徑。",
+      "confirm": "開始改建",
+      "repairNotice": "開始改建將取消正在進行的修繕。",
+      "parcelNotice": "開工時將移除{{removed}}個市有空地塊，並削減{{shaved}}個地塊的部分面積。",
+      "accepted": "改建已開始。",
+      "refreshFailed": "工程已受理，但無法重新整理顯示。請重新開啟視窗。"
+    },
     "topology": {
       "mergeTitle": "路徑合併",
       "splitTitle": "路徑分割",

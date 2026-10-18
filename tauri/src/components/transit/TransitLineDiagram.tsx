@@ -1,7 +1,7 @@
 /**
  * 路線図(縦型ストリップ)
  *
- * 地下鉄の車内ドア上に掲示される路線図を縦向きにしたもの。路線カラーの1本の直線に
+ * 地下鉄の車内ドア上に掲示される路線図を縦向きにしたもの。混雑率の右に路線カラーの1本の直線を置き、
  * 停留所を順に丸で打ち、丸の横に停留所名を並べる。地理的な位置関係は表さず、
  * 「どの順で停まるか」だけを示す(実地図上の路線は TransitLineMap が担う)。
  *
@@ -168,7 +168,6 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
               <span className="tld__util">
                 {next && <span className="tld__util-value">{sectionUtilization(v, next)}</span>}
               </span>
-              <span className="tld__index">{String(i + 1).padStart(2, "0")}</span>
               <span className="tld__track" aria-hidden="true">
                 {i > 0 && <span className={`${segClass(upActive)} tld__seg--up`} />}
                 {(i < last || loopBack) && <span className={`${segClass(downActive)} tld__seg--down`} />}
@@ -194,7 +193,6 @@ export function TransitLineDiagram({ stops, routePoints, edges, color, running }
         {loopBack && (
           <li className="tld__row tld__row--loop">
             <span className="tld__util" />
-            <span className="tld__index" />
             <span className="tld__track" aria-hidden="true">
               <span className={`${segClass(loopActive)} tld__seg--up`} />
               <span className="tld__loop-mark">↺</span>

@@ -3,11 +3,12 @@
  *
  * 建設の見積もり情報(建設期間・概算コストと標準コストに対する倍率バッジ・概算維持費)と、
  * 建設中・解体中の実績情報(1エポックあたりのコスト・残りエポック数)を表示する共通カード。
- * 以下の6箇所で共用する。
+ * 以下の画面で共用する。
  * - 建物建設パネル (building/BuildingConstructionPanel)
  * - 道路建設パネル (path/PathConstructionPanel)
  * - 経済主体詳細パネルの建設工事タブ (agent/BuildingConstructionInfoPanel)
  * - パス詳細パネルの建設工事情報 (path/PathConstructionInfoPanel)
+ * - パスのバリアント変更 (path/PathRebuildPanel)
  * - 造成パネル (grading/GradingPanel)
  * - 経済主体詳細パネルの造成工事の建設工事タブ (grading/GradingConstructionInfoPanel)
  *

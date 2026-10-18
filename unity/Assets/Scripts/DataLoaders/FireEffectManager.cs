@@ -7,15 +7,10 @@ using UnityEngine;
 ///
 /// 役割
 /// ----
-/// 建物(agent)の alert ビットのうち火災系の2つを、ビルボードアイコンではなく
-/// 3D空間のパーティクル表現で描く。
-///
-/// - `ALERT_AGENT_ON_FIRE`(本格火災): 炎 + 火の粉 + 黒煙 + 明滅する点光源
-/// - `ALERT_AGENT_ACCIDENTAL_FIRE`(失火): 薄い白煙のみ
-///
-/// 両ビットが同時に立っている建物は本格火災を優先する。ただし当エポックで焼け落ちた建物
-/// (`STATUS_COLLAPSED`)は瓦礫がくすぶっている状態として白煙に落とす(瓦礫の上で炎が
-/// 燃え盛るのは不自然なため)。
+/// 建物(agent)の `ALERT_AGENT_ON_FIRE` を、ビルボードアイコンではなく
+/// 3D空間のパーティクル表現(炎 + 火の粉 + 黒煙 + 明滅する点光源)で描く。
+/// 当エポックで焼け落ちた建物(`STATUS_COLLAPSED`)は瓦礫がくすぶっている状態として
+/// 薄い白煙にする(瓦礫の上で炎が燃え盛るのは不自然なため)。
 ///
 /// データ取得
 /// ----------
@@ -189,21 +184,12 @@ public class FireEffectManager : MonoBehaviour
     {
         bool onFire = (item.alert & Constants.ALERT_AGENT_ON_FIRE) != 0
                       && (agentFilterMask & Constants.ALERT_AGENT_ON_FIRE) != 0;
-        bool accidental = (item.alert & Constants.ALERT_AGENT_ACCIDENTAL_FIRE) != 0
-                          && (agentFilterMask & Constants.ALERT_AGENT_ACCIDENTAL_FIRE) != 0;
+        if (!onFire) return null;
 
-        if (onFire)
-        {
-            // 焼け落ちた建物は炎ではなく瓦礫のくすぶりとして描く。
-            return item.status == Constants.STATUS_COLLAPSED
-                ? FireEffectFactory.PlumeKind.Smolder
-                : FireEffectFactory.PlumeKind.Blaze;
-        }
-        if (accidental)
-        {
-            return FireEffectFactory.PlumeKind.Smolder;
-        }
-        return null;
+        // 焼け落ちた建物は炎ではなく瓦礫のくすぶりとして描く。
+        return item.status == Constants.STATUS_COLLAPSED
+            ? FireEffectFactory.PlumeKind.Smolder
+            : FireEffectFactory.PlumeKind.Blaze;
     }
 
     /// <summary>

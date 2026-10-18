@@ -68,6 +68,19 @@
       "merge": "Fusionner avec la voie voisine",
       "split": "Diviser la voie"
     },
+    "rebuild": {
+      "title": "Changer de variante",
+      "current": "Variante actuelle",
+      "target": "Nouvelle variante",
+      "select": "Choisir une variante",
+      "noVariants": "Aucune autre variante disponible.",
+      "unavailable": "Seules les voies en service peuvent être modifiées.",
+      "confirm": "Lancer la transformation",
+      "repairNotice": "Le lancement de la transformation annulera la réparation en cours.",
+      "parcelNotice": "Au démarrage, {{removed}} parcelles municipales vacantes seront supprimées et {{shaved}} parcelles seront partiellement réduites.",
+      "accepted": "Transformation lancée.",
+      "refreshFailed": "Les travaux ont été acceptés, mais l’affichage n’a pas pu être actualisé. Rouvrez la fenêtre."
+    },
     "topology": {
       "mergeTitle": "Fusion de voies",
       "splitTitle": "Division de voie",

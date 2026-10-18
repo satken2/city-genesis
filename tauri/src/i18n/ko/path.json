@@ -68,6 +68,19 @@
       "merge": "옆 경로와 결합",
       "split": "경로 분할"
     },
+    "rebuild": {
+      "title": "바리안트 변경",
+      "current": "현재 바리안트",
+      "target": "변경할 바리안트",
+      "select": "변경할 바리안트 선택",
+      "noVariants": "변경 가능한 다른 바리안트가 없습니다.",
+      "unavailable": "운영 중인 경로만 변경할 수 있습니다.",
+      "confirm": "변경 공사 시작",
+      "repairNotice": "변경 공사를 시작하면 진행 중인 수선이 취소됩니다.",
+      "parcelNotice": "공사 시작 시 시 소유의 빈 구획 {{removed}}개를 철거하고 {{shaved}}개의 일부를 잘라냅니다.",
+      "accepted": "변경 공사를 시작했습니다.",
+      "refreshFailed": "공사가 접수되었지만 화면을 갱신하지 못했습니다. 창을 다시 열어 주세요."
+    },
     "topology": {
       "mergeTitle": "경로 결합",
       "splitTitle": "경로 분할",

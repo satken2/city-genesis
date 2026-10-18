@@ -3,7 +3,8 @@
  *
  * コアの推定(GET /api/v1/citizens/{id}/itinerary)を表示する。訪問先は勤務先・学校と、世帯が前エポックに
  * 買い物をした店(病院の医療サービスなども小売の買い物)で、どれも自宅との往復。各行に自宅からの片道の
- * 所要時間と乗り継ぎ(徒歩・車・路線)を添える。経路はエポックの経路計算の結果なので、計算前・計算中は理由を出す。
+ * 所要時間と乗り継ぎ(徒歩・車・路線)を添える。リストの上の地図に自宅・訪問先と片道経路を重ね、番号で対応させる。
+ * 経路はエポックの経路計算の結果なので、計算前・計算中は理由を出す。
  */
 
 import { invoke } from "@tauri-apps/api/core";
@@ -11,13 +12,15 @@ import { useTranslation } from "react-i18next";
 
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { CitizenItinerary, CitizenTrip, CitizenVisit } from "../../utils/citizenTracking";
+import { CitizenActivityMap } from "./CitizenActivityMap";
 
 type CitizenActivityPanelProps = {
+  apiBaseUrl: string;
   itinerary: CitizenItinerary | null;
   failed: boolean;
 };
 
-export function CitizenActivityPanel({ itinerary, failed }: CitizenActivityPanelProps) {
+export function CitizenActivityPanel({ apiBaseUrl, itinerary, failed }: CitizenActivityPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
 
@@ -73,6 +76,7 @@ export function CitizenActivityPanel({ itinerary, failed }: CitizenActivityPanel
 
       <section className="agent-detail-section">
         <h3 className="agent-detail-section-title">{t("citizenTracking.visits")}</h3>
+        <CitizenActivityMap apiBaseUrl={apiBaseUrl} itinerary={itinerary} />
         {destinations.length === 0 ? (
           <p className="agent-detail-muted">{t("citizenTracking.noVisits")}</p>
         ) : (
@@ -81,21 +85,24 @@ export function CitizenActivityPanel({ itinerary, failed }: CitizenActivityPanel
               const trip = trips.find((item) => item.from_visit === 0 && item.to_visit === index);
               return (
                 <li key={`${visit.kind}-${visit.agent_id}`} className="citizen-visit">
-                  <div className="citizen-visit-head">
-                    <span className={`citizen-visit-kind citizen-visit-kind--${visit.kind}`}>
-                      {t(`citizenTracking.visitKind.${visit.kind}`)}
-                    </span>
-                    <button className="entity-link" type="button" onClick={() => openAgent(visit.agent_id)}>
-                      {visit.name || `#${visit.agent_id}`}
-                    </button>
-                  </div>
-                  {visit.kind === "shop" && visit.product_ids.length > 0 && (
-                    <div className="citizen-visit-detail">{productNames(visit)}</div>
-                  )}
-                  <div className="citizen-visit-detail">
-                    {trip && trip.status === "ok"
-                      ? t("citizenTracking.trip", { minutes: Math.max(1, Math.round(trip.minutes ?? 0)), route: routeSummary(trip) })
-                      : t("citizenTracking.noRoute")}
+                  <span className="citizen-visit-number">{index}</span>
+                  <div className="citizen-visit-content">
+                    <div className="citizen-visit-head">
+                      <span className={`citizen-visit-kind citizen-visit-kind--${visit.kind}`}>
+                        {t(`citizenTracking.visitKind.${visit.kind}`)}
+                      </span>
+                      <button className="entity-link" type="button" onClick={() => openAgent(visit.agent_id)}>
+                        {visit.name || `#${visit.agent_id}`}
+                      </button>
+                    </div>
+                    {visit.kind === "shop" && visit.product_ids.length > 0 && (
+                      <div className="citizen-visit-detail">{productNames(visit)}</div>
+                    )}
+                    <div className="citizen-visit-detail">
+                      {trip && trip.status === "ok"
+                        ? t("citizenTracking.trip", { minutes: Math.max(1, Math.round(trip.minutes ?? 0)), route: routeSummary(trip) })
+                        : t("citizenTracking.noRoute")}
+                    </div>
                   </div>
                 </li>
               );

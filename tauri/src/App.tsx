@@ -33,6 +33,7 @@ const BuildingDirectAcquisitionConfirmWindow = lazy(() => import("./components/b
 const PathConstructionPanel = lazy(() => import("./components/path/PathConstructionPanel").then(m => ({ default: m.PathConstructionPanel })));
 const PathShapeEditorPanel = lazy(() => import("./components/path/PathShapeEditorPanel").then(m => ({ default: m.PathShapeEditorPanel })));
 const PathDetailPanel = lazy(() => import("./components/path/PathDetailPanel").then(m => ({ default: m.PathDetailPanel })));
+const PathRebuildPanel = lazy(() => import("./components/path/PathRebuildPanel").then(m => ({ default: m.PathRebuildPanel })));
 const BuildingConstructionPanel = lazy(() => import("./components/building/BuildingConstructionPanel").then(m => ({ default: m.BuildingConstructionPanel })));
 const BuildingAppearancePanel = lazy(() => import("./components/building/BuildingAppearancePanel").then(m => ({ default: m.BuildingAppearancePanel })));
 const ParcelCreationPanel = lazy(() => import("./components/parcel/ParcelCreationPanel").then(m => ({ default: m.ParcelCreationPanel })));
@@ -60,7 +61,6 @@ const PropPlacementPanel = lazy(() => import("./components/prop/PropPlacementPan
 const GradingPanel = lazy(() => import("./components/grading/GradingPanel").then(m => ({ default: m.GradingPanel })));
 const AchievementsWindow = lazy(() => import("./components/achievement/AchievementsWindow").then(m => ({ default: m.AchievementsWindow })));
 const QuestEditPanel = lazy(() => import("./components/achievement/QuestEditPanel").then(m => ({ default: m.QuestEditPanel })));
-const CityTaxWindow = lazy(() => import("./components/tax/CityTaxWindow").then(m => ({ default: m.CityTaxWindow })));
 const CityRegulationWindow = lazy(() => import("./components/regulation/CityRegulationWindow").then(m => ({ default: m.CityRegulationWindow })));
 const CityStatisticsWindow = lazy(() => import("./components/statistics/CityStatisticsWindow").then(m => ({ default: m.CityStatisticsWindow })));
 const DisplayOptionsPanel = lazy(() => import("./components/display/DisplayOptionsPanel").then(m => ({ default: m.DisplayOptionsPanel })));
@@ -101,7 +101,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -462,6 +462,9 @@ function App() {
                 pathTemplate={context.definition.fetch!.path_template}
                 initialEntityId={context.entity?.id ?? ""}
               />
+            ) : context.window_type === "path_rebuild" ? (
+              <PathRebuildPanel apiBaseUrl={context.api_base_url}
+                initialEntityId={context.entity?.id ?? ""} onClose={closeWindow} />
             ) : context.window_type === "path_build" ? (
               <PathConstructionPanel
                 apiBaseUrl={context.api_base_url}
@@ -577,8 +580,6 @@ function App() {
               />
             ) : context.window_type === "achievements" ? (
               <AchievementsWindow apiBaseUrl={context.api_base_url} />
-            ) : context.window_type === "city_hall" ? (
-              <CityTaxWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "city_regulation" ? (
               <CityRegulationWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "city_statistics" ? (

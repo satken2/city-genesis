@@ -111,14 +111,21 @@ function facilityUtilizationColor(rate: number): string {
 
 /**
  * (x, z) を中心に稼働率の円グラフを描く。100%で円、50%で半円になるよう、画面の真上から時計回りに伸ばす。
+ * 稼働率が低くても位置と全体の大きさが分かるよう、半透明の白い円を下地にする。
  * ctx は+Zを上にするY反転を含むので、画面で時計回りにするには角度を減らす向きに描く。
  */
 function drawUtilizationPie(ctx: CanvasRenderingContext2D, x: number, z: number, rate: number, zoom: number) {
+  const radius = PIE_RADIUS_PX / zoom;
+  ctx.beginPath();
+  ctx.arc(x, z, radius, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+  ctx.fill();
+
   const ratio = Math.min(1, rate);
   if (!(ratio > 0)) return;
   ctx.beginPath();
   ctx.moveTo(x, z);
-  ctx.arc(x, z, PIE_RADIUS_PX / zoom, Math.PI / 2, Math.PI / 2 - 2 * Math.PI * ratio, true);
+  ctx.arc(x, z, radius, Math.PI / 2, Math.PI / 2 - 2 * Math.PI * ratio, true);
   ctx.closePath();
   ctx.fillStyle = facilityUtilizationColor(rate);
   ctx.fill();

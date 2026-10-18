@@ -10,6 +10,7 @@ import {
   STATUS_PENDING,
   STATUS_CONSTRUCTING,
   STATUS_DEMOLISHING,
+  PATH_TRANSPORT,
 } from "../../constants";
 import { sendSessionReload } from "../../utils/ipc";
 import { notifyRoadsChanged } from "../road/roadApi";
@@ -261,10 +262,21 @@ export function PathOperationPanel({
               <img src={repairIcon} alt={t("path.action.repair")} />
             </button>
           )}
-          {/* 結合・分割は交通ネットワーク上の操作で、稼働中のパスにのみ意味がある
-              (バックエンドも STATUS_ACTIVE 以外を拒否する)。 */}
+          {/* 造り替え・結合・分割は、バックエンドでも稼働中のパスだけが対象となる。 */}
           {path.status === STATUS_ACTIVE && (
             <>
+              {path.path_type !== PATH_TRANSPORT && (
+                <button className="operation-btn" type="button"
+                  title={t("path.rebuild.title")} aria-label={t("path.rebuild.title")}
+                  data-guide="path.rebuild.open" disabled={loading}
+                  onClick={() => {
+                    void invoke("open_registered_window", {
+                      windowType: "path_rebuild", entityId: String(path.path_id),
+                    }).catch(console.error);
+                  }}>
+                  <img src={editIcon} alt="" />
+                </button>
+              )}
               <button
                 className={`operation-btn${topologyEditMode === "merge" ? " operation-btn--on" : ""}`}
                 type="button"

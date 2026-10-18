@@ -39,7 +39,7 @@ using UnityEngine.UI;
 ///
 /// アイコンで表現しないビット
 /// --------------------------
-/// 火災系の2ビット(ALERT_AGENT_ON_FIRE / ALERT_AGENT_ACCIDENTAL_FIRE)はアイコンではなく
+/// 火災(ALERT_AGENT_ON_FIRE)はアイコンではなく
 /// 3Dパーティクル(炎・煙)で表現する。本マネージャはAPI応答をそのまま FireEffectManager へ
 /// 渡すだけで、アイコンは生成しない(表示フィルタと表示トグルには追従させる)。
 ///

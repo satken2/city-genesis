@@ -17,7 +17,17 @@
   min-width: 0;
 }
 
-/* 「行動」タブの訪問先。種別の札・名前の行の下に、買っている品目と自宅からの片道を小さく添える。 */
+/* 経路の全体を眺めつつ、訪問先リストも同じタブで読める高さの埋め込み地図。 */
+.citizen-activity-map {
+  display: grid;
+  place-items: center;
+  height: 24rem;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  background: var(--flat-sunken);
+}
+
+/* 地図とリストの番号を対応させ、種別・名前の下に品目と自宅からの片道を添える。 */
 .citizen-visits {
   list-style: none;
   margin: 0;
@@ -28,9 +38,29 @@
 }
 
 .citizen-visit {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
   padding: 6px 8px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.citizen-visit-number {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  padding: 0 0.2rem;
+  background: var(--flat-warn);
+  color: var(--flat-sunken);
+  font-weight: bold;
+}
+
+.citizen-visit-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .citizen-visit-head {

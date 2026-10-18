@@ -557,24 +557,6 @@
           }
         },
         {
-          "id": "city",
-          "textKey": "tutorial.controls.step4.city",
-          "ui": {
-            "policy": "highlight",
-            "allow": [],
-            "highlight": [
-              "hud.city"
-            ]
-          },
-          "world": {
-            "mode": "observe"
-          },
-          "until": {
-            "type": "page",
-            "id": "icons.city"
-          }
-        },
-        {
           "id": "finance",
           "textKey": "tutorial.controls.step4.finance",
           "ui": {

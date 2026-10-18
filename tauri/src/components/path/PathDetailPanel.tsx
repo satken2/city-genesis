@@ -62,6 +62,7 @@ import { PathOperationPanel } from "./PathOperationPanel";
 import { PathTopologyEditPanel } from "./PathTopologyEditPanel";
 import type { PathTopologyEditMode } from "./PathTopologyEditPanel";
 import { PathConstructionInfoPanel } from "./PathConstructionInfoPanel";
+import { PATH_REBUILD_CHANGED_EVENT } from "./pathRebuildApi";
 import shortageIcon from "../../assets/images/ui/agent_panel/bribery.png";
 import accidentIcon from "../../assets/images/ui/agent_panel/car-accident.png";
 // アラートカード・建設スピードの体裁は経済主体パネルと共有する。各パネルは遅延読み込み
@@ -100,6 +101,13 @@ export function PathDetailPanel({
   const [topologyEditMode, setTopologyEditMode] = useState<PathTopologyEditMode | null>(null);
 
   const url = buildApiUrl(apiBaseUrl, pathTemplate, initialEntityId);
+
+  useEffect(() => {
+    const unlisten = listen<{ path_id: number }>(PATH_REBUILD_CHANGED_EVENT, event => {
+      if (String(event.payload.path_id) === initialEntityId) setRefreshKey(key => key + 1);
+    });
+    return () => { void unlisten.then(stop => stop()); };
+  }, [initialEntityId]);
 
   useEffect(() => {
     const controller = new AbortController();

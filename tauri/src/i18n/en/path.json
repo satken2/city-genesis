@@ -68,6 +68,19 @@
       "merge": "Merge with adjacent path",
       "split": "Split path"
     },
+    "rebuild": {
+      "title": "Change variant",
+      "current": "Current variant",
+      "target": "Target variant",
+      "select": "Select a target variant",
+      "noVariants": "No other variants are available.",
+      "unavailable": "Only active paths can be changed.",
+      "confirm": "Start conversion",
+      "repairNotice": "Starting the conversion will cancel the ongoing repair.",
+      "parcelNotice": "Starting the work will remove {{removed}} vacant city-owned parcels and trim {{shaved}} parcels.",
+      "accepted": "Conversion started.",
+      "refreshFailed": "The work was accepted, but the display could not be refreshed. Reopen the window."
+    },
     "topology": {
       "mergeTitle": "Merge Paths",
       "splitTitle": "Split Path",

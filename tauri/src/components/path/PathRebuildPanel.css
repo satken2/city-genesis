@@ -1,0 +1,70 @@
+.path-rebuild {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  color: var(--flat-text-body);
+}
+
+.path-rebuild__body {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.path-rebuild__hint {
+  color: var(--flat-text-label);
+  margin: 0 0 1rem;
+}
+
+.path-rebuild__comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.path-rebuild__comparison h3,
+.path-rebuild__label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.path-rebuild__comparison select {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.path-rebuild__comparison .pc-description-frame {
+  margin: 0;
+}
+
+.path-rebuild__error {
+  color: var(--flat-danger);
+  overflow-wrap: anywhere;
+}
+
+.path-rebuild__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--flat-surface);
+}
+
+.path-rebuild__actions button {
+  font-size: 1rem;
+}
+
+.path-rebuild__confirm {
+  background: var(--flat-selected);
+}
+
+@media (max-width: 34rem) {
+  .path-rebuild__comparison {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

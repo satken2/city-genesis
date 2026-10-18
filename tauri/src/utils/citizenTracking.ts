@@ -27,6 +27,8 @@ export type CitizenVisit = {
 
 export type CitizenTripLeg = {
   kind: "walk" | "drive" | "transit" | "conveyor" | "access" | "turn";
+  /** 行程に含まれる道路・公共交通上の形状。ワールド座標の [x, z]。 */
+  points: number[][];
   minutes: number;
   distance_m: number;
   name: string;

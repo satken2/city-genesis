@@ -68,6 +68,19 @@
       "merge": "隣のパスと結合",
       "split": "パスを分割"
     },
+    "rebuild": {
+      "title": "バリアント変更",
+      "current": "現在のバリアント",
+      "target": "変更先のバリアント",
+      "select": "変更先を選択",
+      "noVariants": "変更できる別のバリアントがありません。",
+      "unavailable": "稼働中のパスのみ変更できます。",
+      "confirm": "変更工事を開始",
+      "repairNotice": "修繕中のため、変更工事を開始すると修繕は中止されます。",
+      "parcelNotice": "工事開始時に市有空き区画を{{removed}}件撤去し、{{shaved}}件の一部を削り取ります。",
+      "accepted": "変更工事を開始しました。",
+      "refreshFailed": "工事は受理されましたが、表示の更新に失敗しました。ウィンドウを開き直してください。"
+    },
     "topology": {
       "mergeTitle": "パスの結合",
       "splitTitle": "パスの分割",

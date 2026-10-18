@@ -15,7 +15,7 @@
  *   - 就労・教育: 勤務先・通学先・専攻スキル・高等教育修了状況
  *   - スキル: 6種のスキル値をレーダーチャートで可視化
  *   - 治安: 犯罪性向
- * 「行動」タブは訪問先と自宅からの経路(GET /api/v1/citizens/{id}/itinerary。`CitizenActivityPanel`)。
+ * 「行動」タブは自宅と訪問先の地図・片道経路、その下の訪問先リスト(`CitizenActivityPanel`)。
  *
  * 所属世帯・勤務先・通学先のリンクは、現在のパネル内ナビゲーションではなく、
  * 別の経済主体詳細ウィンドウを新規に開く(SearchWindow 等と同じ open_registered_window)。
@@ -309,7 +309,7 @@ export function CitizenDetailPanel({
 
       <div className="agent-detail-tab-content">
         {activeTab === "activity" ? (
-          <CitizenActivityPanel itinerary={itinerary} failed={itineraryFailed} />
+          <CitizenActivityPanel apiBaseUrl={apiBaseUrl} itinerary={itinerary} failed={itineraryFailed} />
         ) : (
           <>
             <section className="agent-detail-section">

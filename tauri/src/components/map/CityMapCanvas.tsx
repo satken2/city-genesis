@@ -58,6 +58,7 @@
  *
  * ヒートマップ(heatmap propで1種別だけ選ぶ排他表示):
  *   環境スコアを格子画像として地図へ重ねる。負荷ゼロは透明で、値に比例して濃くする。
+ *   道路・建物の上、ラベルの下に描き、環境スコアと名称を読み取れるようにする。
  *   表示用LODはエポック中に生成され、ズームに合う画像だけを取得・色付けする。
  *   heatmapMode="sources"では騒音・汚染の発生源を建物・道路の色で示す。
  *
@@ -1716,25 +1717,6 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           }
         }
 
-        // 行0は南端なので、地形と同じワールド座標変換で画像を張る。
-        if (heat.grid && heat.mode === "overlay" && heat.grid.levels.length > 0) {
-          const lod = pickHeatmapLod(heat.grid.levels, z);
-          void loadHeatmapLevel(lod);
-          const cached = heat.images.has(lod) ? lod : [...heat.images.keys()].sort((a, b) => Math.abs(a - lod) - Math.abs(b - lod))[0];
-          const image = heat.images.get(cached);
-          if (image) {
-            ctx.save();
-            if (settings) {
-              ctx.beginPath();
-              ctx.rect(-settings.map_width / 2, -settings.map_height / 2, settings.map_width, settings.map_height);
-              ctx.clip();
-            }
-            ctx.imageSmoothingEnabled = true;
-            ctx.drawImage(image, heat.grid.origin_x, heat.grid.origin_z, heat.grid.width_m, heat.grid.height_m);
-            ctx.restore();
-          }
-        }
-
         // 地区の値塗り。地区枠線より先に敷くことで、枠線・道路・建物を潰さずに
         // 「どの地区が良い/悪いか」を面で見せる。
         if (vec.zoneFillBands) {
@@ -1876,6 +1858,25 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.setLineDash([0, px(CITY_BOUNDARY_DOT_PX + CITY_BOUNDARY_GAP_PX)]);
           ctx.strokeRect(-settings.map_width / 2, -settings.map_height / 2, settings.map_width, settings.map_height);
           ctx.restore();
+        }
+
+        // 行0は南端なので、地形と同じワールド座標変換で画像を張る。
+        if (heat.grid && heat.mode === "overlay" && heat.grid.levels.length > 0) {
+          const lod = pickHeatmapLod(heat.grid.levels, z);
+          void loadHeatmapLevel(lod);
+          const cached = heat.images.has(lod) ? lod : [...heat.images.keys()].sort((a, b) => Math.abs(a - lod) - Math.abs(b - lod))[0];
+          const image = heat.images.get(cached);
+          if (image) {
+            ctx.save();
+            if (settings) {
+              ctx.beginPath();
+              ctx.rect(-settings.map_width / 2, -settings.map_height / 2, settings.map_width, settings.map_height);
+              ctx.clip();
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.drawImage(image, heat.grid.origin_x, heat.grid.origin_z, heat.grid.width_m, heat.grid.height_m);
+            ctx.restore();
+          }
         }
 
         if (L.labels) {

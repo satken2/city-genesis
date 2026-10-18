@@ -68,6 +68,19 @@
       "merge": "Unir con la vía contigua",
       "split": "Dividir la vía"
     },
+    "rebuild": {
+      "title": "Cambiar variante",
+      "current": "Variante actual",
+      "target": "Variante de destino",
+      "select": "Selecciona una variante",
+      "noVariants": "No hay otras variantes disponibles.",
+      "unavailable": "Solo se pueden cambiar las vías activas.",
+      "confirm": "Iniciar conversión",
+      "repairNotice": "Iniciar la conversión cancelará la reparación en curso.",
+      "parcelNotice": "Al iniciar la obra se eliminarán {{removed}} parcelas municipales vacías y se recortarán {{shaved}} parcelas.",
+      "accepted": "Conversión iniciada.",
+      "refreshFailed": "Se aceptó la obra, pero no se pudo actualizar la vista. Vuelve a abrir la ventana."
+    },
     "topology": {
       "mergeTitle": "Unión de vías",
       "splitTitle": "División de vía",

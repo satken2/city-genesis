@@ -17,8 +17,8 @@
  *
  * 建設画面の設定は選んだバリアントの種別で決まる。軌道(線路・モノレール)の単線は線路数・進行方向・線路間隔と
  * 駅のホーム設置側を持ち、1本で上下線を持つ複線一体の線路はどちらも持たない(駅のホームの位置は相対式・島式としてバリアントで決まる)。
- * 駅舎は建屋の配置端と通路方式、街路・高速道路は所属道路を持つ。これらと建設プロジェクトの
- * タグは新規敷設でだけ選ぶ(建設後は変えられないか、パス詳細で変える)。
+ * 駅舎の建屋の配置端・通路方式と建設プロジェクトのタグは新規敷設でだけ選ぶ
+ * (建設後は変えられないか、パス詳細で変える)。所属道路は敷設後にパス詳細・道路詳細で設定する。
  * 曲線/直線・吸着の設定はUnity側の操作系(Ctrlラジアルメニュー・カーソルHUD)が担い、このパネルには置かない。
  * 駅舎の敷設中はUnityが既存の道路・線路への吸着を止める(グリッド吸着だけは有効)。
  */
@@ -51,11 +51,8 @@ import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
 import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
 import { StationPassageModeSelect } from "./StationPassageModeSelect";
 import { PathBuildSections } from "./PathBuildSections";
-import { PathRoadAssignmentSection } from "./PathRoadAssignmentSection";
 import { PathTagSection } from "./PathTagSection";
 import { TAGS_CHANGED_EVENT } from "../../utils/constructionTags";
-import { usePathRoadAssignment } from "./usePathRoadAssignment";
-import { isNamedRoadPathType } from "../road/roadApi";
 import turnBackIcon from "../../assets/images/ui/turn-back.png";
 import "./PathConstructionPanel.css";
 import "../building/BuildingConstructionPanel.css";
@@ -174,13 +171,6 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
     ?? variantTabs.find(tabAllowed) ?? variantTabs[0];
   const visibleVariants = activeVariantTab?.variants ?? variantsForCategory;
 
-  /**
-   * 所属道路の選択は、街路・高速道路の新規敷設のときだけ扱う(既存パスの形状編集では所属を変えない。
-   * 所属の変更はパス詳細・道路詳細で行う)。
-   */
-  const roadAssignmentEnabled = isNewBuild && pathConstruction.selectedVariant !== null && isNamedRoadPathType(selectedPathType);
-  const roadAssignment = usePathRoadAssignment(apiBaseUrl, roadAssignmentEnabled, pathConstruction.rawPoints);
-
   /* ---- ハンドラ ---- */
 
   /**
@@ -218,17 +208,11 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
     setIsConfirming(true);
     try {
       const createdPathIds = await pathConstruction.confirmPath({
-        ...roadAssignment.postFields,
         ...(projectTag ? { tag: projectTag } : {}),
       });
       if (projectTag && createdPathIds.length > 0) {
         void emit(TAGS_CHANGED_EVENT, { tag: projectTag }).catch(console.error);
       }
-      // 道路の作成は敷設とは別の要求なので、失敗しても敷設の成功は取り消さずに知らせるだけにする。
-      await roadAssignment.finalize(createdPathIds).catch((err) => {
-        console.error("[PathConstructionPanel] road assignment failed:", err);
-        void showNotification({ message: t("path_construction.road.createFailed"), durationMs: 8000 });
-      });
       // 成功時: Unityに編集終了を通知してデータをリロードさせる
       await sendEditPathFinish();
       // 確定した形状の2D編集パネルは役目を終えるので閉じる(開いていなければ何もしない)
@@ -268,7 +252,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
       }
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [editPathId, onClose, pathConstruction, projectTag, refreshAffordability, roadAssignment, t]);
+  }, [editPathId, onClose, pathConstruction, projectTag, refreshAffordability, t]);
 
   /**
    * キャンセルボタンを押した際のハンドラ。
@@ -467,10 +451,6 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
           onAdjustSpacing={pathConstruction.adjustTrackSpacing}
           onCycleDirection={pathConstruction.cycleTrackDirection}
         />
-      )}
-
-      {roadAssignmentEnabled && (
-        <PathRoadAssignmentSection assignment={roadAssignment} disabled={isConfirming} />
       )}
 
       {/* 既存パスの形状編集ではタグを変えない(タグの付け替えはパス詳細で行う)。 */}

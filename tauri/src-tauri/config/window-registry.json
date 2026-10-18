@@ -18,6 +18,15 @@
       }
     ]
   },
+  "path_rebuild": {
+    "title": "Change Path Variant",
+    "width": 760,
+    "height": 620,
+    "resizable": true,
+    "policy": "single_per_entity",
+    "entity_type": "path",
+    "actions": []
+  },
   "road_detail": {
     "title": "Road Details",
     "width": 520,
@@ -331,16 +340,6 @@
     "resizable": true,
     "policy": "single",
     "empty_shell": true,
-    "actions": []
-  },
-  "city_hall": {
-    "title": "税率設定",
-    "width": 960,
-    "height": 640,
-    "width_ratio": 0.65,
-    "height_ratio": 0.8,
-    "resizable": true,
-    "policy": "single",
     "actions": []
   },
   "display_options": {

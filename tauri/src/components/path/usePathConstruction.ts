@@ -802,7 +802,7 @@ export function usePathConstruction(
   }, [apiBaseUrl, shapePhase, shapeRevision, localCanConfirm, validationKey, validationAttempt, t]);
 
   /**
-   * 確定送信。新規作成のときは extraFields を各パスへ足して送り(道路建設パネルの所属道路 road_id など。
+   * 確定送信。新規作成のときは extraFields を各パスへ足して送り(建設プロジェクトの tag など。
    * 事前検証と見積りの送信形状には含めない)、作成されたパスIDの一覧を返す。既存パスの更新では空配列。
    */
   const confirmPath = useCallback(async (extraFields?: Record<string, unknown>): Promise<number[]> => {
