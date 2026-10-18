@@ -4896,14 +4896,25 @@ public partial class PathManager : BaseApiDataManager
         var points = GetUntrimmedPoints(path, out _);
         if (points == null || points.Count < 2) return null;
         float platform = master?.platform_width ?? 0f;
-        float left = 0f, right = 0f;
-        if (IsTrackTypePath(path) && platform > 0f) TrackPath.ResolvePlatformExtents(path, platform, out left, out right);
+        float left = 0f, right = 0f, median = 0f, sidewalk = 0f;
+        // 橋脚を立てられるのは道路の中央分離帯と歩道だけ。線路の center_width は軌道の間(島式ホーム)なので使わない。
+        if (IsTrackTypePath(path))
+        {
+            if (platform > 0f) TrackPath.ResolvePlatformExtents(path, platform, out left, out right);
+        }
+        else
+        {
+            median = (master?.center_width ?? 0f) * 0.5f;
+            sidewalk = master?.sidewalk_width ?? 0f;
+        }
         return new PillarClearance.Corridor
         {
             Points = points,
             YOffset = RoadPartHeights.BODY_ABOVE_SPLINE,
             HalfWidth = Mathf.Max(path.width, GetRoadWidth(path.path_variant)) * 0.5f + Mathf.Max(left, right),
-            Height = TunnelSectionUtil.GetClearanceHeight(path.path_variant)
+            Height = TunnelSectionUtil.GetClearanceHeight(path.path_variant),
+            MedianHalfWidth = median,
+            SidewalkWidth = sidewalk
         };
     }
 

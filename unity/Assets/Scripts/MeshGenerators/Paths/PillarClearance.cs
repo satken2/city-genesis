@@ -9,6 +9,7 @@ public static class PillarClearance
     /// <summary>
     /// 通行空間。Points は PathManager の点列キャッシュと共有することがあるので読み取り専用として扱い、
     /// 高さの持ち上げは YOffset で表す(判定時に各点のYへ加える)。
+    /// 橋脚の足元は、中心線から MedianHalfWidth までの中央分離帯と、両端から SidewalkWidth までの歩道に置ける(既定の0は全幅が車道)。
     /// </summary>
     public sealed class Corridor
     {
@@ -16,6 +17,33 @@ public static class PillarClearance
         public float HalfWidth;
         public float Height;
         public float YOffset;
+        public float MedianHalfWidth;
+        public float SidewalkWidth;
+
+        /// <summary>柱を置けない帯の数。0番は全幅の床版、1番以降は車道(中央分離帯があれば左右の2本)。</summary>
+        internal int FootBandCount
+        {
+            get
+            {
+                float inner = Mathf.Max(0f, MedianHalfWidth), outer = HalfWidth - Mathf.Max(0f, SidewalkWidth);
+                return outer <= inner ? 1 : inner > 0f ? 3 : 2;
+            }
+        }
+
+        /// <summary>
+        /// 帯の中心線からの横ずれ・半幅と、路面から上で柱を妨げる高さ。
+        /// 床版の高さは -FootTolerance で、路面が足元より FootTolerance 以上高い(柱が貫く)ときだけ妨げる。
+        /// </summary>
+        internal void GetFootBand(int index, out float offset, out float halfWidth, out float height)
+        {
+            offset = 0f;
+            if (index == 0) { halfWidth = HalfWidth; height = -FootTolerance; return; }
+            float inner = Mathf.Max(0f, MedianHalfWidth), outer = HalfWidth - Mathf.Max(0f, SidewalkWidth);
+            height = Height;
+            if (inner <= 0f) { halfWidth = outer; return; }
+            halfWidth = (outer - inner) * 0.5f;
+            offset = (index == 1 ? 1f : -1f) * (inner + halfWidth);
+        }
 
         // テストは Points と HalfWidth を外から差し替えるので、XZ範囲は Points の参照と点数で検証し、HalfWidth は判定時に毎回使う。
         private List<Vector3> boundsSource;
@@ -48,10 +76,13 @@ public static class PillarClearance
 
     public static Func<PathSummary, List<Corridor>> NeighborProvider;
     public const float Margin = 0.25f;
+    // 地表の道路の路面(地形+0.2m)と歩道の段差を、柱が立つ地面とみなす高さ。
+    public const float FootTolerance = 0.5f;
 
     /// <summary>
-    /// 橋脚の横断面で通行空間の左右端を求め、左右それぞれの柱を最小限だけ外へ逃がす。
-    /// 柱の外接円で通行帯を広げ、線分を高さと前後方向で切ってから横方向へ投影する保守的な近似。
+    /// 柱を置けない帯(車道・線路と床版)を橋脚の横断方向へ投影し、左右それぞれの柱を最小限だけ外へ逃がす。
+    /// 歩道・中央分離帯に柱が収まれば、そこで止まる。
+    /// 柱の外接円で帯を広げ、線分を高さと前後方向で切ってから横方向へ投影する保守的な近似。
     /// </summary>
     public static void FindPortalOffsets(Vector3 origin, Vector3 right, float minY, float maxY,
         float legRadius, float minimumHalfSpan, List<Corridor> corridors, out float left, out float rightOffset)
@@ -64,21 +95,31 @@ public static class PillarClearance
         foreach (var corridor in corridors)
         {
             if (corridor.Points == null) continue;
-            float radius = legRadius + corridor.HalfWidth + Margin;
-            for (int i = 1; i < corridor.Points.Count; i++)
+            for (int band = 0; band < corridor.FootBandCount; band++)
             {
-                Vector3 a = corridor.Points[i - 1] + Vector3.up * corridor.YOffset;
-                Vector3 b = corridor.Points[i] + Vector3.up * corridor.YOffset;
-                float lo = 0f, hi = 1f;
-                if (!ClipRange(a.y, b.y, minY - corridor.Height, maxY, ref lo, ref hi)) continue;
-                if (!ClipRange(Vector3.Dot(a - origin, forward), Vector3.Dot(b - origin, forward),
-                        -radius, radius, ref lo, ref hi)) continue;
-                float x0 = Vector3.Dot(Vector3.Lerp(a, b, lo) - origin, right);
-                float x1 = Vector3.Dot(Vector3.Lerp(a, b, hi) - origin, right);
-                intervals.Add(new Vector2(Mathf.Min(x0, x1) - radius, Mathf.Max(x0, x1) + radius));
+                corridor.GetFootBand(band, out float offset, out float halfWidth, out float height);
+                float radius = legRadius + halfWidth + Margin;
+                for (int i = 1; i < corridor.Points.Count; i++)
+                {
+                    Vector3 a = corridor.Points[i - 1] + Vector3.up * corridor.YOffset;
+                    Vector3 b = corridor.Points[i] + Vector3.up * corridor.YOffset;
+                    if (offset != 0f)
+                    {
+                        Vector3 shift = RightOf(a, b) * offset;
+                        a += shift;
+                        b += shift;
+                    }
+                    float lo = 0f, hi = 1f;
+                    if (!ClipRange(a.y, b.y, minY - height, maxY, ref lo, ref hi)) continue;
+                    if (!ClipRange(Vector3.Dot(a - origin, forward), Vector3.Dot(b - origin, forward),
+                            -radius, radius, ref lo, ref hi)) continue;
+                    float x0 = Vector3.Dot(Vector3.Lerp(a, b, lo) - origin, right);
+                    float x1 = Vector3.Dot(Vector3.Lerp(a, b, hi) - origin, right);
+                    intervals.Add(new Vector2(Mathf.Min(x0, x1) - radius, Mathf.Max(x0, x1) + radius));
+                }
             }
         }
-        // 重なる通行帯を順に抜ける。離れた道路までまとめてまたぐ必要はない。
+        // 重なる帯を順に抜ける。離れた道路までまとめてまたぐ必要はない。
         intervals.Sort((a, b) => a.x.CompareTo(b.x));
         for (int i = 0; i < intervals.Count; i++)
             if (rightOffset >= intervals[i].x && rightOffset <= intervals[i].y)
@@ -98,6 +139,9 @@ public static class PillarClearance
         hi = Mathf.Min(hi, Mathf.Max(t0, t1));
         return lo <= hi;
     }
+
+    /// <summary>線分 a→b の平面での右向き単位ベクトル。長さ0の線分では0。</summary>
+    private static Vector3 RightOf(Vector3 a, Vector3 b) => new Vector3(b.z - a.z, 0f, a.x - b.x).normalized;
 
     /// <summary>子メッシュの変換を含む、プレハブルート座標での範囲。ルートのscaleは配置時に適用する。</summary>
     public static Bounds? GetPrefabBounds(GameObject prefab)
@@ -121,7 +165,8 @@ public static class PillarClearance
     }
 
     /// <summary>
-    /// 柱・キャップをそれぞれ外接円と高さ区間で近似する。
+    /// 地面に接する部材(下端=足元)を外接円と高さ区間で近似し、柱を置けない帯に掛かるかを調べる。
+    /// 帯は車道・線路の通行空間と、足元より高い路面(床版)の全幅。地上の歩道・中央分離帯には掛からない。
     /// 道路の線分上で水平の重複区間と高さの重複区間を交差させ、斜路も判定する。
     /// </summary>
     public static bool Intersects(Bounds part, List<Corridor> corridors)
@@ -129,7 +174,11 @@ public static class PillarClearance
         if (corridors == null) return false;
         float partRadius = new Vector2(part.extents.x, part.extents.z).magnitude;
         foreach (var corridor in corridors)
-            if (Reaches(corridor, part.center, partRadius, part.min.y - corridor.Height, part.max.y)) return true;
+            for (int band = 0; band < corridor.FootBandCount; band++)
+            {
+                corridor.GetFootBand(band, out float offset, out float halfWidth, out float height);
+                if (Reaches(corridor, part.center, partRadius, part.min.y - height, part.max.y, offset, halfWidth)) return true;
+            }
         return false;
     }
 
@@ -141,7 +190,7 @@ public static class PillarClearance
     {
         if (corridors == null) return false;
         foreach (var corridor in corridors)
-            if (Reaches(corridor, foot, radius, foot.y + rise, double.PositiveInfinity)) return true;
+            if (Reaches(corridor, foot, radius, foot.y + rise, double.PositiveInfinity, 0f, corridor.HalfWidth)) return true;
         return false;
     }
 
@@ -150,20 +199,26 @@ public static class PillarClearance
     {
         if (points == null) return false;
         for (int i = 0; i < points.Count; i++)
-            if (Reaches(corridor, points[i], radius, double.NegativeInfinity, double.PositiveInfinity)) return true;
+            if (Reaches(corridor, points[i], radius, double.NegativeInfinity, double.PositiveInfinity, 0f, corridor.HalfWidth)) return true;
         return false;
     }
 
-    /// <summary>中心線のうち高さが [minY, maxY] の部分が、平面で center から radius+半幅以内を通るか。</summary>
-    private static bool Reaches(Corridor corridor, Vector3 center, float radius, double minY, double maxY)
+    /// <summary>中心線を右へ offset ずらした線のうち高さが [minY, maxY] の部分が、平面で center から radius+halfWidth 以内を通るか。</summary>
+    private static bool Reaches(Corridor corridor, Vector3 center, float radius, double minY, double maxY, float offset, float halfWidth)
     {
         if (corridor.Points == null || corridor.Points.Count < 2) return false;
-        float reach = radius + corridor.HalfWidth + Margin;
-        if (corridor.IsOutsideXZ(center, reach)) return false;
+        float reach = radius + halfWidth + Margin;
+        if (corridor.IsOutsideXZ(center, reach + Mathf.Abs(offset))) return false;
         Vector3 lift = new Vector3(0f, corridor.YOffset, 0f);
         for (int i = 1; i < corridor.Points.Count; i++)
         {
             Vector3 a = corridor.Points[i - 1] + lift, b = corridor.Points[i] + lift;
+            if (offset != 0f)
+            {
+                Vector3 shift = RightOf(a, b) * offset;
+                a += shift;
+                b += shift;
+            }
             double lo = 0, hi = 1;
             double dy = b.y - a.y;
             if (Math.Abs(dy) < 1e-8)

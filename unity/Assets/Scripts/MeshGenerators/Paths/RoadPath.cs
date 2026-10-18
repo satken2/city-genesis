@@ -1973,11 +1973,13 @@ public class RoadPath : IPathMeshGenerator
         // 柱は天端を原点にして下へ伸ばして作る(原点をキャップの下端に置き、地面まで高さだけ伸縮する)。伸縮させたくない梁などは pillar_cap に分ける。
         pillarScale.y = height / Mathf.Max(0.001f, pillarBounds.GetValueOrDefault().size.y);
 
-        // 通常橋脚を優先し、干渉する地点だけ独立した柱と横梁で通行帯をまたぐ。
-        bool blocked = capBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(capBounds.Value,
+        // 通常橋脚を優先し、柱を置けない地点だけ独立した柱と横梁で車道・線路をまたぐ。
+        // 判定するのは地面に接する部材(柱。柱が要らない低い地点ではキャップ)だけで、キャップは下の通行空間の上へ張り出してよい。
+        bool blocked = needsPillar
+            ? pillarBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(pillarBounds.Value,
+                Matrix4x4.TRS(pillarPosition, rotation, pillarScale)), obstacles)
+            : capBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(capBounds.Value,
                 Matrix4x4.TRS(sample.position, rotation, capScale)), obstacles);
-        blocked |= needsPillar && pillarBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(pillarBounds.Value,
-                Matrix4x4.TRS(pillarPosition, rotation, pillarScale)), obstacles);
         if (blocked)
         {
             float top = sample.position.y + (capBounds.HasValue ? capBounds.Value.max.y * capScale.y : 0f);

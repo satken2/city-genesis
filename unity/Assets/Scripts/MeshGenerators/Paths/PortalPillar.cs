@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>柱と横梁の独立モデルを組み立てる、通行空間をまたぐ門型橋脚。</summary>
+/// <summary>
+/// 柱と横梁の独立モデルを組み立てる、車道・線路をまたぐ門型橋脚。
+/// 干渉を判定するのは地面に接する柱だけで、横梁は下の通行空間の上へ架けてよい。
+/// </summary>
 public sealed class PortalPillar
 {
     // 描画上の上限。交差点や幅広い通行帯を無制限の長さの梁でまたがない。
@@ -56,8 +59,6 @@ public sealed class PortalPillar
         beamPosition.y = supportTop - beamBounds.max.y * beamScale.y;
         // ピボットの横ずれを含むモデルでも梁の中心と柱の間の中心を一致させる。
         beamPosition -= rotation * new Vector3(beamBounds.center.x * beamScale.x, 0f, beamBounds.center.z * beamScale.z);
-        if (PillarClearance.Intersects(Utils.TransformBounds(beamBounds,
-                Matrix4x4.TRS(beamPosition, rotation, beamScale)), obstacles)) return false;
 
         Vector3 leftPosition = position + right * left;
         Vector3 rightPosition = position + right * rightOffset;

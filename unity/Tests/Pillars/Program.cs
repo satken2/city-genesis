@@ -15,6 +15,16 @@ internal static class Program
     private static PillarClearance.Corridor Road(Vector3 a, Vector3 b, float halfWidth = 4f, float height = 5f)
         => new PillarClearance.Corridor { Points = new List<Vector3> { a, b }, HalfWidth = halfWidth, Height = height };
 
+    // 地表の道路は PathManager と同じく、スプライン(地形+0.1)に路面の持ち上げ0.1を加える。
+    private static PillarClearance.Corridor Street(Vector3 a, Vector3 b, float halfWidth, float sidewalk, float medianHalf = 0f)
+    {
+        var road = Road(a, b, halfWidth);
+        road.YOffset = 0.1f;
+        road.SidewalkWidth = sidewalk;
+        road.MedianHalfWidth = medianHalf;
+        return road;
+    }
+
     private static void Main()
     {
         var pillar = new Bounds(new Vector3(0, 5, 0), new Vector3(2, 10, 2));
@@ -53,8 +63,58 @@ internal static class Program
         curve.Points.Reverse();
         Check(true, pillar, curve);
         CheckPortalOffsets();
+        CheckFootBands();
+        CheckPortalFootBands();
         CheckOverhead();
         Console.WriteLine($"PASS: {checks} pillar clearance cases");
+    }
+
+    private static void CheckFootBands()
+    {
+        for (int angle = 0; angle < 180; angle += 30)
+        {
+            float t = angle * (float)Math.PI / 180;
+            var along = new Vector3((float)Math.Cos(t), 0, (float)Math.Sin(t));
+            var side = Vector3.Cross(Vector3.up, along);
+            Bounds Leg(float lateral, float height = 8) => new Bounds(side * lateral + Vector3.up * height * .5f, new Vector3(1, height, 1));
+            Vector3 a = -along * 30 + Vector3.up * .1f, b = along * 30 + Vector3.up * .1f;
+            // 幅12m・歩道2.5mの道路の車道は中心から3.5m。外接円0.71+余裕0.25の柱は中心から4.6mの歩道に立てる。
+            var street = Street(a, b, 6, 2.5f);
+            Check(false, Leg(4.6f), street);
+            Check(false, Leg(-4.6f), street);
+            Check(true, Leg(3.8f), street);
+            Check(true, Leg(-3.8f), street);
+            Check(true, Leg(4.6f), Street(a, b, 6, 0));
+            // 幅32m・歩道3m・中央分離帯3mの道路では、分離帯に収まる柱だけを立てる。
+            var avenue = Street(a, b, 16, 3, 1.5f);
+            Check(false, Leg(0), avenue);
+            Check(true, new Bounds(Vector3.up * 4, new Vector3(2.4f, 8, 2.4f)), avenue);
+            Check(true, Leg(8), avenue);
+            Check(true, Leg(-8), avenue);
+            Check(false, Leg(14), avenue);
+            Check(false, Leg(-14), avenue);
+            Check(true, Leg(0), Street(a, b, 16, 3));
+            // 足元より高い路面(高架の床版)は、歩道も柱を通さない。
+            var deck = Street(a + Vector3.up * 5, b + Vector3.up * 5, 6, 2.5f);
+            Check(true, Leg(4.6f), deck);
+            Check(false, Leg(4.6f, 4), deck);
+        }
+    }
+
+    private static void CheckPortalFootBands()
+    {
+        void Offsets(Vector3 origin, PillarClearance.Corridor corridor, out float left, out float right)
+            => PillarClearance.FindPortalOffsets(origin, Vector3.right, 0, 8, 1.2f, 3,
+                new List<PillarClearance.Corridor> { corridor }, out left, out right);
+        Vector3 a = new Vector3(0, .1f, -100), b = new Vector3(0, .1f, 100);
+        Offsets(Vector3.up * 10, Street(a, b, 6, 2.5f), out float left, out float right);
+        if (Math.Abs(left + 4.96f) > .002f || Math.Abs(right - 4.96f) > .002f) throw new Exception("Portal legs must stop on the sidewalks");
+        // 片側の車道の上の高架は、内側の柱を中央分離帯(中心から0.04m)に、外側の柱を歩道に置く。
+        Offsets(new Vector3(8, 10, 0), Street(a, b, 16, 3, 1.5f), out left, out right);
+        if (Math.Abs(left + 7.96f) > .002f || Math.Abs(right - 6.46f) > .002f) throw new Exception("Inner portal leg must stand in the median");
+        Offsets(Vector3.up * 10, Street(a + Vector3.up * 5, b + Vector3.up * 5, 6, 2.5f), out left, out right);
+        if (left > -7.45f || right < 7.45f) throw new Exception("Portal legs must not pierce an elevated sidewalk");
+        checks += 3;
     }
 
     private static void CheckOverhead()

@@ -137,7 +137,7 @@ public static class PillarQA
             Check(pending.Contains(4), "Road move invalidates old arcade neighborhood");
             foreach (int id in new[] { 1, 2, 4 }) Call("RemovePathFromCache", id);
             PortalCases(master, masterType, cache);
-            File.WriteAllText(result, "PASS: Unity pillar placement, add/move/remove, data-only neighbor, LOD invalidation, curve cells, registration order, railway; real FBX portal, road widths, low clearance, span limit, terrain, construction, preview render");
+            File.WriteAllText(result, "PASS: Unity pillar placement, add/move/remove, data-only neighbor, LOD invalidation, curve cells, registration order, railway; real FBX portal, road widths, low beam, sidewalk legs, median piers, span limit, terrain, construction, preview render");
             EditorApplication.Exit(0);
         }
         catch (Exception ex)
@@ -186,26 +186,22 @@ public static class PillarQA
             var root = GenerateRoot(bridge, 421, 12);
             var pieces = root.GetComponentsInChildren<MeshFilter>();
             Check(pieces.Length == 9, "Three portals above parallel road width " + width);
-            var obstacles = Call("GetPillarObstacles", bridge);
-            foreach (var filter in pieces)
-                Check(!(bool)assembly.GetType("PillarClearance").GetMethod("Intersects").Invoke(null,
-                    new object[] { WorldBounds(filter), obstacles }), "Portal must clear every corridor");
-            var legs = pieces.Where(f => f.sharedMesh.name.Contains("pillar_leg")).ToArray();
+            var legs = CheckLegs(pieces, Call("GetPillarObstacles", bridge));
             Check(legs.Length == 6, "Two independent legs per portal");
             foreach (var leg in legs)
-            {
-                Check(Mathf.Abs(WorldBounds(leg).min.y) < .005f, "Leg contacts ground");
                 Check(Mathf.Abs(WorldBounds(leg).size.x - 1.8f) < .005f, "Leg depth is not stretched with span");
-            }
             if (width == 24) RenderPortal(root);
             UnityEngine.Object.DestroyImmediate(root);
         }
         var construction = GenerateRoot(bridge, 421, 12, true);
         Check(construction.GetComponentsInChildren<MeshFilter>().Length == 9, "Construction has the same three portals");
         UnityEngine.Object.DestroyImmediate(construction);
+        // 横梁は下の道路の通行空間を判定しないので、梁の下が低い高架でも門型を立てる。
         var low = GenerateRoot(bridge, 421, 6);
-        Check(low.GetComponentsInChildren<MeshFilter>().Length == 0, "Low beam must not obstruct vehicles");
+        var lowPieces = low.GetComponentsInChildren<MeshFilter>();
+        Check(lowPieces.Length == 9 && CheckLegs(lowPieces, Call("GetPillarObstacles", bridge)).Length == 6, "Low railway still gets portals");
         UnityEngine.Object.DestroyImmediate(low);
+        SidewalkAndMedianCases(bridge, master, masterType);
         var crossing = Path(11, new Vector3(0, 0, -100), new Vector3(0, 0, 100));
         Set(crossing, "version", 40); Call("SavePathToCache", crossing);
         var longSpan = GenerateRoot(bridge, 421, 12);
@@ -217,6 +213,50 @@ public static class PillarQA
         UnityEngine.Object.DestroyImmediate(restored);
         CheckUnevenGround(bridge);
         CheckRotatedPortals();
+    }
+
+    /// <summary>門型の柱だけを取り出し、接地と、柱を置けない帯から外れていることを確かめる。</summary>
+    static MeshFilter[] CheckLegs(MeshFilter[] pieces, object obstacles)
+    {
+        var legs = pieces.Where(f => f.sharedMesh.name.Contains("pillar_leg")).ToArray();
+        foreach (var leg in legs)
+        {
+            Check(Mathf.Abs(WorldBounds(leg).min.y) < .005f, "Leg contacts ground");
+            Check(!(bool)assembly.GetType("PillarClearance").GetMethod("Intersects").Invoke(null,
+                new object[] { WorldBounds(leg), obstacles }), "Portal legs must clear every corridor");
+        }
+        return legs;
+    }
+
+    static void SidewalkAndMedianCases(object bridge, object master, Type masterType)
+    {
+        var masters = (IDictionary)masterType.GetField("pathMasterById", Private).GetValue(master);
+        // 幅12m・歩道2.5mの道路の上では、柱は車道(中心から3.5m)を抜けた歩道に立ち、道路の外まで逃げない。
+        var street = Activator.CreateInstance(assembly.GetType("PathMasterItem"));
+        Set(street, "width", 12f); Set(street, "height", 5f); Set(street, "sidewalk_width", 2.5f);
+        masters.Add(221, street);
+        var lower = Path(11, new Vector3(-60, 0, 0), new Vector3(60, 0, 0), 221);
+        Set(lower, "path_type", 1); Set(lower, "width", 12f); Set(lower, "version", 60); Call("SavePathToCache", lower);
+        var root = GenerateRoot(bridge, 421, 12);
+        var pieces = root.GetComponentsInChildren<MeshFilter>();
+        var legs = CheckLegs(pieces, Call("GetPillarObstacles", bridge));
+        Check(pieces.Length == 9 && legs.Length == 6, "Three portals above a street with sidewalks");
+        foreach (var leg in legs)
+        {
+            float lateral = Mathf.Abs(WorldBounds(leg).center.z);
+            Check(lateral > 3.5f && lateral < 6f, "Portal leg stands on the sidewalk: " + lateral);
+        }
+        UnityEngine.Object.DestroyImmediate(root);
+        // 中央分離帯10mの道路の中心の真上では、通常の橋脚が分離帯に立つ。
+        var avenue = Activator.CreateInstance(assembly.GetType("PathMasterItem"));
+        Set(avenue, "width", 40f); Set(avenue, "height", 5f); Set(avenue, "sidewalk_width", 3f); Set(avenue, "center_width", 10f);
+        masters.Add(241, avenue);
+        lower = Path(11, new Vector3(-60, 0, 0), new Vector3(60, 0, 0), 241);
+        Set(lower, "path_type", 1); Set(lower, "width", 40f); Set(lower, "version", 61); Call("SavePathToCache", lower);
+        root = GenerateRoot(bridge, 421, 12);
+        pieces = root.GetComponentsInChildren<MeshFilter>();
+        Check(pieces.Length == 6 && !pieces.Any(f => f.sharedMesh.name.Contains("pillar_leg")), "Ordinary piers stand in a wide median");
+        UnityEngine.Object.DestroyImmediate(root);
     }
 
     static void CheckRotatedPortals()
