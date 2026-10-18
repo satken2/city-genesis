@@ -655,7 +655,7 @@ namespace GeneratedModels
         public List<float> average_wage;
         /// <summary>平均賃料の履歴</summary>
         public List<float> average_rent;
-        /// <summary>平均土地価格の履歴</summary>
+        /// <summary>地価の㎡単価（円/㎡）の履歴。民間が建てられる区画の地価の合計 ÷ 面積の合計</summary>
         public List<float> average_land_price;
         /// <summary>地区人口の履歴</summary>
         public List<float> zone_population;

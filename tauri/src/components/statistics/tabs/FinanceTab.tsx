@@ -1,3 +1,4 @@
+/** GDP・物価・中央銀行の推移を表示する金融統計タブ。 */
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,9 +11,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useEpochCachedStats } from "./useEpochCache";
-import "./CityFinancialPolicyWindow.css";
-import { useRemPx } from "../../hooks/useRemPx";
+import { useEpochCachedStats } from "../useEpochCache";
+import "./FinanceTab.css";
+import { useRemPx } from "../../../hooks/useRemPx";
 
 type FinanceStats = {
   epoch: number;
@@ -43,7 +44,7 @@ const TOOLTIP_STYLE = {
   fontSize: "1rem",
 };
 
-export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
+export function FinanceTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<FinanceStats>(
@@ -111,9 +112,8 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
   const formatPriceIndex = (v: number) => `${v.toFixed(3)} (${(v * 100).toFixed(1)}%)`;
 
   return (
-    <div className="finance-window">
-      {/* 左ペイン: サマリ */}
-      <div className="finance-window__left-pane">
+    <div className="finance-tab">
+      <div className="finance-tab__summary">
         <div className="finance-card">
           <h3 className="finance-card__title">{t("financialPolicy.summaryCard")}</h3>
           <dl className="finance-summary-list">
@@ -131,13 +131,9 @@ export function CityFinancialPolicyWindow({ apiBaseUrl }: { apiBaseUrl: string }
             </div>
           </dl>
         </div>
-
-        {/* 左下は空白 */}
-        <div className="finance-window__left-bottom-space" />
       </div>
 
-      {/* 右ペイン: 履歴グラフ */}
-      <div className="finance-window__right-pane">
+      <div className="finance-tab__history">
         {hasHistory ? (
           <div className="finance-charts-container">
             {/* GDP */}

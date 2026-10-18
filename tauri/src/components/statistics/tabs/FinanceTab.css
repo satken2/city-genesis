@@ -1,13 +1,13 @@
-.finance-window {
+.finance-tab {
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
-  background: #0f1622;
+  min-height: 36rem;
   color: #e2e8f0;
-  padding: 16px;
+  padding: 0.5rem;
   box-sizing: border-box;
-  gap: 16px;
-  overflow: hidden;
+  gap: 1rem;
 }
 
 .finance-window-loading,
@@ -26,25 +26,16 @@
   color: #ef4444;
 }
 
-/* 左ペイン */
-.finance-window__left-pane {
-  width: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.finance-tab__summary {
   flex-shrink: 0;
-}
-
-.finance-window__left-bottom-space {
-  flex-grow: 1;
 }
 
 /* カード共通 */
 .finance-card {
   background: rgba(30, 41, 59, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: 0.5rem;
+  padding: 0.875rem;
   backdrop-filter: blur(10px);
 }
 
@@ -52,30 +43,24 @@
   font-size: 1.2rem;
   font-weight: 600;
   color: #38bdf8;
-  margin: 0 0 12px 0;
+  margin: 0 0 0.75rem 0;
   border-left: 3px solid #38bdf8;
-  padding-left: 8px;
+  padding-left: 0.5rem;
 }
 
 /* サマリ表示 */
 .finance-summary-list {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
 }
 
 .finance-summary-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
-  padding-bottom: 6px;
-}
-
-.finance-summary-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
 }
 
 .finance-summary-item dt {
@@ -88,44 +73,48 @@
   font-weight: 700;
   color: #f8fafc;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
-/* 右ペイン */
-.finance-window__right-pane {
-  flex-grow: 1;
+/* グラフの最小高さはタブ全体で確保し、狭いウィンドウでは統計の共通領域をスクロールする。 */
+.finance-tab__history {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;
 }
 
 .finance-charts-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 12px;
-  height: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
 }
 
 .finance-chart-card {
   background: rgba(30, 41, 59, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
-  padding: 10px 14px;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  min-height: 0;
 }
 
 .finance-chart-card__title {
   font-size: 1.02rem;
   font-weight: 600;
   color: #94a3b8;
-  margin: 0 0 6px 0;
+  margin: 0 0 0.375rem 0;
 }
 
 .finance-chart-card__graph {
   flex-grow: 1;
   width: 100%;
-  height: 100%;
+  min-height: 0;
 }
 
 /* 空表示 */
@@ -137,5 +126,5 @@
   font-size: 1rem;
   color: #64748b;
   border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 0.5rem;
 }

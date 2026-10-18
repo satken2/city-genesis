@@ -15,6 +15,7 @@ import { WellbeingTab } from "./tabs/WellbeingTab";
 import { PopulationTab } from "./tabs/PopulationTab";
 import { IncomeTab } from "./tabs/IncomeTab";
 import { EconomyTab } from "./tabs/EconomyTab";
+import { FinanceTab } from "./tabs/FinanceTab";
 import { HealthTab } from "./tabs/HealthTab";
 import { EducationTab } from "./tabs/EducationTab";
 import { EmploymentTab } from "./tabs/EmploymentTab";
@@ -43,6 +44,7 @@ const TABS: TabDef[] = [
   { id: "health", icon: "health", labelKey: "statistics.tabHealth" },
   { id: "income", icon: "income", labelKey: "statistics.tabIncome" },
   { id: "economy", icon: "economy", labelKey: "statistics.tabEconomy" },
+  { id: "finance", icon: "income", labelKey: "statistics.tabFinance" },
   { id: "education", icon: "education", labelKey: "statistics.tabEducation" },
   { id: "employment", icon: "employment", labelKey: "statistics.tabEmployment" },
   { id: "trade", icon: "trade", labelKey: "statistics.tabTrade" },
@@ -330,6 +332,7 @@ export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {activeTab === "population" && <PopulationTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "income" && <IncomeTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "economy" && <EconomyTab apiBaseUrl={apiBaseUrl} />}
+        {activeTab === "finance" && <FinanceTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "health" && <HealthTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "education" && <EducationTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "employment" && <EmploymentTab apiBaseUrl={apiBaseUrl} />}

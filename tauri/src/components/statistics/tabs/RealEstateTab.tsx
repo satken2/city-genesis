@@ -236,7 +236,7 @@ export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           {/* 右下: 地価推移 */}
           <div className="realestate-card realestate-card--half">
             <h3 className="realestate-card__title">
-              {t("statistics.realestateLandPriceTrend", "平均地価の推移")}
+              {t("statistics.realestateLandPriceTrend", "平均地価の推移（m²あたり）")}
             </h3>
             <div className="realestate-chart-container">
               {currentScope.history.length === 0 ? (

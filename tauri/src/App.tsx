@@ -63,7 +63,6 @@ const QuestEditPanel = lazy(() => import("./components/achievement/QuestEditPane
 const CityTaxWindow = lazy(() => import("./components/tax/CityTaxWindow").then(m => ({ default: m.CityTaxWindow })));
 const CityRegulationWindow = lazy(() => import("./components/regulation/CityRegulationWindow").then(m => ({ default: m.CityRegulationWindow })));
 const CityStatisticsWindow = lazy(() => import("./components/statistics/CityStatisticsWindow").then(m => ({ default: m.CityStatisticsWindow })));
-const CityFinancialPolicyWindow = lazy(() => import("./components/statistics/CityFinancialPolicyWindow").then(m => ({ default: m.CityFinancialPolicyWindow })));
 const DisplayOptionsPanel = lazy(() => import("./components/display/DisplayOptionsPanel").then(m => ({ default: m.DisplayOptionsPanel })));
 const EpochConfirmWindow = lazy(() => import("./components/taskbar/EpochConfirmWindow").then(m => ({ default: m.EpochConfirmWindow })));
 const CityNotificationsWindow = lazy(() => import("./components/notification/CityNotificationsWindow").then(m => ({ default: m.CityNotificationsWindow })));
@@ -102,7 +101,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -584,8 +583,6 @@ function App() {
               <CityRegulationWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "city_statistics" ? (
               <CityStatisticsWindow apiBaseUrl={context.api_base_url} />
-            ) : context.window_type === "financial_policy" ? (
-              <CityFinancialPolicyWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "display_options" ? (
               <DisplayOptionsPanel apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "epoch_confirm" ? (

@@ -630,7 +630,7 @@ export type ZoneData = {
   average_wage: number[];
   /** 平均賃料の履歴 */
   average_rent: number[];
-  /** 平均土地価格の履歴 */
+  /** 地価の㎡単価（円/㎡）の履歴。民間が建てられる区画の地価の合計 ÷ 面積の合計 */
   average_land_price: number[];
   /** 地区人口の履歴 */
   zone_population: number[];

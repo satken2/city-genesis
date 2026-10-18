@@ -69,7 +69,6 @@ export const MENU_ICONS: HudIconDef[] = [
   { id: "construction_projects", src: "menu_construction.png", tooltipKey: "taskbar.menuConstructionProjects", windowType: "construction_projects" },
   { id: "regulation", src: "menu_regulation.png", tooltipKey: "taskbar.menuRegulation", windowType: "city_regulation" },
   { id: "city", src: "menu_city.png", tooltipKey: "taskbar.menuCity", windowType: "city_hall" },
-  { id: "finance", src: "menu_finance.png", tooltipKey: "taskbar.menuFinance", windowType: "financial_policy" },
   { id: "stat", src: "menu_stat.png", tooltipKey: "taskbar.menuStat", windowType: "city_statistics" },
 ];
 

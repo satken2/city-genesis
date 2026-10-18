@@ -314,17 +314,6 @@
     "empty_shell": false,
     "actions": []
   },
-  "financial_policy": {
-    "title": "金融政策",
-    "width": 1040,
-    "height": 600,
-    "width_ratio": 0.85,
-    "height_ratio": 0.8,
-    "resizable": true,
-    "policy": "single",
-    "empty_shell": false,
-    "actions": []
-  },
   "parcel_creation": {
     "title": "土地区画作成",
     "width": 460,
