@@ -163,6 +163,27 @@ public sealed class VehiclePolyline
         return result;
     }
 
+    /// <summary>管理済みの円との重複を除き、新しく表示対象になった区間だけを返す。</summary>
+    public List<Vector2> UncoveredIntervals(List<Vector2> current, Vector3 previousCenter, float previousRadius)
+    {
+        var covered = InsideIntervals(previousCenter, previousRadius);
+        var result = new List<Vector2>();
+        foreach (var interval in current)
+        {
+            float start = interval.x;
+            foreach (var old in covered)
+            {
+                if (old.y <= start) continue;
+                if (old.x >= interval.y) break;
+                if (old.x > start) result.Add(new Vector2(start, old.x));
+                start = Mathf.Max(start, old.y);
+                if (start >= interval.y) break;
+            }
+            if (start < interval.y) result.Add(new Vector2(start, interval.y));
+        }
+        return result;
+    }
+
     public static VehiclePolyline Connector(Vector3 p0, Vector3 t0, Vector3 p1, Vector3 t1, float tension)
     {
         float d = Vector3.Distance(p0, p1) * Mathf.Clamp(tension, .1f, .6f);
@@ -174,6 +195,46 @@ public sealed class VehiclePolyline
         }
         return new VehiclePolyline(points);
     }
+}
+
+/// <summary>
+/// 新規に管理する区間の定常密度。道路ごとの端数を切り上げず、全体の人数枠の中で不足分を抽選する。
+/// カメラ移動による初期配置と、入口・境界からの通常の流入を分けるために使う。
+/// </summary>
+public sealed class TrafficPopulationSeed
+{
+    private readonly List<Vector2> intervals;
+    private readonly float length;
+    private float remaining;
+    public float Weight => Mathf.Max(0, remaining);
+
+    public TrafficPopulationSeed(List<Vector2> intervals, float density)
+    {
+        this.intervals = intervals;
+        foreach (var interval in intervals) length += interval.y - interval.x;
+        remaining = length * density;
+    }
+
+    public void Observe(float s)
+    {
+        foreach (var interval in intervals)
+            if (s >= interval.x && s <= interval.y) { remaining--; break; }
+    }
+
+    public float Sample()
+    {
+        float pick = UnityEngine.Random.value * length;
+        foreach (var interval in intervals)
+        {
+            float size = interval.y - interval.x;
+            if (pick <= size) return interval.x + pick;
+            pick -= size;
+        }
+        return intervals[intervals.Count - 1].y;
+    }
+
+    public void Consume() => remaining--;
+    public void Skip() => remaining = 0;
 }
 
 /// <summary>

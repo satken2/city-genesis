@@ -4,10 +4,12 @@
  * 公共サービス（products_master の public_service が真の製品）ごとのタブ構成。
  *
  * 各タブの中身は左右2分割。
- * - 左: 公共サービスの価格統制カード。価格方式（固定価格 / 原価比率）の切替・設定値
- *       （固定価格または原価への乗率）の入力・製造原価と、実績・需要見込み・現在の施設容量のグラフを表示する。
- *       市場変動は無く、必ず固定価格か原価比率のいずれかで統制される。
- * - 右: その公共サービスと関連する高圧財を供給する施設の一覧テーブル。
+ * - 左上: 公共サービスの価格統制カード。価格方式（固定価格 / 原価比率）の切替・設定値
+ *         （固定価格または原価への乗率）の入力・製造原価と、実績・需要見込み・現在の施設容量のグラフを表示する。
+ *         市場変動は無く、必ず固定価格か原価比率のいずれかで統制される。
+ * - 左下: その公共サービスと関連する高圧財を供給する施設の一覧テーブル。
+ * - 右: 都市マップのインフラ表示と同じ地図。タブの財の供給施設に業務逼迫度の円グラフを置き、効果範囲を持つ財は
+ *       範囲と建物の塗り分けを、供給施設がインフラ財を受け取る財(電力・水道)はその網も重ねる。
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -24,6 +26,9 @@ import type {
   PublicServiceSupplyData,
 } from "../../types";
 import { useEpochCachedStats } from "../statistics/useEpochCache";
+import { CityMapCanvas, type CityMapLayerVisibility } from "../map/CityMapCanvas";
+import { useInfraProducts, type InfraSelection } from "../map/infraOverlay";
+import { InfraMapLegend } from "../map/InfraMapLegend";
 import { PublicServiceTrendChart } from "./PublicServiceTrendChart";
 import type { PublicServiceHistoryData, PublicServiceProductHistory } from "./publicServiceTrend";
 import { getPublicServiceFacilities, getPublicServiceInfrastructure } from "./publicServiceInfrastructure";
@@ -230,6 +235,24 @@ function ServicePriceCard({
   );
 }
 
+/**
+ * 地図の下敷き。標高色分け・線路・駅とラベルは出さない。ラベルは施設の円グラフと重なって読みにくくなるため。
+ */
+const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
+  elevation: false,
+  coastline: true,
+  trunkRoads: true,
+  allRoads: true,
+  railways: false,
+  buildings: true,
+  stations: false,
+  parcels: false,
+  contours: false,
+  grid: false,
+  zoneBorders: false,
+  labels: false,
+};
+
 export function PublicFacilitiesWindow({
   apiBaseUrl,
 }: {
@@ -238,6 +261,7 @@ export function PublicFacilitiesWindow({
   const { t } = useTranslation();
   const masterData = useMasterData();
   const marketHistory = useEpochCachedStats<PublicServiceHistoryData>(apiBaseUrl, "/api/v1/stats/market_price");
+  const infraProducts = useInfraProducts(apiBaseUrl);
   const [simulationDays, setSimulationDays] = useState(30);
 
   const [activeTab, setActiveTab] = useState<string | null>(null);
@@ -411,6 +435,16 @@ export function PublicFacilitiesWindow({
   } : undefined;
   const columns = useMemo(() => buildColumns(t, activeProduct?.unit ?? ""), [t, activeProduct?.unit]);
 
+  const coverageOption = activeProduct
+    ? infraProducts.find((p) => p.kind === "coverage" && p.productId === activeProduct.id)
+    : undefined;
+  const feedProductId = coverageOption?.feedProductId ?? null;
+  const mapSelection = useMemo<InfraSelection | null>(
+    () => (activeProduct ? { network: feedProductId, coverage: activeProduct.id } : null),
+    [activeProduct, feedProductId],
+  );
+  const hasCoverage = coverageOption !== undefined;
+
   if (loading || marketHistory.loading) {
     return <div className="pf-window__loading">{t("common.loading")}</div>;
   }
@@ -441,34 +475,52 @@ export function PublicFacilitiesWindow({
       </nav>
 
       <div className="pf-window__content">
-        {activeProduct && (
-          <div className="pf-window__service">
-            <ServicePriceCard
-              product={activeProduct}
-              row={servicePrices[activeProduct.id]}
-              supply={serviceSupplies[activeProduct.id]}
-              infrastructureCapacity={infrastructureCapacity}
-              capacityLabel={infrastructure ? t(`publicServiceTrend.${infrastructure.capacityLabel}`) : undefined}
-              epochs={marketHistory.data?.epochs ?? []}
-              history={marketHistory.data?.products.find((row) => row.product_id === activeProduct.id)}
-              currentEpoch={marketHistory.data?.epoch ?? 0}
-              simulationDays={simulationDays}
-              draft={valueDrafts[activeProduct.id]}
-              onDraftChange={(value) =>
-                setValueDrafts((prev) => ({ ...prev, [activeProduct.id]: value }))
-              }
-              onModeChange={(mode) => handleModeChange(activeProduct.id, mode)}
-              onCommit={() => handleValueCommit(activeProduct.id)}
+        <div className="pf-window__left">
+          {activeProduct && (
+            <div className="pf-window__service">
+              <ServicePriceCard
+                product={activeProduct}
+                row={servicePrices[activeProduct.id]}
+                supply={serviceSupplies[activeProduct.id]}
+                infrastructureCapacity={infrastructureCapacity}
+                capacityLabel={infrastructure ? t(`publicServiceTrend.${infrastructure.capacityLabel}`) : undefined}
+                epochs={marketHistory.data?.epochs ?? []}
+                history={marketHistory.data?.products.find((row) => row.product_id === activeProduct.id)}
+                currentEpoch={marketHistory.data?.epoch ?? 0}
+                simulationDays={simulationDays}
+                draft={valueDrafts[activeProduct.id]}
+                onDraftChange={(value) =>
+                  setValueDrafts((prev) => ({ ...prev, [activeProduct.id]: value }))
+                }
+                onModeChange={(mode) => handleModeChange(activeProduct.id, mode)}
+                onCommit={() => handleValueCommit(activeProduct.id)}
+              />
+            </div>
+          )}
+
+          <div className="pf-window__facilities">
+            <SortableAgentTable
+              columns={columns}
+              rows={activeFacilities}
+              emptyText={t("budget.noFacilities")}
             />
           </div>
-        )}
+        </div>
 
-        <div className="pf-window__facilities">
-          <SortableAgentTable
-            columns={columns}
-            rows={activeFacilities}
-            emptyText={t("budget.noFacilities")}
-          />
+        <div className="pf-window__map-column">
+          <div className="pf-window__map">
+            <CityMapCanvas
+              apiBaseUrl={apiBaseUrl}
+              interactive
+              layers={MAP_LAYERS}
+              infraSelection={mapSelection}
+            />
+          </div>
+          {hasCoverage && mapSelection && (
+            <div className="pf-window__legend">
+              <InfraMapLegend selection={mapSelection} />
+            </div>
+          )}
         </div>
       </div>
     </div>

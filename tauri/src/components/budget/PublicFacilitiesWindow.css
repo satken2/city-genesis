@@ -2,7 +2,7 @@
  * 公共サービスウィンドウのスタイル
  *
  * 暗色テーマを前提とした配色。
- * タブの左側に料金と需給、右側に供給施設の一覧を並べる。
+ * タブの左列は上に料金と需給を中身の高さだけ詰め、残りの高さを供給施設の一覧に充てる。右列は地図と凡例。
  */
 
 .pf-window {
@@ -23,16 +23,46 @@
   gap: 0.75rem;
 }
 
-.pf-window__service,
-.pf-window__facilities {
+.pf-window__left,
+.pf-window__map-column {
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+  gap: 0.75rem;
 }
 
 .pf-window__service {
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  min-width: 0;
+}
+
+.pf-window__facilities {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* CityMapCanvas は親のサイズに追従するため、残りの高さを地図に充てて大きさを確定させる */
+.pf-window__map {
+  flex: 1;
+  min-height: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 凡例(InfraMapLegend)。文字の大きさと色はここで決める。網と効果範囲を重ねる財では2段になる */
+.pf-window__legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 1rem;
+  color: #8ba3bb;
 }
 
 .pf-window__facilities .agent-table thead th,
@@ -99,7 +129,6 @@
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(15, 23, 42, 0.35);
-  flex: 1;
 }
 
 .psp-card__fields {
@@ -192,7 +221,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  flex: 1;
 }
 
 .psp-trend__header,
@@ -251,8 +279,7 @@
 }
 
 .psp-trend__chart {
-  flex: 1;
-  min-height: 14rem;
+  height: 14rem;
   min-width: 0;
 }
 
@@ -263,13 +290,14 @@
     overflow: auto;
   }
 
-  .pf-window__service,
+  .pf-window__left,
+  .pf-window__map-column,
   .pf-window__facilities {
     flex: 0 0 auto;
   }
 
-  .psp-trend__chart {
+  .pf-window__map {
     flex: none;
-    height: 18rem;
+    height: 24rem;
   }
 }

@@ -214,7 +214,6 @@
     "tier2Legend": "Tier 2 (一般財まで)",
     "tier3Legend": "Tier 3 (高級品まで)",
     "tabRealEstate": "不動産",
-    "tabInfrastructure": "インフラ網",
     "tabTourism": "観光",
     "tourism": {
       "title": "観光統計",
@@ -265,25 +264,6 @@
       "consumptionTitle": "観光消費(今期の調達)",
       "noTourists": "滞在中の観光客がいません",
       "noData": "観光の記録がありません"
-    },
-    "infrastructure": {
-      "title": "インフラ網",
-      "production": "生産量",
-      "delivered": "配送量",
-      "demand": "需要量",
-      "fulfillment": "充足率",
-      "producers": "生産施設",
-      "consumers": "消費施設",
-      "facilities": "インフラ施設",
-      "noFacilities": "インフラ施設はありません",
-      "activeSuppliers": "稼働中の施設",
-      "coveredBuildings": "範囲内の建物",
-      "uncoveredBuildings": "範囲外の建物",
-      "coveredRate": "範囲内の割合",
-      "suppliers": "供給施設",
-      "supplierActive": "稼働中",
-      "supplierInactive": "稼働していない",
-      "noData": "インフラ財のデータがありません"
     },
     "realestateTitle": "不動産統計",
     "realestateRentTrend": "平均賃料の推移",

@@ -62,13 +62,12 @@
  *   表示用LODはエポック中に生成され、ズームに合う画像だけを取得・色付けする。
  *   heatmapMode="sources"では騒音・汚染の発生源を建物・道路の色で示す。
  *
- * インフラ表示(infraSelection propで網と効果範囲の財を1つずつ選ぶ):
- *   網はインフラ財の利用率と流れ(アニメーション用の第2キャンバスに描く)、効果範囲はサービス財の
- *   稼働中の施設の範囲の塗り・施設ごとの輪郭・建物の範囲内/範囲外の塗り分けを描き、施設には稼働率の円グラフを
- *   1つずつ置く。取得と描画は
- *   infraOverlay.ts。建物の塗り分けは建物レイヤーに従い、発生源表示と同じく縮尺によらず形状を出す。
+ * インフラ表示(infraSelection propで網と供給施設の財を1つずつ選ぶ):
+ *   網はインフラ財の利用率と流れ(アニメーション用の第2キャンバスに描く)、coverage は財の供給施設と、
+ *   範囲を持つ施設の稼働中の範囲の塗り・施設ごとの輪郭・建物の範囲内/範囲外の塗り分けを描き、施設には
+ *   業務逼迫度の円グラフを1つずつ置く。取得と描画は
+ *   infraOverlay.ts。建物の塗り分けは、通常の建物と同じレイヤー・縮尺の表示条件に従う。
  *   ヒートマップと同じく地図を塗る表示なので、呼び出し側はヒートマップと同時に選ばせない。
- *   取得したデータは onInfraLoaded で通知する(統計タブのサマリーなどに使う)。
  *
  * 地区の値塗り(zoneFill propで地区ごとの値を渡す):
  *   満足度などの地区単位の指標を地区ポリゴンの塗り分けで表現する。塗りは地区枠線より
@@ -121,7 +120,7 @@ import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
 import {
   buildCoverageRender, buildNetworkRender, drawCoverageFill, drawCoverageOutlines, drawNetwork,
   COVERAGE_IN_RANGE_COLOR, COVERAGE_OUT_OF_RANGE_COLOR,
-  type CityMapInfraData, type InfraCoverageRender, type InfraNetworkRender, type InfraSelection,
+  type InfraCoverageRender, type InfraNetworkRender, type InfraSelection,
   type InfrastructureStats, type ServiceCoverageData,
 } from "./infraOverlay";
 import { interchangeDisplayName } from "../intersection/interchangeName";
@@ -310,12 +309,10 @@ export type CityMapCanvasProps = {
    */
   zoneFill?: CityMapZoneFill;
   /**
-   * インフラ表示する財(省略・nullで非表示)。network のインフラ財の網と、coverage のサービス財の
-   * 効果範囲・建物の塗り分けを重ねて描く。ヒートマップとは同時に使わない。
+   * インフラ表示する財(省略・nullで非表示)。network のインフラ財の網と、coverage の財の
+   * 供給施設・効果範囲・建物の塗り分けを重ねて描く。ヒートマップとは同時に使わない。
    */
   infraSelection?: InfraSelection | null;
-  /** インフラ表示のデータの取得完了通知。非表示・取得失敗では null が渡る */
-  onInfraLoaded?: (data: CityMapInfraData | null) => void;
   /** 初期表示範囲(ワールド座標)。省略時はマップ全体にフィットする */
   initialBounds?: CityMapBounds;
   /** マウス・タッチによるパン・ズーム操作を許可するか(埋め込みプレビューではfalse推奨) */
@@ -1276,7 +1273,6 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       onVectorsLoaded,
       zoneFill,
       infraSelection = null,
-      onInfraLoaded,
       className,
     },
     ref
@@ -1307,7 +1303,6 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const heatmapStatsCbRef = useRef<CityMapCanvasProps["onHeatmapStats"]>(onHeatmapStats);
     const vectorsCbRef = useRef<CityMapCanvasProps["onVectorsLoaded"]>(onVectorsLoaded);
     const infraSelectionRef = useRef<InfraSelection | null>(infraSelection);
-    const infraCbRef = useRef<CityMapCanvasProps["onInfraLoaded"]>(onInfraLoaded);
     const masterDataRef = useRef<MasterData | null>(masterData);
     // インターチェンジの未命名時の表示名は描画時に翻訳するため、言語切替にも追従させる
     const { t } = useTranslation();
@@ -1320,7 +1315,6 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     zoomCbRef.current = onZoomChange;
     heatmapStatsCbRef.current = onHeatmapStats;
     vectorsCbRef.current = onVectorsLoaded;
-    infraCbRef.current = onInfraLoaded;
 
     // 描画エンジンの操作関数。初期化effect内で構築し、他のeffect(レイヤー変更等)や
     // useImperativeHandleから呼び出す。
@@ -1640,7 +1634,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const px = (w: number) => w / z; // 画面ピクセル単位の線幅をワールド単位へ
         // 細部の形状は読み取れる縮尺でだけ描く。施設記号・名前は別のズーム基準で表示する。
         const showMinorRoads = L.allRoads && (z > 0.3 || heat.mode === "sources");
-        const showBuildingShapes = L.buildings && (z > 0.7 || heat.mode === "sources" || infra.coverage !== null);
+        const showBuildingShapes = L.buildings && (z > 0.7 || heat.mode === "sources");
         const showParcels = L.parcels && z > 1;
 
         // 都市外の陸地。都市の矩形を1px縮めた外側に塗り、境界の画素を都市の陸地の下に潜らせて
@@ -2221,7 +2215,6 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         infra.network = null;
         infra.coverage = null;
         rebuildPathClassification();
-        infraCbRef.current?.(null);
         draw();
         // 網を外すとrAFループは止まり、その停止時の最終フレームはまだ網が残った状態で描かれるので、ここで消す
         drawAnimatedFrame(0);
@@ -2239,7 +2232,6 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           infra.network = product ? buildNetworkRender(product, simulationDays) : null;
           infra.coverage = coverage ? buildCoverageRender(coverage, product) : null;
           rebuildPathClassification();
-          infraCbRef.current?.({ network: product ? { product, simulationDays } : null, coverage });
           draw();
         } catch (err) {
           if (infra.generation === generation) infra.requestKey = "";

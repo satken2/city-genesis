@@ -38,6 +38,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
 
     private readonly List<Pedestrian> active = new List<Pedestrian>();
     private readonly Dictionary<int, Walk> walks = new Dictionary<int, Walk>();
+    private readonly Dictionary<int, Walk> populatedWalks = new Dictionary<int, Walk>();
     private readonly List<Bucket> buckets = new List<Bucket>();
     private readonly Dictionary<int, Bucket> bucketByPath = new Dictionary<int, Bucket>();
     private readonly List<(Walk walk, bool forward, float weight)> candidates = new List<(Walk, bool, float)>();
@@ -45,7 +46,9 @@ public sealed partial class PedestrianManager : MonoBehaviour
     private ParcelManager parcelManager;
     private BuildingManager buildingManager;
     private Coroutine accessWorker, walkWorker;
-    private bool initialFill = true, pendingInitialFill;
+    private bool seeding;
+    private int seedRemaining;
+    private float seedRemainder;
     private int accessSignature, accessGeneration;
     private bool accessReady, exitPossible;
     private Dictionary<int, List<Entrance>> entrances = new Dictionary<int, List<Entrance>>();
@@ -81,6 +84,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
         public Walk walk;
         public int count, pending;
         public float target, average;
+        public TrafficPopulationSeed seed;
     }
     private sealed class Entrance
     {
@@ -163,11 +167,11 @@ public sealed partial class PedestrianManager : MonoBehaviour
     {
         if (FollowedPedestrian != null) EndFollowRun();
         active.Clear();
-        walks.Clear(); buckets.Clear(); bucketByPath.Clear();
-        population.Reset(); scanTimer = 0; densityTimer = 0;
+        walks.Clear(); populatedWalks.Clear(); buckets.Clear(); bucketByPath.Clear();
+        population.Reset(); scanTimer = 0; densityTimer = 0; seedRemaining = 0; seedRemainder = 0;
         RenderWorkScheduler.Stop(this, walkWorker); walkWorker = null;
         RenderWorkScheduler.Stop(this, accessWorker); accessWorker = null;
-        entrances.Clear(); accessCache.Clear(); initialFill = true; pendingInitialFill = false; accessReady = false; accessGeneration++;
+        entrances.Clear(); accessCache.Clear(); seeding = false; accessReady = false; accessGeneration++;
     }
 
     /// <summary>
@@ -180,7 +184,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
         RenderWorkScheduler.Stop(this, accessWorker); accessWorker = null;
         buckets.Clear(); bucketByPath.Clear();
         scanTimer = 0;
-        pendingInitialFill = true;
+        seeding = false;
     }
 
     /// <summary>
@@ -324,8 +328,54 @@ public sealed partial class PedestrianManager : MonoBehaviour
             if (p.road != walk.line) { p.s = walk.line.RemapFrom(p.road, p.s); p.road = walk.line; }
             PlaceOnBand(p, walk, false);
         }
-        // 新しい区域の目標人数が決まってから初期充填へ戻す。先に戻すと古い目標で即座に打ち切られる。
-        if (pendingInitialFill) { initialFill = true; pendingInitialFill = false; }
+        // 一時停止中でも円外の個体を除き、新しい区域の人数枠を空ける。
+        float radius = Mathf.Max(1, renderRadius + despawnMargin);
+        for (int i = active.Count - 1; i >= 0; i--)
+        {
+            var p = active[i];
+            p.Sample(out var position, out _);
+            if (p != FollowedPedestrian && Utils.XZDistanceSquared(position, center) > radius * radius) Despawn(i);
+        }
+        PrepareSeeds();
+        FillNewCoverage();
+    }
+
+    private void PrepareSeeds()
+    {
+        foreach (var b in buckets)
+        {
+            var walk = b.walk;
+            var intervals = populatedWalks.TryGetValue(walk.data.path_id, out var old) && Traffic(old.data) > 0
+                ? walk.line.UncoveredIntervals(walk.intervals, old.scanCenter, old.scanRadius) : walk.intervals;
+            b.seed = new TrafficPopulationSeed(intervals, b.target / walk.insideLength);
+            b.count = 0;
+        }
+        foreach (var p in active)
+            if (bucketByPath.TryGetValue(p.pathId, out var b))
+            {
+                b.count++;
+                if (!p.InConnector) b.seed.Observe(p.s);
+            }
+        float expected = seedRemainder;
+        foreach (var b in buckets) expected += b.seed.Weight;
+        seedRemaining = Mathf.FloorToInt(expected + .00001f);
+        seedRemainder = Mathf.Max(0, expected - seedRemaining);
+        seeding = true;
+    }
+
+    // 歩行者は描画用GameObjectを持たないので、新しい区間の密度を走査の確定時に満たせる。
+    private void FillNewCoverage()
+    {
+        while (seedRemaining > 0 && active.Count < maxActivePedestrians)
+        {
+            var b = PickBucket(true);
+            if (b == null) break;
+            Spawn(b);
+            seedRemaining--; b.count++; b.seed.Consume(); b.average = b.count;
+        }
+        populatedWalks.Clear();
+        foreach (var entry in walks) populatedWalks.Add(entry.Key, entry.Value);
+        seeding = false;
     }
 
     // 周辺道路だけを走査し、区画・建物・中心線の版が変わった入口だけ再計算する。
@@ -427,7 +477,6 @@ public sealed partial class PedestrianManager : MonoBehaviour
             // 総数が合っていても偏った道路の歩行者を到着させ、不足道路へ再配置する。
             ReserveArrival(true);
         }
-        if (population.Desired > 0 && active.Count >= population.Desired) initialFill = false;
         int missing = population.Desired - active.Count;
         int fill = Mathf.Min(missing, Mathf.Max(1, Mathf.CeilToInt(missing * (1 - Mathf.Exp(-Mathf.Max(0, spawnFillRate) * dt)))));
         for (int i = 0; i < fill; i++)
@@ -440,16 +489,18 @@ public sealed partial class PedestrianManager : MonoBehaviour
         }
     }
 
-    private Bucket PickSpawnBucket()
+    private Bucket PickSpawnBucket() => PickBucket(false);
+
+    private Bucket PickBucket(bool seed)
     {
         float sum = 0;
-        foreach (var b in buckets) sum += SpawnWeight(b);
+        foreach (var b in buckets) sum += seed ? b.seed.Weight : SpawnWeight(b);
         if (sum <= 0) return null;
         float pick = Random.value * sum;
         Bucket last = null;
         foreach (var b in buckets)
         {
-            float weight = SpawnWeight(b);
+            float weight = seed ? b.seed.Weight : SpawnWeight(b);
             if (weight <= 0) continue;
             last = b; pick -= weight;
             if (pick <= 0) return b;
@@ -458,7 +509,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
     }
 
     private float SpawnWeight(Bucket b)
-        => b.target <= 0 || (!initialFill && !HasSpawnPointCached(b.walk)) ? 0
+        => b.target <= 0 || !HasSpawnPointCached(b.walk) ? 0
             : Mathf.Max(0, b.target - b.count) + Mathf.Max(0, b.target - b.average);
 
     // entrances の交換は必ず accessGeneration を進め、intervals は Walk 生成時にしか決まらないので、世代比較で無効化できる。
@@ -511,15 +562,10 @@ public sealed partial class PedestrianManager : MonoBehaviour
     {
         var walk = b.walk;
         bool forward = Random.value < .5f;
-        float pick = Random.value * walk.insideLength, s = walk.intervals[0].x;
-        foreach (var interval in walk.intervals)
-        {
-            s = interval.x + Mathf.Min(pick, interval.y - interval.x);
-            pick -= interval.y - interval.x;
-            if (pick <= 0) break;
-        }
+        float s;
         Entrance origin = null;
-        if (!initialFill)
+        if (seeding) s = b.seed.Sample();
+        else
         {
             // 初期配置後の補充は建物入口か、管理円へ入ってくる境界付近に限る(道路の途中で湧かせない)。
             var options = new List<(float s, bool forward, Entrance entry)>();
@@ -539,6 +585,8 @@ public sealed partial class PedestrianManager : MonoBehaviour
             variant = Random.Range(0, MaxModelVariants),
             speed = Mathf.Max(.1f, walkSpeed * (1 + Random.Range(-walkSpeedJitter, walkSpeedJitter))),
             walked = Random.value * stepLength * 2,
+            age = seeding ? fadeDuration : 0,
+            moving = seeding,
         };
         p.SetPath(walk.data.path_id, walk.line, forward, s);
         PlaceOnBand(p, walk, true);

@@ -214,7 +214,6 @@
     "tier2Legend": "Nivel 2 (hasta bienes generales)",
     "tier3Legend": "Nivel 3 (hasta bienes de lujo)",
     "tabRealEstate": "Inmuebles",
-    "tabInfrastructure": "Red de infraestructura",
     "tabTourism": "Turismo",
     "tourism": {
       "title": "Estadísticas de turismo",
@@ -265,25 +264,6 @@
       "consumptionTitle": "Gasto turístico (esta época)",
       "noTourists": "No hay turistas alojados",
       "noData": "Aún no hay registros de turismo"
-    },
-    "infrastructure": {
-      "title": "Red de infraestructura",
-      "production": "Producción",
-      "delivered": "Volumen entregado",
-      "demand": "Demanda",
-      "fulfillment": "Cobertura",
-      "producers": "Instalaciones productoras",
-      "consumers": "Instalaciones consumidoras",
-      "facilities": "Instalaciones de infraestructura",
-      "noFacilities": "No hay instalaciones de infraestructura",
-      "activeSuppliers": "Instalaciones en funcionamiento",
-      "coveredBuildings": "Edificios dentro del área",
-      "uncoveredBuildings": "Edificios fuera del área",
-      "coveredRate": "Proporción dentro del área",
-      "suppliers": "Instalaciones de suministro",
-      "supplierActive": "En funcionamiento",
-      "supplierInactive": "Sin funcionar",
-      "noData": "No hay datos de bienes de infraestructura"
     },
     "realestateTitle": "Estadísticas inmobiliarias",
     "realestateRentTrend": "Evolución del alquiler promedio",

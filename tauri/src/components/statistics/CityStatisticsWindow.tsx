@@ -24,7 +24,6 @@ import { AccidentsTab } from "./tabs/AccidentsTab";
 import { BusinessTab } from "./tabs/BusinessTab";
 import { CommuteTab } from "./tabs/CommuteTab";
 import { RealEstateTab } from "./tabs/RealEstateTab";
-import { InfrastructureTab } from "./tabs/InfrastructureTab";
 import { TourismTab } from "./tabs/TourismTab";
 import { DebugAgentSpawnTab } from "./tabs/DebugAgentSpawnTab";
 import { DebugBuildingSpawnTab } from "./tabs/DebugBuildingSpawnTab";
@@ -52,7 +51,6 @@ const TABS: TabDef[] = [
   { id: "business", icon: "business", labelKey: "statistics.tabBusiness" },
   { id: "commute", icon: "commute", labelKey: "statistics.tabCommute" },
   { id: "realestate", icon: "realestate", labelKey: "statistics.tabRealEstate" },
-  { id: "infrastructure", icon: "infrastructure", labelKey: "statistics.tabInfrastructure" },
   { id: "tourism", icon: "tourism", labelKey: "statistics.tabTourism" },
 ];
 
@@ -231,14 +229,6 @@ function TabIcon({ icon, className }: { icon: string; className?: string }) {
       </svg>
     );
   }
-  if (icon === "infrastructure") {
-    // 送電を想起させる稲妻アイコン(インフラ網タブ)
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
-    );
-  }
   if (icon === "tourism") {
     // 観光タブ: 旅行かばんのアイコン
     return (
@@ -341,7 +331,6 @@ export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {activeTab === "business" && <BusinessTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "commute" && <CommuteTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "realestate" && <RealEstateTab apiBaseUrl={apiBaseUrl} />}
-        {activeTab === "infrastructure" && <InfrastructureTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "tourism" && <TourismTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "debugAgentSpawn" && debugEnabled && <DebugAgentSpawnTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "debugBuildingSpawn" && debugEnabled && <DebugBuildingSpawnTab apiBaseUrl={apiBaseUrl} />}

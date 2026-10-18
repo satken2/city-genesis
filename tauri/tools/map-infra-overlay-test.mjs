@@ -46,11 +46,11 @@ const square = (x, z, h) => [[x - h, z - h], [x - h, z + h], [x + h, z + h], [x 
 const coverageData = {
   product_id: 306,
   suppliers: [
-    { agent_id: 1, name: "a", variant: 1058, status: 1, center_point: [0, 0],
+    { agent_id: 1, name: "a", variant: 1058, status: 1, utilization: 1, load: 0.2, center_point: [0, 0],
       region: { type: "polygon", polygons: [{ exterior: square(0, 0, 100), holes: [[...square(0, 0, 20)].reverse()] }] } },
-    { agent_id: 2, name: "b", variant: 1058, status: 1, center_point: [150, 0],
+    { agent_id: 2, name: "b", variant: 1058, status: 1, utilization: 1, load: 0.5, center_point: [150, 0],
       region: { type: "circle", center: [150, 0], radius: 80 } },
-    { agent_id: 3, name: "c", variant: 1058, status: 4, center_point: [-300, 0],
+    { agent_id: 3, name: "c", variant: 1058, status: 4, utilization: 0, load: 0, center_point: [-300, 0],
       region: { type: "circle", center: [-300, 0], radius: 80 } },
   ],
   covered_building_ids: [10, 11],
@@ -66,11 +66,23 @@ assert.deepEqual([...render.covered], [10, 11]);
 assert.deepEqual([...render.uncovered], [12]);
 console.log("PASS: coverage fill winding (union with holes), active/inactive outlines, building sets");
 
-// 稼働率の円グラフは施設ごとに1つ。一緒に描く網に出る施設は網の記号の下に描くので、効果範囲の側には置かない。
+// 業務逼迫度の円グラフは施設ごとに1つ。一緒に描く網に出る施設は網の記号の下に描くので、効果範囲の側には置かない。
 assert.deepEqual(render.pies.map((p) => p.x), [0, 150, -300], "網が無ければ全施設の中心に置く");
+assert.deepEqual(render.pies.map((p) => p.load), [0.2, 0.5, 0], "円グラフは稼働率ではなく業務逼迫度");
 const withNetwork = buildCoverageRender(coverageData, { producers: [], consumers: [{ agent_id: 2 }] });
 assert.deepEqual(withNetwork.pies.map((p) => p.x), [0, -300], "網にも出る施設は効果範囲の側で描かない");
-console.log("PASS: one utilization pie per facility (network markers take the facilities they show)");
+console.log("PASS: one load pie per facility (network markers take the facilities they show)");
+
+// 効果範囲を持たない財(消防など)は施設の円グラフだけを置き、範囲の塗りと輪郭は描かない。
+const locationsOnly = buildCoverageRender({
+  product_id: 125,
+  suppliers: [{ agent_id: 4, name: "d", variant: 1052, status: 1, utilization: 1, load: 0.1, center_point: [40, 60], region: null }],
+  covered_building_ids: [],
+  uncovered_building_ids: [],
+});
+assert.equal(locationsOnly.fill.subpaths.length + locationsOnly.activeOutline.subpaths.length + locationsOnly.inactiveOutline.subpaths.length, 0);
+assert.deepEqual(JSON.parse(JSON.stringify(locationsOnly.pies)), [{ x: 40, z: 60, load: 0.1 }]);
+console.log("PASS: suppliers without an effect range are drawn as pies only");
 
 // 供給施設がインフラ財を受け取るサービス財は網と組にし、組になったインフラ財は単独の選択肢から外す。
 const options = pairWithFeedNetwork([

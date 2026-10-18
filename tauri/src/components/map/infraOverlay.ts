@@ -5,10 +5,12 @@
  * - 網(インフラ財 GOODS_INFRASTRUCTURE): GET /api/v1/stats/infrastructure の網。パスを流量/容量の利用率で
  *   色分けし(太さは容量)、流量のあるパスには流れの向きへ動く縞を重ね、生産施設(丸)・消費施設(菱形)を置く。
  *   未接続の施設は赤で描く。
- * - 効果範囲(効果範囲を持つサービス財): GET /api/v1/buildings/service-coverage/{product_id}。稼働中の施設の範囲を
- *   重なりで濃くならないよう和集合で薄く塗り、施設ごとの輪郭を描く(稼働していない施設は破線)。
- *   建物は範囲内・範囲外で塗り分ける(建物の描画に組み込むため CityMapCanvas が行う)。
- * - 施設の稼働率は円グラフで示し、施設ごとに1つだけ置く。網の施設は記号の下、網に出ない効果範囲の施設は施設の中心。
+ * - 供給施設と効果範囲: GET /api/v1/buildings/service-coverage/{product_id}。財を供給する施設を置き、範囲を持つ施設は
+ *   稼働中の施設の範囲を重なりで濃くならないよう和集合で薄く塗り、施設ごとの輪郭を描く(稼働していない施設は破線)。
+ *   建物は範囲内・範囲外で塗り分ける(建物の描画に組み込むため CityMapCanvas が行う)。範囲を持たない財(消防など)は施設だけ。
+ * - 施設の業務逼迫度(販売量 ÷ 生産能力)は円グラフで示し、施設ごとに1つだけ置く。網の施設は記号の下、網に出ない施設は施設の中心。
+ *   稼働率(生産量 ÷ 生産能力)ではないのは、需要と無関係に能力いっぱい待機生産する施設(消防署・定量方式の発電所など)が
+ *   常に満杯に見え、施設の種類によって色の意味が変わってしまうため。
  *
  * 描画関数の ctx にはワールド座標系のビュー変換(Y反転込み)が適用済みとする。
  * 画面上で一定の太さ・大きさにしたいものは /view.zoom でスケールする。
@@ -36,6 +38,8 @@ export type InfraProducerItem = {
   shipped: number;
   /** 当エポックの稼働率(0〜1) */
   utilization: number;
+  /** 当エポックの業務逼迫度(出荷量 ÷ 生産能力。0〜1) */
+  load: number;
   connected: boolean;
 };
 
@@ -49,6 +53,8 @@ export type InfraConsumerItem = {
   received: number;
   /** 当エポックの稼働率(0〜1) */
   utilization: number;
+  /** 当エポックの業務逼迫度(自身が供給する財の販売量 ÷ 生産能力。0〜1) */
+  load: number;
   connected: boolean;
 };
 
@@ -100,26 +106,29 @@ const CAPACITY_REF_PX = 5;
 const WIDTH_MIN_PX = 3;
 const WIDTH_MAX_PX = 12;
 
-/* 施設の稼働率の円グラフ(画面px)。網の施設では記号の下に間を空けて置く。 */
+/* 施設の業務逼迫度の円グラフ(画面px)。網の施設では記号の下に間を空けて置く。 */
 const PIE_RADIUS_PX = 10;
 const PIE_GAP_PX = 3;
 
-/** 施設の稼働率の円グラフの色。90%を超えると赤、70%を超えるとオレンジ、それ以下は緑。 */
-function facilityUtilizationColor(rate: number): string {
+/** 施設の業務逼迫度の円グラフの色。90%を超えると赤、70%を超えるとオレンジ、それ以下は緑。 */
+function facilityLoadColor(rate: number): string {
   return rate > 0.9 ? "#ef4444" : rate > 0.7 ? "#f97316" : "#22c55e";
 }
 
 /**
- * (x, z) を中心に稼働率の円グラフを描く。100%で円、50%で半円になるよう、画面の真上から時計回りに伸ばす。
- * 稼働率が低くても位置と全体の大きさが分かるよう、半透明の白い円を下地にする。
+ * (x, z) を中心に業務逼迫度の円グラフを描く。100%で円、50%で半円になるよう、画面の真上から時計回りに伸ばす。
+ * 逼迫度が低くても位置と全体の大きさが分かるよう、半透明の白い円を下地にし、明るい陸地でも埋もれないよう縁取る。
  * ctx は+Zを上にするY反転を含むので、画面で時計回りにするには角度を減らす向きに描く。
  */
-function drawUtilizationPie(ctx: CanvasRenderingContext2D, x: number, z: number, rate: number, zoom: number) {
+function drawLoadPie(ctx: CanvasRenderingContext2D, x: number, z: number, rate: number, zoom: number) {
   const radius = PIE_RADIUS_PX / zoom;
   ctx.beginPath();
   ctx.arc(x, z, radius, 0, Math.PI * 2);
   ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
   ctx.fill();
+  ctx.lineWidth = 1.5 / zoom;
+  ctx.strokeStyle = "#0b0f19";
+  ctx.stroke();
 
   const ratio = Math.min(1, rate);
   if (!(ratio > 0)) return;
@@ -127,7 +136,7 @@ function drawUtilizationPie(ctx: CanvasRenderingContext2D, x: number, z: number,
   ctx.moveTo(x, z);
   ctx.arc(x, z, radius, Math.PI / 2, Math.PI / 2 - 2 * Math.PI * ratio, true);
   ctx.closePath();
-  ctx.fillStyle = facilityUtilizationColor(rate);
+  ctx.fillStyle = facilityLoadColor(rate);
   ctx.fill();
 }
 
@@ -239,7 +248,7 @@ export function drawNetwork(
     ctx.lineWidth = outline;
     ctx.strokeStyle = "#0b0f19";
     ctx.stroke();
-    drawUtilizationPie(ctx, cp[0], cp[1] - pieOffset, producer.utilization, view.zoom);
+    drawLoadPie(ctx, cp[0], cp[1] - pieOffset, producer.load, view.zoom);
   }
   for (const consumer of render.product.consumers) {
     const cp = consumer.node_point ?? consumer.center_point;
@@ -255,7 +264,7 @@ export function drawNetwork(
     ctx.lineWidth = outline;
     ctx.strokeStyle = "#0b0f19";
     ctx.stroke();
-    drawUtilizationPie(ctx, cp[0], cp[1] - pieOffset, consumer.utilization, view.zoom);
+    drawLoadPie(ctx, cp[0], cp[1] - pieOffset, consumer.load, view.zoom);
   }
 }
 
@@ -270,8 +279,11 @@ export type ServiceCoverageSupplier = {
   status: number;
   /** 当エポックの稼働率(0〜1) */
   utilization: number;
+  /** 当エポックの業務逼迫度(販売量 ÷ 生産能力。0〜1) */
+  load: number;
   center_point: number[] | null;
-  region: EffectRangeRegion;
+  /** 効果範囲。範囲を持たない施設(消防署など)は null */
+  region: EffectRangeRegion | null;
 };
 
 export type ServiceCoverageData = {
@@ -298,8 +310,8 @@ export type InfraCoverageRender = {
   inactiveOutline: Path2D;
   covered: Set<number>;
   uncovered: Set<number>;
-  /** 稼働率の円グラフを置く施設。網にも出る施設は網の側で描くので含めない */
-  pies: { x: number; z: number; utilization: number }[];
+  /** 業務逼迫度の円グラフを置く施設。網にも出る施設は網の側で描くので含めない */
+  pies: { x: number; z: number; load: number }[];
 };
 
 /** リングの符号付き面積(ワールドXZ)。正なら Canvas の arc の既定と同じ向き。 */
@@ -322,7 +334,8 @@ function appendRing(path: Path2D, ring: number[][], positive: boolean) {
   path.closePath();
 }
 
-function appendRegion(path: Path2D, region: EffectRangeRegion) {
+function appendRegion(path: Path2D, region: EffectRangeRegion | null) {
+  if (!region) return;
   if (region.type === "circle") {
     if (region.radius <= 0) return;
     path.moveTo(region.center[0] + region.radius, region.center[1]);
@@ -358,7 +371,7 @@ export function buildCoverageRender(data: ServiceCoverageData, network: InfraPro
     uncovered: new Set(data.uncovered_building_ids),
     pies: data.suppliers
       .filter((s) => s.center_point && !onNetwork.has(s.agent_id))
-      .map((s) => ({ x: s.center_point![0], z: s.center_point![1], utilization: s.utilization })),
+      .map((s) => ({ x: s.center_point![0], z: s.center_point![1], load: s.load })),
   };
 }
 
@@ -368,7 +381,7 @@ export function drawCoverageFill(ctx: CanvasRenderingContext2D, render: InfraCov
   ctx.fill(render.fill, "nonzero");
 }
 
-/** 施設ごとの効果範囲の輪郭と、網に出ない施設の稼働率の円グラフを描く。道路・建物の上に描く。 */
+/** 施設ごとの効果範囲の輪郭と、網に出ない施設の業務逼迫度の円グラフを描く。道路・建物の上に描く。 */
 export function drawCoverageOutlines(
   ctx: CanvasRenderingContext2D,
   view: { zoom: number },
@@ -382,7 +395,7 @@ export function drawCoverageOutlines(
   ctx.setLineDash([COVERAGE_DASH_PX / view.zoom, COVERAGE_GAP_PX / view.zoom]);
   ctx.stroke(render.inactiveOutline);
   ctx.setLineDash([]);
-  for (const pie of render.pies) drawUtilizationPie(ctx, pie.x, pie.z, pie.utilization, view.zoom);
+  for (const pie of render.pies) drawLoadPie(ctx, pie.x, pie.z, pie.load, view.zoom);
 }
 
 /* ============================================================================
@@ -392,14 +405,8 @@ export function drawCoverageOutlines(
 /** network = インフラ財の網、coverage = サービス財の効果範囲 */
 export type InfraProductKind = "network" | "coverage";
 
-/** 地図に重ねる財。網(インフラ財)と効果範囲(サービス財)をそれぞれ1つまで同時に描ける */
+/** 地図に重ねる財。網(インフラ財)と供給施設・効果範囲(coverage)をそれぞれ1つまで同時に描ける */
 export type InfraSelection = { network: number | null; coverage: number | null };
-
-/** CityMapCanvas が取得した表示中の財のデータ(onInfraLoaded で通知する) */
-export type CityMapInfraData = {
-  network: { product: InfraProductStats; simulationDays: number } | null;
-  coverage: ServiceCoverageData | null;
-};
 
 export type InfraProductOption = {
   productId: number;
@@ -488,7 +495,7 @@ export type InfraSelectionState = {
   select: (productId: number) => void;
 };
 
-/** インフラ表示の選択肢と選択状態。都市マップのインフラオーバーレイと統計のインフラ網タブが共有する */
+/** インフラ表示の選択肢と選択状態。都市マップのインフラオーバーレイが使う */
 export function useInfraSelection(apiBaseUrl: string): InfraSelectionState {
   const products = useInfraProducts(apiBaseUrl);
   const options = useMemo(

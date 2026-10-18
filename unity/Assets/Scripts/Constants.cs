@@ -280,6 +280,8 @@ public static class Constants
     public const int CONVEYOR_MAX_NODE_DEGREE = 2;
     public const float PATH_TANGENT_ALIGN_MAX_ANGLE_DEG = 20.0f;
     public const float INFRA_TAP_HEIGHT_TOLERANCE = 3.0f;
+    public const float SERVICE_COVERAGE_GAP_CLOSE = 2.0f;
+    public const float SERVICE_COVERAGE_SIMPLIFY_TOLERANCE = 1.0f;
     public const float RAIL_MIN_HEADWAY_MIN = 2.0f;
     public const float WATER_BRIDGE_MIN_CLEARANCE = 0.5f;
     public const float QUAY_KEEP_WIDTH = 2.8f;

@@ -214,7 +214,6 @@
     "tier2Legend": "Tier 2 (General Goods)",
     "tier3Legend": "Tier 3 (Luxury/Entertainment)",
     "tabRealEstate": "Real Estate",
-    "tabInfrastructure": "Infrastructure",
     "tabTourism": "Tourism",
     "tourism": {
       "title": "Tourism Statistics",
@@ -265,25 +264,6 @@
       "consumptionTitle": "Tourist Spending (this epoch)",
       "noTourists": "No tourists are staying",
       "noData": "No tourism records yet"
-    },
-    "infrastructure": {
-      "title": "Infrastructure Network",
-      "production": "Production",
-      "delivered": "Delivered",
-      "demand": "Demand",
-      "fulfillment": "Fulfillment",
-      "producers": "Producers",
-      "consumers": "Consumers",
-      "facilities": "Infrastructure Facilities",
-      "noFacilities": "No infrastructure facilities",
-      "activeSuppliers": "Operating facilities",
-      "coveredBuildings": "Buildings in range",
-      "uncoveredBuildings": "Buildings out of range",
-      "coveredRate": "Share in range",
-      "suppliers": "Supplying facilities",
-      "supplierActive": "Operating",
-      "supplierInactive": "Not operating",
-      "noData": "No infrastructure goods data"
     },
     "realestateTitle": "Real Estate Statistics",
     "realestateRentTrend": "Average Rent Trend",

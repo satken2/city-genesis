@@ -8,7 +8,7 @@
  * ツールバーは2段。1段目は重ねてONにできるレイヤーのボタンとオーバーレイの切り替え、2段目は選んだ
  * オーバーレイの設定(公共交通の種別・ヒートマップの種類・インフラの財)で、設定の無いオーバーレイでは2段目を出さない。
  * オーバーレイ(公共交通・ヒートマップ・インフラ)はどれも地図に色を重ねて読む表示なので、1つだけ選ぶ。
- * インフラの選択肢・選択状態(useInfraSelection)と凡例(InfraMapLegend)は統計のインフラ網タブと共通。
+ * インフラの選択肢(useInfraProducts)と凡例(InfraMapLegend)は公共施設ウィンドウの地図と共通。
  */
 
 import { useCallback, useMemo, useState, type ReactNode, type RefObject } from "react";

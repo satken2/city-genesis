@@ -41,6 +41,7 @@ public partial class VehicleManager : MonoBehaviour
     private readonly List<GameObject> pendingDeactivation = new List<GameObject>();
     private readonly List<long> substituteKeys = new List<long>();
     private readonly Dictionary<int, Road> roads = new Dictionary<int, Road>();
+    private readonly Dictionary<int, Road> populatedRoads = new Dictionary<int, Road>();
     private readonly List<Bucket> buckets = new List<Bucket>();
     private readonly Dictionary<long, Bucket> bucketByKey = new Dictionary<long, Bucket>();
     private readonly List<(Road road, bool forward, float weight)> candidates = new List<(Road, bool, float)>();
@@ -52,7 +53,9 @@ public partial class VehicleManager : MonoBehaviour
     private int spawnBacklog;
     private bool regulatedThisFrame;
     private readonly Stopwatch spawnWatch = new Stopwatch();
-    private bool initialFill = true, pendingInitialFill;
+    private bool seeding;
+    private int seedRemaining;
+    private float seedRemainder, nextSeedRemainder;
     private int accessSignature, accessGeneration;
     private bool accessReady;
     private Dictionary<int, List<Entrance>> entrances = new Dictionary<int, List<Entrance>>();
@@ -108,6 +111,7 @@ public partial class VehicleManager : MonoBehaviour
         public Road road;
         public int type, count, pending;
         public float target, average;
+        public TrafficPopulationSeed seed;
     }
 
     private void Awake()
@@ -165,6 +169,7 @@ public partial class VehicleManager : MonoBehaviour
             if (roadWorker == null) roadWorker = RenderWorkScheduler.Start(this, ScanRoads(center, true), "vehicleRoads", () => false);
             scanTimer = Mathf.Max(.1f, rangeScanInterval);
         }
+        if (seeding) FillNewCoverage();
         float trafficDt = dt * DriveMode.SpeedMultiplier * TrafficClock.Scale;
         // 早送りでも追従間隔を小刻みに再評価し、前車を一度に飛び越えない。
         for (float left = trafficDt; left > .00001f; left -= Mathf.Min(left, 1f / 30f))
@@ -204,11 +209,11 @@ public partial class VehicleManager : MonoBehaviour
     {
         motionGeneration++; motionInFlight=false; motionFetchTime=0; motion.Clear();
         for (int i = active.Count - 1; i >= 0; i--) Despawn(i);
-        roads.Clear(); buckets.Clear(); bucketByKey.Clear();
-        population.Reset(); scanTimer = 0; densityTimer = 0; spawnBacklog = 0;
+        roads.Clear(); populatedRoads.Clear(); buckets.Clear(); bucketByKey.Clear();
+        population.Reset(); scanTimer = 0; densityTimer = 0; spawnBacklog = 0; seedRemaining = 0; seedRemainder = 0;
         RenderWorkScheduler.Stop(this, roadWorker); roadWorker = null;
         RenderWorkScheduler.Stop(this, accessWorker); accessWorker = null;
-        entrances.Clear(); exitRanks.Clear(); accessCache.Clear(); initialFill = true; pendingInitialFill = false; accessReady = false; accessGeneration++;
+        entrances.Clear(); exitRanks.Clear(); accessCache.Clear(); seeding = false; accessReady = false; accessGeneration++;
     }
 
     /// <summary>
@@ -222,7 +227,7 @@ public partial class VehicleManager : MonoBehaviour
         RenderWorkScheduler.Stop(this, accessWorker); accessWorker = null;
         buckets.Clear(); bucketByKey.Clear();
         spawnBacklog = 0; scanTimer = 0; motionFetchTime = 0;
-        pendingInitialFill = true;
+        seeding = false;
     }
 
     /// <summary>同期で道路集合を作り直す。乗車開始は、その場で道路を得てから車を置く必要がある。</summary>
@@ -339,8 +344,62 @@ public partial class VehicleManager : MonoBehaviour
             if (v.road != road.line) { v.s = road.line.RemapFrom(v.road, v.s); v.road = road.line; }
             SetLane(v, road, false);
         }
-        // 新しい区域の目標台数が決まってから初期充填へ戻す。先に戻すと古い目標で即座に打ち切られる。
-        if (pendingInitialFill) { initialFill = true; pendingInitialFill = false; }
+        // 一時停止中のカメラ移動でも、円外の個体が新しい区域の人数枠を占有しないようにする。
+        float radius = Mathf.Max(1, renderRadius + despawnMargin);
+        for (int i = active.Count - 1; i >= 0; i--)
+        {
+            var v = active[i];
+            if (v != DrivenVehicle && v != FollowedVehicle && Utils.XZDistanceSquared(v.go.transform.position, center) > radius * radius)
+                Despawn(i);
+        }
+        PrepareSeeds();
+    }
+
+    private void PrepareSeeds()
+    {
+        foreach (var b in buckets)
+        {
+            var road = b.road;
+            var intervals = populatedRoads.TryGetValue(road.data.path_id, out var old) && Traffic(old.data, b.type) > 0
+                ? road.line.UncoveredIntervals(road.intervals, old.scanCenter, old.scanRadius) : road.intervals;
+            b.seed = new TrafficPopulationSeed(intervals, b.target / road.insideLength);
+            b.count = 0;
+        }
+        foreach (var v in active)
+            if (bucketByKey.TryGetValue(Key(v.pathId, v.vehicleType), out var b))
+            {
+                b.count++;
+                if (!v.InIntersection && !v.ExitingRoad) b.seed.Observe(v.s);
+            }
+        float expected = seedRemainder;
+        foreach (var b in buckets) expected += b.seed.Weight;
+        seedRemaining = Mathf.FloorToInt(expected + .00001f);
+        nextSeedRemainder = Mathf.Max(0, expected - seedRemaining);
+        spawnBacklog = 0;
+        seeding = true;
+    }
+
+    /// <summary>
+    /// 新しく管理する区間は最初から走行中の分布として置く。車体の生成だけをフレーム予算で分散し、
+    /// 充填率・交通の時計・沿道入口のロードは待たない。完了するまで管理済みの範囲を進めない。
+    /// </summary>
+    private void FillNewCoverage()
+    {
+        spawnWatch.Restart();
+        for (int attempted = 0; seedRemaining > 0 && active.Count < maxActiveVehicles; attempted++)
+        {
+            if (attempted > 0 && spawnWatch.Elapsed.TotalMilliseconds >= spawnBudgetMs) return;
+            var b = PickBucket(true);
+            if (b == null) break;
+            bool spawned = false;
+            for (int retry = 0; retry < 4 && !spawned; retry++) spawned = Spawn(b);
+            if (spawned) { seedRemaining--; b.count++; b.seed.Consume(); b.average = b.count; }
+            else b.seed.Skip();
+        }
+        populatedRoads.Clear();
+        foreach (var entry in roads) populatedRoads.Add(entry.Key, entry.Value);
+        seedRemainder = nextSeedRemainder;
+        seeding = false;
     }
 
     // 周辺道路だけを走査し、区画・建物・中心線の版が変わった入口だけ再計算する。
@@ -500,7 +559,7 @@ public partial class VehicleManager : MonoBehaviour
             ReserveArrival(true);
         }
 
-        if (population.Desired > 0 && active.Count >= population.Desired) initialFill = false;
+        if (seeding) return;
         int missing = population.Desired - active.Count;
         int fill = Mathf.Min(missing, Mathf.Max(1, Mathf.CeilToInt(missing * (1 - Mathf.Exp(-Mathf.Max(0, spawnFillRate) * dt)))));
         // 車体の有効化・生成が1フレームに集中しないよう時間予算で打ち切る。1台目は必ず試みるので充填は止まらない。
@@ -533,16 +592,18 @@ public partial class VehicleManager : MonoBehaviour
         spawnBacklog = 0;
     }
 
-    private Bucket PickSpawnBucket()
+    private Bucket PickSpawnBucket() => PickBucket(false);
+
+    private Bucket PickBucket(bool seed)
     {
         float sum = 0;
-        foreach (var b in buckets) sum += SpawnWeight(b);
+        foreach (var b in buckets) sum += seed ? b.seed.Weight : SpawnWeight(b);
         if (sum <= 0) return null;
         float pick = Random.value * sum;
         Bucket last = null;
         foreach (var b in buckets)
         {
-            float weight = SpawnWeight(b);
+            float weight = seed ? b.seed.Weight : SpawnWeight(b);
             if (weight <= 0) continue;
             last = b; pick -= weight;
             if (pick <= 0) return b;
@@ -551,7 +612,7 @@ public partial class VehicleManager : MonoBehaviour
     }
 
     private float SpawnWeight(Bucket b)
-        => b.target <= 0 || (!initialFill && !HasSpawnPointCached(b.road)) ? 0
+        => b.target <= 0 || !HasSpawnPointCached(b.road) ? 0
             : Mathf.Max(0, b.target - b.count) + Mathf.Max(0, b.target - b.average);
 
     // entrances の交換は必ず accessGeneration を進め、intervals は Road 生成時にしか決まらないので、世代比較で無効化できる。
@@ -665,14 +726,9 @@ public partial class VehicleManager : MonoBehaviour
         var road = b.road;
         bool forward = road.data.travel_direction == Constants.DIR_FORWARD ||
             (road.data.travel_direction == Constants.DIR_BOTH && Random.value < .5f);
-        float pick = Random.value * road.insideLength, s = road.intervals[0].x;
-        foreach (var interval in road.intervals)
-        {
-            s = interval.x + Mathf.Min(pick, interval.y - interval.x);
-            pick -= interval.y - interval.x;
-            if (pick <= 0) break;
-        }
-        if (!initialFill)
+        float s;
+        if (seeding) s = b.seed.Sample();
+        else
         {
             var options = new List<(float s, bool forward)>();
             if (entrances.TryGetValue(road.data.path_id, out var list))
@@ -699,7 +755,7 @@ public partial class VehicleManager : MonoBehaviour
         var go = Acquire(b.type, ref variant);
         var v = new Vehicle { vehicleType = b.type, variantId = variant,
             speed = Mathf.Max(.1f, MeanSpeed(b.road.data.path_id,b.type)),
-            go = go, spawnBlendRemaining = 15 };
+            go = go, spawnBlendRemaining = seeding ? 0 : 15, age = seeding ? fadeDuration : 0 };
         v.SetPath(road.data.path_id, road.line, forward, s);
         v.lane = lane;
         SetLane(v, road, false);

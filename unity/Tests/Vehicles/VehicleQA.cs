@@ -67,7 +67,7 @@ public static partial class VehicleQA
                 EditorApplication.Exit(0); return;
             }
             StreetParking();
-            Geometry(); Budget(); Junction(); Congestion(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitConsistGeometry(); TransitHighlightSelection(); DriveCamera();
+            Geometry(); Budget(); PopulationCoverage(); Junction(); Congestion(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitConsistGeometry(); TransitHighlightSelection(); DriveCamera();
             PedestrianBands(); PedestrianModels(); PedestrianPoses(); accessTimings.Add(PedestrianDrawTiming());
             var report = new List<string>();
             foreach(int split in new[]{1,5}) report.Add(PedestrianNetwork(split,12,1200,false,true));
@@ -133,6 +133,110 @@ public static partial class VehicleQA
             for(int i=0;i<1000;i++) { total+=Property(budget,"Desired");Call(budget,"Advance",12f); }
             Near((float)(total/1000),target,.002f,"Fractional budget bias");
             Call(budget,"SetTarget",0f);Near(Property(budget,"Desired"),0,0,"Budget reduction");
+        }
+    }
+    static void PopulationCoverage()
+    {
+        foreach (bool pedestrian in new[] { false, true })
+        {
+            UnityEngine.Random.InitState(7301);
+            string kind = pedestrian ? "Pedestrian" : "Vehicle";
+            var master = new GameObject(kind + "CoverageMaster").AddComponent(game.GetType("MasterDataStore"));
+            game.GetType("MasterDataStore").GetField("<Instance>k__BackingField", Flags).SetValue(null, master);
+            ((IDictionary)Get(master, "pathMasterById"))[0] = New("PathMasterItem");
+            var paths = new GameObject(kind + "CoveragePaths").AddComponent(game.GetType("PathManager"));
+            var manager = new GameObject(kind + "Coverage").AddComponent(game.GetType(kind + "Manager"));
+            Set(manager, "pathManager", paths); Set(manager, "renderRadius", 100f); Set(manager, "despawnMargin", 0f);
+            if (!pedestrian) { Set(manager, "motionInFlight", true); Set(manager, "spawnBudgetMs", 1000f); }
+            var constants = game.GetType("Constants");
+            int street = (int)constants.GetField("PATH_STREET").GetRawConstantValue();
+            int status = (int)constants.GetField("STATUS_ACTIVE").GetRawConstantValue();
+            var segmentType = manager.GetType().GetNestedType(pedestrian ? "Walk" : "Road", BindingFlags.NonPublic);
+            var active = (IList)Get(manager, "active");
+            var data = new List<object>(); var lines = new List<object>();
+            float speed = (float)Get(manager, pedestrian ? "walkSpeed" : "baseSpeed");
+            float traffic = 20f * (float)Get(manager, "activeHoursPerDay") * 3600f * speed / 200f;
+            for (int i = 0; i < 2; i++)
+            {
+                var path = New("GeneratedModels.PathSummary");
+                Set(path, "path_id", i + 1); Set(path, "start_node_id", 10 + i * 2); Set(path, "end_node_id", 11 + i * 2);
+                Set(path, "path_type", street); Set(path, "status", status);
+                Set(path, "path_traffic", new Dictionary<string, float> { { pedestrian ? "0" : "10", traffic } });
+                Call(paths, "SavePathToCache", path); data.Add(path);
+                lines.Add(Line(new Vector3(-1000, 0, i * 20), new Vector3(1000, 0, i * 20)));
+            }
+            Action<float, int> commit = (x, count) =>
+            {
+                Vector3 center = new Vector3(x, 0, 0);
+                var snapshot = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(typeof(int), segmentType));
+                for (int i = 0; i < count; i++)
+                {
+                    var segment = Activator.CreateInstance(segmentType);
+                    var intervals = (List<Vector2>)Call(lines[i], "InsideIntervals", center, 100f);
+                    float length = 0; foreach (var interval in intervals) length += interval.y - interval.x;
+                    Set(segment, "data", data[i]); Set(segment, "line", lines[i]); Set(segment, "intervals", intervals);
+                    Set(segment, "insideLength", length); Set(segment, "scanCenter", center); Set(segment, "scanRadius", 100f);
+                    if (pedestrian) Set(segment, "centered", true);
+                    else Set(segment, "lanes", New("RoadLaneLayout", 24f, 0f, 0f, 0f, 4, 0));
+                    snapshot.Add(i + 1, segment);
+                }
+                Call(manager, pedestrian ? "CommitWalks" : "CommitRoads", snapshot, center);
+                if (!pedestrian) while ((bool)Get(manager, "seeding")) Call(manager, "FillNewCoverage");
+            };
+            Func<Dictionary<object, float>> positions = () =>
+            {
+                var result = new Dictionary<object, float>();
+                foreach (var item in active) result.Add(item, (float)Get(item, "s"));
+                return result;
+            };
+            Func<Dictionary<object, float>, int> additions = before =>
+            {
+                int added = 0;
+                foreach (var item in active)
+                    if (before.TryGetValue(item, out float s)) Near((float)Get(item, "s"), s, .001f, kind + " overlap moved during seeding");
+                    else
+                    {
+                        added++;
+                        Check((float)Get(item, "age") >= (float)Get(manager, "fadeDuration"), kind + " new area fades in from empty");
+                        if (!pedestrian)
+                        {
+                            Near(((GameObject)Get(item, "go")).transform.localScale.x, 1f, .001f, "Seeded car is invisible");
+                            Near((float)Get(item, "spawnBlendRemaining"), 0, 0, "Seeded car starts on the shoulder");
+                        }
+                    }
+                return added;
+            };
+            game.GetType("TrafficClock").GetMethod("SetPaused").Invoke(null, new object[] { true });
+            commit(0, 1);
+            Check(active.Count >= 19 && active.Count <= 20, kind + " initial density waits for inflow");
+            var before = positions(); commit(0, 1);
+            Check(additions(before) == 0, kind + " stationary view keeps spawning");
+            before = positions(); commit(50, 1);
+            Check(additions(before) >= 4, kind + " ordinary pan leaves new coverage empty");
+            foreach (var item in active)
+                if (!before.ContainsKey(item)) Check((float)Get(item, "s") >= 1100f, kind + " pan seeds the old overlap");
+            int smallPanAdds = 0;
+            for (int i = 1; i <= 10; i++) { before = positions(); commit(50 + i * 5, 1); smallPanAdds += additions(before); }
+            Check(smallPanAdds >= 4 && smallPanAdds <= 6, kind + " small pans lose fractional density");
+            commit(600, 1);
+            Check(active.Count >= 19 && active.Count <= 21, kind + " jump retains offscreen population or fills slowly");
+            var quarters = new HashSet<int>();
+            foreach (var item in active) quarters.Add(Mathf.Clamp((int)(((float)Get(item, "s") - 1500f) / 50f), 0, 3));
+            Check(quarters.Count == 4, kind + " new area is clustered at its boundary");
+            before = positions(); commit(600, 2);
+            Check(additions(before) >= 18, kind + " late-loaded road waits for an entrance");
+            before = positions(); commit(600, 2);
+            Check(additions(before) == 0, kind + " repeated loaded snapshot duplicates population");
+            Call(manager, pedestrian ? "ClearPedestrians" : "ClearVehicles");
+            Set(manager, pedestrian ? "maxActivePedestrians" : "maxActiveVehicles", 5);
+            if (!pedestrian) Set(manager, "motionInFlight", true);
+            commit(0, 2);
+            Check(active.Count <= 5, kind + " coverage bypasses the hard cap");
+            Call(manager, pedestrian ? "ClearPedestrians" : "ClearVehicles");
+            game.GetType("TrafficClock").GetMethod("SetPaused").Invoke(null, new object[] { false });
+            UnityEngine.Object.DestroyImmediate(manager.gameObject); UnityEngine.Object.DestroyImmediate(paths.gameObject);
+            UnityEngine.Object.DestroyImmediate(master.gameObject);
+            accessTimings.Add(kind + " coverage: initial, paused, stationary, pan, small pans, jump, streaming, cap");
         }
     }
     static void TransitPlacement()
@@ -861,6 +965,8 @@ public static partial class VehicleQA
         }
         var fixtureObjects = new List<GameObject>();
         if(withAccess) AccessFixture(manager,subdivisions,fixtureObjects);
+        Call(manager,"PrepareSeeds");
+        while ((bool)Get(manager,"seeding")) Call(manager,"FillNewCoverage");
         int observed=0,peak=0,transitions=0;double sum=0;
         var roadSamples = new double[count];
         var priorPaths=new Dictionary<object,int>();
@@ -1162,6 +1268,7 @@ public static partial class VehicleQA
         }
         var fixtureObjects=new List<GameObject>();
         if(withAccess) PedestrianAccessFixture(manager,fixtureObjects,subdivisions/2+1);   // 南辺のうち区画(x=±3)の前を通る分割
+        Call(manager,"PrepareSeeds");Call(manager,"FillNewCoverage");
         int observed=0,peak=0,transitions=0,forwardSeen=0,backwardSeen=0;double sum=0;
         var priorPaths=new Dictionary<object,int>();
         for(int tick=0;tick<seconds*hz;tick++)

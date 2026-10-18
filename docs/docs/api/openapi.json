@@ -826,6 +826,26 @@
         }
       }
     },
+    "/api/v1/buildings/overview": {
+      "get": {
+        "tags": [
+          "buildings"
+        ],
+        "summary": "Get Buildings Overview",
+        "description": "都市全域の建物を、遠くから見た箱の形だけで返す(底面を持つ建物すべて)。常に MessagePack で返す。\ncount のほか、各列は little-endian のバイト列: agent_id・variant・landmark・floors・status は int32、\ncenter は中心の (x, z)、polygon は中心基準の底面の (x, z) を float32 で並べる。\nbase は float32 で、海上区画に建つ建物は区画の基準標高、それ以外は NaN(地形の高さに置く)。\n建物 i の底面は polygon_offset[i] から polygon_offset[i+1] までの頂点(polygon_offset は int32 で count+1 個)。",
+        "operationId": "get_buildings_overview_api_v1_buildings_overview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/buildings/placed-landmarks": {
       "get": {
         "tags": [
@@ -1087,7 +1107,7 @@
           "buildings"
         ],
         "summary": "Preview Building Effect Range",
-        "description": "インフラ供給施設（変電所・下水処理場・電波塔などサービス財 GOODS_SERVICE を生産する施設）を\nその土地区画に建てた場合の「効果範囲」を、設置前に算出して返す。\n\n建物建設パネルが 3D 上に効果範囲を可視化するために使う。効果範囲の制限を持たない\nvariant（通常建物・全域供給の施設）には `{\"restricted\": false}` を返す。\n\n必須フィールド: variant, floors, および parcel_id か position のいずれか\n（position は直接配置モード用。[x, z] または Unity 由来の [x, y, z]）\n\n返却値（restricted=true のとき）:\n  - region: 効果範囲の領域。円 `{\"type\":\"circle\",\"center\":[x,z],\"radius\":r}` または\n    不定形 `{\"type\":\"polygon\",\"polygons\":[{\"exterior\":[[x,z]...],\"holes\":[...]}...]}`。\n\n効果範囲の算出ロジックは app/services/service_coverage.py と共通（設置後の永続領域と同一）。\n設置前の仮算出なので永続化はしない。",
+        "description": "インフラ供給施設（変電所・下水処理場・電波塔などサービス財 GOODS_SERVICE を生産する施設）を\nその土地区画に建てた場合の「効果範囲」を、設置前に算出して返す。\n\n建物建設パネルが 3D 上に効果範囲を可視化するために使う。効果範囲の制限を持たない\nvariant（通常建物・全域供給の施設）には `{\"restricted\": false}` を返す。\n\n必須フィールド: variant, floors, および parcel_id か position のいずれか\n（position は直接配置モード用。[x, z] または Unity 由来の [x, y, z]）\n\n返却値（restricted=true のとき）:\n  - region: 効果範囲の領域。円 `{\"type\":\"circle\",\"center\":[x,z],\"radius\":r}` または\n    不定形 `{\"type\":\"polygon\",\"polygons\":[{\"exterior\":[[x,z]...],\"holes\":[...]}...]}`。\n\n効果範囲の算出ロジックは app/services/service_coverage.py と共通（設置後の領域と同じ判定）。\n設置前の仮算出なので永続化はしない。",
         "operationId": "preview_building_effect_range_api_v1_buildings_preview_effect_range_post",
         "requestBody": {
           "content": {
@@ -1149,7 +1169,7 @@
           "buildings"
         ],
         "summary": "Get Existing Effect Ranges",
-        "description": "指定バリアントと同じサービス財を供給する既存施設の効果範囲（領域）一覧を返す。\n\n建物建設パネルが、新設プレビューの効果範囲と併せて「既にカバー済みの範囲」を\n3D 上に可視化するために使う。領域は設置時に算出された永続値\n（`city.service_coverage_region`）をそのまま返すため再計算は発生しない。\n建設中の施設も設置時点で領域が登録されるため一覧に含まれる（カバー予定の範囲も\n見えたほうが重複建設を避けられる）。\n\n返却値:\n  - restricted: 指定バリアントが効果範囲の制限対象かどうか。false なら ranges は常に空。\n  - product_id: 供給するサービス財の製品ID（restricted=true のとき）。\n  - ranges: [{agent_id, variant, region}] の配列。region の形式は\n    preview-effect-range と同一（circle / polygon）。",
+        "description": "指定バリアントと同じサービス財を供給する既存施設の効果範囲（領域）一覧を返す。\n\n建物建設パネルが、新設プレビューの効果範囲と併せて「既にカバー済みの範囲」を\n3D 上に可視化するために使う。道路・区画の変更分を更新した上で、\n`city.service_coverage_region` の領域を返す。入力が同じなら再計算しない。\n建設中の施設も設置時点で領域が登録されるため一覧に含まれる（カバー予定の範囲も\n見えたほうが重複建設を避けられる）。\n\n返却値:\n  - restricted: 指定バリアントが効果範囲の制限対象かどうか。false なら ranges は常に空。\n  - product_id: 供給するサービス財の製品ID（restricted=true のとき）。\n  - ranges: [{agent_id, variant, region}] の配列。region の形式は\n    preview-effect-range と同一（circle / polygon）。",
         "operationId": "get_existing_effect_ranges_api_v1_buildings_effect_ranges_get",
         "parameters": [
           {
@@ -1190,7 +1210,7 @@
           "buildings"
         ],
         "summary": "Get Service Coverage Products",
-        "description": "効果範囲の制限を持つサービス財（電力・水道など）の一覧を返す。\n\n表示パネルの効果範囲タブ・都市マップ・統計のインフラ網タブが、選べる財を並べるために使う。\n手書きプレーンJSON（endpoints.yaml 不使用）。\n\n返却値:\n  - products: [{product_id, supplier_variants}] の配列（製品ID順）。supplier_variants は\n    その財を供給する効果範囲付きの施設の variant 一覧。",
+        "description": "効果範囲の制限を持つサービス財（電力・水道など）の一覧を返す。\n\n表示パネルの効果範囲タブ・都市マップが、選べる財を並べるために使う。\n手書きプレーンJSON（endpoints.yaml 不使用）。\n\n返却値:\n  - products: [{product_id, supplier_variants}] の配列（製品ID順）。supplier_variants は\n    その財を供給する効果範囲付きの施設の variant 一覧。",
         "operationId": "get_service_coverage_products_api_v1_buildings_service_coverage_get",
         "responses": {
           "200": {
@@ -1210,7 +1230,7 @@
           "buildings"
         ],
         "summary": "Get Service Coverage",
-        "description": "サービス財1品目の効果範囲と、範囲内・範囲外の建物を返す。\n\n表示パネルの効果範囲タブ・都市マップ・統計のインフラ網タブが、施設ごとの範囲と建物の\n塗り分けを描くために使う。手書きプレーンJSON（endpoints.yaml 不使用）。\n\n返却値:\n  - product_id: 製品ID。\n  - suppliers: その財を供給する施設すべて（状態を問わない）の\n    [{agent_id, name, variant, status, center_point, region}]。region の形式は\n    preview-effect-range と同一（circle / polygon）。\n  - covered_building_ids / uncovered_building_ids: 稼働中の建物のうち、敷地の土地区画が\n    稼働中の施設の効果範囲に入るもの / 入らないもの。建設中などの施設の範囲は判定に含めない。",
+        "description": "財1品目の供給施設と効果範囲、範囲内・範囲外の建物を返す。効果範囲の制限を持たない財\n（消防・医療など）も受け付け、施設の位置だけを返す。\n\n表示パネルの効果範囲タブ・都市マップ・公共施設ウィンドウが、施設ごとの位置と範囲・建物の\n塗り分けを描くために使う。手書きプレーンJSON（endpoints.yaml 不使用）。\n\n返却値:\n  - product_id: 製品ID。\n  - suppliers: その財を供給する施設すべて（状態を問わない）の\n    [{agent_id, name, variant, status, utilization, load, center_point, region}]。utilization は当エポックの\n    稼働率、load は当エポックの業務逼迫度（販売量 ÷ 生産能力。0〜1）。region の形式は\n    preview-effect-range と同一（circle / polygon）で、効果範囲を持たない施設では null。\n  - covered_building_ids / uncovered_building_ids: 稼働中の建物のうち、敷地の土地区画が\n    稼働中の施設の効果範囲に入るもの / 入らないもの。建設中などの施設の範囲は判定に含めない。\n    効果範囲を持つ施設が無い財では両方とも空。",
         "operationId": "get_service_coverage_api_v1_buildings_service_coverage__product_id__get",
         "parameters": [
           {
@@ -1913,6 +1933,26 @@
         }
       }
     },
+    "/api/v1/paths/overview": {
+      "get": {
+        "tags": [
+          "paths"
+        ],
+        "summary": "Get Paths Overview",
+        "description": "都市全域の地上のパスを、遠くから見た帯の形だけで返す(地下のパスと公共交通の区間を除く)。常に MessagePack で返す。\ncount のほか、各列は little-endian のバイト列: path_id・path_variant は int32、points は間引いた中心線の (x, z) を float32 で並べる。\nパス i の中心線は point_offset[i] から point_offset[i+1] までの点(point_offset は int32 で count+1 個)。",
+        "operationId": "get_paths_overview_api_v1_paths_overview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/paths/{path_id}": {
       "get": {
         "tags": [
@@ -2050,7 +2090,7 @@
           "paths"
         ],
         "summary": "Get Path Station Info",
-        "description": "駅舎パスの駅情報(所属ホーム・発着路線・乗降統計・専有エリア)を取得する。\n\n駅は独立したエンティティではなく駅舎パスそのもので、駅名はパスの name、\nステータス・バリアントはパス本体が持つ。ここでは保存されない集計値だけを\n都度組み立てて返す(手書きプレーンJSON。endpoints.yaml 不使用)。\n駅舎パス以外のIDを渡すと ValidationError。",
+        "description": "駅舎パスの駅情報(所属ホーム・発着路線・停留所ごとの乗車回数・専有エリア)を取得する。\n\n駅は独立したエンティティではなく駅舎パスそのもので、駅名はパスの name、\nステータス・バリアントはパス本体が持つ。ここでは保存されない集計値だけを\n都度組み立てて返す(手書きプレーンJSON。endpoints.yaml 不使用)。\n駅舎パス以外のIDを渡すと ValidationError。",
         "operationId": "get_path_station_info_api_v1_paths__path_id__station_info_get",
         "parameters": [
           {
@@ -2811,7 +2851,7 @@
           "parcels"
         ],
         "summary": "Create Parcels",
-        "description": "土地区画を作成する。\nペイロードで作成モードを指定可能:\n- mode: \"empty_area\" | \"random\" | \"block\" | \"along_path\"\n        | \"split_perimeter\" | \"split_random\" | \"split_rectangle\"\n- dry_run: true の場合はプレビューのみ返却（実際の作成は行わない）",
+        "description": "土地区画を作成する。\nペイロードで作成モードを指定可能:\n- mode: \"empty_area\" | \"random\" | \"block\" | \"along_path\"\n        | \"split_perimeter\" | \"split_random\" | \"split_rectangle\" | \"merge\"\n- dry_run: true の場合はプレビューのみ返却（実際の作成は行わない）\n\nmode=\"merge\" は parcel_ids に並べた隣接する空き区画を1つの区画に結合する。結合後の区画は\n新しい parcel_id で作られ、先頭の区画が個別の建築規制を持っていればそれを引き継ぐ。",
         "operationId": "create_parcels_api_v1_parcels__post",
         "requestBody": {
           "required": true,
@@ -3026,8 +3066,49 @@
           "parcels"
         ],
         "summary": "Get Parcel Facing Paths",
-        "description": "土地区画が接道（front_path_id）として選べる道路（街路）の候補一覧を取得する。\n\n自動判定と同じ基準（接道閾値内の PATH_STREET）で候補を距離の近い順に返す。\n各候補は path_id / distance / name / zone_id / zone_name / is_current を持つ。\nバージョン管理外の派生値のため endpoints.yaml のスキーマは使わずプレーンJSONで返す。",
+        "description": "土地区画が接道（front_path_id）として選べる道路（街路）の候補一覧を取得する。\n\n自動判定と同じ基準（最寄りの街路までの距離と100mの大きい方以内の接道可能な街路）で、\n区画の前面に沿う道路を優先して返す。\n各候補は path_id / distance / name / zone_id / zone_name / is_current を持つ。\nバージョン管理外の派生値のため endpoints.yaml のスキーマは使わずプレーンJSONで返す。",
         "operationId": "get_parcel_facing_paths_api_v1_parcels__parcel_id__facing_paths_get",
+        "parameters": [
+          {
+            "name": "parcel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Parcel Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/parcels/{parcel_id}/merge-candidates": {
+      "get": {
+        "tags": [
+          "parcels"
+        ],
+        "summary": "Get Parcel Merge Candidates",
+        "description": "土地区画を隣接する区画と結合して広げるときの、結合相手の候補一覧を取得する。\n\n結合できる隣接区画を共有辺の長い順に返す。各候補は parcel_id / shared_length(共有辺の長さ m) /\npolygon(結合後の区画の形)を持つ。確定は POST /api/v1/parcels/ の mode=\"merge\" で行う。\nバージョン管理外の派生値のため endpoints.yaml のスキーマは使わずプレーンJSONで返す。",
+        "operationId": "get_parcel_merge_candidates_api_v1_parcels__parcel_id__merge_candidates_get",
         "parameters": [
           {
             "name": "parcel_id",
@@ -3215,6 +3296,28 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/epochs/progress": {
+      "get": {
+        "tags": [
+          "epochs"
+        ],
+        "summary": "Get Epoch Progress",
+        "description": "エポック実行の進捗を返す。\n\nPOST の実行中にも応答する。実行中の待機画面が、処理中の段と何エポック目かを表示するために読む。",
+        "operationId": "get_epoch_progress_api_v1_epochs_progress_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EpochProgress"
                 }
               }
             }
@@ -3551,6 +3654,26 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/city/climate-effects": {
+      "get": {
+        "tags": [
+          "city"
+        ],
+        "summary": "Get Climate Effects",
+        "description": "確定気候と、気候の影響を受ける施設(バリアント)ごとの生産倍率を取得する。\n\nclimate は確定気候の値(temperature=℃・precipitation=月相当のmm・sunlight=%・wind_speed=m/s)。\nvariants の各行の factors は、その施設の生産を左右する気候の要素だけを climate と同じキーで持ち、\n値はその要素による倍率(0〜1)。factor は要素の倍率の積で、生産量に掛かる倍率。\n気候が未確定(最初のエポック開始前)の間は climate の値と倍率がすべて null になる。",
+        "operationId": "get_climate_effects_api_v1_city_climate_effects_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -3931,7 +4054,7 @@
           "city"
         ],
         "summary": "Get Budgets",
-        "description": "予算設定と前エポック実績、および予算の維持優先度（Tier。1=最優先維持〜4=最初に削減）の設定を取得する。\n\n- budgets: 当エポックの予算配分（必要額 × category_ratio から導出された円額）\n- prev_budgets: 前エポックの予算配分\n- total_expense: 前エポックのカテゴリ別実績支出\n- total_revenue: 前エポックのカテゴリ別収入\n- budget_tiers: 各カテゴリの維持優先度設定（1=最優先維持〜4=最初に削減）\n- history: 前回収入の時系列履歴リスト\n- category_ratio: プレイヤーが設定した「必要額に対する比率」（0〜1.5、予算パネルの主入力）\n- effective_category_ratio: 資金不足の自動調整後の実効比率（budgets / 基準額）\n- prev_total_expense: 前エポック実績支出のスナップショット（「前実績」バーの表示用）\n- projected_required: カテゴリ別の必要額（予算導出の基準額。比率スライダーの分母）\n- savings_target / savings: 貯蓄目標と、配分後に実際に貯蓄として残った額\n- budget_auto_adjusted: 直近の配分で資金不足による自動調整が発生したか（UIバナー表示用）\n- reserves_history: 市政府の現預金のエポック末推移（[{epoch, reserves}] の古い順リスト）\n- current_reserves: 現在（ユーザー操作フェーズ）の市政府の現預金",
+        "description": "予算設定と前エポック実績、および予算の維持優先度（Tier。1=最優先維持〜4=最初に削減）の設定を取得する。\n\n- budgets: 当エポックの予算配分（必要額 × category_ratio から導出された円額）\n- prev_budgets: 前エポックの予算配分\n- total_expense: 前エポックのカテゴリ別実績支出\n- total_revenue: 前エポックのカテゴリ別収入\n- budget_tiers: 各カテゴリの維持優先度設定（1=最優先維持〜4=最初に削減）\n- history: 前回収入の時系列履歴リスト\n- category_ratio: プレイヤーが設定した「必要額に対する比率」（0〜1.5、予算パネルの主入力）\n- effective_category_ratio: 資金不足の自動調整後の実効比率（budgets / 基準額）\n- prev_total_expense: 前エポック実績支出のスナップショット（「前実績」バーの表示用）\n- projected_required: カテゴリ別の必要額（予算導出の基準額。比率スライダーの分母）\n- projected_payment: カテゴリ別の次エポックの支払見込み（在庫で賄う原材料を除いた額。必要額以下）\n- savings_target / savings: 貯蓄目標と、配分後に実際に貯蓄として残った額\n- budget_auto_adjusted: 直近の配分で資金不足による自動調整が発生したか（UIバナー表示用）\n- reserves_history: 市政府の現預金のエポック末推移（[{epoch, reserves}] の古い順リスト）\n- current_reserves: 現在（ユーザー操作フェーズ）の市政府の現預金",
         "operationId": "get_budgets_api_v1_city_budgets_get",
         "responses": {
           "200": {
@@ -3991,7 +4114,7 @@
           "city"
         ],
         "summary": "Get Budget Agents",
-        "description": "予算カテゴリごとのエージェント（公共施設、建設代理エージェントなど）一覧と、\nそれぞれの前エポック実績支出および次エポック見込み支出を取得する。",
+        "description": "予算カテゴリごとのエージェント（公共施設、建設代理エージェントなど）一覧と、\nそれぞれの前エポック実績支出、次エポック見込み支出（予算の基準になる必要額）、\n次エポックの支払見込み（在庫で賄う原材料を除いた額）を取得する。",
         "operationId": "get_budget_agents_api_v1_city_budgets_agents_get",
         "parameters": [
           {
@@ -4119,14 +4242,36 @@
           "city"
         ],
         "summary": "Get Public Service Supply",
-        "description": "公共サービスの需給（供給キャパシティ・需要量・生産量）を regulated 製品ごとに取得する。\n\n価格統制パネル用の /public-service-prices と違い、価格の概念を持たないインフラ財\n（高圧電力・高圧水道）も含めて返す。コックピットの充足度メーター（需要÷キャパシティ）と\n公共施設ウィンドウの需給ドーナツが参照する。\n\n保存されない派生集計のため endpoints.yaml は使わず手書きのプレーンJSONで返す。",
+        "description": "公共サービスの需給（供給キャパシティ・需要量・生産量）を regulated 製品ごとに取得する。\n\n価格統制パネル用の /public-service-prices と違い、価格の概念を持たないインフラ財\n（高圧電力・高圧水道）も含めて返す。コックピットの充足度メーター（需要÷キャパシティ）と\n公共サービスウィンドウの需給推移が参照する。\n\ninclude_facilities=true の場合、各製品の行に供給施設の一覧 facilities を含める。\n施設の項目は /budgets/public-facilities と共通で、インフラ財の施設も取得できる。\n\n保存されない派生集計のため endpoints.yaml は使わず手書きのプレーンJSONで返す。",
         "operationId": "get_public_service_supply_api_v1_city_public_service_supply_get",
+        "parameters": [
+          {
+            "name": "include_facilities",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Facilities"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -4199,8 +4344,28 @@
           "city"
         ],
         "summary": "Get Public Facilities",
-        "description": "公共施設エージェント一覧を、UIの公共施設タブに対応するグループ単位で取得する。\n各施設にはグループの種類に応じてカード表示用のメトリクスを付与する。\n\nグループキーは agents SoA の type / public_facility / supply_product_id から決定する:\n  - TYPE_CITY                          → \"city\"（市政府）\n  - TYPE_EDUCATION                     → \"education\"（教育機関）\n  - TYPE_TRADE                        → \"port\"（港湾施設）\n  - TYPE_BUILDING かつ public_facility==1 → \"real_estate\"（不動産）\n  - TYPE_STANDARD かつ public_facility==1:\n      - regulated 財を供給          → str(product_id)（公共サービスの製品別タブ）\n      - それ以外                    → \"public_standard\"（公営施設）\n  - 上記いずれにも該当しないエージェント（世帯・民間施設・仮想建設代理エージェント等）は除外する。\n\nTYPE_CITY / TYPE_EDUCATION / TYPE_TRADE は本来的に公共主体であるため\npublic_facility フラグに依らず type のみで抽出する。仮想建設代理エージェントは type==0 の\nため、いずれの type 条件にも合致せず自然に除外される。\n\n各グループのメトリクス（type ごとに付与するフィールドが異なる）:\n  - 不動産（TYPE_BUILDING）: supply_floor / occupancy_rate / rent / balance / utilization_rate\n  - 港湾（TYPE_TRADE）: capacity / import_handling / export_handling / utilization_rate（取扱量は方向別。いずれもt）\n  - サービス・公営（TYPE_STANDARD）: production_capacity / production / sold_amount / price\n                                    / balance / utilization_rate\n  - 市政府・教育（TYPE_CITY / TYPE_EDUCATION）: カード基本情報のみ（メトリクスフィールドなし）\n\nname / import_capacity / export_capacity は SoA ではなく Python オブジェクト側の\n__slots__ プロパティに保持されるため、ループ内で個別に取得する。",
+        "description": "公共サービスを供給する施設の一覧を、公共サービス(products_master の public_service が真の製品)ごとに取得する。\nキーは製品IDの文字列で、公共サービスウィンドウのタブに対応する。\n\n各施設のメトリクス:\n  - production_capacity: スペース制約だけで決まる理論上の生産上限（エポック量）。\n                         space_need<=0 の施設は上限が定まらないため None。\n  - balance: 直近エポックの収支\n  - utilization_rate: 平均稼働率",
         "operationId": "get_public_facilities_api_v1_city_budgets_public_facilities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/city/government-agents": {
+      "get": {
+        "tags": [
+          "city"
+        ],
+        "summary": "Get Government Agents",
+        "description": "市政府ウィンドウに並べる公的な経済主体の一覧を、カテゴリ単位で取得する。\n公共サービスを供給する施設は公共サービスウィンドウ(/budgets/public-facilities)が扱うため含めない。\n\nカテゴリのキー:\n  - intercity: 都市間輸送(都市間旅客輸送を供給する玄関口)\n  - city: 市政府\n  - education: 教育機関\n  - port: 港湾施設(輸出入拠点)\n  - real_estate: 公営の不動産\n  - open_space: 公営のオープンスペース\n  - public_standard: 公営施設(上記以外の財を供給する公営の事業所)\n\nメトリクスは経済主体の type で決まる:\n  - 不動産(TYPE_BUILDING): supply_floor / occupancy_rate / rent / balance / utilization_rate\n  - 輸出入拠点(TYPE_TRADE): capacity / import_handling / export_handling(いずれもt) / utilization_rate\n  - 事業所(TYPE_STANDARD): production / sold_amount / price / balance / utilization_rate\n  - それ以外: なし(agent_id / name / status のみ)",
+        "operationId": "get_government_agents_api_v1_city_government_agents_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6457,6 +6622,64 @@
         }
       }
     },
+    "/api/v1/templates/citizen-skills": {
+      "get": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Get Citizen Skills",
+        "description": "定住済み・就労可能年齢・非在学の住民の高度人材比率と専門分野の内訳を取得する。",
+        "operationId": "get_citizen_skills_api_v1_templates_citizen_skills_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Apply Citizen Skills",
+        "description": "指定比率へ住民のスキルを一度だけ調整し、変更人数と適用後の構成を返す。\n\n年齢・所属世帯・勤務先・学校は変更せず、雇用の移動は次のエポックに任せる。\n子供・在学生・未定住移民・観光客は対象外。比率を維持する設定は保存しない。",
+        "operationId": "apply_citizen_skills_api_v1_templates_citizen_skills_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioSkillDistributionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/templates/complete-construction": {
       "post": {
         "tags": [
@@ -7175,7 +7398,7 @@
           "stats"
         ],
         "summary": "Get Accident Statistics",
-        "description": "事故・災害統計データを取得する。\n\n統計ウィンドウの事故タブが参照する。レスポンスは以下の構造を持つ。\n\n- ``epoch``: 現在のエポック番号\n- ``history``: 過去最大 HISTORY_COUNT エポック分の事故・災害履歴。\n  各要素は ``{epoch, traffic_deaths, collapse_deaths, fire_count, traffic_accident_count, crime_count, crime_sign_count, collapse_count}``。\n  ``traffic_deaths`` は交通事故(AccidentPhase)による死者、\n  ``collapse_deaths`` は建物倒壊(BuildingLifecyclePhase)による死者で、\n  両者の和が ``city.accident_death_count`` に一致する。\n  ``fire_count`` は本格火災(FireResolvePhase)になった建物数、\n  ``traffic_accident_count`` は交通事故が発生した道路数、\n  ``crime_count`` は犯罪発生件数、\n  ``crime_sign_count`` は犯罪の兆候件数、\n  ``collapse_count`` は建物・パスの倒壊件数。\n- ``latest``: 直近1エポック(完了済みエポック)で発生したイベント一覧。\n  - ``traffic_accidents``: 交通事故が発生した道路(path)のリスト\n    (``paths.alert`` の ``ALERT_PATH_ACCIDENT`` ビットから抽出)。\n  - ``fires``: 火災が発生した建物(agent)のリスト\n    (``agents.alert`` の ``ALERT_AGENT_ON_FIRE`` ビットから抽出)。\n  - ``crimes``: 犯罪が発生した建物(agent)のリスト\n    (``agents.alert`` の ``ALERT_AGENT_CRIME`` ビットから抽出)。\n  - ``collapses``: 倒壊した建物/パスのリスト(``city.collapse_events`` から抽出)。\n    パスの倒壊は ``death_count=0`` となる(パス倒壊では市民の直接死亡は扱わない)。\n- ``fire_stations``: 消防署エントリのリスト。\n- ``police_stations``: 警察署エントリのリスト。",
+        "description": "事故・災害統計データを取得する。\n\n統計ウィンドウの事故タブが参照する。レスポンスは以下の構造を持つ。\n\n- ``epoch``: 現在のエポック番号\n- ``history``: 過去最大 HISTORY_COUNT エポック分の事故・災害履歴。\n  各要素は ``{epoch, traffic_deaths, collapse_deaths, fire_count, misfire_count, traffic_accident_count, crime_count, crime_sign_count, collapse_count}``。\n  ``traffic_deaths`` は交通事故(AccidentPhase)による死者、\n  ``collapse_deaths`` は建物倒壊(BuildingLifecyclePhase)による死者で、\n  両者の和が ``city.accident_death_count`` に一致する。\n  ``fire_count`` は本格火災(FireResolvePhase)になった建物数、\n  ``misfire_count`` は本格火災を含めて火の出た建物の総数(失火だけの件数は両者の差)、\n  ``traffic_accident_count`` は交通事故が発生した道路数、\n  ``crime_count`` は犯罪発生件数、\n  ``crime_sign_count`` は犯罪の兆候件数、\n  ``collapse_count`` は建物・パスの倒壊件数。\n- ``latest``: 直近1エポック(完了済みエポック)で発生したイベント一覧。\n  - ``traffic_accidents``: 交通事故が発生した道路(path)のリスト\n    (``paths.alert`` の ``ALERT_PATH_ACCIDENT`` ビットから抽出)。\n  - ``fires``: 火災が発生した建物(agent)のリスト\n    (``agents.alert`` の ``ALERT_AGENT_ON_FIRE`` ビットから抽出)。\n  - ``crimes``: 犯罪が発生した建物(agent)のリスト\n    (``agents.alert`` の ``ALERT_AGENT_CRIME`` ビットから抽出)。\n  - ``collapses``: 倒壊した建物/パスのリスト(``city.collapse_events`` から抽出)。\n    パスの倒壊は ``death_count=0`` となる(パス倒壊では市民の直接死亡は扱わない)。\n- ``fire_stations``: 消防署エントリのリスト。\n- ``police_stations``: 警察署エントリのリスト。",
         "operationId": "get_accident_statistics_api_v1_stats_accidents_get",
         "responses": {
           "200": {
@@ -7314,7 +7537,7 @@
           "stats"
         ],
         "summary": "Get Commute Statistics",
-        "description": "移動統計データ（通勤・通学時間、昼夜人口、地区間流動、地区別の自動車保有率）を取得する。",
+        "description": "移動統計データ（通勤・通学時間、昼夜人口、地区間流動、地区別の自動車保有率）を取得する。\n\nod_flows は地区間の移動を commute(通勤・通学)・shopping(買い物)・total(合計)ごとに\n{from_zone_id, from_name, to_zone_id, to_name, count} のリストで持つ。count は1日あたりの往復回数。\n買い物は直近エポックの記録で、シミュレーション前とロード直後は shopping と total が null。\n\ncommute_time_scopes は通勤・通学時間の分布を集計範囲（都市全体 + 各地区）ごとに持つ。\n各要素は zone_id・name（都市全体はどちらも None）と、5分刻みの分布 distribution\n（{bucket, workers, students} のリスト）。地区は市民の居住地区で振り分ける。",
         "operationId": "get_commute_statistics_api_v1_stats_commute_get",
         "responses": {
           "200": {
@@ -7414,7 +7637,7 @@
           "stats"
         ],
         "summary": "Get Infrastructure Statistics",
-        "description": "インフラ網統計を取得する。\n\nインフラ財の製品ごとに以下を返す:\n- producers: 生産施設の一覧(位置・当エポック生産量・当エポック出荷量・接続状態)\n- consumers: 消費施設の一覧(位置・残需要・当エポック受領量・接続状態)。\n  需要ゼロの施設も接続状態を見せるため、抽出は需要ではなく\n  「variant がこの製品を授受するか」で行う。\n- paths: この製品を流せるインフラパスの一覧(折れ線ジオメトリ・当エポック流量・\n  エポックあたり容量)。建設中パスも含めて返し、UI 側で描き分ける。\n\n接続状態(connected)は「接続端子ノードが、この製品を流せる稼働中キャリアパスの\n端点ノード集合に含まれるか」で判定する(ConstructionProgressPhase の\nALERT_AGENT_INFRA_DISCONNECTED と同じ集合を build_infra_node_sets で共有)。\nキャリアパスは infra_products のみで抽出し path_type では絞らないため、\n電化線路(infra_products を持つ線路・駅パス)も電力タブに含まれる。\nインフラ施設・キャリアパスは都市全体でも高々数千のため、位置・ジオメトリの取得は\nPython オブジェクト参照のハイブリッド方式で行う(alert.py と同じ設計)。",
+        "description": "インフラ網統計を取得する。\n\nインフラ財の製品ごとに以下を返す:\n- producers: 生産施設の一覧(位置・当エポック生産量・当エポック出荷量・稼働率・業務逼迫度・接続状態)\n- consumers: 消費施設の一覧(位置・残需要・当エポック受領量・稼働率・業務逼迫度・接続状態)。\n  需要ゼロの施設も接続状態を見せるため、抽出は需要ではなく\n  「variant がこの製品を授受するか」で行う。\n- paths: この製品を流せるインフラパスの一覧(折れ線ジオメトリ・当エポック流量・\n  エポックあたり容量)。建設中パスも含めて返し、UI 側で描き分ける。\n\n接続状態(connected)は「接続端子ノードが、この製品を流せる稼働中キャリアパスの\n端点ノード集合に含まれるか」で判定する(ConstructionProgressPhase の\nALERT_AGENT_INFRA_DISCONNECTED と同じ集合を build_infra_node_sets で共有)。\nキャリアパスは infra_products のみで抽出し path_type では絞らないため、\n電化線路(infra_products を持つ線路・駅パス)も電力タブに含まれる。\nインフラ施設・キャリアパスは都市全体でも高々数千のため、位置・ジオメトリの取得は\nPython オブジェクト参照のハイブリッド方式で行う(alert.py と同じ設計)。",
         "operationId": "get_infrastructure_statistics_api_v1_stats_infrastructure_get",
         "responses": {
           "200": {
@@ -7696,7 +7919,7 @@
           "zones"
         ],
         "summary": "Update Zone Endpoint",
-        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, color, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, auto_managed\ncolor は #rrggbb 形式の識別色。不正な値は更新せずエラーにする。\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / color / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
+        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, color, path_ids, sides, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio\ncolor は #rrggbb 形式の識別色。不正な値は更新せずエラーにする。\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\n道路の割り当て後に地区の連結性とサイズ制限を満たさない場合は更新しない。",
         "operationId": "update_zone_endpoint_api_v1_zones__zone_id__patch",
         "parameters": [
           {
@@ -11468,6 +11691,30 @@
         ],
         "title": "Endpoint"
       },
+      "EpochProgress": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "step": {
+            "type": "string",
+            "title": "Step"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "count",
+          "step"
+        ],
+        "title": "EpochProgress",
+        "description": "エポック実行の進捗。実行していないときは直前の実行の最後の値が残る。"
+      },
       "EpochReport": {
         "properties": {
           "construction_progress": {
@@ -11588,6 +11835,14 @@
             "type": "number",
             "title": "Received"
           },
+          "utilization": {
+            "type": "number",
+            "title": "Utilization"
+          },
+          "load": {
+            "type": "number",
+            "title": "Load"
+          },
           "connected": {
             "type": "boolean",
             "title": "Connected"
@@ -11599,6 +11854,8 @@
           "name",
           "demand",
           "received",
+          "utilization",
+          "load",
           "connected"
         ],
         "title": "InfraConsumerItem",
@@ -11690,6 +11947,14 @@
             "type": "number",
             "title": "Shipped"
           },
+          "utilization": {
+            "type": "number",
+            "title": "Utilization"
+          },
+          "load": {
+            "type": "number",
+            "title": "Load"
+          },
           "connected": {
             "type": "boolean",
             "title": "Connected"
@@ -11701,6 +11966,8 @@
           "name",
           "production",
           "shipped",
+          "utilization",
+          "load",
           "connected"
         ],
         "title": "InfraProducerItem",
@@ -11997,7 +12264,7 @@
           "created_date"
         ],
         "title": "NotificationItem",
-        "description": "L1通知1件分。\n\nid は差分検出用の安定キー。継続状態系の通知(資源余命など)は状態が続く限り\n同じ id を保ち、ワンショット系(倒壊・死者など)は日付を含んだ id を持つ。\nentity は通知対象のエンティティ参照(クリックで詳細ウィンドウを開くために使う)。\n対象が特定エンティティに紐づかない集約通知では null。\nseverity は \"warning\"(都市崩壊の差し迫った危機。アイコン点滅+赤バッジ) /\n\"caution\"(成長停止・緩慢な荒廃。点滅なしの黄バッジ) の2階調。\nデフォルトは warning(severity 導入前のセーブデータの通知を安全側へ倒す)。"
+        "description": "L1通知1件分。\n\nid は差分検出用の安定キー。継続状態系の通知(資源余命など)は状態が続く限り\n同じ id を保ち、ワンショット系(倒壊・死者など)は日付を含んだ id を持つ。\nentity は通知対象のエンティティ参照(クリックで詳細ウィンドウを開くために使う)。\n対象が特定エンティティに紐づかない集約通知では null。\nseverity は \"warning\"(都市の機能が損なわれつつあり、今打てる手がある問題。アイコン点滅+赤バッジ) /\n\"caution\"(すぐには解決できない、または壊れるのが成長・余力に留まる問題。点滅なしの黄バッジ) の2階調。\nデフォルトは warning(severity 導入前のセーブデータの通知を安全側へ倒す)。"
       },
       "NotificationsResponse": {
         "properties": {
@@ -12457,6 +12724,32 @@
         "title": "ScenarioMetadata",
         "description": "PATCH /api/v1/scenarios/{id} の本文。送った項目だけを書き換える(null・省略は変更しない)。\n\n言語(都市内の名前の言語)は紹介情報では変えられない。名前を付け直さずに言語だけを書き換えると、\nゲーム開始時の付け直しの判定が狂うため。"
       },
+      "ScenarioSkillDistributionRequest": {
+        "properties": {
+          "high_skill_ratio": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "High Skill Ratio",
+            "description": "対象住民に占める高度人材の割合(%)"
+          },
+          "major_ratios": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Major Ratios",
+            "description": "高度人材の専門スキル別内訳(%)。全専門分野を指定し合計100"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "high_skill_ratio",
+          "major_ratios"
+        ],
+        "title": "ScenarioSkillDistributionRequest"
+      },
       "ScenarioTerrainUpdate": {
         "properties": {
           "near_base64": {
@@ -12870,6 +13163,17 @@
           "key": {
             "type": "string",
             "title": "Key"
+          },
+          "phase": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phase"
           },
           "ms": {
             "type": "number",

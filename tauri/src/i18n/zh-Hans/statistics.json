@@ -214,7 +214,6 @@
     "tier2Legend": "档次 2（可购一般商品）",
     "tier3Legend": "档次 3（可购高档商品）",
     "tabRealEstate": "不动产",
-    "tabInfrastructure": "基础设施网",
     "tabTourism": "观光",
     "tourism": {
       "title": "观光统计",
@@ -265,25 +264,6 @@
       "consumptionTitle": "观光消费(本期采购)",
       "noTourists": "没有在住游客",
       "noData": "尚无观光记录"
-    },
-    "infrastructure": {
-      "title": "基础设施网",
-      "production": "产量",
-      "delivered": "配送量",
-      "demand": "需求量",
-      "fulfillment": "充足率",
-      "producers": "生产设施",
-      "consumers": "消费设施",
-      "facilities": "基础设施",
-      "noFacilities": "没有基础设施",
-      "activeSuppliers": "运营中的设施",
-      "coveredBuildings": "范围内的建筑",
-      "uncoveredBuildings": "范围外的建筑",
-      "coveredRate": "范围内比例",
-      "suppliers": "供给设施",
-      "supplierActive": "运营中",
-      "supplierInactive": "未运营",
-      "noData": "没有基础设施财货的数据"
     },
     "realestateTitle": "不动产统计",
     "realestateRentTrend": "平均租金走势",

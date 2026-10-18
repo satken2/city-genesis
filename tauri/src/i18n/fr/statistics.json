@@ -214,7 +214,6 @@
     "tier2Legend": "Palier 2 (jusqu'aux biens courants)",
     "tier3Legend": "Palier 3 (jusqu'aux produits de luxe)",
     "tabRealEstate": "Immobilier",
-    "tabInfrastructure": "Réseaux d'infrastructure",
     "tabTourism": "Tourisme",
     "tourism": {
       "title": "Statistiques du tourisme",
@@ -265,25 +264,6 @@
       "consumptionTitle": "Dépenses touristiques (cette époque)",
       "noTourists": "Aucun touriste en séjour",
       "noData": "Aucune donnée touristique"
-    },
-    "infrastructure": {
-      "title": "Réseaux d'infrastructure",
-      "production": "Production",
-      "delivered": "Volume acheminé",
-      "demand": "Demande",
-      "fulfillment": "Taux de couverture",
-      "producers": "Installations productrices",
-      "consumers": "Installations consommatrices",
-      "facilities": "Installations d'infrastructure",
-      "noFacilities": "Aucune installation d'infrastructure",
-      "activeSuppliers": "Installations en service",
-      "coveredBuildings": "Bâtiments dans la zone",
-      "uncoveredBuildings": "Bâtiments hors zone",
-      "coveredRate": "Part dans la zone",
-      "suppliers": "Installations de fourniture",
-      "supplierActive": "En service",
-      "supplierInactive": "Hors service",
-      "noData": "Aucune donnée sur les biens d'infrastructure"
     },
     "realestateTitle": "Statistiques immobilières",
     "realestateRentTrend": "Évolution du loyer moyen",
