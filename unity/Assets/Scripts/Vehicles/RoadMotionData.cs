@@ -14,14 +14,21 @@ public class RoadMotionData
 [Serializable]
 public class RoadMotionResponse { public List<RoadMotionData> paths; public float active_hours; }
 
-/// <summary>追従の遅れを自由走行速度以内で吸収する。実現不能な締切は超過を許す。</summary>
+/// <summary>
+/// 一般車の速度制御。車は自由走行の速度で走り、混雑による遅れは一様な減速ではなく交差点の手前での待ちとして描く。
+/// 待つ車の後ろには前車への追従で列ができ、締切(コアの混雑込みの所要時間)どおりに抜けるので平均の所要時間は変わらない。
+/// </summary>
 public static class RoadMotionControl
 {
-    public static float DesiredSpeed(float remainingDistance,float remainingSeconds,float freeSpeed)
-        => remainingSeconds > .001f ? Mathf.Clamp(remainingDistance/remainingSeconds,0,freeSpeed) : freeSpeed;
+    public const float CarLength = 4.5f;   // 追従と停止線の判定に使う標準の車長
+    private const float StopMargin = 2f;   // 止まったときに前の車との間に残す距離
+
+    /// <summary>自由走行の速度で端まで走っても締切より早く着く間は、前のバンパーが道路の端に来る位置を前の車とみなす。</summary>
+    public static float StopLineGap(float distanceToEnd,float remainingSeconds,float freeSpeed)
+        => remainingSeconds > distanceToEnd/Mathf.Max(.1f,freeSpeed) ? Mathf.Max(0,distanceToEnd-CarLength*.5f)+StopMargin : float.PositiveInfinity;
     public static float FollowingSpeed(float desired,float current,float gap,float dt)
     {
-        float safe = Mathf.Max(0,gap-2);
+        float safe = Mathf.Max(0,gap-StopMargin);
         float stoppingSpeed = Mathf.Sqrt(2*3*safe);
         float target = Mathf.Min(desired,stoppingSpeed);
         float next = Mathf.MoveTowards(current,target,(target<current?3:1.5f)*dt);

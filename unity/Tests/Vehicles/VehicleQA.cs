@@ -67,7 +67,7 @@ public static partial class VehicleQA
                 EditorApplication.Exit(0); return;
             }
             StreetParking();
-            Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitConsistGeometry(); TransitHighlightSelection(); DriveCamera();
+            Geometry(); Budget(); Junction(); Congestion(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitConsistGeometry(); TransitHighlightSelection(); DriveCamera();
             PedestrianBands(); PedestrianModels(); PedestrianPoses(); accessTimings.Add(PedestrianDrawTiming());
             var report = new List<string>();
             foreach(int split in new[]{1,5}) report.Add(PedestrianNetwork(split,12,1200,false,true));
@@ -544,8 +544,10 @@ public static partial class VehicleQA
             Near(Convert.ToSingle(args[1]),(float)pair[1],.001f,"Shared acceleration/time position");
         }
         var control=game.GetType("RoadMotionControl");
-        float requested=(float)control.GetMethod("DesiredSpeed").Invoke(null,new object[]{100f,5f,12f});
-        Near(requested,12,0.0001f,"Late vehicle exceeds free speed");
+        float early=(float)control.GetMethod("StopLineGap").Invoke(null,new object[]{100f,20f,12f});
+        Near(early,99.75f,0.0001f,"Early car does not stop with its front at the stop line");
+        float late=(float)control.GetMethod("StopLineGap").Invoke(null,new object[]{100f,5f,12f});
+        Check(float.IsPositiveInfinity(late),"Late vehicle waits at the stop line");
         float stopped=(float)control.GetMethod("FollowingSpeed").Invoke(null,new object[]{12f,12f,2f,.1f});
         Near(stopped,0,0.0001f,"Following vehicle overlaps stopped leader");
         var v=New("Vehicle");Call(v,"SetPath",1,Line(Vector3.zero,Vector3.forward*100),true,50f);
@@ -619,6 +621,88 @@ public static partial class VehicleQA
         Call(manager,"Despawn",((IList)Get(manager,"active")).IndexOf(watched));
         Check(manager.GetType().GetProperty("WatchedVehicle").GetValue(manager)==null,"Despawned car stays watched");
         ((IDictionary)Get(manager,"exitRanks")).Clear();
+        UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(paths.gameObject);UnityEngine.Object.DestroyImmediate(master.gameObject);
+    }
+
+    static void Congestion()
+    {
+        var master=new GameObject("CongestionMaster").AddComponent(game.GetType("MasterDataStore"));
+        game.GetType("MasterDataStore").GetField("<Instance>k__BackingField",Flags).SetValue(null,master);
+        ((IDictionary)Get(master,"pathMasterById"))[0]=New("PathMasterItem");
+        var paths=new GameObject("CongestionPaths").AddComponent(game.GetType("PathManager"));
+        var manager=new GameObject("CongestionVehicles").AddComponent(game.GetType("VehicleManager"));
+        Set(manager,"pathManager",paths);
+        var roads=(IDictionary)Get(manager,"roads");var active=(IList)Get(manager,"active");
+        var roadType=manager.GetType().GetNestedType("Road",BindingFlags.NonPublic);
+        var constants=game.GetType("Constants");
+        int street=(int)constants.GetField("PATH_STREET").GetRawConstantValue(),motorway=(int)constants.GetField("PATH_MOTORWAY").GetRawConstantValue();
+        // 1→交差点20→2・3 の丁字路、分割しただけのつなぎ目41で結ぶ 4→5、先の無い高速道路 6・7。
+        var specs=new (int id,int from,int to,int type,Vector3 a,Vector3 b)[]{
+            (1,10,20,street,new Vector3(-200,0,0),new Vector3(-5,0,0)),
+            (2,20,21,street,new Vector3(5,0,0),new Vector3(200,0,0)),
+            (3,20,22,street,new Vector3(0,0,5),new Vector3(0,0,200)),
+            (4,40,41,street,new Vector3(-100,0,50),new Vector3(0,0,50)),
+            (5,41,42,street,new Vector3(0,0,50),new Vector3(100,0,50)),
+            (6,60,61,motorway,new Vector3(-100,0,-80),new Vector3(0,0,-80)),
+            (7,70,71,motorway,new Vector3(-100,0,-120),new Vector3(0,0,-120))};
+        foreach(var spec in specs)
+        {
+            var p=New("GeneratedModels.PathSummary");Set(p,"path_id",spec.id);Set(p,"start_node_id",spec.from);Set(p,"end_node_id",spec.to);
+            Set(p,"travel_direction",1);Set(p,"status",(int)constants.GetField("STATUS_ACTIVE").GetRawConstantValue());
+            Set(p,"path_type",spec.type);Set(p,"path_traffic",new Dictionary<string,float>{{"10",100}});
+            Call(paths,"SavePathToCache",p);
+            var road=Activator.CreateInstance(roadType);Set(road,"data",p);Set(road,"line",Line(spec.a,spec.b));
+            Set(road,"lanes",New("RoadLaneLayout",12f,2f,.5f,0f,2,1));roads.Add(spec.id,road);
+        }
+        Func<int,float> length=path=>Property(Get(roads[path],"line"),"Length");
+        // 道路1は自由走行16.25秒に対して混雑込み65秒(利用率100%の4倍)。
+        var timing=New("RoadMotionData");Set(timing,"path_id",1);Set(timing,"length_m",length(1));
+        Set(timing,"free_seconds",length(1)/12f);Set(timing,"total_seconds",65f);
+        ((IDictionary)Get(manager,"motion"))[1]=timing;
+        var bodies=new List<GameObject>();
+        Func<int,float,bool,object> car=(path,s,withBody)=>
+        {
+            var road=roads[path];
+            var v=New("Vehicle");Set(v,"vehicleType",10);Set(v,"speed",12f);Set(v,"age",100f);
+            if(withBody){var body=new GameObject("CongestionCar"+path);bodies.Add(body);Set(v,"go",body);}
+            Call(v,"SetPath",path,Get(road,"line"),true,s);Call(manager,"SetLane",v,road,false);Call(manager,"SetMotion",v,0f);
+            active.Add(v);return v;
+        };
+
+        var leader=car(1,length(1),false);
+        Check((bool)Get(leader,"holdAtEnd"),"Junction ahead is not a stop line");
+        Check((bool)Call(manager,"Transition",leader),"Leader could not enter the junction");
+        var follower=car(1,length(1)-10,false);
+        Call(manager,"BuildFollowingGaps");
+        Near((float)((IDictionary)Get(manager,"gaps"))[follower],5.5f,.01f,"Car behind does not follow the car inside the junction");
+        active.Clear();
+
+        var joined=car(4,length(4),false);
+        Check(!(bool)Get(joined,"holdAtEnd"),"Split point is treated as a stop line");
+        Set(joined,"motionRemaining",5f);
+        Check((bool)Call(manager,"Transition",joined),"Car could not cross the split point");
+        Near((float)Get(joined,"motionRemaining"),5f+(length(5)+Property(Get(joined,"connector"),"Length"))/12f,.001f,"Unspent delay is not carried past the split point");
+        active.Clear();
+
+        var queued=car(1,0f,true);var stuck=car(6,length(6)-30,true);var driven=car(7,length(7)-30,true);
+        manager.GetType().GetProperty("DrivenVehicle").SetValue(manager,driven);
+        const int hz=30;
+        float departed=-1,waitSpeed=-1,waitRemaining=-1;
+        for(int tick=1;tick<=70*hz;tick++)
+        {
+            Call(manager,"MoveVehicles",1f/hz,Vector3.zero);
+            if(departed<0 && (int)Get(queued,"pathId")!=1)departed=(float)tick/hz;
+            if(tick==40*hz){waitSpeed=(float)Get(queued,"speed");waitRemaining=Property(queued,"Remaining");Check(active.Contains(queued),"Car waiting before its deadline was removed");}
+            if(tick==11*hz)Check(active.Contains(stuck),"Stuck car removed before 10 seconds");
+            if(tick==14*hz)Check(!active.Contains(stuck),"Car stuck past its deadline was not removed");
+        }
+        Near(waitSpeed,0,.001f,"Congested car does not stop before the junction");
+        Near(waitRemaining,2.25f,.3f,"Congested car does not wait with its front at the stop line");
+        Near(departed,65,3,"Congested car does not leave at the core travel time");
+        Check(active.Contains(driven),"Driven car was removed as stuck");
+        accessTimings.Add($"congestion departed={departed:F2}s wait={waitRemaining:F2}m");
+        Call(manager,"StopDrive");Call(manager,"ClearVehicles");
+        foreach(var body in bodies)if(body!=null)UnityEngine.Object.DestroyImmediate(body);
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(paths.gameObject);UnityEngine.Object.DestroyImmediate(master.gameObject);
     }
 
@@ -797,7 +881,7 @@ public static partial class VehicleQA
                 bool exiting=(bool)v.GetType().GetProperty("ExitingRoad").GetValue(v);
                 bool completed=(bool)v.GetType().GetProperty("ExitComplete").GetValue(v);
                 if(exiting && !completed) Near(go.transform.localScale.x,1,.001f,"Car shrinks before leaving road");
-                if((bool)Get(v,"fading")) Check(exiting && completed,"Fade starts on carriageway");
+                if((bool)Get(v,"fading")) Check((exiting && completed) || (float)Get(v,"stuckSeconds")>=10,"Fade starts on carriageway");
                 Check(active.Count<=300,"Global hard cap");
             }
             if(tick>=60*hz)

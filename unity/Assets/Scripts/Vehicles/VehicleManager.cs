@@ -78,10 +78,11 @@ public partial class VehicleManager : MonoBehaviour
     private int motionGeneration;
     private readonly Dictionary<int,RoadMotionData> motion = new();
     private readonly Dictionary<Vehicle,float> gaps = new();
-    private readonly Dictionary<(int,bool,int),List<Vehicle>> followGroups = new();
-    private readonly Stack<List<Vehicle>> followListPool = new();
-    private static readonly System.Comparison<Vehicle> ByProgress = (a,b)=>Progress(a).CompareTo(Progress(b));
+    private readonly Dictionary<(int,bool,int),List<(Vehicle v,float progress)>> followGroups = new();
+    private readonly Stack<List<(Vehicle v,float progress)>> followListPool = new();
+    private static readonly System.Comparison<(Vehicle v,float progress)> ByProgress = (a,b)=>a.progress.CompareTo(b.progress);
     private const float SpawnClearance = 8f;   // 発生位置の前後にこの距離の空きが無い車線には出さない。重なって出ると後続が即停止するため
+    private const float StuckSeconds = 10f;    // 締切を過ぎてこの時間まったく動けない車を消す。交差点を挟んだ待ち合いをほどく
     private Vector3 lastCenter;
     private bool hasCenter;
     private int densityTick;
@@ -620,7 +621,13 @@ public partial class VehicleManager : MonoBehaviour
         float mean=MeanSpeed(v.pathId,v.vehicleType);
         v.motionRemaining=(v.Remaining+connectorLength)/mean;
         v.motionFreeSpeed=motion.TryGetValue(v.pathId,out var data)?data.FreeSpeed:mean;
+        var path=pathManager.GetPathData(v.pathId);
+        v.holdAtEnd=path!=null && pathManager.GetPathsConnectedToNode(v.AheadNodeId(path.start_node_id,path.end_node_id)).Count!=2;
     }
+    /// <summary>
+    /// 同じ道路・向き・車線の中で、すぐ前の車との車間を求める。交差点の中の車は、入る前の車線の先頭の車としても数える。
+    /// 先の道路が詰まって交差点の中で止まった車の後ろに、手前の道路の車が並ぶ。
+    /// </summary>
     private void BuildFollowingGaps()
     {
         gaps.Clear();
@@ -629,15 +636,23 @@ public partial class VehicleManager : MonoBehaviour
         foreach(var v in active)
         {
             if(v.ExitingRoad || v.fading)continue;
-            var key=(v.pathId,v.forward,v.lane);
-            if(!followGroups.TryGetValue(key,out var list)){list=followListPool.Count>0?followListPool.Pop():new();followGroups[key]=list;}
-            list.Add(v);
+            AddFollower((v.pathId,v.forward,v.lane),v,Progress(v));
+            if(v.InIntersection && v.entryPath>=0)AddFollower((v.entryPath,v.entryForward,v.entryLane),v,v.entryLength+v.connectorS);
         }
         foreach(var list in followGroups.Values)
         {
             list.Sort(ByProgress);
-            for(int i=0;i+1<list.Count;i++)gaps[list[i]]=Mathf.Max(0,Progress(list[i+1])-Progress(list[i])-4.5f);
+            for(int i=0;i+1<list.Count;i++)
+            {
+                float gap=Mathf.Max(0,list[i+1].progress-list[i].progress-RoadMotionControl.CarLength);
+                gaps[list[i].v]=gaps.TryGetValue(list[i].v,out float other)?Mathf.Min(other,gap):gap;
+            }
         }
+    }
+    private void AddFollower((int,bool,int) key,Vehicle v,float progress)
+    {
+        if(!followGroups.TryGetValue(key,out var list)){list=followListPool.Count>0?followListPool.Pop():new();followGroups[key]=list;}
+        list.Add((v,progress));
     }
     private static float Progress(Vehicle v)=>v.InIntersection ? -(v.connector.Length-v.connectorS) : v.forward?v.s:v.TotalLength-v.s;
 
@@ -728,12 +743,13 @@ public partial class VehicleManager : MonoBehaviour
             var data = pathManager.GetPathData(v.pathId);
             if (!Drivable(data) || !DirectionAllowsEntry(data.travel_direction, v.forward)) { Despawn(i); continue; }
             float remaining = dt;
+            Vector3 before = v.go.transform.position;
             if (!v.ExitingRoad && !v.fading)
             {
-                float distance = v.Remaining+(v.InIntersection?v.connector.Length-v.connectorS:0);
                 float free=motion.TryGetValue(v.pathId,out var timing)?timing.FreeSpeed:v.motionFreeSpeed;
-                float desired=RoadMotionControl.DesiredSpeed(distance,v.motionRemaining,free);
-                v.speed=RoadMotionControl.FollowingSpeed(desired,v.speed,gaps.TryGetValue(v,out float gap)?gap:float.PositiveInfinity,dt);
+                float gap=gaps.TryGetValue(v,out float ahead)?ahead:float.PositiveInfinity;
+                if(v.holdAtEnd && !v.InIntersection)gap=Mathf.Min(gap,RoadMotionControl.StopLineGap(v.Remaining,v.motionRemaining,free));
+                v.speed=RoadMotionControl.FollowingSpeed(free,v.speed,gap,dt);
                 v.connectorSpeed=v.speed;
                 v.motionRemaining-=dt;
             }
@@ -797,7 +813,7 @@ public partial class VehicleManager : MonoBehaviour
                     if (++transitions > 128) { invalid = true; break; }
                     if (!Transition(v))
                     {
-                        // 退出先のない行き止まりでは実体を残す。見えている高速道路上で消して帳尻を合わせない。
+                        // 退出先のない行き止まりでもその場では消さず、台数の帳尻合わせに使わない。動けないまま締切を過ぎれば詰まった車として消える。
                         v.age += remaining; remaining = 0; break;
                     }
                     continue;
@@ -805,6 +821,14 @@ public partial class VehicleManager : MonoBehaviour
                 break;
             }
             Place(v);
+            // 締切を過ぎても位置が変わらない車は、交差点を挟んだ待ち合いで動けなくなったとみなして消す。
+            // 締切前の停止線での待ちは数えないので、間引きで次の車までが長い待ち行列や1台だけの待ちは消えない。
+            if (!v.ExitingRoad && !v.fading)
+            {
+                bool stuck = v.motionRemaining < 0 && Utils.XZDistanceSquared(before, v.go.transform.position) < 1e-6f;
+                v.stuckSeconds = stuck ? v.stuckSeconds + dt : 0;
+                if (v.stuckSeconds >= StuckSeconds && v != DrivenVehicle && v != FollowedVehicle) v.fading = true;
+            }
             if (invalid || v.fadeElapsed >= Mathf.Max(.01f, fadeDuration) || (v != DrivenVehicle && v != FollowedVehicle && !v.ExitingRoad && Utils.XZDistanceSquared(v.go.transform.position, center) > radius * radius))
                 Despawn(i);
         }
@@ -855,6 +879,7 @@ public partial class VehicleManager : MonoBehaviour
         if (v == DrivenVehicle) RequestedDrivePath = -1;
         if (next.data.path_id != v.pathId) { v.previousPath2 = v.previousPath; v.previousPath = v.pathId; }
         v.Sample(out Vector3 p0, out Vector3 t0);
+        v.entryPath = v.pathId; v.entryForward = v.forward; v.entryLane = v.lane; v.entryLength = v.TotalLength;
         var merge = pathManager.GetMotorwayMerge(node);
         if (merge != null) v.lane = merge.TargetLane(current.path_id, next.data.path_id, v.lane, CityInfoStore.TrafficHand);
         v.SetPath(next.data.path_id, next.line, nextForward);
@@ -864,7 +889,10 @@ public partial class VehicleManager : MonoBehaviour
         v.connector = VehiclePolyline.Connector(p0, t0, p1, t1, intersectionCurveTension);
         v.connectorS = 0;
         v.connectorSpeed = v.speed;
+        // 締切は道路をまたいで通しで数える。つなぎ目で使わなかった遅れは次の交差点で待ち、遅れた分は次の待ちを縮めて取り戻す。
+        float carried = v.motionRemaining;
         SetMotion(v,v.connector.Length);
+        v.motionRemaining += carried;
         if (v == FollowedVehicle) ApplyFollowArrival(v, next);
         return true;
     }

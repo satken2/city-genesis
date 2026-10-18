@@ -186,7 +186,12 @@ public class Vehicle
     public int previousPath = -1, previousPath2 = -1;   // 直前に通ってきたパス(1つ前・2つ前)。クリックした個体の市民の抽選に渡す
     public bool forward;
     public float s, speed, age, distanceSinceJunction;
-    public float motionRemaining, motionFreeSpeed;
+    public float motionRemaining, motionFreeSpeed;   // motionRemaining=コアの所要時間で見た道路の端までの残り秒。道路をまたいで通しで数え、負なら遅れている
+    public bool holdAtEnd;   // 進む先のノードが交差点(接続が2本でない)。分割しただけのつなぎ目では待たず、遅れを次の交差点へ持ち越す
+    public float stuckSeconds;   // 締切を過ぎて位置が変わらない時間(交通演出の時計)
+    public int entryPath = -1, entryLane;   // 交差点の中にいる間、入る前の道路と車線。そこを走る後続の前の車になる
+    public bool entryForward;
+    public float entryLength;
     public float laneOffset, shoulderOffset;
     public float roadHalfWidth;
     public int destinationParcel, destinationBuilding;
