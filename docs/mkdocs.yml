@@ -41,7 +41,7 @@ nav:
     - 全体概要: economics/1_全体概要.md
     - ゲーム内日付: economics/25_ゲーム内日付.md
     - 経済主体: economics/2_経済主体.md
-    - 道路網: economics/3_道路網.md
+    - パスとノード: economics/3_パスとノード.md
     - 地区と土地区画: economics/4_地区と土地区画.md
     - 公共交通機関: economics/6_公共交通機関.md
     - 金融システム: economics/7_金融システム.md
