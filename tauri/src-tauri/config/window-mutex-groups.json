@@ -1,0 +1,163 @@
+{
+  "scenario_tools": [
+    "scenario_tools"
+  ],
+  "settings": [
+    "settings"
+  ],
+  "path_detail": [
+    "path_detail",
+    "zone_detail"
+  ],
+  "zone_detail": [
+    "path_detail",
+    "zone_detail"
+  ],
+  "path_rebuild": [
+    "path_rebuild"
+  ],
+  "intersection_detail": [
+    "intersection_detail"
+  ],
+  "agent_detail": [
+    "agent_detail"
+  ],
+  "citizen_detail": [
+    "citizen_detail"
+  ],
+  "parcel_detail": [
+    "parcel_detail"
+  ],
+  "resource_detail": [
+    "resource_detail"
+  ],
+  "city_map": [
+    "city_map"
+  ],
+  "building_construction": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "agent_creation": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "city_budget": [
+    "city_budget"
+  ],
+  "city_regulation": [
+    "city_regulation"
+  ],
+  "city_statistics": [
+    "city_statistics"
+  ],
+  "parcel_creation": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "natural_resources": [
+    "natural_resources"
+  ],
+  "display_options": [
+    "display_options"
+  ],
+  "achievements": [
+    "achievements"
+  ],
+  "path_build": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "transit_management": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "transit_creation": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "prop_placement": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "resource_edit": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "grading": [
+    "parcel_creation",
+    "path_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
+  ],
+  "save_load": [
+    "save_load"
+  ],
+  "save_list": [
+    "save_list"
+  ],
+  "epoch_confirm": [
+    "epoch_confirm"
+  ]
+}

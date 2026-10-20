@@ -1,0 +1,45 @@
+/*
+ * ==========================================================================
+ * TransitVehicleSelector.css - Public transport vehicle appearance selector.
+ * Used in left-docked creation panels (bc-*) and right-side line details (agent-detail-*), so use
+ * translucent neutral colors without a background, matching free-placement pp-type-tile styling.
+ * Minimum tile width fits three across about 300px; wider panels add columns.
+ * ==========================================================================
+ */
+
+.tvs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+}
+
+/* Override App.css button defaults (border, rounding, padding) to create tiles. */
+.tvs-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6fbff;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tvs-tile:hover { background: rgba(255, 255, 255, 0.14); }
+.tvs-tile[aria-pressed="true"] { border-color: #4ea1ff; background: #203e60; }
+.tvs-tile:focus-visible { outline: 2px solid #4ea1ff; outline-offset: 1px; }
+.tvs-tile:disabled { opacity: 0.5; cursor: default; }
+
+/* Preview images are square, but fit them inside wide frames to keep tile height low. */
+.tvs-thumbnail { display: grid; place-items: center; aspect-ratio: 4 / 3; overflow: hidden; }
+.tvs-thumbnail img { width: 100%; height: 100%; object-fit: contain; }
+.tvs-thumbnail-missing { color: #93a9c0; font-size: 0.86rem; text-align: center; }
+.tvs-name { font-size: 1rem; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+
+/* Read-only display (basic information row). Size the preview image to fit row height. */
+.tvs-label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.tvs-label-thumbnail { width: 28px; height: 21px; object-fit: contain; flex-shrink: 0; }

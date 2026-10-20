@@ -1,0 +1,77 @@
+/**
+ * Styles for the direct building placement land acquisition confirmation window
+ *
+ * Small window with explanation, caution, and two buttons. Color only the confirmation button
+ * with a warning orange matching acquisition negotiations to convey irreversible demolition
+ * of private land/buildings. Follows ZoneMergeConfirmWindow styles.
+ */
+
+.bda {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.bda-muted {
+  padding: 16px;
+  font-size: 1rem;
+  opacity: 0.75;
+}
+
+.bda-desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.bda-note {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.75;
+}
+
+.bda-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.bda-confirm-btn,
+.bda-cancel-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.bda-confirm-btn {
+  border: none;
+  background-color: #d97706;
+  color: #ffffff;
+}
+
+.bda-confirm-btn:hover:not(:disabled) {
+  background-color: #b45309;
+}
+
+.bda-cancel-btn {
+  border: 1px solid #555555;
+  background-color: transparent;
+  color: #cccccc;
+}
+
+.bda-cancel-btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.bda-confirm-btn:disabled,
+.bda-cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

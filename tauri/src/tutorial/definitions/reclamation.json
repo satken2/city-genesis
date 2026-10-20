@@ -1,0 +1,1226 @@
+{
+  "version": 1,
+  "id": "reclamation",
+  "setup": [],
+  "steps": [
+    {
+      "id": "reclamation.plan",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step1.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.grading"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                4,
+                0
+              ],
+              "distance": 220,
+              "yaw": 0,
+              "pitch": 65
+            },
+            "markers": [
+              [
+                0,
+                4,
+                -70
+              ],
+              [
+                160,
+                4,
+                -70
+              ],
+              [
+                160,
+                4,
+                70
+              ],
+              [
+                0,
+                4,
+                70
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.planned",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "reclamation.land",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                0,
+                0
+              ],
+              "distance": 220,
+              "yaw": 0,
+              "pitch": 65
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.land",
+            "equals": true
+          }
+        ]
+      },
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "reclamation",
+          "action": "commission"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "reclamation.parcel",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.land"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                0,
+                0
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 65
+            },
+            "markers": [
+              [
+                50,
+                0,
+                -30
+              ],
+              [
+                110,
+                0,
+                -30
+              ],
+              [
+                110,
+                0,
+                30
+              ],
+              [
+                50,
+                0,
+                30
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.parcel",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "reclamation.hall",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.reclamation.step4.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                0,
+                0
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 65
+            },
+            "markers": [
+              [
+                80,
+                0,
+                0
+              ]
+            ]
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.reclamation.step4.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction",
+              "building.category:9",
+              "building.variant:100",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:9",
+              "building.variant:100",
+              "building.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                80,
+                0,
+                0
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 65
+            },
+            "markers": [
+              [
+                80,
+                0,
+                0
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.hall",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "reclamation.road",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.reclamation.step5.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                15,
+                0,
+                -45
+              ],
+              [
+                150,
+                0,
+                -45
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  15,
+                  0,
+                  -45
+                ],
+                [
+                  150,
+                  0,
+                  -45
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "reclamation.road"
+            },
+            "camera": {
+              "target": [
+                82.5,
+                0,
+                -30
+              ],
+              "distance": 170,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.guide.selectRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type",
+              "path.variant"
+            ],
+            "highlight": [
+              "path.type",
+              "path.variant"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                15,
+                0,
+                -45
+              ],
+              [
+                150,
+                0,
+                -45
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  15,
+                  0,
+                  -45
+                ],
+                [
+                  150,
+                  0,
+                  -45
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "reclamation.road"
+            },
+            "camera": {
+              "target": [
+                82.5,
+                0,
+                -30
+              ],
+              "distance": 170,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": {
+              "$constant": "TUTORIAL_STREET"
+            }
+          }
+        },
+        {
+          "id": "start",
+          "textKey": "tutorial.guide.placeStart",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                15,
+                0,
+                -45
+              ],
+              [
+                150,
+                0,
+                -45
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  15,
+                  0,
+                  -45
+                ],
+                [
+                  150,
+                  0,
+                  -45
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "reclamation.road"
+            },
+            "camera": {
+              "target": [
+                82.5,
+                0,
+                -30
+              ],
+              "distance": 170,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 1
+          }
+        },
+        {
+          "id": "end",
+          "textKey": "tutorial.guide.placeEnd",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                15,
+                0,
+                -45
+              ],
+              [
+                150,
+                0,
+                -45
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  15,
+                  0,
+                  -45
+                ],
+                [
+                  150,
+                  0,
+                  -45
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "reclamation.road"
+            },
+            "camera": {
+              "target": [
+                82.5,
+                0,
+                -30
+              ],
+              "distance": 170,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2
+          }
+        },
+        {
+          "id": "finalize",
+          "textKey": "tutorial.guide.finalizeRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                15,
+                0,
+                -45
+              ],
+              [
+                150,
+                0,
+                -45
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  15,
+                  0,
+                  -45
+                ],
+                [
+                  150,
+                  0,
+                  -45
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "reclamation.road"
+            },
+            "camera": {
+              "target": [
+                82.5,
+                0,
+                -30
+              ],
+              "distance": 170,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2,
+            "phase": "editing"
+          }
+        },
+        {
+          "id": "confirm",
+          "textKey": "tutorial.guide.confirmRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel",
+              "path.confirm"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                15,
+                0,
+                -45
+              ],
+              [
+                150,
+                0,
+                -45
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  15,
+                  0,
+                  -45
+                ],
+                [
+                  150,
+                  0,
+                  -45
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "reclamation.road"
+            },
+            "camera": {
+              "target": [
+                82.5,
+                0,
+                -30
+              ],
+              "distance": 170,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "paths",
+        "target": "reclamation.road",
+        "where": [
+          {
+            "field": "path_variant",
+            "equals": {
+              "$constant": "TUTORIAL_STREET"
+            }
+          },
+          {
+            "field": "start_point",
+            "equals": [
+              15,
+              0,
+              -45
+            ]
+          },
+          {
+            "field": "end_point",
+            "equals": [
+              150,
+              0,
+              -45
+            ]
+          },
+          {
+            "field": "curved",
+            "equals": false
+          },
+          {
+            "field": "status",
+            "oneOf": [
+              {
+                "$constant": "STATUS_SCHEDULED_CONSTRUCTION"
+              },
+              {
+                "$constant": "STATUS_CONSTRUCTING"
+              },
+              {
+                "$constant": "STATUS_ACTIVE"
+              }
+            ]
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "reclamation",
+          "action": "commission_road"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "reclamation.substation_lot",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step6.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.land"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                117.5,
+                0,
+                -36.5
+              ],
+              [
+                142.5,
+                0,
+                -36.5
+              ],
+              [
+                142.5,
+                0,
+                -11.5
+              ],
+              [
+                117.5,
+                0,
+                -11.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                130,
+                0,
+                -24
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.substation_lot",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "reclamation.substation",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.reclamation.step7.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                130,
+                0,
+                -24
+              ]
+            ],
+            "camera": {
+              "target": [
+                130,
+                0,
+                -24
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.reclamation.step7.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction",
+              "building.category:7",
+              "building.variant:1062",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:7",
+              "building.variant:1062",
+              "building.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                130,
+                0,
+                -24
+              ]
+            ],
+            "camera": {
+              "target": [
+                130,
+                0,
+                -24
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.substation",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "reclamation",
+          "action": "commission_substation"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "reclamation.wind_lot",
+      "legacyStep": 8,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.reclamation.step8.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.land"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                225,
+                0,
+                -45
+              ],
+              [
+                295,
+                0,
+                -45
+              ],
+              [
+                295,
+                0,
+                25
+              ],
+              [
+                225,
+                0,
+                25
+              ]
+            ],
+            "camera": {
+              "target": [
+                260,
+                0,
+                -10
+              ],
+              "distance": 200,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.wind_lot",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "reclamation.windfarm",
+      "legacyStep": 9,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.reclamation.step9.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                260,
+                0,
+                -10
+              ]
+            ],
+            "camera": {
+              "target": [
+                260,
+                0,
+                -10
+              ],
+              "distance": 200,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.reclamation.step9.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction",
+              "building.category:7",
+              "building.variant:1071",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:7",
+              "building.variant:1071",
+              "building.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                260,
+                0,
+                -10
+              ]
+            ],
+            "camera": {
+              "target": [
+                260,
+                0,
+                -10
+              ],
+              "distance": 200,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.windfarm",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "reclamation",
+          "action": "commission_windfarm"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "reclamation.cable",
+      "legacyStep": 10,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.reclamation.step10.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                260,
+                0,
+                25
+              ],
+              [
+                142.5,
+                0,
+                -24
+              ]
+            ],
+            "camera": {
+              "target": [
+                201.25,
+                0,
+                0
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.reclamation.step10.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:11",
+              "path.variant:1104",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:11",
+              "path.variant:1104"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                260,
+                0,
+                25
+              ],
+              [
+                142.5,
+                0,
+                -24
+              ]
+            ],
+            "camera": {
+              "target": [
+                201.25,
+                0,
+                0
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 1104
+          }
+        },
+        {
+          "id": "draw",
+          "textKey": "tutorial.reclamation.step10.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.back",
+              "path.cancel",
+              "path.confirm",
+              "path.height",
+              "path.followTerrain",
+              "path.embankment",
+              "path.shapeEditor",
+              "path.plan",
+              "path.profile",
+              "path.route"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                260,
+                0,
+                25
+              ],
+              [
+                142.5,
+                0,
+                -24
+              ]
+            ],
+            "camera": {
+              "target": [
+                201.25,
+                0,
+                0
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "reclamation",
+          "action": "commission_grid"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.grid",
+            "equals": true
+          }
+        ]
+      }
+    }
+  ]
+}

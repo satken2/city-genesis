@@ -1,0 +1,44 @@
+.citizen-tracking-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.67rem;
+}
+
+/* Tracking list: stack name/age and district/workplace (school) in each row, with camera and Remove buttons on the right. */
+.citizen-tracking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.citizen-tracking-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Row for the citizen currently followed by the camera */
+.citizen-tracking-row--following {
+  border-color: rgba(255, 170, 80, 0.5);
+}
+
+.citizen-tracking-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.citizen-tracking-meta {
+  font-size: 0.9rem;
+  color: #9fb3c8;
+}

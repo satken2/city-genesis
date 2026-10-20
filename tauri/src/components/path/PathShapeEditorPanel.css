@@ -1,0 +1,217 @@
+/* 2D path shape editor. Match the palette and sizing of the city map window (CityMapWindow.css). */
+
+/*
+ * Do not set a background. Expose the popup base (App.css .popup-shell gradient) so space around the map,
+ * profile, and cards matches the rest of the window.
+ */
+.pse {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  color: #cdd6f4;
+  overflow: hidden;
+}
+
+.pse-plan {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/*
+ * Shared heading row for the three sections (plan shape, longitudinal profile, route proposal): explanation beside
+ * the heading, actions at the right. Use separators without a background to blend into the parent, inside cards or directly in the panel.
+ */
+.pse-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #2a3149;
+}
+
+.pse-section-title {
+  flex-shrink: 0;
+  color: #cdd6f4;
+  font-size: 1.04rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Explanation beside the heading. Wrap to show all text when space is limited; do not truncate. */
+.pse-hint {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  color: #cdd6f4;
+  white-space: normal;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.pse-hint--muted {
+  color: #6c7a94;
+}
+
+.pse-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Route proposal card perimeter. Add only vertical spacing so the card spans the panel's full width. */
+.pse-route-area {
+  flex: 0 0 auto;
+  padding: 12px 0;
+  border-top: 1px solid #2a3149;
+}
+
+.pse-route-card {
+  border: 1px solid #2a3149;
+  border-radius: 6px;
+  background: #131827;
+  overflow: hidden;
+}
+
+.pse-route-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
+.pse-route-mode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pse-select {
+  height: 25px;
+  max-width: 190px;
+  padding: 2px 7px;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 1rem;
+}
+
+.pse-route-message {
+  min-width: 0;
+  flex-basis: 100%;
+  color: #f38ba8;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.pse-btn {
+  padding: 4px 12px;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pse-btn:hover {
+  background: #26324f;
+  border-color: #4f6ba8;
+}
+
+.pse-btn:disabled,
+.pse-select:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.pse-btn--primary {
+  border-color: #4f6ba8;
+  background: #26324f;
+}
+
+.pse-map {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Alignment summary (lower left). */
+.pse-summary {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 14px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.8);
+  font-size: 1rem;
+  color: #93a9c0;
+  pointer-events: none;
+}
+
+.pse-summary-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pse-summary-label {
+  color: #6c7a94;
+}
+
+.pse-summary-value {
+  font-family: Consolas, Menlo, monospace;
+  color: #cdd6f4;
+}
+
+.pse-summary-value--bad {
+  color: #f38ba8;
+}
+
+.pse-summary-limit {
+  font-family: Consolas, Menlo, monospace;
+  color: #6c7a94;
+}
+
+/* Cursor coordinates and alignment sample values (lower right). */
+.pse-status {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-family: Consolas, Menlo, monospace;
+  font-size: 1rem;
+  color: #93a9c0;
+  white-space: pre;
+  pointer-events: none;
+}
+
+/* Longitudinal profile strip (below the map; elevated/underground variants only). */
+.pse-profile {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 32%;
+  min-height: 120px;
+  border-top: 1px solid #2a3149;
+}
+
+.pse-profile-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #0b0e16;
+}

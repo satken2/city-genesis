@@ -1,0 +1,30 @@
+{
+  "notifications": {
+    "trayTooltip": "城市通知",
+    "empty": "目前沒有需要處理的問題",
+    "loadFailed": "通知取得失敗",
+    "sections": {
+      "warning": "警告 — 需要立即處理",
+      "caution": "注意 — 阻礙發展的問題"
+    },
+    "types": {
+      "resource_runway": "資源「{{name}}」預計再約{{remaining_epochs}}個紀元將枯竭",
+      "resource_depleted": "資源「{{name}}」已枯竭",
+      "facility_inoperative": "公共設施「{{name}}」無法營運",
+      "facility_inoperative_labor": "公共設施「{{name}}」因勞動力不足而無法營運",
+      "facility_inoperative_material": "公共設施「{{name}}」因原物料不足而無法營運",
+      "facility_inoperative_high_skill": "公共設施「{{name}}」因專業人才不足而無法營運",
+      "facility_inoperative_budget": "公共設施「{{name}}」因預算不足而縮減營運",
+      "education_low_enrollment": "教育機構「{{name}}」招不到學生，處於低負載營運（在學{{enrolled}}人/名額{{max_students}}人）",
+      "infra_facility_down": "基礎設施「{{name}}」已停止運轉",
+      "infra_disconnected": "有{{count}}處設施未接入基礎設施網路",
+      "rail_capacity_exceeded": "有{{count}}段軌道的列車班次超過了軌道容量",
+      "collapse": "有{{count}}處建築・道路倒塌",
+      "collapse_with_deaths": "有{{count}}處建築・道路倒塌，{{deaths}}人死亡",
+      "deaths_traffic": "交通事故導致{{count}}人死亡",
+      "tenant_blocked_by_parcel_size": "在地區「{{zone_name}}」無法建造可容納「{{tenant_name}}」的建築（需要{{required}}m2，地塊最大為{{max_capacity}}m2）。需要更大的地塊",
+      "unknown": "發生了重大事件",
+      "sanitation": "{{count}}個家庭的衛生狀況正在惡化。請改善污水和垃圾處理。"
+    }
+  }
+}

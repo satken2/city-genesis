@@ -1,0 +1,47 @@
+{
+  "citizen": {
+    "basicInfo": "기본 정보",
+    "age": "나이",
+    "ageValue": "{{age}}세",
+    "gender": "성별",
+    "male": "남성",
+    "female": "여성",
+    "maritalStatus": "혼인 상태",
+    "single": "미혼",
+    "married": "기혼",
+    "household": "소속 가구",
+    "workEducation": "취업・교육",
+    "employer": "근무처",
+    "unemployed": "무직",
+    "school": "재학 학교",
+    "notEnrolled": "재학 안 함",
+    "major": "전공 스킬",
+    "higherEducation": "고등 교육",
+    "graduated": "수료",
+    "notGraduated": "미수료",
+    "skills": "스킬",
+    "publicSafety": "치안",
+    "criminality": "범죄 성향",
+    "commuteTime": "통근 시간"
+  },
+  "household": {
+    "familyType": "가구 유형",
+    "familySingle": "1인",
+    "familyCouple": "부부",
+    "familyFamily": "가족",
+    "familySenior": "고령",
+    "hasAutomobile": "자동차 보유",
+    "noAutomobile": "자동차 없음",
+    "discretionaryIncome": "가처분 소득",
+    "satisNutrition": "영양 충족도",
+    "satisHealthcare": "의료 충족도",
+    "satisLeisure": "오락·여가",
+    "satisTourism": "관광 충족도",
+    "tourist": "관광객",
+    "partySize": "인원",
+    "members": "가구 구성원"
+  },
+  "education": {
+    "people": "명"
+  }
+}

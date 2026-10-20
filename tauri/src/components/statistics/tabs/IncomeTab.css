@@ -1,0 +1,233 @@
+/* ==========================================================================
+   Income statistics tab (IncomeTab) stylesheet
+   ========================================================================== */
+
+.income-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #e2e8f0;
+}
+
+/* Scope selection header */
+.income-tab__header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.scope-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scope-selector__label {
+  font-size: 1rem;
+  color: #8ba3bb;
+  font-weight: 500;
+}
+
+.scope-selector__select {
+  background: #141c28;
+  border: 1px solid #2a3b50;
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  padding: 4px 24px 4px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.scope-selector__select:hover,
+.scope-selector__select:focus {
+  border-color: #228be6;
+}
+
+/* Layout body */
+.income-tab__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 1:1 left/right split */
+  gap: 16px;
+  flex: 1;
+  min-height: 0; /* Prevent children inside flex from overflowing. */
+}
+
+.income-tab__left,
+.income-tab__right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Shared statistics cards */
+.income-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 26, 38, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 14px 16px;
+  height: 100%;
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.income-card--half {
+  height: calc(50% - 8px); /* Half height, accounting for the gap */
+}
+
+.income-card__title {
+  font-size: 1.11rem;
+  font-weight: 700;
+  color: #c1c9d2;
+  margin: 0 0 10px 0;
+  border-left: 3px solid #228be6;
+  padding-left: 8px;
+  line-height: 1.2;
+}
+
+.income-card__subtitle-hint {
+  font-size: 0.93rem;
+  font-weight: normal;
+  color: #8ba3bb;
+}
+
+/* Chart area */
+.income-chart-container {
+  flex: 1;
+  width: 100%;
+  height: calc(100% - 24px);
+  min-height: 0;
+}
+
+/* Pie chart layout */
+.income-pie-chart-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex: 1;
+  width: 100%;
+  height: calc(100% - 24px);
+  min-height: 0;
+}
+
+.income-pie-chart {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+/* Pie chart center text */
+.pie-center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pie-center-label__num {
+  font-size: 1.48rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1;
+}
+
+.pie-center-label__unit {
+  font-size: 0.83rem;
+  color: #8ba3bb;
+  margin-top: 2px;
+}
+
+/* Pie chart legend */
+.income-pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 220px;
+}
+
+.pie-legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.pie-legend-item__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.pie-legend-item__label {
+  color: #8ba3bb;
+  margin-right: 12px;
+  white-space: nowrap;
+}
+
+.pie-legend-item__val {
+  color: #f1f5f9;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* Tooltip styles */
+.income-tooltip {
+  background: #141c28;
+  border: 1px solid #2a3b50;
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.income-tooltip__bin,
+.income-tooltip__tier {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin: 0 0 6px 0;
+}
+
+.income-tooltip__item,
+.income-tooltip__val {
+  font-size: 1rem;
+  margin: 4px 0 0 0;
+  color: #c1c9d2;
+}
+
+/* Loading, error, and no-data states */
+.income-tab__loading,
+.income-tab__error,
+.income-tab__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1rem;
+  color: #8ba3bb;
+}
+
+.income-tab__empty {
+  background: rgba(18, 26, 38, 0.2);
+  border-radius: 6px;
+}

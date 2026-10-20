@@ -1,0 +1,18 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "交流道",
+      "jct": "系統交流道"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "出發道路",
+      "to": "到達道路",
+      "road": "{{type}} #{{id}}",
+      "none": "沒有相連的道路組合。"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Floor Composition",
+    "parking": "Parking",
+    "type": "Building Type",
+    "durability": "Durability",
+    "floors": "Floors",
+    "floorsValue": "{{floors}}F (Floor Area {{area, number}}㎡)",
+    "heightLabel": "Height: {{value}}m",
+    "baseAreaLabel": "Base Area: {{area, number}}㎡",
+    "underMaintenance": "Under Maintenance",
+    "parkingCapacity": "Parking Capacity",
+    "parkingCapacityValue": "{{capacity}} cars",
+    "parkingDay": "Daytime",
+    "parkingNight": "Nighttime",
+    "parkingUsage": "{{used}} / {{capacity}} cars"
+  },
+  "building_appearance": {
+    "variantLabel": "Appearance {{index}}",
+    "layoutHint": "Drag a card onto the site to place / drag to move / Shift+drag to rotate / Delete key to remove",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "Remove Selected",
+    "apply": "Apply",
+    "saveFailed": "Failed to save the appearance",
+    "noSubbuildings": "No sub-buildings are defined for this building type"
+  }
+}

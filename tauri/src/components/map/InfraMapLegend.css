@@ -1,0 +1,88 @@
+/* Infrastructure display legend for the city map. */
+
+.infra-map-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.infra-map-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.infra-map-legend__gradient {
+  display: inline-block;
+  width: 44px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, hsl(190, 85%, 55%), hsl(95, 85%, 55%), hsl(0, 85%, 55%));
+}
+
+/*
+ * Flow stripes (a swatch matching the direction and feel of the map animation;
+ * static under prefers-reduced-motion).
+ */
+.infra-map-legend__stripes {
+  display: inline-block;
+  width: 44px;
+  height: 8px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.85) 0 5px,
+    hsl(190, 85%, 35%) 5px 12px
+  );
+  background-size: 12px 100%;
+  animation: infra-map-legend-stripes-flow 6.5s linear infinite;
+}
+
+@keyframes infra-map-legend-stripes-flow {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infra-map-legend__stripes {
+    animation: none;
+  }
+}
+
+.infra-map-legend__marker {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #0b0f19;
+}
+
+.infra-map-legend__marker--circle {
+  border-radius: 50%;
+}
+
+.infra-map-legend__marker--diamond {
+  transform: rotate(45deg);
+}
+
+.infra-map-legend__swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid #0b0f19;
+}
+
+.infra-map-legend__line {
+  display: inline-block;
+  width: 22px;
+  border-top: 2px solid;
+}
+
+.infra-map-legend__line--dashed {
+  border-top-style: dashed;
+}

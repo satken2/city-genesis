@@ -1,0 +1,208 @@
+/*
+ * Fields inside building information (BuildingInfo).
+ * Arrange labels and content vertically.
+ */
+.building-info-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.building-info-tenants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ========== Tab navigation ========== */
+.agent-detail-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.agent-detail-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #9db0c5;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.agent-detail-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6fbff;
+}
+
+.agent-detail-tab--active {
+  background: rgba(78, 161, 255, 0.1);
+  color: #4ea1ff;
+  border-bottom: 2px solid #4ea1ff;
+}
+
+.agent-detail-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ========== Alert display ========== */
+.agent-detail-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.agent-detail-alert-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  line-height: 1.35;
+  background: rgba(220, 120, 30, 0.12);
+  border: 1px solid rgba(255, 160, 50, 0.35);
+  color: #ffb875;
+}
+
+.agent-detail-alert-title {
+  font-weight: bold;
+  font-size: 1.18rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.agent-detail-alert-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.agent-detail-alert-desc {
+  opacity: 0.85;
+  padding-left: 20px;
+}
+
+/* ========== Target utilization ========== */
+.agent-detail-utilization-target {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.agent-detail-utilization-target-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.agent-detail-utilization-target-title {
+  font-size: 0.97rem;
+  font-weight: 600;
+  color: #9db0c5;
+  white-space: nowrap;
+}
+
+.agent-detail-utilization-target-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #4ea1ff;
+}
+
+.agent-detail-utilization-target-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-detail-utilization-target-slider {
+  flex: 1;
+  height: 5px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.agent-detail-utilization-target-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #4ea1ff;
+  cursor: pointer;
+  box-shadow: 0 0 4px rgba(78, 161, 255, 0.5);
+  transition: transform 0.1s;
+}
+
+.agent-detail-utilization-target-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* === Construction not started warning banner === */
+
+.pending-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.pending-banner--active {
+  padding: 10px 14px;
+  background: rgba(255, 159, 26, 0.08);
+  border: 1px solid rgba(255, 159, 26, 0.25);
+  border-radius: 6px;
+}
+
+.pending-banner__text {
+  font-size: 1rem;
+  color: #ffb03a;
+  font-weight: 500;
+}
+
+.pending-banner__btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ff9f1a;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pending-banner__btn:hover {
+  background: #ffb03a;
+}
+
+.pending-banner__btn img {
+  width: 12px;
+  height: 12px;
+}
+
+
+

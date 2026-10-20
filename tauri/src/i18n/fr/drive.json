@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Balade",
+    "car": "Voiture",
+    "rail": "Lignes ferroviaires",
+    "running": "Véhicules en circulation",
+    "standard": "Voiture particulière",
+    "commercial": "Véhicule utilitaire",
+    "truck": "Camion",
+    "finishEditing": "Terminez les modifications avant de démarrer une balade.",
+    "noLines": "Aucune ligne ferroviaire en service n'est disponible.",
+    "pickRail": "Cliquez sur une voie de la ligne choisie.",
+    "pickRoad": "Cliquez sur une route en service.",
+    "pickVehicle": "Cliquez sur une voiture, un bus ou un train en circulation (faites glisser pour déplacer la carte).",
+    "clickStart": "Choisissez le départ (faites glisser pour déplacer la carte).",
+    "startSelected": "Départ sélectionné. Suivez la direction de la flèche.",
+    "reverse": "Inverser le sens",
+    "start": "Partir",
+    "back": "Retour",
+    "close": "Quitter (Échap)",
+    "invalidStart": "Départ impossible ici. Choisissez une route praticable ou une voie de votre ligne.",
+    "invalidVehicle": "Aucun véhicule sélectionné. Cliquez sur une voiture, un bus ou un train en circulation.",
+    "notReady": "Ce sens est indisponible ou les environs sont en cours de chargement. Changez de sens ou de position, ou réessayez plus tard."
+  }
+}

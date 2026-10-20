@@ -1,0 +1,164 @@
+/**
+ * Resource editor styles
+ *
+ * Same layout pattern as PathConstructionPanel.css / BuildingConstructionPanel.css.
+ * Optimized for a single column within popup windows.
+ */
+
+/* ---- Root layout ---- */
+.pc-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- Sections ---- */
+.pc-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pc-section-title {
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: #c5d4e3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ---- Select boxes ---- */
+.pc-select {
+  width: 100%;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.pc-select:focus {
+  border-color: #4ea1ff;
+}
+
+.pc-select option {
+  background: #182231;
+  color: #f6fbff;
+}
+
+/* ---- Settings section ---- */
+.pc-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pc-settings-label {
+  font-size: 1rem;
+  color: #c5d4e3;
+  min-width: max-content;
+}
+
+.pc-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- Information grid ---- */
+.pc-info-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  /* Scale row height with font size and grow rows when values wrap; fixed heights would overlap following rows. */
+  grid-auto-rows: minmax(2.04rem, auto);
+  gap: 3px 10px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pc-info-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.pc-info-value {
+  font-size: 1rem;
+  color: inherit;
+  font-family: "Consolas", "Menlo", monospace;
+}
+
+/* Preset explanation and interpretation of inputs (ResourcePresetHint) */
+.pc-hint {
+  font-size: 0.97rem;
+  color: #93a9c0;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.pc-no-nodes-message {
+  font-size: 1rem;
+  color: #93a9c0;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ---- Action buttons ---- */
+.pc-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.pc-btn {
+  flex: 1;
+  min-width: 60px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.pc-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pc-btn-confirm {
+  background: #4ea1ff;
+  color: #ffffff;
+  border-color: #4ea1ff;
+  font-weight: 600;
+}
+
+.pc-btn-confirm:hover {
+  opacity: 0.85;
+}
+
+.pc-btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Loading / empty ---- */
+.pc-muted {
+  color: #9db0c5;
+  font-size: 1rem;
+  text-align: center;
+  padding: 8px;
+}

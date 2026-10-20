@@ -1,0 +1,82 @@
+/* Agent table. Fills the caller's remaining height and scrolls overflowing rows internally. */
+
+.agent-table {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.agent-table__empty {
+  color: #94a3b8;
+  font-size: 1rem;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.agent-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  color: #e2e8f0;
+}
+
+.agent-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #1a2230;
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #8ba3bb;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  user-select: none;
+}
+
+.agent-table tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+}
+
+.agent-table .agent-table__cell--right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.agent-table .agent-table__cell--center {
+  text-align: center;
+}
+
+.agent-table__th--sortable {
+  cursor: pointer;
+  transition: color 0.12s;
+}
+
+.agent-table__th--sortable:hover {
+  color: #cbd5e1;
+}
+
+.agent-table .agent-table__th--active {
+  color: #4ea1ff;
+}
+
+.agent-table__arrow {
+  margin-left: 4px;
+  font-size: 1rem;
+  opacity: 0.65;
+}
+
+.agent-table__row {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.agent-table__row:hover {
+  background: rgba(78, 161, 255, 0.08);
+}

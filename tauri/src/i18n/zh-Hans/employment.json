@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "要求技能",
+    "wage": "工资",
+    "quota": "所需劳动力",
+    "totalLabor": "已雇佣劳动力",
+    "employees": "员工列表",
+    "hired": "已雇佣",
+    "vacant": "未填补",
+    "noQuota": "无需劳动力",
+    "noEmployees": "没有员工",
+    "statusTitle": "雇佣状况"
+  }
+}

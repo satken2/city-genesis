@@ -1,0 +1,196 @@
+{
+  "agent": {
+    "back": "戻る",
+    "editAppearance": "外観を変更",
+    "relocateCityHall": "市庁舎を移転",
+    "publicFacility": "公共施設",
+    "underAcquisition": "買収交渉中",
+    "publicFacilityPanel": {
+      "title": "公共/公営施設"
+    },
+    "abandon": "放棄",
+    "abandonHint": "維持を放棄し、修繕を行わず老朽化に任せます",
+    "statusSince": {
+      "founded": "設立日",
+      "householdFormed": "世帯形成日",
+      "arrived": "到着日",
+      "opened": "開業日",
+      "schoolOpened": "開校日",
+      "completed": "竣工日",
+      "operatingSince": "稼働開始日",
+      "resumed": "再開日",
+      "paused": "停止日",
+      "suspended": "休業日",
+      "schoolClosed": "休校日",
+      "constructionStarted": "着工日",
+      "demolitionScheduled": "解体決定日",
+      "demolitionStarted": "解体着工日",
+      "demolished": "解体完了日",
+      "collapsed": "倒壊日",
+      "burnedDown": "焼失日",
+      "default": "ステータス変更日"
+    },
+    "reserves": "現預金",
+    "revenues": "収入",
+    "expenses": "支出",
+    "zone": "所属地区",
+    "building": "入居建物",
+    "rent": "家賃",
+    "floorOccupancy": "フロア占有量",
+    "tenants": "入居テナント",
+    "tabBasicInfo": "基本情報",
+    "utilizationTarget": "稼働率目標",
+    "currentUtilization": "現在の稼働率",
+    "constructionSpeed": "建設スピード",
+    "constructionCostPerEpoch": "1エポックの建設コスト",
+    "remainingConstruction": "残り建設期間",
+    "remainingEpochs": "約{{n}}エポック",
+    "tabBuildingInfo": "建物情報",
+    "tabCargoInfo": "荷役情報",
+    "tabHouseholdInfo": "世帯情報",
+    "tabTradeInfo": "需給・取引",
+    "tabEmploymentInfo": "雇用情報",
+    "action": {
+      "purchase": "買収",
+      "bulldoze": "取り壊し",
+      "cancelBulldoze": "取り壊し解除",
+      "pause": "一時停止",
+      "resume": "再開",
+      "delete": "削除",
+      "repair": "修繕",
+      "rebuild": "再建",
+      "edit": "編集",
+      "startConstruction": "着工",
+      "stopConstruction": "保留",
+      "cancelAbandon": "放棄を解除",
+      "explode": "爆破",
+      "explodeConfirm": "この建物を事故に見せかけて爆破しますか？\n建物は即座に倒壊し、中に居た住民と従業員は死亡します。市民感情は大きく悪化し、この操作は取り消せません。",
+      "explodeTitle": "建物の爆破",
+      "explodeConfirmAction": "爆破する"
+    },
+    "pendingWarning": "この建物は計画中です。着工を指示してください。",
+    "alerts": {
+      "diagnoseHint": "クリックして原因を診断",
+      "title": "アラート",
+      "constructionShortage": {
+        "title": "建設サービス不足",
+        "description": "建設予算が不足しているため、工事が遅延しています。"
+      },
+      "onFire": {
+        "title": "火災発生！",
+        "description": "建物で火災が発生しています。"
+      },
+      "accidentalFire": {
+        "title": "失火（小火）",
+        "description": "建物で失火が発生しましたが、小規模に抑えられました。"
+      },
+      "infraDisconnected": {
+        "title": "インフラ網未接続",
+        "description": "この施設の接続端子にインフラパスが接続されていません。網に接続されるまで供給・受け取りができません。"
+      },
+      "crime": {
+        "title": "犯罪発生",
+        "description": "この建物で犯罪が発生しました。"
+      },
+      "crimeSign": {
+        "title": "犯罪の兆候",
+        "description": "この建物で犯罪の兆候が確認されました。治安の悪化に注意してください。"
+      },
+      "laborShortage": {
+        "title": "労働力不足",
+        "description": "従業員が不足しており、生産・サービス提供が計画を下回っています。"
+      },
+      "materialShortage": {
+        "title": "原材料不足",
+        "description": "原材料の調達が不足しており、生産・サービス提供が計画を下回っています。"
+      },
+      "highSkillShortage": {
+        "title": "専門人材不足",
+        "description": "必要な高スキル人材を確保できておらず、稼働できません。"
+      },
+      "budgetCapped": {
+        "title": "予算不足",
+        "description": "割り当てられた予算が必要額を大きく下回っており、稼働を縮小しています。予算配分を見直してください。"
+      },
+      "facilityWarning": {
+        "title": "公共施設の運営不能",
+        "description": "この施設のサービス供給が目標を大きく下回っています。労働力や原材料の調達状況を確認してください。"
+      },
+      "sanitationWarning": {
+        "title": "衛生状態の悪化",
+        "description": "この建物の敷地で衛生状態が深刻に悪化し、居住世帯に影響しています。下水・廃棄物処理の供給を改善してください。"
+      },
+      "infraWarning": {
+        "title": "インフラ施設の停止・倒壊",
+        "description": "この施設の停止・倒壊により、インフラの供給に影響が出ています。施設の状態と供給経路を確認してください。"
+      }
+    },
+    "infra": {
+      "title": "インフラ接続",
+      "connected": "接続済み",
+      "disconnected": "未接続",
+      "received": "受入れ量"
+    },
+    "tabConstructionInfo": "建設工事",
+    "tabEducationInfo": "教育",
+    "education": {
+      "totalStudents": "在籍生徒数",
+      "totalCapacity": "総定員",
+      "statusTitle": "在籍状況",
+      "enrolled": "在籍",
+      "vacant": "空き枠",
+      "noCapacity": "定員なし",
+      "countLabel": "人数",
+      "enrollmentBySkill": "スキル別の在籍状況",
+      "settingsTitle": "受け入れ枠の設定",
+      "settingsHint": "スキルごとの配分重みを設定します。総定員が重みに応じて按分されます。",
+      "skillHeader": "スキル",
+      "weightHeader": "重み",
+      "previewHeader": "定員",
+      "save": "保存",
+      "saving": "保存中...",
+      "saveFailed": "保存に失敗しました",
+      "sumMustBePositive": "枠の合計は1以上にしてください",
+      "invalidWeight": "重みは0以上の整数で入力してください",
+      "studentsList": "生徒リスト",
+      "noStudents": "生徒はいません",
+      "showMore": "さらに表示 ({{count}}人)"
+    }
+  },
+  "agentList": {
+    "filterType": "タイプ",
+    "filterVariant": "バリアント",
+    "filterZone": "地区",
+    "allVariants": "すべてのバリアント",
+    "allZones": "すべての地区",
+    "resultCount": "{{count}}件",
+    "capped": "(全{{total}}件中)",
+    "loading": "読み込み中...",
+    "noResults": "該当する経済主体がありません",
+    "colStatus": "ステータス",
+    "colVariant": "バリアント",
+    "colName": "名前",
+    "colProduct": "製品",
+    "colPrice": "価格",
+    "colProduction": "生産量",
+    "colStock": "在庫量",
+    "colSold": "売却量",
+    "colWage": "賃金",
+    "colEmployment": "雇用",
+    "colUtilization": "稼働率",
+    "colBdType": "建物タイプ",
+    "colDurability": "耐久度",
+    "colRent": "賃料",
+    "colFloors": "階数",
+    "colFloorArea": "床面積",
+    "colOccupancy": "入居率",
+    "colFamilyType": "世帯タイプ",
+    "colDiscretionaryIncome": "可処分所得",
+    "colSatisNutrition": "栄養",
+    "colSatisHealthcare": "医療",
+    "colSatisLeisure": "娯楽・余暇",
+    "colSatisResidential": "住居",
+    "colAutomobile": "自家用車",
+    "colEnrollment": "在籍状況"
+  }
+}

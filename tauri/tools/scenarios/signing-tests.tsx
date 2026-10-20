@@ -1,0 +1,131 @@
+import assert from "node:assert/strict";
+import { act } from "react";
+import { createRoot } from "react-dom/client";
+import { Window } from "happy-dom";
+import { ScenarioManagerWindow } from "../../src/components/scenario/ScenarioManagerWindow";
+import { ScenarioSignWindow } from "../../src/components/scenario/ScenarioSignWindow";
+import { dialog } from "./mock-dialog";
+import { state, emit } from "./mock-runtime";
+
+const window = globalThis.window as unknown as Window;
+const container = window.document.createElement("div");
+window.document.body.append(container);
+const entry = { id: "local~source", scenario_id: "official_source", is_scenario: true, origin: "local", read_only: false,
+  scenario_title: { en: "Source" }, content_revision: 4, required_packs: [] as string[], compatibility: { loadable: true } };
+let available: boolean | undefined = undefined;
+let requiredPacks: string[] = [];
+let request: Record<string, unknown> | undefined;
+let rejectSigning = false;
+globalThis.fetch = async (input, init) => {
+  const url = String(input);
+  if (url.endsWith("/api/v1/scenarios")) return new Response(JSON.stringify({ signing_available: available, upload_available: false, upload_host: null,
+    scenarios: { [entry.id]: { ...entry, required_packs: requiredPacks }, "workshop~1~copy": { ...entry, id: "workshop~1~copy", origin: "workshop", read_only: true } } }));
+  if (url.endsWith("/sign")) {
+    request = JSON.parse(String(init?.body));
+    return rejectSigning ? new Response(JSON.stringify({ code: "SCENARIO_SIGNING_KEY_MISMATCH" }), { status: 422 })
+      : new Response(JSON.stringify({ output_path: "C:\\output\\release.cg", encrypted: !!request?.pack_id }));
+  }
+  return new Response("", { status: 404 });
+};
+const settle = () => act(async () => { await new Promise(resolve => setTimeout(resolve, 15)); });
+const buttons = (name: string) => [...container.querySelectorAll<HTMLButtonElement>("button")].filter(button => button.getAttribute("aria-label") === name);
+const setValue = async (label: string, value: string) => {
+  const input = [...container.querySelectorAll<HTMLInputElement>("input")].find(element => element.getAttribute("aria-label") === label
+    || container.querySelector(`label[for="${element.id}"]`)?.textContent === label)!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")!.set!.call(input, value);
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  });
+};
+let root = createRoot(container);
+await act(async () => { root.render(<ScenarioManagerWindow apiBaseUrl="http://test" />); });
+await settle();
+assert.equal(buttons("scenarios.signing.button").length, 0, "older backends do not expose signing");
+available = false;
+await act(async () => { await emit("scenarios:changed"); });
+await settle();
+assert.equal(buttons("scenarios.signing.button").length, 0, "release and mock backends hide signing");
+available = true;
+await act(async () => { await emit("scenarios:changed"); });
+await settle();
+assert.equal(buttons("scenarios.signing.button").length, 1, "only the local scenario can be signed");
+await act(async () => { buttons("scenarios.signing.button")[0].click(); });
+await settle();
+assert.equal(state.calls.at(-1)?.args.windowType, "scenario_sign");
+assert.equal(state.calls.at(-1)?.args.params.extra.scenarioId, entry.id);
+await act(async () => root.unmount());
+root = createRoot(container);
+await act(async () => root.render(<ScenarioSignWindow apiBaseUrl="http://test" scenarioId={entry.id} onClose={() => undefined} />));
+await settle();
+assert.equal(container.querySelector<HTMLInputElement>('input[aria-label="scenarios.signing.scenarioId"]')?.value, "official_source");
+assert.equal(container.querySelector<HTMLInputElement>('input[aria-label="scenarios.signing.revision"]')?.value, "4");
+assert.ok(container.querySelector<HTMLInputElement>('input[value="official"]')!.checked);
+assert.equal(container.querySelector('section[aria-label="scenarios.signing.encryption"]'), null);
+assert.ok(container.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled);
+dialog.selected = "C:\\keys\\official.key";
+await act(async () => buttons("scenarios.signing.privateKey")[0].click());
+await settle();
+await setValue("scenarios.signing.keyId", "test-1");
+dialog.selected = "C:\\output\\release.cg";
+await act(async () => buttons("scenarios.signing.output")[0].click());
+await settle();
+assert.deepEqual(dialog.calls, ["open", "save"]);
+assert.ok(!container.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled);
+await act(async () => container.querySelector<HTMLButtonElement>('button[type="submit"]')!.click());
+await settle();
+assert.equal(request?.content_revision, 4);
+assert.equal(request?.private_key_path, "C:\\keys\\official.key");
+assert.equal(request?.pack_id, null);
+assert.equal(request?.keyring_path, null);
+assert.ok(container.querySelector('[role="status"]'));
+assert.ok(state.emitted.includes("scenarios:changed"));
+
+await act(async () => container.querySelector<HTMLInputElement>('input[value="dlc"]')!.click());
+await settle();
+assert.ok(container.querySelector('section[aria-label="scenarios.signing.signature"]'));
+assert.ok(container.querySelector('section[aria-label="scenarios.signing.encryption"]'));
+assert.ok(container.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled, "DLC requires its own encryption key and pack ID");
+await setValue("scenarios.signing.packId", "paid-pack");
+assert.ok(container.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled, "a signing key alone cannot export DLC");
+dialog.selected = "C:\\keys\\encryption.json";
+await act(async () => buttons("scenarios.signing.keyring")[0].click());
+await settle();
+assert.ok(!container.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled);
+await act(async () => container.querySelector<HTMLButtonElement>('button[type="submit"]')!.click());
+await settle();
+assert.equal(request?.private_key_path, "C:\\keys\\official.key");
+assert.equal(request?.pack_id, "paid-pack");
+assert.equal(request?.keyring_path, "C:\\keys\\encryption.json");
+assert.equal(container.querySelector('[role="status"]')?.textContent, "scenarios.signing.completedEncrypted");
+
+await act(async () => container.querySelector<HTMLInputElement>('input[value="official"]')!.click());
+await settle();
+assert.equal(container.querySelector('section[aria-label="scenarios.signing.encryption"]'), null);
+await act(async () => container.querySelector<HTMLButtonElement>('button[type="submit"]')!.click());
+await settle();
+assert.equal(request?.pack_id, null);
+assert.equal(request?.keyring_path, null, "free official exports do not reuse previously selected DLC encryption keys");
+assert.equal(container.querySelector('[role="status"]')?.textContent, "scenarios.signing.completed");
+rejectSigning = true;
+await act(async () => container.querySelector<HTMLButtonElement>('button[type="submit"]')!.click());
+await settle();
+assert.equal(container.querySelector('[role="alert"]')?.textContent, "scenarios.signing.keyMismatch");
+await act(async () => root.unmount());
+requiredPacks = ["base"];
+root = createRoot(container);
+await act(async () => root.render(<ScenarioSignWindow apiBaseUrl="http://test" scenarioId={entry.id} onClose={() => undefined} />));
+await settle();
+assert.ok(container.querySelector<HTMLInputElement>('input[value="dlc"]')!.checked);
+assert.ok(container.querySelector<HTMLFieldSetElement>("fieldset")!.disabled, "existing encryption cannot be removed");
+await setValue("scenarios.signing.privateKey", "C:\\keys\\official.key");
+await setValue("scenarios.signing.keyId", "test-1");
+await setValue("scenarios.signing.output", "C:\\output\\pack.cg");
+await setValue("scenarios.signing.keyring", "C:\\keys\\packs.json");
+rejectSigning = false;
+await act(async () => container.querySelector<HTMLButtonElement>('button[type="submit"]')!.click());
+await settle();
+assert.equal(request?.pack_id, "base");
+assert.equal(request?.keyring_path, "C:\\keys\\packs.json");
+await act(async () => root.unmount());
+container.remove();
+console.log("Scenario signing UI tests passed");

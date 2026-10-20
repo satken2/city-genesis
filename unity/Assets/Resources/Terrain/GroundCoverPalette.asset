@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 591eedfd06254e38b249c72c324174e9, type: 3}
+  m_Name: GroundCoverPalette
+  m_EditorClassIdentifier: 
+  profiles:
+  - groundCover: 1
+    textureResource: grass-2500-mm-architextures
+    textureTileSize: {x: 10, y: 10}
+    textureColorWeight: 1
+    textureLuminance: 0.264
+    textureContrast: 1
+    smoothness: 0.15
+    proceduralBlend: 0.84957576
+    proceduralScale: 40
+    groundColorA: {r: 0.20203808, g: 0.3301887, b: 0.03893734, a: 1}
+    groundColorB: {r: 0.15074529, g: 0.26415092, b: 0.051085785, a: 1}
+    groundColorC: {r: 0.3477889, g: 0.4056604, b: 0.109069064, a: 1}
+    detailNormalStrength: 0.25
+    rippleStrength: 0
+    rippleWavelength: 0.6
+    macroVariationStrength: 0.28
+    macroVariationTint: {r: 0.45633167, g: 0.5754717, b: 0.33388218, a: 1}
+    colorGradeStrength: 0.22
+    lowColor: {r: 0.3660866, g: 0.49056602, b: 0.26148093, a: 1}
+    highColor: {r: 0.9, g: 0.92, b: 0.98, a: 1}
+    slopeColor: {r: 0.55, g: 0.4, b: 0.25, a: 1}
+    rockTint: {r: 1, g: 1, b: 1, a: 1}
+    shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
+    shoreSand: 0
+  - groundCover: 2
+    textureResource: Textures/ground-sand-albedo
+    textureTileSize: {x: 10, y: 10}
+    textureColorWeight: 0
+    textureLuminance: 0.244
+    textureContrast: 3
+    smoothness: 0.1
+    proceduralBlend: 0.75
+    proceduralScale: 60
+    groundColorA: {r: 0.66, g: 0.51, b: 0.31, a: 1}
+    groundColorB: {r: 0.57, g: 0.41, b: 0.25, a: 1}
+    groundColorC: {r: 0.76, g: 0.63, b: 0.44, a: 1}
+    detailNormalStrength: 0.12
+    rippleStrength: 0.35
+    rippleWavelength: 0.6
+    macroVariationStrength: 0.18
+    macroVariationTint: {r: 1, g: 0.88, b: 0.72, a: 1}
+    colorGradeStrength: 0.15
+    lowColor: {r: 1, g: 0.95, b: 0.88, a: 1}
+    highColor: {r: 0.96, g: 0.92, b: 0.88, a: 1}
+    slopeColor: {r: 0.86, g: 0.66, b: 0.5, a: 1}
+    rockTint: {r: 1.12, g: 0.92, b: 0.74, a: 1}
+    shoreSandColor: {r: 0.78, g: 0.68, b: 0.5, a: 1}
+    shoreSand: 1
+  - groundCover: 3
+    textureResource: grass-2500-mm-architextures
+    textureTileSize: {x: 10, y: 10}
+    textureColorWeight: 1
+    textureLuminance: 0.264
+    textureContrast: 1
+    smoothness: 0.12
+    proceduralBlend: 0.85
+    proceduralScale: 30
+    groundColorA: {r: 0.09, g: 0.22, b: 0.05, a: 1}
+    groundColorB: {r: 0.06, g: 0.16, b: 0.05, a: 1}
+    groundColorC: {r: 0.16, g: 0.3, b: 0.08, a: 1}
+    detailNormalStrength: 0.35
+    rippleStrength: 0
+    rippleWavelength: 0.6
+    macroVariationStrength: 0.25
+    macroVariationTint: {r: 0.4, g: 0.62, b: 0.4, a: 1}
+    colorGradeStrength: 0.22
+    lowColor: {r: 0.34, g: 0.5, b: 0.32, a: 1}
+    highColor: {r: 0.86, g: 0.92, b: 0.96, a: 1}
+    slopeColor: {r: 0.5, g: 0.42, b: 0.3, a: 1}
+    rockTint: {r: 0.86, g: 0.94, b: 0.82, a: 1}
+    shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
+    shoreSand: 0
+  - groundCover: 4
+    textureResource: Textures/ground-sand-albedo
+    textureTileSize: {x: 16, y: 16}
+    textureColorWeight: 0
+    textureLuminance: 0.244
+    textureContrast: 1.5
+    smoothness: 0.35
+    proceduralBlend: 0.88
+    proceduralScale: 50
+    groundColorA: {r: 0.83, g: 0.87, b: 0.92, a: 1}
+    groundColorB: {r: 0.7, g: 0.77, b: 0.87, a: 1}
+    groundColorC: {r: 0.9, g: 0.92, b: 0.95, a: 1}
+    detailNormalStrength: 0.1
+    rippleStrength: 0.1
+    rippleWavelength: 1.2
+    macroVariationStrength: 0.1
+    macroVariationTint: {r: 0.9, g: 0.94, b: 1, a: 1}
+    colorGradeStrength: 0.18
+    lowColor: {r: 0.97, g: 0.98, b: 1, a: 1}
+    highColor: {r: 0.92, g: 0.95, b: 1, a: 1}
+    slopeColor: {r: 0.72, g: 0.74, b: 0.8, a: 1}
+    rockTint: {r: 0.78, g: 0.8, b: 0.85, a: 1}
+    shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
+    shoreSand: 0
+  - groundCover: 5
+    textureResource: Textures/ground-dry-grass-albedo
+    textureTileSize: {x: 3, y: 3}
+    textureColorWeight: 0.4
+    textureLuminance: 0.327
+    textureContrast: 1
+    smoothness: 0.12
+    proceduralBlend: 0.7
+    proceduralScale: 25
+    groundColorA: {r: 0.62, g: 0.53, b: 0.3, a: 1}
+    groundColorB: {r: 0.3, g: 0.33, b: 0.17, a: 1}
+    groundColorC: {r: 0.72, g: 0.64, b: 0.48, a: 1}
+    detailNormalStrength: 0.25
+    rippleStrength: 0
+    rippleWavelength: 0.6
+    macroVariationStrength: 0.22
+    macroVariationTint: {r: 0.95, g: 0.84, b: 0.62, a: 1}
+    colorGradeStrength: 0.18
+    lowColor: {r: 0.98, g: 0.92, b: 0.8, a: 1}
+    highColor: {r: 0.92, g: 0.92, b: 0.95, a: 1}
+    slopeColor: {r: 0.8, g: 0.66, b: 0.52, a: 1}
+    rockTint: {r: 1.05, g: 0.99, b: 0.9, a: 1}
+    shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
+    shoreSand: 1

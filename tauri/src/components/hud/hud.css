@@ -1,0 +1,126 @@
+/**
+ * Shared HUD styles (icon panel, cockpit, system tray, display tray)
+ *
+ * Each window exactly covers its panel, so panels fill the window. Rounded corners and borders visually lift
+ * them above Unity's 3D view.
+ * Match the existing dark navy theme.
+ */
+
+/* ─── Shared panel appearance ─── */
+
+.hud-panel {
+  display: flex;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 28, 44, 0.92) 0%,
+    rgba(12, 20, 32, 0.96) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(16px);
+  user-select: none;
+  color: #e5eef9;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+}
+
+/*
+ * Disabled state during epoch execution.
+ * Disable all button clicks through pointer-events: none and reduce opacity to indicate unavailable controls.
+ */
+.hud-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ─── Shared icon button frame ─── */
+
+.hud-icon-btn {
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s;
+  padding: 4px;
+}
+
+.hud-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hud-icon-btn:disabled {
+  opacity: 0.3;
+  pointer-events: none;
+  filter: grayscale(100%);
+  cursor: not-allowed;
+}
+
+.hud-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Active appearance of toggle buttons (bulldozer and district editing) */
+.hud-icon-btn--active {
+  background: rgba(233, 84, 32, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(233, 84, 32, 0.8);
+}
+
+.hud-icon-btn--active:hover {
+  background: rgba(233, 84, 32, 0.45);
+}
+
+/* ─── Mini meters (pill-shaped meter widgets in the cockpit) ─── */
+
+/*
+ * Pill with a label on the left and meter bar on the right.
+ * Cockpit mini meters of different widths stack vertically; space-between keeps bars aligned at the right even
+ * when stretched to the parent grid column width.
+ */
+.hud-mini-meter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.hud-mini-meter:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.hud-mini-meter__label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #e5eef9;
+}
+
+/* Value beside the meter (e.g. governance score per household). Tabular numerals prevent width changes between digits. */
+.hud-mini-meter__value {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: #e5eef9;
+}
+
+/* Meter and BalanceMeter use flex:1 / min-width:60px; wrap them in a sized container to fix their width. */
+.hud-mini-meter__bar {
+  width: 84px;
+  display: flex;
+  align-items: center;
+}
+
+.hud-mini-meter__placeholder {
+  font-size: 1rem;
+  color: #8ba3bb;
+}

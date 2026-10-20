@@ -1,0 +1,401 @@
+/* ---- Root layout ---- */
+
+.do-panel-root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+.do-panel-frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background: linear-gradient(
+    180deg,
+    rgba(22, 34, 52, 0.96) 0%,
+    rgba(14, 24, 38, 0.99) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ---- Vertical tabs ---- */
+
+.do-tabs {
+  width: 130px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.do-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px;
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: #c5d4e3;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  text-align: left;
+}
+
+.do-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.do-tab.selected {
+  background: rgba(78, 161, 255, 0.12);
+  border-left-color: #4ea1ff;
+  color: #ffffff;
+}
+
+.do-tab-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.do-tab-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Content ---- */
+
+.do-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.do-content-top {
+  padding: 14px 16px;
+}
+
+.do-content-bottom {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Sections (left column) ---- */
+
+.do-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.do-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.do-mode-btn {
+  width: 40px;
+  height: 40px;
+  padding: 4px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.do-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.do-mode-btn.selected {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.15);
+}
+
+.do-mode-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.do-submode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-left: 10px;
+  border-left: 2px solid rgba(78, 161, 255, 0.25);
+}
+
+.do-submode-btn {
+  width: 30px;
+  height: 30px;
+  padding: 3px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.do-submode-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.do-submode-btn.selected {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.12);
+}
+
+.do-submode-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* ---- Description and legend area ---- */
+
+.do-legend-root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.do-description {
+  color: #e5eef9;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.do-legend-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Legend ---- */
+
+.do-legend-area {
+  min-height: 40px;
+}
+
+.do-legend-none {
+  color: #8a9bb0;
+  font-size: 1rem;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.do-legend-color-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.do-legend-color-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #e5eef9;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+}
+
+.do-legend-color-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.do-legend-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.do-legend-meter-bar {
+  height: 14px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.do-legend-meter-label {
+  color: #e5eef9;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* ---- Terrain tab contour toggle ---- */
+
+.do-terrain-extra {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.do-contour-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #c5d4e3;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.do-contour-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.do-contour-btn.selected {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.15);
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(78, 161, 255, 0.3);
+}
+
+.do-contour-icon {
+  font-size: 1.3rem;
+}
+
+.do-contour-label {
+  font-weight: 500;
+}
+
+/* ---- Special styles for the alerts tab ---- */
+
+.do-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.do-alert-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px 14px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+  min-height: 54px;
+  box-sizing: border-box;
+}
+
+.do-alert-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.do-alert-list > button.do-alert-card,
+.do-toggle-list > button.do-alert-card {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+}
+
+.do-alert-card.enabled {
+  border-color: rgba(78, 161, 255, 0.4);
+  background: rgba(78, 161, 255, 0.05);
+}
+
+.do-alert-card.enabled:hover {
+  background: rgba(78, 161, 255, 0.08);
+  border-color: rgba(78, 161, 255, 0.6);
+}
+
+.do-alert-card-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.do-alert-card-text {
+  flex: 1;
+  color: #e5eef9;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.do-alert-card-toggle {
+  width: 36px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.do-alert-card-toggle::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.do-alert-card.enabled .do-alert-card-toggle {
+  background: #4ea1ff;
+}
+
+.do-alert-card.enabled .do-alert-card-toggle::after {
+  transform: translateX(16px);
+}
+
+/* ---- Visibility toggles independent of color modes (planned objects, public facility highlighting, etc.) ---- */
+/* Reuse the alerts tab's .do-alert-card styles and place cards closely below the mode row. */
+
+.do-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.do-toggle-list .do-alert-card {
+  min-height: 42px;
+  padding: 6px 12px;
+}
+

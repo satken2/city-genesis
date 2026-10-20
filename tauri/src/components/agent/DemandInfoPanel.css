@@ -1,0 +1,30 @@
+/*
+ * Styles for demand information (DemandInfoPanel).
+ *
+ * Displays demand and received amounts by product in a table.
+ * Right-align numeric columns to make digit comparisons easier.
+ */
+
+.demand-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.demand-info-table th {
+  color: #93a9c0;
+  font-weight: 600;
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.demand-info-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.demand-info-num {
+  text-align: right;
+  white-space: nowrap;
+}

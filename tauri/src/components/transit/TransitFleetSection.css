@@ -1,0 +1,53 @@
+/* Fleet section (TransitFleetSection). Stack the total car heading and train side views vertically. */
+
+.transit-fleet__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.transit-fleet__total {
+  font-size: 1.46rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+}
+
+.transit-fleet__formation {
+  font-size: 1rem;
+  color: var(--flat-text-label);
+}
+
+.transit-fleet__trains {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--flat-sunken);
+  border-radius: 6px;
+}
+
+/* Train diagram. Scale long trains down proportionally to fit panel width. */
+.transit-fleet__train {
+  max-width: 100%;
+  height: auto;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* Trains not formed because of vehicle shortages. Fade the line color to represent nonexistent trains. */
+.transit-fleet__train--missing {
+  opacity: 0.45;
+}
+
+.transit-fleet__note {
+  margin: 0;
+  font-size: 0.97rem;
+  color: #6b8299;
+}
+
+.transit-fleet__note--warn {
+  color: #f0c040;
+}

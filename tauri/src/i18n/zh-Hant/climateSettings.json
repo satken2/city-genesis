@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "氣候設定",
+    "name": "氣候名稱",
+    "probabilities": "每月天氣出現機率",
+    "probabilityHint": "左右拖曳顏色分界線進行調整。下方數值欄也可設定機率為0%的天氣。",
+    "month": "{{month}}月",
+    "preset": "氣候預設",
+    "current": "目前設定",
+    "chartHint": "在圖例中選擇項目，然後上下拖曳每月的資料點。",
+    "averageHint": "氣溫、降水量和日照為月平均值。每個時期的實際值會在平均值附近波動。",
+    "apply": "套用",
+    "chart": "每月氣候圖"
+  }
+}

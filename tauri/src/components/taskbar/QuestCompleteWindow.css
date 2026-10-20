@@ -1,0 +1,202 @@
+/**
+ * Quest completion notification styles
+ *
+ * Shown when a quest with notify="modal" is newly completed after epoch execution.
+ * Pops up on a dark background with fanfare (tada.opus) and confetti.
+ */
+
+.quest-complete-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: quest-complete-fade-in 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes quest-complete-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Confetti ── */
+
+.quest-complete-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.quest-complete-confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  opacity: 0;
+  animation-name: quest-complete-confetti-fall;
+  animation-timing-function: ease-in;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes quest-complete-confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(540deg);
+    opacity: 0.6;
+  }
+}
+
+/* ── Card body ── */
+
+.quest-complete-card {
+  position: relative;
+  background: linear-gradient(135deg, #1a2a4a 0%, #0f1b33 100%);
+  border: 2px solid #f0c040;
+  border-radius: 12px;
+  padding: 32px 40px 24px;
+  max-width: 420px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 0 30px rgba(240, 192, 64, 0.3);
+  animation: quest-complete-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes quest-complete-pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.quest-complete-title {
+  text-align: center;
+  font-size: 1.94rem;
+  font-weight: 700;
+  color: #f0c040;
+  margin: 0;
+}
+
+.quest-complete-subtitle {
+  text-align: center;
+  font-size: 1.25rem;
+  color: #b0c4de;
+  margin: 0;
+}
+
+/* ── Quest content ── */
+
+.quest-complete-item {
+  background: rgba(240, 192, 64, 0.08);
+  border: 1px solid rgba(240, 192, 64, 0.25);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quest-complete-item-name {
+  font-size: 1.46rem;
+  font-weight: 600;
+  color: #e8d48a;
+  text-align: center;
+}
+
+.quest-complete-item-desc {
+  font-size: 1rem;
+  color: #a0b8d0;
+  text-align: center;
+}
+
+/* Measured value at completion (measured value, comparison operator, target) */
+.quest-complete-values {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.quest-complete-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.quest-complete-value-current {
+  font-size: 1.81rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.quest-complete-value-sep {
+  font-size: 1rem;
+  color: #7b8fa5;
+}
+
+.quest-complete-value-target {
+  font-size: 1.32rem;
+  color: #9db0c5;
+}
+
+/* Completion reward (grant) */
+.quest-complete-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(108, 212, 127, 0.12);
+  border: 1px solid rgba(108, 212, 127, 0.3);
+}
+
+.quest-complete-reward-label {
+  font-size: 1rem;
+  color: #8fd0a0;
+}
+
+.quest-complete-reward-value {
+  font-size: 1.39rem;
+  font-weight: 700;
+  color: #6cd47f;
+}
+
+/* Page position when multiple quests are completed */
+.quest-complete-pager {
+  text-align: center;
+  font-size: 1rem;
+  color: #7b8fa5;
+}
+
+.quest-complete-close {
+  align-self: center;
+  padding: 8px 32px;
+  border: none;
+  border-radius: 6px;
+  background: #f0c040;
+  color: #1a2a4a;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.quest-complete-close:hover {
+  background: #f5d060;
+}

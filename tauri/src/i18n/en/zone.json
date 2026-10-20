@@ -1,0 +1,40 @@
+{
+  "zone": {
+    "titleWithId": "District #{{id}}",
+    "color": "District color",
+    "colorUpdateFailed": "Failed to update the district color",
+    "basicInfo": "Basic Info",
+    "area": "Area",
+    "zonePopulation": "Resident Population",
+    "daytimePopulation": "Daytime Population",
+    "spaceAmount": "Floor Occupancy",
+    "slotStarvationTitle": "Waiting tenants cannot be housed",
+    "slotStarvationWarning": "\"{{tenant}}\" needs at least {{required}} m2 of floor space in a single building, but the largest buildable in this district is {{max}} m2. Provide a larger parcel.",
+    "restrictions": "Building Regulations",
+    "restrictionUpdateFailed": "Failed to update the district regulations",
+    "restrictionRequired": "Coverage ratio, volume ratio and height cannot be empty",
+    "mergeConfirm": "Merge \"{{source}}\" into \"{{target}}\". The source district disappears along with its regulation settings.",
+    "mergeAction": "Merge",
+    "mergeFailed": "Failed to merge districts (districts that are not adjacent cannot be merged)",
+    "mergeNoRequest": "No district selected to merge",
+    "edit": {
+      "toolCreate": "New District",
+      "toolExpand": "Expand District",
+      "modeBlock": "Whole Block",
+      "modeRoad": "Street Side",
+      "newZone": "New district",
+      "noTarget": "Hover over a district",
+      "hint": {
+        "create": {
+          "block": "Hold Ctrl and drag over blocks enclosed by streets; the painted blocks, with their parcels, become a new district. Drag to pan, scroll to zoom.",
+          "road": "Hold Ctrl and drag over one side of a street (half of the roadway, or the parcels along it); that side of the street, with its parcels, becomes a new district. Drag to pan, scroll to zoom."
+        },
+        "expand": {
+          "block": "Hover over a district, then hold Ctrl and drag over blocks to add them, with their parcels, to that district. Drag to pan, scroll to zoom.",
+          "road": "Hover over a district, then hold Ctrl and drag over one side of a street (half of the roadway, or the parcels along it) to add that side, with its parcels, to that district. Drag to pan, scroll to zoom."
+        }
+      },
+      "failed": "Could not change the district."
+    }
+  }
+}

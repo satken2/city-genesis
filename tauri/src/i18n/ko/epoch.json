@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "현재 날짜",
+    "afterDate": "실행 후 날짜",
+    "epochCount": "에포크 수",
+    "message": "이번 턴의 작업을 마치고 시간을 진행하시겠습니까?",
+    "no": "아니오",
+    "yes": "예",
+    "executing": "시뮬레이션 실행 중...",
+    "errorSteamLimit": "Steam 인증을 확인할 수 없어 더 이상 에포크를 실행할 수 없습니다. (미인증 상태에서는 인구 {{limit}}명까지 플레이할 수 있습니다)",
+    "errorAlreadyRunning": "다른 에포크가 이미 실행 중입니다. 완료된 후 다시 실행하세요.",
+    "errorFailed": "에포크 실행에 실패했습니다: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}}에포크 실행)",
+    "sectionConstruction": "건설 상황",
+    "kindPath": "도로",
+    "kindBuilding": "시설",
+    "kindProject": "프로젝트",
+    "noItems": "대상 없음",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "완성",
+    "sectionStatistics": "통계",
+    "sectionScore": "점수",
+    "scoreGain": "가점",
+    "scoreLoss": "감점",
+    "questState": {
+      "completed": "달성",
+      "active": "진행 중",
+      "locked": "미해금",
+      "failed": "실패"
+    },
+    "trendHint": "최근 {{count}}에포크의 추세: {{trend}}",
+    "trend": {
+      "up": "상승 추세",
+      "flat": "보합",
+      "down": "하락 추세",
+      "none": "이력이 부족합니다"
+    },
+    "statPopulation": "인구",
+    "statTourists": "관광객",
+    "statGdp": "GDP",
+    "statPrice": "물가",
+    "statIncome": "소득",
+    "statUnemployment": "실업률",
+    "statHealthcare": "의료 충족도",
+    "statNutrition": "영양 충족도",
+    "statLeisure": "오락·여가",
+    "statFire": "화재",
+    "statTraffic": "교통사고",
+    "statCrime": "범죄",
+    "questCompleted": "달성!",
+    "questFailed": "기한 초과"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "경로 탐색 중",
+      "prepare": "이번 기 준비 중",
+      "transit": "대중교통 준비 중",
+      "market": "상품 거래 중",
+      "production": "생산·소비 중",
+      "commute": "통근·통학 중",
+      "growth": "시민 성장 중",
+      "evaluate": "도시 평가 중",
+      "immigration": "이민 수용 중",
+      "labor": "구직 중",
+      "spawn": "새 가게·회사 개업 중",
+      "relocate": "이사 중",
+      "construction": "건물 건설 중",
+      "finance": "자금 흐름 정리 중",
+      "plan": "다음 계획 수립 중",
+      "incident": "화재·사고 대응 중",
+      "finalize": "통계 집계 중"
+    }
+  }
+}

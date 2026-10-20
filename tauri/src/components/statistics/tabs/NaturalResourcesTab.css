@@ -1,0 +1,40 @@
+/**
+ * Natural resources tab styles.
+ *
+ * Lists natural resources as wide cards.
+ * Each card is a clickable button that opens a details panel.
+ */
+
+.resource-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ========== Card list ========== */
+
+.resource-tab__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ========== Loading, errors, and empty state ========== */
+
+.resource-tab__loading,
+.resource-tab__error,
+.resource-tab__empty {
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
+}
+
+.resource-tab__error {
+  color: #ff7171;
+}

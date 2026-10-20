@@ -1,0 +1,372 @@
+/**
+ * Incident and accident tab styles.
+ *
+ * Uses the shared dark theme (rgba(30,41,59,...) / #e2e8f0 colors).
+ */
+
+.accidents-tab-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 16px;
+}
+
+/* ===== Top third: summary and fatality chart ===== */
+
+.accidents-top-section {
+  display: flex;
+  height: 30%;
+  min-height: 140px;
+  gap: 20px;
+  flex: 0 0 auto;
+}
+
+/* Summary cards */
+.accidents-summary-card {
+  flex: 1;
+  min-width: 0;
+  background: rgba(26, 34, 48, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.accidents-summary-title {
+  margin: 0 0 10px 0;
+  font-size: 1.14rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  border-left: 3px solid #3b82f6;
+  padding-left: 8px;
+}
+
+.accidents-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  flex: 1;
+}
+
+.accidents-summary-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.4);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.accidents-summary-item:hover {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.accidents-summary-item__label {
+  font-size: 1rem;
+  color: #8ba3bb;
+  margin-bottom: 2px;
+}
+
+.accidents-summary-item__value {
+  font-size: 1.81rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Fatality history chart */
+.accidents-deaths-chart {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ===== Bottom two-thirds: subtabs and details ===== */
+
+.accidents-bottom-section {
+  display: flex;
+  flex-direction: column;
+  height: 70%;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+
+/* Subtab navigation.
+ * Matches the shape of AgentDetailPanel tabs (.agent-detail-tab).
+ * Only colors are overridden through inline styles for each category (fire = rose / crime = cyan, etc.). */
+.accidents-sub-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  flex: 0 0 auto;
+}
+
+.accidents-sub-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 12px;
+  color: #9db0c5;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.accidents-sub-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6fbff;
+}
+
+.accidents-sub-tab-btn--active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.accidents-sub-tab-content {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Two-column layout */
+.accidents-tab-split {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  min-height: 0;
+}
+
+.accidents-tab-split__left {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accidents-tab-split__right {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Individual components: charts, lists, and meters ===== */
+
+.accidents-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.accidents-chart__title {
+  margin: 0;
+  font-size: 1.14rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  border-left: 3px solid #ef4444; /* Warning color by default */
+  padding-left: 8px;
+  flex: 0 0 auto;
+}
+
+.accidents-chart__title--death {
+  border-left-color: #ef4444; /* Fatalities: red */
+}
+.accidents-chart__title--fire {
+  border-left-color: #fb7185; /* Fire: rose */
+}
+.accidents-chart__title--traffic {
+  border-left-color: #f59e0b; /* Traffic accidents: orange */
+}
+
+.accidents-chart__area {
+  flex: 1;
+  min-height: 0;
+  background: rgba(26, 34, 48, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.accidents-chart__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #5a6f86;
+  font-size: 1rem;
+}
+
+/* Incident list */
+.accidents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.accidents-list__title {
+  margin: 0;
+  font-size: 1.14rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  border-left: 3px solid #f59e0b;
+  padding-left: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.accidents-list__count {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #8ba3bb;
+}
+
+.accidents-list__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: rgba(26, 34, 48, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.accidents-list__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  min-height: 60px;
+  padding: 16px;
+  color: #5a6f86;
+  font-size: 1rem;
+}
+
+/* Table */
+.accidents-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.accidents-table thead {
+  position: sticky;
+  top: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+}
+
+.accidents-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 1rem;
+}
+
+.accidents-table th.accidents-table__th--num {
+  text-align: right;
+}
+
+.accidents-table td {
+  padding: 6px 10px;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+
+.accidents-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.accidents-table__cell--name {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accidents-table__cell--muted {
+  color: #8ba3bb;
+  font-size: 1rem;
+}
+
+.accidents-table__cell--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #ff9b9b; /* Warning color */
+}
+
+.accidents-table .entity-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #4ea1ff;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accidents-table .entity-link:hover {
+  text-decoration: underline;
+  color: #7cb9ff;
+}
+
+/* Meter */
+.usage-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.usage-meter__track {
+  flex: 1;
+  height: 6px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.usage-meter__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.usage-meter__label {
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  width: 32px;
+  text-align: right;
+}
+
+/* ===== Loading and errors ===== */
+.accidents-tab__loading,
+.accidents-tab__error {
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
+  font-size: 1rem;
+}
+
+.accidents-tab__error {
+  color: #ff7171;
+}

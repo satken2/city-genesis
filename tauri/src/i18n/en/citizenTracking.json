@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Overview",
+    "tabActivity": "Activity",
+    "follow": "Follow with camera",
+    "unfollow": "Stop following",
+    "track": "Add to tracking list",
+    "trackRandom": "Track a random citizen",
+    "noUntrackedCitizens": "There are no untracked citizens available.",
+    "trackRandomError": "Could not track a citizen.",
+    "untrack": "Remove from tracking list",
+    "home": "Residence",
+    "mobility": "Getting around",
+    "mode": {
+      "automobile": "Car",
+      "pedestrian": "Walking and public transit"
+    },
+    "visits": "Destinations",
+    "visitKind": {
+      "home": "Home",
+      "work": "Work",
+      "school": "School",
+      "shop": "Shopping"
+    },
+    "legs": {
+      "walk": "Walk",
+      "drive": "Car",
+      "transit": "Transit",
+      "conveyor": "People mover"
+    },
+    "trip": "One way {{minutes}} min · {{route}}",
+    "noRoute": "No route",
+    "noVisits": "Has nowhere to go.",
+    "status": {
+      "not_ready": "Shown after the simulation runs.",
+      "busy": "Not available while the simulation is running.",
+      "no_home": "Waiting for housing, so there is no recorded activity.",
+      "missing": "This citizen no longer lives in the city.",
+      "error": "Could not load."
+    },
+    "empty": "No citizens are being tracked.",
+    "pickFailed": {
+      "not_ready": "Run the simulation to click cars and pedestrians and see who they are.",
+      "busy": "Citizens can't be shown while the simulation is running.",
+      "none": "Couldn't find who is in this car or on foot.",
+      "missing": "This citizen no longer lives in the city.",
+      "no_home": "This citizen is waiting for housing.",
+      "error": "Couldn't show the citizen."
+    }
+  }
+}

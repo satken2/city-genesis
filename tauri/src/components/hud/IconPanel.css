@@ -1,0 +1,85 @@
+/**
+ * Icon panel styles (vertical menu at the left edge)
+ *
+ * The panel background is transparent, making each button float above the 3D view.
+ * Draw rounded surfaces, borders, and shadows in CSS, with padded icon images inside. Keeping frames/shadows out
+ * of image assets preserves consistency when replacing icons.
+ * Use the shared navy token as a solid surface: icon assets already contain tonal variation, and shaded surfaces
+ * would blur the overall appearance of a vertical stack.
+ *
+ * Window width is fixed by ICON_PANEL_WIDTH in `window.rs`. If button dimensions change, update it to equal
+ * button width plus horizontal panel padding.
+ *
+ * Height follows icon count, and the window follows React's measured height. Do not set height here: that would
+ * create a circular dependency and an endless ResizeObserver → resize_icon_panel → window resize loop.
+ *
+ * Selectors combine at least two classes including `.hud-icon-btn` to reliably override shared backgrounds,
+ * padding, and hover styles in `hud.css`. CSS chunks have no guaranteed load order; do not rely on equal
+ * specificity.
+ */
+
+.icon-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px;
+  width: 100%;
+  user-select: none;
+}
+
+.hud-icon-btn.icon-panel-slot {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  padding: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: var(--flat-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  transition: background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+}
+
+.hud-icon-btn.icon-panel-slot:hover {
+  background: var(--flat-raised-hover);
+  border-color: var(--flat-accent);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Depress the surface while pressed (weaker shadow and a 1px downward shift). */
+.hud-icon-btn.icon-panel-slot:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Indicate an active toggle (district editing) with an orange surface and border. */
+.hud-icon-btn.icon-panel-slot.hud-icon-btn--active {
+  background: rgba(205, 70, 24, 0.64);
+  border-color: #e95420;
+}
+
+.hud-icon-btn.icon-panel-slot.hud-icon-btn--active:hover {
+  background: rgba(221, 85, 37, 0.74);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hud-icon-btn.icon-panel-slot {
+    transition: none;
+  }
+
+  .hud-icon-btn.icon-panel-slot:hover,
+  .hud-icon-btn.icon-panel-slot:active {
+    transform: none;
+  }
+}
+
+/* Separator for scenario-only icons */
+.icon-panel-divider {
+  width: 28px;
+  height: 1px;
+  margin: 3px 0;
+  background: rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+}

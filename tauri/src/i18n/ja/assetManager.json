@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "建物",
+      "paths": "パス",
+      "vehicles": "車両",
+      "props": "プロップ"
+    },
+    "additional": "追加モデル",
+    "loading": "3D画面からモデルを読み込んでいます…",
+    "noModel": "モデルなし",
+    "noImage": "画像なし",
+    "weight": "重み",
+    "applyNote": "重みの変更は、次にゲームを始めるかロードしたときに反映されます。"
+  }
+}

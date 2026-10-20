@@ -1,0 +1,40 @@
+{
+  "zone": {
+    "titleWithId": "Quartier n° {{id}}",
+    "color": "Couleur du district",
+    "colorUpdateFailed": "Échec de la mise à jour de la couleur du district",
+    "basicInfo": "Informations générales",
+    "area": "Superficie",
+    "zonePopulation": "Population résidente",
+    "daytimePopulation": "Population diurne",
+    "spaceAmount": "Surface occupée",
+    "slotStarvationTitle": "Des occupants en attente ne peuvent pas être logés",
+    "slotStarvationWarning": "L'installation de « {{tenant}} » exige au moins {{required}} m2 de plancher dans un seul bâtiment, mais le maximum constructible sur les parcelles de ce quartier est de {{max}} m2. Prévoyez une parcelle plus grande.",
+    "restrictions": "Réglementation de construction",
+    "restrictionUpdateFailed": "Échec de la mise à jour de la réglementation du quartier",
+    "restrictionRequired": "L'emprise au sol, le COS et la hauteur ne peuvent pas être vides",
+    "mergeConfirm": "« {{source}} » sera fusionné dans « {{target}} ». Le quartier d'origine disparaîtra, ainsi que sa réglementation.",
+    "mergeAction": "Fusionner",
+    "mergeFailed": "Échec de la fusion des quartiers (des quartiers non adjacents ne peuvent pas être fusionnés)",
+    "mergeNoRequest": "Aucun quartier sélectionné pour la fusion",
+    "edit": {
+      "toolCreate": "Nouveau quartier",
+      "toolExpand": "Agrandir un quartier",
+      "modeBlock": "Îlot entier",
+      "modeRoad": "Côté de rue",
+      "newZone": "Nouveau quartier",
+      "noTarget": "Survolez un quartier",
+      "hint": {
+        "create": {
+          "block": "Maintenez Ctrl et faites glisser sur des îlots entourés de rues ; les îlots peints, avec leurs parcelles, forment un nouveau quartier. Faites glisser pour déplacer la carte, molette pour zoomer.",
+          "road": "Maintenez Ctrl et faites glisser sur un côté d'une rue (la moitié de la chaussée ou les parcelles qui la bordent) ; ce côté de la rue, avec ses parcelles, forme un nouveau quartier. Faites glisser pour déplacer la carte, molette pour zoomer."
+        },
+        "expand": {
+          "block": "Survolez un quartier, puis maintenez Ctrl et faites glisser sur des îlots pour les y ajouter avec leurs parcelles. Faites glisser pour déplacer la carte, molette pour zoomer.",
+          "road": "Survolez un quartier, puis maintenez Ctrl et faites glisser sur un côté d'une rue (la moitié de la chaussée ou les parcelles qui la bordent) pour y ajouter ce côté avec ses parcelles. Faites glisser pour déplacer la carte, molette pour zoomer."
+        }
+      },
+      "failed": "Impossible de modifier le quartier."
+    }
+  }
+}

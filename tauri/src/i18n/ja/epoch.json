@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "現在の日付",
+    "afterDate": "実行後の日付",
+    "epochCount": "エポック数",
+    "message": "このターンの作業を完了して、時間を進めますか？",
+    "yes": "はい",
+    "no": "いいえ",
+    "executing": "シミュレーション実行中...",
+    "errorSteamLimit": "Steamの認証が確認できないため、これ以上エポックを実行できません。(未認証では人口{{limit}}人までプレイできます)",
+    "errorAlreadyRunning": "別のエポックを実行中です。終わってからもう一度実行してください。",
+    "errorFailed": "エポックの実行に失敗しました: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} 期実行)",
+    "sectionConstruction": "建設状況",
+    "kindPath": "道路",
+    "kindBuilding": "施設",
+    "kindProject": "プロジェクト",
+    "noItems": "対象なし",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "完成",
+    "sectionStatistics": "統計",
+    "sectionScore": "スコア",
+    "scoreGain": "加点",
+    "scoreLoss": "減点",
+    "questState": {
+      "completed": "達成",
+      "active": "進行中",
+      "locked": "未解放",
+      "failed": "失敗"
+    },
+    "trendHint": "直近{{count}}エポックの傾向: {{trend}}",
+    "trend": {
+      "up": "上昇傾向",
+      "flat": "横ばい",
+      "down": "下降傾向",
+      "none": "履歴が足りません"
+    },
+    "statPopulation": "人口",
+    "statTourists": "観光客",
+    "statGdp": "GDP",
+    "statPrice": "物価",
+    "statIncome": "所得",
+    "statUnemployment": "失業率",
+    "statHealthcare": "医療充足度",
+    "statNutrition": "栄養充足度",
+    "statLeisure": "娯楽・余暇",
+    "statFire": "火災",
+    "statTraffic": "交通事故",
+    "statCrime": "犯罪",
+    "questCompleted": "達成！",
+    "questFailed": "期限切れ"
+  },
+  "epochProgress": {
+    "counter": "{{step}}({{index}}/{{count}})",
+    "steps": {
+      "route": "交通網を調べています",
+      "prepare": "今期の準備をしています",
+      "transit": "公共交通を手配しています",
+      "market": "商品を取引しています",
+      "production": "生産と消費をしています",
+      "commute": "通勤・通学をしています",
+      "growth": "市民が成長しています",
+      "evaluate": "街の評価を計算しています",
+      "immigration": "移民を受け入れています",
+      "labor": "仕事を探しています",
+      "spawn": "新しいお店や会社ができています",
+      "relocate": "転居をしています",
+      "construction": "建物を建設しています",
+      "finance": "お金の流れを整理しています",
+      "plan": "次の計画を立てています",
+      "incident": "火災や事故に対応しています",
+      "finalize": "統計をまとめています"
+    }
+  }
+}

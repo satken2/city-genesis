@@ -1,0 +1,107 @@
+/**
+ * Scenario information section styles
+ *
+ * Full-width band at the top of the achievements window. Prevent shrinking (flex-shrink:0) and cap its height
+ * with internal scrolling to preserve the vertical proportions of score analysis and achievements.
+ * Match the window's cards: a faint white surface and thin border.
+ */
+
+.scenario-info {
+  flex-shrink: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.scenario-info__title {
+  margin: 0 0 6px 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #9db0c5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ==================== Inputs (used by the introduction window and multilingual text fields) ==================== */
+
+.scenario-info__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scenario-info__label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #a4bccc;
+}
+
+.scenario-info__input,
+.scenario-info__textarea {
+  padding: 6px 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.6;
+  background-color: #10161f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  color: #e0e0e0;
+  outline: none;
+  resize: vertical;
+}
+
+.scenario-info__input:focus,
+.scenario-info__textarea:focus {
+  border-color: #4ea1ff;
+}
+
+.scenario-info__input:disabled,
+.scenario-info__textarea:disabled {
+  opacity: 0.6;
+}
+
+/* ==================== Display ==================== */
+
+/* In scenario authoring mode, indicate where to edit the introduction. */
+.scenario-info__hint {
+  color: #9db0c5;
+}
+
+.scenario-info__read {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scenario-info__read-title {
+  font-size: 1.32rem;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.scenario-info__read-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Preserve line breaks entered by the author. */
+.scenario-info__read-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #c8d8e8;
+  white-space: pre-wrap;
+}
+
+.scenario-info__read-thumb {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+

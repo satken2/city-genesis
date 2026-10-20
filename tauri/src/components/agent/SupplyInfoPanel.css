@@ -1,0 +1,22 @@
+/* Styles for the supply information component (SupplyInfoPanel). */
+
+.supply-profit-rate {
+  gap: 10px;
+}
+
+/* Utilization row. Stretch the shared meter across the value cell, with the percentage to its right. */
+.supply-info-meter {
+  gap: 8px;
+}
+
+.supply-info-meter .meter {
+  flex: 1;
+  min-width: 0;
+}
+
+.supply-info-meter-value {
+  flex-shrink: 0;
+  min-width: 32px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

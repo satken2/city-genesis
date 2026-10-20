@@ -1,0 +1,62 @@
+/**
+ * Shared donut gauge styles
+ *
+ * Assumes the dark translucent detail panel background; match .agent-detail-* text colors.
+ */
+
+.donut-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.donut-gauge__chart {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 auto;
+  overflow: visible; /* Do not clip the overflow glow at the frame. */
+}
+
+.donut-gauge__track {
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.donut-gauge__arc {
+  stroke-linecap: butt;
+  transition: stroke-dasharray 0.3s ease, stroke 0.3s ease;
+}
+
+/*
+ * Same magenta glow as Meter overflow (.meter-bar--overflow). Use drop-shadow to follow the ring;
+ * apply it only to the ring group so the central number does not blur.
+ */
+.donut-gauge--overflow .donut-gauge__ring {
+  filter: drop-shadow(0 0 2px rgba(217, 70, 239, 0.95)) drop-shadow(0 0 6px rgba(217, 70, 239, 0.65));
+}
+
+.donut-gauge__value {
+  fill: #e2eaf2;
+  font-size: 1.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.donut-gauge__label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.donut-gauge__detail {
+  color: #c0d0e0;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+}

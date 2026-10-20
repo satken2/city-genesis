@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Configuración del clima",
+    "name": "Nombre del clima",
+    "probabilities": "Probabilidades mensuales del tiempo",
+    "probabilityHint": "Arrastra los límites de color horizontalmente. Los campos inferiores permiten editar también el tiempo con 0%.",
+    "month": "Mes {{month}}",
+    "preset": "Clima predefinido",
+    "current": "Configuración actual",
+    "chartHint": "Selecciona una serie en la leyenda y arrastra sus puntos mensuales verticalmente.",
+    "averageHint": "Temperatura, precipitación y luz solar son promedios mensuales. Los valores reales varían en cada época alrededor de estos promedios.",
+    "apply": "Aplicar",
+    "chart": "Gráfico climático mensual"
+  }
+}

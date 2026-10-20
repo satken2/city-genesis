@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Suggest route",
+    "mode": "Height mode",
+    "fixed": "Keep waypoint heights",
+    "adjust": "Adjust intermediate waypoint heights",
+    "help": "Available after finishing the shape. Endpoints and waypoint XZ positions stay fixed.",
+    "searching": "Searching…",
+    "cancel": "Cancel",
+    "undo": "Undo suggestion",
+    "notFound": "No route was found.",
+    "failed": "Route suggestion failed."
+  }
+}

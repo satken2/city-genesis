@@ -1,0 +1,67 @@
+/**
+ * Styles for the interchange connection diagram.
+ *
+ * Match road boxes to the surfaces, borders, and text colors of the path detail condition tiles (PathConditionPanel.css).
+ * Box height and spacing are set inline from component constants to align with arrow coordinates.
+ */
+
+.ic-conn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ic-conn__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  row-gap: 6px;
+  align-items: start;
+}
+
+.ic-conn__head {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1.03rem;
+}
+
+.ic-conn__roads {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ic-conn__road {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 8px 0 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.ic-conn__road-name,
+.ic-conn__road-zone {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ic-conn__road-name {
+  color: #e2eaf2;
+  font-size: 1rem;
+}
+
+.ic-conn__road-zone {
+  color: #93a9c0;
+  font-size: 1rem;
+  min-height: 1.2em;
+}
+
+.ic-conn__links {
+  display: block;
+  overflow: visible;
+}

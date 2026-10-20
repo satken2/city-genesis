@@ -1,0 +1,18 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Intercambiador",
+      "jct": "Enlace de autopistas"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Desde",
+      "to": "Hacia",
+      "road": "{{type}} #{{id}}",
+      "none": "No hay pares de vías conectadas."
+    }
+  }
+}

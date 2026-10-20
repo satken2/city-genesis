@@ -1,0 +1,96 @@
+/** Settings-specific volume/state display. Shared form styles come from SettingsForm.css. */
+
+/*
+ * =========================================================================
+ * Volume sliders
+ * =========================================================================
+ */
+
+/* Draw tracks separately, keeping the input transparent and only as tall as its thumb. */
+.settings-slider {
+  appearance: none;
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Fill through --settings-fill (current percentage) with accent color; use track color for the remainder. */
+.settings-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    var(--flat-accent) 0 var(--settings-fill),
+    var(--flat-sunken) var(--settings-fill) 100%
+  );
+}
+
+.settings-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 18px;
+  margin-top: -6px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-text);
+  transition: background-color 0.15s ease;
+}
+
+.settings-slider:hover::-webkit-slider-thumb,
+.settings-slider:active::-webkit-slider-thumb {
+  background-color: var(--flat-accent);
+}
+
+/* Firefox for Linux development: ::-moz-range-progress handles the filled segment. */
+.settings-slider::-moz-range-track {
+  height: 6px;
+  background-color: var(--flat-sunken);
+}
+
+.settings-slider::-moz-range-progress {
+  height: 6px;
+  background-color: var(--flat-accent);
+}
+
+.settings-slider::-moz-range-thumb {
+  width: 10px;
+  height: 18px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-text);
+}
+
+.settings-slider-value {
+  width: 40px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text-body);
+}
+
+/*
+ * =========================================================================
+ * State display
+ * =========================================================================
+ */
+
+/* Status lamp before supplementary text: green when active, unlit when inactive. */
+.settings-status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  vertical-align: baseline;
+  background-color: var(--flat-text-muted);
+}
+
+.settings-status-dot--on {
+  background-color: var(--flat-good);
+}
+
+.settings-status-dot--busy {
+  background-color: var(--flat-warn);
+}

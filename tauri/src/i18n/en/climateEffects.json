@@ -1,0 +1,8 @@
+{
+  "climateEffects": {
+    "currentClimate": "This month's average climate",
+    "title": "Facility production efficiency by climate",
+    "facility": "Facility",
+    "factor": "Production efficiency"
+  }
+}

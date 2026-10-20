@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Buildings",
+      "paths": "Paths",
+      "vehicles": "Vehicles",
+      "props": "Props"
+    },
+    "additional": "Additional models",
+    "loading": "Loading models from the 3D view…",
+    "noModel": "No model",
+    "noImage": "No image",
+    "weight": "Weight",
+    "applyNote": "Weight changes take effect the next time you start or load a game."
+  }
+}

@@ -1,0 +1,91 @@
+/**
+ * Earthworks panel styles
+ *
+ * Match the single-column layout and action bar of sibling construction panels (buildings and new public
+ * transport lines).
+ * The shared ConstructionInfoCard and its CSS render estimate tables and warnings.
+ */
+
+.grading-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.grading-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.grading-reasons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Height offset input. Wrap the field to the next line in languages with long labels. */
+.grading-height {
+  margin-bottom: 10px;
+}
+
+.grading-height .pc-settings-row {
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.grading-height-note {
+  font-size: 0.93rem;
+  line-height: 1.4;
+  color: var(--flat-text-label);
+}
+
+/* Fixed to the panel bottom. Match the popup base's top-edge color so scrolled content does not show through. */
+.grading-action-bar {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  background: #182231;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+}
+
+.grading-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.grading-btn {
+  flex: 1;
+  min-width: 60px;
+  font-size: 1rem;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.grading-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.grading-btn.grading-btn-confirm {
+  background: var(--flat-accent);
+  color: #ffffff;
+  border-color: var(--flat-accent);
+  font-weight: 600;
+}
+
+.grading-btn.grading-btn-confirm:hover {
+  opacity: 0.85;
+}
+
+.grading-btn.grading-btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

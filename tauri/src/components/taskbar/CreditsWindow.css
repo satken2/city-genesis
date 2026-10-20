@@ -1,0 +1,143 @@
+/**
+ * Credits window styles
+ *
+ * Match settings: solid rectangles and shadows indicate elevation, without borders, rounded corners, or glow.
+ * App.css's --flat-* tokens exclusively define colors.
+ *
+ * Stack category headings and cards of credit rows. Separate rows by 2px gaps revealing the recessed surface
+ * instead of divider lines.
+ *
+ * Use pixel dimensions for the same reason as settings: font size changes must not move this layout.
+ */
+
+.credits-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.credits-lead {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--flat-text-muted);
+}
+
+.credits-empty {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+.credits-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Indicate heading levels with a solid block at the left, matching settings. */
+.credits-group-title {
+  margin: 0;
+  padding: 2px 0 2px 10px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--flat-text);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+.credits-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: var(--flat-sunken);
+  box-shadow: var(--flat-shadow);
+}
+
+.credits-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  background-color: var(--flat-surface);
+}
+
+/* Put asset and license names on one row, with the license aligned right. */
+.credits-row-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.credits-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--flat-text);
+}
+
+/* Links use button elements; reset default appearance to look like text. */
+.credits-title--link {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  color: var(--flat-accent);
+  cursor: pointer;
+}
+
+.credits-title--link:hover {
+  text-decoration: underline;
+}
+
+.credits-license {
+  margin-left: auto;
+  padding: 2px 6px;
+  background-color: var(--flat-sunken);
+  color: var(--flat-text-body);
+  font-size: 0.93rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere; /* Normally use one line; allow long names containing URLs to wrap to the available width. */
+}
+
+.credits-attribution {
+  font-size: 1rem;
+  color: var(--flat-text-body);
+}
+
+.credits-note {
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+/* License-prescribed wording. Use monospace on a recessed surface to signal the text is unmodified. */
+.credits-required {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 6px 8px;
+  background-color: var(--flat-sunken);
+}
+
+.credits-required-label {
+  font-size: 0.93rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--flat-text-muted);
+}
+
+.credits-required-body {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--flat-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

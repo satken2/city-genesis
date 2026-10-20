@@ -1,0 +1,101 @@
+/**
+ * Shared construction information card styles
+ *
+ * Embedded in both building/path construction and detail panels, so it must not depend on host
+ * classes (bc-* / pc-* / agent-detail-*). Match the detail panels' bordered monospace information grids.
+ */
+
+.construction-info-title {
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: #c5d4e3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.construction-info-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  /* Scale row height with font size and grow rows when values wrap; fixed heights would overlap following rows. */
+  grid-auto-rows: minmax(2.04rem, auto);
+  gap: 3px 10px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.construction-info-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.construction-info-value {
+  font-size: 1rem;
+  color: inherit;
+  font-family: "Consolas", "Menlo", monospace;
+}
+
+/* Multiplier badge such as "x1.3" beside estimated cost. Background indicates cost premium (green → yellow → red). */
+.construction-cost-ratio-badge {
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 1rem;
+  margin-left: 6px;
+  font-weight: bold;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: help;
+}
+
+/* Proportion of revenue beside estimated cost and maintenance cost. */
+.construction-revenue-ratio {
+  margin-left: 6px;
+  color: #93a9c0;
+}
+
+/* "X% of next period's construction budget" note. */
+.construction-budget-note {
+  font-size: 0.97rem;
+  color: #93a9c0;
+  margin-top: 4px;
+}
+
+/* Cost-per-epoch/remaining-time block (spaced below the estimate grid). */
+.construction-per-epoch {
+  margin-top: 8px;
+}
+
+/* Expected construction time value, colored by warning level. */
+.construction-supply-value-mild {
+  color: #eab308;
+}
+
+.construction-supply-value-severe {
+  color: #f97316;
+}
+
+/* Construction service shortage warning banner. */
+.construction-supply-note {
+  font-size: 0.97rem;
+  line-height: 1.5;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.construction-supply-note-mild {
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.construction-supply-note-severe {
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}

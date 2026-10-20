@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Carga de simulación",
+      "heading": "Tiempo de cálculo de la última época ({{days}} días)",
+      "noData": "Sin datos de medición",
+      "note": "Si se ejecutan varias épocas seguidas, se muestra la última. La cantidad de operaciones es una estimación aproximada del número de combinaciones de las comparaciones principales, según el tamaño de la ciudad.",
+      "colGroup": "Proceso",
+      "colTime": "Tiempo",
+      "colWorkload": "Cantidad de operaciones",
+      "workloadHint": "Número aproximado de comparaciones principales (elementos de los arreglos). Pasa el cursor sobre un valor para ver el desglose.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Mercado de bienes",
+      "realestate": "Mercado inmobiliario",
+      "labor": "Mercado laboral",
+      "building_spawn": "Aparición de edificios",
+      "agent_spawn": "Aparición de agentes",
+      "routing": "Búsqueda de rutas de los ciudadanos",
+      "transit": "Búsqueda de rutas del transporte público",
+      "environment": "Entorno residencial",
+      "other": "Otros"
+    },
+    "workload": {
+      "market": "Compradores {{demanders}} × vendedores {{suppliers}} (multiplicado por producto y sumado)",
+      "realestate": "Hogares que piensan mudarse {{movers}} × edificios residenciales {{housing}}",
+      "labor": "Personas que buscan empleo {{seekers}} × empleadores {{employers}}",
+      "building_spawn": "Parcelas candidatas {{parcels}} × tipos de edificio × número de pisos × usos de piso",
+      "agent_spawn": "Productos × distritos {{zones}} × distritos {{zones}}",
+      "routing": "2 modos de transporte × distritos {{zones}} × distritos {{zones}} × 3 rutas candidatas × vías {{paths}}",
+      "transit": "Paradas {{stops}} × nodos {{nodes}}",
+      "environment": "Cuadrícula {{width}} × {{height}} × posiciones del sol"
+    },
+    "entities": {
+      "colMetric": "Indicador",
+      "colCount": "Cantidad",
+      "title": "Cantidad de entidades",
+      "agents": "Agentes",
+      "households": "Hogares",
+      "businesses": "Negocios",
+      "publicFacilities": "Instalaciones públicas",
+      "buildings": "Edificios",
+      "citizens": "Ciudadanos",
+      "population": "Población",
+      "zones": "Distritos",
+      "parcels": "Parcelas",
+      "paths": "Vías",
+      "roads": "Calles",
+      "tracks": "Vías férreas",
+      "infra": "Redes de servicios",
+      "nodes": "Nodos"
+    },
+    "approximation": {
+      "title": "Aproximación de la simulación",
+      "intro": "Se planean opciones para simplificar los cálculos en ciudades grandes. Aún no se pueden cambiar estos ajustes.",
+      "warning": "Estos cambios pueden afectar el equilibrio del juego. No se pueden deshacer.",
+      "irreversible": "Los efectos de la aproximación permanecen en épocas posteriores. Una vez activada, no se podrá desactivar ni reducir.",
+      "undecided": "Por definir",
+      "candidates": "opciones como máximo",
+      "epochs": "épocas entre revisiones",
+      "off": "No",
+      "on": "Sí",
+      "goods": {
+        "label": "Opciones de compra",
+        "description": "Limita los proveedores comparados por precio y distancia."
+      },
+      "jobs": {
+        "label": "Opciones de empleo",
+        "description": "Limita los empleadores comparados por salario y condiciones de traslado."
+      },
+      "housing": {
+        "label": "Opciones de vivienda",
+        "description": "Limita las viviendas comparadas por renta y ubicación."
+      },
+      "interval": {
+        "label": "Intervalo de decisiones habituales",
+        "description": "Revisa con menor frecuencia las opciones de compras, empleo y vivienda."
+      },
+      "aggregation": {
+        "label": "Agrupar ciudadanos y hogares similares",
+        "description": "Toma algunas decisiones en conjunto para ciudadanos u hogares con condiciones similares."
+      }
+    },
+    "status": {
+      "title": "Estado del sistema",
+      "gpuDisabled": "Aceleración GPU: Desactivada",
+      "coreSimulator": "Simulador principal",
+      "currentMemory": "Uso actual de memoria: {{value}}",
+      "peakMemory": "Uso máximo de memoria desde el inicio: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Uso actual de VRAM: {{value}}",
+      "usageTooltip": "Todo el PC {{pc}} / Este juego {{game}} / Instalada {{total}}",
+      "legendPc": "Todo el PC",
+      "legendGame": "Este juego"
+    }
+  }
+}

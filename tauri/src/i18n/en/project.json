@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "Project",
+    "none": "(No tag)",
+    "createNew": "+ New tag…",
+    "newPlaceholder": "Enter a tag name",
+    "add": "Add",
+    "cancel": "Cancel",
+    "saveFailed": "Failed to save the tag",
+    "showObject": "Show in the 3D view",
+    "hideObject": "Hide in the 3D view"
+  },
+  "constructionProjects": {
+    "empty": "No tagged works yet. Choose a tag when placing from a construction panel, or add one from the detail panel of a public facility or road that is planned or under construction.",
+    "loadFailed": "Failed to load construction projects",
+    "totalCost": "Estimated cost",
+    "duration": "Time left",
+    "progress": "Progress",
+    "progressValue": "{{done}} / {{total}} done",
+    "monthsValue": "{{value}} months",
+    "stalled": "Stalled",
+    "stalledWarning": "{{count}} work(s) will not progress because the construction speed is 0 (excluded from the duration total).",
+    "done": "Done",
+    "unnamed": "#{{id}}",
+    "showAll": "Show everything again ({{count}})",
+    "showTag": "Show this project in the 3D view",
+    "hideTag": "Hide this project in the 3D view",
+    "showObject": "Show in the 3D view",
+    "hideObject": "Hide in the 3D view",
+    "deleteTag": "Delete this tag",
+    "confirmDeleteTag": "Delete the tag \"{{tag}}\"? It will be removed from its buildings and roads (the works themselves remain).",
+    "columns": {
+      "name": "Target",
+      "status": "Status",
+      "cost": "Cost left",
+      "remaining": "Time left"
+    }
+  }
+}

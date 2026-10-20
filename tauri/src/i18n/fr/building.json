@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Composition des étages",
+    "parking": "Stationnement",
+    "type": "Type de bâtiment",
+    "durability": "Durabilité",
+    "floors": "Étages",
+    "floorsValue": "{{floors}} étages (surface de plancher {{area, number}} ㎡)",
+    "heightLabel": "Hauteur : {{value}} m",
+    "baseAreaLabel": "Emprise au sol : {{area, number}} ㎡",
+    "underMaintenance": "En réparation",
+    "parkingCapacity": "Capacité de stationnement",
+    "parkingCapacityValue": "{{capacity}} voitures",
+    "parkingDay": "Jour",
+    "parkingNight": "Nuit",
+    "parkingUsage": "{{used}} / {{capacity}} voitures"
+  },
+  "building_appearance": {
+    "variantLabel": "Apparence {{index}}",
+    "layoutHint": "Glissez une carte sur le terrain pour la placer / glissez pour déplacer / Maj+glisser pour pivoter / touche Suppr pour retirer",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Supprimer l'annexe sélectionnée",
+    "apply": "Appliquer",
+    "saveFailed": "Échec de l'enregistrement de l'apparence",
+    "noSubbuildings": "Aucune annexe n'est définie pour ce type de bâtiment"
+  }
+}

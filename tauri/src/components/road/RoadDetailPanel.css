@@ -1,0 +1,174 @@
+/*
+ * RoadDetailPanel.css - Road detail panel (right panel).
+ * Share sections, grids, and tabs with AgentDetailPanel.css, and road-color bands, tiles, small buttons,
+ * and deletion blocks with TransitDetailPanel.css. Define only road-specific elements here:
+ * section-edit/extension-candidate banners, notification rows, table wrapping, and line chips.
+ */
+
+/* ---- Section editing banner (always visible regardless of tab) ---- */
+.road-detail__editing,
+.road-detail__preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.road-detail__editing {
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.road-detail__preview {
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.road-detail__editing-text,
+.road-detail__preview-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #d8e3ee;
+}
+
+/* ---- Single-line operation result notification ---- */
+.road-detail__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.road-detail__notice--info {
+  color: #9fc3e6;
+}
+
+.road-detail__notice--error {
+  color: #ff9a9a;
+}
+
+.road-detail__notice-close {
+  margin-left: auto;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.road-detail__notice-close:hover {
+  opacity: 1;
+}
+
+/* ---- Deleted state ---- */
+.road-detail__deleted {
+  padding: 12px;
+  font-size: 1rem;
+  color: #d8e3ee;
+}
+
+.road-detail__deleted p {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
+/* ---- Basic information ---- */
+.road-detail__tile--link {
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.road-detail__tile--link:hover {
+  filter: brightness(1.15);
+}
+
+.road-detail__tile-hint {
+  font-size: 0.89rem;
+  color: #6b8299;
+  font-variant-numeric: tabular-nums;
+}
+
+.road-detail__grid {
+  align-items: center;
+}
+
+/* Wrap rows containing multiple districts, lane configurations, lines, etc. */
+.road-detail__wrap {
+  flex-wrap: wrap;
+  row-gap: 3px;
+}
+
+.road-detail__zone {
+  display: inline-flex;
+  align-items: center;
+}
+
+.road-detail__sep {
+  color: #6b8299;
+}
+
+.road-detail__muted {
+  color: #6b8299;
+}
+
+.road-detail__warn-tag {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.89rem;
+  font-weight: 600;
+  color: var(--flat-warn);
+  background: var(--flat-warn-surface);
+}
+
+.road-detail__line-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 6px;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: transparent;
+  color: #d8e3ee;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.road-detail__line-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.road-detail__line-chip i {
+  display: inline-block;
+  width: 10px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* ---- Settings-tab action rows (description and button) ---- */
+.road-detail__action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.road-detail__action-desc {
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #8397ab;
+}

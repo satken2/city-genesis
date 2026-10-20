@@ -1,0 +1,59 @@
+.floor-occupancy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.floor-occupancy__bar {
+  display: flex;
+  height: 24px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.floor-occupancy__segment {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.floor-occupancy__filled {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.floor-occupancy__label {
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+.floor-occupancy__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.floor-occupancy__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #9db0c5;
+}
+
+.floor-occupancy__legend-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}

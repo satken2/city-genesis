@@ -1,0 +1,267 @@
+/**
+ * Epoch confirmation window styles.
+ *
+ * As in SaveLoadWindow.css, use the entire titlebar-free window as one surface, with a thin top accent
+ * indicating its edge. Use flat styles (App.css --flat-*), without borders, rounded corners, or glow.
+ * Place content directly on the window surface. Run a seasonal band below the heading's icon column from the
+ * current date to the post-execution date; align date and epoch-count text with the heading text.
+ * Do not indent the question: even Japanese would otherwise wrap only its final few characters.
+ * Season markers at the vertical centers of date rows anchor a single continuous band, preserving its length and
+ * season positions when font size or wrapping changes row heights.
+ * Use the shared SaveDialogButton. Keep the root at content height so the window can be measured to fit, rather
+ * than stretching to window height.
+ */
+
+/* Days represented by the entire band. Register for interpolation so changing epoch count smoothly changes the band's scale. */
+@property --epoch-confirm-span {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 30;
+}
+
+.epoch-confirm {
+  --epoch-confirm-icon: 1.6rem;  /* Heading icon width. The seasonal band and markers pass through the center of this column. */
+  --epoch-confirm-indent: calc(var(--epoch-confirm-icon) + 10px);  /* Start position of heading text */
+  --epoch-confirm-spring: #9fd46a;
+  --epoch-confirm-summer: #2f9e5a;
+  --epoch-confirm-autumn: #e0874a;
+  --epoch-confirm-winter: #e4ecf4;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 22px 18px;
+  overflow-y: auto;
+  background: radial-gradient(130% 55% at 50% 0%, rgba(78, 161, 255, 0.1), transparent 70%);
+  user-select: none;
+}
+
+.epoch-confirm::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--flat-accent) 50%, transparent);
+}
+
+.epoch-confirm-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.epoch-confirm-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--flat-text);
+}
+
+.epoch-confirm-title svg {
+  flex-shrink: 0;
+  width: var(--epoch-confirm-icon);
+  height: var(--epoch-confirm-icon);
+  color: var(--flat-accent);
+}
+
+.epoch-confirm-message {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--flat-text-body);
+}
+
+/* ── Timeline (seasonal band) ── */
+
+.epoch-confirm-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.epoch-confirm-band {
+  position: absolute;
+  top: anchor(--epoch-confirm-from center);
+  bottom: anchor(--epoch-confirm-to center);
+  left: calc(var(--epoch-confirm-icon) / 2 - 3px);
+  width: 6px;
+  background-color: var(--flat-text-muted);
+  transition: --epoch-confirm-span 0.35s ease;
+}
+
+.epoch-confirm-step {
+  position: relative;
+  display: flex;
+  padding: 10px 0 10px var(--epoch-confirm-indent);
+}
+
+.epoch-confirm-step--from,
+.epoch-confirm-step--to {
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Season markers at band endpoints: hollow ring for current date, filled circle after execution. */
+.epoch-confirm-badge {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--epoch-confirm-icon);
+  height: var(--epoch-confirm-icon);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  --epoch-confirm-season: var(--flat-text-muted);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+
+.epoch-confirm-badge svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.epoch-confirm-badge--spring { --epoch-confirm-season: var(--epoch-confirm-spring); }
+.epoch-confirm-badge--summer { --epoch-confirm-season: var(--epoch-confirm-summer); }
+.epoch-confirm-badge--autumn { --epoch-confirm-season: var(--epoch-confirm-autumn); }
+.epoch-confirm-badge--winter { --epoch-confirm-season: var(--epoch-confirm-winter); }
+
+.epoch-confirm-badge--from {
+  anchor-name: --epoch-confirm-from;
+  color: var(--epoch-confirm-season);
+  background-color: var(--flat-surface);
+  box-shadow: inset 0 0 0 2px var(--epoch-confirm-season);
+}
+
+.epoch-confirm-badge--to {
+  anchor-name: --epoch-confirm-to;
+  color: var(--flat-sunken);
+  background-color: var(--epoch-confirm-season);
+}
+
+.epoch-confirm-label {
+  font-size: 1rem;
+  line-height: 1.3;
+  color: var(--flat-text-muted);
+}
+
+.epoch-confirm-date {
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--flat-text-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.epoch-confirm-step--to .epoch-confirm-date {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--flat-text);
+  animation: epoch-confirm-date-in 0.28s ease-out;
+}
+
+@keyframes epoch-confirm-date-in {
+  from { opacity: 0; transform: translateY(-0.35em); }
+}
+
+/* ── Epoch count (stepper within the band) ── */
+
+.epoch-confirm-step--count {
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.epoch-confirm-step--count .epoch-confirm-label {
+  font-size: 1rem;
+  color: var(--flat-text-label);
+}
+
+.epoch-confirm-stepper {
+  display: flex;
+  flex-shrink: 0;
+  box-shadow: var(--flat-shadow-sm);
+}
+
+/* Override global button defaults (border, rounded corners, translucent background). */
+.epoch-confirm-stepper-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  color: var(--flat-text-body);
+  background: var(--flat-raised);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.epoch-confirm-stepper-button svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.epoch-confirm-stepper-button:hover:not(:disabled) {
+  color: var(--flat-text);
+  background: var(--flat-raised-hover);
+}
+
+.epoch-confirm-stepper-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.epoch-confirm-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--flat-text);
+  font-variant-numeric: tabular-nums;
+  background: var(--flat-sunken);
+}
+
+/* Direct input in scenario mode. Hide browser spin buttons because the adjacent buttons change the value. */
+.epoch-confirm-count--input {
+  width: 5.5rem;
+  padding: 0 4px;
+  text-align: center;
+  border: none;
+  border-radius: 0;
+  outline: none;
+  user-select: text;
+}
+
+.epoch-confirm-count--input:focus {
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+.epoch-confirm-count--input:disabled {
+  opacity: 0.6;
+}
+
+.epoch-confirm-count--input::-webkit-inner-spin-button,
+.epoch-confirm-count--input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.epoch-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

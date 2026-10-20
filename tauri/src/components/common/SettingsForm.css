@@ -1,0 +1,292 @@
+/**
+ * Shared settings form styles
+ *
+ * Match top-menu windows (new game, save/load): solid rectangles and drop shadows for elevation,
+ * without borders, rounded corners, or glow. App.css --flat-* tokens are authoritative for colors;
+ * do not hardcode values.
+ *
+ * Stack group headings and cards containing setting rows. Each row has a name/details on the left
+ * and controls on the right. Separate rows with 2px gaps exposing the sunken surface in place of borders.
+ *
+ * Use the screen-wide rem text scale. Form spacing/control dimensions use px;
+ * rows wrap to remain usable when font size changes.
+ */
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* A solid left block indicates heading level. */
+.settings-group-title {
+  margin: 0;
+  padding: 2px 0 2px 10px;
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: var(--flat-text);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+/* Sunken background shows through row gaps, separating them without borders. */
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: var(--flat-sunken);
+  box-shadow: var(--flat-shadow);
+}
+
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  background-color: var(--flat-surface);
+}
+
+.settings-row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.settings-row-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text);
+}
+
+.settings-row-desc {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--flat-text-muted);
+}
+
+/* Align controls to the right. Narrow rows wrap them onto a lower line. */
+.settings-row-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* "Coming soon" badge beside a setting name. */
+.settings-row-badge {
+  margin-left: 8px;
+  padding: 2px 6px;
+  background-color: var(--flat-sunken);
+  color: var(--flat-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Unavailable setting. Keep the name readable; dim only controls and prevent clicks. */
+.settings-row--disabled .settings-row-name {
+  color: var(--flat-text-muted);
+}
+
+.settings-row--disabled .settings-row-control {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Row whose controls span full width, such as volume sliders. */
+.settings-row--stretch .settings-row-label {
+  flex: 0 0 150px;
+}
+
+.settings-row--stretch .settings-row-control {
+  flex: 1 1 180px;
+}
+
+/*
+ * =========================================================================
+ * Segmented selection (shared by presets, binary choices, and CPU/GPU).
+ * =========================================================================
+ */
+
+/* Arrange buttons 2px apart over a recess to indicate one connected control group. */
+.settings-seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background-color: var(--flat-sunken);
+}
+
+.settings-seg-btn {
+  min-width: 56px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text-body);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.settings-seg-btn:hover:not(:disabled) {
+  background-color: var(--flat-raised-hover);
+}
+
+/* Mark selection with a solid bottom block; left blocks are hard to read in horizontal groups. */
+.settings-seg-btn.active {
+  background-color: var(--flat-selected);
+  color: #ffffff;
+  box-shadow: inset 0 -3px 0 var(--flat-accent);
+}
+
+.settings-seg-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* Dim only unselected disabled buttons; preserve selected colors to communicate the current value. */
+.settings-seg-btn:disabled:not(.active) {
+  opacity: 0.5;
+}
+
+/* Show preset actual size (e.g. 14px) in small text below its label. */
+.settings-seg-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.9rem;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/*
+ * =========================================================================
+ * Numeric inputs, dropdowns, buttons.
+ * =========================================================================
+ */
+
+.settings-number {
+  width: 56px;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-sunken);
+  color: var(--flat-text);
+  font-family: inherit;
+  font-size: 1rem;
+  text-align: right;
+  outline: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-number:focus {
+  background-color: var(--flat-raised);
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+/* Hide spin buttons, which consume width and are hard to click. */
+.settings-number::-webkit-inner-spin-button,
+.settings-number::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.settings-unit {
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+/* Wrap dropdowns in a relatively positioned container for overlaying the triangle. */
+.settings-select-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.settings-select {
+  appearance: none;
+  min-width: 190px;
+  padding: 8px 32px 8px 12px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-select:hover {
+  background-color: var(--flat-raised-hover);
+}
+
+.settings-select:focus {
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+/* The expanded list is browser-rendered; match only essential colors. */
+.settings-select option {
+  background-color: var(--flat-surface);
+  color: var(--flat-text);
+}
+
+.settings-select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-right: 2px solid var(--flat-accent);
+  border-bottom: 2px solid var(--flat-accent);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.settings-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text-body);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.settings-btn:hover:not(:disabled) {
+  background-color: var(--flat-raised-hover);
+}
+
+.settings-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Make left/right chevrons one shade brighter than the label to emphasize direction. */
+.settings-btn-chevron {
+  color: var(--flat-accent);
+  font-weight: 700;
+}

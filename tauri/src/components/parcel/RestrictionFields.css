@@ -1,0 +1,104 @@
+/**
+ * Building regulation field styles (RestrictionFields)
+ *
+ * Shared by parcel and district panels, so styles belong to this component rather than either panel.
+ * Panels are lazy-loaded per window and do not load other panels' CSS.
+ */
+
+.restriction-label--disabled {
+  opacity: 0.45;
+}
+
+.restriction-fields {
+  margin-top: 4px;
+}
+
+/**
+ * Arrange numeric input and its right-side unit label horizontally.
+ */
+.restriction-input-with-suffix {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.restriction-input-unit {
+  font-size: 1rem;
+  color: #93a9c0;
+  white-space: nowrap;
+  line-height: 2.04rem;
+}
+
+.restriction-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #e2eaf2;
+  font-size: 1rem;
+  padding: 2px 4px;
+  line-height: 1.67rem;
+}
+
+/**
+ * Keep width compact for approximately three-digit inputs.
+ */
+.restriction-input--narrow {
+  width: 4.17rem;
+  min-width: 4.17rem;
+  max-width: 4.17rem;
+  box-sizing: border-box;
+  text-align: right;
+  /* Hide spin buttons to reserve width for approximately three digits. */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.restriction-input--narrow::-webkit-outer-spin-button,
+.restriction-input--narrow::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.restriction-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.restriction-input:focus:not(:disabled) {
+  outline: none;
+  border-color: rgba(99, 179, 237, 0.6);
+}
+
+/* === Save button row === */
+
+.restriction-save-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.restriction-save-error {
+  color: #fc8181;
+  font-size: 1rem;
+}
+
+.restriction-save-btn {
+  padding: 4px 14px;
+  font-size: 1rem;
+  border-radius: 6px;
+  background: rgba(34, 197, 94, 0.18);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #86efac;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.restriction-save-btn:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.28);
+}
+
+.restriction-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

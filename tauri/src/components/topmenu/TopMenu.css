@@ -1,0 +1,256 @@
+.topmenu {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #e5eef9;
+  position: relative;
+  overflow: hidden;
+}
+
+.topmenu-minimize {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.667rem;
+  height: 2.667rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 0;
+  background: rgba(128, 128, 128, 0.4);
+  color: var(--flat-text);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.topmenu-minimize:hover {
+  background: rgba(128, 128, 128, 0.6);
+}
+
+.topmenu-minimize:focus-visible {
+  outline: 2px solid var(--flat-text);
+  outline-offset: 2px;
+}
+
+.topmenu-minimize > span {
+  width: 1rem;
+  height: 2px;
+  background: currentColor;
+}
+
+/**
+ * Main button container.
+ * Fix at 45% from the top, horizontally centered, with 35% width.
+ * This keeps buttons stable regardless of debug information or messages.
+ */
+.topmenu-main-buttons {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 33%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  z-index: 1;
+}
+
+/* In narrow windows, allow enough width to keep button text on one line. */
+@media (max-width: 600px) {
+  .topmenu-main-buttons {
+    width: 70%;
+  }
+}
+
+/**
+ * Shared buttons, such as Load.
+ * Solid rectangles without borders/glow; shadows alone lift them above the splash image.
+ */
+.topmenu-btn {
+  padding: 16px 40px;
+  font-size: 1.53rem;
+  font-weight: 600;
+
+  background: #16202e;
+  border: none;
+  color: #a0c4ff;
+
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+  border-radius: 0;
+}
+
+.topmenu-btn:hover {
+  background: #22344c;
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Pressed appearance: lower the surface and reduce its shadow. */
+.topmenu-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Brighten the primary New Game button slightly for emphasis. */
+.topmenu-btn-primary {
+  background: #1d3a5c;
+  color: #ffffff;
+}
+
+.topmenu-btn-primary:hover {
+  background: #2c5687;
+}
+
+/**
+ * Exit button.
+ * Square at bottom right, with zero padding and a centered icon.
+ */
+.topmenu-btn-quit {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0;
+  background: #2c2c3c;
+  color: #9cb3cb;
+}
+
+.topmenu-btn-quit:hover {
+  background: #5a2a2a;
+  color: #ff8888;
+}
+
+.topmenu-quit-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+/**
+ * Asset manager button.
+ * Square to the left of Options, displaying only its icon image.
+ */
+.topmenu-btn-asset-manager {
+  position: absolute;
+  bottom: 20px;
+  right: 132px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2c2c3c;
+  color: #9cb3cb;
+}
+
+.topmenu-btn-asset-manager:hover {
+  background: #3d557a;
+}
+
+.topmenu-asset-manager-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+/**
+ * Options button.
+ * Square to the left of Exit, displaying only its icon image.
+ */
+.topmenu-btn-options {
+  position: absolute;
+  bottom: 20px;
+  right: 76px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2c2c3c;
+  color: #9cb3cb;
+}
+
+.topmenu-btn-options:hover {
+  background: #3d557a;
+}
+
+.topmenu-options-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+/**
+ * GitHub button.
+ * Bottom center, with icon and repository name side by side.
+ * Use custom rounded/glowing styles instead of shared dark square button styles.
+ */
+.topmenu-btn-github {
+  position: absolute;
+  background-color: #e5eef9;
+  border: 1px solid rgba(130, 190, 255, 0.4);
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(130, 190, 255, 0.1), inset 0 0 15px rgba(130, 190, 255, 0.1);
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  width: auto;
+  height: auto;
+  min-width: 48px;
+}
+
+/**
+ * Preserve left: 50% + translateX(-50%) centering while applying the active scale effect.
+ * Otherwise active would override translateX(-50%) and shift the button right.
+ */
+.topmenu-btn-github:active {
+  transform: translateX(-50%) scale(0.98);
+  background: #d8e5f5;
+  box-shadow: 0 0 15px rgba(130, 190, 255, 0.1), inset 0 0 15px rgba(130, 190, 255, 0.1);
+}
+
+.topmenu-btn-github:hover {
+  transform: translateX(-50%) translateY(-2px);
+  background: #ffffff;
+  box-shadow: 0 0 20px rgba(130, 190, 255, 0.5), inset 0 0 15px rgba(130, 190, 255, 0.2);
+}
+
+.topmenu-github-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.topmenu-github-label {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #2c2c3c;
+}
+
+.topmenu-versions { position: absolute; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 1rem; color: var(--flat-text-body); }

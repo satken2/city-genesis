@@ -1,0 +1,37 @@
+{
+  "1001": [
+    { "variant": 0, "prop": 364, "key": "cityBus" },
+    { "variant": 1, "prop": 365, "key": "coach" }
+  ],
+  "1002": [
+    { "variant": 0, "prop": 372, "key": "metroStandard" },
+    { "variant": 1, "prop": 373, "key": "metroFuturistic" },
+    { "variant": 2, "prop": 388, "key": "metroRetro" }
+  ],
+  "1003": [
+    { "variant": 0, "prop": 370, "key": "lrt" }
+  ],
+  "1004": [
+    { "variant": 0, "prop": 308, "key": "monorail" }
+  ],
+  "1005": [
+    { "variant": 0, "prop": 376, "key": "trainStandard" },
+    { "variant": 1, "prop": 377, "key": "trainFuturistic" },
+    { "variant": 2, "prop": 390, "key": "trainRetro" }
+  ],
+  "1006": [
+    { "variant": 0, "prop": 380, "key": "freightJr" },
+    { "variant": 1, "prop": 381, "key": "freightAmerican" },
+    { "variant": 2, "prop": 394, "key": "freightIndian" }
+  ],
+  "1007": [
+    { "variant": 0, "prop": 380, "key": "freightJr" },
+    { "variant": 1, "prop": 381, "key": "freightAmerican" },
+    { "variant": 2, "prop": 394, "key": "freightIndian" }
+  ],
+  "1008": [
+    { "variant": 0, "prop": 380, "key": "freightJr" },
+    { "variant": 1, "prop": 381, "key": "freightAmerican" },
+    { "variant": 2, "prop": 394, "key": "freightIndian" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "건물",
+      "paths": "경로",
+      "vehicles": "차량",
+      "props": "프롭"
+    },
+    "additional": "추가 모델",
+    "loading": "3D 화면에서 모델을 불러오는 중…",
+    "noModel": "모델 없음",
+    "noImage": "이미지 없음",
+    "weight": "가중치",
+    "applyNote": "가중치 변경은 다음에 게임을 시작하거나 불러올 때 적용됩니다."
+  }
+}

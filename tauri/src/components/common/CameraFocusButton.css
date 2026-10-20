@@ -1,0 +1,28 @@
+/* Square matching the InfoHeader status bar height (one line plus 2px above/below). */
+.camera-focus-btn {
+  flex-shrink: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+}
+
+.camera-focus-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.camera-focus-btn:active {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.camera-focus-btn svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}

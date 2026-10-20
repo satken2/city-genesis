@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "Projet",
+    "none": "(Sans étiquette)",
+    "createNew": "+ Nouvelle étiquette…",
+    "newPlaceholder": "Saisir un nom d'étiquette",
+    "add": "Ajouter",
+    "cancel": "Annuler",
+    "saveFailed": "Échec de l'enregistrement de l'étiquette",
+    "showObject": "Afficher dans la vue 3D",
+    "hideObject": "Masquer dans la vue 3D"
+  },
+  "constructionProjects": {
+    "empty": "Aucun chantier étiqueté pour l'instant. Choisissez une étiquette en plaçant depuis un panneau de construction, ou ajoutez-la depuis le panneau de détail d'un équipement public ou d'une route prévus ou en chantier.",
+    "loadFailed": "Échec du chargement des projets de construction",
+    "totalCost": "Coût estimé",
+    "duration": "Durée restante",
+    "progress": "Avancement",
+    "progressValue": "{{done}} / {{total}} terminés",
+    "monthsValue": "{{value}} mois",
+    "stalled": "À l'arrêt",
+    "stalledWarning": "{{count}} chantier(s) n'avancent pas car la vitesse de construction est à 0 (exclus du total de durée).",
+    "done": "Terminé",
+    "unnamed": "#{{id}}",
+    "showAll": "Tout réafficher ({{count}})",
+    "showTag": "Afficher ce projet dans la vue 3D",
+    "hideTag": "Masquer ce projet dans la vue 3D",
+    "showObject": "Afficher dans la vue 3D",
+    "hideObject": "Masquer dans la vue 3D",
+    "deleteTag": "Supprimer l'étiquette",
+    "confirmDeleteTag": "Supprimer l'étiquette « {{tag}} » ? Elle sera retirée de ses bâtiments et routes (les travaux, eux, restent).",
+    "columns": {
+      "name": "Objet",
+      "status": "État",
+      "cost": "Coût restant",
+      "remaining": "Durée restante"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+/**
+ * Generic confirmation window styles
+ *
+ * Small window containing only a body and two buttons. Use --flat-* surface/text colors.
+ * Only tone="danger" confirmation buttons are red, also conveying irreversible actions through color.
+ */
+
+.confirm-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.confirm-dialog-muted {
+  padding: 16px;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+.confirm-dialog-message {
+  flex: 1;
+  margin: 0;
+  overflow-y: auto;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--flat-text-body);
+  white-space: pre-line;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.confirm-dialog-btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 0;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: var(--flat-shadow-sm);
+  transition: background-color 0.15s ease;
+}
+
+.confirm-dialog-btn--cancel {
+  background: var(--flat-raised);
+  color: var(--flat-text);
+}
+
+.confirm-dialog-btn--cancel:hover {
+  background: var(--flat-raised-hover);
+}
+
+.confirm-dialog-btn--default {
+  background: var(--flat-selected);
+  color: #ffffff;
+}
+
+.confirm-dialog-btn--default:hover {
+  background: var(--flat-selected-hover);
+}
+
+.confirm-dialog-btn--danger {
+  background: #b3322a;
+  color: #ffffff;
+}
+
+.confirm-dialog-btn--danger:hover {
+  background: #cf3d33;
+}
+
+.confirm-dialog-btn:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: 2px;
+}

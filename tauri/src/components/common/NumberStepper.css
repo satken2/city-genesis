@@ -1,0 +1,84 @@
+/**
+ * Numeric stepper styles
+ *
+ * Place [+]/[-] buttons beside the numeric input.
+ * Use the Catppuccin Mocha palette to match PathBuildPanel controls.
+ */
+
+.number-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.number-stepper__label {
+  font-size: 1rem;
+  color: #a6adc8;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.number-stepper__control {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid #45475a;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #313244;
+}
+
+.number-stepper__btn {
+  width: 32px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #313244;
+  color: #cdd6f4;
+  border: none;
+  cursor: pointer;
+  font-size: 1.18rem;
+  font-family: "Consolas", "Menlo", monospace;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.number-stepper__btn:hover {
+  background: #45475a;
+}
+
+.number-stepper__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.number-stepper__input {
+  width: 52px;
+  height: 30px;
+  text-align: center;
+  background: transparent;
+  color: #cdd6f4;
+  border: none;
+  border-left: 1px solid #45475a;
+  border-right: 1px solid #45475a;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+/* Wider version for large values (natural resource reserves, etc.) without clipping. Set via className. */
+.number-stepper--wide .number-stepper__input {
+  width: 116px;
+}
+
+.number-stepper__input::-webkit-inner-spin-button,
+.number-stepper__input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.number-stepper__input:focus {
+  background: rgba(137, 180, 250, 0.08);
+}

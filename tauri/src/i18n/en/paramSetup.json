@@ -1,0 +1,383 @@
+{
+  "paramSetup": {
+    "title": "Game Parameter Setup",
+    "description": "Default values are generally recommended. Only adjust if you want to customize.",
+    "skip": "Skip",
+    "start": "Start Game",
+    "apply": "Apply & Close",
+    "close": "Close",
+    "loading": "Loading...",
+    "reload": "Reload",
+    "reloadHint": "Reload after backend initialization is complete to get the latest values.",
+    "fetchError": "Failed to fetch parameters",
+    "category": {
+      "population": "Population & Migration",
+      "citizen": "Citizen Life",
+      "economy": "Economy",
+      "labor": "Labor & Wages",
+      "education": "Education",
+      "construction": "Construction & Real Estate",
+      "environment": "Environment",
+      "traffic": "Traffic",
+      "general": "General",
+      "pathfind": "Traffic & Routing",
+      "building": "Buildings & Construction",
+      "disaster": "Disasters & Safety",
+      "sprawl": "Urban Sprawl",
+      "production": "Production & Inventory",
+      "zone": "Districts & Parcels",
+      "financial": "Finance"
+    },
+    "param": {
+      "TFR_TARGET": {
+        "label": "Total Fertility Rate (TFR) Target",
+        "desc": "The birth rate households aim for. Higher values make births more likely."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Marriage Rate",
+        "desc": "Base probability coefficient for citizens getting married. Higher = more marriages."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Minimum Childbearing Age",
+        "desc": "Minimum age at which births can occur. No births below this age."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Maximum Childbearing Age",
+        "desc": "Maximum age at which births can occur. No births above this age."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Immigrant Household Marriage Rate",
+        "desc": "Probability that an incoming immigrant household is a married couple."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "1st Child Rate (Immigrants)",
+        "desc": "Probability that an immigrant household spawns with 1 child."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "2nd Child Rate (Immigrants)",
+        "desc": "Probability that an immigrant household spawns with 2 children."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "3rd Child Rate (Immigrants)",
+        "desc": "Probability that an immigrant household spawns with 3 children."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Immigrant Adult Minimum Age",
+        "desc": "Minimum age of adults flowing in as immigrants."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Immigrant Adult Maximum Age",
+        "desc": "Maximum age of adults flowing in as immigrants."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Lifespan Factor",
+        "desc": "Multiplier for maximum citizen lifespan. 1.08 ≈ 100 years, 1.06 ≈ 150 years.",
+        "graphX": "Age",
+        "graphY": "Annual death probability (health 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Single Household Living Space (m²)",
+        "desc": "Minimum living area required by a single-person household."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Additional Space for Spouse (m²)",
+        "desc": "Extra living area needed when a household has a spouse."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Additional Space per Child (m²)",
+        "desc": "Extra living area needed per child in the household."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Rent-to-Income Ratio (max)",
+        "desc": "Maximum fraction of household income that can be spent on rent. 0.3 = up to 30%."
+      },
+      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
+        "label": "Minimum Disposable Income Ratio",
+        "desc": "Minimum discretionary income ratio a household tries to maintain. If it is too low, household finances break down easily."
+      },
+      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
+        "label": "Epochs to Decide to Move",
+        "desc": "Number of epochs of dissatisfaction with the living environment before a household decides to relocate."
+      },
+      "HOUSEHOLD_SHACK_COUNT": {
+        "label": "Epochs Before Homelessness",
+        "desc": "Number of epochs without housing before a household becomes homeless."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Average Wage (baseline)",
+        "desc": "Reference average wage at simulation start."
+      },
+      "AVERAGE_RENT": {
+        "label": "Average Rent (baseline)",
+        "desc": "Reference average rent at simulation start (per day per m²)."
+      },
+      "MIN_PROFIT_RATE": {
+        "label": "Minimum Profit Rate",
+        "desc": "Minimum profit rate required for a business to stay operational."
+      },
+      "SPAWN_PROFIT_RATE_THRESHOLD": {
+        "label": "New Entry Minimum Profit Rate",
+        "desc": "New businesses only spawn in markets above this profit rate. Prevents oversaturation."
+      },
+      "DIVIDEND_PAYOUT_RATIO": {
+        "label": "Dividend Payout Ratio",
+        "desc": "Fraction of corporate profit distributed to households as dividends."
+      },
+      "MIN_PRODUCTION_LIMIT": {
+        "label": "Minimum Production Ratio",
+        "desc": "Minimum production as a ratio of total demand."
+      },
+      "MAX_LONGRUN_BONUS_DAYS": {
+        "label": "Long-run Operation Bonus Cap (days)",
+        "desc": "Maximum days of long-term operation bonus a business can accrue."
+      },
+      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
+        "label": "Export Cutoff Price Margin",
+        "desc": "How far the supply price may exceed the export price ceiling (external price ÷ (1 + transport ratio)) before trade hubs stop buying. Purchases fall linearly from the ceiling to zero at this margin."
+      },
+      "SPAWN_LABOR_CAP_RATIO": {
+        "label": "Spawn Labor Consumption Cap",
+        "desc": "Maximum fraction of surplus labor a new business can absorb at once."
+      },
+      "DEVELOPER_PROFIT_RATIO": {
+        "label": "Real Estate Developer Profit Ratio",
+        "desc": "Profit ratio for real estate development activities."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Equipment Depreciation Rate",
+        "desc": "Rate at which the capital stock from equipment investment depreciates each epoch."
+      },
+      "WORK_HOURS": {
+        "label": "Daily Work Hours (h)",
+        "desc": "Standard number of hours a citizen works per day."
+      },
+      "NORMAL_LABOR_UTILITY": {
+        "label": "Baseline Labor Utilization",
+        "desc": "Labor utilization rate used in standard price calculation. 1.0 = fully utilized."
+      },
+      "HIGH_SKILL_BOUNDARY": {
+        "label": "High-Skill Boundary",
+        "desc": "Skill level above which a citizen is classified as a high-skill worker."
+      },
+      "MAX_BASE_SKILL": {
+        "label": "Maximum Base Skill",
+        "desc": "Maximum skill level attainable through elementary education."
+      },
+      "MAX_SKILL": {
+        "label": "Maximum Skill",
+        "desc": "Maximum skill level a citizen can reach including higher education and work experience."
+      },
+      "WAGE_OVERSTAFFED_THRESHOLD": {
+        "label": "Overstaffed Wage Cut Threshold",
+        "desc": "Wages are reduced when the overstaffing ratio exceeds this value (labor_surplus / quota)."
+      },
+      "WAGE_UNDERSTAFFED_THRESHOLD": {
+        "label": "Understaffed Wage Raise Threshold",
+        "desc": "Wages are raised when understaffing with zero applicants exceeds this value."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Elementary Education Start Age",
+        "desc": "Age at which children begin elementary (primary) education."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Elementary Education End Age",
+        "desc": "Age at which elementary education ends (equivalent to high school graduation)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "University Graduation / Independence Age",
+        "desc": "Age at which a citizen completes higher education and becomes independent."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Minimum Working Age",
+        "desc": "Citizens below this age are excluded from job seeking and unemployment statistics."
+      },
+      "EDUCATION_CAPACITY_PER_FLOOR": {
+        "label": "Education Facility Capacity (per m²)",
+        "desc": "Number of students an education facility can accept per m² of floor area."
+      },
+      "SCHOOL_SEARCH_MAX_DISTANCE": {
+        "label": "Max School Search Distance (min)",
+        "desc": "Maximum commuting distance (in minutes) when searching for a school."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "High-Rise Cost Surge Threshold (floors)",
+        "desc": "Construction costs rise sharply above this floor count. Limits skyscrapers.",
+        "graphX": "Floors",
+        "graphY": "Construction cost multiplier"
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Floor Penalty Factor",
+        "desc": "Coefficient for the high-rise cost penalty. Higher = smaller penalty for tall buildings.",
+        "graphX": "Floors",
+        "graphY": "Construction cost multiplier"
+      },
+      "BUILDING_ASPECT_RATIO_MAX": {
+        "label": "Max Slenderness Ratio",
+        "desc": "Upper limit of building height ÷ √footprint area. Prevents needle-like towers from being built automatically on tiny lots. 0 = no limit."
+      },
+      "DEMOLITION_RATE": {
+        "label": "Demolition Efficiency Ratio",
+        "desc": "How much more efficient demolition is compared to new construction (multiplier)."
+      },
+      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
+        "label": "Real Estate Supply Surplus Rate",
+        "desc": "Fraction of surplus supply always maintained in the real estate market."
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
+        "label": "Development Pulse Standard Site Area Min",
+        "desc": "Minimum standard development site area (m²) for the construction demand pulse. Multiplied by the zone's demand density to size each epoch's construction demand."
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
+        "label": "Development Pulse Standard Site Area Max",
+        "desc": "Maximum standard development site area (m²) for the construction demand pulse. Larger values allow bigger single developments."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Collapse Base Annual Rate",
+        "desc": "Base annual probability of collapse for a building with durability 0.5."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Collapse Weibull Shape Parameter",
+        "desc": "Higher values cause collapse probability to spike sharply near design lifespan."
+      },
+      "MAINTENANCE_DURABILITY_THRESHOLD": {
+        "label": "Maintenance Durability Threshold",
+        "desc": "Buildings below this durability become eligible for maintenance."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Maintenance Cost Ratio",
+        "desc": "Maintenance cost as a fraction of new construction cost."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Maintenance Transition Base Annual Probability",
+        "desc": "Base annual probability that an eligible building enters maintenance."
+      },
+      "DEMOLITION_DURABILITY_THRESHOLD": {
+        "label": "Paused Building Demolition Threshold",
+        "desc": "Paused buildings below this durability become eligible for demolition."
+      },
+      "DEMOLITION_BASE_RATE_ANNUAL": {
+        "label": "Paused Building Demolition Annual Rate",
+        "desc": "Base annual probability that an eligible paused building is demolished."
+      },
+      "SHUTDOWN_GRACE_PERIOD_DAYS": {
+        "label": "Shutdown Grace Period (days)",
+        "desc": "Days after completion during which shutdown checks are waived. Allows tenants to move in."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Initial Construction Debt (per m²)",
+        "desc": "Initial construction debt per m² of floor area (negative reserves)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Road Traffic Noise Coefficient",
+        "desc": "How much road traffic contributes to the noise heatmap. Higher = louder roads."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Pedestrian Traffic Noise Coefficient",
+        "desc": "How much pedestrian traffic contributes to the noise heatmap."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Pedestrian Noise Threshold",
+        "desc": "Only the portion of pedestrian traffic above this value contributes to noise."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Noise Attenuation Distance (m)",
+        "desc": "Noise weakens with the square of distance and also drops to 1/e over every this many meters (building shielding, air and ground absorption). Lower = stays closer to the source."
+      },
+      "NOISE_SATURATION_LEVEL": {
+        "label": "Noise Saturation Level",
+        "desc": "Maximum value for the noise heatmap. Values above this are capped."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Road Traffic Air Pollution Coefficient",
+        "desc": "How much road traffic contributes to the air pollution heatmap."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Air Pollution Attenuation Distance (m)",
+        "desc": "Air pollution and odor weaken with the square of distance and also drop to 1/e over every this many meters (dispersion and deposition). Lower = stays closer to the source."
+      },
+      "POLLUTION_SATURATION_LEVEL": {
+        "label": "Air Pollution Saturation Level",
+        "desc": "Maximum value for the air pollution heatmap."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Unemployment Crime Weight",
+        "desc": "How strongly unemployment rate affects the crime heatmap. Higher = unemployment leads more directly to worse public safety."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Crime Spread Radius (m)",
+        "desc": "Gaussian blur radius for the crime heatmap."
+      },
+      "CRIME_SATURATION_LEVEL": {
+        "label": "Crime Saturation Level",
+        "desc": "Maximum value for the crime heatmap."
+      },
+      "LIVING_MULTIPLIER_MIN": {
+        "label": "Living Environment Multiplier (min)",
+        "desc": "Rent multiplier when living environment is at its worst."
+      },
+      "LIVING_MULTIPLIER_MAX": {
+        "label": "Living Environment Multiplier (max)",
+        "desc": "Rent multiplier when living environment is ideal."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Pedestrian Speed (km/h)",
+        "desc": "Walking speed used in pathfinding cost calculations."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Vehicle Acceleration Distance (m)",
+        "desc": "Acceleration distance for vehicles. Affects speed calculation on short roads."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Road Active Hours per Day (h)",
+        "desc": "Hours per day the road is active. Used to convert traffic volume."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Road Traffic Bonus Saturation Threshold",
+        "desc": "Road traffic at or above this value gives retail stores the maximum traffic bonus."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Pedestrian Traffic Bonus Saturation Threshold",
+        "desc": "Pedestrian traffic at or above this value gives retail stores the maximum pedestrian bonus."
+      },
+      "RESOURCE_EFFICIENCY_THRESHOLD": {
+        "label": "Natural Resource Efficiency Threshold",
+        "desc": "Extraction efficiency stays near 1.0 above this natural resource remaining ratio. Drops sharply below."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Loading...",
+    "noScenarios": "No scenarios available",
+    "starting": "Starting...",
+    "startFailed": "Failed to start",
+    "confirmTitle": "Confirm Game Settings",
+    "unsavedChangesWarning": "Starting will discard unsaved changes in your current game.",
+    "cityNameLabel": "City Name",
+    "cityNamePlaceholder": "Enter city name (optional)",
+    "languageLabel": "City Language",
+    "languageNote": "*Cannot be changed later",
+    "simulationDaysLabel": "Simulation Days",
+    "simulationDaysNote": "*Cannot be changed later",
+    "daysOption": "{{days}} days",
+    "startButton": "Start",
+    "backButton": "Back",
+    "cleared": "Cleared",
+    "tutorialBadge": "Tutorial",
+    "sectionDebug": "Debug",
+    "sectionTutorials": "Tutorials",
+    "sectionScenarios": "Scenarios",
+    "detailPlaceholder": "Select a scenario from the list on the left.",
+    "detailMapSizeLabel": "Map Size",
+    "detailUnknown": "Unknown",
+    "detailObjectiveLabel": "Objectives",
+    "detailNoObjective": "No objectives",
+    "detailNoDescription": "This scenario has no description.",
+    "tutorialObjective": "Complete every step of the tutorial.",
+    "startScenarioButton": "Start This Scenario",
+    "tabSelect": "Choose a scenario",
+    "tabBrowse": "Find scenarios",
+    "comingSoon": "Coming soon",
+    "relocalizeNote": "This scenario was made in {{from}}. Starting in {{to}} renames districts, facilities, residents, stations, and other names in {{to}} (names given by the author are replaced too; road names and a few others are kept).",
+    "fixedByScenario": "Fixed by the scenario"
+  }
+}

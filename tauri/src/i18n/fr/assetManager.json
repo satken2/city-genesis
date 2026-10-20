@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Bâtiments",
+      "paths": "Voies",
+      "vehicles": "Véhicules",
+      "props": "Décors"
+    },
+    "additional": "Modèles supplémentaires",
+    "loading": "Chargement des modèles depuis la vue 3D…",
+    "noModel": "Aucun modèle",
+    "noImage": "Aucune image",
+    "weight": "Poids",
+    "applyNote": "Les poids modifiés s’appliquent au prochain lancement ou chargement d’une partie."
+  }
+}

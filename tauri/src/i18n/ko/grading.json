@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "종류",
+    "kind": {
+      "land": "토지 정지",
+      "shore": "매립"
+    },
+    "baseHeight": "기준 높이",
+    "targetHeight": "목표 높이",
+    "cutVolume": "절토량",
+    "fillVolume": "성토량",
+    "quayLength": "안벽 길이",
+    "quayArea": "안벽 면적",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "높이(기준과의 차)",
+    "baseNote": {
+      "frontage": "0은 접한 도로의 노면 높이({{value}} m)",
+      "terrain_mean": "0은 범위의 현재 평균 높이({{value}} m)"
+    },
+    "shoreHeightLocked": "매립의 높이는 지정할 수 없습니다",
+    "reasons": {
+      "invalid_polygon": "범위의 형태가 올바르지 않습니다. 변이 교차하지 않도록 그려 주세요.",
+      "outside_city": "범위가 도시 밖으로 벗어났습니다.",
+      "too_large": "범위가 너무 넓습니다(상한 {{limit}} km²).",
+      "on_water": "바다 위로만 이루어진 범위는 조성할 수 없습니다. 육지에 걸치도록 그려 주세요.",
+      "no_land_overlap": "범위를 육지에 겹치도록 그려 주세요(해안과 범위 사이에 바다가 남기 때문입니다).",
+      "overlaps_parcel": "기존 토지 구획과 겹칩니다.",
+      "overlaps_path": "도로·선로 등의 경로와 겹칩니다.",
+      "overlaps_water": "하천이나 호수에 걸쳐 있습니다.",
+      "overlaps_quay_band": "매립지의 안벽에 걸쳐 있습니다.",
+      "invalid_height_offset": "높이 지정이 범위를 벗어났습니다(±{{offsetLimit}} m까지).",
+      "below_sea_level": "해수면보다 낮게 할 수 없습니다.",
+      "too_narrow": "범위가 너무 좁아 안벽 안쪽에 조성할 부분이 없습니다.",
+      "no_work": "지면이 이미 목표 높이여서 공사가 필요 없습니다.",
+      "insufficient_funds": "자금이 부족하여 발주할 수 없습니다."
+    },
+    "confirm": "확정",
+    "confirming": "확정 중...",
+    "cancel": "취소",
+    "confirmFailed": "부지 조성 발주에 실패했습니다."
+  }
+}

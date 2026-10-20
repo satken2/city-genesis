@@ -1,0 +1,17 @@
+/* RoadOverviewMap, embedded in a detail-panel tab, with a fixed height. */
+
+.road-overview-map {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #181825;
+}
+
+.road-overview-map__canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

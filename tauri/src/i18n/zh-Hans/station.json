@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "车站",
+    "name": "车站名称",
+    "ridership": "乘车次数",
+    "platforms": "站台列表",
+    "noPlatforms": "没有归属的站台（与线路相交的站台会归属于此）",
+    "lines": "停靠线路",
+    "noLines": "没有停靠的线路",
+    "stops": "各停靠点的乘车次数",
+    "noStops": "本站没有停靠点",
+    "lineRunning": "运行中",
+    "lineSuspended": "停运",
+    "houseEnds": "站房布置",
+    "houseEnds_both": "两端",
+    "houseEnds_start": "起点",
+    "houseEnds_end": "终点",
+    "passageMode": "通道位置",
+    "passageMode_elevated": "高架",
+    "passageMode_ground": "地面",
+    "passageMode_underground": "地下"
+  }
+}

@@ -1,0 +1,179 @@
+/* Styles for building appearance editing (BuildingAppearancePanel). */
+
+.ba-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+}
+
+.ba-muted {
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.ba-error {
+  color: #f87171;
+  font-size: 1rem;
+}
+
+.ba-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ba-header-name {
+  font-size: 1.39rem;
+  font-weight: 700;
+  color: #e5e7eb;
+}
+
+/* ---- Appearance variant sliders ---- */
+
+.ba-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ba-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ba-slider-label {
+  font-size: 1rem;
+  color: #e5e7eb;
+  white-space: nowrap;
+}
+
+.ba-slider {
+  flex: 1;
+  cursor: pointer;
+}
+
+/* ---- Sub-building card list ---- */
+
+.ba-hint {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.ba-cards {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 6px 2px;
+  flex-shrink: 0;
+}
+
+.ba-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.06);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.ba-card:hover {
+  border-color: rgba(148, 163, 184, 0.6);
+  background: rgba(148, 163, 184, 0.12);
+}
+
+/* Footprint rectangle preview frame. Draw the rectangle at the same real-world scale as the site canvas. */
+.ba-card-rect-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.ba-card-rect {
+  border: 2px solid;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+
+.ba-card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  white-space: nowrap;
+}
+
+.ba-card-size {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+/* ---- Site canvas ---- */
+
+.ba-canvas-container {
+  flex: 1;
+  min-height: 200px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.35);
+  overflow: hidden;
+}
+
+.ba-canvas {
+  display: block;
+  touch-action: none;
+}
+
+/* ---- Action buttons ---- */
+
+.ba-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ba-actions-spacer {
+  flex: 1;
+}
+
+.ba-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.1);
+  color: #e5e7eb;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ba-btn:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.ba-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ba-btn-confirm {
+  border-color: rgba(96, 165, 250, 0.5);
+  background: rgba(96, 165, 250, 0.18);
+  color: #93c5fd;
+}
+
+.ba-btn-confirm:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.3);
+}

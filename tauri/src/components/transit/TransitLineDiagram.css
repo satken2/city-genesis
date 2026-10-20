@@ -1,0 +1,204 @@
+/* Vertical strip line diagram (TransitLineDiagram). Receive line color via --tld-color. */
+
+.tld {
+  --tld-line-width: 10px;
+  --tld-row-height: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Summary row: stop count and origin ⇄ destination. */
+.tld__summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 0 2px 4px;
+  font-size: 1rem;
+  color: #9db0c5;
+}
+
+.tld__summary-count {
+  font-weight: 700;
+  color: #c5d4e3;
+}
+
+.tld__summary-ends {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tld__summary-arrow {
+  color: var(--tld-color);
+  font-weight: 700;
+}
+
+/* Column heading for boardings at each row's right edge. */
+.tld__summary-ridership {
+  margin-left: auto;
+}
+
+.tld__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.tld__row {
+  display: flex;
+  align-items: center;
+  height: var(--tld-row-height);
+  min-width: 0;
+}
+
+/* Section crowding at the left edge. Place values at the boundary to the next row, halfway along the section. */
+.tld__util {
+  position: relative;
+  width: 3.5rem;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.tld__util-value {
+  position: absolute;
+  right: 4px;
+  top: 100%;
+  transform: translateY(-50%);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #c5d4e3;
+}
+
+/* Line/dot column. Use full row height and absolutely position upper/lower line halves and central dot. */
+.tld__track {
+  position: relative;
+  width: 28px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.tld__seg {
+  position: absolute;
+  left: 50%;
+  width: var(--tld-line-width);
+  transform: translateX(-50%);
+  background: var(--tld-color);
+}
+
+.tld__seg--up {
+  top: 0;
+  height: 50%;
+}
+
+.tld__seg--down {
+  top: 50%;
+  height: 50%;
+}
+
+/* Suspended section: gray dashed line. Adjacent half-lines form one section; align dash phase using row height. */
+.tld__seg--suspended {
+  background: repeating-linear-gradient(
+    to bottom,
+    #6c7086 0 6px,
+    transparent 6px 11px
+  );
+}
+
+/* Stop dot: white center with a line-colored ring, overlaid on the line. */
+.tld__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid var(--tld-color);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
+
+/* Origins/destinations use slightly larger double circles. */
+.tld__dot--terminal {
+  width: 18px;
+  height: 18px;
+  border-width: 4px;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(0, 0, 0, 0.35);
+}
+
+.tld__name {
+  margin-left: 8px;
+  padding: 2px 6px;
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e8f0f8;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Stops belonging to station buildings link to station details. Override App.css button defaults for a plain-text appearance. */
+.tld__name--link {
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  color: #e8f0f8;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tld__name--link:hover {
+  background: rgba(78, 161, 255, 0.14);
+  color: #4ea1ff;
+}
+
+/* Boardings at the right edge of each row. */
+.tld__ridership {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #c5d4e3;
+}
+
+/* Badge marking an intermediate turnback, e.g. on a loop service. */
+.tld__badge {
+  flex: 0 0 auto;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--tld-color);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #c9d6e3;
+}
+
+/* "Return to start" row for circular lines. */
+.tld__row--loop {
+  height: 30px;
+}
+
+.tld__loop-mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.25rem;
+  color: var(--tld-color);
+  background: #16202e;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.tld__name--loop {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #9db0c5;
+}

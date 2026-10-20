@@ -1,0 +1,88 @@
+{
+  "common": {
+    "backendConnectionWaiting": "Vérification de la connexion au simulateur principal…",
+    "loading": "Chargement...",
+    "fetchError": "Échec de la récupération des données",
+    "noData": "Aucune donnée",
+    "history": "Historique",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "{{days}} jours depuis le 1er janvier 1800",
+    "close": "Fermer",
+    "sqm": "{{value}} m²",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "rename": "Renommer",
+    "renameFailed": "Échec du renommage",
+    "focusCamera": "Voir dans la vue 3D",
+    "minutes": "min",
+    "processing": "Traitement...",
+    "cancel": "Annuler",
+    "ok": "OK",
+    "delete": "Supprimer",
+    "colorPresets": "Couleurs prédéfinies",
+    "colorHex": "Code couleur"
+  },
+  "status": {
+    "0": "En projet",
+    "1": "En activité",
+    "2": "À l'arrêt",
+    "3": "Construction planifiée",
+    "4": "En construction",
+    "5": "Démolition planifiée",
+    "6": "En démolition",
+    "7": "Terminé",
+    "8": "Annulé",
+    "9": "Vacant",
+    "10": "Effondré",
+    "11": "Démarrage en attente"
+  },
+  "reason": {
+    "1": "Effondrement dû à un incendie",
+    "2": "Vétusté",
+    "3": "Exploitation déficitaire",
+    "4": "Faible utilisation",
+    "5": "Décision du maire"
+  },
+  "spaceType": {
+    "0": "Autre",
+    "1": "Logement",
+    "2": "Commerce",
+    "3": "Entrepôt / Usine",
+    "4": "Bureau",
+    "5": "Ferme"
+  },
+  "resource": {
+    "currentAmount": "Quantité actuelle",
+    "consumptionTrend": "Évolution de la consommation",
+    "amountTrend": "Évolution des réserves",
+    "recoveryAmount": "Régénération/époque",
+    "maxAmount": "Quantité maximale",
+    "unknownResource": "Ressource inconnue"
+  },
+  "errors": {
+    "UNKNOWN_ERROR": "Une erreur est survenue.",
+    "CREATEPATH_INVALID_GEOMETRY": "La forme de la voie est invalide. Vérifiez le point de départ et d'arrivée.",
+    "CREATEPATH_OUTSIDE_COASTLINE": "Impossible de tracer une voie au-delà du littoral.",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "La voie croise plusieurs fois la même route. Choisissez un autre tracé.",
+    "CREATEPATH_ELEVATION_INTERSECTION": "Un croisement à niveaux différents a été détecté. Ajustez la hauteur.",
+    "CREATEPATH_CURVE_TOO_TIGHT": "La courbe est trop serrée pour cette norme. Adoucissez la courbe.",
+    "CREATEPATH_GRADE_TOO_STEEP": "La pente est trop forte pour cette norme. Réduisez la pente.",
+    "CREATEPATH_CONVEYOR_BRANCH": "Les transports à câble (téléphériques, etc.) ne peuvent pas se ramifier. Une extrémité ne peut se raccorder qu'à un seul autre tronçon.",
+    "PATH_TOO_FEW_POINTS": "Au moins 2 points sont requis.",
+    "PATH_MAX_SPAN_EXCEEDED": "La distance entre les nœuds est trop grande. Ajoutez des points intermédiaires.",
+    "PATH_ELEVATION_CONFLICT": "Un croisement à niveaux différents a été détecté. Ajustez la hauteur.",
+    "INSUFFICIENT_FUNDS": "Fonds insuffisants pour passer cette commande.",
+    "GRADING_VALIDATION_ERROR": "Cette zone ne peut pas être aménagée. Consultez les raisons affichées dans la fenêtre de terrassement.",
+    "CREATEPATH_SEA_LAKE_CROSSING": "Un tracé ne peut pas passer sur la mer ou un lac au niveau du sol. Faites-le passer sur un pont bien au-dessus de l'eau, ou en souterrain.",
+    "CREATEPATH_QUAY_BAND_CROSSING": "Un tracé ne peut pas traverser le quai d'un terrain gagné sur la mer au niveau du sol. Faites-le passer en viaduc ou en souterrain, et placez ses extrémités et points de passage hors de la plateforme du quai.",
+    "ZONE_CONTIGUITY_ERROR": "Les rues peintes ne formeraient pas un quartier d'un seul tenant ; l'attribution est impossible. Peignez des rues reliées entre elles.",
+    "ZONE_SIZE_ERROR": "Le quartier dépasserait sa distance maximale ou sa longueur totale de rues. Peignez une zone plus petite.",
+    "OUTSIDE_CITY_EDIT": "Les installations situées hors de la ville ne peuvent pas être modifiées.",
+    "OUTSIDE_CITY_PLACEMENT": "Impossible de placer quoi que ce soit hors de la ville.",
+    "READ_ONLY": "Cette action est impossible en mode lecture seule."
+  },
+  "localizedText": {
+    "languages": "Langue de saisie",
+    "required": "Obligatoire"
+  }
+}

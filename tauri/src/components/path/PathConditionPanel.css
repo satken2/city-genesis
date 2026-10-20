@@ -1,0 +1,72 @@
+/**
+ * Styles for path condition tiles (durability, noise, air pollution).
+ *
+ * maintenance-badge matches BuildingInfoPanel.css, but is defined again because this panel renders independently.
+ */
+
+.path-condition {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/*
+ * Maintenance badge.
+ * Yellow and black diagonal border stripes imitate construction warning tape.
+ */
+.path-condition .maintenance-badge {
+  background: #fbbf24;
+  color: #000;
+  padding: 4px 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: center;
+  border: 3px solid;
+  border-image: repeating-linear-gradient(
+    45deg,
+    #fbbf24 0px,
+    #fbbf24 4px,
+    #000 4px,
+    #000 8px
+  ) 3;
+}
+
+.path-condition-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.path-condition-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.path-condition-tile__label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.path-condition-tile__icon {
+  display: flex;
+}
+
+.path-condition-tile__value {
+  color: #e2eaf2;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

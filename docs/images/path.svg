@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 290" width="940" height="290" font-family="Helvetica, Arial, sans-serif" font-size="24">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#6aaef5"/>
+    </marker>
+  </defs>
+  <rect width="940" height="290" fill="#fff"/>
+  <polyline points="105,207 322,134 455,182 731,111" fill="none" stroke="#555" stroke-width="2" stroke-dasharray="6,4"/>
+  <path d="M105,207 C190,180 280,140 340,153 C385,163 395,168 440,164 C560,152 650,130 731,111" fill="none" stroke="#6aaef5" stroke-width="4" stroke-linecap="round"/>
+  <line x1="490" y1="88" x2="449" y2="152" stroke="#6aaef5" stroke-width="2" marker-end="url(#arrow)"/>
+  <circle cx="105" cy="207" r="13" fill="#666" stroke="#f00" stroke-width="5"/>
+  <circle cx="731" cy="111" r="13" fill="#666" stroke="#f00" stroke-width="5"/>
+  <circle cx="322" cy="134" r="10" fill="#666"/>
+  <circle cx="455" cy="182" r="10" fill="#666"/>
+  <text x="442" y="77" fill="#6aaef5">actual path shape</text>
+  <text x="40" y="184" fill="#f00">start_node</text>
+  <text x="40" y="249" fill="#555">start_point</text>
+  <text x="234" y="120" fill="#555">waypoint1</text>
+  <text x="474" y="209" fill="#555">waypoint2</text>
+  <text x="756" y="121" fill="#f00">end_node</text>
+  <text x="668" y="153" fill="#555">end_point</text>
+</svg>

@@ -1,0 +1,571 @@
+{
+  "version": 1,
+  "id": "acquisition",
+  "setup": [],
+  "steps": [
+    {
+      "id": "acquisition.track",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.acquisition.step1.open",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                -200,
+                7,
+                0
+              ],
+              [
+                200,
+                7,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -200,
+                  7,
+                  0
+                ],
+                [
+                  200,
+                  7,
+                  0
+                ]
+              ],
+              "radius": 15,
+              "variant": 421,
+              "bind": "acquisition.track"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.acquisition.step1.variant",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:4",
+              "path.variant:421"
+            ],
+            "highlight": [
+              "path.type:4",
+              "path.variant:421"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                -200,
+                7,
+                0
+              ],
+              [
+                200,
+                7,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -200,
+                  7,
+                  0
+                ],
+                [
+                  200,
+                  7,
+                  0
+                ]
+              ],
+              "radius": 15,
+              "variant": 421,
+              "bind": "acquisition.track"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 100
+          }
+        },
+        {
+          "id": "start",
+          "textKey": "tutorial.acquisition.step1.start",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -200,
+                7,
+                0
+              ],
+              [
+                200,
+                7,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -200,
+                  7,
+                  0
+                ],
+                [
+                  200,
+                  7,
+                  0
+                ]
+              ],
+              "radius": 15,
+              "variant": 421,
+              "bind": "acquisition.track"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 1
+          }
+        },
+        {
+          "id": "end",
+          "textKey": "tutorial.acquisition.step1.end",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -200,
+                7,
+                0
+              ],
+              [
+                200,
+                7,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -200,
+                  7,
+                  0
+                ],
+                [
+                  200,
+                  7,
+                  0
+                ]
+              ],
+              "radius": 15,
+              "variant": 421,
+              "bind": "acquisition.track"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2
+          }
+        },
+        {
+          "id": "finalize",
+          "textKey": "tutorial.guide.finalizeRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -200,
+                7,
+                0
+              ],
+              [
+                200,
+                7,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -200,
+                  7,
+                  0
+                ],
+                [
+                  200,
+                  7,
+                  0
+                ]
+              ],
+              "radius": 15,
+              "variant": 421,
+              "bind": "acquisition.track"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2,
+            "phase": "editing"
+          }
+        },
+        {
+          "id": "confirm",
+          "textKey": "tutorial.acquisition.step1.confirm",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel",
+              "path.confirm"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -200,
+                7,
+                0
+              ],
+              [
+                200,
+                7,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -200,
+                  7,
+                  0
+                ],
+                [
+                  200,
+                  7,
+                  0
+                ]
+              ],
+              "radius": 15,
+              "variant": 421,
+              "bind": "acquisition.track"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.track",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "acquisition.negotiate",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.acquisition.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            },
+            "markers": [
+              [
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "all",
+        "conditions": [
+          {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.negotiating",
+                "equals": true
+              }
+            ]
+          },
+          {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.blocked",
+                "equals": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "acquisition.demolish",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.acquisition.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            },
+            "markers": [
+              [
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "until": {
+            "type": "window",
+            "window": "agent_detail",
+            "target": "lesson.fire_station.building"
+          }
+        },
+        {
+          "id": "perform",
+          "textKey": "tutorial.acquisition.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "agent.demolish"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            },
+            "markers": [
+              [
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.demolition",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "acquisition.complete",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.acquisition.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                0,
+                0,
+                10
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.connected",
+            "equals": true
+          }
+        ]
+      }
+    }
+  ]
+}

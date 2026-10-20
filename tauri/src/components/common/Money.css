@@ -1,0 +1,5 @@
+/* Compact money display. Use tabular digits for alignment. */
+.money {
+  font-variant-numeric: tabular-nums;
+  cursor: help; /* Indicate that the tooltip provides an exact amount. */
+}

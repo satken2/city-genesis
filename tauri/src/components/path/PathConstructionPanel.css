@@ -1,0 +1,467 @@
+/**
+ * Path construction panel styles.
+ *
+ * Use the same layout pattern as BuildingConstructionPanel.css, optimized for a single-column popup window.
+ * Category tiles, the back button, and card lists reuse the building construction panel's styles (bc-tile, etc.).
+ */
+
+/* ---- Root layout ---- */
+.pc-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- Sections ---- */
+.pc-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pc-section-title {
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: #c5d4e3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* Keep icon tabs in one horizontally scrolling row even as classifications increase. */
+.pc-variant-tabs .flat-tabs {
+  gap: 0.25rem;
+  padding: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pc-variant-tabs .flat-tabs .flat-tab {
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 3rem;
+  padding: 0.5rem;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  color: #93a9c0;
+  box-shadow: none;
+}
+
+.pc-variant-tabs .flat-tabs .flat-tab:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f6fbff;
+}
+
+.pc-variant-tabs .flat-tabs .flat-tab[aria-selected="true"] {
+  background: rgba(78, 161, 255, 0.12);
+  color: #f6fbff;
+  box-shadow: inset 0 -3px 0 #4ea1ff;
+}
+
+.pc-variant-tabs .flat-tabs .flat-tab:disabled {
+  opacity: 0.4;
+}
+
+.pc-variant-tabs .flat-tabs .flat-tab:focus-visible {
+  outline: 2px solid #4ea1ff;
+  outline-offset: -2px;
+}
+
+.pc-variant-tab-icon {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.pc-variant-tab-panel {
+  padding-top: 1rem;
+}
+
+.pc-variant-tab-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: #f6fbff;
+}
+
+/* ---- Select boxes ---- */
+.pc-select {
+  width: 100%;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.pc-select:focus {
+  border-color: #4ea1ff;
+}
+
+/* Disabled appearance (keep the selected value visible while preventing interaction). */
+.pc-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pc-select option {
+  background: #182231;
+  color: #f6fbff;
+}
+
+/* ---- Description (icon and frame) ---- */
+.pc-description-frame {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pc-description-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.pc-description-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pc-description-name {
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: #f6fbff;
+  margin-bottom: 4px;
+}
+
+.pc-description-text {
+  font-size: 1rem;
+  color: #93a9c0;
+  line-height: 1.5;
+}
+
+/* Standards below the description (icon and value only; item names appear in title tooltips). */
+.pc-description-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 6px;
+}
+
+.pc-spec {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+}
+
+.pc-spec-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: #7f97b0;
+}
+
+.pc-spec-value {
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  color: #c5d4e3;
+}
+
+/* ---- Preview section ---- */
+/*
+ * Full-width preview with fixed height. Roads are usually long horizontally,
+ * so a wide preview uses space more efficiently than a square.
+ */
+.pc-canvas-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  width: 100%;
+  height: 160px;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.pc-no-nodes-message {
+  font-size: 1rem;
+  color: #93a9c0;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ---- Settings section ---- */
+.pc-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pc-settings-label {
+  font-size: 1rem;
+  color: #c5d4e3;
+  min-width: max-content;
+}
+
+.pc-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pc-stepper-unit {
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
+/* ---- Action buttons ---- */
+/*
+ * Sticky action bar at the panel bottom, always visible while content scrolls. margin-top: auto pushes it
+ * to the bottom even with short content. It must be opaque to hide content behind it, so use the base gradient's
+ * bottom color directly here (a translucent color would show through).
+ */
+.pc-action-bar {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: 10px 12px;
+  background: #101723;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 2;
+}
+
+.pc-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.pc-validation-message {
+  margin-bottom: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #f38ba8;
+}
+
+.pc-validation-message p {
+  margin: 0;
+}
+
+.pc-btn {
+  flex: 1;
+  min-width: 60px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.pc-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pc-btn-confirm {
+  background: #4ea1ff;
+  color: #ffffff;
+  border-color: #4ea1ff;
+  font-weight: 600;
+}
+
+.pc-btn-confirm:hover {
+  opacity: 0.85;
+}
+
+.pc-btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Loading / empty ---- */
+.pc-muted {
+  color: #9db0c5;
+  font-size: 1rem;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ---- Snapping settings (icon buttons) ---- */
+.pc-snapping-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pc-snap-btn {
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  opacity: 0.45;
+}
+
+.pc-snap-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+  opacity: 0.7;
+}
+
+.pc-snap-btn.active {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.12);
+  opacity: 1;
+}
+
+.pc-snap-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* ---- Curve/straight toggle ---- */
+.pc-curve-toggle {
+  position: relative;
+  width: 72px;
+  height: 36px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pc-curve-toggle.curved {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.10);
+}
+
+.pc-curve-toggle-indicator {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 32px;
+  height: 28px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  display: grid;
+  place-items: center;
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pc-curve-toggle.curved .pc-curve-toggle-indicator {
+  left: 36px;
+  background: rgba(78, 161, 255, 0.35);
+}
+
+.pc-curve-toggle-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* ---- Station platform side (outside/inside/both) segmented toggle ---- */
+.pc-platform-side-group {
+  display: flex;
+  gap: 4px;
+}
+
+.pc-platform-side-btn {
+  padding: 6px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pc-platform-side-btn.active {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.18);
+}
+
+/* ---- Track settings row (track count/direction/spacing) ---- */
+.pc-rail-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* The first settings row needs no top margin because the section already provides padding. */
+.pc-section > .pc-rail-field:first-child {
+  margin-top: 0;
+}
+
+.pc-rail-field > .pc-settings-label {
+  min-width: 56px;
+}
+
+/* ---- Track spacing increase/decrease buttons and current value ---- */
+.pc-spacing-btn {
+  padding: 6px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6fbff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pc-spacing-btn:hover:not(:disabled) {
+  background: rgba(78, 161, 255, 0.14);
+  border-color: #4ea1ff;
+}
+
+.pc-spacing-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pc-spacing-value {
+  min-width: 52px;
+  text-align: center;
+  font-size: 1rem;
+  color: #f6fbff;
+}
+
+/* ---- Direction arrow row ---- */
+.pc-track-direction-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ---- Dev mock section ---- */
+.pc-dev-note {
+  font-size: 0.76rem;
+  color: #585b70;
+  margin-top: 4px;
+}

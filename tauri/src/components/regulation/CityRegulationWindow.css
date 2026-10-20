@@ -1,0 +1,538 @@
+/**
+ * Regulations window styles
+ *
+ * Colors assume a dark theme.
+ * Three rows: horizontal tabs at the top, scrollable selected content below, and one shared Save button at the
+ * bottom.
+ * Tab labels double as section headings, so content has no separate headings.
+ */
+
+.regulation-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  color: #e2e8f0;
+  font-size: 1rem;
+}
+
+/* ========== Tab bar ========== */
+
+.regulation-window__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.regulation-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.regulation-tab:hover {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.regulation-tab--active {
+  color: #e2e8f0;
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/*
+ * Mark tabs with unsaved changes. With one shared Save button, this prevents edits in hidden tabs being
+ * overlooked.
+ */
+.regulation-tab__dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+}
+
+/* ========== Tab content ========== */
+
+.regulation-window__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 6px 10px 2px;
+}
+
+.regulation-pane__description {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  color: #64748b;
+}
+
+/* path_type group (accordion) */
+.regulation-speed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.regulation-speed-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Accordion header (button) */
+.regulation-speed-group__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.1s;
+  width: 100%;
+  text-align: left;
+}
+
+.regulation-speed-group__header:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.regulation-speed-group__toggle-icon {
+  font-size: 1rem;
+  width: 12px;
+  text-align: center;
+  color: #64748b;
+}
+
+.regulation-speed-group__label {
+  margin: 0;
+  font-size: 1rem;
+  color: #94a3b8;
+  font-weight: 600;
+  flex: 1;
+}
+
+.regulation-speed-group__count {
+  font-size: 0.9rem;
+  color: #64748b;
+  background: rgba(15, 23, 42, 0.5);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.regulation-speed-group__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 18px;
+}
+
+/* Variant row */
+.regulation-speed-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+
+.regulation-speed-row:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.regulation-speed-row__name {
+  flex: 1;
+  min-width: 0;
+  color: #cbd5e1;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.regulation-speed-row__name--modified {
+  color: #38bdf8;
+}
+
+/* Input field */
+.regulation-speed-row__input-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.regulation-speed-input {
+  width: 64px;
+  padding: 3px 6px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  font-family: monospace;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.regulation-speed-input:focus {
+  border-color: #3b82f6;
+}
+
+.regulation-speed-input--modified {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.regulation-speed-unit {
+  font-size: 1rem;
+  color: #64748b;
+  min-width: 32px;
+}
+
+
+
+/* Building regulations section */
+.regulation-building-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.regulation-building-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+
+.regulation-building-row:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.regulation-building-row__name {
+  flex: 1;
+  min-width: 0;
+  color: #cbd5e1;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.regulation-building-row__name--modified {
+  color: #38bdf8;
+}
+
+.regulation-building-row__input-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.regulation-building-input {
+  width: 80px;
+  padding: 4px 6px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  font-family: monospace;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.regulation-building-input:focus {
+  border-color: #3b82f6;
+}
+
+.regulation-building-input--modified {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.regulation-building-unit {
+  font-size: 1rem;
+  color: #64748b;
+  min-width: 24px;
+}
+
+/* Loading and errors */
+.regulation-window__loading,
+.regulation-window__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.regulation-window__error {
+  color: #f87171;
+}
+
+.regulation-window__error-inline {
+  color: #f87171;
+  font-size: 1rem;
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 4px;
+}
+
+/* Footer with the single Save button shared by all tabs */
+.regulation-window__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.regulation-window__unsaved {
+  font-size: 1rem;
+  color: #38bdf8;
+}
+
+.regulation-window__save-btn {
+  padding: 8px 24px;
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.regulation-window__save-btn:hover {
+  background: #2563eb;
+}
+
+.regulation-window__save-btn:disabled {
+  background: #475569;
+  cursor: not-allowed;
+}
+
+/* Immigration regulations section */
+.regulation-immigration-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.regulation-immigration-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+
+.regulation-immigration-row:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+/* Left-align checkbox groups and allow wrapping. */
+.regulation-immigration-row--check {
+  align-items: flex-start;
+}
+
+.regulation-immigration-row__name {
+  flex: 1;
+  min-width: 0;
+  color: #cbd5e1;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.regulation-immigration-row__name--modified {
+  color: #38bdf8;
+}
+
+.regulation-immigration-row__input-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.regulation-immigration-input {
+  width: 64px;
+  padding: 4px 6px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  font-family: monospace;
+  text-align: right;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.regulation-immigration-input:focus {
+  border-color: #3b82f6;
+}
+
+.regulation-immigration-input--modified {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.regulation-immigration-separator {
+  font-size: 1rem;
+  color: #64748b;
+  min-width: 16px;
+  text-align: center;
+}
+
+.regulation-immigration-select {
+  padding: 4px 6px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.regulation-immigration-select:focus {
+  border-color: #3b82f6;
+}
+
+/* Checkbox groups */
+.regulation-immigration-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.regulation-immigration-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1rem;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.regulation-immigration-checkbox input[type="checkbox"] {
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.regulation-immigration-checkbox--modified {
+  color: #38bdf8;
+}
+
+/* Skill requirement sliders */
+.regulation-immigration-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+  margin-top: 4px;
+}
+
+.regulation-immigration-skills__title {
+  font-size: 1.11rem;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.regulation-immigration-skills__hint {
+  margin: 0;
+  font-size: 0.94rem;
+  color: #64748b;
+}
+
+.regulation-skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.regulation-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.regulation-skill-row__name {
+  flex: 0 0 90px;
+  min-width: 0;
+  color: #cbd5e1;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.regulation-skill-row__name--modified {
+  color: #38bdf8;
+}
+
+.regulation-skill-row__control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.regulation-skill-slider {
+  flex: 1;
+  accent-color: #3b82f6;
+  cursor: pointer;
+  height: 4px;
+}
+
+.regulation-skill-value {
+  flex: 0 0 32px;
+  text-align: right;
+  font-size: 1rem;
+  font-family: monospace;
+  color: #94a3b8;
+}
+
+/* Supplementary quota text */
+.regulation-immigration-quota-hint {
+  margin: 0;
+  font-size: 0.94rem;
+  color: #64748b;
+}

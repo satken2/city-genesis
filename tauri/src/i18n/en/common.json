@@ -1,0 +1,88 @@
+{
+  "common": {
+    "backendConnectionWaiting": "Checking the core simulator connection…",
+    "loading": "Loading...",
+    "fetchError": "Failed to fetch data",
+    "noData": "No data",
+    "history": "History",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "{{days}} days since Jan 1, 1800",
+    "close": "Close",
+    "sqm": "{{value}} m²",
+    "save": "Save",
+    "saving": "Saving...",
+    "rename": "Rename",
+    "renameFailed": "Failed to rename",
+    "focusCamera": "Show in 3D view",
+    "minutes": "mins",
+    "processing": "Processing...",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "delete": "Delete",
+    "colorPresets": "Color presets",
+    "colorHex": "Color code"
+  },
+  "status": {
+    "0": "Planned",
+    "1": "Active",
+    "2": "Paused",
+    "3": "Construction Planned",
+    "4": "Constructing",
+    "5": "Demolition Planned",
+    "6": "Demolishing",
+    "7": "Completed",
+    "8": "Canceled",
+    "9": "Vacant",
+    "10": "Collapsed",
+    "11": "Pending Construction"
+  },
+  "reason": {
+    "1": "Fire",
+    "2": "Aging",
+    "3": "Deficit",
+    "4": "Low Utilization",
+    "5": "Mayor's Decision"
+  },
+  "spaceType": {
+    "0": "Other",
+    "1": "Residence",
+    "2": "Retail",
+    "3": "Warehouse / Factory",
+    "4": "Office",
+    "5": "Farm"
+  },
+  "resource": {
+    "currentAmount": "Current Amount",
+    "consumptionTrend": "Consumption Trend",
+    "amountTrend": "Amount Trend",
+    "recoveryAmount": "Recovery / epoch",
+    "maxAmount": "Max Amount",
+    "unknownResource": "Unknown Resource"
+  },
+  "errors": {
+    "UNKNOWN_ERROR": "An error occurred.",
+    "CREATEPATH_INVALID_GEOMETRY": "The path geometry is invalid. Please check the start and end points.",
+    "CREATEPATH_OUTSIDE_COASTLINE": "Paths cannot be placed outside the coastline.",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "The path intersects the same road multiple times. Please choose a different route.",
+    "CREATEPATH_ELEVATION_INTERSECTION": "An elevation intersection was detected. Please adjust the height.",
+    "CREATEPATH_CURVE_TOO_TIGHT": "The curve is too tight for this path standard. Ease the curve.",
+    "CREATEPATH_GRADE_TOO_STEEP": "The grade is too steep for this path standard. Reduce the slope.",
+    "CREATEPATH_CONVEYOR_BRANCH": "People movers (ropeways etc.) cannot branch. An endpoint may connect to only one other conveyor path.",
+    "PATH_TOO_FEW_POINTS": "At least 2 points are required.",
+    "PATH_MAX_SPAN_EXCEEDED": "The distance between nodes is too long. Please add intermediate points.",
+    "PATH_ELEVATION_CONFLICT": "An elevation intersection was detected. Please adjust the height.",
+    "INSUFFICIENT_FUNDS": "Insufficient funds to place this order.",
+    "GRADING_VALIDATION_ERROR": "This area cannot be developed. Check the reasons shown in the earthworks window.",
+    "CREATEPATH_SEA_LAKE_CROSSING": "A path cannot run over the sea or a lake at ground level. Make it a bridge well above the water, or run it underground.",
+    "CREATEPATH_QUAY_BAND_CROSSING": "A path cannot cross the quay of reclaimed land at ground level. Run it elevated or underground, and keep its end points and waypoints off the quay top.",
+    "ZONE_CONTIGUITY_ERROR": "The painted streets would not form one connected district, so they cannot be assigned. Paint connected streets.",
+    "ZONE_SIZE_ERROR": "The district would exceed its maximum span or total street length. Paint a smaller area.",
+    "OUTSIDE_CITY_EDIT": "Facilities outside the city cannot be edited.",
+    "OUTSIDE_CITY_PLACEMENT": "You cannot place anything outside the city.",
+    "READ_ONLY": "This action is not available in read-only mode."
+  },
+  "localizedText": {
+    "languages": "Input language",
+    "required": "Required"
+  }
+}

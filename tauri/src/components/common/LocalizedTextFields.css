@@ -1,0 +1,60 @@
+.localized-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.localized-text .localized-text__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+/* Use two classes to override host screen button rules such as .scenario-editor button. */
+.localized-text .localized-text__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 1rem;
+  background: var(--flat-raised);
+  border: 0;
+  border-radius: 6px 6px 0 0;
+  color: var(--flat-text-label);
+  cursor: pointer;
+}
+
+.localized-text .localized-text__tab:hover:not(:disabled) {
+  background: var(--flat-raised-hover);
+}
+
+/* Match the selected tab to the frame's top border color so it appears connected to the frame below. */
+.localized-text .localized-text__tab--active,
+.localized-text .localized-text__tab--active:hover:not(:disabled) {
+  background: var(--flat-selected);
+  color: var(--flat-text);
+}
+
+/* Mark languages containing text with a green dot, distinguishable even over the selected fill. */
+.localized-text .localized-text__tab--filled::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--flat-good);
+}
+
+.localized-text .localized-text__required {
+  font-size: 0.85rem;
+  color: var(--flat-warn);
+}
+
+/* Tab-controlled area. Touch the tab row with its top edge and match the selected tab color. */
+.localized-text .localized-text__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--flat-raised-hover);
+  border-top: 2px solid var(--flat-selected);
+  border-radius: 0 8px 8px 8px;
+}

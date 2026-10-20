@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "建议路线",
+    "mode": "高度模式",
+    "fixed": "固定指定点高度",
+    "adjust": "调整中间指定点高度",
+    "help": "确定形状后可使用。起终点和指定点的XZ坐标保持固定。",
+    "searching": "搜索中…",
+    "cancel": "取消",
+    "undo": "撤销建议",
+    "notFound": "未找到路线。",
+    "failed": "路线建议失败。"
+  }
+}

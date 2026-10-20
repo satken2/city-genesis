@@ -1,0 +1,196 @@
+{
+  "agent": {
+    "back": "뒤로",
+    "editAppearance": "외관 변경",
+    "relocateCityHall": "시청 이전",
+    "publicFacility": "공공시설",
+    "underAcquisition": "매수 협상 중",
+    "publicFacilityPanel": {
+      "title": "공공/공영 시설"
+    },
+    "abandon": "포기",
+    "abandonHint": "유지를 포기하고 수선하지 않은 채 노후화에 맡깁니다",
+    "statusSince": {
+      "founded": "설립일",
+      "householdFormed": "가구 형성일",
+      "arrived": "도착일",
+      "opened": "개업일",
+      "schoolOpened": "개교일",
+      "completed": "준공일",
+      "operatingSince": "가동 개시일",
+      "resumed": "재개일",
+      "paused": "정지일",
+      "suspended": "휴업일",
+      "schoolClosed": "휴교일",
+      "constructionStarted": "착공일",
+      "demolitionScheduled": "철거 결정일",
+      "demolitionStarted": "철거 착공일",
+      "demolished": "철거 완료일",
+      "collapsed": "붕괴일",
+      "burnedDown": "소실일",
+      "default": "상태 변경일"
+    },
+    "reserves": "현금성 자산",
+    "revenues": "수입",
+    "expenses": "지출",
+    "zone": "소속 지구",
+    "building": "입주 건물",
+    "rent": "임대료",
+    "floorOccupancy": "층 점유량",
+    "tenants": "입주 테넌트",
+    "tabBasicInfo": "기본 정보",
+    "utilizationTarget": "가동률 목표",
+    "currentUtilization": "현재 가동률",
+    "constructionSpeed": "건설 속도",
+    "constructionCostPerEpoch": "1에포크당 건설 비용",
+    "remainingConstruction": "남은 공사 기간",
+    "remainingEpochs": "약 {{n}}에포크",
+    "tabBuildingInfo": "건물 정보",
+    "tabCargoInfo": "하역 정보",
+    "tabHouseholdInfo": "가구 정보",
+    "tabTradeInfo": "수급・거래",
+    "tabEmploymentInfo": "고용 정보",
+    "action": {
+      "purchase": "매수",
+      "bulldoze": "철거",
+      "cancelBulldoze": "철거 취소",
+      "pause": "일시 정지",
+      "resume": "재개",
+      "delete": "삭제",
+      "repair": "수선",
+      "rebuild": "재건",
+      "edit": "편집",
+      "startConstruction": "착공",
+      "stopConstruction": "보류",
+      "cancelAbandon": "포기 취소",
+      "explode": "폭파",
+      "explodeConfirm": "이 건물을 사고로 위장해 폭파할까요?\n건물은 즉시 붕괴하고 안에 있던 주민과 직원은 사망합니다. 시민 감정이 크게 나빠지며 이 조작은 되돌릴 수 없습니다.",
+      "explodeTitle": "건물 폭파",
+      "explodeConfirmAction": "폭파하기"
+    },
+    "pendingWarning": "이 건물은 계획 중입니다. 착공을 지시하세요.",
+    "alerts": {
+      "diagnoseHint": "클릭하여 원인 진단",
+      "title": "경보",
+      "constructionShortage": {
+        "title": "건설 서비스 부족",
+        "description": "건설 예산이 부족하여 공사가 지연되고 있습니다."
+      },
+      "onFire": {
+        "title": "화재 발생!",
+        "description": "건물에서 화재가 발생했습니다."
+      },
+      "accidentalFire": {
+        "title": "실화(작은 불)",
+        "description": "건물에서 실화가 발생했지만 소규모로 진화되었습니다."
+      },
+      "infraDisconnected": {
+        "title": "인프라망 미접속",
+        "description": "이 시설의 접속 단자에 인프라 경로가 연결되어 있지 않습니다. 망에 연결될 때까지 공급・수령을 할 수 없습니다."
+      },
+      "crime": {
+        "title": "범죄 발생",
+        "description": "이 건물에서 범죄가 발생했습니다."
+      },
+      "crimeSign": {
+        "title": "범죄 징후",
+        "description": "이 건물에서 범죄 징후가 확인되었습니다. 치안 악화에 주의하세요."
+      },
+      "laborShortage": {
+        "title": "노동력 부족",
+        "description": "종업원이 부족하여 생산・서비스 제공이 계획을 밑돌고 있습니다."
+      },
+      "materialShortage": {
+        "title": "원자재 부족",
+        "description": "원자재 조달이 부족하여 생산・서비스 제공이 계획을 밑돌고 있습니다."
+      },
+      "highSkillShortage": {
+        "title": "전문 인력 부족",
+        "description": "필요한 고숙련 인력을 확보하지 못해 가동할 수 없습니다."
+      },
+      "budgetCapped": {
+        "title": "예산 부족",
+        "description": "배정된 예산이 필요액을 크게 밑돌아 가동을 축소하고 있습니다. 예산 배분을 재검토하세요."
+      },
+      "facilityWarning": {
+        "title": "공공시설 운영 불가",
+        "description": "이 시설의 서비스 공급이 계획보다 크게 부족합니다. 노동력과 원자재 조달 상황을 확인하세요."
+      },
+      "sanitationWarning": {
+        "title": "위생 악화",
+        "description": "이 건물 부지의 위생 상태가 심각하게 악화되어 거주 가구에 영향을 주고 있습니다. 하수 및 폐기물 처리 서비스 공급을 개선하세요."
+      },
+      "infraWarning": {
+        "title": "기반시설 운영 중단 또는 붕괴",
+        "description": "이 시설의 운영 중단 또는 붕괴로 기반시설 공급에 영향이 발생하고 있습니다. 시설 상태와 공급 연결을 확인하세요."
+      }
+    },
+    "infra": {
+      "title": "인프라 연결",
+      "connected": "연결됨",
+      "disconnected": "미연결",
+      "received": "수령량"
+    },
+    "tabConstructionInfo": "건설 공사",
+    "tabEducationInfo": "교육",
+    "education": {
+      "totalStudents": "재학생 수",
+      "totalCapacity": "총정원",
+      "statusTitle": "재적 현황",
+      "enrolled": "재학",
+      "vacant": "빈자리",
+      "noCapacity": "정원 없음",
+      "countLabel": "인원",
+      "enrollmentBySkill": "스킬별 재적 현황",
+      "settingsTitle": "모집 정원 설정",
+      "settingsHint": "스킬별 배분 가중치를 설정합니다. 총정원이 가중치에 따라 배분됩니다.",
+      "skillHeader": "스킬",
+      "weightHeader": "가중치",
+      "previewHeader": "정원",
+      "save": "저장",
+      "saving": "저장 중...",
+      "saveFailed": "저장에 실패했습니다",
+      "sumMustBePositive": "정원의 합계는 1 이상이어야 합니다",
+      "invalidWeight": "가중치는 0 이상의 정수로 입력해 주세요",
+      "studentsList": "학생 목록",
+      "noStudents": "학생이 없습니다",
+      "showMore": "더 보기 ({{count}}명)"
+    }
+  },
+  "agentList": {
+    "filterType": "타입",
+    "filterVariant": "배리언트",
+    "filterZone": "지구",
+    "allVariants": "모든 배리언트",
+    "allZones": "모든 지구",
+    "resultCount": "{{count}}건",
+    "capped": "(전체 {{total}}건 중)",
+    "loading": "불러오는 중...",
+    "noResults": "해당하는 경제 주체가 없습니다",
+    "colStatus": "상태",
+    "colVariant": "배리언트",
+    "colName": "이름",
+    "colProduct": "제품",
+    "colPrice": "가격",
+    "colProduction": "생산량",
+    "colStock": "재고량",
+    "colSold": "판매량",
+    "colWage": "임금",
+    "colEmployment": "고용",
+    "colUtilization": "가동률",
+    "colBdType": "건물 타입",
+    "colDurability": "내구도",
+    "colRent": "임대료",
+    "colFloors": "층수",
+    "colFloorArea": "연면적",
+    "colOccupancy": "입주율",
+    "colFamilyType": "가구 유형",
+    "colDiscretionaryIncome": "가처분 소득",
+    "colSatisNutrition": "영양",
+    "colSatisHealthcare": "의료",
+    "colSatisLeisure": "오락·여가",
+    "colSatisResidential": "주거",
+    "colAutomobile": "자가용",
+    "colEnrollment": "재적 상황"
+  }
+}

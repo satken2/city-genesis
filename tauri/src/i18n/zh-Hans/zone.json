@@ -1,0 +1,40 @@
+{
+  "zone": {
+    "titleWithId": "地区 #{{id}}",
+    "color": "地区颜色",
+    "colorUpdateFailed": "更新地区颜色失败",
+    "basicInfo": "基本信息",
+    "area": "面积",
+    "zonePopulation": "居住人口",
+    "daytimePopulation": "白天人口",
+    "spaceAmount": "楼面占用量",
+    "slotStarvationTitle": "存在无法建设的待入驻需求",
+    "slotStarvationWarning": "「{{tenant}}」入驻需要每栋至少{{required}}m2的楼面，但该地区的地块最大只能建{{max}}m2。请准备更大的地块。",
+    "restrictions": "建筑法规",
+    "restrictionUpdateFailed": "地区法规更新失败",
+    "restrictionRequired": "建蔽率・容积率・高度不能为空",
+    "mergeConfirm": "将把「{{source}}」合并到「{{target}}」。合并来源地区将消失，其法规设置也会一并丢失。",
+    "mergeAction": "合并",
+    "mergeFailed": "地区合并失败（不相邻的地区无法合并）",
+    "mergeNoRequest": "尚未选择要合并的地区",
+    "edit": {
+      "toolCreate": "新建地区",
+      "toolExpand": "扩展现有地区",
+      "modeBlock": "整个街区",
+      "modeRoad": "道路单侧",
+      "newZone": "新地区",
+      "noTarget": "请将鼠标移到地区上",
+      "hint": {
+        "create": {
+          "block": "按住 Ctrl 拖动涂抹被道路围合的街区，涂抹的街区连同其中的地块将成为新地区。拖动可移动地图，滚轮可缩放。",
+          "road": "按住 Ctrl 拖动涂抹道路的一侧（半幅路面或该侧临街的地块），该侧道路连同这些地块将成为新地区。拖动可移动地图，滚轮可缩放。"
+        },
+        "expand": {
+          "block": "将鼠标移到地区上，按住 Ctrl 拖动涂抹街区，即可将其连同地块并入该地区。拖动可移动地图，滚轮可缩放。",
+          "road": "将鼠标移到地区上，按住 Ctrl 拖动涂抹道路的一侧（半幅路面或该侧临街的地块），即可将该侧道路连同地块并入该地区。拖动可移动地图，滚轮可缩放。"
+        }
+      },
+      "failed": "无法更改地区。"
+    }
+  }
+}

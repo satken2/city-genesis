@@ -1,0 +1,16 @@
+{
+  "credits": {
+    "lead": "Este juego utiliza los recursos que se indican a continuación. Los nombres de autores, las fuentes, las licencias y todo texto de atribución exigido por una licencia se reproducen textualmente.",
+    "empty": "No hay elementos.",
+    "requiredText": "Atribución exigida",
+    "categories": {
+      "bgm": "Música",
+      "sfx": "Efectos de sonido",
+      "image": "Imágenes e iconos",
+      "font": "Tipografías",
+      "model": "Modelos 3D",
+      "texture": "Texturas",
+      "data": "Datos geográficos"
+    }
+  }
+}

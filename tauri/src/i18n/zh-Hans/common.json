@@ -1,0 +1,88 @@
+{
+  "common": {
+    "backendConnectionWaiting": "正在检查核心模拟器连接…",
+    "loading": "加载中...",
+    "fetchError": "数据获取失败",
+    "noData": "无数据",
+    "history": "历史记录",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "自1800年1月1日起已过{{days}}天",
+    "close": "关闭",
+    "sqm": "{{value}} m²",
+    "save": "保存",
+    "saving": "保存中...",
+    "rename": "重命名",
+    "renameFailed": "重命名失败",
+    "focusCamera": "在3D视图中查看",
+    "minutes": "分钟",
+    "processing": "处理中...",
+    "cancel": "取消",
+    "ok": "确定",
+    "delete": "删除",
+    "colorPresets": "预设颜色",
+    "colorHex": "颜色代码"
+  },
+  "status": {
+    "0": "规划中",
+    "1": "运营中",
+    "2": "已停运",
+    "3": "已列入建设计划",
+    "4": "建设中",
+    "5": "已列入拆除计划",
+    "6": "拆除中",
+    "7": "已完成",
+    "8": "已中止",
+    "9": "空置",
+    "10": "已倒塌",
+    "11": "等待开工"
+  },
+  "reason": {
+    "1": "火灾倒塌",
+    "2": "老化",
+    "3": "亏损经营",
+    "4": "利用率过低",
+    "5": "市长决定"
+  },
+  "spaceType": {
+    "0": "其他",
+    "1": "住宅",
+    "2": "商业设施",
+    "3": "仓库・工厂",
+    "4": "办公",
+    "5": "农场"
+  },
+  "resource": {
+    "currentAmount": "当前储量",
+    "consumptionTrend": "消耗量走势",
+    "amountTrend": "剩余量走势",
+    "recoveryAmount": "恢复量/纪元",
+    "maxAmount": "最大储量",
+    "unknownResource": "未知资源"
+  },
+  "errors": {
+    "UNKNOWN_ERROR": "发生错误。",
+    "CREATEPATH_INVALID_GEOMETRY": "路径形状无效。请检查起点与终点。",
+    "CREATEPATH_OUTSIDE_COASTLINE": "无法在海岸线之外铺设路径。",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "与同一条道路多次相交。请选择其他路线。",
+    "CREATEPATH_ELEVATION_INTERSECTION": "检测到立体交叉。请调整高度。",
+    "CREATEPATH_CURVE_TOO_TIGHT": "弯道对此规格而言过急。请放缓弯道。",
+    "CREATEPATH_GRADE_TOO_STEEP": "坡度对此规格而言过陡。请减小坡度。",
+    "CREATEPATH_CONVEYOR_BRANCH": "人员输送设施（索道等）不能分叉。端点只能连接另一条输送路径。",
+    "PATH_TOO_FEW_POINTS": "至少需要2个点。",
+    "PATH_MAX_SPAN_EXCEEDED": "节点间距过长。请添加中间点。",
+    "PATH_ELEVATION_CONFLICT": "检测到立体交叉。请调整高度。",
+    "INSUFFICIENT_FUNDS": "资金不足，无法下达建设指令。",
+    "GRADING_VALIDATION_ERROR": "该范围无法施工。请查看土方工程窗口中显示的原因。",
+    "CREATEPATH_SEA_LAKE_CROSSING": "路径不能在地面上经过海面或湖面。请改为高出水面足够高度的桥梁，或从地下通过。",
+    "CREATEPATH_QUAY_BAND_CROSSING": "路径不能在地面上横穿填海地的岸壁。请以高架或地下方式通过，并将端点和途经点置于岸壁顶面之外。",
+    "ZONE_CONTIGUITY_ERROR": "涂抹的道路无法连成一个完整的地区，因此无法分配。请涂抹相连的道路。",
+    "ZONE_SIZE_ERROR": "地区的最大距离或道路总长度将超过上限。请缩小涂抹范围。",
+    "OUTSIDE_CITY_EDIT": "无法编辑城市外的设施。",
+    "OUTSIDE_CITY_PLACEMENT": "无法放置在城市之外。",
+    "READ_ONLY": "只读模式下无法执行此操作。"
+  },
+  "localizedText": {
+    "languages": "输入语言",
+    "required": "必填"
+  }
+}

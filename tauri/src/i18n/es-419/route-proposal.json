@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Proponer ruta",
+    "mode": "Modo de altura",
+    "fixed": "Mantener alturas de los puntos",
+    "adjust": "Ajustar alturas de puntos intermedios",
+    "help": "Disponible al terminar la forma. Los extremos y las posiciones XZ de los puntos de paso permanecen fijos.",
+    "searching": "Buscando…",
+    "cancel": "Cancelar",
+    "undo": "Deshacer propuesta",
+    "notFound": "No se encontró una ruta.",
+    "failed": "No se pudo proponer la ruta."
+  }
+}

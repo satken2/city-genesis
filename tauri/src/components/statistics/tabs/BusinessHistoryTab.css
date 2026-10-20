@@ -1,0 +1,152 @@
+/**
+ * Business opening and closure history tab styles.
+ *
+ * Uses the shared dark theme (rgba(30,41,59,...) / #e2e8f0 colors).
+ * Subtabs and tables match AccidentsTab.
+ */
+
+.business-history-tab-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 12px;
+}
+
+/* Subtab navigation (same shape as AccidentsTab subtabs) */
+.business-history-sub-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  flex: 0 0 auto;
+}
+
+.business-history-sub-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 12px;
+  color: #9db0c5;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.business-history-sub-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6fbff;
+}
+
+.business-history-sub-tab-btn--active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.business-history-sub-tab-btn__count {
+  margin-left: 6px;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #8ba3bb;
+}
+
+/* List body */
+.business-history-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: rgba(26, 34, 48, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.business-history-list__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  min-height: 60px;
+  padding: 16px;
+  color: #5a6f86;
+  font-size: 1rem;
+}
+
+/* Table */
+.business-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.business-history-table thead {
+  position: sticky;
+  top: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+}
+
+.business-history-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.business-history-table th.business-history-table__th--num {
+  text-align: right;
+}
+
+.business-history-table td {
+  padding: 6px 10px;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.business-history-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Facility names need space, so assign the remaining width and truncate overflow with an ellipsis. */
+.business-history-table__cell--name {
+  width: 100%;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.business-history-table__id {
+  margin-left: 6px;
+  color: #5a6f86;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.business-history-table__cell--muted {
+  color: #8ba3bb;
+  font-size: 1rem;
+}
+
+.business-history-table__cell--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Loading and errors ===== */
+.business-history-tab__loading,
+.business-history-tab__error {
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
+  font-size: 1rem;
+}
+
+.business-history-tab__error {
+  color: #ff7171;
+}

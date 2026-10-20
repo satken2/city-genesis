@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 290" width="500" height="290" font-family="Helvetica, Arial, sans-serif" font-size="15">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 L3,5 z" fill="#000"/>
+    </marker>
+  </defs>
+  <rect width="500" height="290" fill="#fff"/>
+  <path d="M116,100 C116,10 376,10 376,98" fill="none" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M376,186 C376,276 116,276 116,188" fill="none" stroke="#000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <rect x="30" y="100" width="172" height="86" rx="12" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+  <rect x="290" y="100" width="172" height="86" rx="12" fill="#fff2cc" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="116" y="138" text-anchor="middle">User Interaction</text>
+  <text x="116" y="158" text-anchor="middle">Phase</text>
+  <text x="376" y="148" text-anchor="middle">Simulation Phase</text>
+</svg>

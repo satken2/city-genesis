@@ -1,0 +1,129 @@
+{
+  "settings": {
+    "title": "設定",
+    "groups": {
+      "general": "一般",
+      "display": "画面",
+      "sound": "サウンド",
+      "system": "システム",
+      "about": "情報",
+      "developer": "開発者向け設定"
+    },
+    "swagger": {
+      "label": "Swagger（APIドキュメント）",
+      "description": "コアシミュレータAPIの仕様を既定のブラウザで表示します",
+      "action": "ブラウザで開く"
+    },
+    "fontSize": {
+      "label": "文字サイズ",
+      "large": "大",
+      "medium": "中",
+      "small": "小",
+      "custom": "カスタム",
+      "preview": "現在のサイズ"
+    },
+    "monitor": {
+      "label": "ディスプレイ",
+      "prev": "前のディスプレイ",
+      "next": "次のディスプレイ"
+    },
+    "graphicMonitor": {
+      "label": "3D画面の表示先"
+    },
+    "multiDisplay": {
+      "label": "マルチディスプレイモード",
+      "description": "各種ウィンドウを別のディスプレイに表示します",
+      "on": "使う",
+      "off": "使わない"
+    },
+    "popupMonitor": {
+      "label": "ウィンドウの表示先"
+    },
+    "hintbar": {
+      "label": "ヒントバー",
+      "show": "表示する",
+      "hide": "表示しない",
+      "description": "画面上部に操作のヒントを表示するバーです"
+    },
+    "language": {
+      "label": "言語",
+      "description": "UIの表示言語です。セーブデータの言語とは異なります",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
+    },
+    "volume": {
+      "label": "音量",
+      "master": "マスターボリューム",
+      "bgm": "BGM",
+      "sfx": "サウンドエフェクト"
+    },
+    "compute": {
+      "label": "GPUアクセラレーション",
+      "comingSoon": "Coming soon",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU有効",
+      "statusInactive": "CPU有効",
+      "restartRequired": "設定変更後にメインプログラムを再起動します",
+      "restarting": "再起動中...",
+      "restartFailed": "再起動に失敗しました",
+      "restartUnavailable": "設定を保存しました。変更はゲームの次回起動時に反映されます",
+      "confirmRestart": "演算処理を{{mode}}に変更します。メインプログラムを再起動してよろしいですか？",
+      "restartAction": "再起動する"
+    },
+    "windowReset": {
+      "label": "ウィンドウ位置・サイズ",
+      "action": "リセット"
+    },
+    "credits": {
+      "label": "クレジット",
+      "description": "本作が利用している素材・ソフトウェアの権利表記です",
+      "action": "表示"
+    }
+  },
+  "saveLoad": {
+    "newGame": "ニューゲーム",
+    "overwriteSave": "上書きセーブ",
+    "saveAs": "別名セーブ",
+    "load": "ロード",
+    "quitGame": "ゲーム終了",
+    "returnToTop": "トップメニューに戻る",
+    "loading": "読み込み中...",
+    "shuttingDown": "終了処理中...",
+    "saveFailed": "保存に失敗しました",
+    "loadFailed": "読み込みに失敗しました",
+    "confirmNewGame": "現在のデータは失われます。新しいゲームを開始しますか？",
+    "confirmQuitGame": "ゲームを終了しますか？現在の進行状況は自動保存されません。",
+    "confirmReturnToTop": "トップメニューに戻りますか？現在の進行状況は自動保存されません。",
+    "confirm": "はい",
+    "cancel": "いいえ",
+    "saveAsScenario": "シナリオとして保存",
+    "saveAsNewScenario": "別のシナリオとして保存",
+    "overwriteScenario": "上書き保存",
+    "backToGame": "ゲームに戻る",
+    "saveName": "セーブ名",
+    "confirmOverwrite": "「{{name}}」に上書きセーブしますか？",
+    "confirmOverwriteScenario": "シナリオ「{{name}}」に上書き保存しますか？"
+  },
+  "saveList": {
+    "noSaves": "セーブデータがありません",
+    "currentSave": "現在のデータ",
+    "population": "人口",
+    "inGameDate": "日付",
+    "savedAt": "保存日時",
+    "loadButton": "ロード",
+    "deleteButton": "削除",
+    "confirmLoad": "このセーブデータを読み込みますか？",
+    "confirmDelete": "このセーブデータを削除しますか？この操作は取り消せません。",
+    "loading": "読み込み中...",
+    "loadFailed": "読み込みに失敗しました",
+    "deleteFailed": "削除に失敗しました",
+    "openFolderButton": "フォルダの場所を表示",
+    "scenario": "シナリオ"
+  }
+}

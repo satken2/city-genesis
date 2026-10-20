@@ -1,0 +1,127 @@
+/*
+ * ==========================================================================
+ * TransitEstimateCard.css - Line profitability estimate card.
+ * Used in both creation panels (bc-*) and line detail settings (agent-detail-*), so the card itself
+ * has no background and uses only App.css --flat-* colors. Only the conclusion row (estimated
+ * balance) has a surface; a solid left block and number color indicate surplus/deficit,
+ * matching operating result tiles.
+ * ==========================================================================
+ */
+
+.transit-estimate {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: opacity 0.15s ease;
+}
+
+/* Keep the previous result faded while refetching. */
+.transit-estimate--stale {
+  opacity: 0.55;
+}
+
+.transit-estimate__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.transit-estimate__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.transit-estimate__row:last-child {
+  border-bottom: none;
+}
+
+.transit-estimate__label {
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+}
+
+.transit-estimate__value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  text-align: right;
+}
+
+.transit-estimate__main {
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+  white-space: nowrap;
+}
+
+.transit-estimate__sub {
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: var(--flat-text-muted);
+}
+
+/* ---- Conclusion row (estimated balance) ---- */
+.transit-estimate__row--total {
+  margin: 3px 0;
+  padding: 6px 10px;
+  border-bottom: none;
+  border-radius: 4px;
+  background: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+}
+
+.transit-estimate__row--total .transit-estimate__main {
+  font-size: 1.28rem;
+}
+
+.transit-estimate__row--positive {
+  box-shadow: inset 4px 0 0 var(--flat-good), var(--flat-shadow-sm);
+}
+.transit-estimate__row--positive .transit-estimate__main {
+  color: var(--flat-good);
+}
+
+.transit-estimate__row--negative {
+  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+}
+.transit-estimate__row--negative .transit-estimate__main {
+  color: var(--flat-danger);
+}
+
+/* ---- Notes/warnings ---- */
+.transit-estimate__note {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--flat-text-muted);
+}
+
+.transit-estimate__warning {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--flat-warn);
+  background: var(--flat-warn-surface);
+}
+
+.transit-estimate__muted {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--flat-text-muted);
+}
+
+.transit-estimate__error {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--flat-danger);
+}

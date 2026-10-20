@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Weather",
+    "choose": "Choose weather",
+    "loading": "Checking weather…",
+    "unknown": "Unknown",
+    "automatic": "{{weather}} (Auto)",
+    "failed": "Could not change weather",
+    "names": {
+      "clear": "Clear",
+      "high_clouds": "High clouds",
+      "fair": "Fair",
+      "broken_clouds": "Sunny intervals",
+      "overcast": "Overcast",
+      "rain_clouds": "Rain clouds",
+      "fog": "Fog",
+      "drizzle": "Drizzle",
+      "rain": "Rain",
+      "heavy_rain": "Heavy rain",
+      "light_snow": "Light snow",
+      "snow": "Snow",
+      "blizzard": "Blizzard"
+    },
+    "epochClimate": "Epoch climate",
+    "temperature": "Temperature",
+    "precipitation": "Precipitation",
+    "sunlight": "Sunlight intensity",
+    "windSpeed": "Wind speed"
+  }
+}

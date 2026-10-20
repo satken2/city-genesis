@@ -1,0 +1,383 @@
+{
+  "paramSetup": {
+    "title": "Configuración de parámetros del juego",
+    "description": "En general se recomiendan los valores predeterminados. Ajústalos solo si quieres cambiarlos.",
+    "skip": "Omitir",
+    "start": "Iniciar la partida",
+    "apply": "Aplicar y cerrar",
+    "close": "Cerrar",
+    "loading": "Cargando...",
+    "reload": "Recargar",
+    "reloadHint": "Si recargas cuando el servidor haya terminado de inicializarse, verás los valores más recientes",
+    "fetchError": "No se pudieron obtener los parámetros",
+    "category": {
+      "population": "Población y migración",
+      "citizen": "Vida ciudadana",
+      "economy": "Economía",
+      "labor": "Trabajo y salarios",
+      "education": "Educación",
+      "construction": "Construcción e inmuebles",
+      "environment": "Medio ambiente",
+      "traffic": "Transporte",
+      "general": "General",
+      "pathfind": "Tráfico y rutas",
+      "building": "Edificios y construcción",
+      "disaster": "Desastres y seguridad",
+      "sprawl": "Expansión urbana",
+      "production": "Producción e inventario",
+      "zone": "Distritos y parcelas",
+      "financial": "Finanzas"
+    },
+    "param": {
+      "TFR_TARGET": {
+        "label": "Tasa global de fecundidad (TGF) objetivo",
+        "desc": "Tasa de fecundidad que buscan los hogares. Cuanto más alta, más fácil es que nazcan niños."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Tasa de nupcialidad",
+        "desc": "Coeficiente de la probabilidad base de que los ciudadanos se casen. Cuanto mayor, más fácil es casarse."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Edad mínima para tener hijos",
+        "desc": "Edad mínima a la que pueden nacer hijos. Por debajo de esta edad no hay nacimientos."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Edad máxima para tener hijos",
+        "desc": "Edad máxima a la que pueden nacer hijos. Por encima de esta edad no hay nacimientos."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Tasa de matrimonio de los hogares migrantes",
+        "desc": "Probabilidad de que un hogar migrante que llega a la ciudad sea una pareja."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Probabilidad de 1 hijo (migrantes)",
+        "desc": "Probabilidad de que un hogar migrante aparezca con un hijo."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Probabilidad de 2 hijos (migrantes)",
+        "desc": "Probabilidad de que un hogar migrante aparezca con dos hijos."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Probabilidad de 3 hijos (migrantes)",
+        "desc": "Probabilidad de que un hogar migrante aparezca con tres hijos."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Edad mínima de los migrantes adultos",
+        "desc": "Edad mínima de los adultos que llegan como migrantes."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Edad máxima de los migrantes adultos",
+        "desc": "Edad máxima de los adultos que llegan como migrantes."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Coeficiente de esperanza de vida",
+        "desc": "Coeficiente aplicado a la vida máxima de los ciudadanos. Con 1.08 el tope es de unos 100 años; con 1.06, de 150.",
+        "graphX": "Edad",
+        "graphY": "Probabilidad anual de muerte (salud 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Espacio habitable de un hogar unipersonal (m²)",
+        "desc": "Superficie habitable mínima que necesita un hogar de una sola persona."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Espacio adicional por cónyuge (m²)",
+        "desc": "Superficie habitable adicional que necesita un hogar de pareja respecto a uno unipersonal."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Espacio adicional por hijo (m²)",
+        "desc": "Superficie habitable que se suma por cada hijo."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Proporción alquiler/ingreso (tope pagable)",
+        "desc": "Proporción máxima del ingreso del hogar que puede destinarse al alquiler. Con 0.3, hasta el 30 % del ingreso."
+      },
+      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
+        "label": "Proporción mínima de ingreso disponible",
+        "desc": "Proporción de ingreso discrecional que el hogar intenta conservar como mínimo. Si es muy baja, la economía doméstica se quiebra con facilidad."
+      },
+      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
+        "label": "Épocas hasta decidir la mudanza",
+        "desc": "Épocas que transcurren desde que el hogar se siente insatisfecho con su entorno residencial hasta que decide mudarse."
+      },
+      "HOUSEHOLD_SHACK_COUNT": {
+        "label": "Épocas hasta caer en situación de calle",
+        "desc": "Épocas que transcurren desde la pérdida de la vivienda hasta quedar en situación de calle."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Salario promedio (valor de referencia)",
+        "desc": "Salario promedio de referencia al iniciar la simulación."
+      },
+      "AVERAGE_RENT": {
+        "label": "Alquiler promedio (valor de referencia)",
+        "desc": "Alquiler promedio de referencia al iniciar la simulación (por m² y por día)."
+      },
+      "MIN_PROFIT_RATE": {
+        "label": "Margen de ganancia mínimo",
+        "desc": "Margen de ganancia mínimo para que una empresa siga operando."
+      },
+      "SPAWN_PROFIT_RATE_THRESHOLD": {
+        "label": "Margen mínimo para permitir la entrada de nuevas empresas",
+        "desc": "Solo aparecen empresas nuevas en mercados que superen este margen. Sirve para frenar la sobreoferta."
+      },
+      "DIVIDEND_PAYOUT_RATIO": {
+        "label": "Proporción de reparto de dividendos",
+        "desc": "Porción de las ganancias empresariales que se reparte a los hogares."
+      },
+      "MIN_PRODUCTION_LIMIT": {
+        "label": "Proporción mínima de producción",
+        "desc": "Proporción mínima de producción respecto a la demanda total."
+      },
+      "MAX_LONGRUN_BONUS_DAYS": {
+        "label": "Días máximos de bonificación por operación prolongada",
+        "desc": "Tope de días de la bonificación que obtienen las empresas por operar de forma prolongada."
+      },
+      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
+        "label": "Margen de precio que detiene la exportación",
+        "desc": "Cuánto puede superar el precio de oferta al límite de cobro de exportación (precio de fuera de la región ÷ (1 + proporción de transporte)) antes de que los centros de comercio exterior dejen de comprar. Las compras bajan en línea recta desde el límite hasta cero en este margen."
+      },
+      "SPAWN_LABOR_CAP_RATIO": {
+        "label": "Tope de mano de obra consumida al aparecer",
+        "desc": "Proporción máxima del excedente laboral de la ciudad que puede consumir de una vez una empresa nueva al aparecer."
+      },
+      "DEVELOPER_PROFIT_RATIO": {
+        "label": "Margen de la desarrolladora inmobiliaria",
+        "desc": "Proporción de ganancia del desarrollo inmobiliario."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Tasa de depreciación del equipo",
+        "desc": "Tasa de depreciación por época sobre el stock de capital invertido en equipo."
+      },
+      "WORK_HOURS": {
+        "label": "Horas de trabajo diarias (h)",
+        "desc": "Horas estándar que trabaja un ciudadano al día."
+      },
+      "NORMAL_LABOR_UTILITY": {
+        "label": "Aprovechamiento laboral de referencia",
+        "desc": "Aprovechamiento de la mano de obra al calcular el precio estándar. Con 1.0 es aprovechamiento total."
+      },
+      "HIGH_SKILL_BOUNDARY": {
+        "label": "Umbral de alta calificación",
+        "desc": "Por encima de este valor el trabajador se considera altamente calificado."
+      },
+      "MAX_BASE_SKILL": {
+        "label": "Habilidad básica máxima",
+        "desc": "Valor máximo de habilidad que se puede alcanzar con la educación básica."
+      },
+      "MAX_SKILL": {
+        "label": "Tope de habilidad",
+        "desc": "Valor máximo de habilidad que puede adquirir un ciudadano (incluyendo educación superior y experiencia laboral)."
+      },
+      "WAGE_OVERSTAFFED_THRESHOLD": {
+        "label": "Umbral de baja salarial por exceso de personal",
+        "desc": "Si la tasa de exceso de personal supera este valor, se bajan los salarios (se evalúa como labor_surplus / quota)."
+      },
+      "WAGE_UNDERSTAFFED_THRESHOLD": {
+        "label": "Umbral de alza salarial por falta de personal",
+        "desc": "Si la falta de personal sin postulantes supera este valor, se suben los salarios."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Edad de inicio de la educación básica",
+        "desc": "Edad a la que los niños comienzan la educación básica (equivalente a la primaria)."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Edad de término de la educación básica",
+        "desc": "Edad a la que termina la educación básica (equivalente al fin del bachillerato)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Edad de egreso universitario e independencia",
+        "desc": "Edad a la que se concluye la educación superior y se abandona el hogar familiar."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Edad mínima para trabajar",
+        "desc": "Los ciudadanos menores a esta edad no buscan empleo ni entran en el cálculo del desempleo."
+      },
+      "EDUCATION_CAPACITY_PER_FLOOR": {
+        "label": "Capacidad del centro educativo (por m²)",
+        "desc": "Número de estudiantes que pueden atenderse por cada m² de superficie construida."
+      },
+      "SCHOOL_SEARCH_MAX_DISTANCE": {
+        "label": "Distancia máxima al centro educativo (minutos)",
+        "desc": "Distancia máxima (en minutos) para buscar un centro educativo."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Umbral de encarecimiento en altura (pisos)",
+        "desc": "A partir de este número de pisos el costo de construcción se dispara. Frena la construcción de rascacielos.",
+        "graphX": "Pisos",
+        "graphY": "Multiplicador del costo de construcción"
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Coeficiente de penalización por altura",
+        "desc": "Coeficiente de la penalización por construir en altura. Cuanto mayor, menor es la penalización.",
+        "graphX": "Pisos",
+        "graphY": "Multiplicador del costo de construcción"
+      },
+      "BUILDING_ASPECT_RATIO_MAX": {
+        "label": "Esbeltez máxima",
+        "desc": "Límite de altura ÷ √superficie en planta. Evita que se construyan automáticamente torres tipo aguja en lotes pequeños. 0 = sin límite."
+      },
+      "DEMOLITION_RATE": {
+        "label": "Eficiencia relativa de la demolición",
+        "desc": "Cuánto más eficiente es demoler que construir de nuevo (multiplicador)."
+      },
+      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
+        "label": "Tasa de excedente de oferta inmobiliaria",
+        "desc": "Proporción de oferta excedente que se mantiene siempre en el mercado inmobiliario."
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
+        "label": "Superficie estándar mínima de desarrollo inducido",
+        "desc": "Límite inferior (m²) de la superficie estándar de desarrollo del pulso de inducción. Multiplicada por la densidad de demanda del distrito, define el tamaño de la demanda de obra de una época."
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
+        "label": "Superficie estándar máxima de desarrollo inducido",
+        "desc": "Límite superior (m²) de la superficie estándar de desarrollo del pulso de inducción. Cuanto mayor, más grande es cada desarrollo."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Probabilidad anual base de derrumbe",
+        "desc": "Probabilidad base de que un edificio con durabilidad 0.5 se derrumbe en un año."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Parámetro de forma de Weibull del derrumbe",
+        "desc": "Cuanto mayor, más rápido crece la probabilidad de derrumbe cerca del fin de la vida útil."
+      },
+      "MAINTENANCE_DURABILITY_THRESHOLD": {
+        "label": "Umbral de durabilidad para reparar",
+        "desc": "Los edificios por debajo de esta durabilidad se vuelven candidatos a reparación."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Proporción del costo de reparación",
+        "desc": "Costo de reparación expresado como proporción del costo de construir de nuevo."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Probabilidad anual base de entrar en reparación",
+        "desc": "Probabilidad anual base de que un edificio candidato entre efectivamente en reparación."
+      },
+      "DEMOLITION_DURABILITY_THRESHOLD": {
+        "label": "Umbral de demolición de edificios detenidos",
+        "desc": "Un edificio detenido pasa a ser candidato a demolición cuando cae por debajo de esta durabilidad."
+      },
+      "DEMOLITION_BASE_RATE_ANNUAL": {
+        "label": "Probabilidad anual de demoler edificios detenidos",
+        "desc": "Probabilidad base de que un edificio detenido y candidato sea demolido en un año."
+      },
+      "SHUTDOWN_GRACE_PERIOD_DAYS": {
+        "label": "Periodo de gracia antes del cierre (días)",
+        "desc": "Días durante los cuales un edificio recién terminado queda exento de la evaluación de cierre. Da tiempo a que lleguen los inquilinos."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Deuda inicial de construcción (por m²)",
+        "desc": "Deuda inicial de construcción por cada m² de superficie construida (reservas negativas)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Coeficiente de ruido del tránsito vial",
+        "desc": "Coeficiente con que el tránsito vial alimenta el mapa de calor de ruido. Cuanto mayor, más ruidosas resultan las calles."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Coeficiente de ruido peatonal",
+        "desc": "Coeficiente con que el flujo peatonal alimenta el mapa de calor de ruido."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Umbral de ruido peatonal",
+        "desc": "Solo la parte del flujo peatonal que supera este valor contribuye al ruido."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Distancia de atenuación del ruido (m)",
+        "desc": "El ruido se debilita con el cuadrado de la distancia y además cae a 1/e cada vez que se recorre esta distancia (apantallamiento de los edificios, absorción del aire y del suelo). Cuanto menor, más cerca de la fuente se queda."
+      },
+      "NOISE_SATURATION_LEVEL": {
+        "label": "Nivel de saturación de ruido",
+        "desc": "Valor máximo del mapa de calor de ruido. Por encima de él, el ruido se estanca."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Coeficiente de contaminación del tránsito vial",
+        "desc": "Coeficiente con que el tránsito vial alimenta el mapa de calor de contaminación del aire."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Distancia de atenuación de la contaminación (m)",
+        "desc": "La contaminación del aire y los olores se debilitan con el cuadrado de la distancia y además caen a 1/e cada vez que se recorre esta distancia (dispersión y deposición). Cuanto menor, más cerca de la fuente se quedan."
+      },
+      "POLLUTION_SATURATION_LEVEL": {
+        "label": "Nivel de saturación de contaminación",
+        "desc": "Valor máximo del mapa de calor de contaminación del aire."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Peso del desempleo en la delincuencia",
+        "desc": "Peso del desempleo en el mapa de calor de seguridad. Cuanto mayor, más directamente empeora la seguridad."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Alcance de dispersión de la delincuencia (m)",
+        "desc": "Radio del desenfoque gaussiano del mapa de calor de seguridad."
+      },
+      "CRIME_SATURATION_LEVEL": {
+        "label": "Nivel de saturación de delincuencia",
+        "desc": "Valor máximo del mapa de calor de seguridad."
+      },
+      "LIVING_MULTIPLIER_MIN": {
+        "label": "Multiplicador mínimo del entorno residencial",
+        "desc": "Multiplicador mínimo del alquiler cuando el entorno residencial es pésimo."
+      },
+      "LIVING_MULTIPLIER_MAX": {
+        "label": "Multiplicador máximo del entorno residencial",
+        "desc": "Multiplicador máximo del alquiler cuando el entorno residencial es ideal."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Velocidad peatonal (km/h)",
+        "desc": "Velocidad de desplazamiento de los peatones. Se usa para calcular el costo de las rutas."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Distancia de aceleración de los automóviles (m)",
+        "desc": "Distancia que emplean los automóviles para acelerar. Afecta el cálculo de velocidad en calles cortas."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Horas diarias de operación de las calles (h)",
+        "desc": "Horas al día en que la calle está en operación. Se usa para convertir los volúmenes de tránsito."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Umbral de saturación de la bonificación por tránsito vial",
+        "desc": "A partir de este volumen de tránsito vial, la bonificación de tránsito para los comercios llega a su máximo."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Umbral de saturación de la bonificación peatonal",
+        "desc": "A partir de este flujo peatonal, la bonificación peatonal para los comercios llega a su máximo."
+      },
+      "RESOURCE_EFFICIENCY_THRESHOLD": {
+        "label": "Umbral de eficiencia de los recursos naturales",
+        "desc": "Si el porcentaje restante de recursos naturales supera este valor, la eficiencia de extracción se mantiene cerca de 1.0; por debajo cae de golpe."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Cargando...",
+    "noScenarios": "No hay escenarios disponibles",
+    "starting": "Iniciando...",
+    "startFailed": "No se pudo iniciar",
+    "confirmTitle": "Confirmación de la configuración del juego",
+    "unsavedChangesWarning": "Al iniciar, se perderán los cambios sin guardar de tu partida actual.",
+    "cityNameLabel": "Nombre de la ciudad",
+    "cityNamePlaceholder": "Escribe el nombre de la ciudad (opcional)",
+    "languageLabel": "Idioma de la ciudad",
+    "languageNote": "* No podrá cambiarse después",
+    "simulationDaysLabel": "Días de simulación",
+    "simulationDaysNote": "* No podrá cambiarse después",
+    "daysOption": "{{days}} días",
+    "startButton": "Iniciar",
+    "backButton": "Volver",
+    "cleared": "Completado",
+    "tutorialBadge": "Tutorial",
+    "sectionDebug": "Depuración",
+    "sectionTutorials": "Tutoriales",
+    "sectionScenarios": "Escenarios",
+    "detailPlaceholder": "Elige un escenario de la lista de la izquierda.",
+    "detailMapSizeLabel": "Tamaño del mapa",
+    "detailUnknown": "Desconocido",
+    "detailObjectiveLabel": "Condiciones de logro",
+    "detailNoObjective": "Sin condiciones de logro",
+    "detailNoDescription": "Este escenario no tiene descripción.",
+    "tutorialObjective": "Completa todos los pasos del tutorial.",
+    "startScenarioButton": "Empezar este escenario",
+    "tabSelect": "Elegir escenario",
+    "tabBrowse": "Buscar escenarios",
+    "comingSoon": "Coming soon",
+    "relocalizeNote": "Este escenario se creó en {{from}}. Si empiezas en {{to}}, los nombres de distritos, instalaciones, residentes, estaciones y otros se cambian a {{to}} (también se reemplazan los nombres que puso el autor; se conservan los nombres de las calles y algunos otros).",
+    "fixedByScenario": "Fijado por el escenario"
+  }
+}

@@ -1,0 +1,347 @@
+/**
+ * Tourism statistics tab styles (matching the trade tab's glassmorphism).
+ */
+
+.tourism-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background-color: #0b0f19;
+  color: #f3f4f6;
+}
+
+.tourism-tab__title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #ffffff;
+  border-left: 4px solid #ec4899;
+  padding-left: 10px;
+  line-height: 1.2;
+}
+
+/* Summary tiles */
+.tourism-tiles {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.tourism-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: rgba(22, 29, 43, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.tourism-tile__label {
+  font-size: 1rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tourism-tile__value {
+  font-size: 1.48rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: monospace;
+}
+
+.tourism-tile__sub {
+  font-size: 0.93rem;
+  color: #8ba3bb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tourism-tab__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.tourism-tab__col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Shared cards */
+.tourism-card {
+  background: rgba(22, 29, 43, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.tourism-card__title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tourism-card__chart-container {
+  height: 200px;
+  position: relative;
+}
+
+.tourism-card__chart-container--short {
+  height: 150px;
+}
+
+.tourism-card__no-data,
+.tourism-card__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.tourism-card__no-data {
+  position: absolute;
+  inset: 0;
+}
+
+/* Table */
+.tourism-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.tourism-table th {
+  color: #8ba3bb;
+  font-weight: 500;
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid #253246;
+}
+
+.tourism-table td {
+  padding: 6px;
+  border-bottom: 1px solid #1a2a3a;
+  vertical-align: top;
+}
+
+.tourism-table--compact td {
+  padding: 4px 6px;
+}
+
+.tourism-table .text-right {
+  text-align: right;
+  font-family: monospace;
+}
+
+.tourism-table .font-semibold {
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.tourism-table__product,
+.tourism-table__muted,
+.tourism-table__facility {
+  display: block;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #8ba3bb;
+}
+
+.tourism-badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 0.93rem;
+  font-weight: 600;
+}
+
+.tourism-badge--constraint {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* Accommodation supply/demand key-value pairs */
+.tourism-kv-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.tourism-kv__label {
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.tourism-kv__value {
+  color: #e5e7eb;
+  font-family: monospace;
+}
+
+.tourism-kv__note {
+  margin-left: 8px;
+  color: #8ba3bb;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.tourism-occupancy-bar {
+  height: 10px;
+  background-color: #111827;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.tourism-occupancy-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #be185d, #ec4899);
+  transition: width 0.3s ease-out;
+}
+
+/* Satisfaction meter */
+.tourism-meters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tourism-meter {
+  display: grid;
+  grid-template-columns: 110px 1fr 44px;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+}
+
+.tourism-meter__label {
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tourism-meter__track {
+  height: 8px;
+  background-color: #111827;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tourism-meter__fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.tourism-meter__value {
+  text-align: right;
+  font-family: monospace;
+  color: #e5e7eb;
+}
+
+/* Tourist spending list */
+.tourism-card__list-container {
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tourism-card__list-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tourism-card__list-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.tourism-bar-item {
+  margin-bottom: 10px;
+}
+
+.tourism-bar-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.tourism-bar-item__name {
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+.tourism-bar-item__values {
+  font-family: monospace;
+  font-size: 1rem;
+}
+
+.tourism-bar-item__value {
+  font-weight: 700;
+  color: #f9a8d4;
+}
+
+.tourism-bar-item__amount {
+  color: #9ca3af;
+  margin-left: 8px;
+}
+
+.tourism-bar-track {
+  height: 10px;
+  background-color: #111827;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.tourism-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #be185d, #ec4899);
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
+  transition: width 0.3s ease-out;
+}
+
+/* Loading and errors */
+.tourism-tab__loading,
+.tourism-tab__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+.tourism-tab__error {
+  color: #f87171;
+}

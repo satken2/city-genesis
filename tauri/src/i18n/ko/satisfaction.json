@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "지침",
+    "unhappy": "불만",
+    "neutral": "보통",
+    "happy": "만족",
+    "delighted": "매우 만족",
+    "zero": "만족도 0"
+  }
+}

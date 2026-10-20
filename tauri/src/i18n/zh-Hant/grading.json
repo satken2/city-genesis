@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "類型",
+    "kind": {
+      "land": "陸地整地",
+      "shore": "填海"
+    },
+    "baseHeight": "基準高度",
+    "targetHeight": "目標高度",
+    "cutVolume": "挖方量",
+    "fillVolume": "填方量",
+    "quayLength": "岸壁長度",
+    "quayArea": "岸壁面積",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "高度（與基準的差）",
+    "baseNote": {
+      "frontage": "0 為所臨道路的路面高度（{{value}} m）",
+      "terrain_mean": "0 為範圍目前的平均高度（{{value}} m）"
+    },
+    "shoreHeightLocked": "無法指定填海的高度",
+    "reasons": {
+      "invalid_polygon": "範圍的形狀無效。請畫成各邊互不相交的形狀。",
+      "outside_city": "範圍超出了城市。",
+      "too_large": "範圍過大（上限 {{limit}} km²）。",
+      "on_water": "完全位於海上的範圍無法施工。請畫到陸地上。",
+      "no_land_overlap": "請將範圍畫得與陸地重疊（否則岸邊與範圍之間會留下海面）。",
+      "overlaps_parcel": "與現有地塊重疊。",
+      "overlaps_path": "與道路、軌道等路徑重疊。",
+      "overlaps_water": "觸及河川或湖泊。",
+      "overlaps_quay_band": "觸及填海地的岸壁。",
+      "invalid_height_offset": "高度指定超出範圍（最多 ±{{offsetLimit}} m）。",
+      "below_sea_level": "不能低於海平面。",
+      "too_narrow": "範圍過窄，岸壁內側沒有可以填築的部分。",
+      "no_work": "地面已經處於目標高度，無需施工。",
+      "insufficient_funds": "資金不足，無法下達建設指令。"
+    },
+    "confirm": "確定",
+    "confirming": "確定中...",
+    "cancel": "取消",
+    "confirmFailed": "土方工程下單失敗。"
+  }
+}

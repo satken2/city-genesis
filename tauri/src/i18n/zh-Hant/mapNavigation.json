@@ -1,0 +1,55 @@
+{
+  "mapNavigation": {
+    "title": "探索城市",
+    "back": "返回",
+    "search": "搜尋地點",
+    "origin": "搜尋出發地",
+    "destination": "搜尋目的地",
+    "clear": "清除",
+    "searching": "搜尋中…",
+    "error": "無法連線，請重新整理後再試。",
+    "noResults": "找不到地點",
+    "mode": "交通方式",
+    "pedestrian": "步行與大眾運輸",
+    "automobile": "開車",
+    "pickOrigin": "在地圖上選擇起點",
+    "pickDestination": "在地圖上選擇終點",
+    "swap": "交換",
+    "cancel": "取消",
+    "directions": "前往此處",
+    "intro": "搜尋設施、車站、地區或道路，或在地圖上選擇地點。",
+    "chooseOrigin": "搜尋出發地，或在地圖上選擇。",
+    "routing": "正在搜尋路線…",
+    "showRoute": "顯示完整路線",
+    "mapPoint": "地圖上的地點",
+    "minutes": "約{{count}}分鐘",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "依第{{epoch}}次路線計算的路網估算。虛線表示步行及道路接駁路段。",
+    "busy": "模擬執行中，完成後將更新。",
+    "not_ready": "尚無路線資料。在此城市執行模擬後即可顯示。",
+    "unreachable": "找不到連接這兩個地點的路線。",
+    "no_access": "所選地點附近沒有可用道路。",
+    "geometry_unavailable": "無法取得此路線的大眾運輸行駛形狀。",
+    "place_missing": "所選地點已刪除，請重新選擇。",
+    "kind": {
+      "agent": "設施",
+      "zone": "地區",
+      "stop": "站點",
+      "station": "車站",
+      "point": "地點",
+      "road": "道路"
+    },
+    "leg": {
+      "walk": "步行",
+      "drive": "開車",
+      "transit": "大眾運輸",
+      "conveyor": "人員運輸",
+      "access": "道路接駁",
+      "turn": "路口轉彎"
+    },
+    "picking": {
+      "origin": "請在地圖上點選出發地。",
+      "destination": "請在地圖上點選目的地。"
+    }
+  }
+}

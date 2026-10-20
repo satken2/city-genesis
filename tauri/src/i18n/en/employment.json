@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Required Skill",
+    "wage": "Wage",
+    "quota": "Required Labor",
+    "totalLabor": "Hired Labor",
+    "employees": "Employee List",
+    "hired": "Hired",
+    "vacant": "Vacant",
+    "noQuota": "No labor required",
+    "noEmployees": "No employees",
+    "statusTitle": "Employment Status"
+  }
+}

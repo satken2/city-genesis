@@ -1,0 +1,477 @@
+:root {
+  color: #e5eef9;
+  background: transparent;
+  font-family: "Segoe UI", sans-serif;
+  font-size: var(--font-size-base, 13px); /* 1rem = body text. The value comes from the font size setting (FontSizeContext). */
+  line-height: 1.35;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* =========================================================================
+ * Shared flat design tokens. Used by top menu windows (new game, save/load, epoch results). Solid rectangles and
+ * drop shadows express surface elevation without borders, rounded corners, or glow. Emphasis uses a solid
+ * left-edge block (box-shadow: inset 4px 0 0 accent-color). Earlier implementations (NewGameWindow /
+ * SaveListWindow / SaveLoadWindow) hardcode the same colors. New windows using this design must reference these
+ * tokens instead; change colors here too.
+ * ========================================================================= */
+:root {
+  --flat-surface: #16202e;          /* Panel and card surfaces */
+  --flat-raised: #1b2635;           /* Tiles and buttons on panels */
+  --flat-raised-hover: #26374d;
+  --flat-sunken: #10161f;           /* Input fields and progress bar tracks */
+  --flat-selected: #2c5687;         /* Selected and primary buttons */
+  --flat-selected-hover: #3a6ba8;
+  --flat-accent: #4ea1ff;
+  --flat-text: #e0e0e0;             /* Headings and values */
+  --flat-text-body: #c8d8e8;
+  --flat-text-label: #a4bccc;
+  --flat-text-muted: #6b8299;
+  --flat-good: #6cd47f;
+  --flat-warn: #f0c040;
+  --flat-warn-surface: #3a2f16;
+  --flat-danger: #ff9a9a;
+  --flat-danger-surface: #3d1f22;
+  --flat-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --flat-shadow-sm: 0 3px 8px rgba(0, 0, 0, 0.45);
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: transparent;
+}
+
+/* Match body and input text to the configured base size; specify size differences only for headings and supplementary text. */
+input,
+textarea {
+  font: inherit;
+  font-size: 1rem;
+}
+
+select {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  padding: 0.56rem 0.83rem;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+select option {
+  background: #182231;
+  color: #f6fbff;
+}
+
+button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  padding: 0.56rem 1.11rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1rem;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* =========================================================================
+ * Scrollbars shared by all windows. WebView2 (Chromium/Edge) defaults to overlay scrollbars, which can hide and
+ * block values, buttons, or inputs at a panel's right edge. Defining ::-webkit-scrollbar switches elements to
+ * classic scrollbars that occupy layout width; apply to all scrollable areas to prevent overlap. Do not mix with
+ * standard scrollbar-width / scrollbar-color: Chromium prioritizes them and disables ::-webkit-scrollbar rules.
+ * ========================================================================= */
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+/* Corner where horizontal and vertical scrollbars meet. Make transparent to avoid the default conspicuous white square. */
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.popup-shell {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 32px 1fr;
+  background: linear-gradient(180deg, #182231 0%, #101723 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Titleless popups (chromeless in the registry). The body fills the entire window. */
+.popup-shell--chromeless {
+  grid-template-rows: 1fr;
+}
+
+.host-shell {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: min(2rem, 4vw, 4vh);
+  overflow: hidden;
+  background: var(--flat-sunken);
+  color: var(--flat-text);
+}
+
+.host-panel {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: min(1rem, 3vh);
+  text-align: center;
+}
+
+.host-panel::before {
+  content: "";
+  width: 2.5rem;
+  height: 2px;
+  background: var(--flat-accent);
+}
+
+.host-panel h1 {
+  margin: 0;
+  font-size: clamp(0.65rem, 5vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+}
+
+.host-panel p {
+  margin: 0;
+  color: var(--flat-text-label);
+  font-size: clamp(0.65rem, 3vw, 1rem);
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 20, 32, 0.95);
+}
+
+.titlebar-drag-region {
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: grab;
+  user-select: none;
+}
+
+.titlebar-drag-region:active {
+  cursor: grabbing;
+}
+
+.titlebar-text {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.titlebar-title {
+  font-size: 1.22rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titlebar-actions {
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.titlebar-close-button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: #981120;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.1s;
+  margin-right: 4px;
+}
+
+.titlebar-close-button:hover {
+  background: #f13b49;
+}
+
+.titlebar-close-button img {
+  width: 12px;
+  height: 12px;
+  filter: brightness(0) invert(1);
+}
+
+.ghost-button {
+  padding: 0.5rem 0.97rem;
+  font-size: 1rem;
+}
+
+.content {
+  overflow: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* =========================================================================
+ * Shared layout for agent-detail panels. Agent, parcel, path, district, citizen, and other detail panels share
+ * `.agent-detail` as their root class. Since separate lazy-loaded chunks render them, include shared styles in
+ * the main bundle to load first and prevent FOUC. Explicitly set `align-content: start` to ensure top alignment:
+ * although CSS Grid specifies `align-content: normal` resolves to `start`, account for browser implementations
+ * that might resolve it to `stretch`.
+ * ========================================================================= */
+
+.agent-detail {
+  display: grid;
+  gap: 8px;
+  height: 100%;
+  align-content: start;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.agent-detail-back {
+  padding: 2px 8px;
+  font-size: 1rem;
+  width: fit-content;
+}
+
+.agent-detail-muted {
+  color: #9db0c5;
+  font-size: 1rem;
+}
+
+.agent-detail-error {
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(193, 62, 62, 0.16);
+  border: 1px solid rgba(255, 113, 113, 0.3);
+}
+
+.agent-detail-section {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.agent-detail-section-title {
+  font-size: 1.18rem;
+  font-weight: bold;
+  color: #c5d4e3;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  margin-top: 0;
+}
+
+.agent-detail-grid {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 0;
+  align-items: stretch;
+}
+
+.agent-detail-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  padding: 5px 12px 5px 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  min-height: 28px;
+  box-sizing: border-box;
+}
+
+.agent-detail-value {
+  font-size: 1rem;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  padding: 5px 0 5px 12px;
+  min-height: 28px;
+  box-sizing: border-box;
+}
+
+/* empty_shell: intentionally leave the area below the title bar empty. */
+.content-empty-shell {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.content-iframe {
+  overflow: hidden;
+}
+
+.html-panel-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.19rem;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 10px;
+}
+
+.meta-label {
+  color: #93a9c0;
+  font-weight: 600;
+}
+
+.meta-value {
+  margin: 0;
+  word-break: break-all;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.json-view {
+  margin: 0;
+  padding: 8px;
+  border-radius: 8px;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 1rem;
+}
+
+.muted {
+  color: #9db0c5;
+}
+
+.error-box {
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(193, 62, 62, 0.16);
+  border: 1px solid rgba(255, 113, 113, 0.3);
+}
+
+/**
+ * Shared entity link styles. Used for clickable entity references such as ZoneLink and AgentLink. Blue accent
+ * colors indicate links.
+ */
+.entity-link {
+  padding: 2px 6px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #4ea1ff;
+  border-color: rgba(78, 161, 255, 0.3);
+}
+
+.entity-link:hover {
+  background: rgba(78, 161, 255, 0.12);
+}
+
+/**
+ * Full-width edit button for detail panels. Shared by scenario authoring property editing and mashup building
+ * placement editing.
+ */
+.property-edit-open-btn {
+  width: 100%;
+  padding: 8px 0;
+  margin-top: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.property-edit-open-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
+/* Keep the existing screen while waiting for connectivity and block pointer/keyboard interaction. */
+.connection-content { display: contents; }
+.backend-connection-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: rgba(16, 20, 28, 0.85);
+  color: white;
+  font-size: 1rem;
+}

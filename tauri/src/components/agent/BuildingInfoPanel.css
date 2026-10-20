@@ -1,0 +1,100 @@
+.building-info-section {
+  position: relative;
+}
+
+/*
+ * Under repair badge.
+ * Yellow and black diagonal striped border resembling construction warning tape,
+ * implemented with border-image and repeating-linear-gradient.
+ */
+.maintenance-badge {
+  background: #fbbf24;
+  color: #000;
+  padding: 4px 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 8px;
+  border: 3px solid;
+  border-image: repeating-linear-gradient(
+    45deg,
+    #fbbf24 0px,
+    #fbbf24 4px,
+    #000 4px,
+    #000 8px
+  ) 3;
+}
+
+.building-info-content {
+  display: flex;
+  gap: 0px;
+  align-items: flex-start;
+}
+
+.building-info-table {
+  flex: 3;
+  min-width: 0;
+}
+
+.building-info-meter {
+  margin-top: 4px;
+}
+
+/* === Parking capacity (daytime and nighttime bars) === */
+
+.building-parking {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.building-parking-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+}
+
+.building-parking-title,
+.building-parking-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1.11rem;
+  white-space: nowrap;
+}
+
+.building-parking-capacity {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Share columns between the two rows so bar starts align even when day/night headings differ in width by language. */
+.building-parking-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 8px;
+  padding-left: 8px;
+}
+
+.building-parking-row {
+  display: contents;
+}
+
+.building-parking-value {
+  font-size: 1rem;
+  color: #c0d0e0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.building-info-diagram {
+  flex: 2;
+  min-width: 0;
+}
+
+.building-info-diagram svg {
+  width: 100%;
+  height: auto;
+}

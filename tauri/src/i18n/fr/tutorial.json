@@ -1,0 +1,753 @@
+{
+  "tutorial": {
+    "startButton": "Commencer",
+    "controls": {
+      "title": "Commandes de base",
+      "description": "Découvrez la ville que vous visez en tant que maire et comment planifier avant de faire avancer le temps. Après avoir vu ce que signifient les informations à l’écran, ce que permet chaque bouton et comment déplacer la caméra, vous prolongerez une route pour créer un nouveau quartier résidentiel et y apporterez logements, électricité et eau.",
+      "step1": {
+        "title": "Commencez à bâtir en tant que maire",
+        "role": "Dans City Genesis, vous développez une ville en tant que maire. Vous planifiez routes et équipements, décidez de l’usage des terrains, fixez les impôts et attribuez les budgets des services publics. Votre rôle est de créer un environnement favorable aux habitants et aux entreprises. Appuyez sur « Suivant ».",
+        "goal": "Visez une ville où les habitants vivent confortablement et en sécurité. Fournissez logements, emplois, électricité, eau et soins. Développer la ville coûte aussi de l’argent. Tenez compte de la vie des habitants et des finances municipales pour choisir vos priorités.",
+        "epoch": "Le temps avance d’un mois à la fois. Préparez d’abord budgets et projets, puis appuyez sur « Démarrer ». Les travaux et les activités des habitants et des entreprises avancent ; examinez les résultats avant de planifier à nouveau. La date reste fixe jusqu’au démarrage : prenez le temps de réfléchir."
+      },
+      "step2": {
+        "title": "Comprendre la ville depuis le cockpit",
+        "tools": "Le cockpit, en bas de l’écran, vous aide à examiner la ville et à choisir vos prochaines actions. « Affichage » utilise des couleurs pour repérer les pénuries et les problèmes. « Carte » montre la position des lieux et vous aide à vous orienter lorsque la ville grandit.",
+        "tracking": "« Liste de suivi » conserve les habitants que vous souhaitez revoir. Ajoutez une personne depuis ses détails, puis utilisez ce bouton pour retrouver ses informations et ses trajets. Découvrez les vies individuelles derrière les chiffres de la ville.",
+        "bulldozer": "« Bulldozer » supprime les parcelles vides et annule les bâtiments et routes en projet. Appuyez sur le bouton, puis sur une cible dans la vue 3D ; appuyez encore pour quitter le mode. Pour retirer un bâtiment ou une route achevés, ouvrez leurs détails et choisissez la démolition.",
+        "services": "Les jauges de l’éclair et de la goutte indiquent la marge de vos capacités en électricité et en eau. Plus elles se remplissent, plus la demande approche de la capacité. Cliquez dessus pour examiner les équipements publics et vérifier s’il faut renforcer l’offre avant d’agrandir la ville.",
+        "score": "Le « Score » résume la satisfaction des habitants envers la vie dans votre ville. Plus il est élevé, mieux c’est. Logements, emplois, soins et cadre de vie agréable contribuent à l’améliorer. S’il baisse, cherchez les difficultés des habitants.",
+        "budget": "Le « Budget » indique les dépenses prévues le mois prochain par rapport aux revenus du mois dernier. Quand la jauge penche vers la droite, les dépenses dépassent les revenus ; à l’inverse, quand elle penche vers la gauche, il reste de l’argent. Vérifiez-le avant de faire avancer le temps.",
+        "budgetChanges": "Davantage de travaux, une activité accrue des équipements ou des travaux plus rapides augmentent les besoins et la jauge. Réduire l’activité ou ralentir les travaux peut diminuer les coûts prévus. Quand les recettes fiscales augmentent, la jauge baisse même si les dépenses restent les mêmes.",
+        "budgetPlanning": "Une jauge basse signifie que vous avez de l’argent disponible pour la ville. Envisagez d’investir dans les services manquants ou les équipements bientôt nécessaires.",
+        "date": "La date indique jusqu’où le temps de la ville a avancé. Elle aide à suivre les travaux et les changements de saison. Elle reste fixe pendant la planification et change lorsque vous faites avancer le temps avec « Démarrer ».",
+        "climate": "Le panneau de température, pluie, ensoleillement et vent indique le climat moyen du mois. Ces conditions influencent l’agriculture et les productions éolienne et solaire. Si les récoltes ou la production électrique sont faibles, vérifiez aussi le climat.",
+        "climateEffects": "Un faible ensoleillement réduit la production solaire ; un vent faible réduit la production éolienne. Température et pluie influencent aussi l’agriculture. Cliquez sur le panneau climatique pour voir l’effet du mois sur l’efficacité de chaque équipement. Préparez l’offre en tenant compte des saisons.",
+        "notifications": "Le nombre sur « Notifications » compte les avertissements et les points de vigilance à examiner. Un nombre rouge et un clignotement signalent une perturbation des fonctions de la ville à traiter rapidement. Les nombres jaunes signalent des points de vigilance, comme la préparation à la croissance ou des problèmes longs à améliorer. Cliquez pour les lire.",
+        "notificationActions": "Lorsqu’un avis identifie un équipement ou un quartier, cliquez sur sa ligne pour l’examiner. Agissez sur la cause : raccordez les lignes électriques manquantes ou assurez les approvisionnements en matériaux. Les avis de problèmes persistants disparaissent lorsque leur cause est résolue. Vérifiez ensuite les résultats du mois suivant."
+      },
+      "step3": {
+        "title": "Changer l’affichage pour repérer les problèmes",
+        "open": "Les pénuries d’électricité et les embouteillages sont parfois difficiles à voir dans le paysage. Utilisez « Affichage » pour faire apparaître les informations utiles sur la carte. Appuyez sur « Affichage » dans le cockpit pour ouvrir le panneau.",
+        "tabs": "Les onglets verticaux choisissent ce que vous examinez : bâtiments, routes, parcelles ou quartiers. Vous pouvez aussi masquer les éléments inutiles si les informations se chevauchent. Appuyez sur « Suivant » pour découvrir les modes d’affichage.",
+        "modes": "Les boutons de chaque onglet choisissent l’information utilisée pour colorer les objets. Repérez les routes encombrées ou les bâtiments en difficulté pour orienter vos actions. Cliquez sur un objet dans la vue 3D pour l’examiner. Gardez le panneau ouvert et appuyez sur « Suivant »."
+      },
+      "step4": {
+        "title": "Découvrir les outils de construction",
+        "grading": "Parcourons les boutons de gauche de haut en bas. « Terrassement » aplanit les pentes ou gagne du terrain sur la mer. Il offre de la place au développement lorsque logements et emplois manquent d’espace utilisable.",
+        "road": "« Routes, voies ferrées et infrastructures » crée les trajets des personnes, marchandises, de l’électricité et de l’eau. Les routes relient logements et lieux de travail, les voies ferrées relient des lieux éloignés, et les lignes électriques et canalisations relient les équipements entre eux. Ces réseaux soutiennent les déplacements, le commerce et l’approvisionnement.",
+        "land": "« Parcelles » prépare les terrains destinés aux bâtiments. Un terrain vide ne suffit pas : il faut une parcelle. Les logements supplémentaires comme les grands équipements ont besoin d’un terrain assez vaste.",
+        "landDevelopment": "Les parcelles accueillent les constructions municipales ainsi que les logements et entreprises privés. Les bâtiments privés se développent selon la demande et les règles du quartier. Pour augmenter logements ou emplois, vérifiez qu’il reste assez de parcelles libres.",
+        "district": "« Quartiers » permet de gérer des parties de la ville selon leurs priorités, comme un secteur résidentiel ou industriel. Chaque quartier peut limiter les types de bâtiments autorisés et donner une orientation adaptée au développement de toute la zone.",
+        "districtRules": "Les détails du quartier permettent de choisir les types de bâtiments autorisés. Utilisez-les selon le type de ville que vous voulez faire grandir, par exemple pour éviter les usines dans un secteur résidentiel. Comparez aussi la population et les conditions de vie entre quartiers pour décider où apporter du soutien.",
+        "construction": "« Construction » planifie les bâtiments nécessaires à la ville. Vous pouvez construire logements, lieux de travail, hôpitaux, écoles et centrales. Elle permet de développer logements et emplois ou de répondre aux besoins en soins, éducation, électricité et autres services.",
+        "transport": "« Transports publics » aide les habitants à se déplacer en bus ou en train. Vous pouvez définir lignes et arrêts et ajuster tarifs et intervalles. Relier logements, emplois et écoles allège la charge des trajets quotidiens.",
+        "propPlacement": "« Placement de décors » ajoute arbres, rochers et autres éléments du paysage. Il permet de verdir les rues ou de décorer le terrain.",
+        "constructionProjects": "« Projets de construction » rassemble les travaux prévus et en cours. Examinez l’avancement et les coûts pour décider quels travaux poursuivre.",
+        "regulation": "« Réglementations » fixe les règles de vie et de travail : vitesse, horaires de travail, immigration ou protection sociale. Ajustez-les selon vos priorités de sécurité, de temps libre et de croissance.",
+        "stat": "« Statistiques » aide à évaluer vos décisions. Les graphiques montrent population, revenus, trajets, satisfaction, taille de l’économie et prix. Après avoir changé politiques ou équipements, vérifiez si la vie s’améliore et ce qui manque encore. Voilà les boutons de gauche."
+      },
+      "step5": {
+        "title": "Exécuter les projets et examiner les résultats",
+        "flow": "Après avoir examiné la ville et préparé travaux et budgets, utilisez « Démarrer » pour faire avancer le temps. Les travaux progressent, les habitants travaillent, les entreprises produisent et finances et score évoluent. Certains projets prennent plusieurs mois pour porter leurs fruits.",
+        "execute": "Une fois le temps avancé, consultez résultats et notifications. Traitez les difficultés dans vos prochains projets, puis avancez encore. Développez la ville en répétant « planifier, avancer, vérifier ». Ici, inutile d’appuyer sur « Démarrer ». Appuyez sur « Suivant » pour apprendre les commandes de caméra."
+      },
+      "step6": {
+        "title": "Déplacer la caméra",
+        "description": "Voici comment déplacer la caméra : faites glisser avec le bouton gauche pour déplacer la vue, avec le bouton droit pour la faire pivoter, utilisez W/A/S/D (ou les flèches) pour avancer, Q/E pour pivoter, R/F pour changer la hauteur et la molette de la souris pour zoomer. Essayez librement, puis appuyez sur « Suivant »."
+      },
+      "step7": {
+        "title": "Mode vol et mode cinéma",
+        "description": "La caméra dispose de deux modes spéciaux. Le « mode vol » s'active avec Maj+F : avancez dans la direction de votre regard avec W/A/S/D, regardez autour de vous avec la souris et montez ou descendez avec R/F. Appuyez sur Échap pour en sortir. Le « mode cinéma » se lance depuis le bouton en haut à droite de l'écran et permet de tourner autour de la ville. Regardez autour de vous avec la souris ; Maj alterne entre orbite et déplacement, Espace met en pause, Retour arrière inverse et Échap quitte. Les panneaux de l'écran sont masqués pendant ces deux modes et réapparaissent quand vous appuyez sur Échap. Une fois les essais terminés, quittez les deux modes et appuyez sur « Suivant »."
+      },
+      "step8": {
+        "title": "Voir les limites de la ville",
+        "description": "Nous avons déplacé la caméra vers le bord est de la ville. La zone utilisable comme ville est ce rectangle où existe un terrain détaillé, et la caméra ne peut pas en sortir non plus. C'est tout pour l'écran et les commandes. Passons maintenant à la création d'un vrai quartier résidentiel. Appuyez sur « Suivant »."
+      },
+      "step9": {
+        "title": "Prolongeons la route",
+        "description": "Créons maintenant un quartier résidentiel pour accueillir de nouveaux habitants. Logements et lieux de travail ne servent à rien sans routes pour les relier : les gens ne peuvent pas circuler et les marchandises n’arrivent pas. Prolongez d’abord vers l’ouest la rue est-ouest de la ville pour ouvrir l’accès au nouveau quartier. Appuyez sur « Routes, voies ferrées et infrastructures » dans le panneau d’icônes pour ouvrir le panneau de construction."
+      },
+      "step10": {
+        "title": "Terminons la route",
+        "description": "La route est encore au statut « Construction planifiée ». Une route planifiée n’est pas encore utilisable : piétons et voitures ne peuvent l’emprunter qu’une fois les travaux terminés. Appuyez 2 ou 3 fois sur « Démarrer » dans le cockpit pour faire avancer le temps et attendez son achèvement. Pendant les travaux, un coût de construction est prélevé chaque mois."
+      },
+      "step11": {
+        "title": "Créons des parcelles",
+        "description": "La route est prête. Préparez maintenant des parcelles qui serviront de terrains à bâtir. Les bâtiments ne peuvent s’élever que sur des parcelles, et une parcelle qui borde une route permet aux personnes et aux marchandises d’entrer et de sortir. Appuyez sur « Parcelles » dans le panneau d’icônes.",
+        "create": "Vérifiez que « Le long de la route » est sélectionné, puis cliquez sur la route prolongée dans la vue 3D. Lorsque des contours rouges s’alignent le long de la route, validez pour créer les parcelles."
+      },
+      "step12": {
+        "title": "Créons un quartier",
+        "description": "Avant de construire, décidez de ce que doit devenir cette rue. Sans orientation, une usine pourrait s’installer juste à côté des logements. Ces orientations se décident par « Quartiers ». Les quartiers se définissent route par route, et une parcelle appartient au quartier de la route qu’elle borde. Appuyez sur « Quartiers » dans le panneau d’icônes pour ouvrir la fenêtre Modifier les quartiers : pour l’instant, toute la ville forme un seul quartier.",
+        "create": "Utilisez le mode de peinture « Côté de rue ». Passez l’outil sur « Nouveau quartier », maintenez Ctrl et faites glisser le long de la route prolongée. Les deux côtés de la route peinte, avec les parcelles qui les bordent, deviennent un nouveau quartier."
+      },
+      "step13": {
+        "title": "Le quartier est découpé",
+        "description": "Vous avez séparé la nouvelle rue du centre-ville en un quartier à part. Vous pouvez consulter la population et les prix par quartier et choisir les bâtiments autorisés, pour que chaque secteur se développe comme il lui convient. Une fois vérifié, fermez la fenêtre Modifier les quartiers."
+      },
+      "step14": {
+        "title": "Ouvrons le détail du quartier",
+        "description": "Faisons du nouveau quartier une zone résidentielle. Affichez les quartiers avec l’icône en bas à gauche de l’écran, puis cliquez sur l’étiquette du quartier que vous venez de créer pour ouvrir son détail."
+      },
+      "step15": {
+        "title": "Réservons-le à l’habitat",
+        "description": "La réglementation de construction, en bas du panneau, choisit les bâtiments autorisés sur les parcelles de ce quartier. Nous voulons ici un endroit calme où vivre : cliquez sur tous les bâtiments sauf « Logement collectif » et « Maison individuelle » pour les désactiver."
+      },
+      "step16": {
+        "title": "Vérifions une parcelle",
+        "description": "La réglementation d’un quartier s’applique à toutes ses parcelles. Cliquez sur la parcelle au repère jaune pour ouvrir son détail."
+      },
+      "step17": {
+        "title": "La réglementation est appliquée",
+        "description": "En bas du panneau de la parcelle, vous voyez la réglementation du quartier qui n’autorise que « Logement collectif » et « Maison individuelle ». Désormais, seuls des logements peuvent être construits dans cette rue. Plutôt que de régler les parcelles une à une, il suffit de fixer l’orientation du quartier pour que toute la rue la suive."
+      },
+      "step18": {
+        "title": "Construisons des logements",
+        "description": "Préparons maintenant des logements. D’ordinaire, le secteur privé en construit automatiquement quand des gens veulent s’installer, mais les logements publics construits par la ville comblent rapidement une pénurie. Construisons ici un logement collectif public. Appuyez sur « Construction » dans le panneau d’icônes.",
+        "select": "Choisissez « Immeuble résidentiel » dans la catégorie « Logement », cliquez sur n’importe quelle parcelle du nouveau quartier comme site de chantier, puis validez."
+      },
+      "step19": {
+        "title": "Terminons les logements",
+        "description": "Comme la route, un bâtiment planifié n’est pas encore habitable. Un logement collectif demande plus de six mois de travaux. Appuyez sur « Démarrer » pour faire avancer le temps et attendez son achèvement."
+      },
+      "step20": {
+        "title": "Vérifions l’électricité",
+        "description": "Un logement ne suffit pas pour vivre : il faut aussi de l’électricité et de l’eau. Cette ville n’a encore ni centrale électrique ni eau courante. Cliquez sur le logement collectif au repère jaune, où vivent les habitants, pour ouvrir son détail, choisissez l’un des occupants dans l’onglet « Bâtiment », puis ouvrez son onglet « Offre, demande et échanges » : vous verrez que la quantité obtenue d’électricité est de 0."
+      },
+      "step21": {
+        "title": "Construisons une centrale solaire",
+        "description": "Pour apporter l’électricité, il faut d’abord une centrale pour la produire. Construisez une « Centrale solaire » sur la parcelle au repère jaune. Normalement, l’achèvement prend du temps, mais comme il s’agit d’un tutoriel, la durée du chantier est ignorée."
+      },
+      "step22": {
+        "title": "Construisons une sous-station",
+        "description": "L’électricité haute tension d’une centrale ne peut pas être utilisée telle quelle dans les foyers. La sous-station la convertit en électricité domestique et la distribue aux bâtiments voisins reliés par la route. Construisez une « Sous-station électrique » sur la parcelle au repère jaune, près du logement collectif."
+      },
+      "step23": {
+        "title": "Raccordons par une ligne électrique",
+        "description": "Même si la centrale et la sous-station sont éloignées, un chemin pour l’électricité les relie. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Ligne électrique haute tension » sous « Électricité », et tracez une ligne de la borne de raccordement de la centrale solaire à celle de la sous-station. Une seule ligne droite entre les bornes suffit."
+      },
+      "step24": {
+        "title": "Vérifions l’alimentation électrique",
+        "description": "Une fois raccordées, vérifiez que l’électricité circule vraiment. Appuyez sur « Démarrer » pour faire avancer le temps, cliquez sur la sous-station pour ouvrir son détail et, dans l’onglet « Offre, demande et échanges », vérifiez que la quantité reçue d’électricité haute tension n’est pas nulle. Il peut falloir quelques mois pour que la centrale démarre et que l’électricité arrive."
+      },
+      "step25": {
+        "title": "L’électricité arrive dans les foyers",
+        "description": "Depuis le détail du logement collectif, ouvrez comme au début l’onglet « Offre, demande et échanges » d’un occupant et vérifiez que la quantité obtenue d’électricité n’est plus nulle. Il peut falloir encore un ou deux mois pour qu’elle atteigne les foyers. Produire à la centrale, transporter par la ligne, distribuer depuis la sous-station : ce n’est que lorsque les trois sont reliés que l’électricité arrive dans les foyers."
+      },
+      "step26": {
+        "title": "Cherchons une source d’eau",
+        "description": "Passons à l’eau. L’eau du robinet est de l’eau souterraine pompée puis envoyée en ville. Cherchez d’abord où l’on peut pomper de l’eau. Appuyez sur « Affichage » dans le cockpit pour ouvrir le panneau.",
+        "show": "Choisissez « Ressources naturelles » dans les onglets verticaux et passez sur « Affiché ». Les sources d’eau apparaissent en bleu clair sur la carte. Cliquez sur la source d’eau au repère jaune pour ouvrir son détail."
+      },
+      "step27": {
+        "title": "Construisons une pompe à eau souterraine",
+        "description": "Une pompe à eau souterraine puise l’eau du sous-sol : elle doit donc être construite là où se trouve une source d’eau. Elle a aussi besoin d’électricité et de main-d’œuvre pour fonctionner, c’est pourquoi nous avons d’abord amené l’électricité. Construisez une « Pompe à eau souterraine » sur la parcelle au repère jaune, au-dessus de la source d’eau. Comme il s’agit d’un tutoriel, la durée du chantier est ignorée."
+      },
+      "step28": {
+        "title": "Construisons une station de pompage",
+        "description": "L’eau pompée ne peut pas être distribuée telle quelle aux foyers. Comme la sous-station distribue l’électricité, la station de pompage distribue l’eau aux bâtiments voisins reliés par la route. Construisez une « Station de pompage d'eau » sur la parcelle au repère jaune, près du logement collectif."
+      },
+      "step29": {
+        "title": "Raccordons par une conduite",
+        "description": "Il faut une conduite pour amener l’eau de la pompe souterraine à la station de pompage. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Conduite d'eau principale » sous « Eau », et posez-la de la borne de raccordement de la pompe à celle de la station de pompage."
+      },
+      "step30": {
+        "title": "Vérifions l’alimentation en eau",
+        "description": "Appuyez sur « Démarrer » pour faire avancer le temps, cliquez sur la station de pompage pour ouvrir son détail et, dans l’onglet « Offre, demande et échanges », vérifiez que la quantité reçue d’eau sous haute pression n’est pas nulle. Il peut falloir quelques mois pour que la pompe souterraine trouve des travailleurs et que l’eau arrive."
+      },
+      "step31": {
+        "title": "Les bases sont en place",
+        "description": "L’eau est arrivée à la station de pompage : les foyers alentour peuvent désormais utiliser l’eau courante. Tracer des routes, préparer des parcelles, fixer l’orientation de chaque quartier, construire des logements, puis apporter l’électricité et l’eau : voilà le déroulement de base de l’aménagement d’une ville. Appuyez sur « Suivant » pour terminer le tutoriel des commandes de base."
+      }
+    },
+    "scenario4": {
+      "title": "Construisons un chemin de fer",
+      "description": "Nous voulons relier la zone résidentielle et les lieux de travail par un chemin de fer, mais des bâtiments privés et un hôpital public occupent le tracé prévu. Ce tutoriel enseigne acquisition foncière et démolition d’équipements publics, voies au-dessus des routes, quais, gares, dépôt, réglage des courbes et pentes, alimentation et ouverture du service.",
+      "step1": {
+        "title": "Poser les quais surélevés",
+        "description": "Ouvrez Routes, voies ferrées et infrastructures → Chemin de fer. Construisez les quais latéraux surélevés à haut standard à l’ouest de la ville et les quais latéraux à double voie à l’est de la ville. Cliquez à gauche sur les deux extrémités marquées à 6m, terminez la forme avec un clic droit puis confirmez.",
+        "open": "Ouvrez Routes, voies ferrées et infrastructures → Chemin de fer. Construisez les quais latéraux surélevés à haut standard à l’ouest de la ville et les quais latéraux à double voie à l’est de la ville. Cliquez à gauche sur les deux extrémités marquées à 6m, terminez la forme avec un clic droit puis confirmez.",
+        "variant": "Ouvrez Routes, voies ferrées et infrastructures → Chemin de fer. Construisez les quais latéraux surélevés à haut standard à l’ouest de la ville et les quais latéraux à double voie à l’est de la ville. Cliquez à gauche sur les deux extrémités marquées à 6m, terminez la forme avec un clic droit puis confirmez.",
+        "start": "Ouvrez Routes, voies ferrées et infrastructures → Chemin de fer. Construisez les quais latéraux surélevés à haut standard à l’ouest de la ville et les quais latéraux à double voie à l’est de la ville. Cliquez à gauche sur les deux extrémités marquées à 6m, terminez la forme avec un clic droit puis confirmez.",
+        "end": "Ouvrez Routes, voies ferrées et infrastructures → Chemin de fer. Construisez les quais latéraux surélevés à haut standard à l’ouest de la ville et les quais latéraux à double voie à l’est de la ville. Cliquez à gauche sur les deux extrémités marquées à 6m, terminez la forme avec un clic droit puis confirmez.",
+        "confirm": "Ouvrez Routes, voies ferrées et infrastructures → Chemin de fer. Construisez les quais latéraux surélevés à haut standard à l’ouest de la ville et les quais latéraux à double voie à l’est de la ville. Cliquez à gauche sur les deux extrémités marquées à 6m, terminez la forme avec un clic droit puis confirmez.",
+        "town": "Construisez les quais latéraux surélevés à haut standard à l’ouest, à 6m. Cliquez à gauche sur les extrémités marquées, terminez avec un clic droit puis confirmez.",
+        "new": "Construisez les quais latéraux à double voie à l’est. Cliquez sur Retour pour revenir aux cartes et sélectionnez ce type dans Chemin de fer. Placez les extrémités à 6m d’un clic gauche, terminez avec un clic droit puis confirmez. Si le panneau est fermé, rouvrez Routes, voies ferrées et infrastructures.",
+        "east": "Construisez les quais latéraux à double voie à l’est. Cliquez sur Retour pour revenir aux cartes et sélectionnez ce type dans Chemin de fer. Placez les extrémités à 6m d’un clic gauche, terminez avec un clic droit puis confirmez. Si le panneau est fermé, rouvrez Routes, voies ferrées et infrastructures."
+      },
+      "step2": {
+        "title": "Construire les accès des gares",
+        "description": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "open": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "variant": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "start": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "end": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "confirm": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "town": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "new": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages.",
+        "east": "Choisissez le bâtiment de gare simple. Reliez chaque paire de repères par un court passage traversant le quai. Placez les entrées juste de part et d’autre du quai. Cliquez à gauche sur les extrémités, terminez avec un clic droit puis confirmez les deux passages."
+      },
+      "step3": {
+        "title": "Planifier la section à acquérir",
+        "description": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée.",
+        "open": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée.",
+        "variant": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée.",
+        "start": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée.",
+        "end": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée.",
+        "confirm": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée.",
+        "town": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée.",
+        "new": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée.",
+        "east": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée."
+      },
+      "step4": {
+        "title": "Observer acquisition et blocage",
+        "description": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
+        "open": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
+        "variant": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
+        "start": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
+        "end": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
+        "confirm": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
+        "town": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
+        "new": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
+        "east": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là."
+      },
+      "step5": {
+        "title": "Ordonner la démolition de l’hôpital",
+        "description": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
+        "open": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
+        "variant": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
+        "start": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
+        "end": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
+        "confirm": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
+        "town": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
+        "new": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
+        "east": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée."
+      },
+      "step6": {
+        "title": "Attendre la fin de cette section",
+        "description": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
+        "open": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
+        "variant": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
+        "start": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
+        "end": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
+        "confirm": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
+        "town": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
+        "new": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
+        "east": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires."
+      },
+      "step7": {
+        "title": "Poser la voie au-dessus de la route",
+        "description": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
+        "open": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
+        "variant": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
+        "start": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
+        "end": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
+        "confirm": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
+        "town": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
+        "new": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
+        "east": "Enfin, posez une voie ferrée double à 6 m, de l’extrémité est de la grande route à l’extrémité ouest du quai est. Une fois les deux quais reliés, Suivant termine les travaux."
+      },
+      "step8": {
+        "title": "Construire le dépôt ferroviaire",
+        "description": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
+        "open": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
+        "variant": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
+        "start": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
+        "end": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
+        "confirm": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
+        "town": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
+        "new": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
+        "east": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction."
+      },
+      "step9": {
+        "title": "Régler courbe et pente",
+        "description": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
+        "open": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
+        "variant": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
+        "start": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
+        "end": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
+        "confirm": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
+        "town": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
+        "new": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
+        "east": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées."
+      },
+      "step10": {
+        "title": "Alimenter le dépôt",
+        "description": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
+        "open": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
+        "variant": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
+        "start": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
+        "end": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
+        "confirm": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
+        "town": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
+        "new": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
+        "east": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez."
+      },
+      "step11": {
+        "title": "Ouvrir la ligne ferroviaire",
+        "description": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "open": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "variant": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "start": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "end": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "confirm": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "town": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "new": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "east": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez."
+      },
+      "step12": {
+        "title": "Vérifier les véhicules et le service",
+        "description": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
+        "open": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
+        "variant": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
+        "start": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
+        "end": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
+        "confirm": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
+        "town": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
+        "new": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
+        "east": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs."
+      },
+      "step13": {
+        "title": "Revoir la construction",
+        "description": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
+        "open": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
+        "variant": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
+        "start": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
+        "end": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
+        "confirm": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
+        "town": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
+        "new": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
+        "east": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets."
+      }
+    },
+    "complete": {
+      "title": "Tutoriel terminé",
+      "description": "Félicitations ! Le tutoriel est terminé. Appuyez sur « Terminer » pour fermer le guide et continuer à jouer librement dans cette ville.",
+      "button": "Terminer"
+    },
+    "nextButton": "Suivant",
+    "checking": "Vérification...",
+    "failed": "Les conditions ne sont pas remplies. Réessayez.",
+    "completed": "Tutoriel terminé ! Beau travail.",
+    "stepProgress": "Étape {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Ouvrez le panneau de construction avec l’icône de route.",
+      "selectRoad": "Sélectionnez la rue à deux voies au niveau du sol. Seule la variante demandée est disponible.",
+      "placeStart": "Faites un clic gauche dans le cercle cyan pour placer le début de la route.",
+      "placeEnd": "Faites un clic gauche dans le cercle jaune pour placer la fin de la route.",
+      "finalizeRoad": "Faites un clic droit dans la vue 3D pour terminer le tracé de la route.",
+      "confirmRoad": "Confirmez dans le panneau de construction pour enregistrer la route, puis appuyez sur « Suivant ».",
+      "failed": "Échec de la préparation ou de la communication. Réessayez ; si le problème persiste, quittez et lancez le tutoriel dans une nouvelle ville.",
+      "retry": "Réessayer",
+      "placementRequired": "Utilisez la variante et les positions indiquées.",
+      "preparing": "Préparation de la ville du tutoriel.",
+      "finishFailed": "Impossible de terminer le tutoriel. Veuillez réessayer."
+    },
+    "trade": {
+      "title": "Développer le commerce international",
+      "description": "Une usine locale cherche des clients à l'étranger. Ce tutoriel vous permettra d'apprendre à exporter des aliments par un port et à importer des marchandises par un chemin de fer de fret relié au pays voisin.",
+      "step1": {
+        "description": "Un terminal d'exportation est nécessaire pour expédier à l'étranger les aliments produits sur cette île. Construisez un « Terminal à conteneurs » sur la parcelle côtière au repère jaune. Comme il s'agit d'un tutoriel, la durée du chantier est ignorée.",
+        "title": "Construire un port à conteneurs"
+      },
+      "step2": {
+        "description": "La production de l'usine et le transport mettent quelques mois à démarrer : faites avancer le temps et observez les exportations du port. Fermez une fois le détail du Terminal à conteneurs puis rouvrez-le : l'onglet Manutention affiche ses importations et exportations.",
+        "title": "Vérifier les exportations alimentaires"
+      },
+      "step3": {
+        "description": "Vous disposez maintenant d'un lieu pour importer et exporter par bateau. Créons maintenant un lieu pour importer et exporter des marchandises par chemin de fer. Construisez une « Gare de fret internationale » sur la parcelle au repère jaune le long de la route. À la frontière est se trouvent une voie ferrée qui mène au pays voisin et une gare de fret frontalière.",
+        "title": "Construire une gare de fret internationale"
+      },
+      "step4": {
+        "open": "Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Quai de fret pour conteneurs » dans « Chemin de fer ».",
+        "place": "Posez un quai au nord de la gare de fret internationale, parallèlement à celle-ci. Faites un clic gauche dans le cercle cyan (ouest) pour placer le début, puis dans le cercle jaune (est) pour placer la fin, et faites un clic droit dans la vue 3D pour terminer le tracé. Réglez le « Côté du quai » sur « Intérieur » et vérifiez que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Une fois la pose terminée, appuyez sur « Suivant ».",
+        "title": "Construire un quai à côté de la gare"
+      },
+      "step5": {
+        "description": "Appuyez sur « Retour » pour revenir à la liste, choisissez « Voie de chemin de fer » et posez la voie depuis l'extrémité est du quai jusqu'à l'extrémité ouest de la voie qui arrive de la gare de fret frontalière, située hors de la ville.",
+        "title": "Poser la voie jusqu'à la frontière"
+      },
+      "step6": {
+        "title": "Construire le dépôt",
+        "description": "Construisez un « Dépôt ferroviaire » sur la parcelle au repère jaune le long de la voie. En appuyant sur « Suivant », comme il s'agit d'un tutoriel, la durée du chantier est ignorée et le dépôt est terminé."
+      },
+      "step7": {
+        "title": "Relier le dépôt à la ligne principale",
+        "description": "Posez une voie de desserte depuis la borne de raccordement située à l'extrémité est du dépôt jusqu'à la ligne principale. Raccordez-la à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est. Une fois la pose terminée, appuyez sur « Suivant »."
+      },
+      "step8": {
+        "description": "Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire située à l'est de la ville à celle du dépôt.",
+        "title": "Alimenter le dépôt en électricité"
+      },
+      "step9": {
+        "description": "Dans « Transports publics », appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de fret internationale » comme type de ligne. Placez des arrêts sur les quais de la gare de fret internationale et de la gare de fret frontalière, puis mettez la ligne en service. Les trains ne pouvant pas se croiser sur une voie unique, réglez l'intervalle cible sur 45 minutes pour qu'un seul train fasse l'aller-retour.",
+        "title": "Mettre en service la ligne de fret internationale"
+      },
+      "step10": {
+        "description": "Faites avancer le temps et vérifiez que les trains de fret commencent à circuler sur la ligne de fret internationale. Il faut quelques mois au dépôt pour embaucher du personnel, acheter les matériaux et préparer les véhicules.",
+        "title": "Faire circuler les trains de fret"
+      }
+    },
+    "highway": {
+      "title": "Construire une autoroute",
+      "description": "La ville aura besoin d'un autre itinéraire pour ses véhicules en grandissant. Ce tutoriel vous permettra d'apprendre à faire passer une autoroute au-dessus d'une route locale et à les relier par des bretelles pour créer un échangeur.",
+      "step1": {
+        "title": "Croiser la rue en viaduc",
+        "open": "Franchissez la rue centrale avec une autoroute surélevée. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes et choisissez l’autoroute à deux voies dans « Autoroutes ».",
+        "start": "Faites un clic gauche dans le cercle cyan pour placer le début de l’autoroute. Il s’aimante sur un viaduc à 7 m de hauteur.",
+        "end": "Faites un clic gauche dans le cercle jaune pour placer la fin. Elle s’aimante à la même hauteur de 7 m, de l’autre côté de la rue.",
+        "confirm": "Confirmez dans le panneau de construction pour enregistrer l’autoroute, puis appuyez sur « Suivant ». Comme il s’agit d’un tutoriel, le délai de construction est sauté et l’autoroute est terminée aussitôt."
+      },
+      "step2": {
+        "title": "Nommer l’autoroute",
+        "description": "Vous pouvez gérer les routes en leur donnant un nom. Tout en haut de la fenêtre de détail de l’autoroute que vous avez construite, la route à laquelle elle appartient est actuellement « Aucune (hors route nommée) » ; donnez-lui donc un nom de votre choix."
+      },
+      "step3": {
+        "title": "Construire une bretelle",
+        "description": "Construisez une bretelle de raccordement à la rue. Choisissez « Bretelle d'autoroute » comme type de route, puis reliez à l'autoroute une bretelle en courbe douce à partir de la position du repère jaune à l'écran."
+      },
+      "step4": {
+        "title": "Inspecter l’échangeur",
+        "description": "En cliquant sur « IC1 » affiché autour de la bretelle, vous pouvez ouvrir le panneau de détail de l’échangeur. Vérifiez que la rue et l’autoroute sont bien raccordées."
+      }
+    },
+    "mining": {
+      "title": "Extraire des ressources",
+      "description": "L'île possède des ressources précieuses, mais aucun moyen de les acheminer. Ce tutoriel vous permettra d'apprendre à aménager une mine, un chemin de fer de fret et un port pour extraire, transporter et exporter du minerai.",
+      "step1": {
+        "description": "Activez les ressources naturelles et ouvrez le panneau de détail du gisement au sud-est.",
+        "title": "Inspecter le filon"
+      },
+      "step2": {
+        "description": "Construisez une mine sur la parcelle jaune du gisement au sud-est. Comme il s’agit d’un tutoriel, la durée du chantier est ignorée.",
+        "title": "Construire une mine"
+      },
+      "step3": {
+        "description": "Construisez une gare de chargement du minerai sur la grande parcelle existante au sud-est de la mine. La gare de chargement du minerai permet de charger dans les trains le minerai extrait de la mine.",
+        "title": "Construire la gare de chargement à côté de la mine"
+      },
+      "step4": {
+        "description": "Construisez une gare de déchargement du minerai sur la grande parcelle existante au sud du port. La gare de déchargement du minerai permet d’évacuer le minerai acheminé par train.",
+        "title": "Construire la gare de déchargement près du port"
+      },
+      "step5": {
+        "description": "Construisez un port de vrac sur la parcelle côtière jaune.",
+        "title": "Construire un port de vrac"
+      },
+      "step6": {
+        "open": "Choisissez un quai de fret minéral et reliez chaque paire de repères, au sud-ouest du chargement et au sud du déchargement. Orientez le quai vers son installation.",
+        "loading": "Choisissez un quai de fret minéral et reliez chaque paire de repères, au sud-ouest du chargement et au sud du déchargement. Orientez le quai vers son installation.",
+        "unloading": "Choisissez un quai de fret minéral et reliez chaque paire de repères, au sud-ouest du chargement et au sud du déchargement. Orientez le quai vers son installation.",
+        "title": "Construire des quais à côté des gares"
+      },
+      "step7": {
+        "town": "Posez la voie ferrée de fret depuis l’extrémité est du quai du port, en passant au sud du point médian de la route, jusqu’à l’extrémité nord-ouest du quai de montagne. La voie n’est pas encore reliée, posez-la donc vous-même. Utilisez des courbes pour aligner le sens de circulation, réglez le suivi du terrain sur « Ne pas suivre » pour la montée et ajustez la pente et le rayon jusqu’à supprimer les violations rouges. Ajoutez des points intermédiaires pour que chaque tronçon fasse 500m au plus.",
+        "climb": "Posez la voie ferrée de fret depuis l’extrémité est du quai du port, en passant au sud du point médian de la route, jusqu’à l’extrémité nord-ouest du quai de montagne. La voie n’est pas encore reliée, posez-la donc vous-même. Utilisez des courbes pour aligner le sens de circulation, réglez le suivi du terrain sur « Ne pas suivre » pour la montée et ajustez la pente et le rayon jusqu’à supprimer les violations rouges. Ajoutez des points intermédiaires pour que chaque tronçon fasse 500m au plus.",
+        "title": "Relier les deux gares par le rail"
+      },
+      "step8": {
+        "title": "Construire le dépôt",
+        "description": "Construisez le dépôt ferroviaire sur la parcelle existante au sud-ouest du port. Orientez-le de sorte qu’une voie puisse relier son terminal, à l’extrémité est, au quai du port."
+      },
+      "step9": {
+        "title": "Relier le dépôt à la ligne principale",
+        "description": "Reliez par une branche le terminal est du dépôt, au sol, à l’extrémité ouest du quai du port. Raccordez-la en douceur, sous un angle faible."
+      },
+      "step10": {
+        "description": "Reliez la centrale solaire existante au terminal commun à l’est du dépôt par une ligne électrique.",
+        "title": "Alimenter le dépôt en électricité"
+      },
+      "step11": {
+        "description": "Créez une ligne de transport de minerai, posez des arrêts sur les deux quais puis cliquez sur le premier pour fermer le retour. Les trains ne pouvant pas se croiser sur une voie unique, réglez l'intervalle cible sur 45 minutes pour qu'un seul train fasse l'aller-retour, puis confirmez.",
+        "title": "Mettre en service la ligne de transport de minerai"
+      },
+      "step12": {
+        "description": "Faites avancer le temps pour lancer l'extraction, le chargement, le transport ferroviaire, le déchargement et l'exportation. L'acquisition des véhicules et la montée en puissance du transport prennent quelques mois.",
+        "title": "Faire avancer le temps"
+      },
+      "step13": {
+        "description": "Faites avancer le temps et consultez, dans le détail du port de vrac côtier, les réceptions et exportations de minerai. Véhicules, extraction et transport prennent plusieurs mois.",
+        "title": "Vérifier les exportations de minerai"
+      }
+    },
+    "tourism": {
+      "title": "Développer le tourisme",
+      "description": "L’île a besoin d’un port, d’hébergements et d’une ligne de bus pour accueillir les visiteurs de ses ruines. Apprenez à construire un hôtel et un terminal de passagers, à créer une ligne de bus et à vérifier les arrivées de touristes, les ventes des restaurants et l’utilisation du bus.",
+      "step1": {
+        "description": "Construisez un Hôtel touristique sur la parcelle marquée en jaune à l’ouest des ruines antiques. Comme il s’agit d’un tutoriel, la durée du chantier est ignorée.",
+        "title": "Construire un hôtel près des ruines"
+      },
+      "step2": {
+        "description": "Il faut un port pour accueillir les touristes. Construisez un Terminal de passagers sur la parcelle indiquée du port.",
+        "title": "Construire un terminal de passagers"
+      },
+      "step3": {
+        "description": "Les touristes n’ont pas de voiture personnelle : il faut donc mettre en place des transports publics. Ouvrez Transports publics → Nouvelle ligne et choisissez Ligne de bus. Placez les arrêts sur la route aux repères jaunes : port → logements → ruines → logements. Fixez le tarif à 0 et l’intervalle cible à 1 minute, puis confirmez.",
+        "title": "Créer une ligne de bus du port aux ruines"
+      },
+      "step4": {
+        "description": "Faites avancer le temps pour accueillir les touristes. Les installations et l’approvisionnement en bus mettent quelques mois à démarrer.",
+        "title": "Faire avancer le temps"
+      },
+      "step5": {
+        "description": "Consultez les ventes du restaurant près des ruines et les voyageurs de la ligne créée. L’étape est accomplie lorsque des touristes sont arrivés, que les ventes dépassent leur niveau initial et que le bus transporte des voyageurs. Faites encore avancer le temps si nécessaire.",
+        "title": "Vérifier les ventes et les voyageurs"
+      }
+    },
+    "intro": {
+      "controls": "Nouveau maire, nous vous confions une ville où les habitants vivent bien et en sécurité. Cette ville n’a encore ni logements pour accueillir de nouveaux habitants, ni électricité, ni eau courante. Ce tutoriel vous apprend votre rôle de maire, comment faire avancer le temps, lire l’état de la ville et utiliser les boutons et la caméra, puis vous guide pour préparer routes et parcelles, fixer l’orientation d’un quartier, construire des logements et apporter l’électricité et l’eau.",
+      "scenario4": "Nous voulons relier la zone résidentielle et les lieux de travail par un chemin de fer, mais des bâtiments privés et un hôpital public occupent le tracé prévu. Ce tutoriel enseigne acquisition foncière et démolition d’équipements publics, voies au-dessus des routes, quais, gares, dépôt, réglage des courbes et pentes, alimentation et ouverture du service.",
+      "trade": "Une usine alimentaire locale souhaite vendre ses produits à l'étranger. La ville voudrait aussi disposer d'un moyen de faire venir les biens dont elle a besoin. Ce tutoriel vous permettra d'apprendre à exporter des aliments par un port et à importer des marchandises par une voie ferrée reliée au pays voisin.",
+      "highway": "Avec le développement de la ville, davantage de véhicules transporteront personnes et marchandises. Il faut prévoir un autre itinéraire pour que le trafic de transit ne se concentre pas sur la route locale. Ce tutoriel vous permettra d'apprendre à faire passer une autoroute au-dessus d'une route locale et à les relier par des bretelles pour créer un échangeur.",
+      "mining": "Des ressources précieuses dorment sous cette île, mais aucun moyen de transport ne relie la montagne au port. Sans ce lien, l'île ne peut pas en faire une industrie. Ce tutoriel vous permettra d'apprendre à aménager une mine, un chemin de fer de fret et un port pour extraire, transporter et exporter du minerai.",
+      "tourism": "Les habitants souhaitent faire découvrir leurs ruines antiques situées à l’intérieur des terres. Mais il manque un port de passagers, des hébergements et une ligne de bus vers le village. Ce tutoriel vous apprend à construire un hôtel et un terminal, créer une ligne de bus et vérifier les arrivées de touristes, les ventes du restaurant et l’utilisation du bus.",
+      "heading": "Une demande au maire",
+      "reclamation": "Ce minuscule récif manque de terrain plat pour un hôtel de ville et de terre pour une centrale électrique. Dans ce tutoriel, vous apprendrez à remblayer la côte, à placer un hôtel de ville et à acheminer l’électricité d’un parc éolien en mer jusqu’à une sous-station par un câble sous-marin.",
+      "acquisition": "Des logements, des bureaux et une caserne de pompiers se trouvent entre deux quais surélevés. Dans ce tutoriel, vous apprendrez à planifier les voies, acquérir les terrains privés, démolir un équipement public et terminer la liaison."
+    },
+    "reclamation": {
+      "title": "Gagner du terrain sur la mer",
+      "description": "Ce minuscule récif manque de terrain plat pour un hôtel de ville et de terre pour une centrale électrique. Dans ce tutoriel, vous apprendrez à remblayer la côte, à placer un hôtel de ville et à acheminer l’électricité d’un parc éolien en mer jusqu’à une sous-station par un câble sous-marin.",
+      "step1": {
+        "title": "Planifier le remblaiement",
+        "description": "Ouvrez l’outil de terrassement. Cliquez avec le bouton gauche sur les quatre repères jaunes dans l’ordre pour dessiner un rectangle du rivage vers la mer. Fermez-le avec un clic droit, vérifiez que le devis concerne un remblaiement et confirmez le projet."
+      },
+      "step2": {
+        "title": "Terminer le terrain gagné sur la mer",
+        "description": "Avancez d’au moins un mois avec Démarrer, puis appuyez sur Suivant. Ce tutoriel n’a pas de fournisseurs de construction : Suivant achève les travaux de remblaiement restants. La mer devient un terrain constructible."
+      },
+      "step3": {
+        "title": "Créer une parcelle sur le nouveau terrain",
+        "description": "Ouvrez l’outil de parcelles et choisissez Parcelle unique. Réglez Profondeur et Longueur à 60 m, cliquez au centre des quatre repères et confirmez. Gardez la parcelle à l’intérieur du remblai, à l’écart du quai, avec assez de place pour l’hôtel de ville."
+      },
+      "step4": {
+        "title": "Placer l’hôtel de ville",
+        "description": "Ouvrez l’outil de bâtiments et choisissez l’hôtel de ville dans Services publics. Placez-le au centre de votre nouvelle parcelle. La ville est alors fondée."
+      },
+      "step5": {
+        "title": "Tracez une route devant l’hôtel de ville",
+        "description": "La ville est fondée ; préparons maintenant l’électricité. Une sous-station alimente les bâtiments qui lui sont reliés par la route : tracez d’abord une route devant l’hôtel de ville pour pouvoir construire une sous-station le long de celle-ci. Cette leçon n’a pas de fournisseur de travaux, la route est donc achevée dès que vous la validez. Appuyez sur « Routes, voies ferrées et infrastructures » dans le panneau d’icônes pour ouvrir le panneau de construction."
+      },
+      "step6": {
+        "title": "Créez une parcelle pour la sous-station",
+        "description": "Préparez un terrain pour la sous-station le long de la route. Ouvrez l’outil de parcelles et choisissez Parcelle unique. Réglez Profondeur et Longueur à 25 m, cliquez au centre des quatre repères et confirmez."
+      },
+      "step7": {
+        "title": "Construisez la sous-station",
+        "description": "Une sous-station convertit l’électricité haute tension reçue en électricité utilisable par les bâtiments et la distribue à ceux qui lui sont reliés par la route. Ouvrez l’outil de bâtiments, choisissez « Sous-station électrique » dans la catégorie « Centrales électriques » et construisez-la sur votre nouvelle parcelle. Cette leçon ignore la durée du chantier."
+      },
+      "step8": {
+        "title": "Créez une parcelle en mer",
+        "description": "Cette île n’a pas de terre pour une centrale, mais des vents forts soufflent sur la mer alentour. En mer, le vent est plus fort et plus régulier que sur terre : un parc éolien en mer peut produire beaucoup d’électricité. Ouvrez l’outil de parcelles, choisissez Parcelle unique, réglez Profondeur et Longueur à 70 m, cliquez au centre des quatre repères en mer et confirmez."
+      },
+      "step9": {
+        "title": "Construisez le parc éolien en mer",
+        "description": "Sur une parcelle en mer, seuls des équipements conçus pour la mer peuvent être construits. Ouvrez l’outil de bâtiments, choisissez « Parc éolien en mer » dans la catégorie « Centrales électriques » et construisez-le sur la parcelle en mer. Cette leçon ignore la durée du chantier."
+      },
+      "step10": {
+        "title": "Raccordez par un câble sous-marin",
+        "description": "Enfin, acheminez l’électricité du parc éolien jusqu’à la sous-station à terre. Les lignes électriques ordinaires ne peuvent pas être tendues au-dessus de la mer : utilisez un câble posé sur le fond marin. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Câble électrique sous-marin » sous « Électricité » et tracez-le de la borne de raccordement du parc éolien à celle de la sous-station. Une fois le raccordement fait, le tutoriel est terminé."
+      }
+    },
+    "acquisition": {
+      "title": "Acquisition foncière et construction du métro",
+      "description": "Des logements, des bureaux et une caserne de pompiers se trouvent entre deux quais surélevés. Dans ce tutoriel, vous apprendrez à planifier les voies, acquérir les terrains privés, démolir un équipement public et terminer la liaison.",
+      "step1": {
+        "title": "Relier les quais par des voies",
+        "open": "Ouvrez l’outil de routes et de voies. Reliez les deux quais existants par des voies surélevées à 7 m du sol.",
+        "start": "Choisissez la double voie et cliquez avec le bouton gauche sur l’extrémité intérieure du quai ouest, au repère cyan. Le départ s’accroche à l’extrémité existante à 7 m de hauteur.",
+        "end": "Cliquez avec le bouton gauche sur l’extrémité intérieure du quai est, au repère jaune. Vous pouvez planifier les voies même si elles traversent des logements et des bureaux.",
+        "confirm": "Vérifiez le devis et appuyez sur Valider. Ce tutoriel porte sur la construction des voies et ne demande pas de créer un service de trains.",
+        "variant": "Dans la catégorie ferroviaire, choisissez la carte de double voie mise en évidence."
+      },
+      "step2": {
+        "title": "Observer l’acquisition et le blocage",
+        "description": "Faites avancer le temps avec Démarrer. Les négociations d’acquisition commencent pour les parcelles privées sur le tracé. La caserne au repère jaune est un équipement public : elle n’est pas acquise automatiquement et les voies restent à l’état de projet. Consultez les détails des parcelles et bâtiments."
+      },
+      "step3": {
+        "title": "Ordonner la démolition de la caserne",
+        "description": "Cliquez sur la caserne au repère jaune pour ouvrir ses détails, puis appuyez sur Démolir pour ordonner sa démolition. Les équipements publics exigent votre ordre explicite. Laissez l’acquisition foncière traiter les autres logements et bureaux."
+      },
+      "step4": {
+        "title": "Attendre l’acquisition et l’achèvement",
+        "description": "Continuez à faire avancer le temps avec Démarrer. La construction des voies progresse après l’acquisition des terrains privés et les démolitions. Le tutoriel se termine lorsque les deux quais sont reliés par des voies achevées."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Commencer la partie",
+    "nowLoading": "Now Loading...",
+    "startError": "Impossible de démarrer. Veuillez réessayer.",
+    "todaysTips": "Astuce du jour",
+    "gotIt": "Fermer",
+    "items": {
+      "tip1": {
+        "title": "L'argent circule",
+        "description": "La dépense des uns est toujours le revenu des autres. Dépensez les recettes fiscales sans hésiter et faites tourner l'économie de la ville."
+      },
+      "tip2": {
+        "title": "Le long combat pour la sécurité",
+        "description": "Un habitant élevé dans un mauvais environnement conserve souvent une conduite problématique à l'âge adulte. Améliorer la sécurité demande l'effort de plusieurs générations."
+      },
+      "tip3": {
+        "title": "Laissez passer",
+        "description": "Si les véhicules de secours arrivent en retard, les dégâts s'aggravent. Veillez à ce que les routes qu'ils empruntent souvent ne soient pas embouteillées."
+      },
+      "tip5": {
+        "title": "Un chemin escarpé",
+        "description": "Faire passer routes et réseaux sur des pentes raides coûte cher. Choisissez des tracés aussi plats que possible."
+      },
+      "tip6": {
+        "title": "Prévoyez avant d'utiliser",
+        "description": "L'aménagement de l'électricité et de l'eau prend du temps. Anticipez la croissance et développez les réseaux avec méthode."
+      },
+      "tip7": {
+        "title": "Qui va lentement va sûrement",
+        "description": "Relever les limitations de vitesse augmente les accidents. Privilégiez de belles courbes et des limitations raisonnables."
+      },
+      "tip8": {
+        "title": "Investir dans l'avenir",
+        "description": "L'industrie de pointe a besoin de personnel formé dans l'enseignement supérieur. Prenez le temps de former les talents."
+      },
+      "tip9": {
+        "title": "Faites durer",
+        "description": "Les incendies et l'effondrement des infrastructures dégradent fortement le moral des habitants. Prévoyez un budget d'entretien et d'incendie confortable pour prévenir les drames évitables."
+      },
+      "tip10": {
+        "title": "Grand incendie",
+        "description": "Les zones où les bâtiments sont serrés résistent mal au feu. Bâtissez la ville en gardant une marge d'espace raisonnable."
+      },
+      "tip11": {
+        "title": "Creusez sans relâche",
+        "description": "Repérez l'emplacement des ressources du sous-sol et implantez-y l'activité minière. Pensez aussi à la stratégie de sortie une fois le gisement épuisé."
+      },
+      "tip12": {
+        "title": "L'arbre à billets",
+        "description": "Le maire peut lui aussi construire logements et commerces. Installez des équipements municipaux sur les meilleurs emplacements et faites fortune."
+      },
+      "tip13": {
+        "title": "Pressez le citron",
+        "description": "Réglez la fiscalité dans le détail. L'impôt ne finance pas seulement la gestion de la ville : il sert aussi à orienter quels secteurs se développent."
+      },
+      "tip14": {
+        "title": "Sauvegarde",
+        "description": "Si un accident ou une catastrophe arrête une installation d'infrastructure, l'économie urbaine en souffre lourdement. Doublez les installations critiques pour disposer d'une solution de secours."
+      },
+      "tip15": {
+        "title": "Pas de laisser-faire",
+        "description": "Si les parcelles ne suffisent pas à la demande, routes et parcelles apparaissent de façon désordonnée. Aménagez la ville avec méthode pour éviter la formation de bidonvilles."
+      },
+      "tip16": {
+        "title": "Pôles industriels",
+        "description": "La productivité augmente lorsque des industries similaires ou des producteurs de matières premières sont proches. Créez des zones industrielles et des pôles technologiques pour regrouper les entreprises."
+      },
+      "tip17": {
+        "title": "Travailler 24 heures sur 24 ?",
+        "description": "Allonger le temps de travail dans le panneau Réglementations augmente la productivité, mais la santé des citoyens et leurs dépenses de loisirs diminuent. Si vous augmentez trop le temps passé à gagner de l'argent, il ne reste plus de temps pour le dépenser."
+      },
+      "tip18": {
+        "title": "Métro, boulot, dodo",
+        "description": "Quand les trajets domicile-travail sont longs, le temps libre diminue et la consommation chute. Même le quartier animé que vous avez mis tant de peine à bâtir n'est qu'un paysage derrière la vitre pour des citoyens qui rentrent juste dormir."
+      },
+      "tip19": {
+        "title": "Voir loin",
+        "description": "Impossible de faire circuler des trains plus longs que les quais. Construisez votre réseau ferroviaire en prévoyant de la marge."
+      },
+      "tip20": {
+        "title": "Cachez ce problème",
+        "description": "Les routes souterraines ne produisent ni bruit ni pollution atmosphérique. Certains problèmes se règlent bel et bien en les enterrant."
+      },
+      "tip21": {
+        "title": "À l’ombre du progrès",
+        "description": "Les grands immeubles font de l’ombre à leurs voisins et dégradent le cadre de vie. L’avenir de votre ville peut être radieux, même si ses rues restent dans le noir."
+      },
+      "tip22": {
+        "title": "Un abonnement plutôt qu’une voiture",
+        "description": "Avec des transports en commun pratiques, même les habitants aisés renoncent à la voiture et peuvent dépenser leur argent ailleurs."
+      },
+      "tip23": {
+        "title": "Transport de courants d’air",
+        "description": "Même vides, les bus occupent la chaussée. Évitez que les mesures censées résorber les bouchons n'en créent davantage."
+      },
+      "tip24": {
+        "title": "Les taupes ne paient pas de loyer",
+        "description": "Au-delà d’une certaine profondeur, les tunnels ne nécessitent aucun achat de terrain. Si les négociations s’enlisent, creusez plus profond."
+      },
+      "tip25": {
+        "title": "Aller au travail par les airs",
+        "description": "Les téléphériques permettent de se déplacer même sur les terrains escarpés. Si les transports en commun passent mal, suspendez vos citoyens."
+      },
+      "tip26": {
+        "title": "Embouteillage électrique",
+        "description": "Produire plus d’électricité ne sert à rien si les lignes ne peuvent pas l’acheminer. Avant de construire une autre centrale, vérifiez que le courant ne reste pas coincé en chemin."
+      },
+      "tip27": {
+        "title": "Un fâcheux accident",
+        "description": "Un bâtiment qui gêne vos projets peut être dynamité en maquillant l’opération en accident. Le moral des habitants en souffre beaucoup : rachetez-le et démolissez-le dans les règles quand c’est possible."
+      },
+      "tip28": {
+        "title": "Cap sur la mer",
+        "description": "Si les terrains libres manquent sur la terre ferme, étendez-vous en mer. Vous pouvez construire des plates-formes pétrolières en mer ou gagner du terrain sur la mer."
+      },
+      "tip29": {
+        "title": "L'enfer des feux rouges",
+        "description": "Chaque intersection ajoute un feu rouge. Un quadrillage trop serré bloquera les conducteurs à chaque carrefour, et leur patience aura disparu bien avant leur arrivée. Reliez vos routes le plus simplement possible."
+      },
+      "tip30": {
+        "title": "Dégagez la vue",
+        "description": "Plus une tour de télécommunications est haute et perchée en altitude, plus sa zone de couverture est vaste. Les ondes bloquées par les montagnes ne se contournent pas par la seule force de volonté."
+      },
+      "tip31": {
+        "title": "Les bienfaits de la mer",
+        "description": "Si vous ne trouvez pas de source d'eau douce, vous pouvez ériger une usine de dessalement sur la côte. Elle consomme toutefois beaucoup d'énergie. Après avoir cherché de l'eau, cherchez de l'électricité."
+      },
+      "tip32": {
+        "title": "Une autre forme de sécurité",
+        "description": "Le chômage est l'un des principaux facteurs d'insécurité. N'installez pas seulement des commissariats, créez aussi des emplois. Avant de vous ruiner en budget de sécurité, misez sur l'embauche."
+      },
+      "tip33": {
+        "title": "La facture de demain",
+        "description": "Chaque bâtiment et chaque route entraîne des frais d'entretien réguliers. Trop construire sous prétexte d'avoir des fonds vous exposera à des coûts de réparation écrasants. Le maire de demain, c'est encore vous."
+      },
+      "tip34": {
+        "title": "Attention au surpompage",
+        "description": "Si vous puisez plus d'eau que la source ne peut en reconstituer, la pénurie sera inévitable. Multiplier les pompes ne fera pas jaillir plus d'eau."
+      },
+      "tip35": {
+        "title": "Une erreur coûteuse",
+        "description": "Une fois la construction commencée, il n'est pas facile de déplacer une route ou un bâtiment. Planifiez bien avant de commencer. Mais une route courbée par mégarde peut aussi donner du caractère à votre ville, une fois que vous vous y êtes habitué."
+      },
+      "tip36": {
+        "title": "Société de surveillance",
+        "description": "Cliquez sur des piétons ou des véhicules pour ajouter des citoyens à votre liste de suivi. Observez quel genre de vie mènent les habitants de votre ville."
+      },
+      "tip37": {
+        "title": "Énergie de base",
+        "description": "L'énergie solaire et éolienne est peu coûteuse à produire, mais son rendement dépend des conditions météo. Pensez à les compléter par des sources d'énergie stables comme le thermique ou le nucléaire."
+      },
+      "tip38": {
+        "title": "De l'espace pour bâtir",
+        "description": "Certains bâtiments ne peuvent pas être construits sur des parcelles trop étroites. Aménagez des parcelles adaptées aux dimensions des bâtiments souhaités."
+      },
+      "tip39": {
+        "title": "Ce service est payant",
+        "description": "Les services publics comme le traitement des eaux usées, la gestion des déchets, les télécommunications et les soins de santé peuvent être gratuits par défaut. Vous pouvez fixer librement leurs tarifs. À vous de choisir, en tant que maire, entre des prix abordables pour les citoyens et une facture salée."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Sélectionnez une parcelle pour projeter un bâtiment. Un certain temps s'écoule entre le projet et l'achèvement du chantier.",
+    "parcelCreation": "Maintenez Ctrl pour ouvrir le menu radial et choisir la méthode de création, puis cliquez dans la vue 3D pour désigner la cible. Ajustez les dimensions dans le panneau et validez.",
+    "transitCreation": "Clic gauche pour placer les arrêts dans l'ordre ; cliquez sur le premier arrêt pour fermer la boucle. Glissez un tronçon pour ajouter un point de passage, glissez un point pour le déplacer, clic droit pour supprimer. Pour un aller-retour, placez aussi les arrêts du retour.",
+    "transitManagement": "Liste des lignes de transport public. Ajustez les tarifs et les fréquences, ou créez et supprimez des lignes. Le tarif influence le choix d'itinéraire des habitants. Un tarif trop élevé fait chuter la fréquentation et augmente la motorisation.",
+    "pathConstruction": "Construisez des routes ou des voies ferrées. Cliquez sur le terrain dans la vue 3D. Le clic gauche ajoute des sommets, le clic droit valide la forme, et les sommets se déplacent par glisser. Maintenir Ctrl ouvre le menu de réglages (courbe/droite, accrochage). Les touches 3/4 modifient la hauteur de remblai et de déblai.",
+    "pathConstructionElevated": "Construisez des routes ou des voies ferrées. Cliquez sur le terrain dans la vue 3D. Le clic gauche ajoute des sommets, le clic droit valide la forme, et les sommets se déplacent par glisser. Maintenir Ctrl ouvre le menu de réglages (courbe/droite, accrochage). Page préc./Page suiv. ou les touches 1/2 modifient la hauteur, et les touches 3/4 la hauteur de remblai et de déblai.",
+    "districtEdit": "Vous pouvez créer, étendre et fusionner les « quartiers », unité de référence des réglementations et des statistiques. Dans la vue 3D, maintenez Ctrl pour changer d'outil. Outil de création : un clic gauche sur une route crée un quartier de cette couleur (la couleur change à chaque sélection de l'outil). Outil d'extension : le clic droit choisit le quartier de destination, le clic gauche sur une route l'y intègre. Outil de fusion : le clic droit choisit le quartier de destination, le clic gauche sur le quartier à fusionner ouvre le panneau de validation. La couleur et le nom du quartier sélectionné s'affichent à côté du curseur. Appuyez de nouveau sur le bouton pour quitter.",
+    "bulldozer": "Mode bulldozer. Le clic gauche supprime les terrains vides, les bâtiments et routes en projet ainsi que les décors du terrain (les décors dispersés sont supprimés par zone entière après confirmation). Appuyez de nouveau sur le bouton pour quitter.",
+    "bulldozerInstant": "Mode bulldozer. Le clic gauche supprime immédiatement et sans confirmation les bâtiments, routes, terrains vides et décors du terrain. Les bâtiments disparaissent avec leurs occupants et leurs habitants, et le terrain n'est pas restauré (l'hôtel de ville, le poste-frontière et les tronçons de transport public ne peuvent pas être supprimés ; les décors dispersés sont toujours supprimés par zone entière après confirmation). Appuyez de nouveau sur le bouton pour quitter.",
+    "cityBudget": "Décidez de la répartition, pour la période suivante, des fonds tirés de l'impôt et de l'exploitation. Lorsque la municipalité achète des biens pour construire des routes ou exploiter des équipements publics, elle ne peut le faire que dans la limite du budget défini ici. De plus, si l'enveloppe est insuffisante, du personnel des équipements publics peut être licencié.",
+    "resourceEdit": "Créez des zones de ressources naturelles. Choisissez le type de ressource, puis cliquez sur le terrain. Le clic gauche ajoute un sommet, un clic sur une arête y insère un sommet, et le clic droit supprime un sommet. Le glisser déplace les sommets.",
+    "grading": "Clic gauche pour placer les sommets, puis clic droit pour confirmer la zone."
+  }
+}

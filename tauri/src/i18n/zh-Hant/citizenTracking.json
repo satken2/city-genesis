@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "基本",
+    "tabActivity": "行動",
+    "follow": "用鏡頭跟隨",
+    "unfollow": "停止跟隨",
+    "track": "加入追蹤清單",
+    "trackRandom": "隨機追蹤一位市民",
+    "noUntrackedCitizens": "沒有可追蹤的未追蹤市民。",
+    "trackRandomError": "無法追蹤市民。",
+    "untrack": "從追蹤清單移除",
+    "home": "住所",
+    "mobility": "出行方式",
+    "mode": {
+      "automobile": "汽車",
+      "pedestrian": "步行和大眾運輸"
+    },
+    "visits": "目的地",
+    "visitKind": {
+      "home": "住所",
+      "work": "工作地點",
+      "school": "學校",
+      "shop": "購物"
+    },
+    "legs": {
+      "walk": "步行",
+      "drive": "汽車",
+      "transit": "大眾運輸",
+      "conveyor": "人員輸送設備"
+    },
+    "trip": "單程 {{minutes}} 分鐘 · {{route}}",
+    "noRoute": "沒有路線",
+    "noVisits": "沒有要去的地方。",
+    "status": {
+      "not_ready": "執行模擬後顯示。",
+      "busy": "模擬執行中無法顯示。",
+      "no_home": "正在等待住房，沒有行動紀錄。",
+      "missing": "該市民已不在城市中。",
+      "error": "無法取得。"
+    },
+    "empty": "沒有正在追蹤的市民。",
+    "pickFailed": {
+      "not_ready": "執行模擬後，即可點擊車輛和行人查看市民。",
+      "busy": "模擬執行中無法顯示市民。",
+      "none": "找不到這輛車或這名行人對應的市民。",
+      "missing": "該市民已不在城市中。",
+      "no_home": "該市民正在等待住房。",
+      "error": "無法顯示市民。"
+    }
+  }
+}

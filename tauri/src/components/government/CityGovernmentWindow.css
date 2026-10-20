@@ -1,0 +1,92 @@
+/**
+ * City government window styles
+ *
+ * Show the city overview in the left third and agent lists by category in the right two thirds, separated by a
+ * vertical rule.
+ */
+
+.city-gov {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  height: 100%;
+  color: var(--flat-text);
+  font-size: 1rem;
+}
+
+.city-gov__message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--flat-text-label);
+}
+
+.city-gov__message--error {
+  color: var(--flat-danger);
+}
+
+.city-gov__overview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 20px;
+  border-right: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.city-gov__name {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.city-gov__stats {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.city-gov__stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.city-gov__stat dt {
+  color: var(--flat-text-label);
+}
+
+.city-gov__stat dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.city-gov__unit {
+  margin-left: 4px;
+  font-size: 0.85rem;
+  color: var(--flat-text-muted);
+}
+
+.city-gov__agents {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px 20px;
+}
+
+/* Remove the shared tab row's top-of-window spacing inside panes, reduce horizontal spacing, and wrap tabs that do not fit. */
+.city-gov__agents .flat-tabs {
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+.city-gov__agents .flat-tabs .flat-tab {
+  padding: 10px 14px;
+}

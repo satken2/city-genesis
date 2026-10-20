@@ -1,0 +1,22 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "En attente des données de l'éditeur de terrain…"
+  },
+  "groundCover": {
+    "label": "Couverture du sol",
+    "hint": "Change la couleur et la texture du sol dans le jeu ainsi que les couleurs des cartes 2D. N'affecte pas la simulation.",
+    "1": "Prairie",
+    "2": "Désert",
+    "3": "Prairie luxuriante",
+    "4": "Champ de neige",
+    "5": "Semi-aride"
+  },
+  "climate": {
+    "label": "Climat",
+    "hint": "Copie la température, les précipitations, l'ensoleillement et les probabilités météo mensuels d'un préréglage. Modifiez les détails dans les paramètres climatiques du mode de création de scénarios."
+  },
+  "assetPack": {
+    "label": "Pack de ressources",
+    "standard": "Standard"
+  }
+}

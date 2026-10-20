@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Type",
+    "kind": {
+      "land": "Land grading",
+      "shore": "Land reclamation"
+    },
+    "baseHeight": "Base height",
+    "targetHeight": "Target height",
+    "cutVolume": "Cut volume",
+    "fillVolume": "Fill volume",
+    "quayLength": "Quay length",
+    "quayArea": "Quay face area",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Height (offset from base)",
+    "baseNote": {
+      "frontage": "0 is the surface of the road it faces ({{value}} m)",
+      "terrain_mean": "0 is the current average height of the area ({{value}} m)"
+    },
+    "shoreHeightLocked": "The height of reclaimed land cannot be specified",
+    "reasons": {
+      "invalid_polygon": "The area shape is invalid. Draw it without crossing edges.",
+      "outside_city": "The area extends outside the city.",
+      "too_large": "The area is too large (limit: {{limit}} km²).",
+      "on_water": "An area entirely over the sea cannot be developed. Draw it so that it reaches land.",
+      "no_land_overlap": "Draw the area so that it overlaps the land (otherwise a strip of sea is left between the shore and the area).",
+      "overlaps_parcel": "The area overlaps an existing land parcel.",
+      "overlaps_path": "The area overlaps a road, track, or other path.",
+      "overlaps_water": "The area touches a river or lake.",
+      "overlaps_quay_band": "The area overlaps the quay of reclaimed land.",
+      "invalid_height_offset": "The height is out of range (up to ±{{offsetLimit}} m).",
+      "below_sea_level": "The height cannot be set below sea level.",
+      "too_narrow": "The area is too narrow; nothing is left to fill inside the quay.",
+      "no_work": "The ground is already at the target height, so no work is needed.",
+      "insufficient_funds": "Insufficient funds to place this order."
+    },
+    "confirm": "Confirm",
+    "confirming": "Confirming...",
+    "cancel": "Cancel",
+    "confirmFailed": "Failed to order the earthworks."
+  }
+}

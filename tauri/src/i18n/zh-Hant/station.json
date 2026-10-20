@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "車站",
+    "name": "車站名稱",
+    "ridership": "乘車次數",
+    "platforms": "月台列表",
+    "noPlatforms": "沒有歸屬的月台（與路線相交的月台會歸屬於此）",
+    "lines": "停靠路線",
+    "noLines": "沒有停靠的路線",
+    "stops": "各停靠點的乘車次數",
+    "noStops": "本站沒有停靠點",
+    "lineRunning": "行駛中",
+    "lineSuspended": "停駛",
+    "houseEnds": "站房配置",
+    "houseEnds_both": "兩端",
+    "houseEnds_start": "起點",
+    "houseEnds_end": "終點",
+    "passageMode": "通道位置",
+    "passageMode_elevated": "高架",
+    "passageMode_ground": "地面",
+    "passageMode_underground": "地下"
+  }
+}

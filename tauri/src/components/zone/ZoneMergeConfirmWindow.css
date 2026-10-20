@@ -1,0 +1,95 @@
+/**
+ * District merge confirmation styles
+ *
+ * Small window showing source → target on one line, explanatory text, and two buttons.
+ * Only Confirm uses warning colors to communicate irreversibility.
+ */
+
+.zone-merge {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.zone-merge-muted {
+  padding: 16px;
+  font-size: 1rem;
+  opacity: 0.75;
+}
+
+.zone-merge-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.39rem;
+  font-weight: 600;
+  flex-wrap: wrap;
+}
+
+.zone-merge-arrow {
+  color: #d97706;
+}
+
+/* Strike through the disappearing district so it is immediately recognizable. */
+.zone-merge-source {
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.zone-merge-desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.zone-merge-error {
+  margin: 0;
+  font-size: 1rem;
+  color: #fca5a5;
+}
+
+.zone-merge-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.zone-merge-confirm-btn,
+.zone-merge-cancel-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.zone-merge-confirm-btn {
+  border: none;
+  background-color: #d97706;
+  color: #ffffff;
+}
+
+.zone-merge-confirm-btn:hover:not(:disabled) {
+  background-color: #b45309;
+}
+
+.zone-merge-cancel-btn {
+  border: 1px solid #555555;
+  background-color: transparent;
+  color: #cccccc;
+}
+
+.zone-merge-cancel-btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.zone-merge-confirm-btn:disabled,
+.zone-merge-cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

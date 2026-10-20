@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "天氣",
+    "choose": "選擇天氣",
+    "loading": "正在取得天氣…",
+    "unknown": "未知",
+    "automatic": "{{weather}}（自動）",
+    "failed": "無法變更天氣",
+    "names": {
+      "clear": "晴空萬里",
+      "high_clouds": "薄雲",
+      "fair": "晴天",
+      "broken_clouds": "多雲時晴",
+      "overcast": "陰天",
+      "rain_clouds": "雨雲",
+      "fog": "霧",
+      "drizzle": "毛毛雨",
+      "rain": "雨",
+      "heavy_rain": "大雨",
+      "light_snow": "小雪",
+      "snow": "雪",
+      "blizzard": "暴風雪"
+    },
+    "epochClimate": "週期氣候",
+    "temperature": "氣溫",
+    "precipitation": "降水量",
+    "sunlight": "日照強度",
+    "windSpeed": "風速"
+  }
+}

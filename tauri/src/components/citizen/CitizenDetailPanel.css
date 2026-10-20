@@ -1,0 +1,99 @@
+/* Skill radar chart, centered to fit the panel width. */
+.citizen-skill-chart {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+/* Criminal propensity row, showing the meter and value side by side. */
+.citizen-criminality {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.citizen-criminality-meter {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Embedded map tall enough to show the whole route while keeping the destination list readable in the same tab. */
+.citizen-activity-map {
+  display: grid;
+  place-items: center;
+  height: 24rem;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  background: var(--flat-sunken);
+}
+
+/* Match map and list numbers; show products and the outbound trip from home below the type and name. */
+.citizen-visits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.citizen-visit {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.citizen-visit-number {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  padding: 0 0.2rem;
+  background: var(--flat-warn);
+  color: var(--flat-sunken);
+  font-weight: bold;
+}
+
+.citizen-visit-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.citizen-visit-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.citizen-visit-kind {
+  flex-shrink: 0;
+  min-width: 4.5rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 1rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  color: #c5d4e3;
+}
+
+.citizen-visit-kind--work,
+.citizen-visit-kind--school {
+  background: rgba(78, 161, 255, 0.2);
+  color: #cfe5ff;
+}
+
+.citizen-visit-kind--shop {
+  background: rgba(255, 190, 80, 0.18);
+  color: #ffe2b0;
+}
+
+.citizen-visit-detail {
+  margin-top: 2px;
+  padding-left: calc(4.5rem + 20px);
+  font-size: 1rem;
+  color: #9fb3c8;
+}

@@ -1,0 +1,759 @@
+/**
+ * Budget window styles
+ *
+ * Match NewGameWindow.css: solid rectangular cards with no borders, rounded corners, or glow;
+ * use only drop shadows for elevation. A solid left block (box-shadow: inset 4px 0 0 accent-color)
+ * indicates emphasis and grouping. Use shared App.css tokens (--flat-*) for colors and shadows,
+ * without hardcoded values.
+ *
+ * Three fixed surface levels:
+ *   Subpanel (--flat-surface) > card/tile (--flat-raised) > recess/badge (--flat-sunken).
+ * To avoid nested card borders, maintenance-priority (Tier) groups have no surface;
+ * distinguish tiers only by the solid block color in the heading.
+ *
+ * Layout: header (funds, planning period) + [left: budget/tax tabs] / [right: tax revenue trend +
+ * cash trend / income/expenditure balance]. Category details and per-product tax rates open
+ * in .budget-overlay, covering the whole window.
+ */
+
+.budget-window {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  color: var(--flat-text);
+}
+
+/*
+ * Header: funds (left) and planning period (right). It only establishes context for the whole
+ * window, so place directly on the background; cards are reserved for the four body subpanels.
+ */
+.budget-window__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.budget-window__reserves-card {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.budget-window__reserves-card-label {
+  font-size: 1rem;
+  color: var(--flat-text-label);
+}
+
+.budget-window__reserves-card-value {
+  font-size: 1.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+}
+
+.budget-window__period-info {
+  font-size: 1rem;
+  color: var(--flat-text-body);
+}
+
+/* Automatic adjustment banner for insufficient funds. */
+.budget-window__auto-adjust-banner {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 1rem;
+  color: var(--flat-warn);
+  background-color: var(--flat-warn-surface);
+  box-shadow: inset 4px 0 0 var(--flat-warn), var(--flat-shadow-sm);
+}
+
+/* Main split: left 1/3 = budget/tax tabs; right 2/3 = tax revenue/cash trends and income/expenditure balance. */
+.budget-window__split-container {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  min-height: 0; /* Required to enable scrolling. */
+}
+
+/* Use gaps between cards rather than borders for divisions in the right area and nested lower section. */
+.budget-window__right-area {
+  flex: 2;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Top row: tax revenue trend (left) and cash trend (right), each taking half. */
+.budget-window__charts-row {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 10px;
+}
+
+/* Shared surface for the four subpanels. One shade darker than the tiles inside. */
+.budget-window__left-pane,
+.budget-window__chart-section,
+.budget-window__balance-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 12px;
+  background-color: var(--flat-surface);
+  box-shadow: var(--flat-shadow);
+}
+
+/* Left column: fixed tabs/edit toggle and scrollable tab content. */
+.budget-window__left-pane {
+  flex: 1;
+  min-width: 240px;
+}
+
+/* Left pane heading row: budget/tax tabs and slider visibility toggle. */
+.budget-window__pane-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+
+/* Compact heading tabs with the same height as the edit toggle. */
+.budget-window__pane-header .flat-tabs {
+  padding: 0;
+}
+
+.budget-window__pane-header .flat-tabs .flat-tab {
+  padding: 5px 16px;
+}
+
+/* Subpanel headings. The solid left block indicates level, as in the new game window. */
+.budget-window__section-title {
+  margin: 0;
+  padding: 2px 0 2px 10px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--flat-text);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+/* Autosave sending indicator. Show subtly to the left of the edit toggle. */
+.budget-window__saving-note {
+  margin-left: auto;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+/* Slider visibility toggle shared by budgets and taxes. When off, read-only viewing shows only badge values. */
+.budget-window__edit-btn {
+  margin-left: auto;
+  padding: 5px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  background-color: var(--flat-raised);
+  border: none;
+  border-radius: 0;
+  box-shadow: var(--flat-shadow-sm);
+  color: var(--flat-text-body);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Compact the button while the sending indicator takes up spacing. */
+.budget-window__saving-note + .budget-window__edit-btn {
+  margin-left: 0;
+}
+
+.budget-window__edit-btn:hover:not(.budget-window__edit-btn--active) {
+  background-color: var(--flat-raised-hover);
+  color: var(--flat-text);
+}
+
+.budget-window__edit-btn--active {
+  background-color: var(--flat-selected);
+  color: #ffffff;
+}
+
+/*
+ * Tab content (stacked Tier groups for budgets, tax cards for taxes). Only this area scrolls
+ * vertically in the left pane. Keep inactive tabs mounted with hidden to preserve state.
+ */
+.budget-window__tab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.budget-window__tab-panel[hidden] {
+  display: none;
+}
+
+/* Loading/failure display for tab content. */
+.budget-window__pane-status {
+  padding: 20px 8px;
+  font-size: 1rem;
+  text-align: center;
+  color: var(--flat-text-muted);
+}
+
+.budget-window__pane-status--error {
+  color: var(--flat-danger);
+}
+
+/*
+ * Tier groups have no surface; category cards inside already have one and a surrounding surface
+ * would create double borders. Tier 1 (highest maintenance priority) appears first.
+ */
+.budget-tier-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.budget-tier-group__title {
+  padding: 1px 0 1px 8px;
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+}
+
+/* Solid block colors per Tier: higher maintenance priority (smaller number) is brighter. */
+.budget-tier-group--tier1 .budget-tier-group__title {
+  color: var(--flat-text);
+  box-shadow: inset 3px 0 0 var(--flat-accent);
+}
+.budget-tier-group--tier2 .budget-tier-group__title {
+  box-shadow: inset 3px 0 0 var(--flat-selected-hover);
+}
+.budget-tier-group--tier3 .budget-tier-group__title {
+  box-shadow: inset 3px 0 0 var(--flat-text-muted);
+}
+.budget-tier-group--tier4 .budget-tier-group__title {
+  color: var(--flat-text-muted);
+  box-shadow: inset 3px 0 0 #3a4759;
+}
+
+.budget-tier-group__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Category card: icon, category name/allocation (plus slider while editing), and upper-right ratio badge. */
+.budget-category-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background-color: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.budget-category-card:hover:not(.budget-category-card--static) {
+  background-color: var(--flat-raised-hover);
+}
+
+/* Cards with nothing to open on click (taxes without per-product rates). */
+.budget-category-card--static {
+  cursor: default;
+}
+
+/*
+ * Left category icon (reserve a square only). Icon images are transparent, so use no surface
+ * and let the card color show through. Missing icons leave empty space to preserve alignment.
+ */
+.budget-category-card__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.budget-category-card__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Right: vertically stacked title and slider, taking all remaining width. */
+.budget-category-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.budget-category-card__name {
+  padding-right: 42px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--flat-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Upper-right ratio badge. The only numeric display while the slider is hidden. */
+.budget-category-card__badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 1px 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  color: var(--flat-text-body);
+  background-color: var(--flat-sunken);
+  pointer-events: none;
+}
+
+/* Allocated budget derived from the ratio, shown small below the category name. */
+.budget-category-card__amount {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text-label);
+}
+
+.budget-category-card__slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budget-category-card__slider {
+  flex: 1;
+  min-width: 60px;
+  accent-color: var(--flat-accent);
+}
+
+/* Top charts (tax revenue and cash trends). Fix chart height and leave remaining height to the balance below. */
+.budget-window__chart-section {
+  flex: 1;
+}
+
+.budget-window__chart {
+  height: 200px;
+}
+
+.budget-window__chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+/* Bottom: income/expenditure balance (full width). */
+.budget-window__balance-section {
+  flex: 1;
+}
+
+/* Balance summary row (income minus expenditure). */
+.budget-window__balance-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 5px 10px;
+  background-color: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+  flex-shrink: 0;
+}
+
+.budget-window__balance-summary-label {
+  font-size: 1rem;
+  color: var(--flat-text-label);
+}
+
+.budget-window__balance-summary-value {
+  font-size: 1.48rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-window__balance-summary-value--surplus {
+  color: var(--flat-good);
+}
+
+.budget-window__balance-summary-value--deficit {
+  color: var(--flat-danger);
+}
+
+.budget-window__balance-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Shared monetary chart tooltip (ChartValueTooltip). List only series with values. */
+.budget-chart-tooltip {
+  padding: 6px 8px;
+  font-size: 1rem;
+  color: var(--flat-text-body);
+  background-color: var(--flat-surface);
+  box-shadow: var(--flat-shadow);
+  pointer-events: none;
+}
+
+.budget-chart-tooltip__label {
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--flat-text);
+}
+
+.budget-chart-tooltip__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.6;
+}
+
+.budget-chart-tooltip__swatch {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+}
+
+.budget-chart-tooltip__name {
+  flex: 1;
+  color: var(--flat-text-body);
+}
+
+.budget-chart-tooltip__value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.budget-chart-tooltip__row--total {
+  margin-top: 3px;
+  padding-top: 3px;
+  font-weight: 600;
+  color: var(--flat-text);
+}
+
+/* ── Overlay for category details/per-product tax rates. Backdrop covers the window; center the box over it. */
+.budget-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 14, 24, 0.85);
+}
+
+/* Height follows content; content exceeding the window scrolls within the body. */
+.budget-overlay__dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 46rem;
+  max-height: 100%;
+  padding: 14px 16px 16px;
+  box-sizing: border-box;
+  background: var(--flat-surface);
+  box-shadow: inset 0 3px 0 var(--flat-accent), 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.budget-overlay__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.budget-overlay__header .budget-window__section-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.budget-overlay__close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  background: var(--flat-raised);
+  color: var(--flat-text-label);
+  cursor: pointer;
+}
+
+.budget-overlay__close:hover {
+  background: var(--flat-raised-hover);
+  color: var(--flat-text);
+}
+
+.budget-overlay__close svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* Content handles scrolling (detail table tbody or per-product tax rate list). */
+.budget-overlay__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.budget-overlay__placeholder {
+  padding: 20px 8px;
+  font-size: 1rem;
+  text-align: center;
+  color: var(--flat-text-muted);
+}
+
+/* ── Facility list (category details). */
+/* To allow variable table height, set thead/tbody display separately and scroll only tbody. */
+.budget-agent-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.budget-agent-table thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  flex-shrink: 0;
+}
+
+.budget-agent-table tbody {
+  display: block;
+  width: 100%;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.budget-agent-table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Use surface color rather than borders to distinguish the header (borderless design). */
+.budget-agent-table__header {
+  text-align: left;
+  padding: 5px 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+  background-color: var(--flat-surface);
+}
+
+.budget-agent-table__header--num {
+  text-align: right;
+}
+
+.budget-agent-table__cell {
+  padding: 6px 8px;
+  color: var(--flat-text-body);
+  vertical-align: middle;
+}
+
+.budget-agent-table__cell--name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budget-agent-table__cell--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Separate rows with alternating surface colors rather than borders. */
+.budget-agent-table__row:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.budget-agent-table__row:hover {
+  background-color: var(--flat-raised);
+}
+
+/* Pin the total row at the top as a solid-filled card. */
+.budget-agent-table__row--total {
+  background-color: var(--flat-raised);
+  font-weight: 600;
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+.budget-agent-table__cell--total {
+  color: var(--flat-text);
+}
+
+.budget-agent-table__cell--empty {
+  padding: 20px 8px;
+  text-align: center;
+  color: var(--flat-text-muted);
+}
+
+.budget-agent-name-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budget-util-note {
+  margin-top: 1px;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+/* ── Tax rate tab. */
+
+/* Bulk/individual toggle (shown only while editing). */
+.tax-mode-toggle {
+  display: flex;
+  align-self: flex-start;
+  box-shadow: var(--flat-shadow-sm);
+}
+
+.tax-mode-toggle__btn {
+  padding: 3px 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+  background-color: var(--flat-sunken);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tax-mode-toggle__btn:hover:not(.tax-mode-toggle__btn--active) {
+  color: var(--flat-text);
+  background-color: var(--flat-raised-hover);
+}
+
+.tax-mode-toggle__btn--active {
+  color: #ffffff;
+  background-color: var(--flat-selected);
+}
+
+/* Tax rate slider and numeric input. */
+.tax-slider-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tax-slider-input__slider {
+  flex: 1;
+  min-width: 60px;
+  accent-color: var(--flat-accent);
+}
+
+.tax-slider-input__number {
+  width: 4.5rem;
+  padding: 3px 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--flat-text);
+  background-color: var(--flat-sunken);
+  border: none;
+  border-radius: 0;
+  outline: none;
+}
+
+.tax-slider-input__number:focus {
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+.tax-slider-input__slider:disabled,
+.tax-slider-input__number:disabled {
+  opacity: 0.4;
+}
+
+.tax-slider-input__unit {
+  font-size: 1rem;
+  color: var(--flat-text-label);
+}
+
+/* Per-product tax rate list (overlay body). Separate rows with alternating surface colors. */
+.tax-product-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tax-product-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 8px;
+}
+
+.tax-product-row:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.tax-product-row__name {
+  flex: 0 0 12rem;
+  min-width: 0;
+  font-size: 1rem;
+  color: var(--flat-text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tax-product-row .tax-slider-input {
+  flex: 1;
+}
+
+.tax-product-row__rate {
+  margin-left: auto;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+}
+
+/* Loading/error state. */
+.budget-window__loading,
+.budget-window__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+.budget-window__error {
+  color: var(--flat-danger);
+}

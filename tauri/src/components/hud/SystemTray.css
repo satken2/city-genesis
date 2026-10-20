@@ -1,0 +1,50 @@
+/**
+ * System tray styles (bottom right)
+ *
+ * Arrange icons smaller than menu icons horizontally, like the Windows notification area.
+ */
+
+/*
+ * Use content size based on button count and the label; report the measured value to Rust to fit the window.
+ * If the window is temporarily wider, align right so transparent space intercepting Unity clicks stays on the
+ * left. Do not set height here: the window follows the measured height, so filling it would never shrink.
+ */
+.system-tray {
+  width: max-content;
+  margin-left: auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Without the label, the row plus the panel border equals SYSTEM_TRAY_HEIGHT in `window.rs`. */
+.system-tray-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 8px;
+}
+
+/* The panel's rounded corners and overflow clip this band, so it reads as part of the tray. */
+.system-tray-unverified {
+  padding: 2px 8px;
+  background: #c62828;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.system-tray-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+/* Play mode indicator. It is not clickable, so omit the button frame/hover background and match only image padding. */
+.system-tray-mode {
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  box-sizing: border-box;
+}

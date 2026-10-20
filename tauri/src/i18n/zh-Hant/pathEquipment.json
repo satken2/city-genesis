@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "道路設施",
+    "streetlight_type": "路燈",
+    "fence_type": "護欄",
+    "street_tree_type": "行道樹",
+    "utility_mode": "配線方式",
+    "none": "無",
+    "standard": "標準",
+    "overhead": "架空線路",
+    "underground": "地下線路",
+    "apply": "套用",
+    "bench_type": "長椅",
+    "bin_type": "垃圾桶",
+    "planter_type": "花圃",
+    "advert_type": "廣告"
+  }
+}

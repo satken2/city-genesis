@@ -1,0 +1,822 @@
+/**
+ * New Game window styles
+ *
+ * Use one titlebar-free surface with a thin top accent, matching the system menu/epoch results. Flat styles
+ * (App.css --flat-*) use rectangles without borders, rounded corners, or glow; solid blocks provide emphasis.
+ *
+ * Two-column layout:
+ * - Left (.new-game-main): hero (subheading and heading-sized tabs), tiled lists by section (only this area
+ *   scrolls), then Close footer.
+ * - Right (.new-game-detail): fixed-width detail panel flush with the top, right, and bottom edges. Use a
+ *   recessed translucent surface; its image fills the top, fades downward, and carries the title at its lower
+ *   edge. Fix Start at the bottom. Align left footer/right Start rows to the same height so their top rule
+ *   connects.
+ * - Settings confirmation: full overlay and centered box, matching save overlays (SaveDialog.css).
+ *
+ * Tiles/details overlay text on images; darken image bottoms with a base-color gradient for legibility.
+ */
+
+.new-game {
+  --new-game-scrim: color-mix(in srgb, var(--flat-sunken) 94%, transparent);
+  --new-game-footer-height: 5.4rem;
+  position: relative; /* Anchor for the settings confirmation overlay */
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(90% 45% at 30% 0%, rgba(78, 161, 255, 0.1), transparent 70%);
+}
+
+.new-game::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 5;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--flat-accent) 50%, transparent);
+  pointer-events: none;
+}
+
+/*
+ * =========================================================================
+ * Left column: hero / list / footer
+ * =========================================================================
+ */
+
+.new-game-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.new-game-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 26px 28px 4px;
+}
+
+.new-game-overline {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--flat-accent);
+}
+
+/*
+ * Turn shared FlatTabs into heading-sized text-only tabs.
+ * Indicate selection with bright text and a short accent line extending from the lower left.
+ */
+.new-game-hero .flat-tabs {
+  flex-wrap: wrap;
+  gap: 4px 30px;
+  padding: 0;
+}
+
+.new-game-hero .flat-tabs .flat-tab {
+  position: relative;
+  gap: 12px;
+  padding: 0 0 12px;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--flat-text-muted);
+  background: transparent;
+  box-shadow: none;
+  transition: color 0.15s ease;
+}
+
+.new-game-hero .flat-tabs .flat-tab::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 2.6rem;
+  height: 3px;
+  background: var(--flat-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+
+.new-game-hero .flat-tabs .flat-tab:hover:not(:disabled) {
+  color: var(--flat-text-body);
+  background: transparent;
+}
+
+.new-game-hero .flat-tabs .flat-tab[aria-selected="true"] {
+  color: var(--flat-text);
+  background: transparent;
+  box-shadow: none;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.new-game-hero .flat-tabs .flat-tab[aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.new-game-hero .flat-tabs .flat-tab:disabled {
+  color: color-mix(in srgb, var(--flat-text-muted) 75%, transparent);
+  background: transparent;
+}
+
+.new-game-hero .flat-tab-badge {
+  align-self: center;
+  font-size: 0.85rem;
+}
+
+/* Tile list: grids beneath section headings. */
+.new-game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 20px 28px 26px;
+  overflow-y: auto;
+}
+
+.new-game-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Indicate heading levels with solid left-edge blocks, as in epoch results. Use left borders because headings sit directly on the base. */
+.new-game-section-title {
+  margin: 0;
+  padding: 1px 0 1px 9px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--flat-text);
+  border-left: 3px solid var(--flat-accent);
+}
+
+.new-game-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.new-game-section-toggle:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: 3px;
+}
+
+.new-game-section-chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.3rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+.new-game-section-toggle[aria-expanded="true"] .new-game-section-chevron {
+  transform: rotate(45deg);
+}
+
+.new-game-empty {
+  padding: 18px 12px;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+  background: color-mix(in srgb, var(--flat-surface) 45%, transparent);
+}
+
+.new-game-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
+  gap: 14px;
+}
+
+.new-game-tiles[hidden] {
+  display: none;
+}
+
+/*
+ * =========================================================================
+ * Tiles: full-surface images with names over the bottom gradient
+ * =========================================================================
+ */
+
+/* Stacking order: image → gradient (::before) → badges/name → selection line (::after). */
+.new-game-tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  overflow: hidden;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: var(--flat-sunken);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  animation: new-game-rise 0.34s ease-out backwards;
+  animation-delay: calc(min(var(--new-game-tile-index, 0), 14) * 28ms);
+}
+
+.new-game-tile:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: 2px;
+}
+
+.new-game-tile:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Dim unselected images slightly, restoring brightness on hover/selection. */
+.new-game-tile-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.8) brightness(0.72);
+  transition: transform 0.4s ease, filter 0.2s ease;
+}
+
+.new-game-tile:hover:not(:disabled) .new-game-tile-image,
+.new-game-tile.selected .new-game-tile-image {
+  filter: none;
+}
+
+.new-game-tile:hover:not(:disabled) .new-game-tile-image {
+  transform: scale(1.06);
+}
+
+.new-game-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to top, var(--new-game-scrim) 0%, color-mix(in srgb, var(--flat-sunken) 55%, transparent) 38%, transparent 68%);
+  transition: background 0.2s ease;
+}
+
+.new-game-tile.selected::before {
+  background: linear-gradient(to top, color-mix(in srgb, var(--flat-selected) 92%, transparent) 0%, color-mix(in srgb, var(--flat-selected) 45%, transparent) 38%, transparent 70%);
+}
+
+/* Bottom accent line grows slightly from the left on hover, then fills the width when selected. */
+.new-game-tile::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  height: 3px;
+  background: var(--flat-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.24s ease;
+}
+
+.new-game-tile:hover:not(:disabled)::after {
+  transform: scaleX(0.3);
+}
+
+.new-game-tile.selected::after {
+  transform: scaleX(1);
+}
+
+.new-game-tile-name {
+  position: absolute;
+  right: 12px;
+  bottom: 11px;
+  left: 12px;
+  z-index: 2;
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--flat-text);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.75);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.new-game-tile .scenario-badges {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+}
+
+/* Show completion badges at the tile's upper right and beside the type label in details. */
+.new-game-tile-cleared,
+.new-game-detail-cleared {
+  width: 2.1rem;
+  height: 2.1rem;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.new-game-tile-cleared {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Scenarios/tutorials without images use a blueprint-like grid surface: selection color for scenarios, positive color for tutorials. */
+.new-game-tile-image--scenario,
+.new-game-detail-image--scenario,
+.new-game-tile-image--tutorial,
+.new-game-detail-image--tutorial {
+  --new-game-blueprint: var(--flat-selected);
+  background-color: var(--flat-sunken);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--flat-accent) 13%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--flat-accent) 13%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 28% 22%, color-mix(in srgb, var(--new-game-blueprint) 60%, transparent), transparent 72%);
+  background-size: 18px 18px, 18px 18px, 100% 100%;
+}
+
+.new-game-tile-image--tutorial,
+.new-game-detail-image--tutorial {
+  --new-game-blueprint: color-mix(in srgb, var(--flat-good) 45%, var(--flat-sunken));
+}
+
+/*
+ * =========================================================================
+ * Detail panel (fixed-width right column)
+ * =========================================================================
+ */
+
+/* Place details below the list when the window is too narrow for two columns. */
+@media (max-width: 600px) {
+  .new-game {
+    flex-direction: column;
+  }
+
+  .new-game-main {
+    flex: 1 1 45%;
+    min-height: 0;
+  }
+
+  .new-game-detail {
+    flex: 1 1 55%;
+    width: auto;
+  }
+}
+
+.new-game-detail {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: clamp(380px, 36%, 540px);
+  min-height: 0;
+  background: color-mix(in srgb, var(--flat-sunken) 70%, transparent);
+  box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Scroll image/title/body together. Recreate on selection changes for a fresh fade-in. */
+.new-game-detail-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  animation: new-game-fade 0.3s ease-out;
+}
+
+/* Full-width top image, fading downward into the panel surface. */
+.new-game-detail-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 42%, rgba(0, 0, 0, 0.6) 68%, rgba(0, 0, 0, 0.18) 88%, transparent 100%);
+}
+
+.new-game-detail-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: -4.4rem;
+  padding: 0 26px;
+}
+
+.new-game-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+/* Tutorial badge, matching the position/size of ScenarioOriginBadges. */
+.new-game-detail-kind {
+  padding: 2px 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--flat-sunken);
+  white-space: nowrap;
+  background: var(--flat-accent);
+}
+
+.new-game-detail-title {
+  margin: 0;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--flat-text);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
+  overflow-wrap: anywhere;
+}
+
+.new-game-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 14px 26px 26px;
+}
+
+.new-game-detail .save-version-info {
+  font-size: 0.93rem;
+  color: var(--flat-text-muted);
+}
+
+/* Preserve line breaks in author-entered descriptions and completion conditions. */
+.new-game-detail-desc,
+.new-game-detail-block-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--flat-text-body);
+  white-space: pre-wrap;
+}
+
+.new-game-detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.new-game-detail-block-title {
+  margin: 0;
+  padding: 1px 0 1px 9px;
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: var(--flat-text);
+  border-left: 3px solid var(--flat-accent);
+}
+
+.new-game-detail-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 1 1 auto;
+  padding: 24px 36px;
+  text-align: center;
+  color: var(--flat-text-muted);
+}
+
+.new-game-detail-placeholder p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.new-game-detail-placeholder-icon {
+  width: 3.6rem;
+  height: 3.6rem;
+  opacity: 0.5;
+}
+
+/*
+ * =========================================================================
+ * Bottom row: left Close footer and right Start button, equal height with a continuous rule
+ * =========================================================================
+ */
+
+.new-game-footer,
+.new-game-detail-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: var(--new-game-footer-height);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.new-game-footer {
+  padding: 0 28px;
+}
+
+.new-game-detail-actions {
+  padding: 0 24px;
+}
+
+/* Full-width solid Start button. The left block and right arrow extend on hover. */
+.new-game-start {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 18px 13px 22px;
+  font: inherit;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-align: left;
+  background: var(--flat-selected);
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.new-game-start:hover:not(:disabled) {
+  background: var(--flat-selected-hover);
+  box-shadow: inset 8px 0 0 var(--flat-accent);
+}
+
+.new-game-start:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: 2px;
+}
+
+.new-game-start:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Mirror the Back arrow horizontally to point forward. */
+.new-game-start-arrow {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  transform: scaleX(-1);
+  transition: transform 0.18s ease;
+}
+
+.new-game-start:hover:not(:disabled) .new-game-start-arrow {
+  transform: scaleX(-1) translateX(-4px);
+}
+
+/*
+ * =========================================================================
+ * Settings confirmation (overlay and box matching save overlays)
+ * =========================================================================
+ */
+
+/* Overlay covering both selection columns */
+.new-game-confirm-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 14, 24, 0.85);
+  animation: new-game-fade 0.14s ease-out;
+}
+
+/* If fields exceed window height, scroll only the fields, retaining title/buttons. */
+.new-game-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 100%;
+  padding: 22px 24px 18px;
+  background: var(--flat-surface);
+  box-shadow: inset 0 3px 0 var(--flat-accent), 0 16px 40px rgba(0, 0, 0, 0.6);
+  animation: new-game-rise 0.16s ease-out;
+}
+
+.new-game-confirm-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--flat-text);
+}
+
+.new-game-confirm-title svg {
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--flat-accent);
+}
+
+.new-game-confirm-warning {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--flat-warn);
+  background: var(--flat-warn-surface);
+  box-shadow: inset 3px 0 0 var(--flat-warn);
+}
+
+.new-game-confirm-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.new-game-confirm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.new-game-confirm-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+}
+
+/* Use dark recessed inputs/dropdowns, indicating focus with a solid bottom block. */
+.new-game-confirm-input,
+.new-game-confirm-select {
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--flat-text);
+  background: var(--flat-sunken);
+  border: none;
+  border-radius: 0;
+  outline: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.new-game-confirm-input::placeholder {
+  color: var(--flat-text-muted);
+}
+
+.new-game-confirm-input:focus,
+.new-game-confirm-select:focus {
+  background: color-mix(in srgb, var(--flat-sunken) 70%, var(--flat-raised));
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+.new-game-confirm-input:disabled,
+.new-game-confirm-select:disabled {
+  opacity: 0.6;
+}
+
+/* Use the wrapper as the positioning box for the pseudo-element dropdown arrow. */
+.new-game-confirm-select-wrap {
+  position: relative;
+  display: flex;
+}
+
+.new-game-confirm-select {
+  flex: 1;
+  padding-right: 34px;
+  cursor: pointer;
+  appearance: none;
+}
+
+.new-game-confirm-select:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--flat-sunken) 70%, var(--flat-raised));
+}
+
+.new-game-confirm-select:disabled {
+  cursor: default;
+}
+
+/* The expanded list is browser-rendered; match only essential colors. */
+.new-game-confirm-select option {
+  color: var(--flat-text);
+  background: var(--flat-raised);
+}
+
+.new-game-confirm-select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-right: 2px solid var(--flat-accent);
+  border-bottom: 2px solid var(--flat-accent);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+/* Simulation days: contiguous toggle buttons, using selection color and a solid bottom block when selected. */
+.new-game-confirm-days {
+  display: flex;
+  gap: 2px;
+}
+
+.new-game-confirm-days-btn {
+  flex: 1;
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+  white-space: nowrap;
+  background: var(--flat-sunken);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.new-game-confirm-days-btn:hover:not(:disabled) {
+  color: var(--flat-text);
+  background: var(--flat-raised);
+}
+
+.new-game-confirm-days-btn.active,
+.new-game-confirm-days-btn.active:hover:not(:disabled) {
+  color: #ffffff;
+  background: var(--flat-selected);
+  box-shadow: inset 0 -3px 0 var(--flat-accent);
+}
+
+.new-game-confirm-days-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Notes such as "Cannot be changed later" */
+.new-game-confirm-note {
+  font-size: 0.93rem;
+  line-height: 1.5;
+  color: var(--flat-text-muted);
+}
+
+/* Warn that choosing a language different from the scenario regenerates names; emphasize more than ordinary notes. */
+.new-game-confirm-relocalize {
+  padding: 8px 10px 8px 12px;
+  color: var(--flat-warn);
+  background: var(--flat-warn-surface);
+  box-shadow: inset 3px 0 0 var(--flat-warn);
+}
+
+/* Author-fixed starting options: read-only values with a Fixed badge. */
+.new-game-confirm-fixed {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  color: var(--flat-text);
+  background: color-mix(in srgb, var(--flat-sunken) 50%, transparent);
+}
+
+.new-game-confirm-fixed-badge {
+  padding: 2px 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+  background: var(--flat-raised);
+}
+
+.new-game-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding-top: 2px;
+}
+
+@keyframes new-game-rise {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes new-game-fade {
+  from { opacity: 0; }
+}

@@ -1,0 +1,77 @@
+/* Public/publicly operated facility control panel. */
+
+.pf-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.pf-panel__title {
+  font-size: 1.11rem;
+  font-weight: 700;
+  color: #9db0c5;
+  letter-spacing: 0.02em;
+}
+
+/*
+ * Operation button row inside the card. Reuse .operation-panel / .operation-btn styles
+ * from AgentOperationPanel.css. Reduce vertical spacing inside the card.
+ */
+.pf-panel .operation-panel {
+  padding: 0;
+}
+
+/*
+ * Target utilization button. Align to the right of the button row and size to its icon and value.
+ * Click to toggle the slider below.
+ */
+.pf-panel .operation-btn--util {
+  width: auto;
+  margin-left: auto;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.pf-panel .operation-btn--util svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.pf-panel .operation-btn--util[aria-expanded="true"] {
+  background: rgba(78, 161, 255, 0.18);
+  border-color: rgba(78, 161, 255, 0.5);
+}
+
+.operation-btn__util-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #4ea1ff;
+  line-height: 1;
+}
+
+/*
+ * Expanded slider and actual utilization below it. Use a two-column grid to align caption widths
+ * and align the actual utilization value with the slider's left edge.
+ */
+.pf-panel__util-slider {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.pf-panel__util-current {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Add a gap to the left of the delete button. */
+.pf-panel .operation-btn--delete {
+  margin-left: 12px;
+}

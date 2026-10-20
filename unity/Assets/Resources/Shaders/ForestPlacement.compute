@@ -1,0 +1,92 @@
+#pragma kernel Generate
+
+struct ForestPoint { float4 positionScale; float4 rotationVisible; };
+RWStructuredBuffer<ForestPoint> _Points;
+StructuredBuffer<float2> _Vertices;
+StructuredBuffer<float4> _Rings;
+Texture2D<float4> _Heightmap;
+SamplerState linearClampSampler;
+int4 _Grid;
+int _Count, _Seed, _RegionRings, _RingCount, _HeightResolution;
+float _Spacing, _Clearance;
+float _EdgeFadeWidth;
+float4 _Rect;
+float3 _TileOrigin, _TileSize, _Offset;
+
+uint Hash(uint v) { v ^= v >> 16; v *= 0x7feb352d; v ^= v >> 15; v *= 0x846ca68b; return v ^ (v >> 16); }
+float Unit(uint v) { return (Hash(v) & 0xffffff) / 16777216.0; }
+
+float SegmentDistanceSq(float2 p, float2 a, float2 b)
+{
+    float2 ab = b-a;
+    float t = dot(ab, ab) > 0 ? saturate(dot(p-a, ab)/dot(ab, ab)) : 0;
+    float2 d = p-a-t*ab;
+    return dot(d,d);
+}
+
+bool InRing(float2 p, int index, out float edgeDistanceSq)
+{
+    int start = (int)_Rings[index].x, count = (int)_Rings[index].y;
+    bool inside = false;
+    edgeDistanceSq = 1e30;
+    for (int i=0, j=count-1; i<count; j=i++)
+    {
+        float2 a = _Vertices[start+i], b = _Vertices[start+j];
+        edgeDistanceSq = min(edgeDistanceSq, SegmentDistanceSq(p,a,b));
+        if ((a.y>p.y)!=(b.y>p.y) && p.x < (b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x) inside = !inside;
+    }
+    return inside || edgeDistanceSq < 1e-10;
+}
+
+bool Covered(float2 p, int start, int end, float clearance, bool obstacle, float edgeRank)
+{
+    int i = start;
+    while (i < end)
+    {
+        float edge;
+        bool outer = InRing(p,i,edge);
+        float boundaryDistanceSq = edge;
+        bool covers = outer || (obstacle && edge <= clearance*clearance);
+        int group = (int)_Rings[i].z;
+        i++;
+        while (i < end && (int)_Rings[i].z == group)
+        {
+            bool hole = InRing(p,i,edge);
+            boundaryDistanceSq = min(boundaryDistanceSq, edge);
+            if (hole && (!obstacle || edge > clearance*clearance)) covers = false;
+            i++;
+        }
+        if (covers)
+        {
+            if (obstacle || _EdgeFadeWidth <= 0) return true;
+            float t = saturate(sqrt(boundaryDistanceSq) / _EdgeFadeWidth);
+            if (edgeRank < t*t*(3-2*t)) return true;
+        }
+    }
+    return false;
+}
+
+[numthreads(64,1,1)]
+void Generate(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_Count) return;
+    // 予算超過時だけ格子を均等抽出する。乱数は抽出番号でなく元の世界格子から求める。
+    uint cell = _Count == _Grid.w ? id.x : (uint)floor((float)id.x * _Grid.w / _Count);
+    int x = _Grid.x + (int)(cell % (uint)_Grid.z);
+    int z = _Grid.y + (int)(cell / (uint)_Grid.z);
+    // 位置・回転・倍率は PropGeometry.Sample と同じ式で求め、CPUの候補と同じ個体にする。
+    uint h = Hash((uint)x) ^ Hash((uint)z + 0x9e3779b9) ^ Hash((uint)_Seed);
+    float2 p = (float2(x,z) + float2(Unit(h),Unit(h+1))) * _Spacing;
+    float scale = .8 + Unit(h+3)*.4;
+    bool visible = all(p >= _Rect.xy) && all(p < _Rect.zw);
+    if (visible) visible = Covered(p,0,_RegionRings,0,false,Unit(h+6)) && !Covered(p,_RegionRings,_RingCount,min(8,_Clearance*scale),true,0);
+    float2 world = p + _Offset.xz;
+    float2 grid = (world-_TileOrigin.xz)/_TileSize.xz * (_HeightResolution-1);
+    float2 uv = (grid+.5)/_HeightResolution;
+    // Unity の heightmapTexture は高さを 0〜0.5 に詰めて格納しているので、2倍してから地形の高さに戻す。
+    float height = _Heightmap.SampleLevel(linearClampSampler,uv,0).r * 2 * _TileSize.y + _TileOrigin.y;
+    ForestPoint result;
+    result.positionScale = float4(world.x,height,world.y,scale);
+    result.rotationVisible = float4(Unit(h+2)*6.28318530718,visible ? 1 : 0,Unit(h+4),Unit(h+5));
+    _Points[id.x] = result;
+}

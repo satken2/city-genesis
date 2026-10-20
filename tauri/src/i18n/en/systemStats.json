@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Simulation load",
+      "heading": "Computation time of the latest epoch ({{days}} days)",
+      "noData": "No measurement data",
+      "note": "When several epochs run in a row, this shows the last one. Operation count is a rough estimate of the number of combinations in the main comparisons, based on the size of the city.",
+      "colGroup": "Process",
+      "colTime": "Time",
+      "colWorkload": "Operation count",
+      "workloadHint": "Rough number of main comparisons (array elements). Hover over a value to see the breakdown.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Goods market",
+      "realestate": "Real estate market",
+      "labor": "Labor market",
+      "building_spawn": "Building spawn",
+      "agent_spawn": "Agent spawn",
+      "routing": "Citizen pathfinding",
+      "transit": "Transit pathfinding",
+      "environment": "Living environment",
+      "other": "Other"
+    },
+    "workload": {
+      "market": "Buyers {{demanders}} × sellers {{suppliers}} (multiplied per product and summed)",
+      "realestate": "Households considering a move {{movers}} × residential buildings {{housing}}",
+      "labor": "Job seekers {{seekers}} × employers {{employers}}",
+      "building_spawn": "Candidate parcels {{parcels}} × building types × floor counts × floor uses",
+      "agent_spawn": "Products × zones {{zones}} × zones {{zones}}",
+      "routing": "2 travel modes × zones {{zones}} × zones {{zones}} × 3 candidate routes × paths {{paths}}",
+      "transit": "Stops {{stops}} × nodes {{nodes}}",
+      "environment": "Grid {{width}} × {{height}} × sun positions"
+    },
+    "entities": {
+      "colMetric": "Metric",
+      "colCount": "Count",
+      "title": "Entity counts",
+      "agents": "Agents",
+      "households": "Households",
+      "businesses": "Businesses",
+      "publicFacilities": "Public facilities",
+      "buildings": "Buildings",
+      "citizens": "Citizens",
+      "population": "Population",
+      "zones": "Zones",
+      "parcels": "Parcels",
+      "paths": "Paths",
+      "roads": "Roads",
+      "tracks": "Tracks",
+      "infra": "Utility networks",
+      "nodes": "Nodes"
+    },
+    "approximation": {
+      "title": "Simulation approximation",
+      "intro": "Options to simplify calculations for large cities are planned. These settings cannot be changed yet.",
+      "warning": "These changes may affect game balance. They cannot be undone.",
+      "irreversible": "Changes caused by approximation persist in later epochs. Once enabled, approximation cannot be disabled or reduced.",
+      "undecided": "TBD",
+      "candidates": "candidates max.",
+      "epochs": "epochs between reviews",
+      "off": "Off",
+      "on": "On",
+      "goods": {
+        "label": "Purchase candidates",
+        "description": "Limit the suppliers compared by price and distance."
+      },
+      "jobs": {
+        "label": "Job candidates",
+        "description": "Limit the employers compared by wages and commuting conditions."
+      },
+      "housing": {
+        "label": "Housing candidates",
+        "description": "Limit the homes compared by rent and location."
+      },
+      "interval": {
+        "label": "Routine decision interval",
+        "description": "Review shopping, job and housing choices less often."
+      },
+      "aggregation": {
+        "label": "Group similar citizens and households",
+        "description": "Make some decisions collectively for citizens or households with similar circumstances."
+      }
+    },
+    "status": {
+      "title": "System status",
+      "gpuDisabled": "GPU acceleration: Disabled",
+      "coreSimulator": "Core simulator",
+      "currentMemory": "Current memory usage: {{value}}",
+      "peakMemory": "Peak memory usage since startup: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Current VRAM usage: {{value}}",
+      "usageTooltip": "Whole PC {{pc}} / This game {{game}} / Installed {{total}}",
+      "legendPc": "Whole PC",
+      "legendGame": "This game"
+    }
+  }
+}

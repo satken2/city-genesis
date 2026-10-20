@@ -1,0 +1,40 @@
+/* 上部バー。ウィンドウは画面の幅いっぱいで、パネルもその全体に広げる */
+
+.debug-bar {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.debug-bar__date {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.debug-bar__count {
+  width: 4.5em;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 0 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  color: inherit;
+  font: inherit;
+  text-align: right;
+}
+
+.debug-bar__execute {
+  height: 34px;
+  padding: 0 10px;
+}
+
+.debug-bar__execute .cockpit-execute-img {
+  height: 30px;
+}

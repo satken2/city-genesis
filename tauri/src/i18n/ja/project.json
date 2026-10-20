@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "建設プロジェクト",
+    "none": "（タグなし）",
+    "createNew": "＋ 新しいタグ…",
+    "newPlaceholder": "タグ名を入力",
+    "add": "追加",
+    "cancel": "キャンセル",
+    "saveFailed": "タグの保存に失敗しました",
+    "showObject": "3Dビューに表示する",
+    "hideObject": "3Dビューで非表示にする"
+  },
+  "constructionProjects": {
+    "empty": "タグの付いた工事がありません。建設パネルで設置するときにタグを選ぶか、着工前・建設中の公共施設や道路の詳細パネルからタグを付けてください。",
+    "loadFailed": "建設プロジェクトの取得に失敗しました",
+    "totalCost": "建設費（見込み）",
+    "duration": "工期（残り）",
+    "progress": "進捗",
+    "progressValue": "{{done}} / {{total}} 件 完了",
+    "monthsValue": "{{value}}ヶ月",
+    "stalled": "進行なし",
+    "stalledWarning": "{{count}} 件の工事は建設スピードが0のため進みません（工期の集計から除外しています）。",
+    "done": "完了",
+    "unnamed": "#{{id}}",
+    "showAll": "すべて表示に戻す（{{count}}）",
+    "showTag": "このプロジェクトを3Dビューに表示する",
+    "hideTag": "このプロジェクトを3Dビューで非表示にする",
+    "showObject": "3Dビューに表示する",
+    "hideObject": "3Dビューで非表示にする",
+    "deleteTag": "タグを削除する",
+    "confirmDeleteTag": "タグ「{{tag}}」を削除します。対象の建物・道路からタグが外れます（工事自体は消えません）。よろしいですか？",
+    "columns": {
+      "name": "対象",
+      "status": "状態",
+      "cost": "残り建設費",
+      "remaining": "残り工期"
+    }
+  }
+}

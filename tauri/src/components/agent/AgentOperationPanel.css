@@ -1,0 +1,65 @@
+.operation-panel {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.operation-btn {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.operation-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.operation-btn:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.operation-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.operation-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.operation-btn.operation-btn--active {
+  background: rgba(255, 150, 40, 0.24);
+  border-color: rgba(255, 170, 80, 0.6);
+}
+
+
+/* Match our SVG icons (explosion and City Hall relocation buttons) to the size of image icons. */
+.operation-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Buttons for irreversible operations. Use red tones to reduce accidental actions. */
+.operation-btn.operation-btn--danger {
+  background: rgba(220, 60, 50, 0.22);
+  border-color: rgba(255, 110, 90, 0.55);
+  color: #ffd9d3;
+}
+
+.operation-btn.operation-btn--danger:hover:not(:disabled) {
+  background: rgba(220, 60, 50, 0.38);
+}
+
+.operation-btn.operation-btn--danger:active:not(:disabled) {
+  background: rgba(220, 60, 50, 0.5);
+}

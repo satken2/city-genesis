@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "目前日期",
+    "afterDate": "執行後的日期",
+    "epochCount": "紀元數",
+    "message": "完成本回合的作業並推進時間嗎？",
+    "no": "否",
+    "yes": "是",
+    "executing": "模擬執行中...",
+    "errorSteamLimit": "無法確認Steam認證，因此無法繼續執行紀元。（未認證狀態下可遊玩至人口{{limit}}人）",
+    "errorAlreadyRunning": "另一個紀元正在執行。請在其完成後再試。",
+    "errorFailed": "紀元執行失敗：{{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "（執行了{{count}}個紀元）",
+    "sectionConstruction": "建設狀況",
+    "kindPath": "道路",
+    "kindBuilding": "設施",
+    "kindProject": "專案",
+    "noItems": "無對象",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "完成",
+    "sectionStatistics": "統計",
+    "sectionScore": "評分",
+    "scoreGain": "加分",
+    "scoreLoss": "扣分",
+    "questState": {
+      "completed": "已達成",
+      "active": "進行中",
+      "locked": "未解鎖",
+      "failed": "失敗"
+    },
+    "trendHint": "最近{{count}}個紀元的趨勢：{{trend}}",
+    "trend": {
+      "up": "上升趨勢",
+      "flat": "持平",
+      "down": "下降趨勢",
+      "none": "歷史資料不足"
+    },
+    "statPopulation": "人口",
+    "statTourists": "遊客",
+    "statGdp": "GDP",
+    "statPrice": "物價",
+    "statIncome": "所得",
+    "statUnemployment": "失業率",
+    "statHealthcare": "醫療滿足度",
+    "statNutrition": "營養滿足度",
+    "statLeisure": "娛樂與休閒",
+    "statFire": "火災",
+    "statTraffic": "交通事故",
+    "statCrime": "犯罪",
+    "questCompleted": "達成！",
+    "questFailed": "已逾期"
+  },
+  "epochProgress": {
+    "counter": "{{step}}（{{index}}/{{count}}）",
+    "steps": {
+      "route": "正在規劃路線",
+      "prepare": "正在準備本期",
+      "transit": "正在安排大眾運輸",
+      "market": "正在交易商品",
+      "production": "正在生產與消費",
+      "commute": "正在上班上學",
+      "growth": "市民正在成長",
+      "evaluate": "正在評估城市",
+      "immigration": "正在接納移民",
+      "labor": "正在尋找工作",
+      "spawn": "新店鋪和公司正在開業",
+      "relocate": "正在搬家",
+      "construction": "正在興建建築",
+      "finance": "正在整理資金流向",
+      "plan": "正在制定下期計畫",
+      "incident": "正在應對火災和事故",
+      "finalize": "正在彙整統計"
+    }
+  }
+}

@@ -1,0 +1,383 @@
+{
+  "paramSetup": {
+    "title": "遊戲參數設定",
+    "description": "基本上建議使用預設值。僅在需要變更時進行調整。",
+    "skip": "略過",
+    "start": "開始遊戲",
+    "apply": "套用並關閉",
+    "close": "關閉",
+    "loading": "載入中...",
+    "reload": "重新載入",
+    "reloadHint": "在後端初始化完成後重新載入，即可反映最新的數值",
+    "fetchError": "參數取得失敗",
+    "category": {
+      "population": "人口・移民",
+      "citizen": "市民生活",
+      "economy": "經濟",
+      "labor": "勞動・薪資",
+      "education": "教育",
+      "construction": "建設・不動產",
+      "environment": "環境",
+      "traffic": "交通",
+      "general": "通用",
+      "pathfind": "交通・路徑",
+      "building": "建築・建設",
+      "disaster": "災害・治安",
+      "sprawl": "城市蔓延",
+      "production": "生產・庫存",
+      "zone": "地區・地塊",
+      "financial": "金融"
+    },
+    "param": {
+      "TFR_TARGET": {
+        "label": "總生育率（TFR）目標",
+        "desc": "家庭所追求的生育率。數值越高越容易生育。"
+      },
+      "MARRIAGE_RATE": {
+        "label": "結婚率",
+        "desc": "市民結婚的基礎機率係數。數值越大越容易結婚。"
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "可生育最低年齡",
+        "desc": "可以生育的最低年齡。低於此年齡不會發生生育。"
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "可生育最高年齡",
+        "desc": "可以生育的最高年齡。超過此年齡不會發生生育。"
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "移民家庭的已婚比例",
+        "desc": "移民家庭流入城市時為夫妻的機率。"
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "第1名子女持有率（移民）",
+        "desc": "移民家庭生成時擁有1名子女的機率。"
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "第2名子女持有率（移民）",
+        "desc": "移民家庭生成時擁有2名子女的機率。"
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "第3名子女持有率（移民）",
+        "desc": "移民家庭生成時擁有3名子女的機率。"
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "成年移民的最小年齡",
+        "desc": "作為移民流入的成年人的最小年齡。"
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "成年移民的最大年齡",
+        "desc": "作為移民流入的成年人的最大年齡。"
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "壽命係數",
+        "desc": "作用於市民最大壽命的係數。1.08時上限約100歲，1.06時約150歲。",
+        "graphX": "年齡",
+        "graphY": "年死亡機率(健康度1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "單身家庭的居住面積（m²）",
+        "desc": "單身家庭所需的最低居住面積。"
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "配偶所需的額外面積（m²）",
+        "desc": "夫妻家庭相較單身家庭額外需要的居住面積。"
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "每名子女的額外面積（m²）",
+        "desc": "每增加1名子女所增加的居住面積。"
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "房租所得比（可支付上限）",
+        "desc": "相對於家庭所得可支付房租的最大比例。0.3表示最多可用所得的30%。"
+      },
+      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
+        "label": "可支配所得下限比率",
+        "desc": "家庭力求保留的最低裁量所得比例。過低會導致生活容易崩潰。"
+      },
+      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
+        "label": "決定搬遷的紀元數",
+        "desc": "從對居住環境不滿到決定搬遷所經過的紀元數。"
+      },
+      "HOUSEHOLD_SHACK_COUNT": {
+        "label": "淪為無家可歸的紀元數",
+        "desc": "從失去住所到進入無家可歸狀態所經過的紀元數。"
+      },
+      "AVERAGE_WAGE": {
+        "label": "平均薪資（基準值）",
+        "desc": "模擬開始時的基準平均薪資。"
+      },
+      "AVERAGE_RENT": {
+        "label": "平均房租（基準值）",
+        "desc": "模擬開始時的基準平均房租（每日每平方公尺）。"
+      },
+      "MIN_PROFIT_RATE": {
+        "label": "最低利潤率",
+        "desc": "企業維持營運所需的最低利潤率。"
+      },
+      "SPAWN_PROFIT_RATE_THRESHOLD": {
+        "label": "允許新進入的最低利潤率",
+        "desc": "只有利潤率高於此值的市場才會生成新企業。用於抑制過度展店。"
+      },
+      "DIVIDEND_PAYOUT_RATIO": {
+        "label": "股利發放比率",
+        "desc": "企業利潤中分配給家庭的比例。"
+      },
+      "MIN_PRODUCTION_LIMIT": {
+        "label": "最低產量比率",
+        "desc": "相對於總需求的最低產量比例。"
+      },
+      "MAX_LONGRUN_BONUS_DAYS": {
+        "label": "長期營運加成最大天數",
+        "desc": "企業因長期營運而獲得加成的天數上限。"
+      },
+      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
+        "label": "出口停止的價格差",
+        "desc": "供應價格高於出口收取上限（境外價格 ÷ (1 + 運輸費率)）達到此比例時，進出口據點的收購降為0。超出上限的部分越多，收購按直線減少。"
+      },
+      "SPAWN_LABOR_CAP_RATIO": {
+        "label": "生成時勞動力消耗上限",
+        "desc": "新企業生成時可一次性消耗城市剩餘勞動力的最大比例。"
+      },
+      "DEVELOPER_PROFIT_RATIO": {
+        "label": "不動產開發商利潤率",
+        "desc": "不動產開發所得利潤的比例。"
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "設備折舊率",
+        "desc": "設備投資資本存量每紀元的折舊率。"
+      },
+      "WORK_HOURS": {
+        "label": "每日勞動時間（h）",
+        "desc": "市民每日工作的標準時數。"
+      },
+      "NORMAL_LABOR_UTILITY": {
+        "label": "基準勞動力利用度",
+        "desc": "計算標準價格時的勞動力利用度。1.0為完全利用。"
+      },
+      "HIGH_SKILL_BOUNDARY": {
+        "label": "高技能分界值",
+        "desc": "超過此值即視為高技能勞動者。"
+      },
+      "MAX_BASE_SKILL": {
+        "label": "基礎技能最大值",
+        "desc": "透過初等教育可達到的最大技能值。"
+      },
+      "MAX_SKILL": {
+        "label": "技能上限值",
+        "desc": "市民可習得的最大技能值（含高等教育與工作經驗）。"
+      },
+      "WAGE_OVERSTAFFED_THRESHOLD": {
+        "label": "冗員時降薪閾值",
+        "desc": "冗員率超過此值時調降薪資（以 labor_surplus / quota 評估）。"
+      },
+      "WAGE_UNDERSTAFFED_THRESHOLD": {
+        "label": "人手不足時加薪閾值",
+        "desc": "人手不足且無人應徵的狀態超過此值時調升薪資。"
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "初等教育開始年齡",
+        "desc": "兒童開始接受初等教育（相當於小學）的年齡。"
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "初等教育結束年齡",
+        "desc": "初等教育結束的年齡（相當於高中畢業）。"
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "大學畢業・獨立年齡",
+        "desc": "完成高等教育並從家庭獨立的年齡。"
+      },
+      "MIN_WORKING_AGE": {
+        "label": "可就業最低年齡",
+        "desc": "低於此年齡的市民不納入求職對象與失業率統計。"
+      },
+      "EDUCATION_CAPACITY_PER_FLOOR": {
+        "label": "教育設施的容納人數（每m²）",
+        "desc": "每1平方公尺樓地板面積可接收的學生人數。"
+      },
+      "SCHOOL_SEARCH_MAX_DISTANCE": {
+        "label": "可通學最大距離（分鐘）",
+        "desc": "尋找就讀學校時的最大距離（換算為分鐘）。"
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "高層化成本驟增閾值（層）",
+        "desc": "超過此樓層數後建設費用急劇上升。可抑制超高層建築的建設。",
+        "graphX": "樓層數",
+        "graphY": "建設費倍率"
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "樓層懲罰係數",
+        "desc": "高層化成本懲罰的係數。數值越大，高層懲罰越小。",
+        "graphX": "樓層數",
+        "graphY": "建設費倍率"
+      },
+      "BUILDING_ASPECT_RATIO_MAX": {
+        "label": "塔狀比上限",
+        "desc": "建築高度÷√建築面積的上限。防止在小地塊上自動建起細長的高樓。0為不限制。"
+      },
+      "DEMOLITION_RATE": {
+        "label": "拆除效率比",
+        "desc": "拆除相較於新建的效率倍率。"
+      },
+      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
+        "label": "不動產供給餘裕率",
+        "desc": "不動產市場中始終保留的餘裕供給比例。"
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
+        "label": "開發誘發的標準用地面積下限",
+        "desc": "開發誘發脈衝的標準開發用地面積下限（m²）。與地區的需求密度相乘，決定單個紀元的建設需求規模。"
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
+        "label": "開發誘發的標準用地面積上限",
+        "desc": "開發誘發脈衝的標準開發用地面積上限（m²）。數值越大，單次開發規模越大。"
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "倒塌基準年機率",
+        "desc": "耐久度0.5的建築在1年內倒塌的基準機率。"
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "倒塌機率韋伯形狀參數",
+        "desc": "數值越大，在使用年限附近倒塌機率上升越急劇。"
+      },
+      "MAINTENANCE_DURABILITY_THRESHOLD": {
+        "label": "修繕判定的耐久度閾值",
+        "desc": "耐久度低於此值的建築成為修繕對象。"
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "修繕成本比率",
+        "desc": "修繕成本相對於新建成本的比例。"
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "進入修繕的基準年機率",
+        "desc": "修繕對象建築實際進入修繕的基準年機率。"
+      },
+      "DEMOLITION_DURABILITY_THRESHOLD": {
+        "label": "停業建築的拆除閾值",
+        "desc": "停業中的建築耐久度低於此值時成為拆除對象。"
+      },
+      "DEMOLITION_BASE_RATE_ANNUAL": {
+        "label": "停業建築的年拆除機率",
+        "desc": "停業且屬於拆除對象的建築在1年內被拆除的基準機率。"
+      },
+      "SHUTDOWN_GRACE_PERIOD_DAYS": {
+        "label": "停業判定寬限期（日）",
+        "desc": "建築竣工後免於停業判定的天數。用於給租戶聚集留出緩衝期。"
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "初始建設負債（每m²）",
+        "desc": "建築每1平方公尺樓地板面積的初始建設負債（負的現金存款）。"
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "道路交通噪音係數",
+        "desc": "道路交通量對噪音熱力圖的影響係數。數值越大沿街越吵。"
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "行人交通噪音係數",
+        "desc": "行人交通量對噪音熱力圖的影響係數。"
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "行人噪音產生閾值",
+        "desc": "行人交通量超過此值的部分才會貢獻噪音。"
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "噪音衰減距離（m）",
+        "desc": "噪音隨距離的平方減弱，並且每經過這一距離再衰減到1/e（建築遮擋、空氣與地面吸收）。數值越小越集中在聲源附近。"
+      },
+      "NOISE_SATURATION_LEVEL": {
+        "label": "噪音飽和水準",
+        "desc": "噪音熱力圖的最大值。超過此值的噪音將封頂。"
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "道路交通空氣污染係數",
+        "desc": "道路交通量對空氣污染熱力圖的影響係數。"
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "空氣污染衰減距離（m）",
+        "desc": "空氣污染與惡臭隨距離的平方減弱，並且每經過這一距離再衰減到1/e（擴散與沉降）。數值越小越集中在污染源附近。"
+      },
+      "POLLUTION_SATURATION_LEVEL": {
+        "label": "空氣污染飽和水準",
+        "desc": "空氣污染熱力圖的最大值。"
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "失業的犯罪權重",
+        "desc": "失業率對治安熱力圖的權重。數值越大失業越直接導致治安惡化。"
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "犯罪擴散範圍（m）",
+        "desc": "治安熱力圖的高斯模糊半徑。"
+      },
+      "CRIME_SATURATION_LEVEL": {
+        "label": "犯罪飽和水準",
+        "desc": "治安熱力圖的最大值。"
+      },
+      "LIVING_MULTIPLIER_MIN": {
+        "label": "居住環境乘數下限",
+        "desc": "居住環境最差時的房租乘數下限。"
+      },
+      "LIVING_MULTIPLIER_MAX": {
+        "label": "居住環境乘數上限",
+        "desc": "居住環境理想時的房租乘數上限。"
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "行人速度（km/h）",
+        "desc": "行人的移動速度。用於計算路徑搜尋成本。"
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "汽車加速距離（m）",
+        "desc": "汽車加速所用的距離。影響短道路的速度計算。"
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "道路每日運行時間（h）",
+        "desc": "道路每日處於運行狀態的時數。用於交通量換算。"
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "道路交通量加成飽和閾值",
+        "desc": "道路交通量達到此值以上時，對零售店的交通加成達到最大。"
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "行人交通量加成飽和閾值",
+        "desc": "行人交通量達到此值以上時，對零售店的行人加成達到最大。"
+      },
+      "RESOURCE_EFFICIENCY_THRESHOLD": {
+        "label": "天然資源效率閾值",
+        "desc": "天然資源剩餘率在此值以上時開採效率保持接近1.0，低於此值則急劇下降。"
+      }
+    }
+  },
+  "newGame": {
+    "loading": "載入中...",
+    "noScenarios": "沒有可用的劇本",
+    "starting": "開始中...",
+    "startFailed": "開始失敗",
+    "confirmTitle": "遊戲設定確認",
+    "unsavedChangesWarning": "開始後，目前遊戲中未儲存的變更將會遺失。",
+    "cityNameLabel": "城市名稱",
+    "cityNamePlaceholder": "輸入城市名稱（選填）",
+    "languageLabel": "城市的語言",
+    "languageNote": "※之後無法變更",
+    "simulationDaysLabel": "模擬天數",
+    "simulationDaysNote": "※之後無法變更",
+    "daysOption": "{{days}}天",
+    "startButton": "開始",
+    "backButton": "返回",
+    "cleared": "已通關",
+    "tutorialBadge": "新手教學",
+    "sectionDebug": "除錯",
+    "sectionTutorials": "新手教學",
+    "sectionScenarios": "劇本",
+    "detailPlaceholder": "請從左側列表中選擇劇本。",
+    "detailMapSizeLabel": "地圖尺寸",
+    "detailUnknown": "未知",
+    "detailObjectiveLabel": "達成條件",
+    "detailNoObjective": "無達成條件",
+    "detailNoDescription": "此劇本沒有設定說明。",
+    "tutorialObjective": "完成新手教學的所有步驟。",
+    "startScenarioButton": "開始此劇本",
+    "tabSelect": "選擇劇本",
+    "tabBrowse": "尋找劇本",
+    "comingSoon": "Coming soon",
+    "relocalizeNote": "此場景以{{from}}製作。以{{to}}開始時，區、設施、居民、車站等名稱將以{{to}}重新命名(作者取的名稱也會被取代;道路名稱等會保留)。",
+    "fixedByScenario": "由場景固定"
+  }
+}

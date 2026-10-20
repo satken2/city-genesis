@@ -1,0 +1,81 @@
+.employment-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.employment-chart-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.employment-chart-title {
+  font-size: 1.06rem;
+  font-weight: 600;
+  color: #9db0c5;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.employment-chart-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.employment-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.employment-legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  gap: 6px;
+}
+
+.employment-legend-bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.employment-legend-label {
+  color: #9db0c5;
+}
+
+.employment-info-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.employment-info-bottom-title {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1.11rem;
+  margin-bottom: 4px;
+}
+
+.employment-employees-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 4px;
+}

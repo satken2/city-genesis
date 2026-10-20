@@ -1,0 +1,42 @@
+/* Station information section styles in path details. Share common styling with AgentDetailPanel.css. */
+
+/*
+ * One platform/line row, with links and supplementary length/status information on opposite sides.
+ * Span the full grid-column width across agent-detail-grid's two columns.
+ */
+.station-info__row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+}
+
+/* Left side of a stop row, containing line and platform links. */
+.station-info__stop {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  min-width: 0;
+}
+
+.station-info__meta {
+  color: #93a9c0;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.station-info__subtitle {
+  margin: 10px 0 4px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #c5d4e3;
+}
+
+.station-info__count {
+  margin-left: 6px;
+  opacity: 0.7;
+}
+

@@ -1,0 +1,8 @@
+{
+  "climateEffects": {
+    "currentClimate": "Climat moyen de ce mois",
+    "title": "Efficacité de production des installations selon le climat",
+    "facility": "Installation",
+    "factor": "Efficacité de production"
+  }
+}

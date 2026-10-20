@@ -1,0 +1,37 @@
+{
+  "supply": {
+    "title": "공급 정보",
+    "product": "공급 제품",
+    "amount": "공급량",
+    "price": "공급 가격",
+    "soldAmount": "판매량",
+    "profitRate": "이익률",
+    "utilization": "가동률"
+  },
+  "demand": {
+    "product": "상품",
+    "demandAmount": "수요량",
+    "receivedAmount": "획득량",
+    "acquiredAmount": "재고"
+  },
+  "cargo": {
+    "title": "하역 정보",
+    "description": "이 거점은 역외에서 상품을 수입해 도시 내 시장에 공급하고, 도시 내 잉여 생산물을 매입해 역외로 수출합니다.",
+    "capacity": "취급 능력",
+    "perEpochPerDirection": "/에포크(수출입 각각)",
+    "materialCapacity": "받은 원자재에 따른 상한",
+    "areaCapacity": "면적에 따른 상한",
+    "importHandled": "수입 취급량",
+    "exportHandled": "수출 취급량",
+    "utilization": "가동률",
+    "importSectionTitle": "수입(도시로 판매)",
+    "exportSectionTitle": "수출(도시에서 매입)",
+    "handledImport": "판매량",
+    "handledExport": "매입량",
+    "allocation": "할당량",
+    "priceImport": "판매 단가",
+    "priceExport": "매입 단가",
+    "lost": "판매 기회 손실",
+    "noProducts": "취급 품목이 없습니다"
+  }
+}

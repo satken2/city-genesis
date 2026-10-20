@@ -1,0 +1,242 @@
+/**
+ * Shared styles for developer-only Spawn debug tabs.
+ * Used by both DebugAgentSpawnTab and DebugBuildingSpawnTab.
+ * Matches the dark card layout used by other statistics tabs.
+ */
+
+.debug-spawn-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/*
+ * Building-tab-only modifier: fit the chart to the window height at all times without scrolling
+ * the entire tab. Only the latest Epoch table on the right (.debug-spawn-table-scroll--fill)
+ * should scroll. Propagate min-height:0 through descendant flex/grid items so the chart area
+ * can shrink to fit the available height.
+ */
+.debug-spawn-tab--fixed {
+  overflow-y: hidden;
+  min-height: 0;
+}
+
+.debug-spawn-tab__title {
+  margin: 0;
+  font-size: 1.39rem;
+  color: #dbe7f3;
+}
+
+.debug-spawn-tab__loading,
+.debug-spawn-tab__error {
+  padding: 16px;
+  color: #8ba3bb;
+  font-size: 1rem;
+}
+
+/* Overall layout: left three-quarters (charts) + right quarter (latest Epoch table) */
+.debug-spawn-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.debug-spawn-layout__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.debug-spawn-layout__side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.debug-spawn-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Card filling the remaining parent-column height (right table and building tab's single chart) */
+.debug-spawn-card--fill {
+  flex: 1;
+  min-height: 0;
+}
+
+.debug-spawn-card__title {
+  margin: 0;
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: #9cb3cb;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.debug-spawn-card__meta {
+  font-weight: 400;
+  color: #64748b;
+  font-size: 0.93rem;
+}
+
+/* Header placing the card heading and filter selector side by side */
+.debug-spawn-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.debug-spawn-card__header .debug-spawn-control {
+  flex: 0 1 260px;
+}
+
+.debug-spawn-card__chart {
+  width: 100%;
+  height: 240px;
+}
+
+/*
+ * In a single-chart card (building tab), fill the card's remaining height.
+ * A fixed min-height would force the entire tab to scroll in small windows, so use 0
+ * to allow shrinking freely to the available height.
+ */
+.debug-spawn-card__chart--tall {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+.debug-spawn-card__no-data {
+  padding: 24px 0;
+  text-align: center;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.debug-spawn-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.debug-spawn-control__label {
+  font-size: 1rem;
+  color: #8ba3bb;
+  white-space: nowrap;
+}
+
+.debug-spawn-control__select {
+  flex: 1;
+  min-width: 0;
+  background: #1a2230;
+  color: #dbe7f3;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  font-size: 1rem;
+  padding: 3px 6px;
+}
+
+.debug-spawn-table-scroll {
+  overflow-y: auto;
+  max-height: 260px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+}
+
+/* Expand the right-column table's scrolling area to fill the card's remaining height. */
+.debug-spawn-table-scroll--fill {
+  flex: 1;
+  max-height: none;
+  min-height: 0;
+}
+
+.debug-spawn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  color: #c4d3e3;
+}
+
+.debug-spawn-table th {
+  position: sticky;
+  top: 0;
+  background: #1a2230;
+  color: #8ba3bb;
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.debug-spawn-table td {
+  padding: 3px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.debug-spawn-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Table where clicking a row switches the chart target */
+.debug-spawn-table--clickable tbody tr {
+  cursor: pointer;
+}
+
+.debug-spawn-table--clickable tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Highlight the Variant row currently shown (selected) in the chart. */
+.debug-spawn-table__row--selected td {
+  background: rgba(78, 161, 255, 0.12);
+}
+
+/* Highlight rows with positive scores (= viable construction) or recorded Spawns. */
+.debug-spawn-table__row--positive td {
+  color: #6ee7b7;
+}
+
+/* Values exceeding an entry gate threshold (e.g. estimated initial capital > credit concentration limit) */
+.debug-spawn-table__num--over {
+  color: #f87171;
+}
+
+/*
+ * Supplementary line outside the table (e.g. a city-wide threshold shared by industries).
+ * Keep spacing compact because it sits between the table heading and body.
+ */
+.debug-spawn-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.93rem;
+  color: #8ba3bb;
+}
+
+/* Unit keeping each "label: value" pair together without a line break */
+.debug-spawn-note__item {
+  white-space: nowrap;
+}
+
+.debug-spawn-note__value {
+  color: #c4d3e3;
+  font-variant-numeric: tabular-nums;
+}

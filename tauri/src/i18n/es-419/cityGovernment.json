@@ -1,0 +1,31 @@
+{
+  "cityGovernment": {
+    "tooltip": "Haz clic para abrir el gobierno municipal",
+    "categories": "Categorías",
+    "population": "Población",
+    "unitPeople": "personas",
+    "unemploymentRate": "Tasa de desempleo",
+    "averageWage": "Salario promedio",
+    "unitPerPersonDay": "/persona/día",
+    "averageRent": "Alquiler promedio",
+    "unitPerAreaDay": "/m²/día",
+    "cityScore": "Puntuación de la ciudad",
+    "tabRealEstate": "Inmuebles",
+    "tabPublicStandard": "Instalaciones públicas",
+    "tabOpenSpace": "Espacios abiertos",
+    "tabEducation": "Educación",
+    "tabPort": "Puerto",
+    "tabIntercity": "Transporte interurbano",
+    "tabCity": "Gobierno municipal",
+    "supplyFloor": "Superficie ofrecida",
+    "occupancyRate": "Ocupación",
+    "rent": "Alquiler",
+    "capacity": "Capacidad",
+    "importHandling": "Volumen importado",
+    "exportHandling": "Volumen exportado",
+    "production": "Producción",
+    "soldAmount": "Cantidad vendida",
+    "price": "Precio",
+    "empty": "No hay entidades que coincidan."
+  }
+}

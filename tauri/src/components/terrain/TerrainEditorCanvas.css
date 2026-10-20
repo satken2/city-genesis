@@ -1,0 +1,431 @@
+.terrain-editor-root {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: #0d0d14;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+/* Left tool panel for card-based editing UI (the 3D preview is a separate window). */
+.terrain-editor-tools {
+  flex: 0 0 300px;
+  width: 300px;
+  height: 100%;
+  background-color: #16161c;
+  border-right: 1px solid #2a2a35;
+  padding: 16px 12px;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Place preview and metadata buttons side by side below the heading (Scenario name). */
+.terrain-editor-tools-title-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #2a2a35;
+  flex: 0 0 auto;
+}
+
+.terrain-editor-tools-title {
+  margin: 0;
+  font-size: 1.39rem;
+  font-weight: 600;
+  color: #a0c8ff;
+  overflow-wrap: anywhere;
+}
+
+/* Explains elevation/water/river locks and why tab choices are disabled. */
+.terrain-editor-lock-notice {
+  flex: 0 0 auto;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid #6a5a2e;
+  border-radius: 4px;
+  background-color: rgba(240, 200, 100, 0.08);
+  color: #e8d6a0;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.terrain-editor-lock-notice p,
+.terrain-editor-lock-notice ul {
+  margin: 0;
+}
+
+.terrain-editor-lock-notice ul {
+  padding-left: 1.2em;
+}
+
+/* Card area. Show only the selected column, using the remaining height for scrolling. */
+.terrain-editor-cards-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.terrain-editor-cards-left {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.terrain-editor-cards-right {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card appearance */
+.terrain-editor-card {
+  background-color: #1a1a26;
+  border: 1px solid #282833;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.terrain-editor-card-title {
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: #9aa0b0;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #24242e;
+}
+
+/* Editing tool section dividers within the manual editing card */
+.terrain-editor-section {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #24242e;
+}
+
+.terrain-editor-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.terrain-editor-section-title {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: #9aa0b0;
+  margin-bottom: 6px;
+}
+
+/* Mode / selection method / editing method buttons */
+.terrain-editor-toggle-group {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.terrain-editor-toggle-group-vertical {
+  flex-direction: column;
+}
+
+.terrain-editor-toggle-btn {
+  flex: 1 1 0;
+  padding: 5px 6px;
+  font-size: 1rem;
+  color: #c8c8d0;
+  background-color: #1c1c24;
+  border: 1px solid #30303c;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.terrain-editor-toggle-btn:hover {
+  border-color: #4a4a5a;
+}
+
+.terrain-editor-toggle-btn.selected {
+  background-color: #2a3a52;
+  border-color: #5a8fd6;
+  color: #a0c8ff;
+}
+
+/* Parameter input rows */
+.terrain-editor-param-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.terrain-editor-param-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.terrain-editor-param-label {
+  font-size: 1rem;
+  color: #b0b0bc;
+  flex: 1 1 auto;
+}
+
+.terrain-editor-select {
+  flex: 0 0 auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  background-color: #1c1c24;
+  color: #e0e0e0;
+  border: 1px solid #30303c;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 1rem;
+}
+
+.terrain-editor-hint {
+  font-size: 0.93rem;
+  color: #777;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
+.terrain-editor-hint--success {
+  color: #8fd69a;
+}
+
+.terrain-editor-hint--error {
+  color: #f0a0a0;
+}
+
+.terrain-editor-param-value {
+  flex: 0 0 auto;
+  font-size: 1rem;
+}
+
+.terrain-editor-unsaved {
+  color: #e8c878;
+}
+
+.terrain-editor-meta-readonly {
+  font-size: 0.93rem;
+  color: #777;
+  line-height: 1.5;
+}
+
+.terrain-editor-polygon-count {
+  font-size: 1rem;
+  color: #a0c8ff;
+}
+
+.terrain-editor-selection-status {
+  font-size: 1rem;
+  color: #a0c8ff;
+  font-weight: 600;
+}
+
+/* Action buttons */
+.terrain-editor-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.terrain-editor-action-buttons-vertical {
+  flex-direction: column;
+}
+
+.terrain-editor-btn {
+  flex: 1 1 0;
+  padding: 6px 6px;
+  font-size: 1rem;
+  color: #e0e0e0;
+  background-color: #23232d;
+  border: 1px solid #383846;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.terrain-editor-btn:hover:not(:disabled) {
+  border-color: #5a5a6e;
+}
+
+.terrain-editor-btn:disabled {
+  color: #666;
+  cursor: not-allowed;
+}
+
+.terrain-editor-btn-confirm {
+  background-color: #2a4a2e;
+  border-color: #4a8f52;
+  color: #b8f0c0;
+}
+
+.terrain-editor-btn-confirm:hover:not(:disabled) {
+  border-color: #6ad07a;
+}
+
+/* Canvas area, filling the display. */
+.terrain-editor-canvas-wrap {
+  flex: 1 1 auto;
+  position: relative;
+  min-width: 0;
+  height: 100%;
+}
+
+/* Stack terrain (WebGL2), vector, and cursor (Canvas2D) layers from bottom to top. Only the vector layer receives mouse input. */
+.terrain-editor-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.terrain-editor-canvas--terrain,
+.terrain-editor-canvas--cursor {
+  pointer-events: none;
+}
+
+.terrain-editor-canvas--vectors {
+  cursor: grab;
+}
+
+.terrain-editor-canvas--vectors:active {
+  cursor: grabbing;
+}
+
+/* Centered loading/error message */
+.terrain-editor-msg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 14px 24px;
+  background-color: rgba(20, 20, 28, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #ccc;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.terrain-editor-msg--error {
+  color: #f0a0a0;
+  background-color: rgba(58, 31, 31, 0.95);
+  border-color: #5a2a2a;
+}
+
+/* Bottom left: cursor coordinates */
+.terrain-editor-coord-overlay {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  background-color: rgba(0, 0, 0, 0.55);
+  border-radius: 4px;
+  font-family: Consolas, Menlo, monospace;
+  font-size: 1rem;
+  color: #c0c0c0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Bottom right: zoom factor */
+.terrain-editor-zoom-overlay {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  background-color: rgba(0, 0, 0, 0.55);
+  border-radius: 4px;
+  font-family: Consolas, Menlo, monospace;
+  font-size: 1rem;
+  color: #c0c0c0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Editing target switcher (label + dropdown) */
+.terrain-editor-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2a2a35;
+  flex: 0 0 auto;
+}
+
+.terrain-editor-tabs-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #9aa0b0;
+  flex: 0 0 auto;
+}
+
+/* The current editing target must always be visible, so emphasize it and give it more width than other dropdowns. */
+.terrain-editor-tab-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  background-color: #2a3a52;
+  border-color: #5a8fd6;
+  color: #a0c8ff;
+}
+
+.terrain-editor-tab-select:disabled {
+  background-color: #1c1c24;
+  border-color: #30303c;
+  color: #555;
+  cursor: not-allowed;
+}
+
+
+/* River list rows. Click the heading row to select; a solid block at the left marks selection, following the flat design's emphasis style. */
+.terrain-editor-river-row {
+  padding-left: 6px;
+}
+
+.terrain-editor-river-row-head {
+  cursor: pointer;
+}
+
+.terrain-editor-river-row.is-selected {
+  box-shadow: inset 3px 0 0 #7cc4ff;
+  background-color: rgba(124, 196, 255, 0.08);
+}
+
+.terrain-editor-cards-left[hidden],
+.terrain-editor-cards-right[hidden] { display: none; }
+.terrain-editor-subtabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.terrain-editor-header-actions { display: flex; gap: 6px; }
+.terrain-editor-save-actions { flex: 0 0 auto; margin-top: 10px; }
+.terrain-editor-metadata-dialog {
+  width: min(560px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  border: none;
+  padding: 16px;
+  color: var(--flat-text);
+  background: var(--flat-surface);
+  box-shadow: var(--flat-shadow);
+}
+.terrain-editor-metadata-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+.terrain-editor-dialog-close { display: block; margin-left: auto; margin-bottom: 12px; }

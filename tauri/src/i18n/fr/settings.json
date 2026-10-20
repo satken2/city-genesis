@@ -1,0 +1,129 @@
+{
+  "settings": {
+    "title": "Paramètres",
+    "groups": {
+      "general": "Général",
+      "display": "Affichage",
+      "sound": "Son",
+      "system": "Système",
+      "about": "Informations",
+      "developer": "Paramètres pour les développeurs"
+    },
+    "swagger": {
+      "label": "Swagger (documentation API)",
+      "description": "Affiche l’API du serveur connecté dans votre navigateur par défaut",
+      "action": "Ouvrir dans le navigateur"
+    },
+    "fontSize": {
+      "label": "Taille du texte",
+      "large": "Grande",
+      "medium": "Moyenne",
+      "small": "Petite",
+      "custom": "Personnalisée",
+      "preview": "Taille actuelle"
+    },
+    "monitor": {
+      "label": "Écran",
+      "prev": "Écran précédent",
+      "next": "Écran suivant"
+    },
+    "graphicMonitor": {
+      "label": "Écran de la vue 3D"
+    },
+    "multiDisplay": {
+      "label": "Mode multi-écran",
+      "description": "Affiche les fenêtres sur un autre écran que celui du jeu",
+      "on": "Activé",
+      "off": "Désactivé"
+    },
+    "popupMonitor": {
+      "label": "Écran des fenêtres"
+    },
+    "hintbar": {
+      "label": "Barre d'astuces",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "description": "Barre en haut de l'écran qui affiche des astuces d'utilisation"
+    },
+    "language": {
+      "label": "Langue",
+      "description": "Langue d'affichage de l'interface. Elle est distincte de la langue des données de sauvegarde.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
+    },
+    "volume": {
+      "label": "Volume",
+      "master": "Volume général",
+      "bgm": "Musique",
+      "sfx": "Effets sonores"
+    },
+    "compute": {
+      "label": "Accélération GPU",
+      "comingSoon": "Coming soon",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU activé",
+      "statusInactive": "CPU activé",
+      "restartRequired": "Le programme principal redémarrera après la modification de ce réglage",
+      "restarting": "Redémarrage...",
+      "restartFailed": "Échec du redémarrage",
+      "restartUnavailable": "Paramètres enregistrés. Les changements prendront effet au prochain démarrage du jeu",
+      "confirmRestart": "Basculer le calcul sur {{mode}} ? Le programme principal va redémarrer.",
+      "restartAction": "Redémarrer"
+    },
+    "windowReset": {
+      "label": "Position et taille des fenêtres",
+      "action": "Réinitialiser"
+    },
+    "credits": {
+      "label": "Crédits",
+      "description": "Attributions des ressources et logiciels utilisés dans ce jeu",
+      "action": "Afficher"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Nouvelle partie",
+    "overwriteSave": "Écraser la sauvegarde",
+    "saveAs": "Enregistrer sous",
+    "load": "Charger",
+    "quitGame": "Quitter le jeu",
+    "returnToTop": "Revenir au menu principal",
+    "loading": "Chargement...",
+    "shuttingDown": "Fermeture...",
+    "saveFailed": "Échec de la sauvegarde",
+    "loadFailed": "Échec du chargement",
+    "confirmNewGame": "Les données actuelles seront perdues. Démarrer une nouvelle partie ?",
+    "confirmQuitGame": "Quitter le jeu ? La progression actuelle n'est pas sauvegardée automatiquement.",
+    "confirmReturnToTop": "Revenir au menu principal ? La progression actuelle n'est pas sauvegardée automatiquement.",
+    "confirm": "Oui",
+    "cancel": "Non",
+    "saveAsScenario": "Enregistrer comme scénario",
+    "saveAsNewScenario": "Enregistrer comme un autre scénario",
+    "overwriteScenario": "Écraser le scénario",
+    "backToGame": "Retour au jeu",
+    "saveName": "Nom de la sauvegarde",
+    "confirmOverwrite": "Écraser la sauvegarde « {{name}} » ?",
+    "confirmOverwriteScenario": "Écraser le scénario « {{name}} » ?"
+  },
+  "saveList": {
+    "noSaves": "Aucune sauvegarde",
+    "currentSave": "Données actuelles",
+    "population": "Population",
+    "inGameDate": "Date",
+    "savedAt": "Date de sauvegarde",
+    "loadButton": "Charger",
+    "deleteButton": "Supprimer",
+    "confirmLoad": "Charger cette sauvegarde ?",
+    "confirmDelete": "Supprimer cette sauvegarde ? Cette action est irréversible.",
+    "loading": "Chargement...",
+    "loadFailed": "Échec du chargement",
+    "deleteFailed": "Échec de la suppression",
+    "openFolderButton": "Afficher le dossier",
+    "scenario": "Scénario"
+  }
+}

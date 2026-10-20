@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Type",
+    "kind": {
+      "land": "Nivellement du terrain",
+      "shore": "Remblaiement sur la mer"
+    },
+    "baseHeight": "Hauteur de base",
+    "targetHeight": "Hauteur cible",
+    "cutVolume": "Volume de déblai",
+    "fillVolume": "Volume de remblai",
+    "quayLength": "Longueur du quai",
+    "quayArea": "Surface du parement du quai",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Hauteur (écart à la base)",
+    "baseNote": {
+      "frontage": "0 correspond à la chaussée de la route qui borde la zone ({{value}} m)",
+      "terrain_mean": "0 correspond à la hauteur moyenne actuelle de la zone ({{value}} m)"
+    },
+    "shoreHeightLocked": "La hauteur d'un remblai sur la mer ne peut pas être définie",
+    "reasons": {
+      "invalid_polygon": "La forme de la zone n'est pas valide. Tracez-la sans que les côtés se croisent.",
+      "outside_city": "La zone dépasse les limites de la ville.",
+      "too_large": "La zone est trop grande (limite : {{limit}} km²).",
+      "on_water": "Une zone entièrement en mer ne peut pas être aménagée. Tracez-la de façon à atteindre la terre.",
+      "no_land_overlap": "Tracez la zone de façon à chevaucher la terre (sinon une bande de mer reste entre la côte et la zone).",
+      "overlaps_parcel": "La zone chevauche une parcelle existante.",
+      "overlaps_path": "La zone chevauche une route, une voie ou un autre tracé.",
+      "overlaps_water": "La zone touche une rivière ou un lac.",
+      "overlaps_quay_band": "La zone chevauche le quai d'un terrain gagné sur la mer.",
+      "invalid_height_offset": "La hauteur indiquée est hors limites (jusqu'à ±{{offsetLimit}} m).",
+      "below_sea_level": "La hauteur ne peut pas être inférieure au niveau de la mer.",
+      "too_narrow": "La zone est trop étroite ; il ne reste rien à remblayer à l'intérieur du quai.",
+      "no_work": "Le terrain est déjà à la hauteur cible ; aucun travail n'est nécessaire.",
+      "insufficient_funds": "Fonds insuffisants pour passer cette commande."
+    },
+    "confirm": "Valider",
+    "confirming": "Validation...",
+    "cancel": "Annuler",
+    "confirmFailed": "Échec de la commande du terrassement."
+  }
+}

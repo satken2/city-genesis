@@ -1,0 +1,37 @@
+{
+  "supply": {
+    "title": "供給資訊",
+    "product": "供給產品",
+    "amount": "供給量",
+    "price": "供給價格",
+    "soldAmount": "售出量",
+    "profitRate": "利潤率",
+    "utilization": "使用率"
+  },
+  "demand": {
+    "product": "商品",
+    "demandAmount": "需求量",
+    "receivedAmount": "取得量",
+    "acquiredAmount": "庫存"
+  },
+  "cargo": {
+    "title": "裝卸資訊",
+    "description": "此據點從境外進口商品供應給城市內的市場，並收購城市內的過剩產品出口到境外。",
+    "capacity": "處理能力",
+    "perEpochPerDirection": "/紀元（進出口各自）",
+    "materialCapacity": "按所收原材料的上限",
+    "areaCapacity": "按面積的上限",
+    "importHandled": "進口處理量",
+    "exportHandled": "出口處理量",
+    "utilization": "使用率",
+    "importSectionTitle": "進口（向城市銷售）",
+    "exportSectionTitle": "出口（從城市收購）",
+    "handledImport": "銷售量",
+    "handledExport": "收購量",
+    "allocation": "分配量",
+    "priceImport": "銷售單價",
+    "priceExport": "收購單價",
+    "lost": "錯失銷售",
+    "noProducts": "沒有經營的品項"
+  }
+}

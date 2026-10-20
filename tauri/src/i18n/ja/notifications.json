@@ -1,0 +1,30 @@
+{
+  "notifications": {
+    "trayTooltip": "都市の通知",
+    "empty": "現在、対処が必要な問題はありません",
+    "loadFailed": "通知の取得に失敗しました",
+    "sections": {
+      "warning": "警告 — 今すぐ対処が必要",
+      "caution": "注意 — 成長を妨げる問題"
+    },
+    "types": {
+      "resource_runway": "資源「{{name}}」があと約{{remaining_epochs}}エポックで枯渇する見込みです",
+      "resource_depleted": "資源「{{name}}」が枯渇しました",
+      "facility_inoperative": "公共施設「{{name}}」が運営できていません",
+      "facility_inoperative_labor": "公共施設「{{name}}」が労働力不足で運営できていません",
+      "facility_inoperative_material": "公共施設「{{name}}」が原材料不足で運営できていません",
+      "facility_inoperative_high_skill": "公共施設「{{name}}」が専門人材の不足で運営できていません",
+      "facility_inoperative_budget": "公共施設「{{name}}」が予算不足で運営を縮小しています",
+      "education_low_enrollment": "教育機関「{{name}}」は学生が集まらず低稼働です（在籍{{enrolled}}人／定員{{max_students}}人）",
+      "infra_facility_down": "インフラ施設「{{name}}」が停止しています",
+      "infra_disconnected": "{{count}}件の施設がインフラ網に接続されていません",
+      "rail_capacity_exceeded": "{{count}}本の線路で列車の便数が軌道の容量を超えています",
+      "collapse": "{{count}}件の建物・道路が倒壊しました",
+      "collapse_with_deaths": "{{count}}件の建物・道路が倒壊し、{{deaths}}人が死亡しました",
+      "deaths_traffic": "交通事故により{{count}}人が死亡しました",
+      "tenant_blocked_by_parcel_size": "地区「{{zone_name}}」で「{{tenant_name}}」が入居できる建物を建てられません（必要{{required}}m2、区画の最大{{max_capacity}}m2）。より大きな土地区画が必要です",
+      "unknown": "重大な事象が発生しました",
+      "sanitation": "{{count}}世帯の衛生状態が悪化しています。下水・廃棄物処理を改善してください。"
+    }
+  }
+}

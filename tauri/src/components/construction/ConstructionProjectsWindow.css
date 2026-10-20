@@ -1,0 +1,187 @@
+/*
+ * Construction projects window. One card per tag, with totals in the heading and a construction table inside.
+ * Visibility eye icons appear in the heading (per tag) and in each row (per object).
+ */
+.cp-root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.cp-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cp-showall-btn {
+  font-size: 1rem;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5d4e3;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cp-showall-btn:hover {
+  background: rgba(78, 161, 255, 0.16);
+  border-color: #4ea1ff;
+}
+
+.cp-empty {
+  margin: 24px 0;
+  text-align: center;
+  font-size: 1rem;
+  color: #8195a9;
+}
+
+.cp-project {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.cp-project-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cp-project-title {
+  margin: 0;
+  font-size: 1.28rem;
+  color: #f6fbff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Totals (estimated cost, construction time, and progress), evenly spaced on the right of the heading. */
+.cp-project-summary {
+  display: flex;
+  gap: 18px;
+  margin: 0 0 0 auto;
+}
+
+.cp-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.cp-summary-item dt {
+  font-size: 0.89rem;
+  color: #8195a9;
+}
+
+.cp-summary-item dd {
+  margin: 0;
+  font-size: 1.19rem;
+  color: #f6fbff;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-delete-btn {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #8195a9;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cp-delete-btn:hover {
+  background: rgba(255, 120, 120, 0.18);
+  color: #ff9a9a;
+}
+
+.cp-warning {
+  margin: 8px 0 0;
+  font-size: 1rem;
+  color: #ffc46b;
+}
+
+.cp-table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.cp-table th {
+  text-align: left;
+  font-weight: normal;
+  font-size: 1rem;
+  color: #8195a9;
+  padding: 2px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cp-table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.cp-col-eye {
+  width: 26px;
+}
+
+.cp-col-cost,
+.cp-col-epochs {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cp-col-status {
+  width: 96px;
+}
+
+/* Completed construction is excluded from totals; tone down its rows as well. */
+.cp-row--done {
+  opacity: 0.55;
+}
+
+/* Make rows hidden in the 3D view immediately recognizable in the table too. */
+.cp-row--hidden .cp-col-name,
+.cp-row--hidden .cp-col-cost,
+.cp-row--hidden .cp-col-epochs {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.cp-variant {
+  margin-left: 6px;
+  font-size: 1rem;
+  color: #8195a9;
+}
+
+.cp-eye {
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #c5d4e3;
+  font-size: 1.14rem;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.cp-eye:hover {
+  background: rgba(78, 161, 255, 0.16);
+}
+
+.cp-eye--hidden {
+  color: #ff9a9a;
+}

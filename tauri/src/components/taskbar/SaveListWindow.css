@@ -1,0 +1,387 @@
+/**
+ * Save list (load screen) styles
+ *
+ * Use one titlebar-free surface with a thin top accent, matching the system menu/epoch results. Flat styles
+ * (App.css --flat-*) have no borders, rounded corners, or glow; solid left-edge blocks provide emphasis.
+ *
+ * Layout:
+ * - Hero: Load subheading and Save Data List heading.
+ * - List: wide cards with a saved image on the left (16:9, city-language flag at upper left), name/source
+ *   scenario/population/game date in the center, Load/Delete at the right, and real save timestamp at lower
+ *   right. Separate the timestamp from the center to avoid confusion with game date, using the same subtle text
+ *   as the version row. Cards use translucent surfaces without shadows; selection color and a left block
+ *   identify the current save.
+ * - Footer: folder location left, Close right.
+ * Position the root as the anchor for full-window SaveDialog overlays.
+ */
+
+.save-list {
+  --save-list-pane: color-mix(in srgb, var(--flat-raised-hover) 48%, transparent);
+  --save-list-pane-hover: color-mix(in srgb, var(--flat-raised-hover) 72%, transparent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(120% 50% at 50% 0%, rgba(78, 161, 255, 0.1), transparent 70%);
+}
+
+.save-list::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--flat-accent) 50%, transparent);
+  pointer-events: none;
+}
+
+/* ── Hero ── */
+.save-list-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding: 28px 28px 18px;
+}
+
+.save-list-overline {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--flat-accent);
+}
+
+.save-list-title {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--flat-text);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* ── List ── */
+.save-list-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 28px 20px;
+  overflow-y: auto;
+}
+
+.save-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 16px;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+  text-align: center;
+}
+
+.save-list-empty-icon {
+  width: 3.6rem;
+  height: 3.6rem;
+  opacity: 0.5;
+}
+
+.save-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One wide card per save, fading in from top to bottom when the list opens. */
+.save-card {
+  display: grid;
+  grid-template-columns: 12.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px 10px 10px;
+  background: var(--save-list-pane);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+  animation: save-list-rise 0.34s ease-out backwards;
+  animation-delay: calc(min(var(--save-card-index, 0), 10) * 36ms);
+}
+
+.save-card:hover {
+  background: var(--save-list-pane-hover);
+  box-shadow: inset 3px 0 0 var(--flat-accent);
+}
+
+/* When three columns do not fit, move the buttons/timestamp below the body. */
+@media (max-width: 600px) {
+  .save-card {
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+
+  .save-card-side {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Currently loaded save. Draw its solid left block as an inset shadow without a border. */
+.save-card--current {
+  background: color-mix(in srgb, var(--flat-selected) 42%, transparent);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+.save-card--current:hover {
+  background: color-mix(in srgb, var(--flat-selected) 58%, transparent);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+/* Saves without images show a cityscape icon over a grid, matching imageless scenarios in New Game. */
+.save-card-thumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background-color: var(--flat-sunken);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--flat-accent) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--flat-accent) 12%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 28% 22%, color-mix(in srgb, var(--flat-selected) 55%, transparent), transparent 72%);
+  background-size: 16px 16px, 16px 16px, 100% 100%;
+}
+
+.save-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.save-card:hover .save-card-thumb img {
+  transform: scale(1.05);
+}
+
+.save-card-thumb-placeholder {
+  width: 40%;
+  height: 50%;
+  color: color-mix(in srgb, var(--flat-accent) 45%, var(--flat-sunken));
+}
+
+/* Use a dark backing for legibility over images. */
+.save-card-flag {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  padding: 1px 5px;
+  font-size: 1rem;
+  line-height: 1.25;
+  background: color-mix(in srgb, var(--flat-sunken) 75%, transparent);
+}
+
+/* Stretch the center column to card height, placing the version row at the bottom aligned with the timestamp. */
+.save-card-body {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  gap: 6px;
+  min-width: 0;
+}
+
+.save-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.save-card-name {
+  overflow: hidden;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--flat-text);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.save-card-current {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--flat-sunken);
+  white-space: nowrap;
+  background: var(--flat-accent);
+}
+
+.save-card-scenario {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 1rem;
+  color: color-mix(in srgb, var(--flat-accent) 55%, var(--flat-text));
+}
+
+.save-card-scenario > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.save-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text-label);
+}
+
+.save-card-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.save-card-meta-icon {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--flat-accent);
+  opacity: 0.85;
+}
+
+.save-card-body .save-version-info {
+  margin-top: auto;
+  font-size: 0.9rem;
+  color: var(--flat-text-muted);
+}
+
+/* Stretch the right column to card height; center buttons in the remaining space and place the timestamp at bottom right. */
+.save-card-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  align-self: stretch;
+  gap: 8px;
+}
+
+.save-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: auto 0;
+}
+
+/* Same size and intensity as .save-version-info */
+.save-card-saved-at {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text-muted);
+  white-space: nowrap;
+}
+
+/* Override global bordered/rounded buttons with solid rectangles. */
+.save-card-load,
+.save-card-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.save-card-load {
+  min-width: 6.5rem;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--flat-selected);
+  box-shadow: inset 3px 0 0 var(--flat-accent);
+}
+
+.save-card-load:hover:not(:disabled) {
+  background: var(--flat-selected-hover);
+  box-shadow: inset 6px 0 0 var(--flat-accent);
+}
+
+.save-card-delete {
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0;
+  color: var(--flat-text-muted);
+  background: transparent;
+}
+
+.save-card-delete svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.save-card-delete:hover:not(:disabled) {
+  color: var(--flat-danger);
+  background: var(--flat-danger-surface);
+}
+
+.save-card-load:focus-visible,
+.save-card-delete:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: 2px;
+}
+
+.save-card-load:disabled,
+.save-card-delete:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── Footer: folder location (left) + Close (right) ── */
+.save-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+  padding: 14px 28px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Override global bordered/rounded buttons with subtle text-only actions. */
+.save-list-folder-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 10px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--flat-text-label);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.save-list-folder-btn:hover {
+  color: var(--flat-text);
+  background: var(--save-list-pane);
+}
+
+.save-list-folder-icon {
+  width: 1.3rem;
+  height: 1.3rem;
+  color: var(--flat-accent);
+}
+
+@keyframes save-list-rise {
+  from { opacity: 0; transform: translateY(8px); }
+}

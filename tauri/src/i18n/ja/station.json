@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "駅",
+    "name": "駅名",
+    "ridership": "乗車回数",
+    "platforms": "ホーム一覧",
+    "noPlatforms": "所属するホームはありません(線と交差したプラットフォームが所属します)",
+    "lines": "発着路線",
+    "noLines": "発着する路線はありません",
+    "stops": "停留所ごとの乗車回数",
+    "noStops": "この駅に停まる停留所はありません",
+    "lineRunning": "運行中",
+    "lineSuspended": "運休",
+    "houseEnds": "建屋の配置",
+    "houseEnds_both": "両端",
+    "houseEnds_start": "始点",
+    "houseEnds_end": "終点",
+    "passageMode": "通路の配置",
+    "passageMode_elevated": "上空",
+    "passageMode_ground": "地上",
+    "passageMode_underground": "地下"
+  }
+}

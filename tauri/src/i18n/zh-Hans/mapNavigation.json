@@ -1,0 +1,55 @@
+{
+  "mapNavigation": {
+    "title": "探索城市",
+    "back": "返回",
+    "search": "搜索地点",
+    "origin": "搜索出发地",
+    "destination": "搜索目的地",
+    "clear": "清除",
+    "searching": "正在搜索…",
+    "error": "无法连接。请刷新后重试。",
+    "noResults": "未找到地点",
+    "mode": "出行方式",
+    "pedestrian": "步行与公共交通",
+    "automobile": "驾车",
+    "pickOrigin": "在地图上选择起点",
+    "pickDestination": "在地图上选择终点",
+    "swap": "交换",
+    "cancel": "取消",
+    "directions": "到这里去",
+    "intro": "搜索设施、车站、地区或道路，或在地图上选择地点。",
+    "chooseOrigin": "搜索出发地，或在地图上选择。",
+    "routing": "正在搜索路线…",
+    "showRoute": "显示完整路线",
+    "mapPoint": "地图上的地点",
+    "minutes": "约{{count}}分钟",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "根据第{{epoch}}次路线计算的路网估算。虚线表示步行及道路接驳路段。",
+    "busy": "模拟正在运行，完成后将更新。",
+    "not_ready": "暂无路线数据。在本城市运行模拟后即可显示。",
+    "unreachable": "未找到连接这两个地点的路线。",
+    "no_access": "所选地点附近没有可用道路。",
+    "geometry_unavailable": "无法获取此路线的公共交通行驶形状。",
+    "place_missing": "所选地点已被删除，请重新选择。",
+    "kind": {
+      "agent": "设施",
+      "zone": "地区",
+      "stop": "站点",
+      "station": "车站",
+      "point": "地点",
+      "road": "道路"
+    },
+    "leg": {
+      "walk": "步行",
+      "drive": "驾车",
+      "transit": "公共交通",
+      "conveyor": "人员输送",
+      "access": "道路接驳",
+      "turn": "路口转弯"
+    },
+    "picking": {
+      "origin": "请在地图上点击出发地。",
+      "destination": "请在地图上点击目的地。"
+    }
+  }
+}

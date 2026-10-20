@@ -1,0 +1,63 @@
+{
+  "diagnosis": {
+    "refresh": "再診断",
+    "note": "前回のシミュレーション結果をもとに、問題の原因を順にたどります。対処後は次のエポックを実行すると結果が更新されます。",
+    "noProblem": {
+      "title": "問題は見つかりませんでした",
+      "description": "現在この経済主体に報告すべき不調はありません。"
+    },
+    "target": {
+      "agent": "施設 #{{id}}",
+      "path": "パス #{{id}}",
+      "node": "接続点 #{{id}}",
+      "nodeAt": "地点 ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": { "title": "経済主体が見つかりません", "description": "" },
+      "cycle": { "title": "原因が循環しています", "description": "この施設の不調はすでに上位で診断中です(互いに依存し合う関係)。" },
+      "depth_limit": { "title": "これ以上は掘り下げません", "description": "原因の連鎖が深すぎるため、ここで打ち切りました。対象の施設を直接診断してください。" },
+      "no_alert": { "title": "この施設自身に不調はありません", "description": "供給が足りない理由は施設の規模や稼働率目標にある可能性があります。" },
+      "facility_inactive": { "title": "施設が稼働していません", "description": "建設中・停止中・倒壊などのため生産していません。施設の詳細を確認してください。" },
+      "producer_ref": { "title": "供給元の施設", "description": "" },
+      "material_shortage": { "title": "原材料を調達できていません", "description": "必要な原材料の一部が届かず、生産が計画を下回っています。" },
+      "material_unmet": { "title": "{{product_name}}の不足", "description": "必要量 {{demand}} に対して受け取れたのは {{received}}({{ratio}}%)です。" },
+      "material_unmet_unknown": { "title": "不足した原材料を特定できませんでした", "description": "直近の需要が縮小した直後などに起きます。次のエポックの結果を確認してください。" },
+      "infra_disconnected": { "title": "{{product_name}}の網に接続されていません", "description": "" },
+      "infra_no_terminal": { "title": "接続端子がありません", "description": "この施設には{{product_name}}の接続端子ノードがありません。" },
+      "infra_terminal_unconnected": { "title": "接続端子にパスが1本も繋がっていません", "description": "{{product_name}}を流せるパスを施設の接続端子まで引き込んでください。" },
+      "infra_link_not_active": { "title": "引き込みパスがまだ稼働していません", "description": "接続端子に繋がる{{count}}本のパスが建設中または未着工です。完成すると供給が始まります。" },
+      "infra_link_incompatible": { "title": "引き込みパスが{{product_name}}を流せません", "description": "接続端子に繋がるパスはこの財を運べない種類です(非電化線路など)。流せる種類へ造り替えるか、別途パスを引き込んでください。" },
+      "infra_no_producer": { "title": "{{product_name}}の生産施設が都市にありません", "description": "発電所などの生産施設を建設し、網に接続してください。" },
+      "infra_producers_inactive": { "title": "{{product_name}}の生産施設が稼働していません", "description": "都市にある{{count}}か所の生産施設がいずれも稼働していません。" },
+      "infra_producers_unconnected": { "title": "生産施設が網に接続されていません", "description": "{{count}}か所の生産施設は稼働していますが、どれも{{product_name}}の網に繋がっていません。" },
+      "infra_network_split": { "title": "この網には生産施設がありません", "description": "{{product_name}}の生産施設({{producers}}か所)は別の網に繋がっています。2つの網が途中で途切れているか、接続されていません。" },
+      "infra_link_under_construction": { "title": "網をつなぐパスが建設中です", "description": "この網に接続予定のパスが{{count}}本あります。完成すると生産施設側の網とつながる可能性があります。" },
+      "infra_gap_detected": { "title": "ここで網が途切れています", "description": "2つの網の端点が {{distance}}m しか離れていません。この2点を{{product_name}}を流せるパスでつなぐか、端点同士を結合してください。" },
+      "infra_tap_missing": { "title": "生産施設側の網と接続されていません", "description": "{{product_name}}を流せるパス(送電線など)を生産施設側の網から引いて、この網へタップ接続してください。" },
+      "infra_generation_shortage": { "title": "{{product_name}}の生産量が不足しています", "description": "この網の生産量 {{supply}} に対して需要は {{demand}} です(生産施設 {{producers}}か所)。生産施設を増設・拡張してください。" },
+      "infra_transmission_bottleneck": { "title": "網の容量が不足しています", "description": "{{count}}本のパスが容量いっぱいまで使われています。並行してパスを増設するか、容量の大きい種類へ造り替えてください。" },
+      "infra_unexplained": { "title": "網の状態は正常に見えます", "description": "生産量・接続とも足りているため、一時的な不足だった可能性があります。次のエポックの結果を確認してください。" },
+      "market_no_supplier": { "title": "{{product_name}}の供給者が都市にいません", "description": "国内に稼働中の生産者がなく、輸入もされていません。生産施設を誘致するか、輸入拠点を用意してください。" },
+      "market_supply_insufficient": { "title": "{{product_name}}の供給が需要に届いていません", "description": "供給 {{supply}} に対して都市全体の注文は {{demand}} です(生産者 {{producers}}・輸入拠点 {{hubs}})。" },
+      "market_unmatched": { "title": "{{product_name}}を市場で調達できませんでした", "description": "都市全体では供給 {{supply}} が注文 {{demand}} を満たしていますが、この施設には届きませんでした。距離・価格・供給範囲が原因の可能性があります。" },
+      "high_skill_shortage": { "title": "専門人材を確保できていません", "description": "必要な高スキル人材の最低数を満たせず、生産計画がゼロになっています。高度人材は大学で育成します。大学を整備し、受け入れ枠を該当スキルに配分してください。" },
+      "labor_shortage": { "title": "従業員が不足しています", "description": "必要な労働力 {{quota}} に対して確保できたのは {{total_labor}} です。" },
+      "labor_market_tight": { "title": "都市に働き手が残っていません", "description": "失業率が {{unemployment_rate}}% と低く、雇える人がいません。住宅を増やして人口を呼び込んでください。" },
+      "labor_unfilled": { "title": "求職者はいるのに集まりません", "description": "失業率は {{unemployment_rate}}% です。通勤距離が遠い、賃金が低い、スキルが合わないなどが考えられます。" },
+      "budget_capped": { "title": "予算が不足しています", "description": "配分された予算が必要額を大きく下回っています。予算配分を見直してください。" },
+      "construction_shortage": { "title": "{{product_name}}を調達できていません", "description": "" },
+      "line_paused_route_disconnected": { "title": "停留所間の経路が分断されています", "description": "巡回順で隣り合う停留所の間が、通れる向きの線路・街路でつながっていません。分断箇所を再建するか、経路を見直してください。一方通行の線路で折り返すには、両方向に走れる線路(1本で上下線を持つ複線など)の駅で折り返すか、上下の線路を1つのノードに集める・渡り線を敷くなどで反対向きの線路へ移れるようにし、帰りの停留所は反対向きのホームに置いてください。" },
+      "line_paused_no_underlay": { "title": "停留所の下地パスがありません", "description": "停留所が乗っていた線路・街路が失われています。" },
+      "line_paused_train_too_long": { "title": "編成が停留所のある区間より長すぎます", "description": "1編成の車両数を減らすか、停留所のある区間(駅のホームや、道路・軌道の区間)を延伸してください。" },
+      "line_no_vehicle_product": { "title": "この路線種別には車両が定義されていません", "description": "" },
+      "line_vehicle_shortage": { "title": "車両を調達できていません", "description": "必要 {{required}} 両に対して調達できたのは {{received}} 両です。" },
+      "line_off_network": { "title": "路線が走行網に乗っていません", "description": "路線の下地経路がどの線路・街路とも結ばれていません。" },
+      "transit_no_depot": { "title": "{{product_name}}の車両基地が都市にありません", "description": "車両基地を建設し、走行網に接続してください。" },
+      "transit_depots_inactive": { "title": "車両基地が稼働していません", "description": "都市にある{{count}}か所の車両基地がいずれも稼働していません。" },
+      "transit_depots_unconnected": { "title": "車両基地が走行網に接続されていません", "description": "{{count}}か所の車両基地はどれも線路・街路に繋がっていません。鉄道の場合は本線から基地の接続端子へ引き込み線を敷いてください。" },
+      "transit_depot_other_network": { "title": "車両基地が別の走行網にあります", "description": "{{count}}か所の車両基地は、この路線とつながっていない別の線路網に接続されています。線路でつなぐか、この網に基地を建設してください。" },
+      "transit_vehicle_insufficient": { "title": "車両の生産量が不足しています", "description": "この走行網の車両基地({{depots}}か所)の供給 {{supply}} 両に対して、路線の必要数は {{demand}} 両です。" },
+      "transit_unexplained": { "title": "車両基地の状態は正常に見えます", "description": "供給・接続とも足りているため、一時的な不足だった可能性があります。次のエポックの結果を確認してください。" }
+    }
+  }
+}

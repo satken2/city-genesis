@@ -1,0 +1,323 @@
+/* ==========================================================================
+   Commute statistics tab (CommuteTab) stylesheet - new layout (2:3 left/right split)
+   ========================================================================== */
+
+.commute-tab {
+  display: grid;
+  grid-template-columns: 2fr 3fr; /* 2:3 left/right split (40% / 60%) */
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #e2e8f0;
+}
+
+/* Shared title */
+.commute-panel-title {
+  font-size: 1.11rem;
+  font-weight: 700;
+  color: #8ba3bb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  border-left: 3px solid #228be6;
+  padding-left: 6px;
+  line-height: 1.2;
+}
+
+/* --------------------------------------------------------------------------
+   Left pane (time distribution in top third + car ownership map in bottom two-thirds)
+   -------------------------------------------------------------------------- */
+.commute-tab__left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Top left: work/school commute time distribution */
+.commute-distribution {
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 26, 38, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 10px 12px;
+  height: 33.33%; /* One-third height */
+  min-height: 150px;
+  box-sizing: border-box;
+}
+
+/* Heading + aggregation scope dropdown */
+.commute-distribution__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.commute-distribution__header .commute-panel-title {
+  margin-bottom: 0;
+}
+
+.commute-distribution__scope {
+  min-width: 0;
+  max-width: 60%;
+  background: #141c28;
+  border: 1px solid #2a3b50;
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 1rem;
+  padding: 4px 24px 4px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.commute-distribution__scope:hover,
+.commute-distribution__scope:focus {
+  border-color: #228be6;
+}
+
+.commute-distribution__chart {
+  flex: 1;
+  width: 100%;
+  height: calc(100% - 22px);
+}
+
+/* Bottom left: car ownership map by District */
+.commute-car {
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 26, 38, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 10px 12px;
+  flex: 1; /* Remaining two-thirds height */
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.commute-car__summary {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.commute-car__metric {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 1rem;
+  color: #8ba3bb;
+}
+
+.commute-car__metric b {
+  font-size: 1.48rem;
+  font-weight: 700;
+  color: #4dabf7;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The desired rate supplements ownership, so use color and size to establish their hierarchy. */
+.commute-car__metric--sub b {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.commute-car__note {
+  margin: 0 0 8px;
+  font-size: 0.93rem;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.commute-car__map {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Overlay the legend on the map. Colors are relative to the District min–max range, so show actual values at both ends. */
+.commute-car__legend {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-size: 0.93rem;
+  color: #93a9c0;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.commute-car__legend-bar {
+  width: 80px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.commute-car__empty {
+  position: absolute;
+  inset: auto 8px 8px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-size: 1rem;
+  color: #93a9c0;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Right pane (Sankey at full height)
+   -------------------------------------------------------------------------- */
+.commute-tab__right {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Right: population movement */
+.commute-flow {
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 26, 38, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 10px 12px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* "Total", "Work/school", and "Shopping" subtabs. The active underline uses the Sankey origin color (set inline). */
+.commute-flow__tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  flex: 0 0 auto;
+  margin-bottom: 6px;
+}
+
+.commute-flow__tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px 4px 0 0;
+  padding: 6px 12px;
+  color: #9db0c5;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.commute-flow__tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6fbff;
+}
+
+.commute-flow__tab--active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.commute-flow__chart {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  position: relative;
+}
+
+.commute-flow__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1rem;
+  color: #64748b;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   Shared tooltips (Recharts)
+   -------------------------------------------------------------------------- */
+.commute-tooltip {
+  background: #0d1622;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  color: #cbd5e1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+/* Bar chart tooltip */
+.commute-tooltip__time {
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 4px;
+}
+
+.commute-tooltip__item {
+  margin: 3px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.commute-tooltip__divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 0 4px 0;
+}
+
+.commute-tooltip__total {
+  font-weight: bold;
+  color: #f1f5f9;
+  margin-top: 2px;
+}
+
+/* Sankey tooltip */
+.commute-tooltip__route {
+  font-weight: bold;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.commute-tooltip__val {
+  color: #4ade80;
+}
+
+/* --------------------------------------------------------------------------
+   Loading and error screens
+   -------------------------------------------------------------------------- */
+.commute-tab__loading,
+.commute-tab__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1rem;
+  color: #8ba3bb;
+}
+
+.commute-tab__error {
+  color: #f87171;
+}

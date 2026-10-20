@@ -1,0 +1,40 @@
+{
+  "zone": {
+    "titleWithId": "Distrito n.º {{id}}",
+    "color": "Color del distrito",
+    "colorUpdateFailed": "No se pudo actualizar el color del distrito",
+    "basicInfo": "Información básica",
+    "area": "Superficie",
+    "zonePopulation": "Población residente",
+    "daytimePopulation": "Población diurna",
+    "spaceAmount": "Superficie ocupada",
+    "slotStarvationTitle": "Hay demanda en espera que no puede construirse",
+    "slotStarvationWarning": "Para alojar a «{{tenant}}» se necesitan al menos {{required}} m2 de piso por edificio, pero el máximo construible en las parcelas de este distrito es {{max}} m2. Prepara una parcela más grande.",
+    "restrictions": "Normativa de construcción",
+    "restrictionUpdateFailed": "No se pudo actualizar la normativa del distrito",
+    "restrictionRequired": "El coeficiente de ocupación, el coeficiente de construcción y la altura no pueden quedar vacíos",
+    "mergeConfirm": "Se fusionará «{{source}}» en «{{target}}». El distrito de origen desaparecerá junto con su normativa.",
+    "mergeAction": "Fusionar",
+    "mergeFailed": "No se pudieron fusionar los distritos (los distritos no colindantes no pueden fusionarse)",
+    "mergeNoRequest": "No se ha seleccionado un distrito para fusionar",
+    "edit": {
+      "toolCreate": "Nuevo distrito",
+      "toolExpand": "Ampliar distrito",
+      "modeBlock": "Manzana completa",
+      "modeRoad": "Lado de calle",
+      "newZone": "Nuevo distrito",
+      "noTarget": "Pasa el cursor sobre un distrito",
+      "hint": {
+        "create": {
+          "block": "Mantén presionado Ctrl y arrastra sobre manzanas rodeadas de calles; las manzanas pintadas, con sus parcelas, forman un nuevo distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",
+          "road": "Mantén presionado Ctrl y arrastra sobre un lado de una calle (la mitad de la calzada o las parcelas a lo largo de ella); ese lado de la calle, con sus parcelas, forma un nuevo distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar."
+        },
+        "expand": {
+          "block": "Pasa el cursor sobre un distrito y, con Ctrl presionado, arrastra sobre manzanas para añadirlas, con sus parcelas, a ese distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",
+          "road": "Pasa el cursor sobre un distrito y, con Ctrl presionado, arrastra sobre un lado de una calle (la mitad de la calzada o las parcelas a lo largo de ella) para añadir ese lado, con sus parcelas, a ese distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar."
+        }
+      },
+      "failed": "No se pudo modificar el distrito."
+    }
+  }
+}

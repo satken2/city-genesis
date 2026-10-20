@@ -1,0 +1,27 @@
+/* Road membership selection. Reuse common/TagSelect.css tag-row classes; define only road-specific parts here. */
+.road-membership-row {
+  flex-wrap: wrap;
+}
+
+/* Selected road color, matching map/3D highlight bands for easy identification. */
+.road-select__swatch {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.road-membership-row__error {
+  padding-left: 2px;
+}
+
+/* Extension notice in the road construction panel ("Extend ..."). */
+.road-select__note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 1rem;
+  color: #a9c7e3;
+}

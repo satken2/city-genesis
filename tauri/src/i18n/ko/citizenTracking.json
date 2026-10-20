@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "기본",
+    "tabActivity": "활동",
+    "follow": "카메라로 따라가기",
+    "unfollow": "따라가기 중지",
+    "track": "추적 목록에 추가",
+    "trackRandom": "무작위 시민 1명 추적",
+    "noUntrackedCitizens": "추적할 수 있는 미추적 시민이 없습니다.",
+    "trackRandomError": "시민을 추적할 수 없습니다.",
+    "untrack": "추적 목록에서 제거",
+    "home": "거주지",
+    "mobility": "이동 수단",
+    "mode": {
+      "automobile": "자동차",
+      "pedestrian": "도보·대중교통"
+    },
+    "visits": "방문지",
+    "visitKind": {
+      "home": "집",
+      "work": "직장",
+      "school": "학교",
+      "shop": "쇼핑"
+    },
+    "legs": {
+      "walk": "도보",
+      "drive": "자동차",
+      "transit": "대중교통",
+      "conveyor": "인원 수송 설비"
+    },
+    "trip": "편도 {{minutes}}분 · {{route}}",
+    "noRoute": "경로 없음",
+    "noVisits": "갈 곳이 없습니다.",
+    "status": {
+      "not_ready": "시뮬레이션을 실행하면 표시됩니다.",
+      "busy": "시뮬레이션 중에는 표시할 수 없습니다.",
+      "no_home": "주택을 기다리는 중이라 활동 기록이 없습니다.",
+      "missing": "이 시민은 더 이상 도시에 없습니다.",
+      "error": "가져올 수 없습니다."
+    },
+    "empty": "추적 중인 시민이 없습니다.",
+    "pickFailed": {
+      "not_ready": "시뮬레이션을 실행하면 차량과 보행자를 클릭해 시민을 볼 수 있습니다.",
+      "busy": "시뮬레이션 중에는 시민을 표시할 수 없습니다.",
+      "none": "이 차량이나 보행자의 시민을 찾지 못했습니다.",
+      "missing": "이 시민은 더 이상 도시에 없습니다.",
+      "no_home": "이 시민은 주택을 기다리고 있습니다.",
+      "error": "시민을 표시할 수 없습니다."
+    }
+  }
+}

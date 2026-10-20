@@ -1,0 +1,21 @@
+.asset-manager { display: flex; flex-direction: column; gap: .75rem; height: 100%; padding: 1rem 1.25rem; color: var(--flat-text-body); }
+.asset-manager__toolbar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.asset-manager__pack { display: flex; align-items: center; gap: .5rem; color: var(--flat-text-label); }
+.asset-manager__pack select { padding: .35rem .5rem; color: var(--flat-text); background: var(--flat-sunken); border: 1px solid var(--flat-text-muted); }
+.asset-manager__note { color: var(--flat-text-muted); }
+.asset-manager__error { margin: 0; color: var(--flat-danger); }
+.asset-manager__list { flex: 1; min-height: 0; overflow: auto; }
+.asset-manager__head, .asset-manager__row { display: grid; grid-template-columns: minmax(0, 1fr) 12rem; gap: .75rem; }
+.asset-manager__head { position: sticky; top: 0; z-index: 1; padding: .25rem 0; color: var(--flat-text-muted); background: var(--flat-surface); }
+.asset-manager__extra-head { color: var(--flat-accent); }
+.asset-manager__row { padding: .75rem 0; border-bottom: 1px solid var(--flat-raised-hover); }
+.asset-manager__title { display: flex; align-items: baseline; gap: .5rem; margin-bottom: .5rem; color: var(--flat-text); }
+.asset-manager__id { color: var(--flat-text-muted); }
+.asset-manager__models { display: flex; flex-wrap: wrap; gap: .75rem; }
+.asset-manager__model { display: flex; flex-direction: column; align-items: center; gap: .35rem; margin: 0; }
+.asset-manager__model img, .asset-manager__placeholder { width: 160px; height: 120px; background: var(--flat-sunken); }
+.asset-manager__placeholder { display: flex; align-items: center; justify-content: center; color: var(--flat-text-muted); }
+.asset-manager__weight { display: flex; align-items: center; gap: .35rem; color: var(--flat-text-label); }
+.asset-manager__weight input { width: 5.5rem; padding: .3rem; color: var(--flat-text); background: var(--flat-sunken); border: 1px solid var(--flat-text-muted); }
+.asset-manager__empty { color: var(--flat-text-muted); }
+.asset-manager__extra { min-height: 120px; border: 1px solid rgba(78, 161, 255, 0.45); background: rgba(78, 161, 255, 0.08); }

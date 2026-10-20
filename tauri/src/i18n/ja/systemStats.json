@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "シミュレーション負荷",
+      "heading": "直近のエポック({{days}}日分)の計算時間",
+      "noData": "計測データなし",
+      "note": "複数のエポックを続けて実行したときは、最後のエポックの値です。処理件数は、主な比較の組み合わせ数を都市の規模から見積もった目安です。",
+      "colGroup": "処理",
+      "colTime": "時間",
+      "colWorkload": "処理件数",
+      "workloadHint": "主な比較の組み合わせ数(配列の要素数)の目安です。値にマウスを重ねると内訳が出ます。",
+      "seconds": "{{value}} 秒",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "商品市場",
+      "realestate": "不動産市場",
+      "labor": "労働市場",
+      "building_spawn": "建物スポーン",
+      "agent_spawn": "経済主体スポーン",
+      "routing": "市民の経路探索",
+      "transit": "公共交通の経路探索",
+      "environment": "住環境",
+      "other": "その他"
+    },
+    "workload": {
+      "market": "需要者 {{demanders}} × 供給者 {{suppliers}}(商品ごとに掛けて合計)",
+      "realestate": "転居を考える世帯 {{movers}} × 住宅のある建物 {{housing}}",
+      "labor": "求職者 {{seekers}} × 雇用主体 {{employers}}",
+      "building_spawn": "候補区画 {{parcels}} × 建物の種類 × 階数 × 床用途",
+      "agent_spawn": "商品 × 地区 {{zones}} × 地区 {{zones}}",
+      "routing": "交通手段 2 × 地区 {{zones}} × 地区 {{zones}} × 候補経路 3 × パス {{paths}}",
+      "transit": "停留所 {{stops}} × ノード {{nodes}}",
+      "environment": "格子 {{width}} × {{height}} × 日照の時刻"
+    },
+    "entities": {
+      "colMetric": "項目",
+      "colCount": "件数",
+      "title": "エンティティ数",
+      "agents": "経済主体",
+      "households": "世帯",
+      "businesses": "事業所",
+      "publicFacilities": "公共施設",
+      "buildings": "建物",
+      "citizens": "市民",
+      "population": "人口",
+      "zones": "地区",
+      "parcels": "土地区画",
+      "paths": "パス",
+      "roads": "道路",
+      "tracks": "軌道",
+      "infra": "インフラ網",
+      "nodes": "ノード"
+    },
+    "approximation": {
+      "title": "シミュレーションの近似",
+      "intro": "大規模な都市向けに、計算を簡略化する設定を追加予定です。現在は変更できません。",
+      "warning": "ゲームバランスに影響がある可能性があります。元に戻せません",
+      "irreversible": "近似によって生じた変化は、その後のエポックにも残ります。有効化した近似を解除したり、近似度を下げたりすることはできません。",
+      "undecided": "未定",
+      "candidates": "候補まで",
+      "epochs": "エポックごと",
+      "off": "オフ",
+      "on": "オン",
+      "goods": {
+        "label": "商品の購入候補数",
+        "description": "価格や距離を比べる購入先の数を制限します。"
+      },
+      "jobs": {
+        "label": "就職・転職の候補数",
+        "description": "賃金や通勤条件を比べる勤務先の数を制限します。"
+      },
+      "housing": {
+        "label": "転居先の候補数",
+        "description": "家賃や立地を比べる住まいの数を制限します。"
+      },
+      "interval": {
+        "label": "定期的な判断の間隔",
+        "description": "買い物先や転職・転居先を見直す頻度を下げます。"
+      },
+      "aggregation": {
+        "label": "似た市民・世帯をまとめて計算",
+        "description": "条件が似た市民や世帯の一部の判断を、集団として扱います。"
+      }
+    },
+    "status": {
+      "title": "システムステータス",
+      "gpuDisabled": "GPUアクセラレーション: 無効",
+      "coreSimulator": "コアシミュレーター",
+      "currentMemory": "現在のメモリ使用量: {{value}}",
+      "peakMemory": "起動以降の最大メモリ使用量: {{value}}",
+      "graphic": "3D",
+      "currentVram": "現在のVRAM使用量: {{value}}",
+      "usageTooltip": "PC全体 {{pc}} / 本ゲーム {{game}} / 搭載 {{total}}",
+      "legendPc": "PC全体",
+      "legendGame": "本ゲーム"
+    }
+  }
+}

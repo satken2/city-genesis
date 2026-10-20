@@ -1,0 +1,383 @@
+{
+  "paramSetup": {
+    "title": "Réglage des paramètres de jeu",
+    "description": "Les valeurs par défaut sont généralement recommandées. Ne les ajustez que si vous souhaitez les modifier.",
+    "skip": "Passer",
+    "start": "Démarrer la partie",
+    "apply": "Appliquer et fermer",
+    "close": "Fermer",
+    "loading": "Chargement...",
+    "reload": "Recharger",
+    "reloadHint": "Rechargez une fois l'initialisation du serveur terminée pour obtenir les valeurs les plus récentes",
+    "fetchError": "Échec de la récupération des paramètres",
+    "category": {
+      "population": "Population et migration",
+      "citizen": "Vie des habitants",
+      "economy": "Économie",
+      "labor": "Travail et salaires",
+      "education": "Éducation",
+      "construction": "Construction et immobilier",
+      "environment": "Environnement",
+      "traffic": "Transports",
+      "general": "Général",
+      "pathfind": "Trafic et itinéraires",
+      "building": "Bâtiments et construction",
+      "disaster": "Catastrophes et sécurité",
+      "sprawl": "Étalement urbain",
+      "production": "Production et stocks",
+      "zone": "Quartiers et parcelles",
+      "financial": "Finance"
+    },
+    "param": {
+      "TFR_TARGET": {
+        "label": "Indice synthétique de fécondité (ISF) visé",
+        "desc": "Taux de fécondité visé par les ménages. Plus il est élevé, plus les naissances sont fréquentes."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Taux de nuptialité",
+        "desc": "Coefficient de la probabilité de base qu'un habitant se marie. Plus il est élevé, plus les mariages sont fréquents."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Âge minimal de procréation",
+        "desc": "Âge minimal auquel des enfants peuvent naître. En dessous, aucune naissance."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Âge maximal de procréation",
+        "desc": "Âge maximal auquel des enfants peuvent naître. Au-delà, aucune naissance."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Part de couples parmi les ménages migrants",
+        "desc": "Probabilité qu'un ménage migrant arrivant dans la ville soit un couple."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Probabilité d'un enfant (migrants)",
+        "desc": "Probabilité qu'un ménage migrant apparaisse avec un enfant."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Probabilité de deux enfants (migrants)",
+        "desc": "Probabilité qu'un ménage migrant apparaisse avec deux enfants."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Probabilité de trois enfants (migrants)",
+        "desc": "Probabilité qu'un ménage migrant apparaisse avec trois enfants."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Âge minimal des migrants adultes",
+        "desc": "Âge minimal des adultes arrivant comme migrants."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Âge maximal des migrants adultes",
+        "desc": "Âge maximal des adultes arrivant comme migrants."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Coefficient de longévité",
+        "desc": "Coefficient appliqué à la longévité maximale des habitants. À 1,08 le plafond est d'environ 100 ans ; à 1,06, de 150 ans.",
+        "graphX": "Âge",
+        "graphY": "Probabilité annuelle de décès (santé 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Surface habitable d'un ménage d'une personne (m²)",
+        "desc": "Surface habitable minimale nécessaire à une personne seule."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Surface supplémentaire pour le conjoint (m²)",
+        "desc": "Surface habitable supplémentaire nécessaire à un couple par rapport à une personne seule."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Surface supplémentaire par enfant (m²)",
+        "desc": "Surface habitable ajoutée pour chaque enfant."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Taux d'effort maximal pour le loyer",
+        "desc": "Part maximale du revenu du ménage pouvant être consacrée au loyer. À 0,3, jusqu'à 30 % du revenu."
+      },
+      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
+        "label": "Part minimale de revenu disponible",
+        "desc": "Part de revenu discrétionnaire que le ménage cherche à préserver au minimum. Trop basse, le budget familial se rompt facilement."
+      },
+      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
+        "label": "Époques avant décision de déménager",
+        "desc": "Nombre d'époques entre l'insatisfaction du ménage vis-à-vis de son cadre de vie et sa décision de déménager."
+      },
+      "HOUSEHOLD_SHACK_COUNT": {
+        "label": "Époques avant de basculer sans domicile",
+        "desc": "Nombre d'époques entre la perte du logement et l'état de sans-abri."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Salaire moyen (valeur de référence)",
+        "desc": "Salaire moyen de référence au début de la simulation."
+      },
+      "AVERAGE_RENT": {
+        "label": "Loyer moyen (valeur de référence)",
+        "desc": "Loyer moyen de référence au début de la simulation (par m² et par jour)."
+      },
+      "MIN_PROFIT_RATE": {
+        "label": "Taux de marge minimal",
+        "desc": "Taux de marge minimal pour qu'une entreprise poursuive son activité."
+      },
+      "SPAWN_PROFIT_RATE_THRESHOLD": {
+        "label": "Marge minimale autorisant de nouvelles entrées",
+        "desc": "De nouvelles entreprises n'apparaissent que sur les marchés dépassant cette marge. Limite la suroffre."
+      },
+      "DIVIDEND_PAYOUT_RATIO": {
+        "label": "Taux de distribution des dividendes",
+        "desc": "Part des bénéfices des entreprises reversée aux ménages."
+      },
+      "MIN_PRODUCTION_LIMIT": {
+        "label": "Part minimale de production",
+        "desc": "Part minimale de production par rapport à la demande totale."
+      },
+      "MAX_LONGRUN_BONUS_DAYS": {
+        "label": "Durée maximale du bonus d'exploitation longue",
+        "desc": "Plafond, en jours, du bonus obtenu par une entreprise qui fonctionne durablement."
+      },
+      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
+        "label": "Écart de prix arrêtant l'export",
+        "desc": "De combien le prix de l'offre peut dépasser le plafond de recette à l'export (prix extérieur ÷ (1 + taux de transport)) avant que les plateformes d’import-export cessent d'acheter. Les achats baissent linéairement du plafond jusqu'à zéro à cet écart."
+      },
+      "SPAWN_LABOR_CAP_RATIO": {
+        "label": "Plafond de main-d'œuvre consommée à l'apparition",
+        "desc": "Part maximale de l'excédent de main-d'œuvre de la ville qu'une nouvelle entreprise peut absorber d'un coup."
+      },
+      "DEVELOPER_PROFIT_RATIO": {
+        "label": "Marge du promoteur immobilier",
+        "desc": "Part de bénéfice tirée de la promotion immobilière."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Taux d'amortissement des équipements",
+        "desc": "Taux d'amortissement par époque du capital investi en équipements."
+      },
+      "WORK_HOURS": {
+        "label": "Heures de travail quotidiennes (h)",
+        "desc": "Nombre d'heures standard travaillées par habitant et par jour."
+      },
+      "NORMAL_LABOR_UTILITY": {
+        "label": "Taux d'utilisation de référence de la main-d'œuvre",
+        "desc": "Taux d'utilisation de la main-d'œuvre retenu pour le calcul du prix standard. 1,0 correspond à une utilisation complète."
+      },
+      "HIGH_SKILL_BOUNDARY": {
+        "label": "Seuil de haute qualification",
+        "desc": "Au-delà de cette valeur, le travailleur est considéré comme hautement qualifié."
+      },
+      "MAX_BASE_SKILL": {
+        "label": "Compétence de base maximale",
+        "desc": "Valeur de compétence maximale atteignable par l'enseignement primaire."
+      },
+      "MAX_SKILL": {
+        "label": "Plafond de compétence",
+        "desc": "Valeur de compétence maximale qu'un habitant peut acquérir (enseignement supérieur et expérience professionnelle inclus)."
+      },
+      "WAGE_OVERSTAFFED_THRESHOLD": {
+        "label": "Seuil de baisse salariale en cas de sureffectif",
+        "desc": "Au-delà de ce taux de sureffectif, les salaires sont abaissés (évalué par labor_surplus / quota)."
+      },
+      "WAGE_UNDERSTAFFED_THRESHOLD": {
+        "label": "Seuil de hausse salariale en cas de sous-effectif",
+        "desc": "Au-delà de ce seuil de sous-effectif sans aucun candidat, les salaires sont relevés."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Âge d'entrée dans l'enseignement primaire",
+        "desc": "Âge auquel les enfants commencent l'enseignement primaire."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Âge de fin de l'enseignement primaire",
+        "desc": "Âge auquel se termine l'enseignement primaire (équivalent de la fin du lycée)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Âge de sortie de l'université et d'indépendance",
+        "desc": "Âge auquel les études supérieures s'achèvent et où l'on quitte le ménage familial."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Âge minimal de travail",
+        "desc": "Les habitants en dessous de cet âge ne sont ni demandeurs d'emploi ni comptabilisés dans le taux de chômage."
+      },
+      "EDUCATION_CAPACITY_PER_FLOOR": {
+        "label": "Capacité de l'établissement scolaire (par m²)",
+        "desc": "Nombre d'élèves accueillis par m² de surface de plancher."
+      },
+      "SCHOOL_SEARCH_MAX_DISTANCE": {
+        "label": "Distance maximale au lieu d'études (minutes)",
+        "desc": "Distance maximale (en minutes) pour rechercher un établissement scolaire."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Seuil d'envolée du coût en hauteur (étages)",
+        "desc": "Au-delà de ce nombre d'étages, le coût de construction s'envole. Cela freine la construction de gratte-ciel.",
+        "graphX": "Étages",
+        "graphY": "Multiplicateur du coût de construction"
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Coefficient de pénalité d'étage",
+        "desc": "Coefficient de la pénalité de coût en hauteur. Plus il est élevé, plus la pénalité est faible.",
+        "graphX": "Étages",
+        "graphY": "Multiplicateur du coût de construction"
+      },
+      "BUILDING_ASPECT_RATIO_MAX": {
+        "label": "Élancement maximal",
+        "desc": "Limite de la hauteur ÷ √surface au sol. Empêche la construction automatique de tours filiformes sur de petites parcelles. 0 = pas de limite."
+      },
+      "DEMOLITION_RATE": {
+        "label": "Efficacité relative de la démolition",
+        "desc": "À quel point démolir est plus efficace que construire à neuf (multiplicateur)."
+      },
+      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
+        "label": "Taux d'offre excédentaire immobilière",
+        "desc": "Part d'offre excédentaire maintenue en permanence sur le marché immobilier."
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
+        "label": "Surface standard minimale d'opération induite",
+        "desc": "Borne inférieure (m²) de la surface d'opération standard de l'impulsion d'aménagement. Multipliée par la densité de demande du quartier, elle définit l'ampleur de la demande de chantier d'une époque."
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
+        "label": "Surface standard maximale d'opération induite",
+        "desc": "Borne supérieure (m²) de la surface d'opération standard de l'impulsion d'aménagement. Plus elle est élevée, plus chaque opération est vaste."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Probabilité annuelle de base d'effondrement",
+        "desc": "Probabilité de base qu'un bâtiment de durabilité 0,5 s'effondre en un an."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Paramètre de forme de Weibull pour l'effondrement",
+        "desc": "Plus il est élevé, plus la probabilité d'effondrement croît brutalement près de la fin de vie."
+      },
+      "MAINTENANCE_DURABILITY_THRESHOLD": {
+        "label": "Seuil de durabilité déclenchant la réparation",
+        "desc": "Les bâtiments sous cette durabilité deviennent candidats à la réparation."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Taux du coût de réparation",
+        "desc": "Coût de réparation exprimé en proportion du coût de construction neuve."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Probabilité annuelle de base d'entrée en réparation",
+        "desc": "Probabilité annuelle de base qu'un bâtiment candidat entre effectivement en réparation."
+      },
+      "DEMOLITION_DURABILITY_THRESHOLD": {
+        "label": "Seuil de démolition des bâtiments à l'arrêt",
+        "desc": "Un bâtiment à l'arrêt devient candidat à la démolition lorsqu'il passe sous cette durabilité."
+      },
+      "DEMOLITION_BASE_RATE_ANNUAL": {
+        "label": "Probabilité annuelle de démolition des bâtiments à l'arrêt",
+        "desc": "Probabilité de base qu'un bâtiment à l'arrêt et candidat soit démoli dans l'année."
+      },
+      "SHUTDOWN_GRACE_PERIOD_DAYS": {
+        "label": "Délai de grâce avant fermeture (jours)",
+        "desc": "Nombre de jours pendant lesquels un bâtiment fraîchement livré échappe à l'évaluation de fermeture. Laisse le temps aux occupants d'arriver."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Dette initiale de construction (par m²)",
+        "desc": "Dette initiale de construction par m² de surface de plancher (trésorerie négative)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Coefficient de bruit du trafic routier",
+        "desc": "Coefficient par lequel le trafic routier alimente la carte thermique du bruit. Plus il est élevé, plus les abords des routes sont bruyants."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Coefficient de bruit piéton",
+        "desc": "Coefficient par lequel le flux piéton alimente la carte thermique du bruit."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Seuil de bruit piéton",
+        "desc": "Seule la part du flux piéton dépassant cette valeur contribue au bruit."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Distance d'atténuation du bruit (m)",
+        "desc": "Le bruit s'affaiblit avec le carré de la distance, puis encore d'un facteur 1/e à chaque fois qu'on s'éloigne de cette distance (écran des bâtiments, absorption par l'air et le sol). Plus la valeur est faible, plus il reste près de la source."
+      },
+      "NOISE_SATURATION_LEVEL": {
+        "label": "Niveau de saturation du bruit",
+        "desc": "Valeur maximale de la carte thermique du bruit. Au-delà, le bruit plafonne."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Coefficient de pollution du trafic routier",
+        "desc": "Coefficient par lequel le trafic routier alimente la carte thermique de pollution de l'air."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Distance d'atténuation de la pollution (m)",
+        "desc": "La pollution de l'air et les odeurs s'affaiblissent avec le carré de la distance, puis encore d'un facteur 1/e à chaque fois qu'on s'éloigne de cette distance (dispersion et dépôt). Plus la valeur est faible, plus elles restent près de la source."
+      },
+      "POLLUTION_SATURATION_LEVEL": {
+        "label": "Niveau de saturation de la pollution",
+        "desc": "Valeur maximale de la carte thermique de pollution de l'air."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Poids du chômage dans la délinquance",
+        "desc": "Poids du chômage dans la carte thermique de sécurité. Plus il est élevé, plus le chômage dégrade directement la sécurité."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Portée de diffusion de la délinquance (m)",
+        "desc": "Rayon du flou gaussien de la carte thermique de sécurité."
+      },
+      "CRIME_SATURATION_LEVEL": {
+        "label": "Niveau de saturation de la délinquance",
+        "desc": "Valeur maximale de la carte thermique de sécurité."
+      },
+      "LIVING_MULTIPLIER_MIN": {
+        "label": "Multiplicateur minimal du cadre de vie",
+        "desc": "Multiplicateur de loyer minimal lorsque le cadre de vie est au plus mauvais."
+      },
+      "LIVING_MULTIPLIER_MAX": {
+        "label": "Multiplicateur maximal du cadre de vie",
+        "desc": "Multiplicateur de loyer maximal lorsque le cadre de vie est idéal."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Vitesse des piétons (km/h)",
+        "desc": "Vitesse de déplacement des piétons. Utilisée pour le calcul du coût des itinéraires."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Distance d'accélération des automobiles (m)",
+        "desc": "Distance utilisée par les automobiles pour accélérer. Influe sur le calcul de vitesse sur les routes courtes."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Heures d'exploitation quotidiennes des routes (h)",
+        "desc": "Nombre d'heures par jour pendant lesquelles une route est en service. Utilisé pour convertir les volumes de trafic."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Seuil de saturation du bonus de trafic routier",
+        "desc": "À partir de ce volume de trafic routier, le bonus de trafic pour les commerces atteint son maximum."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Seuil de saturation du bonus piéton",
+        "desc": "À partir de ce flux piéton, le bonus piéton pour les commerces atteint son maximum."
+      },
+      "RESOURCE_EFFICIENCY_THRESHOLD": {
+        "label": "Seuil d'efficacité des ressources naturelles",
+        "desc": "Au-dessus de ce taux de ressources naturelles restantes, l'efficacité d'extraction reste proche de 1,0 ; en dessous, elle chute brutalement."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Chargement...",
+    "noScenarios": "Aucun scénario disponible",
+    "starting": "Démarrage...",
+    "startFailed": "Échec du démarrage",
+    "confirmTitle": "Confirmation des réglages de la partie",
+    "unsavedChangesWarning": "Le démarrage entraînera la perte des modifications non enregistrées de votre partie actuelle.",
+    "cityNameLabel": "Nom de la ville",
+    "cityNamePlaceholder": "Saisissez le nom de la ville (facultatif)",
+    "languageLabel": "Langue de la ville",
+    "languageNote": "* Ce choix ne pourra plus être modifié",
+    "simulationDaysLabel": "Jours de simulation",
+    "simulationDaysNote": "* Ce choix ne pourra plus être modifié",
+    "daysOption": "{{days}} jours",
+    "startButton": "Démarrer",
+    "backButton": "Retour",
+    "cleared": "Terminé",
+    "tutorialBadge": "Tutoriel",
+    "sectionDebug": "Débogage",
+    "sectionTutorials": "Tutoriels",
+    "sectionScenarios": "Scénarios",
+    "detailPlaceholder": "Choisissez un scénario dans la liste de gauche.",
+    "detailMapSizeLabel": "Taille de la carte",
+    "detailUnknown": "Inconnu",
+    "detailObjectiveLabel": "Conditions de réussite",
+    "detailNoObjective": "Aucune condition de réussite",
+    "detailNoDescription": "Aucune description n'est définie pour ce scénario.",
+    "tutorialObjective": "Terminer toutes les étapes du tutoriel.",
+    "startScenarioButton": "Commencer ce scénario",
+    "tabSelect": "Choisir un scénario",
+    "tabBrowse": "Trouver des scénarios",
+    "comingSoon": "Coming soon",
+    "relocalizeNote": "Ce scénario a été créé en {{from}}. Commencer en {{to}} renomme en {{to}} les quartiers, installations, habitants, gares et autres noms (les noms donnés par l'auteur sont aussi remplacés ; les noms de rues et quelques autres sont conservés).",
+    "fixedByScenario": "Fixé par le scénario"
+  }
+}

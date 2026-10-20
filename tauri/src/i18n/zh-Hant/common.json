@@ -1,0 +1,88 @@
+{
+  "common": {
+    "backendConnectionWaiting": "正在檢查核心模擬器連線…",
+    "loading": "載入中...",
+    "fetchError": "資料取得失敗",
+    "noData": "無資料",
+    "history": "歷史紀錄",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "自1800年1月1日起已過{{days}}天",
+    "close": "關閉",
+    "sqm": "{{value}} m²",
+    "save": "儲存",
+    "saving": "儲存中...",
+    "rename": "重新命名",
+    "renameFailed": "重新命名失敗",
+    "focusCamera": "在3D視圖中查看",
+    "minutes": "分鐘",
+    "processing": "處理中...",
+    "cancel": "取消",
+    "ok": "確定",
+    "delete": "刪除",
+    "colorPresets": "預設顏色",
+    "colorHex": "顏色代碼"
+  },
+  "status": {
+    "0": "規劃中",
+    "1": "營運中",
+    "2": "已停業",
+    "3": "已列入建設計畫",
+    "4": "建設中",
+    "5": "已列入拆除計畫",
+    "6": "拆除中",
+    "7": "已完成",
+    "8": "已中止",
+    "9": "閒置",
+    "10": "已倒塌",
+    "11": "等待開工"
+  },
+  "reason": {
+    "1": "火災倒塌",
+    "2": "老化",
+    "3": "虧損經營",
+    "4": "使用率過低",
+    "5": "市長決定"
+  },
+  "spaceType": {
+    "0": "其他",
+    "1": "住宅",
+    "2": "商業設施",
+    "3": "倉庫・工廠",
+    "4": "辦公",
+    "5": "農場"
+  },
+  "resource": {
+    "currentAmount": "目前儲量",
+    "consumptionTrend": "消耗量走勢",
+    "amountTrend": "剩餘量走勢",
+    "recoveryAmount": "恢復量/紀元",
+    "maxAmount": "最大儲量",
+    "unknownResource": "未知資源"
+  },
+  "errors": {
+    "UNKNOWN_ERROR": "發生錯誤。",
+    "CREATEPATH_INVALID_GEOMETRY": "路徑形狀無效。請確認起點與終點。",
+    "CREATEPATH_OUTSIDE_COASTLINE": "無法在海岸線之外鋪設路徑。",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "與同一條道路多次相交。請選擇其他路線。",
+    "CREATEPATH_ELEVATION_INTERSECTION": "偵測到立體交叉。請調整高度。",
+    "CREATEPATH_CURVE_TOO_TIGHT": "彎道對此規格而言過急。請放緩彎道。",
+    "CREATEPATH_GRADE_TOO_STEEP": "坡度對此規格而言過陡。請減小坡度。",
+    "CREATEPATH_CONVEYOR_BRANCH": "人員輸送設施（索道等）不能分叉。端點只能連接另一條輸送路徑。",
+    "PATH_TOO_FEW_POINTS": "至少需要2個點。",
+    "PATH_MAX_SPAN_EXCEEDED": "節點間距過長。請新增中間點。",
+    "PATH_ELEVATION_CONFLICT": "偵測到立體交叉。請調整高度。",
+    "INSUFFICIENT_FUNDS": "資金不足，無法下達建設指令。",
+    "GRADING_VALIDATION_ERROR": "該範圍無法施工。請查看土方工程視窗中顯示的原因。",
+    "CREATEPATH_SEA_LAKE_CROSSING": "路徑不能在地面上經過海面或湖面。請改為高出水面足夠高度的橋梁，或從地下通過。",
+    "CREATEPATH_QUAY_BAND_CROSSING": "路徑不能在地面上橫越填海地的岸壁。請以高架或地下方式通過，並將端點和途經點置於岸壁頂面之外。",
+    "ZONE_CONTIGUITY_ERROR": "塗抹的道路無法連成一個完整的地區，因此無法分配。請塗抹相連的道路。",
+    "ZONE_SIZE_ERROR": "地區的最大距離或道路總長度將超過上限。請縮小塗抹範圍。",
+    "OUTSIDE_CITY_EDIT": "無法編輯城市外的設施。",
+    "OUTSIDE_CITY_PLACEMENT": "無法放置在城市之外。",
+    "READ_ONLY": "唯讀模式下無法執行此操作。"
+  },
+  "localizedText": {
+    "languages": "輸入語言",
+    "required": "必填"
+  }
+}

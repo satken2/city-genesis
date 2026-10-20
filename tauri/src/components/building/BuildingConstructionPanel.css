@@ -1,0 +1,577 @@
+/**
+ * Building construction panel styles
+ *
+ * Optimized for a single-column layout inside popup windows.
+ */
+
+/* ---- Root layout ---- */
+.bc-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- Sections ---- */
+.bc-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.bc-section-title {
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: #c5d4e3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ---- Select boxes ---- */
+.bc-select {
+  width: 100%;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.bc-select:focus {
+  border-color: #4ea1ff;
+}
+
+.bc-select option {
+  background: #182231;
+  color: #f6fbff;
+}
+
+.bc-empty-variants {
+  padding: 12px;
+  color: #93a9c0;
+  text-align: center;
+  font-size: 1rem;
+}
+
+/* ---- Category/building selection ---- */
+.bc-selection-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  min-height: 32px;
+}
+
+/* Header buttons (shared borderless style for Back and Copy existing building). */
+.bc-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #e5eef9;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.bc-header-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+}
+
+.bc-header-btn:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.bc-header-btn:focus-visible {
+  outline: 2px solid #4ea1ff;
+  outline-offset: 1px;
+}
+
+/* Icon images inside header buttons. */
+.bc-header-btn-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+/* Copy existing building button: always align to the far right. */
+.bc-copy-btn {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+/* Spacing for a standalone Back button (outside the header). */
+.bc-back-btn {
+  margin-bottom: 8px;
+}
+
+.bc-selection-header .bc-back-btn {
+  margin-bottom: 0;
+}
+
+.bc-variant-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bc-variant-card-btn {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  box-sizing: border-box;
+  margin: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.bc-variant-card-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.bc-variant-card-btn:focus-visible {
+  outline: 2px solid #4ea1ff;
+  outline-offset: 1px;
+}
+
+.bc-variant-card-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+
+.bc-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+}
+
+/* Override App.css button defaults (borders/padding) to create tiles. */
+.bc-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6fbff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bc-tile:hover { background: rgba(255, 255, 255, 0.14); }
+.bc-tile:focus-visible { outline: 2px solid #4ea1ff; outline-offset: 1px; }
+.bc-tile:disabled { opacity: 0.5; cursor: default; }
+
+/* Keep an empty frame of equal height on tiles without images to align names. */
+.bc-tile-icon { display: grid; place-items: center; height: 52px; }
+.bc-tile-icon img { width: 52px; height: 52px; object-fit: contain; }
+.bc-tile-name { font-size: 1rem; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+
+/* ---- Description (icon and frame) ---- */
+.bc-description-frame {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bc-description-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.bc-description-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.bc-description-name {
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: #f6fbff;
+  margin-bottom: 4px;
+}
+
+.bc-description-text {
+  font-size: 1rem;
+  color: #93a9c0;
+  line-height: 1.5;
+}
+
+/* Floor specifications below the description (type icon and floor count; title tooltips explain both). */
+.bc-description-floors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.bc-floor {
+  display: inline-flex;
+  cursor: default;
+}
+
+.bc-floor-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.bc-floor-range {
+  margin-left: 2px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  color: #c5d4e3;
+  cursor: default;
+}
+
+/* Site card area/regulations (icon and value; title tooltips name the fields). */
+.bc-parcel-specs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+}
+
+.bc-parcel-spec {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #93a9c0;
+  cursor: default;
+}
+
+.bc-parcel-spec-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+}
+
+.bc-parcel-spec-value {
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  color: #c5d4e3;
+}
+
+/* Leave a small gap between the buildable building list and regulation row on site cards. */
+.bc-parcel-allowed {
+  margin-top: 6px;
+}
+
+/* Center the prompt without an icon when no site is selected. */
+.bc-parcel-prompt {
+  text-align: center;
+}
+
+/* ---- Site selection message ---- */
+.bc-parcel-message {
+  font-size: 1rem;
+  color: #93a9c0;
+  text-align: center;
+  padding: 8px;
+}
+
+.bc-parcel-message.active {
+  color: #4ea1ff;
+}
+
+/* ---- Shape preview section ---- */
+.bc-canvas-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  width: 100%;
+  aspect-ratio: 1;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* ---- Information grid (bordered) ---- */
+.bc-info-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  /* Scale row height with font size and grow rows when values wrap; fixed heights would overlap following rows. */
+  grid-auto-rows: minmax(2.04rem, auto);
+  gap: 3px 10px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bc-info-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.bc-info-value {
+  font-size: 1rem;
+  color: inherit;
+  font-family: "Consolas", "Menlo", monospace;
+}
+
+/* Operating cost breakdown (labor/material costs). Indent one level and use a muted color. */
+.bc-info-label--sub {
+  padding-left: 12px;
+  font-weight: 400;
+  color: #6f849b;
+}
+
+.bc-info-value--sub {
+  color: #a8b8c8;
+}
+
+/* Source budget category row (expense icon and label). */
+.bc-ledger-value {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: inherit;
+}
+
+.bc-ledger-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* Operating cost assumption note (per epoch at full operation). */
+.bc-running-cost-note {
+  margin-top: 4px;
+}
+
+/* ---- Stepper section ---- */
+.bc-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bc-stepper-unit {
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
+/* ---- Appearance randomization slider section ---- */
+.bc-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.bc-slider-row:last-child {
+  margin-bottom: 0;
+}
+
+.bc-slider-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #93a9c0;
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.bc-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #45475a;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.bc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #4ea1ff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.bc-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #4ea1ff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.bc-slider-value {
+  font-size: 1rem;
+  color: #93a9c0;
+  font-family: "Consolas", "Menlo", monospace;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ---- Floor count/building coverage ratio in two columns ---- */
+.bc-split-row {
+  display: flex;
+  gap: 12px;
+}
+
+.bc-split-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- Inline construction budget ratio (right of one month's construction cost) ---- */
+.bc-budget-ratio-inline {
+  margin-left: 6px;
+  color: #93a9c0;
+  font-size: 0.94rem;
+}
+
+/* ---- Action buttons (fixed at panel bottom) ---- */
+.bc-action-bar {
+  position: sticky;
+  bottom: 0;
+  /* Fill with a similar panel color so underlying content does not show through during scrolling. */
+  background: #182231;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+}
+
+.bc-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.bc-btn {
+  flex: 1;
+  min-width: 60px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 1rem;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.bc-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.bc-btn-confirm {
+  background: #4ea1ff;
+  color: #ffffff;
+  border-color: #4ea1ff;
+  font-weight: 600;
+}
+
+.bc-btn-confirm:hover {
+  opacity: 0.85;
+}
+
+.bc-btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Loading / empty ---- */
+.bc-muted {
+  color: #9db0c5;
+  font-size: 1rem;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ---- Placement unavailable message in direct placement mode ---- */
+.bc-direct-invalid {
+  color: #ff8a8a;
+  font-weight: 600;
+}
+
+/* ---- Acquisition required message in direct placement mode (warning that allows confirmation after consent) ---- */
+/* Orange matching the acquisition negotiation indicator (ACQUISITION_FRAME_COLOR in AgentDetailPanel). */
+.bc-direct-acquisition {
+  color: #f97316;
+  font-weight: 600;
+}
+
+/* ---- Infrastructure service area legend ---- */
+.bc-effect-range-legend {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(80, 200, 120, 0.35);
+  border-radius: 6px;
+  background: rgba(80, 200, 120, 0.08);
+  font-size: 1rem;
+  color: #cfe6d6;
+}
+
+.bc-effect-range-legend-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.bc-effect-range-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.6;
+}
+
+.bc-effect-range-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+/* Area fill: translucent green (matches Unity overlay colors). */
+.bc-effect-range-swatch-area {
+  background: rgba(80, 200, 120, 0.35);
+  border: 1px solid rgba(80, 200, 120, 0.7);
+}
+
+/* Already covered areas of existing facilities: translucent blue (matches Unity overlay colors). */
+.bc-effect-range-swatch-existing {
+  background: rgba(70, 150, 240, 0.35);
+  border: 1px solid rgba(70, 150, 240, 0.7);
+}

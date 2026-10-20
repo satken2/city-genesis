@@ -1,0 +1,259 @@
+.property-edit {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ---- Header ---- */
+.property-edit-header {
+  flex-shrink: 0;
+}
+
+.property-edit-header-row {
+  display: flex;
+  gap: 8px;
+}
+
+.property-edit-select {
+  flex: 0 0 140px;
+  padding: 4px 6px;
+  font-size: 1rem;
+  background: var(--panel-bg, #1e1e2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #444);
+  border-radius: 4px;
+}
+
+.property-edit-input {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 1rem;
+  background: var(--panel-bg, #1e1e2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #444);
+  border-radius: 4px;
+}
+
+.property-edit-input:disabled {
+  opacity: 0.5;
+}
+
+.property-edit-load-btn {
+  flex-shrink: 0;
+  padding: 4px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.property-edit-load-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.property-edit-load-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Errors / messages ---- */
+.property-edit-error {
+  color: #f87171;
+  font-size: 1rem;
+  background: rgba(248, 113, 113, 0.1);
+  padding: 6px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.property-edit-message {
+  color: #4ade80;
+  font-size: 1rem;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 6px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.property-edit-loading {
+  color: var(--muted, #888);
+  font-size: 1rem;
+  text-align: center;
+  padding: 16px 0;
+}
+
+/* ---- Field list ---- */
+.property-edit-fields {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.property-edit-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.property-edit-field--dirty {
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.property-edit-field-label {
+  flex: 0 0 150px;
+  font-size: 1rem;
+  color: var(--muted, #888);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.property-edit-field-control {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.property-edit-field-input {
+  flex: 1;
+  padding: 2px 6px;
+  font-size: 1rem;
+  background: var(--panel-bg, #1e1e2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #555);
+  border-radius: 3px;
+}
+
+.property-edit-field-input--readonly {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.property-edit-field-dirty-mark {
+  color: #facc15;
+  font-weight: bold;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  width: 12px;
+}
+
+.property-edit-field-type-badge {
+  font-size: 0.9rem;
+  color: var(--muted, #666);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.property-edit-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.property-edit-checkbox {
+  cursor: pointer;
+}
+
+.property-edit-checkbox-text {
+  font-size: 1rem;
+  color: var(--text, #e0e0e0);
+}
+
+/* ---- Action buttons ---- */
+.property-edit-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border, #444);
+}
+
+.property-edit-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.property-edit-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.property-edit-btn--save {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.property-edit-btn--save:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.property-edit-btn--delete {
+  background: #ef4444;
+  color: #fff;
+}
+
+.property-edit-btn--delete:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.property-edit-field--textarea {
+  align-items: flex-start;
+}
+
+.property-edit-field--textarea .property-edit-field-label {
+  margin-top: 6px;
+}
+
+.property-edit-textarea-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.property-edit-field-textarea {
+  flex: 1;
+  padding: 4px 6px;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 1rem;
+  background: var(--panel-bg, #1e1e2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #555);
+  border-radius: 3px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.property-edit-field-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.property-edit-field-textarea--error {
+  border-color: #ef4444;
+}
+
+.property-edit-field-error-text {
+  color: #f87171;
+  font-size: 1rem;
+}

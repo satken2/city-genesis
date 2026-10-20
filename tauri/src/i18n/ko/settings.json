@@ -1,0 +1,129 @@
+{
+  "settings": {
+    "title": "설정",
+    "groups": {
+      "general": "일반",
+      "display": "화면",
+      "sound": "사운드",
+      "system": "시스템",
+      "about": "정보",
+      "developer": "개발자 설정"
+    },
+    "swagger": {
+      "label": "Swagger (API 문서)",
+      "description": "기본 브라우저에서 현재 연결된 백엔드 API를 표시합니다",
+      "action": "브라우저에서 열기"
+    },
+    "fontSize": {
+      "label": "글자 크기",
+      "large": "큼",
+      "medium": "보통",
+      "small": "작음",
+      "custom": "사용자 지정",
+      "preview": "현재 크기"
+    },
+    "monitor": {
+      "label": "디스플레이",
+      "prev": "이전 디스플레이",
+      "next": "다음 디스플레이"
+    },
+    "graphicMonitor": {
+      "label": "3D 화면을 표시할 디스플레이"
+    },
+    "multiDisplay": {
+      "label": "멀티 디스플레이 모드",
+      "description": "각종 창을 게임 화면과 다른 디스플레이에 표시합니다",
+      "on": "사용",
+      "off": "사용 안 함"
+    },
+    "popupMonitor": {
+      "label": "창을 표시할 디스플레이"
+    },
+    "hintbar": {
+      "label": "힌트 바",
+      "show": "표시",
+      "hide": "표시 안 함",
+      "description": "화면 상단에 조작 힌트를 표시하는 바입니다"
+    },
+    "language": {
+      "label": "언어",
+      "description": "UI 표시 언어입니다. 세이브 데이터의 언어와는 다릅니다.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
+    },
+    "volume": {
+      "label": "음량",
+      "master": "마스터 볼륨",
+      "bgm": "BGM",
+      "sfx": "효과음"
+    },
+    "compute": {
+      "label": "GPU 가속",
+      "comingSoon": "Coming soon",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU 사용 중",
+      "statusInactive": "CPU 사용 중",
+      "restartRequired": "설정 변경 후 메인 프로그램을 재시작합니다",
+      "restarting": "재시작 중...",
+      "restartFailed": "재시작에 실패했습니다",
+      "restartUnavailable": "설정을 저장했습니다. 변경 사항은 다음 게임 실행 시 반영됩니다",
+      "confirmRestart": "연산 처리를 {{mode}}(으)로 변경합니다. 메인 프로그램을 재시작하시겠습니까?",
+      "restartAction": "재시작"
+    },
+    "windowReset": {
+      "label": "창 위치・크기",
+      "action": "초기화"
+    },
+    "credits": {
+      "label": "크레디트",
+      "description": "본 작품에 사용된 소재・소프트웨어의 저작권 표기입니다",
+      "action": "보기"
+    }
+  },
+  "saveLoad": {
+    "newGame": "새 게임",
+    "overwriteSave": "덮어쓰기 저장",
+    "saveAs": "다른 이름으로 저장",
+    "load": "불러오기",
+    "quitGame": "게임 종료",
+    "returnToTop": "메인 메뉴로 돌아가기",
+    "loading": "불러오는 중...",
+    "shuttingDown": "종료 처리 중...",
+    "saveFailed": "저장에 실패했습니다",
+    "loadFailed": "불러오기에 실패했습니다",
+    "confirmNewGame": "현재 데이터는 사라집니다. 새 게임을 시작하시겠습니까?",
+    "confirmQuitGame": "게임을 종료하시겠습니까? 현재 진행 상황은 자동 저장되지 않습니다.",
+    "confirmReturnToTop": "메인 메뉴로 돌아가시겠습니까? 현재 진행 상황은 자동 저장되지 않습니다.",
+    "confirm": "예",
+    "cancel": "아니오",
+    "saveAsScenario": "시나리오로 저장",
+    "saveAsNewScenario": "다른 시나리오로 저장",
+    "overwriteScenario": "시나리오 덮어쓰기",
+    "backToGame": "게임으로 돌아가기",
+    "saveName": "세이브 이름",
+    "confirmOverwrite": "“{{name}}”에 덮어쓰기 저장하시겠습니까?",
+    "confirmOverwriteScenario": "시나리오 “{{name}}”에 덮어쓰기 저장하시겠습니까?"
+  },
+  "saveList": {
+    "noSaves": "세이브 데이터가 없습니다",
+    "currentSave": "현재 데이터",
+    "population": "인구",
+    "inGameDate": "날짜",
+    "savedAt": "저장 일시",
+    "loadButton": "불러오기",
+    "deleteButton": "삭제",
+    "confirmLoad": "이 세이브 데이터를 불러오시겠습니까?",
+    "confirmDelete": "이 세이브 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "loading": "불러오는 중...",
+    "loadFailed": "불러오기에 실패했습니다",
+    "deleteFailed": "삭제에 실패했습니다",
+    "openFolderButton": "폴더 위치 표시",
+    "scenario": "시나리오"
+  }
+}

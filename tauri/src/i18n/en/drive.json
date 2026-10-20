@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Drive",
+    "car": "Car",
+    "rail": "Rail routes",
+    "running": "Running vehicles",
+    "standard": "Passenger car",
+    "commercial": "Commercial vehicle",
+    "truck": "Truck",
+    "finishEditing": "Finish editing before starting a drive.",
+    "noLines": "No operating rail routes are available to ride.",
+    "pickRail": "Click a track on the selected route.",
+    "pickRoad": "Click an active road.",
+    "pickVehicle": "Click a moving car, bus or train (drag to pan).",
+    "clickStart": "Select a starting position (drag to pan).",
+    "startSelected": "Start selected. Depart in the arrow's direction.",
+    "reverse": "Reverse direction",
+    "start": "Depart",
+    "back": "Back",
+    "close": "Exit (Esc)",
+    "invalidStart": "Cannot start here. Select a drivable road or a track on your route.",
+    "invalidVehicle": "No vehicle selected. Click a moving car, bus or train.",
+    "notReady": "This direction is unavailable or the surroundings are loading. Change direction or position, or wait and retry."
+  }
+}

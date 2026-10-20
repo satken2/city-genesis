@@ -1,0 +1,753 @@
+{
+  "tutorial": {
+    "startButton": "Start",
+    "controls": {
+      "title": "Basic Controls",
+      "description": "Learn your goals as mayor and how to plan before advancing time. After exploring what the city’s information means, what each button does and how to move the camera, you will extend a road to create a new residential area and provide it with homes, electricity and water.",
+      "step1": {
+        "title": "Build a city as mayor",
+        "role": "In City Genesis, you grow a city as its mayor. You plan roads and facilities, decide how land is used, set taxes and allocate money to public services. Your job is to create the conditions that support residents and businesses. Press “Next” to continue.",
+        "goal": "Aim for a city where residents can live comfortably and safely. Provide homes and jobs, electricity, water and healthcare. Growing the city also takes money. Consider both people’s lives and the city’s finances when deciding what to improve.",
+        "epoch": "Time advances one month at a time. First set budgets and construction plans, then press “Start” when you are ready. Construction and the activities of residents and businesses advance; review the results before making your next plans. The date stays still until you start, so take your time."
+      },
+      "step2": {
+        "title": "Read the city from the cockpit",
+        "tools": "The cockpit at the bottom of the screen helps you check the city and decide what to do next. “View” uses colors to help find shortages and problem areas. “Map” shows where places are across the city, helping you find your way as it grows.",
+        "tracking": "“Tracking list” keeps residents you want to revisit. Add someone to tracking from their citizen details, then use this button to return to their information and commutes. Explore individual lives behind the citywide figures.",
+        "bulldozer": "“Bulldozer” removes empty parcels and cancels planned buildings and roads. Press the button, then click a target in the 3D view; press it again to leave the mode. To remove a completed building or road, open its details and choose demolition.",
+        "services": "The lightning and water-drop gauges show how much room your electricity and water supplies have to grow. As they fill, demand is approaching capacity. Click them to review public facilities, and check whether you need more supply before expanding the city.",
+        "score": "“Score” summarizes how satisfied residents are with life in your city. Higher is better. Homes, jobs, healthcare and a pleasant living environment help improve it. If it falls, look for the difficulties residents are facing.",
+        "budget": "“Budget” shows next month’s expected expenses relative to last month’s income. When the gauge swings to the right, expenses exceed income. Conversely, when it swings to the left, you have money to spare. Check it before advancing time.",
+        "budgetChanges": "More construction, higher facility operation and faster construction increase the money needed and raise the budget gauge. Lower operation or slower construction can reduce expected costs. When tax revenue increases, the gauge goes down even if expenses stay the same.",
+        "budgetPlanning": "A low gauge means you have money available for the city. Consider investing in missing services or facilities you will need soon.",
+        "date": "The date shows how far the city’s time has advanced. Use it to track construction progress and seasonal changes. It stays still while you plan and updates when you advance time with “Start”.",
+        "climate": "The temperature, rainfall, sunlight and wind panel shows this month’s average climate. These conditions affect farming, wind power and solar power. If crops or electricity production are low, check the climate too.",
+        "climateEffects": "Weak sunlight reduces solar output, and weak wind reduces wind output. Temperature and rainfall also affect farming. Click the climate panel to see how this month’s conditions affect each facility’s production efficiency. Plan facilities with seasonal changes in supply in mind.",
+        "notifications": "The number on “Notifications” counts warnings and cautions to review. A red number and flashing button mean city functions are being disrupted and need prompt attention. Yellow numbers indicate cautions, such as preparing for growth or problems that take time to improve. Press the button to read them.",
+        "notificationActions": "When a notice identifies a facility or district, click its row to inspect it. Respond to the cause: connect missing power lines or arrange supplies for a facility short of materials. Notices about ongoing problems disappear when their cause is resolved. After taking action, check next month’s results."
+      },
+      "step3": {
+        "title": "Change the view to find problems",
+        "open": "Power shortages and traffic congestion can be hard to spot from the city’s appearance. Use “View” to show the information you need on the map. Press “View” in the cockpit to open the panel.",
+        "tabs": "The vertical tabs let you choose what to inspect, such as buildings, roads, parcels or districts. You can also hide unwanted objects when overlapping information makes the view hard to read. Press “Next” to explore the display options.",
+        "modes": "The buttons in each tab choose which information colors the objects. Find busy roads or troubled buildings and use them as clues for your next action. Click an object in the 3D view to inspect it further. Leave the panel open and press “Next”."
+      },
+      "step4": {
+        "title": "Discover your city-building tools",
+        "grading": "Let’s explore the buttons on the left from top to bottom. “Earthworks” levels slopes for building or reclaims land from the sea. It creates room for growth when you need more homes or workplaces but have too little usable land.",
+        "road": "“Roads, Rail & Infrastructure” creates routes for people, goods, power and water. Connect homes and workplaces with roads, link distant places with rail, and connect facilities with power lines and pipes. These networks support travel, trade and utility supplies.",
+        "land": "“Land Parcels” prepares sites for buildings. Empty land alone is not a building site. More homes and large facilities both need sites with enough room for them.",
+        "landDevelopment": "Parcels provide space for city construction and for private homes and businesses to develop. Private buildings grow according to demand and district building rules. When you want more homes or jobs, check that enough vacant parcels are available.",
+        "district": "“District” lets you manage parts of the city with different priorities, such as a residential neighborhood or an industrial area. Each district can restrict the types of buildings allowed, giving the whole neighborhood a suitable direction for development.",
+        "districtRules": "District details let you choose which types of buildings are allowed. Use them according to the kind of city you want to grow, such as keeping factories out of a residential neighborhood. You can also compare population and living conditions between districts to decide where support is needed.",
+        "construction": "“Construction” plans buildings the city needs. You can build homes, workplaces, hospitals, schools and power plants. Use it to provide more housing and jobs or fill gaps in healthcare, education, electricity and other services.",
+        "transport": "“Public Transport” helps residents travel by bus or rail. You can set routes and stops, and adjust fares and service intervals. Linking homes with workplaces and schools helps reduce the burden of commuting.",
+        "propPlacement": "“Prop Placement” adds trees, rocks and other scenery. Use it to add greenery to streets or decorate the terrain.",
+        "constructionProjects": "“Construction Projects” gathers planned and ongoing works in one place. Review progress and costs to decide which works to advance.",
+        "regulation": "“Regulations” sets rules for living and working in the city, including speed limits, working hours, immigration and social security. Adjust them to suit your priorities for safety, time to enjoy life and city growth.",
+        "stat": "“Statistics” helps you evaluate your decisions. Charts show changes in population, income, commuting, resident satisfaction, and the size of the economy and prices. After changing policies or facilities, check whether life is improving and what is still missing. That completes the buttons on the left."
+      },
+      "step5": {
+        "title": "Run your plans and review results",
+        "flow": "After checking the city and planning construction and budgets, use “Start” in the cockpit to advance time. Work progresses, residents work, businesses produce, and finances and scores change. Some plans need several months to show their effects.",
+        "execute": "After advancing time, review the results and notices. Address problems in your next plans, then advance time again. Grow the city by repeating “plan, advance, review”. You do not need to press “Start” here. Press “Next” to learn the camera controls."
+      },
+      "step6": {
+        "title": "Move the camera",
+        "description": "You can move the camera like this: drag with the left button to move the view, drag with the right button to rotate, W/A/S/D (or the arrow keys) to move, Q/E to rotate, R/F to change the height, and the mouse wheel to zoom. Try it freely, then press \"Next\"."
+      },
+      "step7": {
+        "title": "Fly mode and cinema mode",
+        "description": "The camera has two special modes. \"Fly mode\" starts with Shift+F: move along your view with W/A/S/D, look around with the mouse, and go up or down with R/F. Press Esc to leave it. \"Cinema mode\" starts from the button in the top-right corner of the screen and lets you circle around the city. Look around with the mouse; Shift switches between orbiting and travelling, Space pauses, Backspace reverses, and Esc exits. The on-screen panels are hidden while either mode is on and come back when you press Esc. When you've tried them, exit both modes and press \"Next\"."
+      },
+      "step8": {
+        "title": "See the city boundary",
+        "description": "We moved the camera to the east edge of the city. The area you can use as a city is this rectangle where detailed terrain exists, and the camera cannot leave it either. That's all for the screen and controls. Next, let's actually create a new residential area. Press “Next”."
+      },
+      "step9": {
+        "title": "Extend the Road",
+        "description": "Now let's build a residential area to welcome new residents. Homes and workplaces are no use unless roads connect them: people can't come and go, and goods can't arrive. First, extend the town’s east–west street to the west to open a way into the new neighborhood. Press “Roads, Rail & Infrastructure” on the icon panel to open the construction panel."
+      },
+      "step10": {
+        "title": "Complete the Road",
+        "description": "The road is still “Construction Planned”. A planned road can't be used yet — people and cars can only use it once the work is finished. Press “Start” in the cockpit 2–3 times to advance time and wait for it to be completed. Construction costs money every month while it is underway."
+      },
+      "step11": {
+        "title": "Create Parcels",
+        "description": "The road is ready. Next, prepare parcels to serve as building sites. Buildings can only stand on parcels, and a parcel facing a road lets people and goods come and go. Press “Land Parcels” on the icon panel.",
+        "create": "Make sure “Create Along Road” is selected, then click the road you extended in the 3D view. When red outlines line up along the road, confirm to create the parcels."
+      },
+      "step12": {
+        "title": "Create a District",
+        "description": "Before building, decide what this street should become. Without a plan, a factory might go up right next to the homes. Such plans are made per “District”. Districts are assigned road by road, and a parcel belongs to the district of the road it faces. Press “District” on the icon panel to open the Edit Districts window: right now the whole town is a single district.",
+        "create": "Use the “Street Side” brush. Switch the tool to “New District”, hold Ctrl and drag along the road you extended. Both sides of the road you paint, along with the parcels facing them, become a new district."
+      },
+      "step13": {
+        "title": "District Created",
+        "description": "You've separated the new street from the town center as its own district. You can check population and prices per district and decide which buildings may be built there, so each area can grow in the way that suits it. Once you've checked it, close the Edit Districts window."
+      },
+      "step14": {
+        "title": "Open District Details",
+        "description": "Let's make the new district a residential area. Show the districts with the icon at the bottom left of the screen, then click the label of the district you just created to open its details."
+      },
+      "step15": {
+        "title": "Make It Residential",
+        "description": "The building regulations near the bottom of the panel choose which buildings may be built on this district's parcels. We want a calm place to live here, so click every building other than “Apartment” and “House” to disable them."
+      },
+      "step16": {
+        "title": "Check a Parcel",
+        "description": "A district's regulations apply to every parcel in it. Click the parcel with the yellow marker to open its details."
+      },
+      "step17": {
+        "title": "Regulation Applied",
+        "description": "Near the bottom of the parcel panel, you can see the district's regulation allowing only “Apartment” and “House”. Now only homes can be built on this street. Instead of setting parcels one by one, deciding a district's direction makes the whole street follow it."
+      },
+      "step18": {
+        "title": "Build Homes",
+        "description": "Now let's provide homes. Housing is normally built automatically by the private sector when people want to live here, but public housing built by the city quickly makes up for a shortage. Let's build a public apartment building here. Press “Construction” on the icon panel.",
+        "select": "Choose “Apartment Complex” in the “Residential” category, click any parcel in the new district as the site, and confirm."
+      },
+      "step19": {
+        "title": "Complete the Homes",
+        "description": "Like roads, buildings can't be lived in just because they're planned. An apartment building takes more than half a year to finish. Press “Start” to advance time and wait for it to be completed."
+      },
+      "step20": {
+        "title": "Check for Electricity",
+        "description": "Homes alone don't make a life: people also need electricity and water. This town has no power plant and no water supply yet. Click the apartment building with the yellow marker, where the townspeople live, to open its details, pick one of the tenants in the “Building Info” tab, then open its “Supply, Demand & Trade” tab: you can confirm that the Acquired amount of Electricity is 0."
+      },
+      "step21": {
+        "title": "Build a Solar Power Plant",
+        "description": "To deliver electricity, you first need a power plant to generate it. Build a “Solar Power Plant” on the parcel with the yellow marker. It would normally take time to complete, but since this is a tutorial, the construction period is skipped."
+      },
+      "step22": {
+        "title": "Build a Substation",
+        "description": "The high-voltage electricity from a power plant can't be used by households as it is. A substation converts it into power homes can use and distributes it to the surrounding buildings connected by road. Build an “Electrical Substation” on the parcel with the yellow marker near the apartment building."
+      },
+      "step23": {
+        "title": "Connect with a Power Line",
+        "description": "Even when the power plant and the substation are apart, a route for the electricity connects them. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Power Transmission Line” under “Electricity”, and draw a line from the solar power plant's connection terminal to the substation's terminal. A straight line between the terminals does it in one go."
+      },
+      "step24": {
+        "title": "Confirm the Power Supply",
+        "description": "Once connected, make sure electricity is really flowing. Press “Start” to advance time, click the substation to open its details, and in the “Supply, Demand & Trade” tab check that the Received amount of High-Voltage Electricity isn't 0. It may take a few months for the plant to start up and the power to arrive."
+      },
+      "step25": {
+        "title": "Power Reaches Homes",
+        "description": "From the apartment building's details, open a tenant's “Supply, Demand & Trade” tab as you did at first, and check that the Acquired amount of Electricity is no longer 0. It may take another month or two to reach households. Generate it at a power plant, carry it over power lines, distribute it from a substation — only when all three are connected does electricity reach homes."
+      },
+      "step26": {
+        "title": "Find a Water Source",
+        "description": "Next is water. Tap water is groundwater pumped up and sent to the town. First, find out where water can be pumped. Press “View” in the cockpit to open the View panel.",
+        "show": "Choose “Natural Resources” from the vertical tabs and switch it to “Visible”. Water sources appear in light blue on the map. Click the water source with the yellow marker to open its details."
+      },
+      "step27": {
+        "title": "Build a Groundwater Pump",
+        "description": "A groundwater pump draws water up from underground, so it must be built where there is a water source. It also needs electricity and workers to run, which is why we brought in power first. Build a “Groundwater Well Pump” on the parcel with the yellow marker on top of the water source. Since this is a tutorial, the construction period is skipped."
+      },
+      "step28": {
+        "title": "Build a Water Pumping Station",
+        "description": "Pumped water can't be handed to households as it is. Just as a substation distributes electricity, a water pumping station delivers water to the surrounding buildings connected by road. Build a “Water Pumping Station” on the parcel with the yellow marker near the apartment building."
+      },
+      "step29": {
+        "title": "Connect with a Pipe",
+        "description": "You need a pipe to carry the water from the groundwater pump to the pumping station. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Water Aqueduct Pipe” under “Water”, and lay it from the groundwater pump's connection terminal to the pumping station's terminal."
+      },
+      "step30": {
+        "title": "Confirm the Water Supply",
+        "description": "Press “Start” to advance time, click the water pumping station to open its details, and in the “Supply, Demand & Trade” tab check that the Received amount of High-Pressure Water isn't 0. It may take a few months for workers to gather at the groundwater pump and for the water to arrive."
+      },
+      "step31": {
+        "title": "The Basics Are in Place",
+        "description": "Water has reached the pumping station, so homes around it can now use tap water. Lay roads, prepare parcels, decide each district's direction, build homes, and bring in electricity and water — that is the basic flow of city building. Press “Next” to finish the Basic Controls tutorial."
+      }
+    },
+    "scenario4": {
+      "title": "Build a Railway",
+      "description": "We want to connect the residential area and workplaces by railway, but private buildings and a public hospital obstruct the route. In this tutorial you will learn land acquisition, public-facility demolition, elevated track above roads, platforms and stations, a depot, curve and grade adjustment, power connection and opening a service.",
+      "step1": {
+        "title": "Lay elevated platforms",
+        "description": "Open Roads, Rail & Infrastructure → Railways. Build the high-standard elevated side platforms on the west side of town and the double-track side platforms on the east side. Left-click both marked endpoints at 6m, right-click to finish the shape, then confirm.",
+        "open": "Open Roads, Rail & Infrastructure → Railways. Build the high-standard elevated side platforms on the west side of town and the double-track side platforms on the east side. Left-click both marked endpoints at 6m, right-click to finish the shape, then confirm.",
+        "variant": "Open Roads, Rail & Infrastructure → Railways. Build the high-standard elevated side platforms on the west side of town and the double-track side platforms on the east side. Left-click both marked endpoints at 6m, right-click to finish the shape, then confirm.",
+        "start": "Open Roads, Rail & Infrastructure → Railways. Build the high-standard elevated side platforms on the west side of town and the double-track side platforms on the east side. Left-click both marked endpoints at 6m, right-click to finish the shape, then confirm.",
+        "end": "Open Roads, Rail & Infrastructure → Railways. Build the high-standard elevated side platforms on the west side of town and the double-track side platforms on the east side. Left-click both marked endpoints at 6m, right-click to finish the shape, then confirm.",
+        "confirm": "Open Roads, Rail & Infrastructure → Railways. Build the high-standard elevated side platforms on the west side of town and the double-track side platforms on the east side. Left-click both marked endpoints at 6m, right-click to finish the shape, then confirm.",
+        "town": "Build the western high-standard elevated side platforms at 6m. Left-click both marked endpoints, right-click to finish the shape, then confirm.",
+        "new": "Build the eastern double-track side platforms. Use Back to return to the cards and select this platform under Railways. Left-click both endpoints at 6m, right-click to finish the shape, then confirm. If the panel is closed, reopen Roads, Rail & Infrastructure.",
+        "east": "Build the eastern double-track side platforms. Use Back to return to the cards and select this platform under Railways. Left-click both endpoints at 6m, right-click to finish the shape, then confirm. If the panel is closed, reopen Roads, Rail & Infrastructure."
+      },
+      "step2": {
+        "title": "Build station entrances",
+        "description": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "open": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "variant": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "start": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "end": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "confirm": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "town": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "new": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages.",
+        "east": "Choose Simple station building. Connect each pair of markers with a short passage across its platform. Place the entrances just outside both sides of the platform. Left-click the marked endpoints, right-click to finish the shape, then confirm both passages."
+      },
+      "step3": {
+        "title": "Plan the acquisition section",
+        "description": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here.",
+        "open": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here.",
+        "variant": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here.",
+        "start": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here.",
+        "end": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here.",
+        "confirm": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here.",
+        "town": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here.",
+        "new": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here.",
+        "east": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here."
+      },
+      "step4": {
+        "title": "Observe acquisition and the blocked project",
+        "description": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "open": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "variant": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "start": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "end": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "confirm": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "town": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "new": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
+        "east": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction."
+      },
+      "step5": {
+        "title": "Order the hospital demolished",
+        "description": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
+        "open": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
+        "variant": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
+        "start": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
+        "end": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
+        "confirm": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
+        "town": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
+        "new": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
+        "east": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled."
+      },
+      "step6": {
+        "title": "Wait for the acquisition section to finish",
+        "description": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
+        "open": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
+        "variant": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
+        "start": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
+        "end": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
+        "confirm": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
+        "town": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
+        "new": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
+        "east": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction."
+      },
+      "step7": {
+        "title": "Lay track directly above the main road",
+        "description": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "open": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "variant": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "start": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "end": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "confirm": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "town": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "new": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
+        "east": "Finally, lay Double Railway Track at 6 m from the east end of the arterial road to the west end of the eastern platform. Once both platforms are connected, Next completes construction."
+      },
+      "step8": {
+        "title": "Build the rail depot",
+        "description": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
+        "open": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
+        "variant": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
+        "start": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
+        "end": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
+        "confirm": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
+        "town": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
+        "new": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
+        "east": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time."
+      },
+      "step9": {
+        "title": "Shape the curved climbing branch",
+        "description": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
+        "open": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
+        "variant": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
+        "start": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
+        "end": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
+        "confirm": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
+        "town": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
+        "new": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
+        "east": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles."
+      },
+      "step10": {
+        "title": "Power the depot from the existing plant",
+        "description": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "open": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "variant": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "start": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "end": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "confirm": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "town": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "new": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
+        "east": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line."
+      },
+      "step11": {
+        "title": "Open the railway service",
+        "description": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "open": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "variant": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "start": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "end": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "confirm": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "town": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "new": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
+        "east": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm."
+      },
+      "step12": {
+        "title": "Confirm vehicles and service",
+        "description": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "open": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "variant": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "start": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "end": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "confirm": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "town": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "new": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
+        "east": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet."
+      },
+      "step13": {
+        "title": "Review railway construction",
+        "description": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "open": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "variant": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "start": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "end": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "confirm": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "town": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "new": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
+        "east": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects."
+      }
+    },
+    "complete": {
+      "title": "Tutorial Complete",
+      "description": "Congratulations! You have completed the tutorial. Press \"Finish\" to close the guide and keep playing this city freely.",
+      "button": "Finish"
+    },
+    "nextButton": "Next",
+    "checking": "Verifying...",
+    "failed": "Condition not met. Please try again.",
+    "completed": "Tutorial complete! Well done.",
+    "stepProgress": "Step {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Open the construction panel using the road icon.",
+      "selectRoad": "Select the ground-level two-lane street. Only the required variant is available.",
+      "placeStart": "Left-click inside the cyan circle to place the start of the road.",
+      "placeEnd": "Left-click inside the yellow circle to place the end of the road.",
+      "finalizeRoad": "Right-click in the 3D view to finish the road shape.",
+      "confirmRoad": "Confirm in the construction panel to save the road, then press \"Next\".",
+      "failed": "Setup or communication failed. Retry; if the problem persists, exit and start the tutorial in a new city.",
+      "retry": "Retry",
+      "placementRequired": "Use the variant and positions shown by the guide.",
+      "preparing": "Preparing the tutorial city.",
+      "finishFailed": "Could not finish the tutorial. Please try again."
+    },
+    "trade": {
+      "title": "Start international trade",
+      "description": "A local factory wants to reach overseas customers. In this tutorial, you'll learn how to export food through a port and import goods by freight rail from a neighboring country.",
+      "step1": {
+        "description": "An export terminal is needed to ship the food produced on this island overseas. Build a \"Container Terminal\" on the coastal parcel with the yellow marker. Since this is a tutorial, the construction period is skipped.",
+        "title": "Build a container port"
+      },
+      "step2": {
+        "description": "It takes a few months for the factory's production and transport to get going, so advance time and look at the port's export results. Close the Container Terminal's details once and reopen them, and you can see its import and export results in the Cargo tab.",
+        "title": "Confirm food exports"
+      },
+      "step3": {
+        "description": "You now have a place to import and export by ship. Next, let's build a place to import and export goods by rail. Build an \"International Freight Station\" on the parcel with the yellow marker along the road. At the eastern border, there is a railway leading into the neighboring country and a border freight station.",
+        "title": "Build an international freight station"
+      },
+      "step4": {
+        "open": "Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Container Freight Platform\" under \"Railways\".",
+        "place": "Lay a platform north of the international freight station, parallel to it. Left-click inside the cyan circle (west) to place the start and inside the yellow circle (east) to place the end, then right-click in the 3D view to finish the shape. Switch \"Platform Side\" to \"Inside\" and check that the platform is on the station building's side (the south side) before confirming. When you're done, press \"Next\".",
+        "title": "Build a platform beside the station"
+      },
+      "step5": {
+        "description": "Press \"Back\" to return to the list, choose \"Railway Track\", and lay track from the east end of the platform to the west end of the track coming in from the border freight station outside the city.",
+        "title": "Lay track to the border"
+      },
+      "step6": {
+        "title": "Build a Depot",
+        "description": "Build a \"Rail Depot\" on the parcel with the yellow marker along the track. Press \"Next\" and, since this is a tutorial, the construction period is skipped and the depot is completed."
+      },
+      "step7": {
+        "title": "Connect the Depot to the Main Line",
+        "description": "Lay a siding from the connection terminal at the east end of the depot to the main line. Join the main line at a shallow angle heading east rather than at a right angle. When you're done, press \"Next\"."
+      },
+      "step8": {
+        "description": "Open \"Roads, Rail & Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the solar power plant east of town to the depot's connection terminal.",
+        "title": "Supply power to the depot"
+      },
+      "step9": {
+        "description": "In \"Public Transport\", press \"+ New line\" and choose \"International Freight Line\" as the line type. Place stops on the platforms of the international freight station and the border freight station, and open the line. Trains cannot pass each other on single track, so set the target headway to 45 minutes so that one train can make the round trip.",
+        "title": "Open the international freight line"
+      },
+      "step10": {
+        "description": "Advance time and confirm that freight trains start running on the international freight line. It takes a few months for the depot to hire staff, buy materials and prepare the vehicles.",
+        "title": "Run the freight trains"
+      }
+    },
+    "highway": {
+      "title": "Build a motorway",
+      "description": "The town needs another route for vehicles as it grows. In this tutorial, you'll learn how to build an elevated highway over a local road and connect them with ramps to create an interchange.",
+      "step1": {
+        "title": "Cross above the street",
+        "open": "Cross the central street with an elevated motorway. Open \"Roads, Rail & Infrastructure\" on the icon panel and choose the two-lane motorway under \"Motorways\".",
+        "start": "Left-click inside the cyan circle to place the start of the motorway. It snaps to a viaduct 7 m above the ground.",
+        "end": "Left-click inside the yellow circle to place the end. It snaps to the same 7 m height on the far side of the street.",
+        "confirm": "Confirm in the construction panel to save the motorway, then press \"Next\". Since this is a tutorial, construction time is skipped and it is completed right away."
+      },
+      "step2": {
+        "title": "Name the motorway",
+        "description": "You can manage roads by giving them names. At the very top of the details window of the motorway you built, the road it belongs to is currently \"None (not part of a road)\", so give it any name you like."
+      },
+      "step3": {
+        "title": "Build a ramp",
+        "description": "Build a ramp to connect to the street. Select \"Ramp\" as the road type, and connect a smoothly curved ramp from the position of the yellow marker on the screen to the motorway."
+      },
+      "step4": {
+        "title": "Inspect the interchange",
+        "description": "You can open the interchange detail panel by clicking \"IC1\" displayed around the ramp. Confirm that the street and motorway are connected."
+      }
+    },
+    "mining": {
+      "title": "Mine resources",
+      "description": "Valuable resources lie beneath the island, but there's no way to haul them out. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",
+      "step1": {
+        "description": "Enable natural resources and open the detail panel of the southeastern ore deposit.",
+        "title": "Inspect the ore vein"
+      },
+      "step2": {
+        "description": "Build a Mine on the yellow plot over the southeastern ore vein. Since this is a tutorial, construction time is skipped.",
+        "title": "Build a mine"
+      },
+      "step3": {
+        "description": "Build an Ore loading station on the large existing plot southeast of the mine. An ore loading station lets you load the ore extracted at the mine onto trains.",
+        "title": "Build a loading station next to the mine"
+      },
+      "step4": {
+        "description": "Build an Ore unloading station on the large existing plot south of the harbor. An ore unloading station lets you carry out the ore brought in by train.",
+        "title": "Build an unloading station near the port"
+      },
+      "step5": {
+        "description": "Build a Bulk port on the yellow coastal plot.",
+        "title": "Build a bulk port"
+      },
+      "step6": {
+        "open": "Choose Ore freight platform and connect each pair of markers southwest of the loading station and south of the unloading station. Face the platforms toward their facilities.",
+        "loading": "Choose Ore freight platform and connect each pair of markers southwest of the loading station and south of the unloading station. Face the platforms toward their facilities.",
+        "unloading": "Choose Ore freight platform and connect each pair of markers southwest of the loading station and south of the unloading station. Face the platforms toward their facilities.",
+        "title": "Build platforms beside the stations"
+      },
+      "step7": {
+        "town": "Lay freight track from the eastern harbor-platform end, passing south of the road’s midpoint, to the northwestern mountain-platform end. The track is not connected yet, so lay it yourself. Use curves to align the direction of travel, set Terrain Follow to \"No Follow\" for the climb, and adjust grade and radius until the red violations disappear. Add intermediate points so each span is 500m or less.",
+        "climb": "Lay freight track from the eastern harbor-platform end, passing south of the road’s midpoint, to the northwestern mountain-platform end. The track is not connected yet, so lay it yourself. Use curves to align the direction of travel, set Terrain Follow to \"No Follow\" for the climb, and adjust grade and radius until the red violations disappear. Add intermediate points so each span is 500m or less.",
+        "title": "Connect the two stations by rail"
+      },
+      "step8": {
+        "title": "Build a Depot",
+        "description": "Build a Rail depot on the existing plot southwest of the harbor. Orient it so that a track can be led from the connection terminal at its eastern end to the harbor-side platform."
+      },
+      "step9": {
+        "title": "Connect the Depot to the Main Line",
+        "description": "Connect the depot’s eastern terminal to the western harbor-platform end with a smooth shallow-angle branch."
+      },
+      "step10": {
+        "description": "Connect the existing solar plant terminal to the depot’s eastern shared terminal with a power line.",
+        "title": "Supply power to the depot"
+      },
+      "step11": {
+        "description": "Create an Ore transport line, place stops on both ore freight platforms, and click the first stop to close the return loop. Trains cannot pass each other on single track, so set the target headway to 45 minutes so that one train can make the round trip, then confirm.",
+        "title": "Open the ore freight line"
+      },
+      "step12": {
+        "description": "Advance time to get mining, loading, rail transport, unloading, and exports going. Procuring vehicles and getting transport up and running takes a few months.",
+        "title": "Advance time"
+      },
+      "step13": {
+        "description": "Advance time and check the ore receipts and exports in the coastal Bulk port’s details. Mining, vehicle procurement and transport take several months.",
+        "title": "Confirm ore exports"
+      }
+    },
+    "tourism": {
+      "title": "Develop tourism",
+      "description": "The island needs a harbor, accommodation, and a bus route to welcome visitors to its ruins. Learn to build a hotel and passenger terminal, create a bus route, and check tourist arrivals, restaurant sales, and bus use.",
+      "step1": {
+        "description": "Build a Tourist Hotel on the lot marked in yellow west of the ancient ruins. Since this is a tutorial, construction time is skipped.",
+        "title": "Build a hotel beside the ruins"
+      },
+      "step2": {
+        "description": "A harbor is needed to receive tourists. Build a Passenger Terminal on the marked harbor lot.",
+        "title": "Build a passenger terminal"
+      },
+      "step3": {
+        "description": "Tourists do not have private cars, so public transport needs to be provided. Open Public Transport → New line and choose Bus Route. Place stops on the roads at the yellow markers in this order: harbor → housing → ruins → housing. Set the fare to 0 and the target headway to 1 minute, then confirm.",
+        "title": "Create a bus route from the harbor to the ruins"
+      },
+      "step4": {
+        "description": "Advance time to welcome tourists. Facilities and bus vehicle procurement take a few months to get going.",
+        "title": "Advance time"
+      },
+      "step5": {
+        "description": "Check the sales of the restaurant by the ruins and the passengers on the bus route you created. Complete this step when tourists have arrived, restaurant sales exceed their starting level, and the bus has passengers. Advance time further if needed.",
+        "title": "Check restaurant sales and bus passengers"
+      }
+    },
+    "intro": {
+      "controls": "As the new mayor, help build a city where residents can live well and feel safe. This town has no homes for newcomers yet, and no electricity or water supply. This tutorial teaches your role as mayor, how to advance time, how to read the city’s condition, and the buttons and camera controls, then walks you through preparing roads and parcels, setting a district’s direction, building homes, and supplying electricity and water.",
+      "scenario4": "We want to connect the residential area and workplaces by railway, but private buildings and a public hospital obstruct the route. In this tutorial you will learn land acquisition, public-facility demolition, elevated track above roads, platforms and stations, a depot, curve and grade adjustment, power connection and opening a service.",
+      "trade": "A local food factory has asked for help selling its products overseas. The town also wants a way to bring in goods it needs from abroad. In this tutorial, you'll learn how to export food through a port and import goods by freight rail from a neighboring country.",
+      "highway": "As the town grows, more vehicles will carry people and goods through it. The town wants another route ready so through traffic won't all end up on the local road. In this tutorial, you'll learn how to build an elevated highway over a local road and connect them with ramps to create an interchange.",
+      "mining": "Valuable resources lie beneath this island, but there is no way to haul them from the mountain to the port. Without transport, the island can't turn that wealth into an industry. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",
+      "tourism": "The islanders want to share their ancient inland ruins with more visitors. But they lack a passenger harbor, accommodation, and a bus route from the harbor to town. In this tutorial, you will learn to build a hotel and passenger terminal, create a bus route, and check tourist arrivals, restaurant sales, and bus use.",
+      "heading": "A Request for the Mayor",
+      "reclamation": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a submarine cable.",
+      "acquisition": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, demolish a public facility, and complete the connection."
+    },
+    "reclamation": {
+      "title": "Reclaim the coast",
+      "description": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a submarine cable.",
+      "step1": {
+        "title": "Plan the reclamation",
+        "description": "Open the Earthworks tool. Left-click the four yellow markers in order to draw a rectangle from the shore into the sea. Right-click to close it, check that the estimate is for reclamation, and confirm the project."
+      },
+      "step2": {
+        "title": "Complete the reclaimed land",
+        "description": "Use Start to advance at least one month, then press Next. Since this lesson has no construction suppliers, Next skips the remaining reclamation work. The sea inside the project becomes land."
+      },
+      "step3": {
+        "title": "Create a parcel on the new land",
+        "description": "Open the parcel tool and choose Single. Set both Depth and Length to 60 m, click the center of the four markers, and confirm. Keep the parcel inside the reclaimed land, away from the quay, with enough room for a city hall."
+      },
+      "step4": {
+        "title": "Place the city hall",
+        "description": "Open the building tool, select City Hall in the Public Services category, and place it at the center of your new parcel. Placing it founds the city."
+      },
+      "step5": {
+        "title": "Lay a road in front of the city hall",
+        "description": "Now that the city exists, let's prepare electricity. A substation delivers power to buildings connected to it by road, so first lay a road in front of the city hall so that a substation can be built along it. This lesson has no construction suppliers, so the road is completed as soon as you confirm it. Press “Roads, Rail & Infrastructure” on the icon panel to open the construction panel."
+      },
+      "step6": {
+        "title": "Create a parcel for the substation",
+        "description": "Prepare a site for the substation along the road. Open the parcel tool and choose Single. Set both Depth and Length to 25 m, click the center of the four markers, and confirm."
+      },
+      "step7": {
+        "title": "Build the substation",
+        "description": "A substation converts incoming high-voltage electricity into power that buildings can use and distributes it to buildings connected by road. Open the building tool, choose “Electrical Substation” in the “Power Plants” category, and build it on your new parcel. This lesson skips the construction period."
+      },
+      "step8": {
+        "title": "Create a parcel at sea",
+        "description": "There is no land for a power plant on this island, but strong winds blow over the surrounding sea. Wind at sea is stronger and steadier than on land, so an offshore wind farm can generate a lot of power. Open the parcel tool, choose Single, set both Depth and Length to 70 m, click the center of the four markers on the sea, and confirm."
+      },
+      "step9": {
+        "title": "Build the offshore wind farm",
+        "description": "Only facilities meant for the sea can be built on a parcel at sea. Open the building tool, choose “Offshore Wind Farm” in the “Power Plants” category, and build it on the parcel at sea. This lesson skips the construction period."
+      },
+      "step10": {
+        "title": "Connect with a submarine cable",
+        "description": "Finally, carry the wind farm's electricity to the substation on land. Ordinary power lines can't be strung over the sea, so use a cable laid on the seabed. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Submarine Power Cable” under “Electricity”, and draw it from the wind farm's connection terminal to the substation's terminal. Once they are connected, this tutorial is complete."
+      }
+    },
+    "acquisition": {
+      "title": "Land acquisition and metro construction",
+      "description": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, demolish a public facility, and complete the connection.",
+      "step1": {
+        "title": "Connect the platforms with tracks",
+        "open": "Open the road and railway tool. Connect the two existing platforms with elevated tracks 7 m above the ground.",
+        "start": "Select Double Track and left-click the inner end of the western platform at the cyan marker. The start snaps to the existing endpoint at a height of 7 m.",
+        "end": "Left-click the inner end of the eastern platform at the yellow marker. You can plan construction even where the tracks overlap homes and offices.",
+        "confirm": "Review the estimate and press Confirm. This lesson covers track construction; it does not require setting up a train service.",
+        "variant": "In the railway category, select the highlighted Double Track card."
+      },
+      "step2": {
+        "title": "Observe acquisition and the obstruction",
+        "description": "Use Start to advance time. Acquisition negotiations begin for private parcels in the track corridor. The fire station at the yellow marker is a public facility, so it cannot be acquired automatically and the tracks remain planned. Inspect parcel and building details to see what is happening."
+      },
+      "step3": {
+        "title": "Demolish the fire station explicitly",
+        "description": "Click the fire station at the yellow marker to open its details, then press Bulldoze to order its removal. Public facilities require your explicit demolition order. Leave the other homes and offices to land acquisition."
+      },
+      "step4": {
+        "title": "Wait for acquisition and completion",
+        "description": "Keep advancing time with Start. Track construction proceeds once private land acquisition and demolition are complete. Connecting the two platforms with completed tracks finishes this tutorial."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Start Game",
+    "nowLoading": "Now Loading...",
+    "startError": "Unable to start. Please try again.",
+    "todaysTips": "Today's Tips",
+    "gotIt": "Close",
+    "items": {
+      "tip1": {
+        "title": "Money Circulates",
+        "description": "Someone's spending is always someone else's income. Spend all your tax revenue without holding back and keep the city's economy turning."
+      },
+      "tip2": {
+        "title": "The Long Fight for Public Safety",
+        "description": "Citizens who grow up in a bad environment stay badly behaved even as adults. Improving public safety takes effort across several generations."
+      },
+      "tip3": {
+        "title": "Make Way",
+        "description": "If emergency vehicles arrive late, the damage grows. Take care that the roads emergency vehicles often use don't get congested."
+      },
+      "tip5": {
+        "title": "A Steep Road",
+        "description": "Laying roads and infrastructure on steep slopes costs a lot. Choose the flattest route you can when building roads."
+      },
+      "tip6": {
+        "title": "Plan Before You Use",
+        "description": "Building out electricity and water takes time. Anticipate growth and develop your infrastructure with a plan."
+      },
+      "tip7": {
+        "title": "Haste Makes Waste",
+        "description": "Raising speed limits increases accidents. Aim for graceful curves and gentle speed limits."
+      },
+      "tip8": {
+        "title": "Investing in the Future",
+        "description": "The development of advanced industry requires people with higher education. Take the time to cultivate talent."
+      },
+      "tip9": {
+        "title": "Make It Last",
+        "description": "Fires and infrastructure collapse badly hurt citizen sentiment. Secure ample maintenance and fire budgets to prevent man-made disasters before they happen."
+      },
+      "tip10": {
+        "title": "Great Fire",
+        "description": "Places where buildings are packed tightly become vulnerable to fire. Leave a moderate amount of breathing room when building your city."
+      },
+      "tip11": {
+        "title": "Dig, Dig, Dig",
+        "description": "Find out where the underground resources are and locate your mining there. And think about an exit strategy for after they run dry."
+      },
+      "tip12": {
+        "title": "The Money Tree",
+        "description": "The mayor can build housing and commercial facilities. Put city-run facilities on prime land and rake in the profits."
+      },
+      "tip13": {
+        "title": "Squeeze Out Every Drop",
+        "description": "Set your taxes in fine detail. Taxes are not only the funding source for running the city; they can also be used to control which industries develop."
+      },
+      "tip14": {
+        "title": "Better Safe Than Sorry",
+        "description": "If critical infrastructure shuts down due to accidents or disasters, the city's economy will take a massive hit. Build redundant facilities to keep backups ready."
+      },
+      "tip15": {
+        "title": "Don't Let It Sprawl",
+        "description": "When there are not enough parcels for the demand, roads and parcels appear on their own in a disorderly way. Develop the city deliberately to keep slums from forming."
+      },
+      "tip16": {
+        "title": "Industrial Clusters",
+        "description": "Productivity rises when similar industries or raw material producers are nearby. Create industrial zones and tech districts to bring businesses together."
+      },
+      "tip17": {
+        "title": "Can You Work Around the Clock?",
+        "description": "Extending working hours in the Regulations panel raises productivity, but citizens' health and entertainment spending go down. If you add too much time for earning, there will be no time left for spending."
+      },
+      "tip18": {
+        "title": "Commuter Hell",
+        "description": "Longer commutes mean less leisure time, and spending drops. Even a bustling downtown you worked hard to build is just scenery out the window to citizens who go home only to sleep."
+      },
+      "tip19": {
+        "title": "Think Ahead",
+        "description": "You cannot run trains longer than station platforms. Build your railway with room to grow."
+      },
+      "tip20": {
+        "title": "Bury the Problem",
+        "description": "Underground roads produce neither noise nor air pollution. Some problems really can be solved by burying them."
+      },
+      "tip21": {
+        "title": "In the Shadow of Progress",
+        "description": "Tall buildings cast shadows on their neighbors, making the area less pleasant to live in. Your city may have a bright future, but its streets could be in the dark."
+      },
+      "tip22": {
+        "title": "Trade the Keys for a Transit Pass",
+        "description": "With convenient public transit, even wealthy residents can give up their cars and spend their money on other things."
+      },
+      "tip23": {
+        "title": "Now Transporting: Air",
+        "description": "Even empty buses take up road space. Do not turn your congestion relief plan into a traffic jam."
+      },
+      "tip24": {
+        "title": "Moles Pay No Rent",
+        "description": "Tunnels below a certain depth need no land acquisition. If negotiations get tough, dig deeper."
+      },
+      "tip25": {
+        "title": "The High Road to Work",
+        "description": "Cable cars provide transport even on steep terrain. If public transit is hard to build, leave your citizens hanging."
+      },
+      "tip26": {
+        "title": "An Electrical Traffic Jam",
+        "description": "Spare generating capacity is no help if the power lines cannot carry it. Before building another power plant, check for bottlenecks along the way."
+      },
+      "tip27": {
+        "title": "An Unfortunate Accident",
+        "description": "A building that stands in the way of development can be blown up and passed off as an accident. Public sentiment takes a heavy hit, so buy it and demolish it properly when you can."
+      },
+      "tip28": {
+        "title": "Take to the Sea",
+        "description": "If you are running out of vacant land, expand out to sea. You can build oil platforms offshore or reclaim land from the sea."
+      },
+      "tip29": {
+        "title": "Red Light Hell",
+        "description": "Every intersection adds another red light. Grid layouts packed too closely together will trap drivers at every single block, and their patience will run out long before they reach their destination. Keep your road connections simple."
+      },
+      "tip30": {
+        "title": "Good Line of Sight",
+        "description": "Radio towers cover a wider area the higher they are built and the higher the ground. Signals blocked by mountains can't be overcome by sheer willpower alone."
+      },
+      "tip31": {
+        "title": "Bounty of the Sea",
+        "description": "If you can't find a freshwater source, you can build a desalination plant along the coast. It does require significant power, though. Finding water leads right into finding electricity."
+      },
+      "tip32": {
+        "title": "Another Form of Policing",
+        "description": "Unemployment is one of the root causes of crime. Don't just build police stations—provide jobs. Before agonizing over your police budget, consider investing in employment programs."
+      },
+      "tip33": {
+        "title": "Bills for the Future",
+        "description": "Both buildings and roads demand ongoing maintenance once built. If you overbuild just because you have spare cash, repair bills will haunt you later. Remember, that future mayor is still you."
+      },
+      "tip34": {
+        "title": "Don't Over-Pump",
+        "description": "If you pump water faster than the water source can replenish, you'll eventually face a shortage. Adding more pumps won't create more water."
+      },
+      "tip35": {
+        "title": "A Costly Blunder",
+        "description": "Once construction has started, roads and buildings cannot be moved easily. Plan carefully before breaking ground. Though an unintentionally curved road can become part of the city's charm once you get used to it."
+      },
+      "tip36": {
+        "title": "Surveillance Society",
+        "description": "Click on pedestrians or vehicles to add citizens to your tracking list. Take a look at the daily lives of your city's residents."
+      },
+      "tip37": {
+        "title": "Baseload Power",
+        "description": "Solar and wind power are cheap to operate, but their output depends heavily on the weather. Be sure to back them up with stable baseload sources like thermal or nuclear power."
+      },
+      "tip38": {
+        "title": "Room to Build",
+        "description": "Some buildings simply won't fit on smaller parcels. Create adequately sized parcels to accommodate the buildings you want to build."
+      },
+      "tip39": {
+        "title": "That Service Isn't Free",
+        "description": "Public services such as sewage treatment, waste disposal, telecommunications, and healthcare may be free by default. You can set their prices freely. Whether you keep them affordable for citizens or put a hefty price tag on them is up to you, Mayor."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Select a parcel to plan a building. It takes some time from planning to completion.",
+    "parcelCreation": "Hold Ctrl to pick a creation method from the radial menu, then click a target in the 3D view. Adjust the size in the panel and confirm.",
+    "transitCreation": "Left-click to place stops in order; click the first stop to close the loop. Drag a segment to add a waypoint, drag a point to move it, right-click to delete. For a round trip, also place the return stops.",
+    "transitManagement": "List of public transit lines. Adjust fares and headways, or create and delete lines. Fares affect residents' route choice. Fares that are too high reduce ridership and increase car ownership.",
+    "pathConstruction": "Construct roads and railways. Click on the terrain in the 3D view: left-click to add vertices, right-click to confirm the shape, and drag vertices to reposition them. Hold Ctrl to open the settings menu (curve/straight and snapping). Use 3/4 keys to change embankment/cut height.",
+    "pathConstructionElevated": "Construct roads and railways. Click on the terrain in the 3D view: left-click to add vertices, right-click to confirm the shape, and drag vertices to reposition them. Hold Ctrl to open the settings menu (curve/straight and snapping). Use PageUp/PageDown or 1/2 to change height, and 3/4 keys to change embankment/cut height.",
+    "districtEdit": "Create, expand and merge \"districts\", the units for regulations and statistics. Hold Ctrl in the 3D view to switch tools. Create tool: left-click a road to create a new district in the shown color (a new color is drawn each time you pick the tool). Expand tool: right-click to pick the district to grow, then left-click roads to pull them into it. Merge tool: right-click to pick the district to merge into, then left-click another district to open the confirmation panel. The selected district's color and name are shown next to the mouse cursor. Press the button again to exit.",
+    "bulldozer": "Bulldozer mode. Left-click to remove empty parcels, planned buildings, planned roads, and terrain props (scattered props are removed as a whole area after confirmation). Press the button again to exit.",
+    "bulldozerInstant": "Bulldozer mode. Left-click to instantly delete buildings, roads, empty parcels, and terrain props with no confirmation. Buildings are removed together with their tenants and residents, and terrain is not restored (the city hall, the border checkpoint, and public transit segments cannot be deleted; scattered props are still removed as a whole area after confirmation). Press the button again to exit.",
+    "cityBudget": "Decide how to allocate the funds earned from taxes and business operations for the next period. When the government purchases materials for road construction or public facility operations, it can only do so within the budget decided here. If the budget is insufficient, employees of public facilities may be dismissed.",
+    "resourceEdit": "Create a natural resource area. Select a resource type, then click on the terrain. Left-click to add a vertex, click an edge to insert a vertex, and right-click to remove a vertex. Drag a vertex to reposition it.",
+    "grading": "Left-click to place vertices, then right-click to confirm the area."
+  }
+}

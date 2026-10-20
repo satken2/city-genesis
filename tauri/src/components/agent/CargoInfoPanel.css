@@ -1,0 +1,133 @@
+/*
+ * Styles for cargo information (CargoInfoPanel).
+ *
+ * Shows item throughput with double horizontal bars: pale for allocation, dark for actual throughput.
+ * The actual bar is slightly shorter vertically so colors remain distinguishable at 100% fulfillment
+ * (the same visual rule as FloorOccupancyBar).
+ * Uses blue for imports (cargo--import) and green for exports (cargo--export).
+ */
+
+.cargo-description {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #93a9c0;
+}
+
+.cargo-unit-suffix {
+  margin-left: 2px;
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
+.cargo-products-title {
+  margin: 14px 0 6px;
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: #c6d4e2;
+}
+
+/* Legend. */
+.cargo-legend {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
+.cargo-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cargo-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* Item row. */
+.cargo-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cargo-row__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+  font-size: 1.11rem;
+}
+
+.cargo-row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cargo-row__values {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: #c6d4e2;
+}
+
+/* Bar chart nesting: track (full width) > allocation (pale) > actual throughput (dark). */
+.cargo-row__track {
+  height: 14px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.cargo-row__allocation {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.cargo-row__handled {
+  height: 10px;
+  border-radius: 2px;
+  margin-left: 1px;
+}
+
+.cargo-row__sub {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 0.97rem;
+  color: #93a9c0;
+}
+
+.cargo-row__lost {
+  color: #e8a06a;
+}
+
+/* Imports: blue tones. */
+.cargo--import .cargo-row__allocation,
+.cargo--import .cargo-legend__swatch--allocation {
+  background-color: rgba(78, 161, 255, 0.22);
+}
+
+.cargo--import .cargo-row__handled,
+.cargo--import .cargo-legend__swatch--handled {
+  background-color: rgba(78, 161, 255, 0.85);
+}
+
+/* Exports: green tones. */
+.cargo--export .cargo-row__allocation,
+.cargo--export .cargo-legend__swatch--allocation {
+  background-color: rgba(52, 211, 153, 0.22);
+}
+
+.cargo--export .cargo-row__handled,
+.cargo--export .cargo-legend__swatch--handled {
+  background-color: rgba(52, 211, 153, 0.85);
+}

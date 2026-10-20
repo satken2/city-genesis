@@ -1,0 +1,17 @@
+/**
+ * Shared speed limit sign styles.
+ */
+
+.speed-limit-sign {
+  flex: 0 0 auto;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+}
+
+/* Bold condensed lettering resembling real signs. */
+.speed-limit-sign__number {
+  fill: #1b5396;
+  font-family: "Arial Narrow", "Roboto Condensed", "Segoe UI", sans-serif;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}

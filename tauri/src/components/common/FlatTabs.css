@@ -1,0 +1,57 @@
+/*
+ * Flat-style tab row. Selected tabs use the selection surface color and a solid bottom block.
+ * Use two classes to override host window button rules such as `.scenario-manager button`.
+ */
+.flat-tabs {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 16px 20px 0;
+}
+
+.flat-tabs .flat-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 0;
+  background: var(--flat-raised);
+  color: var(--flat-text-label);
+  box-shadow: var(--flat-shadow-sm);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.flat-tabs .flat-tab:hover:not(:disabled) {
+  background: var(--flat-raised-hover);
+  color: var(--flat-text);
+}
+
+.flat-tabs .flat-tab[aria-selected="true"] {
+  background: var(--flat-selected);
+  color: var(--flat-text);
+  box-shadow: inset 0 -3px 0 var(--flat-accent), var(--flat-shadow-sm);
+  cursor: default;
+}
+
+/* Unavailable tabs. Keep labels readable; a badge and lack of shadow indicate they cannot be clicked. */
+.flat-tabs .flat-tab:disabled {
+  background: var(--flat-surface);
+  color: var(--flat-text-muted);
+  box-shadow: none;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.flat-tab-badge {
+  padding: 2px 6px;
+  background: var(--flat-sunken);
+  color: var(--flat-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}

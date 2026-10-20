@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "建筑",
+      "paths": "路径",
+      "vehicles": "车辆",
+      "props": "装饰物"
+    },
+    "additional": "追加模型",
+    "loading": "正在从3D画面读取模型…",
+    "noModel": "无模型",
+    "noImage": "无图像",
+    "weight": "权重",
+    "applyNote": "权重的更改将在下次开始或读取游戏时生效。"
+  }
+}

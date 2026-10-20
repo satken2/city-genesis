@@ -1,0 +1,187 @@
+.education-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Enrollment donut chart card (same design as the employment status card in the employment information panel). */
+.education-chart-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.education-chart-title {
+  font-size: 1.06rem;
+  font-weight: 600;
+  color: #9db0c5;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.education-chart-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.education-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.education-legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  gap: 6px;
+}
+
+.education-legend-bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.education-legend-label {
+  color: #9db0c5;
+}
+
+/* Section headings (enrollment by skill / admission capacity settings / student list). */
+.education-block-title {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1.11rem;
+  margin-bottom: 4px;
+}
+
+.education-skill-block,
+.education-settings-block,
+.education-students-block {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.education-settings-hint {
+  margin: 0;
+  font-size: 1rem;
+  color: #7f93aa;
+}
+
+/* Admission capacity form: three columns [skill name][weight input][allocated capacity]. */
+.education-settings-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.education-settings-header,
+.education-settings-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 90px;
+  gap: 8px;
+  align-items: center;
+}
+
+.education-settings-header {
+  font-size: 1rem;
+  color: #7f93aa;
+  font-weight: 600;
+}
+
+.education-settings-header > span:not(:first-child) {
+  text-align: right;
+}
+
+.education-settings-row .agent-detail-label,
+.education-settings-row .agent-detail-value {
+  border-right: none;
+  padding: 0;
+  min-height: 0;
+}
+
+.education-settings-row .agent-detail-value {
+  justify-content: flex-end;
+}
+
+.education-settings-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: inherit;
+  font-size: 1rem;
+  padding: 4px 6px;
+  text-align: right;
+}
+
+.education-settings-input:disabled {
+  opacity: 0.5;
+}
+
+.education-settings-error {
+  margin: 0;
+  font-size: 1rem;
+  color: #f87171;
+}
+
+.education-settings-save {
+  align-self: flex-end;
+  background: #2563eb;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 6px 16px;
+  cursor: pointer;
+}
+
+.education-settings-save:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.education-settings-save:disabled {
+  background: #374151;
+  color: #9ca3af;
+  cursor: default;
+}
+
+/* Student list (same multicolumn grid as the employee list). */
+.education-students-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.education-students-show-more {
+  align-self: center;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #9db0c5;
+  font-size: 1rem;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+.education-students-show-more:hover {
+  background: rgba(255, 255, 255, 0.05);
+}

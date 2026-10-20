@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Estación",
+    "name": "Nombre de la estación",
+    "ridership": "Viajes",
+    "platforms": "Lista de andenes",
+    "noPlatforms": "No hay andenes asignados a esta estación (se asignan los andenes que cruza la línea)",
+    "lines": "Líneas que la sirven",
+    "noLines": "Ninguna línea la sirve",
+    "stops": "Viajes por parada",
+    "noStops": "Ninguna parada en esta estación",
+    "lineRunning": "En servicio",
+    "lineSuspended": "Suspendida",
+    "houseEnds": "Ubicación de los edificios de estación",
+    "houseEnds_both": "Ambos extremos",
+    "houseEnds_start": "Inicio",
+    "houseEnds_end": "Final",
+    "passageMode": "Ubicación del pasaje",
+    "passageMode_elevated": "Elevado",
+    "passageMode_ground": "A nivel del suelo",
+    "passageMode_underground": "Subterráneo"
+  }
+}

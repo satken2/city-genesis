@@ -1,0 +1,164 @@
+/**
+ * Economy tab styles.
+ *
+ * Styles the table of statistics by good and the bars inside its cells.
+ * Uses white text on a dark background to blend into the dark theme, with a different
+ * dark bar color for each column.
+ */
+
+/* Fit the table within the tab height and scroll inside its frame so the economic trend overlay backdrop can cover the entire tab. */
+.econ-tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+}
+
+.econ-tab__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.econ-tab__body .flat-tabs {
+  padding: 0;
+}
+
+.econ-tab__title {
+  margin: 0;
+  font-size: 1.46rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.econ-tab__loading,
+.econ-tab__error {
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
+}
+
+.econ-tab__error {
+  color: #ff7171;
+}
+
+/* ========== Table layout ========== */
+
+.econ-tab__table-container {
+  min-height: 0;
+  overflow: auto;
+  border-radius: 0 10px 10px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.econ-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  text-align: left;
+}
+
+.econ-table__header {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #7b8fa5;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.econ-table__header--right {
+  text-align: right;
+}
+
+.econ-table__row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.econ-table__row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.econ-table__cell {
+  padding: 8px 12px;
+  vertical-align: middle;
+  color: #cbd5e1;
+}
+
+.econ-table__cell--product {
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.econ-table__id {
+  font-size: 1rem;
+  color: #5a6f86;
+}
+
+.econ-table__cell--price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.econ-table__cell--right {
+  text-align: right;
+}
+
+/* ========== Numeric cells with bars ========== */
+
+.econ-table__cell--bar {
+  position: relative;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  z-index: 1;
+}
+
+.econ-table__bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  transition: width 0.3s ease;
+}
+
+.econ-table__value {
+  position: relative;
+  z-index: 2;
+  font-weight: 600;
+  color: #ffffff; /* White text */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); /* Improve readability where bars overlap. */
+}
+
+/* ========== Bar colors by column ========== */
+
+/* Production: dark blue */
+.econ-table__bar--production {
+  background-color: rgba(29, 78, 216, 0.55);
+  border-right: 2px solid rgba(59, 130, 246, 0.85);
+}
+
+/* Consumption: dark red */
+.econ-table__bar--consumption {
+  background-color: rgba(185, 28, 28, 0.55);
+  border-right: 2px solid rgba(239, 68, 68, 0.85);
+}
+
+/* Exports: dark green */
+.econ-table__bar--export {
+  background-color: rgba(4, 120, 87, 0.55);
+  border-right: 2px solid rgba(16, 185, 129, 0.85);
+}
+
+/* Imports: dark purple */
+.econ-table__bar--import {
+  background-color: rgba(109, 40, 217, 0.55);
+  border-right: 2px solid rgba(139, 92, 246, 0.85);
+}

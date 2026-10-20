@@ -1,0 +1,18 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "インターチェンジ",
+      "jct": "ジャンクション"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "出発する道路",
+      "to": "到着する道路",
+      "road": "{{type}} #{{id}}",
+      "none": "つながっている道路の組がありません"
+    }
+  }
+}

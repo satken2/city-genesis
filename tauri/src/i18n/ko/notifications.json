@@ -1,0 +1,30 @@
+{
+  "notifications": {
+    "trayTooltip": "도시 알림",
+    "empty": "현재 대응이 필요한 문제가 없습니다",
+    "loadFailed": "알림을 가져오지 못했습니다",
+    "sections": {
+      "warning": "경고 — 즉시 대처 필요",
+      "caution": "주의 — 성장을 저해하는 문제"
+    },
+    "types": {
+      "resource_runway": "자원 「{{name}}」이(가) 약 {{remaining_epochs}}에포크 후 고갈될 전망입니다",
+      "resource_depleted": "자원 「{{name}}」이(가) 고갈되었습니다",
+      "facility_inoperative": "공공시설 「{{name}}」이(가) 운영되지 않고 있습니다",
+      "facility_inoperative_labor": "공공시설 「{{name}}」이(가) 노동력 부족으로 운영되지 않고 있습니다",
+      "facility_inoperative_material": "공공시설 「{{name}}」이(가) 원자재 부족으로 운영되지 않고 있습니다",
+      "facility_inoperative_high_skill": "공공시설 「{{name}}」이(가) 전문 인력 부족으로 운영되지 않고 있습니다",
+      "facility_inoperative_budget": "공공시설 「{{name}}」이(가) 예산 부족으로 운영을 축소하고 있습니다",
+      "education_low_enrollment": "교육 기관 「{{name}}」에 학생이 모이지 않아 가동률이 낮습니다(재적 {{enrolled}}명/정원 {{max_students}}명)",
+      "infra_facility_down": "인프라 시설 「{{name}}」이(가) 정지되어 있습니다",
+      "infra_disconnected": "{{count}}개 시설이 인프라망에 연결되어 있지 않습니다",
+      "rail_capacity_exceeded": "{{count}}개 선로에서 열차 운행 횟수가 궤도 용량을 초과했습니다",
+      "collapse": "{{count}}개의 건물・도로가 붕괴했습니다",
+      "collapse_with_deaths": "{{count}}개의 건물・도로가 붕괴하여 {{deaths}}명이 사망했습니다",
+      "deaths_traffic": "교통사고로 {{count}}명이 사망했습니다",
+      "tenant_blocked_by_parcel_size": "지구 「{{zone_name}}」에서 「{{tenant_name}}」이(가) 입주할 수 있는 건물을 지을 수 없습니다(필요 {{required}}m2, 구획 최대 {{max_capacity}}m2). 더 큰 토지 구획이 필요합니다",
+      "unknown": "중대한 사건이 발생했습니다",
+      "sanitation": "{{count}}가구의 위생 상태가 악화되고 있습니다. 하수 및 폐기물 처리를 개선하세요."
+    }
+  }
+}

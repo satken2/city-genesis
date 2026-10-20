@@ -1,0 +1,1286 @@
+{
+  "version": 1,
+  "id": "trade",
+  "steps": [
+    {
+      "id": "trade.port",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.trade.step1.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -243.5,
+                0,
+                80
+              ]
+            ],
+            "camera": {
+              "target": [
+                -243.5,
+                0,
+                80
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.trade.step1.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction",
+              "building.category:12",
+              "building.variant:403",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:12",
+              "building.variant:403",
+              "building.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -243.5,
+                0,
+                80
+              ]
+            ],
+            "camera": {
+              "target": [
+                -243.5,
+                0,
+                80
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.port",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_port"
+        },
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "port_trade"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "trade.exports",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -243.5,
+                0,
+                80
+              ]
+            ],
+            "camera": {
+              "target": [
+                -243.5,
+                0,
+                80
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.exports",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.freight",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.trade.step3.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                20,
+                0,
+                36.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                20,
+                0,
+                36.5
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.trade.step3.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction",
+              "building.category:11",
+              "building.variant:404",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:11",
+              "building.variant:404",
+              "building.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                20,
+                0,
+                36.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                20,
+                0,
+                36.5
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.freight",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_freight"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "trade.platform",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.trade.step4.open",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                -50,
+                0,
+                83
+              ],
+              [
+                90,
+                0,
+                83
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -50,
+                  0,
+                  83
+                ],
+                [
+                  90,
+                  0,
+                  83
+                ]
+              ],
+              "radius": 12,
+              "variant": 463
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                60
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.trade.step4.open",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:4",
+              "path.variant:463",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:4",
+              "path.variant:463"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                -50,
+                0,
+                83
+              ],
+              [
+                90,
+                0,
+                83
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -50,
+                  0,
+                  83
+                ],
+                [
+                  90,
+                  0,
+                  83
+                ]
+              ],
+              "radius": 12,
+              "variant": 463
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                60
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 463
+          }
+        },
+        {
+          "id": "place",
+          "textKey": "tutorial.trade.step4.place",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.back",
+              "path.cancel",
+              "path.confirm",
+              "path.platformSide:0",
+              "path.platformSide:1",
+              "path.platformSide:2"
+            ],
+            "highlight": [
+              "path.confirm",
+              "path.platformSide:1"
+            ]
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -50,
+                0,
+                83
+              ],
+              [
+                90,
+                0,
+                83
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -50,
+                  0,
+                  83
+                ],
+                [
+                  90,
+                  0,
+                  83
+                ]
+              ],
+              "radius": 12,
+              "variant": 463
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                60
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.freight_pf",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.rail",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.trade.step5.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                90,
+                0,
+                83
+              ],
+              [
+                480,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                285,
+                0,
+                83
+              ],
+              "distance": 270,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.trade.step5.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:4",
+              "path.variant:411",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:4",
+              "path.variant:411"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                90,
+                0,
+                83
+              ],
+              [
+                480,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                285,
+                0,
+                83
+              ],
+              "distance": 270,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 411
+          }
+        },
+        {
+          "id": "draw",
+          "textKey": "tutorial.trade.step5.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.back",
+              "path.cancel",
+              "path.confirm",
+              "path.height",
+              "path.followTerrain",
+              "path.embankment",
+              "path.shapeEditor",
+              "path.plan",
+              "path.profile",
+              "path.route"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                90,
+                0,
+                83
+              ],
+              [
+                480,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                285,
+                0,
+                83
+              ],
+              "distance": 270,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_tracks"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.depot",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.trade.step6.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction"
+            ],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                155,
+                0,
+                65.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                155,
+                0,
+                65.5
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "building_construction"
+          }
+        },
+        {
+          "id": "select",
+          "textKey": "tutorial.trade.step6.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.construction",
+              "building.category:11",
+              "building.variant:1060",
+              "building.back",
+              "building.cancel",
+              "building.confirm"
+            ],
+            "highlight": [
+              "building.category:11",
+              "building.variant:1060",
+              "building.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                155,
+                0,
+                65.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                155,
+                0,
+                65.5
+              ],
+              "distance": 140,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_depot"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "trade.branch",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.trade.step7.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                205,
+                0,
+                65.5
+              ],
+              [
+                315,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                260,
+                0,
+                74
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.trade.step7.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:4",
+              "path.variant:411",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:4",
+              "path.variant:411"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                205,
+                0,
+                65.5
+              ],
+              [
+                315,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                260,
+                0,
+                74
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 411
+          }
+        },
+        {
+          "id": "draw",
+          "textKey": "tutorial.trade.step7.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.back",
+              "path.cancel",
+              "path.confirm",
+              "path.height",
+              "path.followTerrain",
+              "path.embankment",
+              "path.shapeEditor",
+              "path.plan",
+              "path.profile",
+              "path.route"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                205,
+                0,
+                65.5
+              ],
+              [
+                315,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                260,
+                0,
+                74
+              ],
+              "distance": 150,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_tracks"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot_rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.power",
+      "legacyStep": 8,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.trade.step8.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                461.5,
+                0,
+                -177.5
+              ],
+              [
+                205,
+                0,
+                65.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                333,
+                0,
+                -56
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.trade.step8.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type:11",
+              "path.variant:1101",
+              "path.back"
+            ],
+            "highlight": [
+              "path.type:11",
+              "path.variant:1101"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                461.5,
+                0,
+                -177.5
+              ],
+              [
+                205,
+                0,
+                65.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                333,
+                0,
+                -56
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 1101
+          }
+        },
+        {
+          "id": "draw",
+          "textKey": "tutorial.trade.step8.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.back",
+              "path.cancel",
+              "path.confirm",
+              "path.height",
+              "path.followTerrain",
+              "path.embankment",
+              "path.shapeEditor",
+              "path.plan",
+              "path.profile",
+              "path.route"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                461.5,
+                0,
+                -177.5
+              ],
+              [
+                205,
+                0,
+                65.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                333,
+                0,
+                -56
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_power"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot_power",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.line",
+      "legacyStep": 9,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.trade.step9.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.transport"
+            ],
+            "highlight": [
+              "hud.transport"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                20,
+                0,
+                83
+              ],
+              [
+                570,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                295,
+                0,
+                83
+              ],
+              "distance": 370,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "any",
+            "conditions": [
+              {
+                "type": "window",
+                "window": "transit_management"
+              },
+              {
+                "type": "window",
+                "window": "transit_creation"
+              }
+            ]
+          }
+        },
+        {
+          "id": "new",
+          "textKey": "tutorial.trade.step9.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.transport",
+              "transit.new"
+            ],
+            "highlight": [
+              "transit.new"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                20,
+                0,
+                83
+              ],
+              [
+                570,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                295,
+                0,
+                83
+              ],
+              "distance": 370,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "transit_creation"
+          }
+        },
+        {
+          "id": "create",
+          "textKey": "tutorial.trade.step9.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.transport",
+              "transit.type",
+              "transit.fare",
+              "transit.headway",
+              "transit.confirm",
+              "transit.cancel"
+            ],
+            "highlight": [
+              "transit.type",
+              "transit.confirm"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                20,
+                0,
+                83
+              ],
+              [
+                570,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                295,
+                0,
+                83
+              ],
+              "distance": 370,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.line",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.operating",
+      "legacyStep": 10,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step10.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                20,
+                0,
+                83
+              ],
+              [
+                570,
+                0,
+                83
+              ]
+            ],
+            "camera": {
+              "target": [
+                295,
+                0,
+                83
+              ],
+              "distance": 370,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.operating",
+            "equals": true
+          }
+        ]
+      }
+    }
+  ]
+}

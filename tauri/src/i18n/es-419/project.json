@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "Proyecto",
+    "none": "(Sin etiqueta)",
+    "createNew": "+ Nueva etiqueta…",
+    "newPlaceholder": "Escribe un nombre de etiqueta",
+    "add": "Agregar",
+    "cancel": "Cancelar",
+    "saveFailed": "No se pudo guardar la etiqueta",
+    "showObject": "Mostrar en la vista 3D",
+    "hideObject": "Ocultar en la vista 3D"
+  },
+  "constructionProjects": {
+    "empty": "Todavía no hay obras con etiqueta. Elige una al colocar desde un panel de construcción, o agrégala desde el panel de detalle de un edificio público o una calle planificados o en construcción.",
+    "loadFailed": "No se pudieron cargar los proyectos de construcción",
+    "totalCost": "Costo estimado",
+    "duration": "Tiempo restante",
+    "progress": "Avance",
+    "progressValue": "{{done}} / {{total}} terminadas",
+    "monthsValue": "{{value}} meses",
+    "stalled": "Detenida",
+    "stalledWarning": "{{count}} obra(s) no avanzan porque su velocidad de construcción es 0 (se excluyen del total de duración).",
+    "done": "Terminada",
+    "unnamed": "#{{id}}",
+    "showAll": "Volver a mostrar todo ({{count}})",
+    "showTag": "Mostrar este proyecto en la vista 3D",
+    "hideTag": "Ocultar este proyecto en la vista 3D",
+    "showObject": "Mostrar en la vista 3D",
+    "hideObject": "Ocultar en la vista 3D",
+    "deleteTag": "Eliminar la etiqueta",
+    "confirmDeleteTag": "¿Eliminar la etiqueta «{{tag}}»? Se quitará de sus edificios y calles (las obras no se eliminan).",
+    "columns": {
+      "name": "Objetivo",
+      "status": "Estado",
+      "cost": "Costo restante",
+      "remaining": "Tiempo restante"
+    }
+  }
+}

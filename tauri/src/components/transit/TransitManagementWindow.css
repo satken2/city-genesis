@@ -1,0 +1,344 @@
+/*
+ * ==========================================================================
+ * TransitManagementWindow.css - Public transport window (line list).
+ *
+ * Draw directly on the popup base (.popup-shell gradient). No root background, border,
+ * rounded corners, or shadow, which would look like another floating card inside the window.
+ * Left = vertical type tabs and creation button; right = line table.
+ * Button surfaces use App.css --flat-* tokens.
+ *
+ * Line details also import operation status badges (.transit-badge).
+ * ==========================================================================
+ */
+
+.transit-window {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  height: 100%;
+  min-height: 0;
+  color: #e2e8f0;
+  font-size: 1rem;
+  overflow: hidden;
+}
+
+.transit-window__loading,
+.transit-window__error {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 1rem;
+  color: var(--flat-text-muted);
+}
+
+.transit-window__error {
+  color: var(--flat-danger);
+}
+
+/* ---- Left sidebar: create-line button and type tabs ---- */
+.transit-sidebar {
+  width: 16.3rem;
+  min-width: 14.81rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding-right: 10px;
+}
+
+.transit-window__new-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--flat-selected);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: var(--flat-shadow-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.transit-window__new-btn:hover {
+  background: var(--flat-selected-hover);
+}
+
+.transit-window__new-btn svg {
+  flex-shrink: 0;
+}
+
+/* Vertical type tab list. */
+.transit-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.transit-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #9db0c5;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.transit-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6fbff;
+}
+
+.transit-tab--active,
+.transit-tab--active:hover {
+  background: rgba(78, 161, 255, 0.12);
+  color: #4ea1ff;
+  border-color: rgba(78, 161, 255, 0.35);
+}
+
+.transit-tab__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.transit-tab__icon--all {
+  color: #9db0c5;
+  transition: color 0.15s;
+}
+
+.transit-tab:hover .transit-tab__icon--all {
+  color: #f6fbff;
+}
+
+.transit-tab--active .transit-tab__icon--all {
+  color: #4ea1ff;
+}
+
+.transit-tab__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.transit-tab__count {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #9db0c5;
+  font-size: 0.94rem;
+  line-height: 1.48rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.transit-tab--active .transit-tab__count {
+  background: rgba(78, 161, 255, 0.2);
+  color: #cfe4ff;
+}
+
+/* ---- Right main area ---- */
+.transit-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+}
+
+.transit-window__error-inline {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: var(--flat-danger-surface);
+  color: var(--flat-danger);
+  font-size: 1rem;
+}
+
+/* ---- Line table ---- */
+.transit-table-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.transit-window__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--flat-text-muted);
+}
+
+/*
+ * Use border-collapse: separate because collapse makes the sticky header's bottom border
+ * scroll away with rows.
+ */
+.transit-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/*
+ * The header needs a background to cover scrolling rows. Use --flat-surface, nearly matching
+ * the base gradient's top, so it does not stand out as a band.
+ */
+.transit-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 8px;
+  background: var(--flat-surface);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8ba3bb;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.transit-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.transit-table th + th,
+.transit-table td + td {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Shrink non-name columns to content width and allocate all remaining width to line names. */
+.transit-table th:not(:first-child),
+.transit-table td:not(:first-child) {
+  width: 1%;
+}
+
+/* Start line-name width at 0 and use only spare width; ellipsize long names instead of pushing other columns out. */
+.transit-table td:first-child {
+  max-width: 0;
+  min-width: 180px;
+}
+
+.transit-table tbody tr {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.transit-table tbody tr:hover,
+.transit-table tbody tr:focus-within {
+  background: rgba(78, 161, 255, 0.06);
+}
+
+.transit-table .transit-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.transit-table__sub {
+  color: var(--flat-text-muted);
+}
+
+.transit-table__balance--positive {
+  color: var(--flat-good);
+}
+
+.transit-table__balance--negative {
+  color: var(--flat-danger);
+}
+
+.transit-table__meter {
+  width: 96px;
+}
+
+/* Line name cell: [vertical line-color band][type icon][name link][suspended marker]. */
+.transit-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.transit-line__stripe {
+  flex-shrink: 0;
+  width: 4px;
+  height: 22px;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Fade line colors while suspended, matching the detail panel band. */
+.transit-line--suspended .transit-line__stripe {
+  opacity: 0.4;
+}
+
+.transit-line__icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+/* Line names link to detail windows (App.css .entity-link colors/hover). */
+.transit-line__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  text-align: left;
+}
+
+.transit-line .transit-badge {
+  flex-shrink: 0;
+}
+
+/* ---- Operation status badges (list shows suspended only; detail status uses both) ---- */
+.transit-badge {
+  display: inline-block;
+  width: fit-content;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.transit-badge--running {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+
+.transit-badge--suspended {
+  background: var(--flat-warn-surface);
+  color: var(--flat-warn);
+}

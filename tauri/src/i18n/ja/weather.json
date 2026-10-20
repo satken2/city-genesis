@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "天気",
+    "choose": "天気を選択",
+    "loading": "天気を確認中…",
+    "unknown": "不明",
+    "automatic": "{{weather}}（自動）",
+    "failed": "天気を変更できませんでした",
+    "names": {
+      "clear": "快晴",
+      "high_clouds": "薄雲",
+      "fair": "晴れ",
+      "broken_clouds": "晴れ間",
+      "overcast": "曇り",
+      "rain_clouds": "雨雲",
+      "fog": "霧",
+      "drizzle": "霧雨",
+      "rain": "雨",
+      "heavy_rain": "大雨",
+      "light_snow": "小雪",
+      "snow": "雪",
+      "blizzard": "吹雪"
+    },
+    "epochClimate": "確定気候",
+    "temperature": "気温",
+    "precipitation": "降水量",
+    "sunlight": "日照強度",
+    "windSpeed": "風速"
+  }
+}

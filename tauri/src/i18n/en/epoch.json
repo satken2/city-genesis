@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Current Date",
+    "afterDate": "Date After Execution",
+    "epochCount": "Epochs",
+    "message": "Finish this turn's work and advance time?",
+    "no": "No",
+    "yes": "Yes",
+    "executing": "Running simulation...",
+    "errorSteamLimit": "Steam verification could not be confirmed, so no more epochs can be run. (Without verification, you can play up to a population of {{limit}}.)",
+    "errorAlreadyRunning": "Another epoch is already running. Try again after it finishes.",
+    "errorFailed": "Failed to run the epoch: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} Epochs)",
+    "sectionConstruction": "Under Construction",
+    "kindPath": "Road",
+    "kindBuilding": "Facility",
+    "kindProject": "Project",
+    "noItems": "None",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Completed",
+    "sectionStatistics": "Statistics",
+    "sectionScore": "Score",
+    "scoreGain": "Gains",
+    "scoreLoss": "Penalties",
+    "questState": {
+      "completed": "Achieved",
+      "active": "In progress",
+      "locked": "Locked",
+      "failed": "Failed"
+    },
+    "trendHint": "Trend over the last {{count}} epochs: {{trend}}",
+    "trend": {
+      "up": "Rising",
+      "flat": "Steady",
+      "down": "Falling",
+      "none": "Not enough history"
+    },
+    "statPopulation": "Population",
+    "statTourists": "Tourists",
+    "statGdp": "GDP",
+    "statPrice": "Prices",
+    "statIncome": "Income",
+    "statUnemployment": "Unemployment",
+    "statHealthcare": "Healthcare",
+    "statNutrition": "Nutrition",
+    "statLeisure": "Leisure",
+    "statFire": "Fires",
+    "statTraffic": "Traffic Accidents",
+    "statCrime": "Crime",
+    "questCompleted": "Achieved!",
+    "questFailed": "Deadline passed"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Mapping transport routes",
+      "prepare": "Preparing this term",
+      "transit": "Arranging public transit",
+      "market": "Trading goods",
+      "production": "Producing and consuming",
+      "commute": "Going to work and school",
+      "growth": "Citizens growing up",
+      "evaluate": "Evaluating the city",
+      "immigration": "Welcoming immigrants",
+      "labor": "Looking for jobs",
+      "spawn": "Opening new businesses",
+      "relocate": "Moving households",
+      "construction": "Constructing buildings",
+      "finance": "Settling finances",
+      "plan": "Planning the next term",
+      "incident": "Responding to incidents",
+      "finalize": "Compiling statistics"
+    }
+  }
+}

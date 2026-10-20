@@ -1,0 +1,45 @@
+{
+  "supplyGraph": {
+    "title": "Chaîne d’approvisionnement",
+    "selected": "Sélection",
+    "providers": "Fournisseurs de {{product}}",
+    "executing": "Les informations d’approvisionnement sont indisponibles pendant la simulation.",
+    "fetchError": "Impossible de charger les informations d’approvisionnement.",
+    "activeCount": "Actifs {{active}} / {{count}}",
+    "production": "Dernière production : {{amount}} {{unit}}",
+    "resourceRemaining": "Réserves accessibles : {{amount}} {{unit}}",
+    "state": {
+      "ok": "Disponible",
+      "unknown": "Indéterminé",
+      "missing": "Absent",
+      "inactive": "Inactif",
+      "partial": "Partiellement affecté",
+      "limited": "Limité / arrêté",
+      "disconnected": "Déconnecté",
+      "supply_shortage": "Pénurie possible",
+      "capacity_limited": "Limite de capacité possible"
+    },
+    "facilities": {
+      "401": "Centrales électriques",
+      "402": "Installations de captage d’eau",
+      "403": "Fournisseurs de pétrole",
+      "404": "Gares de fret",
+      "405": "Fournisseurs de minerai",
+      "501": "Dépôts ferroviaires",
+      "502": "Dépôts de bus",
+      "503": "Dépôts de tramway",
+      "504": "Dépôts de monorail"
+    },
+    "consumers": {
+      "401": "Consommateurs électriques",
+      "402": "Pompes à eau",
+      "403": "Consommateurs de pétrole",
+      "404": "Consommateurs de fret",
+      "405": "Consommateurs de minerai",
+      "501": "Lignes ferroviaires",
+      "502": "Lignes de bus",
+      "503": "Lignes de tramway",
+      "504": "Lignes de monorail"
+    }
+  }
+}

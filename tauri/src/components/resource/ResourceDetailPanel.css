@@ -1,0 +1,94 @@
+/**
+ * Natural resource detail panel styles
+ *
+ * Follow NaturalResourcesTab.css's card layout.
+ * Stack vertically in the popup's scroll area.
+ */
+
+.resource-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0;
+}
+
+/* ========== Loading and errors ========== */
+
+.resource-detail__loading {
+  color: #9db0c5;
+  font-size: 1rem;
+}
+
+.resource-detail__error {
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(193, 62, 62, 0.16);
+  border: 1px solid rgba(255, 113, 113, 0.3);
+}
+
+/* ========== Information card ========== */
+
+.resource-detail__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.resource-detail__card-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.resource-detail__card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.resource-detail__card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f6fbff;
+  margin-bottom: 6px;
+}
+
+.resource-detail__card-stats {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 3px 10px;
+  align-items: baseline;
+}
+
+.resource-detail__card-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #93a9c0;
+}
+
+.resource-detail__card-value {
+  font-size: 1rem;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========== Chart section ========== */
+
+.resource-detail__chart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resource-detail__chart-title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}

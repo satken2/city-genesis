@@ -1,0 +1,55 @@
+{
+  "mapNavigation": {
+    "title": "도시 둘러보기",
+    "back": "뒤로",
+    "search": "장소 검색",
+    "origin": "출발지 검색",
+    "destination": "목적지 검색",
+    "clear": "지우기",
+    "searching": "검색 중…",
+    "error": "연결할 수 없습니다. 새로고침 후 다시 시도하세요.",
+    "noResults": "장소를 찾을 수 없습니다",
+    "mode": "이동 수단",
+    "pedestrian": "도보·대중교통",
+    "automobile": "자동차",
+    "pickOrigin": "지도에서 출발지 선택",
+    "pickDestination": "지도에서 목적지 선택",
+    "swap": "바꾸기",
+    "cancel": "취소",
+    "directions": "여기로 가는 길",
+    "intro": "시설, 역, 지구, 도로를 검색하거나 지도에서 장소를 선택하세요.",
+    "chooseOrigin": "출발지를 검색하거나 지도에서 선택하세요.",
+    "routing": "경로 검색 중…",
+    "showRoute": "전체 경로 보기",
+    "mapPoint": "지도 위 지점",
+    "minutes": "약 {{count}}분",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "경로 계산 #{{epoch}}의 도로망을 기준으로 한 예상값입니다. 점선은 도보 및 도로 연결 구간입니다.",
+    "busy": "시뮬레이션 중입니다. 완료 후 갱신됩니다.",
+    "not_ready": "경로 데이터가 없습니다. 이 도시에서 시뮬레이션을 실행하면 표시됩니다.",
+    "unreachable": "두 장소를 연결하는 경로가 없습니다.",
+    "no_access": "선택한 장소 근처에 이용 가능한 도로가 없습니다.",
+    "geometry_unavailable": "이 경로의 대중교통 주행 형상을 가져올 수 없습니다.",
+    "place_missing": "선택한 장소가 삭제되었습니다. 다시 선택하세요.",
+    "kind": {
+      "agent": "시설",
+      "zone": "지구",
+      "stop": "정류장",
+      "station": "역",
+      "point": "지점",
+      "road": "도로"
+    },
+    "leg": {
+      "walk": "도보",
+      "drive": "자동차",
+      "transit": "대중교통",
+      "conveyor": "인원 수송",
+      "access": "도로 연결",
+      "turn": "교차로 회전"
+    },
+    "picking": {
+      "origin": "지도에서 출발지를 클릭하세요.",
+      "destination": "지도에서 목적지를 클릭하세요."
+    }
+  }
+}

@@ -1,0 +1,248 @@
+/**
+ * Styles for the economic trend overlay by good.
+ *
+ * The backdrop covers the entire economy tab (.econ-tab), and the box fills the backdrop to
+ * provide chart drawing space. Inside, a two-column, two-row grid contains the control panel,
+ * latest values, price history chart, Sankey diagram, and supply/demand history chart.
+ * The top-left cell is further split horizontally (left = dropdowns, right = latest Epoch values).
+ * Theme, colors, and card decoration use the same dark glassmorphism as TradeTab.css.
+ */
+
+.economy-trend-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  padding: 12px;
+  background: rgba(8, 14, 24, 0.85);
+}
+
+/* In short windows, scroll inside the box instead of crushing the cards. */
+.economy-trend-dialog {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 14px 16px 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background-color: #0b0f19;
+  box-shadow: inset 0 3px 0 var(--flat-accent), 0 16px 40px rgba(0, 0, 0, 0.6);
+  color: #f3f4f6;
+}
+
+.economy-trend-dialog__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.economy-trend-dialog__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--flat-text);
+}
+
+.economy-trend-dialog__close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  background: var(--flat-raised);
+  color: var(--flat-text-label);
+  cursor: pointer;
+}
+
+.economy-trend-dialog__close:hover {
+  background: var(--flat-raised-hover);
+  color: var(--flat-text);
+}
+
+.economy-trend-dialog__close svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* Two-column, two-row grid (four sections), with equal-height cells. */
+.economy-trend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Shared card styles (glassmorphism and dark theme) */
+.economy-trend-card {
+  background: rgba(22, 29, 43, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.economy-trend-card__title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.economy-trend-card__chart-container {
+  flex: 1;
+  min-height: 120px;
+  position: relative;
+}
+
+.economy-trend-card__no-data {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/*
+ * Top-left cell styles.
+ * Split the card horizontally (left = dropdowns, right = latest Epoch values).
+ * Let .economy-trend-card provide the card's padding and .economy-trend-topleft fill
+ * the remaining inner area.
+ */
+.economy-trend-card--top-left {
+  padding: 16px;
+}
+
+.economy-trend-topleft {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 1.4fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.economy-trend-topleft__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+/*
+ * Latest Epoch values area.
+ * Add a left border to separate it from the dropdowns on the left.
+ */
+.economy-trend-topleft__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  padding-left: 12px;
+  min-width: 0;
+}
+
+/* Definition list for latest Epoch values (label + value) */
+.economy-trend-stats {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.economy-trend-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 1rem;
+}
+
+.economy-trend-stat dt {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.economy-trend-stat dd {
+  margin: 0;
+  color: #f3f4f6;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.economy-trend-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.economy-trend-control__label {
+  font-size: 1rem;
+  color: #9ca3af;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.economy-trend-control__select {
+  width: 100%;
+  padding: 6px 8px;
+  background-color: #111827;
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.economy-trend-control__select:focus {
+  outline: none;
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+}
+
+.economy-trend-control__note {
+  font-size: 1rem;
+  color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-top: 4px;
+}
+
+/* Loading and error states */
+.economy-trend-dialog__status {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+.economy-trend-dialog__status--error {
+  color: #f87171;
+}

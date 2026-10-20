@@ -1,0 +1,25 @@
+/**
+ * Line map (TransitLineMap) styles.
+ * Provide a fixed-height viewport because it is embedded in a detail-panel section.
+ */
+
+.transit-line-map {
+  position: relative;
+  width: 100%;
+  /*
+ * Height ensuring useful map visibility at detail-panel width.
+ * Guarantee sufficient height because a small map makes stop markers crowd together unreadably.
+ */
+  height: 280px;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #181825;
+}
+
+.transit-line-map__canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}

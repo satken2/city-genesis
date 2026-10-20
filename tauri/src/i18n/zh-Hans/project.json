@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "建设项目",
+    "none": "（无标签）",
+    "createNew": "＋ 新建标签…",
+    "newPlaceholder": "输入标签名称",
+    "add": "添加",
+    "cancel": "取消",
+    "saveFailed": "标签保存失败",
+    "showObject": "在3D视图中显示",
+    "hideObject": "在3D视图中隐藏"
+  },
+  "constructionProjects": {
+    "empty": "还没有带标签的工程。请在建设面板中放置时选择标签，或在计划中、建设中的公共设施或道路的详情面板中添加标签。",
+    "loadFailed": "建设项目加载失败",
+    "totalCost": "预计建设费",
+    "duration": "剩余工期",
+    "progress": "进度",
+    "progressValue": "已完成 {{done}} / {{total}}",
+    "monthsValue": "{{value}}个月",
+    "stalled": "停滞",
+    "stalledWarning": "有 {{count}} 项工程因建设速度为0而无法推进（已从工期统计中排除）。",
+    "done": "已完成",
+    "unnamed": "#{{id}}",
+    "showAll": "全部恢复显示（{{count}}）",
+    "showTag": "在3D视图中显示该项目",
+    "hideTag": "在3D视图中隐藏该项目",
+    "showObject": "在3D视图中显示",
+    "hideObject": "在3D视图中隐藏",
+    "deleteTag": "删除标签",
+    "confirmDeleteTag": "要删除标签「{{tag}}」吗？相关建筑和道路的标签会被移除（工程本身不会消失）。",
+    "columns": {
+      "name": "对象",
+      "status": "状态",
+      "cost": "剩余费用",
+      "remaining": "剩余工期"
+    }
+  }
+}

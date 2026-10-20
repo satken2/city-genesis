@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "역",
+    "name": "역 이름",
+    "ridership": "승차 횟수",
+    "platforms": "승강장 목록",
+    "noPlatforms": "소속된 승강장이 없습니다(선과 교차한 승강장이 소속됩니다)",
+    "lines": "발착 노선",
+    "noLines": "발착하는 노선이 없습니다",
+    "stops": "정류장별 승차 횟수",
+    "noStops": "이 역에 서는 정류장이 없습니다",
+    "lineRunning": "운행 중",
+    "lineSuspended": "운휴",
+    "houseEnds": "역사 배치",
+    "houseEnds_both": "양쪽 끝",
+    "houseEnds_start": "시작점",
+    "houseEnds_end": "끝점",
+    "passageMode": "통로 배치",
+    "passageMode_elevated": "고가",
+    "passageMode_ground": "지상",
+    "passageMode_underground": "지하"
+  }
+}

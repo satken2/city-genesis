@@ -1,0 +1,21 @@
+/**
+ * Building shape preview canvas styles
+ *
+ * Square black canvas. Draw the parcel polygon with a white outline and the building shape in green.
+ */
+
+.building-shape-canvas {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.building-shape-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}

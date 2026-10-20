@@ -1,0 +1,21 @@
+/**
+ * Time series chart styles.
+ */
+
+.time-series-chart {
+  min-width: 0;
+}
+
+.time-series-chart-empty {
+  color: #9db0c5;
+  font-size: 1rem;
+}
+
+.time-series-chart-tooltip {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 1rem;
+  color: #e2eaf2;
+}

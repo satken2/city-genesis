@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "气候设置",
+    "name": "气候名称",
+    "probabilities": "每月天气出现概率",
+    "probabilityHint": "左右拖动颜色分界线进行调整。下方数值栏也可设置概率为0%的天气。",
+    "month": "{{month}}月",
+    "preset": "气候预设",
+    "current": "当前设置",
+    "chartHint": "在图例中选择项目，然后上下拖动每月的数据点。",
+    "averageHint": "气温、降水量和日照为月平均值。每个时期的实际值会在平均值附近波动。",
+    "apply": "应用",
+    "chart": "每月气候图"
+  }
+}

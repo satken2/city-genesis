@@ -1,0 +1,385 @@
+agents:
+  4:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  100:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  200:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  201:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  401:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  402:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  403:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  404:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1001:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1016:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1017:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1019:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1021:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1022:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1023:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1025:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1028:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1029:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1037:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1041:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1048:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1049:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1050:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1051:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1052:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1053:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1054:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1055:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1056:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1057:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1058:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1059:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1060:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1061:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1062:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1063:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1064:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1065:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1068:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1071:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1072:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1073:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1077:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1078:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1079:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1080:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1081:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1082:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  2000:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 200
+      - 400
+      - 600
+      - 800
+  2001:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 200
+      - 400
+      - 600
+      - 800
+  2002:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 200
+      - 400
+      - 600
+      - 800
+  2003:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 400
+      - 700
+  2004:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 200
+      - 500
+      - 700
+  2006:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2007:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2008:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2009:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 200
+      - 400
+      - 600
+      - 800
+  2010:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2012:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 200
+      - 400
+      - 600
+      - 800
+  2013:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 200
+      - 500
+      - 700
+  2014:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 500
+  2015:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 200
+      - 400
+      - 600
+      - 800
+  2016:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  2017:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  3001:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  3002:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  3003:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  3004:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  3005:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+landmark_prefixes:
+  - landmark-ancient_ruins
+  - landmark-colossal_statue
+  - landmark-grand_cathedral
+  - landmark-great_tower
+  - landmark-old_castle

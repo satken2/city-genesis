@@ -1,0 +1,898 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "setup": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "create"
+              },
+              "resource": {
+                "enum": [
+                  "paths",
+                  "parcels",
+                  "zones",
+                  "buildings"
+                ]
+              },
+              "bind": {
+                "type": "string",
+                "minLength": 1
+              },
+              "body": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/definitions/value"
+                }
+              }
+            },
+            "required": [
+              "type",
+              "resource",
+              "bind",
+              "body"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "completeConstruction"
+              },
+              "target": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "type",
+              "target"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "reload"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "scenarioAction"
+              },
+              "scenario": {
+                "enum": [
+                  "controls",
+                  "scenario4",
+                  "trade",
+                  "highway",
+                  "mining",
+                  "tourism",
+                  "reclamation"
+                ]
+              },
+              "action": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "type",
+              "scenario",
+              "action"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "legacyStep": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "textKey": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "ui": {
+                  "type": "object",
+                  "properties": {
+                    "policy": {
+                      "enum": [
+                        "highlight",
+                        "related",
+                        "strict"
+                      ]
+                    },
+                    "allow": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "highlight": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "policy",
+                    "allow",
+                    "highlight"
+                  ],
+                  "additionalProperties": false
+                },
+                "world": {
+                  "type": "object",
+                  "properties": {
+                    "mode": {
+                      "enum": [
+                        "observe",
+                        "blocked",
+                        "path"
+                      ]
+                    },
+                    "markers": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      }
+                    },
+                    "path": {
+                      "type": "object",
+                      "properties": {
+                        "points": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "minItems": 2,
+                          "maxItems": 2
+                        },
+                        "radius": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "variant": {
+                          "$ref": "#/definitions/value"
+                        },
+                        "bind": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "points",
+                        "radius",
+                        "variant"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "camera": {
+                      "type": "object",
+                      "properties": {
+                        "target": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "distance": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "yaw": {
+                          "type": "number"
+                        },
+                        "pitch": {
+                          "type": "number",
+                          "minimum": 5,
+                          "maximum": 89
+                        }
+                      },
+                      "required": [
+                        "target",
+                        "distance",
+                        "yaw",
+                        "pitch"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "mode"
+                  ],
+                  "additionalProperties": false
+                },
+                "until": {
+                  "$ref": "#/definitions/condition"
+                }
+              },
+              "required": [
+                "id",
+                "textKey",
+                "ui",
+                "world",
+                "until"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "beforeCheck": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "create"
+                    },
+                    "resource": {
+                      "enum": [
+                        "paths",
+                        "parcels",
+                        "zones",
+                        "buildings"
+                      ]
+                    },
+                    "bind": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "body": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/definitions/value"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "resource",
+                    "bind",
+                    "body"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "completeConstruction"
+                    },
+                    "target": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "reload"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "scenarioAction"
+                    },
+                    "scenario": {
+                      "enum": [
+                        "controls",
+                        "scenario4",
+                        "trade",
+                        "highway",
+                        "mining",
+                        "tourism",
+                        "reclamation"
+                      ]
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "scenario",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "complete": {
+            "$ref": "#/definitions/condition"
+          },
+          "afterCheck": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "create"
+                    },
+                    "resource": {
+                      "enum": [
+                        "paths",
+                        "parcels",
+                        "zones",
+                        "buildings"
+                      ]
+                    },
+                    "bind": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "body": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/definitions/value"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "resource",
+                    "bind",
+                    "body"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "completeConstruction"
+                    },
+                    "target": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "reload"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "const": "scenarioAction"
+                    },
+                    "scenario": {
+                      "enum": [
+                        "controls",
+                        "scenario4",
+                        "trade",
+                        "highway",
+                        "mining",
+                        "tourism",
+                        "reclamation"
+                      ]
+                    },
+                    "action": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "scenario",
+                    "action"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "legacyStep",
+          "phases"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "id",
+    "steps"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "value": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number",
+            "string"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/value"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/value"
+          }
+        }
+      ]
+    },
+    "match": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "equals": {
+          "$ref": "#/definitions/value"
+        },
+        "notEquals": {
+          "$ref": "#/definitions/value"
+        },
+        "oneOf": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/value"
+          },
+          "minItems": 1
+        },
+        "greaterThan": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "field"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "required": [
+            "equals"
+          ]
+        },
+        {
+          "required": [
+            "notEquals"
+          ]
+        },
+        {
+          "required": [
+            "oneOf"
+          ]
+        },
+        {
+          "required": [
+            "greaterThan"
+          ]
+        }
+      ]
+    },
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ack"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "all",
+                "any"
+              ]
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/condition"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "type",
+            "conditions"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "page"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "type",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "window"
+            },
+            "window": {
+              "type": "string",
+              "minLength": 1
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "type",
+            "window"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "pathVariant"
+            },
+            "value": {
+              "$ref": "#/definitions/value"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "pathPoints"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "phase": {
+              "enum": [
+                "placing",
+                "editing",
+                "inactive"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "hudMode"
+            },
+            "mode": {
+              "enum": [
+                "district",
+                "bulldozer"
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "mode"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "entity"
+            },
+            "resource": {
+              "enum": [
+                "paths",
+                "parcels",
+                "buildings",
+                "agents",
+                "zones",
+                "city",
+                "budgets",
+                "lines",
+                "tutorial"
+              ]
+            },
+            "where": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/match"
+              }
+            },
+            "bind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "type",
+            "resource",
+            "where"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "budgetRatio"
+            },
+            "category": {
+              "type": "string",
+              "minLength": 1
+            },
+            "min": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "type",
+            "category",
+            "min"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "connected"
+            },
+            "from": {
+              "type": "string",
+              "minLength": 1
+            },
+            "to": {
+              "type": "string",
+              "minLength": 1
+            },
+            "terminal": {
+              "type": "string",
+              "minLength": 1
+            },
+            "where": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/match"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "from",
+            "to",
+            "terminal",
+            "where"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "create"
+            },
+            "resource": {
+              "enum": [
+                "paths",
+                "parcels",
+                "zones",
+                "buildings"
+              ]
+            },
+            "bind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/definitions/value"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "resource",
+            "bind",
+            "body"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "completeConstruction"
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "type",
+            "target"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "reload"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "scenarioAction"
+            },
+            "scenario": {
+              "enum": [
+                "controls",
+                "scenario4",
+                "trade",
+                "highway",
+                "mining",
+                "tourism",
+                "reclamation"
+              ]
+            },
+            "action": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "type",
+            "scenario",
+            "action"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

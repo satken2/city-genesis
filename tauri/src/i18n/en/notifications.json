@@ -1,0 +1,30 @@
+{
+  "notifications": {
+    "trayTooltip": "City Notifications",
+    "empty": "No problems require attention right now",
+    "loadFailed": "Failed to load notifications",
+    "sections": {
+      "warning": "Warnings — immediate action required",
+      "caution": "Cautions — issues holding back growth"
+    },
+    "types": {
+      "resource_runway": "Resource \"{{name}}\" is expected to be depleted in about {{remaining_epochs}} epochs",
+      "resource_depleted": "Resource \"{{name}}\" has been depleted",
+      "facility_inoperative": "Public facility \"{{name}}\" is not operating",
+      "facility_inoperative_labor": "Public facility \"{{name}}\" is not operating due to a labor shortage",
+      "facility_inoperative_material": "Public facility \"{{name}}\" is not operating due to a material shortage",
+      "facility_inoperative_high_skill": "Public facility \"{{name}}\" is not operating due to a shortage of skilled staff",
+      "facility_inoperative_budget": "Public facility \"{{name}}\" is running at reduced capacity due to a budget shortfall",
+      "education_low_enrollment": "Educational institution \"{{name}}\" is underused — few students are enrolled ({{enrolled}} of {{max_students}} seats)",
+      "infra_facility_down": "Infrastructure facility \"{{name}}\" is out of service",
+      "infra_disconnected": "{{count}} facilities are disconnected from the infrastructure network",
+      "rail_capacity_exceeded": "Train frequency exceeds track capacity on {{count}} track segment(s)",
+      "collapse": "{{count}} buildings/roads have collapsed",
+      "collapse_with_deaths": "{{count}} buildings/roads have collapsed, killing {{deaths}} people",
+      "deaths_traffic": "{{count}} people died in traffic accidents",
+      "tenant_blocked_by_parcel_size": "No building for \"{{tenant_name}}\" can be constructed in district \"{{zone_name}}\" (needs {{required}} m2, largest buildable {{max_capacity}} m2). A larger parcel is required",
+      "unknown": "A critical event has occurred",
+      "sanitation": "Sanitation is deteriorating for {{count}} households. Improve sewage and waste treatment."
+    }
+  }
+}

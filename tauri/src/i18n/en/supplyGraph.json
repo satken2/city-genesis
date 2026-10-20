@@ -1,0 +1,45 @@
+{
+  "supplyGraph": {
+    "title": "Supply chain",
+    "selected": "Selected",
+    "providers": "{{product}} suppliers",
+    "executing": "Supply information is unavailable while the simulation is running.",
+    "fetchError": "Could not load supply information.",
+    "activeCount": "Active {{active}} / {{count}}",
+    "production": "Last production: {{amount}} {{unit}}",
+    "resourceRemaining": "Accessible reserves: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Available",
+      "unknown": "Undetermined",
+      "missing": "Absent",
+      "inactive": "Inactive",
+      "partial": "Partly affected",
+      "limited": "Limited / stopped",
+      "disconnected": "Disconnected",
+      "supply_shortage": "Possible supply shortage",
+      "capacity_limited": "Possible capacity limit"
+    },
+    "facilities": {
+      "401": "Power plants",
+      "402": "Water intake facilities",
+      "403": "Oil suppliers",
+      "404": "Freight stations",
+      "405": "Ore suppliers",
+      "501": "Rail depots",
+      "502": "Bus depots",
+      "503": "LRT depots",
+      "504": "Monorail depots"
+    },
+    "consumers": {
+      "401": "Power consumers",
+      "402": "Water pumps",
+      "403": "Oil consumers",
+      "404": "Freight consumers",
+      "405": "Ore consumers",
+      "501": "Rail routes",
+      "502": "Bus routes",
+      "503": "LRT routes",
+      "504": "Monorail routes"
+    }
+  }
+}

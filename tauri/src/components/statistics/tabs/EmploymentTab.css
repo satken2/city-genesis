@@ -1,0 +1,514 @@
+/* EmploymentTab.css */
+
+.emp-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  color: #e2e8f0;
+  box-sizing: border-box;
+}
+
+/* ── Header (scope selector) ── */
+.emp-tab__header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Reuse shared scope-selector styles from education. */
+.scope-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scope-selector__label {
+  font-size: 1rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.scope-selector__select {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #f1f5f9;
+  font-size: 1rem;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.scope-selector__select:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Two-column layout ── */
+.emp-tab__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+  padding: 12px;
+  background: #0f172a;
+}
+
+.emp-tab__left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.emp-tab__right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* ── Shared cards ── */
+.emp-card {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.emp-card--full {
+  flex: 1;
+  min-height: 0;
+}
+
+.emp-card__title {
+  font-size: 1.11rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #38bdf8;
+  border-left: 3px solid #38bdf8;
+  padding-left: 8px;
+}
+
+/* ── ① KPI summary ── */
+.emp-kpi-row {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.emp-kpi-card {
+  flex: 1;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.emp-kpi-card__label {
+  font-size: 0.93rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.emp-kpi-card__value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.emp-kpi-card__sub {
+  font-size: 0.83rem;
+  color: #475569;
+  line-height: 1.2;
+}
+
+.emp-unemployed-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.emp-unemployed-label {
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.emp-unemployed-value {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* ── ② Unemployment rate history chart ── */
+.emp-card--chart {
+  flex-shrink: 0;
+}
+
+.emp-chart-container {
+  width: 100%;
+  height: 140px;
+}
+
+.emp-chart__no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #475569;
+  font-size: 1rem;
+}
+
+/* ── ③ Supply/demand balance by wage tier (overlaid demand and supply) ── */
+.emp-tier-legend {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.emp-tier-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1rem;
+  color: #64748b;
+}
+
+/* Legend bar samples. Demand is light and supply is dark, matching the actual bars. */
+.emp-tier-legend__bar {
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+  background: #64748b;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Supply (dark) is drawn in front, so its sample also covers the entire demand bar behind it. */
+.emp-tier-legend__bar--demand {
+  background: #64748b;
+  opacity: 0.3;
+}
+
+.emp-tier-legend__bar--supply {
+  background: #64748b;
+}
+
+.emp-tier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emp-tier-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.emp-tier-row__label {
+  width: 68px;
+  font-size: 1rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* Single track for overlaid demand and supply. Both bars start at the left edge. */
+.emp-tier-overlay-track {
+  flex: 1;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Demand bar: light color (low opacity), drawn behind at full track height. */
+.emp-tier-overlay-bar--demand {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  opacity: 0.3;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  z-index: 1;
+}
+
+/* Supply bar: dark color, overlaid on demand. Slightly shorter and centered so both remain visible. */
+.emp-tier-overlay-bar--supply {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 10px;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  z-index: 2;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.emp-tier-row__values {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.emp-tier-row__supply {
+  font-weight: 700;
+}
+
+.emp-tier-row__sep {
+  color: #475569;
+}
+
+.emp-tier-row__demand {
+  color: #94a3b8;
+}
+
+.emp-tier-row__wage {
+  width: 42px;
+  font-size: 1rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── ③ Job demand by Skill ── */
+.emp-skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.emp-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.emp-skill-row__label {
+  width: 36px;
+  font-size: 1rem;
+  color: #94a3b8;
+  font-weight: 600;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.emp-skill-row__bar-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.emp-skill-bar-bg {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.emp-skill-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.emp-skill-bar-overflow {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  opacity: 0.9;
+}
+
+.emp-skill-row__rate {
+  width: 38px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.emp-skill-row__nums {
+  width: 60px;
+  font-size: 1rem;
+  color: #475569;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── ④ Industry table ── */
+.emp-industry-table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.emp-industry-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.emp-industry-table__th {
+  position: sticky;
+  top: 0;
+  background: #1e293b;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 5px 6px;
+  text-align: left;
+  white-space: nowrap;
+  z-index: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.emp-industry-table__th--name {
+  width: 40%;
+}
+
+.emp-industry-table__th--num {
+  text-align: right;
+  width: 14%;
+}
+
+.emp-industry-table__row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background 0.15s;
+}
+
+.emp-industry-table__row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.emp-industry-table__td {
+  padding: 5px 6px;
+  vertical-align: middle;
+}
+
+.emp-industry-table__td--name {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.emp-industry-table__name {
+  color: #e2e8f0;
+  font-weight: 500;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 160px;
+}
+
+.emp-industry-table__quota {
+  color: #475569;
+  font-size: 1rem;
+}
+
+.emp-industry-table__td--num {
+  text-align: right;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.emp-industry-table__td--bar {
+  width: 38%;
+  padding-right: 10px;
+}
+
+.emp-industry-bar-bg {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 2px;
+}
+
+.emp-industry-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.emp-industry-bar-label {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.emp-industry-table__empty {
+  text-align: center;
+  color: #475569;
+  padding: 20px;
+  font-size: 1rem;
+}
+
+/* Scrollbar */
+.emp-tab__left::-webkit-scrollbar,
+.emp-industry-table-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.emp-tab__left::-webkit-scrollbar-track,
+.emp-industry-table-wrapper::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 4px;
+}
+
+.emp-tab__left::-webkit-scrollbar-thumb,
+.emp-industry-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.emp-tab__left::-webkit-scrollbar-thumb:hover,
+.emp-industry-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Loading and errors */
+.stats-tab-loading,
+.stats-tab-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.stats-tab-error {
+  color: #ef4444;
+}

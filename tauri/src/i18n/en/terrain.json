@@ -1,0 +1,22 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Waiting for data from the terrain editor…"
+  },
+  "groundCover": {
+    "label": "Ground Cover",
+    "hint": "Changes the color and texture of the ground in the game and the colors of 2D maps. It does not affect the simulation.",
+    "1": "Grassland",
+    "2": "Desert",
+    "3": "Lush Meadow",
+    "4": "Snowfield",
+    "5": "Semi-arid"
+  },
+  "climate": {
+    "label": "Climate",
+    "hint": "Copies monthly temperature, precipitation, sunlight and weather probabilities from a preset. Edit the details in Climate settings in scenario creation mode."
+  },
+  "assetPack": {
+    "label": "Asset pack",
+    "standard": "Standard"
+  }
+}

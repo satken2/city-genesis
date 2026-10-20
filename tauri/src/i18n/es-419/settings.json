@@ -1,0 +1,129 @@
+{
+  "settings": {
+    "title": "Ajustes",
+    "groups": {
+      "general": "General",
+      "display": "Pantalla",
+      "sound": "Sonido",
+      "system": "Sistema",
+      "about": "Información",
+      "developer": "Configuración para desarrolladores"
+    },
+    "swagger": {
+      "label": "Swagger (documentación de la API)",
+      "description": "Muestra la API del backend conectado en tu navegador predeterminado",
+      "action": "Abrir en el navegador"
+    },
+    "fontSize": {
+      "label": "Tamaño de letra",
+      "large": "Grande",
+      "medium": "Mediano",
+      "small": "Chico",
+      "custom": "Personalizado",
+      "preview": "Tamaño actual"
+    },
+    "monitor": {
+      "label": "Pantalla",
+      "prev": "Pantalla anterior",
+      "next": "Pantalla siguiente"
+    },
+    "graphicMonitor": {
+      "label": "Pantalla de la vista 3D"
+    },
+    "multiDisplay": {
+      "label": "Modo multipantalla",
+      "description": "Muestra las ventanas fuera de la pantalla del juego",
+      "on": "Activado",
+      "off": "Desactivado"
+    },
+    "popupMonitor": {
+      "label": "Pantalla de las ventanas"
+    },
+    "hintbar": {
+      "label": "Barra de sugerencias",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "description": "Barra en la parte superior que muestra sugerencias de uso"
+    },
+    "language": {
+      "label": "Idioma",
+      "description": "Idioma de visualización de la interfaz. No es el mismo que el idioma de los datos guardados.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
+    },
+    "volume": {
+      "label": "Volumen",
+      "master": "Volumen general",
+      "bgm": "Música",
+      "sfx": "Efectos de sonido"
+    },
+    "compute": {
+      "label": "Aceleración por GPU",
+      "comingSoon": "Coming soon",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU activa",
+      "statusInactive": "CPU activa",
+      "restartRequired": "El programa principal se reiniciará al cambiar este ajuste",
+      "restarting": "Reiniciando...",
+      "restartFailed": "No se pudo reiniciar",
+      "restartUnavailable": "Ajustes guardados. Los cambios se aplicarán al iniciar el juego la próxima vez",
+      "confirmRestart": "Se cambiará el procesamiento a {{mode}}. ¿Reiniciar el programa principal?",
+      "restartAction": "Reiniciar"
+    },
+    "windowReset": {
+      "label": "Posición y tamaño de las ventanas",
+      "action": "Restablecer"
+    },
+    "credits": {
+      "label": "Créditos",
+      "description": "Atribuciones de los recursos y el software utilizados en este juego",
+      "action": "Ver"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Partida nueva",
+    "overwriteSave": "Sobrescribir partida",
+    "saveAs": "Guardar como",
+    "load": "Cargar",
+    "quitGame": "Salir del juego",
+    "returnToTop": "Volver al menú principal",
+    "loading": "Cargando...",
+    "shuttingDown": "Cerrando...",
+    "saveFailed": "No se pudo guardar",
+    "loadFailed": "No se pudo cargar",
+    "confirmNewGame": "Se perderán los datos actuales. ¿Iniciar una partida nueva?",
+    "confirmQuitGame": "¿Salir del juego? El progreso actual no se guarda automáticamente.",
+    "confirmReturnToTop": "¿Volver al menú principal? El progreso actual no se guarda automáticamente.",
+    "confirm": "Sí",
+    "cancel": "No",
+    "saveAsScenario": "Guardar como escenario",
+    "saveAsNewScenario": "Guardar como otro escenario",
+    "overwriteScenario": "Sobrescribir escenario",
+    "backToGame": "Volver al juego",
+    "saveName": "Nombre de la partida",
+    "confirmOverwrite": "¿Sobrescribir la partida «{{name}}»?",
+    "confirmOverwriteScenario": "¿Sobrescribir el escenario «{{name}}»?"
+  },
+  "saveList": {
+    "noSaves": "No hay partidas guardadas",
+    "currentSave": "Datos actuales",
+    "population": "Población",
+    "inGameDate": "Fecha",
+    "savedAt": "Fecha de guardado",
+    "loadButton": "Cargar",
+    "deleteButton": "Eliminar",
+    "confirmLoad": "¿Cargar esta partida guardada?",
+    "confirmDelete": "¿Eliminar esta partida guardada? Esta acción no se puede deshacer.",
+    "loading": "Cargando...",
+    "loadFailed": "No se pudo cargar",
+    "deleteFailed": "No se pudo eliminar",
+    "openFolderButton": "Mostrar la carpeta",
+    "scenario": "Escenario"
+  }
+}

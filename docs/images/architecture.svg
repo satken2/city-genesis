@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="530" viewBox="0 0 960 530" role="img" aria-labelledby="title description">
+  <title id="title">City Genesis desktop architecture</title>
+  <desc id="description">The separate closed-source simulation core owns city state and runs epochs. Unity graphics and the Tauri user interface are in this repository. Each uses HTTP to communicate with the core. They exchange selection, editing, and display state through MemoryMappedFile IPC.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 1 1 L 9 5 L 1 9 Z" fill="#52667d"/>
+    </marker>
+  </defs>
+  <rect width="960" height="530" rx="20" fill="#ffffff"/>
+  <g font-family="Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <rect x="300" y="20" width="360" height="138" rx="16" fill="#f3f5f8" stroke="#a7b3c2" stroke-width="1.5"/>
+    <text x="480" y="48" font-size="12" font-weight="600" letter-spacing="1.3" fill="#526174">SEPARATE · CLOSED SOURCE</text>
+    <text x="480" y="82" font-size="26" font-weight="650" fill="#152c46">Simulation core</text>
+    <text x="480" y="109" font-size="16" fill="#43556a">Python · FastAPI</text>
+    <text x="480" y="136" font-size="15" fill="#43556a">City state &amp; epoch simulation</text>
+
+    <rect x="24" y="290" width="912" height="216" rx="18" fill="#f0f7fe" stroke="#b3d3ef" stroke-width="1.5"/>
+    <text x="48" y="321" text-anchor="start" font-size="12" font-weight="600" letter-spacing="1.3" fill="#236296">THIS REPOSITORY</text>
+
+    <g fill="none" stroke="#52667d" stroke-width="2" stroke-linejoin="round" marker-start="url(#arrow)" marker-end="url(#arrow)">
+      <path d="M 340 163 V 210 H 206 V 345"/>
+      <path d="M 620 163 V 210 H 754 V 345"/>
+      <path d="M 362 416 H 598"/>
+    </g>
+
+    <g fill="#ffffff">
+      <rect x="100" y="230" width="212" height="50" rx="8"/>
+      <rect x="648" y="230" width="212" height="50" rx="8"/>
+    </g>
+    <g font-size="16" font-weight="600" fill="#254f75">
+      <text x="206" y="250">HTTP</text>
+      <text x="754" y="250">HTTP</text>
+    </g>
+    <g font-size="14" fill="#43556a">
+      <text x="206" y="273">City data &amp; commands</text>
+      <text x="754" y="273">City data &amp; commands</text>
+    </g>
+
+    <rect x="56" y="350" width="300" height="132" rx="14" fill="#ffffff" stroke="#72a8d6" stroke-width="1.5"/>
+    <text x="206" y="386" font-size="25" font-weight="650" fill="#152c46">Unity</text>
+    <text x="206" y="414" font-size="16" fill="#43556a">C#</text>
+    <text x="206" y="451" font-size="16" fill="#254f75">3D world &amp; spatial input</text>
+
+    <rect x="604" y="350" width="300" height="132" rx="14" fill="#ffffff" stroke="#72a8d6" stroke-width="1.5"/>
+    <text x="754" y="386" font-size="25" font-weight="650" fill="#152c46">Tauri UI</text>
+    <text x="754" y="414" font-size="16" fill="#43556a">Rust · React · TypeScript</text>
+    <text x="754" y="451" font-size="16" fill="#254f75">Windows, panels &amp; charts</text>
+
+    <text x="480" y="394" font-size="16" font-weight="600" fill="#254f75">MemoryMappedFile</text>
+    <text x="480" y="444" font-size="14" fill="#43556a">Selection · editing · display</text>
+  </g>
+</svg>

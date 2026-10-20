@@ -1,0 +1,31 @@
+.pc-track-arrow {
+  width: 28px;
+  height: 32px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6fbff;
+  font-size: 1.39rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pc-track-arrow:hover:not(:disabled) {
+  background: rgba(78, 161, 255, 0.14);
+  border-color: #4ea1ff;
+}
+
+.pc-track-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pc-track-arrow-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}

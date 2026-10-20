@@ -1,0 +1,109 @@
+/**
+ * Path merge/split section styles.
+ *
+ * A bordered section shown only during the operation in path details.
+ * Switch selection-waiting, preview, and error states within one frame.
+ */
+
+.path-topology-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  background: rgba(64, 174, 255, 0.08);
+  border: 1px solid rgba(64, 174, 255, 0.28);
+  border-radius: 6px;
+}
+
+.path-topology-title {
+  margin: 0;
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: #7cc7ff;
+}
+
+.path-topology-hint {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: rgba(246, 251, 255, 0.75);
+}
+
+.path-topology-waiting {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(246, 251, 255, 0.55);
+}
+
+.path-topology-error {
+  padding: 6px 8px;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #ff9a9a;
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  border-radius: 4px;
+}
+
+.path-topology-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  font-size: 1rem;
+}
+
+.path-topology-label {
+  color: rgba(246, 251, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.path-topology-value {
+  color: #f6fbff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Emphasize result rows such as after merging/splitting. */
+.path-topology-label--total,
+.path-topology-value--total {
+  font-weight: 700;
+  color: #7cc7ff;
+}
+
+.path-topology-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.path-topology-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f6fbff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.path-topology-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.path-topology-btn--confirm {
+  color: #06212f;
+  background: #40aeff;
+  border-color: transparent;
+}
+
+.path-topology-btn--confirm:hover:not(:disabled) {
+  background: #6ec3ff;
+}
+
+.path-topology-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

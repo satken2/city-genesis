@@ -1,0 +1,30 @@
+{
+  "notifications": {
+    "trayTooltip": "Notificaciones de la ciudad",
+    "empty": "Por ahora no hay problemas que atender",
+    "loadFailed": "No se pudieron obtener las alertas",
+    "sections": {
+      "warning": "Alertas — requieren acción inmediata",
+      "caution": "Avisos — problemas que frenan el crecimiento"
+    },
+    "types": {
+      "resource_runway": "Se prevé que el recurso «{{name}}» se agote en unas {{remaining_epochs}} épocas",
+      "resource_depleted": "El recurso «{{name}}» se ha agotado",
+      "facility_inoperative": "El servicio público «{{name}}» no está operando",
+      "facility_inoperative_labor": "El servicio público «{{name}}» no opera por falta de mano de obra",
+      "facility_inoperative_material": "El servicio público «{{name}}» no opera por falta de insumos",
+      "facility_inoperative_high_skill": "El servicio público «{{name}}» no opera por falta de personal especializado",
+      "facility_inoperative_budget": "El servicio público «{{name}}» redujo su operación por falta de presupuesto",
+      "education_low_enrollment": "La institución educativa «{{name}}» está subutilizada: hay pocos estudiantes inscritos ({{enrolled}} de {{max_students}} cupos)",
+      "infra_facility_down": "La instalación de infraestructura «{{name}}» está fuera de servicio",
+      "infra_disconnected": "{{count}} instalaciones no están conectadas a la red de infraestructura",
+      "rail_capacity_exceeded": "La frecuencia de trenes supera la capacidad de la vía en {{count}} tramo(s)",
+      "collapse": "{{count}} edificios o calles se derrumbaron",
+      "collapse_with_deaths": "{{count}} edificios o calles se derrumbaron y murieron {{deaths}} personas",
+      "deaths_traffic": "{{count}} personas murieron en accidentes de tránsito",
+      "tenant_blocked_by_parcel_size": "En el distrito «{{zone_name}}» no se puede construir un edificio donde quepa «{{tenant_name}}» (se requieren {{required}} m2, el máximo de la parcela es {{max_capacity}} m2). Hace falta una parcela más grande",
+      "unknown": "Ocurrió un evento crítico",
+      "sanitation": "El saneamiento empeora para {{count}} hogares. Mejora el tratamiento de aguas residuales y residuos."
+    }
+  }
+}

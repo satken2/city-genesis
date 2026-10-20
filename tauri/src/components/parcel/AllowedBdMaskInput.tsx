@@ -1,0 +1,98 @@
+/**
+ * Buildable building type mask input
+ *
+ * Treat allowed_bd_mask as bit flags, edited through icon toggle buttons per building type.
+ * Each button toggles its corresponding bit.
+ * When disabled=true, disable and gray out all buttons.
+ */
+
+import {
+  BUILDING_APARTMENT,
+  BUILDING_HOUSE,
+  BUILDING_RETAIL,
+  BUILDING_FACTORY,
+  BUILDING_OFFICE,
+  BUILDING_FARM,
+  BUILDING_MINE,
+  BUILDING_PORT,
+  BUILDING_OTHER,
+  BUILDING_PUBLIC,
+} from "../../constants";
+import "./AllowedBdMaskInput.css";
+
+const buildingModules = import.meta.glob<{ default: string }>(
+  "../../assets/images/buildings/*.png",
+  { eager: true }
+);
+
+function getBuildingIcon(bdMask: number): string {
+  const key = `../../assets/images/buildings/bd_${bdMask}.png`;
+  return buildingModules[key]?.default ?? "";
+}
+
+type BuildingTypeDef = {
+  mask: number;
+  labelKey: string;
+};
+
+const BUILDING_TYPES: BuildingTypeDef[] = [
+  { mask: BUILDING_APARTMENT, labelKey: "parcel.bdApartment" },
+  { mask: BUILDING_HOUSE,     labelKey: "parcel.bdHouse"     },
+  { mask: BUILDING_RETAIL,    labelKey: "parcel.bdRetail"    },
+  { mask: BUILDING_FACTORY,   labelKey: "parcel.bdFactory"   },
+  { mask: BUILDING_OFFICE,    labelKey: "parcel.bdOffice"    },
+  { mask: BUILDING_FARM,      labelKey: "parcel.bdFarm"      },
+  { mask: BUILDING_MINE,      labelKey: "parcel.bdMine"      },
+  { mask: BUILDING_PORT,      labelKey: "parcel.bdPort"      },
+  { mask: BUILDING_OTHER,     labelKey: "parcel.bdOther"     },
+  { mask: BUILDING_PUBLIC,    labelKey: "parcel.bdPublic"    },
+];
+
+type AllowedBdMaskInputProps = {
+  /** Bitmask of buildable building types. */
+  value: number;
+  /** Callback when the bitmask changes. */
+  onChange: (value: number) => void;
+  /** True disables and grays out all buttons. */
+  disabled: boolean;
+  /** Function resolving button labels for i18n. */
+  getLabel: (key: string) => string;
+};
+
+export function AllowedBdMaskInput({
+  value,
+  onChange,
+  disabled,
+  getLabel,
+}: AllowedBdMaskInputProps) {
+  function toggleBit(mask: number) {
+    if (disabled) return;
+    onChange(value ^ mask);
+  }
+
+  return (
+    <div className={`bd-mask-grid${disabled ? " bd-mask-grid--disabled" : ""}`}>
+      {BUILDING_TYPES.map(({ mask, labelKey }) => {
+        const active = (value & mask) !== 0;
+        return (
+          <button
+            key={mask}
+            type="button"
+            className={`bd-mask-btn${active ? " bd-mask-btn--active" : ""}`}
+            onClick={() => toggleBit(mask)}
+            disabled={disabled}
+            title={getLabel(labelKey)}
+            aria-pressed={active}
+          >
+            <img
+              src={getBuildingIcon(mask)}
+              alt={getLabel(labelKey)}
+              className="bd-mask-btn-icon"
+              draggable={false}
+            />
+          </button>
+        );
+      })}
+    </div>
+  );
+}

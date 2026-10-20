@@ -1,0 +1,45 @@
+{
+  "supplyGraph": {
+    "title": "Cadena de suministro",
+    "selected": "Seleccionado",
+    "providers": "Proveedores de {{product}}",
+    "executing": "La información de suministro no está disponible mientras se ejecuta la simulación.",
+    "fetchError": "No se pudo cargar la información de suministro.",
+    "activeCount": "Activos {{active}} / {{count}}",
+    "production": "Última producción: {{amount}} {{unit}}",
+    "resourceRemaining": "Reservas accesibles: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Disponible",
+      "unknown": "Sin determinar",
+      "missing": "Ausente",
+      "inactive": "Inactivo",
+      "partial": "Problema parcial",
+      "limited": "Limitado / detenido",
+      "disconnected": "Desconectado",
+      "supply_shortage": "Posible falta de suministro",
+      "capacity_limited": "Posible límite de capacidad"
+    },
+    "facilities": {
+      "401": "Centrales eléctricas",
+      "402": "Instalaciones de captación de agua",
+      "403": "Proveedores de petróleo",
+      "404": "Estaciones de carga",
+      "405": "Proveedores de mineral",
+      "501": "Depósitos ferroviarios",
+      "502": "Depósitos de autobuses",
+      "503": "Depósitos de tren ligero",
+      "504": "Depósitos de monorriel"
+    },
+    "consumers": {
+      "401": "Instalaciones que usan electricidad",
+      "402": "Bombas de agua",
+      "403": "Instalaciones que usan petróleo",
+      "404": "Instalaciones que usan carga",
+      "405": "Instalaciones que usan mineral",
+      "501": "Líneas ferroviarias",
+      "502": "Líneas de autobús",
+      "503": "Líneas de tren ligero",
+      "504": "Líneas de monorriel"
+    }
+  }
+}

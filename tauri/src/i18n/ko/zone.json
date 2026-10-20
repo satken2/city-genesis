@@ -1,0 +1,40 @@
+{
+  "zone": {
+    "titleWithId": "지구 #{{id}}",
+    "color": "지구 색상",
+    "colorUpdateFailed": "지구 색상 변경에 실패했습니다",
+    "basicInfo": "기본 정보",
+    "area": "면적",
+    "zonePopulation": "거주 인구",
+    "daytimePopulation": "주간 인구",
+    "spaceAmount": "층 점유량",
+    "slotStarvationTitle": "건설할 수 없는 입주 대기 수요가 있습니다",
+    "slotStarvationWarning": "「{{tenant}}」이(가) 입주하려면 1개 동당 {{required}}m2 이상의 바닥이 필요하지만, 이 지구의 구획에서 지을 수 있는 최대는 {{max}}m2입니다. 더 큰 토지 구획을 마련하세요.",
+    "restrictions": "건축 규제",
+    "restrictionUpdateFailed": "지구 규제 갱신에 실패했습니다",
+    "restrictionRequired": "건폐율・용적률・높이는 비워 둘 수 없습니다",
+    "mergeConfirm": "「{{source}}」을(를) 「{{target}}」에 통합합니다. 통합 원본 지구는 사라지고 그 규제 설정도 함께 사라집니다.",
+    "mergeAction": "통합",
+    "mergeFailed": "지구 통합에 실패했습니다(인접하지 않은 지구끼리는 통합할 수 없습니다)",
+    "mergeNoRequest": "통합할 지구가 선택되지 않았습니다",
+    "edit": {
+      "toolCreate": "새 지구",
+      "toolExpand": "기존 지구 확장",
+      "modeBlock": "블록 전체",
+      "modeRoad": "도로 한쪽",
+      "newZone": "새 지구",
+      "noTarget": "지구 위에 마우스를 올려 주세요",
+      "hint": {
+        "create": {
+          "block": "Ctrl을 누른 채 드래그하여 도로로 둘러싸인 블록을 칠하면 칠한 블록이 안의 구획과 함께 새 지구가 됩니다. 드래그로 지도 이동, 휠로 확대·축소합니다.",
+          "road": "Ctrl을 누른 채 드래그하여 도로 한쪽(노면의 절반이나 그쪽에 접한 구획)을 칠하면 그쪽 도로가 구획과 함께 새 지구가 됩니다. 드래그로 지도 이동, 휠로 확대·축소합니다."
+        },
+        "expand": {
+          "block": "지구 위에 마우스를 올리고 Ctrl을 누른 채 드래그하여 블록을 칠하면 안의 구획과 함께 그 지구에 편입됩니다. 드래그로 지도 이동, 휠로 확대·축소합니다.",
+          "road": "지구 위에 마우스를 올리고 Ctrl을 누른 채 드래그하여 도로 한쪽(노면의 절반이나 그쪽에 접한 구획)을 칠하면 그쪽 도로가 구획과 함께 그 지구에 편입됩니다. 드래그로 지도 이동, 휠로 확대·축소합니다."
+        }
+      },
+      "failed": "지구를 변경하지 못했습니다."
+    }
+  }
+}

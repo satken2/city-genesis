@@ -1,0 +1,196 @@
+{
+  "agent": {
+    "back": "Back",
+    "editAppearance": "Change Appearance",
+    "relocateCityHall": "Relocate City Hall",
+    "publicFacility": "Public Facility",
+    "underAcquisition": "Negotiating Land Acquisition",
+    "publicFacilityPanel": {
+      "title": "Public Facility"
+    },
+    "abandon": "Abandon",
+    "abandonHint": "Give up upkeep and let it decay without repairs",
+    "statusSince": {
+      "founded": "Founded",
+      "householdFormed": "Household Formed",
+      "arrived": "Arrived",
+      "opened": "Opened",
+      "schoolOpened": "Opened",
+      "completed": "Completed",
+      "operatingSince": "Active Since",
+      "resumed": "Resumed",
+      "paused": "Paused",
+      "suspended": "Suspended",
+      "schoolClosed": "Suspended",
+      "constructionStarted": "Construction Started",
+      "demolitionScheduled": "Demolition Scheduled",
+      "demolitionStarted": "Demolition Started",
+      "demolished": "Demolished",
+      "collapsed": "Collapsed",
+      "burnedDown": "Burned Down",
+      "default": "Status Since"
+    },
+    "reserves": "Reserves",
+    "revenues": "Revenue",
+    "expenses": "Expenses",
+    "zone": "District",
+    "building": "Building",
+    "rent": "Rent",
+    "floorOccupancy": "Floor Occupancy",
+    "tenants": "Tenants",
+    "tabBasicInfo": "Basic Info",
+    "utilizationTarget": "Target Utilization",
+    "currentUtilization": "Current Utilization",
+    "constructionSpeed": "Construction Speed",
+    "constructionCostPerEpoch": "Construction Cost / Epoch",
+    "remainingConstruction": "Remaining Construction Time",
+    "remainingEpochs": "~{{n}} epochs",
+    "tabBuildingInfo": "Building Info",
+    "tabCargoInfo": "Cargo",
+    "tabHouseholdInfo": "Household",
+    "tabTradeInfo": "Supply, Demand & Trade",
+    "tabEmploymentInfo": "Employment",
+    "action": {
+      "purchase": "Purchase",
+      "bulldoze": "Bulldoze",
+      "cancelBulldoze": "Cancel Demolition",
+      "pause": "Pause",
+      "resume": "Resume",
+      "delete": "Delete",
+      "repair": "Repair",
+      "rebuild": "Rebuild",
+      "edit": "Edit",
+      "startConstruction": "Start Construction",
+      "stopConstruction": "Suspend Construction",
+      "cancelAbandon": "Cancel Abandonment",
+      "explode": "Blow Up",
+      "explodeConfirm": "Blow up this building and stage it as an accident?\nThe building collapses at once and everyone living or working inside is killed. Public sentiment will suffer badly, and this cannot be undone.",
+      "explodeTitle": "Blow Up Building",
+      "explodeConfirmAction": "Blow Up"
+    },
+    "pendingWarning": "This building is planned. Please command to start construction.",
+    "alerts": {
+      "diagnoseHint": "Click to diagnose the cause",
+      "title": "Alerts",
+      "constructionShortage": {
+        "title": "Construction Service Shortage",
+        "description": "Construction budget is insufficient, causing delays in construction."
+      },
+      "onFire": {
+        "title": "Fire Incident!",
+        "description": "A fire has broken out in the building."
+      },
+      "accidentalFire": {
+        "title": "Accidental Fire (Minor)",
+        "description": "An accidental minor fire occurred but was kept small."
+      },
+      "infraDisconnected": {
+        "title": "Not Connected to Infrastructure Network",
+        "description": "No infrastructure path is connected to this facility's terminal. It cannot send or receive supplies until it is connected to the network."
+      },
+      "crime": {
+        "title": "Crime Occurred",
+        "description": "A crime has occurred at this building."
+      },
+      "crimeSign": {
+        "title": "Signs of Crime",
+        "description": "Signs of crime have been observed at this building. Watch out for worsening public safety."
+      },
+      "laborShortage": {
+        "title": "Labor Shortage",
+        "description": "Not enough workers are employed, so production and services are falling short of the plan."
+      },
+      "materialShortage": {
+        "title": "Material Shortage",
+        "description": "Raw material procurement is insufficient, so production and services are falling short of the plan."
+      },
+      "highSkillShortage": {
+        "title": "Skilled Staff Shortage",
+        "description": "The required highly skilled staff cannot be secured, so this facility cannot operate."
+      },
+      "budgetCapped": {
+        "title": "Budget Shortfall",
+        "description": "The allocated budget is far below the required amount, so operations have been scaled down. Review the budget allocation."
+      },
+      "facilityWarning": {
+        "title": "Public Facility Inoperative",
+        "description": "This facility is providing far less service than planned. Check its labor and material procurement."
+      },
+      "sanitationWarning": {
+        "title": "Worsening Sanitation",
+        "description": "Sanitation on this building’s parcel has severely deteriorated, affecting resident households. Improve sewage and waste treatment supply."
+      },
+      "infraWarning": {
+        "title": "Infrastructure Facility Stopped or Collapsed",
+        "description": "This facility has stopped operating or collapsed, affecting infrastructure supply. Check its status and supply connections."
+      }
+    },
+    "infra": {
+      "title": "Infrastructure Connection",
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "received": "Received"
+    },
+    "tabConstructionInfo": "Construction",
+    "tabEducationInfo": "Education",
+    "education": {
+      "totalStudents": "Enrolled students",
+      "totalCapacity": "Total capacity",
+      "statusTitle": "Enrollment",
+      "enrolled": "Enrolled",
+      "vacant": "Open seats",
+      "noCapacity": "No capacity",
+      "countLabel": "Count",
+      "enrollmentBySkill": "Enrollment by skill",
+      "settingsTitle": "Admission quotas",
+      "settingsHint": "Set the allocation weight for each skill. The total capacity is divided in proportion to the weights.",
+      "skillHeader": "Skill",
+      "weightHeader": "Weight",
+      "previewHeader": "Capacity",
+      "save": "Save",
+      "saving": "Saving...",
+      "saveFailed": "Failed to save",
+      "sumMustBePositive": "The total of the quotas must be at least 1",
+      "invalidWeight": "Weights must be integers of 0 or more",
+      "studentsList": "Student list",
+      "noStudents": "No students",
+      "showMore": "Show more ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Type",
+    "filterVariant": "Variant",
+    "filterZone": "Zone",
+    "allVariants": "All variants",
+    "allZones": "All zones",
+    "resultCount": "{{count}} results",
+    "capped": "(of {{total}} total)",
+    "loading": "Loading...",
+    "noResults": "No matching agents",
+    "colStatus": "Status",
+    "colVariant": "Variant",
+    "colName": "Name",
+    "colProduct": "Product",
+    "colPrice": "Price",
+    "colProduction": "Production",
+    "colStock": "Stock",
+    "colSold": "Sold",
+    "colWage": "Wages",
+    "colEmployment": "Employment",
+    "colUtilization": "Utilization",
+    "colBdType": "Building type",
+    "colDurability": "Durability",
+    "colRent": "Rent",
+    "colFloors": "Floors",
+    "colFloorArea": "Floor area",
+    "colOccupancy": "Occupancy",
+    "colFamilyType": "Family type",
+    "colDiscretionaryIncome": "Disposable income",
+    "colSatisNutrition": "Nutrition",
+    "colSatisHealthcare": "Healthcare",
+    "colSatisLeisure": "Leisure",
+    "colSatisResidential": "Residential",
+    "colAutomobile": "Car",
+    "colEnrollment": "Enrollment"
+  }
+}

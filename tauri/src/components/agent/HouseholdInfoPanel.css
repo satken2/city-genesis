@@ -1,0 +1,44 @@
+.household-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.household-family-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.household-automobile-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.household-info-meters {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.household-members-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.household-members-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.household-members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Fecha actual",
+    "afterDate": "Fecha tras la ejecución",
+    "epochCount": "Número de épocas",
+    "message": "¿Terminar el trabajo de este turno y avanzar el tiempo?",
+    "no": "No",
+    "yes": "Sí",
+    "executing": "Ejecutando la simulación...",
+    "errorSteamLimit": "No se pudo verificar la autenticación de Steam, por lo que no es posible ejecutar más épocas. (Sin verificar se puede jugar hasta una población de {{limit}} habitantes).",
+    "errorAlreadyRunning": "Ya se está ejecutando otra época. Vuelve a intentarlo cuando termine.",
+    "errorFailed": "No se pudo ejecutar la época: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} épocas ejecutadas)",
+    "sectionConstruction": "Estado de las obras",
+    "kindPath": "Calle",
+    "kindBuilding": "Instalación",
+    "kindProject": "Proyecto",
+    "noItems": "Sin elementos",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Terminado",
+    "sectionStatistics": "Estadísticas",
+    "sectionScore": "Puntaje",
+    "scoreGain": "Puntos ganados",
+    "scoreLoss": "Puntos perdidos",
+    "questState": {
+      "completed": "Alcanzado",
+      "active": "En curso",
+      "locked": "Bloqueado",
+      "failed": "Fallido"
+    },
+    "trendHint": "Tendencia de las últimas {{count}} épocas: {{trend}}",
+    "trend": {
+      "up": "Al alza",
+      "flat": "Estable",
+      "down": "A la baja",
+      "none": "Historial insuficiente"
+    },
+    "statPopulation": "Población",
+    "statTourists": "Turistas",
+    "statGdp": "PIB",
+    "statPrice": "Precios",
+    "statIncome": "Ingresos",
+    "statUnemployment": "Desempleo",
+    "statHealthcare": "Cobertura sanitaria",
+    "statNutrition": "Cobertura nutricional",
+    "statLeisure": "Ocio",
+    "statFire": "Incendios",
+    "statTraffic": "Accidentes de tránsito",
+    "statCrime": "Delitos",
+    "questCompleted": "¡Alcanzado!",
+    "questFailed": "Plazo vencido"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Trazando rutas",
+      "prepare": "Preparando el período",
+      "transit": "Organizando el transporte público",
+      "market": "Comerciando bienes",
+      "production": "Produciendo y consumiendo",
+      "commute": "Desplazamientos diarios",
+      "growth": "Los ciudadanos crecen",
+      "evaluate": "Evaluando la ciudad",
+      "immigration": "Recibiendo inmigrantes",
+      "labor": "Buscando empleo",
+      "spawn": "Abriendo nuevos negocios",
+      "relocate": "Hogares mudándose",
+      "construction": "Construyendo edificios",
+      "finance": "Ajustando las finanzas",
+      "plan": "Haciendo los planes",
+      "incident": "Atendiendo incidentes",
+      "finalize": "Recopilando estadísticas"
+    }
+  }
+}

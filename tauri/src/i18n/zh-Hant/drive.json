@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "駕駛遊覽",
+    "car": "汽車",
+    "rail": "鐵路路線",
+    "running": "行駛中的車輛",
+    "standard": "乘用車",
+    "commercial": "商用車",
+    "truck": "卡車",
+    "finishEditing": "請先結束編輯，再開始遊覽。",
+    "noLines": "沒有可搭乘的營運中鐵路路線。",
+    "pickRail": "點擊所選路線上的軌道。",
+    "pickRoad": "點擊使用中的道路。",
+    "pickVehicle": "點擊行駛中的汽車、公車或列車（拖曳可移動地圖）。",
+    "clickStart": "選擇起點（拖曳可移動地圖）。",
+    "startSelected": "已選擇起點，將沿箭頭方向出發。",
+    "reverse": "反轉方向",
+    "start": "出發",
+    "back": "返回",
+    "close": "離開（Esc）",
+    "invalidStart": "無法從此處出發。請選擇可行駛道路或所選路線上的軌道。",
+    "invalidVehicle": "未能選取車輛。請點擊行駛中的汽車、公車或列車。",
+    "notReady": "此方向無法使用，或周邊正在載入。請更換方向、位置，或稍後重試。"
+  }
+}

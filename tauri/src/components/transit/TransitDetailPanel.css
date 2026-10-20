@@ -1,0 +1,353 @@
+/*
+ * ==========================================================================
+ * TransitDetailPanel.css - Line detail panel (right panel).
+ * Share most styling with AgentDetailPanel.css (agent-detail-* sections, grids, tabs).
+ * Define only transit-specific elements here: line color band, warning banners, result tiles,
+ * vehicle appearance row, settings toolbar, closure block, and small buttons.
+ * TransitVehicleSelector.css owns the appearance tile design itself.
+ * ==========================================================================
+ */
+
+/* ---- Line color band (below header) ---- */
+.transit-detail__stripe {
+  height: 5px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.transit-detail__stripe--suspended {
+  opacity: 0.4;
+}
+
+/* ---- Suspension reason/vehicle shortage warning banner (text and diagnostic button) ---- */
+.transit-detail__notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.transit-detail__notice-text {
+  flex: 1;
+  min-width: 0;
+  color: #fcd34d;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Unsaved-change dot on tab headings. */
+.transit-detail__tab-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 5px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: #f0c040;
+  box-shadow: 0 0 4px rgba(240, 192, 64, 0.8);
+}
+
+/* Units/details beside values. */
+.transit-detail__unit {
+  margin-left: 4px;
+  font-size: 1rem;
+  color: #93a9c0;
+}
+
+.transit-detail__hint {
+  margin-left: 8px;
+  font-size: 0.97rem;
+  color: #6b8299;
+}
+
+/* ---- Meter row (shared meter and percentage) ---- */
+.transit-detail__meter {
+  gap: 8px;
+}
+
+.transit-detail__meter .meter {
+  flex: 1;
+  min-width: 0;
+}
+
+.transit-detail__meter-value {
+  flex-shrink: 0;
+  min-width: 32px;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--flat-text-body);
+}
+
+/* ---- Operating result tiles (two columns) ---- */
+.transit-detail__tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.transit-detail__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 10px;
+  background: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+  border-radius: 4px;
+  min-width: 0;
+}
+
+.transit-detail__tile-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transit-detail__tile-value {
+  font-size: 1.36rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+  white-space: nowrap;
+}
+
+/* Balance sign. A solid left block indicates good/bad, matching top-menu design. */
+.transit-detail__tile--positive {
+  box-shadow: inset 4px 0 0 var(--flat-good), var(--flat-shadow-sm);
+}
+.transit-detail__tile--positive .transit-detail__tile-value {
+  color: var(--flat-good);
+}
+
+.transit-detail__tile--negative {
+  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+}
+.transit-detail__tile--negative .transit-detail__tile-value {
+  color: var(--flat-danger);
+}
+
+/* ---- Settings tab ---- */
+.transit-detail__settings-grid {
+  align-items: center;
+  row-gap: 6px;
+}
+
+/* Profitability estimate directly below fare/headway/car count, spanning both grid columns. */
+.transit-detail__estimate {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.transit-detail__estimate-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.03rem;
+  font-weight: 700;
+  color: var(--flat-text-body);
+}
+
+/* Badge indicating estimates use unsaved values (same yellow as the unsaved dot). */
+.transit-detail__estimate-tag {
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.89rem;
+  font-weight: 600;
+  color: var(--flat-warn);
+  background: var(--flat-warn-surface);
+}
+
+/* Top-align swatches because they may span multiple rows. */
+.transit-detail__color-value {
+  align-items: flex-start;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Vehicle appearance tiles cannot fit the value column, so span both grid columns. */
+.transit-detail__vehicle-models {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 4px;
+}
+
+.transit-detail__note {
+  margin: 0;
+  font-size: 0.97rem;
+  line-height: 1.45;
+  color: #6b8299;
+}
+
+.transit-detail__settings-grid > .transit-detail__note {
+  grid-column: 1 / -1;
+}
+
+/* Save toolbar: unsaved note on the left, buttons on the right. */
+.transit-detail__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.transit-detail__dirty {
+  font-size: 1rem;
+  color: #6b8299;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transit-detail__dirty--on {
+  color: #f0c040;
+}
+
+.transit-detail__dirty--on::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #f0c040;
+  vertical-align: middle;
+}
+
+.transit-detail__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.transit-detail__error {
+  margin: 0;
+  font-size: 1rem;
+  color: #ff9a9a;
+}
+
+/* ---- Small buttons (smaller than App.css defaults, with drop shadows indicating elevation) ---- */
+.transit-detail__btn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.transit-detail__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.transit-detail__btn--primary {
+  background: var(--flat-selected);
+  color: #ffffff;
+  box-shadow: var(--flat-shadow-sm);
+}
+.transit-detail__btn--primary:not(:disabled):hover {
+  background: var(--flat-selected-hover);
+}
+
+.transit-detail__btn--ghost {
+  background: transparent;
+  color: #a4bccc;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.transit-detail__btn--ghost:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+}
+
+.transit-detail__btn--warn {
+  background: rgba(220, 120, 30, 0.22);
+  color: #ffb875;
+  border: 1px solid rgba(255, 160, 50, 0.5);
+}
+.transit-detail__btn--warn:not(:disabled):hover {
+  background: rgba(220, 120, 30, 0.36);
+}
+
+.transit-detail__btn--danger {
+  background: transparent;
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+.transit-detail__btn--danger:not(:disabled):hover {
+  background: rgba(239, 68, 68, 0.16);
+}
+
+.transit-detail__btn--danger-solid {
+  background: #b91c1c;
+  color: #ffffff;
+  box-shadow: var(--flat-shadow-sm);
+}
+.transit-detail__btn--danger-solid:not(:disabled):hover {
+  background: #dc2626;
+}
+
+/* ---- Route editing (settings tab) ---- */
+.transit-detail__route-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.transit-detail__route-desc {
+  min-width: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #6b8299;
+}
+
+/* ---- Line closure block (end of settings tab) ---- */
+.transit-detail__danger {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(239, 68, 68, 0.35);
+}
+
+.transit-detail__danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.transit-detail__danger-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.transit-detail__danger-title {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #fca5a5;
+}
+
+.transit-detail__danger-desc {
+  font-size: 0.94rem;
+  line-height: 1.4;
+  color: #6b8299;
+}

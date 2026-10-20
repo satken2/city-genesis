@@ -1,0 +1,63 @@
+{
+  "diagnosis": {
+    "refresh": "重新診斷",
+    "note": "根據上一次模擬結果逐層追溯問題的原因。處理後執行下一回合即可更新結果。",
+    "noProblem": {
+      "title": "未發現問題",
+      "description": "目前此經濟主體沒有需要回報的異常。"
+    },
+    "target": {
+      "agent": "設施 #{{id}}",
+      "path": "路徑 #{{id}}",
+      "node": "接點 #{{id}}",
+      "nodeAt": "地點 ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": { "title": "找不到經濟主體", "description": "" },
+      "cycle": { "title": "原因循環", "description": "此設施的異常已在上層診斷中（相互依賴）。" },
+      "depth_limit": { "title": "不再繼續深入", "description": "原因鏈過長，在此中止。請直接診斷該設施。" },
+      "no_alert": { "title": "此設施本身沒有異常", "description": "供應不足的原因可能在於設施規模或使用率目標。" },
+      "facility_inactive": { "title": "設施未運轉", "description": "因建設中、停止或倒塌等原因未生產。請查看設施詳情。" },
+      "producer_ref": { "title": "供應來源設施", "description": "" },
+      "material_shortage": { "title": "無法採購原材料", "description": "部分所需原材料未送達，生產低於計畫。" },
+      "material_unmet": { "title": "{{product_name}}不足", "description": "所需 {{demand}}，實際收到 {{received}}（{{ratio}}%）。" },
+      "material_unmet_unknown": { "title": "無法確定短缺的原材料", "description": "常見於需求剛縮減之後。請查看下一回合的結果。" },
+      "infra_disconnected": { "title": "未接入{{product_name}}網路", "description": "" },
+      "infra_no_terminal": { "title": "沒有連接端子", "description": "此設施沒有{{product_name}}的連接端子節點。" },
+      "infra_terminal_unconnected": { "title": "連接端子沒有任何路徑接入", "description": "請將可輸送{{product_name}}的路徑引至設施的連接端子。" },
+      "infra_link_not_active": { "title": "引入路徑尚未啟用", "description": "接入端子的 {{count}} 條路徑正在建設或尚未開工。建成後即開始供應。" },
+      "infra_link_incompatible": { "title": "引入路徑無法輸送{{product_name}}", "description": "接入端子的路徑類型無法運送此物資（如非電氣化軌道）。請改建為相容類型或另行引入路徑。" },
+      "infra_no_producer": { "title": "城市中沒有{{product_name}}的生產設施", "description": "請建設發電廠等生產設施並接入網路。" },
+      "infra_producers_inactive": { "title": "{{product_name}}的生產設施未運轉", "description": "城市中的 {{count}} 處生產設施均未運轉。" },
+      "infra_producers_unconnected": { "title": "生產設施未接入網路", "description": "{{count}} 處生產設施在運轉，但均未接入{{product_name}}網路。" },
+      "infra_network_split": { "title": "此網路中沒有生產設施", "description": "{{product_name}}的生產設施（{{producers}} 處）接在另一個網路上。兩個網路中途斷開或從未連接。" },
+      "infra_link_under_construction": { "title": "連接網路的路徑正在建設", "description": "有 {{count}} 條路徑計畫接入此網路。建成後可能與生產設施側的網路相連。" },
+      "infra_gap_detected": { "title": "網路在此處斷開", "description": "兩個網路的端點僅相距 {{distance}}m。請用可輸送{{product_name}}的路徑連接這兩點，或合併端點。" },
+      "infra_tap_missing": { "title": "未與生產設施側的網路連接", "description": "請從生產設施側的網路引出可輸送{{product_name}}的路徑（如輸電線）並搭接到此網路。" },
+      "infra_generation_shortage": { "title": "{{product_name}}產量不足", "description": "此網路產量 {{supply}}，需求 {{demand}}（生產設施 {{producers}} 處）。請增建或擴建生產設施。" },
+      "infra_transmission_bottleneck": { "title": "網路容量不足", "description": "{{count}} 條路徑已滿載。請並行增設路徑或改建為大容量類型。" },
+      "infra_unexplained": { "title": "網路狀態看起來正常", "description": "產量與連接均充足，可能只是暫時短缺。請查看下一回合的結果。" },
+      "market_no_supplier": { "title": "城市中沒有{{product_name}}的供應者", "description": "國內沒有運轉中的生產者，也沒有進口。請引進生產設施或設立進口樞紐。" },
+      "market_supply_insufficient": { "title": "{{product_name}}供應不足以滿足需求", "description": "供應 {{supply}}，全市訂單 {{demand}}（生產者 {{producers}}，進口樞紐 {{hubs}}）。" },
+      "market_unmatched": { "title": "未能在市場上採購到{{product_name}}", "description": "全市供應 {{supply}} 可滿足訂單 {{demand}}，但未送達此設施。可能是距離、價格或供應範圍所致。" },
+      "high_skill_shortage": { "title": "無法確保專業人才", "description": "未滿足高技能人才的最低人數，生產計畫歸零。高技能人才需在大學培養。請建設大學，並將招生名額分配給所需技能。" },
+      "labor_shortage": { "title": "員工不足", "description": "所需勞動力 {{quota}}，實際確保 {{total_labor}}。" },
+      "labor_market_tight": { "title": "城市中已沒有勞動力", "description": "失業率僅 {{unemployment_rate}}%，無人可僱。請增加住宅以吸引人口。" },
+      "labor_unfilled": { "title": "有求職者但招不到人", "description": "失業率為 {{unemployment_rate}}%。可能是通勤距離過遠、薪資偏低或技能不符。" },
+      "budget_capped": { "title": "預算不足", "description": "分配的預算遠低於所需金額。請重新檢視預算分配。" },
+      "construction_shortage": { "title": "無法採購{{product_name}}", "description": "" },
+      "line_paused_route_disconnected": { "title": "站點之間的路線中斷", "description": "依序相鄰的站點之間沒有可依所需方向通行的軌道或街道相連。請重建中斷路段或調整路線走向。要在單向軌道上折返，可在能雙向行駛的軌道（例如以1條路徑表示上下行的複線）的車站折返，或將上下行軌道匯集到同一個節點、鋪設渡線，使列車能轉到反方向的軌道，並將回程站點設在反方向的月台上。" },
+      "line_paused_no_underlay": { "title": "站點沒有底層路徑", "description": "站點所在的軌道或街道已不存在。" },
+      "line_paused_train_too_long": { "title": "列車編組長於停靠站所在區段", "description": "請減少每列車的車輛數，或延長停靠站所在的區段（車站月台，或道路、軌道區段）。" },
+      "line_no_vehicle_product": { "title": "此路線類型未定義車輛", "description": "" },
+      "line_vehicle_shortage": { "title": "無法採購車輛", "description": "所需 {{required}} 輛，實際採購 {{received}} 輛。" },
+      "line_off_network": { "title": "路線不在運行網路上", "description": "路線的底層路線未與任何軌道或街道相連。" },
+      "transit_no_depot": { "title": "城市中沒有{{product_name}}的車輛基地", "description": "請建設車輛基地並接入運行網路。" },
+      "transit_depots_inactive": { "title": "車輛基地未運轉", "description": "城市中的 {{count}} 處車輛基地均未運轉。" },
+      "transit_depots_unconnected": { "title": "車輛基地未接入運行網路", "description": "{{count}} 處車輛基地均未與軌道或街道相連。鐵路請從正線向車輛基地的連接端子鋪設引入線。" },
+      "transit_depot_other_network": { "title": "車輛基地位於其他運行網路", "description": "{{count}} 處車輛基地接在與此路線不連通的另一軌道網上。請用軌道連接，或在本網路建設車輛基地。" },
+      "transit_vehicle_insufficient": { "title": "車輛產量不足", "description": "此運行網路的車輛基地（{{depots}} 處）供應 {{supply}} 輛，路線需求 {{demand}} 輛。" },
+      "transit_unexplained": { "title": "車輛基地狀態看起來正常", "description": "供應與連接均充足，可能只是暫時短缺。請查看下一回合的結果。" }
+    }
+  }
+}

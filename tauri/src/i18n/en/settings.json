@@ -1,0 +1,129 @@
+{
+  "settings": {
+    "title": "Settings",
+    "groups": {
+      "general": "General",
+      "display": "Display",
+      "sound": "Sound",
+      "system": "System",
+      "about": "About",
+      "developer": "Developer Settings"
+    },
+    "swagger": {
+      "label": "Swagger (API Documentation)",
+      "description": "View the connected backend API in your default browser",
+      "action": "Open in Browser"
+    },
+    "fontSize": {
+      "label": "Font Size",
+      "large": "Large",
+      "medium": "Medium",
+      "small": "Small",
+      "custom": "Custom",
+      "preview": "Current size"
+    },
+    "monitor": {
+      "label": "Display",
+      "prev": "Previous Display",
+      "next": "Next Display"
+    },
+    "graphicMonitor": {
+      "label": "3D View Display"
+    },
+    "multiDisplay": {
+      "label": "Multi-Display Mode",
+      "description": "Shows windows on a different display from the game screen",
+      "on": "On",
+      "off": "Off"
+    },
+    "popupMonitor": {
+      "label": "Window Display"
+    },
+    "hintbar": {
+      "label": "Hint Bar",
+      "show": "Show",
+      "hide": "Hide",
+      "description": "Bar at the top of the screen that shows operation hints"
+    },
+    "language": {
+      "label": "Language",
+      "description": "The display language of the UI. This is separate from the language of your save data.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
+    },
+    "volume": {
+      "label": "Volume",
+      "master": "Master Volume",
+      "bgm": "BGM",
+      "sfx": "Sound Effects"
+    },
+    "compute": {
+      "label": "GPU Acceleration",
+      "comingSoon": "Coming soon",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU Active",
+      "statusInactive": "CPU Active",
+      "restartRequired": "The main program will restart after changing this setting",
+      "restarting": "Restarting...",
+      "restartFailed": "Restart failed",
+      "restartUnavailable": "Settings saved. Changes will take effect the next time the game starts",
+      "confirmRestart": "Switch compute mode to {{mode}}? The main program will restart.",
+      "restartAction": "Restart"
+    },
+    "windowReset": {
+      "label": "Window Position & Size",
+      "action": "Reset"
+    },
+    "credits": {
+      "label": "Credits",
+      "description": "Attributions for the assets and software used in this game",
+      "action": "View"
+    }
+  },
+  "saveLoad": {
+    "newGame": "New Game",
+    "overwriteSave": "Overwrite Save",
+    "saveAs": "Save As",
+    "load": "Load",
+    "quitGame": "Quit Game",
+    "returnToTop": "Return to Top Menu",
+    "loading": "Loading...",
+    "shuttingDown": "Shutting down...",
+    "saveFailed": "Save failed",
+    "loadFailed": "Load failed",
+    "confirmNewGame": "Current data will be lost. Start a new game?",
+    "confirmQuitGame": "Are you sure you want to quit? Your current progress is not saved automatically.",
+    "confirmReturnToTop": "Return to the top menu? Your current progress is not saved automatically.",
+    "confirm": "Yes",
+    "cancel": "No",
+    "saveAsScenario": "Save as scenario",
+    "saveAsNewScenario": "Save as another scenario",
+    "overwriteScenario": "Overwrite Scenario",
+    "backToGame": "Back to Game",
+    "saveName": "Save name",
+    "confirmOverwrite": "Overwrite the save “{{name}}”?",
+    "confirmOverwriteScenario": "Overwrite the scenario “{{name}}”?"
+  },
+  "saveList": {
+    "noSaves": "No save data found",
+    "currentSave": "Current Data",
+    "population": "Population",
+    "inGameDate": "Date",
+    "savedAt": "Saved At",
+    "loadButton": "Load",
+    "deleteButton": "Delete",
+    "confirmLoad": "Load this save data?",
+    "confirmDelete": "Delete this save data? This cannot be undone.",
+    "loading": "Loading...",
+    "loadFailed": "Load failed",
+    "deleteFailed": "Delete failed",
+    "openFolderButton": "Open Save Folder",
+    "scenario": "Scenario"
+  }
+}

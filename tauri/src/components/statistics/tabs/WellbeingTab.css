@@ -1,0 +1,302 @@
+/**
+ * Satisfaction, leisure, and Living environment tab styles.
+ *
+ * "Satisfaction" and "Living environment" split the lower section into equal-width columns:
+ * two stacked charts on the left (history and composition), with metric selection, details,
+ * and a District map stacked on the right.
+ * "Leisure" stacks explanatory text, a row of current-value KPI cards, and a history chart.
+ * All views fit within the window height (no scrolling inside the tab).
+ * Card surfaces, borders, and headings match the dark theme of existing tabs such as employment.
+ * Accent colors differ by view and are passed by the component through --wellbeing-accent.
+ */
+
+.wellbeing-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  color: #e2e8f0;
+}
+
+.wellbeing-tab__description {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #8ba3bb;
+}
+
+.wellbeing-scope { display: flex; align-items: center; gap: 8px; flex-shrink: 0; font-size: 1rem; color: #8ba3bb; }
+.wellbeing-scope select { background: #1e293b; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 4px 8px; max-width: 300px; }
+/* Display while switching scopes. Values still belong to the previous scope, so make the pending update explicit. */
+.wellbeing-scope__pending { color: #64748b; font-size: 1rem; }
+
+/* ========== Middle: KPI card row ========== */
+
+.wellbeing-kpi-row {
+  display: flex;
+  gap: 8px;
+}
+
+.wellbeing-kpi-card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+/* Emphasize only the overall Household satisfaction card's border to distinguish it from its components. */
+.wellbeing-kpi-card--total {
+  border-color: rgba(78, 161, 255, 0.35);
+  background: rgba(78, 161, 255, 0.08);
+}
+
+.wellbeing-kpi-card__label {
+  font-size: 0.93rem;
+  font-weight: 500;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wellbeing-kpi-card__value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.wellbeing-kpi-card__unit {
+  margin-left: 3px;
+  font-size: 0.93rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+/* ========== Bottom: chart cards ========== */
+
+.wellbeing-tab__body {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Split satisfaction into equal-width chart and map columns so the map remains readable. */
+.wellbeing-tab__body--split > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Chart column. Satisfaction divides it equally into history and composition; other views use one full-height chart. */
+.wellbeing-charts {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.wellbeing-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.wellbeing-card--chart {
+  flex: 1;
+}
+
+/* Right column in satisfaction. Sections provide their own card surfaces, so this is a plain vertical stack. */
+.wellbeing-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.wellbeing-card__title {
+  margin: 0 0 8px;
+  font-size: 1.11rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  border-left: 3px solid var(--wellbeing-accent, #38bdf8);
+  padding-left: 8px;
+}
+
+.wellbeing-card__note {
+  margin: 0 0 8px;
+  font-size: 0.93rem;
+  line-height: 1.5;
+  color: #8ba3bb;
+}
+
+/*
+ * Chart surfaces use flex: 1 to fill the parent's remaining height. Content-dependent row heights
+ * collapse to 0 and leave ResponsiveContainer drawing nothing, so the parent must be a flex
+ * child with min-height: 0.
+ */
+.wellbeing-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ========== Metric switching (four axes + Household satisfaction) ========== */
+
+.wellbeing-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.wellbeing-seg__btn {
+  padding: 5px 10px;
+  background: rgba(22, 29, 43, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #9ca3af;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+/* Exclude the selected button. Otherwise hover specificity overrides the --active text color,
+   placing light text on a solid series-color background and making the label unreadable. */
+.wellbeing-seg__btn:not(.wellbeing-seg__btn--active):hover {
+  color: #e5e7eb;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Selected buttons use a solid series-color background, matching the line and details card value.
+   (The component applies SERIES_COLORS through inline styles.) */
+.wellbeing-seg__btn--active {
+  color: #0b0f19;
+  font-weight: 700;
+}
+
+/* ========== Selected metric details (description + current value + District range) ========== */
+
+.wellbeing-detail {
+  flex: 0 0 auto;
+}
+
+.wellbeing-detail__value {
+  font-size: 2.22rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.wellbeing-detail__unit {
+  margin-left: 3px;
+  font-size: 0.93rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.wellbeing-detail__range {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.wellbeing-detail__range b {
+  margin-left: 4px;
+  color: #e2e8f0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========== District choropleth map ========== */
+
+/*
+ * The map uses all remaining height in the right column. CityMapCanvas follows its parent's
+ * size, so the parent needs a definite height. A min-height would trigger overflow-y on the
+ * statistics pane and scroll the tab, so use only flex: 1 + min-height: 0.
+ */
+.wellbeing-card--map {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.wellbeing-map {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* Overlay the legend on the map. Colors are relative to the District min–max range, so show actual values at both ends. */
+.wellbeing-map__legend {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-size: 1rem;
+  color: #93a9c0;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.wellbeing-map__legend-bar {
+  width: 80px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.wellbeing-map__empty {
+  position: absolute;
+  inset: auto 8px 8px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-size: 1rem;
+  color: #93a9c0;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ========== Loading, errors, and no data ========== */
+
+.wellbeing-tab__loading,
+.wellbeing-tab__error,
+.wellbeing-tab__empty {
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
+  font-size: 1rem;
+}
+
+.wellbeing-tab__error {
+  color: #ff7171;
+}
