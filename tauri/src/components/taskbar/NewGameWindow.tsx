@@ -10,7 +10,8 @@
  * Development debug cities (source debug), included only when the core runs in debug/non-Nuitka mode, appear
  * above tutorials in a separate Debug section and start like scenarios. There is no direct terrain start: import
  * elevation files as scenarios in scenario management first. Tutorials start from core-bundled lesson cities by
- * sending only the tutorial ID.
+ * sending only the tutorial ID. Every tutorial and scenario can start only when its list item from the core
+ * reports it loadable; never assume compatibility when that is unknown.
  *
  * Tiles use full-surface images with names/source badges; descriptions and completion conditions belong in the
  * right column. Add completion badge images to cleared tutorial/scenario tiles and details, using the
@@ -53,9 +54,9 @@ import { BackIcon, NewGameIcon, ScenarioIcon } from "./SaveIcons";
 import clearedBadgeImage from "../../assets/images/ui/badge.png";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
-import { AssetPackEntry, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
+import { AssetPackEntry, CommonSaveEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { ASSET_PACK_STANDARD, CLIMATE_TYPES, GROUND_COVER_TYPES } from "../../constants";
-import { SaveVersionInfo } from "../common/SaveVersionInfo";
+import { SaveCompatibilityReason, SaveVersionInfo } from "../common/SaveVersionInfo";
 
 type NewGameWindowProps = {
   apiBaseUrl: string;
@@ -102,8 +103,8 @@ type DetailView = {
   cleared: boolean;
   /** Free-text completion conditions. null if unset; still show the section with No Completion Conditions, since absence is informative. */
   objective: string | null;
-  /** For unreadable scenarios, show the reason in details and block only starting. */
-  startDisabled: boolean;
+  /** Loadability from the core's list item; null while unknown. Unreadable items show the reason in details and block only starting. */
+  compatibility: SaveCompatibility | null;
   onStart: () => void;
 };
 
@@ -194,6 +195,8 @@ export function NewGameWindow({
   const { t, i18n } = useTranslation();
   const master = useMasterData();
   const [allScenarios, setAllScenarios] = useState<ScenarioEntry[]>([]);
+  // Keyed by tutorial ID, matching tutorial_id in POST /api/v1/sessions
+  const [tutorialEntries, setTutorialEntries] = useState<Record<string, CommonSaveEntry>>({});
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileEntry | null>(null);
   const [tutorialsExpanded, setTutorialsExpanded] = useState<boolean | null>(null);
@@ -242,15 +245,20 @@ export function NewGameWindow({
   }, [apiBaseUrl]);
 
   /**
-   * Fetch scenarios on window initialization. Failure leaves an empty list but still permits tutorials.
+   * Fetch scenarios and tutorial loadability on window initialization. Failure leaves both empty, so nothing can start.
    * Refetch on scenarios:changed when scenario management adds/removes scenarios.
    */
   useEffect(() => {
     if (!apiBaseUrl) return;
     const base = apiBaseUrl.replace(/\/+$/, "");
     let active = true;
-    const fetchScenarios = () => fetchApi<{ scenarios: Record<string, ScenarioEntry> }>(`${base}/api/v1/scenarios`, { cache: "reload" })
-      .then(data => { if (active) setAllScenarios(Object.values(data.scenarios)); });
+    const fetchScenarios = () => fetchApi<{ scenarios: Record<string, ScenarioEntry>; tutorials: Record<string, CommonSaveEntry> }>(
+      `${base}/api/v1/scenarios`, { cache: "reload" },
+    ).then(data => {
+      if (!active) return;
+      setAllScenarios(Object.values(data.scenarios));
+      setTutorialEntries(data.tutorials ?? {});
+    });
 
     setLoading(true);
     void fetchScenarios().catch(() => {}).finally(() => { if (active) setLoading(false); });
@@ -347,7 +355,7 @@ export function NewGameWindow({
         terrain: null,
         cleared: isTutorialCleared(scenario.id),
         objective: t("newGame.tutorialObjective"),
-        startDisabled: false,
+        compatibility: tutorialEntries[scenario.id]?.compatibility ?? null,
         onStart: () => void handleStartTutorial(scenario.id),
       };
     }
@@ -367,12 +375,13 @@ export function NewGameWindow({
       },
       cleared: isScenarioCleared(entry.id),
       objective: resolveLocalizedText(entry.scenario_objective, i18n.language) || null,
-      startDisabled: entry.compatibility?.loadable === false,
+      compatibility: entry.compatibility ?? null,
       onStart: () => void handleStartScenario(entry),
     };
   }, [
     selection,
     allScenarios,
+    tutorialEntries,
     t,
     i18n.language,
     isTutorialCleared,
@@ -582,7 +591,9 @@ export function NewGameWindow({
             </div>
 
             <div className="new-game-detail-content">
-              {detail.scenario && <SaveVersionInfo entry={detail.scenario} />}
+              {detail.scenario
+                ? <SaveVersionInfo entry={detail.scenario} />
+                : <SaveCompatibilityReason compatibility={detail.compatibility} />}
               <p className="new-game-detail-desc">{detail.description}</p>
 
               {detail.terrain && <TerrainFacts {...detail.terrain} />}
@@ -604,7 +615,7 @@ export function NewGameWindow({
           <button
             className="new-game-start"
             onClick={detail?.onStart}
-            disabled={busy || !detail || detail.startDisabled}
+            disabled={busy || detail?.compatibility?.loadable !== true}
             type="button"
           >
             <span>{t("newGame.startScenarioButton")}</span>

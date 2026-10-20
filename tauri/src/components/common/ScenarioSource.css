@@ -61,7 +61,8 @@
   font-size: 0.93rem;
 }
 
-.save-version-info .save-version-info-reason {
+.save-version-info-reason {
   margin: 0;
   color: var(--flat-danger);
+  font-size: 0.93rem;
 }

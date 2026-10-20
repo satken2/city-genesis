@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import type { CommonSaveEntry } from "../../utils/saves";
+import type { CommonSaveEntry, SaveCompatibility } from "../../utils/saves";
 import { RequiredPacks } from "./ScenarioSource";
 import "./ScenarioSource.css";
 
@@ -19,8 +19,15 @@ export function SaveVersionInfo({ entry }: { entry: CommonSaveEntry }) {
       simulated: entry.last_simulated_core_version ?? t("saveCompatibility.notSimulated"),
     })}>{t("saveCompatibility.savedVersion", { version: entry.saved_core_version?.split(".")[0] ?? t("saveCompatibility.unknown") })}</span>
     <RequiredPacks entry={entry} />
-    {entry.compatibility?.loadable === false && <p role="status" className="scenario-error save-version-info-reason">
-      {t(`saveCompatibility.${entry.compatibility.code}`, { defaultValue: t("saveCompatibility.SAVE_CORRUPT") })}
-    </p>}
+    <SaveCompatibilityReason compatibility={entry.compatibility} />
   </div>;
+}
+
+/** Reason loading is unavailable, as returned by the core. Renders nothing for loadable entries. */
+export function SaveCompatibilityReason({ compatibility }: { compatibility?: SaveCompatibility | null }) {
+  const { t } = useTranslation();
+  if (compatibility?.loadable !== false) return null;
+  return <p role="status" className="scenario-error save-version-info-reason">
+    {t(`saveCompatibility.${compatibility.code}`, { defaultValue: t("saveCompatibility.SAVE_CORRUPT") })}
+  </p>;
 }
