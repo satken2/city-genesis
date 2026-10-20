@@ -1,0 +1,9 @@
+# OSが作る管理ファイル
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Pythonの実行キャッシュ
+__pycache__/
+*.pyc
+*.pyo

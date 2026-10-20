@@ -1,0 +1,11 @@
+.VSCodeCounter/
+
+.obsidian/
+.smart-env/
+.obsidian
+.smart-env
+obsidian/.obsidian/
+
+.opencode/
+
+site/
