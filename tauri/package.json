@@ -1,7 +1,7 @@
 {
   "name": "city-genesis/tauri",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "sync:version": "node tools/sync-version.mjs",
