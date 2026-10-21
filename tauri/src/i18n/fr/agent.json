@@ -38,6 +38,7 @@
     "rent": "Loyer",
     "floorOccupancy": "Surface occupée",
     "tenants": "Occupants",
+    "guests": "Clients hébergés",
     "tabBasicInfo": "Informations générales",
     "utilizationTarget": "Taux d'utilisation visé",
     "currentUtilization": "Taux d'utilisation actuel",

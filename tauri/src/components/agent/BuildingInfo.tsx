@@ -2,14 +2,14 @@
  * Floor composition component
  *
  * Displays the building cross-section on the right. For TYPE_BUILDING buildings, the left
- * shows rent, occupied area by floor type, and the tenant list.
+ * shows rent, occupied area by floor type, and the tenant list (labeled as guests for hotels).
  * Reuses agent-detail-section styles to match the basic information section when displaying
  * building-specific information.
  */
 
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
-import { TYPE_BUILDING } from "../../constants";
+import { SPACE_LODGING, TYPE_BUILDING } from "../../constants";
 import { AgentLink } from "../common/AgentLink";
 import { SpaceAmountChart } from "../common/SpaceAmountChart";
 import { BuildingDiagram } from "./BuildingDiagram";
@@ -32,6 +32,7 @@ export function BuildingInfo({ agent, onNavigate }: BuildingInfoProps) {
   const hasOccupancy =
     hasFloorDetails && agent.capacity != null && agent.occupied != null;
   const hasTenants = hasFloorDetails && agent.tenants != null && agent.tenants.length > 0;
+  const isHotel = (agent.capacity?.[SPACE_LODGING] ?? 0) > 0;
   const hasDiagramData =
     agent.is_bd &&
     agent.capacity != null &&
@@ -71,7 +72,9 @@ export function BuildingInfo({ agent, onNavigate }: BuildingInfoProps) {
 
           {hasTenants && (
             <div className="building-info-field">
-              <span className="agent-detail-label">{t("agent.tenants")}</span>
+              <span className="agent-detail-label">
+                {isHotel ? t("agent.guests") : t("agent.tenants")}
+              </span>
               <div className="building-info-tenants">
                 {agent.tenants!.map((tenant) => (
                   <AgentLink

@@ -38,6 +38,7 @@
     "rent": "Rent",
     "floorOccupancy": "Floor Occupancy",
     "tenants": "Tenants",
+    "guests": "Guests",
     "tabBasicInfo": "Basic Info",
     "utilizationTarget": "Target Utilization",
     "currentUtilization": "Current Utilization",

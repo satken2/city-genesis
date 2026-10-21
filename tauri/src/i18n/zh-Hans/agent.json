@@ -38,6 +38,7 @@
     "rent": "房租",
     "floorOccupancy": "楼面占用量",
     "tenants": "入驻租户",
+    "guests": "住客",
     "tabBasicInfo": "基本信息",
     "utilizationTarget": "利用率目标",
     "currentUtilization": "当前利用率",

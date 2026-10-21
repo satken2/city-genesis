@@ -38,6 +38,7 @@
     "rent": "임대료",
     "floorOccupancy": "층 점유량",
     "tenants": "입주 테넌트",
+    "guests": "숙박객",
     "tabBasicInfo": "기본 정보",
     "utilizationTarget": "가동률 목표",
     "currentUtilization": "현재 가동률",

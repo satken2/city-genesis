@@ -38,6 +38,7 @@
     "rent": "家賃",
     "floorOccupancy": "フロア占有量",
     "tenants": "入居テナント",
+    "guests": "宿泊者",
     "tabBasicInfo": "基本情報",
     "utilizationTarget": "稼働率目標",
     "currentUtilization": "現在の稼働率",

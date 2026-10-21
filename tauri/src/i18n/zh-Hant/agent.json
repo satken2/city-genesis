@@ -38,6 +38,7 @@
     "rent": "房租",
     "floorOccupancy": "樓地板占用量",
     "tenants": "進駐租戶",
+    "guests": "住客",
     "tabBasicInfo": "基本資訊",
     "utilizationTarget": "使用率目標",
     "currentUtilization": "目前使用率",
