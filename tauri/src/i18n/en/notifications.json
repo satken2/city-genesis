@@ -13,7 +13,7 @@
       "facility_inoperative": "Public facility \"{{name}}\" is not operating",
       "facility_inoperative_labor": "Public facility \"{{name}}\" is not operating due to a labor shortage",
       "facility_inoperative_material": "Public facility \"{{name}}\" is not operating due to a material shortage",
-      "facility_inoperative_high_skill": "Public facility \"{{name}}\" is not operating due to a shortage of skilled staff",
+      "facility_inoperative_high_skill": "Public facility \"{{name}}\" is running at reduced capacity due to a shortage of skilled staff",
       "facility_inoperative_budget": "Public facility \"{{name}}\" is running at reduced capacity due to a budget shortfall",
       "education_low_enrollment": "Educational institution \"{{name}}\" is underused — few students are enrolled ({{enrolled}} of {{max_students}} seats)",
       "infra_facility_down": "Infrastructure facility \"{{name}}\" is out of service",

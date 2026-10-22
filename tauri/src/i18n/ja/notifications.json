@@ -13,7 +13,7 @@
       "facility_inoperative": "公共施設「{{name}}」が運営できていません",
       "facility_inoperative_labor": "公共施設「{{name}}」が労働力不足で運営できていません",
       "facility_inoperative_material": "公共施設「{{name}}」が原材料不足で運営できていません",
-      "facility_inoperative_high_skill": "公共施設「{{name}}」が専門人材の不足で運営できていません",
+      "facility_inoperative_high_skill": "公共施設「{{name}}」が専門人材の不足で運営を縮小しています",
       "facility_inoperative_budget": "公共施設「{{name}}」が予算不足で運営を縮小しています",
       "education_low_enrollment": "教育機関「{{name}}」は学生が集まらず低稼働です（在籍{{enrolled}}人／定員{{max_students}}人）",
       "infra_facility_down": "インフラ施設「{{name}}」が停止しています",

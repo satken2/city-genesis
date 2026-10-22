@@ -8,7 +8,7 @@ A negative balance represents borrowing. Private businesses can borrow to start 
 
 ## 12.2. Central bank
 
-The central bank assumes assets and liabilities left by private agents that withdraw. These balances are returned to or shared across the economy over time, preventing large failures from imposing their full burden immediately.
+The central bank assumes assets and liabilities left by private agents that withdraw. These balances are returned to or shared across private deposits (positive balances) in proportion to their size over time, preventing large failures from imposing their full burden immediately. These transfers change deposits only and are not counted as income or profit.
 
 Money associated with land settlement and sales of city-owned land to private owners also returns to the economy through the central bank. Public facility funds are consolidated in city government accounts ([budgets](15_budgets.md)).
 

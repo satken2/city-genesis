@@ -107,7 +107,7 @@
       },
       "highSkillShortage": {
         "title": "Manque de personnel qualifié",
-        "description": "Le personnel hautement qualifié requis n'a pas pu être recruté : l'installation ne peut pas fonctionner."
+        "description": "Le personnel hautement qualifié est insuffisant : la production est réduite à ce que le personnel disponible peut assurer."
       },
       "budgetCapped": {
         "title": "Budget insuffisant",

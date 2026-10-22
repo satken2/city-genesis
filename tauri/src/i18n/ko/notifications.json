@@ -13,7 +13,7 @@
       "facility_inoperative": "공공시설 「{{name}}」이(가) 운영되지 않고 있습니다",
       "facility_inoperative_labor": "공공시설 「{{name}}」이(가) 노동력 부족으로 운영되지 않고 있습니다",
       "facility_inoperative_material": "공공시설 「{{name}}」이(가) 원자재 부족으로 운영되지 않고 있습니다",
-      "facility_inoperative_high_skill": "공공시설 「{{name}}」이(가) 전문 인력 부족으로 운영되지 않고 있습니다",
+      "facility_inoperative_high_skill": "공공시설 「{{name}}」이(가) 전문 인력 부족으로 운영을 축소하고 있습니다",
       "facility_inoperative_budget": "공공시설 「{{name}}」이(가) 예산 부족으로 운영을 축소하고 있습니다",
       "education_low_enrollment": "교육 기관 「{{name}}」에 학생이 모이지 않아 가동률이 낮습니다(재적 {{enrolled}}명/정원 {{max_students}}명)",
       "infra_facility_down": "인프라 시설 「{{name}}」이(가) 정지되어 있습니다",

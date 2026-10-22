@@ -107,7 +107,7 @@
       },
       "highSkillShortage": {
         "title": "Falta de personal especializado",
-        "description": "No se logró conseguir el personal altamente calificado necesario, por lo que la instalación no puede operar."
+        "description": "No hay suficiente personal altamente calificado, por lo que la producción se reduce a lo que puede atender el personal disponible."
       },
       "budgetCapped": {
         "title": "Presupuesto insuficiente",

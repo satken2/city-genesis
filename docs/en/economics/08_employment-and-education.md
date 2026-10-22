@@ -35,5 +35,5 @@ Highly skilled workers are normally developed through local higher education. Un
 
 ## 8.5. Highly skilled workers
 
-A highly skilled worker has at least 1.5 in a skill other than general education. Citizens reach this level by studying a specialty at university after basic education; work experience alone is insufficient. Some facilities, including medical facilities, need a minimum number of highly skilled workers in the relevant field before they can operate. Adding general workers cannot replace those specialists.
+A highly skilled worker has at least 1.5 in a skill other than general education. Citizens reach this level by studying a specialty at university after basic education; work experience alone is insufficient. Some facilities, including medical facilities and advanced factories, can operate only to the extent that they employ highly skilled workers in the relevant field. Adding general workers cannot replace those specialists.
 

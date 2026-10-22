@@ -107,7 +107,7 @@
       },
       "highSkillShortage": {
         "title": "専門人材不足",
-        "description": "必要な高スキル人材を確保できておらず、稼働できません。"
+        "description": "必要な高スキル人材が足りないため、いる人材で回せる分まで生産を減らしています。"
       },
       "budgetCapped": {
         "title": "予算不足",

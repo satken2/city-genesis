@@ -107,7 +107,7 @@
       },
       "highSkillShortage": {
         "title": "전문 인력 부족",
-        "description": "필요한 고숙련 인력을 확보하지 못해 가동할 수 없습니다."
+        "description": "필요한 고숙련 인력이 부족해, 현재 인력으로 감당할 수 있는 만큼으로 생산을 줄이고 있습니다."
       },
       "budgetCapped": {
         "title": "예산 부족",

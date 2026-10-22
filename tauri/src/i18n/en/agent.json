@@ -107,7 +107,7 @@
       },
       "highSkillShortage": {
         "title": "Skilled Staff Shortage",
-        "description": "The required highly skilled staff cannot be secured, so this facility cannot operate."
+        "description": "There are not enough highly skilled staff, so output is reduced to what the available staff can handle."
       },
       "budgetCapped": {
         "title": "Budget Shortfall",

@@ -13,7 +13,7 @@
       "facility_inoperative": "L'équipement public « {{name}} » ne fonctionne pas",
       "facility_inoperative_labor": "L'équipement public « {{name}} » ne fonctionne pas faute de main-d'œuvre",
       "facility_inoperative_material": "L'équipement public « {{name}} » ne fonctionne pas faute de matières premières",
-      "facility_inoperative_high_skill": "L'équipement public « {{name}} » ne fonctionne pas faute de personnel qualifié",
+      "facility_inoperative_high_skill": "L'équipement public « {{name}} » tourne au ralenti faute de personnel qualifié",
       "facility_inoperative_budget": "L'équipement public « {{name}} » tourne au ralenti faute de budget",
       "education_low_enrollment": "L'établissement d'enseignement « {{name}} » est sous-utilisé — peu d'étudiants inscrits ({{enrolled}} sur {{max_students}} places)",
       "infra_facility_down": "L'installation d'infrastructure « {{name}} » est à l'arrêt",

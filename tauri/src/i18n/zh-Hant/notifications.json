@@ -13,7 +13,7 @@
       "facility_inoperative": "公共設施「{{name}}」無法營運",
       "facility_inoperative_labor": "公共設施「{{name}}」因勞動力不足而無法營運",
       "facility_inoperative_material": "公共設施「{{name}}」因原物料不足而無法營運",
-      "facility_inoperative_high_skill": "公共設施「{{name}}」因專業人才不足而無法營運",
+      "facility_inoperative_high_skill": "公共設施「{{name}}」因專業人才不足而縮減營運",
       "facility_inoperative_budget": "公共設施「{{name}}」因預算不足而縮減營運",
       "education_low_enrollment": "教育機構「{{name}}」招不到學生，處於低負載營運（在學{{enrolled}}人/名額{{max_students}}人）",
       "infra_facility_down": "基礎設施「{{name}}」已停止運轉",

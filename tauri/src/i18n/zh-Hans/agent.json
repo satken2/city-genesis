@@ -107,7 +107,7 @@
       },
       "highSkillShortage": {
         "title": "专业人才不足",
-        "description": "未能确保所需的高技能人才，无法运营。"
+        "description": "所需的高技能人才不足，生产已减少到现有人才能承担的程度。"
       },
       "budgetCapped": {
         "title": "预算不足",
