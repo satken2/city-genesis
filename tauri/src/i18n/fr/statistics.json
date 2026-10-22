@@ -150,7 +150,8 @@
       "unitDays": "{{days}} jours",
       "reason": {
         "deficit_paused": "Suspendu pour déficit",
-        "deficit_closed": "Fermé pour déficit"
+        "deficit_closed": "Fermé pour déficit",
+        "demolition_closed": "Fermé (démolition du bâtiment)"
       },
       "noOpens": "Aucune ouverture enregistrée",
       "noCloses": "Aucune fermeture enregistrée"

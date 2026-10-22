@@ -38,7 +38,7 @@ type CloseItem = {
   duration_days: number;
   /** Cash at closure. */
   reserves: number;
-  /** Closure reason code (deficit_paused / deficit_closed). */
+  /** Closure reason code (deficit_paused / deficit_closed / demolition_closed). */
   reason: string;
 };
 

@@ -150,7 +150,8 @@
       "unitDays": "{{days}}일",
       "reason": {
         "deficit_paused": "적자로 인한 휴업",
-        "deficit_closed": "적자로 인한 철수"
+        "deficit_closed": "적자로 인한 철수",
+        "demolition_closed": "건물 철거로 인한 철수"
       },
       "noOpens": "개점 기록이 없습니다",
       "noCloses": "폐점 기록이 없습니다"

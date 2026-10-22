@@ -150,7 +150,8 @@
       "unitDays": "{{days}}天",
       "reason": {
         "deficit_paused": "因虧損而停業",
-        "deficit_closed": "因虧損而撤出"
+        "deficit_closed": "因虧損而撤出",
+        "demolition_closed": "因建築拆除而撤出"
       },
       "noOpens": "沒有開業紀錄",
       "noCloses": "沒有歇業紀錄"

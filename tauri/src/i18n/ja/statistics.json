@@ -150,7 +150,8 @@
       "unitDays": "{{days}}日",
       "reason": {
         "deficit_paused": "赤字により休止",
-        "deficit_closed": "赤字により撤退"
+        "deficit_closed": "赤字により撤退",
+        "demolition_closed": "建物の解体により撤退"
       },
       "noOpens": "開店の記録はありません",
       "noCloses": "閉店の記録はありません"

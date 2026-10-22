@@ -150,7 +150,8 @@
       "unitDays": "{{days}}天",
       "reason": {
         "deficit_paused": "因亏损而停业",
-        "deficit_closed": "因亏损而撤出"
+        "deficit_closed": "因亏损而撤出",
+        "demolition_closed": "因建筑拆除而撤出"
       },
       "noOpens": "没有开业记录",
       "noCloses": "没有关闭记录"

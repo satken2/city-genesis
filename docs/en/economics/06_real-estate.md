@@ -14,7 +14,7 @@ Tenants pay rent to buildings for the use of space. A building's `rent` is the a
 
 Facilities consider rent and business suitability; households also consider commuting, education, shopping access, and the living environment. Building pauses and redevelopment can also trigger relocation.
 
-Households and facilities without premises temporarily occupy a virtual building in each district representing agents awaiting relocation. This means they have not secured residential or business space. See [households](07_households.md) for the distinction between immigrants awaiting housing and established residents.
+Households and facilities without premises temporarily occupy a virtual building in each district representing agents awaiting relocation. This means they have not secured residential or business space. Households evicted by a building pause, demolition, or unpaid rent move there immediately and search for a new home from there. Private shops, factories, and offices in a building scheduled for demolition close instead of relocating. See [households](07_households.md) for the distinction between immigrants awaiting housing and established residents.
 
 ## 6.4. Spontaneous urban sprawl
 

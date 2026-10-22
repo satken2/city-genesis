@@ -10,7 +10,7 @@ Population counts established residents. It excludes immigrants who have not yet
 
 ## 7.2. Population changes
 
-Births, deaths, and immigration change population; established residents do not leave the city. Births depend on the age distribution of women of childbearing age and a fixed birth rate. The rate does not rise when population declines, so generational waves occur. Death depends on age and health. Nutrition, sanitation, air pollution, working hours, and medical care affect health ([scores and achievements](16_scores-and-achievements.md)). Independence and marriage create new households, which begin awaiting housing.
+Births, deaths, immigration, and emigration change population. Residents awaiting housing after eviction, independence, or marriage leave the city if they cannot find a home within a set period. Births depend on the age distribution of women of childbearing age and a fixed birth rate. The rate does not rise when population declines, so generational waves occur. Death depends on age and health. Nutrition, sanitation, air pollution, working hours, and medical care affect health ([scores and achievements](16_scores-and-achievements.md)). Independence and marriage create new households, which begin awaiting housing.
 
 Death statistics distinguish causes such as poor sanitation, disease and old age, and accidents.
 
