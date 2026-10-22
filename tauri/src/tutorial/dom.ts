@@ -2,7 +2,7 @@ import type { Phase } from "./model";
 
 /** Keep saving, recovery, exit, and related screens independent of the scenario allowlist. */
 const unrestrictedWindows = new Set([
-  "tutorial", "tutorial_intro", "notification", "tips", "system-tray", "settings", "credits",
+  "tutorial", "info_dialog", "notification", "tips", "system-tray", "settings", "credits",
   "save_load", "save_list", "new_game", "confirm_dialog",
 ]);
 

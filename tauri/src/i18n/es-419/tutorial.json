@@ -503,6 +503,7 @@
       "mining": "Esta isla tiene recursos valiosos bajo tierra, pero no hay cómo llevarlos de la montaña al puerto. Sin transporte, la isla no puede convertir esa riqueza en una industria. En este tutorial aprenderás a preparar una mina, un ferrocarril de carga y un puerto para extraer mineral, transportarlo y exportarlo al extranjero.",
       "tourism": "Los habitantes quieren compartir sus antiguas ruinas del interior con más visitantes, pero no cuentan con un puerto de pasajeros, alojamiento ni una ruta de autobús al pueblo. En este tutorial aprenderás a construir un hotel y una terminal, crear una ruta de autobús y revisar la llegada de turistas, las ventas del restaurante y el uso del autobús.",
       "heading": "Un pedido para la alcaldía",
+      "windowTitle": "Tutorial",
       "reclamation": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal ni tierra para una central eléctrica. En este tutorial aprenderás a ganar terreno al mar, colocar la sede municipal y llevar la electricidad de un parque eólico marino hasta una subestación mediante un cable submarino.",
       "acquisition": "Entre dos plataformas elevadas hay viviendas, oficinas y una estación de bomberos. En este tutorial aprenderás a planificar vías, adquirir terrenos privados, demoler una instalación pública y completar la conexión."
     },

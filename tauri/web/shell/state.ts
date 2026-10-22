@@ -128,6 +128,7 @@ export const state = {
   awaitingParameterSetup: false,
   loadingStarted: false,
   tutorialId: null as string | null,
+  introDialog: null as unknown,
   parameterSetupEditMode: false,
   notificationQueue: [] as NotificationPayload[],
   notificationShowing: false,

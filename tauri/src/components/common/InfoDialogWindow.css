@@ -1,27 +1,28 @@
 /* Rendered on the popup base, so the root needs no background, border, or shadow. */
-.tutorial-intro {
+.info-dialog {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
 }
 
-/* Thumbnail fills the upper half of the window, cropped while preserving aspect ratio. */
-.tutorial-intro-image {
+/* Image fills the upper half of the window, keeping its top edge (where titles and logos sit) and cropping the rest. */
+.info-dialog-image {
   flex: 0 0 50%;
   min-height: 0;
   overflow: hidden;
   background-color: var(--flat-sunken);
 }
 
-.tutorial-intro-image img {
+.info-dialog-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top;
   display: block;
 }
 
-.tutorial-intro-content {
+.info-dialog-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -31,14 +32,14 @@
   overflow-y: auto;
 }
 
-.tutorial-intro-title {
+.info-dialog-heading {
   margin: 0;
   font-size: 1.39rem;
   font-weight: 600;
   color: var(--flat-text);
 }
 
-.tutorial-intro-heading {
+.info-dialog-subheading {
   margin: 0;
   padding: 2px 0 2px 8px;
   font-size: 1rem;
@@ -47,14 +48,14 @@
   box-shadow: inset 3px 0 0 var(--flat-accent);
 }
 
-.tutorial-intro-text {
+.info-dialog-text {
   margin: 0;
   font-size: 1rem;
   line-height: 1.7;
   color: var(--flat-text-body);
 }
 
-.tutorial-intro-start {
+.info-dialog-button {
   flex-shrink: 0;
   align-self: flex-end;
   margin-top: 8px;
@@ -68,6 +69,6 @@
   cursor: pointer;
 }
 
-.tutorial-intro-start:hover {
+.info-dialog-button:hover {
   background-color: var(--flat-selected-hover);
 }

@@ -638,6 +638,7 @@ await settle();
 const session = lastCall("create_session");
 assert.equal(session.scenarioId, "local~mine");
 assert.equal(session.playMode, PLAY_MODE_NORMAL, "new games start in normal mode");
+assert.equal(session.introDialog?.textKey, "newGame.developmentNotice.text", "normal starts show the development notice once the city appears");
 assert.deepEqual([session.language, session.cityName, session.climate, session.groundCover, session.assetPack, session.simulationDays],
   ["fr", "Mine", null, 2, "standard", 30]);
 delete state.results.load_app_settings;
@@ -662,6 +663,7 @@ await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const tutorialSession = lastCall("create_session");
 assert.deepEqual([tutorialSession.playMode, tutorialSession.tutorialId, tutorialSession.scenarioId], [PLAY_MODE_TUTORIAL, firstTutorial, null]);
+assert.equal(tutorialSession.introDialog, null, "tutorials open their own introduction instead of the development notice");
 assert.ok(!("terrainMapId" in tutorialSession), "no terrain is sent for tutorials");
 await act(async () => { root.unmount(); });
 

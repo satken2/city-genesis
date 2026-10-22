@@ -60,5 +60,5 @@ for (const lang of LANGS) {
     if (!text.tutorial.intro?.[id]) throw new Error(`Missing intro ${lang}:${id}`);
   }
 }
-if (!registry.tutorial_intro) throw new Error("Intro window is not registered");
+if (!registry.info_dialog) throw new Error("Intro window is not registered");
 console.log("PASS: definitions, translations, step titles, intro texts and window names");

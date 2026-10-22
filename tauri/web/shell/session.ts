@@ -18,6 +18,7 @@ import {
   dismissNotification,
   openParameterSetupWindow,
   openTipsWindow,
+  openWindow,
   setHudVisible,
   showHintbarIfEnabled,
 } from "./windows";
@@ -100,6 +101,7 @@ export function beginInitialLoading(needsSetup: boolean): void {
   state.needsParameterSetup = needsSetup;
   state.awaitingParameterSetup = false;
   state.tutorialId = null;
+  state.introDialog = null;
   setHudVisible(false);
   host.hide("hintbar");
   try {
@@ -146,6 +148,12 @@ function showGameControls(): void {
   if (state.tutorialId !== null) {
     host.show("tutorial");
     emit("tutorial:show", state.tutorialId);
+  }
+  const introDialog = state.introDialog;
+  state.introDialog = null;
+  if (introDialog !== null) {
+    openWindow({ window_type: "info_dialog", entity: null, params: { preferred_position: null, extra: introDialog } })
+      .catch((error) => console.error("[showGameControls] 案内ウィンドウを開けません:", error));
   }
 }
 
@@ -336,6 +344,8 @@ interface CreateSessionArgs {
   climate?: number | null;
   groundCover?: number | null;
   assetPack?: string | null;
+  /** 都市が表示されたあとに開く案内ウィンドウの内容。 */
+  introDialog?: unknown;
 }
 
 /** 新規ゲームのセッションを作る(`create_session`)。追加の指定はクエリパラメータでコアへ渡す。 */
@@ -352,6 +362,7 @@ export async function createSession(args: CreateSessionArgs): Promise<void> {
   beginInitialLoading(scenarioId === null && playMode === PLAY_MODE_NORMAL);
   state.isLoading = true;
   state.tutorialId = playMode === PLAY_MODE_TUTORIAL ? (args.tutorialId ?? "basic") : null;
+  state.introDialog = args.introDialog ?? null;
 
   const query = new URLSearchParams();
   const optional: [string, unknown][] = [

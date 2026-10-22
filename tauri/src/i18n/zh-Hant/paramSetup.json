@@ -378,6 +378,12 @@
     "tabBrowse": "尋找劇本",
     "comingSoon": "Coming soon",
     "relocalizeNote": "此場景以{{from}}製作。以{{to}}開始時，區、設施、居民、車站等名稱將以{{to}}重新命名(作者取的名稱也會被取代;道路名稱等會保留)。",
-    "fixedByScenario": "由場景固定"
+    "fixedByScenario": "由場景固定",
+    "developmentNotice": {
+      "heading": "本遊戲是開發中的試驗版",
+      "subheading": "遊玩前請閱讀",
+      "text": "經濟參數與邏輯仍在調整，城市可能無法正常發展。失業率可能上升，城市甚至可能破產，但這絕不是你的玩法造成的。敬請期待後續更新。",
+      "button": "我知道了"
+    }
   }
 }

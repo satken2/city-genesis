@@ -378,6 +378,12 @@
     "tabBrowse": "寻找剧本",
     "comingSoon": "Coming soon",
     "relocalizeNote": "此场景以{{from}}制作。以{{to}}开始时，区、设施、居民、车站等名称将以{{to}}重新命名(作者起的名称也会被替换;道路名称等会保留)。",
-    "fixedByScenario": "由场景固定"
+    "fixedByScenario": "由场景固定",
+    "developmentNotice": {
+      "heading": "本游戏是开发中的试验版",
+      "subheading": "游玩前请阅读",
+      "text": "经济参数和逻辑仍在调整，城市可能无法正常发展。失业率可能上升，城市甚至可能破产，但这绝不是你的玩法造成的。敬请期待后续更新。",
+      "button": "我知道了"
+    }
   }
 }

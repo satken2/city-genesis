@@ -23,8 +23,8 @@ const settle = async (fn: () => void | Promise<void>) => {
 const button = (label: string) => [...container.querySelectorAll<HTMLButtonElement>("button")].find(b => b.textContent === label);
 const session = async (id: string | null) => settle(() => emit("session-state", { current_save_id: id, apiBaseUrl: "http://fixture", tutorialId: "controls" }));
 const show = () => settle(() => emit("tutorial:show", "controls"));
-const closeIntro = () => settle(() => emit("tutorial:window_visibility", { label: "tutorial_intro", window: "tutorial_intro", visible: false }));
-const introRequests = () => invocations.filter(([command, args]) => command === "open_registered_window" && (args as { windowType?: string }).windowType === "tutorial_intro").length;
+const closeIntro = () => settle(() => emit("tutorial:window_visibility", { label: "info_dialog", window: "info_dialog", visible: false }));
+const introRequests = () => invocations.filter(([command, args]) => command === "open_registered_window" && (args as { windowType?: string }).windowType === "info_dialog").length;
 const originalFetch = globalThis.fetch;
 const requests: { url: string; method?: string; body?: string }[] = [];
 let finish: (response: Response) => void;

@@ -378,6 +378,12 @@
     "tabBrowse": "Find scenarios",
     "comingSoon": "Coming soon",
     "relocalizeNote": "This scenario was made in {{from}}. Starting in {{to}} renames districts, facilities, residents, stations, and other names in {{to}} (names given by the author are replaced too; road names and a few others are kept).",
-    "fixedByScenario": "Fixed by the scenario"
+    "fixedByScenario": "Fixed by the scenario",
+    "developmentNotice": {
+      "heading": "This game is an experimental build in development",
+      "subheading": "Please read before playing",
+      "text": "Its economic parameters and logic are still being tuned, so your city may not grow as it should. Unemployment may rise and the city may even collapse, but that is never the fault of your play. Stay tuned for future updates!",
+      "button": "Got it"
+    }
   }
 }

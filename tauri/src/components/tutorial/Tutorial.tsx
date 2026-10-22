@@ -31,6 +31,7 @@ import { TUTORIAL_SCENARIOS } from "./tutorialSteps";
 import { useTutorialGuide } from "../../tutorial/useTutorialGuide";
 import { fetchApi } from "../../utils/api";
 import { showNotification } from "../../utils/notification";
+import type { InfoDialogContent } from "../common/InfoDialogWindow";
 import "./Tutorial.css";
 
 /** localStorage key prefix for tutorial progress */
@@ -126,14 +127,22 @@ export function Tutorial() {
     const key = `${saveId}_${tutorialId}`;
     if (introOpenedRef.current === key) return;
     introOpenedRef.current = key;
-    void invoke("open_registered_window", { windowType: "tutorial_intro", params: { extra: { tutorialId } } }).catch(console.error);
-  }, [visible, introDone, saveId, tutorialId, completed]);
+    const content: InfoDialogContent = {
+      titleKey: "tutorial.intro.windowTitle",
+      image: currentScenario.image,
+      headingKey: currentScenario.titleKey,
+      subheadingKey: "tutorial.intro.heading",
+      textKey: currentScenario.introKey,
+      buttonKey: "tutorial.startButton",
+    };
+    void invoke("open_registered_window", { windowType: "info_dialog", params: { extra: content } }).catch(console.error);
+  }, [visible, introDone, saveId, tutorialId, completed, currentScenario]);
 
   useEffect(() => {
     if (introDone || !saveId) return;
     let stop: (() => void) | undefined, disposed = false;
     void listen<{ window: string; visible: boolean }>("tutorial:window_visibility", (event) => {
-      if (event.payload.window !== "tutorial_intro" || event.payload.visible) return;
+      if (event.payload.window !== "info_dialog" || event.payload.visible) return;
       localStorage.setItem(`${TUTORIAL_INTRO_KEY_PREFIX}${tutorialId}_${saveId}`, "1");
       setIntroDone(true);
     }).then((fn) => { if (disposed) fn(); else stop = fn; });

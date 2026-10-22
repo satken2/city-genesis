@@ -378,6 +378,12 @@
     "tabBrowse": "Buscar escenarios",
     "comingSoon": "Coming soon",
     "relocalizeNote": "Este escenario se creó en {{from}}. Si empiezas en {{to}}, los nombres de distritos, instalaciones, residentes, estaciones y otros se cambian a {{to}} (también se reemplazan los nombres que puso el autor; se conservan los nombres de las calles y algunos otros).",
-    "fixedByScenario": "Fijado por el escenario"
+    "fixedByScenario": "Fijado por el escenario",
+    "developmentNotice": {
+      "heading": "Este juego es una versión experimental en desarrollo",
+      "subheading": "Lee esto antes de jugar",
+      "text": "Los parámetros y la lógica de la economía aún se están ajustando, así que es posible que la ciudad no crezca con normalidad. El desempleo puede aumentar e incluso la ciudad puede quebrar, pero eso nunca será culpa de tu forma de jugar. ¡Espera las próximas actualizaciones!",
+      "button": "Entendido"
+    }
   }
 }

@@ -68,6 +68,8 @@ pub struct AppState {
     pub loading_started: bool,
     /// Started tutorial ID (None for normal play).
     pub tutorial_id: Option<String>,
+    /// Information window content to open once the new city appears (`params.extra` of info_dialog).
+    pub intro_dialog: Option<Value>,
     /// Whether parameter setup opened in in-game editing mode. false
     /// (default): initial setup for a new free-mode game; show HUD on
     /// completion. true: reopened from Taskbar during scenario authoring; only close
@@ -149,6 +151,7 @@ impl SharedState {
             awaiting_parameter_setup: false,
             loading_started: false,
             tutorial_id: None,
+            intro_dialog: None,
             parameter_setup_edit_mode: false,
             notification_queue: VecDeque::new(),
             notification_showing: false,

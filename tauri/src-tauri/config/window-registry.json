@@ -539,8 +539,8 @@
     "policy": "single",
     "actions": []
   },
-  "tutorial_intro": {
-    "title": "チュートリアル",
+  "info_dialog": {
+    "title": "お知らせ",
     "width": 520,
     "height": 620,
     "resizable": false,

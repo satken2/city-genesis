@@ -52,11 +52,13 @@ import { ScenarioOriginBadges } from "../common/ScenarioSource";
 import { SaveDialogButton } from "./SaveDialog";
 import { BackIcon, NewGameIcon, ScenarioIcon } from "./SaveIcons";
 import clearedBadgeImage from "../../assets/images/ui/badge.png";
+import splashImage from "../../assets/images/splash.png";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
 import { AssetPackEntry, CommonSaveEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { ASSET_PACK_STANDARD, CLIMATE_TYPES, GROUND_COVER_TYPES } from "../../constants";
 import { SaveCompatibilityReason, SaveVersionInfo } from "../common/SaveVersionInfo";
+import type { InfoDialogContent } from "../common/InfoDialogWindow";
 
 type NewGameWindowProps = {
   apiBaseUrl: string;
@@ -140,6 +142,15 @@ function startOptionValuesOf(scenario: ScenarioEntry | null): Record<Exclude<Sce
     ground_cover: normalizeGroundCover(scenario?.ground_cover),
   };
 }
+
+/** Shown once the city appears after starting in normal play, because the economic balance is still being tuned. */
+const DEVELOPMENT_NOTICE: InfoDialogContent = {
+  image: splashImage,
+  headingKey: "newGame.developmentNotice.heading",
+  subheadingKey: "newGame.developmentNotice.subheading",
+  textKey: "newGame.developmentNotice.text",
+  buttonKey: "newGame.developmentNotice.button",
+};
 
 /**
  * Languages supported by the game, matching Tauri's settings.
@@ -420,6 +431,7 @@ export function NewGameWindow({
         assetPack: confirmSelection.scenario ? assetPack : null,
         playMode: confirmSelection.playMode,
         tutorialId: confirmSelection.tutorialId || null,
+        introDialog: confirmSelection.playMode === PLAY_MODE_NORMAL ? DEVELOPMENT_NOTICE : null,
       });
       onClose();
     } catch (error) {

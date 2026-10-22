@@ -503,6 +503,7 @@
       "mining": "Valuable resources lie beneath this island, but there is no way to haul them from the mountain to the port. Without transport, the island can't turn that wealth into an industry. In this tutorial, you'll learn how to set up a mine, freight railway, and port to extract ore, transport it, and export it overseas.",
       "tourism": "The islanders want to share their ancient inland ruins with more visitors. But they lack a passenger harbor, accommodation, and a bus route from the harbor to town. In this tutorial, you will learn to build a hotel and passenger terminal, create a bus route, and check tourist arrivals, restaurant sales, and bus use.",
       "heading": "A Request for the Mayor",
+      "windowTitle": "Tutorial",
       "reclamation": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a submarine cable.",
       "acquisition": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, demolish a public facility, and complete the connection."
     },

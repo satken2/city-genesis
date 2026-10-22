@@ -392,6 +392,7 @@ fn close_registered_window(
 /// Pass extra parameters (city name, language, simulation days, climate, ground cover, and asset
 /// packs) to the backend as query parameters. When loading a scenario, only settings not locked by the
 /// author may override scenario values (the core rejects different values for locked settings with 422).
+/// `intro_dialog` is the content of the information window opened once the city appears.
 #[tauri::command]
 async fn create_session(
     app: tauri::AppHandle,
@@ -406,6 +407,7 @@ async fn create_session(
     climate: Option<i32>,
     ground_cover: Option<i32>,
     asset_pack: Option<String>,
+    intro_dialog: Option<serde_json::Value>,
 ) -> Result<(), String> {
     let play_mode = play_mode.unwrap_or(PLAY_MODE_NORMAL);
     if !matches!(play_mode, PLAY_MODE_NORMAL | PLAY_MODE_SCENARIO | PLAY_MODE_TUTORIAL) {
@@ -442,7 +444,7 @@ async fn create_session(
         } else {
             None
         };
-
+        guard.intro_dialog = intro_dialog;
     }
 
     let api_base_url = {
@@ -1195,6 +1197,7 @@ fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setu
         guard.needs_parameter_setup = needs_setup;
         guard.awaiting_parameter_setup = false;
         guard.tutorial_id = None;
+        guard.intro_dialog = None;
     }
     window::set_hud_visible(app, false);
     if let Some(hintbar) = app.get_webview_window("hintbar") { let _ = hintbar.hide(); }
@@ -1247,6 +1250,21 @@ fn show_game_controls(app: &tauri::AppHandle, state: &SharedState) {
     if let Some(tid) = tutorial_id {
         if let Some(tutorial) = app.get_webview_window("tutorial") { let _ = tutorial.show(); }
         let _ = app.emit("tutorial:show", tid);
+    }
+    let intro_dialog = state.lock().intro_dialog.take();
+    if let Some(extra) = intro_dialog {
+        let payload = messages::OpenWindowPayload {
+            window_type: "info_dialog".into(),
+            entity: None,
+            params: Some(messages::OpenWindowParams { preferred_position: None, extra: Some(extra) }),
+        };
+        // finish_parameter_setup runs on the main thread, so do not wait for window creation here.
+        let (app, state) = (app.clone(), state.clone());
+        tauri::async_runtime::spawn(async move {
+            if let Err(err) = window::open_window(app, state, payload).await {
+                log::error!("[show_game_controls] 案内ウィンドウを開けません: {err}");
+            }
+        });
     }
 }
 
