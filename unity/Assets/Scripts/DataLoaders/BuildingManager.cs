@@ -1523,8 +1523,9 @@ public class BuildingManager : BaseApiDataManager
             float groundHeight = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z));
             buildingGO.transform.position = new Vector3(p.x, groundHeight + BuildingBaseLift, p.z);
         }
-        // Distant combined batches do not detect position changes themselves, so notify them from the code moving the object.
+        // Distant combined batches and instanced scatter parts do not detect position changes themselves, so notify them from the code moving the object.
         FarBuildingMember.RefreshObject(buildingGO);
+        BuildingScatterMember.RefreshObject(buildingGO);
     }
 
     /// <summary>
@@ -2552,6 +2553,7 @@ public class BuildingManager : BaseApiDataManager
             int flags = VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetFlags(InputObjectType.BUILDING) : VisualFlag.SHOW_PLAN;
             mr.enabled = (flags & VisualFlag.SHOW_PLAN) != 0;
         }
+        BuildingScatterMember.Add(buildingGO, meshResult?.Scatter);
 
         // Update the dictionary to the new object immediately.
         // This prevents duplicate objects if the same ID is redrawn again shortly afterward.

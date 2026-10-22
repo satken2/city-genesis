@@ -770,19 +770,38 @@ public static class ModularBodyBuilder
 
     /// <summary>
     /// Find scatter1, 2, … sequentially from 1 (stop at gaps); place actual-size parts at <see cref="ScatterLayout"/> positions.
-    /// Combine parts including node transforms; align origin to placement ground. For terrain conformity, ground is the lowest
-    /// of four bounding-box-corner heights, burying the uphill side to prevent floating (same as port-yard cargo). Do nothing if absent.
+    /// Align origin to placement ground. For terrain conformity, ground is the lowest of four bounding-box-corner heights,
+    /// burying the uphill side to prevent floating (same as port-yard cargo). Do nothing if absent.
+    /// While <see cref="BuildingScatterRenderer.Sink"/> is set (shown buildings), hand placements to instanced rendering;
+    /// otherwise combine parts including node transforms. Both measure placement bounds from the combined part mesh.
     /// </summary>
     private static void GenerateScatter(
         string prefix, int suffix, Vector2[] site, Vector2[] footprint, float seed,
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
+        var sink = BuildingScatterRenderer.Sink;
+        var paths = new List<string>();
         var meshes = new List<Mesh>();
         var meshMaterials = new List<Material[]>();
         var kinds = new List<Bounds>();
         for (int n = 1; n <= MAX_SCATTER_PARTS; n++)
         {
+            if (sink != null)
+            {
+                string path = BuildingMeshUtils.PartPath(prefix, $"scatter{n}", suffix);
+                BuildingScatterRenderer.Model model = BuildingScatterRenderer.GetModel(path);
+                if (model == null)
+                {
+                    break;
+                }
+                if (model.render != null)
+                {
+                    paths.Add(path);
+                    kinds.Add(model.layout);
+                }
+                continue;
+            }
             GameObject part = BuildingMeshUtils.GetPartNoPosition(prefix, $"scatter{n}", suffix, true);
             if (part == null)
             {
@@ -817,6 +836,11 @@ public static class ModularBodyBuilder
                 }
             }
             Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(item.Position.x, baseY, item.Position.y), item.Rotation, Vector3.one);
+            if (sink != null)
+            {
+                sink.Add(new BuildingScatterRenderer.Instance { path = paths[item.Kind], local = matrix });
+                continue;
+            }
             Mesh mesh = meshes[item.Kind];
             Material[] materials = meshMaterials[item.Kind];
             for (int subMeshIndex = 0; subMeshIndex < mesh.subMeshCount; subMeshIndex++)

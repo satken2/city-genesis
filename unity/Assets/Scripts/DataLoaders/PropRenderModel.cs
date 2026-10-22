@@ -58,18 +58,34 @@ public sealed class PropRenderModel : IDisposable
     /// </summary>
     public PropRenderModel(string name, bool distantTree = false)
     {
+        Load($"Models/Props/{name}");
+        if (distantTree) CreateDistantTree();
+    }
+
+    /// <summary>Load a model by resource path with the same `_close` / `_far` rules (building scatter parts).</summary>
+    public static PropRenderModel FromPath(string path)
+    {
+        var model = new PropRenderModel();
+        model.Load(path);
+        return model;
+    }
+
+    private PropRenderModel() { }
+
+    private void Load(string path)
+    {
         var manager = ModelManager.Instance;
         if (manager == null) return;
-        var prefab = manager.GetModel($"Models/Props/{name}");
+        var prefab = manager.GetModel(path);
         if (prefab == null) return;
         Extract(prefab, normal);
         if (normal.Count == 0) return;
         CalculateBounds();
-        var closePrefab = manager.GetModel($"Models/Props/{name}_close", true);
+        var closePrefab = manager.GetModel($"{path}_close", true);
         if (closePrefab != null) Extract(closePrefab, close);
         DedicatedClose = close.Count > 0;
         if (close.Count == 0) close.AddRange(normal);
-        var farPrefab = manager.GetModel($"Models/Props/{name}_far", true);
+        var farPrefab = manager.GetModel($"{path}_far", true);
         if (farPrefab != null) Extract(farPrefab, far);
         DedicatedFar = far.Count > 0;
         if (far.Count == 0)
@@ -84,7 +100,6 @@ public sealed class PropRenderModel : IDisposable
                 far.Add(new Part { mesh = mesh, material = part.material, local = part.local });
             }
         }
-        if (distantTree) CreateDistantTree();
     }
 
     private void CreateDistantTree()

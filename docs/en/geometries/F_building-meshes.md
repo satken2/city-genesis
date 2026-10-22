@@ -35,6 +35,8 @@ For missing walls and corners, search the same folder in this order: position 1 
 
 Close prefers `{part}_close` in the selected folder and falls back to the ordinary part. Folder selection always depends on ordinary-part availability, regardless of LOD. Far never assembles parts: it stretches one far model to the building envelope, or each wing for mashups and open pits, falling back to boxes. Construction, demolition, and collapse use low Far boxes. See [LOD](E_lod.md) and [data loading](H_data-loading.md) for retention, reuse, and waiting for terrain.
 
+Scatter parts (`scatter{n}`) are not built into the building mesh. Like [terrain props](M_terrain-props.md), their shared models are drawn with GPU instancing across buildings. Their draw LOD is selected per part with the terrain-prop rules regardless of the building, including the handling of `_close` and `_far`. Generation that creates no shown building object, such as plan previews, includes scatter parts in the single mesh.
+
 ## Road-access frontages
 
 Facilities can provide entrances to which road rendering blends paving ([road meshes](G_road-meshes.md)). Frontages come from markers in prebuilt and port models or station-rotary layout plans. They exist only for active, paused, or scheduled-for-demolition buildings and do not depend on draw LOD.

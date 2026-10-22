@@ -36,6 +36,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// Close uses the same assembly but prefers `_close` parts (BuildingMeshUtils.CurrentDrawLod).
     /// isDynamic is a compatibility argument for terrain conformity, independent of rendering LOD.
     /// Callers passing animateCrane=true must attach the returned CraneTop before initializing the visual mode.
+    /// separateExterior is for shown buildings: site decorations become ExteriorJobs where applicable,
+    /// and scatter parts become Scatter for <see cref="BuildingScatterRenderer"/> instead of being combined.
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false, bool animateCrane = false)
     {
@@ -51,21 +53,29 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
         DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
         var previousCapture = BuildingExteriorRenderer.Capture;
+        var previousSink = BuildingScatterRenderer.Sink;
         int modelType = GetModelType(buildingData);
         bool split = separateExterior && (IsApplicableModelType(modelType) || modelType == Constants.MODEL_PREBUILT);
         var jobs = split ? new List<BuildingExteriorRenderer.Build>() : null;
+        var scatter = separateExterior ? new List<BuildingScatterRenderer.Instance>() : null;
         BuildingMeshUtils.CurrentDrawLod = drawLod;
         BuildingExteriorRenderer.Capture = jobs;
+        BuildingScatterRenderer.Sink = scatter;
         try
         {
             var result = GenerateDetailed(buildingData, isDynamic, animateCrane);
-            if (result != null) result.ExteriorJobs = jobs;
+            if (result != null)
+            {
+                result.ExteriorJobs = jobs;
+                result.Scatter = scatter;
+            }
             return result;
         }
         finally
         {
             BuildingMeshUtils.CurrentDrawLod = previous;
             BuildingExteriorRenderer.Capture = previousCapture;
+            BuildingScatterRenderer.Sink = previousSink;
         }
     }
 
@@ -270,7 +280,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         return new BuildingMeshResult(mesh, finalMaterials.ToArray(), meshResult.ColliderMesh)
-        { ExteriorJobs = meshResult.ExteriorJobs, CraneTop = meshResult.CraneTop };
+        { ExteriorJobs = meshResult.ExteriorJobs, Scatter = meshResult.Scatter, CraneTop = meshResult.CraneTop };
     }
 
     private static Material cachedDefaultBuildingMaterial;
@@ -328,7 +338,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         if (result.Materials == null || result.Materials.Length == 0)
         {
             return new BuildingMeshResult(result.Mesh, new[] { fallback }, result.ColliderMesh)
-            { ExteriorJobs = result.ExteriorJobs, CraneTop = result.CraneTop };
+            { ExteriorJobs = result.ExteriorJobs, Scatter = result.Scatter, CraneTop = result.CraneTop };
         }
 
         // Check for null elements in the array.
@@ -354,7 +364,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         return new BuildingMeshResult(result.Mesh, resolved, result.ColliderMesh)
-        { ExteriorJobs = result.ExteriorJobs, CraneTop = result.CraneTop };
+        { ExteriorJobs = result.ExteriorJobs, Scatter = result.Scatter, CraneTop = result.CraneTop };
     }
 
     /// <summary>

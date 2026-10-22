@@ -516,10 +516,11 @@ public static class BuildingMeshUtils
     /// </summary>
     public static GameObject GetPartNoPosition(string prefix, string partName, int suffix, bool suppressWarning = false)
     {
-        string path = $"Models/Buildings/{prefix}/{suffix}/{partName}";
-
-        return GetModelForDrawLod(path, suppressWarning);
+        return GetModelForDrawLod(PartPath(prefix, partName, suffix), suppressWarning);
     }
+
+    /// <summary>Resource path of a part without a position number, before the render-LOD suffix.</summary>
+    public static string PartPath(string prefix, string partName, int suffix) => $"Models/Buildings/{prefix}/{suffix}/{partName}";
 
     /// <summary>
     /// Select one exterior model number (numbered folder under the prefix folder) using visual_variant (0–1) and prefix-folder weights

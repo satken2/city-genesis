@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Generate site decorations as work separate from the structure and collider.
+/// Generate site decorations as work separate from the structure and collider. Scatter parts go to <see cref="BuildingScatterRenderer"/>.
 /// Building GameObjects have no scheduler lifetime component (RenderWorkLifetime), so run work on a shared host
 /// and stop it in this component's OnDisable. Work stops while hidden (parked) and resumes unfinished jobs when shown again.
 /// </summary>
@@ -63,12 +63,15 @@ public sealed class BuildingExteriorRenderer : MonoBehaviour
             var parts = new List<CombineInstance>();
             var materials = new List<Material>();
             var temporary = new List<Mesh>();
+            var scatter = new List<BuildingScatterRenderer.Instance>();
             Mesh mesh = null;
             DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
+            var previousSink = BuildingScatterRenderer.Sink;
             try
             {
                 // Share decoration geometry with the normal model, independent of structure close-up switching.
                 BuildingMeshUtils.CurrentDrawLod = DrawLod.Normal;
+                BuildingScatterRenderer.Sink = scatter;
                 jobs[completed](parts, materials, temporary);
                 if (parts.Count > 0)
                 {
@@ -86,11 +89,13 @@ public sealed class BuildingExteriorRenderer : MonoBehaviour
                     mesh = null;
                     GetComponent<VisualModeObject>()?.RefreshMaterials();
                 }
+                BuildingScatterMember.Add(gameObject, scatter);
                 completed++;
             }
             finally
             {
                 BuildingMeshUtils.CurrentDrawLod = previous;
+                BuildingScatterRenderer.Sink = previousSink;
                 foreach (var item in temporary) if (item != null) Destroy(item);
                 if (mesh != null) Destroy(mesh);
             }

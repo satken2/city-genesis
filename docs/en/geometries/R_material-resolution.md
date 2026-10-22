@@ -20,5 +20,5 @@ Path master `body_material` names the variant's representative surface material 
 
 ## Replacement after generation
 
-Hover, planned or construction state colors, district colors, and heatmaps are applied afterward by visual-mode components replacing renderer materials and restoring them when the mode ends ([Unity visual modes](../programs/unity-visual-modes.md)). Materials resolved here define the ordinary appearance.
+Hover, planned or construction state colors, district colors, and heatmaps are applied afterward by visual-mode components replacing renderer materials and restoring them when the mode ends ([Unity visual modes](../programs/unity-visual-modes.md)). Materials resolved here define the ordinary appearance. Building scatter parts are not part of the building's renderers, so they are not replaced: they keep their ordinary appearance and follow only the building's visibility ([building meshes](F_building-meshes.md)).
 
