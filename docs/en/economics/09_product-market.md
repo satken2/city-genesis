@@ -34,7 +34,7 @@ Buyers consider price, travel or freight burdens, and seller attractiveness. Nea
 
 Industrial materials mainly move as freight; retail buyers travel to shops. These movements generate traffic. See [supply and transport](17_supply-and-transport.md) for on-site logistics and dedicated networks.
 
-Some services reach the entire city; others reach only nearby areas. Arrival time matters for services such as firefighting, while road connectivity or terrain determines other service areas. Even within reach, insufficient capacity can leave demand unmet.
+Some services reach the entire city; others reach only nearby areas. Arrival time matters for services such as firefighting, while distance from the facility or terrain determines other service areas. Even within reach, insufficient capacity can leave demand unmet.
 
 ## 9.4. Prices and taxes
 

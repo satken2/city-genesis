@@ -117,7 +117,7 @@ public class EffectRangeOverlay : MonoBehaviour
     /// <summary>
     /// Splits the rings' AABB into a grid and fills cells whose centers lie inside (circles use the same polygon as their boundary).
     /// For each row, find all ring intersections with a horizontal line through cell centers once, then fill alternating sorted pairs (even-odd rule).
-    /// Holes remain empty without distinguishing them from the perimeter. Checking all vertices per cell would take seconds for coverage with thousands of vertices along roads.
+    /// Holes remain empty without distinguishing them from the perimeter. Checking all vertices per cell would take seconds for coverage with thousands of vertices.
     /// Cells are small, so sampling terrain height at all four corners follows the relief.
     /// </summary>
     private void FillRings(List<List<Vector2>> rings, Color fillColor)
