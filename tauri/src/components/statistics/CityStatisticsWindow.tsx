@@ -25,6 +25,7 @@ import { BusinessTab } from "./tabs/BusinessTab";
 import { CommuteTab } from "./tabs/CommuteTab";
 import { RealEstateTab } from "./tabs/RealEstateTab";
 import { TourismTab } from "./tabs/TourismTab";
+import { ZoneListTab } from "./tabs/ZoneListTab";
 import { DebugAgentSpawnTab } from "./tabs/DebugAgentSpawnTab";
 import { DebugBuildingSpawnTab } from "./tabs/DebugBuildingSpawnTab";
 import "./CityStatisticsWindow.css";
@@ -52,6 +53,7 @@ const TABS: TabDef[] = [
   { id: "commute", icon: "commute", labelKey: "statistics.tabCommute" },
   { id: "realestate", icon: "realestate", labelKey: "statistics.tabRealEstate" },
   { id: "tourism", icon: "tourism", labelKey: "statistics.tabTourism" },
+  { id: "zones", icon: "zones", labelKey: "statistics.tabZones" },
 ];
 
 /**
@@ -240,6 +242,16 @@ function TabIcon({ icon, className }: { icon: string; className?: string }) {
       </svg>
     );
   }
+  if (icon === "zones") {
+    // District list tab: stacked wide cards.
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="5" rx="1" />
+        <rect x="3" y="10" width="18" height="5" rx="1" />
+        <rect x="3" y="17" width="18" height="4" rx="1" />
+      </svg>
+    );
+  }
   if (icon === "debugAgentSpawn") {
     // Developer-only tab (Agent spawning): bug icon representing debugging.
     return (
@@ -332,6 +344,7 @@ export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {activeTab === "commute" && <CommuteTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "realestate" && <RealEstateTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "tourism" && <TourismTab apiBaseUrl={apiBaseUrl} />}
+        {activeTab === "zones" && <ZoneListTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "debugAgentSpawn" && debugEnabled && <DebugAgentSpawnTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "debugBuildingSpawn" && debugEnabled && <DebugBuildingSpawnTab apiBaseUrl={apiBaseUrl} />}
       </div>

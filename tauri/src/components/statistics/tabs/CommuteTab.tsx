@@ -137,7 +137,7 @@ const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
 };
 
 /** Formats a ratio (0–1) as a percentage string. Missing values are "—". */
-function formatRate(rate: number | null | undefined): string {
+export function formatRate(rate: number | null | undefined): string {
   return rate == null ? "—" : `${(rate * 100).toFixed(1)}%`;
 }
 

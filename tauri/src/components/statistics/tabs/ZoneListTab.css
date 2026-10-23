@@ -1,0 +1,122 @@
+/**
+ * District list tab styles.
+ *
+ * Every card uses the same column template so each metric lines up vertically across Districts.
+ * Metric rows, floor table rows, and column headings share one row height so the three columns align.
+ */
+
+.zone-list-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 0.83rem;
+  color: #c1c9d2;
+}
+
+.zone-list-tab__message {
+  padding: 1.39rem;
+  color: #8ba3bb;
+}
+
+.zone-list-card {
+  background-color: #131f2d;
+  border: 1px solid #203245;
+  border-radius: 6px;
+  padding: 1.04rem 1.39rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.zone-list-card__title {
+  margin: 0 0 0.69rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ecf0f5;
+  border-left: 3px solid #228be6;
+  padding-left: 0.69rem;
+  line-height: 1.2;
+}
+
+.zone-list-card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 2.08rem;
+  align-items: start;
+}
+
+.zone-list-card__list {
+  margin: 0;
+}
+
+.zone-list-card__row,
+.zone-list-card__heading,
+.zone-list-card__floors th,
+.zone-list-card__floors td {
+  font-size: 1rem;
+  border-bottom: 1px solid #1c2b3b;
+}
+
+.zone-list-card__row,
+.zone-list-card__heading {
+  min-height: 1.94rem;
+}
+
+.zone-list-card__floors th,
+.zone-list-card__floors td {
+  height: 1.94rem;
+}
+
+.zone-list-card__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.69rem;
+}
+
+.zone-list-card__row dt {
+  color: #8ba3bb;
+}
+
+.zone-list-card__row dd {
+  margin: 0;
+  color: #e2e8f0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.zone-list-card__heading {
+  display: flex;
+  align-items: center;
+}
+
+.zone-list-card__heading,
+.zone-list-card__floors th {
+  color: #8ba3bb;
+  font-weight: 600;
+}
+
+.zone-list-card__floors {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.zone-list-card__floors th,
+.zone-list-card__floors td {
+  padding: 0 0 0 0.69rem;
+  text-align: right;
+}
+
+.zone-list-card__floors td {
+  color: #e2e8f0;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.zone-list-card__floors th:first-child,
+.zone-list-card__floors td:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.zone-list-card__floors td:first-child {
+  color: #8ba3bb;
+  font-weight: normal;
+}

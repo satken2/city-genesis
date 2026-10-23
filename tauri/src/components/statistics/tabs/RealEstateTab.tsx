@@ -60,6 +60,24 @@ type RealEstateStats = {
 
 const CHART_MARGIN = { top: 10, right: 15, left: -5, bottom: 5 };
 
+/** i18n key for a floor type name (space_type_name) returned by the real estate API. */
+export function spaceTypeLabelKey(name: string): string {
+  switch (name) {
+    case "residence":
+      return "display.subSpaceResidence";
+    case "retail":
+      return "display.subSpaceRetail";
+    case "factory":
+      return "display.subSpaceFactory";
+    case "office":
+      return "display.subSpaceOffice";
+    case "farm":
+      return "display.subSpaceFarm";
+    default:
+      return "display.subSpaceOther";
+  }
+}
+
 export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const remPx = useRemPx();
@@ -91,23 +109,6 @@ export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       </div>
     );
   }
-
-  const getSpaceTypeName = (name: string) => {
-    switch (name) {
-      case "residence":
-        return t("display.subSpaceResidence");
-      case "retail":
-        return t("display.subSpaceRetail");
-      case "factory":
-        return t("display.subSpaceFactory");
-      case "office":
-        return t("display.subSpaceOffice");
-      case "farm":
-        return t("display.subSpaceFarm");
-      default:
-        return t("display.subSpaceOther");
-    }
-  };
 
   return (
     <div className="realestate-tab">
@@ -160,7 +161,7 @@ export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     const vacPercent = floor.vacancy_rate * 100;
                     return (
                       <tr key={floor.space_type}>
-                        <td className="font-semibold">{getSpaceTypeName(floor.space_type_name)}</td>
+                        <td className="font-semibold">{t(spaceTypeLabelKey(floor.space_type_name))}</td>
                         <td className="text-right">
                           {floor.capacity.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ㎡
                         </td>
