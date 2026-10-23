@@ -6,10 +6,12 @@
  * Use the record's backend-computed connections (pairs reachable without sharp turns) directly.
  */
 
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { PATH_MOTORWAY, PATH_STREET } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { InterchangeArmDetail } from "../../types";
+import { hasRoad, roadDisplayName } from "../road/roadApi";
 import "./InterchangeConnectionDiagram.css";
 
 /** Road box height and spacing, and arrow band width (px). Arrow coordinates derive from these values, so these also define box dimensions. */
@@ -29,6 +31,9 @@ const ARROW_HALF_WIDTH = 4;
 const ARM_COLORS = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"];
 const FOLD_COLOR = "#8c99a8";
 
+/** 8-point directions clockwise from north, in steps of 45 degrees. */
+const DIRECTION_KEYS = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
+
 type InterchangeConnectionDiagramProps = {
   arms: InterchangeArmDetail[];
   connections: [number, number][];
@@ -40,6 +45,10 @@ function typeRank(arm: InterchangeArmDetail): number {
   if (arm.path_type === PATH_MOTORWAY) return 0;
   if (arm.path_type === PATH_STREET) return 1;
   return 2;
+}
+
+function directionLabel(bearingDeg: number, t: TFunction): string {
+  return t(`interchange.connections.direction.${DIRECTION_KEYS[Math.round(bearingDeg / 45) % DIRECTION_KEYS.length]}`);
 }
 
 function rowCenter(row: number): number {
@@ -90,14 +99,21 @@ export function InterchangeConnectionDiagram({ arms, connections }: InterchangeC
   const endY = portYs(links, (link) => link.to, (link) => link.from);
 
   const colorOf = (row: number) => ARM_COLORS[row] ?? FOLD_COLOR;
+  // Road name first, then section name, then type and ID, matching the crossing labels of the road strip map.
   const labelOf = (arm: InterchangeArmDetail) => {
+    if (hasRoad(arm.road_id)) return roadDisplayName(arm.road_name, arm.road_id, t);
+    if (arm.path_name !== "") return arm.path_name;
     const typeName = arm.path_type != null ? masterData?.path_types[arm.path_type]?.display_name : undefined;
     return typeName
       ? t("interchange.connections.road", { type: typeName, id: arm.path_id })
       : t("path.titleWithId", { id: arm.path_id });
   };
-  // Show districts only for streets. Leave highways blank even if they have a district.
-  const zoneOf = (arm: InterchangeArmDetail) => (arm.path_type === PATH_STREET ? arm.zone_name ?? "" : "");
+  // The side of the interchange the road leaves from, plus the district for streets only (highways omit it even if they have one).
+  const sideOf = (arm: InterchangeArmDetail) => {
+    const direction = arm.bearing_deg != null ? directionLabel(arm.bearing_deg, t) : "";
+    const zone = arm.path_type === PATH_STREET ? arm.zone_name ?? "" : "";
+    return direction && zone ? t("interchange.connections.sideZone", { direction, zone }) : direction || zone;
+  };
 
   const height = rows.length * ROW_HEIGHT + Math.max(rows.length - 1, 0) * ROW_GAP;
   const x0 = 2;
@@ -114,7 +130,7 @@ export function InterchangeConnectionDiagram({ arms, connections }: InterchangeC
           style={{ height: ROW_HEIGHT, boxShadow: withColor ? `inset 3px 0 0 ${colorOf(row)}` : undefined }}
         >
           <span className="ic-conn__road-name">{labelOf(arm)}</span>
-          <span className="ic-conn__road-zone">{zoneOf(arm)}</span>
+          <span className="ic-conn__road-side">{sideOf(arm)}</span>
         </div>
       ))}
     </div>

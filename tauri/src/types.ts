@@ -309,9 +309,16 @@ export type InterchangeArmDetail = {
   path_id: number;
   /** Arm road type (PATH_STREET / PATH_MOTORWAY). null if the road is not found. */
   path_type: number | null;
+  /** Section name of the arm path. Empty if unnamed. */
+  path_name: string;
+  /** Road the arm path belongs to. VALUE_NONE if none. */
+  road_id: number;
+  road_name: string;
   zone_id: number;
   /** Containing district name. null if not in a district. */
   zone_name: string | null;
+  /** Bearing from the interchange center to the portal node (clockwise degrees from north = +Z). null if the node is not found. */
+  bearing_deg: number | null;
 };
 
 /** GET /api/v1/interchanges/ response. version increments whenever list contents change. */

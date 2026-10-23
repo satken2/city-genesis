@@ -12,7 +12,18 @@
       "from": "Desde",
       "to": "Hacia",
       "road": "{{type}} #{{id}}",
-      "none": "No hay pares de vías conectadas."
+      "none": "No hay pares de vías conectadas.",
+      "direction": {
+        "n": "Norte",
+        "ne": "Noreste",
+        "e": "Este",
+        "se": "Sureste",
+        "s": "Sur",
+        "sw": "Suroeste",
+        "w": "Oeste",
+        "nw": "Noroeste"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
     }
   }
 }

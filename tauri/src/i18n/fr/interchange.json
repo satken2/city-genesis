@@ -12,7 +12,18 @@
       "from": "Depuis",
       "to": "Vers",
       "road": "{{type}} #{{id}}",
-      "none": "Aucune paire de routes reliées."
+      "none": "Aucune paire de routes reliées.",
+      "direction": {
+        "n": "Nord",
+        "ne": "Nord-est",
+        "e": "Est",
+        "se": "Sud-est",
+        "s": "Sud",
+        "sw": "Sud-ouest",
+        "w": "Ouest",
+        "nw": "Nord-ouest"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
     }
   }
 }

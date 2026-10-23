@@ -12,7 +12,18 @@
       "from": "From",
       "to": "To",
       "road": "{{type}} #{{id}}",
-      "none": "No connected road pairs."
+      "none": "No connected road pairs.",
+      "direction": {
+        "n": "North",
+        "ne": "Northeast",
+        "e": "East",
+        "se": "Southeast",
+        "s": "South",
+        "sw": "Southwest",
+        "w": "West",
+        "nw": "Northwest"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
     }
   }
 }
