@@ -13,6 +13,14 @@ public static class PropRenderPolicy
         ? distance >= MaxDistance(type) * (previous == DrawLod.Hidden ? .9f : 1f)
         : DrawLodEvaluator.PropHiddenByDistance(distance, previous);
 
+    /// <summary>Whether props whose bounds are this far from the camera cast shadows: everything the sun's shadow maps reach, at every render LOD.</summary>
+    public static bool WithinShadowDistance(Bounds bounds, Vector3 camera)
+    {
+        var asset = UnityEngine.Rendering.Universal.UniversalRenderPipeline.asset;
+        float distance = asset != null ? asset.shadowDistance : 0f;
+        return bounds.SqrDistance(camera) < distance * distance;
+    }
+
     // Divide by an upper bound on circle-intersecting patches to prevent grass replacement as movement changes allocations.
     public static int DetailQuota(float chunkSize)
     {

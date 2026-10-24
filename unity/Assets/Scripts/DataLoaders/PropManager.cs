@@ -122,7 +122,7 @@ public class PropManager : BaseApiDataManager
         public Matrix4x4[] matrices;
         public Bounds bounds;
         public bool shadows;
-        public bool shadowEligible; // Whether this type/LOD casts shadows. Retained so camera movement updates only shadow distance checks
+        public bool shadowEligible; // Whether this type casts shadows. Retained so camera movement updates only shadow distance checks
     }
     private sealed class Chunk
     {
@@ -192,7 +192,6 @@ public class PropManager : BaseApiDataManager
     public int SubmittedForestBatches { get; private set; }
     /// <summary>Resident candidate points hidden by camera distance (for statistics).</summary>
     public int DistanceHiddenCount { get { int n = 0; foreach (var chunk in chunks.Values) n += chunk.hiddenCount; return n; } }
-    public const int ShadowInstanceBudget = 4096;
     public int LastRegeneratedChunks { get; private set; }
     public int LastExclusionUpdatedChunks { get; private set; }
     private float ChunkSize => TerrainManager.CellSize / Mathf.Max(1, subdivisions);
@@ -896,7 +895,7 @@ public class PropManager : BaseApiDataManager
         if (!structural && !changed)
         {
             if (!committable) yield break;
-            foreach (var batch in chunk.batches) batch.shadows = batch.shadowEligible && Vector3.Distance(batch.bounds.center, cameraPosition) < 150f;
+            foreach (var batch in chunk.batches) batch.shadows = batch.shadowEligible && PropRenderPolicy.WithinShadowDistance(batch.bounds, cameraPosition);
             chunk.far = far; chunk.hidden = beyond; chunk.hiddenCount = hiddenCount;
             chunk.lastCamera = cameraPosition; chunk.lastProjection = projection;
             yield break;
@@ -920,7 +919,7 @@ public class PropManager : BaseApiDataManager
             var transforms = groupScratch[key];
             var model = Model(key.Item1);
             var parts = key.Item3 ? model.distant : key.Item2 == DrawLod.Far ? model.far : key.Item2 == DrawLod.Close ? model.close : model.normal;
-            bool shadowEligible = !PropRenderPolicy.NearOnly(key.Item1) && key.Item2 != DrawLod.Far;
+            bool shadowEligible = !PropRenderPolicy.NearOnly(key.Item1);
             foreach (var part in parts)
                 for (int start = 0; start < transforms.Count; start += BatchSize)
                 {
@@ -934,7 +933,7 @@ public class PropManager : BaseApiDataManager
                         if (i == 0) bounds = b; else bounds.Encapsulate(b);
                     }
                     batchScratch.Add(new DrawBatch { part = part, matrices = matrices, bounds = bounds, shadowEligible = shadowEligible,
-                        shadows = shadowEligible && Vector3.Distance(bounds.center, cameraPosition) < 150f });
+                        shadows = shadowEligible && PropRenderPolicy.WithinShadowDistance(bounds, cameraPosition) });
                     if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                     { yield return RenderWorkScheduler.Continue; timer.Restart(); if (serial != generation) yield break; }
                 }
@@ -1026,21 +1025,22 @@ public class PropManager : BaseApiDataManager
             forestOverview.UpdateDetail(forestReadyRects, ChunkSize);
         }
         GeometryUtility.CalculateFrustumPlanes(cam, planes);
+        int shadowInstances = 0;
         foreach (var chunk in chunks.Values) foreach (var batch in chunk.batches)
         {
-            if (chunk.offset != Offset || !GeometryUtility.TestPlanesAABB(planes, batch.bounds)) continue;
-            bool shadows = batch.shadows && SubmittedShadowInstances + batch.matrices.Length <= ShadowInstanceBudget;
-            if (shadows) SubmittedShadowInstances += batch.matrices.Length;
+            // Submit off-view batches that cast shadows too: Unity culls them from the view by worldBounds, and their shadows still reach into it.
+            bool shadows = GraphicsConfig.PropShadows && batch.shadows;
+            if (chunk.offset != Offset || !shadows && !GeometryUtility.TestPlanesAABB(planes, batch.bounds)) continue;
+            if (shadows) shadowInstances += batch.matrices.Length;
             var parameters = new RenderParams(UndergroundMaterials.ForSurface(batch.part.material)) { worldBounds = batch.bounds, camera = cam,
                 shadowCastingMode = shadows ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off,
                 receiveShadows = true };
             Graphics.RenderMeshInstanced(parameters, batch.part.mesh, batch.part.submesh, batch.matrices);
             SubmittedBatchCount++; SubmittedInstanceCount += batch.matrices.Length;
         }
-        int shadowBudget = ShadowInstanceBudget - SubmittedShadowInstances;
         foreach (var chunk in chunks.Values) foreach (var patch in chunk.forests)
-            SubmittedForestBatches += forestRenderer.Draw(patch, cam, planes, ref shadowBudget);
-        SubmittedShadowInstances = ShadowInstanceBudget - shadowBudget;
+            SubmittedForestBatches += forestRenderer.Draw(patch, cam, planes, GraphicsConfig.PropShadows, ref shadowInstances);
+        SubmittedShadowInstances = shadowInstances;
     }
     public IEnumerator AdjustPropHeightsForCellsCoroutine(List<Vector2Int> cells)
     {

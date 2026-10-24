@@ -48,6 +48,7 @@ public sealed class WeatherController : MonoBehaviour
     private ReflectionProbe reflection;
     private WeatherPrecipitation precipitation;
 
+    private const float GroundAlbedo = 0.2f; // Typical reflectance of streets and vegetation.
     private static readonly int SunScatterId = Shader.PropertyToID("_SunScatterFraction");
     private static readonly Color LowSunZenith = Hex("696E9B"), LowSunHorizon = Hex("ECA68D"), LowSunLight = Hex("FFA477"), LowSunCloud = Hex("EDB7AB");
     private static readonly Color NightZenith = Hex("05070D"), NightHorizon = Hex("0B1019"), NightCloud = Hex("0C1018");
@@ -115,7 +116,6 @@ public sealed class WeatherController : MonoBehaviour
         RenderSettings.ambientMode = AmbientMode.Custom;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Linear;
-        sun.shadows = LightShadows.Soft;
         sun.useColorTemperature = false;
         sunData.lightCookieSize = new Vector2(2600, 2600);
         // If Realtime Reflection Probes is disabled in quality settings, this probe is unused,
@@ -405,6 +405,8 @@ public sealed class WeatherController : MonoBehaviour
         sun.transform.rotation = Quaternion.Euler(Mathf.Max(elevation, 2f), Clock.Azimuth + 180f, 0f);
         sun.color = sunlight;
         sun.intensity = look.Intensity * lowSun * daylight;
+        var shadows = !GraphicsConfig.SunShadows ? LightShadows.None : GraphicsConfig.SoftShadows ? LightShadows.Soft : LightShadows.Hard;
+        if (sun.shadows != shadows) sun.shadows = shadows;
         sun.shadowStrength = look.Shadow * daylight;
         // Shadow strength is the fraction of sunlight arriving as a point source; clouds diffuse the rest, which water does not reflect sharply.
         Shader.SetGlobalFloat(SunScatterId, 1f - look.Shadow);
@@ -420,9 +422,16 @@ public sealed class WeatherController : MonoBehaviour
         RenderSettings.ambientEquatorColor = horizon * 0.48f;
         RenderSettings.ambientGroundColor = horizon * 0.22f;
         // Explicitly provide SH for URP dynamic meshes to reflect overcast diffuse lighting without waiting for a sky rebake.
+        // Skylight comes from the upper hemisphere and the ground returns only skylight from below: ambient light shows only in shadow,
+        // where the surrounding ground is shaded too. A hemisphere of value S on upward faces evaluates to S(1+n.y)/2, which SH L0 and L1y represent exactly.
+        Color skylight = horizon.linear * Mathf.Lerp(0.28f, 0.48f, look.Coverage) + zenith.linear * 0.12f;
+        Color bounce = skylight * GroundAlbedo;
         var ambient = new SphericalHarmonicsL2();
-        ambient.AddAmbientLight(horizon.linear * Mathf.Lerp(0.28f, 0.48f, look.Coverage));
-        ambient.AddDirectionalLight(Vector3.up, zenith.linear, 0.12f);
+        for (int c = 0; c < 3; c++)
+        {
+            ambient[c, 0] = (skylight[c] + bounce[c]) * 0.5f;
+            ambient[c, 1] = (skylight[c] - bounce[c]) * 0.5f;
+        }
         RenderSettings.ambientProbe = ambient;
         RenderSettings.fogColor = horizon;
         RenderSettings.fogStartDistance = Mathf.Lerp(1000, 60, look.Haze);
@@ -564,7 +573,6 @@ public sealed class WeatherController : MonoBehaviour
         RenderSettings.ambientMode = AmbientMode.Custom;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Linear;
-        sun.shadows = LightShadows.Soft;
         sun.useColorTemperature = false;
         sunData.lightCookieSize = new Vector2(2600, 2600);
         sun.cookie = cookie;

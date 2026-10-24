@@ -26,7 +26,7 @@ public sealed class WeatherPreset
 
     public static readonly System.Collections.Generic.IReadOnlyList<WeatherPreset> All = System.Array.AsReadOnly(new[]
     {
-        new WeatherPreset("clear", "快晴 / Clear", 0, 0, "2872BC", "C5DDEC", "FFF3DE", "FFFFFF", 1.35f, 0.03f, 0.25f, 0.10f, 0.85f, 300),
+        new WeatherPreset("clear", "快晴 / Clear", 0, 0, "2872BC", "C5DDEC", "FFF3DE", "FFFFFF", 1.35f, 0.03f, 0.25f, 0.10f, 1.00f, 300),
         new WeatherPreset("high_clouds", "薄雲 / High clouds", 0, 0, "4284C1", "D5DFE8", "FFF0D9", "FFF9EE", 1.15f, 0.30f, 0.22f, 0.18f, 0.70f, 200),
         new WeatherPreset("fair", "晴れ / Fair", 0, 0, "327BB8", "CCDCE5", "FFF1D8", "FFFAF1", 1.30f, 0.48f, 0.75f, 0.15f, 0.80f, 240),
         new WeatherPreset("broken_clouds", "晴れ間 / Broken clouds", 0, 0, "4A7EAA", "C7D4DD", "FFE8CA", "F7F3EA", 1.12f, 0.66f, 0.85f, 0.26f, 0.65f, 180),

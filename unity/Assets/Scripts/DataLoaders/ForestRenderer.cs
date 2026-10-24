@@ -163,9 +163,13 @@ public sealed class ForestRenderer : IDisposable
         return material;
     }
 
-    public int Draw(Patch p, Camera camera, Plane[] planes, ref int shadowBudget)
+    /// <summary>Submit one patch. castShadows enables shadows within the shadow distance; shadowInstances accumulates instances submitted with shadows.</summary>
+    public int Draw(Patch p, Camera camera, Plane[] planes, bool castShadows, ref int shadowInstances)
     {
-        if (!p.ready || p.hidden || !GeometryUtility.TestPlanesAABB(planes, p.bounds)) return 0;
+        if (!p.ready || p.hidden) return 0;
+        // Off-view patches that cast shadows are submitted too; Unity culls them from the view by worldBounds.
+        bool shadows = castShadows && PropRenderPolicy.WithinShadowDistance(p.bounds, camera.transform.position);
+        if (!shadows && !GeometryUtility.TestPlanesAABB(planes, p.bounds)) return 0;
         float nearest = Mathf.Sqrt(p.bounds.SqrDistance(camera.transform.position));
         if (nearest > DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE + p.model.Radius) return 0;
         var properties = p.properties;
@@ -177,18 +181,17 @@ public sealed class ForestRenderer : IDisposable
         int draws = 0;
         // Near and Far use the same fixed random values when switching, avoiding duplicate rendering or boundary bands.
         if (nearest < DetailDistance + TransitionWidth * .5f)
-            draws += DrawParts(p, p.model.normal, camera, 0, ref shadowBudget);
-        draws += DrawParts(p, p.model.far, camera, 1, ref shadowBudget);
+            draws += DrawParts(p, p.model.normal, camera, 0, shadows, ref shadowInstances);
+        draws += DrawParts(p, p.model.far, camera, 1, shadows, ref shadowInstances);
         return draws;
     }
 
-    int DrawParts(Patch p, List<PropRenderModel.Part> parts, Camera camera, int lod, ref int shadowBudget)
+    int DrawParts(Patch p, List<PropRenderModel.Part> parts, Camera camera, int lod, bool shadows, ref int shadowInstances)
     {
         int draws = 0;
         foreach (var part in parts)
         {
-            bool shadows = lod == 0 && shadowBudget >= p.count;
-            if (shadows) shadowBudget -= p.count;
+            if (shadows) shadowInstances += p.count;
             p.properties.SetInt("_ForestLod", lod);
             p.properties.SetMatrix("_PartLocal", part.local);
             p.properties.SetMatrix("_PartNormal", part.local.inverse.transpose);
