@@ -2,7 +2,11 @@
   "publicFacilities": {
     "productionCapacity": "Capacité de production",
     "balance": "Solde",
-    "utilizationRate": "Utilisation"
+    "utilizationRate": "Utilisation",
+    "logisticsTab": "Logistique",
+    "hubs": "Plateformes d’import-export",
+    "stations": "Gares et terminaux de fret",
+    "routes": "Lignes"
   },
   "publicServicePrices": {
     "priceMode": "Mode de tarification",

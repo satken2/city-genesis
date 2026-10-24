@@ -1,7 +1,8 @@
 /**
  * Public service window component
  *
- * One tab per public service (products whose public_service is true in products_master).
+ * One tab per public service (products whose public_service is true in products_master), followed by the
+ * logistics tab (LogisticsPane: trade hubs, freight stations and freight routes).
  *
  * Each tab has two columns:
  * - Top left: public service price controls, including method (fixed price / cost ratio), value
@@ -34,7 +35,11 @@ import { InfraMapLegend } from "../map/InfraMapLegend";
 import { PublicServiceTrendChart } from "./PublicServiceTrendChart";
 import type { PublicServiceHistoryData, PublicServiceProductHistory } from "./publicServiceTrend";
 import { getPublicServiceFacilities, getPublicServiceInfrastructure } from "./publicServiceInfrastructure";
+import { LogisticsPane } from "./LogisticsPane";
 import "./PublicFacilitiesWindow.css";
+
+/** Tab key of the logistics tab, placed after the public service tabs (product ID strings never collide with it). */
+const LOGISTICS_TAB = "logistics";
 
 type PublicServicePricesData = {
   prices: PublicServicePrice[];
@@ -475,57 +480,68 @@ export function PublicFacilitiesWindow({
             {product.display_name}
           </button>
         ))}
+        <button
+          type="button"
+          className={["pf-tabs__tab", activeTab === LOGISTICS_TAB && "pf-tabs__tab--active"].filter(Boolean).join(" ")}
+          onClick={() => setActiveTab(LOGISTICS_TAB)}
+        >
+          {t("publicFacilities.logisticsTab")}
+        </button>
       </nav>
 
-      <div className="pf-window__content">
-        <div className="pf-window__left">
-          {activeProduct && (
-            <div className="pf-window__service">
-              <ServicePriceCard
-                product={activeProduct}
-                row={servicePrices[activeProduct.id]}
-                supply={serviceSupplies[activeProduct.id]}
-                infrastructureCapacity={infrastructureCapacity}
-                capacityLabel={infrastructure ? t(`publicServiceTrend.${infrastructure.capacityLabel}`) : undefined}
-                epochs={marketHistory.data?.epochs ?? []}
-                history={marketHistory.data?.products.find((row) => row.product_id === activeProduct.id)}
-                currentEpoch={marketHistory.data?.epoch ?? 0}
-                simulationDays={simulationDays}
-                draft={valueDrafts[activeProduct.id]}
-                onDraftChange={(value) =>
-                  setValueDrafts((prev) => ({ ...prev, [activeProduct.id]: value }))
-                }
-                onModeChange={(mode) => handleModeChange(activeProduct.id, mode)}
-                onCommit={() => handleValueCommit(activeProduct.id)}
+      {activeTab === LOGISTICS_TAB ? (
+        <LogisticsPane apiBaseUrl={apiBaseUrl} />
+      ) : (
+        <div className="pf-window__content">
+          <div className="pf-window__left">
+            {activeProduct && (
+              <div className="pf-window__service">
+                <ServicePriceCard
+                  product={activeProduct}
+                  row={servicePrices[activeProduct.id]}
+                  supply={serviceSupplies[activeProduct.id]}
+                  infrastructureCapacity={infrastructureCapacity}
+                  capacityLabel={infrastructure ? t(`publicServiceTrend.${infrastructure.capacityLabel}`) : undefined}
+                  epochs={marketHistory.data?.epochs ?? []}
+                  history={marketHistory.data?.products.find((row) => row.product_id === activeProduct.id)}
+                  currentEpoch={marketHistory.data?.epoch ?? 0}
+                  simulationDays={simulationDays}
+                  draft={valueDrafts[activeProduct.id]}
+                  onDraftChange={(value) =>
+                    setValueDrafts((prev) => ({ ...prev, [activeProduct.id]: value }))
+                  }
+                  onModeChange={(mode) => handleModeChange(activeProduct.id, mode)}
+                  onCommit={() => handleValueCommit(activeProduct.id)}
+                />
+              </div>
+            )}
+
+            <div className="pf-window__facilities">
+              <SortableAgentTable
+                columns={columns}
+                rows={activeFacilities}
+                emptyText={t("budget.noFacilities")}
               />
             </div>
-          )}
-
-          <div className="pf-window__facilities">
-            <SortableAgentTable
-              columns={columns}
-              rows={activeFacilities}
-              emptyText={t("budget.noFacilities")}
-            />
           </div>
-        </div>
 
-        <div className="pf-window__map-column">
-          <div className="pf-window__map">
-            <CityMapCanvas
-              apiBaseUrl={apiBaseUrl}
-              interactive
-              layers={MAP_LAYERS}
-              infraSelection={mapSelection}
-            />
-          </div>
-          {hasCoverage && mapSelection && (
-            <div className="pf-window__legend">
-              <InfraMapLegend selection={mapSelection} />
+          <div className="pf-window__map-column">
+            <div className="pf-window__map">
+              <CityMapCanvas
+                apiBaseUrl={apiBaseUrl}
+                interactive
+                layers={MAP_LAYERS}
+                infraSelection={mapSelection}
+              />
             </div>
-          )}
+            {hasCoverage && mapSelection && (
+              <div className="pf-window__legend">
+                <InfraMapLegend selection={mapSelection} />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

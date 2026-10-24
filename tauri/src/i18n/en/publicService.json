@@ -2,7 +2,11 @@
   "publicFacilities": {
     "productionCapacity": "Production capacity",
     "balance": "Balance",
-    "utilizationRate": "Utilization"
+    "utilizationRate": "Utilization",
+    "logisticsTab": "Logistics",
+    "hubs": "Trade hubs",
+    "stations": "Freight stations and terminals",
+    "routes": "Routes"
   },
   "publicServicePrices": {
     "priceMode": "Pricing",

@@ -2,7 +2,11 @@
   "publicFacilities": {
     "productionCapacity": "생산 용량",
     "balance": "수지",
-    "utilizationRate": "가동률"
+    "utilizationRate": "가동률",
+    "logisticsTab": "물류",
+    "hubs": "수출입 거점",
+    "stations": "화물역・기지",
+    "routes": "노선"
   },
   "publicServicePrices": {
     "priceMode": "가격 방식",

@@ -2,7 +2,11 @@
   "publicFacilities": {
     "productionCapacity": "生產容量",
     "balance": "收支",
-    "utilizationRate": "使用率"
+    "utilizationRate": "使用率",
+    "logisticsTab": "物流",
+    "hubs": "進出口據點",
+    "stations": "貨運站・基地",
+    "routes": "路線"
   },
   "publicServicePrices": {
     "priceMode": "定價方式",

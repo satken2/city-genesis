@@ -284,6 +284,23 @@
   min-width: 0;
 }
 
+/* ========== Logistics tab (LogisticsPane) ========== */
+
+.lg-pane__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+}
+
+.lg-pane__routes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  color: var(--flat-text-label);
+}
+
 @media (max-width: 760px) {
   .pf-window__content {
     display: flex;
