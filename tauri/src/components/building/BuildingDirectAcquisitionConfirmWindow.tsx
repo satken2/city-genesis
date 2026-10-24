@@ -1,14 +1,15 @@
 /**
- * Direct building placement land acquisition confirmation window
+ * Building placement land acquisition confirmation window
  *
- * Small window_type="building_direct_acquisition" popup. In direct placement, the construction
- * panel opens it when confirmation is clicked while overlapping private parcels
- * (preview-direct requires_acquisition=True). Acquisition details are in `params.extra.pendingAcquisition`.
+ * Small window_type="building_direct_acquisition" popup. The construction panel opens it when
+ * confirmation is clicked while direct placement overlaps private parcels (preview-direct
+ * requires_acquisition=True) or the selected parcel has a private building (preview
+ * requires_acquisition=True). Acquisition details are in `params.extra.pendingAcquisition`.
  *
  * Automatic city government acquisition/demolition of private land/buildings is irreversible,
  * so require confirmation before committing, as for district merging in ZoneMergeConfirmWindow.
  * OK emits the cross-window event "building_direct:acquisition_confirmed"; the construction
- * panel commits with consent (POST /buildings/direct + acknowledge_acquisition).
+ * panel commits with consent (POST /buildings/direct or POST /buildings + acknowledge_acquisition).
  *
  * Cancel/close emits nothing. The panel has no pending-confirmation state and retains its preview,
  * so no special Rust close handling is needed.
@@ -20,9 +21,9 @@ import { emit } from "@tauri-apps/api/event";
 
 import "./BuildingDirectAcquisitionConfirmWindow.css";
 
-/** Acquisition details passed from the construction panel's preview-direct result. */
+/** Acquisition details passed from the construction panel's preview result. */
 export type PendingDirectAcquisition = {
-  /** Number of overlapping private parcels. */
+  /** Number of private parcels to acquire. */
   blockingCount: number;
   /** Total estimated acquisition cost (residual building value + estimated demolition cost + land price). */
   estimatedCost: number;

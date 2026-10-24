@@ -170,6 +170,20 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     count: number;
     estimatedCost: number;
   } | null>(null);
+  // Site check for parcel-based placement, including copy construction (preview site_invalid_reason).
+  // A private parcel with a building can be confirmed with consent to acquisition (siteAcquisition non-null);
+  // other reasons block confirmation. New construction only; edits keep their own site.
+  const [siteInvalidReason, setSiteInvalidReason] = useState<string | null>(null);
+  const [siteAcquisition, setSiteAcquisition] = useState<{
+    count: number;
+    estimatedCost: number;
+  } | null>(null);
+  /** Direct placement remains active before fixing a point, allowing numeric editing during position selection. */
+  const isDirectMode = editAgentId == null && placementMode !== "parcel";
+  // Acquisition the current placement requires (direct placement or the selected parcel).
+  const pendingAcquisition = isDirectMode ? directAcquisition : siteAcquisition;
+  const requiresAcquisition = isDirectMode ? directRequiresAcquisition : siteAcquisition !== null;
+  const siteBlocked = siteInvalidReason !== null && siteAcquisition === null;
   const [buildingPreview, setBuildingPreview] = useState<BuildingPreviewData | null>(null);
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   // Standard cost on perfectly flat terrain (zero slope), used to show estimated cost as a multiple of standard cost.
@@ -182,9 +196,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   const [expectedDurationDays, setExpectedDurationDays] = useState<number | null>(null);
   // City funds available for orders (cash minus savings target minus existing commitments), used to preview the funding check.
   const [availableFunds, setAvailableFunds] = useState<number | null>(null);
-  // Total required for funding check = construction cost plus direct-placement land acquisition estimate (automatic private-parcel acquisition is also city spending).
+  // Total required for funding check = construction cost plus land acquisition estimate (automatic private-parcel acquisition is also city spending).
   const requiredTotal =
-    estimatedCost == null ? null : estimatedCost + (directAcquisition?.estimatedCost ?? 0);
+    estimatedCost == null ? null : estimatedCost + (pendingAcquisition?.estimatedCost ?? 0);
   const isAffordable = isConstructionAffordable(requiredTotal, availableFunds);
   // Returned only for TYPE_STANDARD (ordinary facilities): estimated production, employment, and operating costs at full operation, all per simulation_days.
   const [estimatedMaxProduction, setEstimatedMaxProduction] = useState<number | null>(null);
@@ -446,8 +460,6 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     return masterData.landmarks?.[landmark] ?? null;
   }, [landmark, masterData]);
 
-  /** Direct placement remains active before fixing a point, allowing numeric editing during position selection. */
-  const isDirectMode = editAgentId == null && placementMode !== "parcel";
   const directRequestKey = JSON.stringify([selectedVariant, placementRevision, pickedPosition, rectWidth, rectDepth, rectAngle, floors, landmark]);
   const directPreviewReady = pickedPosition !== null && validatedDirectKey === directRequestKey && !placementCommandPending;
   /** Whether copy construction mode is active (copies an existing building's actual footprint unchanged). */
@@ -504,7 +516,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         ? { copy_source_agent_id: copySrc, parcel_id: pId, floors: f }
         : { variant, parcel_id: pId, floors: f, coverage_ratio: cr, ...(lm != null ? { landmark: lm } : {}) };
       try {
-        const data = await fetchApi<BuildingPreviewData & { valid?: boolean; invalid_reason?: string | null }>(url, {
+        const data = await fetchApi<BuildingPreviewData & {
+          valid?: boolean;
+          invalid_reason?: string | null;
+          site_invalid_reason?: string | null;
+          requires_acquisition?: boolean;
+          acquisition?: { count: number; estimated_cost: number } | null;
+        }>(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...body, ...(editAgentId != null ? { exclude_agent_id: editAgentId } : {}) }),
@@ -516,6 +534,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           if (copySrc != null) {
             setCopyValid(data.valid ?? false);
             setCopyInvalidReason(data.invalid_reason ?? null);
+          }
+          if (editAgentId == null) {
+            setSiteInvalidReason(data.site_invalid_reason ?? null);
+            setSiteAcquisition(
+              data.requires_acquisition === true && data.acquisition
+                ? { count: data.acquisition.count, estimatedCost: data.acquisition.estimated_cost }
+                : null,
+            );
           }
           // Send backend shape data to Unity to display the 3D preview.
           sendEditBuildingUpdateShape(
@@ -539,6 +565,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   );
 
   /* ---- Refetch preview when the variant, parcel, or floor count changes ---- */
+
+  // Clear the site check until the new parcel's preview arrives, so an old parcel's acquisition is never committed.
+  useEffect(() => {
+    setSiteInvalidReason(null);
+    setSiteAcquisition(null);
+  }, [parcelId]);
 
   useEffect(() => {
     if (selectedVariant === null || parcelId === null) return;
@@ -1366,8 +1398,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   /**
  * Parcel-mode construction confirmation handler. UI sends directly to the backend, matching
  * road construction responsibilities: POST /buildings for new buildings, PATCH /agents/{id} for edits.
+ *
+ * Pass acknowledgeAcquisition=true only after the player consents in the confirmation window
+ * to acquiring a private parcel with a building; the backend rejects that parcel without consent.
  */
-  async function handleParcelConfirm() {
+  async function handleParcelConfirm(acknowledgeAcquisition = false) {
     if (selectedVariant === null || parcelId === null || selectedVariantData === null) return;
     const baseUrl = apiBaseUrl.replace(/\/+$/, "");
     try {
@@ -1392,6 +1427,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
             construction_ratio: coverageRatio,
             floors,
             ...(landmark != null ? { landmark } : {}),
+            ...(acknowledgeAcquisition ? { acknowledge_acquisition: true } : {}),
             // Copy mode retains the original actual footprint and discounts faithful copies.
             ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
             ...(projectTag ? { tag: projectTag } : {}),
@@ -1456,20 +1492,23 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
 
   // Ref for calling the latest confirmation handler from the confirmation window's OK subscription.
   // Even with a persistent listen useEffect subscription, confirmation always uses the latest state.
-  const directConfirmRef = useRef<(acknowledge: boolean) => Promise<void>>();
-  directConfirmRef.current = handleDirectConfirm;
+  const acquisitionConfirmRef = useRef<() => Promise<void>>();
+  acquisitionConfirmRef.current = async () => {
+    if (!requiresAcquisition) return;
+    await (isDirectMode ? handleDirectConfirm(true) : handleParcelConfirm(true));
+  };
 
   /* ---- Cross-window event: acquisition confirmation window OK ---- */
 
   /**
  * Fired when the player clicks "Acquire and build" in BuildingDirectAcquisitionConfirmWindow.
- * Commit with consent only if direct placement remains active and the acquisition-required
- * preview is still valid.
+ * Commit with consent only while the current placement (direct placement or the selected parcel)
+ * still requires acquisition.
  */
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     listen(EVENT_ACQUISITION_CONFIRMED, () => {
-      void directConfirmRef.current?.(true);
+      void acquisitionConfirmRef.current?.();
     })
       .then((fn) => { unlisten = fn; })
       .catch(console.error);
@@ -1788,6 +1827,22 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                           {t("building_construction.parcelTypeRequired", { type: requiredParcelTypeName })}
                         </div>
                       )}
+                      {siteAcquisition !== null ? (
+                        // A private building stands on the parcel. The confirmation button opens the acquisition window.
+                        <div className="bc-description-text bc-direct-acquisition">
+                          {t("building_construction.directAcquisitionRequired", { count: siteAcquisition.count })}
+                          <br />
+                          {t("building_construction.directAcquisitionCost", {
+                            cost: Math.round(siteAcquisition.estimatedCost).toLocaleString(),
+                          })}
+                        </div>
+                      ) : siteInvalidReason !== null && (
+                        <div className="bc-description-text bc-direct-invalid">
+                          {t(`building_construction.directInvalid.${siteInvalidReason}`, {
+                            defaultValue: t("building_construction.directInvalid.generic"),
+                          })}
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -2001,6 +2056,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
               // Confirmation requires a selected parcel in parcel mode, or directValid in direct mode, or
               // an overlap resolvable through automatic private-parcel acquisition (directRequiresAcquisition).
               // Copy mode requires a selected parcel and a fitting footprint (copyValid).
+              // Parcel and copy modes also stop on a site that acquisition cannot clear (siteBlocked).
               // Block confirmation if construction plus estimated acquisition cost exceeds available funds; the backend uses the same rule.
               // Also stop parcel type mismatches (e.g. offshore structures on land parcels), which the backend rejects.
               disabled={
@@ -2008,31 +2064,29 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                 || (isDirectMode
                   ? !directPreviewReady || !(directValid || directRequiresAcquisition)
                   : isCopyMode
-                    ? parcelId === null || !copyValid || parcelTypeMismatch
-                    : parcelId === null || parcelTypeMismatch)
+                    ? parcelId === null || !copyValid || parcelTypeMismatch || siteBlocked
+                    : parcelId === null || parcelTypeMismatch || siteBlocked)
               }
               type="button"
               data-guide="building.confirm"
               onClick={async () => {
-                if (isDirectMode) {
-                  if (directRequiresAcquisition) {
-                    // Positions requiring automatic private-parcel acquisition show confirmation before committing.
-                    // OK sends "building_direct:acquisition_confirmed",
-                    // which executes confirmation with consent (handleDirectConfirm(true)).
-                    void invoke("open_registered_window", {
-                      windowType: "building_direct_acquisition",
-                      params: {
-                        extra: {
-                          pendingAcquisition: {
-                            blockingCount: directAcquisition?.count ?? 0,
-                            estimatedCost: directAcquisition?.estimatedCost ?? 0,
-                          },
+                if (requiresAcquisition) {
+                  // Placements requiring automatic private-parcel acquisition show confirmation before committing.
+                  // OK sends "building_direct:acquisition_confirmed",
+                  // which executes confirmation with consent (acquisitionConfirmRef).
+                  void invoke("open_registered_window", {
+                    windowType: "building_direct_acquisition",
+                    params: {
+                      extra: {
+                        pendingAcquisition: {
+                          blockingCount: pendingAcquisition?.count ?? 0,
+                          estimatedCost: pendingAcquisition?.estimatedCost ?? 0,
                         },
                       },
-                    });
-                  } else {
-                    await handleDirectConfirm();
-                  }
+                    },
+                  });
+                } else if (isDirectMode) {
+                  await handleDirectConfirm();
                 } else {
                   await handleParcelConfirm();
                 }
