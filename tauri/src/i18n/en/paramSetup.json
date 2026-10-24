@@ -123,6 +123,10 @@
         "label": "Dividend Payout Ratio",
         "desc": "Fraction of corporate profit distributed to households as dividends."
       },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Dividend Wealth-Proportional Share",
+        "desc": "Share of dividends distributed in proportion to each household's cash savings. The rest is split equally among all households. 0 = all equal, 1 = all in proportion to savings."
+      },
       "MIN_PRODUCTION_LIMIT": {
         "label": "Minimum Production Ratio",
         "desc": "Minimum production as a ratio of total demand."

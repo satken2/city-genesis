@@ -123,6 +123,10 @@
         "label": "股利發放比率",
         "desc": "企業利潤中分配給家庭的比例。"
       },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "股利按資產比例分配比率",
+        "desc": "股利中按各家庭現金存款比例分配的比例。其餘部分平均分給所有家庭。0為全部平均，1為全部按現金存款比例。"
+      },
       "MIN_PRODUCTION_LIMIT": {
         "label": "最低產量比率",
         "desc": "相對於總需求的最低產量比例。"

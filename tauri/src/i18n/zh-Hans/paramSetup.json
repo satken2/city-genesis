@@ -123,6 +123,10 @@
         "label": "分红支付比率",
         "desc": "企业利润中分配给家庭的比例。"
       },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "分红按资产比例分配比率",
+        "desc": "分红中按各家庭现金存款比例分配的比例。其余部分平均分给所有家庭。0为全部平均，1为全部按现金存款比例。"
+      },
       "MIN_PRODUCTION_LIMIT": {
         "label": "最低产量比率",
         "desc": "相对于总需求的最低产量比例。"

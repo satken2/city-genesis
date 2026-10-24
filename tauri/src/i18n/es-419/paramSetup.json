@@ -123,6 +123,10 @@
         "label": "Proporción de reparto de dividendos",
         "desc": "Porción de las ganancias empresariales que se reparte a los hogares."
       },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Proporción de dividendos según el patrimonio",
+        "desc": "Parte de los dividendos que se reparte en proporción a los ahorros de cada hogar. El resto se divide en partes iguales entre todos los hogares. 0 = todo en partes iguales, 1 = todo según los ahorros."
+      },
       "MIN_PRODUCTION_LIMIT": {
         "label": "Proporción mínima de producción",
         "desc": "Proporción mínima de producción respecto a la demanda total."
