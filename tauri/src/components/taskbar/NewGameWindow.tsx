@@ -52,7 +52,7 @@ import { ScenarioOriginBadges } from "../common/ScenarioSource";
 import { SaveDialogButton } from "./SaveDialog";
 import { BackIcon, NewGameIcon, ScenarioIcon } from "./SaveIcons";
 import clearedBadgeImage from "../../assets/images/ui/badge.png";
-import splashImage from "../../assets/images/splash.png";
+import developmentNoticeImage from "../../assets/images/development_notice.jpg";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
 import { AssetPackEntry, CommonSaveEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
@@ -145,7 +145,7 @@ function startOptionValuesOf(scenario: ScenarioEntry | null): Record<Exclude<Sce
 
 /** Shown once the city appears after starting in normal play, because the economic balance is still being tuned. */
 const DEVELOPMENT_NOTICE: InfoDialogContent = {
-  image: splashImage,
+  image: developmentNoticeImage,
   headingKey: "newGame.developmentNotice.heading",
   subheadingKey: "newGame.developmentNotice.subheading",
   textKey: "newGame.developmentNotice.text",
