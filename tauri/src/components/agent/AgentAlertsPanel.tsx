@@ -25,6 +25,7 @@ import {
   ALERT_AGENT_MATERIAL_SHORTAGE,
   ALERT_AGENT_HIGH_SKILL_SHORTAGE,
   ALERT_AGENT_BUDGET_CAPPED,
+  ALERT_AGENT_CAPACITY_TIGHT,
   ALERT_DISPLAY_FACILITY_WARNING,
   ALERT_DISPLAY_SANITATION_WARNING,
   ALERT_DISPLAY_INFRA_WARNING,
@@ -34,6 +35,7 @@ import fireIcon from "../../assets/images/ui/agent_panel/fire.png";
 import facilityWarningIcon from "../../assets/images/alerts/bribery.png";
 import sanitationWarningIcon from "../../assets/images/alerts/sanitation.png";
 import infraWarningIcon from "../../assets/images/alerts/electricity.png";
+import capacityTightIcon from "../../assets/images/alerts/capacity-tight.svg";
 import "./AgentDetailPanel.css";
 
 type AlertCardDef = {
@@ -52,6 +54,7 @@ const ALERT_CARDS: AlertCardDef[] = [
   { bit: ALERT_AGENT_CRIME, icon: shortageIcon, key: "crime" },
   { bit: ALERT_AGENT_CRIME_SIGN, icon: shortageIcon, key: "crimeSign" },
   { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: shortageIcon, key: "infraDisconnected" },
+  { bit: ALERT_AGENT_CAPACITY_TIGHT, icon: capacityTightIcon, key: "capacityTight" },
   { bit: ALERT_AGENT_LABOR_SHORTAGE, icon: shortageIcon, key: "laborShortage" },
   { bit: ALERT_AGENT_MATERIAL_SHORTAGE, icon: shortageIcon, key: "materialShortage" },
   { bit: ALERT_AGENT_HIGH_SKILL_SHORTAGE, icon: shortageIcon, key: "highSkillShortage" },

@@ -89,6 +89,10 @@
         "title": "Not Connected to Infrastructure Network",
         "description": "No infrastructure path is connected to this facility's terminal. It cannot send or receive supplies until it is connected to the network."
       },
+      "capacityTight": {
+        "title": "Near Capacity",
+        "description": "This facility is handling 90% or more of its capacity. It can barely meet any more demand."
+      },
       "crime": {
         "title": "Crime Occurred",
         "description": "A crime has occurred at this building."

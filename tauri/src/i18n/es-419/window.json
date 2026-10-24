@@ -218,6 +218,7 @@
     "alertAgentOnFire": "Edificios en llamas",
     "alertAgentCrime": "Edificios afectados por delitos",
     "alertAgentInfraDisconnected": "Instalaciones sin conexión a la red de infraestructura",
+    "alertAgentCapacityTight": "Instalaciones que usan el 90 % o más de su capacidad",
     "alertPathConstructionShortage": "Calles detenidas por falta de fondos",
     "alertPathAccident": "Calles con accidentes de tránsito",
     "alertPathNoStationHouse": "Andenes sin estación asignada",

@@ -218,6 +218,7 @@
     "alertAgentOnFire": "Bâtiments en feu",
     "alertAgentCrime": "Bâtiments victimes d'un délit",
     "alertAgentInfraDisconnected": "Installations non raccordées au réseau d'infrastructure",
+    "alertAgentCapacityTight": "Installations utilisant 90 % ou plus de leur capacité",
     "alertPathConstructionShortage": "Routes à l'arrêt faute de financement",
     "alertPathAccident": "Routes touchées par un accident",
     "alertPathNoStationHouse": "Quais non rattachés à une gare",

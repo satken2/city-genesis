@@ -19,7 +19,7 @@ await build({
   entryNames: "[name]",
   outExtension: { ".js": ".mjs" },
   bundle: true, platform: "node", format: "esm", packages: "external",
-  loader: { ".css": "empty", ".png": "dataurl" },
+  loader: { ".css": "empty", ".png": "dataurl", ".svg": "dataurl" },
 });
 const load = name => import(new URL(`${name}.mjs`, directory).href);
 const { buildingWarningMask, fetchSpatialWarnings } = await load("agentAlerts");

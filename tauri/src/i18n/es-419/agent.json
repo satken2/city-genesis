@@ -89,6 +89,10 @@
         "title": "Sin conexión a la red de infraestructura",
         "description": "Ninguna vía de infraestructura llega a la terminal de esta instalación. No podrá enviar ni recibir suministros hasta conectarse a la red."
       },
+      "capacityTight": {
+        "title": "Cerca del límite de capacidad",
+        "description": "Esta instalación maneja el 90 % o más de su capacidad. Apenas puede atender más demanda."
+      },
       "crime": {
         "title": "Delito cometido",
         "description": "Se cometió un delito en este edificio."

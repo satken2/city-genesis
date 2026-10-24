@@ -394,6 +394,7 @@ public static class Constants
     public const int ALERT_AGENT_MATERIAL_SHORTAGE = 128;
     public const int ALERT_AGENT_HIGH_SKILL_SHORTAGE = 256;
     public const int ALERT_AGENT_BUDGET_CAPPED = 512;
+    public const int ALERT_AGENT_CAPACITY_TIGHT = 1024;
     public const int ALERT_PATH_CONSTRUCTION_SHORTAGE = 1;
     public const int ALERT_PATH_ACCIDENT = 2;
     public const int ALERT_PATH_NO_STATION_HOUSE = 4;
@@ -404,6 +405,7 @@ public static class Constants
     public const int ALERT_DISPLAY_SANITATION_WARNING = 524288;
     public const int ALERT_DISPLAY_INFRA_WARNING = 1048576;
     public const float ALERT_BUDGET_CAPPED_SCALE_THRESHOLD = 0.5f;
+    public const float ALERT_CAPACITY_TIGHT_RATIO = 0.9f;
     public const int PATH_EQUIPMENT_NONE = 0;
     public const int PATH_EQUIPMENT_STANDARD = 1;
     public const int PATH_UTILITY_NONE = 0;
@@ -482,7 +484,7 @@ public static class Constants
 
     public static readonly int[] ALERT_WARNING_DISPLAY_BITS = new int[] { ALERT_DISPLAY_RESOURCE_WARNING, ALERT_DISPLAY_FACILITY_WARNING, ALERT_DISPLAY_SANITATION_WARNING, ALERT_DISPLAY_INFRA_WARNING };
 
-    public static readonly int[] ALERT_AGENT_ICON_BITS = new int[] { ALERT_AGENT_CONSTRUCTION_SHORTAGE, ALERT_AGENT_CRIME, ALERT_AGENT_INFRA_DISCONNECTED };
+    public static readonly int[] ALERT_AGENT_ICON_BITS = new int[] { ALERT_AGENT_CONSTRUCTION_SHORTAGE, ALERT_AGENT_CRIME, ALERT_AGENT_INFRA_DISCONNECTED, ALERT_AGENT_CAPACITY_TIGHT };
 
     public static readonly int[] ALERT_AGENT_VFX_BITS = new int[] { ALERT_AGENT_ON_FIRE };
 

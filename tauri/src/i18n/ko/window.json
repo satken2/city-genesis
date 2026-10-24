@@ -218,6 +218,7 @@
     "alertAgentOnFire": "화재가 발생한 건물",
     "alertAgentCrime": "범죄가 발생한 건물",
     "alertAgentInfraDisconnected": "인프라망에 연결되지 않은 시설",
+    "alertAgentCapacityTight": "능력의 90% 이상을 쓰고 있는 시설",
     "alertPathConstructionShortage": "자금 부족으로 건설이 멈춘 도로",
     "alertPathAccident": "교통사고가 발생한 도로",
     "alertPathNoStationHouse": "역사에 속하지 않은 승강장",

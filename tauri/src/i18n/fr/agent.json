@@ -89,6 +89,10 @@
         "title": "Non raccordé au réseau d'infrastructure",
         "description": "Aucune voie d'infrastructure n'atteint la borne de cette installation. Elle ne peut ni fournir ni recevoir tant qu'elle n'est pas raccordée au réseau."
       },
+      "capacityTight": {
+        "title": "Proche de la capacité maximale",
+        "description": "Cette installation traite 90 % ou plus de sa capacité. Elle peut à peine absorber davantage de demande."
+      },
       "crime": {
         "title": "Délit commis",
         "description": "Un délit a été commis dans ce bâtiment."

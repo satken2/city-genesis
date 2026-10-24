@@ -25,7 +25,7 @@ const buildingModules = import.meta.glob<{ default: string }>(
 );
 
 const alertModules = import.meta.glob<{ default: string }>(
-  "../../assets/images/alerts/*.png",
+  "../../assets/images/alerts/*.{png,svg}",
   { eager: true },
 );
 

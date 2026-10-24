@@ -218,6 +218,7 @@
     "alertAgentOnFire": "發生火災的建築",
     "alertAgentCrime": "發生犯罪的建築",
     "alertAgentInfraDisconnected": "未接入基礎設施網路的設施",
+    "alertAgentCapacityTight": "已使用能力九成以上的設施",
     "alertPathConstructionShortage": "因資金不足而停工的道路",
     "alertPathAccident": "發生交通事故的道路",
     "alertPathNoStationHouse": "未歸屬站房的月台",
