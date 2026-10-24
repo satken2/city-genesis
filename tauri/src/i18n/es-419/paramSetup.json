@@ -204,10 +204,8 @@
         "desc": "Distancia máxima (en minutos) para buscar un centro educativo."
       },
       "BUILDING_FLOOR_LIMIT": {
-        "label": "Umbral de encarecimiento en altura (pisos)",
-        "desc": "A partir de este número de pisos el costo de construcción se dispara. Frena la construcción de rascacielos.",
-        "graphX": "Pisos",
-        "graphY": "Multiplicador del costo de construcción"
+        "label": "Pisos máximos (pisos)",
+        "desc": "Límite de pisos de los edificios que el sector privado construye automáticamente."
       },
       "FLOOR_PENALTY_FACTOR": {
         "label": "Coeficiente de penalización por altura",

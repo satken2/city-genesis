@@ -204,10 +204,8 @@
         "desc": "Maximum commuting distance (in minutes) when searching for a school."
       },
       "BUILDING_FLOOR_LIMIT": {
-        "label": "High-Rise Cost Surge Threshold (floors)",
-        "desc": "Construction costs rise sharply above this floor count. Limits skyscrapers.",
-        "graphX": "Floors",
-        "graphY": "Construction cost multiplier"
+        "label": "Maximum Floors (floors)",
+        "desc": "Upper limit on the number of floors of buildings built automatically by the private sector."
       },
       "FLOOR_PENALTY_FACTOR": {
         "label": "Floor Penalty Factor",

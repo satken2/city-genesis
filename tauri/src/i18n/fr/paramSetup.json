@@ -204,10 +204,8 @@
         "desc": "Distance maximale (en minutes) pour rechercher un établissement scolaire."
       },
       "BUILDING_FLOOR_LIMIT": {
-        "label": "Seuil d'envolée du coût en hauteur (étages)",
-        "desc": "Au-delà de ce nombre d'étages, le coût de construction s'envole. Cela freine la construction de gratte-ciel.",
-        "graphX": "Étages",
-        "graphY": "Multiplicateur du coût de construction"
+        "label": "Nombre maximal d'étages (étages)",
+        "desc": "Limite du nombre d'étages des bâtiments construits automatiquement par le secteur privé."
       },
       "FLOOR_PENALTY_FACTOR": {
         "label": "Coefficient de pénalité d'étage",
