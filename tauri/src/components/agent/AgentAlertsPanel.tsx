@@ -36,6 +36,7 @@ import facilityWarningIcon from "../../assets/images/alerts/bribery.png";
 import sanitationWarningIcon from "../../assets/images/alerts/sanitation.png";
 import infraWarningIcon from "../../assets/images/alerts/electricity.png";
 import capacityTightIcon from "../../assets/images/alerts/capacity-tight.svg";
+import infraDisconnectedIcon from "../../assets/images/alerts/infra-disconnected.svg";
 import "./AgentDetailPanel.css";
 
 type AlertCardDef = {
@@ -53,7 +54,7 @@ const ALERT_CARDS: AlertCardDef[] = [
   { bit: ALERT_AGENT_ACCIDENTAL_FIRE, icon: fireIcon, key: "accidentalFire" },
   { bit: ALERT_AGENT_CRIME, icon: shortageIcon, key: "crime" },
   { bit: ALERT_AGENT_CRIME_SIGN, icon: shortageIcon, key: "crimeSign" },
-  { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: shortageIcon, key: "infraDisconnected" },
+  { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: infraDisconnectedIcon, key: "infraDisconnected" },
   { bit: ALERT_AGENT_CAPACITY_TIGHT, icon: capacityTightIcon, key: "capacityTight" },
   { bit: ALERT_AGENT_LABOR_SHORTAGE, icon: shortageIcon, key: "laborShortage" },
   { bit: ALERT_AGENT_MATERIAL_SHORTAGE, icon: shortageIcon, key: "materialShortage" },

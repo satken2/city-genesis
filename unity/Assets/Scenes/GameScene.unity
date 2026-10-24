@@ -432,7 +432,7 @@ MonoBehaviour:
   pathCollapsedStatusIcon: {fileID: 21300000, guid: 8be2e2ba52a72704294cf2976371bf2f, type: 3}
   agentConstructionShortageIcon: {fileID: 21300000, guid: 0bfb3f30954e0b5469b353c8be2fdb5f, type: 3}
   agentCrimeIcon: {fileID: 21300000, guid: c7615043d86348f3b29aded26d9959de, type: 3}
-  agentInfraDisconnectedIcon: {fileID: 21300000, guid: 1c8a74c1949e45afb5c23c056b18b771, type: 3}
+  agentInfraDisconnectedIcon: {fileID: 21300000, guid: 11ec009918df49487752220f8239b68b, type: 3}
   agentCapacityTightIcon: {fileID: 21300000, guid: 260b6d3296bc4e5199d2483442781f90, type: 3}
   pathConstructionShortageIcon: {fileID: 21300000, guid: 0bfb3f30954e0b5469b353c8be2fdb5f, type: 3}
   pathAccidentIcon: {fileID: 21300000, guid: 333de04c1087e854f8f47bda967c1e20, type: 3}
