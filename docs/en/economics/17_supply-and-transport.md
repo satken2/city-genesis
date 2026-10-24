@@ -8,7 +8,7 @@ Natural resources are deposits, oil fields, water sources, and similar features 
 
 ### Extraction, depletion, and recovery
 
-Resources have reserves that decrease with extraction. Deposits and oil fields do not recover; resources such as water sources do. Falling reserves reduce extraction efficiency, and depletion prevents continued production there. Renewable resources also become scarce when extraction exceeds recovery. Extracted materials enter the product market or dedicated infrastructure networks ([product market](09_product-market.md)).
+Resources have reserves that decrease with extraction. Deposits and oil fields do not recover; resources such as water sources do. Extraction is limited to the remaining reserves, sites with little left become less favorable locations, and depletion prevents continued production there. Renewable resources also become scarce when extraction exceeds recovery. Extracted materials enter the product market or dedicated infrastructure networks ([product market](09_product-market.md)).
 
 ### Open-pit mining and terrain
 
