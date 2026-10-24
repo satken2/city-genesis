@@ -85,7 +85,6 @@ public partial class PathManager : BaseApiDataManager
         // The hidden set may change while parked, so resolve the filter again as during generation.
         ObjectVisibilityFilter.ApplyToObject(next, InputObjectType.PATH, path.path_id);
         EnsureEndIntersectionsVisible(path);
-        if (lod == DrawLod.Close) closePathIds.Add(path.path_id); else closePathIds.Remove(path.path_id);
         if (updateIntersections) RegisterPathData(path); else SavePathToCache(path);
         RegisterPathCells(path);
         next.GetComponent<VisualPathStats>()?.InitFrom(path);
@@ -852,8 +851,13 @@ public partial class PathManager : BaseApiDataManager
     /// <summary>Persistent worker reevaluating path render LOD on camera movement. Starts on the first LOD load.</summary>
     private Coroutine pathDrawLodWorker;
 
-    /// <summary>Path IDs holding close-up meshes. Population counted by DrawLodConfig.MAX_CLOSE_PATHS.</summary>
-    private readonly HashSet<int> closePathIds = new HashSet<int>();
+    /// <summary>
+    /// Paths meeting the close-up condition around the camera, ascending by (distance, path ID). Rebuilt on first use each frame (closeRankingFrame)
+    /// so every evaluation in a frame shares it; only the DrawLodConfig.MAX_CLOSE_PATHS nearest render Close.
+    /// </summary>
+    private readonly List<(float distance, int id)> closeRanking = new List<(float distance, int id)>();
+    private readonly HashSet<int> closeRankingVisited = new HashSet<int>();
+    private int closeRankingFrame = -1;
 
     /// <summary>Camera position at the previous render LOD evaluation. Reevaluate only after moving a specified distance.</summary>
     private Vector3 lastPathDrawLodCameraPos = new Vector3(float.NaN, 0f, 0f);
@@ -879,11 +883,21 @@ public partial class PathManager : BaseApiDataManager
     /// would need rebuilding when tiles arrive). Roads already detailed retain their geometry while waiting for terrain updates.
     /// Use full-length route clipping and leave long-road subdivision to the fixed-section worker.
     /// </summary>
-    private DrawLod DeterminePathDrawLod(PathSummary path, LodTier tier, Vector3 camPos, out double detailFrom, out double detailTo)
+    /// <param name="distance">Nearest camera distance to the anchor points. Used to order rebuilds.</param>
+    private DrawLod DeterminePathDrawLod(PathSummary path, LodTier tier, Vector3 camPos, out double detailFrom, out double detailTo, out float distance)
     {
         detailFrom = 0.0;
         detailTo = 1.0;
+        return EvaluatePathDrawLod(path, camPos, true, out distance);
+    }
 
+    /// <summary>
+    /// Core of DeterminePathDrawLod. limitClose=true allows Close only for the nearest close-up candidates (closeRanking);
+    /// false evaluates the close-up condition alone to build that ranking.
+    /// </summary>
+    private DrawLod EvaluatePathDrawLod(PathSummary path, Vector3 camPos, bool limitClose, out float distance)
+    {
+        distance = float.MaxValue;
         List<Vector3> anchors = GetAnchorPolyline(path, out float length);
         if (anchors.Count < 2) return DrawLod.Normal;
 
@@ -893,9 +907,9 @@ public partial class PathManager : BaseApiDataManager
         {
             current = DrawLodInfo.GetDrawLod(existing, DrawLod.Normal);
         }
-        float minDist = DrawLodEvaluator.MinDistanceToPolyline(anchors, camPos);
-        bool allowClose = closePathIds.Contains(path.path_id) || closePathIds.Count < DrawLodConfig.MAX_CLOSE_PATHS;
-        DrawLod lod = DrawLodEvaluator.EvaluatePathByDistance(minDist, current, allowClose);
+        distance = DrawLodEvaluator.MinDistanceToPolyline(anchors, camPos);
+        bool allowClose = !limitClose || IsAmongNearestClosePaths(path.path_id, distance, camPos);
+        DrawLod lod = DrawLodEvaluator.EvaluatePathByDistance(distance, current, allowClose);
         TerrainManager terrain = Utils.CachedTerrainManager;
         if (lod != DrawLod.Far && (!hasExisting || current == DrawLod.Far)
             && terrain != null && !terrain.IsDetailTerrainReady(GetPathCoveredCellsCached(path))) return DrawLod.Far;
@@ -906,6 +920,44 @@ public partial class PathManager : BaseApiDataManager
         // so inspect actual objects if generated. Far has no sections, so estimate as for first generation.
         if (existing != null && current != DrawLod.Far) return HasBodySegments(existing) ? DrawLod.Normal : DrawLod.Close;
         return length >= 256f && IsSegmentedLongRoad(path) ? DrawLod.Normal : DrawLod.Close;
+    }
+
+    private bool IsAmongNearestClosePaths(int pathId, float distance, Vector3 camPos)
+    {
+        // Beyond this distance Close is impossible, so most evaluations skip building the ranking.
+        if (distance > DrawLodConfig.PATH_CLOSE_EXIT_DISTANCE) return false;
+        RefreshCloseRanking(camPos);
+        return DrawLodEvaluator.IsAmongNearest(closeRanking, pathId, distance, DrawLodConfig.MAX_CLOSE_PATHS);
+    }
+
+    /// <summary>
+    /// Rebuild closeRanking from registered paths crossing cells within the close-up distance, once per frame.
+    /// Roads whose fixed sections switch Close themselves never evaluate to Close, so they take no slot.
+    /// </summary>
+    private void RefreshCloseRanking(Vector3 camPos)
+    {
+        if (closeRankingFrame == Time.frameCount) return;
+        closeRankingFrame = Time.frameCount;
+        closeRanking.Clear();
+        closeRankingVisited.Clear();
+        float reach = DrawLodConfig.PATH_CLOSE_EXIT_DISTANCE;
+        Vector2Int min = TerrainManager.WorldToCell(new Vector3(camPos.x - reach, 0f, camPos.z - reach));
+        Vector2Int max = TerrainManager.WorldToCell(new Vector3(camPos.x + reach, 0f, camPos.z + reach));
+        for (int x = min.x; x <= max.x; x++)
+        {
+            for (int z = min.y; z <= max.y; z++)
+            {
+                if (!pathIdsByCell.TryGetValue(new Vector2Int(x, z), out HashSet<int> ids)) continue;
+                foreach (int id in ids)
+                {
+                    if (!closeRankingVisited.Add(id) || !pathDataCache.TryGetValue(id, out PathSummary path)) continue;
+                    if (DrawLodEvaluator.MinDistanceToPolyline(GetAnchorPolyline(path, out _), camPos) > reach) continue;
+                    if (EvaluatePathDrawLod(path, camPos, false, out float distance) == DrawLod.Close)
+                        closeRanking.Add((distance, id));
+                }
+            }
+        }
+        closeRanking.Sort();
     }
 
     private static readonly List<SplinePartLod> splinePartLodBuffer = new List<SplinePartLod>();
@@ -997,7 +1049,7 @@ public partial class PathManager : BaseApiDataManager
 
     /// <summary>
     /// Persistent worker reevaluating generated path render LOD on camera movement.
-    /// Scan all paths only at fixed frame intervals after sufficient movement, switching mismatches
+    /// Scan all paths only at fixed frame intervals after sufficient movement, switching mismatches nearest first
     /// within the shared frame budget. Rotation/FOV do not change distance-based LOD.
     /// Keep old objects visible until regeneration finishes.
     /// </summary>
@@ -1005,7 +1057,7 @@ public partial class PathManager : BaseApiDataManager
 
     // Scans are split into shared-budget slices, so iterate a copy of keys instead of enumerating the dictionary directly.
     private readonly List<int> drawLodScanIds = new List<int>();
-    private readonly List<int> drawLodChangeIds = new List<int>();
+    private readonly List<(float distance, int id)> drawLodChangeIds = new List<(float distance, int id)>();
     private readonly System.Diagnostics.Stopwatch drawLodScanWatch = new System.Diagnostics.Stopwatch();
 
     private IEnumerator PathDrawLodReevaluationWorker()
@@ -1045,9 +1097,9 @@ public partial class PathManager : BaseApiDataManager
                 int id = drawLodScanIds[i];
                 if (!pathObjectsCache.TryGetValue(id, out GameObject obj) || obj == null || !obj.activeSelf) continue;
                 if (!pathDataCache.TryGetValue(id, out PathSummary path)) continue;
-                DrawLod desired = DeterminePathDrawLod(path, LodTier.Near, camPos, out double from, out double to);
+                DrawLod desired = DeterminePathDrawLod(path, LodTier.Near, camPos, out double from, out double to, out float distance);
                 if (DrawLodMatches(obj, desired, from, to)) continue;
-                drawLodChangeIds.Add(id);
+                drawLodChangeIds.Add((distance, id));
             }
             drawLodScanIds.Clear();
             if (aborted)
@@ -1055,6 +1107,7 @@ public partial class PathManager : BaseApiDataManager
                 drawLodChangeIds.Clear();
                 continue;
             }
+            drawLodChangeIds.Sort();
             for (int i = 0; i < drawLodChangeIds.Count; i++)
             {
                 // Generating during a batch would count geometry built before intersection cut points are final as already built,
@@ -1065,7 +1118,7 @@ public partial class PathManager : BaseApiDataManager
                     break;
                 }
                 // Data may be replaced during yields; resolve it again each time to avoid overwriting with stale instances.
-                if (!pathDataCache.TryGetValue(drawLodChangeIds[i], out PathSummary path)) continue;
+                if (!pathDataCache.TryGetValue(drawLodChangeIds[i].id, out PathSummary path)) continue;
                 TryRebuildPathOnce(path, LodTier.Near, false, false, "描画LOD");
                 yield return RenderWorkScheduler.Continue;
             }
@@ -1297,7 +1350,7 @@ public partial class PathManager : BaseApiDataManager
         GetComponent<PathSpeedLimitOverlay>()?.Clear();
         RoadMarkingAtlas.Clear();
         Debug.Log("PathManager: 全ノード・道路データをクリア");
-        closePathIds.Clear();
+        closeRankingFrame = -1;
         lodCache.Clear();
         geometryRevisions.Clear();
         pendingBuildingAccessRebuilds.Clear();
@@ -2262,7 +2315,7 @@ public partial class PathManager : BaseApiDataManager
         // Even for Near/Dynamic data tiers, render paths as Far when distant and visually small.
         Camera drawCam = Camera.main;
         Vector3 drawCamPos = drawCam != null ? drawCam.transform.position : Vector3.zero;
-        DrawLod drawLod = DeterminePathDrawLod(path, tier, drawCamPos, out double detailFrom, out double detailTo);
+        DrawLod drawLod = DeterminePathDrawLod(path, tier, drawCamPos, out double detailFrom, out double detailTo, out _);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"PathManager: 再描画 path{path.path_id} tier={tier} draw={drawLod} range=({detailFrom:F2}〜{detailTo:F2}) reason={reason}");
         var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [Camera freeze investigation] Remove after investigation
         int freezeProbeWarnings = FreezeProbe.WarningCount; // [Camera freeze investigation] Remove after investigation
@@ -2379,7 +2432,6 @@ public partial class PathManager : BaseApiDataManager
                 Destroy(obj);
                 RemovePathObject(pathId);
             }
-            closePathIds.Remove(pathId);
         }
     }
 
@@ -2600,7 +2652,6 @@ public partial class PathManager : BaseApiDataManager
         StampPathBuild(pathGO, path, buildRevision, buildSerial);
         UpdatePlannedIcon(pathGO, path, path.status == Constants.STATUS_PENDING);
         DrawLodInfo.Ensure(pathGO).drawLod = DrawLod.Far;
-        closePathIds.Remove(path.path_id);
         DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
             oldPath != null ? DrawLodInfo.GetDrawLod(oldPath, DrawLod.Normal) : (DrawLod?)null, DrawLod.Far);
 
@@ -3580,10 +3631,6 @@ public partial class PathManager : BaseApiDataManager
     {
         EnsureEndIntersectionsVisible(path);
         if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden) drawLod = DrawLod.Normal;
-        if (drawLod == DrawLod.Close && closePathIds.Count >= DrawLodConfig.MAX_CLOSE_PATHS && !closePathIds.Contains(path.path_id))
-        {
-            drawLod = DrawLod.Normal;
-        }
         string renderKey = PathRenderKey(path, drawLod, forceRebuild);
         if (RestorePathLod(path, renderKey, drawLod, updateIntersections)) return;
         geometryRevisions.TryGetValue(path.path_id, out int buildRevision);
@@ -3713,8 +3760,6 @@ public partial class PathManager : BaseApiDataManager
         {
             AddFarRemainders(pathGO, path, points, detailFrom, detailTo);
         }
-        if (drawLod == DrawLod.Close) closePathIds.Add(path.path_id);
-        else closePathIds.Remove(path.path_id);
 
         mf.mesh = meshResult?.Mesh;
         bool modulesCreated = meshResult?.ModulesCreated ?? false;
@@ -5195,7 +5240,6 @@ public partial class PathManager : BaseApiDataManager
             Destroy(obj);
         }
         RemovePathObject(pathId);
-        closePathIds.Remove(pathId);
         // Recalculate endpoint intersections of ramps formerly aligned to the removed main line using the post-removal state.
         foreach (int node in mergeNodes)
         {

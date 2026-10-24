@@ -108,8 +108,12 @@ public class BuildingManager : BaseApiDataManager
     // Render LOD (per-building detail, independent of the cell data tier)
     // ================================================================
 
-    /// <summary>Building IDs with close-up meshes. Population counted by DrawLodConfig.MAX_CLOSE_BUILDINGS.</summary>
-    private readonly HashSet<int> closeBuildingIds = new HashSet<int>();
+    /// <summary>
+    /// Buildings meeting the close-up condition around the camera, ascending by (distance, ID). Rebuilt on first use each frame (closeRankingFrame)
+    /// so every evaluation in a frame shares it; only the DrawLodConfig.MAX_CLOSE_BUILDINGS nearest render Close.
+    /// </summary>
+    private readonly List<(float distance, int id)> closeRanking = new List<(float distance, int id)>();
+    private int closeRankingFrame = -1;
 
     /// <summary>Bounding sphere radius per building ID (from the farthest footprint point and height). Used for projected ratio checks.</summary>
     private readonly Dictionary<int, float> buildingBoundsRadius = new Dictionary<int, float>();
@@ -399,7 +403,7 @@ public class BuildingManager : BaseApiDataManager
         deferredDetailBuildings.Clear();
         detailedBuildingIds.Clear();
         buildingLastVisibleFrame.Clear();
-        closeBuildingIds.Clear();
+        closeRankingFrame = -1;
         buildingBoundsRadius.Clear();
         pendingUnloadCells.Clear();
         previewCellsWithObjects.Clear();
@@ -912,7 +916,6 @@ public class BuildingManager : BaseApiDataManager
             buildingLastVisibleFrame.Remove(id);
             deferredDetailBuildings.Remove(id);
             buildingVersionCache.Remove(id);
-            closeBuildingIds.Remove(id);
             buildingBoundsRadius.Remove(id);
             buildingTerrainSignatures.Remove(id);
             buildingGeometryRevisions.Remove(id);
@@ -1273,12 +1276,10 @@ public class BuildingManager : BaseApiDataManager
     /// Register the building ID as holding a full detail mesh and set its last-visible frame to the current frame.
     /// Called by both generation and pooled reuse paths in CreateOrUpdateBuildingObject.
     /// </summary>
-    private void MarkBuildingDetailed(int buildingId, DrawLod drawLod)
+    private void MarkBuildingDetailed(int buildingId)
     {
         detailedBuildingIds.Add(buildingId);
         buildingLastVisibleFrame[buildingId] = Time.frameCount;
-        if (drawLod == DrawLod.Close) closeBuildingIds.Add(buildingId);
-        else closeBuildingIds.Remove(buildingId);
     }
 
     // ================================================================
@@ -1318,23 +1319,81 @@ public class BuildingManager : BaseApiDataManager
     {
         float[] cp = data.centerPointArray;
         if (cp == null || cp.Length < 2) return DrawLod.Normal;
-        if (buildingObjectsCache.TryGetValue(data.agent_id, out GameObject existing) && existing != null)
-            return EvaluateBuildingDrawLod(data, DrawLodInfo.GetDrawLod(existing, DrawLod.Normal), existing.transform.position.y, camPos, tanHalfFov, orthographic);
-        return EvaluateBuildingDrawLod(data, DrawLod.Normal, Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1])), camPos, tanHalfFov, orthographic);
+        ResolveBuildingLodBase(data, cp, out DrawLod current, out float baseY);
+        return EvaluateBuildingDrawLod(data, current, baseY, camPos, tanHalfFov, orthographic);
     }
+
+    /// <summary>Hysteresis reference and base height for render LOD: the existing object's values, otherwise Normal at the terrain height.</summary>
+    private void ResolveBuildingLodBase(BuildingSummary data, float[] cp, out DrawLod current, out float baseY)
+    {
+        if (buildingObjectsCache.TryGetValue(data.agent_id, out GameObject existing) && existing != null)
+        {
+            current = DrawLodInfo.GetDrawLod(existing, DrawLod.Normal);
+            baseY = existing.transform.position.y;
+            return;
+        }
+        current = DrawLod.Normal;
+        baseY = Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1]));
+    }
+
+    private DrawLod EvaluateBuildingDrawLod(BuildingSummary data, DrawLod current, float baseY, Vector3 camPos, float tanHalfFov, bool orthographic)
+        => EvaluateBuildingDrawLod(data, current, baseY, camPos, tanHalfFov, orthographic, true, out _);
 
     /// <summary>
     /// Core render LOD decision. baseY is the building reference height; reuse an existing object's position to avoid sampling terrain
     /// (the few-meter difference from parcel elevation is negligible relative to the hysteresis band).
+    /// limitClose=true allows Close only for the nearest close-up candidates (closeRanking); false evaluates the close-up condition alone to build that ranking.
     /// </summary>
-    private DrawLod EvaluateBuildingDrawLod(BuildingSummary data, DrawLod current, float baseY, Vector3 camPos, float tanHalfFov, bool orthographic)
+    private DrawLod EvaluateBuildingDrawLod(BuildingSummary data, DrawLod current, float baseY, Vector3 camPos, float tanHalfFov, bool orthographic, bool limitClose, out float distance)
     {
+        distance = float.MaxValue;
         float[] cp = data.centerPointArray;
         if (cp == null || cp.Length < 2) return DrawLod.Normal;
         float radius = GetBuildingBoundsRadius(data);
-        float distance = Vector3.Distance(camPos, new Vector3(cp[0], baseY + radius * 0.5f, cp[1]));
-        bool allowClose = closeBuildingIds.Contains(data.agent_id) || closeBuildingIds.Count < DrawLodConfig.MAX_CLOSE_BUILDINGS;
+        distance = Vector3.Distance(camPos, new Vector3(cp[0], baseY + radius * 0.5f, cp[1]));
+        bool allowClose = !limitClose || IsAmongNearestCloseBuildings(data.agent_id, distance, camPos, tanHalfFov, orthographic);
         return DrawLodEvaluator.EvaluateBySize(radius, distance, tanHalfFov, current, allowClose, orthographic);
+    }
+
+    private bool IsAmongNearestCloseBuildings(int id, float distance, Vector3 camPos, float tanHalfFov, bool orthographic)
+    {
+        // Beyond this distance Close is impossible, so most evaluations skip building the ranking.
+        if (distance > DrawLodConfig.CLOSE_EXIT_MAX_DISTANCE) return false;
+        RefreshCloseRanking(camPos, tanHalfFov, orthographic);
+        return DrawLodEvaluator.IsAmongNearest(closeRanking, id, distance, DrawLodConfig.MAX_CLOSE_BUILDINGS);
+    }
+
+    /// <summary>
+    /// Rebuild closeRanking from registered buildings whose centers lie within the close-up distance, once per frame.
+    /// Candidates use the same hysteresis inputs as their own evaluation, so a ranked building stays consistent with its result.
+    /// </summary>
+    private void RefreshCloseRanking(Vector3 camPos, float tanHalfFov, bool orthographic)
+    {
+        if (closeRankingFrame == Time.frameCount) return;
+        closeRankingFrame = Time.frameCount;
+        closeRanking.Clear();
+        float reach = DrawLodConfig.CLOSE_EXIT_MAX_DISTANCE;
+        Vector2Int min = TerrainManager.WorldToCell(new Vector3(camPos.x - reach, 0f, camPos.z - reach));
+        Vector2Int max = TerrainManager.WorldToCell(new Vector3(camPos.x + reach, 0f, camPos.z + reach));
+        for (int x = min.x; x <= max.x; x++)
+        {
+            for (int z = min.y; z <= max.y; z++)
+            {
+                if (!buildingIdsByCell.TryGetValue(new Vector2Int(x, z), out HashSet<int> ids)) continue;
+                foreach (int id in ids)
+                {
+                    if (!buildingDataCache.TryGetValue(id, out BuildingSummary data)) continue;
+                    float[] cp = data.centerPointArray;
+                    if (cp == null || cp.Length < 2) continue;
+                    float dx = cp[0] - camPos.x, dz = cp[1] - camPos.z;
+                    if (dx * dx + dz * dz > reach * reach) continue;
+                    ResolveBuildingLodBase(data, cp, out DrawLod current, out float baseY);
+                    if (EvaluateBuildingDrawLod(data, current, baseY, camPos, tanHalfFov, orthographic, false, out float distance) == DrawLod.Close)
+                        closeRanking.Add((distance, id));
+                }
+            }
+        }
+        closeRanking.Sort();
     }
 
     /// <summary>
@@ -1797,8 +1856,8 @@ public class BuildingManager : BaseApiDataManager
         RecordBuildingTerrainSignature(data);
         RegisterBuildingCell(data.agent_id, ready.transform.position);
         UpdatePlannedIcon(ready, data);
-        if (lod == DrawLod.Far) { detailedBuildingIds.Remove(data.agent_id); closeBuildingIds.Remove(data.agent_id); }
-        else MarkBuildingDetailed(data.agent_id, lod);
+        if (lod == DrawLod.Far) detailedBuildingIds.Remove(data.agent_id);
+        else MarkBuildingDetailed(data.agent_id);
         deferredDetailBuildings.Remove(data.agent_id);
         buildingVersionCache[data.agent_id] = data.version;
         return true;
@@ -1914,7 +1973,6 @@ public class BuildingManager : BaseApiDataManager
 
         // Now that the building is Far (a box), remove it from detail LRU bookkeeping and deferred requests.
         detailedBuildingIds.Remove(buildingData.agent_id);
-        closeBuildingIds.Remove(buildingData.agent_id);
         buildingLastVisibleFrame.Remove(buildingData.agent_id);
         deferredDetailBuildings.Remove(buildingData.agent_id);
 
@@ -2310,7 +2368,6 @@ public class BuildingManager : BaseApiDataManager
         buildingObjectsCache.Remove(id);
         buildingVersionCache.Remove(id);
         detailedBuildingIds.Remove(id);
-        closeBuildingIds.Remove(id);
         buildingLastVisibleFrame.Remove(id);
         buildingTerrainSignatures.Remove(id);
     }
@@ -2430,7 +2487,7 @@ public class BuildingManager : BaseApiDataManager
                     UpdateBuildingHeight(existingBuilding);
                     RecordBuildingTerrainSignature(buildingData);
                     RegisterBuildingCell(buildingData.agent_id, existingBuilding.transform.position);
-                    MarkBuildingDetailed(buildingData.agent_id, drawLod);
+                    MarkBuildingDetailed(buildingData.agent_id);
                     VisualModeObject vmo = existingBuilding.GetComponent<VisualModeObject>();
                     if (vmo != null)
                     {
@@ -2558,7 +2615,7 @@ public class BuildingManager : BaseApiDataManager
         // Update the dictionary to the new object immediately.
         // This prevents duplicate objects if the same ID is redrawn again shortly afterward.
         buildingObjectsCache[buildingData.agent_id] = buildingGO;
-        MarkBuildingDetailed(buildingData.agent_id, drawLod);
+        MarkBuildingDetailed(buildingData.agent_id);
         DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building,
             oldBuilding != null ? DrawLodInfo.GetDrawLod(oldBuilding, DrawLod.Normal) : (DrawLod?)null, drawLod);
         // The detail mesh is generated, so remaining deferred requests are unnecessary.

@@ -36,6 +36,8 @@ public static class DrawLodConfig
     /// Large facilities have high projected ratios even far away, so projected ratio alone is insufficient.
     /// </summary>
     public const float CLOSE_MAX_DISTANCE = 50f;
+    /// <summary>Maximum distance (m) for keeping Close once shown.</summary>
+    public const float CLOSE_EXIT_MAX_DISTANCE = CLOSE_MAX_DISTANCE * 1.15f;
     /// <summary>Projected ratio promoting Far to Normal.</summary>
     public const float NORMAL_ENTER_RATIO = 0.045f;
     /// <summary>Projected ratio demoting Normal to Far.</summary>
@@ -66,9 +68,9 @@ public static class DrawLodConfig
     /// <summary>Reevaluate only after the camera moves at least this distance (m).</summary>
     public const float REEVALUATE_CAMERA_MOVE_DISTANCE = 4f;
 
-    /// <summary>Maximum buildings holding close-up meshes simultaneously. Do not promote beyond this count (projected ratio controls demotion).</summary>
+    /// <summary>Number of buildings rendered Close: the nearest to the camera among those meeting the close-up condition.</summary>
     public const int MAX_CLOSE_BUILDINGS = 5;
-    /// <summary>Maximum paths holding close-up meshes simultaneously.</summary>
+    /// <summary>Number of paths rendered Close: the nearest to the camera among those meeting the close-up condition.</summary>
     public const int MAX_CLOSE_PATHS = 5;
 }
 
@@ -99,22 +101,16 @@ public static class DrawLodEvaluator
 
     /// <summary>
     /// Evaluate render LOD for objects whose size is represented by a bounding sphere, such as buildings.
-    /// current is the current render LOD (for hysteresis). allowClose=false prevents promotion to Close
-    /// when the close-up limit is reached. Never return Hidden (buildings retain the distant skyline).
+    /// current is the current render LOD (for hysteresis). allowClose=false never returns Close, including for objects
+    /// currently Close. Never return Hidden (buildings retain the distant skyline).
     /// </summary>
     public static DrawLod EvaluateBySize(float radius, float distance, float tanHalfFov, DrawLod current, bool allowClose, bool orthographic = false)
     {
         float ratio = ProjectedRatio(radius, orthographic ? 1f : distance, tanHalfFov);
 
-        bool closeNow;
-        if (current == DrawLod.Close)
-        {
-            closeNow = ratio >= DrawLodConfig.CLOSE_EXIT_RATIO && distance <= DrawLodConfig.CLOSE_MAX_DISTANCE * 1.15f;
-        }
-        else
-        {
-            closeNow = allowClose && ratio >= DrawLodConfig.CLOSE_ENTER_RATIO && distance <= DrawLodConfig.CLOSE_MAX_DISTANCE;
-        }
+        bool closeNow = allowClose && (current == DrawLod.Close
+            ? ratio >= DrawLodConfig.CLOSE_EXIT_RATIO && distance <= DrawLodConfig.CLOSE_EXIT_MAX_DISTANCE
+            : ratio >= DrawLodConfig.CLOSE_ENTER_RATIO && distance <= DrawLodConfig.CLOSE_MAX_DISTANCE);
         if (closeNow) return DrawLod.Close;
 
         bool normalNow = current >= DrawLod.Normal
@@ -124,13 +120,13 @@ public static class DrawLodEvaluator
     }
 
     /// <summary>
-    /// Evaluate path render LOD using nearest distance to its centerline. Never return Hidden.
+    /// Evaluate path render LOD using nearest distance to its centerline. allowClose=false never returns Close. Never return Hidden.
     /// </summary>
     public static DrawLod EvaluatePathByDistance(float distance, DrawLod current, bool allowClose)
     {
-        bool closeNow = current == DrawLod.Close
+        bool closeNow = allowClose && (current == DrawLod.Close
             ? distance <= DrawLodConfig.PATH_CLOSE_EXIT_DISTANCE
-            : allowClose && distance <= DrawLodConfig.PATH_CLOSE_ENTER_DISTANCE;
+            : distance <= DrawLodConfig.PATH_CLOSE_ENTER_DISTANCE);
         if (closeNow) return DrawLod.Close;
 
         bool normalNow = current >= DrawLod.Normal
@@ -148,6 +144,21 @@ public static class DrawLodEvaluator
         return current == DrawLod.Hidden
             ? distance >= DrawLodConfig.PROP_HIDDEN_EXIT_DISTANCE
             : distance >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
+    }
+
+    /// <summary>
+    /// Whether fewer than limit other candidates in ranking (ascending by distance, then ID) are nearer than this object.
+    /// The object's own entry is skipped, so objects not yet ranked are compared the same way.
+    /// </summary>
+    public static bool IsAmongNearest(System.Collections.Generic.List<(float distance, int id)> ranking, int id, float distance, int limit)
+    {
+        int nearer = 0;
+        foreach (var (otherDistance, otherId) in ranking)
+        {
+            if (otherDistance > distance || (otherDistance == distance && otherId > id)) break;
+            if (otherId != id && ++nearer >= limit) return false;
+        }
+        return true;
     }
 
     /// <summary>Nearest 3D camera distance to an XZ point sequence. Find the nearest point on each segment.</summary>
