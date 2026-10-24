@@ -14,8 +14,8 @@ using GeneratedModels;
 ///     (from GET /api/v1/buildings/effect-ranges, a list of regions for multiple facilities)
 /// Both region types use two terrain-following layers:
 ///   1. Region fill: a translucent surface covering the entire area, including wilderness without parcels.
-///      Splitting the region AABB into a grid and tiling cells inside it with small quads
-///      supports arbitrary shapes (including concavities and holes) while following terrain.
+///      A circle is covered by one disc of concentric rings. An irregular polygon splits its AABB into a grid
+///      and tiles cells inside it with small quads, which supports concavities and holes.
 ///   2. Boundary outline: outlines the perimeter and holes to clearly show coverage limits.
 ///
 /// Fill cells are planar and may intersect terrain, so use the default Custom/OverlayLine (LEqul + negative depth offset)
@@ -103,7 +103,8 @@ public class EffectRangeOverlay : MonoBehaviour
     {
         if (region == null || string.IsNullOrEmpty(region.type)) return;
         var rings = region.Rings();
-        FillRings(rings, fillColor);
+        if (region.type == "circle") FillDisc(region, fillColor);
+        else FillRings(rings, fillColor);
         foreach (var ring in rings)
         {
             DrawWorldRing(lineRenderer, ring, boundaryColor, 1.6f, 6f);
@@ -111,11 +112,49 @@ public class EffectRangeOverlay : MonoBehaviour
     }
 
     // =====================================================================
-    // Region fill (grid tiling)
+    // Region fill (disc for circles, grid tiling for polygons)
     // =====================================================================
 
     /// <summary>
-    /// Splits the rings' AABB into a grid and fills cells whose centers lie inside (circles use the same polygon as their boundary).
+    /// Covers a circle with one disc of concentric rings, sampling terrain height at every vertex.
+    /// Angular divisions match the boundary ring so the disc edge lies on the outline. The ring count is a quarter of them,
+    /// so a circle costs at most about 13,000 triangles however large it is, unlike a grid fill that grows with the area.
+    /// </summary>
+    private void FillDisc(EffectRangeRegionData circle, Color fillColor)
+    {
+        if (circle.radius <= 0f) return;
+        int segments = circle.CircleSegments;
+        int rings = Mathf.Max(1, segments / 4);
+        Vector3 center = GroundPoint(circle.center.x, circle.center.y);
+        var inner = new Vector3[segments];
+        var outer = new Vector3[segments];
+        var triangles = new List<Vector3>(segments * (rings * 2 - 1) * 3);
+        for (int k = 1; k <= rings; k++)
+        {
+            float r = circle.radius * k / rings;
+            for (int i = 0; i < segments; i++)
+            {
+                float a = (float)i / segments * Mathf.PI * 2f;
+                outer[i] = GroundPoint(circle.center.x + Mathf.Cos(a) * r, circle.center.y + Mathf.Sin(a) * r);
+            }
+            for (int i = 0; i < segments; i++)
+            {
+                int j = (i + 1) % segments;
+                if (k == 1)
+                {
+                    triangles.Add(center); triangles.Add(outer[i]); triangles.Add(outer[j]);
+                    continue;
+                }
+                triangles.Add(inner[i]); triangles.Add(outer[i]); triangles.Add(outer[j]);
+                triangles.Add(inner[i]); triangles.Add(outer[j]); triangles.Add(inner[j]);
+            }
+            (inner, outer) = (outer, inner);
+        }
+        fillRenderer.AddPreTriangulated(triangles, fillColor);
+    }
+
+    /// <summary>
+    /// Splits the rings' AABB into a grid and fills cells whose centers lie inside.
     /// For each row, find all ring intersections with a horizontal line through cell centers once, then fill alternating sorted pairs (even-odd rule).
     /// Holes remain empty without distinguishing them from the perimeter. Checking all vertices per cell would take seconds for coverage with thousands of vertices.
     /// Cells are small, so sampling terrain height at all four corners follows the relief.
@@ -220,6 +259,9 @@ public class EffectRangeRegionData
     public float radius;                                 // circle
     public List<EffectRangePolygonData> polygons = new List<EffectRangePolygonData>(); // polygon
 
+    /// <summary>Angular divisions of a circle, shared by its boundary ring and its fill disc.</summary>
+    public int CircleSegments => Mathf.Clamp(Mathf.CeilToInt(radius / 4f), 24, 160);
+
     /// <summary>
     /// Enumerates closed boundary rings (world XZ). Circles use a radius-dependent polygon; polygons use the perimeter and holes.
     /// </summary>
@@ -229,7 +271,7 @@ public class EffectRangeRegionData
         if (type == "circle")
         {
             if (radius <= 0f) return rings;
-            int segments = Mathf.Clamp(Mathf.CeilToInt(radius / 4f), 24, 160);
+            int segments = CircleSegments;
             var ring = new List<Vector2>(segments);
             for (int i = 0; i < segments; i++)
             {
