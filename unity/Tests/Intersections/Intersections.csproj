@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <None Update="Fixtures/**/*.json" CopyToOutputDirectory="PreserveNewest" />
     <Compile Remove="Unity/**/*.cs" />
     <Reference Include="Assembly-CSharp"><HintPath>../../Temp/bin/Debug/Assembly-CSharp.dll</HintPath></Reference>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(UnityCorePath)</HintPath></Reference>

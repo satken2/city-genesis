@@ -406,6 +406,7 @@ public static class Constants
     public const int ALERT_DISPLAY_INFRA_WARNING = 1048576;
     public const float ALERT_BUDGET_CAPPED_SCALE_THRESHOLD = 0.5f;
     public const float ALERT_CAPACITY_TIGHT_RATIO = 0.9f;
+    public const float ALERT_MATERIAL_SHORTAGE_RATIO = 0.05f;
     public const int PATH_EQUIPMENT_NONE = 0;
     public const int PATH_EQUIPMENT_STANDARD = 1;
     public const int PATH_UTILITY_NONE = 0;

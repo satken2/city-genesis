@@ -284,7 +284,7 @@ public static class ModularBodyBuilder
             floorMaterial,
             centerPointWorld, deformToTerrain,
             combineInstances, allMaterials, temporaryMeshes,
-            scatterFootprint: occupiedFootprint ?? footprint, scatterSeed: visual_variant2);
+            scatterFootprint: occupiedFootprint ?? footprint, scatterSeed: visual_variant2, frontFootprint: footprint);
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] 壁・角・地面完了: {combineInstances.Count}インスタンス, {allMaterials.Count}マテリアル");
 
@@ -299,17 +299,23 @@ public static class ModularBodyBuilder
     }
 
     /// <summary>
-    /// Generate site decorations (fences/tiles/ground panels) and add them to combine lists.
+    /// Generate site decorations (fences/gates/trails/tiles/scatter/ground panels) and add them to combine lists.
     /// Shared by modular (GenerateBody) and prebuilt (PreBuiltBuildingMeshBuilder) buildings.
     /// Receive polygons in local XZ relative to center_point (same convention as footprint)
     /// (pass parcel polygons already transformed by BuildingMeshUtils.ResolveParcelContext).
     ///
+    /// - Entry: with frontFootprint, resolve where the approach from the building front crosses fenceFootprint (<see cref="SiteEntryLayout"/>).
+    ///   It opens the fence, places the gate part there, lays the trail part up to the building front, and keeps that corridor clear of scatter parts.
+    ///   The opening is as wide as the gate part, or <see cref="SiteEntryLayout.OPENING_WIDTH"/> without one.
+    ///   Callers with their own access (rail-yard track leads) pass fenceOpeningCenter instead and no frontFootprint.
     /// - Fences: place unscaled ground-level fence-w / fence-c parts around fenceFootprint.
     ///   Skip edges/corners with unresolved parts. Null omits fences.
-    ///   If opening center/radius are given, omit walls/corners within that circle for access.
+    ///   Omit walls/corners within the opening circle for access.
+    /// - Gate: place the unscaled gate part with its origin at the opening center, oriented along the parcel edge like fence walls.
+    /// - Trail: tile the trail part like fence walls from the building front to the opening center.
     /// - Tiles: tile the interior of tilePolygon with tile parts (GenerateTiles).
     ///   Do nothing if no tile part exists. Null omits tiles.
-    /// - Scatter: place scatter parts in floorPolygon's vacant area outside building scatterFootprint
+    /// - Scatter: place scatter parts in floorPolygon's vacant area outside building scatterFootprint and the entry corridor
     ///   (GenerateScatter). scatterSeed controls randomness. Null scatterFootprint omits scatter.
     /// - Ground panels: create a horizontal floorPolygon panel at GROUND_OFFSET.
     ///   Visibility/material follow caller-resolved floorMaterial from master draw_floor
@@ -326,16 +332,28 @@ public static class ModularBodyBuilder
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
         Vector2? fenceOpeningCenter = null, float fenceOpeningRadius = 0f,
-        Vector2[] scatterFootprint = null, float scatterSeed = 0f)
+        Vector2[] scatterFootprint = null, float scatterSeed = 0f, Vector2[] frontFootprint = null)
     {
         if (BuildingExteriorRenderer.Capture != null)
         {
             BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) => GenerateSiteDecorations(
                 prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, floorMaterial, centerPointWorld,
                 deformToTerrain, meshes, materials, temporary, fenceOpeningCenter, fenceOpeningRadius,
-                scatterFootprint, scatterSeed));
+                scatterFootprint, scatterSeed, frontFootprint));
             return;
         }
+
+        // --- Entry ---
+        GameObject gateModule = BuildingMeshUtils.GetPartNoPosition(prefix, "gate", suffix, true);
+        Mesh gateMesh = GetWallSourceMesh(gateModule);
+        bool hasEntry = SiteEntryLayout.TryResolve(fenceFootprint, frontFootprint, scatterFootprint,
+            gateMesh != null ? gateMesh.bounds.size.x : SiteEntryLayout.OPENING_WIDTH, out SiteEntryLayout.Entry entry);
+        if (hasEntry)
+        {
+            fenceOpeningCenter = entry.Gate;
+            fenceOpeningRadius = entry.Width * 0.5f;
+        }
+
         // --- Fences (fence) ---
         // Skip missing parts.
         if (fenceFootprint != null && fenceFootprint.Length >= 3)
@@ -409,6 +427,44 @@ public static class ModularBodyBuilder
             }
         }
 
+        // --- Gate and trail ---
+        if (hasEntry && gateMesh != null)
+        {
+            // Same rotation convention as fence walls along the CCW parcel edge (BuildWallRun), so local +Z (Blender −Y) faces the road.
+            Vector2 edge = entry.EdgeEnd - entry.EdgeStart;
+            Quaternion rotation = Quaternion.Euler(0f, -Mathf.Atan2(edge.y, edge.x) * Mathf.Rad2Deg + 180f, 0f);
+            Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(entry.Gate.x, 0f, entry.Gate.y), rotation, Vector3.one);
+            Mesh gate = Object.Instantiate(gateMesh);
+            Vector3[] vertices = gate.vertices;
+            for (int v = 0; v < vertices.Length; v++)
+            {
+                vertices[v] = matrix.MultiplyPoint3x4(vertices[v]);
+            }
+            gate.vertices = vertices;
+            gate.RecalculateNormals();
+            gate.RecalculateBounds();
+            if (deformToTerrain)
+            {
+                DeformMeshToTerrain(gate, centerPointWorld);
+            }
+            AddSegmentToCombineList(new SegmentMeshData { Mesh = gate, Materials = BuildingMeshUtils.GetModuleMaterials(gateModule) },
+                combineInstances, allMaterials, temporaryMeshes);
+        }
+        GameObject trailModule = hasEntry ? BuildingMeshUtils.GetPartNoPosition(prefix, "trail", suffix, true) : null;
+        if (trailModule != null)
+        {
+            Material[] trailMaterials = BuildingMeshUtils.GetModuleMaterials(trailModule);
+            foreach (var trailSegment in GenerateFenceSegments(entry.Front, entry.Gate, trailModule, trailMaterials, 0f, 0f))
+            {
+                if (!trailSegment.IsValid) continue;
+                if (deformToTerrain)
+                {
+                    DeformMeshToTerrain(trailSegment.Mesh, centerPointWorld);
+                }
+                AddSegmentToCombineList(trailSegment, combineInstances, allMaterials, temporaryMeshes);
+            }
+        }
+
         // --- Tile objects ---
         if (tilePolygon != null && tilePolygon.Length >= 3)
         {
@@ -419,8 +475,8 @@ public static class ModularBodyBuilder
         // --- Scatter parts ---
         if (scatterFootprint != null && floorPolygon != null && floorPolygon.Length >= 3)
         {
-            GenerateScatter(prefix, suffix, floorPolygon, scatterFootprint, scatterSeed, centerPointWorld, deformToTerrain,
-                            combineInstances, allMaterials, temporaryMeshes);
+            GenerateScatter(prefix, suffix, floorPolygon, scatterFootprint, hasEntry ? entry.Corridor() : null, scatterSeed,
+                            centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
         }
 
         // --- Ground panels ---
@@ -765,18 +821,19 @@ public static class ModularBodyBuilder
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, () => $"[MBB] タイル: {tileCount}個配置 ({prefix}/{suffix}/tile)");
     }
 
-    /// <summary>Search limit for scatter parts (scatter1, 2, …).</summary>
+    /// <summary>Search limit for each scatter-part series (scatter1, 2, … / scatter-single1, 2, …).</summary>
     private const int MAX_SCATTER_PARTS = 16;
 
     /// <summary>
-    /// Find scatter1, 2, … sequentially from 1 (stop at gaps); place actual-size parts at <see cref="ScatterLayout"/> positions.
+    /// Find scatter1, 2, … and scatter-single1, 2, … sequentially from 1 (each series stops at its first gap); place actual-size parts
+    /// at <see cref="ScatterLayout"/> positions outside the footprint and keepClear. scatter-single kinds appear at most once per building.
     /// Align origin to placement ground. For terrain conformity, ground is the lowest of four bounding-box-corner heights,
     /// burying the uphill side to prevent floating (same as port-yard cargo). Do nothing if absent.
     /// While <see cref="BuildingScatterRenderer.Sink"/> is set (shown buildings), hand placements to instanced rendering;
     /// otherwise combine parts including node transforms. Both measure placement bounds from the combined part mesh.
     /// </summary>
     private static void GenerateScatter(
-        string prefix, int suffix, Vector2[] site, Vector2[] footprint, float seed,
+        string prefix, int suffix, Vector2[] site, Vector2[] footprint, Vector2[] keepClear, float seed,
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
@@ -784,45 +841,49 @@ public static class ModularBodyBuilder
         var paths = new List<string>();
         var meshes = new List<Mesh>();
         var meshMaterials = new List<Material[]>();
-        var kinds = new List<Bounds>();
-        for (int n = 1; n <= MAX_SCATTER_PARTS; n++)
+        var kinds = new List<ScatterLayout.Kind>();
+        foreach (bool single in new[] { false, true })
         {
-            if (sink != null)
+            string series = single ? "scatter-single" : "scatter";
+            for (int n = 1; n <= MAX_SCATTER_PARTS; n++)
             {
-                string path = BuildingMeshUtils.PartPath(prefix, $"scatter{n}", suffix);
-                BuildingScatterRenderer.Model model = BuildingScatterRenderer.GetModel(path);
-                if (model == null)
+                if (sink != null)
+                {
+                    string path = BuildingMeshUtils.PartPath(prefix, $"{series}{n}", suffix);
+                    BuildingScatterRenderer.Model model = BuildingScatterRenderer.GetModel(path);
+                    if (model == null)
+                    {
+                        break;
+                    }
+                    if (model.render != null)
+                    {
+                        paths.Add(path);
+                        kinds.Add(new ScatterLayout.Kind { Bounds = model.layout, Single = single });
+                    }
+                    continue;
+                }
+                GameObject part = BuildingMeshUtils.GetPartNoPosition(prefix, $"{series}{n}", suffix, true);
+                if (part == null)
                 {
                     break;
                 }
-                if (model.render != null)
+                Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(part, out Material[] materials);
+                if (mesh == null)
                 {
-                    paths.Add(path);
-                    kinds.Add(model.layout);
+                    continue;
                 }
-                continue;
+                temporaryMeshes.Add(mesh);
+                meshes.Add(mesh);
+                meshMaterials.Add(materials);
+                kinds.Add(new ScatterLayout.Kind { Bounds = mesh.bounds, Single = single });
             }
-            GameObject part = BuildingMeshUtils.GetPartNoPosition(prefix, $"scatter{n}", suffix, true);
-            if (part == null)
-            {
-                break;
-            }
-            Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(part, out Material[] materials);
-            if (mesh == null)
-            {
-                continue;
-            }
-            temporaryMeshes.Add(mesh);
-            meshes.Add(mesh);
-            meshMaterials.Add(materials);
-            kinds.Add(mesh.bounds);
         }
         if (kinds.Count == 0)
         {
             return;
         }
 
-        List<ScatterLayout.Item> items = ScatterLayout.Plan(site, footprint, kinds, Mathf.FloorToInt(Mathf.Clamp01(seed) * 1000000f));
+        List<ScatterLayout.Item> items = ScatterLayout.Plan(site, footprint, keepClear, kinds, Mathf.FloorToInt(Mathf.Clamp01(seed) * 1000000f));
         foreach (ScatterLayout.Item item in items)
         {
             float baseY = 0f;

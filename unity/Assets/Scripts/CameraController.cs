@@ -254,6 +254,10 @@ public partial class CameraController : MonoBehaviour
         {
             driveModeButton.onClick.AddListener(DriveMode.RequestToggle);
         }
+        if (dioramaModeButton != null)
+        {
+            dioramaModeButton.onClick.AddListener(ToggleDioramaMode);
+        }
         TrafficClock.PausedChanged += HandleTrafficPausedChanged;
         UpdateUIButtons();
 
@@ -264,6 +268,7 @@ public partial class CameraController : MonoBehaviour
     private void OnDestroy()
     {
         TrafficClock.PausedChanged -= HandleTrafficPausedChanged;
+        DisposeDioramaMode();
     }
 
     private void ToggleTrafficPause()

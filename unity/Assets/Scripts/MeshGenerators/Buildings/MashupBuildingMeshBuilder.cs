@@ -23,7 +23,7 @@ using GeneratedModels;
 /// no concrete foundation). Since large parcels can span slopes, always adjust each sub-building Y
 /// to terrain elevation at its own position (difference from center elevation).
 ///
-/// Draw site decorations along the parcel: fences (fence-w / fence-c) and ground panels (floor, only with master draw_floor=yes).
+/// Draw site decorations along the parcel: fences (fence-w / fence-c) opened at the front entry, gates and trails there, and ground panels (floor, only with master draw_floor=yes).
 /// Do not place tiles (tile).
 /// Extrude the parcel polygon to the maximum rendered height for the collider
 /// (so clicking anywhere in the parcel selects the building).
@@ -108,7 +108,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
             fenceFootprint, null, sitePolygon,
             floorMaterial,
             centerPointWorld, deformToTerrain: isDynamic,
-            combineInstances, materials, temporaryMeshes);
+            combineInstances, materials, temporaryMeshes, frontFootprint: footprint);
 
         if (combineInstances.Count == 0 && !openPit)
         {

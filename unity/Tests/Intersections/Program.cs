@@ -37,6 +37,7 @@ internal static class Program
         int layouts = 0, constrained = 0;
         var factory = new GeometryFactory();
         int mixedWidths = CheckMixedWidthCorners(factory);
+        int shortPolylines = ShortPolylineJunctionQA.Run();
         foreach (float length in new[] { 4f, 20f, 100f })
         foreach (float width in new[] { 2f, 8f, 24f })
         foreach (float angle in new[] { 15f, 45f, 90f, 150f, 179f, 180f })
@@ -99,7 +100,7 @@ internal static class Program
         string surfaces = CheckSlopedSurfaces(factory);
         int stationGrades = StationGradeQA.Run();
         int roadJoins = RoadContinuousJoinQA.Run();
-        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, {mixedWidths} mixed-width corners, original curve preservation, input-order invariance, {merges} motorway merge checks, {junctions} track junction checks, sloped surfaces [{surfaces}], {stationGrades} station grade checks, {roadJoins} continuous road join checks.");
+        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, {mixedWidths} mixed-width corners, {shortPolylines} short polyline checks, original curve preservation, input-order invariance, {merges} motorway merge checks, {junctions} track junction checks, sloped surfaces [{surfaces}], {stationGrades} station grade checks, {roadJoins} continuous road join checks.");
     }
 
     private static int CheckMixedWidthCorners(GeometryFactory factory)

@@ -25,6 +25,7 @@ public class AppRoot : MonoBehaviour
         WebGLInput.captureAllKeyboardInput = false;
         Application.targetFrameRate = -1;
 #endif
+        GraphicsConfig.Load();
         GraphicsConfig.ApplyAmbientOcclusion();
         DontDestroyOnLoad(gameObject); 
     }

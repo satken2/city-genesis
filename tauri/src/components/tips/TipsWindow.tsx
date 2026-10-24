@@ -43,6 +43,7 @@ import tip36 from "../../assets/images/tips/tip_36.jpg";
 import tip37 from "../../assets/images/tips/tip_37.jpg";
 import tip38 from "../../assets/images/tips/tip_38.jpg";
 import tip39 from "../../assets/images/tips/tip_39.jpg";
+import tip40 from "../../assets/images/tips/tip_40.jpg";
 
 type TipItem = {
   id: string;
@@ -95,6 +96,7 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip37", image: tip37 },
   { id: "tip38", image: tip38 },
   { id: "tip39", image: tip39 },
+  { id: "tip40", image: tip40 },
 ];
 
 export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: string; mode?: "initial" | "epoch" }) {

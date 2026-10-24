@@ -185,20 +185,31 @@ public sealed class PropRenderModel : IDisposable
             if (sourceUv.Length == positions.Length) uvs[cluster] += sourceUv[index];
         }
         for (int i = 0; i < vertices.Count; i++) { vertices[i] /= counts[i]; uvs[i] /= counts[i]; }
-        var triangles = new List<int>(); var seen = new HashSet<(int,int,int)>();
+        // Flat shading: each triangle owns its vertices and face normal. Clustering collapses the front and back of thin
+        // plates and opposite sides of cylinders onto the same vertices, so shared vertex normals cancel to zero and
+        // become NaN in lighting (Bloom then spreads them into a white blob).
+        var flatVertices = new List<Vector3>(); var flatUvs = new List<Vector2>(); var normals = new List<Vector3>();
+        var seen = new HashSet<(int,int,int)>();
         for (int i = 0; i < indices.Length; i += 3)
         {
             int a = mapping[indices[i]], b = mapping[indices[i+1]], c = mapping[indices[i+2]];
             if (a == b || b == c || a == c) continue;
-            if (Vector3.Cross(vertices[b]-vertices[a], vertices[c]-vertices[a]).sqrMagnitude < 1e-12f) continue;
+            var cross = Vector3.Cross(vertices[b]-vertices[a], vertices[c]-vertices[a]);
+            if (cross.sqrMagnitude < 1e-12f) continue;
             var canonical = a < b && a < c ? (a,b,c) : b < c ? (b,c,a) : (c,a,b);
             if (!seen.Add(canonical)) continue;
-            triangles.Add(a); triangles.Add(b); triangles.Add(c);
+            var normal = cross / cross.magnitude;
+            foreach (int v in new[] { a, b, c })
+            {
+                flatVertices.Add(vertices[v]); flatUvs.Add(uvs[v]); normals.Add(normal);
+            }
         }
-        if (triangles.Count == 0 || triangles.Count >= indices.Length) return null;
+        if (flatVertices.Count == 0 || flatVertices.Count >= indices.Length) return null;
+        var triangles = new int[flatVertices.Count];
+        for (int i = 0; i < triangles.Length; i++) triangles[i] = i;
         var mesh = new Mesh { name = "PropFarClustered" };
-        mesh.SetVertices(vertices); mesh.SetUVs(0,uvs); mesh.SetTriangles(triangles,0);
-        mesh.RecalculateNormals(); mesh.RecalculateBounds(); return mesh;
+        mesh.SetVertices(flatVertices); mesh.SetNormals(normals); mesh.SetUVs(0,flatUvs); mesh.SetTriangles(triangles,0);
+        mesh.RecalculateBounds(); return mesh;
     }
 
     public void Dispose()

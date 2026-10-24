@@ -401,6 +401,7 @@ export const ALERT_DISPLAY_SANITATION_WARNING: number = 524288;
 export const ALERT_DISPLAY_INFRA_WARNING: number = 1048576;
 export const ALERT_BUDGET_CAPPED_SCALE_THRESHOLD: number = 0.5;
 export const ALERT_CAPACITY_TIGHT_RATIO: number = 0.9;
+export const ALERT_MATERIAL_SHORTAGE_RATIO: number = 0.05;
 export const PATH_EQUIPMENT_NONE: number = 0;
 export const PATH_EQUIPMENT_STANDARD: number = 1;
 export const PATH_UTILITY_NONE: number = 0;

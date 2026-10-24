@@ -130,7 +130,7 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
             floorMaterial,
             centerPointWorld, deformToTerrain: isDynamic,
             combineInstances, materials, temporaryMeshes,
-            scatterFootprint: footprint, scatterSeed: buildingData.visual_variant2);
+            scatterFootprint: footprint, scatterSeed: buildingData.visual_variant2, frontFootprint: footprint);
 
         if (combineInstances.Count == 0)
         {

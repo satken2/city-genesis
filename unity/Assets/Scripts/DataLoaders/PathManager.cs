@@ -3852,30 +3852,52 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private static List<Vector3> CalculateSectionCenterline(PathSummary path, List<Vector3> points)
     {
-        if (!IsAnchorPolyline(path, points)) return points;
+        if (!IsAnchorPolyline(path, points, out int firstSpan)) return points;
         var result = new List<Vector3>();
         for (int i = 0; i < points.Count - 1; i++)
         {
-            var span = SubdividePointsWithTerrain(new List<Vector3> { points[i], points[i + 1] }, TERRAIN_SAMPLE_INTERVAL, LinearSpanFollowsTerrain(path, i));
+            var span = SubdividePointsWithTerrain(new List<Vector3> { points[i], points[i + 1] }, TERRAIN_SAMPLE_INTERVAL, LinearSpanFollowsTerrain(path, firstSpan + i));
             result.AddRange(i == 0 ? span : span.GetRange(1, span.Count - 1));
         }
         return result;
     }
 
     /// <summary>
-    /// Whether these points are polyline anchors (start, waypoints, end). Endpoints move during intersection clipping, so check waypoint planar positions.
-    /// Apply RoadPath corner processing only to these points; after section splitting, treat points as a rendered centerline in one spline.
+    /// 保存された折れ線の連続区間かを判定する。交差点で端の経由点まで切り取られた場合も、残るアンカーと元のスパン番号を対応させる。
+    /// 細分化済みの描画点列は対象にせず、RoadPath の角処理とスパンごとの地形追従にだけ使う。
     /// </summary>
     public static bool IsAnchorPolyline(PathSummary path, List<Vector3> points)
+        => IsAnchorPolyline(path, points, out _);
+
+    public static bool IsAnchorPolyline(PathSummary path, List<Vector3> points, out int firstSpan)
     {
+        firstSpan = 0;
         var waypoints = path.GetWaypointList();
-        if (waypoints == null || waypoints.Count == 0 || points == null || points.Count != waypoints.Count + 2) return false;
-        for (int i = 0; i < waypoints.Count; i++)
+        if (waypoints == null || waypoints.Count == 0 || points == null || points.Count < 2 || points.Count > waypoints.Count + 2) return false;
+        var start = path.GetStartPointList();
+        var end = path.GetEndPointList();
+        if (start == null || end == null) return false;
+        var anchors = new List<Vector2> { new Vector2(start[0], start[start.Count - 1]) };
+        foreach (var waypoint in waypoints)
+            anchors.Add(new Vector2(waypoint.position[0], waypoint.position[waypoint.position.Length - 1]));
+        anchors.Add(new Vector2(end[0], end[end.Count - 1]));
+        var from = IntersectionPolygonUtil.XZ(points[0]);
+        var to = IntersectionPolygonUtil.XZ(points[points.Count - 1]);
+        for (int candidate = 0; candidate + points.Count <= anchors.Count; candidate++)
         {
-            Vector3 anchor = waypoints[i].GetAbsolutePosition();
-            if (Mathf.Abs(points[i + 1].x - anchor.x) > 1e-3f || Mathf.Abs(points[i + 1].z - anchor.z) > 1e-3f) return false;
+            int lastSpan = candidate + points.Count - 2;
+            if (PolylineUtils.DistanceToSegmentSq(from, anchors[candidate], anchors[candidate + 1]) > 1e-6f
+                || PolylineUtils.DistanceToSegmentSq(to, anchors[lastSpan], anchors[lastSpan + 1]) > 1e-6f) continue;
+            if (points.Count == 2 && PolylineUtils.ProjectOnSegment(from, anchors[candidate], anchors[candidate + 1])
+                > PolylineUtils.ProjectOnSegment(to, anchors[candidate], anchors[candidate + 1])) continue;
+            bool matches = true;
+            for (int i = 1; i < points.Count - 1; i++)
+                if ((IntersectionPolygonUtil.XZ(points[i]) - anchors[candidate + i]).sqrMagnitude > 1e-6f) { matches = false; break; }
+            if (!matches) continue;
+            firstSpan = candidate;
+            return true;
         }
-        return true;
+        return false;
     }
 
     /// <summary>
@@ -4653,14 +4675,14 @@ public partial class PathManager : BaseApiDataManager
         return points;
     }
 
-    /// <summary>Reserve cut distances at both ends if the opposite node also has an intersection.</summary>
+    /// <summary>両端の交差点の切断区間を分ける。通常の折れ線の経由点は交差点内に取り込めるが、single_span の構造アンカーは残す。</summary>
     private float GetIntersectionCutLimit(PathSummary path, int nodeId, List<Vector3> points)
     {
         int otherNode = path.start_node_id == nodeId ? path.end_node_id : path.start_node_id;
         bool bothEnds = pathsByNodeIndex.TryGetValue(otherNode, out var connected) && connected.Count > 1;
         float limit = IntersectionPolygonUtil.Length(points) * (bothEnds ? 0.45f : 0.95f);
         bool singleSpan = MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false;
-        if ((!path.curved || singleSpan) && points.Count > 1)
+        if (singleSpan && points.Count > 1)
         {
             // Design vertical alignment subdivides rendering points, so take the next anchor from stored path waypoints.
             var waypoints = path.GetWaypointList();

@@ -1,10 +1,14 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// On/off switches for rendering features with high GPU cost. Defaults keep full quality.
-/// The settings screen will write these values. Sun and prop switches are read where they apply every frame.
+/// GraphicsSettingsPanel writes these values and saves them to graphics_settings.json in the user directory; AppRoot loads them at startup.
+/// Sun and prop switches are read where they apply every frame.
 /// </summary>
 public static class GraphicsConfig
 {
@@ -13,7 +17,58 @@ public static class GraphicsConfig
     public static bool PropShadows = true;      // Tree and prop shadows within the shadow distance.
     public static bool AmbientOcclusion = true; // SSAO and its depth-normals prepass. Takes effect through ApplyAmbientOcclusion.
 
+    private const string FILE_NAME = "graphics_settings.json";
+
     private static readonly Dictionary<ScriptableRendererFeature, bool> originalAmbientOcclusion = new Dictionary<ScriptableRendererFeature, bool>();
+
+    /// <summary>
+    /// Saved form of the switches. Fields start from the current values, so keys missing from the file keep them.
+    /// </summary>
+    private sealed class Snapshot
+    {
+        public bool SunShadows = GraphicsConfig.SunShadows;
+        public bool SoftShadows = GraphicsConfig.SoftShadows;
+        public bool PropShadows = GraphicsConfig.PropShadows;
+        public bool AmbientOcclusion = GraphicsConfig.AmbientOcclusion;
+    }
+
+    /// <summary>
+    /// Read the saved switches. Without a user directory (browser build) or a readable file, the defaults stay.
+    /// </summary>
+    public static void Load()
+    {
+        if (UserDataDir.Root == null) return;
+        string path = Path.Combine(UserDataDir.Root, FILE_NAME);
+        if (!File.Exists(path)) return;
+        try
+        {
+            var saved = JsonConvert.DeserializeObject<Snapshot>(File.ReadAllText(path));
+            if (saved == null) return;
+            SunShadows = saved.SunShadows;
+            SoftShadows = saved.SoftShadows;
+            PropShadows = saved.PropShadows;
+            AmbientOcclusion = saved.AmbientOcclusion;
+        }
+        catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is JsonException)
+        {
+            Debug.LogWarning($"GraphicsConfig: {path} を読めません。既定のグラフィック設定で描きます: {e.Message}");
+        }
+    }
+
+    public static void Save()
+    {
+        if (UserDataDir.Root == null) return;
+        string path = Path.Combine(UserDataDir.Root, FILE_NAME);
+        try
+        {
+            Directory.CreateDirectory(UserDataDir.Root);
+            File.WriteAllText(path, JsonConvert.SerializeObject(new Snapshot(), Formatting.Indented));
+        }
+        catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+        {
+            Debug.LogWarning($"GraphicsConfig: {path} に保存できません: {e.Message}");
+        }
+    }
 
     /// <summary>
     /// Reflect AmbientOcclusion in the active pipeline's SSAO features. Feature state is serialized in the renderer asset,

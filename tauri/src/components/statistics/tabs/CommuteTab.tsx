@@ -145,8 +145,11 @@ function scopeKey(scope: CommuteTimeScope): string {
   return scope.zone_id == null ? "city" : String(scope.zone_id);
 }
 
-/** Sankey nodes. Separate residence (left) and destination (right) nodes even for the same District, since self-loops for movement within a District cannot be drawn. */
-type SankeyNode = { name: string; isSource: boolean };
+/**
+ * Sankey nodes. Separate residence (left) and destination (right) nodes even for the same District, since self-loops for movement within a District cannot be drawn.
+ * nodeKey identifies a node across re-renders, because Recharts rebuilds node objects on every layout pass.
+ */
+type SankeyNode = { name: string; isSource: boolean; nodeKey: string };
 
 /**
  * Choropleth map of car ownership by District.
@@ -240,6 +243,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   const [selectedKey, setSelectedKey] = useState<string>("city");
   const [flowKind, setFlowKind] = useState<FlowKind>("total");
+  const [hoveredNodeKey, setHoveredNodeKey] = useState<string | null>(null);
 
   const timeScope = useMemo<CommuteTimeScope | null>(() => {
     const scopes = data?.commute_time_scopes ?? [];
@@ -253,28 +257,34 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       return { nodes: [], links: [] };
     }
 
+    // With sort={false}, Recharts keeps the node array order within each column, so origins are
+    // ordered by total outflow and destinations by total inflow, largest first.
     const nodes: SankeyNode[] = [];
-    const nodeMap = new Map<string, number>();
-    const links: { source: number; target: number; value: number }[] = [];
-
-    const nodeIndex = (zoneId: number, name: string, isSource: boolean): number => {
-      const key = `${isSource ? "src" : "dst"}:${zoneId}`;
-      let index = nodeMap.get(key);
-      if (index === undefined) {
-        index = nodes.length;
-        nodeMap.set(key, index);
-        nodes.push({ name, isSource });
+    const addColumn = (isSource: boolean): Map<number, number> => {
+      const totals = new Map<number, { name: string; total: number }>();
+      for (const item of flows) {
+        const zoneId = isSource ? item.from_zone_id : item.to_zone_id;
+        const entry = totals.get(zoneId) ?? { name: isSource ? item.from_name : item.to_name, total: 0 };
+        entry.total += item.count;
+        totals.set(zoneId, entry);
       }
-      return index;
+      const indexByZone = new Map<number, number>();
+      [...totals]
+        .sort((a, b) => b[1].total - a[1].total)
+        .forEach(([zoneId, { name }]) => {
+          indexByZone.set(zoneId, nodes.length);
+          nodes.push({ name, isSource, nodeKey: `${isSource ? "src" : "dst"}:${zoneId}` });
+        });
+      return indexByZone;
     };
+    const sourceIndex = addColumn(true);
+    const targetIndex = addColumn(false);
 
-    flows.forEach((item) => {
-      links.push({
-        source: nodeIndex(item.from_zone_id, item.from_name, true),
-        target: nodeIndex(item.to_zone_id, item.to_name, false),
-        value: item.count,
-      });
-    });
+    const links = flows.map((item) => ({
+      source: sourceIndex.get(item.from_zone_id)!,
+      target: targetIndex.get(item.to_zone_id)!,
+      value: item.count,
+    }));
 
     return { nodes, links };
   }, [flows]);
@@ -306,7 +316,11 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     const isSource = (payload as SankeyNode).isSource;
 
     return (
-      <g key={`node-${index}`}>
+      <g
+        key={`node-${index}`}
+        onMouseEnter={() => setHoveredNodeKey((payload as SankeyNode).nodeKey)}
+        onMouseLeave={() => setHoveredNodeKey(null)}
+      >
         <rect
           x={x}
           y={y}
@@ -327,6 +341,23 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           {payload.name}
         </text>
       </g>
+    );
+  };
+
+  // --- Custom Sankey link rendering ---
+  // Draws the same curve as the Recharts default link; links connected to the hovered node are opaque.
+  const renderSankeyLink = ({ sourceX, sourceY, sourceControlX, targetX, targetY, targetControlX, linkWidth, payload }: any) => {
+    const highlighted =
+      hoveredNodeKey != null &&
+      ((payload.source as SankeyNode).nodeKey === hoveredNodeKey || (payload.target as SankeyNode).nodeKey === hoveredNodeKey);
+    return (
+      <path
+        d={`M${sourceX},${sourceY} C${sourceControlX},${sourceY} ${targetControlX},${targetY} ${targetX},${targetY}`}
+        fill="none"
+        stroke={flowColors.link}
+        strokeWidth={linkWidth}
+        strokeOpacity={highlighted ? 1 : 0.2}
+      />
     );
   };
 
@@ -451,7 +482,8 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   key={flowKind}
                   data={sankeyData}
                   node={renderSankeyNode}
-                  link={{ stroke: flowColors.link, fill: "none" }}
+                  link={renderSankeyLink}
+                  sort={false}
                   nodePadding={12}
                   margin={{ top: 10, right: 80, bottom: 10, left: 80 }}
                 >

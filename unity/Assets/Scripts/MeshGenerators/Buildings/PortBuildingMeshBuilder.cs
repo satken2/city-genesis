@@ -252,7 +252,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             fenceFootprint, yard, yard,
             floorMaterial,
             centerPointWorld, deformToTerrain: true,
-            combineInstances, materials, temporaryMeshes);
+            combineInstances, materials, temporaryMeshes, frontFootprint: footprint);
 
         // Ports facing reclaimed quays have no slab; without any resolved part, their mesh is empty.
         if (combineInstances.Count == 0)

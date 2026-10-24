@@ -217,9 +217,9 @@ public class RoadPath : IPathMeshGenerator
         // Process corners only on anchor sequences. Already subdivided section/profile points form one rendered-centerline spline.
         // Linear splines average neighboring directions (linearAverageDirection); using one anchor spline
         // misorients the whole section after a corner. With subdivided points, only the first section after it differs.
-        if (!isCurved && hasWaypoints && PathManager.IsAnchorPolyline(pathData, points))
+        if (!isCurved && hasWaypoints && PathManager.IsAnchorPolyline(pathData, points, out int firstSpan))
         {
-            return GenerateLinearPathWithCorners(pathData, points, startSidewalkSetback, endSidewalkSetback, singleSpan);
+            return GenerateLinearPathWithCorners(pathData, points, startSidewalkSetback, endSidewalkSetback, singleSpan, firstSpan);
         }
 
         // Straight paths without waypoints contain only start/end control points,
@@ -1313,12 +1313,10 @@ public class RoadPath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// Generate roads with curved=False and waypoints.
-    /// Create independent splines per segment; at corners (waypoints),
-    /// calculate intersection regions using RoadIntersectionMeshGenerator logic,
-    /// cut roads at connection sections, and fill corners with shared-perimeter meshes.
+    /// 切断後の折れ線を区間ごとに描き、経由点の角を交差点と同じ生成器で埋める。
+    /// firstSpan は元のアンカー列のスパン番号。交差点内で除かれた経由点を飛ばし、残る角と高さ指定を対応させる。
     /// </summary>
-    private PathMeshResult GenerateLinearPathWithCorners(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default, bool singleSpan = false)
+    private PathMeshResult GenerateLinearPathWithCorners(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default, bool singleSpan = false, int firstSpan = 0)
     {
         // Separate segment splines cannot use detail intervals expressed as full-path fractions
         // (draw full length at one detail level).
@@ -1346,14 +1344,14 @@ public class RoadPath : IPathMeshGenerator
         }
 
         var waypoints = pathData.GetWaypointList();
-        if (waypoints != null && waypoints.Count > 0 && waypoints.Count == points.Count - 2)
+        if (waypoints != null && waypoints.Count > 0)
         {
             var gf = new NetTopologySuite.Geometries.GeometryFactory();
 
-            for (int i = 0; i < waypoints.Count; i++)
+            for (int i = 0; i < points.Count - 2; i++)
             {
                 int pointIndex = i + 1;
-                var wp = waypoints[i];
+                var wp = waypoints[firstSpan + i];
                 Vector3 wpPos = points[pointIndex];
                 Vector3 prevPos = points[pointIndex - 1];
                 Vector3 nextPos = points[pointIndex + 1];
@@ -1485,7 +1483,7 @@ public class RoadPath : IPathMeshGenerator
             else
             {
                 List<Vector3> anchorPoints = new List<Vector3> { segStart, segEnd };
-                splinePoints = PathManager.SubdividePointsWithTerrain(anchorPoints, PathManager.TERRAIN_SAMPLE_INTERVAL, PathManager.LinearSpanFollowsTerrain(pathData, i));
+                splinePoints = PathManager.SubdividePointsWithTerrain(anchorPoints, PathManager.TERRAIN_SAMPLE_INTERVAL, PathManager.LinearSpanFollowsTerrain(pathData, firstSpan + i));
             }
             allSubdividedPoints.AddRange(splinePoints);
             segmentPoints[i] = splinePoints;

@@ -734,6 +734,10 @@
       "tip39": {
         "title": "Ese servicio se cobra",
         "description": "Los servicios públicos, como el tratamiento de aguas residuales, la gestión de residuos, las telecomunicaciones y la atención médica, pueden ser gratuitos por defecto. Puedes fijar sus tarifas libremente. Como alcalde, tú decides si ofrecer precios accesibles para los ciudadanos o ponerles una tarifa bien alta."
+      },
+      "tip40": {
+        "title": "Ciudad de copiar y pegar",
+        "description": "Al construir edificios, el alcalde puede copiar y replicar los ya existentes. Aunque el aspecto resulte uniforme, permite mantener bajos los costos de construcción."
       }
     }
   },

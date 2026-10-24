@@ -734,6 +734,10 @@
       "tip39": {
         "title": "Ce service est payant",
         "description": "Les services publics comme le traitement des eaux usées, la gestion des déchets, les télécommunications et les soins de santé peuvent être gratuits par défaut. Vous pouvez fixer librement leurs tarifs. À vous de choisir, en tant que maire, entre des prix abordables pour les citoyens et une facture salée."
+      },
+      "tip40": {
+        "title": "Ville copier-coller",
+        "description": "Lors de la construction de bâtiments, le maire peut copier un bâtiment existant. L'apparence devient uniforme, mais les coûts de construction sont nettement réduits."
       }
     }
   },

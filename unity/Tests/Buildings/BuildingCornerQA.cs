@@ -94,7 +94,7 @@ public static class BuildingCornerQA
             var polygon = new[] { Vector2.zero, new Vector2(20, 0), new Vector2(20, 20), new Vector2(0, 20) };
             builder.GetMethod("GenerateSiteDecorations").Invoke(null, new object[] {
                 prefix, 0, polygon, null, null, null, Vector3.zero, false,
-                combines, materials, meshes, null, 0f, null, 0f
+                combines, materials, meshes, null, 0f, null, 0f, null
             });
             Require(combines.Count == 0, "A site without fence assets generated exterior walls");
             cache[path + "fence-w1"] = fence;

@@ -20,7 +20,11 @@ public static class IntersectionQA
  static Dictionary<string,List<Vector3>> partVertices=new Dictionary<string,List<Vector3>>();
  static Dictionary<int,List<Vector3>> bodyVertices=new Dictionary<int,List<Vector3>>();
  static Dictionary<int,List<Vector3>> bodyNormals=new Dictionary<int,List<Vector3>>();
+ static Component shortPolylineManager;
  static List<Vector3> Samples<T>(T p) {return points[(int)p.GetType().GetField("path_id").GetValue(p)];}
+ static float ShortPolylineCutLimit<T>(T path) => (float)shortPolylineManager.GetType()
+  .GetMethod("GetIntersectionCutLimit", BindingFlags.Instance | BindingFlags.NonPublic)
+  .Invoke(shortPolylineManager, new object[] { path, 187, Samples(path) });
  public static void Run()
  {
   try {
@@ -87,9 +91,10 @@ public static class IntersectionQA
    CheckRailCrossing(asm, pathType, itemType, dict, cache, gen);
    CheckLinearCorner(asm, pathType);
    CheckMixedWidthRoadCrossing(asm, pathType, itemType, dict, cache, gen);
+   CheckShortPolylineJunction(asm, pathType, itemType, dict, cache, gen);
    CheckContinuousRoadJoin(asm, pathType, itemType, dict, cache, gen);
    int motorwayCases = MotorwayMergeQA.Run(asm, dict, cache, root);
-   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+" normal seam="+normalSeam+"; 24m/3m road crossing; mixed crossing and 2-to-1 rail endpoints; straight road body/sidewalk seams; motorway merges="+motorwayCases);
+   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+" normal seam="+normalSeam+"; 24m/3m road crossing; node187 short polyline road/corner seams; mixed crossing and 2-to-1 rail endpoints; straight road body/sidewalk seams; motorway merges="+motorwayCases);
    EditorApplication.Exit(0);
   } catch(Exception ex){File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt",ex.ToString());Debug.LogException(ex);EditorApplication.Exit(1);}
  }
@@ -235,6 +240,111 @@ public static class IntersectionQA
   UnityEngine.Object.DestroyImmediate(image); UnityEngine.Object.DestroyImmediate(target);
   UnityEngine.Object.DestroyImmediate(camera.gameObject); UnityEngine.Object.DestroyImmediate(preview);
   UnityEngine.Object.DestroyImmediate(asphalt); UnityEngine.Object.DestroyImmediate(pavement);
+ }
+
+ static void CheckShortPolylineJunction(Assembly asm, Type pathType, Type itemType, IDictionary masters, IDictionary models, object generator)
+ {
+  var deserialize = Assembly.Load("Newtonsoft.Json").GetType("Newtonsoft.Json.JsonConvert")
+   .GetMethod("DeserializeObject", new[] { typeof(string), typeof(Type) });
+  var paths = (IList)deserialize.Invoke(null, new object[] {
+   File.ReadAllText(root + "/Tests/Intersections/Fixtures/node187.json"), typeof(List<>).MakeGenericType(pathType),
+  });
+  foreach (int variant in new[] { 211, 231 })
+  {
+   var master = Activator.CreateInstance(itemType);
+   itemType.GetField("width").SetValue(master, variant == 211 ? 3f : 24f);
+   itemType.GetField("sidewalk_width").SetValue(master, variant == 211 ? 0f : 3f);
+   itemType.GetField("side_width").SetValue(master, .5f);
+   itemType.GetField("lanes").SetValue(master, variant == 211 ? 1 : 4);
+   itemType.GetField("follow_terrain").SetValue(master, false);
+   masters[variant] = master;
+   foreach (string part in new[] { "body", "sidewalk", "line" })
+    models["Models/Paths/p" + variant + "/" + part] = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Paths/p2/" + part + ".fbx");
+  }
+  var util = asm.GetType("IntersectionPolygonUtil");
+  foreach (var path in paths)
+  {
+   int id = (int)pathType.GetField("path_id").GetValue(path);
+   points[id] = (List<Vector3>)util.GetMethod("SamplePlan").Invoke(null, new[] { path });
+  }
+  var managerObject = new GameObject("ShortPolylineManager");
+  managerObject.SetActive(false);
+  shortPolylineManager = managerObject.AddComponent(asm.GetType("PathManager"));
+  shortPolylineManager.GetType().GetField("pathsByNodeIndex", BindingFlags.Instance | BindingFlags.NonPublic)
+   .SetValue(shortPolylineManager, new Dictionary<int, HashSet<int>> {
+    [183] = new HashSet<int> { 273, 274 }, [186] = new HashSet<int> { 282, 283 }, [188] = new HashSet<int> { 284, 285 },
+   });
+  var provider = Delegate.CreateDelegate(typeof(Func<,>).MakeGenericType(pathType, typeof(List<Vector3>)),
+   typeof(IntersectionQA).GetMethod("Samples", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(pathType));
+  var limits = Delegate.CreateDelegate(typeof(Func<,>).MakeGenericType(pathType, typeof(float)),
+   typeof(IntersectionQA).GetMethod("ShortPolylineCutLimit", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(pathType));
+  var node = points[273][0];
+  var result = generator.GetType().GetMethod("GenerateWithSections").Invoke(generator, new object[] { 187, node, paths, 0f, provider, limits });
+  if (result == null) throw new Exception("Node187 intersection mesh missing");
+  var cuts = (IDictionary)result.GetType().GetProperty("ConnectionPoints").GetValue(result);
+  if (Vector3.Distance((Vector3)cuts[273], node) < 17f) throw new Exception("Short alley entrance remains inside main road");
+  var preview = new GameObject("ShortPolylineJunction");
+  var surface = new GameObject("Surface");
+  surface.transform.SetParent(preview.transform, false);
+  surface.transform.position = node;
+  var mesh = (Mesh)result.GetType().GetProperty("Mesh").GetValue(result);
+  surface.AddComponent<MeshFilter>().sharedMesh = mesh;
+  var asphalt = new Material(Shader.Find("Standard")) { color = new Color(.28f, .28f, .28f) };
+  var pavement = new Material(Shader.Find("Standard")) { color = new Color(.65f, .65f, .65f) };
+  surface.AddComponent<MeshRenderer>().sharedMaterial = asphalt;
+  var roadType = asm.GetType("RoadPath");
+  var specs = (IList)result.GetType().GetProperty("SidewalkConnectors").GetValue(result);
+  for (int i = 0; i < specs.Count; i++) roadType.GetMethod("CreateSidewalkConnectorObject").Invoke(null, new object[] { surface.transform, specs[i], i });
+  foreach (var path in paths)
+  {
+   int id = (int)pathType.GetField("path_id").GetValue(path);
+   bool atStart = (int)pathType.GetField("start_node_id").GetValue(path) == 187;
+   var cut = (Vector3)cuts[id];
+   var trimmed = (List<Vector3>)util.GetMethod("Trim").Invoke(null, new object[] { points[id], atStart ? (Vector3?)cut : null, atStart ? null : (Vector3?)cut });
+   var road = Activator.CreateInstance(roadType);
+   var setback = Activator.CreateInstance(asm.GetType("SidewalkSetback"));
+   var generated = roadType.GetMethod("Generate").Invoke(road, new object[] { path, trimmed, setback, setback });
+   var body = (GameObject)generated.GetType().GetProperty("GeneratedObject").GetValue(generated);
+   body.transform.SetParent(preview.transform, false);
+   if (id == 273 && !body.GetComponentsInChildren<MeshFilter>().Any(f => f.name.StartsWith("Corner_") && f.sharedMesh != null))
+    throw new Exception("Remaining alley corner mesh missing after clipping");
+   foreach (var component in body.GetComponentsInChildren<Component>())
+    if (component != null && component.GetType().Name == "SplineMesh")
+    {
+     var rebuild = component.GetType().GetMethod("RebuildImmediate");
+     rebuild.Invoke(component, rebuild.GetParameters().Length == 0 ? null : new object[] { true });
+    }
+   var vertices = body.GetComponentsInChildren<MeshFilter>().Where(f => f.name.EndsWith("/body"))
+    .SelectMany(f => f.sharedMesh.vertices.Select(v => f.transform.TransformPoint(v))).ToList();
+   var outward = (atStart ? trimmed[1] - trimmed[0] : trimmed[trimmed.Count - 2] - trimmed[trimmed.Count - 1]).normalized;
+   var right = Vector3.Cross(Vector3.up, outward);
+   float width = (float)pathType.GetField("width").GetValue(path);
+   foreach (float side in new[] { -1f, 1f })
+   {
+    var expected = cut + right * width * .5f * side + Vector3.up * .1f;
+    float surfaceError = mesh.vertices.Min(v => Vector3.Distance(v + node, expected));
+    float bodyError = vertices.Count == 0 ? float.PositiveInfinity : vertices.Min(v => Vector3.Distance(v, expected));
+    // 本線の曲線はスプラインと点列の接線差を許容し、直線区間で接続する路地は3mm以内で確かめる。
+    if (surfaceError > .005f) throw new Exception("Node187 surface mouth missing id=" + id + " side=" + side + " error=" + surfaceError);
+    if (bodyError > (id == 273 ? .003f : .05f)) throw new Exception("Node187 body seam mismatch id=" + id + " side=" + side + " error=" + bodyError);
+   }
+  }
+  foreach (var renderer in preview.GetComponentsInChildren<MeshRenderer>())
+   renderer.sharedMaterials = renderer.sharedMaterials.Select(m => renderer.name.Contains("sidewalk") ? pavement : asphalt).ToArray();
+  var camera = new GameObject("ShortPolylineCamera").AddComponent<Camera>();
+  camera.orthographic = true; camera.orthographicSize = 45f;
+  camera.transform.position = node + Vector3.up * 150f;
+  camera.transform.rotation = Quaternion.Euler(90f, 0f, -50f);
+  camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(.32f, .42f, .22f);
+  var target = new RenderTexture(1000, 800, 24); camera.targetTexture = target;
+  camera.Render(); RenderTexture.active = target;
+  var image = new Texture2D(1000, 800, TextureFormat.RGB24, false);
+  image.ReadPixels(new Rect(0, 0, 1000, 800), 0, 0); image.Apply();
+  File.WriteAllBytes(root + "/Temp/IntersectionUnityQA/node187.png", image.EncodeToPNG());
+  camera.targetTexture = null; RenderTexture.active = null; target.Release();
+  foreach (var resource in new UnityEngine.Object[] { image, target, camera.gameObject, preview, asphalt, pavement, managerObject })
+   UnityEngine.Object.DestroyImmediate(resource);
+  shortPolylineManager = null;
  }
 
  static void CheckSurfaceOrigins(Assembly asm, IDictionary cache)
