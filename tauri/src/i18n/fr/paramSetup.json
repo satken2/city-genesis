@@ -155,10 +155,6 @@
         "label": "Heures de travail quotidiennes (h)",
         "desc": "Nombre d'heures standard travaillées par habitant et par jour."
       },
-      "NORMAL_LABOR_UTILITY": {
-        "label": "Taux d'utilisation de référence de la main-d'œuvre",
-        "desc": "Taux d'utilisation de la main-d'œuvre retenu pour le calcul du prix standard. 1,0 correspond à une utilisation complète."
-      },
       "HIGH_SKILL_BOUNDARY": {
         "label": "Seuil de haute qualification",
         "desc": "Au-delà de cette valeur, le travailleur est considéré comme hautement qualifié."

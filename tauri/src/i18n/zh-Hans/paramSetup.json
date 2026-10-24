@@ -155,10 +155,6 @@
         "label": "每日劳动时间（h）",
         "desc": "市民每日工作的标准小时数。"
       },
-      "NORMAL_LABOR_UTILITY": {
-        "label": "基准劳动力利用度",
-        "desc": "计算标准价格时的劳动力利用度。1.0为完全利用。"
-      },
       "HIGH_SKILL_BOUNDARY": {
         "label": "高技能分界值",
         "desc": "超过该值即视为高技能劳动者。"

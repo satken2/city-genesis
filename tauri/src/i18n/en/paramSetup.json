@@ -155,10 +155,6 @@
         "label": "Daily Work Hours (h)",
         "desc": "Standard number of hours a citizen works per day."
       },
-      "NORMAL_LABOR_UTILITY": {
-        "label": "Baseline Labor Utilization",
-        "desc": "Labor utilization rate used in standard price calculation. 1.0 = fully utilized."
-      },
       "HIGH_SKILL_BOUNDARY": {
         "label": "High-Skill Boundary",
         "desc": "Skill level above which a citizen is classified as a high-skill worker."

@@ -155,10 +155,6 @@
         "label": "Horas de trabajo diarias (h)",
         "desc": "Horas estándar que trabaja un ciudadano al día."
       },
-      "NORMAL_LABOR_UTILITY": {
-        "label": "Aprovechamiento laboral de referencia",
-        "desc": "Aprovechamiento de la mano de obra al calcular el precio estándar. Con 1.0 es aprovechamiento total."
-      },
       "HIGH_SKILL_BOUNDARY": {
         "label": "Umbral de alta calificación",
         "desc": "Por encima de este valor el trabajador se considera altamente calificado."
