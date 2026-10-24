@@ -3,8 +3,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Selects private vehicles/pedestrians while paused. On press, collects oriented boxes for visible instances and ray-tests them
+/// Selects private vehicles/pedestrians, moving or paused. On press, collects oriented boxes for visible instances and ray-tests them
 /// (avoids permanent colliders); rejects picks occluded by buildings, etc. Movement of 5px or more yields to camera controls.
+/// The press-time candidate is kept even if it moves before release.
 /// On release, <see cref="CitizenFollow.RequestPick"/> selects a citizen and opens the citizen panel. Called before physics raycasts.
 /// </summary>
 public static class CitizenPickSelection
@@ -22,7 +23,7 @@ public static class CitizenPickSelection
     public static bool ProcessPointer(Camera cam)
     {
         var mouse = Mouse.current;
-        if (mouse == null || !TrafficClock.Paused) { pending = null; return false; }
+        if (mouse == null) { pending = null; return false; }
         Vector2 point = mouse.position.ReadValue();
         if (mouse.leftButton.wasPressedThisFrame) { cancelled = false; pressed = point; pending = Pick(cam, cam.ScreenPointToRay(point)); }
         if (pending == null) return false;

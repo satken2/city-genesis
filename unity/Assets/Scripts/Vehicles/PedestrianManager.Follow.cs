@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// One pedestrian designated for citizen following, plus paused click detection. It uses the same walking bands and speed as others,
+/// One pedestrian designated for citizen following, plus click detection. It uses the same walking bands and speed as others,
 /// but follows the itinerary's path sequence (<see cref="FollowRun"/>) at branches and is excluded from arrival scheduling and out-of-range removal.
 /// </summary>
 public sealed partial class PedestrianManager
@@ -12,7 +12,7 @@ public sealed partial class PedestrianManager
     // Pedestrians are small, so use a slightly oversized click box with its origin at the feet.
     private static readonly Bounds PickBounds = new Bounds(new Vector3(0, 1.05f, 0), new Vector3(1f, 2.1f, 1f));
 
-    /// <summary>On-screen pedestrians. Since they do not move while paused, collect them at click time for hit testing.</summary>
+    /// <summary>On-screen pedestrians. Collect at button press for hit tests.</summary>
     public void CollectPickTargets(List<Pedestrian> result, Plane[] frustum)
     {
         foreach (var p in active)

@@ -41,7 +41,7 @@ Numeric aliases of the same geometry are registered as [terrain props](M_terrain
 
 ## Traffic clock
 
-Ordinary vehicles, public transport, ropeways, aircraft, ships, and pedestrians use `TrafficClock`, rather than Unity-wide `Time.timeScale`. Traffic pause stops only this clock. Paused private cars or pedestrians can still be selected for citizen tracking. Vehicles report positions and speeds to shared audio management instead of playing independent sounds ([sound](../programs/sound.md)).
+Ordinary vehicles, public transport, ropeways, aircraft, ships, and pedestrians use `TrafficClock`, rather than Unity-wide `Time.timeScale`. Traffic pause stops only this clock. Vehicles report positions and speeds to shared audio management instead of playing independent sounds ([sound](../programs/sound.md)).
 
 ## Drive mode
 

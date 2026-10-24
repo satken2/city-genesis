@@ -42,7 +42,7 @@ public partial class CameraController : MonoBehaviour
     [SerializeField] private Button flyModeButton;  // Fly mode toggle button.
     [SerializeField] private Sprite flyModeOnIcon;  // Icon while fly mode is active.
     [SerializeField] private Sprite flyModeOffIcon; // Icon in normal mode (fly mode off).
-    [SerializeField] private Button trafficPauseButton;  // Pause button for traffic animation, including cars and pedestrians. Cars and people can be clicked only while paused.
+    [SerializeField] private Button trafficPauseButton;  // Pause button for traffic animation, including cars and pedestrians.
     [SerializeField] private Sprite trafficPauseIcon;    // Icon while moving (click to pause).
     [SerializeField] private Sprite trafficResumeIcon;   // Icon while paused (click to resume).
     [SerializeField] private Button driveModeButton;     // Button to start or stop driving.

@@ -21,7 +21,7 @@ public sealed class FollowRun
 }
 
 /// <summary>
-/// Citizen following and sampling the citizen represented by an entity clicked while paused. Fetch core estimates via POST /citizens/pick and GET /citizens/{id}/itinerary,
+/// Citizen following and sampling the citizen represented by a clicked entity. Fetch core estimates via POST /citizens/pick and GET /citizens/{id}/itinerary,
 /// then move a designated car/pedestrian along the itinerary and follow it with the camera. Rendering only; city state is unchanged.
 /// The itinerary consists of round trips from home; each return selects the next destination proportionally to daily visit frequency.
 /// For sections not renderable as cars/pedestrians, such as public transport rides or station passages, hide the entity and move only the camera along the route.
@@ -212,7 +212,7 @@ public sealed class CitizenFollow : MonoBehaviour
             else if (target is Pedestrian p && !Car && people != null && people.IsActive(p)) { path = p.pathId; forward = p.forward; }
             else return false;
             // The entity may have advanced since sampling, so search for its current path from the sampled position onward.
-            // Do not inherit if it left the route, such as turning onto another road while watching after unpausing.
+            // Do not inherit if it left the route, such as turning onto another road after the click.
             int start = pick.trip.steps.FindIndex(pick.step_index.Value, item => item.path_id == path && item.forward == forward);
             if (start < 0) return false;
             destinationAgent = pick.to_agent_id; visitAgent = -1;

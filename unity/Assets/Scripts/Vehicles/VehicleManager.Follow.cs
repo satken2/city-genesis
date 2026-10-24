@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// One car designated for citizen following, plus paused click detection. It uses the same lanes, speeds, and following as NPCs,
+/// One car designated for citizen following, plus click detection. It uses the same lanes, speeds, and following as NPCs,
 /// but follows the itinerary path sequence (<see cref="FollowRun"/>) at branches. To keep it on the route,
 /// exclude it from road-marking direction constraints, scheduled arrivals, and out-of-range removal.
 /// </summary>
