@@ -578,80 +578,80 @@
     "gotIt": "Cerrar",
     "items": {
       "tip1": {
-        "title": "El dinero circula",
-        "description": "El gasto de alguien siempre es el ingreso de alguien más. Gasta la recaudación sin reparos y haz girar la economía de la ciudad."
+        "title": "Que circule el dinero",
+        "description": "El gasto de alguien siempre es el ingreso de alguien más. Pon toda la recaudación a trabajar y mantén en marcha la economía de la ciudad."
       },
       "tip2": {
-        "title": "La larga batalla por la seguridad",
-        "description": "Quien crece en un mal entorno suele conservar la mala conducta de adulto. Mejorar la seguridad requiere el esfuerzo de varias generaciones."
+        "title": "La seguridad lleva su tiempo",
+        "description": "Los ciudadanos que crecen en un mal entorno conservan esos malos hábitos de adultos. Mejorar la seguridad requiere esfuerzos durante varias generaciones."
       },
       "tip3": {
         "title": "Abran paso",
         "description": "Si los vehículos de emergencia llegan tarde, los daños son mayores. Cuida que las calles por donde suelen circular no se congestionen."
       },
       "tip5": {
-        "title": "Un camino escarpado",
-        "description": "Trazar calles o infraestructura por pendientes pronunciadas cuesta mucho. Elige rutas lo más planas posible."
+        "title": "Cuesta arriba, cuesta más",
+        "description": "Construir calles e infraestructura en pendientes pronunciadas sale caro. Elige rutas lo más planas posible."
       },
       "tip6": {
-        "title": "Planifica antes de usar",
-        "description": "Desarrollar la red eléctrica o de agua lleva tiempo. Anticipa el crecimiento y construye la infraestructura con un plan."
+        "title": "Más vale planear que lamentar",
+        "description": "Las redes de electricidad y agua no se construyen de un día para otro. Anticípate al crecimiento y prepara la infraestructura con tiempo."
       },
       "tip7": {
-        "title": "Vísteme despacio, que llevo prisa",
-        "description": "Subir los límites de velocidad aumenta los accidentes. Apuesta por curvas amables y límites moderados."
+        "title": "Despacio, que tengo prisa",
+        "description": "Subir los límites de velocidad aumenta los accidentes. Procura que las curvas sean suaves y los límites, sensatos."
       },
       "tip8": {
         "title": "Invertir en el futuro",
         "description": "La industria avanzada necesita personal con estudios superiores. Tómate tu tiempo para formar talento."
       },
       "tip9": {
-        "title": "Que dure mucho",
-        "description": "Los incendios y el colapso de la infraestructura empeoran mucho el ánimo de la gente. Reserva presupuesto suficiente para reparaciones y bomberos y evita las desgracias evitables."
+        "title": "Que dure, que dure",
+        "description": "Los incendios y el colapso de la infraestructura afectan mucho el ánimo ciudadano. Reserva un buen presupuesto para mantenimiento y bomberos: hay desastres que se pueden evitar."
       },
       "tip10": {
-        "title": "Gran incendio",
-        "description": "Las zonas con edificios muy juntos son vulnerables al fuego. Al construir la ciudad, deja un margen de espacio adecuado."
+        "title": "Juntos, pero no tanto",
+        "description": "Las zonas con edificios muy pegados son más vulnerables al fuego. Dale a tu ciudad un poco de espacio para respirar."
       },
       "tip11": {
-        "title": "A excavar",
-        "description": "Localiza los recursos del subsuelo e instala allí la minería. Y piensa también en la estrategia de salida cuando se agoten."
+        "title": "A picar piedra",
+        "description": "Ubica los recursos del subsuelo e instala ahí la minería. Eso sí, piensa qué harás cuando ya no quede nada que sacar."
       },
       "tip12": {
-        "title": "El árbol del dinero",
-        "description": "El alcalde también puede construir viviendas y locales comerciales. Levanta instalaciones municipales en las mejores ubicaciones y haz una fortuna."
+        "title": "La gallina de los huevos de oro",
+        "description": "Como alcalde, también puedes construir viviendas y locales comerciales. Pon propiedades municipales en las mejores ubicaciones y haz caja a lo grande."
       },
       "tip13": {
-        "title": "Exprime la recaudación",
-        "description": "Ajusta los impuestos con detalle. No solo financian la gestión de la ciudad: también sirven para controlar qué sectores se desarrollan."
+        "title": "Hasta la última gota",
+        "description": "Ajusta los impuestos con detalle. Además de financiar la ciudad, te permiten orientar qué industrias se desarrollan."
       },
       "tip14": {
-        "title": "Respaldo",
-        "description": "Si un accidente o desastre detiene una instalación de infraestructura, el golpe a la economía urbana es grande. Duplica las instalaciones críticas para tener un respaldo listo."
+        "title": "Por si las moscas",
+        "description": "Si un accidente o desastre deja fuera de servicio la infraestructura, la economía de la ciudad lo resiente. Duplica las instalaciones esenciales para tener un respaldo listo."
       },
       "tip15": {
-        "title": "Nada de crecer a lo loco",
-        "description": "Si no hay suficientes parcelas para la demanda, aparecerán calles y parcelas de forma desordenada. Urbaniza con un plan y evita la formación de barrios marginales."
+        "title": "Aquí no se crece a lo loco",
+        "description": "Si faltan parcelas para cubrir la demanda, aparecerán calles y parcelas sin orden alguno. Planifica el desarrollo para evitar que se formen barrios marginales."
       },
       "tip16": {
         "title": "Concentración industrial",
         "description": "La productividad aumenta cuando hay industrias similares o productores de materias primas cerca. Crea zonas industriales y distritos tecnológicos para reunir a las empresas."
       },
       "tip17": {
-        "title": "¿Puedes trabajar las 24 horas?",
-        "description": "Aumentar las horas de trabajo en el panel de Normativas eleva la productividad, pero la salud y el gasto en entretenimiento de los ciudadanos disminuyen. Si dedicas demasiado tiempo a ganar dinero, no te queda tiempo para gastarlo."
+        "title": "Trabajar, trabajar... ¿y vivir?",
+        "description": "Alargar la jornada en el panel de Normativas aumenta la productividad, pero empeora la salud de los ciudadanos y reduce su gasto en entretenimiento. De tanto darles tiempo para ganar dinero, puedes dejarlos sin tiempo para gastarlo."
       },
       "tip18": {
-        "title": "El infierno de ir al trabajo",
-        "description": "Si el trayecto al trabajo es largo, hay menos tiempo libre y el consumo cae. Incluso la zona más animada que tanto te costó construir no es más que un paisaje tras la ventanilla para los ciudadanos que solo vuelven a casa a dormir."
+        "title": "La vida tras la ventanilla",
+        "description": "Los viajes largos al trabajo dejan menos tiempo libre y reducen el consumo. Esa zona tan animada que tanto te costó construir será puro paisaje para quienes solo llegan a casa a dormir."
       },
       "tip19": {
-        "title": "Visión de futuro",
-        "description": "No puedes operar trenes más largos que los andenes. Construye tu ferrocarril con espacio para crecer."
+        "title": "Piensa en grande",
+        "description": "Los trenes no pueden ser más largos que los andenes. Construye tu red ferroviaria dejando espacio para el crecimiento futuro."
       },
       "tip20": {
         "title": "Entierra el problema",
-        "description": "Las calles subterráneas no generan ruido ni contaminación del aire. Hay problemas que sí se resuelven enterrándolos."
+        "description": "Las calles subterráneas no generan ruido ni contaminación del aire. Hay problemas que sí se resuelven echándoles tierra encima."
       },
       "tip21": {
         "title": "A la sombra del progreso",
@@ -659,79 +659,79 @@
       },
       "tip22": {
         "title": "Mejor un pase que un auto",
-        "description": "Con un transporte público conveniente, hasta quienes tienen dinero dejan el auto y pueden gastar en otras cosas."
+        "description": "Si el transporte público es cómodo y práctico, hasta los ciudadanos con dinero dejan de tener auto y pueden gastar en otras cosas."
       },
       "tip23": {
-        "title": "Transportando aire",
-        "description": "Los autobuses vacíos también ocupan las calles. Procura que las medidas contra los embotellamientos no generen más embotellamientos."
+        "title": "Paseando aire",
+        "description": "Hasta los autobuses vacíos ocupan espacio en las calles. Que tu solución al tráfico no termine haciendo fila en el mismo embotellamiento."
       },
       "tip24": {
         "title": "Los topos no pagan renta",
         "description": "Los túneles a partir de cierta profundidad no requieren comprar terrenos. Si negociar se complica, cava más hondo."
       },
       "tip25": {
-        "title": "Al trabajo por los aires",
-        "description": "Los teleféricos permiten viajar incluso por terrenos escarpados. Si llevar transporte público resulta difícil, deja a tus ciudadanos colgados."
+        "title": "Al trabajo por todo lo alto",
+        "description": "Los teleféricos permiten moverse incluso por terrenos escarpados. Si cuesta llevar transporte público hasta allí, deja a tus ciudadanos colgados."
       },
       "tip26": {
-        "title": "Un embotellamiento eléctrico",
+        "title": "La corriente también hace fila",
         "description": "De nada sirve generar electricidad de sobra si las líneas no tienen capacidad para llevarla. Antes de construir otra central, revisa si hay un cuello de botella en el camino."
       },
       "tip27": {
-        "title": "Un lamentable accidente",
-        "description": "Un edificio que estorba al desarrollo puede volarse y hacerlo pasar por un accidente. El ánimo ciudadano empeora mucho, así que, de ser posible, cómpralo y demuélelo como corresponde."
+        "title": "Fue un «accidente»",
+        "description": "Puedes volar un edificio que estorbe al desarrollo y hacerlo pasar por un accidente. El ánimo ciudadano cae en picada, así que mejor cómpralo y demuélelo como corresponde, si puedes."
       },
       "tip28": {
-        "title": "Sal al mar",
-        "description": "Si te falta terreno libre en tierra firme, avanza hacia el mar. Puedes construir plataformas petroleras sobre el agua o ganar terreno al mar."
+        "title": "Al agua, ciudad",
+        "description": "Si ya no queda terreno libre en tierra firme, mira hacia el mar. Puedes construir plataformas petroleras en el agua o ganar terreno al mar."
       },
       "tip29": {
-        "title": "El infierno de los semáforos",
-        "description": "Cada intersección añade otro semáforo en rojo. Si creas una cuadrícula demasiado apretada, los conductores se detendrán en cada manzana y su paciencia se agotará antes de llegar. Conecta las calles de forma sencilla."
+        "title": "Todos en rojo",
+        "description": "Cada cruce añade más espera en los semáforos. Una cuadrícula demasiado apretada puede dejar a los conductores esperando el verde hasta que anochezca. Conecta las calles de forma sencilla."
       },
       "tip30": {
-        "title": "Buena visibilidad",
-        "description": "Las torres de telecomunicaciones cubren un área mayor cuanto más altas se construyan y a mayor elevación. Las señales bloqueadas por montañas no se solucionan aumentando la potencia a la fuerza."
+        "title": "La señal no mueve montañas",
+        "description": "Las torres de telecomunicaciones pueden cubrir más terreno si son más altas y están en lugares elevados. Si una montaña bloquea la señal, subir la potencia con mucha fe no va a moverla."
       },
       "tip31": {
-        "title": "El fruto del mar",
-        "description": "Si no encuentras fuentes de agua dulce, puedes construir una planta desalinizadora en la costa. Eso sí, requiere mucha electricidad. Tras buscar agua, te tocará buscar energía."
+        "title": "Agua hay; falta el enchufe",
+        "description": "Si no encuentras agua dulce, puedes construir una planta desalinizadora en la costa. Eso sí, necesita electricidad. Resuelta la búsqueda de agua, empieza la búsqueda de energía."
       },
       "tip32": {
-        "title": "Otra forma de seguridad",
-        "description": "El desempleo es una de las causas del crimen. No construyas solo comisarías; genera también puestos de trabajo. Antes de sufrir por el presupuesto policial, prueba con medidas de empleo."
+        "title": "También se previene con empleo",
+        "description": "El desempleo es uno de los factores que empeoran la seguridad. Además de comisarías, hacen falta puestos de trabajo. Antes de angustiarte por el presupuesto de seguridad, considera si una medida de empleo podría ayudar."
       },
       "tip33": {
-        "title": "Cuentas para el futuro",
-        "description": "Tanto los edificios como las carreteras exigen costes de mantenimiento. Construir de más solo porque te sobra dinero te dejará ahogado en reparaciones. Recuerda que el alcalde del futuro seguirás siendo tú."
+        "title": "Que se encargue mi yo del futuro",
+        "description": "Los edificios y las calles siguen costando dinero después de construirse. Si construyes de más porque hoy te sobra, mañana las reparaciones te pasarán la cuenta. Aviso: el alcalde del futuro también eres tú."
       },
       "tip34": {
-        "title": "Cuidado con sobreexplotar",
-        "description": "Si extraes agua a un ritmo mayor del que la fuente se recarga, terminarás en escasez. Añadir más bombas no creará más agua."
+        "title": "Más bombas, la misma agua",
+        "description": "Si extraes agua más rápido de lo que se repone, tarde o temprano tendrás escasez. Puedes multiplicar las bombas; el agua no se multiplica con ellas."
       },
       "tip35": {
-        "title": "Un error costoso",
-        "description": "Una vez que empiezas a construir una carretera o un edificio, no es fácil cambiarlo de lugar. Planifica bien antes de comenzar. Aunque una carretera que quedó curva por accidente también puede darle personalidad a tu ciudad cuando te acostumbras a verla."
+        "title": "Era parte del plan",
+        "description": "Una vez iniciada la construcción, mover una calle o un edificio no es tan fácil. Planifica antes de empezar. Aunque esa calle que salió torcida por accidente, con el tiempo, puede pasar por encanto local."
       },
       "tip36": {
-        "title": "Sociedad de vigilancia",
-        "description": "Haz clic en peatones o vehículos para añadir ciudadanos a tu lista de seguimiento. Echa un vistazo a la vida cotidiana de los habitantes de tu ciudad."
+        "title": "El alcalde te está mirando",
+        "description": "Haz clic en peatones o vehículos para añadir ciudadanos a tu lista de seguimiento. Date una vuelta por la vida cotidiana de quienes viven en tu ciudad."
       },
       "tip37": {
-        "title": "Energía de carga base",
-        "description": "La energía solar y la eólica son económicas de generar, pero su producción depende del clima. Asegúrate de combinarlas con fuentes estables de carga base, como centrales térmicas o nucleares."
+        "title": "Por si el clima no coopera",
+        "description": "La energía solar y la eólica son baratas de producir, pero dependen del clima. Combínalas con fuentes estables, como centrales térmicas o nucleares."
       },
       "tip38": {
-        "title": "Espacio para construir",
-        "description": "Hay edificios que no caben en parcelas demasiado pequeñas. Planifica parcelas con el tamaño adecuado para los edificios que deseas construir."
+        "title": "Aquí no cabe",
+        "description": "Algunos edificios no caben en parcelas pequeñas. Prepara parcelas del tamaño adecuado para lo que quieras construir."
       },
       "tip39": {
         "title": "Ese servicio se cobra",
-        "description": "Los servicios públicos, como el tratamiento de aguas residuales, la gestión de residuos, las telecomunicaciones y la atención médica, pueden ser gratuitos por defecto. Puedes fijar sus tarifas libremente. Como alcalde, tú decides si ofrecer precios accesibles para los ciudadanos o ponerles una tarifa bien alta."
+        "description": "El tratamiento de aguas residuales, la gestión de residuos, las telecomunicaciones y la atención médica pueden ser gratuitos por defecto. Tú decides las tarifas: precios accesibles o una cuenta que haga levantar las cejas. Cosas de ser alcalde."
       },
       "tip40": {
-        "title": "Ciudad de copiar y pegar",
-        "description": "Al construir edificios, el alcalde puede copiar y replicar los ya existentes. Aunque el aspecto resulte uniforme, permite mantener bajos los costos de construcción."
+        "title": "Copiar, pegar, ahorrar",
+        "description": "Al construir, puedes copiar edificios existentes. La ciudad tendrá cierto aire de «esto ya lo vi», pero los costos de construcción serán más bajos."
       }
     }
   },
