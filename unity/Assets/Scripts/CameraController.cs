@@ -136,7 +136,7 @@ public partial class CameraController : MonoBehaviour
     private Quaternion dragStartCameraRotation;  // Camera rotation at drag start.
     private Vector3 dragStartGroundPosition;     // Ground coordinates at drag start.
     public float dragStartThreshold = 5f; // Screen-pixel threshold for committing a drag.
-    public float maxDragDistance = 1500f; // Do not start panning if the grabbed point is farther away than this distance.
+    public float minDragGrazingAngle = 5f; // Do not start panning if the cursor ray meets the horizontal plane at a shallower angle than this (degrees).
 
     // Mouse-drag inertia.
     private Vector3 dragVelocity; // Velocity at drag end, in world units per second.
@@ -1527,9 +1527,10 @@ public partial class CameraController : MonoBehaviour
             Vector3? groundPos = GetGroundPosition();
             if (groundPos.HasValue)
             {
-                // Check the distance from the camera to the grabbed point; do not start dragging if too far away.
-                float dist = Vector3.Distance(transform.position, groundPos.Value);
-                if (dist <= maxDragDistance)
+                // Near the horizon, a one-pixel cursor movement shifts the grabbed point by a huge distance.
+                // Judge by the ray's angle rather than distance so that grabbing still works from high altitude.
+                float grazingAngle = Mathf.Asin(Mathf.Abs(cam.ScreenPointToRay(InputUtil.MousePosition).direction.y)) * Mathf.Rad2Deg;
+                if (grazingAngle >= minDragGrazingAngle)
                 {
                     isPendingDrag = true;
                     dragStartScreenPosition = InputUtil.MousePosition;
