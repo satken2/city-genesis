@@ -29,6 +29,7 @@ public sealed class RoadMarkingAtlas : MonoBehaviour
     private int epoch, cycle, frame = -1, framePixels, frameBakes;
     private bool frameBudgetBlocked;
     private readonly Plane[] planes = new Plane[6];
+    private readonly System.Diagnostics.Stopwatch sliceWatch = new System.Diagnostics.Stopwatch();
 
     public sealed class Page
     {
@@ -104,6 +105,7 @@ public sealed class RoadMarkingAtlas : MonoBehaviour
             yield return Collect(camera);
             int pending = 0;
             float refreshAt = Time.unscaledTime + .15f;
+            sliceWatch.Restart();
             for (int index = 0; index < requests.Count; index++)
             {
                 var request = requests[index];
@@ -112,12 +114,17 @@ public sealed class RoadMarkingAtlas : MonoBehaviour
                 while (!complete && frameBudgetBlocked && Time.unscaledTime < refreshAt)
                 {
                     yield return null;
+                    sliceWatch.Restart();
                     if (generation != epoch) break;
                     complete = Process(request);
                 }
                 if (!complete) pending++;
                 if (Time.unscaledTime >= refreshAt) { pending += requests.Count - index - 1; break; }
-                yield return RenderWorkScheduler.Continue;
+                if (sliceWatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
+                {
+                    yield return RenderWorkScheduler.Continue;
+                    sliceWatch.Restart();
+                }
             }
             PendingPages = pending;
             yield return new WaitForSecondsRealtime(.15f);
@@ -130,9 +137,15 @@ public sealed class RoadMarkingAtlas : MonoBehaviour
         GeometryUtility.CalculateFrustumPlanes(camera, planes);
         // Cell counts cannot limit density; use both spatial queries and frame budgets.
         var nearby = new HashSet<RoadMarkingSurface>(spatial.Query(camera.transform.position, DrawLodConfig.PATH_NORMAL_EXIT_DISTANCE));
+        sliceWatch.Restart();
         foreach (var surface in nearby)
         {
-            yield return RenderWorkScheduler.Continue;
+            // Yield by elapsed time: the scheduler takes turns per step, so yielding per surface would stall collection behind heavy generators.
+            if (sliceWatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
+            {
+                yield return RenderWorkScheduler.Continue;
+                sliceWatch.Restart();
+            }
             if (surface == null || !surface.isActiveAndEnabled || surface.Renderer == null || !surface.Renderer.enabled) continue;
             Bounds bounds = surface.Renderer.bounds;
             float distance = Mathf.Sqrt(bounds.SqrDistance(camera.transform.position));

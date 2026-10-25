@@ -336,7 +336,7 @@ public partial class PathManager : BaseApiDataManager
     private HashSet<int> deferredLodIntersectionNodeIds = new HashSet<int>();
     /// <summary>
     /// Paths the current LOD batch may rebuild. Add every received ID in phase 1; remove IDs found not to need regeneration
-    /// in phase 2. The terrain-following queue does not take these during the batch.
+    /// in phase 2. The terrain-following queue and render LOD reevaluation do not take these during the batch.
     /// </summary>
     private readonly HashSet<int> lodBatchPendingBuildIds = new HashSet<int>();
     /// <summary>LOD load cancellation generation. Bulk fetches from canceled batches stop communication/decoding (ApiClient.GetBulk isCanceled).</summary>
@@ -345,7 +345,7 @@ public partial class PathManager : BaseApiDataManager
     /// <summary>
     /// Whether bulk LOD loading (LoadMergedPathsAndNodesAndApplyCells) is running.
     /// During bulk loading, TryRebuildPathOnce skips duplicate regeneration using lodBatchRebuiltPathIds for roads already built in the batch.
-    /// Terrain-arrival requests are outside the batch (batchMember=false); do not take roads the batch plans to rebuild.
+    /// Terrain-arrival requests and render LOD reevaluation are outside the batch (batchMember=false); do not take roads the batch plans to rebuild.
     /// </summary>
     public bool IsLodBatchActive => isLodPathBatchActive;
 
@@ -1049,9 +1049,11 @@ public partial class PathManager : BaseApiDataManager
 
     /// <summary>
     /// Persistent worker reevaluating generated path render LOD on camera movement.
-    /// Scan all paths only at fixed frame intervals after sufficient movement, switching mismatches nearest first
-    /// within the shared frame budget. Rotation/FOV do not change distance-based LOD.
-    /// Keep old objects visible until regeneration finishes.
+    /// Scan all paths after sufficient movement, switching mismatches nearest first within the shared frame budget.
+    /// If the camera moves again after rebuilding for a fixed frame interval, discard the rest of the list and rescan,
+    /// so roads near the current camera always come before the remainder of a list made at an old position.
+    /// During an LOD batch, leave only roads the batch plans to build to the batch, as TerrainFollowRebuildWorker does.
+    /// Rotation/FOV do not change distance-based LOD. Keep old objects visible until regeneration finishes.
     /// </summary>
     private LodViewState drawViewState;
 
@@ -1062,15 +1064,26 @@ public partial class PathManager : BaseApiDataManager
 
     private IEnumerator PathDrawLodReevaluationWorker()
     {
+        int nextScanFrame = 0;
+        bool rescanAfterBatch = false;
+        float moveSqr = DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE * DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE;
         while (true)
         {
-            for (int i = 0; i < DrawLodConfig.REEVALUATE_INTERVAL_FRAMES; i++) yield return null;
-            if (pathObjectsCache.Count == 0 || isLodPathBatchActive) continue;
+            while (Time.frameCount < nextScanFrame) yield return null;
+            nextScanFrame = Time.frameCount + DrawLodConfig.REEVALUATE_INTERVAL_FRAMES;
+            // Roads left to a batch stay mismatched if it is canceled before building them, so rescan once it ends even without movement.
+            if (rescanAfterBatch && !isLodPathBatchActive)
+            {
+                rescanAfterBatch = false;
+                drawViewState = default;
+            }
+            if (pathObjectsCache.Count == 0) continue;
 
             Camera cam = Camera.main;
             if (cam == null) continue;
-            if (!drawViewState.UpdatePosition(cam)) continue;
+            if (!drawViewState.UpdatePosition(cam, DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE)) continue;
             Vector3 camPos = cam.transform.position;
+            Vector3 scanPos = camPos;
             RenderWorkScheduler.CountEvent("path.lodScanned", pathObjectsCache.Count);
 
             drawLodScanIds.Clear();
@@ -1085,8 +1098,8 @@ public partial class PathManager : BaseApiDataManager
                     yield return RenderWorkScheduler.Continue;
                     drawLodScanWatch.Restart();
                     cam = Camera.main;
-                    // Stop scanning during a batch because the batch evaluates each path. Clear the reference position to guarantee a rescan next cycle.
-                    if (cam == null || isLodPathBatchActive)
+                    // Clear the reference position to guarantee a rescan next cycle.
+                    if (cam == null)
                     {
                         aborted = true;
                         drawViewState = default;
@@ -1108,18 +1121,25 @@ public partial class PathManager : BaseApiDataManager
                 continue;
             }
             drawLodChangeIds.Sort();
+            // Count the interval from the end of the scan so a scan slower than the interval still leaves time to rebuild.
+            nextScanFrame = Time.frameCount + DrawLodConfig.REEVALUATE_INTERVAL_FRAMES;
             for (int i = 0; i < drawLodChangeIds.Count; i++)
             {
-                // Generating during a batch would count geometry built before intersection cut points are final as already built,
-                // causing batch regeneration to be skipped as duplicate work. Discard the remainder and rescan next cycle.
-                if (isLodPathBatchActive)
+                cam = Camera.main;
+                if (cam == null) break;
+                // drawViewState still holds scanPos, so the next cycle rescans immediately.
+                if (Time.frameCount >= nextScanFrame && (cam.transform.position - scanPos).sqrMagnitude >= moveSqr) break;
+                int id = drawLodChangeIds[i].id;
+                // Building before the batch finalizes cut points would be wasted; the batch builds these itself.
+                if (isLodPathBatchActive && (lodBatchPendingBuildIds.Contains(id) || deferredIntersectionPathRebuildIds.Contains(id)))
                 {
-                    drawViewState = default;
-                    break;
+                    rescanAfterBatch = true;
+                    continue;
                 }
                 // Data may be replaced during yields; resolve it again each time to avoid overwriting with stale instances.
-                if (!pathDataCache.TryGetValue(drawLodChangeIds[i].id, out PathSummary path)) continue;
-                TryRebuildPathOnce(path, LodTier.Near, false, false, "描画LOD");
+                if (!pathDataCache.TryGetValue(id, out PathSummary path)) continue;
+                // Outside batch duplicate tracking, so a batch can still rebuild this road after finalizing its cut points.
+                TryRebuildPathOnce(path, LodTier.Near, false, false, "描画LOD", batchMember: false);
                 yield return RenderWorkScheduler.Continue;
             }
             drawLodChangeIds.Clear();
@@ -1148,21 +1168,17 @@ public partial class PathManager : BaseApiDataManager
     private readonly HashSet<int> pendingTrackNeighborRebuildIds = new HashSet<int>();
 
     /// <summary>
-    /// Path view-priority score (lower is earlier). Start with horizontal distance to the nearest
-    /// cell rectangle among cells covered by the path, adding a large penalty outside the view.
+    /// Path view-priority score (lower is earlier). Take the camera distance to the nearest point of each anchor segment
+    /// (the same polyline as render LOD), adding a large penalty to points outside the view, and return the minimum.
     /// </summary>
     private float ScorePathForViewPriority(PathSummary path, Vector3 camPos, Vector3 camForwardHorizontal)
     {
-        float cellSize = TerrainManager.CellSize;
+        List<Vector3> anchors = GetAnchorPolyline(path, out _);
         float best = float.MaxValue - 1f;
-        foreach (var cell in GetPathCoveredCellsCached(path))
+        for (int i = 0; i < anchors.Count; i++)
         {
-            float cx = Mathf.Clamp(camPos.x, cell.x * cellSize, (cell.x + 1) * cellSize);
-            float cz = Mathf.Clamp(camPos.z, cell.y * cellSize, (cell.y + 1) * cellSize);
-            Vector3 closest = new Vector3(cx, 0f, cz);
-            Vector3 to = closest - camPos;
-            to.y = 0f;
-            float dist = to.magnitude;
+            Vector3 closest = i == 0 ? anchors[0] : PolylineUtils.ClosestPointOnSegment(camPos, anchors[i - 1], anchors[i]);
+            float dist = Vector3.Distance(closest, camPos);
             if (!Utils.IsInHorizontalView(closest, camPos, camForwardHorizontal, PATH_VIEW_NEAR_DISTANCE, PATH_VIEW_HALF_ANGLE_DEG))
             {
                 dist += PATH_OUT_OF_VIEW_PENALTY;
