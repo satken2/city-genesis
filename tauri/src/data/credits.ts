@@ -258,13 +258,13 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     license: "CC0 1.0",
   },
   {
-    title: "Tada!",
+    title: "Success Fanfare Trumpets",
     category: "sfx",
-    author: "Yoshicakes77",
+    author: "FunWithSound",
     source: "Freesound",
-    url: "https://freesound.org/s/850021/",
-    license: "CC0 1.0",
-    note: "Quest complete",
+    url: "https://freesound.org/people/FunWithSound/sounds/456966/",
+    license: "CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/",
+    note: "Quest complete (fanfare.opus). Converted from the Freesound HQ Ogg preview to Ogg Opus with ffmpeg at 96 kbps VBR. License verified 2026-10-25.",
   },
   {
     title: "Congrats",

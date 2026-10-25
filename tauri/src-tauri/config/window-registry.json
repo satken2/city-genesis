@@ -537,15 +537,16 @@
     "height": 540,
     "resizable": false,
     "policy": "single",
+    "chromeless": true,
     "actions": []
   },
   "achievement_unlocked": {
     "title": "実績解除",
     "width": 400,
-    "height": 370,
+    "height": 338,
     "resizable": false,
     "policy": "single",
-    "layout": "right_top",
+    "chromeless": true,
     "actions": []
   },
   "info_dialog": {

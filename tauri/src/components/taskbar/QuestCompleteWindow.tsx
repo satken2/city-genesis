@@ -2,21 +2,22 @@
  * Quest completion notification window
  *
  * Celebration popup shown after epoch execution when newly completed quests have notify="modal".
- * Play tada.opus with a confetti animation.
+ * Play fanfare.opus with a confetti animation.
  *
- * Show simultaneous completions one per page, using Next and Close on the last page.
+ * No title bar (registry chromeless). Show simultaneous completions one per page, using Next and Close on the
+ * last page; clicking outside the card content also advances.
  * Each page displays measured values at completion (achieved_values) and rewards (reward).
  *
  * Receive the completed quest array from the parent and call onClose after all pages have been viewed and
  * closed.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { QuestNotification } from "../../types";
 // Always reference audio through imports. Passing a literal path directly to Audio excludes it from the bundle,
 // leaving the file missing and playback silent in production builds.
-import tadaSound from "../../assets/sounds/tada.opus";
+import fanfareSound from "../../assets/sounds/fanfare.opus";
 import { logInfoToFile } from "../../utils/log";
 import { resolveLocalizedText } from "../../utils/locale";
 import "./QuestCompleteWindow.css";
@@ -32,10 +33,36 @@ type QuestCompleteWindowProps = {
 };
 
 /** Number of confetti pieces, each a decorative element falling through CSS animation */
-const CONFETTI_COUNT = 24;
+const CONFETTI_COUNT = 40;
 
 /** Confetti color palette */
 const CONFETTI_COLORS = ["#f0c040", "#f5d060", "#ffe9a0", "#e8a020"];
+
+type ConfettiPiece = {
+  left: number;
+  width: number;
+  height: number;
+  color: string;
+  delay: number;
+  duration: number;
+  sway: number;
+  spin: number;
+};
+
+/** Randomize every piece so the confetti flutters irregularly instead of falling in rows. */
+function scatterConfetti(): ConfettiPiece[] {
+  const between = (min: number, max: number) => min + Math.random() * (max - min);
+  return Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
+    left: between(0, 100),
+    width: between(6, 10),
+    height: between(9, 15),
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    delay: between(0, 1.5),
+    duration: between(4, 6.5),
+    sway: between(10, 30) * (Math.random() < 0.5 ? -1 : 1),
+    spin: Math.round(between(2, 5)) * 360,
+  }));
+}
 
 function formatValue(v: number | null): string {
   if (v === null || v === undefined) return "—";
@@ -47,6 +74,7 @@ function formatValue(v: number | null): string {
 
 /** Log playback success/failure to tauri.log so silence can be diagnosed from device logs. */
 function playFanfare(audio: HTMLAudioElement): void {
+  audio.currentTime = 0;
   audio.play()
     .then(() => logInfoToFile("quest_complete: fanfare started"))
     .catch((e: unknown) => {
@@ -61,9 +89,11 @@ export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestComplete
   const [pageIndex, setPageIndex] = useState(0);
 
   const modalQuests = useMemo(() => quests.filter((q) => q.notify === "modal"), [quests]);
+  // Fixed per opening and page; rerolling on other rerenders would restyle pieces mid-flight.
+  const confetti = useMemo(() => scatterConfetti(), [openedAt, pageIndex]);
 
   useEffect(() => {
-    const audio = new Audio(tadaSound);
+    const audio = new Audio(fanfareSound);
     audioRef.current = audio;
     playFanfare(audio);
     return () => {
@@ -92,18 +122,22 @@ export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestComplete
 
   return (
     <div className="quest-complete-overlay" onClick={handleNext}>
-      {/* Confetti: include pageIndex in keys to replay animations on page changes. */}
+      {/* Confetti: include openedAt and pageIndex in keys to replay animations along with the fanfare. */}
       <div className="quest-complete-confetti" aria-hidden={true}>
-        {Array.from({ length: CONFETTI_COUNT }, (_, i) => (
+        {confetti.map((piece, i) => (
           <span
-            key={`${pageIndex}-${i}`}
+            key={`${openedAt}-${pageIndex}-${i}`}
             className="quest-complete-confetti-piece"
             style={{
-              left: `${(i * 100) / CONFETTI_COUNT + 2}%`,
-              backgroundColor: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-              animationDelay: `${(i % 8) * 0.15}s`,
-              animationDuration: `${2.2 + (i % 5) * 0.35}s`,
-            }}
+              left: `${piece.left}%`,
+              width: piece.width,
+              height: piece.height,
+              backgroundColor: piece.color,
+              animationDelay: `${piece.delay}s`,
+              animationDuration: `${piece.duration}s`,
+              "--sway": `${piece.sway}px`,
+              "--spin": `${piece.spin}deg`,
+            } as CSSProperties}
           />
         ))}
       </div>

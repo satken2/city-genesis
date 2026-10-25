@@ -1,6 +1,7 @@
 /**
  * Achievement unlocked window
  *
+ * No title bar (registry chromeless); close with the button on the last page.
  * Shows achievements newly unlocked in this city, one per page, with achievement.opus. Achievements unlocked by
  * something completed or opened in the city carry its location, and the camera button moves the 3D view there.
  * Names and descriptions come from i18n (steamAchievements.items.<API name>); Steamworks registers the same text.
