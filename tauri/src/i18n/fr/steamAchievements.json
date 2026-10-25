@@ -8,19 +8,19 @@
         "description": "Terminez votre première route"
       },
       "FIRST_BUILDING": {
-        "name": "Premier bâtiment",
-        "description": "Terminez votre premier bâtiment"
+        "name": "Les premiers pas d'une ville",
+        "description": "Terminez votre premier bâtiment. L'histoire de votre ville commence ici."
       },
       "FIRST_PUBLIC_FACILITY": {
         "name": "Premier équipement public",
         "description": "Terminez votre premier équipement public, comme une centrale électrique ou un poste électrique"
       },
       "FIRST_OFFSHORE": {
-        "name": "Cap sur la mer",
-        "description": "Terminez votre premier parc éolien en mer ou votre première plateforme pétrolière en mer"
+        "name": "La ville gagne le large",
+        "description": "Terminez votre premier parc éolien en mer ou votre première plateforme pétrolière en mer. L'industrie de votre ville prend le large."
       },
       "RAIL_LINES_1": {
-        "name": "Inauguration ferroviaire",
+        "name": "En voiture !",
         "description": "Ouvrez une ligne ferroviaire"
       },
       "RAIL_LINES_5": {
@@ -29,10 +29,10 @@
       },
       "RAIL_LINES_20": {
         "name": "Royaume du rail",
-        "description": "Exploitez 20 lignes ferroviaires dans une même ville"
+        "description": "Exploitez 20 lignes ferroviaires dans une même ville. Ce plan des lignes mérite le détour."
       },
       "BUS_LINES_1": {
-        "name": "Inauguration du bus",
+        "name": "Le bus arrive en ville",
         "description": "Ouvrez une ligne de bus"
       },
       "BUS_LINES_5": {
@@ -40,7 +40,7 @@
         "description": "Exploitez 5 lignes de bus dans une même ville"
       },
       "BUS_LINES_20": {
-        "name": "Ville du bus",
+        "name": "Partout en bus",
         "description": "Exploitez 20 lignes de bus dans une même ville"
       },
       "BUS_LINES_50": {
@@ -48,8 +48,8 @@
         "description": "Exploitez 50 lignes de bus dans une même ville"
       },
       "MONORAIL_LINES_1": {
-        "name": "Inauguration du monorail",
-        "description": "Ouvrez une ligne de monorail"
+        "name": "Au travail par les airs",
+        "description": "Ouvrez une ligne de monorail. Redécouvrez les rues familières d'un peu plus haut."
       },
       "MONORAIL_LINES_5": {
         "name": "Réseau de monorail",
@@ -60,7 +60,7 @@
         "description": "Exploitez 20 lignes de monorail dans une même ville"
       },
       "LRT_LINES_1": {
-        "name": "Inauguration du tramway",
+        "name": "Le tramway arrive en ville",
         "description": "Ouvrez une ligne de tramway"
       },
       "LRT_LINES_5": {
@@ -68,63 +68,63 @@
         "description": "Exploitez 5 lignes de tramway dans une même ville"
       },
       "LRT_LINES_20": {
-        "name": "Ville du tramway",
+        "name": "La cité des tramways",
         "description": "Exploitez 20 lignes de tramway dans une même ville"
       },
       "POPULATION_10K": {
-        "name": "Naissance d'une ville",
+        "name": "10 000 personnes y sont chez elles",
         "description": "Atteignez 10 000 habitants"
       },
       "POPULATION_100K": {
-        "name": "Ville régionale",
+        "name": "Une ville de région pleine de vie",
         "description": "Atteignez 100 000 habitants"
       },
       "POPULATION_500K": {
-        "name": "Grande ville",
+        "name": "Parmi les grandes villes",
         "description": "Atteignez 500 000 habitants"
       },
       "POPULATION_1M": {
         "name": "Ville millionnaire",
-        "description": "Atteignez 1 000 000 d'habitants"
+        "description": "Atteignez 1 000 000 d'habitants. Une métropole au service d'un million de vies."
       },
       "POPULATION_2M": {
         "name": "Métropole",
         "description": "Atteignez 2 000 000 d'habitants"
       },
       "FLOORS_5": {
-        "name": "Immeuble moyen",
+        "name": "La ville prend de la hauteur",
         "description": "Un bâtiment privé de 5 étages ou plus est terminé"
       },
       "FLOORS_10": {
-        "name": "Tour",
-        "description": "Un bâtiment privé de 10 étages ou plus est terminé"
+        "name": "Les premières grandes tours",
+        "description": "Un bâtiment privé de 10 étages ou plus est terminé. Heureusement que les ascenseurs existent."
       },
       "FLOORS_20": {
-        "name": "Grande tour",
+        "name": "Un horizon de grandes tours",
         "description": "Un bâtiment privé de 20 étages ou plus est terminé"
       },
       "FLOORS_40": {
         "name": "Gratte-ciel",
-        "description": "Un bâtiment privé de 40 étages ou plus est terminé"
+        "description": "Un bâtiment privé de 40 étages ou plus est terminé. Un nouveau symbole pour votre ville."
       },
       "INDUSTRY_PHARMACEUTICAL": {
-        "name": "Pôle pharmaceutique",
-        "description": "Une usine pharmaceutique entre en activité dans votre ville"
+        "name": "L'industrie au service de la santé",
+        "description": "Une usine pharmaceutique entre en activité dans votre ville. Contribuez à la santé de tous depuis votre ville."
       },
       "INDUSTRY_SEMICONDUCTOR": {
         "name": "Ville du silicium",
-        "description": "Une usine de semi-conducteurs entre en activité dans votre ville"
+        "description": "Une usine de semi-conducteurs entre en activité dans votre ville. De minuscules puces pour une grande industrie."
       },
       "INDUSTRY_PRECISION": {
-        "name": "Industrie de précision",
-        "description": "Une usine d'instruments de précision entre en activité dans votre ville"
+        "name": "La cité de la précision",
+        "description": "Une usine d'instruments de précision entre en activité dans votre ville. Le savoir-faire devient une force pour votre ville."
       },
       "INDUSTRY_SOFTWARE": {
-        "name": "Arrivée de la tech",
-        "description": "Une entreprise de logiciels ouvre ses portes dans votre ville"
+        "name": "Une nouvelle terre du logiciel",
+        "description": "Une entreprise de logiciels ouvre ses portes dans votre ville. Offrez aux idées nouvelles un lieu où grandir."
       },
       "TOURISTS_1": {
-        "name": "Premier touriste",
+        "name": "Bienvenue dans notre ville",
         "description": "Un touriste séjourne pour la première fois dans votre ville"
       },
       "TOURISTS_100": {
@@ -132,32 +132,32 @@
         "description": "Accueillez 100 touristes en même temps dans votre ville"
       },
       "TOURISTS_1K": {
-        "name": "Destination prisée",
+        "name": "Une ville qui vaut le voyage",
         "description": "Accueillez 1 000 touristes en même temps dans votre ville"
       },
       "TOURISTS_10K": {
-        "name": "Destination mondiale",
+        "name": "Le monde vient en visite",
         "description": "Accueillez 10 000 touristes en même temps dans votre ville"
       },
       "YEARS_10": {
-        "name": "Une décennie",
-        "description": "Jouez 10 ans dans une même ville"
+        "name": "Dix ans aux côtés de la ville",
+        "description": "Jouez 10 ans dans une même ville. Il reste encore tant de choses à bâtir."
       },
       "YEARS_100": {
         "name": "Ville centenaire",
-        "description": "Jouez 100 ans dans une même ville"
+        "description": "Jouez 100 ans dans une même ville. Accompagnez votre ville pendant un siècle entier."
       },
       "YEARS_500": {
-        "name": "Cinq siècles",
-        "description": "Jouez 500 ans dans une même ville"
+        "name": "Une ville qui écrit son histoire",
+        "description": "Jouez 500 ans dans une même ville. Les générations passent, la ville continue."
       },
       "YEARS_1000": {
         "name": "Ville millénaire",
-        "description": "Jouez 1 000 ans dans une même ville"
+        "description": "Jouez 1 000 ans dans une même ville. Bâtissez une cité riche de mille ans d'histoire."
       },
       "YEARS_10000": {
         "name": "Ville éternelle",
-        "description": "Jouez 10 000 ans dans une même ville"
+        "description": "Jouez 10 000 ans dans une même ville. Voilà un mandat municipal qui dure."
       },
       "ALL_TUTORIALS": {
         "name": "Diplômé en urbanisme",

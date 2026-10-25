@@ -8,19 +8,19 @@
         "description": "Complete your first road"
       },
       "FIRST_BUILDING": {
-        "name": "First Building",
-        "description": "Complete your first building"
+        "name": "A City's First Steps",
+        "description": "Complete your first building. Your city's story starts here."
       },
       "FIRST_PUBLIC_FACILITY": {
         "name": "First Public Facility",
         "description": "Complete your first public facility, such as a power plant or substation"
       },
       "FIRST_OFFSHORE": {
-        "name": "Out to Sea",
-        "description": "Complete your first offshore wind farm or offshore oil platform"
+        "name": "A City Takes to the Sea",
+        "description": "Complete your first offshore wind farm or offshore oil platform. Your city's industry heads out to sea."
       },
       "RAIL_LINES_1": {
-        "name": "Rail Opening",
+        "name": "All Aboard!",
         "description": "Open a rail line"
       },
       "RAIL_LINES_5": {
@@ -29,10 +29,10 @@
       },
       "RAIL_LINES_20": {
         "name": "Railway Kingdom",
-        "description": "Operate 20 rail lines in one city"
+        "description": "Operate 20 rail lines in one city. That route map is quite a sight."
       },
       "BUS_LINES_1": {
-        "name": "Bus Opening",
+        "name": "The Bus Comes to Town",
         "description": "Open a bus line"
       },
       "BUS_LINES_5": {
@@ -40,7 +40,7 @@
         "description": "Operate 5 bus lines in one city"
       },
       "BUS_LINES_20": {
-        "name": "Bus City",
+        "name": "Everywhere by Bus",
         "description": "Operate 20 bus lines in one city"
       },
       "BUS_LINES_50": {
@@ -48,8 +48,8 @@
         "description": "Operate 50 bus lines in one city"
       },
       "MONORAIL_LINES_1": {
-        "name": "Monorail Opening",
-        "description": "Open a monorail line"
+        "name": "Commuting Above the City",
+        "description": "Open a monorail line. See familiar streets from a little higher up."
       },
       "MONORAIL_LINES_5": {
         "name": "Monorail Network",
@@ -60,7 +60,7 @@
         "description": "Operate 20 monorail lines in one city"
       },
       "LRT_LINES_1": {
-        "name": "LRT Opening",
+        "name": "Trams Come to Town",
         "description": "Open an LRT line"
       },
       "LRT_LINES_5": {
@@ -68,63 +68,63 @@
         "description": "Operate 5 LRT lines in one city"
       },
       "LRT_LINES_20": {
-        "name": "Tram City",
+        "name": "City of Trams",
         "description": "Operate 20 LRT lines in one city"
       },
       "POPULATION_10K": {
-        "name": "A Town Is Born",
+        "name": "Home to 10,000",
         "description": "Reach a population of 10,000"
       },
       "POPULATION_100K": {
-        "name": "Regional City",
+        "name": "A Thriving Regional City",
         "description": "Reach a population of 100,000"
       },
       "POPULATION_500K": {
-        "name": "Core City",
+        "name": "Joining the Big Cities",
         "description": "Reach a population of 500,000"
       },
       "POPULATION_1M": {
         "name": "Million City",
-        "description": "Reach a population of 1,000,000"
+        "description": "Reach a population of 1,000,000. A metropolis with a million lives to support."
       },
       "POPULATION_2M": {
         "name": "Metropolis",
         "description": "Reach a population of 2,000,000"
       },
       "FLOORS_5": {
-        "name": "Mid-Rise",
+        "name": "A City Grows Upward",
         "description": "Have a private building of 5 or more floors completed"
       },
       "FLOORS_10": {
-        "name": "High-Rise",
-        "description": "Have a private building of 10 or more floors completed"
+        "name": "High-Rise Beginnings",
+        "description": "Have a private building of 10 or more floors completed. Thank goodness for elevators."
       },
       "FLOORS_20": {
-        "name": "Super High-Rise",
+        "name": "A Skyline Takes Shape",
         "description": "Have a private building of 20 or more floors completed"
       },
       "FLOORS_40": {
         "name": "Skyscraper",
-        "description": "Have a private building of 40 or more floors completed"
+        "description": "Have a private building of 40 or more floors completed. A new symbol for your city."
       },
       "INDUSTRY_PHARMACEUTICAL": {
-        "name": "Pharma Hub",
-        "description": "Have a pharmaceutical factory start operating in your city"
+        "name": "Industry for Better Health",
+        "description": "Have a pharmaceutical factory start operating in your city. Help people live healthier lives, starting here."
       },
       "INDUSTRY_SEMICONDUCTOR": {
         "name": "Silicon City",
-        "description": "Have a semiconductor factory start operating in your city"
+        "description": "Have a semiconductor factory start operating in your city. Tiny chips, a major industry."
       },
       "INDUSTRY_PRECISION": {
-        "name": "Precision Craft",
-        "description": "Have a precision instruments factory start operating in your city"
+        "name": "A City of Precision",
+        "description": "Have a precision instruments factory start operating in your city. Technical expertise becomes a strength of your city."
       },
       "INDUSTRY_SOFTWARE": {
-        "name": "Tech Arrives",
-        "description": "Have a software company open for business in your city"
+        "name": "A New Home for Software",
+        "description": "Have a software company open for business in your city. Give new ideas a place to grow."
       },
       "TOURISTS_1": {
-        "name": "First Tourist",
+        "name": "Welcome to Our City",
         "description": "Have a tourist stay in your city for the first time"
       },
       "TOURISTS_100": {
@@ -132,32 +132,32 @@
         "description": "Have 100 tourists staying in your city at once"
       },
       "TOURISTS_1K": {
-        "name": "Popular Destination",
+        "name": "A City Worth the Trip",
         "description": "Have 1,000 tourists staying in your city at once"
       },
       "TOURISTS_10K": {
-        "name": "World-Class Destination",
+        "name": "The World Comes to Visit",
         "description": "Have 10,000 tourists staying in your city at once"
       },
       "YEARS_10": {
-        "name": "A Decade",
-        "description": "Play for 10 years in one city"
+        "name": "Ten Years with the City",
+        "description": "Play for 10 years in one city. There's plenty more city building ahead."
       },
       "YEARS_100": {
         "name": "Century City",
-        "description": "Play for 100 years in one city"
+        "description": "Play for 100 years in one city. See your city through a full century."
       },
       "YEARS_500": {
-        "name": "Five Centuries",
-        "description": "Play for 500 years in one city"
+        "name": "A City Making History",
+        "description": "Play for 500 years in one city. Generations pass, and the city carries on."
       },
       "YEARS_1000": {
         "name": "Millennial City",
-        "description": "Play for 1,000 years in one city"
+        "description": "Play for 1,000 years in one city. Build a city with a thousand years of history."
       },
       "YEARS_10000": {
         "name": "Eternal City",
-        "description": "Play for 10,000 years in one city"
+        "description": "Play for 10,000 years in one city. That's quite a term in office, Mayor."
       },
       "ALL_TUTORIALS": {
         "name": "Planning Graduate",

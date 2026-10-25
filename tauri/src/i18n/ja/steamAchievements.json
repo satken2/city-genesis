@@ -8,19 +8,19 @@
         "description": "道路を初めて完成させる"
       },
       "FIRST_BUILDING": {
-        "name": "初めての建物",
-        "description": "建物を初めて完成させる"
+        "name": "街づくりの第一歩",
+        "description": "建物を初めて完成させる。ここから街の歴史が始まる。"
       },
       "FIRST_PUBLIC_FACILITY": {
         "name": "初めての公共施設",
         "description": "発電所や変電所などの公共施設を初めて完成させる"
       },
       "FIRST_OFFSHORE": {
-        "name": "海へ漕ぎ出す",
-        "description": "洋上風力発電所か洋上石油プラットフォームを初めて完成させる"
+        "name": "海へ広がる街",
+        "description": "洋上風力発電所か洋上石油プラットフォームを初めて完成させる。街の産業は、海の上へ。"
       },
       "RAIL_LINES_1": {
-        "name": "鉄道開業",
+        "name": "出発進行！",
         "description": "鉄道路線を開業させる"
       },
       "RAIL_LINES_5": {
@@ -29,10 +29,10 @@
       },
       "RAIL_LINES_20": {
         "name": "鉄道王国",
-        "description": "1つの都市で鉄道路線を20本運行する"
+        "description": "1つの都市で鉄道路線を20本運行する。路線図も、なかなかの見応えに。"
       },
       "BUS_LINES_1": {
-        "name": "バス開業",
+        "name": "今日からバス通り",
         "description": "バス路線を開業させる"
       },
       "BUS_LINES_5": {
@@ -40,7 +40,7 @@
         "description": "1つの都市でバス路線を5本運行する"
       },
       "BUS_LINES_20": {
-        "name": "バスの街",
+        "name": "バスでどこまでも",
         "description": "1つの都市でバス路線を20本運行する"
       },
       "BUS_LINES_50": {
@@ -48,8 +48,8 @@
         "description": "1つの都市でバス路線を50本運行する"
       },
       "MONORAIL_LINES_1": {
-        "name": "モノレール開業",
-        "description": "モノレール路線を開業させる"
+        "name": "空の通勤路",
+        "description": "モノレール路線を開業させる。いつもの街を、少し高い目線から。"
       },
       "MONORAIL_LINES_5": {
         "name": "モノレール網",
@@ -60,7 +60,7 @@
         "description": "1つの都市でモノレール路線を20本運行する"
       },
       "LRT_LINES_1": {
-        "name": "LRT開業",
+        "name": "街に路面電車がやってきた",
         "description": "LRT路線を開業させる"
       },
       "LRT_LINES_5": {
@@ -68,63 +68,63 @@
         "description": "1つの都市でLRT路線を5本運行する"
       },
       "LRT_LINES_20": {
-        "name": "路面電車の街",
+        "name": "路面電車の都",
         "description": "1つの都市でLRT路線を20本運行する"
       },
       "POPULATION_10K": {
-        "name": "町の誕生",
+        "name": "1万人のふるさと",
         "description": "人口1万人に到達する"
       },
       "POPULATION_100K": {
-        "name": "地方都市",
+        "name": "にぎわう地方都市",
         "description": "人口10万人に到達する"
       },
       "POPULATION_500K": {
-        "name": "中核都市",
+        "name": "大都市の仲間入り",
         "description": "人口50万人に到達する"
       },
       "POPULATION_1M": {
         "name": "百万都市",
-        "description": "人口100万人に到達する"
+        "description": "人口100万人に到達する。百万通りの暮らしを支える大都市へ。"
       },
       "POPULATION_2M": {
         "name": "大都市圏",
         "description": "人口200万人に到達する"
       },
       "FLOORS_5": {
-        "name": "中層ビル",
+        "name": "上へ伸びる街",
         "description": "民間の5階建て以上の建物が完成する"
       },
       "FLOORS_10": {
-        "name": "高層ビル",
-        "description": "民間の10階建て以上の建物が完成する"
+        "name": "高層都市への一歩",
+        "description": "民間の10階建て以上の建物が完成する。エレベーターが頼もしい。"
       },
       "FLOORS_20": {
-        "name": "超高層ビル",
+        "name": "超高層の街並み",
         "description": "民間の20階建て以上の建物が完成する"
       },
       "FLOORS_40": {
         "name": "摩天楼",
-        "description": "民間の40階建て以上の建物が完成する"
+        "description": "民間の40階建て以上の建物が完成する。街の新たなシンボルに。"
       },
       "INDUSTRY_PHARMACEUTICAL": {
-        "name": "創薬の拠点",
-        "description": "医薬品工場が都市で操業を始める"
+        "name": "健康を支える産業",
+        "description": "医薬品工場が都市で操業を始める。この街から、人々の健康を支えよう。"
       },
       "INDUSTRY_SEMICONDUCTOR": {
         "name": "シリコンの街",
-        "description": "半導体工場が都市で操業を始める"
+        "description": "半導体工場が都市で操業を始める。小さなチップが、大きな産業に。"
       },
       "INDUSTRY_PRECISION": {
-        "name": "精密のものづくり",
-        "description": "精密機器工場が都市で操業を始める"
+        "name": "精密技術が光る街",
+        "description": "精密機器工場が都市で操業を始める。確かな技術が街の力になる。"
       },
       "INDUSTRY_SOFTWARE": {
-        "name": "IT企業の進出",
-        "description": "ソフトウェア会社が都市で営業を始める"
+        "name": "ソフトウェアの新天地",
+        "description": "ソフトウェア会社が都市で営業を始める。新しいアイデアが育つ場所に。"
       },
       "TOURISTS_1": {
-        "name": "初めての観光客",
+        "name": "ようこそ、わが街へ",
         "description": "観光客が初めて都市に滞在する"
       },
       "TOURISTS_100": {
@@ -132,32 +132,32 @@
         "description": "100人の観光客が同時に都市に滞在する"
       },
       "TOURISTS_1K": {
-        "name": "人気の観光地",
+        "name": "旅先に選ばれる街",
         "description": "1,000人の観光客が同時に都市に滞在する"
       },
       "TOURISTS_10K": {
-        "name": "世界的な観光地",
+        "name": "世界が訪れる街",
         "description": "1万人の観光客が同時に都市に滞在する"
       },
       "YEARS_10": {
-        "name": "10年の歩み",
-        "description": "1つの都市で10年間プレイする"
+        "name": "街と歩んだ10年",
+        "description": "1つの都市で10年間プレイする。街づくりは、これからも続く。"
       },
       "YEARS_100": {
         "name": "百年の都",
-        "description": "1つの都市で100年間プレイする"
+        "description": "1つの都市で100年間プレイする。街の一世紀を見届けよう。"
       },
       "YEARS_500": {
-        "name": "五百年の歴史",
-        "description": "1つの都市で500年間プレイする"
+        "name": "歴史を刻む街",
+        "description": "1つの都市で500年間プレイする。世代を超えて、街は続く。"
       },
       "YEARS_1000": {
         "name": "千年の都",
-        "description": "1つの都市で1,000年間プレイする"
+        "description": "1つの都市で1,000年間プレイする。千年の歴史を持つ都を築こう。"
       },
       "YEARS_10000": {
         "name": "悠久の都",
-        "description": "1つの都市で1万年間プレイする"
+        "description": "1つの都市で1万年間プレイする。市長の任期も、ずいぶん長くなりました。"
       },
       "ALL_TUTORIALS": {
         "name": "都市計画の修了",

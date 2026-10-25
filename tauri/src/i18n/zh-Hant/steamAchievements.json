@@ -8,19 +8,19 @@
         "description": "首次建成道路"
       },
       "FIRST_BUILDING": {
-        "name": "第一棟建築",
-        "description": "首次建成建築"
+        "name": "城市建設的第一步",
+        "description": "首次建成建築。城市的歷史從這裡開始。"
       },
       "FIRST_PUBLIC_FACILITY": {
         "name": "第一座公共設施",
         "description": "首次建成發電廠、變電所等公共設施"
       },
       "FIRST_OFFSHORE": {
-        "name": "駛向大海",
-        "description": "首次建成離岸風場或海上石油平台"
+        "name": "向海延伸的城市",
+        "description": "首次建成離岸風場或海上石油平台。城市的產業向海上延伸。"
       },
       "RAIL_LINES_1": {
-        "name": "鐵路通車",
+        "name": "發車！",
         "description": "開通一條鐵路路線"
       },
       "RAIL_LINES_5": {
@@ -29,10 +29,10 @@
       },
       "RAIL_LINES_20": {
         "name": "鐵道王國",
-        "description": "在一座城市中營運20條鐵路路線"
+        "description": "在一座城市中營運20條鐵路路線。這張路線圖，也頗有看頭了。"
       },
       "BUS_LINES_1": {
-        "name": "公車開通",
+        "name": "公車開到家門口",
         "description": "開通一條公車路線"
       },
       "BUS_LINES_5": {
@@ -40,7 +40,7 @@
         "description": "在一座城市中營運5條公車路線"
       },
       "BUS_LINES_20": {
-        "name": "公車之城",
+        "name": "搭公車走遍全城",
         "description": "在一座城市中營運20條公車路線"
       },
       "BUS_LINES_50": {
@@ -48,8 +48,8 @@
         "description": "在一座城市中營運50條公車路線"
       },
       "MONORAIL_LINES_1": {
-        "name": "單軌通車",
-        "description": "開通一條單軌路線"
+        "name": "空中通勤路",
+        "description": "開通一條單軌路線。從稍高的視角，看看熟悉的城市。"
       },
       "MONORAIL_LINES_5": {
         "name": "單軌路網",
@@ -60,7 +60,7 @@
         "description": "在一座城市中營運20條單軌路線"
       },
       "LRT_LINES_1": {
-        "name": "輕軌通車",
+        "name": "路面電車進城了",
         "description": "開通一條輕軌路線"
       },
       "LRT_LINES_5": {
@@ -68,63 +68,63 @@
         "description": "在一座城市中營運5條輕軌路線"
       },
       "LRT_LINES_20": {
-        "name": "路面電車之城",
+        "name": "路面電車之都",
         "description": "在一座城市中營運20條輕軌路線"
       },
       "POPULATION_10K": {
-        "name": "小鎮誕生",
+        "name": "一萬人的故鄉",
         "description": "人口達到1萬"
       },
       "POPULATION_100K": {
-        "name": "地方城市",
+        "name": "充滿活力的地方城市",
         "description": "人口達到10萬"
       },
       "POPULATION_500K": {
-        "name": "中心城市",
+        "name": "邁入大城市行列",
         "description": "人口達到50萬"
       },
       "POPULATION_1M": {
         "name": "百萬之城",
-        "description": "人口達到100萬"
+        "description": "人口達到100萬。建成一座承載百萬種生活的大都市。"
       },
       "POPULATION_2M": {
         "name": "大都會區",
         "description": "人口達到200萬"
       },
       "FLOORS_5": {
-        "name": "中層大樓",
+        "name": "向上成長的城市",
         "description": "民間的5層以上建築落成"
       },
       "FLOORS_10": {
-        "name": "高樓大廈",
-        "description": "民間的10層以上建築落成"
+        "name": "邁向高樓之城",
+        "description": "民間的10層以上建築落成。還好有電梯。"
       },
       "FLOORS_20": {
-        "name": "超高層大樓",
+        "name": "高樓勾勒天際線",
         "description": "民間的20層以上建築落成"
       },
       "FLOORS_40": {
         "name": "摩天大樓",
-        "description": "民間的40層以上建築落成"
+        "description": "民間的40層以上建築落成。成為城市的新地標。"
       },
       "INDUSTRY_PHARMACEUTICAL": {
-        "name": "製藥據點",
-        "description": "醫藥品工廠在城市中開始運作"
+        "name": "守護健康的產業",
+        "description": "醫藥品工廠在城市中開始運作。從這座城市出發，守護人們的健康。"
       },
       "INDUSTRY_SEMICONDUCTOR": {
         "name": "矽之城",
-        "description": "半導體工廠在城市中開始運作"
+        "description": "半導體工廠在城市中開始運作。小小晶片，成就大產業。"
       },
       "INDUSTRY_PRECISION": {
-        "name": "精密製造",
-        "description": "精密儀器工廠在城市中開始運作"
+        "name": "精密技術之城",
+        "description": "精密儀器工廠在城市中開始運作。精湛的技術成為城市的力量。"
       },
       "INDUSTRY_SOFTWARE": {
-        "name": "IT企業進駐",
-        "description": "軟體公司在城市中開業"
+        "name": "軟體產業的新天地",
+        "description": "軟體公司在城市中開業。讓新的創意在這裡成長。"
       },
       "TOURISTS_1": {
-        "name": "第一位遊客",
+        "name": "歡迎來到我們的城市",
         "description": "首次有遊客在城市中停留"
       },
       "TOURISTS_100": {
@@ -132,32 +132,32 @@
         "description": "同時有100名遊客在城市中停留"
       },
       "TOURISTS_1K": {
-        "name": "熱門景點",
+        "name": "值得一遊的城市",
         "description": "同時有1,000名遊客在城市中停留"
       },
       "TOURISTS_10K": {
-        "name": "世界級觀光地",
+        "name": "世界來作客",
         "description": "同時有1萬名遊客在城市中停留"
       },
       "YEARS_10": {
-        "name": "十年足跡",
-        "description": "在一座城市中遊玩10年"
+        "name": "與城市同行十年",
+        "description": "在一座城市中遊玩10年。城市建設，還將繼續。"
       },
       "YEARS_100": {
         "name": "百年之都",
-        "description": "在一座城市中遊玩100年"
+        "description": "在一座城市中遊玩100年。見證城市走過一個世紀。"
       },
       "YEARS_500": {
-        "name": "五百年歷史",
-        "description": "在一座城市中遊玩500年"
+        "name": "寫下歷史的城市",
+        "description": "在一座城市中遊玩500年。世代更替，城市依然延續。"
       },
       "YEARS_1000": {
         "name": "千年之都",
-        "description": "在一座城市中遊玩1,000年"
+        "description": "在一座城市中遊玩1,000年。建起一座擁有千年歷史的城市。"
       },
       "YEARS_10000": {
         "name": "永恆之都",
-        "description": "在一座城市中遊玩1萬年"
+        "description": "在一座城市中遊玩1萬年。市長，這任期可真夠長的。"
       },
       "ALL_TUTORIALS": {
         "name": "都市計畫結業",

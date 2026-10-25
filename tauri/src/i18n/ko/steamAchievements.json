@@ -8,19 +8,19 @@
         "description": "도로를 처음으로 완공한다"
       },
       "FIRST_BUILDING": {
-        "name": "첫 건물",
-        "description": "건물을 처음으로 완공한다"
+        "name": "도시 건설의 첫걸음",
+        "description": "건물을 처음으로 완공한다. 도시의 역사가 여기서 시작된다."
       },
       "FIRST_PUBLIC_FACILITY": {
         "name": "첫 공공시설",
         "description": "발전소나 변전소 같은 공공시설을 처음으로 완공한다"
       },
       "FIRST_OFFSHORE": {
-        "name": "바다로 나아가다",
-        "description": "해상 풍력 발전소나 해상 석유 플랫폼을 처음으로 완공한다"
+        "name": "바다로 뻗어 가는 도시",
+        "description": "해상 풍력 발전소나 해상 석유 플랫폼을 처음으로 완공한다. 도시의 산업이 바다 위로 뻗어 나간다."
       },
       "RAIL_LINES_1": {
-        "name": "철도 개통",
+        "name": "출발합니다!",
         "description": "철도 노선을 개통한다"
       },
       "RAIL_LINES_5": {
@@ -29,10 +29,10 @@
       },
       "RAIL_LINES_20": {
         "name": "철도 왕국",
-        "description": "한 도시에서 철도 노선 20개를 운행한다"
+        "description": "한 도시에서 철도 노선 20개를 운행한다. 노선도도 제법 볼만해졌다."
       },
       "BUS_LINES_1": {
-        "name": "버스 개통",
+        "name": "오늘부터 버스가 다닙니다",
         "description": "버스 노선을 개통한다"
       },
       "BUS_LINES_5": {
@@ -40,7 +40,7 @@
         "description": "한 도시에서 버스 노선 5개를 운행한다"
       },
       "BUS_LINES_20": {
-        "name": "버스의 도시",
+        "name": "버스로 어디든",
         "description": "한 도시에서 버스 노선 20개를 운행한다"
       },
       "BUS_LINES_50": {
@@ -48,8 +48,8 @@
         "description": "한 도시에서 버스 노선 50개를 운행한다"
       },
       "MONORAIL_LINES_1": {
-        "name": "모노레일 개통",
-        "description": "모노레일 노선을 개통한다"
+        "name": "하늘 위 출근길",
+        "description": "모노레일 노선을 개통한다. 익숙한 도시를 조금 더 높은 곳에서 바라보자."
       },
       "MONORAIL_LINES_5": {
         "name": "모노레일망",
@@ -60,7 +60,7 @@
         "description": "한 도시에서 모노레일 노선 20개를 운행한다"
       },
       "LRT_LINES_1": {
-        "name": "LRT 개통",
+        "name": "도시에 노면전차가 찾아왔다",
         "description": "LRT 노선을 개통한다"
       },
       "LRT_LINES_5": {
@@ -72,59 +72,59 @@
         "description": "한 도시에서 LRT 노선 20개를 운행한다"
       },
       "POPULATION_10K": {
-        "name": "마을의 탄생",
+        "name": "1만 명의 고향",
         "description": "인구 1만 명에 도달한다"
       },
       "POPULATION_100K": {
-        "name": "지방 도시",
+        "name": "활기 넘치는 지방 도시",
         "description": "인구 10만 명에 도달한다"
       },
       "POPULATION_500K": {
-        "name": "중핵 도시",
+        "name": "이제는 대도시",
         "description": "인구 50만 명에 도달한다"
       },
       "POPULATION_1M": {
         "name": "백만 도시",
-        "description": "인구 100만 명에 도달한다"
+        "description": "인구 100만 명에 도달한다. 백만 가지 삶을 품는 대도시로."
       },
       "POPULATION_2M": {
         "name": "대도시권",
         "description": "인구 200만 명에 도달한다"
       },
       "FLOORS_5": {
-        "name": "중층 빌딩",
+        "name": "위로 자라는 도시",
         "description": "민간의 5층 이상 건물이 완공된다"
       },
       "FLOORS_10": {
-        "name": "고층 빌딩",
-        "description": "민간의 10층 이상 건물이 완공된다"
+        "name": "고층 도시를 향한 첫걸음",
+        "description": "민간의 10층 이상 건물이 완공된다. 엘리베이터가 있어 참 다행이다."
       },
       "FLOORS_20": {
-        "name": "초고층 빌딩",
+        "name": "초고층 건물이 이루는 풍경",
         "description": "민간의 20층 이상 건물이 완공된다"
       },
       "FLOORS_40": {
         "name": "마천루",
-        "description": "민간의 40층 이상 건물이 완공된다"
+        "description": "민간의 40층 이상 건물이 완공된다. 도시의 새로운 상징이 된다."
       },
       "INDUSTRY_PHARMACEUTICAL": {
-        "name": "신약의 거점",
-        "description": "의약품 공장이 도시에서 가동을 시작한다"
+        "name": "건강을 지키는 산업",
+        "description": "의약품 공장이 도시에서 가동을 시작한다. 이 도시에서 사람들의 건강을 지켜 나가자."
       },
       "INDUSTRY_SEMICONDUCTOR": {
         "name": "실리콘 도시",
-        "description": "반도체 공장이 도시에서 가동을 시작한다"
+        "description": "반도체 공장이 도시에서 가동을 시작한다. 작은 칩이 큰 산업으로 자라난다."
       },
       "INDUSTRY_PRECISION": {
-        "name": "정밀 제조",
-        "description": "정밀 기기 공장이 도시에서 가동을 시작한다"
+        "name": "정밀 기술이 빛나는 도시",
+        "description": "정밀 기기 공장이 도시에서 가동을 시작한다. 탄탄한 기술이 도시의 힘이 된다."
       },
       "INDUSTRY_SOFTWARE": {
-        "name": "IT 기업의 진출",
-        "description": "소프트웨어 회사가 도시에서 영업을 시작한다"
+        "name": "소프트웨어의 새로운 터전",
+        "description": "소프트웨어 회사가 도시에서 영업을 시작한다. 새로운 아이디어가 자라는 곳으로."
       },
       "TOURISTS_1": {
-        "name": "첫 관광객",
+        "name": "우리 도시에 오신 것을 환영합니다",
         "description": "관광객이 처음으로 도시에 머문다"
       },
       "TOURISTS_100": {
@@ -132,32 +132,32 @@
         "description": "관광객 100명이 동시에 도시에 머문다"
       },
       "TOURISTS_1K": {
-        "name": "인기 관광지",
+        "name": "여행지로 선택받는 도시",
         "description": "관광객 1,000명이 동시에 도시에 머문다"
       },
       "TOURISTS_10K": {
-        "name": "세계적인 관광지",
+        "name": "세계가 찾아오는 도시",
         "description": "관광객 1만 명이 동시에 도시에 머문다"
       },
       "YEARS_10": {
-        "name": "10년의 발자취",
-        "description": "한 도시에서 10년 동안 플레이한다"
+        "name": "도시와 함께한 10년",
+        "description": "한 도시에서 10년 동안 플레이한다. 도시 건설은 앞으로도 계속된다."
       },
       "YEARS_100": {
         "name": "백 년의 도읍",
-        "description": "한 도시에서 100년 동안 플레이한다"
+        "description": "한 도시에서 100년 동안 플레이한다. 도시의 한 세기를 함께하자."
       },
       "YEARS_500": {
-        "name": "오백 년의 역사",
-        "description": "한 도시에서 500년 동안 플레이한다"
+        "name": "역사를 새기는 도시",
+        "description": "한 도시에서 500년 동안 플레이한다. 세대가 바뀌어도 도시는 이어진다."
       },
       "YEARS_1000": {
         "name": "천 년의 도읍",
-        "description": "한 도시에서 1,000년 동안 플레이한다"
+        "description": "한 도시에서 1,000년 동안 플레이한다. 천 년의 역사를 지닌 도시를 만들자."
       },
       "YEARS_10000": {
         "name": "영원의 도읍",
-        "description": "한 도시에서 1만 년 동안 플레이한다"
+        "description": "한 도시에서 1만 년 동안 플레이한다. 시장님의 임기도 꽤 길어졌네요."
       },
       "ALL_TUTORIALS": {
         "name": "도시 계획 수료",
