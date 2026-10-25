@@ -16,7 +16,7 @@ City Genesis の公開リポジトリ。Unity の3D描画、Tauri の操作UI、
 
 ## 共通ルール
 
-- 公開文書は日本語を原本とし、英語はその翻訳とする。README は `README.ja.md` が原本、`README.md` が英訳。本文は `docs/ja/` を先に編集し、対応する `docs/en/` の英訳も同じ変更で揃える。GitHub 上で Markdown を直接読み、各言語の README.md を目次にする。内容が食い違う場合は日本語を優先する。AGENTS.md・Skillは日本語で維持する。コードコメントは原則日本語とし、`unity/Assets/Scripts/` の手書きソースでは英語で維持する。
+- 公開文書は日本語を原本とし、英語はその翻訳とする。README は `README.ja.md` が原本、`README.md` が英訳。プライバシーポリシーも同じく `PRIVACY.ja.md` が原本、`PRIVACY.md` が英訳。本文は `docs/ja/` を先に編集し、対応する `docs/en/` の英訳も同じ変更で揃える。GitHub 上で Markdown を直接読み、各言語の README.md を目次にする。内容が食い違う場合は日本語を優先する。AGENTS.md・Skillは日本語で維持する。コードコメントは原則日本語とし、`unity/Assets/Scripts/` の手書きソースでは英語で維持する。
 - このリポジトリは描画と操作を担当する。コアの経済計算をフロント側で再実装しない。
 - コアとの HTTP は各モジュールの共通 API 窓口、Unity と UI の連携は共通 IPC 窓口を使う。通信契約の変更は双方と公開仕様を揃える。
 - 共有定数・API 型の生成物を手編集しない。生成元は非公開コア側にあり、このリポジトリ単体で変更が必要な場合はユーザーに依頼する。

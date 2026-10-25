@@ -149,6 +149,7 @@ const DEVELOPMENT_NOTICE: InfoDialogContent = {
   headingKey: "newGame.developmentNotice.heading",
   subheadingKey: "newGame.developmentNotice.subheading",
   textKey: "newGame.developmentNotice.text",
+  url: "https://store.steampowered.com/app/5021240/CityGenesis/",
   buttonKey: "newGame.developmentNotice.button",
 };
 

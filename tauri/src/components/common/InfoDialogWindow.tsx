@@ -6,6 +6,7 @@
  * button both simply close the window; openers that wait for dismissal watch its hidden notification.
  */
 
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
 import "./InfoDialogWindow.css";
 
@@ -16,6 +17,8 @@ export type InfoDialogContent = {
   headingKey: string;
   subheadingKey: string;
   textKey: string;
+  /** Shown after the explanation and opened in the default browser, because text in the WebView cannot be selected or copied. */
+  url?: string;
   buttonKey: string;
 };
 
@@ -37,6 +40,11 @@ export function InfoDialogWindow({ content, onClose }: InfoDialogWindowProps) {
         <h2 className="info-dialog-heading">{t(content.headingKey)}</h2>
         <h3 className="info-dialog-subheading">{t(content.subheadingKey)}</h3>
         <p className="info-dialog-text">{t(content.textKey)}</p>
+        {content.url && (
+          <button className="info-dialog-link" type="button" onClick={() => void openUrl(content.url!)}>
+            {content.url}
+          </button>
+        )}
       </div>
       <button className="info-dialog-button" type="button" onClick={onClose}>
         {t(content.buttonKey)}
