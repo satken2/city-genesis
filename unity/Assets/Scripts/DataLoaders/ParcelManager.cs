@@ -524,7 +524,9 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         if (cellsNeedingFetch.Count > 0)
         {
             IsLoading = true;
-            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, TrackParcelLoad(new List<Vector2Int>(cellsNeedingFetch)), "ParcelManager"));
+            // Building generation waits for this load, so it runs ahead of normal render work like terrain tile publishing.
+            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, TrackParcelLoad(new List<Vector2Int>(cellsNeedingFetch)), "ParcelManager",
+                priority: RenderWorkPriority.High));
         }
     }
 

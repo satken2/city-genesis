@@ -1689,6 +1689,11 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private IEnumerator LoadMergedPathsAndNodes(List<Vector2Int> cells, HashSet<Vector2Int> nearSet, HashSet<Vector2Int> dynamicSet, Action<bool> onComplete = null, HashSet<int> rebuiltPathIds = null, HashSet<int> targetPathIds = null, HashSet<Vector2Int> changedCellsFilter = null)
     {
+        // Paths are applied after nodes, but their pages are fetched while nodes load. Only communication overlaps.
+        PagedPathListResponse fetchedPaths = null;
+        Coroutine pathFetch = RenderWorkScheduler.Start(this, FetchMergedPaths(cells, response => fetchedPaths = response), "PathManager");
+        if (pathFetch != null) activeLodCoroutines.Add(pathFetch);
+
         // Bulk-fetch nodes for all visible cells, including Far cells, just like paths.
         // This avoids individual API fetches for nodes at road ends in Far cells.
         if (cells.Count > 0)
@@ -1698,10 +1703,36 @@ public partial class PathManager : BaseApiDataManager
             UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  LoadMergedNodes: {swNode.ElapsedMilliseconds}ms");
         }
 
-        // Bulk-fetch paths using the merged BBOX of all cells
         var swPath = System.Diagnostics.Stopwatch.StartNew();
-        yield return LoadMergedPaths(cells, nearSet, dynamicSet, onComplete, rebuiltPathIds, targetPathIds, changedCellsFilter);
+        if (pathFetch != null) yield return pathFetch;
+        yield return LoadMergedPaths(fetchedPaths, cells, nearSet, dynamicSet, onComplete, rebuiltPathIds, targetPathIds, changedCellsFilter);
         UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  LoadMergedPaths: {swPath.ElapsedMilliseconds}ms");
+    }
+
+    /// <summary>Fetch every page of paths in the cells' merged BBOX. Passes null when a page fails, is canceled, or the cursor does not advance.</summary>
+    private IEnumerator FetchMergedPaths(List<Vector2Int> cells, Action<PagedPathListResponse> onDone)
+    {
+        CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
+        string bbox = $"{minX},{minZ},{maxX},{maxZ}";
+        PagedPathListResponse response = new PagedPathListResponse { paths = new List<ConstructionPathSummary>() };
+        int cursor = 0;
+        int generation = lodFetchGeneration;
+        Func<bool> isCanceled = () => generation != lodFetchGeneration;
+        while (true)
+        {
+            PagedPathListResponse page = null;
+            yield return ApiClient.GetBulk<PagedPathListResponse>(
+                $"/paths/?bbox={bbox}&limit=500&cursor={cursor}", value => page = value,
+                timingLabel: "PathManager page", isCanceled: isCanceled);
+            if (page?.paths == null) { response = null; break; }
+            RenderWorkScheduler.CountEvent("path.received", page.paths.Count);
+            response.paths.AddRange(page.paths);
+            if (!page.next_cursor.HasValue) break;
+            if (page.next_cursor.Value <= cursor) { response = null; break; }
+            cursor = page.next_cursor.Value;
+            yield return null;
+        }
+        onDone(response);
     }
 
     /// <summary>
@@ -1749,31 +1780,11 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Bulk-fetch paths in a BBOX merging multiple cells.
+    /// Apply paths fetched from a BBOX merging multiple cells (FetchMergedPaths). A null response reports failure.
     /// Determine each path's LOD tier from its position; use full detail for Near and simplified rendering for Far.
     /// </summary>
-    private IEnumerator LoadMergedPaths(List<Vector2Int> cells, HashSet<Vector2Int> nearSet, HashSet<Vector2Int> dynamicSet, Action<bool> onComplete = null, HashSet<int> rebuiltPathIds = null, HashSet<int> targetPathIds = null, HashSet<Vector2Int> changedCellsFilter = null)
+    private IEnumerator LoadMergedPaths(PagedPathListResponse response, List<Vector2Int> cells, HashSet<Vector2Int> nearSet, HashSet<Vector2Int> dynamicSet, Action<bool> onComplete = null, HashSet<int> rebuiltPathIds = null, HashSet<int> targetPathIds = null, HashSet<Vector2Int> changedCellsFilter = null)
     {
-        CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
-        string bbox = $"{minX},{minZ},{maxX},{maxZ}";
-        PagedPathListResponse response = new PagedPathListResponse { paths = new List<ConstructionPathSummary>() };
-        int cursor = 0;
-        int generation = lodFetchGeneration;
-        Func<bool> isCanceled = () => generation != lodFetchGeneration;
-        while (true)
-        {
-            PagedPathListResponse page = null;
-            yield return ApiClient.GetBulk<PagedPathListResponse>(
-                $"/paths/?bbox={bbox}&limit=500&cursor={cursor}", value => page = value,
-                timingLabel: "PathManager page", isCanceled: isCanceled);
-            if (page?.paths == null) { response = null; break; }
-            RenderWorkScheduler.CountEvent("path.received", page.paths.Count);
-            response.paths.AddRange(page.paths);
-            if (!page.next_cursor.HasValue) break;
-            if (page.next_cursor.Value <= cursor) { response = null; break; }
-            cursor = page.next_cursor.Value;
-            yield return null;
-        }
         if (response == null)
         {
             onComplete?.Invoke(false);
@@ -1927,9 +1938,9 @@ public partial class PathManager : BaseApiDataManager
         {
             SortPathsByCameraDistance(highPriorityPaths);
             SortPathsByCameraDistance(lowPriorityPaths);
-            // Show roads without objects as Far before waiting for expensive pairwise intersection finalization.
+            // Show roads drawn as Far before waiting for expensive pairwise intersection finalization.
             var provisionalFarIds = new HashSet<int>();
-            yield return BuildProvisionalFarPaths(highPriorityPaths, provisionalFarIds);
+            yield return BuildProvisionalFarPaths(highPriorityPaths, batchPathTiers, provisionalFarIds);
 
             // Communication is batched, so bulk-fetch missing nodes
             yield return UpdateDeferredLodIntersections();
@@ -1985,15 +1996,19 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Show roads without objects as Far during LOD batches. The same batch generates detail after intersections are finalized,
-    /// so do not count these in lodBatchRebuiltPathIds duplicate suppression.
+    /// During LOD batches, build roads without objects whose draw LOD is Far now, before intersections are finalized; the batch reuses them while they stay Far.
+    /// Roads drawn in detail wait for intersection finalization, keeping the citywide overview band until their object exists
+    /// (a provisional Far model would be discarded seconds later). Do not count these in lodBatchRebuiltPathIds duplicate suppression.
     /// </summary>
-    private IEnumerator BuildProvisionalFarPaths(List<PathSummary> paths, HashSet<int> builtIds)
+    private IEnumerator BuildProvisionalFarPaths(List<PathSummary> paths, Dictionary<int, LodTier> tiers, HashSet<int> builtIds)
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        Camera cam = Camera.main;
+        Vector3 camPos = cam != null ? cam.transform.position : Vector3.zero;
         foreach (var path in paths)
         {
             if (HasPathRepresentation(path)) continue;
+            if (DeterminePathDrawLod(path, tiers[path.path_id], camPos, out _, out _, out _) != DrawLod.Far) continue;
             CreateOrUpdateFarPath(path, forceRebuild: true);
             builtIds.Add(path.path_id);
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)

@@ -20,6 +20,17 @@
   border-bottom: 1px solid var(--flat-raised-hover);
 }
 
+.zone-edit__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zone-edit__heading {
+  font-size: 0.85rem;
+  color: var(--flat-text-label);
+}
+
 .zone-edit__tools {
   display: flex;
   gap: 4px;
@@ -27,6 +38,9 @@
 }
 
 .zone-edit__tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 4px 12px;
   border: 1px solid var(--flat-raised-hover);
   border-radius: 4px;
@@ -45,16 +59,6 @@
   background: var(--flat-selected);
   border-color: var(--flat-selected-hover);
   color: var(--flat-text);
-}
-
-.zone-edit__target {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 12rem;
-  font-size: 1rem;
-  color: var(--flat-text);
-  white-space: nowrap;
 }
 
 .zone-edit__chip {

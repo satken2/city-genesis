@@ -126,13 +126,13 @@ MonoBehaviour:
     smoothness: 0.12
     proceduralBlend: 0.7
     proceduralScale: 25
-    groundColorA: {r: 0.62, g: 0.53, b: 0.3, a: 1}
-    groundColorB: {r: 0.3, g: 0.33, b: 0.17, a: 1}
-    groundColorC: {r: 0.72, g: 0.64, b: 0.48, a: 1}
+    groundColorA: {r: 0.53, g: 0.48, b: 0.3, a: 1}
+    groundColorB: {r: 0.49, g: 0.46, b: 0.3, a: 1}
+    groundColorC: {r: 0.58, g: 0.54, b: 0.38, a: 1}
     detailNormalStrength: 0.25
     rippleStrength: 0
     rippleWavelength: 0.6
-    macroVariationStrength: 0.22
+    macroVariationStrength: 0.08
     macroVariationTint: {r: 0.95, g: 0.84, b: 0.62, a: 1}
     colorGradeStrength: 0.18
     lowColor: {r: 0.98, g: 0.92, b: 0.8, a: 1}

@@ -18,12 +18,13 @@
     "mergeFailed": "Failed to merge districts (districts that are not adjacent cannot be merged)",
     "mergeNoRequest": "No district selected to merge",
     "edit": {
-      "toolCreate": "New District",
+      "toolHeading": "Operation",
+      "toolCreate": "Create New District",
       "toolExpand": "Expand District",
+      "toolExpandZone": "Expand {{name}}",
+      "modeHeading": "Selection Method",
       "modeBlock": "Whole Block",
       "modeRoad": "Street Side",
-      "newZone": "New district",
-      "noTarget": "Hover over a district",
       "hint": {
         "create": {
           "block": "Hold Ctrl and drag over blocks enclosed by streets; the painted blocks, with their parcels, become a new district. Drag to pan, scroll to zoom.",

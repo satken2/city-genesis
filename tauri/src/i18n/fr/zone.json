@@ -18,12 +18,13 @@
     "mergeFailed": "Échec de la fusion des quartiers (des quartiers non adjacents ne peuvent pas être fusionnés)",
     "mergeNoRequest": "Aucun quartier sélectionné pour la fusion",
     "edit": {
-      "toolCreate": "Nouveau quartier",
+      "toolHeading": "Opération",
+      "toolCreate": "Créer un quartier",
       "toolExpand": "Agrandir un quartier",
+      "toolExpandZone": "Agrandir {{name}}",
+      "modeHeading": "Méthode de sélection",
       "modeBlock": "Îlot entier",
       "modeRoad": "Côté de rue",
-      "newZone": "Nouveau quartier",
-      "noTarget": "Survolez un quartier",
       "hint": {
         "create": {
           "block": "Maintenez Ctrl et faites glisser sur des îlots entourés de rues ; les îlots peints, avec leurs parcelles, forment un nouveau quartier. Faites glisser pour déplacer la carte, molette pour zoomer.",

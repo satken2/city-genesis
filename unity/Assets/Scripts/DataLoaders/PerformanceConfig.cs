@@ -19,8 +19,9 @@ public static class PerformanceConfig
     public static float SliceBudgetMs => Mathf.Max(0.05f, Mathf.Min(0.5f, FrameBudgetMs - (float)RenderWorkScheduler.UsedMs));
     /// <summary>
     /// Maximum per-frame processing time (milliseconds) for operations such as coroutine object generation.
-    /// Calculated dynamically from target FPS.
-    /// Example: at 60FPS, use 16.67ms per frame minus headroom for other work as the frame budget.
+    /// A fixed share of the actual frame time, never less than that share of the target frame time.
+    /// When frames run slower than the target (heavy rendering during loading), generation keeps the same share of each frame
+    /// instead of a budget sized for the target rate, which would leave loading throughput falling with the frame rate.
     /// </summary>
     public static float FrameBudgetMs
     {
@@ -32,7 +33,7 @@ public static class PerformanceConfig
             // Fraction of frame time allocated to coroutine work.
             // Remaining time is used for rendering, physics, input, etc.
             const float budgetRatio = 0.25f;
-            float frameTime = 1000f / targetFps;
+            float frameTime = Mathf.Max(1000f / targetFps, Time.smoothDeltaTime * 1000f);
             return Mathf.Max(2f, frameTime * budgetRatio);
         }
     }

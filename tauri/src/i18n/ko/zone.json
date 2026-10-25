@@ -18,12 +18,13 @@
     "mergeFailed": "지구 통합에 실패했습니다(인접하지 않은 지구끼리는 통합할 수 없습니다)",
     "mergeNoRequest": "통합할 지구가 선택되지 않았습니다",
     "edit": {
-      "toolCreate": "새 지구",
+      "toolHeading": "편집 내용",
+      "toolCreate": "새 지구 만들기",
       "toolExpand": "기존 지구 확장",
+      "toolExpandZone": "{{name}} 확장",
+      "modeHeading": "범위 지정 방법",
       "modeBlock": "블록 전체",
       "modeRoad": "도로 한쪽",
-      "newZone": "새 지구",
-      "noTarget": "지구 위에 마우스를 올려 주세요",
       "hint": {
         "create": {
           "block": "Ctrl을 누른 채 드래그하여 도로로 둘러싸인 블록을 칠하면 칠한 블록이 안의 구획과 함께 새 지구가 됩니다. 드래그로 지도 이동, 휠로 확대·축소합니다.",

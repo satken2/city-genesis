@@ -31,7 +31,7 @@ The path's `follow_terrain` controls this behavior; -1 means use `path_master.fo
 
 Surface-path fill and excavation use `embankment_heights`, rather than Y: one height in meters per anchor, positive for fill and negative for cuts, linearly interpolated between anchors. Construction changes terrain accordingly, smoothing the road longitudinally before applying it. Unity follows the finished terrain without smoothing it again during rendering.
 
-A design profile (`station_grade_profile`) is a road-surface reference independent of terrain. Its points are `[x, absolute elevation, z]`, with absolute rather than relative Y. Paths laid together, such as station tracks, can carry this profile. Their surface height comes from horizontal projection onto it instead of Y and terrain. Splitting preserves the profile; terrain changes do not regenerate it.
+A design profile (`station_grade_profile`) is a road-surface reference independent of terrain. Its points are `[x, absolute elevation, z]`, with absolute rather than relative Y. Paths laid together, such as station tracks, can carry this profile. Their surface height comes from horizontal projection onto it instead of Y and terrain. Splitting preserves the profile; terrain changes do not regenerate it. Point spacing in core responses is not uniform: a straight span with constant grade has only its two end points.
 
 ## Length and occupancy
 

@@ -8,8 +8,8 @@
  * Tools (destination for brushed sides):
  * - New district: create from picked sides (POST /api/v1/zones/), then switch to Extend so painting can
  *   continue.
- * - Extend existing district: highlight the hovered district, then start brushing there to add picked sides to
- *   it (POST /api/v1/paths/batch-zone).
+ * - Extend existing district: highlight the hovered district and show its name and color on this tool's button,
+ *   then start brushing there to add picked sides to it (POST /api/v1/paths/batch-zone).
  * Brush modes:
  * - Whole block: touching a block enclosed by local roads picks every block-facing boundary side.
  * - By road: pick one road section's side, also selectable through frontage parcels. If exactly one road lies
@@ -503,44 +503,53 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     ctx.restore();
   }, []);
 
-  const target = tool === "create" ? { name: t("zone.edit.newZone"), color: previewColor } : hoverZoneId !== null ? zonesById.get(hoverZoneId) : undefined;
+  const hoverZone = hoverZoneId !== null ? zonesById.get(hoverZoneId) : undefined;
 
   return (
     <div className="zone-edit">
       <div className="zone-edit__toolbar">
-        <div className="zone-edit__tools" role="group">
-          {(["create", "expand"] as const).map((key) => (
-            <button
-              key={key}
-              type="button"
-              className={`zone-edit__tool${tool === key ? " zone-edit__tool--active" : ""}`}
-              aria-pressed={tool === key}
-              data-guide="zone_edit.tool"
-              data-guide-value={key}
-              onClick={() => selectTool(key)}
-            >
-              {t(TOOL_LABELS[key])}
-            </button>
-          ))}
+        <div className="zone-edit__group">
+          <span className="zone-edit__heading">{t("zone.edit.modeHeading")}</span>
+          <div className="zone-edit__tools" role="group">
+            {(["block", "road"] as const).map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`zone-edit__tool${mode === key ? " zone-edit__tool--active" : ""}`}
+                aria-pressed={mode === key}
+                data-guide="zone_edit.mode"
+                data-guide-value={key}
+                onClick={() => selectMode(key)}
+              >
+                {t(MODE_LABELS[key])}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="zone-edit__tools" role="group">
-          {(["block", "road"] as const).map((key) => (
-            <button
-              key={key}
-              type="button"
-              className={`zone-edit__tool${mode === key ? " zone-edit__tool--active" : ""}`}
-              aria-pressed={mode === key}
-              data-guide="zone_edit.mode"
-              data-guide-value={key}
-              onClick={() => selectMode(key)}
-            >
-              {t(MODE_LABELS[key])}
-            </button>
-          ))}
-        </div>
-        <div className="zone-edit__target">
-          <span className="zone-edit__chip" style={{ background: target?.color ?? "transparent" }} />
-          <span>{target?.name ?? t("zone.edit.noTarget")}</span>
+        <div className="zone-edit__group">
+          <span className="zone-edit__heading">{t("zone.edit.toolHeading")}</span>
+          <div className="zone-edit__tools" role="group">
+            {(["create", "expand"] as const).map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`zone-edit__tool${tool === key ? " zone-edit__tool--active" : ""}`}
+                aria-pressed={tool === key}
+                data-guide="zone_edit.tool"
+                data-guide-value={key}
+                onClick={() => selectTool(key)}
+              >
+                {key === "expand" && hoverZone ? (
+                  <>
+                    <span className="zone-edit__chip" style={{ background: hoverZone.color }} />
+                    {t("zone.edit.toolExpandZone", { name: hoverZone.name })}
+                  </>
+                ) : (
+                  t(TOOL_LABELS[key])
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       <div className="zone-edit__map">

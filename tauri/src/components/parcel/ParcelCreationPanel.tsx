@@ -836,37 +836,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         <div className="pc-body">
           {/* Top: inputs. */}
           <div className="pc-input-section">
-            <div className="pc-preset-list">
-              {SIZE_PRESETS.map((preset, index) => (
-                <button
-                  key={preset.nameKey}
-                  type="button"
-                  className={`pc-preset-btn ${selectedPreset === index ? "selected" : ""}`}
-                  onClick={() => handlePresetClick(index)}
-                >
-                  {t("parcel_creation.presetLabel", {
-                    name: t(preset.nameKey),
-                    width: preset.width,
-                    depth: preset.depth,
-                  })}
-                </button>
-              ))}
-            </div>
-            <div className="pc-input-row">
-              <span className="pc-input-label">{t("parcel_creation.aspectRatio")}</span>
-              <input
-                type="range"
-                className="pc-aspect-slider"
-                min={-ASPECT_STEPS}
-                max={ASPECT_STEPS}
-                step={1}
-                value={aspectStep}
-                disabled={selectedPreset === null || PRESET_FIELD[selectedMode] !== "size"}
-                onChange={(e) => handleAspectChange(Number(e.target.value))}
-              />
-              <span className="pc-input-unit">{formatAspect(aspectStep)}</span>
-            </div>
-
+            <h3 className="pc-section-title">{t("parcel_creation.sectionDetail")}</h3>
             {(selectedMode === "empty_area" || selectedMode === "random") && (
               <>
                 <div className="pc-input-row">
@@ -1080,28 +1050,39 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
               </div>
             )}
 
-            {/* Selection state. */}
-            {isPointMode && (
-              <div className={`pc-selection-message ${pickedPosition ? "active" : "waiting"}`}>
-                {pickedPosition
-                  ? t("parcel_creation.pointSelected")
-                  : t("parcel_creation.selectPoint")}
+            <div className="pc-preset-box">
+              <span className="pc-input-label">{t("parcel_creation.presetTitle")}</span>
+              <div className="pc-preset-list">
+                {SIZE_PRESETS.map((preset, index) => (
+                  <button
+                    key={preset.nameKey}
+                    type="button"
+                    className={`pc-preset-btn ${selectedPreset === index ? "selected" : ""}`}
+                    onClick={() => handlePresetClick(index)}
+                  >
+                    {t("parcel_creation.presetLabel", {
+                      name: t(preset.nameKey),
+                      width: preset.width,
+                      depth: preset.depth,
+                    })}
+                  </button>
+                ))}
               </div>
-            )}
-            {selectedMode === "along_path" && (
-              <div className={`pc-selection-message ${selectedPathId != null ? "active" : "waiting"}`}>
-                {selectedPathId != null
-                  ? t("parcel_creation.pathSelected", { id: selectedPathId })
-                  : t(alongPathSelectPromptKey)}
+              <div className="pc-input-row">
+                <span className="pc-input-label">{t("parcel_creation.aspectRatio")}</span>
+                <input
+                  type="range"
+                  className="pc-aspect-slider"
+                  min={-ASPECT_STEPS}
+                  max={ASPECT_STEPS}
+                  step={1}
+                  value={aspectStep}
+                  disabled={selectedPreset === null || PRESET_FIELD[selectedMode] !== "size"}
+                  onChange={(e) => handleAspectChange(Number(e.target.value))}
+                />
+                <span className="pc-input-unit">{formatAspect(aspectStep)}</span>
               </div>
-            )}
-            {(selectedMode === "split_rectangle" || selectedMode === "split_random") && (
-              <div className={`pc-selection-message ${selectedParcelId != null ? "active" : "waiting"}`}>
-                {selectedParcelId != null
-                  ? t("parcel_creation.parcelSelected", { id: selectedParcelId })
-                  : t("parcel_creation.selectParcel")}
-              </div>
-            )}
+            </div>
           </div>
 
           {/* Bottom: preview retrieval status. Shapes themselves appear in 3D. */}

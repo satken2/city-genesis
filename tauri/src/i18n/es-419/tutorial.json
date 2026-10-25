@@ -85,7 +85,7 @@
       "step12": {
         "title": "Creemos un distrito",
         "description": "Antes de construir, decide en qué quieres convertir esta calle. Sin un plan, podría levantarse una fábrica justo al lado de las viviendas. Ese tipo de plan se decide por «Distritos». Los distritos se asignan calle por calle, y cada parcela pertenece al distrito de la calle a la que da. Pulsa «Distritos» en el panel de iconos para abrir la ventana Editar distritos: ahora todo el pueblo es un solo distrito.",
-        "create": "Usa el modo de pintura «Lado de calle». Cambia la herramienta a «Nuevo distrito», mantén pulsada la tecla Ctrl y arrastra sobre la calle que prolongaste. Los dos lados de la calle que pintes, con las parcelas que dan a ellos, pasarán a ser un distrito nuevo."
+        "create": "Usa el modo de pintura «Lado de calle». Cambia la herramienta a «Crear distrito nuevo», mantén pulsada la tecla Ctrl y arrastra sobre la calle que prolongaste. Los dos lados de la calle que pintes, con las parcelas que dan a ellos, pasarán a ser un distrito nuevo."
       },
       "step13": {
         "title": "El distrito quedó dividido",
@@ -734,7 +734,7 @@
         "description": "Como alcalde, puedes copiar edificios existentes. Mantén el tipo y la cantidad de pisos, y elige una parcela donde quepa el original para reducir costos. El paisaje será repetitivo, pero tu bolsillo disfrutará la vista."
       },
       "tip41": {
-        "title": "Renta divina, viaje infernal",
+        "title": "Más que un alquiler barato",
         "description": "Al mudarse, los residentes comparan el alquiler, los viajes al trabajo, la escuela y las tiendas, la calidad de la vivienda y el entorno residencial. Importan el ruido, el aire, la seguridad y la luz solar. Una vivienda barata pero incómoda atrae menos; una bien ubicada aún necesita un alquiler accesible y espacio suficiente."
       },
       "tip42": {

@@ -85,7 +85,7 @@
       "step12": {
         "title": "Créons un quartier",
         "description": "Avant de construire, décidez de ce que doit devenir cette rue. Sans orientation, une usine pourrait s’installer juste à côté des logements. Ces orientations se décident par « Quartiers ». Les quartiers se définissent route par route, et une parcelle appartient au quartier de la route qu’elle borde. Appuyez sur « Quartiers » dans le panneau d’icônes pour ouvrir la fenêtre Modifier les quartiers : pour l’instant, toute la ville forme un seul quartier.",
-        "create": "Utilisez le mode de peinture « Côté de rue ». Passez l’outil sur « Nouveau quartier », maintenez Ctrl et faites glisser le long de la route prolongée. Les deux côtés de la route peinte, avec les parcelles qui les bordent, deviennent un nouveau quartier."
+        "create": "Utilisez le mode de peinture « Côté de rue ». Passez l’outil sur « Créer un quartier », maintenez Ctrl et faites glisser le long de la route prolongée. Les deux côtés de la route peinte, avec les parcelles qui les bordent, deviennent un nouveau quartier."
       },
       "step13": {
         "title": "Le quartier est découpé",
@@ -734,7 +734,7 @@
         "description": "Le maire peut copier un bâtiment existant. Gardez son type et ses étages, sur une parcelle assez grande, pour réduire le coût des travaux. Le paysage sera répétitif, mais votre portefeuille appréciera la vue."
       },
       "tip41": {
-        "title": "Loyer doux, trajet infernal",
+        "title": "Le loyer ne fait pas tout",
         "description": "Pour déménager, les habitants comparent loyer, trajets vers travail, école et commerces, qualité du logement et cadre de vie. Bruit, pollution, sécurité et soleil comptent aussi. Un logement bon marché mais peu pratique attire moins ; un logement bien placé doit encore être abordable et assez spacieux."
       },
       "tip42": {

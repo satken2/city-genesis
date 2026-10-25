@@ -249,7 +249,7 @@ public static class GeneratedModelUtils
 public static class PathSummaryExtensions
 {
     // Converted saved design elevations, cached by source list because each response creates a new list.
-    // Polylines contain thousands of points at 1m intervals; repeated conversion on height lookup would make grade-separation checks and snapping take seconds.
+    // Height lookups run per sample in grade-separation checks and snapping; converting on every lookup would make them take seconds.
     private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<List<object>, List<List<float>>> stationGradeProfiles = new();
 
     /// <summary>Share conversion of a received point list between rendering and snapping. New data converts from a new list.</summary>

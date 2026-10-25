@@ -18,12 +18,13 @@
     "mergeFailed": "No se pudieron fusionar los distritos (los distritos no colindantes no pueden fusionarse)",
     "mergeNoRequest": "No se ha seleccionado un distrito para fusionar",
     "edit": {
-      "toolCreate": "Nuevo distrito",
+      "toolHeading": "Operación",
+      "toolCreate": "Crear distrito nuevo",
       "toolExpand": "Ampliar distrito",
+      "toolExpandZone": "Ampliar {{name}}",
+      "modeHeading": "Método de selección",
       "modeBlock": "Manzana completa",
       "modeRoad": "Lado de calle",
-      "newZone": "Nuevo distrito",
-      "noTarget": "Pasa el cursor sobre un distrito",
       "hint": {
         "create": {
           "block": "Mantén presionado Ctrl y arrastra sobre manzanas rodeadas de calles; las manzanas pintadas, con sus parcelas, forman un nuevo distrito. Arrastra para desplazar el mapa y usa la rueda para acercar o alejar.",

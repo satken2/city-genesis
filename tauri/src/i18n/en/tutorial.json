@@ -85,7 +85,7 @@
       "step12": {
         "title": "Create a District",
         "description": "Before building, decide what this street should become. Without a plan, a factory might go up right next to the homes. Such plans are made per “District”. Districts are assigned road by road, and a parcel belongs to the district of the road it faces. Press “District” on the icon panel to open the Edit Districts window: right now the whole town is a single district.",
-        "create": "Use the “Street Side” brush. Switch the tool to “New District”, hold Ctrl and drag along the road you extended. Both sides of the road you paint, along with the parcels facing them, become a new district."
+        "create": "Use the “Street Side” brush. Switch the tool to “Create New District”, hold Ctrl and drag along the road you extended. Both sides of the road you paint, along with the parcels facing them, become a new district."
       },
       "step13": {
         "title": "District Created",
@@ -734,7 +734,7 @@
         "description": "As mayor, you can construct copies of existing buildings. Keep the type and floor count unchanged and use a parcel that fits the original to reduce construction costs. The streetscape may look repetitive, but your wallet will enjoy the view."
       },
       "tip41": {
-        "title": "Rent Heaven, Commute Hell",
+        "title": "More Than the Rent",
         "description": "Residents compare rent, work and school commutes, shopping trips, housing quality, and the living environment when choosing a new home. Noise, air pollution, public safety, and sunlight all matter. Cheap but inconvenient homes are less appealing; convenient ones still need affordable rent and enough room to move in."
       },
       "tip42": {

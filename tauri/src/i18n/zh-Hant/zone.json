@@ -18,12 +18,13 @@
     "mergeFailed": "地區合併失敗（不相鄰的地區無法合併）",
     "mergeNoRequest": "尚未選擇要合併的地區",
     "edit": {
-      "toolCreate": "新建地區",
+      "toolHeading": "編輯內容",
+      "toolCreate": "建立新地區",
       "toolExpand": "擴展現有地區",
+      "toolExpandZone": "擴展{{name}}",
+      "modeHeading": "範圍指定方式",
       "modeBlock": "整個街區",
       "modeRoad": "道路單側",
-      "newZone": "新地區",
-      "noTarget": "請將滑鼠移到地區上",
       "hint": {
         "create": {
           "block": "按住 Ctrl 拖曳塗抹被道路圍合的街區，塗抹的街區連同其中的地塊將成為新地區。拖曳可移動地圖，滾輪可縮放。",

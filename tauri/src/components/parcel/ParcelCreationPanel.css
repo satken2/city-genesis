@@ -106,6 +106,15 @@
 }
 
 /* Size presets (select exactly one, like radio buttons). */
+.pc-preset-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
 .pc-preset-list {
   display: flex;
   flex-direction: column;
@@ -155,20 +164,6 @@
 
 .pc-radio-label input[type="radio"] {
   cursor: pointer;
-}
-
-/* Selection status message. */
-.pc-selection-message {
-  font-size: 1rem;
-  padding: 4px 0;
-}
-
-.pc-selection-message.active {
-  color: #4ea1ff;
-}
-
-.pc-selection-message.waiting {
-  color: #93a9c0;
 }
 
 /* ---- Preview retrieval status message (bottom) ---- */

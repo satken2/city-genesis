@@ -18,12 +18,13 @@
     "mergeFailed": "地区の統合に失敗しました（隣接していない地区同士は統合できません）",
     "mergeNoRequest": "統合する地区が選択されていません",
     "edit": {
-      "toolCreate": "新規地区",
+      "toolHeading": "編集内容",
+      "toolCreate": "新規地区の作成",
       "toolExpand": "既存地区の拡張",
+      "toolExpandZone": "{{name}}の拡張",
+      "modeHeading": "範囲の指定方法",
       "modeBlock": "ブロック一括",
       "modeRoad": "道路単位",
-      "newZone": "新しい地区",
-      "noTarget": "地区にマウスを合わせてください",
       "hint": {
         "create": {
           "block": "Ctrlを押しながらドラッグして、道路に囲まれたブロックを塗ると、塗ったブロックが中の土地区画ごと新しい地区になります。ドラッグで地図の移動、ホイールで拡大・縮小です。",

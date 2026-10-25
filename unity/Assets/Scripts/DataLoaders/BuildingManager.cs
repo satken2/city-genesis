@@ -529,7 +529,9 @@ public class BuildingManager : BaseApiDataManager
 
         if (cellsToLoad.Count > 0)
         {
-            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, LoadMergedBuildingsAndApplyCells(cellsToLoad, nearSet, dynamicSet, toUnload, lodUpdates, tierChangedBuildingCells, staleMarkRevision), "BuildingManager"));
+            // Detailed generation can select only received buildings, so data intake runs ahead of normal render work like parcel loading.
+            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, LoadMergedBuildingsAndApplyCells(cellsToLoad, nearSet, dynamicSet, toUnload, lodUpdates, tierChangedBuildingCells, staleMarkRevision), "BuildingManager",
+                priority: RenderWorkPriority.High));
         }
         else
         {
