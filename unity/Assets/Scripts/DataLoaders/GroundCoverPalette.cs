@@ -100,6 +100,10 @@ public class GroundCoverProfile
     [Header("Rock And Shore")]
     [Tooltip("崖・波打ち際の岩の色に掛ける色。白で岩テクスチャのまま")]
     [ColorUsage(false, true)] public Color rockTint = Color.white;
+    [Tooltip("岩が混ざり始める斜面の角度(度)")]
+    [Range(0f, 90f)] public float rockStartAngle = 56.633f;
+    [Tooltip("完全に岩になる斜面の角度(度)")]
+    [Range(0f, 90f)] public float rockFullAngle = 68.284f;
     [Tooltip("波打ち際の砂の色")]
     public Color shoreSandColor = new Color(0.80f, 0.72f, 0.56f, 1f);
     [Tooltip("低地(波打ち際・浅い海底)の岩を砂へ置き換える割合。0 で岩のまま、1 で砂浜")]
@@ -123,6 +127,8 @@ public class GroundCoverProfile
     private static readonly int TextureLuminanceId = Shader.PropertyToID("_GroundTextureLuminance");
     private static readonly int TextureContrastId = Shader.PropertyToID("_GroundTextureContrast");
     private static readonly int RockTintId = Shader.PropertyToID("_CliffRockTint");
+    private static readonly int RockSlopeThresholdId = Shader.PropertyToID("_CliffSlopeThreshold");
+    private static readonly int RockSlopeBlendId = Shader.PropertyToID("_CliffSlopeBlend");
     private static readonly int ShoreSandColorId = Shader.PropertyToID("_ShoreSandColor");
 
     /// <summary>
@@ -150,6 +156,11 @@ public class GroundCoverProfile
         material.SetFloat(TextureLuminanceId, Mathf.Max(0.001f, textureLuminance));
         material.SetFloat(TextureContrastId, textureContrast);
         material.SetColor(RockTintId, rockTint);
+        // The shader measures slope as 1 - normalWS.y, so convert angles to that measure
+        float rockStart = 1f - Mathf.Cos(rockStartAngle * Mathf.Deg2Rad);
+        float rockFull = 1f - Mathf.Cos(rockFullAngle * Mathf.Deg2Rad);
+        material.SetFloat(RockSlopeThresholdId, rockStart);
+        material.SetFloat(RockSlopeBlendId, rockFull - rockStart);
         // Pass the sand replacement fraction in alpha (SetColor does not convert alpha to linear)
         Color shore = shoreSandColor;
         shore.a = shoreSand;
@@ -183,6 +194,7 @@ public class GroundCoverProfile
                 highColor = new Color(0.90f, 0.92f, 0.98f),
                 slopeColor = new Color(0.55f, 0.40f, 0.25f),
                 rockTint = Color.white, shoreSandColor = new Color(0.80f, 0.72f, 0.56f), shoreSand = 0f,
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f,
             },
             new GroundCoverProfile
             {
@@ -200,6 +212,7 @@ public class GroundCoverProfile
                 highColor = new Color(0.96f, 0.92f, 0.88f),
                 slopeColor = new Color(0.86f, 0.66f, 0.50f),
                 rockTint = new Color(1.12f, 0.92f, 0.74f), shoreSandColor = new Color(0.78f, 0.68f, 0.50f), shoreSand = 1f,
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f,
             },
             new GroundCoverProfile
             {
@@ -217,6 +230,7 @@ public class GroundCoverProfile
                 highColor = new Color(0.86f, 0.92f, 0.96f),
                 slopeColor = new Color(0.50f, 0.42f, 0.30f),
                 rockTint = new Color(0.86f, 0.94f, 0.82f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f), shoreSand = 0f,
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f,
             },
             new GroundCoverProfile
             {
@@ -234,6 +248,7 @@ public class GroundCoverProfile
                 highColor = new Color(0.92f, 0.95f, 1.00f),
                 slopeColor = new Color(0.72f, 0.74f, 0.80f),
                 rockTint = new Color(0.78f, 0.80f, 0.85f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f), shoreSand = 0f,
+                rockStartAngle = 25f, rockFullAngle = 30f, // Snow slides off slopes steeper than about 30°, exposing dark rock
             },
             new GroundCoverProfile
             {
@@ -251,6 +266,7 @@ public class GroundCoverProfile
                 highColor = new Color(0.92f, 0.92f, 0.95f),
                 slopeColor = new Color(0.80f, 0.66f, 0.52f),
                 rockTint = new Color(1.05f, 0.99f, 0.90f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f), shoreSand = 1f,
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f,
             },
         };
     }

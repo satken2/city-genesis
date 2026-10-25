@@ -179,10 +179,6 @@ public partial class TerrainManager : BaseApiDataManager
     [SerializeField] private Texture2D cliffNormalTexture;
     /// <summary>Rock texture tiling period (m), setting real-world scale of triplanar projection.</summary>
     [SerializeField] private float cliffTilingMeters = 12f;
-    /// <summary>Slope where rock blending begins (0=horizontal, 1=vertical), compared with 1 - normalWS.y. Higher values restrict rock to steeper cliffs, retaining green on gentle slopes.</summary>
-    [SerializeField, Range(0f, 1f)] private float cliffSlopeThreshold = 0.45f;
-    /// <summary>Grass-to-rock transition width. Smaller values give sharper boundaries.</summary>
-    [SerializeField, Range(0.01f, 1f)] private float cliffSlopeBlend = 0.18f;
     /// <summary>
     /// World noise period (m) perturbing thresholds to prevent boundary banding.
     /// Large periods near cliff width (tens of meters) place opposing V-valley sides in different noise regions,
@@ -223,8 +219,6 @@ public partial class TerrainManager : BaseApiDataManager
     private static readonly int CliffAlbedoMapId = Shader.PropertyToID("_CliffAlbedoMap");
     private static readonly int CliffNormalMapId = Shader.PropertyToID("_CliffNormalMap");
     private static readonly int CliffUvScaleId = Shader.PropertyToID("_CliffUvScale");
-    private static readonly int CliffSlopeThresholdId = Shader.PropertyToID("_CliffSlopeThreshold");
-    private static readonly int CliffSlopeBlendId = Shader.PropertyToID("_CliffSlopeBlend");
     private static readonly int CliffNoiseScaleId = Shader.PropertyToID("_CliffNoiseScale");
     private static readonly int CliffNoiseStrengthId = Shader.PropertyToID("_CliffNoiseStrength");
     private static readonly int CliffNormalStrengthId = Shader.PropertyToID("_CliffNormalStrength");
@@ -2597,7 +2591,7 @@ public partial class TerrainManager : BaseApiDataManager
     {
         if (material == null) return;
 
-        // Ground-cover-dependent values (base colors, relief, post-lighting overlays, rock tint, shoreline)
+        // Ground-cover-dependent values (base colors, relief, post-lighting overlays, rock tint and slope angles, shoreline)
         ActiveGroundCover.ApplyTo(material);
 
         // The following values are shared and independent of ground cover type.
@@ -2617,8 +2611,6 @@ public partial class TerrainManager : BaseApiDataManager
         material.SetFloat(CliffTexturesLoadedId, cliffTexturesAvailable ? 1f : 0f);
         // Shaders multiply by inverse tiling period (1/m); invert here before passing
         material.SetFloat(CliffUvScaleId, 1f / Mathf.Max(1f, cliffTilingMeters));
-        material.SetFloat(CliffSlopeThresholdId, cliffSlopeThreshold);
-        material.SetFloat(CliffSlopeBlendId, Mathf.Max(0.01f, cliffSlopeBlend));
         material.SetFloat(CliffNoiseScaleId, Mathf.Max(1f, cliffNoiseScale));
         material.SetFloat(CliffNoiseStrengthId, cliffNoiseStrength);
         material.SetFloat(CliffNormalStrengthId, cliffNormalStrength);
