@@ -50,17 +50,11 @@
   box-shadow: 0 0 4px rgba(240, 192, 64, 0.8);
 }
 
-/* Units/details beside values. */
+/* Units beside values. */
 .transit-detail__unit {
   margin-left: 4px;
   font-size: 1rem;
   color: #93a9c0;
-}
-
-.transit-detail__hint {
-  margin-left: 8px;
-  font-size: 0.97rem;
-  color: #6b8299;
 }
 
 /* ---- Meter row (shared meter and percentage) ---- */
@@ -184,17 +178,6 @@
   padding-bottom: 4px;
 }
 
-.transit-detail__note {
-  margin: 0;
-  font-size: 0.97rem;
-  line-height: 1.45;
-  color: #6b8299;
-}
-
-.transit-detail__settings-grid > .transit-detail__note {
-  grid-column: 1 / -1;
-}
-
 /* Save toolbar: unsaved note on the left, buttons on the right. */
 .transit-detail__toolbar {
   display: flex;
@@ -310,13 +293,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-}
-
-.transit-detail__route-desc {
-  min-width: 0;
-  font-size: 1rem;
-  line-height: 1.4;
-  color: #6b8299;
 }
 
 /* ---- Line closure block (end of settings tab) ---- */

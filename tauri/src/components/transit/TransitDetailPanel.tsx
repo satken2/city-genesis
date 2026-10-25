@@ -426,9 +426,6 @@ export function TransitDetailPanel({
                 <span className="agent-detail-value">
                   {Math.round(line.train_count ?? 0).toLocaleString()}
                   <span className="transit-detail__unit">{t("transit.trainsUnit")}</span>
-                  <span className="transit-detail__hint">
-                    {t("transit.carsPerTrainShort", { n: Math.max(1, Math.round(line.cars_per_train ?? 1)) })}
-                  </span>
                 </span>
                 <span className="agent-detail-label">{t("transit.stopsCount")}</span>
                 <span className="agent-detail-value">{line.stops.length}</span>
@@ -512,7 +509,6 @@ export function TransitDetailPanel({
                   <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={freight ? 2 : 1} max={20} step={1} integerOnly={true} />
                   <span className="transit-detail__unit">{t("transit.carsUnit")}</span>
                 </span>
-                {freight && <p className="transit-detail__note">{t("transit.freightConsistNote")}</p>}
                 {/* Only the three fields above affect profitability; re-estimate directly below them on every change. */}
                 <div className="transit-detail__estimate">
                   <div className="transit-detail__estimate-title">
@@ -540,7 +536,6 @@ export function TransitDetailPanel({
                         onChange={setVehicleModel}
                         disabled={saving}
                       />
-                      <p className="transit-detail__note">{t("transit.vehicleModelNote")}</p>
                     </div>
                   </>
                 )}
@@ -577,12 +572,6 @@ export function TransitDetailPanel({
             <section className="agent-detail-section">
               <h3 className="agent-detail-section-title">{t("transit.routeSection")}</h3>
               <div className="transit-detail__route-row">
-                <span className="transit-detail__route-desc">
-                  {t("transit.routeSummary", {
-                    stops: line.route_points.filter((p) => p.kind === "stop").length,
-                    waypoints: line.route_points.filter((p) => p.kind === "waypoint").length,
-                  })}
-                </span>
                 <button type="button" className="transit-detail__btn transit-detail__btn--ghost" onClick={openRouteEditor}>
                   {t("transit.editRoute")}
                 </button>
@@ -594,7 +583,6 @@ export function TransitDetailPanel({
               <div className="transit-detail__danger-row">
                 <div className="transit-detail__danger-text">
                   <span className="transit-detail__danger-title">{t("transit.deleteTitle")}</span>
-                  <span className="transit-detail__danger-desc">{t("transit.deleteDescription")}</span>
                 </div>
                 {confirmDelete ? (
                   <div className="transit-detail__actions">

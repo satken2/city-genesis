@@ -26,7 +26,7 @@ type TransitFleetSectionProps = {
   color: string;
 };
 
-/** Maximum illustrated train count. Express excess counts in text instead of more rows. */
+/** Maximum illustrated train count. The total-car heading and formation text carry the full count. */
 const MAX_TRAINS_DRAWN = 12;
 
 /** Base car width (px). Shrink longer trains to fit the panel width. */
@@ -54,7 +54,6 @@ export function TransitFleetSection({
 
   const drawnRunning = Math.min(runningTrains, MAX_TRAINS_DRAWN);
   const drawnMissing = Math.min(missingTrains, MAX_TRAINS_DRAWN - drawnRunning);
-  const hidden = runningTrains + missingTrains - drawnRunning - drawnMissing;
 
   const carWidth = Math.max(CAR_WIDTH_MIN, Math.min(CAR_WIDTH_MAX, Math.floor(TRAIN_WIDTH_BUDGET / cars)));
 
@@ -82,9 +81,6 @@ export function TransitFleetSection({
         </div>
       )}
 
-      {hidden > 0 && (
-        <p className="transit-fleet__note">{t("transit.fleetMoreTrains", { count: hidden })}</p>
-      )}
       {missingTrains > 0 && (
         <p className="transit-fleet__note transit-fleet__note--warn">
           {t("transit.fleetShortage", { count: missingTrains })}

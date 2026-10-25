@@ -45,26 +45,12 @@
   color: var(--flat-text-label);
 }
 
-.transit-estimate__value {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  min-width: 0;
-  text-align: right;
-}
-
 .transit-estimate__main {
   font-size: 1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
   white-space: nowrap;
-}
-
-.transit-estimate__sub {
-  font-size: 0.92rem;
-  line-height: 1.35;
-  color: var(--flat-text-muted);
 }
 
 /* ---- Conclusion row (estimated balance) ---- */
@@ -95,14 +81,7 @@
   color: var(--flat-danger);
 }
 
-/* ---- Notes/warnings ---- */
-.transit-estimate__note {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.45;
-  color: var(--flat-text-muted);
-}
-
+/* ---- Warnings ---- */
 .transit-estimate__warning {
   margin: 0;
   padding: 6px 8px;

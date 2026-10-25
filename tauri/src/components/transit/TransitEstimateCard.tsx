@@ -57,7 +57,6 @@ export function TransitEstimateCard({ estimate, loading, error, placeholder }: T
   const number = (value: number, digits = 0) =>
     value.toLocaleString(locale, { maximumFractionDigits: digits, minimumFractionDigits: digits });
   const money = (value: number) => `${number(Math.round(value))}${t("transit.currencyUnit")}`;
-  const loadPercent = formatPercent(estimate.load_factor, locale);
   const balance = estimate.balance;
   const breakEven = estimate.break_even_load_factor;
   // Even with several overloaded tracks, showing only the highest load ratio suffices to decide between longer headways and more tracks.
@@ -73,7 +72,6 @@ export function TransitEstimateCard({ estimate, loading, error, placeholder }: T
         <EstimateRow
           label={t("transit.estimate.vehicles")}
           value={t("transit.estimate.vehiclesValue", { count: estimate.vehicles_required ?? 0 })}
-          sub={t("transit.fleetFormation", { cars: estimate.cars_per_train, trains: estimate.train_count ?? 0 })}
         />
         <EstimateRow
           label={t("transit.estimate.roundTrip")}
@@ -81,25 +79,12 @@ export function TransitEstimateCard({ estimate, loading, error, placeholder }: T
             km: number((estimate.round_trip_length_m ?? 0) / 1000, 1),
             minutes: number(estimate.round_trip_minutes ?? 0, 1),
           })}
-          sub={t("transit.estimate.effectiveHeadway", { minutes: number(estimate.effective_headway ?? 0, 1) })}
         />
         <EstimateRow
           label={t("transit.estimate.operatingCost")}
           value={estimate.operating_cost != null ? money(estimate.operating_cost) : "—"}
-          sub={
-            estimate.lease_price != null
-              ? t("transit.estimate.leasePrice", { price: money(estimate.lease_price) })
-              : t("transit.estimate.leasePriceUnknown")
-          }
         />
-        <EstimateRow
-          label={t("transit.estimate.revenue")}
-          value={money(estimate.revenue ?? 0)}
-          sub={t("transit.estimate.revenueBasis", {
-            percent: loadPercent,
-            riders: number(Math.round(estimate.riders_per_day ?? 0)),
-          })}
-        />
+        <EstimateRow label={t("transit.estimate.revenue")} value={money(estimate.revenue ?? 0)} />
         <EstimateRow
           label={t("transit.estimate.balance")}
           value={balance != null ? `${balance > 0 ? "+" : ""}${money(balance)}` : "—"}
@@ -135,10 +120,6 @@ export function TransitEstimateCard({ estimate, loading, error, placeholder }: T
               : t("transit.estimate.singleTrackFull")}
         </p>
       )}
-      <p className="transit-estimate__note">
-        {t("transit.estimate.note", { days: number(estimate.simulation_days), percent: loadPercent })}
-        {estimate.lease_price_basis === "estimated" && ` ${t("transit.estimate.estimatedLeaseNote")}`}
-      </p>
     </div>
   );
 }
@@ -157,15 +138,13 @@ function formatPercent(ratio: number, locale: string): string {
 type EstimateRowProps = {
   label: string;
   value: string;
-  /** Supporting detail below a value (train breakdown, unit price, assumed occupancy, etc.). */
-  sub?: string;
   /** Add a surface to emphasize the conclusion row (estimated balance). */
   total?: boolean;
   /** Balance surplus/deficit colors. */
   tone?: "positive" | "negative";
 };
 
-function EstimateRow({ label, value, sub, total, tone }: EstimateRowProps) {
+function EstimateRow({ label, value, total, tone }: EstimateRowProps) {
   const className = [
     "transit-estimate__row",
     total && "transit-estimate__row--total",
@@ -176,10 +155,7 @@ function EstimateRow({ label, value, sub, total, tone }: EstimateRowProps) {
   return (
     <div className={className}>
       <span className="transit-estimate__label">{label}</span>
-      <span className="transit-estimate__value">
-        <span className="transit-estimate__main">{value}</span>
-        {sub && <span className="transit-estimate__sub">{sub}</span>}
-      </span>
+      <span className="transit-estimate__main">{value}</span>
     </div>
   );
 }
