@@ -8,19 +8,19 @@ description: City Genesisの地区/土地区画のジオメトリ観点のロジ
 このSkillはコード本体を持たない「道しるべ」です。全体の考え方は以下のドキュメントに、個別の仕様と意図はソースのコメントに書かれているので、実装前に必ず読むこと。
 
 ## 読むべきドキュメント(概念、公開)
-- `docs/ja/geometries/B_土地形状.md` (区画分割・ボロノイ分割の手順はコアの `geo_parcels.py` の docstring)
+- `docs/ja/geometries/B_土地形状.md`
 - `docs/ja/geometries/H_バックエンドデータロード.md` (ParcelManager / ZoneManager の描画)
 
 ## 読むべきドキュメント(非公開)
 - `genesis-core/docs/game-logic/地区の処理ロジック.md`
 
 ## 読むべきAGENTS.md
-- `genesis-core/app/services/geometry/AGENTS.md` (海岸線ユーティリティの使い分け、`geo_parcels.py` / `geo_zones.py` の入口関数)
+- `genesis-core/app/services/geometry/AGENTS.md` (区画・地区の形状と海岸線の処理)
 - `unity/Assets/Scripts/MeshGenerators/AGENTS.md` (`Percels/DefaultParcel.cs`)
 - `unity/Assets/Scripts/DataLoaders/AGENTS.md` (区画・地区の節の規約)
 
 ## 編集対象になりやすいディレクトリ/ファイル
-- バックエンド: `genesis-core/app/services/geometry/geo_parcels.py`, `geo_zones.py`
+- コア側の区画・地区の形状を変える必要がある場合は、非公開コアの担当者と契約を揃える。
 - Unity: `unity/Assets/Scripts/MeshGenerators/Percels/DefaultParcel.cs`, `ParcelMeshFactory.cs`, `unity/Assets/Scripts/DataLoaders/ParcelManager.cs`, `ZoneManager.cs`
 
 ## 進め方

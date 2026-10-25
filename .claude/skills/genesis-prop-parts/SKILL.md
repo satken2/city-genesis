@@ -45,7 +45,7 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
 
 - 種別の一覧は `genesis-core/assets/master.yaml` の `prop_master`(`display_name` のみ)。
   **`prop_master` はスプレッドシート由来ではなく master.yaml に直書き**されており、生成スクリプトは無い
-  (他の `create_*_master.py` は自分のセクションだけ差し替えて書き戻すので消えない)。
+  (ほかのマスターの取り込みは対象のセクションだけを書き換えるので、このセクションは残る)。
   種別を足すときは `prop_master` に `ID: {display_name: …}` を追記する
   ([[master-data]] Skillの「yamlを直接編集しない」はこのセクションには当たらない。2026-09-08時点)。
 - 木2種は `pipeline/jobs/build_prop_trees.py` で原点に著作する。通常72/96三角形、専用Far14/20三角形（幹なしの八角錐/丸い葉塊）。

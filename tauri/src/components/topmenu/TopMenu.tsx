@@ -148,7 +148,7 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
    * Exit handling.
    *
    * Rust's exit_app owns shutdown: notify Unity → coordinated backend shutdown → exit UI.
-   * The genesis.py supervisor manages emergency autosave and child-process termination, so frontend shutdown
+   * The core manages emergency autosave and the application coordinates child-process termination, so frontend shutdown
    * polling is unnecessary.
    */
   async function handleQuit() {

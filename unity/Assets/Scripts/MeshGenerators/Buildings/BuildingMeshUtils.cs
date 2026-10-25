@@ -931,7 +931,7 @@ public static class BuildingMeshUtils
 
     /// <summary>
     /// Normalize polygon rings (building footprints/parcels) for mesh generation. Backend polygons follow
-    /// the closed-ring contract (B_土地形状.md) and may contain shapely's closing duplicate (last=first),
+    /// the closed-ring contract (B_土地形状.md) and may contain a duplicate closing vertex (last=first),
     /// or nearly collinear intermediate vertices introduced by road cutouts and parcel shaping
     /// (buildings covering entire parcels inherit the same degeneracy because footprint=parcel polygon).
     /// Using these directly for wall/corner placement (one corner part per vertex) makes interior angles undefined
@@ -951,7 +951,7 @@ public static class BuildingMeshUtils
                 dedup.Add(p);
             }
         }
-        // Degenerate edge at the ring seam (last→first). Removes shapely's closing duplicate here.
+        // Degenerate edge at the ring seam (last→first). Removes a duplicate closing vertex here.
         while (dedup.Count >= 2 && (dedup[0] - dedup[dedup.Count - 1]).magnitude < RING_MIN_EDGE_LENGTH)
         {
             dedup.RemoveAt(dedup.Count - 1);

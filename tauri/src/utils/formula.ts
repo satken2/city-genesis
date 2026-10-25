@@ -2,8 +2,8 @@
  * Expression evaluator for parameter setup graph editing. Expressions come from general_params graph_formula in
  * the sheet. Since WebView CSP forbids eval, build functions with a small recursive descent parser. Accept only
  * numbers, variable names, arithmetic, exponentiation (^), parentheses, and FORMULA_FUNCTIONS calls. Precedence
- * matches Python (-x^2 = -(x^2), ^ is right-associative). Match the syntax/functions checked by the core import
- * script (tools/create_parameters.py) during generation.
+ * follows -x^2 = -(x^2), with right-associative ^. Match the syntax and functions accepted by the
+ * core when importing the parameter definitions.
  */
 
 export type FormulaVars = Record<string, number>;

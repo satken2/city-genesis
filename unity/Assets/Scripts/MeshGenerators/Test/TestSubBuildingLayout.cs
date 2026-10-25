@@ -16,7 +16,7 @@ using GeneratedModels;
 /// Intentional backend differences:
 /// - Tests lack frontage data; always use longest-edge fallback
 ///   (same deterministic behavior as backend parcels without frontage).
-/// - Test cell containment via four-corner containment instead of shapely within
+/// - Test cell containment by checking all four corners
 ///   (test footprints are convex, so equivalent).
 /// - Omit wings lacking model_prefix (backend excludes these during delivery, so they never render).
 /// </summary>

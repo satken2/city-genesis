@@ -287,7 +287,7 @@ const COLOR_TAX_REVENUE_TOTAL = "#e2e8f0";
 
 /**
  * Tax revenue trend data. One row per epoch with actual amounts by tax (ledger key) and total
- * for the five taxes. Same "total plus five taxes" structure as the analysis screen (data.py).
+ * for the five taxes. Match the "total plus five taxes" structure returned by the analysis API.
  */
 function buildTaxRevenueChartData(history: TaxRevenueHistoryPoint[]): Record<string, number>[] {
   return history.map((entry) => {

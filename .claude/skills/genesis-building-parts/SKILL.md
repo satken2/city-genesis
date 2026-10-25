@@ -195,7 +195,7 @@ a200  初等学校     11個  base-w1 base-c1 mid-w1 mid-w2 mid-c1 top-w1 top-c1
 パーツを作っただけでは反映されない設定がある。**モデル作業の最後に必ず下表を確認し、
 更新が必要なら [[master-data]] Skill に従ってGoogleスプレッドシートを更新する。**
 `master.yaml` は編集禁止の自動生成物なので、**yamlを直接書き換えてはいけない**
-(次の再生成で消える)。シート更新 → `create_agent_master.py` 等で再生成 → `git diff` 検証、
+(次の再生成で消える)。シート更新 → 対応する取り込み手順で再生成 → `git diff` 検証、
 の順で進める。書き込み権限が無ければ、変更するセルと値を表にしてユーザーに依頼する。
 
 | 何をしたか | 更新するマスター項目(タブ: agent_master) |
@@ -205,12 +205,12 @@ a200  初等学校     11個  base-w1 base-c1 mid-w1 mid-w2 mid-c1 top-w1 top-c1
 | 屋根の形を変えた(切妻/片流れ/寄棟にした) | `model_type` を 3 / 8 / 2 へ |
 | 階高に合わせてパーツを作った/階高を変えたい | `height_per_floor`(既定4.0)。パーツの著作高さとずれると隙間・めり込みが出る |
 | `b{bd_type}` フォルダにパーツを置いた | その建物の `bd_type` が該当ビットか確認(フォールバック先が変わる) |
-| マッシュアップのサブ建物を作った | タブ `subbuilding_master` の `model_prefix`(パーツ名 `mashup-{model_prefix}-*-prebuilt` と一致必須)・width/height/floors/count。再生成は `create_subbuilding_master.py` |
+| マッシュアップのサブ建物を作った | タブ `subbuilding_master` の `model_prefix`(パーツ名 `mashup-{model_prefix}-*-prebuilt` と一致必須)・width/height/floors/count。対応する取り込み手順で再生成する |
 
 ### スプレッドシート以外に必要な再生成
 
 - **新しく `a{id}` フォルダを作った場合**は `unity/Assets/Resources/Config/agent_model_config.yaml`
-  の再生成が要る(`genesis-core/tools/generate_agent_model_config.py`)。ここに定義が無いと
+  の再生成が要る(非公開コア側の設定生成手順)。ここに定義が無いと
   Unityは `a{variant}` ではなく `b{bd_type}` のパーツを見に行く。
   このスクリプトは `Resources/Models/Buildings/` のprefabを走査するため、
   **Unityでprefabを生成した後**に実行する必要がある。

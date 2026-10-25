@@ -667,7 +667,7 @@ export type PathMasterEntry = {
   platform_width?: number | null;
   /**
    * Track structure type (tracks, monorails, people movers), matching master.yaml track_type. Numeric values
-   * match TRACK_* in consts.py (TRACK_NORMAL=normal / TRACK_BRIDGE=bridge / TRACK_STATION=station). Sort
+   * match the shared TRACK_* constants (TRACK_NORMAL=normal / TRACK_BRIDGE=bridge / TRACK_STATION=station). Sort
    * construction panel track variants by normal/bridge/station structure. Unset means TRACK_NORMAL; unused for
    * non-track variants.
    */
@@ -1019,8 +1019,8 @@ export type PublicServiceSupplyData = {
 };
 
 // ---------------------------------------------------------------------------
-// Achievement quests (quest). Types corresponding to backend
-// app/services/crud/crud_quests.py. Conditions have three layers:
+// Achievement quests (quest). Types corresponding to the core API.
+// Conditions have three layers:
 // metric resolution × temporal derivation × logical composition.
 // See city-genesis/docs/ja/economics/16_スコアと達成目標.md for concepts.
 // ---------------------------------------------------------------------------

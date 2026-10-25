@@ -16,7 +16,7 @@ using GeneratedModels;
 ///      rectangle inner-edge midpoint (modelOrigin, same as path endpoint without sliding)
 ///      because prefab geometry supplies depth/lateral offset. Extend girders to that position too.
 ///
-/// Calculate exclusive rectangles with the same deterministic algorithm as backend geo_station_house.py
+/// Calculate exclusive rectangles with the same deterministic placement rule as the core
 /// (ComputeEndFootprints). Keep both implementations consistent.
 ///
 /// Picking uses PathObject (path details) like other paths; station=station-house path,
@@ -375,7 +375,7 @@ public class StationHousePath : IPathMeshGenerator
     }
 
     // =====================================================================
-    // Exclusive-area calculation (ported from geo_station_house.py).
+    // Exclusive-area calculation follows the shared placement rule.
     // =====================================================================
 
     /// <summary>

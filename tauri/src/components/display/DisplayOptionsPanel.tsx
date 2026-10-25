@@ -281,7 +281,7 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
 
 /**
  * Card definitions for alert display filters. Include ALERT_AGENT_ICON_BITS + ALERT_AGENT_VFX_BITS /
- * ALERT_PATH_ICON_BITS from consts.py: the alerts Unity displays in 3D (fire uses particles rather than icons).
+ * Shared constant ALERT_PATH_ICON_BITS: the alerts Unity displays in 3D (fire uses particles rather than icons).
  * Exclude production bottleneck bits used only in detail panels.
  * Building (agent) and road (path) bit values overlap, so shift road bits upward by ALERT_PATH_MASK_SHIFT in the
  * filter mask to separate namespaces, matching Unity's AlertManager.

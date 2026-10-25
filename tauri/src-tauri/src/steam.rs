@@ -13,7 +13,7 @@ use std::sync::OnceLock;
 use std::time::{Duration, Instant};
 use steamworks::{AuthTicket, Client, TicketForWebApiResponse};
 
-/// Ticket identity. The core's consts.py is authoritative; build.rs embeds it from `src/constants.ts`.
+/// チケット識別子。コアと共有する定数を build.rs が `src/constants.ts` から埋め込む。
 const TICKET_IDENTITY: &str = env!("CG_STEAM_TICKET_IDENTITY");
 
 /// Core response retry interval and timeout (actually wait only when the core was started externally).

@@ -1,4 +1,4 @@
-/** グラフ編集の式評価器が、コアの取り込みスクリプトが検査する Python の式と同じ値を返すことを確かめる。 */
+/** グラフ編集の式評価器が、コアが受け付ける式の優先順位と計算結果に一致することを確かめる。 */
 import { compileFormula } from "../src/utils/formula";
 
 const cases: [string, Record<string, number>, number][] = [

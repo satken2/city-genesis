@@ -9,8 +9,8 @@ fn main() {
     assert_eq!(version["frontend_version"].as_str().unwrap(), env::var("CARGO_PKG_VERSION").unwrap(), "Run npm run sync:version");
     tauri_build::build();
 
-    // For Steam builds, use the same ticket identity as the core. The source of truth is the core's
-    // consts.py; embed the value from the synchronized src/constants.ts (there is no Rust synchronization target).
+    // Steam のチケット識別子はコアと共有する定数を使う。
+    // Rust 向けの同期先は無いため、同期済みの src/constants.ts から値を埋め込む。
     if env::var_os("CARGO_FEATURE_STEAM").is_some() {
         let source = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("../src/constants.ts");
         println!("cargo:rerun-if-changed={}", source.display());

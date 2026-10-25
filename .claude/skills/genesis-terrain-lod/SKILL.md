@@ -24,11 +24,10 @@ description: City Genesisの地形/LOD/セル分割まわり(heightmap、LODテ�
 ## 読むべきAGENTS.md
 - `unity/AGENTS.md` (ルートのデータロード全体像・座標系変換の要点)
 - `unity/Assets/Scripts/DataLoaders/AGENTS.md` (地形の節: 知らないと事故る順序制約と規約。ティア表・海岸線・超遠景メッシュ・Z-fighting対策の仕様は D / E / H 文書。海岸線は埋立の完了で広がり `session:reload` のたびに取り直す。埋立地の岸壁・帯・天端と帯の中の接地 max(地形, 天端) は D 文書の D.12)
-- `genesis-core/app/services/AGENTS.md` (`terrain_registry.py`)
+- `genesis-core/app/services/AGENTS.md` (地形データの管理)
 
 ## 編集対象になりやすいディレクトリ/ファイル
-- バックエンド: `genesis-core/app/services/terrain_registry.py`, `genesis-core/app/entities/terrain.py`, `genesis-core/app/services/geometry/geo_terrain.py`, `geo_terrain_modify.py`, `genesis-core/app/services/utility/terrain_cell_util.py`
-- バックエンド(埋立地の幾何): `genesis-core/app/services/geometry/geo_reclaimed_land.py`(岸壁・帯・天端の唯一の窓口。Unity は判定を再実装しない)
+- コア側の地形・埋立地の形状を変える必要がある場合は、非公開コアの担当者と契約を揃える。岸壁・帯・天端はコアが返す派生値を使い、Unity で判定を再実装しない。
 - Unity: `unity/Assets/Scripts/DataLoaders/TerrainManager.cs`, `LodConfig.cs`, `CellDataLoader.cs`, `CameraCellChecker.cs`, `ReclaimedLandStore.cs` / `ReclaimedLandManager.cs`(埋立地の岸壁), `unity/Assets/Scripts/MeshGenerators/ReclaimedLandMeshBuilder.cs`, `unity/Assets/Scripts/Utils.cs`(`GetGroundHeight`)
 
 ## 進め方

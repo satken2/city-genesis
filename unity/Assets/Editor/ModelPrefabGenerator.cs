@@ -123,7 +123,7 @@ public static class ModelPrefabGenerator
     /// <summary>
     /// 孤児プレハブの削除で空になったミラーフォルダを親へさかのぼって削除する(PrefabRoot 自体は残す)。
     /// 空フォルダを残すとフォルダの .meta だけがバージョン管理に残り、閾値フォルダ名を列挙する
-    /// agent_model_config.yaml の生成器(genesis-core/tools/generate_agent_model_config.py)にも旧閾値が載り続ける。
+    /// agent_model_config.yaml の生成器にも旧閾値が載り続ける。
     /// </summary>
     private static int DeleteEmptiedFolders(IEnumerable<string> deletedPrefabPaths)
     {

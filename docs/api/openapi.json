@@ -669,7 +669,7 @@
           "buildings"
         ],
         "summary": "Get Buildings",
-        "description": "建物agent一覧を取得する（上限はlimitパラメータで変更可能、デフォルト500件）。\nis_bd=Trueのagentのみを対象とする。\nクエリパラメータでフィルタリング可能:\n- bbox: center_pointが指定バウンディングボックス内の建物を取得\n- filter: [key][formula]value 形式でプロパティをフィルタ\n- diff: 前回のエポックで更新された建物のみ取得\n- limit: 取得件数の上限（デフォルト500）\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため。negotiation.py 参照)。",
+        "description": "建物agent一覧を取得する（上限はlimitパラメータで変更可能、デフォルト500件）。\nis_bd=Trueのagentのみを対象とする。\nクエリパラメータでフィルタリング可能:\n- bbox: center_pointが指定バウンディングボックス内の建物を取得\n- filter: [key][formula]value 形式でプロパティをフィルタ\n- diff: 前回のエポックで更新された建物のみ取得\n- limit: 取得件数の上限（デフォルト500）\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため)。",
         "operationId": "get_buildings_api_v1_buildings__get",
         "parameters": [
           {
@@ -1111,7 +1111,7 @@
           "buildings"
         ],
         "summary": "Preview Building Effect Range",
-        "description": "インフラ供給施設（変電所・下水処理場・電波塔などサービス財 GOODS_SERVICE を生産する施設）を\nその土地区画に建てた場合の「効果範囲」を、設置前に算出して返す。\n\n建物建設パネルが 3D 上に効果範囲を可視化するために使う。効果範囲の制限を持たない\nvariant（通常建物・全域供給の施設）には `{\"restricted\": false}` を返す。\n\n必須フィールド: variant, floors, および parcel_id か position のいずれか\n（position は直接配置モード用。[x, z] または Unity 由来の [x, y, z]）\n\n返却値（restricted=true のとき）:\n  - region: 効果範囲の領域。円 `{\"type\":\"circle\",\"center\":[x,z],\"radius\":r}` または\n    不定形 `{\"type\":\"polygon\",\"polygons\":[{\"exterior\":[[x,z]...],\"holes\":[...]}...]}`。\n\n効果範囲の算出ロジックは app/services/service_coverage.py と共通（設置後の領域と同じ判定）。\n設置前の仮算出なので永続化はしない。",
+        "description": "インフラ供給施設（変電所・下水処理場・電波塔などサービス財 GOODS_SERVICE を生産する施設）を\nその土地区画に建てた場合の「効果範囲」を、設置前に算出して返す。\n\n建物建設パネルが 3D 上に効果範囲を可視化するために使う。効果範囲の制限を持たない\nvariant（通常建物・全域供給の施設）には `{\"restricted\": false}` を返す。\n\n必須フィールド: variant, floors, および parcel_id か position のいずれか\n（position は直接配置モード用。[x, z] または Unity 由来の [x, y, z]）\n\n返却値（restricted=true のとき）:\n  - region: 効果範囲の領域。円 `{\"type\":\"circle\",\"center\":[x,z],\"radius\":r}` または\n    不定形 `{\"type\":\"polygon\",\"polygons\":[{\"exterior\":[[x,z]...],\"holes\":[...]}...]}`。\n\n効果範囲は設置後の領域と同じ規則で算出する。\n設置前の仮算出なので永続化はしない。",
         "operationId": "preview_building_effect_range_api_v1_buildings_preview_effect_range_post",
         "requestBody": {
           "content": {
@@ -1564,7 +1564,7 @@
           "nodes"
         ],
         "summary": "Get Nodes In Range",
-        "description": "指定された座標範囲内にあるノード情報を返却するエンドポイント。\nids（カンマ区切りのノードID列）を指定した場合は、範囲ではなくID列で直接取得する。\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため。negotiation.py 参照)。msgpack 経路では\nresponse_model による検証・変換をスキップする(素の filter_node_data の\ndict をそのまま返す。numpy 型は negotiation._msgpack_default が変換する)。",
+        "description": "指定された座標範囲内にあるノード情報を返却するエンドポイント。\nids（カンマ区切りのノードID列）を指定した場合は、範囲ではなくID列で直接取得する。\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため)。",
         "operationId": "get_nodes_in_range_api_v1_nodes__get",
         "parameters": [
           {
@@ -1722,7 +1722,7 @@
           "paths"
         ],
         "summary": "Get Paths",
-        "description": "すべてのpathを取得する（上限はlimitパラメータで変更可能、デフォルト100件）。\nクエリパラメータでフィルタリング可能:\n- bbox: 指定バウンディングボックス内のpathを取得\n- filter: [key][formula]value 形式でプロパティをフィルタ\n- diff: 前回のエポックで更新されたpathのみ取得\n- limit: 取得件数の上限（デフォルト100）\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため。negotiation.py 参照)。",
+        "description": "すべてのpathを取得する（上限はlimitパラメータで変更可能、デフォルト100件）。\nクエリパラメータでフィルタリング可能:\n- bbox: 指定バウンディングボックス内のpathを取得\n- filter: [key][formula]value 形式でプロパティをフィルタ\n- diff: 前回のエポックで更新されたpathのみ取得\n- limit: 取得件数の上限（デフォルト100）\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため)。",
         "operationId": "get_paths_api_v1_paths__get",
         "parameters": [
           {
@@ -2819,7 +2819,7 @@
           "parcels"
         ],
         "summary": "Get Parcels",
-        "description": "すべてのparcelを取得する（上限はlimitパラメータで変更可能、デフォルト100件）。\nクエリパラメータでフィルタリング可能:\n- bbox: center_pointが指定バウンディングボックス内のparcelを取得\n- filter: [key][formula]value 形式でプロパティをフィルタ\n- diff: 前回のエポックで更新されたparcelのみ取得\n- limit: 取得件数の上限（デフォルト100）\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため。negotiation.py 参照)。",
+        "description": "すべてのparcelを取得する（上限はlimitパラメータで変更可能、デフォルト100件）。\nクエリパラメータでフィルタリング可能:\n- bbox: center_pointが指定バウンディングボックス内のparcelを取得\n- filter: [key][formula]value 形式でプロパティをフィルタ\n- diff: 前回のエポックで更新されたparcelのみ取得\n- limit: 取得件数の上限（デフォルト100）\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため)。",
         "operationId": "get_parcels_api_v1_parcels__get",
         "parameters": [
           {
@@ -3265,7 +3265,7 @@
           "alerts"
         ],
         "summary": "Get Alerts Endpoint",
-        "description": "アラート対象と、L1由来の位置付き警告の一覧を返す。\n\nエポック実行後に Unity の AlertManager が呼び出すことで、ビルボード形式の\nアラートアイコンを表示すべき建物・道路を特定する。alert は int16 のビット和で\n返り、各ビットの意味は consts.py の ALERT_AGENT_* / ALERT_PATH_* 定数に対応する。",
+        "description": "アラート対象と、L1由来の位置付き警告の一覧を返す。\n\nエポック実行後に Unity の AlertManager が呼び出すことで、ビルボード形式の\nアラートアイコンを表示すべき建物・道路を特定する。alert は int16 のビット和で\n返り、各ビットの意味は 共有定数 ALERT_AGENT_* / ALERT_PATH_*に対応する。",
         "operationId": "get_alerts_endpoint_api_v1_alerts__get",
         "parameters": [
           {
@@ -3570,7 +3570,7 @@
           "debug"
         ],
         "summary": "Get Soa Debug",
-        "description": "InMemoryDB._soa_arrays / _soa_dict_arrays の内容（JSON 用に tolist）、データタイプ（テーブル名）、\n要素数（soa_size）、各列の dtype とストライド（numpy の歩幅・バイト）を返す。",
+        "description": "列ごとのデータを配列として、データタイプ（テーブル名）、\n要素数、各列のデータ型と要素間のバイト間隔を返す。",
         "operationId": "get_soa_debug_api_v1_debug_soa__data_type__get",
         "parameters": [
           {
@@ -4780,7 +4780,7 @@
           "agents"
         ],
         "summary": "Get Agent Diagnosis",
-        "description": "経済主体の診断木と、詳細パネル上部の供給図を読み取り専用で取得する。\n\nアラートビット(原材料不足・インフラ網未接続・労働力不足・専門人材不足・予算不足・\n建設サービス不足)と公共交通路線の運休/車両不足を症状として、直接の原因→その原因→…を\nノードの木(type / params / targets / children)で返す。ルールは\nservices/agent_diagnosis.py。文言はフロントの i18n キー diagnosis.nodes.<type> が担う。\ngraph は資源・上流施設を財ごとに集約した図。接続と資源は現在、受領と生産は前回、需要は次回。\nエポック実行中は pending=true で分析を保留する。endpoints.yaml は使わず手書きJSON。",
+        "description": "経済主体の診断木と、詳細パネル上部の供給図を読み取り専用で取得する。\n\nアラートビット(原材料不足・インフラ網未接続・労働力不足・専門人材不足・予算不足・\n建設サービス不足)と公共交通路線の運休/車両不足を症状として、直接の原因→その原因→…を\nノードの木(type / params / targets / children)で返す。文言はフロントの i18n キー diagnosis.nodes.<type> が担う。\ngraph は資源・上流施設を財ごとに集約した図。接続と資源は現在、受領と生産は前回、需要は次回。\nエポック実行中は pending=true で分析を保留する。",
         "operationId": "get_agent_diagnosis_api_v1_agents__agent_id__diagnosis_get",
         "parameters": [
           {
@@ -7799,7 +7799,7 @@
           "stats"
         ],
         "summary": "Get Spawn Debug Stats",
-        "description": "開発者向けの経済成長デバッグ統計を取得する。\n\nスポーン系フェーズが毎エポック記録している以下の履歴をそのまま返す。\n\n- construction: 建物スポーンの「建ちそう度」。ConstructionPhase が記録する\n  {date, candidates(候補パーセル数), positive_patterns(正スコアパターン数),\n   spawned(スポーン数), variants: {variant_id: {best_score, spawned}}} のリスト。\n  best_score は全候補地×階数の最高最終スコアで、負値は「0までのギャップ＝\n  あとどれぐらいで建つか」を表す。\n- agent_spawn: 経済主体スポーンの阻害要因カウンタ。SpawnPhase が記録する\n  {date, variants: {variant_id: {要因キー: 件数}}} のリスト。variant ごとに\n  阻害要因を分けて記録するため、UI で業種別に確認できる。要因キーの意味は\n  SpawnPhase._debug_count の docstring を参照。\n\nこのデータは開発者専用であり、UI のデバッグ統計タブは enabled が true の\nときのみ表示される。Nuitka ビルドでは is_debug_enabled() が常に False の\nため enabled=False となり、データを返さない（記録側も is_debug_enabled()\nでゲートされているため、そもそも履歴は蓄積されない）。",
+        "description": "開発者向けの経済成長デバッグ統計を取得する。\n\nスポーン系フェーズが毎エポック記録している以下の履歴をそのまま返す。\n\n- construction: 建物スポーンの「建ちそう度」。建設状況を表す\n  {date, candidates(候補パーセル数), positive_patterns(正スコアパターン数),\n   spawned(スポーン数), variants: {variant_id: {best_score, spawned}}} のリスト。\n  best_score は全候補地×階数の最高最終スコアで、負値は「0までのギャップ＝\n  あとどれぐらいで建つか」を表す。\n- agent_spawn: 経済主体スポーンの阻害要因カウンタ。生成状況を表す\n  {date, variants: {variant_id: {要因キー: 件数}}} のリスト。variant ごとに\n  阻害要因を分けて記録するため、UI で業種別に確認できる。\n\nこのデータは開発者専用であり、UI のデバッグ統計タブは enabled が true の\nときのみ表示される。配布版では enabled=false となり、履歴データを返さない。",
         "operationId": "get_spawn_debug_stats_api_v1_stats_spawn_debug_get",
         "responses": {
           "200": {
@@ -7819,7 +7819,7 @@
           "stats"
         ],
         "summary": "Get Infrastructure Statistics",
-        "description": "インフラ網統計を取得する。\n\nインフラ財の製品ごとに以下を返す:\n- producers: 生産施設の一覧(位置・当エポック生産量・当エポック出荷量・稼働率・業務逼迫度・接続状態)\n- consumers: 消費施設の一覧(位置・残需要・当エポック受領量・稼働率・業務逼迫度・接続状態)。\n  需要ゼロの施設も接続状態を見せるため、抽出は需要ではなく\n  「variant がこの製品を授受するか」で行う。\n- paths: この製品を流せるインフラパスの一覧(折れ線ジオメトリ・当エポック流量・\n  エポックあたり容量)。建設中パスも含めて返し、UI 側で描き分ける。\n\n接続状態(connected)は「接続端子ノードが、この製品を流せる稼働中キャリアパスの\n端点ノード集合に含まれるか」で判定する(ConstructionProgressPhase の\nALERT_AGENT_INFRA_DISCONNECTED と同じ集合を build_infra_node_sets で共有)。\nキャリアパスは infra_products のみで抽出し path_type では絞らないため、\n電化線路(infra_products を持つ線路・駅パス)も電力タブに含まれる。\nインフラ施設・キャリアパスは都市全体でも高々数千のため、位置・ジオメトリの取得は\nPython オブジェクト参照のハイブリッド方式で行う(alert.py と同じ設計)。",
+        "description": "インフラ網統計を取得する。\n\nインフラ財の製品ごとに以下を返す:\n- producers: 生産施設の一覧(位置・当エポック生産量・当エポック出荷量・稼働率・業務逼迫度・接続状態)\n- consumers: 消費施設の一覧(位置・残需要・当エポック受領量・稼働率・業務逼迫度・接続状態)。\n  需要ゼロの施設も接続状態を見せるため、抽出は需要ではなく\n  「variant がこの製品を授受するか」で行う。\n- paths: この製品を流せるインフラパスの一覧(折れ線ジオメトリ・当エポック流量・\n  エポックあたり容量)。建設中パスも含めて返し、UI 側で描き分ける。\n\n接続状態(connected)は「接続端子ノードが、この製品を流せる稼働中キャリアパスの\n端点ノード集合に含まれるか」で判定する。警告フラグ ALERT_AGENT_INFRA_DISCONNECTED と同じ接続状態を表す。\nキャリアパスは infra_products のみで抽出し path_type では絞らないため、\n電化線路(infra_products を持つ線路・駅パス)も電力タブに含まれる。",
         "operationId": "get_infrastructure_statistics_api_v1_stats_infrastructure_get",
         "responses": {
           "200": {
@@ -7883,7 +7883,7 @@
           "zones"
         ],
         "summary": "Get Zones",
-        "description": "すべてのzoneを取得する（上限100件）。\nクエリパラメータでフィルタリング可能:\n- bbox: center_pointが指定バウンディングボックス内のzoneを取得\n- filter: [key][formula]value 形式でプロパティをフィルタ\n- diff: 前回のエポックで更新されたzoneのみ取得\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため。negotiation.py 参照)。",
+        "description": "すべてのzoneを取得する（上限100件）。\nクエリパラメータでフィルタリング可能:\n- bbox: center_pointが指定バウンディングボックス内のzoneを取得\n- filter: [key][formula]value 形式でプロパティをフィルタ\n- diff: 前回のエポックで更新されたzoneのみ取得\n\nAccept: application/x-msgpack を指定すると MessagePack バイナリで返す\n(一括取得のレスポンスが大きいため)。",
         "operationId": "get_zones_api_v1_zones__get",
         "parameters": [
           {
@@ -10555,7 +10555,7 @@
           "alert": {
             "type": "integer",
             "title": "Alert",
-            "description": "警告フラグのビット和（int16。consts.py の ALERT_AGENT_* を参照）"
+            "description": "警告フラグのビット和（int16。共有定数の ALERT_AGENT_* を参照）"
           },
           "created_date": {
             "type": "integer",
@@ -10982,7 +10982,7 @@
               }
             ],
             "title": "Family Type",
-            "description": "世帯タイプ（単身・夫婦・子ありなど。consts.py の FAMILY_* を参照）"
+            "description": "世帯タイプ（単身・夫婦・子ありなど。共有定数の FAMILY_* を参照）"
           },
           "members": {
             "anyOf": [
@@ -11500,7 +11500,7 @@
           "status": {
             "type": "integer",
             "title": "Status",
-            "description": "ステータス（計画中・建設中・稼働中など。consts.py の STATUS_* を参照）"
+            "description": "ステータス（計画中・建設中・稼働中など。共有定数の STATUS_* を参照）"
           },
           "status_reason": {
             "anyOf": [
@@ -11782,7 +11782,7 @@
           "citizen_type": {
             "type": "integer",
             "title": "Citizen Type",
-            "description": "世帯内での立場（世帯主・配偶者・子など。consts.py の MEMBER_* を参照）"
+            "description": "世帯内での立場（世帯主・配偶者・子など。共有定数の MEMBER_* を参照）"
           },
           "age": {
             "type": "integer",
@@ -11941,7 +11941,7 @@
           "citizen_type": {
             "type": "integer",
             "title": "Citizen Type",
-            "description": "世帯内での立場（世帯主・配偶者・子など。consts.py の MEMBER_* を参照）"
+            "description": "世帯内での立場（世帯主・配偶者・子など。共有定数の MEMBER_* を参照）"
           },
           "age": {
             "type": "integer",
@@ -13189,7 +13189,7 @@
           "alert": {
             "type": "integer",
             "title": "Alert",
-            "description": "警告フラグのビット和（int16。consts.py の ALERT_PATH_* を参照）"
+            "description": "警告フラグのビット和（int16。共有定数の ALERT_PATH_* を参照）"
           },
           "line_agent_id": {
             "type": "integer",

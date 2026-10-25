@@ -6,7 +6,6 @@
  * The backend automatically deletes road records when no sections remain.
  *
  * Backend: GET/POST /api/v1/roads/, GET/PATCH/DELETE /api/v1/roads/{id}, etc.
- * (genesis-core app/controllers/roads.py; all handwritten plain JSON).
  */
 
 /** Road name placement in map/3D. angle_deg is world-XZ road orientation (atan2(dz, dx) in degrees). */

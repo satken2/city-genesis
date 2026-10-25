@@ -49,7 +49,7 @@ public static class TrackIntersectionMeshGenerator
 
     /// <summary>
     /// Whether a path type has constrained node turns (runs on rigid guideways).
-    /// Keep the same set as backend PATH_TYPES_TURN_RESTRICTED (consts.py).
+    /// Keep the same set as the shared PATH_TYPES_TURN_RESTRICTED constant.
     /// </summary>
     public static bool IsTrackType(int pathType)
     {

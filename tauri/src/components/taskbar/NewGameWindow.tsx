@@ -7,7 +7,7 @@
  * The left hero shows a subheading and heading-sized Select Scenario / Find Scenarios tabs. Find Scenarios is
  * disabled because shared scenario browsing is unavailable. Below, tiled sections show collapsible tutorial
  * missions and scenarios from all sources in the order of GET /api/v1/scenarios (bundled scenarios first).
- * Development debug cities (source debug), included only when the core runs in debug/non-Nuitka mode, appear
+ * Development debug cities (source debug), included only when the core enables development debugging, appear
  * above tutorials in a separate Debug section and start like scenarios. There is no direct terrain start: import
  * elevation files as scenarios in scenario management first. Tutorials start from core-bundled lesson cities by
  * sending only the tutorial ID. Every tutorial and scenario can start only when its list item from the core

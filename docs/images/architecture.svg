@@ -11,7 +11,7 @@
     <rect x="300" y="20" width="360" height="138" rx="16" fill="#f3f5f8" stroke="#a7b3c2" stroke-width="1.5"/>
     <text x="480" y="48" font-size="12" font-weight="600" letter-spacing="1.3" fill="#526174">SEPARATE · CLOSED SOURCE</text>
     <text x="480" y="82" font-size="26" font-weight="650" fill="#152c46">Simulation core</text>
-    <text x="480" y="109" font-size="16" fill="#43556a">Python · FastAPI</text>
+    <text x="480" y="109" font-size="16" fill="#43556a">HTTP API</text>
     <text x="480" y="136" font-size="15" fill="#43556a">City state &amp; epoch simulation</text>
 
     <rect x="24" y="290" width="912" height="216" rx="18" fill="#f0f7fe" stroke="#b3d3ef" stroke-width="1.5"/>

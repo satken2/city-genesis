@@ -3,7 +3,7 @@
  *
  * Contains only pure functions, without React or canvas rendering dependencies. Shared by the
  * terrain editor (area polygon extraction / 2D display) and 3D preview (water surface mesh),
- * and serves as a reference for the same contract in the backend (geo_rivers.py) and Unity
+ * and serves as a reference for the same contract in the core and Unity
  * (RiverStore / RiverSurfaceManager).
  *
  * All coordinates use world XZ (map center at (0,0)); elevations are absolute meters with sea level = 0.

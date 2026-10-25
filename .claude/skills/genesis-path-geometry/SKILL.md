@@ -15,13 +15,13 @@ description: City Genesisのパス/ノード(道路・鉄道)のジオメトリ�
 
 ## 読むべきAGENTS.md
 - `unity/Assets/Scripts/MeshGenerators/AGENTS.md` (`Paths/`の生成器一覧、DrawLodの経路、規約、バックエンドとの鏡写し表)
-- `unity/Assets/Scripts/DataLoaders/AGENTS.md` (道路の節。`CalculatePathPoints`の制御点自動計算はバックエンド`Path._auto_fill_controls`と**同一式を維持する必要がある**ので、片方だけ直して終わらせないこと)
-- `genesis-core/app/services/geometry/AGENTS.md` (`geo_bezier.py`, `geo_paths.py`)
+- `unity/Assets/Scripts/DataLoaders/AGENTS.md` (道路の節。`CalculatePathPoints`の制御点自動計算はコアと**同一の形状規則を維持する必要がある**ので、片方だけ直して終わらせないこと)
+- `genesis-core/app/services/geometry/AGENTS.md` (パス形状とベジエ補間)
 
 ## 編集対象になりやすいディレクトリ/ファイル
 - Unity: `unity/Assets/Scripts/MeshGenerators/Paths/RoadPath.cs`, `RoadIntersectionMeshGenerator.cs`, `unity/Assets/Scripts/DataLoaders/PathManager.cs`, `Utils/IntersectionPolygonUtil.cs`
 - LRT(222/242/303/431): 軌道の横位置・踏面の高さ・停留所ホームの寸法は `MeshGenerators/Paths/LrtRoadParts.cs` が唯一の正(車両・交差点コネクタ・設備・歩行帯が参照する)。LRTの線路は1本のパスで上下線を持つ複線(DIR_BOTH固定)で、通常鉄道・モノレールの軌道数2のパス(まとめた複線)と同じ方式(通常鉄道は一方通行の単線2本を並べても複線を作れる)。ノードでつながる軌道端は「パスと進む向きで走る軌道が1つに決まる」規則(`TrackPath.TrackIndexForTravel`)で決まり、交差点コネクタと TrackPath の車止めが `TrackIntersectionMeshGenerator` の同じ判定を共有する(つながり得るパス種別の組は `RailsConnect`)。停留所の相対式ホームは `MeshGenerators/Paths/LrtPlatformParts.cs` が下地パスの生成の一部として描く(停留所は路線サマリの `stop_points` を `DataLoaders/LrtStopPlatforms.cs` が索引化し、範囲が変わったパスを `PathManager.RequestLrtPlatformRebuild` で作り直す。デッキは交差点で切断済みの区間へ収め、デッキ端の外側のスロープは交差点ハル上や行き止まり端の先へはみ出してよい。範囲の決め方の詳細・431の架線柱移設と高欄省略・303の設備抑止は `LrtPlatformParts.cs`・`LrtStopPlatforms.cs` のコメント)。回帰検証は `unity/Tests/Lrt/run.ps1`
-- バックエンド: `genesis-core/app/services/geometry/geo_bezier.py`, `geo_paths.py`(`create_road_polygon_from_path`, 交差判定)
+- コア側のパス形状・交差判定を変える必要がある場合は、非公開コアの担当者と契約を揃える。
 
 ## 進め方
 1. 公開ドキュメントで形状・メッシュ生成パイプラインの仕様を把握する

@@ -9,7 +9,7 @@ public static class AgentModelConfig
     private const string ResourcePath = "Config/agent_model_config";
     private static readonly Dictionary<int, AgentModelDefinition> agentDefinitions = new();
     // List of prefab folders for landmarks (landmark-{model_prefix}).
-    // Contains only names of existing folders listed by the generator (generate_agent_model_config.py).
+    // Contains only names of existing folders listed by the configuration generator.
     private static readonly HashSet<string> landmarkPrefixes = new(StringComparer.Ordinal);
     private static bool isLoaded;
 

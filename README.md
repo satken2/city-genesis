@@ -34,7 +34,7 @@ Unity renders the city and handles spatial interaction. Tauri places a React int
 | --- | --- | --- |
 | Unity / C# | 3D rendering, visualization, selection, and placement | [`unity/`](unity/) |
 | Tauri / Rust / React / TypeScript | UI, window management, and application lifecycle | [`tauri/`](tauri/) |
-| Core / Python / FastAPI | City state, simulation, and persistence through an HTTP API | Separate, closed-source repository |
+| Core | City state, simulation, and persistence through an HTTP API | Separate, closed-source repository |
 
 Both front ends read city data and submit edits through the core's HTTP API. Their direct IPC connection carries selections, editing state, and display commands. For example, selecting a building in Unity opens its details in the UI; choosing a construction tool in the UI switches Unity's interaction mode.
 
@@ -67,7 +67,7 @@ Add `unity/` to Unity Hub, open it, and wait for package restoration, asset impo
 
 ### First launch
 
-1. Extract the distribution ZIP outside this repository. Keep the entire `Core/` directory together; do not copy out only `genesis.exe`. No Python installation is required.
+1. Extract the distribution ZIP outside this repository. Keep the entire `Core/` directory together; do not copy out only `genesis.exe`.
 2. Open PowerShell in the distribution's `Core/` directory and run the following. Leave this terminal running.
 
    ```powershell

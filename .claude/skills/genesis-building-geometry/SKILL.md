@@ -17,11 +17,11 @@ description: City Genesisの建物のジオメトリ観点のロジック(3D形�
 
 ## 読むべきAGENTS.md
 - `unity/Assets/Scripts/MeshGenerators/AGENTS.md` (`BuildingMeshBuilder`, `ModularBuildingMeshBuilder`, `PortBuildingMeshBuilder`等)
-- `genesis-core/app/services/geometry/AGENTS.md` (`geo_buildings.py`のフットプリント生成)
+- `genesis-core/app/services/geometry/AGENTS.md` (建物のフットプリント生成)
 
 ## 編集対象になりやすいディレクトリ/ファイル
 - Unity: `unity/Assets/Scripts/MeshGenerators/Buildings/`配下(`BuildingMeshBuilder.cs`, 各種Body/Roofビルダー, `PortBuildingMeshBuilder.cs`)
-- バックエンド: `genesis-core/app/services/geometry/geo_buildings.py`(`generate_building`), `genesis-core/app/services/crud/crud_buildings.py`(`preview_building_shape`)
+- コア側のフットプリント生成・形状プレビューを変える必要がある場合は、非公開コアの担当者と契約を揃える。
 
 ## 進め方
 1. 公開ドキュメントで形状・メッシュ生成パイプラインの仕様を把握する

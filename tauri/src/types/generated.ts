@@ -2,7 +2,7 @@
  * endpoints.yaml から自動生成された型定義。
  *
  * このファイルは手動で編集しないでください。
- * 変更する場合はスプレッドシートを編集し、tools/generate_models.py を再実行してください。
+ * 変更する場合はスプレッドシートを編集し、コア側の型定義生成手順で再生成してください。
  */
 
 /** referrer メソッドが返す {id, name} オブジェクト */
@@ -16,7 +16,7 @@ export type CitizenSummary = {
   citizen_id: number;
   /** 市民名（ランダム生成） */
   name: string;
-  /** 世帯内での立場（世帯主・配偶者・子など。consts.py の MEMBER_* を参照） */
+  /** 世帯内での立場（世帯主・配偶者・子など。共有定数の MEMBER_* を参照） */
   citizen_type: number;
   /** 年齢（歳） */
   age: number;
@@ -29,7 +29,7 @@ export type CitizenData = {
   citizen_id: number;
   /** 市民名（ランダム生成） */
   name: string;
-  /** 世帯内での立場（世帯主・配偶者・子など。consts.py の MEMBER_* を参照） */
+  /** 世帯内での立場（世帯主・配偶者・子など。共有定数の MEMBER_* を参照） */
   citizen_type: number;
   /** 年齢（歳） */
   age: number;
@@ -82,7 +82,7 @@ export type AgentSummary = {
   polygon?: any[];
   /** 中心点座標 [x, z] */
   center_point?: any[];
-  /** ステータス（計画中・建設中・稼働中など。consts.py の STATUS_* を参照） */
+  /** ステータス（計画中・建設中・稼働中など。共有定数の STATUS_* を参照） */
   status: number;
   /** ステータス遷移理由 */
   status_reason?: number;
@@ -131,7 +131,7 @@ export type AgentData = {
   status: number;
   /** ステータス遷移理由 */
   status_reason?: number;
-  /** 警告フラグのビット和（int16。consts.py の ALERT_AGENT_* を参照） */
+  /** 警告フラグのビット和（int16。共有定数の ALERT_AGENT_* を参照） */
   alert: number;
   /** 作成日 */
   created_date: number;
@@ -215,7 +215,7 @@ export type AgentData = {
   satis_residential?: number;
   /** 観光体験充足度（0.0〜1.0。観光客世帯の観光満足度の要素） */
   satis_tourism?: number;
-  /** 世帯タイプ（単身・夫婦・子ありなど。consts.py の FAMILY_* を参照） */
+  /** 世帯タイプ（単身・夫婦・子ありなど。共有定数の FAMILY_* を参照） */
   family_type?: number;
   /** この世帯に所属する市民のリスト */
   members?: RefItem[];
@@ -382,7 +382,7 @@ export type PathData = {
   path_variant: number;
   /** ステータス（計画中・建設中・稼働中など。STATUS_*） */
   status: number;
-  /** 警告フラグのビット和（int16。consts.py の ALERT_PATH_* を参照） */
+  /** 警告フラグのビット和（int16。共有定数の ALERT_PATH_* を参照） */
   alert: number;
   /** この区間パスが属する公共交通路線エージェントのID */
   line_agent_id: number;

@@ -18,11 +18,11 @@ use std::sync::atomic::Ordering;
 use std::time::Duration;
 use tauri::{Emitter, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
-// HTTP play modes. Send the same values as the core's consts.py.
+// HTTP のプレイモード。コアと共有する定数と値を揃える。
 const PLAY_MODE_NORMAL: i32 = 0;
 const PLAY_MODE_SCENARIO: i32 = 1;
 const PLAY_MODE_TUTORIAL: i32 = 2;
-// verification_status in GET /sessions. Same value as the core's consts.py.
+// GET /sessions の verification_status。コアと共有する定数と値を揃える。
 const GAME_VERIFIED: i64 = 0;
 
 fn load_registry() -> WindowRegistry {
@@ -1399,14 +1399,12 @@ fn disconnected_session_state(api_base_url: &str, core_version: &Value) -> Value
 /// Tips after both Unity's game:loaded and the user's Start action.
 fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
     std::thread::spawn(move || {
-        // Create the client outside the loop to retain the connection pool.
-        // Even on localhost, recreating clients requires TCP connection setup
-        // and makes timeouts more likely due to Python's GIL and connection queue.
+        // 接続プールを再利用するため、クライアントをループの外で作る。
+        // ローカル接続でも接続の作り直しは待ち時間を増やし、タイムアウトにつながる。
         let client = reqwest::blocking::Client::builder()
             .timeout(Duration::from_secs(10))
-            // Use a timeout shorter than Python's (uvicorn's)
-            // keep-alive timeout to reduce brief request failures caused
-            // by reusing idle connections already closed by the server.
+            // サーバーの接続維持時間より短くして、
+            // サーバー側で閉じた待機接続の再利用による一時的な失敗を減らす。
             .pool_idle_timeout(Duration::from_secs(3))
             .pool_max_idle_per_host(10)
             .build()

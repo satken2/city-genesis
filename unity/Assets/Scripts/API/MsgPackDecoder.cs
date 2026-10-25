@@ -162,7 +162,7 @@ public static class MsgPackDecoder
     {
         // BitConverter.Int32BitsToSingle is unavailable at the .NET Framework 4.x compatibility level,
         // so convert by reordering bytes from big-endian to the runtime's little-endian order.
-        // Python msgpack packs floats as float64 by default, so this path is rarely used.
+        // The core normally sends floating-point values as float64, so this path is rarely used.
         byte[] tmp = { buf[pos + 3], buf[pos + 2], buf[pos + 1], buf[pos] };
         pos += 4;
         return BitConverter.ToSingle(tmp, 0);

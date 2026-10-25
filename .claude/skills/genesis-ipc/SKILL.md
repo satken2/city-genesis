@@ -30,7 +30,7 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 
 ## HTTPの契約(新しいクライアント・HTTP呼び出しを足すときに必ず守る)
 - APIに認証・Host検査は無く、サードパーティ製プログラムからも同じAPIで読み書きできることが仕様なので、アクセス制限を足さない。コアは `127.0.0.1` にだけ bind する。
-- ゲームのセッションが無い間(ゲーム開始前・シナリオの地形編集などのヘッドレス処理中)に通るのは system・sessions・saves・scenarios・parameters・scenario-tools・master・profile だけで、ほかは503 `NO_SAVE_LOADED`。トップメニューやシナリオ管理から呼ぶ新しいAPIは、この範囲に置くか、コアの `api.py` の許可一覧を見直す(公開の考え方は `セーブデータ仕様.md`)。
+- ゲームのセッションが無い間(ゲーム開始前・シナリオの地形編集などのヘッドレス処理中)に通るのは system・sessions・saves・scenarios・parameters・scenario-tools・master・profile だけで、ほかは503 `NO_SAVE_LOADED`。トップメニューやシナリオ管理から呼ぶ新しいAPIは、この範囲に置くか、コア側のセッション制約と契約を揃える(公開の考え方は `セーブデータ仕様.md`)。
 - ヘッダーは各モジュールの共通窓口が付けるので、窓口を通すことだけを守る。
   - UI(WebView): `fetchApi` か、`configureBackendRequests` が置き換えた `fetch`。APIの画像は `<img src>` で直接読まず `hooks/useApiImageUrl`(fetch→Blob URL。版ヘッダーを付けるため)。コアの版情報と照合結果は起動時にRust側で取得・共有し、WebViewごとの版取得や定期的な版確認は行わない。
   - UI(Rust): `version::client()` か、要求ごとの `.headers(version::headers())`。

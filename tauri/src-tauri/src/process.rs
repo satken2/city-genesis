@@ -12,13 +12,13 @@ use std::process::{Child, Command, ExitStatus, Stdio};
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Manager};
 
-/// Core (Nuitka build) and graphics (Unity build) executables relative to the installation directory.
+/// インストール先から見た、配布版コアとグラフィックの実行ファイルの相対パス。
 const CORE_EXE: &str = "Core/genesis";
 const GRAPHIC_EXE: &str = "Graphics/Realcity";
-/// Connection endpoint when not launching the core. Matches a manually started development core (`uvicorn api:app --port 5000`).
+/// コアを起動しない構成の接続先。手動で起動したコアの開発用接続先と揃える。
 const EXTERNAL_CORE_URL: &str = "http://127.0.0.1:5000";
 
-/// Maximum wait for a core response. The Nuitka build takes time to load libraries and master data.
+/// コア応答の最大待ち時間。配布版の起動時にはマスターデータなどの読み込みを待つ。
 const CORE_READY_TIMEOUT: Duration = Duration::from_secs(120);
 /// Maximum wait for the core to finish emergency autosaving and exit. Force termination after this timeout.
 const CORE_EXIT_TIMEOUT: Duration = Duration::from_secs(60);

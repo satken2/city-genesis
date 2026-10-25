@@ -335,7 +335,7 @@ export async function sendPickCopySource(windowType: string = "building_construc
  * Infrastructure supply facility coverage region shape.
  * - Circle: {type:"circle", center:[x,z], radius}
  * - Arbitrary: {type:"polygon", polygons:[{exterior:[[x,z],...], holes:[[[x,z],...],...]}]}
- * Same structure as region dicts in backend app/services/service_coverage.py.
+ * Matches the coverage region format returned by the core API.
  */
 export type EffectRangeRegion =
   | { type: "circle"; center: number[]; radius: number }

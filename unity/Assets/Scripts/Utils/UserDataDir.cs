@@ -3,7 +3,7 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// User directory (UrbanGenesis under the OS local-data directory), resolved with the same rule as core consts.py and Tauri version.rs.
+/// User directory (UrbanGenesis under the OS local-data directory), resolved with the same rule as the core and Tauri version.rs.
 /// Alongside saves, store settings retained across game updates, such as asset weights, and files exchanged with Tauri.
 /// null in environments without a user directory, such as the browser build.
 /// </summary>

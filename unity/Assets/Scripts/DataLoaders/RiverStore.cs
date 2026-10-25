@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 /// Rivers comprise an area polygon (polygon; holes are river islands) and a water elevation profile line (profile)
 /// (backend GET /terrain/rivers; authoritative specification: D_地形形状.md §D.8). Water elevation at any position
 /// inside the area equals y at the nearest point on the profile polyline, a shared contract with the terrain editor
-/// (RiverProfileSampler in riverGeometry.ts) and backend (geo_rivers.py).
+/// (RiverProfileSampler in riverGeometry.ts) and the core.
 ///
 /// Water meshes (RiverSurfaceManager) and interference occupancy boxes (RoadPlanManager / HighlightManager)
 /// share the same grid (GridStep spacing, CornerMask), so store rasterized grid results here too.

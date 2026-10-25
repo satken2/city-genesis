@@ -20,7 +20,7 @@ using GeneratedModels;
 ///
 /// Resolve terminal position from PathManager's node cache. If unloaded or in test scenes,
 /// fall back to backend initial placement (short-edge midpoint for rectangular parcels; otherwise midpoint of the edge farthest from frontage;
-/// front-edge midpoint for LRT depots; _connection_node_position in crud_agents.py).
+/// front-edge midpoint for LRT depots).
 /// BuildingManager.OnTerminalNodeMoved regenerates this building after confirmed terminal movement.
 ///
 /// If one double-track path connects to the terminal (LRT dedicated track 431 or combined double track), draw the lead

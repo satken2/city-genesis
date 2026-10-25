@@ -16,7 +16,7 @@ using UnityEngine;
 ///
 /// Classification depends only on the depth function at each sample, allowing repeated
 /// open-cut/tunnel transitions within one path, with portals at every threshold crossing.
-/// The backend's matching classification is in genesis-core geo_path_depth.py;
+/// The core uses the same depth-based classification;
 /// excavated open-cut sections having depth approximately 0 keeps both classifications consistent.
 /// </summary>
 public static class TunnelSectionUtil
