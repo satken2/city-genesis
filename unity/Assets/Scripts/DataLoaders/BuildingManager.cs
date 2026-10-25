@@ -1930,7 +1930,7 @@ public class BuildingManager : BaseApiDataManager
             mf.mesh = meshResult.Mesh;
         }
 
-        mr.sharedMaterial = GetFarBuildingMaterial();
+        mr.sharedMaterials = GetSharedDepthOffsetMaterials(meshResult?.Materials) ?? new[] { GetFarBuildingMaterial() };
         DrawLodInfo.Ensure(buildingGO).drawLod = DrawLod.Far;
 
         // Far LOD buildings have no VisualModeObject (FarBuildingBatcher combines outline meshes),

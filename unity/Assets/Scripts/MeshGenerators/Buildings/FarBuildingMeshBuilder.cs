@@ -10,7 +10,8 @@ using UnityEngine;
 ///   Wings without distant models stretch a unit cube to the same box.
 /// Resolve models by scanning exterior model-number folders. Fit model XZ bounds to the outline;
 /// fit height above the model origin (contact plane), so underground/underwater geometry below origin scales identically.
-/// Distant buildings use one shared material, ignoring model materials.
+/// Keep the model's materials and UVs; triangles sharing a material go into one submesh across wings.
+/// Unit cubes have a null material, which the caller replaces with the default building material.
 /// </summary>
 public static class FarBuildingMeshBuilder
 {
@@ -22,8 +23,7 @@ public static class FarBuildingMeshBuilder
         string prefix = BuildingMeshUtils.GetGlbPrefix1(buildingData);
         int variantNumber = BuildingMeshUtils.ResolveModelId(prefix, buildingData.visual_variant);
         float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
-        var vertices = new List<Vector3>();
-        var triangles = new List<int>();
+        var parts = new Parts();
 
         if (buildingData.sub_buildings != null && buildingData.sub_buildings.Count > 0)
         {
@@ -47,7 +47,7 @@ public static class FarBuildingMeshBuilder
                 GameObject model = BuildingMeshUtils.GetPartBySuffixScan(prefix, $"mashup-{placement.model_prefix}-far", variantNumber);
                 AddStretched(model, new Rect(-halfWidth, -halfDepth, halfWidth * 2f, halfDepth * 2f),
                     Mathf.Max(1, placement.floors) * storyHeight, Quaternion.Euler(0f, -placement.rotation + 180f, 0f),
-                    new Vector3(offset.x, baseY, offset.y), vertices, triangles);
+                    new Vector3(offset.x, baseY, offset.y), parts);
             }
         }
         else
@@ -69,44 +69,72 @@ public static class FarBuildingMeshBuilder
                 max = Vector2.Max(max, new Vector2(local.x, local.z));
             }
             AddStretched(model, Rect.MinMaxRect(min.x, min.y, max.x, max.y),
-                Mathf.Max(1, buildingData.floors ?? 1) * floorHeight, rotation, Vector3.zero, vertices, triangles);
+                Mathf.Max(1, buildingData.floors ?? 1) * floorHeight, rotation, Vector3.zero, parts);
         }
 
-        if (triangles.Count == 0)
+        if (parts.triangles.Count == 0)
         {
             return null;
         }
         var mesh = new Mesh
         {
-            indexFormat = vertices.Count > 65535 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16,
+            indexFormat = parts.vertices.Count > 65535 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16,
         };
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(triangles, 0);
+        mesh.SetVertices(parts.vertices);
+        mesh.SetUVs(0, parts.uvs);
+        mesh.subMeshCount = parts.triangles.Count;
+        for (int i = 0; i < parts.triangles.Count; i++)
+        {
+            mesh.SetTriangles(parts.triangles[i], i);
+        }
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
-        return new BuildingMeshResult(mesh, null);
+        return new BuildingMeshResult(mesh, parts.materials.ToArray());
+    }
+
+    /// <summary>Accumulated stretched geometry. triangles[i] is the submesh drawn with materials[i].</summary>
+    private sealed class Parts
+    {
+        public readonly List<Vector3> vertices = new List<Vector3>();
+        public readonly List<Vector2> uvs = new List<Vector2>();
+        public readonly List<Material> materials = new List<Material>();
+        public readonly List<List<int>> triangles = new List<List<int>>();
+
+        public List<int> TrianglesFor(Material material)
+        {
+            int index = materials.IndexOf(material);
+            if (index >= 0) return triangles[index];
+            materials.Add(material);
+            triangles.Add(new List<int>());
+            return triangles[triangles.Count - 1];
+        }
     }
 
     /// <summary>
     /// Stretch the model (or unit cube) in unrotated local space to rect in XZ and height vertically, then rotate/translate into place.
     /// </summary>
-    private static void AddStretched(GameObject model, Rect rect, float height, Quaternion rotation, Vector3 offset,
-        List<Vector3> vertices, List<int> triangles)
+    private static void AddStretched(GameObject model, Rect rect, float height, Quaternion rotation, Vector3 offset, Parts parts)
     {
-        Mesh source = model != null ? BuildingMeshUtils.CombineModuleMeshes(model, out _) : null;
+        Material[] materials = null;
+        Mesh source = model != null ? BuildingMeshUtils.CombineModuleMeshes(model, out materials) : null;
         Mesh mesh = source != null ? source : UnitBox;
         Bounds bounds = mesh.bounds;
         float scaleX = rect.width / Mathf.Max(bounds.size.x, 0.01f);
         float scaleZ = rect.height / Mathf.Max(bounds.size.z, 0.01f);
         float scaleY = height / Mathf.Max(bounds.max.y, 0.01f);
-        int first = vertices.Count;
+        int first = parts.vertices.Count;
         foreach (Vector3 v in mesh.vertices)
         {
             var local = new Vector3(rect.xMin + (v.x - bounds.min.x) * scaleX, v.y * scaleY, rect.yMin + (v.z - bounds.min.z) * scaleZ);
-            vertices.Add(rotation * local + offset);
+            parts.vertices.Add(rotation * local + offset);
         }
+        Vector2[] uv = mesh.uv;
+        if (uv.Length == mesh.vertexCount) parts.uvs.AddRange(uv);
+        else parts.uvs.AddRange(new Vector2[mesh.vertexCount]);
         for (int s = 0; s < mesh.subMeshCount; s++)
         {
+            Material material = materials != null && materials.Length > 0 ? materials[Mathf.Min(s, materials.Length - 1)] : null;
+            List<int> triangles = parts.TrianglesFor(material);
             foreach (int index in mesh.GetTriangles(s))
             {
                 triangles.Add(first + index);

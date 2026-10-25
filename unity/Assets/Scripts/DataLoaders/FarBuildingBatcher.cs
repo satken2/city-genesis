@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Combine distant outline meshes into batches of up to 64 buildings per small spatial group (256m × material × parent).
+/// Combine distant outline meshes into batches of up to 64 buildings per small spatial group (256m × parent),
+/// with one submesh per material shared by the members.
 /// When members enter or leave, immediately dismantle only their batch and restore individual rendering;
 /// the persistent worker recombines only dirty groups within budget.
 /// </summary>
@@ -16,7 +17,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
     }
     private sealed class Group
     {
-        public (int, int, EntityId, EntityId) key;
+        public (int, int, EntityId) key;
         public readonly HashSet<FarBuildingMember> members = new HashSet<FarBuildingMember>();
         public readonly List<Batch> batches = new List<Batch>();
         public bool queued;
@@ -25,11 +26,13 @@ public sealed class FarBuildingBatcher : MonoBehaviour
     /// <summary>Treat smaller batches as remainders and merge with other remainders or unbatched candidates, preventing endless fragmentation as members come and go.</summary>
     private const int MergeBelow = 32;
     private static FarBuildingBatcher instance;
-    private readonly Dictionary<(int, int, EntityId, EntityId), Group> groups = new Dictionary<(int, int, EntityId, EntityId), Group>();
+    private readonly Dictionary<(int, int, EntityId), Group> groups = new Dictionary<(int, int, EntityId), Group>();
     private readonly Queue<Group> dirtyGroups = new Queue<Group>();
     private readonly List<FarBuildingMember> candidates = new List<FarBuildingMember>();
     private readonly List<FarBuildingMember> batchScratch = new List<FarBuildingMember>(MaxBatchMembers);
-    private readonly List<CombineInstance> combineScratch = new List<CombineInstance>();
+    private readonly List<Material> materialScratch = new List<Material>();
+    private readonly List<Material> memberMaterials = new List<Material>();
+    private readonly List<List<CombineInstance>> combineByMaterial = new List<List<CombineInstance>>();
 
     public static void Register(FarBuildingMember member)
     {
@@ -40,7 +43,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
         }
         var position = member.transform.position;
         member.groupKey = (Mathf.FloorToInt(position.x/256f), Mathf.FloorToInt(position.z/256f),
-            member.source.sharedMaterial.GetEntityId(), member.transform.parent != null ? member.transform.parent.GetEntityId() : EntityId.None);
+            member.transform.parent != null ? member.transform.parent.GetEntityId() : EntityId.None);
         if (!instance.groups.TryGetValue(member.groupKey, out var group))
             instance.groups.Add(member.groupKey, group = new Group { key = member.groupKey });
         group.members.Add(member);
@@ -144,7 +147,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
         }
     }
 
-    /// <summary>Combine candidates[start..start+count) into one batch. Merge all submeshes into one (Far uses a single material).</summary>
+    /// <summary>Combine candidates[start..start+count) into one batch. Members' submeshes with the same material merge into one submesh.</summary>
     private void BuildBatch(Group group, int start, int count)
     {
         batchScratch.Clear();
@@ -158,21 +161,42 @@ public sealed class FarBuildingBatcher : MonoBehaviour
         var first = batchScratch[0];
         Transform parent = first.transform.parent;
         Matrix4x4 worldToLocal = parent != null ? parent.worldToLocalMatrix : Matrix4x4.identity;
-        combineScratch.Clear();
+        materialScratch.Clear();
         foreach (var member in batchScratch)
         {
             Matrix4x4 matrix = worldToLocal * member.transform.localToWorldMatrix;
+            member.source.GetSharedMaterials(memberMaterials);
             for (int s = 0; s < member.mesh.subMeshCount; s++)
-                combineScratch.Add(new CombineInstance { mesh = member.mesh, subMeshIndex = s, transform = matrix });
+            {
+                Material material = memberMaterials.Count > 0 ? memberMaterials[Mathf.Min(s, memberMaterials.Count - 1)] : null;
+                int slot = materialScratch.IndexOf(material);
+                if (slot < 0)
+                {
+                    slot = materialScratch.Count;
+                    materialScratch.Add(material);
+                    if (combineByMaterial.Count <= slot) combineByMaterial.Add(new List<CombineInstance>());
+                }
+                combineByMaterial[slot].Add(new CombineInstance { mesh = member.mesh, subMeshIndex = s, transform = matrix });
+            }
+        }
+        var parts = new CombineInstance[materialScratch.Count];
+        for (int slot = 0; slot < parts.Length; slot++)
+        {
+            var part = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            part.CombineMeshes(combineByMaterial[slot].ToArray(), true, true);
+            combineByMaterial[slot].Clear();
+            parts[slot] = new CombineInstance { mesh = part, transform = Matrix4x4.identity };
         }
         var mesh = new Mesh { name = "BuildingSummary", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
-        mesh.CombineMeshes(combineScratch.ToArray(), true, true);
-        combineScratch.Clear();
+        mesh.CombineMeshes(parts, false, false);
+        foreach (var part in parts) Destroy(part.mesh);
+        memberMaterials.Clear();
         var go = new GameObject("BuildingSummary");
         go.transform.SetParent(parent, false);
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
         var renderer = go.AddComponent<MeshRenderer>();
-        renderer.sharedMaterial = first.source.sharedMaterial;
+        renderer.sharedMaterials = materialScratch.ToArray();
+        materialScratch.Clear();
         go.AddComponent<UndergroundGhostObject>();
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         go.AddComponent<RenderCacheIdentity>().mesh = mesh;
@@ -205,11 +229,12 @@ public sealed class FarBuildingMember : MonoBehaviour, IVisualModeHandler
 {
     internal MeshRenderer source;
     internal Mesh mesh;
-    internal (int, int, EntityId, EntityId) groupKey;
+    internal (int, int, EntityId) groupKey;
     internal FarBuildingBatcher.Batch batch;
     private bool registered, wasEnabled, hadPropertyBlock;
     private Matrix4x4 matrix;
-    private Material material;
+    private readonly List<Material> materials = new List<Material>();
+    private static readonly List<Material> currentMaterials = new List<Material>();
     public void Configure(MeshRenderer renderer, Mesh sourceMesh)
     {
         source = renderer; mesh = sourceMesh;
@@ -223,7 +248,7 @@ public sealed class FarBuildingMember : MonoBehaviour, IVisualModeHandler
     }
     private void RegisterBatch()
     {
-        matrix = transform.localToWorldMatrix; material = source.sharedMaterial; wasEnabled = source.enabled;
+        matrix = transform.localToWorldMatrix; source.GetSharedMaterials(materials); wasEnabled = source.enabled;
         hadPropertyBlock = source.HasPropertyBlock();
         FarBuildingBatcher.Register(this); registered = true;
     }
@@ -248,19 +273,29 @@ public sealed class FarBuildingMember : MonoBehaviour, IVisualModeHandler
     }
 
     /// <summary>
-    /// Called by code changing a Far building's Renderer.enabled, Transform, sharedMaterial, or property block.
+    /// Called by code changing a Far building's Renderer.enabled, Transform, sharedMaterials, or property block.
     /// Reregister with the combined batch if anything changed.
     /// </summary>
     public void Refresh()
     {
         if (source == null) return;
-        if (matrix != transform.localToWorldMatrix || material != source.sharedMaterial || wasEnabled != source.enabled || hadPropertyBlock != source.HasPropertyBlock())
+        source.GetSharedMaterials(currentMaterials);
+        bool materialsChanged = !SameMaterials(materials, currentMaterials);
+        currentMaterials.Clear();
+        if (matrix != transform.localToWorldMatrix || materialsChanged || wasEnabled != source.enabled || hadPropertyBlock != source.HasPropertyBlock())
         {
             // Material replacement does not reregister the visual mode, avoiding overwriting partially applied visibility with another notification.
             if (registered) FarBuildingBatcher.Remove(this);
             registered = false;
             if (isActiveAndEnabled && mesh != null && source.sharedMaterial != null) RegisterBatch();
         }
+    }
+
+    private static bool SameMaterials(List<Material> a, List<Material> b)
+    {
+        if (a.Count != b.Count) return false;
+        for (int i = 0; i < a.Count; i++) if (a[i] != b[i]) return false;
+        return true;
     }
 
     /// <summary>Call Refresh if go (may be null or destroyed) has a FarBuildingMember.</summary>
