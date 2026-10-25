@@ -74,7 +74,7 @@ public static class RoadMarkingsQA
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
         var material = new Material(Shader.Find("Universal Render Pipeline/Lit")); material.SetColor("_BaseColor",new Color(.12f,.12f,.12f));
         go.AddComponent<MeshRenderer>().sharedMaterial = material;
-        var s = go.AddComponent(Type("RoadMarkingSurface")); Method(s,"Configure",plan,null,false);
+        var s = go.AddComponent(Type("RoadMarkingSurface")); Method(s,"Configure",plan,null);
         return go;
     }
 
@@ -310,7 +310,7 @@ public static class RoadMarkingsQA
         go.AddComponent<MeshRenderer>().sharedMaterial=new Material(Shader.Find("Universal Render Pipeline/Lit"));
         go.GetComponent<MeshRenderer>().sharedMaterial.SetColor("_BaseColor",new Color(.12f,.12f,.12f));
         object plan=result.GetType().GetProperty("Markings").GetValue(result);
-        Method(go.AddComponent(Type("RoadMarkingSurface")),"Configure",plan,null,false);roads.Add(go);
+        Method(go.AddComponent(Type("RoadMarkingSurface")),"Configure",plan,null);roads.Add(go);
         var connections=(IDictionary)result.GetType().GetProperty("ConnectionPoints").GetValue(result);
         var roadGenerator=Activator.CreateInstance(Type("RoadPath"));var setback=Activator.CreateInstance(Type("SidewalkSetback"));
         for(int i=0;i<4;i++)
@@ -429,6 +429,7 @@ public static class RoadMarkingsQA
         foreach(string name in new[]{"PATH_CONCRETE",null,"MISSING_ROAD_MATERIAL"})
         {
             item.GetType().GetField("body_material").SetValue(item,name);
+            Type("PathDrawContext").GetProperty("PathVariant").SetValue(null,231); // Direct section builds above end the draw context and reset it to 0.
             var alternate=Method(Activator.CreateInstance(Type("RoadPath")),"Generate",path,new List<Vector3>{Vector3.zero,new Vector3(0,20,400)},setback,setback);
             var alternateRoad=(GameObject)alternate.GetType().GetProperty("GeneratedObject").GetValue(alternate);
             var alternateLod=alternateRoad.GetComponentsInChildren(Type("SplinePartLod")).First(c=>(bool)c.GetType().GetProperty("IsBody").GetValue(c));
