@@ -4,6 +4,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
+/// <summary>Queue a render work operation joins. High runs before Normal every frame; Low uses only the budget Normal leaves over.</summary>
+public enum RenderWorkPriority
+{
+    High,
+    Normal,
+    Low,
+}
+
 /// <summary>
 /// Advance render preparation coroutines within a shared budget. Exclude communication/frame waits,
 /// summing only synchronous processing during MoveNext. Split individual heavy generators into small work units separately.
@@ -15,6 +23,8 @@ public static class RenderWorkScheduler
     private static readonly LinkedList<Operation> waiting = new LinkedList<Operation>();
     /// <summary>Work preceding normal jobs every frame (terrain tile publication), ensuring terrain is ready before object generation.</summary>
     private static readonly LinkedList<Operation> priorityWaiting = new LinkedList<Operation>();
+    /// <summary>Work following normal jobs (deferred site decorations), so it never delays building or road generation.</summary>
+    private static readonly LinkedList<Operation> lowWaiting = new LinkedList<Operation>();
     private static readonly Dictionary<string, double> categoryMs = new Dictionary<string, double>();
     private sealed class TimingSample
     {
@@ -92,7 +102,7 @@ public static class RenderWorkScheduler
     public static double LastFrameMs { get; private set; }
     public static double MaximumStepMs { get; private set; }
     public static long Steps { get; private set; }
-    public static int WaitingCount => waiting.Count + priorityWaiting.Count;
+    public static int WaitingCount => waiting.Count + priorityWaiting.Count + lowWaiting.Count;
     public static bool HasPendingInitialWork
     {
         get
@@ -118,6 +128,7 @@ public static class RenderWorkScheduler
         Steps = 0;
         waiting.Clear();
         priorityWaiting.Clear();
+        lowWaiting.Clear();
         categoryMs.Clear();
         timingSamples.Clear();
         eventCounts.Clear();
@@ -135,8 +146,7 @@ public static class RenderWorkScheduler
 
     public static double GetCategoryMilliseconds(string category) => categoryMs.TryGetValue(category, out double ms) ? ms : 0;
 
-    /// <param name="priority">If true, advance before normal work every frame.</param>
-    public static Coroutine Start(MonoBehaviour owner, IEnumerator routine, string category, Func<bool> hasPendingWork = null, bool priority = false)
+    public static Coroutine Start(MonoBehaviour owner, IEnumerator routine, string category, Func<bool> hasPendingWork = null, RenderWorkPriority priority = RenderWorkPriority.Normal)
     {
         EnsurePump();
         if (owner.GetComponent<RenderWorkLifetime>() == null) owner.gameObject.AddComponent<RenderWorkLifetime>();
@@ -148,7 +158,8 @@ public static class RenderWorkScheduler
         if (!operationsByObject.TryGetValue(operation.ownerId, out var list))
             operationsByObject[operation.ownerId] = list = new List<Operation>();
         list.Add(operation);
-        operation.ticket = (priority ? priorityWaiting : waiting).AddLast(operation);
+        operation.ticket = (priority == RenderWorkPriority.High ? priorityWaiting
+            : priority == RenderWorkPriority.Low ? lowWaiting : waiting).AddLast(operation);
         return operation.handle;
     }
 
@@ -228,10 +239,12 @@ public static class RenderWorkScheduler
         long started = Stopwatch.GetTimestamp();
         PumpQueue(priorityWaiting, started);
         PumpQueue(waiting, started);
+        PumpQueue(lowWaiting, started);
         if (LocalConstants.UNITY_LOG_TIMING)
         {
             CountQueueFrames(priorityWaiting);
             CountQueueFrames(waiting);
+            CountQueueFrames(lowWaiting);
         }
     }
 
@@ -325,6 +338,97 @@ public sealed class RenderWorkPump : MonoBehaviour
         RenderWorkScheduler.Pump();
         RenderWorkScheduler.ReportTimings();
         FreezeProbe.Check(); // [Camera freeze investigation] Remove after investigation
+        BuildingStageProbe.Check(); // [Building stage measurement] Remove after investigation
+    }
+}
+
+/// <summary>
+/// [Building stage measurement] Temporary totals of every "Building." / "Path." profiler marker, logged every five seconds while buildings or roads are generated.
+/// Totals include nested markers. Remove the entire class after investigation.
+/// </summary>
+internal static class BuildingStageProbe
+{
+    private static readonly string[] Prefixes = { "Building.", "Path." };
+    private const double ReportSeconds = 5;
+    private const float LongFrameSeconds = 0.05f;
+
+    private sealed class Stage
+    {
+        public string name;
+        public Unity.Profiling.ProfilerRecorder recorder;
+        public long calls;
+        public double totalMs, maxFrameMs;
+    }
+
+    private static readonly List<Stage> stages = new();
+    private static readonly HashSet<string> recordedNames = new();
+    private static readonly List<Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle> handles = new();
+    private static int refreshedFrame = -100000, frames, longFrames;
+    private static double windowStart = -1, maxFrameMs;
+
+    internal static void Check()
+    {
+        // Markers register when their owning class first initializes, so periodically pick up new ones.
+        if (Time.frameCount - refreshedFrame >= 300) Refresh();
+        // Each recorder holds one per-frame sum. Read in LateUpdate, it describes the preceding frame (as in FreezeProbe).
+        foreach (var stage in stages)
+        {
+            if (stage.recorder.Count == 0) continue;
+            var sample = stage.recorder.GetSample(0);
+            double ms = sample.Value * 1e-6;
+            stage.calls += sample.Count;
+            stage.totalMs += ms;
+            stage.maxFrameMs = Math.Max(stage.maxFrameMs, ms);
+        }
+        double now = Time.realtimeSinceStartupAsDouble;
+        if (windowStart < 0) windowStart = now;
+        frames++;
+        float dt = Time.unscaledDeltaTime;
+        if (dt >= LongFrameSeconds) longFrames++;
+        maxFrameMs = Math.Max(maxFrameMs, dt * 1000.0);
+        if (now - windowStart < ReportSeconds) return;
+        Report(now - windowStart);
+        windowStart = now;
+        frames = longFrames = 0;
+        maxFrameMs = 0;
+    }
+
+    private static void Report(double seconds)
+    {
+        var active = stages.FindAll(stage => stage.totalMs > 0);
+        if (active.Count > 0)
+        {
+            active.Sort((a, b) => b.totalMs.CompareTo(a.totalMs));
+            var message = new System.Text.StringBuilder();
+            message.Append($"[建物計測] 区間={seconds:F1}s フレーム={frames} 長いフレーム(50ms以上)={longFrames} 最長フレーム={maxFrameMs:F0}ms");
+            foreach (var stage in active)
+                message.Append($"\n  {stage.name}: 回数={stage.calls} 合計={stage.totalMs:F1}ms 平均={stage.totalMs / Math.Max(1, stage.calls):F2}ms 1フレーム最大={stage.maxFrameMs:F1}ms");
+            UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message.ToString());
+        }
+        foreach (var stage in stages)
+        {
+            stage.calls = 0;
+            stage.totalMs = stage.maxFrameMs = 0;
+        }
+    }
+
+    private static void Refresh()
+    {
+        refreshedFrame = Time.frameCount;
+        handles.Clear();
+        Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle.GetAvailable(handles);
+        foreach (var handle in handles)
+        {
+            var description = Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle.GetDescription(handle);
+            string name = description.Name;
+            if (name == null || !Array.Exists(Prefixes, prefix => name.StartsWith(prefix, StringComparison.Ordinal)) || !recordedNames.Add(name)) continue;
+            stages.Add(new Stage
+            {
+                name = name,
+                recorder = new Unity.Profiling.ProfilerRecorder(handle, 1,
+                    Unity.Profiling.ProfilerRecorderOptions.Default | Unity.Profiling.ProfilerRecorderOptions.StartImmediately),
+            });
+        }
     }
 }
 

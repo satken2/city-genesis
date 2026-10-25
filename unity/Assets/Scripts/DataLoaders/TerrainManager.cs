@@ -1670,7 +1670,7 @@ public partial class TerrainManager : BaseApiDataManager
     {
         if (streamWorkerCoroutine == null)
         {
-            streamWorkerCoroutine = RenderWorkScheduler.Start(this, HeightStreamWorker(), "TerrainManager", () => pendingStreamRequests.Count > 0, priority: true);
+            streamWorkerCoroutine = RenderWorkScheduler.Start(this, HeightStreamWorker(), "TerrainManager", () => pendingStreamRequests.Count > 0, RenderWorkPriority.High);
         }
     }
 
@@ -1854,7 +1854,7 @@ public partial class TerrainManager : BaseApiDataManager
     {
         pendingTileNotifications.Enqueue(notification);
         if (notifyWorkerCoroutine == null && isActiveAndEnabled)
-            notifyWorkerCoroutine = RenderWorkScheduler.Start(this, TileNotifyWorker(), "TerrainManager", () => pendingTileNotifications.Count > 0, priority: true);
+            notifyWorkerCoroutine = RenderWorkScheduler.Start(this, TileNotifyWorker(), "TerrainManager", () => pendingTileNotifications.Count > 0, RenderWorkPriority.High);
         if (notifyWorkerCoroutine == null)
             while (pendingTileNotifications.Count > 0) DispatchTileNotification(pendingTileNotifications.Dequeue());
     }

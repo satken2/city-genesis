@@ -175,8 +175,9 @@ public partial class VehicleManager : MonoBehaviour
         scanTimer -= dt;
         if (scanTimer <= 0)
         {
-            // A periodic resident worker, excluded from initial-load waiting.
-            if (roadWorker == null) roadWorker = RenderWorkScheduler.Start(this, ScanRoads(center, true), "vehicleRoads", () => false);
+            // A periodic resident worker, excluded from initial-load waiting. Ambient vehicles are decoration,
+            // so the scan uses only budget left over by city object generation.
+            if (roadWorker == null) roadWorker = RenderWorkScheduler.Start(this, ScanRoads(center, true), "vehicleRoads", () => false, RenderWorkPriority.Low);
             scanTimer = Mathf.Max(.1f, rangeScanInterval);
         }
         if (seeding) FillNewCoverage();

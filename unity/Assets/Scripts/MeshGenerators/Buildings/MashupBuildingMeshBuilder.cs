@@ -46,7 +46,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 
     /// <summary>
     /// Generate a mashup building mesh from BuildingSummary.
-    /// When isDynamic is true, fences/ground panels follow terrain.
+    /// When isDynamic is true, fences follow terrain (ground panels only at close-up).
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
@@ -110,7 +110,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
             centerPointWorld, deformToTerrain: isDynamic,
             combineInstances, materials, temporaryMeshes, frontFootprint: footprint);
 
-        if (combineInstances.Count == 0 && !openPit)
+        if (combineInstances.Count == 0 && !openPit && !BuildingExteriorRenderer.HasCapturedWork)
         {
             // If no sub-buildings are registered and no decoration parts exist, show only a white footprint box to indicate presence.
             CleanupMeshes(temporaryMeshes);
@@ -119,7 +119,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
+        if (combineInstances.Count > 0) finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
         finalMesh.RecalculateBounds();
         finalMesh.RecalculateNormals();
 

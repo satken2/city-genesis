@@ -53,7 +53,7 @@ Area forests are scattered on the GPU. Other props thin resident candidates usin
 
 ## Generation budget and lifetime
 
-Generation shares a frame-time budget. Start and stop generation coroutines through `RenderWorkScheduler`, which limits total synchronous generator work to a fraction of target frame time. Do not call Unity's `StopCoroutine` directly: it does not dispose nested work. Stop work when its owning GameObject is disabled or destroyed. Publish terrain tiles ahead of other work because object detail depends on them.
+Generation shares a frame-time budget. Start and stop generation coroutines through `RenderWorkScheduler`, which limits total synchronous generator work to a fraction of target frame time. Do not call Unity's `StopCoroutine` directly: it does not dispose nested work. Stop work when its owning GameObject is disabled or destroyed. Publish terrain tiles ahead of other work because object detail depends on them. Work that may appear later, such as building ground panels, some site decoration, and ambient pedestrians and vehicles, runs at low priority: only with budget left over by normal generation. Deferred site decoration is built for the nearest buildings first.
 
 Meshes from retired rendering objects are retained in an LRU with per-target and global limits derived from PC memory.
 

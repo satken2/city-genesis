@@ -11,6 +11,17 @@ public static class ModularBodyBuilder
 {
     public const float GROUND_OFFSET = 0.005f;
 
+    private static readonly StageMarker bodyMarker = new StageMarker("Building.Body");
+    private static readonly StageMarker loadPartMarker = new StageMarker("Building.LoadPart");
+    private static readonly StageMarker wallRunMarker = new StageMarker("Building.WallRun");
+    private static readonly StageMarker cornerPlacementMarker = new StageMarker("Building.CornerPlacement");
+    private static readonly StageMarker siteDecorationsMarker = new StageMarker("Building.SiteDecorations");
+    private static readonly StageMarker tilesMarker = new StageMarker("Building.Tiles");
+    private static readonly StageMarker scatterMarker = new StageMarker("Building.Scatter");
+    private static readonly StageMarker fenceCornerMarker = new StageMarker("Building.FenceCorner");
+    private static readonly StageMarker deformToTerrainMarker = new StageMarker("Building.DeformToTerrain");
+    private static readonly StageMarker groundPanelMarker = new StageMarker("Building.GroundPanel");
+
     /// <summary>
     /// Holds wall/corner/ground-panel results from modular assembly.
     /// </summary>
@@ -114,6 +125,7 @@ public static class ModularBodyBuilder
         Vector2[] occupiedFootprint = null,
         float visual_variant2 = 0f)
     {
+        using var scope = bodyMarker.Auto();
         int variantNumber = BuildingMeshUtils.ResolveModelId(prefix, visual_variant);
         bool isGroundModel = modelType == Constants.MODEL_MODULAR_GROUND;
 
@@ -270,7 +282,7 @@ public static class ModularBodyBuilder
         // Tiles/ground panels cover the full parcel polygon (fenceFootprint). Footprint-only panels
         // would be hidden beneath the body. Fall back to footprint when the parcel is unavailable.
         // Slope-supporting buildings (IsApplicableModelType=FLAT/HOUSE/GABLE) rest on a horizontal plane
-        // plus concrete foundation, but site decorations (fences/tiles/ground panels) follow terrain.
+        // plus concrete foundation, but site decorations follow terrain (ground panels only at close-up; see AppendGroundPanel).
         // Conformity uses centerPointWorld.y (terrain elevation at building center), matching
         // BuildingManager.ResolveBuildingBaseHeight placement on land.
         bool deformToTerrain = isDynamic;
@@ -317,14 +329,15 @@ public static class ModularBodyBuilder
     ///   Do nothing if no tile part exists. Null omits tiles.
     /// - Scatter: place scatter parts in floorPolygon's vacant area outside building scatterFootprint and the entry corridor
     ///   (GenerateScatter). scatterSeed controls randomness. Null scatterFootprint omits scatter.
-    /// - Ground panels: create a horizontal floorPolygon panel at GROUND_OFFSET.
-    ///   Visibility/material follow caller-resolved floorMaterial from master draw_floor
-    ///   and floor parts (a{variant}→b{bd_type}→common).
+    /// - Ground panels: cover floorPolygon with caller-resolved floorMaterial from master draw_floor
+    ///   and floor parts (a{variant}→b{bd_type}→common) (<see cref="AppendGroundPanel"/>).
     ///   Null floorMaterial (draw_floor disabled or no floor parts anywhere) omits
     ///   ground panels (no default material fallback). Null floorPolygon
     ///   also omits them.
-    /// - deformToTerrain=true makes fence/tile/ground-panel vertices follow terrain
+    /// - deformToTerrain=true makes fence/tile vertices follow terrain, and ground panels too at close-up
     ///   (for ultra-near GROUND / PREBUILT).
+    /// While a shown building is generated, the ground panel always becomes deferred work and the other decorations follow
+    /// BuildingExteriorRenderer.DeferSiteDecorations.
     /// </summary>
     public static void GenerateSiteDecorations(
         string prefix, int suffix,
@@ -334,14 +347,71 @@ public static class ModularBodyBuilder
         Vector2? fenceOpeningCenter = null, float fenceOpeningRadius = 0f,
         Vector2[] scatterFootprint = null, float scatterSeed = 0f, Vector2[] frontFootprint = null)
     {
-        if (BuildingExteriorRenderer.Capture != null)
+        if (BuildingExteriorRenderer.Capture != null && BuildingExteriorRenderer.DeferSiteDecorations)
         {
-            BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) => GenerateSiteDecorations(
-                prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, floorMaterial, centerPointWorld,
+            BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) => BuildSiteDecorations(
+                prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, centerPointWorld,
                 deformToTerrain, meshes, materials, temporary, fenceOpeningCenter, fenceOpeningRadius,
                 scatterFootprint, scatterSeed, frontFootprint));
+        }
+        else
+        {
+            BuildSiteDecorations(prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, centerPointWorld,
+                deformToTerrain, combineInstances, allMaterials, temporaryMeshes, fenceOpeningCenter, fenceOpeningRadius,
+                scatterFootprint, scatterSeed, frontFootprint);
+        }
+        AppendGroundPanel(floorPolygon, floorMaterial, centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
+    }
+
+    /// <summary>
+    /// Cover polygon with material (site ground panels, construction-site dirt). Only close-up buildings (DrawLod.Close) with deformToTerrain
+    /// clip the panel against the terrain grid; other levels draw one flat panel at GROUND_OFFSET, because clipping a whole parcel
+    /// costs tens of milliseconds on large parcels. While a shown building is generated, the panel becomes deferred low-priority work.
+    /// Terrain following is decided here because deferred jobs run with the Normal LOD set.
+    /// </summary>
+    public static void AppendGroundPanel(Vector2[] polygon, Material material, Vector3 centerPointWorld, bool deformToTerrain,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        if (material == null || polygon == null || polygon.Length < 3) return;
+        bool followTerrain = deformToTerrain && BuildingMeshUtils.CurrentDrawLod == DrawLod.Close;
+        if (BuildingExteriorRenderer.Capture != null)
+        {
+            BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) =>
+                AddGroundPanelMesh(polygon, material, centerPointWorld, followTerrain, meshes, materials, temporary));
             return;
         }
+        AddGroundPanelMesh(polygon, material, centerPointWorld, followTerrain, combineInstances, allMaterials, temporaryMeshes);
+    }
+
+    private static void AddGroundPanelMesh(Vector2[] polygon, Material material, Vector3 centerPointWorld, bool followTerrain,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        Mesh mesh;
+        using (groundPanelMarker.Auto())
+            mesh = followTerrain
+                ? GenerateTerrainConformingFloorMesh(polygon, centerPointWorld)
+                : GenerateFloorMesh(polygon, GROUND_OFFSET);
+        if (mesh == null) return;
+        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] 地面パネル: material={FormatMaterial(material)}");
+        combineInstances.Add(new CombineInstance
+        {
+            mesh = mesh,
+            subMeshIndex = 0,
+            transform = Matrix4x4.identity
+        });
+        allMaterials.Add(material);
+        temporaryMeshes.Add(mesh);
+    }
+
+    private static void BuildSiteDecorations(
+        string prefix, int suffix,
+        Vector2[] fenceFootprint, Vector2[] tilePolygon, Vector2[] floorPolygon,
+        Vector3 centerPointWorld, bool deformToTerrain,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
+        Vector2? fenceOpeningCenter, float fenceOpeningRadius,
+        Vector2[] scatterFootprint, float scatterSeed, Vector2[] frontFootprint)
+    {
+        using var scope = siteDecorationsMarker.Auto();
 
         // --- Entry ---
         GameObject gateModule = BuildingMeshUtils.GetPartNoPosition(prefix, "gate", suffix, true);
@@ -478,28 +548,6 @@ public static class ModularBodyBuilder
             GenerateScatter(prefix, suffix, floorPolygon, scatterFootprint, hasEntry ? entry.Corridor() : null, scatterSeed,
                             centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
         }
-
-        // --- Ground panels ---
-        // The caller has already resolved floorMaterial from draw_floor and floor parts
-        // with a{variant}→b{bd_type}→common fallbacks. Null omits drawing.
-        if (floorMaterial != null && floorPolygon != null && floorPolygon.Length >= 3)
-        {
-            Mesh floorMesh = deformToTerrain
-                ? GenerateTerrainConformingFloorMesh(floorPolygon, centerPointWorld)
-                : GenerateFloorMesh(floorPolygon, GROUND_OFFSET);
-            if (floorMesh != null)
-            {
-                UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] 地面パネル: material={FormatMaterial(floorMaterial)}");
-                combineInstances.Add(new CombineInstance
-                {
-                    mesh = floorMesh,
-                    subMeshIndex = 0,
-                    transform = Matrix4x4.identity
-                });
-                allMaterials.Add(floorMaterial);
-                temporaryMeshes.Add(floorMesh);
-            }
-        }
     }
 
     /// <summary>
@@ -628,6 +676,7 @@ public static class ModularBodyBuilder
     /// </summary>
     private static void DeformMeshToTerrain(Mesh mesh, Vector3 centerPointWorld)
     {
+        using var scope = deformToTerrainMarker.Auto();
         if (mesh == null || mesh.vertexCount == 0) return;
 
         Vector3[] vertices = mesh.vertices;
@@ -658,6 +707,7 @@ public static class ModularBodyBuilder
         List<Material> allMaterials,
         List<Mesh> temporaryMeshes)
     {
+        using var scope = tilesMarker.Auto();
         if (polygon == null || polygon.Length < 3) return;
 
         GameObject tileModule = BuildingMeshUtils.GetPartNoPosition(prefix, "tile", suffix, true);
@@ -837,6 +887,7 @@ public static class ModularBodyBuilder
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
+        using var scope = scatterMarker.Auto();
         var sink = BuildingScatterRenderer.Sink;
         var paths = new List<string>();
         var meshes = new List<Mesh>();
@@ -947,6 +998,7 @@ public static class ModularBodyBuilder
     /// </summary>
     private static GameObject LoadPartWithFallback(string prefix, string level, string type, int position, int suffix, out Material[] materials)
     {
+        using var scope = loadPartMarker.Auto();
         string desc = $"{prefix}/{suffix}/{level}-{type}{position}";
 
         // 1. Try the specified position.
@@ -1205,6 +1257,7 @@ public static class ModularBodyBuilder
         float startOffset, float endOffset,
         Dictionary<GameObject, Mesh> sharedSources = null, List<Mesh> temporaryMeshes = null)
     {
+        using var scope = wallRunMarker.Auto();
         List<SegmentMeshData> segments = new List<SegmentMeshData>();
 
         if (wallModule == null) return segments;
@@ -1344,6 +1397,7 @@ public static class ModularBodyBuilder
     /// </summary>
     public static SegmentMeshData GenerateFenceCorner(Vector2 p0, Vector2 p1, Vector2 p2, GameObject cornerModule, Material[] sharedMaterials)
     {
+        using var scope = fenceCornerMarker.Auto();
         // Same logic as body corners. Place fences at floorY=0, unscaled.
         return GenerateCornerCore(p0, p1, p2, 0f, cornerModule, sharedMaterials, NO_Y_SCALE);
     }
@@ -1421,6 +1475,7 @@ public static class ModularBodyBuilder
         GameObject module, Material[] materials, float targetHeight,
         Dictionary<(GameObject module, float angle), Mesh> sources, List<Mesh> temporary)
     {
+        using var scope = cornerPlacementMarker.Auto();
         if (module == null) return default;
         Quaternion rotation = ComputeCornerRotation(p0, p1, p2, out _, out float angle);
         if (IsUnsupportedConcaveCorner(module, angle)) return default;

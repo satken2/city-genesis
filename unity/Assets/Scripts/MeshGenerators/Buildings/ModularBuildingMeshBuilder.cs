@@ -9,6 +9,11 @@ using GeneratedModels;
 /// </summary>
 public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
 {
+    private static readonly StageMarker roofMarker = new StageMarker("Building.Roof");
+    private static readonly StageMarker combineMarker = new StageMarker("Building.Combine");
+    private static readonly StageMarker normalsMarker = new StageMarker("Building.Normals");
+    private static readonly StageMarker destroyTemporaryMarker = new StageMarker("Building.DestroyTemporary");
+
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
         if (buildingData.polygonArray == null || buildingData.polygonArray.Length < 3)
@@ -132,33 +137,36 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
                 combineInstances, allMaterials, temporaryMeshes);
             // 2. Generate roof (select builder by model_type).
             BuildingMeshResult roofResult = null;
-            switch (modelType)
+            using (roofMarker.Auto())
             {
-                case Constants.MODEL_MODULAR_HOUSE:
-                    // Walls/corners/ground match FLAT. Only the roof becomes a residential hip roof, using the same ceil material as FLAT.
-                    roofResult = HouseRoofBuilder.GenerateRoof(
-                        footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
-                        allMaterials.Count > 0 ? allMaterials.ToArray() : null);
-                    break;
-                case Constants.MODEL_MODULAR_GABLE:
-                    // Walls/corners/ground match FLAT. Only the roof becomes a gable roof, using the same ceil material as FLAT.
-                    roofResult = GableRoofBuilder.GenerateRoof(
-                        footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
-                        allMaterials.Count > 0 ? allMaterials.ToArray() : null);
-                    break;
-                case Constants.MODEL_MODULAR_SHED:
-                    // Walls/corners/ground match FLAT. Only the roof becomes a shed roof (corrugated metal).
-                    roofResult = ShedRoofBuilder.GenerateRoof(
-                        footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
-                        allMaterials.Count > 0 ? allMaterials.ToArray() : null);
-                    break;
-                case Constants.MODEL_MODULAR_FLAT:
-                default:
-                    if (!hasInteriorFloors)
-                        roofResult = FlatRoofBuilder.GenerateRoof(
-                            footprint, buildingHeight, prefix, resolvedSuffix,
+                switch (modelType)
+                {
+                    case Constants.MODEL_MODULAR_HOUSE:
+                        // Walls/corners/ground match FLAT. Only the roof becomes a residential hip roof, using the same ceil material as FLAT.
+                        roofResult = HouseRoofBuilder.GenerateRoof(
+                            footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
                             allMaterials.Count > 0 ? allMaterials.ToArray() : null);
-                    break;
+                        break;
+                    case Constants.MODEL_MODULAR_GABLE:
+                        // Walls/corners/ground match FLAT. Only the roof becomes a gable roof, using the same ceil material as FLAT.
+                        roofResult = GableRoofBuilder.GenerateRoof(
+                            footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
+                            allMaterials.Count > 0 ? allMaterials.ToArray() : null);
+                        break;
+                    case Constants.MODEL_MODULAR_SHED:
+                        // Walls/corners/ground match FLAT. Only the roof becomes a shed roof (corrugated metal).
+                        roofResult = ShedRoofBuilder.GenerateRoof(
+                            footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
+                            allMaterials.Count > 0 ? allMaterials.ToArray() : null);
+                        break;
+                    case Constants.MODEL_MODULAR_FLAT:
+                    default:
+                        if (!hasInteriorFloors)
+                            roofResult = FlatRoofBuilder.GenerateRoof(
+                                footprint, buildingHeight, prefix, resolvedSuffix,
+                                allMaterials.Count > 0 ? allMaterials.ToArray() : null);
+                        break;
+                }
             }
 
             if (roofResult?.Mesh != null)
@@ -188,7 +196,7 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
 
-        if (combineInstances.Count == 0)
+        if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork)
         {
             Debug.LogWarning($"[MBMB] パーツが0件 → 白い箱フォールバック");
             foreach (Mesh temp in temporaryMeshes)
@@ -207,13 +215,21 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
         // 4. Combine meshes.
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
-        finalMesh.RecalculateNormals();
-        finalMesh.RecalculateBounds();
-
-        foreach (Mesh temp in temporaryMeshes)
+        // A ground-only building whose only content is deferred (ground panel) has nothing to combine now.
+        using (combineMarker.Auto())
+            if (combineInstances.Count > 0) finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
+        using (normalsMarker.Auto())
         {
-            Object.Destroy(temp);
+            finalMesh.RecalculateNormals();
+            finalMesh.RecalculateBounds();
+        }
+
+        using (destroyTemporaryMarker.Auto())
+        {
+            foreach (Mesh temp in temporaryMeshes)
+            {
+                Object.Destroy(temp);
+            }
         }
 
         // 5. Generate collider.

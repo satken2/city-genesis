@@ -245,7 +245,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         // 7. Site decorations (fences/tiles/ground panels). Shared with modular/prebuilt;
         //    draw yard ground panels for draw_floor=yes, continuous with quay top via the same floor material.
         //    Omit the parcel's sea area (beyond quay). Yard height changes across coastline (reclaimed top and original land,
-        //    beach beneath slab), so always follow terrain regardless of distance.
+        //    beach beneath slab), so fences always follow terrain; the yard panel follows it at close-up like every ground panel.
         Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(buildingData, out _, out _);
         ModularBodyBuilder.GenerateSiteDecorations(
             prefix, 0,
@@ -255,7 +255,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             combineInstances, materials, temporaryMeshes, frontFootprint: footprint);
 
         // Ports facing reclaimed quays have no slab; without any resolved part, their mesh is empty.
-        if (combineInstances.Count == 0)
+        if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork)
         {
             foreach (Mesh temp in temporaryMeshes)
             {
@@ -267,7 +267,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         // 8. Combine meshes.
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
+        if (combineInstances.Count > 0) finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
         finalMesh.RecalculateNormals();
         finalMesh.RecalculateBounds();
 

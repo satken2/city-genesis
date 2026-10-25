@@ -6,7 +6,7 @@ Unity assembles FBX parts using core-provided footprints, floor counts, and appe
 
 Vertex ordering and frontage follow [building geometry](C_building-geometry.md). Buildings are grounded at terrain elevation at `center_point`, except water-parcel buildings at sea level. Floor heights follow the master's `height_per_floor` grid. Fences, ground panels, and other site decorations follow parcel geometry rather than the building footprint. The site entry is where a line extended outward from the middle of the footprint's front edge meets the parcel boundary: the fence opens there, a gate stands there, and a walkway runs from the front to it. Scatter parts avoid both the footprint and this walkway. `visual_variant` selects appearance; `visual_variant2` seeds variation such as rooftop or scattered-part placement. Identical values produce identical appearance.
 
-Modular building bodies are horizontal. Concrete foundations fill downhill gaps on slopes, while site decoration follows terrain. Entrances and exterior stairs stay inside the footprint, setting back the main body as needed. The footprint therefore includes projecting parts.
+Modular building bodies are horizontal. Concrete foundations fill downhill gaps on slopes, while site decoration follows terrain. The ground panel covering the whole parcel follows terrain only on close-up buildings and is otherwise one flat panel, because cutting a whole parcel along the terrain grid becomes costly on large parcels. Ground panels are built after the building body as low-priority work. Entrances and exterior stairs stay inside the footprint, setting back the main body as needed. The footprint therefore includes projecting parts.
 
 ## Part locations and names
 

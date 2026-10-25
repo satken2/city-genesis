@@ -21,10 +21,29 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly IBuildingMeshGenerator demolishingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Demolition);
     private static readonly IBuildingMeshGenerator collapsedGenerator = new CollapsedBuildingMeshBuilder();
 
+    // Profiler markers for building display stages share the "Building." prefix, so one Profiler search shows the whole breakdown.
+    private static readonly StageMarker generateMarker = new StageMarker("Building.Generate");
+    private static readonly StageMarker modularMarker = new StageMarker("Building.Gen.Modular");
+    private static readonly StageMarker prebuiltMarker = new StageMarker("Building.Gen.Prebuilt");
+    private static readonly StageMarker portMarker = new StageMarker("Building.Gen.Port");
+    private static readonly StageMarker mashupMarker = new StageMarker("Building.Gen.Mashup");
+    private static readonly StageMarker openPitMarker = new StageMarker("Building.Gen.OpenPit");
+    private static readonly StageMarker railYardMarker = new StageMarker("Building.Gen.RailYard");
+    private static readonly StageMarker openSpaceMarker = new StageMarker("Building.Gen.OpenSpace");
+    private static readonly StageMarker constructingMarker = new StageMarker("Building.Gen.Constructing");
+    private static readonly StageMarker demolishingMarker = new StageMarker("Building.Gen.Demolishing");
+    private static readonly StageMarker collapsedMarker = new StageMarker("Building.Gen.Collapsed");
+    private static readonly StageMarker farMarker = new StageMarker("Building.Gen.Far");
+    private static readonly StageMarker foundationMarker = new StageMarker("Building.Foundation");
+    private static readonly StageMarker roofpropMarker = new StageMarker("Building.Roofprop");
+    private static readonly StageMarker entranceMarker = new StageMarker("Building.Entrance");
+    private static readonly StageMarker colliderMarker = new StageMarker("Building.ColliderMesh");
+    private static readonly StageMarker mergeSubMeshesMarker = new StageMarker("Building.MergeSubMeshes");
+
     /// <summary>
     /// Generate a building mesh from BuildingSummary.
     /// Choose the generation method based on model_type.
-    /// When isDynamic is true, modular/prebuilt fences, tiles, and ground panels follow the terrain.
+    /// When isDynamic is true, modular/prebuilt fences and tiles follow the terrain (ground panels only at close-up).
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
@@ -36,11 +55,12 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// Close uses the same assembly but prefers `_close` parts (BuildingMeshUtils.CurrentDrawLod).
     /// isDynamic is a compatibility argument for terrain conformity, independent of rendering LOD.
     /// Callers passing animateCrane=true must attach the returned CraneTop before initializing the visual mode.
-    /// separateExterior is for shown buildings: site decorations become ExteriorJobs where applicable,
-    /// and scatter parts become Scatter for <see cref="BuildingScatterRenderer"/> instead of being combined.
+    /// separateExterior is for shown buildings: ground panels (for every model type) and other site decorations (where applicable)
+    /// become ExteriorJobs, and scatter parts become Scatter for <see cref="BuildingScatterRenderer"/> instead of being combined.
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false, bool animateCrane = false)
     {
+        using var scope = generateMarker.Auto();
         if (buildingData == null)
         {
             Debug.LogError("BuildingMeshBuilder.Generate: BuildingSummary が null です。");
@@ -53,13 +73,14 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
         DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
         var previousCapture = BuildingExteriorRenderer.Capture;
+        bool previousDefer = BuildingExteriorRenderer.DeferSiteDecorations;
         var previousSink = BuildingScatterRenderer.Sink;
         int modelType = GetModelType(buildingData);
-        bool split = separateExterior && (IsApplicableModelType(modelType) || modelType == Constants.MODEL_PREBUILT);
-        var jobs = split ? new List<BuildingExteriorRenderer.Build>() : null;
+        var jobs = separateExterior ? new List<BuildingExteriorRenderer.Build>() : null;
         var scatter = separateExterior ? new List<BuildingScatterRenderer.Instance>() : null;
         BuildingMeshUtils.CurrentDrawLod = drawLod;
         BuildingExteriorRenderer.Capture = jobs;
+        BuildingExteriorRenderer.DeferSiteDecorations = separateExterior && (IsApplicableModelType(modelType) || modelType == Constants.MODEL_PREBUILT);
         BuildingScatterRenderer.Sink = scatter;
         try
         {
@@ -75,6 +96,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         {
             BuildingMeshUtils.CurrentDrawLod = previous;
             BuildingExteriorRenderer.Capture = previousCapture;
+            BuildingExteriorRenderer.DeferSiteDecorations = previousDefer;
             BuildingScatterRenderer.Sink = previousSink;
         }
     }
@@ -88,6 +110,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public static BuildingMeshResult GenerateFarBuilding(BuildingSummary buildingData)
     {
+        using var scope = farMarker.Auto();
         int status = buildingData.status;
         if (status != Constants.STATUS_CONSTRUCTING && status != Constants.STATUS_DEMOLISHING && status != Constants.STATUS_COLLAPSED)
         {
@@ -115,21 +138,24 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
         // Construction/demolition/ruins use dedicated meshes regardless of model_type. Checking status before
         // branching on model_type covers every generation route: Near/Far, DetailWorker, and direct calls.
-        // - Constructing (STATUS_CONSTRUCTING): dirt mound + scaffolding + crane.
-        // - Demolishing (STATUS_DEMOLISHING): dirt mound + scaffolding with sound barriers + rooftop excavator (same builder as construction; height decreases with progress).
+        // - Constructing (STATUS_CONSTRUCTING): site dirt + scaffolding + crane.
+        // - Demolishing (STATUS_DEMOLISHING): site dirt + scaffolding with sound barriers + rooftop excavator (same builder as construction; height decreases with progress).
         // - Ruins (STATUS_COLLAPSED): rubble mound + optional collapsed fragments.
         //   Fire damage (status_reason == REASON_FIRE) uses a charred rubble material (selected within the builder).
         if (buildingData.status == Constants.STATUS_CONSTRUCTING)
         {
-            return EnsureMaterials(constructingGenerator.Generate(buildingData, isDynamic, animateCrane));
+            using (constructingMarker.Auto())
+                return EnsureMaterials(constructingGenerator.Generate(buildingData, isDynamic, animateCrane));
         }
         if (buildingData.status == Constants.STATUS_DEMOLISHING)
         {
-            return EnsureMaterials(demolishingGenerator.Generate(buildingData, isDynamic));
+            using (demolishingMarker.Auto())
+                return EnsureMaterials(demolishingGenerator.Generate(buildingData, isDynamic));
         }
         if (buildingData.status == Constants.STATUS_COLLAPSED)
         {
-            return EnsureMaterials(collapsedGenerator.Generate(buildingData, isDynamic));
+            using (collapsedMarker.Auto())
+                return EnsureMaterials(collapsedGenerator.Generate(buildingData, isDynamic));
         }
 
         int modelType = GetModelType(buildingData);
@@ -140,29 +166,36 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             case Constants.MODEL_PARKING:
             case Constants.MODEL_ROTARY:
             case Constants.MODEL_PARK:
-                result = openSpaceGenerator.Generate(buildingData, isDynamic);
+                using (openSpaceMarker.Auto())
+                    result = openSpaceGenerator.Generate(buildingData, isDynamic);
                 break;
             case Constants.MODEL_MODULAR_FLAT:
             case Constants.MODEL_MODULAR_HOUSE:
             case Constants.MODEL_MODULAR_GABLE:
             case Constants.MODEL_MODULAR_SHED:
             case Constants.MODEL_MODULAR_GROUND:
-                result = modularGenerator.Generate(buildingData, isDynamic);
+                using (modularMarker.Auto())
+                    result = modularGenerator.Generate(buildingData, isDynamic);
                 break;
             case Constants.MODEL_PREBUILT:
-                result = prebuiltGenerator.Generate(buildingData, isDynamic);
+                using (prebuiltMarker.Auto())
+                    result = prebuiltGenerator.Generate(buildingData, isDynamic);
                 break;
             case Constants.MODEL_PORT:
-                result = portGenerator.Generate(buildingData, isDynamic);
+                using (portMarker.Auto())
+                    result = portGenerator.Generate(buildingData, isDynamic);
                 break;
             case Constants.MODEL_MASHUP:
-                result = mashupGenerator.Generate(buildingData, isDynamic);
+                using (mashupMarker.Auto())
+                    result = mashupGenerator.Generate(buildingData, isDynamic);
                 break;
             case Constants.MODEL_OPEN_PIT:
-                result = openPitGenerator.Generate(buildingData, isDynamic);
+                using (openPitMarker.Auto())
+                    result = openPitGenerator.Generate(buildingData, isDynamic);
                 break;
             case Constants.MODEL_RAIL_YARD:
-                result = railYardGenerator.Generate(buildingData, isDynamic);
+                using (railYardMarker.Auto())
+                    result = railYardGenerator.Generate(buildingData, isDynamic);
                 break;
             default:
                 UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
@@ -214,6 +247,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public static BuildingMeshResult MergeSubMeshes(BuildingMeshResult meshResult)
     {
+        using var scope = mergeSubMeshesMarker.Auto();
         if (meshResult == null || meshResult.Mesh == null)
         {
             return meshResult;
@@ -453,6 +487,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public static Mesh GenerateColliderMesh(Vector2[] footprint, float buildingHeight)
     {
+        using var scope = colliderMarker.Auto();
         if (footprint == null || footprint.Length < 3)
         {
             return null;
@@ -525,6 +560,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public static void GenerateRoofprop(string prefix, int suffix, float visual_variant2, Vector2[] footprint, float buildingHeight, List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
+        using var scope = roofpropMarker.Auto();
         GameObject roofpropModule = BuildingMeshUtils.GetPartNoPosition(prefix, "roofprop", suffix, true);
         if (roofpropModule == null)
         {
@@ -630,6 +666,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public static void GenerateEntrance(string prefix, int suffix, Vector2[] footprint, List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
+        using var scope = entranceMarker.Auto();
         if (footprint == null || footprint.Length < 3)
         {
             return;
@@ -870,7 +907,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// and avoid cracks from T-junctions. Append generated midpoint vertices to verts
     /// (callers can use verts directly as the vertex array).
     /// Once MAX_SUBDIVIDED_TRIANGLES is reached, retain the rest without subdivision (no holes).
-    /// Used to add interior vertices to surface meshes that follow uneven terrain (ground panels and dirt mounds).
+    /// Used to add interior vertices to surface meshes that follow uneven terrain (ground panels and rubble mounds).
     /// </summary>
     public static List<(int a, int b, int c)> SubdivideTrianglesByEdgeLength(
         List<Vector2> verts, List<int> baseTriangles, float maxEdge)
@@ -1312,7 +1349,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// Return the construction-site dirt material (Resources/ConstructionDirt).
     /// If the asset is missing, fall back to the existing construction material (Resources/ConstructionMaterial, yellow),
     /// then the default building material, so rendering still works.
-    /// Referenced by both building dirt mounds and path dirt strips.
+    /// Referenced by both construction-site dirt and path dirt strips.
     /// </summary>
     public static Material GetConstructionDirtMaterial()
     {
@@ -1406,6 +1443,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public static Mesh GenerateFoundationMesh(Vector2[] footprint, Vector3 centerPointWorld)
     {
+        using var scope = foundationMarker.Auto();
         if (footprint == null || footprint.Length < 3) return null;
 
         float baseY = centerPointWorld.y;

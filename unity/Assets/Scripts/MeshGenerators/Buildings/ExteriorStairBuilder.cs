@@ -9,6 +9,7 @@ using UnityEngine;
 public static class ExteriorStairBuilder
 {
     static readonly string[] Levels = { "base", "mid", "top" };
+    static readonly StageMarker createMarker = new StageMarker("Building.ExteriorStairs");
 
     /// <summary>Exterior stairs for one edge.</summary>
     public sealed class Stair
@@ -95,6 +96,7 @@ public static class ExteriorStairBuilder
     /// <param name="entrance">Entrance bounds (enclose standard/close-up). Null for buildings without an entrance or part.</param>
     public static Layout Create(Vector2[] footprint, string prefix, int suffix, float floorHeight, bool withStairs, Bounds? entrance)
     {
+        using var scope = createMarker.Auto();
         if (footprint == null || footprint.Length < 3 || suffix < 0) return null;
         var layout = new Layout();
         if (entrance.HasValue && TryLayout(footprint, layout.Stairs, entrance, out var body))

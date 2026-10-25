@@ -21,6 +21,16 @@ public class BuildingManager : BaseApiDataManager
     private const string BUILDING_PREFIX = "Building_";
     private const string BUILDING_TAG = "BuildingObject";
 
+    private static readonly StageMarker createDetailedMarker = new StageMarker("Building.CreateDetailed");
+    private static readonly StageMarker createFarMarker = new StageMarker("Building.CreateFar");
+    private static readonly StageMarker restoreLodMarker = new StageMarker("Building.RestoreLod");
+    private static readonly StageMarker uploadMeshMarker = new StageMarker("Building.UploadMesh");
+    private static readonly StageMarker baseHeightMarker = new StageMarker("Building.BaseHeight");
+    private static readonly StageMarker visualModeMarker = new StageMarker("Building.VisualMode");
+    private static readonly StageMarker selectCandidatesMarker = new StageMarker("Building.SelectCandidates");
+    private static readonly StageMarker evictOverCapMarker = new StageMarker("Building.EvictOverCap");
+    private static readonly StageMarker colliderAssignMarker = new StageMarker("Building.Collider.Assign");
+
     private Dictionary<int, GameObject> buildingObjectsCache = new Dictionary<int, GameObject>();
     private Dictionary<int, BuildingSummary> buildingDataCache = new Dictionary<int, BuildingSummary>();
     private Dictionary<Vector2Int, LodTier> cellBuildingLod = new Dictionary<Vector2Int, LodTier>();
@@ -757,7 +767,7 @@ public class BuildingManager : BaseApiDataManager
         EvictDetailedBuildingsOverCap(viewCamPos, viewCamFwd, justCreatedId: 0);
     }
 
-    /// <summary>Fetch batches finish restoration and outline display first, then begin expensive detail generation.</summary>
+    /// <summary>Restore or show the outline at once; DetailGenerationWorker generates queued details nearest first while later pages are still being prepared.</summary>
     private void PrepareBuildingRepresentation(BuildingSummary data, bool isDynamic, DrawLod lod)
     {
         RegisterBuildingDataToCache(data);
@@ -996,11 +1006,6 @@ public class BuildingManager : BaseApiDataManager
         int restoreRevision = -1;
         while (true)
         {
-            if (preparingRepresentations > 0)
-            {
-                yield return null;
-                continue;
-            }
             if (deferredDetailBuildings.Count == 0)
             {
                 stalled = false;
@@ -1016,7 +1021,8 @@ public class BuildingManager : BaseApiDataManager
                 continue;
             }
             // Collect all restorable requests before beginning expensive generation in distance order.
-            if (restoreRevision != deferredRevision)
+            // Skip the scan while pages are being prepared (each request queued there already tried restoration) and run it once afterwards.
+            if (restoreRevision != deferredRevision && preparingRepresentations == 0)
             {
                 restoreRevision = deferredRevision;
                 yield return RestoreDeferredBuildingRepresentations();
@@ -1036,6 +1042,8 @@ public class BuildingManager : BaseApiDataManager
             }
             // Viewpoint changes affect both processing order and deferral decisions, so reselect candidates.
             if (topView.Update(cam)) topCount = topCursor = 0;
+            // Requests keep arriving while later pages are prepared; reselect so nearer new requests come before the remaining candidates.
+            if (topRevision != DeferredSelectionRevision) topCount = topCursor = 0;
             Vector3 camPos = cam.transform.position;
             Vector3 fwd = GetHorizontalForward(cam);
             float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(cam);
@@ -1154,6 +1162,7 @@ public class BuildingManager : BaseApiDataManager
     /// </summary>
     private int SelectTopDeferredBuildings(Vector3 camPos, Vector3 camForwardHorizontal, float[] topScore, int[] topId)
     {
+        using var scope = selectCandidatesMarker.Auto();
         int capacity = topId.Length;
         int count = 0;
         TerrainManager terrain = Utils.CachedTerrainManager;
@@ -1203,6 +1212,7 @@ public class BuildingManager : BaseApiDataManager
     /// </summary>
     private void EvictDetailedBuildingsOverCap(Vector3 camPos, Vector3 camForwardHorizontal, int justCreatedId)
     {
+        using var scope = evictOverCapMarker.Auto();
         bool rebuilt = false;
         while (detailedBuildingIds.Count > maxDetailedBuildingObjects)
         {
@@ -1505,6 +1515,7 @@ public class BuildingManager : BaseApiDataManager
     /// </summary>
     private float ResolveBuildingBaseHeight(ParcelSummary parcel, float cx, float cz)
     {
+        using var scope = baseHeightMarker.Auto();
         if (parcel == null)
         {
             parcel = ResolveParcelBelowSeaLevel(cx, cz);
@@ -1827,6 +1838,7 @@ public class BuildingManager : BaseApiDataManager
 
     private bool RestoreBuildingLod(BuildingSummary data, DrawLod lod, string key, bool reportMiss = true)
     {
+        using var scope = restoreLodMarker.Auto();
         buildingObjectsCache.TryGetValue(data.agent_id, out GameObject old);
         var identity = old != null ? old.GetComponent<RenderCacheIdentity>() : null;
         string sampledKey = BuildingGenerationKey(data, lod, key);
@@ -1865,6 +1877,7 @@ public class BuildingManager : BaseApiDataManager
 
     private void CreateFarBuildingObject(BuildingSummary buildingData)
     {
+        using var scope = createFarMarker.Auto();
         string renderKey = BuildingRenderKey(buildingData, DrawLod.Far);
         if (RestoreBuildingLod(buildingData, DrawLod.Far, renderKey)) return;
         GameObject oldBuilding = null;
@@ -2353,6 +2366,7 @@ public class BuildingManager : BaseApiDataManager
     /// <summary>Release CPU copies only for completed display meshes requiring neither further processing nor physics baking.</summary>
     private static void ReleaseBuildingCpuCopy(BuildingMeshResult result)
     {
+        using var scope = uploadMeshMarker.Auto();
         if (result?.Mesh != null && result.Mesh != result.ColliderMesh && result.Mesh.isReadable)
             result.Mesh.UploadMeshData(true);
     }
@@ -2461,6 +2475,7 @@ public class BuildingManager : BaseApiDataManager
     /// <param name="drawLod">Render LOD (Normal / Close). CreateFarBuildingObject handles Far.</param>
     private void CreateOrUpdateBuildingObject(BuildingSummary buildingData, bool isDynamic, bool forceRebuild = false, DrawLod drawLod = DrawLod.Normal)
     {
+        using var scope = createDetailedMarker.Auto();
         if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden) drawLod = DrawLod.Normal;
         string renderKey = BuildingRenderKey(buildingData, drawLod);
         if (RestoreBuildingLod(buildingData, drawLod, renderKey)) return;
@@ -2521,6 +2536,9 @@ public class BuildingManager : BaseApiDataManager
         buildingGO.tag = BUILDING_TAG;
 
         MeshFilter mf = buildingGO.AddComponent<MeshFilter>();
+        // Add while the MeshFilter is still empty. A MeshCollider added later copies the MeshFilter's render mesh and cooks it
+        // on the main thread, only to be replaced by the baked collider mesh (SetColliderAsync).
+        buildingGO.AddComponent<MeshCollider>();
         MeshRenderer mr = buildingGO.AddComponent<MeshRenderer>();
 
         var genWatch = System.Diagnostics.Stopwatch.StartNew();
@@ -2588,16 +2606,19 @@ public class BuildingManager : BaseApiDataManager
         BuildingInputHandler inputHandler = buildingGO.AddComponent<BuildingInputHandler>();
         inputHandler.buildingId = buildingData.agent_id;
 
-        VisualModeObject visualModeObject = buildingGO.AddComponent<VisualModeObject>();
-        visualModeObject.objectType = InputObjectType.BUILDING;
-        visualModeObject.useChildRenderers = true;
-        visualModeObject.InitializeMaterials();
-        visualModeObject.SetStatus(status);
-        // The per-object display filter must also affect buildings generated later through incremental loading,
-        // so resolve its initial state here immediately after generation.
-        visualModeObject.SetFilterHidden(
-            ObjectVisibilityFilter.IsHidden(InputObjectType.BUILDING, buildingData.agent_id));
-        buildingGO.AddComponent<VisualBuildingObject>();
+        using (visualModeMarker.Auto())
+        {
+            VisualModeObject visualModeObject = buildingGO.AddComponent<VisualModeObject>();
+            visualModeObject.objectType = InputObjectType.BUILDING;
+            visualModeObject.useChildRenderers = true;
+            visualModeObject.InitializeMaterials();
+            visualModeObject.SetStatus(status);
+            // The per-object display filter must also affect buildings generated later through incremental loading,
+            // so resolve its initial state here immediately after generation.
+            visualModeObject.SetFilterHidden(
+                ObjectVisibilityFilter.IsHidden(InputObjectType.BUILDING, buildingData.agent_id));
+            buildingGO.AddComponent<VisualBuildingObject>();
+        }
 
         if (meshResult?.ExteriorJobs != null && meshResult.ExteriorJobs.Count > 0)
             buildingGO.AddComponent<BuildingExteriorRenderer>().Configure(meshResult.ExteriorJobs);
@@ -2764,8 +2785,7 @@ public class BuildingManager : BaseApiDataManager
 
     /// <summary>
     /// Generate mesh collider physics data asynchronously on another thread (Physics.BakeMesh),
-    /// then assign it to the collider component after baking finishes.
-    /// This reduces stuttering caused by physics baking on the main thread.
+    /// then assign it to the collider the building object received at creation. Assigning baked data costs almost nothing on the main thread.
     /// </summary>
     private IEnumerator SetColliderAsync(GameObject targetGO, Mesh mesh)
     {
@@ -2774,14 +2794,10 @@ public class BuildingManager : BaseApiDataManager
         Task bakeTask = MeshBakeService.Bake(mesh);
         yield return Utils.WaitTask(bakeTask);
 
-        if (targetGO != null)
+        if (targetGO != null && targetGO.TryGetComponent(out MeshCollider collider))
         {
-            MeshCollider collider = targetGO.GetComponent<MeshCollider>();
-            if (collider == null)
-            {
-                collider = targetGO.AddComponent<MeshCollider>();
-            }
-            collider.sharedMesh = mesh;
+            using (colliderAssignMarker.Auto())
+                collider.sharedMesh = mesh;
         }
     }
 

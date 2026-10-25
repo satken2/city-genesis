@@ -9,6 +9,12 @@ using GeneratedModels;
 /// </summary>
 public class RoadPath : IPathMeshGenerator
 {
+    private static readonly StageMarker splineMeshMarker = new StageMarker("Path.SplineMesh");
+    private static readonly StageMarker splineMeshRebuildMarker = new StageMarker("Path.SplineMesh.Rebuild");
+    private static readonly StageMarker splineMeshCapsMarker = new StageMarker("Path.SplineMesh.Caps");
+    private static readonly StageMarker pillarCandidatesMarker = new StageMarker("Path.Pillars.Candidates");
+    private static readonly StageMarker pillarPortalMarker = new StageMarker("Path.Pillars.Portal");
+    private static readonly StageMarker pillarInstantiateMarker = new StageMarker("Path.Pillars.Instantiate");
     private static readonly Dictionary<string, Material> MaterialCache = new Dictionary<string, Material>();
     private static readonly Dictionary<Mesh, Mesh> MirroredMeshCache = new Dictionary<Mesh, Mesh>();
     private static readonly Dictionary<(Mesh, float), Mesh> PartMeshCache = new Dictionary<(Mesh, float), Mesh>();
@@ -322,6 +328,7 @@ public class RoadPath : IPathMeshGenerator
     /// </param>
     public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true, float maxTileLength = MAX_EXTRUDE_TILE_LENGTH, bool normalizeBodySurface = true)
     {
+        using var scope = splineMeshMarker.Auto();
         // Even through the shared construction entry point, do not widen ropeway cables to road width.
         if (prefabName == "Models/Paths/p601/body" || prefabName == "Models/Paths/p602/body")
         {
@@ -634,7 +641,8 @@ public class RoadPath : IPathMeshGenerator
 
         try
         {
-            splineMesh.RebuildImmediate();
+            using (splineMeshRebuildMarker.Auto())
+                splineMesh.RebuildImmediate();
         }
         catch (Exception ex)
         {
@@ -644,7 +652,8 @@ public class RoadPath : IPathMeshGenerator
 
         if (!singleSpan && !isDashed && (prefabName.EndsWith("/body", StringComparison.Ordinal)
             || prefabName.EndsWith("/sidewalk", StringComparison.Ordinal) || prefabName.EndsWith("/lrt_track", StringComparison.Ordinal)))
-            RemoveInternalTileCaps(go.GetComponent<MeshFilter>()?.sharedMesh, channel);
+            using (splineMeshCapsMarker.Auto())
+                RemoveInternalTileCaps(go.GetComponent<MeshFilter>()?.sharedMesh, channel);
 
         if (normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal))
             parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
@@ -1825,7 +1834,9 @@ public class RoadPath : IPathMeshGenerator
             anchorPercents.Add(pct);
         }
 
-        var obstacles = PillarClearance.NeighborProvider?.Invoke(pathData);
+        PillarClearance.ObstacleQuery obstacles;
+        using (pillarCandidatesMarker.Auto())
+            obstacles = PillarClearance.NeighborProvider?.Invoke(pathData);
         var pillarBounds = PillarClearance.GetPrefabBounds(pillarPrefab);
         var capBounds = PillarClearance.GetPrefabBounds(pillarCapPrefab);
         var portal = PortalPillar.Load(variantBase, typeBase);
@@ -1963,7 +1974,7 @@ public class RoadPath : IPathMeshGenerator
     /// to decide placement. Scale pillar body only to the road-ground gap.
     /// </summary>
     private static bool PlacePillar(GameObject container, GameObject pillarPrefab, GameObject pillarCapPrefab,
-        Bounds? pillarBounds, Bounds? capBounds, List<PillarClearance.Corridor> obstacles,
+        Bounds? pillarBounds, Bounds? capBounds, PillarClearance.ObstacleQuery obstacles,
         SplineComputer spline, double percent, float baseHeight, float capWidthScale = 1f, PortalPillar portal = null)
     {
         SplineSample sample = spline.Evaluate(ClampSplinePercent(percent));
@@ -1996,9 +2007,13 @@ public class RoadPath : IPathMeshGenerator
         {
             float top = sample.position.y + (capBounds.HasValue ? capBounds.Value.max.y * capScale.y : 0f);
             float halfWidth = capBounds.HasValue ? capBounds.Value.extents.x * capScale.x : pillarBounds.GetValueOrDefault().extents.x;
-            return portal != null && portal.TryPlace(container, sample.position, rotation, top, halfWidth, obstacles);
+            // Portal legs stay within MaxSpan of the pier position, so only passage spaces within that reach matter.
+            using (pillarPortalMarker.Auto())
+                return portal != null && portal.TryPlace(container, sample.position, rotation, top, halfWidth,
+                    obstacles?.Near(sample.position, PortalPillar.MaxSpan + PillarClearance.Margin));
         }
 
+        using var instantiateScope = pillarInstantiateMarker.Auto();
         bool placed = false;
         if (pillarCapPrefab != null)
         {

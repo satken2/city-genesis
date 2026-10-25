@@ -14,6 +14,21 @@ using NetTopologySuite.Algorithm;
 /// </summary>
 public partial class PathManager : BaseApiDataManager
 {
+    // Road stage markers share the "Path." prefix, mirroring the "Building." markers of building generation.
+    private static readonly StageMarker restoreLodMarker = new StageMarker("Path.RestoreLod");
+    private static readonly StageMarker evaluateDrawLodMarker = new StageMarker("Path.EvaluateDrawLod");
+    private static readonly StageMarker closeRankingMarker = new StageMarker("Path.CloseRanking");
+    private static readonly StageMarker hasBodySegmentsMarker = new StageMarker("Path.HasBodySegments");
+    private static readonly StageMarker anchorPolylineMarker = new StageMarker("Path.AnchorPolyline");
+    private static readonly StageMarker coveredCellsMarker = new StageMarker("Path.CoveredCells");
+    private static readonly StageMarker rebuildMarker = new StageMarker("Path.Rebuild");
+    private static readonly StageMarker createOrUpdateFarMarker = new StageMarker("Path.CreateOrUpdateFar");
+    private static readonly StageMarker createOrUpdateMarker = new StageMarker("Path.CreateOrUpdate");
+    private static readonly StageMarker calculatePointsMarker = new StageMarker("Path.CalculatePoints");
+    private static readonly StageMarker isTerrainCurrentMarker = new StageMarker("Path.IsTerrainCurrent");
+    private static readonly StageMarker setupVisualsMarker = new StageMarker("Path.SetupVisuals");
+    private static readonly StageMarker registerSegmentsMarker = new StageMarker("Path.RegisterSegments");
+
     public int PendingTerrainRebuildCount => queuedTerrainFollowPathIds.Count + queuedTerrainFollowNodeIds.Count;
     private readonly RenderObjectCache lodCache = new RenderObjectCache(128L * 1024 * 1024);
     private readonly HashSet<int> pendingPillarRebuildIds = new HashSet<int>();
@@ -59,6 +74,7 @@ public partial class PathManager : BaseApiDataManager
 
     private bool RestorePathLod(PathSummary path, string key, DrawLod lod, bool updateIntersections)
     {
+        using var scope = restoreLodMarker.Auto();
         pathObjectsCache.TryGetValue(path.path_id, out GameObject old);
         GameObject next = old != null && old.GetComponent<RenderCacheIdentity>()?.key == key ? old : lodCache.Take(key);
         if (next != null && next != old && !IsCachedBuildTerrainCurrent(next, path))
@@ -465,7 +481,7 @@ public partial class PathManager : BaseApiDataManager
             PowerLineRailGantry.TrackPolyline = null;
         if (PowerLineRailGantry.NeighborProvider == (Func<PathSummary, List<TrackNeighborInfo>>)GetPowerLineTrackNeighbors)
             PowerLineRailGantry.NeighborProvider = null;
-        if (PillarClearance.NeighborProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetPillarObstacles)
+        if (PillarClearance.NeighborProvider == (Func<PathSummary, PillarClearance.ObstacleQuery>)GetPillarObstacles)
             PillarClearance.NeighborProvider = null;
         if (RoadEquipmentGenerator.OverheadProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetOverheadObstacles)
             RoadEquipmentGenerator.OverheadProvider = null;
@@ -819,9 +835,12 @@ public partial class PathManager : BaseApiDataManager
     /// Only entry point for the terrain-following regeneration queue. changeSerial is pathBuildSerialCounter after applying the cause.
     /// Set terrain-only/pillar-only markers only on new entries; clear if another reason overlaps (skipping always stays conservative).
     /// </summary>
-    private void EnqueueTerrainFollowPath(int id, long changeSerial, TerrainFollowQueueReason reason)
+    private void EnqueueTerrainFollowPath(int id, long changeSerial, TerrainFollowQueueReason reason,
+        [System.Runtime.CompilerServices.CallerMemberName] string caller = "") // [Camera freeze investigation] Remove caller after investigation
     {
         bool added = queuedTerrainFollowPathIds.Add(id);
+        // [Camera freeze investigation] Remove after investigation
+        queuedTerrainFollowCallers[id] = !added && queuedTerrainFollowCallers.TryGetValue(id, out string callers) && !callers.Contains(caller) ? callers + "+" + caller : caller;
         if (added || !queuedTerrainFollowSerials.TryGetValue(id, out long queuedSerial) || queuedSerial < changeSerial)
             queuedTerrainFollowSerials[id] = changeSerial;
         if (added && reason == TerrainFollowQueueReason.Terrain) terrainOnlyQueuedPathIds.Add(id);
@@ -832,9 +851,13 @@ public partial class PathManager : BaseApiDataManager
         EnsureTerrainFollowRebuildWorker();
     }
 
+    /// <summary>[Camera freeze investigation] Methods that queued each path, shown in the regeneration log. Remove after investigation.</summary>
+    private readonly Dictionary<int, string> queuedTerrainFollowCallers = new Dictionary<int, string>();
+
     private void ClearTerrainFollowQueue()
     {
         queuedTerrainFollowPathIds.Clear();
+        queuedTerrainFollowCallers.Clear(); // [Camera freeze investigation] Remove after investigation
         queuedTerrainFollowNodeIds.Clear();
         terrainOnlyQueuedPathIds.Clear();
         queuedPillarOnlyIds.Clear();
@@ -897,6 +920,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private DrawLod EvaluatePathDrawLod(PathSummary path, Vector3 camPos, bool limitClose, out float distance)
     {
+        using var scope = evaluateDrawLodMarker.Auto();
         distance = float.MaxValue;
         List<Vector3> anchors = GetAnchorPolyline(path, out float length);
         if (anchors.Count < 2) return DrawLod.Normal;
@@ -936,6 +960,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private void RefreshCloseRanking(Vector3 camPos)
     {
+        using var scope = closeRankingMarker.Auto();
         if (closeRankingFrame == Time.frameCount) return;
         closeRankingFrame = Time.frameCount;
         closeRanking.Clear();
@@ -964,6 +989,7 @@ public partial class PathManager : BaseApiDataManager
 
     private static bool HasBodySegments(GameObject pathGO)
     {
+        using var scope = hasBodySegmentsMarker.Auto();
         pathGO.GetComponentsInChildren(true, splinePartLodBuffer);
         bool found = splinePartLodBuffer.Exists(part => part.IsBody);
         splinePartLodBuffer.Clear();
@@ -992,6 +1018,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private List<Vector3> GetAnchorPolyline(PathSummary path, out float length)
     {
+        using var scope = anchorPolylineMarker.Auto();
         if (anchorPolylineCache.TryGetValue(path.path_id, out AnchorEntry entry) && ReferenceEquals(entry.source, path))
         {
             length = entry.length;
@@ -1298,6 +1325,7 @@ public partial class PathManager : BaseApiDataManager
 
                 processed++;
                 queuedTerrainFollowPathIds.Remove(bestId);
+                queuedTerrainFollowCallers.Remove(bestId, out string queuedBy); // [Camera freeze investigation] Remove after investigation
                 bool terrainOnly = terrainOnlyQueuedPathIds.Remove(bestId);
                 bool pillarOnly = queuedPillarOnlyIds.Remove(bestId);
                 queuedTerrainFollowSerials.TryGetValue(bestId, out long queuedSerial);
@@ -1348,7 +1376,7 @@ public partial class PathManager : BaseApiDataManager
                 {
                     if (cellPathLod.TryGetValue(cell, out LodTier t) && t > tier) tier = t;
                 }
-                TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "地形追従(キュー)", batchMember: false);
+                TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: $"地形追従(キュー:{queuedBy})", batchMember: false); // [Camera freeze investigation] Restore the fixed reason after investigation
             }
 
             // If all remaining work waits for the active batch, wait for batch completion (or the sorting interval) instead of repeatedly sorting.
@@ -1433,6 +1461,7 @@ public partial class PathManager : BaseApiDataManager
         pathIdsByCell.Clear();
         pathCellsById.Clear();
         pathCellsVersion.Clear();
+        pathPlanBoundsById.Clear();
         pathPointsCache.Clear();
         pathLabelPositions.Clear();
         cellPathLod.Clear();
@@ -2096,6 +2125,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private HashSet<Vector2Int> GetPathCoveredCellsCached(PathSummary path)
     {
+        using var scope = coveredCellsMarker.Auto();
         if (path != null && pathCellsById.TryGetValue(path.path_id, out HashSet<Vector2Int> cached))
         {
             return cached;
@@ -2311,6 +2341,7 @@ public partial class PathManager : BaseApiDataManager
     /// (terrain-following queue) from suppressing later batch regeneration after cut points are finalized.</param>
     private bool TryRebuildPathOnce(PathSummary path, LodTier tier, bool updateIntersections, bool forceRebuild, string reason, bool batchMember = true)
     {
+        using var scope = rebuildMarker.Auto();
         if (path == null) return false;
         RenderWorkScheduler.CountEvent(forceRebuild ? "path.forceRebuildRequested" : "path.lodRebuildRequested");
         if (forceRebuild && reason.StartsWith("地形追従", StringComparison.Ordinal))
@@ -2524,6 +2555,7 @@ public partial class PathManager : BaseApiDataManager
 
     private void CreateOrUpdateFarPath(PathSummary path, bool forceRebuild = false)
     {
+        using var scope = createOrUpdateFarMarker.Auto();
         SavePathToCache(path);
         EnsureEndIntersectionsVisible(path);
 
@@ -3645,6 +3677,7 @@ public partial class PathManager : BaseApiDataManager
     /// <param name="detailTo">End of the detailed-parts section.</param>
     public void CreateOrUpdatePath(PathSummary path, bool updateIntersections = true, bool forceRebuild = false, DrawLod drawLod = DrawLod.Normal, double detailFrom = 0.0, double detailTo = 1.0)
     {
+        using var scope = createOrUpdateMarker.Auto();
         EnsureEndIntersectionsVisible(path);
         if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden) drawLod = DrawLod.Normal;
         string renderKey = PathRenderKey(path, drawLod, forceRebuild);
@@ -4237,6 +4270,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     public List<Vector3> CalculatePathPoints(PathSummary path, bool trimIntersection = true)
     {
+        using var scope = calculatePointsMarker.Auto();
         List<Vector3> shared = GetUntrimmedPoints(path, out bool isShared);
         List<Vector3> points = isShared ? new List<Vector3>(shared) : shared;
         return trimIntersection ? TrimIntersectionPoints(path, points) : points;
@@ -4409,6 +4443,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private bool IsTerrainCurrent(PathSummary path)
     {
+        using var scope = isTerrainCurrentMarker.Auto();
         if (path == null || !pathObjectsCache.TryGetValue(path.path_id, out GameObject go) || go == null) return false;
         PathBuildStamp stamp = go.GetComponent<PathBuildStamp>();
         if (stamp == null || !stamp.terrainKnown || stamp.version != path.version || stamp.status != path.status
@@ -4774,6 +4809,7 @@ public partial class PathManager : BaseApiDataManager
 
     private void SetupVisuals(GameObject pathGO, PathSummary path, int status, bool modulesCreated)
     {
+        using var scope = setupVisualsMarker.Auto();
         VisualModeObject visualModeObject = pathGO.AddComponent<VisualModeObject>();
         visualModeObject.objectType = InputObjectType.PATH;
         visualModeObject.useChildRenderers = true;
@@ -4821,6 +4857,7 @@ public partial class PathManager : BaseApiDataManager
 
     private void RegisterPathSegments(PathSummary path, List<Vector3> points)
     {
+        using var scope = registerSegmentsMarker.Auto();
         if (points == null || points.Count < 2) return;
 
         // Remove old segments before reregistering
@@ -4942,27 +4979,66 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Build traffic clearance volumes from current data without consulting meshes or LOD. Do not recalculate per pillar candidate.
-    /// Share the cached uncut points of neighbors; represent road-surface lift through Corridor.YOffset.
+    /// Build traffic clearance volumes from current data without consulting meshes or LOD (independent of drawing order).
+    /// Candidates come from neighboring cells, but each passage space is built only when a pier or arch position reaches its plan bounds,
+    /// so terrain-following points are computed for roads beside the supports alone. Share the cached uncut points of neighbors.
     /// </summary>
-    public List<PillarClearance.Corridor> GetPillarObstacles(PathSummary path) => CollectObstacleCorridors(path, false);
-
-    /// <summary>Implementation of RoadEquipmentGenerator.OverheadProvider. Return only paths capable of leaving the ground.</summary>
-    public List<PillarClearance.Corridor> GetOverheadObstacles(PathSummary path) => CollectObstacleCorridors(path, true);
-
-    private List<PillarClearance.Corridor> CollectObstacleCorridors(PathSummary path, bool leavingGroundOnly)
+    public PillarClearance.ObstacleQuery GetPillarObstacles(PathSummary path)
     {
-        var result = new List<PillarClearance.Corridor>();
-        // New data being generated may not have registered crossed cells; recalculate only in that case.
-        bool registered = pathDataCache.TryGetValue(path.path_id, out PathSummary current) && ReferenceEquals(current, path);
-        foreach (int id in CollectPillarNeighborIds(registered ? GetPathCoveredCellsCached(path) : GetPathCoveredCells(path), path.path_id))
+        var candidates = new List<PillarClearance.Candidate>();
+        foreach (int id in CollectPillarNeighborIds(GetObstacleSearchCells(path), path.path_id))
         {
             if (!pathDataCache.TryGetValue(id, out var other) || !IsPillarObstacle(other)) continue;
-            if (leavingGroundOnly && !CanLeaveGround(other)) continue;
+            if (!pathPlanBoundsById.TryGetValue(id, out Rect bounds) && !TryComputePlanBounds(other, out bounds)) continue;
+            candidates.Add(new PillarClearance.Candidate { PlanBounds = bounds, HalfWidth = ObstacleHalfWidth(other), Build = () => BuildObstacleCorridor(other) });
+        }
+        return new PillarClearance.ObstacleQuery(candidates);
+    }
+
+    /// <summary>Implementation of RoadEquipmentGenerator.OverheadProvider. Return only paths capable of leaving the ground.</summary>
+    public List<PillarClearance.Corridor> GetOverheadObstacles(PathSummary path)
+    {
+        var result = new List<PillarClearance.Corridor>();
+        foreach (int id in CollectPillarNeighborIds(GetObstacleSearchCells(path), path.path_id))
+        {
+            if (!pathDataCache.TryGetValue(id, out var other) || !IsPillarObstacle(other) || !CanLeaveGround(other)) continue;
             var corridor = BuildObstacleCorridor(other);
             if (corridor != null) result.Add(corridor);
         }
         return result;
+    }
+
+    /// <summary>Crossed cells of the path. New data being generated may not have registered crossed cells; recalculate only in that case.</summary>
+    private HashSet<Vector2Int> GetObstacleSearchCells(PathSummary path)
+    {
+        bool registered = pathDataCache.TryGetValue(path.path_id, out PathSummary current) && ReferenceEquals(current, path);
+        return registered ? GetPathCoveredCellsCached(path) : GetPathCoveredCells(path);
+    }
+
+    /// <summary>Plan bounds of the designed centerline. SamplePlan follows the same Bezier controls as the designed points, so the bounds enclose them.</summary>
+    private bool TryComputePlanBounds(PathSummary path, out Rect bounds)
+    {
+        bounds = default;
+        List<Vector3> plan = IntersectionPolygonUtil.SamplePlan(path) ?? GetPathAnchorPositions(path);
+        if (plan == null || plan.Count == 0) return false;
+        float minX = float.MaxValue, minZ = float.MaxValue, maxX = float.MinValue, maxZ = float.MinValue;
+        foreach (Vector3 p in plan)
+        {
+            minX = Mathf.Min(minX, p.x); maxX = Mathf.Max(maxX, p.x);
+            minZ = Mathf.Min(minZ, p.z); maxZ = Mathf.Max(maxZ, p.z);
+        }
+        bounds = Rect.MinMaxRect(minX, minZ, maxX, maxZ);
+        return true;
+    }
+
+    /// <summary>Passage half width: road width plus platform extensions of station tracks.</summary>
+    private float ObstacleHalfWidth(PathSummary path)
+    {
+        var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+        float platform = master?.platform_width ?? 0f;
+        float left = 0f, right = 0f;
+        if (IsTrackTypePath(path) && platform > 0f) TrackPath.ResolvePlatformExtents(path, platform, out left, out right);
+        return Mathf.Max(path.width, GetRoadWidth(path.path_variant)) * 0.5f + Mathf.Max(left, right);
     }
 
     private PillarClearance.Corridor BuildObstacleCorridor(PathSummary path)
@@ -4972,14 +5048,9 @@ public partial class PathManager : BaseApiDataManager
         // Use the uncut centerline to retain traffic clearance inside intersections. Rendering point caches may be stale.
         var points = GetUntrimmedPoints(path, out _);
         if (points == null || points.Count < 2) return null;
-        float platform = master?.platform_width ?? 0f;
-        float left = 0f, right = 0f, median = 0f, sidewalk = 0f;
+        float median = 0f, sidewalk = 0f;
         // Pillars can stand only in road medians and sidewalks. Do not use track center_width, which represents between-track space (island platforms).
-        if (IsTrackTypePath(path))
-        {
-            if (platform > 0f) TrackPath.ResolvePlatformExtents(path, platform, out left, out right);
-        }
-        else
+        if (!IsTrackTypePath(path))
         {
             median = (master?.center_width ?? 0f) * 0.5f;
             sidewalk = master?.sidewalk_width ?? 0f;
@@ -4988,7 +5059,7 @@ public partial class PathManager : BaseApiDataManager
         {
             Points = points,
             YOffset = RoadPartHeights.BODY_ABOVE_SPLINE,
-            HalfWidth = Mathf.Max(path.width, GetRoadWidth(path.path_variant)) * 0.5f + Mathf.Max(left, right),
+            HalfWidth = ObstacleHalfWidth(path),
             Height = TunnelSectionUtil.GetClearanceHeight(path.path_variant),
             MedianHalfWidth = median,
             SidewalkWidth = sidewalk
@@ -5840,6 +5911,12 @@ public partial class PathManager : BaseApiDataManager
     /// <summary>Version when crossed cells were calculated. Geometry changes only with version, so skip reregistration at matching versions.</summary>
     private readonly Dictionary<int, int> pathCellsVersion = new Dictionary<int, int>();
 
+    /// <summary>
+    /// Plan (XZ) bounds of each registered path's designed centerline, kept with its crossed cells.
+    /// Pier clearance compares these against each pier before building terrain-following points.
+    /// </summary>
+    private readonly Dictionary<int, Rect> pathPlanBoundsById = new Dictionary<int, Rect>();
+
     private void RegisterPathCells(PathSummary path)
     {
         if (path == null) return;
@@ -5850,6 +5927,7 @@ public partial class PathManager : BaseApiDataManager
         HashSet<Vector2Int> cells = GetPathCoveredCells(path);
         pathCellsById[path.path_id] = cells;
         pathCellsVersion[path.path_id] = path.version;
+        if (TryComputePlanBounds(path, out Rect planBounds)) pathPlanBoundsById[path.path_id] = planBounds;
 
         foreach (var cell in cells)
         {
@@ -5879,6 +5957,7 @@ public partial class PathManager : BaseApiDataManager
     private void UnregisterPathCells(int pathId)
     {
         pathCellsVersion.Remove(pathId);
+        pathPlanBoundsById.Remove(pathId);
         if (pathObjectsCache.ContainsKey(pathId)) unregisteredPathObjectIds.Add(pathId);
         if (!pathCellsById.TryGetValue(pathId, out HashSet<Vector2Int> cells)) return;
 

@@ -7,10 +7,13 @@ using UnityEngine;
 /// </summary>
 public static class InteriorFloorBuilder
 {
+    private static readonly StageMarker appendMarker = new StageMarker("Building.InteriorFloors");
+
     public static bool Append(Vector2[] footprint, int floors, float floorHeight,
         string prefix, int suffix, bool includeRoof,
         List<CombineInstance> instances, List<Material> materials, List<Mesh> temporary)
     {
+        using var scope = appendMarker.Auto();
         var part = BuildingMeshUtils.GetPartNoPosition(prefix, "interior-floor", suffix, true);
         if (part == null || footprint == null || footprint.Length < 3) return false;
         Mesh reference = BuildingMeshUtils.CombineModuleMeshes(part, out Material[] partMaterials);

@@ -160,7 +160,7 @@ public static class LocalConstants
     public const bool UNITY_LOG_BUILDING = false; // BuildingMeshBuilder and others.
     public const bool UNITY_LOG_ROAD = false;     // RoadPath and others.
     public const bool UNITY_LOG_LOADER = false;   // Loading progress logs from CellDataLoader and each Manager.
-    public const bool UNITY_LOG_TIMING = false;  // [TIMING] measurement logs.
+    public const bool UNITY_LOG_TIMING = true;  // [TIMING] measurement logs.
 }
 
 /// <summary>

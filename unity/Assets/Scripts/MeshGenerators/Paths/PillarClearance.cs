@@ -74,7 +74,53 @@ public static class PillarClearance
         }
     }
 
-    public static Func<PathSummary, List<Corridor>> NeighborProvider;
+    /// <summary>
+    /// Obstacle candidate around one path. Plan bounds and half width come without terrain sampling;
+    /// Build creates the passage space (terrain-following centerline) only when a query first reaches the candidate.
+    /// </summary>
+    public sealed class Candidate
+    {
+        public Rect PlanBounds;
+        public float HalfWidth;
+        public Func<Corridor> Build;
+        internal Corridor corridor;
+        internal bool built;
+    }
+
+    /// <summary>
+    /// Passage spaces around one path, built per query position. Each pier or arch asks only for candidates whose plan bounds come within reach,
+    /// so centerlines are computed for roads beside the supports instead of every road in the surrounding cells.
+    /// </summary>
+    public sealed class ObstacleQuery
+    {
+        private readonly List<Candidate> candidates;
+
+        public ObstacleQuery(List<Candidate> candidates) => this.candidates = candidates;
+
+        /// <summary>Passage spaces of candidates whose plan bounds, widened by their half width, lie within reach of center in plan.</summary>
+        public List<Corridor> Near(Vector3 center, float reach)
+        {
+            var result = new List<Corridor>();
+            foreach (var candidate in candidates)
+            {
+                float r = reach + candidate.HalfWidth;
+                Rect b = candidate.PlanBounds;
+                if (center.x < b.xMin - r || center.x > b.xMax + r || center.z < b.yMin - r || center.z > b.yMax + r) continue;
+                if (!candidate.built)
+                {
+                    using (buildMarker.Auto())
+                        candidate.corridor = candidate.Build();
+                    candidate.built = true;
+                }
+                if (candidate.corridor != null) result.Add(candidate.corridor);
+            }
+            return result;
+        }
+    }
+
+    public static Func<PathSummary, ObstacleQuery> NeighborProvider;
+    private static readonly StageMarker intersectsMarker = new StageMarker("Path.Pillars.Intersects");
+    private static readonly StageMarker buildMarker = new StageMarker("Path.Pillars.Obstacles");
     public const float Margin = 0.25f;
     // Height treating surface roads (terrain+0.2m) and sidewalk steps as ground supporting posts.
     public const float FootTolerance = 0.5f;
@@ -169,8 +215,13 @@ public static class PillarClearance
     /// Bands cover roadway/track passage and full-width decks above foot, excluding surface sidewalks/medians.
     /// Intersect horizontal-overlap and height-overlap intervals along road segments to handle ramps.
     /// </summary>
+    /// <summary>Intersects against the passage spaces within the part's reach only.</summary>
+    public static bool Intersects(Bounds part, ObstacleQuery query)
+        => query != null && Intersects(part, query.Near(part.center, new Vector2(part.extents.x, part.extents.z).magnitude + Margin));
+
     public static bool Intersects(Bounds part, List<Corridor> corridors)
     {
+        using var scope = intersectsMarker.Auto();
         if (corridors == null) return false;
         float partRadius = new Vector2(part.extents.x, part.extents.z).magnitude;
         foreach (var corridor in corridors)

@@ -49,7 +49,7 @@ The terminal is `depot_node_id`, falling back to `infra_node_id`. Electrified de
 
 An open pit (`MODEL_OPEN_PIT`) is terrain; building rendering covers only equipment in the unexcavated frontage yard. Reload changed terrain cells as mining progresses ([LOD](E_lod.md), [supply and transport](../economics/17_supply-and-transport.md)). Equipment arrives as `sub_buildings` and uses mashup assembly.
 
-The building center lies in the pit, so center-height parcel extrusion misses the frontage yard, while a flat surface or white box would cover the hole. Selection combines a terrain-following parcel surface and equipment bounding boxes. Ground panels also follow terrain across the entire parcel, including yard and pit.
+The building center lies in the pit, so center-height parcel extrusion misses the frontage yard, while a flat surface or white box would cover the hole. Selection combines a terrain-following parcel surface and equipment bounding boxes. Ground panels cover the entire parcel, including yard and pit.
 
 ## Construction, demolition, and collapse
 
@@ -57,8 +57,8 @@ Unfinished states use shared dirt or rubble covering the site, with appropriate 
 
 | State | Rendering |
 | --- | --- |
-| Construction (`STATUS_CONSTRUCTING`) | Dirt mound, `scaffold-wall` and `scaffold-corner`, and `crane-*` tower cranes above a floor-count threshold |
-| Demolition (`STATUS_DEMOLISHING`) | Dirt mound, `demo-scaffold-wall` and `demo-scaffold-corner`, `demo-ceil`, and an `excavator` on top |
+| Construction (`STATUS_CONSTRUCTING`) | Dirt ground panel, `scaffold-wall` and `scaffold-corner`, and `crane-*` tower cranes above a floor-count threshold |
+| Demolition (`STATUS_DEMOLISHING`) | Dirt ground panel, `demo-scaffold-wall` and `demo-scaffold-corner`, `demo-ceil`, and an `excavator` on top |
 | Collapse (`STATUS_COLLAPSED`) | Rough rubble and optional `collapse` structure. `status_reason` equal to `REASON_FIRE` uses burned rubble material |
 
 Scaffold tiers follow `construction_progress`, the percentage of required construction or demolition volume procured. Construction grows upward with progress; demolition retains floors corresponding to the undemolished portion. Both show at least one floor. Progress and completion advance building versions and trigger diff reloads. Missing construction parts fall back to `common`, then are omitted.

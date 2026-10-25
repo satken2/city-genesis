@@ -49,6 +49,11 @@ public sealed class SplinePartLod : MonoBehaviour
     private static int tickFrame = -1;
     private static LodViewState sharedView; // This is a struct; readonly would make UpdatePosition affect only a defensive copy, losing recorded state.
     private static readonly Comparison<(float distance, SplinePartLod part, Segment segment)> ByDistance = (a, b) => a.distance.CompareTo(b.distance);
+    private static readonly StageMarker applyMarker = new StageMarker("Path.Segment.Apply");
+    private static readonly StageMarker buildMarker = new StageMarker("Path.Segment.Build");
+    private static readonly StageMarker parkMarker = new StageMarker("Path.Segment.Park");
+    private static readonly StageMarker refreshMaterialsMarker = new StageMarker("Path.Segment.RefreshMaterials");
+    private static readonly StageMarker commitMarker = new StageMarker("Path.Segment.Commit");
 
     private static void Tick()
     {
@@ -181,6 +186,7 @@ public sealed class SplinePartLod : MonoBehaviour
     /// </summary>
     private bool Apply(Segment segment, Vector3 cameraPosition)
     {
+        using var scope = applyMarker.Auto();
         Vector3 position = transform.InverseTransformPoint(cameraPosition);
         DrawLod desired = DrawLodEvaluator.EvaluatePathByDistance(Mathf.Sqrt(segment.bounds.SqrDistance(position)), segment.lod, true);
         if (desired == segment.lod) return false;
@@ -190,7 +196,8 @@ public sealed class SplinePartLod : MonoBehaviour
         if (next == null && (desired != DrawLod.Far || farVariant > 0))
         {
             RenderWorkScheduler.CountEvent("roadSegment.buildRequested");
-            next = desired == DrawLod.Far ? BuildFar(segment) : build(desired, segment.from, segment.to);
+            using (buildMarker.Auto())
+                next = desired == DrawLod.Far ? BuildFar(segment) : build(desired, segment.from, segment.to);
             if (next != null)
             {
                 var identity = next.GetComponent<RenderCacheIdentity>();
@@ -198,7 +205,9 @@ public sealed class SplinePartLod : MonoBehaviour
                 identity.key = key;
             }
         }
-        if (segment.shown != null) cache.Park(segment.shown);
+        if (segment.shown != null)
+            using (parkMarker.Auto())
+                cache.Park(segment.shown);
         segment.shown = next;
         segment.lod = desired;
         // Both attach to the path root and retain parents through parking/restoration; cache them once found.
@@ -209,8 +218,12 @@ public sealed class SplinePartLod : MonoBehaviour
             next.SetActive(true);
         }
         if (visual == null) visual = GetComponentInParent<VisualModeObject>();
-        if (visual != null) visual.RefreshMaterials();
-        if (presentation != null) presentation.TryCommit();
+        if (visual != null)
+            using (refreshMaterialsMarker.Auto())
+                visual.RefreshMaterials();
+        if (presentation != null)
+            using (commitMarker.Auto())
+                presentation.TryCommit();
         return true;
     }
 

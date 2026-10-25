@@ -6,6 +6,16 @@ using GeneratedModels;
 
 public static class BuildingMeshUtils
 {
+    private static readonly StageMarker combineModuleMarker = new StageMarker("Building.CombineModuleMeshes");
+    private static readonly StageMarker parcelContextMarker = new StageMarker("Building.ParcelContext");
+    private static readonly StageMarker findParcelManagerMarker = new StageMarker("Building.FindParcelManager");
+
+    /// <summary>
+    /// Scene search result reused by ResolveParcelContext, which runs for every generated building. The search scans every loaded object,
+    /// so repeat it only when the reference is missing or the manager was destroyed (session reset).
+    /// </summary>
+    private static ParcelManager cachedParcelManager;
+
     /// <summary>
     /// Initialize required caches (materials, etc.).
     /// </summary>
@@ -58,6 +68,7 @@ public static class BuildingMeshUtils
     /// </summary>
     public static Mesh CombineModuleMeshes(GameObject prefab, out Material[] materials)
     {
+        using var scope = combineModuleMarker.Auto();
         materials = null;
         if (prefab == null)
         {
@@ -856,13 +867,19 @@ public static class BuildingMeshUtils
     public static Vector2[] ResolveParcelContext(BuildingSummary buildingData,
         out ParcelSummary parcel, out Vector3 centerPointWorld)
     {
+        using var scope = parcelContextMarker.Auto();
         parcel = null;
         centerPointWorld = Vector3.zero;
         Vector2[] parcelFootprint = null;
 
         if (buildingData.parcel_id > 0)
         {
-            ParcelManager parcelManager = Object.FindAnyObjectByType<ParcelManager>();
+            if (cachedParcelManager == null)
+            {
+                using (findParcelManagerMarker.Auto())
+                    cachedParcelManager = Object.FindAnyObjectByType<ParcelManager>();
+            }
+            ParcelManager parcelManager = cachedParcelManager;
             if (parcelManager != null)
             {
                 parcel = parcelManager.GetParcelSummary(buildingData.parcel_id);

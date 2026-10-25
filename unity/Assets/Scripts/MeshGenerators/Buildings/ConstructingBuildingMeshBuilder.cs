@@ -12,9 +12,9 @@ using GeneratedModels;
 /// allowing one builder to serve both states.
 ///
 /// Output:
-/// - Dirt mound: covers the entire site (parcel polygon, or footprint if unavailable), with thickness and
-///   random Perlin-noise bumps. Material: Resources/ConstructionDirt
-///   (falls back to ConstructionMaterial → BuildingMaterial if missing).
+/// - Site dirt: a ground panel covering the entire site (parcel polygon, or footprint if unavailable), drawn by the same rule as
+///   site ground panels (ModularBodyBuilder.AppendGroundPanel: terrain-following only at close-up, deferred low-priority work).
+///   Material: Resources/ConstructionDirt (falls back to ConstructionMaterial → BuildingMaterial if missing).
 /// - Foundation: the same Y-extruded footprint base as completed buildings (BuildingMeshBuilder.GenerateFoundationMesh),
 ///   using dirt material. Only for model_type values supporting slopes (IsApplicableModelType).
 /// - Scaffolding rings: place profile scaffold wall/corner parts around the footprint
@@ -35,11 +35,17 @@ using GeneratedModels;
 /// reruns this builder, extending scaffolding/machinery (lowering them during demolition).
 ///
 /// Known simplifications:
-/// - MODEL_MODULAR_GROUND (fields/gardens), open spaces, MODEL_PORT (quays), MODEL_RAIL_YARD (depots), and MODEL_OPEN_PIT (open pits) have dirt mounds only (no scaffolding/machinery).
+/// - MODEL_MODULAR_GROUND (fields/gardens), open spaces, MODEL_PORT (quays), MODEL_RAIL_YARD (depots), and MODEL_OPEN_PIT (open pits) have site dirt only (no scaffolding/machinery).
 /// - MODEL_PORT sites include coastline, so dirt may be rendered above sea level.
 /// </summary>
 public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
 {
+    private static readonly StageMarker dirtMoundMarker = new StageMarker("Building.Mound");
+    private static readonly StageMarker scaffoldMarker = new StageMarker("Building.Site.Scaffold");
+    private static readonly StageMarker craneMarker = new StageMarker("Building.Site.Crane");
+    private static readonly StageMarker roofMachineMarker = new StageMarker("Building.Site.RoofMachine");
+    private static readonly StageMarker combineMarker = new StageMarker("Building.Site.Combine");
+
     private readonly ConstructionSiteProfile profile;
 
     /// <summary>
@@ -101,14 +107,9 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
 
         Material dirtMaterial = BuildingMeshBuilder.GetConstructionDirtMaterial();
 
-        // --- 1. Dirt mound (top with thickness + Perlin bumps, skirt down to ground) ---
-        Mesh moundMesh = GenerateDirtMoundMesh(dirtPolygon, centerPointWorld, isDynamic);
-        if (moundMesh != null)
-        {
-            combineInstances.Add(new CombineInstance { mesh = moundMesh, subMeshIndex = 0, transform = Matrix4x4.identity });
-            allMaterials.Add(dirtMaterial);
-            temporaryMeshes.Add(moundMesh);
-        }
+        // --- 1. Site dirt ---
+        ModularBodyBuilder.AppendGroundPanel(dirtPolygon, dirtMaterial, centerPointWorld, isDynamic,
+            combineInstances, allMaterials, temporaryMeshes);
 
         // --- 2. Foundation (slope base). Same footprint extrusion as completed buildings, with dirt material ---
         // model_type values without completed foundations (GROUND / PORT / PREBUILT) also omit them during construction
@@ -165,7 +166,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
                 profile.CeilPart, combineInstances, allMaterials, temporaryMeshes);
         }
 
-        if (combineInstances.Count == 0)
+        if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork)
         {
             foreach (Mesh temp in temporaryMeshes)
             {
@@ -177,9 +178,13 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         // --- 4. Combine ---
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
-        finalMesh.RecalculateNormals();
-        finalMesh.RecalculateBounds();
+        using (combineMarker.Auto())
+        {
+            // Dirt-only sites (no scaffolding) have nothing to combine until the deferred dirt panel is built.
+            if (combineInstances.Count > 0) finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
+            finalMesh.RecalculateNormals();
+            finalMesh.RecalculateBounds();
+        }
 
         foreach (Mesh temp in temporaryMeshes)
         {
@@ -210,6 +215,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         float floorHeight, int builtFloors, string wallPart, string cornerPart,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
+        using var scope = scaffoldMarker.Auto();
         GameObject wallModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, wallPart, visualVariant);
         if (wallModule == null)
         {
@@ -295,6 +301,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         string basePart, string midPart, string topPart,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes, bool animateCrane)
     {
+        using var scope = craneMarker.Auto();
         GameObject baseModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, basePart, visualVariant);
         GameObject midModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, midPart, visualVariant);
         GameObject topModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, topPart, visualVariant);
@@ -354,6 +361,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         float topY, string machinePart,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
+        using var scope = roofMachineMarker.Auto();
         GameObject machineModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, machinePart, visualVariant);
         if (machineModule == null)
         {
@@ -373,7 +381,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
     // ------------------------------------------------------------------
 
     /// <summary>
-    /// Generate a dirt mound covering the site polygon (local XZ relative to center_point).
+    /// Generate a mound covering the site polygon (local XZ relative to center_point). Used for collapsed rubble.
     ///
     /// Shape generation:
     /// 1. Ear-clip the polygon, then split edges exceeding CONSTRUCTION_DIRT_MAX_EDGE
@@ -391,6 +399,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         float thickness = LocalConstants.CONSTRUCTION_DIRT_THICKNESS,
         float bumpAmplitude = LocalConstants.CONSTRUCTION_DIRT_BUMP_AMPLITUDE)
     {
+        using var scope = dirtMoundMarker.Auto();
         if (localPolygon == null || localPolygon.Length < 3) return null;
 
         var localVerts = new List<Vector2>(localPolygon);

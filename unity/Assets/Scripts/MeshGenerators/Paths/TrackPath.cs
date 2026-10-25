@@ -107,6 +107,23 @@ using GeneratedModels;
 /// </summary>
 public class TrackPath : IPathMeshGenerator
 {
+    private static readonly StageMarker corridorMarker = new StageMarker("Path.Track.Corridor");
+    private static readonly StageMarker splineMarker = new StageMarker("Path.Track.Spline");
+    private static readonly StageMarker partsMarker = new StageMarker("Path.Track.Parts");
+    private static readonly StageMarker bodyMarker = new StageMarker("Path.Track.Body");
+    private static readonly StageMarker gapFillerMarker = new StageMarker("Path.Track.GapFillers");
+    private static readonly StageMarker railsMarker = new StageMarker("Path.Track.Rails");
+    private static readonly StageMarker terminationsMarker = new StageMarker("Path.Track.Terminations");
+    private static readonly StageMarker lrtPlatformsMarker = new StageMarker("Path.Track.LrtPlatforms");
+    private static readonly StageMarker platformsMarker = new StageMarker("Path.Track.Platforms");
+    private static readonly StageMarker wiresMarker = new StageMarker("Path.Track.Wires");
+    private static readonly StageMarker polesMarker = new StageMarker("Path.Track.Poles");
+    private static readonly StageMarker wallsMarker = new StageMarker("Path.Track.Walls");
+    private static readonly StageMarker tunnelsMarker = new StageMarker("Path.Track.Tunnels");
+    private static readonly StageMarker pillarsMarker = new StageMarker("Path.Track.Pillars");
+    private static readonly StageMarker arrowsMarker = new StageMarker("Path.Track.Arrows");
+    private static readonly StageMarker colliderMarker = new StageMarker("Path.Track.Collider");
+
     /// <summary>Connected paths from node reverse lookup. Without a provider, defer buffer-stop placement.</summary>
     public static System.Func<int, List<PathSummary>> ConnectedPathsProvider;
     /// <summary>Facility terminals such as depots. Tracks continue inside facilities, so omit buffer stops.</summary>
@@ -213,13 +230,22 @@ public class TrackPath : IPathMeshGenerator
         // Compute uses platformLeft/platformRight to suppress platform-side bed joins
         // (ballast infill, etc.) and detect island-platform joins.
         // S curves for straight joins to differing track positions (TrackEndTransition). Null keeps original positions throughout.
-        TrackLateralSampler lateral = ResolveLateral(pathData, points);
-        var corridor = ResolveCorridor(pathData, points, width, wallWidth, platformLeft, platformRight, lateral);
+        TrackLateralSampler lateral;
+        TrackCorridorInfo corridor;
+        using (corridorMarker.Auto())
+        {
+            lateral = ResolveLateral(pathData, points);
+            corridor = ResolveCorridor(pathData, points, width, wallWidth, platformLeft, platformRight, lateral);
+        }
 
         GameObject container = new GameObject($"Track_{pathData.path_id}");
-        SplineComputer spline = RoadPath.BuildSpline(container, points, isCurved);
-        // Derive repeated bed/wire/wall tile length from curvature (track/platform retain fixed authored lengths).
-        PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, RoadPath.MAX_EXTRUDE_TILE_LENGTH));
+        SplineComputer spline;
+        using (splineMarker.Auto())
+        {
+            spline = RoadPath.BuildSpline(container, points, isCurved);
+            // Derive repeated bed/wire/wall tile length from curvature (track/platform retain fixed authored lengths).
+            PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, RoadPath.MAX_EXTRUDE_TILE_LENGTH));
+        }
 
         activeLateral = lateral;
         try
@@ -233,13 +259,16 @@ public class TrackPath : IPathMeshGenerator
 
         // Add direction-arrow overlays to one-way tracks (nothing for bidirectional).
         // Visible only in road-placement mode (STATE_EDIT_PATH), controlled collectively by TrackDirectionArrows.
-        TrackDirectionArrows.Create(container, spline, pathData.travel_direction);
+        using (arrowsMarker.Auto())
+            TrackDirectionArrows.Create(container, spline, pathData.travel_direction);
 
         // Picking collider uses a strip, like roads. Include platforms in full width,
         // shifting center toward platform sides for asymmetry.
         float colliderWidth = width + platformLeft + platformRight;
         float colliderOffset = (platformRight - platformLeft) * 0.5f;
-        Mesh colliderMesh = RoadPath.BuildColliderMeshFromSpline(spline, colliderWidth, colliderOffset);
+        Mesh colliderMesh;
+        using (colliderMarker.Auto())
+            colliderMesh = RoadPath.BuildColliderMeshFromSpline(spline, colliderWidth, colliderOffset);
         if (colliderMesh != null)
         {
             colliderMesh.name = $"TrackCollider_{pathData.path_id}";
@@ -545,6 +574,7 @@ public class TrackPath : IPathMeshGenerator
     /// </summary>
     private static void CreateTrackParts(GameObject container, SplineComputer spline, List<Vector3> points, float width, int lanes, float wallWidth, float? pillarSpacing, bool heightEditable, float baseHeight, float? wireSpacing, PathSummary pathData, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, bool constructionOnly = false)
     {
+        using var scope = partsMarker.Auto();
         string variantBase = $"Models/Paths/p{pathData.path_variant}";
         string typeBase = $"Models/Paths/p{pathData.path_type}";
         int laneCount = Mathf.Max(1, lanes);
@@ -566,6 +596,7 @@ public class TrackPath : IPathMeshGenerator
         // coplanar with intersection bed hulls (reference + BODY_ABOVE_SPLINE).
         // body_elevated skips body top rebasing/top-width fitting; author top at origin height and full-section width at path width.
         GameObject ballast = null;
+        using (bodyMarker.Auto())
         WithWarp(bodyWarp, () =>
         {
             foreach (var range in groundRanges)
@@ -588,7 +619,8 @@ public class TrackPath : IPathMeshGenerator
         {
             MeshRenderer ballastRenderer = ballast.GetComponent<MeshRenderer>();
             Material bodyMaterial = ballastRenderer != null ? ballastRenderer.sharedMaterial : null;
-            CreateBodyGapFillers(container, corridor, bodyMaterial);
+            using (gapFillerMarker.Auto())
+                CreateBodyGapFillers(container, corridor, bodyMaterial);
         }
 
         // Track: actual-size placement at each track center (stretchToWidth=false preserves gauge).
@@ -596,6 +628,7 @@ public class TrackPath : IPathMeshGenerator
         // With S curves, place each track on its shifted spline for perpendicular sleepers; wires share it.
         var trackSplines = new SplineComputer[laneCount];
         int placedTracks = 0;
+        using (railsMarker.Auto())
         for (int i = 0; i < laneCount; i++)
         {
             float offset = GetTrackCenterOffset(width, laneCount, i, centerWidth);
@@ -621,13 +654,19 @@ public class TrackPath : IPathMeshGenerator
             }
         }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] track(軌道): {placedTracks}/{laneCount}本配置");
-        if (!constructionOnly) CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
+        if (!constructionOnly)
+            using (terminationsMarker.Auto())
+                CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
 
         // LRT-stop platforms (431). In platform intervals (ramps+margin), move poles outside and omit elevated parapets.
         // Omit intervals overlapped by other beds on each side (pole/parapet intervals use decks before subtraction).
-        List<LrtPlatformParts.Span> lrtPlatforms = constructionOnly ? null : LrtPlatformParts.Resolve(pathData, points, spline.CalculateLength());
-        LrtPlatformParts.Generate(container, spline, pathData, lrtPlatforms,
-            corridor?.GetLrtPlatformBlockedRanges(leftSide: true), corridor?.GetLrtPlatformBlockedRanges(leftSide: false));
+        List<LrtPlatformParts.Span> lrtPlatforms;
+        using (lrtPlatformsMarker.Auto())
+        {
+            lrtPlatforms = constructionOnly ? null : LrtPlatformParts.Resolve(pathData, points, spline.CalculateLength());
+            LrtPlatformParts.Generate(container, spline, pathData, lrtPlatforms,
+                corridor?.GetLrtPlatformBlockedRanges(leftSide: true), corridor?.GetLrtPlatformBlockedRanges(leftSide: false));
+        }
         List<Vector2> lrtPlatformZones = LrtPlatformParts.ZoneRanges(lrtPlatforms,
             LrtRoadParts.PlatformRampLength(pathData.path_variant), LrtRoadParts.PLATFORM_TRACK_ZONE_MARGIN);
 
@@ -645,18 +684,22 @@ public class TrackPath : IPathMeshGenerator
         // RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE. Edge/outer prefabs use
         // origin=facing track centerline/track surface, with rise supplied by geometry.
         // Island stations have no exterior extension (platformLeft/Right=0); place two edges/one deck between tracks.
-        if (!constructionOnly && (platformLeft > 0f || platformRight > 0f))
+        using (platformsMarker.Auto())
         {
-            CreatePlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, platformLeft, platformRight, variantBase, typeBase, pathData);
-        }
-        else if (!constructionOnly && IsIslandPlatform(pathData))
-        {
-            CreateIslandPlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, variantBase, typeBase, pathData);
+            if (!constructionOnly && (platformLeft > 0f || platformRight > 0f))
+            {
+                CreatePlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, platformLeft, platformRight, variantBase, typeBase, pathData);
+            }
+            else if (!constructionOnly && IsIslandPlatform(pathData))
+            {
+                CreateIslandPlatformParts(container, spline, points, corridor, width, laneCount, centerWidth, variantBase, typeBase, pathData);
+            }
         }
 
         // Overhead system (electrified variants with wire_spacing only).
         if (!constructionOnly && wireSpacing.HasValue && wireSpacing.Value > 0f)
         {
+            using (wiresMarker.Auto())
             for (int i = 0; i < laneCount; i++)
             {
                 float offset = lateral != null ? 0f : GetTrackCenterOffset(width, laneCount, i, centerWidth);
@@ -677,6 +720,7 @@ public class TrackPath : IPathMeshGenerator
         // Omit walls on platform sides to avoid blocking boarding space;
         // platform_wall handles outer walls/fences. Nonplatform sides retain normal walls.
         // LRT platforms exist on both sides; omit both walls in platform intervals (platform fences handle them).
+        using (wallsMarker.Auto())
         if (wallWidth > 0f && elevatedRanges.Count > 0)
         {
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
@@ -704,18 +748,21 @@ public class TrackPath : IPathMeshGenerator
         }
 
         // Underground walls lie outside passage space including platforms, independent of parapet width/platform-side presence.
-        var tunnels = PathTunnelParts.Ranges(spline, pathData);
-        float lrtOuter = lrtPlatforms != null && lrtPlatforms.Count > 0 ? LrtRoadParts.PlatformOuterOffset(pathData) : 0f;
-        WithWarp(lateral != null ? new PartWarp { Shift = percent => -lateral.OuterShiftAtPercent(percent) } : null,
-            () => PathTunnelParts.GenerateWall(container, spline, pathData, Mathf.Max(width * .5f + platformLeft, lrtOuter),
-                wallWidth, true, tunnels, GetWallPercentRanges(corridor, true)));
-        WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.OuterShiftAtPercent(percent) } : null,
-            () => PathTunnelParts.GenerateWall(container, spline, pathData, Mathf.Max(width * .5f + platformRight, lrtOuter),
-                wallWidth, false, tunnels, GetWallPercentRanges(corridor, false)));
-        float ceilingLeft = Mathf.Max(width * .5f + platformLeft, lrtOuter);
-        float ceilingRight = Mathf.Max(width * .5f + platformRight, lrtOuter);
-        WithWarp(lateral != null ? new PartWarp { Scale = percent => 1f + 2f * lateral.OuterShiftAtPercent(percent) / (ceilingLeft + ceilingRight) } : null,
-            () => PathTunnelParts.GenerateCeiling(container, spline, pathData, ceilingLeft, ceilingRight, tunnels));
+        using (tunnelsMarker.Auto())
+        {
+            var tunnels = PathTunnelParts.Ranges(spline, pathData);
+            float lrtOuter = lrtPlatforms != null && lrtPlatforms.Count > 0 ? LrtRoadParts.PlatformOuterOffset(pathData) : 0f;
+            WithWarp(lateral != null ? new PartWarp { Shift = percent => -lateral.OuterShiftAtPercent(percent) } : null,
+                () => PathTunnelParts.GenerateWall(container, spline, pathData, Mathf.Max(width * .5f + platformLeft, lrtOuter),
+                    wallWidth, true, tunnels, GetWallPercentRanges(corridor, true)));
+            WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.OuterShiftAtPercent(percent) } : null,
+                () => PathTunnelParts.GenerateWall(container, spline, pathData, Mathf.Max(width * .5f + platformRight, lrtOuter),
+                    wallWidth, false, tunnels, GetWallPercentRanges(corridor, false)));
+            float ceilingLeft = Mathf.Max(width * .5f + platformLeft, lrtOuter);
+            float ceilingRight = Mathf.Max(width * .5f + platformRight, lrtOuter);
+            WithWarp(lateral != null ? new PartWarp { Scale = percent => 1f + 2f * lateral.OuterShiftAtPercent(percent) / (ceilingLeft + ceilingRight) } : null,
+                () => PathTunnelParts.GenerateCeiling(container, spline, pathData, ceilingLeft, ceilingRight, tunnels));
+        }
 
         // Elevated piers share road logic. Omit underground (see RoadPath rationale).
         if (!constructionOnly && heightEditable && pillarSpacing.HasValue && pillarSpacing.Value > 0f
@@ -723,6 +770,7 @@ public class TrackPath : IPathMeshGenerator
         {
             // Only one of directly joined paths places endpoint piers at plate-free straight joins.
             RoadEndJoin startJoin = RoadAdjacency.EndJoin(pathData, true), endJoin = RoadAdjacency.EndJoin(pathData, false);
+            using (pillarsMarker.Auto())
             WithWarp(bodyWarp, () => RoadPath.GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase,
                 startJoin.Continuous && !startJoin.OwnsSupport, endJoin.Continuous && !endJoin.OwnsSupport));
         }
@@ -1313,6 +1361,7 @@ public class TrackPath : IPathMeshGenerator
     /// </summary>
     private static void GeneratePolesAndBeams(GameObject container, SplineComputer spline, float spacing, float width, string variantBase, string typeBase, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, List<Vector2> lrtPlatformZones = null, float lrtPoleOffset = 0f, float tunnelClearance = float.PositiveInfinity)
     {
+        using var scope = polesMarker.Auto();
         GameObject polePrefab = LoadPrefab($"{variantBase}/pole", $"{typeBase}/pole");
         GameObject beamPrefab = LoadPrefab($"{variantBase}/beam", $"{typeBase}/beam");
         if (polePrefab == null && beamPrefab == null)

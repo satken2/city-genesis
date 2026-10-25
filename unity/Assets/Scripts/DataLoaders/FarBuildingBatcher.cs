@@ -33,6 +33,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
     private readonly List<Material> materialScratch = new List<Material>();
     private readonly List<Material> memberMaterials = new List<Material>();
     private readonly List<List<CombineInstance>> combineByMaterial = new List<List<CombineInstance>>();
+    private static readonly StageMarker buildBatchMarker = new StageMarker("Building.FarBatch");
 
     public static void Register(FarBuildingMember member)
     {
@@ -150,6 +151,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
     /// <summary>Combine candidates[start..start+count) into one batch. Members' submeshes with the same material merge into one submesh.</summary>
     private void BuildBatch(Group group, int start, int count)
     {
+        using var scope = buildBatchMarker.Auto();
         batchScratch.Clear();
         for (int i = 0; i < count; i++)
         {

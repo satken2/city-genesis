@@ -31,14 +31,14 @@ using GeneratedModels;
 ///
 /// Excluded from slope handling (IsApplicableModelType): buildings rest on center terrain elevation
 /// (BuildingManager placement rules), with no concrete foundation.
-/// Thus ultra-near (isDynamic) fences/tiles/ground panels follow terrain
+/// Thus ultra-near (isDynamic) fences/tiles follow terrain, and ground panels too at close-up
 /// (same treatment as MODEL_MODULAR_GROUND).
 /// </summary>
 public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
 {
     /// <summary>
     /// Generate a prebuilt building mesh from BuildingSummary.
-    /// With isDynamic=true, fences/tiles/ground panels follow terrain.
+    /// With isDynamic=true, fences/tiles follow terrain (ground panels only at close-up).
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
@@ -119,7 +119,7 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
         // Draw ground panels only for master draw_floor=yes; resolve floor-part materials
         // via a{variant}→b{bd_type}→common (draw only for non-null floorMaterial).
         // Prebuilt buildings rest at center terrain elevation (excluded from slope handling),
-        // so ultra-near (isDynamic) fences/tiles/ground panels follow terrain.
+        // so ultra-near (isDynamic) fences/tiles follow terrain (ground panels only at close-up).
         Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
             buildingData, out _, out Vector3 centerPointWorld);
         Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;
@@ -132,7 +132,7 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
             combineInstances, materials, temporaryMeshes,
             scatterFootprint: footprint, scatterSeed: buildingData.visual_variant2, frontFootprint: footprint);
 
-        if (combineInstances.Count == 0)
+        if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork)
         {
             CleanupMeshes(temporaryMeshes);
             return GenerateFallbackBox(buildingData);
@@ -140,7 +140,7 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
 
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
+        if (combineInstances.Count > 0) finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
         finalMesh.RecalculateBounds();
         finalMesh.RecalculateNormals();
 

@@ -11,6 +11,8 @@ public static class SiteEntryLayout
     /// <summary>Opening width (m) when the building has no gate part, wide enough for one car.</summary>
     public const float OPENING_WIDTH = 3f;
 
+    private static readonly StageMarker resolveMarker = new StageMarker("Building.SiteEntry");
+
     /// <summary>Distance (m) the ray starts behind the front edge, so the exit from the occupied outline is found even when the edge lies on it.</summary>
     private const float RAY_BACKOFF = 0.05f;
 
@@ -40,6 +42,7 @@ public static class SiteEntryLayout
     /// </summary>
     public static bool TryResolve(Vector2[] site, Vector2[] front, Vector2[] occupied, float width, out Entry entry)
     {
+        using var scope = resolveMarker.Auto();
         entry = default;
         if (site == null || site.Length < 3 || front == null || front.Length < 3)
         {

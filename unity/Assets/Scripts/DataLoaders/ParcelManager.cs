@@ -171,7 +171,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// so treat responses reaching the limit as incomplete, split the cell set in two, and refetch.
     /// </summary>
     private const int PARCEL_FETCH_LIMIT = 5000;
-    private const int FetchSkipBatch = 64;
 
     /// <summary>
     /// Parcel IDs queued for terrain alignment when tiles arrive. terrainRefreshQueued prevents duplicate insertion.
@@ -571,15 +570,18 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         var cellSet = new HashSet<Vector2Int>(cells);
         var receivedIds = new HashSet<int>();
-        int skipped = 0;
+        var slice = System.Diagnostics.Stopwatch.StartNew();
         for (int i = 0; i < count; i++)
         {
-            ParcelSummary p = parcels[i];
-            if (p == null || !TryGetCenterCell(p, out Vector2Int centerCell) || !cellSet.Contains(centerCell))
+            // Yield by elapsed time: one parcel takes well under a millisecond, and yielding per parcel would wait
+            // a whole scheduler round behind heavy workers each time.
+            if (slice.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                if (++skipped % FetchSkipBatch == 0) yield return RenderWorkScheduler.Continue;
-                continue;
+                yield return RenderWorkScheduler.Continue;
+                slice.Restart();
             }
+            ParcelSummary p = parcels[i];
+            if (p == null || !TryGetCenterCell(p, out Vector2Int centerCell) || !cellSet.Contains(centerCell)) continue;
             receivedIds.Add(p.parcel_id);
 
             // Version comparison: do not recreate if the cached version matches
@@ -597,7 +599,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                 CreateOrUpdateParcelObject(p);
                 parcelVersionCache[p.parcel_id] = p.version;
             }
-            yield return RenderWorkScheduler.Continue;
         }
 
         // Remove parcels whose centroids lie in fetched cells but are absent from the response (complete responses only)

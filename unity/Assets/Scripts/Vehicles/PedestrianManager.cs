@@ -135,8 +135,9 @@ public sealed partial class PedestrianManager : MonoBehaviour
         scanTimer -= dt;
         if (scanTimer <= 0)
         {
-            // A periodic resident worker, excluded from initial-load waiting.
-            if (walkWorker == null) walkWorker = RenderWorkScheduler.Start(this, ScanWalks(center), "pedestrianWalks", () => false);
+            // A periodic resident worker, excluded from initial-load waiting. Ambient pedestrians are decoration,
+            // so the scan uses only budget left over by city object generation.
+            if (walkWorker == null) walkWorker = RenderWorkScheduler.Start(this, ScanWalks(center), "pedestrianWalks", () => false, RenderWorkPriority.Low);
             scanTimer = Mathf.Max(.1f, rangeScanInterval);
         }
         if (TrafficClock.Paused) return;
