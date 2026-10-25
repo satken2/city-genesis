@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<defs>
+<radialGradient id="population-10k-bg" cx=".5" cy=".38" r=".78"><stop offset="0" stop-color="#e35a93"/><stop offset="1" stop-color="#621a3d"/></radialGradient>
+<radialGradient id="population-10k-glow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="population-10k-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd9b3"/><stop offset=".3" stop-color="#cd8043"/><stop offset=".5" stop-color="#ffd9b3"/><stop offset=".75" stop-color="#cd8043"/><stop offset="1" stop-color="#6e3a17"/></linearGradient><linearGradient id="population-10k-badge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9b3"/><stop offset=".55" stop-color="#cd8043"/><stop offset="1" stop-color="#cd8043"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="256" height="256" fill="url(#population-10k-bg)"/>
+<circle cx="128" cy="104" r="100" fill="url(#population-10k-glow)"/>
+<clipPath id="population-10k-inner"><rect x="14" y="14" width="228" height="228" rx="25"/></clipPath>
+<g clip-path="url(#population-10k-inner)"><g transform="translate(48 24)"><path d="M20.9 134L20.9 109.8Q20.9 87.8 44 87.8Q67.1 87.8 67.1 109.8L67.1 134Z" fill="#cfdbe6" stroke="#621a3d" stroke-width="4"/><circle cx="44" cy="70.2" r="13.75" fill="#cfdbe6" stroke="#621a3d" stroke-width="4"/><path d="M92.9 134L92.9 109.8Q92.9 87.8 116 87.8Q139.1 87.8 139.1 109.8L139.1 134Z" fill="#cfdbe6" stroke="#621a3d" stroke-width="4"/><circle cx="116" cy="70.2" r="13.75" fill="#cfdbe6" stroke="#621a3d" stroke-width="4"/><path d="M51.65 156L51.65 126.3Q51.65 99.3 80 99.3Q108.35 99.3 108.35 126.3L108.35 156Z" fill="#f8fbff" stroke="#621a3d" stroke-width="4"/><circle cx="80" cy="77.7" r="16.88" fill="#f8fbff" stroke="#621a3d" stroke-width="4"/></g></g>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="15"/>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="url(#population-10k-metal)" stroke-width="10"/>
+<rect x="74.8" y="188" width="106.4" height="50" rx="25" fill="url(#population-10k-badge)" stroke="#140d06" stroke-opacity=".6" stroke-width="3"/><g transform="translate(0 197) scale(1.6)" fill="none" stroke="#1d2029" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path transform="translate(60.5 0)" d="M0.5 4.6L6 0V20"/><path transform="translate(71 0)" d="M0 6A6 6 0 0 1 12 6V14A6 6 0 0 1 0 14Z"/><path transform="translate(87.5 0)" d="M0 0V20M11.5 0L0 12.5M4 8.2L12 20"/></g>
+</svg>

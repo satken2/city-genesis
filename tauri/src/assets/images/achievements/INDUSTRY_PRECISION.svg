@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<defs>
+<radialGradient id="industry-precision-bg" cx=".5" cy=".38" r=".78"><stop offset="0" stop-color="#a05fd6"/><stop offset="1" stop-color="#3a185c"/></radialGradient>
+<radialGradient id="industry-precision-glow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="industry-precision-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff5bd"/><stop offset=".3" stop-color="#f2c14e"/><stop offset=".5" stop-color="#fff5bd"/><stop offset=".75" stop-color="#f2c14e"/><stop offset="1" stop-color="#8f600e"/></linearGradient><linearGradient id="industry-precision-badge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5bd"/><stop offset=".55" stop-color="#f2c14e"/><stop offset="1" stop-color="#f2c14e"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="256" height="256" fill="url(#industry-precision-bg)"/>
+<circle cx="128" cy="128" r="100" fill="url(#industry-precision-glow)"/>
+<clipPath id="industry-precision-inner"><rect x="14" y="14" width="228" height="228" rx="25"/></clipPath>
+<g clip-path="url(#industry-precision-inner)"><g transform="translate(32 32) scale(1.2)"><path d="M133.01 69.7L145.58 72.53L145.58 87.47L133.01 90.3L131.06 97.58L140.53 106.32L133.05 119.26L120.75 115.43L115.43 120.75L119.26 133.05L106.32 140.53L97.58 131.06L90.3 133.01L87.47 145.58L72.53 145.58L69.7 133.01L62.42 131.06L53.68 140.53L40.74 133.05L44.57 120.75L39.25 115.43L26.95 119.26L19.47 106.32L28.94 97.58L26.99 90.3L14.42 87.47L14.42 72.53L26.99 69.7L28.94 62.42L19.47 53.68L26.95 40.74L39.25 44.57L44.57 39.25L40.74 26.95L53.68 19.47L62.42 28.94L69.7 26.99L72.53 14.42L87.47 14.42L90.3 26.99L97.58 28.94L106.32 19.47L119.26 26.95L115.43 39.25L120.75 44.57L133.05 40.74L140.53 53.68L131.06 62.42Z" fill="#f8fbff"/><circle cx="80" cy="80" r="36" fill="#3a185c"/><circle cx="80" cy="80" r="26" fill="#8fd3ff" stroke="#cfdbe6" stroke-width="3"/><path d="M80 58V102M58 80H102" fill="none" stroke="#3a185c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/><path d="M64 74A17 17 0 0 1 76 63" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><circle cx="80" cy="80" r="2.5" fill="#3a185c"/></g></g>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="15"/>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="url(#industry-precision-metal)" stroke-width="10"/>
+</svg>

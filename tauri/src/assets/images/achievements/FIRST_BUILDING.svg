@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<defs>
+<radialGradient id="first-building-bg" cx=".5" cy=".38" r=".78"><stop offset="0" stop-color="#6f8ea8"/><stop offset="1" stop-color="#22313e"/></radialGradient>
+<radialGradient id="first-building-glow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="first-building-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff5bd"/><stop offset=".3" stop-color="#f2c14e"/><stop offset=".5" stop-color="#fff5bd"/><stop offset=".75" stop-color="#f2c14e"/><stop offset="1" stop-color="#8f600e"/></linearGradient><linearGradient id="first-building-badge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5bd"/><stop offset=".55" stop-color="#f2c14e"/><stop offset="1" stop-color="#f2c14e"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="256" height="256" fill="url(#first-building-bg)"/>
+<circle cx="128" cy="128" r="100" fill="url(#first-building-glow)"/>
+<clipPath id="first-building-inner"><rect x="14" y="14" width="228" height="228" rx="25"/></clipPath>
+<g clip-path="url(#first-building-inner)"><g transform="translate(32 32) scale(1.2)"><rect x="12" y="144" width="136" height="8" rx="4" fill="#cfdbe6"/><rect x="36" y="32" width="88" height="12" rx="3" fill="#cfdbe6"/><rect x="42" y="42" width="76" height="104" rx="3" fill="#f8fbff"/><rect x="52" y="54" width="14" height="14" rx="2" fill="#ffd25a"/><rect x="73" y="54" width="14" height="14" rx="2" fill="#22313e"/><rect x="94" y="54" width="14" height="14" rx="2" fill="#ffd25a"/><rect x="52" y="76" width="14" height="14" rx="2" fill="#22313e"/><rect x="73" y="76" width="14" height="14" rx="2" fill="#ffd25a"/><rect x="94" y="76" width="14" height="14" rx="2" fill="#22313e"/><rect x="52" y="98" width="14" height="14" rx="2" fill="#ffd25a"/><rect x="73" y="98" width="14" height="14" rx="2" fill="#22313e"/><rect x="94" y="98" width="14" height="14" rx="2" fill="#ffd25a"/><rect x="69" y="118" width="22" height="28" rx="2" fill="#22313e"/><path d="M138 9Q138 24 153 24Q138 24 138 39Q138 24 123 24Q138 24 138 9Z" fill="#ffd25a"/><path d="M20 41Q20 50 29 50Q20 50 20 59Q20 50 11 50Q20 50 20 41Z" fill="#ffd25a"/></g></g>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="15"/>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="url(#first-building-metal)" stroke-width="10"/>
+</svg>

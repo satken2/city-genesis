@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<defs>
+<radialGradient id="years-500-bg" cx=".5" cy=".38" r=".78"><stop offset="0" stop-color="#b08455"/><stop offset="1" stop-color="#3b2512"/></radialGradient>
+<radialGradient id="years-500-glow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="years-500-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff5bd"/><stop offset=".3" stop-color="#f2c14e"/><stop offset=".5" stop-color="#fff5bd"/><stop offset=".75" stop-color="#f2c14e"/><stop offset="1" stop-color="#8f600e"/></linearGradient><linearGradient id="years-500-badge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5bd"/><stop offset=".55" stop-color="#f2c14e"/><stop offset="1" stop-color="#f2c14e"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="256" height="256" fill="url(#years-500-bg)"/>
+<circle cx="128" cy="104" r="100" fill="url(#years-500-glow)"/>
+<clipPath id="years-500-inner"><rect x="14" y="14" width="228" height="228" rx="25"/></clipPath>
+<g clip-path="url(#years-500-inner)"><g transform="translate(48 24)"><rect x="40" y="28" width="6" height="104" fill="#cfdbe6"/><rect x="114" y="28" width="6" height="104" fill="#cfdbe6"/><clipPath id="years-500-glass"><path d="M50 30C50 60 74 68 74 80C74 92 50 100 50 130H110C110 100 86 92 86 80C86 68 110 60 110 30Z"/></clipPath><path d="M50 30C50 60 74 68 74 80C74 92 50 100 50 130H110C110 100 86 92 86 80C86 68 110 60 110 30Z" fill="#e4f4fb" opacity=".92"/><g clip-path="url(#years-500-glass)"><rect x="40" y="61.2" width="80" height="18.8" fill="#ffd25a"/><path d="M44 130L44 109.6Q80 93.6 116 109.6L116 130Z" fill="#ffd25a"/></g><path d="M80 80V101.6" fill="none" stroke="#ffd25a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M58 38C58 56 66 64 70 70" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/><rect x="30" y="18" width="100" height="12" rx="5" fill="#f8fbff"/><rect x="30" y="130" width="100" height="12" rx="5" fill="#f8fbff"/></g></g>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="15"/>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="url(#years-500-metal)" stroke-width="10"/>
+<rect x="70" y="188" width="116" height="50" rx="25" fill="url(#years-500-badge)" stroke="#140d06" stroke-opacity=".6" stroke-width="3"/><g transform="translate(0 197) scale(1.6)" fill="none" stroke="#1d2029" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path transform="translate(57.5 0)" d="M11 0H1.6L0.9 8.6A6.2 6.2 0 1 1 0.4 17.4"/><path transform="translate(74 0)" d="M0 6A6 6 0 0 1 12 6V14A6 6 0 0 1 0 14Z"/><path transform="translate(90.5 0)" d="M0 6A6 6 0 0 1 12 6V14A6 6 0 0 1 0 14Z"/></g>
+</svg>

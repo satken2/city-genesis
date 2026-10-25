@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<defs>
+<radialGradient id="bus-lines-5-bg" cx=".5" cy=".38" r=".78"><stop offset="0" stop-color="#f09a35"/><stop offset="1" stop-color="#713c0a"/></radialGradient>
+<radialGradient id="bus-lines-5-glow"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="bus-lines-5-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".3" stop-color="#bfc9d1"/><stop offset=".5" stop-color="#ffffff"/><stop offset=".75" stop-color="#bfc9d1"/><stop offset="1" stop-color="#5d6973"/></linearGradient><linearGradient id="bus-lines-5-badge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#bfc9d1"/><stop offset="1" stop-color="#bfc9d1"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="256" height="256" fill="url(#bus-lines-5-bg)"/>
+<circle cx="128" cy="104" r="100" fill="url(#bus-lines-5-glow)"/>
+<clipPath id="bus-lines-5-inner"><rect x="14" y="14" width="228" height="228" rx="25"/></clipPath>
+<g clip-path="url(#bus-lines-5-inner)"><g transform="translate(48 24)"><rect x="40" y="128" width="20" height="22" rx="5" fill="#1d2029"/><rect x="100" y="128" width="20" height="22" rx="5" fill="#1d2029"/><path d="M34 52C24 50 20 54 20 60M126 52C136 50 140 54 140 60" fill="none" stroke="#f8fbff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="14" y="60" width="11" height="19" rx="3" fill="#f8fbff"/><rect x="135" y="60" width="11" height="19" rx="3" fill="#f8fbff"/><rect x="32" y="22" width="96" height="114" rx="14" fill="#f8fbff"/><rect x="46" y="30" width="68" height="11" rx="3" fill="#ffd25a"/><rect x="40" y="46" width="80" height="44" rx="8" fill="#713c0a"/><rect x="32" y="94" width="96" height="6" fill="#f09a35"/><rect x="62" y="106" width="36" height="8" rx="3" fill="#cfdbe6"/><rect x="42" y="104" width="16" height="10" rx="3" fill="#ffd25a"/><rect x="102" y="104" width="16" height="10" rx="3" fill="#ffd25a"/><rect x="32" y="120" width="96" height="12" rx="5" fill="#cfdbe6"/></g></g>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="15"/>
+<rect x="9" y="9" width="238" height="238" rx="30" fill="none" stroke="url(#bus-lines-5-metal)" stroke-width="10"/>
+<rect x="92" y="188" width="72" height="50" rx="25" fill="url(#bus-lines-5-badge)" stroke="#140d06" stroke-opacity=".6" stroke-width="3"/><g transform="translate(0 197) scale(1.6)" fill="none" stroke="#1d2029" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path transform="translate(74 0)" d="M11 0H1.6L0.9 8.6A6.2 6.2 0 1 1 0.4 17.4"/></g>
+</svg>
