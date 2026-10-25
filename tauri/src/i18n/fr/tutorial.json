@@ -736,6 +736,10 @@
       "tip41": {
         "title": "Loyer doux, trajet infernal",
         "description": "Pour déménager, les habitants comparent loyer, trajets vers travail, école et commerces, qualité du logement et cadre de vie. Bruit, pollution, sécurité et soleil comptent aussi. Un logement bon marché mais peu pratique attire moins ; un logement bien placé doit encore être abordable et assez spacieux."
+      },
+      "tip42": {
+        "title": "Mieux vaut prévenir que s'échouer",
+        "description": "Les grands ports, comme ceux à conteneurs, de vrac ou pour navires-citernes, ont besoin d'une profondeur d'eau suffisante. Les côtes où les fonds marins descendent en pente raide conviennent bien, car l'eau profonde est proche du rivage. Même sur une côte plate bordée de hauts-fonds, vous pouvez construire un port en gagnant des terres sur la mer par remblaiement jusqu'aux eaux plus profondes."
       }
     }
   },

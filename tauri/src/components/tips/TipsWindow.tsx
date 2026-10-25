@@ -100,6 +100,7 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip39", image: tip39 },
   { id: "tip40", image: tip40 },
   { id: "tip41", image: tip41 },
+  { id: "tip42" },
 ];
 
 export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: string; mode?: "initial" | "epoch" }) {

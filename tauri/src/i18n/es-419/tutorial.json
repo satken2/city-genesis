@@ -736,6 +736,10 @@
       "tip41": {
         "title": "Renta divina, viaje infernal",
         "description": "Al mudarse, los residentes comparan el alquiler, los viajes al trabajo, la escuela y las tiendas, la calidad de la vivienda y el entorno residencial. Importan el ruido, el aire, la seguridad y la luz solar. Una vivienda barata pero incómoda atrae menos; una bien ubicada aún necesita un alquiler accesible y espacio suficiente."
+      },
+      "tip42": {
+        "title": "Más vale prevenir que encallar",
+        "description": "Los puertos grandes, como los de contenedores, graneles y buques cisterna, necesitan suficiente profundidad. Las costas donde el fondo marino desciende con una pendiente pronunciada son adecuadas porque las aguas profundas están cerca de la orilla. Incluso en una costa plana con aguas poco profundas que se extienden mar adentro, puedes construir un puerto ganándole terreno al mar hasta llegar a aguas más profundas."
       }
     }
   },
