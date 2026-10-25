@@ -1,4 +1,4 @@
-param([string]$UnityExe = 'C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe', [switch]$Wait)
+param([string]$UnityExe = 'C:/Program Files/Unity/Hub/Editor/6000.6.5f1/Editor/Unity.exe', [switch]$Wait)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $PSScriptRoot '../BuildRuntime.ps1')

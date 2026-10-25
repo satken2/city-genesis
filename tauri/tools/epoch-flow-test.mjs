@@ -90,6 +90,7 @@ for (const early of [true, false]) {
           getInitialLoadingReady: async () => { queries++; return true; },
           startGameFromTips: async () => { starts++; },
         };
+        if (name.endsWith("/hudCommon")) return { iconUrl: () => "test-image" };
         return { default: "test-image" };
       },
     });

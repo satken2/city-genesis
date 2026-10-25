@@ -15,6 +15,6 @@ Copy-Item "$unityRoot/ProjectSettings/ProjectVersion.txt" "$qaRoot/ProjectSettin
 $manifest = Get-Content "$unityRoot/Packages/manifest.json" -Raw | ConvertFrom-Json
 @{ dependencies = @{ 'com.unity.render-pipelines.universal' = $manifest.dependencies.'com.unity.render-pipelines.universal' } } | ConvertTo-Json -Depth 5 | Set-Content "$qaRoot/Packages/manifest.json"
 Set-Content "$qaRoot/result.txt" 'RUNNING'
-$unityExe = 'C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe'
+$unityExe = 'C:/Program Files/Unity/Hub/Editor/6000.6.5f1/Editor/Unity.exe'
 $process = Start-Process -FilePath $unityExe -ArgumentList @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'WaterFogQA.Run', '-logFile', ('"' + $qaRoot + '/qa.log"')) -WindowStyle Hidden -PassThru
 Write-Output "Water fog QA process: $($process.Id); results: $qaRoot/result.txt"

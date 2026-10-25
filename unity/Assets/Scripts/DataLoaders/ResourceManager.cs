@@ -419,22 +419,7 @@ public class ResourceManager : BaseApiDataManager
         Text text = labelGO.AddComponent<Text>();
         text.text = resource.resource_type_label ?? "";
         text.fontSize = 35;
-
-        // Prefer multilingual fonts installed in the OS.
-        // Same font list and priority as ZoneManager.CreateZoneLabelUI.
-        // Yu Gothic UI / Meiryo are standard Windows fonts covering Japanese, English, digits, Cyrillic, Arabic,
-        // Thai, CJK Unified Ideographs, and many other glyphs.
-        string[] preferredFonts = new string[] {
-            "Yu Gothic UI",
-            "Meiryo",
-            "Microsoft YaHei UI",
-            "Malgun Gothic",
-            "Leelawadee UI",
-            "Segoe UI",
-            "Arial"
-        };
-        Font osFont = Font.CreateDynamicFontFromOSFont(preferredFonts, text.fontSize);
-        text.font = osFont != null ? osFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = UiFontProvider.GetFont(text.fontSize);
         text.color = Color.white;
         text.alignment = TextAnchor.MiddleCenter;
         text.horizontalOverflow = HorizontalWrapMode.Overflow;

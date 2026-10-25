@@ -866,9 +866,9 @@ public static class PlatformQA
         var planObject = new GameObject("SnapQA");
         var plan = planObject.AddComponent(planType);
         planType.GetField("LateralOffsets").SetValue(plan, new[] { -4f, 4f });
-        object[] offsetArgs = { Vector3.zero, new Vector3(4, 2.375f, 0), Vector3.forward, 0f, 5f, Vector3.zero, 0f, false };
+        object[] offsetArgs = { Vector3.zero, new Vector3(4, 2.375f, 0), Vector3.forward, 5f, Vector3.zero, 0f, false };
         planType.GetMethod("EvaluateTangentOffsetCandidates", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(plan, offsetArgs);
-        Require((bool)offsetArgs[7] && Mathf.Abs(((Vector3)offsetArgs[5]).y - 2.375f) < .0001f, "Parallel offset lost target absolute height");
+        Require((bool)offsetArgs[6] && Mathf.Abs(((Vector3)offsetArgs[4]).y - 2.375f) < .0001f, "Parallel offset lost target absolute height");
         UnityEngine.Object.DestroyImmediate(planObject);
         var own = new List<Vector3> { new Vector3(0, 999, 0), new Vector3(0, -999, 40) };
         manager.GetMethod("ApplyStationGrade").Invoke(null, new object[] { path, own });

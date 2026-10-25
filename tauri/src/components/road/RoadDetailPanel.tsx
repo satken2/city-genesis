@@ -536,7 +536,7 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
     [apiBaseUrl, roadId, refresh],
   );
 
-  /** EditableLabel displays exception messages inline, so throw excessive-length errors here too. */
+  /** Throwing keeps EditableLabel in edit mode with its generic rename-failed message; the thrown text itself is not shown. */
   const handleNameSave = useCallback(
     async (next: string) => {
       const name = next.trim().replace(/\s+/g, " ");

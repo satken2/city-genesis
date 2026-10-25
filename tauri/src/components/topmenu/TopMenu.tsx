@@ -111,7 +111,7 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }
 
-  /** Scenario management (list, terrain import, introduction, terrain editor) runs entirely in the UI. create_session launches Unity when opening a city. */
+  /** Scenario management (list, terrain import, introduction, terrain editor) runs entirely in the UI. Unity is already running, started with the app by process::start_children. */
   async function handleScenarioManager() {
     try {
       await invoke("open_registered_window", { windowType: "scenario_manager" });

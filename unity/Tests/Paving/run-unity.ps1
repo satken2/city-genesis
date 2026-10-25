@@ -18,6 +18,6 @@ $manifest.dependencies.PSObject.Properties.Remove('com.rlabrecque.steamworks.net
 $manifest.dependencies.PSObject.Properties.Remove('com.siccity.gltfutility')
 $manifest | ConvertTo-Json -Depth 10 | Set-Content "$qaRoot/Packages/manifest.json"
 Set-Content "$qaRoot/result.txt" 'RUNNING'
-$unityExe = 'C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe'
+$unityExe = 'C:/Program Files/Unity/Hub/Editor/6000.6.5f1/Editor/Unity.exe'
 $process = Start-Process -FilePath $unityExe -ArgumentList @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'PavingQA.Run', '-logFile', ('"' + $qaRoot + '/qa.log"')) -WindowStyle Hidden -PassThru
 Write-Output "Paving QA process: $($process.Id); results: $qaRoot/result.txt"

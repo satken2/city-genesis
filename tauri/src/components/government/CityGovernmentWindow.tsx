@@ -14,6 +14,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { emit } from "@tauri-apps/api/event";
 
+import { PLAY_MODE_READ_ONLY } from "../../constants";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { resolveIntlLocale } from "../../utils/locale";
 import { formatExactAmount } from "../../utils/money";
@@ -118,6 +120,7 @@ function buildColumns(
 export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
   const locale = resolveIntlLocale(i18n.language);
+  const readOnly = usePlayMode(apiBaseUrl) === PLAY_MODE_READ_ONLY;
 
   const [overview, setOverview] = useState<CityOverview | null>(null);
   const [groups, setGroups] = useState<Record<string, GovernmentAgent[]>>({});
@@ -208,12 +211,16 @@ export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   return (
     <div className="city-gov">
       <section className="city-gov__overview">
-        <EditableLabel
-          value={overview.name}
-          maxLength={CITY_NAME_MAX_LENGTH}
-          textClassName="city-gov__name"
-          onSave={handleRename}
-        />
+        {readOnly ? (
+          <span className="city-gov__name">{overview.name}</span>
+        ) : (
+          <EditableLabel
+            value={overview.name}
+            maxLength={CITY_NAME_MAX_LENGTH}
+            textClassName="city-gov__name"
+            onSave={handleRename}
+          />
+        )}
         <dl className="city-gov__stats">
           {stats.map((stat) => (
             <div key={stat.key} className="city-gov__stat">

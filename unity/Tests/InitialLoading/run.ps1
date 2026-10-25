@@ -1,4 +1,4 @@
-param([string]$UnityEditor = 'C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor')
+param([string]$UnityEditor = 'C:/Program Files/Unity/Hub/Editor/6000.6.5f1/Editor')
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $compileDir = Join-Path $unityRoot 'Temp/InitialLoadingQA'
