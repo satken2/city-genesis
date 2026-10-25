@@ -114,6 +114,7 @@
       "overlap_city_building": "Chevauche une installation municipale ou un site de construction planifié",
       "overlap_path": "Chevauche une route",
       "incompatible_parcel_type": "Ce bâtiment ne peut pas être construit sur ce type de terrain",
+      "insufficient_water_depth": "L'eau devant ce quai fait environ {{depth}} m de profondeur. Ce bâtiment a besoin d'au moins {{required}} m",
       "not_city_land": "Chevauche une parcelle qui n'appartient pas à la ville",
       "generic": "Construction impossible à cet endroit"
     },
@@ -131,6 +132,7 @@
     "copyInvalid": {
       "does_not_fit": "L'emprise du bâtiment source ne tient pas sur cette parcelle",
       "incompatible_parcel_type": "Ce bâtiment ne peut pas être construit sur ce type de parcelle",
+      "insufficient_water_depth": "L'eau devant ce quai fait environ {{depth}} m de profondeur. Ce bâtiment a besoin d'au moins {{required}} m",
       "regulation": "Construction impossible : contraire à la réglementation",
       "generic": "Construction impossible sur cette parcelle"
     }

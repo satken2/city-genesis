@@ -22,6 +22,8 @@ The core creates parcel shapes. See [districts and parcels](../economics/04_dist
 
 Creation determines type from polygon position and the current [coastline](D_terrain.md). A boundary touching a sea, lake, or river shore produces a shore parcel. A polygon with almost no land overlap over sea, lake, or river produces a water parcel. Others are land. Maps without coastlines and areas outside the city are treated as land. Polygons are not clipped to coastlines, and existing parcel types do not change when reclamation extends land. Each building variant's `agent_master.parcel_type` determines compatible types, defaulting to land.
 
+Shore parcels carry the quay line where ships berth and the water depth just outside it, `water_depth`. Both are derived values the core computes from the current coastline, reclaimed land, and terrain; the quay line is returned as `berth_line` on the building standing on the parcel. Port variants where ships berth have `agent_master.berth_depth` and stand only on parcels whose `water_depth` reaches it. Unity's buildable-parcel highlight and click check look at both the parcel type and this depth.
+
 Water parcels are sites for offshore equipment. They have no road access because people and goods do not enter by land. Their reference elevation is sea level, zero; Unity places their buildings and parcel top surfaces there. Following terrain would sink them to the seabed. They belong to districts but do not contribute to district outlines.
 
 ## B.6. Existing parcel overlap

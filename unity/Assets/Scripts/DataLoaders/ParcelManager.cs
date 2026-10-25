@@ -1774,14 +1774,14 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// Check whether the specified building type can be built on the parcel.
-    /// True only if both building regulations (allowed_bd_mask) and location requirements (parcel_type) are satisfied.
-    /// Prioritize parcel_type of the currently selected construction variant
+    /// True only if both building regulations (allowed_bd_mask) and site requirements (parcel_type and berth water depth) are satisfied.
+    /// Prioritize the site requirements of the currently selected construction variant
     /// because identical bd_type values may distinguish land, coastal, and offshore locations (such as offshore wind farms).
     /// </summary>
     private bool IsBuildable(VisualParcelStats stats, int buildingTypeBit)
     {
         if ((stats.allowed_bd_mask & buildingTypeBit) == 0) return false;
-        return BuildingPlanManager.IsParcelTypeAllowed(stats.parcel_type, buildingTypeBit);
+        return BuildingPlanManager.ResolveSiteIncompatibility(stats.parcel_type, stats.water_depth, buildingTypeBit) == null;
     }
 
     /// <summary>

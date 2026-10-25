@@ -1738,6 +1738,7 @@ public class BuildingManager : BaseApiDataManager
         hasher.AddValue(d.construction_progress);
         hasher.Add(d.polygonArray);
         hasher.Add(d.centerPointArray);
+        hasher.Add(d.berthLineArray);
         hasher.Add(d.visual_variant);
         hasher.Add(d.visual_variant2);
         hasher.Add(d.visual_variant3);

@@ -93,6 +93,8 @@ namespace GeneratedModels
         public List<object> polygon;
         /// <summary>中心点座標 [x, z]</summary>
         public List<object> center_point;
+        /// <summary>立地区画の天然の海岸の岸壁の線 [A'x, A'z, B'x, B'z](A'→B' で海が左)。港の岸壁の描画と入港船の接岸に使う。沿岸区画以外・埋立地の岸壁に面する区画は null サーバーサイドで計算されるフィールド。型は動的。</summary>
+        public object berth_line;
         /// <summary>ステータス（計画中・建設中・稼働中など。共有定数の STATUS_* を参照）</summary>
         public int status;
         /// <summary>ステータス遷移理由</summary>
@@ -540,6 +542,8 @@ namespace GeneratedModels
         public float limit_height;
         /// <summary>この区画を使用している建物エージェントのID（0=空き地）</summary>
         public int usage_id;
+        /// <summary>岸壁のすぐ外の水深(m)。港の必要水深(agent_master の berth_depth)以上の区画にだけ港が建つ。沿岸区画以外は0</summary>
+        public float water_depth;
     }
 
     [Serializable]
@@ -567,6 +571,8 @@ namespace GeneratedModels
         public Dictionary<string, float> resource_id;
         /// <summary>地形の平均勾配（無次元）。建設難易度の元データ</summary>
         public float terrain_slope;
+        /// <summary>岸壁のすぐ外の水深(m)。港の必要水深(agent_master の berth_depth)以上の区画にだけ港が建つ。沿岸区画以外は0</summary>
+        public float water_depth;
         /// <summary>区画に重なる天然資源の名称（資源種別→名称） サーバーサイドで計算されるフィールド。型は動的。</summary>
         public object name_resource;
         /// <summary>接道している街路のID</summary>

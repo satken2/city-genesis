@@ -25,6 +25,16 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// </summary>
     public static int SelectedParcelType { get; private set; }
 
+    /// <summary>
+    /// Required water depth just outside the quay (m) of the selected construction variant (agent_master.berth_depth); 0 means none.
+    /// Paired with <see cref="SelectedParcelType"/> so highlighting and click validation apply the backend's site rule.
+    /// </summary>
+    public static float SelectedBerthDepth { get; private set; }
+
+    /// <summary>Site reason codes shared with the backend (bd_mask_util) and sent to the UI in edit_building:invalid_parcel.</summary>
+    public const string SITE_INCOMPATIBLE_PARCEL_TYPE = "incompatible_parcel_type";
+    public const string SITE_INSUFFICIENT_WATER_DEPTH = "insufficient_water_depth";
+
     // Construction values actually used (input values)
     private int currentFloors = 3;
     // Visual variants (visual_variant1/2/3). Values from 0.0 to 1.0 determine the building appearance.
@@ -204,18 +214,21 @@ public partial class BuildingPlanManager : MonoBehaviour
                 }
 
                 SelectedParcelType = agentMaster.parcel_type ?? 0;
+                SelectedBerthDepth = agentMaster.berth_depth ?? 0f;
 
                 Debug.Log($"BuildingPlanManager: 建物バリアントを設定しました: {variant}, agent_type: {agentType}, bd_type: {bdType}, parcel_type: {SelectedParcelType}");
             }
             else
             {
                 SelectedParcelType = 0;
+                SelectedBerthDepth = 0f;
                 Debug.LogWarning($"BuildingPlanManager: agent_master (variant={variant}) が見つかりません");
             }
         }
         else
         {
             SelectedParcelType = 0;
+            SelectedBerthDepth = 0f;
             Debug.LogWarning("BuildingPlanManager: MasterDataStore.Instanceがnullです");
             Debug.Log($"BuildingPlanManager: 建物バリアントを設定しました: {variant}");
         }
@@ -312,13 +325,14 @@ public partial class BuildingPlanManager : MonoBehaviour
 
         // Reject locations using the same conditions as buildable parcel highlighting and warn the UI.
         // Calls without parcelData cannot be checked here; allow them through for backend validation.
-        if (parcelData != null && !IsParcelTypeAllowed(parcelData.parcel_type, bdType))
+        string siteReason = parcelData != null ? ResolveSiteIncompatibility(parcelData.parcel_type, parcelData.water_depth, bdType) : null;
+        if (siteReason != null)
         {
-            Debug.Log($"BuildingPlanManager: parcel_type={parcelData.parcel_type} はバリアント {agentVariant} の立地条件({ResolveRequiredParcelType(bdType)})を満たしません。クリックを無視します。");
+            Debug.Log($"BuildingPlanManager: 区画 {parcelId} (parcel_type={parcelData.parcel_type}, 水深={parcelData.water_depth:F1}m) はバリアント {agentVariant} の立地条件を満たしません({siteReason})。クリックを無視します。");
             // Notify the UI to display a warning.
             if (IpcClient.Instance != null)
             {
-                IpcClient.Instance.EmitEditBuildingInvalidParcel(parcelId);
+                IpcClient.Instance.EmitEditBuildingInvalidParcel(parcelId, siteReason, parcelData.water_depth, SelectedBerthDepth);
             }
             return;
         }
@@ -415,6 +429,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         // Clear the selection on leaving construction mode so buildable filters chosen from display layers
         // do not retain the parcel type of the previous variant.
         SelectedParcelType = 0;
+        SelectedBerthDepth = 0f;
 
         // Reset the current construction values to defaults.
         currentFloors = defaultFloors;
@@ -920,11 +935,14 @@ public partial class BuildingPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Tests whether parcel_type satisfies the building location requirements.
+    /// Why the building cannot stand on the parcel (SITE_* code), or null if it can. Same order and rule as the backend's
+    /// site_incompatibility: the parcel type must match, then the water depth just outside the quay must reach the berth depth.
     /// </summary>
-    public static bool IsParcelTypeAllowed(int parcelType, int bdType)
+    public static string ResolveSiteIncompatibility(int parcelType, float waterDepth, int bdType)
     {
-        return parcelType == ResolveRequiredParcelType(bdType);
+        if (parcelType != ResolveRequiredParcelType(bdType)) return SITE_INCOMPATIBLE_PARCEL_TYPE;
+        if (waterDepth < SelectedBerthDepth) return SITE_INSUFFICIENT_WATER_DEPTH;
+        return null;
     }
 
     /// <summary>

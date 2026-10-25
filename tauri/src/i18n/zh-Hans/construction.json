@@ -114,6 +114,7 @@
       "overlap_city_building": "与市政设施或计划建设用地重叠",
       "overlap_path": "与道路重叠",
       "incompatible_parcel_type": "此处的地形无法建造该建筑",
+      "insufficient_water_depth": "此处岸壁前的水深约为{{depth}}米。该建筑需要至少{{required}}米",
       "not_city_land": "与非市政府所有的地块重叠",
       "generic": "无法在此处建设"
     },
@@ -131,6 +132,7 @@
     "copyInvalid": {
       "does_not_fit": "复制源建筑的占地无法容纳于此地块",
       "incompatible_parcel_type": "此地块类型无法建造该建筑",
+      "insufficient_water_depth": "此处岸壁前的水深约为{{depth}}米。该建筑需要至少{{required}}米",
       "regulation": "因违反建筑法规而无法建设",
       "generic": "无法在此地块建设"
     }

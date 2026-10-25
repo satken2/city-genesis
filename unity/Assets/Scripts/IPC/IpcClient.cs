@@ -1254,14 +1254,17 @@ public class IpcClient : MonoBehaviour
 
     /// <summary>
     /// Sends edit_building:invalid_parcel.
-    /// Reports clicks on parcels incompatible with the selected building type in construction mode.
-    /// Used to display a UI warning.
+    /// Reports clicks on parcels where the selected building cannot stand in construction mode. Used to display a UI warning.
+    /// reason is a BuildingPlanManager.SITE_* code; water_depth and berth_depth (m) let the UI show the shortfall.
     /// </summary>
-    public void EmitEditBuildingInvalidParcel(int parcelId)
+    public void EmitEditBuildingInvalidParcel(int parcelId, string reason, float waterDepth, float berthDepth)
     {
         var payload = new Dictionary<string, object>
         {
             ["parcel_id"] = parcelId,
+            ["reason"] = reason,
+            ["water_depth"] = waterDepth,
+            ["berth_depth"] = berthDepth,
         };
 
         SendEnvelope("edit_building:invalid_parcel", payload);

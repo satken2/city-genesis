@@ -1354,7 +1354,11 @@ export const IPC_EVENT_EDIT_BUILDING_SELECT_PARCEL = "edit_building:select_parce
  */
 export const IPC_EVENT_EDIT_BUILDING_SELECT_POINT = "edit_building:select_point";
 
-/** A parcel incompatible with the selected building type was clicked in building construction mode. */
+/**
+ * A parcel where the selected building cannot stand was clicked in building construction mode. Payload: { parcel_id,
+ * reason, water_depth, berth_depth }. reason is the backend's site code ("incompatible_parcel_type" or
+ * "insufficient_water_depth"); water_depth / berth_depth (m) are the parcel's depth at the quay and the port's requirement.
+ */
 export const IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL = "edit_building:invalid_parcel";
 
 /**

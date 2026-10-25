@@ -16,7 +16,8 @@ using UnityEngine;
 ///    If the rules on the core side change, update this mirror to match.
 /// B: The shape of ReclaimedLandMeshBuilder (top surface and vertical faces).
 /// C: PortBuildingMeshBuilder.FindFacingReclaimedQuays (whether a port faces a quay on reclaimed land), and
-///    that the straight cut (BuildQuayFootprint) for a port that does not face the quay does not become diagonal at neighboring reclaimed land.
+///    that the straight cut (BuildQuayFootprint) for a port that does not face the quay follows the backend's berth_line exactly.
+///    Choosing the line itself (chord endpoints next to reclaimed land) is the core's rule and is tested there (test_port_berth_depth.py).
 /// </summary>
 public static class QuayQA
 {
@@ -1090,53 +1091,24 @@ public static class QuayQA
     static readonly Vector2[] CornerTouchPort = { V(100, -50), V(150, -50), V(150, 20), V(110, 20) };
 
     /// <summary>
-    /// Straight cut for a port that does not face the quay: even if reclaimed land 1 touches a port edge or corner, the chord endpoints remain at the two points on the waterline (original coastline z=0) within the parcel,
-    /// so the quay footprint is the same as when there is no reclaimed land. Using intersections on the neighboring reclaimed-land edge as chord endpoints would make the chord diagonal.
+    /// Straight cut for a port that does not face the quay: the quay footprint is the bottom clipped to the landward side of the given
+    /// berth_line (sea on the left of A'→B'), the seaward edge runs along that line, and a missing line leaves the bottom uncut.
     /// </summary>
     static void CheckPortChord()
     {
-        Vector2[] naturalLand = { V(-1000, 0), V(1000, 0), V(1000, 1000), V(-1000, 1000) };
-        var cases = new List<(string label, Vector2[] port, Vector2[] merged)>
-        {
-            ("sharing a side edge", Rect(100, -40, 150, 20), MergedLand(100)),
-            ("3cm gap", Rect(100.03f, -40, 150, 20), MergedLand(100)),
-            ("overlap within the order tolerance (0.008m2)", Rect(100, -40, 150, 20), MergedLand(100.0002f)),
-            ("1m away", Rect(101, -40, 150, 20), MergedLand(100)),
-            ("corner touch", CornerTouchPort, MergedLand(100)),
-        };
-        try
-        {
-            foreach ((string label, Vector2[] port, Vector2[] merged) in cases)
-            {
-                Chord alone = QuayCut(port, naturalLand);
-                Require(alone.Valid && Mathf.Abs(alone.Dir.y) < 1e-4f && (alone.Normal - V(0, -1)).magnitude < 1e-4f,
-                    $"chord {label}: without the reclamation the cut is not along the coast z=0 (dir {alone.Dir}, normal {alone.Normal})");
-                Chord beside = QuayCut(port, merged);
-                Require(beside.Valid && Mathf.Abs(beside.Dir.y) < 1e-4f && (beside.Normal - V(0, -1)).magnitude < 1e-4f,
-                    $"chord {label}: beside the reclamation the cut is slanted (dir {beside.Dir}, normal {beside.Normal})");
-                Require(SameRing(alone.Footprint, beside.Footprint, 1e-3f),
-                    $"chord {label}: the reclamation changed the quay footprint ({Describe(alone.Footprint)} -> {Describe(beside.Footprint)})");
-            }
-            // The projection is QUAY_PROTRUSION (20 m) on both sides from the two ends of the waterline. It is shorter than the parcel's seaward depth (40 m), so it is not clamped.
-            Chord plain = QuayCut(Rect(100, -40, 150, 20), naturalLand);
-            Require(SameRing(plain.Footprint, Rect(100, -20, 150, 20), 1e-3f),
-                $"chord: the quay footprint of a plain port is {Describe(plain.Footprint)} instead of [100,150]x[-20,20]");
-            // For a parcel whose seaward depth is shallower than the projection, it is clamped at the parcel's seaward edge.
-            Chord shallow = QuayCut(Rect(100, -12, 150, 20), naturalLand);
-            Require(SameRing(shallow.Footprint, Rect(100, -12, 150, 20), 1e-3f),
-                $"chord: the quay footprint of a shallow port is {Describe(shallow.Footprint)} instead of [100,150]x[-12,20]");
-        }
-        finally
-        {
-            SetCoastline();
-        }
-        results.Add("Port chord: sharing a side edge/3cm gap/overlap within the order tolerance/1m away/corner touch keep the straight cut along the coast, " +
-                    "same quay footprint as without the reclamation");
+        Chord plain = QuayCut(Rect(100, -40, 150, 20), new[] { 150f, -20f, 100f, -20f });
+        Require(plain.Valid && Mathf.Abs(plain.Dir.y) < 1e-4f && (plain.Normal - V(0, -1)).magnitude < 1e-4f,
+            $"chord: the cut does not run along berth_line z=-20 (dir {plain.Dir}, normal {plain.Normal})");
+        Require(SameRing(plain.Footprint, Rect(100, -20, 150, 20), 1e-3f),
+            $"chord: the quay footprint of a plain port is {Describe(plain.Footprint)} instead of [100,150]x[-20,20]");
+        Chord shallow = QuayCut(Rect(100, -12, 150, 20), new[] { 150f, -12f, 100f, -12f });
+        Require(SameRing(shallow.Footprint, Rect(100, -12, 150, 20), 1e-3f),
+            $"chord: the quay footprint on a line at the parcel's seaward edge is {Describe(shallow.Footprint)} instead of [100,150]x[-12,20]");
+        Chord none = QuayCut(Rect(100, -40, 150, 20), null);
+        Require(!none.Valid && SameRing(none.Footprint, Rect(100, -40, 150, 20), 1e-3f),
+            $"chord: without berth_line the bottom must stay uncut ({Describe(none.Footprint)})");
+        results.Add("Port chord: the straight cut follows berth_line (20m out / at the parcel's seaward edge); no line leaves the bottom uncut");
     }
-
-    /// <summary>Coastline of the union of the original land (z>0) and reclaimed land 1 ([0,east]x[-50,0]).</summary>
-    static Vector2[] MergedLand(float east) =>
-        new[] { V(-1000, 0), V(0, 0), V(0, -50), V(east, -50), V(east, 0), V(1000, 0), V(1000, 1000), V(-1000, 1000) };
 
     struct Chord
     {
@@ -1145,10 +1117,9 @@ public static class QuayQA
         public Vector2[] Footprint;
     }
 
-    /// <summary>Convert the coastline to rings and straight-cut the port bottom (world coordinates) with PortBuildingMeshBuilder.BuildQuayFootprint.</summary>
-    static Chord QuayCut(Vector2[] portWorld, params Vector2[][] rings)
+    /// <summary>Straight-cut the port bottom (world coordinates) on berthLine (world [A'x, A'z, B'x, B'z]) with PortBuildingMeshBuilder.BuildQuayFootprint.</summary>
+    static Chord QuayCut(Vector2[] portWorld, float[] berthLine)
     {
-        SetCoastline(rings);
         Vector2 center = Vector2.zero;
         foreach (Vector2 p in portWorld) center += p;
         center /= portWorld.Length;
@@ -1156,9 +1127,9 @@ public static class QuayQA
         for (int i = 0; i < portWorld.Length; i++) local[i] = portWorld[i] - center;
         MethodInfo method = T("PortBuildingMeshBuilder").GetMethod("BuildQuayFootprint", BindingFlags.NonPublic | BindingFlags.Static)
             ?? throw new Exception("PortBuildingMeshBuilder.BuildQuayFootprint not found");
-        object[] args = { local, new Vector3(center.x, 0f, center.y), null };
+        object[] args = { local, berthLine, new Vector3(center.x, 0f, center.y), null };
         var footprint = (Vector2[])method.Invoke(null, args);
-        object seaward = args[2];
+        object seaward = args[3];
         Type edge = seaward.GetType();
         var world = new Vector2[footprint.Length];
         for (int i = 0; i < footprint.Length; i++) world[i] = footprint[i] + center;
@@ -1169,18 +1140,6 @@ public static class QuayQA
             Normal = (Vector2)edge.GetField("Normal").GetValue(seaward),
             Footprint = world,
         };
-    }
-
-    /// <summary>Convert the contents of CoastlineStore to rings (if empty, return it to the unloaded state). Advance the version as when fetching again so the port land-area cache is discarded.</summary>
-    static void SetCoastline(params Vector2[][] rings)
-    {
-        Type store = T("CoastlineStore");
-        store.GetMethod("Clear", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
-        if (rings.Length == 0) return;
-        var list = (List<Vector2[]>)(store.GetField("rings", BindingFlags.NonPublic | BindingFlags.Static)
-            ?? throw new Exception("CoastlineStore.rings not found")).GetValue(null);
-        list.AddRange(rings);
-        store.GetProperty("IsLoaded", BindingFlags.Public | BindingFlags.Static).GetSetMethod(true).Invoke(null, new object[] { true });
     }
 
     /// <summary>Whether the vertex sets match within the tolerance (regardless of starting point or orientation).</summary>

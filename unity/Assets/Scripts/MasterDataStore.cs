@@ -25,6 +25,8 @@ public class MasterDataStore : MonoBehaviour
 		public int? bd_type;
 		// Allowed parcel types (PARCEL_*). Unset values use bd_type defaults: coastal for ports, land for others.
 		public int? parcel_type;
+		// Required water depth just outside the quay (m). Null means no requirement; compared with ParcelSummary.water_depth.
+		public float? berth_depth;
 		public int? building_shape;
 		public int? model_type;
 		public int? model_source_variant;

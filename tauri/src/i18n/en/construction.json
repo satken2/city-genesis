@@ -114,6 +114,7 @@
       "overlap_city_building": "Overlaps a city facility or planned construction site",
       "overlap_path": "Overlaps a road",
       "incompatible_parcel_type": "This building cannot be built on this terrain",
+      "insufficient_water_depth": "The water at this quay is about {{depth}} m deep. This building needs at least {{required}} m",
       "not_city_land": "Overlaps a parcel not owned by the city",
       "generic": "Cannot build here"
     },
@@ -131,6 +132,7 @@
     "copyInvalid": {
       "does_not_fit": "The source building's footprint does not fit on this parcel",
       "incompatible_parcel_type": "This building cannot be built on this parcel type",
+      "insufficient_water_depth": "The water at this quay is about {{depth}} m deep. This building needs at least {{required}} m",
       "regulation": "Blocked by building regulations",
       "generic": "Cannot build on this parcel"
     }

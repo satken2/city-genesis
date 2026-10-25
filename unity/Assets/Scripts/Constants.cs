@@ -287,6 +287,9 @@ public static class Constants
     public const float QUAY_KEEP_WIDTH = 2.8f;
     public const float QUAY_BAND_WIDTH = 5.6f;
     public const float QUAY_PROBE_DISTANCE = 0.5f;
+    public const float QUAY_FACE_TOLERANCE = 0.1f;
+    public const float QUAY_FACE_MIN_LENGTH = 1.0f;
+    public const float QUAY_LAND_SIDE_MIN_COVER = 0.5f;
     public const float SEA_GRADING_TOP = 3.0f;
     public const float GRADING_MAX_AREA = 4000000.0f;
     public const float GRADING_HEIGHT_OFFSET_LIMIT = 100.0f;

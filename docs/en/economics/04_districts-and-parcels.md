@@ -18,6 +18,8 @@ Parcels have three categories based on their relationship to the coastline. Buil
 | Shore | `PARCEL_SHORE` | Land touching the coastline |
 | Water | `PARCEL_WATER` | Sites for offshore structures |
 
+Ports where ships berth stand only on shore parcels whose water just outside the quay reaches the depth each port type requires. The seabed extends the slope of the land into the sea, so steep coasts have deep water nearby and suit ports (natural harbors), while on shallow, flat coasts the land must first be reclaimed out to deep water before a port can be built.
+
 See [land geometry](../geometries/B_land-geometry.md) for shapes and [buildings](05_buildings.md) for their relationship to buildings.
 
 ## 4.3. Regulations and location

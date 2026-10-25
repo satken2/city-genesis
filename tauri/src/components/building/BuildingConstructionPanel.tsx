@@ -92,6 +92,14 @@ function normalizeAngle(angle: number): number {
   return ((angle % 360) + 360) % 360;
 }
 
+// Interpolation values of the insufficient_water_depth reason: the measured depth to one decimal, the requirement as written.
+function berthDepthText(water: number, required: number): { depth: string; required: string } {
+  return {
+    depth: water.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+    required: required.toLocaleString(undefined, { maximumFractionDigits: 1 }),
+  };
+}
+
 type BuildingPreviewData = {
   polygon: number[][];
   height: number;
@@ -162,6 +170,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   // Direct-placement validity (valid / invalid_reason from backend preview-direct).
   const [directValid, setDirectValid] = useState(false);
   const [directInvalidReason, setDirectInvalidReason] = useState<string | null>(null);
+  // Water depth just outside the quay and the building's required berth depth (m) from the latest direct/copy preview,
+  // interpolated into the insufficient_water_depth reason.
+  const [berthDepths, setBerthDepths] = useState<{ water: number; required: number }>({ water: 0, required: 0 });
   // Confirmation allowed if automatic land acquisition resolves overlaps with private parcels
   // (preview-direct requires_acquisition). The button stays enabled but opens confirmation before committing.
   const [directRequiresAcquisition, setDirectRequiresAcquisition] = useState(false);
@@ -519,6 +530,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         const data = await fetchApi<BuildingPreviewData & {
           valid?: boolean;
           invalid_reason?: string | null;
+          water_depth?: number;
+          berth_depth?: number;
           site_invalid_reason?: string | null;
           requires_acquisition?: boolean;
           acquisition?: { count: number; estimated_cost: number } | null;
@@ -534,6 +547,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           if (copySrc != null) {
             setCopyValid(data.valid ?? false);
             setCopyInvalidReason(data.invalid_reason ?? null);
+            setBerthDepths({ water: data.water_depth ?? 0, required: data.berth_depth ?? 0 });
           }
           if (editAgentId == null) {
             setSiteInvalidReason(data.site_invalid_reason ?? null);
@@ -798,6 +812,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       area: number;
       valid: boolean;
       invalid_reason: string | null;
+      water_depth?: number;
+      berth_depth?: number;
       requires_acquisition?: boolean;
       acquisition?: {
         blocking_parcel_ids: number[];
@@ -835,6 +851,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         setDirectValid(data.valid);
         setValidatedDirectKey(directRequestKey);
         setDirectInvalidReason(data.invalid_reason ?? null);
+        setBerthDepths({ water: data.water_depth ?? 0, required: data.berth_depth ?? 0 });
         setDirectRequiresAcquisition(data.requires_acquisition === true);
         setDirectAcquisition(
           data.requires_acquisition === true && data.acquisition
@@ -1102,9 +1119,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     let unlisten: (() => void) | undefined;
 
     appWindow
-      .listen<{ parcel_id: number }>(IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL, () => {
+      .listen<{ parcel_id: number; reason: string; water_depth: number; berth_depth: number }>(IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL, (event) => {
+        const { reason, water_depth, berth_depth } = event.payload;
         showNotification({
-          message: t("building_construction.invalidParcel"),
+          message: reason === "insufficient_water_depth"
+            ? t("building_construction.directInvalid.insufficient_water_depth", berthDepthText(water_depth, berth_depth))
+            : t("building_construction.invalidParcel"),
           durationMs: 3000,
         }).catch((err) => {
           console.error("[BuildingConstruction] showNotification failed:", err);
@@ -1748,6 +1768,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                       {directInvalidReason
                         ? t(`building_construction.directInvalid.${directInvalidReason}`, {
                             defaultValue: t("building_construction.directInvalid.generic"),
+                            ...berthDepthText(berthDepths.water, berthDepths.required),
                           })
                         : t("building_construction.directInvalid.generic")}
                     </span>
@@ -1774,6 +1795,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                       {copyInvalidReason
                         ? t(`building_construction.copyInvalid.${copyInvalidReason}`, {
                             defaultValue: t("building_construction.copyInvalid.generic"),
+                            ...berthDepthText(berthDepths.water, berthDepths.required),
                           })
                         : t("building_construction.copyInvalid.generic")}
                     </span>

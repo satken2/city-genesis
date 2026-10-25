@@ -47,6 +47,13 @@ namespace GeneratedModels
         /// </summary>
         public int space_types;
 
+        /// <summary>
+        /// Natural-coast quay line of the building's parcel, world XZ [A'x, A'z, B'x, B'z] with the sea on the left of A'→B'
+        /// (multi_agent schema, method: other). The backend decides it and judges port water depth along it;
+        /// PortBuildingMeshBuilder cuts the quay slab on it. Null off the coast or when the parcel faces reclaimed quays.
+        /// </summary>
+        public List<object> berth_line;
+
         private float[][] _polygonArrayCache;
 
         /// <summary>
@@ -60,6 +67,19 @@ namespace GeneratedModels
                 if (_polygonArrayCache == null && polygon != null)
                     _polygonArrayCache = GeneratedModelUtils.ToFloatJaggedArray(polygon);
                 return _polygonArrayCache;
+            }
+        }
+
+        private float[] _berthLineArrayCache;
+
+        /// <summary>Get berth_line as float[] (lazily cached); null when absent.</summary>
+        public float[] berthLineArray
+        {
+            get
+            {
+                if (_berthLineArrayCache == null && berth_line != null)
+                    _berthLineArrayCache = GeneratedModelUtils.ToFloatArray(berth_line);
+                return _berthLineArrayCache;
             }
         }
 

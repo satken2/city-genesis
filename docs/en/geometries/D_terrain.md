@@ -56,6 +56,8 @@ Scenarios also contain initial [natural resources](../economics/17_supply-and-tr
 
 The game does not bundle elevation maps. Scenarios (`.cg`) contain terrain independently. Users import grayscale PNG or `.npy` elevation files to create scenarios. Fresh imports contain elevation and optional background terrain, with default ground cover and climate. See [sessions and saves](../programs/sessions-and-saves.md) for scenarios and API reference for import fields.
 
+The seabed extends the slope of the land into the sea: the steeper the land near the coast, the closer the deep water, and the flatter, the shallower. The water depth where ports can be built ([land geometry](B_land-geometry.md)) is decided by this seabed. Importing an elevation file and the terrain editor's sea-floor generation (following the land slope) use the same rule and produce the same seabed from the same elevation.
+
 Tauri's terrain editor reads and writes elevation, water surfaces, rivers, camera, ground cover, and climate through scenario terrain APIs. Resources and props are edited in scenario creation mode sessions; the terrain editor passes their loaded content through unchanged. Encrypted DLC scenarios are excluded to prevent terrain extraction.
 
 Elevation, water surfaces, and rivers are locked in scenarios containing any paths, buildings, edited cells, or reclaimed land. Construction grounds objects against the terrain at that time; changing only the ground would cause disagreement. Saving elevation, water, or rivers makes the core regenerate derived values such as coastlines and parcel types.

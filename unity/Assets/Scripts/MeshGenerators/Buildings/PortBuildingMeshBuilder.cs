@@ -15,9 +15,10 @@ using NetTopologySuite.Geometries;
 /// - Parcel landward of reclaimed quay (<see cref="FindFacingReclaimedQuays"/>, a port drawn on reclamation): leave the water edge to the reclaimed quay
 ///   (<see cref="ReclaimedLandManager"/> draws top/vertical faces); generate no slab. Water edge = facing quay sections;
 ///   yard = parcel land portion.
-/// - Otherwise (natural coast): backend preserves coastal parcels without coastline clipping (B_土地形状 B.5),
-///   so cut the footprint along the chord connecting water-edge endpoints, shifted seaward equally by <see cref="QUAY_PROTRUSION"/>,
-///   then extrude a thick board (quay slab). Water edge = cut-line edges; yard = slab area.
+/// - Otherwise (natural coast): backend preserves coastal parcels without coastline clipping (B_土地形状 B.5)
+///   and decides the quay line itself (the parcel's berth_line: the water-edge chord shifted seaward, capped by the parcel),
+///   because it judges the port's required water depth along that line. Cut the footprint along berth_line and extrude
+///   a thick board (quay slab); never derive the line here. Water edge = cut-line edges; yard = slab area.
 ///
 /// visual_variant(1) selects exterior models as for other buildings (F_建物メッシュの生成); visual_variant2 seeds
 /// yard cargo placement. Close-up uses `_close` parts at identical positions. Far uses distant models/boxes like other buildings, bypassing this generator.
@@ -29,43 +30,11 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>Quay-top height above sea level (m). Facility modules also never sit below this.</summary>
     public const float QUAY_TOP_HEIGHT = 2f;
 
-    /// <summary>Natural-coast quay projection seaward from water-edge endpoints (on coastline), in m.</summary>
-    public const float QUAY_PROTRUSION = 20f;
-
     /// <summary>Distance tolerance for sea-edge membership (m). Matches cut line to quay-footprint edges.</summary>
     private const float SEAWARD_EDGE_EPSILON = 0.05f;
 
-    /// <summary>
-    /// Parcel expansion distance for finding reclaimed quay sections (m), avoiding misses when numerical error puts coincident quays slightly outside.
-    /// </summary>
-    private const float QUAY_FACE_TOLERANCE = 0.1f;
-
-    /// <summary>
-    /// Minimum facing quay length (m). Even point contacts at corners/vertices leave short sections crossing the tolerance band
-    /// at oblique angles (under 1m even at 10°); shorter sections do not count as facing.
-    /// </summary>
-    private const float QUAY_FACE_MIN_LENGTH = 1f;
-
-    /// <summary>
-    /// Minimum parcel coverage of the landward band (inward from quay by <see cref="Constants.QUAY_PROBE_DISTANCE"/>)
-    /// for landward classification. Edge-coincident landward parcels cover over 80% despite tolerance offsets; seaward ones cover under 20%.
-    /// </summary>
-    private const double QUAY_LAND_SIDE_MIN_COVER = 0.5;
-
-    /// <summary>Minimum land-portion area (m²). Below this, treat the parcel as merely touching coastline from outside.</summary>
+    /// <summary>Minimum land-portion area (m²) for the yard of a port facing reclaimed quays; smaller pieces are slivers.</summary>
     private const double MIN_LAND_PART_AREA = 1.0;
-
-    /// <summary>Probe-circle radius around candidate quay endpoints for checking both land/sea inside the parcel (m).</summary>
-    private const double QUAY_END_PROBE_RADIUS = 0.5;
-
-    /// <summary>
-    /// Minimum land/sea shares of the parcel portion within a circle for a candidate quay endpoint.
-    /// Prevents mistaking tiny overlap strips from adjacent reclamation (within the 0.01m² order-validation allowance) for the water edge.
-    /// </summary>
-    private const double QUAY_END_MIN_SHARE = 0.01;
-
-    /// <summary>Distance (m) for treating land-portion vertices as on the footprint perimeter.</summary>
-    private const double QUAY_END_OUTLINE_TOLERANCE = 0.01;
 
     /// <summary>Search limit for yard cargo variants (port_cargo1, 2, … / port_container1, 2, …).</summary>
     private const int MAX_CARGO_PARTS = 16;
@@ -134,8 +103,8 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         }
         else
         {
-            // Natural coast: derive the chord between water-edge endpoints and clip the footprint with a line shifted seaward by a fixed distance at both ends.
-            Vector2[] quayFootprint = BuildQuayFootprint(footprint, centerPointWorld, out QuaySeawardEdge seaward);
+            // Natural coast: clip the footprint along the backend's quay line (berth_line).
+            Vector2[] quayFootprint = BuildQuayFootprint(footprint, buildingData.berthLineArray, centerPointWorld, out QuaySeawardEdge seaward);
 
             // Slab-top world Y = sea level (0m) + 2m, fixed. GameObject sits at center_point terrain height,
             // so subtract centerPointWorld.y for local Y.
@@ -316,7 +285,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         }
         else
         {
-            Vector2[] quayFootprint = BuildQuayFootprint(BuildingMeshUtils.GetFootprint(buildingData), centerPointWorld, out QuaySeawardEdge seaward);
+            Vector2[] quayFootprint = BuildQuayFootprint(BuildingMeshUtils.GetFootprint(buildingData), buildingData.berthLineArray, centerPointWorld, out QuaySeawardEdge seaward);
             local = EnumerateSeawardWaterlines(quayFootprint, seaward, QUAY_TOP_HEIGHT);
         }
         var origin = new Vector2(centerPointWorld.x, centerPointWorld.z);
@@ -590,7 +559,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             minX = Mathf.Min(minX, p.x); maxX = Mathf.Max(maxX, p.x);
             minZ = Mathf.Min(minZ, p.y); maxZ = Mathf.Max(maxZ, p.y);
         }
-        float margin = QUAY_FACE_TOLERANCE + SEAWARD_EDGE_EPSILON;
+        float margin = Constants.QUAY_FACE_TOLERANCE + SEAWARD_EDGE_EPSILON;
         ReclaimedLandStore.GetQuaySegments(Rect.MinMaxRect(minX - margin, minZ - margin, maxX + margin, maxZ + margin), candidates);
         return candidates.Count == 0 ? candidates : FindFacingReclaimedQuays(parcelWorld, candidates);
     }
@@ -598,10 +567,11 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// Return reclaimed quay sections facing the parcel (world-XZ polygon), clipped to its extent; empty if none face it.
     ///
-    /// Intersect quay sections with the parcel expanded by <see cref="QUAY_FACE_TOLERANCE"/>; trim ends cut at the expanded boundary
-    /// by the tolerance protruding beyond the parcel. A section faces the parcel if longer than <see cref="QUAY_FACE_MIN_LENGTH"/> and the parcel
+    /// Intersect quay sections with the parcel expanded by <see cref="Constants.QUAY_FACE_TOLERANCE"/>; trim ends cut at the expanded boundary
+    /// by the tolerance protruding beyond the parcel. A section faces the parcel if longer than <see cref="Constants.QUAY_FACE_MIN_LENGTH"/> and the parcel
     /// lies landward (opposite outward normal, inside reclamation). Test landward status by parcel coverage
-    /// of a <see cref="Constants.QUAY_PROBE_DISTANCE"/> inward band, requiring <see cref="QUAY_LAND_SIDE_MIN_COVER"/>.
+    /// of a <see cref="Constants.QUAY_PROBE_DISTANCE"/> inward band, requiring <see cref="Constants.QUAY_LAND_SIDE_MIN_COVER"/>.
+    /// The backend measures port water depth in front of the same sections (geo_berth.find_facing_reclaimed_quays); keep both rules identical.
     /// Include quays crossing the parcel or coinciding with its seaward edge (ports drawn on reclamation); exclude quays
     /// coinciding from the sea side (reclamation adjacent to an existing port, outward normal toward parcel water) or merely touching corners/vertices.
     /// Tests/Quay calls this via reflection; preserve name and arguments.
@@ -622,7 +592,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             {
                 parcel = parcel.Buffer(0);
             }
-            Geometry area = parcel.Buffer(QUAY_FACE_TOLERANCE);
+            Geometry area = parcel.Buffer(Constants.QUAY_FACE_TOLERANCE);
             var pieces = new List<LineString>();
             foreach (ReclaimedQuay quay in quays)
             {
@@ -652,13 +622,13 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                     // An end not equal to the original section endpoint lies on the expanded boundary (QUAY_FACE_TOLERANCE outside parcel); trim that excess.
                     if (t0 * length > 1e-4)
                     {
-                        t0 += QUAY_FACE_TOLERANCE / length;
+                        t0 += Constants.QUAY_FACE_TOLERANCE / length;
                     }
                     if ((1.0 - t1) * length > 1e-4)
                     {
-                        t1 -= QUAY_FACE_TOLERANCE / length;
+                        t1 -= Constants.QUAY_FACE_TOLERANCE / length;
                     }
-                    if ((t1 - t0) * length <= QUAY_FACE_MIN_LENGTH)
+                    if ((t1 - t0) * length <= Constants.QUAY_FACE_MIN_LENGTH)
                     {
                         continue;
                     }
@@ -684,7 +654,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 
     /// <summary>
     /// Whether the parcel lies landward of quay section p-q. Take a band of width <see cref="Constants.QUAY_PROBE_DISTANCE"/> opposite the outward normal
-    /// inside reclamation; require parcel coverage of at least <see cref="QUAY_LAND_SIDE_MIN_COVER"/>.
+    /// inside reclamation; require parcel coverage of at least <see cref="Constants.QUAY_LAND_SIDE_MIN_COVER"/>.
     /// </summary>
     private static bool IsOnLandSide(GeometryFactory gf, Geometry parcel, Vector2 p, Vector2 q, Vector2 normal)
     {
@@ -698,7 +668,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             new Coordinate(p.x, p.y),
         });
         double stripArea = strip.Area;
-        return stripArea > 0.0 && parcel.Intersection(strip).Area >= QUAY_LAND_SIDE_MIN_COVER * stripArea;
+        return stripArea > 0.0 && parcel.Intersection(strip).Area >= Constants.QUAY_LAND_SIDE_MIN_COVER * stripArea;
     }
 
     /// <summary>Recursively collect LineStrings from Geometry (LineString / MultiLineString / Collection). Discard points, which have no length.</summary>
@@ -895,125 +865,34 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// Generate quay footprint from the local footprint polygon (relative to center_point).
-    ///
-    /// Choose the farthest pair where parcel water edge reaches footprint perimeter (<see cref="CollectQuayEndCandidates"/>) as left A/right B;
-    /// project both seaward by <see cref="QUAY_PROTRUSION"/>, clip along their connecting line, retaining landward geometry.
-    /// The sea boundary follows one line parallel to chord A-B, not the coastline (equal projection at both ends).
-    /// Cap projection at the distance from chord to the farthest seaward footprint vertex (depth limit), keeping quays inside parcels.
-    /// Return original footprint if coastline is unloaded, fewer than two endpoints exist, no sea vertices exist, or geometry operations fail.
-    /// Tests/Quay supplies coastline to <see cref="CoastlineStore"/> and invokes this via reflection; preserve name/arguments.
+    /// Clip the local footprint (relative to center_point) along the backend's natural-coast quay line, retaining the landward side.
+    /// berthLine is world XZ [A'x, A'z, B'x, B'z] with the sea on the left of A'→B' (BuildingSummary.berth_line). The backend decides
+    /// this line and judges the port's water depth just outside it (geo_berth), so it is never re-derived here.
+    /// Return the original footprint if the line is absent (not a coastal parcel, or undetermined) or geometry operations fail.
+    /// Tests/Quay invokes this via reflection; preserve name and arguments.
     /// </summary>
     /// <param name="seaward">Sea boundary (edges from line clipping), used for water-edge enumeration. Valid=false if clipping fails.</param>
-    private static Vector2[] BuildQuayFootprint(Vector2[] footprint, Vector3 centerPointWorld, out QuaySeawardEdge seaward)
+    private static Vector2[] BuildQuayFootprint(Vector2[] footprint, float[] berthLine, Vector3 centerPointWorld, out QuaySeawardEdge seaward)
     {
         seaward = default;
-        int n = footprint.Length;
-
-        if (!CoastlineStore.IsLoaded || !CoastlineStore.HasCoastline)
+        if (berthLine == null || berthLine.Length < 4)
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-                $"[PortBMB] 海岸線未ロード (IsLoaded={CoastlineStore.IsLoaded})。カットせず元形状を使用");
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, "[PortBMB] 岸壁の線が無いためカットせず元形状を使用");
             return (Vector2[])footprint.Clone();
         }
-
-        Geometry land = GetLandGeometry();
-        if (land == null || land.IsEmpty)
+        var aOut = new Vector2(berthLine[0], berthLine[1]);
+        var bOut = new Vector2(berthLine[2], berthLine[3]);
+        if ((bOut - aOut).sqrMagnitude < 1f)
         {
             return (Vector2[])footprint.Clone();
         }
+        Vector2 u = (bOut - aOut).normalized;
+        var perp = new Vector2(-u.y, u.x);
 
         try
         {
             var gf = new GeometryFactory();
             Geometry footprintPoly = ToWorldPolygon(gf, footprint, centerPointWorld);
-
-            // Enumerate points where parcel water edge meets footprint perimeter; farthest two become left A/right B.
-            var hits = new List<Vector2>();
-            CollectQuayEndCandidates(gf, footprintPoly, land, hits);
-            if (hits.Count < 2)
-            {
-                UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-                    $"[PortBMB] 水際の端が{hits.Count}点のためカットせず元形状を使用（全域が陸または海）");
-                return (Vector2[])footprint.Clone();
-            }
-            Vector2 a = Vector2.zero, b = Vector2.zero;
-            float bestSq = -1f;
-            for (int i = 0; i < hits.Count; i++)
-            {
-                for (int j = i + 1; j < hits.Count; j++)
-                {
-                    float sq = (hits[i] - hits[j]).sqrMagnitude;
-                    if (sq > bestSq)
-                    {
-                        bestSq = sq;
-                        a = hits[i];
-                        b = hits[j];
-                    }
-                }
-            }
-            if (bestSq < 1f)
-            {
-                return (Vector2[])footprint.Clone();
-            }
-
-            // Determine sea direction from the average side of chord A-B occupied by footprint vertices outside land.
-            Vector2 u = (b - a).normalized;
-            Vector2 perp = new Vector2(-u.y, u.x);
-            float sideSum = 0f;
-            var seaOffsets = new List<float>();
-            for (int i = 0; i < n; i++)
-            {
-                float wx = footprint[i].x + centerPointWorld.x;
-                float wz = footprint[i].y + centerPointWorld.z;
-                if (!CoastlineStore.IsLand(wx, wz))
-                {
-                    float s = Vector2.Dot(new Vector2(wx, wz) - a, perp);
-                    sideSum += s;
-                    seaOffsets.Add(s);
-                }
-            }
-            if (seaOffsets.Count == 0)
-            {
-                UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-                    "[PortBMB] 海側の底面頂点が無いためカットせず元形状を使用");
-                return (Vector2[])footprint.Clone();
-            }
-            if (sideSum < 0f)
-            {
-                perp = -perp;
-                for (int i = 0; i < seaOffsets.Count; i++)
-                {
-                    seaOffsets[i] = -seaOffsets[i];
-                }
-            }
-            // Normalize A→B to sea-on-left orientation (stable correspondence for the same building).
-            if (Vector2.Dot(perp, new Vector2(-u.y, u.x)) < 0f)
-            {
-                Vector2 tmp = a;
-                a = b;
-                b = tmp;
-                u = -u;
-            }
-
-            // Depth limit = distance from chord to farthest seaward footprint vertex.
-            float maxDepth = 0f;
-            foreach (float s in seaOffsets)
-            {
-                if (s > maxDepth)
-                {
-                    maxDepth = s;
-                }
-            }
-            if (maxDepth < 0.5f)
-            {
-                return (Vector2[])footprint.Clone();
-            }
-
-            // Project both water-edge endpoints (on coastline) seaward by the same distance.
-            float depth = Mathf.Min(QUAY_PROTRUSION, maxDepth);
-            Vector2 aOut = a + perp * depth;
-            Vector2 bOut = b + perp * depth;
 
             // Intersect footprint with landward half-plane of cut line A'-B' (sufficiently large rectangle) for quay footprint.
             const float L = 1e4f;
@@ -1041,7 +920,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 return (Vector2[])footprint.Clone();
             }
 
-            // Convert exterior ring back to local coordinates.
             Vector2[] quayFootprint = ToLocalRing(best, centerPointWorld);
             if (quayFootprint == null)
             {
@@ -1056,93 +934,13 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 Normal = perp,
             };
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-                $"[PortBMB] 直線カット適用: 頂点 {n}→{quayFootprint.Length}, 張り出し {depth:F1}m (上限{maxDepth:F1}m)");
+                $"[PortBMB] 直線カット適用: 頂点 {footprint.Length}→{quayFootprint.Length}");
             return quayFootprint;
         }
         catch (System.Exception ex)
         {
             Debug.LogWarning($"[PortBMB] 岸壁の直線カットに失敗しました: {ex.Message}。元の形状を使用します。");
             return (Vector2[])footprint.Clone();
-        }
-    }
-
-    /// <summary>
-    /// Collect candidate quay left/right endpoints (where parcel water edge reaches footprint perimeter) in world-space output.
-    ///
-    /// If the parcel contains land (area at least <see cref="MIN_LAND_PART_AREA"/>), water edge separates that land from parcel sea.
-    /// Choose land vertices on the footprint perimeter whose surroundings (radius <see cref="QUAY_END_PROBE_RADIUS"/>) contain
-    /// at least <see cref="QUAY_END_MIN_SHARE"/> each of land/sea within the parcel. Exclude adjacent reclamation touching edges/corners externally:
-    /// coastline may touch the parcel boundary without land inside (including it would tilt the farthest-pair chord).
-    /// If no land is inside, the parcel merely touches coastline externally; use footprint-perimeter/coastline intersections directly.
-    /// </summary>
-    private static void CollectQuayEndCandidates(GeometryFactory gf, Geometry footprintPoly, Geometry land, List<Vector2> output)
-    {
-        Geometry landPart = PolygonalPart(gf, footprintPoly.Intersection(land));
-        if (landPart == null || landPart.Area < MIN_LAND_PART_AREA)
-        {
-            CollectCoordinates(footprintPoly.Boundary.Intersection(land.Boundary), output);
-            return;
-        }
-
-        Geometry outline = footprintPoly.Boundary;
-        foreach (Coordinate c in landPart.Coordinates)
-        {
-            Geometry point = gf.CreatePoint(c);
-            if (outline.Distance(point) > QUAY_END_OUTLINE_TOLERANCE)
-            {
-                continue;
-            }
-            Geometry disk = point.Buffer(QUAY_END_PROBE_RADIUS);
-            double parcelArea = disk.Intersection(footprintPoly).Area;
-            double landArea = disk.Intersection(landPart).Area;
-            double minArea = QUAY_END_MIN_SHARE * parcelArea;
-            if (landArea > minArea && parcelArea - landArea > minArea)
-            {
-                output.Add(new Vector2((float)c.X, (float)c.Y));
-            }
-        }
-    }
-
-    /// <summary>Extract only Polygon surfaces from overlay results. Discard lines/points caused by touching. Null if no surface exists.</summary>
-    private static Geometry PolygonalPart(GeometryFactory gf, Geometry geom)
-    {
-        if (geom == null || geom.IsEmpty)
-        {
-            return null;
-        }
-        var polygons = new List<Polygon>();
-        for (int i = 0; i < geom.NumGeometries; i++)
-        {
-            if (geom.GetGeometryN(i) is Polygon p && !p.IsEmpty)
-            {
-                polygons.Add(p);
-            }
-        }
-        if (polygons.Count == 0)
-        {
-            return null;
-        }
-        return polygons.Count == 1 ? (Geometry)polygons[0] : gf.CreateMultiPolygon(polygons.ToArray());
-    }
-
-    /// <summary>Recursively collect vertex coordinates from Geometry (Point / MultiPoint / LineString / Collection).</summary>
-    private static void CollectCoordinates(Geometry geom, List<Vector2> output)
-    {
-        if (geom == null || geom.IsEmpty)
-        {
-            return;
-        }
-        if (geom is GeometryCollection)
-        {
-            for (int i = 0; i < geom.NumGeometries; i++)
-            {
-                CollectCoordinates(geom.GetGeometryN(i), output);
-            }
-            return;
-        }
-        foreach (Coordinate c in geom.Coordinates)
-        {
-            output.Add(new Vector2((float)c.X, (float)c.Y));
         }
     }
 

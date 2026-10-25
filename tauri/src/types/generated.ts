@@ -82,6 +82,8 @@ export type AgentSummary = {
   polygon?: any[];
   /** 中心点座標 [x, z] */
   center_point?: any[];
+  /** 立地区画の天然の海岸の岸壁の線 [A'x, A'z, B'x, B'z](A'→B' で海が左)。港の岸壁の描画と入港船の接岸に使う。沿岸区画以外・埋立地の岸壁に面する区画は null (サーバーサイドで計算されるフィールド。型は動的。) */
+  berth_line?: any;
   /** ステータス（計画中・建設中・稼働中など。共有定数の STATUS_* を参照） */
   status: number;
   /** ステータス遷移理由 */
@@ -521,6 +523,8 @@ export type ParcelSummary = {
   limit_height: number;
   /** この区画を使用している建物エージェントのID（0=空き地） */
   usage_id: number;
+  /** 岸壁のすぐ外の水深(m)。港の必要水深(agent_master の berth_depth)以上の区画にだけ港が建つ。沿岸区画以外は0 */
+  water_depth: number;
 };
 
 export type ParcelData = {
@@ -546,6 +550,8 @@ export type ParcelData = {
   resource_id: Record<string, number>;
   /** 地形の平均勾配（無次元）。建設難易度の元データ */
   terrain_slope: number;
+  /** 岸壁のすぐ外の水深(m)。港の必要水深(agent_master の berth_depth)以上の区画にだけ港が建つ。沿岸区画以外は0 */
+  water_depth: number;
   /** 区画に重なる天然資源の名称（資源種別→名称） (サーバーサイドで計算されるフィールド。型は動的。) */
   name_resource?: any;
   /** 接道している街路のID */

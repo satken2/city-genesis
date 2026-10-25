@@ -102,7 +102,7 @@ import {
   applyThermalErosion,
   applyHydraulicErosion,
 } from "./terrainErosion";
-import { type SeaFloorParams, applySeaFloor } from "./terrainSeaFloor";
+import { type SeaFloorParams, type SeaFloorSlopeMode, applySeaFloor } from "./terrainSeaFloor";
 import {
   type RiverGenParams,
   type GeneratedRiver,
@@ -1362,7 +1362,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // (toolStateRef). See internal constants in terrainErosion.ts for detailed coefficients.
   const [thermalParams, setThermalParams] = useState<ThermalErosionParams>({ talusAngleDeg: 33, iterations: 50 });
   const [hydraulicParams, setHydraulicParams] = useState<HydraulicErosionParams>({ droplets: 50000, erodeStrength: 0.3 });
-  const [seaFloorParams, setSeaFloorParams] = useState<SeaFloorParams>({ seaLevelThreshold: 0, shelfSlopePercent: 2, maxDepth: 50 });
+  const [seaFloorParams, setSeaFloorParams] = useState<SeaFloorParams>({ seaLevelThreshold: 0, slopeMode: "land", shelfSlopePercent: 2, maxDepth: 50 });
   // Cells changed by the latest sea-floor generation. 0 diagnoses no cells qualifying as sea; null means not run yet.
   const [seaFloorModifiedCount, setSeaFloorModifiedCount] = useState<number | null>(null);
 
@@ -3762,16 +3762,30 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                     />
                   </div>
                   <div className="terrain-editor-param-row">
-                    <span className="terrain-editor-param-label">{t("terrainEditor.seaFloorSlope", { defaultValue: "海岸の海底勾配(%)" })}</span>
-                    <NumberStepper
-                      value={seaFloorParams.shelfSlopePercent}
-                      onChange={(v) => setSeaFloorParams((p) => ({ ...p, shelfSlopePercent: v }))}
-                      min={0.1}
-                      max={20}
-                      step={0.1}
-                      integerOnly={false}
-                    />
+                    <span className="terrain-editor-param-label">{t("terrainEditor.seaFloorSlopeMode")}</span>
+                    <select
+                      className="terrain-editor-select"
+                      value={seaFloorParams.slopeMode}
+                      onChange={(e) => setSeaFloorParams((p) => ({ ...p, slopeMode: e.target.value as SeaFloorSlopeMode }))}
+                      disabled={status !== "ready"}
+                    >
+                      <option value="land">{t("terrainEditor.seaFloorSlopeModeLand")}</option>
+                      <option value="fixed">{t("terrainEditor.seaFloorSlopeModeFixed")}</option>
+                    </select>
                   </div>
+                  {seaFloorParams.slopeMode === "fixed" && (
+                    <div className="terrain-editor-param-row">
+                      <span className="terrain-editor-param-label">{t("terrainEditor.seaFloorSlope", { defaultValue: "海岸の海底勾配(%)" })}</span>
+                      <NumberStepper
+                        value={seaFloorParams.shelfSlopePercent}
+                        onChange={(v) => setSeaFloorParams((p) => ({ ...p, shelfSlopePercent: v }))}
+                        min={0.1}
+                        max={20}
+                        step={0.1}
+                        integerOnly={false}
+                      />
+                    </div>
+                  )}
                   <div className="terrain-editor-param-row">
                     <span className="terrain-editor-param-label">{t("terrainEditor.seaFloorMaxDepth", { defaultValue: "最大水深(m)" })}</span>
                     <NumberStepper
@@ -3800,7 +3814,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                   <div className="terrain-editor-hint">
                     {t("terrainEditor.seaFloorHint", {
                       defaultValue:
-                        "標高が判定値以下のマスを海とみなし、海岸から沖へ向かって指定勾配で深くします(最大水深へ滑らかに漸近)。海面が一律0mのデータ(国土地理院DEM等)から自然な海底を作る用途です。湖など海にしたくない0m地帯がある場合は、先に海側だけを範囲選択してから実行してください",
+                        "標高が判定値以下のマスを海とみなし、海岸から沖へ深くします(最大水深へ滑らかに漸近)。「陸の勾配に合わせる」は海岸近くの陸の勾配を海へ延ばし、急な海岸ほど深い海が近く、平らな海岸ほど遠浅になります。港を建てられる水深はこの海底で決まります。実際と違う所(平地の横の深い川など)は、範囲を選んで「一定の勾配」で直してください。湖など海にしたくない0m地帯がある場合は、先に海側だけを範囲選択してから実行してください",
                     })}
                   </div>
                 </div>

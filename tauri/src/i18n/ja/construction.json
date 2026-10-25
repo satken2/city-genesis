@@ -114,6 +114,7 @@
       "overlap_city_building": "市の施設・建設予定地と重なっています",
       "overlap_path": "道路と重なっています",
       "incompatible_parcel_type": "この場所の地形にはこの建物を建設できません",
+      "insufficient_water_depth": "この場所の岸壁の水深は約{{depth}}mです。この建物には{{required}}m以上必要です",
       "not_city_land": "市政府所有でない土地区画と重なっています",
       "generic": "この場所には建設できません"
     },
@@ -131,6 +132,7 @@
     "copyInvalid": {
       "does_not_fit": "コピー元建物のフットプリントがこの土地区画に収まりません",
       "incompatible_parcel_type": "この土地区画の種類にはこの建物を建設できません",
+      "insufficient_water_depth": "この場所の岸壁の水深は約{{depth}}mです。この建物には{{required}}m以上必要です",
       "regulation": "建築規制に抵触するため建設できません",
       "generic": "この土地区画には建設できません"
     }

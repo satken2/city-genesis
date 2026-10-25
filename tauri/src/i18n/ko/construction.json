@@ -114,6 +114,7 @@
       "overlap_city_building": "시의 시설·건설 예정지와 겹칩니다",
       "overlap_path": "도로와 겹칩니다",
       "incompatible_parcel_type": "이 위치의 지형에는 이 건물을 지을 수 없습니다",
+      "insufficient_water_depth": "이곳 안벽 앞의 수심은 약 {{depth}}m입니다. 이 건물에는 {{required}}m 이상이 필요합니다",
       "not_city_land": "시정부 소유가 아닌 토지 구획과 겹칩니다",
       "generic": "이 위치에는 건설할 수 없습니다"
     },
@@ -131,6 +132,7 @@
     "copyInvalid": {
       "does_not_fit": "복사 원본 건물의 바닥 면적이 이 토지 구획에 들어가지 않습니다",
       "incompatible_parcel_type": "이 토지 구획 종류에는 이 건물을 지을 수 없습니다",
+      "insufficient_water_depth": "이곳 안벽 앞의 수심은 약 {{depth}}m입니다. 이 건물에는 {{required}}m 이상이 필요합니다",
       "regulation": "건축 규제에 저촉되어 건설할 수 없습니다",
       "generic": "이 토지 구획에는 건설할 수 없습니다"
     }
