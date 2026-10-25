@@ -3,17 +3,9 @@
     "next": "下一個",
     "close": "關閉",
     "items": {
-      "FIRST_ROAD": {
-        "name": "第一條道路",
-        "description": "首次建成道路"
-      },
       "FIRST_BUILDING": {
         "name": "城市建設的第一步",
         "description": "首次建成建築。城市的歷史從這裡開始。"
-      },
-      "FIRST_PUBLIC_FACILITY": {
-        "name": "第一座公共設施",
-        "description": "首次建成發電廠、變電所等公共設施"
       },
       "FIRST_OFFSHORE": {
         "name": "向海延伸的城市",
@@ -23,10 +15,6 @@
         "name": "發車！",
         "description": "開通一條鐵路路線"
       },
-      "RAIL_LINES_5": {
-        "name": "鐵路網",
-        "description": "在一座城市中營運5條鐵路路線"
-      },
       "RAIL_LINES_20": {
         "name": "鐵道王國",
         "description": "在一座城市中營運20條鐵路路線。這張路線圖，也頗有看頭了。"
@@ -35,25 +23,13 @@
         "name": "公車開到家門口",
         "description": "開通一條公車路線"
       },
-      "BUS_LINES_5": {
-        "name": "公車路網",
-        "description": "在一座城市中營運5條公車路線"
-      },
       "BUS_LINES_20": {
         "name": "搭公車走遍全城",
         "description": "在一座城市中營運20條公車路線"
       },
-      "BUS_LINES_50": {
-        "name": "公車大國",
-        "description": "在一座城市中營運50條公車路線"
-      },
       "MONORAIL_LINES_1": {
         "name": "空中通勤路",
         "description": "開通一條單軌路線。從稍高的視角，看看熟悉的城市。"
-      },
-      "MONORAIL_LINES_5": {
-        "name": "單軌路網",
-        "description": "在一座城市中營運5條單軌路線"
       },
       "MONORAIL_LINES_20": {
         "name": "空中之城",
@@ -62,10 +38,6 @@
       "LRT_LINES_1": {
         "name": "路面電車進城了",
         "description": "開通一條輕軌路線"
-      },
-      "LRT_LINES_5": {
-        "name": "輕軌路網",
-        "description": "在一座城市中營運5條輕軌路線"
       },
       "LRT_LINES_20": {
         "name": "路面電車之都",
@@ -86,10 +58,6 @@
       "POPULATION_1M": {
         "name": "百萬之城",
         "description": "人口達到100萬。建成一座承載百萬種生活的大都市。"
-      },
-      "POPULATION_2M": {
-        "name": "大都會區",
-        "description": "人口達到200萬"
       },
       "FLOORS_5": {
         "name": "向上成長的城市",
@@ -127,10 +95,6 @@
         "name": "歡迎來到我們的城市",
         "description": "首次有遊客在城市中停留"
       },
-      "TOURISTS_100": {
-        "name": "觀光小城",
-        "description": "同時有100名遊客在城市中停留"
-      },
       "TOURISTS_1K": {
         "name": "值得一遊的城市",
         "description": "同時有1,000名遊客在城市中停留"
@@ -158,10 +122,6 @@
       "YEARS_10000": {
         "name": "永恆之都",
         "description": "在一座城市中遊玩1萬年。市長，這任期可真夠長的。"
-      },
-      "ALL_TUTORIALS": {
-        "name": "都市計畫結業",
-        "description": "完成所有教學"
       }
     }
   }

@@ -3,17 +3,9 @@
     "next": "Suivant",
     "close": "Fermer",
     "items": {
-      "FIRST_ROAD": {
-        "name": "Première route",
-        "description": "Terminez votre première route"
-      },
       "FIRST_BUILDING": {
         "name": "Les premiers pas d'une ville",
         "description": "Terminez votre premier bâtiment. L'histoire de votre ville commence ici."
-      },
-      "FIRST_PUBLIC_FACILITY": {
-        "name": "Premier équipement public",
-        "description": "Terminez votre premier équipement public, comme une centrale électrique ou un poste électrique"
       },
       "FIRST_OFFSHORE": {
         "name": "La ville gagne le large",
@@ -23,10 +15,6 @@
         "name": "En voiture !",
         "description": "Ouvrez une ligne ferroviaire"
       },
-      "RAIL_LINES_5": {
-        "name": "Réseau ferroviaire",
-        "description": "Exploitez 5 lignes ferroviaires dans une même ville"
-      },
       "RAIL_LINES_20": {
         "name": "Royaume du rail",
         "description": "Exploitez 20 lignes ferroviaires dans une même ville. Ce plan des lignes mérite le détour."
@@ -35,25 +23,13 @@
         "name": "Le bus arrive en ville",
         "description": "Ouvrez une ligne de bus"
       },
-      "BUS_LINES_5": {
-        "name": "Réseau de bus",
-        "description": "Exploitez 5 lignes de bus dans une même ville"
-      },
       "BUS_LINES_20": {
         "name": "Partout en bus",
         "description": "Exploitez 20 lignes de bus dans une même ville"
       },
-      "BUS_LINES_50": {
-        "name": "Empire du bus",
-        "description": "Exploitez 50 lignes de bus dans une même ville"
-      },
       "MONORAIL_LINES_1": {
         "name": "Au travail par les airs",
         "description": "Ouvrez une ligne de monorail. Redécouvrez les rues familières d'un peu plus haut."
-      },
-      "MONORAIL_LINES_5": {
-        "name": "Réseau de monorail",
-        "description": "Exploitez 5 lignes de monorail dans une même ville"
       },
       "MONORAIL_LINES_20": {
         "name": "Ville dans le ciel",
@@ -62,10 +38,6 @@
       "LRT_LINES_1": {
         "name": "Le tramway arrive en ville",
         "description": "Ouvrez une ligne de tramway"
-      },
-      "LRT_LINES_5": {
-        "name": "Réseau de tramway",
-        "description": "Exploitez 5 lignes de tramway dans une même ville"
       },
       "LRT_LINES_20": {
         "name": "La cité des tramways",
@@ -86,10 +58,6 @@
       "POPULATION_1M": {
         "name": "Ville millionnaire",
         "description": "Atteignez 1 000 000 d'habitants. Une métropole au service d'un million de vies."
-      },
-      "POPULATION_2M": {
-        "name": "Métropole",
-        "description": "Atteignez 2 000 000 d'habitants"
       },
       "FLOORS_5": {
         "name": "La ville prend de la hauteur",
@@ -127,10 +95,6 @@
         "name": "Bienvenue dans notre ville",
         "description": "Un touriste séjourne pour la première fois dans votre ville"
       },
-      "TOURISTS_100": {
-        "name": "Ville touristique",
-        "description": "Accueillez 100 touristes en même temps dans votre ville"
-      },
       "TOURISTS_1K": {
         "name": "Une ville qui vaut le voyage",
         "description": "Accueillez 1 000 touristes en même temps dans votre ville"
@@ -158,10 +122,6 @@
       "YEARS_10000": {
         "name": "Ville éternelle",
         "description": "Jouez 10 000 ans dans une même ville. Voilà un mandat municipal qui dure."
-      },
-      "ALL_TUTORIALS": {
-        "name": "Diplômé en urbanisme",
-        "description": "Terminez tous les tutoriels"
       }
     }
   }

@@ -3,17 +3,9 @@
     "next": "Next",
     "close": "Close",
     "items": {
-      "FIRST_ROAD": {
-        "name": "First Road",
-        "description": "Complete your first road"
-      },
       "FIRST_BUILDING": {
         "name": "A City's First Steps",
         "description": "Complete your first building. Your city's story starts here."
-      },
-      "FIRST_PUBLIC_FACILITY": {
-        "name": "First Public Facility",
-        "description": "Complete your first public facility, such as a power plant or substation"
       },
       "FIRST_OFFSHORE": {
         "name": "A City Takes to the Sea",
@@ -23,10 +15,6 @@
         "name": "All Aboard!",
         "description": "Open a rail line"
       },
-      "RAIL_LINES_5": {
-        "name": "Rail Network",
-        "description": "Operate 5 rail lines in one city"
-      },
       "RAIL_LINES_20": {
         "name": "Railway Kingdom",
         "description": "Operate 20 rail lines in one city. That route map is quite a sight."
@@ -35,25 +23,13 @@
         "name": "The Bus Comes to Town",
         "description": "Open a bus line"
       },
-      "BUS_LINES_5": {
-        "name": "Bus Network",
-        "description": "Operate 5 bus lines in one city"
-      },
       "BUS_LINES_20": {
         "name": "Everywhere by Bus",
         "description": "Operate 20 bus lines in one city"
       },
-      "BUS_LINES_50": {
-        "name": "Bus Empire",
-        "description": "Operate 50 bus lines in one city"
-      },
       "MONORAIL_LINES_1": {
         "name": "Commuting Above the City",
         "description": "Open a monorail line. See familiar streets from a little higher up."
-      },
-      "MONORAIL_LINES_5": {
-        "name": "Monorail Network",
-        "description": "Operate 5 monorail lines in one city"
       },
       "MONORAIL_LINES_20": {
         "name": "City in the Sky",
@@ -62,10 +38,6 @@
       "LRT_LINES_1": {
         "name": "Trams Come to Town",
         "description": "Open an LRT line"
-      },
-      "LRT_LINES_5": {
-        "name": "LRT Network",
-        "description": "Operate 5 LRT lines in one city"
       },
       "LRT_LINES_20": {
         "name": "City of Trams",
@@ -86,10 +58,6 @@
       "POPULATION_1M": {
         "name": "Million City",
         "description": "Reach a population of 1,000,000. A metropolis with a million lives to support."
-      },
-      "POPULATION_2M": {
-        "name": "Metropolis",
-        "description": "Reach a population of 2,000,000"
       },
       "FLOORS_5": {
         "name": "A City Grows Upward",
@@ -127,10 +95,6 @@
         "name": "Welcome to Our City",
         "description": "Have a tourist stay in your city for the first time"
       },
-      "TOURISTS_100": {
-        "name": "Tourist Town",
-        "description": "Have 100 tourists staying in your city at once"
-      },
       "TOURISTS_1K": {
         "name": "A City Worth the Trip",
         "description": "Have 1,000 tourists staying in your city at once"
@@ -158,10 +122,6 @@
       "YEARS_10000": {
         "name": "Eternal City",
         "description": "Play for 10,000 years in one city. That's quite a term in office, Mayor."
-      },
-      "ALL_TUTORIALS": {
-        "name": "Planning Graduate",
-        "description": "Clear every tutorial"
       }
     }
   }

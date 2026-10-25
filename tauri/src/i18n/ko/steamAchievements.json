@@ -3,17 +3,9 @@
     "next": "다음",
     "close": "닫기",
     "items": {
-      "FIRST_ROAD": {
-        "name": "첫 도로",
-        "description": "도로를 처음으로 완공한다"
-      },
       "FIRST_BUILDING": {
         "name": "도시 건설의 첫걸음",
         "description": "건물을 처음으로 완공한다. 도시의 역사가 여기서 시작된다."
-      },
-      "FIRST_PUBLIC_FACILITY": {
-        "name": "첫 공공시설",
-        "description": "발전소나 변전소 같은 공공시설을 처음으로 완공한다"
       },
       "FIRST_OFFSHORE": {
         "name": "바다로 뻗어 가는 도시",
@@ -23,10 +15,6 @@
         "name": "출발합니다!",
         "description": "철도 노선을 개통한다"
       },
-      "RAIL_LINES_5": {
-        "name": "철도망",
-        "description": "한 도시에서 철도 노선 5개를 운행한다"
-      },
       "RAIL_LINES_20": {
         "name": "철도 왕국",
         "description": "한 도시에서 철도 노선 20개를 운행한다. 노선도도 제법 볼만해졌다."
@@ -35,25 +23,13 @@
         "name": "오늘부터 버스가 다닙니다",
         "description": "버스 노선을 개통한다"
       },
-      "BUS_LINES_5": {
-        "name": "노선버스망",
-        "description": "한 도시에서 버스 노선 5개를 운행한다"
-      },
       "BUS_LINES_20": {
         "name": "버스로 어디든",
         "description": "한 도시에서 버스 노선 20개를 운행한다"
       },
-      "BUS_LINES_50": {
-        "name": "버스 대국",
-        "description": "한 도시에서 버스 노선 50개를 운행한다"
-      },
       "MONORAIL_LINES_1": {
         "name": "하늘 위 출근길",
         "description": "모노레일 노선을 개통한다. 익숙한 도시를 조금 더 높은 곳에서 바라보자."
-      },
-      "MONORAIL_LINES_5": {
-        "name": "모노레일망",
-        "description": "한 도시에서 모노레일 노선 5개를 운행한다"
       },
       "MONORAIL_LINES_20": {
         "name": "하늘을 달리는 도시",
@@ -62,10 +38,6 @@
       "LRT_LINES_1": {
         "name": "도시에 노면전차가 찾아왔다",
         "description": "LRT 노선을 개통한다"
-      },
-      "LRT_LINES_5": {
-        "name": "LRT망",
-        "description": "한 도시에서 LRT 노선 5개를 운행한다"
       },
       "LRT_LINES_20": {
         "name": "노면전차의 도시",
@@ -86,10 +58,6 @@
       "POPULATION_1M": {
         "name": "백만 도시",
         "description": "인구 100만 명에 도달한다. 백만 가지 삶을 품는 대도시로."
-      },
-      "POPULATION_2M": {
-        "name": "대도시권",
-        "description": "인구 200만 명에 도달한다"
       },
       "FLOORS_5": {
         "name": "위로 자라는 도시",
@@ -127,10 +95,6 @@
         "name": "우리 도시에 오신 것을 환영합니다",
         "description": "관광객이 처음으로 도시에 머문다"
       },
-      "TOURISTS_100": {
-        "name": "관광 도시",
-        "description": "관광객 100명이 동시에 도시에 머문다"
-      },
       "TOURISTS_1K": {
         "name": "여행지로 선택받는 도시",
         "description": "관광객 1,000명이 동시에 도시에 머문다"
@@ -158,10 +122,6 @@
       "YEARS_10000": {
         "name": "영원의 도읍",
         "description": "한 도시에서 1만 년 동안 플레이한다. 시장님의 임기도 꽤 길어졌네요."
-      },
-      "ALL_TUTORIALS": {
-        "name": "도시 계획 수료",
-        "description": "모든 튜토리얼을 클리어한다"
       }
     }
   }

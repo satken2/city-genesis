@@ -3,17 +3,9 @@
     "next": "次へ",
     "close": "閉じる",
     "items": {
-      "FIRST_ROAD": {
-        "name": "初めての道路",
-        "description": "道路を初めて完成させる"
-      },
       "FIRST_BUILDING": {
         "name": "街づくりの第一歩",
         "description": "建物を初めて完成させる。ここから街の歴史が始まる。"
-      },
-      "FIRST_PUBLIC_FACILITY": {
-        "name": "初めての公共施設",
-        "description": "発電所や変電所などの公共施設を初めて完成させる"
       },
       "FIRST_OFFSHORE": {
         "name": "海へ広がる街",
@@ -23,10 +15,6 @@
         "name": "出発進行！",
         "description": "鉄道路線を開業させる"
       },
-      "RAIL_LINES_5": {
-        "name": "鉄道網",
-        "description": "1つの都市で鉄道路線を5本運行する"
-      },
       "RAIL_LINES_20": {
         "name": "鉄道王国",
         "description": "1つの都市で鉄道路線を20本運行する。路線図も、なかなかの見応えに。"
@@ -35,25 +23,13 @@
         "name": "今日からバス通り",
         "description": "バス路線を開業させる"
       },
-      "BUS_LINES_5": {
-        "name": "路線バス網",
-        "description": "1つの都市でバス路線を5本運行する"
-      },
       "BUS_LINES_20": {
         "name": "バスでどこまでも",
         "description": "1つの都市でバス路線を20本運行する"
       },
-      "BUS_LINES_50": {
-        "name": "バス大国",
-        "description": "1つの都市でバス路線を50本運行する"
-      },
       "MONORAIL_LINES_1": {
         "name": "空の通勤路",
         "description": "モノレール路線を開業させる。いつもの街を、少し高い目線から。"
-      },
-      "MONORAIL_LINES_5": {
-        "name": "モノレール網",
-        "description": "1つの都市でモノレール路線を5本運行する"
       },
       "MONORAIL_LINES_20": {
         "name": "空ゆく都市",
@@ -62,10 +38,6 @@
       "LRT_LINES_1": {
         "name": "街に路面電車がやってきた",
         "description": "LRT路線を開業させる"
-      },
-      "LRT_LINES_5": {
-        "name": "LRT網",
-        "description": "1つの都市でLRT路線を5本運行する"
       },
       "LRT_LINES_20": {
         "name": "路面電車の都",
@@ -86,10 +58,6 @@
       "POPULATION_1M": {
         "name": "百万都市",
         "description": "人口100万人に到達する。百万通りの暮らしを支える大都市へ。"
-      },
-      "POPULATION_2M": {
-        "name": "大都市圏",
-        "description": "人口200万人に到達する"
       },
       "FLOORS_5": {
         "name": "上へ伸びる街",
@@ -127,10 +95,6 @@
         "name": "ようこそ、わが街へ",
         "description": "観光客が初めて都市に滞在する"
       },
-      "TOURISTS_100": {
-        "name": "観光の街",
-        "description": "100人の観光客が同時に都市に滞在する"
-      },
       "TOURISTS_1K": {
         "name": "旅先に選ばれる街",
         "description": "1,000人の観光客が同時に都市に滞在する"
@@ -158,10 +122,6 @@
       "YEARS_10000": {
         "name": "悠久の都",
         "description": "1つの都市で1万年間プレイする。市長の任期も、ずいぶん長くなりました。"
-      },
-      "ALL_TUTORIALS": {
-        "name": "都市計画の修了",
-        "description": "すべてのチュートリアルをクリアする"
       }
     }
   }

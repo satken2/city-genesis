@@ -3,17 +3,9 @@
     "next": "下一个",
     "close": "关闭",
     "items": {
-      "FIRST_ROAD": {
-        "name": "第一条道路",
-        "description": "首次建成道路"
-      },
       "FIRST_BUILDING": {
         "name": "城市建设的第一步",
         "description": "首次建成建筑。城市的历史从这里开始。"
-      },
-      "FIRST_PUBLIC_FACILITY": {
-        "name": "第一座公共设施",
-        "description": "首次建成发电站、变电站等公共设施"
       },
       "FIRST_OFFSHORE": {
         "name": "向海而生的城市",
@@ -23,10 +15,6 @@
         "name": "发车！",
         "description": "开通一条铁路线路"
       },
-      "RAIL_LINES_5": {
-        "name": "铁路网",
-        "description": "在一座城市中运营5条铁路线路"
-      },
       "RAIL_LINES_20": {
         "name": "铁路王国",
         "description": "在一座城市中运营20条铁路线路。这张线路图，也颇有看头了。"
@@ -35,25 +23,13 @@
         "name": "公交开到家门口",
         "description": "开通一条公交线路"
       },
-      "BUS_LINES_5": {
-        "name": "公交网",
-        "description": "在一座城市中运营5条公交线路"
-      },
       "BUS_LINES_20": {
         "name": "乘公交走遍全城",
         "description": "在一座城市中运营20条公交线路"
       },
-      "BUS_LINES_50": {
-        "name": "公交大国",
-        "description": "在一座城市中运营50条公交线路"
-      },
       "MONORAIL_LINES_1": {
         "name": "空中通勤路",
         "description": "开通一条单轨线路。从稍高的视角，看看熟悉的城市。"
-      },
-      "MONORAIL_LINES_5": {
-        "name": "单轨网",
-        "description": "在一座城市中运营5条单轨线路"
       },
       "MONORAIL_LINES_20": {
         "name": "空中之城",
@@ -62,10 +38,6 @@
       "LRT_LINES_1": {
         "name": "有轨电车进城了",
         "description": "开通一条轻轨线路"
-      },
-      "LRT_LINES_5": {
-        "name": "轻轨网",
-        "description": "在一座城市中运营5条轻轨线路"
       },
       "LRT_LINES_20": {
         "name": "有轨电车之都",
@@ -86,10 +58,6 @@
       "POPULATION_1M": {
         "name": "百万之城",
         "description": "人口达到100万。建成一座承载百万种生活的大都市。"
-      },
-      "POPULATION_2M": {
-        "name": "大都市圈",
-        "description": "人口达到200万"
       },
       "FLOORS_5": {
         "name": "向上生长的城市",
@@ -127,10 +95,6 @@
         "name": "欢迎来到我们的城市",
         "description": "首次有游客在城市中停留"
       },
-      "TOURISTS_100": {
-        "name": "观光小城",
-        "description": "同时有100名游客在城市中停留"
-      },
       "TOURISTS_1K": {
         "name": "值得一游的城市",
         "description": "同时有1,000名游客在城市中停留"
@@ -158,10 +122,6 @@
       "YEARS_10000": {
         "name": "永恒之都",
         "description": "在一座城市中游玩1万年。市长，这任期可真够长的。"
-      },
-      "ALL_TUTORIALS": {
-        "name": "城市规划结业",
-        "description": "完成所有教程"
       }
     }
   }

@@ -3,17 +3,9 @@
     "next": "Siguiente",
     "close": "Cerrar",
     "items": {
-      "FIRST_ROAD": {
-        "name": "Primera calle",
-        "description": "Completa tu primera calle"
-      },
       "FIRST_BUILDING": {
         "name": "Los primeros pasos de una ciudad",
         "description": "Completa tu primer edificio. La historia de tu ciudad empieza aquí."
-      },
-      "FIRST_PUBLIC_FACILITY": {
-        "name": "Primera instalación pública",
-        "description": "Completa tu primera instalación pública, como una central eléctrica o una subestación"
       },
       "FIRST_OFFSHORE": {
         "name": "La ciudad se extiende al mar",
@@ -23,10 +15,6 @@
         "name": "¡Todos a bordo!",
         "description": "Inaugura una línea ferroviaria"
       },
-      "RAIL_LINES_5": {
-        "name": "Red ferroviaria",
-        "description": "Opera 5 líneas ferroviarias en una ciudad"
-      },
       "RAIL_LINES_20": {
         "name": "Reino ferroviario",
         "description": "Opera 20 líneas ferroviarias en una ciudad. Ese mapa de líneas ya merece una buena mirada."
@@ -35,25 +23,13 @@
         "name": "El autobús llega a la ciudad",
         "description": "Inaugura una línea de autobús"
       },
-      "BUS_LINES_5": {
-        "name": "Red de autobuses",
-        "description": "Opera 5 líneas de autobús en una ciudad"
-      },
       "BUS_LINES_20": {
         "name": "A todas partes en autobús",
         "description": "Opera 20 líneas de autobús en una ciudad"
       },
-      "BUS_LINES_50": {
-        "name": "Imperio del autobús",
-        "description": "Opera 50 líneas de autobús en una ciudad"
-      },
       "MONORAIL_LINES_1": {
         "name": "Al trabajo por las alturas",
         "description": "Inaugura una línea de monorriel. Contempla las calles de siempre desde un poco más arriba."
-      },
-      "MONORAIL_LINES_5": {
-        "name": "Red de monorriel",
-        "description": "Opera 5 líneas de monorriel en una ciudad"
       },
       "MONORAIL_LINES_20": {
         "name": "Ciudad en el cielo",
@@ -62,10 +38,6 @@
       "LRT_LINES_1": {
         "name": "El tranvía llega a la ciudad",
         "description": "Inaugura una línea de tren ligero"
-      },
-      "LRT_LINES_5": {
-        "name": "Red de tren ligero",
-        "description": "Opera 5 líneas de tren ligero en una ciudad"
       },
       "LRT_LINES_20": {
         "name": "Ciudad de tranvías",
@@ -86,10 +58,6 @@
       "POPULATION_1M": {
         "name": "Ciudad millonaria",
         "description": "Alcanza una población de 1 000 000 de habitantes. Una metrópolis que sostiene un millón de vidas."
-      },
-      "POPULATION_2M": {
-        "name": "Metrópolis",
-        "description": "Alcanza una población de 2 000 000 de habitantes"
       },
       "FLOORS_5": {
         "name": "La ciudad crece hacia arriba",
@@ -127,10 +95,6 @@
         "name": "Bienvenidos a nuestra ciudad",
         "description": "Un turista se hospeda en tu ciudad por primera vez"
       },
-      "TOURISTS_100": {
-        "name": "Pueblo turístico",
-        "description": "Ten 100 turistas hospedados en tu ciudad al mismo tiempo"
-      },
       "TOURISTS_1K": {
         "name": "Una ciudad que vale el viaje",
         "description": "Ten 1000 turistas hospedados en tu ciudad al mismo tiempo"
@@ -158,10 +122,6 @@
       "YEARS_10000": {
         "name": "Ciudad eterna",
         "description": "Juega 10 000 años en una ciudad. El mandato en la alcaldía se ha alargado bastante."
-      },
-      "ALL_TUTORIALS": {
-        "name": "Urbanista graduado",
-        "description": "Completa todos los tutoriales"
       }
     }
   }
