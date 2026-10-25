@@ -1,6 +1,7 @@
 {
   "climateEffects": {
     "currentClimate": "本月平均气候",
+    "currentClimate_week": "本周平均气候",
     "title": "气候影响下的设施生产效率",
     "facility": "设施",
     "factor": "生产效率"

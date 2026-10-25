@@ -1,6 +1,7 @@
 {
   "climateEffects": {
     "currentClimate": "今月の平均気候",
+    "currentClimate_week": "今週の平均気候",
     "title": "気候による施設の生産効率",
     "facility": "施設",
     "factor": "生産効率"

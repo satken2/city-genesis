@@ -29,6 +29,7 @@ import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { TUTORIAL_SCENARIOS } from "./tutorialSteps";
 import { useTutorialGuide } from "../../tutorial/useTutorialGuide";
+import { useEpochPeriodUnit } from "../../hooks/useEpochPeriodUnit";
 import { fetchApi } from "../../utils/api";
 import { showNotification } from "../../utils/notification";
 import type { InfoDialogContent } from "../common/InfoDialogWindow";
@@ -114,6 +115,7 @@ export function Tutorial() {
   const steps = currentScenario.steps;
   const totalSteps = steps.length;
   const guide = useTutorialGuide(visible && !completed && !showComplete && introDone, tutorialId, currentStep + 1, saveId, apiBaseUrl);
+  const periodUnit = useEpochPeriodUnit(apiBaseUrl);
 
   /**
    * Ref holding the previous save ID.
@@ -410,7 +412,7 @@ export function Tutorial() {
               {step ? t(step.titleKey) : ""}
             </div>
             <div className="tutorial-step-description" key={guide.failed ? "failed" : guide.textKey || step?.descriptionKey}>
-              {guide.failed ? t("tutorial.guide.failed") : guide.textKey ? t(guide.textKey) : step ? t(step.descriptionKey) : ""}
+              {guide.failed ? t("tutorial.guide.failed") : guide.textKey ? t(guide.textKey, { context: periodUnit }) : step ? t(step.descriptionKey, { context: periodUnit }) : ""}
             </div>
             <div className="tutorial-actions">
               {guide.failed && <button className="tutorial-complete-button" type="button" onClick={guide.retry}>{t("tutorial.guide.retry")}</button>}

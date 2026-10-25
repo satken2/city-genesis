@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AgentData, MasterData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { useEpochPeriodUnit } from "../../hooks/useEpochPeriodUnit";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { DataList } from "../common/DataList";
 import "./CargoInfoPanel.css";
@@ -86,8 +87,8 @@ function CargoDirectionSection({ direction, products, masterData }: CargoDirecti
     <div className={`cargo--${direction}`}>
       <h4 className="cargo-products-title">
         {isImport
-          ? t("cargo.importSectionTitle", "輸入(都市への販売)")
-          : t("cargo.exportSectionTitle", "輸出(都市からの買取)")}
+          ? t("cargo.importSectionTitle", "輸入")
+          : t("cargo.exportSectionTitle", "輸出")}
       </h4>
 
       {rows.length === 0 ? (
@@ -160,6 +161,7 @@ export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
   const masterData = useMasterData();
   const [cargo, setCargo] = useState<CargoInfoResponse | null>(null);
   const [error, setError] = useState(false);
+  const periodUnit = useEpochPeriodUnit(apiBaseUrl);
 
   // The agent reference changes whenever the detail panel refetches the agent,
   // so refetch cargo information as well to follow values updated after an epoch.
@@ -208,7 +210,7 @@ export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
         <span className="agent-detail-value">
           {formatAmount(cargo.capacity_per_epoch)} t
           <span className="cargo-unit-suffix">
-            {t("cargo.perEpochPerDirection", "/エポック(輸出入それぞれ)")}
+            {t("cargo.perPeriod", { context: periodUnit })}
           </span>
         </span>
 

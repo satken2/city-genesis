@@ -8,7 +8,8 @@
         "title": "Empieza a construir como alcalde",
         "role": "En City Genesis desarrollas una ciudad como su alcalde. Planeas caminos e instalaciones, decides el uso del suelo, estableces impuestos y asignas recursos a los servicios públicos. Tu trabajo es crear un entorno que apoye a los habitantes y las empresas. Pulsa «Siguiente» para continuar.",
         "goal": "Busca una ciudad donde los habitantes vivan con comodidad y seguridad. Ofrece viviendas, empleos, electricidad, agua y atención médica. Hacer crecer la ciudad también cuesta dinero. Considera tanto la vida de sus habitantes como las finanzas municipales al decidir qué mejorar.",
-        "epoch": "El tiempo avanza un mes cada vez. Primero prepara presupuestos y planes de construcción; cuando estés listo, pulsa «Iniciar». Las obras y la actividad de los habitantes y las empresas avanzan. Revisa los resultados antes de volver a planear. La fecha no cambia hasta que inicies, así que puedes pensar con calma."
+        "epoch": "El tiempo avanza un mes cada vez. Primero prepara presupuestos y planes de construcción; cuando estés listo, pulsa «Iniciar». Las obras y la actividad de los habitantes y las empresas avanzan. Revisa los resultados antes de volver a planear. La fecha no cambia hasta que inicies, así que puedes pensar con calma.",
+        "epoch_week": "El tiempo avanza una semana cada vez. Primero prepara presupuestos y planes de construcción; cuando estés listo, pulsa «Iniciar». Las obras y la actividad de los habitantes y las empresas avanzan. Revisa los resultados antes de volver a planear. La fecha no cambia hasta que inicies, así que puedes pensar con calma."
       },
       "step2": {
         "title": "Conoce la ciudad desde el panel de mando",
@@ -18,11 +19,14 @@
         "services": "Los medidores del rayo y la gota muestran el margen disponible en electricidad y agua. Cuanto más se llenan, más se acerca la demanda a la capacidad. Púlsalos para revisar las instalaciones públicas y ver si necesitas aumentar el suministro antes de ampliar la ciudad.",
         "score": "«Puntaje» resume qué tan satisfechos están los habitantes con la vida en tu ciudad. Cuanto más alto, mejor. Viviendas, empleos, atención médica y un entorno agradable ayudan a mejorarlo. Si baja, busca las dificultades de los habitantes.",
         "budget": "«Presupuesto» muestra los gastos previstos del próximo mes en relación con los ingresos del mes pasado. Cuando el medidor se inclina hacia la derecha, los gastos superan los ingresos. Al contrario, cuando se inclina hacia la izquierda, sobra dinero. Revísalo antes de avanzar el tiempo.",
+        "budget_week": "«Presupuesto» muestra los gastos previstos de la próxima semana en relación con los ingresos de la semana pasada. Cuando el medidor se inclina hacia la derecha, los gastos superan los ingresos. Al contrario, cuando se inclina hacia la izquierda, sobra dinero. Revísalo antes de avanzar el tiempo.",
         "budgetChanges": "Más obras, una mayor actividad de las instalaciones y una construcción más rápida aumentan el dinero necesario y suben el medidor. Reducir la actividad o la velocidad de las obras puede bajar los costos previstos. Si aumenta la recaudación de impuestos, el medidor baja aunque los gastos sean los mismos.",
         "budgetPlanning": "Un medidor bajo indica dinero disponible para la ciudad. Considera invertir en servicios que faltan o instalaciones que pronto necesitarás.",
         "date": "La fecha indica cuánto ha avanzado el tiempo de la ciudad. Úsala para seguir las obras y los cambios estacionales. No avanza mientras planeas; se actualiza al avanzar el tiempo con «Iniciar».",
         "climate": "El panel de temperatura, lluvia, luz solar y viento muestra el clima promedio de este mes. Estas condiciones afectan la agricultura y la producción eólica y solar. Si hay pocos cultivos o poca electricidad, revisa también el clima.",
+        "climate_week": "El panel de temperatura, lluvia, luz solar y viento muestra el clima promedio de esta semana. Estas condiciones afectan la agricultura y la producción eólica y solar. Si hay pocos cultivos o poca electricidad, revisa también el clima.",
         "climateEffects": "Poca luz solar reduce la producción solar y poco viento reduce la eólica. La temperatura y la lluvia también afectan la agricultura. Pulsa el panel climático para ver cómo las condiciones del mes afectan la eficiencia de cada instalación. Prevé los cambios estacionales al preparar el suministro.",
+        "climateEffects_week": "Poca luz solar reduce la producción solar y poco viento reduce la eólica. La temperatura y la lluvia también afectan la agricultura. Pulsa el panel climático para ver cómo las condiciones de la semana afectan la eficiencia de cada instalación. Prevé los cambios estacionales al preparar el suministro.",
         "notifications": "El número de «Notificaciones» cuenta las advertencias y avisos que debes revisar. El número rojo y el parpadeo indican problemas que afectan el funcionamiento de la ciudad y requieren atención pronta. Los números amarillos indican avisos como la preparación para el crecimiento o problemas que tardan en mejorar. Pulsa el botón para leerlos.",
         "notificationActions": "Si un aviso identifica una instalación o distrito, pulsa su fila para ver los detalles. Atiende la causa: conecta líneas eléctricas que falten o consigue materiales para una instalación. Los avisos sobre problemas persistentes desaparecen cuando se resuelve la causa. Después de actuar, revisa los resultados del mes siguiente."
       },
@@ -70,7 +74,8 @@
       },
       "step10": {
         "title": "Terminemos la calle",
-        "description": "La calle todavía está en «Construcción planeada». Una calle planeada aún no se puede usar: las personas y los coches solo pueden circular cuando termina la obra. Pulsa 2 o 3 veces «Iniciar» en el panel de mando para avanzar el tiempo y espera a que se complete. Mientras dura la obra se paga un costo de construcción cada mes."
+        "description": "La calle todavía está en «Construcción planeada». Una calle planeada aún no se puede usar: las personas y los coches solo pueden circular cuando termina la obra. Pulsa 2 o 3 veces «Iniciar» en el panel de mando para avanzar el tiempo y espera a que se complete. Mientras dura la obra se paga un costo de construcción cada mes.",
+        "description_week": "La calle todavía está en «Construcción planeada». Una calle planeada aún no se puede usar: las personas y los coches solo pueden circular cuando termina la obra. Pulsa 2 o 3 veces «Iniciar» en el panel de mando para avanzar el tiempo y espera a que se complete. Mientras dura la obra se paga un costo de construcción cada semana."
       },
       "step11": {
         "title": "Creemos parcelas",
@@ -504,7 +509,8 @@
       },
       "step2": {
         "title": "Completa el terreno ganado",
-        "description": "Avanza al menos un mes con Iniciar y pulsa Siguiente. Como este tutorial no tiene proveedores de construcción, Siguiente omite el trabajo de relleno restante. El mar dentro del proyecto se convierte en tierra."
+        "description": "Avanza al menos un mes con Iniciar y pulsa Siguiente. Como este tutorial no tiene proveedores de construcción, Siguiente omite el trabajo de relleno restante. El mar dentro del proyecto se convierte en tierra.",
+        "description_week": "Avanza al menos una semana con Iniciar y pulsa Siguiente. Como este tutorial no tiene proveedores de construcción, Siguiente omite el trabajo de relleno restante. El mar dentro del proyecto se convierte en tierra."
       },
       "step3": {
         "title": "Crea una parcela en el terreno nuevo",

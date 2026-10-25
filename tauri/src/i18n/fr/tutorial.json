@@ -8,7 +8,8 @@
         "title": "Commencez à bâtir en tant que maire",
         "role": "Dans City Genesis, vous développez une ville en tant que maire. Vous planifiez routes et équipements, décidez de l’usage des terrains, fixez les impôts et attribuez les budgets des services publics. Votre rôle est de créer un environnement favorable aux habitants et aux entreprises. Appuyez sur « Suivant ».",
         "goal": "Visez une ville où les habitants vivent confortablement et en sécurité. Fournissez logements, emplois, électricité, eau et soins. Développer la ville coûte aussi de l’argent. Tenez compte de la vie des habitants et des finances municipales pour choisir vos priorités.",
-        "epoch": "Le temps avance d’un mois à la fois. Préparez d’abord budgets et projets, puis appuyez sur « Démarrer ». Les travaux et les activités des habitants et des entreprises avancent ; examinez les résultats avant de planifier à nouveau. La date reste fixe jusqu’au démarrage : prenez le temps de réfléchir."
+        "epoch": "Le temps avance d’un mois à la fois. Préparez d’abord budgets et projets, puis appuyez sur « Démarrer ». Les travaux et les activités des habitants et des entreprises avancent ; examinez les résultats avant de planifier à nouveau. La date reste fixe jusqu’au démarrage : prenez le temps de réfléchir.",
+        "epoch_week": "Le temps avance d’une semaine à la fois. Préparez d’abord budgets et projets, puis appuyez sur « Démarrer ». Les travaux et les activités des habitants et des entreprises avancent ; examinez les résultats avant de planifier à nouveau. La date reste fixe jusqu’au démarrage : prenez le temps de réfléchir."
       },
       "step2": {
         "title": "Comprendre la ville depuis le cockpit",
@@ -18,11 +19,14 @@
         "services": "Les jauges de l’éclair et de la goutte indiquent la marge de vos capacités en électricité et en eau. Plus elles se remplissent, plus la demande approche de la capacité. Cliquez dessus pour examiner les équipements publics et vérifier s’il faut renforcer l’offre avant d’agrandir la ville.",
         "score": "Le « Score » résume la satisfaction des habitants envers la vie dans votre ville. Plus il est élevé, mieux c’est. Logements, emplois, soins et cadre de vie agréable contribuent à l’améliorer. S’il baisse, cherchez les difficultés des habitants.",
         "budget": "Le « Budget » indique les dépenses prévues le mois prochain par rapport aux revenus du mois dernier. Quand la jauge penche vers la droite, les dépenses dépassent les revenus ; à l’inverse, quand elle penche vers la gauche, il reste de l’argent. Vérifiez-le avant de faire avancer le temps.",
+        "budget_week": "Le « Budget » indique les dépenses prévues la semaine prochaine par rapport aux revenus de la semaine dernière. Quand la jauge penche vers la droite, les dépenses dépassent les revenus ; à l’inverse, quand elle penche vers la gauche, il reste de l’argent. Vérifiez-le avant de faire avancer le temps.",
         "budgetChanges": "Davantage de travaux, une activité accrue des équipements ou des travaux plus rapides augmentent les besoins et la jauge. Réduire l’activité ou ralentir les travaux peut diminuer les coûts prévus. Quand les recettes fiscales augmentent, la jauge baisse même si les dépenses restent les mêmes.",
         "budgetPlanning": "Une jauge basse signifie que vous avez de l’argent disponible pour la ville. Envisagez d’investir dans les services manquants ou les équipements bientôt nécessaires.",
         "date": "La date indique jusqu’où le temps de la ville a avancé. Elle aide à suivre les travaux et les changements de saison. Elle reste fixe pendant la planification et change lorsque vous faites avancer le temps avec « Démarrer ».",
         "climate": "Le panneau de température, pluie, ensoleillement et vent indique le climat moyen du mois. Ces conditions influencent l’agriculture et les productions éolienne et solaire. Si les récoltes ou la production électrique sont faibles, vérifiez aussi le climat.",
+        "climate_week": "Le panneau de température, pluie, ensoleillement et vent indique le climat moyen de la semaine. Ces conditions influencent l’agriculture et les productions éolienne et solaire. Si les récoltes ou la production électrique sont faibles, vérifiez aussi le climat.",
         "climateEffects": "Un faible ensoleillement réduit la production solaire ; un vent faible réduit la production éolienne. Température et pluie influencent aussi l’agriculture. Cliquez sur le panneau climatique pour voir l’effet du mois sur l’efficacité de chaque équipement. Préparez l’offre en tenant compte des saisons.",
+        "climateEffects_week": "Un faible ensoleillement réduit la production solaire ; un vent faible réduit la production éolienne. Température et pluie influencent aussi l’agriculture. Cliquez sur le panneau climatique pour voir l’effet de la semaine sur l’efficacité de chaque équipement. Préparez l’offre en tenant compte des saisons.",
         "notifications": "Le nombre sur « Notifications » compte les avertissements et les points de vigilance à examiner. Un nombre rouge et un clignotement signalent une perturbation des fonctions de la ville à traiter rapidement. Les nombres jaunes signalent des points de vigilance, comme la préparation à la croissance ou des problèmes longs à améliorer. Cliquez pour les lire.",
         "notificationActions": "Lorsqu’un avis identifie un équipement ou un quartier, cliquez sur sa ligne pour l’examiner. Agissez sur la cause : raccordez les lignes électriques manquantes ou assurez les approvisionnements en matériaux. Les avis de problèmes persistants disparaissent lorsque leur cause est résolue. Vérifiez ensuite les résultats du mois suivant."
       },
@@ -70,7 +74,8 @@
       },
       "step10": {
         "title": "Terminons la route",
-        "description": "La route est encore au statut « Construction planifiée ». Une route planifiée n’est pas encore utilisable : piétons et voitures ne peuvent l’emprunter qu’une fois les travaux terminés. Appuyez 2 ou 3 fois sur « Démarrer » dans le cockpit pour faire avancer le temps et attendez son achèvement. Pendant les travaux, un coût de construction est prélevé chaque mois."
+        "description": "La route est encore au statut « Construction planifiée ». Une route planifiée n’est pas encore utilisable : piétons et voitures ne peuvent l’emprunter qu’une fois les travaux terminés. Appuyez 2 ou 3 fois sur « Démarrer » dans le cockpit pour faire avancer le temps et attendez son achèvement. Pendant les travaux, un coût de construction est prélevé chaque mois.",
+        "description_week": "La route est encore au statut « Construction planifiée ». Une route planifiée n’est pas encore utilisable : piétons et voitures ne peuvent l’emprunter qu’une fois les travaux terminés. Appuyez 2 ou 3 fois sur « Démarrer » dans le cockpit pour faire avancer le temps et attendez son achèvement. Pendant les travaux, un coût de construction est prélevé chaque semaine."
       },
       "step11": {
         "title": "Créons des parcelles",
@@ -504,7 +509,8 @@
       },
       "step2": {
         "title": "Terminer le terrain gagné sur la mer",
-        "description": "Avancez d’au moins un mois avec Démarrer, puis appuyez sur Suivant. Ce tutoriel n’a pas de fournisseurs de construction : Suivant achève les travaux de remblaiement restants. La mer devient un terrain constructible."
+        "description": "Avancez d’au moins un mois avec Démarrer, puis appuyez sur Suivant. Ce tutoriel n’a pas de fournisseurs de construction : Suivant achève les travaux de remblaiement restants. La mer devient un terrain constructible.",
+        "description_week": "Avancez d’au moins une semaine avec Démarrer, puis appuyez sur Suivant. Ce tutoriel n’a pas de fournisseurs de construction : Suivant achève les travaux de remblaiement restants. La mer devient un terrain constructible."
       },
       "step3": {
         "title": "Créer une parcelle sur le nouveau terrain",

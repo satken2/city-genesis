@@ -8,7 +8,8 @@
         "title": "Build a city as mayor",
         "role": "In City Genesis, you grow a city as its mayor. You plan roads and facilities, decide how land is used, set taxes and allocate money to public services. Your job is to create the conditions that support residents and businesses. Press “Next” to continue.",
         "goal": "Aim for a city where residents can live comfortably and safely. Provide homes and jobs, electricity, water and healthcare. Growing the city also takes money. Consider both people’s lives and the city’s finances when deciding what to improve.",
-        "epoch": "Time advances one month at a time. First set budgets and construction plans, then press “Start” when you are ready. Construction and the activities of residents and businesses advance; review the results before making your next plans. The date stays still until you start, so take your time."
+        "epoch": "Time advances one month at a time. First set budgets and construction plans, then press “Start” when you are ready. Construction and the activities of residents and businesses advance; review the results before making your next plans. The date stays still until you start, so take your time.",
+        "epoch_week": "Time advances one week at a time. First set budgets and construction plans, then press “Start” when you are ready. Construction and the activities of residents and businesses advance; review the results before making your next plans. The date stays still until you start, so take your time."
       },
       "step2": {
         "title": "Read the city from the cockpit",
@@ -18,11 +19,14 @@
         "services": "The lightning and water-drop gauges show how much room your electricity and water supplies have to grow. As they fill, demand is approaching capacity. Click them to review public facilities, and check whether you need more supply before expanding the city.",
         "score": "“Score” summarizes how satisfied residents are with life in your city. Higher is better. Homes, jobs, healthcare and a pleasant living environment help improve it. If it falls, look for the difficulties residents are facing.",
         "budget": "“Budget” shows next month’s expected expenses relative to last month’s income. When the gauge swings to the right, expenses exceed income. Conversely, when it swings to the left, you have money to spare. Check it before advancing time.",
+        "budget_week": "“Budget” shows next week’s expected expenses relative to last week’s income. When the gauge swings to the right, expenses exceed income. Conversely, when it swings to the left, you have money to spare. Check it before advancing time.",
         "budgetChanges": "More construction, higher facility operation and faster construction increase the money needed and raise the budget gauge. Lower operation or slower construction can reduce expected costs. When tax revenue increases, the gauge goes down even if expenses stay the same.",
         "budgetPlanning": "A low gauge means you have money available for the city. Consider investing in missing services or facilities you will need soon.",
         "date": "The date shows how far the city’s time has advanced. Use it to track construction progress and seasonal changes. It stays still while you plan and updates when you advance time with “Start”.",
         "climate": "The temperature, rainfall, sunlight and wind panel shows this month’s average climate. These conditions affect farming, wind power and solar power. If crops or electricity production are low, check the climate too.",
+        "climate_week": "The temperature, rainfall, sunlight and wind panel shows this week’s average climate. These conditions affect farming, wind power and solar power. If crops or electricity production are low, check the climate too.",
         "climateEffects": "Weak sunlight reduces solar output, and weak wind reduces wind output. Temperature and rainfall also affect farming. Click the climate panel to see how this month’s conditions affect each facility’s production efficiency. Plan facilities with seasonal changes in supply in mind.",
+        "climateEffects_week": "Weak sunlight reduces solar output, and weak wind reduces wind output. Temperature and rainfall also affect farming. Click the climate panel to see how this week’s conditions affect each facility’s production efficiency. Plan facilities with seasonal changes in supply in mind.",
         "notifications": "The number on “Notifications” counts warnings and cautions to review. A red number and flashing button mean city functions are being disrupted and need prompt attention. Yellow numbers indicate cautions, such as preparing for growth or problems that take time to improve. Press the button to read them.",
         "notificationActions": "When a notice identifies a facility or district, click its row to inspect it. Respond to the cause: connect missing power lines or arrange supplies for a facility short of materials. Notices about ongoing problems disappear when their cause is resolved. After taking action, check next month’s results."
       },
@@ -70,7 +74,8 @@
       },
       "step10": {
         "title": "Complete the Road",
-        "description": "The road is still “Construction Planned”. A planned road can't be used yet — people and cars can only use it once the work is finished. Press “Start” in the cockpit 2–3 times to advance time and wait for it to be completed. Construction costs money every month while it is underway."
+        "description": "The road is still “Construction Planned”. A planned road can't be used yet — people and cars can only use it once the work is finished. Press “Start” in the cockpit 2–3 times to advance time and wait for it to be completed. Construction costs money every month while it is underway.",
+        "description_week": "The road is still “Construction Planned”. A planned road can't be used yet — people and cars can only use it once the work is finished. Press “Start” in the cockpit 2–3 times to advance time and wait for it to be completed. Construction costs money every week while it is underway."
       },
       "step11": {
         "title": "Create Parcels",
@@ -504,7 +509,8 @@
       },
       "step2": {
         "title": "Complete the reclaimed land",
-        "description": "Use Start to advance at least one month, then press Next. Since this lesson has no construction suppliers, Next skips the remaining reclamation work. The sea inside the project becomes land."
+        "description": "Use Start to advance at least one month, then press Next. Since this lesson has no construction suppliers, Next skips the remaining reclamation work. The sea inside the project becomes land.",
+        "description_week": "Use Start to advance at least one week, then press Next. Since this lesson has no construction suppliers, Next skips the remaining reclamation work. The sea inside the project becomes land."
       },
       "step3": {
         "title": "Create a parcel on the new land",

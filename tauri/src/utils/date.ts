@@ -4,6 +4,7 @@
  * enero, etc.) and switch only date order by language family. Pure functions accept locale strings without i18n
  * dependencies.
  */
+import { DAYS_PER_MONTH } from "../constants";
 
 /** Format definitions for languages ordering year→month→day with trailing unit words. */
 const CJK_FORMATS: Record<string, { y: string; m: string; d: string; sep: string }> = {
@@ -65,6 +66,14 @@ export function formatEpochDate(
   if (lang === "es") return `${day} de ${name} de ${year}`;
   if (lang === "fr") return `${day} ${name} ${year}`;
   return `${name} ${day}, ${year}`;
+}
+
+/**
+ * Calendar period one epoch represents, used to present per-epoch amounts and periods to the player as months or weeks.
+ * Epoch length is one of SIMULATION_DAYS_CHOICES (7 or 30 days).
+ */
+export function epochPeriodUnit(simulationDays: number): "month" | "week" {
+  return simulationDays === DAYS_PER_MONTH ? "month" : "week";
 }
 
 /**

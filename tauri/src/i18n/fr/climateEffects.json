@@ -1,6 +1,7 @@
 {
   "climateEffects": {
     "currentClimate": "Climat moyen de ce mois",
+    "currentClimate_week": "Climat moyen de cette semaine",
     "title": "Efficacité de production des installations selon le climat",
     "facility": "Installation",
     "factor": "Efficacité de production"

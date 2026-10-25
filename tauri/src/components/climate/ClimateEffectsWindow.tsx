@@ -11,6 +11,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { useEpochPeriodUnit } from "../../hooks/useEpochPeriodUnit";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { resolveIntlLocale } from "../../utils/locale";
 import { Meter } from "../common/Meter";
@@ -33,6 +34,7 @@ export function ClimateEffectsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const master = useMasterData();
   const [data, setData] = useState<ClimateEffectsResponse | null>(null);
   const [error, setError] = useState("");
+  const periodUnit = useEpochPeriodUnit(apiBaseUrl);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -51,7 +53,7 @@ export function ClimateEffectsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   return <div className="climate-effects">
     <section className="climate-effects-card">
-      <h3>{t("climateEffects.currentClimate")}</h3>
+      <h3>{t("climateEffects.currentClimate", { context: periodUnit })}</h3>
       <div className="climate-effects-values">
         {CLIMATE_ELEMENTS.map(({ key, label }) => <div key={key} className="climate-effects-value">
           <ClimateIcon element={key} />
