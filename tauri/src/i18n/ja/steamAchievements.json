@@ -1,0 +1,168 @@
+{
+  "steamAchievements": {
+    "next": "次へ",
+    "close": "閉じる",
+    "items": {
+      "FIRST_ROAD": {
+        "name": "初めての道路",
+        "description": "道路を初めて完成させる"
+      },
+      "FIRST_BUILDING": {
+        "name": "初めての建物",
+        "description": "建物を初めて完成させる"
+      },
+      "FIRST_PUBLIC_FACILITY": {
+        "name": "初めての公共施設",
+        "description": "発電所や変電所などの公共施設を初めて完成させる"
+      },
+      "FIRST_OFFSHORE": {
+        "name": "海へ漕ぎ出す",
+        "description": "洋上風力発電所か洋上石油プラットフォームを初めて完成させる"
+      },
+      "RAIL_LINES_1": {
+        "name": "鉄道開業",
+        "description": "鉄道路線を開業させる"
+      },
+      "RAIL_LINES_5": {
+        "name": "鉄道網",
+        "description": "1つの都市で鉄道路線を5本運行する"
+      },
+      "RAIL_LINES_20": {
+        "name": "鉄道王国",
+        "description": "1つの都市で鉄道路線を20本運行する"
+      },
+      "BUS_LINES_1": {
+        "name": "バス開業",
+        "description": "バス路線を開業させる"
+      },
+      "BUS_LINES_5": {
+        "name": "路線バス網",
+        "description": "1つの都市でバス路線を5本運行する"
+      },
+      "BUS_LINES_20": {
+        "name": "バスの街",
+        "description": "1つの都市でバス路線を20本運行する"
+      },
+      "BUS_LINES_50": {
+        "name": "バス大国",
+        "description": "1つの都市でバス路線を50本運行する"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "モノレール開業",
+        "description": "モノレール路線を開業させる"
+      },
+      "MONORAIL_LINES_5": {
+        "name": "モノレール網",
+        "description": "1つの都市でモノレール路線を5本運行する"
+      },
+      "MONORAIL_LINES_20": {
+        "name": "空ゆく都市",
+        "description": "1つの都市でモノレール路線を20本運行する"
+      },
+      "LRT_LINES_1": {
+        "name": "LRT開業",
+        "description": "LRT路線を開業させる"
+      },
+      "LRT_LINES_5": {
+        "name": "LRT網",
+        "description": "1つの都市でLRT路線を5本運行する"
+      },
+      "LRT_LINES_20": {
+        "name": "路面電車の街",
+        "description": "1つの都市でLRT路線を20本運行する"
+      },
+      "POPULATION_10K": {
+        "name": "町の誕生",
+        "description": "人口1万人に到達する"
+      },
+      "POPULATION_100K": {
+        "name": "地方都市",
+        "description": "人口10万人に到達する"
+      },
+      "POPULATION_500K": {
+        "name": "中核都市",
+        "description": "人口50万人に到達する"
+      },
+      "POPULATION_1M": {
+        "name": "百万都市",
+        "description": "人口100万人に到達する"
+      },
+      "POPULATION_2M": {
+        "name": "大都市圏",
+        "description": "人口200万人に到達する"
+      },
+      "FLOORS_5": {
+        "name": "中層ビル",
+        "description": "民間の5階建て以上の建物が完成する"
+      },
+      "FLOORS_10": {
+        "name": "高層ビル",
+        "description": "民間の10階建て以上の建物が完成する"
+      },
+      "FLOORS_20": {
+        "name": "超高層ビル",
+        "description": "民間の20階建て以上の建物が完成する"
+      },
+      "FLOORS_40": {
+        "name": "摩天楼",
+        "description": "民間の40階建て以上の建物が完成する"
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "創薬の拠点",
+        "description": "医薬品工場が都市で操業を始める"
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "シリコンの街",
+        "description": "半導体工場が都市で操業を始める"
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "精密のものづくり",
+        "description": "精密機器工場が都市で操業を始める"
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "IT企業の進出",
+        "description": "ソフトウェア会社が都市で営業を始める"
+      },
+      "TOURISTS_1": {
+        "name": "初めての観光客",
+        "description": "観光客が初めて都市に滞在する"
+      },
+      "TOURISTS_100": {
+        "name": "観光の街",
+        "description": "100人の観光客が同時に都市に滞在する"
+      },
+      "TOURISTS_1K": {
+        "name": "人気の観光地",
+        "description": "1,000人の観光客が同時に都市に滞在する"
+      },
+      "TOURISTS_10K": {
+        "name": "世界的な観光地",
+        "description": "1万人の観光客が同時に都市に滞在する"
+      },
+      "YEARS_10": {
+        "name": "10年の歩み",
+        "description": "1つの都市で10年間プレイする"
+      },
+      "YEARS_100": {
+        "name": "百年の都",
+        "description": "1つの都市で100年間プレイする"
+      },
+      "YEARS_500": {
+        "name": "五百年の歴史",
+        "description": "1つの都市で500年間プレイする"
+      },
+      "YEARS_1000": {
+        "name": "千年の都",
+        "description": "1つの都市で1,000年間プレイする"
+      },
+      "YEARS_10000": {
+        "name": "悠久の都",
+        "description": "1つの都市で1万年間プレイする"
+      },
+      "ALL_TUTORIALS": {
+        "name": "都市計画の修了",
+        "description": "すべてのチュートリアルをクリアする"
+      }
+    }
+  }
+}

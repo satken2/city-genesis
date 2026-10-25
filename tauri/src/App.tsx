@@ -67,6 +67,7 @@ const CityNotificationsWindow = lazy(() => import("./components/notification/Cit
 const ConstructionProjectsWindow = lazy(() => import("./components/construction/ConstructionProjectsWindow").then(m => ({ default: m.ConstructionProjectsWindow })));
 const EpochResultWindow = lazy(() => import("./components/taskbar/EpochResultWindow").then(m => ({ default: m.EpochResultWindow })));
 const QuestCompleteWindow = lazy(() => import("./components/taskbar/QuestCompleteWindow").then(m => ({ default: m.QuestCompleteWindow })));
+const AchievementUnlockedWindow = lazy(() => import("./components/taskbar/AchievementUnlockedWindow").then(m => ({ default: m.AchievementUnlockedWindow })));
 const InfoDialogWindow = lazy(() => import("./components/common/InfoDialogWindow").then(m => ({ default: m.InfoDialogWindow })));
 const TerrainEditorCanvas = lazy(() => import("./components/terrain/TerrainEditorCanvas").then(m => ({ default: m.TerrainEditorCanvas })));
 const Terrain3DPreviewCanvas = lazy(() => import("./components/terrain/Terrain3DPreviewCanvas").then(m => ({ default: m.Terrain3DPreviewCanvas })));
@@ -81,6 +82,7 @@ import type { PendingZoneMerge } from "./components/zone/ZoneMergeConfirmWindow"
 import type { PendingDirectAcquisition } from "./components/building/BuildingDirectAcquisitionConfirmWindow";
 import type { InfoDialogContent } from "./components/common/InfoDialogWindow";
 import { emitConfirmDialogResult, type ConfirmDialogRequest } from "./utils/confirmDialog";
+import { showUnlockedAchievements, type UnlockedAchievement } from "./utils/achievements";
 
 import { IconPanel } from "./components/hud/IconPanel";
 import { Cockpit } from "./components/hud/Cockpit";
@@ -100,7 +102,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * Window types with dedicated panels. Render these with dedicated components instead of the generic JSON
  * display.
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_tracking", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -600,6 +602,7 @@ function App() {
                   currentDate?: number;
                   completedQuests?: QuestNotification[];
                   failedQuests?: QuestNotification[];
+                  unlockedAchievements?: UnlockedAchievement[];
                 };
                 return (
                   <EpochResultWindow
@@ -619,6 +622,8 @@ function App() {
                           params: { extra: { quests, openedAt: Date.now() } },
                         });
                       }
+                      // Achievements also wait for the results to close, so the camera button is not hidden behind them.
+                      await showUnlockedAchievements(extra.unlockedAchievements ?? []).catch(console.error);
                       await closeWindow();
                     }}
                   />
@@ -631,6 +636,12 @@ function App() {
                     | { quests?: QuestNotification[] }
                     | undefined)?.quests) ?? []
                 }
+                openedAt={Number(windowExtra(context)?.openedAt) || undefined}
+                onClose={closeWindow}
+              />
+            ) : context.window_type === "achievement_unlocked" ? (
+              <AchievementUnlockedWindow
+                achievements={(windowExtra(context)?.achievements as UnlockedAchievement[] | undefined) ?? []}
                 openedAt={Number(windowExtra(context)?.openedAt) || undefined}
                 onClose={closeWindow}
               />

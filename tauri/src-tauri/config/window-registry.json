@@ -539,6 +539,15 @@
     "policy": "single",
     "actions": []
   },
+  "achievement_unlocked": {
+    "title": "実績解除",
+    "width": 400,
+    "height": 370,
+    "resizable": false,
+    "policy": "single",
+    "layout": "right_top",
+    "actions": []
+  },
   "info_dialog": {
     "title": "お知らせ",
     "width": 520,

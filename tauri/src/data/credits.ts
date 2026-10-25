@@ -266,6 +266,15 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Quest complete",
   },
   {
+    title: "Congrats",
+    category: "sfx",
+    author: "Fupicat",
+    source: "Freesound",
+    url: "https://freesound.org/people/Fupicat/sounds/607207/",
+    license: "CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/",
+    note: "Achievement unlocked (achievement.opus). Converted from stereo WAV to Ogg Opus with ffmpeg at 96 kbps VBR. License verified 2026-10-25.",
+  },
+  {
     title: "VS Button Click 04",
     category: "sfx",
     author: "Vilkas_Sound",

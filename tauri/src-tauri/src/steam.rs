@@ -1,5 +1,6 @@
 //! Steam store integration (Cargo feature `steam`): initialize Steam, pass through
-//! Steam-managed folders (DLC/Workshop), and send authentication tickets to the core for verification.
+//! Steam-managed folders (DLC/Workshop), send authentication tickets to the core for verification,
+//! and copy the achievements the core records in the player profile to Steam.
 //!
 //! Continue without integration when launched outside Steam (no Steam client or unknown
 //! App ID). The core remains unverified and subject to the unverified epoch limit. Do not
@@ -149,6 +150,57 @@ fn receive_ticket(receiver: &Receiver<TicketForWebApiResponse>, ticket: AuthTick
         };
     }
     None
+}
+
+/// Bring Steam achievements in line with the player profile (`achievements` of GET /api/v1/profile) on a separate thread.
+/// The core judges and records unlocks; Steam holds a copy. Sending the whole profile each time also delivers
+/// achievements earned while Steam was not running, and leaves already unlocked ones untouched.
+pub fn sync_achievements(api_base_url: String) {
+    let Some(client) = CLIENT.get().cloned() else { return };
+    std::thread::spawn(move || {
+        let http = reqwest::blocking::Client::builder().timeout(Duration::from_secs(30)).build().unwrap_or_default();
+        let base = api_base_url.trim_end_matches('/');
+        if wait_for_core(&http, base) {
+            send_profile_achievements(&client, &http, base);
+        }
+    });
+}
+
+fn send_profile_achievements(client: &Client, http: &reqwest::blocking::Client, base: &str) {
+    let profile = http
+        .get(format!("{base}/api/v1/profile"))
+        .send()
+        .and_then(|response| response.error_for_status())
+        .and_then(|response| response.json::<serde_json::Value>());
+    let names: Vec<String> = match profile {
+        Ok(profile) => profile["achievements"]
+            .as_array()
+            .map(|items| items.iter().filter_map(|item| item.as_str().map(str::to_string)).collect())
+            .unwrap_or_default(),
+        Err(error) => {
+            log::warn!("[steam] プロフィールを取得できないため、実績を送れません: {error}");
+            return;
+        }
+    };
+    let stats = client.user_stats();
+    let mut unlocked = 0;
+    for name in &names {
+        let achievement = stats.achievement(name);
+        if achievement.get() == Ok(true) {
+            continue;
+        }
+        // Fails for API names not registered in Steamworks, or before Steam has delivered the user's stats.
+        match achievement.set() {
+            Ok(()) => unlocked += 1,
+            Err(()) => log::warn!("[steam] 実績 {name} を解除できません"),
+        }
+    }
+    if unlocked > 0 {
+        match stats.store_stats() {
+            Ok(()) => log::info!("[steam] 実績を {unlocked} 件解除しました"),
+            Err(()) => log::warn!("[steam] 実績を Steam に保存できません"),
+        }
+    }
 }
 
 fn to_hex(bytes: &[u8]) -> String {

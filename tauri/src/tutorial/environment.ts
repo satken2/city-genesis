@@ -1,4 +1,5 @@
 import * as constants from "../constants";
+import { presentUnlockedAchievements } from "../utils/achievements";
 import { fetchApi } from "../utils/api";
 import { sendSessionReload } from "../utils/ipc";
 import { entityId } from "./engine";
@@ -59,11 +60,14 @@ export async function createEnvironment(base: string, saveId: string, bindings: 
       assertCurrent();
       const [updated] = await env.read(ref.kind, ref.id);
       if (updated.status !== constants.STATUS_ACTIVE) throw new Error("Construction did not become active");
+      // Completing construction can unlock achievements without an epoch, so show them here.
+      void presentUnlockedAchievements(base).catch(console.error);
     },
     async scenarioAction(scenario, action) {
       await assertSession();
       await fetchApi(`${root}/tutorials/actions`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ save_id: saveId, scenario, action }) });
       assertCurrent();
+      void presentUnlockedAchievements(base).catch(console.error);
     },
     async reload() { assertCurrent(); await sendSessionReload(); },
   };

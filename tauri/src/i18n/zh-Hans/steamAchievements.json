@@ -1,0 +1,168 @@
+{
+  "steamAchievements": {
+    "next": "下一个",
+    "close": "关闭",
+    "items": {
+      "FIRST_ROAD": {
+        "name": "第一条道路",
+        "description": "首次建成道路"
+      },
+      "FIRST_BUILDING": {
+        "name": "第一栋建筑",
+        "description": "首次建成建筑"
+      },
+      "FIRST_PUBLIC_FACILITY": {
+        "name": "第一座公共设施",
+        "description": "首次建成发电站、变电站等公共设施"
+      },
+      "FIRST_OFFSHORE": {
+        "name": "驶向大海",
+        "description": "首次建成海上风电场或海上石油平台"
+      },
+      "RAIL_LINES_1": {
+        "name": "铁路开通",
+        "description": "开通一条铁路线路"
+      },
+      "RAIL_LINES_5": {
+        "name": "铁路网",
+        "description": "在一座城市中运营5条铁路线路"
+      },
+      "RAIL_LINES_20": {
+        "name": "铁路王国",
+        "description": "在一座城市中运营20条铁路线路"
+      },
+      "BUS_LINES_1": {
+        "name": "公交开通",
+        "description": "开通一条公交线路"
+      },
+      "BUS_LINES_5": {
+        "name": "公交网",
+        "description": "在一座城市中运营5条公交线路"
+      },
+      "BUS_LINES_20": {
+        "name": "公交之城",
+        "description": "在一座城市中运营20条公交线路"
+      },
+      "BUS_LINES_50": {
+        "name": "公交大国",
+        "description": "在一座城市中运营50条公交线路"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "单轨开通",
+        "description": "开通一条单轨线路"
+      },
+      "MONORAIL_LINES_5": {
+        "name": "单轨网",
+        "description": "在一座城市中运营5条单轨线路"
+      },
+      "MONORAIL_LINES_20": {
+        "name": "空中之城",
+        "description": "在一座城市中运营20条单轨线路"
+      },
+      "LRT_LINES_1": {
+        "name": "轻轨开通",
+        "description": "开通一条轻轨线路"
+      },
+      "LRT_LINES_5": {
+        "name": "轻轨网",
+        "description": "在一座城市中运营5条轻轨线路"
+      },
+      "LRT_LINES_20": {
+        "name": "有轨电车之城",
+        "description": "在一座城市中运营20条轻轨线路"
+      },
+      "POPULATION_10K": {
+        "name": "小镇诞生",
+        "description": "人口达到1万"
+      },
+      "POPULATION_100K": {
+        "name": "地方城市",
+        "description": "人口达到10万"
+      },
+      "POPULATION_500K": {
+        "name": "中心城市",
+        "description": "人口达到50万"
+      },
+      "POPULATION_1M": {
+        "name": "百万之城",
+        "description": "人口达到100万"
+      },
+      "POPULATION_2M": {
+        "name": "大都市圈",
+        "description": "人口达到200万"
+      },
+      "FLOORS_5": {
+        "name": "中层大楼",
+        "description": "民间的5层及以上建筑建成"
+      },
+      "FLOORS_10": {
+        "name": "高层大楼",
+        "description": "民间的10层及以上建筑建成"
+      },
+      "FLOORS_20": {
+        "name": "超高层大楼",
+        "description": "民间的20层及以上建筑建成"
+      },
+      "FLOORS_40": {
+        "name": "摩天大楼",
+        "description": "民间的40层及以上建筑建成"
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "制药基地",
+        "description": "医药品工厂在城市中投产"
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "硅之城",
+        "description": "半导体工厂在城市中投产"
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "精密制造",
+        "description": "精密仪器工厂在城市中投产"
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "IT企业进驻",
+        "description": "软件公司在城市中开业"
+      },
+      "TOURISTS_1": {
+        "name": "第一位游客",
+        "description": "首次有游客在城市中停留"
+      },
+      "TOURISTS_100": {
+        "name": "观光小城",
+        "description": "同时有100名游客在城市中停留"
+      },
+      "TOURISTS_1K": {
+        "name": "热门景点",
+        "description": "同时有1,000名游客在城市中停留"
+      },
+      "TOURISTS_10K": {
+        "name": "世界级旅游地",
+        "description": "同时有1万名游客在城市中停留"
+      },
+      "YEARS_10": {
+        "name": "十年足迹",
+        "description": "在一座城市中游玩10年"
+      },
+      "YEARS_100": {
+        "name": "百年之都",
+        "description": "在一座城市中游玩100年"
+      },
+      "YEARS_500": {
+        "name": "五百年历史",
+        "description": "在一座城市中游玩500年"
+      },
+      "YEARS_1000": {
+        "name": "千年之都",
+        "description": "在一座城市中游玩1,000年"
+      },
+      "YEARS_10000": {
+        "name": "永恒之都",
+        "description": "在一座城市中游玩1万年"
+      },
+      "ALL_TUTORIALS": {
+        "name": "城市规划结业",
+        "description": "完成所有教程"
+      }
+    }
+  }
+}

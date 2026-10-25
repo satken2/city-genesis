@@ -1,0 +1,168 @@
+{
+  "steamAchievements": {
+    "next": "Next",
+    "close": "Close",
+    "items": {
+      "FIRST_ROAD": {
+        "name": "First Road",
+        "description": "Complete your first road"
+      },
+      "FIRST_BUILDING": {
+        "name": "First Building",
+        "description": "Complete your first building"
+      },
+      "FIRST_PUBLIC_FACILITY": {
+        "name": "First Public Facility",
+        "description": "Complete your first public facility, such as a power plant or substation"
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Out to Sea",
+        "description": "Complete your first offshore wind farm or offshore oil platform"
+      },
+      "RAIL_LINES_1": {
+        "name": "Rail Opening",
+        "description": "Open a rail line"
+      },
+      "RAIL_LINES_5": {
+        "name": "Rail Network",
+        "description": "Operate 5 rail lines in one city"
+      },
+      "RAIL_LINES_20": {
+        "name": "Railway Kingdom",
+        "description": "Operate 20 rail lines in one city"
+      },
+      "BUS_LINES_1": {
+        "name": "Bus Opening",
+        "description": "Open a bus line"
+      },
+      "BUS_LINES_5": {
+        "name": "Bus Network",
+        "description": "Operate 5 bus lines in one city"
+      },
+      "BUS_LINES_20": {
+        "name": "Bus City",
+        "description": "Operate 20 bus lines in one city"
+      },
+      "BUS_LINES_50": {
+        "name": "Bus Empire",
+        "description": "Operate 50 bus lines in one city"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Monorail Opening",
+        "description": "Open a monorail line"
+      },
+      "MONORAIL_LINES_5": {
+        "name": "Monorail Network",
+        "description": "Operate 5 monorail lines in one city"
+      },
+      "MONORAIL_LINES_20": {
+        "name": "City in the Sky",
+        "description": "Operate 20 monorail lines in one city"
+      },
+      "LRT_LINES_1": {
+        "name": "LRT Opening",
+        "description": "Open an LRT line"
+      },
+      "LRT_LINES_5": {
+        "name": "LRT Network",
+        "description": "Operate 5 LRT lines in one city"
+      },
+      "LRT_LINES_20": {
+        "name": "Tram City",
+        "description": "Operate 20 LRT lines in one city"
+      },
+      "POPULATION_10K": {
+        "name": "A Town Is Born",
+        "description": "Reach a population of 10,000"
+      },
+      "POPULATION_100K": {
+        "name": "Regional City",
+        "description": "Reach a population of 100,000"
+      },
+      "POPULATION_500K": {
+        "name": "Core City",
+        "description": "Reach a population of 500,000"
+      },
+      "POPULATION_1M": {
+        "name": "Million City",
+        "description": "Reach a population of 1,000,000"
+      },
+      "POPULATION_2M": {
+        "name": "Metropolis",
+        "description": "Reach a population of 2,000,000"
+      },
+      "FLOORS_5": {
+        "name": "Mid-Rise",
+        "description": "Have a private building of 5 or more floors completed"
+      },
+      "FLOORS_10": {
+        "name": "High-Rise",
+        "description": "Have a private building of 10 or more floors completed"
+      },
+      "FLOORS_20": {
+        "name": "Super High-Rise",
+        "description": "Have a private building of 20 or more floors completed"
+      },
+      "FLOORS_40": {
+        "name": "Skyscraper",
+        "description": "Have a private building of 40 or more floors completed"
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Pharma Hub",
+        "description": "Have a pharmaceutical factory start operating in your city"
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Silicon City",
+        "description": "Have a semiconductor factory start operating in your city"
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Precision Craft",
+        "description": "Have a precision instruments factory start operating in your city"
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Tech Arrives",
+        "description": "Have a software company open for business in your city"
+      },
+      "TOURISTS_1": {
+        "name": "First Tourist",
+        "description": "Have a tourist stay in your city for the first time"
+      },
+      "TOURISTS_100": {
+        "name": "Tourist Town",
+        "description": "Have 100 tourists staying in your city at once"
+      },
+      "TOURISTS_1K": {
+        "name": "Popular Destination",
+        "description": "Have 1,000 tourists staying in your city at once"
+      },
+      "TOURISTS_10K": {
+        "name": "World-Class Destination",
+        "description": "Have 10,000 tourists staying in your city at once"
+      },
+      "YEARS_10": {
+        "name": "A Decade",
+        "description": "Play for 10 years in one city"
+      },
+      "YEARS_100": {
+        "name": "Century City",
+        "description": "Play for 100 years in one city"
+      },
+      "YEARS_500": {
+        "name": "Five Centuries",
+        "description": "Play for 500 years in one city"
+      },
+      "YEARS_1000": {
+        "name": "Millennial City",
+        "description": "Play for 1,000 years in one city"
+      },
+      "YEARS_10000": {
+        "name": "Eternal City",
+        "description": "Play for 10,000 years in one city"
+      },
+      "ALL_TUTORIALS": {
+        "name": "Planning Graduate",
+        "description": "Clear every tutorial"
+      }
+    }
+  }
+}

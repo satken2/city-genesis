@@ -1701,6 +1701,15 @@ fn log_frontend_info(message: String) {
     log::info!("[frontend] {}", message);
 }
 
+/// Copy the achievements recorded in the player profile to Steam. Does nothing without Steam integration.
+#[tauri::command]
+fn sync_steam_achievements(state: tauri::State<'_, SharedState>) {
+    #[cfg(feature = "steam")]
+    steam::sync_achievements(state.lock().api_base_url.clone());
+    #[cfg(not(feature = "steam"))]
+    let _ = state;
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     setup_logging().unwrap_or_else(|e| eprintln!("ログ初期化に失敗しました: {}", e));
@@ -1857,7 +1866,10 @@ pub fn run() {
                     return;
                 }
                 #[cfg(feature = "steam")]
-                steam::start_verification(state.lock().api_base_url.clone());
+                {
+                    steam::start_verification(state.lock().api_base_url.clone());
+                    steam::sync_achievements(state.lock().api_base_url.clone());
+                }
                 start_session_polling(state.clone(), app_handle.clone());
                 process::watch_children(&app_handle, &state);
             });
@@ -1969,6 +1981,7 @@ pub fn run() {
             save_app_settings,
             log_frontend_error,
             log_frontend_info,
+            sync_steam_achievements,
             show_notification,
             dismiss_notification,
             resize_notification_window,

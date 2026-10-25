@@ -40,7 +40,7 @@ The profile spans cities; saves belong to individual cities. Session-only state 
 
 The shared user data directory is `UrbanGenesis/`. On Windows it is under `%LOCALAPPDATA%`, falling back to `%APPDATA%`; on macOS, `~/Library/Application Support`; on Linux, `$XDG_DATA_HOME`, falling back to `~/.local/share`. Resolve it consistently so the UI opens the same directories the core uses.
 
-Store integration belongs to Tauri, which passes authentication tickets and store-managed directories to the core. Use the core's ownership and loading eligibility results.
+Store integration belongs to Tauri, which passes authentication tickets and store-managed directories to the core. Use the core's ownership and loading eligibility results. Store achievements are also judged by the core and recorded in the profile; Tauri only copies that record to the store.
 
 ## Browser version
 

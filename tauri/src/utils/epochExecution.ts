@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { EpochReport } from "../components/taskbar/EpochResultWindow";
 import type { QuestNotification } from "../types";
 import { MAX_UNVERIFIED_POPULATION } from "../constants";
+import { showUnlockedAchievements, takeUnlockedAchievements } from "./achievements";
 import { ApiError, buildApiUrl, fetchApi } from "./api";
 import { beginEpochPresentation } from "./epochPresentation";
 import { runEpochWithPresentation } from "./epochFlow";
@@ -71,6 +72,10 @@ export async function executeEpochs(options: {
     logInfoToFile(`epoch execution: done epoch=${data.epoch ?? "?"}`);
 
     const quests: QuestNotification[] = data.completed_quests ?? [];
+    const achievements = await takeUnlockedAchievements(apiBaseUrl).catch((error: unknown) => {
+      console.error("failed to take unlocked achievements", error);
+      return [];
+    });
     const failedQuests: QuestNotification[] = data.failed_quests ?? [];
     const modalQuests = quests.filter((q) => q.notify === "modal");
     const toastQuests = quests.filter((q) => q.notify === "toast");
@@ -98,15 +103,19 @@ export async function executeEpochs(options: {
             currentDate: Number(data.current_date),
             completedQuests: quests,
             failedQuests,
+            unlockedAchievements: achievements,
           },
         },
       });
       logInfoToFile("epoch execution: epoch_result window opened");
-    } else if (modalQuests.length > 0) {
-      await invoke("open_registered_window", {
-        windowType: "quest_complete",
-        params: { extra: { quests, openedAt: Date.now() } },
-      });
+    } else {
+      if (modalQuests.length > 0) {
+        await invoke("open_registered_window", {
+          windowType: "quest_complete",
+          params: { extra: { quests, openedAt: Date.now() } },
+        });
+      }
+      await showUnlockedAchievements(achievements).catch(console.error);
     }
 
     if (!data.epoch_report) await presentation.finish();

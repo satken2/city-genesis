@@ -169,6 +169,7 @@ const commands: Record<string, Command> = {
   },
   log_frontend_error: (_caller, args) => console.error(`[frontend] ${String(args.message)}`),
   log_frontend_info: (_caller, args) => console.info(`[frontend] ${String(args.message)}`),
+  sync_steam_achievements: () => null, // ブラウザ版は Steam と連携しない
   get_client_system_stats: () => ({ // ブラウザでは測れないので、Rust が非対応の環境で返す形にする
     memory: { system_total_bytes: null, used_bytes: null, graphic: null },
     vram: null,

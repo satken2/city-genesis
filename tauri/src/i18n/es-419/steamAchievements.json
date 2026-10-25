@@ -1,0 +1,168 @@
+{
+  "steamAchievements": {
+    "next": "Siguiente",
+    "close": "Cerrar",
+    "items": {
+      "FIRST_ROAD": {
+        "name": "Primera calle",
+        "description": "Completa tu primera calle"
+      },
+      "FIRST_BUILDING": {
+        "name": "Primer edificio",
+        "description": "Completa tu primer edificio"
+      },
+      "FIRST_PUBLIC_FACILITY": {
+        "name": "Primera instalación pública",
+        "description": "Completa tu primera instalación pública, como una central eléctrica o una subestación"
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Rumbo al mar",
+        "description": "Completa tu primer parque eólico marino o tu primera plataforma petrolera marina"
+      },
+      "RAIL_LINES_1": {
+        "name": "Inauguración ferroviaria",
+        "description": "Inaugura una línea ferroviaria"
+      },
+      "RAIL_LINES_5": {
+        "name": "Red ferroviaria",
+        "description": "Opera 5 líneas ferroviarias en una ciudad"
+      },
+      "RAIL_LINES_20": {
+        "name": "Reino ferroviario",
+        "description": "Opera 20 líneas ferroviarias en una ciudad"
+      },
+      "BUS_LINES_1": {
+        "name": "Inauguración de autobuses",
+        "description": "Inaugura una línea de autobús"
+      },
+      "BUS_LINES_5": {
+        "name": "Red de autobuses",
+        "description": "Opera 5 líneas de autobús en una ciudad"
+      },
+      "BUS_LINES_20": {
+        "name": "Ciudad de autobuses",
+        "description": "Opera 20 líneas de autobús en una ciudad"
+      },
+      "BUS_LINES_50": {
+        "name": "Imperio del autobús",
+        "description": "Opera 50 líneas de autobús en una ciudad"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Inauguración del monorriel",
+        "description": "Inaugura una línea de monorriel"
+      },
+      "MONORAIL_LINES_5": {
+        "name": "Red de monorriel",
+        "description": "Opera 5 líneas de monorriel en una ciudad"
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Ciudad en el cielo",
+        "description": "Opera 20 líneas de monorriel en una ciudad"
+      },
+      "LRT_LINES_1": {
+        "name": "Inauguración del tren ligero",
+        "description": "Inaugura una línea de tren ligero"
+      },
+      "LRT_LINES_5": {
+        "name": "Red de tren ligero",
+        "description": "Opera 5 líneas de tren ligero en una ciudad"
+      },
+      "LRT_LINES_20": {
+        "name": "Ciudad del tranvía",
+        "description": "Opera 20 líneas de tren ligero en una ciudad"
+      },
+      "POPULATION_10K": {
+        "name": "Nace un pueblo",
+        "description": "Alcanza una población de 10 000 habitantes"
+      },
+      "POPULATION_100K": {
+        "name": "Ciudad regional",
+        "description": "Alcanza una población de 100 000 habitantes"
+      },
+      "POPULATION_500K": {
+        "name": "Ciudad central",
+        "description": "Alcanza una población de 500 000 habitantes"
+      },
+      "POPULATION_1M": {
+        "name": "Ciudad millonaria",
+        "description": "Alcanza una población de 1 000 000 de habitantes"
+      },
+      "POPULATION_2M": {
+        "name": "Metrópolis",
+        "description": "Alcanza una población de 2 000 000 de habitantes"
+      },
+      "FLOORS_5": {
+        "name": "Altura media",
+        "description": "Se completa un edificio privado de 5 pisos o más"
+      },
+      "FLOORS_10": {
+        "name": "Edificio alto",
+        "description": "Se completa un edificio privado de 10 pisos o más"
+      },
+      "FLOORS_20": {
+        "name": "Gran altura",
+        "description": "Se completa un edificio privado de 20 pisos o más"
+      },
+      "FLOORS_40": {
+        "name": "Rascacielos",
+        "description": "Se completa un edificio privado de 40 pisos o más"
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Polo farmacéutico",
+        "description": "Una fábrica farmacéutica empieza a operar en tu ciudad"
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Ciudad del silicio",
+        "description": "Una fábrica de semiconductores empieza a operar en tu ciudad"
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Manufactura de precisión",
+        "description": "Una fábrica de instrumentos de precisión empieza a operar en tu ciudad"
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Llega la tecnología",
+        "description": "Una empresa de software abre sus puertas en tu ciudad"
+      },
+      "TOURISTS_1": {
+        "name": "Primer turista",
+        "description": "Un turista se hospeda en tu ciudad por primera vez"
+      },
+      "TOURISTS_100": {
+        "name": "Pueblo turístico",
+        "description": "Ten 100 turistas hospedados en tu ciudad al mismo tiempo"
+      },
+      "TOURISTS_1K": {
+        "name": "Destino popular",
+        "description": "Ten 1000 turistas hospedados en tu ciudad al mismo tiempo"
+      },
+      "TOURISTS_10K": {
+        "name": "Destino de talla mundial",
+        "description": "Ten 10 000 turistas hospedados en tu ciudad al mismo tiempo"
+      },
+      "YEARS_10": {
+        "name": "Una década",
+        "description": "Juega 10 años en una ciudad"
+      },
+      "YEARS_100": {
+        "name": "Ciudad centenaria",
+        "description": "Juega 100 años en una ciudad"
+      },
+      "YEARS_500": {
+        "name": "Cinco siglos",
+        "description": "Juega 500 años en una ciudad"
+      },
+      "YEARS_1000": {
+        "name": "Ciudad milenaria",
+        "description": "Juega 1000 años en una ciudad"
+      },
+      "YEARS_10000": {
+        "name": "Ciudad eterna",
+        "description": "Juega 10 000 años en una ciudad"
+      },
+      "ALL_TUTORIALS": {
+        "name": "Urbanista graduado",
+        "description": "Completa todos los tutoriales"
+      }
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "steamAchievements": {
+    "next": "Suivant",
+    "close": "Fermer",
+    "items": {
+      "FIRST_ROAD": {
+        "name": "Première route",
+        "description": "Terminez votre première route"
+      },
+      "FIRST_BUILDING": {
+        "name": "Premier bâtiment",
+        "description": "Terminez votre premier bâtiment"
+      },
+      "FIRST_PUBLIC_FACILITY": {
+        "name": "Premier équipement public",
+        "description": "Terminez votre premier équipement public, comme une centrale électrique ou un poste électrique"
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Cap sur la mer",
+        "description": "Terminez votre premier parc éolien en mer ou votre première plateforme pétrolière en mer"
+      },
+      "RAIL_LINES_1": {
+        "name": "Inauguration ferroviaire",
+        "description": "Ouvrez une ligne ferroviaire"
+      },
+      "RAIL_LINES_5": {
+        "name": "Réseau ferroviaire",
+        "description": "Exploitez 5 lignes ferroviaires dans une même ville"
+      },
+      "RAIL_LINES_20": {
+        "name": "Royaume du rail",
+        "description": "Exploitez 20 lignes ferroviaires dans une même ville"
+      },
+      "BUS_LINES_1": {
+        "name": "Inauguration du bus",
+        "description": "Ouvrez une ligne de bus"
+      },
+      "BUS_LINES_5": {
+        "name": "Réseau de bus",
+        "description": "Exploitez 5 lignes de bus dans une même ville"
+      },
+      "BUS_LINES_20": {
+        "name": "Ville du bus",
+        "description": "Exploitez 20 lignes de bus dans une même ville"
+      },
+      "BUS_LINES_50": {
+        "name": "Empire du bus",
+        "description": "Exploitez 50 lignes de bus dans une même ville"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Inauguration du monorail",
+        "description": "Ouvrez une ligne de monorail"
+      },
+      "MONORAIL_LINES_5": {
+        "name": "Réseau de monorail",
+        "description": "Exploitez 5 lignes de monorail dans une même ville"
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Ville dans le ciel",
+        "description": "Exploitez 20 lignes de monorail dans une même ville"
+      },
+      "LRT_LINES_1": {
+        "name": "Inauguration du tramway",
+        "description": "Ouvrez une ligne de tramway"
+      },
+      "LRT_LINES_5": {
+        "name": "Réseau de tramway",
+        "description": "Exploitez 5 lignes de tramway dans une même ville"
+      },
+      "LRT_LINES_20": {
+        "name": "Ville du tramway",
+        "description": "Exploitez 20 lignes de tramway dans une même ville"
+      },
+      "POPULATION_10K": {
+        "name": "Naissance d'une ville",
+        "description": "Atteignez 10 000 habitants"
+      },
+      "POPULATION_100K": {
+        "name": "Ville régionale",
+        "description": "Atteignez 100 000 habitants"
+      },
+      "POPULATION_500K": {
+        "name": "Grande ville",
+        "description": "Atteignez 500 000 habitants"
+      },
+      "POPULATION_1M": {
+        "name": "Ville millionnaire",
+        "description": "Atteignez 1 000 000 d'habitants"
+      },
+      "POPULATION_2M": {
+        "name": "Métropole",
+        "description": "Atteignez 2 000 000 d'habitants"
+      },
+      "FLOORS_5": {
+        "name": "Immeuble moyen",
+        "description": "Un bâtiment privé de 5 étages ou plus est terminé"
+      },
+      "FLOORS_10": {
+        "name": "Tour",
+        "description": "Un bâtiment privé de 10 étages ou plus est terminé"
+      },
+      "FLOORS_20": {
+        "name": "Grande tour",
+        "description": "Un bâtiment privé de 20 étages ou plus est terminé"
+      },
+      "FLOORS_40": {
+        "name": "Gratte-ciel",
+        "description": "Un bâtiment privé de 40 étages ou plus est terminé"
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Pôle pharmaceutique",
+        "description": "Une usine pharmaceutique entre en activité dans votre ville"
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Ville du silicium",
+        "description": "Une usine de semi-conducteurs entre en activité dans votre ville"
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Industrie de précision",
+        "description": "Une usine d'instruments de précision entre en activité dans votre ville"
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Arrivée de la tech",
+        "description": "Une entreprise de logiciels ouvre ses portes dans votre ville"
+      },
+      "TOURISTS_1": {
+        "name": "Premier touriste",
+        "description": "Un touriste séjourne pour la première fois dans votre ville"
+      },
+      "TOURISTS_100": {
+        "name": "Ville touristique",
+        "description": "Accueillez 100 touristes en même temps dans votre ville"
+      },
+      "TOURISTS_1K": {
+        "name": "Destination prisée",
+        "description": "Accueillez 1 000 touristes en même temps dans votre ville"
+      },
+      "TOURISTS_10K": {
+        "name": "Destination mondiale",
+        "description": "Accueillez 10 000 touristes en même temps dans votre ville"
+      },
+      "YEARS_10": {
+        "name": "Une décennie",
+        "description": "Jouez 10 ans dans une même ville"
+      },
+      "YEARS_100": {
+        "name": "Ville centenaire",
+        "description": "Jouez 100 ans dans une même ville"
+      },
+      "YEARS_500": {
+        "name": "Cinq siècles",
+        "description": "Jouez 500 ans dans une même ville"
+      },
+      "YEARS_1000": {
+        "name": "Ville millénaire",
+        "description": "Jouez 1 000 ans dans une même ville"
+      },
+      "YEARS_10000": {
+        "name": "Ville éternelle",
+        "description": "Jouez 10 000 ans dans une même ville"
+      },
+      "ALL_TUTORIALS": {
+        "name": "Diplômé en urbanisme",
+        "description": "Terminez tous les tutoriels"
+      }
+    }
+  }
+}
