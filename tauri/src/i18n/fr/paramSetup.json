@@ -91,6 +91,10 @@
         "label": "Taux d'effort maximal pour le loyer",
         "desc": "Part maximale du revenu du ménage pouvant être consacrée au loyer. À 0,3, jusqu'à 30 % du revenu."
       },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Poids du temps de trajet dans le choix du logement",
+        "desc": "Lors du choix d'un logement, poids de chaque minute d'aller-retour pour le travail, l'école et les courses, en multiple du salaire moyen de la ville. À 1, valorisée au salaire. Plus la valeur est élevée, plus les logements proches du travail et des commerces sont privilégiés."
+      },
       "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
         "label": "Part minimale de revenu disponible",
         "desc": "Part de revenu discrétionnaire que le ménage cherche à préserver au minimum. Trop basse, le budget familial se rompt facilement."

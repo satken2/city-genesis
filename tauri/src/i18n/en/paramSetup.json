@@ -91,6 +91,10 @@
         "label": "Rent-to-Income Ratio (max)",
         "desc": "Maximum fraction of household income that can be spent on rent. 0.3 = up to 30%."
       },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Travel Time Weight in Housing Choice",
+        "desc": "When choosing a home, how heavily each minute of round trips for work, school, and shopping counts, as a multiple of the city's average wage. 1 = valued at the wage. Higher values favor homes near workplaces and shops."
+      },
       "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
         "label": "Minimum Disposable Income Ratio",
         "desc": "Minimum discretionary income ratio a household tries to maintain. If it is too low, household finances break down easily."

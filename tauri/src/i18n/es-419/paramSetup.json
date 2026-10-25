@@ -91,6 +91,10 @@
         "label": "Proporción alquiler/ingreso (tope pagable)",
         "desc": "Proporción máxima del ingreso del hogar que puede destinarse al alquiler. Con 0.3, hasta el 30 % del ingreso."
       },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Peso del tiempo de viaje al elegir vivienda",
+        "desc": "Al elegir vivienda, cuánto pesa cada minuto de los viajes de ida y vuelta al trabajo, la escuela y las compras, como múltiplo del salario promedio de la ciudad. Con 1, se valora al salario. Cuanto mayor, más se prefieren las viviendas cerca del trabajo y las tiendas."
+      },
       "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
         "label": "Proporción mínima de ingreso disponible",
         "desc": "Proporción de ingreso discrecional que el hogar intenta conservar como mínimo. Si es muy baja, la economía doméstica se quiebra con facilidad."
