@@ -10,7 +10,7 @@ Modular building bodies are horizontal. Concrete foundations fill downhill gaps 
 
 ## Part locations and names
 
-FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with matching relative wrapper-prefab paths under `Assets/Resources/Models/Buildings/` ([material sharing](P_material-sharing.md)). Select the first available prefix: landmark `landmark-{model_prefix}`, variant-specific `a{variant}`, or building-type shared `b{bd_type}`. `Resources/Config/agent_model_config.yaml` lists landmark and variant folders. Cities using an asset pack search this order in the pack first ([asset packs](X_asset-packs.md)). Parts shared by all buildings live in `Buildings/common/`.
+FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with matching relative wrapper-prefab paths under `Assets/Resources/Models/Buildings/` ([material sharing](P_material-sharing.md)). Select the first available prefix: landmark `landmark-{model_prefix}`, variant-specific `a{variant}`, master-selected shared `a{model_source_variant}`, or building-type shared `b{bd_type}`. `Resources/Config/agent_model_config.yaml` lists landmark and variant folders. Cities using an asset pack search this order in the pack first ([asset packs](X_asset-packs.md)). Parts shared by all buildings live in `Buildings/common/`.
 
 | Part name | Role |
 | --- | --- |

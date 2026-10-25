@@ -156,7 +156,7 @@
         "note": "Réserves récupérables d'un gisement pétrolier (1 unité = 1 baril de brut). Proportionnel à la surface ; ne se régénère pas."
       },
       "oreDeposit": {
-        "name": "Gisement à ciel ouvert",
+        "name": "Gisement métallique à ciel ouvert",
         "note": "Tonnage d'un gisement exploitable à ciel ouvert (1 unité = 1 kg). Proportionnel à la surface ; ne se régénère pas."
       },
       "river": {
@@ -170,6 +170,10 @@
       "groundwater": {
         "name": "Eaux souterraines",
         "note": "Réserve de l'aquifère proportionnelle à la surface, avec une recharge lente par la pluie (1 unité = 1 m³). Une surexploitation met de nombreuses années à se résorber."
+      },
+      "nonmetallicDeposit": {
+        "name": "Gisement de minéraux non métalliques",
+        "note": "Réserves de gravier, de calcaire et de sable siliceux (1 unité = 1 kg). Proportionnelles à la superficie, elles ne se renouvellent pas."
       }
     },
     "summary": {

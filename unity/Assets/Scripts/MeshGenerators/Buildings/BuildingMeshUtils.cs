@@ -744,7 +744,7 @@ public static class BuildingMeshUtils
 
     /// <summary>
     /// Determine the part-folder prefix.
-    /// Resolution order: landmark-{model_prefix} → a{variant} → b{bd_type}. Search the asset pack in this order first;
+    /// Resolution order: landmark-{model_prefix} → a{variant} → a{model_source_variant} → b{bd_type}. Search the asset pack in this order first;
     /// search standard assets only if none exist in the pack (even if the pack has only b{bd_type}, do not mix with standard a{variant}).
     /// If the chosen prefix folder belongs to the pack, read its parts exclusively from the pack (AssetPackStore).
     ///
@@ -755,8 +755,15 @@ public static class BuildingMeshUtils
     {
         string landmarkPrefix = LandmarkFolder(buildingData.landmark);
         string variantPrefix = buildingData.variant > 0 ? $"a{buildingData.variant}" : null;
+        int sourceVariant = 0;
+        if (MasterDataStore.Instance != null && MasterDataStore.Instance.IsInitialized &&
+            MasterDataStore.Instance.GetAgentMasterDictionary().TryGetValue(buildingData.variant, out var agentMaster))
+        {
+            sourceVariant = agentMaster.model_source_variant ?? 0;
+        }
+        string sourcePrefix = sourceVariant > 0 ? $"a{sourceVariant}" : null;
         string bdTypePrefix = $"b{ResolveBdTypeFallback(buildingData.variant, buildingData.bd_type ?? 0)}";
-        foreach (string prefix in new[] { landmarkPrefix, variantPrefix, bdTypePrefix })
+        foreach (string prefix in new[] { landmarkPrefix, variantPrefix, sourcePrefix, bdTypePrefix })
         {
             if (prefix != null && AssetPackStore.HasUnit(BUILDINGS_ROOT + prefix)) return prefix;
         }
@@ -768,6 +775,10 @@ public static class BuildingMeshUtils
         if (HasVariantDefinition(buildingData.variant))
         {
             return variantPrefix;
+        }
+        if (HasVariantDefinition(sourceVariant))
+        {
+            return sourcePrefix;
         }
         return bdTypePrefix;
     }

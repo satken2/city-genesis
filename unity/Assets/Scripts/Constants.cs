@@ -111,6 +111,7 @@ public static class Constants
     public const int RESOURCE_RAREMETAL = 3;
     public const int RESOURCE_FOREST = 4;
     public const int RESOURCE_WATER = 5;
+    public const int RESOURCE_NONMETALLIC = 6;
     public const int TYPE_DEFAULT = 0;
     public const int TYPE_CITY = 1;
     public const int TYPE_EDUCATION = 2;

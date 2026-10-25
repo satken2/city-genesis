@@ -27,6 +27,7 @@ public class MasterDataStore : MonoBehaviour
 		public int? parcel_type;
 		public int? building_shape;
 		public int? model_type;
+		public int? model_source_variant;
 		public int? max_floors;
 		public int? min_floors;
 		public float? height_per_floor;

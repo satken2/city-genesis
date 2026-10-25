@@ -106,6 +106,7 @@ export const RESOURCE_ORE: number = 2;
 export const RESOURCE_RAREMETAL: number = 3;
 export const RESOURCE_FOREST: number = 4;
 export const RESOURCE_WATER: number = 5;
+export const RESOURCE_NONMETALLIC: number = 6;
 export const TYPE_DEFAULT: number = 0;
 export const TYPE_CITY: number = 1;
 export const TYPE_EDUCATION: number = 2;

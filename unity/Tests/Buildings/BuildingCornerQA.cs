@@ -116,6 +116,35 @@ public static class BuildingCornerQA
             foreach (var go in new[] { wall, corner, fence, closeFence, managerObject }) UnityEngine.Object.DestroyImmediate(go);
         }
     }
+    static void CheckSharedModelPrefix()
+    {
+        var assembly = builder.Assembly;
+        var masterType = assembly.GetType("MasterDataStore");
+        var masterObject = new GameObject("SharedModelQA");
+        var master = masterObject.AddComponent(masterType);
+        var entryType = masterType.GetNestedType("AgentMasterItem");
+        var entry = Activator.CreateInstance(entryType);
+        var agents = (IDictionary)masterType.GetField("agentMasterById", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(master);
+        var source = entryType.GetField("model_source_variant");
+        var summaryType = assembly.GetType("GeneratedModels.BuildingSummary");
+        var summary = Activator.CreateInstance(summaryType);
+        summaryType.GetField("variant").SetValue(summary, 1089);
+        entryType.GetField("bd_type").SetValue(entry, 64);
+        agents[1089] = entry;
+        masterType.GetProperty("IsInitialized").SetValue(master, true);
+        var resolve = assembly.GetType("BuildingMeshUtils").GetMethod("GetGlbPrefix1");
+        try
+        {
+            source.SetValue(entry, 1022);
+            Require((string)resolve.Invoke(null, new[] { summary }) == "a1022", "Shared quarry parts did not resolve to the mine model");
+            source.SetValue(entry, null);
+            Require((string)resolve.Invoke(null, new[] { summary }) == "b64", "Unspecified model source did not retain the building-type fallback");
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(masterObject);
+        }
+    }
     public static void Run()
     {
         if (!EditorApplication.isPlaying)
@@ -139,6 +168,7 @@ public static class BuildingCornerQA
             };
             builder = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll").GetType("ModularBodyBuilder");
             CheckFenceFallback();
+            CheckSharedModelPrefix();
             foreach (string file in Directory.GetFiles("Assets/Buildings", "*-c1.fbx", SearchOption.AllDirectories))
             {
                 string path = file.Replace('\\', '/');

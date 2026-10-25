@@ -10,7 +10,7 @@
 
 ## パーツの置き場と名前
 
-FBX は `Assets/Models/Buildings/{prefix}/{番号}/{パーツ名}.fbx` に置き、同じ相対パスのラッパープレハブを `Assets/Resources/Models/Buildings/` に置く（[P_マテリアル共有とエクスポート](P_マテリアル共有とエクスポート.md)）。`{prefix}` は建物ごとに、観光名所の `landmark-{model_prefix}`、バリアント専用の `a{variant}`、建物種別で共有する `b{bd_type}` の順に、あるものを1つ使う。名所とバリアントのフォルダの有無は `Resources/Config/agent_model_config.yaml` の一覧で判定する。アセットパックを使う都市では、この順をパックの中で先に探す（[アセットパック](X_アセットパック.md)）。全建物で共通に使うパーツは `Buildings/common/` に置く。
+FBX は `Assets/Models/Buildings/{prefix}/{番号}/{パーツ名}.fbx` に置き、同じ相対パスのラッパープレハブを `Assets/Resources/Models/Buildings/` に置く（[P_マテリアル共有とエクスポート](P_マテリアル共有とエクスポート.md)）。`{prefix}` は建物ごとに、観光名所の `landmark-{model_prefix}`、バリアント専用の `a{variant}`、マスターで共有先を指定した `a{model_source_variant}`、建物種別で共有する `b{bd_type}` の順に、あるものを1つ使う。名所とバリアントのフォルダの有無は `Resources/Config/agent_model_config.yaml` の一覧で判定する。アセットパックを使う都市では、この順をパックの中で先に探す（[アセットパック](X_アセットパック.md)）。全建物で共通に使うパーツは `Buildings/common/` に置く。
 
 | パーツ名 | 役割 |
 | --- | --- |

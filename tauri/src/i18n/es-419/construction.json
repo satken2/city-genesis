@@ -156,7 +156,7 @@
         "note": "Reservas recuperables de un yacimiento petrolero (1 unidad = 1 barril de crudo). Proporcional al área; no se recupera."
       },
       "oreDeposit": {
-        "name": "Yacimiento a cielo abierto",
+        "name": "Yacimiento metálico a cielo abierto",
         "note": "Tonelaje de un yacimiento explotable a cielo abierto (1 unidad = 1 kg). Proporcional al área; no se recupera."
       },
       "river": {
@@ -170,6 +170,10 @@
       "groundwater": {
         "name": "Agua subterránea",
         "note": "Almacenamiento del acuífero proporcional al área, con recarga lenta por la lluvia (1 unidad = 1 m³). Si se sobreexplota, tarda muchos años en recuperarse."
+      },
+      "nonmetallicDeposit": {
+        "name": "Yacimiento de minerales no metálicos",
+        "note": "Reservas de grava, piedra caliza y arena de sílice (1 unidad = 1 kg). Aumentan con el área y no se regeneran."
       }
     },
     "summary": {

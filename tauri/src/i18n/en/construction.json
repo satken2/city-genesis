@@ -156,7 +156,7 @@
         "note": "Recoverable reserves of an oil field (1 unit = 1 barrel of crude). Scales with area and does not recover."
       },
       "oreDeposit": {
-        "name": "Open-pit ore deposit",
+        "name": "Open-pit metal deposit",
         "note": "Tonnage of a deposit that can be mined open-pit (1 unit = 1 kg). Scales with area and does not recover."
       },
       "river": {
@@ -170,6 +170,10 @@
       "groundwater": {
         "name": "Groundwater",
         "note": "Aquifer storage proportional to area with slow recharge from rainfall (1 unit = 1 m³). Once over-pumped, it takes many years to recover."
+      },
+      "nonmetallicDeposit": {
+        "name": "Nonmetallic mineral deposit",
+        "note": "Gravel, limestone, and silica sand reserves (1 unit = 1 kg). Scales with area and does not recover."
       }
     },
     "summary": {

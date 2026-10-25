@@ -13,6 +13,7 @@ Copy-Item "$unityRoot/ProjectSettings/ProjectVersion.txt" "$qaRoot/ProjectSettin
 Copy-Item "$PSScriptRoot/BuildingCornerQA.cs" "$qaRoot/Assets/Editor/BuildingCornerQA.cs" -Force
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Resources/Config" -Force | Out-Null
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Config/model_weights.json" -Destination "$qaRoot/Assets/Resources/Config" -Force
+Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Config/agent_model_config.yaml" -Destination "$qaRoot/Assets/Resources/Config" -Force
 Get-ChildItem "$unityRoot/Assets/Models/Buildings" -Recurse -Filter '*-c1.fbx' | ForEach-Object {
     $relative = [IO.Path]::GetRelativePath("$unityRoot/Assets/Models/Buildings", $_.FullName)
     $destination = Join-Path "$qaRoot/Assets/Buildings" $relative

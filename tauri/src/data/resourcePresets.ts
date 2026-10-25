@@ -9,7 +9,7 @@
  * matching current master data where facilities produce one output unit per resource unit.
  */
 
-import { RESOURCE_OIL, RESOURCE_ORE, RESOURCE_WATER } from "../constants";
+import { RESOURCE_OIL, RESOURCE_ORE, RESOURCE_WATER, RESOURCE_NONMETALLIC } from "../constants";
 
 export type ResourcePreset = {
   /** Identifier for i18n key resourcePreset.presets.<key>. */
@@ -40,6 +40,9 @@ const RESOURCE_PRESETS: Readonly<Record<number, readonly ResourcePreset[]>> = {
   ],
   [RESOURCE_ORE]: [
     { key: "oreDeposit", basis: "area", amount: 200_000, recoveryRate: 0 }, // 200 million t/km² (75m extraction depth × density 2.7).
+  ],
+  [RESOURCE_NONMETALLIC]: [
+    { key: "nonmetallicDeposit", basis: "area", amount: 200_000, recoveryRate: 0 }, // 岩石の採掘深と密度は金属鉱床と同じ基準で扱う。
   ],
   [RESOURCE_WATER]: [
     { key: "river", basis: "fixed", amount: 100_000 * RESOURCE_PRESET_EPOCH_DAYS, recoveryRate: 0.0334 }, // Available withdrawal: 100,000m³/day. Recovery slightly exceeds 1/30 to guarantee full replenishment in 30 days.
