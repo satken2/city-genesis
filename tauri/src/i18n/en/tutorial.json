@@ -201,30 +201,18 @@
         "east": "Choose Double Railway Track. Draw a straight line at 6m from the eastern end of the west platform to the western end of the main road. Buildings obstruct this section, so it requires land acquisition. Confirm the plan and press Next. Construction time is not skipped here."
       },
       "step4": {
-        "title": "Observe acquisition and the blocked project",
-        "description": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
-        "open": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
-        "variant": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
-        "start": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
-        "end": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
-        "confirm": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
-        "town": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
-        "new": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction.",
-        "east": "Advance time. Negotiations begin for private plots, while the public hospital remains and prevents track construction from starting. Public facilities are not automatically purchased or demolished. Observe both negotiations and the obstruction."
+        "title": "Order the hospital demolished",
+        "description": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next.",
+        "open": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next.",
+        "variant": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next.",
+        "start": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next.",
+        "end": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next.",
+        "confirm": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next.",
+        "town": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next.",
+        "new": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next.",
+        "east": "Negotiations to purchase private plots begin automatically, but the city's public hospital is not removed automatically and prevents track construction from starting. Click the hospital and press Bulldoze in the buttons at the top. Once it shows Demolition Planned, press Next."
       },
       "step5": {
-        "title": "Order the hospital demolished",
-        "description": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
-        "open": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
-        "variant": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
-        "start": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
-        "end": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
-        "confirm": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
-        "town": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
-        "new": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled.",
-        "east": "Click the hospital with the yellow marker and use Bulldoze in its building details. As mayor, you must explicitly remove this public facility. Press Next once demolition is scheduled."
-      },
-      "step6": {
         "title": "Wait for the acquisition section to finish",
         "description": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
         "open": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
@@ -236,7 +224,7 @@
         "new": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction.",
         "east": "Advance time until private land acquisition, hospital demolition and track construction finish. This may take several months. This section completes through normal construction."
       },
-      "step7": {
+      "step6": {
         "title": "Lay track directly above the main road",
         "description": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
         "open": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
@@ -248,7 +236,7 @@
         "new": "Lay Double Railway Track at 6m directly over the center of the main road from west to east. Using the road corridor avoids acquiring adjoining private plots. Moving off the road into buildings can still require acquisition or public-facility demolition.",
         "east": "Finally, lay Double Railway Track at 6 m from the east end of the arterial road to the west end of the eastern platform. Once both platforms are connected, Next completes construction."
       },
-      "step8": {
+      "step7": {
         "title": "Build the rail depot",
         "description": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
         "open": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
@@ -260,7 +248,7 @@
         "new": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time.",
         "east": "Select Rail depot in the construction panel and build it on the yellow plot north of town. Place the depot yourself. Next skips its construction time."
       },
-      "step9": {
+      "step8": {
         "title": "Shape the curved climbing branch",
         "description": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
         "open": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
@@ -272,7 +260,7 @@
         "new": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles.",
         "east": "Choose Railway Track. Start at the depot’s eastern ground-level terminal, make a broad loop east through the northeast marker, and connect to the main line’s merge point at 6m. To stay within the curvature and grade limits, place the track using the yellow intermediate points as a guide. After right-clicking to confirm the shape, you can adjust it by dragging vertices and control handles."
       },
-      "step10": {
+      "step9": {
         "title": "Power the depot from the existing plant",
         "description": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
         "open": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
@@ -284,7 +272,7 @@
         "new": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line.",
         "east": "To run trains, you need to connect a power line from the power plant. Use Power line to connect the plant’s terminal to the depot’s shared eastern terminal. Confirm the line."
       },
-      "step11": {
+      "step10": {
         "title": "Open the railway service",
         "description": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
         "open": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
@@ -296,7 +284,7 @@
         "new": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm.",
         "east": "Open Public transport → New line and select a medium-distance railway line. Place stops on the west and east elevated platforms. Set fare to 0 and target headway to 5 minutes, then confirm."
       },
-      "step12": {
+      "step11": {
         "title": "Confirm vehicles and service",
         "description": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
         "open": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
@@ -308,7 +296,7 @@
         "new": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet.",
         "east": "Advance time and check the line’s capacity and operating interval in public transport management. The depot needs several months to obtain vehicles. Positive capacity confirms that the service is running. Residents also compare walking routes, so this short line may not have passengers yet."
       },
-      "step13": {
+      "step12": {
         "title": "Review railway construction",
         "description": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",
         "open": "The camera has moved to the west station. Take a look at the trains stopping at the platform. You built platforms, stations, tracks, a depot, its curved branch, power connection and a service. You handled private acquisition and public-facility demolition, and avoided acquisition over the road. Use curve-radius and grade feedback in future rail projects.",

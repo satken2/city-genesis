@@ -79,7 +79,7 @@ check(await findPhase(basic, env), 5, "saved road survives closed panel");
   metro.facts.windows.panel = { visible: true, window: "path_build" };
   metro.facts.pathVariant = 421;
   check(acquisition.phases[await findPhase(acquisition, metro)].id, "start", "selecting the permitted railway enters acquisition placement");
-  for (const [index, field, phaseId, variant] of [[1, "station_town", "new", 2001], [6, "road_track", "east", 421]] as const) {
+  for (const [index, field, phaseId, variant] of [[1, "station_town", "new", 2001], [5, "road_track", "east", 421]] as const) {
     const step = DEFINITIONS.scenario4.steps[index], env = fake();
     env.read = async kind => kind === "tutorial" ? [{ checks: { [field]: true } }] : [];
     check(step.phases[await findPhase(step, env)].id, phaseId + "_open", "completed first segment resumes at the second segment");

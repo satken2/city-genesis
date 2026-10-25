@@ -28,21 +28,21 @@ try {
   await settle(() => plan.dispatchEvent(new browser.PointerEvent("pointerdown", { bubbles: true, clientX: 100, clientY: 100 })));
   assert.equal(commands().length, 0, "strict gate blocks unpermitted shape operations");
   release();
-  const step = DEFINITIONS.scenario4.steps[8];
+  const step = DEFINITIONS.scenario4.steps[7];
   release = installUiGuide(step.phases.at(-1)!.ui, "path_shape_editor");
   await settle(() => {
     plan.dispatchEvent(new browser.PointerEvent("pointerdown", { bubbles: true, clientX: 100, clientY: 100 }));
     plan.dispatchEvent(new browser.PointerEvent("pointermove", { bubbles: true, clientX: 120, clientY: 100 }));
     plan.dispatchEvent(new browser.PointerEvent("pointerup", { bubbles: true, clientX: 120, clientY: 100 }));
   });
-  assert.ok(commands().some(c => c.op === "move_node" && c.x === 20), "step 9 plan dragging sends a node move to Unity");
+  assert.ok(commands().some(c => c.op === "move_node" && c.x === 20), "step 8 plan dragging sends a node move to Unity");
   await settle(() => emit("edit_path:update_shape", shape));
   await settle(() => {
     plan.dispatchEvent(new browser.PointerEvent("pointerdown", { bubbles: true, clientX: 130, clientY: 100 }));
     plan.dispatchEvent(new browser.PointerEvent("pointermove", { bubbles: true, clientX: 140, clientY: 120 }));
     plan.dispatchEvent(new browser.PointerEvent("pointerup", { bubbles: true, clientX: 140, clientY: 120 }));
   });
-  assert.ok(commands().some(c => c.op === "move_control"), "step 9 permits curve control handles");
+  assert.ok(commands().some(c => c.op === "move_control"), "step 8 permits curve control handles");
   await settle(() => emit("edit_path:update_shape", shape));
   const profile = host.querySelector<HTMLCanvasElement>(".pse-profile canvas")!;
   const wrap = profile.parentElement!;
@@ -56,7 +56,7 @@ try {
     browser.dispatchEvent(new browser.MouseEvent("mousemove", { clientX: x, clientY: y - 20 }));
     browser.dispatchEvent(new browser.MouseEvent("mouseup"));
   });
-  assert.ok(invocations.some(([,args]) => (args as any)?.action === "edit_path:change_node" && (args as any)?.params.height > 6), "step 9 profile dragging sends a height change to Unity");
+  assert.ok(invocations.some(([,args]) => (args as any)?.action === "edit_path:change_node" && (args as any)?.params.height > 6), "step 8 profile dragging sends a height change to Unity");
   await settle(() => emit("edit_path:update_shape", shape));
   await settle(() => {
     plan.dispatchEvent(new browser.PointerEvent("pointerdown", { bubbles: true, clientX: 100, clientY: 100 }));
@@ -65,4 +65,4 @@ try {
   });
   assert.ok(commands().some(c => c.op === "remove_node"), "diagram focus keeps keyboard node editing available");
 } finally { release(); await settle(() => root.unmount()); await browser.happyDOM.close(); }
-console.log("PASS: step 9 real shape editor plan/control/profile dragging and keyboard editing under tutorial restrictions");
+console.log("PASS: step 8 real shape editor plan/control/profile dragging and keyboard editing under tutorial restrictions");

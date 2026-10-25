@@ -201,30 +201,18 @@
         "east": "Choisissez Voie ferrée double et posez-la en ligne droite à 6m, de l’extrémité est du quai ouest à l’extrémité ouest de la route principale. Les bâtiments imposent une acquisition foncière. Confirmez le plan puis appuyez sur Suivant ; sa construction ne sera pas accélérée."
       },
       "step4": {
-        "title": "Observer acquisition et blocage",
-        "description": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
-        "open": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
-        "variant": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
-        "start": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
-        "end": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
-        "confirm": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
-        "town": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
-        "new": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là.",
-        "east": "Faites avancer le temps. Les négociations commencent pour les parcelles privées, mais l’hôpital public reste et bloque les travaux. Il n’est ni acheté ni démoli automatiquement. Vérifiez que les négociations ont commencé et que l’hôpital est toujours là."
+        "title": "Ordonner la démolition de l’hôpital",
+        "description": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant.",
+        "open": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant.",
+        "variant": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant.",
+        "start": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant.",
+        "end": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant.",
+        "confirm": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant.",
+        "town": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant.",
+        "new": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant.",
+        "east": "Les négociations d’achat des parcelles privées commencent automatiquement, mais l’hôpital public de la ville n’est pas démoli automatiquement et bloque le début des travaux de la voie. Cliquez sur l’hôpital, puis sur Démolir parmi les boutons du haut. Quand il affiche Démolition planifiée, appuyez sur Suivant."
       },
       "step5": {
-        "title": "Ordonner la démolition de l’hôpital",
-        "description": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
-        "open": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
-        "variant": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
-        "start": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
-        "end": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
-        "confirm": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
-        "town": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
-        "new": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée.",
-        "east": "Cliquez sur l’hôpital portant le repère jaune et choisissez Démolir dans ses détails. L’hôpital est un équipement public : le maire doit ordonner sa démolition. Appuyez sur Suivant une fois sa démolition programmée."
-      },
-      "step6": {
         "title": "Attendre la fin de cette section",
         "description": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
         "open": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
@@ -236,7 +224,7 @@
         "new": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires.",
         "east": "Faites avancer le temps pour terminer les acquisitions privées, la démolition de l’hôpital et la construction normale de la voie. Plusieurs mois peuvent être nécessaires."
       },
-      "step7": {
+      "step6": {
         "title": "Poser la voie au-dessus de la route",
         "description": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
         "open": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
@@ -248,7 +236,7 @@
         "new": "Posez une voie ferrée double à 6m exactement au-dessus du centre de la route principale, d’ouest en est. Ce corridor évite d’acquérir les parcelles privées voisines. Sortir de la route vers les bâtiments peut imposer une acquisition ou la démolition d’équipements publics.",
         "east": "Enfin, posez une voie ferrée double à 6 m, de l’extrémité est de la grande route à l’extrémité ouest du quai est. Une fois les deux quais reliés, Suivant termine les travaux."
       },
-      "step8": {
+      "step7": {
         "title": "Construire le dépôt ferroviaire",
         "description": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
         "open": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
@@ -260,7 +248,7 @@
         "new": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction.",
         "east": "Dans Construction, choisissez Dépôt ferroviaire et placez-le vous-même sur la parcelle jaune au nord. Suivant termine sa construction."
       },
-      "step9": {
+      "step8": {
         "title": "Régler courbe et pente",
         "description": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
         "open": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
@@ -272,7 +260,7 @@
         "new": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées.",
         "east": "Avec la voie ferrée, partez du terminal est du dépôt au sol, faites une large boucle vers l’est par le repère nord-est et rejoignez le point de jonction de la ligne principale à 6m. Pour respecter les limites de courbure et de pente, placez la voie en vous guidant sur les points intermédiaires jaunes. Après avoir terminé la forme d’un clic droit, vous pouvez l’ajuster en faisant glisser les sommets et les poignées."
       },
-      "step10": {
+      "step9": {
         "title": "Alimenter le dépôt",
         "description": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
         "open": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
@@ -284,7 +272,7 @@
         "new": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez.",
         "east": "Pour faire rouler les trains, il faut raccorder une ligne électrique depuis la centrale. Reliez le terminal de la centrale au terminal commun à l’est du dépôt par une ligne électrique et confirmez."
       },
-      "step11": {
+      "step10": {
         "title": "Ouvrir la ligne ferroviaire",
         "description": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
         "open": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
@@ -296,7 +284,7 @@
         "new": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
         "east": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez."
       },
-      "step12": {
+      "step11": {
         "title": "Vérifier les véhicules et le service",
         "description": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
         "open": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
@@ -308,7 +296,7 @@
         "new": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs.",
         "east": "Faites avancer le temps et vérifiez la capacité et l’intervalle de la ligne dans la gestion des transports publics. Le dépôt a besoin de plusieurs mois pour obtenir des véhicules. Une capacité positive confirme la mise en service. Les habitants peuvent aussi choisir la marche : cette courte ligne peut donc ne pas encore avoir de voyageurs."
       },
-      "step13": {
+      "step12": {
         "title": "Revoir la construction",
         "description": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",
         "open": "La caméra s'est rapprochée de la gare ouest. Regardez les trains s'arrêter au quai. Vous avez construit quais, gares, voies, dépôt, branche courbe, alimentation et service. Vous avez acquis des terrains privés, ordonné la démolition d’équipements publics et évité l’acquisition au-dessus de la route. Vérifiez rayon et pente dans vos futurs projets.",

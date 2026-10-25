@@ -1242,77 +1242,12 @@
       }
     },
     {
-      "id": "scenario4.negotiate",
+      "id": "scenario4.demolish",
       "legacyStep": 4,
       "phases": [
         {
-          "id": "perform",
-          "textKey": "tutorial.scenario4.step4.description",
-          "ui": {
-            "policy": "highlight",
-            "allow": [],
-            "highlight": [
-              "hud.execute"
-            ]
-          },
-          "world": {
-            "mode": "observe",
-            "markers": [
-              [
-                -24.5,
-                0,
-                -35
-              ]
-            ],
-            "camera": {
-              "target": [
-                -70,
-                0,
-                -20
-              ],
-              "distance": 170,
-              "yaw": 20,
-              "pitch": 55
-            }
-          },
-          "until": {
-            "type": "ack"
-          }
-        }
-      ],
-      "complete": {
-        "type": "all",
-        "conditions": [
-          {
-            "type": "entity",
-            "resource": "tutorial",
-            "where": [
-              {
-                "field": "checks.negotiating",
-                "equals": true
-              }
-            ]
-          },
-          {
-            "type": "entity",
-            "resource": "tutorial",
-            "where": [
-              {
-                "field": "checks.blocked",
-                "equals": true
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "id": "scenario4.demolish",
-      "legacyStep": 5,
-      "phases": [
-        {
           "id": "open",
-          "textKey": "tutorial.scenario4.step5.description",
+          "textKey": "tutorial.scenario4.step4.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1346,7 +1281,7 @@
         },
         {
           "id": "perform",
-          "textKey": "tutorial.scenario4.step5.description",
+          "textKey": "tutorial.scenario4.step4.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1392,11 +1327,11 @@
     },
     {
       "id": "scenario4.acquisition_complete",
-      "legacyStep": 6,
+      "legacyStep": 5,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.scenario4.step6.description",
+          "textKey": "tutorial.scenario4.step5.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1442,11 +1377,11 @@
     },
     {
       "id": "scenario4.road_rail",
-      "legacyStep": 7,
+      "legacyStep": 6,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step7.description",
+          "textKey": "tutorial.scenario4.step6.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1519,7 +1454,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.scenario4.step7.description",
+          "textKey": "tutorial.scenario4.step6.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1596,7 +1531,7 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.scenario4.step7.description",
+          "textKey": "tutorial.scenario4.step6.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1663,7 +1598,7 @@
         },
         {
           "id": "east_open",
-          "textKey": "tutorial.scenario4.step7.east",
+          "textKey": "tutorial.scenario4.step6.east",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1721,7 +1656,7 @@
         },
         {
           "id": "east_variant",
-          "textKey": "tutorial.scenario4.step7.east",
+          "textKey": "tutorial.scenario4.step6.east",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1783,7 +1718,7 @@
         },
         {
           "id": "east",
-          "textKey": "tutorial.scenario4.step7.east",
+          "textKey": "tutorial.scenario4.step6.east",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1865,11 +1800,11 @@
     },
     {
       "id": "scenario4.depot",
-      "legacyStep": 8,
+      "legacyStep": 7,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step8.description",
+          "textKey": "tutorial.scenario4.step7.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1906,7 +1841,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.scenario4.step8.description",
+          "textKey": "tutorial.scenario4.step7.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1971,11 +1906,11 @@
     },
     {
       "id": "scenario4.branch",
-      "legacyStep": 9,
+      "legacyStep": 8,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step9.description",
+          "textKey": "tutorial.scenario4.step8.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2054,7 +1989,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.scenario4.step9.description",
+          "textKey": "tutorial.scenario4.step8.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2137,7 +2072,7 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.scenario4.step9.description",
+          "textKey": "tutorial.scenario4.step8.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2247,11 +2182,11 @@
     },
     {
       "id": "scenario4.power",
-      "legacyStep": 10,
+      "legacyStep": 9,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step10.description",
+          "textKey": "tutorial.scenario4.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2293,7 +2228,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.scenario4.step10.description",
+          "textKey": "tutorial.scenario4.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2339,7 +2274,7 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.scenario4.step10.description",
+          "textKey": "tutorial.scenario4.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2412,11 +2347,11 @@
     },
     {
       "id": "scenario4.line",
-      "legacyStep": 11,
+      "legacyStep": 10,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.scenario4.step11.description",
+          "textKey": "tutorial.scenario4.step10.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2467,7 +2402,7 @@
         },
         {
           "id": "new",
-          "textKey": "tutorial.scenario4.step11.description",
+          "textKey": "tutorial.scenario4.step10.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2510,7 +2445,7 @@
         },
         {
           "id": "create",
-          "textKey": "tutorial.scenario4.step11.description",
+          "textKey": "tutorial.scenario4.step10.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2578,11 +2513,11 @@
     },
     {
       "id": "scenario4.operating",
-      "legacyStep": 12,
+      "legacyStep": 11,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.scenario4.step12.description",
+          "textKey": "tutorial.scenario4.step11.description",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -2630,11 +2565,11 @@
     },
     {
       "id": "scenario4.summary",
-      "legacyStep": 13,
+      "legacyStep": 12,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.scenario4.step13.description",
+          "textKey": "tutorial.scenario4.step12.description",
           "ui": {
             "policy": "highlight",
             "allow": [],

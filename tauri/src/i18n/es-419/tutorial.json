@@ -201,30 +201,18 @@
         "east": "Elige Vía férrea doble y une en línea recta el extremo este de la plataforma oeste con el extremo oeste de la avenida, a 6m. Los edificios obligan a adquirir el terreno. Confirma el plan y pulsa Siguiente; este tramo se construirá sin omitir el tiempo."
       },
       "step4": {
-        "title": "Observa la adquisición y el bloqueo",
-        "description": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí.",
-        "open": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí.",
-        "variant": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí.",
-        "start": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí.",
-        "end": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí.",
-        "confirm": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí.",
-        "town": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí.",
-        "new": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí.",
-        "east": "Avanza el tiempo. Se negocian los terrenos privados, pero el hospital público permanece y bloquea el inicio de la obra. Las instalaciones públicas no se adquieren ni se demuelen automáticamente. Comprueba que han comenzado las negociaciones y que el hospital sigue ahí."
+        "title": "Ordena demoler el hospital",
+        "description": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente.",
+        "open": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente.",
+        "variant": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente.",
+        "start": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente.",
+        "end": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente.",
+        "confirm": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente.",
+        "town": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente.",
+        "new": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente.",
+        "east": "Las negociaciones para comprar los terrenos privados comienzan automáticamente, pero el hospital público de la ciudad no se retira automáticamente y bloquea el inicio de la obra. Haz clic en el hospital y pulsa Demoler en los botones de arriba. Cuando aparezca Demolición planeada, pulsa Siguiente."
       },
       "step5": {
-        "title": "Ordena demoler el hospital",
-        "description": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada.",
-        "open": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada.",
-        "variant": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada.",
-        "start": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada.",
-        "end": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada.",
-        "confirm": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada.",
-        "town": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada.",
-        "new": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada.",
-        "east": "Haz clic en el hospital con el marcador amarillo y elige Demoler en sus detalles. El hospital es una instalación pública, así que el alcalde debe ordenar su demolición. Pulsa Siguiente cuando la demolición esté programada."
-      },
-      "step6": {
         "title": "Espera que termine el tramo",
         "description": "Avanza el tiempo hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varios meses.",
         "open": "Avanza el tiempo hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varios meses.",
@@ -236,7 +224,7 @@
         "new": "Avanza el tiempo hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varios meses.",
         "east": "Avanza el tiempo hasta completar la adquisición privada, la demolición del hospital y la vía. Este tramo sigue la construcción normal y puede requerir varios meses."
       },
-      "step7": {
+      "step6": {
         "title": "Traza la vía sobre la avenida",
         "description": "Traza Vía férrea doble a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición de instalaciones públicas.",
         "open": "Traza Vía férrea doble a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición de instalaciones públicas.",
@@ -248,7 +236,7 @@
         "new": "Traza Vía férrea doble a 6m directamente sobre el centro de la avenida, de oeste a este. Usar ese corredor evita adquirir los lotes privados contiguos. Salir de la avenida y tocar edificios puede requerir adquisición o demolición de instalaciones públicas.",
         "east": "Por último, tiende Vía férrea doble a 6 m desde el extremo este de la avenida hasta el extremo oeste del andén oriental. Cuando los dos andenes estén conectados, Siguiente completará la construcción."
       },
-      "step8": {
+      "step7": {
         "title": "Construye el depósito ferroviario",
         "description": "En Construcción elige Depósito ferroviario y colócalo tú mismo en el lote amarillo al norte. Siguiente completará su obra.",
         "open": "En Construcción elige Depósito ferroviario y colócalo tú mismo en el lote amarillo al norte. Siguiente completará su obra.",
@@ -260,7 +248,7 @@
         "new": "En Construcción elige Depósito ferroviario y colócalo tú mismo en el lote amarillo al norte. Siguiente completará su obra.",
         "east": "En Construcción elige Depósito ferroviario y colócalo tú mismo en el lote amarillo al norte. Siguiente completará su obra."
       },
-      "step9": {
+      "step8": {
         "title": "Ajusta la curva y la pendiente",
         "description": "Con Vía férrea, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este pasando por el marcador noreste y conecta con el punto de unión de la vía principal a 6m. Para no superar los límites de curvatura y pendiente, colócala guiándote por los puntos intermedios amarillos. Tras confirmar la forma con clic derecho, puedes ajustarla arrastrando vértices y puntos de control.",
         "open": "Con Vía férrea, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este pasando por el marcador noreste y conecta con el punto de unión de la vía principal a 6m. Para no superar los límites de curvatura y pendiente, colócala guiándote por los puntos intermedios amarillos. Tras confirmar la forma con clic derecho, puedes ajustarla arrastrando vértices y puntos de control.",
@@ -272,7 +260,7 @@
         "new": "Con Vía férrea, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este pasando por el marcador noreste y conecta con el punto de unión de la vía principal a 6m. Para no superar los límites de curvatura y pendiente, colócala guiándote por los puntos intermedios amarillos. Tras confirmar la forma con clic derecho, puedes ajustarla arrastrando vértices y puntos de control.",
         "east": "Con Vía férrea, parte del terminal este del depósito a nivel del suelo, rodea ampliamente hacia el este pasando por el marcador noreste y conecta con el punto de unión de la vía principal a 6m. Para no superar los límites de curvatura y pendiente, colócala guiándote por los puntos intermedios amarillos. Tras confirmar la forma con clic derecho, puedes ajustarla arrastrando vértices y puntos de control."
       },
-      "step10": {
+      "step9": {
         "title": "Conecta la electricidad del depósito",
         "description": "Para que circulen los trenes, hay que conectar una línea eléctrica desde la central. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
         "open": "Para que circulen los trenes, hay que conectar una línea eléctrica desde la central. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
@@ -284,7 +272,7 @@
         "new": "Para que circulen los trenes, hay que conectar una línea eléctrica desde la central. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma.",
         "east": "Para que circulen los trenes, hay que conectar una línea eléctrica desde la central. Traza una línea eléctrica desde el terminal de la central al terminal compartido al este del depósito y confirma."
       },
-      "step11": {
+      "step10": {
         "title": "Inaugura la línea",
         "description": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
         "open": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
@@ -296,7 +284,7 @@
         "new": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
         "east": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma."
       },
-      "step12": {
+      "step11": {
         "title": "Confirma los vehículos y el servicio",
         "description": "Avanza el tiempo y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varios meses para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
         "open": "Avanza el tiempo y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varios meses para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
@@ -308,7 +296,7 @@
         "new": "Avanza el tiempo y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varios meses para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía.",
         "east": "Avanza el tiempo y consulta la capacidad y el intervalo de la línea en la gestión del transporte público. El depósito necesita varios meses para conseguir vehículos. Una capacidad positiva confirma que el servicio está en marcha. Los residentes también pueden elegir caminar, por lo que esta línea corta puede no tener pasajeros todavía."
       },
-      "step13": {
+      "step12": {
         "title": "Repasa la construcción",
         "description": "La cámara se acercó a la estación oeste. Observa los trenes que se detienen en el andén. Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar la demolición de instalaciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
         "open": "La cámara se acercó a la estación oeste. Observa los trenes que se detienen en el andén. Construiste plataformas, estaciones, vías, depósito, ramal curvo, electricidad y servicio. Aprendiste a adquirir terrenos privados, ordenar la demolición de instalaciones públicas y evitar la adquisición sobre la avenida. Revisa siempre radio y pendiente.",
