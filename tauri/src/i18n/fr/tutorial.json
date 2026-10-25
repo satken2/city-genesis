@@ -579,159 +579,163 @@
     "items": {
       "tip1": {
         "title": "Faites tourner !",
-        "description": "Les dépenses des uns sont toujours les revenus des autres. Remettez toutes vos recettes fiscales en circulation pour faire tourner l'économie de la ville."
+        "description": "Les travaux municipaux et les salaires publics deviennent des revenus pour les entreprises et les ménages, soutenant achats et production. Prélever des impôts ne suffit pas à faire tourner l'économie. Financez les services et réparations nécessaires pour remettre l'argent en circulation."
       },
       "tip2": {
         "title": "La sécurité prend son temps",
-        "description": "Les habitants qui grandissent dans un mauvais environnement gardent leurs mauvaises habitudes à l'âge adulte. Améliorer la sécurité demande des efforts sur plusieurs générations."
+        "description": "Les citoyens élevés dans un environnement peu sûr restent plus enclins à la délinquance à l'âge adulte. Poursuivez le travail de police et améliorez le milieu où grandissent les enfants. Améliorer la sécurité en profondeur prend au moins une génération."
       },
       "tip3": {
         "title": "Pin-pon, laissez passer !",
-        "description": "Plus les secours tardent à arriver, plus les dégâts s'aggravent. Évitez les bouchons sur les routes qu'ils empruntent souvent."
+        "description": "Les pompiers doivent atteindre les lieux pour intervenir. Même avec une caserne disponible, de longs trajets ou des routes encombrées aggravent les dégâts. Examinez l'implantation des casernes et leurs accès, en plus de leur budget."
       },
       "tip5": {
         "title": "Une pente qui coûte cher",
-        "description": "Sur les pentes raides, le coût des routes et des réseaux grimpe vite. Choisissez des tracés aussi plats que possible."
+        "description": "Construire une route sur une forte pente demande plus de travaux qu'en terrain plat. Le trajet le plus court sur la carte n'est pas toujours le moins cher. Comparez relief et devis, et envisagez un léger détour."
       },
       "tip6": {
         "title": "Mieux vaut prévoir que subir",
-        "description": "Les réseaux d'eau et d'électricité ne se construisent pas du jour au lendemain. Anticipez la croissance pour les aménager à temps."
+        "description": "Plus d'habitants et d'usines demandent plus d'eau et d'électricité. Si vous lancez les travaux après l'apparition d'une pénurie, il faudra attendre leur fin. Vérifiez les réserves de capacité avant d'aménager un nouveau quartier."
       },
       "tip7": {
         "title": "Doucement, on est pressés",
-        "description": "Relever les limitations de vitesse augmente les accidents. Préférez des courbes douces et des vitesses raisonnables."
+        "description": "Relever la limite de vitesse accélère les trajets, mais augmente le risque d'accident. Attention aussi aux virages serrés. Là où les accidents sont fréquents, revoyez le tracé et la vitesse autorisée."
       },
       "tip8": {
         "title": "Investir dans l'avenir",
-        "description": "L'industrie de pointe a besoin de personnel formé dans l'enseignement supérieur. Prenez le temps de former les talents."
+        "description": "Accroître la population ne suffit pas à fournir le personnel des hôpitaux et usines de pointe. Réglez les spécialités et les places universitaires pour former les professionnels nécessaires, en prévoyant le temps jusqu'à leur diplôme."
       },
       "tip9": {
         "title": "Mieux vaut entretenir que guérir",
-        "description": "Les incendies et les effondrements d'infrastructures plombent le moral des habitants. Prévoyez de bons budgets pour l'entretien et les pompiers pour que les négligences ne tournent pas à la catastrophe."
+        "description": "Négliger les réparations dégrade bâtiments et routes, jusqu'au risque d'effondrement. Incendies et effondrements nuisent aussi au moral des citoyens. Ne consacrez pas tout aux nouvelles constructions : gardez des fonds pour les réparations et les pompiers."
       },
       "tip10": {
         "title": "Ne jouez pas avec le feu",
-        "description": "Les quartiers aux bâtiments très serrés sont plus vulnérables aux incendies. Laissez votre ville respirer un peu."
+        "description": "Dans un bâti dense, le feu se propage plus facilement aux voisins. Outre les services d'incendie, préserver de l'espace entre les bâtiments contribue à protéger la ville."
       },
       "tip11": {
         "title": "On creuse, on creuse",
-        "description": "Repérez les ressources du sous-sol et installez vos exploitations minières au bon endroit. Pensez tout de même à la suite : à force de creuser, on finit par épuiser le filon."
+        "description": "Consultez la répartition des ressources avant d'implanter mines et sites pétroliers. L'extraction réduit les réserves. Une ville minière doit aussi prévoir ses emplois et recettes fiscales après l'épuisement des gisements."
       },
       "tip12": {
         "title": "La poule aux œufs d'or",
-        "description": "Le maire peut aussi construire des logements et des commerces. Installez des propriétés municipales aux meilleurs emplacements et faites rentrer l'argent."
+        "description": "Le maire peut construire logements et bâtiments commerciaux pour percevoir des loyers. Les locaux vides ne rapportent rien : vérifiez les usages recherchés, les surfaces vacantes voisines et l'emplacement avant de construire."
       },
       "tip13": {
         "title": "Pressez le citron",
-        "description": "Réglez les impôts dans le détail. Ils ne servent pas seulement à financer la ville : ils permettent aussi d'orienter le développement des industries."
+        "description": "Les impôts influencent les coûts et la rentabilité des entreprises, ainsi que les recettes municipales. Alléger la fiscalité d'un secteur peut soutenir son développement. Si les recettes manquent, examinez chaque secteur avant une hausse générale."
       },
       "tip14": {
         "title": "Un plan B, ça se prévoit",
-        "description": "Une infrastructure mise à l'arrêt par un accident ou une catastrophe peut lourdement pénaliser l'économie. Doublez les installations essentielles pour disposer d'une solution de secours."
+        "description": "Un accident ou une catastrophe qui arrête centrales ou lignes électriques affecte aussi usines et habitants. Prévoyez des installations et des voies d'approvisionnement de secours pour les infrastructures essentielles, afin qu'une seule panne ne paralyse pas la ville."
       },
       "tip15": {
         "title": "L'urbanisme en roue libre",
-        "description": "Si les parcelles ne suffisent pas à la demande, routes et terrains à bâtir apparaissent dans le désordre. Gardez la main sur l'aménagement pour éviter la formation de bidonvilles."
+        "description": "Si la demande existe mais que les parcelles constructibles manquent, le privé ajoute routes et parcelles, entraînant un étalement non planifié. Préparez les terrains et les routes là où vous souhaitez développer la ville, avec des réglementations adaptées aux usages prévus."
       },
       "tip16": {
         "title": "Pôles industriels",
-        "description": "La productivité augmente lorsque des industries similaires ou des producteurs de matières premières sont proches. Créez des zones industrielles et des pôles technologiques pour regrouper les entreprises."
+        "description": "Regrouper des industries similaires et leurs producteurs de matières premières favorise la production. Pensez à rapprocher les activités liées plutôt qu'à disperser les usines. Près des logements, surveillez toutefois le bruit et la pollution de l'air."
       },
       "tip17": {
         "title": "Boulot, boulot, boulot",
-        "description": "Allonger les horaires dans le panneau Réglementations augmente la productivité, mais dégrade la santé et réduit les dépenses de loisirs. À force de laisser du temps pour gagner de l'argent, il n'en reste plus pour le dépenser."
+        "description": "Allonger le travail dans Réglementations permet de produire plus avec autant de personnel. Mais santé et loisirs en pâtissent, réduisant les dépenses de divertissement. À trop travailler pour gagner de l'argent, on n'a plus le temps de le dépenser."
       },
       "tip18": {
         "title": "Métro, boulot, dodo",
-        "description": "Les longs trajets domicile-travail grignotent les loisirs et font baisser la consommation. Votre superbe quartier animé ? Un décor derrière la vitre pour ceux qui ne rentrent que pour dormir."
+        "description": "Les longs trajets domicile-travail réduisent loisirs et dépenses de divertissement. Revoyez distance et embouteillages entre logements et emplois. Pour qui ne rentre que pour dormir, votre quartier animé n'est qu'un décor derrière une vitre."
       },
       "tip19": {
         "title": "Voyez plus loin que le quai",
-        "description": "Les trains ne peuvent pas être plus longs que les quais. Prévoyez de la marge en construisant votre réseau ferroviaire."
+        "description": "Les longues rames doivent tenir sur les quais de toutes les gares de la ligne. Prévoyez leur longueur dès la construction pour accueillir la demande future. Allonger une seule gare ne lève pas la contrainte des autres quais trop courts."
       },
       "tip20": {
         "title": "Ni vu ni connu",
-        "description": "Les routes souterraines ne produisent ni bruit ni pollution atmosphérique. Pour une fois, enterrer le problème permet vraiment de le régler."
+        "description": "Les routes souterraines ne produisent ni bruit ni pollution de l'air et peuvent protéger les quartiers résidentiels. Certains problèmes se règlent vraiment en les enterrant."
       },
       "tip21": {
         "title": "À l’ombre du progrès",
-        "description": "Les grands immeubles font de l’ombre à leurs voisins et dégradent le cadre de vie. L’avenir de votre ville peut être radieux, même si ses rues restent dans le noir."
+        "description": "Les immeubles hauts font de l'ombre aux logements voisins et dégradent leur cadre de vie. Veillez à leur hauteur et à leur espacement. L'avenir de votre ville peut être radieux, même si ses trottoirs restent dans le noir."
       },
       "tip22": {
         "title": "Un abonnement, ça libère",
-        "description": "Des transports en commun pratiques peuvent convaincre même les habitants aisés de se passer de voiture. Autant d'argent disponible pour autre chose."
+        "description": "Quand les transports publics facilitent l'accès au travail, à l'école et aux commerces, les ménages choisissent plus volontiers de vivre sans voiture. Les économies réalisées peuvent financer d'autres achats."
       },
       "tip23": {
         "title": "Des bus qui brassent de l'air",
-        "description": "Même sans passagers, les bus prennent de la place sur la route. Évitez que votre remède contre les bouchons ne finisse lui-même dans le bouchon."
+        "description": "Les bus ajoutent du trafic même sans passagers. En faire circuler trop peut aggraver les embouteillages. Examinez la fréquentation et l'intervalle entre les départs pour adapter le service."
       },
       "tip24": {
         "title": "Les taupes ne paient pas de loyer",
-        "description": "Au-delà d’une certaine profondeur, les tunnels ne nécessitent aucun achat de terrain. Si les négociations s’enlisent, creusez plus profond."
+        "description": "Un tunnel profond évite l'achat du terrain au-dessus. Les sections peu profondes l'exigent : vérifiez profondeur et devis. Si les négociations s'enlisent, creusez davantage."
       },
       "tip25": {
         "title": "Prenez de la hauteur",
-        "description": "Les téléphériques permettent de se déplacer même sur les terrains escarpés. Si faire passer les transports en commun devient un casse-tête, faites voyager vos habitants suspendus dans les airs."
+        "description": "Un téléphérique dessert les montagnes et pentes difficiles à aménager en routes. Prévoyez accès aux stations et correspondances. Si circuler au sol devient compliqué, suspendez vos citoyens dans les airs."
       },
       "tip26": {
         "title": "Embouteillage électrique",
-        "description": "Produire plus d’électricité ne sert à rien si les lignes ne peuvent pas l’acheminer. Avant de construire une autre centrale, vérifiez que le courant ne reste pas coincé en chemin."
+        "description": "Une production électrique excédentaire ne suffit pas si les lignes manquent de capacité. Avant d'ajouter des centrales, vérifiez les raccordements et le transport vers le quartier en pénurie. Une seule ligne trop faible peut limiter l'approvisionnement de toute la ville."
       },
       "tip27": {
         "title": "Un accident, bien sûr",
-        "description": "Vous pouvez dynamiter un bâtiment gênant et faire passer l'opération pour un « accident ». Le moral des habitants en prend un sacré coup : mieux vaut racheter le bâtiment et le démolir dans les règles, si possible."
+        "description": "Vous pouvez faire exploser un bâtiment gênant et maquiller l'affaire en accident. Le moral des citoyens en souffrira fortement. Pour libérer un terrain, comparez le coût d'un achat suivi d'une démolition aux conséquences d'une méthode brutale."
       },
       "tip28": {
         "title": "Cap sur la mer",
-        "description": "Plus de terrain libre sur la terre ferme ? Tournez-vous vers la mer : vous pouvez y installer des plateformes pétrolières ou remblayer pour gagner du terrain."
+        "description": "Si les terrains manquent, gagnez de nouvelles terres sur la mer. Des plateformes pétrolières peuvent aussi être construites là où le sous-sol marin contient des ressources."
       },
       "tip29": {
         "title": "Rouge, toujours rouge",
-        "description": "Chaque carrefour ajoute de l'attente aux feux. Avec un quadrillage trop serré, la nuit risque de tomber avant le prochain feu vert. Reliez vos routes simplement."
+        "description": "Multiplier les carrefours à feux allonge l'attente. Évitez d'en ajouter trop sur les grands axes. Avec un quadrillage trop méticuleux, la nuit pourrait tomber avant que vos habitants voient enfin du vert."
       },
       "tip30": {
         "title": "Les montagnes font de la résistance",
-        "description": "Une tour de télécommunications plus haute, sur un terrain plus élevé, peut couvrir une zone plus vaste. Face à une montagne qui bloque les ondes, tourner le bouton de puissance avec conviction ne suffit pas."
+        "description": "Une grande tour en hauteur couvre plus loin. Cherchez les montagnes vers les zones mal couvertes : aucune bonne volonté ne fait traverser le relief aux ondes."
       },
       "tip31": {
         "title": "De l'eau, oui. Du courant aussi.",
-        "description": "Sans source d'eau douce, vous pouvez construire une usine de dessalement sur la côte. Elle a toutefois besoin d'électricité. Après la chasse à l'eau, place à la chasse au courant."
+        "description": "Une usine côtière de dessalement fournit de l'eau sans source proche, mais elle exige de l'électricité. Après la chasse à l'eau, la chasse au courant."
       },
       "tip32": {
         "title": "L'emploi à la rescousse",
-        "description": "Le chômage est l'un des facteurs d'insécurité. Prévoyez des emplois, pas seulement des commissariats. Avant de vous arracher les cheveux sur le budget de sécurité, une mesure pour l'emploi pourrait aider."
+        "description": "Le chômage contribue à dégrader la sécurité. Les habitants ont besoin d'emplois autant que de police. S'il est élevé, vérifiez les postes vacants, les compétences demandées et la possibilité de rejoindre ces lieux de travail."
       },
       "tip33": {
         "title": "Le moi de demain s'en chargera",
-        "description": "Les bâtiments et les routes continuent de coûter après leur construction. Construisez trop parce que les caisses sont pleines, et les réparations finiront par vous rattraper. Petit détail : le maire de demain, c'est toujours vous."
+        "description": "Bâtiments et routes réclament des réparations après leur construction. Trop bâtir peut engloutir les futurs budgets dans l'entretien. Et le futur maire, ce sera encore vous."
       },
       "tip34": {
         "title": "Pomper n'est pas créer",
-        "description": "Prélevez plus d'eau que la source n'en renouvelle et la pénurie finira par arriver. Multiplier les pompes ne multiplie pas l'eau."
+        "description": "Les sources se renouvellent, mais pomper au-delà de ce rythme réduit les réserves. Trouvez d'autres sources avant que la demande augmente. Plus de pompes, ce n'est pas plus d'eau."
       },
       "tip35": {
         "title": "C'est voulu. Enfin, presque.",
-        "description": "Une route ou un bâtiment se déplace difficilement une fois les travaux commencés. Planifiez avant de construire. Et si une route tourne un peu de travers, avec le temps, vous pourrez toujours appeler ça le charme local."
+        "description": "Routes et bâtiments se déplacent mal une fois le chantier lancé. Avant de confirmer, vérifiez orientation, connexions et terrains restants. Mais avec l'habitude, cette route tracée de travers peut devenir une touche de charme local."
       },
       "tip36": {
         "title": "Souriez, le maire vous suit",
-        "description": "Cliquez sur des piétons ou des véhicules pour ajouter des citoyens à votre liste de suivi. Découvrez le quotidien des habitants de votre ville."
+        "description": "Cliquez sur un piéton ou une voiture pour ajouter un citoyen à votre liste de suivi. Utilisez-la pour observer un habitant qui vous intéresse. Au-delà des statistiques générales, découvrez la ville à travers le quotidien d'une personne."
       },
       "tip37": {
         "title": "Au cas où la météo boude",
-        "description": "Le solaire et l'éolien produisent à bas coût, mais leur production dépend de la météo. Prévoyez aussi des sources stables comme le thermique ou le nucléaire."
+        "description": "La production solaire et éolienne varie avec la météo. Se baser uniquement sur les beaux jours peut entraîner une pénurie quand le temps change. Associez-les à des sources moins dépendantes de la météo, comme le thermique ou le nucléaire."
       },
       "tip38": {
         "title": "Ça ne rentre pas au chausse-pied",
-        "description": "Certains bâtiments ne tiennent pas sur les petites parcelles. Prévoyez des terrains de la bonne taille pour ce que vous voulez construire."
+        "description": "Certains bâtiments ne tiennent pas sur de petites parcelles. Vérifiez l'espace nécessaire avant de diviser les terrains. Beaucoup de terres libres ne suffisent pas à un grand bâtiment si elles sont toutes morcelées."
       },
       "tip39": {
         "title": "Le service a un prix",
-        "description": "Eaux usées, déchets, télécommunications, soins : ces services publics peuvent être gratuits par défaut. Vous êtes libre de fixer les tarifs. Prix doux ou addition salée : c'est vous qui décidez."
+        "description": "Assainissement, déchets, télécommunications et soins peuvent être gratuits par défaut. Fixer des tarifs fait participer les usagers aux frais. Prix doux ou étiquettes ambitieuses ? Le maire décide."
       },
       "tip40": {
         "title": "Copier, coller, économiser",
-        "description": "Le maire peut construire en copiant des bâtiments existants. La ville prend un petit air de déjà-vu, mais la facture de construction s'allège."
+        "description": "Le maire peut copier un bâtiment existant. Gardez son type et ses étages, sur une parcelle assez grande, pour réduire le coût des travaux. Le paysage sera répétitif, mais votre portefeuille appréciera la vue."
+      },
+      "tip41": {
+        "title": "Loyer doux, trajet infernal",
+        "description": "Pour déménager, les habitants comparent loyer, trajets vers travail, école et commerces, qualité du logement et cadre de vie. Bruit, pollution, sécurité et soleil comptent aussi. Un logement bon marché mais peu pratique attire moins ; un logement bien placé doit encore être abordable et assez spacieux."
       }
     }
   },

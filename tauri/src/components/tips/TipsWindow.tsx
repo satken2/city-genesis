@@ -57,6 +57,7 @@ type EpochProgress = {
   step: string;
 };
 
+// Tips は待ち時間の読み物と取扱説明を兼ねる。本文は内部の計算式ではなく、現象の原因や操作の結果を伝える。
 const TIPS_LIST: TipItem[] = [
   { id: "tip1", image: tip1 },
   { id: "tip2", image: tip2 },
@@ -97,6 +98,7 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip38", image: tip38 },
   { id: "tip39", image: tip39 },
   { id: "tip40", image: tip40 },
+  { id: "tip41" },
 ];
 
 export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: string; mode?: "initial" | "epoch" }) {

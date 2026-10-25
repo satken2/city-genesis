@@ -28,5 +28,7 @@ Font sizes follow root settings, and dimensions tied to body text generally use 
 
 UI text belongs in i18n resources. Keep keys and [game terminology](../contributing/glossary.md) aligned across supported languages, using common language and locale definitions.
 
+Player-facing explanations should give concrete causes, consequences of actions, and things to check when making decisions. Treat loading-screen Tips as part of the manual, explaining what city-building choices lead to without exposing internal formulas or processing steps. Each item should introduce the context needed to understand it on its own, without familiarity with other Tips or earlier wording. When expanding an explanation, preserve its subject and original humor instead of padding it with obvious cautions.
+
 Scenario and quest descriptions are author-entered multilingual data, separate from UI translation resources. Use common input and resolution mechanisms, falling back to mandatory English when the display language is missing. The language of city proper names is also independent of UI language.
 

@@ -579,159 +579,163 @@
     "items": {
       "tip1": {
         "title": "Money Makes the City Go Round",
-        "description": "Someone's spending is always someone else's income. Put all that tax revenue back to work and keep the city's economy turning."
+        "description": "City spending on construction and public-sector wages becomes income for businesses and households, supporting shopping and production. Collecting taxes alone won't keep the economy moving. Fund needed services and repairs to put money back into the city."
       },
       "tip2": {
         "title": "Playing the Long Game",
-        "description": "Citizens who grow up in a bad environment carry those bad habits into adulthood. Improving public safety takes work over several generations."
+        "description": "Citizens who grow up in unsafe surroundings retain a greater tendency to commit crime as adults. Keep policing crime and improving the environment children grow up in. Addressing the roots of poor public safety takes at least a generation."
       },
       "tip3": {
         "title": "Make Way!",
-        "description": "The later emergency vehicles arrive, the worse the damage. Keep the roads they use most free of traffic jams."
+        "description": "Firefighters need to reach the scene to help. Even with a fire station available, long distances or congested roads let the damage grow. Review station locations and access routes alongside their budgets."
       },
       "tip5": {
         "title": "An Uphill Expense",
-        "description": "Building roads and utilities on steep slopes gets expensive fast. Choose the flattest routes you can."
+        "description": "Building roads on steep slopes takes more work than on flat ground. The shortest route on the map isn't always the cheapest. Compare terrain and construction estimates, and consider a slight detour."
       },
       "tip6": {
         "title": "Some Planning Required",
-        "description": "Power and water networks take time to build. Plan ahead for growth so your infrastructure can keep up."
+        "description": "More residents and factories mean more demand for power and water. Start building after a shortage appears, and you'll be waiting for completion. Check spare supply capacity before developing a new district."
       },
       "tip7": {
         "title": "Haste Makes Waste",
-        "description": "Higher speed limits mean more accidents. Keep the curves smooth and the speed limits sensible."
+        "description": "Higher speed limits make trips faster but raise the risk of accidents. Sharp curves also need care. Where accidents are frequent, review the road layout and speed limit."
       },
       "tip8": {
         "title": "Investing in the Future",
-        "description": "The development of advanced industry requires people with higher education. Take the time to cultivate talent."
+        "description": "A growing population alone won't solve staff shortages at hospitals or advanced factories. Set university specializations and admission capacity to train the needed specialists, and allow time for students to graduate."
       },
       "tip9": {
         "title": "Built to Last",
-        "description": "Fires and collapsing infrastructure hit citizen sentiment hard. Give maintenance and fire services healthy budgets to prevent avoidable disasters."
+        "description": "Neglected repairs let buildings and roads deteriorate, eventually risking collapse. Fires and collapses also worsen public sentiment, so spending everything on new construction is risky. Keep funds available for repairs and firefighting."
       },
       "tip10": {
         "title": "A Little Breathing Room",
-        "description": "Tightly packed buildings are more vulnerable to fire. Give your city a little room to breathe."
+        "description": "Closely packed buildings let a fire spread more easily to their neighbors. Alongside fire services, leaving space between buildings helps protect the city."
       },
       "tip11": {
         "title": "Dig In",
-        "description": "Find the underground resources and set up your mining operations there. Just have an exit strategy for when the deposits run dry."
+        "description": "Check resource deposits before choosing sites for mines and oil extraction. Reserves fall as you extract them. A mining town also needs a plan for jobs and tax revenue after its deposits run out."
       },
       "tip12": {
         "title": "The City's Cash Cow",
-        "description": "The mayor can build housing and commercial properties too. Put city-owned properties in prime locations and watch the money roll in."
+        "description": "The mayor can build housing and commercial buildings to earn rent from tenants. Empty space brings in no rent, so check which uses are in demand, nearby vacancies, and the location before building."
       },
       "tip13": {
         "title": "The Taxman Cometh",
-        "description": "Fine-tune your taxes. They don't just pay for running the city; they also help you steer which industries grow."
+        "description": "Tax rates affect business costs and profitability as well as city revenue. Lower taxes on an industry can help you support its growth. When revenue falls short, check each industry's situation before raising taxes across the board."
       },
       "tip14": {
         "title": "Always Have a Plan B",
-        "description": "An accident or disaster that shuts down infrastructure can hit the city's economy hard. Build backup facilities for essential services."
+        "description": "When accidents or disasters disable power plants or power lines, the effects spread to factories and residents who depend on electricity. Provide backup facilities and delivery routes for important infrastructure so a single failure doesn't bring the whole city to a halt."
       },
       "tip15": {
         "title": "Sprawl Has Entered the Chat",
-        "description": "When demand outstrips available parcels, roads and parcels spring up without a plan. Stay ahead with planned development to keep slums from forming."
+        "description": "When housing or other demand exceeds available buildable parcels, private development adds roads and parcels, causing unplanned sprawl. Prepare roads and parcels where you want growth, with building regulations suited to their intended uses."
       },
       "tip16": {
         "title": "Industrial Clusters",
-        "description": "Productivity rises when similar industries or raw material producers are nearby. Create industrial zones and tech districts to bring businesses together."
+        "description": "Clustering similar industries and their raw-material producers makes a location more favorable for production. Consider grouping related industries instead of scattering factories across the city. Near housing, remember the noise and air pollution they can create."
       },
       "tip17": {
         "title": "Rise and Grind",
-        "description": "Longer working hours in the Regulations panel boost productivity, but citizens' health and leisure spending suffer. Give them too much time to earn money and they won't have any time left to spend it."
+        "description": "Longer working hours in the Regulations panel let the same workforce support more production. But health and leisure suffer, reducing spending on entertainment. Too much time earning money leaves no time to spend it."
       },
       "tip18": {
         "title": "Eat, Commute, Sleep, Repeat",
-        "description": "Long commutes eat into leisure time and consumer spending. That lively downtown you worked so hard on? Just scenery through the window for citizens who only go home to sleep."
+        "description": "Long commutes cut leisure time and spending on entertainment. Review the distance between homes and jobs, and congestion along the way. To residents who only get home in time to sleep, your lively shopping district is just scenery through a window."
       },
       "tip19": {
         "title": "Leave Room to Grow",
-        "description": "Trains can't be longer than the station platforms. Give your railway room to grow."
+        "description": "Longer trains can only run if they fit the platforms at the line's stations. Plan platform lengths when building stations to allow for future demand. Lengthening one station won't help if the others are still too short."
       },
       "tip20": {
         "title": "Sweep It Under the City",
-        "description": "Underground roads produce neither noise nor air pollution. Some problems really can be solved by burying them."
+        "description": "Underground roads produce no noise or air pollution, making them an option for protecting residential areas. Some problems really can be swept under the city."
       },
       "tip21": {
         "title": "In the Shadow of Progress",
-        "description": "Tall buildings cast shadows on their neighbors, making the area less pleasant to live in. Your city may have a bright future, but its streets could be in the dark."
+        "description": "Tall buildings cast shadows and worsen the living environment of nearby homes. Mind their height and spacing near residential areas. Your city's future may be bright, but the ground beneath it might be pitch-black."
       },
       "tip22": {
         "title": "Trade the Keys for a Transit Pass",
-        "description": "Make public transit convenient and even well-off residents will skip owning a car, leaving more money for other things."
+        "description": "When public transport makes workplaces, schools, and shops easy to reach, households are more likely to choose life without a car. Savings on car ownership can go toward other spending."
       },
       "tip23": {
         "title": "Next Stop: Nobody",
-        "description": "Even empty buses take up road space. Make sure your solution to traffic jams doesn't become part of the problem."
+        "description": "Buses add road traffic even with no passengers. Running too many can make congestion worse. Check ridership and headways to decide how much service is needed."
       },
       "tip24": {
         "title": "Moles Pay No Rent",
-        "description": "Tunnels below a certain depth need no land acquisition. If negotiations get tough, dig deeper."
+        "description": "Deep enough tunnels can pass without buying the land above. Shallow sections still require land acquisition, so check depths and estimates. If negotiations get difficult, try digging a little deeper."
       },
       "tip25": {
         "title": "A Suspended Commute",
-        "description": "Cable cars can carry people even over steep terrain. If building public transit is an uphill battle, try leaving your citizens hanging."
+        "description": "Ropeways can provide public transport where mountains and steep slopes make roads difficult. Provide access to stations and connections to other transport too. If travel on the ground is too much trouble, leave your citizens hanging."
       },
       "tip26": {
         "title": "Current Traffic Conditions",
-        "description": "Spare generating capacity won't help if the power lines can't carry it. Before building another power plant, check for a jam along the way."
+        "description": "Spare generating capacity won't help if power lines cannot carry enough electricity. Before adding power plants, check connections and transmission capacity to the district with the shortage. One undersized line may be limiting the whole city's supply."
       },
       "tip27": {
         "title": "Nothing to See Here",
-        "description": "A building in the way of development can be blown up and passed off as an \"accident.\" Citizen sentiment takes a serious hit, though, so buy it and demolish it properly when you can."
+        "description": "You can blow up a building in the way of development and pass it off as an accident. Public sentiment will suffer badly, though. Before clearing a site, weigh the cost of buying and demolishing it against the impact of a forceful approach."
       },
       "tip28": {
         "title": "Take to the Sea",
-        "description": "If you are running out of vacant land, expand out to sea. You can build oil platforms offshore or reclaim land from the sea."
+        "description": "Short on land? Reclaim new sites from the sea. Oil platforms can also be built where there are resources beneath the seabed."
       },
       "tip29": {
         "title": "Red Light, Red Light",
-        "description": "Every intersection means more waiting at traffic lights. Pack your grid too tightly and drivers could spend all day waiting for a green. Keep your road connections simple."
+        "description": "More signal-controlled junctions mean more time waiting at lights. Avoid too many on major roads. With a meticulously intersecting grid, the sun might set before your residents ever see green."
       },
       "tip30": {
         "title": "Can You Hear Me Now?",
-        "description": "Taller radio towers on higher ground can cover more of the city. A mountain in the way won't budge, no matter how enthusiastically you crank up the power."
+        "description": "Taller radio towers on higher ground can cover wider areas. Check for mountains between the tower and places without reception. You can't get a signal through a mountain by sheer enthusiasm for more power."
       },
       "tip31": {
         "title": "Just Add Power",
-        "description": "Can't find a freshwater source? Try a desalination plant on the coast. It needs electricity, though. First you hunt for water, then you hunt for power."
+        "description": "A coastal desalination plant can supply a city with no nearby fresh water source. It needs electricity to operate, though. First you hunt for water, then you hunt for power."
       },
       "tip32": {
         "title": "Jobs on the Beat",
-        "description": "Unemployment is one factor behind crime. Provide jobs as well as police stations. Before agonizing over the public safety budget, see whether employment measures could help."
+        "description": "Unemployment is one factor that worsens public safety. Residents need jobs as well as police protection. If unemployment is high, check vacancies, the skills employers need, and whether residents can reach those jobs."
       },
       "tip33": {
         "title": "That's Future Me's Problem",
-        "description": "Buildings and roads keep costing money after they're built. Build too much just because you have cash to spare and the repair bills will catch up with you. Spoiler: the future mayor is also you."
+        "description": "Buildings and roads keep needing repairs after construction. Expand just because you can afford to build, and future budgets may disappear into upkeep. Remember, the future mayor is also you."
       },
       "tip34": {
         "title": "More Pumps, Same Water",
-        "description": "Keep pumping faster than a water source replenishes and you'll eventually run short. More pumps won't magically make more water."
+        "description": "Water sources replenish over time, but extracting more than they recover reduces reserves. Secure other sources before demand grows. More pumps don't come with more water."
       },
       "tip35": {
         "title": "It's a Feature",
-        "description": "Once construction starts, roads and buildings aren't easy to move. Plan carefully before breaking ground. Still, give that accidentally crooked road a little time and you might call it local character."
+        "description": "Roads and buildings aren't easy to move once construction starts. Before confirming, check orientation, connections, and the land left around them. Still, that accidentally crooked road might grow on you as local character."
       },
       "tip36": {
         "title": "Big Mayor Is Watching",
-        "description": "Click on pedestrians or vehicles to add citizens to your tracking list. See what everyday life looks like for the people in your city."
+        "description": "Click a pedestrian or car to add a citizen to your tracking list. Use it to follow a resident whose life interests you. Alongside citywide statistics, you can see your city through one person's daily life."
       },
       "tip37": {
         "title": "A Backup for the Forecast",
-        "description": "Solar and wind power are cheap to generate, but their output depends on the weather. Pair them with steady sources such as thermal or nuclear power."
+        "description": "Solar and wind output changes with the weather. Planning around good-weather supply alone can leave you short when conditions change. Combine them with sources less dependent on weather, such as thermal or nuclear power."
       },
       "tip38": {
         "title": "Size Matters",
-        "description": "Some buildings won't fit on small parcels. Size your parcels to suit what you want to build."
+        "description": "Some buildings won't fit on small parcels. Check the space needed for a planned facility before dividing the land. Plenty of spare land is no help to a large building if it's all in tiny parcels."
       },
       "tip39": {
         "title": "That'll Cost You",
-        "description": "Public services such as sewage treatment, waste disposal, telecommunications, and healthcare may be free by default. You set the prices. A citizen-friendly rate or a hefty bill? Your call, Mayor."
+        "description": "Sewage treatment, waste disposal, communications, and healthcare may be free by default. Setting fees lets users cover part of the operating costs. Friendly prices or ambitious price tags? That's the mayor's call."
       },
       "tip40": {
         "title": "Copy, Paste, Profit",
-        "description": "When building, the mayor can copy existing buildings. Things may start to look a bit samey, but it keeps construction costs down."
+        "description": "As mayor, you can construct copies of existing buildings. Keep the type and floor count unchanged and use a parcel that fits the original to reduce construction costs. The streetscape may look repetitive, but your wallet will enjoy the view."
+      },
+      "tip41": {
+        "title": "Rent Heaven, Commute Hell",
+        "description": "Residents compare rent, work and school commutes, shopping trips, housing quality, and the living environment when choosing a new home. Noise, air pollution, public safety, and sunlight all matter. Cheap but inconvenient homes are less appealing; convenient ones still need affordable rent and enough room to move in."
       }
     }
   },
