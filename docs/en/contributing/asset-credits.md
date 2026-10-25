@@ -1,6 +1,6 @@
 # Assets and credits
 
-Unity and Tauri share one game-wide list of external asset sources. When importing images, audio, fonts, 3D models, textures, or geographic data, verify their source and terms and record credits in the same change. Separating import from attribution can make sources impossible to trace later.
+Unity and Tauri share one game-wide list of external asset sources. When importing images, audio, fonts, 3D models, or textures, verify their source and terms and record credits in the same change. Separating import from attribution can make sources impossible to trace later.
 
 ## Authoritative records
 
@@ -12,6 +12,6 @@ An editing-software signature or filename alone does not identify a source. Chec
 
 ## Scope
 
-Original assets are excluded from the external-asset list. External terrain and geographic data require source and terms records even when processed into scenarios or lessons.
+Original assets are excluded from the external-asset list. External terrain and geographic data are credited, with their source and terms, by the scenarios that contain them (including tutorial cities), not by the game-wide list. Maps are added, removed, and distributed separately from the game, and scenarios derived from a scenario inherit its credits.
 
 Engine and OSS-library notice obligations are separate from the asset credits screen. Manage their required copyright notices and license texts in the distribution.

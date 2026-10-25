@@ -34,7 +34,8 @@ const entry = { id: "local~mine", is_scenario: true, saved_at: "20261003_215934"
   saved_core_version: "1.0.0", created_core_version: "1.0.0", compatibility: { loadable: true }, origin: "local",
   read_only: false, encrypted: false, required_packs: [], pack_status: {}, official: false };
 const entries = [entry,
-  { ...entry, id: "workshop~123~copy", origin: "workshop", read_only: true, ground_cover: undefined, climate: climate("海岸の気候") },
+  { ...entry, id: "workshop~123~copy", origin: "workshop", read_only: true, ground_cover: undefined, climate: climate("海岸の気候"),
+    scenario_credits: "Elevation: Example DEM\nSource — https://example.com/dem" },
   { ...entry, id: "dlc~pack~city", origin: "dlc", read_only: true, official: true, encrypted: true,
     required_packs: ["pack"], pack_status: { pack: "not_owned" }, compatibility: { loadable: false, code: "SCENARIO_PACK_NOT_OWNED" } },
   { ...entry, id: "local~future", compatibility: { loadable: false, code: "SAVE_VERSION_NEWER" } }];
@@ -150,8 +151,9 @@ const button = (text: string) => buttons(text)[0]!;
 const card = (id: string) => [...container.querySelectorAll<HTMLElement>("article")].find(value => value.dataset.scenarioId === id)!;
 const cardButton = (id: string, text: string) => [...card(id).querySelectorAll("button")].find(named(text))!;
 const lastCall = (command: string) => state.calls.filter(call => call.command === command).at(-1)?.args;
-const setText = (element: HTMLInputElement | HTMLSelectElement, value: string) => {
-  const prototype = element.tagName === "SELECT" ? window.HTMLSelectElement.prototype : window.HTMLInputElement.prototype;
+const setText = (element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, value: string) => {
+  const prototype = element.tagName === "SELECT" ? window.HTMLSelectElement.prototype
+    : element.tagName === "TEXTAREA" ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
   Object.getOwnPropertyDescriptor(prototype, "value")!.set!.call(element, value);
   element.dispatchEvent(new window.Event(element.tagName === "SELECT" ? "change" : "input", { bubbles: true }));
 };
@@ -511,7 +513,7 @@ assert.equal(languageTabs.length, 7);
 assert.ok(languageTabs[0].textContent?.startsWith("settings.language.en"), "English comes first");
 assert.ok(languageTabs[0].textContent?.includes("localizedText.required"));
 assert.equal(container.querySelector(".localized-text [aria-selected=true]")?.textContent, "settings.language.ja", "the display language opens first");
-assert.equal(container.querySelectorAll("textarea").length, 2);
+assert.equal(container.querySelectorAll(".localized-text__panel textarea").length, 2);
 assert.equal((container.querySelector("textarea") as HTMLTextAreaElement).value, "説明");
 assert.ok(container.querySelector(".localized-text__panel")?.contains(container.querySelector("textarea")), "the fields switched by the tabs are framed");
 assert.ok(!container.querySelector(".localized-text__panel")?.textContent?.includes("scenarios.author"), "the author is outside the tab frame");
@@ -524,7 +526,13 @@ assert.ok(changeableBox("asset_pack").checked && changeableBox("asset_pack").dis
 assert.ok(!changeableBox("climate").checked && changeableBox("simulation_days").checked, "the checkbox shows what players may change");
 await act(async () => { changeableBox("simulation_days").click(); });
 await act(async () => { setText(container.querySelector<HTMLSelectElement>(".scenario-start-row[data-option=simulation_days] select")!, "7"); });
+// クレジットは言語のタブの外にある翻訳しない1つの文。
+const creditsBox = [...container.querySelectorAll<HTMLTextAreaElement>("textarea")]
+  .find(box => !container.querySelector(".localized-text__panel")?.contains(box))!;
+assert.equal(creditsBox.value, "");
+await act(async () => { setText(creditsBox, "Source — https://example.com/dem"); });
 await submit();
+assert.equal(metadataWritten.scenario_credits, "Source — https://example.com/dem");
 assert.deepEqual(metadataWritten.scenario_title, { en: "My scenario" });
 assert.deepEqual(metadataWritten.scenario_description, { ja: "説明", en: "Description" });
 assert.deepEqual(metadataWritten.scenario_city_name, { ja: "見本市", en: "Sample Town" });
@@ -572,7 +580,12 @@ assert.ok(facts()?.textContent?.includes("2 × 1 km"), "the map size comes from 
 assert.ok(!container.querySelector(".new-game-detail")?.textContent?.includes("flat.png"), "the terrain source file name is not shown");
 const workshopTile = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]
   .find(value => value.textContent?.includes("scenarios.origin.workshop"))!;
+const creditsBlock = () => [...container.querySelectorAll(".new-game-detail-block")]
+  .find(block => block.querySelector(".new-game-detail-block-title")?.textContent === "newGame.detailCreditsLabel");
+assert.equal(creditsBlock(), undefined, "scenarios without credits have no credits section");
 await act(async () => { workshopTile.click(); });
+assert.equal(creditsBlock()?.querySelector(".new-game-detail-block-text")?.textContent, "Elevation: Example DEM\nSource — https://example.com/dem",
+  "credits are shown verbatim");
 assert.equal(facts()?.querySelector("title")?.textContent, "groundCover.1", "entries without values use the game's default ground cover");
 assert.ok(facts()?.textContent?.includes("海岸の気候"));
 const unloadable = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]

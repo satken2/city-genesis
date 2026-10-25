@@ -368,6 +368,7 @@
     "detailMapSizeLabel": "Map Size",
     "detailUnknown": "Unknown",
     "detailObjectiveLabel": "Objectives",
+    "detailCreditsLabel": "Credits",
     "detailNoObjective": "No objectives",
     "detailNoDescription": "This scenario has no description.",
     "tutorialObjective": "Complete every step of the tutorial.",

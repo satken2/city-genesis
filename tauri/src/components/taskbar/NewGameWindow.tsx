@@ -6,7 +6,7 @@
  *
  * The left hero shows a subheading and heading-sized Select Scenario / Find Scenarios tabs. Find Scenarios is
  * disabled because shared scenario browsing is unavailable. Below, tiled sections show collapsible tutorial
- * missions and scenarios from all sources (custom/community/DLC), fetched via GET /api/v1/scenarios.
+ * missions and scenarios from all sources in the order of GET /api/v1/scenarios (bundled scenarios first).
  * Development debug cities (source debug), included only when the core runs in debug/non-Nuitka mode, appear
  * above tutorials in a separate Debug section and start like scenarios. There is no direct terrain start: import
  * elevation files as scenarios in scenario management first. Tutorials start from core-bundled lesson cities by
@@ -18,7 +18,7 @@
  * city-independent player profile (GET /api/v1/profile).
  * The fixed-width detail panel reaches the window's top/right/bottom edges. Its top image carries the title at
  * the lower edge, followed by description, map facts (size, ground cover, climate; scenarios only), completion
- * conditions, and Start at the bottom. Descriptions/conditions are author-written free text; all map facts come
+ * conditions, credits (only when written), and Start at the bottom. Descriptions/conditions are author-written free text; all map facts come
  * from the scenario list item (city values).
  *
  * Start opens a settings confirmation overlay within the window, not a native popup. Configure city name, naming
@@ -55,7 +55,7 @@ import clearedBadgeImage from "../../assets/images/ui/badge.png";
 import developmentNoticeImage from "../../assets/images/development_notice.jpg";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
-import { AssetPackEntry, CommonSaveEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
+import { AssetPackEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { ASSET_PACK_STANDARD, CLIMATE_TYPES, GROUND_COVER_TYPES } from "../../constants";
 import { SaveCompatibilityReason, SaveVersionInfo } from "../common/SaveVersionInfo";
 import type { InfoDialogContent } from "../common/InfoDialogWindow";
@@ -105,6 +105,8 @@ type DetailView = {
   cleared: boolean;
   /** Free-text completion conditions. null if unset; still show the section with No Completion Conditions, since absence is informative. */
   objective: string | null;
+  /** Attribution written in the city, shown verbatim. Empty when none; the section is then omitted. */
+  credits: string;
   /** Loadability from the core's list item; null while unknown. Unreadable items show the reason in details and block only starting. */
   compatibility: SaveCompatibility | null;
   onStart: () => void;
@@ -208,7 +210,7 @@ export function NewGameWindow({
   const master = useMasterData();
   const [allScenarios, setAllScenarios] = useState<ScenarioEntry[]>([]);
   // Keyed by tutorial ID, matching tutorial_id in POST /api/v1/sessions
-  const [tutorialEntries, setTutorialEntries] = useState<Record<string, CommonSaveEntry>>({});
+  const [tutorialEntries, setTutorialEntries] = useState<Record<string, ScenarioEntry>>({});
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileEntry | null>(null);
   const [tutorialsExpanded, setTutorialsExpanded] = useState<boolean | null>(null);
@@ -264,7 +266,7 @@ export function NewGameWindow({
     if (!apiBaseUrl) return;
     const base = apiBaseUrl.replace(/\/+$/, "");
     let active = true;
-    const fetchScenarios = () => fetchApi<{ scenarios: Record<string, ScenarioEntry>; tutorials: Record<string, CommonSaveEntry> }>(
+    const fetchScenarios = () => fetchApi<{ scenarios: Record<string, ScenarioEntry>; tutorials: Record<string, ScenarioEntry> }>(
       `${base}/api/v1/scenarios`, { cache: "reload" },
     ).then(data => {
       if (!active) return;
@@ -367,6 +369,7 @@ export function NewGameWindow({
         terrain: null,
         cleared: isTutorialCleared(scenario.id),
         objective: t("newGame.tutorialObjective"),
+        credits: tutorialEntries[scenario.id]?.scenario_credits ?? "",
         compatibility: tutorialEntries[scenario.id]?.compatibility ?? null,
         onStart: () => void handleStartTutorial(scenario.id),
       };
@@ -387,6 +390,7 @@ export function NewGameWindow({
       },
       cleared: isScenarioCleared(entry.id),
       objective: resolveLocalizedText(entry.scenario_objective, i18n.language) || null,
+      credits: entry.scenario_credits ?? "",
       compatibility: entry.compatibility ?? null,
       onStart: () => void handleStartScenario(entry),
     };
@@ -615,6 +619,13 @@ export function NewGameWindow({
                 <h3 className="new-game-detail-block-title">{t("newGame.detailObjectiveLabel")}</h3>
                 <p className="new-game-detail-block-text">{detail.objective ?? t("newGame.detailNoObjective")}</p>
               </section>
+
+              {detail.credits && (
+                <section className="new-game-detail-block">
+                  <h3 className="new-game-detail-block-title">{t("newGame.detailCreditsLabel")}</h3>
+                  <p className="new-game-detail-block-text">{detail.credits}</p>
+                </section>
+              )}
             </div>
           </div>
         ) : (

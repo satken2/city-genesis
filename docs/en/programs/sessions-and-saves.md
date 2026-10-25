@@ -12,9 +12,9 @@ The UI uses shared session state to distinguish startup from an operable city. T
 
 Ordinary saves continue cities; scenarios provide starting points for new games. Both store cities including terrain as `.cg` files. Starting from a scenario creates a new save rather than overwriting the original. This differs from editing the scenario itself.
 
-Appearing in a list does not guarantee a file can be loaded. Display the core's compatibility, ownership, and editing eligibility results without reimplementing them. Save timestamps are real-world times, distinct from city dates. See [compatibility](compatibility.md).
+Appearing in a list does not guarantee a file can be loaded. Display the core's compatibility, ownership, and editing eligibility results without reimplementing them. The core also determines scenario list order, so the front end displays scenarios in the order received. Save timestamps are real-world times, distinct from city dates. See [compatibility](compatibility.md).
 
-A scenario's management source, official status, and required DLC are separate attributes. Store-managed scenarios are read-only; custom scenarios can be edited. Do not infer official status from author names or locations, and use the core's DLC checks. Follow [UI foundations](ui-foundations.md) for multilingual descriptions.
+A scenario's management source, official status, and required DLC are separate attributes. Only custom scenarios can be edited; scenarios bundled with the game or managed by a store are read-only. Do not infer official status from author names or locations, and use the core's DLC checks. Follow [UI foundations](ui-foundations.md) for multilingual descriptions. Scenario credits use wording prescribed by data providers, so they are not multilingual data and are shown verbatim.
 
 ## Play modes
 

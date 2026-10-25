@@ -368,6 +368,7 @@
     "detailMapSizeLabel": "地圖尺寸",
     "detailUnknown": "未知",
     "detailObjectiveLabel": "達成條件",
+    "detailCreditsLabel": "鳴謝",
     "detailNoObjective": "無達成條件",
     "detailNoDescription": "此劇本沒有設定說明。",
     "tutorialObjective": "完成新手教學的所有步驟。",

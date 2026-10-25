@@ -10,6 +10,7 @@
     "deleteConfirm": "시나리오 \"{{title}}\"을(를) 삭제할까요? 이 작업은 되돌릴 수 없습니다.",
     "deleted": "시나리오를 삭제했습니다.",
     "author": "제작자",
+    "credits": "크레디트",
     "byAuthor": "제작자: {{author}}",
     "close": "닫기",
     "uploadUnconfigured": "업로드 대상이 설정되지 않았습니다.",
@@ -18,6 +19,7 @@
     "tabTerrains": "지형 가져오기",
     "origin": {
       "local": "내 작품",
+      "bundled": "기본",
       "workshop": "커뮤니티",
       "dlc": "DLC",
       "debug": "디버그"
@@ -25,7 +27,7 @@
     "official": "공식",
     "editTerrain": "지형 편집",
     "editConfirm": "이 시나리오의 도시를 편집할까요? 열려 있는 모든 창이 닫히고, 지형 에디터에서 저장하지 않은 편집 내용은 사라집니다.",
-    "readOnlyHint": "커뮤니티와 DLC 시나리오는 편집할 수 없습니다.",
+    "readOnlyHint": "직접 만든 시나리오만 편집할 수 있습니다.",
     "createFromTerrain": "시나리오 만들기",
     "creating": "만드는 중...",
     "created": "시나리오를 만들었습니다.",

@@ -10,6 +10,7 @@
     "deleteConfirm": "Delete the scenario \"{{title}}\"? This cannot be undone.",
     "deleted": "Scenario deleted.",
     "author": "Author",
+    "credits": "Credits",
     "byAuthor": "By {{author}}",
     "close": "Close",
     "uploadUnconfigured": "No upload destination is configured.",
@@ -18,6 +19,7 @@
     "tabTerrains": "Import terrain",
     "origin": {
       "local": "My creations",
+      "bundled": "Standard",
       "workshop": "Community",
       "dlc": "DLC",
       "debug": "Debug"
@@ -25,7 +27,7 @@
     "official": "Official",
     "editTerrain": "Edit terrain",
     "editConfirm": "Edit this scenario's city? All open windows will close, and unsaved edits in the terrain editor will be lost.",
-    "readOnlyHint": "Community and DLC scenarios cannot be edited.",
+    "readOnlyHint": "Only your own scenarios can be edited.",
     "createFromTerrain": "Create scenario",
     "creating": "Creating...",
     "created": "Scenario created.",

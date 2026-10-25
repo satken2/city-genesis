@@ -368,6 +368,7 @@
     "detailMapSizeLabel": "マップサイズ",
     "detailUnknown": "不明",
     "detailObjectiveLabel": "達成条件",
+    "detailCreditsLabel": "クレジット",
     "detailNoObjective": "達成条件なし",
     "detailNoDescription": "このシナリオには説明が設定されていません。",
     "tutorialObjective": "チュートリアルのすべてのステップを完了する。",

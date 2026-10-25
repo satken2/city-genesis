@@ -10,6 +10,7 @@
     "deleteConfirm": "¿Eliminar el escenario \"{{title}}\"? Esta acción no se puede deshacer.",
     "deleted": "Escenario eliminado.",
     "author": "Autor",
+    "credits": "Créditos",
     "byAuthor": "Por {{author}}",
     "close": "Cerrar",
     "uploadUnconfigured": "No hay un destino de subida configurado.",
@@ -18,6 +19,7 @@
     "tabTerrains": "Importar terreno",
     "origin": {
       "local": "Mis creaciones",
+      "bundled": "Estándar",
       "workshop": "Comunidad",
       "dlc": "DLC",
       "debug": "Depuración"
@@ -25,7 +27,7 @@
     "official": "Oficial",
     "editTerrain": "Editar terreno",
     "editConfirm": "¿Editar la ciudad de este escenario? Se cerrarán todas las ventanas abiertas y se perderán los cambios sin guardar del editor de terreno.",
-    "readOnlyHint": "Los escenarios de la comunidad y los DLC no se pueden editar.",
+    "readOnlyHint": "Solo se pueden editar tus propios escenarios.",
     "createFromTerrain": "Crear escenario",
     "creating": "Creando...",
     "created": "Escenario creado.",

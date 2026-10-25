@@ -5,6 +5,8 @@
  * - Enter multilingual title, description, completion conditions, and initial city name. English is always
  *   required for the title, and required for other fields if any language has text. Fall back to English when
  *   the display language is missing.
+ * - Credits are a single untranslated text, since data providers prescribe their attribution wording. They belong
+ *   to the city, so creation mode starts from the current city's credits and derived scenarios keep them.
  * - Set starting options (simulation days, climate, ground cover) and whether players may change them at game
  *   start. UI checkboxes mean Editable; invert them into fixed fields (scenario_fixed_options) for the core.
  *   Also select a default asset pack; like language, players may always change it, so it cannot be fixed.
@@ -38,7 +40,7 @@ const START_OPTIONS: ScenarioStartOption[] = ["simulation_days", "climate", "gro
 
 /** Initial form data: saved scenario when editing; current city (GET /api/v1/city/) and city language when creating. */
 type ScenarioSource = Pick<ScenarioEntry, (typeof TEXT_KEYS)[number] | "scenario_fixed_options" | "author" | "language"
-  | "simulation_days" | "climate" | "ground_cover" | "asset_pack">;
+  | "scenario_credits" | "simulation_days" | "climate" | "ground_cover" | "asset_pack">;
 
 function startOptionsOf(source: ScenarioSource): Options {
   return {
@@ -56,6 +58,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
   const [language, setLanguage] = useState<string | null>(null);
   const [texts, setTexts] = useState<Texts>({});
   const [author, setAuthor] = useState("");
+  const [credits, setCredits] = useState("");
   const [options, setOptions] = useState<Options | null>(null);
   const [fixed, setFixed] = useState<ScenarioStartOption[]>([]);
   const [assetPack, setAssetPack] = useState(ASSET_PACK_STANDARD);
@@ -69,6 +72,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
     const apply = (source: ScenarioSource) => {
       setTexts(Object.fromEntries(TEXT_KEYS.map(key => [key, source[key] ?? {}])));
       setAuthor(source.author ?? "");
+      setCredits(source.scenario_credits ?? "");
       setOptions(startOptionsOf(source));
       setFixed(source.scenario_fixed_options ?? []);
       setAssetPack(source.asset_pack ?? ASSET_PACK_STANDARD);
@@ -107,7 +111,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
     setBusy(true); setError("");
     const body = JSON.stringify({
       ...Object.fromEntries(TEXT_KEYS.map(key => [key, compactLocalizedText(texts[key])])),
-      author, ...options, asset_pack: assetPack,
+      author, scenario_credits: credits, ...options, asset_pack: assetPack,
       scenario_fixed_options: START_OPTIONS.filter(option => fixed.includes(option)),
     });
     try {
@@ -144,6 +148,8 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
       ]} />
       <label className="scenario-info__field"><span>{t("scenarios.author")}</span>
         <input type="text" className="scenario-info__input" value={author} maxLength={120} disabled={busy} onChange={e => setAuthor(e.target.value)} /></label>
+      <label className="scenario-info__field"><span>{t("scenarios.credits")}</span>
+        <textarea className="scenario-info__textarea" rows={4} value={credits} maxLength={4000} disabled={busy} onChange={e => setCredits(e.target.value)} /></label>
       <section className="scenario-group">
         <h3 className="scenario-group-title">{t("scenarios.startSettings")}</h3>
         <p className="scenario-hint">{t("scenarios.startSettingsHint")}</p>

@@ -9,8 +9,7 @@
       "image": "Images & Icons",
       "font": "Fonts",
       "model": "3D Models",
-      "texture": "Textures",
-      "data": "Terrain & Map Data"
+      "texture": "Textures"
     }
   }
 }

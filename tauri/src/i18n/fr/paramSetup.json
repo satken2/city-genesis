@@ -368,6 +368,7 @@
     "detailMapSizeLabel": "Taille de la carte",
     "detailUnknown": "Inconnu",
     "detailObjectiveLabel": "Conditions de réussite",
+    "detailCreditsLabel": "Crédits",
     "detailNoObjective": "Aucune condition de réussite",
     "detailNoDescription": "Aucune description n'est définie pour ce scénario.",
     "tutorialObjective": "Terminer toutes les étapes du tutoriel.",

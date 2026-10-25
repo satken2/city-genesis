@@ -12,8 +12,8 @@ export type SaveCompatibility = {
   balance_core_version?: string;
   core_version?: string;
 };
-/** Scenario storage source. Only local is writable; others are playable read-only. debug denotes development cities returned only when the core starts in debug mode. */
-export type ScenarioOrigin = "local" | "workshop" | "dlc" | "debug";
+/** Scenario storage source. Only local is writable; others are playable read-only. bundled is shipped with the game and listed first. debug denotes development cities returned only when the core starts in debug mode. */
+export type ScenarioOrigin = "local" | "bundled" | "workshop" | "dlc" | "debug";
 /** Required pack ownership state. unverified means production has neither Steam verification nor its cache yet. */
 export type PackStatus = "owned" | "not_owned" | "unverified";
 /** Common list information across save types. The API derives compatibility/ownership from the runtime environment. */
@@ -53,6 +53,8 @@ export type ScenarioEntry = CommonSaveEntry & {
   /** Start settings locked by the author. Players choose unlocked settings when starting a game. */
   scenario_fixed_options?: ScenarioStartOption[];
   author?: string;
+  /** Attribution for terrain and geographic data. Show verbatim: providers prescribe the wording, so it is never translated. */
+  scenario_credits?: string;
   content_revision?: number;
   /** Map dimensions in m. Unchanged even by the terrain editor. */
   map_width?: number; map_height?: number;

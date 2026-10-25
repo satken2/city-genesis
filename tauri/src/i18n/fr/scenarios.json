@@ -10,6 +10,7 @@
     "deleteConfirm": "Supprimer le scénario « {{title}} » ? Cette action est irréversible.",
     "deleted": "Scénario supprimé.",
     "author": "Auteur",
+    "credits": "Crédits",
     "byAuthor": "Par {{author}}",
     "close": "Fermer",
     "uploadUnconfigured": "Aucune destination de publication configurée.",
@@ -18,6 +19,7 @@
     "tabTerrains": "Importer un terrain",
     "origin": {
       "local": "Mes créations",
+      "bundled": "Standard",
       "workshop": "Communauté",
       "dlc": "DLC",
       "debug": "Débogage"
@@ -25,7 +27,7 @@
     "official": "Officiel",
     "editTerrain": "Modifier le terrain",
     "editConfirm": "Modifier la ville de ce scénario ? Toutes les fenêtres ouvertes seront fermées et les modifications non enregistrées de l’éditeur de terrain seront perdues.",
-    "readOnlyHint": "Les scénarios de la communauté et des DLC ne peuvent pas être modifiés.",
+    "readOnlyHint": "Seuls vos propres scénarios peuvent être modifiés.",
     "createFromTerrain": "Créer un scénario",
     "creating": "Création...",
     "created": "Scénario créé.",

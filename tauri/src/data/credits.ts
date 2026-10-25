@@ -25,8 +25,10 @@
  * Credit categories. `CREDIT_CATEGORY_ORDER` defines window order; i18n key `credits.categories.<category>`
  * supplies headings. Covers assets only, excluding game engines and OSS libraries. Bundle their copyright
  * notices and license text separately (see `city-genesis/docs/ja/contributing/素材クレジット管理.md`).
+ * Terrain and geographic data are credited by each scenario (`scenario_credits`), not here, because maps are
+ * added, removed and downloaded independently of the game.
  */
-export type CreditCategory = "bgm" | "sfx" | "image" | "font" | "model" | "texture" | "data";
+export type CreditCategory = "bgm" | "sfx" | "image" | "font" | "model" | "texture";
 
 /** Category display order. */
 export const CREDIT_CATEGORY_ORDER: CreditCategory[] = [
@@ -36,7 +38,6 @@ export const CREDIT_CATEGORY_ORDER: CreditCategory[] = [
   "font",
   "model",
   "texture",
-  "data",
 ];
 
 export type CreditEntry = {
@@ -334,15 +335,6 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     url: "https://polyhaven.com/a/withered_grass",
     license: "CC0 1.0",
     note: "Terrain ground: semi-arid (2K diffuse). License verified 2026-09-25.",
-  },
-  {
-    title: "標高タイル(基盤地図情報数値標高モデル)",
-    category: "data",
-    source: "国土地理院 地理院タイル",
-    url: "https://maps.gsi.go.jp/development/ichiran.html",
-    license: "国土地理院コンテンツ利用規約 — https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html",
-    requiredText: "地理院タイル（標高タイル（基盤地図情報数値標高モデル））を加工して作成",
-    note: "Tutorial terrain: yoron (the terrain of the bundled tutorial cities set on Yoron Island). Resampled to a 10 m metric grid, small islets removed and sea floor synthesized. License verified 2026-09-18.",
   },
 ];
 

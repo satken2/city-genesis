@@ -368,6 +368,7 @@
     "detailMapSizeLabel": "Tamaño del mapa",
     "detailUnknown": "Desconocido",
     "detailObjectiveLabel": "Condiciones de logro",
+    "detailCreditsLabel": "Créditos",
     "detailNoObjective": "Sin condiciones de logro",
     "detailNoDescription": "Este escenario no tiene descripción.",
     "tutorialObjective": "Completa todos los pasos del tutorial.",

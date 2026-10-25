@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import type { CommonSaveEntry, ScenarioEntry } from "../../utils/saves";
 import "./ScenarioSource.css";
 
-/** Scenario source badges (self-authored/community/DLC) and official signature. */
+/** Scenario source badge and official signature. */
 export function ScenarioOriginBadges({ entry }: { entry: ScenarioEntry }) {
   const { t } = useTranslation();
   const origin = entry.origin;
