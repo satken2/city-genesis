@@ -52,7 +52,8 @@ import {
 } from "../../utils/citizenTracking";
 import { CitizenActivityPanel } from "./CitizenActivityPanel";
 import { CameraIcon, TrackIcon } from "./CitizenTrackingIcons";
-import citizenIcon from "../../assets/images/citizen.png";
+import { citizenFaceUrl, citySkinTone } from "../../utils/citizenFace";
+import { useCityClimate } from "../../hooks/useCityClimate";
 import "../agent/AgentDetailPanel.css";
 import "../agent/AgentOperationPanel.css";
 import "./CitizenDetailPanel.css";
@@ -128,6 +129,7 @@ export function CitizenDetailPanel({
   const [itineraryFailed, setItineraryFailed] = useState(false);
   const [tracked, setTracked] = useState(false);
   const followed = useFollowedCitizen();
+  const climate = useCityClimate(apiBaseUrl);
   const citizenId = Number(initialEntityId);
 
   const url = buildApiUrl(apiBaseUrl, pathTemplate, initialEntityId);
@@ -226,7 +228,8 @@ export function CitizenDetailPanel({
     };
   }, [url]);
 
-  if (loading || !masterData) {
+  // Wait for the climate as well, so the face does not change skin tone right after opening.
+  if (loading || !masterData || climate === undefined) {
     return <p className="agent-detail-muted">{t("common.loading")}</p>;
   }
 
@@ -268,9 +271,14 @@ export function CitizenDetailPanel({
     .sort((a, b) => a.id - b.id);
 
   return (
-    <div className="agent-detail">
+    <div className="agent-detail citizen-detail">
       <InfoHeader
-        iconSrc={citizenIcon}
+        iconSrc={citizenFaceUrl({
+          citizenId: citizenData.citizen_id,
+          gender: citizenData.gender,
+          age: citizenData.age,
+          ...citySkinTone(climate),
+        })}
         showStatus={false}
         variantName={maritalLabel}
         name={citizenData.name}

@@ -1,3 +1,10 @@
+/* Header portrait, larger than other panels' icons so the facial features stay readable. */
+.citizen-detail .info-header-icon {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+}
+
 /* Skill radar chart, centered to fit the panel width. */
 .citizen-skill-chart {
   width: 100%;
