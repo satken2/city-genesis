@@ -122,7 +122,6 @@
     "directAcquisitionCost": "收购费用估算：{{cost}}",
     "acquisitionNoRequest": "没有需要确认的收购内容",
     "acquisitionConfirmDesc": "放置位置与 {{count}} 个私有地块重叠。市政府将自动收购用地并拆除现有建筑后开始建设（收购费用估算：{{cost}}）。",
-    "acquisitionConfirmNote": "收购需要数个周期完成，费用从征地预算中支付。在完成之前，建筑将保持计划状态等待。",
     "acquisitionConfirmAction": "收购并建设",
     "copyExisting": "复制现有建筑",
     "copySourceNotAllowed": "该建筑不能作为复制建设的来源",

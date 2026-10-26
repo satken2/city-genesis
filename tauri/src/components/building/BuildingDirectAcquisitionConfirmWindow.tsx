@@ -75,13 +75,6 @@ export function BuildingDirectAcquisitionConfirmWindow({
         })}
       </p>
 
-      <p className="bda-note">
-        {t(
-          "building_construction.acquisitionConfirmNote",
-          "買収は数エポックかけて進行し、用地買収予算から支払われます。完了までのあいだ建物は計画中のまま待機します。",
-        )}
-      </p>
-
       <div className="bda-actions">
         <button className="bda-cancel-btn" type="button" disabled={busy} onClick={onClose}>
           {t("common.cancel")}

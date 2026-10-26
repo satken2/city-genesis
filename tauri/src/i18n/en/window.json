@@ -48,7 +48,7 @@
     "scenario_metadata": "Metadata",
     "info_dialog": "Notice",
     "citizen_detail": "Citizen",
-    "citizen_tracking": "Tracking list",
+    "citizen_list": "Citizen list",
     "scenario_sign": "Scenario signing",
     "climate_settings": "Climate settings",
     "climate_effects": "Climate",
@@ -139,7 +139,7 @@
     "budgetMeterTooltip": "(Recent revenue − next epoch projected payments) / recent revenue",
     "scoreMeterLabel": "Score",
     "scoreMeterTooltip": "Governance score (per household, max 2.0)",
-    "menuCitizenTracking": "Tracking list"
+    "menuCitizenList": "Citizen list"
   },
   "topmenu": {
     "minimize": "Minimize",

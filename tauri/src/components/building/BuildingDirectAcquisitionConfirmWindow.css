@@ -1,7 +1,7 @@
 /**
  * Styles for the direct building placement land acquisition confirmation window
  *
- * Small window with explanation, caution, and two buttons. Color only the confirmation button
+ * Small window with explanation and two buttons. Color only the confirmation button
  * with a warning orange matching acquisition negotiations to convey irreversible demolition
  * of private land/buildings. Follows ZoneMergeConfirmWindow styles.
  */
@@ -25,13 +25,6 @@
   margin: 0;
   font-size: 1rem;
   line-height: 1.6;
-}
-
-.bda-note {
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.6;
-  opacity: 0.75;
 }
 
 .bda-actions {

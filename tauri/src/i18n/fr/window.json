@@ -48,7 +48,7 @@
     "scenario_metadata": "Présentation",
     "info_dialog": "Information",
     "citizen_detail": "Citoyen",
-    "citizen_tracking": "Liste de suivi",
+    "citizen_list": "Liste des citoyens",
     "scenario_sign": "Signature du scénario",
     "climate_settings": "Paramètres climatiques",
     "climate_effects": "Climat",
@@ -139,7 +139,7 @@
     "budgetMeterTooltip": "(Recettes récentes − paiements prévus de l'époque suivante) / recettes récentes",
     "scoreMeterLabel": "Score",
     "scoreMeterTooltip": "Score de gouvernance (par ménage, maximum 2,0)",
-    "menuCitizenTracking": "Liste de suivi"
+    "menuCitizenList": "Liste des citoyens"
   },
   "topmenu": {
     "minimize": "Réduire",

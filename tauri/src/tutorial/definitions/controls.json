@@ -85,7 +85,7 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.citizen_tracking"
+              "hud.citizen_list"
             ]
           },
           "world": {

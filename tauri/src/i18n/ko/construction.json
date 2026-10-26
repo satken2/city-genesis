@@ -122,7 +122,6 @@
     "directAcquisitionCost": "매수비 견적: {{cost}}",
     "acquisitionNoRequest": "확인할 매수 내용이 없습니다",
     "acquisitionConfirmDesc": "설치 위치가 민간 토지 구획 {{count}}건과 겹칩니다. 시정부가 자동으로 용지를 매수하고 기존 건물을 철거한 뒤 건설을 시작합니다(매수비 견적: {{cost}}).",
-    "acquisitionConfirmNote": "매수는 여러 에포크에 걸쳐 진행되며 용지 매수 예산에서 지불됩니다. 완료될 때까지 건물은 계획 상태로 대기합니다.",
     "acquisitionConfirmAction": "매수하고 건설",
     "copyExisting": "기존 건물 복사",
     "copySourceNotAllowed": "이 건물은 복사 건설의 원본으로 사용할 수 없습니다",

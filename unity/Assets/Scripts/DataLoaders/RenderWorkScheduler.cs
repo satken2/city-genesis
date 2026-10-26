@@ -435,6 +435,8 @@ internal static class BuildingStageProbe
 /// <summary>
 /// [Camera freeze investigation] Temporary profiler-marker breakdown of long frames. Remove the entire class after investigation.
 /// LastValue, unscaledDeltaTime, and LastFrameMs read in LateUpdate all describe the preceding frame.
+/// Records every time marker of every category, so internal work under a phase marker (such as deferred destruction) also appears.
+/// The output is a flat list without nesting; parents and their children both appear.
 /// </summary>
 internal static class FreezeProbe
 {
@@ -442,8 +444,6 @@ internal static class FreezeProbe
     private static readonly List<(string name, Unity.Profiling.ProfilerRecorder recorder)> recorders = new();
     private static readonly HashSet<string> recordedNames = new();
     private static readonly List<Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle> handles = new();
-    private static readonly string[] phasePrefixes = { "Initialization.", "EarlyUpdate.", "FixedUpdate.", "PreUpdate.", "Update.", "PreLateUpdate.", "PostLateUpdate." };
-    private static readonly HashSet<string> categories = new() { "Scripts", "Physics", "GC", "Loading" };
     private static int refreshedFrame = -100000, lastGcCount, lastWarningCount;
     private static bool subscribed;
     public static int WarningCount;
@@ -471,7 +471,7 @@ internal static class FreezeProbe
             top.Sort((a, b) => b.ms.CompareTo(a.ms));
             var message = new System.Text.StringBuilder();
             message.Append($"[カメラフリーズ調査] 長いフレーム {dt * 1000:F0}ms 共通予算の使用={RenderWorkScheduler.LastFrameMs:F0}ms GC={gc - lastGcCount}回 警告ログ={warnings - lastWarningCount}件 frame={Time.frameCount - 1}");
-            for (int i = 0; i < top.Count && i < 25; i++) message.Append($"\n  {top[i].name}={top[i].ms:F1}ms");
+            foreach (var (name, ms) in top) message.Append($"\n  {name}={ms:F1}ms");
             UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message.ToString());
         }
         lastGcCount = gc;
@@ -488,11 +488,7 @@ internal static class FreezeProbe
             var description = Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle.GetDescription(handle);
             if (description.UnitType != Unity.Profiling.ProfilerMarkerDataUnit.TimeNanoseconds) continue;
             string name = description.Name;
-            if (string.IsNullOrEmpty(name) || recordedNames.Contains(name)) continue;
-            bool wanted = name == "PlayerLoop" || name == "EditorLoop" || categories.Contains(description.Category.Name);
-            foreach (var prefix in phasePrefixes) wanted |= name.StartsWith(prefix, StringComparison.Ordinal);
-            if (!wanted) continue;
-            recordedNames.Add(name);
+            if (string.IsNullOrEmpty(name) || !recordedNames.Add(name)) continue;
             recorders.Add((name, new Unity.Profiling.ProfilerRecorder(handle, 1,
                 Unity.Profiling.ProfilerRecorderOptions.Default | Unity.Profiling.ProfilerRecorderOptions.StartImmediately)));
         }

@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "시민 검색",
+    "tabTracking": "추적 목록",
+    "name": "이름",
+    "age": "나이",
+    "ageSeparator": "~",
+    "search": "검색",
+    "noResults": "조건에 맞는 시민이 없습니다.",
+    "truncated": "조건에 맞는 시민 {{total, number}}명 중 {{shown, number}}명을 표시합니다."
+  }
+}

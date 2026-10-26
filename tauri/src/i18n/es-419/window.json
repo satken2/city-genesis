@@ -48,7 +48,7 @@
     "scenario_metadata": "Información",
     "info_dialog": "Aviso",
     "citizen_detail": "Ciudadano",
-    "citizen_tracking": "Lista de seguimiento",
+    "citizen_list": "Lista de ciudadanos",
     "scenario_sign": "Firma de escenarios",
     "climate_settings": "Configuración del clima",
     "climate_effects": "Clima",
@@ -139,7 +139,7 @@
     "budgetMeterTooltip": "(Ingresos recientes − pagos previstos de la próxima época) / ingresos recientes",
     "scoreMeterLabel": "Puntaje",
     "scoreMeterTooltip": "Puntaje de gestión (por hogar, máximo 2.0)",
-    "menuCitizenTracking": "Lista de seguimiento"
+    "menuCitizenList": "Lista de ciudadanos"
   },
   "topmenu": {
     "minimize": "Minimizar",

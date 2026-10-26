@@ -1,0 +1,84 @@
+/* Keep the tabs and search form in place and scroll only the citizen rows. */
+.citizen-list-window {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.citizen-list-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.citizen-list-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--flat-text-label);
+}
+
+.citizen-list-field input {
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  background: var(--flat-sunken);
+  color: var(--flat-text);
+  font: inherit;
+}
+
+.citizen-list-name-input {
+  width: 14rem;
+}
+
+.citizen-list-age-input {
+  width: 4.5rem;
+  text-align: right;
+}
+
+.citizen-list-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* One citizen per line: name, age, district, workplace (school), then the camera and tracking buttons. */
+.citizen-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.citizen-list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) 6rem minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Row for the citizen currently followed by the camera */
+.citizen-list-row--following {
+  border-color: rgba(255, 170, 80, 0.5);
+}
+
+.citizen-list-cell {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.citizen-list-meta {
+  color: #9fb3c8;
+}

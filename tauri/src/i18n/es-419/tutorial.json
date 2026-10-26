@@ -14,7 +14,7 @@
       "step2": {
         "title": "Conoce la ciudad desde el panel de mando",
         "tools": "El panel de mando, abajo en la pantalla, te ayuda a evaluar la ciudad y decidir qué hacer. «Visualización» usa colores para localizar carencias y problemas. «Mapa» muestra dónde están los lugares de la ciudad y te ayuda a orientarte a medida que crece.",
-        "tracking": "«Lista de seguimiento» guarda habitantes que quieres volver a consultar. Añade a alguien desde sus detalles y usa este botón para revisar su información y sus desplazamientos. Conoce la vida individual detrás de las cifras de la ciudad.",
+        "tracking": "«Lista de ciudadanos» te permite buscar habitantes por nombre y guarda los que quieres volver a consultar. Añade a alguien desde sus detalles y usa este botón para revisar su información y sus desplazamientos. Conoce la vida individual detrás de las cifras de la ciudad.",
         "bulldozer": "«Bulldozer» elimina parcelas vacías y cancela edificios y caminos planeados. Pulsa el botón y luego un objetivo en la vista 3D; vuelve a pulsarlo para salir. Para retirar un edificio o camino terminado, abre sus detalles y elige la demolición.",
         "services": "Los medidores del rayo y la gota muestran el margen disponible en electricidad y agua. Cuanto más se llenan, más se acerca la demanda a la capacidad. Púlsalos para revisar las instalaciones públicas y ver si necesitas aumentar el suministro antes de ampliar la ciudad.",
         "score": "«Puntaje» resume qué tan satisfechos están los habitantes con la vida en tu ciudad. Cuanto más alto, mejor. Viviendas, empleos, atención médica y un entorno agradable ayudan a mejorarlo. Si baja, busca las dificultades de los habitantes.",

@@ -14,7 +14,7 @@
       "step2": {
         "title": "Read the city from the cockpit",
         "tools": "The cockpit at the bottom of the screen helps you check the city and decide what to do next. “View” uses colors to help find shortages and problem areas. “Map” shows where places are across the city, helping you find your way as it grows.",
-        "tracking": "“Tracking list” keeps residents you want to revisit. Add someone to tracking from their citizen details, then use this button to return to their information and commutes. Explore individual lives behind the citywide figures.",
+        "tracking": "“Citizen list” lets you find residents by name and keeps residents you want to revisit. Add someone to tracking from their citizen details, then use this button to return to their information and commutes. Explore individual lives behind the citywide figures.",
         "bulldozer": "“Bulldozer” removes empty parcels and cancels planned buildings and roads. Press the button, then click a target in the 3D view; press it again to leave the mode. To remove a completed building or road, open its details and choose demolition.",
         "services": "The lightning and water-drop gauges show how much room your electricity and water supplies have to grow. As they fill, demand is approaching capacity. Click them to review public facilities, and check whether you need more supply before expanding the city.",
         "score": "“Score” summarizes how satisfied residents are with life in your city. Higher is better. Homes, jobs, healthcare and a pleasant living environment help improve it. If it falls, look for the difficulties residents are facing.",

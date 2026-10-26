@@ -1,6 +1,6 @@
 /**
- * Shared citizen tracking logic: destinations/routes, tracked list, and following state. Itinerary/list
- * responses are handwritten JSON outside endpoints.yaml, so define types here. Unity performs following and
+ * Shared citizen tracking logic: destinations/routes, citizen search, tracked list, and following state.
+ * Itinerary/list responses are handwritten JSON outside endpoints.yaml, so define types here. Unity performs following and
  * broadcasts start/end through `citizen:follow_state` to all windows.
  */
 
@@ -53,7 +53,8 @@ export type CitizenItinerary = {
   trips?: CitizenTrip[];
 };
 
-export type TrackedCitizen = {
+/** One row of the citizen list. Search results and the tracking list share this shape. */
+export type CitizenListRow = {
   id: number;
   name: string;
   age: number;
@@ -73,8 +74,28 @@ export async function fetchItinerary(apiBaseUrl: string, citizenId: number, sign
   return fetchApi<CitizenItinerary>(buildApiUrl(apiBaseUrl, `/api/v1/citizens/${citizenId}/itinerary`), { signal });
 }
 
-export async function fetchTrackedCitizens(apiBaseUrl: string, signal?: AbortSignal): Promise<TrackedCitizen[]> {
-  const response = await fetchApi<{ citizens: TrackedCitizen[] }>(buildApiUrl(apiBaseUrl, "/api/v1/citizens/tracked"), { signal });
+/** Search conditions. Empty name and null ages do not filter. */
+export type CitizenSearchQuery = {
+  name: string;
+  age_min: number | null;
+  age_max: number | null;
+};
+
+/** `total` counts every match; the core returns only the first ones in citizen ID order. */
+export type CitizenSearchResult = {
+  citizens: CitizenListRow[];
+  total: number;
+};
+
+export async function searchCitizens(apiBaseUrl: string, query: CitizenSearchQuery, signal?: AbortSignal): Promise<CitizenSearchResult> {
+  const params = new URLSearchParams({ name: query.name });
+  if (query.age_min !== null) params.set("age_min", String(query.age_min));
+  if (query.age_max !== null) params.set("age_max", String(query.age_max));
+  return fetchApi<CitizenSearchResult>(buildApiUrl(apiBaseUrl, `/api/v1/citizens/search?${params}`), { signal });
+}
+
+export async function fetchTrackedCitizens(apiBaseUrl: string, signal?: AbortSignal): Promise<CitizenListRow[]> {
+  const response = await fetchApi<{ citizens: CitizenListRow[] }>(buildApiUrl(apiBaseUrl, "/api/v1/citizens/tracked"), { signal });
   return response.citizens;
 }
 
@@ -82,7 +103,7 @@ export async function trackCitizen(apiBaseUrl: string, citizenId: number): Promi
   await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/citizens/tracked/${citizenId}`), { method: "PUT" });
 }
 
-export async function trackRandomCitizen(apiBaseUrl: string): Promise<{ citizen_id: number | null; citizens: TrackedCitizen[] }> {
+export async function trackRandomCitizen(apiBaseUrl: string): Promise<{ citizen_id: number | null; citizens: CitizenListRow[] }> {
   return fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/citizens/tracked/random"), { method: "POST" });
 }
 

@@ -122,7 +122,6 @@
     "directAcquisitionCost": "買収費見積: {{cost}}",
     "acquisitionNoRequest": "確認する買収内容がありません",
     "acquisitionConfirmDesc": "設置位置が民間の土地区画 {{count}} 件と重なっています。市政府が自動で用地を買収し、既存の建物を取り壊してから建設を開始します（買収費見積: {{cost}}）。",
-    "acquisitionConfirmNote": "買収は数エポックかけて進行し、用地買収予算から支払われます。完了までのあいだ建物は計画中のまま待機します。",
     "acquisitionConfirmAction": "買収して建設",
     "copyExisting": "既存建物をコピー",
     "copySourceNotAllowed": "この建物はコピー建設のコピー元にできません",

@@ -122,7 +122,6 @@
     "directAcquisitionCost": "Coût d'acquisition estimé : {{cost}}",
     "acquisitionNoRequest": "Aucune acquisition à confirmer",
     "acquisitionConfirmDesc": "L'emplacement chevauche {{count}} parcelle(s) privée(s). La municipalité acquerra automatiquement les terrains et démolira les bâtiments existants avant de commencer la construction (coût d'acquisition estimé : {{cost}}).",
-    "acquisitionConfirmNote": "L'acquisition se déroule sur plusieurs époques et est financée par le budget d'acquisition foncière. Le bâtiment reste planifié jusqu'à son achèvement.",
     "acquisitionConfirmAction": "Acquérir et construire",
     "copyExisting": "Copier un bâtiment existant",
     "copySourceNotAllowed": "Ce bâtiment ne peut pas servir de modèle à copier",

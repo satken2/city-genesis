@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Buscar ciudadanos",
+    "tabTracking": "Lista de seguimiento",
+    "name": "Nombre",
+    "age": "Edad",
+    "ageSeparator": "a",
+    "search": "Buscar",
+    "noResults": "Ningún ciudadano coincide.",
+    "truncated": "Se muestran {{shown, number}} de {{total, number}} ciudadanos que coinciden."
+  }
+}

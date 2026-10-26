@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Search citizens",
+    "tabTracking": "Tracking list",
+    "name": "Name",
+    "age": "Age",
+    "ageSeparator": "to",
+    "search": "Search",
+    "noResults": "No citizens match.",
+    "truncated": "Showing {{shown, number}} of {{total, number}} matching citizens."
+  }
+}

@@ -122,7 +122,6 @@
     "directAcquisitionCost": "Estimated acquisition cost: {{cost}}",
     "acquisitionNoRequest": "No acquisition to confirm",
     "acquisitionConfirmDesc": "The placement overlaps {{count}} privately owned parcel(s). The city government will automatically acquire the land and demolish the existing buildings before construction begins (estimated acquisition cost: {{cost}}).",
-    "acquisitionConfirmNote": "Acquisition progresses over several epochs and is paid from the land purchase budget. The building remains planned until it completes.",
     "acquisitionConfirmAction": "Acquire and build",
     "copyExisting": "Copy an existing building",
     "copySourceNotAllowed": "This building cannot be used as a copy source",

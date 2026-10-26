@@ -48,7 +48,7 @@
     "scenario_metadata": "소개 정보",
     "info_dialog": "안내",
     "citizen_detail": "시민",
-    "citizen_tracking": "추적 목록",
+    "citizen_list": "시민 목록",
     "scenario_sign": "시나리오 서명",
     "climate_settings": "기후 설정",
     "climate_effects": "기후",
@@ -139,7 +139,7 @@
     "budgetMeterTooltip": "(최근 수입 − 다음 에포크 지급 전망) / 최근 수입",
     "scoreMeterLabel": "점수",
     "scoreMeterTooltip": "시정 점수(1가구당 / 만점 2.0)",
-    "menuCitizenTracking": "추적 목록"
+    "menuCitizenList": "시민 목록"
   },
   "topmenu": {
     "minimize": "최소화",

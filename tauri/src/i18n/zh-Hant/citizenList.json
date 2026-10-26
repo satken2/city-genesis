@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "搜尋市民",
+    "tabTracking": "追蹤清單",
+    "name": "姓名",
+    "age": "年齡",
+    "ageSeparator": "～",
+    "search": "搜尋",
+    "noResults": "沒有符合條件的市民。",
+    "truncated": "在符合條件的 {{total, number}} 名市民中顯示 {{shown, number}} 名。"
+  }
+}

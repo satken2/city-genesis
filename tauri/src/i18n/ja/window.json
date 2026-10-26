@@ -48,7 +48,7 @@
     "scenario_metadata": "紹介情報",
     "info_dialog": "お知らせ",
     "citizen_detail": "市民",
-    "citizen_tracking": "追跡リスト",
+    "citizen_list": "市民リスト",
     "scenario_sign": "シナリオの署名",
     "climate_settings": "気候設定",
     "climate_effects": "気候",
@@ -139,7 +139,7 @@
     "budgetMeterTooltip": "(直近の収入 − 次エポック支払見込み) / 直近の収入",
     "scoreMeterLabel": "スコア",
     "scoreMeterTooltip": "施政スコア（1世帯あたり / 満点2.0）",
-    "menuCitizenTracking": "追跡リスト"
+    "menuCitizenList": "市民リスト"
   },
   "topmenu": {
     "minimize": "最小化",

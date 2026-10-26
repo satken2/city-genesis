@@ -18,7 +18,7 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
-import citizenTrackingIcon from "../../assets/images/menu/citizen-tracking.svg";
+import citizenListIcon from "../../assets/images/menu/citizen-tracking.svg";
 
 /** Resolve a menu icon image URL (relative to the page location in the browser version). */
 export function iconUrl(filename: string): string {
@@ -79,7 +79,7 @@ export const MENU_ICONS: HudIconDef[] = [
 export const TOOL_ICONS: HudIconDef[] = [
   { id: "visibility", src: iconUrl("visibility.png"), tooltipKey: "taskbar.menuView", padding: "4px", windowType: "display_options" },
   { id: "map", src: iconUrl("map.png"), tooltipKey: "taskbar.menuMap", padding: "4px", windowType: "city_map" },
-  { id: "citizen_tracking", src: citizenTrackingIcon, tooltipKey: "taskbar.menuCitizenTracking", padding: "3px", windowType: "citizen_tracking" },
+  { id: "citizen_list", src: citizenListIcon, tooltipKey: "taskbar.menuCitizenList", padding: "3px", windowType: "citizen_list" },
   { id: "bulldozer", src: iconUrl("bulldozer.png"), tooltipKey: "taskbar.bulldozerOff", padding: "3px" },
 ];
 

@@ -142,7 +142,7 @@
   "building_direct_acquisition": {
     "title": "用地買収の確認",
     "width": 420,
-    "height": 280,
+    "height": 198,
     "resizable": false,
     "policy": "single",
     "actions": []
@@ -486,10 +486,10 @@
     "empty_shell": true,
     "actions": []
   },
-  "citizen_tracking": {
-    "title": "追跡リスト",
-    "width": 460,
-    "height": 520,
+  "citizen_list": {
+    "title": "市民リスト",
+    "width": 760,
+    "height": 640,
     "resizable": true,
     "policy": "single",
     "actions": []

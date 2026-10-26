@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "市民の検索",
+    "tabTracking": "追跡リスト",
+    "name": "名前",
+    "age": "年齢",
+    "ageSeparator": "〜",
+    "search": "検索",
+    "noResults": "条件に合う市民はいません。",
+    "truncated": "条件に合う{{total, number}}人のうち、{{shown, number}}人を表示しています。"
+  }
+}

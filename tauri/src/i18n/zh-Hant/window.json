@@ -48,7 +48,7 @@
     "scenario_metadata": "介紹資訊",
     "info_dialog": "提示",
     "citizen_detail": "市民",
-    "citizen_tracking": "追蹤清單",
+    "citizen_list": "市民清單",
     "scenario_sign": "場景簽署",
     "climate_settings": "氣候設定",
     "climate_effects": "氣候",
@@ -139,7 +139,7 @@
     "budgetMeterTooltip": "(近期收入 − 下一紀元預估支付) / 近期收入",
     "scoreMeterLabel": "評分",
     "scoreMeterTooltip": "施政評分（每戶，滿分2.0）",
-    "menuCitizenTracking": "追蹤清單"
+    "menuCitizenList": "市民清單"
   },
   "topmenu": {
     "minimize": "最小化",
