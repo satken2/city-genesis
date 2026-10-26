@@ -286,6 +286,9 @@ agents:
     prebuilt: false
     variants:
       - 0
+      - 250
+      - 500
+      - 750
   2007:
     model: true
     prebuilt: false
