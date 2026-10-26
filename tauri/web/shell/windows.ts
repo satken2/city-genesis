@@ -24,6 +24,7 @@ export const LABEL_ICON_PANEL = "icon-panel";
 export const LABEL_COCKPIT = "cockpit";
 export const LABEL_SYSTEM_TRAY = "system-tray";
 export const LABEL_DISPLAY_TRAY = "display-tray";
+export const LABEL_CITIZEN_VOICE = "citizen-voice";
 
 const HUD_MARGIN = 8;
 const ICON_PANEL_WIDTH = 58;
@@ -34,6 +35,7 @@ const SYSTEM_TRAY_WIDTH = 176;
 const SYSTEM_TRAY_HEIGHT = 40;
 const DISPLAY_TRAY_WIDTH = 228;
 const DISPLAY_TRAY_HEIGHT = 40;
+const CITIZEN_VOICE_EMPTY_SIZE = 1;
 const HUD_BOTTOM_RESERVED = COCKPIT_HEIGHT + HUD_MARGIN;
 const HUD_LEFT_RESERVED = ICON_PANEL_WIDTH + HUD_MARGIN;
 
@@ -83,6 +85,7 @@ export const DESKTOP_HUD: HudWindowSpec[] = [
   { label: LABEL_COCKPIT, title: "Genesis Cockpit", width: COCKPIT_WIDTH, height: COCKPIT_HEIGHT },
   { label: LABEL_SYSTEM_TRAY, title: "Genesis System Tray", width: SYSTEM_TRAY_WIDTH, height: SYSTEM_TRAY_HEIGHT },
   { label: LABEL_DISPLAY_TRAY, title: "Genesis Display Tray", width: DISPLAY_TRAY_WIDTH, height: DISPLAY_TRAY_HEIGHT },
+  { label: LABEL_CITIZEN_VOICE, title: "Genesis Citizen Voice", width: CITIZEN_VOICE_EMPTY_SIZE, height: CITIZEN_VOICE_EMPTY_SIZE },
 ];
 
 let hudLabels: string[] = [];
@@ -112,6 +115,12 @@ function tutorialPlacement(): Placement {
 function hudRightBottomReserved(): number {
   const tray = host.rect(LABEL_SYSTEM_TRAY);
   return (tray && tray.height > 1 ? tray.height : SYSTEM_TRAY_HEIGHT) + HUD_MARGIN;
+}
+
+/** 右上の市民の声のカードが占める高さ(`hud_right_top_reserved`)。カードが無い間は0。 */
+function hudRightTopReserved(): number {
+  const card = host.rect(LABEL_CITIZEN_VOICE);
+  return card && card.height > CITIZEN_VOICE_EMPTY_SIZE ? card.height + HUD_MARGIN : 0;
 }
 
 function notificationPlacement(height: number): Placement {
@@ -166,13 +175,14 @@ export function relayoutForViewport(): void {
 }
 
 /**
- * HUD を定位置(左端中央・下部中央・右下・左下)へ置く。引数はReactが実測した寸法で、
+ * HUD を定位置(左端中央・下部中央・右下・左下・右上)へ置く。引数はReactが実測した寸法で、
  * null なら今の寸法のまま位置だけ取り直す。
  */
 export function layoutHudWindows(
   iconPanelHeight: number | null,
   systemTraySize: { width: number; height: number } | null,
   cockpitWidth: number | null = null,
+  citizenVoiceSize: { width: number; height: number } | null = null,
 ): void {
   const m = host.monitor();
   const iconPanel = host.rect(LABEL_ICON_PANEL);
@@ -215,6 +225,14 @@ export function layoutHudWindows(
       height: DISPLAY_TRAY_HEIGHT,
     });
   }
+  // 市民の声は 1×1 がカードの無い状態なので、ほかのパネルと違って今の寸法をそのまま使う。
+  const citizenVoice = host.rect(LABEL_CITIZEN_VOICE);
+  if (citizenVoice) {
+    const size = citizenVoiceSize ?? citizenVoice;
+    const width = clamp(size.width, CITIZEN_VOICE_EMPTY_SIZE, m.width - HUD_MARGIN * 2);
+    const height = clamp(size.height, CITIZEN_VOICE_EMPTY_SIZE, m.height - HUD_MARGIN * 2);
+    host.place(LABEL_CITIZEN_VOICE, { x: m.x + m.width - width - HUD_MARGIN, y: m.y + HUD_MARGIN, width, height });
+  }
 }
 
 export function setHudVisible(visible: boolean): void {
@@ -244,6 +262,10 @@ export function resizeCockpit(width: number): void {
   layoutHudWindows(null, null, width);
 }
 
+export function resizeCitizenVoice(width: number, height: number): void {
+  layoutHudWindows(null, null, null, { width, height });
+}
+
 function isDockedLayout(definition: WindowDefinition): boolean {
   return definition.layout !== "default";
 }
@@ -269,11 +291,13 @@ export function recordWindowGeometry(label: string, recordPosition: boolean): vo
 
 /**
  * ポップアップの配置を種別のレイアウトから計算する(`compute_window_geometry`)。
- * 表示先にHUDがあるので、ドック配置は常駐HUD(左のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を避ける。
+ * 表示先にHUDがあるので、ドック配置は常駐HUD(左のアイコンパネル・下部中央のコックピット・右下のシステムトレイ・
+ * 右上の市民の声)を避ける。
  */
 function computeWindowGeometry(definition: WindowDefinition, payload: OpenWindowPayload, saved: WindowGeometry | null): Placement {
   const m = host.monitor();
-  const [leftReserved, bottomReserved, rightBottomReserved] = [HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, hudRightBottomReserved()];
+  const [leftReserved, bottomReserved, rightTopReserved, rightBottomReserved] =
+    [HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, hudRightTopReserved(), hudRightBottomReserved()];
   const margin = HUD_MARGIN;
   switch (definition.layout) {
     case "left_panel":
@@ -291,9 +315,9 @@ function computeWindowGeometry(definition: WindowDefinition, payload: OpenWindow
       const width = saved?.width ?? Math.round(m.width * 0.2);
       return {
         x: m.x + m.width - width - margin,
-        y: m.y + margin,
+        y: m.y + rightTopReserved + margin,
         width,
-        height: saved?.height ?? m.height - rightBottomReserved - margin * 2,
+        height: saved?.height ?? m.height - rightTopReserved - rightBottomReserved - margin * 2,
       };
     }
     case "bottom_center": {
@@ -309,7 +333,7 @@ function computeWindowGeometry(definition: WindowDefinition, payload: OpenWindow
         height: saved?.height ?? definition.height,
       };
     case "right_top": {
-      const workHeight = Math.max(m.height - bottomReserved - margin * 2, 200);
+      const workHeight = Math.max(m.height - rightTopReserved - bottomReserved - margin * 2, 200);
       let defaultWidth = definition.width;
       let defaultHeight = definition.height;
       if (definition.width_ratio !== null && definition.width_ratio > 0) {
@@ -320,7 +344,7 @@ function computeWindowGeometry(definition: WindowDefinition, payload: OpenWindow
             : Math.min(defaultWidth, workHeight);
       }
       const width = saved?.width ?? defaultWidth;
-      return { x: m.x + m.width - width - margin, y: m.y + margin, width, height: saved?.height ?? defaultHeight };
+      return { x: m.x + m.width - width - margin, y: m.y + rightTopReserved + margin, width, height: saved?.height ?? defaultHeight };
     }
     default: {
       if (saved) return { x: saved.x, y: saved.y, width: saved.width, height: saved.height };

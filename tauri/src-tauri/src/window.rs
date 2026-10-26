@@ -17,11 +17,13 @@ pub const LABEL_ICON_PANEL: &str = "icon-panel";
 pub const LABEL_COCKPIT: &str = "cockpit";
 pub const LABEL_SYSTEM_TRAY: &str = "system-tray";
 pub const LABEL_DISPLAY_TRAY: &str = "display-tray";
-pub const HUD_WINDOW_LABELS: [&str; 4] = [
+pub const LABEL_CITIZEN_VOICE: &str = "citizen-voice";
+pub const HUD_WINDOW_LABELS: [&str; 5] = [
     LABEL_ICON_PANEL,
     LABEL_COCKPIT,
     LABEL_SYSTEM_TRAY,
     LABEL_DISPLAY_TRAY,
+    LABEL_CITIZEN_VOICE,
 ];
 
 /// Spacing between HUD panels, screen edges, and other windows.
@@ -52,6 +54,10 @@ pub const SYSTEM_TRAY_HEIGHT: f64 = 40.0;
 /// buttons; too wide creates transparent areas that intercept Unity input.
 pub const DISPLAY_TRAY_WIDTH: f64 = 228.0;
 pub const DISPLAY_TRAY_HEIGHT: f64 = 40.0;
+
+/// Citizen voice card size before React reports it (top right). The window starts at 1×1 and stays there while
+/// there is no card, so an empty window never intercepts Unity clicks.
+pub const CITIZEN_VOICE_EMPTY_SIZE: f64 = 1.0;
 
 /// Height occupied by the bottom-center cockpit (from the screen bottom to its
 /// top). Shift centered popups and bottom-center panels upward by this amount.
@@ -165,6 +171,7 @@ struct PopupTarget {
     monitor: Option<Monitor>,
     /// Whether the destination monitor contains the HUD. If so, avoid HUD-occupied areas.
     has_hud: bool,
+    right_top_reserved: f64,
     right_bottom_reserved: f64,
 }
 
@@ -174,6 +181,7 @@ fn popup_target(app: &AppHandle, state: &SharedState) -> PopupTarget {
     PopupTarget {
         monitor: monitors.into_iter().nth(index),
         has_hud,
+        right_top_reserved: hud_right_top_reserved(app),
         right_bottom_reserved: hud_right_bottom_reserved(app),
     }
 }
@@ -206,6 +214,7 @@ fn hud_window_spec(label: &str) -> (&'static str, f64, f64) {
         LABEL_ICON_PANEL => ("Genesis Icon Panel", ICON_PANEL_WIDTH, ICON_PANEL_DEFAULT_HEIGHT),
         LABEL_COCKPIT => ("Genesis Cockpit", COCKPIT_WIDTH, COCKPIT_HEIGHT),
         LABEL_DISPLAY_TRAY => ("Genesis Display Tray", DISPLAY_TRAY_WIDTH, DISPLAY_TRAY_HEIGHT),
+        LABEL_CITIZEN_VOICE => ("Genesis Citizen Voice", CITIZEN_VOICE_EMPTY_SIZE, CITIZEN_VOICE_EMPTY_SIZE),
         _ => ("Genesis System Tray", SYSTEM_TRAY_WIDTH, SYSTEM_TRAY_HEIGHT),
     }
 }
@@ -232,14 +241,15 @@ pub fn create_hud_windows(
             .build()
             .map_err(|e| format!("failed to create {label} window: {e}"))?;
     }
-    layout_hud_windows(app, monitors, monitor_index, None, None, None);
+    layout_hud_windows(app, monitors, monitor_index, None, None, None, None);
     Ok(())
 }
 
-/// Place HUD windows at fixed positions on the target monitor (left center, bottom center, bottom right, bottom left).
+/// Place HUD windows at fixed positions on the target monitor (left center, bottom center, bottom right, bottom left,
+/// top right).
 ///
-/// `icon_panel_height` explicitly sets icon panel height, `system_tray_size` the system tray size, and
-/// `cockpit_width` the cockpit width. None preserves current
+/// `icon_panel_height` explicitly sets icon panel height, `system_tray_size` the system tray size,
+/// `cockpit_width` the cockpit width, and `citizen_voice_size` the citizen voice card size. None preserves current
 /// dimensions (already measured and reported by React) and only recalculates position.
 pub fn layout_hud_windows(
     app: &AppHandle,
@@ -248,6 +258,7 @@ pub fn layout_hud_windows(
     icon_panel_height: Option<f64>,
     system_tray_size: Option<LogicalSize<f64>>,
     cockpit_width: Option<f64>,
+    citizen_voice_size: Option<LogicalSize<f64>>,
 ) {
     let Some(monitor) = monitors.get(monitor_index) else {
         return;
@@ -329,6 +340,16 @@ pub fn layout_hud_windows(
             m_pos.y + m_size.height - DISPLAY_TRAY_HEIGHT - HUD_MARGIN,
         );
     }
+
+    // Citizen voice: top right. Unlike the other panels, keep a 1×1 current size, since that is the empty state.
+    if let Some(win) = app.get_webview_window(LABEL_CITIZEN_VOICE) {
+        let current = current_size(&win)
+            .unwrap_or(LogicalSize::new(CITIZEN_VOICE_EMPTY_SIZE, CITIZEN_VOICE_EMPTY_SIZE));
+        let size = citizen_voice_size.unwrap_or(current);
+        let width = size.width.clamp(CITIZEN_VOICE_EMPTY_SIZE, m_size.width - HUD_MARGIN * 2.0);
+        let height = size.height.clamp(CITIZEN_VOICE_EMPTY_SIZE, m_size.height - HUD_MARGIN * 2.0);
+        place(&win, width, height, m_pos.x + m_size.width - width - HUD_MARGIN, m_pos.y + HUD_MARGIN);
+    }
 }
 
 /// Show or hide all HUD windows together, following
@@ -346,7 +367,7 @@ pub fn set_hud_visible(app: &AppHandle, visible: bool) {
     }
 }
 
-/// Reassert topmost for all visible Tauri windows (three HUD panels, hint bar, popups, etc.).
+/// Reassert topmost for all visible Tauri windows (HUD panels, hint bar, popups, etc.).
 ///
 /// Setting topmost once at creation is insufficient: when
 /// Unity enters the foreground as fullscreen (borderless
@@ -458,7 +479,7 @@ pub fn resize_icon_panel(app: &AppHandle, state: &SharedState, height: f64) {
         .unwrap_or_default()
         .into_iter()
         .collect();
-    layout_hud_windows(app, &monitors, monitor_index, Some(height), None, None);
+    layout_hud_windows(app, &monitors, monitor_index, Some(height), None, None, None);
 }
 
 /// Height occupied by the bottom-right system tray; right side panels and notifications avoid this area.
@@ -486,14 +507,33 @@ pub fn resize_system_tray(app: &AppHandle, state: &SharedState, width: f64, heig
         .unwrap_or_default()
         .into_iter()
         .collect();
-    layout_hud_windows(app, &monitors, monitor_index, None, Some(LogicalSize::new(width, height)), None);
+    layout_hud_windows(app, &monitors, monitor_index, None, Some(LogicalSize::new(width, height)), None, None);
 }
 
 /// Fit cockpit width to measured content and realign at the bottom center.
 pub fn resize_cockpit(app: &AppHandle, state: &SharedState, width: f64) {
     let monitor_index = state.lock().current_monitor_index;
     let monitors = app.available_monitors().unwrap_or_default();
-    layout_hud_windows(app, &monitors, monitor_index, None, None, Some(width));
+    layout_hud_windows(app, &monitors, monitor_index, None, None, Some(width), None);
+}
+
+/// Fit the citizen voice window to the measured card (0 while there is no card) and realign at the top right.
+pub fn resize_citizen_voice(app: &AppHandle, state: &SharedState, width: f64, height: f64) {
+    let monitor_index = state.lock().current_monitor_index;
+    let monitors = app.available_monitors().unwrap_or_default();
+    layout_hud_windows(app, &monitors, monitor_index, None, None, None, Some(LogicalSize::new(width, height)));
+}
+
+/// Height occupied by the top-right citizen voice card; right side panels start below it. Zero while there is no card.
+pub fn hud_right_top_reserved(app: &AppHandle) -> f64 {
+    app.get_webview_window(LABEL_CITIZEN_VOICE)
+        .and_then(|win| {
+            let scale = win.scale_factor().ok()?;
+            Some(win.inner_size().ok()?.to_logical::<f64>(scale).height)
+        })
+        // The empty 1×1 window can read back as up to about 1.3 logical px after rounding to physical pixels.
+        .filter(|h| *h > 2.0 * CITIZEN_VOICE_EMPTY_SIZE)
+        .map_or(0.0, |h| h + HUD_MARGIN)
 }
 
 /// Whether the layout is docked to a screen edge. Docked windows
@@ -567,8 +607,9 @@ pub fn record_window_geometry(app: &AppHandle, state: &SharedState, label: &str,
 /// changes. Centralized layout calculation applies identical positions/sizes on every path.
 ///
 /// When the destination monitor contains the HUD, docked layouts avoid persistent HUD areas (left icon
-/// panel, bottom-center cockpit, bottom-right system tray). Shift left docks by `HUD_LEFT_RESERVED` and
-/// subtract reserved bottom height. In multi-display mode on a monitor without HUD, use the full screen edges.
+/// panel, bottom-center cockpit, bottom-right system tray, top-right citizen voice). Shift left docks by
+/// `HUD_LEFT_RESERVED`, start right docks below the citizen voice, and subtract reserved bottom height. In
+/// multi-display mode on a monitor without HUD, use the full screen edges.
 ///
 /// Docked layouts (LeftPanel/RightPanel/BottomCenter/LeftTop/RightTop)
 ///   derive position from monitor data; saved_geometry overrides size only.
@@ -584,10 +625,10 @@ fn compute_window_geometry(
     target: &PopupTarget,
 ) -> Placement {
     let monitor = target.monitor.as_ref();
-    let (left_reserved, bottom_reserved, right_bottom_reserved) = if target.has_hud {
-        (HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, target.right_bottom_reserved)
+    let (left_reserved, bottom_reserved, right_top_reserved, right_bottom_reserved) = if target.has_hud {
+        (HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, target.right_top_reserved, target.right_bottom_reserved)
     } else {
-        (0.0, 0.0, 0.0)
+        (0.0, 0.0, 0.0, 0.0)
     };
 
     if definition.layout == WindowLayout::LeftPanel
@@ -633,7 +674,7 @@ fn compute_window_geometry(
 
             let margin = HUD_MARGIN;
             let computed_width = (m_size.width * 0.20).round();
-            let computed_height = m_size.height - right_bottom_reserved - margin * 2.0;
+            let computed_height = m_size.height - right_top_reserved - right_bottom_reserved - margin * 2.0;
 
             // Prefer remembered size when available. Right-edge placement depends on width.
             let panel_width = saved_geometry.map(|g| g.width).unwrap_or(computed_width);
@@ -644,7 +685,7 @@ fn compute_window_geometry(
                 LogicalSize::new(panel_width, panel_height),
                 LogicalPosition::new(
                     m_pos.x + m_size.width - panel_width - margin,
-                    m_pos.y + margin,
+                    m_pos.y + right_top_reserved + margin,
                 ),
             );
         }
@@ -703,7 +744,7 @@ fn compute_window_geometry(
             let margin = HUD_MARGIN;
             // Default size: use width_ratio of monitor width if specified; without height_ratio, make a
             // square (clamped to work area height excluding the cockpit). Without ratios, use registry dimensions.
-            let work_h = (m_size.height - bottom_reserved - margin * 2.0).max(200.0);
+            let work_h = (m_size.height - right_top_reserved - bottom_reserved - margin * 2.0).max(200.0);
             let (default_w, default_h) = match definition.width_ratio {
                 Some(rw) if rw > 0.0 => {
                     let w = (m_size.width * rw).round();
@@ -721,7 +762,7 @@ fn compute_window_geometry(
             return Placement::on_monitor(
                 Some(monitor),
                 LogicalSize::new(w, h),
-                LogicalPosition::new(m_pos.x + m_size.width - w - margin, m_pos.y + margin),
+                LogicalPosition::new(m_pos.x + m_size.width - w - margin, m_pos.y + right_top_reserved + margin),
             );
         }
     } else {

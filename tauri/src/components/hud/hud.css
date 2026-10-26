@@ -1,5 +1,5 @@
 /**
- * Shared HUD styles (icon panel, cockpit, system tray, display tray)
+ * Shared HUD styles (icon panel, cockpit, system tray, display tray, citizen voice)
  *
  * Each window exactly covers its panel, so panels fill the window. Rounded corners and borders visually lift
  * them above Unity's 3D view.

@@ -1,0 +1,101 @@
+/**
+ * Citizen voice styles (top right)
+ *
+ * The window follows the measured panel, so the panel has a fixed width and content height. If the window is
+ * temporarily wider, align right so transparent space stays on the left, as with the system tray.
+ */
+
+.citizen-voice {
+  position: relative;
+  width: 30rem;
+  margin-left: auto;
+  padding: 0.6rem;
+  overflow: hidden;
+}
+
+.citizen-voice-card {
+  display: flex;
+  gap: 0.7rem;
+  width: 100%;
+  animation: citizen-voice-in 0.45s ease-out;
+}
+
+/* The outgoing card overlays the incoming one, so it does not change the measured height. */
+.citizen-voice-card--leaving {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  width: calc(100% - 1.2rem);
+  animation: citizen-voice-out 0.45s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes citizen-voice-in {
+  from {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes citizen-voice-out {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+}
+
+.citizen-voice-face {
+  flex: none;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.citizen-voice-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.citizen-voice-name {
+  overflow: hidden;
+  color: var(--flat-text);
+  font-size: 1.15rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.citizen-voice-meta {
+  color: var(--flat-text-label);
+  font-size: 0.85rem;
+}
+
+/* Reserve three lines so the card height, and with it the window, stays the same for most remarks. */
+.citizen-voice-message {
+  min-height: calc(3 * 1.4em);
+  margin: 0.25rem 0 0;
+  color: var(--flat-text-body);
+  line-height: 1.4;
+}
+
+.citizen-voice-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.citizen-voice-action {
+  width: 30px;
+  height: 30px;
+}

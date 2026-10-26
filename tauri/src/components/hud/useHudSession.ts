@@ -1,5 +1,5 @@
 /**
- * Session state shared by HUD windows (icon panel, cockpit, system tray, display tray)
+ * Session state shared by HUD windows (icon panel, cockpit, system tray, display tray, citizen voice)
  *
  * Receive `session-state`, broadcast to all windows by Rust's session polling thread, and return visibility and
  * basic city information.

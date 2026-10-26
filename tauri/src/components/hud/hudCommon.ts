@@ -1,7 +1,7 @@
 /**
  * Shared HUD definitions (persistent gameplay control panels)
  *
- * The HUD uses four Tauri windows. Transparent areas in a window over Unity still intercept clicks, so each
+ * The HUD uses five Tauri windows. Transparent areas in a window over Unity still intercept clicks, so each
  * window covers only its actual panel.
  *
  * | Window label | Component | Position | Content |
@@ -10,6 +10,7 @@
  * | `cockpit` | `Cockpit` | Bottom center | Tracking list, three common tools, city name/date, governance score/budget meters, alerts, epoch execution |
  * | `system-tray` | `SystemTray` | Bottom right | System statistics, settings, save, reload |
  * | `display-tray` | `DisplayTray` | Bottom left | Quick layer toggles (buildings, paths, props, parcels, terrain, districts) |
+ * | `citizen-voice` | `CitizenVoice` | Top right | Sliding cards of citizens' remarks with action buttons |
  *
  * Cockpit/system tray icons sit directly on the panel, so individual padding fields compensate for image size
  * differences.

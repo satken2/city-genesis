@@ -31,6 +31,7 @@ import {
   openTipsWindow,
   openWindow,
   resetWindowGeometries,
+  resizeCitizenVoice,
   resizeCockpit,
   resizeIconPanel,
   resizeNotificationWindow,
@@ -97,6 +98,7 @@ const commands: Record<string, Command> = {
   resize_icon_panel: (_caller, args) => resizeIconPanel(Number(args.height)),
   resize_system_tray: (_caller, args) => resizeSystemTray(Number(args.width), Number(args.height)),
   resize_cockpit: (_caller, args) => resizeCockpit(Number(args.width)),
+  resize_citizen_voice: (_caller, args) => resizeCitizenVoice(Number(args.width), Number(args.height)),
   get_topmenu_state: () => ({ apiBaseUrl: state.apiBaseUrl }),
   switch_monitor: () => ({ monitorIndex: 0 }), // モニターは表示領域1枚なので、モニター1台の exe と同じ結果になる
   set_multi_display: (_caller, args) => {

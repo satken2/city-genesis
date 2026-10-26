@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for host, HUD (icon panel / cockpit / system tray / display tray), popup and notification windows",
-  "windows": ["main", "icon-panel", "cockpit", "system-tray", "display-tray", "topmenu", "loading", "popup-*", "hintbar", "notification", "parameter-setup", "tutorial", "tips"],
+  "windows": ["main", "icon-panel", "cockpit", "system-tray", "display-tray", "citizen-voice", "topmenu", "loading", "popup-*", "hintbar", "notification", "parameter-setup", "tutorial", "tips"],
   "permissions": [
     "core:default",
     "core:window:allow-start-dragging",

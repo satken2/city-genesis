@@ -87,6 +87,7 @@ import { showUnlockedAchievements, type UnlockedAchievement } from "./utils/achi
 import { IconPanel } from "./components/hud/IconPanel";
 import { Cockpit } from "./components/hud/Cockpit";
 import { SystemTray } from "./components/hud/SystemTray";
+import { CitizenVoice } from "./components/hud/CitizenVoice";
 import { DisplayTray } from "./components/hud/DisplayTray";
 import { TopMenu } from "./components/topmenu/TopMenu";
 import { extraWindow } from "./extraWindows";
@@ -113,7 +114,7 @@ function App() {
   const [backendConnected, setConnection] = useState(true);
   const [queryState, setQueryState] = useState<QueryState>({ status: "idle" });
   const [actionState, setActionState] = useState<string>("");
-  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "extra" | "topmenu" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
+  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "citizen-voice" | "extra" | "topmenu" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
 
   useEffect(() => {
     let disposed = false;
@@ -138,6 +139,8 @@ function App() {
         setWindowKind("system-tray");
       } else if (label === "display-tray") {
         setWindowKind("display-tray");
+      } else if (label === "citizen-voice") {
+        setWindowKind("citizen-voice");
       } else if (label === "topmenu") {
         setWindowKind("topmenu");
 
@@ -166,7 +169,7 @@ function App() {
       // Windows outside window-registry popups (HUD panels, top menu, notifications, Tips, hint bar, tutorial,
       // initial setup, and entry-point-registered windows) are created directly by the shell and have no context.
       const contextlessLabels = [
-        "main", "icon-panel", "cockpit", "system-tray", "display-tray", "topmenu",
+        "main", "icon-panel", "cockpit", "system-tray", "display-tray", "citizen-voice", "topmenu",
         "notification", "tips", "hintbar", "tutorial", "parameter-setup",
       ];
       if (!contextlessLabels.includes(label) && !extraWindow(label)) {
@@ -344,6 +347,8 @@ function App() {
         <SystemTray backendConnected={backendConnected} />
       ) : windowKind === "display-tray" ? (
         <DisplayTray />
+      ) : windowKind === "citizen-voice" ? (
+        <CitizenVoice />
       ) : windowKind === "extra" && ExtraWindow ? (
         <ExtraWindow apiBaseUrl={apiBaseUrl} />
       ) : windowKind === "hintbar" ? (
