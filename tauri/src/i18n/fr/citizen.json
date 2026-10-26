@@ -1,16 +1,11 @@
 {
   "citizen": {
-    "basicInfo": "Informations générales",
-    "age": "Âge",
     "ageValue": "{{age}} ans",
-    "gender": "Sexe",
     "male": "Homme",
     "female": "Femme",
-    "maritalStatus": "Situation matrimoniale",
     "single": "Célibataire",
     "married": "Marié(e)",
     "household": "Ménage",
-    "workEducation": "Travail et études",
     "employer": "Employeur",
     "unemployed": "Sans emploi",
     "school": "Établissement scolaire",
@@ -20,11 +15,15 @@
     "graduated": "Achevées",
     "notGraduated": "Non achevées",
     "skills": "Compétences",
-    "publicSafety": "Sécurité",
     "criminality": "Propension à la délinquance",
-    "commuteTime": "Temps de trajet"
+    "commuteTime": "Temps de trajet",
+    "automobile": "Automobile",
+    "automobileOwned": "Oui",
+    "automobileNone": "Non",
+    "householdStatus": "Situation du ménage"
   },
   "household": {
+    "title": "Ménage",
     "familyType": "Type de ménage",
     "familySingle": "Personne seule",
     "familyCouple": "Couple",
@@ -33,6 +32,13 @@
     "hasAutomobile": "Avec automobile",
     "noAutomobile": "Sans automobile",
     "discretionaryIncome": "Revenu disponible",
+    "livingStandard": "Niveau de vie",
+    "livingStandardLevel": {
+      "0": "Démuni",
+      "1": "Pauvre",
+      "2": "Classe moyenne",
+      "3": "Aisé"
+    },
     "satisNutrition": "Couverture alimentaire",
     "satisHealthcare": "Couverture sanitaire",
     "satisLeisure": "Loisirs",

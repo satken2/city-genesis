@@ -132,6 +132,8 @@ export type AgentData = {
   env_score?: number;
   qol_score?: number;
   has_automobile?: boolean;
+  /** Household's highest ordered product tier (0 = nothing ordered, 1–3 = DEMAND_TIER*), shown as standard of living. */
+  demand_tier?: number;
   education_type?: Record<string, number>;
   /**
    * Enrolled students by skill (skill ID → count), for education facilities (TYPE_EDUCATION) only. Manually

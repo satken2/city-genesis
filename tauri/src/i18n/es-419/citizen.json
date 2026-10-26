@@ -1,16 +1,11 @@
 {
   "citizen": {
-    "basicInfo": "Información básica",
-    "age": "Edad",
     "ageValue": "{{age}} años",
-    "gender": "Sexo",
     "male": "Hombre",
     "female": "Mujer",
-    "maritalStatus": "Estado civil",
     "single": "Soltero(a)",
     "married": "Casado(a)",
     "household": "Hogar",
-    "workEducation": "Trabajo y educación",
     "employer": "Lugar de trabajo",
     "unemployed": "Sin empleo",
     "school": "Centro educativo",
@@ -20,11 +15,15 @@
     "graduated": "Concluida",
     "notGraduated": "No concluida",
     "skills": "Habilidades",
-    "publicSafety": "Seguridad",
     "criminality": "Tendencia delictiva",
-    "commuteTime": "Tiempo de traslado"
+    "commuteTime": "Tiempo de traslado",
+    "automobile": "Automóvil",
+    "automobileOwned": "Sí",
+    "automobileNone": "No",
+    "householdStatus": "Situación del hogar"
   },
   "household": {
+    "title": "Hogar",
     "familyType": "Tipo de hogar",
     "familySingle": "Unipersonal",
     "familyCouple": "Pareja",
@@ -33,6 +32,13 @@
     "hasAutomobile": "Con automóvil",
     "noAutomobile": "Sin automóvil",
     "discretionaryIncome": "Ingreso disponible",
+    "livingStandard": "Nivel de vida",
+    "livingStandardLevel": {
+      "0": "Indigente",
+      "1": "Pobre",
+      "2": "Clase media",
+      "3": "Acomodado"
+    },
     "satisNutrition": "Cobertura nutricional",
     "satisHealthcare": "Cobertura sanitaria",
     "satisLeisure": "Ocio",

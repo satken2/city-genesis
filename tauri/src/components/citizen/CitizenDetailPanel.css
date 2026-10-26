@@ -5,23 +5,56 @@
   padding: 0;
 }
 
+/*
+ * Speech bubble under the header, its tail pointing up at the portrait's center (half the 64px portrait minus half
+ * the tail's width). The top margin leaves room for the tail.
+ */
+.citizen-detail-voice {
+  position: relative;
+  margin: 10px 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--flat-text-body);
+  line-height: 1.4;
+}
+
+.citizen-detail-voice::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 24px;
+  border-style: solid;
+  border-width: 0 8px 10px;
+  border-color: transparent transparent rgba(255, 255, 255, 0.1);
+}
+
+/* Meters in the list stretch across the value column. */
+.citizen-detail .agent-detail-value .meter {
+  flex: 1;
+}
+
+/* Camera button at the right end of a link row, overlapping the row's padding so the row keeps the list's height. */
+.citizen-detail .agent-detail-value .camera-focus-btn {
+  margin: -0.25rem 0 -0.25rem auto;
+}
+
+/* Car ownership, with the same road or pedestrian icon as the household details. */
+.citizen-automobile {
+  gap: 6px;
+}
+
+.citizen-automobile-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 /* Skill radar chart, centered to fit the panel width. */
 .citizen-skill-chart {
   width: 100%;
   max-width: 360px;
   margin: 0 auto;
-}
-
-/* Criminal propensity row, showing the meter and value side by side. */
-.citizen-criminality {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.citizen-criminality-meter {
-  flex: 1;
-  min-width: 0;
 }
 
 /* Embedded map tall enough to show the whole route while keeping the destination list readable in the same tab. */

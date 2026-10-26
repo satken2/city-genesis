@@ -1,16 +1,11 @@
 {
   "citizen": {
-    "basicInfo": "基本信息",
-    "age": "年龄",
     "ageValue": "{{age}}岁",
-    "gender": "性别",
     "male": "男性",
     "female": "女性",
-    "maritalStatus": "婚姻状况",
     "single": "未婚",
     "married": "已婚",
     "household": "所属家庭",
-    "workEducation": "就业・教育",
     "employer": "工作单位",
     "unemployed": "无业",
     "school": "就读学校",
@@ -20,11 +15,15 @@
     "graduated": "已完成",
     "notGraduated": "未完成",
     "skills": "技能",
-    "publicSafety": "治安",
     "criminality": "犯罪倾向",
-    "commuteTime": "通勤时间"
+    "commuteTime": "通勤时间",
+    "automobile": "汽车",
+    "automobileOwned": "有",
+    "automobileNone": "无",
+    "householdStatus": "家庭状况"
   },
   "household": {
+    "title": "家庭信息",
     "familyType": "家庭类型",
     "familySingle": "单身",
     "familyCouple": "夫妻",
@@ -33,6 +32,13 @@
     "hasAutomobile": "拥有汽车",
     "noAutomobile": "没有汽车",
     "discretionaryIncome": "可支配收入",
+    "livingStandard": "生活水平",
+    "livingStandardLevel": {
+      "0": "赤贫",
+      "1": "贫困",
+      "2": "中产",
+      "3": "富裕"
+    },
     "satisNutrition": "营养满足度",
     "satisHealthcare": "医疗满足度",
     "satisLeisure": "娱乐与休闲",

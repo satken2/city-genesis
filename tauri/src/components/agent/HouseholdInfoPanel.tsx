@@ -1,14 +1,18 @@
 /**
  * Household information component
  *
- * Detail panel for TYPE_HOUSEHOLD agents. Shows household type, car ownership,
- * disposable income, satisfaction meters, and members.
+ * Household section for TYPE_HOUSEHOLD agents, shown below the basic information in the Basic tab.
+ * Shows household type, car ownership, disposable income, standard of living, satisfaction meters, and members.
  * Satisfaction values (satis_*) range from 0.0 to 1.0, visualized by Meter.
  * Members appear as CitizenLink entries intended to navigate to citizen details on click.
  *
+ * Standard of living is the household's demand_tier (the highest product tier it ordered: 0 nothing,
+ * 1 necessities only, 2 general goods, 3 luxury goods), shown as a word such as "Destitute" or "Affluent".
+ *
  * Tourist households (VARIANT_TOURIST) have no citizens; trip satisfaction depends on
  * entertainment/leisure and tourism experiences. Show "Tourist" instead of household type,
- * and show only the entertainment/leisure and tourism satisfaction meters.
+ * and show only the entertainment/leisure and tourism satisfaction meters. Their demand_tier follows the separate
+ * tourist demand, so standard of living is hidden.
  */
 
 import { useTranslation } from "react-i18next";
@@ -59,6 +63,7 @@ export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
 
   return (
     <section className="agent-detail-section household-info-section">
+      <h3 className="agent-detail-section-title">{t("household.title")}</h3>
       <div className="household-info-content">
         <div className="agent-detail-grid">
           <span className="agent-detail-label">
@@ -86,6 +91,17 @@ export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
               ? t("common.currency", { value: agent.discretionary_income })
               : "-"}
           </span>
+
+          {!isTourist && agent.demand_tier != null && (
+            <>
+              <span className="agent-detail-label">
+                {t("household.livingStandard")}
+              </span>
+              <span className="agent-detail-value">
+                {t(`household.livingStandardLevel.${agent.demand_tier}`)}
+              </span>
+            </>
+          )}
         </div>
 
         <div className="household-info-meters">

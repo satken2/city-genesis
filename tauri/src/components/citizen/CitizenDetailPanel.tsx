@@ -4,28 +4,35 @@
  * Dedicated panel for the window_type="citizen_detail" popup.
  * Opens when clicking a household member (CitizenLink) in the household details (HouseholdInfoPanel in
  * AgentDetailPanel), clicking a car or pedestrian in the paused 3D view (Unity selects a citizen and opens via
- * world:select_object), or opening from the tracking list.
+ * world:select_object), opening from the tracking list, or clicking a citizen voice card.
  *
- * Action buttons below the heading:
+ * The heading shows age, marital status, and gender above the name. Below it, a full-width speech bubble pointing at
+ * the portrait holds the citizen's voice (`citizenVoiceRemark.ts`). Opened from a voice card, the bubble repeats that
+ * card's remark (`params.extra.voice`), so both say the same words; otherwise a remark is composed from
+ * `/api/v1/citizens/{id}/voice`. Citizens who cannot speak in the citizen voice (such as children) have no bubble.
+ *
+ * Action buttons below the bubble:
  * - Camera: follow this citizen's car or pedestrian in Unity; press again to stop. State follows
  *   `citizen:follow_state`.
  * - Track: add to or remove from the tracking list, which persists in save data.
- * - The mayor's actions, shared with the citizen voice card (`citizenActions.ts`). Expelling closes the panel, since
- *   the citizen no longer exists.
+ * - The mayor's actions (`citizenActions.ts`). Expelling closes the panel, since the citizen no longer exists.
  *
- * The Basic tab uses fields from /api/v1/citizens/{id} (the single_citizen schema in endpoints.yaml).
- * - Basic information: age, gender, marital status, household.
- * - Employment and education: workplace, school, major skill, higher education completion.
+ * The Basic tab uses fields from /api/v1/citizens/{id} (the single_citizen schema in endpoints.yaml) and the
+ * household's satisfaction from /api/v1/agents/{household id}.
+ * - One list: household, workplace, commute time, school, major, higher education completion, and a criminal
+ *   propensity meter.
+ * - Household status: the household's car ownership, standard of living (demand_tier, worded as in the household
+ *   section of the agent detail), and meters for its nutrition, healthcare, and leisure satisfaction.
  * - Skills: radar chart of the six skill values.
- * - Public safety: criminal propensity.
  * The Activity tab contains a map of home, destinations, and outbound routes, with the destination list
  * (`CitizenActivityPanel`) below.
  *
  * Household, workplace, and school links open a separate agent detail window instead of navigating within this
- * panel (using open_registered_window, as in SearchWindow).
+ * panel (using open_registered_window, as in SearchWindow). The household and workplace also have a button moving
+ * the 3D camera to them.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
@@ -37,12 +44,14 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer,
 } from "recharts";
-import type { CitizenData, CitizenResponse } from "../../types";
+import type { AgentData, AgentResponse, CitizenData, CitizenResponse } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { MEMBER_MARRIED } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { InfoHeader } from "../common/InfoHeader";
-import { sendCitizenFollow, sendCitizenUnfollow, sendFocusGraphic } from "../../utils/ipc";
+import { CameraFocusButton } from "../common/CameraFocusButton";
+import { Meter, type MeterPolarity } from "../common/Meter";
+import { sendCameraFocus, sendCitizenFollow, sendCitizenUnfollow, sendFocusGraphic } from "../../utils/ipc";
 import {
   TRACKED_CITIZENS_CHANGED_EVENT,
   fetchItinerary,
@@ -54,8 +63,11 @@ import {
 } from "../../utils/citizenTracking";
 import { CitizenActivityPanel } from "./CitizenActivityPanel";
 import { CITIZEN_ACTIONS, runCitizenAction, type CitizenActionId } from "./citizenActions";
+import { composeRemark, remarkText, type Voice, type VoiceRemark } from "./citizenVoiceRemark";
 import { CameraIcon, TrackIcon } from "./CitizenTrackingIcons";
 import { citizenFaceUrl, citySkinTone } from "../../utils/citizenFace";
+import trafficPedestrian from "../../assets/images/traffics/traffic_pedestrian.png";
+import trafficRoad from "../../assets/images/traffics/traffic_road.png";
 import { useCityClimate } from "../../hooks/useCityClimate";
 import "../agent/AgentDetailPanel.css";
 import "../agent/AgentOperationPanel.css";
@@ -83,21 +95,25 @@ type CitizenDetailPanelProps = {
   apiBaseUrl: string;
   pathTemplate: string;
   initialEntityId: string;
+  /** Remark of the voice card the panel was opened from. */
+  initialVoice?: VoiceRemark;
 };
 
 /**
  * Clickable agent name link.
- * Opens a new detail window for the agent.
+ * Opens a new detail window for the agent. Supplying onFocusCamera adds the camera button at the right end.
  * Show a placeholder if there is no name or referenced agent (e.g. unemployed or not enrolled).
  */
 function AgentWindowLink({
   agentName,
   agentId,
   placeholder,
+  onFocusCamera,
 }: {
   agentName: string | null | undefined;
   agentId: number;
   placeholder: string;
+  onFocusCamera?: () => void;
 }) {
   if (!agentName) {
     return <span className="agent-detail-muted">{placeholder}</span>;
@@ -111,9 +127,12 @@ function AgentWindowLink({
   }
 
   return (
-    <button className="entity-link" onClick={handleClick} type="button">
-      {agentName}
-    </button>
+    <>
+      <button className="entity-link" onClick={handleClick} type="button">
+        {agentName}
+      </button>
+      {onFocusCamera && <CameraFocusButton onClick={onFocusCamera} />}
+    </>
   );
 }
 
@@ -121,12 +140,16 @@ export function CitizenDetailPanel({
   apiBaseUrl,
   pathTemplate,
   initialEntityId,
+  initialVoice,
 }: CitizenDetailPanelProps) {
   const { t, i18n } = useTranslation();
   const masterData = useMasterData();
   const [citizenData, setCitizenData] = useState<CitizenData | null>(null);
+  const [household, setHousehold] = useState<AgentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /** undefined while loading, null when the citizen has no voice. */
+  const [remark, setRemark] = useState<VoiceRemark | null | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<"basic" | "activity">("basic");
   const [itinerary, setItinerary] = useState<CitizenItinerary | null>(null);
   const [itineraryFailed, setItineraryFailed] = useState(false);
@@ -168,6 +191,26 @@ export function CitizenDetailPanel({
     void loadTracked(controller.signal);
     return () => controller.abort();
   }, [apiBaseUrl, citizenId, loadItinerary, loadTracked]);
+
+  useEffect(() => {
+    if (initialVoice) {
+      setRemark(initialVoice);
+      return;
+    }
+    if (!apiBaseUrl || !Number.isFinite(citizenId)) return;
+    const controller = new AbortController();
+    setRemark(undefined);
+    fetchApi<{ voice: Voice | null }>(buildApiUrl(apiBaseUrl, `/api/v1/citizens/${citizenId}/voice`), { signal: controller.signal })
+      .then(({ voice }) => {
+        if (!controller.signal.aborted) setRemark(voice && composeRemark(i18n, voice));
+      })
+      .catch((err: unknown) => {
+        if (controller.signal.aborted) return;
+        console.error("failed to load citizen voice", err);
+        setRemark(null);
+      });
+    return () => controller.abort();
+  }, [apiBaseUrl, citizenId, initialVoice, i18n]);
 
   // Follow tracking changes in other windows and epoch execution, which changes routes and shopping destinations.
   useEffect(() => {
@@ -212,15 +255,31 @@ export function CitizenDetailPanel({
     if (done && action === "expel") await invoke("close_current_window").catch(console.error);
   }
 
+  /** Agents have no geometry, so focus on their parcel (the containing building's parcel for tenants). */
+  async function focusAgent(agentId: number) {
+    const { economic_agent: agent } = await fetchApi<AgentResponse>(buildApiUrl(apiBaseUrl, `/api/v1/agents/${agentId}`));
+    const parcelId = agent.parcel_id ?? 0;
+    if (parcelId <= 0) return;
+    const parcel = await fetchApi<{ polygon: number[][] }>(buildApiUrl(apiBaseUrl, `/api/v1/parcels/${parcelId}`));
+    await sendCameraFocus(WINDOW_TYPE, parcel.polygon);
+  }
+
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
     setError(null);
 
     fetchApi<CitizenResponse>(url, { signal: controller.signal })
-      .then((response) => {
+      .then(async ({ citizen }) => {
+        const householdData = citizen.household_agent_id > 0
+          ? (await fetchApi<AgentResponse>(
+              buildApiUrl(apiBaseUrl, `/api/v1/agents/${citizen.household_agent_id}`),
+              { signal: controller.signal },
+            )).economic_agent
+          : null;
         if (!controller.signal.aborted) {
-          setCitizenData(response.citizen);
+          setCitizenData(citizen);
+          setHousehold(householdData);
           setLoading(false);
         }
       })
@@ -235,10 +294,10 @@ export function CitizenDetailPanel({
     return () => {
       controller.abort();
     };
-  }, [url]);
+  }, [apiBaseUrl, url]);
 
-  // Wait for the climate as well, so the face does not change skin tone right after opening.
-  if (loading || !masterData || climate === undefined) {
+  // Wait for the climate and the voice as well, so the face keeps its skin tone and the layout holds still after opening.
+  if (loading || !masterData || climate === undefined || remark === undefined) {
     return <p className="agent-detail-muted">{t("common.loading")}</p>;
   }
 
@@ -251,14 +310,12 @@ export function CitizenDetailPanel({
     );
   }
 
-  // Display strings for gender and marital status. Backend gender is 0 = male / 1 = female;
-  // citizen_type is MEMBER_SINGLE (single) / MEMBER_MARRIED (married).
-  const genderLabel =
-    citizenData.gender === 0 ? t("citizen.male") : t("citizen.female");
-  const maritalLabel =
-    citizenData.citizen_type === MEMBER_MARRIED
-      ? t("citizen.married")
-      : t("citizen.single");
+  // Backend gender is 0 = male / 1 = female; citizen_type is MEMBER_SINGLE (single) / MEMBER_MARRIED (married).
+  const profile = [
+    t("citizen.ageValue", { age: citizenData.age }),
+    citizenData.citizen_type === MEMBER_MARRIED ? t("citizen.married") : t("citizen.single"),
+    citizenData.gender === 0 ? t("citizen.male") : t("citizen.female"),
+  ].join(t("citizenVoice.separator"));
 
   // Show the higher education major only while enrolled and holding a valid skill ID.
   // (When not enrolled or in basic education, education_skill is VALUE_NONE and has no master entry.)
@@ -268,6 +325,16 @@ export function CitizenDetailPanel({
   const isHigherEducated = Object.values(citizenData.skills ?? {}).some(
     (value) => value >= HIGH_SKILL_BOUNDARY,
   );
+
+  const meterRows = (meters: { label: string; value: number | undefined; polarity?: MeterPolarity }[]) =>
+    meters.map(({ label, value, polarity }) => value != null && (
+      <Fragment key={label}>
+        <span className="agent-detail-label">{label}</span>
+        <span className="agent-detail-value">
+          <Meter value={value} polarity={polarity} />
+        </span>
+      </Fragment>
+    ));
 
   // Radar chart data in ascending skill ID order;
   // resolve display names from master data (display the ID itself for undefined IDs).
@@ -289,9 +356,11 @@ export function CitizenDetailPanel({
           ...citySkinTone(climate),
         })}
         showStatus={false}
-        variantName={maritalLabel}
+        variantName={profile}
         name={citizenData.name}
       />
+
+      {remark && <p className="citizen-detail-voice">{remarkText(remark, t, i18n.language)}</p>}
 
       <div className="operation-panel">
         <button
@@ -346,45 +415,24 @@ export function CitizenDetailPanel({
         ) : (
           <>
             <section className="agent-detail-section">
-              <h3 className="agent-detail-section-title">
-                {t("citizen.basicInfo")}
-              </h3>
               <div className="agent-detail-grid">
-                <span className="agent-detail-label">{t("citizen.age")}</span>
-                <span className="agent-detail-value">
-                  {t("citizen.ageValue", { age: citizenData.age })}
-                </span>
-
-                <span className="agent-detail-label">{t("citizen.gender")}</span>
-                <span className="agent-detail-value">{genderLabel}</span>
-
-                <span className="agent-detail-label">
-                  {t("citizen.maritalStatus")}
-                </span>
-                <span className="agent-detail-value">{maritalLabel}</span>
-
                 <span className="agent-detail-label">{t("citizen.household")}</span>
                 <span className="agent-detail-value">
                   <AgentWindowLink
                     agentName={citizenData.household_agent_name}
                     agentId={citizenData.household_agent_id}
                     placeholder="-"
+                    onFocusCamera={() => void focusAgent(citizenData.household_agent_id).catch(console.error)}
                   />
                 </span>
-              </div>
-            </section>
 
-            <section className="agent-detail-section">
-              <h3 className="agent-detail-section-title">
-                {t("citizen.workEducation")}
-              </h3>
-              <div className="agent-detail-grid">
                 <span className="agent-detail-label">{t("citizen.employer")}</span>
                 <span className="agent-detail-value">
                   <AgentWindowLink
                     agentName={citizenData.employer_agent_name}
                     agentId={citizenData.employer_agent_id}
                     placeholder={t("citizen.unemployed")}
+                    onFocusCamera={() => void focusAgent(citizenData.employer_agent_id).catch(console.error)}
                   />
                 </span>
 
@@ -392,8 +440,8 @@ export function CitizenDetailPanel({
                   <>
                     <span className="agent-detail-label">{t("citizen.commuteTime")}</span>
                     <span className="agent-detail-value citizen-commute" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <div 
-                        className="citizen-commute-meter-container" 
+                      <div
+                        className="citizen-commute-meter-container"
                         style={{
                           width: "120px",
                           height: "12px",
@@ -405,7 +453,7 @@ export function CitizenDetailPanel({
                         }}
                         title={`${citizenData.commute_time.toFixed(1)} mins`}
                       >
-                        <div 
+                        <div
                           className="citizen-commute-meter-fill"
                           style={{
                             width: `${Math.min(100, (citizenData.commute_time / 120) * 100)}%`,
@@ -449,8 +497,44 @@ export function CitizenDetailPanel({
                     ? t("citizen.graduated")
                     : t("citizen.notGraduated")}
                 </span>
+
+                {meterRows([
+                  { label: t("citizen.criminality"), value: citizenData.potential_criminality, polarity: "negative" },
+                ])}
               </div>
             </section>
+
+            {household && (
+              <section className="agent-detail-section">
+                <h3 className="agent-detail-section-title">{t("citizen.householdStatus")}</h3>
+                <div className="agent-detail-grid">
+                  <span className="agent-detail-label">{t("citizen.automobile")}</span>
+                  <span className="agent-detail-value citizen-automobile">
+                    <img
+                      className="citizen-automobile-icon"
+                      src={household.has_automobile ? trafficRoad : trafficPedestrian}
+                      alt=""
+                    />
+                    {household.has_automobile ? t("citizen.automobileOwned") : t("citizen.automobileNone")}
+                  </span>
+
+                  {household.demand_tier != null && (
+                    <>
+                      <span className="agent-detail-label">{t("household.livingStandard")}</span>
+                      <span className="agent-detail-value">
+                        {t(`household.livingStandardLevel.${household.demand_tier}`)}
+                      </span>
+                    </>
+                  )}
+
+                  {meterRows([
+                    { label: t("household.satisNutrition"), value: household.satis_nutrition },
+                    { label: t("household.satisHealthcare"), value: household.satis_healthcare },
+                    { label: t("household.satisLeisure"), value: household.satis_leisure },
+                  ])}
+                </div>
+              </section>
+            )}
 
             {skillChartData.length > 0 && (
               <section className="agent-detail-section">
@@ -486,24 +570,6 @@ export function CitizenDetailPanel({
                 </div>
               </section>
             )}
-
-            <section className="agent-detail-section">
-              <h3 className="agent-detail-section-title">
-                {t("citizen.publicSafety")}
-              </h3>
-              <div className="agent-detail-grid">
-                <span className="agent-detail-label">{t("citizen.criminality")}</span>
-                <span className="agent-detail-value citizen-criminality">
-                  <meter
-                    className="citizen-criminality-meter"
-                    value={citizenData.potential_criminality}
-                    min={0}
-                    max={1}
-                  />
-                  {`${(citizenData.potential_criminality * 100).toFixed(1)}%`}
-                </span>
-              </div>
-            </section>
           </>
         )}
       </div>

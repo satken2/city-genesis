@@ -81,6 +81,7 @@ import type { EpochReport } from "./components/taskbar/EpochResultWindow";
 import type { PendingZoneMerge } from "./components/zone/ZoneMergeConfirmWindow";
 import type { PendingDirectAcquisition } from "./components/building/BuildingDirectAcquisitionConfirmWindow";
 import type { InfoDialogContent } from "./components/common/InfoDialogWindow";
+import type { VoiceRemark } from "./components/citizen/citizenVoiceRemark";
 import { emitConfirmDialogResult, type ConfirmDialogRequest } from "./utils/confirmDialog";
 import { showUnlockedAchievements, type UnlockedAchievement } from "./utils/achievements";
 
@@ -417,6 +418,7 @@ function App() {
                 apiBaseUrl={context.api_base_url}
                 pathTemplate={context.definition.fetch!.path_template}
                 initialEntityId={context.entity?.id ?? ""}
+                initialVoice={windowExtra(context)?.voice as VoiceRemark | undefined}
               />
             ) : context.window_type === "parcel_detail" ? (
               <ParcelDetailPanel

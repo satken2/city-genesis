@@ -268,10 +268,8 @@ export function AgentDetailPanel({
 
     const isImportOrExport = agentData.type === TYPE_TRADE;
     const showBasicInfo = !isImportOrExport;
-    const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
     const hasBasicInfoTab = showBasicInfo;
     const hasEducationInfoTab = agentData.type === TYPE_EDUCATION;
-    const hasHouseholdInfoTab = showHouseholdInfo;
     const hasCargoInfoTab = isImportOrExport;
 
     const showBuildingPanel = agentData.is_bd;
@@ -319,7 +317,6 @@ export function AgentDetailPanel({
       if (hasEducationInfoTab) availableIds.push("education");
       if (hasCargoInfoTab) availableIds.push("cargo");
       if (hasBuildingInfoTab) availableIds.push("building");
-      if (hasHouseholdInfoTab) availableIds.push("household");
       if (hasTradeInfoTab) availableIds.push("trade");
       if (hasEmploymentInfoTab) availableIds.push("employment");
       if (showConstructionTab) availableIds.push("construction");
@@ -405,7 +402,6 @@ export function AgentDetailPanel({
   const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
   const hasBasicInfoTab = showBasicInfo;
   const hasEducationInfoTab = agentData.type === TYPE_EDUCATION;
-  const hasHouseholdInfoTab = showHouseholdInfo;
 
   const hasCargoInfoTab = isImportOrExport;
 
@@ -459,9 +455,6 @@ export function AgentDetailPanel({
     }
     if (hasBuildingInfoTab) {
       tabs.push({ id: "building", label: t("agent.tabBuildingInfo", "建物情報") });
-    }
-    if (hasHouseholdInfoTab) {
-      tabs.push({ id: "household", label: t("agent.tabHouseholdInfo", "世帯情報") });
     }
     if (hasTradeInfoTab) {
       tabs.push({ id: "trade", label: t("agent.tabTradeInfo", "需給・取引") });
@@ -654,10 +647,13 @@ export function AgentDetailPanel({
       {tabs.length > 0 && (
         <div className="agent-detail-tab-content">
           {activeTab === "basic" && hasBasicInfoTab && !isPreConstruction && (
-            <AgentBasicInfoPanel
-              agent={agentData}
-              onNavigate={navigateToAgent}
-            />
+            <>
+              <AgentBasicInfoPanel
+                agent={agentData}
+                onNavigate={navigateToAgent}
+              />
+              {showHouseholdInfo && <HouseholdInfoPanel agent={agentData} />}
+            </>
           )}
 
           {activeTab === "education" && hasEducationInfoTab && !isPreConstruction && (
@@ -678,14 +674,6 @@ export function AgentDetailPanel({
               {showBuildingPanel && <BuildingInfoPanel agent={agentData} />}
               {showBuildingPanel && <ParkingInfoPanel agent={agentData} />}
               <BuildingInfo agent={agentData} onNavigate={navigateToAgent} />
-            </>
-          )}
-
-          {activeTab === "household" && hasHouseholdInfoTab && !isPreConstruction && (
-            <>
-              {showHouseholdInfo && (
-                <HouseholdInfoPanel agent={agentData} />
-              )}
             </>
           )}
 

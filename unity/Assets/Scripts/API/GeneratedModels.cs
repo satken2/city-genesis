@@ -242,6 +242,8 @@ namespace GeneratedModels
         public float? qol_score;
         /// <summary>世帯が自家用車を保有するか（0/1）</summary>
         public bool? has_automobile;
+        /// <summary>世帯の需要ティア（その世帯が注文した商品の最も高い demand_tier。0〜3。0は何も注文できなかった世帯）</summary>
+        public int? demand_tier;
         /// <summary>稼働率（直近エポックのスロット）</summary>
         public List<float> utilization;
         /// <summary>稼働率の目標値（プレイヤー設定。0.0〜1.5）</summary>

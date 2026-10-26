@@ -1,16 +1,11 @@
 {
   "citizen": {
-    "basicInfo": "Basic Info",
-    "age": "Age",
     "ageValue": "{{age}} years old",
-    "gender": "Gender",
     "male": "Male",
     "female": "Female",
-    "maritalStatus": "Marital Status",
     "single": "Single",
     "married": "Married",
     "household": "Household",
-    "workEducation": "Work & Education",
     "employer": "Employer",
     "unemployed": "Unemployed",
     "school": "School",
@@ -20,11 +15,15 @@
     "graduated": "Completed",
     "notGraduated": "Not Completed",
     "skills": "Skills",
-    "publicSafety": "Public Safety",
     "criminality": "Criminal Tendency",
-    "commuteTime": "Commute Time"
+    "commuteTime": "Commute Time",
+    "automobile": "Car",
+    "automobileOwned": "Owned",
+    "automobileNone": "None",
+    "householdStatus": "Household status"
   },
   "household": {
+    "title": "Household",
     "familyType": "Family Type",
     "familySingle": "Single",
     "familyCouple": "Couple",
@@ -33,6 +32,13 @@
     "hasAutomobile": "Has Automobile",
     "noAutomobile": "No Automobile",
     "discretionaryIncome": "Disposable Income",
+    "livingStandard": "Standard of living",
+    "livingStandardLevel": {
+      "0": "Destitute",
+      "1": "Poor",
+      "2": "Middle class",
+      "3": "Affluent"
+    },
     "satisNutrition": "Nutrition",
     "satisHealthcare": "Healthcare",
     "satisLeisure": "Leisure",

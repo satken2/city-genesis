@@ -48,7 +48,6 @@
     "remainingEpochs": "~{{n}} epochs",
     "tabBuildingInfo": "Building Info",
     "tabCargoInfo": "Cargo",
-    "tabHouseholdInfo": "Household",
     "tabTradeInfo": "Supply, Demand & Trade",
     "tabEmploymentInfo": "Employment",
     "action": {

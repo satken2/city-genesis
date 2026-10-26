@@ -1,16 +1,11 @@
 {
   "citizen": {
-    "basicInfo": "基本情報",
-    "age": "年齢",
     "ageValue": "{{age}}歳",
-    "gender": "性別",
     "male": "男性",
     "female": "女性",
-    "maritalStatus": "配偶関係",
     "single": "独身",
     "married": "既婚",
     "household": "所属世帯",
-    "workEducation": "就労・教育",
     "employer": "勤務先",
     "unemployed": "無職",
     "school": "通学先",
@@ -20,11 +15,15 @@
     "graduated": "修了",
     "notGraduated": "未修了",
     "skills": "スキル",
-    "publicSafety": "治安",
     "criminality": "犯罪性向",
-    "commuteTime": "通勤時間"
+    "commuteTime": "通勤時間",
+    "automobile": "自動車",
+    "automobileOwned": "あり",
+    "automobileNone": "なし",
+    "householdStatus": "世帯の状況"
   },
   "household": {
+    "title": "世帯情報",
     "familyType": "世帯タイプ",
     "familySingle": "独身",
     "familyCouple": "カップル",
@@ -33,6 +32,13 @@
     "hasAutomobile": "自動車保有",
     "noAutomobile": "自動車なし",
     "discretionaryIncome": "可処分所得",
+    "livingStandard": "生活水準",
+    "livingStandardLevel": {
+      "0": "極貧",
+      "1": "貧困",
+      "2": "中流",
+      "3": "裕福"
+    },
     "satisNutrition": "栄養充足度",
     "satisHealthcare": "医療充足度",
     "satisLeisure": "娯楽・余暇",
