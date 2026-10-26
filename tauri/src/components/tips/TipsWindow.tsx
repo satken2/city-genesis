@@ -112,6 +112,7 @@ export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: strin
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(false);
   const [progress, setProgress] = useState<EpochProgress | null>(null);
+  const [autoSwitchResetKey, setAutoSwitchResetKey] = useState(0);
 
   const handleReload = useCallback(() => {
     if (TIPS_LIST.length <= 1 || document.hidden) return;
@@ -122,7 +123,12 @@ export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: strin
   useEffect(() => {
     const timer = setInterval(handleReload, 30_000);
     return () => clearInterval(timer);
-  }, [handleReload]);
+  }, [handleReload, autoSwitchResetKey]);
+
+  const handleReloadClick = () => {
+    handleReload();
+    setAutoSwitchResetKey((key) => key + 1);
+  };
 
   const handleFadeEnd = (event: AnimationEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
@@ -223,7 +229,7 @@ export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: strin
         <button
           type="button"
           className="tips-reload-btn"
-          onClick={handleReload}
+          onClick={handleReloadClick}
           title="別のTipsを表示"
         >
           <img src={iconUrl("tray_reload.png")} alt="Reload" className="tips-reload-icon" draggable={false} />
