@@ -42,7 +42,7 @@
     "actions": []
   },
   "agent_detail": {
-    "title": "Agent Details",
+    "title": "Facility Details",
     "width": 460,
     "height": 520,
     "resizable": true,
