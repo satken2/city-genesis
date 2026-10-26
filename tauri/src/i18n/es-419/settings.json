@@ -45,6 +45,12 @@
       "hide": "Ocultar",
       "description": "Barra en la parte superior que muestra sugerencias de uso"
     },
+    "citizenVoice": {
+      "label": "Voces ciudadanas",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "description": "Tarjeta en la esquina superior derecha que muestra comentarios de los residentes uno tras otro"
+    },
     "language": {
       "label": "Idioma",
       "description": "Idioma de visualización de la interfaz. No es el mismo que el idioma de los datos guardados.",

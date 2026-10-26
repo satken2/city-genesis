@@ -8,6 +8,7 @@ export interface AppSettings {
   volumes: Record<string, number>;
   monitor_index: number;
   hintbar_visible: boolean;
+  citizen_voice_visible: boolean;
   multi_display: boolean;
   popup_monitor_index: number;
 }
@@ -21,6 +22,7 @@ function defaults(): AppSettings {
     volumes: { master: 80, bgm: 60, sfx: 70 },
     monitor_index: 0,
     hintbar_visible: true,
+    citizen_voice_visible: true,
     multi_display: false,
     popup_monitor_index: 0,
   };
@@ -40,6 +42,7 @@ function normalize(raw: unknown): AppSettings {
     volumes: pick("volumes", (v) => v !== null && typeof v === "object" && Object.values(v as object).every(isNumber)),
     monitor_index: pick("monitor_index", isNumber),
     hintbar_visible: pick("hintbar_visible", (v) => typeof v === "boolean"),
+    citizen_voice_visible: pick("citizen_voice_visible", (v) => typeof v === "boolean"),
     multi_display: pick("multi_display", (v) => typeof v === "boolean"),
     popup_monitor_index: pick("popup_monitor_index", isNumber),
   };

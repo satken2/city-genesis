@@ -8,7 +8,7 @@ const SETTINGS_FILE_NAME: &str = "settings.json";
 
 /**
  * Application settings structure. Centralizes user settings such as language, font size, volume, HUD/popup
- * monitors, and hint bar visibility. serde's default attributes allow safe deserialization when settings are
+ * monitors, and hint bar/citizen voice visibility. serde's default attributes allow safe deserialization when settings are
  * missing from the file.
  */
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -19,6 +19,8 @@ pub struct AppSettings {
     pub volumes: HashMap<String, u8>,
     pub monitor_index: usize,
     pub hintbar_visible: bool,
+    /// Whether to show the top-right citizen voice card.
+    pub citizen_voice_visible: bool,
     /// Multi-display mode (show popups on a monitor separate from the HUD).
     pub multi_display: bool,
     /// Popup monitor in multi-display mode.
@@ -37,6 +39,7 @@ impl Default for AppSettings {
             volumes,
             monitor_index: 0,
             hintbar_visible: true,
+            citizen_voice_visible: true,
             multi_display: false,
             popup_monitor_index: 0,
         }

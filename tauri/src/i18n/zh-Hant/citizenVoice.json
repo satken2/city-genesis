@@ -1,5 +1,7 @@
 {
   "citizenVoice": {
-    "separator": " · "
+    "separator": " · ",
+    "previous": "上一則心聲",
+    "next": "下一則心聲"
   }
 }

@@ -1,5 +1,7 @@
 {
   "citizenVoice": {
-    "separator": ", "
+    "separator": ", ",
+    "previous": "Voix précédente",
+    "next": "Voix suivante"
   }
 }

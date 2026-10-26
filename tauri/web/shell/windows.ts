@@ -117,12 +117,6 @@ function hudRightBottomReserved(): number {
   return (tray && tray.height > 1 ? tray.height : SYSTEM_TRAY_HEIGHT) + HUD_MARGIN;
 }
 
-/** 右上の市民の声のカードが占める高さ(`hud_right_top_reserved`)。カードが無い間は0。 */
-function hudRightTopReserved(): number {
-  const card = host.rect(LABEL_CITIZEN_VOICE);
-  return card && card.height > CITIZEN_VOICE_EMPTY_SIZE ? card.height + HUD_MARGIN : 0;
-}
-
 function notificationPlacement(height: number): Placement {
   const m = host.monitor();
   const margin = 16;
@@ -291,13 +285,12 @@ export function recordWindowGeometry(label: string, recordPosition: boolean): vo
 
 /**
  * ポップアップの配置を種別のレイアウトから計算する(`compute_window_geometry`)。
- * 表示先にHUDがあるので、ドック配置は常駐HUD(左のアイコンパネル・下部中央のコックピット・右下のシステムトレイ・
- * 右上の市民の声)を避ける。
+ * 表示先にHUDがあるので、ドック配置は常駐HUD(左のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を避ける。
+ * 右上の市民の声は見え続ける必要が無いので避けず、右寄せのウィンドウが上に被さる。
  */
 function computeWindowGeometry(definition: WindowDefinition, payload: OpenWindowPayload, saved: WindowGeometry | null): Placement {
   const m = host.monitor();
-  const [leftReserved, bottomReserved, rightTopReserved, rightBottomReserved] =
-    [HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, hudRightTopReserved(), hudRightBottomReserved()];
+  const [leftReserved, bottomReserved, rightBottomReserved] = [HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, hudRightBottomReserved()];
   const margin = HUD_MARGIN;
   switch (definition.layout) {
     case "left_panel":
@@ -315,9 +308,9 @@ function computeWindowGeometry(definition: WindowDefinition, payload: OpenWindow
       const width = saved?.width ?? Math.round(m.width * 0.2);
       return {
         x: m.x + m.width - width - margin,
-        y: m.y + rightTopReserved + margin,
+        y: m.y + margin,
         width,
-        height: saved?.height ?? m.height - rightTopReserved - rightBottomReserved - margin * 2,
+        height: saved?.height ?? m.height - rightBottomReserved - margin * 2,
       };
     }
     case "bottom_center": {
@@ -333,7 +326,7 @@ function computeWindowGeometry(definition: WindowDefinition, payload: OpenWindow
         height: saved?.height ?? definition.height,
       };
     case "right_top": {
-      const workHeight = Math.max(m.height - rightTopReserved - bottomReserved - margin * 2, 200);
+      const workHeight = Math.max(m.height - bottomReserved - margin * 2, 200);
       let defaultWidth = definition.width;
       let defaultHeight = definition.height;
       if (definition.width_ratio !== null && definition.width_ratio > 0) {
@@ -344,7 +337,7 @@ function computeWindowGeometry(definition: WindowDefinition, payload: OpenWindow
             : Math.min(defaultWidth, workHeight);
       }
       const width = saved?.width ?? defaultWidth;
-      return { x: m.x + m.width - width - margin, y: m.y + rightTopReserved + margin, width, height: saved?.height ?? defaultHeight };
+      return { x: m.x + m.width - width - margin, y: m.y + margin, width, height: saved?.height ?? defaultHeight };
     }
     default: {
       if (saved) return { x: saved.x, y: saved.y, width: saved.width, height: saved.height };

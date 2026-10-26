@@ -45,6 +45,12 @@
       "hide": "Masquer",
       "description": "Barre en haut de l'écran qui affiche des astuces d'utilisation"
     },
+    "citizenVoice": {
+      "label": "Voix des citoyens",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "description": "Carte en haut à droite de l'écran qui affiche tour à tour les propos des habitants"
+    },
     "language": {
       "label": "Langue",
       "description": "Langue d'affichage de l'interface. Elle est distincte de la langue des données de sauvegarde.",

@@ -1,5 +1,5 @@
 /**
- * Mayor's actions on a citizen (buttons on the citizen voice card and in the citizen detail panel)
+ * Mayor's actions on a citizen (buttons in the citizen detail panel)
  *
  * The core carries out each action at once (`/api/v1/citizens/{id}/<action>`).
  * - Reward and donation ask for the amount in the confirmation window, up to the payer's cash: the city's for a

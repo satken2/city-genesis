@@ -6,7 +6,7 @@
  *
  * Six groups:
  * - General: language (SUPPORTED_LANGUAGES in utils/locale.ts), font size (large/medium/small presets or 8–32px
- *   custom input), hint bar visibility.
+ *   custom input), hint bar and citizen voice visibility.
  * - Display: move HUD (icon panel/cockpit/system tray) and 3D view (Unity window) independently between
  *   monitors; multi-display mode and destination for popups separate from HUD; reset window positions/sizes.
  * - Sound: master/BGM/sound effect sliders (placeholders).
@@ -85,6 +85,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   /** Whether to show the top hint bar. Default to visible if absent from settings. */
   const [hintbarVisible, setHintbarVisible] = useState(true);
+  const [citizenVoiceVisible, setCitizenVoiceVisible] = useState(true);
 
   const [multiDisplay, setMultiDisplay] = useState(false);
 
@@ -117,6 +118,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           setVolumes((prev) => ({ ...prev, ...settings.volumes }));
         }
         setHintbarVisible(settings.hintbar_visible !== false);
+        setCitizenVoiceVisible(settings.citizen_voice_visible !== false);
         setMultiDisplay(settings.multi_display === true);
       })
       .catch((err) => {
@@ -269,6 +271,12 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     void persistCurrentSettings({ hintbar_visible: next });
   }
 
+  /** The citizen voice card also follows settings-updated, like the hint bar. */
+  function handleCitizenVoiceVisibleChange(next: boolean) {
+    setCitizenVoiceVisible(next);
+    void persistCurrentSettings({ citizen_voice_visible: next });
+  }
+
   /**
    * Language switch handler.
    * Change i18n language and persist it in settings.
@@ -389,6 +397,24 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                   type="button"
                 >
                   {t(value ? "settings.hintbar.show" : "settings.hintbar.hide")}
+                </button>
+              ))}
+            </div>
+          </SettingsRow>
+
+          <SettingsRow
+            label={t("settings.citizenVoice.label")}
+            description={t("settings.citizenVoice.description")}
+          >
+            <div className="settings-seg">
+              {([true, false] as const).map((value) => (
+                <button
+                  key={value ? "show" : "hide"}
+                  className={`settings-seg-btn ${citizenVoiceVisible === value ? "active" : ""}`}
+                  onClick={() => handleCitizenVoiceVisibleChange(value)}
+                  type="button"
+                >
+                  {t(value ? "settings.citizenVoice.show" : "settings.citizenVoice.hide")}
                 </button>
               ))}
             </div>

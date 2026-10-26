@@ -1,72 +1,58 @@
 /**
  * Citizen voice (persistent top-right card)
  *
- * Slides through cards of residents picked at random: face, name, age/gender/district, a remark, and action buttons.
- * The core picks the citizen, a topic, the mood on it (0 to 1), and values to fill in (`/api/v1/citizens/voices`).
- * The remark is composed when the card arrives: a line for the topic at the mood's tier, optionally wrapped in an
- * opener and a closer for the mood. Only lines whose placeholders the voice can fill are candidates; a topic without
- * its own line at that tier uses the nearest tier, and a topic without its own lines uses the group's `any` lines.
+ * Slides through cards of residents picked at random: face, name, age/gender/district, and a remark.
+ * Voices come from `/api/v1/citizens/voices`, and each card's remark is composed once when it arrives
+ * (`citizen/citizenVoiceRemark.ts`).
  *
  * - Fetch VOICE_BATCH voices at a time and fetch again when VOICE_REFILL_AT or fewer are queued, so cards keep flowing.
  *   An empty batch (epoch running, or no adult residents yet) stops fetching until the next epoch ends.
- * - Voices describe the city when they were fetched, so the queue is discarded and refetched when an epoch ends.
- * - Hovering pauses the slide so the buttons always act on the citizen under the pointer.
- * - The buttons are the mayor's actions (`citizen/citizenActions.ts`). An expelled citizen's cards leave the deck.
- * - Report the measured size through `resize_citizen_voice` (0×0 without a card) so the window covers only the card.
+ * - Voices describe the city when they were fetched, so the queue and the cards already shown are discarded and
+ *   refetched when an epoch ends.
+ * - Each card stays SLIDE_MS; the pie at the top right drains over that time. Hovering pauses the countdown so a
+ *   click always opens the citizen under the pointer, and it resumes where it stopped on leaving.
+ * - The arrows over the left and right edges go back through the cards already shown and forward through the queue.
+ *   A card reached either way gets a fresh countdown.
+ * - Clicking the card opens the citizen detail window with the card's remark, so the window repeats the same words.
+ * - `citizen_voice_visible` in settings turns the card off and on, applied at once through `settings-updated`. While
+ *   off, it is treated like no session: the deck is dropped and nothing is fetched.
+ * - Report the measured size through `resize_citizen_voice` (0×0 without a card). Text metrics make the height
+ *   fractional, so round it up to whole device pixels: a window even slightly shorter than the panel shows the
+ *   page's scrollbars, which hide the panel's right and bottom edges.
  */
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { i18n as I18n, TFunction } from "i18next";
+import type { i18n as I18n } from "i18next";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { formatCompactAmount } from "../../utils/money";
-import { resolveIntlLocale } from "../../utils/locale";
+import { loadAppSettings, type AppSettings } from "../../utils/settings";
 import { citizenFaceUrl, citySkinTone } from "../../utils/citizenFace";
 import { useCityClimate } from "../../hooks/useCityClimate";
 import { useHudSession } from "./useHudSession";
-import { CITIZEN_ACTIONS, runCitizenAction, type CitizenActionId } from "../citizen/citizenActions";
+import { composeRemark, remarkText, type Voice, type VoiceRemark } from "../citizen/citizenVoiceRemark";
 import "./hud.css";
 import "./CitizenVoice.css";
 
-const SLIDE_MS = 8000;
+const SLIDE_MS = 15000;
 const VOICE_BATCH = 30;
 const VOICE_REFILL_AT = 5;
-const TIER_COUNT = 5;
-const OPENER_CHANCE = 0.4;
-const CLOSER_CHANCE = 0.45;
-const MONEY_PARAMS = new Set(["savings", "debt"]);
 
-type Voice = {
-  citizen_id: number;
-  name: string;
-  age: number;
-  /** 0 = male, 1 = female */
-  gender: number;
-  household_agent_id: number;
-  zone_name: string | null;
-  /** "<group>.<name>", e.g. "goods.food_retail" */
-  topic: string;
-  /** Mood on the topic, 0 (worst) to 1 (best) */
-  level: number;
-  /** Values for placeholders. Only those the citizen has are present. */
-  params: Record<string, string | number>;
-};
+type Card = VoiceRemark & { key: number };
 
-/** i18n keys of the remark's parts (opener, line, closer), resolved again on every render so language changes apply. */
-type Card = Voice & { key: number; parts: string[] };
-
-type Deck = { queue: Card[]; current: Card | null; leaving: Card | null };
+/** `history` holds the cards already shown, oldest first. `back` is the direction of the last slide. */
+type Deck = { history: Card[]; queue: Card[]; current: Card | null; leaving: Card | null; back: boolean };
 
 type DeckAction =
   | { type: "add"; cards: Card[] }
   | { type: "next" }
+  | { type: "previous" }
   | { type: "left" }
   | { type: "discardQueue" }
-  | { type: "removeCitizen"; citizenId: number }
   | { type: "reset" };
 
-const EMPTY_DECK: Deck = { queue: [], current: null, leaving: null };
+const EMPTY_DECK: Deck = { history: [], queue: [], current: null, leaving: null, back: false };
 
 function deckReducer(deck: Deck, action: DeckAction): Deck {
   switch (action.type) {
@@ -74,17 +60,19 @@ function deckReducer(deck: Deck, action: DeckAction): Deck {
       const queue = [...deck.queue, ...action.cards];
       return deck.current ? { ...deck, queue } : { ...deck, current: queue[0] ?? null, queue: queue.slice(1) };
     }
-    case "next":
-      return deck.queue.length === 0 ? deck : { queue: deck.queue.slice(1), current: deck.queue[0], leaving: deck.current };
+    case "next": {
+      if (deck.queue.length === 0 || !deck.current) return deck;
+      return { history: [...deck.history, deck.current], queue: deck.queue.slice(1), current: deck.queue[0], leaving: deck.current, back: false };
+    }
+    case "previous": {
+      const previous = deck.history[deck.history.length - 1];
+      if (!previous || !deck.current) return deck;
+      return { history: deck.history.slice(0, -1), queue: [deck.current, ...deck.queue], current: previous, leaving: deck.current, back: true };
+    }
     case "left":
       return { ...deck, leaving: null };
     case "discardQueue":
-      return { ...deck, queue: [] };
-    case "removeCitizen": {
-      const queue = deck.queue.filter((card) => card.citizen_id !== action.citizenId);
-      if (deck.current?.citizen_id !== action.citizenId) return { ...deck, queue };
-      return { queue: queue.slice(1), current: queue[0] ?? null, leaving: deck.current };
-    }
+      return { ...deck, history: [], queue: [] };
     case "reset":
       return EMPTY_DECK;
   }
@@ -92,75 +80,31 @@ function deckReducer(deck: Deck, action: DeckAction): Deck {
 
 let nextCardKey = 1;
 
-const PLACEHOLDER = /\{\{\s*(\w+)/g;
-
-function randomItem<T>(items: T[]): T | undefined {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
-/** Placeholder names the voice can fill, independent of the display language. */
-function availableParams(voice: Voice): Set<string> {
-  const names = new Set(["name", "age", ...Object.keys(voice.params)]);
-  if (voice.zone_name) names.add("zone");
-  if (typeof voice.params.partnerGender === "number") names.add("partnerRelation");
-  if (typeof voice.params.childGender === "number") names.add("childRelation");
-  return names;
-}
-
-/** Keys of the templates under `base` whose placeholders are all available, in the first language that has them. */
-function usableKeys(i18n: I18n, base: string, available: Set<string>): string[] {
-  for (const language of i18n.languages) {
-    const templates = i18n.getResource(language, "translation", base) as Record<string, unknown> | undefined;
-    if (!templates || typeof templates !== "object") continue;
-    return Object.entries(templates)
-      .filter(([, text]) => typeof text === "string" && [...text.matchAll(PLACEHOLDER)].every(([, name]) => available.has(name)))
-      .map(([index]) => `${base}.${index}`);
-  }
-  return [];
-}
-
-function lineKey(i18n: I18n, voice: Voice, tier: number, available: Set<string>): string | undefined {
-  const [group, name] = voice.topic.split(".");
-  for (const base of [`citizenVoice.lines.${group}.${name}`, `citizenVoice.lines.${group}.any`]) {
-    for (let distance = 0; distance < TIER_COUNT; distance += 1) {
-      const keys = [...new Set([tier - distance, tier + distance])]
-        .filter((t) => t >= 0 && t < TIER_COUNT)
-        .flatMap((t) => usableKeys(i18n, `${base}.${t}`, available));
-      if (keys.length > 0) return randomItem(keys);
-    }
-  }
-  return undefined;
-}
-
 function toCard(i18n: I18n, voice: Voice): Card | null {
-  const available = availableParams(voice);
-  const tier = Math.min(TIER_COUNT - 1, Math.max(0, Math.floor(voice.level * TIER_COUNT)));
-  const line = lineKey(i18n, voice, tier, available);
-  if (!line) return null;
-  const mood = tier <= 1 ? "bad" : tier === 2 ? "neutral" : "good";
-  const opener = Math.random() < OPENER_CHANCE ? randomItem(usableKeys(i18n, `citizenVoice.openers.${mood}`, available)) : undefined;
-  const closer = Math.random() < CLOSER_CHANCE ? randomItem(usableKeys(i18n, `citizenVoice.closers.${mood}`, available)) : undefined;
-  return { ...voice, key: nextCardKey++, parts: [opener, line, closer].filter((key): key is string => Boolean(key)) };
+  const remark = composeRemark(i18n, voice);
+  return remark && { ...remark, key: nextCardKey++ };
 }
 
-/** Interpolation values formatted for the display language. */
-function displayParams(voice: Voice, t: TFunction, language: string): Record<string, string> {
-  const locale = resolveIntlLocale(language);
-  const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
-  const values: Record<string, string> = {};
-  for (const [name, value] of Object.entries({ ...voice.params, name: voice.name, age: voice.age, zone: voice.zone_name })) {
-    if (value === null || value === undefined || value === "") continue;
-    values[name] = typeof value !== "number" ? String(value)
-      : MONEY_PARAMS.has(name) ? formatCompactAmount(value, locale, true) : number.format(value);
-  }
-  if (typeof voice.params.partnerGender === "number") values.partnerRelation = t(`citizenVoice.relations.partner.${voice.params.partnerGender}`);
-  if (typeof voice.params.childGender === "number") values.childRelation = t(`citizenVoice.relations.child.${voice.params.childGender}`);
-  return values;
+/** Round a CSS length up to whole device pixels, so the window Rust derives from it is never shorter than the panel. */
+function ceilToDevicePixel(length: number): number {
+  const ratio = window.devicePixelRatio || 1;
+  return Math.ceil(length * ratio) / ratio;
+}
+
+/** Chevron for the slide arrows, drawn here so no asset credit is needed. */
+function ChevronIcon({ back }: { back: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={back ? "M14.5 6l-6 6 6 6" : "M9.5 6l6 6-6 6"} />
+    </svg>
+  );
 }
 
 export function CitizenVoice() {
   const { t, i18n } = useTranslation();
   const { visible, apiBaseUrl, epochExecuting } = useHudSession();
+  const [enabled, setEnabled] = useState(true);
+  const active = visible && enabled;
   const climate = useCityClimate(apiBaseUrl);
   const [deck, dispatch] = useReducer(deckReducer, EMPTY_DECK);
   const [paused, setPaused] = useState(false);
@@ -180,8 +124,19 @@ export function CitizenVoice() {
   }
 
   useEffect(() => {
-    if (!visible) restart({ type: "reset" });
-  }, [visible]);
+    let unlisten: (() => void) | undefined;
+    loadAppSettings()
+      .then((settings) => setEnabled(settings.citizen_voice_visible !== false))
+      .catch(console.error);
+    listen<AppSettings>("settings-updated", (event) => setEnabled(event.payload.citizen_voice_visible !== false))
+      .then((fn) => { unlisten = fn; })
+      .catch(console.error);
+    return () => unlisten?.();
+  }, []);
+
+  useEffect(() => {
+    if (!active) restart({ type: "reset" });
+  }, [active]);
 
   useEffect(() => {
     if (wasExecuting.current && !epochExecuting) restart({ type: "discardQueue" });
@@ -189,7 +144,7 @@ export function CitizenVoice() {
   }, [epochExecuting]);
 
   useEffect(() => {
-    if (!visible || !apiBaseUrl || epochExecuting || exhausted || fetching.current) return;
+    if (!active || !apiBaseUrl || epochExecuting || exhausted || fetching.current) return;
     if (deck.queue.length > VOICE_REFILL_AT) return;
     const requested = generation.current;
     fetching.current = true;
@@ -203,16 +158,29 @@ export function CitizenVoice() {
       .finally(() => {
         if (requested === generation.current) fetching.current = false;
       });
-  }, [visible, apiBaseUrl, epochExecuting, exhausted, deck.queue.length, i18n]);
+  }, [active, apiBaseUrl, epochExecuting, exhausted, deck.queue.length, i18n]);
 
   const hasNext = deck.queue.length > 0;
+  const hasPrevious = deck.history.length > 0;
+  const currentKey = deck.current?.key;
+  /** Time left on the current card. Reset when the card changes and consumed only while counting, so a pause resumes where it stopped. */
+  const remaining = useRef(SLIDE_MS);
   useEffect(() => {
-    if (!deck.current || paused || !hasNext) return;
-    const timer = window.setTimeout(() => dispatch({ type: "next" }), SLIDE_MS);
-    return () => window.clearTimeout(timer);
-  }, [deck.current, paused, hasNext]);
+    remaining.current = SLIDE_MS;
+  }, [currentKey]);
+  // The pie animation and this timer both advance only while counting, which keeps them in step.
+  const counting = currentKey !== undefined && hasNext && !paused;
+  useEffect(() => {
+    if (!counting) return;
+    const startedAt = performance.now();
+    const timer = window.setTimeout(() => dispatch({ type: "next" }), remaining.current);
+    return () => {
+      window.clearTimeout(timer);
+      remaining.current = Math.max(0, remaining.current - (performance.now() - startedAt));
+    };
+  }, [counting, currentKey]);
 
-  const shown = visible && deck.current !== null;
+  const shown = active && deck.current !== null;
   useEffect(() => {
     const element = panelRef.current;
     if (!shown || !element) {
@@ -221,9 +189,10 @@ export function CitizenVoice() {
     }
     let lastSent = { width: 0, height: 0 };
     const observer = new ResizeObserver(() => {
-      const { width, height } = element.getBoundingClientRect();
-      if (width <= 0 || height <= 0) return;
-      if (Math.abs(width - lastSent.width) < 1 && Math.abs(height - lastSent.height) < 1) return;
+      const rect = element.getBoundingClientRect();
+      const width = ceilToDevicePixel(rect.width);
+      const height = ceilToDevicePixel(rect.height);
+      if (width <= 0 || height <= 0 || (width === lastSent.width && height === lastSent.height)) return;
       lastSent = { width, height };
       void invoke("resize_citizen_voice", { width, height }).catch(console.error);
     });
@@ -233,25 +202,29 @@ export function CitizenVoice() {
 
   const skinTone = useMemo(() => citySkinTone(climate), [climate]);
 
-  async function handleAction(card: Card, action: CitizenActionId) {
-    const target = { citizenId: card.citizen_id, name: card.name, householdAgentId: card.household_agent_id };
-    const done = await runCitizenAction(apiBaseUrl, action, target, t, i18n.language);
-    if (done && action === "expel") dispatch({ type: "removeCitizen", citizenId: card.citizen_id });
+  function handleCardClick(card: Card) {
+    void invoke("open_registered_window", {
+      windowType: "citizen_detail",
+      entityId: String(card.citizen_id),
+      params: { extra: { voice: card } },
+    }).catch(console.error);
   }
 
   function renderCard(card: Card, leaving: boolean) {
-    const values = displayParams(card, t, i18n.language);
-    const message = card.parts.map((key) => t(key, values)).join(t("citizenVoice.joiner"));
+    const message = remarkText(card, t, i18n.language);
     const meta = [
       t("citizen.ageValue", { age: card.age }),
       card.gender === 0 ? t("citizen.male") : t("citizen.female"),
       card.zone_name,
     ].filter(Boolean).join(t("citizenVoice.separator"));
+    const className = ["citizen-voice-card", leaving && "citizen-voice-card--leaving", deck.back && "citizen-voice-card--back"]
+      .filter(Boolean).join(" ");
     return (
       <article
         key={card.key}
-        className={`citizen-voice-card${leaving ? " citizen-voice-card--leaving" : ""}`}
-        onAnimationEnd={leaving ? () => dispatch({ type: "left" }) : undefined}
+        className={className}
+        onAnimationEnd={leaving ? (event) => { if (event.target === event.currentTarget) dispatch({ type: "left" }); } : undefined}
+        onClick={leaving ? undefined : () => handleCardClick(card)}
         aria-hidden={leaving || undefined}
       >
         <img
@@ -261,26 +234,26 @@ export function CitizenVoice() {
           draggable={false}
         />
         <div className="citizen-voice-body">
-          <div className="citizen-voice-name">{card.name}</div>
-          <div className="citizen-voice-meta">{meta}</div>
-          <p className="citizen-voice-message">{message}</p>
-          <div className="citizen-voice-actions">
-            {CITIZEN_ACTIONS.map(({ id, icon }) => (
-              <button
-                key={id}
-                type="button"
-                className="hud-icon-btn citizen-voice-action"
-                title={t(`citizenAction.${id}.label`)}
-                aria-label={t(`citizenAction.${id}.label`)}
-                data-guide="citizenVoice.action"
-                data-guide-value={id}
-                tabIndex={leaving ? -1 : undefined}
-                onClick={() => void handleAction(card, id)}
-              >
-                <img src={icon} alt="" className="hud-icon-img" draggable={false} />
-              </button>
-            ))}
+          <div className="citizen-voice-header">
+            <div className="citizen-voice-heading">
+              <div className="citizen-voice-name">{card.name}</div>
+              <div className="citizen-voice-meta">{meta}</div>
+            </div>
+            {/* Pie of the time left. pathLength lets the keyframes count the sector in percent. */}
+            <svg className="citizen-voice-countdown" viewBox="0 0 20 20" aria-hidden="true">
+              <circle className="citizen-voice-countdown-track" cx="10" cy="10" r="9" />
+              <circle
+                className="citizen-voice-countdown-pie"
+                cx="10"
+                cy="10"
+                r="4.5"
+                pathLength="100"
+                transform="rotate(-90 10 10)"
+                style={{ animationDuration: `${SLIDE_MS}ms`, animationPlayState: counting && !leaving ? "running" : "paused" }}
+              />
+            </svg>
           </div>
+          <p className="citizen-voice-message">{message}</p>
         </div>
       </article>
     );
@@ -297,6 +270,26 @@ export function CitizenVoice() {
     >
       {deck.leaving && renderCard(deck.leaving, true)}
       {renderCard(deck.current, false)}
+      <button
+        type="button"
+        className="hud-icon-btn citizen-voice-nav citizen-voice-nav--previous"
+        title={t("citizenVoice.previous")}
+        aria-label={t("citizenVoice.previous")}
+        disabled={!hasPrevious}
+        onClick={() => dispatch({ type: "previous" })}
+      >
+        <ChevronIcon back />
+      </button>
+      <button
+        type="button"
+        className="hud-icon-btn citizen-voice-nav citizen-voice-nav--next"
+        title={t("citizenVoice.next")}
+        aria-label={t("citizenVoice.next")}
+        disabled={!hasNext}
+        onClick={() => dispatch({ type: "next" })}
+      >
+        <ChevronIcon back={false} />
+      </button>
     </div>
   );
 }

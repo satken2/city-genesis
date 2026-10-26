@@ -1,5 +1,7 @@
 {
   "citizenVoice": {
-    "separator": " · "
+    "separator": " · ",
+    "previous": "이전 목소리",
+    "next": "다음 목소리"
   }
 }

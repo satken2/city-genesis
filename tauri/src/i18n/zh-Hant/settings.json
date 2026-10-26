@@ -45,6 +45,12 @@
       "hide": "不顯示",
       "description": "在畫面上方顯示操作提示的橫列"
     },
+    "citizenVoice": {
+      "label": "市民心聲",
+      "show": "顯示",
+      "hide": "不顯示",
+      "description": "在畫面右上方依序顯示市民發言的卡片"
+    },
     "language": {
       "label": "語言",
       "description": "介面的顯示語言。與存檔資料的語言不同。",

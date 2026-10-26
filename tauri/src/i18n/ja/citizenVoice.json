@@ -1,6 +1,8 @@
 {
   "citizenVoice": {
     "separator": "・",
+    "previous": "前の声",
+    "next": "次の声",
     "joiner": "",
     "relations": {
       "partner": {

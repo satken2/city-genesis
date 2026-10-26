@@ -70,6 +70,7 @@ pub const HUD_LEFT_RESERVED: f64 = ICON_PANEL_WIDTH + HUD_MARGIN;
 static NEXT_WINDOW_ID: AtomicU64 = AtomicU64::new(1);
 
 /// Window placement: size in logical pixels, position in physical pixels (virtual screen coordinates).
+/// Both describe the client area, the part the user sees.
 ///
 /// For logical positions, tao converts using the current monitor's scale when moving, or the first
 /// monitor containing the coordinates when creating. Mixed scale factors can place windows
@@ -94,10 +95,18 @@ impl Placement {
     /// Move and resize a window. Set size after moving so conversion uses the
     /// destination scale. Moving across scale factors may shift the position via
     /// Windows' suggested rectangle (WM_DPICHANGED), so reapply the position last.
+    ///
+    /// `set_position` moves the outer frame. Undecorated windows with a shadow keep invisible resize borders outside
+    /// the client area (left, right, bottom), so offset the frame by the measured client inset. Measure it on the
+    /// destination, since the border scales with its DPI.
     pub fn apply<R: Runtime>(&self, window: &WebviewWindow<R>) {
         let _ = window.set_position(self.position);
         let _ = window.set_size(self.size);
-        let _ = window.set_position(self.position);
+        let inset = match (window.outer_position(), window.inner_position()) {
+            (Ok(outer), Ok(inner)) => (inner.x - outer.x, inner.y - outer.y),
+            _ => (0, 0),
+        };
+        let _ = window.set_position(PhysicalPosition::new(self.position.x - inset.0, self.position.y - inset.1));
     }
 }
 
@@ -171,7 +180,6 @@ struct PopupTarget {
     monitor: Option<Monitor>,
     /// Whether the destination monitor contains the HUD. If so, avoid HUD-occupied areas.
     has_hud: bool,
-    right_top_reserved: f64,
     right_bottom_reserved: f64,
 }
 
@@ -181,7 +189,6 @@ fn popup_target(app: &AppHandle, state: &SharedState) -> PopupTarget {
     PopupTarget {
         monitor: monitors.into_iter().nth(index),
         has_hud,
-        right_top_reserved: hud_right_top_reserved(app),
         right_bottom_reserved: hud_right_bottom_reserved(app),
     }
 }
@@ -524,18 +531,6 @@ pub fn resize_citizen_voice(app: &AppHandle, state: &SharedState, width: f64, he
     layout_hud_windows(app, &monitors, monitor_index, None, None, None, Some(LogicalSize::new(width, height)));
 }
 
-/// Height occupied by the top-right citizen voice card; right side panels start below it. Zero while there is no card.
-pub fn hud_right_top_reserved(app: &AppHandle) -> f64 {
-    app.get_webview_window(LABEL_CITIZEN_VOICE)
-        .and_then(|win| {
-            let scale = win.scale_factor().ok()?;
-            Some(win.inner_size().ok()?.to_logical::<f64>(scale).height)
-        })
-        // The empty 1×1 window can read back as up to about 1.3 logical px after rounding to physical pixels.
-        .filter(|h| *h > 2.0 * CITIZEN_VOICE_EMPTY_SIZE)
-        .map_or(0.0, |h| h + HUD_MARGIN)
-}
-
 /// Whether the layout is docked to a screen edge. Docked windows
 /// do not remember positions; layout calculation repositions them.
 fn is_docked_layout(layout: &WindowLayout) -> bool {
@@ -575,15 +570,15 @@ pub fn record_window_geometry(app: &AppHandle, state: &SharedState, label: &str,
     let scale = win.scale_factor().unwrap_or(1.0);
     // Remember size using the inner client area. Restoration uses inner_size /
     // set_size, so remembering outer size would add frame thickness on every reopening
-    // (even undecorated resizable windows have invisible resize borders). Positions
-    // need no conversion because both outer_position and set_position use the outer frame.
+    // (even undecorated resizable windows have invisible resize borders). Remember the
+    // client position for the same reason, since `Placement` places the client area.
     let Some(size) = win.inner_size().map(|s| s.to_logical::<f64>(scale)).ok() else {
         return;
     };
 
     // For docked layouts, update size only. Remember positions in physical coordinates (`WindowGeometry`).
     let pos = if record_position && !is_docked {
-        win.outer_position().ok()
+        win.inner_position().ok()
     } else {
         None
     };
@@ -607,9 +602,9 @@ pub fn record_window_geometry(app: &AppHandle, state: &SharedState, label: &str,
 /// changes. Centralized layout calculation applies identical positions/sizes on every path.
 ///
 /// When the destination monitor contains the HUD, docked layouts avoid persistent HUD areas (left icon
-/// panel, bottom-center cockpit, bottom-right system tray, top-right citizen voice). Shift left docks by
-/// `HUD_LEFT_RESERVED`, start right docks below the citizen voice, and subtract reserved bottom height. In
-/// multi-display mode on a monitor without HUD, use the full screen edges.
+/// panel, bottom-center cockpit, bottom-right system tray). Shift left docks by `HUD_LEFT_RESERVED` and
+/// subtract reserved bottom height. The top-right citizen voice is not avoided: it need not stay visible, so
+/// right docks cover it. In multi-display mode on a monitor without HUD, use the full screen edges.
 ///
 /// Docked layouts (LeftPanel/RightPanel/BottomCenter/LeftTop/RightTop)
 ///   derive position from monitor data; saved_geometry overrides size only.
@@ -625,10 +620,10 @@ fn compute_window_geometry(
     target: &PopupTarget,
 ) -> Placement {
     let monitor = target.monitor.as_ref();
-    let (left_reserved, bottom_reserved, right_top_reserved, right_bottom_reserved) = if target.has_hud {
-        (HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, target.right_top_reserved, target.right_bottom_reserved)
+    let (left_reserved, bottom_reserved, right_bottom_reserved) = if target.has_hud {
+        (HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, target.right_bottom_reserved)
     } else {
-        (0.0, 0.0, 0.0, 0.0)
+        (0.0, 0.0, 0.0)
     };
 
     if definition.layout == WindowLayout::LeftPanel
@@ -674,7 +669,7 @@ fn compute_window_geometry(
 
             let margin = HUD_MARGIN;
             let computed_width = (m_size.width * 0.20).round();
-            let computed_height = m_size.height - right_top_reserved - right_bottom_reserved - margin * 2.0;
+            let computed_height = m_size.height - right_bottom_reserved - margin * 2.0;
 
             // Prefer remembered size when available. Right-edge placement depends on width.
             let panel_width = saved_geometry.map(|g| g.width).unwrap_or(computed_width);
@@ -685,7 +680,7 @@ fn compute_window_geometry(
                 LogicalSize::new(panel_width, panel_height),
                 LogicalPosition::new(
                     m_pos.x + m_size.width - panel_width - margin,
-                    m_pos.y + right_top_reserved + margin,
+                    m_pos.y + margin,
                 ),
             );
         }
@@ -744,7 +739,7 @@ fn compute_window_geometry(
             let margin = HUD_MARGIN;
             // Default size: use width_ratio of monitor width if specified; without height_ratio, make a
             // square (clamped to work area height excluding the cockpit). Without ratios, use registry dimensions.
-            let work_h = (m_size.height - right_top_reserved - bottom_reserved - margin * 2.0).max(200.0);
+            let work_h = (m_size.height - bottom_reserved - margin * 2.0).max(200.0);
             let (default_w, default_h) = match definition.width_ratio {
                 Some(rw) if rw > 0.0 => {
                     let w = (m_size.width * rw).round();
@@ -762,7 +757,7 @@ fn compute_window_geometry(
             return Placement::on_monitor(
                 Some(monitor),
                 LogicalSize::new(w, h),
-                LogicalPosition::new(m_pos.x + m_size.width - w - margin, m_pos.y + right_top_reserved + margin),
+                LogicalPosition::new(m_pos.x + m_size.width - w - margin, m_pos.y + margin),
             );
         }
     } else {

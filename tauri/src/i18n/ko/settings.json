@@ -45,6 +45,12 @@
       "hide": "표시 안 함",
       "description": "화면 상단에 조작 힌트를 표시하는 바입니다"
     },
+    "citizenVoice": {
+      "label": "시민의 목소리",
+      "show": "표시",
+      "hide": "표시 안 함",
+      "description": "화면 오른쪽 위에 시민의 발언을 차례로 표시하는 카드입니다"
+    },
     "language": {
       "label": "언어",
       "description": "UI 표시 언어입니다. 세이브 데이터의 언어와는 다릅니다.",

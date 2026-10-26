@@ -17,6 +17,7 @@
   display: flex;
   gap: 0.7rem;
   width: 100%;
+  cursor: pointer;
   animation: citizen-voice-in 0.45s ease-out;
 }
 
@@ -28,6 +29,15 @@
   width: calc(100% - 1.2rem);
   animation: citizen-voice-out 0.45s ease-in forwards;
   pointer-events: none;
+}
+
+/* Going back, the earlier card returns from the left and the current one leaves to the right. */
+.citizen-voice-card--back {
+  animation-name: citizen-voice-in-back;
+}
+
+.citizen-voice-card--leaving.citizen-voice-card--back {
+  animation-name: citizen-voice-out-back;
 }
 
 @keyframes citizen-voice-in {
@@ -52,6 +62,28 @@
   }
 }
 
+@keyframes citizen-voice-in-back {
+  from {
+    transform: translateX(-110%);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes citizen-voice-out-back {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+}
+
 .citizen-voice-face {
   flex: none;
   width: 9rem;
@@ -61,6 +93,20 @@
 }
 
 .citizen-voice-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.citizen-voice-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.citizen-voice-heading {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -82,20 +128,63 @@
   font-size: 0.85rem;
 }
 
-/* Reserve three lines so the card height, and with it the window, stays the same for most remarks. */
+/* The face sets the card height, so the remark takes everything below the name row down to the bottom. */
 .citizen-voice-message {
-  min-height: calc(3 * 1.4em);
+  flex: 1;
   margin: 0.25rem 0 0;
   color: var(--flat-text-body);
   line-height: 1.4;
 }
 
-.citizen-voice-actions {
-  display: flex;
-  gap: 0.3rem;
+/* Slide arrows over the card's left and right edges, outside the sliding cards so they stay put. */
+.citizen-voice-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 22px;
+  height: 40px;
+  padding: 2px;
+  transform: translateY(-50%);
+  background: rgba(10, 16, 26, 0.55);
+  color: var(--flat-text);
 }
 
-.citizen-voice-action {
-  width: 30px;
-  height: 30px;
+.citizen-voice-nav--previous {
+  left: 2px;
+}
+
+.citizen-voice-nav--next {
+  right: 2px;
+}
+
+.citizen-voice-nav:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Time left until the next card: a pie at the right end of the name row that drains over the slide interval. */
+.citizen-voice-countdown {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.citizen-voice-countdown-track {
+  fill: rgba(255, 255, 255, 0.1);
+}
+
+/* A stroke twice the radius fills the disc, so the dash length is the sector still left. */
+.citizen-voice-countdown-pie {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 9;
+  animation: citizen-voice-countdown linear forwards;
+}
+
+@keyframes citizen-voice-countdown {
+  from {
+    stroke-dasharray: 100 100;
+  }
+  to {
+    stroke-dasharray: 0 100;
+  }
 }
