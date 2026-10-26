@@ -676,8 +676,8 @@ export function AgentDetailPanel({
           {activeTab === "building" && hasBuildingInfoTab && !isPreConstruction && (
             <>
               {showBuildingPanel && <BuildingInfoPanel agent={agentData} />}
-              <BuildingInfo agent={agentData} onNavigate={navigateToAgent} />
               {showBuildingPanel && <ParkingInfoPanel agent={agentData} />}
+              <BuildingInfo agent={agentData} onNavigate={navigateToAgent} />
             </>
           )}
 
