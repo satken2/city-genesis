@@ -8,6 +8,7 @@ Shader "CityGenesis/Forest"
         _Metallic("Metallic", Range(0,1)) = 0
         _UndergroundAlpha("Underground opacity", Range(0,1)) = 1
         _ZWrite("Depth write", Float) = 1
+        _Foliage("Foliage shading", Float) = 0
     }
     SubShader
     {
@@ -17,18 +18,20 @@ Shader "CityGenesis/Forest"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
         #include "Assets/Shaders/ForestCoverage.hlsl"
+        #include "Assets/Shaders/Foliage.hlsl"
         struct ForestPoint { float4 positionScale; float4 rotationVisible; };
         StructuredBuffer<ForestPoint> _ForestPoints;
         TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
         float4 _BaseColor, _BaseMap_ST;
-        half _Smoothness, _Metallic, _UndergroundAlpha;
+        half _Smoothness, _Metallic, _UndergroundAlpha, _Foliage;
         float4x4 _PartLocal, _PartNormal;
         float3 _ForestCamera;
         float _DetailDistance, _TransitionWidth, _MaxDistance;
         int _ForestLod;
         float3 _LightDirection;
-        struct Attributes { float3 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; };
-        struct Varyings { float4 positionCS : SV_POSITION; float3 positionWS : TEXCOORD0; float3 normalWS : TEXCOORD1; float2 uv : TEXCOORD2; };
+        struct Attributes { float3 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; half4 color : COLOR; };
+        struct Varyings { float4 positionCS : SV_POSITION; float3 positionWS : TEXCOORD0; float3 normalWS : TEXCOORD1; float2 uv : TEXCOORD2;
+            float3 clumpPosition : TEXCOORD3; float3 origin : TEXCOORD4; half shade : TEXCOORD5; };
         float3 Rotate(float3 p, float angle)
         {
             float s,c; sincos(angle,s,c);
@@ -48,32 +51,22 @@ Shader "CityGenesis/Forest"
                 o.positionCS = float4(2,2,2,1);
                 return o;
             }
-            float3 local = mul(_PartLocal,float4(input.positionOS,1)).xyz * p.positionScale.w;
-            o.positionWS = p.positionScale.xyz + Rotate(local,p.rotationVisible.x);
+            o.clumpPosition = mul(_PartLocal,float4(input.positionOS,1)).xyz;
+            o.positionWS = p.positionScale.xyz + Rotate(o.clumpPosition * p.positionScale.w,p.rotationVisible.x);
             o.normalWS = normalize(Rotate(mul((float3x3)_PartNormal,input.normalOS),p.rotationVisible.x));
             o.positionCS = TransformWorldToHClip(o.positionWS);
             o.uv = input.uv * _BaseMap_ST.xy + _BaseMap_ST.zw;
+            o.origin = p.positionScale.xyz;
+            o.shade = input.color.r;
             return o;
         }
         half4 ForestFragment(Varyings input) : SV_Target
         {
-            // 配置だけを独自処理とし、陰影は本編のURP Litと共通にする。
-            InputData lighting = (InputData)0;
-            lighting.positionWS = input.positionWS;
-            lighting.normalWS = normalize(input.normalWS);
-            lighting.viewDirectionWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
-            lighting.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
-            lighting.bakedGI = SampleSH(lighting.normalWS);
-            lighting.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
-            lighting.shadowMask = half4(1,1,1,1);
-            SurfaceData surface = (SurfaceData)0;
-            surface.albedo = SAMPLE_TEXTURE2D(_BaseMap,sampler_BaseMap,input.uv).rgb * _BaseColor.rgb;
-            surface.metallic = _Metallic;
-            surface.smoothness = _Smoothness;
-            surface.normalTS = half3(0,0,1);
-            surface.occlusion = 1;
-            surface.alpha = 1;
-            half3 color = UniversalFragmentPBR(lighting,surface).rgb;
+            // 配置だけを独自処理とし、陰影は本編のURP Litと、葉は他の木の Foliage と共通にする。
+            InputData lighting = FoliageInputData(input.positionWS,input.normalWS,input.positionCS);
+            half3 albedo = lerp(SAMPLE_TEXTURE2D(_BaseMap,sampler_BaseMap,input.uv).rgb,
+                FoliageAlbedo(TEXTURE2D_ARGS(_BaseMap,sampler_BaseMap),input.positionWS,lighting.normalWS),_Foliage) * _BaseColor.rgb;
+            half3 color = FoliageShade(lighting,albedo,_Smoothness,_Metallic,input.shade,input.clumpPosition,input.origin,_Foliage);
             // Terrain/Litと同じビュー空間距離を使い、正投影でも霧の濃さを揃える。
             float fog = InitializeInputDataFog(float4(input.positionWS,1),0);
             return half4(MixFog(color,fog),_UndergroundAlpha);

@@ -19,18 +19,21 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'PropsQA.cs') -Destination "$qaR
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ForestQA.cs') -Destination "$qaRoot/Assets/Editor/ForestQA.cs" -Force
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Resources/Shaders" -Force | Out-Null
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Shaders" -Force | Out-Null
-Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/ForestCoverage.hlsl" -Destination "$qaRoot/Assets/Shaders" -Force
+Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/ForestCoverage.hlsl", "$unityRoot/Assets/Shaders/Foliage.hlsl" -Destination "$qaRoot/Assets/Shaders" -Force
 foreach ($name in @('TerrainSurfaceAppearance.hlsl', 'DepthOffsetTerrainLitMacroVariation.hlsl', 'TerrainCliffRock.hlsl', 'TerrainRiverBank.hlsl', 'UltraFarTerrainSink.hlsl')) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/$name" -Destination "$qaRoot/Assets/Shaders" -Force
 }
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/DepthOffsetTerrainLit.shader" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/OverlayLine.shader" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/Forest.shader", "$unityRoot/Assets/Resources/Shaders/ForestPlacement.compute" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
+# Shared leaf materials reference the foliage shader by GUID, so keep its meta.
+Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/Foliage.shader", "$unityRoot/Assets/Resources/Shaders/Foliage.shader.meta" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 # Create a verification forest shader with the clustered-lighting pragma removed, reproduce the issue where sunlight disappears in Forward+, and compare it with the original.
 $missingCluster = (Get-Content -LiteralPath "$unityRoot/Assets/Resources/Shaders/Forest.shader" -Raw).Replace('CityGenesis/Forest', 'CityGenesis/ForestWithoutCluster').Replace('#pragma multi_compile _ _CLUSTER_LIGHT_LOOP', '')
 Set-Content -LiteralPath "$qaRoot/Assets/Resources/Shaders/ForestWithoutCluster.shader" -Value $missingCluster
 Copy-Item -LiteralPath "$unityRoot/Assets/Editor/ModelPrefabGenerator.cs", "$unityRoot/Assets/Editor/ModelImportSettings.cs" -Destination "$qaRoot/Assets/Editor" -Force
 Get-ChildItem -LiteralPath "$unityRoot/Assets/Models/Props" | Copy-Item -Destination "$qaRoot/Assets/Models/Props" -Recurse -Force
+Copy-Item -LiteralPath "$unityRoot/Assets/Models/Materials" -Destination "$qaRoot/Assets/Models" -Recurse -Force
 Set-Content -LiteralPath "$qaRoot/Packages/manifest.json" -Value '{"dependencies":{"com.unity.render-pipelines.universal":"17.4.0","com.unity.nuget.newtonsoft-json":"3.2.2"}}'
 Set-Content -LiteralPath "$qaRoot/result.txt" -Value 'RUNNING'
 $arguments = @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'PropsQA.Run', '-propsSourceRoot', ('"' + $unityRoot + '"'), '-logFile', ('"' + "$qaRoot/qa.log" + '"'))

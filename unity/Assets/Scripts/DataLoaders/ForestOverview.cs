@@ -201,6 +201,7 @@ public sealed class ForestOverview : IDisposable
             }
             finally { RenderTexture.active = previous; RenderTexture.ReleaseTemporary(target); UnityEngine.Object.Destroy(sample); }
         }
+        color *= PropRenderModel.MeanShade(model.far);
         Shader.SetGlobalVector(type == 1 ? "_ForestPineColor" : "_ForestLeafColor", (Vector4)color);
     }
 

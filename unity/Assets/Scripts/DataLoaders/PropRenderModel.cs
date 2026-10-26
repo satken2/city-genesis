@@ -114,9 +114,27 @@ public sealed class PropRenderModel : IDisposable
             new Vector3(canopy.center.x,b.y,canopy.center.z)};
         mesh.triangles = new[] {0,1,2, 0,2,3, 0,4,1, 1,4,2, 2,4,3, 3,4,0};
         mesh.uv = new[] {Vector2.zero,Vector2.right,Vector2.one,Vector2.up,new Vector2(.5f,.5f)};
+        // The foliage shader reads vertex color R as canopy shade; keep the crown's mean brightness.
+        float shade = MeanShade(far);
+        var color = new Color(shade, shade, shade);
+        mesh.colors = new[] {color, color, color, color, color};
         mesh.RecalculateNormals(); mesh.RecalculateBounds();
         owned.Add(mesh);
         distant.Add(new Part {mesh=mesh, material=far[0].material, local=Matrix4x4.identity});
+    }
+
+    /// <summary>Mean vertex color R of parts (1 without colors). Foliage meshes bake canopy shade there.</summary>
+    public static float MeanShade(List<Part> parts)
+    {
+        float sum = 0f; int count = 0;
+        foreach (var part in parts)
+        {
+            if (!part.mesh.isReadable) continue;
+            var colors = part.mesh.colors;
+            foreach (var color in colors) sum += color.r;
+            count += colors.Length;
+        }
+        return count > 0 ? sum / count : 1f;
     }
 
     private void CalculateBounds()
@@ -162,10 +180,11 @@ public sealed class PropRenderModel : IDisposable
         if (indices.Length <= 384) return null;
         var positions = source.vertices;
         var sourceUv = source.uv;
+        var sourceColors = source.colors;
         var bounds = source.bounds;
         var size = bounds.size;
         var cells = new Dictionary<Vector3Int, int>();
-        var vertices = new List<Vector3>(); var uvs = new List<Vector2>(); var counts = new List<int>();
+        var vertices = new List<Vector3>(); var uvs = new List<Vector2>(); var colors = new List<Color>(); var counts = new List<int>();
         var mapping = new Dictionary<int, int>();
         foreach (int index in indices)
         {
@@ -178,17 +197,18 @@ public sealed class PropRenderModel : IDisposable
             if (!cells.TryGetValue(key, out int cluster))
             {
                 cluster = vertices.Count; cells.Add(key, cluster);
-                vertices.Add(Vector3.zero); uvs.Add(Vector2.zero); counts.Add(0);
+                vertices.Add(Vector3.zero); uvs.Add(Vector2.zero); colors.Add(Color.clear); counts.Add(0);
             }
             mapping.Add(index, cluster);
             vertices[cluster] += positions[index]; counts[cluster]++;
             if (sourceUv.Length == positions.Length) uvs[cluster] += sourceUv[index];
+            if (sourceColors.Length == positions.Length) colors[cluster] += sourceColors[index];
         }
-        for (int i = 0; i < vertices.Count; i++) { vertices[i] /= counts[i]; uvs[i] /= counts[i]; }
+        for (int i = 0; i < vertices.Count; i++) { vertices[i] /= counts[i]; uvs[i] /= counts[i]; colors[i] /= counts[i]; }
         // Flat shading: each triangle owns its vertices and face normal. Clustering collapses the front and back of thin
         // plates and opposite sides of cylinders onto the same vertices, so shared vertex normals cancel to zero and
         // become NaN in lighting (Bloom then spreads them into a white blob).
-        var flatVertices = new List<Vector3>(); var flatUvs = new List<Vector2>(); var normals = new List<Vector3>();
+        var flatVertices = new List<Vector3>(); var flatUvs = new List<Vector2>(); var flatColors = new List<Color>(); var normals = new List<Vector3>();
         var seen = new HashSet<(int,int,int)>();
         for (int i = 0; i < indices.Length; i += 3)
         {
@@ -201,7 +221,7 @@ public sealed class PropRenderModel : IDisposable
             var normal = cross / cross.magnitude;
             foreach (int v in new[] { a, b, c })
             {
-                flatVertices.Add(vertices[v]); flatUvs.Add(uvs[v]); normals.Add(normal);
+                flatVertices.Add(vertices[v]); flatUvs.Add(uvs[v]); flatColors.Add(colors[v]); normals.Add(normal);
             }
         }
         if (flatVertices.Count == 0 || flatVertices.Count >= indices.Length) return null;
@@ -209,6 +229,7 @@ public sealed class PropRenderModel : IDisposable
         for (int i = 0; i < triangles.Length; i++) triangles[i] = i;
         var mesh = new Mesh { name = "PropFarClustered" };
         mesh.SetVertices(flatVertices); mesh.SetNormals(normals); mesh.SetUVs(0,flatUvs); mesh.SetTriangles(triangles,0);
+        if (sourceColors.Length == positions.Length) mesh.SetColors(flatColors);
         mesh.RecalculateBounds(); return mesh;
     }
 

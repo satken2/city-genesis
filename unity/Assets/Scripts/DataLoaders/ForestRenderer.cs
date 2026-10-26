@@ -10,7 +10,7 @@ public sealed class ForestRenderer : IDisposable
     public const float TransitionWidth = 20f;
     public const int CandidateBudget = 2000000;
     readonly ComputeShader compute;
-    readonly Shader shader;
+    readonly Shader shader, foliageShader;
     readonly Dictionary<Material, Material> materials = new Dictionary<Material, Material>();
     readonly int kernel;
     public bool Supported => compute != null && shader != null && shader.isSupported;
@@ -20,6 +20,7 @@ public sealed class ForestRenderer : IDisposable
         if (!SystemInfo.supportsComputeShaders || !SystemInfo.supportsInstancing) return;
         compute = Resources.Load<ComputeShader>("Shaders/ForestPlacement");
         shader = Resources.Load<Shader>("Shaders/Forest");
+        foliageShader = Resources.Load<Shader>("Shaders/Foliage");
         if (Supported) kernel = compute.FindKernel("Generate");
     }
 
@@ -142,6 +143,7 @@ public sealed class ForestRenderer : IDisposable
         result.SetFloat("_Smoothness", source.HasProperty("_Smoothness") ? source.GetFloat("_Smoothness") :
             source.HasProperty("_Glossiness") ? source.GetFloat("_Glossiness") : .1f);
         result.SetFloat("_Metallic", source.HasProperty("_Metallic") ? source.GetFloat("_Metallic") : 0f);
+        result.SetFloat("_Foliage", source.shader == foliageShader ? 1f : 0f);
         result.SetTexture("_BaseMap", source.mainTexture != null ? source.mainTexture : Texture2D.whiteTexture);
         result.SetVector("_BaseMap_ST", new Vector4(source.mainTextureScale.x, source.mainTextureScale.y,
             source.mainTextureOffset.x, source.mainTextureOffset.y));
