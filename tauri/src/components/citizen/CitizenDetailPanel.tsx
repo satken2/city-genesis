@@ -10,6 +10,8 @@
  * - Camera: follow this citizen's car or pedestrian in Unity; press again to stop. State follows
  *   `citizen:follow_state`.
  * - Track: add to or remove from the tracking list, which persists in save data.
+ * - The mayor's actions, shared with the citizen voice card (`citizenActions.ts`). Expelling closes the panel, since
+ *   the citizen no longer exists.
  *
  * The Basic tab uses fields from /api/v1/citizens/{id} (the single_citizen schema in endpoints.yaml).
  * - Basic information: age, gender, marital status, household.
@@ -51,6 +53,7 @@ import {
   type CitizenItinerary,
 } from "../../utils/citizenTracking";
 import { CitizenActivityPanel } from "./CitizenActivityPanel";
+import { CITIZEN_ACTIONS, runCitizenAction, type CitizenActionId } from "./citizenActions";
 import { CameraIcon, TrackIcon } from "./CitizenTrackingIcons";
 import { citizenFaceUrl, citySkinTone } from "../../utils/citizenFace";
 import { useCityClimate } from "../../hooks/useCityClimate";
@@ -119,7 +122,7 @@ export function CitizenDetailPanel({
   pathTemplate,
   initialEntityId,
 }: CitizenDetailPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const masterData = useMasterData();
   const [citizenData, setCitizenData] = useState<CitizenData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -201,6 +204,12 @@ export function CitizenDetailPanel({
     } catch (err) {
       console.error("failed to toggle tracked citizen", err);
     }
+  }
+
+  async function handleAction(citizen: CitizenData, action: CitizenActionId) {
+    const target = { citizenId: citizen.citizen_id, name: citizen.name, householdAgentId: citizen.household_agent_id };
+    const done = await runCitizenAction(apiBaseUrl, action, target, t, i18n.language);
+    if (done && action === "expel") await invoke("close_current_window").catch(console.error);
   }
 
   useEffect(() => {
@@ -303,6 +312,19 @@ export function CitizenDetailPanel({
         >
           <TrackIcon />
         </button>
+        {CITIZEN_ACTIONS.map(({ id, icon }) => (
+          <button
+            key={id}
+            className="operation-btn"
+            type="button"
+            title={t(`citizenAction.${id}.label`)}
+            data-guide="citizen.action"
+            data-guide-value={id}
+            onClick={() => void handleAction(citizenData, id)}
+          >
+            <img src={icon} alt={t(`citizenAction.${id}.label`)} />
+          </button>
+        ))}
       </div>
 
       <div className="agent-detail-tabs">

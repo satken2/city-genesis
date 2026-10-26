@@ -1,0 +1,30 @@
+{
+  "citizenAction": {
+    "reward": {
+      "label": "Otorgar una recompensa",
+      "message": "Entregar al hogar de {{name}} una recompensa con fondos de la ciudad.\nEfectivo disponible de la ciudad: {{available}}",
+      "confirm": "Entregar"
+    },
+    "expel": {
+      "label": "Desearle mucho éxito fuera de la ciudad",
+      "results": {
+        "0": "{{name}} empacó sus cosas y dejó la ciudad en silencio. Nadie fue a despedirse.",
+        "1": "{{name}} cruzó el límite de la ciudad gritando: «¡No vuelvo nunca más!».",
+        "2": "Acompañamos amablemente a {{name}} hasta fuera de la ciudad. Le deseamos mucho éxito en otra parte."
+      }
+    },
+    "donation": {
+      "label": "Pedir una donación",
+      "message": "Pedir al hogar de {{name}} una donación para la ciudad.\nEfectivo disponible del hogar: {{available}}",
+      "confirm": "Pedir"
+    },
+    "relocate": {
+      "label": "Sugerir un nuevo hogar",
+      "results": {
+        "0": "La familia de {{name}} fue echada de su casa. Sus muebles están apilados junto a la calle.",
+        "1": "Cambiaron la cerradura de la casa de {{name}}. La familia ya busca un nuevo lugar.",
+        "2": "Le propusimos un nuevo hogar a la familia de {{name}}. Ya no puede volver al anterior."
+      }
+    }
+  }
+}

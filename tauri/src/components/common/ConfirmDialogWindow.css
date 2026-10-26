@@ -36,6 +36,24 @@
   gap: 8px;
 }
 
+.confirm-dialog-amount {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--flat-text-label);
+}
+
+.confirm-dialog-amount input {
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--flat-sunken);
+  color: var(--flat-text);
+}
+
 .confirm-dialog-btn {
   padding: 8px 18px;
   border: none;
@@ -76,4 +94,9 @@
 .confirm-dialog-btn:focus-visible {
   outline: 2px solid var(--flat-accent);
   outline-offset: 2px;
+}
+
+.confirm-dialog-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

@@ -1,0 +1,30 @@
+{
+  "citizenAction": {
+    "reward": {
+      "label": "Grant a reward",
+      "message": "Give {{name}}'s household a reward from city funds.\nCity cash: {{available}}",
+      "confirm": "Give"
+    },
+    "expel": {
+      "label": "Wish them every success outside the city",
+      "results": {
+        "0": "{{name}} packed up and quietly left the city. Nobody came to see them off.",
+        "1": "{{name}} crossed the city limits shouting, \"I'm never coming back!\"",
+        "2": "{{name}} has been courteously escorted past the city limits. We wish them every success elsewhere."
+      }
+    },
+    "donation": {
+      "label": "Ask for a donation",
+      "message": "Ask {{name}}'s household for a donation to the city.\nHousehold cash: {{available}}",
+      "confirm": "Ask"
+    },
+    "relocate": {
+      "label": "Suggest a new home",
+      "results": {
+        "0": "{{name}}'s family has been thrown out of their home. Their furniture is piled up by the road.",
+        "1": "The locks on {{name}}'s home have been changed. The family has started looking for a new place.",
+        "2": "{{name}}'s family has been offered a new home. They can't go back to the old one."
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "citizenAction": {
+    "reward": {
+      "label": "Accorder une prime",
+      "message": "Verser une récompense au ménage de {{name}} sur les fonds de la ville.\nTrésorerie de la ville : {{available}}",
+      "confirm": "Verser"
+    },
+    "expel": {
+      "label": "Lui souhaiter plein succès hors de la ville",
+      "results": {
+        "0": "{{name}} a fait ses valises et quitté la ville en silence. Personne n'est venu lui dire au revoir.",
+        "1": "{{name}} a franchi les limites de la ville en criant : « Je ne reviendrai jamais ! »",
+        "2": "{{name}} a été raccompagné(e) poliment hors de la ville. Nous lui souhaitons plein succès ailleurs."
+      }
+    },
+    "donation": {
+      "label": "Solliciter un don",
+      "message": "Demander au ménage de {{name}} un don pour la ville.\nTrésorerie du ménage : {{available}}",
+      "confirm": "Demander"
+    },
+    "relocate": {
+      "label": "Proposer un nouveau logement",
+      "results": {
+        "0": "La famille de {{name}} a été mise à la porte. Ses meubles sont empilés au bord de la rue.",
+        "1": "Les serrures de chez {{name}} ont été changées. La famille cherche déjà un nouveau logement.",
+        "2": "Un nouveau logement a été proposé à la famille de {{name}}. Impossible de retourner dans l'ancien."
+      }
+    }
+  }
+}
