@@ -24,7 +24,7 @@ public class IpcClient : MonoBehaviour
     // requires bidirectional editing via panel steppers (UI→Unity) and Unity keys.
     public event Action<int, float> OnEditPathChangeNode;
     public event Action<int, float> OnEditPathChangeEmbankment;
-    public event Action<float[][], int, float[], float, int> OnEditBuildingUpdateShape;
+    public event Action<float[][], int, float[], float, int, float[]> OnEditBuildingUpdateShape;
     public event Action<Newtonsoft.Json.Linq.JToken> OnEditBuildingPlacementCommand;
     public event Action<int> OnEditBuildingUpdateFloors;
     public event Action<int> OnBuildingExploded;
@@ -555,7 +555,8 @@ public class IpcClient : MonoBehaviour
                         float height = GetParamFloat(payload, "height");
                         Debug.Log($"IpcClient: edit_building:update_shape -> floors={floors}, has_center={centerPoint != null}, height={height}");
                         int revision = (int?)GetParamToken(payload, "placement_revision") ?? -1;
-                        OnEditBuildingUpdateShape?.Invoke(polygon, floors, centerPoint, height, revision);
+                        float[] berthLine = GetParamFloat1D(payload, "berth_line");
+                        OnEditBuildingUpdateShape?.Invoke(polygon, floors, centerPoint, height, revision, berthLine);
                     }
                     break;
 

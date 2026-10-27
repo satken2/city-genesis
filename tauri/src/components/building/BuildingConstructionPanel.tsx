@@ -532,6 +532,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           invalid_reason?: string | null;
           water_depth?: number;
           berth_depth?: number;
+          berth_line?: number[] | null;
           site_invalid_reason?: string | null;
           requires_acquisition?: boolean;
           acquisition?: { count: number; estimated_cost: number } | null;
@@ -563,6 +564,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
             f,
             data.center_point,
             data.height,
+            undefined,
+            data.berth_line,
           ).catch((err) => {
             console.error("[BuildingConstruction] sendEditBuildingUpdateShape failed:", err);
           });
@@ -814,6 +817,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       invalid_reason: string | null;
       water_depth?: number;
       berth_depth?: number;
+      berth_line?: number[] | null;
       requires_acquisition?: boolean;
       acquisition?: {
         blocking_parcel_ids: number[];
@@ -883,6 +887,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           data.center_point,
           data.height,
           placementRevision,
+          data.berth_line,
         ).catch((err) => {
           console.error("[BuildingConstruction] sendEditBuildingUpdateShape (direct) failed:", err);
         });

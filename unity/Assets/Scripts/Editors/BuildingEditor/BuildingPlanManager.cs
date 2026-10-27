@@ -63,6 +63,7 @@ public partial class BuildingPlanManager : MonoBehaviour
     private float[][] cachedPolygon;
     private float[] cachedCenterPoint;
     private float cachedHeight;
+    private float[] cachedBerthLine; // Backend quay line of the previewed parcel; null for the locally drawn direct ghost
 
     // Selected parcel ID
     private int selectedParcelId = -1;
@@ -452,6 +453,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         cachedPolygon = null;
         cachedCenterPoint = null;
         cachedHeight = 0f;
+        cachedBerthLine = null;
         selectedParcelId = -1;
 
         // Reset the direct placement ghost state.
@@ -474,7 +476,7 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// and directly generates the 3D preview mesh. This is the only source of parcel preview geometry;
     /// Unity does not query the backend for geometry.
     /// </summary>
-    public void OnUpdateShapeFromIpc(float[][] polygon, int floors, float[] centerPoint, float height, int revision = -1)
+    public void OnUpdateShapeFromIpc(float[][] polygon, int floors, float[] centerPoint, float height, int revision = -1, float[] berthLine = null)
     {
         if (!isBuildingModeActive) return;
         // Match direct placement generations so asynchronous replies cannot restore canceled positions or old dimensions.
@@ -494,6 +496,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         cachedPolygon = polygon;
         cachedCenterPoint = centerPoint;
         cachedHeight = height;
+        cachedBerthLine = berthLine;
 
         // When receiving the authoritative direct placement preview (phase B, from preview-direct),
         // retain its center so middle-button rotation can rotate the rectangle locally around it.
@@ -503,7 +506,7 @@ public partial class BuildingPlanManager : MonoBehaviour
             directPreviewVisible = true;
         }
 
-        BuildAndShowPreviewMesh(polygon, floors, centerPoint, height);
+        BuildAndShowPreviewMesh(polygon, floors, centerPoint, height, berthLine);
     }
 
     /// <summary>
@@ -512,9 +515,11 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// and the local direct placement rectangle ghost (BuildDirectRectanglePreview).
     /// The polygon uses coordinates relative to center_point, like actual backend buildings, while the center
     /// uses world coordinates (the mesh is generated locally and placed at center_point).
+    /// berthLine is the backend's quay line from the preview response (same format as BuildingSummary.berth_line), so a port
+    /// preview is cut where the built port will be. Pass null where none is known; the port is then drawn uncut.
     /// The caller is responsible for updating the cache and setting currentFloors.
     /// </summary>
-    private void BuildAndShowPreviewMesh(float[][] polygon, int floors, float[] centerPoint, float height)
+    private void BuildAndShowPreviewMesh(float[][] polygon, int floors, float[] centerPoint, float height, float[] berthLine)
     {
         if (polygon == null || polygon.Length < 3)
         {
@@ -542,6 +547,9 @@ public partial class BuildingPlanManager : MonoBehaviour
             floors = floors,
             height = height,
             polygon = polygonObjList,
+            berth_line = berthLine != null && berthLine.Length >= 4
+                ? new List<object> { berthLine[0], berthLine[1], berthLine[2], berthLine[3] }
+                : null,
             landmark = currentLandmark,
             visual_variant = currentVisualVariant,
             visual_variant2 = currentVisualVariant2,
@@ -669,7 +677,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         }
 
         // Rebuild the mesh from the cached footprint polygon and current visual_variant/floors.
-        BuildAndShowPreviewMesh(cachedPolygon, currentFloors, cachedCenterPoint, cachedHeight);
+        BuildAndShowPreviewMesh(cachedPolygon, currentFloors, cachedCenterPoint, cachedHeight, cachedBerthLine);
     }
 
     // ======================================================================
@@ -813,7 +821,8 @@ public partial class BuildingPlanManager : MonoBehaviour
         cachedPolygon = polygon;
         cachedCenterPoint = new float[] { cx, cz };
         cachedHeight = heightEstimate;
-        BuildAndShowPreviewMesh(polygon, currentFloors, new float[] { cx, cz }, heightEstimate);
+        cachedBerthLine = null;
+        BuildAndShowPreviewMesh(polygon, currentFloors, new float[] { cx, cz }, heightEstimate, null);
 
         directPreviewVisible = true;
         lastGhostCenter = directCenter;
@@ -927,6 +936,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         cachedPolygon = null;
         cachedCenterPoint = null;
         cachedHeight = 0f;
+        cachedBerthLine = null;
     }
 
     // ======================================================================

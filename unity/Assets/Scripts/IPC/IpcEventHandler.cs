@@ -376,19 +376,19 @@ public class IpcEventHandler : MonoBehaviour
     /// <summary>
     /// edit_building.update_shape → BuildingPlanManager.OnUpdateShapeFromIpc()
     /// Pass geometry fetched by the UI from backend preview endpoints
-    /// (polygon, floors, center_point, height) unchanged to BuildingPlanManager.
+    /// (polygon, floors, center_point, height, berth_line) unchanged to BuildingPlanManager.
     /// </summary>
     private void HandleEditBuildingPlacementCommand(Newtonsoft.Json.Linq.JToken command)
     {
         GetBuildingPlanManager()?.OnPlacementCommand(command);
     }
 
-    private void HandleEditBuildingUpdateShape(float[][] polygon, int floors, float[] centerPoint, float height, int revision)
+    private void HandleEditBuildingUpdateShape(float[][] polygon, int floors, float[] centerPoint, float height, int revision, float[] berthLine)
     {
         var bpm = GetBuildingPlanManager();
         if (bpm != null)
         {
-            bpm.OnUpdateShapeFromIpc(polygon, floors, centerPoint, height, revision);
+            bpm.OnUpdateShapeFromIpc(polygon, floors, centerPoint, height, revision, berthLine);
         }
     }
 

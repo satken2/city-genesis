@@ -189,7 +189,8 @@ export async function sendEditPathChangeEmbankment(nodeIndex: number, embankment
 /**
  * `edit_building.update_shape`
  * Change the building footprint during construction mode. Apply backend preview geometry to Unity's 3D preview.
- * center_point and height are required for preview mesh placement and scale.
+ * center_point and height are required for preview mesh placement and scale. berth_line is the backend's quay line
+ * of the parcel (same format as the building's berth_line); Unity cuts the preview port along it like the built one.
  */
 export async function sendEditBuildingUpdateShape(
   polygon: number[][],
@@ -197,6 +198,7 @@ export async function sendEditBuildingUpdateShape(
   centerPoint?: number[],
   height?: number,
   placementRevision?: number,
+  berthLine?: number[] | null,
 ): Promise<void> {
   await invoke("send_window_action", {
     windowType: "building_construction",
@@ -208,6 +210,7 @@ export async function sendEditBuildingUpdateShape(
       center_point: centerPoint ?? null,
       height: height ?? null,
       placement_revision: placementRevision ?? null,
+      berth_line: berthLine ?? null,
     },
   });
 }
