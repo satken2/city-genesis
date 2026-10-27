@@ -323,6 +323,7 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
     half riverRock = ApplyRiverSand(inputData.positionWS, albedo, smoothness, riverBed);
     ApplyCliffRock(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS, albedo, smoothness, riverRock);
     ApplyRiverBedWet(riverBed, albedo, smoothness);
+    ApplySeabedShade(inputData.positionWS, albedo);
     float forest = ForestSurfaceWeight(inputData.positionWS) * (1 - riverBed);
     if (forest > .001)
     {

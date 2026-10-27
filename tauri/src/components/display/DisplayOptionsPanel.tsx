@@ -674,6 +674,17 @@ function LayerSection({
             <span className="do-contour-icon">〰</span>
             <span className="do-contour-label">{t("display.showContours")}</span>
           </button>
+          <button
+            className={`do-contour-btn ${selection.flags.includes("seabed") ? "selected" : ""}`}
+            type="button"
+            onClick={() => {
+              playSound(clickSrc);
+              onToggleFlag(layer.id, "seabed");
+            }}
+          >
+            <span className="do-contour-icon">🌊</span>
+            <span className="do-contour-label">{t("display.showSeabed")}</span>
+          </button>
         </div>
       )}
     </div>

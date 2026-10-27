@@ -58,30 +58,31 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         {
             markerMaterial = Resources.Load<Material>("MarkerMaterial");
         }
+    }
 
-        // Automatically find ParcelEditorManager.
+    /// <summary>
+    /// Finds RoadPlanManager when an input first needs it and returns the cached reference.
+    /// Every terrain tile has this component, so a scene-wide search in Start would run for each created tile.
+    /// </summary>
+    private RoadPlanManager GetRoadPlanManager()
+    {
+        if (roadPlanManager == null)
+        {
+            roadPlanManager = FindAnyObjectByType<RoadPlanManager>();
+        }
+        return roadPlanManager;
+    }
+
+    /// <summary>
+    /// Finds ParcelEditorManager when an input first needs it and returns the cached reference.
+    /// </summary>
+    private ParcelEditorManager GetParcelEditorManager()
+    {
         if (parcelEditorManager == null)
         {
             parcelEditorManager = FindAnyObjectByType<ParcelEditorManager>();
         }
-
-        if (parcelEditorManager == null)
-        {
-            Debug.LogError("ParcelEditorManagerが見つかりません。シーンに配置されているか確認してください。");
-        }
-
-        // Automatically find PathManager.
-        if (pathManager == null)
-        {
-            pathManager = FindAnyObjectByType<PathManager>();
-        }
-
-        // Automatically find RoadPlanManager.
-        roadPlanManager = FindAnyObjectByType<RoadPlanManager>();
-        if (roadPlanManager == null)
-        {
-            Debug.LogError("RoadPlanManagerが見つかりません");
-        }
+        return parcelEditorManager;
     }
 
     /// <summary>
@@ -267,11 +268,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         switch (mode)
         {
             case InputMode.MODE_ROAD_CONSTRUCTION:
-                if (roadPlanManager != null)
-                {
-                    // Right click during road construction: finalize the road.
-                    roadPlanManager.OnTerrainRightClick(clickPosition);
-                }
+                // Right click during road construction: finalize the road.
+                GetRoadPlanManager()?.OnTerrainRightClick(clickPosition);
                 break;
             case InputMode.MODE_PARCEL_SHAPE_EDIT:
                 {
@@ -385,10 +383,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         switch (mode)
         {
             case InputMode.MODE_ROAD_CONSTRUCTION:
-                if (roadPlanManager != null)
-                {
-                    roadPlanManager.OnTerrainHover(finalPosition);
-                }
+                GetRoadPlanManager()?.OnTerrainHover(finalPosition);
                 break;
             case InputMode.MODE_BUILDING_CONSTRUCTION:
                 // Free/roadside placement ghosts. Do not apply shared road-centerline snapping.
@@ -474,9 +469,10 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     private void HandleParcelEditorPointSelection(Vector3 position)
     {
         // Notify ParcelEditorManager of point selection.
-        if (parcelEditorManager != null)
+        ParcelEditorManager parcelEditor = GetParcelEditorManager();
+        if (parcelEditor != null)
         {
-            parcelEditorManager.OnPointSelected(position);
+            parcelEditor.OnPointSelected(position);
         }
         else
         {
@@ -486,14 +482,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
 
     private void HandleRoadConstructionClick(Vector3 position)
     {
-        if (roadPlanManager == null)
+        RoadPlanManager roadPlan = GetRoadPlanManager();
+        if (roadPlan == null)
         {
             Debug.LogError("RoadPlanManagerが見つかりません");
             return;
         }
 
         // Delegate the already-snapped position directly to RoadPlanManager.
-        roadPlanManager.OnTerrainLeftClick(position);
+        roadPlan.OnTerrainLeftClick(position);
     }
 
     private void ShowMarker(Vector3 position)
@@ -568,10 +565,10 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // ParcelEditorManager.Update handles Esc selection reset itself
         // (retains creation mode to allow reselection in the same mode).
         // This only hides the terrain hover marker. This component exists per terrain tile,
-        // so keep the condition lightweight.
-        if (parcelEditorManager != null
-            && parcelEditorManager.IsActive
-            && InputUtil.WorldEscapeWasPressed)
+        // so check the key first and look up the manager only when Escape is pressed.
+        if (!InputUtil.WorldEscapeWasPressed) return;
+        ParcelEditorManager parcelEditor = GetParcelEditorManager();
+        if (parcelEditor != null && parcelEditor.IsActive)
         {
             HideMarker();
         }

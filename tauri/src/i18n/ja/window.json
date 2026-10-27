@@ -233,6 +233,7 @@
     "toggleShowPlanBuilding": "計画中の建物を表示",
     "toggleHighlightPublic": "公共施設をハイライト",
     "showContours": "等高線を表示",
+    "showSeabed": "海底を表示",
     "trayTooltip": "{{name}}: {{state}}",
     "trayStateVisible": "表示",
     "trayStateHidden": "非表示",

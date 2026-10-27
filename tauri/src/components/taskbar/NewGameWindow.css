@@ -446,11 +446,6 @@
   padding: 14px 26px 26px;
 }
 
-.new-game-detail .save-version-info {
-  font-size: 0.93rem;
-  color: var(--flat-text-muted);
-}
-
 /* Preserve line breaks in author-entered descriptions and completion conditions. */
 .new-game-detail-desc,
 .new-game-detail-block-text {
@@ -474,6 +469,39 @@
   font-weight: 600;
   color: var(--flat-text);
   border-left: 3px solid var(--flat-accent);
+}
+
+/* Credits: one toggle line; the attribution text appears only when opened. */
+.new-game-detail-credits summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  font-size: 0.93rem;
+  color: var(--flat-text-label);
+  list-style: none;
+  cursor: pointer;
+}
+
+.new-game-detail-credits summary::-webkit-details-marker {
+  display: none;
+}
+
+.new-game-detail-credits summary:hover {
+  color: var(--flat-text-body);
+}
+
+.new-game-detail-credits summary:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: 3px;
+}
+
+.new-game-detail-credits[open] summary {
+  margin-bottom: 10px;
+}
+
+.new-game-detail-credits[open] .new-game-section-chevron {
+  transform: rotate(45deg);
 }
 
 .new-game-detail-placeholder {

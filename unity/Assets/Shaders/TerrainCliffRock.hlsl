@@ -39,7 +39,9 @@ float _CliffSmoothness;       // 岩部分のスムースネス(乾いた岩な�
 float _CliffTexturesLoaded;   // 1=テクスチャ設定済み。0なら単色フォールバック
 float4 _CliffFallbackColor;   // テクスチャ未設定時の岩色
 float _CliffLowlandStart;     // 低地岩化の開始標高(m)。これ以上は傾斜のみで判定
-float _CliffLowlandFull;      // 低地岩化が最大になる標高(m)。これ以下の海底は一律で岩
+float _CliffLowlandFull;      // 低地岩化が最大になる標高(m)。ここから _SeabedSandHeight までの海底が岩場
+float _SeabedSandHeight;      // 海底が砂になりきる標高(m)。これより深い海底は砂
+float _SeabedShadeDepth;      // 海底を暗くする深さの尺度(m)。明るさ = 1/(1+水深/この値)
 float4 _CliffRockTint;        // 岩の色に掛ける色(地表種別ごと。白=岩テクスチャのまま)
 float4 _ShoreSandColor;       // rgb=波打ち際の砂の色, a=低地の岩を砂へ置き換える割合(0=岩のまま)
 // 海岸線からの陸側の距離マスク(0=海岸線・海, 1=低地の岩が消える距離以上)。TerrainManager が都市のマップ全域について作る。
@@ -61,10 +63,11 @@ float CliffCoastFactor(float3 positionWS)
 
 /// <summary>
 /// 岩ブレンド率を「傾斜による分」と「低地による分」に分けて求める(0=下地のまま, 1=完全に岩)。
+/// 低地のうち海底の深い側は岩ではなく砂の率 seabedSandMask に回す(岩場は波打ち際だけ)。
 /// 閾値にワールドノイズを加算することで、等高線状の均一な帯にならず
 /// 下地と岩の境界が自然に入り乱れる。
 /// </summary>
-void ComputeCliffMasks(float3 normalWS, float3 positionWS, out half slopeMask, out half lowlandMask)
+void ComputeCliffMasks(float3 normalWS, float3 positionWS, out half slopeMask, out half lowlandMask, out half seabedSandMask)
 {
     // --- 傾斜ベース: 急斜面ほど岩 ---
     float slope = 1.0 - saturate(normalWS.y); // 0=水平, 1=垂直
@@ -72,22 +75,38 @@ void ComputeCliffMasks(float3 normalWS, float3 positionWS, out half slopeMask, o
     float threshold = _CliffSlopeThreshold + jitter;
     slopeMask = (half)saturate((slope - threshold) / max(_CliffSlopeBlend, 1e-3));
 
-    // --- 標高ベース: 海岸線近くの低地(波打ち際)と海底は傾斜に関係なく岩 ---
+    // --- 標高ベース: 海岸線近くの低地(波打ち際)と浅い海底は傾斜に関係なく岩 ---
     // positionWS.y は標高(m)。海面がワールドY=0。_CliffLowlandStart(例:2m)から
     // _CliffLowlandFull(例:0m)へ徐々に岩へ寄せ、陸では海岸線から離れるほど弱める。
     // 汀線が真横一直線の帯にならないよう傾斜と同じノイズで開始標高を揺らす。
     float heightNoise = (TerrainMacroNoise(positionWS.xz / max(_CliffNoiseScale, 1.0) + 31.7) - 0.5) * 2.0;
     float lowlandStart = _CliffLowlandStart + heightNoise; // ノイズ振幅は±1m相当
     float lowlandSpan = max(lowlandStart - _CliffLowlandFull, 1e-3);
-    lowlandMask = (half)(saturate((lowlandStart - positionWS.y) / lowlandSpan) * CliffCoastFactor(positionWS));
+    float lowland = saturate((lowlandStart - positionWS.y) / lowlandSpan) * CliffCoastFactor(positionWS);
+    // 岩が最大になる標高から _SeabedSandHeight へ向けて砂に移す。境目は汀線と同じノイズで揺らす。
+    float sandSpan = max(_CliffLowlandFull - (_SeabedSandHeight + heightNoise), 1e-3);
+    float sand = saturate((_CliffLowlandFull - positionWS.y) / sandSpan);
+    lowlandMask = (half)(lowland * (1.0 - sand));
+    seabedSandMask = (half)(lowland * sand);
 }
 
 /// <summary>傾斜・標高いずれかの条件で岩になる率。</summary>
 half ComputeCliffMask(float3 normalWS, float3 positionWS)
 {
-    half slopeMask, lowlandMask;
-    ComputeCliffMasks(normalWS, positionWS, slopeMask, lowlandMask);
+    half slopeMask, lowlandMask, seabedSandMask;
+    ComputeCliffMasks(normalWS, positionWS, slopeMask, lowlandMask, seabedSandMask);
     return max(slopeMask, lowlandMask);
+}
+
+/// <summary>
+/// 海底を深いほど暗くする。水面を消して海底を見たときにも、起伏が明暗で分かるようにするため。
+/// 海面はワールドY=0。海岸線から離れた内陸の海面下の土地には掛けない(CliffCoastFactor)。
+/// </summary>
+void ApplySeabedShade(float3 positionWS, inout half3 albedo)
+{
+    float depth = max(-positionWS.y, 0.0);
+    half shade = (half)(1.0 / (1.0 + depth / max(_SeabedShadeDepth, 1.0)));
+    albedo *= lerp((half)1.0, shade, (half)CliffCoastFactor(positionWS));
 }
 
 /// <summary>
@@ -130,15 +149,15 @@ void SampleCliffRockNoTile(float2 uv, float2 duvdx, float2 duvdy, out half3 albe
 /// normalWS(シェーディング法線)は岩の法線をブレンドする出力先としてのみ使う。
 /// extraRockMask は傾斜・標高以外の理由で岩にしたい率(川床マスク。TerrainRiverBank.hlsl)。
 /// 低地の岩は _ShoreSandColor.a の割合だけ砂へ置き換える(砂漠・乾燥地の砂浜と、浅い海の砂の海底)。
-/// 急斜面と川床は置き換えず岩のまま残す。
+/// 岩場より深い海底は _ShoreSandColor.a によらず砂にする。急斜面と川床は置き換えず岩のまま残す。
 /// </summary>
 void ApplyCliffRock(float3 positionWS, float3 geoNormalWS, inout float3 normalWS, inout half3 albedo, inout half smoothness, half extraRockMask)
 {
-    half slopeMask, lowlandMask;
-    ComputeCliffMasks(geoNormalWS, positionWS, slopeMask, lowlandMask);
+    half slopeMask, lowlandMask, seabedSandMask;
+    ComputeCliffMasks(geoNormalWS, positionWS, slopeMask, lowlandMask, seabedSandMask);
     half shoreSand = (half)saturate(_ShoreSandColor.a);
     half mask = max(max(slopeMask, lowlandMask * (1 - shoreSand)), extraRockMask);
-    albedo = lerp(albedo, (half3)_ShoreSandColor.rgb, lowlandMask * shoreSand * (1 - mask));
+    albedo = lerp(albedo, (half3)_ShoreSandColor.rgb, (lowlandMask * shoreSand + seabedSandMask) * (1 - mask));
 
     // 平地ピクセルはテクスチャタップ0で早期脱出する。
     // 動的分岐内の微分は未定義なので、ミップ選択に使う微分は分岐の前に求めておく。

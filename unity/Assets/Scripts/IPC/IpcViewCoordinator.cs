@@ -36,7 +36,7 @@ public class IpcViewCoordinator : MonoBehaviour
 
     /// <summary>
     /// Per-layer display flags (CSV, e.g. "plan,public").
-    /// An ON/OFF set independent of color modes, currently used only by road/building layers.
+    /// An ON/OFF set independent of color modes, used by road/building/terrain layers.
     /// </summary>
     private Dictionary<string, string> _layerFlags = new Dictionary<string, string>();
 
@@ -232,7 +232,7 @@ public class IpcViewCoordinator : MonoBehaviour
         switch (layer)
         {
             case "terrain":
-                ApplyTerrainMode(mode, subMode);
+                ApplyTerrainMode(mode, subMode, effectiveFlags);
                 break;
 
             case "grid":
@@ -469,22 +469,7 @@ public class IpcViewCoordinator : MonoBehaviour
     {
         if (layer == "terrain")
         {
-            if (_normalStateMemory.TryGetValue("terrain", out var terrainMem))
-            {
-                _layerModes["terrain"] = terrainMem.mode;
-                if (!string.IsNullOrEmpty(terrainMem.subMode))
-                {
-                    _layerSubModes["terrain"] = terrainMem.subMode;
-                }
-                else
-                {
-                    _layerSubModes.Remove("terrain");
-                }
-            }
-            else
-            {
-                _layerSubModes.Remove("terrain");
-            }
+            RestoreTerrainToNormal();
         }
         else if (NORMAL_DEFAULTS.TryGetValue(layer, out var defaultVal))
         {
@@ -565,8 +550,8 @@ public class IpcViewCoordinator : MonoBehaviour
         ForceLayer("building", "default", null, "plan");
         ForceLayer("district", "border_icon");
         ForceLayer("prop", "hidden");
-        // Enable only contours. Preserve the user's terrain color mode (e.g. elevation colors).
-        ForceLayer("terrain", _layerModes["terrain"], "contour_on");
+        // Enable only contours and the seabed view. Preserve the user's terrain color mode (e.g. elevation colors).
+        ForceLayer("terrain", _layerModes["terrain"], "contour_on", "seabed");
     }
 
     /// <summary>
@@ -652,24 +637,21 @@ public class IpcViewCoordinator : MonoBehaviour
             }
         }
 
-        // Terrain color is not forced (editing changes only the contour submode), so
-        // without memory, retain current color mode and disable only contours.
+        RestoreTerrainToNormal();
+    }
+
+    /// <summary>
+    /// Terrain color is not forced (editing changes only the contour submode and the seabed flag), so
+    /// without memory, retain current color mode and disable only contours and the seabed view.
+    /// </summary>
+    private void RestoreTerrainToNormal()
+    {
         if (_normalStateMemory.TryGetValue("terrain", out var terrainMem))
         {
             _layerModes["terrain"] = terrainMem.mode;
-            if (!string.IsNullOrEmpty(terrainMem.subMode))
-            {
-                _layerSubModes["terrain"] = terrainMem.subMode;
-            }
-            else
-            {
-                _layerSubModes.Remove("terrain");
-            }
         }
-        else
-        {
-            _layerSubModes.Remove("terrain");
-        }
+        SetOrRemove(_layerSubModes, "terrain", terrainMem.subMode);
+        SetOrRemove(_layerFlags, "terrain", terrainMem.flags);
     }
 
     /// <summary>
@@ -692,7 +674,7 @@ public class IpcViewCoordinator : MonoBehaviour
     {
         switch (layer)
         {
-            case "terrain": ApplyTerrainMode(mode, subMode); break;
+            case "terrain": ApplyTerrainMode(mode, subMode, flags); break;
             case "grid": ApplyGridMode(mode); break;
             case "road": ApplyRoadMode(mode, subMode, flags); break;
             case "building": ApplyBuildingMode(mode, subMode, flags); break;
@@ -735,7 +717,7 @@ public class IpcViewCoordinator : MonoBehaviour
         IpcClient.Instance?.EmitViewCurrentState(layers);
     }
 
-    private void ApplyTerrainMode(string mode, string subMode = null)
+    private void ApplyTerrainMode(string mode, string subMode, string flags)
     {
         switch (mode)
         {
@@ -757,6 +739,8 @@ public class IpcViewCoordinator : MonoBehaviour
         {
             tm.SetContourLinesVisible(showContours);
         }
+
+        VisualSeaObject.SetSeabedView((ParseFlags(flags) & VisualFlag.SEABED) != 0);
     }
 
     private void ApplyGridMode(string mode)
@@ -857,6 +841,9 @@ public class IpcViewCoordinator : MonoBehaviour
                     break;
                 case "speed_limit":
                     result |= VisualFlag.SPEED_LIMIT_SIGNS;
+                    break;
+                case "seabed":
+                    result |= VisualFlag.SEABED;
                     break;
             }
         }

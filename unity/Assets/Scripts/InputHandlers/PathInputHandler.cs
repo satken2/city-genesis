@@ -17,20 +17,12 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
 
     private VisualModeObject visualModeObject;
 
-    // RoadPlanManager reference
-    private RoadPlanManager roadPlanManager;
-
-    // PathManager reference
-    private PathManager pathManager;
-
+    // Managers are looked up only when an input needs them. Every path rebuild adds this component,
+    // and a scene-wide search in Start would run for each rebuilt path.
     private void Start()
     {
         // Get the VisualModeObject component.
         visualModeObject = GetComponent<VisualModeObject>();
-
-        // Get manager references.
-        roadPlanManager = FindAnyObjectByType<RoadPlanManager>();
-        pathManager = FindAnyObjectByType<PathManager>();
     }
 
     public void onClick(int mode)
@@ -176,7 +168,8 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
         Debug.Log($"PathInputHandler: パス右クリック時の処理: {mode}");
 
         // Right-click handling in construction mode
-        if (mode == InputMode.MODE_ROAD_CONSTRUCTION && roadPlanManager != null)
+        RoadPlanManager roadPlanManager = mode == InputMode.MODE_ROAD_CONSTRUCTION ? FindAnyObjectByType<RoadPlanManager>() : null;
+        if (roadPlanManager != null)
         {
             // In new construction (not editing), handle as a terrain right click.
             if (!roadPlanManager.IsEditMode)
@@ -247,6 +240,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
     private void HandleRoadConstructionClick()
     {
         // Forward path clicks to RoadPlanManager as terrain clicks.
+        var roadPlanManager = FindAnyObjectByType<RoadPlanManager>();
         if (roadPlanManager != null)
         {
             Vector3 terrainClickPosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
@@ -284,7 +278,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
     /// </summary>
     private bool IsPathSelectableForParcelCreation()
     {
-        PathSummary pathData = pathManager?.GetPathData(pathId);
+        PathSummary pathData = FindAnyObjectByType<PathManager>()?.GetPathData(pathId);
         if (pathData == null)
         {
             return false;
@@ -299,7 +293,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
     /// </summary>
     private int GetPathStatus()
     {
-        PathSummary pathData = pathManager?.GetPathData(pathId);
+        PathSummary pathData = FindAnyObjectByType<PathManager>()?.GetPathData(pathId);
         return pathData?.status ?? -1;
     }
 
@@ -308,7 +302,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
     /// </summary>
     private int GetPathType()
     {
-        PathSummary pathData = pathManager?.GetPathData(pathId);
+        PathSummary pathData = FindAnyObjectByType<PathManager>()?.GetPathData(pathId);
         return pathData?.path_type ?? -1;
     }
 

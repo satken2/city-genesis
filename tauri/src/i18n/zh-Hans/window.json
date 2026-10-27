@@ -233,6 +233,7 @@
     "toggleShowPlanBuilding": "显示规划中的建筑",
     "toggleHighlightPublic": "高亮公共设施",
     "showContours": "显示等高线",
+    "showSeabed": "显示海底",
     "trayTooltip": "{{name}}：{{state}}",
     "trayStateVisible": "显示",
     "trayStateHidden": "隐藏",

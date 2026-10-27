@@ -233,6 +233,7 @@
     "toggleShowPlanBuilding": "계획 중인 건물 표시",
     "toggleHighlightPublic": "공공시설 강조",
     "showContours": "등고선 표시",
+    "showSeabed": "해저 표시",
     "trayTooltip": "{{name}}: {{state}}",
     "trayStateVisible": "표시",
     "trayStateHidden": "숨김",

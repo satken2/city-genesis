@@ -248,9 +248,12 @@
   text-align: center;
 }
 
-/* ---- Terrain tab contour toggle ---- */
+/* ---- Terrain tab contour / seabed toggles ---- */
 
 .do-terrain-extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);

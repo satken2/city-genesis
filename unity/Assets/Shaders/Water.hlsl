@@ -12,6 +12,7 @@
 //                   光が水底まで下りて視線方向へ上ってくる距離で、波長ごとに減衰させる。
 //                   赤が先に吸収されるので、浅瀬は水底が青緑に色づいて見え、深くなると
 //                   水底は見えなくなって水自身の体色(_DeepColor)だけが残る。
+//                   海底表示中は減衰を弱め、深い水底まで透かす(水面の反射は残す)。
 //  3. 岸のフォーム: 水深が浅い(岸ぎわ)ピクセルに、アニメする泡ノイズを乗せる。
 //  4. 屈折:         _CameraOpaqueTexture を波の法線でずらしてサンプリングし、水底を歪ませる。
 //                   ずらした先が水面より上(手前の物体・空)なら水中ではないので、ずらさない。
@@ -46,11 +47,16 @@
 #define WATER_IOR 1.33
 #define BERTH_SHALLOW_COLOR half3(1.0, 0.85, 0.1)
 #define BERTH_SHALLOW_OPACITY 0.5
+// 海底表示中の減衰係数の倍率。水深200mの水底も7割ほど透け、深いほどわずかに青く沈む。
+// 水底の無い遠景の海は水深が数千mになるので、透けずに水の体色のまま残る。
+#define SEABED_VIEW_ATTENUATION_SCALE 0.002
 
 // 日光のうち雲で広がった割合(天気が毎フレーム送る)。未設定の0では日光をすべて点光源として扱う。
 float _SunScatterFraction;
 // 建設中の建物の必要な岸壁水深(m)。BuildingPlanManager が送り、必要水深の無い建物と建設中以外は 0。
 float _RequiredBerthDepth;
+// 海底表示(地形レイヤーのフラグ seabed)。VisualSeaObject が送り、1 で水を澄ませて水底を透かす。
+float _SeabedView;
 
 // --- マテリアルプロパティ(SRP Batcher 互換のため UnityPerMaterial にまとめる) ---
 CBUFFER_START(UnityPerMaterial)
@@ -210,7 +216,8 @@ half4 WaterFragment(Varyings IN) : SV_Target
     // --- 水中の減衰: 光は水深ぶん下りて水底で反射し、屈折した視線に沿って水面へ戻る ---
     float cosAir   = saturate(viewDirWS.y);
     float cosWater = sqrt(1.0 - (1.0 - cosAir * cosAir) / (WATER_IOR * WATER_IOR));
-    float3 transmittance = exp(-_Attenuation.rgb * refractDepth * (1.0 + 1.0 / cosWater));
+    float3 attenuation   = _Attenuation.rgb * lerp(1.0, SEABED_VIEW_ATTENUATION_SCALE, saturate(_SeabedView));
+    float3 transmittance = exp(-attenuation * refractDepth * (1.0 + 1.0 / cosWater));
 
     // --- 岸のフォーム: 水深が浅いピクセルにアニメする泡ノイズを乗せる ---
     float foamBand  = 1.0 - saturate(waterDepth / max(_FoamDistance, 0.01));

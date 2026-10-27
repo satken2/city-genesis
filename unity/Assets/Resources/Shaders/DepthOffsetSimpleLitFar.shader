@@ -51,6 +51,8 @@ Shader "Custom/DepthOffsetSimpleLitFar"
         _CliffFallbackColor("Cliff Fallback Color", Color) = (0.42, 0.36, 0.30, 1.0)
         _CliffLowlandStart("Cliff Lowland Start Height (m)", Float) = 2.0
         _CliffLowlandFull("Cliff Lowland Full Height (m)", Float) = 0.0
+        _SeabedSandHeight("Seabed Sand Height (m)", Float) = -3.0
+        _SeabedShadeDepth("Seabed Shade Depth (m)", Float) = 30.0
         _CliffRockTint("Cliff Rock Tint", Color) = (1.0, 1.0, 1.0, 1.0)
         _ShoreSandColor("Shore Sand Color (A = Weight)", Color) = (0.80, 0.72, 0.56, 0.0)
 

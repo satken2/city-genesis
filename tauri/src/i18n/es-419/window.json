@@ -233,6 +233,7 @@
     "toggleShowPlanBuilding": "Mostrar edificios planeados",
     "toggleHighlightPublic": "Resaltar servicios públicos",
     "showContours": "Mostrar curvas de nivel",
+    "showSeabed": "Mostrar el fondo marino",
     "trayTooltip": "{{name}}: {{state}}",
     "trayStateVisible": "Visible",
     "trayStateHidden": "Oculto",

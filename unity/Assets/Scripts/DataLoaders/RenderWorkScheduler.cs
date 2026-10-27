@@ -440,7 +440,7 @@ internal static class BuildingStageProbe
 /// </summary>
 internal static class FreezeProbe
 {
-    private const float HitchSeconds = 0.2f;
+    private const float HitchSeconds = 0.05f;
     private static readonly List<(string name, Unity.Profiling.ProfilerRecorder recorder)> recorders = new();
     private static readonly HashSet<string> recordedNames = new();
     private static readonly List<Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle> handles = new();

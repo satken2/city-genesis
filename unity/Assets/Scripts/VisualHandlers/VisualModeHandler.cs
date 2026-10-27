@@ -25,6 +25,7 @@ public static class VisualFlag
     public const int SHOW_PLAN = 1 << 0;         // Show planned objects (TEMPORARY/PENDING/SCHEDULED).
     public const int HIGHLIGHT_PUBLIC = 1 << 1;  // Illuminate public-facility sites; BUILDING only, rendered by PublicFacilityGlowOverlay.
     public const int SPEED_LIMIT_SIGNS = 1 << 2; // Show signs for configured road/track speed limits.
+    public const int SEABED = 1 << 3;            // Make water clear to show the seabed; TERRAIN only, applied by VisualSeaObject.SetSeabedView.
 }
 
 /// <summary>

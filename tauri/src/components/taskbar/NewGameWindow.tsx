@@ -19,8 +19,9 @@
  * city-independent player profile (GET /api/v1/profile).
  * The fixed-width detail panel reaches the window's top/right/bottom edges. Its top image carries the title at
  * the lower edge, followed by description, map facts (size, ground cover, climate; scenarios only), completion
- * conditions, credits (only when written), and Start at the bottom. Descriptions/conditions are author-written free text; all map facts come
- * from the scenario list item (city values).
+ * conditions, credits (only when written; a one-line toggle, closed by default), and Start at the bottom.
+ * Descriptions/conditions are author-written free text; all map facts come from the scenario list item (city values).
+ * The save format version is not shown; only missing packs and the reason a scenario cannot load appear.
  *
  * Start opens a settings confirmation overlay within the window, not a native popup. Configure city name, naming
  * language, simulation days, etc. before starting. During play, warn about unsaved changes here. Keep the
@@ -49,7 +50,7 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 import { formatMapSize } from "../../utils/mapSize";
 import { FlatTabs } from "../common/FlatTabs";
 import { TerrainFacts } from "../common/TerrainFacts";
-import { ScenarioOriginBadges } from "../common/ScenarioSource";
+import { RequiredPacks, ScenarioOriginBadges } from "../common/ScenarioSource";
 import { SaveDialogButton } from "./SaveDialog";
 import { BackIcon, NewGameIcon, ScenarioIcon } from "./SaveIcons";
 import clearedBadgeImage from "../../assets/images/ui/badge.png";
@@ -58,7 +59,7 @@ import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
 import { AssetPackEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { ASSET_PACK_STANDARD, CLIMATE_TYPES, GROUND_COVER_TYPES } from "../../constants";
-import { SaveCompatibilityReason, SaveVersionInfo } from "../common/SaveVersionInfo";
+import { SaveCompatibilityReason } from "../common/SaveVersionInfo";
 import type { InfoDialogContent } from "../common/InfoDialogWindow";
 
 type NewGameWindowProps = {
@@ -617,9 +618,8 @@ export function NewGameWindow({
             </div>
 
             <div className="new-game-detail-content">
-              {detail.scenario
-                ? <SaveVersionInfo entry={detail.scenario} />
-                : <SaveCompatibilityReason compatibility={detail.compatibility} />}
+              {detail.scenario && <RequiredPacks entry={detail.scenario} />}
+              <SaveCompatibilityReason compatibility={detail.compatibility} />
               <p className="new-game-detail-desc">{detail.description}</p>
 
               {detail.terrain && <TerrainFacts {...detail.terrain} />}
@@ -630,10 +630,13 @@ export function NewGameWindow({
               </section>
 
               {detail.credits && (
-                <section className="new-game-detail-block">
-                  <h3 className="new-game-detail-block-title">{t("newGame.detailCreditsLabel")}</h3>
+                <details className="new-game-detail-credits">
+                  <summary>
+                    <span className="new-game-section-chevron" aria-hidden="true" />
+                    <span>{t("newGame.detailCreditsLabel")}</span>
+                  </summary>
                   <p className="new-game-detail-block-text">{detail.credits}</p>
-                </section>
+                </details>
               )}
             </div>
           </div>

@@ -233,6 +233,7 @@
     "toggleShowPlanBuilding": "Show Planned Buildings",
     "toggleHighlightPublic": "Highlight Public Facilities",
     "showContours": "Show Contour Lines",
+    "showSeabed": "Show Seabed",
     "trayTooltip": "{{name}}: {{state}}",
     "trayStateVisible": "Shown",
     "trayStateHidden": "Hidden",

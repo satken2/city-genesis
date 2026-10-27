@@ -593,10 +593,13 @@ assert.ok(facts()?.textContent?.includes("2 × 1 km"), "the map size comes from 
 assert.ok(!container.querySelector(".new-game-detail")?.textContent?.includes("flat.png"), "the terrain source file name is not shown");
 const workshopTile = [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")]
   .find(value => value.textContent?.includes("scenarios.origin.workshop"))!;
-const creditsBlock = () => [...container.querySelectorAll(".new-game-detail-block")]
-  .find(block => block.querySelector(".new-game-detail-block-title")?.textContent === "newGame.detailCreditsLabel");
-assert.equal(creditsBlock(), undefined, "scenarios without credits have no credits section");
+// クレジットは1行の開閉で、最初は閉じている。フォーマットの版は出さない。
+const creditsBlock = () => container.querySelector<HTMLDetailsElement>(".new-game-detail-credits");
+assert.ok(!creditsBlock(), "scenarios without credits have no credits toggle");
+assert.ok(!container.querySelector(".new-game-detail .save-version-info"), "the save format version is not shown");
 await act(async () => { workshopTile.click(); });
+assert.equal(creditsBlock()?.querySelector("summary")?.textContent, "newGame.detailCreditsLabel");
+assert.equal(creditsBlock()?.open, false, "credits start closed");
 assert.equal(creditsBlock()?.querySelector(".new-game-detail-block-text")?.textContent, "Elevation: Example DEM\nSource — https://example.com/dem",
   "credits are shown verbatim");
 assert.equal(facts()?.querySelector("title")?.textContent, "groundCover.1", "entries without values use the game's default ground cover");

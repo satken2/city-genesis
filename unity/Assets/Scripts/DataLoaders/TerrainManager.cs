@@ -195,8 +195,12 @@ public partial class TerrainManager : BaseApiDataManager
     [SerializeField] private Color cliffFallbackColor = new Color(0.42f, 0.36f, 0.30f, 1f);
     /// <summary>Elevation (m) where lowland rock blending begins. Lower land near the coastline gradually becomes rocky regardless of slope (coasts/shallow-water rock).</summary>
     [SerializeField] private float cliffLowlandStartHeight = 2f;
-    /// <summary>Elevation (m) of maximum lowland rock blending. The seabed below it is fully rocky. Default sea level (0m).</summary>
+    /// <summary>Elevation (m) of maximum lowland rock blending. The seabed from here down to <see cref="seabedSandHeight"/> is rocky. Default sea level (0m).</summary>
     [SerializeField] private float cliffLowlandFullHeight = 0f;
+    /// <summary>Elevation (m) where the seabed turns fully to sand (shore sand color). Only the waterline above it stays rocky.</summary>
+    [SerializeField] private float seabedSandHeight = -3f;
+    /// <summary>Depth scale (m) darkening the seabed: brightness = 1 / (1 + depth / this). Shows seabed relief when water is hidden.</summary>
+    [SerializeField] private float seabedShadeDepth = 30f;
     /// <summary>
     /// Inland distance (m) from the coastline where lowland rock fades out. Lowland rock is strongest at the coastline,
     /// so low plains far from the sea such as river deltas keep their ground cover. Applied when the coastline is next fetched.
@@ -234,6 +238,8 @@ public partial class TerrainManager : BaseApiDataManager
     private static readonly int CliffFallbackColorId = Shader.PropertyToID("_CliffFallbackColor");
     private static readonly int CliffLowlandStartId = Shader.PropertyToID("_CliffLowlandStart");
     private static readonly int CliffLowlandFullId = Shader.PropertyToID("_CliffLowlandFull");
+    private static readonly int SeabedSandHeightId = Shader.PropertyToID("_SeabedSandHeight");
+    private static readonly int SeabedShadeDepthId = Shader.PropertyToID("_SeabedShadeDepth");
     private static readonly int CliffCoastMaskId = Shader.PropertyToID("_CliffCoastMask");
     private static readonly int CliffCoastMaskRectId = Shader.PropertyToID("_CliffCoastMaskRect");
 
@@ -2685,6 +2691,8 @@ public partial class TerrainManager : BaseApiDataManager
         material.SetColor(CliffFallbackColorId, cliffFallbackColor);
         material.SetFloat(CliffLowlandStartId, cliffLowlandStartHeight);
         material.SetFloat(CliffLowlandFullId, cliffLowlandFullHeight);
+        material.SetFloat(SeabedSandHeightId, seabedSandHeight);
+        material.SetFloat(SeabedShadeDepthId, seabedShadeDepth);
     }
 
     /// <summary>
