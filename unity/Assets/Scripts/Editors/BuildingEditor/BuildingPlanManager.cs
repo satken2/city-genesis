@@ -28,8 +28,19 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// <summary>
     /// Required water depth just outside the quay (m) of the selected construction variant (agent_master.berth_depth); 0 means none.
     /// Paired with <see cref="SelectedParcelType"/> so highlighting and click validation apply the backend's site rule.
+    /// Also passed to the water shader (_RequiredBerthDepth), which paints water shallower than this while placing a port.
     /// </summary>
-    public static float SelectedBerthDepth { get; private set; }
+    public static float SelectedBerthDepth
+    {
+        get => selectedBerthDepth;
+        private set
+        {
+            selectedBerthDepth = value;
+            Shader.SetGlobalFloat(RequiredBerthDepthId, value);
+        }
+    }
+    private static float selectedBerthDepth;
+    private static readonly int RequiredBerthDepthId = Shader.PropertyToID("_RequiredBerthDepth");
 
     /// <summary>Site reason codes shared with the backend (bd_mask_util) and sent to the UI in edit_building:invalid_parcel.</summary>
     public const string SITE_INCOMPATIBLE_PARCEL_TYPE = "incompatible_parcel_type";

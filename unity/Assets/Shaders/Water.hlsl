@@ -19,6 +19,7 @@
 //                   フレネルによる空の映り込みと太陽のグレアを物理ベースで得る。
 //                   日光のうち雲で広がった割合は空の広い範囲から来るので、鋭いグレアにしない。
 //                   空の映り込みは、細かい波の陰で浅い角度ほど減る粗い面の反射率にする。
+//  6. 港の建設中:   必要な岸壁水深に届かない浅い水面を黄色で塗る。
 //
 // 水底の取得色は照明・大気フォグを含む描画済みの色なので、アルベドとして再照明せず、
 // PBR の結果へ「水面で反射されずに水中へ入り、戻ってきた割合」だけ足す。
@@ -43,9 +44,13 @@
 
 #define WATER_REFLECTANCE 0.02
 #define WATER_IOR 1.33
+#define BERTH_SHALLOW_COLOR half3(1.0, 0.85, 0.1)
+#define BERTH_SHALLOW_OPACITY 0.5
 
 // 日光のうち雲で広がった割合(天気が毎フレーム送る)。未設定の0では日光をすべて点光源として扱う。
 float _SunScatterFraction;
+// 建設中の建物の必要な岸壁水深(m)。BuildingPlanManager が送り、必要水深の無い建物と建設中以外は 0。
+float _RequiredBerthDepth;
 
 // --- マテリアルプロパティ(SRP Batcher 互換のため UnityPerMaterial にまとめる) ---
 CBUFFER_START(UnityPerMaterial)
@@ -246,6 +251,10 @@ half4 WaterFragment(Varyings IN) : SV_Target
     float3 bottomShare = transmittance * (1.0 - fresnel) * (1.0 - foamMask);
     half3  fogShare    = MixFog(half3(0, 0, 0), inputData.fogCoord);
     color.rgb = MixFog(color.rgb, inputData.fogCoord) + bottomShare * (refracted - fogShare);
+
+    // --- 港の建設中: 必要な岸壁水深に届かない水面を塗る(ちょうど必要水深なら届く。コアの立地判定と同じ) ---
+    float tooShallow = 1.0 - step(_RequiredBerthDepth, waterDepth);
+    color.rgb = lerp(color.rgb, BERTH_SHALLOW_COLOR, BERTH_SHALLOW_OPACITY * tooShallow);
 
     // --- 不透明度: 水際だけソフトにフェードさせて地形との境界をなじませる。
     //     水底は上で合成済みなので、それ以外は不透明にする。泡は境界でも残す。
