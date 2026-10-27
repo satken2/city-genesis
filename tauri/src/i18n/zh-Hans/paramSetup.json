@@ -379,7 +379,7 @@
     "startScenarioButton": "开始该剧本",
     "tabSelect": "选择剧本",
     "tabBrowse": "寻找剧本",
-    "comingSoon": "Coming soon",
+    "tabTerrain": "选择地形",
     "relocalizeNote": "此场景以{{from}}制作。以{{to}}开始时，区、设施、居民、车站等名称将以{{to}}重新命名(作者起的名称也会被替换;道路名称等会保留)。",
     "fixedByScenario": "由场景固定",
     "developmentNotice": {

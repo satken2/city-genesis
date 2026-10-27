@@ -4,9 +4,10 @@
  * Popup opened from New Game in the top/system menu. No title bar (registry chromeless); close through the
  * lower-left button or Esc.
  *
- * The left hero shows a subheading and heading-sized Select Scenario / Find Scenarios tabs. Find Scenarios is
- * disabled because shared scenario browsing is unavailable. Below, tiled sections show collapsible tutorial
- * missions and scenarios from all sources in the order of GET /api/v1/scenarios (bundled scenarios first).
+ * The left hero shows a subheading and heading-sized Select Scenario / Find Scenarios / Select Terrain tabs.
+ * Find Scenarios is disabled because shared scenario browsing is unavailable. Select Scenario shows tiled
+ * sections of collapsible tutorial missions and scenarios from every source except bundled, in the order of
+ * GET /api/v1/scenarios. Select Terrain lists the bundled scenarios (the game's standard maps) alone.
  * Development debug cities (source debug), included only when the core enables development debugging, appear
  * above tutorials in a separate Debug section and start like scenarios. There is no direct terrain start: import
  * elevation files as scenarios in scenario management first. Tutorials start from core-bundled lesson cities by
@@ -73,7 +74,7 @@ type ProfileEntry = {
   scenarios_cleared: string[];
 };
 
-type NewGameTab = "select" | "browse";
+type NewGameTab = "select" | "browse" | "terrain";
 
 /**
  * Selection displayed in the detail panel.
@@ -217,6 +218,7 @@ export function NewGameWindow({
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState("");
   const [hasCurrentGame, setHasCurrentGame] = useState<boolean | null>(null);
+  const [tab, setTab] = useState<NewGameTab>("select");
 
   // Selection currently displayed in details
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -471,21 +473,24 @@ export function NewGameWindow({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [busy, confirmSelection, handleCancelConfirm, onClose]);
 
-  // Find Scenarios is reserved for shared scenario browsing and unavailable, so always show Select Scenario.
+  // Find Scenarios is reserved for shared scenario browsing and stays disabled.
+  // Switching tabs clears the selection so details never show an item outside the visible list.
   const tabs = (
     <FlatTabs<NewGameTab>
       label={t("topmenu.newGame")}
-      active="select"
-      onChange={() => {}}
+      active={tab}
+      onChange={(next) => { setTab(next); setSelection(null); }}
       tabs={[
         { id: "select", label: t("newGame.tabSelect") },
-        { id: "browse", label: t("newGame.tabBrowse"), disabled: true, badge: t("newGame.comingSoon") },
+        { id: "browse", label: t("newGame.tabBrowse"), disabled: true },
+        { id: "terrain", label: t("newGame.tabTerrain") },
       ]}
     />
   );
 
   const debugCities = allScenarios.filter((entry) => entry.origin === "debug");
-  const scenarios = allScenarios.filter((entry) => entry.origin !== "debug");
+  const bundledScenarios = allScenarios.filter((entry) => entry.origin === "bundled");
+  const scenarios = allScenarios.filter((entry) => entry.origin !== "debug" && entry.origin !== "bundled");
   const scenarioTile = (entry: ScenarioEntry, index: number) => (
     <ScenarioTile
       key={entry.id}
@@ -500,6 +505,15 @@ export function NewGameWindow({
       <ScenarioOriginBadges entry={entry} />
     </ScenarioTile>
   );
+  // Unreadable items can still be selected to inspect the reason in details.
+  const scenarioTiles = (entries: ScenarioEntry[], firstIndex: number) =>
+    loading ? (
+      <div className="new-game-empty">{t("newGame.loading")}</div>
+    ) : entries.length === 0 ? (
+      <div className="new-game-empty">{t("newGame.noScenarios")}</div>
+    ) : (
+      <div className="new-game-tiles">{entries.map((entry, index) => scenarioTile(entry, firstIndex + index))}</div>
+    );
 
   const confirmScenario = confirmSelection?.scenario ?? null;
   const fixedOptions = new Set<ScenarioStartOption>(confirmScenario?.scenario_fixed_options ?? []);
@@ -514,63 +528,58 @@ export function NewGameWindow({
           {tabs}
         </header>
 
-        <div className="new-game-list">
-          {debugCities.length > 0 && (
-            <section className="new-game-section">
-              <h3 className="new-game-section-title">{t("newGame.sectionDebug")}</h3>
-              <div className="new-game-tiles">{debugCities.map(scenarioTile)}</div>
-            </section>
-          )}
-
-          <section className="new-game-section">
-            <h3 className="new-game-section-title">
-              <button
-                className="new-game-section-toggle"
-                type="button"
-                aria-expanded={tutorialsOpen}
-                aria-controls="new-game-tutorials"
-                onClick={() => setTutorialsExpanded(!tutorialsOpen)}
-              >
-                <span>{t("newGame.sectionTutorials")}</span>
-                <span className="new-game-section-chevron" aria-hidden="true" />
-              </button>
-            </h3>
-            <div id="new-game-tutorials" className="new-game-tiles" hidden={!tutorialsOpen}>
-              {NEW_GAME_TUTORIAL_SCENARIOS.map((scenario, index) => (
-                <ScenarioTile
-                  key={scenario.id}
-                  className="new-game-tile--tutorial"
-                  title={t(scenario.titleKey)}
-                  selected={isSelected("tutorial", scenario.id)}
-                  cleared={isTutorialCleared(scenario.id)}
-                  disabled={busy}
-                  index={debugCities.length + index}
-                  onSelect={() => setSelection({ kind: "tutorial", id: scenario.id })}
-                >
-                  {scenario.image ? (
-                    <img className="new-game-tile-image" src={scenario.image} alt="" draggable={false} />
-                  ) : (
-                    <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
-                  )}
-                </ScenarioTile>
-              ))}
-            </div>
-          </section>
-
-          <section className="new-game-section">
-            <h3 className="new-game-section-title">{t("newGame.sectionScenarios")}</h3>
-            {loading ? (
-              <div className="new-game-empty">{t("newGame.loading")}</div>
-            ) : scenarios.length === 0 ? (
-              <div className="new-game-empty">{t("newGame.noScenarios")}</div>
-            ) : (
-              <div className="new-game-tiles">
-                {/* Unreadable items can still be selected to inspect the reason in details. */}
-                {scenarios.map((entry, index) => scenarioTile(entry, debugCities.length + NEW_GAME_TUTORIAL_SCENARIOS.length + index))}
-              </div>
+        {tab === "terrain" ? (
+          <div className="new-game-list">{scenarioTiles(bundledScenarios, 0)}</div>
+        ) : (
+          <div className="new-game-list">
+            {debugCities.length > 0 && (
+              <section className="new-game-section">
+                <h3 className="new-game-section-title">{t("newGame.sectionDebug")}</h3>
+                <div className="new-game-tiles">{debugCities.map(scenarioTile)}</div>
+              </section>
             )}
-          </section>
-        </div>
+
+            <section className="new-game-section">
+              <h3 className="new-game-section-title">
+                <button
+                  className="new-game-section-toggle"
+                  type="button"
+                  aria-expanded={tutorialsOpen}
+                  aria-controls="new-game-tutorials"
+                  onClick={() => setTutorialsExpanded(!tutorialsOpen)}
+                >
+                  <span>{t("newGame.sectionTutorials")}</span>
+                  <span className="new-game-section-chevron" aria-hidden="true" />
+                </button>
+              </h3>
+              <div id="new-game-tutorials" className="new-game-tiles" hidden={!tutorialsOpen}>
+                {NEW_GAME_TUTORIAL_SCENARIOS.map((scenario, index) => (
+                  <ScenarioTile
+                    key={scenario.id}
+                    className="new-game-tile--tutorial"
+                    title={t(scenario.titleKey)}
+                    selected={isSelected("tutorial", scenario.id)}
+                    cleared={isTutorialCleared(scenario.id)}
+                    disabled={busy}
+                    index={debugCities.length + index}
+                    onSelect={() => setSelection({ kind: "tutorial", id: scenario.id })}
+                  >
+                    {scenario.image ? (
+                      <img className="new-game-tile-image" src={scenario.image} alt="" draggable={false} />
+                    ) : (
+                      <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
+                    )}
+                  </ScenarioTile>
+                ))}
+              </div>
+            </section>
+
+            <section className="new-game-section">
+              <h3 className="new-game-section-title">{t("newGame.sectionScenarios")}</h3>
+              {scenarioTiles(scenarios, debugCities.length + NEW_GAME_TUTORIAL_SCENARIOS.length)}
+            </section>
+          </div>
+        )}
 
         <footer className="new-game-footer">
           <SaveDialogButton disabled={busy} onClick={onClose}>{t("common.close")}</SaveDialogButton>

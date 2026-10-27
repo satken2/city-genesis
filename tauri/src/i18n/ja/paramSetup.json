@@ -379,7 +379,7 @@
     "startScenarioButton": "このシナリオを始める",
     "tabSelect": "シナリオを選択",
     "tabBrowse": "シナリオを探す",
-    "comingSoon": "Coming soon",
+    "tabTerrain": "地形を選択",
     "relocalizeNote": "このシナリオは{{from}}で作られています。{{to}}で始めると、地区・施設・住民・駅などの名前を{{to}}で付け直します(作者が付けた名前も置き換わります。道路名などは残ります)。",
     "fixedByScenario": "シナリオで固定",
     "developmentNotice": {

@@ -555,20 +555,28 @@ assert.equal(metadataWritten, undefined, "a title without English is not sent");
 assert.equal(container.querySelector(".scenario-error")?.textContent, "scenarios.englishRequired");
 await act(async () => { root.unmount(); });
 
-// ニューゲーム: 「シナリオを探す」は準備中。地形から直接始める入口は無い。
+// ニューゲーム: 「シナリオを探す」は準備中で押せない。同梱のシナリオは「地形を選択」にだけ並ぶ。地形から直接始める入口は無い。
 currentSaveId = "unsaved-city";
 const callsBeforeNewGame = state.calls.length;
 let newGameClosed = 0;
+entries.push({ ...entry, id: "bundled~island", origin: "bundled", read_only: true, scenario_title: { en: "Standard island" } });
 root = createRoot(container);
 await act(async () => { root.render(<NewGameWindow apiBaseUrl="http://test" onClose={() => { newGameClosed++; }} />); });
 await settle();
+entries.pop();
 const newGameTabs = [...container.querySelectorAll<HTMLButtonElement>("[role=tab]")];
-assert.deepEqual(newGameTabs.map(tab => tab.textContent), ["newGame.tabSelect", "newGame.tabBrowsenewGame.comingSoon"]);
+assert.deepEqual(newGameTabs.map(tab => tab.textContent), ["newGame.tabSelect", "newGame.tabBrowse", "newGame.tabTerrain"]);
 assert.ok(newGameTabs[1].disabled);
 assert.ok(!container.textContent?.includes("newGame.fromTerrain"));
 assert.equal(container.querySelectorAll(".new-game-tile--tutorial").length > 0, true);
 const tile = (title: string) => [...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")].find(value => value.title === title)!;
 assert.equal(container.querySelectorAll(".new-game-tile").length - container.querySelectorAll(".new-game-tile--tutorial").length, 4);
+assert.equal(tile("Standard island"), undefined, "bundled scenarios are not in Select Scenario");
+await act(async () => { tile("My scenario").click(); });
+await act(async () => { newGameTabs[2].click(); });
+assert.deepEqual([...container.querySelectorAll<HTMLButtonElement>(".new-game-tile")].map(value => value.title), ["Standard island"]);
+assert.equal(container.querySelector(".new-game-detail-title"), null, "switching tabs clears the selection");
+await act(async () => { newGameTabs[0].click(); });
 assert.equal(container.querySelectorAll(".new-game-tile-cleared").length, 0, "nothing is marked cleared before a clear is recorded");
 await act(async () => { tile("My scenario").click(); });
 assert.ok(!button("newGame.startScenarioButton").disabled);

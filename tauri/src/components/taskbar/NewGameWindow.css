@@ -122,11 +122,6 @@
   background: transparent;
 }
 
-.new-game-hero .flat-tab-badge {
-  align-self: center;
-  font-size: 0.85rem;
-}
-
 /* Tile list: grids beneath section headings. */
 .new-game-list {
   display: flex;
