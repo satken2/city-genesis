@@ -14,6 +14,8 @@ export type SaveCompatibility = {
 };
 /** Scenario storage source. Only local is writable; others are playable read-only. bundled is shipped with the game and listed first. debug denotes development cities returned only when the core starts in debug mode. */
 export type ScenarioOrigin = "local" | "bundled" | "workshop" | "dlc" | "debug";
+/** Tag given only by the bundled catalog. terrain marks a bare terrain listed under Select Terrain in New Game. */
+export type ScenarioTag = "standard" | "terrain";
 /** Required pack ownership state. unverified means production has neither Steam verification nor its cache yet. */
 export type PackStatus = "owned" | "not_owned" | "unverified";
 /** Common list information across save types. The API derives compatibility/ownership from the runtime environment. */
@@ -44,6 +46,7 @@ export type SaveEntry = CommonSaveEntry & {
 export type ScenarioEntry = CommonSaveEntry & {
   is_scenario: true;
   origin?: ScenarioOrigin;
+  tag?: ScenarioTag | null;
   read_only?: boolean;
   /** Whether the official signature is valid. */
   official?: boolean;

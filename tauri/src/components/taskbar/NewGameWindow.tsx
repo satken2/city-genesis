@@ -5,9 +5,9 @@
  * lower-left button or Esc.
  *
  * The left hero shows a subheading and heading-sized Select Scenario / Find Scenarios / Select Terrain tabs.
- * Find Scenarios is disabled because shared scenario browsing is unavailable. Select Scenario shows tiled
- * sections of collapsible tutorial missions and scenarios from every source except bundled, in the order of
- * GET /api/v1/scenarios. Select Terrain lists the bundled scenarios (the game's standard maps) alone.
+ * Find Scenarios is disabled because shared scenario browsing is unavailable. Select Terrain lists the scenarios
+ * the bundled catalog tags terrain (bare terrains). Select Scenario shows tiled sections of collapsible tutorial
+ * missions and all other scenarios, in the order of GET /api/v1/scenarios (bundled scenarios first).
  * Development debug cities (source debug), included only when the core enables development debugging, appear
  * above tutorials in a separate Debug section and start like scenarios. There is no direct terrain start: import
  * elevation files as scenarios in scenario management first. Tutorials start from core-bundled lesson cities by
@@ -489,8 +489,8 @@ export function NewGameWindow({
   );
 
   const debugCities = allScenarios.filter((entry) => entry.origin === "debug");
-  const bundledScenarios = allScenarios.filter((entry) => entry.origin === "bundled");
-  const scenarios = allScenarios.filter((entry) => entry.origin !== "debug" && entry.origin !== "bundled");
+  const terrains = allScenarios.filter((entry) => entry.tag === "terrain");
+  const scenarios = allScenarios.filter((entry) => entry.origin !== "debug" && entry.tag !== "terrain");
   const scenarioTile = (entry: ScenarioEntry, index: number) => (
     <ScenarioTile
       key={entry.id}
@@ -529,7 +529,7 @@ export function NewGameWindow({
         </header>
 
         {tab === "terrain" ? (
-          <div className="new-game-list">{scenarioTiles(bundledScenarios, 0)}</div>
+          <div className="new-game-list">{scenarioTiles(terrains, 0)}</div>
         ) : (
           <div className="new-game-list">
             {debugCities.length > 0 && (

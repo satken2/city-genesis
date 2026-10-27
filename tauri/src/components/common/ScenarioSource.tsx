@@ -2,10 +2,10 @@ import { useTranslation } from "react-i18next";
 import type { CommonSaveEntry, ScenarioEntry } from "../../utils/saves";
 import "./ScenarioSource.css";
 
-/** Scenario source badge and official signature. */
+/** Scenario source badge and official signature. Terrains get no source badge: New Game lists them in their own tab. */
 export function ScenarioOriginBadges({ entry }: { entry: ScenarioEntry }) {
   const { t } = useTranslation();
-  const origin = entry.origin;
+  const origin = entry.tag === "terrain" ? undefined : entry.origin;
   if (!origin && !entry.official) return null;
   return (
     <span className="scenario-badges">
