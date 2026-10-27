@@ -4,8 +4,22 @@ import {
   GROUND_COVER_SEMI_ARID,
   GROUND_COVER_SNOW,
 } from "../../constants";
+import { groundCoverRamp, type Rgb } from "../terrain/terrainData";
 
-/** Original SVG representing ground cover texture. Keep the type name in the tooltip and accessibility label. */
+/** Relative luminance (WCAG) of an sRGB color. */
+function luminance(rgb: Rgb): number {
+  const [r, g, b] = rgb.map(value => {
+    const c = value / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * Original SVG representing ground cover texture. Keep the type name in the tooltip and accessibility label.
+ * The rounded tile uses the cover's midslope terrain color (the same palette as the terrain editor and 2D map),
+ * and the glyph is black or white, whichever contrasts more with it.
+ */
 export function GroundCoverIcon({ cover, label }: { cover: number; label: string }) {
   let shape;
   switch (cover) {
@@ -24,10 +38,14 @@ export function GroundCoverIcon({ cover, label }: { cover: number; label: string
     default:
       shape = <><path d="M4 41h40M14 40Q15 27 7 23M14 35q3-13 8-17M25 40q-1-18-7-29M25 32q4-11 9-13M35 40q0-12 6-16" /></>;
   }
+  const background = groundCoverRamp(cover)[1];
+  const light = luminance(background);
+  const glyph = (light + 0.05) / 0.05 >= 1.05 / (light + 0.05) ? "#000" : "#fff";
   return (
-    <svg className="new-game-ground-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" role="img" aria-label={label}>
+    <svg className="new-game-ground-icon" viewBox="-8 -8 64 64" role="img" aria-label={label}>
       <title>{label}</title>
-      {shape}
+      <rect x="-8" y="-8" width="64" height="64" rx="13" fill={`rgb(${background.join(",")})`} />
+      <g fill="none" stroke={glyph} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">{shape}</g>
     </svg>
   );
 }

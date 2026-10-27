@@ -76,5 +76,4 @@
 .new-game-ground-icon {
   width: 2.2rem;
   height: 2.2rem;
-  color: color-mix(in srgb, var(--flat-accent) 55%, var(--flat-text));
 }
