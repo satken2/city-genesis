@@ -39,9 +39,25 @@ float _CliffSmoothness;       // 岩部分のスムースネス(乾いた岩な�
 float _CliffTexturesLoaded;   // 1=テクスチャ設定済み。0なら単色フォールバック
 float4 _CliffFallbackColor;   // テクスチャ未設定時の岩色
 float _CliffLowlandStart;     // 低地岩化の開始標高(m)。これ以上は傾斜のみで判定
-float _CliffLowlandFull;      // 低地岩化が最大になる標高(m)。これ以下(海面下含む)は一律で岩
+float _CliffLowlandFull;      // 低地岩化が最大になる標高(m)。これ以下の海底は一律で岩
 float4 _CliffRockTint;        // 岩の色に掛ける色(地表種別ごと。白=岩テクスチャのまま)
 float4 _ShoreSandColor;       // rgb=波打ち際の砂の色, a=低地の岩を砂へ置き換える割合(0=岩のまま)
+// 海岸線からの陸側の距離マスク(0=海岸線・海, 1=低地の岩が消える距離以上)。TerrainManager が都市のマップ全域について作る。
+// サンプラーは岩アルベドと共用する。
+TEXTURE2D(_CliffCoastMask);
+float4 _CliffCoastMaskRect;   // xy=マスクの南西隅(m), zw=1/マスクの幅・奥行(1/m)。zw=0 ならマスク無し
+
+/// <summary>
+/// 低地の岩を海岸線の近くに限る率(海岸線と海で1、陸の奥ほど0)。河口のデルタのような内陸の低い平地を岩にしないため。
+/// マスクの外(都市外の背景)とマスク無しのときは1で、標高だけで決まる。
+/// </summary>
+float CliffCoastFactor(float3 positionWS)
+{
+    if (_CliffCoastMaskRect.z <= 0.0) return 1.0;
+    float2 uv = (positionWS.xz - _CliffCoastMaskRect.xy) * _CliffCoastMaskRect.zw;
+    if (any(uv < 0.0) || any(uv > 1.0)) return 1.0;
+    return 1.0 - SAMPLE_TEXTURE2D_LOD(_CliffCoastMask, sampler_CliffAlbedoMap, uv, 0).r;
+}
 
 /// <summary>
 /// 岩ブレンド率を「傾斜による分」と「低地による分」に分けて求める(0=下地のまま, 1=完全に岩)。
@@ -56,14 +72,14 @@ void ComputeCliffMasks(float3 normalWS, float3 positionWS, out half slopeMask, o
     float threshold = _CliffSlopeThreshold + jitter;
     slopeMask = (half)saturate((slope - threshold) / max(_CliffSlopeBlend, 1e-3));
 
-    // --- 標高ベース: 低地(海面下・浅瀬)は傾斜に関係なく岩 ---
+    // --- 標高ベース: 海岸線近くの低地(波打ち際)と海底は傾斜に関係なく岩 ---
     // positionWS.y は標高(m)。海面がワールドY=0。_CliffLowlandStart(例:2m)から
-    // _CliffLowlandFull(例:0m)へ徐々に岩へ寄せ、それ以下(海面下)は一律で岩。
+    // _CliffLowlandFull(例:0m)へ徐々に岩へ寄せ、陸では海岸線から離れるほど弱める。
     // 汀線が真横一直線の帯にならないよう傾斜と同じノイズで開始標高を揺らす。
     float heightNoise = (TerrainMacroNoise(positionWS.xz / max(_CliffNoiseScale, 1.0) + 31.7) - 0.5) * 2.0;
     float lowlandStart = _CliffLowlandStart + heightNoise; // ノイズ振幅は±1m相当
     float lowlandSpan = max(lowlandStart - _CliffLowlandFull, 1e-3);
-    lowlandMask = (half)saturate((lowlandStart - positionWS.y) / lowlandSpan);
+    lowlandMask = (half)(saturate((lowlandStart - positionWS.y) / lowlandSpan) * CliffCoastFactor(positionWS));
 }
 
 /// <summary>傾斜・標高いずれかの条件で岩になる率。</summary>

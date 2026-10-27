@@ -193,10 +193,17 @@ public partial class TerrainManager : BaseApiDataManager
     [SerializeField, Range(0f, 1f)] private float cliffSmoothness = 0.08f;
     /// <summary>Fallback solid color when rock textures are unavailable.</summary>
     [SerializeField] private Color cliffFallbackColor = new Color(0.42f, 0.36f, 0.30f, 1f);
-    /// <summary>Elevation (m) where lowland rock blending begins. Lower land gradually becomes rocky regardless of slope (coasts/shallow-water rock).</summary>
+    /// <summary>Elevation (m) where lowland rock blending begins. Lower land near the coastline gradually becomes rocky regardless of slope (coasts/shallow-water rock).</summary>
     [SerializeField] private float cliffLowlandStartHeight = 2f;
-    /// <summary>Elevation (m) of maximum lowland rock blending. All lower elevations, including underwater Y<0, are fully rocky. Default sea level (0m).</summary>
+    /// <summary>Elevation (m) of maximum lowland rock blending. The seabed below it is fully rocky. Default sea level (0m).</summary>
     [SerializeField] private float cliffLowlandFullHeight = 0f;
+    /// <summary>
+    /// Inland distance (m) from the coastline where lowland rock fades out. Lowland rock is strongest at the coastline,
+    /// so low plains far from the sea such as river deltas keep their ground cover. Applied when the coastline is next fetched.
+    /// </summary>
+    [SerializeField] private float cliffLowlandCoastDistance = 50f;
+    /// <summary>Coastline distance mask over the city map for lowland rock. Null without a coastline.</summary>
+    private Texture2D cliffCoastMask;
 
     /// <summary>Flag resolving Resources rock texture fallbacks only once.</summary>
     private bool cliffTexturesResolved = false;
@@ -227,6 +234,8 @@ public partial class TerrainManager : BaseApiDataManager
     private static readonly int CliffFallbackColorId = Shader.PropertyToID("_CliffFallbackColor");
     private static readonly int CliffLowlandStartId = Shader.PropertyToID("_CliffLowlandStart");
     private static readonly int CliffLowlandFullId = Shader.PropertyToID("_CliffLowlandFull");
+    private static readonly int CliffCoastMaskId = Shader.PropertyToID("_CliffCoastMask");
+    private static readonly int CliffCoastMaskRectId = Shader.PropertyToID("_CliffCoastMaskRect");
 
     // === Settings (lazily loaded from API) ===
     private TerrainSettingsData terrainSettings;
@@ -530,6 +539,7 @@ public partial class TerrainManager : BaseApiDataManager
     private void OnDestroy()
     {
         GroundCoverPalette.Changed -= MarkGroundCoverMaterialsDirty;
+        ClearCliffCoastMask();
         // Clear cached references when TerrainManager is destroyed,
         // allowing subsequent GetGroundHeight calls to use the fallback path.
         if (Utils.CachedTerrainManager == this)
@@ -2223,6 +2233,8 @@ public partial class TerrainManager : BaseApiDataManager
         {
             Debug.Log($"TerrainManager: Coastline loaded (hasCoastline={CoastlineStore.HasCoastline}).");
         }
+        // Build the lowland rock coast mask in the background while the remaining shore data is fetched.
+        Coroutine coastMask = StartCoroutine(BuildCliffCoastMask());
 
         // Fetch and generate non-sea water surfaces such as lakes alongside coastlines.
         // WaterSurfaceManager creates itself in AfterSceneLoad, so Instance normally exists.
@@ -2242,7 +2254,62 @@ public partial class TerrainManager : BaseApiDataManager
         {
             yield return ReclaimedLandManager.Instance.LoadAndBuild();
         }
+        yield return coastMask;
         ShoreDataVersion++;
+    }
+
+    /// <summary>
+    /// Publish the coastline distance mask read by lowland rock (Assets/Shaders/TerrainCliffRock.hlsl) over the city map.
+    /// Texels hold inland distance from the coastline divided by cliffLowlandCoastDistance (0 at the coastline and at sea, 1 beyond it).
+    /// Texels span half that distance, enough for the linear fade under bilinear filtering.
+    /// Without a coastline, clear the mask so lowland rock depends on elevation alone.
+    /// </summary>
+    private IEnumerator BuildCliffCoastMask()
+    {
+        if (!CoastlineStore.HasCoastline)
+        {
+            ClearCliffCoastMask();
+            yield break;
+        }
+        float width = GetMapWidth();
+        float height = GetMapHeight();
+        float range = Mathf.Max(1f, cliffLowlandCoastDistance);
+        float texel = Mathf.Max(range * 0.5f, Mathf.Max(width, height) / 4096f);
+        int nx = Mathf.CeilToInt(width / texel);
+        int nz = Mathf.CeilToInt(height / texel);
+        var xs = new float[nx];
+        var zs = new float[nz];
+        for (int i = 0; i < nx; i++) xs[i] = -width * 0.5f + (i + 0.5f) * width / nx;
+        for (int j = 0; j < nz; j++) zs[j] = -height * 0.5f + (j + 0.5f) * height / nz;
+
+        int version = CoastlineStore.Version;
+        Task<byte[]> task = BackgroundWork.Run(() =>
+        {
+            float[,] signed = CoastlineStore.SampleSignedDistanceGrid(xs, zs, range);
+            var data = new byte[nx * nz];
+            for (int j = 0; j < nz; j++)
+                for (int i = 0; i < nx; i++)
+                    data[j * nx + i] = (byte)Mathf.RoundToInt(255f * Mathf.Clamp01(signed[i, j] / range));
+            return data;
+        });
+        yield return Utils.WaitTask(task);
+        if (task.IsFaulted || task.IsCanceled || version != CoastlineStore.Version) yield break;
+
+        var mask = new Texture2D(nx, nz, TextureFormat.R8, false, true) { name = "CliffCoastMask" };
+        mask.SetPixelData(task.Result, 0);
+        mask.Apply(false, true);
+        ClearCliffCoastMask();
+        cliffCoastMask = mask;
+        Shader.SetGlobalTexture(CliffCoastMaskId, mask);
+        Shader.SetGlobalVector(CliffCoastMaskRectId, new Vector4(-width * 0.5f, -height * 0.5f, 1f / width, 1f / height));
+    }
+
+    /// <summary>Discard the coast mask. The shader treats a zero rect as no mask.</summary>
+    private void ClearCliffCoastMask()
+    {
+        Shader.SetGlobalVector(CliffCoastMaskRectId, Vector4.zero);
+        if (cliffCoastMask != null) Destroy(cliffCoastMask);
+        cliffCoastMask = null;
     }
 
     /// <summary>
