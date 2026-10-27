@@ -182,6 +182,8 @@ fn begin_epoch_presentation(app: tauri::AppHandle, state: tauri::State<'_, Share
             return Err(error);
         }
     }
+    // Hide the HUD as during initial loading; `finish_epoch_presentation` shows it again.
+    window::set_hud_visible(&app, false);
     let _ = app.emit("epoch:executing", serde_json::json!({"executing": true}));
     Ok(connected)
 }
@@ -1192,7 +1194,6 @@ async fn resize_notification_window(
 
 /// Advance the load request generation and ignore completion notifications from the previous session.
 fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setup: bool) -> Result<(), String> {
-    window::cancel_epoch_presentation(app, state);
     {
         let mut guard = state.lock();
         guard.loading_id += 1;
@@ -1205,6 +1206,8 @@ fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setu
         guard.tutorial_id = None;
         guard.intro_dialog = None;
     }
+    // Cancel after marking the load so the cancelled presentation does not show the HUD again.
+    window::cancel_epoch_presentation(app, state);
     window::set_hud_visible(app, false);
     if let Some(hintbar) = app.get_webview_window("hintbar") { let _ = hintbar.hide(); }
     let result = ipc::send_ui_action(state, "".into(), None, "game:loading".into(), serde_json::json!({}))
@@ -1626,9 +1629,9 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             // On recovery, apply session disappearance or switches before allowing
             // interaction. This order prevents stale screens from updating the newly connected city.
             if !observe_backend(&app, &state, true) { break; }
-            let (is_loading, tutorial_id) = {
+            let (is_loading, epoch_presenting, tutorial_id) = {
                 let guard = state.lock();
-                (guard.is_loading, guard.tutorial_id.clone())
+                (guard.is_loading, guard.epoch_presentation_id.is_some(), guard.tutorial_id.clone())
             };
             let _ = app.emit("session-state", serde_json::json!({
                 "current_save_id": current_save_id,
@@ -1636,6 +1639,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 "city": city_data,
                 "apiBaseUrl": api_base_url,
                 "isLoading": is_loading,
+                "epochPresenting": epoch_presenting,
                 "tutorialId": tutorial_id,
                 "coreVersion": core["core_version"],
                 "backendConnected": true,

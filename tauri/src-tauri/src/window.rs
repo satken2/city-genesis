@@ -1048,13 +1048,15 @@ pub fn cancel_epoch_presentation(app: &AppHandle, state: &SharedState) {
 }
 
 pub fn finish_epoch_presentation(app: &AppHandle, state: &SharedState, id: &str) {
-    let connected = {
+    let (connected, in_play) = {
         let mut guard = state.lock();
         if guard.epoch_presentation_id.as_deref() != Some(id) { return; }
         guard.epoch_presentation_id = None;
-        guard.graphic_connected
+        (guard.graphic_connected, guard.last_session_id.is_some() && !guard.is_loading)
     };
     close_tips_window(app);
+    // A presentation cancelled by a city switch or the return to the top menu leaves the HUD to them.
+    if in_play { set_hud_visible(app, true); }
     if connected {
         if let Err(error) = ipc::send_ui_action(state, "".into(), None, "epoch:executing".into(), json!({"executing": false})) {
             log::error!("epoch presentation finish: {error}");

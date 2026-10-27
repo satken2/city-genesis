@@ -6,9 +6,9 @@
  * (`citizen/citizenVoiceRemark.ts`).
  *
  * - Fetch VOICE_BATCH voices at a time and fetch again when VOICE_REFILL_AT or fewer are queued, so cards keep flowing.
- *   An empty batch (epoch running, or no adult residents yet) stops fetching until the next epoch ends.
- * - Voices describe the city when they were fetched, so the queue and the cards already shown are discarded and
- *   refetched when an epoch ends.
+ *   An empty batch (no adult residents yet) stops fetching until the next epoch ends.
+ * - Voices describe the city when they were fetched, so an epoch run is treated like no session: the deck is dropped,
+ *   the card on screen included, and fetched afresh when the run ends.
  * - Each card stays SLIDE_MS; the pie at the top right drains over that time. Hovering pauses the countdown so a
  *   click always opens the citizen under the pointer, and it resumes where it stopped on leaving.
  * - The arrows over the left and right edges go back through the cards already shown and forward through the queue.
@@ -49,7 +49,6 @@ type DeckAction =
   | { type: "next" }
   | { type: "previous" }
   | { type: "left" }
-  | { type: "discardQueue" }
   | { type: "reset" };
 
 const EMPTY_DECK: Deck = { history: [], queue: [], current: null, leaving: null, back: false };
@@ -71,8 +70,6 @@ function deckReducer(deck: Deck, action: DeckAction): Deck {
     }
     case "left":
       return { ...deck, leaving: null };
-    case "discardQueue":
-      return { ...deck, history: [], queue: [] };
     case "reset":
       return EMPTY_DECK;
   }
@@ -104,7 +101,7 @@ export function CitizenVoice() {
   const { t, i18n } = useTranslation();
   const { visible, apiBaseUrl, epochExecuting } = useHudSession();
   const [enabled, setEnabled] = useState(true);
-  const active = visible && enabled;
+  const active = visible && enabled && !epochExecuting;
   const climate = useCityClimate(apiBaseUrl);
   const [deck, dispatch] = useReducer(deckReducer, EMPTY_DECK);
   const [paused, setPaused] = useState(false);
@@ -112,15 +109,14 @@ export function CitizenVoice() {
   const fetching = useRef(false);
   /** Incremented on every reset so a batch requested before it is dropped. */
   const generation = useRef(0);
-  const wasExecuting = useRef(epochExecuting);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
-  function restart(action: DeckAction) {
+  function reset() {
     generation.current += 1;
     fetching.current = false;
     setExhausted(false);
     setPaused(false);
-    dispatch(action);
+    dispatch({ type: "reset" });
   }
 
   useEffect(() => {
@@ -135,16 +131,11 @@ export function CitizenVoice() {
   }, []);
 
   useEffect(() => {
-    if (!active) restart({ type: "reset" });
+    if (!active) reset();
   }, [active]);
 
   useEffect(() => {
-    if (wasExecuting.current && !epochExecuting) restart({ type: "discardQueue" });
-    wasExecuting.current = epochExecuting;
-  }, [epochExecuting]);
-
-  useEffect(() => {
-    if (!active || !apiBaseUrl || epochExecuting || exhausted || fetching.current) return;
+    if (!active || !apiBaseUrl || exhausted || fetching.current) return;
     if (deck.queue.length > VOICE_REFILL_AT) return;
     const requested = generation.current;
     fetching.current = true;
@@ -158,7 +149,7 @@ export function CitizenVoice() {
       .finally(() => {
         if (requested === generation.current) fetching.current = false;
       });
-  }, [active, apiBaseUrl, epochExecuting, exhausted, deck.queue.length, i18n]);
+  }, [active, apiBaseUrl, exhausted, deck.queue.length, i18n]);
 
   const hasNext = deck.queue.length > 0;
   const hasPrevious = deck.history.length > 0;
@@ -264,7 +255,7 @@ export function CitizenVoice() {
   return (
     <div
       ref={panelRef}
-      className={`hud-panel citizen-voice ${epochExecuting ? "hud-disabled" : ""}`}
+      className="hud-panel citizen-voice"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
