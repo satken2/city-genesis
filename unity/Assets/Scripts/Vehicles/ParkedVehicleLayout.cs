@@ -6,7 +6,8 @@ public static class ParkedVehicleLayout
 {
     public const float EndMargin = 5f;
     public const float Gap = 1.2f;
-    public const float CurbMargin = .2f;
+    public const float CurbMargin = .02f;
+    private const float SingleLaneCurbMargin = .2f;
 
     public sealed class Model
     {
@@ -49,17 +50,18 @@ public static class ParkedVehicleLayout
     }
 
     public static List<Placement> Build(VehiclePolyline line, int pathId, float width, float sidewalk,
-        float divider, int direction, int trafficHand, IReadOnlyList<Model> models)
+        float divider, int lanes, int direction, int trafficHand, IReadOnlyList<Model> models)
     {
         var result = new List<Placement>();
         if (line.Length <= EndMargin * 2 || models.Count == 0) return result;
         float outer = width * .5f - Mathf.Max(0, sidewalk);
         float inner = Mathf.Max(0, divider) * .5f;
+        float curbMargin = lanes >= 2 ? CurbMargin : SingleLaneCurbMargin;
         var eligible = new Dictionary<int, List<int>>();
         var eligibleWeights = new Dictionary<int, List<int>>();
         for (int i = 0; i < models.Count; i++)
         {
-            if (models[i].size.x + CurbMargin > outer - inner) continue;
+            if (models[i].size.x + curbMargin > outer - inner) continue;
             if (!eligible.TryGetValue(models[i].type, out var choices))
             {
                 eligible[models[i].type] = choices = new List<int>();
@@ -72,8 +74,12 @@ public static class ParkedVehicleLayout
         var nearby = new SpatialHash<Placement>(16);
         float maxLength = 0;
         foreach (var model in models) maxLength = Mathf.Max(maxLength, model.size.magnitude);
+        // 中央線のない1車線道路は、順方向の通行側だけに駐車する。一方通行では許可された向きに合わせる。
+        int parkingSide = (trafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1)
+            * (direction == Constants.DIR_BACKWARD ? -1 : 1);
         for (int side = -1; side <= 1; side += 2)
         {
+            if (lanes <= 1 && side != parkingSide) continue;
             float cursor = EndMargin;
             int slot = 0;
             while (cursor < line.Length - EndMargin)
@@ -89,7 +95,7 @@ public static class ParkedVehicleLayout
                 if (s + length * .5f > line.Length - EndMargin) break;
                 bool forward = direction == Constants.DIR_FORWARD || (direction == Constants.DIR_BOTH &&
                     side == (trafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1));
-                float offset = side * (outer - CurbMargin - model.size.x * .5f);
+                float offset = side * (outer - curbMargin - model.size.x * .5f);
                 line.Sample(s, true, out var center, out var tangent);
                 Vector3 right = Vector3.Cross(Vector3.up, tangent).normalized;
                 var p = new Placement { model = index, side = side, distance = s, priority = Hash(seed + 2),

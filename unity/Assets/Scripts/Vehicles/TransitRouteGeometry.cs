@@ -123,8 +123,8 @@ public sealed class TransitRouteGeometry
             else
             {
                 RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out float side, out _, out int lanes, out _, out float divider, out _, out _, out _, out _);
-                g.offset = Math.Abs(new RoadLaneLayout(width,sidewalk,side,divider,lanes,data.travel_direction).Center(0,CityInfoStore.TrafficHand));
                 g.lanes = new RoadLaneLayout(width,sidewalk,side,divider,lanes,data.travel_direction);
+                g.offset = Math.Abs(g.lanes.VehicleCenter(0,CityInfoStore.TrafficHand,data.path_type));
                 g.startIncoming = -RoadMarkingRules.Outward(data, data.start_node_id);
                 g.endIncoming = -RoadMarkingRules.Outward(data, data.end_node_id);
                 if (RoadMarkingRules.HasPaint(data) && g.trimmed.Length >= 25f)
@@ -427,7 +427,7 @@ public sealed class TransitRouteGeometry
         if (outgoing.sqrMagnitude < .1f) outgoing = RoadMarkingRules.Outward(next.data, node);
         var turn = RoadMarkingRules.Turn(run.Forward ? g.endIncoming : g.startIncoming, outgoing);
         int lane = RoadMarkingRules.LaneForTurn(available, turn, g.lanes.Count, CityInfoStore.TrafficHand);
-        float target = g.lanes.Center(lane, CityInfoStore.TrafficHand);
+        float target = g.lanes.VehicleCenter(lane, CityInfoStore.TrafficHand, g.data.path_type);
         float original = g.offset * (CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1);
         float remaining = run.Forward ? g.trimEnd - s : s - g.trimStart;
         float length = Mathf.Min(30f, g.trimmed.Length * .4f);

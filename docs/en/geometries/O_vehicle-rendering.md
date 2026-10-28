@@ -10,7 +10,7 @@ Target vehicle counts approximate daily traffic divided by activity hours, multi
 
 Movement and count adjustment are separate. Vehicles continue through intersections; ordinary count differences are corrected through building entrances and managed-range boundaries. Rendering-only entrances (`RoadsideAccess`, shared with pedestrians) come from road-facing parcel edges, rather than model doors.
 
-The managed area is a circle around the camera focus, or the ride position when aboard, or the followed target when tracking a citizen. Parking and pedestrians use the same center. Lanes share `RoadLaneLayout` with markings. At intersections, next roads are sampled by same-type traffic volume. Signals, yielding, and collisions are not modeled. These visual rules do not alter routing or core travel times.
+The managed area is a circle around the camera focus, or the ride position when aboard, or the followed target when tracking a citizen. Parking and pedestrians use the same center. Lane bounds share `RoadLaneLayout` with markings; driving positions stay within those lanes, while parking positions follow the carriageway edge. At intersections, next roads are sampled by same-type traffic volume. Signals, yielding, and collisions are not modeled. These visual rules do not alter routing or core travel times.
 
 Ordinary vehicles and pedestrians represent traffic rather than individual citizens one-to-one. Selection requests a core estimate; tracking visualizes that itinerary. Neither estimation nor tracking changes city state.
 

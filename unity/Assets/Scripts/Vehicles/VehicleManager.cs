@@ -795,7 +795,7 @@ public partial class VehicleManager : MonoBehaviour
     {
         if (choose) v.lane = ChooseLane(v.vehicleType, road);
         v.lane = Mathf.Clamp(v.lane, 0, road.lanes.Count - 1);
-        v.laneOffset = road.lanes.Center(v.lane, CityInfoStore.TrafficHand);
+        v.laneOffset = road.lanes.VehicleCenter(v.lane, CityInfoStore.TrafficHand, road.data.path_type);
         v.shoulderOffset = road.lanes.Outer * (CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1);
         v.roadHalfWidth = Mathf.Max(road.halfWidth, road.lanes.Outer);
     }

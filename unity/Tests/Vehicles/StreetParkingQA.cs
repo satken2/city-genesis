@@ -56,8 +56,8 @@ public static partial class VehicleQA
             Near(mix[13] / 10000f, .3f, .02f, "Commercial mix");
             Near(mix[11] / 10000f, .1f, .02f, "Truck mix");
 
-            IList Build(object line, int direction = 0, int hand = 0, float width = 12) =>
-                (IList)layout.GetMethod("Build").Invoke(null, new object[] { line, 31, width, 2f, 0f, direction, hand, catalog });
+            IList Build(object line, int direction = 0, int hand = 0, float width = 12, int lanes = 2) =>
+                (IList)layout.GetMethod("Build").Invoke(null, new object[] { line, 31, width, 2f, 0f, lanes, direction, hand, catalog });
             var flat = Line(Vector3.zero, Vector3.forward * 150);
             var flatSlots = Build(flat);
             Check(flatSlots.Count > 25, "Full road has insufficient parking slots");
@@ -79,9 +79,15 @@ public static partial class VehicleQA
                     Check((forward.z > 0) == expected, "Parking faces against traffic");
                     var size = (Vector3)Get(catalog[(int)Get(p, "model")], "size");
                     Check(Mathf.Abs(position.x) + size.x * .5f <= 4.001f, "Car overlaps sidewalk");
+                    Near(4f - Mathf.Abs(position.x) - size.x * .5f, .02f, .001f, "Parking is not at the carriageway edge");
                     Check(position.z - size.z * .5f >= 4.999f && position.z + size.z * .5f <= 145.001f, "Car intrudes into junction setback");
                     Near(position.y, .1f, .001f, "Parking does not use body surface height");
                 }
+                var single = Build(flat, direction, hand, lanes: 1);
+                Check(single.Count > 0, "Single-lane street has no parking");
+                int expectedSide = (hand == 0 ? -1 : 1) * (direction == 2 ? -1 : 1);
+                foreach (var p in single)
+                    Check((int)Get(p, "side") == expectedSide, "Single-lane parking uses the opposite side");
             }
             Check(Build(Line(Vector3.zero, Vector3.forward * 9)).Count == 0, "Short path contains cars");
             Check(Build(flat, width: 5).Count == 0, "Narrow road spills into sidewalk");
@@ -172,6 +178,11 @@ public static partial class VehicleQA
             Set(data,"parked_cars",12f);Refresh(Vector3.zero);
             Check((int)Get(roads[7301],"count")==12,"Same-version epoch parking update ignored");
             Check(ReferenceEquals(slots,Get(roads[7301],"slots")),"Count-only change rebuilt placement");
+            Set(item,"lanes",1);Refresh(Vector3.zero);
+            Check(!ReferenceEquals(slots,Get(roads[7301],"slots")),"Lane count change retained two-sided parking");
+            foreach(var p in (IList)Get(roads[7301],"slots"))
+                Check((int)Get(p,"side")==-1,"Single-lane refresh retains parking on both sides");
+            Set(item,"lanes",2);Refresh(Vector3.zero);
             Set(data,"parked_cars",0f);Refresh(Vector3.zero);
             Check(roads.Count==0 && ((IList)Get(manager,"batches")).Count==0,"Zero parking retains old vehicles");
             Set(data,"parked_cars",8f);Refresh(Vector3.zero);

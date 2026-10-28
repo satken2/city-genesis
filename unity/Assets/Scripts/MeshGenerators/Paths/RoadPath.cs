@@ -2130,6 +2130,15 @@ public readonly struct RoadLaneLayout
         return offset * (trafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1);
     }
 
+    // 街路では駐車車両との間隔を広げるため、車線内で中央寄りを走る。区画線の位置は変えない。
+    public float VehicleCenter(int lane, int trafficHand, int pathType)
+    {
+        float offset = Center(lane, trafficHand);
+        if (pathType != Constants.PATH_STREET || totalLanes < 2 || centered) return offset;
+        float laneWidth = OneWay ? 2 * Outer / Count : (Outer - Inner) / Count;
+        return Mathf.MoveTowards(offset, 0, Mathf.Min(.35f, laneWidth * .1f));
+    }
+
     public IEnumerable<(float offset, bool dashed)> Boundaries()
     {
         if (centered) yield break;

@@ -112,7 +112,22 @@ public static partial class VehicleQA
         {
             var layout=New("RoadLaneLayout",24f,3f,.5f,0f,lanes,direction);
             int count=(int)Property(layout,"Count"); float outer=Property(layout,"Outer");
-            for(int i=0;i<count;i++) Check(Mathf.Abs((float)Call(layout,"Center",i,hand))<outer,"Lane outside carriageway");
+            for(int i=0;i<count;i++)
+            {
+                float middle=(float)Call(layout,"Center",i,hand);
+                Check(Mathf.Abs(middle)<outer,"Lane outside carriageway");
+                var constants=game.GetType("Constants");
+                int street=(int)constants.GetField("PATH_STREET").GetRawConstantValue();
+                int motorway=(int)constants.GetField("PATH_MOTORWAY").GetRawConstantValue();
+                float driving=(float)Call(layout,"VehicleCenter",i,hand,street);
+                if(lanes>=2 && middle!=0)
+                {
+                    Check(Mathf.Abs(driving)<Mathf.Abs(middle),"Street traffic does not move toward the centerline");
+                    Check(driving*middle>=0 && Mathf.Abs(driving-middle)<=.351f,"Street traffic crosses the centerline or shifts too far");
+                }
+                else Near(driving,middle,0,"Centered traffic position changed");
+                Near((float)Call(layout,"VehicleCenter",i,hand,motorway),middle,0,"Motorway traffic position changed");
+            }
         }
         var four=New("RoadLaneLayout",24f,3f,.5f,0f,4,0);
         Near((float)Call(four,"Center",0,0),-6.5625f,.001f,"Outer lane");

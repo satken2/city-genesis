@@ -32,7 +32,7 @@ public sealed class ParkedVehicleManager : MonoBehaviour
         public long geometryRevision = -1;   // PathManager.GetPathGeometryRevision; -1 means unknown, requiring point-list comparison.
         public List<ParkedVehicleLayout.Placement> slots;
         public float width, sidewalk, divider;
-        public int direction, hand, count;
+        public int lanes, direction, hand, count;
     }
 
     private sealed class Batch
@@ -139,16 +139,16 @@ public sealed class ParkedVehicleManager : MonoBehaviour
                     line = road != null && VehiclePolyline.SameSource(road.line, points) ? road.line : new VehiclePolyline(points);
                 }
                 if (line.Length <= ParkedVehicleLayout.EndMargin * 2 || line.InsideIntervals(center, Radius).Count == 0) continue;
-                RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out _, out _, out _,
+                RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out _, out _, out int lanes,
                     out _, out float divider, out _, out _, out _, out _);
                 seen.Add(data.path_id);
                 int hand = CityInfoStore.TrafficHand;
                 if (road == null || road.width != width || road.sidewalk != sidewalk ||
-                    road.divider != divider || road.direction != data.travel_direction || road.hand != hand || road.line != line)
+                    road.divider != divider || road.lanes != lanes || road.direction != data.travel_direction || road.hand != hand || road.line != line)
                 {
                     road = new Road { data = data, line = line, geometryRevision = revision, width = width, sidewalk = sidewalk, divider = divider,
-                        direction = data.travel_direction, hand = hand,
-                        slots = ParkedVehicleLayout.Build(line, data.path_id, width, sidewalk, divider, data.travel_direction, hand, models) };
+                        lanes = lanes, direction = data.travel_direction, hand = hand,
+                        slots = ParkedVehicleLayout.Build(line, data.path_id, width, sidewalk, divider, lanes, data.travel_direction, hand, models) };
                     roads[data.path_id] = road;
                     changed = true;
                 }
