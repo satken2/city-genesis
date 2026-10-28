@@ -184,7 +184,7 @@ const CHART_GRID_LINE = "#22303f";
 const CHART_CURSOR_FILL = "rgba(78, 161, 255, 0.08)";
 const CHART_ZERO_LINE = "#ff9a9a";
 
-/** Identifiers for income/expenditure balance bars (X-axis categories). */
+/** 収支バランスの棒を識別する区分。 */
 const BALANCE_ROW_REVENUE = "revenue";
 const BALANCE_ROW_EXPENSE = "expense";
 const BALANCE_ROW_PRE_COMPRESS = "preCompress";
@@ -321,12 +321,9 @@ type ChartTooltipEntry = {
 };
 
 /**
- * Shared monetary chart tooltip.
- *
- * The default recharts tooltip includes empty rows for series with no value at the X position
- * (opposite stacked bars, undisplayed forecast lines, etc.). With many balance series this causes
- * mostly empty rows, so filter to series with values and optionally add a total row
- * (the full stacked bar height). recharts injects active / payload / label.
+ * 金額グラフ共通のツールチップ。選択位置に値のある系列だけを表示し、
+ * 収支の別区分や非表示の予測系列による空行を避ける。
+ * 必要に応じて積み上げの合計額を添える。
  */
 function ChartValueTooltip({
   active,
@@ -343,7 +340,7 @@ function ChartValueTooltip({
   locale: string;
   /** If specified, show a total row with this label when at least two series are present. */
   totalLabel?: string;
-  /** Heading (X-axis label) formatter. Display the label unchanged if omitted. */
+  /** 見出しとなる軸ラベルの整形。省略時はラベルをそのまま表示する。 */
   formatLabel?: (label: string | number | undefined) => string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
@@ -589,14 +586,9 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   );
 
   /**
- * Income/expenditure balance stacked series and data rows.
- *
- * The X axis normally has two bars: income (previous epoch actual) and spending (expected payment
- * next epoch). Only when cash shortages reduce spending, add a third pre-reduction bar at the
- * requested amount. Stack taxes (TAX_REVENUE_META) plus public enterprise income
- * (buildBusinessRevenueItems) for income, and expectedSpending by category for spending
- * (shared with the cockpit budget meter). Use spendCategoryColor as in facility lists/category cards.
- * Drop zero-value series entirely to avoid an unnecessarily long legend.
+ * 収支バランスは収入（前エポック実績）と支出（次エポックの支払見込み）を横棒で比較する。
+ * 資金不足で支出を圧縮した場合だけ、希望額の比較用に圧縮前の棒を添える。
+ * 凡例が長くなりすぎないよう、金額がゼロの系列は除外する。
  */
   const balanceChart = useMemo(() => {
     if (!budgetData) {
@@ -616,11 +608,10 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       row: BALANCE_ROW_REVENUE,
     };
     const expenseRow: Record<string, number | string> = {
-      name: t("budget.balanceExpense", { defaultValue: "支出見込み" }),
       row: BALANCE_ROW_EXPENSE,
     };
     const preRow: Record<string, number | string> = {
-      name: t("budget.balancePreCompress", { defaultValue: "圧縮前" }),
+      name: t("budget.balancePreCompress", { defaultValue: "支出\n(必要額)" }),
       row: BALANCE_ROW_PRE_COMPRESS,
     };
 
@@ -673,8 +664,11 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
     // Spending at requested amounts exceeds committed-budget spending when cash shortages have reduced spending.
     const compressed = totalDesired > totalExpense + 1;
+    expenseRow.name = compressed
+      ? t("budget.balanceExpenseCompressed", { defaultValue: "支出計画\n(予算不足による縮小)" })
+      : t("budget.balanceExpense", { defaultValue: "支出計画" });
     const rows = compressed
-      ? [revenueRow, expenseRow, preRow]
+      ? [revenueRow, preRow, expenseRow]
       : [revenueRow, expenseRow];
 
     return {
@@ -1014,11 +1008,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             </div>
           </div>
 
-          {/*
- * Bottom: income/expenditure balance. Left bar = income (previous epoch actual), right = spending
- * (expected payment next epoch). Only when cash shortages reduce spending, show requested amounts
- * before reduction as a lighter third bar.
- */}
+          {/* 資金不足による圧縮前の希望支出額は、比較用の薄い横棒で示す。 */}
           <div className="budget-window__balance-section">
             <h3 className="budget-window__section-title">
               {t("budget.balanceTitle", { defaultValue: "収支バランス" })}
@@ -1044,21 +1034,50 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={balanceChart.rows}
+                  layout="vertical"
                   margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
                   barCategoryGap="28%"
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_LINE} vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_LINE} horizontal={false} />
                   <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: "1rem", fill: CHART_AXIS_TEXT }}
+                    type="number"
+                    tick={{ fontSize: "0.93rem", fill: CHART_AXIS_TEXT }}
                     tickLine={false}
+                    tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
                     stroke={CHART_AXIS_LINE}
                   />
                   <YAxis
-                    tick={{ fontSize: "0.93rem", fill: CHART_AXIS_TEXT }}
+                    type="category"
+                    dataKey="name"
+                    tick={({ x, y, payload, className }) => {
+                      // 翻訳で指定した改行を保ち、複数行の中央を横棒に揃える。
+                      const lines = String(payload.value).split("\n");
+                      return (
+                        <text
+                          className={className}
+                          x={x}
+                          y={y}
+                          textAnchor="end"
+                          dominantBaseline="central"
+                          fontSize="1rem"
+                          fill={CHART_AXIS_TEXT}
+                          stroke="none"
+                        >
+                          {lines.map((line, index) => (
+                            <tspan
+                              key={index}
+                              x={x}
+                              dy={`${index === 0 ? -(lines.length - 1) * 0.6 : 1.2}em`}
+                            >
+                              {line}
+                            </tspan>
+                          ))}
+                        </text>
+                      );
+                    }}
+                    interval={0}
                     tickLine={false}
-                    width={remPx(4.81)}
-                    tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
+                    width="auto"
                     stroke={CHART_AXIS_LINE}
                   />
                   <RechartsTooltip

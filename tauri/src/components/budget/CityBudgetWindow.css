@@ -418,6 +418,7 @@
 
 .budget-chart-tooltip__label {
   margin-bottom: 4px;
+  white-space: pre-line;
   font-weight: 600;
   color: var(--flat-text);
 }
