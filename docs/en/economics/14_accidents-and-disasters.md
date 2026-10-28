@@ -10,7 +10,7 @@ Ignition occurs randomly, and some ignitions develop into fires. Obtaining firef
 
 ## 14.2. Road accidents
 
-Speed limits unsuitable for road geometry and concentrated traffic increase accident risk. Accidents can cause casualties and reduce the city's evaluation ([paths and nodes](03_paths-and-nodes.md), [scores and achievements](16_scores-and-achievements.md)).
+Speed limits unsuitable for road geometry, concentrated traffic, and street parking beyond dedicated spaces increase accident risk. Roads with no traffic have no traffic accidents. Accidents can cause casualties and reduce the city's evaluation ([paths and nodes](03_paths-and-nodes.md), [scores and achievements](16_scores-and-achievements.md)).
 
 ## 14.3. Crime and public safety
 

@@ -58,9 +58,11 @@ Travel is described at three levels:
 
 - Speed limit (`max_speed`): the regulatory limit set citywide or for an individual road.
 - Base speed (`base_speed`): the speed after penalties for curves, gradients, and similar conditions.
-- Travel time (`travel_time`): the time to traverse a section, including congestion in addition to base speed.
+- Travel time (`travel_time`): the time to traverse a section, including congestion and obstruction from street parking in addition to base speed.
 
 Traffic volume counts passages per day. Roads and tracks have capacities; congestion increases with traffic relative to capacity. Road congestion increases travel times and affects accident risk ([accidents and disasters](14_accidents-and-disasters.md)).
+
+Street parking obstructs automobile traffic as soon as it exceeds dedicated parking spaces. `street_parking_capacity` is a reference capacity for comparing parking quantities, not a set of spaces that vehicles can use without affecting traffic. `path_master.parking_capacity_ratio` expresses dedicated capacity relative to that reference, while `parking_ratio` includes all street parking, including vehicles in dedicated spaces. Road displays and vehicle animation use the adjusted times returned by the core; the frontend must not apply the delay again.
 
 ### Interchanges and junctions
 

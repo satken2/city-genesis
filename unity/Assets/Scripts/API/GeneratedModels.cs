@@ -376,9 +376,9 @@ namespace GeneratedModels
         public int planter_type;
         /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
         public int advert_type;
-        /// <summary>路上駐車台数（合法分と超過分の合計。昼夜の大きい方）</summary>
+        /// <summary>路上駐車台数（専用駐車枠内も含む。昼夜の大きい方）</summary>
         public float parked_cars;
-        /// <summary>合法路上駐車容量（台）。稼働中の地上街路以外は0</summary>
+        /// <summary>路駐率と台数配分の基準容量（台）。交通を妨げない専用駐車枠とは別。稼働中の地上街路以外は0</summary>
         public float street_parking_capacity;
         /// <summary>制限速度(km/h) サーバーサイドで計算されるフィールド。型は動的。</summary>
         public object max_speed;
@@ -499,11 +499,11 @@ namespace GeneratedModels
         public int planter_type;
         /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
         public int advert_type;
-        /// <summary>路上駐車台数（合法分と超過分の合計。昼夜の大きい方）</summary>
+        /// <summary>路上駐車台数（専用駐車枠内も含む。昼夜の大きい方）</summary>
         public float parked_cars;
-        /// <summary>合法路上駐車容量（台）。稼働中の地上街路以外は0</summary>
+        /// <summary>路駐率と台数配分の基準容量（台）。交通を妨げない専用駐車枠とは別。稼働中の地上街路以外は0</summary>
         public float street_parking_capacity;
-        /// <summary>路駐率（parked_cars / street_parking_capacity）。1超えは容量超過。容量0のときは0</summary>
+        /// <summary>路駐率（全路上駐車台数 / street_parking_capacity）。交通への妨げは専用駐車容量の比を差し引いて評価する。基準容量0のときは0</summary>
         public float parking_ratio;
         /// <summary>所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道</summary>
         public int? road_id;
