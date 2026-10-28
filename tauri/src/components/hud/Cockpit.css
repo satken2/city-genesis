@@ -2,7 +2,7 @@
  * Cockpit styles (bottom center)
  *
  * Horizontal layout: [common tools, 2 rows × 2 columns] [public service adequacy] [city name/date / realized
- * climate / score/budget] [alerts] [start epoch].
+ * climate / score/budget] [alerts] [policy] [start epoch].
  * Render to content width and use its measured width for the window. Referencing window width creates a resize
  * loop.
  * Adequacy meter styles are in PublicServiceGauges.css.
@@ -153,12 +153,16 @@
 
 /* ─── Alerts (L1 notifications) ─── */
 
-.cockpit-alert {
-  position: relative;
+.cockpit-alert,
+.cockpit-policy {
   width: 28px;
   height: 28px;
   border-radius: 4px;
   flex-shrink: 0;
+}
+
+.cockpit-alert {
+  position: relative;
 }
 
 /* Pulse red when at least one unresolved L1 notification exists. */

@@ -72,9 +72,7 @@ export const MENU_ICONS: HudIconDef[] = [
 ];
 
 /**
- * Common tools arranged in row order in the cockpit's left three-column grid. Image references are resolved
- * URLs.
- * Cockpit appends its drive button, leaving the bottom-right cell empty.
+ * 共通ツールはコックピット左側の2列2段に配列順で配置する。画像は解決済みのURLを指定する。
  */
 export const TOOL_ICONS: HudIconDef[] = [
   { id: "visibility", src: iconUrl("visibility.png"), tooltipKey: "taskbar.menuView", padding: "4px", windowType: "display_options" },

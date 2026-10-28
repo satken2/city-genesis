@@ -1,0 +1,130 @@
+{
+  "policy": {
+    "title": "Policy planning",
+    "intro": "Choose an indicator, trace its possible causes, and consider actions at each level.",
+    "refresh": "Investigate again",
+    "indicatorsLabel": "Indicators to investigate",
+    "actionsLabel": "Actions at this level",
+    "causes": "Causes and actions",
+    "candidateNote": "Only observed possible causes are shown. Open an action's screen to make a plan.",
+    "sample": "Sample: {{n}}",
+    "pending": "An epoch is running. Investigation resumes when it finishes.",
+    "noData": "There are no relevant residents or households, or no epoch results yet.",
+    "noFindings": "No matching problem was found among the defined checks.",
+    "actionError": "Could not open the action screen.",
+    "indicators": {
+      "unemployment": {
+        "title": "Unemployment",
+        "unit": "Working-age residents"
+      },
+      "income": {
+        "title": "Average household income",
+        "unit": "Per household · daily"
+      },
+      "crime": {
+        "title": "Crime damage",
+        "unit": "Per 1,000 residents · latest epoch"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Current job quotas are full",
+        "evidence": "{{count}} residents are seeking work. Job quota: {{quota}}; employed labor: {{labor}}. Both labor figures use effective labor units."
+      },
+      "unfilled_jobs": {
+        "title": "Vacancies and unemployment coexist",
+        "evidence": "{{count}} job seekers and {{vacancies}} vacant effective labor units. Check skills, commuting, and net pay."
+      },
+      "public_budget": {
+        "title": "Public facilities are constrained by budgets",
+        "evidence": "Operating budgets constrain plans at {{count}} facilities. Funding can also help restore job quotas."
+      },
+      "education_gap": {
+        "title": "Some job seekers lack basic education",
+        "evidence": "All skills of {{count}} job seekers are in the uneducated tier. Education improves future skills and wages."
+      },
+      "no_schools": {
+        "title": "No educational facilities are operating",
+        "evidence": "There are no facilities providing education. Plan accessible locations and operating budgets as well as construction."
+      },
+      "specialists": {
+        "title": "Specialist shortages prevent facilities from operating",
+        "evidence": "{{count}} facilities lack highly skilled workers. Adding general workers alone will not resolve this."
+      },
+      "household_unemployment": {
+        "title": "Some households include unemployed adults",
+        "evidence": "{{count}} households include unemployed working-age residents, a possible source of missing wage income. The branches below describe citywide employment."
+      },
+      "no_income": {
+        "title": "Some households have no income",
+        "evidence": "{{count}} households have average daily income of zero or less. Check benefits and their funding alongside employment measures."
+      },
+      "basic_consumption": {
+        "title": "Some households remain in the basic consumption tier",
+        "evidence": "{{count}} households are in the lowest demand tier. Check whether income leaves room after living costs."
+      },
+      "security_response": {
+        "title": "Security services have not fully suppressed damage",
+        "evidence": "{{count}} cases of crime damage were recorded in the latest epoch. Check police capacity and service reach."
+      },
+      "no_police": {
+        "title": "No police stations are operating",
+        "evidence": "No police stations provide security services. Choose locations that can reach affected areas."
+      },
+      "police_staff": {
+        "title": "Police stations lack workers",
+        "evidence": "Labor shortages constrained production at {{count}} facilities. The branches below show citywide hiring issues."
+      },
+      "police_budget": {
+        "title": "Police operating budgets are insufficient",
+        "evidence": "Budgets have reduced next-epoch plans at {{count}} facilities."
+      },
+      "police_inputs": {
+        "title": "Police stations lack materials",
+        "evidence": "Material shortages were observed at {{count}} facilities. Use facility diagnosis to check missing goods and supply routes."
+      },
+      "unemployment_pressure": {
+        "title": "Unemployment contributes to security problems",
+        "evidence": "There are {{count}} unemployed adults. In this game, unemployed adults contribute to worsening security, so employment measures can help address it."
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Create jobs in public facilities",
+        "description": "Open construction. Employment after completion also needs an operating budget."
+      },
+      "population": {
+        "title": "Reduce population by expelling citizens",
+        "description": "Open the citizen list and choose a person. This also removes population and potential future workers."
+      },
+      "budget": {
+        "title": "Allocate operating budgets",
+        "description": "Allocate funds to the relevant sectors in the budget screen. Check how increases will be funded."
+      },
+      "education": {
+        "title": "Provide basic education",
+        "description": "Plan schools in construction. This helps the next generation rather than immediately employing today's adults."
+      },
+      "higher_education": {
+        "title": "Develop specialists through higher education",
+        "description": "Plan a university and reserve places in the needed majors. Graduation takes time."
+      },
+      "welfare": {
+        "title": "Adjust benefits and income support",
+        "description": "Use Social Security in Regulations. Benefits also require a social security budget."
+      },
+      "employment": {
+        "title": "Examine hiring conditions in employment statistics",
+        "description": "Check vacancies by skill and wages in the statistics screen's Employment tab."
+      },
+      "police": {
+        "title": "Place police stations",
+        "description": "Open construction. Consider locations that reach affected areas and their operating costs."
+      },
+      "facilities": {
+        "title": "Inspect facility operation and shortages",
+        "description": "Open public facilities, then use a relevant facility's details and diagnosis to investigate."
+      }
+    }
+  }
+}

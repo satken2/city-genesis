@@ -1,0 +1,130 @@
+{
+  "policy": {
+    "title": "Planification des politiques",
+    "intro": "Choisissez un indicateur, explorez ses causes possibles et envisagez des actions à chaque niveau.",
+    "refresh": "Réexaminer",
+    "indicatorsLabel": "Indicateurs à examiner",
+    "actionsLabel": "Actions à ce niveau",
+    "causes": "Causes et actions",
+    "candidateNote": "Seules les causes possibles observées sont affichées. Ouvrez l’écran d’une action pour la planifier.",
+    "sample": "Population étudiée : {{n}}",
+    "pending": "Une époque est en cours. L’examen reprendra à sa fin.",
+    "noData": "Aucun habitant ou ménage concerné, ou aucun résultat d’époque disponible.",
+    "noFindings": "Aucun problème correspondant n’a été trouvé parmi les vérifications définies.",
+    "actionError": "Impossible d’ouvrir l’écran de l’action.",
+    "indicators": {
+      "unemployment": {
+        "title": "Chômage",
+        "unit": "Habitants en âge de travailler"
+      },
+      "income": {
+        "title": "Revenu moyen des ménages",
+        "unit": "Par ménage · par jour"
+      },
+      "crime": {
+        "title": "Préjudices liés aux crimes",
+        "unit": "Pour 1 000 habitants · dernière époque"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Les postes prévus sont pourvus",
+        "evidence": "{{count}} habitants cherchent un emploi. Quota d’emploi : {{quota}} ; travail employé : {{labor}}. Ces deux valeurs sont en unités de travail effectif."
+      },
+      "unfilled_jobs": {
+        "title": "Des postes vacants coexistent avec le chômage",
+        "evidence": "{{count}} demandeurs d’emploi et {{vacancies}} unités de travail effectif vacantes. Examinez les compétences, les trajets et le salaire net."
+      },
+      "public_budget": {
+        "title": "Les budgets limitent les équipements publics",
+        "evidence": "Les budgets de fonctionnement limitent les plans de {{count}} équipements. Un financement peut aussi rétablir des quotas d’emploi."
+      },
+      "education_gap": {
+        "title": "Certains demandeurs d’emploi manquent d’éducation de base",
+        "evidence": "Toutes les compétences de {{count}} demandeurs d’emploi sont au niveau sans éducation. L’éducation améliore les compétences et les salaires futurs."
+      },
+      "no_schools": {
+        "title": "Aucun établissement d’enseignement ne fonctionne",
+        "evidence": "Aucun établissement ne fournit d’enseignement. Prévoyez aussi des emplacements accessibles et un budget de fonctionnement."
+      },
+      "specialists": {
+        "title": "Le manque de spécialistes empêche certains équipements de fonctionner",
+        "evidence": "{{count}} équipements manquent de travailleurs hautement qualifiés. Ajouter seulement des travailleurs généralistes ne suffit pas."
+      },
+      "household_unemployment": {
+        "title": "Certains ménages comptent des adultes au chômage",
+        "evidence": "{{count}} ménages comptent des habitants sans emploi en âge de travailler, ce qui peut limiter leurs revenus salariaux. Les branches suivantes décrivent l’emploi dans toute la ville."
+      },
+      "no_income": {
+        "title": "Certains ménages n’ont aucun revenu",
+        "evidence": "Le revenu journalier moyen de {{count}} ménages est nul ou négatif. Examinez les aides et leur financement, ainsi que l’emploi."
+      },
+      "basic_consumption": {
+        "title": "Certains ménages restent au niveau de consommation minimal",
+        "evidence": "{{count}} ménages sont au niveau de demande le plus bas. Vérifiez la marge laissée par leurs revenus après les dépenses de vie."
+      },
+      "security_response": {
+        "title": "La sécurité ne prévient pas tous les préjudices",
+        "evidence": "{{count}} cas de préjudices liés aux crimes ont été enregistrés à la dernière époque. Vérifiez la capacité et la portée des services de police."
+      },
+      "no_police": {
+        "title": "Aucun commissariat ne fonctionne",
+        "evidence": "Aucun commissariat ne fournit de services de sécurité. Choisissez des emplacements desservant les zones touchées."
+      },
+      "police_staff": {
+        "title": "La police manque de personnel",
+        "evidence": "Le manque de main-d’œuvre a limité la production de {{count}} équipements. Les branches suivantes montrent les difficultés de recrutement de la ville."
+      },
+      "police_budget": {
+        "title": "Le budget de fonctionnement de la police est insuffisant",
+        "evidence": "Les budgets ont réduit les plans de {{count}} équipements pour la prochaine époque."
+      },
+      "police_inputs": {
+        "title": "Les commissariats manquent de matières premières",
+        "evidence": "Des pénuries ont été observées dans {{count}} équipements. Consultez leur diagnostic pour identifier les biens et les voies d’approvisionnement manquants."
+      },
+      "unemployment_pressure": {
+        "title": "Le chômage contribue aux problèmes de sécurité",
+        "evidence": "{{count}} adultes sont sans emploi. Dans le jeu, les adultes sans emploi contribuent à la dégradation de la sécurité ; l’emploi constitue donc aussi une piste d’action."
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Créer des emplois dans les équipements publics",
+        "description": "Ouvrir la construction. Les emplois après achèvement nécessitent aussi un budget de fonctionnement."
+      },
+      "population": {
+        "title": "Réduire la population en expulsant des citoyens",
+        "description": "Ouvrir la liste des citoyens et choisir une personne. Cela supprime aussi des habitants et de futurs travailleurs potentiels."
+      },
+      "budget": {
+        "title": "Répartir les budgets de fonctionnement",
+        "description": "Allouez des fonds aux secteurs concernés dans le budget. Vérifiez le financement des hausses."
+      },
+      "education": {
+        "title": "Développer l’éducation de base",
+        "description": "Planifiez des écoles. Cette action aide la prochaine génération, sans employer immédiatement les adultes actuels."
+      },
+      "higher_education": {
+        "title": "Former des spécialistes dans le supérieur",
+        "description": "Planifiez une université et des places dans les spécialités nécessaires. La formation prend du temps."
+      },
+      "welfare": {
+        "title": "Ajuster les allocations et l’aide au revenu",
+        "description": "Utilisez la protection sociale dans les règlements. Les aides nécessitent aussi un budget social."
+      },
+      "employment": {
+        "title": "Examiner le recrutement dans les statistiques d’emploi",
+        "description": "Consultez les postes par compétence et les salaires dans l’onglet Emploi des statistiques."
+      },
+      "police": {
+        "title": "Implanter des commissariats",
+        "description": "Ouvrir la construction. Prévoyez une couverture des zones touchées et les frais de fonctionnement."
+      },
+      "facilities": {
+        "title": "Examiner le fonctionnement et les pénuries",
+        "description": "Ouvrez les équipements publics, puis les détails et le diagnostic d’un équipement concerné."
+      }
+    }
+  }
+}

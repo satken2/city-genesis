@@ -1,5 +1,6 @@
 {
   "windowType": {
+    "policy_planning": "政策规划",
     "diagnosis": "诊断",
     "city_notifications": "重大通知",
     "city_map": "城市地图",

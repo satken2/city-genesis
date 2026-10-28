@@ -630,6 +630,15 @@
     "empty_shell": true,
     "actions": []
   },
+  "policy_planning": {
+    "title": "政策立案",
+    "width": 1100,
+    "height": 780,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
+  },
   "scenario_tools": {
     "title": "シナリオ編集",
     "width": 740,

@@ -16,6 +16,8 @@ Use common session, version, and play-mode state without duplicating retrieval o
 
 Statistics use a common cache keyed to endpoint and epoch and display finalized API values. Distinguish missing values from zero and do not substitute current-period values into historical breakdowns.
 
+City and facility diagnostics display trees of factors investigated by the core from observed values; the UI does not reimplement economic checks. Factors and suggested actions arrive as identifiers, with wording translated in the UI. Suggestions lead to existing operation screens, where the player chooses policies or actions affecting citizens. Defer diagnostics during epoch execution and investigate again after completion.
+
 2D maps use `CityMapCanvas`, with each screen supplying layers and overlays. Coordinates and orientation follow [terrain](../geometries/D_terrain.md); screens do not create separate conventions. Route guidance reflects the core's calculation-time results. Do not assume immediate road-edit reflection or exact shortest routes between arbitrary points. Distinguish travel times from route-selection weights.
 
 ## Common styles

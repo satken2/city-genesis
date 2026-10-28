@@ -2,7 +2,7 @@
  * Cockpit (persistent panel at the bottom center)
  *
  * Combines the most frequently used information and controls:
- * [common tools] [public service adequacy] [city name/date / realized climate / score/budget] [alerts] [start
+ * [common tools] [public service adequacy] [city name/date / realized climate / score/budget] [alerts] [policy] [start
  * epoch].
  *
  * - Tracking list: open citizens added through Track in the citizen panel. This persistent window also shows
@@ -24,12 +24,14 @@
  *   only growth/spare capacity) use a yellow badge without blinking. Persistent blinking for nonurgent issues
  *   would weaken the signal for real crises. Blinking is sufficient to attract attention, so no interrupting
  *   toast is shown.
+ * - 政策立案は警告サイレンの隣の電球ボタンから開く。
  *
  * This is the only HUD window guaranteed to exist once, so it owns BGM playback and opening windows for 3D
  * object selections, preventing duplicate playback/opening.
  * It also handles the 3D view's `drive:request` so the selection screen receives text in the current language.
  */
 import { PLAY_MODE_SCENARIO } from "../../constants";
+import policyIcon from "../../assets/images/menu/policy.svg";
 
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -396,6 +398,18 @@ export function Cockpit() {
         {cautionCount > 0 && (
           <span className="cockpit-alert-badge cockpit-alert-badge--caution">{cautionCount}</span>
         )}
+      </button>
+
+      <button
+        id="policy_planning"
+        className="hud-icon-btn cockpit-policy"
+        type="button"
+        title={t("policy.title")}
+        aria-label={t("policy.title")}
+        data-guide="hud.policy"
+        onClick={() => void openRegisteredWindow("policy_planning")}
+      >
+        <img src={policyIcon} alt="" className="hud-icon-img" draggable={false} />
       </button>
 
       <button

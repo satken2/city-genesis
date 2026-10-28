@@ -1,0 +1,130 @@
+{
+  "policy": {
+    "title": "政策规划",
+    "intro": "选择指标，追溯可能的原因，并考虑各个层级可采取的行动。",
+    "refresh": "重新调查",
+    "indicatorsLabel": "调查指标",
+    "actionsLabel": "此层级可采取的行动",
+    "causes": "原因与对策",
+    "candidateNote": "仅显示观测到的可能原因。通过对策打开相应操作界面，在那里制定计划。",
+    "sample": "统计对象 {{n}}",
+    "pending": "正在执行纪元，完成后将进行调查。",
+    "noData": "没有符合条件的居民或家庭，或尚无纪元实绩。",
+    "noFindings": "在已定义的调查项目中未发现符合条件的问题。",
+    "actionError": "无法打开操作界面。",
+    "indicators": {
+      "unemployment": {
+        "title": "失业率",
+        "unit": "劳动年龄居民"
+      },
+      "income": {
+        "title": "平均家庭收入",
+        "unit": "每户 · 每日"
+      },
+      "crime": {
+        "title": "犯罪损害",
+        "unit": "每千名居民 · 最近纪元"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "当前就业配额已满",
+        "evidence": "{{count}}名居民正在求职。就业配额为{{quota}}，已雇用劳动力为{{labor}}。两项劳动力数值均以有效劳动力为单位。"
+      },
+      "unfilled_jobs": {
+        "title": "职位空缺与失业并存",
+        "evidence": "求职者{{count}}人，空缺就业配额{{vacancies}}（有效劳动力）。请检查技能、通勤及实际收入等招聘条件。"
+      },
+      "public_budget": {
+        "title": "公共设施受预算限制而缩减计划",
+        "evidence": "{{count}}处设施的运营预算限制了计划。确保资金也有助于恢复就业配额。"
+      },
+      "education_gap": {
+        "title": "部分求职者未完成基础教育",
+        "evidence": "{{count}}名求职者的所有技能均处于未受教育等级。教育是提高未来技能与工资的对策。"
+      },
+      "no_schools": {
+        "title": "没有运营中的教育设施",
+        "evidence": "没有提供教育的设施。除建设外，还需确保可通学的选址与运营预算。"
+      },
+      "specialists": {
+        "title": "部分设施因缺乏专业人才而无法运营",
+        "evidence": "{{count}}处设施缺少高技能人才。仅增加普通劳动者无法解决。"
+      },
+      "household_unemployment": {
+        "title": "部分家庭有失业成年人",
+        "evidence": "{{count}}户家庭有劳动年龄的失业居民，这是工资收入不足的可能原因。下方分支显示全市就业情况。"
+      },
+      "no_income": {
+        "title": "部分家庭没有收入",
+        "evidence": "{{count}}户家庭的平均日收入不高于零。除就业对策外，请检查补助及其资金来源。"
+      },
+      "basic_consumption": {
+        "title": "部分家庭停留在基本消费阶段",
+        "evidence": "{{count}}户家庭处于最低需求等级。请检查收入扣除生活费后是否仍有余裕。"
+      },
+      "security_response": {
+        "title": "治安服务未能充分抑制损害",
+        "evidence": "最近纪元记录了{{count}}起犯罪损害。请检查警察的供给能力与服务覆盖范围。"
+      },
+      "no_police": {
+        "title": "没有运营中的警察局",
+        "evidence": "没有警察局提供治安服务。请选择能够覆盖受害地区的位置。"
+      },
+      "police_staff": {
+        "title": "警察局缺乏人员",
+        "evidence": "劳动力短缺限制了{{count}}处设施的生产。下方显示全市观测到的招聘问题。"
+      },
+      "police_budget": {
+        "title": "警察运营预算不足",
+        "evidence": "{{count}}处设施因预算限制而缩减了下一纪元的计划。"
+      },
+      "police_inputs": {
+        "title": "警察局缺乏原材料",
+        "evidence": "{{count}}处设施出现原材料短缺。请通过设施诊断检查短缺物资和供给路径。"
+      },
+      "unemployment_pressure": {
+        "title": "失业导致治安恶化",
+        "evidence": "目前有{{count}}名无职成年人。游戏中无职成年人会加剧治安恶化，因此也可以从就业方面考虑对策。"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "通过公营设施创造就业",
+        "description": "打开建设界面。竣工后的雇用还需要运营预算。"
+      },
+      "population": {
+        "title": "驱逐市民以减少人口",
+        "description": "打开市民列表并选择对象。这也会减少人口与未来的劳动力。"
+      },
+      "budget": {
+        "title": "分配运营预算",
+        "description": "在预算界面向所需领域分配资金。请同时检查增额的资金来源。"
+      },
+      "education": {
+        "title": "完善基础教育",
+        "description": "在建设界面规划学校。这有利于下一代，而非让当前成年人立即就业。"
+      },
+      "higher_education": {
+        "title": "通过高等教育培养专业人才",
+        "description": "规划大学并确保所需专业的招生名额。毕业需要时间。"
+      },
+      "welfare": {
+        "title": "调整补助与生活救助",
+        "description": "在条例界面的社会保障中调整。补助也需要社会保障预算支持。"
+      },
+      "employment": {
+        "title": "通过就业统计调查招聘条件",
+        "description": "在统计界面的就业选项卡检查各技能的职位需求及工资。"
+      },
+      "police": {
+        "title": "布置警察局",
+        "description": "打开建设界面。请考虑能够覆盖受害地区的选址及运营费用。"
+      },
+      "facilities": {
+        "title": "调查设施运营与短缺",
+        "description": "打开公共设施列表，通过相关设施的详情及诊断查明原因。"
+      }
+    }
+  }
+}

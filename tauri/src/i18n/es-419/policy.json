@@ -1,0 +1,130 @@
+{
+  "policy": {
+    "title": "Planificación de políticas",
+    "intro": "Elige un indicador, explora sus posibles causas y considera acciones en cada nivel.",
+    "refresh": "Investigar de nuevo",
+    "indicatorsLabel": "Indicadores a investigar",
+    "actionsLabel": "Acciones en este nivel",
+    "causes": "Causas y acciones",
+    "candidateNote": "Solo se muestran posibles causas observadas. Abre la pantalla de una acción para planificarla.",
+    "sample": "Muestra: {{n}}",
+    "pending": "Hay una época en curso. La investigación se reanudará al terminar.",
+    "noData": "No hay habitantes u hogares pertinentes, o aún no hay resultados de épocas.",
+    "noFindings": "No se encontraron problemas que coincidan con las comprobaciones definidas.",
+    "actionError": "No se pudo abrir la pantalla de la acción.",
+    "indicators": {
+      "unemployment": {
+        "title": "Desempleo",
+        "unit": "Habitantes en edad de trabajar"
+      },
+      "income": {
+        "title": "Ingreso promedio del hogar",
+        "unit": "Por hogar · diario"
+      },
+      "crime": {
+        "title": "Daños por delitos",
+        "unit": "Por cada 1,000 habitantes · última época"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Los cupos de empleo actuales están cubiertos",
+        "evidence": "{{count}} habitantes buscan empleo. Cupo de empleo: {{quota}}; trabajo empleado: {{labor}}. Ambas cifras usan unidades de trabajo efectivo."
+      },
+      "unfilled_jobs": {
+        "title": "Coexisten vacantes y desempleo",
+        "evidence": "{{count}} personas buscan empleo y hay {{vacancies}} unidades de trabajo efectivo vacantes. Revisa habilidades, traslados y salario neto."
+      },
+      "public_budget": {
+        "title": "Los presupuestos limitan las instalaciones públicas",
+        "evidence": "Los presupuestos operativos limitan los planes de {{count}} instalaciones. El financiamiento también puede recuperar cupos de empleo."
+      },
+      "education_gap": {
+        "title": "Algunos solicitantes carecen de educación básica",
+        "evidence": "Todas las habilidades de {{count}} solicitantes están en el nivel sin educación. La educación mejora habilidades y salarios futuros."
+      },
+      "no_schools": {
+        "title": "No hay centros educativos en funcionamiento",
+        "evidence": "No hay centros que impartan educación. Además de construirlos, prevé ubicaciones accesibles y presupuestos operativos."
+      },
+      "specialists": {
+        "title": "La falta de especialistas impide operar instalaciones",
+        "evidence": "{{count}} instalaciones carecen de trabajadores altamente calificados. Aumentar solo la mano de obra general no lo resuelve."
+      },
+      "household_unemployment": {
+        "title": "Algunos hogares tienen adultos desempleados",
+        "evidence": "{{count}} hogares incluyen habitantes desempleados en edad de trabajar, una posible causa de falta de ingresos salariales. Las ramas siguientes describen el empleo de toda la ciudad."
+      },
+      "no_income": {
+        "title": "Algunos hogares no tienen ingresos",
+        "evidence": "{{count}} hogares tienen un ingreso diario promedio de cero o menos. Revisa las prestaciones y su financiamiento, además del empleo."
+      },
+      "basic_consumption": {
+        "title": "Algunos hogares permanecen en el consumo básico",
+        "evidence": "{{count}} hogares están en el nivel de demanda más bajo. Revisa cuánto margen dejan los ingresos tras los gastos de vida."
+      },
+      "security_response": {
+        "title": "La seguridad no ha evitado todos los daños",
+        "evidence": "Se registraron {{count}} casos de daños por delitos en la última época. Revisa la capacidad policial y el alcance del servicio."
+      },
+      "no_police": {
+        "title": "No hay comisarías en funcionamiento",
+        "evidence": "Ninguna comisaría presta servicios de seguridad. Elige ubicaciones que alcancen las zonas afectadas."
+      },
+      "police_staff": {
+        "title": "Las comisarías carecen de personal",
+        "evidence": "La falta de mano de obra limitó la producción de {{count}} instalaciones. Las ramas siguientes muestran problemas de contratación de toda la ciudad."
+      },
+      "police_budget": {
+        "title": "El presupuesto operativo policial es insuficiente",
+        "evidence": "Los presupuestos redujeron los planes de {{count}} instalaciones para la próxima época."
+      },
+      "police_inputs": {
+        "title": "Las comisarías carecen de materiales",
+        "evidence": "Se observaron faltantes de materiales en {{count}} instalaciones. Consulta su diagnóstico para revisar bienes faltantes y rutas de suministro."
+      },
+      "unemployment_pressure": {
+        "title": "El desempleo contribuye a los problemas de seguridad",
+        "evidence": "Hay {{count}} adultos desempleados. En este juego, los adultos desempleados empeoran la seguridad, así que también se pueden considerar medidas de empleo."
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Crear empleos en instalaciones públicas",
+        "description": "Abre la construcción. El empleo tras finalizar las obras también requiere presupuesto operativo."
+      },
+      "population": {
+        "title": "Reducir la población expulsando ciudadanos",
+        "description": "Abre la lista de ciudadanos y elige una persona. Esto también elimina habitantes y posibles trabajadores futuros."
+      },
+      "budget": {
+        "title": "Asignar presupuestos operativos",
+        "description": "Asigna fondos a los sectores pertinentes en la pantalla de presupuesto. Revisa cómo financiar los aumentos."
+      },
+      "education": {
+        "title": "Ofrecer educación básica",
+        "description": "Planifica escuelas en construcción. Ayuda a la próxima generación, sin emplear de inmediato a los adultos actuales."
+      },
+      "higher_education": {
+        "title": "Formar especialistas con educación superior",
+        "description": "Planifica una universidad y cupos en las especialidades necesarias. Graduarse lleva tiempo."
+      },
+      "welfare": {
+        "title": "Ajustar prestaciones y ayudas de ingresos",
+        "description": "Usa Seguridad social en Reglamentos. Las prestaciones también requieren un presupuesto de seguridad social."
+      },
+      "employment": {
+        "title": "Examinar la contratación en las estadísticas de empleo",
+        "description": "Revisa las vacantes por habilidad y los salarios en la pestaña Empleo de las estadísticas."
+      },
+      "police": {
+        "title": "Ubicar comisarías",
+        "description": "Abre la construcción. Considera ubicaciones que alcancen las zonas afectadas y sus costos operativos."
+      },
+      "facilities": {
+        "title": "Revisar operaciones y faltantes de instalaciones",
+        "description": "Abre las instalaciones públicas y consulta los detalles y el diagnóstico de la instalación pertinente."
+      }
+    }
+  }
+}

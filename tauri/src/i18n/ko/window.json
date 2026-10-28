@@ -1,5 +1,6 @@
 {
   "windowType": {
+    "policy_planning": "정책 수립",
     "diagnosis": "진단",
     "city_notifications": "중대 알림",
     "city_map": "도시 지도",

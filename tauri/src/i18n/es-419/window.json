@@ -1,5 +1,6 @@
 {
   "windowType": {
+    "policy_planning": "Planificación de políticas",
     "diagnosis": "Diagnóstico",
     "city_notifications": "Alertas críticas",
     "city_map": "Mapa de la ciudad",
