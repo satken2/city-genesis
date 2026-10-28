@@ -3067,6 +3067,28 @@
             "15": "There are many cars speeding around here. Accidents will happen too."
           }
         },
+        "street_parking": {
+          "0": {
+            "0": "Way too many cars parked on the streets around here. Mayor, you do know a road and a parking lot are different things, right?",
+            "1": "{{road}} is packed with parked cars. Calling it a road is getting pretty optimistic.",
+            "2": "All these parked cars make the neighborhood look like an auto show. Are we charging admission now?",
+            "3": "The streets in {{zone}} are crammed with parked cars. Mayor, this isn't a puzzle game.",
+            "4": "That row of parked cars is quite something. Your masterpiece, Mayor?",
+            "5": "Parked cars have taken over {{road}}. The road itself looks like it's apologizing for being there.",
+            "6": "Parked cars everywhere around here. Did the parking plan get left at the curb too?",
+            "7": "With this many cars parked in the street, what's next, stacking them? Don't get ideas, Mayor."
+          },
+          "1": {
+            "0": "A few too many cars parked around here, don't you think? A street could use some breathing room.",
+            "1": "Aren't we squeezing a few too many parked cars onto {{road}}?",
+            "2": "The street parking in {{zone}} is getting on my nerves. Put a little thought into where all those cars go.",
+            "3": "Mayor, go have a look at the neighborhood streets. The parked cars won't run away, promise.",
+            "4": "The streets around here are turning into car storage. Is anything with asphalt a parking lot now?",
+            "5": "The parked cars really stand out on {{road}}. Wouldn't mind letting something else be the scenery.",
+            "6": "Parked cars are filling up the street. Mayor, cramming things into gaps doesn't count as tidying up.",
+            "7": "Would be nice to sort out the street parking around here. That's what parking lots are for, right?"
+          }
+        },
         "opened": {
           "0": {
             "0": "So {{place}}, a {{placeKind}}, opened nearby. Celebrating that doesn't cancel my complaints about life here, Mayor.",

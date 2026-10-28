@@ -3067,6 +3067,28 @@
             "15": "Hay muchos autos circulando a alta velocidad por aquí. También ocurrirán accidentes."
           }
         },
+        "street_parking": {
+          "0": {
+            "0": "Hay demasiados autos estacionados en las calles de por aquí. Oye, alcalde, ¿sí sabes distinguir una calle de un estacionamiento?",
+            "1": "{{road}} está llena de autos estacionados. Llamarla calle ya es tener mucha fe.",
+            "2": "Con tanto auto estacionado, el barrio parece una exposición de autos. ¿Ya van a cobrar entrada?",
+            "3": "Las calles de {{zone}} están repletas de autos estacionados. Alcalde, esto no es un juego de encajar piezas.",
+            "4": "Qué impresionante fila de autos estacionados. ¿Tu obra maestra, alcalde?",
+            "5": "Los autos estacionados se adueñaron de {{road}}. La calle parece que hasta pide permiso para estar ahí.",
+            "6": "Por aquí hay autos estacionados por todas partes. ¿El plan de estacionamientos también lo dejaron tirado en la calle?",
+            "7": "Con tantos autos estacionados en la calle, ¿qué sigue, apilarlos? Ni se te ocurra, alcalde."
+          },
+          "1": {
+            "0": "¿No hay demasiados autos estacionados por aquí? A la calle también le vendría bien un respiro.",
+            "1": "¿No estamos metiendo demasiados autos estacionados en {{road}}?",
+            "2": "Me molesta tanto auto estacionado en las calles de {{zone}}. Piensen un poquito dónde van a ponerlos.",
+            "3": "Alcalde, date una vuelta por las calles del barrio. Los autos estacionados no se te van a escapar, tranquilo.",
+            "4": "Las calles de por aquí ya parecen bodegas de autos. ¿Todo lo que tiene asfalto cuenta como estacionamiento?",
+            "5": "En {{road}} destacan demasiado los autos estacionados. Ya podrían dejar que otra cosa sea parte del paisaje.",
+            "6": "La calle se está llenando de autos estacionados. Alcalde, meter cosas donde quepan no cuenta como ordenar.",
+            "7": "Ya estaría bien hacer algo con tanto auto estacionado en la calle. Para eso existen los estacionamientos, ¿no?"
+          }
+        },
         "opened": {
           "0": {
             "0": "Abrió {{place}}, un lugar de tipo {{placeKind}}, cerca de aquí. Celebrarlo no borra mis quejas sobre la vida, alcalde.",

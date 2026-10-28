@@ -3067,6 +3067,28 @@
             "15": "Il y a beaucoup de voitures qui roulent à toute vitesse ici."
           }
         },
+        "street_parking": {
+          "0": {
+            "0": "Il y a beaucoup trop de voitures garées dans les rues du coin. Dis, le maire, tu sais faire la différence entre une rue et un parking ?",
+            "1": "{{road}}, c'est plein de voitures garées. Appeler ça une rue, c'est de l'optimisme à ce stade.",
+            "2": "Avec toutes ces voitures garées, le quartier ressemble à un salon de l'auto. On va faire payer l'entrée ?",
+            "3": "Les rues de {{zone}} débordent de voitures garées. Dis, le maire, tu te crois dans un jeu de puzzle ?",
+            "4": "Cette rangée de voitures garées, c'est impressionnant. Ton chef-d'œuvre, le maire ?",
+            "5": "Sur {{road}}, les voitures garées prennent toute la vedette. La rue a presque l'air de s'excuser d'être là.",
+            "6": "Des voitures garées partout dans le coin. Le plan pour les parkings, il a aussi été abandonné au bord de la route ?",
+            "7": "Avec autant de voitures garées dans la rue, la suite, c'est de les empiler ? Va pas nous trouver des idées, le maire."
+          },
+          "1": {
+            "0": "Il y a pas un peu trop de voitures garées dans le coin ? Une rue aussi, ça a besoin de respirer.",
+            "1": "On en tasse pas un peu trop, des voitures garées sur {{road}} ?",
+            "2": "Toutes ces voitures garées dans les rues de {{zone}}, ça m'agace. Réfléchissez un peu à l'endroit où les mettre.",
+            "3": "Dis, le maire, va jeter un œil aux rues du quartier. Les voitures garées vont pas s'enfuir, promis.",
+            "4": "Les rues du coin servent un peu trop de débarras à voitures. Dès qu'il y a du bitume, c'est un parking ?",
+            "5": "Sur {{road}}, on remarque surtout les voitures garées. Ce serait sympa de laisser le paysage exister un peu.",
+            "6": "La rue se remplit de voitures garées. Dis, le maire, bourrer les coins libres, c'est pas du rangement.",
+            "7": "Faudrait faire quelque chose pour toutes ces voitures garées dans la rue. Les parkings, c'est bien fait pour ça, non ?"
+          }
+        },
         "opened": {
           "0": {
             "0": "{{place}}, de type {{placeKind}}, a ouvert à côté. Fêter ça n'efface pas mes plaintes sur la vie ici, le maire.",
