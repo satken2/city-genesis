@@ -1,10 +1,8 @@
 /**
- * Floor composition component
+ * 建物のフロア構成。
  *
- * Displays the building cross-section on the right. For TYPE_BUILDING buildings, the left
- * shows rent, occupied area by floor type, and the tenant list (labeled as guests for hotels).
- * Reuses agent-detail-section styles to match the basic information section when displaying
- * building-specific information.
+ * 断面図は右側に表示し、TYPE_BUILDING では左側に賃料と床用途別の占有面積を並べる。
+ * 入居テナント（ホテルでは宿泊客）は横並びの領域の下で全幅を使い、一覧の折り返しを抑える。
  */
 
 import { useTranslation } from "react-i18next";
@@ -69,24 +67,6 @@ export function BuildingInfo({ agent, onNavigate }: BuildingInfoProps) {
               />
             </div>
           )}
-
-          {hasTenants && (
-            <div className="building-info-field">
-              <span className="agent-detail-label">
-                {isHotel ? t("agent.guests") : t("agent.tenants")}
-              </span>
-              <div className="building-info-tenants">
-                {agent.tenants!.map((tenant) => (
-                  <AgentLink
-                    key={tenant.id}
-                    agentId={tenant.id}
-                    agentName={tenant.name ?? ""}
-                    onNavigate={onNavigate}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {hasDiagramData && (
@@ -99,6 +79,24 @@ export function BuildingInfo({ agent, onNavigate }: BuildingInfoProps) {
           </div>
         )}
       </div>
+
+      {hasTenants && (
+        <div className="building-info-field">
+          <span className="agent-detail-label">
+            {isHotel ? t("agent.guests") : t("agent.tenants")}
+          </span>
+          <div className="building-info-tenants">
+            {agent.tenants!.map((tenant) => (
+              <AgentLink
+                key={tenant.id}
+                agentId={tenant.id}
+                agentName={tenant.name ?? ""}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
