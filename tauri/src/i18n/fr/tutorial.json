@@ -740,6 +740,10 @@
       "tip42": {
         "title": "Mieux vaut prévenir que s'échouer",
         "description": "Les grands ports, comme ceux à conteneurs, de vrac ou pour navires-citernes, ont besoin d'une profondeur d'eau suffisante. Les côtes où les fonds marins descendent en pente raide conviennent bien, car l'eau profonde est proche du rivage. Même sur une côte plate bordée de hauts-fonds, vous pouvez construire un port en gagnant des terres sur la mer par remblaiement jusqu'aux eaux plus profondes."
+      },
+      "tip43": {
+        "title": "Juste deux minutes…",
+        "description": "Trop de voitures garées dans la rue ralentissent la circulation et augmentent le risque d'accident. Aménagez des parkings pour libérer la chaussée. Les « deux petites minutes » des uns font les longues minutes des autres."
       }
     }
   },

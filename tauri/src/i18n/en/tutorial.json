@@ -740,6 +740,10 @@
       "tip42": {
         "title": "Better Deep Than Sorry",
         "description": "Large ports, such as container, bulk, and tanker ports, need sufficiently deep water. Coasts where the seabed slopes steeply are well suited to ports because deep water is close to shore. Even on a flat coast with shallow water stretching offshore, you can build a port by reclaiming land out to deeper water."
+      },
+      "tip43": {
+        "title": "Just a Minute…",
+        "description": "Too much on-street parking slows traffic and increases the risk of accidents. Build parking lots to give those cars somewhere else to stay. One driver's “just a minute” can become everyone else's afternoon."
       }
     }
   },

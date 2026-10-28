@@ -740,6 +740,10 @@
       "tip42": {
         "title": "Más vale prevenir que encallar",
         "description": "Los puertos grandes, como los de contenedores, graneles y buques cisterna, necesitan suficiente profundidad. Las costas donde el fondo marino desciende con una pendiente pronunciada son adecuadas porque las aguas profundas están cerca de la orilla. Incluso en una costa plana con aguas poco profundas que se extienden mar adentro, puedes construir un puerto ganándole terreno al mar hasta llegar a aguas más profundas."
+      },
+      "tip43": {
+        "title": "Solo tantito…",
+        "description": "Demasiados autos estacionados en la calle reducen la velocidad del tránsito y aumentan el riesgo de accidentes. Construye estacionamientos para liberar las calles. El «solo tantito» de uno se convierte en el «¿para cuándo?» de todos."
       }
     }
   },
