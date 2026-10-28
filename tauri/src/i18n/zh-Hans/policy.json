@@ -1,130 +1,151 @@
 {
   "policy": {
     "title": "政策规划",
-    "intro": "选择指标，追溯可能的原因，并考虑各个层级可采取的行动。",
     "refresh": "重新调查",
-    "indicatorsLabel": "调查指标",
-    "actionsLabel": "此层级可采取的行动",
-    "causes": "原因与对策",
-    "candidateNote": "仅显示观测到的可能原因。通过对策打开相应操作界面，在那里制定计划。",
-    "sample": "统计对象 {{n}}",
-    "pending": "正在执行纪元，完成后将进行调查。",
-    "noData": "没有符合条件的居民或家庭，或尚无纪元实绩。",
-    "noFindings": "在已定义的调查项目中未发现符合条件的问题。",
+    "pending": "模拟进行中",
+    "noData": "暂无实绩",
+    "noFindings": "没有符合条件的问题。",
     "actionError": "无法打开操作界面。",
     "indicators": {
       "unemployment": {
         "title": "失业率",
-        "unit": "劳动年龄居民"
+        "tab": "失业率"
       },
       "income": {
         "title": "平均家庭收入",
-        "unit": "每户 · 每日"
+        "tab": "收入"
       },
       "crime": {
         "title": "犯罪损害",
-        "unit": "每千名居民 · 最近纪元"
+        "tab": "犯罪损害"
       }
     },
     "nodes": {
       "no_vacancies": {
         "title": "当前就业配额已满",
-        "evidence": "{{count}}名居民正在求职。就业配额为{{quota}}，已雇用劳动力为{{labor}}。两项劳动力数值均以有效劳动力为单位。"
+        "evidence": "求职者{{count}}人"
       },
       "unfilled_jobs": {
         "title": "职位空缺与失业并存",
-        "evidence": "求职者{{count}}人，空缺就业配额{{vacancies}}（有效劳动力）。请检查技能、通勤及实际收入等招聘条件。"
+        "evidence": "求职者{{count}}人 · 空缺就业配额{{vacancies}}（有效劳动力）"
       },
       "public_budget": {
         "title": "公共设施受预算限制而缩减计划",
-        "evidence": "{{count}}处设施的运营预算限制了计划。确保资金也有助于恢复就业配额。"
+        "evidence": "因运营预算而缩减计划的设施：{{count}}处"
       },
       "education_gap": {
         "title": "部分求职者未完成基础教育",
-        "evidence": "{{count}}名求职者的所有技能均处于未受教育等级。教育是提高未来技能与工资的对策。"
+        "evidence": "基础教育不足的求职者：{{count}}人"
       },
-      "no_schools": {
-        "title": "没有运营中的教育设施",
-        "evidence": "没有提供教育的设施。除建设外，还需确保可通学的选址与运营预算。"
+      "school_capacity": {
+        "title": "基础教育学位不足",
+        "evidence": "在校 {{enrolled}}人 · 未入学 {{waiting}}人／学位 {{capacity}}人"
+      },
+      "immigrant_education_gap": {
+        "title": "缺乏基础教育的求职者中包含移民",
+        "evidence": "缺乏基础教育的移民求职者：{{count}}人"
       },
       "specialists": {
         "title": "部分设施因缺乏专业人才而无法运营",
-        "evidence": "{{count}}处设施缺少高技能人才。仅增加普通劳动者无法解决。"
+        "evidence": "缺乏高技能人才的设施：{{count}}处"
       },
       "household_unemployment": {
         "title": "部分家庭有失业成年人",
-        "evidence": "{{count}}户家庭有劳动年龄的失业居民，这是工资收入不足的可能原因。下方分支显示全市就业情况。"
+        "evidence": "有无职成年人的家庭：{{count}}户"
       },
       "no_income": {
         "title": "部分家庭没有收入",
-        "evidence": "{{count}}户家庭的平均日收入不高于零。除就业对策外，请检查补助及其资金来源。"
+        "evidence": "平均日收入不高于零的家庭：{{count}}户"
       },
       "basic_consumption": {
         "title": "部分家庭停留在基本消费阶段",
-        "evidence": "{{count}}户家庭处于最低需求等级。请检查收入扣除生活费后是否仍有余裕。"
+        "evidence": "处于基本消费阶段的家庭：{{count}}户"
       },
       "security_response": {
-        "title": "治安服务未能充分抑制损害",
-        "evidence": "最近纪元记录了{{count}}起犯罪损害。请检查警察的供给能力与服务覆盖范围。"
+        "title": "警察未能阻止所有损害",
+        "evidence": "最近1个月的犯罪受害：{{count}}起",
+        "evidence_week": "最近1周的犯罪受害：{{count}}起"
       },
       "no_police": {
-        "title": "没有运营中的警察局",
-        "evidence": "没有警察局提供治安服务。请选择能够覆盖受害地区的位置。"
+        "title": "没有正在运作的警察局"
       },
       "police_staff": {
         "title": "警察局缺乏人员",
-        "evidence": "劳动力短缺限制了{{count}}处设施的生产。下方显示全市观测到的招聘问题。"
+        "evidence": "人手不足的警察局：{{count}}处"
       },
       "police_budget": {
-        "title": "警察运营预算不足",
-        "evidence": "{{count}}处设施因预算限制而缩减了下一纪元的计划。"
+        "title": "警察经费不足",
+        "evidence": "经费不足的警察局：{{count}}处"
       },
       "police_inputs": {
-        "title": "警察局缺乏原材料",
-        "evidence": "{{count}}处设施出现原材料短缺。请通过设施诊断检查短缺物资和供给路径。"
+        "title": "警察局物资不足",
+        "evidence": "物资不足的警察局：{{count}}处"
+      },
+      "crime_incidents": {
+        "title": "发生了纠纷",
+        "evidence": "最近1个月的纠纷：{{count}}起",
+        "evidence_week": "最近1周的纠纷：{{count}}起"
       },
       "unemployment_pressure": {
         "title": "失业导致治安恶化",
-        "evidence": "目前有{{count}}名无职成年人。游戏中无职成年人会加剧治安恶化，因此也可以从就业方面考虑对策。"
+        "evidence": "无职成年人：{{count}}人"
+      },
+      "citizen_criminality": {
+        "title": "有些市民容易走向犯罪",
+        "evidence": "容易走向犯罪的市民：{{count}}人"
       }
     },
     "actions": {
       "public_jobs": {
-        "title": "通过公营设施创造就业",
-        "description": "打开建设界面。竣工后的雇用还需要运营预算。"
+        "title": "通过公营设施创造就业"
       },
       "population": {
-        "title": "驱逐市民以减少人口",
-        "description": "打开市民列表并选择对象。这也会减少人口与未来的劳动力。"
+        "title": "驱逐市民以减少人口"
       },
       "budget": {
-        "title": "分配运营预算",
-        "description": "在预算界面向所需领域分配资金。请同时检查增额的资金来源。"
+        "title": "分配运营预算"
       },
       "education": {
-        "title": "完善基础教育",
-        "description": "在建设界面规划学校。这有利于下一代，而非让当前成年人立即就业。"
+        "title": "增建学校"
       },
       "higher_education": {
-        "title": "通过高等教育培养专业人才",
-        "description": "规划大学并确保所需专业的招生名额。毕业需要时间。"
+        "title": "通过高等教育培养专业人才"
       },
       "welfare": {
-        "title": "调整补助与生活救助",
-        "description": "在条例界面的社会保障中调整。补助也需要社会保障预算支持。"
+        "title": "提高补助与生活救助"
       },
       "employment": {
-        "title": "通过就业统计调查招聘条件",
-        "description": "在统计界面的就业选项卡检查各技能的职位需求及工资。"
+        "title": "通过就业统计调查招聘条件"
       },
       "police": {
-        "title": "布置警察局",
-        "description": "打开建设界面。请考虑能够覆盖受害地区的选址及运营费用。"
+        "title": "建造警察局"
       },
       "facilities": {
-        "title": "调查设施运营与短缺",
-        "description": "打开公共设施列表，通过相关设施的详情及诊断查明原因。"
+        "title": "查看设施状况"
+      },
+      "immigration_skills": {
+        "title": "调整移民技能要求"
+      },
+      "immigration_limit": {
+        "title": "限制移民接收"
+      },
+      "criminality": {
+        "title": "查看市民的犯罪倾向"
       }
+    },
+    "selectorTitle": "要调查什么？",
+    "eventsTitle": "正在发生的情况",
+    "adviceTitle": "对策建议",
+    "needsAttention": "有改善空间",
+    "values": {
+      "money": "{{value}} / 家庭·日",
+      "per_thousand": "每1,000人 {{value}}起（最近1个月）",
+      "per_thousand_week": "每1,000人 {{value}}起（最近1周）"
+    },
+    "investigate": {
+      "crime": "调查犯罪损害的原因",
+      "unemployment": "调查失业的原因",
+      "income": "调查低收入的原因"
     }
   }
 }

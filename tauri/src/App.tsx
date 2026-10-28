@@ -592,7 +592,8 @@ function App() {
             ) : context.window_type === "achievements" ? (
               <AchievementsWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "city_regulation" ? (
-              <CityRegulationWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
+              <CityRegulationWindow apiBaseUrl={context.api_base_url} onClose={closeWindow}
+                initialTab={windowExtra(context)?.initialTab as string | undefined} />
             ) : context.window_type === "city_statistics" ? (
               <CityStatisticsWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "display_options" ? (

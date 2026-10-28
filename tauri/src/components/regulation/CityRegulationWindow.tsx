@@ -52,14 +52,17 @@ type TabId = (typeof TABS)[number]["id"];
 export function CityRegulationWindow({
   apiBaseUrl,
   onClose,
+  initialTab,
 }: {
   apiBaseUrl: string;
   onClose: () => void;
+  /** 政策立案から対象の設定へ直接案内するための初期タブ。 */
+  initialTab?: string;
 }) {
   const { t } = useTranslation();
   const masterData = useMasterData();
 
-  const [activeTab, setActiveTab] = useState<TabId>("speed");
+  const [activeTab, setActiveTab] = useState<TabId>(() => TABS.find(tab => tab.id === initialTab)?.id ?? "speed");
 
   /** Saved and draft speed limits (keys are path_variant ID strings, values are km/h). */
   const [cityMaxSpeed, setCityMaxSpeed] = useState<SpeedMap>({});

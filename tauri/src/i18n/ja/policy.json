@@ -1,130 +1,151 @@
 {
   "policy": {
     "title": "政策立案",
-    "intro": "指標を選んで原因をたどり、各段階でできる行動を検討します。",
     "refresh": "再調査",
-    "indicatorsLabel": "調べる指標",
-    "actionsLabel": "この段階でできること",
-    "causes": "原因と打ち手",
-    "candidateNote": "観測された原因候補だけを表示します。対応案から操作画面を開き、そこで計画します。",
-    "sample": "集計対象 {{n}}",
-    "pending": "エポック実行中です。完了後に調査します。",
-    "noData": "対象となる住民・世帯がいないか、まだエポックの実績がありません。",
-    "noFindings": "定義済みの調査項目では、該当する問題を確認できませんでした。",
+    "pending": "シミュレーション中",
+    "noData": "実績なし",
+    "noFindings": "該当する問題はありません。",
     "actionError": "操作画面を開けませんでした。",
     "indicators": {
       "unemployment": {
         "title": "失業率",
-        "unit": "就労可能年齢の住民"
+        "tab": "失業率"
       },
       "income": {
         "title": "平均世帯所得",
-        "unit": "1世帯あたり・日額"
+        "tab": "所得"
       },
       "crime": {
         "title": "犯罪被害",
-        "unit": "人口1,000人あたり・直近エポック"
+        "tab": "犯罪被害"
       }
     },
     "nodes": {
       "no_vacancies": {
         "title": "現在の雇用枠に空きがない",
-        "evidence": "求職中の住民 {{count}} 人。雇用枠 {{quota}} に対して雇用済み労働力 {{labor}}。いずれも実質労働力単位です。"
+        "evidence": "求職者 {{count}}人"
       },
       "unfilled_jobs": {
         "title": "求人と失業が併存している",
-        "evidence": "求職中 {{count}} 人、空き雇用枠 {{vacancies}}（実質労働力）。技能・通勤・手取りなどの採用条件を確認します。"
+        "evidence": "求職者 {{count}}人・空き枠 {{vacancies}}（実質労働力）"
       },
       "public_budget": {
         "title": "公共施設が予算で縮小している",
-        "evidence": "{{count}} 施設で運営予算が計画を制約しています。予算の確保は雇用枠の回復にもつながります。"
+        "evidence": "運営予算による計画縮小：{{count}}施設"
       },
       "education_gap": {
         "title": "基礎教育を終えていない求職者がいる",
-        "evidence": "{{count}} 人は全スキルが無教育ティアです。教育は将来の技能と賃金を育てる対策です。"
+        "evidence": "基礎教育が不足する求職者：{{count}}人"
       },
-      "no_schools": {
-        "title": "稼働中の教育施設がない",
-        "evidence": "教育を担う施設がありません。施設の建設に加え、通学可能な立地と運営予算が必要です。"
+      "school_capacity": {
+        "title": "基礎教育の定員が不足している",
+        "evidence": "通学中 {{enrolled}}人・未就学 {{waiting}}人／定員 {{capacity}}人"
+      },
+      "immigrant_education_gap": {
+        "title": "基礎教育が不足する求職者に移民が含まれる",
+        "evidence": "該当する移民の求職者：{{count}}人"
       },
       "specialists": {
         "title": "専門人材の不足で稼働できない施設がある",
-        "evidence": "{{count}} 施設が高度人材不足です。一般の働き手を増やすだけでは解消しません。"
+        "evidence": "高度人材が不足する施設：{{count}}施設"
       },
       "household_unemployment": {
         "title": "無職の成人がいる世帯がある",
-        "evidence": "{{count}} 世帯に就労可能年齢の無職の住民がいます。賃金収入の不足につながる候補です。下は都市全体の雇用状況です。"
+        "evidence": "無職の成人を含む世帯：{{count}}世帯"
       },
       "no_income": {
         "title": "収入のない世帯がある",
-        "evidence": "{{count}} 世帯の平均日収がゼロ以下です。雇用対策に加え、給付とその財源を確認します。"
+        "evidence": "平均日収がゼロ以下：{{count}}世帯"
       },
       "basic_consumption": {
         "title": "最低限の消費段階に留まる世帯がある",
-        "evidence": "{{count}} 世帯が最も低い需要ティアです。所得と生活費に余裕があるかを確認します。"
+        "evidence": "最低限の消費段階にある世帯：{{count}}世帯"
       },
       "security_response": {
-        "title": "治安維持で被害を抑えきれていない",
-        "evidence": "直近エポックで {{count}} 件の犯罪被害が記録されています。警察の供給能力と届く範囲を確認します。"
+        "title": "警察が被害を防ぎきれていない",
+        "evidence": "直近1か月の犯罪被害：{{count}}件",
+        "evidence_week": "直近1週間の犯罪被害：{{count}}件"
       },
       "no_police": {
-        "title": "稼働中の警察署がない",
-        "evidence": "治安維持サービスを供給する警察署がありません。被害のある地域に届く立地を選びます。"
+        "title": "活動している警察署がない"
       },
       "police_staff": {
         "title": "警察署が人手不足になっている",
-        "evidence": "{{count}} 施設で労働力不足が生産を制約しました。下は都市全体で観測された採用上の問題です。"
+        "evidence": "人手不足の警察署：{{count}}か所"
       },
       "police_budget": {
-        "title": "警察の運営予算が不足している",
-        "evidence": "{{count}} 施設で予算によって来期の計画が縮小しています。"
+        "title": "警察の予算が足りない",
+        "evidence": "予算不足の警察署：{{count}}か所"
       },
       "police_inputs": {
-        "title": "警察署で原材料が不足している",
-        "evidence": "{{count}} 施設で原材料不足が観測されています。施設の診断で不足品目と供給経路を確認します。"
+        "title": "警察署の物資が足りない",
+        "evidence": "物資不足の警察署：{{count}}か所"
+      },
+      "crime_incidents": {
+        "title": "いざこざが起きている",
+        "evidence": "直近1か月のいざこざ：{{count}}件",
+        "evidence_week": "直近1週間のいざこざ：{{count}}件"
       },
       "unemployment_pressure": {
         "title": "失業が治安悪化の要因になっている",
-        "evidence": "無職の成人は {{count}} 人。ゲームでは無職の成人が治安悪化に寄与するため、雇用面からも対策を検討できます。"
+        "evidence": "無職の成人：{{count}}人"
+      },
+      "citizen_criminality": {
+        "title": "犯罪傾向のある市民がいる",
+        "evidence": "犯罪傾向のある市民：{{count}}人"
       }
     },
     "actions": {
       "public_jobs": {
-        "title": "公営施設で働き口をつくる",
-        "description": "建設画面を開きます。竣工後の雇用には運営予算も必要です。"
+        "title": "公営施設で働き口をつくる"
       },
       "population": {
-        "title": "市民を追放して人口を減らす",
-        "description": "市民一覧を開き、対象を選びます。人口と将来の働き手も失われます。"
+        "title": "市民を追放して人口を減らす"
       },
       "budget": {
-        "title": "運営予算を配分する",
-        "description": "予算画面で必要な分野へ配分します。増額分の財源も確認してください。"
+        "title": "運営予算を配分する"
       },
       "education": {
-        "title": "基礎教育を整える",
-        "description": "建設画面で学校を計画します。今いる成人の即時雇用ではなく、次の世代に効く対策です。"
+        "title": "学校を増やす"
       },
       "higher_education": {
-        "title": "高等教育で専門人材を育てる",
-        "description": "大学を計画し、必要な専攻の受け入れ枠を確保します。卒業まで時間がかかります。"
+        "title": "高等教育で専門人材を育てる"
       },
       "welfare": {
-        "title": "給付・生活扶助を調整する",
-        "description": "条例画面の社会保障で調整します。給付を支える社会保障予算も必要です。"
+        "title": "給付金・生活扶助を増やす"
       },
       "employment": {
-        "title": "雇用統計で採用条件を調べる",
-        "description": "統計画面の雇用タブで、技能別の求人や賃金を確認します。"
+        "title": "雇用統計で採用条件を調べる"
       },
       "police": {
-        "title": "警察署を配置する",
-        "description": "建設画面を開きます。被害のある地域までサービスが届く配置と運営費を検討します。"
+        "title": "警察署を建てる"
       },
       "facilities": {
-        "title": "施設の稼働と不足を調べる",
-        "description": "公共施設一覧を開き、該当する施設の詳細・診断で原因を確かめます。"
+        "title": "施設の状況を確認する"
+      },
+      "immigration_skills": {
+        "title": "移民の技能要件を見直す"
+      },
+      "immigration_limit": {
+        "title": "移民の受け入れを制限する"
+      },
+      "criminality": {
+        "title": "市民の犯罪傾向を確認する"
       }
+    },
+    "selectorTitle": "何を調査しますか？",
+    "eventsTitle": "起きていること",
+    "adviceTitle": "対策のアドバイス",
+    "needsAttention": "改善の余地あり",
+    "values": {
+      "money": "{{value}} /世帯・日",
+      "per_thousand": "1,000人あたり {{value}}件（直近1か月）",
+      "per_thousand_week": "1,000人あたり {{value}}件（直近1週間）"
+    },
+    "investigate": {
+      "crime": "犯罪被害の原因を調査",
+      "unemployment": "失業率の原因を調査",
+      "income": "所得の原因を調査"
     }
   }
 }
