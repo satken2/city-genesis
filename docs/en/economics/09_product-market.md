@@ -46,5 +46,5 @@ Trade hubs import products the city lacks and export products that cannot be sol
 
 Some products have no local production facilities and are supplied entirely through imports. Facilities using them need a trade hub that handles the product and a transport route to it.
 
-Trade uses external prices and is affected by overseas freight costs and tariffs. Heavy, inexpensive goods are costly to transport and tend to favor local production; light, expensive goods can trade over greater distances. See [finance](12_finance.md) for trade-related money flows.
+The outside world is an economy of middling development in workforce, supply chains, and equipment, and external prices reflect costs at that level. A young city loses to the outside in most goods and overtakes it as its workforce, equipment, and clusters mature. Trade uses external prices and is affected by overseas freight costs and tariffs. Heavy, inexpensive goods are costly to transport and tend to favor local production; light, expensive goods can trade over greater distances. See [finance](12_finance.md) for trade-related money flows.
 

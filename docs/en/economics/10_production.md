@@ -18,7 +18,7 @@ For public services such as healthcare, electricity, and water, the mayor sets a
 
 ## 10.4. Location, equipment, and climate
 
-Foot traffic, industry clusters, and reputation built through long operation improve a facility's attractiveness or business conditions. Equipment investment raises production efficiency, but equipment depreciates over time.
+Foot traffic, industry clusters, and reputation built through long operation improve a facility's attractiveness or business conditions. Equipment investment raises production efficiency, but equipment depreciates over time. A new facility buys the same standard of equipment as the outside world when it opens, and can invest beyond that from its profits to become more efficient than the outside.
 
 Solar power, wind power, and agriculture respond to sunshine, wind speed, temperature, and precipitation. Simulation uses the city's climate for each epoch, a separate state from the weather being rendered ([weather and lighting](../geometries/U_weather-and-lighting.md)).
 
