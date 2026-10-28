@@ -23,7 +23,7 @@ Requests are grouped into load batches; a new batch cancels the older one. Stale
 | Districts, interchanges/junctions, road names, resources | Citywide lists | `version` and content |
 | Citywide overview buildings and roads | Citywide overview list | Content per terrain cell |
 
-Building and road lists are paginated. Fetch until no next cursor remains, and remove missing IDs only after every page succeeds. Data receipt and rendering completion are separate: retry interrupted generation even for the same data version. Alerts do not advance rendering versions and use a dedicated API ([notifications](../programs/notifications.md)).
+Building and road lists are paginated. Fetch until no next cursor remains, and remove missing IDs only after every page succeeds. Data receipt and rendering completion are separate: retry interrupted generation even for the same data version. Alerts do not advance rendering versions and use a dedicated API ([notifications](../programs/notifications.md)). Alert-driven 3D effects use the same response and distinguish result generations by its epoch number. Random appearances and placements held in Unity survive redisplay of the same generation, but do not carry over to the next generation or another city.
 
 ## Terrain retrieval and publication
 

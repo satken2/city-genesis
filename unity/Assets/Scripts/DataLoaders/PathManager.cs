@@ -5961,12 +5961,14 @@ public partial class PathManager : BaseApiDataManager
     {
         pathObjectsCache[pathId] = pathGO;
         if (!pathCellsById.ContainsKey(pathId)) unregisteredPathObjectIds.Add(pathId);
+        TrafficAccidentEffectManager.Instance?.RefreshPath(pathId);
     }
 
     private void RemovePathObject(int pathId)
     {
         pathObjectsCache.Remove(pathId);
         unregisteredPathObjectIds.Remove(pathId);
+        TrafficAccidentEffectManager.Instance?.RefreshPath(pathId);
     }
 
     private void UnregisterPathCells(int pathId)

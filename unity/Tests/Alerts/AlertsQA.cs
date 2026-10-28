@@ -145,9 +145,10 @@ public static class AlertsQA
             applyResponse(response);
             applyResponse(Item(responseType, "agents", List(itemType), "paths", List(itemType), "warnings", List(warningType)));
             Check(entries.Count == 0, "警告の解消でバブルを削除");
+            TrafficAccidentsQA.Run(source, Check);
             UnityEngine.Object.DestroyImmediate(managerGO);
             UnityEngine.Object.DestroyImmediate(factoryGO);
-            File.WriteAllText("result.txt", "PASS: spatial warning rendering, filters, cache, assets, lifecycle (" + checks + " checks)");
+            File.WriteAllText("result.txt", "PASS: alerts, traffic accidents, placement, smoke, filters, lifecycle (" + checks + " checks)");
             EditorApplication.Exit(0);
         }
         catch (Exception error)

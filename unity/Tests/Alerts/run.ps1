@@ -12,6 +12,9 @@ New-Item -ItemType Directory -Path "$qaRoot/Assets/Editor", "$qaRoot/Assets/Imag
 Copy-Item -LiteralPath "$unityRoot/Temp/bin/Debug/Assembly-CSharp.dll" -Destination "$qaRoot/Runtime" -Force
 Copy-Item -LiteralPath "$unityRoot/ProjectSettings/ProjectVersion.txt" -Destination "$qaRoot/ProjectSettings" -Force
 Copy-Item -LiteralPath "$PSScriptRoot/AlertsQA.cs" -Destination "$qaRoot/Assets/Editor" -Force
+Copy-Item -LiteralPath "$PSScriptRoot/TrafficAccidentsQA.cs" -Destination "$qaRoot/Assets/Editor" -Force
+New-Item -ItemType Directory -Path "$qaRoot/Assets/Resources/Shaders" -Force | Out-Null
+Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/FireParticle.shader" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 foreach ($name in @('sand-clock', 'sanitation', 'bribery', 'electricity', 'rubble')) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Images/$name.png", "$unityRoot/Assets/Images/$name.png.meta" -Destination "$qaRoot/Assets/Images" -Force
 }

@@ -148,6 +148,38 @@ public static class FireEffectFactory
         return root;
     }
 
+    /// <summary>建物用の寸法下限を使わず、事故車の周囲から細く立ち上る煙を作る。</summary>
+    public static GameObject CreateVehicleSmoke(Transform parent)
+    {
+        EnsureMaterials();
+        ParticleSystem smoke = AddSystem(parent, "AccidentSmoke", _smokeMaterial, 45);
+        var main = smoke.main;
+        main.duration = 5f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(2.5f, 4f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(.6f, 1.1f);
+        main.startSize = new ParticleSystem.MinMaxCurve(.22f, .45f);
+        main.startRotation = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
+        main.gravityModifier = -.025f;
+        var emission = smoke.emission;
+        emission.rateOverTime = 7f;
+        var shape = smoke.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 12f;
+        shape.rotation = new Vector3(-90f, 0, 0);
+        shape.radius = .15f;
+        SetColorOverLifetime(smoke,
+            new[] { new GradientColorKey(new Color(.25f, .25f, .25f), 0f), new GradientColorKey(new Color(.65f, .65f, .65f), 1f) },
+            new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(.5f, .15f), new GradientAlphaKey(0f, 1f) });
+        SetSizeOverLifetime(smoke, AnimationCurve.Linear(0f, .6f, 1f, 2.5f));
+        SetSwayNoise(smoke, .25f, .25f, .2f);
+        SetRotationOverLifetime(smoke, 8f);
+        var properties = new MaterialPropertyBlock();
+        properties.SetFloat("_SoftFadeDistance", .6f);
+        smoke.GetComponent<ParticleSystemRenderer>().SetPropertyBlock(properties);
+        smoke.Play();
+        return smoke.gameObject;
+    }
+
     private static ParticleSystem AddExplosionSystem(Transform root, string name, Material material, short count, float radius)
     {
         var ps = AddSystem(root, name, material, count);

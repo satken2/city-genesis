@@ -42,6 +42,7 @@ using UnityEngine.UI;
 /// Fire (ALERT_AGENT_ON_FIRE) is represented by
 /// 3D particles (flames and smoke). This manager only forwards the API response to FireEffectManager
 /// and creates no icon (the effects still follow the display filter and visibility toggle).
+/// 交通事故はアイコンに加えて事故車と煙を描く。同じ取得結果をTrafficAccidentEffectManagerへ渡す。
 ///
 /// Display filter
 /// ------------
@@ -136,6 +137,8 @@ public class AlertManager : MonoBehaviour
             {
                 FireEffectManager.Instance.IsVisible = _isVisible;
             }
+            if (TrafficAccidentEffectManager.Instance != null)
+                TrafficAccidentEffectManager.Instance.IsVisible = _isVisible;
         }
     }
 
@@ -287,7 +290,7 @@ public class AlertManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Clear all alert representations (icons and fire effects).
+    /// すべてのアラート表現（アイコン・火災・事故車）を消去する。
     /// Called by ForceReloadAllData and session resets; also discard in-flight responses and pending requests.
     /// </summary>
     public void ClearAll()
@@ -303,6 +306,7 @@ public class AlertManager : MonoBehaviour
         {
             FireEffectManager.Instance.ClearAll();
         }
+        TrafficAccidentEffectManager.Instance?.ClearAll();
     }
 
     /// <summary>Clear icons only. FireEffectManager retains fire effects separately.</summary>
@@ -381,6 +385,11 @@ public class AlertManager : MonoBehaviour
         {
             FireEffectManager.Instance.IsVisible = _isVisible;
             FireEffectManager.Instance.ApplyAlerts(response.agents, _filterMask);
+        }
+        if (TrafficAccidentEffectManager.Instance != null)
+        {
+            TrafficAccidentEffectManager.Instance.IsVisible = _isVisible;
+            TrafficAccidentEffectManager.Instance.ApplyAlerts(response.paths, _filterMask, response.epoch);
         }
 
         EnsureUICanvas();
@@ -757,6 +766,8 @@ public class AlertItem
 [Serializable]
 public class AlertsResponse
 {
+    /// <summary>アラートの結果世代。道路の描画用versionとは独立して更新される。</summary>
+    public int? epoch;
     public List<AlertItem> agents;
     public List<AlertItem> paths;
     public List<SpatialWarningItem> warnings;
