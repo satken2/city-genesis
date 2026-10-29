@@ -16,6 +16,7 @@ Paths have a broad `type` (`PATH_*`) and a more specific `variant`.
 | Track | `PATH_TRACK` | Railway tracks, station platforms, and dedicated LRT tracks. Variants with `infra_products` also carry electricity ([supply and transport](17_supply-and-transport.md)) |
 | Monorail | `PATH_MONORAIL` | Monorail tracks and stations |
 | People mover | `PATH_CONVEYOR` | Facilities such as ropeways without an operating agent. Pedestrians board and leave only at `boardable` endpoints |
+| Ferry | `PATH_FERRY` | Lanes on the water that ferry lines run on, and piers reaching from land out over the water. Lanes are normally hidden and shown like planned paths ([public transport](18_public-transport.md)) |
 | Public transport | `PATH_TRANSPORT` | Logical sections between stops, without construction ([public transport](18_public-transport.md)) |
 | Power line | `PATH_ELECTRICITY` | Infrastructure delivery only ([supply and transport](17_supply-and-transport.md)) |
 | Water pipe | `PATH_WATER` | Infrastructure delivery only ([supply and transport](17_supply-and-transport.md)) |
@@ -35,6 +36,7 @@ When roads or tracks cross at the same height, a node is created and both paths 
 #### Three-dimensional shape (Y)
 
 Anchor Y values on paths and nodes are heights relative to the ground. Positive relative height produces an elevated section; negative height produces an underground section.
+Variants without height editing sit on the surface. For those that may be laid on water (ferries) the surface is the water, so the relative height of an anchor on water is the depth from the water surface to the bed.
 
 | Section | Condition | Appearance |
 | --- | --- | --- |

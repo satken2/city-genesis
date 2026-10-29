@@ -28,7 +28,8 @@
       "501": "Rail depots",
       "502": "Bus depots",
       "503": "LRT depots",
-      "504": "Monorail depots"
+      "504": "Monorail depots",
+      "505": "Maintenance dock"
     },
     "consumers": {
       "401": "Power consumers",
@@ -39,7 +40,8 @@
       "501": "Rail routes",
       "502": "Bus routes",
       "503": "LRT routes",
-      "504": "Monorail routes"
+      "504": "Monorail routes",
+      "505": "Ferry lines"
     }
   }
 }

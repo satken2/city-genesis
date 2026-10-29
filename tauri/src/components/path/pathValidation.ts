@@ -16,6 +16,7 @@ export function pathValidationShapeKey(shape: PathShapeUpdatePayload): string {
 export type PathValidationResult = PathInterferenceHighlight & {
   is_valid: boolean;
   colliding_sea_lake_ids?: string[]; // The sea uses "sea"; lakes use water_surfaces IDs.
+  ferry_water_violation?: boolean; // A ferry lane leaves the water, or a ferry pier does not reach from land to water.
   colliding_quay_band_ids?: number[]; // reclaimed_land_id
   colliding_grading_site_ids?: number[]; // parcel_id of the parcel undergoing earthworks.
   junction_violations?: Array<{ code: string; position: number[] }>; // Track branching/merging violation. position is the connection [x, absolute road elevation, z].
@@ -80,6 +81,7 @@ export function describePathValidation(result: PathValidationResult, t: Translat
   if (result.colliding_path_ids.length) messages.push(t("path_construction.validationPathCollision"));
   if (result.colliding_river_ids?.length) messages.push(t("path_construction.validationRiverCollision"));
   if (result.colliding_sea_lake_ids?.length) messages.push(t("errors.CREATEPATH_SEA_LAKE_CROSSING"));
+  if (result.ferry_water_violation) messages.push(t("errors.CREATEPATH_FERRY_WATER"));
   if (result.colliding_quay_band_ids?.length) messages.push(t("errors.CREATEPATH_QUAY_BAND_CROSSING"));
   if (result.colliding_grading_site_ids?.length) messages.push(t("path_construction.validationGradingSite"));
   return messages.length ? messages : [t("path_construction.validationRejected")];

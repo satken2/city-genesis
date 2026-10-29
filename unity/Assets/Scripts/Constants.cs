@@ -248,6 +248,7 @@ public static class Constants
     public const int VEHICLE_FREIGHT_TRAIN = 22;
     public const int VEHICLE_HIGH_SPEED_TRAIN = 23;
     public const int VEHICLE_MONORAIL = 24;
+    public const int VEHICLE_FERRY = 30;
     public const int SHAPE_HOUSE = 1;
     public const int SHAPE_OFFICE = 2;
     public const int SHAPE_COMMERCIAL = 3;
@@ -260,6 +261,7 @@ public static class Constants
     public const int PATH_TRACK = 4;
     public const int PATH_MONORAIL = 5;
     public const int PATH_CONVEYOR = 6;
+    public const int PATH_FERRY = 7;
     public const int PATH_TRANSPORT = 10;
     public const int PATH_ELECTRICITY = 11;
     public const int PATH_WATER = 12;
@@ -351,6 +353,7 @@ public static class Constants
     public const int NODE_MONORAIL = 4;
     public const int NODE_CONVEYOR = 8;
     public const int NODE_TRANSIT = 16;
+    public const int NODE_FERRY = 1048576;
     public const int INFRA_BIT_BASE = 5;
     public const int SPACE_OTHER = 1;
     public const int SPACE_RESIDENCE = 2;
@@ -430,7 +433,8 @@ public static class Constants
         { VEHICLE_PASSANGER_TRAIN, TRAFFIC_RAIL },
         { VEHICLE_FREIGHT_TRAIN, TRAFFIC_RAIL },
         { VEHICLE_HIGH_SPEED_TRAIN, TRAFFIC_RAIL },
-        { VEHICLE_MONORAIL, TRAFFIC_RAIL }
+        { VEHICLE_MONORAIL, TRAFFIC_RAIL },
+        { VEHICLE_FERRY, TRAFFIC_ROAD }
     };
 
     public static readonly Dictionary<int, string> STATUS_NAME_MAP = new Dictionary<int, string>
@@ -470,6 +474,8 @@ public static class Constants
     public static readonly int[] ROAD_VEHICLE_KEYS = new int[] { VEHICLE_STANDARD, VEHICLE_TRUCK, VEHICLE_BUS, VEHICLE_COMMERCIAL, VEHICLE_TRAM };
 
     public static readonly int[] RAIL_VEHICLE_KEYS = new int[] { VEHICLE_METRO_TRAIN, VEHICLE_PASSANGER_TRAIN, VEHICLE_FREIGHT_TRAIN, VEHICLE_HIGH_SPEED_TRAIN, VEHICLE_MONORAIL };
+
+    public static readonly int[] SHIP_VEHICLE_KEYS = new int[] { VEHICLE_FERRY };
 
     public static readonly int[] GROUND_COVER_TYPES = new int[] { GROUND_COVER_GRASSLAND, GROUND_COVER_DESERT, GROUND_COVER_LUSH, GROUND_COVER_SNOW, GROUND_COVER_SEMI_ARID };
 

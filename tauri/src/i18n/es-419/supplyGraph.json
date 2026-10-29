@@ -28,7 +28,8 @@
       "501": "Depósitos ferroviarios",
       "502": "Depósitos de autobuses",
       "503": "Depósitos de tren ligero",
-      "504": "Depósitos de monorriel"
+      "504": "Depósitos de monorriel",
+      "505": "Dique de mantenimiento"
     },
     "consumers": {
       "401": "Instalaciones que usan electricidad",
@@ -39,7 +40,8 @@
       "501": "Líneas ferroviarias",
       "502": "Líneas de autobús",
       "503": "Líneas de tren ligero",
-      "504": "Líneas de monorriel"
+      "504": "Líneas de monorriel",
+      "505": "Líneas de ferri"
     }
   }
 }

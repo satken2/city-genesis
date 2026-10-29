@@ -13,7 +13,7 @@ public partial class RoadPlanManager
         if (phase == RoadEditorPhase.Placing && anchors.Count > 0)
         {
             var hover = hoverWorldPosition;
-            hover.y = Utils.GetGroundHeight(hover) + (hoverSnapWasElevated ? hoverSnapRelHeight : currentHeight);
+            hover.y = PlacementSurfaceY(hover) + (hoverSnapWasElevated ? hoverSnapRelHeight : currentHeight);
             anchors.Add(hover); embankments.Add(currentEmbankmentHeight);
         }
         if (anchors.Count < 2) { earthworkPreview?.Clear(); return; }

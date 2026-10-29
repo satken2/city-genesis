@@ -79,6 +79,7 @@ import {
   PATH_TRACK,
   PATH_MONORAIL,
   PATH_CONVEYOR,
+  PATH_FERRY,
   PATH_TRANSPORT,
   PATH_ELECTRICITY,
   PATH_WATER,
@@ -122,7 +123,7 @@ export const PATH_TYPES_HIDDEN_IN_BUILD_PANEL: readonly number[] = [PATH_DEFAULT
  * Path types whose category tiles appear under Tracks in the construction panel. PATH_TYPES_INFRA appear under
  * Infrastructure; all others appear under Roads.
  */
-export const PATH_TYPES_TRACK_GROUP: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_CONVEYOR, PATH_STATION_HOUSE];
+export const PATH_TYPES_TRACK_GROUP: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_CONVEYOR, PATH_FERRY, PATH_STATION_HOUSE];
 
 /**
  * Path types with minimum curve radius/maximum gradient calculated from geometry. Matches backend

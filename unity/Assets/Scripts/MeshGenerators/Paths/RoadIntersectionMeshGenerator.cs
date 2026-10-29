@@ -20,6 +20,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         // have no surface filling connections; draw to anchors. Water conduits (PATH_WATER) create intersections as surface pipes.
         paths = paths?.FindAll(p => p.path_type != Constants.PATH_CONVEYOR
             && p.path_type != Constants.PATH_TRANSPORT
+            && p.path_type != Constants.PATH_FERRY
             && p.path_type != Constants.PATH_ELECTRICITY
             && p.path_type != Constants.PATH_PIPELINE);
         if (paths == null || paths.Count < 2)

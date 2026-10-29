@@ -451,6 +451,30 @@ public partial class RoadPlanManager
     }
 
     /// <summary>
+    /// Whether (x, z) is over water by the backend's definition (geo_sea_lake): outside land and rivers, with terrain below
+    /// the water level (the lake level inside a lake footprint, otherwise sea level 0). Callers check city bounds.
+    /// </summary>
+    private static bool IsOnWater(float x, float z, float terrainY, out float waterY)
+    {
+        var lake = WaterSurfaceStore.FindAt(x, z);
+        waterY = lake != null ? lake.Level : 0f;
+        return terrainY < waterY && RiverStore.FindAt(x, z) == null && !CoastlineStore.IsLand(x, z);
+    }
+
+    /// <summary>
+    /// Surface that relative height 0 refers to while placing. Variants without height editing that may be laid on water (ferries)
+    /// sit on the water surface there, as the backend normalizes them (crud_paths._normalize_path_elevations); otherwise the ground.
+    /// </summary>
+    private float PlacementSurfaceY(Vector3 p)
+    {
+        float ground = Utils.GetGroundHeight(p);
+        if (!CoastlineStore.HasCoastline || IsHeightEditable()) return ground;
+        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(PathSubtype) : null;
+        if (master == null || !master.over_water_allowed) return ground;
+        return IsOnWater(p.x, p.z, ground, out float waterY) ? waterY : ground;
+    }
+
+    /// <summary>
     /// Locally checks whether the edited path crosses sea/lakes at ground level.
     ///
     /// Same rules as backend geo_sea_lake.validate_path_sea_lake_crossings:
@@ -504,11 +528,8 @@ public partial class RoadPlanManager
                 float x = seg.a.x + dx * t;
                 float z = seg.a.z + dz * t;
                 if (Mathf.Abs(x) > halfW || Mathf.Abs(z) > halfH) continue;
-                var lake = WaterSurfaceStore.FindAt(x, z);
-                float waterY = lake != null ? lake.Level : 0f;
                 float terrainY = Utils.GetGroundHeight(new Vector3(x, 0f, z));
-                if (terrainY >= waterY) continue;
-                if (RiverStore.FindAt(x, z) != null || CoastlineStore.IsLand(x, z)) continue;
+                if (!IsOnWater(x, z, terrainY, out float waterY)) continue;
                 float roadY = seg.HeightAt(t, true, terrainY);
                 if (terrainY - roadY > clearance) continue; // Fully buried tunnel
                 if (roadY >= waterY + Constants.WATER_BRIDGE_MIN_CLEARANCE) continue; // Bridge

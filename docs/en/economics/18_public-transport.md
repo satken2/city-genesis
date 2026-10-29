@@ -2,7 +2,8 @@
 
 ## 18.1. Public transport
 
-Households without cars combine public transport with walking for work, school, and shopping. Buses, metro, LRT, monorail, and regional rail run on roads or tracks.
+Households without cars combine public transport with walking for work, school, and shopping. Buses, metro, LRT, monorail, regional rail, and ferries run on roads, tracks, or ferry lanes.
+Ferries carry cars as well as people. They also form routes for private cars and trucks, supporting commuting and freight between islands that roads do not connect. Ferries charge no fare to people or cars.
 
 | Element | Role |
 | --- | --- |

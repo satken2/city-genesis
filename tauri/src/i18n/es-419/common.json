@@ -74,6 +74,7 @@
     "INSUFFICIENT_FUNDS": "Fondos insuficientes para realizar este pedido.",
     "GRADING_VALIDATION_ERROR": "No se puede acondicionar esta área. Revisa los motivos que se muestran en la ventana de movimiento de tierras.",
     "CREATEPATH_SEA_LAKE_CROSSING": "Un trazado no puede pasar sobre el mar o un lago a nivel del suelo. Conviértelo en un puente bien por encima del agua o hazlo pasar bajo tierra.",
+    "CREATEPATH_FERRY_WATER": "Coloca el canal de ferri completamente sobre el mar o un lago, y el muelle de ferri con un extremo en tierra y el otro sobre el agua.",
     "CREATEPATH_QUAY_BAND_CROSSING": "Un trazado no puede cruzar el muelle de un terreno ganado al mar a nivel del suelo. Hazlo pasar en elevado o bajo tierra, y deja sus extremos y puntos intermedios fuera de la plataforma del muelle.",
     "ZONE_CONTIGUITY_ERROR": "Las calles pintadas no formarían un distrito conectado, por lo que no se pueden asignar. Pinta calles conectadas.",
     "ZONE_SIZE_ERROR": "El distrito superaría su distancia máxima o la longitud total de calles. Pinta un área más pequeña.",

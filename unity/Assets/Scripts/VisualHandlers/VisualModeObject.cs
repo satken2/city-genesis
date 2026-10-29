@@ -43,6 +43,9 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     [Tooltip("このオブジェクトのマテリアルを一切変更しない（表示/非表示のみ制御する）")]
     public bool preventMaterialChange = false;
 
+    // Shown only while plans are shown (SHOW_PLAN), whatever the status. For objects with no physical look, such as ferry lanes.
+    public bool planLayerOnly = false;
+
     [Header("Renderer Configuration")]
     [Tooltip("子オブジェクトのRendererも対象にするか")]
     public bool useChildRenderers = false;
@@ -321,6 +324,14 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             {
                 ApplyColorToRenderers(interferenceColor.Value);
             }
+            return;
+        }
+
+        // 1.7. Plan-layer-only objects follow the plan visibility and keep their normal materials.
+        if (planLayerOnly && ((flags & VisualFlag.SHOW_PLAN) == 0 || currentMode == VisualMode.MODE_HIDDEN))
+        {
+            SetRenderersEnabled(false);
+            EnableCollider(false);
             return;
         }
 

@@ -341,6 +341,10 @@ export function TransitDetailPanel({
   const freight = Object.values(masterData?.transit ?? {}).some(
     (entry) => entry.transit_path_id === line.path_variant && entry.freight,
   );
+  // Types that carry cars (ferries) charge no fare, so omit the fare field.
+  const freeFare = Object.values(masterData?.transit ?? {}).some(
+    (entry) => entry.transit_path_id === line.path_variant && (entry.car_capacity ?? 0) > 0,
+  );
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "basic", label: t("transit.tabBasicInfo") },
@@ -494,11 +498,15 @@ export function TransitDetailPanel({
             <section className="agent-detail-section">
               <h3 className="agent-detail-section-title">{t("transit.tabSettings")}</h3>
               <div className="agent-detail-grid transit-detail__settings-grid">
-                <span className="agent-detail-label">{t("transit.fare")}</span>
-                <span className="agent-detail-value">
-                  <NumberStepper value={fare} onChange={setFare} min={0} max={100000} step={10} integerOnly={true} />
-                  <span className="transit-detail__unit">{t("transit.currencyUnit")}</span>
-                </span>
+                {!freeFare && (
+                  <>
+                    <span className="agent-detail-label">{t("transit.fare")}</span>
+                    <span className="agent-detail-value">
+                      <NumberStepper value={fare} onChange={setFare} min={0} max={100000} step={10} integerOnly={true} />
+                      <span className="transit-detail__unit">{t("transit.currencyUnit")}</span>
+                    </span>
+                  </>
+                )}
                 <span className="agent-detail-label">{t("transit.headway")}</span>
                 <span className="agent-detail-value">
                   <NumberStepper value={headway} onChange={setHeadway} min={1} max={120} step={1} integerOnly={true} />

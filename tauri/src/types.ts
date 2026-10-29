@@ -392,7 +392,7 @@ export type SkillEntry = MasterNameEntry;
 
 /**
  * Vehicle type master (vehicle_types). category identifies the transport category (0: walking, 1: road, 2:
- * rail).
+ * rail, 3: ship).
  */
 export type VehicleTypeEntry = {
   display_name: string;
@@ -751,6 +751,8 @@ export type TransitMasterEntry = {
   vehicle_type?: number;
   /** Freight line total car count includes one locomotive that carries no cargo. */
   freight?: boolean;
+  /** Cars one vehicle carries. Positive types also carry cars and charge no fare (ferries). */
+  car_capacity?: number | null;
 };
 
 /**

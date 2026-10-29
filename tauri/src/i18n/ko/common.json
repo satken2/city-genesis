@@ -74,6 +74,7 @@
     "INSUFFICIENT_FUNDS": "자금이 부족하여 발주할 수 없습니다.",
     "GRADING_VALIDATION_ERROR": "이 범위는 조성할 수 없습니다. 부지 조성 창에 표시된 이유를 확인하세요.",
     "CREATEPATH_SEA_LAKE_CROSSING": "바다나 호수 위를 지상으로 지날 수 없습니다. 수면보다 충분히 높은 다리로 만들거나 지하로 통과시키세요.",
+    "CREATEPATH_FERRY_WATER": "페리 항로는 전체를 바다나 호수 위에, 페리 잔교는 한쪽 끝을 육지에, 다른 쪽 끝을 물 위에 두세요.",
     "CREATEPATH_QUAY_BAND_CROSSING": "매립지의 안벽을 지상에서 가로지를 수 없습니다. 고가나 지하로 통과시키고, 끝점과 경유점은 안벽 상부 밖에 두세요.",
     "ZONE_CONTIGUITY_ERROR": "칠한 도로가 하나로 이어진 지구가 되지 않아 할당할 수 없습니다. 이어진 도로를 칠해 주세요.",
     "ZONE_SIZE_ERROR": "지구의 최대 거리 또는 도로 총길이가 상한을 초과합니다. 더 작은 범위를 칠해 주세요.",

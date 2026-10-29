@@ -20,8 +20,8 @@ using UnityEngine;
 /// </summary>
 public static class InfraNetworkUtil
 {
-    // Transport-bit range (0 .. INFRA_BIT_BASE-1). Higher bits represent infrastructure goods.
-    private static int TransportBitMask => (1 << Constants.INFRA_BIT_BASE) - 1;
+    // Transport-bit range (0 .. INFRA_BIT_BASE-1) plus the ferry layer, placed above the infrastructure-good bits.
+    private static int TransportBitMask => ((1 << Constants.INFRA_BIT_BASE) - 1) | Constants.NODE_FERRY;
 
     // Cached infrastructure product IDs in ascending order for deterministic node-bit assignment.
     private static List<int> _infraProductIdsSorted;
@@ -144,6 +144,9 @@ public static class InfraNetworkUtil
                 break;
             case Constants.PATH_TRANSPORT:
                 mask |= Constants.NODE_TRANSIT;
+                break;
+            case Constants.PATH_FERRY:
+                mask |= Constants.NODE_FERRY;
                 break;
         }
 

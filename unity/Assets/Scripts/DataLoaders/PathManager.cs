@@ -520,14 +520,14 @@ public partial class PathManager : BaseApiDataManager
 
     /// <summary>
     /// Whether a node needs an intersection (plate, rail connection, endpoint clipping). Only nodes connecting at least two physical traffic paths
-    /// (excluding infrastructure, people mover, and logical public transport paths) that are not facility terminals.
+    /// (excluding infrastructure, people mover, ferry, and logical public transport paths) that are not facility terminals.
     /// </summary>
     private bool NeedsIntersection(int nodeId, List<PathSummary> connectedPaths)
     {
         int transport = 0;
         foreach (var path in connectedPaths)
             if (!InfraNetworkUtil.IsInfraPathType(path.path_type) && path.path_type != Constants.PATH_CONVEYOR
-                && path.path_type != Constants.PATH_TRANSPORT) transport++;
+                && path.path_type != Constants.PATH_TRANSPORT && path.path_type != Constants.PATH_FERRY) transport++;
         return transport >= 2 && !IsInfrastructureConnection(nodeId);
     }
 
@@ -2707,6 +2707,7 @@ public partial class PathManager : BaseApiDataManager
         var visual = pathGO.AddComponent<VisualModeObject>();
         visual.objectType = InputObjectType.PATH;
         visual.useChildRenderers = true;
+        visual.planLayerOnly = IsPlanLayerOnly(path);
         visual.SetStatus(status);
         visual.SetFilterHidden(ObjectVisibilityFilter.IsHidden(InputObjectType.PATH, path.path_id));
 
@@ -4822,6 +4823,14 @@ public partial class PathManager : BaseApiDataManager
         return result;
     }
 
+    /// <summary>Ferry lanes lie on open water and have no physical look, so they appear only with plans. Piers are always drawn.</summary>
+    private static bool IsPlanLayerOnly(PathSummary path)
+    {
+        if (path.path_type != Constants.PATH_FERRY) return false;
+        var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+        return master == null || master.track_type != Constants.TRACK_STATION;
+    }
+
     private void SetupVisuals(GameObject pathGO, PathSummary path, int status, bool modulesCreated)
     {
         using var scope = setupVisualsMarker.Auto();
@@ -4829,6 +4838,7 @@ public partial class PathManager : BaseApiDataManager
         visualModeObject.objectType = InputObjectType.PATH;
         visualModeObject.useChildRenderers = true;
         visualModeObject.ignoreSelfRenderer = true;
+        visualModeObject.planLayerOnly = IsPlanLayerOnly(path);
         visualModeObject.InitializeMaterials();
 
         var stats = pathGO.AddComponent<VisualPathStats>();
@@ -6430,6 +6440,9 @@ public class PathMasterItem
     /// Exempt from sea/lake crossing checks during placement. Same column as backend coastline validation exemptions.
     /// </summary>
     public bool over_water_allowed;
+
+    /// <summary>Part classification (TRACK_NORMAL / TRACK_STATION / TRACK_BRIDGE). For ferries, TRACK_STATION marks piers.</summary>
+    public int track_type;
 
     /// <summary>
     /// Whether this is an interchange ramp variant. The backend detects IC/JCT from connected ramp components

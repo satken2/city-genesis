@@ -28,7 +28,8 @@
       "501": "Dépôts ferroviaires",
       "502": "Dépôts de bus",
       "503": "Dépôts de tramway",
-      "504": "Dépôts de monorail"
+      "504": "Dépôts de monorail",
+      "505": "Cale de maintenance"
     },
     "consumers": {
       "401": "Consommateurs électriques",
@@ -39,7 +40,8 @@
       "501": "Lignes ferroviaires",
       "502": "Lignes de bus",
       "503": "Lignes de tramway",
-      "504": "Lignes de monorail"
+      "504": "Lignes de monorail",
+      "505": "Lignes de ferry"
     }
   }
 }

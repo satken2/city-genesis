@@ -89,5 +89,6 @@
   "Models/Vehicles/21": { "0": 1, "1": 1, "2": 1 },
   "Models/Vehicles/22": { "0": 1, "1": 1, "2": 1 },
   "Models/Vehicles/23": { "0": 1, "1": 1, "2": 1 },
-  "Models/Vehicles/24": { "0": 1 }
+  "Models/Vehicles/24": { "0": 1 },
+  "Models/Vehicles/30": { "0": 1 }
 }

@@ -192,9 +192,9 @@ public partial class RoadPlanManager
                     if (cmd.index < 0 || cmd.index >= points.Count) return;
                     var pt = points[cmd.index];
                     // 2D moves only XZ. Preserve ground-relative height as with 3D dragging.
-                    float relY = pt.position.y - Utils.GetGroundHeight(pt.position);
+                    float relY = pt.position.y - PlacementSurfaceY(pt.position);
                     Vector3 newPos = new Vector3(cmd.x, 0f, cmd.z);
-                    newPos.y = Utils.GetGroundHeight(newPos) + relY;
+                    newPos.y = PlacementSurfaceY(newPos) + relY;
                     SelectPoint(cmd.index);
                     MoveAnchorPosition(cmd.index, newPos);
                     CommitShapeChange();

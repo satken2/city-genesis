@@ -764,7 +764,7 @@ public partial class RoadPlanManager : MonoBehaviour
             Vector3 snapped = ApplySnapping(worldPos);
             // Inherit elevation when snapping to an elevated node/path (ResolvePlacementHeight also
             // synchronizes currentHeight and the UI elevation display). Otherwise use currentHeight.
-            snapped.y = Utils.GetGroundHeight(snapped) + ResolvePlacementHeight();
+            snapped.y = PlacementSurfaceY(snapped) + ResolvePlacementHeight();
 
             if (points.Count == 0)
             {
@@ -907,8 +907,8 @@ public partial class RoadPlanManager : MonoBehaviour
             var pt = points[dragPointIndex];
             // Preserve relative height during XZ movement.
             float relY = lastSnapWasElevated && IsHeightEditable()
-                ? lastSnapRelHeight : pt.position.y - Utils.GetGroundHeight(pt.position);
-            snappedPos.y = Utils.GetGroundHeight(snappedPos) + relY;
+                ? lastSnapRelHeight : pt.position.y - PlacementSurfaceY(pt.position);
+            snappedPos.y = PlacementSurfaceY(snappedPos) + relY;
 
             // Make manual controls follow the anchor and recalculate only unadjusted controls.
             MoveAnchorPosition(dragPointIndex, snappedPos);
@@ -1027,7 +1027,7 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             Vector3 endPos = ApplySnapping(rightClickPos);
             // Inherit elevation when snapping to an elevated node/path.
-            endPos.y = Utils.GetGroundHeight(endPos) + ResolvePlacementHeight();
+            endPos.y = PlacementSurfaceY(endPos) + ResolvePlacementHeight();
             var endPt = new PathBuildPoint(endPos, PathPointRole.End);
             endPt.embankmentHeight = currentEmbankmentHeight;
             points.Add(endPt);
@@ -1134,7 +1134,7 @@ public partial class RoadPlanManager : MonoBehaviour
     {
         if (edgeIndex < 0 || edgeIndex >= points.Count - 1) return;
 
-        worldPos.y = Utils.GetGroundHeight(worldPos) + currentHeight;
+        worldPos.y = PlacementSurfaceY(worldPos) + currentHeight;
         var insertedPt = new PathBuildPoint(worldPos, PathPointRole.Waypoint);
         insertedPt.embankmentHeight = currentEmbankmentHeight;
         points.Insert(edgeIndex + 1, insertedPt);

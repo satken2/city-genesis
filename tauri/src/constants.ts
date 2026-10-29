@@ -243,6 +243,7 @@ export const VEHICLE_PASSANGER_TRAIN: number = 21;
 export const VEHICLE_FREIGHT_TRAIN: number = 22;
 export const VEHICLE_HIGH_SPEED_TRAIN: number = 23;
 export const VEHICLE_MONORAIL: number = 24;
+export const VEHICLE_FERRY: number = 30;
 export const SHAPE_HOUSE: number = 1;
 export const SHAPE_OFFICE: number = 2;
 export const SHAPE_COMMERCIAL: number = 3;
@@ -255,6 +256,7 @@ export const PATH_WALKWAY: number = 3;
 export const PATH_TRACK: number = 4;
 export const PATH_MONORAIL: number = 5;
 export const PATH_CONVEYOR: number = 6;
+export const PATH_FERRY: number = 7;
 export const PATH_TRANSPORT: number = 10;
 export const PATH_ELECTRICITY: number = 11;
 export const PATH_WATER: number = 12;
@@ -346,6 +348,7 @@ export const NODE_RAIL: number = 2;
 export const NODE_MONORAIL: number = 4;
 export const NODE_CONVEYOR: number = 8;
 export const NODE_TRANSIT: number = 16;
+export const NODE_FERRY: number = 1048576;
 export const INFRA_BIT_BASE: number = 5;
 export const SPACE_OTHER: number = 1;
 export const SPACE_RESIDENCE: number = 2;
@@ -425,6 +428,7 @@ export const VEHICLE_TO_TRAFFIC: Record<number, number> = {
   22: 2,
   23: 2,
   24: 2,
+  30: 1,
 };
 
 export const STATUS_NAME_MAP: Record<number, string> = {
@@ -462,6 +466,8 @@ export const PEDESTRIAN_VEHICLE_KEYS: number[] = [0];
 export const ROAD_VEHICLE_KEYS: number[] = [10, 11, 12, 13, 14];
 
 export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23, 24];
+
+export const SHIP_VEHICLE_KEYS: number[] = [30];
 
 export const GROUND_COVER_TYPES: number[] = [1, 2, 3, 4, 5];
 

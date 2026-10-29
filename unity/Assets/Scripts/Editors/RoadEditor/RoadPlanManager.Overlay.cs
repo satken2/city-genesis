@@ -361,7 +361,7 @@ public partial class RoadPlanManager
     {
         Vector3 lastPos = points[points.Count - 1].position;
         Vector3 hoverPos = hoverWorldPosition;
-        hoverPos.y = Utils.GetGroundHeight(hoverPos) + currentHeight;
+        hoverPos.y = PlacementSurfaceY(hoverPos) + currentHeight;
 
         Color previewColor = new Color(0.3f, 0.6f, 1f, 0.5f);
         overlayRenderer.AddDashedLine(lastPos, hoverPos, previewColor, dashedLineThickness);

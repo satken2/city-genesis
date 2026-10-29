@@ -64,7 +64,7 @@ public static class VehicleModelResolver
         }
         var model = Object.Instantiate(prefab,root.transform);
         model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity;
-        model.SetActive(true); NormalizeModel(root.transform,model.transform);
+        model.SetActive(true); NormalizeModel(root.transform,model.transform,type);
         AddModelLods(root, model, $"Models/Vehicles/{type}/{part}");
         root.SetActive(false); return root;
     }
@@ -96,13 +96,15 @@ public static class VehicleModelResolver
     /// <summary>
     /// Normalize authored placement and longitudinal axis within the wrapper, giving driving code +Z forward and a ground-contact center origin.
     /// Front/back is not inferred from shape; models must be exported facing +Z, Blender -Y.
+    /// Ship models keep their origin height, which is the waterline as for ambient ships, so the hull stays below the water surface.
     /// </summary>
-    private static void NormalizeModel(Transform root,Transform model)
+    private static void NormalizeModel(Transform root,Transform model,int vehicleType)
     {
         Bounds bounds = ModelBounds(root);
         if(bounds.size.x > bounds.size.z)model.localRotation=Quaternion.Euler(0,-90,0)*model.localRotation;
         bounds=ModelBounds(root);
-        model.localPosition-=new Vector3(bounds.center.x,bounds.min.y,bounds.center.z);
+        float baseY = vehicleType == Constants.VEHICLE_FERRY ? 0f : bounds.min.y;
+        model.localPosition-=new Vector3(bounds.center.x,baseY,bounds.center.z);
     }
 
     /// <summary>Bounds of all meshes in root-local coordinates, including hidden LODs and unaffected by root scale.</summary>
@@ -174,7 +176,7 @@ public static class VehicleModelResolver
             model.transform.localPosition = Vector3.zero;
             model.transform.localRotation = Quaternion.identity;
             model.SetActive(true); // Explicitly enable glTF templates because they load inactive.
-            NormalizeModel(root.transform,model.transform);
+            NormalizeModel(root.transform,model.transform,vehicleType);
             // Combine LODs of the same type only if its unsuffixed model actually resolves.
             string path = $"Models/Vehicles/{vehicleType}/{variantId}";
             if (ModelManager.Instance?.GetModel(path, suppressWarning: true) == prefab)

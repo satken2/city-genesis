@@ -21,6 +21,7 @@ const SUPPLIER_ICON_VARIANTS: Record<number, number> = {
   502: 1061,
   503: 1065,
   504: 1064,
+  505: 1092,
 };
 
 const CONSUMER_ICON_VARIANTS: Record<number, number> = {
@@ -30,7 +31,7 @@ const CONSUMER_ICON_VARIANTS: Record<number, number> = {
   404: 404,
   405: 1078,
 };
-const CONSUMER_ROUTE_VARIANTS: Record<number, number> = { 501: 1005, 502: 1001, 503: 1003, 504: 1004 };
+const CONSUMER_ROUTE_VARIANTS: Record<number, number> = { 501: 1005, 502: 1001, 503: 1003, 504: 1004, 505: 1009 };
 
 export function SupplyChainGraph({ graph }: { graph: SupplyGraph }) {
   const { t, i18n } = useTranslation();

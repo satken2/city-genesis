@@ -6,5 +6,6 @@
   "1005": { "vehicle_type": 21 },
   "1006": { "vehicle_type": 22, "wagon": "wagon" },
   "1007": { "vehicle_type": 22, "wagon": "wagon_1" },
-  "1008": { "vehicle_type": 22, "wagon": "wagon_2" }
+  "1008": { "vehicle_type": 22, "wagon": "wagon_2" },
+  "1009": { "vehicle_type": 30 }
 }

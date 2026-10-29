@@ -74,6 +74,7 @@
     "INSUFFICIENT_FUNDS": "Fonds insuffisants pour passer cette commande.",
     "GRADING_VALIDATION_ERROR": "Cette zone ne peut pas être aménagée. Consultez les raisons affichées dans la fenêtre de terrassement.",
     "CREATEPATH_SEA_LAKE_CROSSING": "Un tracé ne peut pas passer sur la mer ou un lac au niveau du sol. Faites-le passer sur un pont bien au-dessus de l'eau, ou en souterrain.",
+    "CREATEPATH_FERRY_WATER": "Placez un couloir de ferry entièrement sur la mer ou un lac, et un embarcadère de ferry avec une extrémité sur la terre et l'autre sur l'eau.",
     "CREATEPATH_QUAY_BAND_CROSSING": "Un tracé ne peut pas traverser le quai d'un terrain gagné sur la mer au niveau du sol. Faites-le passer en viaduc ou en souterrain, et placez ses extrémités et points de passage hors de la plateforme du quai.",
     "ZONE_CONTIGUITY_ERROR": "Les rues peintes ne formeraient pas un quartier d'un seul tenant ; l'attribution est impossible. Peignez des rues reliées entre elles.",
     "ZONE_SIZE_ERROR": "Le quartier dépasserait sa distance maximale ou sa longueur totale de rues. Peignez une zone plus petite.",

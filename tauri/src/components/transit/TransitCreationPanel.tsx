@@ -354,13 +354,16 @@ export function TransitCreationPanel({
           {!isEdit && (
             <>
               <div className="bc-split-row">
-                <div className="bc-split-col">
-                  <div className="bc-section-title">{t("transit.fare")}</div>
-                  <div className="bc-stepper-row" data-guide="transit.fare">
-                    <NumberStepper value={fare} onChange={setFare} min={0} max={100000} step={10} integerOnly={true} />
-                    <span className="bc-stepper-unit">{t("transit.currencyUnit")}</span>
+                {/* Types that carry cars (ferries) charge no fare (the core sets it to 0), so omit the fare field. */}
+                {!((selectedEntry.car_capacity ?? 0) > 0) && (
+                  <div className="bc-split-col">
+                    <div className="bc-section-title">{t("transit.fare")}</div>
+                    <div className="bc-stepper-row" data-guide="transit.fare">
+                      <NumberStepper value={fare} onChange={setFare} min={0} max={100000} step={10} integerOnly={true} />
+                      <span className="bc-stepper-unit">{t("transit.currencyUnit")}</span>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="bc-split-col">
                   <div className="bc-section-title">{t("transit.headway")}</div>
                   <div className="bc-stepper-row" data-guide="transit.headway">
