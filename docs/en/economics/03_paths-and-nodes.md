@@ -16,7 +16,7 @@ Paths have a broad `type` (`PATH_*`) and a more specific `variant`.
 | Track | `PATH_TRACK` | Railway tracks, station platforms, and dedicated LRT tracks. Variants with `infra_products` also carry electricity ([supply and transport](17_supply-and-transport.md)) |
 | Monorail | `PATH_MONORAIL` | Monorail tracks and stations |
 | People mover | `PATH_CONVEYOR` | Facilities such as ropeways without an operating agent. Pedestrians board and leave only at `boardable` endpoints |
-| Ferry | `PATH_FERRY` | Lanes on the water that ferry lines run on, and piers reaching from land out over the water. Lanes are normally hidden and shown like planned paths ([public transport](18_public-transport.md)) |
+| Waterway | `PATH_FERRY` | Lanes on the water, and ferry piers reaching from land out over the water. There are ferry lanes that ferry lines run on, and large-ship lanes that connect ports to the open sea ([public transport](18_public-transport.md), [supply and transport](17_supply-and-transport.md)). Lanes are normally hidden and shown like planned paths |
 | Public transport | `PATH_TRANSPORT` | Logical sections between stops, without construction ([public transport](18_public-transport.md)) |
 | Power line | `PATH_ELECTRICITY` | Infrastructure delivery only ([supply and transport](17_supply-and-transport.md)) |
 | Water pipe | `PATH_WATER` | Infrastructure delivery only ([supply and transport](17_supply-and-transport.md)) |

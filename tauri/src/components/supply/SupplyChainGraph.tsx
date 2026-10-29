@@ -30,6 +30,7 @@ const CONSUMER_ICON_VARIANTS: Record<number, number> = {
   403: 1073,
   404: 404,
   405: 1078,
+  406: 403,
 };
 const CONSUMER_ROUTE_VARIANTS: Record<number, number> = { 501: 1005, 502: 1001, 503: 1003, 504: 1004, 505: 1009 };
 

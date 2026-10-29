@@ -78,7 +78,7 @@ Loading and unloading stations are public facilities connecting local industry w
 
 ### External trade
 
-Seaports, international freight stations, and road freight hubs support trade beyond the city. International freight lines connect scenario-provided border freight stations outside the city with local international freight stations. Station handling capacity and line transport capacity limit trade volume. See [product market](09_product-market.md).
+Seaports, international freight stations, and road freight hubs support trade beyond the city. Ports cannot trade unless large-ship lanes connect them to the open sea. Scenarios provide ocean shipping lanes leading to the open sea, and link lanes join ports to them. Building a port draws a link lane to the nearest ocean shipping lane automatically. Access to the open sea is handled as a good delivered to the port's connection terminal, as in infrastructure networks. Lanes can only be laid on water, so ports cannot open on lakes without a sea outlet or in bays whose mouths have been reclaimed. International freight lines connect scenario-provided border freight stations outside the city with local international freight stations. Station handling capacity and line transport capacity limit trade volume. See [product market](09_product-market.md).
 
 ## 17.4. Public transport vehicle procurement
 
