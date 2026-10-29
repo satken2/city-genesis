@@ -270,6 +270,10 @@ Unityが停留所の下地パスへ相対式ホーム（各軌道の外側）を
 
 鉄塔pillar_capは通常と_closeを著作し、PowerLinePathがPathDrawContext.ResolvePrefab経由で選択する（Instantiate配置の例外）。大型は38m・3段二導体、小型は17m・3相。Farは鉄塔1基と1径間（120m）のたわんだ電線をまとめた`far`で、他のパスと同じく並べる。bodyは120m径間の制作見本で、実行時のたるみは支持点間に生成する。道路幅へ横縮小しない。共有ノードはPowerLineSupportが1基だけ表示する。著作・寸法・再生成は非公開制作ツールgenesis-galleryのpipeline/jobs/power_lines.mdとbuild_power_lines.py、実FBXのLOD・共有所有権の検証はunity/Tests/PowerLines/run.ps1。
 
+## フェリー桟橋702
+
+`model_type` が `pier` のバリアントは `PierPath` が描く。船は中心線上に停まるので、`body` は敷設方向の右側だけの係船岸として、原点=中心線・路面で実寸に著作する(幅の伸縮・横位置の補正をしない)。規約の正は `PierPath.cs` のコメント、著作・寸法・再生成は非公開制作ツールgenesis-galleryの`pipeline/jobs/ferry.md`と`build_ferry_pier.py`。
+
 ## 貨物PF（463・464・465）
 
 旅客のホームと同じ3パーツ構成（淵・動的デッキ・外縁）で、platform_widthは463=14・464=12・465=10m、16mタイル・長手1m分割。規約の正は旅客のホームと同じく `TrackPath.cs` のホームの部品のコメント。

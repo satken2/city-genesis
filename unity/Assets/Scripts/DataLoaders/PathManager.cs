@@ -6530,6 +6530,8 @@ public class PathMasterItem
     /// Mesh generator type. PathMeshFactory selects generators by this value.
     ///   "default" → RoadPath
     ///   "track"   → TrackPath
+    ///   "station_house" → StationHousePath
+    ///   "pier"    → PierPath
     ///   "none"    → no mesh generation (such as routing-only paths)
     /// Null or empty means "default".
     /// </summary>
