@@ -93,6 +93,15 @@
       "citizen_criminality": {
         "title": "有些市民容易走向犯罪",
         "evidence": "容易走向犯罪的市民：{{count}}人"
+      },
+      "children_in_poverty": {
+        "title": "有孩子在收入不足以支付生活費的家庭中成長",
+        "evidence": "收入不足以支付生活費的家庭中的孩子：{{count}}人"
+      },
+      "children_in_crime_zones": {
+        "title": "有孩子在發生犯罪的地區成長",
+        "evidence": "最近1個月發生犯罪的地區中的孩子：{{count}}人",
+        "evidence_week": "最近1週發生犯罪的地區中的孩子：{{count}}人"
       }
     },
     "actions": {

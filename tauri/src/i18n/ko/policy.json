@@ -93,6 +93,15 @@
       "citizen_criminality": {
         "title": "범죄를 저지르기 쉬운 시민이 있음",
         "evidence": "범죄를 저지르기 쉬운 시민: {{count}}명"
+      },
+      "children_in_poverty": {
+        "title": "생활비에 못 미치는 가구에서 자라는 아이가 있음",
+        "evidence": "생활비에 못 미치는 가구의 아이: {{count}}명"
+      },
+      "children_in_crime_zones": {
+        "title": "범죄가 발생한 지구에서 자라는 아이가 있음",
+        "evidence": "최근 1개월 범죄가 발생한 지구의 아이: {{count}}명",
+        "evidence_week": "최근 1주일 범죄가 발생한 지구의 아이: {{count}}명"
       }
     },
     "actions": {

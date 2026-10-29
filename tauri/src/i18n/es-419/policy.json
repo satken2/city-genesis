@@ -93,6 +93,15 @@
       "citizen_criminality": {
         "title": "Hay ciudadanos propensos a delinquir",
         "evidence": "Ciudadanos propensos a delinquir: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Hay niños que crecen en hogares por debajo del costo de vida",
+        "evidence": "Niños en hogares por debajo del costo de vida: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Hay niños que crecen en distritos con delitos",
+        "evidence": "Niños en distritos con delitos en el último mes: {{count}}",
+        "evidence_week": "Niños en distritos con delitos en la última semana: {{count}}"
       }
     },
     "actions": {

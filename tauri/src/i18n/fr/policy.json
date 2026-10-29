@@ -93,6 +93,15 @@
       "citizen_criminality": {
         "title": "Certains citoyens sont enclins à commettre des délits",
         "evidence": "Citoyens enclins à commettre des délits : {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Des enfants grandissent dans des ménages sous le coût de la vie",
+        "evidence": "Enfants dans des ménages sous le coût de la vie : {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Des enfants grandissent dans des quartiers touchés par des crimes",
+        "evidence": "Enfants dans des quartiers touchés par des crimes ce dernier mois : {{count}}",
+        "evidence_week": "Enfants dans des quartiers touchés par des crimes cette dernière semaine : {{count}}"
       }
     },
     "actions": {

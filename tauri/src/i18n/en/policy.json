@@ -93,6 +93,15 @@
       "citizen_criminality": {
         "title": "Some citizens are prone to crime",
         "evidence": "Citizens prone to crime: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Children are growing up in households below the cost of living",
+        "evidence": "Children in households below the cost of living: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Children are growing up in districts with crime",
+        "evidence": "Children in districts with crime in the past month: {{count}}",
+        "evidence_week": "Children in districts with crime in the past week: {{count}}"
       }
     },
     "actions": {

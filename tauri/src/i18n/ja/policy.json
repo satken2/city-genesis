@@ -93,6 +93,15 @@
       "citizen_criminality": {
         "title": "犯罪傾向のある市民がいる",
         "evidence": "犯罪傾向のある市民：{{count}}人"
+      },
+      "children_in_poverty": {
+        "title": "生活費に届かない世帯で子どもが育っている",
+        "evidence": "生活費に届かない世帯の子ども：{{count}}人"
+      },
+      "children_in_crime_zones": {
+        "title": "犯罪の起きた地区で子どもが育っている",
+        "evidence": "直近1か月に犯罪が起きた地区の子ども：{{count}}人",
+        "evidence_week": "直近1週間に犯罪が起きた地区の子ども：{{count}}人"
       }
     },
     "actions": {
