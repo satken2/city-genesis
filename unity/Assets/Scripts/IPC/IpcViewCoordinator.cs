@@ -136,15 +136,11 @@ public class IpcViewCoordinator : MonoBehaviour
         {
             foreach (var layer in LAYER_DEFAULTS.Keys)
             {
-                // For public transport, only clear displayed types below (ApplyTransitMode refetches lines;
-                // avoid fetching the previous city's lines before the new city loads).
-                if (layer == "transit") continue;
                 _layerSubModes.TryGetValue(layer, out var subMode);
                 _layerFlags.TryGetValue(layer, out var flags);
                 ApplyLayerMode(layer, _layerModes[layer], subMode, flags ?? "");
             }
         }
-        TransitOverlayManager.Instance?.SetVisibleVariants(new HashSet<int>());
         // ApplyLayerMode does not apply alerts (alert filtering changes only through view:change_view).
         _layerSubModes.TryGetValue("alert", out var alertSubMode);
         ApplyAlertMode(_layerModes["alert"], alertSubMode);
@@ -951,9 +947,6 @@ public class IpcViewCoordinator : MonoBehaviour
             }
         }
         TransitOverlayManager.Instance.SetVisibleVariants(variants);
-        // Refetch lines on every display switch. The UI resends this event after saving line colors or deleting lines,
-        // updating band colors/composition immediately without waiting for TransitDataStore's periodic fetch.
-        TransitOverlayManager.Instance.RefreshLines();
     }
 
     private void ApplyPropMode(string mode)

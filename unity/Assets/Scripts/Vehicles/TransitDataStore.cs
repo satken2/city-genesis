@@ -10,8 +10,9 @@ public sealed class TransitDataStore : MonoBehaviour
     public int Revision { get; private set; }
     public int Session { get; private set; }
     private int generation;
-    private bool inFlight, pending;
-    private float nextFetch;
+    private bool inFlight;
+    private bool stale = true;   // Lines change only with epochs, edits, and line settings, so refetch on Refresh rather than on a timer.
+    private float retryAt;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap() => Ensure();
@@ -25,30 +26,30 @@ public sealed class TransitDataStore : MonoBehaviour
     private void Update()
     {
         if (GameStateManager.Instance == null || !GameStateManager.Instance.IsGameStarted()) return;
-        if (Time.unscaledTime >= nextFetch) Refresh();
+        if (stale && !inFlight && Time.unscaledTime >= retryAt) Fetch();
     }
     public void Clear()
     {
         generation++; Session++; Revision++;
-        StopAllCoroutines(); inFlight = pending = false;
-        Lines.Clear(); nextFetch = 0;
+        StopAllCoroutines(); inFlight = false; stale = true; retryAt = 0;
+        Lines.Clear();
     }
-    public void Refresh()
+    /// <summary>Refetch after the current request. Call whenever city data is refetched or the UI changes line settings.</summary>
+    public void Refresh() => stale = true;
+    private void Fetch()
     {
-        if (inFlight) { pending = true; return; }
-        inFlight = true; nextFetch = Time.unscaledTime + 5;
+        stale = false; inFlight = true;
         int requestGeneration = generation;
         StartCoroutine(ApiClient.GetBulk<TransitLinesResponse>("/transit/lines", response =>
         {
             if (requestGeneration != generation) return;
             Lines.Clear();
             if (response?.lines != null) Lines.AddRange(response.lines);
-            Revision++; Finish();
-        }, _ => { if (requestGeneration == generation) Finish(); }));
-    }
-    private void Finish()
-    {
-        inFlight = false;
-        if (pending) { pending = false; Refresh(); }
+            Revision++; inFlight = false;
+        }, _ =>
+        {
+            if (requestGeneration != generation) return;
+            inFlight = false; stale = true; retryAt = Time.unscaledTime + 5;
+        }));
     }
 }

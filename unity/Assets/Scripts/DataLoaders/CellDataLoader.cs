@@ -546,6 +546,7 @@ public class CellDataLoader : MonoBehaviour
         cityOverviewManager?.RequestRefresh();
         vehicleManager?.RefetchMotion();
         RopewayNetworkStore.Instance?.RequestRefresh();
+        TransitDataStore.Instance?.Refresh();
         Debug.Log("CellDataLoader: ReloadAllData invoked.");
         loadSuspendedUntilReload = false;
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)

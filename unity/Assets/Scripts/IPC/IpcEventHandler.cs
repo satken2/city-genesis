@@ -313,9 +313,6 @@ public class IpcEventHandler : MonoBehaviour
         {
             CellDataLoader.Instance.ReloadAllData();
         }
-        // Refresh route_path_ids (actual traveled paths) immediately after creation
-        // so new public transport paths appear in overlays (automatically rebuilt on fetch completion).
-        TransitOverlayManager.Instance?.RefreshLines();
     }
 
     /// <summary>

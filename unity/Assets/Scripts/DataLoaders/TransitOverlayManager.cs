@@ -27,6 +27,7 @@ public class TransitOverlayManager : MonoBehaviour
     private TransitRouteGeometry geometry;
     private GUIStyle labelStyle;
     private float nextCheck, nextSafety, nextDetails;
+    private int detailsRevision = -1;   // TransitDataStore.Revision whose stop details were fetched. Details follow line changes only; nextDetails delays retries after failures.
     private bool fetching, dirty, routesDirty = true, terrainChanged, labelsSorted;
     private int routesRevision = -1;
     private long pathSignature;
@@ -71,11 +72,10 @@ public class TransitOverlayManager : MonoBehaviour
     {
         visibleVariants.Clear();
         if (variants != null) visibleVariants.UnionWith(variants);
-        dirty = routesDirty = true; nextDetails = 0;
+        dirty = routesDirty = true; detailsRevision = -1; nextDetails = 0;
         TransitSelection.Cancel();
         if (visibleVariants.Count == 0) { segments.Clear(); groups.Clear(); labels.Clear(); border.ClearMesh(); ribbon.ClearMesh(); }
     }
-    public void MarkDirty() { dirty = true; nextDetails = 0; }
     /// <summary>Line whose route is being edited (-1=none). Hide its bands/stop names to avoid overlapping the new route preview.</summary>
     public int HiddenLineId
     {
@@ -83,7 +83,6 @@ public class TransitOverlayManager : MonoBehaviour
         set { if (hiddenLineId == value) return; hiddenLineId = value; dirty = routesDirty = true; }
     }
     private int hiddenLineId = -1;
-    public void RefreshLines() { TransitDataStore.Ensure().Refresh(); MarkDirty(); }
     public void Clear()
     {
         StopAllCoroutines(); fetching = false;
@@ -98,7 +97,7 @@ public class TransitOverlayManager : MonoBehaviour
         {
             session = store.Session; StopAllCoroutines(); fetching = false;
             details.Clear(); segments.Clear(); groups.Clear(); labels.Clear(); routes.Clear(); routeIds.Clear(); watchedPaths.Clear();
-            dirty = routesDirty = true; nextDetails = 0;
+            dirty = routesDirty = true; detailsRevision = -1; nextDetails = 0;
             border.ClearMesh(); ribbon.ClearMesh();
             TransitSelection.Cancel();
         }
@@ -107,7 +106,7 @@ public class TransitOverlayManager : MonoBehaviour
         if (paths == null) paths = FindAnyObjectByType<PathManager>();
         if (paths == null) return;
         geometry ??= new TransitRouteGeometry(paths);
-        if (!fetching && Time.unscaledTime >= nextDetails) StartCoroutine(RefreshDetails());
+        if (!fetching && store.Revision != detailsRevision && Time.unscaledTime >= nextDetails) StartCoroutine(RefreshDetails());
         Camera cam = Camera.main;
         float now = Time.unscaledTime;
         bool due = dirty || now >= nextSafety;
@@ -129,10 +128,12 @@ public class TransitOverlayManager : MonoBehaviour
     }
     private IEnumerator RefreshDetails()
     {
-        fetching = true; nextDetails = Time.unscaledTime + 10;
+        fetching = true;
         int requestSession = session;
-        bool changed = false;
-        var source = new List<TransitLineSummary>(TransitDataStore.Ensure().Lines);
+        bool changed = false, failed = false;
+        var store = TransitDataStore.Ensure();
+        detailsRevision = store.Revision;
+        var source = new List<TransitLineSummary>(store.Lines);
         var alive = new HashSet<int>();
         foreach (var line in source)
         {
@@ -141,14 +142,15 @@ public class TransitOverlayManager : MonoBehaviour
             int id = line.line_agent_id;
             yield return ApiClient.GetBulk<TransitStopDetail>("/transit/lines/" + id, value =>
             {
-                if (value == null) return;
+                if (value == null) { failed = true; return; }
                 if (!details.TryGetValue(id, out var current)) { details[id] = value; dirty = true; return; } // Show initial results per response
                 if (SameStops(current, value)) return;
                 details[id] = value; changed = true;
-            }, _ => { }, timingLabel: "/transit/lines/{id}", isCanceled: () => session != requestSession);
+            }, _ => failed = true, timingLabel: "/transit/lines/{id}", isCanceled: () => session != requestSession);
         }
         foreach (int id in new List<int>(details.Keys)) if (!alive.Contains(id) && details.Remove(id)) changed = true;
         if (changed) dirty = true;
+        if (failed) { detailsRevision = -1; nextDetails = Time.unscaledTime + 10; }
         fetching = false;
     }
     private static bool SameStops(TransitStopDetail a, TransitStopDetail b)

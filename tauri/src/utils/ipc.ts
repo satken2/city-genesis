@@ -790,6 +790,21 @@ export async function sendZoneUpdated(zoneId: number): Promise<void> {
 }
 
 /**
+ * `transit.lines_changed`
+ * Notify graphics that the UI changed line settings (fare, headway, cars, color, vehicle appearance) or closed a
+ * line. Graphics refetches the line list without touching display settings. Route placement uses
+ * `edit_transit:finish` instead.
+ */
+export async function sendTransitLinesChanged(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "",
+    entity: null,
+    action: "transit:lines_changed",
+    params: {},
+  });
+}
+
+/**
  * `edit_path.finish`
  * End path placement; Unity resets editing state and reloads data. Call after Tauri submits directly to the
  * backend.

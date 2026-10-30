@@ -1429,10 +1429,6 @@ public class IpcStateCoordinator : MonoBehaviour
         // coastlines/water surfaces/rivers before updating 3D.
         StartCoroutine(PrepareCityThenReload(FindAnyObjectByType<TerrainManager>()));
 
-        // route_path_ids recalculate each epoch. Refetch lines on every session:reload
-        // to reflect rerouting, suspension, and other results in public transport overlays.
-        TransitOverlayManager.Instance?.RefreshLines();
-
         // Reflect completed/new facilities and building count changes in coverage displays.
         ServiceCoverageOverlay.Instance?.Refresh();
     }

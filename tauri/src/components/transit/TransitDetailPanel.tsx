@@ -15,9 +15,8 @@
  *
  * Place the supply diagram first in basic information and suspension/vehicle shortage warnings
  * below the header. Fetch via GET /api/v1/transit/lines/{id}, save with PATCH, close with DELETE.
- * After save/delete, emit transit:lines_changed to refresh the public transport window; also refetch
- * on this notification after route edits. Unity's shared line data refreshes periodically,
- * while preserving player display settings.
+ * After save/delete, emit transit:lines_changed to refresh the public transport window and send it to Unity
+ * (sendTransitLinesChanged); also refetch on this notification after route edits.
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -25,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { buildApiUrl } from "../../utils/api";
+import { sendTransitLinesChanged } from "../../utils/ipc";
 import { InfoHeader } from "../common/InfoHeader";
 import { NumberStepper } from "../common/NumberStepper";
 import { ColorSwatchPicker } from "../common/ColorSwatchPicker";
@@ -263,6 +263,7 @@ export function TransitDetailPanel({
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await emit("transit:lines_changed", {});
+      await sendTransitLinesChanged().catch(console.error);
       setRefreshKey((k) => k + 1);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to save");
@@ -281,6 +282,7 @@ export function TransitDetailPanel({
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await emit("transit:lines_changed", {});
+      await sendTransitLinesChanged().catch(console.error);
       await invoke("close_current_window");
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to delete");

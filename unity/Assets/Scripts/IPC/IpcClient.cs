@@ -782,6 +782,10 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "transit:lines_changed":
+                    TransitDataStore.Ensure().Refresh();
+                    break;
+
                 case "view:query_state":
                     Debug.Log("IpcClient: view:query_state");
                     {
