@@ -2666,6 +2666,10 @@ public partial class PathManager : BaseApiDataManager
                 if (sectionGO != null) sectionGO.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
             }
         }
+        else if (PathMeshFactory.GetModelType(path) == "outline")
+        {
+            OutlinePath.Create(pathGO, points, path.path_variant);
+        }
         else
         {
             mesh = PathFarModel.Build(path.path_variant, points, out Material[] farMaterials);
@@ -6531,6 +6535,7 @@ public class PathMasterItem
     ///   "track"   → TrackPath
     ///   "station_house" → StationHousePath
     ///   "pier"    → PierPath
+    ///   "outline" → OutlinePath
     ///   "none"    → no mesh generation (such as routing-only paths)
     /// Null or empty means "default".
     /// </summary>

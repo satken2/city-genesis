@@ -199,6 +199,7 @@ public partial class RoadRenderer : MonoBehaviour
                 Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
                 foreach (var rend in renderers)
                 {
+                    if (rend.GetComponent<OverlayMeshRenderer>() != null) continue; // Overlays keep their own material, as in VisualModeObject.
                     rend.sharedMaterial = previewMaterial;
                 }
             }

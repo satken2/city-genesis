@@ -107,7 +107,7 @@ public interface IPathMeshGenerator
 ///
 /// Select generators by path_master model_type:
 ///   "default" → RoadPath, "track" → TrackPath, "station_house" → StationHousePath, "pier" → PierPath,
-///   "none" → no mesh generation.
+///   "outline" → OutlinePath, "none" → no mesh generation.
 /// </summary>
 public static class PathMeshFactory
 {
@@ -124,6 +124,7 @@ public static class PathMeshFactory
     private static readonly TrackPath trackGenerator = new TrackPath();
     private static readonly StationHousePath stationHouseGenerator = new StationHousePath();
     private static readonly PierPath pierGenerator = new PierPath();
+    private static readonly OutlinePath outlineGenerator = new OutlinePath();
 
     public static PathMeshResult GeneratePathMesh(GeneratedModels.PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
     {
@@ -151,6 +152,8 @@ public static class PathMeshFactory
                 return stationHouseGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
             case "pier":
                 return pierGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
+            case "outline":
+                return outlineGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
             case "none":
                 // No mesh generation (e.g. pathfinding-only paths).
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathMeshFactory] model_type=none: メッシュ生成スキップ (variant={pathData.path_variant})");
