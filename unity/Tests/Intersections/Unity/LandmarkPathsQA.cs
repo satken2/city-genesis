@@ -41,6 +41,7 @@ public static class LandmarkPathsQA
             foreach(float grade in new[]{0f,.15f,-.15f}) Median(grade,true);
             Median(0,false);
             foreach(int id in new[]{251,252,254,256}) foreach(float length in new[]{40f,160f,960f}) Bridge(id,length);
+            foreach(int id in new[]{251,256}) BentBridge(id);
             foreach(int id in new[]{404,414}) foreach(float height in new[]{6f,15f}) Arcade(id,height);
             foreach(int id in new[]{404,414}) ArcadeCrossing(id);
             if(args.Contains("-syncLandmarkPrefabs")) ExportPrefabs(root);
@@ -81,6 +82,8 @@ public static class LandmarkPathsQA
         AssetDatabase.SaveAssets();
     }
     static GameObject Generate(int id,float width,int lanes,float height,float length,float grade,bool trees)
+        => Generate(id,width,lanes,new List<Vector3>{new Vector3(0,height,0),new Vector3(0,height+grade*length,length)},trees);
+    static GameObject Generate(int id,float width,int lanes,List<Vector3> points,bool trees)
     {
         bool track=id==404||id==414,bridge=id>=251&&id<=256;
         var master=Activator.CreateInstance(assembly.GetType("PathMasterItem"));
@@ -94,10 +97,17 @@ public static class LandmarkPathsQA
         var path=Activator.CreateInstance(assembly.GetType("GeneratedModels.PathSummary"));
         Set(path,"path_id",id); Set(path,"path_variant",id); Set(path,"path_type",track?4:2);
         Set(path,"follow_terrain",0); Set(path,"curved",false); Set(path,"street_tree_type",trees?1:0);
+        if(bridge)
+        {
+            // Bridge towers are placed from the anchors; the flat test ground is at 0, so relative and absolute heights agree.
+            List<object> Anchor(Vector3 p) => new List<object>{p.x,p.y,p.z};
+            Set(path,"start_point",Anchor(points[0])); Set(path,"end_point",Anchor(points[points.Count-1]));
+            Set(path,"waypoints",points.Skip(1).Take(points.Count-2)
+                .Select(p=>(object)new Dictionary<string,object>{{"position",Anchor(p)}}).ToList());
+        }
         var type=assembly.GetType(track?"TrackPath":"RoadPath");
         var setback=Activator.CreateInstance(assembly.GetType("SidewalkSetback"));
-        var result=type.GetMethod("Generate").Invoke(Activator.CreateInstance(type),new[]{path,
-            new List<Vector3>{new Vector3(0,height,0),new Vector3(0,height+grade*length,length)},setback,setback});
+        var result=type.GetMethod("Generate").Invoke(Activator.CreateInstance(type),new[]{path,points,setback,setback});
         var go=(GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
         foreach(var c in go.GetComponentsInChildren<Component>()) if(c!=null && c.GetType().Name=="SplineMesh")
         {
@@ -149,15 +159,30 @@ public static class LandmarkPathsQA
         Require(towers.Length==2,"two suspension towers");
         Require(towers.Any(t=>Mathf.Abs(t.position.z-length*.2f)<.05f)&&towers.Any(t=>Mathf.Abs(t.position.z-length*.8f)<.05f),"tower positions");
         Require(go.GetComponentsInChildren<MeshFilter>().Any(f=>f.name=="SuspensionCables"),"main cable/hangers");
-        float cableEdge=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="SuspensionCables")
-            .SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint))
-            .Where(v=>Mathf.Abs(v.z)<.4f).Max(v=>Mathf.Abs(v.x));
-        float widthScale=Mathf.Max(1,width/12);
-        Require(Mathf.Abs(cableEdge-(width*.5f+.8f*widthScale+.25f))<.005f,"main cable diameter 0.5m");
+        var cables=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="SuspensionCables")
+            .SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).ToArray();
+        float cableEdge=cables.Where(v=>Mathf.Abs(v.z-length*.5f)<.4f).Max(v=>Mathf.Abs(v.x));
+        float widthScale=Mathf.Max(1,width/12),lateral=width*.5f+.8f*widthScale;
+        Require(Mathf.Abs(cableEdge-(lateral+.25f))<.005f,"main cable diameter 0.5m");
+        // The anchorage spans a quarter of the side span (deck end to tower) and the cable enters its bridge-side top.
+        var anchorages=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="SuspensionAnchorage")
+            .Select(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint).ToArray()).ToArray();
+        Require(anchorages.Length==2,"two anchorages");
+        float inset=length*.2f*.25f,entry=12.1f+.4f*inset;
+        Require(anchorages.Any(a=>Mathf.Abs(a.Min(v=>v.z))<.01f&&Mathf.Abs(a.Max(v=>v.z)-inset)<.01f)
+            &&anchorages.Any(a=>Mathf.Abs(a.Min(v=>v.z)-(length-inset))<.01f&&Mathf.Abs(a.Max(v=>v.z)-length)<.01f),"anchorage length");
+        foreach(var a in anchorages)
+        {
+            Require(Mathf.Abs(a.Min(v=>v.y)+.15f)<.01f,"anchorage reaches ground");
+            Require(Mathf.Abs(a.Max(v=>v.y)-entry)<.01f,"anchorage height follows its length");
+            Require(a.Max(v=>Mathf.Abs(v.x))<=width*.5f+1.7f*widthScale+.01f&&a.Min(v=>Mathf.Abs(v.x))>width*.5f,"anchorage beside the deck");
+        }
+        foreach(float z in new[]{inset,length-inset}) foreach(int side in new[]{-1,1})
+            Require(cables.Any(v=>(v-new Vector3(side*lateral,entry,z)).magnitude<.3f),"cable enters anchorage");
         foreach(var tower in towers)
         {
             var points=tower.GetComponentsInChildren<MeshFilter>().SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).ToArray();
-            Require(Mathf.Abs(points.Max(v=>v.y)-12.1f-Mathf.Clamp(length*.12f,8,80)*widthScale)<.02f,"tower height follows road width");
+            Require(Mathf.Abs(points.Max(v=>v.y)-12.1f-Mathf.Max(length*.12f,8)*widthScale)<.02f,"tower height follows road width");
             Require(Mathf.Abs(points.Max(v=>v.z)-points.Min(v=>v.z)-2.4f*widthScale)<.02f,"tower thickness follows road width");
         }
         var trusses=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/truss")).ToArray();
@@ -170,6 +195,21 @@ public static class LandmarkPathsQA
             float trussBottom=trusses.SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).Min(v=>v.y);
             Require(Mathf.Abs(trussBottom-(12.1f-(id==254?3.2f:4.2f)))<.02f,"truss depth");
         }
+        UnityEngine.Object.DestroyImmediate(go);
+    }
+    // A waypoint is a corner: one shared tower stands on it, square to the bisector, with no copies per segment.
+    static void BentBridge(int id)
+    {
+        float width=id==251?7:32;
+        Vector3 start=new Vector3(0,12,0),corner=new Vector3(60,12,300),end=new Vector3(0,12,600);
+        var go=Generate(id,width,id==251?1:6,new List<Vector3>{start,corner,end},false);
+        var towers=go.GetComponentsInChildren<Transform>().Where(t=>t.name=="SuspensionTower").ToArray();
+        Require(towers.Length==3,"two end towers and the corner tower");
+        var middle=towers.Where(t=>Vector2.Distance(new Vector2(t.position.x,t.position.z),new Vector2(corner.x,corner.z))<.05f).ToArray();
+        Require(middle.Length==1,"corner tower at the waypoint");
+        var bisector=((corner-start).normalized+(end-corner).normalized).normalized;
+        Require(Vector3.Angle(middle[0].forward,bisector)<.5f,"corner tower faces the bisector");
+        Require(go.GetComponentsInChildren<MeshFilter>().Count(f=>f.name=="SuspensionAnchorage")==2,"anchorages only at the ends");
         UnityEngine.Object.DestroyImmediate(go);
     }
     static void Arcade(int id,float height)

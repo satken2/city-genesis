@@ -255,6 +255,7 @@ public class RoadPath : IPathMeshGenerator
 
         // Generate road parts.
         CreateRoadParts(container, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, points, startSidewalkSetback, endSidewalkSetback);
+        SuspensionBridgeGenerator.Generate(container, points, pathData, width);
 
         // Generate collider mesh.
         Mesh colliderMesh = BuildColliderMeshFromSpline(spline, width);
@@ -1103,7 +1104,7 @@ public class RoadPath : IPathMeshGenerator
             pathData.path_variant == 303
                 ? segmentPlatformZones ?? LrtPlatformParts.ZoneRanges(lrtPlatforms, LrtRoadParts.PlatformRampLength(303), LrtRoadParts.PLATFORM_EQUIPMENT_ZONE_MARGIN)
                 : corridor != null ? SplineDistances(corridor.GetMergedPercentRanges(null), spline.CalculateLength()) : null, access);
-        SuspensionBridgeGenerator.Generate(container, spline, pathData, width);
+        SuspensionBridgeGenerator.GenerateTruss(container, spline, pathData, width);
 
         // Posts.
         // Underground paths (negative relative Y) lie below ground and need no surface-support posts
@@ -1511,6 +1512,8 @@ public class RoadPath : IPathMeshGenerator
 
             CreateRoadParts(segObj, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, segmentPoints[i], segStartSetbacks[i], segEndSetbacks[i], segmentPlatformZones?[i], i == 0, i == segmentPoints.Length - 1);
         }
+        // Corner towers are shared by the spans on both sides, so the bridge structure is drawn once along the whole polyline.
+        SuspensionBridgeGenerator.Generate(container, points, pathData, width);
 
         // Generate collider mesh.
         Mesh colliderMesh = BuildColliderMeshForSegments(allSubdividedPoints, width);
