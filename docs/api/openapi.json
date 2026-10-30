@@ -7699,7 +7699,7 @@
           "stats"
         ],
         "summary": "Get Finance Statistics",
-        "description": "金融統計データ（GDP、物価指数、中央銀行の時系列履歴）を取得する。\n\n``price_index`` は GDP デフレーター。計算できないエポックは 1.0 とする。",
+        "description": "金融統計データ（GDP・物価指数の時系列履歴と、直近エポックの名目GDPの内訳）を取得する。\n\n``price_index`` は GDP デフレーター。計算できないエポックは 1.0 とする。\n``breakdown`` は直近エポックの名目GDPの内訳で、まだエポックを実行していない都市では null。\n金額はすべて1エポックあたり。\n\n- ``gdp`` = ``private`` + ``building`` + ``public`` + ``consumption_tax`` + ``import_tax``\n  (民間企業の付加価値・建物の家賃収入・公共施設の人件費・消費税・輸入関税)\n- 民間企業は ``private_output`` − ``private_raw_cost`` − ``business_rent`` = ``private``\n  (産出額 − 原材料費 − 払った家賃)\n- ``wages`` は賃金の総額(雇用者報酬)で、うち公共施設が払った分が ``public``\n- ``industries`` は経済活動の分類ごとの付加価値(税を除く)で、``variants`` にバリアント別の内訳を持つ\n- ``zones`` は地区別の付加価値、``top_firms`` は付加価値の大きい民間企業(どちらも大きい順)\n- ``workers`` は就業者数。``firms``・``buildings``・``facilities`` は付加価値を計上した民間企業・建物・公共施設の数\n- ``exports``・``imports`` は輸出額・輸入額(観光収入を含む)",
         "operationId": "get_finance_statistics_api_v1_stats_finance_get",
         "responses": {
           "200": {
