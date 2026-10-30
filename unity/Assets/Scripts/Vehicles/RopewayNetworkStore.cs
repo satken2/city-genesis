@@ -14,7 +14,8 @@ public sealed class RopewayNetworkStore : MonoBehaviour
     readonly List<PathSummary> paths = new();
     Coroutine request;
     int generation;
-    float nextFetch;
+    bool stale = true;   // The network changes only with epochs and edits, so refetch on RequestRefresh rather than on a timer.
+    float retryAt;
 
     public static RopewayNetworkStore Ensure()
     {
@@ -32,24 +33,28 @@ public sealed class RopewayNetworkStore : MonoBehaviour
         if (Session != session) { Clear(); Session = session; }
         if (GameStateManager.Instance == null || !GameStateManager.Instance.IsGameStarted())
         { if (request != null || paths.Count > 0) Clear(); return; }
-        if (request == null && Time.unscaledTime >= nextFetch)
+        if (request == null && stale && Time.unscaledTime >= retryAt)
         {
-            nextFetch = Time.unscaledTime + 5;
+            stale = false;
             request = StartCoroutine(Fetch(generation));
         }
     }
+
+    /// <summary>Refetch after the current request. Call whenever city data is refetched.</summary>
+    public void RequestRefresh() => stale = true;
 
     public void Clear()
     {
         generation++;
         StopAllCoroutines(); request = null;
-        paths.Clear(); Revision++; nextFetch = 0;
+        paths.Clear(); Revision++; stale = true; retryAt = 0;
     }
 
     IEnumerator Fetch(int expectedGeneration)
     {
         var received = new List<PathSummary>();
         int cursor = 0;
+        bool complete = false;
         string filter = Uri.EscapeDataString($"[path_type][eq]{Constants.PATH_CONVEYOR}");
         try
         {
@@ -72,7 +77,15 @@ public sealed class RopewayNetworkStore : MonoBehaviour
                     || a.path_variant != b.path_variant || a.start_node_id != b.start_node_id || a.end_node_id != b.end_node_id;
             }
             if (changed) { paths.Clear(); paths.AddRange(received); Revision++; }
+            complete = true;
         }
-        finally { if (expectedGeneration == generation) request = null; }
+        finally
+        {
+            if (expectedGeneration == generation)
+            {
+                request = null;
+                if (!complete) { stale = true; retryAt = Time.unscaledTime + 5; }
+            }
+        }
     }
 }

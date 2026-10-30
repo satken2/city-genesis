@@ -80,6 +80,7 @@ public partial class VehicleManager : MonoBehaviour
     private bool motionInFlight;
     private int motionGeneration;
     private readonly Dictionary<int,RoadMotionData> motion = new();
+    private readonly HashSet<int> motionFetched = new();   // Roads whose travel times are current, including roads the core returned none for.
     private readonly Dictionary<Vehicle,float> gaps = new();
     private readonly Dictionary<(int,bool,int),List<(Vehicle v,float progress)>> followGroups = new();
     private readonly Stack<List<(Vehicle v,float progress)>> followListPool = new();
@@ -218,7 +219,7 @@ public partial class VehicleManager : MonoBehaviour
 
     private void ClearVehicles()
     {
-        motionGeneration++; motionInFlight=false; motionFetchTime=0; motion.Clear();
+        motionGeneration++; motionInFlight=false; motionFetchTime=0; motion.Clear(); motionFetched.Clear();
         for (int i = active.Count - 1; i >= 0; i--) Despawn(i);
         roads.Clear(); populatedRoads.Clear(); buckets.Clear(); bucketByKey.Clear();
         population.Reset(); scanTimer = 0; densityTimer = 0; spawnBacklog = 0; seedRemaining = 0; seedRemainder = 0;
@@ -671,21 +672,33 @@ public partial class VehicleManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>Fetch travel times only for roads not yet asked. Times change only with epochs and edits; RefetchMotion marks them for refetch.</summary>
     private void FetchMotion()
     {
-        if (motionInFlight || Time.unscaledTime < motionFetchTime || roads.Count == 0) return;
+        if (motionInFlight || Time.unscaledTime < motionFetchTime) return;
+        var ids=new List<int>();
+        foreach(int id in roads.Keys)if(!motionFetched.Contains(id))ids.Add(id);
+        if(ids.Count==0)return;
+        if(ids.Count>4096)ids.RemoveRange(4096,ids.Count-4096);
         motionInFlight=true; motionFetchTime=Time.unscaledTime+2;
         int generation=motionGeneration;
-        var ids=new List<int>(roads.Keys);
-        if(ids.Count>4096)ids.RemoveRange(4096,ids.Count-4096);
         StartCoroutine(ApiClient.Post<RoadMotionResponse>("/paths/motion",ids,response=>
         {
             if(generation!=motionGeneration)return;
-            motion.Clear();
-            if(response?.paths!=null)foreach(var item in response.paths)if(item.Valid)motion[item.path_id]=item;
-            if(response != null && response.active_hours > 0) activeHoursPerDay=response.active_hours;
+            if(response!=null)
+            {
+                foreach(int id in ids){motion.Remove(id);motionFetched.Add(id);}
+                if(response.paths!=null)foreach(var item in response.paths)if(item.Valid)motion[item.path_id]=item;
+                if(response.active_hours > 0) activeHoursPerDay=response.active_hours;
+            }
             motionInFlight=false;
         },(_,__)=>{if(generation==motionGeneration)motionInFlight=false;}));
+    }
+
+    /// <summary>Refetch travel times for all roads, keeping current values until replies arrive. Call whenever city data is refetched.</summary>
+    public void RefetchMotion()
+    {
+        motionGeneration++; motionInFlight=false; motionFetchTime=0; motionFetched.Clear();
     }
     private float MeanSpeed(int path,int type) => motion.TryGetValue(path,out var data) ? data.MeanSpeed : Mathf.Max(.1f,baseSpeed*SpeedFactor(type));
     private void SetMotion(Vehicle v,float connectorLength=0)

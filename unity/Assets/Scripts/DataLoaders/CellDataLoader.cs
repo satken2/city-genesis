@@ -18,6 +18,7 @@ public class CellDataLoader : MonoBehaviour
     private InterchangeManager interchangeManager;
     private RoadManager roadManager;
     private CityOverviewManager cityOverviewManager;
+    private VehicleManager vehicleManager;
 
     // Scene in which to create objects
     private UnityEngine.SceneManagement.Scene targetScene;
@@ -162,6 +163,7 @@ public class CellDataLoader : MonoBehaviour
             cityOverviewManager = go.AddComponent<CityOverviewManager>();
         }
         cityOverviewManager.Initialize(terrainManager, buildingManager, pathManager);
+        vehicleManager = FindAnyObjectByType<VehicleManager>();
 
         // Initialize HeightmapTextureManager.
         // Initialize references so the GPU height window can subscribe to terrain tile completion notifications.
@@ -542,6 +544,8 @@ public class CellDataLoader : MonoBehaviour
         buildingManager?.MarkLoadedCellsStale();
         parcelManager?.MarkLoadedCellsStale();
         cityOverviewManager?.RequestRefresh();
+        vehicleManager?.RefetchMotion();
+        RopewayNetworkStore.Instance?.RequestRefresh();
         Debug.Log("CellDataLoader: ReloadAllData invoked.");
         loadSuspendedUntilReload = false;
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)
@@ -641,6 +645,7 @@ public class CellDataLoader : MonoBehaviour
         interchangeManager?.Clear();
         roadManager?.Clear();
         cityOverviewManager?.Clear();
+        vehicleManager?.RefetchMotion();
 
         // Invalidate the GPU height window and per-frame terrain height cache.
         // Otherwise, while loading the next save, Utils.GetGroundHeight would return
