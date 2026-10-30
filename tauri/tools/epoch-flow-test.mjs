@@ -17,28 +17,22 @@ const deferred = () => {
 };
 const flush = () => new Promise((resolve) => setImmediate(resolve));
 
-// 即時完了でも暗転完了前には結果を返さず、Tipsも表示しない。
+// Tipsの期限より前に終わった実行は、期限を待たずに結果を返し、Tipsも出さない。
 {
-  const dark = deferred(), calls = [];
-  let returned = false;
-  const flow = runEpochWithPresentation(() => { calls.push("execute"); return Promise.resolve(42); }, dark.promise, async (v) => calls.push(v));
-  void flow.then(() => { returned = true; });
-  assert.deepEqual(calls, ["execute"]);
-  await flush();
-  assert.equal(returned, false);
-  dark.resolve();
+  const due = deferred(), calls = [];
+  const flow = runEpochWithPresentation(() => { calls.push("execute"); return Promise.resolve(42); }, due.promise, async (v) => calls.push(v));
   assert.equal(await flow, 42);
   assert.deepEqual(calls, ["execute"]);
 }
 
-// 遅い処理は暗転後にだけTipsを出し、閉じ終えてから結果へ渡す。
+// 遅い処理は期限が来てからだけTipsを出し、閉じ終えてから結果へ渡す。
 {
-  const request = deferred(), dark = deferred(), closing = deferred(), calls = [];
+  const request = deferred(), due = deferred(), closing = deferred(), calls = [];
   let returned = false;
-  const flow = runEpochWithPresentation(() => request.promise, dark.promise, async (v) => { calls.push(v); if (!v) await closing.promise; });
+  const flow = runEpochWithPresentation(() => request.promise, due.promise, async (v) => { calls.push(v); if (!v) await closing.promise; });
   void flow.then(() => { returned = true; });
   await flush(); assert.deepEqual(calls, []);
-  dark.resolve(); await flush(); assert.deepEqual(calls, [true]);
+  due.resolve(); await flush(); assert.deepEqual(calls, [true]);
   request.resolve(7); await flush();
   assert.deepEqual(calls, [true, false]); assert.equal(returned, false);
   closing.resolve(); assert.equal(await flow, 7);
@@ -54,14 +48,13 @@ const flush = () => new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(calls, [true, false]);
 }
 
-// 早い拒否は暗転まで保持し、待機中の通信失敗ではTipsも閉じる。
+// 期限前の拒否はTipsを出さずにすぐ返し、Tips表示中の通信失敗ではTipsも閉じる。
 for (const early of [true, false]) {
-  const request = deferred(), dark = deferred(), calls = [], failure = new Error("HTTP 503");
-  const flow = runEpochWithPresentation(() => request.promise, dark.promise, async (v) => calls.push(v));
+  const request = deferred(), due = deferred(), calls = [], failure = new Error("HTTP 503");
+  const flow = runEpochWithPresentation(() => request.promise, due.promise, async (v) => calls.push(v));
   const check = assert.rejects(flow, (error) => error === failure);
-  if (early) { request.reject(failure); await flush(); assert.deepEqual(calls, []); }
-  dark.resolve(); await flush();
-  if (!early) request.reject(failure);
+  if (early) request.reject(failure);
+  else { due.resolve(); await flush(); request.reject(failure); }
   await check;
   assert.deepEqual(calls, early ? [] : [true, false]);
 }
@@ -105,7 +98,7 @@ for (const early of [true, false]) {
   }
 }
 
-// 暗転通知は演出IDを照合する。未接続・停止時も待ち続けず、購読を必ず解除する。
+// Unityの準備完了の通知は演出IDを照合する。未接続・停止時も待ち続けず、購読を必ず解除する。
 {
   const source = await readFile(new URL("../src/utils/epochPresentation.ts", import.meta.url), "utf8");
   const code = ts.transpileModule(source, {
@@ -128,16 +121,16 @@ for (const early of [true, false]) {
       await assert.rejects(exports.beginEpochPresentation(), /IPC unavailable/);
     } else {
       const presentation = await exports.beginEpochPresentation();
-      void presentation.darkened.then(() => { completed = true; });
+      void presentation.ready.then(() => { completed = true; });
       if (scenario !== "disconnected") {
         listener({ payload: { id: "old-id" } }); await flush();
         assert.equal(completed, false);
         if (scenario === "timeout") timeout();
         else listener({ payload: { id: "epoch-id" } });
       }
-      await presentation.darkened;
+      await presentation.ready;
     }
     assert.equal(unsubscribed, 1);
   }
 }
-console.log("PASS: epoch ordering, Tips modes and lifecycle, fast/slow/error responses, correlated blackout acknowledgement and cleanup");
+console.log("PASS: epoch ordering, Tips modes and lifecycle, fast/slow/error responses, correlated readiness acknowledgement and cleanup");

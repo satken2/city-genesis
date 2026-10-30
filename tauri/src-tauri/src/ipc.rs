@@ -630,10 +630,10 @@ pub async fn handle_incoming_message(
         "weather:state" => {
             let _ = app.emit_to(window::LABEL_COCKPIT, "weather:state", envelope.payload);
         }
-        "epoch:darkened" => {
+        "epoch:ready" => {
             let current = state.lock().epoch_presentation_id.clone();
             if current.is_some() && envelope.payload.get("id").and_then(|id| id.as_str()) == current.as_deref() {
-                let _ = app.emit("epoch:darkened", envelope.payload);
+                let _ = app.emit("epoch:ready", envelope.payload);
             }
         }
         "view:grid_angle_changed" => {

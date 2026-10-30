@@ -65,7 +65,7 @@ function receive(json: string): void {
       setMapVisible(false);
       break;
     case "epoch:prepare":
-      send("epoch:darkened", { id: params?.id });
+      send("epoch:ready", { id: params?.id });
       break;
     case "session:reload":
     case "session:force_reload":

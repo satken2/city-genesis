@@ -1038,25 +1038,24 @@ const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "grading",
 ];
 
-/// On session switches, prevent stale HTTP responses from reopening Tips or results.
+/// On session switches, prevent stale HTTP responses from reopening Tips or results. The emitted `epoch:ready` releases a
+/// UI still waiting for Unity; it finds the presentation no longer current and does not start the execution.
 pub fn cancel_epoch_presentation(app: &AppHandle, state: &SharedState) {
     let id = state.lock().epoch_presentation_id.clone();
     if let Some(id) = id {
         finish_epoch_presentation(app, state, &id);
-        let _ = app.emit("epoch:darkened", json!({"id": id}));
+        let _ = app.emit("epoch:ready", json!({"id": id}));
     }
 }
 
 pub fn finish_epoch_presentation(app: &AppHandle, state: &SharedState, id: &str) {
-    let (connected, in_play) = {
+    let connected = {
         let mut guard = state.lock();
         if guard.epoch_presentation_id.as_deref() != Some(id) { return; }
         guard.epoch_presentation_id = None;
-        (guard.graphic_connected, guard.last_session_id.is_some() && !guard.is_loading)
+        guard.graphic_connected
     };
     close_tips_window(app);
-    // A presentation cancelled by a city switch or the return to the top menu leaves the HUD to them.
-    if in_play { set_hud_visible(app, true); }
     if connected {
         if let Err(error) = ipc::send_ui_action(state, "".into(), None, "epoch:executing".into(), json!({"executing": false})) {
             log::error!("epoch presentation finish: {error}");

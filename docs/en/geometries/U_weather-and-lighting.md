@@ -6,19 +6,9 @@ Unity uses city climate settings to render sky, clouds, sunlight, shadows, haze,
 
 Core master `/api/v1/master/weather` defines weather IDs. City `climate` from `GET /api/v1/city/` supplies occurrence proportions by weather ID for each of twelve months. Unity stores appearances in `WeatherPreset` and selects weather from the current city month's proportions. Tauri owns cockpit labels and emoji. Weather-ID changes must align all three. Finalized epoch climate affecting production is distinct from rendered weather ([production](../economics/10_production.md)).
 
-Independently of epochs, weather slowly moves between neighboring states, from increasing cloud through precipitation and clearing. Long-run time shares match monthly proportions. Visual time also advances independently at a constant rate, skipping night by passing from sunset through brief twilight to sunrise. Neither is saved.
+Independently of epochs, weather slowly moves between neighboring states, from increasing cloud through precipitation and clearing. Long-run time shares match monthly proportions. Visual time also advances independently at a constant rate, skipping night by passing from sunset through brief twilight to sunrise. Neither is saved: at session start, Unity selects weather from that city's climate and date and begins in the morning. City reloads only refresh the proportions.
 
 Saved climate contains monthly weather proportions, average temperatures, precipitation, and sunshine. Finalized epoch climate is a core result; editing climate settings does not rewrite history. Unity uses monthly rendering proportions without recalculating production multipliers.
-
-## Epoch coordination
-
-Epoch execution darkens the screen and advances the date behind it. Effect IDs match coordination messages.
-
-1. On confirmed execution, the UI sends `epoch:prepare` alongside the HTTP request. Unity advances the sun to sunset and covers the screen with black.
-2. On the frame after drawing black, Unity returns `epoch:darkened`. The UI waits before showing results, displaying tips if processing remains incomplete. It stops waiting if Unity is disconnected or unresponsive.
-3. Closing results sends `epoch:executing` with `executing: false`. Unity reloads the city, removes black, and moves to morning. If the epoch advanced, it selects new weather behind the curtain.
-
-Weather is reselected only at session start and when epochs advance. Edit-triggered reloads preserve weather and visual time.
 
 ## Weather selection
 

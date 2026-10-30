@@ -18,6 +18,9 @@ export const MAX_EPOCH_COUNT = 10;
 /** Maximum epochs per execution in scenario mode (safeguard against accidentally running tens of thousands). */
 export const SCENARIO_MAX_EPOCH_COUNT = 10000;
 
+/** Delay before Tips appear for an execution still running. */
+const TIPS_DELAY_MS = 2000;
+
 type EpochResponse = {
   epoch?: number;
   current_date: number;
@@ -34,11 +37,12 @@ type EpochResponse = {
 export type EpochExecutionOutcome = "completed" | "failed" | "superseded";
 
 /**
- * Execute count epochs with sunset/fade-out presentation and show results. Start HTTP execution and presentation
- * concurrently; show Tips if still executing after fade-out. On completion, send a session reload to graphics
+ * Execute count epochs and show results. From start until results close, the HUD is disabled and Unity ignores world
+ * input while the city stays visible. Start HTTP once Unity reports that its city cache matches the core, because it
+ * renders from that cache without reading the core during execution. On completion, send a session reload to graphics
  * and open epoch_result if a report exists. Pass completed quests to results; without a report, open the quest
  * window directly for notify="modal" celebrations. Use popups for notify="toast" completions and deadline
- * failures. Closing results restores morning; finish presentation here if no results window opens.
+ * failures. Closing results finishes the presentation; finish it here if no results window opens.
  *
  * On core rejection (403: Steam-unverified population limit; 409 EPOCH_ALREADY_RUNNING: another execution
  * active, etc.) or connection error, cancel presentation and notify the reason. Core bodies are fixed English;
@@ -59,11 +63,13 @@ export async function executeEpochs(options: {
   try {
     presentation = await beginEpochPresentation();
     options.onStarted?.();
+    await presentation.ready;
+    if (!await presentation.isCurrent()) return "superseded";
     const url = buildApiUrl(apiBaseUrl, `/api/v1/epochs?count=${count}`);
     logInfoToFile(`epoch execution: POST ${url}`);
     const data = await runEpochWithPresentation(
       () => fetchApi<EpochResponse>(url, { method: "POST" }),
-      presentation.darkened,
+      new Promise<void>((resolve) => setTimeout(resolve, TIPS_DELAY_MS)),
       presentation.setTipsVisible,
     );
     simulationCompleted = true;

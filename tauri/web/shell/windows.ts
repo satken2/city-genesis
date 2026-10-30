@@ -477,12 +477,15 @@ function placePopup(label: string, placement: Placement, maximized: boolean): vo
   if (maximized) host.maximize(label);
 }
 
-/** セッションの切り替えでは、古い HTTP 応答で Tips や結果を再表示させない。 */
+/**
+ * セッションの切り替えでは、古い HTTP 応答で Tips や結果を再表示させない。送る `epoch:ready` は Unity を待っている UI を解放し、
+ * その UI は演出が現行でないことを見て実行を始めない。
+ */
 export function cancelEpochPresentation(): void {
   const id = state.epochPresentationId;
   if (id !== null) {
     finishEpochPresentation(id);
-    emit("epoch:darkened", { id });
+    emit("epoch:ready", { id });
   }
 }
 

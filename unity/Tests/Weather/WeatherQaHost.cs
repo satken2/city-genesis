@@ -11,12 +11,6 @@ public class IpcClient : MonoBehaviour
     public event Action OnSessionReload, OnSessionForceReload, OnSessionReset, OnGameEnd, OnGameStart;
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
-    public event Action<bool> OnEpochExecuting;
-    public event Action<string> OnEpochPrepare;
-    public string DarkenedId;
-    public int DarkenedCount;
-    public void PrepareEpoch(string id) => OnEpochPrepare?.Invoke(id);
-    public void EmitEpochDarkened(string id) { DarkenedId = id; DarkenedCount++; }
     public int Publishes;
     public string WeatherId;
     public int Rain, Snow;
@@ -28,7 +22,6 @@ public class IpcClient : MonoBehaviour
     { Publishes++; WeatherId = id; Locked = locked; Rain = rain; Snow = snow; Presets = presets; }
     public void QueryWeather() => OnWeatherQuery?.Invoke();
     public void SetWeather(string id) => OnWeatherSet?.Invoke(id);
-    public void Executing(bool value) => OnEpochExecuting?.Invoke(value);
     private void Awake() => Instance = this;
     public void Reload() => OnSessionReload?.Invoke();
     public void ResetSession() => OnSessionReset?.Invoke();
@@ -62,12 +55,10 @@ public static class ApiClient
         }
         return new WeatherClimateSettings { name = "検証用の気候", months = months };
     }
-    public static bool Fail;
     public static IEnumerator Get<T>(string path, Action<T> success, Action<string> error)
     {
         Reads++;
         yield return null;
-        if (Fail) { error("test failure"); yield break; }
         success(Newtonsoft.Json.JsonConvert.DeserializeObject<T>(
             Newtonsoft.Json.JsonConvert.SerializeObject(new { city = new { epoch = Epoch, climate = Climate, current_date = Date } })));
     }
@@ -121,13 +112,6 @@ public sealed class WeatherQaHost : MonoBehaviour
     }
     private IEnumerator Suite()
     {
-        var tracker = new WeatherEpochTracker();
-        Check(tracker.Observe(5) == 0, "initial epoch is baseline");
-        Check(tracker.Observe(5) == 0, "duplicate reload");
-        Check(tracker.Observe(8) == 3, "batch epochs");
-        Check(tracker.Observe(2) == 0, "older save baseline");
-        tracker.Reset(); Check(tracker.Observe(20) == 0, "session reset");
-
         // Monthly data and climate selection with adjacent routes disconnected at 0%.
         int presetCount = WeatherPreset.All.Count;
         var profile = ApiClient.Profile();
@@ -171,26 +155,9 @@ public sealed class WeatherQaHost : MonoBehaviour
         clock.Advance(0.01f);
         Check(clock.Current == WeatherClock.Stage.Day && clock.Phase < 0.01f && Mathf.Abs(clock.Azimuth - 90f) < 1f, "twilight hands over to sunrise in the east");
         Check(peak > 0.5f && peak < 0.6f, "twilight dims without going dark");
-        clock.BeginNight();
-        Check(clock.Current == WeatherClock.Stage.Dusk, "epoch fast-forwards to dusk");
-        clock.Advance(WeatherClock.SunsetSeconds);
-        Check(Mathf.Abs(clock.Elevation - WeatherClock.LowestElevation) < 0.001f && clock.FadeAlpha == 0f, "sunset completes after 1.5 seconds before the screen fade starts");
-        clock.Advance(WeatherClock.FadeSeconds * 0.5f);
-        Check(clock.FadeAlpha > 0f && clock.FadeAlpha < 1f, "screen fades only after sunset");
-        clock.Advance(WeatherClock.FadeSeconds * 0.5f);
-        Check(clock.Current == WeatherClock.Stage.Night && clock.Darkness == 1f && clock.FadeAlpha == 1f, "full black after exactly two seconds");
-        Check(!clock.Advance(30f) && clock.Current == WeatherClock.Stage.Night, "dark until the epoch completes");
-        clock.RequestDawn();
-        Check(clock.Advance(0.01f) && clock.Current == WeatherClock.Stage.Dawn, "dawn starts once and reports it");
-        clock.Advance(WeatherClock.FadeSeconds);
-        Check(clock.FadeAlpha == 0f && clock.Elevation == WeatherClock.LowestElevation, "return fades in for half a second before sunrise");
-        clock.Advance(WeatherClock.SunsetSeconds);
-        Check(clock.Current == WeatherClock.Stage.Day && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase) && clock.Darkness == 0f, "dawn ends in the morning");
-        clock.BeginNight(); clock.RequestDawn();
-        clock.Advance(WeatherClock.DuskSeconds + 0.1f);
-        Check(clock.Current == WeatherClock.Stage.Night && clock.Advance(0.01f), "quick epoch waits for full darkness before dawn");
-        clock.RequestDawn(); clock.StartMorning();
-        Check(clock.Current == WeatherClock.Stage.Day && !clock.Advance(0.01f), "morning reset drops pending dawn");
+        clock.Advance(WeatherClock.DaySeconds * 0.5f);
+        clock.StartMorning();
+        Check(clock.Current == WeatherClock.Stage.Day && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase) && clock.Darkness == 0f, "session start resets to the morning");
 
         // WeatherController and IPC
         var ipc = new GameObject("IPC").AddComponent<IpcClient>();
@@ -211,52 +178,24 @@ public sealed class WeatherQaHost : MonoBehaviour
         int reads = ApiClient.Reads;
         ipc.Reload();
         yield return Frames(4);
-        Check(ApiClient.Reads > reads && !controller.Clock.IsDarkening, "editing reload reads the city without passing a night");
+        Check(ApiClient.Reads > reads && controller.Clock.Current == WeatherClock.Stage.Day, "editing reload reads the city without changing the time");
         int beforeEdit = controller.CurrentIndex;
         ApiClient.Climate.name = "月別設定を編集";
         ApiClient.Climate.months[6].weather["clear"] = 70;
         ApiClient.Climate.months[6].weather["blizzard"] = 30;
         ipc.Reload(); yield return Frames(4);
-        Check(controller.Climate == ApiClient.Climate.name && controller.CurrentIndex == beforeEdit && !controller.Clock.IsDarkening, "climate edits refresh probabilities without advancing weather or time");
+        Check(controller.Climate == ApiClient.Climate.name && controller.CurrentIndex == beforeEdit && controller.Clock.Current == WeatherClock.Stage.Day, "climate edits refresh probabilities without advancing weather or time");
 
-        ipc.PrepareEpoch("result-hold");
+        float phaseBeforeEpoch = controller.Clock.Phase;
         ApiClient.Epoch = 6; ApiClient.Date = Day(1, 10);
         ipc.Reload();
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Night, 5f, "fast epoch still finishes sunset");
-        yield return Frames(10);
-        Check(controller.Clock.Current == WeatherClock.Stage.Night && controller.Clock.FadeAlpha == 1f, "backend completion does not reveal the city before closing the result");
-        Check(ipc.DarkenedId == "result-hold" && ipc.DarkenedCount == 1, "black screen acknowledgement is sent once after applying the overlay");
-        ipc.PrepareEpoch("result-hold");
-        yield return Frames(4);
-        Check(ipc.DarkenedCount == 1 && controller.Clock.Current == WeatherClock.Stage.Night, "duplicate prepare does not replay sunset");
-        ipc.Executing(false);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "epoch end brings the morning");
-        var desertWinter = WeatherClimate.Weights(profile, Day(1, 10));
-        Check(controller.Season == WeatherClimate.Winter && desertWinter[controller.CurrentIndex] > 0, "new day uses the new season");
-
-        ipc.Executing(true);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Night, 5f, "rejected epoch darkens");
-        ipc.Executing(false);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "rejected epoch returns to day");
-
-        ApiClient.Epoch = 7; ipc.Reload();
-        yield return Until(() => controller.Clock.IsDarkening, 5f, "epoch advance without the button still passes a night");
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "unannounced epoch ends in the morning");
-
-        ApiClient.Fail = true;
-        ipc.Executing(true);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Night, 5f, "offline epoch darkens");
-        ipc.Executing(false);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "unreachable backend does not keep it dark");
-        ApiClient.Fail = false;
-        yield return Frames(4);
+        yield return Until(() => controller.Season == WeatherClimate.Winter, 5f, "epoch reload reads the new date");
+        Check(controller.CurrentIndex == beforeEdit && controller.Clock.Current == WeatherClock.Stage.Day && controller.Clock.Phase >= phaseBeforeEpoch, "advanced epoch keeps the weather and time running");
 
         ipc.SetWeather("blizzard");
         Check(ipc.WeatherId == "blizzard" && ipc.Snow == 3 && ipc.Rain == 0 && ipc.Locked, "manual weather acknowledged with snow level");
-        ipc.Executing(true);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Night, 5f, "locked weather still passes the night");
-        ApiClient.Epoch = 8; ipc.Reload(); ipc.Executing(false);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "locked weather sees the morning");
+        ApiClient.Epoch = 8; ipc.Reload();
+        yield return Frames(4);
         Check(controller.CurrentIndex == Index("blizzard"), "photo lock survives epoch");
         ipc.SetWeather("not_a_weather");
         Check(ipc.WeatherId == "blizzard", "unknown weather rejected");
@@ -272,9 +211,6 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(Mathf.Approximately(controller.RainAmount, 3f), "transition completes");
 
         ipc.ResetSession();
-        ipc.Executing(true);
-        yield return null;
-        Check(!controller.Clock.IsDarkening, "no night effect outside a session");
         ApiClient.Epoch = 30; ApiClient.Climate = ApiClient.Profile(); ApiClient.Date = Day(4, 1);
         ipc.Begin();
         yield return Until(() => controller.Climate == ApiClient.Climate.name, 5f, "next session reads its climate");
@@ -462,36 +398,12 @@ public sealed class WeatherQaHost : MonoBehaviour
         yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Twilight && controller.Clock.Darkness > 0.45f, 30f, "twilight reached");
         Check(sun.intensity < 0.05f, "sun below the horizon casts no light");
         Capture(camera, "t_twilight");
-        ipc.Executing(true);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Night, 5f, "night for the capture");
-        yield return Frames(4);
-        Check(sun.intensity == 0f, "epoch night is dark");
-        Capture(camera, "t_night");
-        // Include the blackout overlay in offscreen captures and verify that every pixel is black, rather than checking for dim lighting.
-        var fadeCanvas = controller.GetComponentInChildren<Canvas>();
-        Check(fadeCanvas.renderMode == RenderMode.ScreenSpaceOverlay && fadeCanvas.sortingOrder == short.MaxValue, "black overlay covers the entire game view");
-        fadeCanvas.renderMode = RenderMode.ScreenSpaceCamera;
-        fadeCanvas.worldCamera = camera;
-        fadeCanvas.planeDistance = 1f;
-        Canvas.ForceUpdateCanvases();
-        yield return Frames(4);
-        Capture(camera, "t_blackout", true);
-        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        ipc.Executing(false);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "morning after the capture");
     }
-    private void Capture(Camera camera, string name, bool requireBlack = false)
+    private void Capture(Camera camera, string name)
     {
         RenderTexture.active = camera.targetTexture;
         var pixels = new Texture2D(1280,720,TextureFormat.RGB24,false);
         pixels.ReadPixels(new Rect(0,0,1280,720),0,0); pixels.Apply();
-        if (requireBlack)
-        {
-            bool black = true;
-            foreach (var pixel in pixels.GetPixels32())
-                if (pixel.r > 1 || pixel.g > 1 || pixel.b > 1) { black = false; break; }
-            Check(black, "blackout covers every pixel, including sky and unlit surfaces");
-        }
         File.WriteAllBytes(root + $"/Captures/{name}.png", pixels.EncodeToPNG());
         Destroy(pixels); RenderTexture.active = null;
     }

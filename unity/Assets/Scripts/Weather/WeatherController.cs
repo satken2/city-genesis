@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.UI;
 
 /// <summary>
 /// Manage Unity sky, lighting, fog, and precipitation from weather, time, and climate. Do not write to economics, master data, or saves.
@@ -25,15 +24,10 @@ public sealed class WeatherController : MonoBehaviour
     public float RainAmount => Blended().Rain;
 
     private readonly System.Random random = new System.Random();
-    private readonly WeatherEpochTracker epochs = new WeatherEpochTracker();
     private IpcClient ipc;
     private GameStateManager state;
     private Coroutine query;
-    private bool pending, suspended, panel, awaitingDawn, redrawAtDawn;
-    private bool holdingEpoch, darkenedSent;
-    private string presentationId;
-    private int blackFrame = -1;
-    private CanvasGroup fadeOverlay;
+    private bool pending, suspended, panel, sessionStart = true;
     private float retryAt, dwellLeft, probeAt, cookieAt;
     private Material sky;
     private Light sun;
@@ -134,7 +128,6 @@ public sealed class WeatherController : MonoBehaviour
         precipitation = gameObject.AddComponent<WeatherPrecipitation>();
         cloudSeed = NewSeed();
         StartWeather(WeatherChain.Sample(random, weights));
-        CreateFadeOverlay();
     }
 
     private void Update()
@@ -144,17 +137,9 @@ public sealed class WeatherController : MonoBehaviour
         if (pending && query == null && !suspended && Time.unscaledTime >= retryAt)
             query = StartCoroutine(ReadCity());
         float seconds = Time.unscaledDeltaTime;
-        if (Clock.Advance(seconds)) OnDawn();
+        Clock.Advance(seconds);
         AdvanceWeather(seconds);
         ApplyEnvironment();
-        fadeOverlay.alpha = Clock.FadeAlpha;
-        // Notify only after a frame displaying the black overlay so the UI cannot show results first.
-        if (presentationId != null && !darkenedSent && blackFrame >= 0 && Time.frameCount > blackFrame)
-        {
-            darkenedSent = true;
-            ipc?.EmitEpochDarkened(presentationId);
-        }
-        if (Clock.FadeAlpha >= 1f && blackFrame < 0) blackFrame = Time.frameCount;
         RefreshSky(false);
         HandleKeys();
     }
@@ -172,8 +157,6 @@ public sealed class WeatherController : MonoBehaviour
                 ipc.OnSessionReset += Suspend;
                 ipc.OnGameEnd += Suspend;
                 ipc.OnGameStart += BeginSession;
-                ipc.OnEpochExecuting += SetEpochExecuting;
-                ipc.OnEpochPrepare += PrepareEpoch;
                 ipc.OnWeatherQuery += PublishWeather;
                 ipc.OnWeatherSet += SetWeatherFromUi;
                 PublishWeather();
@@ -200,23 +183,17 @@ public sealed class WeatherController : MonoBehaviour
     private void BeginSession()
     {
         CancelQuery();
-        epochs.Reset();
+        sessionStart = true;
         suspended = false;
-        awaitingDawn = redrawAtDawn = false;
-        holdingEpoch = false;
-        presentationId = null;
         RequestCity();
     }
 
     private void Suspend()
     {
         CancelQuery();
-        epochs.Reset();
+        sessionStart = true;
         suspended = true;
         pending = false;
-        awaitingDawn = redrawAtDawn = false;
-        holdingEpoch = false;
-        presentationId = null;
         Clock.StartMorning();
     }
 
@@ -227,29 +204,6 @@ public sealed class WeatherController : MonoBehaviour
     }
 
     private void RequestCity() { pending = true; retryAt = 0; }
-
-    /// <summary>
-    /// Start/end epoch effects. After results close, read the city before proceeding to sunrise.
-    /// Starting sunrise before reading completes would make weather visibly change after the scene brightens.
-    /// </summary>
-    private void SetEpochExecuting(bool executing)
-    {
-        if (suspended) return;
-        holdingEpoch = executing;
-        if (executing) { awaitingDawn = false; Clock.BeginNight(); return; }
-        presentationId = null;
-        awaitingDawn = true;
-        RequestCity();
-    }
-
-    private void PrepareEpoch(string id)
-    {
-        if (suspended || string.IsNullOrEmpty(id) || presentationId == id) return;
-        presentationId = id;
-        darkenedSent = false;
-        blackFrame = -1;
-        SetEpochExecuting(true);
-    }
 
     private IEnumerator ReadCity()
     {
@@ -264,18 +218,12 @@ public sealed class WeatherController : MonoBehaviour
         }, _ => { });
         query = null;
         if (!received) { pending = true; retryAt = Time.unscaledTime + 5f; }
-        // Proceed to sunrise even if reading fails, avoiding permanent darkness when the backend is down.
-        if (awaitingDawn && (!received || !pending))
-        {
-            awaitingDawn = false;
-            Clock.RequestDawn();
-        }
     }
 
     private void ApplyCity(CityState city)
     {
-        bool sessionStart = !epochs.Epoch.HasValue;
-        int advanced = epochs.Observe(city.epoch.Value);
+        bool first = sessionStart;
+        sessionStart = false;
         if (city.climate?.months?.Length != 12) return;
         Climate = city.climate.name;
         if (city.current_date.HasValue) Season = WeatherClimate.SeasonOf(city.current_date.Value);
@@ -283,40 +231,19 @@ public sealed class WeatherController : MonoBehaviour
         bool changed = false;
         for (int i = 0; i < next.Count; i++) changed |= next[i] != weights[i];
         weights = next;
-        if (sessionStart)
+        if (first)
         {
             // Session start is hidden behind loading, so reselect weather for that city's climate/season and begin in the morning.
             if (!Locked) { cloudSeed = NewSeed(); StartWeather(WeatherChain.Sample(random, weights)); }
-            if (!holdingEpoch) Clock.StartMorning();
-        }
-        else if (advanced > 0)
-        {
-            // An advanced epoch means a new day. If not yet dark, fast-forward into darkness and resample weather at dawn.
-            redrawAtDawn = true;
-            if (!holdingEpoch)
-            {
-                Clock.BeginNight();
-                Clock.RequestDawn();
-            }
+            Clock.StartMorning();
         }
         if (changed) PublishWeather();
-    }
-
-    /// <summary>At the instant darkness ends, switch to the new day's weather before sunrise if the epoch advanced.</summary>
-    private void OnDawn()
-    {
-        if (!redrawAtDawn) return;
-        redrawAtDawn = false;
-        if (Locked) return;
-        cloudSeed = NewSeed();
-        StartWeather(WeatherChain.Sample(random, weights));
     }
 
     private void AdvanceWeather(float seconds)
     {
         if (blend < 1f) blend = Mathf.Min(1f, blend + seconds / blendSeconds);
-        // Do not advance weather while dark; it will be resampled immediately before sunrise.
-        if (Locked || Clock.IsDarkening) return;
+        if (Locked) return;
         dwellLeft -= seconds;
         if (dwellLeft > 0f) return;
         int next = WeatherChain.Step(random, CurrentIndex, weights);
@@ -497,7 +424,7 @@ public sealed class WeatherController : MonoBehaviour
 
     private void OnGUI()
     {
-        if (!panel || sky == null || Clock.FadeAlpha > 0f) return;
+        if (!panel || sky == null) return;
         if (panelStyle == null) panelStyle = new GUIStyle(GUI.skin.box)
             { font = UiFontProvider.GetFont(16), fontSize = 16, alignment = TextAnchor.UpperLeft, padding = new RectOffset(16,16,12,12) };
         float hours = Clock.Hours;
@@ -509,26 +436,6 @@ public sealed class WeatherController : MonoBehaviour
             "F6/F7 天気   F10 固定   F11 再抽選\nF3/F4 時刻を1時間戻す/進める   F5 時刻の停止\nF9 パネルを閉じる（撮影前に非表示）", panelStyle);
     }
 
-    private void CreateFadeOverlay()
-    {
-        // ScreenSpaceOverlay covers the entire view in black independently of lighting or city Unlit materials.
-        var root = new GameObject("Epoch fade", typeof(RectTransform), typeof(Canvas), typeof(CanvasGroup));
-        root.transform.SetParent(transform, false);
-        var canvas = root.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = short.MaxValue;
-        fadeOverlay = root.GetComponent<CanvasGroup>();
-        fadeOverlay.alpha = 0f;
-        fadeOverlay.blocksRaycasts = false;
-        var image = new GameObject("Black", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
-        image.transform.SetParent(root.transform, false);
-        image.color = Color.black;
-        image.raycastTarget = false;
-        image.rectTransform.anchorMin = Vector2.zero;
-        image.rectTransform.anchorMax = Vector2.one;
-        image.rectTransform.offsetMin = image.rectTransform.offsetMax = Vector2.zero;
-    }
-
     private void UnbindIpc()
     {
         if (ipc == null) return;
@@ -537,8 +444,6 @@ public sealed class WeatherController : MonoBehaviour
         ipc.OnSessionReset -= Suspend;
         ipc.OnGameEnd -= Suspend;
         ipc.OnGameStart -= BeginSession;
-        ipc.OnEpochExecuting -= SetEpochExecuting;
-        ipc.OnEpochPrepare -= PrepareEpoch;
         ipc.OnWeatherQuery -= PublishWeather;
         ipc.OnWeatherSet -= SetWeatherFromUi;
     }
@@ -555,7 +460,6 @@ public sealed class WeatherController : MonoBehaviour
 
     private void OnDisable()
     {
-        if (fadeOverlay != null) fadeOverlay.alpha = 0f;
         UnbindIpc(); ipc = null;
         if (state != null) state.OnStateChanged -= StateChanged;
         state = null;
@@ -584,7 +488,6 @@ public sealed class WeatherController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (fadeOverlay != null) Destroy(fadeOverlay.gameObject);
         if (Instance == this) Instance = null;
         if (sky != null) Destroy(sky);
         if (cookie != null) Destroy(cookie);

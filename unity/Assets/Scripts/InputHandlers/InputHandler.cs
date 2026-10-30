@@ -237,10 +237,11 @@ public class InputHandler : MonoBehaviour
     private void Update()
     {
         if (!ApiClient.BackendConnected && isDragging) EndDrag();
-        // Block all mouse input (click/hover/drag) in fly/photography modes.
+        // Block all mouse input (click/hover/drag) in fly/photography modes and during epoch execution.
         // Disable 3D object selection and hover (including tooltips) completely during free flight,
         // returning before any other checks.
-        if (!ApiClient.BackendConnected || TutorialRuntime.BlocksWorldInput || DriveMode.IsOpen || (CameraController.Instance != null && CameraController.Instance.BlocksWorldInput))
+        if (!ApiClient.BackendConnected || TutorialRuntime.BlocksWorldInput || DriveMode.IsOpen || (CameraController.Instance != null && CameraController.Instance.BlocksWorldInput)
+            || (IpcClient.Instance != null && IpcClient.Instance.EpochExecuting))
         {
             ClearHover();
             TooltipManager.Instance?.Hide();

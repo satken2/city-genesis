@@ -3,9 +3,8 @@
  *
  * Receive `session-state`, broadcast to all windows by Rust's session polling thread, and return visibility and
  * basic city information.
- * Rust (`set_hud_visible`) controls native window visibility: hidden without a city, during initial loading, and
- * during epoch presentations. React also stops rendering through `visible` to avoid briefly showing the previous
- * session's content on display; an epoch presentation keeps rendering, since the content belongs to the same city.
+ * Rust (`set_hud_visible`) controls native window visibility: hidden without a city and during initial loading.
+ * React also stops rendering through `visible` to avoid briefly showing the previous session's content on display.
  */
 import { GAME_VERIFIED, MAX_UNVERIFIED_POPULATION, PLAY_MODE_NORMAL } from "../../constants";
 
@@ -20,7 +19,6 @@ type SessionStatePayload = {
   city?: Record<string, unknown>;
   apiBaseUrl: string;
   isLoading?: boolean;
-  epochPresenting?: boolean;
 };
 
 export type HudSession = {
@@ -81,10 +79,10 @@ export function useHudSession(): HudSession {
     listen<SessionStatePayload>("session-state", (event) => {
       const payload = event.payload;
       const inPlay = payload.current_save_id != null && !payload.isLoading;
-      // Rust (`set_hud_visible`) also switches visibility at session start/end and around epoch presentations, but
+      // Rust (`set_hud_visible`) also switches visibility at session start/end, but
       // reconciling with current state on each poll prevents a missed event from
       // leaving a window permanently hidden or visible.
-      if (inPlay && !payload.epochPresenting) {
+      if (inPlay) {
         appWindow.show().catch(() => {});
       } else {
         appWindow.hide().catch(() => {});

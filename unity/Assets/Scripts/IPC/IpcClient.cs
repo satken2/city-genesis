@@ -115,9 +115,12 @@ public class IpcClient : MonoBehaviour
     }
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
-    // Epoch presentation start (true) and end when closing results (false). Used for sunset→blackout→sunrise.
+    // End of an epoch execution when closing results (false). The start arrives as OnEpochPrepare.
     public event Action<bool> OnEpochExecuting;
+    // Start of an epoch execution (argument: execution ID). The UI starts the HTTP execution after EmitEpochReady returns the ID.
     public event Action<string> OnEpochPrepare;
+    // From epoch:prepare until results close (epoch:executing false). Blocks world input; cleared on session switches and game end.
+    public bool EpochExecuting { get; private set; }
     // Capture request just before saving a game/scenario (argument: request ID). Send the image directly to the core.
     public event Action<string> OnCameraCaptureThumbnail;
     // Asset manager render request. Return per-row models and capture thumbnails as files (AssetManagerRenderer).
@@ -756,6 +759,7 @@ public class IpcClient : MonoBehaviour
 
                 case "session:reset":
                     TutorialRuntime.Clear();
+                    EpochExecuting = false;
                     Debug.Log("IpcClient: session:reset");
                     OnSessionReset?.Invoke();
                     break;
@@ -823,6 +827,7 @@ public class IpcClient : MonoBehaviour
 
                 case "game:end":
                     TutorialRuntime.Clear();
+                    EpochExecuting = false;
                     Debug.Log("IpcClient: game:end");
                     OnGameEnd?.Invoke();
                     break;
@@ -853,10 +858,12 @@ public class IpcClient : MonoBehaviour
                     break;
 
                 case "epoch:executing":
-                    OnEpochExecuting?.Invoke(bool.TryParse(GetParamString(payload, "executing"), out bool executing) && executing);
+                    EpochExecuting = bool.TryParse(GetParamString(payload, "executing"), out bool executing) && executing;
+                    OnEpochExecuting?.Invoke(EpochExecuting);
                     break;
 
                 case "epoch:prepare":
+                    EpochExecuting = true;
                     OnEpochPrepare?.Invoke(GetParamString(payload, "id"));
                     break;
 
@@ -1607,9 +1614,9 @@ public class IpcClient : MonoBehaviour
         });
     }
 
-    public void EmitEpochDarkened(string id)
+    public void EmitEpochReady(string id)
     {
-        SendEnvelope("epoch:darkened", new Dictionary<string, object> { ["id"] = id });
+        SendEnvelope("epoch:ready", new Dictionary<string, object> { ["id"] = id });
     }
 
     /// <summary>

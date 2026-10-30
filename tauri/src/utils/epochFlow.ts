@@ -1,7 +1,7 @@
-/** Start HTTP immediately; defer only result/failure display until fade-out completes. */
+/** Show Tips only if execution is still running when tipsDue resolves, so quick executions do not flash a window. */
 export async function runEpochWithPresentation<T>(
   execute: () => Promise<T>,
-  darkened: Promise<void>,
+  tipsDue: Promise<void>,
   setTipsVisible: (visible: boolean) => Promise<void>,
 ): Promise<T> {
   let settled = false;
@@ -9,7 +9,7 @@ export async function runEpochWithPresentation<T>(
     (value) => { settled = true; return { ok: true as const, value }; },
     (error: unknown) => { settled = true; return { ok: false as const, error }; },
   );
-  await darkened;
+  await Promise.race([result, tipsDue]);
   const needsTips = !settled;
   try {
     if (needsTips) await setTipsVisible(true);

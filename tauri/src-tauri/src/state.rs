@@ -101,7 +101,7 @@ pub struct AppState {
     pub graphic_connected: bool,
     pub graphic_contract_error: Option<String>,
     pub graphic_version: Option<String>,
-    /// Presentation from sunset start until the results screen closes. Distinguishes completion notifications from stale windows.
+    /// Presentation from epoch start until the results screen closes. Distinguishes completion notifications from stale windows.
     pub epoch_presentation_id: Option<String>,
 }
 
