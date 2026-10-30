@@ -162,7 +162,7 @@ public partial class RoadPlanManager
     /// <summary>Absolute track surface elevation. Uses the same source as snapping (saved design elevation, otherwise interpolated anchor relative Y).</summary>
     private static float RailSurfaceHeight(GeneratedModels.PathSummary path, Vector3 position)
     {
-        return Utils.GetGroundHeight(position) + path.GetRelativeHeightAtPoint(position.x, position.z);
+        return Utils.GetPathSurfaceHeight(position) + path.GetRelativeHeightAtPoint(position.x, position.z);
     }
 
     /// <summary>Main line tangent grade, measured by the secant across RAIL_JUNCTION_PLANE_LENGTH on both sides of the contact where the backend fits its plane.</summary>

@@ -431,6 +431,7 @@ public partial class PathManager : BaseApiDataManager
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
         RoadAdjacency.NeighborProvider = GetAdjacentRoadNeighbors;
         RoadAdjacency.EndJoinProvider = GetRoadEndJoin;
+        SuspensionBridgeGenerator.JointProvider = GetSuspensionJoints;
         TrackPath.ConnectedPathsProvider = GetTrackPathsAtNode;
         RoadRenderer.PreviewTrackSink = SetPreviewTracks;
         RoadMarkingRules.ConnectedPaths = GetPathsConnectedToNode;
@@ -504,6 +505,10 @@ public partial class PathManager : BaseApiDataManager
         {
             RoadAdjacency.NeighborProvider = null;
             RoadAdjacency.EndJoinProvider = null;
+        }
+        if (SuspensionBridgeGenerator.JointProvider == (Func<PathSummary, bool, List<PathSummary>>)GetSuspensionJoints)
+        {
+            SuspensionBridgeGenerator.JointProvider = null;
         }
     }
 
@@ -602,7 +607,7 @@ public partial class PathManager : BaseApiDataManager
         var anchor = atStart ? path.GetStartPointList() : path.GetEndPointList();
         if (anchor == null || anchor.Count < 3) return false;
         var ground = new Vector3(anchor[0], 0f, anchor[2]);
-        position = new Vector3(anchor[0], Utils.GetGroundHeight(ground) + anchor[1], anchor[2]);
+        position = new Vector3(anchor[0], Utils.GetPathSurfaceHeight(ground) + anchor[1], anchor[2]);
         return true;
     }
 
@@ -2067,7 +2072,7 @@ public partial class PathManager : BaseApiDataManager
         Vector3 endPos = GetPathPointPosition(endPointList);
         Vector3 centerPos = (startPos + endPos) * 0.5f;
 
-        float groundHeight = Utils.GetGroundHeight(new Vector3(centerPos.x, 1000f, centerPos.z));
+        float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(centerPos.x, 1000f, centerPos.z));
         centerPos.y = groundHeight;
 
         // Completion transition from constructing (STATUS_CONSTRUCTING) to active (STATUS_ACTIVE) or completed (STATUS_COMPLETED)
@@ -2657,9 +2662,9 @@ public partial class PathManager : BaseApiDataManager
         // Do not snap endpoints to terrain for non-following paths (girder bridges, explicitly non-following paths, etc.).
         bool farVariantFollows = GetPathFollowTerrain(path);
         if (farVariantFollows && startRelY == farBaseHeight)
-            startPos.y = Utils.GetGroundHeight(new Vector3(startPos.x, 1000f, startPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            startPos.y = Utils.GetPathSurfaceHeight(new Vector3(startPos.x, 1000f, startPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
         if (farVariantFollows && endRelY == farBaseHeight)
-            endPos.y = Utils.GetGroundHeight(new Vector3(endPos.x, 1000f, endPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            endPos.y = Utils.GetPathSurfaceHeight(new Vector3(endPos.x, 1000f, endPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
 
         List<Vector3> points = new List<Vector3> { startPos, endPos };
         ApplyStationGrade(path, points);
@@ -2948,7 +2953,7 @@ public partial class PathManager : BaseApiDataManager
         Vector3 iconPos;
         if (cp != null && cp.Length >= 2)
         {
-            float groundHeight = Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1]));
+            float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(cp[0], 1000f, cp[1]));
             iconPos = new Vector3(cp[0], groundHeight + plannedPathIconYOffset, cp[1]);
         }
         else
@@ -2960,7 +2965,7 @@ public partial class PathManager : BaseApiDataManager
                 Vector3 start = new Vector3(startList[0], 0, startList[1]);
                 Vector3 end = new Vector3(endList[0], 0, endList[1]);
                 Vector3 mid = (start + end) * 0.5f;
-                float groundHeight = Utils.GetGroundHeight(new Vector3(mid.x, 1000f, mid.z));
+                float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(mid.x, 1000f, mid.z));
                 iconPos = new Vector3(mid.x, groundHeight + plannedPathIconYOffset, mid.z);
             }
             else
@@ -4137,7 +4142,7 @@ public partial class PathManager : BaseApiDataManager
 
     /// <summary>
     /// Subdivide consecutive control points at fixed intervals.
-    /// When followTerrain=true, align intermediate Y values to terrain heights;
+    /// When followTerrain=true, align intermediate Y values to the reference surface (Utils.GetPathSurfaceHeight; water over water);
     /// otherwise linearly interpolate endpoint Y values to retain smooth slopes.
     /// </summary>
     public static List<Vector3> SubdividePointsWithTerrain(List<Vector3> controlPoints, float interval = TERRAIN_SAMPLE_INTERVAL, bool followTerrain = true)
@@ -4170,7 +4175,7 @@ public partial class PathManager : BaseApiDataManager
 
                         if (followTerrain)
                         {
-                            float groundHeight = Utils.GetGroundHeight(new Vector3(x, 1000f, z));
+                            float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(x, 1000f, z));
                             result.Add(new Vector3(x, groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET, z));
                         }
                         else
@@ -4217,11 +4222,11 @@ public partial class PathManager : BaseApiDataManager
     public Vector3 GetNodeSnapPosition(NodeData node)
     {
         Vector3 position = node.GetAbsolutePosition();
-        position.y = Utils.GetGroundHeight(position) + node.GetRelativeHeight();
+        position.y = Utils.GetPathSurfaceHeight(position) + node.GetRelativeHeight();
         foreach (var path in GetPathsConnectedToNode(node.node_id))
         {
             if (path.station_grade_profile == null || path.station_grade_profile.Count < 2) continue;
-            position.y = Utils.GetGroundHeight(position) + path.GetRelativeHeightAtPoint(position.x, position.z);
+            position.y = Utils.GetPathSurfaceHeight(position) + path.GetRelativeHeightAtPoint(position.x, position.z);
             return position;
         }
         return position;
@@ -4572,7 +4577,7 @@ public partial class PathManager : BaseApiDataManager
                     float wpRelY = (wp.position != null && wp.position.Length >= 3) ? wp.position[1] : 0f;
                     if (variantFollows && wpRelY == baseHeight)
                     {
-                        float groundHeight = Utils.GetGroundHeight(new Vector3(wpPos.x, 1000f, wpPos.z));
+                        float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(wpPos.x, 1000f, wpPos.z));
                         wpPos.y = groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET;
                     }
 
@@ -4584,7 +4589,7 @@ public partial class PathManager : BaseApiDataManager
                         float nextRelY = (waypointList[i + 1].position != null && waypointList[i + 1].position.Length >= 3) ? waypointList[i + 1].position[1] : 0f;
                         if (variantFollows && nextRelY == baseHeight)
                         {
-                            float groundHeight = Utils.GetGroundHeight(new Vector3(nextPos.x, 1000f, nextPos.z));
+                            float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(nextPos.x, 1000f, nextPos.z));
                             nextPos.y = groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET;
                         }
                     }
@@ -4771,7 +4776,7 @@ public partial class PathManager : BaseApiDataManager
     }
     /// <summary>
     /// Convert API endpoint controls [x, relative height, z] to absolute Unity coordinates.
-    /// Use terrain elevation beneath the associated anchor (start/end), not directly beneath the control.
+    /// Use the reference surface (Utils.GetPathSurfaceHeight) beneath the associated anchor (start/end), not directly beneath the control.
     /// Using terrain under control XZ leaks intermediate relief into curve Y,
     /// conflicting with the backend rule that non-following spans interpolate only anchor elevations
     /// (same reason as PathWaypoint.GetControlInAbsolute).
@@ -4783,14 +4788,14 @@ public partial class PathManager : BaseApiDataManager
         if (anchor == null || anchor.Count < 2) return null;
         float anchorX = anchor[0];
         float anchorZ = anchor[anchor.Count - 1];
-        float groundY = Utils.GetGroundHeight(new Vector3(anchorX, 1000f, anchorZ));
+        float groundY = Utils.GetPathSurfaceHeight(new Vector3(anchorX, 1000f, anchorZ));
         return new Vector3(control[0], groundY + control[1] - baseHeight, control[2]);
     }
 
     /// <summary>
     /// Sample a cubic Bezier segment at approximately 5m spacing.
     /// Include both endpoints in results.
-    /// When followTerrain=true, align each Y to terrain elevation;
+    /// When followTerrain=true, align each Y to the reference surface (Utils.GetPathSurfaceHeight);
     /// otherwise use cubic Bezier interpolation of control Y values unchanged to preserve 3D road geometry.
     /// </summary>
     private static List<Vector3> SampleBezierSegmentWithTerrain(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, bool followTerrain = true)
@@ -4810,7 +4815,7 @@ public partial class PathManager : BaseApiDataManager
 
             if (followTerrain)
             {
-                float groundHeight = Utils.GetGroundHeight(new Vector3(sampled.x, 1000f, sampled.z));
+                float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(sampled.x, 1000f, sampled.z));
                 result.Add(new Vector3(sampled.x, groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET, sampled.z));
             }
             else
@@ -5226,6 +5231,7 @@ public partial class PathManager : BaseApiDataManager
             if (oldPath != null)
             {
                 EnqueuePowerNeighbors(oldPath);
+                EnqueueSuspensionNeighbors(oldPath);
                 InvalidateTerrainFollowPath(oldPath);
                 EnqueuePillarNeighborRebuilds(oldPath, GetPathCoveredCellsCached(oldPath));
             }
@@ -5253,6 +5259,7 @@ public partial class PathManager : BaseApiDataManager
         if (changed)
         {
             EnqueuePowerNeighbors(path);
+            EnqueueSuspensionNeighbors(path);
             EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
         }
     }
@@ -5262,6 +5269,7 @@ public partial class PathManager : BaseApiDataManager
         if (pathDataCache.TryGetValue(pathId, out var path))
         {
             EnqueuePowerNeighbors(path);
+            EnqueueSuspensionNeighbors(path);
             InvalidateTerrainFollowPath(path);
             EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
             RemovePathFromNodeIndex(pathId, path.start_node_id, path.end_node_id);
@@ -5270,6 +5278,36 @@ public partial class PathManager : BaseApiDataManager
             DropUntrimmedPoints(pathId);
             ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Path, pathId);
         }
+    }
+
+    /// <summary>Other suspension bridges joined at the path's start/end node. They share the joint tower (SuspensionBridgeGenerator).</summary>
+    private List<PathSummary> GetSuspensionJoints(PathSummary path, bool start)
+    {
+        var joints = new List<PathSummary>();
+        int node = start ? path.start_node_id : path.end_node_id;
+        if (node <= 0) return joints;
+        foreach (var other in GetPathsConnectedToNode(node))
+            if (other.path_id != path.path_id && SuspensionBridgeGenerator.Handles(other)) joints.Add(other);
+        return joints;
+    }
+
+    /// <summary>Rebuild suspension bridges joined at this bridge's end nodes, since the joint tower's owner and height depend on both.</summary>
+    private void EnqueueSuspensionNeighbors(PathSummary path)
+    {
+        if (!SuspensionBridgeGenerator.Handles(path)) return;
+        foreach (bool start in new[] { true, false })
+            foreach (var neighbor in GetSuspensionJoints(path, start))
+                EnqueueNeighborRebuild(neighbor);
+    }
+
+    private void EnqueueNeighborRebuild(PathSummary neighbor)
+    {
+        bool added = pendingPillarRebuildIds.Add(neighbor.path_id);
+        pendingPillarRebuildSerials[neighbor.path_id] = pathBuildSerialCounter;
+        if (!added) return;
+        InvalidateTerrainFollowPath(neighbor);
+        geometryRevisions.TryGetValue(neighbor.path_id, out int revision);
+        geometryRevisions[neighbor.path_id] = revision + 1;
     }
 
     private void EnqueuePowerNeighbors(PathSummary path)
@@ -5287,13 +5325,8 @@ public partial class PathManager : BaseApiDataManager
             foreach (var neighbor in GetPathsConnectedToNode(node))
             {
                 if (neighbor.path_id == path.path_id || !PowerLinePath.Handles(neighbor)) continue;
-                bool added = pendingPillarRebuildIds.Add(neighbor.path_id);
-                pendingPillarRebuildSerials[neighbor.path_id] = pathBuildSerialCounter;
                 pendingPowerRebuildIds.Add(neighbor.path_id);
-                if (!added) continue;
-                InvalidateTerrainFollowPath(neighbor);
-                geometryRevisions.TryGetValue(neighbor.path_id, out int revision);
-                geometryRevisions[neighbor.path_id] = revision + 1;
+                EnqueueNeighborRebuild(neighbor);
             }
     }
 
@@ -6121,13 +6154,13 @@ public partial class PathManager : BaseApiDataManager
         if (point.Count >= 3)
         {
             Vector3 scaledPos = new Vector3(point[0], point[1], point[2]);
-                float groundHeight = Utils.GetGroundHeight(new Vector3(scaledPos.x, 1000f, scaledPos.z));
+                float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(scaledPos.x, 1000f, scaledPos.z));
                 return new Vector3(scaledPos.x, groundHeight + scaledPos.y + RoadPartHeights.ROAD_SPLINE_OFFSET, scaledPos.z);
         }
         else
         {
             Vector3 pos = new Vector3(point[0], 1000.0f, point[1]);
-            pos.y = Utils.GetGroundHeight(pos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            pos.y = Utils.GetPathSurfaceHeight(pos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
             return pos;
         }
     }
@@ -6272,7 +6305,7 @@ public class NodeData
         }
         else
         {
-            float groundHeight = Utils.GetGroundHeight(new Vector3(position[0], 1000f, position[1]));
+            float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(position[0], 1000f, position[1]));
             return new Vector3(position[0], groundHeight, position[1]);
         }
     }
@@ -6290,7 +6323,7 @@ public class NodeData
     {
         if (position.Length >= 3)
         {
-            float groundHeight = Utils.GetGroundHeight(new Vector3(position[0], 1000f, position[2]));
+            float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(position[0], 1000f, position[2]));
             return new Vector3(position[0], groundHeight + position[1], position[2]);
         }
         else
@@ -6325,7 +6358,7 @@ public class PathWaypoint
         }
         else
         {
-            float groundHeight = Utils.GetGroundHeight(new Vector3(position[0], 1000f, position[1]));
+            float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(position[0], 1000f, position[1]));
             return new Vector3(position[0], groundHeight, position[1]);
         }
     }
@@ -6343,7 +6376,7 @@ public class PathWaypoint
     {
         if (position.Length >= 3)
         {
-            float groundHeight = Utils.GetGroundHeight(new Vector3(position[0], 1000f, position[2]));
+            float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(position[0], 1000f, position[2]));
             return new Vector3(position[0], groundHeight + position[1], position[2]);
         }
         else
@@ -6353,8 +6386,8 @@ public class PathWaypoint
     }
 
     /// <summary>
-    /// Return terrain elevation beneath the associated anchor (this waypoint).
-    /// Absolute control coordinates use the anchor's terrain rather than terrain under control XZ.
+    /// Return the reference surface (Utils.GetPathSurfaceHeight) beneath the associated anchor (this waypoint).
+    /// Absolute control coordinates use the anchor's surface rather than the surface under control XZ.
     /// Using terrain beneath control XZ leaks intermediate cuts/hills into the curve,
     /// conflicting with backend non-following-span interpolation based only on absolute anchor elevations
     /// (geo_path_depth.sample_absolute_path_points).
@@ -6363,13 +6396,13 @@ public class PathWaypoint
     {
         float x = position[0];
         float z = position.Length >= 3 ? position[2] : position[1];
-        return Utils.GetGroundHeight(new Vector3(x, 1000f, z));
+        return Utils.GetPathSurfaceHeight(new Vector3(x, 1000f, z));
     }
 
     /// <summary>
     /// Return absolute coordinates of the incoming control.
     /// Convert backend [x, relativeY, z] into absolute Unity coordinates
-    /// (terrain reference is the associated anchor; see GetAnchorGroundHeight).
+    /// (the reference surface is the associated anchor's; see GetAnchorGroundHeight).
     /// Return null if control_in is unset.
     /// </summary>
     public Vector3? GetControlInAbsolute()
@@ -6382,7 +6415,7 @@ public class PathWaypoint
     /// <summary>
     /// Return absolute coordinates of the outgoing control.
     /// Convert backend [x, relativeY, z] into absolute Unity coordinates
-    /// (terrain reference is the associated anchor; see GetAnchorGroundHeight).
+    /// (the reference surface is the associated anchor's; see GetAnchorGroundHeight).
     /// Return null if control_out is unset.
     /// </summary>
     public Vector3? GetControlOutAbsolute()

@@ -677,7 +677,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             {
                 // Build snap positions from design elevation or node relative Y, excluding render Y.
                 snappedToElevatable = true;
-                snapRelHeight = snappedPos.y - Utils.GetGroundHeight(snappedPos);
+                snapRelHeight = snappedPos.y - Utils.GetPathSurfaceHeight(snappedPos);
                 return snappedPos;
             }
 
@@ -908,7 +908,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 float sx = startList[0];
                 float sz = startList[startList.Count - 1];
                 float sRel = path.GetRelativeHeightAtPoint(sx, sz);
-                float sy = Utils.GetGroundHeight(new Vector3(sx, 0f, sz)) + sRel;
+                float sy = Utils.GetPathSurfaceHeight(new Vector3(sx, 0f, sz)) + sRel;
                 Vector3 startPos = new Vector3(sx, sy, sz);
                 float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(sx, sz));
                 if (dist < minDist && dist <= threshold
@@ -927,7 +927,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 float ex = endList[0];
                 float ez = endList[endList.Count - 1];
                 float eRel = path.GetRelativeHeightAtPoint(ex, ez);
-                float ey = Utils.GetGroundHeight(new Vector3(ex, 0f, ez)) + eRel;
+                float ey = Utils.GetPathSurfaceHeight(new Vector3(ex, 0f, ez)) + eRel;
                 Vector3 endPos = new Vector3(ex, ey, ez);
                 float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(ex, ez));
                 if (dist < minDist && dist <= threshold

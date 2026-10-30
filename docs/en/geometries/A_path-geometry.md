@@ -4,7 +4,7 @@ This page defines path shape data and the conventions that give Unity and the co
 
 ## Coordinates and heights
 
-Path points are `[x, y, z]` in meters. Y is **height relative to the ground**, not absolute elevation. An anchor's Y (`start_point`, `end_point`, or waypoint `position`) is measured from the ground beneath that anchor. A control point's Y is measured from the ground beneath its owning anchor, rather than beneath the control point itself. Using the latter would introduce intermediate terrain relief into the curve and disagree with the core.
+Path points are `[x, y, z]` in meters. Y is **height relative to the reference surface**, not absolute elevation. The reference surface is the water surface over sea and lake water (classified as in [path intersections](J_path-intersections.md)) and the ground elsewhere, including rivers. An anchor's Y (`start_point`, `end_point`, or waypoint `position`) is measured from the reference surface beneath that anchor. A control point's Y is measured from the reference surface beneath its owning anchor, rather than beneath the control point itself. Using the latter would introduce intermediate terrain relief into the curve and disagree with the core. Over water, pier lengths and tunnel depths are still taken from the ground at the bed; the reference surface only sets where Y is measured from.
 
 Surface, elevated, and underground sections are determined by anchor Y, rather than variant, and can coexist in one path. Y is editable only for variants with `path_master.height_editable`; negative Y requires a negative `min_height`. Y specifies elevation or underground placement. Surface road height adjustments, fill, and excavation belong to terrain earthworks and are not written into Y. Excavating a cutting is an exception: anchor Y is adjusted to preserve absolute elevation.
 
@@ -23,7 +23,7 @@ When an endpoint joins an existing path, generated endpoint controls align with 
 
 ## Terrain following (`follow_terrain`)
 
-A span follows terrain only when both anchor Y values are zero and terrain following is enabled. Other spans interpolate anchors and controls converted to absolute elevations using their owning anchors' ground heights, ignoring intermediate terrain. Straight paths interpolate linearly between absolute endpoint elevations.
+A span follows the reference surface only when both anchor Y values are zero and terrain following is enabled. Other spans interpolate anchors and controls converted to absolute elevations using their owning anchors' reference surfaces, ignoring intermediate terrain. Straight paths interpolate linearly between absolute endpoint elevations.
 
 The path's `follow_terrain` controls this behavior; -1 means use `path_master.follow_terrain`. Non-following paths can form bridges over valleys or cuttings and tunnels through hills even with Y zero.
 

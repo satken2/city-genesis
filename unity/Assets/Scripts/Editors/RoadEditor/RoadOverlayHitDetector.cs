@@ -54,7 +54,7 @@ public class RoadOverlayHitDetector
             if (points[i].control_out.HasValue)
             {
                 Vector3 coWorld = points[i].control_out.Value;
-                coWorld.y = Utils.GetGroundHeight(coWorld);
+                coWorld.y = Utils.GetPathSurfaceHeight(coWorld);
                 Vector2 coScreen = cam.WorldToScreenPoint(coWorld);
                 if (Vector2.Distance(mouseScreen, coScreen) < pointHitRadius)
                 {
@@ -65,7 +65,7 @@ public class RoadOverlayHitDetector
             if (points[i].control_in.HasValue)
             {
                 Vector3 ciWorld = points[i].control_in.Value;
-                ciWorld.y = Utils.GetGroundHeight(ciWorld);
+                ciWorld.y = Utils.GetPathSurfaceHeight(ciWorld);
                 Vector2 ciScreen = cam.WorldToScreenPoint(ciWorld);
                 if (Vector2.Distance(mouseScreen, ciScreen) < pointHitRadius)
                 {
@@ -78,7 +78,7 @@ public class RoadOverlayHitDetector
         for (int i = 0; i < points.Count; i++)
         {
             Vector3 ptWorld = points[i].position;
-            ptWorld.y = Utils.GetGroundHeight(ptWorld);
+            ptWorld.y = Utils.GetPathSurfaceHeight(ptWorld);
             Vector2 vScreen = cam.WorldToScreenPoint(ptWorld);
             if (Vector2.Distance(mouseScreen, vScreen) < pointHitRadius)
             {
@@ -90,9 +90,9 @@ public class RoadOverlayHitDetector
         for (int i = 0; i < points.Count - 1; i++)
         {
             Vector3 p1World = points[i].position;
-            p1World.y = Utils.GetGroundHeight(p1World);
+            p1World.y = Utils.GetPathSurfaceHeight(p1World);
             Vector3 p2World = points[i + 1].position;
-            p2World.y = Utils.GetGroundHeight(p2World);
+            p2World.y = Utils.GetPathSurfaceHeight(p2World);
 
             Vector2 s1 = cam.WorldToScreenPoint(p1World);
             Vector2 s2 = cam.WorldToScreenPoint(p2World);

@@ -162,8 +162,8 @@ public partial class RoadPlanManager
             for (int i = 0; i < result.Count; i++)
             {
                 var seg = result[i];
-                seg.absYA = Utils.GetGroundHeight(seg.a) + path.GetRelativeHeightAtPoint(seg.a.x, seg.a.z);
-                seg.absYB = Utils.GetGroundHeight(seg.b) + path.GetRelativeHeightAtPoint(seg.b.x, seg.b.z);
+                seg.absYA = Utils.GetPathSurfaceHeight(seg.a) + path.GetRelativeHeightAtPoint(seg.a.x, seg.a.z);
+                seg.absYB = Utils.GetPathSurfaceHeight(seg.b) + path.GetRelativeHeightAtPoint(seg.b.x, seg.b.z);
                 seg.follows = false;
                 result[i] = seg;
             }
@@ -179,7 +179,7 @@ public partial class RoadPlanManager
         PathBuildPoint RestorePoint(int index)
         {
             Vector3 position = anchors[index];
-            position.y += Utils.GetGroundHeight(position);
+            position.y += Utils.GetPathSurfaceHeight(position);
             var point = new PathBuildPoint(position, PathPointRole.Waypoint);
             if (controlsOut[index].HasValue)
             {
@@ -451,30 +451,6 @@ public partial class RoadPlanManager
     }
 
     /// <summary>
-    /// Whether (x, z) is over water by the backend's definition (geo_sea_lake): outside land and rivers, with terrain below
-    /// the water level (the lake level inside a lake footprint, otherwise sea level 0). Callers check city bounds.
-    /// </summary>
-    private static bool IsOnWater(float x, float z, float terrainY, out float waterY)
-    {
-        var lake = WaterSurfaceStore.FindAt(x, z);
-        waterY = lake != null ? lake.Level : 0f;
-        return terrainY < waterY && RiverStore.FindAt(x, z) == null && !CoastlineStore.IsLand(x, z);
-    }
-
-    /// <summary>
-    /// Surface that relative height 0 refers to while placing. Variants without height editing that may be laid on water (ferries)
-    /// sit on the water surface there, as the backend normalizes them (crud_paths._normalize_path_elevations); otherwise the ground.
-    /// </summary>
-    private float PlacementSurfaceY(Vector3 p)
-    {
-        float ground = Utils.GetGroundHeight(p);
-        if (!CoastlineStore.HasCoastline || IsHeightEditable()) return ground;
-        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(PathSubtype) : null;
-        if (master == null || !master.over_water_allowed) return ground;
-        return IsOnWater(p.x, p.z, ground, out float waterY) ? waterY : ground;
-    }
-
-    /// <summary>
     /// Locally checks whether the edited path crosses sea/lakes at ground level.
     ///
     /// Same rules as backend geo_sea_lake.validate_path_sea_lake_crossings:
@@ -483,7 +459,8 @@ public partial class RoadPlanManager
     /// Over water means inside city bounds, outside land (CoastlineStore), and terrain below water level. Water elevation
     /// is the lake level inside a lake footprint (WaterSurfaceStore), otherwise sea level 0. Simplified coastlines
     /// may differ from the shoreline by several metres; without the terrain condition, roads on dry shores would be rejected.
-    /// CheckRiverCrossings handles rivers. Excludes infrastructure and over_water_allowed variants.
+    /// CheckRiverCrossings handles rivers. Excludes infrastructure (may lie on the bed) and ferries (sit on the water surface);
+    /// suspension bridges with anchors on water (over_water_allowed) are checked like any other bridge.
     ///
     /// Sampling matches CheckRiverCrossings. Returns short surface sections of one sample interval centered on violating points
     /// (absolute coordinates), used to draw occupied boxes.
@@ -495,10 +472,7 @@ public partial class RoadPlanManager
 
         var violations = new List<(Vector3 a, Vector3 b)>();
         cachedSeaLakeViolations = violations;
-        if (!CoastlineStore.HasCoastline || points.Count < 2 || InfraNetworkUtil.IsInfraPathType(PathType))
-            return violations;
-        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(PathSubtype) : null;
-        if (master != null && master.over_water_allowed)
+        if (!CoastlineStore.HasCoastline || points.Count < 2 || InfraNetworkUtil.IsInfraPathType(PathType) || PathType == Constants.PATH_FERRY)
             return violations;
         if (terrainManager == null) terrainManager = FindAnyObjectByType<TerrainManager>();
         // Skip until city bounds are known, since sea cannot be distinguished from outside the city (backend is authoritative).
@@ -511,7 +485,7 @@ public partial class RoadPlanManager
         {
             float x = Mathf.Lerp(seg.a.x, seg.b.x, t);
             float z = Mathf.Lerp(seg.a.z, seg.b.z, t);
-            float y = seg.HeightAt(t, true, Utils.GetGroundHeight(new Vector3(x, 0f, z)));
+            float y = seg.HeightAt(t, true, Utils.GetPathSurfaceHeight(new Vector3(x, 0f, z)));
             return new Vector3(x, y, z);
         }
 
@@ -529,8 +503,8 @@ public partial class RoadPlanManager
                 float z = seg.a.z + dz * t;
                 if (Mathf.Abs(x) > halfW || Mathf.Abs(z) > halfH) continue;
                 float terrainY = Utils.GetGroundHeight(new Vector3(x, 0f, z));
-                if (!IsOnWater(x, z, terrainY, out float waterY)) continue;
-                float roadY = seg.HeightAt(t, true, terrainY);
+                if (!Utils.IsOnWater(x, z, terrainY, out float waterY)) continue;
+                float roadY = seg.HeightAt(t, true, waterY);
                 if (terrainY - roadY > clearance) continue; // Fully buried tunnel
                 if (roadY >= waterY + Constants.WATER_BRIDGE_MIN_CLEARANCE) continue; // Bridge
                 float half = 0.5f / steps;

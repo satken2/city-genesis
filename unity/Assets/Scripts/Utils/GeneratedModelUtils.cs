@@ -298,7 +298,7 @@ public static class PathSummaryExtensions
         if (p.station_grade_profile != null && p.station_grade_profile.Count >= 2)
         {
             var profile = p.GetStationGradeProfile();
-            return PathManager.EvaluateStationGrade(profile, new Vector3(x, 0f, z)) - Utils.GetGroundHeight(new Vector3(x, 0f, z));
+            return PathManager.EvaluateStationGrade(profile, new Vector3(x, 0f, z)) - Utils.GetPathSurfaceHeight(new Vector3(x, 0f, z));
         }
 
         var anchorX = new List<float>();

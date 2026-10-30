@@ -103,7 +103,7 @@ public partial class RoadPlanManager
         {
             foreach (var pt in points)
             {
-                if (pt.position.y - Utils.GetGroundHeight(pt.position) < -TunnelSectionUtil.UNDERGROUND_REL_Y_EPS)
+                if (pt.position.y - Utils.GetPathSurfaceHeight(pt.position) < -TunnelSectionUtil.UNDERGROUND_REL_Y_EPS)
                 {
                     underground = true;
                     break;
@@ -190,8 +190,8 @@ public partial class RoadPlanManager
 
             Vector3 sA = seg.a;
             Vector3 sB = seg.b;
-            sA.y = Utils.GetGroundHeight(sA) + 0.05f;
-            sB.y = Utils.GetGroundHeight(sB) + 0.05f;
+            sA.y = Utils.GetPathSurfaceHeight(sA) + 0.05f;
+            sB.y = Utils.GetPathSurfaceHeight(sB) + 0.05f;
 
             // Cull behind the near plane.
             if (Vector3.Dot(sA - camPos, camFwd) < 0f && Vector3.Dot(sB - camPos, camFwd) < 0f)
@@ -361,7 +361,7 @@ public partial class RoadPlanManager
     {
         Vector3 lastPos = points[points.Count - 1].position;
         Vector3 hoverPos = hoverWorldPosition;
-        hoverPos.y = PlacementSurfaceY(hoverPos) + currentHeight;
+        hoverPos.y = Utils.GetPathSurfaceHeight(hoverPos) + currentHeight;
 
         Color previewColor = new Color(0.3f, 0.6f, 1f, 0.5f);
         overlayRenderer.AddDashedLine(lastPos, hoverPos, previewColor, dashedLineThickness);
@@ -376,7 +376,7 @@ public partial class RoadPlanManager
     private void DrawPlacingMarker(Camera cam)
     {
         Vector3 markerPos = hoverWorldPosition;
-        markerPos.y = Utils.GetGroundHeight(markerPos);
+        markerPos.y = Utils.GetPathSurfaceHeight(markerPos);
 
         if (Vector3.Dot(markerPos - cam.transform.position, cam.transform.forward) < 0f)
             return;
@@ -398,7 +398,7 @@ public partial class RoadPlanManager
         for (int i = 0; i < points.Count; i++)
         {
             Vector3 groundPos = points[i].position;
-            groundPos.y = Utils.GetGroundHeight(groundPos);
+            groundPos.y = Utils.GetPathSurfaceHeight(groundPos);
 
             if (Vector3.Dot(groundPos - camPos, camFwd) < 0f) continue;
 
@@ -446,13 +446,13 @@ public partial class RoadPlanManager
         for (int i = 0; i < points.Count; i++)
         {
             Vector3 anchorGround = points[i].position;
-            anchorGround.y = Utils.GetGroundHeight(anchorGround);
+            anchorGround.y = Utils.GetPathSurfaceHeight(anchorGround);
 
             // Outgoing control (control_out)
             if (points[i].control_out.HasValue)
             {
                 Vector3 coGround = points[i].control_out.Value;
-                coGround.y = Utils.GetGroundHeight(coGround);
+                coGround.y = Utils.GetPathSurfaceHeight(coGround);
 
                 if (Vector3.Dot(anchorGround - camPos, camFwd) >= 0f || Vector3.Dot(coGround - camPos, camFwd) >= 0f)
                 {
@@ -465,7 +465,7 @@ public partial class RoadPlanManager
             if (points[i].control_in.HasValue)
             {
                 Vector3 ciGround = points[i].control_in.Value;
-                ciGround.y = Utils.GetGroundHeight(ciGround);
+                ciGround.y = Utils.GetPathSurfaceHeight(ciGround);
 
                 if (Vector3.Dot(anchorGround - camPos, camFwd) >= 0f || Vector3.Dot(ciGround - camPos, camFwd) >= 0f)
                 {
@@ -485,9 +485,9 @@ public partial class RoadPlanManager
         if (hoveredEdgeIndex < 0 || hoveredEdgeIndex >= points.Count - 1) return;
 
         Vector3 p1Ground = points[hoveredEdgeIndex].position;
-        p1Ground.y = Utils.GetGroundHeight(p1Ground);
+        p1Ground.y = Utils.GetPathSurfaceHeight(p1Ground);
         Vector3 p2Ground = points[hoveredEdgeIndex + 1].position;
-        p2Ground.y = Utils.GetGroundHeight(p2Ground);
+        p2Ground.y = Utils.GetPathSurfaceHeight(p2Ground);
 
         if (Vector3.Dot(p1Ground - cam.transform.position, cam.transform.forward) < 0f
             && Vector3.Dot(p2Ground - cam.transform.position, cam.transform.forward) < 0f)
@@ -524,9 +524,9 @@ public partial class RoadPlanManager
 
         // Two extension reference points (projected onto terrain height)
         Vector3 anchor = straightLineSnapAnchor;
-        anchor.y = Utils.GetGroundHeight(anchor);
+        anchor.y = Utils.GetPathSurfaceHeight(anchor);
         Vector3 ext = straightLineSnapExtension;
-        ext.y = Utils.GetGroundHeight(ext);
+        ext.y = Utils.GetPathSurfaceHeight(ext);
 
         // Draw the extension sufficiently long.
         Vector3 dir = new Vector3(anchor.x - ext.x, 0f, anchor.z - ext.z);
@@ -535,9 +535,9 @@ public partial class RoadPlanManager
 
         // Extend the reference segment 50m on each side.
         Vector3 guideStart = anchor - dir * 50f;
-        guideStart.y = Utils.GetGroundHeight(guideStart);
+        guideStart.y = Utils.GetPathSurfaceHeight(guideStart);
         Vector3 guideEnd = anchor + dir * 50f;
-        guideEnd.y = Utils.GetGroundHeight(guideEnd);
+        guideEnd.y = Utils.GetPathSurfaceHeight(guideEnd);
 
         if (Vector3.Dot(guideStart - cam.transform.position, cam.transform.forward) >= 0f
             || Vector3.Dot(guideEnd - cam.transform.position, cam.transform.forward) >= 0f)
@@ -547,7 +547,7 @@ public partial class RoadPlanManager
 
         // Marker at the snap position
         Vector3 snappedPos = straightLineSnapSnappedPos;
-        snappedPos.y = Utils.GetGroundHeight(snappedPos);
+        snappedPos.y = Utils.GetPathSurfaceHeight(snappedPos);
         if (Vector3.Dot(snappedPos - cam.transform.position, cam.transform.forward) >= 0f)
         {
             overlayRenderer.AddCircle(snappedPos, pointCircleRadius * 1.2f, markerColor);
@@ -568,7 +568,7 @@ public partial class RoadPlanManager
         Color markerColor = new Color(0.65f, 0.89f, 0.63f, 0.8f);   // Green marker
 
         Vector3 origin = rightAngleSnapOrigin;
-        origin.y = Utils.GetGroundHeight(origin);
+        origin.y = Utils.GetPathSurfaceHeight(origin);
 
         // Draw a small cross at the snap reference (convert pixel length to world space).
         if (Vector3.Dot(origin - cam.transform.position, cam.transform.forward) >= 0f)
@@ -583,9 +583,9 @@ public partial class RoadPlanManager
 
         // Draw a dashed line from the original mouse position to the snapped position.
         Vector3 targetPos = rightAngleSnapTarget;
-        targetPos.y = Utils.GetGroundHeight(targetPos);
+        targetPos.y = Utils.GetPathSurfaceHeight(targetPos);
         Vector3 snappedPos = rightAngleSnapSnappedPos;
-        snappedPos.y = Utils.GetGroundHeight(snappedPos);
+        snappedPos.y = Utils.GetPathSurfaceHeight(snappedPos);
 
         if (Vector3.Dot(targetPos - cam.transform.position, cam.transform.forward) >= 0f
             || Vector3.Dot(snappedPos - cam.transform.position, cam.transform.forward) >= 0f)

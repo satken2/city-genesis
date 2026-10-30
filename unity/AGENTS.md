@@ -18,7 +18,7 @@ City Genesis の3D描画と入力を担当する Unity プロジェクト。都�
 ## 共通ルール
 
 - ワールド原点はマップ中心、東は +X、北は +Z。パス・ノードの相対Yと絶対標高、Unity とコアのセル番号を混同せず、既存の変換を使う。原点シフトは行わない。
-- 地形高さは `Utils.GetGroundHeight` を使う。形状・高さ・接続の共有計算を各利用側で再実装しない。
+- 地形高さは `Utils.GetGroundHeight`、パス・ノードの相対Yの基準面(水の上は水面)は `Utils.GetPathSurfaceHeight` を使う。形状・高さ・接続の共有計算を各利用側で再実装しない。
 - HTTP は `ApiClient`、UI連携は共通 IPC を通す。`UnityWebRequest` を直接作らない。
 - 入力モードと表示モードは別の責務。編集時の切り替えは共通のステート・表示管理を通す。
 - 実体の識別は `ObjectIdInfo` を使い、GameObject 名を解析しない。クリック対象のコライダー・タグ・入力ハンドラを整合させる。

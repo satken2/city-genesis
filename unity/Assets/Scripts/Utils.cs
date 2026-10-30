@@ -12,6 +12,7 @@ public static class Utils
     /// Rounding nearby coordinates would make slope heights depend on query order.
     /// </summary>
     private static Dictionary<Vector2, float> heightCache = new Dictionary<Vector2, float>();
+    private static Dictionary<Vector2, float> surfaceCache = new Dictionary<Vector2, float>(); // GetPathSurfaceHeight, same lifetime as heightCache
     private static int cacheFrame = -1;
 
     /// <summary>
@@ -45,6 +46,7 @@ public static class Utils
     {
         cacheFrame = -1;
         heightCache.Clear();
+        surfaceCache.Clear();
     }
 
     /// <summary>
@@ -58,6 +60,7 @@ public static class Utils
         if (frame != cacheFrame)
         {
             heightCache.Clear();
+            surfaceCache.Clear();
             cacheFrame = frame;
         }
 
@@ -70,6 +73,36 @@ public static class Utils
         float groundHeight = ComputeGroundHeight(position);
         heightCache[key] = groundHeight;
         return groundHeight;
+    }
+
+    /// <summary>
+    /// Reference surface that path and node relative Y is measured from: the water surface over water, otherwise
+    /// <see cref="GetGroundHeight"/> (same rule as backend geo_sea_lake.surface_elevations). Measure from GetGroundHeight
+    /// instead for anything about the terrain itself (tunnel depth, pillars and foundations, earthwork).
+    /// </summary>
+    public static float GetPathSurfaceHeight(Vector3 position)
+    {
+        float ground = GetGroundHeight(position);
+        var key = new Vector2(position.x, position.z);
+        if (surfaceCache.TryGetValue(key, out float cached)) return cached;
+        float surface = IsOnWater(position.x, position.z, ground, out float waterY) ? waterY : ground;
+        surfaceCache[key] = surface;
+        return surface;
+    }
+
+    /// <summary>
+    /// Whether (x, z) is over water by the backend's definition (geo_sea_lake): inside the city, outside land and rivers, with
+    /// ground below the water level (the lake level inside a lake footprint, otherwise sea level 0). Rivers have their own check.
+    /// </summary>
+    public static bool IsOnWater(float x, float z, float groundY, out float waterY)
+    {
+        var lake = WaterSurfaceStore.FindAt(x, z);
+        waterY = lake != null ? lake.Level : 0f;
+        if (groundY >= waterY || !CoastlineStore.HasCoastline) return false;
+        // Outside the city there is no coastline data to tell sea from land.
+        if (cachedTerrainManager == null || !cachedTerrainManager.HasTerrainSettings) return false;
+        if (Mathf.Abs(x) > cachedTerrainManager.GetMapWidth() * 0.5f || Mathf.Abs(z) > cachedTerrainManager.GetMapHeight() * 0.5f) return false;
+        return RiverStore.FindAt(x, z) == null && !CoastlineStore.IsLand(x, z);
     }
 
     /// <summary>

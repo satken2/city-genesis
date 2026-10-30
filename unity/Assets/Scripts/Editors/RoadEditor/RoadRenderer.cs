@@ -252,8 +252,8 @@ public partial class RoadRenderer : MonoBehaviour
     {
         Vector3 startPos = componentPoints[0];
         Vector3 endPos = componentPoints[componentPoints.Count - 1];
-        float startGroundY = Utils.GetGroundHeight(startPos);
-        float endGroundY = Utils.GetGroundHeight(endPos);
+        float startGroundY = Utils.GetPathSurfaceHeight(startPos);
+        float endGroundY = Utils.GetPathSurfaceHeight(endPos);
         float startRelY = startPos.y - startGroundY;
         float endRelY = endPos.y - endGroundY;
 
@@ -263,7 +263,7 @@ public partial class RoadRenderer : MonoBehaviour
             for (int i = 1; i < componentPoints.Count - 1; i++)
             {
                 Vector3 wpPos = componentPoints[i];
-                float wpGroundY = Utils.GetGroundHeight(wpPos);
+                float wpGroundY = Utils.GetPathSurfaceHeight(wpPos);
                 float wpRelY = wpPos.y - wpGroundY;
                 // GetWaypointList reads only {position:[x,relY,z]} dictionaries (raw arrays are silently discarded).
                 waypointsList.Add(new Dictionary<string, object> { ["position"] = new List<object> { (object)wpPos.x, (object)wpRelY, (object)wpPos.z } });

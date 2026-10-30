@@ -45,7 +45,7 @@ public partial class RoadPlanManager
         if (phase != RoadEditorPhase.Placing) return;
         Vector3 position = ApplySnapping(worldPos);
         if (points.Count == 2) position = ConstrainGridCorner(position);
-        position.y = Utils.GetGroundHeight(position);
+        position.y = Utils.GetPathSurfaceHeight(position);
         var role = points.Count == 0 ? PathPointRole.Start
             : points.Count == 1 ? PathPointRole.Waypoint : PathPointRole.End;
         points.Add(new PathBuildPoint(position, role));
@@ -156,7 +156,7 @@ public partial class RoadPlanManager
         {
             Vector2 p = Vector2.Lerp(a, b, (float)i / steps);
             var position = new Vector3(p.x, 0f, p.y);
-            position.y = Utils.GetGroundHeight(position) + lift;
+            position.y = Utils.GetPathSurfaceHeight(position) + lift;
             line.Add(position);
         }
         return line;

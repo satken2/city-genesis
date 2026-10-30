@@ -129,7 +129,7 @@ public partial class RoadPlanManager
                 // Project within the segment (0 <= t <= segLen).
                 t = Mathf.Clamp(t, 0f, segLen);
                 Vector3 projected = prev + segDirNorm * t;
-                projected.y = Utils.GetGroundHeight(projected);
+                projected.y = Utils.GetPathSurfaceHeight(projected);
                 float dist = Vector2.Distance(
                     new Vector2(basePos.x, basePos.z),
                     new Vector2(projected.x, projected.z)
@@ -180,7 +180,7 @@ public partial class RoadPlanManager
         Vector3 toBase = new Vector3(basePos.x - extA.x, 0f, basePos.z - extA.z);
         float t = Vector3.Dot(toBase, dirNorm);
         Vector3 projected = extA + dirNorm * t;
-        projected.y = Utils.GetGroundHeight(projected);
+        projected.y = Utils.GetPathSurfaceHeight(projected);
 
         float dist = Vector2.Distance(
             new Vector2(basePos.x, basePos.z),
@@ -369,7 +369,7 @@ public partial class RoadPlanManager
 
         // Snapped position = anchor + perpDir * projLen
         Vector3 snapped = anchor + perpDir * projLen;
-        snapped.y = Utils.GetGroundHeight(snapped);
+        snapped.y = Utils.GetPathSurfaceHeight(snapped);
         // Right-angle snapping flattens Y to ground, so disable elevated height inheritance.
         lastSnapWasElevated = false;
 
@@ -507,7 +507,7 @@ public partial class RoadPlanManager
                                 // (candidate + shift), avoiding noisy inversion of rendered Y minus terrain samples.
                                 snapRelHeight = seg.path != null
                                     ? seg.path.GetRelativeHeightAtPoint(candidate.x + shift.x, candidate.z + shift.z)
-                                        + Utils.GetGroundHeight(candidate + shift) - Utils.GetGroundHeight(candidate)
+                                        + Utils.GetPathSurfaceHeight(candidate + shift) - Utils.GetPathSurfaceHeight(candidate)
                                     : 0f;
                                 found = true;
                             }
@@ -588,7 +588,7 @@ public partial class RoadPlanManager
                     bestDist = dist;
                     candidate.y = targetPos.y;
                     bestPos = candidate;
-                    bestRelHeight = candidate.y - Utils.GetGroundHeight(candidate);
+                    bestRelHeight = candidate.y - Utils.GetPathSurfaceHeight(candidate);
                     found = true;
                 }
             }
@@ -626,7 +626,7 @@ public partial class RoadPlanManager
         float z = pointList[pointList.Count - 1];
         float rel = path.GetRelativeHeightAtPoint(x, z);
         if (Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(x, z)) > searchRadius) return;
-        Vector3 endpoint = new Vector3(x, Utils.GetGroundHeight(new Vector3(x, 0f, z)) + rel, z);
+        Vector3 endpoint = new Vector3(x, Utils.GetPathSurfaceHeight(new Vector3(x, 0f, z)) + rel, z);
         if (!TerrainInputHandler.IsPathSnapPointVisible(path, endpoint)) return;
         EvaluatePointTargetOffsetCandidates(basePos, endpoint, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
     }

@@ -175,7 +175,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             if (!roadPlanManager.IsEditMode)
             {
                 Vector3 terrainClickPosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
-                terrainClickPosition.y = Utils.GetGroundHeight(new Vector3(terrainClickPosition.x, 1000f, terrainClickPosition.z));
+                terrainClickPosition.y = Utils.GetPathSurfaceHeight(new Vector3(terrainClickPosition.x, 1000f, terrainClickPosition.z));
 
                 Debug.Log($"道路敷設モード: パス上の右クリックを地形右クリックとして転送 {terrainClickPosition}");
                 roadPlanManager.OnTerrainRightClick(terrainClickPosition);
@@ -244,7 +244,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
         if (roadPlanManager != null)
         {
             Vector3 terrainClickPosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
-            terrainClickPosition.y = Utils.GetGroundHeight(new Vector3(terrainClickPosition.x, 1000f, terrainClickPosition.z));
+            terrainClickPosition.y = Utils.GetPathSurfaceHeight(new Vector3(terrainClickPosition.x, 1000f, terrainClickPosition.z));
             roadPlanManager.OnTerrainLeftClick(terrainClickPosition);
         }
     }

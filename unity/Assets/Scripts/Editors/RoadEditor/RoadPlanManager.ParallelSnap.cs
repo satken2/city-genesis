@@ -159,7 +159,7 @@ public partial class RoadPlanManager
         if (parallelSnapActive)
         {
             Vector3 marker = parallelGuidePosition;
-            marker.y = Utils.GetGroundHeight(marker);
+            marker.y = Utils.GetPathSurfaceHeight(marker);
             overlayRenderer.AddCircle(marker, pointCircleRadius * 1.2f, new Color(0.7f, 1f, 0.4f, 0.9f));
         }
     }
@@ -168,12 +168,12 @@ public partial class RoadPlanManager
     {
         // Make long guides follow terrain too. Do not derive actual road elevation from these drawing coordinates.
         int count = Mathf.Clamp(Mathf.CeilToInt(RoadParallelSnapGeometry.DistanceXZ(a, b) / 10), 1, 256);
-        a.y = Utils.GetGroundHeight(a);
+        a.y = Utils.GetPathSurfaceHeight(a);
         Vector3 previous = a;
         for (int i = 1; i <= count; i++)
         {
             Vector3 next = Vector3.Lerp(a, b, (float)i / count);
-            next.y = Utils.GetGroundHeight(next);
+            next.y = Utils.GetPathSurfaceHeight(next);
             overlayRenderer.AddDashedLine(previous, next, color, 1.5f);
             previous = next;
         }

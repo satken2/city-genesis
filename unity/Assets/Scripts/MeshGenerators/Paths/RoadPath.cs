@@ -1307,7 +1307,7 @@ public class RoadPath : IPathMeshGenerator
                 float wpRelY = (wp.position != null && wp.position.Length >= 3) ? wp.position[1] : 0f;
                 if (wpRelY == 0f)
                 {
-                    float groundHeight = Utils.GetGroundHeight(new Vector3(wpPos.x, 1000f, wpPos.z));
+                    float groundHeight = Utils.GetPathSurfaceHeight(new Vector3(wpPos.x, 1000f, wpPos.z));
                     wpPos.y = groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET;
                 }
                 anchors.Add(wpPos);
@@ -1790,7 +1790,7 @@ public class RoadPath : IPathMeshGenerator
         if (startList != null && startList.Count >= 2)
         {
             float startRelY = startList.Count > 2 ? startList[1] : 0f;
-            float startGroundY = Utils.GetGroundHeight(new Vector3(startList[0], 0f, startList[startList.Count - 1]));
+            float startGroundY = Utils.GetPathSurfaceHeight(new Vector3(startList[0], 0f, startList[startList.Count - 1]));
             anchors.Add(new Vector3(startList[0], startGroundY + startRelY - baseHeight, startList[startList.Count - 1]));
         }
 
@@ -1809,7 +1809,7 @@ public class RoadPath : IPathMeshGenerator
         if (endList != null && endList.Count >= 2)
         {
             float endRelY = endList.Count > 2 ? endList[1] : 0f;
-            float endGroundY = Utils.GetGroundHeight(new Vector3(endList[0], 0f, endList[endList.Count - 1]));
+            float endGroundY = Utils.GetPathSurfaceHeight(new Vector3(endList[0], 0f, endList[endList.Count - 1]));
             anchors.Add(new Vector3(endList[0], endGroundY + endRelY - baseHeight, endList[endList.Count - 1]));
         }
 

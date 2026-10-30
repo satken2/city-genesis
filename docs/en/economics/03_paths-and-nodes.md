@@ -35,8 +35,8 @@ When roads or tracks cross at the same height, a node is created and both paths 
 
 #### Three-dimensional shape (Y)
 
-Anchor Y values on paths and nodes are heights relative to the ground. Positive relative height produces an elevated section; negative height produces an underground section.
-Variants without height editing sit on the surface. For those that may be laid on water (ferries) the surface is the water, so the relative height of an anchor on water is the depth from the water surface to the bed.
+Anchor Y values on paths and nodes are heights relative to the reference surface: the water surface over sea and lakes, the ground elsewhere ([path geometry](../geometries/A_path-geometry.md)). Positive relative height produces an elevated section; negative height produces an underground section (below the water surface over water).
+Variants without height editing sit on the reference surface at relative height zero, so those that may be laid on water (ferries) rest on the water surface.
 
 | Section | Condition | Appearance |
 | --- | --- | --- |

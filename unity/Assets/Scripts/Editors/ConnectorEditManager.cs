@@ -382,7 +382,7 @@ public class ConnectorEditManager : MonoBehaviour
             rel = nd.position[1];
         }
         Vector3 p = nodeGO.transform.position;
-        p.y = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z)) + rel;
+        p.y = Utils.GetPathSurfaceHeight(new Vector3(p.x, 1000f, p.z)) + rel;
         nodeGO.transform.position = p;
     }
 

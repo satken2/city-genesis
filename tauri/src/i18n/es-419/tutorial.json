@@ -497,12 +497,12 @@
       "tourism": "Los habitantes quieren compartir sus antiguas ruinas del interior con más visitantes, pero no cuentan con un puerto de pasajeros, alojamiento ni una ruta de autobús al pueblo. En este tutorial aprenderás a construir un hotel y una terminal, crear una ruta de autobús y revisar la llegada de turistas, las ventas del restaurante y el uso del autobús.",
       "heading": "Un pedido para la alcaldía",
       "windowTitle": "Tutorial",
-      "reclamation": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal ni tierra para una central eléctrica. En este tutorial aprenderás a ganar terreno al mar, colocar la sede municipal y llevar la electricidad de un parque eólico marino hasta una subestación mediante un cable submarino.",
+      "reclamation": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal ni tierra para una central eléctrica. En este tutorial aprenderás a ganar terreno al mar, colocar la sede municipal y llevar la electricidad de un parque eólico marino hasta una subestación mediante una línea eléctrica.",
       "acquisition": "Entre dos plataformas elevadas hay viviendas, oficinas y una estación de bomberos. En este tutorial aprenderás a planificar vías, adquirir terrenos privados, demoler una instalación pública y completar la conexión."
     },
     "reclamation": {
       "title": "Gana terreno al mar",
-      "description": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal ni tierra para una central eléctrica. En este tutorial aprenderás a ganar terreno al mar, colocar la sede municipal y llevar la electricidad de un parque eólico marino hasta una subestación mediante un cable submarino.",
+      "description": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal ni tierra para una central eléctrica. En este tutorial aprenderás a ganar terreno al mar, colocar la sede municipal y llevar la electricidad de un parque eólico marino hasta una subestación mediante una línea eléctrica.",
       "step1": {
         "title": "Planifica el relleno costero",
         "description": "Abre la herramienta de movimiento de tierras. Haz clic izquierdo en los cuatro marcadores amarillos en orden para dibujar un rectángulo desde la costa hacia el mar. Ciérralo con clic derecho, comprueba que el presupuesto sea de relleno costero y confirma el proyecto."
@@ -541,8 +541,8 @@
         "description": "En una parcela sobre el mar solo pueden construirse instalaciones pensadas para el mar. Abre la herramienta de edificios, elige «Parque eólico marino» en la categoría «Centrales eléctricas» y constrúyelo en la parcela del mar. En esta lección se omite el plazo de obra."
       },
       "step10": {
-        "title": "Conecta con un cable submarino",
-        "description": "Por último, lleva la electricidad del parque eólico hasta la subestación en tierra. Las líneas de transmisión comunes no pueden tenderse sobre el mar, así que usarás un cable tendido en el fondo marino. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Cable eléctrico submarino» en «Electricidad» y trázalo desde el terminal de conexión del parque eólico hasta el de la subestación. Cuando queden conectados, el tutorial habrá terminado."
+        "title": "Conecta con una línea eléctrica",
+        "description": "Por último, lleva la electricidad del parque eólico hasta la subestación en tierra. Las líneas eléctricas también pueden tenderse sobre el mar, con torres levantadas en el agua. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Línea de transmisión eléctrica» en «Electricidad» y trázala desde el terminal de conexión del parque eólico hasta el de la subestación. Cuando queden conectados, el tutorial habrá terminado."
       }
     },
     "acquisition": {

@@ -203,7 +203,7 @@ public partial class RoadPlanManager : MonoBehaviour
             if (selectedPointIndex >= 0 && selectedPointIndex < points.Count)
             {
                 var pt = points[selectedPointIndex];
-                return pt.position.y - Utils.GetGroundHeight(pt.position);
+                return pt.position.y - Utils.GetPathSurfaceHeight(pt.position);
             }
             return currentHeight;
         }
@@ -565,7 +565,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 if (startList != null && startList.Count >= 2)
                 {
                     float startRelY = startList.Count > 2 ? startList[1] : 0f;
-                    float startGroundY = Utils.GetGroundHeight(new Vector3(startList[0], 0f, startList[startList.Count - 1]));
+                    float startGroundY = Utils.GetPathSurfaceHeight(new Vector3(startList[0], 0f, startList[startList.Count - 1]));
                     Vector3 startPos = new Vector3(startList[0], startGroundY + startRelY, startList[startList.Count - 1]);
                     points.Add(new PathBuildPoint(startPos, PathPointRole.Start));
                 }
@@ -579,7 +579,7 @@ public partial class RoadPlanManager : MonoBehaviour
                         if (wp.position != null && wp.position.Length >= 2)
                         {
                             float wpRelY = wp.position.Length > 2 ? wp.position[1] : 0f;
-                            float wpGroundY = Utils.GetGroundHeight(new Vector3(wp.position[0], 0f, wp.position[wp.position.Length - 1]));
+                            float wpGroundY = Utils.GetPathSurfaceHeight(new Vector3(wp.position[0], 0f, wp.position[wp.position.Length - 1]));
                             Vector3 wpPos = new Vector3(wp.position[0], wpGroundY + wpRelY, wp.position[wp.position.Length - 1]);
                             var pt = new PathBuildPoint(wpPos, PathPointRole.Waypoint);
                             if (wp.control_in != null && wp.control_in.Length >= 2)
@@ -602,7 +602,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 if (endList != null && endList.Count >= 2)
                 {
                     float endRelY = endList.Count > 2 ? endList[1] : 0f;
-                    float endGroundY = Utils.GetGroundHeight(new Vector3(endList[0], 0f, endList[endList.Count - 1]));
+                    float endGroundY = Utils.GetPathSurfaceHeight(new Vector3(endList[0], 0f, endList[endList.Count - 1]));
                     Vector3 endPos = new Vector3(endList[0], endGroundY + endRelY, endList[endList.Count - 1]);
                     var endPt = new PathBuildPoint(endPos, PathPointRole.End);
                     points.Add(endPt);
@@ -764,7 +764,7 @@ public partial class RoadPlanManager : MonoBehaviour
             Vector3 snapped = ApplySnapping(worldPos);
             // Inherit elevation when snapping to an elevated node/path (ResolvePlacementHeight also
             // synchronizes currentHeight and the UI elevation display). Otherwise use currentHeight.
-            snapped.y = PlacementSurfaceY(snapped) + ResolvePlacementHeight();
+            snapped.y = Utils.GetPathSurfaceHeight(snapped) + ResolvePlacementHeight();
 
             if (points.Count == 0)
             {
@@ -890,7 +890,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         // InputHandler coordinates have Y=0, so align to actual ground height.
         Vector3 newWorldPos = worldPos;
-        newWorldPos.y = Utils.GetGroundHeight(newWorldPos);
+        newWorldPos.y = Utils.GetPathSurfaceHeight(newWorldPos);
 
         if (dragTarget == DragTarget.Point && anchorDragAxis == AnchorDragAxis.Y)
         {
@@ -907,8 +907,8 @@ public partial class RoadPlanManager : MonoBehaviour
             var pt = points[dragPointIndex];
             // Preserve relative height during XZ movement.
             float relY = lastSnapWasElevated && IsHeightEditable()
-                ? lastSnapRelHeight : pt.position.y - PlacementSurfaceY(pt.position);
-            snappedPos.y = PlacementSurfaceY(snappedPos) + relY;
+                ? lastSnapRelHeight : pt.position.y - Utils.GetPathSurfaceHeight(pt.position);
+            snappedPos.y = Utils.GetPathSurfaceHeight(snappedPos) + relY;
 
             // Make manual controls follow the anchor and recalculate only unadjusted controls.
             MoveAnchorPosition(dragPointIndex, snappedPos);
@@ -931,7 +931,7 @@ public partial class RoadPlanManager : MonoBehaviour
     {
         var pt = points[dragPointIndex];
         verticalDragAnchor = pt.position;
-        verticalDragStartRelY = pt.position.y - Utils.GetGroundHeight(pt.position);
+        verticalDragStartRelY = pt.position.y - Utils.GetPathSurfaceHeight(pt.position);
         verticalDragStartPlaneY = ResolveVerticalDragY(cam, verticalDragAnchor);
     }
 
@@ -949,7 +949,7 @@ public partial class RoadPlanManager : MonoBehaviour
         float relY = Mathf.Max(verticalDragStartRelY + (planeY - verticalDragStartPlaneY), GetMinHeightFromMaster());
 
         Vector3 newPos = points[dragPointIndex].position;
-        newPos.y = Utils.GetGroundHeight(newPos) + relY;
+        newPos.y = Utils.GetPathSurfaceHeight(newPos) + relY;
         MoveAnchorPosition(dragPointIndex, newPos);
     }
 
@@ -1027,7 +1027,7 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             Vector3 endPos = ApplySnapping(rightClickPos);
             // Inherit elevation when snapping to an elevated node/path.
-            endPos.y = PlacementSurfaceY(endPos) + ResolvePlacementHeight();
+            endPos.y = Utils.GetPathSurfaceHeight(endPos) + ResolvePlacementHeight();
             var endPt = new PathBuildPoint(endPos, PathPointRole.End);
             endPt.embankmentHeight = currentEmbankmentHeight;
             points.Add(endPt);
@@ -1134,7 +1134,7 @@ public partial class RoadPlanManager : MonoBehaviour
     {
         if (edgeIndex < 0 || edgeIndex >= points.Count - 1) return;
 
-        worldPos.y = PlacementSurfaceY(worldPos) + currentHeight;
+        worldPos.y = Utils.GetPathSurfaceHeight(worldPos) + currentHeight;
         var insertedPt = new PathBuildPoint(worldPos, PathPointRole.Waypoint);
         insertedPt.embankmentHeight = currentEmbankmentHeight;
         points.Insert(edgeIndex + 1, insertedPt);
@@ -1229,7 +1229,7 @@ public partial class RoadPlanManager : MonoBehaviour
         }
         if (!IsEditMode || nodeIndex < 0 || nodeIndex >= points.Count) return;
         Vector3 position = points[nodeIndex].position;
-        position.y = Utils.GetGroundHeight(position) + height;
+        position.y = Utils.GetPathSurfaceHeight(position) + height;
         MoveAnchorPosition(nodeIndex, position);
         CommitShapeChange();
         EmitSelectNode();
@@ -1313,7 +1313,7 @@ public partial class RoadPlanManager : MonoBehaviour
         if (selectedPointIndex < 0 || selectedPointIndex >= points.Count) return;
 
         var pt = points[selectedPointIndex];
-        float groundY = Utils.GetGroundHeight(pt.position);
+        float groundY = Utils.GetPathSurfaceHeight(pt.position);
         float relY = pt.position.y - groundY;
         IpcClient.Instance.EmitEditPathSelectNode(
             pathId,
@@ -1431,7 +1431,7 @@ public partial class RoadPlanManager : MonoBehaviour
         var pointsList = new List<List<float>>();
         foreach (var pt in points)
         {
-            float groundY = Utils.GetGroundHeight(pt.position);
+            float groundY = Utils.GetPathSurfaceHeight(pt.position);
             float relY = pt.position.y - groundY;
             pointsList.Add(new List<float> { pt.position.x, relY, pt.position.z });
         }

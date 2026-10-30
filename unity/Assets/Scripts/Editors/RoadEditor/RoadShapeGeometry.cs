@@ -20,7 +20,7 @@ public static class RoadShapeGeometry
                 ? PolylineUtils.CubicBezierPoint(start - origin, controlOut - origin, controlIn - origin, end - origin, t)
                 : Vector3.Lerp(start - origin, end - origin, t);
             if (follows)
-                point.y = Utils.GetGroundHeight(point + origin) - origin.y
+                point.y = Utils.GetPathSurfaceHeight(point + origin) - origin.y
                     + Mathf.Lerp(relativeStart, relativeEnd, t) + surfaceOffset;
             return point;
         }
@@ -45,8 +45,8 @@ public static class RoadShapeGeometry
 
     public static Span CreateSpan(PathBuildPoint a, PathBuildPoint b, bool curved, bool followsTerrain, float groundRelativeHeight)
     {
-        float relativeA = a.position.y - Utils.GetGroundHeight(a.position);
-        float relativeB = b.position.y - Utils.GetGroundHeight(b.position);
+        float relativeA = a.position.y - Utils.GetPathSurfaceHeight(a.position);
+        float relativeB = b.position.y - Utils.GetPathSurfaceHeight(b.position);
         return new Span
         {
             start = a.position + Vector3.up * a.embankmentHeight,
@@ -76,9 +76,9 @@ public static class RoadShapeGeometry
                 Vector3 next = span.Sample(t);
                 // a/b Y values are relative heights. Store non-following absolute profiles separately so intermediate terrain does not bend them.
                 float relativeA = span.follows ? Mathf.Lerp(span.relativeStart, span.relativeEnd, (float)(i - 1) / steps)
-                    : previous.y - Utils.GetGroundHeight(previous);
+                    : previous.y - Utils.GetPathSurfaceHeight(previous);
                 float relativeB = span.follows ? Mathf.Lerp(span.relativeStart, span.relativeEnd, t)
-                    : next.y - Utils.GetGroundHeight(next);
+                    : next.y - Utils.GetPathSurfaceHeight(next);
                 result.Add(new ElevationSegment
                 {
                     a = new Vector3(previous.x, relativeA, previous.z),
@@ -95,11 +95,11 @@ public static class RoadShapeGeometry
     {
         if (!control.HasValue) return null;
         Vector3 point = control.Value;
-        return new List<float> { point.x, point.y - Utils.GetGroundHeight(anchor), point.z };
+        return new List<float> { point.x, point.y - Utils.GetPathSurfaceHeight(anchor), point.z };
     }
 
     public static Vector3 RestoreControl(float x, float relativeY, float z, Vector3 anchor)
-        => new Vector3(x, Utils.GetGroundHeight(anchor) + relativeY, z);
+        => new Vector3(x, Utils.GetPathSurfaceHeight(anchor) + relativeY, z);
 
     public static bool SegmentsIntersectXZ(Vector3 a1, Vector3 a2, Vector3 b1, Vector3 b2, out float tA, out float tB)
     {
@@ -118,7 +118,7 @@ public static class RoadShapeGeometry
     {
         if (!SegmentsIntersectXZ(a.a, a.b, b.a, b.b, out float tA, out float tB)) return false;
         float ground = absolute && (a.follows || b.follows)
-            ? Utils.GetGroundHeight(Vector3.Lerp(a.a, a.b, tA)) : 0f;
+            ? Utils.GetPathSurfaceHeight(Vector3.Lerp(a.a, a.b, tA)) : 0f;
         float ya = a.HeightAt(tA, absolute, ground), yb = b.HeightAt(tB, absolute, ground);
         if (Mathf.Abs(ya - yb) < (absolute ? AbsoluteHeightTolerance : RelativeHeightTolerance)) return false;
         return ya < yb + heightB && ya + heightA > yb;

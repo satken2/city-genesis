@@ -72,7 +72,7 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
         {
             // Forward node right clicks as terrain right clicks.
             Vector3 terrainClickPosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
-            terrainClickPosition.y = Utils.GetGroundHeight(new Vector3(terrainClickPosition.x, 1000f, terrainClickPosition.z));
+            terrainClickPosition.y = Utils.GetPathSurfaceHeight(new Vector3(terrainClickPosition.x, 1000f, terrainClickPosition.z));
             roadPlanManager.OnTerrainRightClick(terrainClickPosition);
         }
     }
@@ -169,7 +169,7 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
         if (roadPlanManager != null)
         {
             Vector3 terrainClickPosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
-            terrainClickPosition.y = Utils.GetGroundHeight(new Vector3(terrainClickPosition.x, 1000f, terrainClickPosition.z));
+            terrainClickPosition.y = Utils.GetPathSurfaceHeight(new Vector3(terrainClickPosition.x, 1000f, terrainClickPosition.z));
             roadPlanManager.OnTerrainLeftClick(terrainClickPosition);
         }
         else
@@ -223,13 +223,13 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
         {
             // For infrastructure/vehicle/shared terminals, update the node itself (PATCH /api/v1/nodes/{nodeId}).
 
-            // Backend node positions use [x, relative height above ground, z]
-            // (see root AGENTS.md for relative heights; frontend NodeData.GetAbsolutePosition also
-            // adds position[1] to terrain height to restore absolute coordinates).
-            // During dragging, transform.position holds absolute world Y; subtract terrain height
+            // Backend node positions use [x, relative height above the reference surface, z]
+            // (Utils.GetPathSurfaceHeight; frontend NodeData.GetAbsolutePosition also
+            // adds position[1] to the surface height to restore absolute coordinates).
+            // During dragging, transform.position holds absolute world Y; subtract the surface height
             // before sending/updating the cache. Storing absolute Y would make
-            // GetAbsolutePosition add terrain height twice, causing the marker to jump on drop.
-            float groundHeight = Utils.GetGroundHeight(newPosition);
+            // GetAbsolutePosition add the surface height twice, causing the marker to jump on drop.
+            float groundHeight = Utils.GetPathSurfaceHeight(newPosition);
             float relativeHeight = newPosition.y - groundHeight;
             Vector3 backendPosition = new Vector3(newPosition.x, relativeHeight, newPosition.z);
 
@@ -312,15 +312,15 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
 
             if (isStartNode)
             {
-                // Calculate height relative to terrain.
-                float groundHeight = Utils.GetGroundHeight(newPosition);
+                // Calculate height relative to the reference surface.
+                float groundHeight = Utils.GetPathSurfaceHeight(newPosition);
                 float relativeHeight = newPosition.y - groundHeight;
                 pathData.start_point = new List<object> { newPosition.x, relativeHeight, newPosition.z };
             }
             else if (isEndNode)
             {
-                // Calculate height relative to terrain.
-                float groundHeight = Utils.GetGroundHeight(newPosition);
+                // Calculate height relative to the reference surface.
+                float groundHeight = Utils.GetPathSurfaceHeight(newPosition);
                 float relativeHeight = newPosition.y - groundHeight;
                 pathData.end_point = new List<object> { newPosition.x, relativeHeight, newPosition.z };
             }

@@ -13,7 +13,7 @@ public partial class RoadPlanManager
         if (phase == RoadEditorPhase.Placing && anchors.Count > 0)
         {
             var hover = hoverWorldPosition;
-            hover.y = PlacementSurfaceY(hover) + (hoverSnapWasElevated ? hoverSnapRelHeight : currentHeight);
+            hover.y = Utils.GetPathSurfaceHeight(hover) + (hoverSnapWasElevated ? hoverSnapRelHeight : currentHeight);
             anchors.Add(hover); embankments.Add(currentEmbankmentHeight);
         }
         if (anchors.Count < 2) { earthworkPreview?.Clear(); return; }
@@ -29,12 +29,12 @@ public partial class RoadPlanManager
             var shifted = RoadRenderer.OffsetPolylineLateral(anchors, offsets[line]);
             var relative = new List<float[]>();
             for (int i=0;i<anchors.Count;i++)
-                relative.Add(new[] {shifted[i].x, anchors[i].y-Utils.GetGroundHeight(anchors[i]), shifted[i].z});
+                relative.Add(new[] {shifted[i].x, anchors[i].y-Utils.GetPathSurfaceHeight(anchors[i]), shifted[i].z});
             float[] Control(Vector3? control, int i)
             {
                 if (!Curved || !control.HasValue) return null;
                 var p = control.Value + shifted[i]-anchors[i];
-                float y = control.Value.y-Utils.GetGroundHeight(anchors[i]);
+                float y = control.Value.y-Utils.GetPathSurfaceHeight(anchors[i]);
                 return new[] {p.x,y,p.z};
             }
             var waypoints = new List<object>();

@@ -1111,12 +1111,12 @@
             "allow": [
               "hud.road",
               "path.type:11",
-              "path.variant:1104",
+              "path.variant:1101",
               "path.back"
             ],
             "highlight": [
               "path.type:11",
-              "path.variant:1104"
+              "path.variant:1101"
             ]
           },
           "world": {
@@ -1146,7 +1146,7 @@
           },
           "until": {
             "type": "pathVariant",
-            "value": 1104
+            "value": 1101
           }
         },
         {

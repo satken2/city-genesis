@@ -30,7 +30,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
     static Vector3 Point(List<float> p, float baseHeight)
     {
         var v = new Vector3(p[0], 0, p[p.Count - 1]);
-        v.y = Utils.GetGroundHeight(v) + (p.Count > 2 ? p[1] : baseHeight) - baseHeight;
+        v.y = Utils.GetPathSurfaceHeight(v) + (p.Count > 2 ? p[1] : baseHeight) - baseHeight;
         return v;
     }
     static Vector3 Direction(Vector3 v)
@@ -98,7 +98,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
                 float t = (float)j / count;
                 Vector3 p = Vector3.Lerp(a,b,t);
                 if (j > 0 && j < count && PathManager.GetPathFollowTerrain(path))
-                    p.y = Utils.GetGroundHeight(p) + Mathf.Lerp(a.y-Utils.GetGroundHeight(a), b.y-Utils.GetGroundHeight(b),t);
+                    p.y = Utils.GetPathSurfaceHeight(p) + Mathf.Lerp(a.y-Utils.GetPathSurfaceHeight(a), b.y-Utils.GetPathSurfaceHeight(b),t);
                 int node = span == 0 && j == 0 ? path.start_node_id : span == anchors.Count-2 && j == count ? path.end_node_id : 0;
                 result.Add(Endpoint(path,node,p,b-a));
             }

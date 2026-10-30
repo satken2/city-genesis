@@ -64,11 +64,11 @@ public static class ConstructionMeshUtil
 
         int pointCount = points.Count;
 
-        // Ground Y at each point (terrain elevation + road-spline lift).
+        // Ground Y at each point (reference surface, water over water, + road-spline lift).
         float[] groundY = new float[pointCount];
         for (int i = 0; i < pointCount; i++)
         {
-            groundY[i] = followTerrain ? Utils.GetGroundHeight(new Vector3(points[i].x, 1000f, points[i].z))
+            groundY[i] = followTerrain ? Utils.GetPathSurfaceHeight(new Vector3(points[i].x, 1000f, points[i].z))
                 + RoadPartHeights.ROAD_SPLINE_OFFSET : points[i].y;
         }
 
@@ -109,10 +109,10 @@ public static class ConstructionMeshUtil
             // Conform edges and roadbed independently to their ground on cross-slopes.
             if (followTerrain)
             {
-                leftEdge.y = Utils.GetGroundHeight(leftEdge) + .015f;
-                rightEdge.y = Utils.GetGroundHeight(rightEdge) + .015f;
-                leftCrestPos.y = Utils.GetGroundHeight(leftCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
-                rightCrestPos.y = Utils.GetGroundHeight(rightCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+                leftEdge.y = Utils.GetPathSurfaceHeight(leftEdge) + .015f;
+                rightEdge.y = Utils.GetPathSurfaceHeight(rightEdge) + .015f;
+                leftCrestPos.y = Utils.GetPathSurfaceHeight(leftCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+                rightCrestPos.y = Utils.GetPathSurfaceHeight(rightCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
             }
 
             // Multi-octave dirt noise (shared with building dirt mounds).

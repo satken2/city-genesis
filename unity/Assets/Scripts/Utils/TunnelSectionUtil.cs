@@ -265,10 +265,10 @@ public static class TunnelSectionUtil
         return runs;
     }
 
-    /// <summary>Check whether a point is attached to the surface, as a terrain-following point.</summary>
+    /// <summary>Check whether a point is attached to the reference surface (Utils.GetPathSurfaceHeight), as a terrain-following point.</summary>
     private static bool IsOnGround(Vector3 p)
     {
-        float ground = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z));
+        float ground = Utils.GetPathSurfaceHeight(new Vector3(p.x, 1000f, p.z));
         return Mathf.Abs(ground - p.y) <= GROUND_SNAP_EPSILON;
     }
 

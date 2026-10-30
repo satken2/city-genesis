@@ -497,12 +497,12 @@
       "tourism": "Les habitants souhaitent faire découvrir leurs ruines antiques situées à l’intérieur des terres. Mais il manque un port de passagers, des hébergements et une ligne de bus vers le village. Ce tutoriel vous apprend à construire un hôtel et un terminal, créer une ligne de bus et vérifier les arrivées de touristes, les ventes du restaurant et l’utilisation du bus.",
       "heading": "Une demande au maire",
       "windowTitle": "Tutoriel",
-      "reclamation": "Ce minuscule récif manque de terrain plat pour un hôtel de ville et de terre pour une centrale électrique. Dans ce tutoriel, vous apprendrez à remblayer la côte, à placer un hôtel de ville et à acheminer l’électricité d’un parc éolien en mer jusqu’à une sous-station par un câble sous-marin.",
+      "reclamation": "Ce minuscule récif manque de terrain plat pour un hôtel de ville et de terre pour une centrale électrique. Dans ce tutoriel, vous apprendrez à remblayer la côte, à placer un hôtel de ville et à acheminer l’électricité d’un parc éolien en mer jusqu’à une sous-station par une ligne électrique.",
       "acquisition": "Des logements, des bureaux et une caserne de pompiers se trouvent entre deux quais surélevés. Dans ce tutoriel, vous apprendrez à planifier les voies, acquérir les terrains privés, démolir un équipement public et terminer la liaison."
     },
     "reclamation": {
       "title": "Gagner du terrain sur la mer",
-      "description": "Ce minuscule récif manque de terrain plat pour un hôtel de ville et de terre pour une centrale électrique. Dans ce tutoriel, vous apprendrez à remblayer la côte, à placer un hôtel de ville et à acheminer l’électricité d’un parc éolien en mer jusqu’à une sous-station par un câble sous-marin.",
+      "description": "Ce minuscule récif manque de terrain plat pour un hôtel de ville et de terre pour une centrale électrique. Dans ce tutoriel, vous apprendrez à remblayer la côte, à placer un hôtel de ville et à acheminer l’électricité d’un parc éolien en mer jusqu’à une sous-station par une ligne électrique.",
       "step1": {
         "title": "Planifier le remblaiement",
         "description": "Ouvrez l’outil de terrassement. Cliquez avec le bouton gauche sur les quatre repères jaunes dans l’ordre pour dessiner un rectangle du rivage vers la mer. Fermez-le avec un clic droit, vérifiez que le devis concerne un remblaiement et confirmez le projet."
@@ -541,8 +541,8 @@
         "description": "Sur une parcelle en mer, seuls des équipements conçus pour la mer peuvent être construits. Ouvrez l’outil de bâtiments, choisissez « Parc éolien en mer » dans la catégorie « Centrales électriques » et construisez-le sur la parcelle en mer. Cette leçon ignore la durée du chantier."
       },
       "step10": {
-        "title": "Raccordez par un câble sous-marin",
-        "description": "Enfin, acheminez l’électricité du parc éolien jusqu’à la sous-station à terre. Les lignes électriques ordinaires ne peuvent pas être tendues au-dessus de la mer : utilisez un câble posé sur le fond marin. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Câble électrique sous-marin » sous « Électricité » et tracez-le de la borne de raccordement du parc éolien à celle de la sous-station. Une fois le raccordement fait, le tutoriel est terminé."
+        "title": "Raccordez par une ligne électrique",
+        "description": "Enfin, acheminez l’électricité du parc éolien jusqu’à la sous-station à terre. Les lignes électriques peuvent aussi être tendues au-dessus de la mer, sur des pylônes dressés dans l’eau. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Ligne électrique haute tension » sous « Électricité » et tracez-la de la borne de raccordement du parc éolien à celle de la sous-station. Une fois le raccordement fait, le tutoriel est terminé."
       }
     },
     "acquisition": {

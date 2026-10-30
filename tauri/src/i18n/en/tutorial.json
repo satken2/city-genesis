@@ -497,12 +497,12 @@
       "tourism": "The islanders want to share their ancient inland ruins with more visitors. But they lack a passenger harbor, accommodation, and a bus route from the harbor to town. In this tutorial, you will learn to build a hotel and passenger terminal, create a bus route, and check tourist arrivals, restaurant sales, and bus use.",
       "heading": "A Request for the Mayor",
       "windowTitle": "Tutorial",
-      "reclamation": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a submarine cable.",
+      "reclamation": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a power line.",
       "acquisition": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, demolish a public facility, and complete the connection."
     },
     "reclamation": {
       "title": "Reclaim the coast",
-      "description": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a submarine cable.",
+      "description": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a power line.",
       "step1": {
         "title": "Plan the reclamation",
         "description": "Open the Earthworks tool. Left-click the four yellow markers in order to draw a rectangle from the shore into the sea. Right-click to close it, check that the estimate is for reclamation, and confirm the project."
@@ -541,8 +541,8 @@
         "description": "Only facilities meant for the sea can be built on a parcel at sea. Open the building tool, choose “Offshore Wind Farm” in the “Power Plants” category, and build it on the parcel at sea. This lesson skips the construction period."
       },
       "step10": {
-        "title": "Connect with a submarine cable",
-        "description": "Finally, carry the wind farm's electricity to the substation on land. Ordinary power lines can't be strung over the sea, so use a cable laid on the seabed. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Submarine Power Cable” under “Electricity”, and draw it from the wind farm's connection terminal to the substation's terminal. Once they are connected, this tutorial is complete."
+        "title": "Connect with a power line",
+        "description": "Finally, carry the wind farm's electricity to the substation on land. Power lines can be strung over the sea on pylons standing in the water. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Power Transmission Line” under “Electricity”, and draw it from the wind farm's connection terminal to the substation's terminal. Once they are connected, this tutorial is complete."
       }
     },
     "acquisition": {
