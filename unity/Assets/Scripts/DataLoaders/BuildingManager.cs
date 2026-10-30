@@ -607,44 +607,40 @@ public class BuildingManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Split fetched cells into a few rectangles (SplitFetchRects) and fetch buildings in bulk.
-    /// Restore buildings and display outlines as each page arrives, without waiting for all pages.
-    /// If any page fails, do not apply cells or delete buildings absent from the response
+    /// Read the cells' buildings from the city cache, a few rectangles (SplitFetchRects) at a time, in pages.
+    /// Restore buildings and display outlines page by page. If the cache cannot provide a rectangle (before the first
+    /// synchronization, when its range fetch fails), do not apply cells or delete buildings absent from the result
     /// (cellsWithShownObjects retains shown buildings for reconciliation in the next batch).
     /// </summary>
     private IEnumerator LoadMergedBuildings(List<Vector2Int> cells, HashSet<Vector2Int> nearSet, HashSet<Vector2Int> dynamicSet, HashSet<Vector2Int> tierChangedBuildingCells, Action<bool> onComplete = null)
     {
         // Buildings on rectangle boundaries also appear in adjacent rectangles, so deduplicate by ID.
         var receivedIds = new HashSet<int>();
-        // Rectangle rounding or fallback to a bounding rectangle may return buildings in cells outside the fetch set (nonresident or loaded cells not being refetched).
-        // Do not generate them (nonresident objects would remain outside every cell set; loaded cells can retain their existing objects).
+        // Rectangles cover cells outside the fetch set (nonresident or loaded cells not being refetched).
+        // Do not generate their buildings (nonresident objects would remain outside every cell set; loaded cells can retain their existing objects).
         var fetchSet = new HashSet<Vector2Int>(cells);
         float cellSize = TerrainManager.CellSize;
+        CityDataCache cache = CityDataCache.Ensure();
         foreach (var rect in SplitFetchRects(cells))
         {
-            float minX = rect.min.x * cellSize, minZ = rect.min.y * cellSize;
-            float maxX = (rect.max.x + 1) * cellSize, maxZ = (rect.max.y + 1) * cellSize;
-            int cursor = 0;
-            while (true)
+            var area = Rect.MinMaxRect(rect.min.x * cellSize, rect.min.y * cellSize, (rect.max.x + 1) * cellSize, (rect.max.y + 1) * cellSize);
+            bool available = false;
+            yield return cache.EnsureRect(CityDataCache.Kind.Buildings, area, null, ok => available = ok);
+            if (!available)
             {
-                BuildingsListResponse page = null;
-                yield return ApiClient.GetBulk<BuildingsListResponse>(
-                    $"/buildings/?bbox={minX},{minZ},{maxX},{maxZ}&limit=500&cursor={cursor}", value => page = value,
-                    timingLabel: "BuildingManager page");
-                if (page?.buildings == null || (page.next_cursor.HasValue && page.next_cursor.Value <= cursor))
-                {
-                    onComplete?.Invoke(false);
-                    yield break;
-                }
-                RenderWorkScheduler.CountEvent("building.received", page.buildings.Count);
-                yield return PrepareReceivedBuildings(page.buildings, receivedIds, fetchSet, nearSet, dynamicSet, tierChangedBuildingCells);
-                if (!page.next_cursor.HasValue) break;
-                cursor = page.next_cursor.Value;
+                onComplete?.Invoke(false);
+                yield break;
+            }
+            List<BuildingSummary> buildings = cache.BuildingsIn(area);
+            RenderWorkScheduler.CountEvent("building.received", buildings.Count);
+            for (int i = 0; i < buildings.Count; i += 500)
+            {
+                yield return PrepareReceivedBuildings(buildings.GetRange(i, Mathf.Min(500, buildings.Count - i)), receivedIds, fetchSet, nearSet, dynamicSet, tierChangedBuildingCells);
                 yield return null;
             }
         }
 
-        // Remove buildings absent from the response
+        // Remove buildings absent from the result
         SyncBuildingsInCells(cells, receivedIds);
 
         onComplete?.Invoke(true);
@@ -2735,6 +2731,7 @@ public class BuildingManager : BaseApiDataManager
                         return;
                     if (buildingDataCache.TryGetValue(agentId, out var cached) && cached.version > building.version)
                         return;
+                    CityDataCache.Ensure().Register(building);
                     float[] cp = building.centerPointArray;
                     if (cp == null || cp.Length < 2) return;
 

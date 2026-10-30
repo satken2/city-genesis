@@ -73,6 +73,8 @@ public class PropManager : BaseApiDataManager
     private bool GpuForests => useGpuForests && (forestRenderer ?? (forestRenderer = new ForestRenderer())).Supported;
     private bool IsGpuTree(int type) => (type == 1 || type == 2) && GpuForests;
     private const int BatchSize = 511;
+    /// <summary>Obstacles within this distance of the range also apply (the core's PROP_OBSTACLE_MARGIN, the clearance upper bound).</summary>
+    private const float ObstacleMargin = 8f;
     private sealed class Scatter
     {
         public PropScatterItem data;
@@ -288,24 +290,19 @@ public class PropManager : BaseApiDataManager
         {
             if (cells.Count == 0) yield break;
             CalculateMergedBBox(cells, out float x0, out float z0, out float x1, out float z1);
+            var area = Rect.MinMaxRect(x0, z0, x1, z1);
+            bool available = false;
+            CityDataCache cache = CityDataCache.Ensure();
+            yield return cache.EnsureRect(CityDataCache.Kind.Props, area, () => Canceled(serial, batch), ok => available = ok);
+            if (Canceled(serial, batch) || !available) yield break;
+            PropListResponse response = cache.PropsIn(area, ObstacleMargin);
             // Obstacles serve only existing-prop exclusion and scatter previews. If no props exist
-            // and no preview is requested, skip fetching every parcel/road polygon.
-            if (!PreviewDemanded)
+            // and no preview is requested, skip building exclusions from every parcel/road polygon.
+            if (!PreviewDemanded && response.scatters.Count == 0 && response.instances.Count == 0)
             {
-                PropListResponse probe = null;
-                yield return ApiClient.GetBulk<PropListResponse>(FormattableString.Invariant($"/props?bbox={x0},{z0},{x1},{z1}&limit=1"),
-                    data => probe = data, error => Debug.LogError($"PropManager: {error}"), "/props?limit=1", isCanceled: () => Canceled(serial, batch));
-                if (Canceled(serial, batch) || probe == null) yield break;
-                if ((probe.scatters == null || probe.scatters.Count == 0) && (probe.instances == null || probe.instances.Count == 0))
-                {
-                    ApplyEmpty();
-                    yield break;
-                }
+                ApplyEmpty();
+                yield break;
             }
-            PropListResponse response = null;
-            yield return ApiClient.GetBulk<PropListResponse>(FormattableString.Invariant($"/props?bbox={x0},{z0},{x1},{z1}&include_obstacles=true"),
-                data => response = data, error => Debug.LogError($"PropManager: {error}"), isCanceled: () => Canceled(serial, batch));
-            if (Canceled(serial, batch) || response == null || response.obstacles == null) yield break;
             yield return ApplySnapshot(response, cells, force, serial, batch);
             loading = null;
         }

@@ -42,6 +42,34 @@ public static class MsgPackDecoder
         return (T)MapValue(graph, typeof(T));
     }
 
+    private static readonly MethodInfo MemberwiseCloneMethod =
+        typeof(object).GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
+
+    private static readonly ConcurrentDictionary<Type, FieldInfo[]> PrivateFieldCache = new ConcurrentDictionary<Type, FieldInfo[]>();
+
+    /// <summary>
+    /// Shallow copy of source with the named public fields replaced by intermediate values (converted as in Deserialize).
+    /// Unknown names are ignored. Non-public fields of API records are lazy caches derived from public fields, so reset them.
+    /// Records already handed to managers are compared against new ones, so never modify them in place.
+    /// Safe on background threads.
+    /// </summary>
+    public static T CloneWithFields<T>(T source, IEnumerable<KeyValuePair<string, object>> fields) where T : class
+    {
+        object copy = MemberwiseCloneMethod.Invoke(source, null);
+        Type type = copy.GetType();
+        foreach (FieldInfo cache in PrivateFieldCache.GetOrAdd(type, t => t.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)))
+            cache.SetValue(copy, null);
+        Dictionary<string, FieldInfo> fieldMap = GetFieldMap(type);
+        foreach (var kv in fields)
+        {
+            if (!fieldMap.TryGetValue(kv.Key, out FieldInfo field)) continue;
+            object converted = MapValue(kv.Value, field.FieldType);
+            if (converted == null && field.FieldType.IsValueType && Nullable.GetUnderlyingType(field.FieldType) == null) continue;
+            field.SetValue(copy, converted);
+        }
+        return (T)copy;
+    }
+
     // ================================================================
     // 1. Binary data -> intermediate object graph.
     // ================================================================

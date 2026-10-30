@@ -167,12 +167,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     private int staleMarkSerial;
 
     /// <summary>
-    /// Maximum results per /parcels/ fetch. The backend has no cursor and truncates from the beginning,
-    /// so treat responses reaching the limit as incomplete, split the cell set in two, and refetch.
-    /// </summary>
-    private const int PARCEL_FETCH_LIMIT = 5000;
-
-    /// <summary>
     /// Parcel IDs queued for terrain alignment when tiles arrive. terrainRefreshQueued prevents duplicate insertion.
     /// Synchronously rebuilding every parcel in one tile makes long frames, so TerrainRefreshWorker processes within budget.
     /// </summary>
@@ -540,35 +534,22 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
-    /// Fetch parcels in bulk using the cells' bounding rectangle and incrementally apply only parcels with centroids in the set.
+    /// Read parcels overlapping the cells' bounding rectangle from the city cache and incrementally apply only parcels with centroids in the set.
     /// The rectangle can include nonresident cells; filtering by centroid cell prevents creating GameObjects that no cell will hide.
-    /// If the response reaches the result limit, do not apply it; split the cell set in two and refetch.
-    /// If even one cell reaches the limit, apply it but do not delete parcels absent from the response (synchronization).
     /// </summary>
     private IEnumerator FetchAndApplyCells(List<Vector2Int> cells)
     {
         int serialAtRequest = staleMarkSerial;
         CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
-        ParcelListResponse response = null;
-        yield return ApiClient.GetBulk<ParcelListResponse>(
-            $"/parcels/?bbox={minX},{minZ},{maxX},{maxZ}&limit={PARCEL_FETCH_LIMIT}",
-            r => response = r,
-            timingLabel: "ParcelManager parcels");
+        var area = Rect.MinMaxRect(minX, minZ, maxX, maxZ);
+        bool available = false;
+        CityDataCache cache = CityDataCache.Ensure();
+        yield return cache.EnsureRect(CityDataCache.Kind.Parcels, area, null, ok => available = ok);
         // Failed cells remain in cellsNeedingFetch and are refetched by the next LoadLodCells
-        if (response == null) yield break;
+        if (!available) yield break;
 
-        List<ParcelSummary> parcels = response.parcels;
-        int count = parcels != null ? parcels.Count : 0;
-        if (count >= PARCEL_FETCH_LIMIT && cells.Count > 1)
-        {
-            SplitCells(cells, out List<Vector2Int> first, out List<Vector2Int> second);
-            response = null;
-            parcels = null;
-            yield return FetchAndApplyCells(first);
-            yield return FetchAndApplyCells(second);
-            yield break;
-        }
-        bool truncated = count >= PARCEL_FETCH_LIMIT;
+        List<ParcelSummary> parcels = cache.ParcelsIn(area);
+        int count = parcels.Count;
 
         var cellSet = new HashSet<Vector2Int>(cells);
         var receivedIds = new HashSet<int>();
@@ -603,15 +584,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             }
         }
 
-        // Remove parcels whose centroids lie in fetched cells but are absent from the response (complete responses only)
-        if (!truncated)
-        {
-            SyncParcelsInCells(cellSet, receivedIds);
-        }
-        else
-        {
-            Debug.LogWarning($"ParcelManager: セル {cells[0]} の区画が取得上限 {PARCEL_FETCH_LIMIT} 件に達したため、応答に無い区画の削除を見送ります。");
-        }
+        // Remove parcels whose centroids lie in fetched cells but are absent from the result
+        SyncParcelsInCells(cellSet, receivedIds);
 
         // If refetch was requested during fetching, this response may be old; retain the refetch marker
         bool keepStale = serialAtRequest != staleMarkSerial;
@@ -629,32 +603,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         if (p.center_point == null || p.center_point.Count < 2) return false;
         cell = TerrainManager.WorldToCell(GeneratedModelUtils.ToFloat(p.center_point[0]), GeneratedModelUtils.ToFloat(p.center_point[1]));
         return true;
-    }
-
-    /// <summary>
-    /// Sort cells along the longer axis of their cell-coordinate bounding rectangle and divide in half.
-    /// </summary>
-    private static void SplitCells(List<Vector2Int> cells, out List<Vector2Int> first, out List<Vector2Int> second)
-    {
-        int minX = int.MaxValue, maxX = int.MinValue, minZ = int.MaxValue, maxZ = int.MinValue;
-        foreach (Vector2Int c in cells)
-        {
-            if (c.x < minX) minX = c.x;
-            if (c.x > maxX) maxX = c.x;
-            if (c.y < minZ) minZ = c.y;
-            if (c.y > maxZ) maxZ = c.y;
-        }
-        bool alongX = maxX - minX >= maxZ - minZ;
-        var sorted = new List<Vector2Int>(cells);
-        sorted.Sort((a, b) =>
-        {
-            int order = alongX ? a.x.CompareTo(b.x) : a.y.CompareTo(b.y);
-            if (order != 0) return order;
-            return alongX ? a.y.CompareTo(b.y) : a.x.CompareTo(b.x);
-        });
-        int half = sorted.Count / 2;
-        first = sorted.GetRange(0, half);
-        second = sorted.GetRange(half, sorted.Count - half);
     }
 
     /// <summary>
@@ -854,13 +802,16 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         }
     }
 
+    /// <summary>Refetch one parcel in the list form (the same form the city cache holds) and redraw it.</summary>
     public IEnumerator FetchParcel(int parcelId)
     {
-        yield return ApiClient.Get<ParcelSummary>(
-            $"/parcels/{parcelId}",
-            parcel =>
+        yield return ApiClient.GetBulk<ParcelListResponse>(
+            $"/parcels/?ids={parcelId}",
+            response =>
             {
-                if (parcel == null) return;
+                if (response?.parcels == null || response.parcels.Count == 0) return;
+                ParcelSummary parcel = response.parcels[0];
+                CityDataCache.Ensure().Register(parcel);
                 CreateOrUpdateParcelObject(parcel);
                 parcelVersionCache[parcel.parcel_id] = parcel.version;
             },

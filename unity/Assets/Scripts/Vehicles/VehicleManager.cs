@@ -76,11 +76,6 @@ public partial class VehicleManager : MonoBehaviour
     private static long State(int path, bool forward) => ((long)path << 1) | (forward ? 1L : 0L);
     private Transform container;
     private float scanTimer, densityTimer;
-    private float motionFetchTime;
-    private bool motionInFlight;
-    private int motionGeneration;
-    private readonly Dictionary<int,RoadMotionData> motion = new();
-    private readonly HashSet<int> motionFetched = new();   // Roads whose travel times are current, including roads the core returned none for.
     private readonly Dictionary<Vehicle,float> gaps = new();
     private readonly Dictionary<(int,bool,int),List<(Vehicle v,float progress)>> followGroups = new();
     private readonly Stack<List<(Vehicle v,float progress)>> followListPool = new();
@@ -146,7 +141,6 @@ public partial class VehicleManager : MonoBehaviour
     {
         RenderWorkScheduler.StopAll(this);
         roadWorker = null; accessWorker = null; poolWarmStarted = false;
-        motionGeneration++; motionInFlight = false;
     }
 
     private void Update()
@@ -219,7 +213,6 @@ public partial class VehicleManager : MonoBehaviour
 
     private void ClearVehicles()
     {
-        motionGeneration++; motionInFlight=false; motionFetchTime=0; motion.Clear(); motionFetched.Clear();
         for (int i = active.Count - 1; i >= 0; i--) Despawn(i);
         roads.Clear(); populatedRoads.Clear(); buckets.Clear(); bucketByKey.Clear();
         population.Reset(); scanTimer = 0; densityTimer = 0; spawnBacklog = 0; seedRemaining = 0; seedRemainder = 0;
@@ -238,7 +231,7 @@ public partial class VehicleManager : MonoBehaviour
         RenderWorkScheduler.Stop(this, roadWorker); roadWorker = null;
         RenderWorkScheduler.Stop(this, accessWorker); accessWorker = null;
         buckets.Clear(); bucketByKey.Clear();
-        spawnBacklog = 0; scanTimer = 0; motionFetchTime = 0;
+        spawnBacklog = 0; scanTimer = 0;
         seeding = false;
     }
 
@@ -328,7 +321,6 @@ public partial class VehicleManager : MonoBehaviour
     {
         roads.Clear();
         foreach (var entry in next) roads.Add(entry.Key, entry.Value);
-        FetchMotion();
         if (accessWorker == null) accessWorker = RenderWorkScheduler.Start(this, UpdateAccess(center), "vehicleAccess", () => false);
         var previous = new Dictionary<long, Bucket>(bucketByKey);
         buckets.Clear(); bucketByKey.Clear();
@@ -339,7 +331,7 @@ public partial class VehicleManager : MonoBehaviour
             // TransitVehicleManager renders buses/LRT along their lines, so do not spawn them as ambient traffic.
             if (type == Constants.VEHICLE_BUS || type == Constants.VEHICLE_TRAM) continue;
             long key = Key(road.data.path_id, type);
-            float target = Traffic(road.data, type) / Mathf.Max(1, activeHoursPerDay * 3600) * road.insideLength
+            float target = Traffic(road.data, type) / Mathf.Max(1, ActiveHoursPerDay * 3600) * road.insideLength
                 / MeanSpeed(road.data.path_id,type) * Mathf.Clamp01(renderFraction);
             var bucket = new Bucket { road = road, type = type, target = target,
                 average = previous.TryGetValue(key, out var old) ? old.average : 0 };
@@ -672,40 +664,21 @@ public partial class VehicleManager : MonoBehaviour
         return true;
     }
 
-    /// <summary>Fetch travel times only for roads not yet asked. Times change only with epochs and edits; RefetchMotion marks them for refetch.</summary>
-    private void FetchMotion()
-    {
-        if (motionInFlight || Time.unscaledTime < motionFetchTime) return;
-        var ids=new List<int>();
-        foreach(int id in roads.Keys)if(!motionFetched.Contains(id))ids.Add(id);
-        if(ids.Count==0)return;
-        if(ids.Count>4096)ids.RemoveRange(4096,ids.Count-4096);
-        motionInFlight=true; motionFetchTime=Time.unscaledTime+2;
-        int generation=motionGeneration;
-        StartCoroutine(ApiClient.Post<RoadMotionResponse>("/paths/motion",ids,response=>
-        {
-            if(generation!=motionGeneration)return;
-            if(response!=null)
-            {
-                foreach(int id in ids){motion.Remove(id);motionFetched.Add(id);}
-                if(response.paths!=null)foreach(var item in response.paths)if(item.Valid)motion[item.path_id]=item;
-                if(response.active_hours > 0) activeHoursPerDay=response.active_hours;
-            }
-            motionInFlight=false;
-        },(_,__)=>{if(generation==motionGeneration)motionInFlight=false;}));
-    }
+    /// <summary>The core's daily active hours (PATH_ACTIVE_HOURS) once travel times arrive; the serialized default before that.</summary>
+    private float ActiveHoursPerDay => CityDataCache.Instance != null && CityDataCache.Instance.MotionActiveHours > 0 ? CityDataCache.Instance.MotionActiveHours : activeHoursPerDay;
 
-    /// <summary>Refetch travel times for all roads, keeping current values until replies arrive. Call whenever city data is refetched.</summary>
-    public void RefetchMotion()
+    /// <summary>Travel times of every road come with the city data (CityDataCache), synchronized with epochs and edits.</summary>
+    private static bool TryGetMotion(int path,out RoadMotionData data)
     {
-        motionGeneration++; motionInFlight=false; motionFetchTime=0; motionFetched.Clear();
+        data=null;
+        return CityDataCache.Instance!=null && CityDataCache.Instance.TryGetMotion(path,out data);
     }
-    private float MeanSpeed(int path,int type) => motion.TryGetValue(path,out var data) ? data.MeanSpeed : Mathf.Max(.1f,baseSpeed*SpeedFactor(type));
+    private float MeanSpeed(int path,int type) => TryGetMotion(path,out var data) ? data.MeanSpeed : Mathf.Max(.1f,baseSpeed*SpeedFactor(type));
     private void SetMotion(Vehicle v,float connectorLength=0)
     {
         float mean=MeanSpeed(v.pathId,v.vehicleType);
         v.motionRemaining=(v.Remaining+connectorLength)/mean;
-        v.motionFreeSpeed=motion.TryGetValue(v.pathId,out var data)?data.FreeSpeed:mean;
+        v.motionFreeSpeed=TryGetMotion(v.pathId,out var data)?data.FreeSpeed:mean;
         var path=pathManager.GetPathData(v.pathId);
         v.holdAtEnd=path!=null && pathManager.GetPathsConnectedToNode(v.AheadNodeId(path.start_node_id,path.end_node_id)).Count!=2;
     }
@@ -826,7 +799,7 @@ public partial class VehicleManager : MonoBehaviour
             Vector3 before = v.go.transform.position;
             if (!v.ExitingRoad && !v.fading)
             {
-                float free=motion.TryGetValue(v.pathId,out var timing)?timing.FreeSpeed:v.motionFreeSpeed;
+                float free=TryGetMotion(v.pathId,out var timing)?timing.FreeSpeed:v.motionFreeSpeed;
                 float gap=gaps.TryGetValue(v,out float ahead)?ahead:float.PositiveInfinity;
                 if(v.holdAtEnd && !v.InIntersection)gap=Mathf.Min(gap,RoadMotionControl.StopLineGap(v.Remaining,v.motionRemaining,free));
                 v.speed=RoadMotionControl.FollowingSpeed(free,v.speed,gap,dt);

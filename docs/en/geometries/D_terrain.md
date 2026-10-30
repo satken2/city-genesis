@@ -28,9 +28,9 @@ Core cell indices are nonnegative and originate at the map's southwest corner. U
 
 ## D.5. Elevation retrieval
 
-Elevation APIs return binary little-endian floating-point values in the orientation above. Current cell elevations are square float32 grids sharing boundary points with neighbors. Headers `X-Grid-Rows`, `X-Grid-Cols`, and `X-Cell-Version` provide dimensions and version. Citywide current elevation at far resolution and original natural terrain at near resolution use float16. Cells absent from the version list are version zero, unedited.
+Elevation APIs return binary little-endian floating-point values in the orientation above. Current elevation is the interpolated original natural terrain (the near grid from city creation) overlaid with the fine grids of cells rewritten by construction. Unity fetches the original terrain and the rewritten cells as unrounded float32 and builds resident-cell tiles locally with the same interpolation rule as the core, so camera movement never queries the core. Keep the rule identical in the core and Unity; never change only one side. Citywide current elevation at far resolution uses float16. Cells absent from the version list are version zero, unedited.
 
-Interpolation near cell boundaries reads neighboring cells, so versions also reflect surrounding edits. The front end uses versions only to compare with retained terrain. Grounding and geometry use current elevation, rather than independently interpolating original terrain or storage arrays.
+Interpolation near cell boundaries reads neighboring cells, so versions also reflect surrounding edits. The front end uses versions only to compare with retained terrain and to decide which rewritten cells to refetch.
 
 ## D.6. Coastlines
 

@@ -25,7 +25,7 @@ Unity and the core share a map-centered origin. Unity does not shift it when the
 
 ## Terrain rendering
 
-All resident cells use tiles of the same resolution from current core elevation; Unity Terrain adjusts on-screen detail. Shared boundary grid points prevent height seams.
+All resident cells use tiles of the same resolution from current elevation computed locally with the core's rule ([terrain](D_terrain.md)); Unity Terrain adjusts on-screen detail. Shared boundary grid points prevent height seams.
 
 Outside resident cells, one citywide overview land mesh covers only the core coastline's land. A water plane supplies the sea, preventing coarse terrain from protruding above water offshore. Shaders sink overview land beneath cells with visible terrain tiles so it cannot poke through.
 

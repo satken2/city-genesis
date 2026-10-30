@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 /// <summary>
 /// Manager fetching backend terrain elevations and placing resident-cell Terrain tiles and citywide UltraFar land meshes.
-/// - Resident cells: /api/v1/terrain/surface (float32 per cell, 513 grid). Apply incrementally to temporary TerrainData before swapping.
+/// - Resident cells: generated locally by TerrainSurfaceSampler from /api/v1/terrain/near and edited cells (/api/v1/terrain/dynamic), 513 grid. Apply incrementally to temporary TerrainData before swapping.
 /// - Overview: build UltraFar land meshes from /api/v1/terrain/far coarse map elevations.
 /// - Fetch map dimensions/cell size from /api/v1/terrain/settings and ground cover type from /api/v1/city.
 /// </summary>
@@ -94,15 +94,19 @@ public partial class TerrainManager : BaseApiDataManager
 
     /// <summary>
     /// Latest /terrain/cell-versions response in Unity cell coordinates. Terrain revisions change only during epochs/edits,
-    /// always followed by ReloadAllData → InvalidateCellVersions, so reuse for camera-triggered batches.
+    /// always followed by ReloadAllData → InvalidateCellVersions, so reuse for camera-triggered batches (never refetch on a timer:
+    /// while an epoch runs the core must not be asked).
     /// If invalidated during fetching, do not clear dirty using that response (check cellVersionsGeneration).
     /// </summary>
     private Dictionary<Vector2Int, int> cachedCellVersions;
-    private float cellVersionsFetchedAt;
     private bool cellVersionsDirty = true;
     private int cellVersionsGeneration;
-    // Refetch beyond this many seconds even if backend changes were missed.
-    private const float CELL_VERSIONS_MAX_AGE = 5f;
+
+    /// <summary>Tile source matching cachedCellVersions. Replaced together with it; null until the base grid arrives.</summary>
+    private TerrainSurfaceSampler surfaceSampler;
+    /// <summary>Base grid (/terrain/near), fixed for the session.</summary>
+    private float[] nearHeights;
+    private int nearRows, nearCols;
 
     /// <summary>
     /// Whether debug mode is enabled. Read by MinimapOverlay and similar callers.
@@ -330,8 +334,8 @@ public partial class TerrainManager : BaseApiDataManager
     private int activeTileDownloads;
 
     /// <summary>
-    /// Fetch slot count. Publication workers return slots when starting tile publication, limiting concurrent HTTP requests
-    /// and memory for received height arrays awaiting publication, while allowing next-tile fetching during publication.
+    /// Generation slot count. Publication workers return slots when starting tile publication, limiting concurrent generation
+    /// and memory for height arrays awaiting publication, while allowing next-tile generation during publication.
     /// </summary>
     private const int MAX_PARALLEL_TILE_DOWNLOADS = 4;
 
@@ -879,8 +883,8 @@ public partial class TerrainManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Fetch and normalize one cell tile, then wait for streaming application and OnTerrainTileReady notification.
-    /// If LRU has a tile meeting the required revision, request restoration without consuming a fetch slot (unused with force).
+    /// Generate and normalize one cell tile, then wait for streaming application and OnTerrainTileReady notification.
+    /// If LRU has a tile meeting the required revision, request restoration without consuming a generation slot (unused with force).
     /// Use native waits (WaitUntil) throughout, consuming no shared-budget Steps while waiting.
     /// </summary>
     private IEnumerator TileJobRoutine(TileJob job)
@@ -897,10 +901,10 @@ public partial class TerrainManager : BaseApiDataManager
                 RenderWorkScheduler.CountEvent("terrain.tileCacheHit");
                 var restoreRequest = new HeightStreamRequest { job = job, version = cached.version, restoreTile = cached.terrain };
                 yield return EnqueueAndWait(cell, restoreRequest);
-                // Proceed to fetching only if restoration failed, such as destruction while retained.
+                // Proceed to generation only if restoration failed, such as destruction while retained.
                 if (restoreRequest.succeeded || IsJobCanceled(job)) yield break;
             }
-            // If prefetched heights are available, skip fetching and request publication only.
+            // If prefetched heights are available, skip generation and request publication only.
             if (!job.force && TryTakePrefetchedHeights(cell, job.requiredVersion, out float[,] prefetched, out int prefetchedVersion))
             {
                 RenderWorkScheduler.CountEvent("terrain.prefetchHeightsHit");
@@ -913,33 +917,14 @@ public partial class TerrainManager : BaseApiDataManager
             if (!job.slotGranted) yield return new WaitUntil(() => job.slotGranted || IsJobCanceled(job));
             if (IsJobCanceled(job)) yield break;
 
+            TerrainSurfaceSampler sampler = surfaceSampler;
+            if (sampler == null) yield break;
+            int version = sampler.Version(cell);
             Vector2Int backend = UnityCellToBackendCell(cell);
-            string path = $"/terrain/surface?cell_x={backend.x}&cell_z={backend.y}&resolution={TILE_RESOLUTION}";
-            byte[] bytes;
-            int version;
-            RenderWorkScheduler.CountEvent("terrain.tileDownload");
-            using (ApiRequest call = ApiClient.Request("GET", path, timeoutSeconds: 30))
-            {
-                yield return call.Send(() => IsJobCanceled(job));
-                if (call.Aborted)
-                {
-                    RenderWorkScheduler.CountEvent("terrain.tileDownloadAborted");
-                    yield break;
-                }
-                UnityWebRequest request = call.Web;
-                if (request.result != UnityWebRequest.Result.Success)
-                {
-                    Debug.LogWarning($"地形セル{cell}の取得失敗: {request.error}");
-                    yield break;
-                }
-                bytes = request.downloadHandler.data;
-                version = ParseIntHeader(request, "X-Cell-Version", 0);
-            }
-            if (IsJobCanceled(job)) yield break;
             float span = terrainSize.y;
-            float below = SeaFloorDepthSpan;
+            RenderWorkScheduler.CountEvent("terrain.tileGenerate");
             float[,] heights = buffer = RentHeightBuffer();
-            normalizeTask = BackgroundWork.Run(() => NormalizeTileHeights(bytes, heights, span, below));
+            normalizeTask = BackgroundWork.Run(() => GenerateTileHeights(sampler, backend, heights, span, SeaFloorDepthSpan));
             Task task = normalizeTask;
             yield return new WaitUntil(() => task.IsCompleted || IsJobCanceled(job));
             if (IsJobCanceled(job)) yield break;
@@ -964,13 +949,12 @@ public partial class TerrainManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Copy received float32 elevations directly into tile arrays while normalizing to 0–1, avoiding intermediate 1D arrays.
+    /// Generate one cell's elevations into the tile array and normalize them to 0–1 in place.
     /// Called on another thread; do not access Unity APIs.
     /// </summary>
-    private static void NormalizeTileHeights(byte[] bytes, float[,] heights, float span, float below)
+    private static void GenerateTileHeights(TerrainSurfaceSampler sampler, Vector2Int backendCell, float[,] heights, float span, float below)
     {
-        if (bytes.Length != TILE_RESOLUTION * TILE_RESOLUTION * sizeof(float)) throw new InvalidOperationException("地形配列のサイズが不正です");
-        Buffer.BlockCopy(bytes, 0, heights, 0, bytes.Length);
+        sampler.Tile(backendCell, TILE_RESOLUTION, heights);
         for (int z = 0; z < TILE_RESOLUTION; z++)
             for (int x = 0; x < TILE_RESOLUTION; x++)
             {
@@ -1070,6 +1054,8 @@ public partial class TerrainManager : BaseApiDataManager
         cachedCellVersions = null;
         cellVersionsDirty = true;
         cellVersionsGeneration++;
+        surfaceSampler = null;
+        nearHeights = null;
 
         residentTerrainCells.Clear();
         ClearPrefetch();
@@ -1123,9 +1109,10 @@ public partial class TerrainManager : BaseApiDataManager
     {
         yield return EnsureSettingsLoaded();
         if (terrainSettings == null || batch.IsCanceled) yield break;
-        if (isForce || cellVersionsDirty || cachedCellVersions == null || Time.unscaledTime - cellVersionsFetchedAt > CELL_VERSIONS_MAX_AGE)
+        if (isForce || cellVersionsDirty || cachedCellVersions == null || surfaceSampler == null)
         {
             int generation = cellVersionsGeneration;
+            int epoch = clearEpoch;
             CellVersionsResponse response = null;
             while (response == null && !batch.IsCanceled)
             {
@@ -1139,8 +1126,15 @@ public partial class TerrainManager : BaseApiDataManager
                 foreach (var item in response.cells)
                     foreach (var cell in BackendCellToUnityCells(new Vector2Int(item.cell_x, item.cell_z)))
                         fetched[cell] = item.version;
+            TerrainSurfaceSampler sampler = null;
+            while (sampler == null && !batch.IsCanceled && epoch == clearEpoch)
+            {
+                yield return BuildSurfaceSampler(fetched, value => sampler = value);
+                if (sampler == null) yield return new WaitForSecondsRealtime(2f);
+            }
+            if (batch.IsCanceled || epoch != clearEpoch) yield break;
+            surfaceSampler = sampler;
             cachedCellVersions = fetched;
-            cellVersionsFetchedAt = Time.unscaledTime;
             if (generation == cellVersionsGeneration) cellVersionsDirty = false;
             RenderWorkScheduler.CountEvent("terrain.cellVersionsFetched");
         }
@@ -1379,6 +1373,85 @@ public partial class TerrainManager : BaseApiDataManager
 
     /// <summary>Revision of received overview elevations. Objects placed at overview heights use this to decide rebuilding. -1 before reception.</summary>
     public long OverviewDataRevision => farTerrainHeights != null ? overviewDataRevision : -1;
+
+    /// <summary>
+    /// Build a tile source for the given revision list. Fetch the base grid once per session, and refetch edited cells whose listed
+    /// revision changed (the list covers edited cells and their 3x3 neighbors; unedited ones answer 404). Pass null on any failure.
+    /// </summary>
+    private IEnumerator BuildSurfaceSampler(Dictionary<Vector2Int, int> versions, Action<TerrainSurfaceSampler> onDone)
+    {
+        int epoch = clearEpoch;
+        if (nearHeights == null)
+        {
+            byte[] bytes = null;
+            using (ApiRequest call = ApiClient.Request("GET", "/terrain/near?dtype=float32", timeoutSeconds: 60))
+            {
+                yield return call.Send();
+                if (call.Web.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogWarning($"基礎地形の取得失敗: {call.Web.error}");
+                    onDone(null);
+                    yield break;
+                }
+                bytes = call.Web.downloadHandler.data;
+            }
+            int rows = terrainSettings.map_height / terrainSettings.near_map_spacing + 1;
+            int cols = terrainSettings.map_width / terrainSettings.near_map_spacing + 1;
+            if (bytes.Length != rows * cols * sizeof(float))
+            {
+                Debug.LogError($"基礎地形の大きさが設定と合いません: {bytes.Length}バイト, {rows}x{cols}");
+                onDone(null);
+                yield break;
+            }
+            Task<float[]> decode = BackgroundWork.Run(() =>
+            {
+                var heights = new float[rows * cols];
+                Buffer.BlockCopy(bytes, 0, heights, 0, bytes.Length);
+                return heights;
+            });
+            yield return Utils.WaitTask(decode);
+            if (epoch != clearEpoch || decode.IsFaulted) { onDone(null); yield break; }
+            nearHeights = decode.Result;
+            nearRows = rows;
+            nearCols = cols;
+        }
+
+        TerrainSurfaceSampler previous = surfaceSampler;
+        var edited = new Dictionary<Vector2Int, float[]>();
+        int size = terrainSettings.cell_size / terrainSettings.dynamic_map_spacing + 1;
+        foreach (var item in versions)
+        {
+            Vector2Int backend = UnityCellToBackendCell(item.Key);
+            if (previous != null && previous.Version(item.Key) == item.Value)
+            {
+                if (previous.EditedCells.TryGetValue(backend, out float[] kept)) edited[backend] = kept;
+                continue;
+            }
+            using (ApiRequest call = ApiClient.Request("GET", $"/terrain/dynamic?cell_x={backend.x}&cell_z={backend.y}", timeoutSeconds: 30))
+            {
+                yield return call.Send();
+                if (epoch != clearEpoch) { onDone(null); yield break; }
+                if (call.Web.responseCode == 404) continue;
+                if (call.Web.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogWarning($"編集済み地形セル{backend}の取得失敗: {call.Web.error}");
+                    onDone(null);
+                    yield break;
+                }
+                byte[] bytes = call.Web.downloadHandler.data;
+                if (bytes.Length != size * size * sizeof(float))
+                {
+                    Debug.LogError($"編集済み地形セル{backend}の大きさが不正です: {bytes.Length}バイト");
+                    onDone(null);
+                    yield break;
+                }
+                var heights = new float[size * size];
+                Buffer.BlockCopy(bytes, 0, heights, 0, bytes.Length);
+                edited[backend] = heights;
+            }
+        }
+        onDone(new TerrainSurfaceSampler(nearHeights, nearRows, nearCols, terrainSettings, edited, versions));
+    }
 
     private IEnumerator EnsureOverview(long revision, LoadBatch batch)
     {

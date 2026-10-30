@@ -2,12 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 
 /// <summary>
 /// Prefetch nearby nonresident cells selected by LodConfig nearest-first that may become resident after turning or slight movement.
-/// Fetch only when resident-cell fetching/publication is finished and shared budget is available; retain completed hidden tiles in LRU.
-/// On residency entry, simply reshow LRU tiles without waiting for fetching, band application, SyncHeightmap, or collider generation.
+/// Generate only when resident-cell generation/publication is finished and shared budget is available; retain completed hidden tiles in LRU.
+/// On residency entry, simply reshow LRU tiles without waiting for generation, band application, SyncHeightmap, or collider generation.
 /// Prefetch tiles are excluded from display, grounding, GPU height windows, and overview masks, just like retained LRU tiles.
 /// </summary>
 public partial class TerrainManager
@@ -15,7 +14,7 @@ public partial class TerrainManager
     /// <summary>Prefetch cells, nearest first. Replaced for each load batch.</summary>
     private readonly List<Vector2Int> prefetchCells = new List<Vector2Int>();
 
-    /// <summary>Normalized prefetched heights. Discard after assembly; resident tile jobs use them instead of fetching.</summary>
+    /// <summary>Normalized prefetched heights. Discard after assembly; resident tile jobs use them instead of generating.</summary>
     private sealed class PrefetchedHeights
     {
         public float[,] heights;
@@ -26,9 +25,9 @@ public partial class TerrainManager
     private readonly Dictionary<Vector2Int, PrefetchedHeights> prefetchedHeights = new Dictionary<Vector2Int, PrefetchedHeights>();
     /// <summary>prefetchedHeights insertion order, oldest first; discard from here at capacity.</summary>
     private readonly LinkedList<Vector2Int> prefetchedHeightsOrder = new LinkedList<Vector2Int>();
-    /// <summary>Maximum heights awaiting assembly (about 1MB each). Few needed because assembly follows fetching immediately.</summary>
+    /// <summary>Maximum heights awaiting assembly (about 1MB each). Few needed because assembly follows generation immediately.</summary>
     private const int PREFETCH_HEIGHTS_CAPACITY = 8;
-    /// <summary>Cells whose fetching failed. Do not reselect within the same prefetch set, avoiding repeated failures.</summary>
+    /// <summary>Cells whose generation failed. Do not reselect within the same prefetch set, avoiding repeated failures.</summary>
     private readonly HashSet<Vector2Int> prefetchFailedCells = new HashSet<Vector2Int>();
     private Coroutine prefetchWorkerCoroutine;
 
@@ -76,7 +75,7 @@ public partial class TerrainManager
     }
 
     /// <summary>
-    /// Fetch heights and assemble hidden tiles one at a time, nearest first. Wait before each stage for resident work and budget availability,
+    /// Generate heights and assemble hidden tiles one at a time, nearest first. Wait before each stage for resident work and budget availability,
     /// avoiding resident display delays. Abort assembly if the cell becomes resident, yielding fetched heights to its resident tile job.
     /// </summary>
     private IEnumerator PrefetchWorker()
@@ -87,12 +86,12 @@ public partial class TerrainManager
             while (true)
             {
                 yield return null;
-                if (terrainSettings == null || cachedCellVersions == null || cellVersionsDirty || !IsPrefetchIdle()) continue;
+                if (terrainSettings == null || surfaceSampler == null || cachedCellVersions == null || cellVersionsDirty || !IsPrefetchIdle()) continue;
                 if (!TryPickPrefetchCell(out Vector2Int cell)) continue;
                 int epoch = clearEpoch;
                 if (!prefetchedHeights.TryGetValue(cell, out PrefetchedHeights entry) || entry.version < RequiredCellVersion(cell))
                 {
-                    yield return DownloadPrefetchHeights(cell, epoch);
+                    yield return GeneratePrefetchHeights(cell, epoch);
                     continue;
                 }
 
@@ -137,30 +136,17 @@ public partial class TerrainManager
     private bool IsPrefetchBuildValid(Vector2Int cell, int epoch, PrefetchedHeights entry) =>
         IsPrefetchTarget(cell, epoch) && prefetchedHeights.TryGetValue(cell, out PrefetchedHeights current) && current == entry;
 
-    /// <summary>Fetch, normalize, and retain prefetch heights. Use the resident tile API without consuming fetch slots.</summary>
-    private IEnumerator DownloadPrefetchHeights(Vector2Int cell, int epoch)
+    /// <summary>Generate, normalize, and retain prefetch heights without consuming generation slots.</summary>
+    private IEnumerator GeneratePrefetchHeights(Vector2Int cell, int epoch)
     {
+        TerrainSurfaceSampler sampler = surfaceSampler;
         Vector2Int backend = UnityCellToBackendCell(cell);
-        string path = $"/terrain/surface?cell_x={backend.x}&cell_z={backend.y}&resolution={TILE_RESOLUTION}";
-        byte[] bytes;
-        int version;
-        RenderWorkScheduler.CountEvent("terrain.prefetchDownload");
-        using (ApiRequest call = ApiClient.Request("GET", path, timeoutSeconds: 30))
-        {
-            yield return call.Send(() => epoch != clearEpoch);
-            if (call.Aborted) yield break;
-            if (call.Web.result != UnityWebRequest.Result.Success)
-            {
-                prefetchFailedCells.Add(cell);
-                yield break;
-            }
-            bytes = call.Web.downloadHandler.data;
-            version = ParseIntHeader(call.Web, "X-Cell-Version", 0);
-        }
+        int version = sampler.Version(cell);
+        RenderWorkScheduler.CountEvent("terrain.prefetchGenerate");
         float span = terrainSize.y;
         float below = SeaFloorDepthSpan;
         float[,] heights = RentHeightBuffer();
-        Task task = BackgroundWork.Run(() => NormalizeTileHeights(bytes, heights, span, below));
+        Task task = BackgroundWork.Run(() => GenerateTileHeights(sampler, backend, heights, span, below));
         yield return new WaitUntil(() => task.IsCompleted);
         if (task.IsFaulted || task.IsCanceled)
         {

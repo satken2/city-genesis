@@ -1714,50 +1714,40 @@ public partial class PathManager : BaseApiDataManager
         UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  LoadMergedPaths: {swPath.ElapsedMilliseconds}ms");
     }
 
-    /// <summary>Fetch every page of paths in the cells' merged BBOX. Passes null when a page fails, is canceled, or the cursor does not advance.</summary>
+    /// <summary>Read the paths overlapping the cells' merged BBOX from the city cache. Passes null when the cache cannot provide the range or the batch is canceled.</summary>
     private IEnumerator FetchMergedPaths(List<Vector2Int> cells, Action<PagedPathListResponse> onDone)
     {
         CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
-        string bbox = $"{minX},{minZ},{maxX},{maxZ}";
-        PagedPathListResponse response = new PagedPathListResponse { paths = new List<ConstructionPathSummary>() };
-        int cursor = 0;
+        var area = Rect.MinMaxRect(minX, minZ, maxX, maxZ);
         int generation = lodFetchGeneration;
         Func<bool> isCanceled = () => generation != lodFetchGeneration;
-        while (true)
-        {
-            PagedPathListResponse page = null;
-            yield return ApiClient.GetBulk<PagedPathListResponse>(
-                $"/paths/?bbox={bbox}&limit=500&cursor={cursor}", value => page = value,
-                timingLabel: "PathManager page", isCanceled: isCanceled);
-            if (page?.paths == null) { response = null; break; }
-            RenderWorkScheduler.CountEvent("path.received", page.paths.Count);
-            response.paths.AddRange(page.paths);
-            if (!page.next_cursor.HasValue) break;
-            if (page.next_cursor.Value <= cursor) { response = null; break; }
-            cursor = page.next_cursor.Value;
-            yield return null;
-        }
+        bool available = false;
+        CityDataCache cache = CityDataCache.Ensure();
+        yield return cache.EnsureRect(CityDataCache.Kind.Paths, area, isCanceled, ok => available = ok);
+        if (!available || isCanceled()) { onDone(null); yield break; }
+        var response = new PagedPathListResponse { paths = cache.PathsIn(area) };
+        RenderWorkScheduler.CountEvent("path.received", response.paths.Count);
         onDone(response);
     }
 
     /// <summary>
-    /// Bulk-fetch nodes in a BBOX merging multiple cells.
+    /// Read the nodes in a BBOX merging multiple cells from the city cache.
     /// </summary>
     private IEnumerator LoadMergedNodes(List<Vector2Int> cells)
     {
         CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
+        var area = Rect.MinMaxRect(minX, minZ, maxX, maxZ);
 
         int generation = lodFetchGeneration;
-        NodeGeometryResponse response = null;
-        yield return ApiClient.GetBulk<NodeGeometryResponse>(
-            $"/nodes?start_x={minX}&end_x={maxX}&start_z={minZ}&end_z={maxZ}",
-            r => response = r,
-            timingLabel: "PathManager nodes",
-            isCanceled: () => generation != lodFetchGeneration);
-        if (response == null)
+        Func<bool> isCanceled = () => generation != lodFetchGeneration;
+        bool available = false;
+        CityDataCache cache = CityDataCache.Ensure();
+        yield return cache.EnsureRect(CityDataCache.Kind.Nodes, area, isCanceled, ok => available = ok);
+        if (!available || isCanceled())
         {
             yield break;
         }
+        var response = new NodeGeometryResponse { nodes = cache.NodesIn(area) };
 
         HashSet<int> receivedNodeIds = new HashSet<int>();
 
@@ -2278,47 +2268,32 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Accept missing node IDs and send bulk backend requests using comma-separated ids parameters.
-    /// Split into batches of at most 100 to respect URL length limits and similar constraints.
+    /// Register missing nodes from the city cache (before the first synchronization, the cache fetches them by ID).
     /// </summary>
     private IEnumerator FetchNodesBatchCoroutine(List<int> nodeIds)
     {
-        const int batchSize = 100;
-        for (int i = 0; i < nodeIds.Count; i += batchSize)
+        // Set fetching flags to prevent duplicate in-flight requests
+        foreach (int nodeId in nodeIds)
         {
-            List<int> batch = nodeIds.GetRange(i, Math.Min(batchSize, nodeIds.Count - i));
-            string idsParam = string.Join(",", batch);
+            fetchingIntersectionNodeIds.Add(nodeId);
+        }
 
-            // Set fetching flags to prevent duplicate in-flight requests
-            foreach (int nodeId in batch)
+        // Clear flags on batch cancellation too (Dispose through RenderWorkScheduler.Stop).
+        // Otherwise later batches wait forever for these nodes and IsLodBatchActive never clears.
+        try
+        {
+            CityDataCache cache = CityDataCache.Ensure();
+            yield return cache.EnsureNodes(nodeIds, null);
+            foreach (int nodeId in nodeIds)
             {
-                fetchingIntersectionNodeIds.Add(nodeId);
+                if (cache.TryGetNode(nodeId, out NodeData n)) RegisterNodeData(n, out _);
             }
-
-            // Clear flags on batch cancellation too (Dispose through RenderWorkScheduler.Stop).
-            // Otherwise later batches wait forever for these nodes and IsLodBatchActive never clears.
-            try
+        }
+        finally
+        {
+            foreach (int nodeId in nodeIds)
             {
-                NodeGeometryResponse response = null;
-                yield return ApiClient.GetBulk<NodeGeometryResponse>(
-                    $"/nodes?ids={idsParam}",
-                    r => response = r,
-                    timingLabel: "PathManager nodes-batch");
-
-                if (response?.nodes != null)
-                {
-                    foreach (var n in response.nodes)
-                    {
-                        RegisterNodeData(n, out _);
-                    }
-                }
-            }
-            finally
-            {
-                foreach (int nodeId in batch)
-                {
-                    fetchingIntersectionNodeIds.Remove(nodeId);
-                }
+                fetchingIntersectionNodeIds.Remove(nodeId);
             }
         }
     }
@@ -6189,14 +6164,16 @@ public partial class PathManager : BaseApiDataManager
         return defaultBackendWidth;
     }
 
+    /// <summary>Refetch one path in the list form (the same form the city cache holds) and redraw it.</summary>
     public IEnumerator FetchPath(int pathId)
     {
-        yield return ApiClient.Get<ConstructionPathSummary>(
-            $"/paths/{pathId}",
-            path =>
+        yield return ApiClient.GetBulk<PagedPathListResponse>(
+            $"/paths/?ids={pathId}",
+            response =>
             {
-                if (path != null)
-                    CreateOrUpdatePath(path);
+                if (response?.paths == null || response.paths.Count == 0) return;
+                CityDataCache.Ensure().Register(response.paths[0]);
+                CreateOrUpdatePath(response.paths[0]);
             },
             error => Debug.LogError($"FetchPath({pathId}) failed: {error}")
         );
@@ -6208,30 +6185,19 @@ public partial class PathManager : BaseApiDataManager
         // Cancellation does not invoke callbacks, so guarantee flag cleanup in finally too.
         try
         {
-            yield return ApiClient.Get<NodeData>(
-                $"/nodes/{nodeId}",
-                node =>
-                {
-                    fetchingIntersectionNodeIds.Remove(nodeId);
-                    if (node != null)
-                    {
-                        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} fetched successfully.");
-                        RegisterNodeData(node, out _);
-                        UpdateNodeIntersectionMesh(node.node_id);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} response was null.");
-                        RemoveNodeIntersectionMesh(nodeId);
-                    }
-                },
-                error =>
-                {
-                    fetchingIntersectionNodeIds.Remove(nodeId);
-                    Debug.LogError($"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} fetch failed: {error}");
-                    RemoveNodeIntersectionMesh(nodeId);
-                }
-            );
+            CityDataCache cache = CityDataCache.Ensure();
+            yield return cache.EnsureNodes(new List<int> { nodeId }, null);
+            fetchingIntersectionNodeIds.Remove(nodeId);
+            if (cache.TryGetNode(nodeId, out NodeData node))
+            {
+                RegisterNodeData(node, out _);
+                UpdateNodeIntersectionMesh(node.node_id);
+            }
+            else
+            {
+                Debug.LogWarning($"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} is not in the city data.");
+                RemoveNodeIntersectionMesh(nodeId);
+            }
         }
         finally
         {

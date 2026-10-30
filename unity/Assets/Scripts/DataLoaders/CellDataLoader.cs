@@ -18,7 +18,6 @@ public class CellDataLoader : MonoBehaviour
     private InterchangeManager interchangeManager;
     private RoadManager roadManager;
     private CityOverviewManager cityOverviewManager;
-    private VehicleManager vehicleManager;
 
     // Scene in which to create objects
     private UnityEngine.SceneManagement.Scene targetScene;
@@ -97,6 +96,7 @@ public class CellDataLoader : MonoBehaviour
 
     private IEnumerator FetchCoastlineThenLoad()
     {
+        CityDataCache.Ensure().RequestSync();
         if (terrainManager != null)
         {
             yield return terrainManager.FetchCoastline();
@@ -163,7 +163,6 @@ public class CellDataLoader : MonoBehaviour
             cityOverviewManager = go.AddComponent<CityOverviewManager>();
         }
         cityOverviewManager.Initialize(terrainManager, buildingManager, pathManager);
-        vehicleManager = FindAnyObjectByType<VehicleManager>();
 
         // Initialize HeightmapTextureManager.
         // Initialize references so the GPU height window can subscribe to terrain tile completion notifications.
@@ -530,25 +529,42 @@ public class CellDataLoader : MonoBehaviour
         ForceReloadAllData();
     }
 
+    /// <summary>Incremental update waiting for the city cache to synchronize. Stopped by ClearAllManagerData.</summary>
+    private Coroutine reloadAfterSync;
+
     /// <summary>
     /// Apply incremental updates after backend data changes.
-    /// Called after committing road, building, or district creation, for example.
-    /// Run incremental updates for all managers even if the camera has not moved.
+    /// Called after committing road, building, or district creation, epoch completion, and session:reload, for example.
+    /// First synchronize the city cache with the core, then run incremental updates for all managers even if the camera has not moved
+    /// (marking cells stale before synchronization ends would let a camera batch clear the marks with old data).
     /// Each manager compares versions to skip redrawing unchanged objects.
     /// </summary>
     public void ReloadAllData()
     {
+        Debug.Log("CellDataLoader: ReloadAllData invoked.");
+        loadSuspendedUntilReload = false;
+        int ticket = CityDataCache.Ensure().RequestSync();
+        if (reloadAfterSync != null) RenderWorkScheduler.Stop(this, reloadAfterSync);
+        reloadAfterSync = RenderWorkScheduler.Start(this, ReloadAfterSync(ticket), "CellDataLoader", () => false);
+    }
+
+    private IEnumerator ReloadAfterSync(int ticket)
+    {
+        while (!CityDataCache.Instance.IsSyncedThrough(ticket)) yield return null;
+        reloadAfterSync = null;
+        ApplyReload();
+    }
+
+    private void ApplyReload()
+    {
         PropManager.Instance?.InvalidateForestOverview();
-        // Record refetch signals synchronously on request, ensuring the next batch refetches even if subsequent batches are canceled.
+        // Record refetch signals before issuing the batch, ensuring the next batch refetches even if subsequent batches are canceled.
         terrainManager?.InvalidateCellVersions();
         buildingManager?.MarkLoadedCellsStale();
         parcelManager?.MarkLoadedCellsStale();
         cityOverviewManager?.RequestRefresh();
-        vehicleManager?.RefetchMotion();
         RopewayNetworkStore.Instance?.RequestRefresh();
         TransitDataStore.Instance?.Refresh();
-        Debug.Log("CellDataLoader: ReloadAllData invoked.");
-        loadSuspendedUntilReload = false;
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)
         {
             LodCellSets cellSets = CalculateLodCellSets();
@@ -593,6 +609,7 @@ public class CellDataLoader : MonoBehaviour
     private IEnumerator ForceReloadAllDataCoroutine()
     {
         ClearAllManagerData();
+        CityDataCache.Ensure().RequestSync();
 
         // ClearAllManagerData empties coastline, water surface, river, and reclaimed land stores too, so
         // refetch before generating buildings and roads (used for port quay checks, river crossings, and grounding inside bands).
@@ -646,7 +663,9 @@ public class CellDataLoader : MonoBehaviour
         interchangeManager?.Clear();
         roadManager?.Clear();
         cityOverviewManager?.Clear();
-        vehicleManager?.RefetchMotion();
+        CityDataCache.Ensure().Clear();
+        if (reloadAfterSync != null) RenderWorkScheduler.Stop(this, reloadAfterSync);
+        reloadAfterSync = null;
 
         // Invalidate the GPU height window and per-frame terrain height cache.
         // Otherwise, while loading the next save, Utils.GetGroundHeight would return
