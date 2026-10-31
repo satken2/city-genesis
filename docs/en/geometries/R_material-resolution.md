@@ -16,7 +16,11 @@ Buildings use prefab material instances directly without cloning. Buildings usin
 
 Paths always use a shared pool keyed by material name. A same-named material looked up by name takes precedence. Otherwise the pool clones the part material and shifts render order one step later to avoid Z-fighting, sharing one instance per name. Intersection and sidewalk joins also use this pool instead of prefab materials directly.
 
-Path master `body_material` names the variant's representative surface material under `Assets/Resources/`, used by model-free faces such as intersection asphalt and far strips. New generators should follow one of these two approaches rather than adding independent resource loading or `new Material` calls.
+Path master `body_material` names the variant's representative surface material under `Assets/Resources/`, used by model-free faces such as intersection asphalt and far strips.
+
+A path's paint material `PATH_PAINT` is replaced with a copy painted in the path's color (API `color`: the path's own color, otherwise the variant's default color), sharing one instance per color. Which parts are painted is decided by the parts of the model that use this material name. Variants that use no color keep the model's own color.
+
+New generators should follow one of these two approaches rather than adding independent resource loading or `new Material` calls.
 
 ## Replacement after generation
 

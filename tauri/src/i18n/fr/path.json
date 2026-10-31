@@ -17,6 +17,8 @@
     "followTerrain": "Suivi du terrain",
     "followTerrainFollow": "Oui (réglage individuel)",
     "followTerrainNone": "Non (réglage individuel)",
+    "color": "Couleur",
+    "colorReset": "Rétablir par défaut",
     "durability": "Durabilité",
     "noise": "Bruit",
     "airPollution": "Pollution de l'air",

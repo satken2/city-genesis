@@ -642,6 +642,8 @@ export type PathMasterEntry = {
   ramp?: boolean;
   /** Variant available only in scenario authoring (unset = false). Hide from normal-play construction, rebuilding, and line options. */
   template_only?: boolean;
+  /** Paint color ("#RRGGBB") of paths without their own color. null for variants that use no color. */
+  default_color?: string | null;
   /**
    * Variants this path can carry as an attached lower deck, built in the same placement with this path's shape.
    * Attached variants are template_only, so they are placed only this way in normal play. Empty/unset means none.
@@ -883,6 +885,8 @@ export type PathData = {
   planter_type: number;
   advert_type: number;
   utility_mode: number;
+  /** Paint color ("#RRGGBB"): the path's own color, else the variant default. null for variants that use no color. */
+  color?: string | null;
 
   path_id: number;
   name: string;

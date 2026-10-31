@@ -20,6 +20,8 @@ description: City Genesisの道路・線路パーツ3Dモデル(body/line/sidewa
 2. **最小構成から始める**(下記)。パーツ種類は多いが全部作る前提ではない。
 3. **マテリアルは既存を流用する。** 道路系の接頭辞は `PATH_*`
    (`pipeline/materials.py --category Paths` で一覧・検索)。
+   パスの色で塗る部分(吊り橋の主塔・トラスなど)は `PATH_PAINT` にする。地の色と質感は `PATH_METAL` と同じで、
+   Unityがパスの色(マスターの `default_color` を持つバリアントだけ)で塗り替える。
 4. **寸法はマスターデータに従う。** `master.yaml` の `path_master[variant]` の
    `width` / `sidewalk_width` / `side_width` / `wall_width` / `center_width` /
    `tree_spacing` / `pillar_spacing` / `wire_spacing` / `platform_width` が

@@ -107,6 +107,29 @@ public class RoadPath : IPathMeshGenerator
         MaterialCache[key] = material;
     }
 
+    /// <summary>Paint material. Model parts using it are drawn in the path's color; the model decides which parts are painted.</summary>
+    public const string PAINT_MATERIAL = "PATH_PAINT";
+
+    /// <summary>The path's paint color (API `color`, "#RRGGBB"). Null when the variant uses no color.</summary>
+    public static Color? PaintColorOf(PathSummary path)
+        => !string.IsNullOrEmpty(path?.color) && ColorUtility.TryParseHtmlString(path.color, out Color color) ? color : null;
+
+    /// <summary>
+    /// Shared-pool material of a part of a path drawn in the paint color: a PATH_PAINT source becomes the pooled copy
+    /// in that color (one instance per color, named by it so the pool resolves it again); other materials and a null
+    /// color resolve as <see cref="GetOrCreateRoadMaterial"/>. Variant-wide caches must not store the result.
+    /// </summary>
+    public static Material GetOrCreatePartMaterial(Material source, Color? paint)
+    {
+        Material pooled = GetOrCreateRoadMaterial(source);
+        if (pooled == null || paint is not Color color || !source.name.StartsWith(PAINT_MATERIAL, StringComparison.Ordinal)) return pooled;
+        string key = $"{PAINT_MATERIAL}#{ColorUtility.ToHtmlStringRGB(color)}";
+        if (MaterialCache.TryGetValue(key, out Material painted)) return painted;
+        painted = new Material(pooled) { name = key, color = color, renderQueue = pooled.renderQueue };
+        MaterialCache[key] = painted;
+        return painted;
+    }
+
     private static Material GetFallbackRoadMaterial()
     {
         // Use URP-compatible assets through the shared pool, preserving shader references in builds.
@@ -369,6 +392,7 @@ public class RoadPath : IPathMeshGenerator
             var group = new GameObject(prefabName + "_LOD");
             group.transform.SetParent(parent.transform, false);
             float adaptive = PathDrawContext.AdaptiveTileLength;
+            Color? paint = PathDrawContext.PaintColor;
             bool isBody = prefabName.EndsWith("/body", StringComparison.Ordinal);
             group.AddComponent<SplinePartLod>().Configure(spline, width, centerOffsetX, offsetY,
                 isBody, isBody ? PathDrawContext.PathVariant : 0, clipFrom, clipTo,
@@ -376,6 +400,7 @@ public class RoadPath : IPathMeshGenerator
                 {
                     PathDrawContext.Begin(lod, from, to);
                     PathDrawContext.SetAdaptiveTileLength(adaptive);
+                    PathDrawContext.PaintColor = paint;
                     PathDrawContext.Warp = warp;
                     PathDrawContext.PartCreated = partCreated;
                     try
@@ -451,7 +476,7 @@ public class RoadPath : IPathMeshGenerator
 
                 for (int i = 0; i < originalMaterials.Length; i++)
                 {
-                    cachedMaterials[i] = GetOrCreateRoadMaterial(originalMaterials[i]);
+                    cachedMaterials[i] = GetOrCreatePartMaterial(originalMaterials[i], PathDrawContext.PaintColor);
                 }
                 targetMr.sharedMaterials = cachedMaterials;
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   マテリアル割当完了: {cachedMaterials.Length}件");

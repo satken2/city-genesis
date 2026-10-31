@@ -17,6 +17,8 @@
     "followTerrain": "地形追従",
     "followTerrainFollow": "する(個別設定)",
     "followTerrainNone": "しない(個別設定)",
+    "color": "色",
+    "colorReset": "既定に戻す",
     "durability": "耐久度",
     "noise": "騒音",
     "airPollution": "大気汚染",

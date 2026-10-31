@@ -9,8 +9,8 @@ import { describeError } from "../../utils/errors";
  * - InfoHeader: icon, status, name (if unnamed and assigned to a road: "road name (section #id)").
  * - Road membership row for streets/highways (road/RoadMembershipRow).
  * - Basic information tab:
- *   - Basic information section: district, terrain following, and meters for utilization/durability/noise/
- *     air pollution (PathConditionPanel).
+ *   - Basic information section: district, terrain following, color (PathColorRow), and meters for
+ *     utilization/durability/noise/air pollution (PathConditionPanel).
  *   - Traffic/speed settings (PathTrafficPanel): direction toggle, speed-limit sign/input, passing speed,
  *     on-street parking donut, traffic by vehicle type.
  * - Road equipment tab: streetlights, fences, street trees, power distribution method.
@@ -56,6 +56,7 @@ import { ZoneLink } from "../common/ZoneLink";
 import { StationInfoSection } from "./StationInfoSection";
 import { hasPathCondition, PathConditionPanel } from "./PathConditionPanel";
 import { PathEquipmentPanel, pathEquipmentFields } from "./PathEquipmentPanel";
+import { PathColorRow } from "./PathColorRow";
 import { PathTrafficPanel } from "./PathTrafficPanel";
 import { PathOperationPanel } from "./PathOperationPanel";
 import { PathTopologyEditPanel } from "./PathTopologyEditPanel";
@@ -362,7 +363,8 @@ export function PathDetailPanel({
 
   const showZoneRow = pathData.zone_name != null || canChangeZone;
   const showFollowTerrainRow = pathData.follow_terrain === 0 || pathData.follow_terrain === 1;
-  const hasBasicGrid = showZoneRow || showFollowTerrainRow;
+  const showColorRow = pathData.color != null;
+  const hasBasicGrid = showZoneRow || showFollowTerrainRow || showColorRow;
   const hasCondition = hasPathCondition(pathData);
 
   return (
@@ -579,6 +581,7 @@ export function PathDetailPanel({
                           </span>
                         </>
                       )}
+                      {showColorRow && <PathColorRow path={pathData} apiBaseUrl={apiBaseUrl} onSaved={setPathData} />}
                     </div>
                   )}
                   {zoneError && (

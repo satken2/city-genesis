@@ -17,6 +17,8 @@
     "followTerrain": "地形追隨",
     "followTerrainFollow": "追隨（個別設定）",
     "followTerrainNone": "不追隨（個別設定）",
+    "color": "顏色",
+    "colorReset": "恢復預設",
     "durability": "耐久度",
     "noise": "噪音",
     "airPollution": "空氣污染",

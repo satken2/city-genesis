@@ -388,6 +388,8 @@ namespace GeneratedModels
         public int? road_id;
         /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配から算出し、交差点での減速・停止は含まない</summary>
         public float base_speed;
+        /// <summary>色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る</summary>
+        public string color;
     }
 
     [Serializable]
@@ -509,6 +511,8 @@ namespace GeneratedModels
         public float parking_ratio;
         /// <summary>所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道</summary>
         public int? road_id;
+        /// <summary>色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る</summary>
+        public string color;
     }
 
     [Serializable]

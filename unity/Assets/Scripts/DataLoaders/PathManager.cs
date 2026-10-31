@@ -3770,13 +3770,13 @@ public partial class PathManager : BaseApiDataManager
             if (PowerLinePath.Handles(path))
             {
                 PathDrawContext.Begin(drawLod);
-                PathDrawContext.PathVariant = path.path_variant;
+                PathDrawContext.SetPath(path);
                 meshResult = PathMeshFactory.GeneratePathMesh(path, points);
             }
             else if (status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none")
             {
                 PathDrawContext.Begin(drawLod);
-                PathDrawContext.PathVariant = path.path_variant;
+                PathDrawContext.SetPath(path);
                 meshResult = GenerateConstructingPathMesh(path, points);
             }
             else if (UsesTunnelMesh(path, points))
@@ -3784,13 +3784,13 @@ public partial class PathManager : BaseApiDataManager
                 // Do not apply sidewalk setbacks to paths containing tunnel sections because rendering is split into sections
                 // (underground road intersection end caps are currently out of scope).
                 PathDrawContext.Begin(drawLod);
-                PathDrawContext.PathVariant = path.path_variant;
+                PathDrawContext.SetPath(path);
                 meshResult = GenerateSectionedPathMesh(path, points);
             }
             else
             {
                 PathDrawContext.Begin(drawLod, detailFrom, detailTo);
-                PathDrawContext.PathVariant = path.path_variant;
+                PathDrawContext.SetPath(path);
                 pathStartSidewalkSetbacks.TryGetValue(path.path_id, out SidewalkSetback startSetback);
                 pathEndSidewalkSetbacks.TryGetValue(path.path_id, out SidewalkSetback endSetback);
                 meshResult = PathMeshFactory.GeneratePathMesh(path, points, startSetback, endSetback);

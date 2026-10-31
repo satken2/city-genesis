@@ -42,6 +42,7 @@ public static class LandmarkPathsQA
             Median(0,false);
             foreach(int id in new[]{252,254,256}) foreach(float length in new[]{40f,160f,960f}) Bridge(id,length);
             foreach(int id in new[]{252,256}) BentBridge(id);
+            foreach(int id in new[]{252,254,256}) PaintedBridge(id);
             foreach(int id in new[]{404,414}) foreach(float height in new[]{6f,15f}) Arcade(id,height);
             foreach(int id in new[]{404,414}) ArcadeCrossing(id);
             if(args.Contains("-syncLandmarkPrefabs")) ExportPrefabs(root);
@@ -83,7 +84,7 @@ public static class LandmarkPathsQA
     }
     static GameObject Generate(int id,float width,int lanes,float height,float length,float grade,bool trees)
         => Generate(id,width,lanes,new List<Vector3>{new Vector3(0,height,0),new Vector3(0,height+grade*length,length)},trees);
-    static GameObject Generate(int id,float width,int lanes,List<Vector3> points,bool trees)
+    static GameObject Generate(int id,float width,int lanes,List<Vector3> points,bool trees,string color=null)
     {
         bool track=id==404||id==414,bridge=id>=252&&id<=256;
         var master=Activator.CreateInstance(assembly.GetType("PathMasterItem"));
@@ -95,9 +96,15 @@ public static class LandmarkPathsQA
         if(id==414) Set(master,"wire_spacing",35f);
         masters[id]=master;
         var path=PathFor(id,points,trees);
+        Set(path,"color",color);
         var type=assembly.GetType(track?"TrackPath":"RoadPath");
         var setback=Activator.CreateInstance(assembly.GetType("SidewalkSetback"));
-        var result=type.GetMethod("Generate").Invoke(Activator.CreateInstance(type),new[]{path,points,setback,setback});
+        // PathManager sets the paint color of the path being drawn; spline parts such as the truss read it from the context.
+        var paint=assembly.GetType("PathDrawContext").GetProperty("PaintColor");
+        paint.SetValue(null,assembly.GetType("RoadPath").GetMethod("PaintColorOf").Invoke(null,new[]{path}));
+        object result;
+        try { result=type.GetMethod("Generate").Invoke(Activator.CreateInstance(type),new[]{path,points,setback,setback}); }
+        finally { paint.SetValue(null,null); }
         var go=(GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
         foreach(var c in go.GetComponentsInChildren<Component>()) if(c!=null && c.GetType().Name=="SplineMesh")
         {
@@ -207,6 +214,25 @@ public static class LandmarkPathsQA
             float trussBottom=trusses.SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).Min(v=>v.y);
             Require(Mathf.Abs(trussBottom-(12.1f-13.55f))<.02f,"truss depth");
         }
+        UnityEngine.Object.DestroyImmediate(go);
+    }
+    // The path's color paints the PATH_PAINT parts (towers, cables with the legs below the deck, truss); concrete keeps its own.
+    static void PaintedBridge(int id)
+    {
+        const string color="#C0362C";
+        ColorUtility.TryParseHtmlString(color,out Color expected);
+        var go=Generate(id,id==252?12:id==254?22:32,id==252?2:id==254?4:6,
+            new List<Vector3>{new Vector3(0,12,0),new Vector3(0,12,160)},false,color);
+        Material[] Of(Func<string,bool> part)=>go.GetComponentsInChildren<Transform>().Where(t=>part(t.name))
+            .SelectMany(t=>t.GetComponents<MeshRenderer>()).SelectMany(r=>r.sharedMaterials).ToArray();
+        bool Painted(Material m)=>m.name=="PATH_PAINT"+color && ((Vector4)(m.color-expected)).magnitude<.002f;
+        var tower=go.GetComponentsInChildren<Transform>().First(t=>t.name=="SuspensionTower")
+            .GetComponentsInChildren<MeshRenderer>().SelectMany(r=>r.sharedMaterials).ToArray();
+        Require(tower.Any(Painted)&&tower.Any(m=>m.name.StartsWith("PATH_CONCRETE"))&&!tower.Any(m=>m.name=="PATH_PAINT"),"tower painted, foundation concrete");
+        Require(Of(n=>n=="SuspensionCables").All(Painted),"cables painted");
+        Require(Of(n=>n=="SuspensionAnchorage").All(m=>!m.name.StartsWith("PATH_PAINT")),"anchorage unpainted");
+        var truss=Of(n=>n.EndsWith("/truss"));
+        Require(id>=254?truss.Length>0&&truss.All(Painted):truss.Length==0,"truss painted");
         UnityEngine.Object.DestroyImmediate(go);
     }
     // A waypoint is a corner: one shared tower stands on it, square to the bisector, with no copies per segment.

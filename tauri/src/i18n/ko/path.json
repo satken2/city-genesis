@@ -17,6 +17,8 @@
     "followTerrain": "지형 추종",
     "followTerrainFollow": "함(개별 설정)",
     "followTerrainNone": "안 함(개별 설정)",
+    "color": "색상",
+    "colorReset": "기본으로 되돌리기",
     "durability": "내구도",
     "noise": "소음",
     "airPollution": "대기 오염",

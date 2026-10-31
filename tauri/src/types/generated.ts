@@ -373,6 +373,8 @@ export type PathSummary = {
   road_id?: number;
   /** 形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配から算出し、交差点での減速・停止は含まない */
   base_speed: number;
+  /** 色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る */
+  color?: string;
 };
 
 export type PathData = {
@@ -492,6 +494,8 @@ export type PathData = {
   parking_ratio: number;
   /** 所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道 */
   road_id?: number;
+  /** 色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る */
+  color?: string;
 };
 
 export type ParcelSummary = {

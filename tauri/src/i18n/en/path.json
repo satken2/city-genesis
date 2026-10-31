@@ -17,6 +17,8 @@
     "followTerrain": "Terrain Follow",
     "followTerrainFollow": "Yes (overridden)",
     "followTerrainNone": "No (overridden)",
+    "color": "Color",
+    "colorReset": "Reset to default",
     "durability": "Durability",
     "noise": "Noise",
     "airPollution": "Air Pollution",

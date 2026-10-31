@@ -17,6 +17,8 @@
     "followTerrain": "地形追随",
     "followTerrainFollow": "追随（单独设置）",
     "followTerrainNone": "不追随（单独设置）",
+    "color": "颜色",
+    "colorReset": "恢复默认",
     "durability": "耐久度",
     "noise": "噪音",
     "airPollution": "大气污染",

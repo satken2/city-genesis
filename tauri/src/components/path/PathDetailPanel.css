@@ -43,6 +43,45 @@
   margin-top: 2px;
 }
 
+/* === Color row === */
+
+.path-color-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.path-color-input {
+  width: 3rem;
+  height: 2.04rem;
+  padding: 0 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.path-color-input:disabled,
+.path-color-reset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.path-color-reset {
+  font-size: 1rem;
+  line-height: 2.04rem;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5d4e3;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.path-color-reset:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
 /* === Construction not started warning banner === */
 
 .pending-banner {

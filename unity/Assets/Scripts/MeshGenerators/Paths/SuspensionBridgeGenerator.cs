@@ -81,8 +81,10 @@ public static class SuspensionBridgeGenerator
                 : deck.Project(PlanPoint(anchors, stations[k]));
 
         float lateral = width*.5f + .8f * widthScale;
-        var metal = System.Array.Find(renderer.sharedMaterials, m => m != null && m.name.StartsWith("PATH_METAL"));
-        var batch = new PathStructureMesh(parent, "SuspensionCables", new[] { metal ?? renderer.sharedMaterial });
+        Color? paint = RoadPath.PaintColorOf(path);
+        // Cables and the tower legs below the deck share the tower's painted steel.
+        var steel = System.Array.Find(renderer.sharedMaterials, m => m != null && m.name.StartsWith(RoadPath.PAINT_MATERIAL));
+        var batch = new PathStructureMesh(parent, "SuspensionCables", new[] { RoadPath.GetOrCreatePartMaterial(steel ?? renderer.sharedMaterial, paint) });
         Vector3 DeckPoint(float d, Vector3 right, float x) => deck.Point(d) + right*x + Vector3.up*RoadPartHeights.BODY_ABOVE_SPLINE;
         for (int k = 0; k <= last; k++)
         {
@@ -97,7 +99,7 @@ public static class SuspensionBridgeGenerator
             foreach (var r in tower.GetComponentsInChildren<MeshRenderer>())
             {
                 var mats = r.sharedMaterials;
-                for (int i=0;i<mats.Length;i++) mats[i]=RoadPath.GetOrCreateRoadMaterial(mats[i]);
+                for (int i=0;i<mats.Length;i++) mats[i]=RoadPath.GetOrCreatePartMaterial(mats[i], paint);
                 r.sharedMaterials=mats;
             }
             for (int side=-1;side<=1;side+=2)
@@ -188,7 +190,8 @@ public static class SuspensionBridgeGenerator
             float ground = Mathf.Min(top.y, Utils.GetGroundHeight(top) - .15f);
             world[i] = new Vector3(top.x, Mathf.Lerp(top.y, ground, v.y / bounds.min.y), top.z);
         }
-        var batch = new PathStructureMesh(parent, "SuspensionAnchorage", renderer.sharedMaterials);
+        var batch = new PathStructureMesh(parent, "SuspensionAnchorage",
+            System.Array.ConvertAll(renderer.sharedMaterials, m => RoadPath.GetOrCreatePartMaterial(m, RoadPath.PaintColorOf(path))));
         batch.Append(source, world);
         batch.Finish();
         return (bounds.max.z * scale, bounds.max.y * scale);

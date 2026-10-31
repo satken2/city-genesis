@@ -47,6 +47,9 @@ public static class PathDrawContext
     /// <summary>Current path variant. Fixed road-surface section LOD uses it to select distant models; 0 is unknown and omits distant intervals.</summary>
     public static int PathVariant { get; set; }
 
+    /// <summary>Paint color of the current path (API `color`) for RoadPath.GetOrCreatePartMaterial; null keeps model colors.</summary>
+    public static Color? PaintColor { get; set; }
+
     public static bool HasDetailRange => !SuppressDetailRange && (DetailFrom > 0.0001 || DetailTo < 0.9999);
 
     /// <summary>Close-up part suffix (e.g. Models/Paths/p411/body_close).</summary>
@@ -73,6 +76,7 @@ public static class PathDrawContext
         Warp = null;
         PartCreated = null;
         PathVariant = 0;
+        PaintColor = null;
     }
 
     public static void End()
@@ -85,6 +89,14 @@ public static class PathDrawContext
         Warp = null;
         PartCreated = null;
         PathVariant = 0;
+        PaintColor = null;
+    }
+
+    /// <summary>Set the path being drawn (its variant and paint color) after <see cref="Begin"/>.</summary>
+    public static void SetPath(GeneratedModels.PathSummary path)
+    {
+        PathVariant = path.path_variant;
+        PaintColor = RoadPath.PaintColorOf(path);
     }
 
     public static void SetAdaptiveTileLength(float length)
