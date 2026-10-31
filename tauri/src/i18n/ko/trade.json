@@ -8,6 +8,21 @@
     "profitRate": "이익률",
     "utilization": "가동률"
   },
+  "tourismSupply": {
+    "title": "관광객 수용",
+    "touristCapacity": "관광객 수용 가능 인원",
+    "persons": "{{value}}명",
+    "218": {
+      "price": "입장료",
+      "amount": "수용 한도(연인원)",
+      "soldAmount": "방문객(연인원)"
+    },
+    "219": {
+      "price": "운임",
+      "amount": "수송 한도(연인원)",
+      "soldAmount": "이용객(연인원)"
+    }
+  },
   "demand": {
     "product": "상품",
     "demandAmount": "수요량",

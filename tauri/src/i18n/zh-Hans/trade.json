@@ -8,6 +8,21 @@
     "profitRate": "利润率",
     "utilization": "利用率"
   },
+  "tourismSupply": {
+    "title": "游客接待",
+    "touristCapacity": "游客可接待人数",
+    "persons": "{{value}}人",
+    "218": {
+      "price": "门票",
+      "amount": "接待上限(累计)",
+      "soldAmount": "参观者(累计)"
+    },
+    "219": {
+      "price": "票价",
+      "amount": "运输上限(累计)",
+      "soldAmount": "乘客(累计)"
+    }
+  },
   "demand": {
     "product": "商品",
     "demandAmount": "需求量",

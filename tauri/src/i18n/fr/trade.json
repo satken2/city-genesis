@@ -8,6 +8,21 @@
     "profitRate": "Taux de marge",
     "utilization": "Utilisation"
   },
+  "tourismSupply": {
+    "title": "Accueil des touristes",
+    "touristCapacity": "Capacité d'accueil de touristes",
+    "persons": "{{value}} personnes",
+    "218": {
+      "price": "Prix d'entrée",
+      "amount": "Capacité de visiteurs (cumul)",
+      "soldAmount": "Visiteurs (cumul)"
+    },
+    "219": {
+      "price": "Tarif",
+      "amount": "Capacité de passagers (cumul)",
+      "soldAmount": "Passagers (cumul)"
+    }
+  },
   "demand": {
     "product": "Produit",
     "demandAmount": "Demande",

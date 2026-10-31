@@ -458,7 +458,13 @@ export function AgentDetailPanel({
       tabs.push({ id: "building", label: t("agent.tabBuildingInfo", "建物情報") });
     }
     if (hasTradeInfoTab) {
-      tabs.push({ id: "trade", label: t("agent.tabTradeInfo", "需給・取引") });
+      // 観光客の受け入れとして見せる施設(SupplyInfoPanel)はタブ名も揃える。
+      tabs.push({
+        id: "trade",
+        label: agentData.tourist_capacity != null
+          ? t("agent.tabTourismInfo")
+          : t("agent.tabTradeInfo", "需給・取引"),
+      });
     }
     if (hasEmploymentInfoTab) {
       tabs.push({ id: "employment", label: t("agent.tabEmploymentInfo", "雇用情報") });

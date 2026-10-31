@@ -49,6 +49,7 @@
     "tabBuildingInfo": "Building Info",
     "tabCargoInfo": "Cargo",
     "tabTradeInfo": "Supply, Demand & Trade",
+    "tabTourismInfo": "Tourism",
     "tabEmploymentInfo": "Employment",
     "action": {
       "purchase": "Purchase",

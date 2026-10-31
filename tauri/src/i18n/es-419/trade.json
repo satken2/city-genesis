@@ -8,6 +8,21 @@
     "profitRate": "Margen de ganancia",
     "utilization": "Utilización"
   },
+  "tourismSupply": {
+    "title": "Recepción de turistas",
+    "touristCapacity": "Capacidad de recepción de turistas",
+    "persons": "{{value}} personas",
+    "218": {
+      "price": "Precio de entrada",
+      "amount": "Cupo de visitantes (acumulado)",
+      "soldAmount": "Visitantes (acumulado)"
+    },
+    "219": {
+      "price": "Tarifa",
+      "amount": "Cupo de pasajeros (acumulado)",
+      "soldAmount": "Pasajeros (acumulado)"
+    }
+  },
   "demand": {
     "product": "Producto",
     "demandAmount": "Demanda",

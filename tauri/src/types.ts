@@ -121,6 +121,8 @@ export type AgentData = {
   supply_production?: number;
   supply_sold_amount?: number[];
   profit_rates?: number[];
+  /** この施設が都市の観光客の受入可能人数に加える人数。観光地・玄関口の施設だけが値を持ち、それ以外は null。 */
+  tourist_capacity?: number | null;
   utilization?: number[];
   satis_nutrition?: number;
   satis_healthcare?: number;

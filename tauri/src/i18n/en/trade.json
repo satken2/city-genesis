@@ -8,6 +8,21 @@
     "profitRate": "Profit Rate",
     "utilization": "Utilization"
   },
+  "tourismSupply": {
+    "title": "Hosting Tourists",
+    "touristCapacity": "Tourist Capacity",
+    "persons": "{{value}} people",
+    "218": {
+      "price": "Admission Fee",
+      "amount": "Visitor Capacity (total)",
+      "soldAmount": "Visitors (total)"
+    },
+    "219": {
+      "price": "Fare",
+      "amount": "Passenger Capacity (total)",
+      "soldAmount": "Passengers (total)"
+    }
+  },
   "demand": {
     "product": "Product",
     "demandAmount": "Demand",

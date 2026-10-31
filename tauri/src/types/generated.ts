@@ -261,6 +261,8 @@ export type AgentData = {
   supply_sold_amount?: number[];
   /** 利益率の履歴（エポック別） */
   profit_rates?: number[];
+  /** この施設が都市の観光客の受入可能人数に加える人数（人）。観光地・玄関口の施設のみで、稼働中でなければ0 (サーバーサイドで計算されるフィールド。型は動的。) */
+  tourist_capacity?: any;
   /** 受け入れスキル別の定員（スキルID→人数） */
   education_type?: Record<string, any>;
   /** この学校に在籍している市民のリスト */

@@ -274,6 +274,8 @@ namespace GeneratedModels
         public List<float> supply_sold_amount;
         /// <summary>利益率の履歴（エポック別）</summary>
         public List<float> profit_rates;
+        /// <summary>この施設が都市の観光客の受入可能人数に加える人数（人）。観光地・玄関口の施設のみで、稼働中でなければ0 サーバーサイドで計算されるフィールド。型は動的。</summary>
+        public object tourist_capacity;
         /// <summary>受け入れスキル別の定員（スキルID→人数）</summary>
         public Dictionary<string, object> education_type;
         /// <summary>この学校に在籍している市民のリスト</summary>

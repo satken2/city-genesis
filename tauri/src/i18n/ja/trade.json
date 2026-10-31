@@ -8,6 +8,21 @@
     "profitRate": "利益率",
     "utilization": "稼働率"
   },
+  "tourismSupply": {
+    "title": "観光客の受け入れ",
+    "touristCapacity": "観光客の受入可能人数",
+    "persons": "{{value}}人",
+    "218": {
+      "price": "入場料",
+      "amount": "受け入れ枠(延べ)",
+      "soldAmount": "来場者(延べ)"
+    },
+    "219": {
+      "price": "運賃",
+      "amount": "輸送枠(延べ)",
+      "soldAmount": "利用者(延べ)"
+    }
+  },
   "demand": {
     "product": "商品",
     "demandAmount": "需要量",
