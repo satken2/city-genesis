@@ -40,6 +40,7 @@ steamworks = { version = "0.13", optional = true }
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-sys = { version = "0.61", features = [
     "Win32_Foundation",
+    "Win32_Globalization",
     "Win32_Graphics_Dwm",
     "Win32_Security",
     "Win32_System_JobObjects",

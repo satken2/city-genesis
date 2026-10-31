@@ -59,6 +59,22 @@ fn content_dirs(client: &Client) -> Vec<(&'static str, PathBuf)> {
     dirs
 }
 
+/// UI language code for the game language set in Steam. Steam always answers with a language registered for the app
+/// in Steamworks (the player's choice, else the Steam UI language or its regional variant, else English); return
+/// None for registered languages the UI does not support and when Steam initialization failed.
+pub fn game_language() -> Option<&'static str> {
+    match CLIENT.get()?.apps().current_game_language().as_str() {
+        "japanese" => Some("ja"),
+        "english" => Some("en"),
+        "latam" => Some("es-419"),
+        "schinese" => Some("zh-Hans"),
+        "tchinese" => Some("zh-Hant"),
+        "french" => Some("fr"),
+        "koreana" => Some("ko"),
+        _ => None,
+    }
+}
+
 /// Start core ticket verification on a separate thread. Do nothing if Steam initialization failed.
 pub fn start_verification(api_base_url: String) {
     let Some(client) = CLIENT.get().cloned() else { return };

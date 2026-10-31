@@ -1,6 +1,9 @@
+import { languageFromLocaleTag } from "../../src/utils/locale";
+
 /**
  * アプリの設定。`src-tauri/src/settings.rs` の移植で、項目と既定値は Rust の AppSettings と同じ。
  * exe は設定ファイルに、ブラウザ版は localStorage に保存する。
+ * 言語の既定値だけは、Steam の代わりにブラウザの優先言語を順に見て、対応言語が無ければ英語にする。
  */
 export interface AppSettings {
   language: string;
@@ -17,7 +20,7 @@ const STORAGE_KEY = "city-genesis.settings";
 
 function defaults(): AppSettings {
   return {
-    language: "ja",
+    language: navigator.languages.map(languageFromLocaleTag).find((language) => language !== undefined) ?? "en",
     font_size: 13,
     volumes: { master: 80, bgm: 60, sfx: 70 },
     monitor_index: 0,

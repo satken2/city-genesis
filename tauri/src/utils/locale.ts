@@ -2,7 +2,8 @@
  * Shared display language definitions. Manage UI language codes (i18next) and BCP47 number/date formatting
  * locales together. Add languages only through SUPPORTED_LANGUAGES and INTL_LOCALES here. Codes must match
  * src/i18n/<code>/ directories. Chinese uses script rather than region because Simplified/Traditional vocabulary
- * differs. Spanish uses es-419 for Latin American spelling/vocabulary.
+ * differs. Spanish uses es-419 for Latin American spelling/vocabulary. The first-launch language detection in
+ * src-tauri/src/settings.rs and steam.rs also lists these codes.
  */
 
 /** Supported UI language codes. Settings/new-game choices follow this order. */
@@ -43,17 +44,32 @@ export function isSupportedLanguage(value: unknown): value is SupportedLanguage 
   );
 }
 
+/** Regions that write Chinese in Traditional script, for tags without a script subtag (zh-TW, zh-HK, zh-MO). */
+const TRADITIONAL_CHINESE_REGIONS = ["tw", "hk", "mo"];
+
 /**
- * Normalize an arbitrary code to a supported language. i18next may return regional codes such as ja-JP; try an
- * exact match, then the leading language subtag, then the default. Used to resolve dropdown values that must
- * always select one option.
+ * Map a BCP 47 tag (ja-JP, zh-Hant-HK, ...) to a supported language by its primary subtag. Chinese is split by
+ * script, so infer the script from the region when the tag has no script subtag. Same rule as
+ * language_from_locale_tag in src-tauri/src/settings.rs.
+ */
+export function languageFromLocaleTag(tag: string): SupportedLanguage | undefined {
+  const subtags = tag.toLowerCase().split(/[-_]/);
+  const primary = subtags[0];
+  if (primary === "zh") {
+    const traditional =
+      subtags.includes("hant") ||
+      (!subtags.includes("hans") && subtags.some((subtag) => TRADITIONAL_CHINESE_REGIONS.includes(subtag)));
+    return traditional ? "zh-Hant" : "zh-Hans";
+  }
+  return SUPPORTED_LANGUAGES.find((code) => code.split("-")[0] === primary);
+}
+
+/**
+ * Normalize an arbitrary code to a supported language, or the default. i18next may return regional codes such
+ * as ja-JP. Used to resolve dropdown values that must always select one option.
  */
 export function resolveSupportedLanguage(language: string | undefined): SupportedLanguage {
-  if (isSupportedLanguage(language)) {
-    return language;
-  }
-  const primary = (language ?? "").split("-")[0];
-  return SUPPORTED_LANGUAGES.find((code) => code.split("-")[0] === primary) ?? DEFAULT_LANGUAGE;
+  return languageFromLocaleTag(language ?? "") ?? DEFAULT_LANGUAGE;
 }
 
 /**
