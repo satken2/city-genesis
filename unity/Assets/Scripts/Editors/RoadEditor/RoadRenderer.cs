@@ -88,6 +88,8 @@ public partial class RoadRenderer : MonoBehaviour
     /// so this makes platforms extend on the same side as after confirmation. Missing entries
     /// use DIR_BOTH (bidirectional).
     /// Matches the appearance of UI expansion into parallel single-track paths on confirmation.
+    /// profiles (post-earthworks profiles, one per line) replace only each line's drawn points. Waypoints of a straight
+    /// path always come from subdividePoints: the profile is a dense sample, and towers and piers stand at waypoints.
     /// RegisterPreviewTracks registers preview tracks as provisional partners, joining existing tracks and each other
     /// through nearby-track stitching (TrackAdjacency) and junction S-curves (TrackEndTransition).
     /// </summary>
@@ -128,7 +130,7 @@ public partial class RoadRenderer : MonoBehaviour
         if (lateralOffsets == null || lateralOffsets.Length == 0)
         {
             // Single path: generate one path using the received points directly as its centerline.
-            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, previewMaterial, null, houseEnds, profiles != null, passageMode, 0);
+            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, previewMaterial, null, houseEnds, profiles != null, passageMode, 0);
         }
         else
         {
@@ -139,11 +141,11 @@ public partial class RoadRenderer : MonoBehaviour
             currentPreviewObject = container;
             for (int i = 0; i < lateralOffsets.Length; i++)
             {
-                List<Vector3> offsetPoints = profiles != null && i < profiles.Count
-                    ? profiles[i] : OffsetPolylineLateral(subdividePoints, lateralOffsets[i]);
+                List<Vector3> anchorLine = OffsetPolylineLateral(subdividePoints, lateralOffsets[i]);
+                List<Vector3> offsetPoints = profiles != null && i < profiles.Count ? profiles[i] : anchorLine;
                 int travelDirection = (travelDirections != null && i < travelDirections.Length)
                     ? travelDirections[i] : Constants.DIR_BOTH;
-                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, previewMaterial, container, houseEnds, profiles != null, passageMode, i);
+                GenerateComponentPreview(offsetPoints, anchorLine, pathType, pathSubtype, curved, platformSide, travelDirection, previewMaterial, container, houseEnds, profiles != null, passageMode, i);
             }
         }
 
@@ -174,9 +176,9 @@ public partial class RoadRenderer : MonoBehaviour
     /// componentPoints use design coordinates (ground + relative Y); subtract base_height
     /// for drawing points passed to the generator (ToDrawPoints). Keep temporary PathSummary start/end/waypoints as design values.
     /// </summary>
-    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material previewMaterial, GameObject parent, string houseEnds, bool designed = false, string passageMode = "elevated", int componentIndex = 0)
+    private void GenerateComponentPreview(List<Vector3> componentPoints, List<Vector3> anchorLine, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material previewMaterial, GameObject parent, string houseEnds, bool designed = false, string passageMode = "elevated", int componentIndex = 0)
     {
-        PathSummary tempPathData = BuildPreviewSummary(componentPoints, pathType, pathSubtype, curved, platformSide, travelDirection, houseEnds, designed, passageMode);
+        PathSummary tempPathData = BuildPreviewSummary(componentPoints, anchorLine, pathType, pathSubtype, curved, platformSide, travelDirection, houseEnds, designed, passageMode);
         // Give each track a unique negative path_id matching its provisional registration (RegisterPreviewTracks).
         tempPathData.path_id = PreviewPathId(componentIndex, pathType);
         PathMeshResult meshResult = PathMeshFactory.GeneratePathMesh(tempPathData, ToDrawPoints(componentPoints, pathSubtype));
@@ -247,9 +249,10 @@ public partial class RoadRenderer : MonoBehaviour
 
     /// <summary>
     /// Temporary PathSummary for one preview line. Start/end/waypoints (when straight) use design values (relative Y).
+    /// Waypoints are the interior points of anchorLine (the line's anchors); componentPoints are the drawn points.
     /// Tracks retain endpoint directions as endpoint controls even on curves, for node direction checks (junction S-curves and plateless straight connections).
     /// </summary>
-    private static PathSummary BuildPreviewSummary(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, string houseEnds, bool designed, string passageMode)
+    private static PathSummary BuildPreviewSummary(List<Vector3> componentPoints, List<Vector3> anchorLine, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, string houseEnds, bool designed, string passageMode)
     {
         Vector3 startPos = componentPoints[0];
         Vector3 endPos = componentPoints[componentPoints.Count - 1];
@@ -261,9 +264,9 @@ public partial class RoadRenderer : MonoBehaviour
         List<object> waypointsList = new List<object>();
         if (!curved)
         {
-            for (int i = 1; i < componentPoints.Count - 1; i++)
+            for (int i = 1; i < anchorLine.Count - 1; i++)
             {
-                Vector3 wpPos = componentPoints[i];
+                Vector3 wpPos = anchorLine[i];
                 float wpGroundY = Utils.GetPathSurfaceHeight(wpPos);
                 float wpRelY = wpPos.y - wpGroundY;
                 // GetWaypointList reads only {position:[x,relY,z]} dictionaries (raw arrays are silently discarded).
@@ -331,11 +334,12 @@ public partial class RoadRenderer : MonoBehaviour
         var drawPoints = new List<List<Vector3>>(count);
         for (int i = 0; i < count; i++)
         {
-            List<Vector3> component = profiles != null ? profiles[i]
-                : lateralOffsets != null && lateralOffsets.Length > 0 ? OffsetPolylineLateral(centerPoints, lateralOffsets[i]) : centerPoints;
+            List<Vector3> anchorLine = lateralOffsets != null && i < lateralOffsets.Length
+                ? OffsetPolylineLateral(centerPoints, lateralOffsets[i]) : centerPoints;
+            List<Vector3> component = profiles != null ? profiles[i] : anchorLine;
             if (component == null || component.Count < 2) continue;
             int direction = travelDirections != null && i < travelDirections.Length ? travelDirections[i] : Constants.DIR_BOTH;
-            PathSummary summary = BuildPreviewSummary(component, pathType, pathSubtype, curved, platformSide, direction, houseEnds, profiles != null, passageMode);
+            PathSummary summary = BuildPreviewSummary(component, anchorLine, pathType, pathSubtype, curved, platformSide, direction, houseEnds, profiles != null, passageMode);
             summary.path_id = PreviewPathId(i, pathType);
             summaries.Add(summary);
             drawPoints.Add(ToDrawPoints(component, pathSubtype));

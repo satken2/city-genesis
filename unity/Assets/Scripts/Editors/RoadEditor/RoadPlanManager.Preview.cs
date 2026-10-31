@@ -75,15 +75,15 @@ public partial class RoadPlanManager
 
         // After input stops, use post-earthworks elevations for the whole path. Continue lightweight local display while fetching/dragging.
         var profiles = earthworkPreview?.PathProfiles;
+        List<Vector3> renderPoints = GetRenderPoints();
         if (phase == RoadEditorPhase.Editing && !isDragging && profiles != null
             && profiles.Count > 0 && profiles.TrueForAll(line => line.Count >= 2))
         {
-            RegisterPreviewTracks(profiles[0], profiles);
-            roadRenderer.UpdateSections(profiles[0], profiles[0], null, null, PathType,
+            RegisterPreviewTracks(renderPoints, profiles);
+            roadRenderer.UpdateSections(renderPoints, renderPoints, null, null, PathType,
                 PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds, profiles, PassageMode);
             return;
         }
-        List<Vector3> renderPoints = GetRenderPoints();
         UpdatePreviewSections(renderPoints);
     }
 
