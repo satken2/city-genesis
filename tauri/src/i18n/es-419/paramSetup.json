@@ -221,6 +221,10 @@
         "label": "Eficiencia relativa de la demolición",
         "desc": "Cuánto más eficiente es demoler que construir de nuevo (multiplicador)."
       },
+      "REPLACEMENT_GRACE_PERIOD_DAYS": {
+        "label": "Periodo de gracia para la reconstrucción (días)",
+        "desc": "Los promotores privados no reemplazan un edificio hasta que pasen estos días desde que se decidió su construcción (incluida la duración de la obra). Las ruinas derrumbadas o incendiadas quedan exentas y pueden reemplazarse de inmediato."
+      },
       "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
         "label": "Tasa de excedente de oferta inmobiliaria",
         "desc": "Proporción de oferta excedente que se mantiene siempre en el mercado inmobiliario."

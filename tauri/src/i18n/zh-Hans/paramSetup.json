@@ -221,6 +221,10 @@
         "label": "拆除效率比",
         "desc": "拆除相较于新建的效率倍率。"
       },
+      "REPLACEMENT_GRACE_PERIOD_DAYS": {
+        "label": "重建宽限期（日）",
+        "desc": "自决定建造建筑起，在经过此天数之前，民间不会对其进行重建（含工期）。倒塌或烧毁的废墟不受此限制，可立即重建。"
+      },
       "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
         "label": "不动产供给余量率",
         "desc": "不动产市场中始终保留的余量供给比例。"

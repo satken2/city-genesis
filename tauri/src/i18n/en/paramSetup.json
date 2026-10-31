@@ -221,6 +221,10 @@
         "label": "Demolition Efficiency Ratio",
         "desc": "How much more efficient demolition is compared to new construction (multiplier)."
       },
+      "REPLACEMENT_GRACE_PERIOD_DAYS": {
+        "label": "Rebuild Grace Period (days)",
+        "desc": "Private developers do not replace a building until this many days have passed since its construction was decided (construction time included). Collapsed or burned-out ruins are exempt and can be replaced right away."
+      },
       "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
         "label": "Real Estate Supply Surplus Rate",
         "desc": "Fraction of surplus supply always maintained in the real estate market."

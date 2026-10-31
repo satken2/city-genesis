@@ -221,6 +221,10 @@
         "label": "Efficacité relative de la démolition",
         "desc": "À quel point démolir est plus efficace que construire à neuf (multiplicateur)."
       },
+      "REPLACEMENT_GRACE_PERIOD_DAYS": {
+        "label": "Délai de grâce avant reconstruction (jours)",
+        "desc": "Les promoteurs privés ne remplacent pas un bâtiment avant que ce nombre de jours se soit écoulé depuis la décision de le construire (durée des travaux comprise). Les ruines effondrées ou incendiées en sont exemptées et peuvent être remplacées immédiatement."
+      },
       "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
         "label": "Taux d'offre excédentaire immobilière",
         "desc": "Part d'offre excédentaire maintenue en permanence sur le marché immobilier."
