@@ -385,7 +385,7 @@
     "tabSelect": "Choisir un scénario",
     "tabBrowse": "Trouver des scénarios",
     "tabTerrain": "Choisir un terrain",
-    "relocalizeNote": "Ce scénario a été créé en {{from}}. Commencer en {{to}} renomme en {{to}} les quartiers, installations, habitants, gares et autres noms (les noms donnés par l'auteur sont aussi remplacés ; les noms de rues et quelques autres sont conservés).",
+    "relocalizeNote": "Ce scénario a été créé en {{from}}. Commencer en {{to}} renomme en {{to}} les quartiers, installations, habitants, gares et autres noms.",
     "developmentNotice": {
       "heading": "Ce jeu est une version expérimentale en cours de développement",
       "subheading": "À lire avant de jouer",

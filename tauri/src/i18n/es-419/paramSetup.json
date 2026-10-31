@@ -385,7 +385,7 @@
     "tabSelect": "Elegir escenario",
     "tabBrowse": "Buscar escenarios",
     "tabTerrain": "Elegir terreno",
-    "relocalizeNote": "Este escenario se creó en {{from}}. Si empiezas en {{to}}, los nombres de distritos, instalaciones, residentes, estaciones y otros se cambian a {{to}} (también se reemplazan los nombres que puso el autor; se conservan los nombres de las calles y algunos otros).",
+    "relocalizeNote": "Este escenario se creó en {{from}}. Si empiezas en {{to}}, los nombres de distritos, instalaciones, residentes, estaciones y otros se cambian a {{to}}.",
     "developmentNotice": {
       "heading": "Este juego es una versión experimental en desarrollo",
       "subheading": "Lee esto antes de jugar",
