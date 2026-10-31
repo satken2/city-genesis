@@ -5,8 +5,8 @@
  * - City speed limit: per-variant regulation value (max_speed from GET /api/v1/city), dimmed as a reference.
  * - This road's speed limit: an input. Empty inherits the city value; a number sets override_max_speed for this road.
  *   Clearing removes the override and lets the backend restore the city value.
- * - Passing speed: shape-derived speed (only when showBaseSpeed is true). Accident risk rises as the limit exceeds
- *   passing speed, so place them together for comparison.
+ * - Passing speed: shape-derived speed. Accident risk rises as the limit exceeds passing speed, so place them
+ *   together for comparison.
  *
  * No save button. Automatically PATCH after SAVE_DELAY_MS of inactivity to coalesce typing.
  * Apply immediately on blur or Enter. The sign immediately reflects input (overrides always take precedence over
@@ -78,12 +78,10 @@ function sameOverride(a: number | null, b: number | null): boolean {
 type PathSpeedLimitEditorProps = {
   path: PathData;
   apiBaseUrl: string;
-  /** Whether to show passing speed (only types deriving it from geometry). */
-  showBaseSpeed: boolean;
   onSaved: (updated: PathData) => void;
 };
 
-export function PathSpeedLimitEditor({ path, apiBaseUrl, showBaseSpeed, onSaved }: PathSpeedLimitEditorProps) {
+export function PathSpeedLimitEditor({ path, apiBaseUrl, onSaved }: PathSpeedLimitEditorProps) {
   const { t, i18n } = useTranslation();
   const locale = resolveIntlLocale(i18n.language);
   const inputId = useId();
@@ -253,7 +251,7 @@ export function PathSpeedLimitEditor({ path, apiBaseUrl, showBaseSpeed, onSaved 
           </span>
         </span>
 
-        {showBaseSpeed && path.base_speed != null && (
+        {path.base_speed != null && (
           <>
             <span className="path-speed-limit__label">{t("path.baseSpeed")}</span>
             <span className="path-speed-limit__value">{formatSpeed(Math.round(path.base_speed))}</span>

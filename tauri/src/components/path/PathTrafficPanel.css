@@ -1,8 +1,9 @@
 /**
- * Traffic/speed section styles (utilization/on-street parking donuts and traffic by vehicle type;
+ * Traffic/speed section styles (on-street parking donut and traffic by vehicle type;
  * PathSpeedLimitEditor.css defines the speed-limit block).
  *
- * Trailing .path-save-* rules style the Apply button in PathEquipmentPanel, which explicitly imports this CSS.
+ * PathConditionPanel reuses .path-traffic-row* for its meters, and trailing .path-save-* rules style the Apply
+ * button in PathEquipmentPanel; both explicitly import this CSS.
  */
 
 .path-traffic-section {
@@ -17,7 +18,7 @@
   gap: 0.67rem;
 }
 
-/* === Utilization/on-street parking donuts (side by side) === */
+/* === On-street parking donut === */
 
 .path-traffic-gauges {
   display: flex;
@@ -55,11 +56,6 @@
   align-items: center;
   gap: 8px;
   padding: 2px 4px;
-  border-radius: 4px;
-}
-
-.path-traffic-row:nth-child(even) {
-  background: rgba(255, 255, 255, 0.03);
 }
 
 .path-traffic-row--pedestrian {

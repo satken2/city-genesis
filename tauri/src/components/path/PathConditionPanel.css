@@ -1,6 +1,7 @@
 /**
- * Styles for path condition tiles (durability, noise, air pollution).
+ * Styles for path condition meters (utilization, durability, noise, air pollution).
  *
+ * Rows use the traffic-by-vehicle row classes in PathTrafficPanel.css; only the label column is defined here.
  * maintenance-badge matches BuildingInfoPanel.css, but is defined again because this panel renders independently.
  */
 
@@ -32,41 +33,24 @@
   ) 3;
 }
 
-.path-condition-tiles {
+/* Rows share the list's columns through subgrid so bars start at the same position regardless of label length. */
+.path-condition-meters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: max-content minmax(0, 1fr) 84px;
+  row-gap: 3px;
 }
 
-.path-condition-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 6px 7px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  min-width: 0;
+.path-condition-meters .path-traffic-row {
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
 }
 
-.path-condition-tile__label {
+.path-condition-meter__label {
   color: #93a9c0;
   font-weight: 600;
   font-size: 1rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.path-condition-tile__icon {
-  display: flex;
-}
-
-.path-condition-tile__value {
-  color: #e2eaf2;
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

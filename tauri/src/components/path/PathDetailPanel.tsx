@@ -7,10 +7,10 @@
  * - InfoHeader: icon, status, name (if unnamed and assigned to a road: "road name (section #id)").
  * - Road membership row for streets/highways (road/RoadMembershipRow).
  * - Basic information tab:
- *   - Basic information section: district, terrain following, minimum curve radius, maximum grade, and
- *     condition tiles for durability/noise/air pollution (PathConditionPanel).
+ *   - Basic information section: district, terrain following, and meters for utilization/durability/noise/
+ *     air pollution (PathConditionPanel).
  *   - Traffic/speed settings (PathTrafficPanel): direction toggle, speed-limit sign/input, passing speed,
- *     utilization and on-street parking donuts, traffic by vehicle type.
+ *     on-street parking donut, traffic by vehicle type.
  * - Road equipment tab: streetlights, fences, street trees, power distribution method.
  * - Station information for station buildings; construction tab for planned paths and paths under construction.
  *
@@ -33,7 +33,6 @@ import type { PathInterferenceHighlight } from "../../utils/ipc";
 import { usePlayMode } from "../../hooks/usePlayMode";
 import { resolvePathIcon } from "../../utils/pathIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import { PATH_TYPES_WITH_ALIGNMENT } from "../../local-constants";
 import {
   PATH_STREET,
   PATH_STATION_HOUSE,
@@ -53,7 +52,7 @@ import { RoadMembershipRow, useRoadList, type PathRoadFields } from "../road/Roa
 import { hasRoad, isNamedRoadPathType, notifyRoadsChanged, roadDisplayName, ROADS_CHANGED_EVENT } from "../road/roadApi";
 import { ZoneLink } from "../common/ZoneLink";
 import { StationInfoSection } from "./StationInfoSection";
-import { PathConditionPanel } from "./PathConditionPanel";
+import { hasPathCondition, PathConditionPanel } from "./PathConditionPanel";
 import { PathEquipmentPanel, pathEquipmentFields } from "./PathEquipmentPanel";
 import { PathTrafficPanel } from "./PathTrafficPanel";
 import { PathOperationPanel } from "./PathOperationPanel";
@@ -69,9 +68,6 @@ import accidentIcon from "../../assets/images/ui/agent_panel/car-accident.png";
 import "../agent/AgentDetailPanel.css";
 import "./PathDetailPanel.css";
 import rocketIcon from "../../assets/images/ui/rocket.png";
-
-// Backend geo_path_alignment.NO_CURVATURE_RADIUS (radius threshold treated as straight). Display "straight" at or above it.
-const STRAIGHT_RADIUS_THRESHOLD = 1.0e6;
 
 type PathDetailPanelProps = {
   apiBaseUrl: string;
@@ -368,19 +364,10 @@ export function PathDetailPanel({
         })
         : t("path.titleWithId", { id: pathData.path_id });
 
-  // Rows of the basic information table. Alignment metrics are meaningful only for types that compute them from geometry
-  // (other types retain the defaults: straight and 0%).
   const showZoneRow = pathData.zone_name != null || canChangeZone;
   const showFollowTerrainRow = pathData.follow_terrain === 0 || pathData.follow_terrain === 1;
-  const hasAlignment = PATH_TYPES_WITH_ALIGNMENT.includes(pathData.path_type);
-  const minCurveRadius = hasAlignment ? pathData.min_curve_radius ?? null : null;
-  const maxGrade = hasAlignment ? pathData.max_grade ?? null : null;
-  const hasBasicGrid = showZoneRow || showFollowTerrainRow || minCurveRadius != null || maxGrade != null;
-  const hasCondition =
-    !!pathData.under_maintenance ||
-    pathData.durability != null ||
-    pathData.noise != null ||
-    pathData.air_pollution != null;
+  const hasBasicGrid = showZoneRow || showFollowTerrainRow;
+  const hasCondition = hasPathCondition(pathData);
 
   return (
     <div className="agent-detail">
@@ -554,7 +541,6 @@ export function PathDetailPanel({
         <>
           <div id="path-detail-basic" hidden={activeTab !== "basic"}>
             <div className="agent-detail-tab-content">
-              {/* Basic information: district/alignment metrics table and durability/noise/air pollution tiles. */}
               {(hasBasicGrid || hasCondition) && (
                 <section className="agent-detail-section">
                   <h3 className="agent-detail-section-title">{t("path.tabs.basic")}</h3>
@@ -595,22 +581,6 @@ export function PathDetailPanel({
                               ? t("path.followTerrainFollow", "する(個別設定)")
                               : t("path.followTerrainNone", "しない(個別設定)")}
                           </span>
-                        </>
-                      )}
-                      {minCurveRadius != null && (
-                        <>
-                          <span className="agent-detail-label">{t("path.minCurveRadius")}</span>
-                          <span className="agent-detail-value">
-                            {minCurveRadius >= STRAIGHT_RADIUS_THRESHOLD
-                              ? t("path.straightLine")
-                              : `${Math.round(minCurveRadius)} m`}
-                          </span>
-                        </>
-                      )}
-                      {maxGrade != null && (
-                        <>
-                          <span className="agent-detail-label">{t("path.maxGrade")}</span>
-                          <span className="agent-detail-value">{maxGrade.toFixed(1)} %</span>
                         </>
                       )}
                     </div>

@@ -75,7 +75,6 @@ import {
   PATH_DEFAULT,
   PATH_STREET,
   PATH_MOTORWAY,
-  PATH_WALKWAY,
   PATH_TRACK,
   PATH_MONORAIL,
   PATH_CONVEYOR,
@@ -126,27 +125,13 @@ export const PATH_TYPES_HIDDEN_IN_BUILD_PANEL: readonly number[] = [PATH_DEFAULT
 export const PATH_TYPES_TRACK_GROUP: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_CONVEYOR, PATH_FERRY, PATH_STATION_HOUSE];
 
 /**
- * Path types with minimum curve radius/maximum gradient calculated from geometry. Matches backend
- * geo_path_alignment.SPEED_PATH_TYPES. Other types retain uncalculated defaults (0/straight), so omit them from
- * path details.
+ * Path types showing speed limits (signs and individual settings) and traversal speed (base_speed) in path details:
+ * roads carrying cars only. Track/monorail limits are assumed unchanged by regulations (default 300km/h), and actual
+ * train speed depends on curve radius and the line type's maximum speed. Sidewalk limits do not affect pedestrians.
+ * People movers use equipment cruising speed; public transport section paths, infrastructure, and station buildings
+ * have no traversal time.
  */
-export const PATH_TYPES_WITH_ALIGNMENT: readonly number[] = [PATH_STREET, PATH_MOTORWAY, PATH_TRACK, PATH_MONORAIL];
-
-/**
- * Path types showing traversal speed (base_speed) in path details: roads carrying cars only. Track/monorail
- * limits are assumed unchanged by regulations (default 300km/h), leaving traversal speed at that ceiling. Actual
- * train speed depends on curve radius and the line type's maximum speed, making this display meaningless.
- */
-export const PATH_TYPES_WITH_BASE_SPEED: readonly number[] = [PATH_STREET, PATH_MOTORWAY];
-
-/**
- * Path types supporting speed limits (signs and individual settings) in path details. Include sidewalks in
- * addition to traversal-speed types: limits do not affect pedestrians, but LRT on pedestrian roads with LRT uses
- * them. Exclude tracks/monorails because player-set limits serve no purpose (same in regulations). People movers
- * use equipment cruising speed; public transport section paths, infrastructure, and station buildings have no
- * traversal time, so exclude them.
- */
-export const PATH_TYPES_WITH_SPEED_LIMIT: readonly number[] = [...PATH_TYPES_WITH_BASE_SPEED, PATH_WALKWAY];
+export const PATH_TYPES_WITH_SPEED_LIMIT: readonly number[] = [PATH_STREET, PATH_MOTORWAY];
 
 /**
  * Path types with calculated utilization, matching backend PathUtilizationPhase. Other types always have zero

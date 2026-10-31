@@ -4,13 +4,13 @@
  * Combines direction, speed limits, and traffic conditions in path detail's basic information tab.
  * - Direction: track/monorail direction toggle. Combined double-track paths are fixed to both directions.
  * - Speed limit/passing speed: PathSpeedLimitEditor (road sign + city value + this road's input, applied automatically).
- * - Utilization/on-street parking: side-by-side donuts. Both represent use relative to capacity (pressure), so use
- *   congestionColor. Parking counts can exceed capacity (overflow from building parking), so show actual counts too.
- *   Show only for roads with capacity (active ground-level local roads) or roads with parked vehicles.
+ * - On-street parking: a donut colored by congestionColor. Parking counts can exceed capacity (overflow from
+ *   building parking), so show actual counts too. Show only for roads with capacity (active ground-level local
+ *   roads) or roads with parked vehicles. Utilization is a meter in the basic information section (PathConditionPanel).
  * - Daily traffic: one icon-based vehicle list, with bar lengths relative to the list maximum.
  *
- * Show speed limits only for PATH_TYPES_WITH_SPEED_LIMIT, passing speeds for PATH_TYPES_WITH_BASE_SPEED,
- * and utilization for PATH_TYPES_WITH_UTILIZATION, since other types have no meaningful values.
+ * Show speed limits and passing speeds only for PATH_TYPES_WITH_SPEED_LIMIT, since other types have no
+ * meaningful values.
  * Hide the section if no items apply.
  */
 
@@ -21,11 +21,7 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 import { resolveIntlLocale } from "../../utils/locale";
 import { parkingUsage } from "../../utils/parking";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import {
-  PATH_TYPES_WITH_BASE_SPEED,
-  PATH_TYPES_WITH_SPEED_LIMIT,
-  PATH_TYPES_WITH_UTILIZATION,
-} from "../../local-constants";
+import { PATH_TYPES_WITH_SPEED_LIMIT } from "../../local-constants";
 import { DonutGauge } from "../common/DonutGauge";
 import {
   PATH_CONVEYOR,
@@ -81,10 +77,10 @@ function listedVehicleKeys(pathType: number): number[] {
 }
 
 /**
- * Colors for usage relative to capacity. Up to half has spare capacity; above 80% is pressured
- * (same thresholds as UsageMeter in statistics/tabs/AccidentsTab for road congestion).
+ * Colors for usage relative to capacity (on-street parking, utilization). Up to half has spare capacity; above 80%
+ * is pressured (same thresholds as UsageMeter in statistics/tabs/AccidentsTab for road congestion).
  */
-function congestionColor(ratio: number): string {
+export function congestionColor(ratio: number): string {
   if (ratio > 0.8) return "#ef4444";
   if (ratio > 0.5) return "#f59e0b";
   return "#10b981";
@@ -133,7 +129,6 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
   };
 
   const showSpeedLimit = PATH_TYPES_WITH_SPEED_LIMIT.includes(path.path_type);
-  const showUtilization = path.utilization != null && PATH_TYPES_WITH_UTILIZATION.includes(path.path_type);
 
   // Show on-street parking to one decimal because per-road counts are small and fractions matter.
   const parkingOnPath =
@@ -155,7 +150,7 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
     .map((vehicleType) => ({ vehicleType, count: trafficCounts[String(vehicleType)] ?? 0 }));
   const maxTraffic = Math.max(0, ...trafficRows.map((row) => row.count));
 
-  if (!showDirection && !showSpeedLimit && !showUtilization && !streetParking && trafficRows.length === 0) return null;
+  if (!showDirection && !showSpeedLimit && !streetParking && trafficRows.length === 0) return null;
 
   const vehicleName = (vehicleType: number) =>
     t(`path.vehicles.${vehicleType}`, {
@@ -177,34 +172,20 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
       {directionError && <div className="agent-detail-error" role="alert">{directionError}</div>}
 
       {showSpeedLimit && (
-        <PathSpeedLimitEditor
-          path={path}
-          apiBaseUrl={apiBaseUrl}
-          showBaseSpeed={PATH_TYPES_WITH_BASE_SPEED.includes(path.path_type)}
-          onSaved={onSaved}
-        />
+        <PathSpeedLimitEditor path={path} apiBaseUrl={apiBaseUrl} onSaved={onSaved} />
       )}
 
-      {(showUtilization || streetParking) && (
+      {streetParking && (
         <div className="path-traffic-gauges">
-          {showUtilization && path.utilization != null && (
-            <DonutGauge
-              value={path.utilization}
-              label={t("path.utilization")}
-              color={congestionColor(path.utilization)}
-            />
-          )}
-          {streetParking && (
-            <DonutGauge
-              value={streetParking.ratio}
-              label={t("path.streetParking")}
-              color={congestionColor(streetParking.ratio)}
-              detail={t("path.streetParkingUsage", {
-                parked: formatParkingCars(streetParking.used),
-                capacity: formatParkingCars(streetParking.capacity),
-              })}
-            />
-          )}
+          <DonutGauge
+            value={streetParking.ratio}
+            label={t("path.streetParking")}
+            color={congestionColor(streetParking.ratio)}
+            detail={t("path.streetParkingUsage", {
+              parked: formatParkingCars(streetParking.used),
+              capacity: formatParkingCars(streetParking.capacity),
+            })}
+          />
         </div>
       )}
 
