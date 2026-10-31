@@ -8,12 +8,17 @@ using UnityEngine;
 /// keeping posts/towers upright while road surfaces follow grade. Section-boundary vertices coincide, preventing seams.
 /// Model origin lies on the rendered centerline (ground for base_height paths); author distant models around that origin.
 /// Variants without distant models tile master-width plates using the same rules.
+/// Elevated spans of those plates use the `body_elevated` material when the variant has that part, as detailed tracks do.
 /// Use DepthOffsetLit variants of model materials (road material for plates) to prevent burial in coarse distant terrain.
 /// </summary>
 public static class PathFarModel
 {
     /// <summary>Plate length for variants without distant models (m).</summary>
     private const float PLATE_LENGTH = 15f;
+
+    /// <summary>Elevated range covering the whole polyline, for callers drawing a single elevated part.</summary>
+    public static readonly IReadOnlyList<TrackCorridorInfo.PercentRange> WholeElevated =
+        new[] { new TrackCorridorInfo.PercentRange { From = 0.0, To = 1.0 } };
 
     private sealed class Tile
     {
@@ -24,88 +29,151 @@ public static class PathFarModel
         public float minZ, length;
     }
 
-    // Models per variant; null for variants with nothing to draw. Prefabs (asset packs) and masters may differ
-    // by city, so discard on city switches.
-    private static readonly Dictionary<int, Tile> tiles = new Dictionary<int, Tile>();
+    // Models per variant and elevation; null for variants with nothing to draw. Elevated entries share the ground tile
+    // when elevated spans look the same. Prefabs (asset packs) and masters may differ by city, so discard on city switches.
+    private static readonly Dictionary<(int variant, bool elevated), Tile> tiles = new Dictionary<(int variant, bool elevated), Tile>();
 
     static PathFarModel() => AssetPackStore.CityChanging += tiles.Clear;
 
-    /// <summary>Mesh tiled along points. Null if nothing to draw. Caller releases returned meshes.</summary>
-    public static Mesh Build(int variant, List<Vector3> points, out Material[] materials)
+    /// <summary>Whether elevated spans of the variant draw differently from ground spans.</summary>
+    public static bool HasElevatedLook(int variant) => GetTile(variant, true) != GetTile(variant, false);
+
+    /// <summary>
+    /// Mesh tiled along points. Null if nothing to draw. Caller releases returned meshes.
+    /// elevated holds sorted, nonoverlapping length-fraction ranges drawn with the elevated tile; null for none.
+    /// Each span is tiled separately, with one submesh per material.
+    /// </summary>
+    public static Mesh Build(int variant, List<Vector3> points, IReadOnlyList<TrackCorridorInfo.PercentRange> elevated, out Material[] materials)
     {
         materials = null;
-        Tile tile = GetTile(variant);
-        if (tile == null || points == null || points.Count < 2)
+        if (points == null || points.Count < 2)
         {
             return null;
         }
-        var cumulative = new float[points.Count];
-        for (int i = 1; i < points.Count; i++)
+        var builder = new Builder();
+        double cursor = 0.0;
+        if (elevated != null)
         {
-            cumulative[i] = cumulative[i - 1] + Vector3.Distance(points[i - 1], points[i]);
-        }
-        float total = cumulative[points.Count - 1];
-        if (total < 0.01f)
-        {
-            return null;
-        }
-
-        int count = Mathf.Max(1, Mathf.RoundToInt(total / tile.length));
-        float step = total / count;
-        var vertices = new List<Vector3>(count * tile.vertices.Length);
-        var uv = tile.uv != null ? new List<Vector2>(count * tile.uv.Length) : null;
-        var triangles = new List<int>[tile.triangles.Length];
-        for (int s = 0; s < triangles.Length; s++)
-        {
-            triangles[s] = new List<int>(count * tile.triangles[s].Length);
-        }
-        for (int i = 0; i < count; i++)
-        {
-            int first = vertices.Count;
-            foreach (Vector3 v in tile.vertices)
+            foreach (var range in elevated)
             {
-                Sample(points, cumulative, (i + (v.z - tile.minZ) / tile.length) * step, out Vector3 position, out Vector3 right);
-                vertices.Add(position + right * v.x + Vector3.up * v.y);
+                builder.Append(variant, false, points, cursor, range.From);
+                builder.Append(variant, true, points, range.From, range.To);
+                cursor = range.To;
             }
-            uv?.AddRange(tile.uv);
-            for (int s = 0; s < triangles.Length; s++)
+        }
+        builder.Append(variant, false, points, cursor, 1.0);
+        return builder.ToMesh(out materials);
+    }
+
+    private sealed class Builder
+    {
+        private readonly List<Vector3> vertices = new List<Vector3>();
+        private readonly List<Vector2> uv = new List<Vector2>();
+        private readonly List<Material> materials = new List<Material>();
+        private readonly List<List<int>> triangles = new List<List<int>>();
+        private bool hasUv;
+
+        public void Append(int variant, bool elevated, List<Vector3> points, double from, double to)
+        {
+            if (to - from <= 1e-6)
             {
-                foreach (int index in tile.triangles[s])
+                return;
+            }
+            Tile tile = GetTile(variant, elevated);
+            if (tile == null)
+            {
+                return;
+            }
+            List<Vector3> span = from <= 0.0 && to >= 1.0 ? points : PathDrawContext.SlicePolylineByFraction(points, from, to);
+            if (span.Count < 2)
+            {
+                return;
+            }
+            var cumulative = new float[span.Count];
+            for (int i = 1; i < span.Count; i++)
+            {
+                cumulative[i] = cumulative[i - 1] + Vector3.Distance(span[i - 1], span[i]);
+            }
+            float total = cumulative[span.Count - 1];
+            if (total < 0.01f)
+            {
+                return;
+            }
+
+            var slots = new List<int>[tile.triangles.Length];
+            for (int s = 0; s < slots.Length; s++)
+            {
+                Material material = tile.materials[s];
+                int slot = materials.IndexOf(material);
+                if (slot < 0)
                 {
-                    triangles[s].Add(first + index);
+                    slot = materials.Count;
+                    materials.Add(material);
+                    triangles.Add(new List<int>());
+                }
+                slots[s] = triangles[slot];
+            }
+            hasUv |= tile.uv != null;
+            Vector2[] tileUv = tile.uv ?? new Vector2[tile.vertices.Length];
+            int count = Mathf.Max(1, Mathf.RoundToInt(total / tile.length));
+            float step = total / count;
+            for (int i = 0; i < count; i++)
+            {
+                int first = vertices.Count;
+                foreach (Vector3 v in tile.vertices)
+                {
+                    Sample(span, cumulative, (i + (v.z - tile.minZ) / tile.length) * step, out Vector3 position, out Vector3 right);
+                    vertices.Add(position + right * v.x + Vector3.up * v.y);
+                }
+                uv.AddRange(tileUv);
+                for (int s = 0; s < slots.Length; s++)
+                {
+                    foreach (int index in tile.triangles[s])
+                    {
+                        slots[s].Add(first + index);
+                    }
                 }
             }
         }
 
-        var mesh = new Mesh
+        public Mesh ToMesh(out Material[] result)
         {
-            name = "PathFar",
-            indexFormat = vertices.Count > 65535 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16,
-        };
-        mesh.SetVertices(vertices);
-        if (uv != null)
-        {
-            mesh.SetUVs(0, uv);
+            result = null;
+            if (vertices.Count == 0)
+            {
+                return null;
+            }
+            var mesh = new Mesh
+            {
+                name = "PathFar",
+                indexFormat = vertices.Count > 65535 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16,
+            };
+            mesh.SetVertices(vertices);
+            if (hasUv)
+            {
+                mesh.SetUVs(0, uv);
+            }
+            mesh.subMeshCount = triangles.Count;
+            for (int s = 0; s < triangles.Count; s++)
+            {
+                mesh.SetTriangles(triangles[s], s);
+            }
+            mesh.RecalculateNormals();
+            if (hasUv)
+            {
+                mesh.RecalculateTangents();
+            }
+            mesh.RecalculateBounds();
+            result = materials.ToArray();
+            return mesh;
         }
-        mesh.subMeshCount = triangles.Length;
-        for (int s = 0; s < triangles.Length; s++)
-        {
-            mesh.SetTriangles(triangles[s], s);
-        }
-        mesh.RecalculateNormals();
-        if (uv != null)
-        {
-            mesh.RecalculateTangents();
-        }
-        mesh.RecalculateBounds();
-        materials = tile.materials;
-        return mesh;
     }
 
     /// <summary>Create a tiled distant child object under parent. Null if nothing to draw.</summary>
-    public static GameObject Create(GameObject parent, string name, int variant, List<Vector3> points)
+    public static GameObject Create(GameObject parent, string name, int variant, List<Vector3> points,
+        IReadOnlyList<TrackCorridorInfo.PercentRange> elevated = null)
     {
-        Mesh mesh = Build(variant, points, out Material[] materials);
+        Mesh mesh = Build(variant, points, elevated, out Material[] materials);
         if (mesh == null)
         {
             return null;
@@ -134,20 +202,31 @@ public static class PathFarModel
         right = direction.sqrMagnitude > 1e-8f ? Vector3.Cross(Vector3.up, direction).normalized : Vector3.right;
     }
 
-    private static Tile GetTile(int variant)
+    private static Tile GetTile(int variant, bool elevated)
     {
-        if (tiles.TryGetValue(variant, out Tile cached))
+        if (tiles.TryGetValue((variant, elevated), out Tile cached))
         {
             return cached;
         }
         GameObject prefab = ModelManager.Instance != null ? ModelManager.Instance.GetModel($"Models/Paths/p{variant}/far", true) : null;
-        Tile tile = prefab != null ? ModelTile(prefab) : PlateTile(variant);
+        // Distant models cover elevated spans too; only plates take the elevated part's material.
+        Material elevatedMaterial = elevated && prefab == null ? ElevatedBodyMaterial(variant) : null;
+        Tile tile = elevated && elevatedMaterial == null ? GetTile(variant, false)
+            : prefab != null ? ModelTile(prefab) : PlateTile(variant, elevatedMaterial);
         // Caching results before models/masters are ready would leave that variant permanently absent in distant rendering.
         if (ModelManager.Instance != null && MasterDataStore.Instance != null && MasterDataStore.Instance.IsInitialized)
         {
-            tiles[variant] = tile;
+            tiles[(variant, elevated)] = tile;
         }
         return tile;
+    }
+
+    /// <summary>Material of the variant's `body_elevated`, which detailed tracks lay above terrain. Null without that part.</summary>
+    private static Material ElevatedBodyMaterial(int variant)
+    {
+        GameObject prefab = ModelManager.Instance != null ? ModelManager.Instance.GetModel($"Models/Paths/p{variant}/body_elevated", true) : null;
+        Material source = prefab != null ? prefab.GetComponent<MeshRenderer>()?.sharedMaterial : null;
+        return source != null ? RoadPath.GetOrCreateRoadMaterial(source) : null;
     }
 
     private static Tile ModelTile(GameObject prefab)
@@ -177,7 +256,8 @@ public static class PathFarModel
         return tile;
     }
 
-    private static Tile PlateTile(int variant)
+    /// <param name="material">Plate material; null resolves the variant's body material.</param>
+    private static Tile PlateTile(int variant, Material material)
     {
         PathMasterItem master = MasterDataStore.Instance?.GetPathMaster(variant);
         if (master == null || master.width <= 0f)
@@ -185,7 +265,7 @@ public static class PathFarModel
             return null;
         }
         float half = master.width * 0.5f;
-        Material material = RoadPath.ResolveBodyMaterial(variant, master.type) ?? AssetPackStore.LoadNamedMaterial("Road");
+        material ??= RoadPath.ResolveBodyMaterial(variant, master.type) ?? AssetPackStore.LoadNamedMaterial("Road");
         return new Tile
         {
             vertices = new[] { new Vector3(-half, 0f, 0f), new Vector3(-half, 0f, PLATE_LENGTH), new Vector3(half, 0f, PLATE_LENGTH), new Vector3(half, 0f, 0f) },

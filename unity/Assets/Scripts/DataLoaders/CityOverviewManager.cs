@@ -412,12 +412,13 @@ public class CityOverviewManager : MonoBehaviour
             int id = s.pathIds[i];
             if (shownPaths.Contains(id) || ObjectVisibilityFilter.IsHidden(InputObjectType.PATH, id)) continue;
             List<Vector3> points = PlatePoints(s, i);
-            // Paths that do not follow terrain (bridges, viaducts) take their Far shape from the whole-city copy.
-            // Until the copy holds the path, draw the overview band and rebuild once it arrives.
+            // Paths not lying on terrain (bridges, viaducts, including tracks raised by anchor heights) take their Far shape
+            // from the whole-city copy. Until the copy holds the path, draw the overview band and rebuild once it arrives.
             ConstructionPathSummary path = null;
             bool known = CityDataCache.Instance != null && CityDataCache.Instance.TryGetPath(id, out path);
             chunk.readsCityData |= !known;
-            if (known && !PathManager.GetPathFollowTerrain(path) && pathManager != null)
+            List<TrackCorridorInfo.PercentRange> elevated = null;
+            if (known && !PathManager.LiesOnTerrain(path) && pathManager != null)
             {
                 chunk.readsCityData = true;
                 List<Vector3> farPoints = pathManager.CalculateFarPoints(path);
@@ -425,11 +426,12 @@ public class CityOverviewManager : MonoBehaviour
                 {
                     for (int k = 0; k < farPoints.Count; k++) farPoints[k] -= Vector3.up * PLATE_SINK;
                     points = farPoints;
+                    elevated = pathManager.GetFarElevatedRanges(path);
                     structures ??= new GameObject("Structures");
                     SuspensionBridgeGenerator.GenerateFar(structures, points, path);
                 }
             }
-            Mesh mesh = PathFarModel.Build(s.pathVariants[i], points, out Material[] materials);
+            Mesh mesh = PathFarModel.Build(s.pathVariants[i], points, elevated, out Material[] materials);
             if (mesh == null) continue;
             temporary.Add(mesh);
             for (int sub = 0; sub < mesh.subMeshCount; sub++)

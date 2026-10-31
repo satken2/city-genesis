@@ -27,6 +27,7 @@ public sealed class SplinePartLod : MonoBehaviour
     private float width, lateral, height;
     private bool body;
     private int farVariant;
+    private bool farElevated;
     private Vector3? queriedPosition;
     private Segment queriedSegment;
     private PathPresentation presentation;
@@ -84,12 +85,14 @@ public sealed class SplinePartLod : MonoBehaviour
     }
 
     /// <param name="pathVariant">Far model variant repeated in distant sections (PathFarModel). 0 means do not draw Far sections.</param>
+    /// <param name="elevated">The part is an elevated bed, so distant sections use the elevated plate.</param>
     public void Configure(SplineComputer source, float partWidth, float offset, float offsetY, bool isBody,
-        int pathVariant, double from, double to, Func<DrawLod, double, double, GameObject> factory)
+        int pathVariant, bool elevated, double from, double to, Func<DrawLod, double, double, GameObject> factory)
     {
         spline = source; width = partWidth; lateral = offset; height = offsetY; body = isBody; build = factory;
         queriedPosition = null;
         farVariant = pathVariant;
+        farElevated = elevated;
         int count = Mathf.Max(1, Mathf.CeilToInt(spline.CalculateLength() / SegmentLength));
         for (int i = 0; i < count; i++)
         {
@@ -236,7 +239,7 @@ public sealed class SplinePartLod : MonoBehaviour
             Vector3 right = Vector3.Cross(Vector3.up, sample.forward).normalized;
             points.Add(transform.InverseTransformPoint(sample.position + right*lateral + Vector3.up*height));
         }
-        return PathFarModel.Create(gameObject, "RoadSummary", farVariant, points);
+        return PathFarModel.Create(gameObject, "RoadSummary", farVariant, points, farElevated ? PathFarModel.WholeElevated : null);
     }
 
     private void OnDestroy() { cache.Clear(); }

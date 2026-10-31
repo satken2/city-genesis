@@ -393,9 +393,11 @@ public class RoadPath : IPathMeshGenerator
             group.transform.SetParent(parent.transform, false);
             float adaptive = PathDrawContext.AdaptiveTileLength;
             Color? paint = PathDrawContext.PaintColor;
-            bool isBody = prefabName.EndsWith("/body", StringComparison.Ordinal);
+            // Elevated track beds count as beds: their distant sections become plates as ground beds do.
+            bool elevatedBody = prefabName.EndsWith("/body_elevated", StringComparison.Ordinal);
+            bool isBody = elevatedBody || prefabName.EndsWith("/body", StringComparison.Ordinal);
             group.AddComponent<SplinePartLod>().Configure(spline, width, centerOffsetX, offsetY,
-                isBody, isBody ? PathDrawContext.PathVariant : 0, clipFrom, clipTo,
+                isBody, isBody ? PathDrawContext.PathVariant : 0, elevatedBody, clipFrom, clipTo,
                 (lod, from, to) =>
                 {
                     PathDrawContext.Begin(lod, from, to);

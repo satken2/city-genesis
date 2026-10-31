@@ -2626,10 +2626,13 @@ public partial class PathManager : BaseApiDataManager
         {
             // Linear interpolation between thinned points deviates from terrain; split using the original centerline before thinning each section.
             List<Vector3> centerline = CalculateSectionCenterline(path, CalculatePathPoints(path));
+            bool elevatedLook = PathFarModel.HasElevatedLook(path.path_variant);
+            float baseHeight = GetPathBaseHeight(path.path_variant);
             foreach (var section in TunnelSectionUtil.GetDrawSections(centerline, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
                 UndergroundView.IsActive))
             {
-                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, DecimatePolyline(section.Points, FAR_SAMPLE_INTERVAL));
+                var elevated = elevatedLook ? TrackPath.GetElevatedPercentRanges(TrackPath.RenderPoints(path, section.Points), baseHeight) : null;
+                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, DecimatePolyline(section.Points, FAR_SAMPLE_INTERVAL), elevated);
                 if (sectionGO != null) sectionGO.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
             }
         }
@@ -2639,7 +2642,7 @@ public partial class PathManager : BaseApiDataManager
         }
         else
         {
-            mesh = PathFarModel.Build(path.path_variant, points, out Material[] farMaterials);
+            mesh = PathFarModel.Build(path.path_variant, points, GetFarElevatedRanges(path), out Material[] farMaterials);
             if (mesh != null)
             {
                 pathGO.AddComponent<MeshFilter>().mesh = mesh;
@@ -2724,6 +2727,33 @@ public partial class PathManager : BaseApiDataManager
             }
         }
         return points;
+    }
+
+    /// <summary>
+    /// Whether the whole path lies on the reference surface: terrain-following, every anchor at base_height, and no station grade profile.
+    /// Rendering snaps such anchors to the surface (ComputeDesignedPathPoints), so these paths have no elevated span.
+    /// </summary>
+    public static bool LiesOnTerrain(PathSummary path)
+    {
+        if (!GetPathFollowTerrain(path) || (path.station_grade_profile?.Count ?? 0) >= 2) return false;
+        float baseHeight = GetPathBaseHeight(path.path_variant);
+        var start = path.GetStartPointList();
+        var end = path.GetEndPointList();
+        if ((start?.Count >= 3 ? start[1] : 0f) != baseHeight || (end?.Count >= 3 ? end[1] : 0f) != baseHeight) return false;
+        var waypoints = path.GetWaypointList();
+        return waypoints == null || waypoints.TrueForAll(wp => wp.GetRelativeHeight() == baseHeight);
+    }
+
+    /// <summary>
+    /// Elevated spans of the Far plate, judged on the detailed track centerline by the same rule (TrackPath.GetElevatedPercentRanges).
+    /// Null when no span can look different from afar, skipping the centerline calculation.
+    /// </summary>
+    public List<TrackCorridorInfo.PercentRange> GetFarElevatedRanges(PathSummary path)
+    {
+        if (LiesOnTerrain(path) || !PathFarModel.HasElevatedLook(path.path_variant)) return null;
+        List<Vector3> points = CalculatePathPoints(path);
+        if (points.Count < 2) return null;
+        return TrackPath.GetElevatedPercentRanges(TrackPath.RenderPoints(path, points), GetPathBaseHeight(path.path_variant));
     }
 
     public List<PathSummary> GetAllPaths()

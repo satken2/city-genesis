@@ -210,19 +210,7 @@ public class TrackPath : IPathMeshGenerator
         ResolvePlatformExtents(pathData, platformWidth, out float platformLeft, out float platformRight);
 
         bool isCurved = pathData.curved;
-
-        // With curved=False, CalculatePathPoints returns anchors only, preventing terrain conformity.
-        // Interpolate intermediate points at regular intervals and apply terrain height.
-        // Preserve waypoint corners as Broken points (no road-style corner cutting/filling;
-        // tracks normally use smooth curved=true; polyline corners are simplified rendering).
-        // PathManager already applies design elevations to station_grade_profile tracks; do not reconform to terrain.
-        if (!isCurved && (pathData.station_grade_profile == null || pathData.station_grade_profile.Count < 2)
-            && (points.Count == 2 || (pathData.GetWaypointList()?.Count ?? 0) > 0))
-        {
-            bool followTerrain = PathManager.GetPathFollowTerrain(pathData)
-                && AreAllAnchorsOnGround(pathData);
-            points = PathManager.SubdividePointsWithTerrain(points, PathManager.TERRAIN_SAMPLE_INTERVAL, followTerrain);
-        }
+        points = RenderPoints(pathData, points);
 
         // Nearby parallel-track corridor joins and station-platform
         // joining/encroachment information. Null without joins/provider (test scenes, etc.),
@@ -279,27 +267,18 @@ public class TrackPath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// Whether start/end/all waypoint relative Ys are zero (ground-following).
-    /// Determines terrain-conformity subdivision.
+    /// Centerline the track is drawn along, from PathManager.CalculatePathPoints.
+    /// With curved=False, those are anchors only, preventing terrain conformity.
+    /// Interpolate intermediate points at regular intervals and apply terrain height.
+    /// Preserve waypoint corners as Broken points (no road-style corner cutting/filling;
+    /// tracks normally use smooth curved=true; polyline corners are simplified rendering).
+    /// PathManager already applies design elevations to station_grade_profile tracks; do not reconform to terrain.
     /// </summary>
-    private static bool AreAllAnchorsOnGround(PathSummary pathData)
+    public static List<Vector3> RenderPoints(PathSummary pathData, List<Vector3> points)
     {
-        var startList = pathData.GetStartPointList();
-        var endList = pathData.GetEndPointList();
-        float startRelY = (startList != null && startList.Count >= 3) ? startList[1] : 0f;
-        float endRelY = (endList != null && endList.Count >= 3) ? endList[1] : 0f;
-        if (startRelY != 0f || endRelY != 0f) return false;
-
-        var waypointList = pathData.GetWaypointList();
-        if (waypointList != null)
-        {
-            foreach (var wp in waypointList)
-            {
-                float relY = (wp.position != null && wp.position.Length >= 3) ? wp.position[1] : 0f;
-                if (relY != 0f) return false;
-            }
-        }
-        return true;
+        if (pathData.curved || (pathData.station_grade_profile != null && pathData.station_grade_profile.Count >= 2)
+            || (points.Count != 2 && (pathData.GetWaypointList()?.Count ?? 0) == 0)) return points;
+        return PathManager.SubdividePointsWithTerrain(points, PathManager.TERRAIN_SAMPLE_INTERVAL, PathManager.LiesOnTerrain(pathData));
     }
 
     /// <summary>
@@ -1526,8 +1505,9 @@ public class TrackPath : IPathMeshGenerator
     /// Return continuous point intervals above terrain by more than GROUND_SNAP_EPSILON
     /// as arc-length-fraction spline-percent ranges, boundaries midway between samples.
     /// Exclude surface/cuttings (underground tunnel sections never reach this point list).
+    /// Far plates use the same ranges (PathManager.GetFarElevatedRanges) so distant tracks change look where detailed ones do.
     /// </summary>
-    private static List<TrackCorridorInfo.PercentRange> GetElevatedPercentRanges(List<Vector3> points, float baseHeight)
+    public static List<TrackCorridorInfo.PercentRange> GetElevatedPercentRanges(List<Vector3> points, float baseHeight)
     {
         var result = new List<TrackCorridorInfo.PercentRange>();
         int n = points.Count;
