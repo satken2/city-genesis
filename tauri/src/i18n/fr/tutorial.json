@@ -497,8 +497,7 @@
       "tourism": "Les habitants souhaitent faire découvrir leurs ruines antiques situées à l’intérieur des terres. Mais il manque un port de passagers, des hébergements et une ligne de bus vers le village. Ce tutoriel vous apprend à construire un hôtel et un terminal, créer une ligne de bus et vérifier les arrivées de touristes, les ventes du restaurant et l’utilisation du bus.",
       "heading": "Une demande au maire",
       "windowTitle": "Tutoriel",
-      "reclamation": "Ce minuscule récif manque de terrain plat pour un hôtel de ville et de terre pour une centrale électrique. Dans ce tutoriel, vous apprendrez à remblayer la côte, à placer un hôtel de ville et à acheminer l’électricité d’un parc éolien en mer jusqu’à une sous-station par une ligne électrique.",
-      "acquisition": "Des logements, des bureaux et une caserne de pompiers se trouvent entre deux quais surélevés. Dans ce tutoriel, vous apprendrez à planifier les voies, acquérir les terrains privés, démolir un équipement public et terminer la liaison."
+      "reclamation": "Ce minuscule récif manque de terrain plat pour un hôtel de ville et de terre pour une centrale électrique. Dans ce tutoriel, vous apprendrez à remblayer la côte, à placer un hôtel de ville et à acheminer l’électricité d’un parc éolien en mer jusqu’à une sous-station par une ligne électrique."
     },
     "reclamation": {
       "title": "Gagner du terrain sur la mer",
@@ -543,30 +542,6 @@
       "step10": {
         "title": "Raccordez par une ligne électrique",
         "description": "Enfin, acheminez l’électricité du parc éolien jusqu’à la sous-station à terre. Les lignes électriques peuvent aussi être tendues au-dessus de la mer, sur des pylônes dressés dans l’eau. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Ligne électrique haute tension » sous « Électricité » et tracez-la de la borne de raccordement du parc éolien à celle de la sous-station. Une fois le raccordement fait, le tutoriel est terminé."
-      }
-    },
-    "acquisition": {
-      "title": "Acquisition foncière et construction du métro",
-      "description": "Des logements, des bureaux et une caserne de pompiers se trouvent entre deux quais surélevés. Dans ce tutoriel, vous apprendrez à planifier les voies, acquérir les terrains privés, démolir un équipement public et terminer la liaison.",
-      "step1": {
-        "title": "Relier les quais par des voies",
-        "open": "Ouvrez l’outil de routes et de voies. Reliez les deux quais existants par des voies surélevées à 7 m du sol.",
-        "start": "Choisissez la double voie et cliquez avec le bouton gauche sur l’extrémité intérieure du quai ouest, au repère cyan. Le départ s’accroche à l’extrémité existante à 7 m de hauteur.",
-        "end": "Cliquez avec le bouton gauche sur l’extrémité intérieure du quai est, au repère jaune. Vous pouvez planifier les voies même si elles traversent des logements et des bureaux.",
-        "confirm": "Vérifiez le devis et appuyez sur Valider. Ce tutoriel porte sur la construction des voies et ne demande pas de créer un service de trains.",
-        "variant": "Dans la catégorie ferroviaire, choisissez la carte de double voie mise en évidence."
-      },
-      "step2": {
-        "title": "Observer l’acquisition et le blocage",
-        "description": "Faites avancer le temps avec Démarrer. Les négociations d’acquisition commencent pour les parcelles privées sur le tracé. La caserne au repère jaune est un équipement public : elle n’est pas acquise automatiquement et les voies restent à l’état de projet. Consultez les détails des parcelles et bâtiments."
-      },
-      "step3": {
-        "title": "Ordonner la démolition de la caserne",
-        "description": "Cliquez sur la caserne au repère jaune pour ouvrir ses détails, puis appuyez sur Démolir pour ordonner sa démolition. Les équipements publics exigent votre ordre explicite. Laissez l’acquisition foncière traiter les autres logements et bureaux."
-      },
-      "step4": {
-        "title": "Attendre l’acquisition et l’achèvement",
-        "description": "Continuez à faire avancer le temps avec Démarrer. La construction des voies progresse après l’acquisition des terrains privés et les démolitions. Le tutoriel se termine lorsque les deux quais sont reliés par des voies achevées."
       }
     }
   },

@@ -37,7 +37,7 @@ await build({ entryPoints: ["tools/tutorial/shape-editor-tests.tsx"], outfile: s
 await import(pathToFileURL(shapeOutput).href + `?run=${Date.now()}`);
 const registry = JSON.parse(await readFile("src-tauri/config/window-registry.json", "utf8"));
 const LANGS = ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"];
-const SCENARIOS = ["controls", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
+const SCENARIOS = ["controls", "scenario4", "trade", "highway", "mining", "tourism", "reclamation"];
 const walk = (value, visit) => { if (value && typeof value === "object") { visit(value); Object.values(value).forEach(v => walk(v, visit)); } };
 const lookup = (text, key) => key.split(".").reduce((v, k) => v?.[k], text);
 for (const name of SCENARIOS) {

@@ -497,8 +497,7 @@
       "tourism": "Los habitantes quieren compartir sus antiguas ruinas del interior con más visitantes, pero no cuentan con un puerto de pasajeros, alojamiento ni una ruta de autobús al pueblo. En este tutorial aprenderás a construir un hotel y una terminal, crear una ruta de autobús y revisar la llegada de turistas, las ventas del restaurante y el uso del autobús.",
       "heading": "Un pedido para la alcaldía",
       "windowTitle": "Tutorial",
-      "reclamation": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal ni tierra para una central eléctrica. En este tutorial aprenderás a ganar terreno al mar, colocar la sede municipal y llevar la electricidad de un parque eólico marino hasta una subestación mediante una línea eléctrica.",
-      "acquisition": "Entre dos plataformas elevadas hay viviendas, oficinas y una estación de bomberos. En este tutorial aprenderás a planificar vías, adquirir terrenos privados, demoler una instalación pública y completar la conexión."
+      "reclamation": "Este pequeño arrecife no tiene terreno llano para una sede del gobierno municipal ni tierra para una central eléctrica. En este tutorial aprenderás a ganar terreno al mar, colocar la sede municipal y llevar la electricidad de un parque eólico marino hasta una subestación mediante una línea eléctrica."
     },
     "reclamation": {
       "title": "Gana terreno al mar",
@@ -543,30 +542,6 @@
       "step10": {
         "title": "Conecta con una línea eléctrica",
         "description": "Por último, lleva la electricidad del parque eólico hasta la subestación en tierra. Las líneas eléctricas también pueden tenderse sobre el mar, con torres levantadas en el agua. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Línea de transmisión eléctrica» en «Electricidad» y trázala desde el terminal de conexión del parque eólico hasta el de la subestación. Cuando queden conectados, el tutorial habrá terminado."
-      }
-    },
-    "acquisition": {
-      "title": "Adquisición de terrenos y construcción del metro",
-      "description": "Entre dos plataformas elevadas hay viviendas, oficinas y una estación de bomberos. En este tutorial aprenderás a planificar vías, adquirir terrenos privados, demoler una instalación pública y completar la conexión.",
-      "step1": {
-        "title": "Conecta las plataformas con vías",
-        "open": "Abre la herramienta de carreteras y vías. Conecta las dos plataformas existentes con vías elevadas a 7 m del suelo.",
-        "start": "Elige vía doble y haz clic izquierdo en el extremo interior de la plataforma oeste, en el marcador celeste. El inicio se ajusta al extremo existente a una altura de 7 m.",
-        "end": "Haz clic izquierdo en el extremo interior de la plataforma este, en el marcador amarillo. Puedes planificar las vías aunque se superpongan con viviendas y oficinas.",
-        "confirm": "Revisa el presupuesto y pulsa Confirmar. Este tutorial trata la construcción de vías y no requiere configurar un servicio de trenes.",
-        "variant": "En la categoría ferroviaria, elige la tarjeta resaltada de vía doble."
-      },
-      "step2": {
-        "title": "Observa la adquisición y el bloqueo",
-        "description": "Avanza el tiempo con Iniciar. Comienzan las negociaciones para adquirir las parcelas privadas que interfieren con las vías. La estación de bomberos del marcador amarillo es pública: no se adquiere automáticamente y las vías siguen planificadas. Revisa los detalles de parcelas y edificios."
-      },
-      "step3": {
-        "title": "Ordena la demolición de la estación de bomberos",
-        "description": "Haz clic en la estación de bomberos del marcador amarillo para abrir sus detalles y pulsa Demoler para ordenar su retiro. Las instalaciones públicas necesitan tu orden explícita. Deja las demás viviendas y oficinas a la adquisición de terrenos."
-      },
-      "step4": {
-        "title": "Espera la adquisición y la finalización",
-        "description": "Sigue avanzando el tiempo con Iniciar. Cuando terminan la adquisición de terrenos privados y la demolición, la obra de las vías puede avanzar. El tutorial termina al conectar ambas plataformas con vías completas."
       }
     }
   },

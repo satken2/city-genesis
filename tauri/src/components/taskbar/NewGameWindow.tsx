@@ -44,7 +44,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { loadAppSettings } from "../../utils/settings";
 import { SUPPORTED_LANGUAGES, resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
-import { NEW_GAME_TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
+import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { normalizeGroundCover } from "../terrain/terrainData";
 import { formatMapSize } from "../../utils/mapSize";
@@ -298,7 +298,7 @@ export function NewGameWindow({
   const isTutorialCleared = useCallback((id: string) => profile?.tutorials_cleared.includes(id) ?? false, [profile]);
   const isScenarioCleared = useCallback((id: string) => profile?.scenarios_cleared.includes(id) ?? false, [profile]);
   // Keep the list collapsed while fetching records to avoid briefly expanding it for players who cleared everything. Respect manual expansion choices.
-  const tutorialsOpen = tutorialsExpanded ?? (profile !== null && !NEW_GAME_TUTORIAL_SCENARIOS.every(scenario => isTutorialCleared(scenario.id)));
+  const tutorialsOpen = tutorialsExpanded ?? (profile !== null && !TUTORIAL_SCENARIOS.every(scenario => isTutorialCleared(scenario.id)));
 
   /**
    * Start from a scenario.
@@ -365,7 +365,7 @@ export function NewGameWindow({
     if (!selection) return null;
 
     if (selection.kind === "tutorial") {
-      const scenario = NEW_GAME_TUTORIAL_SCENARIOS.find((s) => s.id === selection.id);
+      const scenario = TUTORIAL_SCENARIOS.find((s) => s.id === selection.id);
       if (!scenario) return null;
       return {
         thumbnailUrl: scenario.image || null,
@@ -561,7 +561,7 @@ export function NewGameWindow({
                 </button>
               </h3>
               <div id="new-game-tutorials" className="new-game-tiles" hidden={!tutorialsOpen}>
-                {NEW_GAME_TUTORIAL_SCENARIOS.map((scenario, index) => (
+                {TUTORIAL_SCENARIOS.map((scenario, index) => (
                   <ScenarioTile
                     key={scenario.id}
                     className="new-game-tile--tutorial"
@@ -584,7 +584,7 @@ export function NewGameWindow({
 
             <section className="new-game-section">
               <h3 className="new-game-section-title">{t("newGame.sectionScenarios")}</h3>
-              {scenarioTiles(scenarios, debugCities.length + NEW_GAME_TUTORIAL_SCENARIOS.length)}
+              {scenarioTiles(scenarios, debugCities.length + TUTORIAL_SCENARIOS.length)}
             </section>
           </div>
         )}

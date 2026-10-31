@@ -14,7 +14,6 @@ import highwayScenarioThumbnail from "../../assets/images/scenarios/highway.png"
 import miningScenarioThumbnail from "../../assets/images/scenarios/mining.png";
 import tourismScenarioThumbnail from "../../assets/images/scenarios/tourism.png";
 import reclamationScenarioThumbnail from "../../assets/images/scenarios/reclamation.png";
-import acquisitionScenarioThumbnail from "../../assets/images/scenarios/acquisition.svg";
 import controlsScenarioThumbnail from "../../assets/images/scenarios/controls.png";
 
 /** Display information for one step in the tutorial window */
@@ -40,7 +39,7 @@ export interface TutorialScenario {
 }
 
 /** List order (learning sequence) */
-const SCENARIO_ORDER = ["controls", "scenario4", "trade", "highway", "mining", "tourism", "reclamation", "acquisition"];
+const SCENARIO_ORDER = ["controls", "scenario4", "trade", "highway", "mining", "tourism", "reclamation"];
 
 const THUMBNAILS: Record<string, string> = {
   controls: controlsScenarioThumbnail,
@@ -50,7 +49,6 @@ const THUMBNAILS: Record<string, string> = {
   mining: miningScenarioThumbnail,
   tourism: tourismScenarioThumbnail,
   reclamation: reclamationScenarioThumbnail,
-  acquisition: acquisitionScenarioThumbnail,
 };
 
 /**
@@ -68,6 +66,3 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = SCENARIO_ORDER.map((id) =>
     descriptionKey: step.phases[0].textKey,
   })),
 }));
-
-/** Acquisition is taught in railway construction. Retain the old lesson definition for resuming saved tutorials. */
-export const NEW_GAME_TUTORIAL_SCENARIOS = TUTORIAL_SCENARIOS.filter((scenario) => scenario.id !== "acquisition");

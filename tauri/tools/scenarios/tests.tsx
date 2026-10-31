@@ -17,14 +17,14 @@ import { emit, state } from "./mock-runtime";
 import jaScenarios from "../../src/i18n/ja/scenarios.json";
 import jaTerrainEditor from "../../src/i18n/ja/terrainEditor.json";
 import type { ClimateSettings } from "../../src/utils/climate";
-import { NEW_GAME_TUTORIAL_SCENARIOS } from "../../src/components/tutorial/tutorialSteps";
+import { TUTORIAL_SCENARIOS } from "../../src/components/tutorial/tutorialSteps";
 
 // DOM は run.mjs が React より先に用意する(単体で読み込んだときだけここで作る)。
 const window = ((globalThis as { window?: Window }).window ?? new Window()) as Window;
 const climate = (name: string): ClimateSettings => ({ name, months: Array.from({ length: 12 }, () => ({
   temperature: 20, precipitation: 100, sunlight: 70, weather: { clear: 100 },
 })) });
-const firstTutorial = NEW_GAME_TUTORIAL_SCENARIOS[0].id;
+const firstTutorial = TUTORIAL_SCENARIOS[0].id;
 Object.assign(globalThis, { window, document: window.document, HTMLElement: window.HTMLElement,
   IS_REACT_ACT_ENVIRONMENT: true });
 const entry = { id: "local~mine", is_scenario: true, saved_at: "20261003_215934", scenario_title: { en: "My scenario" } as Record<string, string>, author: "Author",
@@ -139,7 +139,7 @@ globalThis.fetch = async (input, init) => {
   if (url.includes("/saves/")) return new Response(JSON.stringify({ save: entry }));
   listFetches++;
   return new Response(JSON.stringify({ scenarios: Object.fromEntries(entries.map(value => [value.id, value])),
-    tutorials: Object.fromEntries(NEW_GAME_TUTORIAL_SCENARIOS.map(({ id }) => [id, { id, compatibility: { loadable: true },
+    tutorials: Object.fromEntries(TUTORIAL_SCENARIOS.map(({ id }) => [id, { id, compatibility: { loadable: true },
       scenario_fixed_options: ["city_name", "language", "simulation_days", "ground_cover"] }])),
     upload_available: false }));
 };

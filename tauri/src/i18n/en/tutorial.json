@@ -497,8 +497,7 @@
       "tourism": "The islanders want to share their ancient inland ruins with more visitors. But they lack a passenger harbor, accommodation, and a bus route from the harbor to town. In this tutorial, you will learn to build a hotel and passenger terminal, create a bus route, and check tourist arrivals, restaurant sales, and bus use.",
       "heading": "A Request for the Mayor",
       "windowTitle": "Tutorial",
-      "reclamation": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a power line.",
-      "acquisition": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, demolish a public facility, and complete the connection."
+      "reclamation": "This tiny reef has no flat ground for a city hall and no land for a power plant. In this tutorial, you will learn to reclaim coastal land, place a city hall, and bring electricity from an offshore wind farm to a substation through a power line."
     },
     "reclamation": {
       "title": "Reclaim the coast",
@@ -543,30 +542,6 @@
       "step10": {
         "title": "Connect with a power line",
         "description": "Finally, carry the wind farm's electricity to the substation on land. Power lines can be strung over the sea on pylons standing in the water. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Power Transmission Line” under “Electricity”, and draw it from the wind farm's connection terminal to the substation's terminal. Once they are connected, this tutorial is complete."
-      }
-    },
-    "acquisition": {
-      "title": "Land acquisition and metro construction",
-      "description": "Homes, offices, and a fire station stand between two elevated platforms. In this tutorial, you will learn to plan tracks, acquire private land, demolish a public facility, and complete the connection.",
-      "step1": {
-        "title": "Connect the platforms with tracks",
-        "open": "Open the road and railway tool. Connect the two existing platforms with elevated tracks 7 m above the ground.",
-        "start": "Select Double Track and left-click the inner end of the western platform at the cyan marker. The start snaps to the existing endpoint at a height of 7 m.",
-        "end": "Left-click the inner end of the eastern platform at the yellow marker. You can plan construction even where the tracks overlap homes and offices.",
-        "confirm": "Review the estimate and press Confirm. This lesson covers track construction; it does not require setting up a train service.",
-        "variant": "In the railway category, select the highlighted Double Track card."
-      },
-      "step2": {
-        "title": "Observe acquisition and the obstruction",
-        "description": "Use Start to advance time. Acquisition negotiations begin for private parcels in the track corridor. The fire station at the yellow marker is a public facility, so it cannot be acquired automatically and the tracks remain planned. Inspect parcel and building details to see what is happening."
-      },
-      "step3": {
-        "title": "Demolish the fire station explicitly",
-        "description": "Click the fire station at the yellow marker to open its details, then press Bulldoze to order its removal. Public facilities require your explicit demolition order. Leave the other homes and offices to land acquisition."
-      },
-      "step4": {
-        "title": "Wait for acquisition and completion",
-        "description": "Keep advancing time with Start. Track construction proceeds once private land acquisition and demolition are complete. Connecting the two platforms with completed tracks finishes this tutorial."
       }
     }
   },
