@@ -7,7 +7,7 @@
  *   the display language is missing.
  * - Credits are a single untranslated text, since data providers prescribe their attribution wording. They belong
  *   to the city, so creation mode starts from the current city's credits and derived scenarios keep them.
- * - Set starting options (simulation days, climate, ground cover) and whether players may change them at game
+ * - Set starting options (simulation days, ground cover) and whether players may change them at game
  *   start. UI checkboxes mean Editable; invert them into fixed fields (scenario_fixed_options) for the core.
  *   Also select a default asset pack; like language, players may always change it, so it cannot be fixed.
  * - Show the city's naming language first in starting options. It cannot be edited here: changing language
@@ -26,26 +26,24 @@ import { AssetPackEntry, ScenarioEntry, ScenarioStartOption, captureSaveThumbnai
 import { compactLocalizedText, missingEnglish, resolveLocalizedText, type LocalizedText } from "../../utils/locale";
 import { ASSET_PACK_STANDARD, GROUND_COVER_TYPES, SIMULATION_DAYS_CHOICES } from "../../constants";
 import { normalizeGroundCover } from "../terrain/terrainData";
-import type { ClimateSettings } from "../../utils/climate";
 import { LocalizedTextFields } from "../common/LocalizedTextFields";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { SaveVersionInfo } from "../common/SaveVersionInfo";
 import "./Scenarios.css";
 
 type Texts = Record<string, LocalizedText | undefined>;
-type Options = Record<Exclude<ScenarioStartOption, "climate">, number> & { climate: ClimateSettings };
+type Options = Record<ScenarioStartOption, number>;
 
 const TEXT_KEYS = ["scenario_title", "scenario_description", "scenario_objective", "scenario_city_name"] as const;
-const START_OPTIONS: ScenarioStartOption[] = ["simulation_days", "climate", "ground_cover"];
+const START_OPTIONS: ScenarioStartOption[] = ["simulation_days", "ground_cover"];
 
 /** Initial form data: saved scenario when editing; current city (GET /api/v1/city/) and city language when creating. */
 type ScenarioSource = Pick<ScenarioEntry, (typeof TEXT_KEYS)[number] | "scenario_fixed_options" | "author" | "language"
-  | "scenario_credits" | "simulation_days" | "climate" | "ground_cover" | "asset_pack">;
+  | "scenario_credits" | "simulation_days" | "ground_cover" | "asset_pack">;
 
 function startOptionsOf(source: ScenarioSource): Options {
   return {
     simulation_days: source.simulation_days || 30,
-    climate: source.climate!,
     ground_cover: normalizeGroundCover(source.ground_cover),
   };
 }
@@ -90,13 +88,12 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
     return () => controller.abort();
   }, [apiBaseUrl, create, scenarioId, t]);
 
-  const choices: Record<Exclude<ScenarioStartOption, "climate">, { values: number[]; label: (value: number) => string }> = {
+  const choices: Record<ScenarioStartOption, { values: number[]; label: (value: number) => string }> = {
     simulation_days: { values: SIMULATION_DAYS_CHOICES, label: days => t("newGame.daysOption", { days }) },
     ground_cover: { values: GROUND_COVER_TYPES, label: value => t(`groundCover.${value}`) },
   };
   const optionLabels: Record<ScenarioStartOption, string> = {
-    simulation_days: t("newGame.simulationDaysLabel"), climate: t("climate.label"),
-    ground_cover: t("groundCover.label"),
+    simulation_days: t("newGame.simulationDaysLabel"), ground_cover: t("groundCover.label"),
   };
   // If the default pack is not owned by the author, retain its ID as an option so resaving does not change the default.
   const packChoices = assetPacks.some(pack => pack.pack_id === assetPack) || assetPack === ASSET_PACK_STANDARD
@@ -163,10 +160,10 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
         </div>
         {START_OPTIONS.map(option => <div className="scenario-start-row" key={option} data-option={option}>
           <span>{optionLabels[option]}</span>
-          {option === "climate" ? <span className="scenario-start-value">{options.climate.name}</span> : <select value={options[option]} disabled={busy} aria-label={optionLabels[option]}
+          <select value={options[option]} disabled={busy} aria-label={optionLabels[option]}
             onChange={e => setOptions({ ...options, [option]: Number(e.target.value) })}>
             {choices[option].values.map(value => <option key={value} value={value}>{choices[option].label(value)}</option>)}
-          </select>}
+          </select>
           <label className="scenario-start-changeable">
             <input type="checkbox" checked={!fixed.includes(option)} disabled={busy}
               onChange={e => setFixed(e.target.checked ? fixed.filter(value => value !== option) : [...fixed, option])} />

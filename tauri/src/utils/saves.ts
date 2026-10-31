@@ -69,7 +69,7 @@ export type ScenarioEntry = CommonSaveEntry & {
 };
 
 /** Start settings the author may lock (core SCENARIO_START_OPTIONS). Excludes language/asset packs, which players always choose. */
-export type ScenarioStartOption = "simulation_days" | "climate" | "ground_cover";
+export type ScenarioStartOption = "simulation_days" | "ground_cover";
 
 /** Available asset packs (owned and installed), excluding standard. */
 export type AssetPackEntry = { pack_id: string; display_name: LocalizedText };

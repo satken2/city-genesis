@@ -397,7 +397,7 @@ fn close_registered_window(
 /// tutorial). Ask Unity to clear the previous city, hide topmenu and
 /// current popups, show Tips, then POST /api/v1/sessions to the backend.
 ///
-/// Pass extra parameters (city name, language, simulation days, climate, ground cover, and asset
+/// Pass extra parameters (city name, language, simulation days, ground cover, and asset
 /// packs) to the backend as query parameters. When loading a scenario, only settings not locked by the
 /// author may override scenario values (the core rejects different values for locked settings with 422).
 /// `intro_dialog` is the content of the information window opened once the city appears.
@@ -412,7 +412,6 @@ async fn create_session(
     play_mode: Option<i32>,
     tutorial_id: Option<String>,
     accept_balance_change: Option<bool>,
-    climate: Option<i32>,
     ground_cover: Option<i32>,
     asset_pack: Option<String>,
     intro_dialog: Option<serde_json::Value>,
@@ -422,9 +421,9 @@ async fn create_session(
         return Err("PLAY_MODE_FORBIDDEN".into());
     }
     log::info!(
-        "[create_session] scenario_id={:?} city_name={:?} language={:?} simulation_days={:?} play_mode={} tutorial_id={:?} climate={:?} ground_cover={:?} asset_pack={:?}",
+        "[create_session] scenario_id={:?} city_name={:?} language={:?} simulation_days={:?} play_mode={} tutorial_id={:?} ground_cover={:?} asset_pack={:?}",
         scenario_id, city_name, language, simulation_days, play_mode, tutorial_id,
-        climate, ground_cover, asset_pack
+        ground_cover, asset_pack
     );
 
     version::verify_core(state.inner()).await?;
@@ -474,7 +473,6 @@ async fn create_session(
         play_mode: i32,
         tutorial_id: Option<String>,
         accept_balance_change: bool,
-        climate: Option<i32>,
         ground_cover: Option<i32>,
         asset_pack: Option<String>,
     }
@@ -486,7 +484,6 @@ async fn create_session(
         play_mode,
         tutorial_id: tutorial_id.clone(),
         accept_balance_change: accept_balance_change.unwrap_or(false),
-        climate,
         ground_cover,
         asset_pack,
     };

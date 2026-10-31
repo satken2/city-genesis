@@ -31,8 +31,8 @@
  * the display language and city names in the selected city language, falling back to English. City language is
  * always selectable and defaults to the app language. If it differs from the scenario, the core regenerates
  * names within the city.
- * For simulation days, climate, ground cover, and asset region, author-fixed settings are display-only; others
- * are selectable with scenario values as defaults.
+ * For simulation days and ground cover, author-fixed settings are display-only; others are selectable with
+ * scenario values as defaults.
  */
 import { PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL } from "../../constants";
 
@@ -46,7 +46,6 @@ import { SUPPORTED_LANGUAGES, resolveLocalizedText, resolveSupportedLanguage } f
 import { NEW_GAME_TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { normalizeGroundCover } from "../terrain/terrainData";
-import { useMasterData } from "../../contexts/MasterDataContext";
 import { formatMapSize } from "../../utils/mapSize";
 import { FlatTabs } from "../common/FlatTabs";
 import { TerrainFacts } from "../common/TerrainFacts";
@@ -58,7 +57,7 @@ import developmentNoticeImage from "../../assets/images/development_notice.jpg";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
 import { AssetPackEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
-import { ASSET_PACK_STANDARD, CLIMATE_TYPES, GROUND_COVER_TYPES } from "../../constants";
+import { ASSET_PACK_STANDARD, GROUND_COVER_TYPES } from "../../constants";
 import { SaveCompatibilityReason } from "../common/SaveVersionInfo";
 import type { InfoDialogContent } from "../common/InfoDialogWindow";
 
@@ -131,7 +130,6 @@ type ConfirmSelection = {
 
 /** Scenario starting options other than simulation days: value lists and translation key prefixes. */
 const EXTRA_START_OPTIONS: { key: Exclude<ScenarioStartOption, "simulation_days">; values: number[]; labelKey: string }[] = [
-  { key: "climate", values: [0, ...CLIMATE_TYPES], labelKey: "climate" },
   { key: "ground_cover", values: GROUND_COVER_TYPES, labelKey: "groundCover" },
 ];
 
@@ -142,7 +140,6 @@ function defaultCityNameOf(scenario: ScenarioEntry, language: string): string {
 
 function startOptionValuesOf(scenario: ScenarioEntry | null): Record<Exclude<ScenarioStartOption, "simulation_days">, number> {
   return {
-    climate: 0,
     ground_cover: normalizeGroundCover(scenario?.ground_cover),
   };
 }
@@ -209,7 +206,6 @@ export function NewGameWindow({
   onClose,
 }: NewGameWindowProps) {
   const { t, i18n } = useTranslation();
-  const master = useMasterData();
   const [allScenarios, setAllScenarios] = useState<ScenarioEntry[]>([]);
   // Keyed by tutorial ID, matching tutorial_id in POST /api/v1/sessions
   const [tutorialEntries, setTutorialEntries] = useState<Record<string, ScenarioEntry>>({});
@@ -434,7 +430,6 @@ export function NewGameWindow({
         cityName: cityName || null,
         language,
         simulationDays: fixed.has("simulation_days") ? null : simulationDays,
-        climate: startOptions.climate === 0 ? null : chosen("climate", startOptions.climate),
         groundCover: chosen("ground_cover", startOptions.ground_cover),
         assetPack: confirmSelection.scenario ? assetPack : null,
         playMode: confirmSelection.playMode,
@@ -757,13 +752,13 @@ export function NewGameWindow({
                 <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
               </div>
 
-              {/* Climate, ground cover, and asset pack (scenario starts only) */}
+              {/* Ground cover and asset pack (scenario starts only) */}
               {confirmScenario && EXTRA_START_OPTIONS.map(({ key, values, labelKey }) => (
                 <div className="new-game-confirm-field" key={key} data-option={key}>
                   <label className="new-game-confirm-label">{t(`${labelKey}.label`)}</label>
                   {fixedOptions.has(key) ? (
                     <span className="new-game-confirm-fixed">
-                      {key === "climate" ? confirmScenario.climate!.name : t(`${labelKey}.${startOptions[key]}`)}
+                      {t(`${labelKey}.${startOptions[key]}`)}
                       <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
                     </span>
                   ) : (
@@ -776,9 +771,7 @@ export function NewGameWindow({
                         disabled={busy}
                       >
                         {values.map((value) => (
-                          <option key={value} value={value}>{key === "climate"
-                            ? value === 0 ? confirmScenario.climate!.name : master?.climates[value]?.display_name
-                            : t(`${labelKey}.${value}`)}</option>
+                          <option key={value} value={value}>{t(`${labelKey}.${value}`)}</option>
                         ))}
                       </select>
                     </div>
