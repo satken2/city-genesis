@@ -23,6 +23,24 @@ public static class HoverMaterials
         if (source == null) return null;
         if (materials.TryGetValue(source, out var material) && material != null) return material;
         material = new Material(source) { name = source.name + " (Hover)", hideFlags = HideFlags.DontSave };
+        Brighten(source, material);
+        materials[source] = material;
+        return material;
+    }
+
+    /// <summary>
+    /// 元材質の値を実行中に変えたときに、作成済みのホバー材質へ写し直す(都市の市旗・紋章の画像の差し替えなど)。
+    /// 同じ実体を更新するので、ホバー中の描画物にもそのまま反映される。
+    /// </summary>
+    public static void Refresh(Material source)
+    {
+        if (source == null || !materials.TryGetValue(source, out var material) || material == null) return;
+        material.CopyPropertiesFromMaterial(source);
+        Brighten(source, material);
+    }
+
+    private static void Brighten(Material source, Material material)
+    {
         int colorProperty = source.HasProperty(BaseColor) ? BaseColor : LegacyColor;
         if (source.HasProperty(colorProperty))
         {
@@ -38,8 +56,6 @@ public static class HoverMaterials
             material.EnableKeyword("_EMISSION");
             material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
         }
-        materials[source] = material;
-        return material;
     }
 
     public static void Clear()

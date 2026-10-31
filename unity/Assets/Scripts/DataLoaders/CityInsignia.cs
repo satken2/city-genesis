@@ -106,6 +106,7 @@ public static class CityInsignia
             slot.texture = png != null ? Decode(png, slot.materialName) : null;
             slot.png = png;
             Apply(slot);
+            HoverMaterials.Refresh(slot.material);
             if (previous != null) Object.Destroy(previous);
         }
     }
