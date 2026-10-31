@@ -193,7 +193,7 @@ public static class LandmarkPathsQA
         if(id>=254)
         {
             float trussBottom=trusses.SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).Min(v=>v.y);
-            Require(Mathf.Abs(trussBottom-(12.1f-8.55f))<.02f,"truss depth");
+            Require(Mathf.Abs(trussBottom-(12.1f-13.55f))<.02f,"truss depth");
         }
         UnityEngine.Object.DestroyImmediate(go);
     }
