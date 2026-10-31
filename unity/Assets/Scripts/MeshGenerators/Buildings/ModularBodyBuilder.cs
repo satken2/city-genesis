@@ -323,7 +323,7 @@ public static class ModularBodyBuilder
     /// (pass parcel polygons already transformed by BuildingMeshUtils.ResolveParcelContext).
     ///
     /// - Fence line: fenceFootprint inset by <see cref="FENCE_INSET"/>. Fences, the entry, gates, and trails use this line.
-    /// - Entry: with frontFootprint, resolve where the approach from the building front crosses the fence line (<see cref="SiteEntryLayout"/>).
+    /// - Entry: with frontFootprint, resolve where the approach from the building front reaches the fence line (<see cref="SiteEntryLayout"/>).
     ///   It opens the fence, places the gate part there, lays the trail part up to the building front, and keeps that corridor clear of scatter parts.
     ///   The opening is as wide as the gate part, or <see cref="SiteEntryLayout.OPENING_WIDTH"/> without one.
     ///   Callers with their own access (rail-yard track leads) pass fenceOpeningCenter instead and no frontFootprint.
@@ -424,7 +424,7 @@ public static class ModularBodyBuilder
         // --- Entry ---
         GameObject gateModule = BuildingMeshUtils.GetPartNoPosition(prefix, "gate", suffix, true);
         Mesh gateMesh = GetWallSourceMesh(gateModule);
-        bool hasEntry = SiteEntryLayout.TryResolve(fenceLine, frontFootprint, scatterFootprint,
+        bool hasEntry = SiteEntryLayout.TryResolve(fenceFootprint, fenceLine, frontFootprint, scatterFootprint,
             gateMesh != null ? gateMesh.bounds.size.x : SiteEntryLayout.OPENING_WIDTH, out SiteEntryLayout.Entry entry);
         if (hasEntry)
         {

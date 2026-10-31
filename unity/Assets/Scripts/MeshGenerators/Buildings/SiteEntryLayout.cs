@@ -1,9 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// Pure data for a site's entry: where the approach from the building front crosses the fence line just inside the parcel perimeter.
+/// Pure data for a site's entry: where the approach from the building front reaches the fence line just inside the parcel perimeter.
 /// The approach runs along the outward normal from the midpoint of the building's front edge (vertex 0→1), where the entrance part sits,
 /// so fence openings, gates, trails, and the vacant area kept clear of scatter parts all follow one line.
+/// The gate is the first fence-line crossing when stepping back inward from where the approach meets the parcel perimeter,
+/// so buildings whose front touches the perimeter (fence line running inside the footprint) still get their opening.
 /// All positions use local XZ relative to center_point. Specification: city-genesis/docs/ja/geometries/F_建物メッシュの生成.md.
 /// </summary>
 public static class SiteEntryLayout
@@ -37,14 +39,14 @@ public static class SiteEntryLayout
     }
 
     /// <summary>
-    /// Resolve the entry. site=fence line, front=body outline whose edge 0→1 is the front, occupied=outline including entrance/stair setbacks
-    /// (all CCW). Return false when no outline or the ray never reaches the fence line.
+    /// Resolve the entry. site=parcel, fence=fence line, front=body outline whose edge 0→1 is the front,
+    /// occupied=outline including entrance/stair setbacks (all CCW). Return false when no outline or the approach misses the parcel perimeter or the fence line.
     /// </summary>
-    public static bool TryResolve(Vector2[] site, Vector2[] front, Vector2[] occupied, float width, out Entry entry)
+    public static bool TryResolve(Vector2[] site, Vector2[] fence, Vector2[] front, Vector2[] occupied, float width, out Entry entry)
     {
         using var scope = resolveMarker.Auto();
         entry = default;
-        if (site == null || site.Length < 3 || front == null || front.Length < 3)
+        if (site == null || site.Length < 3 || fence == null || fence.Length < 3 || front == null || front.Length < 3)
         {
             return false;
         }
@@ -62,17 +64,23 @@ public static class SiteEntryLayout
         {
             exit = RAY_BACKOFF;
         }
-        float reach = FirstHit(site, origin, direction, exit, out int siteEdge);
+        float reach = FirstHit(site, origin, direction, exit, out _);
         if (float.IsInfinity(reach))
+        {
+            return false;
+        }
+        Vector2 perimeter = origin + direction * reach;
+        float back = FirstHit(fence, perimeter, -direction, 0f, out int fenceEdge);
+        if (float.IsInfinity(back))
         {
             return false;
         }
 
         entry = new Entry
         {
-            Gate = origin + direction * reach,
-            EdgeStart = site[siteEdge],
-            EdgeEnd = site[(siteEdge + 1) % site.Length],
+            Gate = perimeter - direction * back,
+            EdgeStart = fence[fenceEdge],
+            EdgeEnd = fence[(fenceEdge + 1) % fence.Length],
             Front = origin + direction * exit,
             Width = width,
         };
