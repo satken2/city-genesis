@@ -1,9 +1,10 @@
 /**
  * Building regulations tab
  *
- * Set citywide height limits, volume ratios, and building coverage ratios.
- * These settings are defaults for districts created from this point onward; they do not apply retroactively to
- * existing districts/parcels. Edit existing districts through their detail panels.
+ * Set citywide height limits, volume ratios, building coverage ratios, and the parking requirement.
+ * Height limits, volume ratios, and building coverage ratios are defaults for districts created from this point
+ * onward; they do not apply retroactively to existing districts/parcels. Edit existing districts through their
+ * detail panels. The parking requirement has no district value and applies to every tenant building built afterward.
  *
  * The API stores ratios, but display/edit volume and building coverage ratios as percentages, following Japanese
  * building regulation conventions. This file owns unit conversion.
@@ -18,6 +19,7 @@ export const BUILDING_REG_KEYS: BuildingRegKey[] = [
   "limit_height",
   "limit_volume_ratio",
   "limit_coverage_ratio",
+  "required_parking_ratio",
 ];
 
 /**
@@ -28,6 +30,7 @@ export const BUILDING_REG_KEYS: BuildingRegKey[] = [
 const PERCENT_REG_KEYS = new Set<BuildingRegKey>([
   "limit_volume_ratio",
   "limit_coverage_ratio",
+  "required_parking_ratio",
 ]);
 
 /**
@@ -58,6 +61,7 @@ const ROWS: {
   { key: "limit_height", labelKey: "regulation.limitHeight", unitKey: "parcel.unitMeter", step: 0.5 },
   { key: "limit_volume_ratio", labelKey: "regulation.limitVolumeRatio", unitKey: "parcel.unitPercent", step: 10 },
   { key: "limit_coverage_ratio", labelKey: "regulation.limitCoverageRatio", unitKey: "parcel.unitPercent", step: 1, max: 100 },
+  { key: "required_parking_ratio", labelKey: "regulation.requiredParkingRatio", unitKey: "parcel.unitPercent", step: 1, max: 99 }, // 100% leaves no floor to rent; the core rejects it
 ];
 
 export function BuildingRegulationTab({

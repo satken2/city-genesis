@@ -19,14 +19,15 @@ export type CityData = {
 
 /**
  * Response type for GET /api/v1/city/regulations.
- * Includes building regulations (volume ratio, height limit, building coverage ratio) and immigration
- * regulations.
+ * Includes building regulations (volume ratio, height limit, building coverage ratio, parking requirement) and
+ * immigration regulations.
  */
 export type RegulationsData = {
   work_hours: number;
   limit_volume_ratio: number;
   limit_height: number;
   limit_coverage_ratio: number;
+  required_parking_ratio: number; // Parking area required of new tenant buildings, as a 0–1 ratio of total floor area. Citywide.
   // Immigration regulations (admission conditions set as player policy)
   immigration_age_min: number;
   immigration_age_max: number;
@@ -76,7 +77,7 @@ export type ImmigrationRegulations = {
  * Keys for numeric building regulations.
  * Immigration includes bool/dict fields, so numeric building regulation handlers use only these keys.
  */
-export type BuildingRegKey = "limit_volume_ratio" | "limit_height" | "limit_coverage_ratio";
+export type BuildingRegKey = "limit_volume_ratio" | "limit_height" | "limit_coverage_ratio" | "required_parking_ratio";
 
 /**
  * Draft speed limits.

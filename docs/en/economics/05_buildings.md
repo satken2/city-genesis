@@ -41,5 +41,5 @@ City Hall represents city government on the map. Placing it begins city developm
 
 ## 5.5. Parking
 
-Buildings have `parking_capacity`. Cars gather at workplaces and shops during the day and homes at night, so parking demand varies with time and land use. Cars exceeding building capacity overflow into nearby parking facilities and onto streets. Parking facilities are a land use that accommodates this demand.
+Buildings have `parking_capacity`. Cars gather at workplaces and shops during the day and homes at night, so parking demand varies with time and land use. Cars exceeding building capacity overflow into nearby parking facilities and onto streets. Parking facilities are a land use that accommodates this demand. Buildings that rent floors to tenants must provide the parking area required by the parking requirement (a share of total floor area) when built. Whatever the open space on the site cannot hold is taken from the rentable floors, so the rentable floors can total less than the total floor area. Unlike the district-level building regulations, the parking requirement is citywide, and changing it affects only buildings built afterward.
 
