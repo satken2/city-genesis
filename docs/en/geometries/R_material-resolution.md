@@ -20,6 +20,8 @@ Path master `body_material` names the variant's representative surface material 
 
 A path's paint material `PATH_PAINT` is replaced with a copy painted in the path's color (API `color`: the path's own color, otherwise the variant's default color), sharing one instance per color. Which parts are painted is decided by the parts of the model that use this material name. Variants that use no color keep the model's own color.
 
+A building model's city flag and emblem materials `SLOT_CITY_FLAG` and `SLOT_CITY_EMBLEM` are replaced with materials showing the city's flag and emblem images (API `/city/insignia/{flag|emblem}`), one instance shared by all buildings. Where they appear is decided by the parts of the model that use these material names, and the image fits within the UV 0–1 frame of those parts. Cities without an image draw nothing there.
+
 New generators should follow one of these two approaches rather than adding independent resource loading or `new Material` calls.
 
 ## Replacement after generation

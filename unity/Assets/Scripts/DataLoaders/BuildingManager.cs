@@ -2403,6 +2403,7 @@ public class BuildingManager : BaseApiDataManager
     /// Return one DepthOffsetLit version per original material, shared across all buildings.
     /// VisualModeObject changes individual building colors through sharedMaterials replacement and property blocks, so
     /// sharing is safe (never modify each building renderer's .material). Retain across sessions.
+    /// The city flag and emblem slot materials resolve to the city's insignia materials instead (<see cref="CityInsignia"/>).
     /// </summary>
     internal static Material[] GetSharedDepthOffsetMaterials(Material[] source)
     {
@@ -2418,6 +2419,12 @@ public class BuildingManager : BaseApiDataManager
         for (int i = 0; i < source.Length; i++)
         {
             Material src = source[i];
+            Material insignia = CityInsignia.MaterialFor(src);
+            if (insignia != null)
+            {
+                result[i] = insignia;
+                continue;
+            }
             if (src == null || src.shader == depthOffsetShader)
             {
                 result[i] = src;
