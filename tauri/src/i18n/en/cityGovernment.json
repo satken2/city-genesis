@@ -26,6 +26,24 @@
     "production": "Production",
     "soldAmount": "Sold",
     "price": "Price",
-    "empty": "No matching entities."
+    "empty": "No matching entities.",
+    "records": {
+      "title": "City records",
+      "oldestCitizen": "Oldest citizen",
+      "wealthiestHousehold": "Wealthiest household",
+      "tallestBuilding": "Tallest building",
+      "oldestBuilding": "Oldest surviving building",
+      "highestRentBuilding": "Building with the highest rent",
+      "mayorDays": "Days in office",
+      "roadLength": "Total road length",
+      "railwayLength": "Total railway length",
+      "totalFloorArea": "Total building floor area",
+      "privateCars": "Private cars",
+      "age": "Age {{value}}",
+      "days": "{{value}} days",
+      "cars": "{{value}}",
+      "createdDateHint": "Shows the date the building was created.",
+      "railwayLengthHint": "Total railway and monorail track length. Double track counts twice; tracks shared with roads are excluded."
+    }
   }
 }

@@ -26,6 +26,24 @@
     "production": "产量",
     "soldAmount": "售出量",
     "price": "价格",
-    "empty": "没有符合条件的经济主体。"
+    "empty": "没有符合条件的经济主体。",
+    "records": {
+      "title": "城市纪录",
+      "oldestCitizen": "最高龄市民",
+      "wealthiestHousehold": "资产最多的家庭",
+      "tallestBuilding": "最高的建筑",
+      "oldestBuilding": "现存最古老的建筑",
+      "highestRentBuilding": "租金最高的建筑",
+      "mayorDays": "市长就任天数",
+      "roadLength": "道路总长度",
+      "railwayLength": "铁路总长度",
+      "totalFloorArea": "所有建筑总楼面面积",
+      "privateCars": "私家车数量",
+      "age": "{{value}}岁",
+      "days": "{{value}}天",
+      "cars": "{{value}}辆",
+      "createdDateHint": "显示建筑的创建日期。",
+      "railwayLengthHint": "铁路和单轨轨道的总长度。复线按两条轨道计算，不含与道路共用的轨道。"
+    }
   }
 }

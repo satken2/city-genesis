@@ -26,6 +26,24 @@
     "production": "생산량",
     "soldAmount": "판매량",
     "price": "가격",
-    "empty": "해당하는 경제 주체가 없습니다."
+    "empty": "해당하는 경제 주체가 없습니다.",
+    "records": {
+      "title": "도시 기록",
+      "oldestCitizen": "최고령 시민",
+      "wealthiestHousehold": "자산이 가장 많은 가구",
+      "tallestBuilding": "가장 높은 건물",
+      "oldestBuilding": "현존하는 가장 오래된 건물",
+      "highestRentBuilding": "임대료가 가장 높은 건물",
+      "mayorDays": "시장 취임 후 경과 일수",
+      "roadLength": "도로 총연장",
+      "railwayLength": "철도 총연장",
+      "totalFloorArea": "전체 건물 연면적",
+      "privateCars": "자가용 대수",
+      "age": "{{value}}세",
+      "days": "{{value}}일",
+      "cars": "{{value}}대",
+      "createdDateHint": "건물의 생성 날짜를 표시합니다.",
+      "railwayLengthHint": "철도 및 모노레일 궤도의 총연장입니다. 복선은 2개 선로로 계산하며 도로와 공유하는 궤도는 제외합니다."
+    }
   }
 }

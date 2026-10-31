@@ -72,6 +72,37 @@
   color: var(--flat-text-muted);
 }
 
+.city-gov__records h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.city-gov__record {
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  padding: 0.375rem 0;
+}
+
+.city-gov__record dd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  max-width: 100%;
+  margin-left: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.city-gov__record .entity-link {
+  max-width: 100%;
+  text-align: right;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .city-gov__agents {
   display: flex;
   flex-direction: column;

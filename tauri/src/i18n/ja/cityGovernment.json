@@ -26,6 +26,24 @@
     "production": "生産量",
     "soldAmount": "売却量",
     "price": "価格",
-    "empty": "該当する経済主体はありません"
+    "empty": "該当する経済主体はありません",
+    "records": {
+      "title": "都市の記録",
+      "oldestCitizen": "最高齢の市民",
+      "wealthiestHousehold": "最も資産を持つ世帯",
+      "tallestBuilding": "最も高い建物",
+      "oldestBuilding": "現存する最古の建物",
+      "highestRentBuilding": "最も家賃が高い建物",
+      "mayorDays": "市長就任からの日数",
+      "roadLength": "道路の総延長",
+      "railwayLength": "鉄道の総延長",
+      "totalFloorArea": "全建物の延べ床面積",
+      "privateCars": "自家用車の台数",
+      "age": "{{value}}歳",
+      "days": "{{value}}日",
+      "cars": "{{value}}台",
+      "createdDateHint": "建物の作成日を表示します。",
+      "railwayLengthHint": "線路・モノレールの軌道の総延長。複線は2本分とし、道路上の併用軌道は含みません。"
+    }
   }
 }

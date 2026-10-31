@@ -26,6 +26,24 @@
     "production": "Production",
     "soldAmount": "Quantité vendue",
     "price": "Prix",
-    "empty": "Aucune entité correspondante."
+    "empty": "Aucune entité correspondante.",
+    "records": {
+      "title": "Records de la ville",
+      "oldestCitizen": "Habitant le plus âgé",
+      "wealthiestHousehold": "Ménage le plus riche",
+      "tallestBuilding": "Bâtiment le plus haut",
+      "oldestBuilding": "Plus ancien bâtiment existant",
+      "highestRentBuilding": "Bâtiment au loyer le plus élevé",
+      "mayorDays": "Jours depuis la prise de fonction",
+      "roadLength": "Longueur totale des routes",
+      "railwayLength": "Longueur totale des voies ferrées",
+      "totalFloorArea": "Surface de plancher totale",
+      "privateCars": "Voitures particulières",
+      "age": "{{value}} ans",
+      "days": "{{value}} jours",
+      "cars": "{{value}}",
+      "createdDateHint": "Affiche la date de création du bâtiment.",
+      "railwayLengthHint": "Longueur totale des voies ferrées et de monorail. Les doubles voies comptent deux fois ; les voies partagées avec les routes sont exclues."
+    }
   }
 }

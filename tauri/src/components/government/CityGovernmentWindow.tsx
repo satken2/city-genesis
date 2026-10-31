@@ -5,6 +5,7 @@
  * Show city overview (name, population, unemployment rate, average wage, average rent, city score) on the left,
  * and public agents grouped in category tabs on the right. Facilities supplying public services belong to the
  * public services window and are omitted here.
+ * 左側の概要の下に /city/records の記録を表示する。再表示時は親の open_seq による再生成で取得し直す。
  *
  * Change the city name through `name` in `PATCH /api/v1/city/`, then emit the global `city:renamed` event.
  * Rust's session polling updates the HUD name every few seconds; this notification applies it immediately.
@@ -24,6 +25,7 @@ import { EditableLabel } from "../common/EditableLabel";
 import { FlatTabs } from "../common/FlatTabs";
 import { SortableAgentTable, type SortableAgentColumn } from "../common/SortableAgentTable";
 import { StatusBadge } from "../common/StatusBadge";
+import { CityRecords, type CityRecordsData } from "./CityRecords";
 import "./CityGovernmentWindow.css";
 
 /** Maximum city name length, limited to fit the cockpit UI and remain practical as a save name. */
@@ -123,6 +125,7 @@ export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const readOnly = usePlayMode(apiBaseUrl) === PLAY_MODE_READ_ONLY;
 
   const [overview, setOverview] = useState<CityOverview | null>(null);
+  const [records, setRecords] = useState<CityRecordsData | null>(null);
   const [groups, setGroups] = useState<Record<string, GovernmentAgent[]>>({});
   const [activeGroup, setActiveGroup] = useState<GroupKey>(GROUPS[0].key);
   const [error, setError] = useState("");
@@ -131,7 +134,7 @@ export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     const controller = new AbortController();
     (async () => {
       try {
-        const [cityRes, agentsRes] = await Promise.all([
+        const [cityRes, agentsRes, recordsRes] = await Promise.all([
           fetchApi<{ city: CityOverview }>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), {
             signal: controller.signal,
           }),
@@ -139,9 +142,12 @@ export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             buildApiUrl(apiBaseUrl, "/api/v1/city/government-agents"),
             { signal: controller.signal },
           ),
+          fetchApi<CityRecordsData>(buildApiUrl(apiBaseUrl, "/api/v1/city/records"), { signal: controller.signal }),
         ]);
+        if (controller.signal.aborted) return;
         setOverview(cityRes.city);
         setGroups(agentsRes.groups);
+        setRecords(recordsRes);
       } catch (err) {
         if (controller.signal.aborted) return;
         console.error("[CityGovernment] failed to fetch", err);
@@ -232,6 +238,7 @@ export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             </div>
           ))}
         </dl>
+        {records && <CityRecords records={records} />}
       </section>
 
       <section className="city-gov__agents">

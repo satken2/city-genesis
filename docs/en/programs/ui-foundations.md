@@ -14,7 +14,7 @@ Transparent WebViews also receive input, so persistent UI windows must fit their
 
 Use common session, version, and play-mode state without duplicating retrieval or checks per screen. Follow [IPC principles](ipc.md) for editing and display synchronization. After a successful change affecting multiple windows, the changing side emits a global event and recipients refresh their displays.
 
-Statistics use a common cache keyed to endpoint and epoch and display finalized API values. Distinguish missing values from zero and do not substitute current-period values into historical breakdowns.
+Time-series statistics use a common cache keyed to endpoint and epoch and display finalized API values. Current city totals and record holders display results aggregated by the core from the city state at retrieval time. Use record values and their holders' IDs and names from the same response; do not fetch every entity to recalculate rankings in the frontend. Distinguish missing values from zero and do not substitute current-period values into historical breakdowns.
 
 City and facility diagnostics display trees of factors investigated by the core from observed values; the UI does not reimplement economic checks. Factors and suggested actions arrive as identifiers, with wording translated in the UI. Suggestions lead to existing operation screens, where the player chooses policies or actions affecting citizens. Defer diagnostics during epoch execution and investigate again after completion.
 

@@ -26,6 +26,24 @@
     "production": "產量",
     "soldAmount": "售出量",
     "price": "價格",
-    "empty": "沒有符合條件的經濟主體。"
+    "empty": "沒有符合條件的經濟主體。",
+    "records": {
+      "title": "城市紀錄",
+      "oldestCitizen": "最高齡市民",
+      "wealthiestHousehold": "資產最多的家庭",
+      "tallestBuilding": "最高的建築",
+      "oldestBuilding": "現存最古老的建築",
+      "highestRentBuilding": "租金最高的建築",
+      "mayorDays": "市長就任天數",
+      "roadLength": "道路總長度",
+      "railwayLength": "鐵路總長度",
+      "totalFloorArea": "所有建築總樓地板面積",
+      "privateCars": "私家車數量",
+      "age": "{{value}}歲",
+      "days": "{{value}}天",
+      "cars": "{{value}}輛",
+      "createdDateHint": "顯示建築的建立日期。",
+      "railwayLengthHint": "鐵路和單軌軌道的總長度。複線按兩條軌道計算，不含與道路共用的軌道。"
+    }
   }
 }
