@@ -32,7 +32,7 @@ const ACTIONS: Record<string, { window: string; edits?: boolean; params?: Record
   budget: { window: "city_budget", edits: true },
   education: { window: "building_construction", edits: true },
   higher_education: { window: "building_construction", edits: true },
-  welfare: { window: "city_regulation", edits: true, params: { extra: { initialTab: "welfare" } } },
+  welfare: { window: "city_regulation", edits: true, params: { extra: { initialTab: "labor" } } },
   immigration_skills: { window: "city_regulation", edits: true, params: { extra: { initialTab: "immigration" } } },
   immigration_limit: { window: "city_regulation", edits: true, params: { extra: { initialTab: "immigration" } } },
   employment: { window: "city_statistics" },

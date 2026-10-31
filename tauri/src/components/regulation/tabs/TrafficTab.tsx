@@ -1,7 +1,7 @@
 /**
- * Speed limit tab
+ * Traffic regulations tab
  *
- * Set speed limits (km/h) per path_variant (road variant).
+ * Speed limits: set speed limits (km/h) per path_variant (road variant).
  * - Display the city.max_speed override, or default_speed_limit from master data if absent.
  * - Group by path_type in collapsible accordions, initially all expanded.
  * - Highlight inputs/names when the speed differs from the master default.
@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useMasterData } from "../../../contexts/MasterDataContext";
 import { PATH_MOTORWAY, PATH_STREET } from "../../../constants";
 import type { PathVariantInfo, SpeedMap } from "../regulationTypes";
+import { RegulationSection } from "../RegulationForm";
 
 /**
  * Allowlisted path_type IDs supporting speed limits
@@ -32,7 +33,7 @@ const EDITABLE_PATH_TYPE_IDS = new Set([PATH_STREET, PATH_MOTORWAY]);
 /** Default speed (km/h) for variants without default_speed_limit in master data */
 export const FALLBACK_SPEED_LIMIT = 40;
 
-export function SpeedLimitTab({
+export function TrafficTab({
   pathVariants,
   cityMaxSpeed,
   pendingSpeeds,
@@ -114,11 +115,7 @@ export function SpeedLimitTab({
   );
 
   return (
-    <>
-      <p className="regulation-pane__description">
-        {t("regulation.speedLimitDescription")}
-      </p>
-
+    <RegulationSection title={t("regulation.speedLimitTitle")} description={t("regulation.speedLimitDescription")}>
       <div className="regulation-speed-list">
         {Array.from(groupedVariants.entries()).map(([typeId, variants]) => {
           const isExpanded = expandedGroups.has(typeId);
@@ -179,6 +176,6 @@ export function SpeedLimitTab({
           );
         })}
       </div>
-    </>
+    </RegulationSection>
   );
 }

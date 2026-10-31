@@ -117,8 +117,8 @@ await act(async () => dispatch("session-state", { session: { play_mode: PLAY_MOD
 assert.ok(welfareButton.disabled);
 await act(async () => dispatch("session-state", { session: { play_mode: PLAY_MODE_NORMAL } }));
 await click('.policy-row[data-depth="0"] [data-guide="policy.action.welfare"]');
-assert.deepEqual(invocations.at(-1), { windowType: "city_regulation", params: { extra: { initialTab: "welfare" } } },
-  "給付増額から条例の社会保障タブを直接開く");
+assert.deepEqual(invocations.at(-1), { windowType: "city_regulation", params: { extra: { initialTab: "labor" } } },
+  "給付増額から条例の労働・社会保障タブを直接開く");
 globals.policyPayload = { epoch: 2, pending: false, indicators: [
   { id: "unemployment", value: 0.2, unit: "percent", sample: 100, roots: [
     { type: "unfilled_jobs", params: { count: 20, vacancies: 10 }, actions: ["employment"], children: [

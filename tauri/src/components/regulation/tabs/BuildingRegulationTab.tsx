@@ -1,18 +1,22 @@
 /**
  * Building regulations tab
  *
- * Set citywide height limits, volume ratios, building coverage ratios, and the parking requirement.
- * Height limits, volume ratios, and building coverage ratios are defaults for districts created from this point
- * onward; they do not apply retroactively to existing districts/parcels. Edit existing districts through their
- * detail panels. The parking requirement has no district value and applies to every tenant building built afterward.
+ * District defaults: height limits, volume ratios, and building coverage ratios for districts created from this
+ * point onward; they do not apply retroactively to existing districts/parcels. Edit existing districts through
+ * their detail panels.
+ * Parking: the parking requirement has no district value and applies to every tenant building built afterward.
+ * Repair: durability thresholds for initiating public building/road repairs. Below the threshold, repairs begin
+ * probabilistically.
  *
  * The API stores ratios, but display/edit volume and building coverage ratios as percentages, following Japanese
- * building regulation conventions. This file owns unit conversion.
+ * building regulation conventions. This file owns that unit conversion. Repair thresholds are handled as 0–100
+ * percentages here; the window converts them to 0–1 ratios on save.
  */
 
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { BuildingRegKey, RegulationsData } from "../regulationTypes";
+import { RegulationNumberRow, RegulationSection } from "../RegulationForm";
 
 /** Building regulation keys used for save payloads and change detection. */
 export const BUILDING_REG_KEYS: BuildingRegKey[] = [
@@ -21,6 +25,9 @@ export const BUILDING_REG_KEYS: BuildingRegKey[] = [
   "limit_coverage_ratio",
   "required_parking_ratio",
 ];
+
+/** Repair threshold target; roads and public buildings have separate thresholds. */
+export type RepairTarget = "building" | "path";
 
 /**
  * Building regulation keys converted to percentages in inputs.
@@ -47,34 +54,55 @@ function toApiUnit(key: BuildingRegKey, displayValue: number): number {
   return PERCENT_REG_KEYS.has(key) ? displayValue / 100 : displayValue;
 }
 
+type RegRow = { key: BuildingRegKey; labelKey: string; unitKey: string; step: number; max?: number };
+
 /**
- * Input settings per row.
+ * Building regulation sections and their rows.
  * Do not cap volume ratio, which can greatly exceed 100% (e.g. 3000% in commercial districts).
  */
-const ROWS: {
-  key: BuildingRegKey;
-  labelKey: string;
-  unitKey: string;
-  step: number;
-  max?: number;
-}[] = [
-  { key: "limit_height", labelKey: "regulation.limitHeight", unitKey: "parcel.unitMeter", step: 0.5 },
-  { key: "limit_volume_ratio", labelKey: "regulation.limitVolumeRatio", unitKey: "parcel.unitPercent", step: 10 },
-  { key: "limit_coverage_ratio", labelKey: "regulation.limitCoverageRatio", unitKey: "parcel.unitPercent", step: 1, max: 100 },
-  { key: "required_parking_ratio", labelKey: "regulation.requiredParkingRatio", unitKey: "parcel.unitPercent", step: 1, max: 99 }, // 100% leaves no floor to rent; the core rejects it
+const REG_SECTIONS: { titleKey: string; descriptionKey: string; rows: RegRow[] }[] = [
+  {
+    titleKey: "regulation.districtDefaultsTitle",
+    descriptionKey: "regulation.districtDefaultsDescription",
+    rows: [
+      { key: "limit_height", labelKey: "regulation.limitHeight", unitKey: "parcel.unitMeter", step: 0.5 },
+      { key: "limit_volume_ratio", labelKey: "regulation.limitVolumeRatio", unitKey: "parcel.unitPercent", step: 10 },
+      { key: "limit_coverage_ratio", labelKey: "regulation.limitCoverageRatio", unitKey: "parcel.unitPercent", step: 1, max: 100 },
+    ],
+  },
+  {
+    titleKey: "regulation.parkingTitle",
+    descriptionKey: "regulation.parkingDescription",
+    rows: [
+      { key: "required_parking_ratio", labelKey: "regulation.requiredParkingRatio", unitKey: "parcel.unitPercent", step: 1, max: 99 }, // 100% leaves no floor to rent; the core rejects it
+    ],
+  },
+];
+
+const REPAIR_ROWS: { target: RepairTarget; labelKey: string }[] = [
+  { target: "building", labelKey: "regulation.repairThresholdBuilding" },
+  { target: "path", labelKey: "regulation.repairThresholdPath" },
 ];
 
 export function BuildingRegulationTab({
   cityRegulations,
   pendingRegulations,
-  onChange,
+  onRegulationChange,
+  cityRepair,
+  pendingRepair,
+  onRepairChange,
 }: {
   /** Saved values retrieved from the API */
   cityRegulations: RegulationsData;
   /** Draft values in API units; absent keys display saved values. */
   pendingRegulations: Partial<RegulationsData>;
   /** Report values already converted to API units. */
-  onChange: (key: BuildingRegKey, apiValue: number) => void;
+  onRegulationChange: (key: BuildingRegKey, apiValue: number) => void;
+  /** Saved repair thresholds (0–100 percentages) */
+  cityRepair: Record<RepairTarget, number>;
+  /** Draft repair thresholds; null for unedited targets. */
+  pendingRepair: Record<RepairTarget, number | null>;
+  onRepairChange: (target: RepairTarget, value: number) => void;
 }) {
   const { t } = useTranslation();
 
@@ -84,57 +112,64 @@ export function BuildingRegulationTab({
     [pendingRegulations, cityRegulations],
   );
 
-  const handleChange = useCallback(
+  const handleRegulationChange = useCallback(
     (key: BuildingRegKey, rawValue: string) => {
       const parsed = parseFloat(rawValue);
       if (isNaN(parsed) || parsed < 0) return;
-      onChange(key, toApiUnit(key, parsed));
+      onRegulationChange(key, toApiUnit(key, parsed));
     },
-    [onChange],
+    [onRegulationChange],
+  );
+
+  const handleRepairChange = useCallback(
+    (target: RepairTarget, rawValue: string) => {
+      const parsed = parseFloat(rawValue);
+      if (isNaN(parsed) || parsed < 0 || parsed > 100) return;
+      onRepairChange(target, parsed);
+    },
+    [onRepairChange],
   );
 
   return (
     <>
-      <p className="regulation-pane__description">
-        {t("regulation.buildingRegulationDescription")}
-      </p>
+      {REG_SECTIONS.map((section) => (
+        <RegulationSection key={section.titleKey} title={t(section.titleKey)} description={t(section.descriptionKey)}>
+          <div className="regulation-building-list">
+            {section.rows.map((row) => (
+              <RegulationNumberRow
+                key={row.key}
+                label={t(row.labelKey)}
+                unit={t(row.unitKey)}
+                value={toDisplayUnit(row.key, getValue(row.key))}
+                modified={getValue(row.key) !== cityRegulations[row.key]}
+                max={row.max}
+                step={row.step}
+                onChange={(raw) => handleRegulationChange(row.key, raw)}
+              />
+            ))}
+          </div>
+        </RegulationSection>
+      ))}
 
-      <div className="regulation-building-list">
-        {ROWS.map((row) => {
-          const modified = getValue(row.key) !== cityRegulations[row.key];
-          return (
-            <div key={row.key} className="regulation-building-row">
-              <span
-                className={[
-                  "regulation-building-row__name",
-                  modified && "regulation-building-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t(row.labelKey)}
-              </span>
-              <div className="regulation-building-row__input-group">
-                <input
-                  type="number"
-                  min={0}
-                  max={row.max}
-                  step={row.step}
-                  className={[
-                    "regulation-building-input",
-                    modified && "regulation-building-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={toDisplayUnit(row.key, getValue(row.key))}
-                  onChange={(e) => handleChange(row.key, e.target.value)}
-                />
-                <span className="regulation-building-unit">{t(row.unitKey)}</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <RegulationSection title={t("regulation.repairTitle")} description={t("regulation.repairDescription")}>
+        <div className="regulation-building-list">
+          {REPAIR_ROWS.map((row) => {
+            const value = pendingRepair[row.target] ?? cityRepair[row.target];
+            return (
+              <RegulationNumberRow
+                key={row.target}
+                label={t(row.labelKey)}
+                unit={t("parcel.unitPercent")}
+                value={value}
+                modified={value !== cityRepair[row.target]}
+                max={100}
+                step={5}
+                onChange={(raw) => handleRepairChange(row.target, raw)}
+              />
+            );
+          })}
+        </div>
+      </RegulationSection>
     </>
   );
 }

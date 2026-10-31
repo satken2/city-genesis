@@ -2,10 +2,10 @@ import { describeError } from "../../utils/errors";
 /**
  * Regulations window component
  *
- * Manages citywide regulations and policies across six tabs: working hours, speed limits, building regulations,
- * repair settings, immigration regulations, and social security.
+ * Manages citywide regulations and policies across four tabs: labor and social security, traffic regulations,
+ * building regulations (including repair settings), and immigration policy.
  * This component handles data retrieval, draft values, saving, and tab switching; components under `tabs/`
- * render each tab.
+ * render each tab as a stack of sections.
  *
  * A single shared Save button submits changes from all tabs together. Mark tabs with unsaved edits so changes in
  * hidden tabs remain noticeable.
@@ -30,22 +30,17 @@ import type {
   SpeedMap,
   WelfareRegulations,
 } from "./regulationTypes";
-import { FALLBACK_SPEED_LIMIT, SpeedLimitTab } from "./tabs/SpeedLimitTab";
-import { BUILDING_REG_KEYS, BuildingRegulationTab } from "./tabs/BuildingRegulationTab";
-import { RepairTab, type RepairTarget } from "./tabs/RepairTab";
+import { FALLBACK_SPEED_LIMIT, TrafficTab } from "./tabs/TrafficTab";
+import { BUILDING_REG_KEYS, BuildingRegulationTab, type RepairTarget } from "./tabs/BuildingRegulationTab";
 import { IMMIGRATION_SCALAR_KEYS, ImmigrationTab } from "./tabs/ImmigrationTab";
-import { WELFARE_KEYS, WelfareTab, type WelfareKey } from "./tabs/WelfareTab";
-import { WorkHoursTab } from "./tabs/WorkHoursTab";
+import { LaborTab, WELFARE_KEYS, type WelfareKey } from "./tabs/LaborTab";
 import "./CityRegulationWindow.css";
 
-/** Tab order. Use section headings directly as labels. */
 const TABS = [
-  { id: "labor", labelKey: "wellbeing.workTitle" },
-  { id: "speed", labelKey: "regulation.speedLimitTitle" },
+  { id: "labor", labelKey: "regulation.laborWelfareTitle" },
+  { id: "traffic", labelKey: "regulation.trafficTitle" },
   { id: "building", labelKey: "regulation.buildingRegulationTitle" },
-  { id: "repair", labelKey: "regulation.repairTitle" },
   { id: "immigration", labelKey: "regulation.immigrationTitle" },
-  { id: "welfare", labelKey: "regulation.welfareTitle" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -63,7 +58,7 @@ export function CityRegulationWindow({
   const { t } = useTranslation();
   const masterData = useMasterData();
 
-  const [activeTab, setActiveTab] = useState<TabId>(() => TABS.find(tab => tab.id === initialTab)?.id ?? "speed");
+  const [activeTab, setActiveTab] = useState<TabId>(() => TABS.find(tab => tab.id === initialTab)?.id ?? "traffic");
 
   /** Saved and draft speed limits (keys are path_variant ID strings, values are km/h). */
   const [cityMaxSpeed, setCityMaxSpeed] = useState<SpeedMap>({});
@@ -283,8 +278,13 @@ export function CityRegulationWindow({
       cityWelfare != null &&
       WELFARE_KEYS.some((key) => (pendingWelfare[key] ?? cityWelfare[key]) !== cityWelfare[key]);
 
-    const labor = pendingWorkHours != null && pendingWorkHours !== cityRegulations?.work_hours;
-    return { labor, speed, building, repair, immigration, welfare };
+    const workHours = pendingWorkHours != null && pendingWorkHours !== cityRegulations?.work_hours;
+    return {
+      labor: workHours || welfare,
+      traffic: speed,
+      building: building || repair,
+      immigration,
+    };
   }, [
     pendingWorkHours,
     pendingSpeeds,
@@ -417,9 +417,17 @@ export function CityRegulationWindow({
       </nav>
 
       <div className="regulation-window__content">
-        {activeTab === "labor" && <WorkHoursTab value={pendingWorkHours ?? cityRegulations.work_hours} onChange={setPendingWorkHours} />}
-        {activeTab === "speed" && (
-          <SpeedLimitTab
+        {activeTab === "labor" && (
+          <LaborTab
+            workHours={pendingWorkHours ?? cityRegulations.work_hours}
+            onWorkHoursChange={setPendingWorkHours}
+            cityWelfare={cityWelfare}
+            pendingWelfare={pendingWelfare}
+            onWelfareChange={handleWelfareChange}
+          />
+        )}
+        {activeTab === "traffic" && (
+          <TrafficTab
             pathVariants={pathVariants}
             cityMaxSpeed={cityMaxSpeed}
             pendingSpeeds={pendingSpeeds}
@@ -430,14 +438,10 @@ export function CityRegulationWindow({
           <BuildingRegulationTab
             cityRegulations={cityRegulations}
             pendingRegulations={pendingRegulations}
-            onChange={handleRegulationChange}
-          />
-        )}
-        {activeTab === "repair" && (
-          <RepairTab
-            cityThresholds={cityRepair}
-            pendingThresholds={pendingRepair}
-            onChange={handleRepairChange}
+            onRegulationChange={handleRegulationChange}
+            cityRepair={cityRepair}
+            pendingRepair={pendingRepair}
+            onRepairChange={handleRepairChange}
           />
         )}
         {activeTab === "immigration" && (
@@ -447,13 +451,6 @@ export function CityRegulationWindow({
             onNumberChange={handleImmNumberChange}
             onBoolChange={handleImmBoolChange}
             onSkillThresholdChange={handleSkillThresholdChange}
-          />
-        )}
-        {activeTab === "welfare" && (
-          <WelfareTab
-            cityWelfare={cityWelfare}
-            pendingWelfare={pendingWelfare}
-            onChange={handleWelfareChange}
           />
         )}
       </div>

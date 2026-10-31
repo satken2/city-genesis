@@ -4,7 +4,7 @@
  * Colors assume a dark theme.
  * Three rows: horizontal tabs at the top, scrollable selected content below, and one shared Save button at the
  * bottom.
- * Tab labels double as section headings, so content has no separate headings.
+ * Tab content is a stack of sections. Section headings use the shared App.css agent-detail-section-title.
  */
 
 .regulation-window {
@@ -75,11 +75,17 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 20px;
   padding: 10px 6px 10px 2px;
 }
 
-.regulation-pane__description {
+.regulation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.regulation-section__description {
   margin: 0 0 4px 0;
   font-size: 1rem;
   color: #64748b;
@@ -460,27 +466,6 @@
 }
 
 /* Skill requirement sliders */
-.regulation-immigration-skills {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 6px;
-  border-top: 1px solid rgba(148, 163, 184, 0.15);
-  margin-top: 4px;
-}
-
-.regulation-immigration-skills__title {
-  font-size: 1.11rem;
-  color: #cbd5e1;
-  font-weight: 600;
-}
-
-.regulation-immigration-skills__hint {
-  margin: 0;
-  font-size: 0.94rem;
-  color: #64748b;
-}
-
 .regulation-skill-list {
   display: flex;
   flex-direction: column;

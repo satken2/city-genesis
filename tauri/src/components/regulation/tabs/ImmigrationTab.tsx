@@ -1,9 +1,8 @@
 /**
- * Immigration regulations tab
+ * Immigration policy tab
  *
- * Set admission conditions: household head age, household composition, gender, skill requirements, and admission
- * quota.
- * Reject applicant immigrant households that do not meet these conditions.
+ * Admission: whether to accept immigrants at all, and the admission quota.
+ * Household conditions and skill requirements: reject applicant immigrant households that do not meet them.
  *
  * Drafts use separate state from building regulations because fields include bool/dict types.
  */
@@ -13,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useMasterData } from "../../../contexts/MasterDataContext";
 import type { SkillEntry } from "../../../types";
 import type { ImmigrationRegulations } from "../regulationTypes";
+import { RegulationSection } from "../RegulationForm";
 
 /** Scalar (nondictionary) keys used for save payloads and change detection */
 export const IMMIGRATION_SCALAR_KEYS = [
@@ -115,191 +115,194 @@ export function ImmigrationTab({
 
   return (
     <>
-      <p className="regulation-pane__description">
-        {t("regulation.immigrationDescription")}
-      </p>
+      <RegulationSection title={t("regulation.immigrationAdmissionTitle")}>
+        <div className="regulation-immigration-list">
+          <div className="regulation-immigration-row regulation-immigration-row--check">
+            <label className="regulation-immigration-checkbox">
+              <input
+                type="checkbox"
+                checked={getScalar("immigration_enabled")}
+                onChange={(e) => onBoolChange("immigration_enabled", e.target.checked)}
+              />
+              <span className={isModified("immigration_enabled") ? "regulation-immigration-checkbox--modified" : ""}>
+                {t("regulation.immigrationEnabled")}
+              </span>
+            </label>
+          </div>
 
-      <div className="regulation-immigration-list">
-        <div className="regulation-immigration-row regulation-immigration-row--check">
-          <label className="regulation-immigration-checkbox">
-            <input
-              type="checkbox"
-              checked={getScalar("immigration_enabled")}
-              onChange={(e) => onBoolChange("immigration_enabled", e.target.checked)}
-            />
-            <span className={isModified("immigration_enabled") ? "regulation-immigration-checkbox--modified" : ""}>
-              {t("regulation.immigrationEnabled")}
+          {/* Admission limit (quota) */}
+          <div className="regulation-immigration-row">
+            <span
+              className={[
+                "regulation-immigration-row__name",
+                isModified("immigration_quota") && "regulation-immigration-row__name--modified",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {t("regulation.immigrationQuota")}
             </span>
-          </label>
-        </div>
-        {/* Household head age range */}
-        <div className="regulation-immigration-row">
-          <span
-            className={[
-              "regulation-immigration-row__name",
-              (isModified("immigration_age_min") || isModified("immigration_age_max")) &&
-                "regulation-immigration-row__name--modified",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {t("regulation.immigrationAgeRange")}
-          </span>
-          <div className="regulation-immigration-row__input-group">
-            <input
-              type="number"
-              min={0}
-              max={120}
-              step={1}
-              className={[
-                "regulation-immigration-input",
-                isModified("immigration_age_min") && "regulation-immigration-input--modified",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              value={getScalar("immigration_age_min")}
-              onChange={(e) => handleNumberChange("immigration_age_min", e.target.value)}
-            />
-            <span className="regulation-immigration-separator">〜</span>
-            <input
-              type="number"
-              min={0}
-              max={120}
-              step={1}
-              className={[
-                "regulation-immigration-input",
-                isModified("immigration_age_max") && "regulation-immigration-input--modified",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              value={getScalar("immigration_age_max")}
-              onChange={(e) => handleNumberChange("immigration_age_max", e.target.value)}
-            />
+            <div className="regulation-immigration-row__input-group">
+              <input
+                type="number"
+                min={0}
+                step={1}
+                className={[
+                  "regulation-immigration-input",
+                  isModified("immigration_quota") && "regulation-immigration-input--modified",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                value={getScalar("immigration_quota")}
+                onChange={(e) => handleNumberChange("immigration_quota", e.target.value)}
+              />
+              <span className="regulation-immigration-separator">
+                {t("regulation.immigrationQuotaUnit")}
+              </span>
+            </div>
           </div>
-        </div>
-
-        {/* Household composition */}
-        <div className="regulation-immigration-row regulation-immigration-row--check">
-          <span className="regulation-immigration-row__name">
-            {t("regulation.immigrationHouseholdComposition")}
-          </span>
-          <div className="regulation-immigration-checkboxes">
-            {HOUSEHOLD_CHECKS.map((check) => (
-              <label key={check.key} className="regulation-immigration-checkbox">
-                <input
-                  type="checkbox"
-                  checked={getScalar(check.key)}
-                  onChange={(e) => onBoolChange(check.key, e.target.checked)}
-                />
-                <span className={isModified(check.key) ? "regulation-immigration-checkbox--modified" : ""}>
-                  {t(check.labelKey)}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Gender (household head) */}
-        <div className="regulation-immigration-row">
-          <span
-            className={[
-              "regulation-immigration-row__name",
-              isModified("immigration_gender_policy") && "regulation-immigration-row__name--modified",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {t("regulation.immigrationGenderPolicy")}
-          </span>
-          <select
-            className="regulation-immigration-select"
-            value={getScalar("immigration_gender_policy")}
-            onChange={(e) => handleNumberChange("immigration_gender_policy", e.target.value)}
-          >
-            <option value={0}>{t("regulation.immigrationGenderAny")}</option>
-            <option value={1}>{t("regulation.immigrationGenderMale")}</option>
-            <option value={2}>{t("regulation.immigrationGenderFemale")}</option>
-          </select>
-        </div>
-
-        {/* Admission limit (quota) */}
-        <div className="regulation-immigration-row">
-          <span
-            className={[
-              "regulation-immigration-row__name",
-              isModified("immigration_quota") && "regulation-immigration-row__name--modified",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
-            {t("regulation.immigrationQuota")}
-          </span>
-          <div className="regulation-immigration-row__input-group">
-            <input
-              type="number"
-              min={0}
-              step={1}
-              className={[
-                "regulation-immigration-input",
-                isModified("immigration_quota") && "regulation-immigration-input--modified",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              value={getScalar("immigration_quota")}
-              onChange={(e) => handleNumberChange("immigration_quota", e.target.value)}
-            />
-            <span className="regulation-immigration-separator">
-              {t("regulation.immigrationQuotaUnit")}
-            </span>
-          </div>
-        </div>
-        <p className="regulation-immigration-quota-hint">
-          {t("regulation.immigrationQuotaHint")}
-        </p>
-
-        {/* Skill requirements (OR condition) */}
-        <div className="regulation-immigration-skills">
-          <span className="regulation-immigration-skills__title">
-            {t("regulation.immigrationSkillThresholds")}
-          </span>
-          <p className="regulation-immigration-skills__hint">
-            {t("regulation.immigrationSkillHint")}
+          <p className="regulation-immigration-quota-hint">
+            {t("regulation.immigrationQuotaHint")}
           </p>
-          <div className="regulation-skill-list">
-            {skillEntries.map((skill) => {
-              const value = getSkillThreshold(skill.id);
-              const modified = value !== (cityImmigration.immigration_skill_thresholds[String(skill.id)] ?? 0);
-              return (
-                <div key={skill.id} className="regulation-skill-row">
-                  <span
-                    className={[
-                      "regulation-skill-row__name",
-                      modified && "regulation-skill-row__name--modified",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                    title={skill.display_name}
-                  >
-                    {skill.display_name}
+        </div>
+      </RegulationSection>
+
+      <RegulationSection
+        title={t("regulation.immigrationHouseholdTitle")}
+        description={t("regulation.immigrationDescription")}
+      >
+        <div className="regulation-immigration-list">
+          {/* Household head age range */}
+          <div className="regulation-immigration-row">
+            <span
+              className={[
+                "regulation-immigration-row__name",
+                (isModified("immigration_age_min") || isModified("immigration_age_max")) &&
+                  "regulation-immigration-row__name--modified",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {t("regulation.immigrationAgeRange")}
+            </span>
+            <div className="regulation-immigration-row__input-group">
+              <input
+                type="number"
+                min={0}
+                max={120}
+                step={1}
+                className={[
+                  "regulation-immigration-input",
+                  isModified("immigration_age_min") && "regulation-immigration-input--modified",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                value={getScalar("immigration_age_min")}
+                onChange={(e) => handleNumberChange("immigration_age_min", e.target.value)}
+              />
+              <span className="regulation-immigration-separator">〜</span>
+              <input
+                type="number"
+                min={0}
+                max={120}
+                step={1}
+                className={[
+                  "regulation-immigration-input",
+                  isModified("immigration_age_max") && "regulation-immigration-input--modified",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                value={getScalar("immigration_age_max")}
+                onChange={(e) => handleNumberChange("immigration_age_max", e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Household composition */}
+          <div className="regulation-immigration-row regulation-immigration-row--check">
+            <span className="regulation-immigration-row__name">
+              {t("regulation.immigrationHouseholdComposition")}
+            </span>
+            <div className="regulation-immigration-checkboxes">
+              {HOUSEHOLD_CHECKS.map((check) => (
+                <label key={check.key} className="regulation-immigration-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={getScalar(check.key)}
+                    onChange={(e) => onBoolChange(check.key, e.target.checked)}
+                  />
+                  <span className={isModified(check.key) ? "regulation-immigration-checkbox--modified" : ""}>
+                    {t(check.labelKey)}
                   </span>
-                  <div className="regulation-skill-row__control">
-                    <input
-                      type="range"
-                      min={0}
-                      max={SKILL_SLIDER_MAX}
-                      step={0.05}
-                      className="regulation-skill-slider"
-                      value={value}
-                      onChange={(e) => onSkillThresholdChange(skill.id, parseFloat(e.target.value))}
-                    />
-                    <span className="regulation-skill-value">{value.toFixed(2)}</span>
-                  </div>
-                </div>
-              );
-            })}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Gender (household head) */}
+          <div className="regulation-immigration-row">
+            <span
+              className={[
+                "regulation-immigration-row__name",
+                isModified("immigration_gender_policy") && "regulation-immigration-row__name--modified",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {t("regulation.immigrationGenderPolicy")}
+            </span>
+            <select
+              className="regulation-immigration-select"
+              value={getScalar("immigration_gender_policy")}
+              onChange={(e) => handleNumberChange("immigration_gender_policy", e.target.value)}
+            >
+              <option value={0}>{t("regulation.immigrationGenderAny")}</option>
+              <option value={1}>{t("regulation.immigrationGenderMale")}</option>
+              <option value={2}>{t("regulation.immigrationGenderFemale")}</option>
+            </select>
           </div>
         </div>
-      </div>
+      </RegulationSection>
+
+      {/* Skill requirements (OR condition) */}
+      <RegulationSection
+        title={t("regulation.immigrationSkillThresholds")}
+        description={t("regulation.immigrationSkillHint")}
+      >
+        <div className="regulation-skill-list">
+          {skillEntries.map((skill) => {
+            const value = getSkillThreshold(skill.id);
+            const modified = value !== (cityImmigration.immigration_skill_thresholds[String(skill.id)] ?? 0);
+            return (
+              <div key={skill.id} className="regulation-skill-row">
+                <span
+                  className={[
+                    "regulation-skill-row__name",
+                    modified && "regulation-skill-row__name--modified",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  title={skill.display_name}
+                >
+                  {skill.display_name}
+                </span>
+                <div className="regulation-skill-row__control">
+                  <input
+                    type="range"
+                    min={0}
+                    max={SKILL_SLIDER_MAX}
+                    step={0.05}
+                    className="regulation-skill-slider"
+                    value={value}
+                    onChange={(e) => onSkillThresholdChange(skill.id, parseFloat(e.target.value))}
+                  />
+                  <span className="regulation-skill-value">{value.toFixed(2)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </RegulationSection>
     </>
   );
 }
