@@ -90,7 +90,7 @@ LOD制作は**同じ建物を距離に応じて表現する作業**である。�
 | 外階段・立体駐車場の階間スロープ・外付けのエレベーターシャフト | 置く辺の `mid-stair{n}`（必要なら `base-stair{n}` / `top-stair{n}`）。配置の前提は `ExteriorStairBuilder.cs` のコメント |
 | 屋上に塔屋・設備・看板 | `roofprop` |
 | 敷地の地面を描きたい | `floor`(マスターが `draw_floor=yes` の建物のみ描画される) |
-| 敷地を塀・柵で囲みたい | `fence-w1`(角も要るなら `fence-c1`)。形状は区画の内側(Blender +Y)に置き、隣の区画の柵と背中合わせにする。正面の入口では柵が開く |
+| 敷地を塀・柵で囲みたい | `fence-w1`(角も要るなら `fence-c1`)。形状は原点の線から内側(Blender +Y)に置く。Unityは区画の外周を少し内側へ引いた線に原点を並べる。正面の入口では柵が開く |
 | 敷地の入口に門を置きたい | `gate`(原点=入口の中心・接地0。bbox の幅がそのまま柵の開口の幅。入口の決め方は `SiteEntryLayout.cs` のコメント) |
 | 正面から入口まで通路を敷きたい | `trail`(柵と同じく X 方向に敷き詰める。原点は進む線上=Y中心) |
 | 敷地の空き地に植栽・車両・資材を散らしたい | `scatter1`, `scatter2`, …。犬小屋のように1棟に1個までの物は `scatter-single1`, … (配置の前提は `ScatterLayout.cs` のコメント。既存のプロップ・車両は `genesis-gallery/pipeline/jobs/scatter_parts.py` で写す。植え込み・庭木の葉は [[genesis-prop-parts]] の「樹木・植え込みの葉」に従う。接道側に空き地をまとめるならマスターの `building_shape=setback`) |

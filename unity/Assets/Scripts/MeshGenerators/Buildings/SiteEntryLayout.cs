@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Pure data for a site's entry: where the approach from the building front crosses the parcel perimeter.
+/// Pure data for a site's entry: where the approach from the building front crosses the fence line just inside the parcel perimeter.
 /// The approach runs along the outward normal from the midpoint of the building's front edge (vertex 0→1), where the entrance part sits,
 /// so fence openings, gates, trails, and the vacant area kept clear of scatter parts all follow one line.
 /// All positions use local XZ relative to center_point. Specification: city-genesis/docs/ja/geometries/F_建物メッシュの生成.md.
@@ -18,9 +18,9 @@ public static class SiteEntryLayout
 
     public struct Entry
     {
-        /// <summary>Opening center on the parcel perimeter.</summary>
+        /// <summary>Opening center on the fence line.</summary>
         public Vector2 Gate;
-        /// <summary>Parcel edge (CCW) carrying the opening. Gates face along it like fence walls.</summary>
+        /// <summary>Fence-line edge (CCW) carrying the opening. Gates face along it like fence walls.</summary>
         public Vector2 EdgeStart, EdgeEnd;
         /// <summary>Where the approach leaves the occupied outline (the entrance's front face when the body is set back for it).</summary>
         public Vector2 Front;
@@ -37,8 +37,8 @@ public static class SiteEntryLayout
     }
 
     /// <summary>
-    /// Resolve the entry. site=parcel, front=body outline whose edge 0→1 is the front, occupied=outline including entrance/stair setbacks
-    /// (all CCW). Return false when no outline or the ray never reaches the parcel perimeter.
+    /// Resolve the entry. site=fence line, front=body outline whose edge 0→1 is the front, occupied=outline including entrance/stair setbacks
+    /// (all CCW). Return false when no outline or the ray never reaches the fence line.
     /// </summary>
     public static bool TryResolve(Vector2[] site, Vector2[] front, Vector2[] occupied, float width, out Entry entry)
     {

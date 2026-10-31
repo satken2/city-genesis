@@ -54,6 +54,12 @@ public static class ModularBodyBuilder
     private const float NO_Y_SCALE = 0f;
 
     /// <summary>
+    /// Distance (m) the fence line runs inside the parcel perimeter. Fence parts, the entry opening, gates, and trails all follow this line;
+    /// tiles, ground panels, and scatter parts still use the parcel itself.
+    /// </summary>
+    private const float FENCE_INSET = 0.3f;
+
+    /// <summary>
     /// Threshold (m) for detecting implausibly small actual-size parts.
     /// Without scaling, FBXs exported in centimeters or as 1×1 unit geometry
     /// would render extremely small. Warn so this can be noticed.
@@ -316,14 +322,15 @@ public static class ModularBodyBuilder
     /// Receive polygons in local XZ relative to center_point (same convention as footprint)
     /// (pass parcel polygons already transformed by BuildingMeshUtils.ResolveParcelContext).
     ///
-    /// - Entry: with frontFootprint, resolve where the approach from the building front crosses fenceFootprint (<see cref="SiteEntryLayout"/>).
+    /// - Fence line: fenceFootprint inset by <see cref="FENCE_INSET"/>. Fences, the entry, gates, and trails use this line.
+    /// - Entry: with frontFootprint, resolve where the approach from the building front crosses the fence line (<see cref="SiteEntryLayout"/>).
     ///   It opens the fence, places the gate part there, lays the trail part up to the building front, and keeps that corridor clear of scatter parts.
     ///   The opening is as wide as the gate part, or <see cref="SiteEntryLayout.OPENING_WIDTH"/> without one.
     ///   Callers with their own access (rail-yard track leads) pass fenceOpeningCenter instead and no frontFootprint.
-    /// - Fences: place unscaled ground-level fence-w / fence-c parts around fenceFootprint.
+    /// - Fences: place unscaled ground-level fence-w / fence-c parts along the fence line.
     ///   Skip edges/corners with unresolved parts. Null omits fences.
     ///   Omit walls/corners within the opening circle for access.
-    /// - Gate: place the unscaled gate part with its origin at the opening center, oriented along the parcel edge like fence walls.
+    /// - Gate: place the unscaled gate part with its origin at the opening center, oriented along the fence-line edge like fence walls.
     /// - Trail: tile the trail part like fence walls from the building front to the opening center.
     /// - Tiles: tile the interior of tilePolygon with tile parts (GenerateTiles).
     ///   Do nothing if no tile part exists. Null omits tiles.
@@ -412,11 +419,12 @@ public static class ModularBodyBuilder
         Vector2[] scatterFootprint, float scatterSeed, Vector2[] frontFootprint)
     {
         using var scope = siteDecorationsMarker.Auto();
+        Vector2[] fenceLine = BuildingMeshUtils.OffsetPolygonOutward(fenceFootprint, -FENCE_INSET);
 
         // --- Entry ---
         GameObject gateModule = BuildingMeshUtils.GetPartNoPosition(prefix, "gate", suffix, true);
         Mesh gateMesh = GetWallSourceMesh(gateModule);
-        bool hasEntry = SiteEntryLayout.TryResolve(fenceFootprint, frontFootprint, scatterFootprint,
+        bool hasEntry = SiteEntryLayout.TryResolve(fenceLine, frontFootprint, scatterFootprint,
             gateMesh != null ? gateMesh.bounds.size.x : SiteEntryLayout.OPENING_WIDTH, out SiteEntryLayout.Entry entry);
         if (hasEntry)
         {
@@ -426,22 +434,22 @@ public static class ModularBodyBuilder
 
         // --- Fences (fence) ---
         // Skip missing parts.
-        if (fenceFootprint != null && fenceFootprint.Length >= 3)
+        if (fenceLine != null)
         {
-            int fn = fenceFootprint.Length;
+            int fn = fenceLine.Length;
             for (int i = 0; i < fn; i++)
             {
                 int position = i + 1;
-                Vector2 p0 = fenceFootprint[(i + fn - 1) % fn];
-                Vector2 p1 = fenceFootprint[i];
-                Vector2 p2 = fenceFootprint[(i + 1) % fn];
+                Vector2 p0 = fenceLine[(i + fn - 1) % fn];
+                Vector2 p1 = fenceLine[i];
+                Vector2 p2 = fenceLine[(i + 1) % fn];
 
                 GameObject wallModule = LoadPartWithFallback(prefix, "fence", "w", position, suffix, out Material[] wallMaterials);
                 GameObject cornerModule = LoadPartWithFallback(prefix, "fence", "c", position, suffix, out Material[] cornerMaterials);
 
                 if (wallModule != null)
                 {
-                    Vector2 p3 = fenceFootprint[(i + 2) % fn];
+                    Vector2 p3 = fenceLine[(i + 2) % fn];
                     int nextPosition = (i + 1) % fn + 1;
                     GameObject nextCornerModule = LoadPartWithFallback(prefix, "fence", "c", nextPosition, suffix, out _);
 
@@ -500,7 +508,7 @@ public static class ModularBodyBuilder
         // --- Gate and trail ---
         if (hasEntry && gateMesh != null)
         {
-            // Same rotation convention as fence walls along the CCW parcel edge (BuildWallRun), so local +Z (Blender −Y) faces the road.
+            // Same rotation convention as fence walls along the CCW fence-line edge (BuildWallRun), so local +Z (Blender −Y) faces the road.
             Vector2 edge = entry.EdgeEnd - entry.EdgeStart;
             Quaternion rotation = Quaternion.Euler(0f, -Mathf.Atan2(edge.y, edge.x) * Mathf.Rad2Deg + 180f, 0f);
             Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(entry.Gate.x, 0f, entry.Gate.y), rotation, Vector3.one);

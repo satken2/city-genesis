@@ -557,8 +557,8 @@ public static class BuildingMeshUtils
 
     /// <summary>
     /// Offset a CCW polygon outward by a constant distance. Move each vertex along the bisector
-    /// of its adjacent edges' outward normals, scaling by 1/cos so acute corners do not become too narrow.
-    /// Shared by roof builders to create the outline of eaves and verge overhangs.
+    /// of its adjacent edges' outward normals, scaling by 1/cos so acute corners do not become too narrow. A negative offset insets it.
+    /// Shared by roof builders to create the outline of eaves and verge overhangs, and by site fences to inset the fence line.
     /// </summary>
     public static Vector2[] OffsetPolygonOutward(Vector2[] polygon, float offset)
     {
