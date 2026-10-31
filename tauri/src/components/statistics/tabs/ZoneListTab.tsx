@@ -1,7 +1,9 @@
 /**
- * 地区を縦に比較するため、全カードで列幅・項目順・棒の尺度を揃える。
- * 人口（居住・昼間共通）・所得・床面積は全地区の最大値、保有率・住環境は100%を上限とする。
- * 床は不動産統計の容量と占有量を重ねる。地区APIの市場への出品・需要量とは区別する。
+ * To compare Districts vertically, every card shares the same column widths, item order and bar scales.
+ * Population (shared by resident and daytime), income and floor area scale to the maximum across all Districts;
+ * ownership rate and living environment scale to 100%.
+ * Floors overlay capacity and occupancy from the real estate statistics, kept distinct from the District API's
+ * market supply and demand quantities.
  */
 
 import { useMemo } from "react";
