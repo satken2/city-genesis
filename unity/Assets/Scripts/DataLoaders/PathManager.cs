@@ -34,8 +34,8 @@ public partial class PathManager : BaseApiDataManager
     private readonly HashSet<int> pendingPillarRebuildIds = new HashSet<int>();
     /// <summary>pathBuildSerialCounter at the last pendingPillarRebuildIds notification.</summary>
     private readonly Dictionary<int, long> pendingPillarRebuildSerials = new Dictionary<int, long>();
-    /// <summary>Entries in pendingPillarRebuildIds containing power-line adjacency notifications. Distant power lines also need rebuilding, so do not treat them as pillar-only.</summary>
-    private readonly HashSet<int> pendingPowerRebuildIds = new HashSet<int>();
+    /// <summary>Entries in pendingPillarRebuildIds whose Far drawing also depends on the neighbor (power-line spans, suspension towers), so do not treat them as pillar-only.</summary>
+    private readonly HashSet<int> pendingFarRebuildIds = new HashSet<int>();
     private readonly Dictionary<int, int> geometryRevisions = new Dictionary<int, int>();
 
     /// <summary>Discard derived path caches containing terrain heights (label positions and anchor points).</summary>
@@ -1442,7 +1442,7 @@ public partial class PathManager : BaseApiDataManager
         ConstructionAmbience.Clear(ConstructionAmbience.Kind.Path);
         pendingPillarRebuildIds.Clear();
         pendingPillarRebuildSerials.Clear();
-        pendingPowerRebuildIds.Clear();
+        pendingFarRebuildIds.Clear();
         pathsByNodeIndex.Clear();
         pathVersionCache.Clear();
 
@@ -2614,44 +2614,11 @@ public partial class PathManager : BaseApiDataManager
         
         pathGO.tag = PATH_TAG;
 
-        var startPointList = path.GetStartPointList();
-        var endPointList = path.GetEndPointList();
-
-        if (startPointList == null || startPointList.Count < 2 || endPointList == null || endPointList.Count < 2)
+        List<Vector3> points = CalculateFarPoints(path);
+        if (points == null)
         {
             Destroy(pathGO);
             return;
-        }
-
-        Vector3 startPos = GetPathPointPosition(startPointList);
-        Vector3 endPos = GetPathPointPosition(endPointList);
-
-        // Subtract base_height for 3D rendering (same shift as CalculatePathPoints).
-        float farBaseHeight = GetPathBaseHeight(path.path_variant);
-        startPos.y -= farBaseHeight;
-        endPos.y -= farBaseHeight;
-
-        float startRelY = (startPointList != null && startPointList.Count >= 3) ? startPointList[1] : 0f;
-        float endRelY = (endPointList != null && endPointList.Count >= 3) ? endPointList[1] : 0f;
-
-        // Do not snap endpoints to terrain for non-following paths (girder bridges, explicitly non-following paths, etc.).
-        bool farVariantFollows = GetPathFollowTerrain(path);
-        if (farVariantFollows && startRelY == farBaseHeight)
-            startPos.y = Utils.GetPathSurfaceHeight(new Vector3(startPos.x, 1000f, startPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
-        if (farVariantFollows && endRelY == farBaseHeight)
-            endPos.y = Utils.GetPathSurfaceHeight(new Vector3(endPos.x, 1000f, endPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
-
-        List<Vector3> points = new List<Vector3> { startPos, endPos };
-        ApplyStationGrade(path, points);
-        // For curves or paths with waypoints, preserve shape by thinning rendering points instead of using a straight endpoint line.
-        bool hasWaypoints = (path.GetWaypointList()?.Count ?? 0) > 0;
-        if (path.curved || hasWaypoints)
-        {
-            List<Vector3> curvePoints = CalculatePathPoints(path);
-            if (curvePoints.Count >= 2)
-            {
-                points = DecimatePolyline(curvePoints, FAR_SAMPLE_INTERVAL);
-            }
         }
         // Repeat the variant's Far model along points (PathFarModel), consistently across types and statuses.
         Mesh mesh = null;
@@ -2680,6 +2647,7 @@ public partial class PathManager : BaseApiDataManager
                 mr.sharedMaterials = farMaterials;
                 mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             }
+            SuspensionBridgeGenerator.GenerateFar(pathGO, points, path);
         }
 
         var identity = pathGO.AddComponent<RenderCacheIdentity>();
@@ -2713,6 +2681,49 @@ public partial class PathManager : BaseApiDataManager
             PathPresentation.Replace(pathGO, oldPath, lodCache);
         }
         ReevaluateAwaitingIntersectionsForPath(path);
+    }
+
+    /// <summary>
+    /// Far centerline: the endpoints, or thinned rendering points for curves and paths with waypoints. Null without endpoints.
+    /// The citywide overview uses it for paths that do not follow terrain, so bridges and viaducts stand at their Far height.
+    /// </summary>
+    public List<Vector3> CalculateFarPoints(PathSummary path)
+    {
+        var startPointList = path.GetStartPointList();
+        var endPointList = path.GetEndPointList();
+        if (startPointList == null || startPointList.Count < 2 || endPointList == null || endPointList.Count < 2) return null;
+
+        Vector3 startPos = GetPathPointPosition(startPointList);
+        Vector3 endPos = GetPathPointPosition(endPointList);
+
+        // Subtract base_height for 3D rendering (same shift as CalculatePathPoints).
+        float farBaseHeight = GetPathBaseHeight(path.path_variant);
+        startPos.y -= farBaseHeight;
+        endPos.y -= farBaseHeight;
+
+        float startRelY = startPointList.Count >= 3 ? startPointList[1] : 0f;
+        float endRelY = endPointList.Count >= 3 ? endPointList[1] : 0f;
+
+        // Do not snap endpoints to terrain for non-following paths (girder bridges, explicitly non-following paths, etc.).
+        bool farVariantFollows = GetPathFollowTerrain(path);
+        if (farVariantFollows && startRelY == farBaseHeight)
+            startPos.y = Utils.GetPathSurfaceHeight(new Vector3(startPos.x, 1000f, startPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+        if (farVariantFollows && endRelY == farBaseHeight)
+            endPos.y = Utils.GetPathSurfaceHeight(new Vector3(endPos.x, 1000f, endPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+
+        List<Vector3> points = new List<Vector3> { startPos, endPos };
+        ApplyStationGrade(path, points);
+        // For curves or paths with waypoints, preserve shape by thinning rendering points instead of using a straight endpoint line.
+        bool hasWaypoints = (path.GetWaypointList()?.Count ?? 0) > 0;
+        if (path.curved || hasWaypoints)
+        {
+            List<Vector3> curvePoints = CalculatePathPoints(path);
+            if (curvePoints.Count >= 2)
+            {
+                points = DecimatePolyline(curvePoints, FAR_SAMPLE_INTERVAL);
+            }
+        }
+        return points;
     }
 
     public List<PathSummary> GetAllPaths()
@@ -5114,7 +5125,7 @@ public partial class PathManager : BaseApiDataManager
             bool added = pendingPillarRebuildIds.Add(id);
             pendingPillarRebuildSerials[id] = pathBuildSerialCounter;
             if (!added) continue;
-            pendingPowerRebuildIds.Remove(id);
+            pendingFarRebuildIds.Remove(id);
             InvalidateTerrainFollowPath(neighbor);
             geometryRevisions.TryGetValue(id, out int revision);
             geometryRevisions[id] = revision + 1;
@@ -5192,11 +5203,11 @@ public partial class PathManager : BaseApiDataManager
         {
             long serial = pendingPillarRebuildSerials.TryGetValue(id, out long notified) ? notified : pathBuildSerialCounter;
             EnqueueTerrainFollowPath(id, serial,
-                pendingPowerRebuildIds.Contains(id) ? TerrainFollowQueueReason.Other : TerrainFollowQueueReason.Pillar);
+                pendingFarRebuildIds.Contains(id) ? TerrainFollowQueueReason.Other : TerrainFollowQueueReason.Pillar);
         }
         pendingPillarRebuildIds.Clear();
         pendingPillarRebuildSerials.Clear();
-        pendingPowerRebuildIds.Clear();
+        pendingFarRebuildIds.Clear();
     }
 
     private void SavePathToCache(PathSummary path)
@@ -5259,14 +5270,20 @@ public partial class PathManager : BaseApiDataManager
         }
     }
 
-    /// <summary>Other suspension bridges joined at the path's start/end node. They share the joint tower (SuspensionBridgeGenerator).</summary>
+    /// <summary>
+    /// Other suspension bridges joined at the path's start/end node. They share the joint tower (SuspensionBridgeGenerator).
+    /// Searched in the whole-city copy, since the citywide overview draws towers of bridges outside the resident cells too.
+    /// </summary>
     private List<PathSummary> GetSuspensionJoints(PathSummary path, bool start)
     {
         var joints = new List<PathSummary>();
         int node = start ? path.start_node_id : path.end_node_id;
-        if (node <= 0) return joints;
-        foreach (var other in GetPathsConnectedToNode(node))
-            if (other.path_id != path.path_id && SuspensionBridgeGenerator.Handles(other)) joints.Add(other);
+        var end = start ? path.GetStartPointList() : path.GetEndPointList();
+        if (node <= 0 || end == null || end.Count < 2 || CityDataCache.Instance == null) return joints;
+        var around = new Rect(end[0] - 1f, end[end.Count - 1] - 1f, 2f, 2f);
+        foreach (var other in CityDataCache.Instance.PathsIn(around))
+            if (other.path_id != path.path_id && (other.start_node_id == node || other.end_node_id == node)
+                && SuspensionBridgeGenerator.Handles(other)) joints.Add(other);
         return joints;
     }
 
@@ -5276,7 +5293,10 @@ public partial class PathManager : BaseApiDataManager
         if (!SuspensionBridgeGenerator.Handles(path)) return;
         foreach (bool start in new[] { true, false })
             foreach (var neighbor in GetSuspensionJoints(path, start))
+            {
+                pendingFarRebuildIds.Add(neighbor.path_id);
                 EnqueueNeighborRebuild(neighbor);
+            }
     }
 
     private void EnqueueNeighborRebuild(PathSummary neighbor)
@@ -5304,7 +5324,7 @@ public partial class PathManager : BaseApiDataManager
             foreach (var neighbor in GetPathsConnectedToNode(node))
             {
                 if (neighbor.path_id == path.path_id || !PowerLinePath.Handles(neighbor)) continue;
-                pendingPowerRebuildIds.Add(neighbor.path_id);
+                pendingFarRebuildIds.Add(neighbor.path_id);
                 EnqueueNeighborRebuild(neighbor);
             }
     }

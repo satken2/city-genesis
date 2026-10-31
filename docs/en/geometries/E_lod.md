@@ -45,7 +45,7 @@ Rendering centerlines, after intersection trimming, are reused while road data a
 
 ## Citywide overview
 
-`CityOverviewManager` renders buildings and surface roads across the entire city from the beginning, independently of residency. The core's overview list is combined into meshes per terrain cell. Buildings use boxes at Far heights; roads use Far models or strips, grounded on citywide current elevation. Objects with real Far, Normal, or Close rendering, and objects hidden by filters, are excluded to avoid duplication. Reload the list after epochs and confirmed edits and rebuild only changed cells.
+`CityOverviewManager` renders buildings and surface roads across the entire city from the beginning, independently of residency. The core's overview list is combined into meshes per terrain cell. Buildings use boxes at Far heights; roads use Far models or strips, grounded on citywide current elevation. Paths that do not follow terrain (bridges, viaducts) take their Far shape from the whole-city copy (`CityDataCache`), so they do not sink to the ground or seabed. Objects with real Far, Normal, or Close rendering, and objects hidden by filters, are excluded to avoid duplication. Reload the list after epochs and confirmed edits and rebuild only changed cells.
 
 ## Props and forests
 

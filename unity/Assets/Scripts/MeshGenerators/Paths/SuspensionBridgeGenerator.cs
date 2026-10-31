@@ -10,14 +10,14 @@ using UnityEngine;
 /// and at the free ends of a chain at SIDE_SPAN_RATIO of the end span. A free end has an anchorage that receives the cable.
 /// A joint tower is shared: only the bridge with the smallest path ID at the node draws it, and every bridge there sizes it
 /// from the longest adjacent main span so their cables meet the same tower top.
-/// Towers, cables and anchorages are drawn once per path along the whole deck polyline (Generate);
-/// the truss is a continuous part drawn per road spline (GenerateTruss).
+/// Towers, cables and anchorages are drawn once per path along the whole deck polyline (Generate), and Far LOD keeps
+/// the towers (GenerateFar); the truss is a continuous part drawn per road spline (GenerateTruss).
 /// </summary>
 public static class SuspensionBridgeGenerator
 {
     private const float SIDE_SPAN_RATIO = 0.2f;        // End-to-tower distance as a share of the end span.
-    private const float TOWER_HEIGHT_PER_SPAN = 0.2f;  // Tower height per metre of the adjacent main span (12m two-lane reference).
-    private const float MIN_TOWER_HEIGHT = 8f;
+    private const float TOWER_HEIGHT_PER_SPAN = 0.08f; // Tower height above the deck per metre of the adjacent main span (12m two-lane reference).
+    private const float MIN_TOWER_HEIGHT = 3.2f;
     private const float ANCHORAGE_SHARE = 0.25f;       // Anchorage length as a share of the side span (deck end to tower).
     private const float DECK_CABLE_RISE = 0.8f;        // Cable height above the deck where it lands at an end without an anchorage model.
 
@@ -37,8 +37,19 @@ public static class SuspensionBridgeGenerator
                 stretchToWidth: false, maxTileLength: 0, normalizeBodySurface: false);
     }
 
+    /// <summary>
+    /// Far LOD: towers only. The tiled far model cannot hold towers at span-dependent positions and heights,
+    /// while cables and anchorages are too thin or low to read at that distance. Does nothing for paths without a tower model.
+    /// </summary>
+    public static void GenerateFar(GameObject parent, List<Vector3> points, PathSummary path)
+    {
+        if (!Handles(path)) return;
+        RoadPath.GetPathMasterParams(path, out float width, out _, out _, out _, out _, out _, out _, out _, out _, out _, out _);
+        Generate(parent, points, path, width, towersOnly: true);
+    }
+
     /// <summary>points: the drawn deck centerline (trimmed ends and the remaining waypoints).</summary>
-    public static void Generate(GameObject parent, List<Vector3> points, PathSummary path, float width)
+    public static void Generate(GameObject parent, List<Vector3> points, PathSummary path, float width, bool towersOnly = false)
     {
         var prefab = PathDrawContext.ResolvePrefab($"Models/Paths/p{path.path_variant}/tower", null, out _);
         if (prefab == null || points == null || points.Count < 2) return;
@@ -95,6 +106,11 @@ public static class SuspensionBridgeGenerator
                 Vector3 ground=new Vector3(top.x,Utils.GetGroundHeight(top),top.z);
                 if (top.y > ground.y) batch.Bar(ground,top,.85f * widthScale);
             }
+        }
+        if (towersOnly)
+        {
+            batch.Finish();
+            return;
         }
 
         // Cable spans: [from, to] in deck distance, with rise above the deck as a function of the span parameter u.

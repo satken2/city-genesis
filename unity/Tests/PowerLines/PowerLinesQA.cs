@@ -343,7 +343,7 @@ public static class PowerLinesQA
         var paths=(IDictionary)Private("pathDataCache");paths[10]=main;paths[100]=rail;
         Invoke("AddPathToNodeIndex",main);Invoke("AddPathToNodeIndex",rail);
         Invoke("RegisterPathCells",main);Invoke("RegisterPathCells",rail);
-        var queued=(HashSet<int>)Private("pendingPowerRebuildIds");
+        var queued=(HashSet<int>)Private("pendingFarRebuildIds");
         Invoke("EnqueuePowerNeighbors",rail);
         Check(queued.Contains(10),"Rail change schedules feeder rebuild");
         var cells=Invoke("GetPathCoveredCellsCached",rail);

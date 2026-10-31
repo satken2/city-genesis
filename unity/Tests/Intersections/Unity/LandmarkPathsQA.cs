@@ -94,17 +94,7 @@ public static class LandmarkPathsQA
         Set(master,"street_tree_type_allowed",id==241);
         if(id==414) Set(master,"wire_spacing",35f);
         masters[id]=master;
-        var path=Activator.CreateInstance(assembly.GetType("GeneratedModels.PathSummary"));
-        Set(path,"path_id",id); Set(path,"path_variant",id); Set(path,"path_type",track?4:2);
-        Set(path,"follow_terrain",0); Set(path,"curved",false); Set(path,"street_tree_type",trees?1:0);
-        if(bridge)
-        {
-            // Bridge towers are placed from the anchors; the flat test ground is at 0, so relative and absolute heights agree.
-            List<object> Anchor(Vector3 p) => new List<object>{p.x,p.y,p.z};
-            Set(path,"start_point",Anchor(points[0])); Set(path,"end_point",Anchor(points[points.Count-1]));
-            Set(path,"waypoints",points.Skip(1).Take(points.Count-2)
-                .Select(p=>(object)new Dictionary<string,object>{{"position",Anchor(p)}}).ToList());
-        }
+        var path=PathFor(id,points,trees);
         var type=assembly.GetType(track?"TrackPath":"RoadPath");
         var setback=Activator.CreateInstance(assembly.GetType("SidewalkSetback"));
         var result=type.GetMethod("Generate").Invoke(Activator.CreateInstance(type),new[]{path,points,setback,setback});
@@ -120,6 +110,19 @@ public static class LandmarkPathsQA
             Require(f.sharedMesh.vertices.All(v=>!float.IsNaN(v.x)&&!float.IsNaN(v.y)&&!float.IsNaN(v.z)),"finite "+f.name);
         }
         return go;
+    }
+    static object PathFor(int id,List<Vector3> points,bool trees)
+    {
+        bool track=id==404||id==414;
+        var path=Activator.CreateInstance(assembly.GetType("GeneratedModels.PathSummary"));
+        Set(path,"path_id",id); Set(path,"path_variant",id); Set(path,"path_type",track?4:2);
+        Set(path,"follow_terrain",0); Set(path,"curved",false); Set(path,"street_tree_type",trees?1:0);
+        // Bridge towers and road markings read the anchors; the flat test ground is at 0, so relative and absolute heights agree.
+        List<object> Anchor(Vector3 p) => new List<object>{p.x,p.y,p.z};
+        Set(path,"start_point",Anchor(points[0])); Set(path,"end_point",Anchor(points[points.Count-1]));
+        Set(path,"waypoints",points.Skip(1).Take(points.Count-2)
+            .Select(p=>(object)new Dictionary<string,object>{{"position",Anchor(p)}}).ToList());
+        return path;
     }
     static void Median(float grade,bool trees)
     {
@@ -182,9 +185,18 @@ public static class LandmarkPathsQA
         foreach(var tower in towers)
         {
             var points=tower.GetComponentsInChildren<MeshFilter>().SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).ToArray();
-            Require(Mathf.Abs(points.Max(v=>v.y)-12.1f-Mathf.Max(length*.12f,8)*widthScale)<.02f,"tower height follows road width");
+            Require(Mathf.Abs(points.Max(v=>v.y)-12.1f-Mathf.Max(length*.6f*.08f,3.2f)*widthScale)<.02f,"tower height follows road width");
             Require(Mathf.Abs(points.Max(v=>v.z)-points.Min(v=>v.z)-2.4f*widthScale)<.02f,"tower thickness follows road width");
         }
+        // Far LOD keeps the towers with their legs below the deck, and drops the cables and anchorages.
+        var far=new GameObject("Far");
+        var deck=new List<Vector3>{new Vector3(0,12,0),new Vector3(0,12,length)};
+        assembly.GetType("SuspensionBridgeGenerator").GetMethod("GenerateFar").Invoke(null,new object[]{far,deck,PathFor(id,deck,false)});
+        Require(far.GetComponentsInChildren<Transform>().Count(t=>t.name=="SuspensionTower")==2,"far towers");
+        Require(!far.GetComponentsInChildren<MeshFilter>().Any(f=>f.name=="SuspensionAnchorage"),"far drops anchorages");
+        Require(far.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="SuspensionCables")
+            .SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).All(v=>v.y<=12.1f+.01f),"far drops cables");
+        UnityEngine.Object.DestroyImmediate(far);
         var trusses=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/truss")).ToArray();
         Require(id>=254?trusses.Length>0:trusses.Length==0,"truss selection "+id+" length="+length);
         var bodies=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/body")).ToArray();

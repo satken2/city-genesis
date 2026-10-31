@@ -9,7 +9,9 @@ using UnityEngine;
 /// Combine core overview lists (/buildings/overview and /paths/overview) into meshes per terrain cell,
 /// excluding buildings/roads with actual objects (Far, Normal, or Close) displayed or hidden by the display filter.
 /// Overlap lasts only until exclusions are applied; slightly shrink boxes inside actual objects and lower bands to avoid coplanar surfaces.
-/// Place at overview terrain heights (TerrainManager.TrySampleOverview). Refetch lists after each epoch completion or committed edit.
+/// Place at overview terrain heights (TerrainManager.TrySampleOverview), except paths that do not follow terrain (bridges, viaducts):
+/// they take the Far shape, suspension towers included, from the whole-city copy (CityDataCache) so they do not sink to the ground or seabed.
+/// Refetch lists after each epoch completion or committed edit.
 /// </summary>
 public class CityOverviewManager : MonoBehaviour
 {
@@ -46,6 +48,8 @@ public class CityOverviewManager : MonoBehaviour
         public GameObject root;
         public readonly List<Mesh> meshes = new List<Mesh>();
         public bool queued;
+        /// <summary>Holds paths drawn from the whole-city copy, or missing from it. Rebuilt when the copy's revision changes.</summary>
+        public bool readsCityData;
     }
 
     private TerrainManager terrainManager;
@@ -59,6 +63,7 @@ public class CityOverviewManager : MonoBehaviour
     private HashSet<int> shownBuildings = new HashSet<int>(), scanBuildings = new HashSet<int>();
     private HashSet<int> shownPaths = new HashSet<int>(), scanPaths = new HashSet<int>();
     private int filterRevision;
+    private int cityDataRevision = -1;
     private bool refreshRequested = true;
     private int generation;
     private Coroutine fetchCoroutine;
@@ -131,6 +136,13 @@ public class CityOverviewManager : MonoBehaviour
             filterRevision = ObjectVisibilityFilter.Revision;
             foreach (var chunk in buildingChunks.Values) MarkDirty(chunk);
             foreach (var chunk in pathChunks.Values) MarkDirty(chunk);
+        }
+        // Before the first full synchronization the copy grows range by range, so wait for it to complete.
+        var cityData = CityDataCache.Instance;
+        if (cityData != null && cityData.IsComplete && cityDataRevision != cityData.Revision)
+        {
+            cityDataRevision = cityData.Revision;
+            foreach (var chunk in pathChunks.Values) if (chunk.readsCityData) MarkDirty(chunk);
         }
     }
 
@@ -393,11 +405,31 @@ public class CityOverviewManager : MonoBehaviour
         Snapshot s = snapshot;
         var groups = new Dictionary<Material, List<CombineInstance>>();
         var temporary = new List<Mesh>();
+        GameObject structures = null;
+        chunk.readsCityData = false;
         foreach (int i in chunk.items)
         {
             int id = s.pathIds[i];
             if (shownPaths.Contains(id) || ObjectVisibilityFilter.IsHidden(InputObjectType.PATH, id)) continue;
-            Mesh mesh = PathFarModel.Build(s.pathVariants[i], PlatePoints(s, i), out Material[] materials);
+            List<Vector3> points = PlatePoints(s, i);
+            // Paths that do not follow terrain (bridges, viaducts) take their Far shape from the whole-city copy.
+            // Until the copy holds the path, draw the overview band and rebuild once it arrives.
+            ConstructionPathSummary path = null;
+            bool known = CityDataCache.Instance != null && CityDataCache.Instance.TryGetPath(id, out path);
+            chunk.readsCityData |= !known;
+            if (known && !PathManager.GetPathFollowTerrain(path) && pathManager != null)
+            {
+                chunk.readsCityData = true;
+                List<Vector3> farPoints = pathManager.CalculateFarPoints(path);
+                if (farPoints != null)
+                {
+                    for (int k = 0; k < farPoints.Count; k++) farPoints[k] -= Vector3.up * PLATE_SINK;
+                    points = farPoints;
+                    structures ??= new GameObject("Structures");
+                    SuspensionBridgeGenerator.GenerateFar(structures, points, path);
+                }
+            }
+            Mesh mesh = PathFarModel.Build(s.pathVariants[i], points, out Material[] materials);
             if (mesh == null) continue;
             temporary.Add(mesh);
             for (int sub = 0; sub < mesh.subMeshCount; sub++)
@@ -421,7 +453,12 @@ public class CityOverviewManager : MonoBehaviour
             built.Add((combined, group.Key));
         }
         foreach (var mesh in temporary) Destroy(mesh);
-        ReplaceMeshes(chunk, built);
+        if (structures != null && structures.transform.childCount == 0)
+        {
+            Destroy(structures);
+            structures = null;
+        }
+        ReplaceMeshes(chunk, built, structures);
     }
 
     /// <summary>Subdivide centerlines to terrain-following sample spacing and place at overview heights. Lower slightly to avoid matching actual band heights.</summary>
@@ -454,16 +491,17 @@ public class CityOverviewManager : MonoBehaviour
         return height;
     }
 
-    /// <summary>Replace a cell's mesh. Keep one child object per material.</summary>
-    private void ReplaceMeshes(Chunk chunk, List<(Mesh mesh, Material material)> built)
+    /// <summary>Replace a cell's mesh. Keep one child object per material. Structures (suspension towers) go under the same root and are destroyed with it.</summary>
+    private void ReplaceMeshes(Chunk chunk, List<(Mesh mesh, Material material)> built, GameObject structures = null)
     {
         foreach (var mesh in chunk.meshes) if (mesh != null) Destroy(mesh);
         chunk.meshes.Clear();
         if (chunk.root != null) Destroy(chunk.root);
         chunk.root = null;
-        if (built.Count == 0) return;
+        if (built.Count == 0 && structures == null) return;
         chunk.root = new GameObject($"{(chunk.isPath ? "Paths" : "Buildings")}_{chunk.cell.x}_{chunk.cell.y}");
         chunk.root.transform.SetParent(container, false);
+        structures?.transform.SetParent(chunk.root.transform, false);
         foreach (var (mesh, material) in built)
         {
             var part = new GameObject(mesh.name);
