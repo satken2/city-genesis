@@ -490,7 +490,7 @@ export const CLIMATE_TYPES: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1
 
 export const SIMULATION_DAYS_CHOICES: number[] = [7, 30];
 
-export const SCENARIO_START_OPTIONS: string[] = ["simulation_days", "ground_cover"];
+export const SCENARIO_START_OPTIONS: string[] = ["city_name", "language", "simulation_days", "ground_cover"];
 
 export const PATH_TYPES_NAMED_ROAD: number[] = [1, 2];
 

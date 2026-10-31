@@ -809,25 +809,6 @@
   box-shadow: inset 3px 0 0 var(--flat-warn);
 }
 
-/* Author-fixed starting options: read-only values with a Fixed badge. */
-.new-game-confirm-fixed {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  font-size: 1rem;
-  color: var(--flat-text);
-  background: color-mix(in srgb, var(--flat-sunken) 50%, transparent);
-}
-
-.new-game-confirm-fixed-badge {
-  padding: 2px 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--flat-text-label);
-  background: var(--flat-raised);
-}
-
 .new-game-confirm-actions {
   display: flex;
   justify-content: flex-end;

@@ -29,7 +29,7 @@ Object.assign(globalThis, { window, document: window.document, HTMLElement: wind
   IS_REACT_ACT_ENVIRONMENT: true });
 const entry = { id: "local~mine", is_scenario: true, saved_at: "20261003_215934", scenario_title: { en: "My scenario" } as Record<string, string>, author: "Author",
   scenario_description: { en: "Description", ja: "説明" }, scenario_objective: { en: "Objective" }, language: "ja",
-  scenario_city_name: { ja: "見本市", en: "Sample Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, asset_pack: "standard",
+  scenario_city_name: { ja: "見本市", en: "Sample Town" }, scenario_fixed_options: ["simulation_days"], simulation_days: 30, asset_pack: "standard",
   map_width: 2000, map_height: 1000, ground_cover: 4 as number | undefined, climate: climate("島の気候"),
   saved_core_version: "1.0.0", created_core_version: "1.0.0", compatibility: { loadable: true }, origin: "local",
   read_only: false, encrypted: false, required_packs: [], pack_status: {}, official: false };
@@ -67,7 +67,7 @@ const saveEntry = { id: "", city_name: "港町", save_name: "", population: 1234
   saved_at: "20260930_120000", is_scenario: false, language: "ja", saved_core_version: "1.0.0", created_core_version: "1.0.0",
   compatibility: { loadable: true }, required_packs: [], pack_status: {} };
 const playingCity = { name: "港町", scenario_title: { en: "Port" }, scenario_description: {}, scenario_objective: {},
-  scenario_city_name: { en: "Port Town" }, scenario_fixed_options: ["climate"], simulation_days: 30, climate: climate("港の気候"), ground_cover: 1, asset_pack: "standard" };
+  scenario_city_name: { en: "Port Town" }, scenario_fixed_options: ["ground_cover"], simulation_days: 30, climate: climate("港の気候"), ground_cover: 1, asset_pack: "standard" };
 /** 変更系の要求(保存・シナリオ作成・画像の保留)だけを拾う。一覧・詳細の取得はほかの分岐が返す */
 function saveMenuResponse(url: string, init?: RequestInit): Response | null {
   const method = init?.method ?? "GET";
@@ -138,7 +138,10 @@ globalThis.fetch = async (input, init) => {
   }
   if (url.includes("/saves/")) return new Response(JSON.stringify({ save: entry }));
   listFetches++;
-  return new Response(JSON.stringify({ scenarios: Object.fromEntries(entries.map(value => [value.id, value])), upload_available: false }));
+  return new Response(JSON.stringify({ scenarios: Object.fromEntries(entries.map(value => [value.id, value])),
+    tutorials: Object.fromEntries(NEW_GAME_TUTORIAL_SCENARIOS.map(({ id }) => [id, { id, compatibility: { loadable: true },
+      scenario_fixed_options: ["city_name", "language", "simulation_days", "ground_cover"] }])),
+    upload_available: false }));
 };
 const settle = () => act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); });
 
@@ -519,12 +522,12 @@ assert.ok(container.querySelector(".localized-text__panel")?.contains(container.
 assert.ok(!container.querySelector(".localized-text__panel")?.textContent?.includes("scenarios.author"), "the author is outside the tab frame");
 assert.equal(container.querySelector(".scenario-group-title")?.textContent, "scenarios.startSettings", "the start settings title sits inside its frame");
 assert.deepEqual([...container.querySelectorAll<HTMLElement>(".scenario-start-row")].map(row => row.dataset.option),
-  ["language", "simulation_days", "climate", "ground_cover", "asset_pack"], "the city language leads the start settings");
+  ["language", "simulation_days", "ground_cover", "asset_pack"], "the city language leads the start settings");
 const changeableBox = (option: string) => container.querySelector<HTMLInputElement>(`.scenario-start-row[data-option=${option}] input[type=checkbox]`)!;
 assert.ok(changeableBox("language").checked && changeableBox("language").disabled, "players can always change the language");
 assert.ok(changeableBox("asset_pack").checked && changeableBox("asset_pack").disabled, "authors only choose the default asset pack");
-assert.ok(!changeableBox("climate").checked && changeableBox("simulation_days").checked, "the checkbox shows what players may change");
-await act(async () => { changeableBox("simulation_days").click(); });
+assert.ok(!changeableBox("simulation_days").checked && changeableBox("ground_cover").checked, "the checkbox shows what players may change");
+await act(async () => { changeableBox("ground_cover").click(); });
 await act(async () => { setText(container.querySelector<HTMLSelectElement>(".scenario-start-row[data-option=simulation_days] select")!, "7"); });
 // クレジットは言語のタブの外にある翻訳しない1つの文。
 const creditsBox = [...container.querySelectorAll<HTMLTextAreaElement>("textarea")]
@@ -536,8 +539,8 @@ assert.equal(metadataWritten.scenario_credits, "Source — https://example.com/d
 assert.deepEqual(metadataWritten.scenario_title, { en: "My scenario" });
 assert.deepEqual(metadataWritten.scenario_description, { ja: "説明", en: "Description" });
 assert.deepEqual(metadataWritten.scenario_city_name, { ja: "見本市", en: "Sample Town" });
-assert.deepEqual(metadataWritten.scenario_fixed_options, ["simulation_days", "climate"]);
-assert.deepEqual([metadataWritten.simulation_days, metadataWritten.climate, metadataWritten.ground_cover, metadataWritten.asset_pack], [7, entry.climate, 4, "standard"]);
+assert.deepEqual(metadataWritten.scenario_fixed_options, ["simulation_days", "ground_cover"]);
+assert.deepEqual([metadataWritten.simulation_days, metadataWritten.ground_cover, metadataWritten.asset_pack], [7, 4, "standard"]);
 assert.equal(metadataWritten.author, entry.author);
 assert.ok(!("language" in metadataWritten), "the city language is not editable here");
 assert.ok(closed);
@@ -651,10 +654,11 @@ assert.ok(!container.querySelector(".new-game-confirm-relocalize"));
 await act(async () => { setText(cityNameInput, "Mine"); });
 await act(async () => { setText(languageSelect, "fr"); });
 assert.equal(cityNameInput.value, "Mine", "a typed city name is kept");
-// 作者が固定した気候は表示だけ。固定していない項目は選べる。
-const optionRow = (option: string) => container.querySelector(`.new-game-confirm-field[data-option=${option}]`)!;
-assert.ok(optionRow("climate").querySelector(".new-game-confirm-fixed") && !optionRow("climate").querySelector("select"));
-await act(async () => { setText(optionRow("ground_cover").querySelector("select")!, "2"); });
+// 作者が固定した項目は出さない。固定していない項目は選べる。
+const optionRow = (option: string) => container.querySelector(`.new-game-confirm-field[data-option=${option}]`);
+assert.equal(container.querySelector(".new-game-confirm-title")?.textContent, "newGame.confirmTitle");
+assert.equal(optionRow("simulation_days"), null, "fixed simulation days are hidden");
+await act(async () => { setText(optionRow("ground_cover")!.querySelector("select")!, "2"); });
 // 開始に失敗したら、理由をダイアログの中に出して開いたままにする。
 state.errors.create_session = { code: "SAVE_CORRUPT", params: {} };
 await act(async () => { button("newGame.startButton").click(); });
@@ -668,8 +672,8 @@ const session = lastCall("create_session");
 assert.equal(session.scenarioId, "local~mine");
 assert.equal(session.playMode, PLAY_MODE_NORMAL, "new games start in normal mode");
 assert.equal(session.introDialog?.textKey, "newGame.developmentNotice.text", "normal starts show the development notice once the city appears");
-assert.deepEqual([session.language, session.cityName, session.climate, session.groundCover, session.assetPack, session.simulationDays],
-  ["fr", "Mine", null, 2, "standard", 30]);
+assert.deepEqual([session.language, session.cityName, session.groundCover, session.assetPack, session.simulationDays],
+  ["fr", "Mine", 2, "standard", null], "fixed simulation days keep the scenario value");
 delete state.results.load_app_settings;
 
 // チュートリアルは同梱の教材の都市から始まるので、地形の情報を出さずにIDだけを送る。
@@ -681,6 +685,9 @@ await act(async () => { container.querySelector<HTMLButtonElement>(".new-game-ti
 assert.equal(facts(), null, "tutorials have no map facts");
 await act(async () => { button("newGame.startScenarioButton").click(); });
 await settle();
+// 教材は開始設定をすべて固定しているので、項目を出さずに開始するかだけを聞く。
+assert.equal(container.querySelector(".new-game-confirm-title")?.textContent, "newGame.confirmStartTitle");
+assert.equal(container.querySelector(".new-game-confirm-fields"), null, "a fully fixed tutorial lists no start settings");
 assert.ok(container.querySelector(".new-game-confirm-warning"), "tutorials also warn before replacing the current game");
 await act(async () => { await emit("session-state", { current_save_id: null, backendConnected: false }); });
 assert.ok(container.querySelector(".new-game-confirm-warning"), "a connection failure does not erase the discard warning");
@@ -692,6 +699,8 @@ await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const tutorialSession = lastCall("create_session");
 assert.deepEqual([tutorialSession.playMode, tutorialSession.tutorialId, tutorialSession.scenarioId], [PLAY_MODE_TUTORIAL, firstTutorial, null]);
+assert.deepEqual([tutorialSession.cityName, tutorialSession.language, tutorialSession.simulationDays], [null, "ja", null],
+  "fixed settings keep the tutorial's values; a fixed language follows the display language");
 assert.equal(tutorialSession.introDialog, null, "tutorials open their own introduction instead of the development notice");
 assert.ok(!("terrainMapId" in tutorialSession), "no terrain is sent for tutorials");
 await act(async () => { root.unmount(); });
@@ -765,8 +774,8 @@ await settle();
 const createdScenario = saveRequests.find(request => request.url.endsWith("/api/v1/scenario-tools"));
 assert.ok(createdScenario && createdScenario.method === "POST", "saving creates a new scenario");
 const createdBody = JSON.parse(String(createdScenario!.body));
-assert.deepEqual([createdBody.scenario_title, createdBody.scenario_city_name, createdBody.scenario_fixed_options, createdBody.climate],
-  [{ en: "Port" }, { en: "Port Town" }, ["climate"], playingCity.climate], "the playing city's introduction is the starting point");
+assert.deepEqual([createdBody.scenario_title, createdBody.scenario_city_name, createdBody.scenario_fixed_options],
+  [{ en: "Port" }, { en: "Port Town" }, ["ground_cover"]], "the playing city's introduction is the starting point");
 assert.ok(lastCall("request_thumbnail_capture"), "without a chosen image the 3D view is captured first");
 assert.ok(state.emitted.includes("scenarios:changed"));
 await act(async () => { root.unmount(); });

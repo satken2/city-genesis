@@ -357,6 +357,7 @@
     "starting": "Démarrage...",
     "startFailed": "Échec du démarrage",
     "confirmTitle": "Confirmation des réglages de la partie",
+    "confirmStartTitle": "Démarrer la partie ?",
     "unsavedChangesWarning": "Le démarrage entraînera la perte des modifications non enregistrées de votre partie actuelle.",
     "cityNameLabel": "Nom de la ville",
     "cityNamePlaceholder": "Saisissez le nom de la ville (facultatif)",
@@ -385,7 +386,6 @@
     "tabBrowse": "Trouver des scénarios",
     "tabTerrain": "Choisir un terrain",
     "relocalizeNote": "Ce scénario a été créé en {{from}}. Commencer en {{to}} renomme en {{to}} les quartiers, installations, habitants, gares et autres noms (les noms donnés par l'auteur sont aussi remplacés ; les noms de rues et quelques autres sont conservés).",
-    "fixedByScenario": "Fixé par le scénario",
     "developmentNotice": {
       "heading": "Ce jeu est une version expérimentale en cours de développement",
       "subheading": "À lire avant de jouer",

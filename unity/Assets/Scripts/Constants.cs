@@ -498,7 +498,7 @@ public static class Constants
 
     public static readonly int[] SIMULATION_DAYS_CHOICES = new int[] { 7, 30 };
 
-    public static readonly string[] SCENARIO_START_OPTIONS = new string[] { "simulation_days", "ground_cover" };
+    public static readonly string[] SCENARIO_START_OPTIONS = new string[] { "city_name", "language", "simulation_days", "ground_cover" };
 
     public static readonly int[] PATH_TYPES_NAMED_ROAD = new int[] { PATH_STREET, PATH_MOTORWAY };
 

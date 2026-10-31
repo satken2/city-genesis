@@ -357,6 +357,7 @@
     "starting": "開始中...",
     "startFailed": "開始に失敗しました",
     "confirmTitle": "ゲーム設定の確認",
+    "confirmStartTitle": "ゲームを開始しますか？",
     "unsavedChangesWarning": "開始すると、現在のゲームの未保存の変更は失われます。",
     "cityNameLabel": "都市名",
     "cityNamePlaceholder": "都市名を入力（任意）",
@@ -385,7 +386,6 @@
     "tabBrowse": "シナリオを探す",
     "tabTerrain": "地形を選択",
     "relocalizeNote": "このシナリオは{{from}}で作られています。{{to}}で始めると、地区・施設・住民・駅などの名前を{{to}}で付け直します(作者が付けた名前も置き換わります。道路名などは残ります)。",
-    "fixedByScenario": "シナリオで固定",
     "developmentNotice": {
       "heading": "このゲームは開発中の試験版です",
       "subheading": "プレイの前にお読みください",

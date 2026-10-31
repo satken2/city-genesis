@@ -357,6 +357,7 @@
     "starting": "시작 중...",
     "startFailed": "시작에 실패했습니다",
     "confirmTitle": "게임 설정 확인",
+    "confirmStartTitle": "게임을 시작하시겠습니까?",
     "unsavedChangesWarning": "시작하면 현재 게임에서 저장하지 않은 변경 사항이 사라집니다.",
     "cityNameLabel": "도시 이름",
     "cityNamePlaceholder": "도시 이름 입력(선택)",
@@ -385,7 +386,6 @@
     "tabBrowse": "시나리오 찾기",
     "tabTerrain": "지형 선택",
     "relocalizeNote": "이 시나리오는 {{from}}(으)로 만들어졌습니다. {{to}}(으)로 시작하면 지구·시설·주민·역 등의 이름을 {{to}}(으)로 다시 붙입니다(제작자가 붙인 이름도 바뀝니다. 도로 이름 등은 유지됩니다).",
-    "fixedByScenario": "시나리오에서 고정",
     "developmentNotice": {
       "heading": "이 게임은 개발 중인 시험판입니다",
       "subheading": "플레이하기 전에 읽어 주세요",

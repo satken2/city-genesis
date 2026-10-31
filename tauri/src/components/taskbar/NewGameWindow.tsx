@@ -23,16 +23,17 @@
  * Descriptions/conditions are author-written free text; all map facts come from the scenario list item (city values).
  * The save format version is not shown; only missing packs and the reason a scenario cannot load appear.
  *
- * Start opens a settings confirmation overlay within the window, not a native popup. Configure city name, naming
- * language, simulation days, etc. before starting. During play, warn about unsaved changes here. Keep the
- * current city and Unity view until final Start.
+ * Start opens a settings confirmation overlay within the window, not a native popup. It lists only the start
+ * settings the player may change (city name, naming language, simulation days, etc.); with none left, it only asks
+ * whether to start. During play, warn about unsaved changes here. Keep the current city and Unity view until final
+ * Start.
  *
  * Scenario introductions and initial city names are author-written multilingual text. Resolve introductions in
- * the display language and city names in the selected city language, falling back to English. City language is
- * always selectable and defaults to the app language. If it differs from the scenario, the core regenerates
- * names within the city.
- * For simulation days and ground cover, author-fixed settings are display-only; others are selectable with
- * scenario values as defaults.
+ * the display language and city names in the selected city language, falling back to English. City language
+ * defaults to the app language. If it differs from the scenario, the core regenerates names within the city.
+ * Settings the author fixed (scenario_fixed_options of the scenario or tutorial list item) are hidden and keep the
+ * scenario values, except a fixed language, which starts in the app language. Others are selectable with scenario
+ * values as defaults.
  */
 import { PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL } from "../../constants";
 
@@ -119,8 +120,10 @@ type DetailView = {
  */
 type ConfirmSelection = {
   scenarioId: string | null;
-  /** List item when starting a scenario (language, starting option values, fixed flags); null for tutorials. */
+  /** List item when starting a scenario (language, starting option values); null for tutorials. */
   scenario: ScenarioEntry | null;
+  /** Start settings the author fixed, from the scenario or tutorial list item. */
+  fixedOptions: ScenarioStartOption[];
   defaultCityName: string;
   defaultLanguage: string;
   defaultSimulationDays: number;
@@ -128,8 +131,11 @@ type ConfirmSelection = {
   tutorialId?: string | null;
 };
 
-/** Scenario starting options other than simulation days: value lists and translation key prefixes. */
-const EXTRA_START_OPTIONS: { key: Exclude<ScenarioStartOption, "simulation_days">; values: number[]; labelKey: string }[] = [
+/** Scenario starting options listed after the common fields (scenario starts only). */
+type ExtraStartOption = Exclude<ScenarioStartOption, "city_name" | "language" | "simulation_days">;
+
+/** Value lists and translation key prefixes for ExtraStartOption. */
+const EXTRA_START_OPTIONS: { key: ExtraStartOption; values: number[]; labelKey: string }[] = [
   { key: "ground_cover", values: GROUND_COVER_TYPES, labelKey: "groundCover" },
 ];
 
@@ -138,7 +144,7 @@ function defaultCityNameOf(scenario: ScenarioEntry, language: string): string {
   return resolveLocalizedText(scenario.scenario_city_name, language);
 }
 
-function startOptionValuesOf(scenario: ScenarioEntry | null): Record<Exclude<ScenarioStartOption, "simulation_days">, number> {
+function startOptionValuesOf(scenario: ScenarioEntry | null): Record<ExtraStartOption, number> {
   return {
     ground_cover: normalizeGroundCover(scenario?.ground_cover),
   };
@@ -316,6 +322,7 @@ export function NewGameWindow({
       setConfirmSelection({
         scenarioId: scenario.id,
         scenario,
+        fixedOptions: scenario.scenario_fixed_options ?? [],
         defaultCityName,
         defaultLanguage: defaultLang,
         defaultSimulationDays: defaultDays,
@@ -341,13 +348,14 @@ export function NewGameWindow({
     setConfirmSelection({
       scenarioId: null,
       scenario: null,
+      fixedOptions: tutorialEntries[tutorialId]?.scenario_fixed_options ?? [],
       defaultCityName: "",
       defaultLanguage: defaultLang,
       defaultSimulationDays: 30,
       playMode: PLAY_MODE_TUTORIAL,
       tutorialId,
     });
-  }, [i18n]);
+  }, [i18n, tutorialEntries]);
 
   /**
    * Normalize the current selection for the detail panel.
@@ -415,8 +423,8 @@ export function NewGameWindow({
 
     setBusy(true);
     setFailure("");
-    // Omit author-fixed options; the core starts with scenario values.
-    const fixed = new Set(confirmSelection.scenario?.scenario_fixed_options ?? []);
+    // Omit author-fixed options; the core starts with scenario values. A fixed language still sends the app language.
+    const fixed = new Set(confirmSelection.fixedOptions);
     const chosen = (option: ScenarioStartOption, value: number) =>
       confirmSelection.scenario && !fixed.has(option) ? value : null;
     try {
@@ -427,7 +435,7 @@ export function NewGameWindow({
       await invoke("create_session", {
         acceptBalanceChange: true,
         scenarioId: confirmSelection.scenarioId,
-        cityName: cityName || null,
+        cityName: fixed.has("city_name") ? null : cityName || null,
         language,
         simulationDays: fixed.has("simulation_days") ? null : simulationDays,
         groundCover: chosen("ground_cover", startOptions.ground_cover),
@@ -512,7 +520,11 @@ export function NewGameWindow({
     );
 
   const confirmScenario = confirmSelection?.scenario ?? null;
-  const fixedOptions = new Set<ScenarioStartOption>(confirmScenario?.scenario_fixed_options ?? []);
+  const fixedOptions = new Set<ScenarioStartOption>(confirmSelection?.fixedOptions ?? []);
+  const extraOptions = confirmScenario ? EXTRA_START_OPTIONS.filter(({ key }) => !fixedOptions.has(key)) : [];
+  // Scenario starts always list the asset pack.
+  const hasStartFields = confirmScenario != null
+    || (["city_name", "language", "simulation_days"] as const).some((option) => !fixedOptions.has(option));
   const isSelected = (kind: Selection["kind"], id: string) => selection?.kind === kind && selection.id === id;
 
   // Keep the selection screen rendered beneath the settings confirmation overlay.
@@ -668,7 +680,7 @@ export function NewGameWindow({
           >
             <h2 id="new-game-confirm-title" className="new-game-confirm-title">
               <NewGameIcon />
-              <span>{t("newGame.confirmTitle")}</span>
+              <span>{t(hasStartFields ? "newGame.confirmTitle" : "newGame.confirmStartTitle")}</span>
             </h2>
 
             {hasCurrentGame && (
@@ -677,91 +689,85 @@ export function NewGameWindow({
               </p>
             )}
 
-            <div className="new-game-confirm-fields">
-              {/* City name */}
-              <div className="new-game-confirm-field">
-                <label className="new-game-confirm-label">
-                  {t("newGame.cityNameLabel")}
-                </label>
-                <input
-                  className="new-game-confirm-input"
-                  type="text"
-                  value={cityName}
-                  onChange={(e) => { setCityName(e.target.value); setCityNameEdited(true); }}
-                  placeholder={t("newGame.cityNamePlaceholder")}
-                  disabled={busy}
-                />
-              </div>
-
-              {/* City language */}
-              <div className="new-game-confirm-field">
-                <label className="new-game-confirm-label">
-                  {t("newGame.languageLabel")}
-                </label>
-                <div className="new-game-confirm-select-wrap">
-                  <select
-                    className="new-game-confirm-select"
-                    value={language}
-                    onChange={(e) => handleLanguageChange(e.target.value)}
-                    disabled={busy}
-                  >
-                    {AVAILABLE_LANGUAGES.map((lang) => (
-                      <option key={lang} value={lang}>
-                        {t(`settings.language.${lang}`)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <span className="new-game-confirm-note">{t("newGame.languageNote")}</span>
-                {confirmScenario && language !== confirmScenario.language && (
-                  <span className="new-game-confirm-note new-game-confirm-relocalize">
-                    {t("newGame.relocalizeNote", {
-                      from: t(`settings.language.${confirmScenario.language}`, { defaultValue: confirmScenario.language }),
-                      to: t(`settings.language.${language}`),
-                    })}
-                  </span>
-                )}
-              </div>
-
-              {/* Simulation days */}
-              <div className="new-game-confirm-field">
-                <label className="new-game-confirm-label">
-                  {t("newGame.simulationDaysLabel")}
-                </label>
-                {fixedOptions.has("simulation_days") ? (
-                  <span className="new-game-confirm-fixed">
-                    {t("newGame.daysOption", { days: simulationDays })}
-                    <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
-                  </span>
-                ) : (
-                  <div className="new-game-confirm-days">
-                    {SIMULATION_DAYS_OPTIONS.map((days) => (
-                      <button
-                        key={days}
-                        className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
-                        onClick={() => setSimulationDays(days)}
-                        disabled={busy}
-                        type="button"
-                        aria-pressed={simulationDays === days}
-                      >
-                        {t("newGame.daysOption", { days })}
-                      </button>
-                    ))}
+            {hasStartFields && (
+              <div className="new-game-confirm-fields">
+                {/* City name */}
+                {!fixedOptions.has("city_name") && (
+                  <div className="new-game-confirm-field" data-option="city_name">
+                    <label className="new-game-confirm-label">
+                      {t("newGame.cityNameLabel")}
+                    </label>
+                    <input
+                      className="new-game-confirm-input"
+                      type="text"
+                      value={cityName}
+                      onChange={(e) => { setCityName(e.target.value); setCityNameEdited(true); }}
+                      placeholder={t("newGame.cityNamePlaceholder")}
+                      disabled={busy}
+                    />
                   </div>
                 )}
-                <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
-              </div>
 
-              {/* Ground cover and asset pack (scenario starts only) */}
-              {confirmScenario && EXTRA_START_OPTIONS.map(({ key, values, labelKey }) => (
-                <div className="new-game-confirm-field" key={key} data-option={key}>
-                  <label className="new-game-confirm-label">{t(`${labelKey}.label`)}</label>
-                  {fixedOptions.has(key) ? (
-                    <span className="new-game-confirm-fixed">
-                      {t(`${labelKey}.${startOptions[key]}`)}
-                      <span className="new-game-confirm-fixed-badge">{t("newGame.fixedByScenario")}</span>
-                    </span>
-                  ) : (
+                {/* City language */}
+                {!fixedOptions.has("language") && (
+                  <div className="new-game-confirm-field" data-option="language">
+                    <label className="new-game-confirm-label">
+                      {t("newGame.languageLabel")}
+                    </label>
+                    <div className="new-game-confirm-select-wrap">
+                      <select
+                        className="new-game-confirm-select"
+                        value={language}
+                        onChange={(e) => handleLanguageChange(e.target.value)}
+                        disabled={busy}
+                      >
+                        {AVAILABLE_LANGUAGES.map((lang) => (
+                          <option key={lang} value={lang}>
+                            {t(`settings.language.${lang}`)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <span className="new-game-confirm-note">{t("newGame.languageNote")}</span>
+                    {confirmScenario && language !== confirmScenario.language && (
+                      <span className="new-game-confirm-note new-game-confirm-relocalize">
+                        {t("newGame.relocalizeNote", {
+                          from: t(`settings.language.${confirmScenario.language}`, { defaultValue: confirmScenario.language }),
+                          to: t(`settings.language.${language}`),
+                        })}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Simulation days */}
+                {!fixedOptions.has("simulation_days") && (
+                  <div className="new-game-confirm-field" data-option="simulation_days">
+                    <label className="new-game-confirm-label">
+                      {t("newGame.simulationDaysLabel")}
+                    </label>
+                    <div className="new-game-confirm-days">
+                      {SIMULATION_DAYS_OPTIONS.map((days) => (
+                        <button
+                          key={days}
+                          className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
+                          onClick={() => setSimulationDays(days)}
+                          disabled={busy}
+                          type="button"
+                          aria-pressed={simulationDays === days}
+                        >
+                          {t("newGame.daysOption", { days })}
+                        </button>
+                      ))}
+                    </div>
+                    <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
+                  </div>
+                )}
+
+                {/* Ground cover and asset pack (scenario starts only) */}
+                {extraOptions.map(({ key, values, labelKey }) => (
+                  <div className="new-game-confirm-field" key={key} data-option={key}>
+                    <label className="new-game-confirm-label">{t(`${labelKey}.label`)}</label>
                     <div className="new-game-confirm-select-wrap">
                       <select
                         className="new-game-confirm-select"
@@ -775,29 +781,29 @@ export function NewGameWindow({
                         ))}
                       </select>
                     </div>
-                  )}
-                </div>
-              ))}
-              {confirmScenario && (
-                <div className="new-game-confirm-field" data-option="asset_pack">
-                  <label className="new-game-confirm-label">{t("assetPack.label")}</label>
-                  <div className="new-game-confirm-select-wrap">
-                    <select
-                      className="new-game-confirm-select"
-                      value={assetPack}
-                      aria-label={t("assetPack.label")}
-                      onChange={(e) => setAssetPack(e.target.value)}
-                      disabled={busy}
-                    >
-                      <option value={ASSET_PACK_STANDARD}>{t("assetPack.standard")}</option>
-                      {assetPacks.map((pack) => (
-                        <option key={pack.pack_id} value={pack.pack_id}>{resolveLocalizedText(pack.display_name, i18n.language)}</option>
-                      ))}
-                    </select>
                   </div>
-                </div>
-              )}
-            </div>
+                ))}
+                {confirmScenario && (
+                  <div className="new-game-confirm-field" data-option="asset_pack">
+                    <label className="new-game-confirm-label">{t("assetPack.label")}</label>
+                    <div className="new-game-confirm-select-wrap">
+                      <select
+                        className="new-game-confirm-select"
+                        value={assetPack}
+                        aria-label={t("assetPack.label")}
+                        onChange={(e) => setAssetPack(e.target.value)}
+                        disabled={busy}
+                      >
+                        <option value={ASSET_PACK_STANDARD}>{t("assetPack.standard")}</option>
+                        {assetPacks.map((pack) => (
+                          <option key={pack.pack_id} value={pack.pack_id}>{resolveLocalizedText(pack.display_name, i18n.language)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Reason starting failed; use the button spinner while starting. */}
             {failure && <p className="save-dialog-error" role="alert">{failure}</p>}

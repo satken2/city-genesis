@@ -357,6 +357,7 @@
     "starting": "Starting...",
     "startFailed": "Failed to start",
     "confirmTitle": "Confirm Game Settings",
+    "confirmStartTitle": "Start the game?",
     "unsavedChangesWarning": "Starting will discard unsaved changes in your current game.",
     "cityNameLabel": "City Name",
     "cityNamePlaceholder": "Enter city name (optional)",
@@ -385,7 +386,6 @@
     "tabBrowse": "Find scenarios",
     "tabTerrain": "Choose a terrain",
     "relocalizeNote": "This scenario was made in {{from}}. Starting in {{to}} renames districts, facilities, residents, stations, and other names in {{to}} (names given by the author are replaced too; road names and a few others are kept).",
-    "fixedByScenario": "Fixed by the scenario",
     "developmentNotice": {
       "heading": "This game is an experimental build in development",
       "subheading": "Please read before playing",

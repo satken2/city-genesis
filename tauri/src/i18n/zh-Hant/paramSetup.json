@@ -357,6 +357,7 @@
     "starting": "開始中...",
     "startFailed": "開始失敗",
     "confirmTitle": "遊戲設定確認",
+    "confirmStartTitle": "要開始遊戲嗎？",
     "unsavedChangesWarning": "開始後，目前遊戲中未儲存的變更將會遺失。",
     "cityNameLabel": "城市名稱",
     "cityNamePlaceholder": "輸入城市名稱（選填）",
@@ -385,7 +386,6 @@
     "tabBrowse": "尋找劇本",
     "tabTerrain": "選擇地形",
     "relocalizeNote": "此場景以{{from}}製作。以{{to}}開始時，區、設施、居民、車站等名稱將以{{to}}重新命名(作者取的名稱也會被取代;道路名稱等會保留)。",
-    "fixedByScenario": "由場景固定",
     "developmentNotice": {
       "heading": "本遊戲是開發中的試驗版",
       "subheading": "遊玩前請閱讀",

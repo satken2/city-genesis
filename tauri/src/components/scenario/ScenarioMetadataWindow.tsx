@@ -32,10 +32,12 @@ import { SaveVersionInfo } from "../common/SaveVersionInfo";
 import "./Scenarios.css";
 
 type Texts = Record<string, LocalizedText | undefined>;
-type Options = Record<ScenarioStartOption, number>;
+/** Start settings whose value is chosen from a list here. */
+type ValueOption = Extract<ScenarioStartOption, "simulation_days" | "ground_cover">;
+type Options = Record<ValueOption, number>;
 
 const TEXT_KEYS = ["scenario_title", "scenario_description", "scenario_objective", "scenario_city_name"] as const;
-const START_OPTIONS: ScenarioStartOption[] = ["simulation_days", "ground_cover"];
+const START_OPTIONS: ValueOption[] = ["simulation_days", "ground_cover"];
 
 /** Initial form data: saved scenario when editing; current city (GET /api/v1/city/) and city language when creating. */
 type ScenarioSource = Pick<ScenarioEntry, (typeof TEXT_KEYS)[number] | "scenario_fixed_options" | "author" | "language"
@@ -88,11 +90,11 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
     return () => controller.abort();
   }, [apiBaseUrl, create, scenarioId, t]);
 
-  const choices: Record<ScenarioStartOption, { values: number[]; label: (value: number) => string }> = {
+  const choices: Record<ValueOption, { values: number[]; label: (value: number) => string }> = {
     simulation_days: { values: SIMULATION_DAYS_CHOICES, label: days => t("newGame.daysOption", { days }) },
     ground_cover: { values: GROUND_COVER_TYPES, label: value => t(`groundCover.${value}`) },
   };
-  const optionLabels: Record<ScenarioStartOption, string> = {
+  const optionLabels: Record<ValueOption, string> = {
     simulation_days: t("newGame.simulationDaysLabel"), ground_cover: t("groundCover.label"),
   };
   // If the default pack is not owned by the author, retain its ID as an option so resaving does not change the default.

@@ -357,6 +357,7 @@
     "starting": "Iniciando...",
     "startFailed": "No se pudo iniciar",
     "confirmTitle": "Confirmación de la configuración del juego",
+    "confirmStartTitle": "¿Iniciar la partida?",
     "unsavedChangesWarning": "Al iniciar, se perderán los cambios sin guardar de tu partida actual.",
     "cityNameLabel": "Nombre de la ciudad",
     "cityNamePlaceholder": "Escribe el nombre de la ciudad (opcional)",
@@ -385,7 +386,6 @@
     "tabBrowse": "Buscar escenarios",
     "tabTerrain": "Elegir terreno",
     "relocalizeNote": "Este escenario se creó en {{from}}. Si empiezas en {{to}}, los nombres de distritos, instalaciones, residentes, estaciones y otros se cambian a {{to}} (también se reemplazan los nombres que puso el autor; se conservan los nombres de las calles y algunos otros).",
-    "fixedByScenario": "Fijado por el escenario",
     "developmentNotice": {
       "heading": "Este juego es una versión experimental en desarrollo",
       "subheading": "Lee esto antes de jugar",
