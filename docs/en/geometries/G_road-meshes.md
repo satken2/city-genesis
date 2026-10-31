@@ -35,7 +35,6 @@ Models use `Models/Paths/p{path_variant}/{part}`, falling back to `Models/Paths/
 | `wall_underground`, `ceiling_underground` | Tunnel walls and ceiling |
 | `pillar`, `pillar_cap` | Elevated support and cap |
 | `pillar_leg`, `pillar_crossbeam` | Portal-frame support legs and beam |
-| `portal` | Tunnel entrance |
 | `tree`, `center_tree`, `streetlight`, `utility_pole`, `utility_box`, `fence`, `bench`, `bin`, `planter`, `advert` | Roadside equipment |
 | `far` | Far model |
 | `{part}_close` | Close-up model |
@@ -54,7 +53,7 @@ Variants with `height_editable` and `pillar_spacing` place caps and ground-reach
 
 `base_height` is a visual offset: render at relative height minus `base_height`. It serves models such as power lines whose geometry already includes height above ground.
 
-Underground paths compare depth at each point with master clearance `height`. Shallow sections are cuttings excavated by the core at construction and render normally. Deep tunnel sections are hidden, with `portal` at boundaries. [Underground view](../programs/unity-visual-modes.md) also renders tunnel sections.
+Underground paths compare depth at each point with master clearance `height`. Shallow sections are cuttings that the core excavates down to the road surface at construction; deep sections are tunnels that leave terrain unchanged. The same generator renders both. Tunnels stay hidden under terrain and show from outside only through their portals. Excavation leaves a vertical cut face at each portal, so a headwall covering that face (wall, arch ring, and coping) is generated from the terrain rather than taken from a part, and the terrain shader skips terrain inside the tunnel interior within the headwall's thickness. Tunnel interiors can be clicked only in the [underground view](../programs/unity-visual-modes.md), which makes terrain transparent.
 
 ## Roadside equipment
 

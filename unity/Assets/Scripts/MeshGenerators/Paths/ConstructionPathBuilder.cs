@@ -69,8 +69,7 @@ public static class ConstructionPathBuilder
 
     private static List<TunnelSectionUtil.DrawSection> DrawSections(List<Vector3> points, PathSummary path, bool underground)
         => points.Count < 2 ? new List<TunnelSectionUtil.DrawSection>() : underground
-            ? TunnelSectionUtil.GetDrawSections(points, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
-                UndergroundView.IsActive)
+            ? TunnelSectionUtil.GetDrawSections(points, TunnelSectionUtil.GetClearanceHeight(path.path_variant), true)
             : new List<TunnelSectionUtil.DrawSection> { new TunnelSectionUtil.DrawSection(points, false) };
 
     /// <param name="points">For underground paths, use the rendered centerline (PathManager.CalculateSectionCenterline).</param>
@@ -142,7 +141,7 @@ public static class ConstructionPathBuilder
             Mesh mesh = ConstructionMeshUtil.BuildDirtStripMesh(section.Points, width + LocalConstants.CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH, !section.IsUnderground);
             var go = AddMesh(root, "ConstructionDirt", mesh, dirt);
             if (go != null) go.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
-            if (mesh != null) colliderParts.Add(mesh);
+            if (mesh != null && section.Pickable) colliderParts.Add(mesh);
         }
         foreach (var section in completeRuns)
         {
@@ -183,7 +182,7 @@ public static class ConstructionPathBuilder
                 PathTunnelParts.GenerateCeiling(complete, roadSpline, path, width * .5f, width * .5f, tunnels);
                 if (body == null) RoadPath.CreateFallbackRoadBody(complete, roadSpline, width);
             }
-            var collision = RoadPath.BuildColliderMeshFromSpline(roadSpline, width);
+            var collision = section.Pickable ? RoadPath.BuildColliderMeshFromSpline(roadSpline, width) : null;
             if (collision != null) colliderParts.Add(collision);
         }
         if (elevated ? progress > 0f : progress < 1f)
@@ -252,7 +251,6 @@ public static class ConstructionPathBuilder
             Quaternion rotation = Quaternion.LookRotation(forward);
             Vector3 position = sample[0];
             bool inTunnel = TunnelSectionUtil.IsTunnelPoint(position, tunnelClearance);
-            if (inTunnel && !UndergroundView.IsActive) continue;
             if (onDeck)
             {
                 position += Vector3.up * RoadPartHeights.BODY_ABOVE_SPLINE - rotation * Vector3.up * bounds.min.y;

@@ -6,7 +6,7 @@ Appearance also depends on connected and nearby parallel paths. `PathManager` su
 
 ## Parts
 
-Search `Models/Paths/p{path_variant}/{part}`, then `Models/Paths/p{path_type}/{part}`. Elevated sections prefer `body_elevated` and `track_elevated` when available. Pillars, tunnel walls and ceilings, and portals share road parts.
+Search `Models/Paths/p{path_variant}/{part}`, then `Models/Paths/p{path_type}/{part}`. Elevated sections prefer `body_elevated` and `track_elevated` when available. Pillars and tunnel walls and ceilings share road parts, and portals are generated from the terrain as for roads.
 
 | Part | Role |
 | --- | --- |

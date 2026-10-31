@@ -429,6 +429,7 @@ public partial class PathManager : BaseApiDataManager
         PillarClearance.NeighborProvider = GetPillarObstacles;
         RoadEquipmentGenerator.OverheadProvider = GetOverheadObstacles;
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
+        TunnelPortalBuilder.NeighborProvider = GetPortalNeighbors;
         RoadAdjacency.NeighborProvider = GetAdjacentRoadNeighbors;
         RoadAdjacency.EndJoinProvider = GetRoadEndJoin;
         SuspensionBridgeGenerator.JointProvider = GetSuspensionJoints;
@@ -484,6 +485,8 @@ public partial class PathManager : BaseApiDataManager
             PowerLineRailGantry.NeighborProvider = null;
         if (PillarClearance.NeighborProvider == (Func<PathSummary, PillarClearance.ObstacleQuery>)GetPillarObstacles)
             PillarClearance.NeighborProvider = null;
+        if (TunnelPortalBuilder.NeighborProvider == (Func<Vector3, float, int, List<TunnelPortalBuilder.Neighbor>>)GetPortalNeighbors)
+            TunnelPortalBuilder.NeighborProvider = null;
         if (RoadEquipmentGenerator.OverheadProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetOverheadObstacles)
             RoadEquipmentGenerator.OverheadProvider = null;
         if (LrtPlatformParts.PolylineProvider == (Func<int, bool, List<Vector3>>)GetLrtPlatformPolyline)
@@ -2633,7 +2636,12 @@ public partial class PathManager : BaseApiDataManager
             {
                 var elevated = elevatedLook ? TrackPath.GetElevatedPercentRanges(TrackPath.RenderPoints(path, section.Points), baseHeight) : null;
                 GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, DecimatePolyline(section.Points, FAR_SAMPLE_INTERVAL), elevated);
-                if (sectionGO != null) sectionGO.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
+                if (sectionGO != null)
+                {
+                    var display = sectionGO.AddComponent<PathSection>();
+                    display.IsUnderground = section.IsUnderground;
+                    display.UndergroundViewOnly = section.IsUnderground;
+                }
             }
         }
         else if (PathMeshFactory.GetModelType(path) == "outline")
@@ -3482,6 +3490,55 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     public List<TrackNeighborInfo> GetAdjacentTrackNeighbors(PathSummary path) => BuildAdjacentTrackNeighbors(path,true);
 
+    /// <summary>
+    /// Implementation of TunnelPortalBuilder.NeighborProvider: rendering points of other portal-building paths whose anchors come within radius.
+    /// Use cached pathPointsCache if generated; otherwise calculate, so the result does not depend on which neighbor rendered first.
+    /// </summary>
+    private List<TunnelPortalBuilder.Neighbor> GetPortalNeighbors(Vector3 position, float radius, int excludePathId)
+    {
+        var result = new List<TunnelPortalBuilder.Neighbor>();
+        var seen = new HashSet<int>();
+        Vector2Int min = TerrainManager.WorldToCell(position.x - radius, position.z - radius);
+        Vector2Int max = TerrainManager.WorldToCell(position.x + radius, position.z + radius);
+        for (int x = min.x; x <= max.x; x++)
+        for (int y = min.y; y <= max.y; y++)
+        {
+            if (!pathIdsByCell.TryGetValue(new Vector2Int(x, y), out HashSet<int> ids)) continue;
+            foreach (int id in ids)
+            {
+                if (id == excludePathId || !seen.Add(id) || !pathDataCache.TryGetValue(id, out PathSummary other)) continue;
+                if (!TunnelPortalBuilder.BuildsPortals(other) || !AnchorsWithin(other, position, radius)) continue;
+                if (!pathPointsCache.TryGetValue(id, out List<Vector3> points) || points == null || points.Count < 2) points = CalculatePathPoints(other);
+                if (points == null || points.Count < 2) continue;
+                result.Add(new TunnelPortalBuilder.Neighbor(id, points, GetRoadWidth(other.path_variant) * .5f));
+            }
+        }
+        return result;
+    }
+
+    /// <summary>Whether the XZ bounds of the path's anchors, widened by radius, contain position.</summary>
+    private static bool AnchorsWithin(PathSummary path, Vector3 position, float radius)
+    {
+        var start = path.GetStartPointList();
+        var end = path.GetEndPointList();
+        if (start == null || end == null || start.Count < 2 || end.Count < 2) return false;
+        float minX = Mathf.Min(start[0], end[0]), maxX = Mathf.Max(start[0], end[0]);
+        float minZ = Mathf.Min(start[start.Count - 1], end[end.Count - 1]), maxZ = Mathf.Max(start[start.Count - 1], end[end.Count - 1]);
+        var waypoints = path.GetWaypointList();
+        if (waypoints != null)
+        {
+            foreach (var waypoint in waypoints)
+            {
+                if (waypoint.position == null || waypoint.position.Length < 2) continue;
+                minX = Mathf.Min(minX, waypoint.position[0]);
+                maxX = Mathf.Max(maxX, waypoint.position[0]);
+                minZ = Mathf.Min(minZ, waypoint.position[waypoint.position.Length - 1]);
+                maxZ = Mathf.Max(maxZ, waypoint.position[waypoint.position.Length - 1]);
+            }
+        }
+        return position.x >= minX - radius && position.x <= maxX + radius && position.z >= minZ - radius && position.z <= maxZ + radius;
+    }
+
     private List<TrackNeighborInfo> BuildAdjacentTrackNeighbors(PathSummary path, bool trimIntersection)
     {
         var result = new List<TrackNeighborInfo>();
@@ -3786,8 +3843,8 @@ public partial class PathManager : BaseApiDataManager
 
         MeshFilter mf = pathGO.AddComponent<MeshFilter>();
 
-        // Pass paths containing underground sections to the same generator per visible section.
-        // Include fully buried sections only in underground view and place portal parts at boundaries (tunnel mouths).
+        // Pass paths containing underground sections to the same generator per section, fully buried sections included,
+        // and build portals at the boundaries (tunnel mouths).
         // During construction, assemble earthworks, pillars, and completed sections according to progress.
         // However, model_type=none paths (such as public transport lines, unrendered even when complete) remain hidden during construction.
         // Pass render LOD and detailed sections to generators through PathDrawContext. Detailed sections are fractions of full path length,
@@ -4027,14 +4084,14 @@ public partial class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Call the normal generator for each visible section and place portals at above/below-ground boundaries.
-    /// Include fully buried sections in underground view and combine rendered section meshes into the selection collider.
+    /// Call the normal generator for every section, fully buried ones included, and build portals at above/below-ground boundaries.
+    /// Terrain covers buried sections, so they show from outside only through the portals. Combine pickable section meshes into the selection collider.
     /// </summary>
     private PathMeshResult GenerateSectionedPathMesh(PathSummary path, List<Vector3> points)
     {
         float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
         var portals = new List<TunnelSectionUtil.PortalInfo>();
-        var sections = TunnelSectionUtil.GetDrawSections(CalculateSectionCenterline(path, points), clearance, UndergroundView.IsActive, portals);
+        var sections = TunnelSectionUtil.GetDrawSections(CalculateSectionCenterline(path, points), clearance, true, portals);
 
         GameObject container = new GameObject("PathSections");
         var colliderCombine = new List<CombineInstance>();
@@ -4050,7 +4107,8 @@ public partial class PathManager : BaseApiDataManager
                 runResult.GeneratedObject.AddComponent<PathSection>().IsUnderground = section.IsUnderground;
             }
 
-            if (runResult.Mesh != null)
+            if (runResult.Mesh == null) continue;
+            if (section.Pickable)
             {
                 colliderCombine.Add(new CombineInstance
                 {
@@ -4058,9 +4116,10 @@ public partial class PathManager : BaseApiDataManager
                     transform = Matrix4x4.identity,
                 });
             }
+            else Destroy(runResult.Mesh);
         }
 
-        PlaceTunnelPortals(container, path, portals);
+        TunnelPortalBuilder.Build(container, path, portals);
 
         Mesh colliderMesh = null;
         if (colliderCombine.Count == 1)
@@ -4088,43 +4147,8 @@ public partial class PathManager : BaseApiDataManager
     {
         bool underground = UsesTunnelMesh(path, points);
         var result = ConstructionPathBuilder.Generate(path, underground ? CalculateSectionCenterline(path, points) : points, underground, out var portals);
-        PlaceTunnelPortals(result.GeneratedObject, path, portals);
+        TunnelPortalBuilder.Build(result.GeneratedObject, path, portals);
         return result;
-    }
-
-    /// <summary>
-    /// Place portal parts at tunnel entrances/exits.
-    /// Search prefabs by variant then type; skip if unavailable (optional part).
-    /// Prefabs assume local +Z faces into the tunnel; place at boundary points with Y rotation only.
-    /// </summary>
-    private void PlaceTunnelPortals(GameObject container, PathSummary path, List<TunnelSectionUtil.PortalInfo> portals)
-    {
-        if (portals == null || portals.Count == 0 || ModelManager.Instance == null) return;
-
-        int pathType = path.path_type;
-        var master = MasterDataStore.Instance != null && MasterDataStore.Instance.IsInitialized
-            ? MasterDataStore.Instance.GetPathMaster(path.path_variant)
-            : null;
-        if (master != null) pathType = master.type;
-
-        GameObject portalPrefab = ModelManager.Instance.GetModel($"Models/Paths/p{path.path_variant}/portal");
-        if (portalPrefab == null)
-        {
-            portalPrefab = ModelManager.Instance.GetModel($"Models/Paths/p{pathType}/portal");
-        }
-        if (portalPrefab == null)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD,
-                () => $"[PathManager] portal プレハブなし (variant={path.path_variant}, type={pathType})。坑口の配置をスキップ");
-            return;
-        }
-
-        foreach (var portal in portals)
-        {
-            GameObject portalGO = Instantiate(portalPrefab, container.transform);
-            portalGO.transform.position = portal.position;
-            portalGO.transform.rotation = Quaternion.LookRotation(portal.direction, Vector3.up);
-        }
     }
 
     /// <summary>

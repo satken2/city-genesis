@@ -11,7 +11,7 @@ public static class PathTunnelParts
     public const string CeilingPart = "ceiling_underground";
     public const float DefaultWallWidth = 0.3f;
     private static readonly Dictionary<int, GameObject> DefaultWalls = new();
-    private static GameObject defaultCeiling;
+    private static readonly Dictionary<bool, GameObject> DefaultCeilings = new();
     private static readonly Dictionary<Mesh, Mesh> PlatformsWithoutRoof = new();
 
     // Default wall/ceiling materials resolve by name (from asset packs if present); rebuild on city switches.
@@ -21,8 +21,8 @@ public static class PathTunnelParts
     {
         foreach (var wall in DefaultWalls.Values) if (wall != null) UnityEngine.Object.Destroy(wall);
         DefaultWalls.Clear();
-        if (defaultCeiling != null) UnityEngine.Object.Destroy(defaultCeiling);
-        defaultCeiling = null;
+        foreach (var ceiling in DefaultCeilings.Values) if (ceiling != null) UnityEngine.Object.Destroy(ceiling);
+        DefaultCeilings.Clear();
     }
 
     // Authoring boundary separating platform floors/doors from shelters. Shelters/supports are independent members above this height.
@@ -88,7 +88,7 @@ public static class PathTunnelParts
             }
     }
 
-    /// <summary>Add ceiling at clearance height. Like default ceilings, dedicated models are one-sided at origin height, facing downward.</summary>
+    /// <summary>Add ceiling at clearance height. Dedicated models are one-sided at origin height, facing downward.</summary>
     public static void GenerateCeiling(GameObject parent, SplineComputer spline, PathSummary path,
         float leftExtent, float rightExtent, List<TrackCorridorInfo.PercentRange> tunnels)
     {
@@ -189,20 +189,34 @@ public static class PathTunnelParts
     {
         if (name != null && name.EndsWith("/" + CeilingPart, StringComparison.Ordinal))
         {
-            if (defaultCeiling != null) return defaultCeiling;
-            var mesh = new Mesh { name = "DefaultTunnelCeiling" };
-            mesh.vertices = new[] { new Vector3(-.5f,0,-.5f), new Vector3(-.5f,0,.5f), new Vector3(.5f,0,.5f), new Vector3(.5f,0,-.5f) };
-            // Face winding as well as normals downward, allowing backface-culling transparency from above.
-            mesh.triangles = new[] { 0,2,1,0,3,2 };
-            mesh.uv = new[] { Vector2.zero, Vector2.up, Vector2.one, Vector2.right };
+            // Underground view sees tunnels from above through the ceiling, so it faces only downward there (backface culling).
+            // Normal view adds the upper face: where a hillside dips below the ceiling, the exposed tunnel reads as a concrete box.
+            bool upperFace = !UndergroundView.IsActive;
+            if (DefaultCeilings.TryGetValue(upperFace, out var cached) && cached != null) return cached;
+            var mesh = new Mesh { name = upperFace ? "DefaultTunnelCeilingTwoSided" : "DefaultTunnelCeiling" };
+            var corners = new[] { new Vector3(-.5f,0,-.5f), new Vector3(-.5f,0,.5f), new Vector3(.5f,0,.5f), new Vector3(.5f,0,-.5f) };
+            var uv = new[] { Vector2.zero, Vector2.up, Vector2.one, Vector2.right };
+            if (upperFace)
+            {
+                mesh.vertices = new[] { corners[0], corners[1], corners[2], corners[3], corners[0], corners[1], corners[2], corners[3] };
+                mesh.triangles = new[] { 0,2,1,0,3,2, 4,5,6,4,6,7 };
+                mesh.uv = new[] { uv[0], uv[1], uv[2], uv[3], uv[0], uv[1], uv[2], uv[3] };
+            }
+            else
+            {
+                mesh.vertices = corners;
+                mesh.triangles = new[] { 0,2,1,0,3,2 };
+                mesh.uv = uv;
+            }
             mesh.RecalculateNormals(); mesh.RecalculateBounds();
-            defaultCeiling = new GameObject("DefaultTunnelCeiling");
-            defaultCeiling.hideFlags = HideFlags.HideAndDontSave;
-            defaultCeiling.SetActive(false);
-            defaultCeiling.AddComponent<MeshFilter>().sharedMesh = mesh;
-            defaultCeiling.AddComponent<MeshRenderer>().sharedMaterial = RoadPath.GetOrCreateRoadMaterialByName("PATH_CONCRETE");
-            defaultCeiling.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
-            return defaultCeiling;
+            var ceiling = new GameObject(mesh.name);
+            ceiling.hideFlags = HideFlags.HideAndDontSave;
+            ceiling.SetActive(false);
+            ceiling.AddComponent<MeshFilter>().sharedMesh = mesh;
+            ceiling.AddComponent<MeshRenderer>().sharedMaterial = RoadPath.GetOrCreateRoadMaterialByName("PATH_CONCRETE");
+            ceiling.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
+            DefaultCeilings[upperFace] = ceiling;
+            return ceiling;
         }
         return ResolveDefaultWall(name);
     }

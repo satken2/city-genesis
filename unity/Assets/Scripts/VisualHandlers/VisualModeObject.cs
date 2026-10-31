@@ -701,7 +701,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         foreach (var info in targetRenderers)
         {
             if (info.renderer != null)
-                info.renderer.enabled = enabled && (UndergroundView.IsActive || info.renderer.GetComponentInParent<PathSection>()?.IsUnderground != true);
+                info.renderer.enabled = enabled && (UndergroundView.IsActive || info.renderer.GetComponentInParent<PathSection>()?.UndergroundViewOnly != true);
         }
         BuildingScatterMember.RefreshObject(gameObject);
     }

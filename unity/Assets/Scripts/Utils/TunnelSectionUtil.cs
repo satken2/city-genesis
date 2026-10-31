@@ -10,9 +10,9 @@ using UnityEngine;
 ///
 /// - Depth ≤ height: open-cut section. The backend excavates terrain to road elevation
 ///   when construction starts, so render the mesh normally.
-/// - Depth > height: fully buried tunnel section. Terrain is not deformed,
-///   so skip mesh generation in normal view and use the same generator in underground view.
-///   Place portal parts at the boundaries.
+/// - Depth > height: fully buried tunnel section. Terrain is not deformed and covers the section,
+///   so the same generator renders it in every view; from outside it shows only through the portals
+///   (TunnelPortalBuilder) placed at the boundaries.
 ///
 /// Classification depends only on the depth function at each sample, allowing repeated
 /// open-cut/tunnel transitions within one path, with portals at every threshold crossing.
@@ -26,10 +26,13 @@ public static class TunnelSectionUtil
         public readonly List<Vector3> Points;
         public readonly bool IsUnderground;
         public DrawSection(List<Vector3> points, bool underground) { Points = points; IsUnderground = underground; }
+
+        /// <summary>Buried sections join click targets only in underground view, so a hill over a tunnel never selects the tunnel.</summary>
+        public bool Pickable => !IsUnderground || UndergroundView.IsActive;
     }
 
     /// <summary>
-    /// Visible sections shared by normal, construction, and distant rendering. Underground view also passes buried sections to the same generator.
+    /// Sections shared by normal, construction, and distant rendering. includeUnderground also passes buried sections to the same generator.
     /// points is the exact rendered centerline (PathManager.CalculateSectionCenterline).
     /// </summary>
     public static List<DrawSection> GetDrawSections(List<Vector3> points, float clearance,
@@ -66,6 +69,9 @@ public static class TunnelSectionUtil
 
         /// <summary>Normalized horizontal direction toward the tunnel interior.</summary>
         public Vector3 direction;
+
+        /// <summary>Road grade along direction (rise per horizontal meter; positive when climbing into the tunnel).</summary>
+        public float grade;
     }
 
     /// <summary>
@@ -279,22 +285,23 @@ public static class TunnelSectionUtil
         return ground - p.y;
     }
 
+    /// <summary>Bisection steps for boundary points; samples SAMPLE_INTERVAL apart narrow to about 5mm.</summary>
+    private const int BOUNDARY_BISECTIONS = 10;
+
     /// <summary>
-    /// Linearly interpolate between tunnelSide and openSide
-    /// to find the boundary point at exactly clearance depth.
+    /// Boundary point between tunnelSide and openSide where depth crosses clearance.
+    /// After excavation depth jumps at the vertical cut of the portal, so interpolating depth linearly between samples
+    /// would miss the cut by meters; bisect the depth function instead so portals stand on the cut.
     /// </summary>
     private static Vector3 InterpolateBoundary(Vector3 tunnelSide, Vector3 openSide, float clearance)
     {
-        float depthTunnel = GetDepth(tunnelSide);
-        float depthOpen = GetDepth(openSide);
-
-        float denom = depthTunnel - depthOpen;
-        if (Mathf.Abs(denom) < 1e-4f) return openSide;
-
-        // Position from openSide toward tunnelSide where depth equals clearance.
-        float t = (clearance - depthOpen) / denom;
-        t = Mathf.Clamp01(t);
-        return Vector3.Lerp(openSide, tunnelSide, t);
+        for (int i = 0; i < BOUNDARY_BISECTIONS; i++)
+        {
+            Vector3 middle = (tunnelSide + openSide) * .5f;
+            if (GetDepth(middle) > clearance) tunnelSide = middle;
+            else openSide = middle;
+        }
+        return (tunnelSide + openSide) * .5f;
     }
 
     private static void AddPortal(List<PortalInfo> portals, Vector3 position, Vector3 towardTunnel)
@@ -302,11 +309,13 @@ public static class TunnelSectionUtil
         if (portals == null) return;
 
         Vector3 dir = new Vector3(towardTunnel.x, 0f, towardTunnel.z);
-        if (dir.sqrMagnitude < 1e-8f) dir = Vector3.forward;
+        float horizontal = dir.magnitude;
+        if (horizontal < 1e-4f) dir = Vector3.forward;
         portals.Add(new PortalInfo
         {
             position = position,
             direction = dir.normalized,
+            grade = horizontal < 1e-4f ? 0f : towardTunnel.y / horizontal,
         });
     }
 }

@@ -41,8 +41,8 @@ Variants without height editing sit on the reference surface at relative height 
 | Section | Condition | Appearance |
 | --- | --- | --- |
 | Cutting | 0 < depth ≤ `height` | Terrain is excavated to the surface when construction starts; rendered normally |
-| Portal | Where depth crosses `height` | Tunnel entrance parts are rendered |
-| Tunnel | Depth > `height` | Visible only in the underground view |
+| Portal | Where depth crosses `height` | A headwall covering the cut face left by excavation is rendered |
+| Tunnel | Depth > `height` | Rendered under the terrain and seen from outside through the portals |
 
 Paths generally cannot be placed through parcels even above or below ground. Sufficiently deep tunnels and sections above or below city-owned parcels can be built while retaining the parcels. Parcels crossed by shallow underground or elevated paths have `has_crossing_path` set ([districts and parcels](04_districts-and-parcels.md)).
 

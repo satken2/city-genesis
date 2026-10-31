@@ -1011,9 +1011,8 @@ public class MeshTestController : MonoBehaviour
 
     /// <summary>
     /// Underground tunnel entrance. One smooth surface-to-underground descent uses
-    /// the same section classification as normal PathManager.GenerateSectionedPathMesh rendering:
-    /// TunnelSectionUtil.SplitDrawableRuns plus portal placement.
-    /// Tunnel sections deeper than clearance omit meshes; place portal parts at boundary mouths.
+    /// the same section classification and portals as normal PathManager.GenerateSectionedPathMesh rendering.
+    /// Portals stand only on the excavation step at a mouth, which flat test ground lacks.
     ///
     /// Show one entrance, not descent at both ends. Densely sampled intermediate points
     /// gradually steepen grade, avoiding angular bends.
@@ -1058,46 +1057,19 @@ public class MeshTestController : MonoBehaviour
         {
             var path = MakePath(variant, type, PARALLEL_ID_BASE + k, curved: true);
             var portals = new List<TunnelSectionUtil.PortalInfo>();
-            List<List<Vector3>> runs = TunnelSectionUtil.SplitDrawableRuns(sets[k], clearance, portals);
-
-            foreach (var run in runs)
+            foreach (var section in TunnelSectionUtil.GetDrawSections(sets[k], clearance, true, portals))
             {
-                PathMeshResult runResult = PathMeshFactory.GeneratePathMesh(path, run);
+                PathMeshResult runResult = PathMeshFactory.GeneratePathMesh(path, section.Points);
                 if (runResult?.GeneratedObject != null)
                 {
                     runResult.GeneratedObject.transform.SetParent(underground.transform, true);
                 }
             }
-            PlaceTunnelPortals(underground, variant, type, portals);
+            TunnelPortalBuilder.Build(underground, path, portals);
         }
         underground.transform.SetParent(container.transform, true);
 
         CreateLabel(container, "地下トンネル入口 Tunnel", new Vector3(0f, 3f, 50f));
-    }
-
-    /// <summary>
-    /// Place portal parts at tunnel mouths.
-    /// Resolve Models/Paths/p{variant}/portal → p{type}/portal;
-    /// omit if absent (mesh ends indicate portals in scenes without models).
-    /// </summary>
-    private void PlaceTunnelPortals(GameObject container, int variant, int type, List<TunnelSectionUtil.PortalInfo> portals)
-    {
-        if (portals == null || portals.Count == 0 || ModelManager.Instance == null) return;
-
-        GameObject portalPrefab = ModelManager.Instance.GetModel($"Models/Paths/p{variant}/portal")
-            ?? ModelManager.Instance.GetModel($"Models/Paths/p{type}/portal");
-        if (portalPrefab == null)
-        {
-            Debug.Log($"[MeshTest] portal プレハブなし (variant={variant}, type={type})。坑口の配置をスキップします。");
-            return;
-        }
-
-        foreach (var portal in portals)
-        {
-            GameObject portalGO = Instantiate(portalPrefab, container.transform);
-            portalGO.transform.position = portal.position;
-            portalGO.transform.rotation = Quaternion.LookRotation(portal.direction, Vector3.up);
-        }
     }
 
     /// <summary>

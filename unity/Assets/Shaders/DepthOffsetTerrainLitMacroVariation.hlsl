@@ -2,6 +2,7 @@
 #define DEPTH_OFFSET_TERRAIN_LIT_MACRO_VARIATION_INCLUDED
 
 #include "Assets/Shaders/TerrainSurfaceAppearance.hlsl"
+#include "Assets/Shaders/TerrainTunnelCut.hlsl"
 
 #define SplatmapFragment DepthOffsetTerrainLitOriginalSplatmapFragment
 #define UniversalFragmentPBR CliffTerrainFragmentPBR
@@ -15,6 +16,7 @@
 // 本プロジェクトはForward+レンダリングなのでこのパスは使われない。
 GBufferFragOutput SplatmapFragment(Varyings IN)
 {
+    ClipTunnelCuts(IN.positionWS);
     GBufferFragOutput output = DepthOffsetTerrainLitOriginalSplatmapFragment(IN);
     output.gBuffer0.rgb = ApplyTerrainMacroVariation(output.gBuffer0.rgb, IN.positionWS);
     output.gBuffer0.rgb = ApplyTerrainColorGrade(output.gBuffer0.rgb, IN.positionWS);
@@ -33,6 +35,7 @@ void SplatmapFragment(
 #endif
     )
 {
+    ClipTunnelCuts(IN.positionWS);
     DepthOffsetTerrainLitOriginalSplatmapFragment(
         IN
         , outColor

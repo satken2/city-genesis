@@ -6,7 +6,7 @@
 
 ## パーツ
 
-プレハブは `Models/Paths/p{path_variant}/{パーツ名}` を探し、無ければ `Models/Paths/p{path_type}/{パーツ名}` を使う。`body`・`track` は、地表より高い区間では `body_elevated`・`track_elevated` があればそれを使う。橋脚・トンネルの側壁と天井・坑口は道路と共通のパーツである。
+プレハブは `Models/Paths/p{path_variant}/{パーツ名}` を探し、無ければ `Models/Paths/p{path_type}/{パーツ名}` を使う。`body`・`track` は、地表より高い区間では `body_elevated`・`track_elevated` があればそれを使う。橋脚・トンネルの側壁と天井は道路と共通のパーツで、坑門も道路と同じく地形から生成する。
 
 | パーツ | 役割 |
 | --- | --- |

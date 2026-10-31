@@ -76,7 +76,7 @@ public static class ConstructionPathQA
     static object Generate(object path,List<Vector3> points,bool tunnel=false)
     {
         var context=assembly.GetType("PathDrawContext");context.GetMethod("Begin").Invoke(null,new object[]{Enum.Parse(assembly.GetType("DrawLod"),"Normal"),0d,1d});
-        var args=new object[]{path,points,tunnel,true,null};
+        var args=new object[]{path,points,tunnel,null};
         try{return builder.GetMethod("Generate").Invoke(null,args);}finally{context.GetMethod("End").Invoke(null,null);}
     }
     static List<Vector3> Line(float height) => Enumerable.Range(0,101).Select(i=>new Vector3(i-50,height+.1f,0)).ToList();
@@ -199,7 +199,10 @@ public static class ConstructionPathQA
     static void VerifyTunnel()
     {
         var path=PathData(2,50,-20);var result=Generate(path,Line(-20),true);var root=(GameObject)Field(result,"GeneratedObject");
-        Check(root.GetComponentsInChildren<Renderer>().Length==0,"Buried construction visible");UnityEngine.Object.DestroyImmediate(root);
+        var section=assembly.GetType("PathSection");var renderers=root.GetComponentsInChildren<Renderer>();
+        Check(renderers.Length>0 && renderers.All(r=>{var s=r.GetComponentInParent(section);return s!=null && (bool)section.GetField("IsUnderground").GetValue(s);}),"Buried construction must render as underground sections");
+        Check(result.GetType().GetProperty("Mesh").GetValue(result)==null,"Buried construction must stay out of the click collider outside underground view");
+        UnityEngine.Object.DestroyImmediate(root);
     }
     static void VerifyProgressContract()
     {

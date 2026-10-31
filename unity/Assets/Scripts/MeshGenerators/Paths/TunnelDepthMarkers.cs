@@ -30,7 +30,13 @@ public static class TunnelDepthMarkers
             Vector3 ground = new Vector3(top.x, Utils.GetGroundHeight(top), top.z);
             if (ground.y > top.y)
             {
-                if (overlay == null) overlay = OverlayMeshRenderer.CreateStatic("TunnelDepthMarkers", false, part.transform);
+                if (overlay == null)
+                {
+                    overlay = OverlayMeshRenderer.CreateStatic("TunnelDepthMarkers", false, part.transform);
+                    var section = overlay.gameObject.AddComponent<PathSection>();
+                    section.IsUnderground = true;
+                    section.UndergroundViewOnly = true;
+                }
                 overlay.AddSolidLine(top, ground, LineColor, 3f);
                 overlay.AddCircle(top, 3f, CeilingColor);
                 overlay.AddCircle(ground, 3f, GroundColor);

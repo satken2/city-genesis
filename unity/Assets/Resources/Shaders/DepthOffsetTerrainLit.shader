@@ -154,10 +154,10 @@ Shader "Custom/DepthOffsetTerrainLit"
             ColorMask 0
 
             HLSLPROGRAM
-            #pragma target 2.0
+            #pragma target 3.0
 
-            #pragma vertex ShadowPassVertex
-            #pragma fragment ShadowPassFragment
+            #pragma vertex TunnelCutShadowPassVertex
+            #pragma fragment TunnelCutShadowPassFragment
 
             #pragma multi_compile_instancing
             #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
@@ -170,6 +170,7 @@ Shader "Custom/DepthOffsetTerrainLit"
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitPasses.hlsl"
+            #include "Assets/Shaders/TerrainTunnelCutPasses.hlsl"
             ENDHLSL
         }
 
@@ -246,16 +247,17 @@ Shader "Custom/DepthOffsetTerrainLit"
             ColorMask R
 
             HLSLPROGRAM
-            #pragma target 2.0
+            #pragma target 3.0
 
-            #pragma vertex DepthOnlyVertex
-            #pragma fragment DepthOnlyFragment
+            #pragma vertex TunnelCutDepthOnlyVertex
+            #pragma fragment TunnelCutDepthOnlyFragment
 
             #pragma multi_compile_instancing
             #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitPasses.hlsl"
+            #include "Assets/Shaders/TerrainTunnelCutPasses.hlsl"
             ENDHLSL
         }
 
@@ -268,9 +270,9 @@ Shader "Custom/DepthOffsetTerrainLit"
             ZWrite On
 
             HLSLPROGRAM
-            #pragma target 2.0
-            #pragma vertex DepthNormalOnlyVertex
-            #pragma fragment DepthNormalOnlyFragment
+            #pragma target 3.0
+            #pragma vertex TunnelCutDepthNormalOnlyVertex
+            #pragma fragment TunnelCutDepthNormalOnlyFragment
 
             #pragma shader_feature_local _NORMALMAP
             #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
@@ -280,6 +282,7 @@ Shader "Custom/DepthOffsetTerrainLit"
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitDepthNormalsPass.hlsl"
+            #include "Assets/Shaders/TerrainTunnelCutPasses.hlsl"
             ENDHLSL
         }
 
@@ -289,10 +292,10 @@ Shader "Custom/DepthOffsetTerrainLit"
             Tags { "LightMode" = "SceneSelectionPass" }
 
             HLSLPROGRAM
-            #pragma target 2.0
+            #pragma target 3.0
 
-            #pragma vertex DepthOnlyVertex
-            #pragma fragment DepthOnlyFragment
+            #pragma vertex TunnelCutDepthOnlyVertex
+            #pragma fragment TunnelCutDepthOnlyFragment
 
             #pragma multi_compile_instancing
             #pragma instancing_options assumeuniformscaling nomatrices nolightprobe nolightmap
@@ -300,6 +303,7 @@ Shader "Custom/DepthOffsetTerrainLit"
             #define SCENESELECTIONPASS
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Terrain/TerrainLitPasses.hlsl"
+            #include "Assets/Shaders/TerrainTunnelCutPasses.hlsl"
             ENDHLSL
         }
 

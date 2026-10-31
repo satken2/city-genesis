@@ -483,14 +483,14 @@ public static class UndergroundQA
             Drain((IEnumerator)Call(modes,"NotifyObjectsBatched",pathType,normal));
             Check(proxies.Values.Cast<GameObject>().SelectMany(go=>go.GetComponentsInChildren(T("OverlayMeshRenderer"))).All(c=>!c.GetComponent<Renderer>().enabled),
                 "normal view hides depth markers through the common visual notification");
-            Check(!nodeGO.GetComponent<Renderer>().enabled,"tunnel junction hides with common visual notification before regeneration");
+            Check(nodeGO.GetComponent<Renderer>().enabled,"tunnel junction stays drawn in normal view (terrain covers it)");
             FinishUpdates();
             Call(terrainVisual,"ApplyVisualMode",normal); Call(seaVisual,"ApplyVisualMode",normal); Call(visual,"ApplyVisualMode",normal);
             Check(terrain.enabled && sea.GetComponent<Renderer>().enabled,"normal ground and sea are restored");
             Check(blocker.GetComponent<Renderer>().sharedMaterial==originalMaterial && latePart.GetComponent<Renderer>().sharedMaterial==lateOriginal,"original materials survive switching and late generation");
             Check(camera.backgroundColor==Color.gray,"camera background is restored");
             proxy=Build(road);
-            Check(proxy.GetComponentsInChildren<MeshRenderer>().Length==0 && proxy.GetComponent<MeshCollider>()==null,"normal view excludes tunnel meshes and colliders through common generation");
+            Check(proxy.GetComponentsInChildren<MeshRenderer>().Length>0 && proxy.GetComponent<MeshCollider>()==null,"normal view draws tunnel meshes under the terrain but keeps them out of picking");
             Check(farRenderer.sharedMaterial==farOriginal,"far building original material is restored");
             forestMaterial=(Material)Call(forest,"MaterialFor",farOriginal);
             Check(forestMaterial.GetFloat("_UndergroundAlpha")==1 && forestMaterial.GetFloat("_ZWrite")==1 && forestMaterial.GetShaderPassEnabled("ShadowCaster"),"GPU forest depth and shadows return in normal view");
