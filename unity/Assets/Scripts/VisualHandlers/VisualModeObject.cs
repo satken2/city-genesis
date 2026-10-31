@@ -16,7 +16,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     [Tooltip("このオブジェクトの種類(InputObjectType)を指定します")]
     public int objectType;
 
-    [Tooltip("ハイライト表示に使用するマテリアル")]
+    [Tooltip("境界・所有者の強調表示に使用するマテリアル")]
     [SerializeField] private Material highlightMaterial;
 
     [Tooltip("pendingステータス用の赤いマテリアル")]
@@ -168,8 +168,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         if (r is ParticleSystemRenderer) return true;
         if (r.GetComponent<TextMeshPro>() != null) return true;
         if (r.GetComponent<OverlayMeshRenderer>() != null) return true;
-        // One-way track direction arrows are overlays, so retain their own colors
-        // instead of overwriting with hover/planned blue highlights; visibility still follows the body.
+        // 一方通行の方向矢印は案内用の色を保ち、ホバーや計画中の材質では上書きしない。
         if (r.GetComponent<TrackDirectionArrows>() != null) return true;
         return false;
     }
@@ -352,7 +351,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             {
                 if (isHovered)
                 {
-                    ApplyMaterialToAllSubmeshes(highlightMaterial);
+                    ApplyHoverMaterials();
                 }
                 else
                 {
@@ -402,7 +401,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             {
                 if (isHovered)
                 {
-                    ApplyMaterialToAllSubmeshes(highlightMaterial);
+                    ApplyHoverMaterials();
                 }
                 else
                 {
@@ -454,7 +453,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -478,7 +477,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
 
             // --- Numeric road color modes ---
             // Read values from VisualPathStats and use Lerp to determine fill colors.
-            // Prioritize highlightMaterial while hovered, as in normal mode.
+            // ホバー中は通常の材質を明るく表示する。
 
             case VisualModePath.UTILIZATION:
                 SetRenderersEnabled(true);
@@ -486,7 +485,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -507,7 +506,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -528,7 +527,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -549,7 +548,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -567,7 +566,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
 
             // --- Numeric building color modes ---
             // Read values from VisualBuildingObject and use Lerp to determine fill colors.
-            // Prioritize highlightMaterial while hovered, as in normal mode.
+            // ホバー中は通常の材質を明るく表示する。
 
             case VisualModeBuilding.RENT:
                 SetRenderersEnabled(true);
@@ -575,7 +574,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -603,7 +602,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -628,7 +627,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             // --- Building floor-type color modes ---
             // Fill buildings with capacity for the specified space type using that type's color;
             // show buildings without it translucently.
-            // Prioritize highlightMaterial while hovered.
+            // ホバー中は通常の材質を明るく表示する。
 
             case VisualModeBuilding.SPACE_OTHER:
             case VisualModeBuilding.SPACE_RESIDENCE:
@@ -641,7 +640,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -677,7 +676,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 {
                     if (isHovered)
                     {
-                        ApplyMaterialToAllSubmeshes(highlightMaterial);
+                        ApplyHoverMaterials();
                     }
                     else
                     {
@@ -685,6 +684,19 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                     }
                 }
                 break;
+        }
+    }
+
+    /// <summary>一時的な色分けを解除してから、元の材質の明るい共有版へ切り替える。</summary>
+    private void ApplyHoverMaterials()
+    {
+        RestoreOriginalMaterials();
+        foreach (var info in targetRenderers)
+        {
+            if (info.renderer == null || info.preventMaterialChange) continue;
+            var materials = new Material[info.originalMaterials.Length];
+            for (int i = 0; i < materials.Length; i++) materials[i] = HoverMaterials.Get(info.originalMaterials[i]);
+            info.renderer.sharedMaterials = materials;
         }
     }
 

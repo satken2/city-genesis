@@ -93,7 +93,8 @@ Shader "Custom/DepthOffsetSimpleLit"
             // -------------------------------------
             // Material Keywords
             #pragma shader_feature_local _NORMALMAP
-            #pragma shader_feature_local_fragment _EMISSION
+            // ホバー時に実行時で有効にするため、未使用の発光バリアントもビルドに残す。
+            #pragma multi_compile_local_fragment _ _EMISSION
             #pragma shader_feature_local _RECEIVE_SHADOWS_OFF
             #pragma shader_feature_local_fragment _SURFACE_TYPE_TRANSPARENT
             #pragma shader_feature_local_fragment _ALPHATEST_ON
@@ -231,7 +232,7 @@ Shader "Custom/DepthOffsetSimpleLit"
             #pragma shader_feature_local_fragment _ _SPECGLOSSMAP _SPECULAR_COLOR
             #pragma shader_feature_local_fragment _GLOSSINESS_FROM_BASE_ALPHA
             #pragma shader_feature_local _NORMALMAP
-            #pragma shader_feature_local_fragment _EMISSION
+            #pragma multi_compile_local_fragment _ _EMISSION
             #pragma shader_feature_local _RECEIVE_SHADOWS_OFF
 
             // -------------------------------------

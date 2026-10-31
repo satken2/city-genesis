@@ -39,7 +39,8 @@ Shader "Custom/RoadSurface"
             #pragma shader_feature_local _NORMALMAP
             #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
             #pragma shader_feature_local_fragment _OCCLUSIONMAP
-            #pragma shader_feature_local_fragment _EMISSION
+            // ホバー時に実行時で有効にするため、未使用の発光バリアントもビルドに残す。
+            #pragma multi_compile_local_fragment _ _EMISSION
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS

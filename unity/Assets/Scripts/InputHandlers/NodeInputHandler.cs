@@ -18,7 +18,6 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
     
     private Renderer objectRenderer;
     private Material originalMaterial;
-    private Material highlightMaterial;
     
     // RoadPlanManager reference
     private RoadPlanManager roadPlanManager;
@@ -34,8 +33,7 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
         objectRenderer = GetComponent<Renderer>();
         if (objectRenderer != null)
         {
-            originalMaterial = objectRenderer.material;
-            highlightMaterial = Resources.Load<Material>("HighlightMaterial");
+            originalMaterial = objectRenderer.sharedMaterial;
         }
         
         // Get the RoadPlanManager reference.
@@ -126,10 +124,9 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
 
     public void onHoverStart(int mode)
     {
-        // Highlight.
-        if (objectRenderer != null && highlightMaterial != null)
+        if (objectRenderer != null && originalMaterial != null)
         {
-            objectRenderer.material = highlightMaterial;
+            objectRenderer.sharedMaterial = HoverMaterials.Get(originalMaterial);
         }
     }
 
@@ -138,7 +135,7 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
         // Clear highlighting.
         if (objectRenderer != null && originalMaterial != null)
         {
-            objectRenderer.material = originalMaterial;
+            objectRenderer.sharedMaterial = originalMaterial;
         }
     }
 
