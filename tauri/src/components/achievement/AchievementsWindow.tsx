@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 import { PLAY_MODE_SCENARIO } from "../../constants";
 import { useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -102,7 +103,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         setScoreData(scoreRes);
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
         }
       } finally {
         setLoading(false);

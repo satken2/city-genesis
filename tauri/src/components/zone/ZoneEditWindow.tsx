@@ -40,7 +40,7 @@ import {
   type CityMapVectors,
   type CityMapViewState,
 } from "../map/CityMapCanvas";
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { describeError, buildApiUrl, fetchApi } from "../../utils/api";
 import { clearHintbarTextIf, setHintbarText } from "../../utils/hintbar";
 import { sendSessionReload } from "../../utils/ipc";
 import { PATH_SIDE_LEFT, PATH_SIDE_RIGHT, PATH_STREET } from "../../constants";
@@ -386,10 +386,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   );
 
   const errorMessage = useCallback(
-    (err: unknown): string =>
-      err instanceof ApiError
-        ? t(`errors.${err.code}`, { defaultValue: t("zone.edit.failed") })
-        : t("zone.edit.failed"),
+    (err: unknown): string => describeError(err, t),
     [t]
   );
 

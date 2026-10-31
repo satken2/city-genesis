@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Public service window component
  *
@@ -321,7 +322,7 @@ export function PublicFacilitiesWindow({
         setServiceSupplies(supplyMap);
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
         }
       } finally {
         setLoading(false);
@@ -357,7 +358,7 @@ export function PublicFacilitiesWindow({
           return next;
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(describeError(err));
       }
     },
     [apiBaseUrl],

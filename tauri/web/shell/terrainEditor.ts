@@ -4,6 +4,7 @@
  * exe はユーザーフォルダのファイルに、ブラウザ版はページのメモリに置く。
  */
 import { apiBase, fetchWithTimeout } from "./net";
+import { errorInfo, type ErrorInfo } from "../../src/utils/errors";
 import { requireBackend } from "./session";
 import { state } from "./state";
 
@@ -30,14 +31,9 @@ function scenarioTerrainUrl(scenarioId: string): string {
   return `${apiBase()}/api/v1/scenarios/${encodeURIComponent(scenarioId)}/terrain`;
 }
 
-/** コアのエラー応答を「CODE: 本文」の文字列にする。UI は先頭のコードで翻訳文を引く。 */
-async function scenarioApiError(response: Response): Promise<string> {
-  const data = (await response.json().catch(() => null)) as Record<string, unknown> | null;
-  const detail = data?.detail;
-  const body = (detail !== null && typeof detail === "object" ? detail : data) as Record<string, unknown> | null;
-  const code = body?.code;
-  if (typeof code === "string") return `${code}: ${typeof body?.message === "string" ? body.message : ""}`;
-  return `HTTP ${response.status} ${response.statusText}`;
+/** デスクトップと同じコードとパラメータを iframe へ渡す。 */
+async function scenarioApiError(response: Response): Promise<ErrorInfo> {
+  return errorInfo(await response.json().catch(() => null));
 }
 
 function decodeBase64(text: string): Uint8Array {
@@ -196,7 +192,7 @@ export async function saveScenarioTerrain(args: SaveArgs) {
   const waterSurfaces = args.waterSurfaces ?? null;
   const rivers = args.rivers ?? null;
   if (heightsLocked && (nearBase64 !== null || waterSurfaces !== null || rivers !== null)) {
-    throw "TERRAIN_LOCKED: 建設物があるシナリオでは標高・水面・川を保存できません";
+    throw "TERRAIN_LOCKED";
   }
   const body = {
     near_base64: nearBase64,

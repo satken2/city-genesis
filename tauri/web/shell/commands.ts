@@ -1,6 +1,6 @@
 /**
  * Tauri のコマンドの実装。`src-tauri/src/lib.rs` の invoke_handler に並ぶコマンドを、同じ名前・引数・戻り値で受ける。
- * 引数の名前は Tauri と同じく JS 側の camelCase。失敗は Rust の Err(String) と同じく文字列で返す。
+ * 引数の名前は Tauri と同じく JS 側の camelCase。失敗は共通のコードとパラメータで iframe へ返す。
  */
 import { emit } from "./events";
 import { sendUiAction } from "./ipc";

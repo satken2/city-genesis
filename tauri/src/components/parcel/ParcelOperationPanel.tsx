@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -88,8 +90,8 @@ export function ParcelOperationPanel({
   }, []);
 
   function errorMessage(err: unknown, fallback: string): string {
-    if (err instanceof ApiError) return t(`errors.${err.code}`, { defaultValue: err.message });
-    return err instanceof Error ? err.message : fallback;
+    if (err instanceof ApiError) return describeError(err, t);
+    return err instanceof Error ? describeError(err) : fallback;
   }
 
   function showMergePreview(candidates: MergeCandidate[], index: number) {
@@ -110,7 +112,7 @@ export function ParcelOperationPanel({
       const res = await fetch(`${base}/api/v1/parcels/${parcel.parcel_id}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       await invoke("close_current_window");
     } catch (err) {
       console.error("Delete failed:", err);

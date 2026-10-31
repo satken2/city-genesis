@@ -1,10 +1,10 @@
+import { describeError } from "./errors";
 import type { TFunction } from "i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { EpochReport } from "../components/taskbar/EpochResultWindow";
 import type { QuestNotification } from "../types";
-import { MAX_UNVERIFIED_POPULATION } from "../constants";
 import { showUnlockedAchievements, takeUnlockedAchievements } from "./achievements";
-import { ApiError, buildApiUrl, fetchApi } from "./api";
+import { buildApiUrl, fetchApi } from "./api";
 import { beginEpochPresentation } from "./epochPresentation";
 import { runEpochWithPresentation } from "./epochFlow";
 import { sendSessionReload } from "./ipc";
@@ -45,9 +45,8 @@ export type EpochExecutionOutcome = "completed" | "failed" | "superseded";
  * failures. Closing results finishes the presentation; finish it here if no results window opens.
  *
  * On core rejection (403: Steam-unverified population limit; 409 EPOCH_ALREADY_RUNNING: another execution
- * active, etc.) or connection error, cancel presentation and notify the reason. Core bodies are fixed English;
- * use dedicated translations for recognized rejections. Call onStarted when presentation begins (execution is
- * confirmed).
+ * active, etc.) or connection error, cancel presentation and translate the reason through the common error handler.
+ * Call onStarted when presentation begins (execution is confirmed).
  */
 export async function executeEpochs(options: {
   apiBaseUrl: string;
@@ -131,11 +130,7 @@ export async function executeEpochs(options: {
     if (presentation && !await presentation.isCurrent().catch(() => true)) return "superseded";
     await presentation?.finish().catch(console.error);
     void showNotification({
-      message: error instanceof ApiError && error.status === 403
-        ? t("epochConfirm.errorSteamLimit", { limit: MAX_UNVERIFIED_POPULATION })
-        : error instanceof ApiError && error.code === "EPOCH_ALREADY_RUNNING"
-          ? t("epochConfirm.errorAlreadyRunning")
-          : t("epochConfirm.errorFailed", { reason: error instanceof Error ? error.message : String(error) }),
+      message: t("epochConfirm.errorFailed", { reason: describeError(error, t) }),
       durationMs: 8000,
     });
     return simulationCompleted ? "completed" : "failed";

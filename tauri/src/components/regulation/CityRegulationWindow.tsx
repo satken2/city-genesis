@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Regulations window component
  *
@@ -175,7 +176,7 @@ export function CityRegulationWindow({
         setPendingWelfare({});
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
         }
       }
     }
@@ -363,7 +364,7 @@ export function CityRegulationWindow({
 
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
+      setError(describeError(err));
     } finally {
       setIsSaving(false);
     }

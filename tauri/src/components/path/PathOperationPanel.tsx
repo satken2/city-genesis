@@ -1,3 +1,4 @@
+import { requireApiSuccess } from "../../utils/api";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -72,7 +73,7 @@ export function PathOperationPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       // This changes planned/under-construction lengths in road details and dashed line-map rendering.
       await notifyRoadsChanged(undefined, "path_detail");
       onActionPerformed();
@@ -89,7 +90,7 @@ export function PathOperationPanel({
       const res = await fetch(`${base}/api/v1/paths/${path.path_id}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       // Request a Unity data reload.
       await sendSessionReload();
       // Deletion removes road membership and deletes roads left with no sections. Notify before closing because hidden windows are reused.
@@ -110,7 +111,7 @@ export function PathOperationPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ under_maintenance: true }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
     } catch (err) {
       console.error("Repair failed:", err);
     } finally {
@@ -130,7 +131,7 @@ export function PathOperationPanel({
       const res = await fetch(`${base}/api/v1/paths/${path.path_id}/demolish`, {
         method: isDemolishing ? "DELETE" : "POST",
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       await sendSessionReload();
       await notifyRoadsChanged(undefined, "path_detail");
       onActionPerformed();
@@ -152,7 +153,7 @@ export function PathOperationPanel({
         `${base}/api/v1/paths/${path.path_id}/reconstruct`,
         { method: "POST" },
       );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       await sendSessionReload();
       await notifyRoadsChanged(undefined, "path_detail");
       onActionPerformed();

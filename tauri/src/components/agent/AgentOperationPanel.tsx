@@ -1,3 +1,4 @@
+import { requireApiSuccess } from "../../utils/api";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -104,7 +105,7 @@ export function AgentOperationPanel({
         headers: body ? { "Content-Type": "application/json" } : undefined,
         body: body ? JSON.stringify(body) : undefined,
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       if (notify) onActionPerformed();
       return true;
     } catch (err) {
@@ -198,7 +199,7 @@ export function AgentOperationPanel({
         `${base}/api/v1/agents/${agent.agent_id}/reconstruct`,
         { method: "POST" },
       );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       onActionPerformed();
     } catch (err) {
       console.error("Reconstruct failed:", err);

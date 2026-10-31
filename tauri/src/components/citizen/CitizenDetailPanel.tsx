@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Citizen detail panel
  *
@@ -285,7 +286,7 @@ export function CitizenDetailPanel({
       })
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
-          const message = err instanceof Error ? err.message : "Unknown error";
+          const message = describeError(err);
           setError(message);
           setLoading(false);
         }

@@ -3,8 +3,8 @@ export const state = {
   confirmed: true,
   /** コマンドごとの戻り値。未登録のコマンドは `{ error: null }` を返す */
   results: {} as Record<string, unknown>,
-  /** コマンドごとの失敗(Rust の Err(String) と同じく文字列で reject する)。results より優先する */
-  errors: {} as Record<string, string>,
+  /** コマンドごとの失敗。構造化エラーもそのまま reject する。results より優先する */
+  errors: {} as Record<string, unknown>,
   /** emit されたイベント名(他のウィンドウへ知らせたかを確かめる) */
   emitted: [] as string[],
 };

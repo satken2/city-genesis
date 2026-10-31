@@ -1,7 +1,8 @@
 import type { TFunction } from "i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { ApiError, buildApiUrl, fetchApi } from "./api";
+import { buildApiUrl, fetchApi } from "./api";
+import { describeError, errorInfo } from "./errors";
 import { requestConfirm } from "./confirmDialog";
 import { resolveLocalizedText, type LocalizedText } from "./locale";
 
@@ -113,17 +114,14 @@ export async function captureSaveThumbnail(): Promise<void> {
   }
 }
 
-/** Error reason code: ApiError.code or the prefix of Rust command failures formatted as CODE: body (including version checks formatted as "CODE": body). null if absent. */
+/** HTTP と Rust の構造化エラーから理由コードを取得する。 */
 export function errorCode(error: unknown): string | null {
-  if (error instanceof ApiError) return error.code;
-  const message = error instanceof Error ? error.message : String(error);
-  return message.match(/^"?([A-Z_]+)"?(?::|$)/)?.[1] ?? null;
+  const { code } = errorInfo(error);
+  return code === "UNKNOWN_ERROR" ? null : code;
 }
 
 export function saveError(error: unknown, t: TFunction): string {
-  const message = error instanceof Error ? error.message : String(error);
-  const code = errorCode(error);
-  return code ? t(`saveCompatibility.${code}`, { defaultValue: message }) : message;
+  return describeError(error, t);
 }
 
 /** Register a scenario image (PNG). Shared by metadata windows and the plan view immediately after terrain import. */

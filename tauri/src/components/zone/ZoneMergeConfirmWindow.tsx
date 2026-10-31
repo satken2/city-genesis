@@ -16,7 +16,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { describeError, buildApiUrl, fetchApi } from "../../utils/api";
 import { sendEditZoneFinishMerge } from "../../utils/ipc";
 import "./ZoneMergeConfirmWindow.css";
 
@@ -74,9 +74,7 @@ export function ZoneMergeConfirmWindow({
       await sendEditZoneFinishMerge(true);
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError
-        ? t(`errors.${err.code}`, { defaultValue: t("zone.mergeFailed") })
-        : t("zone.mergeFailed"));
+      setError(describeError(err, t));
       setBusy(false);
     }
   };

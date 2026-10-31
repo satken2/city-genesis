@@ -1,3 +1,4 @@
+use crate::errors::ApiFailure;
 use crate::state::SharedState;
 use serde_json::{json, Value};
 use std::path::PathBuf;
@@ -52,7 +53,10 @@ pub fn check_frontend_version(core: &Value) -> Result<(), String> {
     let frontend = definition()["frontend_version"].as_str().unwrap_or_default().to_string();
     let core_version = core["core_version"].as_str().unwrap_or_default();
     if frontend_covers_core(&frontend, core_version) { Ok(()) }
-    else { Err(format!("FRONTEND_VERSION_OUTDATED: core {core_version} / UI {frontend}")) }
+    else {
+        log::error!("FRONTEND_VERSION_OUTDATED: core {core_version} / UI {frontend}");
+        Err("FRONTEND_VERSION_OUTDATED".into())
+    }
 }
 
 fn frontend_covers_core(frontend: &str, core: &str) -> bool {
@@ -104,16 +108,15 @@ pub async fn prepare_graphic(state: &SharedState) -> Result<(), String> {
     Err("IPC_CONTRACT_MISMATCH".into())
 }
 
-pub async fn validate_load(state: &SharedState, id: &str, scenario: bool, accepted: bool) -> Result<(), String> {
+pub async fn validate_load(state: &SharedState, id: &str, scenario: bool, accepted: bool) -> Result<(), ApiFailure> {
     verify_core(state).await?;
     let base = state.lock().api_base_url.clone();
     let mut url = reqwest::Url::parse(&format!("{}/api/v1/saves/", base.trim_end_matches('/'))).map_err(|e| e.to_string())?;
     url.path_segments_mut().map_err(|_| "invalid API URL")?.pop_if_empty().push(id).push("validation");
     let response = reqwest::Client::new().get(url).query(&[("scenario", scenario)]).timeout(Duration::from_secs(120))
         .send().await.map_err(|e| e.to_string())?;
-    let status = response.status();
+    if !response.status().is_success() { return Err(ApiFailure::response(response).await); }
     let data: Value = response.json().await.map_err(|e| e.to_string())?;
-    if !status.is_success() { return Err(format!("{}: {}", data["code"], data["message"])); }
     if data["compatibility"]["balance_changed"] == true && !accepted {
         return Err("SAVE_BALANCE_CONFIRMATION_REQUIRED".into());
     }

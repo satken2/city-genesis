@@ -1,3 +1,4 @@
+import { describeError } from "../../../utils/errors";
 /**
  * Economy tab component.
  *
@@ -57,7 +58,7 @@ export function EconomyTab({ apiBaseUrl }: { apiBaseUrl: string }) {
         setCityData(res.city);
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
         }
       } finally {
         setLoading(false);

@@ -1,3 +1,4 @@
+import { describeError } from "../../../utils/errors";
 /**
  * Shops and businesses tab.
  *
@@ -195,7 +196,7 @@ export function BusinessTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       } catch (err) {
         if (controller.signal.aborted || cancelled) return;
         console.error("[BusinessTab] agents fetch error:", err);
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(describeError(err));
         setData(null);
       } finally {
         if (!cancelled) setLoading(false);

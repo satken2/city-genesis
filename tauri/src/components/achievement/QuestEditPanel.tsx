@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 /**
  * Achievement quest editor
  *
@@ -198,7 +200,7 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
 
     fetch(`${base}/api/v1/quests/${editQuestId}`, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json();
       })
       .then((data) => {
@@ -230,7 +232,7 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
       })
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(describeError(err));
         setLoading(false);
       });
 
@@ -369,13 +371,10 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}: ${bodyText}`);
-      }
+      await requireApiSuccess(res);
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      setError(describeError(err));
       setSaving(false);
     }
   }
@@ -395,13 +394,10 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
     setError(null);
     try {
       const res = await fetch(`${base}/api/v1/quests/${editQuestId}`, { method: "DELETE" });
-      if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}: ${bodyText}`);
-      }
+      await requireApiSuccess(res);
       onClose();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      setError(describeError(err));
       setDeleting(false);
     }
   }

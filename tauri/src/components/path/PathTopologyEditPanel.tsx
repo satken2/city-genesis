@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Path merge/split operation section.
  *
@@ -18,7 +19,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { PathData } from "../../types";
-import { ApiError, fetchApi } from "../../utils/api";
+import { fetchApi } from "../../utils/api";
 import {
   sendEndPathTopologyEdit,
   sendFinishPathTopologyEdit,
@@ -178,7 +179,7 @@ export function PathTopologyEditPanel({
         if (controller.signal.aborted) return;
         setMergePreview(null);
         setSplitPreview(null);
-        setError(err instanceof ApiError || err instanceof Error ? err.message : String(err));
+        setError(describeError(err));
       })
       .finally(() => {
         if (!controller.signal.aborted) setPreviewLoading(false);
@@ -241,7 +242,7 @@ export function PathTopologyEditPanel({
         onClose();
       })
       .catch((err: unknown) => {
-        setError(err instanceof ApiError || err instanceof Error ? err.message : String(err));
+        setError(describeError(err));
       })
       .finally(() => setSubmitting(false));
   }, [canSubmit, mode, base, pathId, mergeTarget, splitPoint, onCompleted, onClose]);

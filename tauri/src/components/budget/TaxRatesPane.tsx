@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * "Tax rates" tab in the budget window
  *
@@ -229,7 +230,7 @@ export function TaxRatesPane({
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
         }
       });
     return () => controller.abort();

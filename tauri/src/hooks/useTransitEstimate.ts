@@ -1,3 +1,4 @@
+import { describeError } from "../utils/errors";
 /**
  * Hook fetching line financial estimates: required vehicles, operating cost, fare revenue at assumed occupancy,
  * and balance. Calculations are centralized in the backend (POST /api/v1/transit/lines/estimate and
@@ -87,7 +88,7 @@ export function useTransitEstimate(
         .catch((err: unknown) => {
           if (controller.signal.aborted) return;
           setEstimate(null);
-          setError(err instanceof Error ? err.message : String(err));
+          setError(describeError(err));
         })
         .finally(() => {
           if (!controller.signal.aborted) setLoading(false);

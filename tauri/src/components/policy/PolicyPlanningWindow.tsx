@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * 政策立案はコアの観測結果を表示し、各階層の対応案から既存の操作画面へ案内する。
  * 別の指標で調べる要因は参照ノードで止め、そのボタンで調査先を切り替える。
@@ -204,7 +205,7 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setReport(null);
     void fetchApi<Report>(buildApiUrl(apiBaseUrl, "/api/v1/city/policy-planning"), { signal: controller.signal })
       .then(result => { if (!controller.signal.aborted) setReport(result); })
-      .catch(e => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : String(e)); })
+      .catch(e => { if (!controller.signal.aborted) setError(describeError(e)); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [apiBaseUrl, revision, executing]);

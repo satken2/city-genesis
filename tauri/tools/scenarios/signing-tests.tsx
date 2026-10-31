@@ -109,7 +109,7 @@ assert.equal(container.querySelector('[role="status"]')?.textContent, "scenarios
 rejectSigning = true;
 await act(async () => container.querySelector<HTMLButtonElement>('button[type="submit"]')!.click());
 await settle();
-assert.equal(container.querySelector('[role="alert"]')?.textContent, "scenarios.signing.keyMismatch");
+assert.equal(container.querySelector('[role="alert"]')?.textContent, "errors.SCENARIO_SIGNING_KEY_MISMATCH");
 await act(async () => root.unmount());
 requiredPacks = ["base"];
 root = createRoot(container);

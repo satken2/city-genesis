@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -510,7 +511,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         setPendingRatios(ratios);
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
         }
       }
     }

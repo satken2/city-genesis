@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Climate window
  *
@@ -40,7 +41,7 @@ export function ClimateEffectsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     const controller = new AbortController();
     void fetchApi<ClimateEffectsResponse>(buildApiUrl(apiBaseUrl, "/api/v1/city/climate-effects"), { signal: controller.signal })
       .then(response => { if (!controller.signal.aborted) setData(response); })
-      .catch(e => { if (!controller.signal.aborted) setError(e instanceof Error ? e.message : String(e)); });
+      .catch(e => { if (!controller.signal.aborted) setError(describeError(e)); });
     return () => controller.abort();
   }, [apiBaseUrl]);
 

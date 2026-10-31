@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Public transport window
  *
@@ -106,7 +107,7 @@ export function TransitManagementWindow({ apiBaseUrl }: { apiBaseUrl: string }) 
         setError(null);
       } catch (err) {
         if (!signal?.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
         }
       }
     },

@@ -1,3 +1,4 @@
+import { describeError } from "./utils/errors";
 import { configureBackendRequests, setBackendConnected } from "./utils/api";
 import { useEffect, useMemo, useState, lazy, Suspense, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -271,7 +272,7 @@ function App() {
         if (controller.signal.aborted) {
           return;
         }
-        const message = error instanceof Error ? error.message : "Unknown error";
+        const message = describeError(error);
         setQueryState({ status: "error", url, message });
       });
 
@@ -326,7 +327,7 @@ function App() {
       });
       setActionState(`sent:${action}`);
     } catch (error) {
-      setActionState(`error:${String(error)}`);
+      setActionState(describeError(error));
     }
   }
 

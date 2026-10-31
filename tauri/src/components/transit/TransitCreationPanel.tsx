@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Public transport creation/route editing panel
  *
@@ -161,7 +162,7 @@ export function TransitCreationPanel({
         if (!controller.signal.aborted) setEditedLine(line);
       })
       .catch((err: unknown) => {
-        if (!controller.signal.aborted) setError(err instanceof Error ? err.message : String(err));
+        if (!controller.signal.aborted) setError(describeError(err));
       });
     return () => controller.abort();
   }, [apiBaseUrl, isEdit, editLineId]);
@@ -273,7 +274,7 @@ export function TransitCreationPanel({
       await showNotification({ message, durationMs: paused ? 5000 : 3000 }).catch(() => {});
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save line");
+      setError(describeError(err));
     } finally {
       setIsSaving(false);
     }

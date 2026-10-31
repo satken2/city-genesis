@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Building appearance editing
  *
@@ -32,7 +33,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SubBuildingMasterEntry } from "../../types";
-import { fetchApi, ApiError } from "../../utils/api";
+import { fetchApi } from "../../utils/api";
 import { sendSessionReload } from "../../utils/ipc";
 import { showNotification } from "../../utils/notification";
 import { useMasterData } from "../../contexts/MasterDataContext";
@@ -228,7 +229,7 @@ export function BuildingAppearancePanel({ apiBaseUrl, initialEntityId, onClose }
       } catch (err) {
         if (!controller.signal.aborted) {
           console.error("[BuildingAppearance] Failed to load building data:", err);
-          setLoadError(err instanceof Error ? err.message : String(err));
+          setLoadError(describeError(err));
         }
       }
     })();
@@ -601,16 +602,7 @@ export function BuildingAppearancePanel({ apiBaseUrl, initialEntityId, onClose }
       await sendSessionReload();
     } catch (err) {
       console.error("[BuildingAppearance] Failed to apply appearance:", err);
-      let message = t("building_appearance.saveFailed");
-      if (err instanceof ApiError) {
-        const i18nKey = err.code ? `errors.${err.code}` : null;
-        message =
-          i18nKey && i18nKey !== "errors.UNKNOWN_ERROR"
-            ? t(i18nKey, { defaultValue: err.message })
-            : err.message;
-      } else if (err instanceof Error) {
-        message = err.message;
-      }
+      const message = describeError(err, t);
       void showNotification({ message, durationMs: 5000 });
     } finally {
       setIsSaving(false);

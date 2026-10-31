@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Station information (station building variants only, in path details).
  *
@@ -106,7 +107,7 @@ export function StationInfoSection({
       onRenamed();
       await sendSessionReload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(describeError(err));
     } finally {
       setSaving(false);
     }

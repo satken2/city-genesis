@@ -3,6 +3,7 @@
  * `backend_health.rs` の移植で、状態の遷移と送るイベントは exe と同じにする。
  */
 import { DEVELOPMENT } from "./config";
+import { requireApiSuccess } from "../../src/utils/api";
 import { emit } from "./events";
 import * as host from "./host";
 import { sendUiAction } from "./ipc";
@@ -351,7 +352,7 @@ interface CreateSessionArgs {
 /** 新規ゲームのセッションを作る(`create_session`)。追加の指定はクエリパラメータでコアへ渡す。 */
 export async function createSession(args: CreateSessionArgs): Promise<void> {
   const playMode = args.playMode ?? PLAY_MODE_NORMAL;
-  if (![PLAY_MODE_NORMAL, PLAY_MODE_SCENARIO, PLAY_MODE_TUTORIAL].includes(playMode)) throw "不正なプレイモードです。";
+  if (![PLAY_MODE_NORMAL, PLAY_MODE_SCENARIO, PLAY_MODE_TUTORIAL].includes(playMode)) throw "PLAY_MODE_FORBIDDEN";
   const scenarioId = args.scenarioId ?? null;
   await verifyCore();
   if (scenarioId !== null) await validateLoad(scenarioId, true, args.acceptBalanceChange ?? false);
@@ -405,12 +406,11 @@ async function postSessionStart(url: string, what: string): Promise<void> {
     throw `${what}リクエストに失敗しました: ${String(error)}`;
   }
   if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    console.error(`[${what}] 失敗: ${response.status} ${body}`);
+    console.error(`[${what}] 失敗: ${response.status}`);
     abortInitialLoading();
     host.show("topmenu");
     state.isLoading = false;
-    throw `${what}に失敗しました: ${response.status} ${response.statusText} ${body}`;
+    await requireApiSuccess(response);
   }
   state.backendLoadComplete = true;
 }

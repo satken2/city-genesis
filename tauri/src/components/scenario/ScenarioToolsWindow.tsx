@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -7,7 +8,7 @@ import { usePlayMode } from "../../hooks/usePlayMode";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { FlatTabs } from "../common/FlatTabs";
 import { MasterOverrideEditor } from "./MasterOverrideEditor";
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { sendSessionReload } from "../../utils/ipc";
 import { setHintbarText } from "../../utils/hintbar";
 import { apportionSkillCounts, type ScenarioSkillDistribution } from "../../utils/scenarioSkills";
@@ -33,9 +34,7 @@ export function ScenarioToolsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   const enabled = playMode === PLAY_MODE_SCENARIO && !busy && !epochExecuting;
 
-  const errorMessage = useCallback((error: unknown) => error instanceof ApiError
-    ? t(`errors.${error.code}`, { defaultValue: error.message })
-    : t("scenarioTools.editor.failed"), [t]);
+  const errorMessage = useCallback((error: unknown) => describeError(error, t), [t]);
 
   const showError = useCallback((error: unknown) => setMessage({ text: errorMessage(error), error: true }), [errorMessage]);
 

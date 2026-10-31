@@ -1,3 +1,5 @@
+mod errors;
+use errors::ApiFailure;
 mod asset_manager;
 mod ipc;
 mod messages;
@@ -414,10 +416,10 @@ async fn create_session(
     ground_cover: Option<i32>,
     asset_pack: Option<String>,
     intro_dialog: Option<serde_json::Value>,
-) -> Result<(), String> {
+) -> Result<(), ApiFailure> {
     let play_mode = play_mode.unwrap_or(PLAY_MODE_NORMAL);
     if !matches!(play_mode, PLAY_MODE_NORMAL | PLAY_MODE_SCENARIO | PLAY_MODE_TUTORIAL) {
-        return Err("不正なプレイモードです。".to_string());
+        return Err("PLAY_MODE_FORBIDDEN".into());
     }
     log::info!(
         "[create_session] scenario_id={:?} city_name={:?} language={:?} simulation_days={:?} play_mode={} tutorial_id={:?} climate={:?} ground_cover={:?} asset_pack={:?}",
@@ -499,9 +501,8 @@ async fn create_session(
         .map_err(|e| { abort_initial_loading(&app, state.inner()); format!("セッション作成リクエストに失敗しました: {e}") })?;
 
     if !res.status().is_success() {
-        let status = res.status();
-        let body = res.text().await.unwrap_or_default();
-        log::error!("[create_session] セッション作成失敗: {} {}", status, body);
+        let error = ApiFailure::response(res).await;
+        log::error!("[create_session] セッション作成失敗: {} {}", error.code, error.params);
         abort_initial_loading(&app, state.inner());
         if let Some(topmenu) = app.get_webview_window("topmenu") {
             let _ = topmenu.show();
@@ -510,7 +511,7 @@ async fn create_session(
             let mut guard = state.lock();
             guard.is_loading = false;
         }
-        return Err(format!("セッション作成に失敗しました: {status} {body}"));
+        return Err(error);
     }
 
     // The initial camera view bypasses the UI. On game:start, the graphics module
@@ -529,7 +530,7 @@ async fn start_load_game(
     state: tauri::State<'_, SharedState>,
     save_id: String,
     accept_balance_change: Option<bool>,
-) -> Result<(), String> {
+) -> Result<(), ApiFailure> {
     log::info!("[start_load_game] save_id={} でロード開始", save_id);
 
     version::validate_load(state.inner(), &save_id, false, accept_balance_change.unwrap_or(false)).await?;
@@ -564,9 +565,8 @@ async fn start_load_game(
         .map_err(|e| { abort_initial_loading(&app, state.inner()); format!("ロードリクエストに失敗しました: {e}") })?;
 
     if !res.status().is_success() {
-        let status = res.status();
-        let body = res.text().await.unwrap_or_default();
-        log::error!("[start_load_game] ロード失敗: {} {}", status, body);
+        let error = ApiFailure::response(res).await;
+        log::error!("[start_load_game] ロード失敗: {} {}", error.code, error.params);
         abort_initial_loading(&app, state.inner());
         if let Some(topmenu) = app.get_webview_window("topmenu") {
             let _ = topmenu.show();
@@ -575,7 +575,7 @@ async fn start_load_game(
             let mut guard = state.lock();
             guard.is_loading = false;
         }
-        return Err(format!("ロードに失敗しました: {status} {body}"));
+        return Err(error);
     }
 
     log::info!("[start_load_game] ロードリクエスト成功。ポーリング待機に委譲");
@@ -691,16 +691,7 @@ fn scenario_terrain_url(state: &SharedState, scenario_id: &str) -> Result<reqwes
     Ok(url)
 }
 
-/// Convert a core error response to a `CODE: body` string. The UI uses the leading code to find a translation (saveError in `utils/saves.ts`).
-async fn scenario_api_error(response: reqwest::Response) -> String {
-    let status = response.status();
-    let data: Value = response.json().await.unwrap_or(Value::Null);
-    let body = data.get("detail").filter(|detail| detail.is_object()).unwrap_or(&data);
-    match body.get("code").and_then(Value::as_str) {
-        Some(code) => format!("{code}: {}", body.get("message").and_then(Value::as_str).unwrap_or_default()),
-        None => format!("HTTP {status}"),
-    }
-}
+
 
 /// Response from GET /api/v1/scenarios/{id}/terrain. The core's scenario terrain API defines the contract.
 #[derive(serde::Deserialize)]
@@ -801,7 +792,7 @@ fn scenario_terrain_working_copy(scenario_id: &str, document: ScenarioTerrainDoc
 async fn prepare_scenario_terrain_editor(
     state: tauri::State<'_, SharedState>,
     scenario_id: String,
-) -> Result<String, String> {
+) -> Result<String, ApiFailure> {
     let root = terrain_editor_dir()?;
     let (visible, referenced) = terrain_editor_window_ids(state.inner());
     let opened = visible.into_iter().find(|id| {
@@ -821,7 +812,7 @@ async fn prepare_scenario_terrain_editor(
         .await
         .map_err(|e| format!("シナリオの地形を取得できません: {e}"))?;
     if !response.status().is_success() {
-        return Err(scenario_api_error(response).await);
+        return Err(ApiFailure::response(response).await);
     }
     let document: ScenarioTerrainDocument = response
         .json()
@@ -982,7 +973,7 @@ async fn save_scenario_terrain(
     camera: Option<Value>,
     ground_cover: i64,
     climate: Value,
-) -> Result<ScenarioTerrainSaveResult, String> {
+) -> Result<ScenarioTerrainSaveResult, ApiFailure> {
     require_backend(state.inner())?;
     let dir = terrain_editor_copy_dir(&editor_id)?;
     let meta = read_terrain_editor_meta(&dir)?;
@@ -993,7 +984,7 @@ async fn save_scenario_terrain(
         .to_string();
     let heights_locked = meta["locks"]["heights_locked"].as_bool().unwrap_or(true);
     if heights_locked && (near_base64.is_some() || water_surfaces.is_some() || rivers.is_some()) {
-        return Err("TERRAIN_LOCKED: 建設物があるシナリオでは標高・水面・川を保存できません".into());
+        return Err("TERRAIN_LOCKED".into());
     }
     let body = serde_json::json!({
         "near_base64": near_base64,
@@ -1014,7 +1005,7 @@ async fn save_scenario_terrain(
         .await
         .map_err(|e| format!("シナリオへ保存できません: {e}"))?;
     if !response.status().is_success() {
-        return Err(scenario_api_error(response).await);
+        return Err(ApiFailure::response(response).await);
     }
     let result: ScenarioTerrainSaveResult = response
         .json()

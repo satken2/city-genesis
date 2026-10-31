@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 /**
  * State management hook for the path construction panel.
  *
@@ -860,7 +862,7 @@ export function usePathConstruction(
           layout_json: JSON.stringify(result.paths.map((p) => [p.start_point, p.end_point])),
         }).catch(console.error);
       } catch (error) {
-        if (!cancelled) setLayout({ key: layoutRequest, error: error instanceof Error ? error.message : String(error) });
+        if (!cancelled) setLayout({ key: layoutRequest, error: describeError(error) });
       }
     }, 150);
     return () => { cancelled = true; clearTimeout(timer); };
@@ -931,7 +933,7 @@ export function usePathConstruction(
         }
       } catch (error) {
         if (!cancelled && currentValidationKey.current === validationKey && currentShapeRevision.current === shapeRevision) {
-          setValidation({ key: validationKey, error: error instanceof Error ? error.message : String(error) });
+          setValidation({ key: validationKey, error: describeError(error) });
         }
       }
     }, 150);
@@ -957,7 +959,7 @@ export function usePathConstruction(
         { method: "POST", headers: { "Content-Type": "application/json" }, body: validationKey }
       );
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
+      const reason = describeError(error);
       if (currentValidationKey.current === validationKey && currentShapeRevision.current === shapeRevision)
         setValidation({ key: validationKey, error: reason });
       throw new Error(t("path_construction.validationFailed", { reason }));
@@ -1002,7 +1004,7 @@ export function usePathConstruction(
     const controller = new AbortController();
     fetch(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/city/`, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<{ traffic_hand?: number }>;
       })
       .then((data) => {
@@ -1232,7 +1234,7 @@ export function usePathConstruction(
           body: JSON.stringify(req),
           signal: controller.signal,
         }).then(async (res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          await requireApiSuccess(res);
           return res.json();
         })
       )

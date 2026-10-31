@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Path traffic/speed settings section.
  *
@@ -122,7 +123,7 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
       });
       onSaved(updated);
     } catch (err) {
-      setDirectionError(err instanceof Error ? err.message : t("common.fetchError"));
+      setDirectionError(err instanceof Error ? describeError(err) : t("common.fetchError"));
     } finally {
       setDirectionSaving(false);
     }

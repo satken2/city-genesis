@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 /**
  * Line detail panel
  *
@@ -180,7 +182,7 @@ export function TransitDetailPanel({
     setError(null);
     fetch(url, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<TransitLineDetail>;
       })
       .then((data) => {
@@ -195,7 +197,7 @@ export function TransitDetailPanel({
       })
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
           setLoading(false);
         }
       });
@@ -261,12 +263,12 @@ export function TransitDetailPanel({
           }),
         },
       );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       await emit("transit:lines_changed", {});
       await sendTransitLinesChanged().catch(console.error);
       setRefreshKey((k) => k + 1);
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to save");
+      setSaveError(describeError(err));
     } finally {
       setSaving(false);
     }
@@ -280,12 +282,12 @@ export function TransitDetailPanel({
         buildApiUrl(apiBaseUrl, `/api/v1/transit/lines/${line.line_agent_id}`),
         { method: "DELETE" },
       );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       await emit("transit:lines_changed", {});
       await sendTransitLinesChanged().catch(console.error);
       await invoke("close_current_window");
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to delete");
+      setSaveError(describeError(err));
       setDeleting(false);
       setConfirmDelete(false);
     }

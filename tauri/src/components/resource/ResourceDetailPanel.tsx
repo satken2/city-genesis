@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Natural resource detail panel
  *
@@ -141,7 +142,7 @@ export function ResourceDetailPanel({
       })
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
           setLoading(false);
         }
       });

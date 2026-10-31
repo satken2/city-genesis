@@ -1,3 +1,4 @@
+import { describeError } from "../../../utils/errors";
 /**
  * Natural resources tab component.
  *
@@ -45,7 +46,7 @@ export function NaturalResourcesTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       })
       .catch((err: unknown) => {
         if (controller.signal.aborted) return;
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(describeError(err));
       });
     return () => controller.abort();
   }, [apiBaseUrl]);

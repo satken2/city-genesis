@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Agent detail panel
  *
@@ -251,7 +252,7 @@ export function AgentDetailPanel({
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
           const message =
-            err instanceof Error ? err.message : "Unknown error";
+            describeError(err);
           setError(message);
           setLoading(false);
         }

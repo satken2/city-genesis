@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Prop placement panel.
  *
@@ -35,7 +36,7 @@ import { NumberStepper } from "../common/NumberStepper";
 import { PropTypeSelector } from "./PropTypeSelector";
 import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import {
   sendChangeState,
   sendEditPropChangeSettings,
@@ -293,16 +294,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
       onClose();
     } catch (err) {
       setIsConfirming(false);
-      let displayMessage: string;
-      if (err instanceof ApiError) {
-        const i18nKey = `errors.${err.code}`;
-        displayMessage =
-          i18nKey !== "errors.UNKNOWN_ERROR"
-            ? t(i18nKey, { defaultValue: err.message })
-            : err.message;
-      } else {
-        displayMessage = t("prop_placement.confirmFailedUnknown");
-      }
+      const displayMessage = describeError(err, t);
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
   }, [mode, selectedType, instances, polygon, density, seed, apiBaseUrl, onClose, t]);

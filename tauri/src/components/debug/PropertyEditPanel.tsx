@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 /**
  * Property editor panel
  *
@@ -140,10 +142,7 @@ export function PropertyEditPanel({
       const url = `${base}${cfg.apiPath}/${id}`;
       try {
         const res = await fetch(url, { signal: controller.signal });
-        if (!res.ok) {
-          const body = await res.text().catch(() => "");
-          throw new Error(`HTTP ${res.status}: ${body}`);
-        }
+        await requireApiSuccess(res);
         const data = (await res.json()) as Record<string, unknown>;
 
         // Unwrap the response if it has a wrapper.
@@ -169,7 +168,7 @@ export function PropertyEditPanel({
         setLoading(false);
       } catch (err: unknown) {
         if (controller.signal.aborted) return;
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(describeError(err));
         setLoading(false);
       }
     },
@@ -228,7 +227,7 @@ export function PropertyEditPanel({
             // serializing both values before comparison.
             dirty = JSON.stringify(f.originalValue) !== JSON.stringify(parsed);
           } catch (err) {
-            validationError = err instanceof Error ? err.message : t("property_edit.invalidJson", "Invalid JSON format.");
+            validationError = t("property_edit.invalidJson", "Invalid JSON format.");
             // Set dirty to true to disable Save and prevent submission while invalid.
             dirty = true;
           }
@@ -276,16 +275,13 @@ export function PropertyEditPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}: ${bodyText}`);
-      }
+      await requireApiSuccess(res);
       // Refetch after a successful PATCH to reset dirty state.
       setSaveMessage(t("property_edit.saved", "Saved successfully."));
       setSaving(false);
       void performFetch(entityType, entityId);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      setError(describeError(err));
       setSaving(false);
     }
   }
@@ -305,14 +301,11 @@ export function PropertyEditPanel({
     const url = `${base}${config.apiPath}/${entityId}`;
     try {
       const res = await fetch(url, { method: "DELETE" });
-      if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}: ${bodyText}`);
-      }
+      await requireApiSuccess(res);
       setFields([]);
       setSaveMessage(t("property_edit.deleted", "Deleted successfully."));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      setError(describeError(err));
     } finally {
       setDeleting(false);
     }

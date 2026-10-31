@@ -4,6 +4,7 @@
  * グラフィック(全面に置く都市の表示)を渡す。
  */
 import { SHELL_GLOBAL, type InvokeReply, type ListenTarget, type PopupMenuRequest, type ShellApi, type WindowOp } from "../shared/shellApi";
+import { errorInfo, type ErrorInfo } from "../../src/utils/errors";
 import { runCommand } from "./commands";
 import { CORE_API_URL } from "./config";
 import { addListener, emit, removeListener, removeListenersOf } from "./events";
@@ -16,8 +17,10 @@ import { state } from "./state";
 import { definition } from "./version";
 import { onWindowDestroyed, recordWindowGeometry, relayoutForViewport } from "./windows";
 
-function errorValue(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+function errorValue(error: unknown): ErrorInfo {
+  const info = errorInfo(error);
+  if (info.code === "UNKNOWN_ERROR") console.error("Web command failed", error);
+  return info;
 }
 
 async function reply(run: () => unknown): Promise<string> {

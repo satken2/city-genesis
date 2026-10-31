@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 /**
  * Path detail panel.
  *
@@ -110,7 +112,7 @@ export function PathDetailPanel({
 
     fetch(url, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<PathData & PathRoadFields>;
       })
       .then((data) => {
@@ -121,7 +123,7 @@ export function PathDetailPanel({
       })
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
           setLoading(false);
         }
       });
@@ -182,8 +184,8 @@ export function PathDetailPanel({
     fetch(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId}/interference`, {
       signal: controller.signal,
     })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      .then(async (res) => {
+        await requireApiSuccess(res);
         return res.json() as Promise<PathInterferenceHighlight>;
       })
       .then((data) => {
@@ -240,10 +242,7 @@ export function PathDetailPanel({
       body: JSON.stringify({ status: newStatus }),
     })
       .then(async (res) => {
-        if (!res.ok) {
-          const body = await res.text().catch(() => "");
-          throw new Error(`HTTP ${res.status}: ${body}`);
-        }
+        await requireApiSuccess(res);
         setRefreshKey((k) => k + 1);
         // This changes planned/under-construction lengths in road details and dashed line-map rendering.
         await notifyRoadsChanged(undefined, "path_detail");
@@ -299,14 +298,11 @@ export function PathDetailPanel({
         body: JSON.stringify({ zone_id: newZoneId }),
       })
         .then(async (res) => {
-          if (!res.ok) {
-            const body = await res.text().catch(() => "");
-            throw new Error(`HTTP ${res.status}: ${body}`);
-          }
+          await requireApiSuccess(res);
           setRefreshKey((k) => k + 1);
         })
         .catch((err) => {
-          setZoneError(err instanceof Error ? err.message : "Unknown error");
+          setZoneError(describeError(err));
         })
         .finally(() => setZoneSaving(false));
     },

@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Terrain editor canvas body.
  *
@@ -55,7 +56,6 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { NumberStepper } from "../common/NumberStepper";
-import { errorCode, saveError } from "../../utils/saves";
 import { GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { copyClimatePreset, type ClimateSettings } from "../../utils/climate";
@@ -3139,17 +3139,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
-   * Converts save failures into display text. Terrain-specific codes use terrainEditor.saveErrors;
-   * others use shared Scenario messages. Failures without codes (Rust communication/file errors)
-   * have fixed Japanese bodies, so show generic text in the UI and keep the body only in logs.
+   * 保存失敗も HTTP・ネイティブ共通の理由コードで表示する。
    */
   function describeSaveError(error: unknown): string {
-    const code = errorCode(error);
-    if (!code) {
-      console.error("[TerrainEditor] failed to save the scenario terrain", error);
-      return t("terrainEditor.saveFailed");
-    }
-    return t(`terrainEditor.saveErrors.${code}`, { defaultValue: saveError(error, t) });
+    return describeError(error, t);
   }
 
   /**
@@ -3225,7 +3218,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         setStatus("ready");
       } catch (error) {
         if (cancelled) return;
-        setErrorMsg(error instanceof Error ? error.message : String(error));
+        setErrorMsg(describeError(error));
         setStatus("error");
       }
     }

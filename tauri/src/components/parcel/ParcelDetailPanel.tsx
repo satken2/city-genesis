@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 /**
  * Parcel detail panel
  *
@@ -22,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import type { ParcelData } from "../../types";
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { showNotification } from "../../utils/notification";
 import { resolveParcelIcon } from "../../utils/parcelIcon";
 import { usePlayMode } from "../../hooks/usePlayMode";
@@ -224,7 +226,7 @@ export function ParcelDetailPanel({
 
     fetch(url, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<ParcelData>;
       })
       .then((data) => {
@@ -242,7 +244,7 @@ export function ParcelDetailPanel({
       })
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
           setLoading(false);
         }
       });
@@ -315,7 +317,7 @@ export function ParcelDetailPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       const updated = await res.json() as ParcelData;
       setParcelData(updated);
       setRestrictionOverride(updated.restriction_override);
@@ -326,7 +328,7 @@ export function ParcelDetailPanel({
         limit_height: updated.limit_height ?? null,
       });
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Unknown error");
+      setSaveError(describeError(err));
     } finally {
       setSaving(false);
     }
@@ -349,13 +351,13 @@ export function ParcelDetailPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ front_path_id: selectedFrontPathId }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await requireApiSuccess(res);
       const updated = await res.json() as ParcelData;
       setParcelData(updated);
       setSelectedFrontPathId(null);
       setRefreshKey((k) => k + 1);
     } catch (err) {
-      setFrontPathSaveError(err instanceof Error ? err.message : "Unknown error");
+      setFrontPathSaveError(describeError(err));
     } finally {
       setFrontPathSaving(false);
     }
@@ -421,19 +423,7 @@ export function ParcelDetailPanel({
             );
           } catch (err) {
             console.error("[ParcelDetail] shape edit confirm failed:", err);
-            let message = t("parcel.shapeEditFailed", "形状の保存に失敗しました");
-            let code: string | undefined;
-            if (err instanceof ApiError) {
-              message = err.message;
-              code = err.code;
-            } else if (err instanceof Error) {
-              message = err.message;
-            }
-            const i18nKey = code ? `errors.${code}` : null;
-            const displayMessage =
-              i18nKey && i18nKey !== "errors.UNKNOWN_ERROR"
-                ? t(i18nKey, { defaultValue: message })
-                : message;
+            const displayMessage = describeError(err, t);
             void showNotification({ message: displayMessage, durationMs: 5000 });
             return;
           }

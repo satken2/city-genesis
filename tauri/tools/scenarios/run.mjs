@@ -15,7 +15,7 @@ const selected = process.argv.slice(2);
 for (const name of selected.length ? selected : ["tests", "signing-tests", "climate-tests", "skills-tests"]) {
   const output = resolve(`node_modules/.cache/scenario-${name}.mjs`);
   await build({ entryPoints: [`tools/scenarios/${name}.tsx`], outfile: output, bundle: true,
-    platform: "node", format: "esm", packages: "external", loader: { ".css": "empty", ".png": "empty", ".svg": "empty" },
+    platform: "node", format: "esm", packages: "external", loader: { ".css": "empty", ".png": "empty", ".jpg": "empty", ".svg": "empty" },
     alias: { "@tauri-apps/api/core": mock, "@tauri-apps/api/event": mock, "@tauri-apps/plugin-dialog": dialog, "react-i18next": mock } });
   await import(pathToFileURL(output).href);
 }

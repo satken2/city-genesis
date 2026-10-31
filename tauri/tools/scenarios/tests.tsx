@@ -207,7 +207,7 @@ rejectDelete = true;
 const fetchesBefore = listFetches;
 await act(async () => { cardButton("local~future", "common.delete").click(); });
 await settle();
-assert.equal(container.querySelector("[role=alert]")?.textContent, "saveCompatibility.SCENARIO_READ_ONLY");
+assert.equal(container.querySelector("[role=alert]")?.textContent, "errors.SCENARIO_READ_ONLY");
 assert.ok(listFetches > fetchesBefore, "a failed delete refreshes the list");
 assert.ok(card("local~future"), "a rejected delete keeps the card");
 rejectDelete = false;
@@ -238,14 +238,14 @@ const logged: unknown[][] = [];
 const consoleError = console.error;
 console.error = (...args: unknown[]) => { logged.push(args); };
 const alertText = () => container.querySelector(".scenario-error")?.textContent;
-state.errors.prepare_scenario_terrain_editor = "SCENARIO_READ_ONLY: コミュニティ・DLCのシナリオは変更できません。";
+state.errors.prepare_scenario_terrain_editor = { code: "SCENARIO_READ_ONLY", params: {} };
 await act(async () => { cardButton("local~mine", "scenarios.editTerrain").click(); });
 await settle();
-assert.equal(alertText(), "saveCompatibility.SCENARIO_READ_ONLY");
+assert.equal(alertText(), "errors.SCENARIO_READ_ONLY");
 state.errors.prepare_scenario_terrain_editor = "シナリオの地形を取得できません: connection refused";
 await act(async () => { cardButton("local~mine", "scenarios.editTerrain").click(); });
 await settle();
-assert.equal(alertText(), "scenarios.terrainOpenFailed");
+assert.equal(alertText(), "errors.UNKNOWN_ERROR");
 assert.ok(logged.some(args => args.includes(state.errors.prepare_scenario_terrain_editor)), "the raw error is kept in the log");
 console.error = consoleError;
 delete state.errors.prepare_scenario_terrain_editor;
@@ -344,7 +344,7 @@ assert.ok(!createButton().disabled && !importForm().textContent?.includes("scena
 rejectHeightmap = true;
 await act(async () => { createButton().click(); });
 await settle();
-assert.equal(container.querySelector(".scenario-error[role=alert]")?.textContent, "saveCompatibility.HEIGHTMAP_INVALID");
+assert.equal(container.querySelector(".scenario-error[role=alert]")?.textContent, "errors.HEIGHTMAP_INVALID");
 assert.equal(container.querySelector("[role=tab][aria-selected=true]")?.textContent, "scenarios.tabTerrains");
 rejectHeightmap = false;
 
@@ -656,7 +656,7 @@ const optionRow = (option: string) => container.querySelector(`.new-game-confirm
 assert.ok(optionRow("climate").querySelector(".new-game-confirm-fixed") && !optionRow("climate").querySelector("select"));
 await act(async () => { setText(optionRow("ground_cover").querySelector("select")!, "2"); });
 // 開始に失敗したら、理由をダイアログの中に出して開いたままにする。
-state.errors.create_session = "SAVE_CORRUPT: corrupt";
+state.errors.create_session = { code: "SAVE_CORRUPT", params: {} };
 await act(async () => { button("newGame.startButton").click(); });
 await settle();
 assert.ok(overlay()?.querySelector(".new-game-confirm .save-dialog-error"), "a failed start is reported in the dialog");
@@ -722,16 +722,16 @@ assert.equal(await prepareSaveLoad("http://test", entry.id, true, ((key: string)
 rejectLoad = true;
 await assert.rejects(prepareSaveLoad("http://test", entry.id, true, ((key: string) => key) as any), ApiError);
 
-// 理由コードの取り出し: ApiError の code、Rust の「CODE: 本文」、版照合の「"CODE": 本文」。コードの無い本文はそのまま出す。
-assert.equal(errorCode(new ApiError("NOT_FOUND", "none", 404)), "NOT_FOUND");
-assert.equal(errorCode("TERRAIN_LOCKED: 建設物があります"), "TERRAIN_LOCKED");
-assert.equal(errorCode("\"SAVE_CORRUPT\": \"broken\""), "SAVE_CORRUPT");
+// 理由コードは構造化データから取り出し、診断文の文字列を解析・表示しない。
+assert.equal(errorCode(new ApiError("NOT_FOUND", {}, 404)), "NOT_FOUND");
+assert.equal(errorCode({ code: "TERRAIN_LOCKED", params: {} }), "TERRAIN_LOCKED");
+assert.equal(errorCode("TERRAIN_LOCKED: 建設物があります"), null);
 assert.equal(errorCode("IPC_CONTRACT_MISMATCH"), "IPC_CONTRACT_MISMATCH");
 assert.equal(errorCode("HTTP 500 Internal Server Error"), null);
 assert.equal(errorCode(new Error("シナリオへ保存できません: timeout")), null);
-const echo = ((key: string, options?: { defaultValue?: string }) => `${key}|${options?.defaultValue ?? ""}`) as any;
-assert.equal(saveError("SCENARIO_TOO_LARGE: 上限超過", echo), "saveCompatibility.SCENARIO_TOO_LARGE|SCENARIO_TOO_LARGE: 上限超過");
-assert.equal(saveError("HTTP 502", echo), "HTTP 502");
+const echo = ((key: string) => key) as any;
+assert.equal(saveError({ code: "SCENARIO_TOO_LARGE", params: {} }, echo), "errors.SCENARIO_TOO_LARGE");
+assert.equal(saveError("HTTP 502", echo), "errors.UNKNOWN_ERROR");
 
 // コアが返す理由コードの翻訳(日本語が原本。他の言語との揃いは check_i18n_parity.py が見る)。
 for (const code of ["SCENARIO_TOO_LARGE", "SCENARIO_READ_ONLY", "SCENARIO_ENCRYPTED", "NOT_FOUND", "SESSION_ACTIVE", "HEIGHTMAP_INVALID"]) {

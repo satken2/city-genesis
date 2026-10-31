@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Resource editor panel
  *
@@ -30,7 +31,7 @@ import { RESOURCE_MAX_AMOUNT_LIMIT } from "../../data/resourcePresets";
 
 import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import {
   sendChangeState,
   sendEditResourceFinish,
@@ -146,16 +147,7 @@ export function ResourceConstructionPanel({ apiBaseUrl, onClose }: ResourceConst
       onClose();
     } catch (err) {
       setIsConfirming(false);
-      let displayMessage: string;
-      if (err instanceof ApiError) {
-        const i18nKey = `errors.${err.code}`;
-        displayMessage =
-          i18nKey !== "errors.UNKNOWN_ERROR"
-            ? t(i18nKey, { defaultValue: err.message })
-            : err.message;
-      } else {
-        displayMessage = t("resource_construction.confirmFailedUnknown");
-      }
+      const displayMessage = describeError(err, t);
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
   }, [selectedType, polygon, maxAmount, recoveryRate, apiBaseUrl, onClose, t]);

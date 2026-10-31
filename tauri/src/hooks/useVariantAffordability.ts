@@ -1,3 +1,4 @@
+import { requireApiSuccess } from "../utils/api";
 /**
  * Hook fetching per-variant affordability estimates for construction panels. Call GET
  * /api/v1/paths/variant-affordability or GET /api/v1/buildings/variant-affordability for all variants' reference
@@ -53,7 +54,7 @@ export function useVariantAffordability(
     const base = apiBaseUrl.replace(/\/+$/, "");
     fetch(`${base}/api/v1/${kind}/variant-affordability`, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<ApiResponse>;
       })
       .then((data) => {

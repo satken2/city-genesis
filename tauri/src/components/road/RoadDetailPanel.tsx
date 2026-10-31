@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Road detail panel.
  *
@@ -119,10 +120,7 @@ function isWindowVisible(): Promise<boolean> {
 }
 
 function errorText(err: unknown, t: TFunction): string {
-  if (err instanceof ApiError) {
-    return t(`errors.${err.code}`, { defaultValue: err.message });
-  }
-  return err instanceof Error ? err.message : t("errors.UNKNOWN_ERROR");
+  return describeError(err, t);
 }
 
 export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = false, seedPathId }: RoadDetailPanelProps) {
@@ -179,7 +177,7 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
           setDeleted(true);
           setRoad(null);
         } else {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
         }
         setLoading(false);
       });

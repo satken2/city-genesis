@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 /**
  * District (Zone) detail panel
  *
@@ -152,7 +154,7 @@ export function ZoneDetailPanel({
 
     fetch(url, { signal: controller.signal })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<ZoneResponse>;
       })
       .then((data) => {
@@ -171,7 +173,7 @@ export function ZoneDetailPanel({
       })
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
           setLoading(false);
         }
       });

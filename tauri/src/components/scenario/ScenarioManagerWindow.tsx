@@ -26,7 +26,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { errorCode, prepareSaveLoad, ScenarioEntry, saveError, scenarioDisplayTitle } from "../../utils/saves";
+import { prepareSaveLoad, ScenarioEntry, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { loadAppSettings } from "../../utils/settings";
 import { resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
@@ -105,14 +105,12 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   }
   /**
    * Export scenario terrain to a working folder, then open the terrain editor without a session.
-   * Translate core reason codes directly. For uncoded Rust failures with fixed Japanese messages, show generic
-   * text and log the original message.
+   * 取得失敗の診断はログに残し、表示は共通の理由コードの翻訳へ任せる。
    */
   async function editTerrain(entry: ScenarioEntry) {
     const editorId = await invoke<string>("prepare_scenario_terrain_editor", { scenarioId: entry.id }).catch((e: unknown) => {
-      if (errorCode(e)) throw e;
       console.error("[ScenarioManager] failed to prepare the terrain editor", e);
-      throw new Error(t("scenarios.terrainOpenFailed"));
+      throw e;
     });
     await invoke("open_registered_window", { windowType: "terrain_editor", entityId: editorId });
   }

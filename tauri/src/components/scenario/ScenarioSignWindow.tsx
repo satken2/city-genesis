@@ -4,7 +4,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { emit } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { errorCode, saveError, scenarioDisplayTitle } from "../../utils/saves";
+import { saveError, scenarioDisplayTitle } from "../../utils/saves";
 import "./Scenarios.css";
 
 type ScenarioEntry = Parameters<typeof scenarioDisplayTitle>[0];
@@ -74,12 +74,7 @@ export function ScenarioSignWindow({ apiBaseUrl, scenarioId, onClose }: {
       setResult(response);
       await emit("scenarios:changed");
     } catch (e) {
-      const code = errorCode(e);
-      const keys: Record<string, string> = {
-        DEBUG_DISABLED: "unavailable", SCENARIO_SIGNING_INVALID: "invalid", SCENARIO_SIGNING_FAILED: "failed",
-        SCENARIO_SIGNING_KEY_MISMATCH: "keyMismatch",
-      };
-      setError(code && keys[code] ? t(`scenarios.signing.${keys[code]}`) : saveError(e, t));
+      setError(saveError(e, t));
     } finally { setBusy(false); }
   }
 

@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Street grid creation window (window_type="street_grid"), scenario mode only.
  *
@@ -30,7 +31,7 @@ import {
   type CityMapViewState,
 } from "../map/CityMapCanvas";
 import { IPC_EVENT_CAMERA_STATE, sendCameraQueryState, sendSessionReload } from "../../utils/ipc";
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { PATH_STREET } from "../../constants";
 import "./StreetGridWindow.css";
@@ -288,12 +289,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       await sendSessionReload();
       mapRef.current?.reload();
     } catch (err) {
-      if (err instanceof ApiError) {
-        const i18nKey = `errors.${err.code}`;
-        setMessage(i18nKey !== "errors.UNKNOWN_ERROR" ? t(i18nKey, { defaultValue: err.message }) : err.message);
-      } else {
-        setMessage(t("scenarioTools.gridFailed"));
-      }
+      setMessage(describeError(err, t));
     } finally {
       setBusy(false);
     }

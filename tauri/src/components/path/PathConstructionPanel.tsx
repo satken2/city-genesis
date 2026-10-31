@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Path construction panel.
  *
@@ -32,7 +33,7 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 
 import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
-import { ApiError, fetchApi } from "../../utils/api";
+import { fetchApi } from "../../utils/api";
 import { resolvePathCategoryIcon } from "../../utils/pathCategoryIcon";
 import { usePathConstruction } from "./usePathConstruction";
 import { useVariantAffordability } from "../../hooks/useVariantAffordability";
@@ -242,16 +243,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
       }
     } catch (err) {
       setIsConfirming(false);
-      let displayMessage: string;
-      if (err instanceof ApiError) {
-        const i18nKey = `errors.${err.code}`;
-        displayMessage =
-          i18nKey !== "errors.UNKNOWN_ERROR"
-            ? t(i18nKey, { defaultValue: err.message })
-            : err.message;
-      } else {
-        displayMessage = t("path_construction.confirmFailedUnknown");
-      }
+      const displayMessage = describeError(err, t);
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
   }, [editPathId, onClose, pathConstruction, projectTag, refreshAffordability, t]);

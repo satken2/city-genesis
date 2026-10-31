@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Agent creation panel (window_type="agent_creation"), scenario mode only.
  *
@@ -32,7 +33,7 @@ import {
   sendChangeState,
   sendPickCopySource,
 } from "../../utils/ipc";
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { STATUS_ACTIVE, STATUS_PAUSED, TYPE_BUILDING, TYPE_DEFAULT, TYPE_STANDARD, TYPE_TRADE } from "../../constants";
 import type { AgentData } from "../../types";
@@ -115,7 +116,7 @@ export function AgentCreationPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
         setBuilding(result.economic_agent);
       } catch (err) {
         setBuilding(null);
-        setMessage({ text: describeError(err, t("scenarioTools.agentCreation.loadingBuilding")), error: true });
+        setMessage({ text: describeError(err, t), error: true });
       } finally {
         setBuildingLoading(false);
       }
@@ -245,19 +246,10 @@ export function AgentCreationPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
       // Refetch occupancy to refresh vacancies so more agents can enter the same building consecutively.
       await loadBuilding(building.agent_id);
     } catch (err) {
-      setMessage({ text: describeError(err, t("scenarioTools.agentCreation.createFailed")), error: true });
+      setMessage({ text: describeError(err, t), error: true });
     } finally {
       setBusy(false);
     }
-  }
-
-  /** For ApiError, use errors.<code> translation, falling back to the server message. */
-  function describeError(err: unknown, fallback: string): string {
-    if (err instanceof ApiError) {
-      const i18nKey = `errors.${err.code}`;
-      return i18nKey !== "errors.UNKNOWN_ERROR" ? t(i18nKey, { defaultValue: err.message }) : err.message;
-    }
-    return fallback;
   }
 
   const controlsDisabled = busy || picking;

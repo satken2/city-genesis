@@ -1,3 +1,5 @@
+import { requireApiSuccess } from "../../utils/api";
+import { describeError } from "../../utils/errors";
 /**
  * Building construction panel
  *
@@ -54,7 +56,7 @@ import {
   IPC_EVENT_BUILDING_CONSTRUCTION_COPY_SOURCE,
 } from "../../utils/ipc";
 import type { BuildingPlacementState, EffectRangeRegion, PathInterferenceHighlight } from "../../utils/ipc";
-import { fetchApi, ApiError } from "../../utils/api";
+import { fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { NumberStepper } from "../common/NumberStepper";
 import { TagPicker } from "../common/TagPicker";
@@ -315,7 +317,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       signal: controller.signal,
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<{ economic_agent: { bd_type: number; variant: number; floors: number; parcel_id: number; landmark?: number; visual_variant?: number; visual_variant2?: number; visual_variant3?: number } }>;
       })
       .then((data) => {
@@ -574,7 +576,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         if (!signal?.aborted) {
           console.error("Failed to fetch building preview:", err);
           setBuildingPreview(null);
-          setEstimateError(err instanceof Error ? err.message : String(err));
+          setEstimateError(describeError(err));
         }
       }
     },
@@ -657,7 +659,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.error("[BuildingConstructionPanel] Failed to fetch construction cost:", err);
-          setEstimateError(err instanceof Error ? err.message : String(err));
+          setEstimateError(describeError(err));
           setEstimatedCost(null);
           setEstimatedStandardCost(null);
           setEstimatedDurationDays(null);
@@ -704,7 +706,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       signal: controller.signal,
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<{
           restricted: boolean;
           region?: EffectRangeRegion | null;
@@ -895,7 +897,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.error("[BuildingConstruction] Failed to fetch direct preview:", err);
-          setEstimateError(err instanceof Error ? err.message : String(err));
+          setEstimateError(describeError(err));
         }
       });
 
@@ -943,7 +945,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.error("[BuildingConstruction] Failed to fetch direct construction cost:", err);
-          setEstimateError(err instanceof Error ? err.message : String(err));
+          setEstimateError(describeError(err));
         }
       })
       .finally(() => {
@@ -1223,7 +1225,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       signal: controller.signal,
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await requireApiSuccess(res);
         return res.json() as Promise<ParcelData>;
       })
       .then((data) => {
@@ -1328,24 +1330,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
 
 
   /**
- * Confirmation failure notification. Map ApiError codes to i18n keys;
- * if no translation exists, display the backend message unchanged.
+ * 確定処理の失敗を共通の翻訳処理で通知する。
  */
   function notifyConfirmError(err: unknown) {
     console.error("[BuildingConstruction] confirm failed:", err);
-    let message = t("building_construction.confirmFailed");
-    let code: string | undefined;
-    if (err instanceof ApiError) {
-      message = err.message;
-      code = err.code;
-    } else if (err instanceof Error) {
-      message = err.message;
-    }
-    const i18nKey = code ? `errors.${code}` : null;
-    const displayMessage =
-      i18nKey && i18nKey !== "errors.UNKNOWN_ERROR"
-        ? t(i18nKey, { defaultValue: message })
-        : message;
+    const displayMessage = describeError(err, t);
     void showNotification({ message: displayMessage, durationMs: 5000 });
   }
 

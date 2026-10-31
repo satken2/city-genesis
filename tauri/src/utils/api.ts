@@ -3,7 +3,8 @@
  */
 
 import { decode } from "@msgpack/msgpack";
-import i18n from "i18next";
+import { errorInfo, type ErrorInfo } from "./errors";
+export { describeError, errorInfo } from "./errors";
 
 /**
  * MessagePack response media type. Backend BBOX bulk endpoints (paths/parcels/buildings/zones/nodes) return
@@ -27,27 +28,33 @@ export function buildApiUrl(
 }
 
 /**
- * Standard backend error response type. Expected format: { code: "CREATEPATH_OUTSIDE_COASTLINE", message: "..."
- * }.
+ * コアのエラー応答。表示文は UI の翻訳リソースで作る。
  */
-export interface ApiErrorResponse {
-  code: string;
-  message: string;
-}
+export type ApiErrorResponse = ErrorInfo;
 
 /**
- * Custom API error class matching backend CrudError subclasses and holding code/message.
+ * HTTP の状態と理由を保持する。Error.message は診断用のコードで、画面は describeError を使う。
  */
 export class ApiError extends Error {
   code: string;
   status: number;
+  params: Record<string, unknown>;
 
-  constructor(code: string, message: string, status: number) {
-    super(message);
+  constructor(code: string, params: Record<string, unknown>, status: number) {
+    super(code);
     this.code = code;
     this.status = status;
+    this.params = params;
     this.name = "ApiError";
   }
+}
+
+/** JSON 以外を取得する fetch 呼び出しも、失敗時は同じ契約で解釈する。 */
+export async function requireApiSuccess(response: Response): Promise<void> {
+  if (response.ok) return;
+  const data: unknown = await response.json().catch(() => null);
+  const info = errorInfo(data);
+  throw new ApiError(info.code, info.params, response.status);
 }
 
 const nativeFetch = globalThis.fetch.bind(globalThis);
@@ -76,7 +83,7 @@ export function configureBackendRequests(baseUrl: string) {
     const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
     // Queuing/retrying mutations risks executing an operation twice when only its response was lost.
     if (!backendConnected && !["GET", "HEAD", "OPTIONS"].includes(method)) {
-      throw new ApiError("BACKEND_DISCONNECTED", "BACKEND_DISCONNECTED", 503);
+      throw new ApiError("BACKEND_DISCONNECTED", {}, 503);
     }
     return nativeFetch(input, init);
   };
@@ -84,9 +91,7 @@ export function configureBackendRequests(baseUrl: string) {
 
 /**
  * Fetch API data. Always advertise MessagePack in Accept; decode MessagePack binary or JSON automatically by
- * Content-Type. For non-ok responses, read {code, message} and throw ApiError (errors always use JSON). If
- * errors.<code> is translated, use the display language for message: the core message is Japanese, while screens
- * may display err.message directly. If body parsing fails, fall back to ApiError containing the HTTP status.
+ * Content-Type. エラーは code/params のまま保持し、表示時に describeError へ渡す。
  */
 export async function fetchApi<T>(
   url: string,
@@ -114,17 +119,7 @@ export async function fetchApi<T>(
       contentType: response.headers.get("content-type"),
     });
   }
-  if (!response.ok) {
-    const errorData: Partial<ApiErrorResponse> = await response
-      .json()
-      .catch(() => ({}));
-    const messageKey = `errors.${errorData.code}`;
-    throw new ApiError(
-      errorData.code ?? "UNKNOWN_ERROR",
-      errorData.code && i18n.exists(messageKey) ? i18n.t(messageKey) : errorData.message ?? `HTTP ${response.status}`,
-      response.status
-    );
-  }
+  await requireApiSuccess(response);
   if (response.status === 204) return undefined as T;
   if (options?.responseType === "blob") return await response.blob() as T;
   const contentType = response.headers.get("content-type") ?? "";

@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Earthworks panel (window_type="grading")
  *
@@ -27,7 +28,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
 import { NumberStepper } from "../common/NumberStepper";
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
 import { constructionFundsShortfall } from "../../utils/constructionFunding";
@@ -136,10 +137,7 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
         .catch((err: unknown) => {
           if (controller.signal.aborted) return;
           console.error("[GradingPanel] preview failed:", err);
-          const error =
-            err instanceof ApiError
-              ? t(`errors.${err.code}`, { defaultValue: err.message })
-              : t("errors.UNKNOWN_ERROR");
+          const error = describeError(err, t);
           setResult({ key: requestBody, estimate: null, error });
         });
     }, PREVIEW_DEBOUNCE_MS);
@@ -196,12 +194,7 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
       // Discard stale results and disable Confirm until the new response arrives.
       setResult(null);
       setPreviewNonce((n) => n + 1);
-      const message =
-        err instanceof ApiError && err.code !== "UNKNOWN_ERROR"
-          ? t(`errors.${err.code}`, { defaultValue: err.message })
-          : err instanceof ApiError
-            ? err.message
-            : t("grading.confirmFailed");
+      const message = describeError(err, t);
       void showNotification({ message, durationMs: 8000 });
       return;
     }

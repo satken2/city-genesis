@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Reuses statistics responses within the same connection, city (session_id) and Epoch.
  * Discards all entries when the generation changes; limits growth from District switching to 32 entries.
@@ -88,7 +89,7 @@ export function useEpochCachedStats<T>(
         setState({
           data: null,
           loading: false,
-          error: err instanceof Error ? err.message : "Unknown error",
+          error: describeError(err),
           epoch: null,
         });
       }

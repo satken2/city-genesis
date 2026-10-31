@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Interchange (IC/JCT) detail panel.
  *
@@ -51,7 +52,7 @@ export function IntersectionDetailPanel({
       })
       .catch((err: unknown) => {
         if (!controller.signal.aborted) {
-          setError(err instanceof Error ? err.message : "Unknown error");
+          setError(describeError(err));
           setLoading(false);
         }
       });

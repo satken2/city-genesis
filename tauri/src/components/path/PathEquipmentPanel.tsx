@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMasterData } from "../../contexts/MasterDataContext";
@@ -42,7 +43,7 @@ export function PathEquipmentPanel({ path, apiBaseUrl, onSaved }: {
       });
       onSaved(updated);
       await sendSessionReload();
-    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+    } catch (e) { setError(describeError(e)); }
     finally { setSaving(false); }
   }
   return <section className="agent-detail-section path-equipment-section">

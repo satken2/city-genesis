@@ -1,5 +1,6 @@
 /** 版情報と接続前の確認。`src-tauri/src/version.rs` の移植。 */
 import versionJson from "../../../version.json";
+import { requireApiSuccess } from "../../src/utils/api";
 import { DEVELOPMENT } from "./config";
 import { sendUiAction } from "./ipc";
 import { apiBase, fetchWithTimeout, sleep } from "./net";
@@ -45,7 +46,8 @@ export function checkFrontendVersion(core: Record<string, unknown>): string | nu
   const major = (version: string) => (/^\d+$/.test(version.split(".")[0]) ? Number(version.split(".")[0]) : null);
   const [frontMajor, coreMajor] = [major(frontend), major(coreVersion)];
   if (frontMajor !== null && coreMajor !== null && frontMajor >= coreMajor) return null;
-  return `FRONTEND_VERSION_OUTDATED: core ${coreVersion} / UI ${frontend}`;
+  console.error(`FRONTEND_VERSION_OUTDATED: core ${coreVersion} / UI ${frontend}`);
+  return "FRONTEND_VERSION_OUTDATED";
 }
 
 export async function verifyCore(): Promise<void> {
@@ -74,8 +76,8 @@ export async function validateLoad(id: string, scenario: boolean, accepted: bool
   await verifyCore();
   const url = `${apiBase()}/api/v1/saves/${encodeURIComponent(id)}/validation?scenario=${scenario}`;
   const response = await fetchWithTimeout(url, 120000);
+  await requireApiSuccess(response);
   const data = (await response.json()) as Record<string, unknown>;
-  if (!response.ok) throw `${JSON.stringify(data.code ?? null)}: ${JSON.stringify(data.message ?? null)}`;
   const compatibility = data.compatibility as Record<string, unknown> | undefined;
   if (compatibility?.balance_changed === true && !accepted) throw "SAVE_BALANCE_CONFIRMATION_REQUIRED";
 }

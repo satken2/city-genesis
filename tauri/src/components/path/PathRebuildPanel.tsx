@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Confirmation screen for rebuilding an existing path as another variant of the same type while preserving its shape.
  * Shares construction-panel cards but does not enter Unity placement mode.
@@ -42,7 +43,7 @@ export function PathRebuildPanel({ apiBaseUrl, initialEntityId, onClose }: Props
     }).then(data => {
       if (!controller.signal.aborted) setPath(data);
     }).catch((err: unknown) => {
-      if (!controller.signal.aborted) setError(err instanceof Error ? err.message : String(err));
+      if (!controller.signal.aborted) setError(describeError(err));
     });
     return () => controller.abort();
   }, [apiBaseUrl, initialEntityId]);
@@ -57,7 +58,7 @@ export function PathRebuildPanel({ apiBaseUrl, initialEntityId, onClose }: Props
         if (!controller.signal.aborted) setPreview(data);
       })
       .catch((err: unknown) => {
-        if (!controller.signal.aborted) setError(err instanceof Error ? err.message : String(err));
+        if (!controller.signal.aborted) setError(describeError(err));
       })
       .finally(() => {
         if (!controller.signal.aborted) setChecking(false);
@@ -94,7 +95,7 @@ export function PathRebuildPanel({ apiBaseUrl, initialEntityId, onClose }: Props
         onClose();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(describeError(err));
     } finally {
       submitting.current = false;
       setSaving(false);

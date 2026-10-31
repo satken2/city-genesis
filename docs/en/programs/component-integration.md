@@ -13,6 +13,8 @@ Treat the core as a service addressed by URL, without assuming it runs on the sa
 
 Use each module's common HTTP entry point for consistent version headers and endpoint handling: `fetchApi` in Tauri WebViews, the version-checked common client in Rust, and `ApiClient` in Unity. Tauri retrieves and shares core version and session state centrally; individual screens do not create independent monitors. See [sessions and saves](sessions-and-saves.md).
 
+HTTP errors carry a language-independent reason `code` and interpolation values in `params`. The UI builds the message in its current language, using a translated generic message for unknown codes or unreadable responses. Core diagnostic text and response bodies are not displayed; Rust and browser relays preserve the code and values.
+
 The locally distributed core listens on `127.0.0.1`; other programs on the same PC can use ordinary APIs. Use the production core for front-end development too. For individual paths, fields, and errors, use Swagger (`/docs`) or OpenAPI (`/openapi.json`) in the distribution.
 
 WebView CORS and CSP are browser restrictions, distinct from Rust and Unity HTTP behavior. The distributed UI does not permit runtime code generation. Development-server and distribution restrictions differ, so verify communication and dependency changes in distributed builds too.

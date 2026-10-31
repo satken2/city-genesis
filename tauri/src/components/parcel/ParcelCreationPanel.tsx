@@ -1,3 +1,4 @@
+import { describeError } from "../../utils/errors";
 /**
  * Parcel creation panel
  *
@@ -424,19 +425,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
           setPreviewLoading(false);
           void sendEditParcelUpdatePreview(selectedMode, [], null);
 
-          let message = "Failed to fetch parcel preview";
-          let code: string | undefined;
-          if (err instanceof ApiError) {
-            message = err.message;
-            code = err.code;
-          } else if (err instanceof Error) {
-            message = err.message;
-          }
-          const i18nKey = code ? `errors.${code}` : null;
-          const displayMessage =
-            i18nKey && i18nKey !== "errors.UNKNOWN_ERROR"
-              ? t(i18nKey, { defaultValue: message })
-              : message;
+          const displayMessage = describeError(err, t);
           showNotification({ message: displayMessage, durationMs: 5000 });
         }
       }
@@ -756,20 +745,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       console.error("Failed to create parcels:", err);
       setStatusMessage("error");
 
-      let message = "Failed to create parcels";
-      let code: string | undefined;
-      if (err instanceof ApiError) {
-        message = err.message;
-        code = err.code;
-      } else if (err instanceof Error) {
-        message = err.message;
-      }
-
-      const i18nKey = code ? `errors.${code}` : null;
-      const displayMessage =
-        i18nKey && i18nKey !== "errors.UNKNOWN_ERROR"
-          ? t(i18nKey, { defaultValue: message })
-          : message;
+      const displayMessage = describeError(err, t);
       showNotification({ message: displayMessage, durationMs: 5000 });
     }
   }
