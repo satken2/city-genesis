@@ -182,6 +182,19 @@
       "13": "Oil",
       "20": "Station Buildings"
     },
+    "categoryDescription": {
+      "1": "General-purpose roads that shape the city. Buildings line the road, and both cars and pedestrians can use it.",
+      "2": "Roads for cars only. They are separated from the surrounding land by noise barriers, so no buildings can be built along them.",
+      "3": "Narrow paths for pedestrians only.",
+      "4": "Tracks for passenger rail, metro, and LRT.",
+      "5": "Guideways for monorails only. They handle steep grades and sharp curves well, making them suited to cramped urban areas with no room for railways.",
+      "6": "Build ropeways that climb steep slopes or span valleys.",
+      "7": "Routes for city-run ferries and for cargo and passenger ships arriving from outside the city.",
+      "11": "Carries electricity generated at power plants to substations near where it is consumed.",
+      "12": "Carries water drawn at intake facilities to distribution facilities near where it is consumed.",
+      "13": "Carries oil extracted at oil platforms to coastal oil terminals.",
+      "20": "Buildings and passageways for stations."
+    },
     "shape": "Shape",
     "elevation": "Elevation (Y)",
     "embankmentHeight": "Embankment Height",

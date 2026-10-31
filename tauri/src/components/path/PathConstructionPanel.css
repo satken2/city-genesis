@@ -29,6 +29,13 @@
   margin-bottom: 8px;
 }
 
+.pc-category-description {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: #93a9c0;
+  line-height: 1.5;
+}
+
 /* Keep icon tabs in one horizontally scrolling row even as classifications increase. */
 .pc-variant-tabs .flat-tabs {
   gap: 0.25rem;

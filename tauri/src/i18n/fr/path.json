@@ -182,6 +182,19 @@
       "13": "Pétrole",
       "20": "Bâtiments de gare"
     },
+    "categoryDescription": {
+      "1": "Routes ordinaires qui façonnent la ville. Des bâtiments s'élèvent le long de la voie, et voitures comme piétons peuvent y circuler.",
+      "2": "Routes réservées aux voitures. Séparées des terrains environnants par des murs antibruit, elles ne permettent pas de construire de bâtiments le long de leur tracé.",
+      "3": "Voies étroites réservées aux piétons.",
+      "4": "Voies empruntées par les trains de voyageurs, le métro et le tramway.",
+      "5": "Voies réservées au monorail. Elles supportent bien les fortes pentes et les virages serrés, et conviennent aux quartiers urbains étroits où un chemin de fer ne peut pas passer.",
+      "6": "Permet de tendre des téléphériques qui gravissent les fortes pentes ou franchissent les vallées.",
+      "7": "Itinéraires des ferries exploités par la ville et des navires de marchandises et de passagers venant de l'extérieur de la ville.",
+      "11": "Achemine l'électricité produite par les centrales jusqu'aux postes électriques proches des lieux de consommation.",
+      "12": "Achemine l'eau captée par les installations de prise d'eau jusqu'aux installations de distribution proches des lieux de consommation.",
+      "13": "Achemine le pétrole extrait par les plateformes pétrolières jusqu'aux terminaux pétroliers côtiers.",
+      "20": "Bâtiments et passages installés dans les gares."
+    },
     "shape": "Forme",
     "elevation": "Altitude (Y)",
     "embankmentHeight": "Hauteur du remblai",

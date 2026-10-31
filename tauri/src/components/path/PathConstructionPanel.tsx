@@ -378,6 +378,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
             <div className="bc-selection-header">
               <BackButton onClick={() => setSelectedCategory(null)} />
             </div>
+            <p className="pc-category-description">{t(`path_construction.categoryDescription.${selectedCategory}`)}</p>
             {activeVariantTab && (
               <div className="pc-variant-tabs">
                 <FlatTabs
@@ -413,6 +414,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
                         entry={data}
                         disabled={unaffordable || !tutorialVariantAllowed(id)}
                         onClick={() => handleVariantSelect(id)}
+                        showDescription={false}
                       />
                     </UnaffordableOverlay>
                   );

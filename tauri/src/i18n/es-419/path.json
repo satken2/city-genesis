@@ -182,6 +182,19 @@
       "13": "Petróleo",
       "20": "Edificios de estación"
     },
+    "categoryDescription": {
+      "1": "Vías comunes que dan forma a la ciudad. A lo largo de ellas se levantan edificios, y por ellas pueden circular automóviles y peatones.",
+      "2": "Vías exclusivas para automóviles. Están separadas del terreno circundante por barreras acústicas, por lo que no se pueden construir edificios a lo largo de ellas.",
+      "3": "Vías estrechas exclusivas para peatones.",
+      "4": "Vías por las que pueden circular trenes de pasajeros, metro y tren ligero.",
+      "5": "Vías exclusivas para monorriel. Soportan bien las pendientes y las curvas cerradas, por lo que son adecuadas para zonas urbanas estrechas donde no cabe un ferrocarril.",
+      "6": "Permite tender teleféricos que salvan pendientes pronunciadas o cruzan valles.",
+      "7": "Rutas de los transbordadores que opera la ciudad y de los buques de carga y de pasajeros que llegan desde fuera de la ciudad.",
+      "11": "Transporta la electricidad generada en las centrales eléctricas hasta las subestaciones cercanas a los lugares de consumo.",
+      "12": "Transporta el agua captada en las instalaciones de toma hasta las instalaciones de distribución cercanas a los lugares de consumo.",
+      "13": "Transporta el petróleo extraído en las plataformas petrolíferas hasta las terminales petroleras de la costa.",
+      "20": "Edificios y pasarelas que se instalan en las estaciones."
+    },
     "shape": "Forma",
     "elevation": "Altitud (Y)",
     "embankmentHeight": "Altura del terraplén",

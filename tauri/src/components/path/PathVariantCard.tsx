@@ -2,7 +2,7 @@
  * Path variant card (icon, name, description, alignment/structure standards).
  *
  * Used in construction/rebuild panels in two ways (same composition as BuildingVariantCard):
- * 1. Variant list after category selection (with onClick): render as a button.
+ * 1. Variant list after category selection (with onClick): render as a button without the description.
  * 2. Construction screen after variant selection (without onClick): static summary card for the selected variant.
  *
  * Below the description, show placement-validation constraints as small icons and values only
@@ -25,6 +25,8 @@ type PathVariantCardProps = {
   disabled?: boolean;
   /** When provided, render as a button. */
   onClick?: () => void;
+  /** Show the description text. Lists omit it so that many cards can be compared at a glance. */
+  showDescription?: boolean;
 };
 
 /** One standard value. i18n keys are under path_construction.spec; value includes units. */
@@ -99,7 +101,7 @@ function collectSpecs(entry: PathMasterEntry): SpecItem[] {
   return specs;
 }
 
-export function PathVariantCard({ variantId, entry, disabled = false, onClick }: PathVariantCardProps) {
+export function PathVariantCard({ variantId, entry, disabled = false, onClick, showDescription = true }: PathVariantCardProps) {
   const { t } = useTranslation();
   const specs = collectSpecs(entry);
 
@@ -113,7 +115,7 @@ export function PathVariantCard({ variantId, entry, disabled = false, onClick }:
       />
       <div className="pc-description-body">
         <div className="pc-description-name">{entry.display_name}</div>
-        <div className="pc-description-text">{entry.description || "—"}</div>
+        {showDescription && <div className="pc-description-text">{entry.description || "—"}</div>}
         {specs.length > 0 && (
           <div className="pc-description-specs">
             {specs.map((spec) => (
