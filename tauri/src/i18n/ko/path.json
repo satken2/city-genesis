@@ -203,6 +203,8 @@
     "platformSideOutside": "바깥쪽",
     "platformSideInside": "안쪽",
     "platformSideBoth": "양쪽",
+    "attachedVariant": "하층",
+    "attachedVariantNone": "없음",
     "rail": {
       "parallel": "병주",
       "trackCount": "선로 수",

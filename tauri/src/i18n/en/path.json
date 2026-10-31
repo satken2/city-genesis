@@ -203,6 +203,8 @@
     "platformSideOutside": "Outside",
     "platformSideInside": "Inside",
     "platformSideBoth": "Both",
+    "attachedVariant": "Lower Deck",
+    "attachedVariantNone": "None",
     "rail": {
       "parallel": "Parallel Tracks",
       "trackCount": "Tracks",

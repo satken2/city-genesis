@@ -104,6 +104,8 @@ Public transport section paths require no construction and are either operating 
 
 Path construction requires land and construction services. Existing roadside land uses can require acquisition and demolition. Active paths can also be rebuilt. See [budgets](15_budgets.md) for costs.
 
+A path can run attached to the structure of another path (its host), like the lower deck of a suspension bridge. The host's `path_master` entries `attach_variants` and `attach_offset` define which variants can attach and the difference in surface height. The attached path is created in the same request as the host, with the host's shape shifted vertically. After creation the two are separate paths for traffic and construction, but bulldozing the host also bulldozes the attached path, and the attached path disappears with its host. Paired paths cannot change their shape or variant.
+
 ## 3.6. Named roads
 
 A named road groups paths separated by intersections into a recognizable road, such as Ome Kaido. It is a unit for identifying and naming a road across sections and does not affect economic or traffic calculations.

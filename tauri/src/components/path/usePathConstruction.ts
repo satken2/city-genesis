@@ -155,6 +155,33 @@ function computeSplineControls(points: BuildPoint[]): {
   return { start, end };
 }
 
+/**
+ * Request geometry of a path attached under host: the host's shape shifted vertically by dy (attach_offset).
+ * The core rebuilds the attached path from the host the same way and ignores this geometry, so the copy only
+ * serves the per-path cost estimate.
+ */
+function attachedPathData(host: Record<string, unknown>, variant: number, dy: number): Record<string, unknown> {
+  const shift = (p: unknown) => (Array.isArray(p) ? [p[0], p[1] + dy, p[2]] : p);
+  const data: Record<string, unknown> = {
+    path_variant: variant,
+    path_temp_id: `${host.path_temp_id}_attached`,
+    attach_host_temp_id: host.path_temp_id,
+    start_point: shift(host.start_point),
+    end_point: shift(host.end_point),
+    curved: host.curved,
+  };
+  if (host.start_control) data.start_control = shift(host.start_control);
+  if (host.end_control) data.end_control = shift(host.end_control);
+  if (Array.isArray(host.waypoints)) {
+    data.waypoints = host.waypoints.map((wp) => {
+      if (Array.isArray(wp)) return shift(wp);
+      const w = wp as { position: number[]; control_in: number[] | null; control_out: number[] | null };
+      return { position: shift(w.position), control_in: shift(w.control_in), control_out: shift(w.control_out) };
+    });
+  }
+  return data;
+}
+
 /* ---- Hook implementation ---- */
 
 /**
@@ -273,6 +300,10 @@ export function usePathConstruction(
   const isLayoutBuildRef = useRef(isLayoutBuild);
   isLayoutBuildRef.current = isLayoutBuild;
 
+  // Lower deck chosen for the placed path (null = none). Kept across continuous placement; applies only while the
+  // selected variant lists it (attachChoices).
+  const [attachedVariant, setAttachedVariant] = useState<number | null>(null);
+
   /* ---- Parallel track placement settings ---- */
   const [trackCount, setTrackCount] = useState<number>(1);
   // Spacing adjustment (m). Effective spacing = master width + adjustment, clamped. Reset to 0 after each confirmed path.
@@ -344,6 +375,17 @@ export function usePathConstruction(
  * notify Unity of changes. False for combined double-track stations with variant-defined side/island platforms.
  */
   const hasPlatformSide = useMemo(() => hasPlatformSideChoice(selectedVariantData), [selectedVariantData]);
+
+  /**
+ * Lower deck variants for the selected path. Only for new single placement: the pair is created together and
+ * cannot be reshaped afterwards, and placement methods expand paths without the attached deck.
+ */
+  const attachChoices = useMemo(
+    () => (pathId == null && !isLayoutBuild ? selectedVariantData?.attach_variants ?? [] : []),
+    [pathId, isLayoutBuild, selectedVariantData]
+  );
+  const effectiveAttachedVariant = attachedVariant !== null && attachChoices.includes(attachedVariant)
+    ? attachedVariant : null;
 
   /**
  * Effective directions per track (defaults plus user overrides).
@@ -776,8 +818,12 @@ export function usePathConstruction(
       pathData.follow_terrain = followTerrain;
     }
 
-    return { paths: [pathData], align_station_tracks: false };
-  }, [isLayoutBuild, currentLayout, selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatformSide, houseEnds, passageMode, platformSide, followTerrain]);
+    const paths = [pathData];
+    if (effectiveAttachedVariant !== null) {
+      paths.push(attachedPathData(pathData, effectiveAttachedVariant, selectedVariantData?.attach_offset ?? 0));
+    }
+    return { paths, align_station_tracks: false };
+  }, [isLayoutBuild, currentLayout, selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatformSide, houseEnds, passageMode, platformSide, followTerrain, effectiveAttachedVariant]);
 
   const [localCanConfirm, setLocalCanConfirm] = useState(false);
   const [maxSpanViolations, setMaxSpanViolations] = useState<PathMaxSpanViolation[]>([]);
@@ -1300,6 +1346,10 @@ export function usePathConstruction(
     railComponents,
     changeTrackCount,
     cycleTrackDirection,
+    // Attached lower deck.
+    attachChoices,
+    attachedVariant: effectiveAttachedVariant,
+    setAttachedVariant,
     // Costs.
     estimatedCost,
     estimatedStandardCost,

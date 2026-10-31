@@ -51,6 +51,7 @@ import { UnaffordableOverlay } from "../common/UnaffordableOverlay";
 import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
 import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
 import { StationPassageModeSelect } from "./StationPassageModeSelect";
+import { PathAttachedVariantSelect } from "./PathAttachedVariantSelect";
 import { PathBuildSections } from "./PathBuildSections";
 import { PathBuildMethodSection } from "./PathBuildMethodSection";
 import { PathTagSection } from "./PathTagSection";
@@ -448,6 +449,17 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
         <div className="pc-section">
           <StationHouseEndsSelect value={pathConstruction.houseEnds} onChange={pathConstruction.setHouseEnds} />
           <StationPassageModeSelect value={pathConstruction.passageMode} onChange={pathConstruction.setPassageMode} />
+        </div>
+      )}
+
+      {pathConstruction.attachChoices.length > 0 && (
+        <div className="pc-section">
+          <PathAttachedVariantSelect
+            choices={pathConstruction.attachChoices}
+            masterData={masterData}
+            value={pathConstruction.attachedVariant}
+            onChange={pathConstruction.setAttachedVariant}
+          />
         </div>
       )}
 

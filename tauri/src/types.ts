@@ -641,6 +641,13 @@ export type PathMasterEntry = {
   /** Variant available only in scenario authoring (unset = false). Hide from normal-play construction, rebuilding, and line options. */
   template_only?: boolean;
   /**
+   * Variants this path can carry as an attached lower deck, built in the same placement with this path's shape.
+   * Attached variants are template_only, so they are placed only this way in normal play. Empty/unset means none.
+   */
+  attach_variants?: number[];
+  /** Surface height of an attached path relative to this path's surface, in m (negative = below). */
+  attach_offset?: number;
+  /**
    * Mesh generator type. PathMeshFactory selects RoadPath / TrackPath / none from this value: "default" →
    * RoadPath, "track" → TrackPath, "none" → no mesh generation. Unset means "default".
    */

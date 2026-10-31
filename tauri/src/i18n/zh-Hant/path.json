@@ -203,6 +203,8 @@
     "platformSideOutside": "外側",
     "platformSideInside": "內側",
     "platformSideBoth": "兩側",
+    "attachedVariant": "下層",
+    "attachedVariantNone": "無",
     "rail": {
       "parallel": "並行",
       "trackCount": "軌道數",

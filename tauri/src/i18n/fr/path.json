@@ -203,6 +203,8 @@
     "platformSideOutside": "Extérieur",
     "platformSideInside": "Intérieur",
     "platformSideBoth": "Des deux côtés",
+    "attachedVariant": "Tablier inférieur",
+    "attachedVariantNone": "Aucun",
     "rail": {
       "parallel": "Voies parallèles",
       "trackCount": "Nombre de voies",
