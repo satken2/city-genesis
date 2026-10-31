@@ -565,6 +565,7 @@ public class CellDataLoader : MonoBehaviour
         cityOverviewManager?.RequestRefresh();
         RopewayNetworkStore.Instance?.RequestRefresh();
         TransitDataStore.Instance?.Refresh();
+        BuildingMotion.RefreshAll();
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)
         {
             LodCellSets cellSets = CalculateLodCellSets();

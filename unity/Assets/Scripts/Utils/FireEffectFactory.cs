@@ -8,6 +8,7 @@ using UnityEngine.Rendering;
 /// ----
 /// - Blaze (burning building): flames + sparks + black smoke + flickering point light.
 /// - Smolder (burned rubble): thin white smoke only, without flames or lights.
+/// - Chimney (outlet of an operating building): a light plume bent by the prevailing wind; the caller sets its emission.
 ///
 /// Asset independence
 /// --------------
@@ -146,6 +147,60 @@ public static class FireEffectFactory
 
         foreach (var ps in root.GetComponentsInChildren<ParticleSystem>()) ps.Play();
         return root;
+    }
+
+    /// <summary>
+    /// Plume rising from a smoke outlet of the given radius at localPosition under parent, not yet playing.
+    /// Its emission rate is the full-operation rate; the caller scales it by the operation rate and starts playback.
+    /// </summary>
+    public static ParticleSystem CreateChimneySmoke(Transform parent, Vector3 localPosition, float radius)
+    {
+        EnsureMaterials();
+        float r = Mathf.Clamp(radius, 0.3f, 20f);
+        ParticleSystem ps = AddSystem(parent, "ChimneySmoke", _smokeMaterial, 160);
+        ps.transform.localPosition = localPosition;
+
+        var main = ps.main;
+        main.duration = 12f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(8f, 12f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(1.6f, 2.6f);
+        main.startSize = new ParticleSystem.MinMaxCurve(Mathf.Max(1.2f, r * 1.6f), Mathf.Max(2f, r * 2.4f));
+        main.startRotation = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
+        main.gravityModifier = -0.01f;
+
+        var emission = ps.emission;
+        emission.rateOverTime = Mathf.Clamp(3f + r * 3f, 3f, 12f);
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 8f;
+        shape.radius = r * 0.6f;
+        shape.rotation = new Vector3(-90f, 0f, 0f);
+
+        SetColorOverLifetime(ps,
+            new[]
+            {
+                new GradientColorKey(new Color(0.80f, 0.80f, 0.79f), 0.00f),
+                new GradientColorKey(new Color(0.90f, 0.90f, 0.89f), 1.00f),
+            },
+            new[]
+            {
+                new GradientAlphaKey(0.00f, 0.00f),
+                new GradientAlphaKey(0.45f, 0.12f),
+                new GradientAlphaKey(0.25f, 0.60f),
+                new GradientAlphaKey(0.00f, 1.00f),
+            });
+
+        SetSizeOverLifetime(ps, new AnimationCurve(
+            new Keyframe(0f, 0.50f),
+            new Keyframe(0.40f, 1.60f),
+            new Keyframe(1f, 3.00f)));
+
+        SetRotationOverLifetime(ps, degreesPerSecond: 6f);
+        SetSwayNoise(ps, strength: Mathf.Max(0.3f, r * 0.3f), frequency: 0.15f, scrollSpeed: 0.15f);
+        Vector3 wind = WeatherPrecipitation.WindDirection;
+        SetDrift(ps, new Vector2(wind.x, wind.z), speed: 2.2f);
+        return ps;
     }
 
     /// <summary>建物用の寸法下限を使わず、事故車の周囲から細く立ち上る煙を作る。</summary>

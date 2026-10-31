@@ -17,7 +17,8 @@ public sealed class WeatherPrecipitation : MonoBehaviour
     private static readonly float[] SnowFall = { 0.9f, 0.9f, 1.2f, 1.6f };
     private static readonly float[] SnowWind = { 0.6f, 0.6f, 1.2f, 7f };
     private static readonly float[] SnowLife = { 7f, 7f, 7f, 4f };
-    private static readonly Vector3 WindDirection = new Vector3(0.92f, 0f, 0.38f);
+    /// <summary>Prevailing wind (unit, horizontal). Snow and chimney smoke both drift along it.</summary>
+    public static readonly Vector3 WindDirection = new Vector3(0.92f, 0f, 0.38f);
 
     private ParticleSystem rain, snow;
     private Material rainMaterial, snowMaterial;

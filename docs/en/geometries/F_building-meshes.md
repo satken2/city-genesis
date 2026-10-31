@@ -25,6 +25,8 @@ FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with m
 | `far` / `mashup-{model_prefix}-far` | Far models for whole buildings or individual wings |
 | `{part}_close` | Close-up model |
 | `road_access_{type}_{identifier}` | Empty model objects marking road-access frontages |
+| Names starting with `rotor` | Child meshes in a model that spin with the utilization of an operating building (wind turbine blades) |
+| Names starting with `smoke` | Empty model objects marking outlets that emit smoke with the utilization of an operating building |
 
 ## Appearance variants and fallback
 

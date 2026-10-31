@@ -164,6 +164,8 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     private bool ShouldPreventMaterialChange(Renderer r)
     {
         if (r is SpriteRenderer) return true;
+        // Particles such as chimney smoke are effects, not surfaces, so only their visibility follows the body.
+        if (r is ParticleSystemRenderer) return true;
         if (r.GetComponent<TextMeshPro>() != null) return true;
         if (r.GetComponent<OverlayMeshRenderer>() != null) return true;
         // One-way track direction arrows are overlays, so retain their own colors

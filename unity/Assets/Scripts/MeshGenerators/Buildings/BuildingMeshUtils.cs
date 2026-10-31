@@ -65,8 +65,9 @@ public static class BuildingMeshUtils
     /// Vertices occupy contiguous ranges per submesh, each containing only vertices referenced by that submesh
     /// (<see cref="CompactSubMeshVertices"/>). Recombining the result by submesh therefore does not duplicate vertices.
     /// Return null if no mesh is found. The caller must destroy the returned mesh.
+    /// leaveOutRotors skips rotors that <see cref="BuildingMotionParts"/> separates during this generation.
     /// </summary>
-    public static Mesh CombineModuleMeshes(GameObject prefab, out Material[] materials)
+    public static Mesh CombineModuleMeshes(GameObject prefab, out Material[] materials, bool leaveOutRotors = false)
     {
         using var scope = combineModuleMarker.Auto();
         materials = null;
@@ -86,7 +87,7 @@ public static class BuildingMeshUtils
         MeshFilter[] meshFilters = prefab.GetComponentsInChildren<MeshFilter>(true);
         foreach (MeshFilter mf in meshFilters)
         {
-            if (mf == null || mf.sharedMesh == null)
+            if (mf == null || mf.sharedMesh == null || (leaveOutRotors && BuildingMotionParts.IsSeparated(mf.transform)))
             {
                 continue;
             }
@@ -1161,13 +1162,15 @@ public static class BuildingMeshUtils
     ///     the origin connect precisely without gaps between levels.
     /// - Translate the XZ model origin (pivot) by xzOffset.
     ///   Apply rotation about Y around the origin to vertices.
+    /// - Separated rotors still count toward the bounds, so heights match the merged part; their placement and the smoke outlets
+    ///   go to <see cref="BuildingMotionParts"/> through the same transform as the vertices.
     /// </summary>
     /// <returns>Height consumed by the placed module (m, added to the next level's baseY). Zero on placement failure.</returns>
     public static float AddStackedModule(GameObject prefab, float baseY, float? fitHeight,
         List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes,
         Vector2 xzOffset = default, Quaternion? rotation = null, bool alignByOrigin = false)
     {
-        Mesh moduleMesh = CombineModuleMeshes(prefab, out Material[] moduleMaterials);
+        Mesh moduleMesh = CombineModuleMeshes(prefab, out Material[] moduleMaterials, leaveOutRotors: true);
         if (moduleMesh == null || moduleMesh.subMeshCount == 0)
         {
             if (moduleMesh != null)
@@ -1178,6 +1181,7 @@ public static class BuildingMeshUtils
         }
 
         Bounds bounds = moduleMesh.bounds;
+        BuildingMotionParts.EncapsulateSeparated(prefab, ref bounds);
         // Reference height for fitHeight: height above origin for alignByOrigin=true; full mesh height otherwise.
         float refHeight = alignByOrigin
             ? Mathf.Max(bounds.max.y, MIN_STACKED_MODULE_HEIGHT)
@@ -1204,6 +1208,10 @@ public static class BuildingMeshUtils
         moduleMesh.vertices = vertices;
         moduleMesh.RecalculateNormals();
         moduleMesh.RecalculateBounds();
+        BuildingMotionParts.Collect(prefab, prefab.transform,
+            Matrix4x4.TRS(new Vector3(xzOffset.x, baseY, xzOffset.y), rot, new Vector3(1f, scaleY, 1f))
+                * Matrix4x4.Translate(new Vector3(0f, alignByOrigin ? 0f : -bounds.min.y, 0f)),
+            rot);
 
         for (int subIndex = 0; subIndex < moduleMesh.subMeshCount; subIndex++)
         {

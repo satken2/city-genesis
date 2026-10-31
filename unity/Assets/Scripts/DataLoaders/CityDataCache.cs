@@ -132,6 +132,7 @@ public sealed class CityDataCache : MonoBehaviour
         return response;
     }
 
+    public bool TryGetBuilding(int agentId, out BuildingSummary building) => buildings.TryGet(agentId, out building);
     public bool TryGetPath(int pathId, out ConstructionPathSummary path) => paths.TryGet(pathId, out path);
     public bool TryGetNode(int nodeId, out NodeData node) => nodes.TryGet(nodeId, out node);
     public bool TryGetMotion(int pathId, out RoadMotionData data) => motion.TryGetValue(pathId, out data);

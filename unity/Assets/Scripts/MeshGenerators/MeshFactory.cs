@@ -15,6 +15,8 @@ public class BuildingMeshResult
     /// <summary>Scatter parts left out of Mesh for <see cref="BuildingScatterRenderer"/> (generation with separateExterior only).</summary>
     public List<BuildingScatterRenderer.Instance> Scatter { get; set; }
     public ConstructionCraneAnimator.Placement CraneTop { get; set; }
+    /// <summary>Rotors and smoke outlets left out of Mesh for <see cref="BuildingMotion"/> (generation with animate only).</summary>
+    public BuildingMotionParts Motion { get; set; }
 
     public BuildingMeshResult(Mesh mesh, Material[] materials, Mesh colliderMesh = null)
     {

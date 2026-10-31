@@ -2541,8 +2541,9 @@ public class BuildingManager : BaseApiDataManager
         MeshRenderer mr = buildingGO.AddComponent<MeshRenderer>();
 
         var genWatch = System.Diagnostics.Stopwatch.StartNew();
-        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, true, drawLod, separateExterior: true, animateCrane: true);
+        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, true, drawLod, separateExterior: true, animate: true);
         ConstructionCraneAnimator.Attach(buildingGO, meshResult?.CraneTop, buildingData.agent_id);
+        BuildingMotion.Attach(buildingGO, meshResult?.Motion, buildingData);
         var renderIdentity = buildingGO.AddComponent<RenderCacheIdentity>();
         renderIdentity.key = renderKey;
         renderIdentity.mesh = meshResult?.Mesh;

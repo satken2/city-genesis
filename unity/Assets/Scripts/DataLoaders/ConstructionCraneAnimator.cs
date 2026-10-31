@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>Rotate the crane top around the connection point's Y axis as a visual effect independent of simulation.</summary>
@@ -22,33 +21,17 @@ public sealed class ConstructionCraneAnimator : MonoBehaviour
     private int seed;
     private MeshRenderer craneRenderer;
 
-    /// <summary>
-    /// Combined mesh and DepthOffset materials per top prefab. Top geometry depends only on the prefab and is shared by all buildings;
-    /// building destruction or parked-cache eviction must not release it (no RenderCacheIdentity). Retain across sessions.
-    /// </summary>
-    private static readonly Dictionary<GameObject, (Mesh mesh, Material[] materials)> sharedTops =
-        new Dictionary<GameObject, (Mesh mesh, Material[] materials)>();
-
     public static void Attach(GameObject building, Placement placement, int buildingId)
     {
-        if (placement == null || placement.Prefab == null) return;
-        if (!sharedTops.TryGetValue(placement.Prefab, out var shared) || shared.mesh == null)
-        {
-            Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(placement.Prefab, out Material[] materials);
-            if (mesh == null) return;
-            var result = BuildingMeshBuilder.EnsureMaterials(
-                BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(mesh, materials)));
-            shared = (result.Mesh, BuildingManager.GetSharedDepthOffsetMaterials(result.Materials));
-            sharedTops[placement.Prefab] = shared;
-        }
+        if (placement == null || !SharedPartMesh.TryGet(placement.Prefab, out Mesh mesh, out Material[] materials)) return;
 
         var top = new GameObject("ConstructionCraneTop");
         top.layer = building.layer;
         top.transform.SetParent(building.transform, false);
         top.transform.localPosition = placement.Position;
-        top.AddComponent<MeshFilter>().sharedMesh = shared.mesh;
+        top.AddComponent<MeshFilter>().sharedMesh = mesh;
         var renderer = top.AddComponent<MeshRenderer>();
-        renderer.sharedMaterials = shared.materials;
+        renderer.sharedMaterials = materials;
         var animator = top.AddComponent<ConstructionCraneAnimator>();
         animator.baseRotation = placement.Rotation;
         animator.seed = buildingId;

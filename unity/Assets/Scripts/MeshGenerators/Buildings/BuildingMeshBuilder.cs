@@ -54,11 +54,12 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// Generate with a rendering LOD. Far stretches a distant model to the outline or uses a box (<see cref="GenerateFarBuilding"/>);
     /// Close uses the same assembly but prefers `_close` parts (BuildingMeshUtils.CurrentDrawLod).
     /// isDynamic is a compatibility argument for terrain conformity, independent of rendering LOD.
-    /// Callers passing animateCrane=true must attach the returned CraneTop before initializing the visual mode.
+    /// animate is for shown buildings: the crane top (CraneTop) and the model's moving parts (Motion) are returned
+    /// instead of being combined, and the caller must attach them before initializing the visual mode.
     /// separateExterior is for shown buildings: ground panels (for every model type) and other site decorations (where applicable)
     /// become ExteriorJobs, and scatter parts become Scatter for <see cref="BuildingScatterRenderer"/> instead of being combined.
     /// </summary>
-    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false, bool animateCrane = false)
+    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false, bool animate = false)
     {
         using var scope = generateMarker.Auto();
         if (buildingData == null)
@@ -75,20 +76,24 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         var previousCapture = BuildingExteriorRenderer.Capture;
         bool previousDefer = BuildingExteriorRenderer.DeferSiteDecorations;
         var previousSink = BuildingScatterRenderer.Sink;
+        var previousMotion = BuildingMotionParts.Sink;
         int modelType = GetModelType(buildingData);
         var jobs = separateExterior ? new List<BuildingExteriorRenderer.Build>() : null;
         var scatter = separateExterior ? new List<BuildingScatterRenderer.Instance>() : null;
+        var motion = animate ? new BuildingMotionParts() : null;
         BuildingMeshUtils.CurrentDrawLod = drawLod;
         BuildingExteriorRenderer.Capture = jobs;
         BuildingExteriorRenderer.DeferSiteDecorations = separateExterior && (IsApplicableModelType(modelType) || modelType == Constants.MODEL_PREBUILT);
         BuildingScatterRenderer.Sink = scatter;
+        BuildingMotionParts.Sink = motion;
         try
         {
-            var result = GenerateDetailed(buildingData, isDynamic, animateCrane);
+            var result = GenerateDetailed(buildingData, isDynamic, animate);
             if (result != null)
             {
                 result.ExteriorJobs = jobs;
                 result.Scatter = scatter;
+                result.Motion = motion != null && !motion.IsEmpty ? motion : null;
             }
             return result;
         }
@@ -98,6 +103,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             BuildingExteriorRenderer.Capture = previousCapture;
             BuildingExteriorRenderer.DeferSiteDecorations = previousDefer;
             BuildingScatterRenderer.Sink = previousSink;
+            BuildingMotionParts.Sink = previousMotion;
         }
     }
 
@@ -605,6 +611,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         meshInstance.vertices = vertices;
         meshInstance.RecalculateNormals();
         meshInstance.RecalculateBounds();
+        BuildingMotionParts.Collect(roofpropModule, mf.transform, matrix, rotation);
 
         int subMeshCount = meshInstance.subMeshCount;
         Material[] moduleMaterials = BuildingMeshUtils.GetModuleMaterials(roofpropModule);
