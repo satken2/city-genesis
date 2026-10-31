@@ -49,7 +49,7 @@ description: City Genesisの道路・線路パーツ3Dモデル(body/line/sidewa
 - ロープウェイ602の`station_shell`も`CreateSplineMesh`を通り、`station_shell_close`へ切り替わる。ホーム451/461・462・502と602の接写設備は、非公開の制作ツール`genesis-gallery/pipeline/jobs/build_platform_close.py`が通常モデルから著作する。通常の各ジョブを再実行したら接写ジョブも後に実行する。8m周期・原点・bbox・材質を保持する。再生成・実Unity検証・ミラー同期は同ツールの`pipeline/jobs/platform_close.md`を参照。
 
 - スプラインに沿って敷く `body / line / sidewalk / wall / wall_underground / ceiling_underground / center`、線路の `track / wire / platform / platform_wall` が対象。高架用も `body_elevated_close` / `track_elevated_close` の命名で扱う。
-- 送電線1101/1102の`pillar_cap`は専用生成器がCloseへ切り替える。それ以外の`tree / pillar / pillar_cap / portal / pole / beam`などのInstantiate配置、道路の点設備、ノード内のコネクタ・終端部品は無印を使う。**`_close` を書き出すだけでは切り替わらない。** 対象外パーツの接写対応を求められた場合は `genesis-path-geometry` で読み込み経路を確認し、アセットだけで対応済みとしない。
+- 送電線1101/1102の`pillar_cap`は専用生成器がCloseへ切り替える。それ以外の`tree / pillar / pillar_cap / pole / beam`などのInstantiate配置、道路の点設備、ノード内のコネクタ・終端部品は無印を使う。**`_close` を書き出すだけでは切り替わらない。** 対象外パーツの接写対応を求められた場合は `genesis-path-geometry` で読み込み経路を確認し、アセットだけで対応済みとしない。
 - 対象パーツのClose解決順は、バリアントの `_close` → バリアントの無印 → タイプの `_close` → タイプの無印。共通タイプにCloseを追加しても、専用バリアントの無印が優先される場合がある。
 
 ### 造形・軽量化・検証
@@ -64,7 +64,7 @@ description: City Genesisの道路・線路パーツ3Dモデル(body/line/sidewa
 
 **必須は `body` ただ1つ**(線路は `body`=道床 と `track`=軌道)。
 これが無いとスプラインに沿った白い板にフォールバックする。
-他はオプションで、無ければそのパーツをスキップする。地下の壁・天井だけは専用モデルが無くても既定のコンクリート形状を生成する。
+他はオプションで、無ければそのパーツをスキップする。地下の壁・天井だけは専用モデルが無くても既定のコンクリート形状を生成する。トンネルの坑門はパーツを持たず、Unity が地形から生成する。
 
 | ユーザーの要求に含まれる特徴 | 足すパーツ | 必要なマスター値 |
 |---|---|---|
@@ -77,7 +77,6 @@ description: City Genesisの道路・線路パーツ3Dモデル(body/line/sidewa
 | 街路樹 | `tree` | `tree_spacing` |
 | 高架にできる道路の柱 | `pillar` (+ `pillar_cap`) | `height_editable=true`, `pillar_spacing` |
 | 他パスをまたぐ門型橋脚 | `pillar_leg`（柱1本） / `pillar_crossbeam`（横梁） | 通常橋脚の干渉時に組み立てる。原点・伸縮方向・幅上限は `PortalPillar.cs` のコメント。現行は鉄道共通 `p4` に無印のみ |
-| 地下道の坑口 | `portal` | — |
 | **線路**: 軌道(レール+枕木) | `track` | `lanes` |
 | 分岐器のレールコネクタ | `rail` (無ければ `track` で代用) | — |
 | 電化(架線柱・門型梁) | `pole` / `beam` | `wire_spacing` |
@@ -89,17 +88,17 @@ description: City Genesisの道路・線路パーツ3Dモデル(body/line/sidewa
 ```
 p201/p2002/p2005   1個  body                      (最小構成)
 p1   4個  body line sidewalk tree                 (街路=PATH_STREET のタイプ既定)
-p2   8個  body line sidewalk tree wall center pillar portal   (高速道路=PATH_MOTORWAY のタイプ既定)
-p401 3個  body track portal                       (最小の線路)
+p2   7個  body line sidewalk tree wall center pillar   (高速道路=PATH_MOTORWAY のタイプ既定)
+p401 2個  body track                              (最小の線路)
 p403 3個  body track wall                          (鉄橋。wallが主構トラス)
-p4   8個  body track platform pole beam pillar wall portal    (電化+駅)
+p4   7個  body track platform pole beam pillar wall    (電化+駅)
 p411 5個  body track wire pole beam                (電化地上線路)
 p413 6個  body track wall wire pole beam           (電化鉄橋。poleはトラス上弦取付)
 p461 8個  body track platform platform_wall platform_panel wire pole beam (電化駅+上屋)
 p463〜465 18〜19個 461と同じ線路・架線・高架の14個(メッシュ共有) + platform platform_wall platform_panel + 接写(463=platform_wall_close、464・465=platform_close platform_wall_close) (貨物PF)
-p421 14個 411の軌道・架線・高欄・坑口(共有) + 幅10mの body/body_close・body_elevated・pillar/pillar_cap・11m beam (軌道数2の複線)
+p421 13個 411の軌道・架線・高欄(共有) + 幅10mの body/body_close・body_elevated・pillar/pillar_cap・11m beam (軌道数2の複線)
 p423 8個  413の軌道・主構・架線・柱(共有) + 幅10mの床組 body・pillar/pillar_cap (軌道数2の鉄橋)
-p471 19個 461のホーム・軌道・架線(共有) + 421の道床・高架桁 + 駅用門型橋脚・17m beam・幅広 portal (軌道数2の相対式の駅)
+p471 18個 461のホーム・軌道・架線(共有) + 421の道床・高架桁 + 駅用門型橋脚・17m beam (軌道数2の相対式の駅)
 p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 + 島式の platform/platform_close (軌道数2・center_width 6 の島式の駅)
 ```
 
@@ -126,7 +125,6 @@ p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 
 | `tree` | **接地点**(原点=地面) | Instantiate配置。スケールなし。葉は [[genesis-prop-parts]] の「樹木・植え込みの葉」に従う |
 | `pillar` | **天端=原点**(柱は下方向へ長めに伸ばす) | 中心線。地下パスには配置されない |
 | `pillar_cap` | 路面原点(下方向へ厚みを持つ) | 中心線。Zスケールされない |
-| `portal` | 接地点 | **ローカル +Z がトンネル内部**を向く |
 | `track` / `rail` | **枕木の下面** | 軌道スロットに実寸配置(スケールなし) |
 | `pole` | 設置面(柱は上方向) | 「右側用」。腕金は -X(軌道中心)向き。左側はY軸180°回転 |
 | `beam` | スプライン中心の設置面 | X幅が柱間に引き伸ばされる |
@@ -246,7 +244,7 @@ LRTの線路は1本のパスで複線(上下線)を表す。222（幅24m・4車�
 - lrt_trackは幅3m、レール中心±0.7175m、踏面Z=0.025m。lrt_wireの中心はZ=5.30m。原点はどちらも路面で、UnityはBODY_ABOVE_SPLINEを加える。
 - lrt_poleは道路中心・路面原点の実寸配置。222/242は中央T字柱、303は両側X=±5.4mの2本柱で、各腕が近い方の軌道（±1.75m）へ出る。bounds中心へ再配置しない。架線系はwire_spacingが正の場合だけ描く。
 - 303のbodyは幅12mの段差のない舗装。石畳|x|<3.25m（軌道敷）・白い境界帯3.25〜3.45m（PATH_CONCRETE）・暖色レンガ3.45〜5.8m・縁5.8〜6.0m。設備列は±5.1m。
-- 431のbody/body_closeは幅7.0mの複線道床で、上面Z=0が全幅±3.5mに届く矩形断面（下端-0.55m）。**TrackPathは地上の道床を全体boundsではなく最上面（最高点から2mm以内の頂点）の幅でマスター幅へ伸縮し、その最高点をスプライン+0.1mに置く**（`RoadPath.GetBodySurfaceBounds`）。法面や軌道間の盛りで最上面が狭くなると道床が数倍に広がって沈むので、最上面を全幅に届かせて通常・接写とも横倍率1にする。411/461の台形道床は天端3.7m（接写3.33m）が5.0mへ伸びて描かれる。それ以外（track/wire/pole/beam/高架系/portal）は411とメッシュ共有する。
+- 431のbody/body_closeは幅7.0mの複線道床で、上面Z=0が全幅±3.5mに届く矩形断面（下端-0.55m）。**TrackPathは地上の道床を全体boundsではなく最上面（最高点から2mm以内の頂点）の幅でマスター幅へ伸縮し、その最高点をスプライン+0.1mに置く**（`RoadPath.GetBodySurfaceBounds`）。法面や軌道間の盛りで最上面が狭くなると道床が数倍に広がって沈むので、最上面を全幅に届かせて通常・接写とも横倍率1にする。411/461の台形道床は天端3.7m（接写3.33m）が5.0mへ伸びて描かれる。それ以外（track/wire/pole/beam/高架系）は411とメッシュ共有する。
 - 新規バリアントはpath_masterだけでなく、transit_masterのLRT走行・停留所リストにも追加する。
 
 ### LRT停留所のホーム
