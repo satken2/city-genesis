@@ -40,8 +40,8 @@ public static class LandmarkPathsQA
             }
             foreach(float grade in new[]{0f,.15f,-.15f}) Median(grade,true);
             Median(0,false);
-            foreach(int id in new[]{251,252,254,256}) foreach(float length in new[]{40f,160f,960f}) Bridge(id,length);
-            foreach(int id in new[]{251,256}) BentBridge(id);
+            foreach(int id in new[]{252,254,256}) foreach(float length in new[]{40f,160f,960f}) Bridge(id,length);
+            foreach(int id in new[]{252,256}) BentBridge(id);
             foreach(int id in new[]{404,414}) foreach(float height in new[]{6f,15f}) Arcade(id,height);
             foreach(int id in new[]{404,414}) ArcadeCrossing(id);
             if(args.Contains("-syncLandmarkPrefabs")) ExportPrefabs(root);
@@ -58,7 +58,7 @@ public static class LandmarkPathsQA
     }
     static void ExportPrefabs(string root)
     {
-        foreach(int id in new[]{241,404,414,251,252,254,256})
+        foreach(int id in new[]{241,404,414,252,254,256})
             foreach(string file in Directory.GetFiles("Assets/Paths/p"+id,"*.fbx"))
             {
                 string source=file.Replace('\\','/');
@@ -85,7 +85,7 @@ public static class LandmarkPathsQA
         => Generate(id,width,lanes,new List<Vector3>{new Vector3(0,height,0),new Vector3(0,height+grade*length,length)},trees);
     static GameObject Generate(int id,float width,int lanes,List<Vector3> points,bool trees)
     {
-        bool track=id==404||id==414,bridge=id>=251&&id<=256;
+        bool track=id==404||id==414,bridge=id>=252&&id<=256;
         var master=Activator.CreateInstance(assembly.GetType("PathMasterItem"));
         Set(master,"width",width); Set(master,"lanes",lanes); Set(master,"follow_terrain",false);
         Set(master,"height_editable",true); Set(master,"single_span",bridge);
@@ -146,8 +146,8 @@ public static class LandmarkPathsQA
     }
     static void Bridge(int id,float length)
     {
-        float width=id==251?7:id==252?12:id==254?22:32;
-        var go=Generate(id,width,id==251?1:id==252?2:id==254?4:6,12,length,0,false);
+        float width=id==252?12:id==254?22:32;
+        var go=Generate(id,width,id==252?2:id==254?4:6,12,length,0,false);
         if(id>=254 && length<256)
         {
             var center=go.GetComponentsInChildren<MeshFilter>().Single(f=>f.name.EndsWith("/center"));
@@ -189,7 +189,7 @@ public static class LandmarkPathsQA
         Require(id>=254?trusses.Length>0:trusses.Length==0,"truss selection "+id+" length="+length);
         var bodies=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name.EndsWith("/body")).ToArray();
         float bottom=bodies.SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).Min(v=>v.y);
-        Require(Mathf.Abs(bottom-(12.1f-(id==251?1.1f:id==252?1.3f:1.2f)))<.01f,"deck thickness");
+        Require(Mathf.Abs(bottom-(12.1f-(id==252?1.3f:1.2f)))<.01f,"deck thickness");
         if(id>=254)
         {
             float trussBottom=trusses.SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).Min(v=>v.y);
@@ -200,9 +200,9 @@ public static class LandmarkPathsQA
     // A waypoint is a corner: one shared tower stands on it, square to the bisector, with no copies per segment.
     static void BentBridge(int id)
     {
-        float width=id==251?7:32;
+        float width=id==252?12:32;
         Vector3 start=new Vector3(0,12,0),corner=new Vector3(60,12,300),end=new Vector3(0,12,600);
-        var go=Generate(id,width,id==251?1:6,new List<Vector3>{start,corner,end},false);
+        var go=Generate(id,width,id==252?2:6,new List<Vector3>{start,corner,end},false);
         var towers=go.GetComponentsInChildren<Transform>().Where(t=>t.name=="SuspensionTower").ToArray();
         Require(towers.Length==3,"two end towers and the corner tower");
         var middle=towers.Where(t=>Vector2.Distance(new Vector2(t.position.x,t.position.z),new Vector2(corner.x,corner.z))<.05f).ToArray();
