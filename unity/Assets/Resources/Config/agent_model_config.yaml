@@ -239,6 +239,16 @@ agents:
     prebuilt: true
     variants:
       - 0
+  1093:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1094:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
   2000:
     model: true
     prebuilt: false
@@ -382,7 +392,19 @@ agents:
       - 0
 landmark_prefixes:
   - landmark-ancient_ruins
+  - landmark-clock_tower
   - landmark-colossal_statue
+  - landmark-fairytale_castle
+  - landmark-five_story_pagoda
   - landmark-grand_cathedral
+  - landmark-grand_mausoleum
+  - landmark-great_buddha
   - landmark-great_tower
+  - landmark-lattice_tower
+  - landmark-leaning_tower
+  - landmark-moai_platform
   - landmark-old_castle
+  - landmark-pyramid
+  - landmark-redeemer_statue
+  - landmark-seed_vault
+  - landmark-triumphal_arch
