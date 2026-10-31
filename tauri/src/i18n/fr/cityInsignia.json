@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Blason",
+    "flag": "Drapeau",
+    "motif": "Motif",
+    "fieldColor": "Couleur du fond",
+    "motifColor": "Couleur du motif",
+    "pattern": "Disposition",
+    "accentColor": "Couleur d’accent",
+    "placement": "Position du blason",
+    "loadImage": "Charger une image",
+    "randomize": "Au hasard",
+    "apply": "Appliquer",
+    "imageLoadFailed": "Impossible de charger l’image.",
+    "placements": {
+      "center": "Centre",
+      "canton": "En haut à gauche",
+      "none": "Aucune"
+    },
+    "motifs": {
+      "wave": "Vagues",
+      "mountain": "Montagne",
+      "star": "Étoile",
+      "tree": "Arbre",
+      "sun": "Soleil",
+      "moon": "Lune",
+      "flower": "Fleur",
+      "leaf": "Feuille",
+      "bird": "Oiseau",
+      "fish": "Poisson",
+      "anchor": "Ancre",
+      "gear": "Engrenage",
+      "tower": "Château",
+      "bridge": "Pont",
+      "key": "Clé",
+      "crown": "Couronne",
+      "snowflake": "Flocon",
+      "flame": "Flamme",
+      "diamond": "Losange",
+      "cross": "Croix"
+    },
+    "patterns": {
+      "plain": "Uni",
+      "bicolor": "Bicolore",
+      "triband": "Trois bandes verticales",
+      "diagonal": "Diagonale",
+      "border": "Bordure",
+      "bands": "Bandes"
+    }
+  }
+}

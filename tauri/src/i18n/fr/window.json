@@ -54,7 +54,8 @@
     "climate_settings": "Paramètres climatiques",
     "climate_effects": "Climat",
     "scenario_tools": "Édition du scénario",
-    "asset_manager": "Gestionnaire de ressources"
+    "asset_manager": "Gestionnaire de ressources",
+    "city_insignia": "Éditeur de blason et de drapeau"
   },
   "cityMap": {
     "layers": {

@@ -486,6 +486,15 @@
     "empty_shell": true,
     "actions": []
   },
+  "city_insignia": {
+    "title": "紋章・市旗エディタ",
+    "width": 1000,
+    "height": 760,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
+  },
   "citizen_list": {
     "title": "市民リスト",
     "width": 760,

@@ -9,13 +9,18 @@
  *
  * Change the city name through `name` in `PATCH /api/v1/city/`, then emit the global `city:renamed` event.
  * Rust's session polling updates the HUD name every few seconds; this notification applies it immediately.
+ *
+ * The emblem and city flag above the name open the emblem and flag editor (city_insignia). An unset image shows an
+ * empty frame. The editor emits `city:insignia-changed` after saving, and the images are fetched again.
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { emit } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
+import { emit, listen } from "@tauri-apps/api/event";
 
 import { PLAY_MODE_READ_ONLY } from "../../constants";
+import { useApiImageUrl } from "../../hooks/useApiImageUrl";
 import { usePlayMode } from "../../hooks/usePlayMode";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { resolveIntlLocale } from "../../utils/locale";
@@ -129,6 +134,16 @@ export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [groups, setGroups] = useState<Record<string, GovernmentAgent[]>>({});
   const [activeGroup, setActiveGroup] = useState<GroupKey>(GROUPS[0].key);
   const [error, setError] = useState("");
+  const [insigniaVersion, setInsigniaVersion] = useState(0);
+  const emblem = useApiImageUrl(buildApiUrl(apiBaseUrl, `/api/v1/city/insignia/emblem?v=${insigniaVersion}`));
+  const flag = useApiImageUrl(buildApiUrl(apiBaseUrl, `/api/v1/city/insignia/flag?v=${insigniaVersion}`));
+
+  useEffect(() => {
+    const unlisten = listen("city:insignia-changed", () => setInsigniaVersion((v) => v + 1));
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -217,6 +232,17 @@ export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   return (
     <div className="city-gov">
       <section className="city-gov__overview">
+        <button
+          type="button"
+          className="city-gov__insignia"
+          disabled={readOnly}
+          title={t("windowType.city_insignia")}
+          aria-label={t("windowType.city_insignia")}
+          onClick={() => void invoke("open_registered_window", { windowType: "city_insignia" }).catch(console.error)}
+        >
+          <span className="city-gov__emblem">{emblem.src && <img src={emblem.src} alt="" onError={emblem.onError} />}</span>
+          <span className="city-gov__flag">{flag.src && <img src={flag.src} alt="" onError={flag.onError} />}</span>
+        </button>
         {readOnly ? (
           <span className="city-gov__name">{overview.name}</span>
         ) : (

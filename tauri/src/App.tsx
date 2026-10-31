@@ -51,6 +51,7 @@ const ScenarioSignWindow = lazy(() => import("./components/scenario/ScenarioSign
 const SaveListWindow = lazy(() => import("./components/taskbar/SaveListWindow").then(m => ({ default: m.SaveListWindow })));
 const NewGameWindow = lazy(() => import("./components/taskbar/NewGameWindow").then(m => ({ default: m.NewGameWindow })));
 const CityGovernmentWindow = lazy(() => import("./components/government/CityGovernmentWindow").then(m => ({ default: m.CityGovernmentWindow })));
+const CityInsigniaEditor = lazy(() => import("./components/government/CityInsigniaEditor").then(m => ({ default: m.CityInsigniaEditor })));
 const ClimateSettingsWindow = lazy(() => import("./components/climate/ClimateSettingsWindow").then(m => ({ default: m.ClimateSettingsWindow })));
 const ClimateEffectsWindow = lazy(() => import("./components/climate/ClimateEffectsWindow").then(m => ({ default: m.ClimateEffectsWindow })));
 const PolicyPlanningWindow = lazy(() => import("./components/policy/PolicyPlanningWindow").then(m => ({ default: m.PolicyPlanningWindow })));
@@ -106,7 +107,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * Window types with dedicated panels. Render these with dedicated components instead of the generic JSON
  * display.
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "climate_settings", "climate_effects", "policy_planning", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "policy_planning", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -568,6 +569,8 @@ function App() {
               <NewGameWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "city_government" ? (
               <CityGovernmentWindow apiBaseUrl={context.api_base_url} />
+            ) : context.window_type === "city_insignia" ? (
+              <CityInsigniaEditor apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "climate_settings" ? (
               <ClimateSettingsWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "climate_effects" ? (

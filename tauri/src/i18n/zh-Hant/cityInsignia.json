@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "紋章",
+    "flag": "市旗",
+    "motif": "圖案",
+    "fieldColor": "底色",
+    "motifColor": "圖案顏色",
+    "pattern": "底紋",
+    "accentColor": "輔色",
+    "placement": "紋章位置",
+    "loadImage": "載入圖片",
+    "randomize": "隨機",
+    "apply": "確定",
+    "imageLoadFailed": "無法載入圖片。",
+    "placements": {
+      "center": "中央",
+      "canton": "左上",
+      "none": "無"
+    },
+    "motifs": {
+      "wave": "波浪",
+      "mountain": "山",
+      "star": "星",
+      "tree": "樹",
+      "sun": "太陽",
+      "moon": "月亮",
+      "flower": "花",
+      "leaf": "葉",
+      "bird": "鳥",
+      "fish": "魚",
+      "anchor": "錨",
+      "gear": "齒輪",
+      "tower": "城堡",
+      "bridge": "橋",
+      "key": "鑰匙",
+      "crown": "王冠",
+      "snowflake": "雪花",
+      "flame": "火焰",
+      "diamond": "菱形",
+      "cross": "十字"
+    },
+    "patterns": {
+      "plain": "純色",
+      "bicolor": "上下雙色",
+      "triband": "直三分",
+      "diagonal": "斜分",
+      "border": "鑲邊",
+      "bands": "上下條紋"
+    }
+  }
+}

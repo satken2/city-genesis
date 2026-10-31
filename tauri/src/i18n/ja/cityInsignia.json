@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "紋章",
+    "flag": "市旗",
+    "motif": "図柄",
+    "fieldColor": "地の色",
+    "motifColor": "図柄の色",
+    "pattern": "地模様",
+    "accentColor": "差し色",
+    "placement": "紋章の配置",
+    "loadImage": "画像を読み込む",
+    "randomize": "おまかせ",
+    "apply": "決定",
+    "imageLoadFailed": "画像を読み込めませんでした",
+    "placements": {
+      "center": "中央",
+      "canton": "左上",
+      "none": "なし"
+    },
+    "motifs": {
+      "wave": "波",
+      "mountain": "山",
+      "star": "星",
+      "tree": "木",
+      "sun": "太陽",
+      "moon": "月",
+      "flower": "花",
+      "leaf": "葉",
+      "bird": "鳥",
+      "fish": "魚",
+      "anchor": "錨",
+      "gear": "歯車",
+      "tower": "城",
+      "bridge": "橋",
+      "key": "鍵",
+      "crown": "王冠",
+      "snowflake": "雪",
+      "flame": "炎",
+      "diamond": "菱",
+      "cross": "十字"
+    },
+    "patterns": {
+      "plain": "無地",
+      "bicolor": "上下二色",
+      "triband": "縦三分割",
+      "diagonal": "斜め分割",
+      "border": "縁取り",
+      "bands": "上下の帯"
+    }
+  }
+}

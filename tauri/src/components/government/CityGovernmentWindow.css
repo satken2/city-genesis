@@ -41,6 +41,54 @@
   font-weight: 600;
 }
 
+/* Emblem and flag button. An empty slot (unset or failed image) shows a dashed frame. */
+.city-gov__insignia {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.city-gov__insignia:hover {
+  background: none;
+}
+
+.city-gov__insignia:disabled {
+  cursor: default;
+}
+
+.city-gov__emblem,
+.city-gov__flag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88px;
+}
+
+.city-gov__emblem {
+  width: 88px;
+}
+
+.city-gov__flag {
+  width: 132px;
+}
+
+.city-gov__emblem:empty,
+.city-gov__flag:empty {
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+}
+
+.city-gov__emblem img,
+.city-gov__flag img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
 .city-gov__stats {
   display: flex;
   flex-direction: column;

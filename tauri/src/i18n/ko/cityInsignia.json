@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "문장",
+    "flag": "시기",
+    "motif": "도안",
+    "fieldColor": "바탕색",
+    "motifColor": "도안 색",
+    "pattern": "바탕 무늬",
+    "accentColor": "강조색",
+    "placement": "문장 위치",
+    "loadImage": "이미지 불러오기",
+    "randomize": "무작위",
+    "apply": "적용",
+    "imageLoadFailed": "이미지를 불러오지 못했습니다.",
+    "placements": {
+      "center": "가운데",
+      "canton": "왼쪽 위",
+      "none": "없음"
+    },
+    "motifs": {
+      "wave": "물결",
+      "mountain": "산",
+      "star": "별",
+      "tree": "나무",
+      "sun": "태양",
+      "moon": "달",
+      "flower": "꽃",
+      "leaf": "잎",
+      "bird": "새",
+      "fish": "물고기",
+      "anchor": "닻",
+      "gear": "톱니바퀴",
+      "tower": "성",
+      "bridge": "다리",
+      "key": "열쇠",
+      "crown": "왕관",
+      "snowflake": "눈송이",
+      "flame": "불꽃",
+      "diamond": "마름모",
+      "cross": "십자"
+    },
+    "patterns": {
+      "plain": "단색",
+      "bicolor": "상하 2색",
+      "triband": "세로 3분할",
+      "diagonal": "대각선 분할",
+      "border": "테두리",
+      "bands": "상하 띠"
+    }
+  }
+}

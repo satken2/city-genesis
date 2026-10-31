@@ -54,7 +54,8 @@
     "climate_settings": "氣候設定",
     "climate_effects": "氣候",
     "scenario_tools": "情境編輯",
-    "asset_manager": "素材管理器"
+    "asset_manager": "素材管理器",
+    "city_insignia": "紋章·市旗編輯器"
   },
   "cityMap": {
     "layers": {

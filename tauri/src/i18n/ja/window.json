@@ -54,7 +54,8 @@
     "climate_settings": "気候設定",
     "climate_effects": "気候",
     "scenario_tools": "シナリオ編集",
-    "asset_manager": "アセットマネージャー"
+    "asset_manager": "アセットマネージャー",
+    "city_insignia": "紋章・市旗エディタ"
   },
   "cityMap": {
     "layers": {

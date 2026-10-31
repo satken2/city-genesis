@@ -54,7 +54,8 @@
     "climate_settings": "Climate settings",
     "climate_effects": "Climate",
     "scenario_tools": "Scenario editing",
-    "asset_manager": "Asset Manager"
+    "asset_manager": "Asset Manager",
+    "city_insignia": "Emblem & Flag Editor"
   },
   "cityMap": {
     "layers": {

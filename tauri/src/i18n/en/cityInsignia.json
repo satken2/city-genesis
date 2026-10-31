@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Emblem",
+    "flag": "City Flag",
+    "motif": "Motif",
+    "fieldColor": "Field Color",
+    "motifColor": "Motif Color",
+    "pattern": "Pattern",
+    "accentColor": "Accent Color",
+    "placement": "Emblem Position",
+    "loadImage": "Load Image",
+    "randomize": "Randomize",
+    "apply": "Apply",
+    "imageLoadFailed": "Could not load the image.",
+    "placements": {
+      "center": "Center",
+      "canton": "Top Left",
+      "none": "None"
+    },
+    "motifs": {
+      "wave": "Wave",
+      "mountain": "Mountain",
+      "star": "Star",
+      "tree": "Tree",
+      "sun": "Sun",
+      "moon": "Moon",
+      "flower": "Flower",
+      "leaf": "Leaf",
+      "bird": "Bird",
+      "fish": "Fish",
+      "anchor": "Anchor",
+      "gear": "Gear",
+      "tower": "Castle",
+      "bridge": "Bridge",
+      "key": "Key",
+      "crown": "Crown",
+      "snowflake": "Snowflake",
+      "flame": "Flame",
+      "diamond": "Diamond",
+      "cross": "Cross"
+    },
+    "patterns": {
+      "plain": "Plain",
+      "bicolor": "Bicolor",
+      "triband": "Triband",
+      "diagonal": "Diagonal",
+      "border": "Border",
+      "bands": "Bands"
+    }
+  }
+}
