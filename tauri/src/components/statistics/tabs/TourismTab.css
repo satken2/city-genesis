@@ -1,50 +1,43 @@
 /**
- * Tourism statistics tab styles (matching the trade tab's glassmorphism).
+ * Tourism statistics tab styles.
+ *
+ * Sections are not enclosed in cards; headings, values, tables, and bars use the population tab's styles.
  */
 
 .tourism-tab {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 16px;
   box-sizing: border-box;
   overflow-y: auto;
-  background-color: #0b0f19;
-  color: #f3f4f6;
+  color: #e2e8f0;
 }
 
 .tourism-tab__title {
-  font-size: 1.85rem;
-  font-weight: 700;
   margin: 0 0 12px 0;
-  color: #ffffff;
-  border-left: 4px solid #ec4899;
-  padding-left: 10px;
-  line-height: 1.2;
+  font-size: 1.46rem;
+  font-weight: 700;
+  color: #e2e8f0;
 }
 
-/* Summary tiles */
+/* Summary values */
 .tourism-tiles {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .tourism-tile {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 8px 10px;
-  background: rgba(22, 29, 43, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
   min-width: 0;
 }
 
 .tourism-tile__label {
   font-size: 1rem;
-  color: #9ca3af;
+  font-weight: 600;
+  color: #7b8fa5;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -53,13 +46,13 @@
 .tourism-tile__value {
   font-size: 1.48rem;
   font-weight: 700;
-  color: #ffffff;
-  font-family: monospace;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
 }
 
 .tourism-tile__sub {
-  font-size: 0.93rem;
-  color: #8ba3bb;
+  font-size: 1rem;
+  color: #5a6f86;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -68,38 +61,28 @@
 .tourism-tab__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
   align-items: start;
 }
 
 .tourism-tab__col {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   min-width: 0;
 }
 
-/* Shared cards */
 .tourism-card {
-  background: rgba(22, 29, 43, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
 }
 
 .tourism-card__title {
-  font-size: 1.2rem;
+  margin: 0 0 6px;
+  font-size: 1.08rem;
   font-weight: 600;
-  margin: 0 0 10px 0;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #cbd5e1;
 }
 
 .tourism-card__chart-container {
@@ -117,7 +100,7 @@
   align-items: center;
   justify-content: center;
   min-height: 60px;
-  color: #6b7280;
+  color: #5a6f86;
   font-size: 1rem;
 }
 
@@ -135,30 +118,30 @@
 
 .tourism-table th {
   color: #8ba3bb;
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
-  padding: 4px 6px;
-  border-bottom: 1px solid #253246;
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .tourism-table td {
-  padding: 6px;
-  border-bottom: 1px solid #1a2a3a;
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   vertical-align: top;
 }
 
 .tourism-table--compact td {
-  padding: 4px 6px;
+  padding: 4px 8px;
 }
 
 .tourism-table .text-right {
   text-align: right;
-  font-family: monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 .tourism-table .font-semibold {
   font-weight: 600;
-  color: #e5e7eb;
+  color: #f1f5f9;
 }
 
 .tourism-table__product,
@@ -170,19 +153,19 @@
   color: #8ba3bb;
 }
 
+/* Same shape as the population tab's day/night ratio badge */
 .tourism-badge {
   display: inline-block;
   margin-top: 4px;
   padding: 1px 6px;
-  border-radius: 999px;
-  font-size: 0.93rem;
-  font-weight: 600;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .tourism-badge--constraint {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: rgba(250, 82, 82, 0.15);
+  color: #ff8787;
 }
 
 /* Accommodation supply/demand key-value pairs */
@@ -195,34 +178,31 @@
 }
 
 .tourism-kv__label {
-  color: #9ca3af;
+  color: #94a3b8;
   white-space: nowrap;
 }
 
 .tourism-kv__value {
-  color: #e5e7eb;
-  font-family: monospace;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
 }
 
 .tourism-kv__note {
   margin-left: 8px;
   color: #8ba3bb;
   font-size: 1rem;
-  font-family: inherit;
 }
 
 .tourism-occupancy-bar {
   height: 10px;
-  background-color: #111827;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
   overflow: hidden;
   margin-bottom: 12px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .tourism-occupancy-bar__fill {
   height: 100%;
-  background: linear-gradient(90deg, #be185d, #ec4899);
+  background: #ec4899;
   transition: width 0.3s ease-out;
 }
 
@@ -243,7 +223,7 @@
 }
 
 .tourism-meter__label {
-  color: #9ca3af;
+  color: #94a3b8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -251,20 +231,18 @@
 
 .tourism-meter__track {
   height: 8px;
-  background-color: #111827;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
   overflow: hidden;
 }
 
 .tourism-meter__fill {
   height: 100%;
-  border-radius: 4px;
 }
 
 .tourism-meter__value {
   text-align: right;
-  font-family: monospace;
-  color: #e5e7eb;
+  font-variant-numeric: tabular-nums;
+  color: #e2e8f0;
 }
 
 /* Tourist spending list */
@@ -272,15 +250,6 @@
   max-height: 260px;
   overflow-y: auto;
   padding-right: 4px;
-}
-
-.tourism-card__list-container::-webkit-scrollbar {
-  width: 4px;
-}
-
-.tourism-card__list-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
 }
 
 .tourism-bar-item {
@@ -296,13 +265,13 @@
 }
 
 .tourism-bar-item__name {
-  font-weight: 500;
-  color: #e5e7eb;
+  font-weight: 600;
+  color: #e2e8f0;
 }
 
 .tourism-bar-item__values {
-  font-family: monospace;
   font-size: 1rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .tourism-bar-item__value {
@@ -311,37 +280,32 @@
 }
 
 .tourism-bar-item__amount {
-  color: #9ca3af;
+  color: #94a3b8;
   margin-left: 8px;
 }
 
 .tourism-bar-track {
   height: 10px;
-  background-color: #111827;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .tourism-bar-fill {
   height: 100%;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #be185d, #ec4899);
-  box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
+  background: #ec4899;
   transition: width 0.3s ease-out;
 }
 
 /* Loading and errors */
 .tourism-tab__loading,
 .tourism-tab__error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #9ca3af;
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
   font-size: 1rem;
 }
 
 .tourism-tab__error {
-  color: #f87171;
+  color: #ff7171;
 }

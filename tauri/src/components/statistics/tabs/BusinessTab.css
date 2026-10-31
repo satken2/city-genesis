@@ -1,8 +1,8 @@
 /**
  * Shops and businesses tab styles.
  *
- * Matches the statistics window's dark theme. A two-row layout stacks a filter bar above
- * a sortable results table.
+ * A two-row layout stacks a filter row above a sortable results table. The filter row is not
+ * enclosed in a card; selects and the table use the population tab's styles.
  */
 
 .biz-tab {
@@ -20,10 +20,6 @@
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 14px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .biz-filter {
@@ -35,31 +31,24 @@
 .biz-filter__label {
   font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #8ba3bb;
-  text-transform: uppercase;
+  color: #94a3b8;
 }
 
 .biz-filter__select {
-  min-width: 150px;
+  min-width: 160px;
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(255, 255, 255, 0.05);
   color: #e2e8f0;
   font: inherit;
   font-size: 1rem;
   cursor: pointer;
-  transition: border-color 0.12s, background 0.12s;
-}
-
-.biz-filter__select:hover {
-  border-color: rgba(78, 161, 255, 0.5);
 }
 
 .biz-filter__select:focus {
   outline: none;
-  border-color: rgba(78, 161, 255, 0.8);
+  border-color: rgba(78, 161, 255, 0.5);
 }
 
 .biz-filter__count {
@@ -79,8 +68,9 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  background: rgba(13, 20, 30, 0.5);
 }
 
 .biz-status {
@@ -105,15 +95,14 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #1a2230;
-  padding: 9px 12px;
+  background: #111827;
+  padding: 8px 12px;
   text-align: left;
   font-weight: 600;
   font-size: 1rem;
   color: #8ba3bb;
-  letter-spacing: 0.02em;
   white-space: nowrap;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   user-select: none;
 }
 
@@ -146,7 +135,7 @@
 
 .biz-table tbody td {
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   white-space: nowrap;
 }
 

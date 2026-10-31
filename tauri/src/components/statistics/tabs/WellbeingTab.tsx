@@ -20,7 +20,7 @@
  * In "Leisure", only time series use the right axis.
  */
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   LineChart,
@@ -153,13 +153,6 @@ const VIEW_COMPOSITION: Partial<Record<View, CompositionPart[]>> = {
   ],
 };
 
-/** Accent color by view (left border of card headings). */
-const VIEW_ACCENT: Record<View, string> = {
-  satisfaction: "#38bdf8",
-  leisure: "#f59e0b",
-  comfort: "#10b981",
-};
-
 // Share the four axis colors between lines and metric buttons.
 const AXIS_COLORS: Record<(typeof AXES)[number], string> = {
   wealth: "#f59e0b",
@@ -235,16 +228,14 @@ function KpiCard({
   value,
   unit,
   color,
-  emphasized,
 }: {
   label: string;
   value: number | null;
   unit: string;
   color: string;
-  emphasized?: boolean;
 }) {
   return (
-    <div className={`wellbeing-kpi-card${emphasized ? " wellbeing-kpi-card--total" : ""}`}>
+    <div className="wellbeing-kpi-card">
       <div className="wellbeing-kpi-card__label">{label}</div>
       <div className="wellbeing-kpi-card__value" style={{ color }}>
         {value == null ? "—" : value.toFixed(1)}
@@ -495,10 +486,7 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
   };
 
   return (
-    <div
-      className="wellbeing-tab"
-      style={{ "--wellbeing-accent": VIEW_ACCENT[view] } as CSSProperties}
-    >
+    <div className="wellbeing-tab">
       {scopeSelector}
 
       {/* Satisfaction descriptions are shown per metric in the right-column card, so omit them here. */}
@@ -523,7 +511,6 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
             value={toDisplayValue(total, current[total])}
             unit={unitOf(total)}
             color={SERIES_COLORS[total]}
-            emphasized
           />
         </div>
       )}

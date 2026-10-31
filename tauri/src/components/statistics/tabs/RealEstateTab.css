@@ -1,30 +1,28 @@
 /**
  * Real estate statistics tab styles.
+ *
+ * Sections are not enclosed in cards; headings, the table, and badges use the population tab's styles.
  */
 
 .realestate-tab {
   display: flex;
   flex-direction: column;
+  gap: 12px;
   height: 100%;
   width: 100%;
-  color: #c1c9d2;
+  color: #e2e8f0;
 }
 
 .realestate-tab__header {
-  padding: 0.69rem 1.39rem;
-  background-color: #16222f;
-  border-bottom: 1px solid #203245;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
 }
 
 .realestate-tab__body {
   display: flex;
   flex: 1;
   min-height: 0; /* Required for scroll control */
-  gap: 1.39rem;
-  padding: 1.39rem;
-  background-color: #0d1620;
+  gap: 14px;
 }
 
 .realestate-tab__left {
@@ -37,21 +35,15 @@
   flex: 0.9;
   display: flex;
   flex-direction: column;
-  gap: 1.39rem;
+  gap: 10px;
   min-width: 0;
 }
 
-/* Card definitions */
 .realestate-card {
-  background-color: #131f2d;
-  border: 1px solid #203245;
-  border-radius: 6px;
-  padding: 1.39rem;
   display: flex;
   flex-direction: column;
   width: 100%;
   min-height: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .realestate-card--half {
@@ -60,13 +52,10 @@
 }
 
 .realestate-card__title {
-  margin: 0 0 1.04rem 0;
-  font-size: 1.25rem;
+  margin: 0 0 2px;
+  font-size: 1.08rem;
   font-weight: 600;
-  color: #ecf0f5;
-  border-left: 3px solid #228be6;
-  padding-left: 0.69rem;
-  line-height: 1.2;
+  color: #cbd5e1;
 }
 
 /* Supply/demand table */
@@ -74,6 +63,9 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  background: rgba(13, 20, 30, 0.5);
 }
 
 .realestate-table {
@@ -85,35 +77,36 @@
 .realestate-table th {
   position: sticky;
   top: 0;
-  background-color: #131f2d;
-  color: #8ba3bb;
-  font-weight: 500;
-  text-align: left;
-  padding: 0.69rem;
-  border-bottom: 2px solid #203245;
   z-index: 1;
+  background: #111827;
+  color: #8ba3bb;
+  font-weight: 600;
+  text-align: left;
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .realestate-table td {
-  padding: 0.9rem 0.69rem;
-  border-bottom: 1px solid #1a2a3a;
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   vertical-align: middle;
 }
 
-.realestate-table tr:hover td {
-  background-color: #18283a;
+.realestate-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .realestate-table .text-right {
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .realestate-table .font-semibold {
   font-weight: 600;
-  color: #ecf0f5;
+  color: #f1f5f9;
 }
 
-/* Vacancy rate cells and progress bars */
+/* Vacancy rate cells and bars */
 .vacancy-cell {
   display: flex;
   align-items: center;
@@ -123,7 +116,6 @@
 
 .vacancy-rate {
   font-variant-numeric: tabular-nums;
-  font-weight: 500;
   min-width: 4.44rem;
   text-align: right;
 }
@@ -131,43 +123,32 @@
 .vacancy-bar-bg {
   width: 50px;
   height: 6px;
-  background-color: #1a2a3a;
-  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.05);
   overflow: hidden;
   position: relative;
 }
 
 .vacancy-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b5bdb, #228be6);
-  border-radius: 3px;
+  background: #228be6;
   transition: width 0.3s ease;
 }
 
-/* Demand pressure badge */
+/* Demand pressure badge (same shape as the population tab's day/night ratio badge) */
 .demand-pressure-badge {
   display: inline-block;
-  padding: 0.21rem 0.56rem;
+  padding: 1px 6px;
   border-radius: 4px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  background-color: #1a2a3a;
-  color: #8ba3bb;
-  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
 }
 
 .demand-pressure-badge.has-pressure {
-  background-color: rgba(250, 82, 82, 0.15);
+  background: rgba(250, 82, 82, 0.15);
   color: #ff8787;
-  border-color: rgba(250, 82, 82, 0.3);
-  animation: pulse-border 2s infinite ease-in-out;
-}
-
-@keyframes pulse-border {
-  0% { border-color: rgba(250, 82, 82, 0.3); }
-  50% { border-color: rgba(250, 82, 82, 0.7); }
-  100% { border-color: rgba(250, 82, 82, 0.3); }
 }
 
 /* Recharts container */
@@ -180,23 +161,22 @@
 
 /* Empty, loading, and error states */
 .realestate-tab__empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   height: 100%;
   font-size: 1rem;
-  color: #5c6b7a;
+  color: #5a6f86;
 }
 
 .realestate-tab__loading,
 .realestate-tab__error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+  display: grid;
+  place-items: center;
+  height: 200px;
   font-size: 1rem;
+  color: #9db0c5;
 }
 
 .realestate-tab__error {
-  color: #fa5252;
+  color: #ff7171;
 }

@@ -1,7 +1,7 @@
 /**
  * Shared styles for developer-only Spawn debug tabs.
  * Used by both DebugAgentSpawnTab and DebugBuildingSpawnTab.
- * Matches the dark card layout used by other statistics tabs.
+ * Sections are not enclosed in cards and use the population tab's styles.
  */
 
 .debug-spawn-tab {
@@ -26,8 +26,9 @@
 
 .debug-spawn-tab__title {
   margin: 0;
-  font-size: 1.39rem;
-  color: #dbe7f3;
+  font-size: 1.46rem;
+  font-weight: 700;
+  color: #e2e8f0;
 }
 
 .debug-spawn-tab__loading,
@@ -41,7 +42,7 @@
 .debug-spawn-layout {
   display: grid;
   grid-template-columns: 3fr 1fr;
-  gap: 12px;
+  gap: 14px;
   flex: 1;
   min-height: 0;
 }
@@ -62,13 +63,9 @@
 }
 
 .debug-spawn-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 /* Card filling the remaining parent-column height (right table and building tab's single chart) */
@@ -79,9 +76,9 @@
 
 .debug-spawn-card__title {
   margin: 0;
-  font-size: 1.11rem;
+  font-size: 1.08rem;
   font-weight: 600;
-  color: #9cb3cb;
+  color: #cbd5e1;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -126,7 +123,7 @@
 .debug-spawn-card__no-data {
   padding: 24px 0;
   text-align: center;
-  color: #64748b;
+  color: #5a6f86;
   font-size: 1rem;
 }
 
@@ -138,26 +135,34 @@
 
 .debug-spawn-control__label {
   font-size: 1rem;
-  color: #8ba3bb;
+  font-weight: 600;
+  color: #94a3b8;
   white-space: nowrap;
 }
 
 .debug-spawn-control__select {
   flex: 1;
   min-width: 0;
-  background: #1a2230;
-  color: #dbe7f3;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  border-radius: 6px;
+  font: inherit;
   font-size: 1rem;
-  padding: 3px 6px;
+  padding: 6px 10px;
+}
+
+.debug-spawn-control__select:focus {
+  outline: none;
+  border-color: rgba(78, 161, 255, 0.5);
 }
 
 .debug-spawn-table-scroll {
   overflow-y: auto;
   max-height: 260px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  background: rgba(13, 20, 30, 0.5);
 }
 
 /* Expand the right-column table's scrolling area to fill the card's remaining height. */
@@ -177,17 +182,17 @@
 .debug-spawn-table th {
   position: sticky;
   top: 0;
-  background: #1a2230;
+  background: #111827;
   color: #8ba3bb;
   text-align: left;
-  padding: 4px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   font-weight: 600;
 }
 
 .debug-spawn-table td {
   padding: 3px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .debug-spawn-table__num {

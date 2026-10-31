@@ -1,28 +1,24 @@
+/* Sections are not enclosed in cards; headings, values, and bars use the population tab's styles. */
 .trade-tab {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 16px;
   box-sizing: border-box;
   overflow-y: auto;
-  background-color: #0b0f19;
-  color: #f3f4f6;
+  color: #e2e8f0;
 }
 
 .trade-tab__title {
-  font-size: 1.85rem;
+  margin: 0 0 12px 0;
+  font-size: 1.46rem;
   font-weight: 700;
-  margin: 0 0 16px 0;
-  color: #ffffff;
-  border-left: 4px solid #06b6d4;
-  padding-left: 10px;
-  line-height: 1.2;
+  color: #e2e8f0;
 }
 
 .trade-tab__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 14px;
   flex: 1;
   min-height: 0;
 }
@@ -31,31 +27,23 @@
 .trade-tab__col-right {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
-/* Shared card styles (glassmorphism and dark theme) */
+/* The no-data message is positioned against the section. */
 .trade-card {
-  background: rgba(22, 29, 43, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 16px;
+  position: relative;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
   flex: 1;
 }
 
 .trade-card__title {
-  font-size: 1.3rem;
+  margin: 0 0 6px;
+  font-size: 1.08rem;
   font-weight: 600;
-  margin: 0 0 12px 0;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #cbd5e1;
 }
 
 .trade-card__chart-container {
@@ -73,7 +61,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
+  color: #5a6f86;
   font-size: 1rem;
 }
 
@@ -85,22 +73,8 @@
   padding-right: 4px;
 }
 
-/* Scrollbar decoration */
-.trade-card__list-container::-webkit-scrollbar {
-  width: 4px;
-}
-
-.trade-card__list-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.trade-card__list-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
 .trade-bar-item {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
 .trade-bar-item:last-child {
@@ -112,17 +86,17 @@
   justify-content: space-between;
   align-items: center;
   font-size: 1rem;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .trade-bar-item__name {
-  font-weight: 500;
-  color: #e5e7eb;
+  font-weight: 600;
+  color: #e2e8f0;
 }
 
 .trade-bar-item__values {
-  font-family: monospace;
   font-size: 1rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .trade-bar-item__val-actual {
@@ -130,22 +104,20 @@
 }
 
 .trade-bar-item__val-divider {
-  color: #4b5563;
+  color: #5a6f86;
   margin: 0 4px;
 }
 
 .trade-bar-item__val-capacity {
-  color: #9ca3af;
+  color: #94a3b8;
 }
 
 /* Track for overlaid horizontal bars */
 .trade-bar-track {
-  height: 14px;
-  background-color: #111827;
-  border-radius: 4px;
+  height: 10px;
+  background-color: rgba(255, 255, 255, 0.05);
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* Overlaid bar fills */
@@ -154,51 +126,43 @@
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 4px;
   transition: width 0.3s ease-out;
 }
 
 /* Export capacity (light green) */
 .trade-bar-fill--capacity-export {
-  background-color: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  box-sizing: border-box;
+  background-color: rgba(16, 185, 129, 0.25);
   z-index: 1;
 }
 
 /* Actual exports (dark green) */
 .trade-bar-fill--actual-export {
-  background: linear-gradient(90deg, #059669, #10b981);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  background-color: #10b981;
   z-index: 2;
 }
 
 /* Import capacity (light red) */
 .trade-bar-fill--capacity-import {
-  background-color: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  box-sizing: border-box;
+  background-color: rgba(239, 68, 68, 0.25);
   z-index: 1;
 }
 
 /* Actual imports (dark red) */
 .trade-bar-fill--actual-import {
-  background: linear-gradient(90deg, #dc2626, #ef4444);
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+  background-color: #ef4444;
   z-index: 2;
 }
 
 /* Loading and error states */
 .trade-tab__loading,
 .trade-tab__error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #9ca3af;
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
   font-size: 1rem;
 }
 
 .trade-tab__error {
-  color: #f87171;
+  color: #ff7171;
 }

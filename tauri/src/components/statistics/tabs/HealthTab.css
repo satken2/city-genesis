@@ -4,13 +4,13 @@
  * A scope dropdown at the top, followed by two equal-width columns in the middle (life
  * expectancy line chart and stacked horizontal death-age distribution bars by cause and age
  * band), and two equal-width columns at the bottom (nutrition and healthcare fulfillment
- * distributions). Uses the shared window dark theme (rgba(30,41,59,...) / #e2e8f0 colors).
+ * distributions). Charts are not enclosed in cards and use the population tab's styles.
  */
 
 .health-tab {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   height: 100%;
   min-height: 0;
 }
@@ -47,7 +47,6 @@
   padding: 6px 10px;
   cursor: pointer;
   min-width: 160px;
-  transition: border-color 0.12s;
 }
 
 .health-tab__scope-select:focus {
@@ -55,7 +54,7 @@
   border-color: rgba(78, 161, 255, 0.5);
 }
 
-/* ========== Chart container ========== */
+/* ========== Chart rows ========== */
 
 /*
  * Split the two rows equally (flex: 1). The chart area .health-chart__area uses flex: 1
@@ -63,36 +62,10 @@
  * (flex-basis: auto), it collapses to 0 and ResponsiveContainer draws nothing.
  * Always give rows a definite height.
  */
-.health-tab__top-row {
-  display: flex;
-  gap: 20px;
-  flex: 1;
-  min-height: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 16px;
-}
-
-/* Split the top two charts (life expectancy / death-age distribution) equally left and right. */
-.health-chart--lifespan,
-.health-chart--deaths {
-  flex: 1;
-  min-width: 0;
-}
-
-.health-chart--deaths .health-chart__title {
-  border-left-color: #dc2626; /* Deaths use red. */
-}
-
-.health-chart__subtitle {
-  margin-left: 8px;
-  font-size: 0.97rem;
-  font-weight: 400;
-  color: #8ba3bb;
-}
-
+.health-tab__top-row,
 .health-tab__bottom-row {
   display: flex;
-  gap: 20px;
+  gap: 14px;
   flex: 1;
   min-height: 0;
 }
@@ -102,39 +75,28 @@
 .health-chart {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  flex: 1;
+  min-width: 0;
   min-height: 0;
 }
 
-.health-chart--half {
-  flex: 1;
-  min-width: 0;
-}
-
 .health-chart__title {
-  margin: 0;
-  font-size: 1.14rem;
+  margin: 0 0 2px;
+  font-size: 1.08rem;
   font-weight: 600;
   color: #cbd5e1;
-  border-left: 3px solid #3b82f6;
-  padding-left: 8px;
 }
 
-.health-tab__bottom-row .health-chart--half:nth-child(1) .health-chart__title {
-  border-left-color: #10b981; /* Nutrition uses green. */
-}
-
-.health-tab__bottom-row .health-chart--half:nth-child(2) .health-chart__title {
-  border-left-color: #06b6d4; /* Healthcare uses cyan. */
+.health-chart__subtitle {
+  margin-left: 8px;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #8ba3bb;
 }
 
 .health-chart__area {
   flex: 1;
   min-height: 0;
-  background: rgba(26, 34, 48, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
-  padding: 10px;
 }
 
 .health-chart__empty {

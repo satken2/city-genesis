@@ -1,8 +1,11 @@
-/* EmploymentTab.css */
+/* EmploymentTab.css
+ * Sections are not enclosed in cards; headings, the scope selector, values, and the table use the population tab's styles.
+ */
 
 .emp-tab {
   display: flex;
   flex-direction: column;
+  gap: 12px;
   height: 100%;
   width: 100%;
   color: #e2e8f0;
@@ -12,13 +15,9 @@
 /* ── Header (scope selector) ── */
 .emp-tab__header {
   display: flex;
-  justify-content: flex-end;
-  padding: 8px 12px;
-  background: rgba(15, 23, 42, 0.4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
 }
 
-/* Reuse shared scope-selector styles from education. */
 .scope-selector {
   display: flex;
   align-items: center;
@@ -27,24 +26,25 @@
 
 .scope-selector__label {
   font-size: 1rem;
+  font-weight: 600;
   color: #94a3b8;
-  font-weight: 500;
 }
 
 .scope-selector__select {
-  background: #1e293b;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font: inherit;
   font-size: 1rem;
-  padding: 4px 8px;
-  outline: none;
+  padding: 6px 10px;
   cursor: pointer;
-  transition: border-color 0.2s;
+  min-width: 160px;
 }
 
-.scope-selector__select:hover {
-  border-color: rgba(255, 255, 255, 0.25);
+.scope-selector__select:focus {
+  outline: none;
+  border-color: rgba(78, 161, 255, 0.5);
 }
 
 /* ── Two-column layout ── */
@@ -52,16 +52,14 @@
   display: flex;
   flex: 1;
   min-height: 0;
-  gap: 12px;
-  padding: 12px;
-  background: #0f172a;
+  gap: 14px;
 }
 
 .emp-tab__left {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   min-width: 0;
   overflow-y: auto;
 }
@@ -70,17 +68,11 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
   min-width: 0;
 }
 
-/* ── Shared cards ── */
+/* ── Sections ── */
 .emp-card {
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 10px 12px;
   display: flex;
   flex-direction: column;
 }
@@ -91,49 +83,41 @@
 }
 
 .emp-card__title {
-  font-size: 1.11rem;
+  margin: 0 0 6px;
+  font-size: 1.08rem;
   font-weight: 600;
-  margin: 0 0 8px 0;
-  color: #38bdf8;
-  border-left: 3px solid #38bdf8;
-  padding-left: 8px;
+  color: #cbd5e1;
 }
 
 /* ── ① KPI summary ── */
 .emp-kpi-row {
   display: flex;
-  gap: 8px;
-  justify-content: space-between;
+  gap: 14px;
 }
 
 .emp-kpi-card {
   flex: 1;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
-  padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
   min-width: 0;
 }
 
 .emp-kpi-card__label {
-  font-size: 0.93rem;
-  color: #64748b;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7b8fa5;
 }
 
 .emp-kpi-card__value {
-  font-size: 1.85rem;
+  font-size: 2.08rem;
   font-weight: 700;
-  letter-spacing: -0.5px;
   line-height: 1.2;
+  font-variant-numeric: tabular-nums;
 }
 
 .emp-kpi-card__sub {
-  font-size: 0.83rem;
-  color: #475569;
+  font-size: 1rem;
+  color: #5a6f86;
   line-height: 1.2;
 }
 
@@ -142,13 +126,11 @@
   align-items: center;
   gap: 6px;
   margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .emp-unemployed-label {
   font-size: 1rem;
-  color: #64748b;
+  color: #7b8fa5;
 }
 
 .emp-unemployed-value {
@@ -171,7 +153,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #475569;
+  color: #5a6f86;
   font-size: 1rem;
 }
 
@@ -235,7 +217,6 @@
   flex: 1;
   height: 16px;
   background: rgba(255, 255, 255, 0.04);
-  border-radius: 2px;
   position: relative;
   overflow: hidden;
   min-width: 0;
@@ -248,7 +229,6 @@
   top: 0;
   height: 100%;
   opacity: 0.3;
-  border-radius: 2px;
   transition: width 0.3s ease;
   z-index: 1;
 }
@@ -260,10 +240,8 @@
   top: 50%;
   height: 10px;
   transform: translateY(-50%);
-  border-radius: 2px;
   transition: width 0.3s ease;
   z-index: 2;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
 .emp-tier-row__values {
@@ -288,7 +266,7 @@
 }
 
 .emp-tier-row__wage {
-  width: 42px;
+  width: 5rem;
   font-size: 1rem;
   color: #94a3b8;
   white-space: nowrap;
@@ -326,14 +304,12 @@
 .emp-skill-bar-bg {
   height: 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
   overflow: hidden;
   position: relative;
 }
 
 .emp-skill-bar-fill {
   height: 100%;
-  border-radius: 2px;
   transition: width 0.3s ease;
 }
 
@@ -367,6 +343,9 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  background: rgba(13, 20, 30, 0.5);
 }
 
 .emp-industry-table {
@@ -378,17 +357,15 @@
 .emp-industry-table__th {
   position: sticky;
   top: 0;
-  background: #1e293b;
-  color: #64748b;
+  background: #111827;
+  color: #8ba3bb;
   font-size: 1rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 5px 6px;
+  padding: 5px 8px;
   text-align: left;
   white-space: nowrap;
   z-index: 1;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .emp-industry-table__th--name {
@@ -410,7 +387,7 @@
 }
 
 .emp-industry-table__td {
-  padding: 5px 6px;
+  padding: 5px 8px;
   vertical-align: middle;
 }
 
@@ -450,7 +427,6 @@
 .emp-industry-bar-bg {
   height: 8px;
   background: rgba(255, 255, 255, 0.06);
-  border-radius: 2px;
   overflow: hidden;
   position: relative;
   margin-bottom: 2px;
@@ -458,7 +434,6 @@
 
 .emp-industry-bar-fill {
   height: 100%;
-  border-radius: 2px;
   transition: width 0.3s ease;
 }
 
@@ -474,41 +449,16 @@
   font-size: 1rem;
 }
 
-/* Scrollbar */
-.emp-tab__left::-webkit-scrollbar,
-.emp-industry-table-wrapper::-webkit-scrollbar {
-  width: 4px;
-}
-
-.emp-tab__left::-webkit-scrollbar-track,
-.emp-industry-table-wrapper::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.3);
-  border-radius: 4px;
-}
-
-.emp-tab__left::-webkit-scrollbar-thumb,
-.emp-industry-table-wrapper::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.emp-tab__left::-webkit-scrollbar-thumb:hover,
-.emp-industry-table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 /* Loading and errors */
 .stats-tab-loading,
 .stats-tab-error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  color: #94a3b8;
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
   font-size: 1rem;
 }
 
 .stats-tab-error {
-  color: #ef4444;
+  color: #ff7171;
 }
