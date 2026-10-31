@@ -62,7 +62,7 @@ try {
   globalThis.fetch = async () => new Response("{}", { headers: { "Content-Type": "application/json" } });
   assert.deepEqual(await fetchSpatialWarnings("http://localhost:5000"), []);
   globalThis.fetch = async () => new Response("{}", { status: 503 });
-  await assert.rejects(fetchSpatialWarnings("http://localhost:5000"), /HTTP 503/,
+  await assert.rejects(fetchSpatialWarnings("http://localhost:5000"), error => error.status === 503,
     "警告APIの失敗を警告なしとして扱わない");
 } finally {
   globalThis.fetch = nativeFetch;

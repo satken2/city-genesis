@@ -14,6 +14,6 @@
 | --- | --- |
 | `SHAPE_FULL` | 区画そのもの |
 | `SHAPE_OFFICE` | 区画の向きに合わせた矩形 |
-| `SHAPE_HOUSE` | 接道辺から下がって建つ、正方形に近い矩形 |
+| `SHAPE_HOUSE` | 区画の中央に接道辺と平行に置く、正方形に近い矩形 |
 | `SHAPE_COMMERCIAL` | 接道辺に沿った帯状の矩形 |
 | `SHAPE_SETBACK` | 区画の奥に寄せ、接道側に空き地を残す |

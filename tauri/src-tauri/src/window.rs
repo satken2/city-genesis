@@ -1038,7 +1038,7 @@ const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "grading",
 ];
 
-/// On session switches, prevent stale HTTP responses from reopening Tips or results. The emitted `epoch:ready` releases a
+/// On session switches, prevent stale HTTP responses from showing progress or results. The emitted `epoch:ready` releases a
 /// UI still waiting for Unity; it finds the presentation no longer current and does not start the execution.
 pub fn cancel_epoch_presentation(app: &AppHandle, state: &SharedState) {
     let id = state.lock().epoch_presentation_id.clone();
@@ -1055,13 +1055,18 @@ pub fn finish_epoch_presentation(app: &AppHandle, state: &SharedState, id: &str)
         guard.epoch_presentation_id = None;
         guard.graphic_connected
     };
-    close_tips_window(app);
+    emit_epoch_progress_visible(app, false);
     if connected {
         if let Err(error) = ipc::send_ui_action(state, "".into(), None, "epoch:executing".into(), json!({"executing": false})) {
             log::error!("epoch presentation finish: {error}");
         }
     }
     let _ = app.emit("epoch:executing", json!({"executing": false}));
+}
+
+/// Switch the cockpit's overlay showing the core's current stage, from epoch start until the simulation returns.
+pub fn emit_epoch_progress_visible(app: &AppHandle, visible: bool) {
+    let _ = app.emit_to(LABEL_COCKPIT, "epoch:progress_visible", json!({"visible": visible}));
 }
 
 pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) -> Result<(), String> {
@@ -1491,28 +1496,14 @@ pub fn close_parameter_setup_window(app: &AppHandle) {
     }
 }
 
-/// Show the Tips of the Day window. Do nothing if already
-/// visible. Display a small 580x380 window at screen center.
+/// Show the Tips of the Day window during initial loading; it waits for the Start button. Do nothing if already
+/// visible. Display a small 680x380 window at screen center. Create windows from an async command or worker thread.
 pub fn open_tips_window(app: &AppHandle, state: &SharedState) -> Result<(), String> {
-    let monitor_index = {
-        let guard = state.lock();
-        guard.current_monitor_index
-    };
-    open_tips_window_on_monitor(app, monitor_index)
-}
-
-/// Show Tips of the Day on the specified monitor index.
-/// Create windows from an async command or worker thread.
-pub fn open_tips_window_on_monitor(app: &AppHandle, monitor_index: usize) -> Result<(), String> {
-    open_tips_window_with_mode(app, monitor_index, false)
-}
-
-/// Initial loading waits for the Start button; for epoch waits, the caller closes it on completion.
-pub fn open_tips_window_with_mode(app: &AppHandle, monitor_index: usize, epoch: bool) -> Result<(), String> {
     if app.get_webview_window("tips").is_some() {
         return Ok(());
     }
 
+    let monitor_index = state.lock().current_monitor_index;
     let monitors: Vec<_> = app
         .available_monitors()
         .unwrap_or_default()
@@ -1525,7 +1516,7 @@ pub fn open_tips_window_with_mode(app: &AppHandle, monitor_index: usize, epoch: 
     let builder = WebviewWindowBuilder::new(
         app,
         "tips",
-        WebviewUrl::App(if epoch { "index.html?tipsMode=epoch" } else { "index.html" }.into()),
+        WebviewUrl::App("index.html".into()),
     )
     .title("Today's Tips")
     .decorations(false)

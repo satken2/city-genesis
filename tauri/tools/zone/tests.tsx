@@ -70,7 +70,7 @@ for (const polygon of [null, undefined, [], [[0, 0]], [[0, 0], [1, 1]]] as const
 
   await act(async () => { editContainer.querySelector<HTMLButtonElement>('[data-guide-value="expand"]')!.click(); });
   await act(async () => { mapProps.onCursorWorldPos!({ x: 50, z: 2 }); });
-  assert.ok(editContainer.querySelector(".zone-edit__target")!.textContent?.includes("Empty"));
+  assert.equal(editContainer.querySelector<HTMLElement>('[data-guide-value="expand"] .zone-edit__chip')?.style.background, "#123456");
   paints.length = 0;
   mapProps.animatedOverlayDraw!(ctx, view, 0);
   assert.equal(paints.length, 0, "a district without a polygon must not paint a previous path");

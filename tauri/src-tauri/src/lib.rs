@@ -185,19 +185,15 @@ fn begin_epoch_presentation(app: tauri::AppHandle, state: tauri::State<'_, Share
         }
     }
     let _ = app.emit("epoch:executing", serde_json::json!({"executing": true}));
+    window::emit_epoch_progress_visible(&app, true);
     Ok(connected)
 }
 
+/// Hide the cockpit's progress once the simulation returns; the HUD stays disabled until the results close.
 #[tauri::command]
-async fn set_epoch_tips_visible(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, id: String, visible: bool) -> Result<(), String> {
-    let monitor = {
-        let guard = state.lock();
-        if guard.epoch_presentation_id.as_deref() != Some(&id) { return Ok(()); }
-        guard.current_monitor_index
-    };
-    if visible { window::open_tips_window_with_mode(&app, monitor, true)?; }
-    else { window::close_tips_window(&app); }
-    Ok(())
+fn hide_epoch_progress(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, id: String) {
+    if state.lock().epoch_presentation_id.as_deref() != Some(&id) { return; }
+    window::emit_epoch_progress_visible(&app, false);
 }
 
 #[tauri::command]
@@ -1895,7 +1891,7 @@ pub fn run() {
                             }
                             "parameter-setup" if event_state.lock().awaiting_parameter_setup => { api.prevent_close(); }
                             "notification" | "hintbar" | "tutorial" | "parameter-setup" => {}
-                            "tips" if { let guard = event_state.lock(); guard.is_loading || guard.epoch_presentation_id.is_some() } => { api.prevent_close(); }
+                            "tips" if event_state.lock().is_loading => { api.prevent_close(); }
                             "tips" => {}
                             _ => {
                                 let is_managed_popup = {
@@ -1951,7 +1947,7 @@ pub fn run() {
             close_current_window,
             send_window_action,
             begin_epoch_presentation,
-            set_epoch_tips_visible,
+            hide_epoch_progress,
             finish_epoch_presentation,
             is_epoch_presentation_current,
             request_thumbnail_capture,

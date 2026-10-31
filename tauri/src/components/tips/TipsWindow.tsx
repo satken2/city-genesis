@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, type AnimationEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { buildApiUrl, fetchApi } from "../../utils/api";
 import { getInitialLoadingReady, startGameFromTips } from "../../utils/ipc";
 import { iconUrl } from "../hud/hudCommon";
 import "./TipsWindow.css";
@@ -53,13 +52,6 @@ type TipItem = {
   image?: string;
 };
 
-/** Epoch execution progress (GET /api/v1/epochs/progress). step is the core's current stage, empty before entry. */
-type EpochProgress = {
-  index: number;
-  count: number;
-  step: string;
-};
-
 // Tips は待ち時間の読み物と取扱説明を兼ねる。本文は内部の計算式ではなく、現象の原因や操作の結果を伝える。
 const TIPS_LIST: TipItem[] = [
   { id: "tip1", image: tip1 },
@@ -106,14 +98,13 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip43", image: tip43 },
 ];
 
-export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: string; mode?: "initial" | "epoch" }) {
+export function TipsWindow() {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * TIPS_LIST.length));
   const [fadePhase, setFadePhase] = useState<"visible" | "out" | "loading" | "in">("visible");
   const [ready, setReady] = useState(false);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(false);
-  const [progress, setProgress] = useState<EpochProgress | null>(null);
   const [autoSwitchResetKey, setAutoSwitchResetKey] = useState(0);
 
   const handleReload = useCallback(() => {
@@ -148,20 +139,14 @@ export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: strin
     setFadePhase((phase) => phase === "loading" ? "in" : phase);
   };
 
-  // During initial loading, keep checking readiness to start; during epoch execution, keep reading the core's current stage.
+  // Keep checking whether rendering is ready so the Start button appears.
   useEffect(() => {
-    if (mode === "epoch" && !apiBaseUrl) return;
     let disposed = false;
     let timer: ReturnType<typeof setTimeout>;
     const refresh = async () => {
       try {
-        if (mode === "epoch") {
-          const value = await fetchApi<EpochProgress>(buildApiUrl(apiBaseUrl, "/api/v1/epochs/progress"));
-          if (!disposed) setProgress(value);
-        } else {
-          const value = await getInitialLoadingReady();
-          if (!disposed) setReady(value);
-        }
+        const value = await getInitialLoadingReady();
+        if (!disposed) setReady(value);
       } catch (e) {
         console.error("Failed to read loading state:", e);
       } finally {
@@ -170,10 +155,10 @@ export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: strin
     };
     void refresh();
     return () => { disposed = true; clearTimeout(timer); };
-  }, [mode, apiBaseUrl]);
+  }, []);
 
   const handleStart = async () => {
-    if (mode !== "initial" || !ready || starting) return;
+    if (!ready || starting) return;
     setStarting(true);
     setError(false);
     try {
@@ -186,12 +171,6 @@ export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: strin
   };
 
   const currentTip = TIPS_LIST[currentIndex];
-  const stepLabel = progress?.step ? t(`epochProgress.steps.${progress.step}`) : t("epochConfirm.executing");
-  const loadingLabel = mode === "initial"
-    ? t("tips.nowLoading")
-    : progress && progress.count > 1
-      ? t("epochProgress.counter", { step: stepLabel, index: progress.index, count: progress.count })
-      : stepLabel;
 
   return (
     <div className="tips-window" data-tauri-drag-region>
@@ -238,14 +217,14 @@ export function TipsWindow({ apiBaseUrl, mode = "initial" }: { apiBaseUrl: strin
         </button>
         <div className="tips-footer-right">
           {error && <span role="alert">{t("tips.startError")}</span>}
-          {mode === "initial" && ready ? (
+          {ready ? (
             <button className="tips-btn tips-btn--primary" onClick={handleStart} disabled={starting} type="button">
               {t("tips.startGame")}
             </button>
           ) : (
             <span className="tips-loading" role="status" aria-live="polite">
               <span className="tips-loading-spinner" aria-hidden="true" />
-              <span className="tips-loading-text">{loadingLabel}</span>
+              <span className="tips-loading-text">{t("tips.nowLoading")}</span>
             </span>
           )}
         </div>

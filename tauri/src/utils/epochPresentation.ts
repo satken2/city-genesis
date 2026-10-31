@@ -28,9 +28,9 @@ export async function beginEpochPresentation() {
     id,
     isCurrent: () => invoke<boolean>("is_epoch_presentation_current", { id }),
     ready: ready.finally(dispose),
-    setTipsVisible: async (visible: boolean) => {
-      await invoke("set_epoch_tips_visible", { id, visible }).catch((error) => {
-        console.error("failed to update epoch tips", error);
+    hideProgress: async () => {
+      await invoke("hide_epoch_progress", { id }).catch((error) => {
+        console.error("failed to hide epoch progress", error);
       });
     },
     finish: () => invoke<void>("finish_epoch_presentation", { id }),

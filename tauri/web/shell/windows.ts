@@ -478,7 +478,7 @@ function placePopup(label: string, placement: Placement, maximized: boolean): vo
 }
 
 /**
- * セッションの切り替えでは、古い HTTP 応答で Tips や結果を再表示させない。送る `epoch:ready` は Unity を待っている UI を解放し、
+ * セッションの切り替えでは、古い HTTP 応答で進捗や結果を表示させない。送る `epoch:ready` は Unity を待っている UI を解放し、
  * その UI は演出が現行でないことを見て実行を始めない。
  */
 export function cancelEpochPresentation(): void {
@@ -493,7 +493,7 @@ export function finishEpochPresentation(id: string): void {
   if (state.epochPresentationId !== id) return;
   state.epochPresentationId = null;
   const connected = state.graphicConnected;
-  closeTipsWindow();
+  emitEpochProgressVisible(false);
   if (connected) {
     try {
       sendUiAction("", null, "epoch:executing", { executing: false });
@@ -502,6 +502,11 @@ export function finishEpochPresentation(id: string): void {
     }
   }
   emit("epoch:executing", { executing: false });
+}
+
+/** エポックの開始からシミュレーションが返るまで、コックピットにコアの処理中の段を重ねて出す。 */
+export function emitEpochProgressVisible(visible: boolean): void {
+  emitTo(LABEL_COCKPIT, "epoch:progress_visible", { visible });
 }
 
 function sendQuietly(windowType: string, action: string, params: unknown): void {
@@ -628,11 +633,11 @@ export function closeParameterSetupWindow(): void {
   host.destroy("parameter-setup");
 }
 
-/** Tips のウィンドウ。初期ロードは開始ボタンを待ち、エポック待機(epoch)は呼び出し元が完了時に閉じる。 */
-export function openTipsWindow(epoch = false): void {
+/** 初期ロードの Tips のウィンドウ。開始ボタンを待つ。 */
+export function openTipsWindow(): void {
   if (host.hasWindow("tips")) return;
   host.createWindow("tips", {
-    url: appUrl(epoch ? "?tipsMode=epoch" : ""),
+    url: appUrl(""),
     placement: centeredOnMonitor(TIPS_WIDTH, TIPS_HEIGHT),
     visible: true,
     title: "Today's Tips",

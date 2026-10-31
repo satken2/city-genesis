@@ -14,7 +14,7 @@ The master field `building_shape` selects each variant's footprint method. Each 
 | --- | --- |
 | `SHAPE_FULL` | The parcel itself |
 | `SHAPE_OFFICE` | A rectangle aligned with the parcel |
-| `SHAPE_HOUSE` | A near-square rectangle set back from the frontage |
+| `SHAPE_HOUSE` | A near-square rectangle centered on the parcel, parallel to the frontage |
 | `SHAPE_COMMERCIAL` | A strip-like rectangle along the frontage |
 | `SHAPE_SETBACK` | A footprint toward the rear, leaving open space at the front |
 

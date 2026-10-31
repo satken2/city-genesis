@@ -41,10 +41,12 @@ globalThis.fetch = async (input, init) => {
   }
   if (url.endsWith("/api/v1/city/")) return new Response(JSON.stringify({ city: { climate: saved } }));
   if (url.endsWith("/api/v1/sessions")) return new Response(JSON.stringify({ play_mode: playMode }));
-  const category = url.split("/").at(-1)!;
-  const data = category === "climates" ? { 1: preset } : category === "weather"
-    ? Object.fromEntries(Object.keys(preset.months[0].weather).map(id => [id, { display_name: id }])) : {};
-  return new Response(JSON.stringify({ [category]: data }));
+  // GET /api/v1/master は全種類を1本で返す。この窓が使わない種類は空にする。
+  const kinds = ["bd_types", "skills", "vehicle_types", "space_categories", "product_types", "parcel_types", "path_types",
+    "agent_types", "agents", "subbuildings", "landmarks", "products", "paths", "transit", "combined_paths", "budgets",
+    "resource_types", "prop_types"];
+  return new Response(JSON.stringify({ session_id: null, ...Object.fromEntries(kinds.map(kind => [kind, {}])), climates: { 1: preset },
+    weather: Object.fromEntries(Object.keys(preset.months[0].weather).map(id => [id, { display_name: id }])) }));
 };
 const container = document.createElement("div");
 document.body.append(container);

@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync, readdirSync } from "node:fs";
+import i18n from "i18next";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { PathRebuildPanel } from "../../src/components/path/PathRebuildPanel";
@@ -15,6 +17,10 @@ master.data = { paths: {
   203: { type: PATH_STREET, display_name: "Narrow road" },
   601: { type: PATH_TRACK, display_name: "Railway" },
 } } as unknown as MasterData;
+// describeError translates reason codes through the shared i18next instance, so give it the English resources.
+const i18nFolder = "src/i18n/en";
+await i18n.init({ lng: "en", interpolation: { escapeValue: false }, resources: { en: { translation: Object.assign({},
+  ...readdirSync(i18nFolder).filter(file => file.endsWith(".json")).map(file => JSON.parse(readFileSync(`${i18nFolder}/${file}`, "utf8")))) } } });
 const path = { path_id: 7, path_variant: 201, path_type: PATH_STREET, status: STATUS_ACTIVE,
   under_maintenance: true } as PathData;
 const quote = (variant: number) => ({ path_id: 7, current_variant: 201, rebuild_variant: variant,
@@ -33,7 +39,7 @@ globalThis.fetch = async (input, init) => {
     return preview(body.path_variant);
   }
   commits.push(body);
-  return failCommit ? Response.json({ code: "REJECTED", message: "Conditions changed" }, { status: 400 })
+  return failCommit ? Response.json({ code: "CONFLICT", params: {} }, { status: 409 })
     : Response.json(quote(body.path_variant));
 };
 const container = document.createElement("div");
@@ -80,10 +86,10 @@ preview = async variant => Response.json({ ...quote(variant), affordable: false,
 await select(203);
 assert.ok(confirm().disabled);
 assert.ok(container.textContent?.includes("construction.insufficientFunds"));
-preview = async () => Response.json({ code: "COLLISION", message: "Path overlaps a building" }, { status: 400 });
+preview = async () => Response.json({ code: "CREATEPATH_CONFLICT", params: {} }, { status: 409 });
 await select(202);
 assert.ok(confirm().disabled);
-assert.ok(container.querySelector('[role="alert"]')?.textContent?.includes("Path overlaps a building"));
+assert.ok(container.querySelector('[role="alert"]')?.textContent?.includes(i18n.t("errors.CREATEPATH_CONFLICT")));
 assert.equal(commits.length, 0);
 console.log("PASS: funding and geometry rejection block confirmation and show the reason");
 
@@ -92,7 +98,7 @@ await select(203);
 failCommit = true;
 await act(async () => confirm().click());
 assert.equal(closed, 0);
-assert.ok(container.querySelector('[role="alert"]')?.textContent?.includes("Conditions changed"));
+assert.ok(container.querySelector('[role="alert"]')?.textContent?.includes(i18n.t("errors.CONFLICT")));
 assert.equal(state.emitted.length, 0, "a rejected order must not notify or close");
 failCommit = false;
 await act(async () => { confirm().click(); confirm().click(); });

@@ -25,6 +25,8 @@
  *   would weaken the signal for real crises. Blinking is sufficient to attract attention, so no interrupting
  *   toast is shown.
  * - 政策立案は警告サイレンの隣の電球ボタンから開く。
+ * - Epoch execution: from start until the simulation returns, an overlay covering the whole panel shows the core's
+ *   progress (`epoch:progress_visible` from Rust). Afterwards the panel stays dimmed until the results close.
  *
  * This is the only HUD window guaranteed to exist once, so it owns BGM playback and opening windows for 3D
  * object selections, preventing duplicate playback/opening.
@@ -62,6 +64,7 @@ import {
   type L1Notification,
 } from "../../utils/cityNotifications";
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
+import { EpochProgressOverlay } from "./EpochProgressOverlay";
 import { PublicServiceGauges } from "./PublicServiceGauges";
 import { ScoreMiniMeter } from "./ScoreMiniMeter";
 import { TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
@@ -89,6 +92,7 @@ export function Cockpit() {
 
   // Currently active L1 notifications (major events requiring immediate action), used for badges and blinking.
   const [l1Notifications, setL1Notifications] = useState<L1Notification[]>([]);
+  const [progressVisible, setProgressVisible] = useState(false);
 
   // Report only content width changes caused by language, date, or font size, keeping transparent margins from blocking the 3D view.
   useEffect(() => {
@@ -180,6 +184,22 @@ export function Cockpit() {
       unlisten?.();
     };
   }, [masterData, t]);
+
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    let unlisten: (() => void) | undefined;
+    appWindow
+      .listen<{ visible: boolean }>("epoch:progress_visible", (event) => {
+        setProgressVisible(event.payload.visible);
+      })
+      .then((fn) => {
+        unlisten = fn;
+      })
+      .catch(console.error);
+    return () => {
+      unlisten?.();
+    };
+  }, []);
 
   // Clear the shared followed-citizen state at app startup (Unity also restarts with no citizen being followed),
   // then keep receiving updates even while the citizen panel and tracking list are closed.
@@ -320,11 +340,13 @@ export function Cockpit() {
   // solvable or affecting growth only) use a nonblinking yellow badge to preserve the warning signal.
   const cautionCount = l1Notifications.filter(isCautionNotification).length;
   const warningCount = l1Notifications.length - cautionCount;
+  // The overlay blocks input itself; dimming the panel under it would dim the overlay too.
+  const dimmed = epochExecuting && !progressVisible;
 
   return (
     <div
       ref={panelRef}
-      className={`hud-panel cockpit ${mode === "bulldozer" ? "cockpit--bulldozer" : ""} ${epochExecuting ? "hud-disabled" : ""}`}
+      className={`hud-panel cockpit ${mode === "bulldozer" ? "cockpit--bulldozer" : ""} ${dimmed ? "hud-disabled" : ""}`}
     >
       <div className="cockpit-tools">
         {TOOL_ICONS.map((icon) => {
@@ -423,6 +445,8 @@ export function Cockpit() {
         {t("taskbar.menuExecute")}
         <img src={iconUrl("menu_execute.png")} alt="" className="cockpit-execute-img" draggable={false} />
       </button>
+
+      {progressVisible && <EpochProgressOverlay apiBaseUrl={apiBaseUrl} />}
     </div>
   );
 }

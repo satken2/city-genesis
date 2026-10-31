@@ -18,17 +18,16 @@ import { loadTerrainEditorData, prepareScenarioTerrainEditor, saveScenarioTerrai
 import { coreInfo, getFrontendStatus } from "./version";
 import {
   closeParameterSetupWindow,
-  closeTipsWindow,
   closeWindowByLabel,
   closeWindowsByType,
   dismissNotification,
+  emitEpochProgressVisible,
   enqueueNotification,
   finishEpochPresentation,
   getConnectionStatus,
   normalizeEntity,
   normalizeOpenParams,
   openParameterSetupWindow,
-  openTipsWindow,
   openWindow,
   resetWindowGeometries,
   resizeCitizenVoice,
@@ -80,12 +79,12 @@ const commands: Record<string, Command> = {
       }
     }
     emit("epoch:executing", { executing: true });
+    emitEpochProgressVisible(true);
     return connected;
   },
-  set_epoch_tips_visible: (_caller, args) => {
-    if (state.epochPresentationId !== stringArg(args, "id", "set_epoch_tips_visible")) return;
-    if (args.visible === true) openTipsWindow(true);
-    else closeTipsWindow();
+  hide_epoch_progress: (_caller, args) => {
+    if (state.epochPresentationId !== stringArg(args, "id", "hide_epoch_progress")) return;
+    emitEpochProgressVisible(false);
   },
   finish_epoch_presentation: (_caller, args) => finishEpochPresentation(stringArg(args, "id", "finish_epoch_presentation")),
   is_epoch_presentation_current: (_caller, args) => state.epochPresentationId === stringArg(args, "id", "is_epoch_presentation_current"),
