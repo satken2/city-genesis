@@ -217,6 +217,8 @@
     "tabRealEstate": "Inmuebles",
     "tabTourism": "Turismo",
     "tabZones": "Distritos",
+    "zoneComparisonOverview": "Población e ingresos",
+    "zoneComparisonRange": "Escala: 0–{{max}}",
     "tourism": {
       "title": "Estadísticas de turismo",
       "tileTourists": "Turistas alojados",

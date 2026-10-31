@@ -217,6 +217,8 @@
     "tabRealEstate": "不動産",
     "tabTourism": "観光",
     "tabZones": "地区一覧",
+    "zoneComparisonOverview": "人口・所得",
+    "zoneComparisonRange": "表示範囲: 0–{{max}}",
     "tourism": {
       "title": "観光統計",
       "tileTourists": "滞在観光客",

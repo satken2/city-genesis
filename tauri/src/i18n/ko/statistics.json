@@ -217,6 +217,8 @@
     "tabRealEstate": "부동산",
     "tabTourism": "관광",
     "tabZones": "지구 목록",
+    "zoneComparisonOverview": "인구·소득",
+    "zoneComparisonRange": "표시 범위: 0–{{max}}",
     "tourism": {
       "title": "관광 통계",
       "tileTourists": "체류 관광객",

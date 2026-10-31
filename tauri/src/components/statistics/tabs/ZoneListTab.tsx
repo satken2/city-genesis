@@ -1,16 +1,7 @@
 /**
- * District list tab component.
- *
- * Lists every District as a wide card, stacked vertically, so Districts can be compared at a glance.
- * Each card has three columns:
- * - Population, daytime population, car ownership rate, and average Household income.
- * - Floor capacity and occupancy by floor type.
- * - Living environment metrics on a 100-point scale.
- *
- * Combines the per-District data of existing statistics APIs (commute, income, real estate, and
- * wellbeing District snapshot). They share the per-Epoch cache with the corresponding tabs.
- * Floor amounts come from the real estate API: the District API's space supplies/demands are
- * market quantities and do not equal the floor area in use.
+ * 地区を縦に比較するため、全カードで列幅・項目順・棒の尺度を揃える。
+ * 人口（居住・昼間共通）・所得・床面積は全地区の最大値、保有率・住環境は100%を上限とする。
+ * 床は不動産統計の容量と占有量を重ねる。地区APIの市場への出品・需要量とは区別する。
  */
 
 import { useMemo } from "react";
@@ -19,6 +10,7 @@ import { useEpochCachedStats } from "../useEpochCache";
 import { resolveIntlLocale } from "../../../utils/locale";
 import { formatRate } from "./CommuteTab";
 import { spaceTypeLabelKey } from "./RealEstateTab";
+import { Meter } from "../../common/Meter";
 import "./ZoneListTab.css";
 
 // --- Fields of the backend responses used by this tab ---
@@ -68,11 +60,34 @@ type ZoneCard = {
   comfort: Record<string, number | null>;
 };
 
-function ZoneMetric({ label, value }: { label: string; value: string }) {
+function ZoneMetric({ label, value, max, detail, capacity, color }: {
+  label: string;
+  value: number | null;
+  max: number;
+  detail: string;
+  capacity?: number;
+  color?: string;
+}) {
   return (
     <div className="zone-list-card__row">
-      <dt>{label}</dt>
-      <dd>{value}</dd>
+      <dt title={label}>{label}</dt>
+      <dd>
+        <div className="zone-list-card__graphic" role="img" aria-label={detail} tabIndex={0}>
+          {value == null ? <span className="zone-list-card__missing" aria-hidden="true">—</span> : (
+            <div className="zone-list-card__track" aria-hidden="true">
+              {capacity != null && (
+                <div className="zone-list-card__capacity">
+                  <Meter value={max > 0 ? capacity / max : 0} color="var(--flat-accent)" />
+                </div>
+              )}
+              <div className={capacity == null ? "zone-list-card__fill" : "zone-list-card__occupied"}>
+                <Meter value={max > 0 ? value / max : 0} color={color} />
+              </div>
+            </div>
+          )}
+          <span className="zone-list-card__tooltip" aria-hidden="true">{detail}</span>
+        </div>
+      </dd>
     </div>
   );
 }
@@ -129,47 +144,78 @@ export function ZoneListTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const points = (v: number | null | undefined) =>
     v == null ? "—" : `${(v * 100).toFixed(1)} ${t("wellbeing.points")}`;
 
+  const populationMax = cards.reduce((max, card) => Math.max(max, card.population, card.daytimePopulation), 0);
+  const incomeMax = cards.reduce((max, card) => Math.max(max, card.averageIncome ?? 0), 0);
+  const floorMax = cards.reduce((max, card) => card.floors.reduce(
+    (floorMax, floor) => Math.max(floorMax, floor.capacity, floor.occupied), max
+  ), 0);
+  // 欠測の用途も同じ行を確保し、地区によって棒の並びがずれないようにする。
+  const floorTypes = Array.from(new Map(cards.flatMap((card) => card.floors.map(
+    (floor) => [floor.space_type, floor.space_type_name] as const
+  )))).sort(([a], [b]) => a - b);
+  const detail = (label: string, value: string, max: string) =>
+    `${label}: ${value}\n${t("statistics.zoneComparisonRange", { max })}`;
+
   return (
     <div className="zone-list-tab">
+      <div className="zone-list-tab__legend">
+        <div className="zone-list-tab__columns">
+          <h4>{t("statistics.zoneComparisonOverview")}</h4>
+          <div className="zone-list-tab__floor-legend">
+            <h4>{t("statistics.tabRealEstate")}</h4>
+            <span><i className="zone-list-tab__swatch zone-list-tab__swatch--capacity" />{t("statistics.floorCapacity")}</span>
+            <span><i className="zone-list-tab__swatch" />{t("statistics.floorOccupied")}</span>
+          </div>
+          <h4>{t("wellbeing.comfortTitle")} <span className="zone-list-tab__scale">0–100</span></h4>
+        </div>
+      </div>
       {cards.map((card) => (
         <article key={card.zoneId} className="zone-list-card">
-          <h3 className="zone-list-card__title">{card.name}</h3>
+          <h3 className="zone-list-card__title" title={card.name}>{card.name}</h3>
           <div className="zone-list-card__body">
             <dl className="zone-list-card__list">
-              <ZoneMetric label={t("zone.zonePopulation")} value={people(card.population)} />
-              <ZoneMetric label={t("zone.daytimePopulation")} value={people(card.daytimePopulation)} />
-              <ZoneMetric label={t("statistics.carOwnershipTitle")} value={formatRate(card.carOwnershipRate)} />
               <ZoneMetric
-                label={t("statistics.incomeLegend")}
-                value={card.averageIncome == null ? "—" : t("common.currency", { value: Math.round(card.averageIncome) })}
+                label={t("zone.zonePopulation")} value={card.population} max={populationMax}
+                detail={detail(t("zone.zonePopulation"), people(card.population), people(populationMax))}
+                color="var(--flat-accent)"
+              />
+              <ZoneMetric
+                label={t("zone.daytimePopulation")} value={card.daytimePopulation} max={populationMax}
+                detail={detail(t("zone.daytimePopulation"), people(card.daytimePopulation), people(populationMax))}
+                color="var(--flat-accent)"
+              />
+              <ZoneMetric
+                label={t("statistics.carOwnershipTitle")} value={card.carOwnershipRate} max={1}
+                detail={detail(t("statistics.carOwnershipTitle"), formatRate(card.carOwnershipRate), formatRate(1))}
+                color="var(--flat-accent)"
+              />
+              <ZoneMetric
+                label={t("statistics.incomeLegend")} value={card.averageIncome} max={incomeMax}
+                detail={detail(t("statistics.incomeLegend"),
+                  card.averageIncome == null ? "—" : t("common.currency", { value: Math.round(card.averageIncome) }),
+                  t("common.currency", { value: Math.round(incomeMax) }))}
+                color="var(--flat-accent)"
               />
             </dl>
-            <table className="zone-list-card__floors">
-              <thead>
-                <tr>
-                  <th>{t("statistics.floorType")}</th>
-                  <th>{t("statistics.floorCapacity")}</th>
-                  <th>{t("statistics.floorOccupied")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {card.floors.map((floor) => (
-                  <tr key={floor.space_type}>
-                    <td>{t(spaceTypeLabelKey(floor.space_type_name))}</td>
-                    <td>{sqm(floor.capacity)}</td>
-                    <td>{sqm(floor.occupied)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <section>
-              <div className="zone-list-card__heading">{t("wellbeing.comfortTitle")}</div>
-              <dl className="zone-list-card__list">
-                {COMFORT_KEYS.map((key) => (
-                  <ZoneMetric key={key} label={t(`wellbeing.${key}`)} value={points(card.comfort[key])} />
-                ))}
-              </dl>
-            </section>
+            <dl className="zone-list-card__list">
+              {floorTypes.map(([type, name]) => {
+                const floor = card.floors.find((floor) => floor.space_type === type);
+                const label = t(spaceTypeLabelKey(name));
+                return (
+                  <ZoneMetric key={type} label={label} value={floor?.occupied ?? null} max={floorMax}
+                    capacity={floor?.capacity} color="var(--flat-accent)"
+                    detail={`${label}\n${t("statistics.floorCapacity")}: ${floor ? sqm(floor.capacity) : "—"}\n${t("statistics.floorOccupied")}: ${floor ? sqm(floor.occupied) : "—"}\n${t("statistics.zoneComparisonRange", { max: sqm(floorMax) })}`}
+                  />
+                );
+              })}
+            </dl>
+            <dl className="zone-list-card__list">
+              {COMFORT_KEYS.map((key) => (
+                <ZoneMetric key={key} label={t(`wellbeing.${key}`)} value={card.comfort[key] ?? null} max={1}
+                  detail={detail(t(`wellbeing.${key}`), points(card.comfort[key]), points(1))}
+                />
+              ))}
+            </dl>
           </div>
         </article>
       ))}

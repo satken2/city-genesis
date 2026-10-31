@@ -217,6 +217,8 @@
     "tabRealEstate": "Real Estate",
     "tabTourism": "Tourism",
     "tabZones": "Districts",
+    "zoneComparisonOverview": "Population & income",
+    "zoneComparisonRange": "Range: 0–{{max}}",
     "tourism": {
       "title": "Tourism Statistics",
       "tileTourists": "Tourists Staying",

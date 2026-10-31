@@ -217,6 +217,8 @@
     "tabRealEstate": "不動產",
     "tabTourism": "觀光",
     "tabZones": "地區列表",
+    "zoneComparisonOverview": "人口與收入",
+    "zoneComparisonRange": "顯示範圍：0–{{max}}",
     "tourism": {
       "title": "觀光統計",
       "tileTourists": "在住遊客",
