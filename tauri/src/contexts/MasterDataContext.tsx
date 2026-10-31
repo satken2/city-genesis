@@ -5,8 +5,8 @@
  *
  * Fetch only while shared monitoring confirms backend connectivity. Do not retry independently; refetch when
  * connectivity recovers (connected becomes true). Master data can differ between cities because the core reloads
- * it on each game start. Remember the session when fetching; discard/refetch when session-state reports a
- * changed session_id.
+ * it on each game start. Remember the session_id returned with the master data; discard/refetch when
+ * session-state reports a changed session_id. Fetch every kind with one GET /api/v1/master request per window.
  */
 
 import {
@@ -38,30 +38,34 @@ const MasterDataContext = createContext<MasterDataContextValue>({
 });
 
 /**
- * Backend master data API endpoints. Keys are MasterData property names; values are API paths.
+ * Master kinds in the GET /api/v1/master response. key: MasterData property name; name: response key (the same
+ * name as the per-kind /api/v1/master/{name} endpoint).
  */
-const MASTER_ENDPOINTS: { key: keyof MasterData; path: string; numericKeys?: boolean }[] = [
-  { key: "climates", path: "/api/v1/master/climates" },
-  { key: "weather", path: "/api/v1/master/weather", numericKeys: false },
-  { key: "bd_types", path: "/api/v1/master/bd_types" },
-  { key: "skills", path: "/api/v1/master/skills" },
-  { key: "vehicle_types", path: "/api/v1/master/vehicle_types" },
-  { key: "space_categories", path: "/api/v1/master/space_categories" },
-  { key: "product_types", path: "/api/v1/master/product_types" },
-  { key: "parcel_types", path: "/api/v1/master/parcel_types" },
-  { key: "path_types", path: "/api/v1/master/path_types" },
-  { key: "agent_types", path: "/api/v1/master/agent_types" },
-  { key: "agents", path: "/api/v1/master/agents" },
-  { key: "subbuildings", path: "/api/v1/master/subbuildings" },
-  { key: "landmarks", path: "/api/v1/master/landmarks" },
-  { key: "products", path: "/api/v1/master/products" },
-  { key: "paths", path: "/api/v1/master/paths" },
-  { key: "transit", path: "/api/v1/master/transit" },
-  { key: "combined_paths", path: "/api/v1/master/combined_paths" },
-  { key: "budget_categories", path: "/api/v1/master/budgets" },
-  { key: "resource_types", path: "/api/v1/master/resource_types" },
-  { key: "prop_types", path: "/api/v1/master/prop_types" },
+const MASTER_KINDS: { key: keyof MasterData; name: string; numericKeys?: boolean }[] = [
+  { key: "climates", name: "climates" },
+  { key: "weather", name: "weather", numericKeys: false },
+  { key: "bd_types", name: "bd_types" },
+  { key: "skills", name: "skills" },
+  { key: "vehicle_types", name: "vehicle_types" },
+  { key: "space_categories", name: "space_categories" },
+  { key: "product_types", name: "product_types" },
+  { key: "parcel_types", name: "parcel_types" },
+  { key: "path_types", name: "path_types" },
+  { key: "agent_types", name: "agent_types" },
+  { key: "agents", name: "agents" },
+  { key: "subbuildings", name: "subbuildings" },
+  { key: "landmarks", name: "landmarks" },
+  { key: "products", name: "products" },
+  { key: "paths", name: "paths" },
+  { key: "transit", name: "transit" },
+  { key: "combined_paths", name: "combined_paths" },
+  { key: "budget_categories", name: "budgets" },
+  { key: "resource_types", name: "resource_types" },
+  { key: "prop_types", name: "prop_types" },
 ];
+
+/** GET /api/v1/master response: each kind maps IDs to entries; session_id identifies the city owning the data. */
+type MasterResponse = { session_id: string | null; [name: string]: unknown };
 
 /**
  * Convert API response string keys to numeric keys. JSON object keys are always strings; convert on fetch for
@@ -78,25 +82,8 @@ function toNumericKeys<T>(
 }
 
 /**
- * Fetch one master dataset and convert keys only for numeric IDs. Backend response format: { "endpoint_name": {
- * "0": {...}, "1": {...} } }. The first level wraps the endpoint name; the second maps IDs to entries. Preserve
- * string IDs such as weather IDs.
- */
-async function fetchMasterEndpoint<T>(
-  baseUrl: string,
-  path: string,
-  numericKeys = true,
-): Promise<Record<string, T>> {
-  type ApiResponse = Record<string, Record<string, T>>;
-  const response = await fetchApi<ApiResponse>(`${baseUrl}${path}`);
-  const inner = Object.values(response)[0];
-  return numericKeys ? toNumericKeys(inner) : inner;
-}
-
-/**
- * Provider that fetches master data in bulk and exposes it through Context. Fetch all endpoints in parallel when
- * requested, apiBaseUrl is known, and connectivity is confirmed. Discard/refetch data when apiBaseUrl or the
- * city (session_id) changes.
+ * Provider that fetches master data in bulk and exposes it through Context. Fetch when requested, apiBaseUrl is
+ * known, and connectivity is confirmed. Discard/refetch data when apiBaseUrl or the city (session_id) changes.
  */
 export function MasterDataProvider({
   apiBaseUrl,
@@ -114,7 +101,7 @@ export function MasterDataProvider({
   masterDataRef.current = masterData;
   const inFlightRef = useRef(false);
   const disposedRef = useRef(false);
-  // City owning the fetched master data (session_id from GET /sessions just before fetching; null if no city).
+  // City owning the fetched master data (session_id returned with it; null if no city).
   const dataSessionRef = useRef<string | null>(null);
 
   const fetchAll = useCallback(async (base: string) => {
@@ -122,15 +109,13 @@ export function MasterDataProvider({
 
     inFlightRef.current = true;
     try {
-      const session = await fetchApi<{ session_id?: string | null }>(`${base}/api/v1/sessions`, { cache: "reload" });
-      const results = await Promise.all(
-        MASTER_ENDPOINTS.map(async ({ key, path, numericKeys }) => {
-          const entries = await fetchMasterEndpoint(base, path, numericKeys);
-          return [key, entries] as const;
-        })
-      );
+      const response = await fetchApi<MasterResponse>(`${base}/api/v1/master`, { cache: "reload" });
+      const results = MASTER_KINDS.map(({ key, name, numericKeys = true }) => {
+        const entries = response[name] as Record<string, unknown>;
+        return [key, numericKeys ? toNumericKeys(entries) : entries] as const;
+      });
       if (!disposedRef.current) {
-        dataSessionRef.current = session.session_id ?? null;
+        dataSessionRef.current = response.session_id ?? null;
         setMasterData(Object.fromEntries(results) as unknown as MasterData);
       }
     } catch (error: unknown) {
