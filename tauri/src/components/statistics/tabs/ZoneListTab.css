@@ -1,4 +1,4 @@
-/* 比較用の横並びを保つ。狭いウィンドウでもカードを積み直さず、親のスクロール領域で横に見る。 */
+/* Keep the side-by-side layout for comparison. Narrow windows do not restack the cards; they scroll horizontally in the parent's scroll area. */
 .zone-list-tab {
   --zone-list-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
   display: flex;

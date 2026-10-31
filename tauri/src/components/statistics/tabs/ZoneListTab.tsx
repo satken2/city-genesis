@@ -151,7 +151,7 @@ export function ZoneListTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const floorMax = cards.reduce((max, card) => card.floors.reduce(
     (floorMax, floor) => Math.max(floorMax, floor.capacity, floor.occupied), max
   ), 0);
-  // 欠測の用途も同じ行を確保し、地区によって棒の並びがずれないようにする。
+  // Keep a row for floor types missing in a District too, so the bars line up across Districts.
   const floorTypes = Array.from(new Map(cards.flatMap((card) => card.floors.map(
     (floor) => [floor.space_type, floor.space_type_name] as const
   )))).sort(([a], [b]) => a - b);
