@@ -2,8 +2,10 @@
  * Scenario manager window, opened from the top menu without Unity.
  *
  * - Scenarios tab: one list for custom, community (Workshop), and DLC scenarios.
- *   Custom scenarios support city, terrain, and introduction editing, upload, and deletion. Actions are icon
- *   buttons with hover explanations.
+ *   Bundled scenarios appear only while the core reports them writable (read_only false), which happens only in a
+ *   debug launch where they are the repository originals. Otherwise players just pick them in New Game.
+ *   Writable scenarios support city, terrain, and introduction editing. Upload, signing, and deletion are for
+ *   custom scenarios only. Actions are icon buttons with hover explanations.
  *   Deletion mainly removes unreadable scenarios (corrupt or too new), so it is available regardless of
  *   readability.
  *   Community/DLC scenarios are read-only and can only be played through New Game; show no action buttons.
@@ -29,7 +31,7 @@ import { buildApiUrl, fetchApi } from "../../utils/api";
 import { prepareSaveLoad, ScenarioEntry, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { requestConfirm } from "../../utils/confirmDialog";
 import { loadAppSettings } from "../../utils/settings";
-import { resolveLocalizedText, resolveSupportedLanguage } from "../../utils/locale";
+import { resolveSupportedLanguage } from "../../utils/locale";
 import { formatMapSize } from "../../utils/mapSize";
 import { FlatTabs } from "../common/FlatTabs";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
@@ -141,7 +143,7 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     void emit("scenarios:changed");
   }
 
-  const entries = catalog ? Object.values(catalog.scenarios) : [];
+  const entries = catalog ? Object.values(catalog.scenarios).filter(entry => entry.origin !== "bundled" || !entry.read_only) : [];
   return <div className="scenario-manager">
     <FlatTabs<Tab>
       label={t("scenarios.manage")}
@@ -155,19 +157,21 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       {status && <p className="scenario-status" role="status">{status}</p>}
       <div ref={grid} className="scenario-grid" aria-busy={busy || !catalog}>
         {catalog && entries.map(entry => {
-          const own = entry.origin === "local" && !entry.read_only;
+          const own = entry.origin === "local";
           const loadable = entry.compatibility.loadable;
-          const description = resolveLocalizedText(entry.scenario_description, i18n.language);
           return <article key={entry.id} data-scenario-id={entry.id} aria-current={entry.id === selectedId ? "true" : undefined}
             className={`scenario-card${entry.id === selectedId ? " scenario-card--selected" : ""}`} onClick={() => setSelectedId(entry.id)}>
-            <ScenarioThumbnail apiBaseUrl={apiBaseUrl} scenarioId={entry.id} revision={entry.content_revision} className="scenario-thumbnail" />
+            <ScenarioThumbnail apiBaseUrl={apiBaseUrl} scenarioId={entry.id} revision={entry.content_revision} className="scenario-card-thumbnail" />
             <div className="scenario-card-content">
-              <ScenarioOriginBadges entry={entry} />
-              <h3>{scenarioDisplayTitle(entry, i18n.language)}</h3>
-              {description && <p className="scenario-description">{description}</p>}
-              {entry.author && <p>{t("scenarios.byAuthor", { author: entry.author })}</p>}
-              <SaveVersionInfo entry={entry} />
-              {own && <div className="scenario-actions">
+              <div className="scenario-card-heading">
+                <ScenarioOriginBadges entry={entry} />
+                <h3>{scenarioDisplayTitle(entry, i18n.language)}</h3>
+              </div>
+              <div className="scenario-card-meta">
+                {entry.author && <p>{t("scenarios.byAuthor", { author: entry.author })}</p>}
+                <SaveVersionInfo entry={entry} />
+              </div>
+              {!entry.read_only && <div className="scenario-actions">
                 <ScenarioActionButton icon={infoIcon} label={t("scenarios.editMetadata")} disabled={busy || !loadable}
                   onClick={() => void run(() => invoke("open_registered_window", {
                     windowType: "scenario_metadata", params: { extra: { scenarioId: entry.id } },
@@ -176,19 +180,21 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                   reason={entry.encrypted ? t("scenarios.terrainEncryptedHint") : undefined} onClick={() => void run(() => editTerrain(entry))} />
                 <ScenarioActionButton icon={repairIcon} label={t("scenarios.editCity")} disabled={busy || !loadable}
                   onClick={() => void run(() => editCity(entry))} />
-                <ScenarioActionButton icon={rocketIcon} label={t("scenarios.upload")} disabled={busy || !catalog.upload_available || !loadable}
-                  reason={!catalog.upload_available ? t("scenarios.uploadUnconfigured") : undefined}
-                  onClick={() => void run(async () => {
-                    if (!await requestConfirm({ message: t("scenarios.uploadConfirm", { host: catalog.upload_host }) })) return;
-                    await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/scenarios/${encodeURIComponent(entry.id)}/upload`), { method: "POST" });
-                    setStatus(t("scenarios.uploaded"));
-                  })} />
-                {catalog.signing_available && <ScenarioActionButton icon={approvedIcon} label={t("scenarios.signing.button")} disabled={busy || !loadable}
-                  onClick={() => void run(() => invoke("open_registered_window", {
-                    windowType: "scenario_sign", params: { extra: { scenarioId: entry.id, openedAt: Date.now() } },
-                  }))} />}
-                <ScenarioActionButton icon={trashIcon} label={t("common.delete")} className="scenario-icon-button--delete" disabled={busy}
-                  onClick={() => void run(() => deleteScenario(entry))} />
+                {own && <>
+                  <ScenarioActionButton icon={rocketIcon} label={t("scenarios.upload")} disabled={busy || !catalog.upload_available || !loadable}
+                    reason={!catalog.upload_available ? t("scenarios.uploadUnconfigured") : undefined}
+                    onClick={() => void run(async () => {
+                      if (!await requestConfirm({ message: t("scenarios.uploadConfirm", { host: catalog.upload_host }) })) return;
+                      await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/scenarios/${encodeURIComponent(entry.id)}/upload`), { method: "POST" });
+                      setStatus(t("scenarios.uploaded"));
+                    })} />
+                  {catalog.signing_available && <ScenarioActionButton icon={approvedIcon} label={t("scenarios.signing.button")} disabled={busy || !loadable}
+                    onClick={() => void run(() => invoke("open_registered_window", {
+                      windowType: "scenario_sign", params: { extra: { scenarioId: entry.id, openedAt: Date.now() } },
+                    }))} />}
+                  <ScenarioActionButton icon={trashIcon} label={t("common.delete")} className="scenario-icon-button--delete" disabled={busy}
+                    onClick={() => void run(() => deleteScenario(entry))} />
+                </>}
               </div>}
             </div>
           </article>;
