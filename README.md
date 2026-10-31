@@ -113,7 +113,7 @@ The documentation explains concepts and contracts needed by graphics and UI cont
 - [Data loading](docs/en/geometries/H_data-loading.md) and [UI foundations](docs/en/programs/ui-foundations.md) — the shared rendering and interface mechanisms.
 - [Compatibility](docs/en/programs/compatibility.md) — how the front end, core, and IPC contracts fit together across versions.
 
-For individual HTTP operations, consult the core's `/docs` or `/openapi.json`, or the checked-in [OpenAPI specification](docs/api/openapi.json).
+For individual HTTP operations, consult the core's `/docs` or `/openapi.json`.
 
 ## Contributing
 

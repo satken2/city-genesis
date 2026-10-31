@@ -93,8 +93,6 @@
 
 ### API リファレンス
 
-バックエンド REST API の全エンドポイント仕様
-
-[OpenAPI](../api/openapi.json)
+バックエンド REST API の全エンドポイント仕様は、実行中のコアの Swagger(`/docs`)・OpenAPI(`/openapi.json`)で参照できます。
 
 © 2024-2026 City Genesis Project

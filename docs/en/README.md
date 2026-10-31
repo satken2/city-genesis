@@ -93,8 +93,6 @@ Shape specifications for paths, land, buildings, and terrain.
 
 ### API Reference
 
-Full endpoint specifications for the backend REST API.
-
-[OpenAPI](../api/openapi.json)
+Full endpoint specifications for the backend REST API are available from the running core's Swagger (`/docs`) and OpenAPI (`/openapi.json`).
 
 © 2024-2026 City Genesis Project

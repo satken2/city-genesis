@@ -113,7 +113,7 @@ Unity 側の .NET テストは、初回の準備で C# プロジェクトファ�
 - [データロード](docs/ja/geometries/H_バックエンドデータロード.md)・[UI共通基盤](docs/ja/programs/UI共通基盤.md)：描画と UI の共通の仕組み。
 - [互換性](docs/ja/programs/バージョニングと互換性.md)：フロント・コア・IPC 契約の版の関係。
 
-個別の HTTP 操作は、コアの `/docs`・`/openapi.json` またはリポジトリの [OpenAPI 仕様](docs/api/openapi.json)を参照してください。
+個別の HTTP 操作は、コアの `/docs`・`/openapi.json` を参照してください。
 
 ## コントリビューション
 
