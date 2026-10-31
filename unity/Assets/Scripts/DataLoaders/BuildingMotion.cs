@@ -14,8 +14,11 @@ using UnityEngine;
 /// </summary>
 public sealed class BuildingMotion : MonoBehaviour
 {
-    /// <summary>Full-operation speed (rpm), about the rated speed of a 70 m rotor.</summary>
-    private const float RATED_RPM = 15f;
+    /// <summary>
+    /// Full-operation speed (rpm). The model's 72 m rotor stands for a rotor of about 150 m at the game scale
+    /// (large equipment at 0.4-0.5x), so this is the rated speed of that class (about 7-10 rpm).
+    /// </summary>
+    private const float RATED_RPM = 7.5f;
 
     private static readonly HashSet<BuildingMotion> enabledMotions = new HashSet<BuildingMotion>();
 
