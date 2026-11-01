@@ -54,6 +54,11 @@ agents:
     prebuilt: false
     variants:
       - 0
+  1018:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
   1019:
     model: true
     prebuilt: true
@@ -219,6 +224,11 @@ agents:
     prebuilt: false
     variants:
       - 0
+  1074:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
   1077:
     model: true
     prebuilt: true
@@ -333,6 +343,13 @@ agents:
     prebuilt: false
     variants:
       - 0
+  2011:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 300
+      - 600
   2012:
     model: true
     prebuilt: false
