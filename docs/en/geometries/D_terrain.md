@@ -92,5 +92,5 @@ The city boundary equals the detailed elevation map boundary. Background terrain
 
 Scenarios and saves contain background terrain. Its API returns little-endian float32 elevation in the common orientation. Headers `X-Grid-Rows`, `X-Grid-Cols`, `X-Grid-Spacing`, `X-Origin-X`, and `X-Origin-Z` provide dimensions, spacing, and southwest world-XZ origin. No background returns 204. A coarse coastline supports coloring external land on city maps. Because it can disagree at the boundary, use it only outside the city rectangle.
 
-Roads, tracks, buildings, and parcels can be placed outside city bounds only in scenario creation mode. Roads split at the city boundary on completion, with external sections assigned to the common outside-city district. Automatic changes such as building spawning and equipment deterioration do not occur outside the city.
+Roads, tracks, buildings, and parcels can be placed outside city bounds only in scenario creation mode. Roads split at the city boundary on completion, and external sections belong to an outside-city district, one for each group of external paths connected to each other. Automatic changes such as building spawning and equipment deterioration do not occur outside the city.
 
