@@ -13,7 +13,7 @@ import tradeScenarioThumbnail from "../../assets/images/scenarios/trade.png";
 import highwayScenarioThumbnail from "../../assets/images/scenarios/highway.png";
 import miningScenarioThumbnail from "../../assets/images/scenarios/mining.png";
 import tourismScenarioThumbnail from "../../assets/images/scenarios/tourism.png";
-import reclamationScenarioThumbnail from "../../assets/images/scenarios/reclamation.png";
+import marineScenarioThumbnail from "../../assets/images/scenarios/marine.png";
 import controlsScenarioThumbnail from "../../assets/images/scenarios/controls.png";
 
 /** Display information for one step in the tutorial window */
@@ -39,7 +39,7 @@ export interface TutorialScenario {
 }
 
 /** List order (learning sequence) */
-const SCENARIO_ORDER = ["controls", "scenario4", "trade", "highway", "mining", "tourism", "reclamation"];
+const SCENARIO_ORDER = ["controls", "scenario4", "trade", "highway", "mining", "tourism", "marine"];
 
 const THUMBNAILS: Record<string, string> = {
   controls: controlsScenarioThumbnail,
@@ -48,7 +48,7 @@ const THUMBNAILS: Record<string, string> = {
   highway: highwayScenarioThumbnail,
   mining: miningScenarioThumbnail,
   tourism: tourismScenarioThumbnail,
-  reclamation: reclamationScenarioThumbnail,
+  marine: marineScenarioThumbnail,
 };
 
 /**

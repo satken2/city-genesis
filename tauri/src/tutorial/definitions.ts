@@ -4,7 +4,7 @@ import trade from "./definitions/trade.json";
 import highway from "./definitions/highway.json";
 import mining from "./definitions/mining.json";
 import tourism from "./definitions/tourism.json";
-import reclamation from "./definitions/reclamation.json";
+import marine from "./definitions/marine.json";
 import controls from "./definitions/controls.json";
 
 import type { Condition, Definition } from "./model";
@@ -67,4 +67,4 @@ export function validateDefinition(value: unknown): asserts value is Definition 
   }
 }
 export const DEFINITIONS: Record<string, Definition> = {};
-for (const value of [rail, trade, highway, mining, tourism, reclamation, controls]) { validateDefinition(value); DEFINITIONS[value.id] = value; }
+for (const value of [rail, trade, highway, mining, tourism, marine, controls]) { validateDefinition(value); DEFINITIONS[value.id] = value; }

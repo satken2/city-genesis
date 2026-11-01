@@ -88,7 +88,7 @@
                   "highway",
                   "mining",
                   "tourism",
-                  "reclamation"
+                  "marine"
                 ]
               },
               "action": {
@@ -353,7 +353,7 @@
                         "highway",
                         "mining",
                         "tourism",
-                        "reclamation"
+                        "marine"
                       ]
                     },
                     "action": {
@@ -454,7 +454,7 @@
                         "highway",
                         "mining",
                         "tourism",
-                        "reclamation"
+                        "marine"
                       ]
                     },
                     "action": {
@@ -877,7 +877,7 @@
                 "highway",
                 "mining",
                 "tourism",
-                "reclamation"
+                "marine"
               ]
             },
             "action": {

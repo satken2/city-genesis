@@ -364,9 +364,9 @@ if (process.env.TUTORIAL_API_TEST_URL) {
   projects.read = async () => [{ checks: status }];
   const actions: string[] = [];
   projects.scenarioAction = async (scenario, action) => { actions.push(`${scenario}.${action}`); };
-  const land = DEFINITIONS.reclamation.steps[1];
+  const land = DEFINITIONS.marine.steps[1];
   await execute(land.beforeCheck!, projects);
-  check(actions, ["reclamation.commission"], "reclamation commissions through the core action before rechecking land");
+  check(actions, ["marine.commission_grading"], "reclamation commissions through the core action before rechecking land");
   check(await evaluate(land.complete!, projects), false, "an unfinished reclamation remains incomplete after a refused early action");
   status.land = true;
   check(await evaluate(land.complete!, projects), true, "finished reclaimed land passes");
