@@ -18,11 +18,11 @@
       "volume": "{{value, number}} m³"
     },
     "heightOffset": "Altura (diferencia con la base)",
+    "seaLevelHeight": "Altura (sobre el nivel del mar)",
     "baseNote": {
       "frontage": "0 es la altura de la calzada a la que da ({{value}} m)",
       "terrain_mean": "0 es la altura media actual del área ({{value}} m)"
     },
-    "shoreHeightLocked": "La altura del relleno costero no se puede especificar",
     "reasons": {
       "invalid_polygon": "La forma del área no es válida. Dibújala sin que los lados se crucen.",
       "outside_city": "El área se sale de la ciudad.",
@@ -33,7 +33,7 @@
       "overlaps_path": "El área se superpone a una calle, vía u otro trazado.",
       "overlaps_water": "El área toca un río o un lago.",
       "overlaps_quay_band": "El área se superpone al muelle de un terreno ganado al mar.",
-      "invalid_height_offset": "La altura indicada está fuera del rango (hasta ±{{offsetLimit}} m).",
+      "invalid_height_offset": "La altura indicada está fuera del rango (hasta ±{{offsetLimit}} m respecto de la altura base).",
       "below_sea_level": "No se puede dejar por debajo del nivel del mar.",
       "too_narrow": "El área es demasiado estrecha; no queda nada que rellenar dentro del muelle.",
       "no_work": "El terreno ya está a la altura objetivo, así que no hace falta ninguna obra.",

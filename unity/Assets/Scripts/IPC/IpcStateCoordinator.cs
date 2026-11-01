@@ -43,6 +43,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnBuildingConstructionPickSource += HandleBuildingConstructionPickSource;
             IpcClient.Instance.OnEditRoadCancel += HandleEditRoadCancel;
             IpcClient.Instance.OnEditGradingFinish += HandleEditGradingFinish;
+            IpcClient.Instance.OnEditGradingPreviewHeight += HandleEditGradingPreviewHeight;
         }
     }
 
@@ -69,6 +70,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnBuildingConstructionPickSource -= HandleBuildingConstructionPickSource;
             IpcClient.Instance.OnEditRoadCancel -= HandleEditRoadCancel;
             IpcClient.Instance.OnEditGradingFinish -= HandleEditGradingFinish;
+            IpcClient.Instance.OnEditGradingPreviewHeight -= HandleEditGradingPreviewHeight;
         }
     }
 
@@ -903,6 +905,19 @@ public class IpcStateCoordinator : MonoBehaviour
         // Only new fetches, camera cell movement, and session switches cancel incremental reload;
         // later STATE_NORMAL messages do not.
         CellDataLoader.Instance?.ReloadAllData();
+    }
+
+    /// <summary>
+    /// edit_grading:preview_height: reclamation preview plane height. Ignored unless drawing an earthworks area,
+    /// so a message arriving after leaving the mode does not carry a stale height into the next drawing.
+    /// </summary>
+    private void HandleEditGradingPreviewHeight(float? height)
+    {
+        var gradingAreaEditManager = FindAnyObjectByType<GradingAreaEditManager>();
+        if (gradingAreaEditManager != null && gradingAreaEditManager.IsEditMode)
+        {
+            gradingAreaEditManager.SetPreviewHeight(height);
+        }
     }
 
     /// <summary>

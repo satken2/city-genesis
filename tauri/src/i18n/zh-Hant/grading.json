@@ -18,11 +18,11 @@
       "volume": "{{value, number}} m³"
     },
     "heightOffset": "高度（與基準的差）",
+    "seaLevelHeight": "高度（海拔）",
     "baseNote": {
       "frontage": "0 為所臨道路的路面高度（{{value}} m）",
       "terrain_mean": "0 為範圍目前的平均高度（{{value}} m）"
     },
-    "shoreHeightLocked": "無法指定填海的高度",
     "reasons": {
       "invalid_polygon": "範圍的形狀無效。請畫成各邊互不相交的形狀。",
       "outside_city": "範圍超出了城市。",
@@ -33,7 +33,7 @@
       "overlaps_path": "與道路、軌道等路徑重疊。",
       "overlaps_water": "觸及河川或湖泊。",
       "overlaps_quay_band": "觸及填海地的岸壁。",
-      "invalid_height_offset": "高度指定超出範圍（最多 ±{{offsetLimit}} m）。",
+      "invalid_height_offset": "高度指定超出範圍（最多為基準高度 ±{{offsetLimit}} m）。",
       "below_sea_level": "不能低於海平面。",
       "too_narrow": "範圍過窄，岸壁內側沒有可以填築的部分。",
       "no_work": "地面已經處於目標高度，無需施工。",

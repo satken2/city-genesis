@@ -89,6 +89,8 @@ public class IpcClient : MonoBehaviour
     public event Action OnEditPathQueryShape;
     public event Action OnEditResourceFinish;
     public event Action OnEditGradingFinish;
+    // Reclamation preview plane height (m above sea level). null hides the plane.
+    public event Action<float?> OnEditGradingPreviewHeight;
     public event Action OnEditTransitFinish;
     // Prop placement. change_settings passes (rotation?, scale?, density?, seed?) as a dictionary.
     public event Action<Dictionary<string, object>> OnEditPropChangeSettings;
@@ -507,6 +509,14 @@ public class IpcClient : MonoBehaviour
                     {
                         Debug.Log("IpcClient: edit_grading:finish received");
                         OnEditGradingFinish?.Invoke();
+                    }
+                    break;
+
+                case "edit_grading:preview_height":
+                    {
+                        float? height = (float?)GetParamToken(payload, "height");
+                        Debug.Log($"IpcClient: edit_grading:preview_height -> {height}");
+                        OnEditGradingPreviewHeight?.Invoke(height);
                     }
                     break;
 

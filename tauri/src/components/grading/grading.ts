@@ -20,8 +20,7 @@ export type GradingKind = "land" | "shore";
 /**
  * Reference for a height offset of zero. frontage: adjoining road surface elevation; terrain_mean: current mean
  * elevation of the area (land grading without road frontage);
- * sea_top: default elevation for reclamation without road frontage (reclamation does not accept a height
- * offset).
+ * sea_top: default elevation for reclamation without road frontage.
  */
 export type GradingBaseKind = "frontage" | "terrain_mean" | "sea_top";
 
@@ -37,12 +36,15 @@ export type GradingEstimate = {
   kind: GradingKind | null;
   variant: number | null;
   parcel_type: number | null;
-  /** Target height H (absolute elevation in meters relative to sea level). For land grading: base_height + height_offset. */
+  /** Target height H (absolute elevation in meters relative to sea level), base_height + height_offset. */
   target_height: number | null;
   /** Reference height (absolute elevation in meters). null when the area cannot be estimated and for GET /grading/{agent_id}. */
   base_height: number | null;
   base_kind: GradingBaseKind | null;
-  /** Applied height offset (meters relative to the reference). Always 0 for reclamation; null for GET /grading/{agent_id}. */
+  /**
+   * Applied height offset (meters relative to the reference). For reclamation, which takes target_height in the request,
+   * this is target_height minus base_height. null for GET /grading/{agent_id}.
+   */
   height_offset: number | null;
   area: number;
   cut_volume: number;
@@ -70,13 +72,11 @@ export type GradingCreateResponse = GradingEstimate & {
 };
 
 /**
- * Explain what zero means below the height offset input, including the reference height to one decimal place.
- * Return null unless the reference is road frontage or the area mean (e.g. default reclamation height or
- * unavailable estimate).
+ * Explain what zero means below the land grading height offset input, including the reference height to one
+ * decimal place. Return null for reclamation (its input is a height above sea level) or an unavailable estimate.
  */
 export function gradingBaseNote(t: TFunction, estimate: GradingEstimate | null): string | null {
-  if (estimate?.base_height == null) return null;
-  if (estimate.base_kind !== "frontage" && estimate.base_kind !== "terrain_mean") return null;
+  if (estimate?.kind !== "land" || estimate.base_height == null) return null;
   return t(`grading.baseNote.${estimate.base_kind}`, { value: estimate.base_height.toFixed(1) });
 }
 

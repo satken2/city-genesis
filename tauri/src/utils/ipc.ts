@@ -657,6 +657,21 @@ export async function sendEditGradingFinish(): Promise<void> {
 }
 
 /**
+ * `edit_grading:preview_height`
+ * Height (m above sea level) at which Unity draws the reclamation preview plane over the drawn area. null hides
+ * the plane (land grading, or no estimate yet). The plane follows Unity's vertices; only the height comes from
+ * the panel.
+ */
+export async function sendEditGradingPreviewHeight(height: number | null): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "grading",
+    entity: null,
+    action: "edit_grading:preview_height",
+    params: { height },
+  });
+}
+
+/**
  * `edit_prop:change_settings`
  * Change numeric settings outside dropdowns (rotation, scale, density, seed) during prop placement. Unity
  * immediately applies them to ghost/scatter previews, like `edit_path:change_curved` for road previews.

@@ -8,11 +8,15 @@ import { describeError } from "../../utils/errors";
  *
  * - Send STATE_EDIT_GRADING on mount. Redisplay remounts through open_seq, so it is sent every time.
  * - Request estimates (POST /grading/preview) only after the area is closed (finalized). Unity sends every frame
- *   while dragging vertices; debounce input and abort stale requests. Include the height offset in the same
+ *   while dragging vertices; debounce input and abort stale requests. Include the height inputs in the same
  *   request.
- * - Preserve heightOffset during vertex editing; reset it to 0 on restart (Cancel). Confirmation remounts the
- *   whole window. Reclamation does not accept offsets (kind is shore or reference is sea_top); disable the field
- *   and show the applied value.
+ * - The height field follows the kind of the last estimate. Land grading takes heightOffset (difference from
+ *   the reference height, default 0); reclamation takes shoreHeight (m above sea level, null = the reference
+ *   height the backend returns). Every request carries both and the backend uses the one matching the kind.
+ *   Preserve both during vertex editing and reset them on restart (Cancel). Confirmation remounts the whole
+ *   window.
+ * - Send the reclamation height shown in the field to Unity's preview plane (edit_grading:preview_height), and
+ *   null while the estimate is not reclamation.
  * - Confirm: POST /grading → open agent details → edit_grading:finish → close. The panel does not send
  *   STATE_NORMAL; finish returns Unity to normal and refreshes data. Closing follows Rust's close-button path,
  *   which redundantly sends STATE_NORMAL. This is harmless because Unity is already in normal state and the
@@ -36,6 +40,7 @@ import { GRADING_HEIGHT_OFFSET_LIMIT, GRADING_MAX_AREA } from "../../constants";
 import {
   sendChangeState,
   sendEditGradingFinish,
+  sendEditGradingPreviewHeight,
   IPC_EVENT_EDIT_GRADING_UPDATE_SHAPE,
 } from "../../utils/ipc";
 import {
@@ -69,7 +74,7 @@ const PREVIEW_DEBOUNCE_MS = 300;
 
 const EMPTY_SHAPE: GradingShape = { polygon: [], finalized: false };
 
-const HEIGHT_OFFSET_STEP = 0.1;
+const HEIGHT_STEP = 0.1;
 
 export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
   const { t } = useTranslation();
@@ -78,6 +83,7 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
   const [previewNonce, setPreviewNonce] = useState(0);
   const [isConfirming, setIsConfirming] = useState(false);
   const [heightOffset, setHeightOffset] = useState(0);
+  const [shoreHeight, setShoreHeight] = useState<number | null>(null);
 
   useEffect(() => {
     sendChangeState("STATE_EDIT_GRADING", undefined, "grading").catch((err) => {
@@ -114,7 +120,7 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
 
   const requestBody =
     shape.finalized && shape.polygon.length >= 3
-      ? JSON.stringify({ polygon: shape.polygon, height_offset: heightOffset })
+      ? JSON.stringify({ polygon: shape.polygon, height_offset: heightOffset, target_height: shoreHeight })
       : null;
 
   useEffect(() => {
@@ -162,17 +168,35 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
     (code) => !(code === "insufficient_funds" && shortfall != null && shortfall > 0),
   );
 
-  // Reclamation does not accept a height offset. If the last response was reclamation (kind is shore even with road frontage), disable the input and show the applied value (0).
-  const isShore = shownEstimate?.kind === "shore" || shownEstimate?.base_kind === "sea_top";
-  const baseNote = isShore
-    ? t("grading.shoreHeightLocked")
-    : requestBody === null
+  // Stepper bounds are the backend's limit on the difference from the reference height, around the input meaning
+  // difference 0. The reclamation default is shown rounded to the stepper resolution while requests keep null, so the
+  // backend uses the exact reference height.
+  const shoreBase = shownEstimate?.kind === "shore" ? shownEstimate.base_height : null;
+  const heightField =
+    shoreBase !== null
+      ? {
+          label: t("grading.seaLevelHeight"),
+          value: shoreHeight ?? Number(shoreBase.toFixed(1)),
+          onChange: setShoreHeight,
+          origin: shoreBase,
+        }
+      : { label: t("grading.heightOffset"), value: heightOffset, onChange: setHeightOffset, origin: 0 };
+  const previewHeight = shoreBase !== null ? heightField.value : null;
+  const baseNote =
+    requestBody === null || shoreBase !== null
       ? null
       : gradingBaseNote(t, shownEstimate) ?? (isLoading ? t("common.loading") : null);
+
+  useEffect(() => {
+    sendEditGradingPreviewHeight(previewHeight).catch((err) => {
+      console.error("[GradingPanel] sendEditGradingPreviewHeight failed:", err);
+    });
+  }, [previewHeight]);
 
   const handleCancel = useCallback(() => {
     setShape(EMPTY_SHAPE);
     setHeightOffset(0);
+    setShoreHeight(null);
     sendChangeState("STATE_EDIT_GRADING", undefined, "grading").catch((err) => {
       console.error("[GradingPanel] Failed to restart drawing:", err);
     });
@@ -214,17 +238,17 @@ export function GradingPanel({ apiBaseUrl, onClose }: GradingPanelProps) {
       <div className="grading-section">
         <div className="grading-height">
           <div className="pc-settings-row">
-            <span className="pc-settings-label">{t("grading.heightOffset")}</span>
+            <span className="pc-settings-label">{heightField.label}</span>
             <div className="pc-stepper-row">
               {/* NumberStepper does not call onChange for empty input, a sign alone, or NaN. Only committed finite values arrive. */}
               <NumberStepper
-                value={isShore ? shownEstimate?.height_offset ?? 0 : heightOffset}
-                onChange={setHeightOffset}
-                min={-GRADING_HEIGHT_OFFSET_LIMIT}
-                max={GRADING_HEIGHT_OFFSET_LIMIT}
-                step={HEIGHT_OFFSET_STEP}
+                value={heightField.value}
+                onChange={heightField.onChange}
+                min={heightField.origin - GRADING_HEIGHT_OFFSET_LIMIT}
+                max={heightField.origin + GRADING_HEIGHT_OFFSET_LIMIT}
+                step={HEIGHT_STEP}
                 integerOnly={false}
-                disabled={isShore || isConfirming}
+                disabled={isConfirming}
               />
               <span className="pc-stepper-unit">m</span>
             </div>

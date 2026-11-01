@@ -18,11 +18,11 @@
       "volume": "{{value, number}} m³"
     },
     "heightOffset": "Height (offset from base)",
+    "seaLevelHeight": "Height (above sea level)",
     "baseNote": {
       "frontage": "0 is the surface of the road it faces ({{value}} m)",
       "terrain_mean": "0 is the current average height of the area ({{value}} m)"
     },
-    "shoreHeightLocked": "The height of reclaimed land cannot be specified",
     "reasons": {
       "invalid_polygon": "The area shape is invalid. Draw it without crossing edges.",
       "outside_city": "The area extends outside the city.",
@@ -33,7 +33,7 @@
       "overlaps_path": "The area overlaps a road, track, or other path.",
       "overlaps_water": "The area touches a river or lake.",
       "overlaps_quay_band": "The area overlaps the quay of reclaimed land.",
-      "invalid_height_offset": "The height is out of range (up to ±{{offsetLimit}} m).",
+      "invalid_height_offset": "The height is out of range (up to ±{{offsetLimit}} m from the base height).",
       "below_sea_level": "The height cannot be set below sea level.",
       "too_narrow": "The area is too narrow; nothing is left to fill inside the quay.",
       "no_work": "The ground is already at the target height, so no work is needed.",
