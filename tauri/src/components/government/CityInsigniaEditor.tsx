@@ -15,7 +15,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { emit } from "@tauri-apps/api/event";
 
-import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { describeError } from "../../utils/errors";
 import { sendSessionReload } from "../../utils/ipc";
 import { ColorSwatchPicker } from "../common/ColorSwatchPicker";
@@ -34,13 +34,8 @@ const PATTERN_THUMB_HEIGHT = 48;
 type Kind = "emblem" | "flag";
 
 async function loadSavedImage(apiBaseUrl: string, kind: Kind, signal: AbortSignal): Promise<ImageBitmap | null> {
-  try {
-    const blob = await fetchApi<Blob>(buildApiUrl(apiBaseUrl, `/api/v1/city/insignia/${kind}`), { responseType: "blob", signal });
-    return await createImageBitmap(blob);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) return null;
-    throw error;
-  }
+  const blob = await fetchApi<Blob | undefined>(buildApiUrl(apiBaseUrl, `/api/v1/city/insignia/${kind}`), { responseType: "blob", signal });
+  return blob ? await createImageBitmap(blob) : null;
 }
 
 /** 画像を選ぶボタン。同じファイルを選び直せるよう、選んだ後に入力を空に戻す。 */

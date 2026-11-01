@@ -5,8 +5,8 @@ type ApiImageState = { url: string | null; src: string | null; failed: boolean }
 
 /**
  * Return a backend API image as a Blob URL. Fetch through fetchApi and release the old Blob URL on URL changes
- * or unmount. Neither `src` nor `failed` is set while loading. Fetch failures such as 404, or `onError`
- * (undecodable image), set `failed`.
+ * or unmount. Neither `src` nor `failed` is set while loading, and a 204 (no image) leaves both unset. Fetch
+ * failures such as 404, or `onError` (undecodable image), set `failed`.
  */
 export function useApiImageUrl(url: string | null): { src: string | null; failed: boolean; onError: () => void } {
   const [state, setState] = useState<ApiImageState>({ url: null, src: null, failed: false });
@@ -15,10 +15,10 @@ export function useApiImageUrl(url: string | null): { src: string | null; failed
     if (!url) return;
     const controller = new AbortController();
     let objectUrl: string | null = null;
-    fetchApi<Blob>(url, { responseType: "blob", signal: controller.signal })
+    fetchApi<Blob | undefined>(url, { responseType: "blob", signal: controller.signal })
       .then(blob => {
         if (controller.signal.aborted) return;
-        objectUrl = URL.createObjectURL(blob);
+        objectUrl = blob ? URL.createObjectURL(blob) : null;
         setState({ url, src: objectUrl, failed: false });
       })
       .catch(() => {

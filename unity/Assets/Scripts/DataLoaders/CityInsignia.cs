@@ -93,13 +93,12 @@ public static class CityInsignia
                 yield return call.Send();
                 if (expected != generation) yield break;
                 UnityWebRequest web = call.Web;
-                if (web.result == UnityWebRequest.Result.Success) png = web.downloadHandler.data;
-                else if (web.responseCode == 404) png = null;
-                else
+                if (web.result != UnityWebRequest.Result.Success)
                 {
                     Debug.LogWarning($"CityInsignia: failed to fetch {slot.kind}: {web.error}");
                     continue;
                 }
+                png = web.responseCode == 204 ? null : web.downloadHandler.data; // 204 = the city has no image
             }
             if (SameBytes(png, slot.png)) continue;
             Texture2D previous = slot.texture;
