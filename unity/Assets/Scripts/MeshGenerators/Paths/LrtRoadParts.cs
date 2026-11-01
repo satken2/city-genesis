@@ -10,8 +10,21 @@ using GeneratedModels;
 /// </summary>
 public static class LrtRoadParts
 {
-    public static bool IsEmbedded(int variant) => variant == 222 || variant == 242 || variant == 303;
-    public static bool IsLrt(int variant) => IsEmbedded(variant) || variant == 431;
+    /// <summary>LRT paths are the underlying paths that LRT lines (the transit_master type running VEHICLE_TRAM) traverse.</summary>
+    public static bool IsLrt(int variant)
+    {
+        var transit = MasterDataStore.Instance?.GetTransitMasterDictionary();
+        if (transit == null) return false;
+        foreach (var item in transit.Values)
+            if (item.vehicle_type == Constants.VEHICLE_TRAM && item.route_path_variants.Contains(variant)) return true;
+        return false;
+    }
+
+    /// <summary>Tracks on LRT paths other than dedicated tracks (streets, pedestrian roads) are embedded in the road surface.</summary>
+    public static bool IsEmbedded(int variant) => IsLrt(variant) && PathType(variant) != Constants.PATH_TRACK;
+
+    private static int PathType(int variant) =>
+        MasterDataStore.Instance != null && MasterDataStore.Instance.GetPathMasterDictionary().TryGetValue(variant, out var master) ? master.type : 0;
 
     public const float EMBEDDED_RAIL_TOP = .025f;       // lrt_track rail top (from road-surface origin).
     public const float DEDICATED_RAIL_TOP = .355f;      // 431 track rail top (shared with 411, relative to TRACK_ABOVE_SPLINE).
@@ -32,7 +45,7 @@ public static class LrtRoadParts
 
     /// <summary>
     /// Lateral track-center distance (positive, one of two symmetric tracks).
-    /// 222/242 use innermost bidirectional lane centers; 303 is constant; 431 matches TrackPath.GetTrackCenterOffset derivation.
+    /// Streets use innermost bidirectional lane centers; 303 is constant; dedicated tracks match TrackPath.GetTrackCenterOffset derivation.
     /// </summary>
     public static float Offset(PathSummary path)
     {
@@ -70,8 +83,8 @@ public static class LrtRoadParts
         ? RoadPartHeights.BODY_ABOVE_SPLINE + EMBEDDED_RAIL_TOP
         : RoadPartHeights.TRACK_ABOVE_SPLINE + DEDICATED_RAIL_TOP;
 
-    /// <summary>Platform width. For 222/242, safe-island width avoiding outer-lane vehicles.</summary>
-    public static float PlatformWidth(int variant) => variant == 222 || variant == 242 ? 1.2f : 2f;
+    /// <summary>Platform width. Streets get a safe-island width avoiding outer-lane vehicles.</summary>
+    public static float PlatformWidth(int variant) => PathType(variant) == Constants.PATH_STREET ? 1.2f : 2f;
 
     /// <summary>Ramp length outside each deck end.</summary>
     public static float PlatformRampLength(int variant) => variant == 431 ? 6f : 3f;
@@ -100,8 +113,8 @@ public static class LrtRoadParts
     }
 
     /// <summary>
-    /// Shared-street (222/242/303) tracks/wires/poles and stop platforms (platforms from LrtPlatformParts.Resolve).
-    /// 222/242 center poles and 303 side poles do not intersect platforms, so remain fixed within platform sections.
+    /// Shared-street tracks/wires/poles and stop platforms (platforms from LrtPlatformParts.Resolve).
+    /// Street center poles and 303 side poles do not intersect platforms, so remain fixed within platform sections.
     /// </summary>
     public static void Generate(GameObject parent, SplineComputer spline, PathSummary path, List<LrtPlatformParts.Span> platforms = null)
     {

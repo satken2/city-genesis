@@ -985,7 +985,7 @@ public class RoadPath : IPathMeshGenerator
         if (corridor != null && !ramp) CreateMergeFillers(container, corridor, width * 0.5f, bodyMaterial);
         access.GenerateSurface(container, bodyMaterial ?? roadBody.GetComponent<MeshRenderer>()?.sharedMaterial);
 
-        // Shared-street tracks (222/242/303) and platforms. 303 excludes roadside equipment in platform intervals (RoadEquipmentGenerator below).
+        // Shared-street LRT tracks and platforms. 303 excludes roadside equipment in platform intervals (RoadEquipmentGenerator below).
         List<LrtPlatformParts.Span> lrtPlatforms = segmentPlatformZones == null
             ? LrtPlatformParts.Resolve(pathData, controlPoints, spline.CalculateLength()) : null;
         LrtRoadParts.Generate(container, spline, pathData, lrtPlatforms);
@@ -1554,7 +1554,7 @@ public class RoadPath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// Draw LRT platforms on bent linear roads (222/242/303) using one whole-path polyline spline joining segment points/corner vertices in order
+    /// Draw LRT platforms on bent linear shared-street roads using one whole-path polyline spline joining segment points/corner vertices in order
     /// (cutting at corners would omit decks there and add ramps/shelters per corner).
     /// Across corners, use simplified bent extrusion like polyline tracks (TrackPath).
     /// Null for non-shared-street LRT; otherwise return platform intervals mapped to each segment's spline distance

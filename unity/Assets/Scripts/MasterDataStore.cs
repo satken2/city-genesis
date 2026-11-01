@@ -99,6 +99,7 @@ public class MasterDataStore : MonoBehaviour
 		public List<int> route_path_variants = new();
 		// Product ID of vehicle goods procured from depots. Used to look up running networks of depots supplying that product.
 		public int? vehicle;
+		public int? vehicle_type;  // Constants.VEHICLE_*. VEHICLE_TRAM marks the LRT type.
 	}
 
 	[Serializable]
