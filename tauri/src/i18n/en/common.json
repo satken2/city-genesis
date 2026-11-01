@@ -77,7 +77,7 @@
     "CREATEPATH_FERRY_WATER": "Place a ferry lane entirely over the sea or a lake, and a ferry pier with one end on land and the other over water.",
     "CREATEPATH_QUAY_BAND_CROSSING": "A path cannot cross the quay of reclaimed land at ground level. Run it elevated or underground, and keep its end points and waypoints off the quay top.",
     "ZONE_CONTIGUITY_ERROR": "The painted streets would not form one connected district, so they cannot be assigned. Paint connected streets.",
-    "ZONE_SIZE_ERROR": "The district would exceed its maximum span or total street length. Paint a smaller area.",
+    "ZONE_SIZE_ERROR": "The district would exceed its maximum number of parcels or total street length. Paint a smaller area.",
     "OUTSIDE_CITY_EDIT": "Facilities outside the city cannot be edited.",
     "OUTSIDE_CITY_PLACEMENT": "You cannot place anything outside the city.",
     "READ_ONLY": "This action is not available in read-only mode.",
