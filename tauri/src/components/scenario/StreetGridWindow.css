@@ -67,6 +67,20 @@
   font-size: 1rem;
 }
 
+/* Street type checkboxes wrap within the field because there are many types. */
+.street-grid__variants {
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
+.street-grid__variant {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #cdd6f4;
+  white-space: nowrap;
+}
+
 .street-grid__field input[type="number"] {
   width: 64px;
   text-align: right;
@@ -117,7 +131,7 @@
   min-height: 0;
 }
 
-/* Creation results/errors, overlaid at the bottom of the map */
+/* Preview/creation results and errors, overlaid at the bottom of the map */
 .street-grid__message {
   position: absolute;
   left: 8px;
