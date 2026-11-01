@@ -8,6 +8,7 @@ using UnityEngine;
 /// keeping posts/towers upright while road surfaces follow grade. Section-boundary vertices coincide, preventing seams.
 /// Model origin lies on the rendered centerline (ground for base_height paths); author distant models around that origin.
 /// Variants without distant models tile master-width plates using the same rules.
+/// Plates stand in for a physical body, so paths without one (model_type="outline", such as ferry lanes) draw nothing at a distance.
 /// Elevated spans of those plates use the `body_elevated` material when the variant has that part, as detailed tracks do.
 /// Use DepthOffsetLit variants of model materials (road material for plates) to prevent burial in coarse distant terrain.
 /// </summary>
@@ -260,7 +261,7 @@ public static class PathFarModel
     private static Tile PlateTile(int variant, Material material)
     {
         PathMasterItem master = MasterDataStore.Instance?.GetPathMaster(variant);
-        if (master == null || master.width <= 0f)
+        if (master == null || master.width <= 0f || master.model_type == "outline")
         {
             return null;
         }

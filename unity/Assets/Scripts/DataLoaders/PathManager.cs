@@ -2644,10 +2644,6 @@ public partial class PathManager : BaseApiDataManager
                 }
             }
         }
-        else if (PathMeshFactory.GetModelType(path) == "outline")
-        {
-            OutlinePath.Create(pathGO, points, path.path_variant);
-        }
         else
         {
             mesh = PathFarModel.Build(path.path_variant, points, GetFarElevatedRanges(path), out Material[] farMaterials);

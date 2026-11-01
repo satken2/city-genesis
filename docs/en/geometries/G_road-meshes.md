@@ -45,7 +45,7 @@ Dedicated structures such as suspension bridges, on-street LRT, and ropeway stat
 
 Search variant then type, omitting absent parts. Missing `body` alone falls back to a white strip of `width` so play can continue.
 
-Draw LOD follows camera distance per path or per section for long roads ([LOD](E_lod.md)). Close prefers `_close` spline parts. Far repeats the variant's `far` model along points, falling back to a strip of `width`.
+Draw LOD follows camera distance per path or per section for long roads ([LOD](E_lod.md)). Close prefers `_close` spline parts. Far repeats the variant's `far` model along points, falling back to a strip of `width`. The strip stands in for a physical body, so `outline` paths, which have none, draw nothing at Far or in the citywide overview.
 
 ## Elevated and underground paths
 

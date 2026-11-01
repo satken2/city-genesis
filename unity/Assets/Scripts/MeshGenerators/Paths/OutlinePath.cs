@@ -5,7 +5,8 @@ using UnityEngine;
 /// <summary>
 /// Paths with no physical look (model_type="outline"), such as ferry lanes and ship routes.
 /// Draws dashed lines along both edges of the master width with constant screen thickness, following the drawn centerline including curves.
-/// The look is the same at every LOD, so the whole path is drawn regardless of detail ranges, and Far paths use <see cref="Create"/> too.
+/// Only Normal/Close paths draw them: constant-thickness lines do not shrink with distance, so Far paths and the overview draw nothing (PathFarModel).
+/// The look is the same at Normal and Close, so the whole path is drawn regardless of detail ranges.
 /// The lines are overlays and keep their own color in previews, plans, and highlights.
 /// </summary>
 public sealed class OutlinePath : IPathMeshGenerator
@@ -29,7 +30,7 @@ public sealed class OutlinePath : IPathMeshGenerator
     }
 
     /// <summary>Add the dashed edges of the variant's width along the centerline points under parent.</summary>
-    public static void Create(GameObject parent, List<Vector3> points, int variant)
+    private static void Create(GameObject parent, List<Vector3> points, int variant)
     {
         float half = Width(variant) * .5f;
         if (points == null || points.Count < 2 || half <= 0f) return;
