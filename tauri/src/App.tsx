@@ -661,7 +661,7 @@ function App() {
                 onClose={closeWindow}
               />
             ) : context.window_type === "info_dialog" ? (
-              <InfoDialogWindow content={windowExtra(context) as InfoDialogContent} onClose={closeWindow} />
+              <InfoDialogWindow apiBaseUrl={context.api_base_url} content={windowExtra(context) as InfoDialogContent} onClose={closeWindow} />
             ) : context.window_type === "city_map" ? (
               <CityMapWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "zone_edit" ? (

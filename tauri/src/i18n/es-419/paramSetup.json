@@ -359,8 +359,9 @@
     "confirmTitle": "Confirmación de la configuración del juego",
     "confirmStartTitle": "¿Iniciar la partida?",
     "unsavedChangesWarning": "Al iniciar, se perderán los cambios sin guardar de tu partida actual.",
+    "startSettingsHeading": "Configuración de la ciudad",
     "cityNameLabel": "Nombre de la ciudad",
-    "cityNamePlaceholder": "Escribe el nombre de la ciudad (opcional)",
+    "insigniaLabel": "Escudo y bandera",
     "languageLabel": "Idioma de la ciudad",
     "languageNote": "* No podrá cambiarse después",
     "simulationDaysLabel": "Días de simulación",
@@ -389,8 +390,7 @@
     "developmentNotice": {
       "heading": "Este juego es una versión experimental en desarrollo",
       "subheading": "Lee esto antes de jugar",
-      "text": "Los parámetros y la lógica de la economía aún se están ajustando, así que es posible que la ciudad no crezca con normalidad. El desempleo puede aumentar e incluso la ciudad puede quebrar, pero eso nunca será culpa de tu forma de jugar. ¡Espera las próximas actualizaciones! ¡Agrega el juego a tu lista de deseados y espera el lanzamiento oficial!",
-      "button": "Entendido"
+      "text": "Los parámetros y la lógica de la economía aún se están ajustando, así que es posible que la ciudad no crezca con normalidad. El desempleo puede aumentar e incluso la ciudad puede quebrar, pero eso nunca será culpa de tu forma de jugar. ¡Espera las próximas actualizaciones! ¡Agrega el juego a tu lista de deseados y espera el lanzamiento oficial!"
     }
   }
 }

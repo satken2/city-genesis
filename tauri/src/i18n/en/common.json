@@ -8,6 +8,7 @@
     "currency": "{{value, number}}",
     "daysSinceEpoch": "{{days}} days since Jan 1, 1800",
     "close": "Close",
+    "next": "Next",
     "sqm": "{{value}} m²",
     "save": "Save",
     "saving": "Saving...",

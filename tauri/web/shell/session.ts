@@ -336,9 +336,7 @@ async function fetchCity(base: string): Promise<unknown> {
 
 interface CreateSessionArgs {
   scenarioId?: string | null;
-  cityName?: string | null;
   language?: string | null;
-  simulationDays?: number | null;
   playMode?: number | null;
   tutorialId?: string | null;
   acceptBalanceChange?: boolean | null;
@@ -368,9 +366,7 @@ export async function createSession(args: CreateSessionArgs): Promise<void> {
   const query = new URLSearchParams();
   const optional: [string, unknown][] = [
     ["scenario_id", scenarioId],
-    ["city_name", args.cityName],
     ["language", args.language],
-    ["simulation_days", args.simulationDays],
     ["play_mode", playMode],
     ["tutorial_id", args.tutorialId],
     ["accept_balance_change", args.acceptBalanceChange ?? false],

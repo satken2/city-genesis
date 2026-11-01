@@ -8,6 +8,7 @@
     "currency": "{{value, number}}",
     "daysSinceEpoch": "{{days}} jours depuis le 1er janvier 1800",
     "close": "Fermer",
+    "next": "Suivant",
     "sqm": "{{value}} m²",
     "save": "Enregistrer",
     "saving": "Enregistrement...",

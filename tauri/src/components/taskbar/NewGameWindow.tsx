@@ -24,16 +24,19 @@
  * The save format version is not shown; only missing packs and the reason a scenario cannot load appear.
  *
  * Start opens a settings confirmation overlay within the window, not a native popup. It lists only the start
- * settings the player may change (city name, naming language, simulation days, etc.); with none left, it only asks
- * whether to start. During play, warn about unsaved changes here. Keep the current city and Unity view until final
- * Start.
+ * settings chosen before loading because changing them afterwards renames or redraws the whole city (city language,
+ * ground cover, asset pack); with none left, it only asks whether to start. During play, warn about unsaved changes
+ * here. Keep the current city and Unity view until final Start.
  *
- * Scenario introductions and initial city names are author-written multilingual text. Resolve introductions in
- * the display language and city names in the selected city language, falling back to English. City language
- * defaults to the app language. If it differs from the scenario, the core regenerates names within the city.
- * Settings the author fixed (scenario_fixed_options of the scenario or tutorial list item) are hidden and keep the
- * scenario values, except a fixed language, which starts in the app language. Others are selectable with scenario
- * values as defaults.
+ * Once a scenario's city appears, the information window shows the development notice, the scenario introduction,
+ * and the start settings page (city name, emblem and flag, simulation days) in order. Tutorials open their own
+ * introduction instead.
+ *
+ * Scenario introductions are author-written multilingual text resolved in the display language, falling back to
+ * English; the core resolves the initial city name in the city language. City language defaults to the app language.
+ * If it differs from the scenario, the core regenerates names within the city. Settings the author fixed
+ * (scenario_fixed_options of the scenario or tutorial list item) are hidden and keep the scenario values, except a
+ * fixed language, which starts in the app language. Others are selectable with scenario values as defaults.
  */
 import { PLAY_MODE_NORMAL, PLAY_MODE_TUTORIAL } from "../../constants";
 
@@ -60,7 +63,7 @@ import { fetchApi } from "../../utils/api";
 import { AssetPackEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
 import { ASSET_PACK_STANDARD, GROUND_COVER_TYPES } from "../../constants";
 import { SaveCompatibilityReason } from "../common/SaveVersionInfo";
-import type { InfoDialogContent } from "../common/InfoDialogWindow";
+import type { InfoDialogContent, InfoDialogPage } from "../common/InfoDialogWindow";
 
 type NewGameWindowProps = {
   apiBaseUrl: string;
@@ -124,9 +127,7 @@ type ConfirmSelection = {
   scenario: ScenarioEntry | null;
   /** Start settings the author fixed, from the scenario or tutorial list item. */
   fixedOptions: ScenarioStartOption[];
-  defaultCityName: string;
   defaultLanguage: string;
-  defaultSimulationDays: number;
   playMode: number;
   tutorialId?: string | null;
 };
@@ -139,36 +140,39 @@ const EXTRA_START_OPTIONS: { key: ExtraStartOption; values: number[]; labelKey: 
   { key: "ground_cover", values: GROUND_COVER_TYPES, labelKey: "groundCover" },
 ];
 
-/** Initial city name, resolved in selected city language, then English. */
-function defaultCityNameOf(scenario: ScenarioEntry, language: string): string {
-  return resolveLocalizedText(scenario.scenario_city_name, language);
-}
-
 function startOptionValuesOf(scenario: ScenarioEntry | null): Record<ExtraStartOption, number> {
   return {
     ground_cover: normalizeGroundCover(scenario?.ground_cover),
   };
 }
 
-/** Shown once the city appears after starting in normal play, because the economic balance is still being tuned. */
-const DEVELOPMENT_NOTICE: InfoDialogContent = {
+/** First intro page during the playtest only, because the economic balance is still being tuned. */
+const DEVELOPMENT_NOTICE: InfoDialogPage = {
+  kind: "text",
   image: developmentNoticeImage,
   headingKey: "newGame.developmentNotice.heading",
   subheadingKey: "newGame.developmentNotice.subheading",
   textKey: "newGame.developmentNotice.text",
   url: "https://store.steampowered.com/app/5021240/CityGenesis/",
-  buttonKey: "newGame.developmentNotice.button",
 };
+
+/** Information window opened once a scenario's city appears. */
+function scenarioIntroOf(scenario: ScenarioEntry): InfoDialogContent {
+  const { id, content_revision, scenario_title, scenario_city_name, scenario_description, scenario_objective } = scenario;
+  return {
+    pages: [
+      DEVELOPMENT_NOTICE,
+      { kind: "scenario", scenario: { id, content_revision, scenario_title, scenario_city_name, scenario_description, scenario_objective } },
+      { kind: "start_settings" },
+    ],
+    buttonKey: "newGame.startButton",
+  };
+}
 
 /**
  * Languages supported by the game, matching Tauri's settings.
  */
 const AVAILABLE_LANGUAGES = SUPPORTED_LANGUAGES;
-
-/**
- * Simulation day options
- */
-const SIMULATION_DAYS_OPTIONS = [7, 30] as const;
 
 /** Completion badge */
 function ClearedBadge({ className }: { className: string }) {
@@ -230,11 +234,7 @@ export function NewGameWindow({
   const [confirmSelection, setConfirmSelection] = useState<ConfirmSelection | null>(null);
 
   // Input values in settings confirmation
-  const [cityName, setCityName] = useState("");
-  // Whether the player edited the city name. If not, changing language resolves the initial name again.
-  const [cityNameEdited, setCityNameEdited] = useState(false);
   const [language, setLanguage] = useState("ja");
-  const [simulationDays, setSimulationDays] = useState(30);
   const [startOptions, setStartOptions] = useState(() => startOptionValuesOf(null));
   // Available additional asset packs and selected pack. Default to the scenario pack, or standard if unavailable.
   const [assetPacks, setAssetPacks] = useState<AssetPackEntry[]>([]);
@@ -309,12 +309,7 @@ export function NewGameWindow({
       const settings = await loadAppSettings();
       // Default the city language to the app language so players start in their own language without extra action.
       const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
-      const defaultDays = scenario.simulation_days || 30;
-      const defaultCityName = defaultCityNameOf(scenario, defaultLang);
-      setCityName(defaultCityName);
-      setCityNameEdited(false);
       setLanguage(defaultLang);
-      setSimulationDays(defaultDays);
       setStartOptions(startOptionValuesOf(scenario));
       const packs = await fetchAssetPacks(apiBaseUrl).catch((): AssetPackEntry[] => []);
       setAssetPacks(packs);
@@ -323,9 +318,7 @@ export function NewGameWindow({
         scenarioId: scenario.id,
         scenario,
         fixedOptions: scenario.scenario_fixed_options ?? [],
-        defaultCityName,
         defaultLanguage: defaultLang,
-        defaultSimulationDays: defaultDays,
         playMode: PLAY_MODE_NORMAL,
         tutorialId: null,
       });
@@ -341,17 +334,12 @@ export function NewGameWindow({
   const handleStartTutorial = useCallback(async (tutorialId: string) => {
     const settings = await loadAppSettings();
     const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
-    setCityName("");
-    setCityNameEdited(false);
     setLanguage(defaultLang);
-    setSimulationDays(30);
     setConfirmSelection({
       scenarioId: null,
       scenario: null,
       fixedOptions: tutorialEntries[tutorialId]?.scenario_fixed_options ?? [],
-      defaultCityName: "",
       defaultLanguage: defaultLang,
-      defaultSimulationDays: 30,
       playMode: PLAY_MODE_TUTORIAL,
       tutorialId,
     });
@@ -435,27 +423,19 @@ export function NewGameWindow({
       await invoke("create_session", {
         acceptBalanceChange: true,
         scenarioId: confirmSelection.scenarioId,
-        cityName: fixed.has("city_name") ? null : cityName || null,
         language,
-        simulationDays: fixed.has("simulation_days") ? null : simulationDays,
         groundCover: chosen("ground_cover", startOptions.ground_cover),
         assetPack: confirmSelection.scenario ? assetPack : null,
         playMode: confirmSelection.playMode,
         tutorialId: confirmSelection.tutorialId || null,
-        introDialog: confirmSelection.playMode === PLAY_MODE_NORMAL ? DEVELOPMENT_NOTICE : null,
+        introDialog: confirmSelection.scenario ? scenarioIntroOf(confirmSelection.scenario) : null,
       });
       onClose();
     } catch (error) {
       setFailure(saveError(error, t) || t("newGame.startFailed"));
       setBusy(false);
     }
-  }, [apiBaseUrl, t, onClose, confirmSelection, hasCurrentGame, cityName, language, simulationDays, startOptions, assetPack]);
-
-  /** Change city language. Unless the name was edited, resolve its initial value in the new language. */
-  const handleLanguageChange = useCallback((next: string) => {
-    setLanguage(next);
-    if (confirmSelection?.scenario && !cityNameEdited) setCityName(defaultCityNameOf(confirmSelection.scenario, next));
-  }, [confirmSelection, cityNameEdited]);
+  }, [apiBaseUrl, t, onClose, confirmSelection, hasCurrentGame, language, startOptions, assetPack]);
 
   /**
    * Close settings confirmation and return to tile selection.
@@ -523,8 +503,7 @@ export function NewGameWindow({
   const fixedOptions = new Set<ScenarioStartOption>(confirmSelection?.fixedOptions ?? []);
   const extraOptions = confirmScenario ? EXTRA_START_OPTIONS.filter(({ key }) => !fixedOptions.has(key)) : [];
   // Scenario starts always list the asset pack.
-  const hasStartFields = confirmScenario != null
-    || (["city_name", "language", "simulation_days"] as const).some((option) => !fixedOptions.has(option));
+  const hasStartFields = confirmScenario != null || !fixedOptions.has("language");
   const isSelected = (kind: Selection["kind"], id: string) => selection?.kind === kind && selection.id === id;
 
   // Keep the selection screen rendered beneath the settings confirmation overlay.
@@ -691,23 +670,6 @@ export function NewGameWindow({
 
             {hasStartFields && (
               <div className="new-game-confirm-fields">
-                {/* City name */}
-                {!fixedOptions.has("city_name") && (
-                  <div className="new-game-confirm-field" data-option="city_name">
-                    <label className="new-game-confirm-label">
-                      {t("newGame.cityNameLabel")}
-                    </label>
-                    <input
-                      className="new-game-confirm-input"
-                      type="text"
-                      value={cityName}
-                      onChange={(e) => { setCityName(e.target.value); setCityNameEdited(true); }}
-                      placeholder={t("newGame.cityNamePlaceholder")}
-                      disabled={busy}
-                    />
-                  </div>
-                )}
-
                 {/* City language */}
                 {!fixedOptions.has("language") && (
                   <div className="new-game-confirm-field" data-option="language">
@@ -718,7 +680,7 @@ export function NewGameWindow({
                       <select
                         className="new-game-confirm-select"
                         value={language}
-                        onChange={(e) => handleLanguageChange(e.target.value)}
+                        onChange={(e) => setLanguage(e.target.value)}
                         disabled={busy}
                       >
                         {AVAILABLE_LANGUAGES.map((lang) => (
@@ -737,30 +699,6 @@ export function NewGameWindow({
                         })}
                       </span>
                     )}
-                  </div>
-                )}
-
-                {/* Simulation days */}
-                {!fixedOptions.has("simulation_days") && (
-                  <div className="new-game-confirm-field" data-option="simulation_days">
-                    <label className="new-game-confirm-label">
-                      {t("newGame.simulationDaysLabel")}
-                    </label>
-                    <div className="new-game-confirm-days">
-                      {SIMULATION_DAYS_OPTIONS.map((days) => (
-                        <button
-                          key={days}
-                          className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
-                          onClick={() => setSimulationDays(days)}
-                          disabled={busy}
-                          type="button"
-                          aria-pressed={simulationDays === days}
-                        >
-                          {t("newGame.daysOption", { days })}
-                        </button>
-                      ))}
-                    </div>
-                    <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
                   </div>
                 )}
 

@@ -393,18 +393,17 @@ fn close_registered_window(
 /// tutorial). Ask Unity to clear the previous city, hide topmenu and
 /// current popups, show Tips, then POST /api/v1/sessions to the backend.
 ///
-/// Pass extra parameters (city name, language, simulation days, ground cover, and asset
-/// packs) to the backend as query parameters. When loading a scenario, only settings not locked by the
-/// author may override scenario values (the core rejects different values for locked settings with 422).
+/// Pass extra parameters (language, ground cover, and asset pack) to the backend as query parameters.
+/// When loading a scenario, only settings not locked by the author may override scenario values (the core
+/// rejects different values for locked settings with 422). City name and simulation days are chosen after the
+/// city appears, on the start settings page of the information window.
 /// `intro_dialog` is the content of the information window opened once the city appears.
 #[tauri::command]
 async fn create_session(
     app: tauri::AppHandle,
     state: tauri::State<'_, SharedState>,
     scenario_id: Option<String>,
-    city_name: Option<String>,
     language: Option<String>,
-    simulation_days: Option<u32>,
     play_mode: Option<i32>,
     tutorial_id: Option<String>,
     accept_balance_change: Option<bool>,
@@ -417,9 +416,8 @@ async fn create_session(
         return Err("PLAY_MODE_FORBIDDEN".into());
     }
     log::info!(
-        "[create_session] scenario_id={:?} city_name={:?} language={:?} simulation_days={:?} play_mode={} tutorial_id={:?} ground_cover={:?} asset_pack={:?}",
-        scenario_id, city_name, language, simulation_days, play_mode, tutorial_id,
-        ground_cover, asset_pack
+        "[create_session] scenario_id={:?} language={:?} play_mode={} tutorial_id={:?} ground_cover={:?} asset_pack={:?}",
+        scenario_id, language, play_mode, tutorial_id, ground_cover, asset_pack
     );
 
     version::verify_core(state.inner()).await?;
@@ -463,9 +461,7 @@ async fn create_session(
     #[derive(serde::Serialize)]
     struct SessionParams {
         scenario_id: Option<String>,
-        city_name: Option<String>,
         language: Option<String>,
-        simulation_days: Option<u32>,
         play_mode: i32,
         tutorial_id: Option<String>,
         accept_balance_change: bool,
@@ -474,9 +470,7 @@ async fn create_session(
     }
     let query_params = SessionParams {
         scenario_id: scenario_id.clone(),
-        city_name: city_name.clone(),
         language: language.clone(),
-        simulation_days,
         play_mode,
         tutorial_id: tutorial_id.clone(),
         accept_balance_change: accept_balance_change.unwrap_or(false),

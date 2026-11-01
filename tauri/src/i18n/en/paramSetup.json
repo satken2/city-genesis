@@ -359,8 +359,9 @@
     "confirmTitle": "Confirm Game Settings",
     "confirmStartTitle": "Start the game?",
     "unsavedChangesWarning": "Starting will discard unsaved changes in your current game.",
+    "startSettingsHeading": "City Settings",
     "cityNameLabel": "City Name",
-    "cityNamePlaceholder": "Enter city name (optional)",
+    "insigniaLabel": "Emblem & City Flag",
     "languageLabel": "City Language",
     "languageNote": "*Cannot be changed later",
     "simulationDaysLabel": "Simulation Days",
@@ -389,8 +390,7 @@
     "developmentNotice": {
       "heading": "This game is an experimental build in development",
       "subheading": "Please read before playing",
-      "text": "Its economic parameters and logic are still being tuned, so your city may not grow as it should. Unemployment may rise and the city may even collapse, but that is never the fault of your play. Stay tuned for future updates! Add the game to your wishlist and look forward to the official release!",
-      "button": "Got it"
+      "text": "Its economic parameters and logic are still being tuned, so your city may not grow as it should. Unemployment may rise and the city may even collapse, but that is never the fault of your play. Stay tuned for future updates! Add the game to your wishlist and look forward to the official release!"
     }
   }
 }

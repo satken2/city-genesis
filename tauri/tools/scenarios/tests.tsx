@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import { ScenarioManagerWindow } from "../../src/components/scenario/ScenarioManagerWindow";
 import { ScenarioMetadataWindow } from "../../src/components/scenario/ScenarioMetadataWindow";
 import { NewGameWindow } from "../../src/components/taskbar/NewGameWindow";
+import { InfoDialogWindow } from "../../src/components/common/InfoDialogWindow";
 import { SaveLoadWindow } from "../../src/components/taskbar/SaveLoadWindow";
 import { SaveListWindow } from "../../src/components/taskbar/SaveListWindow";
 import { errorCode, prepareSaveLoad, saveError } from "../../src/utils/saves";
@@ -73,6 +74,7 @@ function saveMenuResponse(url: string, init?: RequestInit): Response | null {
   const method = init?.method ?? "GET";
   const saveId = /\/api\/v1\/saves\/([^/?]+)$/.exec(url)?.[1];
   const scenarioSaveId = /\/api\/v1\/saves\/([^/?]+)\?scenario=true$/.exec(url)?.[1];
+  if (url.endsWith("/api/v1/city/") && method === "PATCH") saveRequests.push({ method, url, body: init?.body });
   if (url.endsWith("/api/v1/city/")) return new Response(JSON.stringify({ city: playingCity }));
   if (url.endsWith("/api/v1/sessions") && method === "GET") {
     return new Response(JSON.stringify({ current_save_id: currentSaveId, current_save_is_scenario: editingScenario, debug_execution: false, language: "ja" }));
@@ -642,22 +644,18 @@ assert.ok(!state.calls.slice(callsBeforeNewGame).some(call => ["launch_graphic",
   "browsing scenarios and cancelling does not reset Unity or replace the city");
 await act(async () => { button("newGame.startScenarioButton").click(); });
 await settle();
-// 都市の言語の既定はアプリ設定の言語。シナリオと違えば名前の付け直しを知らせ、都市名は初期の都市名をその言語で引く。
+// 都市の言語の既定はアプリ設定の言語。シナリオと違えば名前の付け直しを知らせる。
 const languageSelect = container.querySelector<HTMLSelectElement>(".new-game-confirm-select")!;
-const cityNameInput = container.querySelector<HTMLInputElement>(".new-game-confirm-input")!;
 assert.equal(languageSelect.value, "en");
 assert.ok(container.querySelector(".new-game-confirm-relocalize"), "starting in another language renames the city");
-assert.equal(cityNameInput.value, "Sample Town");
 await act(async () => { setText(languageSelect, "ja"); });
-assert.equal(cityNameInput.value, "見本市");
 assert.ok(!container.querySelector(".new-game-confirm-relocalize"));
-await act(async () => { setText(cityNameInput, "Mine"); });
 await act(async () => { setText(languageSelect, "fr"); });
-assert.equal(cityNameInput.value, "Mine", "a typed city name is kept");
-// 作者が固定した項目は出さない。固定していない項目は選べる。
+// ロード前に決めるのは言語・地表・アセットパックだけ。都市名と日数は都市が表示されたあとの設定ページで決める。
 const optionRow = (option: string) => container.querySelector(`.new-game-confirm-field[data-option=${option}]`);
 assert.equal(container.querySelector(".new-game-confirm-title")?.textContent, "newGame.confirmTitle");
-assert.equal(optionRow("simulation_days"), null, "fixed simulation days are hidden");
+assert.deepEqual([...container.querySelectorAll<HTMLElement>(".new-game-confirm-field")].map(field => field.dataset.option),
+  ["language", "ground_cover", "asset_pack"], "city name and simulation days are chosen after the city appears");
 await act(async () => { setText(optionRow("ground_cover")!.querySelector("select")!, "2"); });
 // 開始に失敗したら、理由をダイアログの中に出して開いたままにする。
 state.errors.create_session = { code: "SAVE_CORRUPT", params: {} };
@@ -671,9 +669,14 @@ await settle();
 const session = lastCall("create_session");
 assert.equal(session.scenarioId, "local~mine");
 assert.equal(session.playMode, PLAY_MODE_NORMAL, "new games start in normal mode");
-assert.equal(session.introDialog?.textKey, "newGame.developmentNotice.text", "normal starts show the development notice once the city appears");
-assert.deepEqual([session.language, session.cityName, session.groundCover, session.assetPack, session.simulationDays],
-  ["fr", "Mine", 2, "standard", null], "fixed simulation days keep the scenario value");
+assert.deepEqual(session.introDialog?.pages?.map((page: { kind: string }) => page.kind), ["text", "scenario", "start_settings"],
+  "scenario starts show the development notice, the introduction, and the start settings once the city appears");
+assert.equal(session.introDialog?.pages?.[0]?.textKey, "newGame.developmentNotice.text");
+assert.deepEqual(session.introDialog?.pages?.[1]?.scenario?.scenario_description, entry.scenario_description,
+  "the introduction matches the scenario details");
+assert.deepEqual([session.language, session.groundCover, session.assetPack], ["fr", 2, "standard"]);
+assert.ok(!("cityName" in session) && !("simulationDays" in session),
+  "city name and simulation days keep the scenario values until the start settings page");
 delete state.results.load_app_settings;
 
 // チュートリアルは同梱の教材の都市から始まるので、地形の情報を出さずにIDだけを送る。
@@ -699,10 +702,36 @@ await act(async () => { button("newGame.startButton").click(); });
 await settle();
 const tutorialSession = lastCall("create_session");
 assert.deepEqual([tutorialSession.playMode, tutorialSession.tutorialId, tutorialSession.scenarioId], [PLAY_MODE_TUTORIAL, firstTutorial, null]);
-assert.deepEqual([tutorialSession.cityName, tutorialSession.language, tutorialSession.simulationDays], [null, "ja", null],
-  "fixed settings keep the tutorial's values; a fixed language follows the display language");
-assert.equal(tutorialSession.introDialog, null, "tutorials open their own introduction instead of the development notice");
+assert.equal(tutorialSession.language, "ja", "a fixed language follows the display language");
+assert.equal(tutorialSession.introDialog, null, "tutorials open their own introduction without the start settings page");
 assert.ok(!("terrainMapId" in tutorialSession), "no terrain is sent for tutorials");
+await act(async () => { root.unmount(); });
+
+// 都市が表示されたあとの案内は、最後のページ以外の右下が「次へ」。設定ページは変えた都市名と日数だけを送る。
+let introClosed = 0;
+root = createRoot(container);
+await act(async () => { root.render(<InfoDialogWindow apiBaseUrl="http://test" content={session.introDialog} onClose={() => { introClosed++; }} />); });
+await settle();
+assert.equal(container.querySelector(".info-dialog-heading")?.textContent, "newGame.developmentNotice.heading");
+await act(async () => { button("common.next").click(); });
+await settle();
+assert.equal(container.querySelector(".info-dialog-heading")?.textContent, "My scenario", "the second page introduces the scenario");
+assert.equal(container.querySelector(".info-dialog-text")?.textContent, "説明", "author text resolves in the display language");
+await act(async () => { button("common.next").click(); });
+await settle();
+const startCityName = container.querySelector<HTMLInputElement>("#start-settings-city-name")!;
+assert.equal(startCityName.value, "港町", "the start settings begin with the loaded city's values");
+assert.ok(container.querySelector(".info-dialog .city-insignia-button"), "the emblem and flag open the editor from the start settings");
+await act(async () => { setText(startCityName, "新しい町"); });
+await act(async () => { container.querySelectorAll<HTMLButtonElement>(".new-game-confirm-days-btn")[0].click(); });
+const requestsBeforeStart = saveRequests.length;
+await act(async () => { button("newGame.startButton").click(); });
+await settle();
+assert.deepEqual(saveRequests.slice(requestsBeforeStart).map(request => [request.method, JSON.parse(String(request.body))]),
+  [["PATCH", { name: "新しい町", simulation_days: 7 }]]);
+assert.ok(state.emitted.includes("city:renamed"), "the HUD learns the new name immediately");
+assert.equal(introClosed, 1, "the last page's button closes the window");
+saveRequests.length = 0;
 await act(async () => { root.unmount(); });
 
 // クリア済みの札: プロフィールの記録と照らし、タイルの右上と詳細に出す。チュートリアルは教材ID、シナリオは一覧のidで引く。

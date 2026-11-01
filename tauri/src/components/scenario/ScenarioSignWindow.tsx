@@ -4,10 +4,9 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { emit } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { saveError, scenarioDisplayTitle } from "../../utils/saves";
+import { saveError, scenarioDisplayTitle, type ScenarioEntry } from "../../utils/saves";
 import "./Scenarios.css";
 
-type ScenarioEntry = Parameters<typeof scenarioDisplayTitle>[0];
 export type ScenarioCatalog = {
   scenarios: Record<string, ScenarioEntry & { scenario_id?: string }>;
   upload_available: boolean; upload_host: string | null; signing_available?: boolean;

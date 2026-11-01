@@ -22,6 +22,13 @@
   display: block;
 }
 
+/* Unregistered scenario thumbnails leave the image area's background. */
+.info-dialog-thumbnail {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .info-dialog-content {
   display: flex;
   flex-direction: column;
@@ -53,6 +60,18 @@
   font-size: 1rem;
   line-height: 1.7;
   color: var(--flat-text-body);
+}
+
+/* Author-written text keeps its line breaks. */
+.info-dialog-text--authored {
+  white-space: pre-wrap;
+}
+
+.info-dialog-error {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--flat-danger);
 }
 
 .info-dialog-link {
@@ -88,6 +107,11 @@
   cursor: pointer;
 }
 
-.info-dialog-button:hover {
+.info-dialog-button:hover:not(:disabled) {
   background-color: var(--flat-selected-hover);
+}
+
+.info-dialog-button:disabled {
+  opacity: 0.6;
+  cursor: default;
 }

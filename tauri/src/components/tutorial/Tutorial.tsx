@@ -131,10 +131,13 @@ export function Tutorial() {
     introOpenedRef.current = key;
     const content: InfoDialogContent = {
       titleKey: "tutorial.intro.windowTitle",
-      image: currentScenario.image,
-      headingKey: currentScenario.titleKey,
-      subheadingKey: "tutorial.intro.heading",
-      textKey: currentScenario.introKey,
+      pages: [{
+        kind: "text",
+        image: currentScenario.image,
+        headingKey: currentScenario.titleKey,
+        subheadingKey: "tutorial.intro.heading",
+        textKey: currentScenario.introKey,
+      }],
       buttonKey: "tutorial.startButton",
     };
     void invoke("open_registered_window", { windowType: "info_dialog", params: { extra: content } }).catch(console.error);

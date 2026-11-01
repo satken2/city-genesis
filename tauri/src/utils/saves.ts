@@ -83,7 +83,7 @@ export async function fetchAssetPacks(apiBaseUrl: string): Promise<AssetPackEntr
 }
 
 /** Scenario heading: title, then initial city name, then ID prefix. */
-export function scenarioDisplayTitle(entry: ScenarioEntry, language: string | undefined): string {
+export function scenarioDisplayTitle(entry: Pick<ScenarioEntry, "id" | "scenario_title" | "scenario_city_name">, language: string | undefined): string {
   return resolveLocalizedText(entry.scenario_title, language) || resolveLocalizedText(entry.scenario_city_name, language) || entry.id.slice(0, 8);
 }
 

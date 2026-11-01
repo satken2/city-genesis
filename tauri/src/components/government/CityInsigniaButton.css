@@ -1,0 +1,47 @@
+.city-insignia-button {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.city-insignia-button:hover {
+  background: none;
+}
+
+.city-insignia-button:disabled {
+  cursor: default;
+}
+
+.city-insignia-button__emblem,
+.city-insignia-button__flag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88px;
+}
+
+.city-insignia-button__emblem {
+  width: 88px;
+}
+
+.city-insignia-button__flag {
+  width: 132px;
+}
+
+/* An empty slot (unset or failed image) shows a dashed frame. */
+.city-insignia-button__emblem:empty,
+.city-insignia-button__flag:empty {
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+}
+
+.city-insignia-button__emblem img,
+.city-insignia-button__flag img {
+  max-width: 100%;
+  max-height: 100%;
+}

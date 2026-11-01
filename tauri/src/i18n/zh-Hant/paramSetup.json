@@ -359,8 +359,9 @@
     "confirmTitle": "遊戲設定確認",
     "confirmStartTitle": "要開始遊戲嗎？",
     "unsavedChangesWarning": "開始後，目前遊戲中未儲存的變更將會遺失。",
+    "startSettingsHeading": "城市設定",
     "cityNameLabel": "城市名稱",
-    "cityNamePlaceholder": "輸入城市名稱（選填）",
+    "insigniaLabel": "紋章·市旗",
     "languageLabel": "城市的語言",
     "languageNote": "※之後無法變更",
     "simulationDaysLabel": "模擬天數",
@@ -389,8 +390,7 @@
     "developmentNotice": {
       "heading": "本遊戲是開發中的試驗版",
       "subheading": "遊玩前請閱讀",
-      "text": "經濟參數與邏輯仍在調整，城市可能無法正常發展。失業率可能上升，城市甚至可能破產，但這絕不是你的玩法造成的。敬請期待後續更新。請將本遊戲加入願望清單，敬候正式發售。",
-      "button": "我知道了"
+      "text": "經濟參數與邏輯仍在調整，城市可能無法正常發展。失業率可能上升，城市甚至可能破產，但這絕不是你的玩法造成的。敬請期待後續更新。請將本遊戲加入願望清單，敬候正式發售。"
     }
   }
 }

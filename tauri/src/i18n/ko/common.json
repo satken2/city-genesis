@@ -8,6 +8,7 @@
     "currency": "{{value, number}}",
     "daysSinceEpoch": "1800년 1월 1일부터 {{days}}일 경과",
     "close": "닫기",
+    "next": "다음",
     "sqm": "{{value}} m²",
     "save": "저장",
     "saving": "저장 중...",

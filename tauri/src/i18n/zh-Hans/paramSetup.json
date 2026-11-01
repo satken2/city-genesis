@@ -359,8 +359,9 @@
     "confirmTitle": "游戏设置确认",
     "confirmStartTitle": "要开始游戏吗？",
     "unsavedChangesWarning": "开始后，当前游戏中未保存的更改将丢失。",
+    "startSettingsHeading": "城市设置",
     "cityNameLabel": "城市名称",
-    "cityNamePlaceholder": "输入城市名称（可选）",
+    "insigniaLabel": "纹章·市旗",
     "languageLabel": "城市的语言",
     "languageNote": "※之后无法更改",
     "simulationDaysLabel": "模拟天数",
@@ -389,8 +390,7 @@
     "developmentNotice": {
       "heading": "本游戏是开发中的试验版",
       "subheading": "游玩前请阅读",
-      "text": "经济参数和逻辑仍在调整，城市可能无法正常发展。失业率可能上升，城市甚至可能破产，但这绝不是你的玩法造成的。敬请期待后续更新。请将本游戏加入愿望单，敬候正式发售。",
-      "button": "我知道了"
+      "text": "经济参数和逻辑仍在调整，城市可能无法正常发展。失业率可能上升，城市甚至可能破产，但这绝不是你的玩法造成的。敬请期待后续更新。请将本游戏加入愿望单，敬候正式发售。"
     }
   }
 }

@@ -8,6 +8,7 @@
     "currency": "{{value, number}}",
     "daysSinceEpoch": "1800年1月1日から{{days}}日経過",
     "close": "閉じる",
+    "next": "次へ",
     "sqm": "{{value}} m²",
     "save": "保存",
     "saving": "保存中...",
