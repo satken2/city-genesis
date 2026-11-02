@@ -1,6 +1,6 @@
 import { describeError } from "./utils/errors";
 import { configureBackendRequests, setBackendConnected } from "./utils/api";
-import { useEffect, useMemo, useState, lazy, Suspense, type MouseEvent as ReactMouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, lazy, Suspense, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -253,7 +253,7 @@ function App() {
     };
   }, [context]);
 
-  async function closeWindow() {
+  const closeWindow = useCallback(async () => {
     try {
       if (context) {
         await emit("bgm:release", { id: context.window_type });
@@ -267,7 +267,21 @@ function App() {
     } catch {
       // Ignore already closed windows or close failures.
     }
-  }
+  }, [context]);
+
+  useEffect(() => {
+    if (windowKind !== "popup" || !context) return;
+
+    // フォーカス中のポップアップだけで受け取り、入力欄や個別パネルの Escape 処理との二重実行を防ぐ。
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (!event.repeat) void closeWindow();
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [windowKind, context, closeWindow]);
 
   async function startWindowDrag(event: ReactMouseEvent<HTMLElement>) {
     if (event.button !== 0) {

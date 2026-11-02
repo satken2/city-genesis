@@ -6,7 +6,7 @@ The Tauri UI consists of multiple WebViews. Rust manages window lifetimes, place
 
 Common management defines window types, placement, and which windows can coexist. Initial data is passed through window context rather than events sent before subscriptions exist.
 
-Closed popups can remain hidden and be reused, so React unmounting does not mark the end of interaction. Reset targets and editing state on reopening, and prevent hidden-window events from causing side effects such as Unity actions. Window management ends editing and clears highlighting on close.
+Closed popups can remain hidden and be reused, so React unmounting does not mark the end of interaction. Reset targets and editing state on reopening, and prevent hidden-window events from causing side effects such as Unity actions. Window management ends editing and clears highlighting on close. The title-bar close button and the Escape key in a focused popup use the same close path.
 
 Transparent WebViews also receive input, so persistent UI windows must fit their actual panel area. Common management handles placement across monitors and DPI settings; screens do not correct positions independently.
 
