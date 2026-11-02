@@ -115,13 +115,20 @@ public static class RoadShapeGeometry
 
     /// <summary>
     /// Whether two segments collide at their XZ crossing, comparing absolute elevations (core validate_path_elevation_intersections).
-    /// Only pairs that connect (sameHeightAllowed: their node masks share a bit) may meet at the same height as an
-    /// intersection or level crossing; any other pair collides whenever the occupied ranges [y, y + height] overlap.
+    /// Pairs that connect (sameHeightAllowed: their node masks share a bit) do not collide where they touch: within
+    /// riserRadius of an infrastructure endpoint (risers, XZ), which joins vertically at any height, or within
+    /// AbsoluteHeightTolerance as an intersection or level crossing. Otherwise segments collide whenever the occupied
+    /// ranges [y, y + height] overlap.
     /// </summary>
-    public static bool ElevationOverlaps(ElevationSegment a, float heightA, ElevationSegment b, float heightB, bool sameHeightAllowed)
+    public static bool ElevationOverlaps(ElevationSegment a, float heightA, ElevationSegment b, float heightB, bool sameHeightAllowed,
+        IReadOnlyList<Vector2> risers = null, float riserRadius = 0f)
     {
         if (!SegmentsIntersectXZ(a.a, a.b, b.a, b.b, out float tA, out float tB)) return false;
-        float ground = a.follows || b.follows ? Utils.GetPathSurfaceHeight(Vector3.Lerp(a.a, a.b, tA)) : 0f;
+        Vector3 crossing = Vector3.Lerp(a.a, a.b, tA);
+        if (sameHeightAllowed && risers != null)
+            foreach (var riser in risers)
+                if (Vector2.Distance(new Vector2(crossing.x, crossing.z), riser) <= riserRadius) return false;
+        float ground = a.follows || b.follows ? Utils.GetPathSurfaceHeight(crossing) : 0f;
         float ya = a.HeightAt(tA, ground), yb = b.HeightAt(tB, ground);
         if (sameHeightAllowed && Mathf.Abs(ya - yb) < AbsoluteHeightTolerance) return false;
         return ya < yb + heightB && ya + heightA > yb;

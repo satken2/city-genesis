@@ -155,7 +155,7 @@
       },
       "step29": {
         "title": "Raccordons par une conduite",
-        "description": "Il faut une conduite pour amener l’eau de la pompe souterraine à la station de pompage. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Conduite d'eau principale » sous « Eau », et posez-la de la borne de raccordement de la pompe à celle de la station de pompage."
+        "description": "Il faut une conduite pour amener l’eau de la pompe souterraine à la station de pompage. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Conduite d'eau principale » sous « Eau », et posez-la de la borne de raccordement de la pompe à celle de la station de pompage. Pour éviter les routes et la ligne électrique, faites un large détour par l’est."
       },
       "step30": {
         "title": "Vérifions l’alimentation en eau",

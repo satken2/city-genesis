@@ -155,7 +155,7 @@
       },
       "step29": {
         "title": "Conectemos con una tubería",
-        "description": "Hace falta una tubería que lleve el agua de la bomba subterránea a la estación de bombeo. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Tubería de aducción de agua» en «Agua» y tiéndela desde el terminal de conexión de la bomba hasta el de la estación de bombeo."
+        "description": "Hace falta una tubería que lleve el agua de la bomba subterránea a la estación de bombeo. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Tubería de aducción de agua» en «Agua» y tiéndela desde el terminal de conexión de la bomba hasta el de la estación de bombeo. Para que no choque con las calles ni con la línea de transmisión, rodea ampliamente por el lado este."
       },
       "step30": {
         "title": "Comprobemos el suministro de agua",

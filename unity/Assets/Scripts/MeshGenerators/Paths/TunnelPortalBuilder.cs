@@ -55,8 +55,13 @@ public static class TunnelPortalBuilder
     private const float SearchStep = 0.25f;
     private const float LateralStep = 1f;
 
+    /// <summary>
+    /// Whether the path gets portals where it enters a tunnel. Infrastructure pipes and cables go underground
+    /// without tunnel portals, even though their master height (pipe thickness) also acts as the tunnel clearance.
+    /// </summary>
     public static bool BuildsPortals(PathSummary path)
     {
+        if (InfraNetworkUtil.IsInfraPathType(path.path_type)) return false;
         var store = MasterDataStore.Instance;
         var master = store != null && store.IsInitialized ? store.GetPathMaster(path.path_variant) : null;
         string modelType = master?.model_type;

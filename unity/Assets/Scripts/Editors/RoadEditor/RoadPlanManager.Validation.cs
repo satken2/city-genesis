@@ -240,6 +240,13 @@ public partial class RoadPlanManager
         }
 
         int myNetworkMask = InfraNetworkUtil.GetRequiredNodeTypeForPath(PathSubtype);
+        var myRisers = new List<Vector2>();
+        if (InfraNetworkUtil.IsInfraPathType(PathType))
+        {
+            myRisers.Add(new Vector2(mySegments[0].a.x, mySegments[0].a.z));
+            myRisers.Add(new Vector2(mySegments[mySegments.Count - 1].b.x, mySegments[mySegments.Count - 1].b.z));
+        }
+        float myWidth = pathManager.GetRoadWidth(PathSubtype);
 
         var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [Freeze investigation] Remove after investigation.
         int freezeProbeBuilt = 0; // [Freeze investigation] Remove after investigation.
@@ -282,6 +289,23 @@ public partial class RoadPlanManager
             if (myHeight <= 0f && otherHeight <= 0f) continue;
 
             bool sameHeightAllowed = (myNetworkMask & InfraNetworkUtil.GetRequiredNodeTypeForPath(exPath.path_variant)) != 0;
+            // Infrastructure endpoints join vertically, so a connecting pair does not collide near them
+            // (same radius as core: max of the T-junction reach and the 1m endpoint-contact distance).
+            List<Vector2> risers = null;
+            float riserRadius = 0f;
+            if (sameHeightAllowed)
+            {
+                risers = new List<Vector2>(myRisers);
+                if (InfraNetworkUtil.IsInfraPathType(exPath.path_type))
+                {
+                    var exStart = exPath.GetStartPointList();
+                    var exEnd = exPath.GetEndPointList();
+                    if (exStart != null && exStart.Count >= 2) risers.Add(new Vector2(exStart[0], exStart[exStart.Count - 1]));
+                    if (exEnd != null && exEnd.Count >= 2) risers.Add(new Vector2(exEnd[0], exEnd[exEnd.Count - 1]));
+                }
+                bool railInvolved = TrackIntersectionMeshGenerator.IsTrackType(PathType) || TrackIntersectionMeshGenerator.IsTrackType(exPath.path_type);
+                riserRadius = Mathf.Max(1f, railInvolved ? 0f : Mathf.Max(myWidth, pathManager.GetRoadWidth(exPath.path_variant)) * 0.5f);
+            }
 
             for (int i = 0; i < mySegments.Count; i++)
             {
@@ -290,7 +314,7 @@ public partial class RoadPlanManager
                     var mySeg = mySegments[i];
                     var exSeg = exSegments[j];
 
-                    if (RoadShapeGeometry.ElevationOverlaps(mySeg, myHeight, exSeg, otherHeight, sameHeightAllowed))
+                    if (RoadShapeGeometry.ElevationOverlaps(mySeg, myHeight, exSeg, otherHeight, sameHeightAllowed, risers, riserRadius))
                     {
                         // Create a dummy PathSegment converted to absolute coordinates for drawing.
                         Vector3 aAbs = new Vector3(exSeg.a.x, exSeg.absYA, exSeg.a.z);
