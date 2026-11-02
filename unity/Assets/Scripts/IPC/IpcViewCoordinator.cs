@@ -366,8 +366,21 @@ public class IpcViewCoordinator : MonoBehaviour
                 break;
 
             default:
+                // 表示を引き継ぐ編集でも、布設専用の航路表示は引き継がない。
+                // 色モードと他のフラグを保ち、UI側の記憶からも航路フラグを外す。
+                if (_layerFlags.TryGetValue("road", out var roadFlags))
+                {
+                    var remainingFlags = new List<string>(roadFlags.Split(','));
+                    if (remainingFlags.RemoveAll(flag => flag.Trim() == "navigation_guides") > 0)
+                    {
+                        SetOrRemove(_layerFlags, "road", string.Join(",", remainingFlags));
+                        var handler = VisualModeHandler.Instance;
+                        if (handler != null)
+                            handler.SetFlags(InputObjectType.PATH, handler.GetFlags(InputObjectType.PATH) & ~VisualFlag.SHOW_NAVIGATION_GUIDES);
+                    }
+                }
                 Debug.LogWarning($"IpcViewCoordinator: SyncFromState 不明なステート: {state}");
-                return;
+                break;
         }
 
         Debug.Log($"IpcViewCoordinator: SyncFromState -> {state} (currentState was {_currentState})");

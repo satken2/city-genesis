@@ -16,7 +16,7 @@ Individual visibility filters last only for the session and are not saved. Const
 
 ## Normal and temporary display
 
-Distinguish the user's ordinary display choices from temporary views for editing or inspection. Ending editing restores normal display without overwriting user choices.
+Distinguish the user's ordinary display choices from temporary views for editing or inspection. Ending editing restores normal display without overwriting user choices. When switching directly to another editing state without returning to normal display, also clear guidance displays that the destination does not use.
 
 Ordinary changes use `view:change_view`; temporary views from screens without editing states use presets. Bypassing common management can make the UI and actual rendering disagree. See [IPC](ipc.md) for synchronization.
 
