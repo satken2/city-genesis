@@ -4,8 +4,10 @@ using UnityEngine;
 /// <summary>Road editor section geometry. Do not include render-only lift in saved coordinates or collision checks.</summary>
 public static class RoadShapeGeometry
 {
-    public const float RelativeHeightTolerance = 0.01f;
-    // Absolute elevations include terrain quantization/sampler differences, so use a wider same-height tolerance.
+    // A span follows terrain when both anchors sit at the variant base_height within this tolerance (core UNDERGROUND_REL_Y_EPS).
+    public const float GroundSpanTolerance = 0.01f;
+    // Two paths touch in height when their absolute elevations differ by less than this (core ELEVATION_INTERSECTION_EPSILON_ABS).
+    // Absolute elevations include terrain quantization/sampler differences.
     public const float AbsoluteHeightTolerance = 0.5f;
 
     public struct Span
@@ -36,11 +38,9 @@ public static class RoadShapeGeometry
         public float relYA, relYB, absYA, absYB;
         public bool follows;
 
-        public float HeightAt(float t, bool absolute, float groundAtCrossing)
-        {
-            float relative = Mathf.Lerp(relYA, relYB, t);
-            return !absolute ? relative : follows ? groundAtCrossing + relative : Mathf.Lerp(absYA, absYB, t);
-        }
+        /// <summary>Absolute elevation at t. Following spans use the reference surface at the point, not the interpolated polyline.</summary>
+        public float HeightAt(float t, float groundAtCrossing)
+            => follows ? groundAtCrossing + Mathf.Lerp(relYA, relYB, t) : Mathf.Lerp(absYA, absYB, t);
     }
 
     public static Span CreateSpan(PathBuildPoint a, PathBuildPoint b, bool curved, bool followsTerrain, float groundRelativeHeight)
@@ -58,8 +58,8 @@ public static class RoadShapeGeometry
             relativeStart = relativeA + a.embankmentHeight,
             relativeEnd = relativeB + b.embankmentHeight,
             curved = curved,
-            follows = followsTerrain && Mathf.Abs(relativeA - groundRelativeHeight) <= RelativeHeightTolerance
-                && Mathf.Abs(relativeB - groundRelativeHeight) <= RelativeHeightTolerance,
+            follows = followsTerrain && Mathf.Abs(relativeA - groundRelativeHeight) <= GroundSpanTolerance
+                && Mathf.Abs(relativeB - groundRelativeHeight) <= GroundSpanTolerance,
         };
     }
 
@@ -113,14 +113,17 @@ public static class RoadShapeGeometry
         return tA >= -1e-4f && tA <= 1f + 1e-4f && tB >= -1e-4f && tB <= 1f + 1e-4f;
     }
 
-    /// <summary>Uses identical same-height exceptions and occupied ranges for existing-path and self-intersections.</summary>
-    public static bool ElevationOverlaps(ElevationSegment a, float heightA, ElevationSegment b, float heightB, bool absolute)
+    /// <summary>
+    /// Whether two segments collide at their XZ crossing, comparing absolute elevations (core validate_path_elevation_intersections).
+    /// Only pairs that connect (sameHeightAllowed: their node masks share a bit) may meet at the same height as an
+    /// intersection or level crossing; any other pair collides whenever the occupied ranges [y, y + height] overlap.
+    /// </summary>
+    public static bool ElevationOverlaps(ElevationSegment a, float heightA, ElevationSegment b, float heightB, bool sameHeightAllowed)
     {
         if (!SegmentsIntersectXZ(a.a, a.b, b.a, b.b, out float tA, out float tB)) return false;
-        float ground = absolute && (a.follows || b.follows)
-            ? Utils.GetPathSurfaceHeight(Vector3.Lerp(a.a, a.b, tA)) : 0f;
-        float ya = a.HeightAt(tA, absolute, ground), yb = b.HeightAt(tB, absolute, ground);
-        if (Mathf.Abs(ya - yb) < (absolute ? AbsoluteHeightTolerance : RelativeHeightTolerance)) return false;
+        float ground = a.follows || b.follows ? Utils.GetPathSurfaceHeight(Vector3.Lerp(a.a, a.b, tA)) : 0f;
+        float ya = a.HeightAt(tA, ground), yb = b.HeightAt(tB, ground);
+        if (sameHeightAllowed && Mathf.Abs(ya - yb) < AbsoluteHeightTolerance) return false;
         return ya < yb + heightB && ya + heightA > yb;
     }
 }

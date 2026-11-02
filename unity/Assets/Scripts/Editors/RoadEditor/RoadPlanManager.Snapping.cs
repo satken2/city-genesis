@@ -503,8 +503,8 @@ public partial class RoadPlanManager
                             {
                                 bestDist = dist;
                                 snapped = candidate;
-                                // Inherit elevation from anchor relative-Y interpolation at the corresponding original centerline point
-                                // (candidate + shift), avoiding noisy inversion of rendered Y minus terrain samples.
+                                // Inherit the path height at the corresponding original centerline point (candidate + shift;
+                                // GetRelativeHeightAtPoint), avoiding noisy inversion of rendered Y minus terrain samples.
                                 snapRelHeight = seg.path != null
                                     ? seg.path.GetRelativeHeightAtPoint(candidate.x + shift.x, candidate.z + shift.z)
                                         + Utils.GetPathSurfaceHeight(candidate + shift) - Utils.GetPathSurfaceHeight(candidate)

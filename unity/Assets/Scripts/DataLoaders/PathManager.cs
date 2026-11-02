@@ -4045,10 +4045,13 @@ public partial class PathManager : BaseApiDataManager
 
     /// <summary>
     /// Whether a polyline span (anchor span to span+1) follows terrain. Follow only if effective follow_terrain is true and both anchor relative Y values
-    /// are zero; otherwise connect anchor elevations linearly (same span rules as core geo_path_depth).
+    /// equal base_height; otherwise connect anchor elevations linearly (same span rules as core geo_path_depth).
     /// </summary>
     public static bool LinearSpanFollowsTerrain(PathSummary path, int span)
-        => GetPathFollowTerrain(path) && AnchorRelativeY(path, span) == 0f && AnchorRelativeY(path, span + 1) == 0f;
+    {
+        float baseHeight = GetPathBaseHeight(path.path_variant);
+        return GetPathFollowTerrain(path) && AnchorRelativeY(path, span) == baseHeight && AnchorRelativeY(path, span + 1) == baseHeight;
+    }
 
     /// <summary>Anchor relative Y (0=start, 1 onward=waypoints, final=end).</summary>
     private static float AnchorRelativeY(PathSummary path, int index)
@@ -4659,7 +4662,7 @@ public partial class PathManager : BaseApiDataManager
             bool singleSpan = MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false;
             if ((anchorPoints.Count == 2 || path.station_grade_profile?.Count >= 2) && !singleSpan)
             {
-                bool followTerrain = GetPathFollowTerrain(path) && startPointList[1] == 0f && endPointList[1] == 0f;
+                bool followTerrain = GetPathFollowTerrain(path) && startPointList[1] == baseHeight && endPointList[1] == baseHeight;
                 var sampled = SubdividePointsWithTerrain(anchorPoints, TERRAIN_SAMPLE_INTERVAL, followTerrain);
                 ApplyStationGrade(path, sampled);
                 return sampled;

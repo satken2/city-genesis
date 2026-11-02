@@ -209,35 +209,14 @@ public partial class RoadPlanManager
     }
 
     /// <summary>
-    /// Returns whether segments contain a non-following span (height-edited or follow_terrain=false
-    /// variant). ElevationSegment.follows already accounts for both
-    /// the variant flag and relY≈0, so its negation suffices.
-    /// Equivalent to backend geo_path_depth.path_has_non_follow_span.
-    /// </summary>
-    private static bool HasNonFollowSegment(List<ElevationSegment> segments)
-    {
-        foreach (var seg in segments)
-        {
-            if (!seg.follows) return true;
-        }
-        return false;
-    }
-
-    /// <summary>
     /// Detects elevation collisions between the edited path and existing segments.
     ///
-    /// Rules:
-    /// - If two segments cross in XZ, check whether their height ranges
-    ///   [Y, Y + height] overlap at the crossing.
-    /// - Allow crossings when their height difference is within tolerance
-    ///   as same-height intersections/level crossings (1cm for relative comparisons / 0.5m for absolute).
-    /// - For following × following pairs, ignore terrain elevation and compare relative heights
-    ///   on a virtual flat plane.
-    /// - For pairs involving non-following spans (height-edited or follow_terrain=false
-    ///   bridge variants), use absolute elevation (terrain + relative height), matching backend
-    ///   validate_path_elevation_intersections. This correctly allows tunnels beneath hills versus
-    ///   surface roads above, and bridges crossing cuttings versus roads at their bottoms.
-    ///   Following segments use terrain elevation at the crossing.
+    /// Rules (backend validate_path_elevation_intersections):
+    /// - If two segments cross in XZ, compare their absolute elevations at the crossing
+    ///   (terrain + relative height; following spans use terrain at the crossing). This correctly allows
+    ///   tunnels beneath hills versus surface roads above, and bridges crossing cuttings versus roads at their bottoms.
+    /// - Pairs on the same network (node masks share a bit) may meet within AbsoluteHeightTolerance as
+    ///   intersections/level crossings. Any other pair collides whenever the height ranges [Y, Y + height] overlap.
     /// - Also check the path itself (when editing an existing path) and new path self-intersections.
     /// </summary>
     private List<(int segIndex, PathSegment otherSeg)> CheckElevationIntersections()
@@ -260,11 +239,7 @@ public partial class RoadPlanManager
             return cachedElevationViolations;
         }
 
-        // Whether the edited path contains non-following spans (height-edited or follow_terrain=false
-        // variants). Interpolated relY on these spans is not a physical height at the crossing,
-        // so use absolute elevation for involved pairs (same test as backend
-        // path_has_non_follow_span).
-        bool editingNonFollow = HasNonFollowSegment(mySegments);
+        int myNetworkMask = InfraNetworkUtil.GetRequiredNodeTypeForPath(PathSubtype);
 
         var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [Freeze investigation] Remove after investigation.
         int freezeProbeBuilt = 0; // [Freeze investigation] Remove after investigation.
@@ -306,8 +281,7 @@ public partial class RoadPlanManager
 
             if (myHeight <= 0f && otherHeight <= 0f) continue;
 
-            // Compare absolute elevations (terrain + relative height) for pairs involving non-following spans.
-            bool useAbsolute = editingNonFollow || HasNonFollowSegment(exSegments);
+            bool sameHeightAllowed = (myNetworkMask & InfraNetworkUtil.GetRequiredNodeTypeForPath(exPath.path_variant)) != 0;
 
             for (int i = 0; i < mySegments.Count; i++)
             {
@@ -316,7 +290,7 @@ public partial class RoadPlanManager
                     var mySeg = mySegments[i];
                     var exSeg = exSegments[j];
 
-                    if (RoadShapeGeometry.ElevationOverlaps(mySeg, myHeight, exSeg, otherHeight, useAbsolute))
+                    if (RoadShapeGeometry.ElevationOverlaps(mySeg, myHeight, exSeg, otherHeight, sameHeightAllowed))
                     {
                         // Create a dummy PathSegment converted to absolute coordinates for drawing.
                         Vector3 aAbs = new Vector3(exSeg.a.x, exSeg.absYA, exSeg.a.z);
@@ -329,7 +303,6 @@ public partial class RoadPlanManager
         }
 
         // --- Self-intersection checks ---
-        // Use absolute elevations (terrain + relative height) for paths with non-following spans.
         for (int i = 0; i < mySegments.Count; i++)
         {
             for (int j = i + 2; j < mySegments.Count; j++) // Ignore adjacent segments.
@@ -337,7 +310,7 @@ public partial class RoadPlanManager
                 var mySeg1 = mySegments[i];
                 var mySeg2 = mySegments[j];
 
-                if (RoadShapeGeometry.ElevationOverlaps(mySeg1, myHeight, mySeg2, myHeight, editingNonFollow))
+                if (RoadShapeGeometry.ElevationOverlaps(mySeg1, myHeight, mySeg2, myHeight, true))
                 {
                     Vector3 aAbs = new Vector3(mySeg2.a.x, mySeg2.absYA, mySeg2.a.z);
                     Vector3 bAbs = new Vector3(mySeg2.b.x, mySeg2.absYB, mySeg2.b.z);
@@ -432,7 +405,7 @@ public partial class RoadPlanManager
                 var river = RiverStore.FindAt(x, z);
                 if (river == null) continue;
                 float terrainY = Utils.GetGroundHeight(new Vector3(x, 0f, z));
-                float roadY = seg.HeightAt(t, true, terrainY);
+                float roadY = seg.HeightAt(t, terrainY);
                 if (terrainY - roadY > clearance) continue; // Fully buried tunnel
                 float waterY = river.WaterLevelAt(x, z);
                 if (roadY >= waterY + Constants.WATER_BRIDGE_MIN_CLEARANCE) continue; // Bridge
@@ -485,7 +458,7 @@ public partial class RoadPlanManager
         {
             float x = Mathf.Lerp(seg.a.x, seg.b.x, t);
             float z = Mathf.Lerp(seg.a.z, seg.b.z, t);
-            float y = seg.HeightAt(t, true, Utils.GetPathSurfaceHeight(new Vector3(x, 0f, z)));
+            float y = seg.HeightAt(t, Utils.GetPathSurfaceHeight(new Vector3(x, 0f, z)));
             return new Vector3(x, y, z);
         }
 
@@ -504,7 +477,7 @@ public partial class RoadPlanManager
                 if (Mathf.Abs(x) > halfW || Mathf.Abs(z) > halfH) continue;
                 float terrainY = Utils.GetGroundHeight(new Vector3(x, 0f, z));
                 if (!Utils.IsOnWater(x, z, terrainY, out float waterY)) continue;
-                float roadY = seg.HeightAt(t, true, waterY);
+                float roadY = seg.HeightAt(t, waterY);
                 if (terrainY - roadY > clearance) continue; // Fully buried tunnel
                 if (roadY >= waterY + Constants.WATER_BRIDGE_MIN_CLEARANCE) continue; // Bridge
                 float half = 0.5f / steps;

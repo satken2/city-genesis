@@ -702,7 +702,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             int segmentIndex;
             if (FindNearestPathSegment(basePosition, actualThreshold, pathManager, out snappedPos, out snappedPath, out segmentIndex, drawingPathVariant))
             {
-                // Inherit elevation by interpolating the target path's anchor relative Y at the snap point.
+                // Inherit the target path's height at the snap point (GetRelativeHeightAtPoint, the height the core compares).
                 // Never invert absolute render-polyline Y minus terrain samples
                 // (see GetRelativeHeightAtPoint comments: even ground-path snaps would
                 // treat endpoints as underground/airborne and silently break infrastructure T-taps).

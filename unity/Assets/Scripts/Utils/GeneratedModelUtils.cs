@@ -284,8 +284,12 @@ public static class PathSummaryExtensions
     }
 
     /// <summary>
-    /// Return relative height above terrain at the specified XZ position along the path centerline.
-    /// Linearly interpolate relative Y between the nearest XZ anchor segment (start -> waypoints -> end).
+    /// Return the height of the path centerline above the reference surface at the specified XZ position,
+    /// using the nearest XZ anchor segment (start -> waypoints -> end). This is the same physical height the core compares
+    /// for connections and collisions (geo_paths._get_path_elevation_at_point_absolute):
+    /// a span following terrain (both anchors at base_height) keeps the interpolated relative Y, and any other span
+    /// interpolates the anchors' absolute elevations, so snapping to the middle of an elevated span on uneven terrain
+    /// lands on the span itself. Curved spans ignore control-point Y.
     /// If saved design elevations exist, prefer that reference line and return its difference from Utils terrain elevation.
     /// Always use this method when inheriting path elevation through snapping.
     /// Do not reconstruct it as rendered-polyline absolute Y minus a terrain sample: terrain variation within polyline chords,
@@ -332,7 +336,8 @@ public static class PathSummaryExtensions
 
         var pXZ = new Vector2(x, z);
         float bestDistSqr = float.MaxValue;
-        float bestRel = anchorRel[0];
+        int bestSpan = 0;
+        float bestT = 0f;
         for (int i = 0; i < anchorRel.Count - 1; i++)
         {
             var a = new Vector2(anchorX[i], anchorZ[i]);
@@ -343,10 +348,20 @@ public static class PathSummaryExtensions
             if (distSqr < bestDistSqr)
             {
                 bestDistSqr = distSqr;
-                bestRel = Mathf.Lerp(anchorRel[i], anchorRel[i + 1], t);
+                bestSpan = i;
+                bestT = t;
             }
         }
-        return bestRel;
+
+        float relA = anchorRel[bestSpan], relB = anchorRel[bestSpan + 1];
+        float baseHeight = PathManager.GetPathBaseHeight(p.path_variant);
+        bool follows = PathManager.GetPathFollowTerrain(p)
+            && Mathf.Abs(relA - baseHeight) <= RoadShapeGeometry.GroundSpanTolerance
+            && Mathf.Abs(relB - baseHeight) <= RoadShapeGeometry.GroundSpanTolerance;
+        if (follows) return Mathf.Lerp(relA, relB, bestT);
+        float absA = Utils.GetPathSurfaceHeight(new Vector3(anchorX[bestSpan], 0f, anchorZ[bestSpan])) + relA;
+        float absB = Utils.GetPathSurfaceHeight(new Vector3(anchorX[bestSpan + 1], 0f, anchorZ[bestSpan + 1])) + relB;
+        return Mathf.Lerp(absA, absB, bestT) - Utils.GetPathSurfaceHeight(new Vector3(x, 0f, z));
     }
 
     /// <summary>

@@ -79,25 +79,42 @@ public sealed class PowerLinePath : IPathMeshGenerator
         return support;
     }
 
+    /// <summary>
+    /// Place towers at the anchors and every pillar_spacing between them. A span at the standard height (both anchors at
+    /// base_height on a terrain-following path) stands its towers on the ground; any other span keeps the wire straight
+    /// between its anchors and extends the towers down to the ground (the height the core compares; geo_path_depth).
+    /// </summary>
     public static List<Support> Plan(PathSummary path, List<Vector3> points)
     {
         var result = new List<Support>();
         if (points == null || points.Count < 2) return result;
+        float baseHeight = BaseHeight(path.path_variant);
         var anchors = new List<Vector3> { points[0] };
+        var start = path.GetStartPointList();
+        var anchorRel = new List<float> { start != null && start.Count >= 3 ? start[1] : baseHeight };
         var waypoints = path.GetWaypointList();
         if (waypoints != null) foreach (var wp in waypoints)
-            anchors.Add(wp.GetAbsolutePosition() - Vector3.up * BaseHeight(path.path_variant));
+        {
+            anchors.Add(wp.GetAbsolutePosition() - Vector3.up * baseHeight);
+            anchorRel.Add(wp.GetRelativeHeight());
+        }
         anchors.Add(points[points.Count - 1]);
+        var end = path.GetEndPointList();
+        anchorRel.Add(end != null && end.Count >= 3 ? end[1] : baseHeight);
+        bool follows = PathManager.GetPathFollowTerrain(path);
         float spacing = Mathf.Max(10, MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.pillar_spacing ?? 120);
         for (int span = 0; span < anchors.Count - 1; span++)
         {
             var a = anchors[span]; var b = anchors[span + 1];
+            bool spanOnGround = follows
+                && Mathf.Abs(anchorRel[span] - baseHeight) <= RoadShapeGeometry.GroundSpanTolerance
+                && Mathf.Abs(anchorRel[span + 1] - baseHeight) <= RoadShapeGeometry.GroundSpanTolerance;
             int count = Mathf.Max(1, Mathf.CeilToInt(Vector3.Distance(a,b) / spacing));
             for (int j = span == 0 ? 0 : 1; j <= count; j++)
             {
                 float t = (float)j / count;
                 Vector3 p = Vector3.Lerp(a,b,t);
-                if (j > 0 && j < count && PathManager.GetPathFollowTerrain(path))
+                if (j > 0 && j < count && spanOnGround)
                     p.y = Utils.GetPathSurfaceHeight(p) + Mathf.Lerp(a.y-Utils.GetPathSurfaceHeight(a), b.y-Utils.GetPathSurfaceHeight(b),t);
                 int node = span == 0 && j == 0 ? path.start_node_id : span == anchors.Count-2 && j == count ? path.end_node_id : 0;
                 result.Add(Endpoint(path,node,p,b-a));

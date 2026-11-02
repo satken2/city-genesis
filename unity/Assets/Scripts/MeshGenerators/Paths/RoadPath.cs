@@ -262,7 +262,7 @@ public class RoadPath : IPathMeshGenerator
             float startRelY = (startList != null && startList.Count >= 3) ? startList[1] : 0f;
             float endRelY = (endList != null && endList.Count >= 3) ? endList[1] : 0f;
             bool followTerrain = PathManager.GetPathFollowTerrain(pathData)
-                && startRelY == 0f && endRelY == 0f;
+                && startRelY == baseHeight && endRelY == baseHeight;
             points = PathManager.SubdividePointsWithTerrain(points, PathManager.TERRAIN_SAMPLE_INTERVAL, followTerrain);
         }
 
