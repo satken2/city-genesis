@@ -62,7 +62,7 @@
       },
       "step7": {
         "title": "Fly mode and cinema mode",
-        "description": "The camera has two special modes. \"Fly mode\" starts with Shift+F: move along your view with W/A/S/D, look around with the mouse, and go up or down with R/F. Press Esc to leave it. \"Cinema mode\" starts from the button in the top-right corner of the screen and lets you circle around the city. Look around with the mouse; Shift switches between orbiting and travelling, Space pauses, Backspace reverses, and Esc exits. The on-screen panels are hidden while either mode is on and come back when you press Esc. When you've tried them, exit both modes and press \"Next\"."
+        "description": "The camera has two special modes. \"Fly mode\" starts with Shift+F: move along your view with W/A/S/D, look around with the mouse, and go up or down with R/F. Press Esc to leave it. \"Cinema mode\" starts from the button in the top-left corner of the screen and lets you circle around the city. Look around with the mouse; Shift switches between orbiting and travelling, Space pauses, Backspace reverses, and Esc exits. The on-screen panels are hidden while either mode is on and come back when you press Esc. When you've tried them, exit both modes and press \"Next\"."
       },
       "step8": {
         "title": "See the city boundary",

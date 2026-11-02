@@ -62,7 +62,7 @@
       },
       "step7": {
         "title": "Modo vuelo y modo cine",
-        "description": "La cámara tiene dos modos especiales. El «modo vuelo» se activa con Shift+F: avanza en la dirección de tu vista con W/A/S/D, mira alrededor con el ratón y sube o baja con R/F. Pulsa Esc para salir. El «modo cine» se inicia con el botón de la esquina superior derecha de la pantalla y te permite rodear la ciudad. Mira alrededor con el ratón; Shift alterna entre órbita y desplazamiento, Espacio pausa, Retroceso invierte y Esc sale. Los paneles de la pantalla se ocultan mientras uno de los modos está activo y vuelven al pulsar Esc. Cuando los hayas probado, sal de ambos modos y pulsa «Siguiente»."
+        "description": "La cámara tiene dos modos especiales. El «modo vuelo» se activa con Shift+F: avanza en la dirección de tu vista con W/A/S/D, mira alrededor con el ratón y sube o baja con R/F. Pulsa Esc para salir. El «modo cine» se inicia con el botón de la esquina superior izquierda de la pantalla y te permite rodear la ciudad. Mira alrededor con el ratón; Shift alterna entre órbita y desplazamiento, Espacio pausa, Retroceso invierte y Esc sale. Los paneles de la pantalla se ocultan mientras uno de los modos está activo y vuelven al pulsar Esc. Cuando los hayas probado, sal de ambos modos y pulsa «Siguiente»."
       },
       "step8": {
         "title": "Mira el límite de la ciudad",

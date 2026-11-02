@@ -62,7 +62,7 @@
       },
       "step7": {
         "title": "Mode vol et mode cinéma",
-        "description": "La caméra dispose de deux modes spéciaux. Le « mode vol » s'active avec Maj+F : avancez dans la direction de votre regard avec W/A/S/D, regardez autour de vous avec la souris et montez ou descendez avec R/F. Appuyez sur Échap pour en sortir. Le « mode cinéma » se lance depuis le bouton en haut à droite de l'écran et permet de tourner autour de la ville. Regardez autour de vous avec la souris ; Maj alterne entre orbite et déplacement, Espace met en pause, Retour arrière inverse et Échap quitte. Les panneaux de l'écran sont masqués pendant ces deux modes et réapparaissent quand vous appuyez sur Échap. Une fois les essais terminés, quittez les deux modes et appuyez sur « Suivant »."
+        "description": "La caméra dispose de deux modes spéciaux. Le « mode vol » s'active avec Maj+F : avancez dans la direction de votre regard avec W/A/S/D, regardez autour de vous avec la souris et montez ou descendez avec R/F. Appuyez sur Échap pour en sortir. Le « mode cinéma » se lance depuis le bouton en haut à gauche de l'écran et permet de tourner autour de la ville. Regardez autour de vous avec la souris ; Maj alterne entre orbite et déplacement, Espace met en pause, Retour arrière inverse et Échap quitte. Les panneaux de l'écran sont masqués pendant ces deux modes et réapparaissent quand vous appuyez sur Échap. Une fois les essais terminés, quittez les deux modes et appuyez sur « Suivant »."
       },
       "step8": {
         "title": "Voir les limites de la ville",
