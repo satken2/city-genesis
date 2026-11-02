@@ -10,9 +10,9 @@ Scattering stores no individual coordinates. Unity generates candidates from a w
 
 ## Overlap
 
-Creating or reshaping parcels, paths, or buildings does not change props in the core. Unity hides scattered candidates overlapping parcels, surface or elevated paths, and water when `allow_water` is false. Removing obstacles restores the same individuals. Intentional individual placements remain visible despite overlap. Fetch obstacles with `include_obstacles` and rebuild exclusions only when their geometric `signature` changes; economic updates do not change it.
+Unity hides scattered candidates overlapping parcels, surface or elevated paths, and water when `allow_water` is false. This is separate from deleting a saved region; removing obstacles restores the same individuals. Intentional individual placements remain visible despite overlap. Fetch obstacles with `include_obstacles` and rebuild exclusions only when their geometric `signature` changes; economic updates do not change it.
 
-Saved placement changes only through player placement, editing or removal, full replacement through scenario terrain APIs, or the start of building/path demolition. Demolition deletes individual placements inside the affected area so attached decoration does not float after structures disappear. Area scattering is retained.
+Reflect added, changed, and removed placements using reloaded prop data. Distinguish updates to saved data from temporary hiding caused by obstacles.
 
 ## Rendering
 

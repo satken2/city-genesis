@@ -12,7 +12,7 @@ Map dimensions and grids are fixed when a city or scenario is created. The front
 
 ## D.3. Elevation reference
 
-Elevation is absolute meters relative to sea level zero. Water levels, quay tops, parcel reference elevations, and camera heights use the same reference. Only path and node Y coordinates are relative to the ground ([path geometry](A_path-geometry.md)).
+Elevation is absolute meters relative to sea level zero. Water levels, quay tops, parcel reference elevations, and camera heights use the same reference. Path and node Y coordinates are relative to their reference surfaces ([path geometry](A_path-geometry.md)).
 
 ### D.3.1. Array orientation and directions
 
@@ -34,19 +34,19 @@ Interpolation near cell boundaries reads neighboring cells, so versions also ref
 
 ## D.6. Coastlines
 
-Coastlines represent land as GeoJSON `Polygon` or `MultiPolygon` geometry in world XZ. At city creation, land is extracted from original terrain at elevation zero, lake and river areas become holes, and geometry is clipped to the map rectangle. Edges produced by map clipping are not shores. Land membership uses even–odd parity across all rings, including holes.
+Coastlines represent land as GeoJSON `Polygon` or `MultiPolygon` geometry in world XZ. Handle the whole geometry, including multiple land areas and holes such as lakes and rivers, rather than just an outer ring. Distinguish edges along the map boundary from waterfronts.
 
-Coastlines are saved and expand during play only when reclamation completes. Road fill, cuts, and grading do not change them. Reload coastlines on every `session:reload` rather than retaining the initial result. They define [parcel types](B_land-geometry.md) and [water crossings](J_path-intersections.md).
+Coastlines are geographic data separate from elevation; the front end does not regenerate them from terrain. Reload them on every `session:reload` for water display and placement previews. Use retrieved parcel types rather than inferring them from the coastline ([land geometry](B_land-geometry.md)).
 
 ## D.7. Water surfaces
 
-Flat water surfaces such as upland lakes and reservoirs can have levels different from the sea at zero. `water_level` is absolute elevation. Their `polygon` uses the coastline format, with inner-ring holes, and bounds where water may exist. Only terrain below the water level inside it becomes a coastline hole. Unity renders a horizontal surface across the full area, with higher terrain visible in front of it. Rivers whose surface height changes downstream are separate.
+Flat water surfaces such as upland lakes and reservoirs can have levels different from the sea at zero. `water_level` is absolute elevation. Their `polygon` uses the coastline format, with inner-ring holes, and bounds where water may exist. Unity renders a horizontal surface across the full area, with higher terrain visible in front of it. Rivers whose surface height changes downstream are separate.
 
 ## D.8. Rivers
 
 A river retains its area and water-surface heights after the terrain editor carves its bed into elevation. The bed is ordinary terrain to the game. Channel, width, and depth used during carving are editor intermediates and are not passed to the game.
 
-River `polygon` uses the water-surface format, with islands as holes. `profile` is a sequence of `[x, absolute elevation, z]` points ordered upstream to downstream, with non-increasing downstream elevation. Water height at any point is the height at the horizontally nearest point on the profile polyline. The editor, core, and Unity share this rule for rendering and path-crossing checks. The entire river area becomes a coastline hole.
+River `polygon` uses the water-surface format, with islands as holes. `profile` is a sequence of `[x, absolute elevation, z]` points ordered upstream to downstream, with non-increasing downstream elevation. Water height at any point is the height at the horizontally nearest point on the profile polyline. The editor, core, and Unity share this rule for rendering and path-crossing checks.
 
 ## D.9. Natural resources and camera
 
@@ -62,7 +62,7 @@ Elevation-file import and the terrain editor's sea-floor generation (following t
 
 Tauri's terrain editor reads and writes elevation, water surfaces, rivers, camera, ground cover, and climate through scenario terrain APIs. Resources and props are edited in scenario creation mode sessions; the terrain editor passes their loaded content through unchanged. Encrypted DLC scenarios are excluded to prevent terrain extraction.
 
-Elevation, water surfaces, and rivers are locked in scenarios containing any paths, buildings, edited cells, or reclaimed land. Construction grounds objects against the terrain at that time; changing only the ground would cause disagreement. Saving elevation, water, or rivers makes the core regenerate derived values such as coastlines and parcel types.
+Terrain editing has restrictions to keep structures and ground consistent. The front end follows editing eligibility provided by the scenario terrain API and uses reloaded data for display after saving.
 
 ## D.11. Ground cover and climate
 
@@ -80,11 +80,11 @@ Cities and scenarios save twelve months of weather, temperature, precipitation, 
 
 ## D.12. Reclaimed land
 
-When [reclamation](../economics/04_districts-and-parcels.md) completes, the project area is registered as reclaimed land and added to the coastline. Seaward edges become quays, rendered by Unity with concrete tops and vertical walls.
+Quays on [reclaimed land](../economics/04_districts-and-parcels.md) are structures rendered together with terrain. Unity uses the quay geometry returned by the API to render concrete tops and vertical walls.
 
-Reclaimed land stores only ID, area, and version. Quays, walls, top-cover bands, and top elevations are derived by the core from current coastline and terrain and returned by APIs. Adjacent reclamation can remove quays and increment the affected area's version. The front end uses returned geometry for rendering and tests rather than reclassifying quays or bands.
+Receive quays, walls, bands covered by the tops, and top elevations from the API for rendering and checks. The front end does not derive them from reclaimed-land areas or coastlines. Follow [data loading](H_data-loading.md) when applying updates.
 
-Ground immediately inside a quay retains its original seabed elevation, and a wider band covers the step. Unity interpolates between terrain grid points; raising terrain right up to the quay would make it protrude into the sea outside. Inside the band, ground is the higher of terrain and quay top. The core and Unity use this same [grounding rule](E_lod.md).
+Inside a band, the quay top covers the ground, so grounding height is the higher of terrain and quay top. Use Unity's shared grounding logic rather than terrain elevation alone ([LOD](E_lod.md)).
 
 ## Background terrain outside the city
 
@@ -92,5 +92,5 @@ The city boundary equals the detailed elevation map boundary. Background terrain
 
 Scenarios and saves contain background terrain. Its API returns little-endian float32 elevation in the common orientation. Headers `X-Grid-Rows`, `X-Grid-Cols`, `X-Grid-Spacing`, `X-Origin-X`, and `X-Origin-Z` provide dimensions, spacing, and southwest world-XZ origin. No background returns 204. A coarse coastline supports coloring external land on city maps. Because it can disagree at the boundary, use it only outside the city rectangle.
 
-Roads, tracks, buildings, and parcels can be placed outside city bounds only in scenario creation mode. Roads split at the city boundary on completion, and external sections belong to an outside-city district, one for each group of external paths connected to each other. Automatic changes such as building spawning and equipment deterioration do not occur outside the city.
+Roads, tracks, buildings, and parcels can be placed outside city bounds only in scenario creation mode. Use path, parcel, and district relationships retrieved from the core for rendering and display.
 

@@ -1,20 +1,11 @@
 # C. Building geometry
 
-The core determines a building's horizontal footprint from parcel shape, building coverage, and the master shape category. The front end renders the returned `polygon` rather than reproducing these rules. Placement previews also receive footprints from the API. Floor counts and per-floor uses are separate values; footprint area, floor count, and floor heights determine total floor area and building height. Choosing variants and parcels belongs to the economy ([agents](../economics/02_agents.md)).
+Building rendering uses the `polygon` returned by the core as the horizontal footprint. Placement previews also receive footprints from the API. The front end does not regenerate the footprint; it combines it with rendering inputs such as floor counts and floor heights. See [agents](../economics/02_agents.md) for the economic meaning of buildings.
 
 ## Footprints received by the front end
 
-`polygon` is a counterclockwise sequence of XZ vertices relative to `center_point`, normally contained in the parcel. Edge 0→1 is ordered to be closest to the parcel's frontage edge (`facade_edge_index`; [land geometry](B_land-geometry.md)). It defines the building front for entrances and prebuilt-part orientation ([building meshes](F_building-meshes.md)). Footprints need not have right angles or four vertices: L-shapes, trapezoids, and parcel-shaped polygons are possible.
+`polygon` is a counterclockwise sequence of XZ vertices relative to `center_point`, normally contained in the parcel. Edge 0→1 defines the building front for entrances and prebuilt-part orientation ([building meshes](F_building-meshes.md)). Footprints need not have right angles or four vertices: L-shapes, trapezoids, and parcel-shaped polygons are possible. See [land geometry](B_land-geometry.md) for parcel shape data.
 
 ## Shape categories (`building_shape`)
 
-The master field `building_shape` selects each variant's footprint method. Each aims toward the area limit determined by coverage.
-
-| Value | Footprint |
-| --- | --- |
-| `SHAPE_FULL` | The parcel itself |
-| `SHAPE_OFFICE` | A rectangle aligned with the parcel |
-| `SHAPE_HOUSE` | A near-square rectangle centered on the parcel, parallel to the frontage |
-| `SHAPE_COMMERCIAL` | A strip-like rectangle along the frontage |
-| `SHAPE_SETBACK` | A footprint toward the rear, leaving open space at the front |
-
+Master `building_shape` describes the footprint category, separately from `model_type`, which describes mesh assembly. `SHAPE_FULL` uses the entire parcel as its footprint and also affects Unity rendering ([building mesh methods](F1_building-mesh-methods.md)). Do not infer a specific footprint from the category; use the returned `polygon` for every category.

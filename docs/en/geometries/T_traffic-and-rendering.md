@@ -10,7 +10,7 @@ Consistency is measured by passage counts and mean travel times over the same se
 
 Exchange time in seconds and distance in meters. Separate free-flow time, congestion delay, and stop dwell time. Passenger waiting and fare-to-time conversions are route-choice costs, not additions to vehicle motion.
 
-Line `journeys` describes section direction, initial and final speed, travel time, and dwell time between stops. Travel times already include curves and gradients. Core ride times, required vehicles, service frequency, and Unity motion use the same values. Trains never depart more frequently than target headway; spare circuit time is spent at the first stop until the next departure. Core frequency and track load include the same wait as Unity motion.
+Line `journeys` describes section direction, initial and final speed, travel time, and dwell time between stops. Travel times already include curves and gradients. Unity moves trains using the retrieved motion profiles and headways without recalculating travel times in rendering. Waiting to maintain headways uses the same clock as vehicle motion.
 
 Positions use path ID, direction, and a fraction of horizontal centerline distance. Stops retain positions within paths rather than snapping to endpoints. Respect one-way rules, reversal constraints, and distinct outbound and return routes. Unity path geometry determines visual height; the core determines underlying routes.
 

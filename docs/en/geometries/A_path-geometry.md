@@ -4,22 +4,15 @@ This page defines path shape data and the conventions that give Unity and the co
 
 ## Coordinates and heights
 
-Path points are `[x, y, z]` in meters. Y is **height relative to the reference surface**, not absolute elevation. The reference surface is the water surface over sea and lake water (classified as in [path intersections](J_path-intersections.md)) and the ground elsewhere, including rivers. An anchor's Y (`start_point`, `end_point`, or waypoint `position`) is measured from the reference surface beneath that anchor. A control point's Y is measured from the reference surface beneath its owning anchor, rather than beneath the control point itself. Using the latter would introduce intermediate terrain relief into the curve and disagree with the core. Over water, pier lengths and tunnel depths are still taken from the ground at the bed; the reference surface only sets where Y is measured from.
+Path points are `[x, y, z]` in meters. Y is **height relative to the reference surface**, not absolute elevation. The reference surface is the water surface over sea and lake water, and the ground elsewhere, including rivers. An anchor's Y (`start_point`, `end_point`, or waypoint `position`) is measured from the reference surface beneath that anchor. A control point's Y is measured from the reference surface beneath its owning anchor. Using the surface beneath the control point would introduce intermediate terrain relief into the curve and disagree with the saved shape. Over water, pier lengths and tunnel depths still use the ground at the bed as their reference.
 
-Surface, elevated, and underground sections are determined by anchor Y, rather than variant, and can coexist in one path. Y is editable only for variants with `path_master.height_editable`; negative Y requires a negative `min_height`. Y specifies elevation or underground placement. Surface road height adjustments, fill, and excavation belong to terrain earthworks and are not written into Y. Excavating a cutting is an exception: anchor Y is adjusted to preserve absolute elevation.
+One path can contain surface, elevated, and underground sections. Height editing uses settings such as `path_master.height_editable` and `min_height`. Distinguish anchor Y height settings from fill and excavation for surface roads.
 
 ## Curves and control points
 
 Each pair of anchors is connected by a cubic Bézier curve. The four points are anchor i, its outgoing control (`start_control` or `control_out`), anchor i+1's incoming control (`end_control` or `control_in`), and anchor i+1. Paths with `curved` false connect anchors by straight lines without using controls.
 
-### Automatic control points
-
-The core fills missing controls using the following rules and saves them. Unity prefers stored controls and calculates only missing ones using the same rules. Changing only one implementation would make occupancy and parcel checks disagree with rendering.
-
-- Without waypoints, controls lie at one-third and two-thirds of the start–end segment, forming a straight line.
-- With waypoints, each anchor's tangent is the vector between its previous and next anchors, or the neighboring-anchor vector at endpoints. The outgoing control is one-sixth of this vector forward from the anchor; the incoming control is one-sixth backward, using Catmull–Rom tangents.
-
-When an endpoint joins an existing path, generated endpoint controls align with the other path's continuation when the angular difference is within `PATH_TANGENT_ALIGN_MAX_ANGLE_DEG`. Unity placement previews follow the same rule.
+Unity prefers saved controls. Previews and rendering use shared geometry calculations for missing controls and alignment with connecting paths. These rules must also remain consistent with the core; do not change only one side. Consult Unity's geometry and editing sources for the calculations.
 
 ## Terrain following (`follow_terrain`)
 
@@ -29,15 +22,14 @@ The path's `follow_terrain` controls this behavior; -1 means use `path_master.fo
 
 ## Earthworks and design profiles
 
-Surface-path fill and excavation use `embankment_heights`, rather than Y: one height in meters per anchor, positive for fill and negative for cuts, linearly interpolated between anchors. Construction changes terrain accordingly, smoothing the road longitudinally before applying it. Unity follows the finished terrain without smoothing it again during rendering.
+Surface-path fill and excavation are specified through `embankment_heights`: one height in meters per anchor, positive for fill and negative for cuts. Unity uses the retrieved terrain after earthworks without applying fill, excavation, or smoothing again during rendering.
 
-A design profile (`station_grade_profile`) is a road-surface reference independent of terrain. Its points are `[x, absolute elevation, z]`, with absolute rather than relative Y. Paths laid together, such as station tracks, can carry this profile. Their surface height comes from horizontal projection onto it instead of Y and terrain. Splitting preserves the profile; terrain changes do not regenerate it. Point spacing in core responses is not uniform: a straight span with constant grade has only its two end points.
+A design profile (`station_grade_profile`) is a road-surface reference independent of terrain, with points `[x, absolute elevation, z]`. When rendering a path with a profile, it takes precedence over anchor relative heights and terrain; use the elevation at the horizontal projection onto the reference line. Use the retrieved shape without assuming uniformly spaced points.
 
 ## Length and occupancy
 
-`length` is the straight-line start–end distance, or the anchor polyline length when `curved` is false, rather than curve length. The occupancy `polygon` expands the centerline by half the road width on each side. It is used for overlap and interference checks, not rendering.
+`length` is the straight-line start–end distance, or the anchor polyline length when `curved` is false, rather than curve length. `polygon` represents the path's horizontal occupancy for overlaps and interference. Road-surface rendering uses the centerline and master dimensions.
 
 ## Valid shapes
 
-Core validation is authoritative. Anchors must lie on land unless the variant allows water placement. Master data defines curve eligibility, minimum radius, maximum gradient, and maximum non-following span length per variant. A minimum radius of zero means no limit; a positive value applies to polyline corners as well as Bézier curves. Gradients use the surface after earthworks. See [path intersections](J_path-intersections.md) for water and quay crossings and [terrain](D_terrain.md) for placement outside the city.
-
+Unity editing uses master constraints on curves, gradients, heights, and similar properties to aid interaction. Final eligibility follows core validation results. See [path intersections](J_path-intersections.md) for validation and preview responsibilities and [terrain](D_terrain.md) for city bounds.

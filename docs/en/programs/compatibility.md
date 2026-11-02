@@ -26,5 +26,5 @@ For the front end, use PATCH for fixes, MINOR for added features, and MAJOR for 
 
 Ordinary loading accepts saves written by a core version no newer than the running core and with the same MAJOR. Loaded cities use the current rules, so load compatibility does not guarantee identical outcomes.
 
-Rule-change checks use the version that last calculated an epoch, rather than the version that last saved. Merely loading and saving must not bypass confirmation. The UI displays the core's `balance_changed` result and obtains player consent when required. See [sessions and saves](sessions-and-saves.md).
+Follow the core's `balance_changed` result for rule changes. The UI displays it and obtains player consent before loading when required. The front end does not derive this decision from version numbers. See [sessions and saves](sessions-and-saves.md).
 

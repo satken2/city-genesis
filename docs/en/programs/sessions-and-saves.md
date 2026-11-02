@@ -4,7 +4,7 @@ A session is the currently open city and its interaction context; a save records
 
 ## Session identity
 
-`session_id` changes whenever a city is opened and identifies city switches. The overwrite destination `current_save_id` also changes on Save As, so it does not identify a city session. Do not carry IDs, caches, or pending requests across city switches. Master data can also differ per city (the core reloads it whenever a game starts), so fetch it again after a switch.
+`session_id` changes whenever a city is opened and identifies city switches. The overwrite destination `current_save_id` also changes on Save As, so it does not identify a city session. Do not carry IDs, caches, or pending requests across city switches. Master data can also differ per city, so fetch it again after a switch.
 
 The UI uses shared session state to distinguish startup from an operable city. The core rejects unavailable operations, such as city APIs before opening a city, another epoch during execution, or scenario terrain editing during ordinary play.
 
