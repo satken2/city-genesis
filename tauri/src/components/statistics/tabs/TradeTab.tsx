@@ -14,6 +14,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
+import { resolveIntlLocale } from "../../../utils/locale";
+import { formatExactAmount } from "../../../utils/money";
 import "./TradeTab.css";
 import { useRemPx } from "../../../hooks/useRemPx";
 
@@ -52,7 +54,9 @@ const TOOLTIP_STYLE = {
 };
 
 export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
+  const money = (value: number) => formatExactAmount(value, locale);
   const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<TradeStats>(
     apiBaseUrl,
@@ -127,12 +131,14 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       axisLine={{ stroke: "#253246" }}
                     />
                     <YAxis
+                      tickFormatter={money}
                       width={remPx(Y_AXIS_WIDTH_REM)}
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
                     />
                     <Tooltip
+                      formatter={(value) => money(Number(value))}
                       contentStyle={TOOLTIP_STYLE}
                       labelFormatter={(label) => `Epoch ${label}`}
                       cursor={{ fill: "rgba(255,255,255,0.05)" }}
@@ -176,12 +182,14 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       axisLine={{ stroke: "#253246" }}
                     />
                     <YAxis
+                      tickFormatter={money}
                       width={remPx(Y_AXIS_WIDTH_REM)}
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
                     />
                     <Tooltip
+                      formatter={(value) => money(Number(value))}
                       contentStyle={TOOLTIP_STYLE}
                       labelFormatter={(label) => `Epoch ${label}`}
                     />

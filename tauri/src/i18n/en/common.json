@@ -5,7 +5,6 @@
     "fetchError": "Failed to fetch data",
     "noData": "No data",
     "history": "History",
-    "currency": "{{value, number}}",
     "daysSinceEpoch": "{{days}} days since Jan 1, 1800",
     "close": "Close",
     "next": "Next",

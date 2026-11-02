@@ -8,6 +8,8 @@
  * headings/frames; this renders only the content without a background.
  */
 
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
+import { formatExactAmount } from "../../utils/money";
 import { useTranslation } from "react-i18next";
 import type { TransitLineEstimate } from "../../types";
 import { resolveIntlLocale } from "../../utils/locale";
@@ -33,6 +35,7 @@ type TransitEstimateCardProps = {
 
 export function TransitEstimateCard({ estimate, loading, error, placeholder }: TransitEstimateCardProps) {
   const { t, i18n } = useTranslation();
+  useCurrencyUnit();
   const locale = resolveIntlLocale(i18n.language);
 
   if (error) {
@@ -56,7 +59,7 @@ export function TransitEstimateCard({ estimate, loading, error, placeholder }: T
 
   const number = (value: number, digits = 0) =>
     value.toLocaleString(locale, { maximumFractionDigits: digits, minimumFractionDigits: digits });
-  const money = (value: number) => `${number(Math.round(value))}${t("transit.currencyUnit")}`;
+  const money = (value: number) => formatExactAmount(value, locale, true, { maximumFractionDigits: 0 });
   const balance = estimate.balance;
   const breakEven = estimate.break_even_load_factor;
   // Even with several overloaded tracks, showing only the highest load ratio suffices to decide between longer headways and more tracks.

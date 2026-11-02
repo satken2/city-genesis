@@ -9,6 +9,8 @@
  * a compact legend without numbers sits to the right of the pie chart.
  */
 
+import { resolveIntlLocale } from "../../utils/locale";
+import { formatExactAmount } from "../../utils/money";
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
@@ -28,7 +30,8 @@ const TOOLTIP_STYLE = {
 };
 
 export function EmploymentInfoPanel({ agent }: EmploymentInfoPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const masterData = useMasterData();
 
   const skillName =
@@ -38,7 +41,7 @@ export function EmploymentInfoPanel({ agent }: EmploymentInfoPanelProps) {
       : null;
 
   // Format wages to two decimal places.
-  const formatCurrency = (value: number) => t("common.currency", { value: value.toFixed(2) });
+  const formatCurrency = (value: number) => formatExactAmount(value, locale, false, { maximumFractionDigits: 2 });
 
   const hiredCount = agent.total_labor ?? 0;
   const quotaCount = agent.quota ?? 0;

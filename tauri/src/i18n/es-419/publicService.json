@@ -18,7 +18,6 @@
     "demand": "Demanda",
     "production": "Producción",
     "supplyStatus": "Oferta, demanda y capacidad",
-    "currencyUnit": "yenes",
     "costRatioPrefix": "Costo de producción ×",
     "costRatioSuffix": ""
   },

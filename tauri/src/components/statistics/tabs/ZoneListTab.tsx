@@ -6,6 +6,7 @@
  * market supply and demand quantities.
  */
 
+import { formatExactAmount } from "../../../utils/money";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useEpochCachedStats } from "../useEpochCache";
@@ -194,8 +195,8 @@ export function ZoneListTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               <ZoneMetric
                 label={t("statistics.incomeLegend")} value={card.averageIncome} max={incomeMax}
                 detail={detail(t("statistics.incomeLegend"),
-                  card.averageIncome == null ? "—" : t("common.currency", { value: Math.round(card.averageIncome) }),
-                  t("common.currency", { value: Math.round(incomeMax) }))}
+                  card.averageIncome == null ? "—" : formatExactAmount(card.averageIncome, locale, false, { maximumFractionDigits: 0 }),
+                  formatExactAmount(incomeMax, locale, false, { maximumFractionDigits: 0 }))}
                 color="var(--flat-accent)"
               />
             </dl>

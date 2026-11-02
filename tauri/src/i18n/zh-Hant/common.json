@@ -5,7 +5,6 @@
     "fetchError": "資料取得失敗",
     "noData": "無資料",
     "history": "歷史紀錄",
-    "currency": "{{value, number}}",
     "daysSinceEpoch": "自1800年1月1日起已過{{days}}天",
     "close": "關閉",
     "next": "下一步",

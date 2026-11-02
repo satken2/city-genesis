@@ -9,8 +9,7 @@ import "./App.css";
 import closeIcon from "./assets/images/ui/close.png";
 import type { QueryState, QuestNotification, WindowContext, WindowDefinition } from "./types";
 import { buildApiUrl } from "./utils/api";
-import { loadAppSettings, type AppSettings } from "./utils/settings";
-import { isSupportedLanguage } from "./utils/locale";
+import { useAppDisplaySettings } from "./hooks/useAppDisplaySettings";
 
 /**
  * Lazy imports for popup panels. These panels have heavy dependencies (recharts, three.js, etc.) and only one
@@ -111,7 +110,8 @@ const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_
 
 
 function App() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  useAppDisplaySettings();
   const appWindow = useMemo(() => getCurrentWindow(), []);
   const [context, setContext] = useState<WindowContext | null>(null);
   const [apiBaseUrl, setApiBaseUrl] = useState<string>("");
@@ -182,16 +182,6 @@ function App() {
           setContext(initialContext);
         }
       }
-
-      // Restore the language from the settings file.
-      try {
-        const settings = await loadAppSettings();
-        if (isSupportedLanguage(settings.language)) {
-          await i18n.changeLanguage(settings.language);
-        }
-      } catch {
-        // Use the default language if the settings file cannot be read.
-      }
     };
 
     initialize().catch((error) => {
@@ -214,26 +204,7 @@ function App() {
       unlistenWindow?.();
       void connectionListener.then((unlisten) => unlisten());
     };
-  }, [appWindow, i18n]);
-
-  /**
-   * Apply settings-window language changes immediately to all open windows. Each window (WebView) has an
-   * independent i18n instance; changeLanguage in settings does not propagate elsewhere. Receiving the
-   * `settings-updated` broadcast on settings save also updates the three persistent HUD panels and top menu
-   * without remounting (otherwise they retain the old language until restart).
-   */
-  useEffect(() => {
-    const unlisten = listen<AppSettings>("settings-updated", (event) => {
-      const language = event.payload?.language;
-      if (isSupportedLanguage(language) && language !== i18n.language) {
-        void i18n.changeLanguage(language);
-      }
-    });
-
-    return () => {
-      void unlisten.then((fn) => fn());
-    };
-  }, [i18n]);
+  }, [appWindow]);
 
   useEffect(() => {
     if (!context) {

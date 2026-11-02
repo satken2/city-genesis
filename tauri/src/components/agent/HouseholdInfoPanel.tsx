@@ -15,6 +15,8 @@
  * tourist demand, so standard of living is hidden.
  */
 
+import { resolveIntlLocale } from "../../utils/locale";
+import { formatExactAmount } from "../../utils/money";
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import {
@@ -53,7 +55,8 @@ function getFamilyTypeName(familyType: number, t: (key: string) => string): stri
 }
 
 export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const isTourist = agent.variant === VARIANT_TOURIST;
 
   const automobileIconSrc = agent.has_automobile ? trafficRoad : trafficPedestrian;
@@ -88,7 +91,7 @@ export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
           </span>
           <span className="agent-detail-value">
             {agent.discretionary_income != null
-              ? t("common.currency", { value: agent.discretionary_income })
+              ? formatExactAmount(agent.discretionary_income, locale)
               : "-"}
           </span>
 

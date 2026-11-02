@@ -1,3 +1,5 @@
+import { resolveIntlLocale } from "../../utils/locale";
+import { formatExactAmount } from "../../utils/money";
 import { requireApiSuccess } from "../../utils/api";
 import { describeError } from "../../utils/errors";
 /**
@@ -83,7 +85,8 @@ export function ParcelDetailPanel({
   pathTemplate,
   initialEntityId,
 }: ParcelDetailPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const masterData = useMasterData();
   const scenarioMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCENARIO;
   const [parcelData, setParcelData] = useState<ParcelData | null>(null);
@@ -476,7 +479,7 @@ export function ParcelDetailPanel({
 
           <span className="agent-detail-label">{t("parcel.landPrice")}</span>
           <span className="agent-detail-value">
-            {t("common.currency", { value: parcelData.land_price })}
+            {formatExactAmount(parcelData.land_price, locale)}
           </span>
 
           <span className="agent-detail-label">{t("parcel.area")}</span>

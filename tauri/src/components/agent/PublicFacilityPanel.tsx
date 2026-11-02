@@ -20,6 +20,8 @@
  * The city government (TYPE_CITY) is permanent and has no operations, so omit the card itself.
  */
 
+import { resolveIntlLocale } from "../../utils/locale";
+import { formatExactAmount } from "../../utils/money";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -110,7 +112,8 @@ export function PublicFacilityPanel({
   constructionCostPerEpoch,
   remainingEpochs,
 }: PublicFacilityPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const masterData = useMasterData();
   const [loading, setLoading] = useState(false);
   // Expansion state of the target utilization slider. Closed by default; opens only when its value is clicked.
@@ -452,9 +455,7 @@ export function PublicFacilityPanel({
           </span>
           <span className="agent-detail-value">
             {constructionCostPerEpoch != null
-              ? t("common.currency", {
-                  value: Math.round(constructionCostPerEpoch),
-                })
+              ? formatExactAmount(constructionCostPerEpoch, locale, false, { maximumFractionDigits: 0 })
               : "—"}
           </span>
           <span className="agent-detail-label">

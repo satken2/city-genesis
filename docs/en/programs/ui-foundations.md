@@ -16,6 +16,10 @@ Use common session, version, and play-mode state without duplicating retrieval o
 
 Time-series statistics use a common cache keyed to endpoint and epoch and display finalized API values. Current city totals and record holders display results aggregated by the core from the city state at retrieval time. Use record values and their holders' IDs and names from the same response; do not fetch every entity to recalculate rankings in the frontend. Distinguish missing values from zero and do not substitute current-period values into historical breakdowns.
 
+Use shared money formatting for digit grouping, compact notation, and currency units instead of defining them separately in screens or translation resources. Apply the same rule to chart ticks and tooltips, and do not reuse money formatting for quantities such as resource amounts or population counts.
+
+Save the currency unit as an application setting, following the UI display language when no unit is specified. The initial language follows the existing Steam and OS detection, and each WebView applies unit changes when it receives the settings notification. Choosing a unit does not change monetary values or simulation calculations.
+
 City and facility diagnostics display trees of factors investigated by the core from observed values; the UI does not reimplement economic checks. Factors and suggested actions arrive as identifiers, with wording translated in the UI. Suggestions lead to existing operation screens, where the player chooses policies or actions affecting citizens. Defer diagnostics during epoch execution and investigate again after completion.
 
 2D maps use `CityMapCanvas`, with each screen supplying layers and overlays. Coordinates and orientation follow [terrain](../geometries/D_terrain.md); screens do not create separate conventions. Route guidance reflects the core's calculation-time results. Do not assume immediate road-edit reflection or exact shortest routes between arbitrary points. Distinguish travel times from route-selection weights.

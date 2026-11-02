@@ -13,6 +13,7 @@
  * これらの財は1単位が1人1回の入場・乗車なので、量を人数として読める。行名は財IDごとの訳語を使う。
  */
 
+import { formatExactAmount } from "../../utils/money";
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
@@ -53,7 +54,7 @@ export function SupplyInfoPanel({ agent }: SupplyInfoPanelProps) {
 
   // profit_rates arrives as (revenue-cost)/revenue, a ratio (-1 to 1); convert to percentages for display.
   const formatPercent = (value: number) => `${(value * 100).toFixed(2)}%`;
-  const formatCurrency = (value: number) => t("common.currency", { value: value.toFixed(2) });
+  const formatCurrency = (value: number) => formatExactAmount(value, locale, false, { maximumFractionDigits: 2 });
   const utilization = agent.utilization?.[0];
 
   return (

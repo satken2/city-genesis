@@ -5,6 +5,8 @@
  * 入居テナント（ホテルでは宿泊客）は横並びの領域の下で全幅を使い、一覧の折り返しを抑える。
  */
 
+import { resolveIntlLocale } from "../../utils/locale";
+import { formatExactAmount } from "../../utils/money";
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import { SPACE_LODGING, TYPE_BUILDING } from "../../constants";
@@ -20,10 +22,11 @@ type BuildingInfoProps = {
 };
 
 export function BuildingInfo({ agent, onNavigate }: BuildingInfoProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
 
   const formatCurrency = (value: number) =>
-    t("common.currency", { value });
+    formatExactAmount(value, locale);
 
   const hasFloorDetails = agent.type === TYPE_BUILDING;
   const hasRent = hasFloorDetails && agent.rent != null;

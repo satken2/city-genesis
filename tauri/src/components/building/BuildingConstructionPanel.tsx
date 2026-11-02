@@ -1,3 +1,5 @@
+import { formatExactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 import { requireApiSuccess } from "../../utils/api";
 import { describeError } from "../../utils/errors";
 /**
@@ -120,7 +122,8 @@ type BuildingConstructionPanelProps = {
 /* ---- Main component ---- */
 
 export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, relocateCityHall = false }: BuildingConstructionPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const masterData = useMasterData();
   // Funding estimate by variant (do not allow tiles for facilities unaffordable even at minimum size).
   const { affordability: variantAffordability } = useVariantAffordability("buildings", apiBaseUrl);
@@ -1752,7 +1755,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                         <>
                           <br />
                           {t("building_construction.directAcquisitionCost", {
-                            cost: Math.round(directAcquisition.estimatedCost).toLocaleString(),
+                            cost: formatExactAmount(directAcquisition.estimatedCost, locale, false, { maximumFractionDigits: 0 }),
                           })}
                         </>
                       )}
@@ -1849,7 +1852,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                           {t("building_construction.directAcquisitionRequired", { count: siteAcquisition.count })}
                           <br />
                           {t("building_construction.directAcquisitionCost", {
-                            cost: Math.round(siteAcquisition.estimatedCost).toLocaleString(),
+                            cost: formatExactAmount(siteAcquisition.estimatedCost, locale, false, { maximumFractionDigits: 0 }),
                           })}
                         </div>
                       ) : siteInvalidReason !== null && (

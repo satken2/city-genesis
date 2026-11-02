@@ -11,6 +11,8 @@
  * dark for actual throughput (imports: sales to the city; exports: purchases from the city), matching FloorOccupancyBar.
  */
 
+import { resolveIntlLocale } from "../../utils/locale";
+import { formatExactAmount } from "../../utils/money";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { AgentData, MasterData } from "../../types";
@@ -63,7 +65,8 @@ type CargoDirectionSectionProps = {
  * The wrapper class cargo--import / cargo--export selects blue for imports or green for exports.
  */
 function CargoDirectionSection({ direction, products, masterData }: CargoDirectionSectionProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const isImport = direction === "import";
 
   // Scale the bars to the largest value across all items (the larger of allocation and actual throughput).
@@ -136,7 +139,7 @@ function CargoDirectionSection({ direction, products, masterData }: CargoDirecti
                         ? t("cargo.priceImport", "販売単価")
                         : t("cargo.priceExport", "買取単価")}
                       {": "}
-                      {t("common.currency", { value: row.price.toFixed(2) })}
+                      {formatExactAmount(row.price, locale, false, { maximumFractionDigits: 2 })}
                     </span>
                     {(row.lost ?? 0) > 0 && (
                       <span className="cargo-row__lost">

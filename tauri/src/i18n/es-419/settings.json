@@ -14,6 +14,10 @@
       "description": "Muestra la API del backend conectado en tu navegador predeterminado",
       "action": "Abrir en el navegador"
     },
+    "currencyUnit": {
+      "label": "Unidad monetaria",
+      "description": "La unidad que se muestra con los importes. Deja el campo vacío para usar la del idioma de la interfaz."
+    },
     "fontSize": {
       "label": "Tamaño de letra",
       "large": "Grande",

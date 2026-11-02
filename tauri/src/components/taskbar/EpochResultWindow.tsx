@@ -42,7 +42,7 @@ import { EpochDate } from "../common/EpochDate";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { STATUS_STYLE_MAP } from "../../local-constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { formatCompactAmount } from "../../utils/money";
+import { formatExactAmount, formatCompactAmount } from "../../utils/money";
 import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
 import { seasonImageUrl } from "../../utils/season";
 import { formatQuestValue, questCompareLabel } from "../../utils/quest";
@@ -433,7 +433,7 @@ export function EpochResultWindow({
       {
         key: "income",
         label: t("epochResult.statIncome"),
-        value: t("common.currency", { value: Math.round(stats.income) }),
+        value: formatExactAmount(stats.income, locale, false, { maximumFractionDigits: 0 }),
         tone: "normal",
         polarity: "up-good",
       },

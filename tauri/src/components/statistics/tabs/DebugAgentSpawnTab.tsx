@@ -28,6 +28,8 @@
  * and margins are industry-specific values with no meaningful sum.
  */
 
+import { resolveIntlLocale } from "../../../utils/locale";
+import { formatCompactAmount } from "../../../utils/money";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -122,7 +124,8 @@ type LatestAgentRow = {
 };
 
 export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const remPx = useRemPx();
   const masterData = useMasterData();
   const { data, loading, error } = useEpochCachedStats<SpawnDebugStats>(
@@ -452,13 +455,13 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 <span className="debug-spawn-note__item">
                   {t("statistics.debugSpawnCreditLimit")}:{" "}
                   <span className="debug-spawn-note__value">
-                    {formatCompact(latestRecord.credit_limit)}
+                    {formatCompactAmount(latestRecord.credit_limit, locale)}
                   </span>
                 </span>
                 <span className="debug-spawn-note__item">
                   {t("statistics.debugSpawnAnnualGdp")}:{" "}
                   <span className="debug-spawn-note__value">
-                    {formatCompact(latestRecord.annual_gdp)}
+                    {formatCompactAmount(latestRecord.annual_gdp, locale)}
                   </span>
                 </span>
               </div>
@@ -519,7 +522,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                             .join(" ")}
                         >
                           {row.capitalNeed !== null
-                            ? formatCompact(row.capitalNeed)
+                            ? formatCompactAmount(row.capitalNeed, locale)
                             : "-"}
                         </td>
                         <td className="debug-spawn-table__num">

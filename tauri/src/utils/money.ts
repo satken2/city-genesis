@@ -1,43 +1,67 @@
-/**
- * Money formatting utilities. Compact amounts by language, dropping finer digits according to magnitude
- * (Japanese: 52.5億; English: 5.25B). Thin wrapper over Intl.NumberFormat compact notation, which supports
- * Japanese 万/億/兆 and English K/M/B. Like date.ts, use pure functions accepting locale strings.
- */
+/** 金額の整形と通貨単位を集約する。数量や人数には使わず、表示する桁数だけ呼び出し側で指定する。 */
 
-/** Temporary currency unit placeholder. Replace here when the in-game currency unit is finalized. */
-export const PLACEHOLDER_CURRENCY_UNIT = "¢";
+import { resolveSupportedLanguage, type SupportedLanguage } from "./locale";
 
-/**
- * Format money compactly with three significant digits (ja-JP: 52.5億 / 2.84万; en-US: 5.25B / 28.4K). Append the
- * temporary currency unit when unit is true.
- */
+const DEFAULT_CURRENCY_UNITS: Record<SupportedLanguage, string> = {
+  ja: "円",
+  en: "$",
+  "es-419": "$",
+  "zh-Hans": "元",
+  "zh-Hant": "元",
+  fr: "€",
+  ko: "₩",
+};
+
+/** null は言語に追従する。通貨設定は各 WebView で復元し、React 外の確認文も同じ値を参照する。 */
+let currencyUnitOverride: string | null = null;
+const currencyUnitListeners = new Set<() => void>();
+
+export function defaultCurrencyUnit(language: string): string {
+  return DEFAULT_CURRENCY_UNITS[resolveSupportedLanguage(language)];
+}
+
+export function getCurrencyUnitOverride(): string | null {
+  return currencyUnitOverride;
+}
+
+export function getCurrencyUnit(language: string): string {
+  return currencyUnitOverride ?? defaultCurrencyUnit(language);
+}
+
+export function setCurrencyUnit(unit: string | null | undefined): void {
+  const next = typeof unit === "string" ? unit.trim() || null : null;
+  if (next === currencyUnitOverride) return;
+  currencyUnitOverride = next;
+  currencyUnitListeners.forEach((listener) => listener());
+}
+
+export function subscribeCurrencyUnit(listener: () => void): () => void {
+  currencyUnitListeners.add(listener);
+  return () => { currencyUnitListeners.delete(listener); };
+}
+
+/** 日本語の万・億、英語の K・M・B など、ロケールに合わせて有効数字3桁で省略表示する。 */
 export function formatCompactAmount(
   value: number,
   locale: string,
   unit = false
 ): string {
-  if (!Number.isFinite(value)) {
-    return "-";
-  }
-  const formatted = new Intl.NumberFormat(locale, {
+  return formatExactAmount(value, locale, unit, {
     notation: "compact",
     maximumSignificantDigits: 3,
-  }).format(value);
-  return unit ? `${formatted}${PLACEHOLDER_CURRENCY_UNIT}` : formatted;
+  });
 }
 
-/**
- * Format unrounded money with three-digit grouping (e.g. 5,250,437,891) for tooltips. Append the temporary
- * currency unit when unit is true.
- */
+/** 桁区切り付きの金額を表示する。単価などで必要な小数桁も、この入口で整形する。 */
 export function formatExactAmount(
   value: number,
   locale: string,
-  unit = false
+  unit = false,
+  options?: Intl.NumberFormatOptions,
 ): string {
   if (!Number.isFinite(value)) {
     return "-";
   }
-  const formatted = value.toLocaleString(locale);
-  return unit ? `${formatted}${PLACEHOLDER_CURRENCY_UNIT}` : formatted;
+  const formatted = value.toLocaleString(locale, options);
+  return unit ? `${formatted}${getCurrencyUnit(locale)}` : formatted;
 }

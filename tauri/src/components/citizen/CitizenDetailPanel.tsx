@@ -1,3 +1,4 @@
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
 import { describeError } from "../../utils/errors";
 /**
  * Citizen detail panel
@@ -144,6 +145,7 @@ export function CitizenDetailPanel({
   initialVoice,
 }: CitizenDetailPanelProps) {
   const { t, i18n } = useTranslation();
+  useCurrencyUnit();
   const masterData = useMasterData();
   const [citizenData, setCitizenData] = useState<CitizenData | null>(null);
   const [household, setHousehold] = useState<AgentData | null>(null);

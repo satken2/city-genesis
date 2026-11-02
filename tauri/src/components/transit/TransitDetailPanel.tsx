@@ -1,3 +1,6 @@
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
+import { formatExactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 import { requireApiSuccess } from "../../utils/api";
 import { describeError } from "../../utils/errors";
 /**
@@ -152,7 +155,9 @@ export function TransitDetailPanel({
   pathTemplate,
   initialEntityId,
 }: TransitDetailPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currencyUnit = useCurrencyUnit();
+  const locale = resolveIntlLocale(i18n.language);
   const masterData = useMasterData();
 
   const [line, setLine] = useState<TransitLineDetail | null>(null);
@@ -449,18 +454,18 @@ export function TransitDetailPanel({
                 <StatTile label={t("transit.colRidership")} value={Math.round(line.ridership).toLocaleString()} />
                 <StatTile
                   label={t("transit.colRevenues")}
-                  value={Math.round(line.revenues).toLocaleString()}
-                  unit={t("transit.currencyUnit")}
+                  value={formatExactAmount(line.revenues, locale, false, { maximumFractionDigits: 0 })}
+                  unit={currencyUnit}
                 />
                 <StatTile
                   label={t("transit.vehicleCost")}
-                  value={Math.round(line.expenses).toLocaleString()}
-                  unit={t("transit.currencyUnit")}
+                  value={formatExactAmount(line.expenses, locale, false, { maximumFractionDigits: 0 })}
+                  unit={currencyUnit}
                 />
                 <StatTile
                   label={t("transit.balance")}
-                  value={`${balance > 0 ? "+" : ""}${Math.round(balance).toLocaleString()}`}
-                  unit={t("transit.currencyUnit")}
+                  value={`${balance > 0 ? "+" : ""}${formatExactAmount(balance, locale, false, { maximumFractionDigits: 0 })}`}
+                  unit={currencyUnit}
                   tone={balance < 0 ? "negative" : balance > 0 ? "positive" : undefined}
                 />
               </div>
@@ -507,7 +512,7 @@ export function TransitDetailPanel({
                     <span className="agent-detail-label">{t("transit.fare")}</span>
                     <span className="agent-detail-value">
                       <NumberStepper value={fare} onChange={setFare} min={0} max={100000} step={10} integerOnly={true} />
-                      <span className="transit-detail__unit">{t("transit.currencyUnit")}</span>
+                      <span className="transit-detail__unit">{currencyUnit}</span>
                     </span>
                   </>
                 )}

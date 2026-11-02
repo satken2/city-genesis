@@ -4,6 +4,7 @@
  * Left column: GDP (nominal/real) and GDP deflator histories, stacked vertically.
  * Right column: breakdown of the latest Epoch's nominal GDP (GdpBreakdownPanel).
  */
+import { useCurrencyUnit } from "../../../hooks/useCurrencyUnit";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -46,6 +47,7 @@ const TOOLTIP_STYLE = {
 
 export function FinanceTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
+  useCurrencyUnit();
   const locale = resolveIntlLocale(i18n.language);
   const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<FinanceStats>(

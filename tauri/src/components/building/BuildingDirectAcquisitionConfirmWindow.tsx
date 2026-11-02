@@ -15,6 +15,8 @@
  * so no special Rust close handling is needed.
  */
 
+import { formatExactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { emit } from "@tauri-apps/api/event";
@@ -38,7 +40,8 @@ export function BuildingDirectAcquisitionConfirmWindow({
   pendingAcquisition,
   onClose,
 }: BuildingDirectAcquisitionConfirmWindowProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
 
   const [busy, setBusy] = useState(false);
 
@@ -69,7 +72,7 @@ export function BuildingDirectAcquisitionConfirmWindow({
       <p className="bda-desc">
         {t("building_construction.acquisitionConfirmDesc", {
           count: pendingAcquisition.blockingCount,
-          cost: Math.round(pendingAcquisition.estimatedCost).toLocaleString(),
+          cost: formatExactAmount(pendingAcquisition.estimatedCost, locale, false, { maximumFractionDigits: 0 }),
           defaultValue:
             "設置位置が民間の土地区画 {{count}} 件と重なっています。市政府が自動で用地を買収し、既存の建物を取り壊してから建設を開始します(買収費見積: {{cost}})。",
         })}

@@ -18,7 +18,6 @@
     "demand": "수요량",
     "production": "생산량",
     "supplyStatus": "수급과 용량",
-    "currencyUnit": "엔",
     "costRatioPrefix": "제조 원가의",
     "costRatioSuffix": "배"
   },

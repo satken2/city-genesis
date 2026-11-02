@@ -14,6 +14,10 @@
       "description": "在預設瀏覽器中查看目前連線的後端 API",
       "action": "在瀏覽器中開啟"
     },
+    "currencyUnit": {
+      "label": "貨幣單位",
+      "description": "金額後顯示的單位。留空則使用介面語言對應的單位。"
+    },
     "fontSize": {
       "label": "文字大小",
       "large": "大",

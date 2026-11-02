@@ -1,3 +1,4 @@
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
 import { describeError } from "../../utils/errors";
 /**
  * Public transport creation/route editing panel
@@ -96,6 +97,7 @@ export function TransitCreationPanel({
   editLineId?: number | null;
 }) {
   const { t } = useTranslation();
+  const currencyUnit = useCurrencyUnit();
   const masterData = useMasterData();
   const scenarioMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCENARIO;
   const isEdit = editLineId != null;
@@ -361,7 +363,7 @@ export function TransitCreationPanel({
                     <div className="bc-section-title">{t("transit.fare")}</div>
                     <div className="bc-stepper-row" data-guide="transit.fare">
                       <NumberStepper value={fare} onChange={setFare} min={0} max={100000} step={10} integerOnly={true} />
-                      <span className="bc-stepper-unit">{t("transit.currencyUnit")}</span>
+                      <span className="bc-stepper-unit">{currencyUnit}</span>
                     </div>
                   </div>
                 )}

@@ -1,3 +1,5 @@
+import { resolveIntlLocale } from "../../../utils/locale";
+import { formatExactAmount } from "../../../utils/money";
 import { describeError } from "../../../utils/errors";
 /**
  * Economy tab component.
@@ -38,7 +40,8 @@ const GOODS_TABS: { id: GoodsTab; goodsType: number; labelKey: string }[] = [
 ];
 
 export function EconomyTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const masterData = useMasterData();
   const [cityData, setCityData] = useState<CityResponse["city"] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -184,7 +187,7 @@ export function EconomyTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                     </td>
                     <td className="econ-table__cell econ-table__cell--price econ-table__cell--right">
                       {row.price > 0
-                        ? t("common.currency", { value: row.price.toFixed(1) })
+                        ? formatExactAmount(row.price, locale, false, { maximumFractionDigits: 1 })
                         : "-"}
                     </td>
                     <td className="econ-table__cell econ-table__cell--bar econ-table__cell--production">

@@ -22,7 +22,6 @@
     "headway": "배차 간격",
     "carsPerTrain": "1편성의 차량 수",
     "trainCount": "편성 수",
-    "currencyUnit": "엔",
     "minutesUnit": "분",
     "carsUnit": "량",
     "trainsUnit": "편성",

@@ -13,6 +13,9 @@
  * - Employment by industry table (scrollable): detailed list by Variant.
  */
 
+import { useCurrencyUnit } from "../../../hooks/useCurrencyUnit";
+import { formatExactAmount } from "../../../utils/money";
+import { resolveIntlLocale } from "../../../utils/locale";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -120,9 +123,9 @@ function formatRate(rate: number): string {
   return `${(rate * 100).toFixed(1)}%`;
 }
 
-function formatWage(wage: number): string {
+function formatWage(wage: number, locale: string): string {
   if (wage === 0) return "-";
-  return `$${wage.toFixed(1)}`;
+  return formatExactAmount(wage, locale, true, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 // KPI cards.
@@ -149,7 +152,9 @@ function KpiCard({
 }
 
 export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  useCurrencyUnit();
+  const locale = resolveIntlLocale(i18n.language);
   const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<EmploymentStats>(
     apiBaseUrl,
@@ -276,7 +281,7 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               />
               <KpiCard
                 label={t("statistics.employment.averageWage", "平均賃金")}
-                value={formatWage(summary.average_wage)}
+                value={formatWage(summary.average_wage, locale)}
                 sub={t("statistics.employment.perEpoch", "/エポック")}
               />
             </div>
@@ -401,7 +406,7 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       </span>
                     </div>
                     <div className="emp-tier-row__wage">
-                      {formatWage(tb.average_wage)}
+                      {formatWage(tb.average_wage, locale)}
                     </div>
                   </div>
                 );
@@ -521,7 +526,7 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         </td>
                         <td className="emp-industry-table__td emp-industry-table__td--num">
                           <span style={{ color: "#94a3b8" }}>
-                            {formatWage(row.average_wage)}
+                            {formatWage(row.average_wage, locale)}
                           </span>
                         </td>
                       </tr>

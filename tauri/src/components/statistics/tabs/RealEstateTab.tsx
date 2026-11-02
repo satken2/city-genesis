@@ -25,6 +25,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
+import { resolveIntlLocale } from "../../../utils/locale";
+import { formatExactAmount } from "../../../utils/money";
 import "./RealEstateTab.css";
 import { useRemPx } from "../../../hooks/useRemPx";
 
@@ -79,7 +81,9 @@ export function spaceTypeLabelKey(name: string): string {
 }
 
 export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
+  const money = (value: number) => formatExactAmount(value, locale);
   const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<RealEstateStats>(
     apiBaseUrl,
@@ -214,8 +218,9 @@ export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
                     <XAxis dataKey="epoch" stroke="#8ba3bb" fontSize="0.83rem" />
-                    <YAxis width={remPx(5.56)} stroke="#8ba3bb" fontSize="0.83rem" />
+                    <YAxis width={remPx(5.56)} stroke="#8ba3bb" fontSize="0.83rem" tickFormatter={money} />
                     <Tooltip
+                      formatter={(value) => money(Number(value))}
                       contentStyle={{ background: "#1a2230", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px" }}
                       itemStyle={{ fontSize: "0.93rem" }}
                       labelStyle={{ fontSize: "0.93rem", fontWeight: "bold", color: "#8ba3bb" }}
@@ -250,8 +255,9 @@ export function RealEstateTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
                     <XAxis dataKey="epoch" stroke="#8ba3bb" fontSize="0.83rem" />
-                    <YAxis width={remPx(5.56)} stroke="#8ba3bb" fontSize="0.83rem" />
+                    <YAxis width={remPx(5.56)} stroke="#8ba3bb" fontSize="0.83rem" tickFormatter={money} />
                     <Tooltip
+                      formatter={(value) => money(Number(value))}
                       contentStyle={{ background: "#1a2230", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px" }}
                       itemStyle={{ fontSize: "0.93rem" }}
                       labelStyle={{ fontSize: "0.93rem", fontWeight: "bold", color: "#8ba3bb" }}

@@ -14,6 +14,10 @@
       "description": "コアシミュレータAPIの仕様を既定のブラウザで表示します",
       "action": "ブラウザで開く"
     },
+    "currencyUnit": {
+      "label": "通貨単位",
+      "description": "金額に付ける単位です。空欄の場合は表示言語に合わせます。"
+    },
     "fontSize": {
       "label": "文字サイズ",
       "large": "大",

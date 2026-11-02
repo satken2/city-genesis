@@ -18,7 +18,6 @@
     "demand": "需求量",
     "production": "产量",
     "supplyStatus": "供需与容量",
-    "currencyUnit": "日元",
     "costRatioPrefix": "制造成本的",
     "costRatioSuffix": "倍"
   },

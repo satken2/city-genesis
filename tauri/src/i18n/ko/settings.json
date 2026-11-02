@@ -14,6 +14,10 @@
       "description": "기본 브라우저에서 현재 연결된 백엔드 API를 표시합니다",
       "action": "브라우저에서 열기"
     },
+    "currencyUnit": {
+      "label": "화폐 단위",
+      "description": "금액에 표시할 단위입니다. 비워 두면 표시 언어에 맞는 단위를 사용합니다."
+    },
     "fontSize": {
       "label": "글자 크기",
       "large": "큼",

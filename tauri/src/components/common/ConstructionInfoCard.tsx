@@ -33,6 +33,8 @@
  *   utils/constructionFunding. Also show "Available funds" unless showAvailableFunds is false.
  */
 
+import { resolveIntlLocale } from "../../utils/locale";
+import { formatExactAmount } from "../../utils/money";
 import { Fragment, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Money } from "./Money";
@@ -134,7 +136,8 @@ export function ConstructionInfoCard({
   showAvailableFunds = true,
   perEpoch,
 }: ConstructionInfoCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
 
   // Funding shortfall. Positive only when all check inputs exist and required total exceeds available funds.
   const fundsShortfall = isCostLoading ? null : constructionFundsShortfall(requiredTotal, availableFunds);
@@ -292,7 +295,7 @@ export function ConstructionInfoCard({
           <span className="construction-info-label">{t("construction.availableFunds")}</span>
           <span className="construction-info-value">
             {availableFunds != null
-              ? t("common.currency", { value: Math.round(availableFunds) })
+              ? formatExactAmount(availableFunds, locale, false, { maximumFractionDigits: 0 })
               : "—"}
           </span>
         </div>
@@ -300,7 +303,7 @@ export function ConstructionInfoCard({
       {fundsShortfall != null && fundsShortfall > 0 && (
         <div className="construction-supply-note construction-supply-note-severe">
           {t("construction.insufficientFunds", {
-            value: t("common.currency", { value: Math.round(fundsShortfall) }),
+            value: formatExactAmount(fundsShortfall, locale, false, { maximumFractionDigits: 0 }),
           })}
         </div>
       )}
@@ -327,7 +330,7 @@ export function ConstructionInfoCard({
           </span>
           <span className="construction-info-value">
             {perEpoch.costPerEpoch != null
-              ? t("common.currency", { value: Math.round(perEpoch.costPerEpoch) })
+              ? formatExactAmount(perEpoch.costPerEpoch, locale, false, { maximumFractionDigits: 0 })
               : "—"}
           </span>
 

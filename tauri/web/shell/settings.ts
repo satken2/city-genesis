@@ -7,6 +7,7 @@ import { languageFromLocaleTag } from "../../src/utils/locale";
  */
 export interface AppSettings {
   language: string;
+  currency_unit: string | null;
   font_size: number;
   volumes: Record<string, number>;
   monitor_index: number;
@@ -21,6 +22,7 @@ const STORAGE_KEY = "city-genesis.settings";
 function defaults(): AppSettings {
   return {
     language: navigator.languages.map(languageFromLocaleTag).find((language) => language !== undefined) ?? "en",
+    currency_unit: null,
     font_size: 13,
     volumes: { master: 80, bgm: 60, sfx: 70 },
     monitor_index: 0,
@@ -41,6 +43,7 @@ function normalize(raw: unknown): AppSettings {
   const isNumber = (v: unknown) => typeof v === "number" && Number.isFinite(v);
   return {
     language: pick("language", (v) => typeof v === "string"),
+    currency_unit: pick("currency_unit", (v) => v === null || typeof v === "string"),
     font_size: pick("font_size", isNumber),
     volumes: pick("volumes", (v) => v !== null && typeof v === "object" && Object.values(v as object).every(isNumber)),
     monitor_index: pick("monitor_index", isNumber),

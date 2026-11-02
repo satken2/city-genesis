@@ -18,6 +18,8 @@
  * Close by clicking the backdrop outside the box or the close button.
  */
 
+import { resolveIntlLocale } from "../../../utils/locale";
+import { formatExactAmount } from "../../../utils/money";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -658,7 +660,8 @@ function EconomyTrendGrid({
   epochs: number[];
   product: MarketPriceProduct | null;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   // Scope selection (entire city = city / District = zone). Only city-wide data is currently implemented.
   const [scopeMode, setScopeMode] = useState<"city" | "zone">("city");
 
@@ -694,7 +697,7 @@ function EconomyTrendGrid({
 
   // Currency formatting (for prices).
   const priceFormatter = (v: number) =>
-    t("common.currency", { value: v.toFixed(0) });
+    formatExactAmount(v, locale, false, { maximumFractionDigits: 0 });
   // Quantity formatting (for production, consumption, exports/imports). Append a unit if available.
   const amountFormatter = (v: number) => {
     if (Math.abs(v) >= 1000) {

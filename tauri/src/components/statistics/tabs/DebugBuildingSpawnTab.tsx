@@ -16,6 +16,8 @@
  * - Right: Variant scores for the latest Epoch. Clicking a row selects the Variant in the left chart.
  */
 
+import { resolveIntlLocale } from "../../../utils/locale";
+import { formatCompactAmount } from "../../../utils/money";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -39,7 +41,6 @@ import {
   CHART_MARGIN,
   AXIS_TICK,
   TOOLTIP_STYLE,
-  formatCompact,
 } from "./spawnDebugShared";
 import "./DebugSpawnTab.css";
 import { useRemPx } from "../../../hooks/useRemPx";
@@ -55,7 +56,9 @@ function totalCost(entry: ConstructionVariantEntry): number {
 }
 
 export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
+  const money = (value: number) => formatCompactAmount(value, locale);
   const remPx = useRemPx();
   const masterData = useMasterData();
   const { data, loading, error } = useEpochCachedStats<SpawnDebugStats>(
@@ -179,7 +182,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
                       width={remPx(4.81)}
-                      tickFormatter={formatCompact}
+                      tickFormatter={money}
                       domain={["auto", "auto"]}
                     />
                     <YAxis
@@ -196,7 +199,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       formatter={(value: any, _name: any, item: any) =>
                         item?.dataKey === "spawned"
                           ? value
-                          : formatCompact(Number(value))
+                          : money(Number(value))
                       }
                     />
                     <Legend wrapperStyle={{ fontSize: "1rem" }} />
@@ -302,12 +305,12 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         onClick={() => setSelectedVariantId(row.variantId)}
                       >
                         <td>{variantName(row.variantId)}</td>
-                        <td className="debug-spawn-table__num">{formatCompact(row.bestScore)}</td>
+                        <td className="debug-spawn-table__num">{money(row.bestScore)}</td>
                         <td className="debug-spawn-table__num">
-                          {row.npv !== null ? formatCompact(row.npv) : "-"}
+                          {row.npv !== null ? money(row.npv) : "-"}
                         </td>
                         <td className="debug-spawn-table__num">
-                          {row.cost !== null ? formatCompact(row.cost) : "-"}
+                          {row.cost !== null ? money(row.cost) : "-"}
                         </td>
                         <td className="debug-spawn-table__num">{row.spawned}</td>
                       </tr>

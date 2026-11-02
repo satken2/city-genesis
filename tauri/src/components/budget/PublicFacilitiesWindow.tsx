@@ -1,3 +1,6 @@
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
+import { formatExactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 import { describeError } from "../../utils/errors";
 /**
  * Public service window component
@@ -65,14 +68,9 @@ function num(v?: number | null, digits = 0): string {
       });
 }
 
-/** Round rates/costs to two decimal places; electricity (1 kWh) and water (1 L) may cost less than ¥1 per unit. */
+/** 公共料金の入力・保存は小数第2位まで扱う。電力や水道の単価は1未満にもなる。 */
 function roundPrice(v: number): number {
   return Math.round(v * 100) / 100;
-}
-
-/** Display rates/costs with thousands separators (up to two decimal places for fractions below ¥1). */
-function price(v: number): string {
-  return roundPrice(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
 /** Format a proportion as a percentage. */
@@ -85,7 +83,7 @@ function pct(v?: number): string {
  * The left price control card shows prices, production, and sales for the whole city,
  * so list only per-facility spare supply capacity (production capacity) and business indicators here.
  */
-function buildColumns(t: TFn2, unit: string): SortableAgentColumn<PublicFacilityAgent>[] {
+function buildColumns(t: TFn2, unit: string, locale: string): SortableAgentColumn<PublicFacilityAgent>[] {
   return [
     {
       key: "status",
@@ -111,7 +109,7 @@ function buildColumns(t: TFn2, unit: string): SortableAgentColumn<PublicFacility
       key: "balance",
       label: t("publicFacilities.balance"),
       align: "right",
-      render: (a) => num(a.balance, 0),
+      render: (a) => a.balance == null ? "—" : formatExactAmount(a.balance, locale, false, { maximumFractionDigits: 0 }),
       sortValue: (a) => a.balance,
     },
     {
@@ -160,7 +158,9 @@ function ServicePriceCard({
   onModeChange,
   onCommit,
 }: ServicePriceCardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currencyUnit = useCurrencyUnit();
+  const locale = resolveIntlLocale(i18n.language);
 
   const mode: PublicServicePriceMode = row?.mode ?? "cost_ratio";
   const isRatio = mode === "cost_ratio";
@@ -214,7 +214,7 @@ function ServicePriceCard({
                 }
               }}
             />
-            <span>{t(isRatio ? "publicServicePrices.costRatioSuffix" : "publicServicePrices.currencyUnit")}</span>
+            <span>{isRatio ? t("publicServicePrices.costRatioSuffix") : currencyUnit}</span>
           </div>
 
           <div className="psp-card__cost">
@@ -222,8 +222,8 @@ function ServicePriceCard({
               {t("publicServicePrices.unitCost")}
             </span>
             <span className="psp-field__num">
-              {price(row.unit_cost)}
-              <span className="psp-row__unit">{t("publicServicePrices.currencyUnit")}/{product.unit}</span>
+              {formatExactAmount(row.unit_cost, locale, false, { maximumFractionDigits: 2 })}
+              <span className="psp-row__unit">{currencyUnit}/{product.unit}</span>
             </span>
           </div>
         </div>
@@ -267,7 +267,8 @@ export function PublicFacilitiesWindow({
 }: {
   apiBaseUrl: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const masterData = useMasterData();
   const marketHistory = useEpochCachedStats<PublicServiceHistoryData>(apiBaseUrl, "/api/v1/stats/market_price");
   const infraProducts = useInfraProducts(apiBaseUrl);
@@ -442,7 +443,7 @@ export function PublicFacilitiesWindow({
     label: t(`publicServiceTrend.${infrastructure.infrastructureCapacityLabel}`),
     value: infrastructureSupply.supply_capacity * infrastructure.quantityScale,
   } : undefined;
-  const columns = useMemo(() => buildColumns(t, activeProduct?.unit ?? ""), [t, activeProduct?.unit]);
+  const columns = useMemo(() => buildColumns(t, activeProduct?.unit ?? "", locale), [t, activeProduct?.unit, locale]);
 
   const coverageOption = activeProduct
     ? infraProducts.find((p) => p.kind === "coverage" && p.productId === activeProduct.id)

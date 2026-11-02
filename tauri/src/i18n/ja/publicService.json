@@ -18,7 +18,6 @@
     "demand": "需要量",
     "production": "生産量",
     "supplyStatus": "需給とキャパシティ",
-    "currencyUnit": "円",
     "costRatioPrefix": "製造原価の",
     "costRatioSuffix": "倍"
   },

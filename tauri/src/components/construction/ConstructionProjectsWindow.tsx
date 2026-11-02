@@ -15,6 +15,7 @@
  *   within the session (`useObjectVisibility`); it is not saved in the backend.
  */
 
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -46,6 +47,7 @@ type ConstructionProjectsWindowProps = {
 
 export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsWindowProps) {
   const { t, i18n } = useTranslation();
+  useCurrencyUnit();
   const masterData = useMasterData();
   const locale = resolveIntlLocale(i18n.language);
   const [projects, setProjects] = useState<TagProject[] | null>(null);

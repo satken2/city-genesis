@@ -17,6 +17,8 @@
  * does not aggregate these.
  */
 
+import { resolveIntlLocale } from "../../../utils/locale";
+import { formatExactAmount } from "../../../utils/money";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -158,7 +160,8 @@ function pct(ratio: number): string {
 }
 
 export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<TourismStats>(
     apiBaseUrl,
@@ -215,7 +218,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     {
       key: "revenue",
       label: t("statistics.tourism.tileRevenue"),
-      value: t("common.currency", { value: Math.round(summary.tourism_revenue) }),
+      value: formatExactAmount(summary.tourism_revenue, locale, false, { maximumFractionDigits: 0 }),
     },
     {
       key: "qol",
@@ -227,7 +230,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     },
   ];
 
-  const renderHistoryChart = (children: React.ReactNode) => (
+  const renderHistoryChart = (children: React.ReactNode, valueFormatter?: (value: number) => string) => (
     <div className="tourism-card__chart-container">
       {hasHistory ? (
         <ResponsiveContainer width="100%" height="100%">
@@ -240,8 +243,13 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               tickLine={false}
               axisLine={{ stroke: "#253246" }}
               allowDecimals={false}
+              tickFormatter={valueFormatter}
             />
-            <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={(label) => `Epoch ${label}`} />
+            <Tooltip
+              contentStyle={TOOLTIP_STYLE}
+              labelFormatter={(label) => `Epoch ${label}`}
+              formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined}
+            />
             <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconSize={8} />
             {children}
           </LineChart>
@@ -294,7 +302,8 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           <div className="tourism-card">
             <h3 className="tourism-card__title">{t("statistics.tourism.chartRevenueHistory")}</h3>
             {renderHistoryChart(
-              <Line type="monotone" dataKey="tourism_revenue" name={t("statistics.tourism.seriesRevenue")} stroke={COLOR_REVENUE} strokeWidth={2} dot={{ r: 2 }} />
+              <Line type="monotone" dataKey="tourism_revenue" name={t("statistics.tourism.seriesRevenue")} stroke={COLOR_REVENUE} strokeWidth={2} dot={{ r: 2 }} />,
+              (value) => formatExactAmount(value, locale),
             )}
           </div>
         </div>
@@ -375,10 +384,10 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               </span>
               <span className="tourism-kv__label">{t("statistics.tourism.lodgingCost")}</span>
               <span className="tourism-kv__value">
-                {t("common.currency", { value: lodging.lodging_cost_per_party_day })}
+                {formatExactAmount(lodging.lodging_cost_per_party_day, locale)}
                 <span className="tourism-kv__note">
                   {t("statistics.tourism.touristWtp")}{" "}
-                  {t("common.currency", { value: lodging.tourist_wtp_per_party_day })}
+                  {formatExactAmount(lodging.tourist_wtp_per_party_day, locale)}
                 </span>
               </span>
             </div>
@@ -464,7 +473,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         <span className="tourism-bar-item__name">{item.product_name}</span>
                         <span className="tourism-bar-item__values">
                           <span className="tourism-bar-item__value">
-                            {t("common.currency", { value: item.value })}
+                            {formatExactAmount(item.value, locale)}
                           </span>
                           <span className="tourism-bar-item__amount">
                             {fmt(item.amount, 1)} {item.unit}

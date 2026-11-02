@@ -14,11 +14,11 @@
  * with false in the caller.
  */
 
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { emitConfirmDialogResult, type ConfirmDialogRequest } from "../../utils/confirmDialog";
-import { PLACEHOLDER_CURRENCY_UNIT } from "../../utils/money";
 import "./ConfirmDialogWindow.css";
 
 type ConfirmDialogWindowProps = {
@@ -28,6 +28,7 @@ type ConfirmDialogWindowProps = {
 
 export function ConfirmDialogWindow({ request, onClose }: ConfirmDialogWindowProps) {
   const { t } = useTranslation();
+  const currencyUnit = useCurrencyUnit();
   const answeredRef = useRef(false);
   const currentRequestIdRef = useRef<string | undefined>(undefined);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
@@ -89,7 +90,7 @@ export function ConfirmDialogWindow({ request, onClose }: ConfirmDialogWindowPro
                 if (event.key === "Enter") void answer(true);
               }}
             />
-            {PLACEHOLDER_CURRENCY_UNIT}
+            {currencyUnit}
           </label>
         )}
         {!request.noticeOnly && (

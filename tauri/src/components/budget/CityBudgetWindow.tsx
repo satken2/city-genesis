@@ -1,3 +1,4 @@
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
 import { describeError } from "../../utils/errors";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -344,6 +345,7 @@ function ChartValueTooltip({
   /** 見出しとなる軸ラベルの整形。省略時はラベルをそのまま表示する。 */
   formatLabel?: (label: string | number | undefined) => string;
 }) {
+  useCurrencyUnit();
   if (!active || !payload || payload.length === 0) return null;
   const items = payload.filter(
     (p) => typeof p.value === "number" && Number.isFinite(p.value) && p.value !== 0,

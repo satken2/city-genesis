@@ -10,6 +10,8 @@
  * Use a different HSL hue per category and opacity to distinguish the three bars.
  */
 
+import { formatExactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 import { useTranslation } from "react-i18next";
 import "./BudgetActualBarGraph.css";
 
@@ -31,7 +33,8 @@ type BudgetActualBarGraphProps = {
 };
 
 export function BudgetActualBarGraph({ items, baseValue }: BudgetActualBarGraphProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
 
   if (baseValue <= 0) return null;
 
@@ -71,7 +74,7 @@ export function BudgetActualBarGraph({ items, baseValue }: BudgetActualBarGraphP
                   width: `${budgetPct}%`,
                   backgroundColor: `hsla(${hue}, 50%, 55%, 0.3)`,
                 }}
-                title={`${t("budget.prevBudget")}: ${Math.round(item.budget).toLocaleString()}`}
+                title={`${t("budget.prevBudget")}: ${formatExactAmount(item.budget, locale, false, { maximumFractionDigits: 0 })}`}
               />
               <div
                 className="budget-actual-graph__bar"
@@ -79,7 +82,7 @@ export function BudgetActualBarGraph({ items, baseValue }: BudgetActualBarGraphP
                   width: `${actualPct}%`,
                   backgroundColor: `hsla(${hue}, 50%, 55%, 0.6)`,
                 }}
-                title={`${t("budget.prevActual")}: ${Math.round(item.actual).toLocaleString()}`}
+                title={`${t("budget.prevActual")}: ${formatExactAmount(item.actual, locale, false, { maximumFractionDigits: 0 })}`}
               />
               <div
                 className="budget-actual-graph__bar"
@@ -87,7 +90,7 @@ export function BudgetActualBarGraph({ items, baseValue }: BudgetActualBarGraphP
                   width: `${currentPct}%`,
                   backgroundColor: `hsl(${hue}, 50%, 55%)`,
                 }}
-                title={`${t("budget.currentBudget")}: ${Math.round(item.currentBudget).toLocaleString()}`}
+                title={`${t("budget.currentBudget")}: ${formatExactAmount(item.currentBudget, locale, false, { maximumFractionDigits: 0 })}`}
               />
             </div>
           </div>

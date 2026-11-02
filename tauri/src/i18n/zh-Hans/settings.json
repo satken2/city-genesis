@@ -14,6 +14,10 @@
       "description": "在默认浏览器中查看当前连接的后端 API",
       "action": "在浏览器中打开"
     },
+    "currencyUnit": {
+      "label": "货币单位",
+      "description": "金额后显示的单位。留空则使用界面语言对应的单位。"
+    },
     "fontSize": {
       "label": "字体大小",
       "large": "大",

@@ -8,6 +8,8 @@ import { emit } from "@tauri-apps/api/event";
  */
 export type AppSettings = {
   language: string;
+  /** 未指定なら UI の表示言語に対応する通貨単位を使う。 */
+  currency_unit: string | null;
   font_size: number;
   volumes: Record<string, number>;
   monitor_index: number;

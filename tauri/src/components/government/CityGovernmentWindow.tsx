@@ -13,6 +13,7 @@
  * The emblem and city flag above the name open the emblem and flag editor (CityInsigniaButton).
  */
 
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { emit } from "@tauri-apps/api/event";
@@ -60,24 +61,28 @@ const GROUPS: { key: GroupKey; labelKey: string; metrics: MetricKey[] }[] = [
   { key: "city", labelKey: "cityGovernment.tabCity", metrics: [] },
 ];
 
-type Format = "integer" | "decimal" | "percent" | "tons";
+type Format = "integer" | "decimal" | "percent" | "tons" | "money" | "price";
 
 const METRICS: Record<MetricKey, { labelKey: string; format: Format }> = {
   supply_floor: { labelKey: "cityGovernment.supplyFloor", format: "integer" },
   occupancy_rate: { labelKey: "cityGovernment.occupancyRate", format: "percent" },
-  rent: { labelKey: "cityGovernment.rent", format: "integer" },
+  rent: { labelKey: "cityGovernment.rent", format: "money" },
   capacity: { labelKey: "cityGovernment.capacity", format: "tons" },
   import_handling: { labelKey: "cityGovernment.importHandling", format: "tons" },
   export_handling: { labelKey: "cityGovernment.exportHandling", format: "tons" },
   production: { labelKey: "cityGovernment.production", format: "decimal" },
   sold_amount: { labelKey: "cityGovernment.soldAmount", format: "decimal" },
-  price: { labelKey: "cityGovernment.price", format: "decimal" },
-  balance: { labelKey: "publicFacilities.balance", format: "integer" },
+  price: { labelKey: "cityGovernment.price", format: "price" },
+  balance: { labelKey: "publicFacilities.balance", format: "money" },
   utilization_rate: { labelKey: "publicFacilities.utilizationRate", format: "percent" },
 };
 
 function formatMetric(value: number, format: Format, locale: string): string {
   switch (format) {
+    case "money":
+      return formatExactAmount(value, locale, false, { maximumFractionDigits: 0 });
+    case "price":
+      return formatExactAmount(value, locale, false, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     case "percent":
       return `${Math.round(value * 100)}%`;
     case "decimal":
@@ -124,6 +129,7 @@ function buildColumns(
 
 export function CityGovernmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
+  useCurrencyUnit();
   const locale = resolveIntlLocale(i18n.language);
   const readOnly = usePlayMode(apiBaseUrl) === PLAY_MODE_READ_ONLY;
 

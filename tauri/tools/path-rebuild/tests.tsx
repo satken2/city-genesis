@@ -65,7 +65,7 @@ assert.ok(container.textContent?.includes("path.rebuild.repairNotice"));
 await select(202);
 assert.equal(confirm().disabled, false);
 assert.ok(container.textContent?.includes("Wider road"));
-assert.ok(container.querySelector('.money[title="20,200¢"]'));
+assert.ok(container.querySelector('.money[title="20,200円"]'));
 assert.equal(commits.length, 0, "preview must not place an order");
 console.log("PASS: variants stay within the current type; preview shows costs without changing the city");
 

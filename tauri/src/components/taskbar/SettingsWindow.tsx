@@ -35,6 +35,7 @@ import {
   resolveSupportedLanguage,
 } from "../../utils/locale";
 import { SettingsRow } from "../common/SettingsRow";
+import { defaultCurrencyUnit } from "../../utils/money";
 import "./SettingsWindow.css";
 
 /**
@@ -69,6 +70,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
    * Synchronize with the actual font size on preset selection and input commitment.
    */
   const [customInput, setCustomInput] = useState(String(fontSize));
+  const [currencyUnitInput, setCurrencyUnitInput] = useState("");
 
   /**
    * Volume controls are placeholders.
@@ -106,6 +108,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         if (isSupportedLanguage(settings.language)) {
           void i18n.changeLanguage(settings.language);
         }
+        setCurrencyUnitInput(settings.currency_unit ?? "");
         if (
           Number.isFinite(settings.font_size) &&
           settings.font_size >= FONT_SIZE_MIN &&
@@ -262,6 +265,13 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setCustomInput(String(fontSize));
   }
 
+  /** 空欄は既定値への復帰とし、入力途中の文字列は保存せず、確定時に全ウィンドウへ反映する。 */
+  function handleCurrencyUnitCommit() {
+    const value = currencyUnitInput.trim();
+    setCurrencyUnitInput(value);
+    void persistCurrentSettings({ currency_unit: value || null });
+  }
+
   /**
    * Hint bar visibility handler.
    * Saving settings emits settings-updated, which the hint bar receives to change visibility immediately.
@@ -350,6 +360,24 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                 ))}
               </select>
             </div>
+          </SettingsRow>
+
+          <SettingsRow
+            label={t("settings.currencyUnit.label")}
+            description={t("settings.currencyUnit.description")}
+          >
+            <input
+              className="settings-number settings-currency-unit"
+              type="text"
+              value={currencyUnitInput}
+              placeholder={defaultCurrencyUnit(currentLanguage)}
+              onChange={(event) => setCurrencyUnitInput(event.target.value)}
+              onBlur={handleCurrencyUnitCommit}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.nativeEvent.isComposing) event.currentTarget.blur();
+              }}
+              aria-label={t("settings.currencyUnit.label")}
+            />
           </SettingsRow>
 
           <SettingsRow

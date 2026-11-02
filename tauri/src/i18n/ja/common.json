@@ -5,7 +5,6 @@
     "fetchError": "データの取得に失敗しました",
     "noData": "データなし",
     "history": "履歴",
-    "currency": "{{value, number}}",
     "daysSinceEpoch": "1800年1月1日から{{days}}日経過",
     "close": "閉じる",
     "next": "次へ",

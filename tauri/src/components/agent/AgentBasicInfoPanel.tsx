@@ -8,6 +8,8 @@
  * Not displayed for import/export hubs (TYPE_TRADE).
  */
 
+import { resolveIntlLocale } from "../../utils/locale";
+import { formatExactAmount } from "../../utils/money";
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import {
@@ -124,10 +126,11 @@ export function AgentBasicInfoPanel({
   agent,
   onNavigate,
 }: AgentBasicInfoPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
 
   const formatCurrency = (value: number) =>
-    t("common.currency", { value });
+    formatExactAmount(value, locale);
 
   return (
     <section className="agent-detail-section">

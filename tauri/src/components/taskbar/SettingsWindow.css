@@ -1,5 +1,10 @@
 /** Settings-specific volume/state display. Shared form styles come from SettingsForm.css. */
 
+.settings-currency-unit {
+  width: 8rem;
+  text-align: left;
+}
+
 /*
  * =========================================================================
  * Volume sliders

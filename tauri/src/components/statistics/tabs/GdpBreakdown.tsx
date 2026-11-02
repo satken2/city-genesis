@@ -10,6 +10,7 @@
  *   firms joins the other rent in the buildings, so the right side reads intermediate inputs plus GDP by income.
  * - Industries (agent_master industry), expandable to facility types; Districts; firms with the largest value added.
  */
+import { useCurrencyUnit } from "../../../hooks/useCurrencyUnit";
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
@@ -92,6 +93,7 @@ type Formatters = {
 
 export function GdpBreakdownPanel({ breakdown }: { breakdown: GdpBreakdown }) {
   const { i18n } = useTranslation();
+  useCurrencyUnit();
   const locale = resolveIntlLocale(i18n.language);
   const shareFormat = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 });
   const countFormat = new Intl.NumberFormat(locale);

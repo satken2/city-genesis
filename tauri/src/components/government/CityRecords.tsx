@@ -2,6 +2,7 @@
  * 都市の現在の記録。対象・集計・単位の正は /city/records の応答で、ここでは表示だけを行う。
  * 最古の建物は作成日を仮想暦で表示する。記録保持者の名前は既存の詳細画面へのリンクにする。
  */
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
 import { formatEpochDate } from "../../utils/date";
@@ -31,6 +32,7 @@ function openAgent(entityId: string) {
 
 export function CityRecords({ records }: { records: CityRecordsData }) {
   const { t, i18n } = useTranslation();
+  useCurrencyUnit();
   const locale = resolveIntlLocale(i18n.language);
   const number = (value: number, decimals = 0) => value.toLocaleString(locale, { maximumFractionDigits: decimals });
   const money = (value: number) => formatExactAmount(value, locale, true);

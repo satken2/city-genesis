@@ -1,3 +1,5 @@
+import { formatExactAmount } from "../../../utils/money";
+import { resolveIntlLocale } from "../../../utils/locale";
 import { describeError } from "../../../utils/errors";
 /**
  * Shops and businesses tab.
@@ -138,7 +140,8 @@ function num(v?: number | null, digits = 0): string {
 }
 
 export function BusinessTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const masterData = useMasterData();
 
   const [selectedType, setSelectedType] = useState<number>(TYPE_STANDARD);
@@ -233,8 +236,8 @@ export function BusinessTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   // Column definitions by type.
   const columns = useMemo(
-    () => buildColumns(selectedType, masterData, t),
-    [selectedType, masterData, t]
+    () => buildColumns(selectedType, masterData, t, locale),
+    [selectedType, masterData, t, locale]
   );
 
   // Display rows after sorting.
@@ -463,8 +466,14 @@ function baseColumns(masterData: MasterData | null, t: TFn): ColumnDef[] {
 function buildColumns(
   type: number,
   masterData: MasterData | null,
-  t: TFn
+  t: TFn,
+  locale: string,
 ): ColumnDef[] {
+  const money = (value: number | null | undefined, digits = 0) =>
+    value == null ? "—" : formatExactAmount(value, locale, false, {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    });
   const base = baseColumns(masterData, t);
 
   if (type === TYPE_STANDARD) {
@@ -474,7 +483,7 @@ function buildColumns(
         key: "supply_price",
         label: t("agentList.colPrice"),
         align: "right",
-        render: (a) => num(a.supply_price, 1),
+        render: (a) => money(a.supply_price, 1),
         sortValue: (a) => a.supply_price ?? 0,
       },
       {
@@ -503,7 +512,7 @@ function buildColumns(
         label: t("agentList.colWage"),
         align: "right",
         render: (a) =>
-          `${num(a.wage_high, 0)} / ${num(a.wage, 0)} / ${num(a.wage_uneducated, 0)}`,
+          `${money(a.wage_high, 0)} / ${money(a.wage, 0)} / ${money(a.wage_uneducated, 0)}`,
         sortValue: (a) => a.wage ?? 0,
       },
       {
@@ -546,7 +555,7 @@ function buildColumns(
         key: "rent",
         label: t("agentList.colRent"),
         align: "right",
-        render: (a) => num(a.rent, 0),
+        render: (a) => money(a.rent, 0),
         sortValue: (a) => a.rent ?? 0,
       },
       {
@@ -586,7 +595,7 @@ function buildColumns(
         key: "discretionary_income",
         label: t("agentList.colDiscretionaryIncome"),
         align: "right",
-        render: (a) => num(a.discretionary_income, 0),
+        render: (a) => money(a.discretionary_income, 0),
         sortValue: (a) => a.discretionary_income ?? 0,
       },
       {

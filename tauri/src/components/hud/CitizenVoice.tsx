@@ -20,6 +20,7 @@
  *   fractional, so round it up to whole device pixels: a window even slightly shorter than the panel shows the
  *   page's scrollbars, which hide the panel's right and bottom edges.
  */
+import { useCurrencyUnit } from "../../hooks/useCurrencyUnit";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { i18n as I18n } from "i18next";
@@ -99,6 +100,7 @@ function ChevronIcon({ back }: { back: boolean }) {
 
 export function CitizenVoice() {
   const { t, i18n } = useTranslation();
+  useCurrencyUnit();
   const { visible, apiBaseUrl, epochExecuting } = useHudSession();
   const [enabled, setEnabled] = useState(true);
   const active = visible && enabled && !epochExecuting;

@@ -9,6 +9,7 @@
  * facilities may already have been deleted, leaving no destination for a details view.
  */
 
+import { useCurrencyUnit } from "../../../hooks/useCurrencyUnit";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useEpochCachedStats } from "../useEpochCache";
@@ -52,6 +53,7 @@ const COLOR_CLOSE = "#ef4444"; // Closures: red.
 
 export function BusinessHistoryTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
+  useCurrencyUnit();
   const masterData = useMasterData();
   const { data, loading, error } = useEpochCachedStats<BusinessHistory>(
     apiBaseUrl,

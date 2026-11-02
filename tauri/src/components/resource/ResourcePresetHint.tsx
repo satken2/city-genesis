@@ -10,7 +10,6 @@
 import { useTranslation } from "react-i18next";
 import { DAYS_PER_YEAR } from "../../constants";
 import { sustainableDailyYield, type ResourcePreset } from "../../data/resourcePresets";
-import { formatCompactAmount } from "../../utils/money";
 import { resolveIntlLocale } from "../../utils/locale";
 
 type ResourcePresetHintProps = {
@@ -39,13 +38,15 @@ export function ResourcePresetHint({
 }: ResourcePresetHintProps) {
   const { t, i18n } = useTranslation();
   const locale = resolveIntlLocale(i18n.language);
+  const amountFormat = new Intl.NumberFormat(locale, { notation: "compact", maximumSignificantDigits: 3 });
+  const formatAmount = (value: number) => Number.isFinite(value) ? amountFormat.format(value) : "-";
 
   const parts: string[] = [];
   if (areaM2 > 0) parts.push(t("resourcePreset.summary.area", { area: formatArea(areaM2, locale) }));
-  parts.push(t("resourcePreset.summary.amount", { amount: formatCompactAmount(maxAmount, locale) }));
+  parts.push(t("resourcePreset.summary.amount", { amount: formatAmount(maxAmount) }));
   if (recoveryRate > 0) {
     const dailyYield = sustainableDailyYield(maxAmount, recoveryRate);
-    parts.push(t("resourcePreset.summary.yield", { amount: formatCompactAmount(dailyYield, locale) }));
+    parts.push(t("resourcePreset.summary.yield", { amount: formatAmount(dailyYield) }));
     // Recovery is constant at maximum × rate, so filling from empty takes 1 / recovery rate days.
     const refillDays = 1 / recoveryRate;
     parts.push(

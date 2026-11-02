@@ -22,6 +22,8 @@ const TRADITIONAL_CHINESE_REGIONS: [&str; 3] = ["tw", "hk", "mo"];
 #[serde(default)]
 pub struct AppSettings {
     pub language: String,
+    /// 未指定なら、Steam・OS・保存済みの言語設定から決まった UI 言語に通貨単位を合わせる。
+    pub currency_unit: Option<String>,
     pub font_size: f64,
     pub volumes: HashMap<String, u8>,
     pub monitor_index: usize,
@@ -42,6 +44,7 @@ impl Default for AppSettings {
         volumes.insert("sfx".to_string(), 70);
         Self {
             language: initial_language(),
+            currency_unit: None,
             font_size: 13.0, // Body text size in px. Match the UI's FONT_SIZE_PRESETS.medium.
             volumes,
             monitor_index: 0,
@@ -159,6 +162,21 @@ pub fn save_settings(app: &AppHandle, settings: &AppSettings) -> Result<(), Stri
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn old_settings_leave_currency_unit_language_dependent() {
+        let settings: AppSettings = serde_json::from_str(r#"{"language":"ja"}"#).unwrap();
+        assert_eq!(settings.language, "ja");
+        assert_eq!(settings.currency_unit, None);
+    }
+
+    #[test]
+    fn custom_currency_unit_survives_serialization() {
+        let settings: AppSettings = serde_json::from_str(r#"{"language":"en","currency_unit":"コイン"}"#).unwrap();
+        let saved = serde_json::to_string(&settings).unwrap();
+        let restored: AppSettings = serde_json::from_str(&saved).unwrap();
+        assert_eq!(restored.currency_unit.as_deref(), Some("コイン"));
+    }
 
     #[test]
     fn locale_tags_map_to_supported_languages() {

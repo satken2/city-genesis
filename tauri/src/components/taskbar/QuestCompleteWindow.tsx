@@ -12,6 +12,7 @@
  * closed.
  */
 
+import { formatExactAmount } from "../../utils/money";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { QuestNotification } from "../../types";
@@ -19,7 +20,7 @@ import type { QuestNotification } from "../../types";
 // leaving the file missing and playback silent in production builds.
 import fanfareSound from "../../assets/sounds/fanfare.opus";
 import { logInfoToFile } from "../../utils/log";
-import { resolveLocalizedText } from "../../utils/locale";
+import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
 import "./QuestCompleteWindow.css";
 
 type QuestCompleteWindowProps = {
@@ -85,6 +86,7 @@ function playFanfare(audio: HTMLAudioElement): void {
 
 export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestCompleteWindowProps) {
   const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -168,7 +170,7 @@ export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestComplete
             <div className="quest-complete-reward">
               <span className="quest-complete-reward-label">{t("questComplete.reward")}</span>
               <span className="quest-complete-reward-value">
-                {t("common.currency", { value: quest.reward.amount })}
+                {formatExactAmount(quest.reward.amount, locale)}
               </span>
             </div>
           )}
