@@ -37,6 +37,8 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
 | 2 | 広葉樹 | `2` / `Tree_2`(58頂点・高さ9m・半幅3m) | `Props/2.fbx` |
 | 3 | 岩 | **無し** | **無し**(選べるが何も描画されない) |
 | 4 | 草（近景専用） | `4` / `Grass_4`（18枚の両面葉、108三角形） | `Props/4.fbx` |
+| 5 | ヤシの木 | `5`・`5_far` / `Prop_5`（直立した幹と両面の葉14枚、432三角形・高さ11.5m） | `Props/5.fbx`・`5_far.fbx` |
+| 6 | 熱帯の低木 | `6` / `Prop_6`（根元から出る両面の葉16枚、384三角形・高さ1.4m） | `Props/6.fbx` |
 | 101〜104 | 駅階段 | `101`〜`104` | `Props/101.fbx`〜 |
 | 111・112 | 屋根付き歩道橋（24m・32m道路用、コの字階段） | `111`・`112`と専用Far | `Props/111.fbx`・`112.fbx`と`_far` |
 | 121〜126 | 片持ち青・緑・電光看板（各4/6車線用） | `121`〜`126` | `Props/121.fbx`〜。面は共有画像 |
@@ -51,6 +53,8 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
 - 木2種は `pipeline/jobs/build_prop_trees.py` で原点に著作する。通常72/96三角形、専用Far14/20三角形（幹なしの八角錐/丸い葉塊）。
   広葉樹は4個の葉塊、針葉樹は細身の4段樹冠。両種の再生成は同ジョブを一度実行する。
   葉はスムーズ法線と粗さ0.9、共有256×256色画像（Props/Textures）を使う。画像は外部参照でFarも共有し、FBX拡散色は白にする。
+- ヤシの木5・熱帯の低木6は `pipeline/jobs/build_prop_tropical.py` で著作する。森のGPU描画(1・2)の対象外で、通常の散布で描く。
+  葉の帯は自動簡略化で崩れるので、ヤシだけ幹付きの専用Farを持つ。寸法・再生成は同じ場所の `tropical.md`。
 - **樹木・植え込みの葉**(森の木・街路樹・公園の木・戸建ての植え込みと庭木)は、葉の材質の面へ樹冠全体に寄せた法線と陰り(頂点色R)を焼き、
   UnityではFBXの葉材質を取り込み設定で `Assets/Models/Materials/` の共有材質(`CityGenesis/Foliage`)へ割り当てる。
   この材質は頂点色Rを樹冠の陰りとして読むので、焼いていないFBXを割り当てない。焼き方・対象・再生成順は非公開制作ツールの `pipeline/jobs/foliage.md`。
@@ -110,8 +114,10 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
    (Windowsで制作ツールのラッパーとPythonランチャーが利用できる場合は `py -3 pipeline/windows_run.py validator/validate.py <パス>`)
 6. `pipeline/build_gallery.py --only Props` でサムネイル更新 → ユーザーが目視。
    **プロップに組み立てプレビューは無い**(単体サムネイルのみ。散布の見え方は実機でしか確認できない)
-7. 新種別なら `prop_master` に追記する(上記)。Tauriの配置パネルは `/api/v1/master/prop_types` から一覧を作るので
-   バックエンド再起動で選択肢に出る
+7. 新種別なら `prop_master` に追記する(上記)。表示名の翻訳は `genesis-core/assets/i18n/masterdata.{言語}.yaml` の
+   `prop_master` に各言語で足す。Tauriの配置パネルは `/api/v1/master/prop_types` から一覧を作るので
+   バックエンド再起動で選択肢に出る。分類は `tauri/src/data/propCategories.json`、サムネイルは
+   `tauri/tools/render_prop_thumbnails.py --only <ID>` で足す
 8. Unityを利用できる環境で開き、`ModelPrefabImportWatcher` が `Resources/Models/Props/{id}.prefab` を自動生成したことを
    確認して実機で散布・個別配置を目視する。Windows環境でUnity単体の回帰を行う場合は `unity/Tests/Props/run.ps1`
    (`Assets/Models/Props` 直下の全FBXを独立プロジェクトへコピーして検証する)
