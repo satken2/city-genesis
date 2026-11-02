@@ -43,8 +43,8 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     [Tooltip("このオブジェクトのマテリアルを一切変更しない（表示/非表示のみ制御する）")]
     public bool preventMaterialChange = false;
 
-    // Shown only while plans are shown (SHOW_PLAN), whatever the status. For objects with no physical look, such as ferry lanes.
-    public bool planLayerOnly = false;
+    // 航路の案内線は実体を持たないため、計画中かどうかにかかわらず専用の表示フラグに従う。
+    public bool navigationGuideOnly = false;
 
     [Header("Renderer Configuration")]
     [Tooltip("子オブジェクトのRendererも対象にするか")]
@@ -293,6 +293,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         // currentMode is one exclusive color mode; flags is an independent set of visibility toggles.
         int currentMode = modeOverride ?? (VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetMode(objectType) : VisualMode.MODE_NORMAL);
         int flags = VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetFlags(objectType) : VisualFlag.SHOW_PLAN;
+        int visibilityFlag = navigationGuideOnly ? VisualFlag.SHOW_NAVIGATION_GUIDES : VisualFlag.SHOW_PLAN;
 
         // 0. Per-object visibility filter, highest priority.
         // The player explicitly hid this building/road, so override all rendering,
@@ -328,12 +329,16 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             return;
         }
 
-        // 1.7. Plan-layer-only objects follow the plan visibility and keep their normal materials.
-        if (planLayerOnly && ((flags & VisualFlag.SHOW_PLAN) == 0 || currentMode == VisualMode.MODE_HIDDEN))
+        // 案内線は完成後も専用フラグに従い、非表示中はクリック対象からも外す。
+        if (navigationGuideOnly)
         {
-            SetRenderersEnabled(false);
-            EnableCollider(false);
-            return;
+            bool visible = (flags & visibilityFlag) != 0 && currentMode != VisualMode.MODE_HIDDEN;
+            EnableCollider(visible);
+            if (!visible)
+            {
+                SetRenderersEnabled(false);
+                return;
+            }
         }
 
         // 2. Construction/demolition/collapse statuses.
@@ -366,9 +371,8 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         // so use gray with depth writes and shadows to retain depth cues.
         if (objectStatus == Constants.STATUS_TEMPORARY || objectStatus == Constants.STATUS_SCHEDULED_CONSTRUCTION || objectStatus == Constants.STATUS_PENDING)
         {
-            // Show only when SHOW_PLAN is set.
-            // Hidden color mode still hides everything, including planned objects.
-            if ((flags & VisualFlag.SHOW_PLAN) != 0 && currentMode != VisualMode.MODE_HIDDEN)
+            // 案内線と実体の計画はそれぞれのフラグに従う。レイヤーを隠した場合は両方とも表示しない。
+            if ((flags & visibilityFlag) != 0 && currentMode != VisualMode.MODE_HIDDEN)
             {
                 SetRenderersEnabled(true);
                 EnableCollider(true);

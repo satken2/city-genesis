@@ -542,7 +542,7 @@ public class IpcViewCoordinator : MonoBehaviour
     private void ApplyConstructionPreset(string parcelMode, string parcelSubMode)
     {
         ForceLayer("parcel", parcelMode, parcelSubMode);
-        ForceLayer("road", "default", null, "plan");
+        ForceLayer("road", "default", null, "plan,navigation_guides");
         ForceLayer("building", "default", null, "plan");
         ForceLayer("district", "border_icon");
         ForceLayer("prop", "hidden");
@@ -831,6 +831,9 @@ public class IpcViewCoordinator : MonoBehaviour
             {
                 case "plan":
                     result |= VisualFlag.SHOW_PLAN;
+                    break;
+                case "navigation_guides":
+                    result |= VisualFlag.SHOW_NAVIGATION_GUIDES;
                     break;
                 case "public":
                     result |= VisualFlag.HIGHLIGHT_PUBLIC;

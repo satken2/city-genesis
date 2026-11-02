@@ -26,6 +26,7 @@ public static class VisualFlag
     public const int HIGHLIGHT_PUBLIC = 1 << 1;  // Illuminate public-facility sites; BUILDING only, rendered by PublicFacilityGlowOverlay.
     public const int SPEED_LIMIT_SIGNS = 1 << 2; // Show signs for configured road/track speed limits.
     public const int SEABED = 1 << 3;            // Make water clear to show the seabed; TERRAIN only, applied by VisualSeaObject.SetSeabedView.
+    public const int SHOW_NAVIGATION_GUIDES = 1 << 4; // 航路の案内線を表示する。実体の計画中表示とは独立する。
 }
 
 /// <summary>

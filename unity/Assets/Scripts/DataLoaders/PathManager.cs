@@ -2669,7 +2669,7 @@ public partial class PathManager : BaseApiDataManager
         var visual = pathGO.AddComponent<VisualModeObject>();
         visual.objectType = InputObjectType.PATH;
         visual.useChildRenderers = true;
-        visual.planLayerOnly = IsPlanLayerOnly(path);
+        visual.navigationGuideOnly = IsNavigationGuide(path);
         visual.SetStatus(status);
         visual.SetFilterHidden(ObjectVisibilityFilter.IsHidden(InputObjectType.PATH, path.path_id));
 
@@ -4874,8 +4874,8 @@ public partial class PathManager : BaseApiDataManager
         return result;
     }
 
-    /// <summary>Ferry lanes lie on open water and have no physical look, so they appear only with plans. Piers are always drawn.</summary>
-    private static bool IsPlanLayerOnly(PathSummary path)
+    /// <summary>水上の航路は布設時の案内線として扱い、実体を持つ桟橋とは表示を分ける。</summary>
+    private static bool IsNavigationGuide(PathSummary path)
     {
         if (path.path_type != Constants.PATH_FERRY) return false;
         var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
@@ -4889,7 +4889,7 @@ public partial class PathManager : BaseApiDataManager
         visualModeObject.objectType = InputObjectType.PATH;
         visualModeObject.useChildRenderers = true;
         visualModeObject.ignoreSelfRenderer = true;
-        visualModeObject.planLayerOnly = IsPlanLayerOnly(path);
+        visualModeObject.navigationGuideOnly = IsNavigationGuide(path);
         visualModeObject.InitializeMaterials();
 
         var stats = pathGO.AddComponent<VisualPathStats>();
