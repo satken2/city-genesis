@@ -55,14 +55,14 @@ public class IpcViewCoordinator : MonoBehaviour
     /// <summary>
     /// Normal-mode display defaults for layers the user has never changed.
     /// Must match UI initial values in displayConstants.ts DISPLAY_LAYERS.
-    /// Hide planned buildings/roads normally, showing them temporarily in relevant edit states.
+    /// Show planned buildings/roads by default; relevant edit states force them visible even if the user hid them.
     /// Terrain has no forced color mode, so exclude it from this table and handle separately.
     /// </summary>
     private static readonly Dictionary<string, (string mode, string subMode, string flags)> NORMAL_DEFAULTS =
         new Dictionary<string, (string, string, string)>
     {
-        { "building", ("default", null, null) },
-        { "road", ("default", null, null) },
+        { "building", ("default", null, "plan") },
+        { "road", ("default", null, "plan") },
         { "parcel", ("hidden", null, null) },
         { "district", ("hidden", null, null) },
         { "prop", ("visible", null, null) },

@@ -237,6 +237,7 @@
     "showContours": "等高線を表示",
     "showSeabed": "海底を表示",
     "trayTooltip": "{{name}}: {{state}}",
+    "trayPlan": "計画中の道路・建物",
     "trayStateVisible": "表示",
     "trayStateHidden": "非表示",
     "trayStateContour": "等高線表示",

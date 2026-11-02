@@ -237,6 +237,7 @@
     "showContours": "Show Contour Lines",
     "showSeabed": "Show Seabed",
     "trayTooltip": "{{name}}: {{state}}",
+    "trayPlan": "Planned Roads and Buildings",
     "trayStateVisible": "Shown",
     "trayStateHidden": "Hidden",
     "trayStateContour": "Contour Lines",

@@ -2,8 +2,8 @@
  * Display tray styles (bottom left)
  *
  * Arrange icons horizontally at the same size as the system tray.
- * With a fixed button count, width is fixed to match DISPLAY_TRAY_WIDTH in `window.rs`: 30px × 6 buttons + 6px ×
- * 5 gaps + 8px × 2 padding + 1px × 2 borders = 228px.
+ * With a fixed button count, width is fixed to match DISPLAY_TRAY_WIDTH in `window.rs`: 30px × 7 buttons + 1px
+ * divider + 6px × 7 gaps + 8px × 2 padding + 1px × 2 borders = 271px.
  */
 
 .display-tray {
@@ -19,6 +19,14 @@
 .display-tray-icon {
   width: 30px;
   height: 30px;
+  flex-shrink: 0;
+}
+
+/* Separates the layer buttons from the planned-object button */
+.display-tray-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
 }
 

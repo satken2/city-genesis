@@ -237,6 +237,7 @@
     "showContours": "Afficher les courbes de niveau",
     "showSeabed": "Afficher le fond marin",
     "trayTooltip": "{{name}} : {{state}}",
+    "trayPlan": "Routes et bâtiments planifiés",
     "trayStateVisible": "Affiché",
     "trayStateHidden": "Masqué",
     "trayStateContour": "Courbes de niveau",

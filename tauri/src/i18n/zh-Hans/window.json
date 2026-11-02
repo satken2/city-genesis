@@ -237,6 +237,7 @@
     "showContours": "显示等高线",
     "showSeabed": "显示海底",
     "trayTooltip": "{{name}}：{{state}}",
+    "trayPlan": "规划中的道路和建筑",
     "trayStateVisible": "显示",
     "trayStateHidden": "隐藏",
     "trayStateContour": "等高线显示",

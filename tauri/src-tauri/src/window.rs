@@ -48,11 +48,11 @@ pub const SYSTEM_TRAY_WIDTH: f64 = 176.0;
 pub const SYSTEM_TRAY_HEIGHT: f64 = 40.0;
 
 /// Display tray size (bottom left: layer visibility toggle icons). With
-/// six fixed buttons, use these values without measured-size
-/// notifications. Match `DisplayTray.css`: button 30px, gap 6px, horizontal
-/// padding 8px, border 1px (30×6 + 6×5 + 8×2 + 1×2 = 228). Too narrow clips
-/// buttons; too wide creates transparent areas that intercept Unity input.
-pub const DISPLAY_TRAY_WIDTH: f64 = 228.0;
+/// seven fixed buttons and one divider, use these values without measured-size
+/// notifications. Match `DisplayTray.css`: button 30px, divider 1px, gap 6px,
+/// horizontal padding 8px, border 1px (30×7 + 1 + 6×7 + 8×2 + 1×2 = 271). Too
+/// narrow clips buttons; too wide creates transparent areas that intercept Unity input.
+pub const DISPLAY_TRAY_WIDTH: f64 = 271.0;
 pub const DISPLAY_TRAY_HEIGHT: f64 = 40.0;
 
 /// Citizen voice card size before React reports it (top right). The window starts at 1×1 and stays there while

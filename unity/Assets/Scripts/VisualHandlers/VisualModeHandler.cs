@@ -53,12 +53,12 @@ public class VisualModeHandler : MonoBehaviour
     };
 
     // Visibility flags per object type, combining VisualFlag bits.
-    // Match the UI's initial display; enable planned objects through edit presets or player selection.
+    // Match the UI's initial display (planned buildings/roads shown).
     private Dictionary<int, int> objectTypeFlags = new Dictionary<int, int>
     {
-        { InputObjectType.BUILDING, VisualFlag.NONE },
+        { InputObjectType.BUILDING, VisualFlag.SHOW_PLAN },
         { InputObjectType.PARCEL, VisualFlag.NONE },
-        { InputObjectType.PATH, VisualFlag.NONE },
+        { InputObjectType.PATH, VisualFlag.SHOW_PLAN },
         { InputObjectType.NODE, VisualFlag.NONE },
         { InputObjectType.TERRAIN, VisualFlag.NONE },
         { InputObjectType.ZONE, VisualFlag.NONE }

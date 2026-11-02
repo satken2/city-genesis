@@ -21,6 +21,7 @@ import propIcon from "../../assets/images/menu/display-prop.svg";
 import parcelIcon from "../../assets/images/menu/display-parcel.svg";
 import terrainIcon from "../../assets/images/menu/display-terrain.svg";
 import districtIcon from "../../assets/images/menu/display-district.svg";
+import planIcon from "../../assets/images/menu/display-plan.svg";
 import "./hud.css";
 import "./DisplayTray.css";
 
@@ -40,7 +41,7 @@ type DisplayTrayItem = {
 };
 
 /**
- * Array order is the left-to-right button order.
+ * Array order is the left-to-right button order. The planned-object button follows after a divider.
  * The button count determines DISPLAY_TRAY_WIDTH in `window.rs`; update the width if it changes.
  *
  * Terrain alone toggles normal/contour display instead of visibility. Replace the submode (`contour_on` /
@@ -97,10 +98,40 @@ const TRAY_ITEMS: DisplayTrayItem[] = [
   },
 ];
 
+/**
+ * Layers whose "plan" flag the planned-object button switches together.
+ * This is the same flag as the per-layer "show planned" toggles in the display options panel.
+ */
+const PLAN_LAYER_IDS = ["road", "building"];
+
+type TrayButtonProps = {
+  id: string;
+  icon: string;
+  on: boolean;
+  tooltip: string;
+  onClick: () => void;
+};
+
+function TrayButton({ id, icon, on, tooltip, onClick }: TrayButtonProps) {
+  return (
+    <button
+      id={id}
+      className={`hud-icon-btn display-tray-icon${on ? "" : " display-tray-icon--off"}`}
+      type="button"
+      title={tooltip}
+      aria-label={tooltip}
+      aria-pressed={on}
+      onClick={onClick}
+    >
+      <img src={icon} alt="" className="hud-icon-img" draggable={false} />
+    </button>
+  );
+}
+
 export function DisplayTray() {
   const { t } = useTranslation();
   const { visible, epochExecuting } = useHudSession();
-  const { selections, selectMode } = useDisplayOptions();
+  const { selections, selectMode, toggleFlag } = useDisplayOptions();
 
   /**
    * Remember each layer's color mode immediately before hiding it and restore it when shown.
@@ -148,31 +179,46 @@ export function DisplayTray() {
     }
   }
 
+  const planOn = PLAN_LAYER_IDS.every((layerId) => selections[layerId]?.flags.includes("plan"));
+
+  /** Flip only the layers that differ from the target, so a mixed state (only one layer shown) turns both on. */
+  function handlePlanToggle() {
+    for (const layerId of PLAN_LAYER_IDS) {
+      if ((selections[layerId]?.flags.includes("plan") ?? false) === planOn) toggleFlag(layerId, "plan");
+    }
+  }
+
   if (!visible) return null;
 
   return (
     <div className={`hud-panel display-tray ${epochExecuting ? "hud-disabled" : ""}`}>
       {TRAY_ITEMS.map((item) => {
         const on = isOn(item);
-        const tooltip = t("display.trayTooltip", {
-          name: t(item.labelKey),
-          state: t(on ? item.onStateKey : item.offStateKey),
-        });
         return (
-          <button
+          <TrayButton
             key={item.layerId}
             id={`display_tray_${item.layerId}`}
-            className={`hud-icon-btn display-tray-icon${on ? "" : " display-tray-icon--off"}`}
-            type="button"
-            title={tooltip}
-            aria-label={tooltip}
-            aria-pressed={on}
+            icon={item.icon}
+            on={on}
+            tooltip={t("display.trayTooltip", {
+              name: t(item.labelKey),
+              state: t(on ? item.onStateKey : item.offStateKey),
+            })}
             onClick={() => handleToggle(item)}
-          >
-            <img src={item.icon} alt="" className="hud-icon-img" draggable={false} />
-          </button>
+          />
         );
       })}
+      <div className="display-tray-divider" />
+      <TrayButton
+        id="display_tray_plan"
+        icon={planIcon}
+        on={planOn}
+        tooltip={t("display.trayTooltip", {
+          name: t("display.trayPlan"),
+          state: t(planOn ? "display.trayStateVisible" : "display.trayStateHidden"),
+        })}
+        onClick={handlePlanToggle}
+      />
     </div>
   );
 }

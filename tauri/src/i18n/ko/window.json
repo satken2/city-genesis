@@ -237,6 +237,7 @@
     "showContours": "등고선 표시",
     "showSeabed": "해저 표시",
     "trayTooltip": "{{name}}: {{state}}",
+    "trayPlan": "계획 중인 도로·건물",
     "trayStateVisible": "표시",
     "trayStateHidden": "숨김",
     "trayStateContour": "등고선 표시",

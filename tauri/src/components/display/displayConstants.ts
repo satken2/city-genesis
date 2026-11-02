@@ -86,7 +86,7 @@ export type DisplayLayer = {
 
 // ---- Section definitions ----
 
-// Hide planned buildings and roads normally; let Unity's display presets handle temporary visibility during editing.
+// Show planned buildings and roads by default. Unity's edit presets force them visible during editing whatever the user chose.
 export const DISPLAY_LAYERS: DisplayLayer[] = [
   {
     id: "terrain",
@@ -110,6 +110,7 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     id: "road",
     titleKey: "display.layerRoad",
     defaultMode: "default",
+    defaultFlags: ["plan"],
     modes: [
       { id: "default", tooltipKey: "display.modeRoadDefault", icon: "visual/normal.png" },
       {
@@ -136,6 +137,7 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     id: "building",
     titleKey: "display.layerBuilding",
     defaultMode: "default",
+    defaultFlags: ["plan"],
     modes: [
       { id: "default", tooltipKey: "display.modeBuildingDefault", icon: "visual/normal.png" },
       {

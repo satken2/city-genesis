@@ -237,6 +237,7 @@
     "showContours": "Mostrar curvas de nivel",
     "showSeabed": "Mostrar el fondo marino",
     "trayTooltip": "{{name}}: {{state}}",
+    "trayPlan": "Calles y edificios planeados",
     "trayStateVisible": "Visible",
     "trayStateHidden": "Oculto",
     "trayStateContour": "Curvas de nivel",

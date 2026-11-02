@@ -9,7 +9,7 @@
  * | `icon-panel` | `IconPanel` | Left edge, vertically centered | Menus (roads/construction/budget/statistics…), transparent background |
  * | `cockpit` | `Cockpit` | Bottom center | Tracking list, three common tools, city name/date, governance score/budget meters, alerts, epoch execution |
  * | `system-tray` | `SystemTray` | Bottom right | System statistics, settings, save, reload |
- * | `display-tray` | `DisplayTray` | Bottom left | Quick layer toggles (buildings, paths, props, parcels, terrain, districts) |
+ * | `display-tray` | `DisplayTray` | Bottom left | Quick layer toggles (buildings, paths, props, parcels, terrain, districts) and planned roads and buildings |
  * | `citizen-voice` | `CitizenVoice` | Top right | Sliding cards of citizens' remarks with action buttons |
  *
  * Cockpit/system tray icons sit directly on the panel, so individual padding fields compensate for image size
