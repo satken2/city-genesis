@@ -7,6 +7,10 @@
  * fill are candidates; a topic without its own line at that tier uses the nearest tier, and a topic without its own
  * lines uses the group's `any` lines.
  *
+ * 2%の確率で、市民自身のどうでもいい日常報告を単独で出す。都市・天気・資産・気分に依存させないため、
+ * 通常の話題より先に抽選し、差し込み値も気分に応じた前置き・締め言葉も使わない。
+ * 各言語の報告は独自の内容でもよいが、言語切り替え後も同じキーを解決できるよう本数を揃える。
+ *
  * Weather lines speak of temperature, sunshine, wind, and how rainy or sunny the month was, never of the sky right now:
  * Unity picks the weather on screen at random from the climate and season, so it need not match the month's values.
  *
@@ -19,6 +23,7 @@ import { formatCompactAmount } from "../../utils/money";
 import { resolveIntlLocale } from "../../utils/locale";
 
 const TIER_COUNT = 5;
+const OFF_TOPIC_CHANCE = 0.02;
 const OPENER_CHANCE = 0.4;
 const CLOSER_CHANCE = 0.45;
 const MONEY_PARAMS = new Set(["savings", "debt"]);
@@ -40,7 +45,7 @@ export type Voice = {
   params: Record<string, string | number>;
 };
 
-/** `parts` are the i18n keys of the opener, line, and closer, in that order. */
+/** `parts` は前置き・本文・締め言葉の順の翻訳キー。日常報告では本文1つだけを保持する。 */
 export type VoiceRemark = Voice & { parts: string[] };
 
 function randomItem<T>(items: T[]): T | undefined {
@@ -83,6 +88,10 @@ function lineKey(i18n: I18n, voice: Voice, tier: number, available: Set<string>)
 
 /** Pick the remark's parts. Null when no line fits the voice. */
 export function composeRemark(i18n: I18n, voice: Voice): VoiceRemark | null {
+  if (Math.random() < OFF_TOPIC_CHANCE) {
+    const line = randomItem(usableKeys(i18n, "citizenVoice.offTopic", new Set<string>()));
+    if (line) return { ...voice, parts: [line] };
+  }
   const available = availableParams(voice);
   const tier = Math.min(TIER_COUNT - 1, Math.max(0, Math.floor(voice.level * TIER_COUNT)));
   const line = lineKey(i18n, voice, tier, available);
