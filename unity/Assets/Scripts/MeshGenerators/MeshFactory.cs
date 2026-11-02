@@ -162,7 +162,9 @@ public static class PathMeshFactory
                 return null;
             case "default":
             default:
-                return roadGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
+                var result = roadGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
+                WaterPipeTerminal.Generate(result?.GeneratedObject, pathData, points);
+                return result;
         }
     }
 

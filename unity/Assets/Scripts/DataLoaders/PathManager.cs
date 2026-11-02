@@ -442,7 +442,8 @@ public partial class PathManager : BaseApiDataManager
             return connections.TryGetValue(path.path_id, out var cut) && Vector3.Distance(cut, point) < 1f;
         };
         PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
-        PowerLinePath.FacilityTerminalPosition = GetPowerLineFacilityTerminalPosition;
+        PowerLinePath.FacilityTerminalPosition = GetFacilityTerminalPosition;
+        WaterPipeTerminal.FacilityTerminalPosition = GetFacilityTerminalPosition;
         PowerLineRailGantry.TrackPolyline = GetPowerLineTrackPolyline;
         PowerLineRailGantry.NeighborProvider = GetPowerLineTrackNeighbors;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
@@ -458,7 +459,7 @@ public partial class PathManager : BaseApiDataManager
     private List<Vector3> GetPowerLineTrackPolyline(PathSummary path) => CalculatePathPoints(path,false);
     private List<TrackNeighborInfo> GetPowerLineTrackNeighbors(PathSummary path) => BuildAdjacentTrackNeighbors(path,false);
 
-    private Vector3? GetPowerLineFacilityTerminalPosition(int nodeId)
+    private Vector3? GetFacilityTerminalPosition(int nodeId)
     {
         if (BuildingManager.Instance == null || !BuildingManager.Instance.TryGetInfraTerminalOwner(nodeId, out _)) return null;
         return GetNodeData(nodeId)?.GetAbsolutePosition();
@@ -477,8 +478,10 @@ public partial class PathManager : BaseApiDataManager
         lodCache.Clear();
         if (PowerLinePath.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
             PowerLinePath.ConnectedPaths = null;
-        if (PowerLinePath.FacilityTerminalPosition == (Func<int, Vector3?>)GetPowerLineFacilityTerminalPosition)
+        if (PowerLinePath.FacilityTerminalPosition == (Func<int, Vector3?>)GetFacilityTerminalPosition)
             PowerLinePath.FacilityTerminalPosition = null;
+        if (WaterPipeTerminal.FacilityTerminalPosition == (Func<int, Vector3?>)GetFacilityTerminalPosition)
+            WaterPipeTerminal.FacilityTerminalPosition = null;
         if (PowerLineRailGantry.TrackPolyline == (Func<PathSummary, List<Vector3>>)GetPowerLineTrackPolyline)
             PowerLineRailGantry.TrackPolyline = null;
         if (PowerLineRailGantry.NeighborProvider == (Func<PathSummary, List<TrackNeighborInfo>>)GetPowerLineTrackNeighbors)

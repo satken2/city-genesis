@@ -8,7 +8,7 @@ The road network is a graph of nodes and paths. Lines crossing in plan are disti
 
 A level crossing connects at the same height, as at road intersections and railway crossings. A grade-separated crossing passes independently at different heights. Overlapping passage space is treated as placement interference. Infrastructure, station buildings, and other path types have different connection meanings, so road intersection rendering does not apply to every path.
 
-Infrastructure path endpoints may have Y values different from their connected nodes. Unity renders endpoints at their saved heights without adding parts to bridge the vertical difference.
+Infrastructure path endpoints may have Y values different from their connected nodes. Adding visual connection equipment does not change the saved endpoint heights or connections.
 
 ## Shared geometry in Unity previews
 

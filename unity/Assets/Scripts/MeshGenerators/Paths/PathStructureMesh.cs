@@ -45,6 +45,25 @@ public sealed class PathStructureMesh
         }
     }
 
+    /// <summary>面ごとに頂点を分け、隣り合う面の法線を混ぜずに直方体を描く。</summary>
+    public void Box(Vector3 center, Vector3 size, Quaternion rotation, int material = 0)
+    {
+        if (vertices.Count + 24 > RoadPath.SPLINE_MESH_VERTEX_BUDGET) Finish();
+        var axes = new[] { rotation * Vector3.right * (size.x * .5f), rotation * Vector3.up * (size.y * .5f), rotation * Vector3.forward * (size.z * .5f) };
+        for (int axis = 0; axis < 3; axis++) for (int side = -1; side <= 1; side += 2)
+        {
+            Vector3 normal = axes[axis] * side;
+            Vector3 u = axes[(axis + 1) % 3], v = axes[(axis + 2) % 3] * side;
+            int start = vertices.Count;
+            vertices.Add(parent.transform.InverseTransformPoint(center + normal - u - v));
+            vertices.Add(parent.transform.InverseTransformPoint(center + normal + u - v));
+            vertices.Add(parent.transform.InverseTransformPoint(center + normal + u + v));
+            vertices.Add(parent.transform.InverseTransformPoint(center + normal - u + v));
+            uv.AddRange(new[] { Vector2.zero, Vector2.right, Vector2.one, Vector2.up });
+            triangles[material].AddRange(new[] { start, start + 1, start + 2, start, start + 2, start + 3 });
+        }
+    }
+
     public void Bar(Vector3 a, Vector3 b, float radius, int material = 0, int sides = 6)
     {
         if ((b-a).sqrMagnitude < .000001f) return;

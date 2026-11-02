@@ -19,6 +19,8 @@ import type { QuestNotification } from "../../types";
 // Always reference audio through imports. Passing a literal path directly to Audio excludes it from the bundle,
 // leaving the file missing and playback silent in production builds.
 import fanfareSound from "../../assets/sounds/fanfare.opus";
+import questCompleteBg from "../../assets/images/quest_complete_bg.jpg";
+import congratulationsImage from "../../assets/images/congratulations.png";
 import { logInfoToFile } from "../../utils/log";
 import { resolveIntlLocale, resolveLocalizedText } from "../../utils/locale";
 import "./QuestCompleteWindow.css";
@@ -123,7 +125,13 @@ export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestComplete
   }
 
   return (
-    <div className="quest-complete-overlay" onClick={handleNext}>
+    <div
+      className="quest-complete-overlay"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(10, 18, 32, 0.35) 0%, rgba(8, 14, 26, 0.68) 100%), url(${questCompleteBg})`,
+      }}
+      onClick={handleNext}
+    >
       {/* Confetti: include openedAt and pageIndex in keys to replay animations along with the fanfare. */}
       <div className="quest-complete-confetti" aria-hidden={true}>
         {confetti.map((piece, i) => (
@@ -145,8 +153,16 @@ export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestComplete
       </div>
 
       <div className="quest-complete-card" onClick={(e) => e.stopPropagation()}>
-        <h2 className="quest-complete-title">{t("questComplete.title")}</h2>
-        <p className="quest-complete-subtitle">{t("questComplete.congratulations")}</p>
+        <div className="quest-complete-header">
+          <img
+            src={congratulationsImage}
+            alt="Congratulations!"
+            className="quest-complete-caption"
+            draggable={false}
+          />
+        </div>
+
+        <div className="quest-complete-content">
 
         <div className="quest-complete-item">
           <span className="quest-complete-item-name">{resolveLocalizedText(quest.name, i18n.language)}</span>
@@ -183,9 +199,13 @@ export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestComplete
           </span>
         )}
 
-        <button className="quest-complete-close" onClick={handleNext} type="button">
-          {isLastPage ? t("questComplete.close") : t("questComplete.next")}
-        </button>
+        </div>
+
+        <div className="quest-complete-footer">
+          <button className="quest-complete-close" onClick={handleNext} type="button">
+            {isLastPage ? t("questComplete.close") : t("questComplete.next")}
+          </button>
+        </div>
       </div>
     </div>
   );
