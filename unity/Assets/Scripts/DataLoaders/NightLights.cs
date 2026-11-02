@@ -5,13 +5,14 @@ using UnityEngine;
 /// Night lights drawn only as material emission; light does not fall on the surroundings.
 /// Window glass (a material name containing WINDOW or GLASS) glows with indoor light, and road surfaces
 /// (the body materials of street and motorway variants) return street light by their reflectance.
-/// The weather sets the level from the share of daylight no longer reaching the ground: lights come on as the sun sets
-/// and go out at sunrise. Under the fixed exposure even a faint glow by day washes the colour out of dark glass.
+/// The weather sets the level to the darkness of the scene: lights come on only as it grows dark after sunset
+/// and are out by sunrise. Under the fixed exposure even a faint glow by day washes the colour out of dark glass.
+/// Copies made from a glowing material elsewhere (such as the road-marking surface) must be adopted too, or they keep the glow of the moment they were made.
 /// Only the copies made by the shared material pools change, never assets (in the Editor that would rewrite the files).
 /// </summary>
 public static class NightLights
 {
-    private const float StreetLight = 0.3f; // Street light on road surfaces, multiplied by their reflectance.
+    private const float StreetLight = 0.8f; // Street light on road surfaces, multiplied by their reflectance.
     private static readonly Color WindowLight = new Color(1f, 0.8f, 0.55f); // Linear emission of a lit window at full night.
 
     private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
@@ -39,7 +40,7 @@ public static class NightLights
         Apply(copy, light);
     }
 
-    /// <summary>Lights from 0 (sun up) to 1 (sun down). Changes below 1/256 are skipped.</summary>
+    /// <summary>Lights from 0 (day) to 1 (night). Changes below 1/256 are skipped.</summary>
     public static void SetLevel(float value)
     {
         float next = Mathf.Round(Mathf.Clamp01(value) * 256f) / 256f;

@@ -14,7 +14,7 @@ Shader "Custom/RoadSurface"
         _OcclusionMap("Occlusion", 2D) = "white" {}
         _OcclusionStrength("Occlusion Strength", Float) = 1
         _EmissionMap("Emission", 2D) = "white" {}
-        _EmissionColor("Emission Color", Color) = (0,0,0,0)
+        [HDR] _EmissionColor("Emission Color", Color) = (0,0,0,0)
         _Cutoff("Cutoff", Float) = .5
         [HideInInspector] _Cull("Cull", Float) = 2
         [HideInInspector] _ZWrite("ZWrite", Float) = 1

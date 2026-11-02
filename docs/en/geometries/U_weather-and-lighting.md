@@ -19,7 +19,7 @@ Scenario creation mode allows cockpit weather selection and locking. The UI send
 A procedural URP skybox, `Resources/Weather/Atmosphere.shader`, and one scene Directional Light render the sky and sun. Time and weather determine direction, color, intensity, and shadow strength. Weather modifies only its assigned sky, light, fog, and reflection probes, leaving city meshes and materials alone and restoring settings when disabled.
 
 - Global `_SunScatterFraction` passes the cloud-diffused sunlight fraction to water rendering ([LOD](E_lod.md)).
-- The share of daylight no longer reaching the ground is passed as the level of the night lights of windows and road surfaces ([material resolution](R_material-resolution.md)). Lights come on as the sun sets and go out at sunrise. Exposure is fixed, so even a faint glow while the sun is up washes dark glass out to white.
+- The darkness from the time of day (0 by day, 1 at night) is passed as the level of the night lights of windows and road surfaces ([material resolution](R_material-resolution.md)). Lights come on as it grows dark after sunset and are out by sunrise. Exposure is fixed, so even a faint glow while the sun is up washes dark glass out to white.
 - Sky reflections use a realtime reflection probe. Enable Realtime Reflection Probes at every quality level; otherwise water and buildings reflect default blue sky regardless of weather.
 - Rain and snow particles appear only near the camera to keep cost independent of city size. `CameraAmbience` plays rain and environmental audio ([sound](../programs/sound.md)).
 

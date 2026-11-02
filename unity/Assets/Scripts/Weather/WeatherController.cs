@@ -332,7 +332,7 @@ public sealed class WeatherController : MonoBehaviour
         sun.transform.rotation = Quaternion.Euler(Mathf.Max(elevation, 2f), Clock.Azimuth + 180f, 0f);
         sun.color = sunlight;
         sun.intensity = look.Intensity * lowSun * daylight;
-        NightLights.SetLevel(1f - daylight);
+        NightLights.SetLevel(darkness);
         var shadows = !GraphicsConfig.SunShadows ? LightShadows.None : GraphicsConfig.SoftShadows ? LightShadows.Soft : LightShadows.Hard;
         if (sun.shadows != shadows) sun.shadows = shadows;
         sun.shadowStrength = look.Shadow * daylight;

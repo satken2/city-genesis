@@ -48,6 +48,7 @@ public sealed class RoadMarkingSurface : MonoBehaviour
         shader ??= Resources.Load<Shader>("Shaders/RoadSurface");
         if (shader == null) return source;
         material = new Material(source) { shader = shader, name = source.name + " (road surface)" };
+        NightLights.Adopt(material, source);
         materials[source] = material;
         return material;
     }

@@ -22,7 +22,7 @@ A path's paint material `PATH_PAINT` is replaced with a copy painted in the path
 
 A building model's city flag and emblem materials `SLOT_CITY_FLAG` and `SLOT_CITY_EMBLEM` are replaced with materials showing the city's flag and emblem images (API `/city/insignia/{flag|emblem}`), one instance shared by all buildings. Where they appear is decided by the parts of the model that use these material names, and the image fits within the UV 0–1 frame of those parts. Cities without an image draw nothing there.
 
-Materials whose names contain `WINDOW` or `GLASS` glow at night as window glass lit from inside, and the materials named by the `body_material` of road (street and motorway) variants glow as road surfaces under street lights. The emission is set on the shared instances and does not light the surroundings, so every face using the same material glows equally. The lights come on as the sun sets and go out at sunrise ([weather and lighting](U_weather-and-lighting.md)).
+Materials whose names contain `WINDOW` or `GLASS` glow at night as window glass lit from inside, and the materials named by the `body_material` of road (street and motorway) variants glow as road surfaces under street lights. The emission is set on the shared instances and does not light the surroundings, so every face using the same material glows equally. The lights come on as it grows dark after sunset and are out by sunrise ([weather and lighting](U_weather-and-lighting.md)).
 
 New generators should follow one of these two approaches rather than adding independent resource loading or `new Material` calls.
 
