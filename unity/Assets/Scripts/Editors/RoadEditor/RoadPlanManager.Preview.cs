@@ -33,7 +33,8 @@ public partial class RoadPlanManager
     private PathBuildPoint GetHoverPoint()
     {
         Vector3 position = hoverWorldPosition;
-        position.y = Utils.GetPathSurfaceHeight(position) + (hoverSnapWasElevated ? hoverSnapRelHeight : currentHeight);
+        position.y = Utils.GetPathSurfaceHeight(position) + (TryGetWaterBedHeight(position, out float bedHeight) ? bedHeight
+            : hoverSnapWasElevated ? hoverSnapRelHeight : currentHeight);
         return new PathBuildPoint(position, PathPointRole.End) { embankmentHeight = currentEmbankmentHeight };
     }
 

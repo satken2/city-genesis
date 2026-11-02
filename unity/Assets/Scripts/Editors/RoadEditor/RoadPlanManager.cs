@@ -764,7 +764,8 @@ public partial class RoadPlanManager : MonoBehaviour
             Vector3 snapped = ApplySnapping(worldPos);
             // Inherit elevation when snapping to an elevated node/path (ResolvePlacementHeight also
             // synchronizes currentHeight and the UI elevation display). Otherwise use currentHeight.
-            snapped.y = Utils.GetPathSurfaceHeight(snapped) + ResolvePlacementHeight();
+            snapped.y = Utils.GetPathSurfaceHeight(snapped)
+                + (TryGetWaterBedHeight(snapped, out float bedHeight) ? bedHeight : ResolvePlacementHeight());
 
             if (points.Count == 0)
             {
@@ -906,7 +907,8 @@ public partial class RoadPlanManager : MonoBehaviour
 
             var pt = points[dragPointIndex];
             // Preserve relative height during XZ movement.
-            float relY = lastSnapWasElevated && IsHeightEditable()
+            float relY = TryGetWaterBedHeight(snappedPos, out float bedHeight) ? bedHeight
+                : lastSnapWasElevated && IsHeightEditable()
                 ? lastSnapRelHeight : pt.position.y - Utils.GetPathSurfaceHeight(pt.position);
             snappedPos.y = Utils.GetPathSurfaceHeight(snappedPos) + relY;
 
@@ -1027,7 +1029,8 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             Vector3 endPos = ApplySnapping(rightClickPos);
             // Inherit elevation when snapping to an elevated node/path.
-            endPos.y = Utils.GetPathSurfaceHeight(endPos) + ResolvePlacementHeight();
+            endPos.y = Utils.GetPathSurfaceHeight(endPos)
+                + (TryGetWaterBedHeight(endPos, out float bedHeight) ? bedHeight : ResolvePlacementHeight());
             var endPt = new PathBuildPoint(endPos, PathPointRole.End);
             endPt.embankmentHeight = currentEmbankmentHeight;
             points.Add(endPt);
@@ -1134,7 +1137,8 @@ public partial class RoadPlanManager : MonoBehaviour
     {
         if (edgeIndex < 0 || edgeIndex >= points.Count - 1) return;
 
-        worldPos.y = Utils.GetPathSurfaceHeight(worldPos) + currentHeight;
+        worldPos.y = Utils.GetPathSurfaceHeight(worldPos)
+            + (TryGetWaterBedHeight(worldPos, out float bedHeight) ? bedHeight : currentHeight);
         var insertedPt = new PathBuildPoint(worldPos, PathPointRole.Waypoint);
         insertedPt.embankmentHeight = currentEmbankmentHeight;
         points.Insert(edgeIndex + 1, insertedPt);
@@ -1283,6 +1287,25 @@ public partial class RoadPlanManager : MonoBehaviour
             return relH;
         }
         return currentHeight;
+    }
+
+    /// <summary>
+    /// Relative height for an infrastructure point placed or moved over sea or lake water: the water bed, not below min_height.
+    /// Relative height is measured from the water surface there, so the usual placement height would leave pipes and
+    /// buried lines floating on the surface. Infrastructure endpoints join terminals vertically, so the bed applies
+    /// even when snapping to a terminal node on the surface, and it does not change currentHeight for later land points.
+    /// False for other paths, for variants that cannot go below the surface (overhead lines), and off the water.
+    /// </summary>
+    private bool TryGetWaterBedHeight(Vector3 position, out float relHeight)
+    {
+        relHeight = 0f;
+        if (!InfraNetworkUtil.IsInfraPathType(PathType)) return false;
+        float minHeight = GetMinHeightFromMaster();
+        if (minHeight >= 0f) return false;
+        float ground = Utils.GetGroundHeight(position);
+        if (!Utils.IsOnWater(position.x, position.z, ground, out float waterY)) return false;
+        relHeight = Mathf.Max(ground - waterY, minHeight);
+        return true;
     }
 
     /// <summary>
