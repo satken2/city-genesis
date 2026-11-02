@@ -78,7 +78,7 @@
     "CREATEPATH_FERRY_WATER": "Coloca el canal de ferri completamente sobre el mar o un lago, y el muelle de ferri con un extremo en tierra y el otro sobre el agua.",
     "CREATEPATH_QUAY_BAND_CROSSING": "Un trazado no puede cruzar el muelle de un terreno ganado al mar a nivel del suelo. Hazlo pasar en elevado o bajo tierra, y deja sus extremos y puntos intermedios fuera de la plataforma del muelle.",
     "ZONE_CONTIGUITY_ERROR": "Las calles pintadas no formarían un distrito conectado, por lo que no se pueden asignar. Pinta calles conectadas.",
-    "ZONE_SIZE_ERROR": "El distrito superaría su distancia máxima o la longitud total de calles. Pinta un área más pequeña.",
+    "ZONE_SIZE_ERROR": "El distrito superaría su número máximo de parcelas o la longitud total de calles. Pinta un área más pequeña.",
     "OUTSIDE_CITY_EDIT": "No se pueden editar las instalaciones fuera de la ciudad.",
     "OUTSIDE_CITY_PLACEMENT": "No se puede colocar nada fuera de la ciudad.",
     "READ_ONLY": "Esta acción no está disponible en el modo de solo lectura.",

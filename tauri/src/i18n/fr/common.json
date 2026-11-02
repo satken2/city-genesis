@@ -78,7 +78,7 @@
     "CREATEPATH_FERRY_WATER": "Placez un couloir de ferry entièrement sur la mer ou un lac, et un embarcadère de ferry avec une extrémité sur la terre et l'autre sur l'eau.",
     "CREATEPATH_QUAY_BAND_CROSSING": "Un tracé ne peut pas traverser le quai d'un terrain gagné sur la mer au niveau du sol. Faites-le passer en viaduc ou en souterrain, et placez ses extrémités et points de passage hors de la plateforme du quai.",
     "ZONE_CONTIGUITY_ERROR": "Les rues peintes ne formeraient pas un quartier d'un seul tenant ; l'attribution est impossible. Peignez des rues reliées entre elles.",
-    "ZONE_SIZE_ERROR": "Le quartier dépasserait sa distance maximale ou sa longueur totale de rues. Peignez une zone plus petite.",
+    "ZONE_SIZE_ERROR": "Le quartier dépasserait son nombre maximal de parcelles ou sa longueur totale de rues. Peignez une zone plus petite.",
     "OUTSIDE_CITY_EDIT": "Les installations situées hors de la ville ne peuvent pas être modifiées.",
     "OUTSIDE_CITY_PLACEMENT": "Impossible de placer quoi que ce soit hors de la ville.",
     "READ_ONLY": "Cette action est impossible en mode lecture seule.",

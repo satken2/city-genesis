@@ -57,7 +57,7 @@ public static class TrackIntersectionMeshGenerator
     }
 
     /// <summary>
-    /// Whether two paths' rails may connect at a node, ignoring turn angle/direction. LRT networks (222/242/303/431) connect
+    /// Whether two paths' rails may connect at a node, ignoring turn angle/direction. LRT networks connect
     /// across path types; LRT/regular rail and track/monorail do not.
     /// </summary>
     public static bool RailsConnect(int typeA, int variantA, int typeB, int variantB)

@@ -78,7 +78,7 @@
     "CREATEPATH_FERRY_WATER": "渡轮航道须整条位于海面或湖面上，渡轮栈桥须一端在陆地上、另一端在水面上。",
     "CREATEPATH_QUAY_BAND_CROSSING": "路径不能在地面上横穿填海地的岸壁。请以高架或地下方式通过，并将端点和途经点置于岸壁顶面之外。",
     "ZONE_CONTIGUITY_ERROR": "涂抹的道路无法连成一个完整的地区，因此无法分配。请涂抹相连的道路。",
-    "ZONE_SIZE_ERROR": "地区的最大距离或道路总长度将超过上限。请缩小涂抹范围。",
+    "ZONE_SIZE_ERROR": "地区的地块数或道路总长度将超过上限。请缩小涂抹范围。",
     "OUTSIDE_CITY_EDIT": "无法编辑城市外的设施。",
     "OUTSIDE_CITY_PLACEMENT": "无法放置在城市之外。",
     "READ_ONLY": "只读模式下无法执行此操作。",

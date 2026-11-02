@@ -5,7 +5,9 @@ import { describeError } from "../../utils/errors";
  * Specify a polygon on CityMapCanvas and create streets of the selected pattern inside it as planned
  * construction (STATUS_SCHEDULED_CONSTRUCTION).
  * POST /api/v1/scenario-tools/street-grid handles terrain-following growth, layout within blocks, and
- * connectivity/alignment validation.
+ * connectivity/alignment validation. The preview endpoint returns the streets the same input would create,
+ * so the preview is discarded whenever an input changes. Multiple street types are laid out by the backend
+ * from the lowest max grade.
  * After creation, inspect in 3D, delete unwanted streets, and complete them with Complete All in scenario
  * editing.
  *
@@ -41,15 +43,24 @@ const STREET_PATTERNS = ["relaxed_grid", "contour", "organic"] as const;
 const BLOCK_PATTERNS = ["block_grid", "block_strips", "block_perimeter"] as const;
 type StreetPattern = (typeof STREET_PATTERNS)[number] | (typeof BLOCK_PATTERNS)[number];
 
-/** Return value of backend create_street_grid */
-type StreetGridResult = {
-  path_ids: number[];
-  created: number;
+/** Fields shared by the backend's street grid preview and creation responses */
+type StreetGridSummary = {
   candidates: number;
   rejected: Record<string, number>;
   axis_angle_deg: number;
   pattern: StreetPattern | "fixed_grid";
   blocks?: number;
+};
+
+/** Return value of backend create_street_grid */
+type StreetGridResult = StreetGridSummary & {
+  path_ids: number[];
+  created: number;
+};
+
+/** Return value of backend plan_street_grid (segments in creation order) */
+type StreetGridPlan = StreetGridSummary & {
+  segments: { path_variant: number; points: [number, number][] }[];
 };
 
 /** 3D camera state (camera:state); only position is used. */
@@ -75,13 +86,15 @@ const AREA_EDGE = "#f9e2af";
 const VERTEX_FILL = "#f9e2af";
 const VERTEX_EDGE = "#1e1e2e";
 const VERTEX_RADIUS_PX = 5;
+const PREVIEW_COLOR = "rgba(250, 179, 135, 0.9)";
+/** Minimum preview stroke width so narrow streets remain visible when zoomed out */
+const PREVIEW_MIN_WIDTH_PX = 2;
 
-/** Street grid creation needs only roads and parcel/district outlines; hide elevation, buildings, etc. */
+/** Show existing roads over terrain colors and shading so slopes can be judged when drawing the area; hide buildings. */
 const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
   ...DEFAULT_CITY_MAP_LAYERS,
-  elevation: false,
+  elevation: true,
   buildings: false,
-  contours: true,
 };
 
 export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
@@ -93,11 +106,14 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [spacing, setSpacing] = useState(DEFAULT_SPACING_M);
   const [pattern, setPattern] = useState<StreetPattern>("relaxed_grid");
   const [parcelSize, setParcelSize] = useState(20);
-  const [variant, setVariant] = useState<number | null>(null);
+  /** Selected street types. null until master data provides the default. */
+  const [variants, setVariants] = useState<number[] | null>(null);
   const [angleAuto, setAngleAuto] = useState(true);
   const [angleDeg, setAngleDeg] = useState(0);
-  const [busy, setBusy] = useState(false);
+  const [running, setRunning] = useState<"preview" | "create" | null>(null);
+  const busy = running !== null;
   const [message, setMessage] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{ plan: StreetGridPlan; summary: string } | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
   const blockMode = BLOCK_PATTERNS.some((key) => key === pattern);
 
@@ -109,25 +125,50 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const pressRef = useRef<{ screen: { x: number; y: number }; world: WorldPoint } | null>(null);
   const lastScreenRef = useRef<{ x: number; y: number } | null>(null);
   const fittedRef = useRef(false);
+  const previewRef = useRef<StreetGridPlan | null>(null);
+  previewRef.current = preview?.plan ?? null;
+  const pathMasterRef = useRef(masterData?.paths);
+  pathMasterRef.current = masterData?.paths;
+  /** Incremented on every input change so a preview response for older inputs is ignored. */
+  const inputVersionRef = useRef(0);
 
   const redraw = useCallback(() => setOverlayVersion((v) => v + 1), []);
 
   /** Selectable street variants: surface streets supporting frontage, excluding elevated/underground paths. */
   const streetVariants = useMemo(() => {
-    if (!masterData) return [] as { id: number; name: string }[];
-    return Object.entries(masterData.paths)
+    return Object.entries(masterData?.paths ?? {})
       .map(([id, entry]) => ({ id: Number(id), entry }))
       .filter(({ entry }) => entry.type === PATH_STREET && !entry.height_editable && entry.frontage_allowed)
       .filter(({ entry }) => !blockMode || entry.lanes === 1)
       .sort((a, b) => a.id - b.id)
-      .map(({ id, entry }) => ({ id, name: entry.display_name }));
+      .map(({ id, entry }) => ({ id, name: entry.display_name, grade: entry.max_grade }));
   }, [masterData, blockMode]);
 
+  // Drop types that the pattern cannot use and fall back to the default only when nothing remains.
+  // Unchecking every type by hand leaves the selection empty.
   useEffect(() => {
-    if (streetVariants.length === 0 || streetVariants.some((v) => v.id === variant)) return;
-    const preferred = streetVariants.find((v) => v.id === DEFAULT_VARIANT) ?? streetVariants[0];
-    setVariant(preferred.id);
-  }, [streetVariants, variant]);
+    if (streetVariants.length === 0) return;
+    const fallback = [(streetVariants.find((v) => v.id === DEFAULT_VARIANT) ?? streetVariants[0]).id];
+    if (variants === null) {
+      setVariants(fallback);
+      return;
+    }
+    const available = variants.filter((id) => streetVariants.some((v) => v.id === id));
+    if (available.length === variants.length) return;
+    setVariants(available.length > 0 ? available : fallback);
+  }, [streetVariants, variants]);
+
+  const toggleVariant = (id: number, checked: boolean) => {
+    setVariants((prev) => {
+      const rest = (prev ?? []).filter((v) => v !== id);
+      return checked ? [...rest, id] : rest;
+    });
+  };
+
+  useEffect(() => {
+    inputVersionRef.current += 1;
+    setPreview(null);
+  }, [vertices, pattern, spacing, parcelSize, variants, angleAuto, angleDeg]);
 
   /* ---- Center on the 3D camera only once ---- */
   useEffect(() => {
@@ -171,7 +212,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   useEffect(() => {
     redraw();
-  }, [vertices, redraw]);
+  }, [vertices, preview, redraw]);
 
   /* ---- Pointer controls ---- */
   const handlePointerDown = useCallback((e: CityMapPointerEvent): boolean => {
@@ -209,11 +250,26 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     removeLastVertex();
   }, [removeLastVertex]);
 
-  /* ---- Area overlay ---- */
+  /* ---- Area and preview overlay ---- */
   const overlayDraw = useCallback((ctx: CanvasRenderingContext2D, view: CityMapViewState) => {
+    const px = (v: number) => v / view.zoom;
+    const plan = previewRef.current;
+    if (plan) {
+      ctx.strokeStyle = PREVIEW_COLOR;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.setLineDash([]);
+      for (const segment of plan.segments) {
+        ctx.beginPath();
+        ctx.moveTo(segment.points[0][0], segment.points[0][1]);
+        for (const [x, z] of segment.points.slice(1)) ctx.lineTo(x, z);
+        ctx.lineWidth = Math.max(pathMasterRef.current?.[segment.path_variant]?.width ?? 0, px(PREVIEW_MIN_WIDTH_PX));
+        ctx.stroke();
+      }
+    }
+
     const pts = verticesRef.current;
     if (pts.length === 0) return;
-    const px = (v: number) => v / view.zoom;
 
     if (pts.length >= 2) {
       ctx.beginPath();
@@ -255,35 +311,58 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }, []);
 
-  /* ---- Creation ---- */
-  async function createStreetGrid() {
-    if (busy || vertices.length < 3 || variant === null) return;
-    setBusy(true);
+  /* ---- Preview and creation ---- */
+  const postStreetGrid = <T,>(path: string) =>
+    fetchApi<T>(buildApiUrl(apiBaseUrl, path), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        points: vertices.map((p) => [p.x, p.z]),
+        spacing: blockMode ? undefined : spacing,
+        parcel_size: blockMode ? parcelSize : undefined,
+        pattern,
+        path_variants: variants,
+        angle_deg: blockMode || angleAuto ? null : angleDeg,
+      }),
+    });
+
+  /** Result message: the street count text followed by the per-reason rejection counts. */
+  const summarize = (result: StreetGridSummary, countKey: string, count: number) => {
+    const rejectedTotal = Object.values(result.rejected).reduce((a, b) => a + b, 0);
+    const reasons = Object.entries(result.rejected)
+      .filter(([, n]) => n > 0)
+      .map(([key, n]) => `${t(`scenarioTools.reject.${key}`, { defaultValue: key })}: ${n}`)
+      .join(" / ");
+    return (
+      (blockMode && result.blocks === 0
+        ? t("scenarioTools.noBlocks")
+        : t(countKey, { count, rejected: rejectedTotal })) + (reasons ? ` (${reasons})` : "")
+    );
+  };
+
+  async function previewStreetGrid() {
+    if (!canCreate) return;
+    const version = inputVersionRef.current;
+    setRunning("preview");
     setMessage(null);
     try {
-      const result = await fetchApi<StreetGridResult>(buildApiUrl(apiBaseUrl, "/api/v1/scenario-tools/street-grid"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          points: vertices.map((p) => [p.x, p.z]),
-          spacing: blockMode ? undefined : spacing,
-          parcel_size: blockMode ? parcelSize : undefined,
-          pattern,
-          path_variant: variant,
-          angle_deg: blockMode || angleAuto ? null : angleDeg,
-        }),
-      });
-      const rejectedTotal = Object.values(result.rejected).reduce((a, b) => a + b, 0);
-      const reasons = Object.entries(result.rejected)
-        .filter(([, n]) => n > 0)
-        .map(([key, n]) => `${t(`scenarioTools.reject.${key}`, { defaultValue: key })}: ${n}`)
-        .join(" / ");
-      setMessage(
-        (blockMode && result.blocks === 0
-          ? t("scenarioTools.noBlocks")
-          : t("scenarioTools.gridCreated", { created: result.created, rejected: rejectedTotal })) +
-          (reasons ? ` (${reasons})` : "")
-      );
+      const plan = await postStreetGrid<StreetGridPlan>("/api/v1/scenario-tools/street-grid/preview");
+      if (version !== inputVersionRef.current) return;
+      setPreview({ plan, summary: summarize(plan, "scenarioTools.gridPreviewed", plan.segments.length) });
+    } catch (err) {
+      setMessage(describeError(err, t));
+    } finally {
+      setRunning(null);
+    }
+  }
+
+  async function createStreetGrid() {
+    if (!canCreate) return;
+    setRunning("create");
+    setMessage(null);
+    try {
+      const result = await postStreetGrid<StreetGridResult>("/api/v1/scenario-tools/street-grid");
+      setMessage(summarize(result, "scenarioTools.gridCreated", result.created));
       setVertices([]);
       // Reflect planned streets in 3D and refresh the map's road data.
       await sendSessionReload();
@@ -291,11 +370,12 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     } catch (err) {
       setMessage(describeError(err, t));
     } finally {
-      setBusy(false);
+      setRunning(null);
     }
   }
 
-  const canCreate = vertices.length >= 3 && variant !== null && !busy;
+  const canCreate = vertices.length >= 3 && (variants?.length ?? 0) > 0 && !busy;
+  const shownMessage = preview?.summary ?? message;
 
   return (
     <div className="street-grid">
@@ -339,16 +419,20 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             />
             <span className="street-grid__unit">m</span>
           </label>
-          <label className="street-grid__field">
+          <div className="street-grid__field street-grid__variants">
             <span>{t("scenarioTools.variant")}</span>
-            <select value={variant ?? ""} disabled={busy || streetVariants.length === 0} onChange={(e) => setVariant(Number(e.target.value))}>
-              {streetVariants.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.name}
-                </option>
-              ))}
-            </select>
-          </label>
+            {streetVariants.map((v) => (
+              <label key={v.id} className="street-grid__variant">
+                <input
+                  type="checkbox"
+                  checked={variants?.includes(v.id) ?? false}
+                  disabled={busy}
+                  onChange={(e) => toggleVariant(v.id, e.target.checked)}
+                />
+                {v.grade ? t("scenarioTools.variantOption", { name: v.name, grade: v.grade }) : v.name}
+              </label>
+            ))}
+          </div>
           {!blockMode && <label className="street-grid__field">
             <span>{t("scenarioTools.angle")}</span>
             <select value={angleAuto ? "auto" : "manual"} disabled={busy} onChange={(e) => setAngleAuto(e.target.value === "auto")}>
@@ -378,8 +462,11 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={() => setVertices([])}>
             {t("scenarioTools.clearVertices")}
           </button>
+          <button type="button" className="street-grid__btn" disabled={!canCreate} onClick={() => void previewStreetGrid()}>
+            {running === "preview" ? t("scenarioTools.previewing") : t("scenarioTools.preview")}
+          </button>
           <button type="button" className="street-grid__btn street-grid__btn--primary" disabled={!canCreate} onClick={() => void createStreetGrid()}>
-            {busy ? t("scenarioTools.creating") : t("scenarioTools.create")}
+            {running === "create" ? t("scenarioTools.creating") : t("scenarioTools.create")}
           </button>
         </div>
         {blockMode && <div className="street-grid__block-hint">{t("scenarioTools.blockHint")}</div>}
@@ -398,7 +485,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           onContextMenu={handleContextMenu}
           cursor="crosshair"
         />
-        {message && <div className="street-grid__message">{message}</div>}
+        {shownMessage && <div className="street-grid__message">{shownMessage}</div>}
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ using UnityEngine;
 
 /// <summary>
 /// Resolve/render LRT side platforms (outside each track). Base-path generators (TrackPath for 431,
-/// LrtRoadParts.Generate for 222/242/303) call this during mesh generation, excluding Far/construction.
+/// LrtRoadParts.Generate for shared streets) call this during mesh generation, excluding Far/construction.
 /// Stop positions come from line-summary stop_points (StopProvider, configured by DataLoaders/LrtStopPlatforms);
 /// fraction→distance matches vehicles: fraction × uncut 3D point-list length (TransitRouteGeometry). LrtRoadParts defines dimensions.
 /// </summary>
