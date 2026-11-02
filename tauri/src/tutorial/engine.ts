@@ -151,14 +151,20 @@ export async function execute(actions: Action[], env: Environment): Promise<void
 }
 
 /**
- * Recalculate the guide stage from currently satisfied prerequisites, including cancellations and panel closure.
- * For multi-stage steps, use the final stage when complete conditions are met. This prevents construction
- * guidance returning to the open-panel stage after confirmation closes the panel, despite construction being
- * finished.
+ * Find the guide stage.
+ * Steps with complete judge work on the city, so their stages follow the current state: closing the panel midway
+ * returns to the open-panel stage, which still offers the button to reopen it. Once complete is met they use the
+ * final stage, so confirmation closing the panel does not send finished construction back to the open-panel stage.
+ * Steps without complete only ask the player to open and look at screens, so every satisfied stage condition,
+ * including the final one, is kept in `passed`; closing a panel afterwards neither rewinds the guide nor blocks Next.
  */
-export async function findPhase(step: GuideStep, env: Environment): Promise<number> {
-  if (step.phases.length > 1 && step.complete && await achieved(step.complete, env)) return step.phases.length - 1;
+export async function findPhase(step: GuideStep, env: Environment, passed = new Set<number>()): Promise<number> {
+  const last = step.phases.length - 1;
+  if (last > 0 && step.complete && await achieved(step.complete, env)) return last;
   let index = 0;
-  while (index < step.phases.length - 1 && await evaluate(step.phases[index].until, env)) index++;
-  return index;
+  while (index <= last && (passed.has(index) || await evaluate(step.phases[index].until, env))) {
+    if (!step.complete) passed.add(index);
+    index++;
+  }
+  return Math.min(index, last);
 }

@@ -109,7 +109,7 @@ assert.equal(snapshot()?.phaseId, "goal");
 await settle(async () => { assert.equal(await guide!.advance(), true); });
 assert.equal(snapshot()?.phaseId, "epoch");
 await settle(async () => { assert.equal(await guide!.advance(), false); assert.equal(await guide!.check(), true); });
-// 表示パネルを閉じると先頭へ戻り、開き直したときにページを読み直せる。
+// complete の無いステップは、表示パネルを閉じても到達した段階から戻らず、閉じたまま「次へ」で進める。
 await settle(() => root.render(<Harness scenario="controls" step={3} save="H" />));
 assert.equal(snapshot()?.phaseId, "open");
 await settle(async () => { assert.equal(await guide!.advance(), false); });
@@ -118,11 +118,21 @@ assert.equal(snapshot()?.phaseId, "tabs");
 await settle(async () => { assert.equal(await guide!.advance(), true); });
 assert.equal(snapshot()?.phaseId, "modes");
 await settle(() => emit("tutorial:window_visibility", { label: "display", window: "display_options", visible: false }));
+assert.equal(snapshot()?.phaseId, "modes", "closing the panel keeps the reached stage");
+await settle(async () => { assert.equal(await guide!.check(), true); });
+// 水源の段階: 資源を表示して表示パネルを閉じても戻らず、開いた資源の詳細を閉じてからでも「次へ」で進める。
+await settle(() => root.render(<Harness scenario="controls" step={26} save="I" />));
 assert.equal(snapshot()?.phaseId, "open");
 await settle(() => emit("tutorial:window_visibility", { label: "display", window: "display_options", visible: true }));
-assert.equal(snapshot()?.phaseId, "tabs", "reopening the panel replays the tab page");
+assert.equal(snapshot()?.phaseId, "show");
+await settle(() => emit("tutorial:window_visibility", { label: "display", window: "display_options", visible: false }));
+assert.equal(snapshot()?.phaseId, "show", "closing the display panel keeps the resource guidance");
+await settle(async () => { assert.equal(await guide!.check(), false, "the resource detail has not been opened yet"); });
+await settle(() => emit("tutorial:window_visibility", { label: "resource", window: "resource_detail", visible: true }));
+await settle(() => emit("tutorial:window_visibility", { label: "resource", window: "resource_detail", visible: false }));
+await settle(async () => { assert.equal(await guide!.check(), true, "the opened detail counts after it is closed"); });
 fixture.onAction = undefined;
 await settle(() => root.unmount());
 assert.equal(snapshot()?.active, false);
 await browser.happyDOM.close();
-console.log("PASS: tutorial hook progression, close/reopen, stale events, save isolation, setup retry and cleanup");
+console.log("PASS: tutorial hook progression, close/reopen, observation steps keep reached stages, stale events, save isolation, setup retry and cleanup");

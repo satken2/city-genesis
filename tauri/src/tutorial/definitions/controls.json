@@ -322,7 +322,9 @@
           "textKey": "tutorial.controls.step3.tabs",
           "ui": {
             "policy": "highlight",
-            "allow": [],
+            "allow": [
+              "hud.visibility"
+            ],
             "highlight": [
               "display.tabs"
             ]
@@ -340,7 +342,9 @@
           "textKey": "tutorial.controls.step3.modes",
           "ui": {
             "policy": "highlight",
-            "allow": [],
+            "allow": [
+              "hud.visibility"
+            ],
             "highlight": [
               "display.modes"
             ]

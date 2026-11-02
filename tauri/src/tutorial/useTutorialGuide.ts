@@ -33,6 +33,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
     try { stored = JSON.parse(localStorage.getItem(key) ?? '{"bindings":{}}'); } catch { stored = { bindings: {} }; }
     stored.pendingCreates ??= {};
     const facts: Facts = { windows: {}, pages: {} };
+    const passed = new Set<number>();
     const unlisten: (() => void)[] = [];
     let queue = Promise.resolve();
     setReady(false); setFailed(false); setTextKey(undefined);
@@ -55,7 +56,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
     };
     const reconcile = async () => {
       if (!env || !step || disposed) return;
-      const index = await findPhase(step, env);
+      const index = await findPhase(step, env, passed);
       // When returning to an earlier stage, reset page advances from that stage onward to unsent so closing and reopening a panel restarts its explanation.
       if (index < phaseIndex) for (const phase of step.phases.slice(index)) if (phase.until.type === "page") delete facts.pages![phase.until.id];
       if (index !== phaseIndex) await publish(index);
@@ -85,7 +86,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
         await reconcile();
         // For steps with completion conditions, check those conditions directly rather than the stage (open panel). Next remains available even after confirmation closes the panel.
         const last = step.phases.length - 1;
-        if ((phaseIndex !== last && !step.complete) || !await evaluate(step.phases[last].until, env)) return false;
+        if ((phaseIndex !== last && !step.complete) || !(passed.has(last) || await evaluate(step.phases[last].until, env))) return false;
         await execute(step.beforeCheck ?? [], env);
         if (step.complete && !await evaluate(step.complete, env)) return false;
         await execute(step.afterCheck ?? [], env);
@@ -124,7 +125,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
         if (!stored.setupDone) { await execute(definition.setup ?? [], env); stored.setupDone = true; checkpoint(); }
       }
       assertCurrent();
-      await publish(step ? await findPhase(step, env) : 0);
+      await publish(step ? await findPhase(step, env, passed) : 0);
       setReady(true);
     })().catch(fail);
     return () => {

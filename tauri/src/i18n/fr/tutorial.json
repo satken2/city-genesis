@@ -34,7 +34,7 @@
         "title": "Changer l’affichage pour repérer les problèmes",
         "open": "Les pénuries d’électricité et les embouteillages sont parfois difficiles à voir dans le paysage. Utilisez « Affichage » pour faire apparaître les informations utiles sur la carte. Appuyez sur « Affichage » dans le cockpit pour ouvrir le panneau.",
         "tabs": "Les onglets verticaux choisissent ce que vous examinez : bâtiments, routes, parcelles ou quartiers. Vous pouvez aussi masquer les éléments inutiles si les informations se chevauchent. Appuyez sur « Suivant » pour découvrir les modes d’affichage.",
-        "modes": "Les boutons de chaque onglet choisissent l’information utilisée pour colorer les objets. Repérez les routes encombrées ou les bâtiments en difficulté pour orienter vos actions. Cliquez sur un objet dans la vue 3D pour l’examiner. Gardez le panneau ouvert et appuyez sur « Suivant »."
+        "modes": "Les boutons de chaque onglet choisissent l’information utilisée pour colorer les objets. Repérez les routes encombrées ou les bâtiments en difficulté pour orienter vos actions. Cliquez sur un objet dans la vue 3D pour l’examiner. Appuyez sur « Suivant »."
       },
       "step4": {
         "title": "Découvrir les outils de construction",

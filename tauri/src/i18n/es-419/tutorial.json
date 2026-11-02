@@ -34,7 +34,7 @@
         "title": "Cambia la vista para encontrar problemas",
         "open": "La falta de electricidad y la congestión del tráfico pueden ser difíciles de detectar a simple vista. Usa «Visualización» para mostrar la información necesaria sobre el mapa. Pulsa «Visualización» en el panel de mando para abrir el panel.",
         "tabs": "Las pestañas verticales permiten elegir qué revisar: edificios, caminos, parcelas o distritos. También puedes ocultar elementos cuando la información superpuesta dificulte la lectura. Pulsa «Siguiente» para conocer las opciones de visualización.",
-        "modes": "Los botones de cada pestaña eligen qué información determina los colores. Localiza caminos congestionados o edificios con problemas para decidir cómo actuar. Pulsa un objeto en la vista 3D para ver sus detalles. Deja el panel abierto y pulsa «Siguiente»."
+        "modes": "Los botones de cada pestaña eligen qué información determina los colores. Localiza caminos congestionados o edificios con problemas para decidir cómo actuar. Pulsa un objeto en la vista 3D para ver sus detalles. Pulsa «Siguiente»."
       },
       "step4": {
         "title": "Conoce las herramientas para construir",

@@ -16,7 +16,7 @@ Tauri owns progression. Unity applies current instructions without independently
 
 Lessons use declarative combinations of defined conditions and actions. They do not execute arbitrary code or URLs; validate structure and meaning before use.
 
-Guidance stages derive from current screen and city state. Closing panels or canceling actions must leave guidance aligned with actual interaction state.
+For steps that judge work on the city, guidance stages derive from current screen and city state. Closing panels or canceling actions midway must leave guidance aligned with actual interaction state. Steps that only ask the player to open and look at screens keep stages once satisfied; closing the inspected panel neither rewinds guidance nor blocks advancing.
 
 Conditions are read-only and separate from city-changing actions. Definitions explicitly specify action timing; progression management prevents repeated creation actions.
 

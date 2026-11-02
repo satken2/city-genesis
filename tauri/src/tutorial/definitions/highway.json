@@ -621,17 +621,7 @@
             "window": "intersection_detail"
           }
         }
-      ],
-      "complete": {
-        "type": "entity",
-        "resource": "tutorial",
-        "where": [
-          {
-            "field": "checks.ramp",
-            "equals": true
-          }
-        ]
-      }
+      ]
     }
   ]
 }
