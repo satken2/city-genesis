@@ -68,6 +68,11 @@ public static class Utils
     public static float GroundHeight;
     public static float GetGroundHeight(Vector3 position) => GroundHeight;
 }
+public static class NightLights
+{
+    public static float Level = -1f;
+    public static void SetLevel(float value) => Level = value;
+}
 public sealed class WeatherQaHost : MonoBehaviour
 {
     private int checks;

@@ -75,7 +75,7 @@ public class RoadPath : IPathMeshGenerator
         // No same-name Resources material; clone the FBX material into the shared pool.
         Material targetMat = new Material(source);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   マテリアルキャッシュ生成(clone): '{key}'");
-        RegisterRoadMaterial(key, targetMat);
+        RegisterRoadMaterial(key, targetMat, source);
         return targetMat;
     }
 
@@ -96,14 +96,16 @@ public class RoadPath : IPathMeshGenerator
 
         Material targetMat = new Material(loadedMat);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   マテリアルキャッシュ生成(Resources): '{materialName}'");
-        RegisterRoadMaterial(materialName, targetMat);
+        RegisterRoadMaterial(materialName, targetMat, loadedMat);
         return targetMat;
     }
 
-    private static void RegisterRoadMaterial(string key, Material material)
+    /// <summary>Window glass and road surfaces among the pooled copies glow at night (<see cref="NightLights"/>).</summary>
+    private static void RegisterRoadMaterial(string key, Material material, Material source)
     {
         int baseQueue = material.renderQueue < 0 ? material.shader.renderQueue : material.renderQueue;
         material.renderQueue = baseQueue + 1;
+        NightLights.Adopt(material, source);
         MaterialCache[key] = material;
     }
 

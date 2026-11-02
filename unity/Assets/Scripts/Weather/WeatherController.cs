@@ -332,6 +332,7 @@ public sealed class WeatherController : MonoBehaviour
         sun.transform.rotation = Quaternion.Euler(Mathf.Max(elevation, 2f), Clock.Azimuth + 180f, 0f);
         sun.color = sunlight;
         sun.intensity = look.Intensity * lowSun * daylight;
+        NightLights.SetLevel(1f - daylight);
         var shadows = !GraphicsConfig.SunShadows ? LightShadows.None : GraphicsConfig.SoftShadows ? LightShadows.Soft : LightShadows.Hard;
         if (sun.shadows != shadows) sun.shadows = shadows;
         sun.shadowStrength = look.Shadow * daylight;
@@ -465,6 +466,7 @@ public sealed class WeatherController : MonoBehaviour
         state = null;
         CancelQuery();
         if (original != null) original.Restore(sun, sunData);
+        NightLights.SetLevel(0f);
         if (reflection != null) reflection.enabled = false;
         if (precipitation != null) precipitation.enabled = false;
     }

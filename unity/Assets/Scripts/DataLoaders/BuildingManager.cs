@@ -2404,6 +2404,7 @@ public class BuildingManager : BaseApiDataManager
     /// VisualModeObject changes individual building colors through sharedMaterials replacement and property blocks, so
     /// sharing is safe (never modify each building renderer's .material). Retain across sessions.
     /// The city flag and emblem slot materials resolve to the city's insignia materials instead (<see cref="CityInsignia"/>).
+    /// Copies of window glass and road surfaces glow at night (<see cref="NightLights"/>).
     /// </summary>
     internal static Material[] GetSharedDepthOffsetMaterials(Material[] source)
     {
@@ -2443,6 +2444,7 @@ public class BuildingManager : BaseApiDataManager
                     shared.SetTextureOffset("_BaseMap", src.GetTextureOffset("_MainTex"));
                     if (src.HasProperty("_Color")) shared.SetColor("_BaseColor", src.GetColor("_Color"));
                 }
+                NightLights.Adopt(shared, src);
                 depthOffsetMaterials[src] = shared;
             }
             result[i] = shared;
