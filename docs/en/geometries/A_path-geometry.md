@@ -39,5 +39,5 @@ A design profile (`station_grade_profile`) is a road-surface reference independe
 
 ## Valid shapes
 
-Core validation is authoritative. Anchors must lie on land unless the variant allows water placement. Master data defines curve eligibility, minimum radius, maximum gradient, and maximum non-following span length per variant. Gradients use the surface after earthworks. See [path intersections](J_path-intersections.md) for water and quay crossings and [terrain](D_terrain.md) for placement outside the city.
+Core validation is authoritative. Anchors must lie on land unless the variant allows water placement. Master data defines curve eligibility, minimum radius, maximum gradient, and maximum non-following span length per variant. A minimum radius of zero means no limit; a positive value applies to polyline corners as well as Bézier curves. Gradients use the surface after earthworks. See [path intersections](J_path-intersections.md) for water and quay crossings and [terrain](D_terrain.md) for placement outside the city.
 
