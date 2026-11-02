@@ -39,7 +39,7 @@ const change = (element: HTMLInputElement, value: string) => act(async () => {
 });
 await act(async () => { root.render(render()); });
 await settle();
-for (const [key, type] of [["scenarioTools.editor.streetGrid", "street_grid"], ["taskbar.menuResourceEdit", "resource_edit"], ["taskbar.menuAgentCreation", "agent_creation"]]) {
+for (const [key, type] of [["taskbar.menuResourceEdit", "resource_edit"], ["taskbar.menuAgentCreation", "agent_creation"]]) {
   await act(async () => { button(key).click(); });
   assert.ok(state.calls.some(call => call.command === "open_registered_window" && call.args.windowType === type));
 }

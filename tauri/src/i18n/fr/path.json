@@ -163,6 +163,7 @@
     "alignmentUnready": "Une courbe ou une pente dépasse les limites de cette norme. Adoucissez le tracé.",
     "constructionSpeed": "Vitesse de construction",
     "back": "Retour",
+    "bulkCreate": "Création groupée",
     "group": {
       "road": "Routes",
       "track": "Voies ferrées",

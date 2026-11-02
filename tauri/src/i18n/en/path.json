@@ -163,6 +163,7 @@
     "alignmentUnready": "A curve or grade exceeds the limits of this standard. Ease the alignment.",
     "constructionSpeed": "Construction Speed",
     "back": "Back",
+    "bulkCreate": "Bulk creation",
     "group": {
       "road": "Roads",
       "track": "Rail",

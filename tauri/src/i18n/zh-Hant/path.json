@@ -163,6 +163,7 @@
     "alignmentUnready": "彎道或坡度超出此規格的限制。請放緩線形。",
     "constructionSpeed": "建設速度",
     "back": "返回",
+    "bulkCreate": "批次建立",
     "group": {
       "road": "道路",
       "track": "軌道",

@@ -10,6 +10,7 @@ import { describeError } from "../../utils/errors";
  *   2. Variant cards: use icon tabs for category classifications when present, with classification names in the list.
  *   3. Construction screen: show the selected variant card first as a summary, followed by placement settings and confirm/cancel.
  * Existing path editing preserves type/variant, so starts on the construction screen with no back navigation.
+ * 街路カテゴリーのバリアント選択ヘッダーから、範囲指定による一括作成ウィンドウを開く。
  *
  * Construction flow:
  *   1. Select a card → notify the graphics program of placement mode (STATE_EDIT_PATH) through IPC.
@@ -40,7 +41,7 @@ import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { sendEditPathFinish, sendSetGrid, sendChangeDisplay, sendChangeState, sendFocusGraphic, IPC_EVENT_VIEW_GRID_TOGGLED } from "../../utils/ipc";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
-import { PATH_BUILD_METHOD_GRID, PATH_STATION_HOUSE, PLAY_MODE_SCENARIO } from "../../constants";
+import { PATH_BUILD_METHOD_GRID, PATH_STATION_HOUSE, PATH_STREET, PLAY_MODE_SCENARIO } from "../../constants";
 import { usePlayMode } from "../../hooks/usePlayMode";
 import { tutorialVariantAllowed } from "../../tutorial/TutorialLayer";
 import { buildCategoryGroups, buildCategoryVariants, buildCategoryVariantTabs, buildablePathMaster } from "./pathBuildCategories";
@@ -369,6 +370,24 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
           <div className="pc-section">
             <div className="bc-selection-header">
               <BackButton onClick={() => setSelectedCategory(null)} />
+              {selectedCategory === PATH_STREET && (
+                <button
+                  className="bc-header-btn pc-bulk-create-btn"
+                  type="button"
+                  data-guide="path.bulk-create"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void (async () => {
+                      await setHintbarText("");
+                      await invoke("open_registered_window", { windowType: "street_grid" });
+                    })().catch((error) => {
+                      void showNotification({ message: describeError(error, t), durationMs: 8000 });
+                    });
+                  }}
+                >
+                  {t("path_construction.bulkCreate")}
+                </button>
+              )}
             </div>
             <p className="pc-category-description">{t(`path_construction.categoryDescription.${selectedCategory}`)}</p>
             {activeVariantTab && (

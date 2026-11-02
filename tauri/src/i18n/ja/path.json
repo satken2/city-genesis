@@ -163,6 +163,7 @@
     "alignmentUnready": "急なカーブや勾配が規格の制限を超えています。形状を緩めてください。",
     "constructionSpeed": "建設スピード",
     "back": "戻る",
+    "bulkCreate": "一括作成",
     "group": {
       "road": "道路",
       "track": "軌道",

@@ -1,23 +1,17 @@
 import { describeError } from "../../utils/errors";
 /**
- * Street grid creation window (window_type="street_grid"), scenario mode only.
+ * 街路の一括作成ウィンドウ(window_type="street_grid")。通常の建設とシナリオ制作で共用する。
  *
- * Specify a polygon on CityMapCanvas and create streets of the selected pattern inside it as planned
- * construction (STATUS_SCHEDULED_CONSTRUCTION).
- * POST /api/v1/scenario-tools/street-grid handles terrain-following growth, layout within blocks, and
- * connectivity/alignment validation. The preview endpoint returns the streets the same input would create,
- * so the preview is discarded whenever an input changes. Multiple street types are laid out by the backend
- * from the lowest max grade.
- * After creation, inspect in 3D, delete unwanted streets, and complete them with Complete All in scenario
- * editing.
+ * CityMapCanvasで多角形を指定し、選択したパターンの街路を計画中(STATUS_SCHEDULED_CONSTRUCTION)で作る。
+ * 地形追従・街区内配置・接続と線形の検証はPOST /api/v1/paths/street-gridが担当する。
+ * プレビューは同じ入力で作成される街路を返すため、入力を変えたら破棄する。
+ * 複数種類はバックエンドが最大勾配の小さい順に配置する。
+ * 作成した街路は建設計画として通常の着工・竣工を待つ。シナリオ制作では一括完成も利用できる。
  *
- * Controls: left click adds a vertex; right click, Delete, or Backspace removes the last vertex; left-drag empty
- * space pans; wheel zooms.
- * Distinguish click/drag by screen distance between press and release. CityMapCanvas starts panning when
- * onPointerDown returns false, so always allow panning here and accept a vertex only if released without
- * movement.
+ * 左クリックで頂点追加、右クリック・Delete・Backspaceで末尾削除、左ドラッグで移動、ホイールで拡大縮小する。
+ * CityMapCanvasのパンを許可し、押下から解放までの移動距離で頂点追加とドラッグを判別する。
  *
- * Center the map on the 3D camera position when opened, only on the first camera:state received.
+ * 最初に受けたcamera:stateだけを使い、3Dカメラ位置に地図を合わせる。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -346,7 +340,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setRunning("preview");
     setMessage(null);
     try {
-      const plan = await postStreetGrid<StreetGridPlan>("/api/v1/scenario-tools/street-grid/preview");
+      const plan = await postStreetGrid<StreetGridPlan>("/api/v1/paths/street-grid/preview");
       if (version !== inputVersionRef.current) return;
       setPreview({ plan, summary: summarize(plan, "scenarioTools.gridPreviewed", plan.segments.length) });
     } catch (err) {
@@ -361,7 +355,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setRunning("create");
     setMessage(null);
     try {
-      const result = await postStreetGrid<StreetGridResult>("/api/v1/scenario-tools/street-grid");
+      const result = await postStreetGrid<StreetGridResult>("/api/v1/paths/street-grid");
       setMessage(summarize(result, "scenarioTools.gridCreated", result.created));
       setVertices([]);
       // Reflect planned streets in 3D and refresh the map's road data.

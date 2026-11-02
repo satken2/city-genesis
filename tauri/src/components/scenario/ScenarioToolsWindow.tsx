@@ -123,7 +123,6 @@ export function ScenarioToolsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         const result = await fetchApi<{ privatized_agents: number }>(buildApiUrl(apiBaseUrl, "/api/v1/scenario-tools/privatize-facilities"), { method: "POST" });
         return t("scenarioTools.privatized", { count: result.privatized_agents });
       })}>{t("scenarioTools.editor.privatize")}</button>
-      <button type="button" disabled={!enabled} onClick={() => void openTool("street_grid")}>{t("scenarioTools.editor.streetGrid")}</button>
       <button type="button" disabled={!enabled} onClick={() => void openTool("resource_edit", "hint.resourceEdit")}>{t("taskbar.menuResourceEdit")}</button>
       <button type="button" disabled={!enabled} onClick={() => void openTool("agent_creation")}>{t("taskbar.menuAgentCreation")}</button>
       <button type="button" disabled={!enabled} onClick={() => {

@@ -75,7 +75,7 @@ const TerrainEditorCanvas = lazy(() => import("./components/terrain/TerrainEdito
 const Terrain3DPreviewCanvas = lazy(() => import("./components/terrain/Terrain3DPreviewCanvas").then(m => ({ default: m.Terrain3DPreviewCanvas })));
 const CityMapWindow = lazy(() => import("./components/map/CityMapWindow").then(m => ({ default: m.CityMapWindow })));
 const PropertyEditPanel = lazy(() => import("./components/debug/PropertyEditPanel").then(m => ({ default: m.PropertyEditPanel })));
-const StreetGridWindow = lazy(() => import("./components/scenario/StreetGridWindow").then(m => ({ default: m.StreetGridWindow })));
+const StreetGridWindow = lazy(() => import("./components/path/StreetGridWindow").then(m => ({ default: m.StreetGridWindow })));
 const ScenarioToolsWindow = lazy(() => import("./components/scenario/ScenarioToolsWindow").then(m => ({ default: m.ScenarioToolsWindow })));
 const AgentCreationPanel = lazy(() => import("./components/scenario/AgentCreationPanel").then(m => ({ default: m.AgentCreationPanel })));
 // EpochReport is used only as a type; use a type-only import to exclude its implementation from the bundle.
@@ -640,7 +640,7 @@ function App() {
             ) : context.window_type === "scenario_tools" ? (
               <ScenarioToolsWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "street_grid" ? (
-              // Scenario mode only. Create planned grid alleys within an area selected on the 2D map.
+              // 2D地図で指定した範囲に街路を一括で計画する。
               <StreetGridWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "agent_creation" ? (
               // Scenario mode only. Create an already moved-in non-building agent in a shared building selected in the 3D view.

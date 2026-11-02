@@ -27,6 +27,8 @@ A scenario's management source, official status, and required DLC are separate a
 
 Play mode belongs to the session rather than being fixed in the save. The UI uses shared mode state to expose controls; final permission checks belong to the core. A city can continue in normal play after its tutorial ends.
 
+Creating construction plans in bulk is also a normal city operation. In normal play, it follows the same funding checks, construction start, and completion process as individual construction. Creating plans is separate from instant completion, which is exclusive to scenario editing.
+
 ## Saved state and display state
 
 Construction project tags and citizen tracking lists belong to city records. Camera following, individually hidden objects, and rendered weather belong to presentation and interaction state. See [Unity visual modes](unity-visual-modes.md) for display-state lifetimes.

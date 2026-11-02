@@ -163,6 +163,7 @@
     "alignmentUnready": "급한 곡선 또는 경사가 규격 제한을 초과합니다. 형상을 완만하게 하세요.",
     "constructionSpeed": "건설 속도",
     "back": "뒤로",
+    "bulkCreate": "일괄 생성",
     "group": {
       "road": "도로",
       "track": "궤도",

@@ -163,6 +163,7 @@
     "alignmentUnready": "Una curva o pendiente supera los límites de este estándar. Suaviza el trazado.",
     "constructionSpeed": "Velocidad de construcción",
     "back": "Volver",
+    "bulkCreate": "Creación en lote",
     "group": {
       "road": "Carreteras",
       "track": "Vías férreas",

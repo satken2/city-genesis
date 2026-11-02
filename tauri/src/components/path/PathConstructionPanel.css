@@ -36,6 +36,11 @@
   line-height: 1.5;
 }
 
+.pc-bulk-create-btn {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
 /* Keep icon tabs in one horizontally scrolling row even as classifications increase. */
 .pc-variant-tabs .flat-tabs {
   gap: 0.25rem;
