@@ -259,6 +259,11 @@ agents:
     prebuilt: true
     variants:
       - 0
+  1092:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
   1093:
     model: true
     prebuilt: true
