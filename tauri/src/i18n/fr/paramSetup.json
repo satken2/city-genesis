@@ -123,10 +123,6 @@
         "label": "Marge minimale autorisant de nouvelles entrées",
         "desc": "De nouvelles entreprises n'apparaissent que sur les marchés dépassant cette marge. Limite la suroffre."
       },
-      "DIVIDEND_PAYOUT_RATIO": {
-        "label": "Taux de distribution des dividendes",
-        "desc": "Part des bénéfices des entreprises reversée aux ménages."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Part des dividendes proportionnelle au patrimoine",
         "desc": "Part des dividendes répartie au prorata de l'épargne de chaque ménage. Le reste est partagé à parts égales entre tous les ménages. 0 = tout à parts égales, 1 = tout au prorata de l'épargne."
