@@ -402,6 +402,11 @@ agents:
     prebuilt: false
     variants:
       - 0
+  2020:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   3001:
     model: true
     prebuilt: false
