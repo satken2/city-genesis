@@ -10,6 +10,8 @@ The district outline on the map represents its roads and parcels. Membership dep
 
 Parcels are units of land ownership and use. Every building occupies a parcel. Parcels have owners and land prices, and using private land for public works involves acquisition and compensation. Land prices reflect demand for the land and nearby rents.
 
+Small vacant parcels with no owner are too small for any building's minimum site, so they are automatically absorbed into a neighboring parcel. The small parcel disappears and its neighbor grows (only its shape changes, even if a building stands on it). City-owned parcels are not absorbed.
+
 Parcels have three categories based on their relationship to the coastline. Buildings require compatible parcel types: ports use shore parcels, and offshore structures use water parcels.
 
 | Type | Constant | Meaning |

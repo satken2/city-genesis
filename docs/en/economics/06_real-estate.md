@@ -22,5 +22,5 @@ Persistent housing shortages and hardship cause unpaved alleys, small parcels, a
 
 Alleys extend from existing roads and attract small homes. They bypass normal construction plans and building regulations, producing development that differs from the player's intended land use. Sprawl stops expanding when housing demand is met and hardship subsides.
 
-These alleys and buildings become part of the city; players can rebuild or remove their roads. When financially viable, slum buildings are replaced by ordinary buildings or by multi-storey slum buildings with a shop or workshop on the ground floor. Planned housing and road development helps residents obtain formal homes and supports prevention and redevelopment of sprawl.
+These alleys and buildings become part of the city; players can rebuild or remove their roads. When financially viable, slum buildings are replaced by multi-storey slum buildings with a shop or workshop on the ground floor. Slum buildings are occasionally torn down for no particular reason, and the small vacant parcels left behind are absorbed into their neighbors, so over a long time a slum consolidates into ordinary urban land where regular buildings can stand. Planned housing and road development helps residents obtain formal homes and supports prevention and redevelopment of sprawl.
 
