@@ -21,9 +21,8 @@ public static class WaterPipeTerminal
         metal = RoadPath.GetOrCreateRoadMaterial(metal) ?? RoadPath.GetOrCreateRoadMaterialByName("BuildingMaterial");
         var concrete = RoadPath.GetOrCreateRoadMaterialByName("COMMON_CONCRETE") ?? metal;
 
-        // body の横幅は上面の頂点で合わせるため、管全体の幅はマスターの幅より大きくなる。
-        float renderedWidth = width * source.bounds.size.x / Mathf.Max(.001f, RoadPath.GetBodySurfaceBounds(source).size.x);
-        float centerY = RoadPartHeights.BODY_ABOVE_SPLINE - source.bounds.extents.y;
+        // 管はモデルの原点からの高さを保ち、全幅をマスターの幅に合わせて配置される。
+        float centerY = RoadPartHeights.BODY_ABOVE_SPLINE + source.bounds.center.y;
         for (int end = 0; end < 2; end++)
         {
             bool start = end == 0;
@@ -39,7 +38,7 @@ public static class WaterPipeTerminal
             Vector3 forward = point - points[start ? 1 : points.Count - 2];
             forward.y = 0f;
             if (forward.sqrMagnitude < .0001f) continue;
-            Build(root, point + Vector3.up * centerY, forward.normalized, renderedWidth, source.bounds.extents.y, metal, concrete);
+            Build(root, point + Vector3.up * centerY, forward.normalized, width, source.bounds.extents.y, metal, concrete);
         }
     }
 

@@ -36,6 +36,8 @@ public static class RoadEquipmentQA
             pathType = assembly.GetType("GeneratedModels.PathSummary");
             itemType = assembly.GetType("PathMasterItem");
             masters = CreateManager("MasterDataStore", "pathMasterById");
+            var masterType = assembly.GetType("MasterDataStore");
+            masterType.GetProperty("IsInitialized").SetValue(masterType.GetProperty("Instance").GetValue(null), true);
             models = CreateManager("ModelManager", "_modelCache");
             foreach (string file in Directory.GetFiles("Assets/Paths", "*.fbx", SearchOption.AllDirectories))
             {
@@ -79,6 +81,8 @@ public static class RoadEquipmentQA
         var item = Activator.CreateInstance(itemType);
         Set(item, "width", width); Set(item, "sidewalk_width", sidewalk); Set(item, "lanes", 2);
         Set(item, "follow_terrain", false);
+        // 下り勾配も地表の設備として検査し、トンネル内の設備抑制と分ける。
+        Set(item, "height", 20f);
         Set(item, "streetlight_type_allowed", variant != 201);
         Set(item, "street_tree_type_allowed", sidewalk > 0);
         Set(item, "fence_type_allowed", sidewalk > 0 || variant == 301);

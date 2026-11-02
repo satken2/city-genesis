@@ -160,7 +160,7 @@ public static class ConstructionPathBuilder
                 // Variants with base_height preserve model ground clearance as when completed (see RoadPath.CreateRoadParts).
                 GameObject body = RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/body", width, 0,
                     RoadPartHeights.BODY_ABOVE_SPLINE, fallbackPrefabName: type + "/body", singleSpan: singleSpan,
-                    normalizeBodySurface: baseHeight <= 0f);
+                    roadSurface: baseHeight <= 0f && path.path_type != Constants.PATH_WATER);
                 if (sidewalk > 0f)
                 {
                     for (int side = -1; side <= 1; side += 2)

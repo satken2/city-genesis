@@ -17,7 +17,7 @@ Rendering does not modify saved data. Intersection trimming, ramp height blendin
 
 ## Cross-sections and height
 
-Master `width` is total road width. Sidewalks lie inside its edges, walls and guardrails outside, and medians at the center. Master fields such as `sidewalk_width`, `wall_width`, and `center_width` size the parts. Height has two layers: the spline floats slightly above terrain, and parts sit at fixed offsets from it. `RoadPartHeights` centralizes these values for intersections, vehicles, and pedestrians too.
+Master `width` is total road width. Sidewalks lie inside its edges, walls and guardrails outside, and medians at the center. Master fields such as `sidewalk_width`, `wall_width`, and `center_width` size the parts. Height has two layers: the spline floats slightly above terrain, and parts sit at fixed offsets from it. `RoadPartHeights` centralizes these values for intersections, vehicles, and pedestrians too. Models are authored with this placement position as their origin, and rendering uses vertex heights relative to that origin directly. Road surfaces and track beds place their top at the origin; structures rising above ground, such as water conduits, place their geometry above it.
 
 Marked streets and motorways (`PATH_STREET`, `PATH_MOTORWAY`) render lane and stop lines in the road shader rather than separate part planes. Markings and vehicle lanes share one lane-position definition.
 

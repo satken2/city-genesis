@@ -90,7 +90,7 @@ public class StationHousePath : IPathMeshGenerator
             if (existingBody) bodyPath = $"Models/Paths/p{pathData.path_variant}/body";
             RoadPath.CreateSplineMesh(container, spline, bodyPath, width,
                 0f, RoadPartHeights.STATION_BRIDGE_BASE_ABOVE_SPLINE, false, bodyFallbackPath,
-                stretchToWidth: false, singleSpan: singleSpan, maxTileLength: 0f, normalizeBodySurface: false);
+                stretchToWidth: false, singleSpan: singleSpan, maxTileLength: 0f, roadSurface: false);
 
             bridgeColliderMesh = RoadPath.BuildColliderMeshFromSpline(spline, width);
             if (bridgeColliderMesh != null)

@@ -232,7 +232,7 @@ public static class LrtPlatformParts
                     if (modeled)
                         RoadPath.CreateSplineMesh(parent, spline, variantBase + "/lrt_platform", width, side * track, railTop, side < 0,
                             typeBase + "/lrt_platform", stretchToWidth: false, clipFrom: from, clipTo: to, compensatePivot: false,
-                            maxTileLength: 0f, normalizeBodySurface: false);
+                            maxTileLength: 0f, roadSurface: false);
                     else BuildSlab(parent, spline, from, to, side, inner, outer, surface);
                     float rampLateral = side * (inner + width * .5f);
                     if (piece.RampAtFrom) PlaceRamp(parent, end, spline, from, false, rampLateral, railTop);

@@ -349,11 +349,20 @@ public static class IntersectionQA
 
  static void CheckSurfaceOrigins(Assembly asm, IDictionary cache)
  {
+  foreach (string file in Directory.GetFiles("Assets/Paths", "*.fbx", SearchOption.AllDirectories))
+  {
+   if (Path.GetFileNameWithoutExtension(file) != "body" && Path.GetFileNameWithoutExtension(file) != "body_close") continue;
+   int id = int.Parse(Path.GetFileName(Path.GetDirectoryName(file)).Substring(1));
+   if (id == 12 || id == 20 || id == 1101 || id == 1102 || id >= 2000 && id < 2100) continue;
+   var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(file.Replace('\\','/'));
+   var source=prefab.GetComponent<MeshFilter>().sharedMesh;
+   if (Mathf.Abs(source.bounds.max.y)>.0001f) throw new Exception("Source surface is not at origin: "+file);
+  }
   foreach(int variant in new[]{100,101})foreach(string part in new[]{"sidewalk","line"})
   {
    string path="Models/Paths/p"+variant+"/"+part;
    var source=((GameObject)cache[path]).GetComponent<MeshFilter>().sharedMesh;
-   var mesh=(Mesh)asm.GetType("RoadPath").GetMethod("GetRoadPartMesh").Invoke(null,new object[]{source,path});
+   var mesh=source;
    if(mesh.bounds.min.y>.01f||mesh.bounds.min.y<-.03f)throw new Exception("Part base does not meet road surface: "+path+" minY="+mesh.bounds.min.y);
   }
  }

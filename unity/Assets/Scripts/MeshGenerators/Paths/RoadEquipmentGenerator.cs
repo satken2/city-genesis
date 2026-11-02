@@ -234,7 +234,7 @@ public static class RoadEquipmentGenerator
     /// </summary>
     internal static float SurfaceHeight(PathSummary path, string part, float widthFraction = 0f)
     {
-        // Generation aligns body tops to Y=0. Sidewalks also subtract body height from their selected model family.
+        // 路面は原点、歩道の段差はモデルの相対高さで定義する。
         if (part == "body") return RoadPartHeights.BODY_ABOVE_SPLINE;
         string resourcePath = $"Models/Paths/p{path.path_variant}/{part}";
         var prefab = ModelManager.Instance?.GetModel(resourcePath);
@@ -245,7 +245,6 @@ public static class RoadEquipmentGenerator
         }
         var mesh = prefab != null ? prefab.GetComponent<MeshFilter>()?.sharedMesh : null;
         if (mesh == null) return RoadPartHeights.BODY_ABOVE_SPLINE;
-        mesh = RoadPath.GetRoadPartMesh(mesh, resourcePath);
         // Curb/walking-surface heights differ. Use top height at placement lateral position, not full bounds maximum.
         Vector3 point = mesh.bounds.center;
         point.x += widthFraction * mesh.bounds.size.x;
@@ -290,8 +289,6 @@ public static class RoadEquipmentGenerator
         var mesh = prefab.GetComponent<MeshFilter>()?.sharedMesh;
         if (faceRoad && mesh != null && mesh.bounds.center.x > 0f)
             pose.rotation *= Quaternion.Euler(0f, 180f, 0f);
-        // Legacy common models lacking ground-contact origins also align mesh bottoms to the floor.
-        if (mesh != null) pose.position -= Vector3.up * (mesh.bounds.min.y * prefab.transform.localScale.y);
         var go = Object.Instantiate(prefab, pose.position, pose.rotation, parent.transform);
         PreparePrefab(go);
         return true;

@@ -17,8 +17,6 @@ public class RoadPath : IPathMeshGenerator
     private static readonly StageMarker pillarInstantiateMarker = new StageMarker("Path.Pillars.Instantiate");
     private static readonly Dictionary<string, Material> MaterialCache = new Dictionary<string, Material>();
     private static readonly Dictionary<Mesh, Mesh> MirroredMeshCache = new Dictionary<Mesh, Mesh>();
-    private static readonly Dictionary<(Mesh, float), Mesh> PartMeshCache = new Dictionary<(Mesh, float), Mesh>();
-    private static readonly Dictionary<Mesh, Mesh> BodyMeshCache = new Dictionary<Mesh, Mesh>();
     private static readonly Dictionary<Mesh, Bounds> BodySurfaceBoundsCache = new Dictionary<Mesh, Bounds>();
     /// <summary>Part vertices/UVs/triangles copied by sidewalk connectors. Keys are immutable shared-prefab meshes; read only.</summary>
     private static readonly Dictionary<Mesh, (Vector3[] vertices, Vector2[] uv, int[][] triangles)> ConnectorSourceCache
@@ -31,8 +29,6 @@ public class RoadPath : IPathMeshGenerator
     {
         MaterialCache.Clear();
         MirroredMeshCache.Clear();
-        PartMeshCache.Clear();
-        BodyMeshCache.Clear();
         BodySurfaceBoundsCache.Clear();
         ConnectorSourceCache.Clear();
     }
@@ -165,20 +161,6 @@ public class RoadPath : IPathMeshGenerator
             new Vector3(right - left, 0f, bounds.size.z));
     }
 
-    private static Mesh GetBodySurfaceMesh(Mesh source)
-    {
-        if (BodyMeshCache.TryGetValue(source, out var cached)) return cached;
-        var mesh = UnityEngine.Object.Instantiate(source);
-        // Absorb tiny FBX-origin errors; align shared intersection road height to y=0.
-        var vertices = mesh.vertices;
-        float surfaceY = source.bounds.max.y;
-        for (int i = 0; i < vertices.Length; i++) vertices[i].y -= surfaceY;
-        mesh.vertices = vertices;
-        mesh.RecalculateBounds();
-        BodyMeshCache[source] = mesh;
-        return mesh;
-    }
-
     private static Mesh GetOrCreateMirroredMesh(Mesh originalMesh)
     {
         if (originalMesh == null) return null;
@@ -193,32 +175,6 @@ public class RoadPath : IPathMeshGenerator
         MirroredMeshCache[key] = mirrored;
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   ミラーメッシュキャッシュ生成: '{key}'");
         return mirrored;
-    }
-
-    /// <summary>Use the same model family's road origin to avoid double-counting road height in attached parts.</summary>
-    public static Mesh GetRoadPartMesh(Mesh source, string resourcePath)
-    {
-        if (source == null) return null;
-        string part = resourcePath.Substring(resourcePath.LastIndexOf('/') + 1);
-        // Close-up parts (sidewalk_close, etc.) use the same road origin as standard parts.
-        if (part.EndsWith(PathDrawContext.CLOSE_SUFFIX, StringComparison.Ordinal))
-        {
-            part = part.Substring(0, part.Length - PathDrawContext.CLOSE_SUFFIX.Length);
-        }
-        if (part != "sidewalk" && part != "line") return source;
-        string bodyPath = resourcePath.Substring(0, resourcePath.LastIndexOf('/') + 1) + "body";
-        var body = ModelManager.Instance?.GetModel(bodyPath)?.GetComponent<MeshFilter>()?.sharedMesh;
-        float surfaceY = body != null ? body.bounds.max.y : 0f;
-        if (Mathf.Abs(surfaceY) < 1e-6f) return source;
-        var key = (source, surfaceY);
-        if (PartMeshCache.TryGetValue(key, out var cached)) return cached;
-        var mesh = UnityEngine.Object.Instantiate(source);
-        var vertices = mesh.vertices;
-        for (int i = 0; i < vertices.Length; i++) vertices[i].y -= surfaceY;
-        mesh.vertices = vertices;
-        mesh.RecalculateBounds();
-        PartMeshCache[key] = mesh;
-        return mesh;
     }
 
     public PathMeshResult Generate(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
@@ -348,18 +304,17 @@ public class RoadPath : IPathMeshGenerator
     /// Nonpositive means unlimited, using prefab actual Z length. Used for polylines without vertical curves
     /// (e.g. station-house footbridges) to preserve authored design-unit size.
     /// </param>
-    /// <param name="normalizeBodySurface">
-    /// Align body top to road origin Y=0. False for ground-origin station bridges to preserve model height.
-    /// False also disables road section LOD that substitutes spline-plane geometry.
+    /// <param name="roadSurface">
+    /// 路面幅での横方向の伸縮と、路面用の区間LODを使うかどうか。高さはモデルの原点基準で配置する。
     /// </param>
-    public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true, float maxTileLength = MAX_EXTRUDE_TILE_LENGTH, bool normalizeBodySurface = true)
+    public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true, float maxTileLength = MAX_EXTRUDE_TILE_LENGTH, bool roadSurface = true)
     {
         using var scope = splineMeshMarker.Auto();
         // Even through the shared construction entry point, do not widen ropeway cables to road width.
         if (prefabName == "Models/Paths/p601/body" || prefabName == "Models/Paths/p602/body")
         {
             stretchToWidth = false;
-            normalizeBodySurface = false;
+            roadSurface = false;
         }
         // Deformations such as track-join S curves propagate through deferred section LOD and vertex-limit splitting.
         PartWarp warp = PathDrawContext.Warp;
@@ -388,7 +343,7 @@ public class RoadPath : IPathMeshGenerator
             return null;
         }
 
-        if (normalizeBodySurface && !singleSpan && !isDashed && !PathDrawContext.SuppressDetailRange && spline.CalculateLength() >= 256f
+        if (roadSurface && !singleSpan && !isDashed && !PathDrawContext.SuppressDetailRange && spline.CalculateLength() >= 256f
             && parent.GetComponentInParent<SplinePartLod>() == null)
         {
             var group = new GameObject(prefabName + "_LOD");
@@ -411,7 +366,7 @@ public class RoadPath : IPathMeshGenerator
                     {
                         return CreateSplineMesh(group, spline, prefabName, width, centerOffsetX, offsetY,
                             mirrorX, fallbackPrefabName, isDashed, stretchToWidth, from, to, singleSpan,
-                            compensatePivot, maxTileLength, normalizeBodySurface);
+                            compensatePivot, maxTileLength, roadSurface);
                     }
                     finally { PathDrawContext.End(); }
                 });
@@ -440,8 +395,8 @@ public class RoadPath : IPathMeshGenerator
 
         if(mf != null && mf.sharedMesh != null)
         {
-             bool isBody = normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal);
-             Mesh meshToUse = isBody ? GetBodySurfaceMesh(mf.sharedMesh) : GetRoadPartMesh(mf.sharedMesh, resolvedPrefabName);
+             bool isBody = roadSurface && prefabName.EndsWith("/body", StringComparison.Ordinal);
+             Mesh meshToUse = mf.sharedMesh;
              if (warp?.SourceMesh != null) meshToUse = warp.SourceMesh(meshToUse);
              Bounds fittingBounds = isBody ? GetBodySurfaceBounds(meshToUse) : meshToUse.bounds;
              UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   メッシュ: '{mf.sharedMesh.name}', bounds={mf.sharedMesh.bounds.size}, vertexCount={mf.sharedMesh.vertexCount}");
@@ -659,7 +614,7 @@ public class RoadPath : IPathMeshGenerator
                             double to = clipFrom + (clipTo - clipFrom) * last / totalCount;
                             CreateSplineMesh(group, spline, prefabName, width, centerOffsetX, offsetY,
                                 mirrorX, fallbackPrefabName, false, stretchToWidth, from, to,
-                                false, compensatePivot, maxTileLength, normalizeBodySurface);
+                                false, compensatePivot, maxTileLength, roadSurface);
                         }
                         return group;
                     }
@@ -685,7 +640,7 @@ public class RoadPath : IPathMeshGenerator
             using (splineMeshCapsMarker.Auto())
                 RemoveInternalTileCaps(go.GetComponent<MeshFilter>()?.sharedMesh, channel);
 
-        if (normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal))
+        if (roadSurface && prefabName.EndsWith("/body", StringComparison.Ordinal))
             parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
 
         if (mf != null && mf.sharedMesh != null)
@@ -966,15 +921,13 @@ public class RoadPath : IPathMeshGenerator
         // Road Body
         // Raise body above spline to prevent burial from terrain-resolution limits/Z-fighting.
         // single_span=true stretches one body without tiling (straight span between anchors).
-        // Ropeways preserve actual cable spacing/origins; do not rebase station roofs as road surfaces.
-        // For base_height variants (power lines), splines sit at ground and models supply wire clearance;
-        // aligning their tops to Y=0 would drop wires to ground.
+        // 路面・道床は上面が原点。管・鉄塔・駅舎など地表原点の構造も、モデルの相対高さをそのまま使う。
         bool ropeway = IsRopewayVariant(pathData.path_variant);
         Material bodyMaterial = ResolveBodyMaterial(pathData.path_variant, pathData.path_type);
-        GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, normalizeBodySurface: baseHeight <= 0f);
+        GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, roadSurface: baseHeight <= 0f && pathData.path_type != Constants.PATH_WATER);
         if (ropeway)
             CreateSplineMesh(container, spline, $"{variantBase}/station_shell", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
-                stretchToWidth: false, maxTileLength: 0, normalizeBodySurface: false);
+                stretchToWidth: false, maxTileLength: 0, roadSurface: false);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] body: {(roadBody != null ? "生成成功" : "生成失敗（プレハブなし？）")}");
 
         if (roadBody == null)
@@ -1639,7 +1592,6 @@ public class RoadPath : IPathMeshGenerator
             prefab = ModelManager.Instance.GetModel(resourcePath);
         }
         Mesh source = prefab != null ? prefab.GetComponent<MeshFilter>()?.sharedMesh : null;
-        source = GetRoadPartMesh(source, resourcePath);
         if (source == null) return;
         Bounds bounds = source.bounds;
         if (bounds.size.x < 1e-5f || bounds.size.z < 1e-5f) return;

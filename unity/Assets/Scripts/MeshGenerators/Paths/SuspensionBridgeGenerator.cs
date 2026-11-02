@@ -34,7 +34,7 @@ public static class SuspensionBridgeGenerator
         string truss = $"Models/Paths/p{path.path_variant}/truss";
         if (PathDrawContext.ResolvePrefab(truss, null, out _) != null)
             RoadPath.CreateSplineMesh(parent, spline, truss, width, 0, RoadPartHeights.BODY_ABOVE_SPLINE,
-                stretchToWidth: false, maxTileLength: 0, normalizeBodySurface: false);
+                stretchToWidth: false, maxTileLength: 0, roadSurface: false);
     }
 
     /// <summary>

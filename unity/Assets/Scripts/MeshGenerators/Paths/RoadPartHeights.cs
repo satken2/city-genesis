@@ -24,8 +24,8 @@
 /// Vertical prefab pivot conventions (constants require these):
 ///   - body: pivot=road top (thickness extends downward).
 ///   - line / sidewalk / wall / center: pivot=bottom (extends upward; curb rise is prefab geometry).
-///   Legacy body/line/sidewalk models including road height are rebased to road origin in generation meshes.
-///   Correct sidewalks/lines using body-top Y from the same selected model family.
+///   すべてのパーツは原本の原点基準で著作し、実行時に頂点の高さを補正しない。
+///   地表原点の管・鉄塔・駅舎は、構造の高さをモデル自身に持たせる。
 /// </summary>
 public static class RoadPartHeights
 {
