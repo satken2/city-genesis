@@ -26,6 +26,8 @@ City and facility diagnostics display trees of factors investigated by the core 
 
 ## Common styles
 
+Show guidance for map drawing and selection in the hint bar, and keep settings and action controls in the operation panel.
+
 Use shared tokens for colors, shadows, and state colors, and shared components for forms and tabs. Align body text, ordinary fields, and action labels to the common base size; vary headings, aggregate values, and supplementary text according to information roles.
 
 Font sizes follow root settings, and dimensions tied to body text generally use rem. Treat physical coordinates, such as OS window placement, separately. Adapt to narrow windows according to width rather than runtime environment. Consult shared styles and component sources for concrete tokens and dimensions.

@@ -22,19 +22,6 @@
   border-bottom: 1px solid #2a3149;
 }
 
-.street-grid__hint {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1rem;
-  color: #cdd6f4;
-  white-space: nowrap;
-}
-
-.street-grid__count {
-  color: #6c7a94;
-}
-
 .street-grid__block-hint {
   flex-basis: 100%;
   font-size: 1rem;
@@ -43,6 +30,7 @@
 
 .street-grid__controls {
   display: flex;
+  flex-basis: 100%;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
@@ -69,6 +57,7 @@
 
 /* Street type checkboxes wrap within the field because there are many types. */
 .street-grid__variants {
+  flex-basis: 100%;
   flex-wrap: wrap;
   white-space: normal;
 }
@@ -92,6 +81,7 @@
 
 .street-grid__actions {
   display: flex;
+  margin-left: auto;
   gap: 6px;
   flex-shrink: 0;
 }

@@ -10,6 +10,7 @@ import { describeError } from "../../utils/errors";
  *
  * 左クリックで頂点追加、右クリック・Delete・Backspaceで末尾削除、左ドラッグで移動、ホイールで拡大縮小する。
  * CityMapCanvasのパンを許可し、押下から解放までの移動距離で頂点追加とドラッグを判別する。
+ * 地図の表示領域を確保するため、範囲指定の操作案内はヒントバーに表示する。
  *
  * 最初に受けたcamera:stateだけを使い、3Dカメラ位置に地図を合わせる。
  */
@@ -28,6 +29,7 @@ import {
 } from "../map/CityMapCanvas";
 import { IPC_EVENT_CAMERA_STATE, sendCameraQueryState, sendSessionReload } from "../../utils/ipc";
 import { buildApiUrl, fetchApi } from "../../utils/api";
+import { clearHintbarTextIf, setHintbarText } from "../../utils/hintbar";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { PATH_STREET } from "../../constants";
 import "./StreetGridWindow.css";
@@ -110,6 +112,14 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [preview, setPreview] = useState<{ plan: StreetGridPlan; summary: string } | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
   const blockMode = BLOCK_PATTERNS.some((key) => key === pattern);
+  const hint = t(vertices.length < 3 ? "scenarioTools.hintAddVertices" : "scenarioTools.hintReady");
+
+  useEffect(() => {
+    void setHintbarText(hint).catch(console.error);
+    return () => {
+      void clearHintbarTextIf(hint).catch(console.error);
+    };
+  }, [hint]);
 
   // CityMapCanvas mirrors pointer handlers in refs, so also keep vertices and hover position
   // in refs to access them without recreating handlers.
@@ -135,7 +145,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       .filter(({ entry }) => entry.type === PATH_STREET && !entry.height_editable && entry.frontage_allowed)
       .filter(({ entry }) => !blockMode || entry.lanes === 1)
       .sort((a, b) => a.id - b.id)
-      .map(({ id, entry }) => ({ id, name: entry.display_name, grade: entry.max_grade }));
+      .map(({ id, entry }) => ({ id, name: entry.display_name }));
   }, [masterData, blockMode]);
 
   // Drop types that the pattern cannot use and fall back to the default only when nothing remains.
@@ -374,9 +384,19 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   return (
     <div className="street-grid">
       <div className="street-grid__toolbar">
-        <div className="street-grid__hint">
-          {vertices.length < 3 ? t("scenarioTools.hintAddVertices") : t("scenarioTools.hintReady")}
-          <span className="street-grid__count">{t("scenarioTools.vertexCount", { count: vertices.length })}</span>
+        <div className="street-grid__field street-grid__variants">
+          <span>{t("scenarioTools.variant")}</span>
+          {streetVariants.map((v) => (
+            <label key={v.id} className="street-grid__variant">
+              <input
+                type="checkbox"
+                checked={variants?.includes(v.id) ?? false}
+                disabled={busy}
+                onChange={(e) => toggleVariant(v.id, e.target.checked)}
+              />
+              {v.name}
+            </label>
+          ))}
         </div>
         <div className="street-grid__controls">
           <label className="street-grid__field">
@@ -413,20 +433,6 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             />
             <span className="street-grid__unit">m</span>
           </label>
-          <div className="street-grid__field street-grid__variants">
-            <span>{t("scenarioTools.variant")}</span>
-            {streetVariants.map((v) => (
-              <label key={v.id} className="street-grid__variant">
-                <input
-                  type="checkbox"
-                  checked={variants?.includes(v.id) ?? false}
-                  disabled={busy}
-                  onChange={(e) => toggleVariant(v.id, e.target.checked)}
-                />
-                {v.grade ? t("scenarioTools.variantOption", { name: v.name, grade: v.grade }) : v.name}
-              </label>
-            ))}
-          </div>
           {!blockMode && <label className="street-grid__field">
             <span>{t("scenarioTools.angle")}</span>
             <select value={angleAuto ? "auto" : "manual"} disabled={busy} onChange={(e) => setAngleAuto(e.target.value === "auto")}>
@@ -448,20 +454,20 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               />
             )}
           </label>}
-        </div>
-        <div className="street-grid__actions">
-          <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={removeLastVertex}>
-            {t("scenarioTools.undoVertex")}
-          </button>
-          <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={() => setVertices([])}>
-            {t("scenarioTools.clearVertices")}
-          </button>
-          <button type="button" className="street-grid__btn" disabled={!canCreate} onClick={() => void previewStreetGrid()}>
-            {running === "preview" ? t("scenarioTools.previewing") : t("scenarioTools.preview")}
-          </button>
-          <button type="button" className="street-grid__btn street-grid__btn--primary" disabled={!canCreate} onClick={() => void createStreetGrid()}>
-            {running === "create" ? t("scenarioTools.creating") : t("scenarioTools.create")}
-          </button>
+          <div className="street-grid__actions">
+            <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={removeLastVertex}>
+              {t("scenarioTools.undoVertex")}
+            </button>
+            <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={() => setVertices([])}>
+              {t("scenarioTools.clearVertices")}
+            </button>
+            <button type="button" className="street-grid__btn" disabled={!canCreate} onClick={() => void previewStreetGrid()}>
+              {running === "preview" ? t("scenarioTools.previewing") : t("scenarioTools.preview")}
+            </button>
+            <button type="button" className="street-grid__btn street-grid__btn--primary" disabled={!canCreate} onClick={() => void createStreetGrid()}>
+              {running === "create" ? t("scenarioTools.creating") : t("scenarioTools.create")}
+            </button>
+          </div>
         </div>
         {blockMode && <div className="street-grid__block-hint">{t("scenarioTools.blockHint")}</div>}
       </div>
