@@ -65,7 +65,12 @@
       "bulldoze": "拆除",
       "cancelBulldoze": "取消拆除",
       "merge": "與相鄰路徑合併",
-      "split": "分割路徑"
+      "split": "分割路徑",
+      "attachDeck": "建設下層"
+    },
+    "attachDeck": {
+      "confirm": "建設",
+      "cancel": "取消"
     },
     "rebuild": {
       "title": "變更變體",

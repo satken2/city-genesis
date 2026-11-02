@@ -42,6 +42,7 @@ import {
   STATUS_CONSTRUCTING,
   STATUS_PENDING,
   STATUS_DEMOLISHING,
+  STATUS_COLLAPSED,
   ALERT_PATH_CONSTRUCTION_SHORTAGE,
   ALERT_PATH_ACCIDENT,
   ALERT_PATH_NO_STATION_HOUSE,
@@ -60,6 +61,7 @@ import { PathColorRow } from "./PathColorRow";
 import { PathTrafficPanel } from "./PathTrafficPanel";
 import { PathOperationPanel } from "./PathOperationPanel";
 import { PathTopologyEditPanel } from "./PathTopologyEditPanel";
+import { PathAttachDeckSection } from "./PathAttachDeckSection";
 import type { PathTopologyEditMode } from "./PathTopologyEditPanel";
 import { PathConstructionInfoPanel } from "./PathConstructionInfoPanel";
 import { PATH_REBUILD_CHANGED_EVENT } from "./pathRebuildApi";
@@ -96,8 +98,11 @@ export function PathDetailPanel({
   const [statusSaving, setStatusSaving] = useState(false);
   // Active path merge/split operation. While non-null, the 3D view is in target selection mode.
   const [topologyEditMode, setTopologyEditMode] = useState<PathTopologyEditMode | null>(null);
+  const [attachDeckOpen, setAttachDeckOpen] = useState(false);
 
   const url = buildApiUrl(apiBaseUrl, pathTemplate, initialEntityId);
+
+  useEffect(() => setAttachDeckOpen(false), [initialEntityId]);
 
   useEffect(() => {
     const unlisten = listen<{ path_id: number }>(PATH_REBUILD_CHANGED_EVENT, event => {
@@ -361,6 +366,12 @@ export function PathDetailPanel({
         })
         : t("path.titleWithId", { id: pathData.path_id });
 
+  // Lower decks that can still be built under this path: one per host, not under a host being demolished or collapsed
+  // (the core applies the same rule).
+  const hasAttachedPath = pathData.attached_path_id != null && pathData.attached_path_id !== VALUE_NONE;
+  const attachChoices = hasAttachedPath || pathData.status === STATUS_DEMOLISHING || pathData.status === STATUS_COLLAPSED
+    ? [] : masterData?.paths[pathData.path_variant]?.attach_variants ?? [];
+
   const showZoneRow = pathData.zone_name != null || canChangeZone;
   const showFollowTerrainRow = pathData.follow_terrain === 0 || pathData.follow_terrain === 1;
   const showColorRow = pathData.color != null;
@@ -411,7 +422,24 @@ export function PathDetailPanel({
           // Pressing the same button again cancels the operation (also restores normal 3D mode).
           setTopologyEditMode((current) => (current === mode ? null : mode))
         }
+        attachDeckAvailable={attachChoices.length > 0}
+        attachDeckOpen={attachDeckOpen}
+        onToggleAttachDeck={() => setAttachDeckOpen((open) => !open)}
       />
+
+      {attachDeckOpen && attachChoices.length > 0 && (
+        <PathAttachDeckSection
+          key={pathData.path_id}
+          apiBaseUrl={apiBaseUrl}
+          hostPathId={pathData.path_id}
+          choices={attachChoices}
+          onClose={() => setAttachDeckOpen(false)}
+          onCompleted={() => {
+            setAttachDeckOpen(false);
+            setRefreshKey((k) => k + 1);
+          }}
+        />
+      )}
 
       {/*
  * During merge/split: section for 3D target selection, length review, and confirmation.

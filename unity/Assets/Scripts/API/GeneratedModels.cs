@@ -513,6 +513,8 @@ namespace GeneratedModels
         public int? road_id;
         /// <summary>色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る</summary>
         public string color;
+        /// <summary>このパスの構造に付帯する子(吊り橋の下段)のパスID。-1(VALUE_NONE)は付帯なし</summary>
+        public int? attached_path_id;
     }
 
     [Serializable]

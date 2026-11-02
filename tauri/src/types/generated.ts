@@ -496,6 +496,8 @@ export type PathData = {
   road_id?: number;
   /** 色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る */
   color?: string;
+  /** このパスの構造に付帯する子(吊り橋の下段)のパスID。-1(VALUE_NONE)は付帯なし */
+  attached_path_id?: number;
 };
 
 export type ParcelSummary = {

@@ -645,8 +645,9 @@ export type PathMasterEntry = {
   /** Paint color ("#RRGGBB") of paths without their own color. null for variants that use no color. */
   default_color?: string | null;
   /**
-   * Variants this path can carry as an attached lower deck, built in the same placement with this path's shape.
-   * Attached variants are template_only, so they are placed only this way in normal play. Empty/unset means none.
+   * Variants this path can carry as an attached lower deck, built with this path's shape in the same placement or
+   * later from path details. Attached variants are template_only, so they are placed only this way in normal play.
+   * Empty/unset means none.
    */
   attach_variants?: number[];
   /** Surface height of an attached path relative to this path's surface, in m (negative = below). */
@@ -926,6 +927,8 @@ export type PathData = {
   parcel_id?: number;
   start_node_id?: number;
   end_node_id?: number;
+  /** ID of the path attached under this one (suspension bridge lower deck). VALUE_NONE when none. */
+  attached_path_id?: number | null;
 };
 
 /**

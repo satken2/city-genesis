@@ -65,7 +65,12 @@
       "bulldoze": "Démolir",
       "cancelBulldoze": "Annuler la démolition",
       "merge": "Fusionner avec la voie voisine",
-      "split": "Diviser la voie"
+      "split": "Diviser la voie",
+      "attachDeck": "Construire le tablier inférieur"
+    },
+    "attachDeck": {
+      "confirm": "Construire",
+      "cancel": "Annuler"
     },
     "rebuild": {
       "title": "Changer de variante",

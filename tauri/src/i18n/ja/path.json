@@ -65,7 +65,12 @@
       "bulldoze": "取り壊し",
       "cancelBulldoze": "取り壊し解除",
       "merge": "隣のパスと結合",
-      "split": "パスを分割"
+      "split": "パスを分割",
+      "attachDeck": "下段を建設"
+    },
+    "attachDeck": {
+      "confirm": "建設する",
+      "cancel": "キャンセル"
     },
     "rebuild": {
       "title": "バリアント変更",

@@ -65,7 +65,12 @@
       "bulldoze": "철거",
       "cancelBulldoze": "철거 취소",
       "merge": "옆 경로와 결합",
-      "split": "경로 분할"
+      "split": "경로 분할",
+      "attachDeck": "하층 건설"
+    },
+    "attachDeck": {
+      "confirm": "건설",
+      "cancel": "취소"
     },
     "rebuild": {
       "title": "바리안트 변경",

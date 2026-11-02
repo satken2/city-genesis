@@ -65,7 +65,12 @@
       "bulldoze": "Bulldoze",
       "cancelBulldoze": "Cancel Demolition",
       "merge": "Merge with adjacent path",
-      "split": "Split path"
+      "split": "Split path",
+      "attachDeck": "Build lower deck"
+    },
+    "attachDeck": {
+      "confirm": "Build",
+      "cancel": "Cancel"
     },
     "rebuild": {
       "title": "Change variant",

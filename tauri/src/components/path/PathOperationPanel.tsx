@@ -24,6 +24,7 @@ import rocketIcon from "../../assets/images/ui/rocket.png";
 import pendingIcon from "../../assets/images/ui/pending.png";
 import mergeIcon from "../../assets/images/ui/path_merge.svg";
 import splitIcon from "../../assets/images/ui/path_split.svg";
+import attachDeckIcon from "../../assets/images/ui/path_attach_deck.svg";
 import "./PathOperationPanel.css";
 
 async function openPathEdit(pathId: number) {
@@ -44,6 +45,10 @@ type PathOperationPanelProps = {
   onStartTopologyEdit: (mode: PathTopologyEditMode) => void;
   /** Current merge/split operation (null if none), used for button on states. */
   topologyEditMode: PathTopologyEditMode | null;
+  /** Whether a lower deck can still be built under this path. The parent opens PathAttachDeckSection. */
+  attachDeckAvailable: boolean;
+  attachDeckOpen: boolean;
+  onToggleAttachDeck: () => void;
 };
 
 const PRE_CONSTRUCTION = new Set([STATUS_TEMPORARY, STATUS_SCHEDULED_CONSTRUCTION, STATUS_PENDING]);
@@ -54,6 +59,9 @@ export function PathOperationPanel({
   onActionPerformed,
   onStartTopologyEdit,
   topologyEditMode,
+  attachDeckAvailable,
+  attachDeckOpen,
+  onToggleAttachDeck,
 }: PathOperationPanelProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -164,6 +172,20 @@ export function PathOperationPanel({
     }
   }
 
+  const attachDeckButton = attachDeckAvailable && (
+    <button
+      className={`operation-btn${attachDeckOpen ? " operation-btn--on" : ""}`}
+      type="button"
+      title={t("path.action.attachDeck")}
+      aria-label={t("path.action.attachDeck")}
+      data-guide="path.attachDeck.open"
+      disabled={loading}
+      onClick={onToggleAttachDeck}
+    >
+      <img src={attachDeckIcon} alt="" />
+    </button>
+  );
+
   if (isPreConstruction) {
     return (
       <div className="operation-panel">
@@ -208,6 +230,7 @@ export function PathOperationPanel({
         >
           <img src={editIcon} alt={t("path.action.editShape")} />
         </button>
+        {attachDeckButton}
       </div>
     );
   }
@@ -301,6 +324,7 @@ export function PathOperationPanel({
           )}
         </>
       )}
+      {attachDeckButton}
     </div>
   );
 }
