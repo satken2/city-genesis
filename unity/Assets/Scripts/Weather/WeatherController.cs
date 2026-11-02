@@ -137,7 +137,7 @@ public sealed class WeatherController : MonoBehaviour
         if (pending && query == null && !suspended && Time.unscaledTime >= retryAt)
             query = StartCoroutine(ReadCity());
         float seconds = Time.unscaledDeltaTime;
-        Clock.Advance(seconds);
+        if (!TrafficClock.Paused) Clock.Advance(seconds);
         AdvanceWeather(seconds);
         ApplyEnvironment();
         RefreshSky(false);

@@ -155,6 +155,23 @@ public sealed class WeatherQaHost : MonoBehaviour
         clock.Paused = false;
         clock.Advance(WeatherClock.DaySeconds * 0.26f);
         Check(clock.Current == WeatherClock.Stage.Twilight, "sunset leads into twilight");
+        for (int half = 0; half < 2; half++)
+        {
+            var twilight = new WeatherClock();
+            twilight.Advance(WeatherClock.DaySeconds);
+            twilight.Advance(WeatherClock.TwilightSeconds * (0.25f + half * 0.5f));
+            float phase = twilight.Phase, darkness = twilight.Darkness;
+            twilight.Paused = true;
+            twilight.Advance(WeatherClock.TwilightSeconds * 2f);
+            Check(twilight.Current == WeatherClock.Stage.Twilight && twilight.Phase == phase && twilight.Darkness == darkness,
+                "paused twilight holds sun position and sky brightness on both sides of the sun's return");
+            twilight.Paused = false;
+            twilight.Advance(WeatherClock.TwilightSeconds * 0.1f);
+            Check(twilight.Current == WeatherClock.Stage.Twilight && twilight.Phase != phase && twilight.Darkness != darkness,
+                "unpaused twilight resumes from the held time");
+            twilight.Advance(WeatherClock.TwilightSeconds);
+            Check(twilight.Current == WeatherClock.Stage.Day, "unpaused twilight reaches sunrise");
+        }
         float peak = 0;
         for (int i = 0; i < 40; i++) { clock.Advance(WeatherClock.TwilightSeconds / 40f); peak = Mathf.Max(peak, clock.Darkness); }
         clock.Advance(0.01f);

@@ -24,7 +24,7 @@ public sealed class WeatherClock
     /// <summary>Ambient lighting: 0=day, 1=night.</summary>
     public float Darkness { get; private set; }
 
-    /// <summary>Pause daytime progression for capture without stopping twilight.</summary>
+    /// <summary>撮影用の時刻固定。昼間と薄明の両方で太陽の位置と時刻による明るさを保持する。</summary>
     public bool Paused;
 
     private float progress;
@@ -46,10 +46,11 @@ public sealed class WeatherClock
 
     public void Advance(float seconds)
     {
+        if (Paused) return;
         switch (Current)
         {
             case Stage.Day:
-                if (!Paused) Phase += seconds / DaySeconds;
+                Phase += seconds / DaySeconds;
                 if (Phase >= 1f) { Current = Stage.Twilight; progress = 0f; }
                 break;
             case Stage.Twilight:

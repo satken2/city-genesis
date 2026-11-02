@@ -2,9 +2,9 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Clock and pause state for traffic animation: ordinary cars, pedestrians, public transport, ropeways, aircraft, and ships.
-/// Avoid Time.timeScale because it also stops camera inertia, drag-speed division, and retry waits;
-/// each Manager instead multiplies elapsed time by Scale. Weather, time of day, water, and fires keep running.
+/// 一般車・歩行者・公共交通・索道・航空機・船舶の演出用時計と停止状態。描画用の時刻もこの停止状態に従う。
+/// カメラの慣性やドラッグ速度の計算、再試行待ちを止めないため、Time.timeScale は使わず各 Manager が経過時間に Scale を掛ける。
+/// 天候の変化、水面、火災は停止しない。
 /// </summary>
 public static class TrafficClock
 {

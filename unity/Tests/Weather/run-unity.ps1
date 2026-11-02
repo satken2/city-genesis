@@ -10,6 +10,7 @@ Copy-Item "$unityRoot/Assets/Resources/Audio/Construction/*.ogg*" "$qaRoot/Asset
 Copy-Item "$unityRoot/Assets/Resources/Audio/Vehicles/*.ogg*" "$qaRoot/Assets/Resources/Audio/Vehicles" -Force
 Remove-Item "$qaRoot/Assets/Runtime/*.cs" -Force -ErrorAction SilentlyContinue
 Copy-Item "$unityRoot/Assets/Scripts/Weather/*.cs" "$qaRoot/Assets/Runtime" -Force
+Copy-Item "$unityRoot/Assets/Scripts/Vehicles/TrafficClock.cs" "$qaRoot/Assets/Runtime" -Force
 Copy-Item "$unityRoot/Assets/Scripts/UI/UiFontProvider.cs" "$qaRoot/Assets/Runtime" -Force
 Copy-Item "$unityRoot/Assets/Scripts/Constants.cs" "$qaRoot/Assets/Runtime" -Force
 Copy-Item "$unityRoot/Assets/Scripts/Utils/PolylineUtils.cs" "$qaRoot/Assets/Runtime" -Force
