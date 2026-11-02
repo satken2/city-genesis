@@ -4,7 +4,7 @@ import { describeError } from "../../utils/errors";
  *
  * CityMapCanvasで多角形を指定し、選択したパターンの街路を計画中(STATUS_SCHEDULED_CONSTRUCTION)で作る。
  * 地形追従・街区内配置・接続と線形の検証はPOST /api/v1/paths/street-gridが担当する。
- * プレビューは同じ入力で作成される街路を返すため、入力を変えたら破棄する。
+ * 作成は現在の入力のプレビュー確認後にだけ許可し、入力を変えたらプレビューを破棄する。
  * 複数種類はバックエンドが最大勾配の小さい順に配置する。
  * 作成した街路は建設計画として通常の着工・竣工を待つ。シナリオ制作では一括完成も利用できる。
  *
@@ -345,7 +345,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   };
 
   async function previewStreetGrid() {
-    if (!canCreate) return;
+    if (!canPreview) return;
     const version = inputVersionRef.current;
     setRunning("preview");
     setMessage(null);
@@ -378,7 +378,8 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }
 
-  const canCreate = vertices.length >= 3 && (variants?.length ?? 0) > 0 && !busy;
+  const canPreview = vertices.length >= 3 && (variants?.length ?? 0) > 0 && !busy;
+  const canCreate = canPreview && preview !== null;
   const shownMessage = preview?.summary ?? message;
 
   return (
@@ -455,13 +456,10 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             )}
           </label>}
           <div className="street-grid__actions">
-            <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={removeLastVertex}>
-              {t("scenarioTools.undoVertex")}
-            </button>
             <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={() => setVertices([])}>
               {t("scenarioTools.clearVertices")}
             </button>
-            <button type="button" className="street-grid__btn" disabled={!canCreate} onClick={() => void previewStreetGrid()}>
+            <button type="button" className="street-grid__btn" disabled={!canPreview} onClick={() => void previewStreetGrid()}>
               {running === "preview" ? t("scenarioTools.previewing") : t("scenarioTools.preview")}
             </button>
             <button type="button" className="street-grid__btn street-grid__btn--primary" disabled={!canCreate} onClick={() => void createStreetGrid()}>

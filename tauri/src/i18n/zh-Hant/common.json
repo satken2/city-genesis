@@ -60,6 +60,7 @@
     "unknownResource": "未知資源"
   },
   "errors": {
+    "PATH_STREET_GRID_AREA_TOO_LARGE": "範圍過大。每次請選擇不超過 {{max_area_km2}} km² 的範圍。",
     "UNKNOWN_ERROR": "發生錯誤。",
     "CREATEPATH_INVALID_GEOMETRY": "路徑形狀無效。請確認起點與終點。",
     "CREATEPATH_OUTSIDE_COASTLINE": "無法在海岸線之外鋪設路徑。",

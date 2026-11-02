@@ -14,6 +14,8 @@ Transparent WebViews also receive input, so persistent UI windows must fit their
 
 Use common session, version, and play-mode state without duplicating retrieval or checks per screen. Follow [IPC principles](ipc.md) for editing and display synchronization. After a successful change affecting multiple windows, the changing side emits a global event and recipients refresh their displays.
 
+For creation actions that require preview review, enable confirmation only after receiving results for the current inputs, and invalidate that review when the inputs change.
+
 Time-series statistics use a common cache keyed to endpoint and epoch and display finalized API values. Current city totals and record holders display results aggregated by the core from the city state at retrieval time. Use record values and their holders' IDs and names from the same response; do not fetch every entity to recalculate rankings in the frontend. Distinguish missing values from zero and do not substitute current-period values into historical breakdowns.
 
 Use shared money formatting for digit grouping, compact notation, and currency units instead of defining them separately in screens or translation resources. Apply the same rule to chart ticks and tooltips, and do not reuse money formatting for quantities such as resource amounts or population counts.

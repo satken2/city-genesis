@@ -17,7 +17,6 @@
     "angle": "방향",
     "angleAuto": "가장 가까운 도로에 맞춤",
     "angleManual": "각도 지정",
-    "undoVertex": "되돌리기",
     "clearVertices": "지우기",
     "preview": "미리보기",
     "previewing": "계산 중...",

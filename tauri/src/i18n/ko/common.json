@@ -60,6 +60,7 @@
     "unknownResource": "알 수 없는 자원"
   },
   "errors": {
+    "PATH_STREET_GRID_AREA_TOO_LARGE": "범위가 너무 넓습니다. 한 번에 {{max_area_km2}} km² 이하의 범위를 지정하세요.",
     "UNKNOWN_ERROR": "오류가 발생했습니다.",
     "CREATEPATH_INVALID_GEOMETRY": "경로 형상이 올바르지 않습니다. 시작점과 끝점을 확인하세요.",
     "CREATEPATH_OUTSIDE_COASTLINE": "해안선 바깥에는 경로를 부설할 수 없습니다.",

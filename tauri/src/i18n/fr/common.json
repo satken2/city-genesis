@@ -60,6 +60,7 @@
     "unknownResource": "Ressource inconnue"
   },
   "errors": {
+    "PATH_STREET_GRID_AREA_TOO_LARGE": "La zone est trop grande. Sélectionnez une zone de {{max_area_km2}} km² ou moins à la fois.",
     "UNKNOWN_ERROR": "Une erreur est survenue.",
     "CREATEPATH_INVALID_GEOMETRY": "La forme de la voie est invalide. Vérifiez le point de départ et d'arrivée.",
     "CREATEPATH_OUTSIDE_COASTLINE": "Impossible de tracer une voie au-delà du littoral.",

@@ -17,7 +17,6 @@
     "angle": "向き",
     "angleAuto": "最寄りの道路に揃える",
     "angleManual": "角度を指定",
-    "undoVertex": "1つ戻す",
     "clearVertices": "クリア",
     "preview": "プレビュー",
     "previewing": "計算中...",

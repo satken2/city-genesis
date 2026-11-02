@@ -17,7 +17,6 @@
     "angle": "Orientation",
     "angleAuto": "Align to nearest road",
     "angleManual": "Set angle",
-    "undoVertex": "Undo",
     "clearVertices": "Clear",
     "preview": "Preview",
     "previewing": "Calculating...",

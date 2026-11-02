@@ -60,6 +60,7 @@
     "unknownResource": "不明な資源"
   },
   "errors": {
+    "PATH_STREET_GRID_AREA_TOO_LARGE": "範囲が広すぎます。一度に指定できる面積は {{max_area_km2}} km² までです。範囲を小さくしてください。",
     "UNKNOWN_ERROR": "エラーが発生しました。",
     "CREATEPATH_INVALID_GEOMETRY": "パスの形状が無効です。始点と終点を確認してください。",
     "CREATEPATH_OUTSIDE_COASTLINE": "海岸線の外側にパスを敷設することはできません。",

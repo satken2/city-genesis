@@ -60,6 +60,7 @@
     "unknownResource": "Unknown Resource"
   },
   "errors": {
+    "PATH_STREET_GRID_AREA_TOO_LARGE": "The area is too large. Select an area of {{max_area_km2}} km² or less at a time.",
     "UNKNOWN_ERROR": "An error occurred.",
     "CREATEPATH_INVALID_GEOMETRY": "The path geometry is invalid. Please check the start and end points.",
     "CREATEPATH_OUTSIDE_COASTLINE": "Paths cannot be placed outside the coastline.",
