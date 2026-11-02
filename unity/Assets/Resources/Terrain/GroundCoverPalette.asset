@@ -38,7 +38,8 @@ MonoBehaviour:
     rockStartAngle: 56.633
     rockFullAngle: 68.284
     shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
-    shoreSand: 0
+    shoreRockStartAngle: 10
+    shoreRockFullAngle: 20
   - groundCover: 2
     textureResource: Textures/ground-sand-albedo
     textureTileSize: {x: 10, y: 10}
@@ -64,7 +65,8 @@ MonoBehaviour:
     rockStartAngle: 56.633
     rockFullAngle: 68.284
     shoreSandColor: {r: 0.78, g: 0.68, b: 0.5, a: 1}
-    shoreSand: 1
+    shoreRockStartAngle: 56.633
+    shoreRockFullAngle: 68.284
   - groundCover: 3
     textureResource: grass-2500-mm-architextures
     textureTileSize: {x: 10, y: 10}
@@ -90,7 +92,8 @@ MonoBehaviour:
     rockStartAngle: 56.633
     rockFullAngle: 68.284
     shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
-    shoreSand: 0
+    shoreRockStartAngle: 10
+    shoreRockFullAngle: 20
   - groundCover: 4
     textureResource: Textures/ground-sand-albedo
     textureTileSize: {x: 16, y: 16}
@@ -116,7 +119,8 @@ MonoBehaviour:
     rockStartAngle: 25
     rockFullAngle: 30
     shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
-    shoreSand: 0
+    shoreRockStartAngle: 10
+    shoreRockFullAngle: 20
   - groundCover: 5
     textureResource: Textures/ground-dry-grass-albedo
     textureTileSize: {x: 3, y: 3}
@@ -142,4 +146,5 @@ MonoBehaviour:
     rockStartAngle: 56.633
     rockFullAngle: 68.284
     shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
-    shoreSand: 1
+    shoreRockStartAngle: 56.633
+    shoreRockFullAngle: 68.284

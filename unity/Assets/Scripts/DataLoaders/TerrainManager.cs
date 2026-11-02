@@ -197,23 +197,37 @@ public partial class TerrainManager : BaseApiDataManager
     [SerializeField, Range(0f, 1f)] private float cliffSmoothness = 0.08f;
     /// <summary>Fallback solid color when rock textures are unavailable.</summary>
     [SerializeField] private Color cliffFallbackColor = new Color(0.42f, 0.36f, 0.30f, 1f);
-    /// <summary>Elevation (m) where lowland rock blending begins. Lower land near the coastline gradually becomes rocky regardless of slope (coasts/shallow-water rock).</summary>
+    /// <summary>
+    /// Elevation (m) where coastal lowland blending begins. Lower land near the coastline gradually becomes sand on gentle slopes
+    /// and rock on steep ones (ground cover shore angles), regardless of the cliff angle.
+    /// </summary>
     [SerializeField] private float cliffLowlandStartHeight = 2f;
-    /// <summary>Elevation (m) of maximum lowland rock blending. The seabed from here down to <see cref="seabedSandHeight"/> is rocky. Default sea level (0m).</summary>
+    /// <summary>Elevation (m) of maximum coastal lowland blending. Steep seabed from here down to <see cref="seabedSandHeight"/> is rocky. Default sea level (0m).</summary>
     [SerializeField] private float cliffLowlandFullHeight = 0f;
-    /// <summary>Elevation (m) where the seabed turns fully to sand (shore sand color). Only the waterline above it stays rocky.</summary>
+    /// <summary>Elevation (m) where the seabed turns fully to sand regardless of slope. Only the steep waterline above it stays rocky.</summary>
     [SerializeField] private float seabedSandHeight = -3f;
     /// <summary>Depth scale (m) darkening the seabed: brightness = 1 / (1 + depth / this). Shows seabed relief when water is hidden.</summary>
     [SerializeField] private float seabedShadeDepth = 30f;
     /// <summary>
-    /// Inland distance (m) from the coastline where lowland rock fades out. Lowland rock is strongest at the coastline,
+    /// Inland distance (m) from the coastline where coastal lowland sand and rock fade out. They are strongest at the coastline,
     /// so low plains far from the sea such as river deltas keep their ground cover. Applied when the coastline is next fetched.
     /// </summary>
     [SerializeField] private float cliffLowlandCoastDistance = 50f;
+
+    /// <summary>
+    /// Sand texture for coastal lowland and seabed. Load Resources/Textures/ground-sand-albedo if unset.
+    /// Only its brightness variation is used; the color comes from the ground cover's shore sand color.
+    /// </summary>
+    [Header("Terrain Shore Sand Settings")]
+    [SerializeField] private Texture2D shoreSandTexture;
+    /// <summary>Sand texture tiling period (m).</summary>
+    [SerializeField] private float shoreSandTilingMeters = 10f;
+    /// <summary>Multiplier on the sand texture's brightness variation. Sand textures vary little, so visible grain needs values above 1.</summary>
+    [SerializeField] private float shoreSandContrast = 3f;
     /// <summary>Coastline distance mask over the city map for lowland rock. Null without a coastline.</summary>
     private Texture2D cliffCoastMask;
 
-    /// <summary>Flag resolving Resources rock texture fallbacks only once.</summary>
+    /// <summary>Flag resolving Resources rock and sand texture fallbacks only once.</summary>
     private bool cliffTexturesResolved = false;
 
     /// <summary>City ground cover type (GET /api/v1/city ground_cover), fetched by FetchCoastline at session start.</summary>
@@ -246,6 +260,9 @@ public partial class TerrainManager : BaseApiDataManager
     private static readonly int SeabedShadeDepthId = Shader.PropertyToID("_SeabedShadeDepth");
     private static readonly int CliffCoastMaskId = Shader.PropertyToID("_CliffCoastMask");
     private static readonly int CliffCoastMaskRectId = Shader.PropertyToID("_CliffCoastMaskRect");
+    private static readonly int ShoreSandMapId = Shader.PropertyToID("_ShoreSandMap");
+    private static readonly int ShoreSandUvScaleId = Shader.PropertyToID("_ShoreSandUvScale");
+    private static readonly int ShoreSandContrastId = Shader.PropertyToID("_ShoreSandContrast");
 
     // === Settings (lazily loaded from API) ===
     private TerrainSettingsData terrainSettings;
@@ -603,6 +620,7 @@ public partial class TerrainManager : BaseApiDataManager
         terrainMacroVariationScale = Mathf.Max(1f, terrainMacroVariationScale);
         cliffTilingMeters = Mathf.Max(1f, cliffTilingMeters);
         cliffNoiseScale = Mathf.Max(1f, cliffNoiseScale);
+        shoreSandTilingMeters = Mathf.Max(1f, shoreSandTilingMeters);
 
         MarkGroundCoverMaterialsDirty();
     }
@@ -2766,11 +2784,15 @@ public partial class TerrainManager : BaseApiDataManager
         material.SetFloat(CliffLowlandFullId, cliffLowlandFullHeight);
         material.SetFloat(SeabedSandHeightId, seabedSandHeight);
         material.SetFloat(SeabedShadeDepthId, seabedShadeDepth);
+        // A uniform white texture leaves sand as the plain shore sand color
+        material.SetTexture(ShoreSandMapId, shoreSandTexture != null ? shoreSandTexture : Texture2D.whiteTexture);
+        material.SetFloat(ShoreSandUvScaleId, 1f / Mathf.Max(1f, shoreSandTilingMeters));
+        material.SetFloat(ShoreSandContrastId, shoreSandContrast);
     }
 
     /// <summary>
-    /// Resolve cliff rock textures. If absent in Inspector (scene),
-    /// load Resources/Textures/cliff-rock-albedo / cliff-rock-normal as fallbacks.
+    /// Resolve cliff rock and shore sand textures. If absent in Inspector (scene),
+    /// load Resources/Textures/cliff-rock-albedo / cliff-rock-normal / ground-sand-albedo as fallbacks.
     /// Allows code defaults to work without editing scene files
     /// (past omissions of scene settings such as customTerrainLayers caused failures).
     /// Warn if either is unavailable and continue with the shader's solid-color fallback.
@@ -2787,6 +2809,14 @@ public partial class TerrainManager : BaseApiDataManager
         if (cliffNormalTexture == null)
         {
             cliffNormalTexture = Resources.Load<Texture2D>("Textures/cliff-rock-normal");
+        }
+        if (shoreSandTexture == null)
+        {
+            shoreSandTexture = Resources.Load<Texture2D>("Textures/ground-sand-albedo");
+            if (shoreSandTexture == null)
+            {
+                Debug.LogWarning("TerrainManager: 砂浜の砂テクスチャ Resources/Textures/ground-sand-albedo が見つかりません。砂は単色で描画します。");
+            }
         }
 
         if (cliffAlbedoTexture == null || cliffNormalTexture == null)

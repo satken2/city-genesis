@@ -104,10 +104,12 @@ public class GroundCoverProfile
     [Range(0f, 90f)] public float rockStartAngle = 56.633f;
     [Tooltip("完全に岩になる斜面の角度(度)")]
     [Range(0f, 90f)] public float rockFullAngle = 68.284f;
-    [Tooltip("波打ち際の砂の色")]
+    [Tooltip("沿岸の低地(砂浜・海底)の砂の平均の色。砂テクスチャの濃淡を掛けて描く")]
     public Color shoreSandColor = new Color(0.80f, 0.72f, 0.56f, 1f);
-    [Tooltip("低地(波打ち際・浅い海底)の岩を砂へ置き換える割合。0 で岩のまま、1 で砂浜")]
-    [Range(0f, 1f)] public float shoreSand = 0f;
+    [Tooltip("沿岸の低地で砂浜に岩が混ざり始める斜面の角度(度)")]
+    [Range(0f, 90f)] public float shoreRockStartAngle = 10f;
+    [Tooltip("沿岸の低地が完全に岩になる斜面の角度(度)")]
+    [Range(0f, 90f)] public float shoreRockFullAngle = 20f;
 
     private static readonly int MacroVariationStrengthId = Shader.PropertyToID("_TerrainMacroVariationStrength");
     private static readonly int MacroVariationTintId = Shader.PropertyToID("_TerrainMacroVariationTint");
@@ -130,6 +132,8 @@ public class GroundCoverProfile
     private static readonly int RockSlopeThresholdId = Shader.PropertyToID("_CliffSlopeThreshold");
     private static readonly int RockSlopeBlendId = Shader.PropertyToID("_CliffSlopeBlend");
     private static readonly int ShoreSandColorId = Shader.PropertyToID("_ShoreSandColor");
+    private static readonly int ShoreRockSlopeThresholdId = Shader.PropertyToID("_ShoreRockSlopeThreshold");
+    private static readonly int ShoreRockSlopeBlendId = Shader.PropertyToID("_ShoreRockSlopeBlend");
 
     /// <summary>
     /// Set type-specific values on terrain shader materials
@@ -156,15 +160,19 @@ public class GroundCoverProfile
         material.SetFloat(TextureLuminanceId, Mathf.Max(0.001f, textureLuminance));
         material.SetFloat(TextureContrastId, textureContrast);
         material.SetColor(RockTintId, rockTint);
-        // The shader measures slope as 1 - normalWS.y, so convert angles to that measure
-        float rockStart = 1f - Mathf.Cos(rockStartAngle * Mathf.Deg2Rad);
-        float rockFull = 1f - Mathf.Cos(rockFullAngle * Mathf.Deg2Rad);
+        float rockStart = SlopeOfAngle(rockStartAngle);
         material.SetFloat(RockSlopeThresholdId, rockStart);
-        material.SetFloat(RockSlopeBlendId, rockFull - rockStart);
-        // Pass the sand replacement fraction in alpha (SetColor does not convert alpha to linear)
-        Color shore = shoreSandColor;
-        shore.a = shoreSand;
-        material.SetColor(ShoreSandColorId, shore);
+        material.SetFloat(RockSlopeBlendId, SlopeOfAngle(rockFullAngle) - rockStart);
+        material.SetColor(ShoreSandColorId, shoreSandColor);
+        float shoreRockStart = SlopeOfAngle(shoreRockStartAngle);
+        material.SetFloat(ShoreRockSlopeThresholdId, shoreRockStart);
+        material.SetFloat(ShoreRockSlopeBlendId, SlopeOfAngle(shoreRockFullAngle) - shoreRockStart);
+    }
+
+    /// <summary>The shader measures slope as 1 - normalWS.y, so convert angles to that measure.</summary>
+    private static float SlopeOfAngle(float degrees)
+    {
+        return 1f - Mathf.Cos(degrees * Mathf.Deg2Rad);
     }
 
     /// <summary>
@@ -193,8 +201,8 @@ public class GroundCoverProfile
                 lowColor = new Color(0.3660866f, 0.49056602f, 0.26148093f),
                 highColor = new Color(0.90f, 0.92f, 0.98f),
                 slopeColor = new Color(0.55f, 0.40f, 0.25f),
-                rockTint = Color.white, shoreSandColor = new Color(0.80f, 0.72f, 0.56f), shoreSand = 0f,
-                rockStartAngle = 56.633f, rockFullAngle = 68.284f,
+                rockTint = Color.white, shoreSandColor = new Color(0.80f, 0.72f, 0.56f),
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f, shoreRockStartAngle = 10f, shoreRockFullAngle = 20f,
             },
             new GroundCoverProfile
             {
@@ -211,8 +219,8 @@ public class GroundCoverProfile
                 lowColor = new Color(1.00f, 0.95f, 0.88f),
                 highColor = new Color(0.96f, 0.92f, 0.88f),
                 slopeColor = new Color(0.86f, 0.66f, 0.50f),
-                rockTint = new Color(1.12f, 0.92f, 0.74f), shoreSandColor = new Color(0.78f, 0.68f, 0.50f), shoreSand = 1f,
-                rockStartAngle = 56.633f, rockFullAngle = 68.284f,
+                rockTint = new Color(1.12f, 0.92f, 0.74f), shoreSandColor = new Color(0.78f, 0.68f, 0.50f),
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f, shoreRockStartAngle = 56.633f, shoreRockFullAngle = 68.284f, // Dry coasts stay sandy up to cliff angles
             },
             new GroundCoverProfile
             {
@@ -229,8 +237,8 @@ public class GroundCoverProfile
                 lowColor = new Color(0.34f, 0.50f, 0.32f),
                 highColor = new Color(0.86f, 0.92f, 0.96f),
                 slopeColor = new Color(0.50f, 0.42f, 0.30f),
-                rockTint = new Color(0.86f, 0.94f, 0.82f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f), shoreSand = 0f,
-                rockStartAngle = 56.633f, rockFullAngle = 68.284f,
+                rockTint = new Color(0.86f, 0.94f, 0.82f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f),
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f, shoreRockStartAngle = 10f, shoreRockFullAngle = 20f,
             },
             new GroundCoverProfile
             {
@@ -247,8 +255,9 @@ public class GroundCoverProfile
                 lowColor = new Color(0.97f, 0.98f, 1.00f),
                 highColor = new Color(0.92f, 0.95f, 1.00f),
                 slopeColor = new Color(0.72f, 0.74f, 0.80f),
-                rockTint = new Color(0.78f, 0.80f, 0.85f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f), shoreSand = 0f,
+                rockTint = new Color(0.78f, 0.80f, 0.85f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f),
                 rockStartAngle = 25f, rockFullAngle = 30f, // Snow slides off slopes steeper than about 30°, exposing dark rock
+                shoreRockStartAngle = 10f, shoreRockFullAngle = 20f,
             },
             new GroundCoverProfile
             {
@@ -265,8 +274,8 @@ public class GroundCoverProfile
                 lowColor = new Color(0.98f, 0.92f, 0.80f),
                 highColor = new Color(0.92f, 0.92f, 0.95f),
                 slopeColor = new Color(0.80f, 0.66f, 0.52f),
-                rockTint = new Color(1.05f, 0.99f, 0.90f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f), shoreSand = 1f,
-                rockStartAngle = 56.633f, rockFullAngle = 68.284f,
+                rockTint = new Color(1.05f, 0.99f, 0.90f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f),
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f, shoreRockStartAngle = 56.633f, shoreRockFullAngle = 68.284f, // Dry coasts stay sandy up to cliff angles
             },
         };
     }
