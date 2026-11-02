@@ -1062,6 +1062,8 @@ export function usePathConstruction(
   useEffect(() => {
     const appWindow = getCurrentWindow();
 
+    // Cleanup can run before listen() resolves (StrictMode remount), so release late registrations immediately.
+    let disposed = false;
     let unlistenSelectNode: (() => void) | undefined;
     let unlistenUpdateShape: (() => void) | undefined;
 
@@ -1085,7 +1087,7 @@ export function usePathConstruction(
           setEmbankmentHeight(payload.embankment_height);
         }
       })
-      .then((fn) => { unlistenSelectNode = fn; })
+      .then((fn) => { if (disposed) fn(); else unlistenSelectNode = fn; })
       .catch(console.error);
 
     appWindow
@@ -1178,10 +1180,11 @@ export function usePathConstruction(
           setEndControl(null);
         }
       })
-      .then((fn) => { unlistenUpdateShape = fn; })
+      .then((fn) => { if (disposed) fn(); else unlistenUpdateShape = fn; })
       .catch(console.error);
 
     return () => {
+      disposed = true;
       unlistenSelectNode?.();
       unlistenUpdateShape?.();
       // Always clear placement interference highlights on placement-panel unmount.
