@@ -7,6 +7,9 @@
  * fill are candidates; a topic without its own line at that tier uses the nearest tier, and a topic without its own
  * lines uses the group's `any` lines.
  *
+ * Weather lines speak of temperature, sunshine, wind, and how rainy or sunny the month was, never of the sky right now:
+ * Unity picks the weather on screen at random from the climate and season, so it need not match the month's values.
+ *
  * A remark keeps i18n keys rather than text, so `remarkText` follows language changes, and handing the remark to
  * another window shows the same words there.
  */

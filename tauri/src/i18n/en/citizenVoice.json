@@ -3258,7 +3258,6 @@
             "0": "The summer heat makes it a perfect day for the pool.",
             "1": "It's hot, but the shaved ice is delicious.",
             "2": "It's not bad to sweat.",
-            "3": "It feels good after a shower on a hot day.",
             "4": "It's the season to look forward to summer festivals.",
             "5": "It's hot, but I feel energized by the sunshine.",
             "6": "Watermelon eaten on a day when the temperature is {{temperature}} °C is the best.",
@@ -3326,13 +3325,11 @@
           "4": {
             "0": "Winter is the best! I want to play in the snow.",
             "1": "Hot springs on cold days are irresistible.",
-            "2": "The winter night sky is beautiful.",
             "3": "It's cold! But that's good! Long live winter!",
             "4": "Cocoa on a cold day is the most delicious in the world!",
             "5": "We hold hot pot parties every week on cold days!",
             "6": "{{temperature}} °C is just right for enjoying winter.",
-            "7": "Winter has to be like this. My cheeks are bright red.",
-            "8": "Just looking at the clear sky on a cold morning will cheer you up."
+            "7": "Winter has to be like this. My cheeks are bright red."
           }
         },
         "rainy": {
@@ -3343,7 +3340,6 @@
             "3": "It's been raining continuously and I feel damp.",
             "4": "It keeps raining, and I'm only concerned about the water level of the river.",
             "5": "If it rains {{precipitation}} mm, your shoes will never be dry.",
-            "6": "I'm up to three buckets catching roof leaks.",
             "7": "I hear the sound of rain so much that it even rains in my dreams.",
             "8": "Even with an umbrella, I'm soaked from the waist down every day.",
             "9": "It's been raining so much that I've already forgotten about sunny days."
@@ -3351,45 +3347,22 @@
           "1": {
             "0": "Rain again. The laundry's been hanging indoors so long it should register as a resident.",
             "1": "It rains every day and I don't feel like going outside.",
-            "2": "Commuting on rainy days is tough.",
             "3": "It keeps raining and I'm concerned about the smell of drying clothes indoors.",
             "4": "Due to the rain, all my plans to go out were canceled.",
-            "5": "{{precipitation}} mm. That's why I need an umbrella every day.",
-            "7": "Rainy days make my hair impossible to control.",
-            "8": "The futon is damp due to humidity."
+            "5": "{{precipitation}} mm. That's why I need an umbrella every day."
           },
           "2": {
             "0": "It rains a lot. Well, it's that kind of season.",
-            "1": "I read while listening to the sound of the rain.",
             "2": "{{precipitation}} mm of rain. My umbrella's been busy this month.",
             "3": "I bought rain boots because I have many rainy days.",
-            "4": "It's raining. I have to remember to bring my umbrella.",
-            "5": "We'll be in trouble if it doesn't rain.",
-            "6": "With the rain continuing, I have been spending more time at home.",
-            "7": "I kind of like the air after the rain.",
-            "8": "On rainy days, I make coffee and relax."
+            "6": "With the rain continuing, I have been spending more time at home."
           },
           "3": {
-            "0": "Rain is nice sometimes.",
-            "1": "Thanks to the rain, the greenery is beautiful.",
-            "2": "I'm looking forward to using my new umbrella on rainy days.",
-            "3": "Thanks to the rain, the dust from the city was washed away and it felt refreshing.",
-            "4": "Taking a nap while listening to the sound of the rain is the best.",
-            "5": "I saw a rainbow after the rain. Looks like something good will happen.",
-            "6": "Going to a cafe on a rainy day is kind of relaxing.",
-            "7": "The vegetables in the field are thriving with the rain.",
             "8": "{{precipitation}} mm of blessed rain, the plants are happy."
           },
           "4": {
-            "0": "I like rainy days. It's the best season.",
-            "1": "The sound of rain is soothing and helps me sleep well.",
-            "2": "It's great to be able to immerse yourself in your hobbies at home on rainy days!",
-            "3": "The city sparkles after the rain and is mesmerizing.",
             "4": "I'm glad my favorite rain boots are getting so much use!",
-            "5": "{{precipitation}} mm of rain is irresistible for rain lovers!",
-            "6": "I love the smell of greenery wet in the rain.",
-            "7": "I enjoy walking on rainy days and jumping in puddles.",
-            "8": "The gentle rain washes your soul."
+            "5": "{{precipitation}} mm of rain is irresistible for rain lovers!"
           }
         },
         "windy": {
@@ -3423,7 +3396,6 @@
             "4": "The wind was strong, so I added more clothespins.",
             "5": "The sound of the wind is a bit bothersome at night.",
             "6": "There were a lot of windy days this month.",
-            "7": "When the wind is strong, the clouds move quickly and are interesting to watch.",
             "8": "I lay my bicycle down so it doesn't get knocked over by the wind."
           },
           "3": {
@@ -3432,7 +3404,6 @@
             "2": "Thanks to the strong wind, the laundry dries quickly.",
             "3": "Walking in the wind makes you feel refreshed.",
             "4": "The windmill is spinning well. I never get tired of watching it.",
-            "5": "The wind blows away the clouds and the sky looks high.",
             "6": "On windy days, the sound of leaves on the trees is soothing.",
             "7": "I feel like strong winds can also blow away unpleasant things.",
             "8": "{{wind}} m/s winds. The wind farms must be happy."
@@ -3451,115 +3422,58 @@
         },
         "sunny": {
           "0": {
-            "0": "Even though the weather is nice, I feel terrible.",
-            "1": "Even if it's sunny, there's nothing to enjoy in this city.",
             "2": "The sun is so bright that I can't face reality.",
             "3": "Even if the sunny days continue, my life is always rainy.",
-            "4": "Sunshine rate {{sunlight}}%. The sunlight rate in my life is 0%.",
-            "5": "It's sunny outside, but there's a storm inside your wallet.",
-            "6": "Even though the weather is so nice, there's no reason to go out.",
-            "7": "When the weather is sunny, the darkness in my life stands out.",
-            "8": "The Mayor doesn't get credit for the blue sky."
+            "4": "Sunshine rate {{sunlight}}%. The sunlight rate in my life is 0%."
           },
           "1": {
-            "0": "It's sunny, but I don't have the energy to go out.",
-            "1": "It's nice weather. My heart is cloudy though.",
-            "2": "Bad things only happen on sunny days.",
-            "3": "The nice weather may be the only good thing about this city.",
-            "4": "Sunshine rate {{sunlight}}%. The weather is nice, just the weather.",
-            "5": "Even if it's sunny, I don't have the energy to hang up the laundry.",
-            "6": "Even though it's a sunny day, I have to go back and forth from work to home.",
-            "7": "When it's sunny, it's hot, bright, and a bit tiring.",
-            "8": "When the weather is nice, I actually want to stay at home."
+            "4": "Sunshine rate {{sunlight}}%. The weather is nice, just the weather."
           },
           "2": {
             "0": "The weather continues to be nice.",
             "1": "The sunlight rate is {{sunlight}}%. It's often sunny.",
-            "2": "It's sunny, so the laundry dries well.",
             "3": "There are many sunny days, so you can dry your futon well.",
             "4": "It's been sunny this month. Be careful of sunburn.",
-            "5": "When the weather continues to be sunny, my mood somehow improves.",
-            "6": "On sunny days, I open the windows for ventilation.",
-            "7": "The weather was nice, so I went for a walk around the neighborhood.",
-            "8": "On a clear day, you can see the city clearly."
+            "5": "When the weather continues to be sunny, my mood somehow improves."
           },
           "3": {
-            "0": "The weather is nice and I enjoy walking.",
             "1": "There are many sunny days and it feels great.",
-            "2": "It's a perfect day for a picnic.",
-            "3": "Lunch in the park on a sunny day is the best.",
-            "4": "Sunshine rate {{sunlight}}%. I'm happy to see the sun every day.",
-            "5": "When the weather is sunny, your commute will be easier.",
-            "6": "Walking under the blue sky gives me energy.",
-            "7": "The weather is nice, so the futon is soft and fluffy.",
-            "8": "On a clear day, you can see the most beautiful scenery of {{city}}."
+            "4": "Sunshine rate {{sunlight}}%. I'm happy to see the sun every day."
           },
           "4": {
             "0": "The weather continues to be sunny and I feel great!",
-            "1": "The blue sky is so beautiful that it makes me want to skip work.",
             "2": "Thank you, sunshine! You too, Mayor!",
             "3": "Every day is sunny and my heart is warm!",
             "4": "The sunny days continue, and my life is getting brighter!",
-            "5": "Sunshine rate {{sunlight}}%! A city loved by the sun!",
-            "6": "Clear skies over {{city}}. Did you improve the sky too, Mayor?",
-            "7": "I looked up at the blue sky and took a deep breath. It's the best.",
-            "8": "On sunny days, people all over the city appear to be smiling."
+            "5": "Sunshine rate {{sunlight}}%! A city loved by the sun!"
           }
         },
         "cloudy": {
           "0": {
             "0": "It's cloudy all the time, and even my mood is cloudy.",
-            "1": "The sky and my heart are gray.",
             "2": "When was the last time you saw the sun?",
-            "3": "The sky is gloomy and my wallet is empty. As usual.",
-            "4": "Sunshine rate {{sunlight}}%. This city lacks sunlight.",
-            "5": "I feel like the cloudy sky represents the future of this city.",
-            "6": "Looking at the gray sky makes me sigh more and more.",
-            "7": "The sky is neither sunny nor rainy. It's like my life.",
-            "8": "On cloudy days, I only think about bad things."
+            "4": "Sunshine rate {{sunlight}}%. This city lacks sunlight."
           },
           "1": {
             "0": "The cloudy days continue.",
-            "1": "The weather is gloomy and I don't have much energy.",
             "2": "It's always cloudy and my laundry doesn't dry properly.",
-            "3": "The sky is heavy and I find it difficult to wake up in the morning.",
-            "4": "The sky is overcast and my head feels heavy.",
-            "5": "Sunshine rate {{sunlight}}%. Sun, please come out a little more without slacking off.",
-            "6": "When it's cloudy, the days feel incredibly long.",
-            "7": "It's a pain to have to worry about whether to carry an umbrella every morning.",
-            "8": "The city looks dull under a cloudy sky."
+            "5": "Sunshine rate {{sunlight}}%. Sun, please come out a little more without slacking off."
           },
           "2": {
             "0": "Well, the weather is normal this month.",
             "1": "{{temperature}} °C. The temperature is comfortable.",
-            "2": "I don't dislike cloudy days either.",
-            "3": "It's a bit cloudy, but it's better because it doesn't rain.",
-            "4": "You don't have to get sunburned on cloudy days.",
             "5": "Not too hot or too cold, nothing special to say.",
-            "6": "Cloudy skies in month {{month}}. About what I'd expect.",
-            "7": "When it's cloudy, the city looks quiet.",
             "8": "Sunshine rate {{sunlight}}%. Well, I hope it's sunny once in a while."
           },
           "3": {
             "0": "It's neither hot nor cold, just right.",
             "1": "It's a pleasant season.",
             "2": "I like the air in month {{month}}.",
-            "3": "On cloudy days, it is comfortable to walk without sweating.",
-            "4": "Looking at the shapes of clouds is something I'm looking forward to these days.",
-            "5": "The sunlight is not strong, so you can work outside.",
-            "6": "I am relaxing and drinking tea under the cloudy sky.",
-            "7": "On cloudy days, there is no glare and it is easy on the eyes.",
-            "8": "The quiet cloudy sky is just perfect for thinking."
+            "5": "The sunlight is not strong, so you can work outside."
           },
           "4": {
-            "0": "Even if it's cloudy, my heart is clear!",
             "1": "The weather is calm and every day is peaceful.",
             "2": "The temperature is just right, making it the perfect place to spend your time.",
-            "3": "There is definitely a bright future beyond the clouds!",
-            "4": "Even on cloudy days, you can have fun in this city.",
-            "5": "Even when the sky is gray, the smiling faces of the neighbors are bright.",
-            "6": "Even a cloudy sky is a gentle color if you look at it from a different perspective.",
-            "7": "It's already a great day, just because it doesn't rain!",
             "8": "Sunshine rate {{sunlight}}%? It doesn't matter. I'm happy every day!"
           }
         }

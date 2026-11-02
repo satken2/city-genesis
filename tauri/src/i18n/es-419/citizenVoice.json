@@ -3258,7 +3258,6 @@
             "0": "El calor del verano hace que sea un día perfecto para la piscina.",
             "1": "Hace calor, pero el hielo raspado está delicioso.",
             "2": "No está mal sudar.",
-            "3": "Se siente bien después de una ducha en un día caluroso.",
             "4": "Es la temporada en la que esperamos con ansias los festivales de verano.",
             "5": "Hace calor, pero me siento lleno de energía por el sol.",
             "6": "La sandía consumida en un día cuando la temperatura es {{temperature}} °C es la mejor.",
@@ -3326,13 +3325,11 @@
           "4": {
             "0": "¡El invierno es lo mejor! Quiero jugar en la nieve.",
             "1": "Las aguas termales en los días fríos son irresistibles.",
-            "2": "El cielo nocturno de invierno es hermoso.",
             "3": "¡Hace frío! ¡Pero eso es bueno! ¡Viva el invierno!",
             "4": "¡El cacao en un día frío es el más delicioso del mundo!",
             "5": "¡Organizamos fiestas de hot pot todas las semanas en los días fríos!",
             "6": "{{temperature}} °C es justo lo que necesitas para disfrutar del invierno.",
-            "7": "El invierno tiene que ser así. Mis mejillas están de un rojo brillante.",
-            "8": "Sólo mirar el cielo despejado en una mañana fría te animará."
+            "7": "El invierno tiene que ser así. Mis mejillas están de un rojo brillante."
           }
         },
         "rainy": {
@@ -3343,7 +3340,6 @@
             "3": "Ha estado lloviendo continuamente y me siento húmedo.",
             "4": "Sigue lloviendo y sólo me preocupa el nivel del agua del río.",
             "5": "Si llueve {{precipitation}} mm, tus zapatos nunca estarán secos.",
-            "6": "Estoy hasta tres cubos atrapando fugas en el techo.",
             "7": "Escucho tanto el sonido de la lluvia que incluso llueve en mis sueños.",
             "8": "Incluso con un paraguas, estoy empapado de cintura para abajo todos los días.",
             "9": "Ha estado lloviendo tanto que ya me he olvidado de los días soleados."
@@ -3351,45 +3347,22 @@
           "1": {
             "0": "No para de llover. La ropa lleva tanto tiempo tendida adentro que ya puede empadronarse.",
             "1": "Llueve todos los días y no tengo ganas de salir a la calle.",
-            "2": "Viajar en días lluviosos es difícil.",
             "3": "Sigue lloviendo y me preocupa el olor a ropa secando en el interior.",
             "4": "Debido a la lluvia, todos mis planes de salir fueron cancelados.",
-            "5": "{{precipitation}} mm. Por eso necesito un paraguas todos los días.",
-            "7": "Los días de lluvia hacen que mi cabello sea imposible de controlar.",
-            "8": "El futón está húmedo debido a la humedad."
+            "5": "{{precipitation}} mm. Por eso necesito un paraguas todos los días."
           },
           "2": {
             "0": "Llueve mucho. Bueno, es ese tipo de temporada.",
-            "1": "Leo mientras escucho el sonido de la lluvia.",
             "2": "{{precipitation}} mm de lluvia. Mi paraguas ha estado ocupado este mes.",
             "3": "Compré botas de lluvia porque tengo muchos días de lluvia.",
-            "4": "Está lloviendo. Tengo que acordarme de traer mi paraguas.",
-            "5": "Estaremos en problemas si no llueve.",
-            "6": "Con la lluvia continua, he estado pasando más tiempo en casa.",
-            "7": "Me gusta el aire después de la lluvia.",
-            "8": "En los días de lluvia, preparo café y me relajo."
+            "6": "Con la lluvia continua, he estado pasando más tiempo en casa."
           },
           "3": {
-            "0": "La lluvia a veces es agradable.",
-            "1": "Gracias a la lluvia, el verdor es hermoso.",
-            "2": "Estoy deseando usar mi nuevo paraguas en los días de lluvia.",
-            "3": "Gracias a la lluvia, el polvo de la ciudad fue arrastrado y se sintió refrescante.",
-            "4": "Tomar una siesta mientras escuchas el sonido de la lluvia es lo mejor.",
-            "5": "Vi un arco iris después de la lluvia. Parece que algo bueno va a pasar.",
-            "6": "Ir a una cafetería en un día lluvioso es algo relajante.",
-            "7": "Las hortalizas del campo prosperan con la lluvia.",
             "8": "{{precipitation}} mm de lluvia bendita, las plantas están felices."
           },
           "4": {
-            "0": "Me gustan los días lluviosos. Es la mejor temporada.",
-            "1": "El sonido de la lluvia es relajante y me ayuda a dormir bien.",
-            "2": "¡Es fantástico poder sumergirte en tus aficiones en casa en los días de lluvia!",
-            "3": "La ciudad brilla después de la lluvia y es fascinante.",
             "4": "Me alegro de que mis botas de lluvia favoritas estén recibiendo tanto uso!",
-            "5": "¡No puedo soportar {{precipitation}} mm de lluvia!",
-            "6": "Me encanta el olor a vegetación mojada bajo la lluvia.",
-            "7": "Disfruto caminar en los días de lluvia y saltar en los charcos.",
-            "8": "La suave lluvia lava tu alma."
+            "5": "¡No puedo soportar {{precipitation}} mm de lluvia!"
           }
         },
         "windy": {
@@ -3423,7 +3396,6 @@
             "4": "El viento era fuerte, así que agregué más pinzas para la ropa.",
             "5": "El sonido del viento es un poco molesto por la noche.",
             "6": "Hubo muchos días de viento este mes.",
-            "7": "Cuando el viento es fuerte, las nubes se mueven rápidamente y es interesante observarlas.",
             "8": "Dejo mi bicicleta en el suelo para que el viento no la derribe."
           },
           "3": {
@@ -3432,7 +3404,6 @@
             "2": "Gracias al fuerte viento, la ropa se seca rápidamente.",
             "3": "Caminar con el viento te hace sentir renovado.",
             "4": "El molino de viento gira bien. Nunca me canso de verlo.",
-            "5": "El viento se lleva las nubes y el cielo se ve alto.",
             "6": "En los días de viento, el sonido de las hojas en los árboles es relajante.",
             "7": "Siento que los vientos fuertes también pueden llevarse cosas desagradables.",
             "8": "{{wind}} m/s de viento. Los parques eólicos deben estar contentos."
@@ -3451,115 +3422,58 @@
         },
         "sunny": {
           "0": {
-            "0": "Aunque hace buen tiempo, me siento fatal.",
-            "1": "Incluso si hace sol, no hay nada que disfrutar en esta ciudad.",
             "2": "El sol es tan brillante que no puedo afrontar la realidad.",
             "3": "Aunque los días soleados continúen, mi vida siempre es lluviosa.",
-            "4": "Tasa de insolación {{sunlight}}%. La tasa de luz solar en mi vida es del 0%.",
-            "5": "Afuera hace sol, pero hay una tormenta dentro de tu billetera.",
-            "6": "Aunque hace tan buen tiempo, no hay razón para salir.",
-            "7": "Cuando el clima es soleado, la oscuridad en mi vida se destaca.",
-            "8": "Que el cielo esté azul no es mérito del alcalde."
+            "4": "Tasa de insolación {{sunlight}}%. La tasa de luz solar en mi vida es del 0%."
           },
           "1": {
-            "0": "Hace sol, pero no tengo energía para salir.",
-            "1": "Hace buen tiempo. Aunque mi corazón está nublado.",
-            "2": "Las cosas malas sólo suceden en los días soleados.",
-            "3": "El buen clima puede ser lo único bueno de esta ciudad.",
-            "4": "Tasa de insolación {{sunlight}}%. Hace buen tiempo, solo el tiempo.",
-            "5": "Incluso si hace sol, no tengo energía para tender la ropa.",
-            "6": "Aunque es un día soleado, tengo que ir y venir del trabajo a casa.",
-            "7": "Cuando hace sol, hace calor, hay mucha luz y es un poco agotador.",
-            "8": "Cuando hace buen tiempo, realmente quiero quedarme en casa."
+            "4": "Tasa de insolación {{sunlight}}%. Hace buen tiempo, solo el tiempo."
           },
           "2": {
             "0": "El tiempo sigue siendo agradable.",
             "1": "La tasa de luz solar es {{sunlight}}%. Suele hacer sol.",
-            "2": "Hace sol, por lo que la ropa se seca bien.",
             "3": "Hay muchos días soleados, por lo que puedes secar bien tu futón.",
             "4": "Ha estado soleado este mes. Tenga cuidado con las quemaduras solares.",
-            "5": "Cuando el clima continúa siendo soleado, mi estado de ánimo de alguna manera mejora.",
-            "6": "En los días soleados, abro las ventanas para ventilar.",
-            "7": "Hacía buen tiempo, así que salí a caminar por el barrio.",
-            "8": "En un día despejado, se puede ver la ciudad con claridad."
+            "5": "Cuando el clima continúa siendo soleado, mi estado de ánimo de alguna manera mejora."
           },
           "3": {
-            "0": "Hace buen tiempo y disfruto caminar.",
             "1": "Hay muchos días soleados y se siente genial.",
-            "2": "Es un día perfecto para hacer un picnic.",
-            "3": "Almorzar en el parque en un día soleado es lo mejor.",
-            "4": "Tasa de insolación {{sunlight}}%. Estoy feliz de ver el sol todos los días.",
-            "5": "Cuando hace sol, tu viaje será más fácil.",
-            "6": "Caminar bajo el cielo azul me da energía.",
-            "7": "Hace buen tiempo, por lo que el futón es suave y esponjoso.",
-            "8": "En un día despejado, el paisaje de {{city}} se puede ver de la manera más hermosa."
+            "4": "Tasa de insolación {{sunlight}}%. Estoy feliz de ver el sol todos los días."
           },
           "4": {
             "0": "¡El clima sigue siendo soleado y me siento genial!",
-            "1": "El cielo azul es tan hermoso que me dan ganas de faltar al trabajo.",
             "2": "Gracias, sol, y a ti también, alcalde.",
             "3": "¡Todos los días son soleados y mi corazón está cálido!",
             "4": "¡Los días soleados continúan y mi vida se vuelve más brillante!",
-            "5": "Tasa de sol {{sunlight}}%! ¡Una ciudad amada por el sol!",
-            "6": "Cielos despejados sobre {{city}}. ¿También mejoraste el cielo, alcalde?",
-            "7": "Miré hacia el cielo azul y respiré profundamente. Es lo mejor.",
-            "8": "En los días soleados, la gente de toda la ciudad parece estar sonriendo."
+            "5": "Tasa de sol {{sunlight}}%! ¡Una ciudad amada por el sol!"
           }
         },
         "cloudy": {
           "0": {
             "0": "Está nublado todo el tiempo, e incluso mi estado de ánimo está nublado.",
-            "1": "El cielo y mi corazón son grises.",
             "2": "¿Cuándo fue la última vez que viste el sol?",
-            "3": "El cielo está sombrío y mi billetera está vacía. Como siempre.",
-            "4": "Tasa de insolación {{sunlight}}%. Esta ciudad carece de luz solar.",
-            "5": "Siento que el cielo nublado representa el futuro de esta ciudad.",
-            "6": "Mirar el cielo gris me hace suspirar cada vez más.",
-            "7": "El cielo no está ni soleado ni lluvioso. Es como mi vida.",
-            "8": "En los días nublados, sólo pienso en cosas malas."
+            "4": "Tasa de insolación {{sunlight}}%. Esta ciudad carece de luz solar."
           },
           "1": {
             "0": "Continúan los días nublados.",
-            "1": "El clima está sombrío y no tengo mucha energía.",
             "2": "Siempre está nublado y mi ropa no se seca correctamente.",
-            "3": "El cielo está pesado y me cuesta despertarme por la mañana.",
-            "4": "El cielo está nublado y siento la cabeza pesada.",
-            "5": "Tasa de insolación {{sunlight}}%. Sol, por favor sal un poco más sin aflojar.",
-            "6": "Cuando está nublado, los días se sienten increíblemente largos.",
-            "7": "Es un fastidio tener que preocuparse por llevar un paraguas todas las mañanas.",
-            "8": "La ciudad se ve aburrida bajo un cielo nublado."
+            "5": "Tasa de insolación {{sunlight}}%. Sol, por favor sal un poco más sin aflojar."
           },
           "2": {
             "0": "Bueno, el clima es normal este mes.",
             "1": "{{temperature}} °C. La temperatura es agradable.",
-            "2": "Tampoco me desagradan los días nublados.",
-            "3": "Está un poco nublado, pero es mejor porque no llueve.",
-            "4": "No es necesario quemarse con el sol en los días nublados.",
             "5": "Ni demasiado caliente ni demasiado frío, nada especial que decir.",
-            "6": "Cielos nublados en el mes {{month}}. Sobre lo que esperaría.",
-            "7": "Cuando está nublado, la ciudad parece tranquila.",
             "8": "Tasa de insolación {{sunlight}}%. Bueno, espero que haga sol de vez en cuando."
           },
           "3": {
             "0": "No hace frío ni calor, está bien.",
             "1": "Es una temporada agradable.",
             "2": "Me gusta el aire en el mes {{month}}.",
-            "3": "En días nublados, es cómodo caminar sin sudar.",
-            "4": "Observar las formas de las nubes es algo que espero con ansias estos días.",
-            "5": "La luz del sol no es fuerte, por lo que puedes trabajar al aire libre.",
-            "6": "Estoy relajándome y tomando té bajo el cielo nublado.",
-            "7": "En días nublados, no hay deslumbramiento y es agradable a la vista.",
-            "8": "El tranquilo cielo nublado es perfecto para pensar."
+            "5": "La luz del sol no es fuerte, por lo que puedes trabajar al aire libre."
           },
           "4": {
-            "0": "¡Aunque esté nublado, mi corazón está claro!",
             "1": "El clima está tranquilo y todos los días son pacíficos.",
             "2": "La temperatura es perfecta, lo que lo convierte en el lugar perfecto para pasar el tiempo.",
-            "3": "¡Definitivamente hay un futuro brillante más allá de las nubes!",
-            "4": "Incluso en los días nublados, puedes divertirte en esta ciudad.",
-            "5": "Incluso cuando el cielo está gris, las caras sonrientes de los vecinos son brillantes.",
-            "6": "Incluso un cielo nublado es de un color suave si lo miras desde una perspectiva diferente.",
-            "7": "¡Ya es un gran día, sólo porque no llueve!",
             "8": "Tasa de sol {{sunlight}}%? No importa. ¡Estoy feliz todos los días!"
           }
         }
