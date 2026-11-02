@@ -225,6 +225,8 @@ export function ResourceConstructionPanel({ apiBaseUrl, onClose }: ResourceConst
 
           <ResourcePresetHint
             preset={presetInputs.preset}
+            productId={productId}
+            masterData={masterData}
             areaM2={areaM2}
             maxAmount={maxAmount}
             recoveryRate={recoveryRate}

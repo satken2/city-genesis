@@ -150,6 +150,12 @@
     "cancel": "Cancelar"
   },
   "resourcePreset": {
+    "units": {
+      "barrels": "barriles",
+      "kg": "kg",
+      "tonnes": "t",
+      "m3": "m³"
+    },
     "label": "Referencia",
     "presets": {
       "oilField": {
@@ -184,7 +190,10 @@
       "refillDays": "De vacío a lleno en ~{{days}} días",
       "refillYears": "De vacío a lleno en ~{{years}} años",
       "nonRenewable": "No se recupera (se agota al extraer)",
-      "needsShape": "Dibuja la forma para asignar una reserva según su área"
+      "needsShape": "Dibuja la forma para asignar una reserva según su área",
+      "perArea": "Referencia del ajuste: aproximadamente {{amount}} por km²",
+      "waterPopulation": "La extracción sostenible cubre el agua doméstica de aproximadamente {{population}} personas",
+      "waterPopulationBasis": "No incluye el consumo de agua industrial ni agrícola."
     }
   },
   "prop_placement": {

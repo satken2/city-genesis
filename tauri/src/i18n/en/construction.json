@@ -151,6 +151,12 @@
   },
   "resourcePreset": {
     "label": "Preset",
+    "units": {
+      "barrels": "barrels",
+      "kg": "kg",
+      "tonnes": "t",
+      "m3": "m³"
+    },
     "presets": {
       "oilField": {
         "name": "Conventional oil field",
@@ -184,7 +190,10 @@
       "refillDays": "Empty to full in ~{{days}} days",
       "refillYears": "Empty to full in ~{{years}} years",
       "nonRenewable": "Does not recover (depletes as extracted)",
-      "needsShape": "Draw the shape to fill in a reserve based on its area"
+      "needsShape": "Draw the shape to fill in a reserve based on its area",
+      "perArea": "Preset reference: approximately {{amount}} per km²",
+      "waterPopulation": "Sustainable yield covers domestic water for approximately {{population}} people",
+      "waterPopulationBasis": "Excludes industrial and agricultural water use."
     }
   },
   "prop_placement": {

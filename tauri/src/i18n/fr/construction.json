@@ -150,6 +150,12 @@
     "cancel": "Annuler"
   },
   "resourcePreset": {
+    "units": {
+      "barrels": "barils",
+      "kg": "kg",
+      "tonnes": "t",
+      "m3": "m³"
+    },
     "label": "Préréglage",
     "presets": {
       "oilField": {
@@ -184,7 +190,10 @@
       "refillDays": "Du vide au plein en ~{{days}} jours",
       "refillYears": "Du vide au plein en ~{{years}} ans",
       "nonRenewable": "Ne se régénère pas (s'épuise à l'extraction)",
-      "needsShape": "Tracez la forme pour obtenir une réserve selon sa surface"
+      "needsShape": "Tracez la forme pour obtenir une réserve selon sa surface",
+      "perArea": "Repère du préréglage : environ {{amount}} par km²",
+      "waterPopulation": "Le prélèvement durable couvre l'eau domestique d'environ {{population}} personnes",
+      "waterPopulationBasis": "Hors usages industriels et agricoles de l'eau."
     }
   },
   "prop_placement": {

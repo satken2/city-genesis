@@ -150,6 +150,12 @@
     "cancel": "취소"
   },
   "resourcePreset": {
+    "units": {
+      "barrels": "배럴",
+      "kg": "kg",
+      "tonnes": "t",
+      "m3": "m³"
+    },
     "label": "기준",
     "presets": {
       "oilField": {
@@ -184,7 +190,10 @@
       "refillDays": "비었다가 가득 찰 때까지 약 {{days}}일",
       "refillYears": "비었다가 가득 찰 때까지 약 {{years}}년",
       "nonRenewable": "회복되지 않음(채취한 만큼 줄어듦)",
-      "needsShape": "형상을 그리면 면적에 따른 매장량이 입력됩니다"
+      "needsShape": "형상을 그리면 면적에 따른 매장량이 입력됩니다",
+      "perArea": "프리셋 기준: 1 km²당 약 {{amount}}",
+      "waterPopulation": "지속 가능한 채취량으로 충당할 수 있는 생활용수: 약 {{population}}명분",
+      "waterPopulationBasis": "공업용수와 농업용수는 포함하지 않습니다."
     }
   },
   "prop_placement": {

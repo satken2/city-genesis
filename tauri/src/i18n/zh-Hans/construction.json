@@ -150,6 +150,12 @@
     "cancel": "取消"
   },
   "resourcePreset": {
+    "units": {
+      "barrels": "桶",
+      "kg": "kg",
+      "tonnes": "t",
+      "m3": "m³"
+    },
     "label": "参考",
     "presets": {
       "oilField": {
@@ -184,7 +190,10 @@
       "refillDays": "从空到满约{{days}}天",
       "refillYears": "从空到满约{{years}}年",
       "nonRenewable": "不会恢复（采多少减多少）",
-      "needsShape": "绘制形状后将按面积填入储量"
+      "needsShape": "绘制形状后将按面积填入储量",
+      "perArea": "预设参考：每 km²约{{amount}}",
+      "waterPopulation": "可持续开采量可满足的生活用水：约{{population}}人份",
+      "waterPopulationBasis": "不包含工业用水和农业用水。"
     }
   },
   "prop_placement": {

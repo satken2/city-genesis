@@ -151,6 +151,12 @@
   },
   "resourcePreset": {
     "label": "目安",
+    "units": {
+      "barrels": "バレル",
+      "kg": "kg",
+      "tonnes": "t",
+      "m3": "m³"
+    },
     "presets": {
       "oilField": {
         "name": "在来型油田",
@@ -184,7 +190,10 @@
       "refillDays": "空から満タンまで約{{days}}日",
       "refillYears": "空から満タンまで約{{years}}年",
       "nonRenewable": "回復しない(採った分だけ減る)",
-      "needsShape": "形状を描くと、面積に応じた埋蔵量が入ります"
+      "needsShape": "形状を描くと、面積に応じた埋蔵量が入ります",
+      "perArea": "プリセットの目安：1 km²あたり約{{amount}}",
+      "waterPopulation": "持続採取量で賄える生活用水：約{{population}}人分",
+      "waterPopulationBasis": "工業用水や農業用水を含みません"
     }
   },
   "prop_placement": {
