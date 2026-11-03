@@ -478,14 +478,14 @@ function placePopup(label: string, placement: Placement, maximized: boolean): vo
 }
 
 /**
- * セッションの切り替えでは、古い HTTP 応答で進捗や結果を表示させない。送る `epoch:ready` は Unity を待っている UI を解放し、
- * その UI は演出が現行でないことを見て実行を始めない。
+ * 都市を切り替えたら同期・日没の待機を解放する。UIは実行IDの失効を確認し、古い計算や結果表示へ進まない。
  */
 export function cancelEpochPresentation(): void {
   const id = state.epochPresentationId;
   if (id !== null) {
     finishEpochPresentation(id);
     emit("epoch:ready", { id });
+    emit("epoch:darkened", { id });
   }
 }
 

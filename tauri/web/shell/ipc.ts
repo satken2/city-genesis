@@ -166,7 +166,8 @@ async function handleIncomingMessage(envelope: Envelope): Promise<void> {
       emit("roads:changed", payload);
       break;
     case "epoch:ready":
-      if (state.epochPresentationId !== null && payload?.id === state.epochPresentationId) emit("epoch:ready", payload);
+    case "epoch:darkened":
+      if (state.epochPresentationId !== null && payload?.id === state.epochPresentationId) emit(envelope.event, payload);
       break;
     case "view:ui_visibility":
       setUiCloaked(!(typeof payload?.visible === "boolean" ? payload.visible : true));

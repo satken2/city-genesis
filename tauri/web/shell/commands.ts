@@ -86,6 +86,13 @@ const commands: Record<string, Command> = {
     if (state.epochPresentationId !== stringArg(args, "id", "hide_epoch_progress")) return;
     emitEpochProgressVisible(false);
   },
+  begin_epoch_sunset: (_caller, args) => {
+    const id = stringArg(args, "id", "begin_epoch_sunset");
+    if (state.epochPresentationId !== id) return false;
+    const connected = state.graphicConnected;
+    if (connected) sendUiAction("", null, "epoch:sunset", { id });
+    return connected;
+  },
   finish_epoch_presentation: (_caller, args) => finishEpochPresentation(stringArg(args, "id", "finish_epoch_presentation")),
   is_epoch_presentation_current: (_caller, args) => state.epochPresentationId === stringArg(args, "id", "is_epoch_presentation_current"),
   request_thumbnail_capture: (_caller, args) => {

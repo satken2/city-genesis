@@ -196,6 +196,20 @@ fn hide_epoch_progress(app: tauri::AppHandle, state: tauri::State<'_, SharedStat
     window::emit_epoch_progress_visible(&app, false);
 }
 
+/// 計算完了後に日没を要求する。計算前の都市同期(epoch:ready)とは別の応答を待つ。
+#[tauri::command]
+fn begin_epoch_sunset(state: tauri::State<'_, SharedState>, id: String) -> Result<bool, String> {
+    let connected = {
+        let guard = state.lock();
+        if guard.epoch_presentation_id.as_deref() != Some(&id) { return Ok(false); }
+        guard.graphic_connected
+    };
+    if connected {
+        ipc::send_ui_action(state.inner(), "".into(), None, "epoch:sunset".into(), serde_json::json!({"id": id}))?;
+    }
+    Ok(connected)
+}
+
 #[tauri::command]
 fn finish_epoch_presentation(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, id: String) {
     window::finish_epoch_presentation(&app, state.inner(), &id);
@@ -1942,6 +1956,7 @@ pub fn run() {
             send_window_action,
             begin_epoch_presentation,
             hide_epoch_progress,
+            begin_epoch_sunset,
             finish_epoch_presentation,
             is_epoch_presentation_current,
             request_thumbnail_capture,

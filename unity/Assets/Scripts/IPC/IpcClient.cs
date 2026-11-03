@@ -121,8 +121,11 @@ public class IpcClient : MonoBehaviour
     public event Action<bool> OnEpochExecuting;
     // Start of an epoch execution (argument: execution ID). The UI starts the HTTP execution after EmitEpochReady returns the ID.
     public event Action<string> OnEpochPrepare;
+    // 計算完了後の日没要求。開始時の同期とは区別し、描画済みの暗転をepoch:darkenedで返す。
+    public event Action<string> OnEpochSunset;
     // From epoch:prepare until results close (epoch:executing false). Blocks world input; cleared on session switches and game end.
     public bool EpochExecuting { get; private set; }
+    private string epochPresentationId;
     // Capture request just before saving a game/scenario (argument: request ID). Send the image directly to the core.
     public event Action<string> OnCameraCaptureThumbnail;
     // Asset manager render request. Return per-row models and capture thumbnails as files (AssetManagerRenderer).
@@ -770,6 +773,7 @@ public class IpcClient : MonoBehaviour
                 case "session:reset":
                     TutorialRuntime.Clear();
                     EpochExecuting = false;
+                    epochPresentationId = null;
                     Debug.Log("IpcClient: session:reset");
                     OnSessionReset?.Invoke();
                     break;
@@ -838,6 +842,7 @@ public class IpcClient : MonoBehaviour
                 case "game:end":
                     TutorialRuntime.Clear();
                     EpochExecuting = false;
+                    epochPresentationId = null;
                     Debug.Log("IpcClient: game:end");
                     OnGameEnd?.Invoke();
                     break;
@@ -869,12 +874,20 @@ public class IpcClient : MonoBehaviour
 
                 case "epoch:executing":
                     EpochExecuting = bool.TryParse(GetParamString(payload, "executing"), out bool executing) && executing;
+                    if (!EpochExecuting) epochPresentationId = null;
                     OnEpochExecuting?.Invoke(EpochExecuting);
                     break;
 
                 case "epoch:prepare":
                     EpochExecuting = true;
-                    OnEpochPrepare?.Invoke(GetParamString(payload, "id"));
+                    epochPresentationId = GetParamString(payload, "id");
+                    OnEpochPrepare?.Invoke(epochPresentationId);
+                    break;
+
+                case "epoch:sunset":
+                    string sunsetId = GetParamString(payload, "id");
+                    if (EpochExecuting && !string.IsNullOrEmpty(sunsetId) && sunsetId == epochPresentationId)
+                        OnEpochSunset?.Invoke(sunsetId);
                     break;
 
                 case "view:set_grid":
@@ -1631,6 +1644,11 @@ public class IpcClient : MonoBehaviour
     public void EmitEpochReady(string id)
     {
         SendEnvelope("epoch:ready", new Dictionary<string, object> { ["id"] = id });
+    }
+
+    public void EmitEpochDarkened(string id)
+    {
+        SendEnvelope("epoch:darkened", new Dictionary<string, object> { ["id"] = id });
     }
 
     /// <summary>

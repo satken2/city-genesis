@@ -1,3 +1,4 @@
+param([switch]$WeatherOnly)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $PSScriptRoot '../BuildRuntime.ps1')
@@ -29,5 +30,7 @@ $manifest.dependencies | Add-Member -NotePropertyName 'com.unity.nuget.newtonsof
 $manifest | ConvertTo-Json -Depth 10 | Set-Content "$qaRoot/Packages/manifest.json"
 Set-Content "$qaRoot/result.txt" 'RUNNING'
 $unityExe = 'C:/Program Files/Unity/Hub/Editor/6000.6.5f1/Editor/Unity.exe'
-$process = Start-Process -FilePath $unityExe -ArgumentList @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'WeatherQA.Run', '-logFile', ('"' + $qaRoot + '/qa.log"')) -WindowStyle Hidden -PassThru
+$arguments = @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'WeatherQA.Run', '-logFile', ('"' + $qaRoot + '/qa.log"'))
+if ($WeatherOnly) { $arguments += '-weather-only' }
+$process = Start-Process -FilePath $unityExe -ArgumentList $arguments -WindowStyle Hidden -PassThru
 Write-Output "Weather QA process: $($process.Id); results: $qaRoot/result.txt"

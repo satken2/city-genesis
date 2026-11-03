@@ -33,17 +33,12 @@ type EpochResponse = {
 export type EpochExecutionOutcome = "completed" | "failed" | "superseded";
 
 /**
- * Execute count epochs and show results. From start until results close, the HUD is disabled and Unity ignores world
- * input while the city stays visible; until the simulation returns, the cockpit also shows the core's progress. Start
- * HTTP once Unity reports that its city cache matches the core, because it renders from that cache without reading the
- * core during execution. On completion, send a session reload to graphics
- * and open epoch_result if a report exists. Pass completed quests to results; without a report, open the quest
- * window directly for notify="modal" celebrations. Use popups for notify="toast" completions and deadline
- * failures. Closing results finishes the presentation; finish it here if no results window opens.
+ * 実行開始から結果を閉じるまでHUDとワールドの操作を止め、計算中は街と進捗を表示する。
+ * Unityが計算中にコアへ問い合わせず描画できるよう、都市の写しの同期完了を待って計算を始める。
+ * 計算完了後に日没・暗転を待って都市を再取得し、結果を表示する。結果を閉じると翌朝の演出へ進む。
  *
- * On core rejection (403: Steam-unverified population limit; 409 EPOCH_ALREADY_RUNNING: another execution
- * active, etc.) or connection error, cancel presentation and translate the reason through the common error handler.
- * Call onStarted when presentation begins (execution is confirmed).
+ * クエスト・実績の通知を結果へ渡し、結果が無い場合は直接通知して演出を終了する。
+ * 拒否・通信失敗では演出を解除し、共通のエラー処理で理由を通知する。onStartedは実行の確定時に呼ぶ。
  */
 export async function executeEpochs(options: {
   apiBaseUrl: string;
@@ -67,6 +62,9 @@ export async function executeEpochs(options: {
     simulationCompleted = true;
     if (!await presentation.isCurrent()) return "superseded";
     await presentation.hideProgress();
+    // 計算済みの結果は、Unityへの演出要求が失敗した場合も表示する。
+    await presentation.sunset().catch(console.error);
+    if (!await presentation.isCurrent()) return "superseded";
     await sendSessionReload().catch(console.error);
     logInfoToFile(`epoch execution: done epoch=${data.epoch ?? "?"}`);
 
@@ -75,6 +73,7 @@ export async function executeEpochs(options: {
       console.error("failed to take unlocked achievements", error);
       return [];
     });
+    if (!await presentation.isCurrent()) return "superseded";
     const failedQuests: QuestNotification[] = data.failed_quests ?? [];
     const modalQuests = quests.filter((q) => q.notify === "modal");
     const toastQuests = quests.filter((q) => q.notify === "toast");

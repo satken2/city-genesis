@@ -1038,13 +1038,13 @@ const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "grading",
 ];
 
-/// On session switches, prevent stale HTTP responses from showing progress or results. The emitted `epoch:ready` releases a
-/// UI still waiting for Unity; it finds the presentation no longer current and does not start the execution.
+/// 都市を切り替えたら同期・日没の待機を解放する。UIは実行IDの失効を確認し、古い計算や結果表示へ進まない。
 pub fn cancel_epoch_presentation(app: &AppHandle, state: &SharedState) {
     let id = state.lock().epoch_presentation_id.clone();
     if let Some(id) = id {
         finish_epoch_presentation(app, state, &id);
         let _ = app.emit("epoch:ready", json!({"id": id}));
+        let _ = app.emit("epoch:darkened", json!({"id": id}));
     }
 }
 

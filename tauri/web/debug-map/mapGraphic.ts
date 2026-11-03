@@ -3,7 +3,7 @@
  *
  * Web シェルとは Unity と同じ取り決め(`__genesisGraphicBridge` と Envelope)でやり取りし、シェルの処理は PC 向けページと変えない。
  * 地図は自分でデータを取りに行き、描画の準備を待たせる必要がないので、Unity が準備を終えて返す合図
- * (起動・初期描画・エポック前の暗転)はすぐに返す。版はこのページと同じビルドなので、互換性は常に合う。
+ * (起動・初期描画・エポック前の同期・計算後の日没)はすぐに返す。版はこのページと同じビルドなので、互換性は常に合う。
  * 地図のウィンドウは都市を開くたび(game:start)に作り直す(都市が無い間はデータを取れず、前の都市の表示位置も引き継がないため)。
  * 表示するのは都市を見せる間(game:reveal から game:end・session:reset まで)で、Unity が受ける再読み込みは
  * 同じ名前のイベント(session:reload)で地図へ渡す。地図のタップで開く詳細は、地図がウィンドウを開くコマンドで開く。
@@ -66,6 +66,9 @@ function receive(json: string): void {
       break;
     case "epoch:prepare":
       send("epoch:ready", { id: params?.id });
+      break;
+    case "epoch:sunset":
+      send("epoch:darkened", { id: params?.id });
       break;
     case "session:reload":
     case "session:force_reload":

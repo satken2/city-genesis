@@ -11,6 +11,13 @@ public class IpcClient : MonoBehaviour
     public event Action OnSessionReload, OnSessionForceReload, OnSessionReset, OnGameEnd, OnGameStart;
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
+    public event Action<string> OnEpochSunset;
+    public event Action<bool> OnEpochExecuting;
+    public string DarkenedId;
+    public int Darkenings;
+    public void EmitEpochDarkened(string id) { DarkenedId = id; Darkenings++; }
+    public void Sunset(string id) => OnEpochSunset?.Invoke(id);
+    public void FinishEpoch() => OnEpochExecuting?.Invoke(false);
     public int Publishes;
     public string WeatherId;
     public int Rain, Snow;
@@ -41,6 +48,7 @@ public class GameStateManager : MonoBehaviour
 public static class ApiClient
 {
     public static int Epoch, Reads, Date = 82530;
+    public static bool Fail;
     public static WeatherClimateSettings Climate = Profile();
     public static WeatherClimateSettings Profile()
     {
@@ -59,6 +67,7 @@ public static class ApiClient
     {
         Reads++;
         yield return null;
+        if (Fail) { error("offline"); yield break; }
         success(Newtonsoft.Json.JsonConvert.DeserializeObject<T>(
             Newtonsoft.Json.JsonConvert.SerializeObject(new { city = new { epoch = Epoch, climate = Climate, current_date = Date } })));
     }
@@ -72,6 +81,10 @@ public static class NightLights
 {
     public static float Level = -1f;
     public static void SetLevel(float value) => Level = value;
+}
+public static class GraphicsConfig
+{
+    public static bool SunShadows = true, SoftShadows = true;
 }
 public sealed class WeatherQaHost : MonoBehaviour
 {
@@ -181,6 +194,39 @@ public sealed class WeatherQaHost : MonoBehaviour
         clock.StartMorning();
         Check(clock.Current == WeatherClock.Stage.Day && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase) && clock.Darkness == 0f, "session start resets to the morning");
 
+        // 停止中でも演出は進み、天気を切り替える境界は黒い画面のまま一度だけ通知する。
+        clock.Paused = true;
+        clock.BeginNight();
+        clock.Advance(WeatherClock.SunsetSeconds, true);
+        Check(clock.Elevation < 0f && clock.FadeAlpha == 0f, "sun sets before blackout begins, even while paused");
+        clock.Advance(WeatherClock.FadeSeconds, true);
+        Check(clock.Current == WeatherClock.Stage.Night && clock.FadeAlpha == 1f, "sunset ends in full blackout");
+        clock.Advance(100f, true);
+        Check(clock.Current == WeatherClock.Stage.Night && clock.FadeAlpha == 1f, "night holds until results close");
+        clock.RequestDawn();
+        clock.BeginNight();
+        Check(!clock.Advance(0f, true) && clock.Current == WeatherClock.Stage.Night, "new completed run cancels the previous pending dawn");
+        clock.RequestDawn();
+        Check(clock.Advance(0f, true) && clock.Phase < 0f && clock.FadeAlpha == 1f, "weather boundary is still black and below the horizon");
+        Check(!clock.Advance(WeatherClock.FadeSeconds, true), "dawn boundary is emitted only once");
+        clock.Advance(WeatherClock.SunsetSeconds, true);
+        Check(clock.Current == WeatherClock.Stage.Day && clock.FadeAlpha == 0f && clock.Darkness == 0f, "paused presentation reaches morning");
+        float heldMorning = clock.Phase;
+        clock.Advance(100f, true);
+        Check(clock.Phase == heldMorning && clock.Paused, "normal clock remains paused after presentation");
+        clock.Paused = false;
+        clock.Advance(WeatherClock.DaySeconds);
+        clock.Advance(WeatherClock.TwilightSeconds * 0.75f);
+        Check(clock.Phase < 0f, "twilight has moved the sun east below the horizon");
+        clock.BeginNight();
+        clock.Advance(WeatherClock.SunsetSeconds / 2f);
+        Check(clock.Elevation < 0f, "sunset from twilight does not cross daylight again");
+        clock.RequestDawn();
+        clock.Advance(WeatherClock.DuskSeconds);
+        Check(clock.Advance(0f), "early close waits for sunset before dawn");
+        clock.StartMorning();
+        Check(!clock.IsPresenting && clock.FadeAlpha == 0f, "session reset clears blackout and pending dawn");
+
         // WeatherController and IPC
         var ipc = new GameObject("IPC").AddComponent<IpcClient>();
         new GameObject("State").AddComponent<GameStateManager>();
@@ -214,6 +260,41 @@ public sealed class WeatherQaHost : MonoBehaviour
         yield return Until(() => controller.Season == WeatherClimate.Winter, 5f, "epoch reload reads the new date");
         Check(controller.CurrentIndex == beforeEdit && controller.Clock.Current == WeatherClock.Stage.Day && controller.Clock.Phase >= phaseBeforeEpoch, "advanced epoch keeps the weather and time running");
 
+        controller.Clock.Paused = true;
+        TrafficClock.SetPaused(true);
+        float heldPhase = controller.Clock.Phase;
+        reads = ApiClient.Reads;
+        ipc.FinishEpoch();
+        yield return Frames(4);
+        Check(controller.Clock.Phase == heldPhase && ApiClient.Reads == reads, "failed computation without sunset does not change time or refetch weather");
+        ipc.Sunset("completed");
+        yield return Until(() => ipc.DarkenedId == "completed", 6f, "sunset acknowledgement while both clocks are paused");
+        Check(controller.Clock.Current == WeatherClock.Stage.Night && controller.Clock.FadeAlpha == 1f, "results wait for blackout");
+        Check(controller.CurrentIndex == beforeEdit, "weather stays unchanged through sunset");
+        yield return Frames(4);
+        Check(ipc.Darkenings == 1 && controller.Clock.Current == WeatherClock.Stage.Night, "blackout acknowledged once and held for results");
+        foreach (var preset in WeatherPreset.All) ApiClient.Climate.months[0].weather[preset.Id] = 0;
+        ApiClient.Climate.months[0].weather["drizzle"] = 100;
+        ipc.Reload();
+        yield return Frames(4);
+        Check(controller.CurrentIndex == beforeEdit, "new climate proportions do not change weather behind results");
+        ipc.FinishEpoch();
+        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Dawn, 5f, "results close starts dawn");
+        Check(controller.CurrentIndex == Index("drizzle") && controller.Clock.FadeAlpha > 0.9f, "new month weather selected before morning is visible");
+        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 5f, "dawn completes while paused");
+        Check(controller.Clock.Paused && TrafficClock.Paused && controller.Clock.FadeAlpha == 0f, "dawn preserves pause settings");
+
+        ipc.SetWeather("blizzard");
+        ipc.Sunset("locked");
+        yield return Until(() => ipc.DarkenedId == "locked", 6f, "locked weather sunset");
+        ApiClient.Fail = true;
+        ipc.FinishEpoch();
+        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 6f, "failed climate request still reaches morning");
+        Check(controller.CurrentIndex == Index("blizzard") && controller.Locked, "manual weather lock survives sunrise");
+        ApiClient.Fail = false;
+        TrafficClock.SetPaused(false);
+        controller.Clock.Paused = false;
+
         ipc.SetWeather("blizzard");
         Check(ipc.WeatherId == "blizzard" && ipc.Snow == 3 && ipc.Rain == 0 && ipc.Locked, "manual weather acknowledged with snow level");
         ApiClient.Epoch = 8; ipc.Reload();
@@ -245,6 +326,11 @@ public sealed class WeatherQaHost : MonoBehaviour
         camera.transform.position = new Vector3(220,95,-230); camera.transform.LookAt(new Vector3(0,28,70));
         camera.clearFlags = CameraClearFlags.Skybox; camera.farClipPlane = 8000;
         camera.gameObject.AddComponent<AudioListener>();
+        if (Array.IndexOf(Environment.GetCommandLineArgs(), "-weather-only") >= 0)
+        {
+            yield return CaptureWeather(controller, sun, camera, ipc);
+            yield break;
+        }
         var ambience = new GameObject("Camera ambience").AddComponent<CameraAmbience>();
         Utils.GroundHeight = 85;
         yield return null;
@@ -368,6 +454,12 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(VehicleAmbience.EmitterCount == 0, "clear removes kind");
         vehicles.enabled = false;
 
+        yield return CaptureWeather(controller, sun, camera, ipc);
+    }
+
+    private IEnumerator CaptureWeather(WeatherController controller, Light sun, Camera camera, IpcClient ipc)
+    {
+        int presetCount = WeatherPreset.All.Count;
         // Capture all weather at the same viewpoint at noon, and capture sunrise, evening, twilight, and fade to black in clear weather
         camera.transform.position = new Vector3(220,95,-230); camera.transform.LookAt(new Vector3(0,28,70));
         Utils.GroundHeight = 0;
@@ -420,6 +512,11 @@ public sealed class WeatherQaHost : MonoBehaviour
         yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Twilight && controller.Clock.Darkness > 0.45f, 30f, "twilight reached");
         Check(sun.intensity < 0.05f, "sun below the horizon casts no light");
         Capture(camera, "t_twilight");
+        ipc.Sunset("capture");
+        yield return Until(() => ipc.DarkenedId == "capture", 6f, "capture blackout");
+        Check(controller.GetComponentInChildren<CanvasGroup>().alpha == 1f, "fullscreen overlay is black before acknowledgement");
+        ipc.ResetSession();
+        Check(controller.Clock.FadeAlpha == 0f && controller.GetComponentInChildren<CanvasGroup>().alpha == 0f, "session switch clears the rendered blackout");
     }
     private void Capture(Camera camera, string name)
     {
