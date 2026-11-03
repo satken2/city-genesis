@@ -44,19 +44,23 @@
 .param-setup-body {
   display: flex;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
+/* カテゴリーが増えても操作ボタンの高さを保ち、一覧だけを縦にスクロールする。 */
 .param-setup-nav {
   display: flex;
   flex-direction: column;
+  flex: 0 0 14rem;
   gap: 2px;
   padding: 12px 8px;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  min-width: 120px;
+  overflow-y: auto;
 }
 
 .param-setup-nav-btn {
+  flex-shrink: 0;
   padding: 7px 12px;
   background: transparent;
   border: none;

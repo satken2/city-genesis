@@ -1453,8 +1453,8 @@ pub fn open_parameter_setup_window(
         .into_iter()
         .collect();
 
-    let width = 620.0_f64;
-    let height = 560.0_f64;
+    let width = 800.0_f64;
+    let height = 680.0_f64;
 
     let builder = WebviewWindowBuilder::new(
         app,
