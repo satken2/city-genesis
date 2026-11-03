@@ -1,7 +1,6 @@
 {
   "policy": {
     "title": "政策规划",
-    "refresh": "重新调查",
     "pending": "模拟进行中",
     "noData": "暂无实绩",
     "noFindings": "没有符合条件的问题。",

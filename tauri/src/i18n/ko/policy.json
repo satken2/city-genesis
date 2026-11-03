@@ -1,7 +1,6 @@
 {
   "policy": {
     "title": "정책 수립",
-    "refresh": "다시 조사",
     "pending": "시뮬레이션 진행 중",
     "noData": "실적 없음",
     "noFindings": "해당하는 문제가 없습니다.",

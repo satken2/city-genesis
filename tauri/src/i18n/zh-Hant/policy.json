@@ -1,7 +1,6 @@
 {
   "policy": {
     "title": "政策規劃",
-    "refresh": "重新調查",
     "pending": "模擬進行中",
     "noData": "暫無實績",
     "noFindings": "沒有符合條件的問題。",

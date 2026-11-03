@@ -2,7 +2,7 @@ import { describeError } from "../../utils/errors";
 /**
  * 政策立案はコアの観測結果を表示し、各階層の対応案から既存の操作画面へ案内する。
  * 別の指標で調べる要因は参照ノードで止め、そのボタンで調査先を切り替える。
- * 再表示は App の open_seq で初期化され、エポック完了と明示的な再調査で値を取り直す。
+ * 再表示は App の open_seq で初期化され、エポック完了時にも値を取り直す。
  */
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { invoke } from "@tauri-apps/api/core";
@@ -235,9 +235,6 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             {item.roots.length > 0 && <span role="img" aria-label={t("policy.needsAttention")}>⚠️</span>}
           </button>)}
       </div>
-      <button type="button" disabled={loading || executing} onClick={() => setRevision(value => value + 1)}>
-        {t("policy.refresh")}
-      </button>
     </div>
     {error && <p className="policy-error" role="alert">{t("common.fetchError")}: {error}</p>}
     {actionError && <p className="policy-error" role="alert">{t("policy.actionError")}</p>}

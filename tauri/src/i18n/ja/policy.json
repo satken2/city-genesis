@@ -1,7 +1,6 @@
 {
   "policy": {
     "title": "政策立案",
-    "refresh": "再調査",
     "pending": "シミュレーション中",
     "noData": "実績なし",
     "noFindings": "該当する問題はありません。",

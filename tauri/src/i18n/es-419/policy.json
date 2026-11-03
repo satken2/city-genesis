@@ -1,7 +1,6 @@
 {
   "policy": {
     "title": "Planificación de políticas",
-    "refresh": "Investigar de nuevo",
     "pending": "Simulación en curso",
     "noData": "Sin datos",
     "noFindings": "No hay problemas que coincidan.",

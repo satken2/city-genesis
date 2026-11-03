@@ -13,7 +13,6 @@
 .policy-planning p { margin: 0; }
 .policy-selector-title { margin: 0; font-size: 1rem; font-weight: 500; }
 .policy-toolbar { display: flex; align-items: flex-start; gap: 1rem; justify-content: space-between; padding-bottom: 0.5rem; }
-.policy-toolbar > button { flex-shrink: 0; }
 .policy-planning button { font: inherit; font-size: 1rem; border-radius: 0; }
 .policy-planning button:focus-visible { outline: 2px solid var(--flat-accent); outline-offset: 2px; }
 .policy-indicators { display: flex; flex-wrap: wrap; gap: 0.7rem; }
