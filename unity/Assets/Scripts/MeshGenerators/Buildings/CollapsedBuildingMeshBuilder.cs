@@ -10,7 +10,8 @@ using GeneratedModels;
 /// One rule shapes every collapse: the building's debris (DEBRIS_VOLUME_RATIO of footprint area × height) settles at the
 /// angle of repose. Solving that volume for a flat-topped heap over the footprint whose slopes run outward gives the heap
 /// height and how far it spreads past the footprint, so taller buildings leave higher, wider debris that covers neighboring
-/// parcels and roads. Rubble and sand piles stand on a rubble bed at BED_SHARE of the heap: cones on a jittered grid spaced
+/// parcels and roads. The spread wanders around the building (SpreadScale), so the debris edge does not trace the footprint's
+/// shape. Rubble and sand piles stand on a rubble bed at BED_SHARE of the heap: cones on a jittered grid spaced
 /// by PILE_SPACING of the spread, whose peaks follow the heap and whose sides stand at each material's angle of repose.
 /// Each material is one heightfield; where the two intersect, the higher shows.
 ///
@@ -31,7 +32,10 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
     private const float PILE_JITTER = 0.35f;         // Pile-center offset from its grid cell center, relative to pile spacing.
     private const int MAX_PILES_PER_SIDE = 24;       // Wide, low sites space piles farther apart instead of multiplying them.
     private const int CELLS_PER_PILE = 10;           // Heightfield cells per pile spacing.
-    private const int MAX_GRID_CELLS = 64;           // Heightfield cells per side, bounding vertices per building.
+    private const int MAX_GRID_CELLS = 32;           // Heightfield cells per side, bounding generation time and vertices per building.
+    private const float OUTLINE_VARIATION = 0.5f;    // Share by which the spread varies around the building (SpreadScale).
+    private const float OUTLINE_WAVELENGTH = 2f;     // Size of the outline's lobes relative to the spread.
+    private const int FAR_OUTLINE_POINTS = 16;       // Outline points of the far plate.
     private const float MIN_CELL = 0.5f;             // Smallest heightfield cell (m).
     private const float RUBBLE_ROUGHNESS = 0.35f;    // Vertex height jitter relative to cell size (blocky rubble).
     private const float SAND_ROUGHNESS = 0.15f;      // Vertex height jitter relative to cell size (smoother sand).
@@ -76,7 +80,7 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
         if (!TryResolveSite(buildingData, out Vector2[] source, out Vector3 centerPointWorld)) return EmptyResult(buildingData);
 
         float buildingHeight = Mathf.Max(1, buildingData.floors ?? 1) * BuildingMeshUtils.GetFloorHeight(buildingData);
-        Mesh mesh = BuildFarPlate(source, buildingHeight, centerPointWorld, true);
+        Mesh mesh = BuildFarPlate(source, buildingHeight, buildingData.agent_id, centerPointWorld, true);
         Material rubble = buildingData.status_reason == Constants.REASON_FIRE
             ? BuildingMeshBuilder.GetBurnedRubbleMaterial()
             : BuildingMeshBuilder.GetCollapsedRubbleMaterial();
@@ -111,33 +115,60 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
         buildingData == null ? null : new BuildingMeshResult(new Mesh(), null);
 
     /// <summary>
-    /// Far plate: the footprint's bounding rectangle along its longest edge, widened by the heap's spread, lifted
-    /// FAR_PLATE_LIFT above the ground at each corner (local Y=0 without followTerrain).
+    /// Far plate: a fan from the footprint's bounding-box center out to FAR_OUTLINE_POINTS outline points, each where the ray
+    /// last leaves the footprint plus the local spread (the same SpreadScale as the heap), lifted FAR_PLATE_LIFT above the
+    /// ground at each vertex (local Y=0 without followTerrain).
     /// </summary>
-    internal static Mesh BuildFarPlate(Vector2[] footprint, float buildingHeight, Vector3 centerPointWorld, bool followTerrain)
+    internal static Mesh BuildFarPlate(Vector2[] footprint, float buildingHeight, int seed, Vector3 centerPointWorld, bool followTerrain)
     {
         float rubbleSlope = Mathf.Tan(RUBBLE_REPOSE_DEG * Mathf.Deg2Rad);
         float spread = HeapHeight(footprint, buildingHeight, rubbleSlope) / rubbleSlope;
-        LongestEdgeFrame(footprint, out Vector2 along, out Vector2 across, out float minA, out float maxA, out float minB, out float maxB);
-        var corners = new[]
+        Vector2 min = footprint[0], max = footprint[0];
+        foreach (Vector2 p in footprint)
         {
-            along * (minA - spread) + across * (minB - spread),
-            along * (maxA + spread) + across * (minB - spread),
-            along * (maxA + spread) + across * (maxB + spread),
-            along * (minA - spread) + across * (maxB + spread),
-        };
-        var vertices = new Vector3[4];
-        var uvs = new Vector2[4];
-        for (int i = 0; i < 4; i++)
+            min = Vector2.Min(min, p);
+            max = Vector2.Max(max, p);
+        }
+        Vector2 center = (min + max) * 0.5f;
+
+        var outline = new Vector2[FAR_OUTLINE_POINTS + 1];
+        outline[0] = center;
+        for (int k = 0; k < FAR_OUTLINE_POINTS; k++)
         {
-            Vector2 p = corners[i];
+            float angle = 2f * Mathf.PI * k / FAR_OUTLINE_POINTS;
+            Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+            float exit = 0f;
+            for (int i = 0, j = footprint.Length - 1; i < footprint.Length; j = i++)
+            {
+                Vector2 edge = footprint[i] - footprint[j];
+                float denominator = direction.x * edge.y - direction.y * edge.x;
+                if (Mathf.Abs(denominator) < 1e-6f) continue;
+                Vector2 offset = footprint[j] - center;
+                float t = (offset.x * edge.y - offset.y * edge.x) / denominator;
+                float u = (offset.x * direction.y - offset.y * direction.x) / denominator;
+                if (t > exit && u >= 0f && u <= 1f) exit = t;
+            }
+            Vector2 toe = center + direction * (exit + spread);
+            outline[k + 1] = center + direction * (exit + spread * SpreadScale(seed, toe, spread));
+        }
+
+        var vertices = new Vector3[outline.Length];
+        var triangles = new int[FAR_OUTLINE_POINTS * 3];
+        for (int i = 0; i < outline.Length; i++)
+        {
+            Vector2 p = outline[i];
             float ground = followTerrain
                 ? Utils.GetGroundHeight(new Vector3(p.x + centerPointWorld.x, 1000f, p.y + centerPointWorld.z)) - centerPointWorld.y
                 : 0f;
             vertices[i] = new Vector3(p.x, ground + FAR_PLATE_LIFT, p.y);
-            uvs[i] = p;
         }
-        var mesh = new Mesh { vertices = vertices, uv = uvs, triangles = new[] { 0, 2, 1, 0, 3, 2 } };
+        for (int k = 0; k < FAR_OUTLINE_POINTS; k++)
+        {
+            triangles[k * 3] = 0;
+            triangles[k * 3 + 1] = (k + 1) % FAR_OUTLINE_POINTS + 1;
+            triangles[k * 3 + 2] = k + 1;
+        }
+        var mesh = new Mesh { vertices = vertices, uv = outline, triangles = triangles };
         mesh.RecalculateNormals();
         mesh.RecalculateTangents();
         mesh.RecalculateBounds();
@@ -168,9 +199,10 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
         if (heapHeight < 0.01f) return mesh;
         float spread = heapHeight / rubbleSlope;
 
-        // Pile grid over the footprint and its spread. Each vertex checks only the piles whose cones can reach it.
-        Vector2 pileOrigin = min - Vector2.one * spread;
-        Vector2 pileArea = max - min + Vector2.one * (2f * spread);
+        // Pile grid over the footprint and its widest spread. Each vertex checks only the piles whose cones can reach it.
+        float maxSpread = spread * (1f + OUTLINE_VARIATION);
+        Vector2 pileOrigin = min - Vector2.one * maxSpread;
+        Vector2 pileArea = max - min + Vector2.one * (2f * maxSpread);
         float spacing = Mathf.Max(PILE_SPACING * spread, Mathf.Max(pileArea.x, pileArea.y) / MAX_PILES_PER_SIDE);
         int pilesX = Mathf.Max(1, Mathf.CeilToInt(pileArea.x / spacing));
         int pilesZ = Mathf.Max(1, Mathf.CeilToInt(pileArea.y / spacing));
@@ -185,20 +217,30 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
                 Vector2 center = pileOrigin + (new Vector2(px + 0.5f, pz + 0.5f) + jitter) * spacing;
                 pileCenters[px, pz] = center;
                 pileIsSand[px, pz] = Hash01(seed, px, pz, 3) < SAND_PILE_SHARE;
-                pilePeaks[px, pz] = HeapHeightAt(footprint, center, heapHeight, rubbleSlope)
+                pilePeaks[px, pz] = HeapHeightAt(footprint, center, heapHeight, rubbleSlope, spread, seed)
                     * Mathf.Lerp(PEAK_MIN, PEAK_MAX, Hash01(seed, px, pz, 2)) * (pileIsSand[px, pz] ? SAND_PEAK : 1f);
             }
         }
         float reach = PEAK_MAX * heapHeight * Mathf.Max(1f / rubbleSlope, SAND_PEAK / sandSlope);
         int searchRadius = Mathf.FloorToInt(reach / spacing + 0.5f + PILE_JITTER);
 
-        // Heightfield grid covering every cone.
-        float margin = spread + reach;
-        Vector2 gridOrigin = min - Vector2.one * margin;
-        Vector2 gridArea = max - min + Vector2.one * (2f * margin);
-        float cell = Mathf.Max(MIN_CELL, spacing / CELLS_PER_PILE, Mathf.Max(gridArea.x, gridArea.y) / MAX_GRID_CELLS);
-        int cellsX = Mathf.Max(1, Mathf.CeilToInt(gridArea.x / cell));
-        int cellsZ = Mathf.Max(1, Mathf.CeilToInt(gridArea.y / cell));
+        // Heightfield grid fitted to the bed and every cone, with one cell to spare so the outer ring lies off the debris.
+        Vector2 low = min - Vector2.one * maxSpread, high = max + Vector2.one * maxSpread;
+        for (int px = 0; px < pilesX; px++)
+        {
+            for (int pz = 0; pz < pilesZ; pz++)
+            {
+                if (pilePeaks[px, pz] <= 0f) continue;
+                float radius = pilePeaks[px, pz] / (pileIsSand[px, pz] ? sandSlope : rubbleSlope);
+                low = Vector2.Min(low, pileCenters[px, pz] - Vector2.one * radius);
+                high = Vector2.Max(high, pileCenters[px, pz] + Vector2.one * radius);
+            }
+        }
+        Vector2 extent = high - low;
+        float cell = Mathf.Max(MIN_CELL, spacing / CELLS_PER_PILE, Mathf.Max(extent.x, extent.y) / MAX_GRID_CELLS);
+        Vector2 gridOrigin = low - Vector2.one * cell;
+        int cellsX = Mathf.CeilToInt(extent.x / cell) + 2;
+        int cellsZ = Mathf.CeilToInt(extent.y / cell) + 2;
         int pointsX = cellsX + 1, pointsZ = cellsZ + 1;
         var rubbleHeights = new float[pointsX * pointsZ];
         var sandHeights = new float[pointsX * pointsZ];
@@ -207,7 +249,7 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
             for (int gx = 0; gx < pointsX; gx++)
             {
                 Vector2 p = gridOrigin + new Vector2(gx, gz) * cell;
-                float rubble = BED_SHARE * HeapHeightAt(footprint, p, heapHeight, rubbleSlope);
+                float rubble = BED_SHARE * HeapHeightAt(footprint, p, heapHeight, rubbleSlope, spread, seed);
                 float sand = float.MinValue;
                 int cx = Mathf.FloorToInt((p.x - pileOrigin.x) / spacing);
                 int cz = Mathf.FloorToInt((p.y - pileOrigin.y) / spacing);
@@ -403,13 +445,30 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// Heap height at a point: full height over the footprint, falling at the slope outside it. Negative past the toe, so the
-    /// bed's edge vertices sink below the ground instead of lying flush with it.
+    /// Heap height at a point: full height over the footprint, falling outside it over the local spread (SpreadScale).
+    /// Negative past the toe, so the bed's edge vertices sink below the ground instead of lying flush with it.
     /// </summary>
-    private static float HeapHeightAt(Vector2[] footprint, Vector2 point, float heapHeight, float slope)
+    private static float HeapHeightAt(Vector2[] footprint, Vector2 point, float heapHeight, float slope, float spread, int seed)
     {
         if (PolygonUtils.Contains(footprint, point)) return heapHeight;
-        return heapHeight - slope * PolygonUtils.DistanceToBoundary(footprint, point);
+        return heapHeight - slope * PolygonUtils.DistanceToBoundary(footprint, point) / SpreadScale(seed, point, spread);
+    }
+
+    /// <summary>
+    /// How far the debris reaches here relative to the mean spread: walls fall unevenly, so the reach wanders by
+    /// ±OUTLINE_VARIATION around the building over lobes of OUTLINE_WAVELENGTH spreads instead of tracing the footprint.
+    /// </summary>
+    private static float SpreadScale(int seed, Vector2 point, float spread)
+    {
+        Vector2 q = point / (OUTLINE_WAVELENGTH * spread);
+        int ix = Mathf.FloorToInt(q.x), iz = Mathf.FloorToInt(q.y);
+        float fx = q.x - ix, fz = q.y - iz;
+        fx = fx * fx * (3f - 2f * fx);
+        fz = fz * fz * (3f - 2f * fz);
+        float noise = Mathf.Lerp(
+            Mathf.Lerp(Hash01(seed, ix, iz, 20), Hash01(seed, ix + 1, iz, 20), fx),
+            Mathf.Lerp(Hash01(seed, ix, iz + 1, 20), Hash01(seed, ix + 1, iz + 1, 20), fx), fz);
+        return 1f + OUTLINE_VARIATION * (2f * noise - 1f);
     }
 
     /// <summary>

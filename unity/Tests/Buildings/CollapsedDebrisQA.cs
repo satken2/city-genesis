@@ -189,10 +189,11 @@ public static class CollapsedDebrisQA
             float radius = mesh.bounds.extents.magnitude;
             Capture(s.name, mesh.bounds.center, radius, 38f, -35f);
             // Far: one plate over the debris area, compared with the heap from the same distant viewpoint.
-            var plate = (Mesh)buildFar.Invoke(null, new object[] { s.footprint, s.floors * FLOOR, Vector3.zero, false });
-            Require(plate.vertexCount == 4, "Far plate is not one quad");
-            float plateReach = Overhang(plate, s.footprint);
-            Require(plateReach > 0f && Mathf.Abs(plateReach - heap / Mathf.Tan(38f * Mathf.Deg2Rad)) < 0.01f, $"Far plate does not cover the spread: {plateReach:F2}m");
+            var plate = (Mesh)buildFar.Invoke(null, new object[] { s.footprint, s.floors * FLOOR, s.name.GetHashCode(), Vector3.zero, false });
+            Require(plate.vertexCount == 17, "Far plate is not one 16-point fan");
+            float spread = heap / Mathf.Tan(38f * Mathf.Deg2Rad), plateReach = Overhang(plate, s.footprint);
+            Require(plateReach > 0.5f * spread && plateReach < 1.5f * spread + 0.01f, $"Far plate reach {plateReach:F2}m for spread {spread:F2}m");
+            foreach (var n in plate.normals) Require(n.y > 0.99f, "Far plate faces down");
             if (s.name == "tower-30F" || s.name == "full-parcel-10F")
             {
                 Capture(s.name + "-far-heap", mesh.bounds.center, radius * 8f, 30f, -35f);
