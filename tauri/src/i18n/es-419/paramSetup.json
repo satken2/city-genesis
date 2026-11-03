@@ -245,6 +245,10 @@
         "label": "Proporción del costo de reparación",
         "desc": "Costo de reparación expresado como proporción del costo de construir de nuevo."
       },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Multiplicador de envejecimiento sin mantenimiento",
+        "desc": "Velocidad a la que envejece una vía que no recibe ningún mantenimiento diario, como múltiplo de su envejecimiento con mantenimiento completo. Varía linealmente de 1 a este valor según la parte del mantenimiento que no recibe."
+      },
       "MAINTENANCE_BASE_PROB_ANNUAL": {
         "label": "Probabilidad anual base de entrar en reparación",
         "desc": "Probabilidad anual base de que un edificio candidato entre efectivamente en reparación."

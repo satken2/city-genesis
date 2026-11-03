@@ -245,6 +245,10 @@
         "label": "Taux du coût de réparation",
         "desc": "Coût de réparation exprimé en proportion du coût de construction neuve."
       },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Multiplicateur de vieillissement sans entretien",
+        "desc": "Vitesse de vieillissement d'une voie qui ne reçoit aucun entretien courant, en multiple de son vieillissement avec un entretien complet. Elle varie linéairement de 1 à cette valeur selon la part d'entretien non reçue."
+      },
       "MAINTENANCE_BASE_PROB_ANNUAL": {
         "label": "Probabilité annuelle de base d'entrée en réparation",
         "desc": "Probabilité annuelle de base qu'un bâtiment candidat entre effectivement en réparation."

@@ -54,6 +54,7 @@
       "12": "社會保障",
       "14": "徵地"
     },
+    "upkeepRow": "日常養護：{{name}} {{km}}公里",
     "welfare": {
       "unemployment": "失業給付",
       "pension": "年金",

@@ -54,6 +54,7 @@
       "12": "社会保障",
       "14": "征地"
     },
+    "upkeepRow": "日常养护：{{name}} {{km}}公里",
     "welfare": {
       "unemployment": "失业救济",
       "pension": "养老金",

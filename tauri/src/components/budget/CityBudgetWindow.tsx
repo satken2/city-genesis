@@ -49,7 +49,9 @@ import {
 } from "../../utils/budgetForecast";
 
 type BudgetAgent = {
-  kind?: "agent" | "path" | "parcel" | "welfare";
+  /** "upkeep" rows sum the daily upkeep of all paths of one variant (variant) with their total length in meters (length). */
+  kind?: "agent" | "path" | "parcel" | "welfare" | "upkeep";
+  length?: number;
   agent_id?: number;
   path_id?: number;
   parcel_id?: number;
@@ -78,9 +80,15 @@ type BudgetAgent = {
  * falling back to the backend name. For paths with an empty section name, supply "Road name (Section #id)"
  * if assigned to a road, otherwise "Path #id", matching the path detail header.
  */
-function rowDisplayName(a: BudgetAgent, t: TFunction): string {
+function rowDisplayName(a: BudgetAgent, t: TFunction, pathVariantName: (variant: number) => string | undefined): string {
   if (a.kind === "welfare" && a.welfare_kind) {
     return t(`budget.welfare.${a.welfare_kind}`, { defaultValue: a.name });
+  }
+  if (a.kind === "upkeep" && a.variant != null) {
+    return t("budget.upkeepRow", {
+      name: pathVariantName(a.variant) ?? `#${a.variant}`,
+      km: ((a.length ?? 0) / 1000).toFixed(1),
+    });
   }
   if (a.kind === "path" && a.name === "") {
     return hasRoad(a.road_id)
@@ -95,6 +103,7 @@ function rowKey(a: BudgetAgent): string {
   if (a.kind === "path") return `path:${a.path_id}`;
   if (a.kind === "parcel") return `parcel:${a.parcel_id}`;
   if (a.kind === "welfare") return `welfare:${a.welfare_id}`;
+  if (a.kind === "upkeep") return `upkeep:${a.variant}`;
   return `agent:${a.agent_id}`;
 }
 
@@ -692,12 +701,12 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       .map((agent) => ({
         ...agent,
         rowKeyStr: rowKey(agent),
-        name: rowDisplayName(agent, t),
+        name: rowDisplayName(agent, t, (variant) => masterData?.paths[variant]?.display_name),
         // Required amount per facility. This row total (agentsTotal.projected) always equals the category's
         // required amount (baseAmounts[catId]) because both use the same projected_expense values.
         projected_preview: agent.projected_expense,
       }));
-  }, [budgetAgents, detailCategoryId, t]);
+  }, [budgetAgents, detailCategoryId, t, masterData]);
 
   const agentsTotal = useMemo(() => {
     let actual = 0;

@@ -54,6 +54,7 @@
       "12": "Social Security",
       "14": "Land Purchase"
     },
+    "upkeepRow": "Daily upkeep: {{name}} {{km}} km",
     "welfare": {
       "unemployment": "Unemployment Benefits",
       "pension": "Pensions",

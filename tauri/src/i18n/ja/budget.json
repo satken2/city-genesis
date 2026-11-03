@@ -54,6 +54,7 @@
       "12": "社会保障",
       "14": "用地買収"
     },
+    "upkeepRow": "日常の維持: {{name}} {{km}}km",
     "welfare": {
       "unemployment": "失業給付",
       "pension": "年金",

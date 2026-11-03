@@ -54,6 +54,7 @@
       "12": "Protection sociale",
       "14": "Acquisition foncière"
     },
+    "upkeepRow": "Entretien courant : {{name}} {{km}} km",
     "welfare": {
       "unemployment": "Allocations chômage",
       "pension": "Pensions",
