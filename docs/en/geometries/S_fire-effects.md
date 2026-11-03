@@ -6,7 +6,7 @@ Building fire (`ALERT_AGENT_ON_FIRE`) is shown as 3D flames, embers, black smoke
 
 There is no separate API. `FireEffectManager` receives alert-list results from `AlertManager`. Shared `ALERT_AGENT_VFX_BITS` separates fire bits from icons, and the display panel's alert toggle also controls flames and smoke.
 
-Effects sit at building bases independently of building GameObjects, sized from footprint and height. Textures are generated in code at startup without image assets.
+Effects sit at building bases independently of building GameObjects. Flames are sized from footprint and height. Smoke and embers pour out in large amounts even from a small fire, so they are emitted at a much larger scale than the flames, still proportional to the footprint. Textures are generated in code at startup without image assets.
 
 ## One-shot demolition explosion
 

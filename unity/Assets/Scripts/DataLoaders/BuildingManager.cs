@@ -2765,7 +2765,7 @@ public class BuildingManager : BaseApiDataManager
                     if (playExplosion)
                     {
                         explodedVersions[agentId] = building.version;
-                        float radius = FireEffectManager.ResolveFootprintRadius(building, cp[0], cp[1]);
+                        float radius = FireEffectManager.ResolveFootprintRadius(building);
                         var parcel = building.parcel_id > 0 ? GetParcelManager()?.GetParcelSummary(building.parcel_id) : null;
                         float baseHeight = ResolveBuildingBaseHeight(parcel, cp[0], cp[1]);
                         // Do not parent to the building, preventing LOD regeneration from cutting off lingering smoke or sound.

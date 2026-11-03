@@ -262,7 +262,7 @@ public class FireEffectManager : MonoBehaviour
 
         if (summary != null && summary.polygonArray != null && summary.polygonArray.Length >= 3)
         {
-            radius = ResolveFootprintRadius(summary, x, z);
+            radius = ResolveFootprintRadius(summary);
         }
 
         GameObject buildingGO = BuildingManager.Instance != null
@@ -281,8 +281,11 @@ public class FireEffectManager : MonoBehaviour
         return true;
     }
 
-    /// <summary>Calculate radius around the center from the building base polygon's bounding rectangle.</summary>
-    public static float ResolveFootprintRadius(BuildingSummary summary, float centerX, float centerZ)
+    /// <summary>
+    /// Calculate radius around the center from the building base polygon's bounding rectangle.
+    /// polygonArray is local XZ relative to center_point, so the center is the origin.
+    /// </summary>
+    public static float ResolveFootprintRadius(BuildingSummary summary)
     {
         if (summary?.polygonArray == null) return FALLBACK_RADIUS;
         float minX = float.MaxValue, maxX = float.MinValue;
@@ -300,8 +303,8 @@ public class FireEffectManager : MonoBehaviour
         if (minX > maxX || minZ > maxZ) return FALLBACK_RADIUS;
 
         // The center may differ from the rectangle midpoint (such as L-shaped buildings), so measure to the farther edges.
-        float halfX = Mathf.Max(maxX - centerX, centerX - minX);
-        float halfZ = Mathf.Max(maxZ - centerZ, centerZ - minZ);
+        float halfX = Mathf.Max(maxX, -minX);
+        float halfZ = Mathf.Max(maxZ, -minZ);
         return Mathf.Max(halfX, halfZ);
     }
 

@@ -33,7 +33,7 @@ public static class FireEffectFactory
     /// <summary>Effect dimensions for one building.</summary>
     public readonly struct PlumeSpec
     {
-        /// <summary>Building footprint circumradius (m), governing flame width, smoke thickness, and emission rate.</summary>
+        /// <summary>Building footprint circumradius (m), governing the scale of flames, sparks, smoke, and light.</summary>
         public readonly float Radius;
 
         /// <summary>Building height (m), governing flame outlets and smoke emission height.</summary>
@@ -49,6 +49,21 @@ public static class FireEffectFactory
             Drift = drift.sqrMagnitude > 1e-4f ? drift.normalized : Vector2.right;
         }
     }
+
+    /// <summary>
+    /// Ratio of the radius sizing sparks and all smoke to the footprint radius. Even a small fire puts out far more smoke
+    /// than its flames suggest, so they are sized as if the footprint were this many times wider.
+    /// </summary>
+    private const float PLUME_RADIUS_RATIO = 13.5f;
+
+    /// <summary>
+    /// Upward tilt (degrees) of sparks and smoke. They stream out along the box's +Z like a plume leaning in the wind,
+    /// rising slightly instead of spreading flat over neighboring buildings.
+    /// </summary>
+    private const float PLUME_TILT_DEGREES = 15f;
+
+    /// <summary>Ratio of the blast's flame and smoke radius to the footprint radius. A blast throws fire and dust far beyond the building.</summary>
+    private const float BLAST_RADIUS_RATIO = 10.5f;
 
     private const int FLAME_TEXTURE_SIZE = 128;
     private const int SMOKE_TEXTURE_SIZE = 128;
@@ -93,13 +108,16 @@ public static class FireEffectFactory
         return root;
     }
 
-    /// <summary>One-shot plume for blasting. Shares only regular fire materials and creates no continuously burning smoke column.</summary>
+    /// <summary>
+    /// One-shot plume for blasting a building of the given footprint radius (m).
+    /// Shares only regular fire materials and creates no continuously burning smoke column.
+    /// </summary>
     public static GameObject CreateExplosion(float radius, Transform parent)
     {
         EnsureMaterials();
         var root = new GameObject("BuildingExplosion");
         root.transform.SetParent(parent, false);
-        float r = Mathf.Clamp(radius, 2.5f, 35f);
+        float r = Mathf.Clamp(radius, 2.5f, 35f) * BLAST_RADIUS_RATIO;
 
         var flames = AddExplosionSystem(root.transform, "BlastFlames", _flameMaterial, 30, r);
         var main = flames.main;
@@ -282,9 +300,11 @@ public static class FireEffectFactory
         // Use a box with depth around the upper building so flames appear to emerge
         // from upper-floor openings as well as the roof. Keep its XZ extent inside the footprint;
         // covering the full footprint would make flames appear larger than the building.
+        // A Box shape launches along its local +Z, so turn that axis upward; the Z scale then becomes the height.
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
-        shape.scale = new Vector3(r * 0.85f, h * 0.3f, r * 0.85f);
+        shape.rotation = new Vector3(-90f, 0f, 0f);
+        shape.scale = new Vector3(r * 0.85f, r * 0.85f, h * 0.3f);
         shape.position = new Vector3(0f, h * 0.8f, 0f);
 
         SetColorOverLifetime(ps,
@@ -311,12 +331,15 @@ public static class FireEffectFactory
             new Keyframe(1f, 0.20f)));
 
         SetNoise(ps, strength: Mathf.Max(0.4f, r * 0.18f), frequency: 0.4f, scrollSpeed: 0.55f, octaves: 2);
+
+        // Mirror half the tongues so the texture's bend does not lean every flame the same way.
+        ps.GetComponent<ParticleSystemRenderer>().flip = new Vector3(0.5f, 0f, 0f);
     }
 
     /// <summary>Sparks: small points of light rising from the flames.</summary>
     private static void BuildEmbers(Transform root, in PlumeSpec spec)
     {
-        float r = spec.Radius;
+        float r = spec.Radius * PLUME_RADIUS_RATIO;
         float h = spec.Height;
 
         ParticleSystem ps = AddSystem(root, "Embers", _sparkMaterial, 140);
@@ -333,6 +356,7 @@ public static class FireEffectFactory
 
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
+        shape.rotation = new Vector3(-PLUME_TILT_DEGREES, 0f, 0f);
         shape.scale = new Vector3(r * 0.75f, h * 0.24f, r * 0.75f);
         shape.position = new Vector3(0f, h * 0.84f, 0f);
 
@@ -363,7 +387,7 @@ public static class FireEffectFactory
     /// <summary>Black fire smoke, spreading as it rises and cooling to light gray.</summary>
     private static void BuildBlazeSmoke(Transform root, in PlumeSpec spec)
     {
-        float r = spec.Radius;
+        float r = spec.Radius * PLUME_RADIUS_RATIO;
         float h = spec.Height;
 
         ParticleSystem ps = AddSystem(root, "Smoke", _smokeMaterial, 180);
@@ -383,6 +407,7 @@ public static class FireEffectFactory
 
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
+        shape.rotation = new Vector3(-PLUME_TILT_DEGREES, 0f, 0f);
         shape.scale = new Vector3(r * 0.5f, h * 0.06f, r * 0.5f);
         shape.position = new Vector3(0f, h * 1.0f, 0f);
 
@@ -414,7 +439,7 @@ public static class FireEffectFactory
     /// <summary>White smoke after the fire goes out, rising in a thin column without flames.</summary>
     private static void BuildSmolderSmoke(Transform root, in PlumeSpec spec)
     {
-        float r = spec.Radius;
+        float r = spec.Radius * PLUME_RADIUS_RATIO;
         float h = spec.Height;
 
         ParticleSystem ps = AddSystem(root, "Smoke", _smokeMaterial, 90);
@@ -432,6 +457,7 @@ public static class FireEffectFactory
 
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
+        shape.rotation = new Vector3(-PLUME_TILT_DEGREES, 0f, 0f);
         shape.scale = new Vector3(r * 0.22f, h * 0.04f, r * 0.22f);
         shape.position = new Vector3(0f, h * 0.98f, 0f);
 
@@ -626,7 +652,8 @@ public static class FireEffectFactory
     }
 
     /// <summary>
-    /// Flame-particle texture: an upward-tapering teardrop with noisy edges resembling tongues of flame.
+    /// Flame-particle texture: one tongue of flame with a rounded base, narrowing to a tip that bends sideways.
+    /// Edges grow more ragged toward the top so overlapping particles do not line up as a row of triangles.
     /// View-aligned particles with roll disabled preserve this orientation, with the base at the bottom.
     /// </summary>
     private static Texture2D BuildFlameTexture()
@@ -637,18 +664,21 @@ public static class FireEffectFactory
         for (int y = 0; y < size; y++)
         {
             float v = (y + 0.5f) / size;
-            float halfWidth = (1f - Mathf.Pow(v, 1.6f)) * SmoothStep01(0f, 0.20f, v);
+            float bend = (Fbm(v * 1.6f + 1.3f, 4.1f, 2) - 0.5f) * 0.7f * Mathf.Pow(v, 1.5f);
+            // Widest at about a fifth of the height, where v^0.46 = 0.5.
+            float halfWidth = Mathf.Sin(Mathf.PI * Mathf.Pow(v, 0.46f)) * 0.75f;
+            float verticalFade = (1f - SmoothStep01(0.7f, 1f, v) * 0.5f) * SmoothStep01(0f, 0.14f, v);
 
             for (int x = 0; x < size; x++)
             {
                 float u = (x + 0.5f) / size;
-                float ax = Mathf.Abs(u - 0.5f) * 2f;
+                float ax = Mathf.Abs(u - 0.5f - bend) * 2f;
 
-                float wobble = (Fbm(u * 4f + 3.1f, v * 3f + 7.7f, 3) - 0.5f) * 0.22f;
-                float w = Mathf.Max(halfWidth + wobble, 0f);
-                float alpha = 1f - SmoothStep01(w * 0.35f, w, ax);
+                float ragged = (Fbm(u * 5f + 3.1f, v * 3.5f + 7.7f, 3) - 0.5f) * (0.2f + 0.7f * v);
+                float w = Mathf.Max(halfWidth + ragged, 0f);
+                float alpha = (1f - SmoothStep01(w * 0.2f, w, ax)) * verticalFade;
 
-                float core = (1f - ax) * (1f - SmoothStep01(0.15f, 0.75f, v));
+                float core = (1f - ax / Mathf.Max(w, 1e-3f)) * (1f - SmoothStep01(0.1f, 0.6f, v));
                 Color rgb = Color.Lerp(new Color(1f, 0.78f, 0.45f), Color.white, Mathf.Clamp01(core));
 
                 pixels[y * size + x] = new Color(rgb.r, rgb.g, rgb.b, Mathf.Clamp01(alpha));
