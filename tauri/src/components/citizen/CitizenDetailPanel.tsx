@@ -24,7 +24,7 @@ import { describeError } from "../../utils/errors";
  * household's satisfaction from /api/v1/agents/{household id}.
  * - One list: household, workplace, commute time, school, major, higher education completion, and a criminal
  *   propensity meter.
- * - Household status: the household's car ownership, standard of living (demand_tier, worded as in the household
+ * - Household status: the household's car ownership, standard of living (income_tier, worded as in the household
  *   section of the agent detail), and meters for its nutrition, healthcare, and leisure satisfaction.
  * - Skills: radar chart of the six skill values.
  * The Activity tab contains a map of home, destinations, and outbound routes, with the destination list
@@ -555,11 +555,11 @@ export function CitizenDetailPanel({
                     {household.has_automobile ? t("citizen.automobileOwned") : t("citizen.automobileNone")}
                   </span>
 
-                  {household.demand_tier != null && (
+                  {household.income_tier != null && (
                     <>
                       <span className="agent-detail-label">{t("household.livingStandard")}</span>
                       <span className="agent-detail-value">
-                        {t(`household.livingStandardLevel.${household.demand_tier}`)}
+                        {t(`household.livingStandardLevel.${household.income_tier}`)}
                       </span>
                     </>
                   )}

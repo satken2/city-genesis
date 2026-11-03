@@ -244,6 +244,8 @@ namespace GeneratedModels
         public bool? has_automobile;
         /// <summary>世帯の需要ティア（その世帯が注文した商品の最も高い demand_tier。0〜3。0は何も注文できなかった世帯）</summary>
         public int? demand_tier;
+        /// <summary>世帯の所得ティア（0〜3。収入が届いた生活費の線の数。線は最低生活費、ティア1を需要の上限まで満たす費用、ティア1・2を満たす費用）</summary>
+        public int? income_tier;
         /// <summary>稼働率（直近エポックのスロット）</summary>
         public List<float> utilization;
         /// <summary>稼働率の目標値（プレイヤー設定。0.0〜1.5）</summary>

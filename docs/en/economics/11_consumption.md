@@ -18,6 +18,8 @@ Demand has three tiers according to priority in daily life.
 
 Households prioritize basic needs and expand consumption as resources permit. Demand depends on household size, age, health, and available leisure.
 
+A household's standard of living (income tier) shows how far its income reaches along the cost of living. A household whose income falls short of the minimum cost of living is 0, one that reaches it is 1, one that can fully meet its necessities is 2, and one that can also fully meet ordinary consumer goods is 3; a tier-3 household can afford entertainment and luxuries from its income alone.
+
 ## 11.3. Satisfaction
 
 Satisfaction measures how well needs for goods and services were met.

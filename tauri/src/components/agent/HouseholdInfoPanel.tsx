@@ -6,13 +6,14 @@
  * Satisfaction values (satis_*) range from 0.0 to 1.0, visualized by Meter.
  * Members appear as CitizenLink entries intended to navigate to citizen details on click.
  *
- * Standard of living is the household's demand_tier (the highest product tier it ordered: 0 nothing,
- * 1 necessities only, 2 general goods, 3 luxury goods), shown as a word such as "Destitute" or "Affluent".
+ * Standard of living is the household's income_tier (how many cost-of-living lines its income reaches: 0 below the
+ * minimum cost of living, 1 the minimum, 2 tier-1 goods up to their maximum demand, 3 tier-1 and tier-2 goods),
+ * shown as a word such as "Destitute" or "Affluent".
  *
  * Tourist households (VARIANT_TOURIST) have no citizens; trip satisfaction depends on
  * entertainment/leisure and tourism experiences. Show "Tourist" instead of household type,
- * and show only the entertainment/leisure and tourism satisfaction meters. Their demand_tier follows the separate
- * tourist demand, so standard of living is hidden.
+ * and show only the entertainment/leisure and tourism satisfaction meters. They have no income, so standard of
+ * living is hidden.
  */
 
 import { resolveIntlLocale } from "../../utils/locale";
@@ -95,13 +96,13 @@ export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
               : "-"}
           </span>
 
-          {!isTourist && agent.demand_tier != null && (
+          {!isTourist && agent.income_tier != null && (
             <>
               <span className="agent-detail-label">
                 {t("household.livingStandard")}
               </span>
               <span className="agent-detail-value">
-                {t(`household.livingStandardLevel.${agent.demand_tier}`)}
+                {t(`household.livingStandardLevel.${agent.income_tier}`)}
               </span>
             </>
           )}

@@ -1,7 +1,7 @@
 /**
  * Income statistics tab component.
  *
- * Fetches and displays Household income and disposable income distributions, plus demand
+ * Fetches and displays Household income and disposable income distributions, plus income
  * tier shares and history, from GET /api/v1/stats/income.
  *
  * Layout:
@@ -10,8 +10,8 @@
  *     - Top left: income distribution (horizontal bars, Recharts BarChart).
  *     - Bottom left: disposable income distribution (horizontal bars, Recharts BarChart).
  *   - Right column: vertical split.
- *     - Top right: current demand tier shares (pie chart, Recharts PieChart).
- *     - Bottom right: demand tier count history (line chart, Recharts LineChart).
+ *     - Top right: current income tier shares (pie chart, Recharts PieChart).
+ *     - Bottom right: income tier count history (line chart, Recharts LineChart).
  */
 
 import { useMemo, useState } from "react";
@@ -257,10 +257,10 @@ export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
         {/* Right column: pie chart and history chart */}
         <div className="income-tab__right">
-          {/* Top right: current demand tier shares */}
+          {/* Top right: current income tier shares */}
           <div className="income-card income-card--half">
             <h3 className="income-card__title">
-              {t("statistics.demandTierDistribution", "現在の需要ティア割合")}
+              {t("statistics.incomeTierDistribution", "現在の所得ティア割合")}
             </h3>
             <div className="income-pie-chart-wrapper">
               <div className="income-pie-chart">
@@ -308,10 +308,10 @@ export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
             </div>
           </div>
 
-          {/* Bottom right: Household count history by demand tier */}
+          {/* Bottom right: Household count history by income tier */}
           <div className="income-card income-card--half">
             <h3 className="income-card__title">
-              {t("statistics.demandTierTrend", "需要ティア世帯数の推移")}
+              {t("statistics.incomeTierTrend", "所得ティア世帯数の推移")}
               {selectedScopeKey !== "city" && (
                 <span className="income-card__subtitle-hint"> (※都市全体)</span>
               )}
