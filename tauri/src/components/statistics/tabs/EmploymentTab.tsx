@@ -6,9 +6,6 @@
  *
  * - Employment summary (KPI cards): employment rate, job fulfillment rate, and average wage rate.
  * - Unemployment rate history (line chart): unemployment rate time series by Epoch.
- * - Supply/demand balance by skill level (overlaid horizontal bars): three levels, uneducated,
- *   standard, and advanced. Draw demand in light bars with dark supply bars overlaid.
- *   Scale the maximum of all six demand/supply values across the three levels to the chart width.
  * - Job demand by Skill (horizontal bars): fulfillment rates for six Skills.
  * - Employment by industry table (scrollable): detailed list by Variant.
  */
@@ -44,14 +41,6 @@ type Summary = {
   average_wage: number;
 };
 
-type TierBalance = {
-  tier: "uneducated" | "standard" | "high";
-  supply: number;
-  demand_quota: number;
-  employed: number;
-  average_wage: number;
-};
-
 // One unemployment rate history data point (snapshot for an Epoch).
 type UnemploymentHistoryPoint = {
   epoch: number;
@@ -81,7 +70,6 @@ type Scope = {
   name: string | null;
   history: UnemploymentHistoryPoint[];
   summary: Summary;
-  tier_balance: TierBalance[];
   skill_demand: SkillDemand[];
   industry: IndustryRow[];
 };
@@ -92,10 +80,6 @@ type EmploymentStats = {
 };
 
 // --- Color definitions ---
-const COLOR_UNEDUCATED = "#f59e0b"; // Uneducated: amber.
-const COLOR_STANDARD   = "#3b82f6"; // Standard: blue.
-const COLOR_HIGH       = "#8b5cf6"; // Advanced: violet.
-
 const COLOR_UNEMPLOYMENT = "#ef4444"; // Unemployment rate line: red.
 
 const COLOR_FILL_OK    = "#10b981"; // Good fulfillment: emerald.
@@ -188,36 +172,7 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     );
   }
 
-  const { summary, tier_balance, skill_demand, industry, history } = currentScope;
-
-  // Scale reference for supply/demand balance by skill level.
-  // Fit the largest of the six values (three levels × demand/supply) to the chart width,
-  // taking the maximum across all supply / demand_quota values.
-  const maxTierValue = Math.max(
-    ...tier_balance.map((t) => Math.max(t.supply, t.demand_quota))
-  );
-
-  const tierLabel = (tier: string) => {
-    switch (tier) {
-      case "uneducated":
-        return t("statistics.employment.tierUneducated", "無教育人材");
-      case "standard":
-        return t("statistics.employment.tierStandard", "標準人材");
-      case "high":
-        return t("statistics.employment.tierHigh", "高度人材");
-      default:
-        return tier;
-    }
-  };
-
-  const tierColor = (tier: string) => {
-    switch (tier) {
-      case "uneducated": return COLOR_UNEDUCATED;
-      case "standard": return COLOR_STANDARD;
-      case "high": return COLOR_HIGH;
-      default: return COLOR_STANDARD;
-    }
-  };
+  const { summary, skill_demand, industry, history } = currentScope;
 
   const skillLabel = (name: string) => {
     switch (name) {
@@ -347,70 +302,6 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   {t("statistics.employment.noTrendData", "推移データがありません")}
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* ③ Supply/demand balance by skill level */}
-          <div className="emp-card">
-            <h3 className="emp-card__title">
-              {t("statistics.employment.tierBalanceTitle", "スキル段階別 需給バランス")}
-            </h3>
-            <div className="emp-tier-legend">
-              <span className="emp-tier-legend__item">
-                <span
-                  className="emp-tier-legend__bar emp-tier-legend__bar--demand"
-                />
-                {t("statistics.employment.demandLegend", "需要（求人定員）")}
-              </span>
-              <span className="emp-tier-legend__item">
-                <span
-                  className="emp-tier-legend__bar emp-tier-legend__bar--supply"
-                />
-                {t("statistics.employment.supplyLegend", "供給（人材数）")}
-              </span>
-            </div>
-            <div className="emp-tier-list">
-              {tier_balance.map((tb) => {
-                const supplyWidth = maxTierValue > 0 ? (tb.supply / maxTierValue) * 100 : 0;
-                const demandWidth = maxTierValue > 0 ? (tb.demand_quota / maxTierValue) * 100 : 0;
-                const color = tierColor(tb.tier);
-                return (
-                  <div key={tb.tier} className="emp-tier-row">
-                    <div
-                      className="emp-tier-row__label"
-                      style={{ color }}
-                    >
-                      {tierLabel(tb.tier)}
-                    </div>
-                    <div className="emp-tier-overlay-track">
-                      {/* Demand (job quota): light bar, drawn behind. */}
-                      <div
-                        className="emp-tier-overlay-bar emp-tier-overlay-bar--demand"
-                        style={{ width: `${demandWidth}%`, background: color }}
-                        title={`${t("statistics.employment.demandLegend", "需要")}: ${tb.demand_quota.toFixed(0)}`}
-                      />
-                      {/* Supply (worker count): dark bar, overlaid in front. */}
-                      <div
-                        className="emp-tier-overlay-bar emp-tier-overlay-bar--supply"
-                        style={{ width: `${supplyWidth}%`, background: color }}
-                        title={`${t("statistics.employment.supplyLegend", "供給")}: ${tb.supply.toLocaleString()}`}
-                      />
-                    </div>
-                    <div className="emp-tier-row__values">
-                      <span className="emp-tier-row__supply" style={{ color }}>
-                        {tb.supply.toLocaleString()}
-                      </span>
-                      <span className="emp-tier-row__sep">/</span>
-                      <span className="emp-tier-row__demand">
-                        {tb.demand_quota.toFixed(0)}
-                      </span>
-                    </div>
-                    <div className="emp-tier-row__wage">
-                      {formatWage(tb.average_wage, locale)}
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
 
