@@ -21,7 +21,7 @@ FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with m
 | `tile` / `scatter{n}` / `scatter-single{n}` | Ground tiles and plants, vehicles, or materials scattered outside the body (`scatter-single` at most once per building) |
 | `base-prebuilt` / `mid-prebuilt` / `top-prebuilt` | Prebuilt tiers; mashup wings use names such as `mashup-{model_prefix}-base-prebuilt` |
 | `port_*` / `yard_*` / `site_*` | Port, depot, and open-space parts |
-| `scaffold-*` / `crane-*` / `demo-*` / `excavator` / `collapse` | Construction, demolition, and collapse sites |
+| `scaffold-*` / `crane-*` / `demo-*` / `excavator` | Construction and demolition sites |
 | `far` / `mashup-{model_prefix}-far` | Far models for whole buildings or individual wings |
 | `{part}_close` | Close-up model |
 | `road_access_{type}_{identifier}` | Empty model objects marking road-access frontages |
@@ -36,7 +36,7 @@ For missing walls and corners, search the same folder in this order: position 1 
 
 ## Draw LOD
 
-Close prefers `{part}_close` in the selected folder and falls back to the ordinary part. Folder selection always depends on ordinary-part availability, regardless of LOD. Far never assembles parts: it stretches one far model to the building envelope, or each wing for mashups and open pits, falling back to boxes. Construction, demolition, and collapse use low Far boxes. See [LOD](E_lod.md) and [data loading](H_data-loading.md) for retention, reuse, and waiting for terrain.
+Close prefers `{part}_close` in the selected folder and falls back to the ordinary part. Folder selection always depends on ordinary-part availability, regardless of LOD. Far never assembles parts: it stretches one far model to the building envelope, or each wing for mashups and open pits, falling back to boxes. Construction and demolition use low Far boxes; collapse uses one plate over the area the debris covers. See [LOD](E_lod.md) and [data loading](H_data-loading.md) for retention, reuse, and waiting for terrain.
 
 Scatter parts (`scatter{n}` and `scatter-single{n}`) are not built into the building mesh. Like [terrain props](M_terrain-props.md), their shared models are drawn with GPU instancing across buildings. Their draw LOD is selected per part with the terrain-prop rules regardless of the building, including the handling of `_close` and `_far`. Generation that creates no shown building object, such as plan previews, includes scatter parts in the single mesh.
 

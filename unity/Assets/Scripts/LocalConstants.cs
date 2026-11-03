@@ -115,32 +115,14 @@ public static class LocalConstants
     /// <summary>World frequency of the base dirt-noise octave (1/m). Multiply coordinates by this value (wavelength about 6.7m); higher octaves use 2.7x and 6.1x.</summary>
     public const float CONSTRUCTION_DIRT_NOISE_SCALE = 0.15f;
 
-    /// <summary>Maximum edge length when subdividing the dirt mound's top (m). Longer edges split at midpoints to create interior bump vertices.</summary>
-    public const float CONSTRUCTION_DIRT_MAX_EDGE = 3f;
-
     /// <summary>Maximum edge length of provisional floor meshes before terrain tiles load (m). Unused after loading, when clipping follows the terrain grid.</summary>
     public const float SITE_FLOOR_MAX_EDGE = 6f;
 
     /// <summary>Allowed screen-space error for Terrain rendering LOD, limiting shape differences from covering floors and roads.</summary>
     public const float TERRAIN_HEIGHTMAP_PIXEL_ERROR = 1f;
 
-    /// <summary>Dirt-mound edge fade distance (m). Attenuate bumps within this distance, reaching zero at boundary vertices to avoid gaps with adjacent parcels.</summary>
-    public const float CONSTRUCTION_DIRT_EDGE_FADE = 1.5f;
-
     /// <summary>Extra width added to road width for under-construction path dirt strips (m).</summary>
     public const float CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH = 1.0f;
-
-    /// <summary>Base rubble-mound thickness for STATUS_COLLAPSED (m), thicker than construction dirt (CONSTRUCTION_DIRT_THICKNESS).</summary>
-    public const float CONSTRUCTION_RUBBLE_THICKNESS = 0.8f;
-
-    /// <summary>Top-surface noise bump amplitude for collapsed rubble (m), rougher than dirt (CONSTRUCTION_DIRT_BUMP_AMPLITUDE).</summary>
-    public const float CONSTRUCTION_RUBBLE_BUMP_AMPLITUDE = 0.7f;
-
-    /// <summary>XZ fill ratio when fitting collapse parts to the footprint AABB. Below 1 leaves margins inside the parcel.</summary>
-    public const float COLLAPSE_FRAGMENT_FILL = 0.9f;
-
-    /// <summary>Maximum collapse-part height (m). Taller models are compressed along Y to keep rubble low.</summary>
-    public const float COLLAPSE_FRAGMENT_MAX_HEIGHT = 3.0f;
 
     /// <summary>
     /// Prefix folder for standard parts shared by all buildings.

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /// <summary>
 /// Utility generating dirt strips covering paths under construction (STATUS_CONSTRUCTING).
 /// Called by PathManager.GenerateConstructingPathMesh.
-/// Also holds DirtNoise shared with building dirt mounds (ConstructingBuildingMeshBuilder).
+/// Also holds DirtNoise, shared with ConstructionPathBuilder.
 ///
 /// Shape: strip along points, with trapezoidal mound cross-section: two ground-contact edge vertices and two inner vertices raised by thickness
 /// plus dirt noise. Ground-contact edges eliminate the need for sides,
@@ -32,7 +32,7 @@ public static class ConstructionMeshUtil
     /// Dirt height noise (0–1). Three-octave fbm combines broad undulations (wavelength about 6–7m)
     /// with medium bumps (about 2.5m) and small clods (about 1m).
     /// World-coordinate inputs keep patterns stable across regeneration.
-    /// Shared by building dirt mounds (ConstructingBuildingMeshBuilder) and dirt strips.
+    /// Shared by dirt strips and ConstructionPathBuilder.
     /// </summary>
     public static float DirtNoise(float worldX, float worldZ)
     {
@@ -115,7 +115,7 @@ public static class ConstructionMeshUtil
                 rightCrestPos.y = Utils.GetPathSurfaceHeight(rightCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
             }
 
-            // Multi-octave dirt noise (shared with building dirt mounds).
+            // Multi-octave dirt noise (shared with ConstructionPathBuilder).
             float crestLeftY = thickness + DirtNoise(leftCrestPos.x, leftCrestPos.z) * bumpAmp;
             float crestRightY = thickness + DirtNoise(rightCrestPos.x, rightCrestPos.z) * bumpAmp;
 

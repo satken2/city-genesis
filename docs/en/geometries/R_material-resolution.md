@@ -6,7 +6,7 @@ These conventions assign material instances to generated faces. [Building](F_bui
 
 Modeled components use their prefab materials. Faces without shape parts, including roofs, ground panels, gables, quays, and open-space surfaces, take material-only inputs such as `ceil`, `floor`, `generic-wall`, and `site_*`.
 
-Common faces independent of parts use shared materials looked up by name: default `BuildingMaterial`, foundation concrete `COMMON_CONCRETE`, site soil `ConstructionDirt`, and rubble `CollapsedRubble` or `CollapsedRubbleBurned`. `BuildingMaterial` is the final fallback, so building meshes never lack a material. A material looked up by name comes from the asset pack when it has one with that name, and otherwise from directly under `Assets/Resources/` ([asset packs](X_asset-packs.md)).
+Common faces independent of parts use shared materials looked up by name: default `BuildingMaterial`, foundation concrete `COMMON_CONCRETE`, site soil `ConstructionDirt`, and collapse rubble and sand `CollapsedRubble` and `CollapsedSand`, with `CollapsedRubbleBurned` and `CollapsedSandBurned` for fire damage, and rebar of broken columns `CollapsedRebar`. `BuildingMaterial` is the final fallback, so building meshes never lack a material. A material looked up by name comes from the asset pack when it has one with that name, and otherwise from directly under `Assets/Resources/` ([asset packs](X_asset-packs.md)).
 
 Ground panels alone may be omitted. They apply only to buildings with master `draw_floor`; if no `floor` part exists, omit the panel instead of using a default material. This avoids unnecessary slabs under tile-based facilities. Station building exclusive-area ground follows the same `floor` availability rule.
 

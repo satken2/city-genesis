@@ -111,14 +111,15 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// Building mesh for distant (Far) rendering. Regardless of building type, stretch a distant model to the outline (<see cref="FarBuildingMeshBuilder"/>);
     /// if unavailable, extrude the footprint into a box with height = floor count × floor height.
     /// Distant buildings are the most numerous, so avoid full-detail assembly followed by material replacement.
-    /// During construction/demolition, use a one-floor box instead of a distant model so the unfinished state remains visible from afar;
-    /// for collapsed buildings, use rubble height (0.5 floors).
+    /// During construction/demolition, use a one-floor box instead of a distant model so the unfinished state remains visible from afar.
+    /// Collapsed buildings draw one rubble plate over the area the debris covers, which spreads past the footprint a box would trace.
     /// </summary>
     public static BuildingMeshResult GenerateFarBuilding(BuildingSummary buildingData)
     {
         using var scope = farMarker.Auto();
         int status = buildingData.status;
-        if (status != Constants.STATUS_CONSTRUCTING && status != Constants.STATUS_DEMOLISHING && status != Constants.STATUS_COLLAPSED)
+        if (status == Constants.STATUS_COLLAPSED) return CollapsedBuildingMeshBuilder.GenerateFar(buildingData);
+        if (status != Constants.STATUS_CONSTRUCTING && status != Constants.STATUS_DEMOLISHING)
         {
             BuildingMeshResult far = FarBuildingMeshBuilder.Generate(buildingData);
             if (far != null) return far;
@@ -127,7 +128,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             GetFarBoxHeight(buildingData.variant, buildingData.landmark, buildingData.floors ?? 1, status));
     }
 
-    /// <summary>Distant box height: one floor during construction/demolition, rubble height (0.5 floors) when collapsed, otherwise floor count × floor height.</summary>
+    /// <summary>Distant box height: one floor during construction/demolition, half a floor when collapsed (the citywide overview's low box), otherwise floor count × floor height.</summary>
     public static float GetFarBoxHeight(int variant, int landmark, int floors, int status)
     {
         float floorHeight = BuildingMeshUtils.GetFloorHeight(variant, landmark);
@@ -146,8 +147,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         // branching on model_type covers every generation route: Near/Far, DetailWorker, and direct calls.
         // - Constructing (STATUS_CONSTRUCTING): site dirt + scaffolding + crane.
         // - Demolishing (STATUS_DEMOLISHING): site dirt + scaffolding with sound barriers + rooftop excavator (same builder as construction; height decreases with progress).
-        // - Ruins (STATUS_COLLAPSED): rubble mound + optional collapsed fragments.
-        //   Fire damage (status_reason == REASON_FIRE) uses a charred rubble material (selected within the builder).
+        // - Ruins (STATUS_COLLAPSED): rubble and sand piles that grow higher and spread wider with the building's height.
+        //   Fire damage (status_reason == REASON_FIRE) uses charred materials (selected within the builder).
         if (buildingData.status == Constants.STATUS_CONSTRUCTING)
         {
             using (constructingMarker.Auto())
@@ -347,6 +348,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         cachedConstructionDirtMaterial = null;
         cachedCollapsedRubbleMaterial = null;
         cachedBurnedRubbleMaterial = null;
+        cachedCollapsedSandMaterial = null;
+        cachedBurnedSandMaterial = null;
+        cachedCollapsedRebarMaterial = null;
         cachedCommonConcreteMaterial = null;
     }
 
@@ -927,7 +931,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// and avoid cracks from T-junctions. Append generated midpoint vertices to verts
     /// (callers can use verts directly as the vertex array).
     /// Once MAX_SUBDIVIDED_TRIANGLES is reached, retain the rest without subdivision (no holes).
-    /// Used to add interior vertices to surface meshes that follow uneven terrain (ground panels and rubble mounds).
+    /// Used to add interior vertices to surface meshes that follow uneven terrain (ground panels).
     /// </summary>
     public static List<(int a, int b, int c)> SubdivideTrianglesByEdgeLength(
         List<Vector2> verts, List<int> baseTriangles, float maxEdge)
@@ -1426,6 +1430,63 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             cachedBurnedRubbleMaterial = GetCollapsedRubbleMaterial();
         }
         return cachedBurnedRubbleMaterial;
+    }
+
+    private static Material cachedCollapsedSandMaterial;
+
+    /// <summary>
+    /// Return the sand and fines material (Resources/CollapsedSand) for collapsed buildings' sand piles.
+    /// If the asset is missing, delegate to the rubble material (GetCollapsedRubbleMaterial, including its further fallbacks).
+    /// </summary>
+    public static Material GetCollapsedSandMaterial()
+    {
+        if (cachedCollapsedSandMaterial != null) return cachedCollapsedSandMaterial;
+
+        cachedCollapsedSandMaterial = AssetPackStore.LoadNamedMaterial("CollapsedSand");
+        if (cachedCollapsedSandMaterial == null)
+        {
+            Debug.LogWarning("BuildingMeshBuilder: Resources/CollapsedSand が見つかりません。瓦礫マテリアルにフォールバックします。");
+            cachedCollapsedSandMaterial = GetCollapsedRubbleMaterial();
+        }
+        return cachedCollapsedSandMaterial;
+    }
+
+    private static Material cachedBurnedSandMaterial;
+
+    /// <summary>
+    /// Return the ash material (Resources/CollapsedSandBurned) for sand piles of fire damage (status_reason == REASON_FIRE).
+    /// If the asset is missing, delegate to the regular sand material (GetCollapsedSandMaterial, including its further fallbacks).
+    /// </summary>
+    public static Material GetBurnedSandMaterial()
+    {
+        if (cachedBurnedSandMaterial != null) return cachedBurnedSandMaterial;
+
+        cachedBurnedSandMaterial = AssetPackStore.LoadNamedMaterial("CollapsedSandBurned");
+        if (cachedBurnedSandMaterial == null)
+        {
+            Debug.LogWarning("BuildingMeshBuilder: Resources/CollapsedSandBurned が見つかりません。通常の砂マテリアルにフォールバックします。");
+            cachedBurnedSandMaterial = GetCollapsedSandMaterial();
+        }
+        return cachedBurnedSandMaterial;
+    }
+
+    private static Material cachedCollapsedRebarMaterial;
+
+    /// <summary>
+    /// Return the rusted rebar material (Resources/CollapsedRebar) sticking out of broken columns in collapsed buildings.
+    /// Steel does not burn away, so fire damage uses it as well. If the asset is missing, delegate to the rubble material.
+    /// </summary>
+    public static Material GetCollapsedRebarMaterial()
+    {
+        if (cachedCollapsedRebarMaterial != null) return cachedCollapsedRebarMaterial;
+
+        cachedCollapsedRebarMaterial = AssetPackStore.LoadNamedMaterial("CollapsedRebar");
+        if (cachedCollapsedRebarMaterial == null)
+        {
+            Debug.LogWarning("BuildingMeshBuilder: Resources/CollapsedRebar が見つかりません。瓦礫マテリアルにフォールバックします。");
+            cachedCollapsedRebarMaterial = GetCollapsedRubbleMaterial();
+        }
+        return cachedCollapsedRebarMaterial;
     }
 
     private static Material cachedCommonConcreteMaterial;

@@ -344,7 +344,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         // 2. Construction/demolition/collapse statuses.
         // Always display these with their dedicated mesh appearance:
         // construction/demolition = dirt mound/strip + scaffolding + construction machinery + pillars + portals;
-        // collapse = rubble mound + collapse parts. Apply no color-mode overlay,
+        // collapse = rubble and sand piles. Apply no color-mode overlay,
         // preserving the original construction/rubble appearance that recoloring would erase.
         // Highlight on hover as for normal statuses.
         if (objectStatus == Constants.STATUS_CONSTRUCTING

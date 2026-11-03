@@ -53,13 +53,13 @@ The building center lies in the pit, so center-height parcel extrusion misses th
 
 ## Construction, demolition, and collapse
 
-Unfinished states use shared dirt or rubble covering the site, with appropriate scaffolds, equipment, and structures. Ground assets, open spaces, ports, depots, and open pits use only dirt or rubble.
+Construction and demolition use dirt covering the site, with scaffolds and equipment for the state. Ground assets, open spaces, ports, depots, and open pits use only dirt. Collapse uses a debris heap for every method.
 
 | State | Rendering |
 | --- | --- |
 | Construction (`STATUS_CONSTRUCTING`) | Dirt ground panel, `scaffold-wall` and `scaffold-corner`, and `crane-*` tower cranes above a floor-count threshold |
 | Demolition (`STATUS_DEMOLISHING`) | Dirt ground panel, `demo-scaffold-wall` and `demo-scaffold-corner`, `demo-ceil`, and an `excavator` on top |
-| Collapse (`STATUS_COLLAPSED`) | Rough rubble and optional `collapse` structure. `status_reason` equal to `REASON_FIRE` uses burned rubble material |
+| Collapse (`STATUS_COLLAPSED`) | A heap of rubble and sand matching the building's volume, settled at the angle of repose. Taller buildings leave higher, wider heaps that spread past the footprint onto other parcels and roads. Close-ups add broken columns with exposed rebar inside the footprint. `status_reason` equal to `REASON_FIRE` uses burned materials |
 
 Scaffold tiers follow `construction_progress`, the percentage of required construction or demolition volume procured. Construction grows upward with progress; demolition retains floors corresponding to the undemolished portion. Both show at least one floor. Progress and completion advance building versions and trigger diff reloads. Missing construction parts fall back to `common`, then are omitted.
 

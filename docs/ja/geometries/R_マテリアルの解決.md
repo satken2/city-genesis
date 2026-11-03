@@ -4,7 +4,7 @@
 
 ## マテリアルの出どころ
 
-モデルを持つ部材は、パーツのプレハブが持つマテリアルを使う。形のパーツを持たない面（屋根面・地面パネル・妻壁・岸壁・オープンスペースの面など）は、形を使わずマテリアルだけを渡すパーツ（`ceil`・`floor`・`generic-wall`・`site_*` など）から取る。パーツによらない共通の面は、名前で引く共通マテリアル（建物の既定の `BuildingMaterial`、基盤などのコンクリート `COMMON_CONCRETE`、工事現場の土 `ConstructionDirt`、倒壊の瓦礫 `CollapsedRubble`・`CollapsedRubbleBurned` など）を使う。`BuildingMaterial` はすべての代替の行き着く先で、建物のメッシュがマテリアル無しで出ることは無い。名前で引くマテリアルは、アセットパックが同名のものを持てばそれを、無ければ `Assets/Resources/` 直下のものを使う（[アセットパック](X_アセットパック.md)）。
+モデルを持つ部材は、パーツのプレハブが持つマテリアルを使う。形のパーツを持たない面（屋根面・地面パネル・妻壁・岸壁・オープンスペースの面など）は、形を使わずマテリアルだけを渡すパーツ（`ceil`・`floor`・`generic-wall`・`site_*` など）から取る。パーツによらない共通の面は、名前で引く共通マテリアル（建物の既定の `BuildingMaterial`、基盤などのコンクリート `COMMON_CONCRETE`、工事現場の土 `ConstructionDirt`、倒壊の瓦礫と砂 `CollapsedRubble`・`CollapsedSand` と焼失時の `CollapsedRubbleBurned`・`CollapsedSandBurned`、折れた柱の鉄筋 `CollapsedRebar` など）を使う。`BuildingMaterial` はすべての代替の行き着く先で、建物のメッシュがマテリアル無しで出ることは無い。名前で引くマテリアルは、アセットパックが同名のものを持てばそれを、無ければ `Assets/Resources/` 直下のものを使う（[アセットパック](X_アセットパック.md)）。
 
 地面パネルだけは「描かない」を選べる。マスターの `draw_floor` が有効な建物だけが対象で、`floor` パーツがどこにも無ければ既定のマテリアルへ落とさずに描かない。タイルだけを敷く施設に、要らない板を敷かないためである。駅舎パスの専有エリアの地面も、`floor` パーツの有無で同じように決まる。
 
