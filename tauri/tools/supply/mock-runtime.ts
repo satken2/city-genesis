@@ -6,6 +6,7 @@ export function useTranslation() { return { t: i18n.t.bind(i18n), i18n }; }
 export function useMasterData() { return null; }
 export function resolveAgentIcon(variant: number) { return `/variant-${variant}.png`; }
 export function resolveResourceIcon() { return "/test.png"; }
+export function resolvePathIcon(_type: number, variant?: number) { return `/path-${variant}.png`; }
 export function resolveTransitIcon() { return "/test.png"; }
 
 type Request = { url: string; signal: AbortSignal; resolve: (value: unknown) => void };

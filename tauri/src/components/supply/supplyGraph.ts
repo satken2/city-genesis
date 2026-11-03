@@ -6,7 +6,7 @@ export type SupplyState = "ok" | "unknown" | "missing" | "inactive" | "partial" 
 
 export type SupplyNode = {
   id: string;
-  kind: "facility" | "resource" | "consumer";
+  kind: "facility" | "resource" | "consumer" | "network";
   role: "resource" | "producer" | "consumer" | "vehicle_consumer";
   selected: boolean;
   name?: string;

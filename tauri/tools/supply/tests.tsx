@@ -56,6 +56,20 @@ assert.equal(container.querySelector(".supply-node--missing img")?.getAttribute(
 assert.equal(container.querySelector(".supply-node--missing .supply-node-amount"), null, "consumers have no production total");
 assert.equal(container.querySelectorAll(".supply-node-role, .supply-node-state, button").length, 0);
 
+const network: SupplyGraph = { selected_id: "selected", has_results: true,
+  nodes: [{ ...node("product:406"), kind: "network", product_id: 406, path_variant: 703, production: null },
+    { ...node("selected"), name: "客船ターミナル", variant: 1068, product_id: 219 }],
+  edges: [{ ...graph.edges[1], source: "product:406", target: "selected", product_id: 406,
+    state: "ok", received: 300, demand: 300, path_ids: [] }] };
+await act(async () => { root.render(<SupplyChainGraph graph={network} />); });
+const networkNode = container.querySelector(".supply-node");
+assert.equal(networkNode?.querySelector(".supply-node-name")?.textContent, "大型船航路(外洋)");
+assert.equal(networkNode?.querySelector("img")?.getAttribute("src"), "/path-703.png");
+assert.equal(networkNode?.querySelector(".supply-node-count"), null, "network sources have no facility count");
+assert.equal(networkNode?.querySelector(".supply-node-amount"), null, "network sources have no production total");
+assert.equal(container.querySelectorAll(".supply-edge-warning").length, 0);
+assert.equal(container.querySelectorAll(".supply-edge-flow").length, 1);
+
 function Harness({ id, tab = "trade", epoch = 0, enabled = true }: { id: string; tab?: string; epoch?: number; enabled?: boolean }) {
   const state = useSupplyGraph("http://core/", id, enabled);
   return <div data-epoch={state.data?.epoch} data-current-epoch={epoch}>

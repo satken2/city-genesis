@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { resolveAgentIcon } from "../../utils/agentIcon";
 import { resolveResourceIcon } from "../../utils/resourceIcon";
-import { resolveTransitIcon } from "../../utils/pathIcon";
+import { resolvePathIcon, resolveTransitIcon } from "../../utils/pathIcon";
 import { resolveIntlLocale } from "../../utils/locale";
-import { TYPE_STANDARD } from "../../constants";
+import { PATH_DEFAULT, TYPE_STANDARD } from "../../constants";
 import type { SupplyGraph, SupplyNode } from "./supplyGraph";
 import "./SupplyChain.css";
 
@@ -51,6 +51,9 @@ export function SupplyChainGraph({ graph }: { graph: SupplyGraph }) {
   };
   const icon = (node: SupplyNode) => {
     if (node.kind === "resource") return resolveResourceIcon(node.product_id);
+    if (node.kind === "network") {
+      return resolvePathIcon(master?.paths[node.path_variant ?? -1]?.type ?? PATH_DEFAULT, node.path_variant);
+    }
     if (node.path_variant != null) return resolveTransitIcon(node.path_variant);
     if (node.kind === "consumer" && CONSUMER_ROUTE_VARIANTS[node.product_id] != null) {
       return resolveTransitIcon(CONSUMER_ROUTE_VARIANTS[node.product_id]);
@@ -88,14 +91,14 @@ export function SupplyChainGraph({ graph }: { graph: SupplyGraph }) {
           <div className={`supply-node supply-node--${node.state}${node.selected ? " supply-node--selected" : ""}`}>
             <span className="supply-node-frame"><img src={icon(node)} alt="" /></span>
             <span className="supply-node-name">{label(node)}</span>
-            {!node.selected && node.kind !== "resource" && <span className="supply-node-count">
+            {!node.selected && (node.kind === "facility" || node.kind === "consumer") && <span className="supply-node-count">
               {t("supplyGraph.activeCount", { active: node.active_count, count: node.count })}
             </span>}
             {node.kind === "resource"
               ? <span className="supply-node-amount" title={t("supplyGraph.resourceRemaining", { amount: format(node.resource_amount ?? 0), unit: unit(node.product_id) })}>
                 {format(node.resource_amount ?? 0)} {unit(node.product_id)}
               </span>
-              : node.kind !== "consumer" && node.role !== "vehicle_consumer" && <span className="supply-node-amount"
+              : node.kind === "facility" && node.role !== "vehicle_consumer" && <span className="supply-node-amount"
                 title={t("supplyGraph.production", { amount, unit: unit(node.product_id) })}>
                 {amount} {unit(node.product_id)}
               </span>}
