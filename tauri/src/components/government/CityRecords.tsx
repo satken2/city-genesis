@@ -62,10 +62,10 @@ export function CityRecords({ records }: { records: CityRecordsData }) {
           <div key={key} className="city-gov__stat city-gov__record" title={hint ? t(`cityGovernment.records.${hint}`) : undefined}>
             <dt>{t(`cityGovernment.records.${key}`)}</dt>
             <dd>
-              <span>{value}</span>
               {holder && (citizen
                 ? <CitizenLink citizenId={holder.id} citizenName={holder.name || `#${holder.id}`} />
                 : <AgentLink agentId={holder.id} agentName={holder.name || `#${holder.id}`} onNavigate={openAgent} />)}
+              <span>{value}</span>
             </dd>
           </div>
         ))}

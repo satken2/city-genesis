@@ -1,6 +1,6 @@
 {
   "cityGovernment": {
-    "tooltip": "클릭하여 시정부 열기",
+    "tooltip": "클릭하여 도시 정보 열기",
     "categories": "분류",
     "population": "인구",
     "unitPeople": "명",

@@ -52,12 +52,12 @@ const STANDARD_METRICS: MetricKey[] = ["production", "sold_amount", "price", "ba
 
 // Match key to the category keys returned by `GET /api/v1/city/government-agents`.
 const GROUPS: { key: GroupKey; labelKey: string; metrics: MetricKey[] }[] = [
-  { key: "real_estate", labelKey: "cityGovernment.tabRealEstate", metrics: ["supply_floor", "occupancy_rate", "rent", "balance", "utilization_rate"] },
   { key: "public_standard", labelKey: "cityGovernment.tabPublicStandard", metrics: STANDARD_METRICS },
-  { key: "open_space", labelKey: "cityGovernment.tabOpenSpace", metrics: [] },
   { key: "education", labelKey: "cityGovernment.tabEducation", metrics: [] },
   { key: "port", labelKey: "cityGovernment.tabPort", metrics: ["capacity", "import_handling", "export_handling", "utilization_rate"] },
   { key: "intercity", labelKey: "cityGovernment.tabIntercity", metrics: STANDARD_METRICS },
+  { key: "real_estate", labelKey: "cityGovernment.tabRealEstate", metrics: ["supply_floor", "occupancy_rate", "rent", "balance", "utilization_rate"] },
+  { key: "open_space", labelKey: "cityGovernment.tabOpenSpace", metrics: [] },
   { key: "city", labelKey: "cityGovernment.tabCity", metrics: [] },
 ];
 

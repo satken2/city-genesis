@@ -86,14 +86,12 @@
 
 .city-gov__record dd {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.75rem;
   min-width: 0;
   max-width: 100%;
   margin-left: auto;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  text-align: right;
 }
 
 .city-gov__record .entity-link {

@@ -39,7 +39,7 @@ export interface TutorialScenario {
 }
 
 /** List order (learning sequence) */
-const SCENARIO_ORDER = ["controls", "scenario4", "trade", "highway", "mining", "tourism", "marine"];
+const SCENARIO_ORDER = ["controls", "marine", "scenario4", "trade", "highway", "mining", "tourism"];
 
 const THUMBNAILS: Record<string, string> = {
   controls: controlsScenarioThumbnail,

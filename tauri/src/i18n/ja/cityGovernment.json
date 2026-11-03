@@ -1,6 +1,6 @@
 {
   "cityGovernment": {
-    "tooltip": "クリックして市政府を開く",
+    "tooltip": "クリックして都市の情報を開く",
     "categories": "カテゴリ",
     "population": "人口",
     "unitPeople": "人",
