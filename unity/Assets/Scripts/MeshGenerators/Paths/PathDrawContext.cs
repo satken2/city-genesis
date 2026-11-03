@@ -47,6 +47,9 @@ public static class PathDrawContext
     /// <summary>Current path variant. Fixed road-surface section LOD uses it to select distant models; 0 is unknown and omits distant intervals.</summary>
     public static int PathVariant { get; set; }
 
+    /// <summary>Appearance of the current path, selecting distant models together with <see cref="PathVariant"/>.</summary>
+    public static int PathAppearance { get; set; }
+
     /// <summary>Paint color of the current path (API `color`) for RoadPath.GetOrCreatePartMaterial; null keeps model colors.</summary>
     public static Color? PaintColor { get; set; }
 
@@ -76,6 +79,7 @@ public static class PathDrawContext
         Warp = null;
         PartCreated = null;
         PathVariant = 0;
+        PathAppearance = Constants.PATH_APPEARANCE_STANDARD;
         PaintColor = null;
     }
 
@@ -89,13 +93,15 @@ public static class PathDrawContext
         Warp = null;
         PartCreated = null;
         PathVariant = 0;
+        PathAppearance = Constants.PATH_APPEARANCE_STANDARD;
         PaintColor = null;
     }
 
-    /// <summary>Set the path being drawn (its variant and paint color) after <see cref="Begin"/>.</summary>
+    /// <summary>Set the path being drawn (its variant, appearance, and paint color) after <see cref="Begin"/>.</summary>
     public static void SetPath(GeneratedModels.PathSummary path)
     {
         PathVariant = path.path_variant;
+        PathAppearance = path.appearance;
         PaintColor = RoadPath.PaintColorOf(path);
     }
 

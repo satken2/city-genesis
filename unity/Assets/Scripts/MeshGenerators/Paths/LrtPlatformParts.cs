@@ -208,7 +208,7 @@ public static class LrtPlatformParts
     {
         if (spans == null || spans.Count == 0 || spline == null) return;
         int variant = path.path_variant;
-        string variantBase = $"Models/Paths/p{variant}", typeBase = $"Models/Paths/p{path.path_type}";
+        string variantBase = PathParts.Folder(path), typeBase = $"Models/Paths/p{path.path_type}";
         float track = LrtRoadParts.Offset(path);
         float inner = LrtRoadParts.PlatformInnerOffset(path), width = LrtRoadParts.PlatformWidth(variant), outer = inner + width;
         float railTop = LrtRoadParts.RailTopAboveSpline(variant), surface = LrtRoadParts.PlatformSurfaceAboveSpline(variant);

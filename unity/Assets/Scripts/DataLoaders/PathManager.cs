@@ -1190,8 +1190,8 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private void AddFarRemainders(GameObject pathGO, PathSummary path, List<Vector3> points, double detailFrom, double detailTo)
     {
-        if (detailFrom > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_Start", path.path_variant, PathDrawContext.SlicePolylineByFraction(points, 0.0, detailFrom));
-        if (1.0 - detailTo > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_End", path.path_variant, PathDrawContext.SlicePolylineByFraction(points, detailTo, 1.0));
+        if (detailFrom > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_Start", path.path_variant, path.appearance, PathDrawContext.SlicePolylineByFraction(points, 0.0, detailFrom));
+        if (1.0 - detailTo > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_End", path.path_variant, path.appearance, PathDrawContext.SlicePolylineByFraction(points, detailTo, 1.0));
     }
 
     /// <summary>
@@ -2632,13 +2632,13 @@ public partial class PathManager : BaseApiDataManager
         {
             // Linear interpolation between thinned points deviates from terrain; split using the original centerline before thinning each section.
             List<Vector3> centerline = CalculateSectionCenterline(path, CalculatePathPoints(path));
-            bool elevatedLook = PathFarModel.HasElevatedLook(path.path_variant);
+            bool elevatedLook = PathFarModel.HasElevatedLook(path.path_variant, path.appearance);
             float baseHeight = GetPathBaseHeight(path.path_variant);
             foreach (var section in TunnelSectionUtil.GetDrawSections(centerline, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
                 UndergroundView.IsActive))
             {
                 var elevated = elevatedLook ? TrackPath.GetElevatedPercentRanges(TrackPath.RenderPoints(path, section.Points), baseHeight) : null;
-                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, DecimatePolyline(section.Points, FAR_SAMPLE_INTERVAL), elevated);
+                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, path.appearance, DecimatePolyline(section.Points, FAR_SAMPLE_INTERVAL), elevated);
                 if (sectionGO != null)
                 {
                     var display = sectionGO.AddComponent<PathSection>();
@@ -2649,7 +2649,7 @@ public partial class PathManager : BaseApiDataManager
         }
         else
         {
-            mesh = PathFarModel.Build(path.path_variant, points, GetFarElevatedRanges(path), out Material[] farMaterials);
+            mesh = PathFarModel.Build(path.path_variant, path.appearance, points, GetFarElevatedRanges(path), out Material[] farMaterials);
             if (mesh != null)
             {
                 pathGO.AddComponent<MeshFilter>().mesh = mesh;
@@ -2757,7 +2757,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     public List<TrackCorridorInfo.PercentRange> GetFarElevatedRanges(PathSummary path)
     {
-        if (LiesOnTerrain(path) || !PathFarModel.HasElevatedLook(path.path_variant)) return null;
+        if (LiesOnTerrain(path) || !PathFarModel.HasElevatedLook(path.path_variant, path.appearance)) return null;
         List<Vector3> points = CalculatePathPoints(path);
         if (points.Count < 2) return null;
         return TrackPath.GetElevatedPercentRanges(TrackPath.RenderPoints(path, points), GetPathBaseHeight(path.path_variant));

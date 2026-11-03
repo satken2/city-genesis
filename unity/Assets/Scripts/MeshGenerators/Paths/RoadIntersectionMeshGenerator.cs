@@ -91,7 +91,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             foreach (var path in paths)
             {
                 if (!roadResult.Sections.TryGetValue(path.path_id, out var section)) continue;
-                GameObject body = ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_variant}/body", suppressWarning: true)
+                GameObject body = ModelManager.Instance?.GetModel($"{PathParts.Folder(path)}/body", suppressWarning: true)
                     ?? ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_type}/body");
                 var source = body != null ? body.GetComponent<MeshFilter>()?.sharedMesh : null;
                 section.BodyDepth = source != null ? source.bounds.size.y : 0f;
@@ -177,7 +177,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
     }
 
     private static SidewalkConnectorSpec BuildEdgeConnector(IntersectionCorner corner, float aWidth, float bWidth,
-        int aVariant, int aType, int bVariant, int bType, Vector3 node, bool horizontalPlane, string part)
+        string aFolder, int aType, string bFolder, int bType, Vector3 node, bool horizontalPlane, string part)
     {
         var points = new List<Vector3>(); var widths = new List<float>(); var directions = new List<Vector2>();
         for (int i = 0; i < corner.Points.Count; i++)
@@ -193,10 +193,10 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         {
             points.Reverse(); widths.Reverse(); directions.Reverse();
             for (int i = 0; i < directions.Count; i++) directions[i] = -directions[i];
-            (aVariant,bVariant) = (bVariant,aVariant); (aType,bType) = (bType,aType);
+            (aFolder,bFolder) = (bFolder,aFolder); (aType,bType) = (bType,aType);
         }
-        return new SidewalkConnectorSpec(points,widths,aVariant,aType) { Part=part, Directions=directions,
-            StartDirection=directions[0], EndDirection=directions[directions.Count-1], EndPrefabVariant=bVariant, EndFallbackType=bType };
+        return new SidewalkConnectorSpec(points,widths,aFolder,aType) { Part=part, Directions=directions,
+            StartDirection=directions[0], EndDirection=directions[directions.Count-1], EndPrefabFolder=bFolder, EndFallbackType=bType };
     }
     private static float ResolveWallWidth(PathSummary path, int nodeId, bool outwardLeft)
     {
@@ -242,14 +242,14 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             {
                 var corner = corners.Find(c => c.FromPath == a.path_id && c.ToPath == b.path_id);
                 if (corner == null) continue;
-                var spec = BuildEdgeConnector(corner, wa, wb, a.path_variant, a.path_type, b.path_variant, b.path_type, node, horizontalPlane, "wall");
-                spec.EndPrefabVariant = b.path_variant; spec.EndFallbackType = b.path_type;
+                var spec = BuildEdgeConnector(corner, wa, wb, PathParts.Folder(a), a.path_type, PathParts.Folder(b), b.path_type, node, horizontalPlane, "wall");
+                spec.EndPrefabFolder = PathParts.Folder(b); spec.EndFallbackType = b.path_type;
                 specs.Add(spec);
             }
             else
             {
-                if (wa > 0f) specs.Add(MakeConnector(start, start - sa.Direction * Mathf.Min(wa * 2f, sa.Distance * 0.25f), -sa.Direction, -sa.Direction, wa, 0f, a.path_variant, a.path_type, node, horizontalPlane, "wall"));
-                if (wb > 0f) specs.Add(MakeConnector(end - sb.Direction * Mathf.Min(wb * 2f, sb.Distance * 0.25f), end, sb.Direction, sb.Direction, 0f, wb, b.path_variant, b.path_type, node, horizontalPlane, "wall"));
+                if (wa > 0f) specs.Add(MakeConnector(start, start - sa.Direction * Mathf.Min(wa * 2f, sa.Distance * 0.25f), -sa.Direction, -sa.Direction, wa, 0f, PathParts.Folder(a), a.path_type, node, horizontalPlane, "wall"));
+                if (wb > 0f) specs.Add(MakeConnector(end - sb.Direction * Mathf.Min(wb * 2f, sb.Distance * 0.25f), end, sb.Direction, sb.Direction, 0f, wb, PathParts.Folder(b), b.path_type, node, horizontalPlane, "wall"));
             }
         }
         bool transition = ordered.Count == 2 && Vector2.Dot(sections[ordered[0].path_id].Direction, sections[ordered[1].path_id].Direction) < -0.8f;
@@ -267,12 +267,12 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 if (path != ordered[0]) continue;
                 var otherSection = sections[other.path_id];
                 var spec = MakeConnector(section.Center, otherSection.Center, -section.Direction, otherSection.Direction,
-                    width, otherWidth, path.path_variant, path.path_type, node, horizontalPlane, "center");
-                spec.EndPrefabVariant = other.path_variant; spec.EndFallbackType = other.path_type;
+                    width, otherWidth, PathParts.Folder(path), path.path_type, node, horizontalPlane, "center");
+                spec.EndPrefabFolder = PathParts.Folder(other); spec.EndFallbackType = other.path_type;
                 specs.Add(spec);
             }
             else specs.Add(MakeConnector(section.Center, section.Center - section.Direction * Mathf.Min(width * 2f, section.Distance * 0.5f),
-                -section.Direction, -section.Direction, width, 0f, path.path_variant, path.path_type, node, horizontalPlane, "center"));
+                -section.Direction, -section.Direction, width, 0f, PathParts.Folder(path), path.path_type, node, horizontalPlane, "center"));
         }
         if (transition && !TrackIntersectionMeshGenerator.IsTrackType(ordered[0].path_type) && !TrackIntersectionMeshGenerator.IsTrackType(ordered[1].path_type))
             BuildTransitionLines(ordered[0], ordered[1], sections, specs, node, horizontalPlane);
@@ -288,7 +288,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         float ae = aw * 0.5f - asw - aside * 0.5f, be = bw * 0.5f - bsw - bside * 0.5f;
         for (int side = -1; side <= 1; side += 2)
             specs.Add(MakeConnector(sa.Center + sa.Left * ae * side, sb.Center - sb.Left * be * side,
-                -sa.Direction, sb.Direction, aside * 0.3f, bside * 0.3f, a.path_variant, a.path_type, node, horizontalPlane, "line"));
+                -sa.Direction, sb.Direction, aside * 0.3f, bside * 0.3f, PathParts.Folder(a), a.path_type, node, horizontalPlane, "line"));
         if (acenter <= 0f && bcenter <= 0f)
         {
             int count = Mathf.Max(alanes, blanes);
@@ -298,7 +298,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 float ai = Mathf.Round(t * alanes), bi = Mathf.Round(t * blanes);
                 specs.Add(MakeConnector(sa.Center + sa.Left * Mathf.Lerp(-ae, ae, ai / Mathf.Max(1, alanes)),
                     sb.Center - sb.Left * Mathf.Lerp(-be, be, bi / Mathf.Max(1, blanes)), -sa.Direction, sb.Direction,
-                    aside * 0.3f, bside * 0.3f, a.path_variant, a.path_type, node, horizontalPlane, "line"));
+                    aside * 0.3f, bside * 0.3f, PathParts.Folder(a), a.path_type, node, horizontalPlane, "line"));
             }
         }
     }
@@ -500,7 +500,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(path.path_variant) : null;
         if (master != null && !string.IsNullOrEmpty(master.body_material) && RoadPath.GetOrCreateRoadMaterialByName(master.body_material) != null) return true;
         if (ModelManager.Instance == null) return true;
-        return ModelManager.Instance.GetModel($"Models/Paths/p{path.path_variant}/body", true) != null
+        return ModelManager.Instance.GetModel($"{PathParts.Folder(path)}/body", true) != null
             || ModelManager.Instance.GetModel($"Models/Paths/p{path.path_type}/body", true) != null;
     }
 
@@ -569,7 +569,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         public Vector2 ConnectionPoint;
         public float RoadHalfWidth;
         public float SidewalkWidth;
-        public int PathVariant;
+        public string PathFolder;
         public int PathType;
         public float Angle;
 
@@ -628,7 +628,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             {
                                 var corner = corners.Find(c => c.FromPath == current.PathId && c.ToPath == next.PathId);
                 if (corner != null) specs.Add(BuildEdgeConnector(corner, current.SidewalkWidth, next.SidewalkWidth,
-                    current.PathVariant, current.PathType, next.PathVariant, next.PathType, nodePosition, horizontalPlane, "sidewalk"));
+                    current.PathFolder, current.PathType, next.PathFolder, next.PathType, nodePosition, horizontalPlane, "sidewalk"));
             }
             else
             {
@@ -718,7 +718,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 ConnectionPoint = hasConnection ? connectionPoint : Vector2.zero,
                 RoadHalfWidth = ResolveRoadWidth(path) * 0.5f,
                 SidewalkWidth = sidewalkWidth,
-                PathVariant = path.path_variant,
+                PathFolder = PathParts.Folder(path),
                 PathType = path.path_type,
                 Angle = Mathf.Atan2(direction.y, direction.x),
                 CanSidewalk = sidewalkWidth > 0f && hasConnection
@@ -754,7 +754,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             widths.Reverse();
             directions.Reverse();
         }
-        return new SidewalkConnectorSpec(points, widths, entry.PathVariant, entry.PathType)
+        return new SidewalkConnectorSpec(points, widths, entry.PathFolder, entry.PathType)
         {
             Directions = directions,
             StartDirection = directions[0],
@@ -785,7 +785,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
     }
     /// <summary>Generate transition/termination centerlines with fixed endpoint directions.</summary>
     private static SidewalkConnectorSpec MakeConnector(Vector2 start, Vector2 end, Vector2 startDirection, Vector2 endDirection,
-        float startWidth, float endWidth, int variant, int type, Vector3 node, bool horizontalPlane, string part = "sidewalk")
+        float startWidth, float endWidth, string folder, int type, Vector3 node, bool horizontalPlane, string part = "sidewalk")
     {
         float length = Vector2.Distance(start, end);
         float handle = length / 3f;
@@ -801,7 +801,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             points.Add(ToLocalTerrainPoint(p, node, horizontalPlane));
             widths.Add(Mathf.Lerp(startWidth, endWidth, t*t*(3f-2f*t)));
         }
-        return new SidewalkConnectorSpec(points, widths, variant, type)
+        return new SidewalkConnectorSpec(points, widths, folder, type)
         {
             Part = part, StartDirection = startDirection, EndDirection = endDirection
         };
@@ -892,7 +892,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 // Variants without body_material resolve from body-prefab materials.
                 if (ModelManager.Instance != null)
                 {
-                    GameObject prefab = ModelManager.Instance.GetModel($"Models/Paths/p{selectedPath.path_variant}/body")
+                    GameObject prefab = ModelManager.Instance.GetModel($"{PathParts.Folder(selectedPath)}/body")
                         ?? ModelManager.Instance.GetModel($"Models/Paths/p{selectedPath.path_type}/body");
                     MeshRenderer renderer = prefab != null ? prefab.GetComponent<MeshRenderer>() : null;
                     if (renderer != null && renderer.sharedMaterial != null)

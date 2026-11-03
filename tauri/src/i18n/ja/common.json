@@ -195,6 +195,7 @@
     "PATH_MERGE_GRADE": "設計標高が異なる線路は結合できません。",
     "PATH_MERGE_VARIANT": "同じ規格の道路・線路を選んでください。",
     "PATH_MERGE_EQUIPMENT": "道路の設備設定を揃えてから結合してください。",
+    "PATH_MERGE_APPEARANCE": "パスの外観を揃えてから結合してください。",
     "PATH_MERGE_ROAD": "別の道路に所属しています。所属を外すか揃えてから結合してください。",
     "PATH_MERGE_JUNCTION": "分岐のない1つの端点で接続する道路・線路を選んでください。",
     "PATH_MERGE_DIRECTION": "通行方向がつながらないため結合できません。向きを揃えてください。",

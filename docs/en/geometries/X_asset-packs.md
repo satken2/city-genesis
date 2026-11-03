@@ -21,6 +21,8 @@ As with the standard set, models are loaded when they are first drawn. A unit th
 
 Buildings and vehicles can have several numbered models per unit (a building prefix folder or a vehicle type): buildings use `{prefix}/{number}/` folders and vehicles use `{vehicle type}/{number}` models. A unit's model numbers and standard weights come from the table `model_weights.json` (`{unit: {number: weight}}`; the standard one is in `Resources/Config/`) on the side that holds the unit (the pack or the standard set); numbers missing from the table are not used. Rebuild the tables from the existing models with the editor menu `Tools/Asset Packs` (existing weights are kept, and new models get weight 100).
 
+Path variants can also have numbered appearance folders (`p{variant}/{number}/`; for the search order see [road meshes](G_road-meshes.md)). Their numbers are listed in the same table, but weights are not used because the player chooses each path's appearance and the core saves it. Numbers missing from the open city's models are drawn with the standard appearance.
+
 Weights the player changes in the asset manager are stored in `asset_weights.json` in the user folder (the same place as the core's saves) as `{source: {unit: {number: weight}}}`, where the source is `standard` or a pack ID; they take precedence over the standard weights. Unity rereads them whenever it opens a city.
 
 A model is chosen by stacking the weights in number order and taking the one whose range contains a drawn value. The value comes from `visual_variant` for buildings and from the drawing seed for vehicles, so the same value always gives the same model and saved values never change. If the weights add up to 0, the model with the smallest number is used.

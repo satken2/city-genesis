@@ -195,6 +195,7 @@
     "PATH_MERGE_GRADE": "설계 표고가 다른 선로는 병합할 수 없습니다.",
     "PATH_MERGE_VARIANT": "같은 규격의 도로·선로를 선택해 주세요.",
     "PATH_MERGE_EQUIPMENT": "도로 설비 설정을 일치시킨 후 병합해 주세요.",
+    "PATH_MERGE_APPEARANCE": "경로의 외관을 일치시킨 후 병합해 주세요.",
     "PATH_MERGE_ROAD": "서로 다른 도로에 속해 있습니다. 소속을 해제하거나 일치시킨 후 병합해 주세요.",
     "PATH_MERGE_JUNCTION": "분기 없이 하나의 끝점으로 연결된 도로·선로를 선택해 주세요.",
     "PATH_MERGE_DIRECTION": "통행 방향이 이어지지 않습니다. 방향을 일치시켜 주세요.",

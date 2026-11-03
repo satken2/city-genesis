@@ -47,7 +47,10 @@ public class ModelManager : MonoBehaviour
     /// otherwise search glTF under persistentDataPath, then Resources.
     /// </summary>
     public GameObject GetModel(string resourcePath, bool suppressWarning = false)
-        => GetModelFrom(resourcePath, AssetPackStore.UsesPack(resourcePath), suppressWarning);
+    {
+        resourcePath = InheritPathPart(resourcePath);
+        return GetModelFrom(resourcePath, AssetPackStore.UsesPack(resourcePath), suppressWarning);
+    }
 
     /// <summary>Get from a caller-selected source, supporting search orders such as vehicle-type fallback that searches the pack first.</summary>
     public GameObject GetModelFrom(string resourcePath, bool fromPack, bool suppressWarning = false)
@@ -86,6 +89,7 @@ public class ModelManager : MonoBehaviour
     public bool HasModel(string resourcePath)
     {
         if (string.IsNullOrEmpty(resourcePath)) return false;
+        resourcePath = InheritPathPart(resourcePath);
         if (AssetPackStore.UsesPack(resourcePath)) return AssetPackStore.Has(resourcePath);
         if (_modelCache.ContainsKey(resourcePath)) return true;
         if (_knownMissing.Contains(resourcePath)) return false;
@@ -104,6 +108,19 @@ public class ModelManager : MonoBehaviour
 
         _knownMissing.Add(resourcePath);
         return false;
+    }
+
+    /// <summary>
+    /// A path part missing from an appearance folder is the variant folder's part (PathParts). Judge by the part without its
+    /// close-up suffix, so a part and its close-up model never come from different folders.
+    /// </summary>
+    private string InheritPathPart(string resourcePath)
+    {
+        string standard = PathParts.StandardName(resourcePath);
+        if (standard == null) return resourcePath;
+        string part = resourcePath.EndsWith(PathDrawContext.CLOSE_SUFFIX, System.StringComparison.Ordinal)
+            ? resourcePath.Substring(0, resourcePath.Length - PathDrawContext.CLOSE_SUFFIX.Length) : resourcePath;
+        return GetModelFrom(part, AssetPackStore.UsesPack(part), true) != null ? resourcePath : standard;
     }
 
     /// <summary>Discard pack-loaded model records on city switches; standard models remain reusable.</summary>

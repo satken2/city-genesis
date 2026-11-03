@@ -886,6 +886,8 @@ export type PathData = {
   planter_type: number;
   advert_type: number;
   utility_mode: number;
+  /** Appearance number (PATH_APPEARANCE_STANDARD = standard). Which numbers exist is known only to Unity's models. */
+  appearance: number;
   /** Paint color ("#RRGGBB"): the path's own color, else the variant default. null for variants that use no color. */
   color?: string | null;
 

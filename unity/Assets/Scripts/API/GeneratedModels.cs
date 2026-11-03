@@ -374,6 +374,8 @@ namespace GeneratedModels
         public int planter_type;
         /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
         public int advert_type;
+        /// <summary>外観。0=標準、1以上はバリアントの外観の番号。パスごとの保存値で、見た目だけに使う。</summary>
+        public int appearance;
         /// <summary>路上駐車台数（専用駐車枠内も含む。昼夜の大きい方）</summary>
         public float parked_cars;
         /// <summary>路駐率と台数配分の基準容量（台）。交通を妨げない専用駐車枠とは別。稼働中の地上街路以外は0</summary>
@@ -499,6 +501,8 @@ namespace GeneratedModels
         public int planter_type;
         /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
         public int advert_type;
+        /// <summary>外観。0=標準、1以上はバリアントの外観の番号。パスごとの保存値で、見た目だけに使う。</summary>
+        public int appearance;
         /// <summary>路上駐車台数（専用駐車枠内も含む。昼夜の大きい方）</summary>
         public float parked_cars;
         /// <summary>路駐率と台数配分の基準容量（台）。交通を妨げない専用駐車枠とは別。稼働中の地上街路以外は0</summary>

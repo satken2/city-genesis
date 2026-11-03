@@ -369,18 +369,19 @@ public class SidewalkConnectorSpec
     public Vector3 EndNormal = Vector3.up;
     public Vector2 StartDirection;
     public Vector2 EndDirection;
-    public int EndPrefabVariant = -1;
+    public string EndPrefabFolder; // Part folder of the path the connector ends on; null uses the start path's part.
     public int EndFallbackType = -1;
     public List<Vector3> Points { get; }
     public List<float> Widths { get; }
-    public int PrefabVariant { get; }
+    /// <summary>Part folder of the path the connector starts from (PathParts.Folder).</summary>
+    public string PrefabFolder { get; }
     public int FallbackType { get; }
 
-    public SidewalkConnectorSpec(List<Vector3> points, List<float> widths, int prefabVariant, int fallbackType)
+    public SidewalkConnectorSpec(List<Vector3> points, List<float> widths, string prefabFolder, int fallbackType)
     {
         Points = points;
         Widths = widths;
-        PrefabVariant = prefabVariant;
+        PrefabFolder = prefabFolder;
         FallbackType = fallbackType;
     }
 }
@@ -405,13 +406,14 @@ public class RailConnectorSpec
     public Vector2 StartDirection;
     public Vector2 EndDirection;
     public List<Vector3> Points { get; }
-    public int PrefabVariant { get; }
+    /// <summary>Part folder of the track that supplies the connector parts (PathParts.Folder).</summary>
+    public string PrefabFolder { get; }
     public int FallbackType { get; }
 
-    public RailConnectorSpec(List<Vector3> points, int prefabVariant, int fallbackType)
+    public RailConnectorSpec(List<Vector3> points, string prefabFolder, int fallbackType)
     {
         Points = points;
-        PrefabVariant = prefabVariant;
+        PrefabFolder = prefabFolder;
         FallbackType = fallbackType;
     }
 }

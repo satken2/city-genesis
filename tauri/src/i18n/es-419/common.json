@@ -195,6 +195,7 @@
     "PATH_MERGE_GRADE": "No se pueden unir vías con distintas alturas de diseño.",
     "PATH_MERGE_VARIANT": "Selecciona vías del mismo tipo.",
     "PATH_MERGE_EQUIPMENT": "Iguala la configuración del equipamiento antes de unir las vías.",
+    "PATH_MERGE_APPEARANCE": "Iguala la apariencia de las vías antes de unirlas.",
     "PATH_MERGE_ROAD": "Los tramos pertenecen a calles distintas. Quita o iguala su asignación antes de unirlos.",
     "PATH_MERGE_JUNCTION": "Selecciona vías que compartan un extremo sin otras ramificaciones.",
     "PATH_MERGE_DIRECTION": "Las direcciones de circulación no conectan. Alinéalas antes de unir las vías.",

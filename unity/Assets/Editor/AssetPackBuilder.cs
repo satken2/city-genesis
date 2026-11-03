@@ -12,7 +12,7 @@ using UnityEngine;
 /// Builds/AssetPacks/{パックID}/assets/windows/ へ書き出す。配布物はこの assets/ を
 /// <インストール先>/dlc/{パックID}/assets/ に置き、表示名の pack.json を添える(読み込みは AssetPackStore)。
 ///
-/// 建物と車両のモデルの一覧と重みは、原本の model_weights.json を実在のモデルから作り直し(ModelWeights.Rebuild)、
+/// 建物と車両のモデル・パスの外観の一覧と重みは、原本の model_weights.json を実在のモデルから作り直し(ModelWeights.Rebuild)、
 /// バンドルの隣へ書き出す。標準アセットの表(Resources/Config/model_weights.json)も同じ規則でメニューから作り直す。
 /// バンドルは本体と同じ Unity の版でビルドする(版を上げたら作り直す)。
 /// </summary>
@@ -76,12 +76,12 @@ public static class AssetPackBuilder
         Debug.Log($"AssetPackBuilder: {packId} を {output} へ書き出しました({names.Count} 件)");
     }
 
-    /// <summary>標準アセットの建物・車両のモデルの一覧と重み(Resources/Config/model_weights.json)を、実在のモデルから作り直す。</summary>
+    /// <summary>標準アセットの建物・車両のモデルとパスの外観の一覧と重み(Resources/Config/model_weights.json)を、実在のモデルから作り直す。</summary>
     [MenuItem("Tools/Asset Packs/Update Standard Model Weights")]
     public static void UpdateStandardWeights()
     {
         var names = new List<string>();
-        foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { ResourcesRoot + "Models/Buildings", ResourcesRoot + "Models/Vehicles" }))
+        foreach (string guid in AssetDatabase.FindAssets("t:Prefab", new[] { ResourcesRoot + "Models/Buildings", ResourcesRoot + "Models/Vehicles", ResourcesRoot + "Models/Paths" }))
         {
             string relative = AssetDatabase.GUIDToAssetPath(guid).Substring(ResourcesRoot.Length);
             names.Add(relative.Substring(0, relative.Length - Path.GetExtension(relative).Length));

@@ -29,7 +29,7 @@ public class PierPath : IPathMeshGenerator
         SplineComputer spline = RoadPath.BuildSpline(container, points, pathData.curved);
         PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, RoadPath.MAX_EXTRUDE_TILE_LENGTH));
 
-        GameObject body = RoadPath.CreateSplineMesh(container, spline, $"Models/Paths/p{pathData.path_variant}/body", width, 0f,
+        GameObject body = RoadPath.CreateSplineMesh(container, spline, $"{PathParts.Folder(pathData)}/body", width, 0f,
             RoadPartHeights.BODY_ABOVE_SPLINE, false, $"Models/Paths/p{pathData.path_type}/body",
             stretchToWidth: false, compensatePivot: false);
         if (body == null) RoadPath.CreateFallbackRoadBody(container, spline, width);

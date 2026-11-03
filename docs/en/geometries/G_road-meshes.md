@@ -23,7 +23,7 @@ Marked streets and motorways (`PATH_STREET`, `PATH_MOTORWAY`) render lane and st
 
 ## Part names
 
-Models use `Models/Paths/p{path_variant}/{part}`, falling back to `Models/Paths/p{path_type}/{part}`.
+Models use `Models/Paths/p{path_variant}/{part}`, falling back to `Models/Paths/p{path_type}/{part}`. When the player chose an appearance for the path (`appearance`), the appearance folder `Models/Paths/p{path_variant}/{appearance number}/` is searched first. An appearance folder holds only the parts that differ from the standard set, and parts it lacks come from the variant folder. Close-up `_close` parts are searched in the same folder as their part.
 
 | Part | Role |
 | --- | --- |
@@ -39,7 +39,7 @@ Models use `Models/Paths/p{path_variant}/{part}`, falling back to `Models/Paths/
 | `far` | Far model |
 | `{part}_close` | Close-up model |
 
-Dedicated structures such as suspension bridges, on-street LRT, and ropeway stations keep generator-specific parts in the same folders. Materials are shared by name ([material resolution](R_material-resolution.md)). Master `body_material` names the material for surfaces without models, such as intersections and far strips.
+Dedicated structures such as suspension bridges, on-street LRT, and ropeway stations keep generator-specific parts in the same folders. Structures drawn only when their part exists, such as suspension bridge towers, can differ per appearance by placing them in appearance folders. Materials are shared by name ([material resolution](R_material-resolution.md)). Master `body_material` names the material for surfaces without models, such as intersections and far strips.
 
 ## Fallback and LOD
 

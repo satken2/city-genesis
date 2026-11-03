@@ -195,6 +195,7 @@
     "PATH_MERGE_GRADE": "Des voies aux altitudes de conception différentes ne peuvent pas être fusionnées.",
     "PATH_MERGE_VARIANT": "Sélectionnez des voies de même variante.",
     "PATH_MERGE_EQUIPMENT": "Harmonisez les équipements des voies avant de les fusionner.",
+    "PATH_MERGE_APPEARANCE": "Harmonisez l’apparence des voies avant de les fusionner.",
     "PATH_MERGE_ROAD": "Les tronçons appartiennent à des routes différentes. Retirez ou harmonisez leur affectation avant de les fusionner.",
     "PATH_MERGE_JUNCTION": "Sélectionnez des voies partageant une seule extrémité sans autre branche.",
     "PATH_MERGE_DIRECTION": "Les sens de circulation sont incompatibles. Alignez-les avant la fusion.",

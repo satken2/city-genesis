@@ -14,7 +14,7 @@ public static class WaterPipeTerminal
             || PathDrawContext.CurrentDrawLod == DrawLod.Far) return;
 
         RoadPath.GetPathMasterParams(path, out float width, out _, out _, out _, out _, out _, out _, out _, out _, out _, out _);
-        var body = PathDrawContext.ResolvePrefab($"Models/Paths/p{path.path_variant}/body", $"Models/Paths/p{path.path_type}/body", out _);
+        var body = PathDrawContext.ResolvePrefab($"{PathParts.Folder(path)}/body", $"Models/Paths/p{path.path_type}/body", out _);
         var source = body != null ? body.GetComponent<MeshFilter>()?.sharedMesh : null;
         if (source == null) return;
         var metal = body.GetComponent<MeshRenderer>()?.sharedMaterial;

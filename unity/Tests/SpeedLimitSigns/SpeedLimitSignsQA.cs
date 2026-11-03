@@ -147,7 +147,7 @@ public static class SpeedLimitSignsQA
             var part = longRoad.AddComponent(runtime.GetType("SplinePartLod"));
             var factory = typeof(SpeedLimitSignsQA).GetMethod("SegmentFactory", BindingFlags.Static | BindingFlags.NonPublic)
                 .MakeGenericMethod(lodType).Invoke(null, new object[] { longRoad });
-            Call(part, "Configure", spline, 8f, 0f, 0f, true, null, 0d, 1d, factory);
+            Call(part, "Configure", spline, 8f, 0f, 0f, true, null, null, false, 0d, 1d, factory);
             Call(part, "OnDisable");
             var cache = Activator.CreateInstance(runtime.GetType("RenderObjectCache"), 8L * 1024 * 1024);
             runtime.GetType("PathPresentation").GetMethod("Replace").Invoke(null, new object[] { longRoad, pathObject, cache });

@@ -195,6 +195,7 @@
     "PATH_MERGE_GRADE": "Tracks with different designed elevations cannot be merged.",
     "PATH_MERGE_VARIANT": "Select paths of the same variant.",
     "PATH_MERGE_EQUIPMENT": "Match the paths’ equipment settings before merging.",
+    "PATH_MERGE_APPEARANCE": "Match the paths’ appearances before merging.",
     "PATH_MERGE_ROAD": "The sections belong to different roads. Remove or match their road assignments before merging.",
     "PATH_MERGE_JUNCTION": "Select paths sharing one endpoint with no other branch attached.",
     "PATH_MERGE_DIRECTION": "The travel directions do not connect. Align them before merging.",

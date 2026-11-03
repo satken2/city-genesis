@@ -670,6 +670,10 @@ pub async fn handle_incoming_message(
             // Response to camera:capture_thumbnail (capture immediately before saving). The requesting window identifies its request by id.
             let _ = app.emit("camera:thumbnail_captured", envelope.payload);
         }
+        "path:appearances" => {
+            // Response to path:query_appearances. Path panels identify the reply by variant.
+            let _ = app.emit("path:appearances", envelope.payload);
+        }
         "asset_manager:models" => {
             // Response to asset_manager:render (asset manager rendering request). The requesting window identifies its request by request_id.
             let _ = app.emit("asset_manager:models", envelope.payload);

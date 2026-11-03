@@ -303,7 +303,7 @@ public static class TrackIntersectionMeshGenerator
         bool embedded = LrtRoadParts.IsEmbedded(fromVariant) || LrtRoadParts.IsEmbedded(toVariant);
         if (embedded) prefabSource = LrtRoadParts.IsEmbedded(fromVariant) ? from : to;
 
-        specs.Add(new RailConnectorSpec(points, prefabSource.Path.path_variant, prefabSource.Path.path_type) {
+        specs.Add(new RailConnectorSpec(points, PathParts.Folder(prefabSource.Path), prefabSource.Path.path_type) {
             StartDirection = travelIn, EndDirection = travelOut, StartSlope = -from.Slope, EndSlope = to.Slope,
             EmbeddedLrt = embedded,
             HasWire = HasOverheadWire(fromVariant) && HasOverheadWire(toVariant),

@@ -80,14 +80,14 @@ public class StationHousePath : IPathMeshGenerator
             SplineComputer spline = RoadPath.BuildSpline(container, anchors, false);
             bool ground = pathData.passage_mode == "ground";
             string part = ground ? "passage_ground" : "passage_elevated";
-            string bodyPath = $"Models/Paths/p{pathData.path_variant}/{part}";
+            string bodyPath = $"{PathParts.Folder(pathData)}/{part}";
             string bodyFallbackPath = $"Models/Paths/p{Constants.PATH_STATION_HOUSE}/{part}";
 
             // Use existing dedicated passages for supported modes; resolve other combinations to shared parts.
             bool existingBody = ground
                 ? pathData.path_variant == 2004 || pathData.path_variant == 2007
                 : pathData.path_variant == 2002 || pathData.path_variant == 2005;
-            if (existingBody) bodyPath = $"Models/Paths/p{pathData.path_variant}/body";
+            if (existingBody) bodyPath = $"{PathParts.Folder(pathData)}/body";
             RoadPath.CreateSplineMesh(container, spline, bodyPath, width,
                 0f, RoadPartHeights.STATION_BRIDGE_BASE_ABOVE_SPLINE, false, bodyFallbackPath,
                 stretchToWidth: false, singleSpan: singleSpan, maxTileLength: 0f, roadSurface: false);

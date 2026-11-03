@@ -554,7 +554,7 @@ public class TrackPath : IPathMeshGenerator
     private static void CreateTrackParts(GameObject container, SplineComputer spline, List<Vector3> points, float width, int lanes, float wallWidth, float? pillarSpacing, bool heightEditable, float baseHeight, float? wireSpacing, PathSummary pathData, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, bool constructionOnly = false)
     {
         using var scope = partsMarker.Auto();
-        string variantBase = $"Models/Paths/p{pathData.path_variant}";
+        string variantBase = PathParts.Folder(pathData);
         string typeBase = $"Models/Paths/p{pathData.path_type}";
         int laneCount = Mathf.Max(1, lanes);
         float centerWidth = GetTrackCenterWidth(pathData);
@@ -1702,18 +1702,18 @@ public class TrackPath : IPathMeshGenerator
         // Skip if neither exists (optional; only bed hull renders).
         string railPart = "rail";
         GameObject prefab = connector.EmbeddedLrt
-            ? LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/lrt_track", null)
-            : LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/rail", $"Models/Paths/p{connector.FallbackType}/rail");
+            ? LoadPrefab($"{connector.PrefabFolder}/lrt_track", null)
+            : LoadPrefab($"{connector.PrefabFolder}/rail", $"Models/Paths/p{connector.FallbackType}/rail");
         if (prefab == null)
         {
             railPart = "track";
-            prefab = LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/track", $"Models/Paths/p{connector.FallbackType}/track");
+            prefab = LoadPrefab($"{connector.PrefabFolder}/track", $"Models/Paths/p{connector.FallbackType}/track");
         }
 
         MeshFilter prefabMf = prefab != null ? prefab.GetComponent<MeshFilter>() : null;
         if (prefabMf == null || prefabMf.sharedMesh == null)
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] レールコネクタ: rail/track プレハブなし (variant={connector.PrefabVariant}, type={connector.FallbackType})");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] レールコネクタ: rail/track プレハブなし (folder={connector.PrefabFolder}, type={connector.FallbackType})");
             return;
         }
 
@@ -1733,7 +1733,7 @@ public class TrackPath : IPathMeshGenerator
         SplineComputer spline = RoadPath.BuildSpline(go, points, true);
         if (connector.EmbeddedLrt)
         {
-            RoadPath.CreateSplineMesh(go, spline, $"Models/Paths/p{connector.PrefabVariant}/lrt_track", 3, 0, 0,
+            RoadPath.CreateSplineMesh(go, spline, $"{connector.PrefabFolder}/lrt_track", 3, 0, 0,
                 stretchToWidth: false);
             // Dedicated tracks have different rail-top/contact-wire relative heights; align wire endpoints separately.
             var wireRoot = new GameObject("LrtWireConnector");
@@ -1745,15 +1745,15 @@ public class TrackPath : IPathMeshGenerator
                 wirePoints[i] += Vector3.up * Mathf.Lerp(connector.StartWireOffset, connector.EndWireOffset, t * t * (3 - 2 * t));
             }
             var wireSpline = RoadPath.BuildSpline(wireRoot, wirePoints, true);
-            RoadPath.CreateSplineMesh(wireRoot, wireSpline, $"Models/Paths/p{connector.PrefabVariant}/lrt_wire", 1, 0, 0,
+            RoadPath.CreateSplineMesh(wireRoot, wireSpline, $"{connector.PrefabFolder}/lrt_wire", 1, 0, 0,
                 stretchToWidth: false);
             return;
         }
         // Preserve authored sleeper thickness/period like main tracks; split at vertex limits without reducing tile count.
-        RoadPath.CreateSplineMesh(go, spline, $"Models/Paths/p{connector.PrefabVariant}/{railPart}", 1f, 0f, 0f,
+        RoadPath.CreateSplineMesh(go, spline, $"{connector.PrefabFolder}/{railPart}", 1f, 0f, 0f,
             fallbackPrefabName: $"Models/Paths/p{connector.FallbackType}/{railPart}", stretchToWidth: false, maxTileLength: 0f);
         if (connector.HasWire)
-            RoadPath.CreateSplineMesh(go, spline, $"Models/Paths/p{connector.PrefabVariant}/wire", 1f, 0f, 0f,
+            RoadPath.CreateSplineMesh(go, spline, $"{connector.PrefabFolder}/wire", 1f, 0f, 0f,
                 fallbackPrefabName: $"Models/Paths/p{connector.FallbackType}/wire", stretchToWidth: false);
     }
 

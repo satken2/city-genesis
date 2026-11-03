@@ -9,7 +9,7 @@ import { describeError } from "../../utils/errors";
  * - InfoHeader: icon, status, name (if unnamed and assigned to a road: "road name (section #id)").
  * - Road membership row for streets/highways (road/RoadMembershipRow).
  * - Basic information tab:
- *   - Basic information section: district, terrain following, color (PathColorRow), and meters for
+ *   - Basic information section: district, terrain following, color (PathColorRow), appearance (PathAppearanceRow), and meters for
  *     utilization/durability/noise/air pollution (PathConditionPanel).
  *   - Traffic/speed settings (PathTrafficPanel): direction toggle, speed-limit sign/input, passing speed,
  *     on-street parking donut, traffic by vehicle type.
@@ -21,7 +21,7 @@ import { describeError } from "../../utils/errors";
  * When nearby_zones is included in the API response, district membership can be changed through a dropdown.
  * Only districts of adjacent paths are selectable, maintaining district continuity.
  */
-import { PLAY_MODE_SCENARIO } from "../../constants";
+import { PATH_APPEARANCE_STANDARD, PLAY_MODE_SCENARIO } from "../../constants";
 
 
 import { useCallback, useEffect, useState } from "react";
@@ -58,6 +58,7 @@ import { StationInfoSection } from "./StationInfoSection";
 import { hasPathCondition, PathConditionPanel } from "./PathConditionPanel";
 import { PathEquipmentPanel, pathEquipmentFields } from "./PathEquipmentPanel";
 import { PathColorRow } from "./PathColorRow";
+import { PathAppearanceRow, usePathAppearances } from "./PathAppearanceRow";
 import { PathTrafficPanel } from "./PathTrafficPanel";
 import { PathOperationPanel } from "./PathOperationPanel";
 import { PathTopologyEditPanel } from "./PathTopologyEditPanel";
@@ -315,6 +316,8 @@ export function PathDetailPanel({
     [pathData, apiBaseUrl, zoneSaving],
   );
 
+  const appearances = usePathAppearances(pathData?.path_variant);
+
   if (loading) {
     return <p className="agent-detail-muted">{t("common.loading")}</p>;
   }
@@ -375,7 +378,8 @@ export function PathDetailPanel({
   const showZoneRow = pathData.zone_name != null || canChangeZone;
   const showFollowTerrainRow = pathData.follow_terrain === 0 || pathData.follow_terrain === 1;
   const showColorRow = pathData.color != null;
-  const hasBasicGrid = showZoneRow || showFollowTerrainRow || showColorRow;
+  const showAppearanceRow = appearances.length > 0 || pathData.appearance !== PATH_APPEARANCE_STANDARD;
+  const hasBasicGrid = showZoneRow || showFollowTerrainRow || showColorRow || showAppearanceRow;
   const hasCondition = hasPathCondition(pathData);
 
   return (
@@ -610,6 +614,7 @@ export function PathDetailPanel({
                         </>
                       )}
                       {showColorRow && <PathColorRow path={pathData} apiBaseUrl={apiBaseUrl} onSaved={setPathData} />}
+                      {showAppearanceRow && <PathAppearanceRow path={pathData} appearances={appearances} apiBaseUrl={apiBaseUrl} onSaved={setPathData} />}
                     </div>
                   )}
                   {zoneError && (

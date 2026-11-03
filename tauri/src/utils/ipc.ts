@@ -14,6 +14,13 @@ export async function sendTutorialGuide(state: import("../tutorial/model").Snaps
 }
 
 export const IPC_EVENT_WEATHER_STATE = "weather:state";
+/** appearances: the variant's appearance numbers, ascending, in the open city's pack or standard assets (standard itself is not listed). */
+export type PathAppearances = { variant: number; appearances: number[] };
+export const IPC_EVENT_PATH_APPEARANCES = "path:appearances";
+/** Ask Unity which appearances the variant has; only Unity knows the models. Unity replies with `path:appearances`. */
+export async function queryPathAppearances(windowType: string, variant: number): Promise<void> {
+  await invoke("send_window_action", { windowType, entity: null, action: "path:query_appearances", params: { variant } });
+}
 /** Asset manager tabs: rows are variants for buildings/paths, vehicle types for vehicles, and types for props. */
 export type AssetManagerCategory = "buildings" | "paths" | "vehicles" | "props";
 /** Per-row source (standard or pack ID), unit (null without a model), and models. weight is the standard weight; null for paths/props. */

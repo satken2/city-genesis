@@ -195,6 +195,7 @@
     "PATH_MERGE_GRADE": "无法合并设计标高不同的轨道。",
     "PATH_MERGE_VARIANT": "请选择相同规格的道路或轨道。",
     "PATH_MERGE_EQUIPMENT": "请统一道路设施设置后再合并。",
+    "PATH_MERGE_APPEARANCE": "请统一路径外观后再合并。",
     "PATH_MERGE_ROAD": "区段属于不同道路。请取消或统一归属后再合并。",
     "PATH_MERGE_JUNCTION": "请选择在同一端点相连且无其他分支的道路或轨道。",
     "PATH_MERGE_DIRECTION": "通行方向不连贯。请统一方向后再合并。",

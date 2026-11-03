@@ -119,7 +119,7 @@ public static class LrtRoadParts
     public static void Generate(GameObject parent, SplineComputer spline, PathSummary path, List<LrtPlatformParts.Span> platforms = null)
     {
         if (!IsEmbedded(path.path_variant)) return;
-        string prefix = $"Models/Paths/p{path.path_variant}";
+        string prefix = PathParts.Folder(path);
         float spacing = MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.wire_spacing ?? 0;
         foreach (float x in TrackLaterals(path))
         {

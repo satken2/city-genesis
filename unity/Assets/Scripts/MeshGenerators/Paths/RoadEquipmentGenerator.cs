@@ -236,7 +236,7 @@ public static class RoadEquipmentGenerator
     {
         // 路面は原点、歩道の段差はモデルの相対高さで定義する。
         if (part == "body") return RoadPartHeights.BODY_ABOVE_SPLINE;
-        string resourcePath = $"Models/Paths/p{path.path_variant}/{part}";
+        string resourcePath = $"{PathParts.Folder(path)}/{part}";
         var prefab = ModelManager.Instance?.GetModel(resourcePath);
         if (prefab == null)
         {
@@ -279,7 +279,7 @@ public static class RoadEquipmentGenerator
     }
 
     private static GameObject Resolve(PathSummary path, string part) =>
-        ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_variant}/{part}")
+        ModelManager.Instance?.GetModel($"{PathParts.Folder(path)}/{part}")
         ?? ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_type}/{part}");
 
     private static bool PlacePrefab(GameObject parent, GameObject prefab, Pose pose, bool faceRoad = false)

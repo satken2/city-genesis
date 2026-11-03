@@ -84,7 +84,7 @@ public static class ConstructionPathBuilder
         bool elevated = IsElevated(path, points, underground);
         var spline = RoadPath.BuildSpline(root, points, path.curved);
         PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, RoadPath.MAX_EXTRUDE_TILE_LENGTH));
-        string variant = $"Models/Paths/p{path.path_variant}", type = $"Models/Paths/p{path.path_type}";
+        string variant = PathParts.Folder(path), type = $"Models/Paths/p{path.path_type}";
         var supports = new List<(GameObject obj, double percent)>();
         if (elevated)
         {

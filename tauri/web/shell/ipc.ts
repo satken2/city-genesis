@@ -131,6 +131,7 @@ const BROADCAST_EVENTS = new Set([
   "camera:state",
   "citizen:follow_state",
   "camera:thumbnail_captured",
+  "path:appearances",
   "asset_manager:models",
   "asset_manager:thumbnail",
 ]);

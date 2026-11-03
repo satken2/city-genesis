@@ -6,7 +6,7 @@ Appearance also depends on connected and nearby parallel paths. `PathManager` su
 
 ## Parts
 
-Search `Models/Paths/p{path_variant}/{part}`, then `Models/Paths/p{path_type}/{part}`. Elevated sections prefer `body_elevated` and `track_elevated` when available. Pillars and tunnel walls and ceilings share road parts, and portals are generated from the terrain as for roads.
+Prefabs are searched in the same order as for roads ([road meshes](G_road-meshes.md)). Elevated sections prefer `body_elevated` and `track_elevated` when available. Pillars and tunnel walls and ceilings share road parts, and portals are generated from the terrain as for roads.
 
 | Part | Role |
 | --- | --- |

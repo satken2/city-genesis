@@ -82,7 +82,7 @@ public static class PathTunnelParts
             {
                 double from = Math.Max(range.From, tunnel.From), to = Math.Min(range.To, tunnel.To);
                 if (to <= from) continue;
-                RoadPath.CreateSplineMesh(parent, spline, $"Models/Paths/p{path.path_variant}/{WallPart}",
+                RoadPath.CreateSplineMesh(parent, spline, $"{PathParts.Folder(path)}/{WallPart}",
                     wallWidth, offset, RoadPartHeights.WALL_ABOVE_SPLINE, left,
                     $"Models/Paths/p{path.path_type}/{WallPart}", clipFrom: from, clipTo: to);
             }
@@ -101,7 +101,7 @@ public static class PathTunnelParts
         try
         {
             foreach (var tunnel in tunnels)
-                RoadPath.CreateSplineMesh(parent, spline, $"Models/Paths/p{path.path_variant}/{CeilingPart}",
+                RoadPath.CreateSplineMesh(parent, spline, $"{PathParts.Folder(path)}/{CeilingPart}",
                     leftExtent + rightExtent, lateral, height,
                     fallbackPrefabName: $"Models/Paths/p{path.path_type}/{CeilingPart}", clipFrom: tunnel.From, clipTo: tunnel.To);
         }
@@ -227,7 +227,8 @@ public static class PathTunnelParts
     /// </summary>
     public static GameObject ResolveDefaultWall(string name)
     {
-        const string prefix = "Models/Paths/p";
+        const string prefix = PathParts.ROOT;
+        name = PathParts.StandardName(name) ?? name;
         if (name == null || !name.StartsWith(prefix, StringComparison.Ordinal)
             || !name.EndsWith("/" + WallPart, StringComparison.Ordinal)) return null;
         int slash = name.LastIndexOf('/');

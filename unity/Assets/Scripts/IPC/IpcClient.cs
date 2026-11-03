@@ -917,6 +917,10 @@ public class IpcClient : MonoBehaviour
                     OnCameraCaptureThumbnail?.Invoke(GetParamString(payload, "id"));
                     break;
 
+                case "path:query_appearances":
+                    EmitPathAppearances(GetParamInt(payload, "variant"));
+                    break;
+
                 case "asset_manager:render":
                     OnAssetManagerRender?.Invoke(new AssetManagerRequest
                     {
@@ -1636,6 +1640,15 @@ public class IpcClient : MonoBehaviour
     public void EmitCameraThumbnailCaptured(string id, bool success)
     {
         SendEnvelope("camera:thumbnail_captured", new Dictionary<string, object> { ["id"] = id, ["success"] = success });
+    }
+
+    /// <summary>
+    /// Sends path:appearances (reply to path:query_appearances): the variant's appearance numbers, ascending, in the open city's
+    /// pack or standard assets. The standard appearance (Constants.PATH_APPEARANCE_STANDARD) is not listed.
+    /// </summary>
+    public void EmitPathAppearances(int variant)
+    {
+        SendEnvelope("path:appearances", new Dictionary<string, object> { ["variant"] = variant, ["appearances"] = PathParts.Appearances(variant) });
     }
 
     /// <summary>

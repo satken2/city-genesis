@@ -6,11 +6,11 @@ using UnityEngine;
 public static class BrickArcadeGenerator
 {
     public static bool HasArcade(PathSummary path) =>
-        PathDrawContext.ResolvePrefab($"Models/Paths/p{path.path_variant}/arcade",null,out _) != null;
+        PathDrawContext.ResolvePrefab($"{PathParts.Folder(path)}/arcade",null,out _) != null;
 
     public static void Generate(GameObject parent, SplineComputer spline, PathSummary path, float width)
     {
-        var prefab=PathDrawContext.ResolvePrefab($"Models/Paths/p{path.path_variant}/arcade",null,out _);
+        var prefab=PathDrawContext.ResolvePrefab($"{PathParts.Folder(path)}/arcade",null,out _);
         if(prefab==null) return;
         var filter=prefab.GetComponentInChildren<MeshFilter>();
         var renderer=prefab.GetComponentInChildren<MeshRenderer>();

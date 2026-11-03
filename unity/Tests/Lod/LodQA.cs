@@ -297,7 +297,7 @@ public static class LodQA
             var part = rootObject.AddComponent(Type("SplinePartLod"));
             var factory = typeof(LodQA).GetMethod("SegmentFactory", BindingFlags.Static | BindingFlags.NonPublic)
                 .MakeGenericMethod(Type("DrawLod")).Invoke(null, new object[] { rootObject, (Action)(() => {}) });
-            Call(part,"Configure",spline,8f,0f,0f,false,null,0d,1d,factory);
+            Call(part,"Configure",spline,8f,0f,0f,false,null,null,false,0d,1d,factory);
             return rootObject;
         }
         var old = new GameObject("VisibleRoad");
@@ -343,7 +343,7 @@ public static class LodQA
         int builds = 0;
         var factory = typeof(LodQA).GetMethod("SegmentFactory", BindingFlags.Static | BindingFlags.NonPublic)
             .MakeGenericMethod(Type("DrawLod")).Invoke(null, new object[] { parent, (Action)(() => builds++) });
-        Call(component, "Configure", spline, 8f, 0f, 0f, false, null, 0d, 1d, factory);
+        Call(component, "Configure", spline, 8f, 0f, 0f, false, null, null, false, 0d, 1d, factory);
         var segments = (IList)Field(component, "segments");
         Check(segments.Count == 4, "512m road must have four fixed intervals");
         for (int i = 0; i < 24; i++) yield return null;
@@ -431,7 +431,7 @@ public static class LodQA
                 builds++;
                 camera.transform.position = new Vector3(0,5000,0);
             }) });
-        Call(component,"Configure",spline,8f,0f,0f,false,null,0d,1d,factory);
+        Call(component,"Configure",spline,8f,0f,0f,false,null,null,false,0d,1d,factory);
         for (int i=0;i<30;i++) yield return null;
         Check(builds == 1,"Camera moved away during generation but obsolete detailed road intervals were still built");
         foreach (var segment in (IList)Field(component,"segments"))

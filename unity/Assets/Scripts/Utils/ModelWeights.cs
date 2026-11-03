@@ -10,6 +10,7 @@ using UnityEngine;
 /// Appearance-model lists and weights for buildings and vehicles. Each unit (building-prefix folder Models/Buildings/{prefix}, or vehicle type Models/Vehicles/{type})
 /// stores model indices (numbered folders for buildings, numbered model names for vehicles) and weights. Resources cannot enumerate contents at runtime,
 /// so the bundled table also serves as the unit's model inventory.
+/// Path variants (Models/Paths/p{variant}) list their appearance folders the same way; players choose path appearances, so their weights are unused.
 ///
 /// Default weights come from bundled tables: Resources/Config/model_weights.json for standard assets, or model_weights.json beside the pack bundle.
 /// Player weights edited in Asset Manager are in asset_weights.json under the user directory, grouped by source (standard or pack ID);
@@ -200,14 +201,16 @@ public static class ModelWeights
     }
 
     /// <summary>
-    /// If a logical name identifies a model, return its unit and index: Models/Buildings/{prefix}/{index}/... or Models/Vehicles/{type}/{index}.
+    /// If a logical name identifies a model, return its unit and index: Models/Buildings/{prefix}/{index}/..., Models/Vehicles/{type}/{index},
+    /// or Models/Paths/p{variant}/{appearance}/....
     /// </summary>
     public static bool TryParseModel(string logicalName, out string unit, out int id)
     {
         unit = null;
         id = 0;
         string root = logicalName.StartsWith(BUILDING_ROOT, StringComparison.Ordinal) ? BUILDING_ROOT
-            : logicalName.StartsWith(VEHICLE_ROOT, StringComparison.Ordinal) ? VEHICLE_ROOT : null;
+            : logicalName.StartsWith(VEHICLE_ROOT, StringComparison.Ordinal) ? VEHICLE_ROOT
+            : logicalName.StartsWith(PathParts.ROOT, StringComparison.Ordinal) ? PathParts.ROOT : null;
         if (root == null) return false;
         int folderEnd = logicalName.IndexOf('/', root.Length);
         if (folderEnd < 0) return false;

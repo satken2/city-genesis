@@ -373,7 +373,7 @@ public static class IntersectionQA
   foreach(var spec in specs)
   {
    var type=spec.GetType();
-   if((string)type.GetField("Part").GetValue(spec)!="sidewalk"||(int)type.GetField("EndPrefabVariant").GetValue(spec)>=0)continue;
+   if((string)type.GetField("Part").GetValue(spec)!="sidewalk"||type.GetField("EndPrefabFolder").GetValue(spec)!=null)continue;
    var line=(List<Vector3>)type.GetProperty("Points").GetValue(spec);
    var widths=(List<float>)type.GetProperty("Widths").GetValue(spec);
    var directions=(List<Vector2>)type.GetField("Directions").GetValue(spec);
@@ -414,8 +414,8 @@ public static class IntersectionQA
    if(!partVertices.ContainsKey(part))continue;
    var line=(List<Vector3>)type.GetProperty("Points").GetValue(spec);
    var generated=surface.transform.Find(part+"_"+i).GetComponent<MeshFilter>().sharedMesh.vertices;
-   int variant=(int)type.GetProperty("PrefabVariant").GetValue(spec);
-   var source=((GameObject)cache["Models/Paths/p"+variant+"/"+part]).GetComponent<MeshFilter>().sharedMesh;
+   string folder=(string)type.GetProperty("PrefabFolder").GetValue(spec);
+   var source=((GameObject)cache[folder+"/"+part]).GetComponent<MeshFilter>().sharedMesh;
    var original=source.vertices;
    foreach(bool first in new[]{true,false})
    {

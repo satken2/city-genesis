@@ -311,7 +311,8 @@ public class RoadPath : IPathMeshGenerator
     {
         using var scope = splineMeshMarker.Auto();
         // Even through the shared construction entry point, do not widen ropeway cables to road width.
-        if (prefabName == "Models/Paths/p601/body" || prefabName == "Models/Paths/p602/body")
+        string standardName = PathParts.StandardName(prefabName) ?? prefabName;
+        if (standardName == "Models/Paths/p601/body" || standardName == "Models/Paths/p602/body")
         {
             stretchToWidth = false;
             roadSurface = false;
@@ -354,7 +355,7 @@ public class RoadPath : IPathMeshGenerator
             bool elevatedBody = prefabName.EndsWith("/body_elevated", StringComparison.Ordinal);
             bool isBody = elevatedBody || prefabName.EndsWith("/body", StringComparison.Ordinal);
             group.AddComponent<SplinePartLod>().Configure(spline, width, centerOffsetX, offsetY,
-                isBody, isBody ? PathDrawContext.PathVariant : 0, elevatedBody, clipFrom, clipTo,
+                isBody, isBody ? PathDrawContext.PathVariant : 0, PathDrawContext.PathAppearance, elevatedBody, clipFrom, clipTo,
                 (lod, from, to) =>
                 {
                     PathDrawContext.Begin(lod, from, to);
@@ -891,7 +892,7 @@ public class RoadPath : IPathMeshGenerator
     /// </param>
     private void CreateRoadParts(GameObject container, SplineComputer spline, float width, float sidewalkWidth, float sideWidth, int lanes, float? treeSpacing, float wallWidth, float centerWidth, float? pillarSpacing, bool heightEditable, float baseHeight, bool singleSpan, PathSummary pathData, List<Vector3> controlPoints, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default, List<Vector2> segmentPlatformZones = null, bool startApproach = true, bool endApproach = true)
     {
-        string variantBase = $"Models/Paths/p{pathData.path_variant}";
+        string variantBase = PathParts.Folder(pathData);
         string typeBase = $"Models/Paths/p{pathData.path_type}";
         // Lane debug logs require UNITY_LOG_ROAD for performance.
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] CreateRoadParts開始: variant={variantBase}, type={typeBase}, width={width}, lanes={lanes}, sidewalkWidth={sidewalkWidth}, sideWidth={sideWidth}, wallWidth={wallWidth}, centerWidth={centerWidth}");
@@ -923,7 +924,7 @@ public class RoadPath : IPathMeshGenerator
         // single_span=true stretches one body without tiling (straight span between anchors).
         // 路面・道床は上面が原点。管・鉄塔・駅舎など地表原点の構造も、モデルの相対高さをそのまま使う。
         bool ropeway = IsRopewayVariant(pathData.path_variant);
-        Material bodyMaterial = ResolveBodyMaterial(pathData.path_variant, pathData.path_type);
+        Material bodyMaterial = ResolveBodyMaterial(pathData.path_variant, pathData.appearance, pathData.path_type);
         GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, roadSurface: baseHeight <= 0f && pathData.path_type != Constants.PATH_WATER);
         if (ropeway)
             CreateSplineMesh(container, spline, $"{variantBase}/station_shell", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
@@ -1187,12 +1188,12 @@ public class RoadPath : IPathMeshGenerator
             : new List<TrackCorridorInfo.PercentRange> { new TrackCorridorInfo.PercentRange { From = 0.0, To = 1.0 } };
 
     /// <summary>Like intersections (RoadIntersectionMeshGenerator), master body_material defines road-surface material.</summary>
-    public static Material ResolveBodyMaterial(int variant, int type)
+    public static Material ResolveBodyMaterial(int variant, int appearance, int type)
     {
         var master = MasterDataStore.Instance?.GetPathMaster(variant);
         Material named = master != null ? GetOrCreateRoadMaterialByName(master.body_material) : null;
         if (named != null) return named;
-        GameObject prefab = PathDrawContext.ResolvePrefab($"Models/Paths/p{variant}/body", $"Models/Paths/p{type}/body", out _);
+        GameObject prefab = PathDrawContext.ResolvePrefab($"{PathParts.Folder(variant, appearance)}/body", $"Models/Paths/p{type}/body", out _);
         Material source = prefab != null ? prefab.GetComponent<MeshRenderer>()?.sharedMaterial : null;
         return source != null ? GetOrCreateRoadMaterial(source) : null;
     }
@@ -1584,7 +1585,7 @@ public class RoadPath : IPathMeshGenerator
     {
         if (connector?.Points == null || connector.Points.Count < 2 || ModelManager.Instance == null) return;
         string part = connector.Part;
-        string resourcePath = $"Models/Paths/p{connector.PrefabVariant}/{part}";
+        string resourcePath = $"{connector.PrefabFolder}/{part}";
         GameObject prefab = ModelManager.Instance.GetModel(resourcePath, suppressWarning: true);
         if (prefab == null)
         {
@@ -1597,8 +1598,8 @@ public class RoadPath : IPathMeshGenerator
         if (bounds.size.x < 1e-5f || bounds.size.z < 1e-5f) return;
         float length = IntersectionPolygonUtil.Length(connector.Points);
         if (length < 1e-5f) return;
-        GameObject endPrefab = connector.EndPrefabVariant >= 0
-            ? ModelManager.Instance.GetModel($"Models/Paths/p{connector.EndPrefabVariant}/{part}", suppressWarning: true)
+        GameObject endPrefab = connector.EndPrefabFolder != null
+            ? ModelManager.Instance.GetModel($"{connector.EndPrefabFolder}/{part}", suppressWarning: true)
                 ?? ModelManager.Instance.GetModel($"Models/Paths/p{connector.EndFallbackType}/{part}") : prefab;
         Mesh endSource = endPrefab != null ? endPrefab.GetComponent<MeshFilter>()?.sharedMesh : null;
         float endHeight = endSource != null ? endSource.bounds.size.y : bounds.size.y;

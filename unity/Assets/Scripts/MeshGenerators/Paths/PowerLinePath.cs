@@ -14,6 +14,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
         public Vector3 position;
         public Quaternion rotation;
         public int variant, node;
+        public string folder; // Part folder of the path the support belongs to (PathParts.Folder).
         public float railLeft, railRight, feedSide, minimumBeamHeight;
         public bool IsGantry => railLeft > 0;
     }
@@ -68,7 +69,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
         Vector3 incoming = forward;
         forward = Direction(forward);
         if (forward.z < -.0001f || Mathf.Abs(forward.z) < .0001f && forward.x < 0) forward = -forward;
-        var support = new Support { position = position, rotation = Quaternion.LookRotation(forward), variant = chosen.path_variant, node = node };
+        var support = new Support { position = position, rotation = Quaternion.LookRotation(forward), variant = chosen.path_variant, node = node, folder = PathParts.Folder(chosen) };
         if (node > 0 && FacilityTerminalPosition?.Invoke(node) is Vector3 terminal)
         {
             // Facility-terminal height is independent of power-line placement height; do not subtract base_height.
@@ -136,7 +137,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
     public static void GenerateInto(GameObject root, PathSummary path, List<Vector3> points, DrawLod lod)
     {
         var supports = Plan(path,points);
-        var reference = PathDrawContext.ResolvePrefab($"Models/Paths/p{path.path_variant}/pillar_cap",null,out _);
+        var reference = PathDrawContext.ResolvePrefab($"{PathParts.Folder(path)}/pillar_cap",null,out _);
         Material metal = null;
         if (reference != null)
             foreach (var renderer in reference.GetComponentsInChildren<MeshRenderer>())
@@ -184,7 +185,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
 
     static void GenerateTower(GameObject visual, Support s, Material metal)
     {
-        var prefab = PathDrawContext.ResolvePrefab($"Models/Paths/p{s.variant}/pillar_cap",null,out _);
+        var prefab = PathDrawContext.ResolvePrefab($"{s.folder}/pillar_cap",null,out _);
         if (prefab != null)
         {
             var tower = UnityEngine.Object.Instantiate(prefab,visual.transform);

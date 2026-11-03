@@ -24,14 +24,14 @@ public static class SuspensionBridgeGenerator
     /// <summary>Other suspension bridges joined at the path's start (true) or end node. Provided by PathManager.</summary>
     public static Func<PathSummary, bool, List<PathSummary>> JointProvider;
 
-    /// <summary>Whether the path is drawn as a suspension bridge (its variant has a tower model).</summary>
+    /// <summary>Whether the path is drawn as a suspension bridge (its part folder resolves a tower model).</summary>
     public static bool Handles(PathSummary path)
         => path != null && ModelManager.Instance != null
-            && ModelManager.Instance.GetModel($"Models/Paths/p{path.path_variant}/tower", true) != null;
+            && ModelManager.Instance.GetModel($"{PathParts.Folder(path)}/tower", true) != null;
 
     public static void GenerateTruss(GameObject parent, SplineComputer spline, PathSummary path, float width)
     {
-        string truss = $"Models/Paths/p{path.path_variant}/truss";
+        string truss = $"{PathParts.Folder(path)}/truss";
         if (PathDrawContext.ResolvePrefab(truss, null, out _) != null)
             RoadPath.CreateSplineMesh(parent, spline, truss, width, 0, RoadPartHeights.BODY_ABOVE_SPLINE,
                 stretchToWidth: false, maxTileLength: 0, roadSurface: false);
@@ -51,7 +51,7 @@ public static class SuspensionBridgeGenerator
     /// <summary>points: the drawn deck centerline (trimmed ends and the remaining waypoints).</summary>
     public static void Generate(GameObject parent, List<Vector3> points, PathSummary path, float width, bool towersOnly = false)
     {
-        var prefab = PathDrawContext.ResolvePrefab($"Models/Paths/p{path.path_variant}/tower", null, out _);
+        var prefab = PathDrawContext.ResolvePrefab($"{PathParts.Folder(path)}/tower", null, out _);
         if (prefab == null || points == null || points.Count < 2) return;
         var deck = new Deck(points);
         if (deck.Length < 8f) return;
@@ -166,7 +166,7 @@ public static class SuspensionBridgeGenerator
     /// </summary>
     private static (float inset, float rise) Anchorage(GameObject parent, Deck deck, PathSummary path, bool start, float sideSpan)
     {
-        var prefab = PathDrawContext.ResolvePrefab($"Models/Paths/p{path.path_variant}/anchorage", null, out _);
+        var prefab = PathDrawContext.ResolvePrefab($"{PathParts.Folder(path)}/anchorage", null, out _);
         var filter = prefab != null ? prefab.GetComponentInChildren<MeshFilter>() : null;
         var renderer = prefab != null ? prefab.GetComponentInChildren<MeshRenderer>() : null;
         Mesh source = filter != null ? filter.sharedMesh : null;
