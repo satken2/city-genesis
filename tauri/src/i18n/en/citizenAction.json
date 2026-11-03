@@ -1,5 +1,11 @@
 {
   "citizenAction": {
+    "name": {
+      "label": "Bestow a name",
+      "message": "Enter the name you would like to bestow on {{name}}.",
+      "inputLabel": "New name",
+      "confirm": "Bestow"
+    },
     "reward": {
       "label": "Grant a reward",
       "message": "Give {{name}}'s household a reward from city funds.\nCity cash: {{available}}",

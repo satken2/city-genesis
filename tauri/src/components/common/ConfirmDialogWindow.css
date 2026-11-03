@@ -45,13 +45,19 @@
   color: var(--flat-text-label);
 }
 
-.confirm-dialog-amount input {
+.confirm-dialog-amount input,
+.confirm-dialog-text {
   width: 100%;
   min-width: 0;
   padding: 7px 8px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: var(--flat-sunken);
   color: var(--flat-text);
+}
+
+.confirm-dialog-text {
+  box-sizing: border-box;
+  font-size: 1rem;
 }
 
 .confirm-dialog-btn {

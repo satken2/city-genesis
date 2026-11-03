@@ -1,5 +1,11 @@
 {
   "citizenAction": {
+    "name": {
+      "label": "Attribuer un nom",
+      "message": "Saisissez le nom que vous souhaitez attribuer à {{name}}.",
+      "inputLabel": "Nouveau nom",
+      "confirm": "Attribuer"
+    },
     "reward": {
       "label": "Accorder une prime",
       "message": "Verser une récompense au ménage de {{name}} sur les fonds de la ville.\nTrésorerie de la ville : {{available}}",

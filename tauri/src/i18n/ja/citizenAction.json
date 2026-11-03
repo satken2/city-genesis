@@ -1,5 +1,11 @@
 {
   "citizenAction": {
+    "name": {
+      "label": "名前を授ける",
+      "message": "{{name}}さんに授ける名前を入力してください。",
+      "inputLabel": "新しい名前",
+      "confirm": "授ける"
+    },
     "reward": {
       "label": "報奨金を与える",
       "message": "{{name}}さんの世帯に、市の資金から報奨金を渡します。\n市の現預金: {{available}}",

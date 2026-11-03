@@ -1,5 +1,11 @@
 {
   "citizenAction": {
+    "name": {
+      "label": "赐予名字",
+      "message": "请输入要赐予{{name}}的名字。",
+      "inputLabel": "新名字",
+      "confirm": "赐名"
+    },
     "reward": {
       "label": "发放奖金",
       "message": "从市财政中向{{name}}的家庭发放奖金。\n市现金存款：{{available}}",

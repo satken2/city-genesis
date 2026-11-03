@@ -4,8 +4,7 @@
  * (!window.confirm(...))` always passes through without confirmation. Native dialogs also do not match the
  * game's appearance.
  *
- * The same window also asks for an amount (`requestAmount`) and reports a finished action with only an OK button
- * (`showNotice`).
+ * 金額は requestAmount、空でない文字列は requestText で入力し、完了通知は showNotice で表示する。
  *
  * The confirmation lives in another WebView; return answers through cross-window `CONFIRM_DIALOG_RESULT_EVENT`.
  * Assign requestId per request and accept only its first answer, since duplicate cancellations can arrive.
@@ -21,6 +20,8 @@ export type ConfirmDialogResult = {
   confirmed: boolean;
   /** Entered amount, for confirmed requests with `amountMax`. */
   amount?: number;
+  /** 前後の空白を除いた入力文字列。textInput のある要求を確定したときだけ返す。 */
+  text?: string;
 };
 
 export type ConfirmDialogRequest = {
@@ -35,6 +36,8 @@ export type ConfirmDialogRequest = {
   noticeOnly?: boolean;
   /** Ask for a whole amount from 1 to this value; confirmation is disabled until it is valid. */
   amountMax?: number;
+  /** 空白だけの入力は確定できない。金額入力とは併用しない。 */
+  textInput?: { initialValue: string; label: string };
 };
 
 export type ConfirmDialogOptions = Omit<ConfirmDialogRequest, "requestId"> & {
@@ -43,8 +46,12 @@ export type ConfirmDialogOptions = Omit<ConfirmDialogRequest, "requestId"> & {
 };
 
 /** Return the confirmation window's answer (App.tsx handles closing via the close button). */
-export async function emitConfirmDialogResult(requestId: string, confirmed: boolean, amount?: number) {
-  await emit(CONFIRM_DIALOG_RESULT_EVENT, { requestId, confirmed, amount } satisfies ConfirmDialogResult);
+export async function emitConfirmDialogResult(
+  requestId: string,
+  confirmed: boolean,
+  input?: Pick<ConfirmDialogResult, "amount" | "text">,
+) {
+  await emit(CONFIRM_DIALOG_RESULT_EVENT, { requestId, confirmed, ...input } satisfies ConfirmDialogResult);
 }
 
 async function openConfirmDialog({ titleKey, ...rest }: ConfirmDialogOptions, requestId: string) {
@@ -96,8 +103,16 @@ export async function requestAmount(
   return result.confirmed && result.amount !== undefined ? result.amount : null;
 }
 
+/** 入力した文字列を返す。取り消した場合は null。 */
+export async function requestText(
+  options: Omit<ConfirmDialogOptions, "amountMax" | "noticeOnly"> & { textInput: NonNullable<ConfirmDialogRequest["textInput"]> },
+): Promise<string | null> {
+  const result = await awaitConfirmDialog(options);
+  return result.confirmed && result.text !== undefined ? result.text : null;
+}
+
 /** Show a message with only an OK button. Nothing waits for the acknowledgement. */
-export async function showNotice(options: Omit<ConfirmDialogOptions, "noticeOnly" | "amountMax">) {
+export async function showNotice(options: Omit<ConfirmDialogOptions, "noticeOnly" | "amountMax" | "textInput">) {
   try {
     await openConfirmDialog({ ...options, noticeOnly: true }, crypto.randomUUID());
   } catch (err) {

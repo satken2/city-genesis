@@ -17,6 +17,7 @@ import { describeError } from "../../utils/errors";
  * - Camera: follow this citizen's car or pedestrian in Unity; press again to stop. State follows
  *   `citizen:follow_state`.
  * - Track: add to or remove from the tracking list, which persists in save data.
+ * - 名前を授ける: 共通ダイアログで入力し、既存の市民更新APIへ保存する。追跡一覧にも名前の更新を通知する。
  * - The mayor's actions (`citizenActions.ts`). Expelling closes the panel, since the citizen no longer exists.
  *
  * The Basic tab uses fields from /api/v1/citizens/{id} (the single_citizen schema in endpoints.yaml) and the
@@ -48,6 +49,7 @@ import {
 } from "recharts";
 import type { AgentData, AgentResponse, CitizenData, CitizenResponse } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
+import { requestText, showNotice } from "../../utils/confirmDialog";
 import { MEMBER_MARRIED } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { InfoHeader } from "../common/InfoHeader";
@@ -70,6 +72,7 @@ import { CameraIcon, TrackIcon } from "./CitizenTrackingIcons";
 import { citizenFaceUrl, citySkinTone } from "../../utils/citizenFace";
 import trafficPedestrian from "../../assets/images/traffics/traffic_pedestrian.png";
 import trafficRoad from "../../assets/images/traffics/traffic_road.png";
+import nameIcon from "../../assets/images/citizen-voice/name.svg";
 import { useCityClimate } from "../../hooks/useCityClimate";
 import "../agent/AgentDetailPanel.css";
 import "../agent/AgentOperationPanel.css";
@@ -258,6 +261,27 @@ export function CitizenDetailPanel({
     if (done && action === "expel") await invoke("close_current_window").catch(console.error);
   }
 
+  async function giveName(citizen: CitizenData) {
+    const name = await requestText({
+      titleKey: "citizenAction.name.label",
+      message: t("citizenAction.name.message", { name: citizen.name }),
+      confirmLabel: t("citizenAction.name.confirm"),
+      textInput: { initialValue: citizen.name, label: t("citizenAction.name.inputLabel") },
+    });
+    if (name === null || name === citizen.name) return;
+    try {
+      const result = await fetchApi<CitizenResponse>(
+        buildApiUrl(apiBaseUrl, `/api/v1/citizens/${citizen.citizen_id}`),
+        { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) },
+      );
+      setCitizenData((current) => current?.citizen_id === citizen.citizen_id ? result.citizen : current);
+      await emit(TRACKED_CITIZENS_CHANGED_EVENT, { citizen_id: citizen.citizen_id });
+    } catch (err) {
+      console.error("failed to name citizen", err);
+      await showNotice({ titleKey: "citizenAction.name.label", message: describeError(err) });
+    }
+  }
+
   /** Agents have no geometry, so focus on their parcel (the containing building's parcel for tenants). */
   async function focusAgent(agentId: number) {
     const { economic_agent: agent } = await fetchApi<AgentResponse>(buildApiUrl(apiBaseUrl, `/api/v1/agents/${agentId}`));
@@ -383,6 +407,16 @@ export function CitizenDetailPanel({
           onClick={() => void toggleTracked()}
         >
           <TrackIcon />
+        </button>
+        <button
+          className="operation-btn"
+          type="button"
+          title={t("citizenAction.name.label")}
+          data-guide="citizen.action"
+          data-guide-value="name"
+          onClick={() => void giveName(citizenData)}
+        >
+          <img src={nameIcon} alt={t("citizenAction.name.label")} />
         </button>
         {CITIZEN_ACTIONS.map(({ id, icon }) => (
           <button

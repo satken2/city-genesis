@@ -1,7 +1,7 @@
 /**
  * Generic confirmation window
  *
- * Small window_type="confirm_dialog" popup. Callers use `requestConfirm()`, `requestAmount()`, or `showNotice()` in
+ * Small window_type="confirm_dialog" popup. Callers use `requestConfirm()`, `requestAmount()`, `requestText()`, or `showNotice()` in
  * `utils/confirmDialog.ts`, rather than opening it directly (request in `params.extra.confirmRequest`).
  * Return the answer to the caller window through `emitConfirmDialogResult`.
  * The amount field sits in the button row so the window keeps the same size as a plain confirmation.
@@ -33,12 +33,14 @@ export function ConfirmDialogWindow({ request, onClose }: ConfirmDialogWindowPro
   const currentRequestIdRef = useRef<string | undefined>(undefined);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
-  const amountInputRef = useRef<HTMLInputElement>(null);
-  const [amountText, setAmountText] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [inputText, setInputText] = useState("");
   const requestId = request?.requestId;
   const amountMax = request?.amountMax;
-  const amount = Number(amountText);
+  const textInput = request?.textInput;
+  const amount = Number(inputText);
   const amountValid = amountMax === undefined || (Number.isInteger(amount) && amount >= 1 && amount <= amountMax);
+  const inputValid = amountValid && (!textInput || inputText.trim() !== "");
 
   useEffect(() => {
     if (!requestId || requestId === currentRequestIdRef.current) return;
@@ -46,22 +48,25 @@ export function ConfirmDialogWindow({ request, onClose }: ConfirmDialogWindowPro
     if (replaced && !answeredRef.current) void emitConfirmDialogResult(replaced, false);
     currentRequestIdRef.current = requestId;
     answeredRef.current = false;
-    setAmountText("");
+    setInputText(textInput?.initialValue ?? "");
     // Initially focus Cancel to prevent accidental confirmation with Enter. A notice has only the confirmation.
     if (request?.noticeOnly) confirmButtonRef.current?.focus();
-    else if (request?.amountMax !== undefined) amountInputRef.current?.focus();
+    else if (request?.amountMax !== undefined || textInput) inputRef.current?.focus();
     else cancelButtonRef.current?.focus();
-  }, [requestId, request?.noticeOnly, request?.amountMax]);
+  }, [requestId, request?.noticeOnly, request?.amountMax, textInput]);
 
   const answer = async (confirmed: boolean) => {
-    if (!requestId || answeredRef.current || (confirmed && !amountValid)) return;
+    if (!requestId || answeredRef.current || (confirmed && !inputValid)) return;
     answeredRef.current = true;
-    await emitConfirmDialogResult(requestId, confirmed, confirmed && amountMax !== undefined ? amount : undefined);
+    const input = !confirmed ? undefined : textInput ? { text: inputText.trim() }
+      : amountMax !== undefined ? { amount } : undefined;
+    await emitConfirmDialogResult(requestId, confirmed, input);
     onClose();
   };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.isComposing) return;
       if (event.key === "Escape") void answer(false);
     };
     window.addEventListener("keydown", onKeyDown);
@@ -75,18 +80,33 @@ export function ConfirmDialogWindow({ request, onClose }: ConfirmDialogWindowPro
   return (
     <div className="confirm-dialog">
       <p className="confirm-dialog-message">{request.message}</p>
+      {textInput && (
+        <input
+          ref={inputRef}
+          className="confirm-dialog-text"
+          type="text"
+          aria-label={textInput.label}
+          value={inputText}
+          onChange={(event) => setInputText(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing) return;
+            if (event.key === "Enter") void answer(true);
+          }}
+        />
+      )}
       <div className="confirm-dialog-actions">
         {amountMax !== undefined && (
           <label className="confirm-dialog-amount">
             <input
-              ref={amountInputRef}
+              ref={inputRef}
               type="number"
               min={1}
               max={amountMax}
               step={1}
-              value={amountText}
-              onChange={(event) => setAmountText(event.target.value)}
+              value={inputText}
+              onChange={(event) => setInputText(event.target.value)}
               onKeyDown={(event) => {
+                if (event.nativeEvent.isComposing) return;
                 if (event.key === "Enter") void answer(true);
               }}
             />
@@ -107,7 +127,7 @@ export function ConfirmDialogWindow({ request, onClose }: ConfirmDialogWindowPro
           ref={confirmButtonRef}
           className={`confirm-dialog-btn confirm-dialog-btn--${request.tone ?? "default"}`}
           type="button"
-          disabled={!amountValid}
+          disabled={!inputValid}
           onClick={() => void answer(true)}
         >
           {request.confirmLabel ?? t("common.ok")}

@@ -1,5 +1,11 @@
 {
   "citizenAction": {
+    "name": {
+      "label": "이름을 하사하기",
+      "message": "{{name}}님에게 하사할 이름을 입력하세요.",
+      "inputLabel": "새 이름",
+      "confirm": "하사하기"
+    },
     "reward": {
       "label": "포상금 지급",
       "message": "{{name}} 님의 가구에 시 자금으로 포상금을 줍니다.\n시의 현금성 자산: {{available}}",

@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import type { TFunction } from "i18next";
 import { ConfirmDialogWindow } from "../../src/components/common/ConfirmDialogWindow";
 import { runCitizenAction } from "../../src/components/citizen/citizenActions";
-import { CONFIRM_DIALOG_RESULT_EVENT, type ConfirmDialogRequest } from "../../src/utils/confirmDialog";
+import { CONFIRM_DIALOG_RESULT_EVENT, requestText, type ConfirmDialogRequest } from "../../src/utils/confirmDialog";
 import { listen, state } from "./mock-runtime";
 
 const answers: unknown[] = [];
@@ -38,14 +38,42 @@ assert.equal(closed, 1);
 await render({ requestId: "cancelled", message: "how much", amountMax: 500 });
 await type("100");
 await act(async () => buttons()[0].click());
-assert.deepEqual(answers.at(-1), { requestId: "cancelled", confirmed: false, amount: undefined }, "取り消しは金額を返さない");
+assert.deepEqual(answers.at(-1), { requestId: "cancelled", confirmed: false }, "取り消しは金額を返さない");
 
 await render({ requestId: "notice", message: "done", noticeOnly: true });
 assert.equal(buttons().length, 1, "お知らせは OK だけ");
 assert.equal(container.querySelector("input"), null);
 await act(async () => confirmButton().click());
 assert.equal(closed, 3);
+
+await render({ requestId: "name", message: "name", textInput: { initialValue: "Hanako", label: "New name" } });
+assert.equal(container.querySelector("input")!.value, "Hanako", "元の名前を入力欄に表示する");
+assert.equal(document.activeElement, container.querySelector("input"), "名前の入力欄にフォーカスする");
+await type("  \u3000  ");
+assert.equal(confirmButton().disabled, true, "空白だけの名前は確定できない");
+await type("  花子  ");
+await act(async () => container.querySelector("input")!.dispatchEvent(
+  new window.KeyboardEvent("keydown", { key: "Enter", isComposing: true, bubbles: true }),
+));
+assert.equal(closed, 3, "日本語入力の変換確定では送信しない");
+await act(async () => container.querySelector("input")!.dispatchEvent(
+  new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+));
+assert.deepEqual(answers.at(-1), { requestId: "name", confirmed: true, text: "花子" });
+
+await render({ requestId: "name-cancel", message: "name", textInput: { initialValue: "Taro", label: "New name" } });
+assert.equal(container.querySelector("input")!.value, "Taro", "再利用時に別の市民の名前で初期化する");
+await type("次郎");
+await act(async () => container.querySelector("input")!.dispatchEvent(
+  new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+));
+assert.deepEqual(answers.at(-1), { requestId: "name-cancel", confirmed: false }, "取り消しは名前を返さない");
 await act(async () => root.unmount());
+
+state.answer = { confirmed: true, text: "花子" };
+assert.equal(await requestText({ message: "name", textInput: { initialValue: "Hanako", label: "New name" } }), "花子");
+state.answer = { confirmed: false };
+assert.equal(await requestText({ message: "name", textInput: { initialValue: "Hanako", label: "New name" } }), null);
 
 const posts: { url: string; body: unknown }[] = [];
 let rejectPosts = false;
@@ -92,4 +120,4 @@ const before = dialogs().length;
 assert.equal(await run("relocate"), false);
 assert.equal(dialogs().length, before, "失敗したら結果を出さない");
 
-console.log("PASS: amount and notice dialogs, citizen actions send, cancel and report results");
+console.log("PASS: amount, text and notice dialogs, citizen actions send, cancel and report results");

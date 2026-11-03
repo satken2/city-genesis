@@ -1,5 +1,11 @@
 {
   "citizenAction": {
+    "name": {
+      "label": "Otorgar un nombre",
+      "message": "Escribe el nombre que deseas otorgarle a {{name}}.",
+      "inputLabel": "Nuevo nombre",
+      "confirm": "Otorgar"
+    },
     "reward": {
       "label": "Otorgar una recompensa",
       "message": "Entregar al hogar de {{name}} una recompensa con fondos de la ciudad.\nEfectivo disponible de la ciudad: {{available}}",

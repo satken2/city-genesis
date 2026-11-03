@@ -1,7 +1,7 @@
 export const state = {
   calls: [] as { command: string; args: any }[],
   /** 確認ウィンドウの答え。お知らせ(OK だけ)には答えない */
-  answer: { confirmed: true } as { confirmed: boolean; amount?: number },
+  answer: { confirmed: true } as { confirmed: boolean; amount?: number; text?: string },
   emitted: [] as { event: string; payload: any }[],
 };
 const listeners = new Map<string, Set<(event: any) => void>>();
