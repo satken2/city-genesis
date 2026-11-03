@@ -70,7 +70,7 @@
     "retirementAgeUnit": "años",
     "unemploymentBenefitRatio": "Tasa de prestación por desempleo",
     "pensionBenefitRatio": "Tasa de pensión",
-    "welfareWageRatioUnit": "% del salario estándar del distrito",
+    "welfareWageRatioUnit": "% de la tasa salarial promedio del distrito",
     "livelihoodAssistanceRatio": "Tasa de asistencia de subsistencia",
     "welfareShortfallRatioUnit": "% del déficit respecto al costo mínimo de vida",
     "welfareHint": "La prestación por desempleo se paga a ciudadanos en edad laboral menores de la edad de jubilación sin empleo ni escuela. La pensión se paga a ciudadanos con la edad de jubilación o más. La asistencia de subsistencia cubre la diferencia de los hogares cuyo efectivo más prestaciones no alcanza el costo mínimo de vida.",

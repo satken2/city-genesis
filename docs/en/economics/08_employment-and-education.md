@@ -4,7 +4,7 @@
 
 Employment belongs to individual citizens; each citizen has one workplace. Wages are paid by the workplace to the citizen's household. Facilities seek the labor needed for production, and citizens choose jobs considering wages and commuting burdens. Labor shortages and job openings also affect wages.
 
-## 8.2. Skills and wage tiers
+## 8.2. Skills and wages
 
 Citizens have six skills. Required skills differ by industry.
 
@@ -17,7 +17,9 @@ Citizens have six skills. Required skills differ by industry.
 | `SKILL_TECHNOLOGY` | Science and technology |
 | `SKILL_MEDICAL` | Medicine |
 
-Skills place workers in uneducated, standard, or highly skilled wage tiers. Education is required to advance to higher tiers; work experience alone cannot cross some boundaries.
+Wages are proportional to a worker's effective labor (the productive capacity determined by skill and working hours). Each facility has a single wage per unit of effective labor (wage rate), so within the same facility, workers with higher skill in what the job requires earn more. Skills developed through education or work experience show up directly in the worker's wage.
+
+Skills have boundaries that only education can cross, and skills place workers in uneducated, standard, or highly skilled tiers. Work experience raises skills only up to the next boundary; advancing to a higher tier requires education. These tiers are used, among other things, to identify highly skilled workers.
 
 ## 8.3. Headcount and effective labor
 

@@ -52,8 +52,6 @@ type AgentItem = {
   supply_amount?: number | null;
   supply_sold_amount?: number[] | null;
   wage?: number | null;
-  wage_uneducated?: number | null;
-  wage_high?: number | null;
   quota?: number | null;
   total_labor?: number | null;
   utilization?: number[] | null;
@@ -511,8 +509,7 @@ function buildColumns(
         key: "wage",
         label: t("agentList.colWage"),
         align: "right",
-        render: (a) =>
-          `${money(a.wage_high, 0)} / ${money(a.wage, 0)} / ${money(a.wage_uneducated, 0)}`,
+        render: (a) => money(a.wage, 0),
         sortValue: (a) => a.wage ?? 0,
       },
       {

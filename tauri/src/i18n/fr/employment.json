@@ -1,7 +1,7 @@
 {
   "employment": {
     "requiredSkill": "Compétence requise",
-    "wage": "Salaire",
+    "wage": "Taux de salaire",
     "quota": "Main-d'œuvre nécessaire",
     "totalLabor": "Main-d'œuvre recrutée",
     "employees": "Liste des employés",

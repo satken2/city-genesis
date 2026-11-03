@@ -70,7 +70,7 @@
     "retirementAgeUnit": "歳",
     "unemploymentBenefitRatio": "失業給付率",
     "pensionBenefitRatio": "年金給付率",
-    "welfareWageRatioUnit": "% (地区の標準賃金比)",
+    "welfareWageRatioUnit": "% (地区の平均賃金単価比)",
     "livelihoodAssistanceRatio": "生活扶助率",
     "welfareShortfallRatioUnit": "% (最低生活費への不足額比)",
     "welfareHint": "失業給付は就労可能年齢以上・退職年齢未満で雇用も就学もない市民、年金は退職年齢以上の市民が対象です。生活扶助は残高と給付を合わせても最低生活費に届かない世帯へ不足分を補填します。",

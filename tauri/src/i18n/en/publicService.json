@@ -70,7 +70,7 @@
     "retirementAgeUnit": "years",
     "unemploymentBenefitRatio": "Unemployment benefit rate",
     "pensionBenefitRatio": "Pension rate",
-    "welfareWageRatioUnit": "% of district standard wage",
+    "welfareWageRatioUnit": "% of district average wage rate",
     "livelihoodAssistanceRatio": "Livelihood assistance rate",
     "welfareShortfallRatioUnit": "% of shortfall to minimum living cost",
     "welfareHint": "Unemployment benefits go to citizens of working age below retirement age who have neither a job nor a school. Pensions go to citizens at or above retirement age. Livelihood assistance tops up households whose cash plus benefits fall short of the minimum living cost.",

@@ -157,7 +157,7 @@
   font-size: 1rem;
 }
 
-/* ── ③ Supply/demand balance by wage tier (overlaid demand and supply) ── */
+/* ── ③ Supply/demand balance by skill level (overlaid demand and supply) ── */
 .emp-tier-legend {
   display: flex;
   gap: 12px;

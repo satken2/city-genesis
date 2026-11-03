@@ -70,7 +70,7 @@
     "retirementAgeUnit": "세",
     "unemploymentBenefitRatio": "실업급여율",
     "pensionBenefitRatio": "연금 급여율",
-    "welfareWageRatioUnit": "% (지구 표준 임금 대비)",
+    "welfareWageRatioUnit": "% (지구 평균 임금률 대비)",
     "livelihoodAssistanceRatio": "생활보조율",
     "welfareShortfallRatioUnit": "% (최저 생활비 부족분 대비)",
     "welfareHint": "실업급여는 근로 가능 연령 이상·퇴직 연령 미만이며 직장도 학교도 없는 시민, 연금은 퇴직 연령 이상의 시민이 대상입니다. 생활보조는 잔고와 급여를 합쳐도 최저 생활비에 미치지 못하는 가구에 부족분을 보전합니다.",

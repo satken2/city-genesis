@@ -1,7 +1,7 @@
 {
   "employment": {
     "requiredSkill": "요구 스킬",
-    "wage": "임금",
+    "wage": "임금률",
     "quota": "필요 노동력",
     "totalLabor": "고용된 노동력",
     "employees": "종업원 목록",

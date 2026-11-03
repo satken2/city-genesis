@@ -70,7 +70,7 @@
     "retirementAgeUnit": "ans",
     "unemploymentBenefitRatio": "Taux d'allocation chômage",
     "pensionBenefitRatio": "Taux de pension",
-    "welfareWageRatioUnit": "% du salaire standard du quartier",
+    "welfareWageRatioUnit": "% du taux de salaire moyen du quartier",
     "livelihoodAssistanceRatio": "Taux d'aide à la subsistance",
     "welfareShortfallRatioUnit": "% du manque par rapport au coût de vie minimal",
     "welfareHint": "L'allocation chômage est versée aux citoyens en âge de travailler, sous l'âge de la retraite, sans emploi ni école. La pension est versée aux citoyens ayant atteint l'âge de la retraite. L'aide à la subsistance comble l'écart des ménages dont les liquidités et prestations n'atteignent pas le coût de vie minimal.",

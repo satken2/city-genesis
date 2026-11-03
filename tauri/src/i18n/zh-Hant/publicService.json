@@ -70,7 +70,7 @@
     "retirementAgeUnit": "歲",
     "unemploymentBenefitRatio": "失業給付率",
     "pensionBenefitRatio": "年金給付率",
-    "welfareWageRatioUnit": "%（相對於地區標準薪資）",
+    "welfareWageRatioUnit": "%（相對於地區平均工資率）",
     "livelihoodAssistanceRatio": "生活扶助率",
     "welfareShortfallRatioUnit": "%（相對於最低生活費缺口）",
     "welfareHint": "失業給付面向達到工作年齡、未滿退休年齡且既無工作也未就學的市民；年金面向達到退休年齡的市民。生活扶助為餘額加給付仍不足最低生活費的家庭補足差額。",

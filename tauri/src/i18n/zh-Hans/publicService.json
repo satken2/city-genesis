@@ -70,7 +70,7 @@
     "retirementAgeUnit": "岁",
     "unemploymentBenefitRatio": "失业救济率",
     "pensionBenefitRatio": "养老金给付率",
-    "welfareWageRatioUnit": "%（相对于地区标准工资）",
+    "welfareWageRatioUnit": "%（相对于地区平均工资率）",
     "livelihoodAssistanceRatio": "生活救助率",
     "welfareShortfallRatioUnit": "%（相对于最低生活费缺口）",
     "welfareHint": "失业救济面向达到工作年龄、未满退休年龄且既无工作也未就学的市民；养老金面向达到退休年龄的市民。生活救助为余额加补助仍不足最低生活费的家庭补足差额。",

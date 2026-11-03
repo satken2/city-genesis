@@ -4,11 +4,11 @@
  * Content of the statistics window's "Employment" tab.
  * Fetches employment statistics from GET /api/v1/stats/employment and displays:
  *
- * - Employment summary (KPI cards): employment rate, job fulfillment rate, and average wage.
+ * - Employment summary (KPI cards): employment rate, job fulfillment rate, and average wage rate.
  * - Unemployment rate history (line chart): unemployment rate time series by Epoch.
- * - Supply/demand balance by wage tier (overlaid horizontal bars): three tiers, uneducated,
+ * - Supply/demand balance by skill level (overlaid horizontal bars): three levels, uneducated,
  *   standard, and advanced. Draw demand in light bars with dark supply bars overlaid.
- *   Scale the maximum of all six demand/supply values across the three tiers to the chart width.
+ *   Scale the maximum of all six demand/supply values across the three levels to the chart width.
  * - Job demand by Skill (horizontal bars): fulfillment rates for six Skills.
  * - Employment by industry table (scrollable): detailed list by Variant.
  */
@@ -190,8 +190,8 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   const { summary, tier_balance, skill_demand, industry, history } = currentScope;
 
-  // Scale reference for supply/demand balance by wage tier.
-  // Fit the largest of the six values (three tiers × demand/supply) to the chart width,
+  // Scale reference for supply/demand balance by skill level.
+  // Fit the largest of the six values (three levels × demand/supply) to the chart width,
   // taking the maximum across all supply / demand_quota values.
   const maxTierValue = Math.max(
     ...tier_balance.map((t) => Math.max(t.supply, t.demand_quota))
@@ -280,7 +280,7 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 color={getFillColor(summary.fill_rate)}
               />
               <KpiCard
-                label={t("statistics.employment.averageWage", "平均賃金")}
+                label={t("statistics.employment.averageWage", "平均賃金単価")}
                 value={formatWage(summary.average_wage, locale)}
                 sub={t("statistics.employment.perEpoch", "/エポック")}
               />
@@ -350,10 +350,10 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
             </div>
           </div>
 
-          {/* ③ Supply/demand balance by wage tier */}
+          {/* ③ Supply/demand balance by skill level */}
           <div className="emp-card">
             <h3 className="emp-card__title">
-              {t("statistics.employment.tierBalanceTitle", "賃金ティア別 需給バランス")}
+              {t("statistics.employment.tierBalanceTitle", "スキル段階別 需給バランス")}
             </h3>
             <div className="emp-tier-legend">
               <span className="emp-tier-legend__item">
@@ -484,7 +484,7 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       {t("statistics.employment.colFillRate", "充足率")}
                     </th>
                     <th className="emp-industry-table__th emp-industry-table__th--num">
-                      {t("statistics.employment.colWage", "賃金")}
+                      {t("statistics.employment.colWage", "賃金単価")}
                     </th>
                   </tr>
                 </thead>

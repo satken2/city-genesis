@@ -60,7 +60,7 @@ namespace GeneratedModels
         public int school_agent_id;
         /// <summary>在籍校の名称（school_agent_idの参照解決）</summary>
         public string school_agent_name;
-        /// <summary>スキルID→習熟度の辞書。実質労働力や賃金ティアの算定に使う</summary>
+        /// <summary>スキルID→習熟度の辞書。実質労働力とスキル段階の判定に使う</summary>
         public Dictionary<string, float> skills;
         /// <summary>高等教育を修了したかどうか（0/1）</summary>
         public bool educated;
@@ -248,11 +248,7 @@ namespace GeneratedModels
         public List<float> utilization;
         /// <summary>稼働率の目標値（プレイヤー設定。0.0〜1.5）</summary>
         public float? utilization_target;
-        /// <summary>無教育ティアの提示賃金</summary>
-        public float? wage_uneducated;
-        /// <summary>高度ティアの提示賃金</summary>
-        public float? wage_high;
-        /// <summary>標準ティアの提示賃金</summary>
+        /// <summary>賃金単価。実質労働力1単位・1日あたりの円で、各人の日給はこれに実質労働力を掛けた額</summary>
         public float? wage;
         /// <summary>1エポックの生産・サービス提供の目標数量</summary>
         public float? quota;
@@ -650,7 +646,7 @@ namespace GeneratedModels
         public float limit_height;
         /// <summary>製品別の地区平均価格（税込み。製品ID→価格）</summary>
         public Dictionary<string, float> zone_average_prices;
-        /// <summary>標準ティア平均賃金の履歴</summary>
+        /// <summary>地区の平均賃金単価の履歴</summary>
         public List<float> average_wage;
         /// <summary>平均賃料の履歴</summary>
         public List<float> average_rent;

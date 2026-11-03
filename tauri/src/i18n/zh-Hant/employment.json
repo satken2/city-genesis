@@ -1,7 +1,7 @@
 {
   "employment": {
     "requiredSkill": "要求技能",
-    "wage": "薪資",
+    "wage": "工資率",
     "quota": "所需勞動力",
     "totalLabor": "已僱用勞動力",
     "employees": "員工列表",

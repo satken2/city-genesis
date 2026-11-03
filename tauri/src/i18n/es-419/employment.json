@@ -1,7 +1,7 @@
 {
   "employment": {
     "requiredSkill": "Habilidad requerida",
-    "wage": "Salario",
+    "wage": "Tasa salarial",
     "quota": "Mano de obra necesaria",
     "totalLabor": "Mano de obra contratada",
     "employees": "Lista de empleados",

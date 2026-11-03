@@ -51,7 +51,7 @@ export type CitizenData = {
   school_agent_id: number;
   /** 在籍校の名称（school_agent_idの参照解決） */
   school_agent_name?: string;
-  /** スキルID→習熟度の辞書。実質労働力や賃金ティアの算定に使う */
+  /** スキルID→習熟度の辞書。実質労働力とスキル段階の判定に使う */
   skills: Record<string, number>;
   /** 高等教育を修了したかどうか（0/1） */
   educated: boolean;
@@ -235,11 +235,7 @@ export type AgentData = {
   utilization?: number[];
   /** 稼働率の目標値（プレイヤー設定。0.0〜1.5） */
   utilization_target?: number;
-  /** 無教育ティアの提示賃金 */
-  wage_uneducated?: number;
-  /** 高度ティアの提示賃金 */
-  wage_high?: number;
-  /** 標準ティアの提示賃金 */
+  /** 賃金単価。実質労働力1単位・1日あたりの円で、各人の日給はこれに実質労働力を掛けた額 */
   wage?: number;
   /** 1エポックの生産・サービス提供の目標数量 */
   quota?: number;
@@ -627,7 +623,7 @@ export type ZoneData = {
   limit_height: number;
   /** 製品別の地区平均価格（税込み。製品ID→価格） */
   zone_average_prices: Record<string, number>;
-  /** 標準ティア平均賃金の履歴 */
+  /** 地区の平均賃金単価の履歴 */
   average_wage: number[];
   /** 平均賃料の履歴 */
   average_rent: number[];
