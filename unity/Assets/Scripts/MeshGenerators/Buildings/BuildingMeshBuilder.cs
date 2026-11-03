@@ -249,7 +249,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// Merge submeshes with the same material to minimize draw calls.
+    /// Resolve the materials to the instances shared by all buildings (<see cref="SharedMaterial"/>) and merge submeshes
+    /// with the same material to minimize draw calls. Every building generator ends with this.
     /// </summary>
     public static BuildingMeshResult MergeSubMeshes(BuildingMeshResult meshResult)
     {
@@ -261,12 +262,6 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
         Mesh mesh = meshResult.Mesh;
         int originalSubMeshCount = mesh.subMeshCount;
-
-        if (originalSubMeshCount <= 1)
-        {
-            return meshResult;
-        }
-
         Material[] materials = meshResult.Materials;
 
         Dictionary<EntityId, int> materialKeyToIndex = new Dictionary<EntityId, int>();
@@ -275,9 +270,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
         for (int subMeshIndex = 0; subMeshIndex < originalSubMeshCount; subMeshIndex++)
         {
-            Material material = (materials != null && subMeshIndex < materials.Length)
+            Material material = SharedMaterial((materials != null && subMeshIndex < materials.Length)
                 ? materials[subMeshIndex]
-                : null;
+                : null);
 
             EntityId materialKey = material != null ? material.GetEntityId() : EntityId.None;
             if (!materialKeyToIndex.TryGetValue(materialKey, out int mergedIndex))
@@ -323,6 +318,23 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         { ExteriorJobs = meshResult.ExteriorJobs, Scatter = meshResult.Scatter, CraneTop = meshResult.CraneTop };
     }
 
+    private static readonly Dictionary<(string name, Shader shader), Material> sharedMaterials = new Dictionary<(string, Shader), Material>();
+
+    /// <summary>
+    /// The first instance seen with this material's name and shader. Each FBX embeds its own copy of the library's
+    /// materials, so parts from different files share a material only through this.
+    /// The shader is part of the key because an import may assign a shared asset with its own shader to some parts only
+    /// (leaves with baked shading use the foliage shader; same-named leaves without it keep the embedded copy).
+    /// </summary>
+    private static Material SharedMaterial(Material material)
+    {
+        if (material == null) return null;
+        var key = (material.name, material.shader);
+        if (sharedMaterials.TryGetValue(key, out Material shared) && shared != null) return shared;
+        sharedMaterials[key] = material;
+        return material;
+    }
+
     private static Material cachedDefaultBuildingMaterial;
 
     // Shared materials are resolved by name and may come from an asset pack. Reload them when switching cities.
@@ -330,6 +342,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
     private static void ForgetNamedMaterials()
     {
+        sharedMaterials.Clear();
         cachedDefaultBuildingMaterial = null;
         cachedConstructionDirtMaterial = null;
         cachedCollapsedRubbleMaterial = null;

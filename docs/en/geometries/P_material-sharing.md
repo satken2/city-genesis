@@ -14,7 +14,7 @@ Use identical names for identical materials. Runtime-colored materials need role
 
 ## Sharing identity
 
-Identically named but separate Unity Material instances are not shared and cannot benefit from batching faces using the same material. Models must reference the same `.mat` asset, assigned through FBX import remapping, to share one instance. Path generators uniquely pool by name, so matching path-part names share instances. Runtime glTF files create separate Material and Texture instances even for matching names in different files.
+Identically named but separate Unity Material instances are not shared and cannot benefit from batching faces using the same material. FBX and glTF files each carry their own copies of materials, so building and path generators pool instances by name regardless of where a model comes from (see [material resolution](R_material-resolution.md)). The first one read is used, so a material name must have the same values in every model file. Buildings pool by name and shader together, so a model whose import assigns a `.mat` with a different shader gets an instance separate from same-named copies. Only these two generators pool; to share one instance among other models such as props and vehicles, assign the same `.mat` asset through FBX import remapping.
 
 ## FBX and wrapper prefabs
 

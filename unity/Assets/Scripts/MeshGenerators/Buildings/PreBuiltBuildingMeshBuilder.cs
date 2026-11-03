@@ -152,7 +152,7 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
         float colliderHeight = Mathf.Max(maxDrawnTop, floorHeight);
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight);
 
-        return new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh);
+        return BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh));
     }
 
     /// <summary>

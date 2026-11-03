@@ -12,7 +12,7 @@ Ground panels alone may be omitted. They apply only to buildings with master `dr
 
 ## Buildings and paths
 
-Buildings use prefab material instances directly without cloning. Buildings using the same parts share instances. Each building combines into one mesh and groups faces by material instance to reduce draws; matching names with different instances cannot combine.
+Buildings resolve part materials to the first instance read for each name and shader, sharing it across all buildings without cloning. They are not replaced by materials looked up by name. Each building combines into one mesh and groups faces by material instance to reduce draws, so same-named faces from parts in different files combine.
 
 Paths always use a shared pool keyed by material name. A same-named material looked up by name takes precedence. Otherwise the pool clones the part material and shifts render order one step later to avoid Z-fighting, sharing one instance per name. Intersection and sidewalk joins also use this pool instead of prefab materials directly.
 

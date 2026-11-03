@@ -89,7 +89,7 @@ public static class FarBuildingMeshBuilder
         }
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
-        return new BuildingMeshResult(mesh, parts.materials.ToArray());
+        return BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(mesh, parts.materials.ToArray()));
     }
 
     /// <summary>Accumulated stretched geometry. triangles[i] is the submesh drawn with materials[i].</summary>
