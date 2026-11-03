@@ -9,10 +9,11 @@ public sealed class WeatherClock
 {
     public const float DaySeconds = 600f;
     public const float TwilightSeconds = 20f;
-    public const float SunsetSeconds = 1.5f;
+    public const float SunsetSeconds = 1f;
+    public const float SunriseSeconds = 1.5f;
     public const float FadeSeconds = 0.5f;
     public const float DuskSeconds = SunsetSeconds + FadeSeconds;
-    public const float DawnSeconds = DuskSeconds;
+    public const float DawnSeconds = SunriseSeconds + FadeSeconds;
     public const float MorningPhase = 0.12f;      // Position at session start, about 1.5 hours after sunrise.
     public const float MaxElevation = 55f;        // Noon sun elevation (degrees).
     public const float BelowHorizon = 0.02f;      // Below-horizon travel after sunset/before sunrise, as a fraction of daytime duration.
@@ -89,7 +90,7 @@ public sealed class WeatherClock
             case Stage.Dawn:
                 progress += seconds;
                 FadeAlpha = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(progress / FadeSeconds));
-                float sunrise = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((progress - FadeSeconds) / SunsetSeconds));
+                float sunrise = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((progress - FadeSeconds) / SunriseSeconds));
                 Phase = Mathf.Lerp(-BelowHorizon, MorningPhase, sunrise);
                 Darkness = 1f - sunrise;
                 if (progress >= DawnSeconds) { Current = Stage.Day; Phase = MorningPhase; Darkness = FadeAlpha = 0f; }
