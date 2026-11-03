@@ -13,8 +13,8 @@ public static partial class VehicleQA
         var red = new Color32(229, 23, 31, 255);
         foreach (var (type, variants, hasMiddle) in new[]
         {
-            (12, new[]{0,1}, false), (14, new[]{0}, true), (20, new[]{0,1,2}, true),
-            (21, new[]{0,1,2}, true), (22, new[]{0,1,2}, false), (24, new[]{0}, true), (30, new[]{0}, false),
+            (12, new[]{0,1}, false), (14, new[]{0,1,2,3,4}, true), (20, new[]{0,1,2,3,4}, true),
+            (21, new[]{0,1,2,3,4}, true), (22, new[]{0,1,2}, false), (24, new[]{0,1,2,3,4}, true), (30, new[]{0}, false),
         })
         foreach (int variant in variants)
         foreach (bool middle in hasMiddle ? new[]{false,true} : new[]{false})

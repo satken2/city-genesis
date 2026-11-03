@@ -75,11 +75,11 @@ public static class MonorailQA
             Vertices("Paths/p502/platform_panel");
             // The vehicle origin is at the top of the girder. The underfloor cover is 0.38 m below the top along the full length, and drops beside both sides of the girder to 0.90 m below the top at the bogies.
             float beamDepth = Vertices("Paths/p501/track").Max(v => v.y) - Vertices("Paths/p501/track").Min(v => v.y);
-            foreach (int id in new[] {308, 309})
+            foreach (string name in new[] {"0", "middle", "1", "middle_1", "2", "middle_2", "3", "middle_3", "4", "middle_4"})
             {
-                var car = Vertices($"Props/{id}");
-                var close = Vertices($"Props/{id}_close");
-                var far = Vertices($"Props/{id}_far");
+                var car = Vertices($"Vehicles/24/{name}");
+                var close = Vertices($"Vehicles/24/{name}_close");
+                var far = Vertices($"Vehicles/24/{name}_far");
                 for(int axis=0;axis<3;axis++)
                 {
                     int a=axis;
@@ -101,8 +101,8 @@ public static class MonorailQA
                 Near(car.Min(v => v.z), -7, "Rear coupling limit");
                 Near(car.Max(v => v.x) + car.Min(v => v.x), 0, "Vehicle centered");
                 Check(car.Max(v => Mathf.Abs(v.x)) < 1.5f, "Vehicle must clear boarding edge");
-                if (id == 308)
-                    Check(car.Where(v => v.z > 6.55f).All(v => v.y > -.05f), "Leading fairing rises under the nose");
+                if (!name.StartsWith("middle"))
+                    Check(car.Where(v => v.z > 6.55f).All(v => v.y > -.05f), "Leading fairing rises under the nose: " + name);
             }
             // Recreate the verification wrapper with the main generator so it does not depend on a previous GUID.
             foreach (string guid in AssetDatabase.FindAssets("t:Model", new[] {"Assets/Models"}))
@@ -113,7 +113,7 @@ public static class MonorailQA
                 ModelPrefabGenerator.CreateWrapperPrefab(source, wrapper);
             }
             ModelPrefabGenerator.SyncAll();
-            foreach (string relative in new[] {"Paths/p501/track", "Paths/p502/platform", "Props/308", "Props/309", "Props/308_close", "Props/309_close"})
+            foreach (string relative in new[] {"Paths/p501/track", "Paths/p502/platform", "Vehicles/24/0", "Vehicles/24/middle", "Vehicles/24/0_close", "Vehicles/24/middle_close"})
                 Check(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Models/" + relative + ".prefab") != null, "Missing generated prefab " + relative);
             File.WriteAllText(report, $"PASS monorail: {checks} checks, normal/close FBX, Unity mesh axes, guideway clearance and generated wrappers");
             EditorApplication.Exit(0);

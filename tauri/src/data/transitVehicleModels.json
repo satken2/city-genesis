@@ -6,18 +6,30 @@
   "1002": [
     { "variant": 0, "prop": 372, "key": "metroStandard" },
     { "variant": 1, "prop": 373, "key": "metroFuturistic" },
-    { "variant": 2, "prop": 388, "key": "metroRetro" }
+    { "variant": 2, "prop": 388, "key": "metroRetro" },
+    { "variant": 3, "prop": 326, "key": "metroSoviet" },
+    { "variant": 4, "prop": 328, "key": "metroIndian" }
   ],
   "1003": [
-    { "variant": 0, "prop": 370, "key": "lrt" }
+    { "variant": 0, "prop": 370, "key": "lrtStandard" },
+    { "variant": 1, "prop": 310, "key": "lrtFuturistic" },
+    { "variant": 2, "prop": 312, "key": "lrtRetro" },
+    { "variant": 3, "prop": 314, "key": "lrtSoviet" },
+    { "variant": 4, "prop": 316, "key": "lrtIndian" }
   ],
   "1004": [
-    { "variant": 0, "prop": 308, "key": "monorail" }
+    { "variant": 0, "prop": 308, "key": "monorailStandard" },
+    { "variant": 1, "prop": 318, "key": "monorailFuturistic" },
+    { "variant": 2, "prop": 320, "key": "monorailRetro" },
+    { "variant": 3, "prop": 322, "key": "monorailSoviet" },
+    { "variant": 4, "prop": 324, "key": "monorailIndian" }
   ],
   "1005": [
     { "variant": 0, "prop": 376, "key": "trainStandard" },
     { "variant": 1, "prop": 377, "key": "trainFuturistic" },
-    { "variant": 2, "prop": 390, "key": "trainRetro" }
+    { "variant": 2, "prop": 390, "key": "trainRetro" },
+    { "variant": 3, "prop": 330, "key": "trainSoviet" },
+    { "variant": 4, "prop": 332, "key": "trainIndian" }
   ],
   "1006": [
     { "variant": 0, "prop": 380, "key": "freightJr" },

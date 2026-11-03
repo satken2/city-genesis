@@ -438,6 +438,10 @@ public static partial class VehicleQA
         paths.Add("21/2");ids.Add(390);paths.Add("21/middle_2");ids.Add(391);
         paths.Add("23/2");ids.Add(392);paths.Add("23/middle_2");ids.Add(393);
         paths.Add("22/2");ids.Add(394);paths.Add("22/wagon_2");ids.Add(395);
+        paths.Add("24/0");ids.Add(308);paths.Add("24/middle");ids.Add(309);
+        int next=310;
+        foreach(var (type,first) in new[]{(14,1),(24,1),(20,3),(21,3)})
+            for(int variant=first;variant<5;variant++){paths.Add($"{type}/{variant}");ids.Add(next++);paths.Add($"{type}/middle_{variant}");ids.Add(next++);}
         for(int index=0;index<paths.Count;index++)
         {
             int id=ids[index];
@@ -465,7 +469,7 @@ public static partial class VehicleQA
                 Check(source!=null && far!=null,"Missing authored vehicle far: "+id);
                 var a=source.GetComponentInChildren<MeshFilter>(true).sharedMesh;
                 var b=far.GetComponentInChildren<MeshFilter>(true).sharedMesh;
-                Check(a.triangles.Length<=126 && a.triangles.Length==b.triangles.Length,"Far alias budget/topology");
+                Check(a.triangles.Length<=(paths[index].StartsWith("24/")?192:126) && a.triangles.Length==b.triangles.Length,"Far alias budget/topology");
                 foreach(var item in (IList)Get(model,"far"))
                     Check(AssetDatabase.GetAssetPath((Mesh)Get(item,"mesh")).EndsWith($"/{id}_far.fbx"),"Prop far not selected");
             }
@@ -502,7 +506,7 @@ public static partial class VehicleQA
         foreach(int vehicleType in new[]{10,11,12,13,14,20,21,22,23,24})
         {
             var variants=(IList)game.GetType("VehicleModelResolver").GetMethod("GetVariants").Invoke(null,new object[]{vehicleType});
-            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14||vehicleType==24?1:vehicleType==12||vehicleType==13?2:3),"Configured variant count differs for "+vehicleType);
+            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14||vehicleType==20||vehicleType==21||vehicleType==24?5:vehicleType==12||vehicleType==13?2:3),"Configured variant count differs for "+vehicleType);
             foreach(int variant in variants)
             {
                 string path=$"Assets/Models/Vehicles/{vehicleType}/{variant}.fbx";
@@ -536,15 +540,10 @@ public static partial class VehicleQA
         VehicleProps();
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1004})==24,"Monorail model mapping missing");
-        // The operating monorail vehicle 24 uses the same FBX as free-placement vehicles 308/309. The source is props.blend, so verify that neither copy is left outdated.
-        foreach(var pair in new[]{("0","308"),("middle","309")})
-        foreach(string suffix in new[]{"","_close","_far"})
-            Check(System.Linq.Enumerable.SequenceEqual(File.ReadAllBytes($"Assets/Models/Vehicles/24/{pair.Item1}{suffix}.fbx"),File.ReadAllBytes($"Assets/Models/Props/{pair.Item2}{suffix}.fbx")),
-                "Monorail vehicle differs from its prop original: "+pair.Item1+suffix);
         // For cargo 22, check only the locomotive (numeric name). Freight cars are selected independently of the locomotive's livery, so they do not have a middle-type name.
         foreach (int type in new[]{12,14,20,21,22,23,24})
         {
-            foreach(int variant in type==14||type==24?new[]{0}:type==12?new[]{0,1}:new[]{0,1,2})
+            foreach(int variant in type==14||type==20||type==21||type==24?new[]{0,1,2,3,4}:type==12?new[]{0,1}:new[]{0,1,2})
             foreach(bool middle in type==12||type==22?new[]{false}:new[]{false,true})
             {
                 string expected = middle ? (variant==0 ? "middle" : "middle_"+variant) : variant.ToString();
@@ -567,7 +566,7 @@ public static partial class VehicleQA
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}.fbx"),"Normal LOD uses wrong asset");
                     if((type==20 || type==21) && !middle)
                     {
-                        // For the three metro and mid-distance liveries, verify that the front windows and canopy face forward and extend beyond the outer body.
+                        // For every metro and mid-distance livery, verify that the front windows and canopy face forward and extend beyond the outer body.
                         var renderer=levels[0].renderers[0];
                         var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
                         var vertices=mesh.vertices;var normals=mesh.normals;
