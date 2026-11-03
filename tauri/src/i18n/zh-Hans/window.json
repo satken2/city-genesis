@@ -232,6 +232,7 @@
     "alertSanitationWarning": "卫生状况严重恶化的居住地块",
     "alertInfraWarning": "停止运作或倒塌的基础设施",
     "toggleShowPlanRoad": "显示规划中的道路",
+    "toggleShowNavigationGuides": "显示航道",
     "toggleSpeedLimitSigns": "显示限速标志",
     "toggleShowPlanBuilding": "显示规划中的建筑",
     "toggleHighlightPublic": "高亮公共设施",

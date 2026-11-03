@@ -232,6 +232,7 @@
     "alertSanitationWarning": "위생 상태가 심각하게 악화된 주거 구획",
     "alertInfraWarning": "운영이 중단되거나 붕괴된 기반시설",
     "toggleShowPlanRoad": "계획 중인 도로 표시",
+    "toggleShowNavigationGuides": "항로 표시",
     "toggleSpeedLimitSigns": "제한 속도 표지 표시",
     "toggleShowPlanBuilding": "계획 중인 건물 표시",
     "toggleHighlightPublic": "공공시설 강조",

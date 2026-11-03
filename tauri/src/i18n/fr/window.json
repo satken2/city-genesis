@@ -232,6 +232,7 @@
     "alertSanitationWarning": "Parcelles résidentielles aux conditions sanitaires graves",
     "alertInfraWarning": "Infrastructures arrêtées ou effondrées",
     "toggleShowPlanRoad": "Afficher les routes planifiées",
+    "toggleShowNavigationGuides": "Afficher les routes maritimes",
     "toggleSpeedLimitSigns": "Afficher les panneaux de limitation de vitesse",
     "toggleShowPlanBuilding": "Afficher les bâtiments planifiés",
     "toggleHighlightPublic": "Mettre en évidence les services publics",

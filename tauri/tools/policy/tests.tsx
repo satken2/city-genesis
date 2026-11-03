@@ -39,6 +39,12 @@ const container = document.createElement("div");
 document.body.append(container);
 const root = createRoot(container);
 const flush = async () => { await act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); }); };
+// 診断の再取得はエポック完了に従うため、入力データを差し替えた後も同じ通知経路を通す。
+const refreshAfterEpoch = async () => {
+  await act(async () => dispatch("epoch:executing", { executing: true }));
+  await act(async () => dispatch("epoch:executing", { executing: false }));
+  await flush();
+};
 await act(async () => root.render(<I18nextProvider i18n={i18n}><PolicyPlanningWindow apiBaseUrl="http://test" /></I18nextProvider>));
 await flush();
 assert.equal(container.querySelectorAll(".policy-indicator").length, 3);
@@ -108,7 +114,7 @@ const income = incomePayload.indicators.find(item => item.id === "income")!;
 income.value = 24.5;
 income.roots = [{ type: "household_unemployment", params: { count: 3 }, actions: ["public_jobs", "welfare"], children: [] }];
 globals.policyPayload = incomePayload;
-await click(".policy-toolbar > button");
+await refreshAfterEpoch();
 await click('[data-guide="policy.indicator.income"]');
 const welfareButton = container.querySelector<HTMLButtonElement>('.policy-row[data-depth="0"] [data-guide="policy.action.welfare"]');
 assert.ok(welfareButton);
@@ -129,7 +135,7 @@ globals.policyPayload = { epoch: 2, pending: false, indicators: [
     ] },
   ] },
 ] };
-await click(".policy-toolbar > button");
+await refreshAfterEpoch();
 await click('[data-guide="policy.indicator.unemployment"]');
 assert.equal(container.querySelector('.policy-row[data-depth="2"] .policy-actions')?.children.length, 0,
   "教育未修了の求職者の行には対策を表示しない");
@@ -155,7 +161,7 @@ globals.policyPayload = { epoch: 2, pending: false, indicators: [
     { type: "crime_incidents", params: { count: 5, crimes: 0, signs: 5 }, actions: [], children: [] },
   ] },
 ] };
-await click(".policy-toolbar > button");
+await refreshAfterEpoch();
 await click('[data-guide="policy.indicator.crime"]');
 assert.equal(container.querySelector('[data-guide="policy.indicator.crime"]')?.textContent, "犯罪被害⚠️");
 assert.ok(container.textContent!.includes("直近1週間のいざこざ：5件"));
@@ -165,7 +171,7 @@ assert.equal(container.querySelector('[data-guide="policy.action.police"]'), nul
 globals.policyPayload = { epoch: 1, pending: false, indicators: [
   { id: "crime", value: null, unit: "per_thousand", sample: 0, roots: [] },
 ] };
-await click(".policy-toolbar > button");
+await refreshAfterEpoch();
 await click('[data-guide="policy.indicator.crime"]');
 assert.ok(container.textContent!.includes("実績なし"));
 await act(async () => root.unmount());

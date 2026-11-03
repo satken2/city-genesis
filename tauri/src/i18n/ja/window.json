@@ -232,6 +232,7 @@
     "alertSanitationWarning": "衛生状態が深刻に悪化した居住区画",
     "alertInfraWarning": "停止・倒壊したインフラ施設",
     "toggleShowPlanRoad": "計画中の道路を表示",
+    "toggleShowNavigationGuides": "航路を表示",
     "toggleSpeedLimitSigns": "制限速度標識を表示",
     "toggleShowPlanBuilding": "計画中の建物を表示",
     "toggleHighlightPublic": "公共施設をハイライト",

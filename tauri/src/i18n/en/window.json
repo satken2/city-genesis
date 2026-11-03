@@ -232,6 +232,7 @@
     "alertSanitationWarning": "Residential parcels with severe sanitation problems",
     "alertInfraWarning": "Stopped or collapsed infrastructure facilities",
     "toggleShowPlanRoad": "Show Planned Roads",
+    "toggleShowNavigationGuides": "Show Shipping Lanes",
     "toggleSpeedLimitSigns": "Show Speed Limit Signs",
     "toggleShowPlanBuilding": "Show Planned Buildings",
     "toggleHighlightPublic": "Highlight Public Facilities",

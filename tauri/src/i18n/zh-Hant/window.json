@@ -232,6 +232,7 @@
     "alertSanitationWarning": "衛生狀況嚴重惡化的居住地塊",
     "alertInfraWarning": "停止運作或倒塌的基礎設施",
     "toggleShowPlanRoad": "顯示規劃中的道路",
+    "toggleShowNavigationGuides": "顯示航道",
     "toggleSpeedLimitSigns": "顯示速限標誌",
     "toggleShowPlanBuilding": "顯示規劃中的建築",
     "toggleHighlightPublic": "醒目標示公共設施",

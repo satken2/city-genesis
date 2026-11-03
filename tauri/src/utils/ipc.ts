@@ -121,10 +121,9 @@ export type GraphicState =
 
 /**
  * `view.change_view`
- * Notify graphics of the display mode selected in display options. flags is an ID array of toggles independent
- * of color mode ("plan"=planned view, "public"=public facility highlights, "speed_limit"=speed limit signs),
- * sent as CSV. Omitted flags sends null, which Unity interprets as preserving current flags; an empty array
- * explicitly disables all toggles.
+ * 表示オプションで選んだモードを Unity へ送る。flags は色モードと独立したトグルIDの配列をCSVにする。
+ * "plan" は計画中の実体、"navigation_guides" は完成後も含む航路の案内線、"public" は公共施設の強調、
+ * "speed_limit" は制限速度標識。flags の省略は現在値の保持、空配列はすべてのトグルの無効化を表す。
  */
 export async function sendChangeDisplay(
   layer: string,

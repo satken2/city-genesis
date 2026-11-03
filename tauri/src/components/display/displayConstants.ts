@@ -14,6 +14,11 @@ const trafficModules = import.meta.glob<{ default: string }>(
   { eager: true },
 );
 
+const pathModules = import.meta.glob<{ default: string }>(
+  "../../assets/images/paths/*.png",
+  { eager: true },
+);
+
 const spaceModules = import.meta.glob<{ default: string }>(
   "../../assets/images/spaces/*.png",
   { eager: true },
@@ -38,6 +43,7 @@ const transportModules = import.meta.glob<{ default: string }>(
 const ALL_MODULES: Record<string, { default: string }> = {
   ...visualModules,
   ...trafficModules,
+  ...pathModules,
   ...spaceModules,
   ...buildingModules,
   ...alertModules,
@@ -130,6 +136,7 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     ],
     toggles: [
       { id: "plan", labelKey: "display.toggleShowPlanRoad", icon: "visual/plan.png" },
+      { id: "navigation_guides", labelKey: "display.toggleShowNavigationGuides", icon: "paths/path_7.png" },
       { id: "speed_limit", labelKey: "display.toggleSpeedLimitSigns", icon: "visual/speed.png" },
     ],
   },
