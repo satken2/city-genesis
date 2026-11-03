@@ -3780,7 +3780,7 @@
           "1": {
             "0": "Il y a beaucoup de touristes et les routes sont bondées.",
             "1": "{{count}} touristes. Il n'y a pas de place pour les habitants.",
-            "2": "Il y avait tellement de touristes que je n'ai pas pu monter dans le bus.",
+            "2": "Il y a tellement de touristes que ça prend du temps de se déplacer.",
             "3": "Quand {{count}} les gens viennent, le parc voisin est plein de gens.",
             "4": "Les touristes me demandent tellement d’adresses que je deviens presque un guide.",
             "5": "Comme elle est devenue une destination touristique, le nombre de magasins traditionnels a diminué.",
