@@ -2,7 +2,7 @@
 
 ## 10.1. What supports production
 
-Standard facilities use labor and materials to produce goods and services. Insufficient space, workers, or materials constrains production. Industries requiring advanced skills also need an educated workforce ([employment and education](08_employment-and-education.md)).
+Standard facilities use labor and materials to produce goods and services. Insufficient space, workers, or materials constrains production. Unstaffed facilities such as farms, solar and wind power plants, and radio towers hire no one and instead buy the work they need from contractors as maintenance & contract work, so they can operate at scales smaller than one worker's share. Farms buy it in proportion to output, in the same way as materials; unstaffed power plants and radio towers buy it as daily upkeep of their buildings ([buildings](05_buildings.md)), in proportion to total floor area. Industries requiring advanced skills also need an educated workforce ([employment and education](08_employment-and-education.md)).
 
 Private facilities adjust production to demand and sales. Unsold output encourages contraction; growing demand encourages higher production, more space, and new entrants. Persistent unprofitability leads to exit ([agents](02_agents.md)). `utilization` measures how much productive capacity is used; `profit_rates` describes profitability. It measures the profitability of production and excludes taxes, dividends, and transfers with the central bank.
 

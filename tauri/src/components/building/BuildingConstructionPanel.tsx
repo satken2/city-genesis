@@ -221,7 +221,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   const [estimatedEmployment, setEstimatedEmployment] = useState<number | null>(null);
   const [estimatedOperatingCost, setEstimatedOperatingCost] = useState<number | null>(null);
   // Operating cost breakdown (labor/material costs) and source budget category (LEDGER_*).
-  // Used for operating cost breakdown/category rows. Total = labor + materials (no rent for dedicated buildings).
+  // Used for operating cost breakdown/category rows. Total = labor + materials + building upkeep (no rent for dedicated buildings).
   const [operatingWageCost, setOperatingWageCost] = useState<number | null>(null);
   const [operatingMaterialCost, setOperatingMaterialCost] = useState<number | null>(null);
   const [operatingCostCategory, setOperatingCostCategory] = useState<number | null>(null);

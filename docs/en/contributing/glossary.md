@@ -55,6 +55,8 @@ This glossary keeps game-specific terminology consistent across the UI and docum
 | 取り壊し   | Bulldoze           | Demoler             | 拆除      | 拆除      | Démolir            | 철거     |
 | 公共施設   | Public facility    | Instalación pública | 公共设施    | 公共設施    | Équipement public  | 공공시설   |
 | 公共サービス | Public service     | Servicio público    | 公共服务    | 公共服務    | Service public     | 공공 서비스 |
+| 日常の維持   | Daily upkeep       | Mantenimiento diario | 日常养护    | 日常養護    | Entretien courant  | 일상 유지관리 |
+| 設備保守・作業 | Maintenance & contract work | Mantenimiento y trabajos por encargo | 设备维护·作业 | 設備維護·作業 | Maintenance et travaux sous contrat | 설비 보수·작업 |
 
 ## Paths and lines
 

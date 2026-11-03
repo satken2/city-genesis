@@ -12,7 +12,7 @@
 export type ConstructionVariantEntry = {
   best_score: number;
   spawned: number;
-  /** Best pattern's NPV (present value of rental income). */
+  /** Best pattern's NPV (present value of rental income minus building upkeep). */
   best_npv: number;
   /** Best pattern's construction cost. */
   best_construction_cost: number;

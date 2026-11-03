@@ -31,7 +31,7 @@ Construction requires land and construction services. Existing buildings may req
 
 Completed buildings allow facilities to produce and households or tenants to move in. Private buildings with low profitability or utilization pause and return to use when demand recovers.
 
-Buildings deteriorate with time and are maintained through repairs. Unused or unmaintainable buildings move toward demolition or rebuilding. Collapse caused by deterioration or fire leaves ruins and can harm people and the surrounding environment ([accidents and disasters](14_accidents-and-disasters.md)).
+Buildings deteriorate with time and are maintained through repairs. Operating buildings receive daily upkeep (cleaning, inspection, and equipment maintenance) from contractors as maintenance & contract work in proportion to their total floor area, and wear out faster by the share they do not receive. The building's owner pays for it; public facilities pay from their own operating budgets. Unused or unmaintainable buildings move toward demolition or rebuilding. Collapse caused by deterioration or fire leaves ruins and can harm people and the surrounding environment ([accidents and disasters](14_accidents-and-disasters.md)).
 
 See [agents](02_agents.md) for status definitions and transitions.
 

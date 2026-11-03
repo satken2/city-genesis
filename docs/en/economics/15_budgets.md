@@ -28,7 +28,7 @@ Players set each category's budget as a proportion of its required amount. As ci
 
 ## 15.3. Budgets and city activity
 
-Operating budgets support public facility employment, production, and procurement. Lower budgets reduce capacity and the services residents receive.
+Operating budgets support public facility employment, production, and procurement. Lower budgets reduce capacity and the services residents receive. The daily upkeep of a public facility's building is also paid from that facility's operating budget and does not shrink when production is cut.
 
 Reduced construction or maintenance budgets limit work and delay completion. Paths such as roads and tracks also receive daily upkeep from the maintenance budget and wear out faster when it falls short. Land acquisition and social security shortfalls restrict purchases and benefits.
 

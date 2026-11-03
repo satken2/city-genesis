@@ -154,6 +154,7 @@ export const PATH_VARIANT_GRID: number = 1101;
 export const PRODUCT_CONSTRUCTION_SERVICE: number = 124;
 export const PRODUCT_FIRE_SERVICE: number = 125;
 export const PRODUCT_SECURITY_SERVICE: number = 126;
+export const PRODUCT_MAINTENANCE_WORK: number = 135;
 export const PUBLIC_PRICE_MODE_FIXED: string = "fixed";
 export const PUBLIC_PRICE_MODE_COST_RATIO: string = "cost_ratio";
 export const DEFAULT_PUBLIC_SERVICE_COST_RATIO: number = 1.0;

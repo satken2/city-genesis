@@ -247,7 +247,7 @@
       },
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Aging multiplier without upkeep",
-        "desc": "How fast a path ages when it receives no daily upkeep, as a multiple of its aging with full upkeep. It changes linearly from 1 to this value with the share of upkeep not received."
+        "desc": "How fast a building or path ages when it receives no daily upkeep, as a multiple of its aging with full upkeep. It changes linearly from 1 to this value with the share of upkeep not received."
       },
       "MAINTENANCE_BASE_PROB_ANNUAL": {
         "label": "Maintenance Transition Base Annual Probability",

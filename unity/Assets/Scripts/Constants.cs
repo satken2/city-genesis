@@ -159,6 +159,7 @@ public static class Constants
     public const int PRODUCT_CONSTRUCTION_SERVICE = 124;
     public const int PRODUCT_FIRE_SERVICE = 125;
     public const int PRODUCT_SECURITY_SERVICE = 126;
+    public const int PRODUCT_MAINTENANCE_WORK = 135;
     public const string PUBLIC_PRICE_MODE_FIXED = "fixed";
     public const string PUBLIC_PRICE_MODE_COST_RATIO = "cost_ratio";
     public const float DEFAULT_PUBLIC_SERVICE_COST_RATIO = 1.0f;
