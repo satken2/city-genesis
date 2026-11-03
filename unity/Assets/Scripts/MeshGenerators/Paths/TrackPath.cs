@@ -752,6 +752,7 @@ public class TrackPath : IPathMeshGenerator
             using (pillarsMarker.Auto())
             WithWarp(bodyWarp, () => RoadPath.GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase,
                 startJoin.Continuous && !startJoin.OwnsSupport, endJoin.Continuous && !endJoin.OwnsSupport));
+            BridgeSpanGenerator.Generate(container, spline, pathData, pillarSpacing.Value, baseHeight);
         }
     }
 

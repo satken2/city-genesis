@@ -35,6 +35,7 @@ Models use `Models/Paths/p{path_variant}/{part}`, falling back to `Models/Paths/
 | `wall_underground`, `ceiling_underground` | Tunnel walls and ceiling |
 | `pillar`, `pillar_cap` | Elevated support and cap |
 | `pillar_leg`, `pillar_crossbeam` | Portal-frame support legs and beam |
+| `span` | Bridge structure stretched across each span between piers (trusses, arches, and the like) |
 | `tree`, `center_tree`, `streetlight`, `utility_pole`, `utility_box`, `fence`, `bench`, `bin`, `planter`, `advert` | Roadside equipment |
 | `far` | Far model |
 | `{part}_close` | Close-up model |
@@ -43,9 +44,9 @@ Dedicated structures such as suspension bridges, on-street LRT, and ropeway stat
 
 ## Fallback and LOD
 
-Search variant then type, omitting absent parts. Missing `body` alone falls back to a white strip of `width` so play can continue.
+Search appearance, then variant, then type, omitting absent parts. Missing `body` alone falls back to a white strip of `width` so play can continue.
 
-Draw LOD follows camera distance per path or per section for long roads ([LOD](E_lod.md)). Close prefers `_close` spline parts. Far repeats the variant's `far` model along points, falling back to a strip of `width`. The strip stands in for a physical body, so `outline` paths, which have none, draw nothing at Far or in the citywide overview.
+Draw LOD follows camera distance per path or per section for long roads ([LOD](E_lod.md)). Close prefers `_close` spline parts. Far repeats the `far` model (searched in the same order as parts) along points, falling back to a strip of `width`. The strip stands in for a physical body, so `outline` paths, which have none, draw nothing at Far or in the citywide overview.
 
 ## Elevated and underground paths
 

@@ -1099,6 +1099,7 @@ public class RoadPath : IPathMeshGenerator
             // At direct main-line continuations, only one connected path places join piers.
             GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase,
                 startJoin.Continuous && !startJoin.OwnsSupport, endJoin.Continuous && !endJoin.OwnsSupport);
+            BridgeSpanGenerator.Generate(container, spline, pathData, pillarSpacing.Value, baseHeight);
         }
         else
         {
@@ -1719,6 +1720,84 @@ public class RoadPath : IPathMeshGenerator
         GeneratePillarsCore(container, spline, spacing, baseHeight, path, variantBase, typeBase, onSupport);
     }
 
+    /// <summary>
+    /// Pier positions (spline percents): the path start, then each anchor-to-anchor segment divided evenly into spans no longer
+    /// than spacing (short segments keep only their end). Piers and bridge spans (BridgeSpanGenerator) share these positions.
+    /// endsAtPathEnd tells whether the last position is the path end; on a segment spline of a bent path, later anchors project
+    /// onto its end and add no position. Null when the path has no usable anchors or spline.
+    /// </summary>
+    public static List<double> PierPercents(SplineComputer spline, PathSummary pathData, float spacing, float baseHeight, out bool endsAtPathEnd)
+    {
+        endsAtPathEnd = false;
+        // Build anchor list (start, waypoints, end).
+        // Projection targets a spline already shifted by base_height in CalculatePathPoints;
+        // subtract base_height from anchor Y too.
+        List<Vector3> anchors = new List<Vector3>();
+
+        var startList = GeneratedModelUtils.ToFloatList(pathData.start_point);
+        if (startList != null && startList.Count >= 2)
+        {
+            float startRelY = startList.Count > 2 ? startList[1] : 0f;
+            float startGroundY = Utils.GetPathSurfaceHeight(new Vector3(startList[0], 0f, startList[startList.Count - 1]));
+            anchors.Add(new Vector3(startList[0], startGroundY + startRelY - baseHeight, startList[startList.Count - 1]));
+        }
+
+        var waypointList = pathData.GetWaypointList();
+        if (waypointList != null)
+        {
+            foreach (var wp in waypointList)
+            {
+                Vector3 wpAnchor = wp.GetAbsolutePosition();
+                wpAnchor.y -= baseHeight;
+                anchors.Add(wpAnchor);
+            }
+        }
+
+        var endList = GeneratedModelUtils.ToFloatList(pathData.end_point);
+        if (endList != null && endList.Count >= 2)
+        {
+            float endRelY = endList.Count > 2 ? endList[1] : 0f;
+            float endGroundY = Utils.GetPathSurfaceHeight(new Vector3(endList[0], 0f, endList[endList.Count - 1]));
+            anchors.Add(new Vector3(endList[0], endGroundY + endRelY - baseHeight, endList[endList.Count - 1]));
+        }
+
+        if (anchors.Count < 2)
+        {
+            Debug.LogWarning("[RoadPath] アンカー点が2点未満のため柱を配置できません");
+            return null;
+        }
+
+        float splineLength = spline.CalculateLength();
+        if (splineLength <= 0f || spline.sampleCount == 0)
+        {
+            Debug.LogWarning("[RoadPath] スプライン長が0以下のため柱を配置できません");
+            return null;
+        }
+
+        // Find nearest spline percent for each anchor.
+        List<double> anchorPercents = new List<double>();
+        for (int i = 0; i < anchors.Count; i++)
+        {
+            double pct = FindClosestPercentOnSpline(spline, anchors[i]);
+            anchorPercents.Add(pct);
+        }
+
+
+        var result = new List<double> { anchorPercents[0] };
+        for (int i = 0; i < anchors.Count - 1; i++)
+        {
+            double startPct = anchorPercents[i];
+            double endPct = anchorPercents[i + 1];
+            float segSplineLength = EstimateSegmentSplineLength(spline, startPct, endPct);
+            if (segSplineLength <= 0.01f) continue;
+            // Divide evenly so consecutive short segments do not cluster piers.
+            int divisions = segSplineLength > spacing ? Mathf.CeilToInt(segSplineLength / spacing) : 1;
+            for (int j = 1; j <= divisions; j++) result.Add(startPct + (endPct - startPct) * ((double)j / divisions));
+            endsAtPathEnd = i == anchors.Count - 2;
+        }
+        return result;
+    }
+
     private static void GeneratePillarsCore(GameObject container, SplineComputer spline, float pillarSpacing,
         float baseHeight, PathSummary pathData, string variantBase, string typeBase, System.Action<GameObject, double> onSupport,
         bool skipStart = false, bool skipEnd = false)
@@ -1766,58 +1845,8 @@ public class RoadPath : IPathMeshGenerator
         }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] pillar プレハブロード状況: pillar={(pillarPrefab != null ? "あり" : "なし")}, cap={(pillarCapPrefab != null ? "あり" : "なし")}");
 
-        // Build anchor list (start, waypoints, end).
-        // Projection targets a spline already shifted by base_height in CalculatePathPoints;
-        // subtract base_height from anchor Y too.
-        List<Vector3> anchors = new List<Vector3>();
-
-        var startList = GeneratedModelUtils.ToFloatList(pathData.start_point);
-        if (startList != null && startList.Count >= 2)
-        {
-            float startRelY = startList.Count > 2 ? startList[1] : 0f;
-            float startGroundY = Utils.GetPathSurfaceHeight(new Vector3(startList[0], 0f, startList[startList.Count - 1]));
-            anchors.Add(new Vector3(startList[0], startGroundY + startRelY - baseHeight, startList[startList.Count - 1]));
-        }
-
-        var waypointList = pathData.GetWaypointList();
-        if (waypointList != null)
-        {
-            foreach (var wp in waypointList)
-            {
-                Vector3 wpAnchor = wp.GetAbsolutePosition();
-                wpAnchor.y -= baseHeight;
-                anchors.Add(wpAnchor);
-            }
-        }
-
-        var endList = GeneratedModelUtils.ToFloatList(pathData.end_point);
-        if (endList != null && endList.Count >= 2)
-        {
-            float endRelY = endList.Count > 2 ? endList[1] : 0f;
-            float endGroundY = Utils.GetPathSurfaceHeight(new Vector3(endList[0], 0f, endList[endList.Count - 1]));
-            anchors.Add(new Vector3(endList[0], endGroundY + endRelY - baseHeight, endList[endList.Count - 1]));
-        }
-
-        if (anchors.Count < 2)
-        {
-            Debug.LogWarning("[RoadPath] アンカー点が2点未満のため柱を配置できません");
-            return;
-        }
-
-        float splineLength = spline.CalculateLength();
-        if (splineLength <= 0f || spline.sampleCount == 0)
-        {
-            Debug.LogWarning("[RoadPath] スプライン長が0以下のため柱を配置できません");
-            return;
-        }
-
-        // Find nearest spline percent for each anchor.
-        List<double> anchorPercents = new List<double>();
-        for (int i = 0; i < anchors.Count; i++)
-        {
-            double pct = FindClosestPercentOnSpline(spline, anchors[i]);
-            anchorPercents.Add(pct);
-        }
+        List<double> pierPercents = PierPercents(spline, pathData, pillarSpacing, baseHeight, out bool endsAtPathEnd);
+        if (pierPercents == null) return;
 
         PillarClearance.ObstacleQuery obstacles;
         using (pillarCandidatesMarker.Auto())
@@ -1851,52 +1880,10 @@ public class RoadPath : IPathMeshGenerator
             return true;
         }
 
-        // Include whole-path start (first anchor) as an interference-tested candidate.
-        // Segment loops place posts only at ends; separately placing the start ensures
-        // both whole-path endpoints have exactly one post without duplicates.
-        if (anchorPercents.Count > 0 && !skipStart)
+        for (int i = 0; i < pierPercents.Count; i++)
         {
-            if (TryPlace(anchorPercents[0]))
-            {
-                placedCount++;
-            }
-        }
-
-        // Process each anchor-to-anchor segment.
-        for (int i = 0; i < anchors.Count - 1; i++)
-        {
-            double startPct = anchorPercents[i];
-            double endPct = anchorPercents[i + 1];
-            bool lastSegment = i == anchors.Count - 2;
-
-            // Approximate segment spline length.
-            float segSplineLength = EstimateSegmentSplineLength(spline, startPct, endPct);
-            if (segSplineLength <= 0.01f) continue;
-
-            if (segSplineLength > pillarSpacing)
-            {
-                // If length exceeds pillar_spacing, divide evenly for post placement.
-                // Prevents clustering across consecutive short segments.
-                int divisions = Mathf.CeilToInt(segSplineLength / pillarSpacing);
-                for (int j = 1; j <= divisions; j++)
-                {
-                    if (skipEnd && lastSegment && j == divisions) continue;
-                    double t = (double)j / divisions;
-                    double placementPct = startPct + (endPct - startPct) * t;
-                    if (TryPlace(placementPct))
-                    {
-                        placedCount++;
-                    }
-                }
-            }
-            else
-            {
-                // Short segments place only one post at the end.
-                if (!(skipEnd && lastSegment) && TryPlace(endPct))
-                {
-                    placedCount++;
-                }
-            }
+            if (i == 0 && skipStart || i == pierPercents.Count - 1 && skipEnd && endsAtPathEnd) continue;
+            if (TryPlace(pierPercents[i])) placedCount++;
         }
 
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] 柱配置完了: {placedCount}本");
