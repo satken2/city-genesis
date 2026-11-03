@@ -26,12 +26,12 @@ import {
   sendEditConnectorHide,
 } from "../../utils/ipc";
 import {
+  PRODUCT_EDUCATION,
   TYPE_BUILDING,
   TYPE_CITY,
   TYPE_HOUSEHOLD,
   TYPE_TRADE,
   TYPE_STANDARD,
-  TYPE_EDUCATION,
   STATUS_SCHEDULED_CONSTRUCTION,
   STATUS_CONSTRUCTING,
   STATUS_PENDING,
@@ -270,7 +270,7 @@ export function AgentDetailPanel({
     const isImportOrExport = agentData.type === TYPE_TRADE;
     const showBasicInfo = !isImportOrExport;
     const hasBasicInfoTab = showBasicInfo;
-    const hasEducationInfoTab = agentData.type === TYPE_EDUCATION;
+    const hasEducationInfoTab = agentData.supply_product_id === PRODUCT_EDUCATION;
     const hasCargoInfoTab = isImportOrExport;
 
     const showBuildingPanel = agentData.is_bd;
@@ -402,7 +402,7 @@ export function AgentDetailPanel({
   const showBasicInfo = !isImportOrExport;
   const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
   const hasBasicInfoTab = showBasicInfo;
-  const hasEducationInfoTab = agentData.type === TYPE_EDUCATION;
+  const hasEducationInfoTab = agentData.supply_product_id === PRODUCT_EDUCATION;
 
   const hasCargoInfoTab = isImportOrExport;
 

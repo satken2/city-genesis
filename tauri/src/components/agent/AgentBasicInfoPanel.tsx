@@ -13,6 +13,7 @@ import { formatExactAmount } from "../../utils/money";
 import { useTranslation } from "react-i18next";
 import type { AgentData } from "../../types";
 import {
+  PRODUCT_EDUCATION,
   REASON_FIRE,
   REASON_USER,
   STATUS_ACTIVE,
@@ -24,7 +25,6 @@ import {
   STATUS_SCHEDULED_DEMOLITION,
   STATUS_TEMPORARY,
   TYPE_BUILDING,
-  TYPE_EDUCATION,
   TYPE_HOUSEHOLD,
   TYPE_STANDARD,
   VARIANT_TOURIST,
@@ -75,9 +75,9 @@ function resolveStatusSinceLabel(agent: AgentData): StatusSinceLabel {
     return agent.variant === VARIANT_TOURIST ? "arrived" : "householdFormed";
   }
 
+  const isSchool = agent.supply_product_id === PRODUCT_EDUCATION;
   if (!agent.is_bd) {
-    const isSchool = type === TYPE_EDUCATION;
-    if (!isSchool && type !== TYPE_STANDARD) return "default";
+    if (type !== TYPE_STANDARD) return "default";
     switch (status) {
       case STATUS_TEMPORARY:
         return "founded"; // Seeking a building is a temporary state, so its change date equals the founding date.
@@ -94,12 +94,12 @@ function resolveStatusSinceLabel(agent: AgentData): StatusSinceLabel {
   switch (status) {
     case STATUS_ACTIVE:
       if (agent.status_reason === REASON_USER) return "resumed";
-      if (type === TYPE_EDUCATION) return "schoolOpened";
+      if (isSchool) return "schoolOpened";
       if (type === TYPE_BUILDING) return "operatingSince";
       if (isPrivateBusiness) return "opened";
       return "completed";
     case STATUS_PAUSED:
-      if (type === TYPE_EDUCATION) return "schoolClosed";
+      if (isSchool) return "schoolClosed";
       if (isPrivateBusiness) return "suspended";
       return "paused";
     case STATUS_CONSTRUCTING:

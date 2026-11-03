@@ -15,14 +15,15 @@ function load(file) {
 imports["../../constants"] = load("../src/constants.ts");
 imports["./mapSymbols"] = load("../src/components/map/mapSymbols.ts");
 const { facilitySymbol, drawMapLabels, roadLabelScreenAngle } = load("../src/components/map/mapLabels.ts");
+const { PRODUCT_EDUCATION } = imports["../../constants"];
 for (const [variant, symbol] of [[100, "cityHall"], [1051, "hospital"], [1052, "fire"], [1053, "police"],
   [1054, "power"], [1057, "power"], [1062, "substation"], [1063, "water"], [1048, "intake"], [1058, "sewage"], [1059, "waste"]]) {
-  assert.equal(facilitySymbol(variant, 10, false), symbol);
+  assert.equal(facilitySymbol(variant, undefined, false), symbol);
 }
-assert.equal(facilitySymbol(200, 2, true), "school");
-assert.equal(facilitySymbol(201, 2, false), "school");
-assert.equal(facilitySymbol(9999, 10, true), "generic");
-assert.equal(facilitySymbol(9999, 10, false), null);
+assert.equal(facilitySymbol(200, PRODUCT_EDUCATION, true), "school");
+assert.equal(facilitySymbol(201, PRODUCT_EDUCATION, false), "school");
+assert.equal(facilitySymbol(9999, undefined, true), "generic");
+assert.equal(facilitySymbol(9999, undefined, false), null);
 const drawn = [], circles = [], rotations = [], anchors = new Map();
 let lastTranslate = null;
 const ctx = new Proxy({

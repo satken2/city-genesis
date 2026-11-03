@@ -1,4 +1,4 @@
-import { TYPE_EDUCATION, VARIANT_CITY, VARIANT_FIRE_STATION, VARIANT_POLICE_STATION, VARIANT_SUBSTATION } from "../../constants";
+import { PRODUCT_EDUCATION, VARIANT_CITY, VARIANT_FIRE_STATION, VARIANT_POLICE_STATION, VARIANT_SUBSTATION } from "../../constants";
 import { MAP_SYMBOLS, type MapSymbol } from "./mapSymbols";
 
 /** station / interchange determine label priority and symbol colors (stations → interchanges → facilities). */
@@ -19,8 +19,8 @@ export function roadLabelScreenAngle(angleDeg: number): number {
 }
 
 /** Do not classify by names or translations. Also include generic facilities based on the public ownership flag. */
-export function facilitySymbol(variant: number | undefined, type: number | undefined, isPublic: boolean): MapSymbol | null {
-  if (type === TYPE_EDUCATION) return "school";
+export function facilitySymbol(variant: number | undefined, supplyProductId: number | undefined, isPublic: boolean): MapSymbol | null {
+  if (supplyProductId === PRODUCT_EDUCATION) return "school";
   if (variant === VARIANT_CITY) return "cityHall";
   if (variant === VARIANT_FIRE_STATION) return "fire";
   if (variant === VARIANT_POLICE_STATION) return "police";

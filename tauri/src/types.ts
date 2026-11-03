@@ -137,12 +137,9 @@ export type AgentData = {
   /** Household's income tier (0–3: how many cost-of-living lines its income reaches), shown as standard of living. */
   income_tier?: number;
   education_type?: Record<string, number>;
-  /**
-   * Enrolled students by skill (skill ID → count), for education facilities (TYPE_EDUCATION) only. Manually
-   * injected by the backend because not yet included in generated endpoints.yaml.
-   */
+  /** Enrolled students by skill (skill ID → count). Injected by the backend for schools only. */
   enrolled_by_skill?: Record<string, number>;
-  /** Total capacity from total floor area. Manually injected only for education facilities (TYPE_EDUCATION). */
+  /** Total capacity determined by the site (floor area ÷ space_need). Injected by the backend for schools only. */
   max_students?: number;
   is_evicted?: boolean;
   realestate_amount?: number;
@@ -452,10 +449,10 @@ export type AgentTypeEntry = {
  * Agent master (agents). Detailed definitions by variant; available fields depend on type and the building flag.
  *
  * - type=0 (district): common fields only.
- * - type=1,2 (city government, school): operating parameters such as required_skill.
+ * - type=1 (city government): operating parameters such as required_skill.
  * - type=3 (household): common fields only.
  * - type=4,5 (import/export): investment and demand parameters.
- * - type=10 (private facility): supply, materials, aggregation parameters, etc.; with building=true, also
+ * - type=10 (general facility, including schools): supply, materials, aggregation parameters, etc.; with building=true, also
  * height_per_floor, space_limits, etc.
  * - type=20 (building definition): max_floors, min_floors, and building geometry parameters.
  * - type=30 (open space): only building=true building fields; no supply / labor / space_limits.
@@ -466,7 +463,7 @@ export type AgentMasterEntry = {
   building: boolean;
   description: string;
   space_type: number;
-  /** Higher education flag for education facilities (type=2). true = university (admission capacity is editable). */
+  /** Higher education flag for schools (variants supplying PRODUCT_EDUCATION). true = university (admission capacity is editable). */
   is_higher_education?: boolean;
   required_skill?: number;
   max_skill?: number;

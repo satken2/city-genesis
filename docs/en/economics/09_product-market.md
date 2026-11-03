@@ -2,7 +2,7 @@
 
 ## 9.1. Products
 
-Products are the goods and services agents produce and consume. There are six categories.
+Products are the goods and services agents produce and consume. There are seven categories.
 
 | Category | Constant | Meaning |
 | --- | --- | --- |
@@ -12,8 +12,9 @@ Products are the goods and services agents produce and consume. There are six ca
 | Services | `GOODS_SERVICE` | Services such as healthcare and firefighting; some have limited reach |
 | Infrastructure goods | `GOODS_INFRASTRUCTURE` | Electricity, water, and similar products delivered through dedicated networks ([supply and transport](17_supply-and-transport.md)) |
 | Public transport vehicles | `GOODS_TRANSIT` | Vehicles leased by depots to lines ([supply and transport](17_supply-and-transport.md)) |
+| Education | `GOODS_EDUCATION` | Education that schools provide to enrolled students ([employment and education](08_employment-and-education.md)) |
 
-Industrial materials, retail goods, and services trade in the product market. Natural resources and infrastructure goods are supplied outside it; public transport vehicles are leased.
+Industrial materials, retail goods, and services trade in the product market. Natural resources and infrastructure goods are supplied outside it, public transport vehicles are leased, and schools provide education directly to enrolled students.
 
 ## 9.2. Supply and demand
 

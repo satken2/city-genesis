@@ -195,7 +195,6 @@
     "colSatisHealthcare": "Santé",
     "colSatisLeisure": "Loisirs",
     "colSatisResidential": "Logement",
-    "colAutomobile": "Automobile",
-    "colEnrollment": "Scolarisation"
+    "colAutomobile": "Automobile"
   }
 }

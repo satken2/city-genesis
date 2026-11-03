@@ -31,7 +31,7 @@ Public facility employment is also constrained by city budgets. Longer scheduled
 
 Education develops skills and broadens the kinds of work citizens can perform. Basic education provides foundations for many jobs. Higher education develops specialist skills in citizens with basic education, allowing them to become highly skilled. Work experience has limits, so schools and universities are needed at their respective stages.
 
-Schools are education agents (`TYPE_EDUCATION`). Citizens need an age-appropriate school that they can reach and that has capacity. Players allocate university admissions by major, choosing which specialist fields the city develops.
+Schools are standard facilities (`TYPE_STANDARD`) that supply education (`PRODUCT_EDUCATION`); they employ teachers and use electricity and water. Citizens need an age-appropriate school that they can reach and that has capacity. The number of students a school can accept is set by the size of its buildings, but it falls when teachers or electricity are short or the education budget is cut. In a school operating below its capacity, enrolled students learn more slowly. Players allocate university admissions by major, choosing which specialist fields the city develops.
 
 Highly skilled workers are normally developed through local higher education. Universities take time to produce graduates, so healthcare and advanced industries need education planned ahead. See [households](07_households.md) for immigration.
 

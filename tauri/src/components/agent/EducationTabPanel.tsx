@@ -1,7 +1,7 @@
 /**
  * Education tab component
  *
- * Detail panel shown as the "Education" tab for TYPE_EDUCATION agents, in this order:
+ * Detail panel shown as the "Education" tab for schools (facilities supplying PRODUCT_EDUCATION), in this order:
  * 1. Enrollment summary (enrolled students/total capacity donut chart and numbers).
  * 2. Enrollment/capacity by skill (enrolled_by_skill × education_type).
  * 3. Admission capacity settings (higher education variants, is_higher_education, only).

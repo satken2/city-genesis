@@ -191,10 +191,6 @@
         "label": "취업 가능 최저 연령",
         "desc": "이 연령 미만의 시민은 구직 대상・실업률 집계 대상에서 제외됩니다."
       },
-      "EDUCATION_CAPACITY_PER_FLOOR": {
-        "label": "교육 시설의 수용 인원(m²당)",
-        "desc": "연면적 1m²당 받아들일 수 있는 학생 수."
-      },
       "SCHOOL_SEARCH_MAX_DISTANCE": {
         "label": "통학 가능 최대 거리(분)",
         "desc": "통학할 학교를 찾을 때의 최대 거리(분 환산)."

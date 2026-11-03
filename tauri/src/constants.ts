@@ -116,6 +116,7 @@ export const GOODS_RETAIL: number = 2;
 export const GOODS_SERVICE: number = 3;
 export const GOODS_INFRASTRUCTURE: number = 4;
 export const GOODS_TRANSIT: number = 5;
+export const GOODS_EDUCATION: number = 6;
 export const RESOURCE_OIL: number = 1;
 export const RESOURCE_ORE: number = 2;
 export const RESOURCE_RAREMETAL: number = 3;
@@ -124,7 +125,6 @@ export const RESOURCE_WATER: number = 5;
 export const RESOURCE_NONMETALLIC: number = 6;
 export const TYPE_DEFAULT: number = 0;
 export const TYPE_CITY: number = 1;
-export const TYPE_EDUCATION: number = 2;
 export const TYPE_HOUSEHOLD: number = 3;
 export const TYPE_TRADE: number = 4;
 export const TYPE_STANDARD: number = 10;
@@ -187,6 +187,7 @@ export const PRODUCT_SEWAGE_SERVICE: number = 306;
 export const PRODUCT_GARBAGE_SERVICE: number = 307;
 export const PRODUCT_HIGH_ELECTRICITY: number = 401;
 export const PRODUCT_HIGH_WATER: number = 402;
+export const PRODUCT_EDUCATION: number = 601;
 export const TRACK_NORMAL: number = 1;
 export const TRACK_STATION: number = 2;
 export const TRACK_BRIDGE: number = 3;
@@ -468,7 +469,7 @@ export const ALERT_WARNING_FILTER_MAP: Record<string, number> = {
   "infra_facility_down": 1048576,
 };
 
-export const OFF_MARKET_GOODS_TYPES: number[] = [4, 5];
+export const OFF_MARKET_GOODS_TYPES: number[] = [4, 5, 6];
 
 export const GRADING_VARIANTS: number[] = [3006, 3007];
 

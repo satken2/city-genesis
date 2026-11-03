@@ -191,10 +191,6 @@
         "label": "Âge minimal de travail",
         "desc": "Les habitants en dessous de cet âge ne sont ni demandeurs d'emploi ni comptabilisés dans le taux de chômage."
       },
-      "EDUCATION_CAPACITY_PER_FLOOR": {
-        "label": "Capacité de l'établissement scolaire (par m²)",
-        "desc": "Nombre d'élèves accueillis par m² de surface de plancher."
-      },
       "SCHOOL_SEARCH_MAX_DISTANCE": {
         "label": "Distance maximale au lieu d'études (minutes)",
         "desc": "Distance maximale (en minutes) pour rechercher un établissement scolaire."

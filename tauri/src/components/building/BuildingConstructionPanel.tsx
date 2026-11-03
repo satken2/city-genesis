@@ -418,7 +418,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   /**
  * Variants buildable as buildings (building === true).
  * Includes all buildable agents: TYPE_BUILDING (shared buildings), building=true TYPE_STANDARD
- * (ordinary facilities), TYPE_EDUCATION (education), TYPE_TRADE (import/export hubs), etc.
+ * (ordinary facilities, including schools), TYPE_TRADE (import/export hubs), etc.
  * Display grouped into tiles by bd_category. Outside scenario mode, exclude template_only variants
  * (border checkpoints/landmarks), reserved for scenario authoring, and sprawl_only variants
  * (slum buildings), which only urban sprawl builds.

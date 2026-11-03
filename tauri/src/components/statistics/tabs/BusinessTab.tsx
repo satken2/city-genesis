@@ -23,7 +23,6 @@ import { StatusBadge } from "../../common/StatusBadge";
 import {
   TYPE_STANDARD,
   TYPE_BUILDING,
-  TYPE_EDUCATION,
   TYPE_HOUSEHOLD,
   TYPE_TRADE,
   FAMILY_SINGLE,
@@ -69,9 +68,6 @@ type AgentItem = {
   satis_leisure?: number | null;
   satis_residential?: number | null;
   has_automobile?: boolean | null;
-  // TYPE_EDUCATION
-  education_type?: Record<string, number> | null;
-  enrolled_by_skill?: Record<string, number> | null;
 };
 
 type AgentListResponse = {
@@ -108,13 +104,10 @@ type ColumnDef = {
 const SELECTABLE_TYPES: number[] = [
   TYPE_STANDARD,
   TYPE_BUILDING,
-  TYPE_EDUCATION,
   TYPE_HOUSEHOLD,
   TYPE_TRADE,
   TYPE_OPEN_SPACE,
 ];
-
-const SKILL_ORDER = [0, 1, 2, 3, 4, 5];
 
 /** Extracts the latest value (first element) from a queue-type SoA list. */
 function latest(list?: number[] | null): number | null {
@@ -630,42 +623,6 @@ function buildColumns(
         render: (a) =>
           a.has_automobile == null ? "—" : a.has_automobile ? "○" : "×",
         sortValue: (a) => (a.has_automobile ? 1 : 0),
-      },
-    ];
-  }
-
-  if (type === TYPE_EDUCATION) {
-    // Combine "enrollment / capacity" for each Skill in a single cell.
-    return [
-      ...base,
-      {
-        key: "enrollment",
-        label: t("agentList.colEnrollment"),
-        render: (a) => {
-          const capacity = a.education_type ?? {};
-          const enrolled = a.enrolled_by_skill ?? {};
-          // Show only Skills with a configured capacity, in definition order.
-          const skillKeys = SKILL_ORDER.filter((sk) => (capacity[String(sk)] ?? 0) > 0);
-          if (skillKeys.length === 0) return "—";
-          return (
-            <div className="biz-enrollment">
-              {skillKeys.map((sk) => {
-                const cap = capacity[String(sk)] ?? 0;
-                const enr = enrolled[String(sk)] ?? 0;
-                const skillName =
-                  masterData?.skills?.[sk]?.display_name ?? String(sk);
-                return (
-                  <span key={sk} className="biz-enrollment__item">
-                    <span className="biz-enrollment__skill">{skillName}</span>
-                    <span className="biz-enrollment__count">
-                      {enr} / {cap}
-                    </span>
-                  </span>
-                );
-              })}
-            </div>
-          );
-        },
       },
     ];
   }

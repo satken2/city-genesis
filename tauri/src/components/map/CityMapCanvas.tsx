@@ -2277,7 +2277,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         vec.places = [];
         for (const building of vec.buildings) {
           const master = building.variant === undefined ? undefined : md?.agents?.[building.variant];
-          const symbol = facilitySymbol(building.variant, building.type ?? master?.type, !!building.public_facility);
+          const symbol = facilitySymbol(building.variant, master?.supply, !!building.public_facility);
           const center = toXZ(building.center_point);
           if (symbol && center) vec.places.push({ id: building.agent_id ?? 0, x: center[0], z: center[1],
             name: building.name || master?.display_name || "", symbol });

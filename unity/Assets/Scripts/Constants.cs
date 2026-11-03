@@ -121,6 +121,7 @@ public static class Constants
     public const int GOODS_SERVICE = 3;
     public const int GOODS_INFRASTRUCTURE = 4;
     public const int GOODS_TRANSIT = 5;
+    public const int GOODS_EDUCATION = 6;
     public const int RESOURCE_OIL = 1;
     public const int RESOURCE_ORE = 2;
     public const int RESOURCE_RAREMETAL = 3;
@@ -129,7 +130,6 @@ public static class Constants
     public const int RESOURCE_NONMETALLIC = 6;
     public const int TYPE_DEFAULT = 0;
     public const int TYPE_CITY = 1;
-    public const int TYPE_EDUCATION = 2;
     public const int TYPE_HOUSEHOLD = 3;
     public const int TYPE_TRADE = 4;
     public const int TYPE_STANDARD = 10;
@@ -192,6 +192,7 @@ public static class Constants
     public const int PRODUCT_GARBAGE_SERVICE = 307;
     public const int PRODUCT_HIGH_ELECTRICITY = 401;
     public const int PRODUCT_HIGH_WATER = 402;
+    public const int PRODUCT_EDUCATION = 601;
     public const int TRACK_NORMAL = 1;
     public const int TRACK_STATION = 2;
     public const int TRACK_BRIDGE = 3;
@@ -476,7 +477,7 @@ public static class Constants
         { "infra_facility_down", ALERT_DISPLAY_INFRA_WARNING }
     };
 
-    public static readonly int[] OFF_MARKET_GOODS_TYPES = new int[] { GOODS_INFRASTRUCTURE, GOODS_TRANSIT };
+    public static readonly int[] OFF_MARKET_GOODS_TYPES = new int[] { GOODS_INFRASTRUCTURE, GOODS_TRANSIT, GOODS_EDUCATION };
 
     public static readonly int[] GRADING_VARIANTS = new int[] { VARIANT_GRADING_LAND, VARIANT_GRADING_SHORE };
 

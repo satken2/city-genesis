@@ -195,7 +195,6 @@
     "colSatisHealthcare": "Healthcare",
     "colSatisLeisure": "Leisure",
     "colSatisResidential": "Residential",
-    "colAutomobile": "Car",
-    "colEnrollment": "Enrollment"
+    "colAutomobile": "Car"
   }
 }

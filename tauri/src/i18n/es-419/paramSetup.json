@@ -191,10 +191,6 @@
         "label": "Edad mínima para trabajar",
         "desc": "Los ciudadanos menores a esta edad no buscan empleo ni entran en el cálculo del desempleo."
       },
-      "EDUCATION_CAPACITY_PER_FLOOR": {
-        "label": "Capacidad del centro educativo (por m²)",
-        "desc": "Número de estudiantes que pueden atenderse por cada m² de superficie construida."
-      },
       "SCHOOL_SEARCH_MAX_DISTANCE": {
         "label": "Distancia máxima al centro educativo (minutos)",
         "desc": "Distancia máxima (en minutos) para buscar un centro educativo."

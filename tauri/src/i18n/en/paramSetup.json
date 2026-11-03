@@ -191,10 +191,6 @@
         "label": "Minimum Working Age",
         "desc": "Citizens below this age are excluded from job seeking and unemployment statistics."
       },
-      "EDUCATION_CAPACITY_PER_FLOOR": {
-        "label": "Education Facility Capacity (per m²)",
-        "desc": "Number of students an education facility can accept per m² of floor area."
-      },
       "SCHOOL_SEARCH_MAX_DISTANCE": {
         "label": "Max School Search Distance (min)",
         "desc": "Maximum commuting distance (in minutes) when searching for a school."

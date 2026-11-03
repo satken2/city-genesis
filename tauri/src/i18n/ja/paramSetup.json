@@ -191,10 +191,6 @@
         "label": "就労可能最低年齢",
         "desc": "この年齢未満の市民は求職対象・失業率集計の対象外。"
       },
-      "EDUCATION_CAPACITY_PER_FLOOR": {
-        "label": "教育施設の収容人数（m²あたり）",
-        "desc": "延床面積1m²あたりの受け入れ可能な生徒数。"
-      },
       "SCHOOL_SEARCH_MAX_DISTANCE": {
         "label": "通学可能最大距離（分）",
         "desc": "通学先の学校を探す際の最大距離（分換算）。"

@@ -191,10 +191,6 @@
         "label": "可就业最低年龄",
         "desc": "低于该年龄的市民不纳入求职对象与失业率统计。"
       },
-      "EDUCATION_CAPACITY_PER_FLOOR": {
-        "label": "教育设施的容纳人数（每m²）",
-        "desc": "每1平方米建筑面积可接收的学生人数。"
-      },
       "SCHOOL_SEARCH_MAX_DISTANCE": {
         "label": "可通学最大距离（分钟）",
         "desc": "寻找就读学校时的最大距离（换算为分钟）。"
