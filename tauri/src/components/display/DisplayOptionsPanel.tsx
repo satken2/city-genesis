@@ -148,7 +148,6 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
             { color: "#2196f3", label: "商業" },
             { color: "#fbc02d", label: "工場" },
             { color: "#9c27b0", label: "オフィス" },
-            { color: "#795548", label: "農地" },
             { color: "#9e9e9e", label: "その他" },
           ],
         };

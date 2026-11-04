@@ -73,8 +73,6 @@ export function spaceTypeLabelKey(name: string): string {
       return "display.subSpaceFactory";
     case "office":
       return "display.subSpaceOffice";
-    case "farm":
-      return "display.subSpaceFarm";
     default:
       return "display.subSpaceOther";
   }

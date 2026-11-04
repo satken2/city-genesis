@@ -4,9 +4,9 @@
  * One row below the description on construction panel description cards.
  *
  * Floor types use icons without text; names appear in tooltips. Sources are space_limits keys:
- * - Generic floors (bit values such as SPACE_RESIDENCE): same order/colors as the six floor-coloring
+ * - Generic floors (bit values such as SPACE_RESIDENCE): same order/colors as the five floor-coloring
  *   categories in the display panel (residential=green, retail=blue, factory=yellow, office=purple,
- *   farmland=brown, other=gray). Add hotel lodging floors (SPACE_LODGING) with a pink bed.
+ *   other=gray). Add hotel lodging floors (SPACE_LODGING) with a pink bed.
  * - Dedicated floors (key = agent variant ID): floors accepting only specific business types.
  *   Use a lock icon with allowed business names in its tooltip.
  *
@@ -24,7 +24,6 @@ import {
   SPACE_RETAIL,
   SPACE_FACTORY,
   SPACE_OFFICE,
-  SPACE_FARM,
   SPACE_LODGING,
 } from "../../constants";
 
@@ -85,18 +84,6 @@ const GENERIC_FLOORS: { spaceType: number; color: string; tooltipKey: string; ic
           fillRule="evenodd"
           d="M5 2 H19 V22 H5 Z M8 5 H11 V8 H8 Z M13 5 H16 V8 H13 Z M8 10 H11 V13 H8 Z M13 10 H16 V13 H13 Z M8 15 H11 V18 H8 Z M13 15 H16 V18 H13 Z"
         />
-      </svg>
-    ),
-  },
-  {
-    spaceType: SPACE_FARM,
-    color: "#795548",
-    tooltipKey: "display.subSpaceFarm",
-    icon: (
-      <svg {...ICON_PROPS}>
-        <path d="M11 22 V12 H13 V22 Z" />
-        <path d="M12 12 C12 6 8 3 2 3 C2 9 6 12 12 12 Z" />
-        <path d="M12 12 C12 6 16 3 22 3 C22 9 18 12 12 12 Z" />
       </svg>
     ),
   },

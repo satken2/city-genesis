@@ -330,7 +330,6 @@ public class VisualModeHandler : MonoBehaviour
             case VisualModeBuilding.SPACE_RETAIL: return "小売スペース色分け";
             case VisualModeBuilding.SPACE_FACTORY: return "工場スペース色分け";
             case VisualModeBuilding.SPACE_OFFICE: return "オフィススペース色分け";
-            case VisualModeBuilding.SPACE_FARM: return "農場スペース色分け";
             default: return "不明";
         }
     }

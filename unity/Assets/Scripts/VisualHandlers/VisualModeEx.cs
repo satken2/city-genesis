@@ -43,7 +43,6 @@ public static class VisualModeBuilding
     public const int SPACE_RETAIL = 305;    // Retail space.
     public const int SPACE_FACTORY = 306;   // Factory space.
     public const int SPACE_OFFICE = 307;    // Office space.
-    public const int SPACE_FARM = 308;      // Farm space.
     public const int ZONE_COLOR = 309;      // District colors for buildings.
 }
 

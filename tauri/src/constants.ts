@@ -371,7 +371,6 @@ export const SPACE_RESIDENCE: number = 2;
 export const SPACE_RETAIL: number = 4;
 export const SPACE_FACTORY: number = 8;
 export const SPACE_OFFICE: number = 16;
-export const SPACE_FARM: number = 32;
 export const SPACE_LODGING: number = 64;
 export const DATA_AGENT: string = "EA";
 export const DATA_BUILDING: string = "BD";

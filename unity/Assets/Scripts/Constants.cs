@@ -376,7 +376,6 @@ public static class Constants
     public const int SPACE_RETAIL = 4;
     public const int SPACE_FACTORY = 8;
     public const int SPACE_OFFICE = 16;
-    public const int SPACE_FARM = 32;
     public const int SPACE_LODGING = 64;
     public const string DATA_AGENT = "EA";
     public const string DATA_BUILDING = "BD";

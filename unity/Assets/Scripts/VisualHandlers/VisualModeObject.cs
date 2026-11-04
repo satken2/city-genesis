@@ -638,7 +638,6 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             case VisualModeBuilding.SPACE_RETAIL:
             case VisualModeBuilding.SPACE_FACTORY:
             case VisualModeBuilding.SPACE_OFFICE:
-            case VisualModeBuilding.SPACE_FARM:
                 SetRenderersEnabled(true);
                 if (!preventMaterialChange && objectType == InputObjectType.BUILDING)
                 {
@@ -918,14 +917,14 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     /// <summary>
     /// Convert VisualModeBuilding floor-type mode constants
     /// to Constants SPACE_* values.
-    /// VisualModeBuilding.SPACE_* is sequential, 303..308.
-    /// Constants.SPACE_* uses powers of two: 1, 2, 4, 8, 16, 32.
+    /// VisualModeBuilding.SPACE_* is sequential, 303..307.
+    /// Constants.SPACE_* uses powers of two: 1, 2, 4, 8, 16.
     /// Derive the bit position from the offset and shift 1 to obtain the constant.
     /// </summary>
     private static int VisualModeToSpaceType(int mode)
     {
         int bitPosition = mode - VisualModeBuilding.SPACE_OTHER;
-        if (bitPosition < 0 || bitPosition > 5) return Constants.SPACE_OTHER;
+        if (bitPosition < 0 || bitPosition > 4) return Constants.SPACE_OTHER;
         return 1 << bitPosition;
     }
 

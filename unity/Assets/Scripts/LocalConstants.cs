@@ -16,7 +16,6 @@ public static class LocalConstants
         { Constants.SPACE_FACTORY, new Color(0.95f, 0.85f, 0.2f) },
         { Constants.SPACE_OFFICE, new Color(0.6f, 0.4f, 0.9f) },
         { Constants.SPACE_OTHER, new Color(0.7f, 0.7f, 0.7f) },
-        { Constants.SPACE_FARM, new Color(0.4f, 0.8f, 0.1f) },
         { Constants.SPACE_LODGING, new Color(0.91f, 0.12f, 0.39f) },
     };
     /// <summary>

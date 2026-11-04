@@ -14,7 +14,7 @@ Agents have a broad `type` (`TYPE_*`) and a more specific `variant`.
 | Household | `TYPE_HOUSEHOLD` | Income and consumption units to which citizens belong; tourists are also households ([households](07_households.md), [tourism](20_tourism.md)) |
 | Trade hub | `TYPE_TRADE` | Trading partners outside the city, including ports and international freight stations |
 | Standard facility | `TYPE_STANDARD` | Producers of goods and services, from shops, factories, and farms to power plants, hospitals, schools, and other public services |
-| Shared building | `TYPE_BUILDING` | Buildings that rent space to other agents, including housing, offices, commercial buildings, and farmland |
+| Shared building | `TYPE_BUILDING` | Buildings that rent space to other agents, including housing, offices, and commercial buildings |
 | Open space | `TYPE_OPEN_SPACE` | Land uses without production or employment: parking, squares, parks, and [earthworks](04_districts-and-parcels.md) |
 | Other | `TYPE_DEFAULT` | Accounting entities such as district representatives and [public transport lines](18_public-transport.md), and border checkpoints |
 

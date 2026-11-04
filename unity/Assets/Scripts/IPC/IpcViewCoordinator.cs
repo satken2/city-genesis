@@ -812,7 +812,6 @@ public class IpcViewCoordinator : MonoBehaviour
                     "SPACE_RETAIL" => VisualModeBuilding.SPACE_RETAIL,
                     "SPACE_FACTORY" => VisualModeBuilding.SPACE_FACTORY,
                     "SPACE_OFFICE" => VisualModeBuilding.SPACE_OFFICE,
-                    "SPACE_FARM" => VisualModeBuilding.SPACE_FARM,
                     _ => VisualModeBuilding.SPACE_OTHER
                 };
                 VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, floorMode);

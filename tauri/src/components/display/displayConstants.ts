@@ -157,7 +157,6 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
           { id: "SPACE_RETAIL", tooltipKey: "display.subSpaceRetail", icon: "spaces/space_2.png" },
           { id: "SPACE_FACTORY", tooltipKey: "display.subSpaceFactory", icon: "spaces/space_3.png" },
           { id: "SPACE_OFFICE", tooltipKey: "display.subSpaceOffice", icon: "spaces/space_4.png" },
-          { id: "SPACE_FARM", tooltipKey: "display.subSpaceFarm", icon: "spaces/space_5.png" },
         ],
       },
       { id: "zone_color", tooltipKey: "display.modeBuildingZone", icon: "visual/region.png" },
