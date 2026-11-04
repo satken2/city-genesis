@@ -41,7 +41,7 @@ Close prefers `{part}_close` in the selected folder and falls back to the ordina
 
 Scatter parts (`scatter{n}` and `scatter-single{n}`) and fill parts (`fill{n}`) are not built into the building mesh. Like [terrain props](M_terrain-props.md), their shared models are drawn with GPU instancing across buildings. Their draw LOD is selected per part with the terrain-prop rules regardless of the building, including the handling of `_close` and `_far`. Generation that creates no shown building object, such as plan previews, includes them in the single mesh.
 
-Fill parts are placed one per cell of a grid fixed to world coordinates, in the cells that fit inside the site, and each part's position within its cell, orientation, and kind depend only on the cell's index. When the site's shape changes from epoch to epoch, parts in the cells that remain therefore stay where they were. Buildings with fill parts do not stretch a far model even at Far: they draw the ground panel and fill parts, leaving the distant look to each part's draw LOD.
+Fill parts are placed one per cell of a grid fixed to world coordinates, with their position within the cell, orientation, and size varied as terrain props are, and those that do not fit inside the site are dropped. Neighboring parts may overlap. Each part's position, orientation, size, and kind depend only on the cell's index, so when the site's shape changes from epoch to epoch, parts in the cells that remain stay where they were. Buildings with fill parts do not stretch a far model even at Far: they draw the ground panel and fill parts, leaving the distant look to each part's draw LOD.
 
 ## Road-access frontages
 

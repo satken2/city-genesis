@@ -2,18 +2,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Pure data determining fill-part (fill1, 2, …) positions. Tile the site with a grid fixed to world coordinates, one part per cell.
-/// The kind, one of four world-axis orientations, and the offset inside the cell come only from the cell's integer indices,
-/// so when the site grows or shrinks (its vertices and center_point move every epoch), parts in the cells it keeps do not move.
-/// A cell holds its part only when the rotated bounding box lies inside the site. The footprint and entry are not avoided,
-/// because fill parts are meant for ground models whose footprint has no body.
+/// Pure data determining fill-part (fill1, 2, …) positions. Scatter one part per cell of a grid fixed to world coordinates (cell side = the largest
+/// part's bounding-box side) with the terrain-prop rule (<see cref="PropGeometry.Sample"/>): the bounding-box center anywhere in the cell, any heading,
+/// and a scale of 0.8–1.2, so neighbors may overlap.
+/// The kind also comes only from the cell's integer indices, so when the site grows or shrinks (its vertices and center_point move every epoch),
+/// parts in the cells it keeps do not move. A cell holds its part only when the rotated, scaled bounding box lies inside the site.
+/// The footprint and entry are not avoided, because fill parts are meant for ground models whose footprint has no body.
 /// Positions use local XZ relative to center_point. Specification: city-genesis/docs/ja/geometries/F_建物メッシュの生成.md.
 /// </summary>
 public static class FillLayout
 {
-    /// <summary>Minimum gap (m) between parts in neighboring cells, like a narrow alley. The cell side is the largest part's bounding-box side plus this.</summary>
-    public const float GAP = 1f;
-
     /// <summary>
     /// Determine placements. site=parcel (local XZ), origin=world XZ of center_point that site is relative to,
     /// kinds=placement bounding boxes of the parts. Return empty without a site or parts.
@@ -26,12 +24,11 @@ public static class FillLayout
             return items;
         }
 
-        float largest = 0f;
+        float cell = 0f;
         foreach (Bounds bounds in kinds)
         {
-            largest = Mathf.Max(largest, Mathf.Max(bounds.size.x, bounds.size.z));
+            cell = Mathf.Max(cell, Mathf.Max(bounds.size.x, bounds.size.z));
         }
-        float cell = largest + GAP;
 
         var ring = new Vector2[site.Length];
         var min = new Vector2(float.MaxValue, float.MaxValue);
@@ -45,8 +42,7 @@ public static class FillLayout
         int firstColumn = Mathf.FloorToInt(min.x / cell), lastColumn = Mathf.FloorToInt(max.x / cell);
         int firstRow = Mathf.FloorToInt(min.y / cell), lastRow = Mathf.FloorToInt(max.y / cell);
 
-        // Sites can span thousands of cells, so give each grid row only the edges overlapping it. A box stays inside its row,
-        // so these are all the edges that can touch it or cross the ray of its center test.
+        // Sites can span thousands of cells, so give each grid row only the edges overlapping it.
         var rows = new List<(Vector2 a, Vector2 b)>[lastRow - firstRow + 1];
         for (int i = 0, j = ring.Length - 1; i < ring.Length; j = i++)
         {
@@ -61,29 +57,21 @@ public static class FillLayout
 
         for (int row = firstRow; row <= lastRow; row++)
         {
-            var edges = rows[row - firstRow];
-            if (edges == null) continue;
             for (int column = firstColumn; column <= lastColumn; column++)
             {
-                uint h = CellHash(column, row);
-                int kind = (int)(h % (uint)kinds.Count);
-                h = Hash(h);
-                int turn = (int)(h & 3u);
+                PropGeometry.Point point = PropGeometry.Sample(column, row, cell, 0);
+                int kind = (int)(CellHash(column, row) % (uint)kinds.Count);
                 Bounds bounds = kinds[kind];
-                Quaternion rotation = Quaternion.Euler(0f, 90f * turn, 0f);
-                float width = turn % 2 == 0 ? bounds.size.x : bounds.size.z;
-                float depth = turn % 2 == 0 ? bounds.size.z : bounds.size.x;
-                h = Hash(h);
-                float minX = column * cell + GAP * 0.5f + Unit(h) * (cell - GAP - width);
-                h = Hash(h);
-                float minZ = row * cell + GAP * 0.5f + Unit(h) * (cell - GAP - depth);
-                if (!Inside(edges, minX, minZ, minX + width, minZ + depth)) continue;
+                var scaled = new Bounds(bounds.center * point.scale, bounds.size * point.scale);
+                Quaternion rotation = Quaternion.Euler(0f, point.rotation, 0f);
+                if (!Inside(rows, firstRow, cell, point.position, rotation, scaled.extents)) continue;
 
-                Vector3 center = rotation * bounds.center;
-                Vector2 at = new Vector2(minX + width * 0.5f - center.x, minZ + depth * 0.5f - center.z) - origin;
+                Vector3 center = rotation * scaled.center;
+                Vector2 at = point.position - new Vector2(center.x, center.z) - origin;
                 items.Add(new ScatterLayout.Item
                 {
-                    Kind = kind, Position = at, Rotation = rotation, Corners = PortLayout.RotatedRect(at, rotation, bounds),
+                    Kind = kind, Position = at, Rotation = rotation, Scale = point.scale,
+                    Corners = PortLayout.RotatedRect(at, rotation, scaled),
                 });
             }
         }
@@ -91,17 +79,36 @@ public static class FillLayout
     }
 
     /// <summary>
-    /// Whether an axis-aligned box lies inside the ring, given the ring edges overlapping the box's row: no edge touches the box,
-    /// and its center is inside (even-odd +X ray with the same half-open rule as <see cref="PolygonUtils.Contains(IReadOnlyList{Vector2}, Vector2)"/>).
+    /// Whether the box (world center, heading, half extents) lies inside the ring: no edge in the rows its axis-aligned bounds span touches it,
+    /// and its center is inside (even-odd +X ray over its own row's edges, with the same half-open rule as <see cref="PolygonUtils.Contains(IReadOnlyList{Vector2}, Vector2)"/>).
     /// </summary>
-    private static bool Inside(List<(Vector2 a, Vector2 b)> edges, float minX, float minZ, float maxX, float maxZ)
+    private static bool Inside(List<(Vector2 a, Vector2 b)>[] rows, int firstRow, float cell, Vector2 center, Quaternion rotation, Vector3 extents)
     {
-        float x = (minX + maxX) * 0.5f, z = (minZ + maxZ) * 0.5f;
-        bool inside = false;
-        foreach (var (a, b) in edges)
+        int centerRow = Mathf.FloorToInt(center.y / cell) - firstRow;
+        if (centerRow < 0 || centerRow >= rows.Length || rows[centerRow] == null) return false;
+
+        Vector3 x = rotation * Vector3.right, z = rotation * Vector3.forward;
+        var axisX = new Vector2(x.x, x.z);
+        var axisZ = new Vector2(z.x, z.z);
+        float reachZ = Mathf.Abs(axisX.y) * extents.x + Mathf.Abs(axisZ.y) * extents.z;
+        int from = Mathf.Max(0, Mathf.FloorToInt((center.y - reachZ) / cell) - firstRow);
+        int to = Mathf.Min(rows.Length - 1, Mathf.FloorToInt((center.y + reachZ) / cell) - firstRow);
+        for (int r = from; r <= to; r++)
         {
-            if (Touches(a, b, minX, minZ, maxX, maxZ)) return false;
-            if ((a.y > z) != (b.y > z) && x < (b.x - a.x) * (z - a.y) / (b.y - a.y) + a.x) inside = !inside;
+            if (rows[r] == null) continue;
+            foreach (var (a, b) in rows[r])
+            {
+                Vector2 da = a - center, db = b - center;
+                var localA = new Vector2(Vector2.Dot(da, axisX), Vector2.Dot(da, axisZ));
+                var localB = new Vector2(Vector2.Dot(db, axisX), Vector2.Dot(db, axisZ));
+                if (Touches(localA, localB, -extents.x, -extents.z, extents.x, extents.z)) return false;
+            }
+        }
+
+        bool inside = false;
+        foreach (var (a, b) in rows[centerRow])
+        {
+            if ((a.y > center.y) != (b.y > center.y) && center.x < (b.x - a.x) * (center.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
         }
         return inside;
     }
@@ -130,6 +137,4 @@ public static class FillLayout
     {
         unchecked { value ^= value >> 16; value *= 0x7feb352d; value ^= value >> 15; value *= 0x846ca68b; return value ^ (value >> 16); }
     }
-
-    private static float Unit(uint value) => (value & 0xffffff) / 16777216f;
 }

@@ -36,6 +36,7 @@ public static class ScatterLayout
         /// <summary>Placement position for part origin.</summary>
         public Vector2 Position;
         public Quaternion Rotation;
+        public float Scale;
         /// <summary>Four bounding-box corners (CCW), used for terrain contact.</summary>
         public Vector2[] Corners;
     }
@@ -114,7 +115,7 @@ public static class ScatterLayout
                 continue;
             }
             placed.Add(box);
-            items.Add(new Item { Kind = kind, Position = at, Rotation = rotation, Corners = corners });
+            items.Add(new Item { Kind = kind, Position = at, Rotation = rotation, Scale = 1f, Corners = corners });
             filled += bounds.size.x * bounds.size.z;
             if (kinds[kind].Single)
             {

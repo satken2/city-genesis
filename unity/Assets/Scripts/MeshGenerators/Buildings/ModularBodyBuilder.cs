@@ -964,7 +964,7 @@ public static class ModularBodyBuilder
                     baseY = Mathf.Min(baseY, ground - centerPointWorld.y);
                 }
             }
-            Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(item.Position.x, baseY, item.Position.y), item.Rotation, Vector3.one);
+            Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(item.Position.x, baseY, item.Position.y), item.Rotation, Vector3.one * item.Scale);
             if (sink != null)
             {
                 sink.Add(new BuildingScatterRenderer.Instance { path = parts.paths[item.Kind], local = matrix });
