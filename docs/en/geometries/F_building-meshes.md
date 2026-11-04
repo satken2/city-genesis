@@ -4,7 +4,7 @@ Unity assembles FBX parts using core-provided footprints, floor counts, and appe
 
 ## Inputs
 
-Vertex ordering and frontage follow [building geometry](C_building-geometry.md). Buildings are grounded at terrain elevation at `center_point`, except water-parcel buildings at sea level. Floor heights follow the master's `height_per_floor` grid. Fences, ground panels, and other site decorations follow parcel geometry rather than the building footprint, and fences stand on a line drawn slightly inside the parcel boundary. The site entry is where the line through the middle of the footprint's front edge, perpendicular to the front, meets this fence line just inside the parcel boundary: the fence opens there, a gate stands there, and a walkway runs from the front to it. Scatter parts avoid both the footprint and this walkway. `visual_variant` selects appearance; `visual_variant2` seeds variation such as rooftop or scattered-part placement. Identical values produce identical appearance.
+Vertex ordering and frontage follow [building geometry](C_building-geometry.md). Buildings are grounded at terrain elevation at `center_point`, except water-parcel buildings at sea level. Floor heights follow the master's `height_per_floor` grid. Fences, ground panels, and other site decorations follow parcel geometry rather than the building footprint, and fences stand on a line drawn slightly inside the parcel boundary. The site entry is where the line through the middle of the footprint's front edge, perpendicular to the front, meets this fence line just inside the parcel boundary: the fence opens there, a gate stands there, and a walkway runs from the front to it. Scatter parts avoid both the footprint and this walkway (ground assets, which have no body, also place them over the footprint). `visual_variant` selects appearance; `visual_variant2` seeds variation such as rooftop or scattered-part placement. Identical values produce identical appearance.
 
 Modular building bodies are horizontal. Concrete foundations fill downhill gaps on slopes, while site decoration follows terrain. The ground panel covering the whole parcel follows terrain only on close-up buildings and is otherwise one flat panel, because cutting a whole parcel along the terrain grid becomes costly on large parcels. Ground panels are built after the building body as low-priority work. Entrances and exterior stairs stay inside the footprint, setting back the main body as needed. The footprint therefore includes projecting parts.
 
@@ -18,7 +18,7 @@ FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with m
 | `roofprop` / `entrance` / `interior-floor` | Rooftop structures, entrances, and floor slabs |
 | `ceil` / `floor` / `generic-wall` | Material-only sources for roofs, ground panels, and gable walls ([material resolution](R_material-resolution.md)) |
 | `gate` / `trail` | Gate at the site entry and walkway from the front to the entry |
-| `tile` / `scatter{n}` / `scatter-single{n}` | Ground tiles and plants, vehicles, or materials scattered outside the body (`scatter-single` at most once per building) |
+| `tile` / `scatter{n}` / `scatter-single{n}` | Ground tiles and plants, vehicles, or materials scattered over the vacant site (`scatter-single` at most once per building) |
 | `base-prebuilt` / `mid-prebuilt` / `top-prebuilt` | Prebuilt tiers; mashup wings use names such as `mashup-{model_prefix}-base-prebuilt` |
 | `port_*` / `yard_*` / `site_*` | Port, depot, and open-space parts |
 | `scaffold-*` / `crane-*` / `demo-*` / `excavator` | Construction and demolition sites |
@@ -30,7 +30,7 @@ FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with m
 
 ## Appearance variants and fallback
 
-`{number}` is a folder for one appearance model. A building picks one number from the model table of its prefix folder and `visual_variant` ([asset packs](X_asset-packs.md)). Parts come from the largest folder at or below that number that contains the part, and the building-type shared folder (`b{bd_type}`) is searched with the same number. Modular buildings choose one folder for the whole building based on `mid-w1`; other methods choose per part, except prebuilt buildings and depots, which always use `0`.
+`{number}` is a folder for one appearance model. A building picks one number from the model table of its prefix folder and `visual_variant` ([asset packs](X_asset-packs.md)). Parts come from the largest folder at or below that number that contains the part, and the building-type shared folder (`b{bd_type}`) is searched with the same number. Modular buildings choose one folder for the whole building based on `mid-w1` (ground assets, which have no walls, use the selected number); other methods choose per part, except prebuilt buildings and depots, which always use `0`.
 
 For missing walls and corners, search the same folder in this order: position 1 at the same level, the same position at `mid`, then `mid` position 1. Omit corners if none exists. Fences search only down to position 1 and never substitute building walls or corners. `floor` and construction parts also search `common`. Buildings with nothing renderable use a white extruded-footprint box to show location.
 

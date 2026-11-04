@@ -5,7 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// Pure data determining scatter-part (scatter1, 2, … / scatter-single1, 2, …) positions. Randomly place in site space outside the footprint
-/// and the entry corridor, avoiding bounding-box overlaps. Choose among four orientations aligned to front edge (vertex 0→1).
+/// and the entry corridor, avoiding bounding-box overlaps. Ground models have no body, so their parts may also stand over the footprint. Choose among four orientations aligned to front edge (vertex 0→1).
 /// Every kind is drawn with equal probability; single kinds leave the draw once placed, so each appears at most once per building.
 /// Per-building seeds ensure stable regeneration.
 /// All positions use local XZ relative to center_point. Specification: city-genesis/docs/ja/geometries/F_建物メッシュの生成.md.
@@ -41,10 +41,11 @@ public static class ScatterLayout
     }
 
     /// <summary>
-    /// Determine placements. site=parcel, footprint=building base, keepClear=area to leave open such as the entry corridor (all CCW; keepClear may be null),
+    /// Determine placements. site=parcel, footprint=building base (its front edge orients the parts), overFootprint=the footprint has no body
+    /// and does not block placement, keepClear=area to leave open such as the entry corridor (all CCW; keepClear may be null),
     /// seed=per-building random seed. Return empty when no vacant space or parts exist.
     /// </summary>
-    public static List<Item> Plan(Vector2[] site, Vector2[] footprint, Vector2[] keepClear, IReadOnlyList<Kind> kinds, int seed)
+    public static List<Item> Plan(Vector2[] site, Vector2[] footprint, bool overFootprint, Vector2[] keepClear, IReadOnlyList<Kind> kinds, int seed)
     {
         var items = new List<Item>();
         if (site == null || site.Length < 3 || footprint == null || footprint.Length < 3 || kinds == null || kinds.Count == 0)
@@ -59,8 +60,12 @@ public static class ScatterLayout
         try
         {
             Geometry siteGeom = PortLayout.ToPolygon(gf, site);
-            Geometry body = PortLayout.ToPolygon(gf, footprint);
-            Geometry blocked = body.IsValid ? body : body.Buffer(0);
+            Geometry blocked = gf.CreatePolygon();
+            if (!overFootprint)
+            {
+                Geometry body = PortLayout.ToPolygon(gf, footprint);
+                blocked = body.IsValid ? body : body.Buffer(0);
+            }
             if (keepClear != null && keepClear.Length >= 3)
             {
                 blocked = blocked.Union(PortLayout.ToPolygon(gf, keepClear).Buffer(0));

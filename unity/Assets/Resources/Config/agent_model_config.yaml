@@ -39,11 +39,30 @@ agents:
     prebuilt: true
     variants:
       - 0
+  1000:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 300
+      - 600
   1001:
     model: true
     prebuilt: false
     variants:
       - 0
+  1002:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 500
+  1003:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 500
   1016:
     model: true
     prebuilt: true

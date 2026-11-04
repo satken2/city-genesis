@@ -101,7 +101,7 @@ LOD制作は**同じ建物を距離に応じて表現する作業**である。�
 
 ```
 a1054 太陽光発電所  1個  tile
-b32   農場          3個  fence-w1 fence-c1 floor
+a1003 牧場          8個  floor fence-w1 gate scatter1..3 scatter-single1 far
 a2007/a2012         4個  mid-w1 mid-c1 top-w1 top-c1
 b8                  6個  mid-w1 mid-c1 ceil floor entrance roofprop
 a200  初等学校     11個  base-w1 base-c1 mid-w1 mid-w2 mid-c1 top-w1 top-c1

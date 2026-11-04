@@ -1,6 +1,9 @@
 {
   "Models/Buildings/a100": { "0": 1000 },
+  "Models/Buildings/a1000": { "0": 300, "300": 300, "600": 300 },
   "Models/Buildings/a1001": { "0": 1000 },
+  "Models/Buildings/a1002": { "0": 500, "500": 500 },
+  "Models/Buildings/a1003": { "0": 500, "500": 500 },
   "Models/Buildings/a1016": { "0": 1000 },
   "Models/Buildings/a1017": { "0": 1000 },
   "Models/Buildings/a1018": { "0": 1000 },
@@ -80,7 +83,6 @@
   "Models/Buildings/b128": { "0": 1000 },
   "Models/Buildings/b16": { "0": 1000 },
   "Models/Buildings/b2": { "0": 1000 },
-  "Models/Buildings/b32": { "0": 1000 },
   "Models/Buildings/b8": { "0": 1000 },
   "Models/Buildings/landmark-ancient_ruins": { "0": 1000 },
   "Models/Buildings/landmark-colossal_statue": { "0": 1000 },

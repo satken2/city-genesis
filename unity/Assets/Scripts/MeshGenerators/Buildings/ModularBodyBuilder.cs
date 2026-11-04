@@ -137,19 +137,12 @@ public static class ModularBodyBuilder
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] GenerateBody: prefix={prefix}, floors={floors}, floorHeight={floorHeight}, variantNumber={variantNumber}, building_shape={building_shape}, modelType={modelType}");
 
-        int resolvedSuffix = ResolveBuildingVariant(prefix, variantNumber);
+        // Ground models have no walls, so the selected model number's folder holds the whole building.
+        int resolvedSuffix = isGroundModel ? variantNumber : ResolveBuildingVariant(prefix, variantNumber);
         if (resolvedSuffix < 0)
         {
-            if (isGroundModel)
-            {
-                resolvedSuffix = 0;
-                UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] mid-w1 なしだが MODEL_MODULAR_GROUND のため suffix=0 で継続 (prefix={prefix})");
-            }
-            else
-            {
-                Debug.LogWarning($"[MBB] mid-w1 が全く存在しないため DefaultBodyBuilder にフォールバック (prefix={prefix})");
-                return DefaultBodyBuilder.GenerateBody(footprint, floors, floorHeight);
-            }
+            Debug.LogWarning($"[MBB] mid-w1 が全く存在しないため DefaultBodyBuilder にフォールバック (prefix={prefix})");
+            return DefaultBodyBuilder.GenerateBody(footprint, floors, floorHeight);
         }
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] resolvedSuffix={resolvedSuffix}");
@@ -302,7 +295,8 @@ public static class ModularBodyBuilder
             floorMaterial,
             centerPointWorld, deformToTerrain,
             combineInstances, allMaterials, temporaryMeshes,
-            scatterFootprint: occupiedFootprint ?? footprint, scatterSeed: visual_variant2, frontFootprint: footprint);
+            scatterFootprint: occupiedFootprint ?? footprint, scatterSeed: visual_variant2, frontFootprint: footprint,
+            scatterOverFootprint: isGroundModel);
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] 壁・角・地面完了: {combineInstances.Count}インスタンス, {allMaterials.Count}マテリアル");
 
@@ -336,6 +330,7 @@ public static class ModularBodyBuilder
     ///   Do nothing if no tile part exists. Null omits tiles.
     /// - Scatter: place scatter parts in floorPolygon's vacant area outside building scatterFootprint and the entry corridor
     ///   (GenerateScatter). scatterSeed controls randomness. Null scatterFootprint omits scatter.
+    ///   scatterOverFootprint=true also uses the area over the footprint, for ground models whose footprint has no body.
     /// - Ground panels: cover floorPolygon with caller-resolved floorMaterial from master draw_floor
     ///   and floor parts (a{variant}→b{bd_type}→common) (<see cref="AppendGroundPanel"/>).
     ///   Null floorMaterial (draw_floor disabled or no floor parts anywhere) omits
@@ -352,20 +347,21 @@ public static class ModularBodyBuilder
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
         Vector2? fenceOpeningCenter = null, float fenceOpeningRadius = 0f,
-        Vector2[] scatterFootprint = null, float scatterSeed = 0f, Vector2[] frontFootprint = null)
+        Vector2[] scatterFootprint = null, float scatterSeed = 0f, Vector2[] frontFootprint = null,
+        bool scatterOverFootprint = false)
     {
         if (BuildingExteriorRenderer.Capture != null && BuildingExteriorRenderer.DeferSiteDecorations)
         {
             BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) => BuildSiteDecorations(
                 prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, centerPointWorld,
                 deformToTerrain, meshes, materials, temporary, fenceOpeningCenter, fenceOpeningRadius,
-                scatterFootprint, scatterSeed, frontFootprint));
+                scatterFootprint, scatterSeed, frontFootprint, scatterOverFootprint));
         }
         else
         {
             BuildSiteDecorations(prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, centerPointWorld,
                 deformToTerrain, combineInstances, allMaterials, temporaryMeshes, fenceOpeningCenter, fenceOpeningRadius,
-                scatterFootprint, scatterSeed, frontFootprint);
+                scatterFootprint, scatterSeed, frontFootprint, scatterOverFootprint);
         }
         AppendGroundPanel(floorPolygon, floorMaterial, centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
     }
@@ -416,7 +412,7 @@ public static class ModularBodyBuilder
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
         Vector2? fenceOpeningCenter, float fenceOpeningRadius,
-        Vector2[] scatterFootprint, float scatterSeed, Vector2[] frontFootprint)
+        Vector2[] scatterFootprint, float scatterSeed, Vector2[] frontFootprint, bool scatterOverFootprint)
     {
         using var scope = siteDecorationsMarker.Auto();
         Vector2[] fenceLine = BuildingMeshUtils.OffsetPolygonOutward(fenceFootprint, -FENCE_INSET);
@@ -553,8 +549,8 @@ public static class ModularBodyBuilder
         // --- Scatter parts ---
         if (scatterFootprint != null && floorPolygon != null && floorPolygon.Length >= 3)
         {
-            GenerateScatter(prefix, suffix, floorPolygon, scatterFootprint, hasEntry ? entry.Corridor() : null, scatterSeed,
-                            centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
+            GenerateScatter(prefix, suffix, floorPolygon, scatterFootprint, scatterOverFootprint, hasEntry ? entry.Corridor() : null,
+                            scatterSeed, centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
         }
     }
 
@@ -811,10 +807,10 @@ public static class ModularBodyBuilder
         {
             for (float gz = minZ; gz + stepZ <= maxZ + 0.001f; gz += stepZ)
             {
-                float centerX = gx + stepX * 0.5f;
-                float centerZ = gz + stepZ * 0.5f;
-
-                if (!PolygonUtils.Contains(polygon, new Vector2(centerX, centerZ)))
+                if (!PolygonUtils.Contains(polygon, new Vector2(gx, gz))
+                    || !PolygonUtils.Contains(polygon, new Vector2(gx + stepX, gz))
+                    || !PolygonUtils.Contains(polygon, new Vector2(gx + stepX, gz + stepZ))
+                    || !PolygonUtils.Contains(polygon, new Vector2(gx, gz + stepZ)))
                 {
                     continue;
                 }
@@ -884,14 +880,14 @@ public static class ModularBodyBuilder
 
     /// <summary>
     /// Find scatter1, 2, … and scatter-single1, 2, … sequentially from 1 (each series stops at its first gap); place actual-size parts
-    /// at <see cref="ScatterLayout"/> positions outside the footprint and keepClear. scatter-single kinds appear at most once per building.
+    /// at <see cref="ScatterLayout"/> positions outside keepClear and, unless overFootprint, the footprint. scatter-single kinds appear at most once per building.
     /// Align origin to placement ground. For terrain conformity, ground is the lowest of four bounding-box-corner heights,
     /// burying the uphill side to prevent floating (same as port-yard cargo). Do nothing if absent.
     /// While <see cref="BuildingScatterRenderer.Sink"/> is set (shown buildings), hand placements to instanced rendering;
     /// otherwise combine parts including node transforms. Both measure placement bounds from the combined part mesh.
     /// </summary>
     private static void GenerateScatter(
-        string prefix, int suffix, Vector2[] site, Vector2[] footprint, Vector2[] keepClear, float seed,
+        string prefix, int suffix, Vector2[] site, Vector2[] footprint, bool overFootprint, Vector2[] keepClear, float seed,
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
@@ -942,7 +938,7 @@ public static class ModularBodyBuilder
             return;
         }
 
-        List<ScatterLayout.Item> items = ScatterLayout.Plan(site, footprint, keepClear, kinds, Mathf.FloorToInt(Mathf.Clamp01(seed) * 1000000f));
+        List<ScatterLayout.Item> items = ScatterLayout.Plan(site, footprint, overFootprint, keepClear, kinds, Mathf.FloorToInt(Mathf.Clamp01(seed) * 1000000f));
         foreach (ScatterLayout.Item item in items)
         {
             float baseY = 0f;
@@ -978,7 +974,7 @@ public static class ModularBodyBuilder
     /// For the selected model number (BuildingMeshUtils.ResolveModelId), find the largest suffix
     /// at or below it in the model-number list where `mid-w1` actually exists.
     /// Return -1 if mid-w1 is entirely absent.
-    /// For MODEL_MODULAR_GROUND, callers fall back to suffix=0 and continue.
+    /// Not used for MODEL_MODULAR_GROUND, which has no walls and uses the selected model number.
     /// </summary>
     public static int ResolveBuildingVariant(string prefix, int variantNumber)
     {
