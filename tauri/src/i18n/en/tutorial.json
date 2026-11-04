@@ -629,8 +629,8 @@
         "description": "When accidents or disasters disable power plants or power lines, the effects spread to factories and residents who depend on electricity. Provide backup facilities and delivery routes for important infrastructure so a single failure doesn't bring the whole city to a halt."
       },
       "tip15": {
-        "title": "You Can't Bulldoze a Slum",
-        "description": "When housing runs short, households with nowhere to go build slums on unparceled vacant land, and the slums spread across flat ground. The city cannot clear a slum or run roads through it. Provide housing that residents can afford, and the slum shrinks as people move into regular homes. Lay out parcels in advance on land you want to keep."
+        "title": "A Place to Call Home",
+        "description": "If you leave vacant land downtown unused, people who have lost their homes may settle there, making it a likely spot for a slum. Provide homes they can afford, and the slum will gradually shrink as residents move into them."
       },
       "tip16": {
         "title": "Industrial Clusters",

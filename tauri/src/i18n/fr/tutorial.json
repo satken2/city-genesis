@@ -629,8 +629,8 @@
         "description": "Un accident ou une catastrophe qui arrête centrales ou lignes électriques affecte aussi usines et habitants. Prévoyez des installations et des voies d'approvisionnement de secours pour les infrastructures essentielles, afin qu'une seule panne ne paralyse pas la ville."
       },
       "tip15": {
-        "title": "On ne rase pas un bidonville",
-        "description": "Quand les logements manquent, les ménages sans solution construisent des bidonvilles sur des terrains vacants sans parcelle, qui s’étendent sur les terrains plats. La ville ne peut ni raser un bidonville ni y faire passer des routes. Proposez des logements que les habitants peuvent payer : le bidonville se réduira à mesure qu’ils rejoindront des logements ordinaires. Tracez d’avance des parcelles sur les terrains que vous voulez préserver."
+        "title": "Un endroit où vivre",
+        "description": "Si vous laissez un terrain en friche au centre-ville, des habitants qui ont perdu leur logement risquent de s’y installer et d’y former un bidonville. Si vous proposez des logements à leur portée, les habitants y emménagent peu à peu et le bidonville se réduit de lui-même."
       },
       "tip16": {
         "title": "Pôles industriels",

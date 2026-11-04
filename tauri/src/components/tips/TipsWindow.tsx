@@ -52,7 +52,7 @@ type TipItem = {
   image?: string;
 };
 
-// Tips は待ち時間の読み物と取扱説明を兼ねる。本文は内部の計算式ではなく、現象の原因や操作の結果を伝える。
+// 待ち時間に読めるよう、街で気づくことと市長が試せる工夫を一つの話に絞り、見出しや語り口に遊び心を持たせる。
 const TIPS_LIST: TipItem[] = [
   { id: "tip1", image: tip1 },
   { id: "tip2", image: tip2 },
