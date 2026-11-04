@@ -345,7 +345,10 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
         float crown = saturate(1 - closest);
         float macro = TerrainMacroNoise(inputData.positionWS.xz / 55);
         leaf *= lerp(.78, lerp(.62,1,crown), detail) * lerp(.93,1.07,macro);
-        float3 crownNormal = normalize(float3(offset.x * 1.5 * detail,1,offset.y * 1.5 * detail));
+        // 平面に描いた凹凸はどの向きからも同じ面が見えるが、立体の樹冠はカメラ側の面が見え、隣の木が下側を隠す。
+        // 凹凸の軸を真上とカメラ方向の中間に取り、光の向きで変わる日なたと陰・浅い角度の空の映り込みを木のモデルに揃える。
+        float3 crownAxis = normalize(float3(0,1,0) + inputData.viewDirectionWS);
+        float3 crownNormal = normalize(crownAxis + float3(offset.x * 1.5 * detail,0,offset.y * 1.5 * detail));
         inputData.normalWS = normalize(lerp(inputData.normalWS,crownNormal,forest));
         inputData.bakedGI = lerp(inputData.bakedGI,SampleSH(inputData.normalWS),forest);
         albedo = lerp(albedo,leaf,forest);
