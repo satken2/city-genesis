@@ -752,6 +752,23 @@ public class IpcClient : MonoBehaviour
                     OnWorldRefreshRoads?.Invoke();
                     break;
 
+                case "world:set_map_pins":
+                    {
+                        var pins = new List<MapPinOverlay.Pin>();
+                        if (GetParamToken(payload, "pins") is Newtonsoft.Json.Linq.JArray items)
+                        {
+                            foreach (var item in items)
+                                pins.Add(new MapPinOverlay.Pin { x = (float)item["x"], z = (float)item["z"], color = (string)item["color"] });
+                        }
+                        Debug.Log($"IpcClient: world:set_map_pins -> {pins.Count}");
+                        MapPinOverlay.Ensure().SetPins(pins);
+                    }
+                    break;
+
+                case "world:query_map_pins":
+                    EmitMapPins();
+                    break;
+
                 case "edit_road:set_members":
                     {
                         int roadId = GetParamInt(payload, "road_id");
@@ -1602,6 +1619,20 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("camera:state", payload);
+    }
+
+    /// <summary>
+    /// Sends world:map_pins (reply to world:query_map_pins) so a reopened city map can restore the pins still shown in 3D.
+    /// </summary>
+    public void EmitMapPins()
+    {
+        var pins = new List<Dictionary<string, object>>();
+        if (MapPinOverlay.Instance != null)
+        {
+            foreach (var pin in MapPinOverlay.Instance.Pins)
+                pins.Add(new Dictionary<string, object> { ["x"] = pin.x, ["z"] = pin.z, ["color"] = pin.color });
+        }
+        SendEnvelope("world:map_pins", new Dictionary<string, object> { ["pins"] = pins });
     }
 
     /// <summary>

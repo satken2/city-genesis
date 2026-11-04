@@ -1264,6 +1264,33 @@ export async function sendCameraFocus(windowType: string, polygon: number[][]): 
   });
 }
 
+/** City map pin. color is "#rrggbb". */
+export type MapPin = { x: number; z: number; color: string };
+
+/**
+ * `world.set_map_pins`
+ * Replace the pins shown in 3D with the city map's list. Unity holds the list for the session (not saved) and clears it
+ * on session reset, so the map reads it back with sendQueryMapPins() when it opens.
+ */
+export async function sendSetMapPins(pins: MapPin[]): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "city_map",
+    entity: null,
+    action: "world:set_map_pins",
+    params: { pins },
+  });
+}
+
+/** `world.query_map_pins` asks Unity for the pins it is showing (reply: `world:map_pins`). */
+export async function sendQueryMapPins(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "city_map",
+    entity: null,
+    action: "world:query_map_pins",
+    params: {},
+  });
+}
+
 /**
  * `view.query_state`
  * Query the graphics program's current display state.
@@ -1453,6 +1480,9 @@ export const IPC_EVENT_VIEW_OBJECT_FILTER_STATE = "view:object_filter_state";
  * with yaw in clockwise degrees from north (world +Z)=0. The 2D city map overlays the camera marker from this.
  */
 export const IPC_EVENT_CAMERA_STATE = "camera:state";
+
+/** Pins shown in 3D (Unity → UI), replying to sendQueryMapPins(). Payload: { pins: MapPin[] }. */
+export const IPC_EVENT_MAP_PINS = "world:map_pins";
 
 /** The edited polygon changed in parcel shape editing mode. */
 export const IPC_EVENT_EDIT_PARCEL_UPDATE_SHAPE = "edit_parcel:update_shape";

@@ -649,6 +649,10 @@ pub async fn handle_incoming_message(
             // map. Each camera:query_state request produces exactly one response.
             let _ = app.emit("camera:state", envelope.payload);
         }
+        "world:map_pins" => {
+            // Reply to world:query_map_pins: the pins Unity is showing, read back by the city map when it opens.
+            let _ = app.emit("world:map_pins", envelope.payload);
+        }
         "view:ui_visibility" => {
             // Start/end of fly or capture mode. Hide all UI to show only the 3D view while active.
             let visible = envelope.payload.get("visible").and_then(|v| v.as_bool()).unwrap_or(true);

@@ -1,0 +1,8 @@
+.map-pins { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; padding: 18px 20px; }
+.map-pins__hint { margin: 0; line-height: 1.6; color: var(--flat-text-label); }
+.map-pins__list { flex: 1; min-height: 0; overflow-y: auto; list-style: none; margin: 0; padding: 0; }
+.map-pins__list li { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+.map-pins__swatch { width: 14px; height: 14px; flex-shrink: 0; border: 1px solid rgba(0, 0, 0, 0.35); }
+.map-pins__coord { flex: 1; font-variant-numeric: tabular-nums; }
+.map-pins__list button { cursor: pointer; background: transparent; color: var(--flat-text-label); border: 0; border-radius: 0; box-shadow: none; padding: 2px 8px; font-size: 1.5rem; line-height: 1; }
+.map-pins__list button:hover { background: var(--flat-raised-hover); color: var(--flat-text); }

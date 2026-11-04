@@ -6,10 +6,12 @@
  *
  * Overlay the 3D view camera's position and direction as a marker (see "Camera marker" below).
  *
- * Search and directions on the left show batch route calculation results read-only.
+ * The left sidebar has two tabs. Search and directions show batch route calculation results read-only; pins mark places
+ * on the map and in 3D. Map clicks go to the selected tab.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
 import {
   CityMapCanvas,
@@ -20,6 +22,10 @@ import { IPC_EVENT_CAMERA_STATE, sendCameraQueryState } from "../../utils/ipc";
 import "./CityMapWindow.css";
 import { useCityMapControls } from "./CityMapControls";
 import { useMapNavigation } from "./CityMapNavigation";
+import { useMapPins } from "./CityMapPins";
+import { FlatTabs } from "../common/FlatTabs";
+
+type SidebarTab = "search" | "pins";
 
 /*
  * ---- Camera marker ----
@@ -51,10 +57,13 @@ const CAMERA_MARKER_HALF_WIDTH_PX = 8;
 const CAMERA_MARKER_RADIUS_PX = 4;
 
 export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
+  const { t } = useTranslation();
   const mapRef = useRef<CityMapCanvasHandle>(null);
   const coordRef = useRef<HTMLSpanElement | null>(null);
   const zoomRef = useRef<HTMLSpanElement | null>(null);
   const navigation = useMapNavigation(apiBaseUrl, mapRef);
+  const pins = useMapPins();
+  const [tab, setTab] = useState<SidebarTab>("search");
   const [camera, setCamera] = useState<CameraMarker | null>(null);
 
   /**
@@ -114,6 +123,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const drawCameraMarker = useCallback(
     (ctx: CanvasRenderingContext2D, view: CityMapViewState) => {
       navigation.draw(ctx, view);
+      pins.draw(ctx, view);
       if (!camera) return;
       const px = (v: number) => v / view.zoom;
 
@@ -144,12 +154,25 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       ctx.fill();
       ctx.stroke();
     },
-    [camera, navigation.draw]
+    [camera, navigation.draw, pins.draw]
   );
 
+  const sidebarTabs: { id: SidebarTab; label: string; content: ReactNode }[] = [
+    { id: "search", label: t("mapNavigation.search"), content: navigation.sidebar },
+    { id: "pins", label: t("mapNavigation.pins.tab"), content: pins.panel },
+  ];
   return (
     <div className="city-map-window">
-      {navigation.sidebar}
+      {/* Keep both panels mounted so switching tabs keeps search input and results. */}
+      <aside className="map-nav" aria-label={t("mapNavigation.title")}>
+        <FlatTabs tabs={sidebarTabs} active={tab} onChange={setTab} idPrefix="city-map-sidebar" />
+        {sidebarTabs.map(({ id, content }) => (
+          <div key={id} className="map-nav__panel" role="tabpanel" id={`city-map-sidebar-panel-${id}`}
+            aria-labelledby={`city-map-sidebar-tab-${id}`} hidden={tab !== id}>
+            {content}
+          </div>
+        ))}
+      </aside>
       <div className="city-map-window__main">
       {/* Toolbar: layer toggles and action buttons. */}
       {controls.toolbar}
@@ -169,9 +192,10 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           onZoomChange={handleZoom}
           onHeatmapStats={controls.onHeatmapStats}
           overlayDraw={drawCameraMarker}
-          overlayVersion={(camera?.seq ?? 0) + navigation.overlayVersion}
-          onMapClick={navigation.onMapClick}
-          cursor={navigation.picking ? "crosshair" : undefined}
+          overlayVersion={(camera?.seq ?? 0) + navigation.overlayVersion + pins.overlayVersion}
+          onMapClick={tab === "pins" ? pins.onMapClick : navigation.onMapClick}
+          onContextMenu={tab === "pins" ? pins.onContextMenu : undefined}
+          cursor={tab === "pins" || navigation.picking ? "crosshair" : undefined}
           focusPathIds={navigation.roadFocus?.pathIds ?? null}
           focusColor={navigation.roadFocus?.color ?? null}
         />

@@ -1,8 +1,10 @@
 .map-nav { width: 350px; min-width: 280px; max-width: 38%; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; background: var(--flat-surface); color: var(--flat-text); box-shadow: var(--flat-shadow-sm); z-index: 2; font-size: 1rem; }
 .map-nav button, .map-nav input { font: inherit; box-sizing: border-box; }
-.map-nav button { cursor: pointer; background: transparent; color: var(--flat-accent); border: 0; border-radius: 0; box-shadow: none; }
-.map-nav button:hover { background: var(--flat-raised-hover); }
+.map-nav__search button { cursor: pointer; background: transparent; color: var(--flat-accent); border: 0; border-radius: 0; box-shadow: none; }
+.map-nav__search button:hover { background: var(--flat-raised-hover); }
 .map-nav button:focus-visible, .map-nav input:focus-visible { outline: 2px solid var(--flat-accent); outline-offset: 2px; }
+.map-nav__panel, .map-nav__search { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.map-nav__panel[hidden] { display: none; }
 .map-nav__header { display: flex; align-items: center; gap: 10px; padding: 18px 20px 12px; }
 .map-nav__back { margin-left: auto; padding: 6px; }
 .map-nav__fields { padding: 8px 16px 18px; background: var(--flat-raised); }

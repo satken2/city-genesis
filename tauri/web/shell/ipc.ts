@@ -129,6 +129,7 @@ const BROADCAST_EVENTS = new Set([
   "view:grid_angle_changed",
   "view:grid_toggled",
   "camera:state",
+  "world:map_pins",
   "citizen:follow_state",
   "camera:thumbnail_captured",
   "path:appearances",

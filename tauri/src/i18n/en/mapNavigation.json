@@ -50,6 +50,12 @@
     "picking": {
       "origin": "Click your starting point on the map.",
       "destination": "Click your destination on the map."
+    },
+    "pins": {
+      "tab": "Pins",
+      "hint": "Click the map to place a pin in the chosen color. Right-click a pin to remove it.",
+      "list": "Pin list",
+      "remove": "Remove pin"
     }
   }
 }

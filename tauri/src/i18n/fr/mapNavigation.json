@@ -50,6 +50,12 @@
     "picking": {
       "origin": "Cliquez sur le départ sur la carte.",
       "destination": "Cliquez sur la destination sur la carte."
+    },
+    "pins": {
+      "tab": "Épingles",
+      "hint": "Cliquez sur la carte pour placer une épingle de la couleur choisie. Faites un clic droit sur une épingle pour la supprimer.",
+      "list": "Liste des épingles",
+      "remove": "Supprimer l’épingle"
     }
   }
 }

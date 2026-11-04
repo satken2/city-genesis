@@ -235,7 +235,7 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
     onSelect={p => select(which, p)} onClear={() => {
       pickRequest.current?.abort(); setRoute(null); if (which === "origin") setOrigin(null); else setDestination(null);
     }} />;
-  const sidebar = <aside className="map-nav" aria-label={t("mapNavigation.title")}>
+  const sidebar = <div className="map-nav__search">
     {directions && <div className="map-nav__header"><button type="button" className="map-nav__back" onClick={() => {
       pickRequest.current?.abort(); setDirections(false); setPicking(null); setRoute(null);
     }}>{t("mapNavigation.back")}</button></div>}
@@ -283,7 +283,7 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
         {!origin && !picking && <p className="map-nav__intro">{t("mapNavigation.chooseOrigin")}</p>}
       </>}
     </div>
-  </aside>;
+  </div>;
   return { sidebar, draw, overlayVersion, onMapClick, picking, roadFocus, reload: () => {
     pickRequest.current?.abort(); setRoute(null); setRefresh(v => v + 1);
   } };
