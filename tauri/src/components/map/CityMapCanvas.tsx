@@ -109,6 +109,7 @@ import {
   PATH_WALKWAY,
   PATH_TRACK,
   MODEL_PARK,
+  MODEL_MODULAR_GROUND,
   ROAD_COLOR_PALETTE,
 } from "../../constants";
 import { drawMapLabels, facilitySymbol, type MapPlace, type MapRoadLabel } from "./mapLabels";
@@ -2322,7 +2323,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           const items = colorGroups.get(color) ?? [];
           items.push(building);
           colorGroups.set(color, items);
-          if (isPark(building)) continue;
+          // Ground-type facilities also use their floor count for capacities such as housing, so no solid is extruded from it.
+          if (isPark(building) || (building.variant !== undefined
+            && md?.agents?.[building.variant]?.model_type === MODEL_MODULAR_GROUND)) continue;
           let wallColor = wallColors.get(color);
           if (!wallColor) {
             wallColor = wallColorOf(color);

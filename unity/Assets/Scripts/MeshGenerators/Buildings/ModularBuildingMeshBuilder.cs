@@ -198,7 +198,9 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
 
-        if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork)
+        // Props handed to GPU instancing count as drawn content, so an empty body does not get the fallback shape.
+        if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork
+            && !(BuildingScatterRenderer.Sink?.Count > 0))
         {
             Debug.LogWarning($"[MBMB] パーツが0件 → 白い箱フォールバック");
             foreach (Mesh temp in temporaryMeshes)
