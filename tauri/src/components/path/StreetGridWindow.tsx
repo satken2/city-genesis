@@ -5,11 +5,11 @@ import { describeError } from "../../utils/errors";
  * CityMapCanvasで多角形を指定し、選択したパターンの街路を計画中(STATUS_SCHEDULED_CONSTRUCTION)で作る。
  * 地形追従・街区内配置・接続と線形の検証はPOST /api/v1/paths/street-gridが担当する。
  * 作成は現在の入力のプレビュー確認後にだけ許可し、入力を変えたらプレビューを破棄する。
- * 複数種類はバックエンドが最大勾配の小さい順に配置する。
+ * 地形追従の幹線と枝道の割り当ては、選んだ道路の幅をもとにコアが決める。
  * 作成した街路は建設計画として通常の着工・竣工を待つ。シナリオ制作では一括完成も利用できる。
  *
- * 左クリックで頂点追加、右クリック・Delete・Backspaceで末尾削除、左ドラッグで移動、ホイールで拡大縮小する。
- * CityMapCanvasのパンを許可し、押下から解放までの移動距離で頂点追加とドラッグを判別する。
+ * 左クリックで頂点を置き、右クリックで範囲を閉じる。確定後は頂点のドラッグ・辺への挿入・頂点の削除で編集する。
+ * 面積は描画中の輪郭から求める。海岸線で切り詰めた後の対象面積はコアで判定する。
  * 地図の表示領域を確保するため、範囲指定の操作案内はヒントバーに表示する。
  *
  * 最初に受けたcamera:stateだけを使い、3Dカメラ位置に地図を合わせる。
@@ -32,9 +32,12 @@ import { buildApiUrl, fetchApi } from "../../utils/api";
 import { clearHintbarTextIf, setHintbarText } from "../../utils/hintbar";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { PATH_STREET } from "../../constants";
+import { formatArea } from "../../utils/formatArea";
+import { resolveIntlLocale } from "../../utils/locale";
+import { ringSignedArea } from "../terrain/riverGeometry";
+import { hitTestShape, type XZ as WorldPoint } from "./pathShapeOverlay";
 import "./StreetGridWindow.css";
 
-type WorldPoint = { x: number; z: number };
 const STREET_PATTERNS = ["relaxed_grid", "contour", "organic"] as const;
 const BLOCK_PATTERNS = ["block_grid", "block_strips", "block_perimeter"] as const;
 type StreetPattern = (typeof STREET_PATTERNS)[number] | (typeof BLOCK_PATTERNS)[number];
@@ -61,9 +64,6 @@ type StreetGridPlan = StreetGridSummary & {
 
 /** 3D camera state (camera:state); only position is used. */
 type CameraStatePayload = { position?: number[] };
-
-/** A release within this pixel distance from the press is a click adding a vertex; otherwise it is a pan. */
-const CLICK_THRESHOLD_PX = 4;
 
 /** Radius in meters when centering the map on the camera position */
 const CAMERA_HALF_EXTENT_M = 600;
@@ -94,11 +94,14 @@ const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
 };
 
 export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const masterData = useMasterData();
   const mapRef = useRef<CityMapCanvasHandle>(null);
 
   const [vertices, setVertices] = useState<WorldPoint[]>([]);
+  const [closed, setClosed] = useState(false);
+  const [hover, setHover] = useState<WorldPoint | null>(null);
+  const dragRef = useRef<{ index: number; pointerId: number; start: WorldPoint; vertex: WorldPoint } | null>(null);
   const [spacingInput, setSpacingInput] = useState(String(DEFAULT_SPACING_M));
   const [pattern, setPattern] = useState<StreetPattern>("relaxed_grid");
   const [parcelSizeInput, setParcelSizeInput] = useState("20");
@@ -118,7 +121,10 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const minSizeM = blockMode ? 15 : SPACING_MIN_M;
   const maxSizeM = blockMode ? 25 : SPACING_MAX_M;
   const sizeValid = Number.isInteger(sizeM) && sizeM >= minSizeM && sizeM <= maxSizeM;
-  const hint = t(vertices.length < 3 ? "scenarioTools.hintAddVertices" : "scenarioTools.hintReady");
+  const hint = t(closed ? "scenarioTools.hintReady" : "scenarioTools.hintAddVertices");
+  const provisional = !closed && vertices.length > 0 ? hover : null;
+  const ring = useMemo(() => provisional ? [...vertices, provisional] : vertices, [vertices, provisional]);
+  const areaM2 = useMemo(() => Math.abs(ringSignedArea(ring.map(p => [p.x, p.z]))), [ring]);
 
   useEffect(() => {
     void setHintbarText(hint).catch(console.error);
@@ -127,22 +133,9 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     };
   }, [hint]);
 
-  // CityMapCanvas mirrors pointer handlers in refs, so also keep vertices and hover position
-  // in refs to access them without recreating handlers.
-  const verticesRef = useRef<WorldPoint[]>(vertices);
-  verticesRef.current = vertices;
-  const hoverRef = useRef<WorldPoint | null>(null);
-  const pressRef = useRef<{ screen: { x: number; y: number }; world: WorldPoint } | null>(null);
-  const lastScreenRef = useRef<{ x: number; y: number } | null>(null);
   const fittedRef = useRef(false);
-  const previewRef = useRef<StreetGridPlan | null>(null);
-  previewRef.current = preview?.plan ?? null;
-  const pathMasterRef = useRef(masterData?.paths);
-  pathMasterRef.current = masterData?.paths;
   /** Incremented on every input change so a preview response for older inputs is ignored. */
   const inputVersionRef = useRef(0);
-
-  const redraw = useCallback(() => setOverlayVersion((v) => v + 1), []);
 
   /** Selectable street variants: surface streets supporting frontage, excluding elevated/underground paths. */
   const streetVariants = useMemo(() => {
@@ -205,65 +198,85 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   }, []);
 
   /* ---- Vertex editing ---- */
-  const removeLastVertex = useCallback(() => {
-    setVertices((prev) => prev.slice(0, -1));
+  const removeVertex = useCallback((index: number) => {
+    dragRef.current = null;
+    setVertices(prev => prev.filter((_, i) => i !== index));
+    if (vertices.length <= 3) setClosed(false);
     setMessage(null);
-  }, []);
+  }, [vertices.length]);
+
+  function clearArea() {
+    dragRef.current = null;
+    setVertices([]);
+    setClosed(false);
+    setHover(null);
+  }
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.key === "Delete" || e.key === "Backspace") && !(e.target instanceof HTMLInputElement)) {
-        removeLastVertex();
+      if (!busy && vertices.length && (e.key === "Delete" || e.key === "Backspace") && !(e.target instanceof HTMLInputElement)) {
+        e.preventDefault();
+        removeVertex(vertices.length - 1);
       }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [removeLastVertex]);
-
-  useEffect(() => {
-    redraw();
-  }, [vertices, preview, redraw]);
+  }, [busy, vertices.length, removeVertex]);
 
   /* ---- Pointer controls ---- */
-  const handlePointerDown = useCallback((e: CityMapPointerEvent): boolean => {
-    pressRef.current = { screen: e.screen, world: e.world };
-    lastScreenRef.current = e.screen;
-    // Return false to let CityMapCanvas pan; detect clicks on mouseup.
-    return false;
-  }, []);
+  function hitOutline(e: CityMapPointerEvent) {
+    // 閉じ辺も通常の辺と同じように判定する。頂点が辺に重なる場合は頂点が優先される。
+    return hitTestShape({ anchors: [...vertices, vertices[0]], curved: false }, e.screen, e.view);
+  }
 
-  const handlePointerMove = useCallback(
-    (e: CityMapPointerEvent) => {
-      lastScreenRef.current = e.screen;
-      hoverRef.current = e.world;
-      if (verticesRef.current.length > 0) redraw();
-    },
-    [redraw]
-  );
+  function handleMapClick(e: CityMapPointerEvent) {
+    if (busy) return;
+    if (closed) {
+      const hit = hitOutline(e);
+      if (hit?.type !== "edge") return;
+      const i = hit.index + 1;
+      setVertices(prev => [...prev.slice(0, i), hit.world, ...prev.slice(i)]);
+    } else {
+      setVertices(prev => [...prev, e.world]);
+      setHover(null);
+    }
+    setMessage(null);
+  }
 
-  useEffect(() => {
-    const onMouseUp = (e: MouseEvent) => {
-      const press = pressRef.current;
-      pressRef.current = null;
-      if (!press || e.button !== 0) return;
-      const last = lastScreenRef.current ?? press.screen;
-      const moved = Math.hypot(last.x - press.screen.x, last.y - press.screen.y);
-      if (moved > CLICK_THRESHOLD_PX) return;
-      setVertices((prev) => [...prev, press.world]);
-      setMessage(null);
-    };
-    window.addEventListener("mouseup", onMouseUp);
-    return () => window.removeEventListener("mouseup", onMouseUp);
-  }, []);
+  function handlePointerDown(e: CityMapPointerEvent): boolean {
+    if (busy || !closed) return false;
+    const hit = hitOutline(e);
+    if (hit?.type !== "node") return false;
+    dragRef.current = { index: hit.index, pointerId: (e.event as PointerEvent).pointerId, start: e.world, vertex: vertices[hit.index] };
+    return true;
+  }
 
-  const handleContextMenu = useCallback(() => {
-    removeLastVertex();
-  }, [removeLastVertex]);
+  function moveVertex(e: CityMapPointerEvent) {
+    const drag = dragRef.current;
+    if (!drag || busy || drag.pointerId !== (e.event as PointerEvent).pointerId) return;
+    const point = { x: drag.vertex.x + (e.world.x - drag.start.x), z: drag.vertex.z + (e.world.z - drag.start.z) };
+    setVertices(prev => prev[drag.index]?.x === point.x && prev[drag.index]?.z === point.z
+      ? prev : prev.map((p, i) => i === drag.index ? point : p));
+    setMessage(null);
+  }
+
+  function handleContextMenu(e: CityMapPointerEvent) {
+    if (busy || dragRef.current) return;
+    if (!closed) {
+      if (vertices.length >= 3) {
+        setClosed(true);
+        setHover(null);
+      }
+      return;
+    }
+    const hit = hitOutline(e);
+    if (hit?.type === "node") removeVertex(hit.index);
+  }
 
   /* ---- Area and preview overlay ---- */
   const overlayDraw = useCallback((ctx: CanvasRenderingContext2D, view: CityMapViewState) => {
     const px = (v: number) => v / view.zoom;
-    const plan = previewRef.current;
+    const plan = preview?.plan;
     if (plan) {
       ctx.strokeStyle = PREVIEW_COLOR;
       ctx.lineCap = "round";
@@ -273,36 +286,40 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         ctx.beginPath();
         ctx.moveTo(segment.points[0][0], segment.points[0][1]);
         for (const [x, z] of segment.points.slice(1)) ctx.lineTo(x, z);
-        ctx.lineWidth = Math.max(pathMasterRef.current?.[segment.path_variant]?.width ?? 0, px(PREVIEW_MIN_WIDTH_PX));
+        ctx.lineWidth = Math.max(masterData?.paths[segment.path_variant]?.width ?? 0, px(PREVIEW_MIN_WIDTH_PX));
         ctx.stroke();
       }
     }
 
-    const pts = verticesRef.current;
+    const pts = vertices;
     if (pts.length === 0) return;
+
+    if (ring.length >= 3) {
+      ctx.beginPath();
+      ctx.moveTo(ring[0].x, ring[0].z);
+      for (let i = 1; i < ring.length; i++) ctx.lineTo(ring[i].x, ring[i].z);
+      ctx.closePath();
+      ctx.fillStyle = AREA_FILL;
+      ctx.fill();
+    }
 
     if (pts.length >= 2) {
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].z);
       for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].z);
-      if (pts.length >= 3) {
-        ctx.closePath();
-        ctx.fillStyle = AREA_FILL;
-        ctx.fill();
-      }
+      if (closed) ctx.closePath();
       ctx.strokeStyle = AREA_EDGE;
       ctx.lineWidth = px(2);
       ctx.setLineDash([]);
       ctx.stroke();
     }
 
-    // Provisional edge from the last vertex to the cursor
-    const hover = hoverRef.current;
-    if (hover) {
+    if (provisional) {
       const last = pts[pts.length - 1];
       ctx.beginPath();
       ctx.moveTo(last.x, last.z);
-      ctx.lineTo(hover.x, hover.z);
+      ctx.lineTo(provisional.x, provisional.z);
+      if (pts.length >= 2) ctx.lineTo(pts[0].x, pts[0].z);
       ctx.strokeStyle = AREA_EDGE;
       ctx.lineWidth = px(1);
       ctx.setLineDash([px(6), px(4)]);
@@ -319,7 +336,9 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       ctx.lineWidth = px(1);
       ctx.stroke();
     }
-  }, []);
+  }, [closed, vertices, ring, provisional, preview, masterData]);
+
+  useEffect(() => setOverlayVersion(v => v + 1), [overlayDraw]);
 
   /* ---- Preview and creation ---- */
   const postStreetGrid = <T,>(path: string) =>
@@ -373,7 +392,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     try {
       const result = await postStreetGrid<StreetGridResult>("/api/v1/paths/street-grid");
       setMessage(summarize(result, "scenarioTools.gridCreated", result.created));
-      setVertices([]);
+      clearArea();
       // Reflect planned streets in 3D and refresh the map's road data.
       await sendSessionReload();
       mapRef.current?.reload();
@@ -384,7 +403,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }
 
-  const canPreview = vertices.length >= 3 && (variants?.length ?? 0) > 0 && sizeValid && !busy;
+  const canPreview = closed && areaM2 > 0 && (variants?.length ?? 0) > 0 && sizeValid && !busy;
   const canCreate = canPreview && preview !== null;
   const shownMessage = preview?.summary ?? message;
 
@@ -404,6 +423,9 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               {v.name}
             </label>
           ))}
+          <output className="street-grid__area" aria-live="off">
+            {t("scenarioTools.selectedArea", { area: formatArea(areaM2, resolveIntlLocale(i18n.language)) })}
+          </output>
         </div>
         <div className="street-grid__controls">
           <label className="street-grid__field">
@@ -457,7 +479,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             )}
           </label>}
           <div className="street-grid__actions">
-            <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={() => setVertices([])}>
+            <button type="button" className="street-grid__btn" disabled={busy || vertices.length === 0} onClick={() => { clearArea(); setMessage(null); }}>
               {t("scenarioTools.clearVertices")}
             </button>
             <button type="button" className="street-grid__btn" disabled={!canPreview} onClick={() => void previewStreetGrid()}>
@@ -479,8 +501,14 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           showCompass
           overlayDraw={overlayDraw}
           overlayVersion={overlayVersion}
+          onMapClick={handleMapClick}
+          onCursorWorldPos={!closed && vertices.length > 0 ? setHover : undefined}
           onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
+          onPointerMove={moveVertex}
+          onPointerUp={e => {
+            if (e.event.type !== "pointercancel") moveVertex(e);
+            dragRef.current = null;
+          }}
           onContextMenu={handleContextMenu}
           cursor="crosshair"
         />

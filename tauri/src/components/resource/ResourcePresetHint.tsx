@@ -9,6 +9,7 @@ import { DAYS_PER_YEAR, RESOURCE_WATER } from "../../constants";
 import { sustainableDailyYield, waterPopulationEstimate, type ResourcePreset } from "../../data/resourcePresets";
 import type { MasterData } from "../../types";
 import { resolveIntlLocale } from "../../utils/locale";
+import { formatArea } from "../../utils/formatArea";
 
 type ResourcePresetHintProps = {
   preset: ResourcePreset | null;
@@ -21,12 +22,6 @@ type ResourcePresetHintProps = {
   /** The caller supplies a class to match the notes to the containing panel. */
   className: string;
 };
-
-/** Use m² below 1ha, otherwise km² with three significant figures. */
-function formatArea(areaM2: number, locale: string): string {
-  if (areaM2 < 10_000) return `${Math.round(areaM2).toLocaleString(locale)} m²`;
-  return `${new Intl.NumberFormat(locale, { maximumSignificantDigits: 3 }).format(areaM2 / 1e6)} km²`;
-}
 
 export function ResourcePresetHint({
   preset,

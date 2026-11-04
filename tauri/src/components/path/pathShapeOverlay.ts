@@ -29,6 +29,9 @@ export type PathShapeGeometry = {
   curved: boolean;
 };
 
+type CenterlineGeometry = Pick<PathShapeGeometry, "anchors" | "curved" | "controlIn" | "controlOut">
+  | { anchors: XZ[]; curved: false };
+
 /** Hit test result, prioritized as controls > nodes > edges. */
 export type ShapeHit =
   | { type: "control"; index: number; which: "in" | "out" }
@@ -190,7 +193,7 @@ export function applyLocalMove(p: PathShapeUpdatePayload, hit: ShapeHit, world: 
 /* Polyline conversion */
 
 /** Points for segment i (anchors[i] → anchors[i+1]). A cubic Bézier in curve mode when both controls exist, otherwise a straight line. */
-export function segmentPoints(geom: PathShapeGeometry, i: number): XZ[] {
+export function segmentPoints(geom: CenterlineGeometry, i: number): XZ[] {
   const a = geom.anchors[i];
   const b = geom.anchors[i + 1];
   const c1 = geom.curved ? geom.controlOut[i] : null;
@@ -252,7 +255,7 @@ export function screenToWorld(view: CityMapViewState, s: { x: number; y: number 
  * For edge hits, return the nearest point on the edge in world coordinates for waypoint insertion.
  */
 export function hitTestShape(
-  geom: PathShapeGeometry,
+  geom: CenterlineGeometry,
   screen: { x: number; y: number },
   view: CityMapViewState,
   opts: typeof SHAPE_HIT_OPTIONS = SHAPE_HIT_OPTIONS,
