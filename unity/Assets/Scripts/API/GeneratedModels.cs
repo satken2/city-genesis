@@ -93,6 +93,8 @@ namespace GeneratedModels
         public List<object> polygon;
         /// <summary>中心点座標 [x, z]</summary>
         public List<object> center_point;
+        /// <summary>スラムの描画範囲の座標列 [[x, z], ...](polygon と同じく center_point 基準)。底面(polygon)の外まで広がる見た目だけの範囲で、底面の外の小屋はこの範囲の縁へ向かってまばらに描く。スラム以外は null</summary>
+        public List<object> fringe_polygon;
         /// <summary>立地区画の天然の海岸の岸壁の線 [A'x, A'z, B'x, B'z](A'→B' で海が左)。港の岸壁の描画と入港船の接岸に使う。沿岸区画以外・埋立地の岸壁に面する区画は null サーバーサイドで計算されるフィールド。型は動的。</summary>
         public object berth_line;
         /// <summary>ステータス（計画中・建設中・稼働中など。共有定数の STATUS_* を参照）</summary>

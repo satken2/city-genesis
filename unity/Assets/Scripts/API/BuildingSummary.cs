@@ -54,6 +54,12 @@ namespace GeneratedModels
         /// </summary>
         public List<object> berth_line;
 
+        /// <summary>
+        /// A slum's drawn range (multi_agent schema), local XZ relative to center_point like polygon. It reaches beyond the parcel only on a free
+        /// frontier and coincides with the parcel where the slum was stopped; FillLayout thins huts out toward its edge. Null for other buildings.
+        /// </summary>
+        public List<object> fringe_polygon;
+
         private float[][] _polygonArrayCache;
 
         /// <summary>
@@ -67,6 +73,19 @@ namespace GeneratedModels
                 if (_polygonArrayCache == null && polygon != null)
                     _polygonArrayCache = GeneratedModelUtils.ToFloatJaggedArray(polygon);
                 return _polygonArrayCache;
+            }
+        }
+
+        private float[][] _fringePolygonArrayCache;
+
+        /// <summary>Get fringe_polygon as float[][] (lazily cached); null when absent.</summary>
+        public float[][] fringePolygonArray
+        {
+            get
+            {
+                if (_fringePolygonArrayCache == null && fringe_polygon != null)
+                    _fringePolygonArrayCache = GeneratedModelUtils.ToFloatJaggedArray(fringe_polygon);
+                return _fringePolygonArrayCache;
             }
         }
 

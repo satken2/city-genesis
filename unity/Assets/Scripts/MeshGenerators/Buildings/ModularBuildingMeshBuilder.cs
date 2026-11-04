@@ -43,7 +43,8 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
 
         Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
 
-        return GenerateInternal(footprint, floors, prefix, floorHeight, visual_variant, visual_variant2, modelType, buildingShape, fenceFootprint, centerPointWorld, isDynamic, floorMaterial: floorMaterial);
+        return GenerateInternal(footprint, floors, prefix, floorHeight, visual_variant, visual_variant2, modelType, buildingShape, fenceFootprint, centerPointWorld, isDynamic,
+            floorMaterial: floorMaterial, fillFringe: BuildingMeshUtils.GetFringe(buildingData));
     }
 
     /// <summary>
@@ -77,7 +78,8 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
         Vector3 centerPointWorld,
         bool isDynamic = false,
         bool generateFoundation = true,
-        Material floorMaterial = null)
+        Material floorMaterial = null,
+        Vector2[] fillFringe = null)
     {
         bool isGroundModel = modelType == Constants.MODEL_MODULAR_GROUND;
 
@@ -97,7 +99,7 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
         var bodyData = ModularBodyBuilder.GenerateBody(
             footprint, floors, prefix, floorHeight, visual_variant, buildingShape,
             modelType, fenceFootprint, centerPointWorld, isDynamic, floorMaterial, layout,
-            occupiedFootprint, visual_variant2);
+            occupiedFootprint, visual_variant2, fillFringe);
 
         var combineInstances = bodyData.CombineInstances;
         var allMaterials = bodyData.Materials;

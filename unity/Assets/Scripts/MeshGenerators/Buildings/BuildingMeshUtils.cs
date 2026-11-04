@@ -704,6 +704,22 @@ public static class BuildingMeshUtils
         return NormalizeFootprint(footprint);
     }
 
+    /// <summary>The drawn range (fringe_polygon) as center-relative vertices, like GetFootprint; null without one.</summary>
+    public static Vector2[] GetFringe(BuildingSummary buildingData)
+    {
+        float[][] points = buildingData.fringePolygonArray;
+        if (points == null || points.Length < 3)
+        {
+            return null;
+        }
+        var fringe = new Vector2[points.Length];
+        for (int i = 0; i < points.Length; i++)
+        {
+            fringe[i] = new Vector2(points[i][0], points[i][1]);
+        }
+        return fringe;
+    }
+
     /// <summary>Remove degenerate vertices from the center-relative footprint vertices and normalize to counterclockwise winding. May modify the supplied array.</summary>
     public static Vector2[] NormalizeFootprint(Vector2[] footprint)
     {

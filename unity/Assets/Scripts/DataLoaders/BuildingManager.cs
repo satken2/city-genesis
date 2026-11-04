@@ -1295,7 +1295,8 @@ public class BuildingManager : BaseApiDataManager
     // ================================================================
 
     /// <summary>
-    /// Building bounding sphere radius (m). Combines the farthest point from the footprint center with building height for projected ratio checks.
+    /// Building bounding sphere radius (m). Combines the farthest point from the footprint center (including a slum's drawn range, where huts stand
+    /// beyond the footprint) with building height for projected ratio checks.
     /// Cache per building and reuse assuming geometry remains unchanged across versions
     /// (minor discrepancies from floor count changes are negligible relative to coarse thresholds).
     /// </summary>
@@ -1303,9 +1304,9 @@ public class BuildingManager : BaseApiDataManager
     {
         if (buildingBoundsRadius.TryGetValue(data.agent_id, out float cached)) return cached;
         float horizontal = 0f;
-        var poly = data.polygonArray;
-        if (poly != null)
+        foreach (float[][] poly in new[] { data.polygonArray, data.fringePolygonArray })
         {
+            if (poly == null) continue;
             for (int i = 0; i < poly.Length; i++)
             {
                 if (poly[i] == null || poly[i].Length < 2) continue;
@@ -1737,6 +1738,7 @@ public class BuildingManager : BaseApiDataManager
         hasher.Add(d.polygonArray);
         hasher.Add(d.centerPointArray);
         hasher.Add(d.berthLineArray);
+        hasher.Add(d.fringePolygonArray);
         hasher.Add(d.visual_variant);
         hasher.Add(d.visual_variant2);
         hasher.Add(d.visual_variant3);

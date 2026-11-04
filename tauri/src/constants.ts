@@ -307,6 +307,7 @@ export const SEA_GRADING_TOP: number = 3.0;
 export const GRADING_MAX_AREA: number = 4000000.0;
 export const GRADING_HEIGHT_OFFSET_LIMIT: number = 100.0;
 export const GRADING_MIN_LAND_OVERLAP: number = 1.0;
+export const SLUM_FRINGE_DEPTH: number = 50.0;
 export const ENV_SOURCE_CORE_RADIUS_M: number = 10.0;
 export const ENV_DECAY_CUTOFF_RATIO: number = 4.0;
 export const GROUND_COVER_GRASSLAND: number = 1;

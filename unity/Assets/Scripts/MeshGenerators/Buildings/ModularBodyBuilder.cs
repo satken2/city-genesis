@@ -116,6 +116,7 @@ public static class ModularBodyBuilder
     /// <param name="floorMaterial">Ground-panel material already resolved by caller from master draw_floor and floor parts (a→b→common). Null omits panels.</param>
     /// <param name="occupiedFootprint">Footprint before entrance/exterior-stair setbacks. Scatter parts lie outside it. Null uses footprint.</param>
     /// <param name="visual_variant2">Random seed for scatter placement.</param>
+    /// <param name="fillFringe">Drawn range for fill parts beyond the parcel (local XZ like footprint; <see cref="FillLayout"/>). Null fills only the parcel.</param>
     public static BodyMeshData GenerateBody(
         Vector2[] footprint,
         int floors,
@@ -130,7 +131,8 @@ public static class ModularBodyBuilder
         Material floorMaterial = null,
         ExteriorStairBuilder.Layout stairs = null,
         Vector2[] occupiedFootprint = null,
-        float visual_variant2 = 0f)
+        float visual_variant2 = 0f,
+        Vector2[] fillFringe = null)
     {
         using var scope = bodyMarker.Auto();
         int variantNumber = BuildingMeshUtils.ResolveModelId(prefix, visual_variant);
@@ -297,7 +299,7 @@ public static class ModularBodyBuilder
             centerPointWorld, deformToTerrain,
             combineInstances, allMaterials, temporaryMeshes,
             scatterFootprint: occupiedFootprint ?? footprint, scatterSeed: visual_variant2, frontFootprint: footprint,
-            scatterOverFootprint: isGroundModel);
+            scatterOverFootprint: isGroundModel, fillFringe: fillFringe);
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] 壁・角・地面完了: {combineInstances.Count}インスタンス, {allMaterials.Count}マテリアル");
 
@@ -332,7 +334,7 @@ public static class ModularBodyBuilder
     /// - Scatter: place scatter parts in floorPolygon's vacant area outside building scatterFootprint and the entry corridor
     ///   (GenerateScatter). scatterSeed controls randomness. Null scatterFootprint omits scatter.
     ///   scatterOverFootprint=true also uses the area over the footprint, for ground models whose footprint has no body.
-    /// - Fill: tile all of floorPolygon with fill parts on a grid fixed to world coordinates (GenerateFill).
+    /// - Fill: tile all of floorPolygon with fill parts on a grid fixed to world coordinates, thinning out into fillFringe beyond it (GenerateFill).
     /// - Ground panels: cover floorPolygon with caller-resolved floorMaterial from master draw_floor
     ///   and floor parts (a{variant}→b{bd_type}→common) (<see cref="AppendGroundPanel"/>).
     ///   Null floorMaterial (draw_floor disabled or no floor parts anywhere) omits
@@ -350,20 +352,20 @@ public static class ModularBodyBuilder
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
         Vector2? fenceOpeningCenter = null, float fenceOpeningRadius = 0f,
         Vector2[] scatterFootprint = null, float scatterSeed = 0f, Vector2[] frontFootprint = null,
-        bool scatterOverFootprint = false)
+        bool scatterOverFootprint = false, Vector2[] fillFringe = null)
     {
         if (BuildingExteriorRenderer.Capture != null && BuildingExteriorRenderer.DeferSiteDecorations)
         {
             BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) => BuildSiteDecorations(
                 prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, centerPointWorld,
                 deformToTerrain, meshes, materials, temporary, fenceOpeningCenter, fenceOpeningRadius,
-                scatterFootprint, scatterSeed, frontFootprint, scatterOverFootprint));
+                scatterFootprint, scatterSeed, frontFootprint, scatterOverFootprint, fillFringe));
         }
         else
         {
             BuildSiteDecorations(prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, centerPointWorld,
                 deformToTerrain, combineInstances, allMaterials, temporaryMeshes, fenceOpeningCenter, fenceOpeningRadius,
-                scatterFootprint, scatterSeed, frontFootprint, scatterOverFootprint);
+                scatterFootprint, scatterSeed, frontFootprint, scatterOverFootprint, fillFringe);
         }
         AppendGroundPanel(floorPolygon, floorMaterial, centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
     }
@@ -414,7 +416,7 @@ public static class ModularBodyBuilder
         Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
         Vector2? fenceOpeningCenter, float fenceOpeningRadius,
-        Vector2[] scatterFootprint, float scatterSeed, Vector2[] frontFootprint, bool scatterOverFootprint)
+        Vector2[] scatterFootprint, float scatterSeed, Vector2[] frontFootprint, bool scatterOverFootprint, Vector2[] fillFringe)
     {
         using var scope = siteDecorationsMarker.Auto();
         Vector2[] fenceLine = BuildingMeshUtils.OffsetPolygonOutward(fenceFootprint, -FENCE_INSET);
@@ -558,7 +560,7 @@ public static class ModularBodyBuilder
         // --- Fill parts ---
         if (floorPolygon != null && floorPolygon.Length >= 3)
         {
-            GenerateFill(prefix, suffix, floorPolygon, centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
+            GenerateFill(prefix, suffix, floorPolygon, fillFringe, centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
         }
     }
 
@@ -1006,10 +1008,11 @@ public static class ModularBodyBuilder
 
     /// <summary>
     /// Tile the whole site with fill1, 2, … at <see cref="FillLayout"/> positions on the world-fixed grid, with no count or area limit
-    /// (shown buildings draw them instanced). Placement and grounding are the same as scatter parts. Do nothing if absent.
+    /// (shown buildings draw them instanced), thinning out into the drawn range fringe beyond the site.
+    /// Placement and grounding are the same as scatter parts. Do nothing if absent.
     /// </summary>
     private static void GenerateFill(
-        string prefix, int suffix, Vector2[] site, Vector3 centerPointWorld, bool deformToTerrain,
+        string prefix, int suffix, Vector2[] site, Vector2[] fringe, Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
         using var scope = fillMarker.Auto();
@@ -1020,7 +1023,7 @@ public static class ModularBodyBuilder
             return;
         }
 
-        List<ScatterLayout.Item> items = FillLayout.Plan(site, new Vector2(centerPointWorld.x, centerPointWorld.z),
+        List<ScatterLayout.Item> items = FillLayout.Plan(site, fringe, new Vector2(centerPointWorld.x, centerPointWorld.z),
             parts.kinds.ConvertAll(kind => kind.Bounds));
         PlaceSiteParts(parts, items, centerPointWorld, deformToTerrain, combineInstances, allMaterials);
 
