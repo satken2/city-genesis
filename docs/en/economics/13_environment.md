@@ -11,13 +11,13 @@ The living environment describes how suitable land is for households. A parcel's
 | Noise | Sound from traffic and facility activity |
 | Air pollution | Exhaust, odors, dust, and other contamination from traffic and facilities |
 | Public safety | Local safety, also related to the likelihood of crime |
-| Sunlight | Exposure affected by shadows from surrounding buildings |
+| Sunlight | Exposure affected by shadows from surrounding buildings and crowding within dwellings |
 
 Noise, air pollution, and public safety effects spread beyond individual parcels. Residential and industrial placement, congestion, and density shape local living conditions.
 
 ## 13.3. Sanitation
 
-Insufficient sewage treatment or waste collection worsens sanitation and harms residents' health. Effects accumulate over time, and recovery takes time even after supply is restored. Medical care supports recovery but cannot replace sewage treatment or waste management.
+Insufficient sewage treatment or waste collection worsens sanitation and harms residents' health. Effects accumulate over time, and recovery takes time even after supply is restored. The sanitary condition of the dwelling itself also matters, so some housing problems cannot be resolved by supplying treatment services alone. Medical care supports recovery but cannot replace sewage treatment or waste management.
 
 ## 13.4. Effects on daily life
 
