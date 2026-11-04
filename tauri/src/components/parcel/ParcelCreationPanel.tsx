@@ -207,6 +207,8 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   const [lotDepth, setLotDepth] = useState(20);
   // Shared by random / split_random / block: parcel width variation (%).
   const [jitterPct, setJitterPct] = useState(25);
+  // For random mode: what the parcel rows run along. "terrain" follows the contour through the clicked point.
+  const [randomLayout, setRandomLayout] = useState<"road" | "terrain">("road");
 
   // Selected size preset (SIZE_PRESETS index). Manual editing of target fields clears it.
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
@@ -364,6 +366,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
           height,
           angle,
           average_area: area,
+          follow_terrain: randomLayout === "terrain",
           dry_run: true,
         };
         if (selectedMode === "random") {
@@ -430,7 +433,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         }
       }
     },
-    [selectedMode, pickedPosition, selectedPathId, selectedParcelId, pathAnchor, alongPathScope, alongPathCount, side, width, height, angle, area, lotWidth, lotDepth, jitterPct, baseUrl, pushPreviewToUnity, t]
+    [selectedMode, pickedPosition, selectedPathId, selectedParcelId, pathAnchor, alongPathScope, alongPathCount, side, width, height, angle, area, lotWidth, lotDepth, jitterPct, randomLayout, baseUrl, pushPreviewToUnity, t]
   );
 
   /* ---- Fetch preview after receiving selection ---- */
@@ -468,7 +471,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     const controller = new AbortController();
     void fetchPreview(controller.signal);
     return () => controller.abort();
-  }, [selectedMode, pickedPosition, width, height, angle, area, lotWidth, lotDepth, jitterPct, fetchPreview]);
+  }, [selectedMode, pickedPosition, width, height, angle, area, lotWidth, lotDepth, jitterPct, randomLayout, fetchPreview]);
 
   /* ---- IPC event listeners ---- */
 
@@ -670,6 +673,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         height,
         angle,
         average_area: area,
+        follow_terrain: randomLayout === "terrain",
       };
       if (selectedMode === "random") {
         payload.jitter = jitterPct / 100;
@@ -994,6 +998,32 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   </div>
                 )}
               </>
+            )}
+
+            {selectedMode === "random" && (
+              <div className="pc-input-row">
+                <span className="pc-input-label">{t("parcel_creation.randomLayout")}</span>
+                <div className="pc-radio-group">
+                  <label className="pc-radio-label">
+                    <input
+                      type="radio"
+                      name="randomLayout"
+                      checked={randomLayout === "road"}
+                      onChange={() => setRandomLayout("road")}
+                    />
+                    {t("parcel_creation.randomLayoutRoad")}
+                  </label>
+                  <label className="pc-radio-label">
+                    <input
+                      type="radio"
+                      name="randomLayout"
+                      checked={randomLayout === "terrain"}
+                      onChange={() => setRandomLayout("terrain")}
+                    />
+                    {t("parcel_creation.randomLayoutTerrain")}
+                  </label>
+                </div>
+              </div>
             )}
 
             {(selectedMode === "random" || selectedMode === "split_rectangle" || selectedMode === "split_random") && (
