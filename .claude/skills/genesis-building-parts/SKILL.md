@@ -94,6 +94,7 @@ LOD制作は**同じ建物を距離に応じて表現する作業**である。�
 | 敷地の入口に門を置きたい | `gate`(原点=入口の中心・接地0。bbox の幅がそのまま柵の開口の幅。入口の決め方は `SiteEntryLayout.cs` のコメント) |
 | 正面から入口まで通路を敷きたい | `trail`(柵と同じく X 方向に敷き詰める。原点は進む線上=Y中心) |
 | 敷地の空き地に植栽・車両・資材を散らしたい | `scatter1`, `scatter2`, …。犬小屋のように1棟に1個までの物は `scatter-single1`, … (配置の前提は `ScatterLayout.cs` のコメント。既存のプロップ・車両は `genesis-gallery/pipeline/jobs/scatter_parts.py` で写す。植え込み・庭木の葉は [[genesis-prop-parts]] の「樹木・植え込みの葉」に従う。接道側に空き地をまとめるならマスターの `building_shape=setback`) |
+| 敷地の全体を小屋などで埋め尽くしたい(区画の形が変わる建物でも配置が動かない) | `fill1`, `fill2`, …(遠景は各 `fill{n}_far`。配置の前提は `FillLayout.cs` のコメント) |
 | 切妻/片流れ屋根の妻壁の材質 | `generic-wall` |
 | 畑・庭など地面アセット(MODEL_MODULAR_GROUND) | `tile`(建物本体は一切描かない) |
 

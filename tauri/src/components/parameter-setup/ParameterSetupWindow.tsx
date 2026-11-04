@@ -44,7 +44,7 @@ type ApiResponse = {
   can_edit: boolean;
 };
 
-// Edited values, covering both numeric and boolean parameters (such as SPRAWL_ENABLED).
+// Edited values, covering both numeric and boolean parameters (such as SLUM_ENABLED).
 type EditedGroup = Record<string, number | boolean>;
 type EditedParams = {
   GENERAL_PARAMS?: EditedGroup;

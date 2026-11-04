@@ -513,8 +513,9 @@ export type AgentMasterEntry = {
   model_type?: number;
   // Variant placeable only in scenario authoring mode. Hide from normal-play construction panels.
   template_only?: boolean;
-  // Slum building created only through urban sprawl. Hide from normal-play construction panels.
-  sprawl_only?: boolean;
+  // Slum. Only the simulation places, grows, and shrinks it; the city can neither build nor operate on it,
+  // so it never appears in construction panels (including scenario mode).
+  slum?: boolean;
   // Compatible parcel type (PARCEL_* in constants.ts). Build only on parcels with exactly matching
   // parcel_type. Unset means PARCEL_LAND, matching backend is_building_compatible_with_parcel_type.
   parcel_type?: number;

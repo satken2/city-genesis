@@ -146,6 +146,7 @@
     "validationPathCollision": "道路・線路の占有範囲が干渉しています。赤い占有範囲を確認してください。",
     "validationRiverCollision": "川を地表で横断しています。高さや経路を調整してください。",
     "validationGradingSite": "造成工事の範囲には、高架や地下を含めてパスを通せません。工事が終わるまで範囲を避けてください。",
+    "validationSlum": "スラムには、高架や地下を含めてパスを通せません。スラムを避けて通してください。",
     "railJunction": {
       "main_unfinished": "未完成・造り替え中の線路には分岐・合流できません。",
       "reverse_merge": "未完成の線路の途中へは既存の線路を合流できません。",

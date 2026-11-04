@@ -146,6 +146,7 @@
     "validationPathCollision": "Los volúmenes de carreteras o vías se superponen. Revisa los volúmenes rojos.",
     "validationRiverCollision": "El trazado cruza un río al nivel del suelo. Ajusta la altura o la ruta.",
     "validationGradingSite": "Un trazado no puede atravesar una obra de movimiento de tierras, ni siquiera en elevado o bajo tierra. Evita la zona hasta que termine la obra.",
+    "validationSlum": "Una vía no puede atravesar un barrio marginal, ni siquiera elevada o subterránea. Trázala rodeándolo.",
     "railJunction": {
       "main_unfinished": "No se puede bifurcar desde una vía inconclusa o en reconstrucción, ni unirse a ella.",
       "reverse_merge": "Una vía existente no puede unirse a la mitad de una vía inconclusa.",

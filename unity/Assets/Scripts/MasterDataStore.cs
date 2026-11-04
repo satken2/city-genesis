@@ -38,6 +38,8 @@ public class MasterDataStore : MonoBehaviour
 		public float? default_height;
 		public bool? resizable;
 		public bool? shared_building;
+		// Slum. The city can neither acquire nor remove it, so path interference shows it as blocking (OccupancyVolumeUtil).
+		public bool? slum;
 		// Whether to render a ground panel, a horizontal slab covering the entire ground area. Unset (null) means disabled; opt in explicitly.
 		// Resolve floor-part materials through a{variant} -> b{bd_type} -> common when rendering.
 		public bool? draw_floor;

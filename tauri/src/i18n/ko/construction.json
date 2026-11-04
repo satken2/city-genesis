@@ -112,6 +112,7 @@
     "directInvalid": {
       "overlap_parcel": "기존 토지 구획과 겹칩니다",
       "overlap_city_building": "시의 시설·건설 예정지와 겹칩니다",
+      "overlap_slum": "판자촌과 겹칩니다",
       "overlap_path": "도로와 겹칩니다",
       "incompatible_parcel_type": "이 위치의 지형에는 이 건물을 지을 수 없습니다",
       "insufficient_water_depth": "이곳 안벽 앞의 수심은 약 {{depth}}m입니다. 이 건물에는 {{required}}m 이상이 필요합니다",

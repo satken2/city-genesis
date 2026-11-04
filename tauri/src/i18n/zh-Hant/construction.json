@@ -112,6 +112,7 @@
     "directInvalid": {
       "overlap_parcel": "與既有地塊重疊",
       "overlap_city_building": "與市政設施或計畫建設用地重疊",
+      "overlap_slum": "與棚戶區重疊",
       "overlap_path": "與道路重疊",
       "incompatible_parcel_type": "此處的地形無法建造此建築",
       "insufficient_water_depth": "此處岸壁前的水深約為{{depth}}公尺。此建築需要至少{{required}}公尺",

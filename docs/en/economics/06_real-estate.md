@@ -16,11 +16,8 @@ Facilities consider rent and business suitability; households also consider comm
 
 Households and facilities without premises temporarily occupy a virtual building in each district representing agents awaiting relocation. This means they have not secured residential or business space. Households evicted by a building pause, demolition, or unpaid rent move there immediately and search for a new home from there. Private shops, factories, and offices in a building scheduled for demolition close instead of relocating. See [households](07_households.md) for the distinction between immigrants awaiting housing and established residents.
 
-## 6.4. Spontaneous urban sprawl
+## 6.4. Slums
 
-Persistent housing shortages and hardship cause unpaved alleys, small parcels, and slum buildings to appear independently of city plans. This occurs when road and residential development fall behind demand, leaving households unable to obtain formal housing.
+When households remain unable to secure formal housing, a slum appears on vacant land that has no parcels or paths. A slum is one building paired with the single parcel it occupies. It spreads over flat land as more people move in, shrinks as residents move to regular housing, and disappears together with its parcel when no residents remain. The shapes of its parcel and building footprint therefore change from epoch to epoch.
 
-Alleys extend from existing roads and attract small homes. They bypass normal construction plans and building regulations, producing development that differs from the player's intended land use. Sprawl stops expanding when housing demand is met and hardship subsides.
-
-These alleys and buildings become part of the city; players can rebuild or remove their roads. When financially viable, slum buildings are replaced by multi-storey slum buildings with a shop or workshop on the ground floor. Slum buildings are occasionally torn down for no particular reason, and the small vacant parcels left behind are absorbed into their neighbors, so over a long time a slum consolidates into ordinary urban land where regular buildings can stand. Planned housing and road development helps residents obtain formal homes and supports prevention and redevelopment of sprawl.
-
+A slum charges no rent, and its residents move to regular housing whenever a home they can afford has a vacancy. The city can neither clear nor purchase a slum, and cannot run buildings or paths through it. The only way to shrink it is to provide housing its residents can afford. Slums do not spread onto parcels the player has already laid out.

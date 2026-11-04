@@ -146,6 +146,7 @@
     "validationPathCollision": "도로 또는 선로의 점유 범위가 겹칩니다. 빨간 점유 범위를 확인하세요.",
     "validationRiverCollision": "지표에서 강을 가로지릅니다. 높이나 경로를 조정하세요.",
     "validationGradingSite": "부지 조성 공사 범위에는 고가나 지하를 포함해 경로를 통과시킬 수 없습니다. 공사가 끝날 때까지 범위를 피하세요.",
+    "validationSlum": "판자촌에는 고가나 지하를 포함해 경로를 낼 수 없습니다. 판자촌을 피해서 내 주세요.",
     "railJunction": {
       "main_unfinished": "미완성이거나 재건설 중인 선로에서는 분기·합류할 수 없습니다.",
       "reverse_merge": "미완성 선로의 중간에는 기존 선로를 합류시킬 수 없습니다.",

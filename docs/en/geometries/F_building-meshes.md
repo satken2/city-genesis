@@ -19,6 +19,7 @@ FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with m
 | `ceil` / `floor` / `generic-wall` | Material-only sources for roofs, ground panels, and gable walls ([material resolution](R_material-resolution.md)) |
 | `gate` / `trail` | Gate at the site entry and walkway from the front to the entry |
 | `tile` / `scatter{n}` / `scatter-single{n}` | Ground tiles and plants, vehicles, or materials scattered over the vacant site (`scatter-single` at most once per building) |
+| `fill{n}` | Fill parts, such as shacks, covering the whole site |
 | `base-prebuilt` / `mid-prebuilt` / `top-prebuilt` | Prebuilt tiers; mashup wings use names such as `mashup-{model_prefix}-base-prebuilt` |
 | `port_*` / `yard_*` / `site_*` | Port, depot, and open-space parts |
 | `scaffold-*` / `crane-*` / `demo-*` / `excavator` | Construction and demolition sites |
@@ -36,9 +37,11 @@ For missing walls and corners, search the same folder in this order: position 1 
 
 ## Draw LOD
 
-Close prefers `{part}_close` in the selected folder and falls back to the ordinary part. Folder selection always depends on ordinary-part availability, regardless of LOD. Far never assembles parts: it stretches one far model to the building envelope, or each wing for mashups and open pits, falling back to boxes. Construction and demolition use low Far boxes; collapse uses one plate over the area the debris covers. See [LOD](E_lod.md) and [data loading](H_data-loading.md) for retention, reuse, and waiting for terrain.
+Close prefers `{part}_close` in the selected folder and falls back to the ordinary part. Folder selection always depends on ordinary-part availability, regardless of LOD. Except for buildings with fill parts, Far never assembles parts: it stretches one far model to the building envelope, or each wing for mashups and open pits, falling back to boxes. Construction and demolition use low Far boxes; collapse uses one plate over the area the debris covers. See [LOD](E_lod.md) and [data loading](H_data-loading.md) for retention, reuse, and waiting for terrain.
 
-Scatter parts (`scatter{n}` and `scatter-single{n}`) are not built into the building mesh. Like [terrain props](M_terrain-props.md), their shared models are drawn with GPU instancing across buildings. Their draw LOD is selected per part with the terrain-prop rules regardless of the building, including the handling of `_close` and `_far`. Generation that creates no shown building object, such as plan previews, includes scatter parts in the single mesh.
+Scatter parts (`scatter{n}` and `scatter-single{n}`) and fill parts (`fill{n}`) are not built into the building mesh. Like [terrain props](M_terrain-props.md), their shared models are drawn with GPU instancing across buildings. Their draw LOD is selected per part with the terrain-prop rules regardless of the building, including the handling of `_close` and `_far`. Generation that creates no shown building object, such as plan previews, includes them in the single mesh.
+
+Fill parts are placed one per cell of a grid fixed to world coordinates, in the cells that fit inside the site, and each part's position within its cell, orientation, and kind depend only on the cell's index. When the site's shape changes from epoch to epoch, parts in the cells that remain therefore stay where they were. Buildings with fill parts do not stretch a far model even at Far: they draw the ground panel and fill parts, leaving the distant look to each part's draw LOD.
 
 ## Road-access frontages
 

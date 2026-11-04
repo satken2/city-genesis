@@ -420,15 +420,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
  * Includes all buildable agents: TYPE_BUILDING (shared buildings), building=true TYPE_STANDARD
  * (ordinary facilities, including schools), TYPE_TRADE (import/export hubs), etc.
  * Display grouped into tiles by bd_category. Outside scenario mode, exclude template_only variants
- * (border checkpoints/landmarks), reserved for scenario authoring, and sprawl_only variants
- * (slum buildings), which only urban sprawl builds.
- * Always exclude earthworks, ordered by drawing an area in the dedicated earthworks window.
+ * (border checkpoints/landmarks), reserved for scenario authoring.
+ * Always exclude slums, which only the simulation places, and earthworks, ordered by drawing an area in the dedicated earthworks window.
  * Exclude City Hall when already placed since there can be only one (relocation opens from its details).
  */
   const buildingVariants = useMemo(() => {
     if (!masterData) return [];
     return Object.entries(masterData.agents).filter(
-      ([id, entry]) => entry.building && (scenarioMode || !(entry.template_only || entry.sprawl_only))
+      ([id, entry]) => entry.building && (scenarioMode || !entry.template_only) && !entry.slum
         && !isGradingVariant(Number(id))
         && !(Number(id) === VARIANT_CITY && cityHallPlaced && !relocateCityHall)
     ) as [string, AgentMasterEntry][];
@@ -1177,7 +1176,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         // Each landmark is unique within a city, so it cannot be copied even in scenario mode.
         const isLandmarkVariant = Object.values(masterData.landmarks ?? {})
           .some((lm) => lm.agent_variant === p.variant);
-        if (isLandmarkVariant || ((entry?.template_only || entry?.sprawl_only) && !scenarioMode)) {
+        if (isLandmarkVariant || entry?.slum || (entry?.template_only && !scenarioMode)) {
           void showNotification({
             message: t("building_construction.copySourceNotAllowed"),
             durationMs: 4000,

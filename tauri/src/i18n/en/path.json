@@ -146,6 +146,7 @@
     "validationPathCollision": "Road or track occupancy overlaps. Check the red occupancy volumes.",
     "validationRiverCollision": "The path crosses a river at ground level. Adjust the elevation or route.",
     "validationGradingSite": "A path cannot pass through an earthworks site, even elevated or underground. Keep clear of the site until the work is finished.",
+    "validationSlum": "A path cannot pass through a slum, even elevated or underground. Route it around the slum.",
     "railJunction": {
       "main_unfinished": "Cannot branch from or merge into a track that is unfinished or being rebuilt.",
       "reverse_merge": "An existing track cannot merge into the middle of an unfinished track.",

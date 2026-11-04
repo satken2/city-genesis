@@ -19,6 +19,7 @@ import {
 import { sendBuildingExploded, sendSessionReload } from "../../utils/ipc";
 import { fetchApi } from "../../utils/api";
 import { requestConfirm } from "../../utils/confirmDialog";
+import { useMasterData } from "../../contexts/MasterDataContext";
 import purchaseIcon from "../../assets/images/purchase.png";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
 import pauseIcon from "../../assets/images/ui/pause.png";
@@ -75,6 +76,7 @@ export function AgentOperationPanel({
   onActionPerformed,
 }: AgentOperationPanelProps) {
   const { t } = useTranslation();
+  const masterData = useMasterData();
   const [loading, setLoading] = useState(false);
   const mountedRef = useRef(true);
 
@@ -85,7 +87,8 @@ export function AgentOperationPanel({
     };
   }, []);
 
-  if (NO_OPERATION_TYPES.has(agent.type)) {
+  // The city cannot clear, purchase, or otherwise operate on a slum; it only shrinks as residents move to regular housing.
+  if (NO_OPERATION_TYPES.has(agent.type) || masterData?.agents[agent.variant]?.slum) {
     return null;
   }
 

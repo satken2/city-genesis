@@ -112,6 +112,7 @@
     "directInvalid": {
       "overlap_parcel": "Overlaps an existing parcel",
       "overlap_city_building": "Overlaps a city facility or planned construction site",
+      "overlap_slum": "Overlaps a slum",
       "overlap_path": "Overlaps a road",
       "incompatible_parcel_type": "This building cannot be built on this terrain",
       "insufficient_water_depth": "The water at this quay is about {{depth}} m deep. This building needs at least {{required}} m",

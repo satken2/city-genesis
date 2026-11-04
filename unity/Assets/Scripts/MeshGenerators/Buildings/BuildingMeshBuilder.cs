@@ -51,13 +51,15 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// Generate with a rendering LOD. Far stretches a distant model to the outline or uses a box (<see cref="GenerateFarBuilding"/>);
+    /// Generate with a rendering LOD. Far stretches a distant model to the outline or uses a box (<see cref="GenerateFarBuilding"/>),
+    /// except buildings that keep their assembly at Far (<see cref="AssemblesAtFar"/>);
     /// Close uses the same assembly but prefers `_close` parts (BuildingMeshUtils.CurrentDrawLod).
     /// isDynamic is a compatibility argument for terrain conformity, independent of rendering LOD.
     /// animate is for shown buildings: the crane top (CraneTop) and the model's moving parts (Motion) are returned
     /// instead of being combined, and the caller must attach them before initializing the visual mode.
     /// separateExterior is for shown buildings: ground panels (for every model type) and other site decorations (where applicable)
-    /// become ExteriorJobs, and scatter parts become Scatter for <see cref="BuildingScatterRenderer"/> instead of being combined.
+    /// become ExteriorJobs, and scatter and fill parts become Scatter for <see cref="BuildingScatterRenderer"/> instead of being combined.
+    /// At Far only Scatter is separated, because FarBuildingBatcher combines the distant mesh including its ground panel.
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false, bool animate = false)
     {
@@ -67,7 +69,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             Debug.LogError("BuildingMeshBuilder.Generate: BuildingSummary が null です。");
             return null;
         }
-        if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden)
+        bool far = drawLod == DrawLod.Far || drawLod == DrawLod.Hidden;
+        if (far && !AssemblesAtFar(buildingData))
         {
             return EnsureMaterials(GenerateFarBuilding(buildingData));
         }
@@ -78,7 +81,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         var previousSink = BuildingScatterRenderer.Sink;
         var previousMotion = BuildingMotionParts.Sink;
         int modelType = GetModelType(buildingData);
-        var jobs = separateExterior ? new List<BuildingExteriorRenderer.Build>() : null;
+        var jobs = separateExterior && !far ? new List<BuildingExteriorRenderer.Build>() : null;
         var scatter = separateExterior ? new List<BuildingScatterRenderer.Instance>() : null;
         var motion = animate ? new BuildingMotionParts() : null;
         BuildingMeshUtils.CurrentDrawLod = drawLod;
@@ -126,6 +129,22 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         }
         return GenerateSimpleBuildingWithHeight(BuildingMeshUtils.GetFootprint(buildingData),
             GetFarBoxHeight(buildingData.variant, buildingData.landmark, buildingData.floors ?? 1, status));
+    }
+
+    /// <summary>
+    /// Whether Far keeps the ordinary assembly (flat ground panel, no `_close`) instead of the distant model: buildings whose selected
+    /// model folder has fill parts, outside construction, demolition, and collapse. One stretched model cannot show a site tiled with
+    /// small parts, and the parts already pick their own render LOD by distance.
+    /// </summary>
+    private static bool AssemblesAtFar(BuildingSummary buildingData)
+    {
+        int status = buildingData.status;
+        if (status == Constants.STATUS_CONSTRUCTING || status == Constants.STATUS_DEMOLISHING || status == Constants.STATUS_COLLAPSED)
+        {
+            return false;
+        }
+        string prefix = BuildingMeshUtils.ResolveModelNaming(buildingData).Prefix;
+        return ModularBodyBuilder.HasFillParts(prefix, BuildingMeshUtils.ResolveModelId(prefix, buildingData.visual_variant));
     }
 
     /// <summary>Distant box height: one floor during construction/demolition, half a floor when collapsed (the citywide overview's low box), otherwise floor count × floor height.</summary>

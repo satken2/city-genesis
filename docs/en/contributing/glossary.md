@@ -91,7 +91,7 @@ This glossary keeps game-specific terminology consistent across the UI and docum
 
 | ja | en | es-419 | zh-Hans | zh-Hant | fr | ko |
 | --- | --- | --- | --- | --- | --- | --- |
-| スプロール | Urban sprawl | Expansión urbana | 城市蔓延 | 城市蔓延 | Étalement urbain | 스프롤 |
+| スラム | Slum | Barrio marginal | 棚户区 | 棚戶區 | Bidonville | 판자촌 |
 | 住環境 | Living environment | Entorno residencial | 居住环境 | 居住環境 | Cadre de vie | 주거 환경 |
 | 治安 | Public safety | Seguridad | 治安 | 治安 | Sécurité | 치안 |
 

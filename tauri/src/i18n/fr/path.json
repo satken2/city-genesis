@@ -146,6 +146,7 @@
     "validationPathCollision": "Les volumes occupés des routes ou voies se chevauchent. Vérifiez les volumes rouges.",
     "validationRiverCollision": "Le tracé traverse une rivière au niveau du sol. Ajustez la hauteur ou le tracé.",
     "validationGradingSite": "Un tracé ne peut pas traverser un chantier de terrassement, même en viaduc ou en souterrain. Contournez la zone jusqu'à la fin des travaux.",
+    "validationSlum": "Une voie ne peut pas traverser un bidonville, même surélevée ou souterraine. Faites-la passer autour.",
     "railJunction": {
       "main_unfinished": "Impossible de bifurquer depuis une voie inachevée ou en reconstruction, ni de la rejoindre.",
       "reverse_merge": "Une voie existante ne peut pas rejoindre le milieu d'une voie inachevée.",

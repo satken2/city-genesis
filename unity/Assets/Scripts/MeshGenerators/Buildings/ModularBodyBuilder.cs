@@ -18,6 +18,7 @@ public static class ModularBodyBuilder
     private static readonly StageMarker siteDecorationsMarker = new StageMarker("Building.SiteDecorations");
     private static readonly StageMarker tilesMarker = new StageMarker("Building.Tiles");
     private static readonly StageMarker scatterMarker = new StageMarker("Building.Scatter");
+    private static readonly StageMarker fillMarker = new StageMarker("Building.Fill");
     private static readonly StageMarker fenceCornerMarker = new StageMarker("Building.FenceCorner");
     private static readonly StageMarker deformToTerrainMarker = new StageMarker("Building.DeformToTerrain");
     private static readonly StageMarker groundPanelMarker = new StageMarker("Building.GroundPanel");
@@ -275,8 +276,8 @@ public static class ModularBodyBuilder
             return DefaultBodyBuilder.GenerateBody(footprint, floors, floorHeight);
         }
 
-        // --- Site decorations (fences/tiles/scatter/ground panels) ---
-        // Try fences/scatter for all modelType values; tiles only for MODEL_MODULAR_GROUND.
+        // --- Site decorations (fences/tiles/scatter/fill/ground panels) ---
+        // Try fences/scatter/fill for all modelType values; tiles only for MODEL_MODULAR_GROUND.
         // Draw ground panels only with master draw_floor=yes (non-null floorMaterial).
         // Tiles/ground panels cover the full parcel polygon (fenceFootprint). Footprint-only panels
         // would be hidden beneath the body. Fall back to footprint when the parcel is unavailable.
@@ -311,7 +312,7 @@ public static class ModularBodyBuilder
     }
 
     /// <summary>
-    /// Generate site decorations (fences/gates/trails/tiles/scatter/ground panels) and add them to combine lists.
+    /// Generate site decorations (fences/gates/trails/tiles/scatter/fill/ground panels) and add them to combine lists.
     /// Shared by modular (GenerateBody) and prebuilt (PreBuiltBuildingMeshBuilder) buildings.
     /// Receive polygons in local XZ relative to center_point (same convention as footprint)
     /// (pass parcel polygons already transformed by BuildingMeshUtils.ResolveParcelContext).
@@ -331,6 +332,7 @@ public static class ModularBodyBuilder
     /// - Scatter: place scatter parts in floorPolygon's vacant area outside building scatterFootprint and the entry corridor
     ///   (GenerateScatter). scatterSeed controls randomness. Null scatterFootprint omits scatter.
     ///   scatterOverFootprint=true also uses the area over the footprint, for ground models whose footprint has no body.
+    /// - Fill: tile all of floorPolygon with fill parts on a grid fixed to world coordinates (GenerateFill).
     /// - Ground panels: cover floorPolygon with caller-resolved floorMaterial from master draw_floor
     ///   and floor parts (a{variant}→b{bd_type}→common) (<see cref="AppendGroundPanel"/>).
     ///   Null floorMaterial (draw_floor disabled or no floor parts anywhere) omits
@@ -551,6 +553,12 @@ public static class ModularBodyBuilder
         {
             GenerateScatter(prefix, suffix, floorPolygon, scatterFootprint, scatterOverFootprint, hasEntry ? entry.Corridor() : null,
                             scatterSeed, centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
+        }
+
+        // --- Fill parts ---
+        if (floorPolygon != null && floorPolygon.Length >= 3)
+        {
+            GenerateFill(prefix, suffix, floorPolygon, centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
         }
     }
 
@@ -875,70 +883,75 @@ public static class ModularBodyBuilder
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, () => $"[MBB] タイル: {tileCount}個配置 ({prefix}/{suffix}/tile)");
     }
 
-    /// <summary>Search limit for each scatter-part series (scatter1, 2, … / scatter-single1, 2, …).</summary>
+    /// <summary>Search limit for each scatter or fill part series (scatter1, 2, … / scatter-single1, 2, … / fill1, 2, …).</summary>
     private const int MAX_SCATTER_PARTS = 16;
 
+    /// <summary>Part series tiling the whole site on a world-fixed grid (<see cref="FillLayout"/>).</summary>
+    public const string FILL_SERIES = "fill";
+
+    /// <summary>Whether the model folder has fill parts. Such buildings keep their assembly at Far (BuildingMeshBuilder.Generate).</summary>
+    public static bool HasFillParts(string prefix, int suffix)
+        => BuildingMeshUtils.HasModelAtPath(BuildingMeshUtils.PartPath(prefix, FILL_SERIES + 1, suffix));
+
+    /// <summary>Scatter or fill part models of one building in kinds order: resource paths while a sink is set, otherwise combined meshes and materials.</summary>
+    private sealed class SiteParts
+    {
+        public readonly List<string> paths = new List<string>();
+        public readonly List<Mesh> meshes = new List<Mesh>();
+        public readonly List<Material[]> materials = new List<Material[]>();
+        public readonly List<ScatterLayout.Kind> kinds = new List<ScatterLayout.Kind>();
+    }
+
     /// <summary>
-    /// Find scatter1, 2, … and scatter-single1, 2, … sequentially from 1 (each series stops at its first gap); place actual-size parts
-    /// at <see cref="ScatterLayout"/> positions outside keepClear and, unless overFootprint, the footprint. scatter-single kinds appear at most once per building.
-    /// Align origin to placement ground. For terrain conformity, ground is the lowest of four bounding-box-corner heights,
-    /// burying the uphill side to prevent floating (same as port-yard cargo). Do nothing if absent.
-    /// While <see cref="BuildingScatterRenderer.Sink"/> is set (shown buildings), hand placements to instanced rendering;
+    /// Add {series}1, 2, … sequentially from 1, stopping at the first gap.
+    /// While <see cref="BuildingScatterRenderer.Sink"/> is set (shown buildings), resolve shared models for instanced rendering;
     /// otherwise combine parts including node transforms. Both measure placement bounds from the combined part mesh.
     /// </summary>
-    private static void GenerateScatter(
-        string prefix, int suffix, Vector2[] site, Vector2[] footprint, bool overFootprint, Vector2[] keepClear, float seed,
-        Vector3 centerPointWorld, bool deformToTerrain,
-        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    private static void CollectSiteParts(string prefix, int suffix, string series, bool single, SiteParts parts, List<Mesh> temporaryMeshes)
     {
-        using var scope = scatterMarker.Auto();
-        var sink = BuildingScatterRenderer.Sink;
-        var paths = new List<string>();
-        var meshes = new List<Mesh>();
-        var meshMaterials = new List<Material[]>();
-        var kinds = new List<ScatterLayout.Kind>();
-        foreach (bool single in new[] { false, true })
+        for (int n = 1; n <= MAX_SCATTER_PARTS; n++)
         {
-            string series = single ? "scatter-single" : "scatter";
-            for (int n = 1; n <= MAX_SCATTER_PARTS; n++)
+            if (BuildingScatterRenderer.Sink != null)
             {
-                if (sink != null)
-                {
-                    string path = BuildingMeshUtils.PartPath(prefix, $"{series}{n}", suffix);
-                    BuildingScatterRenderer.Model model = BuildingScatterRenderer.GetModel(path);
-                    if (model == null)
-                    {
-                        break;
-                    }
-                    if (model.render != null)
-                    {
-                        paths.Add(path);
-                        kinds.Add(new ScatterLayout.Kind { Bounds = model.layout, Single = single });
-                    }
-                    continue;
-                }
-                GameObject part = BuildingMeshUtils.GetPartNoPosition(prefix, $"{series}{n}", suffix, true);
-                if (part == null)
+                string path = BuildingMeshUtils.PartPath(prefix, $"{series}{n}", suffix);
+                BuildingScatterRenderer.Model model = BuildingScatterRenderer.GetModel(path);
+                if (model == null)
                 {
                     break;
                 }
-                Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(part, out Material[] materials);
-                if (mesh == null)
+                if (model.render != null)
                 {
-                    continue;
+                    parts.paths.Add(path);
+                    parts.kinds.Add(new ScatterLayout.Kind { Bounds = model.layout, Single = single });
                 }
-                temporaryMeshes.Add(mesh);
-                meshes.Add(mesh);
-                meshMaterials.Add(materials);
-                kinds.Add(new ScatterLayout.Kind { Bounds = mesh.bounds, Single = single });
+                continue;
             }
+            GameObject part = BuildingMeshUtils.GetPartNoPosition(prefix, $"{series}{n}", suffix, true);
+            if (part == null)
+            {
+                break;
+            }
+            Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(part, out Material[] materials);
+            if (mesh == null)
+            {
+                continue;
+            }
+            temporaryMeshes.Add(mesh);
+            parts.meshes.Add(mesh);
+            parts.materials.Add(materials);
+            parts.kinds.Add(new ScatterLayout.Kind { Bounds = mesh.bounds, Single = single });
         }
-        if (kinds.Count == 0)
-        {
-            return;
-        }
+    }
 
-        List<ScatterLayout.Item> items = ScatterLayout.Plan(site, footprint, overFootprint, keepClear, kinds, Mathf.FloorToInt(Mathf.Clamp01(seed) * 1000000f));
+    /// <summary>
+    /// Place actual-size parts at items, aligning each origin to its placement ground. For terrain conformity, ground is the lowest of
+    /// four bounding-box-corner heights, burying the uphill side to prevent floating (same as port-yard cargo).
+    /// Hand placements to <see cref="BuildingScatterRenderer.Sink"/> when set; otherwise combine them.
+    /// </summary>
+    private static void PlaceSiteParts(SiteParts parts, List<ScatterLayout.Item> items, Vector3 centerPointWorld, bool deformToTerrain,
+        List<CombineInstance> combineInstances, List<Material> allMaterials)
+    {
+        var sink = BuildingScatterRenderer.Sink;
         foreach (ScatterLayout.Item item in items)
         {
             float baseY = 0f;
@@ -954,19 +967,64 @@ public static class ModularBodyBuilder
             Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(item.Position.x, baseY, item.Position.y), item.Rotation, Vector3.one);
             if (sink != null)
             {
-                sink.Add(new BuildingScatterRenderer.Instance { path = paths[item.Kind], local = matrix });
+                sink.Add(new BuildingScatterRenderer.Instance { path = parts.paths[item.Kind], local = matrix });
                 continue;
             }
-            Mesh mesh = meshes[item.Kind];
-            Material[] materials = meshMaterials[item.Kind];
+            Mesh mesh = parts.meshes[item.Kind];
+            Material[] materials = parts.materials[item.Kind];
             for (int subMeshIndex = 0; subMeshIndex < mesh.subMeshCount; subMeshIndex++)
             {
                 combineInstances.Add(new CombineInstance { mesh = mesh, subMeshIndex = subMeshIndex, transform = matrix });
                 allMaterials.Add(materials != null && subMeshIndex < materials.Length ? materials[subMeshIndex] : null);
             }
         }
+    }
+
+    /// <summary>
+    /// Place scatter1, 2, … and scatter-single1, 2, … at <see cref="ScatterLayout"/> positions outside keepClear and, unless overFootprint,
+    /// the footprint. scatter-single kinds appear at most once per building. Do nothing if absent.
+    /// </summary>
+    private static void GenerateScatter(
+        string prefix, int suffix, Vector2[] site, Vector2[] footprint, bool overFootprint, Vector2[] keepClear, float seed,
+        Vector3 centerPointWorld, bool deformToTerrain,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        using var scope = scatterMarker.Auto();
+        var parts = new SiteParts();
+        CollectSiteParts(prefix, suffix, "scatter", false, parts, temporaryMeshes);
+        CollectSiteParts(prefix, suffix, "scatter-single", true, parts, temporaryMeshes);
+        if (parts.kinds.Count == 0)
+        {
+            return;
+        }
+
+        List<ScatterLayout.Item> items = ScatterLayout.Plan(site, footprint, overFootprint, keepClear, parts.kinds, Mathf.FloorToInt(Mathf.Clamp01(seed) * 1000000f));
+        PlaceSiteParts(parts, items, centerPointWorld, deformToTerrain, combineInstances, allMaterials);
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, () => $"[MBB] 散布パーツ: {items.Count}個配置 ({prefix}/{suffix}/scatter*)");
+    }
+
+    /// <summary>
+    /// Tile the whole site with fill1, 2, … at <see cref="FillLayout"/> positions on the world-fixed grid, with no count or area limit
+    /// (shown buildings draw them instanced). Placement and grounding are the same as scatter parts. Do nothing if absent.
+    /// </summary>
+    private static void GenerateFill(
+        string prefix, int suffix, Vector2[] site, Vector3 centerPointWorld, bool deformToTerrain,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        using var scope = fillMarker.Auto();
+        var parts = new SiteParts();
+        CollectSiteParts(prefix, suffix, FILL_SERIES, false, parts, temporaryMeshes);
+        if (parts.kinds.Count == 0)
+        {
+            return;
+        }
+
+        List<ScatterLayout.Item> items = FillLayout.Plan(site, new Vector2(centerPointWorld.x, centerPointWorld.z),
+            parts.kinds.ConvertAll(kind => kind.Bounds));
+        PlaceSiteParts(parts, items, centerPointWorld, deformToTerrain, combineInstances, allMaterials);
+
+        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, () => $"[MBB] 敷き詰めパーツ: {items.Count}個配置 ({prefix}/{suffix}/{FILL_SERIES}*)");
     }
 
     /// <summary>

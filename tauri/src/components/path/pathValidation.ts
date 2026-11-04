@@ -19,6 +19,7 @@ export type PathValidationResult = PathInterferenceHighlight & {
   ferry_water_violation?: boolean; // A ferry lane leaves the water, or a ferry pier does not reach from land to water.
   colliding_quay_band_ids?: number[]; // reclaimed_land_id
   colliding_grading_site_ids?: number[]; // parcel_id of the parcel undergoing earthworks.
+  colliding_slum_parcel_ids?: number[]; // parcel_id of slum parcels.
   junction_violations?: Array<{ code: string; position: number[] }>; // Track branching/merging violation. position is the connection [x, absolute road elevation, z].
   alignments?: PathAlignmentResponse[];
   alignment_violations?: Array<{
@@ -84,5 +85,6 @@ export function describePathValidation(result: PathValidationResult, t: Translat
   if (result.ferry_water_violation) messages.push(t("errors.CREATEPATH_FERRY_WATER"));
   if (result.colliding_quay_band_ids?.length) messages.push(t("errors.CREATEPATH_QUAY_BAND_CROSSING"));
   if (result.colliding_grading_site_ids?.length) messages.push(t("path_construction.validationGradingSite"));
+  if (result.colliding_slum_parcel_ids?.length) messages.push(t("path_construction.validationSlum"));
   return messages.length ? messages : [t("path_construction.validationRejected")];
 }

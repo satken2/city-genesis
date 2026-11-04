@@ -1928,8 +1928,9 @@ public class BuildingManager : BaseApiDataManager
         MeshRenderer mr = buildingGO.AddComponent<MeshRenderer>();
 
         // Distant rendering stretches the Far model to the outline or uses a box (GenerateFarBuilding). Do not run full-detail assembly.
+        // Buildings with fill parts keep their assembly instead, and their scatter and fill parts go to instanced rendering as for details.
         var farWatch = System.Diagnostics.Stopwatch.StartNew();
-        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, false, DrawLod.Far);
+        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, false, DrawLod.Far, separateExterior: true);
         // Far GameObjects have no colliders, so release the generated collider mesh here.
         if (meshResult?.ColliderMesh != null && meshResult.ColliderMesh != meshResult.Mesh)
             MeshBakeService.Release(meshResult.ColliderMesh);
@@ -1976,6 +1977,7 @@ public class BuildingManager : BaseApiDataManager
 
         if (meshResult?.Mesh != null) buildingGO.AddComponent<FarBuildingMember>().Configure(mr, meshResult.Mesh);
         buildingGO.AddComponent<UndergroundGhostObject>();
+        BuildingScatterMember.Add(buildingGO, meshResult?.Scatter);
 
         // Update the dictionary to the new object immediately.
         // This prevents duplicate objects if the same ID is redrawn again shortly afterward.

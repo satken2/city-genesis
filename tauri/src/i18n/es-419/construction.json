@@ -112,6 +112,7 @@
     "directInvalid": {
       "overlap_parcel": "Se traslapa con una parcela existente",
       "overlap_city_building": "Se traslapa con una instalación municipal o un sitio de construcción planificado",
+      "overlap_slum": "Se traslapa con un barrio marginal",
       "overlap_path": "Se traslapa con una calle",
       "incompatible_parcel_type": "Este edificio no se puede construir en este tipo de terreno",
       "insufficient_water_depth": "El agua frente a este muelle tiene unos {{depth}} m de profundidad. Este edificio necesita al menos {{required}} m",

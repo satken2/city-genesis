@@ -629,8 +629,8 @@
         "description": "Si un accidente o desastre deja fuera de servicio centrales o líneas eléctricas, también afecta a fábricas y residentes que necesitan energía. Prepara instalaciones y rutas de suministro de respaldo para que una sola falla no paralice toda la ciudad."
       },
       "tip15": {
-        "title": "Aquí no se crece a lo loco",
-        "description": "Si hay demanda de viviendas u otros usos pero faltan parcelas edificables, el desarrollo privado agrega calles y parcelas y la ciudad crece sin planificación. Prepara terrenos y calles donde quieras crecer, con normativas acordes a los usos previstos."
+        "title": "Un barrio marginal no se desaloja",
+        "description": "Cuando falta vivienda, los hogares sin otra opción levantan barrios marginales en terrenos baldíos sin parcelas, y estos se extienden por el terreno plano. La ciudad no puede desalojarlos ni hacer pasar calles por ellos. Ofrece viviendas que los residentes puedan pagar y el barrio marginal se reducirá a medida que se muden a viviendas formales. Traza parcelas con antelación en el terreno que quieras conservar."
       },
       "tip16": {
         "title": "Concentración industrial",

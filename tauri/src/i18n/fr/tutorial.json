@@ -629,8 +629,8 @@
         "description": "Un accident ou une catastrophe qui arrête centrales ou lignes électriques affecte aussi usines et habitants. Prévoyez des installations et des voies d'approvisionnement de secours pour les infrastructures essentielles, afin qu'une seule panne ne paralyse pas la ville."
       },
       "tip15": {
-        "title": "L'urbanisme en roue libre",
-        "description": "Si la demande existe mais que les parcelles constructibles manquent, le privé ajoute routes et parcelles, entraînant un étalement non planifié. Préparez les terrains et les routes là où vous souhaitez développer la ville, avec des réglementations adaptées aux usages prévus."
+        "title": "On ne rase pas un bidonville",
+        "description": "Quand les logements manquent, les ménages sans solution construisent des bidonvilles sur des terrains vacants sans parcelle, qui s’étendent sur les terrains plats. La ville ne peut ni raser un bidonville ni y faire passer des routes. Proposez des logements que les habitants peuvent payer : le bidonville se réduira à mesure qu’ils rejoindront des logements ordinaires. Tracez d’avance des parcelles sur les terrains que vous voulez préserver."
       },
       "tip16": {
         "title": "Pôles industriels",

@@ -11,26 +11,32 @@ public static class OccupancyVolumeUtil
 
     /// <summary>
     /// Collect interfering-building occupancy boxes, colored by demolition handling.
-    /// Public facilities stand on city-owned land and are excluded from automatic acquisition; construction waits for player demolition (red).
-    /// The city demolishes private buildings when automatic land acquisition succeeds (orange).
+    /// Buildings excluded from automatic acquisition block construction (red): public facilities stand on city-owned land and wait for
+    /// player demolition, and slums (master slum) cannot be removed. The city demolishes other private buildings when automatic land acquisition succeeds (orange).
     /// </summary>
     public sealed class BuildingVolumes
     {
-        private readonly List<Vector3> publicFacilities = new List<Vector3>();
-        private readonly List<Vector3> privateBuildings = new List<Vector3>();
+        private readonly List<Vector3> blockingBuildings = new List<Vector3>();
+        private readonly List<Vector3> acquiredBuildings = new List<Vector3>();
 
-        public bool IsEmpty => publicFacilities.Count == 0 && privateBuildings.Count == 0;
+        public bool IsEmpty => blockingBuildings.Count == 0 && acquiredBuildings.Count == 0;
 
         public void Add(BuildingSummary building)
         {
             if (building == null) return;
-            AddBuilding(building.public_facility ? publicFacilities : privateBuildings, building);
+            AddBuilding(building.public_facility || IsSlum(building.variant) ? blockingBuildings : acquiredBuildings, building);
         }
 
         public void Draw(OverlayMeshRenderer renderer)
         {
-            renderer.AddPreTriangulated(publicFacilities, WarningColor);
-            renderer.AddPreTriangulated(privateBuildings, AcquiredBuildingColor);
+            renderer.AddPreTriangulated(blockingBuildings, WarningColor);
+            renderer.AddPreTriangulated(acquiredBuildings, AcquiredBuildingColor);
+        }
+
+        private static bool IsSlum(int variant)
+        {
+            var masters = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetAgentMasterDictionary() : null;
+            return masters != null && masters.TryGetValue(variant, out var master) && master.slum == true;
         }
     }
 

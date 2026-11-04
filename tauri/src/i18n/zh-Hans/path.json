@@ -146,6 +146,7 @@
     "validationPathCollision": "道路或轨道的占用范围重叠。请检查红色占用范围。",
     "validationRiverCollision": "线路在地表横穿河流。请调整高度或路线。",
     "validationGradingSite": "路径不能穿过土方工程的施工范围，高架或地下也不行。请在工程完成前避开该范围。",
+    "validationSlum": "路径不能穿过棚户区，高架或地下也不行。请绕开棚户区。",
     "railJunction": {
       "main_unfinished": "无法从未完工或改建中的轨道分岔或并入。",
       "reverse_merge": "已有轨道无法并入未完工轨道的中间。",

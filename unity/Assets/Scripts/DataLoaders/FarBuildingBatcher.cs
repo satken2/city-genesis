@@ -272,6 +272,7 @@ public sealed class FarBuildingMember : MonoBehaviour, IVisualModeHandler
         var collider = GetComponent<Collider>();
         if (collider != null) collider.enabled = visible;
         Refresh();
+        BuildingScatterMember.RefreshObject(gameObject);
     }
 
     /// <summary>

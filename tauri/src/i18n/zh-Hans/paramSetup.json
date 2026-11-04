@@ -23,7 +23,7 @@
       "pathfind": "交通・路径",
       "building": "建筑・建设",
       "disaster": "灾害・治安",
-      "sprawl": "城市蔓延",
+      "slum": "棚户区",
       "production": "生产・库存",
       "zone": "地区・地块",
       "financial": "金融"

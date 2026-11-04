@@ -670,7 +670,7 @@ public partial class RoadPlanManager
     }
 
     /// <summary>
-    /// Shows occupied boxes for locally estimated interfering buildings: translucent red for public facilities, orange for private buildings.
+    /// Shows occupied boxes for locally estimated interfering buildings: translucent red for buildings excluded from acquisition (public facilities, slums), orange for other private buildings.
     /// HighlightManager adds its display when authoritative backend results arrive.
     /// </summary>
     private void DrawBuildingInterference(Camera cam)

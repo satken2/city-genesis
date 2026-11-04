@@ -7,7 +7,7 @@ using UnityEngine;
 ///
 /// - Parcels: ParcelManager 2D overlay fills by classification (blocking=red/removable=orange/shavable=yellow,
 ///   exempt=none).
-/// - Buildings: translucent occupied boxes (OccupancyVolumeUtil.BuildingVolumes), red for public facilities and orange for private buildings.
+/// - Buildings: translucent occupied boxes (OccupancyVolumeUtil.BuildingVolumes), red for buildings excluded from acquisition (public facilities, slums) and orange for other private buildings.
 /// - Existing paths: translucent occupied tubes (OccupancyVolumeUtil.AddTube).
 /// - Rivers: occupied boxes in the same warning color for rivers crossed at ground level (RiverStore.AddOccupancyBox).
 ///

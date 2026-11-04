@@ -406,7 +406,6 @@ agents:
     prebuilt: false
     variants:
       - 0
-      - 500
   2015:
     model: true
     prebuilt: false
@@ -422,16 +421,6 @@ agents:
     variants:
       - 0
   2017:
-    model: true
-    prebuilt: false
-    variants:
-      - 0
-  2019:
-    model: true
-    prebuilt: false
-    variants:
-      - 0
-  2020:
     model: true
     prebuilt: false
     variants:
