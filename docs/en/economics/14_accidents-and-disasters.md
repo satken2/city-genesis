@@ -14,5 +14,5 @@ Speed limits unsuitable for road geometry, concentrated traffic, and street park
 
 ## 14.3. Crime and public safety
 
-Warning signs of crime arise randomly based on resident and visiting citizens' `potential_criminality`. Like ignition, these signs can develop into incidents, but policing services supplied by police stations can prevent that progression. Police capacity and service reach both matter. Public safety also affects residents' lives and housing choices ([environment](13_environment.md)).
+Crime risk combines contributions from resident and visiting citizens' `potential_criminality` and unemployment with risks arising from land use. Citizens' contributions spread around homes and to visited areas, while land-based effects remain at their source and in the surrounding neighborhood. Incident locations are sampled from this risk distribution. Like ignition, warning signs can develop into incidents, but policing services supplied by police stations can prevent that progression. Police capacity and service reach both matter. Public safety also affects residents' lives and housing choices ([environment](13_environment.md)).
 
