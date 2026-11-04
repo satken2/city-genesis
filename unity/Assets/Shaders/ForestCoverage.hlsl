@@ -36,6 +36,10 @@ float ForestSurfaceWeight(float3 position)
     // 距離・常駐境界ともに、樹冠の下地を完成させてからモデルを減らす。
     float distanceWeight = smoothstep(800,1100,distance(position,_WorldSpaceCameraPos));
     float boundaryWeight = 1 - smoothstep(.7,1,ForestDetailAt(position.xz));
-    return (1 - (1-coverage.r)*(1-coverage.g)) * max(distanceWeight,boundaryWeight);
+    // 被覆は真上から見た樹冠の割合。日の当たる林床が見えるのは視線と日差しの両方が樹冠の隙間を抜ける所だけで、
+    // 残りの林床は樹冠の陰になり遠目には樹冠と同じ色に見える。そこで真上の隙間率を、視線と日差しが樹冠の層を通る長さ(鉛直の何倍か)の和で累乗する。
+    float open = (1-coverage.r)*(1-coverage.g);
+    float path = 1/max(GetWorldSpaceNormalizeViewDir(position).y,.05) + 1/max(_MainLightPosition.y,.05);
+    return (1 - pow(open,path)) * max(distanceWeight,boundaryWeight);
 }
 #endif
