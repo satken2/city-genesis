@@ -99,9 +99,9 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const mapRef = useRef<CityMapCanvasHandle>(null);
 
   const [vertices, setVertices] = useState<WorldPoint[]>([]);
-  const [spacing, setSpacing] = useState(DEFAULT_SPACING_M);
+  const [spacingInput, setSpacingInput] = useState(String(DEFAULT_SPACING_M));
   const [pattern, setPattern] = useState<StreetPattern>("relaxed_grid");
-  const [parcelSize, setParcelSize] = useState(20);
+  const [parcelSizeInput, setParcelSizeInput] = useState("20");
   /** Selected street types. null until master data provides the default. */
   const [variants, setVariants] = useState<number[] | null>(null);
   const [angleAuto, setAngleAuto] = useState(true);
@@ -112,6 +112,12 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [preview, setPreview] = useState<{ plan: StreetGridPlan; summary: string } | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
   const blockMode = BLOCK_PATTERNS.some((key) => key === pattern);
+  // 入力途中の空欄や「120」の最初の「1」もそのまま表示し、送信できるかを別に判定する。
+  const sizeInput = blockMode ? parcelSizeInput : spacingInput;
+  const sizeM = Number(sizeInput);
+  const minSizeM = blockMode ? 15 : SPACING_MIN_M;
+  const maxSizeM = blockMode ? 25 : SPACING_MAX_M;
+  const sizeValid = Number.isInteger(sizeM) && sizeM >= minSizeM && sizeM <= maxSizeM;
   const hint = t(vertices.length < 3 ? "scenarioTools.hintAddVertices" : "scenarioTools.hintReady");
 
   useEffect(() => {
@@ -172,7 +178,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   useEffect(() => {
     inputVersionRef.current += 1;
     setPreview(null);
-  }, [vertices, pattern, spacing, parcelSize, variants, angleAuto, angleDeg]);
+  }, [vertices, pattern, sizeInput, variants, angleAuto, angleDeg]);
 
   /* ---- Center on the 3D camera only once ---- */
   useEffect(() => {
@@ -322,8 +328,8 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         points: vertices.map((p) => [p.x, p.z]),
-        spacing: blockMode ? undefined : spacing,
-        parcel_size: blockMode ? parcelSize : undefined,
+        spacing: blockMode ? undefined : sizeM,
+        parcel_size: blockMode ? sizeM : undefined,
         pattern,
         path_variants: variants,
         angle_deg: blockMode || angleAuto ? null : angleDeg,
@@ -378,7 +384,7 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }
 
-  const canPreview = vertices.length >= 3 && (variants?.length ?? 0) > 0 && !busy;
+  const canPreview = vertices.length >= 3 && (variants?.length ?? 0) > 0 && sizeValid && !busy;
   const canCreate = canPreview && preview !== null;
   const shownMessage = preview?.summary ?? message;
 
@@ -419,18 +425,13 @@ export function StreetGridWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             <span>{t(blockMode ? "scenarioTools.parcelSize" : "scenarioTools.spacing")}</span>
             <input
               type="number"
-              min={blockMode ? 15 : SPACING_MIN_M}
-              max={blockMode ? 25 : SPACING_MAX_M}
+              min={minSizeM}
+              max={maxSizeM}
               step={blockMode ? 1 : 10}
-              value={blockMode ? parcelSize : spacing}
+              value={sizeInput}
+              aria-invalid={!sizeValid}
               disabled={busy}
-              onChange={(e) => {
-                const v = Number.parseInt(e.target.value, 10);
-                if (!Number.isNaN(v)) {
-                  if (blockMode) setParcelSize(Math.max(15, Math.min(25, v)));
-                  else setSpacing(Math.max(SPACING_MIN_M, Math.min(SPACING_MAX_M, v)));
-                }
-              }}
+              onChange={(e) => (blockMode ? setParcelSizeInput : setSpacingInput)(e.currentTarget.value)}
             />
             <span className="street-grid__unit">m</span>
           </label>
