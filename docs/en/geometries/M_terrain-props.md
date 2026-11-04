@@ -10,7 +10,7 @@ Scattering stores no individual coordinates. Unity generates candidates from a w
 
 ## Overlap
 
-Unity hides scattered candidates overlapping parcels, surface or elevated paths, and water when `allow_water` is false. This is separate from deleting a saved region; removing obstacles restores the same individuals. Intentional individual placements remain visible despite overlap. Fetch obstacles with `include_obstacles` and rebuild exclusions only when their geometric `signature` changes; economic updates do not change it.
+Unity hides scattered candidates overlapping parcels, surface or elevated paths, and water when `allow_water` is false. When scattering on water is disabled, density also decreases on land as the water boundary approaches. This is separate from deleting a saved region; removing obstacles restores the same individuals. Intentional individual placements remain visible despite overlap. Fetch obstacles with `include_obstacles` and rebuild exclusions only when their geometric `signature` changes; economic updates do not change it.
 
 Reflect added, changed, and removed placements using reloaded prop data. Distinguish updates to saved data from temporary hiding caused by obstacles.
 

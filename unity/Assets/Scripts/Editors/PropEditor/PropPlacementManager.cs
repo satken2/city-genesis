@@ -463,7 +463,7 @@ public class PropPlacementManager : MonoBehaviour
                 if (++candidates > manager.CandidateBudget) yield break;
                 var position = new Vector3(point.position.x, 0, point.position.y) + previewOffset;
                 position.y = Utils.GetGroundHeight(position);
-                if (manager.CanPreview(position, propType, point.scale))
+                if (manager.CanPreview(position, propType, point.scale, point.waterRank))
                     matrices.Add(Matrix4x4.TRS(position, Quaternion.Euler(0,point.rotation,0), Vector3.one * point.scale));
                 if ((candidates & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.FrameBudgetMs)
                 { yield return null; timer.Restart(); }

@@ -40,7 +40,8 @@ public sealed class ForestOverview : IDisposable
                 regions.Add((region, scatter.prop_type, scatter.density, scatter.edge_fade_width, scatter.allow_water));
             }
         }
-        bounds = Rect.MinMaxRect(bounds.xMin - 8, bounds.yMin - 8, bounds.xMax + 8, bounds.yMax + 8);
+        float margin = Mathf.Max(8f, PropGeometry.WaterFadeWidth);
+        bounds = Rect.MinMaxRect(bounds.xMin - margin, bounds.yMin - margin, bounds.xMax + margin, bounds.yMax + margin);
         float step = Mathf.Max(4, Mathf.Max(bounds.width, bounds.height) / 2048);
         var raster = new Raster { bounds = bounds, width = Mathf.Max(1, Mathf.CeilToInt(bounds.width / step)), height = Mathf.Max(1, Mathf.CeilToInt(bounds.height / step)) };
         raster.pixels = new Color32[raster.width * raster.height];
@@ -52,12 +53,14 @@ public sealed class ForestOverview : IDisposable
             if ((string)response.coastline["type"] == "Polygon") coordinates = new JArray { coordinates };
             foreach (var region in PropGeometry.Parse(coordinates)) Fill(raster, region, cancel, index => land[index] = true);
         }
+        float[] waterWeights = land != null ? WaterWeights(raster, land, cancel) : null;
         foreach (var item in regions)
             Fill(raster, item.region, cancel, index => {
                 if (!item.allowWater && land != null && !land[index]) return;
                 var position = new Vector2(bounds.xMin + (index % raster.width + .5f) * bounds.width / raster.width,
                     bounds.yMin + (index / raster.width + .5f) * bounds.height / raster.height);
                 float density = item.density * PropGeometry.EdgeWeight(position, item.region, item.fadeWidth);
+                if (!item.allowWater && waterWeights != null) density *= waterWeights[index];
                 // Estimate coverage from projected canopy area, reflecting sparse boundary forests in terrain rendering too.
                 byte amount = (byte)Mathf.RoundToInt(255 * (1 - Mathf.Exp(-Mathf.Max(0, density) * (item.type == 1 ? 16 : 36) / 10000)));
                 var p = raster.pixels[index];
@@ -78,6 +81,45 @@ public sealed class ForestOverview : IDisposable
         cancel.ThrowIfCancellationRequested();
         raster.hash = Hash(raster);
         return raster;
+    }
+
+    // 遠景は個体を持たないため、水域マスクから距離を近似して密度へ反映する。
+    // 二方向の走査で求め、画素ごとに海岸線全体を調べる処理を避ける。
+    private static float[] WaterWeights(Raster raster, bool[] land, CancellationToken cancel)
+    {
+        int width = raster.width, height = raster.height;
+        float dx = raster.bounds.width / width, dz = raster.bounds.height / height;
+        float diagonal = Mathf.Sqrt(dx * dx + dz * dz), halfPixel = Mathf.Min(dx, dz) * .5f;
+        var distances = new float[land.Length];
+        for (int i = 0; i < distances.Length; i++) distances[i] = land[i] ? PropGeometry.WaterFadeWidth + halfPixel : 0f;
+        for (int pass = 0; pass < 2; pass++)
+        {
+            int step = pass == 0 ? 1 : -1;
+            for (int y = pass == 0 ? 0 : height - 1; y >= 0 && y < height; y += step)
+            {
+                cancel.ThrowIfCancellationRequested();
+                for (int x = pass == 0 ? 0 : width - 1; x >= 0 && x < width; x += step)
+                {
+                    int index = y * width + x;
+                    float distance = distances[index];
+                    if (x - step >= 0 && x - step < width) distance = Mathf.Min(distance, distances[index - step] + dx);
+                    if (y - step >= 0 && y - step < height)
+                    {
+                        int previous = index - step * width;
+                        distance = Mathf.Min(distance, distances[previous] + dz);
+                        if (x > 0) distance = Mathf.Min(distance, distances[previous - 1] + diagonal);
+                        if (x + 1 < width) distance = Mathf.Min(distance, distances[previous + 1] + diagonal);
+                    }
+                    distances[index] = distance;
+                }
+            }
+        }
+        for (int i = 0; i < distances.Length; i++)
+        {
+            float t = Mathf.Clamp01((distances[i] - halfPixel) / PropGeometry.WaterFadeWidth);
+            distances[i] = t * t * (3 - 2 * t);
+        }
+        return distances;
     }
 
     private static ulong Hash(Raster raster)

@@ -87,7 +87,7 @@ public static partial class PropsQA
             foreach (int fade in new[] { 0, 40, 100 })
             {
                 string snapshot = Snapshot(10000, true).Replace("\"seed\":7", "\"seed\":7,\"edge_fade_width\":" + fade + ",\"allow_water\":" + (water ? "true" : "false"));
-                snapshot = snapshot.Replace("\"obstacles\":[", "\"obstacles\":[{\"key\":\"water:0\",\"signature\":\"water\",\"polygon\":[[0,0],[150,0],[150,500],[0,500]]},");
+                snapshot = snapshot.Replace("\"obstacles\":[", "\"obstacles\":[{\"key\":\"water:0\",\"signature\":\"water\",\"polygon\":[[0,0],[177,0],[177,500],[0,500]]},");
                 Set(manager, "useGpuForests", false); Apply(snapshot, true);
                 var expected = Points();
                 var visible = new HashSet<Vector2>(expected.Where(p => p.Value).Select(p => p.Key));
@@ -176,6 +176,7 @@ public static partial class PropsQA
         Check(At(230,150)==0,"forest overview covered road");
         Check(At(75,75)==0,"forest overview covered lake hole");
         Check(At(450,150)==0,"forest overview covered sea");
+        Check(At(399,250) < At(393,250) && At(393,250) < At(380,250), "forest overview shoreline did not fade");
         Check(width<=2048 && height<=2048,"forest mask exceeded texture budget");
         var scatter = ((IList)Field(response, "scatters"))[0];
         Set(scatter, "allow_water", true); Set(scatter, "edge_fade_width", 100f);

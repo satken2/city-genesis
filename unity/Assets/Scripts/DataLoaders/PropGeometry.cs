@@ -6,17 +6,22 @@ using UnityEngine;
 /// <summary>Placement rules shared by scatter and preview, independent of render patches or traversal order.</summary>
 public static class PropGeometry
 {
+    // 水域の陸側15mで密度を落とす。GPUの散布にも同じ値を渡す。
+    public const float WaterFadeWidth = 15f;
+
     public struct Point
     {
         public Vector2 position;
         public float rotation, scale;
         public float edgeRank;
+        public float waterRank;
     }
 
     public sealed class Region
     {
         public readonly List<Vector2[]> rings = new List<Vector2[]>();
         public Rect bounds;
+        public bool water;
         public bool Contains(Vector2 p)
         {
             if (!bounds.Contains(p) || rings.Count == 0 || !InRing(p, rings[0])) return false;
@@ -101,6 +106,22 @@ public static class PropGeometry
         return true;
     }
 
+    public static float WaterEdgeWeight(Vector2 p, IReadOnlyList<Vector2> ring, Rect bounds, IList<Vector2[]> holes)
+    {
+        if (p.x < bounds.xMin - WaterFadeWidth || p.x > bounds.xMax + WaterFadeWidth ||
+            p.y < bounds.yMin - WaterFadeWidth || p.y > bounds.yMax + WaterFadeWidth) return 1f;
+        float distanceSq = WaterFadeWidth * WaterFadeWidth;
+        void Measure(IReadOnlyList<Vector2> boundary)
+        {
+            for (int i = 0, j = boundary.Count - 1; i < boundary.Count; j = i++)
+                distanceSq = Mathf.Min(distanceSq, PolylineUtils.DistanceToSegmentSq(p, boundary[i], boundary[j]));
+        }
+        Measure(ring);
+        foreach (var hole in holes) Measure(hole);
+        float t = Mathf.Sqrt(distanceSq) / WaterFadeWidth;
+        return t * t * (3 - 2 * t);
+    }
+
     private static uint Hash(uint value)
     {
         unchecked { value ^= value >> 16; value *= 0x7feb352d; value ^= value >> 15; value *= 0x846ca68b; return value ^ (value >> 16); }
@@ -118,7 +139,8 @@ public static class PropGeometry
             uint h = Hash((uint)x) ^ Hash((uint)z + 0x9e3779b9) ^ Hash((uint)seed);
             return new Point {
                 position = new Vector2((x + Unit(h)) * spacing, (z + Unit(h + 1)) * spacing),
-                rotation = Unit(h + 2) * 360f, scale = 0.8f + Unit(h + 3) * 0.4f, edgeRank = Unit(h + 6)
+                rotation = Unit(h + 2) * 360f, scale = 0.8f + Unit(h + 3) * 0.4f,
+                edgeRank = Unit(h + 6), waterRank = Unit(h + 7)
             };
         }
     }

@@ -73,8 +73,8 @@ public class PropManager : BaseApiDataManager
     private bool GpuForests => useGpuForests && (forestRenderer ?? (forestRenderer = new ForestRenderer())).Supported;
     private bool IsGpuTree(int type) => (type == 1 || type == 2) && GpuForests;
     private const int BatchSize = 511;
-    /// <summary>Obstacles within this distance of the range also apply (the core's PROP_OBSTACLE_MARGIN, the clearance upper bound).</summary>
-    private const float ObstacleMargin = 8f;
+    // 水際のぼかしが小区画・常駐セルの境界で途切れないよう、周囲の水域も参照する。
+    private const float ObstacleMargin = PropGeometry.WaterFadeWidth;
     private sealed class Scatter
     {
         public PropScatterItem data;
@@ -105,6 +105,7 @@ public class PropManager : BaseApiDataManager
         public bool visible;
         public bool explicitInstance;
         public bool allowWater;
+        public float waterRank;
         public ulong rank;
         public DrawLod lod;
         public bool distant;
@@ -293,7 +294,8 @@ public class PropManager : BaseApiDataManager
             var area = Rect.MinMaxRect(x0, z0, x1, z1);
             bool available = false;
             CityDataCache cache = CityDataCache.Ensure();
-            yield return cache.EnsureRect(CityDataCache.Kind.Props, area, () => Canceled(serial, batch), ok => available = ok);
+            var obstacleArea = Rect.MinMaxRect(x0 - ObstacleMargin, z0 - ObstacleMargin, x1 + ObstacleMargin, z1 + ObstacleMargin);
+            yield return cache.EnsureRect(CityDataCache.Kind.Props, obstacleArea, () => Canceled(serial, batch), ok => available = ok);
             if (Canceled(serial, batch) || !available) yield break;
             PropListResponse response = cache.PropsIn(area, ObstacleMargin);
             // Obstacles serve only existing-prop exclusion and scatter previews. If no props exist
@@ -351,7 +353,8 @@ public class PropManager : BaseApiDataManager
                     if (hole != null && hole.Count >= 3)
                         obstacle.holes.Add(hole.ConvertAll(p => new Vector2(p[0], p[1])).ToArray());
             obstacle.bounds = PropGeometry.Bounds(obstacle.ring);
-            var expanded = obstacle.bounds; expanded.xMin -= 8; expanded.yMin -= 8; expanded.xMax += 8; expanded.yMax += 8;
+            float margin = IsWater(obstacle) ? ObstacleMargin : 8f;
+            var expanded = obstacle.bounds; expanded.xMin -= margin; expanded.yMin -= margin; expanded.xMax += margin; expanded.yMax += margin;
             foreach (var key in KeysIn(expanded, specs))
             {
                 specs[key].obstacles.Add(obstacle);
@@ -449,7 +452,7 @@ public class PropManager : BaseApiDataManager
                 {
                     var p = points[i];
                     // Individual placements are intentional decoration; retain even on sites or in water.
-                    p.visible = p.explicitInstance || !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), spec.obstacles, p.allowWater);
+                    p.visible = p.explicitInstance || !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), spec.obstacles, p.allowWater, p.waterRank);
                     points[i] = p;
                     if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                     { yield return RenderWorkScheduler.Continue; timer.Restart(); if (Canceled(serial, batch)) yield break; }
@@ -471,7 +474,7 @@ public class PropManager : BaseApiDataManager
                 var landObstacles = new List<PropGeometry.Region>();
                 foreach (var obstacle in spec.obstacles)
                 {
-                    var region = new PropGeometry.Region { bounds = obstacle.bounds };
+                    var region = new PropGeometry.Region { bounds = obstacle.bounds, water = IsWater(obstacle) };
                     region.rings.Add(obstacle.ring); region.rings.AddRange(obstacle.holes); obstacles.Add(region);
                     if (!IsWater(obstacle)) landObstacles.Add(region);
                 }
@@ -571,19 +574,24 @@ public class PropManager : BaseApiDataManager
     }
     private static bool IsWater(Obstacle obstacle) => obstacle.data.key?.StartsWith("water:", StringComparison.Ordinal) == true;
 
-    private static bool Blocked(Vector2 p, float clearance, List<Obstacle> obstacles, bool allowWater = false)
+    private static bool Blocked(Vector2 p, float clearance, List<Obstacle> obstacles, bool allowWater = false, float waterRank = 0f)
     {
         foreach (var obstacle in obstacles)
-            if (!(allowWater && IsWater(obstacle)) && PropGeometry.BlockedWithHoles(p, clearance, obstacle.ring, obstacle.bounds, obstacle.holes)) return true;
+        {
+            bool water = IsWater(obstacle);
+            if (allowWater && water) continue;
+            if (PropGeometry.BlockedWithHoles(p, clearance, obstacle.ring, obstacle.bounds, obstacle.holes)) return true;
+            if (water && waterRank >= PropGeometry.WaterEdgeWeight(p, obstacle.ring, obstacle.bounds, obstacle.holes)) return true;
+        }
         return false;
     }
-    public bool CanPreview(Vector3 world, int type, float scale)
+    public bool CanPreview(Vector3 world, int type, float scale, float waterRank = 0f)
     {
         Vector3 saved = world - Offset;
         var key = Key(new Vector2(saved.x, saved.z));
         var cell = TerrainManager.WorldToCell(saved);
         if (!obstacleReadyCells.Contains(cell)) return false;
-        return !obstacleGrid.TryGetValue(key, out var obstacles) || !Blocked(new Vector2(saved.x,saved.z), Model(type).Clearance(scale), obstacles);
+        return !obstacleGrid.TryGetValue(key, out var obstacles) || !Blocked(new Vector2(saved.x,saved.z), Model(type).Clearance(scale), obstacles, waterRank: waterRank);
     }
 
     /// <summary>
@@ -611,7 +619,7 @@ public class PropManager : BaseApiDataManager
                     int cell = patch.count == patch.gridCount ? index : Mathf.FloorToInt((float)index * patch.gridCount / patch.count);
                     var sample = PropGeometry.Sample(patch.startX + cell % patch.gridWidth, patch.startZ + cell / patch.gridWidth, patch.spacing, patch.seed);
                     if (!patch.rect.Contains(sample.position) || !PropGeometry.Accept(sample, scatter.regions, scatter.data.edge_fade_width)) continue;
-                    if (Blocked(sample.position, patch.model.Clearance(sample.scale), chunk.spec.obstacles, scatter.data.allow_water)) continue;
+                    if (Blocked(sample.position, patch.model.Clearance(sample.scale), chunk.spec.obstacles, scatter.data.allow_water, sample.waterRank)) continue;
                     var position = new Vector3(sample.position.x, 0, sample.position.y); position.y = Height(position);
                     var cam = Camera.main;
                     if (cam != null && Vector3.Distance(position + offset, cam.transform.position) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE) continue;
@@ -701,7 +709,7 @@ public class PropManager : BaseApiDataManager
             foreach (var point in PropGeometry.Scatter(spec.rect, scatter.regions, scatter.data.density, scatter.data.seed, scatter.data.edge_fade_width))
                 yield return new Candidate { type = scatter.data.prop_type, sourceId = scatter.data.prop_scatter_id,
                     position = new Vector3(point.position.x, 0, point.position.y), rotation = point.rotation,
-                    scale = point.scale, lod = DrawLod.Far, allowWater = scatter.data.allow_water,
+                    scale = point.scale, lod = DrawLod.Far, allowWater = scatter.data.allow_water, waterRank = point.waterRank,
                     rank = StableSample<Candidate>.Rank(point.position.x, point.position.y, scatter.data.seed) };
         }
     }
@@ -736,7 +744,7 @@ public class PropManager : BaseApiDataManager
         {
             var p = detail[i];
             p.position.y = Height(p.position);
-            p.visible = !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), chunk.spec.obstacles, p.allowWater);
+            p.visible = !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), chunk.spec.obstacles, p.allowWater, p.waterRank);
             detail[i] = p;
             if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
             {

@@ -9,7 +9,7 @@ SamplerState linearClampSampler;
 int4 _Grid;
 int _Count, _Seed, _RegionRings, _RingCount, _HeightResolution;
 float _Spacing, _Clearance;
-float _EdgeFadeWidth;
+float _EdgeFadeWidth, _WaterFadeWidth;
 float4 _Rect;
 float3 _TileOrigin, _TileSize, _Offset;
 
@@ -38,7 +38,7 @@ bool InRing(float2 p, int index, out float edgeDistanceSq)
     return inside || edgeDistanceSq < 1e-10;
 }
 
-bool Covered(float2 p, int start, int end, float clearance, bool obstacle, float edgeRank)
+bool Covered(float2 p, int start, int end, float clearance, bool obstacle, float edgeRank, float waterRank)
 {
     int i = start;
     while (i < end)
@@ -47,6 +47,7 @@ bool Covered(float2 p, int start, int end, float clearance, bool obstacle, float
         bool outer = InRing(p,i,edge);
         float boundaryDistanceSq = edge;
         bool covers = outer || (obstacle && edge <= clearance*clearance);
+        bool water = _Rings[i].w >= 2;
         int group = (int)_Rings[i].z;
         i++;
         while (i < end && (int)_Rings[i].z == group)
@@ -61,6 +62,12 @@ bool Covered(float2 p, int start, int end, float clearance, bool obstacle, float
             if (obstacle || _EdgeFadeWidth <= 0) return true;
             float t = saturate(sqrt(boundaryDistanceSq) / _EdgeFadeWidth);
             if (edgeRank < t*t*(3-2*t)) return true;
+        }
+        // CPUのプレビュー・選択と同じ固定順位で、水域に近い個体だけを間引く。
+        if (obstacle && water)
+        {
+            float t = saturate(sqrt(boundaryDistanceSq) / _WaterFadeWidth);
+            if (waterRank >= t*t*(3-2*t)) return true;
         }
     }
     return false;
@@ -79,7 +86,7 @@ void Generate(uint3 id : SV_DispatchThreadID)
     float2 p = (float2(x,z) + float2(Unit(h),Unit(h+1))) * _Spacing;
     float scale = .8 + Unit(h+3)*.4;
     bool visible = all(p >= _Rect.xy) && all(p < _Rect.zw);
-    if (visible) visible = Covered(p,0,_RegionRings,0,false,Unit(h+6)) && !Covered(p,_RegionRings,_RingCount,min(8,_Clearance*scale),true,0);
+    if (visible) visible = Covered(p,0,_RegionRings,0,false,Unit(h+6),0) && !Covered(p,_RegionRings,_RingCount,min(8,_Clearance*scale),true,0,Unit(h+7));
     float2 world = p + _Offset.xz;
     float2 grid = (world-_TileOrigin.xz)/_TileSize.xz * (_HeightResolution-1);
     float2 uv = (grid+.5)/_HeightResolution;

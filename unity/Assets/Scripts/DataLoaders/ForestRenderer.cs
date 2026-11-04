@@ -39,7 +39,7 @@ public sealed class ForestRenderer : IDisposable
         public void Dispose() { points?.Dispose(); vertices?.Dispose(); rings?.Dispose(); points = vertices = rings = null; }
     }
 
-    // Each ring stores vertex start, vertex count, polygon index, and hole flag.
+    // リングには頂点開始・頂点数・ポリゴン番号・穴/水域のビットを保持する。
     public Patch Create(PropScatterItem data, List<PropGeometry.Region> regions,
         List<PropGeometry.Region> obstacles, Rect rect, PropRenderModel model, int budget)
     {
@@ -53,7 +53,7 @@ public sealed class ForestRenderer : IDisposable
         var verts = new List<Vector2>(); var descriptors = new List<Vector4>();
         AddPolygons(regions, rect, 0, verts, descriptors);
         p.regionRings = descriptors.Count;
-        AddPolygons(obstacles, rect, 8f, verts, descriptors);
+        AddPolygons(obstacles, rect, Mathf.Max(8f, PropGeometry.WaterFadeWidth), verts, descriptors);
         p.ringCount = descriptors.Count;
         if (p.regionRings == 0) return null;
         try
@@ -99,7 +99,7 @@ public sealed class ForestRenderer : IDisposable
             if (!polygon.bounds.Overlaps(expanded)) continue;
             for (int i = 0; i < polygon.rings.Count; i++)
             {
-                rings.Add(new Vector4(vertices.Count, polygon.rings[i].Length, group, i == 0 ? 0 : 1));
+                rings.Add(new Vector4(vertices.Count, polygon.rings[i].Length, group, (i == 0 ? 0 : 1) + (polygon.water ? 2 : 0)));
                 vertices.AddRange(polygon.rings[i]);
             }
             group++;
@@ -118,6 +118,7 @@ public sealed class ForestRenderer : IDisposable
         compute.SetInt("_RegionRings", p.regionRings); compute.SetInt("_RingCount", p.ringCount);
         compute.SetFloat("_Spacing", p.spacing); compute.SetFloat("_Clearance", p.clearance);
         compute.SetFloat("_EdgeFadeWidth", p.edgeFadeWidth);
+        compute.SetFloat("_WaterFadeWidth", PropGeometry.WaterFadeWidth);
         compute.SetVector("_Rect", new Vector4(p.rect.xMin, p.rect.yMin, p.rect.xMax, p.rect.yMax));
         compute.SetVector("_Offset", offset);
         compute.SetVector("_TileOrigin", terrain.transform.position);

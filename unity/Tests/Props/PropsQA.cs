@@ -173,7 +173,25 @@ public static partial class PropsQA
             Apply(waterSnapshot);
             var coastPoints = Points();
             Check(coastPoints.Where(p=>p.Key.x<90).All(p=>!p.Value), "ocean trees remained visible");
-            Check(coastPoints.Where(p=>p.Key.x>110 && p.Key.x<390 && p.Key.y>110 && p.Key.y<390).All(p=>p.Value), "island trees disappeared");
+            Check(coastPoints.Where(p=>p.Key.x>115 && p.Key.x<385 && p.Key.y>115 && p.Key.y<385).All(p=>p.Value), "island trees disappeared");
+            float ShoreDensity(float min, float max)
+            {
+                var band = coastPoints.Where(p => p.Key.x >= 100 + min && p.Key.x < 100 + max && p.Key.y > 140 && p.Key.y < 360).ToArray();
+                return band.Count(p => p.Value) / (float)band.Length;
+            }
+            float shore = ShoreDensity(0, 5), middle = ShoreDensity(5, 10), inland = ShoreDensity(10, 15);
+            Check(shore < .3f && middle > .3f && middle < .7f && inland > .7f && inland < 1f,
+                $"shore density did not fade smoothly: {shore:F2}/{middle:F2}/{inland:F2}");
+            var coastSample = asm.GetType("PropGeometry").GetMethod("Sample");
+            float coastSpacing = Mathf.Sqrt(10000f / 2000f);
+            foreach (var point in coastPoints.Where(p => p.Key.x > 100 && p.Key.x < 115 && p.Key.y > 140 && p.Key.y < 360))
+            {
+                var sampled = coastSample.Invoke(null, new object[] { Mathf.FloorToInt(point.Key.x / coastSpacing), Mathf.FloorToInt(point.Key.y / coastSpacing), coastSpacing, 7 });
+                bool previewVisible = (bool)managerType.GetMethod("CanPreview").Invoke(manager,
+                    new object[] { new Vector3(point.Key.x, 0, point.Key.y), 1, (float)Field(sampled, "scale"), (float)Field(sampled, "waterRank") });
+                Check(previewVisible == point.Value, "shore preview disagreed with persistent scatter");
+            }
+            results.Add($"Shore density at 0-5/5-10/10-15m: {shore:P0}/{middle:P0}/{inland:P0}; preview agreement passed");
             Check((int)managerType.GetProperty("LastRegeneratedChunks").GetValue(manager)==0,"coast regenerated candidates");
             Apply(Snapshot(50000,false,50000));
             Check(Points().All(p=>p.Value),"coast removal did not restore trees");
