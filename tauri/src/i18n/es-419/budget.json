@@ -55,6 +55,7 @@
       "14": "Compra de terrenos"
     },
     "upkeepRow": "Mantenimiento diario: {{name}} {{km}} km",
+    "buildingUpkeepRow": "Mantenimiento diario: {{name}} ({{n}} edificios)",
     "welfare": {
       "unemployment": "Prestaciones por desempleo",
       "pension": "Pensiones",

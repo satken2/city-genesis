@@ -50,8 +50,10 @@ import {
 
 type BudgetAgent = {
   /** "upkeep" rows sum the daily upkeep of all paths of one variant (variant) with their total length in meters (length). */
-  kind?: "agent" | "path" | "parcel" | "welfare" | "upkeep";
+  /** "building_upkeep" rows sum the daily upkeep of all public buildings of one variant (variant) with their building count (count). */
+  kind?: "agent" | "path" | "parcel" | "welfare" | "upkeep" | "building_upkeep";
   length?: number;
+  count?: number;
   agent_id?: number;
   path_id?: number;
   parcel_id?: number;
@@ -80,7 +82,12 @@ type BudgetAgent = {
  * falling back to the backend name. For paths with an empty section name, supply "Road name (Section #id)"
  * if assigned to a road, otherwise "Path #id", matching the path detail header.
  */
-function rowDisplayName(a: BudgetAgent, t: TFunction, pathVariantName: (variant: number) => string | undefined): string {
+function rowDisplayName(
+  a: BudgetAgent,
+  t: TFunction,
+  pathVariantName: (variant: number) => string | undefined,
+  agentVariantName: (variant: number) => string | undefined,
+): string {
   if (a.kind === "welfare" && a.welfare_kind) {
     return t(`budget.welfare.${a.welfare_kind}`, { defaultValue: a.name });
   }
@@ -88,6 +95,12 @@ function rowDisplayName(a: BudgetAgent, t: TFunction, pathVariantName: (variant:
     return t("budget.upkeepRow", {
       name: pathVariantName(a.variant) ?? `#${a.variant}`,
       km: ((a.length ?? 0) / 1000).toFixed(1),
+    });
+  }
+  if (a.kind === "building_upkeep" && a.variant != null) {
+    return t("budget.buildingUpkeepRow", {
+      name: agentVariantName(a.variant) ?? `#${a.variant}`,
+      n: a.count ?? 0,
     });
   }
   if (a.kind === "path" && a.name === "") {
@@ -104,6 +117,7 @@ function rowKey(a: BudgetAgent): string {
   if (a.kind === "parcel") return `parcel:${a.parcel_id}`;
   if (a.kind === "welfare") return `welfare:${a.welfare_id}`;
   if (a.kind === "upkeep") return `upkeep:${a.variant}`;
+  if (a.kind === "building_upkeep") return `building_upkeep:${a.variant}`;
   return `agent:${a.agent_id}`;
 }
 
@@ -701,7 +715,12 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       .map((agent) => ({
         ...agent,
         rowKeyStr: rowKey(agent),
-        name: rowDisplayName(agent, t, (variant) => masterData?.paths[variant]?.display_name),
+        name: rowDisplayName(
+          agent,
+          t,
+          (variant) => masterData?.paths[variant]?.display_name,
+          (variant) => masterData?.agents[variant]?.display_name,
+        ),
         // Required amount per facility. This row total (agentsTotal.projected) always equals the category's
         // required amount (baseAmounts[catId]) because both use the same projected_expense values.
         projected_preview: agent.projected_expense,

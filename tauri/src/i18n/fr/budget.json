@@ -55,6 +55,7 @@
       "14": "Acquisition foncière"
     },
     "upkeepRow": "Entretien courant : {{name}} {{km}} km",
+    "buildingUpkeepRow": "Entretien courant : {{name}} ({{n}} bâtiments)",
     "welfare": {
       "unemployment": "Allocations chômage",
       "pension": "Pensions",

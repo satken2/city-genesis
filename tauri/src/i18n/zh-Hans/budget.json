@@ -55,6 +55,7 @@
       "14": "征地"
     },
     "upkeepRow": "日常养护：{{name}} {{km}}公里",
+    "buildingUpkeepRow": "日常养护：{{name}} {{n}}栋",
     "welfare": {
       "unemployment": "失业救济",
       "pension": "养老金",

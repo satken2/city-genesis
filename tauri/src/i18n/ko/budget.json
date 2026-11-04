@@ -55,6 +55,7 @@
       "14": "용지 매수"
     },
     "upkeepRow": "일상 유지관리: {{name}} {{km}}km",
+    "buildingUpkeepRow": "일상 유지관리: {{name}} {{n}}동",
     "welfare": {
       "unemployment": "실업급여",
       "pension": "연금",

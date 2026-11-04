@@ -25,7 +25,7 @@ type BuildingFacilityInfoCardProps = {
   estimatedMaxProduction: number | null;
   /** Estimated employment for TYPE_STANDARD. */
   estimatedEmployment: number | null;
-  /** Estimated TYPE_STANDARD operating cost per epoch (labor + materials + building upkeep, with no rent for dedicated buildings). */
+  /** Estimated TYPE_STANDARD operating cost per epoch (labor + materials, with no rent for dedicated buildings). */
   estimatedOperatingCost: number | null;
   /** Operating cost breakdown: labor cost per epoch. */
   operatingWageCost: number | null;
@@ -87,7 +87,7 @@ type StandardFacilityInfoProps = {
  * Information for ordinary facilities (TYPE_STANDARD).
  *
  * Along with estimated production/employment at full operation, display recurring per-epoch
- * operating costs (labor + materials + building upkeep) with a breakdown. The construction-cost backend endpoint
+ * operating costs (labor + materials) with a breakdown. The construction-cost backend endpoint
  * uses calc_rough_cost, shared with new spawn evaluation. No rent is included for dedicated buildings.
  * If a source budget category (LEDGER_*) exists, also display its icon/label so players can
  * understand the recurring budget expense before building.

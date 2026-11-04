@@ -21,16 +21,16 @@ Players set each category's budget as a proportion of its required amount. As ci
 | Other | `LEDGER_OTHER` | Other public facilities |
 | Public transport | `LEDGER_TRANSPORT` | Depots and lines |
 | Construction | `LEDGER_CONSTRUCTION` | Construction and demolition of public buildings and paths |
-| Maintenance | `LEDGER_MAINTENANCE` | Repairs to public buildings and paths, and daily upkeep of paths |
+| Maintenance | `LEDGER_MAINTENANCE` | Repairs to and daily upkeep of public buildings and paths |
 | Social security | `LEDGER_WELFARE` | Household benefits |
 | Land acquisition | `LEDGER_LAND_PURCHASE` | Land for public works |
 | Reserves | `LEDGER_RESERVE` | Cash retained without budget allocation |
 
 ## 15.3. Budgets and city activity
 
-Operating budgets support public facility employment, production, and procurement. Lower budgets reduce capacity and the services residents receive. The daily upkeep of a public facility's building is also paid from that facility's operating budget and does not shrink when production is cut.
+Operating budgets support public facility employment, production, and procurement. Lower budgets reduce capacity and the services residents receive.
 
-Reduced construction or maintenance budgets limit work and delay completion. Paths such as roads and tracks also receive daily upkeep from the maintenance budget and wear out faster when it falls short. Land acquisition and social security shortfalls restrict purchases and benefits.
+Reduced construction or maintenance budgets limit work and delay completion. Public buildings and paths such as roads and tracks also receive daily upkeep from the maintenance budget and wear out faster when it falls short. Land acquisition and social security shortfalls restrict purchases and benefits.
 
 When funds are insufficient, budgets shrink according to the maintenance priorities set by the player. Reserves provide for spending fluctuations and future projects.
 

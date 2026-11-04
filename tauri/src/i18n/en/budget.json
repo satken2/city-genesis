@@ -55,6 +55,7 @@
       "14": "Land Purchase"
     },
     "upkeepRow": "Daily upkeep: {{name}} {{km}} km",
+    "buildingUpkeepRow": "Daily upkeep: {{name}} ({{n}} buildings)",
     "welfare": {
       "unemployment": "Unemployment Benefits",
       "pension": "Pensions",

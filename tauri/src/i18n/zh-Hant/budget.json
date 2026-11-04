@@ -55,6 +55,7 @@
       "14": "徵地"
     },
     "upkeepRow": "日常養護：{{name}} {{km}}公里",
+    "buildingUpkeepRow": "日常養護：{{name}} {{n}}棟",
     "welfare": {
       "unemployment": "失業給付",
       "pension": "年金",
