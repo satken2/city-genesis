@@ -1,0 +1,20 @@
+{
+  "cityDevelopment": {
+    "pattern": "Pattern",
+    "patterns": {
+      "grid": "Grid ignoring terrain",
+      "terrain_grid": "Grid following terrain",
+      "arterial": "Arterials with local streets"
+    },
+    "spacing": "Road spacing",
+    "parcelArea": "Parcel area",
+    "hint": "Hold Ctrl and drag to paint the area to develop. Drag to pan, scroll to zoom.",
+    "clear": "Clear",
+    "preview": "Preview",
+    "previewing": "Calculating...",
+    "create": "Confirm",
+    "creating": "Creating...",
+    "previewed": "Lightly smooths the terrain in {{area}} and can plan {{roads}} road segments and {{parcels}} parcels ({{rejected}} rejected)",
+    "created": "Smoothed the terrain and planned {{roads}} road segments and {{parcels}} parcels ({{rejected}} rejected)"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "cityDevelopment": {
+    "pattern": "Modèle",
+    "patterns": {
+      "grid": "Quadrillage sans tenir compte du relief",
+      "terrain_grid": "Quadrillage suivant le relief",
+      "arterial": "Axes principaux et rues locales"
+    },
+    "spacing": "Espacement des routes",
+    "parcelArea": "Surface des parcelles",
+    "hint": "Maintenez Ctrl et faites glisser pour peindre la zone à développer. Faites glisser pour déplacer la carte, molette pour zoomer.",
+    "clear": "Effacer",
+    "preview": "Aperçu",
+    "previewing": "Calcul...",
+    "create": "Confirmer",
+    "creating": "Création...",
+    "previewed": "Adoucit légèrement le relief sur {{area}} : {{roads}} tronçons de route et {{parcels}} parcelles peuvent être planifiés ({{rejected}} rejetés)",
+    "created": "Relief adouci : {{roads}} tronçons de route et {{parcels}} parcelles planifiés ({{rejected}} rejetés)"
+  }
+}

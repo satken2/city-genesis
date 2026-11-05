@@ -6,6 +6,7 @@
     "city_map": "도시 지도",
     "zone_edit": "지구 편집",
     "street_grid": "도로 일괄 생성",
+    "city_development": "도시 자동 개발",
     "agent_detail": "시설 상세",
     "confirm_dialog": "확인",
     "parcel_detail": "토지 구획 상세",
@@ -112,6 +113,7 @@
   "taskbar": {
     "menuMap": "지도",
     "menuConstruction": "건설",
+    "menuCityDevelopment": "도시 자동 개발",
     "menuConstructionProjects": "건설 프로젝트",
     "menuRoad": "도로·철도·인프라",
     "menuTransport": "대중교통",

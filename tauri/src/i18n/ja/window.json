@@ -6,6 +6,7 @@
     "city_map": "都市マップ",
     "zone_edit": "地区編集",
     "street_grid": "道路の一括作成",
+    "city_development": "都市の自動開発",
     "agent_detail": "施設の詳細",
     "confirm_dialog": "確認",
     "parcel_detail": "土地区画の詳細",
@@ -112,6 +113,7 @@
   "taskbar": {
     "menuMap": "マップ",
     "menuConstruction": "建設",
+    "menuCityDevelopment": "都市の自動開発",
     "menuConstructionProjects": "建設プロジェクト",
     "menuRoad": "道路・鉄道・インフラ",
     "menuTransport": "公共交通機関",

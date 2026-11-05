@@ -1,0 +1,20 @@
+{
+  "cityDevelopment": {
+    "pattern": "Patrón",
+    "patterns": {
+      "grid": "Cuadrícula sin considerar el terreno",
+      "terrain_grid": "Cuadrícula que sigue el terreno",
+      "arterial": "Vías principales con calles locales"
+    },
+    "spacing": "Separación de calles",
+    "parcelArea": "Área de parcela",
+    "hint": "Mantén Ctrl y arrastra para pintar el área a desarrollar. Arrastra para mover el mapa y usa la rueda para acercar o alejar.",
+    "clear": "Limpiar",
+    "preview": "Vista previa",
+    "previewing": "Calculando...",
+    "create": "Confirmar",
+    "creating": "Creando...",
+    "previewed": "Suaviza un poco el terreno en {{area}} y se pueden planificar {{roads}} tramos de calle y {{parcels}} parcelas ({{rejected}} rechazados)",
+    "created": "Se suavizó el terreno y se planificaron {{roads}} tramos de calle y {{parcels}} parcelas ({{rejected}} rechazados)"
+  }
+}

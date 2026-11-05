@@ -1,0 +1,20 @@
+{
+  "cityDevelopment": {
+    "pattern": "패턴",
+    "patterns": {
+      "grid": "지형을 무시한 바둑판",
+      "terrain_grid": "지형을 고려한 바둑판",
+      "arterial": "간선과 골목을 조합한 개발지"
+    },
+    "spacing": "도로 간격",
+    "parcelArea": "구획 면적",
+    "hint": "Ctrl을 누른 채 드래그해 개발할 범위를 칠합니다. 드래그로 지도를 이동하고 휠로 확대·축소합니다.",
+    "clear": "지우기",
+    "preview": "미리보기",
+    "previewing": "계산 중...",
+    "create": "확정",
+    "creating": "생성 중...",
+    "previewed": "{{area}} 범위의 지형을 조금 고르게 하고 도로 {{roads}}개와 구획 {{parcels}}개를 계획할 수 있습니다(거부 {{rejected}}개)",
+    "created": "지형을 고르게 하고 도로 {{roads}}개와 구획 {{parcels}}개를 계획했습니다(거부 {{rejected}}개)"
+  }
+}

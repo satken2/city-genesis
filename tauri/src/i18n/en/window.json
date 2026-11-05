@@ -6,6 +6,7 @@
     "city_map": "City Map",
     "zone_edit": "Edit Districts",
     "street_grid": "Bulk Road Creation",
+    "city_development": "Automatic City Development",
     "agent_detail": "Facility Details",
     "confirm_dialog": "Confirm",
     "parcel_detail": "Parcel Details",
@@ -112,6 +113,7 @@
   "taskbar": {
     "menuMap": "Map",
     "menuConstruction": "Construction",
+    "menuCityDevelopment": "Automatic City Development",
     "menuConstructionProjects": "Construction Projects",
     "menuRoad": "Roads, Rail & Infrastructure",
     "menuTransport": "Public Transport",

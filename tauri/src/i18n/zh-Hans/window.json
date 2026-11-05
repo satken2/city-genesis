@@ -6,6 +6,7 @@
     "city_map": "城市地图",
     "zone_edit": "编辑地区",
     "street_grid": "批量创建道路",
+    "city_development": "城市自动开发",
     "agent_detail": "设施详情",
     "confirm_dialog": "确认",
     "parcel_detail": "地块详情",
@@ -112,6 +113,7 @@
   "taskbar": {
     "menuMap": "地图",
     "menuConstruction": "建设",
+    "menuCityDevelopment": "城市自动开发",
     "menuConstructionProjects": "建设项目",
     "menuRoad": "道路、铁路与基础设施",
     "menuTransport": "公共交通",

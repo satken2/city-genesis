@@ -1,0 +1,20 @@
+{
+  "cityDevelopment": {
+    "pattern": "模式",
+    "patterns": {
+      "grid": "不考慮地形的棋盤格",
+      "terrain_grid": "順應地形的棋盤格",
+      "arterial": "幹道與巷道組合的開發區"
+    },
+    "spacing": "道路間距",
+    "parcelArea": "地塊面積",
+    "hint": "按住 Ctrl 拖曳以塗抹要開發的範圍。拖曳可移動地圖，滾輪可縮放。",
+    "clear": "清除",
+    "preview": "預覽",
+    "previewing": "計算中...",
+    "create": "確定",
+    "creating": "建立中...",
+    "previewed": "將 {{area}} 範圍內的地形稍加整平，可規劃 {{roads}} 段道路與 {{parcels}} 塊地塊（拒絕 {{rejected}} 段）",
+    "created": "已整平地形並規劃 {{roads}} 段道路與 {{parcels}} 塊地塊（拒絕 {{rejected}} 段）"
+  }
+}

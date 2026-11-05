@@ -61,6 +61,7 @@ import {
   type RoadTarget,
   type StreetEdge,
 } from "./zoneBrushTargets";
+import { paintThroughScratch } from "../map/paintThroughScratch";
 import "./ZoneEditWindow.css";
 
 type Tool = "create" | "expand";
@@ -139,35 +140,6 @@ function fillRing(ctx: CanvasRenderingContext2D, ring: Ring): void {
   ctx.moveTo(ring[0][0], ring[0][1]);
   for (let i = 1; i < ring.length; i++) ctx.lineTo(ring[i][0], ring[i][1]);
   ctx.closePath();
-}
-
-/**
- * District geometry has only an exterior ring, without holes, so a district surrounding an enclave also covers
- * it.
- * Paint opaque fills on a working canvas, then composite translucently to prevent overlapping colors from
- * mixing.
- */
-function paintThroughScratch(
-  ctx: CanvasRenderingContext2D,
-  scratch: HTMLCanvasElement,
-  alpha: number,
-  paint: (s: CanvasRenderingContext2D) => void
-): void {
-  if (scratch.width !== ctx.canvas.width || scratch.height !== ctx.canvas.height) {
-    scratch.width = ctx.canvas.width;
-    scratch.height = ctx.canvas.height;
-  }
-  const s = scratch.getContext("2d")!;
-  s.setTransform(1, 0, 0, 1, 0, 0);
-  s.globalCompositeOperation = "source-over";
-  s.clearRect(0, 0, scratch.width, scratch.height);
-  s.setTransform(ctx.getTransform());
-  paint(s);
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.globalAlpha = alpha;
-  ctx.drawImage(scratch, 0, 0);
-  ctx.restore();
 }
 
 export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
@@ -433,6 +405,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   const drawZones = useCallback((ctx: CanvasRenderingContext2D) => {
     zoneScratchRef.current ??= document.createElement("canvas");
+    // District geometry has only an exterior ring, so a district surrounding an enclave also covers it.
     paintThroughScratch(ctx, zoneScratchRef.current, ZONE_FILL_ALPHA, (s) => {
       for (const zone of zonesRef.current) {
         fillRing(s, zone.polygon);

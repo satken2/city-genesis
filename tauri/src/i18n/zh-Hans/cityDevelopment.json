@@ -1,0 +1,20 @@
+{
+  "cityDevelopment": {
+    "pattern": "模式",
+    "patterns": {
+      "grid": "无视地形的棋盘格",
+      "terrain_grid": "顺应地形的棋盘格",
+      "arterial": "干道与小巷组合的开发区"
+    },
+    "spacing": "道路间距",
+    "parcelArea": "地块面积",
+    "hint": "按住 Ctrl 拖动以涂抹要开发的范围。拖动可移动地图，滚轮可缩放。",
+    "clear": "清除",
+    "preview": "预览",
+    "previewing": "计算中...",
+    "create": "确定",
+    "creating": "创建中...",
+    "previewed": "将 {{area}} 范围内的地形稍加平整，可规划 {{roads}} 段道路和 {{parcels}} 块地块（拒绝 {{rejected}} 段）",
+    "created": "已平整地形并规划 {{roads}} 段道路和 {{parcels}} 块地块（拒绝 {{rejected}} 段）"
+  }
+}

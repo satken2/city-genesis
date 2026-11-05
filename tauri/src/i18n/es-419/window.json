@@ -6,6 +6,7 @@
     "city_map": "Mapa de la ciudad",
     "zone_edit": "Editar distritos",
     "street_grid": "Creación de calles en lote",
+    "city_development": "Desarrollo urbano automático",
     "agent_detail": "Detalle de la instalación",
     "confirm_dialog": "Confirmar",
     "parcel_detail": "Detalle de la parcela",
@@ -112,6 +113,7 @@
   "taskbar": {
     "menuMap": "Mapa",
     "menuConstruction": "Construcción",
+    "menuCityDevelopment": "Desarrollo urbano automático",
     "menuConstructionProjects": "Proyectos de construcción",
     "menuRoad": "Calles, ferrocarril e infraestructura",
     "menuTransport": "Transporte público",

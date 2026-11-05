@@ -1,0 +1,20 @@
+{
+  "cityDevelopment": {
+    "pattern": "パターン",
+    "patterns": {
+      "grid": "地形を無視した碁盤",
+      "terrain_grid": "地形を考慮した碁盤",
+      "arterial": "幹線と路地を組み合わせた開発地"
+    },
+    "spacing": "道路の間隔",
+    "parcelArea": "区画の面積",
+    "hint": "Ctrl＋左ドラッグで開発する範囲を塗ります。左ドラッグで地図を移動、ホイールで拡大・縮小します。",
+    "clear": "クリア",
+    "preview": "プレビュー",
+    "previewing": "計算中...",
+    "create": "確定",
+    "creating": "作成中...",
+    "previewed": "範囲 {{area}} の地形を少しならし、道路 {{roads}} 本・土地区画 {{parcels}} 件を計画できます（棄却 {{rejected}} 本）",
+    "created": "地形をならし、道路 {{roads}} 本・土地区画 {{parcels}} 件を計画しました（棄却 {{rejected}} 本）"
+  }
+}

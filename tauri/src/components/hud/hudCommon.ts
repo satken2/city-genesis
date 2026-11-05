@@ -66,6 +66,7 @@ export const MENU_ICONS: HudIconDef[] = [
   { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", windowType: "building_construction", enabledWhenLocked: true, hiddenWhenReadOnly: true },
   { id: "transport", src: "menu_transport.png", tooltipKey: "taskbar.menuTransport", windowType: "transit_management" },
   { id: "prop_placement", src: "menu_prop.png", tooltipKey: "taskbar.menuPropPlacement", windowType: "prop_placement", hintKey: "prop_placement.hint", hiddenWhenReadOnly: true },
+  { id: "city_development", src: "menu_land.png", tooltipKey: "taskbar.menuCityDevelopment", windowType: "city_development", hiddenWhenReadOnly: true },
   { id: "construction_projects", src: "menu_construction.png", tooltipKey: "taskbar.menuConstructionProjects", windowType: "construction_projects" },
   { id: "regulation", src: "menu_regulation.png", tooltipKey: "taskbar.menuRegulation", windowType: "city_regulation" },
   { id: "stat", src: "menu_stat.png", tooltipKey: "taskbar.menuStat", windowType: "city_statistics" },
