@@ -254,12 +254,8 @@
         "desc": "Base annual probability that an eligible building enters maintenance."
       },
       "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "Paused Building Demolition Threshold",
-        "desc": "Paused buildings below this durability become eligible for demolition."
-      },
-      "DEMOLITION_BASE_RATE_ANNUAL": {
-        "label": "Paused Building Demolition Annual Rate",
-        "desc": "Base annual probability that an eligible paused building is demolished."
+        "label": "Private Building Demolition Threshold",
+        "desc": "Private buildings are demolished when their durability falls below this value."
       },
       "SHUTDOWN_GRACE_PERIOD_DAYS": {
         "label": "Shutdown Grace Period (days)",

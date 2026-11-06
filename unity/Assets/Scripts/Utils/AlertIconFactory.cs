@@ -45,6 +45,8 @@ public class AlertIconFactory : MonoBehaviour
     [SerializeField] private Sprite agentInfraDisconnectedIcon;
     [Tooltip("ALERT_AGENT_CAPACITY_TIGHT ビット用アイコン。取扱量が能力の9割以上になった輸出入拠点・インフラ施設に表示。")]
     [SerializeField] private Sprite agentCapacityTightIcon;
+    [Tooltip("ALERT_AGENT_NONCONFORMING ビット用アイコン。立地区画の建築規制に合わない民間建物に表示。")]
+    [SerializeField] private Sprite agentNonconformingIcon;
 
     [Header("Path Alert Icons (by bit)")]
     [Tooltip("ALERT_PATH_CONSTRUCTION_SHORTAGE ビット用アイコン。建設サービス財の調達不足に表示。")]
@@ -97,6 +99,7 @@ public class AlertIconFactory : MonoBehaviour
             _alertIcons[("agent", Constants.ALERT_AGENT_CRIME)]                 = agentCrimeIcon;
             _alertIcons[("agent", Constants.ALERT_AGENT_INFRA_DISCONNECTED)]    = agentInfraDisconnectedIcon;
             _alertIcons[("agent", Constants.ALERT_AGENT_CAPACITY_TIGHT)]        = agentCapacityTightIcon;
+            _alertIcons[("agent", Constants.ALERT_AGENT_NONCONFORMING)]         = agentNonconformingIcon;
             _alertIcons[("path",  Constants.ALERT_PATH_CONSTRUCTION_SHORTAGE)] = pathConstructionShortageIcon;
             _alertIcons[("path",  Constants.ALERT_PATH_ACCIDENT)]              = pathAccidentIcon;
             _alertIcons[("path",  Constants.ALERT_PATH_NO_STATION_HOUSE)]      = pathNoStationHouseIcon;

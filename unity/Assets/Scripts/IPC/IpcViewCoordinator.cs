@@ -974,8 +974,8 @@ public class IpcViewCoordinator : MonoBehaviour
 
     /// <summary>
     /// Applies alert layer filtering.
-    /// subMode is an alert-type bitmask (low byte=ALERT_AGENT_*,
-    /// high byte=ALERT_PATH_* shifted by ALERT_PATH_MASK_SHIFT). Unspecified shows all types.
+    /// subMode is an alert-type bitmask (low bits=ALERT_AGENT_*,
+    /// ALERT_PATH_* shifted up by ALERT_PATH_MASK_SHIFT). Unspecified shows all types.
     /// </summary>
     private void ApplyAlertMode(string mode, string subMode = null)
     {

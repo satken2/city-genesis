@@ -106,7 +106,7 @@ public class AlertManager : MonoBehaviour
         return mask;
     }
 
-    // Display filter: ALERT_AGENT_* in the low byte and ALERT_PATH_* in the high byte (shifted by ALERT_PATH_MASK_SHIFT).
+    // Display filter: ALERT_AGENT_* in the low bits and ALERT_PATH_* shifted up by ALERT_PATH_MASK_SHIFT.
     // This separates the overlapping agent/path bit namespaces; the UI (DisplayOptionsPanel) constructs its mask using the same convention.
     private int _filterMask = DefaultFilterMask;
 
@@ -611,7 +611,7 @@ public class AlertManager : MonoBehaviour
 
     /// <summary>
     /// Return the union of alert bits that are set and enabled in the display filter.
-    /// Since path filter bits occupy the high byte, shift the mask down before comparing.
+    /// Path filter bits sit ALERT_PATH_MASK_SHIFT bits up, so shift the mask down before comparing.
     /// Ruin icons based on STATUS_* are handled by UpdateIcons, not here.
     /// </summary>
     private int ActiveBitMask(int alert, string entityType)

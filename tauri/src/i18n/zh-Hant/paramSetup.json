@@ -254,12 +254,8 @@
         "desc": "修繕對象建築實際進入修繕的基準年機率。"
       },
       "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "停業建築的拆除閾值",
-        "desc": "停業中的建築耐久度低於此值時成為拆除對象。"
-      },
-      "DEMOLITION_BASE_RATE_ANNUAL": {
-        "label": "停業建築的年拆除機率",
-        "desc": "停業且屬於拆除對象的建築在1年內被拆除的基準機率。"
+        "label": "民間建築的拆除閾值",
+        "desc": "民間建築的耐久度低於此值時將被拆除。"
       },
       "SHUTDOWN_GRACE_PERIOD_DAYS": {
         "label": "停業判定寬限期（日）",

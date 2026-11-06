@@ -413,10 +413,11 @@ export const ALERT_AGENT_MATERIAL_SHORTAGE: number = 128;
 export const ALERT_AGENT_HIGH_SKILL_SHORTAGE: number = 256;
 export const ALERT_AGENT_BUDGET_CAPPED: number = 512;
 export const ALERT_AGENT_CAPACITY_TIGHT: number = 1024;
+export const ALERT_AGENT_NONCONFORMING: number = 2048;
 export const ALERT_PATH_CONSTRUCTION_SHORTAGE: number = 1;
 export const ALERT_PATH_ACCIDENT: number = 2;
 export const ALERT_PATH_NO_STATION_HOUSE: number = 4;
-export const ALERT_PATH_MASK_SHIFT: number = 8;
+export const ALERT_PATH_MASK_SHIFT: number = 21;
 export const ALERT_DISPLAY_RUIN: number = 65536;
 export const ALERT_DISPLAY_RESOURCE_WARNING: number = 131072;
 export const ALERT_DISPLAY_FACILITY_WARNING: number = 262144;
@@ -504,7 +505,7 @@ export const TENANT_TYPES: number[] = [2, 4, 8, 16, 64];
 
 export const ALERT_WARNING_DISPLAY_BITS: number[] = [131072, 262144, 524288, 1048576];
 
-export const ALERT_AGENT_ICON_BITS: number[] = [1, 8, 32, 1024];
+export const ALERT_AGENT_ICON_BITS: number[] = [1, 8, 32, 1024, 2048];
 
 export const ALERT_AGENT_VFX_BITS: number[] = [2];
 

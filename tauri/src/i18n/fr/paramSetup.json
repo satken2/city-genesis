@@ -254,12 +254,8 @@
         "desc": "Probabilité annuelle de base qu'un bâtiment candidat entre effectivement en réparation."
       },
       "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "Seuil de démolition des bâtiments à l'arrêt",
-        "desc": "Un bâtiment à l'arrêt devient candidat à la démolition lorsqu'il passe sous cette durabilité."
-      },
-      "DEMOLITION_BASE_RATE_ANNUAL": {
-        "label": "Probabilité annuelle de démolition des bâtiments à l'arrêt",
-        "desc": "Probabilité de base qu'un bâtiment à l'arrêt et candidat soit démoli dans l'année."
+        "label": "Seuil de démolition des bâtiments privés",
+        "desc": "Les bâtiments privés sont démolis lorsque leur durabilité passe sous cette valeur."
       },
       "SHUTDOWN_GRACE_PERIOD_DAYS": {
         "label": "Délai de grâce avant fermeture (jours)",

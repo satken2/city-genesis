@@ -254,12 +254,8 @@
         "desc": "Probabilidad anual base de que un edificio candidato entre efectivamente en reparación."
       },
       "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "Umbral de demolición de edificios detenidos",
-        "desc": "Un edificio detenido pasa a ser candidato a demolición cuando cae por debajo de esta durabilidad."
-      },
-      "DEMOLITION_BASE_RATE_ANNUAL": {
-        "label": "Probabilidad anual de demoler edificios detenidos",
-        "desc": "Probabilidad base de que un edificio detenido y candidato sea demolido en un año."
+        "label": "Umbral de demolición de edificios privados",
+        "desc": "Los edificios privados se demuelen cuando su durabilidad cae por debajo de este valor."
       },
       "SHUTDOWN_GRACE_PERIOD_DAYS": {
         "label": "Periodo de gracia antes del cierre (días)",

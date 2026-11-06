@@ -254,12 +254,8 @@
         "desc": "修繕対象建物が実際に修繕に入る基準年間確率。"
       },
       "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "一時停止建物の取り壊し閾値",
-        "desc": "停止中の建物がこの耐用度を下回ると取り壊し対象になる。"
-      },
-      "DEMOLITION_BASE_RATE_ANNUAL": {
-        "label": "一時停止建物の取り壊し年間確率",
-        "desc": "停止中かつ取り壊し対象の建物が1年間に取り壊される基準確率。"
+        "label": "民間建物の解体閾値",
+        "desc": "民間の建物がこの耐久度を下回ると解体される。"
       },
       "SHUTDOWN_GRACE_PERIOD_DAYS": {
         "label": "シャットダウン猶予期間（日）",

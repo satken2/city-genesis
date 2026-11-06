@@ -224,6 +224,7 @@
     "alertAgentCrime": "犯罪が発生した建物",
     "alertAgentInfraDisconnected": "インフラ網に繋がっていない施設",
     "alertAgentCapacityTight": "能力の9割以上を使っている施設",
+    "alertAgentNonconforming": "建築規制に合わない建物",
     "alertPathConstructionShortage": "資金不足で建設が停滞している道路",
     "alertPathAccident": "交通事故が発生した道路",
     "alertPathNoStationHouse": "駅舎に属していないホーム",

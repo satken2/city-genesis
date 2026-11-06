@@ -93,6 +93,10 @@
         "title": "Proche de la capacité maximale",
         "description": "Cette installation traite 90 % ou plus de sa capacité. Elle peut à peine absorber davantage de demande."
       },
+      "nonconforming": {
+        "title": "Non conforme aux réglementations",
+        "description": "Ce bâtiment n'est pas conforme aux réglementations de sa parcelle. Il ne sera pas réparé et sera démoli une fois dégradé."
+      },
       "crime": {
         "title": "Délit commis",
         "description": "Un délit a été commis dans ce bâtiment."

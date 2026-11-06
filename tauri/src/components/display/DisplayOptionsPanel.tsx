@@ -12,6 +12,7 @@ import {
   ALERT_AGENT_CRIME,
   ALERT_AGENT_INFRA_DISCONNECTED,
   ALERT_AGENT_CAPACITY_TIGHT,
+  ALERT_AGENT_NONCONFORMING,
   ALERT_AGENT_ICON_BITS,
   ALERT_AGENT_VFX_BITS,
   ALERT_PATH_CONSTRUCTION_SHORTAGE,
@@ -294,6 +295,7 @@ const ALERT_CARDS: { bit: number; icon: string; labelKey: string; iconFilter?: s
     { bit: ALERT_AGENT_CRIME, icon: "alerts/shooting.png", labelKey: "display.alertAgentCrime" },
     { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: "alerts/infra-disconnected.svg", labelKey: "display.alertAgentInfraDisconnected" },
     { bit: ALERT_AGENT_CAPACITY_TIGHT, icon: "alerts/capacity-tight.svg", labelKey: "display.alertAgentCapacityTight" },
+    { bit: ALERT_AGENT_NONCONFORMING, icon: "alerts/nonconforming.svg", labelKey: "display.alertAgentNonconforming" },
   ].filter((card) => ALERT_AGENT_ICON_BITS.includes(card.bit) || ALERT_AGENT_VFX_BITS.includes(card.bit)),
   ...[
     { bit: ALERT_PATH_CONSTRUCTION_SHORTAGE, icon: "alerts/road.png", labelKey: "display.alertPathConstructionShortage" },

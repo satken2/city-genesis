@@ -254,12 +254,8 @@
         "desc": "수선 대상 건물이 실제로 수선에 들어갈 기준 연간 확률."
       },
       "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "일시 정지 건물의 철거 임계값",
-        "desc": "정지 중인 건물이 이 내구도를 밑돌면 철거 대상이 됩니다."
-      },
-      "DEMOLITION_BASE_RATE_ANNUAL": {
-        "label": "일시 정지 건물의 연간 철거 확률",
-        "desc": "정지 중이면서 철거 대상인 건물이 1년간 철거될 기준 확률."
+        "label": "민간 건물의 철거 임계값",
+        "desc": "민간 건물의 내구도가 이 값을 밑돌면 철거됩니다."
       },
       "SHUTDOWN_GRACE_PERIOD_DAYS": {
         "label": "셧다운 유예 기간(일)",

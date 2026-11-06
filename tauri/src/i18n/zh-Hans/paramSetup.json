@@ -254,12 +254,8 @@
         "desc": "修缮对象建筑实际进入修缮的基准年概率。"
       },
       "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "停业建筑的拆除阈值",
-        "desc": "停业中的建筑耐久度低于该值时成为拆除对象。"
-      },
-      "DEMOLITION_BASE_RATE_ANNUAL": {
-        "label": "停业建筑的年拆除概率",
-        "desc": "停业且属于拆除对象的建筑在1年内被拆除的基准概率。"
+        "label": "民间建筑的拆除阈值",
+        "desc": "民间建筑的耐久度低于该值时将被拆除。"
       },
       "SHUTDOWN_GRACE_PERIOD_DAYS": {
         "label": "停业判定宽限期（日）",

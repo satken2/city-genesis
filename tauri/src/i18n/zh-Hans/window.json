@@ -224,6 +224,7 @@
     "alertAgentCrime": "发生犯罪的建筑",
     "alertAgentInfraDisconnected": "未接入基础设施网络的设施",
     "alertAgentCapacityTight": "已使用能力九成以上的设施",
+    "alertAgentNonconforming": "不符合法规的建筑",
     "alertPathConstructionShortage": "因资金不足而停工的道路",
     "alertPathAccident": "发生交通事故的道路",
     "alertPathNoStationHouse": "未归属站房的站台",

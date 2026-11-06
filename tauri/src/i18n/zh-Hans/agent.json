@@ -93,6 +93,10 @@
         "title": "能力紧张",
         "description": "该设施的处理量已达到其能力的九成以上，几乎无法再承接更多需求。"
       },
+      "nonconforming": {
+        "title": "不符合建筑法规",
+        "description": "该建筑不符合所在地块的法规。不会进行修缮，老化后将被拆除。"
+      },
       "crime": {
         "title": "发生犯罪",
         "description": "该建筑发生了犯罪。"

@@ -93,6 +93,10 @@
         "title": "Near Capacity",
         "description": "This facility is handling 90% or more of its capacity. It can barely meet any more demand."
       },
+      "nonconforming": {
+        "title": "Does Not Meet Regulations",
+        "description": "This building does not meet its parcel's regulations. It will not be repaired and will be demolished once it deteriorates."
+      },
       "crime": {
         "title": "Crime Occurred",
         "description": "A crime has occurred at this building."

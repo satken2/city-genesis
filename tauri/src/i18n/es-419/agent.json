@@ -93,6 +93,10 @@
         "title": "Cerca del límite de capacidad",
         "description": "Esta instalación maneja el 90 % o más de su capacidad. Apenas puede atender más demanda."
       },
+      "nonconforming": {
+        "title": "No cumple las normativas",
+        "description": "Este edificio no cumple las normativas de su parcela. No se reparará y se demolerá cuando se deteriore."
+      },
       "crime": {
         "title": "Delito cometido",
         "description": "Se cometió un delito en este edificio."
