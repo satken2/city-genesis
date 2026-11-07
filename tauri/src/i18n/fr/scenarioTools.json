@@ -103,6 +103,10 @@
       "failed": "Échec de l’édition du scénario",
       "enterScenario": "Éditer en mode scénario",
       "exitScenario": "Revenir au mode normal",
+      "reloadMaster": "Recharger les données maîtres",
+      "masterReloaded": "Données maîtres rechargées et ville rouverte",
+      "reloadParameters": "Recharger les paramètres",
+      "parametersReloaded": "Paramètres rechargés et ville rouverte",
       "masterTab": "Données maîtres"
     },
     "masterOverride": {

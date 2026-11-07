@@ -103,6 +103,10 @@
       "failed": "场景编辑操作失败",
       "enterScenario": "在场景模式中编辑",
       "exitScenario": "返回普通模式",
+      "reloadMaster": "重新读取主数据",
+      "masterReloaded": "已重新读取主数据并重新打开城市",
+      "reloadParameters": "重新读取参数",
+      "parametersReloaded": "已重新读取参数并重新打开城市",
       "masterTab": "主数据"
     },
     "masterOverride": {

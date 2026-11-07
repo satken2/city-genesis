@@ -70,7 +70,7 @@ export function ScenarioToolsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     return () => controller.abort();
   }, [apiBaseUrl, playMode, tab, acceptDistribution, errorMessage]);
 
-  async function runOperation(operation: () => Promise<string>) {
+  async function runExclusive(operation: () => Promise<string>) {
     if (!enabled || busyRef.current) return;
     busyRef.current = true;
     setBusy(true);
@@ -78,7 +78,6 @@ export function ScenarioToolsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     try {
       await emit("epoch:executing", { executing: true });
       const text = await operation();
-      await sendSessionReload();
       setMessage({ text, error: false });
     } catch (error) {
       setMessage({ text: errorMessage(error), error: true });
@@ -88,6 +87,12 @@ export function ScenarioToolsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       await emit("epoch:executing", { executing: false });
     }
   }
+
+  const runOperation = (operation: () => Promise<string>) => runExclusive(async () => {
+    const text = await operation();
+    await sendSessionReload();
+    return text;
+  });
 
   async function openTool(windowType: string, hintKey?: string) {
     if (!enabled) return;
@@ -166,9 +171,20 @@ export function ScenarioToolsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     </div>}
     {busy && <p role="status">{t("scenarioTools.editor.running")}</p>}
     {message && <p role={message.error ? "alert" : "status"} className={message.error ? "scenario-tools__error" : ""}>{message.text}</p>}
-    {debugExecution && <button className="scenario-tools__exit" type="button" disabled={!enabled} onClick={() => {
-      void fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), { method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ play_mode: PLAY_MODE_NORMAL }) }).catch(error => setMessage({ text: errorMessage(error), error: true }));
-    }}>{t("scenarioTools.editor.exitScenario")}</button>}
+    {debugExecution && <div className="scenario-tools__debug">
+      <button type="button" disabled={!enabled} onClick={() => {
+        void fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/sessions"), { method: "PATCH", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ play_mode: PLAY_MODE_NORMAL }) }).catch(error => setMessage({ text: errorMessage(error), error: true }));
+      }}>{t("scenarioTools.editor.exitScenario")}</button>
+      {/* The core reopens the city under a new session_id, so session polling redraws every window and Unity as for an opened city. */}
+      <button type="button" disabled={!enabled} onClick={() => void runExclusive(async () => {
+        await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/debug/master/reload"), { method: "POST" });
+        return t("scenarioTools.editor.masterReloaded");
+      })}>{t("scenarioTools.editor.reloadMaster")}</button>
+      <button type="button" disabled={!enabled} onClick={() => void runExclusive(async () => {
+        await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/debug/parameters/reload"), { method: "POST" });
+        return t("scenarioTools.editor.parametersReloaded");
+      })}>{t("scenarioTools.editor.reloadParameters")}</button>
+    </div>}
   </div>;
 }

@@ -103,6 +103,10 @@
       "failed": "시나리오 편집 작업에 실패했습니다",
       "enterScenario": "시나리오 모드로 편집",
       "exitScenario": "일반 모드로 돌아가기",
+      "reloadMaster": "마스터 다시 읽기",
+      "masterReloaded": "마스터를 다시 읽고 도시를 다시 열었습니다",
+      "reloadParameters": "파라미터 다시 읽기",
+      "parametersReloaded": "파라미터를 다시 읽고 도시를 다시 열었습니다",
       "masterTab": "마스터"
     },
     "masterOverride": {

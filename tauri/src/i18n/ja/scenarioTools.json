@@ -103,6 +103,10 @@
       "failed": "シナリオ編集の操作に失敗しました",
       "enterScenario": "シナリオモードで編集",
       "exitScenario": "通常モードに戻る",
+      "reloadMaster": "マスターを再読み込み",
+      "masterReloaded": "マスターを読み直して都市を開き直しました",
+      "reloadParameters": "パラメータを再読み込み",
+      "parametersReloaded": "パラメータを読み直して都市を開き直しました",
       "masterTab": "マスター"
     },
     "masterOverride": {

@@ -103,6 +103,10 @@
       "failed": "Falló la edición del escenario",
       "enterScenario": "Editar en modo escenario",
       "exitScenario": "Volver al modo normal",
+      "reloadMaster": "Recargar datos maestros",
+      "masterReloaded": "Se recargaron los datos maestros y se volvió a abrir la ciudad",
+      "reloadParameters": "Recargar parámetros",
+      "parametersReloaded": "Se recargaron los parámetros y se volvió a abrir la ciudad",
       "masterTab": "Datos maestros"
     },
     "masterOverride": {

@@ -103,6 +103,10 @@
       "failed": "Scenario editing failed",
       "enterScenario": "Edit in scenario mode",
       "exitScenario": "Return to normal mode",
+      "reloadMaster": "Reload master data",
+      "masterReloaded": "Reloaded the master data and reopened the city",
+      "reloadParameters": "Reload parameters",
+      "parametersReloaded": "Reloaded the parameters and reopened the city",
       "masterTab": "Master"
     },
     "masterOverride": {

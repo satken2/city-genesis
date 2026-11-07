@@ -103,6 +103,10 @@
       "failed": "情境編輯操作失敗",
       "enterScenario": "在情境模式中編輯",
       "exitScenario": "返回一般模式",
+      "reloadMaster": "重新讀取主資料",
+      "masterReloaded": "已重新讀取主資料並重新開啟城市",
+      "reloadParameters": "重新讀取參數",
+      "parametersReloaded": "已重新讀取參數並重新開啟城市",
       "masterTab": "主資料"
     },
     "masterOverride": {

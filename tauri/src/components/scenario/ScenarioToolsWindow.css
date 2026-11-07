@@ -9,7 +9,7 @@
 .scenario-tools table { width: 100%; border-collapse: collapse; }
 .scenario-tools th, .scenario-tools td { padding: .65rem .4rem; text-align: left; border-bottom: 1px solid var(--flat-raised-hover); }
 .scenario-tools__error { color: var(--flat-danger); }
-.scenario-tools__exit { margin-top: auto; align-self: flex-start; }
+.scenario-tools__debug { margin-top: auto; display: flex; gap: .75rem; flex-wrap: wrap; }
 .scenario-tools button:disabled, .scenario-tools input:disabled { opacity: .5; cursor: default; }
 @media (max-width: 480px) {
   .scenario-tools__actions { grid-template-columns: 1fr; }
