@@ -17,7 +17,7 @@ Noise, air pollution, and public safety effects spread beyond individual parcels
 
 ## 13.3. Sanitation
 
-Insufficient sewage treatment or waste collection worsens sanitation and harms residents' health. Effects accumulate over time, and recovery takes time even after supply is restored. The sanitary condition of the dwelling itself also matters, so some housing problems cannot be resolved by supplying treatment services alone. Medical care supports recovery but cannot replace sewage treatment or waste management.
+Insufficient sewage treatment or waste collection worsens sanitation and harms residents' health. Effects accumulate over time, and recovery takes time even after supply is restored. Medical care supports recovery but cannot replace sewage treatment or waste management.
 
 ## 13.4. Effects on daily life
 

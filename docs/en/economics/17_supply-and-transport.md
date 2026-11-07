@@ -10,8 +10,6 @@ Natural resources are deposits, oil fields, water sources, and similar features 
 
 Resources have reserves that decrease with extraction. Deposits and oil fields do not recover; resources such as water sources do. Extraction is limited to the remaining reserves, sites with little left become less favorable locations, and depletion prevents continued production there. Renewable resources also become scarce when extraction exceeds recovery. Extracted materials enter the product market or dedicated infrastructure networks ([product market](09_product-market.md)).
 
-The scale a water source can support continuously depends on replenishment as well as total storage. When expressing its capacity as domestic water for a population, industrial water demand and the capacity of intake facilities, distribution facilities, and transport networks must be considered separately.
-
 ### Open-pit mining and terrain
 
 Open-pit extraction lowers the land and changes terrain. Pits remain after facilities disappear, affecting the landscape and future land use.
@@ -80,7 +78,7 @@ Loading and unloading stations are public facilities connecting local industry w
 
 ### External trade
 
-Seaports, international freight stations, and road freight hubs support trade beyond the city. Ports, including cruise terminals, cannot operate unless large-ship lanes connect them to the open sea. Scenarios provide ocean shipping lanes leading to the open sea, and link lanes join ports to them. Building a port automatically draws a link lane to the nearest point on the lanes connected to the open sea (ocean shipping lanes and the link lanes joined to them). Access to the open sea is handled as a good delivered to the port's connection terminal, as in infrastructure networks; only whether the port is connected matters, not the amount delivered. Lanes can only be laid on water, so ports cannot open on lakes without a sea outlet or in bays whose mouths have been reclaimed. International freight lines connect scenario-provided border freight stations outside the city with local international freight stations. Station handling capacity and line transport capacity limit trade volume. See [product market](09_product-market.md).
+Seaports, international freight stations, and road freight hubs support trade beyond the city. Ports, including cruise terminals, cannot operate unless large-ship lanes connect them to the open sea. Scenarios provide ocean shipping lanes leading to the open sea, and building a port automatically draws a link lane to the nearest lane. International freight lines connect scenario-provided border freight stations outside the city with local international freight stations. Station handling capacity and line transport capacity limit trade volume. See [product market](09_product-market.md).
 
 ## 17.4. Public transport vehicle procurement
 

@@ -64,7 +64,7 @@ Travel is described at three levels:
 
 Traffic volume counts passages per day. Roads and tracks have capacities; congestion increases with traffic relative to capacity. Road congestion increases travel times and affects accident risk ([accidents and disasters](14_accidents-and-disasters.md)).
 
-Street parking obstructs automobile traffic as soon as it exceeds dedicated parking spaces. `street_parking_capacity` is a reference capacity for comparing parking quantities, not a set of spaces that vehicles can use without affecting traffic. `path_master.parking_capacity_ratio` expresses dedicated capacity relative to that reference, while `parking_ratio` includes all street parking, including vehicles in dedicated spaces. Road displays and vehicle animation use the adjusted times returned by the core; the frontend must not apply the delay again.
+Street parking beyond the dedicated spaces obstructs automobile traffic. `street_parking_capacity` is a reference capacity for comparing parking quantities, not a set of spaces that vehicles can use without affecting traffic. `path_master.parking_capacity_ratio` expresses dedicated capacity relative to that reference, while `parking_ratio` includes all street parking, including vehicles in dedicated spaces. Road displays and vehicle animation use the adjusted times returned by the core; the frontend must not apply the delay again.
 
 ### Interchanges and junctions
 
@@ -104,7 +104,7 @@ Public transport section paths require no construction and are either operating 
 
 Path construction requires land and construction services. Existing roadside land uses can require acquisition and demolition. Active paths can also be rebuilt. See [budgets](15_budgets.md) for costs.
 
-A path can run attached to the structure of another path (its host), like the lower deck of a suspension bridge. The host's `path_master` entries `attach_variants` and `attach_offset` define which variants can attach and the difference in surface height. The attached path is created in the same request as the host or later for an existing host, with the host's shape shifted vertically. After creation the two are separate paths for traffic and construction, but bulldozing the host also bulldozes the attached path, and the attached path disappears with its host. Paired paths cannot change their shape or variant.
+A path can run attached to the structure of another path (its host), like the lower deck of a suspension bridge. The host's `path_master` entries `attach_variants` and `attach_offset` define which variants can attach and the difference in surface height. The attached path is created in the same request as the host or later for an existing host, with the host's shape shifted vertically. Paired paths cannot change their shape or variant.
 
 ## 3.6. Named roads
 

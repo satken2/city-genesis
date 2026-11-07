@@ -10,8 +10,6 @@ The district outline on the map represents its roads and parcels. Membership dep
 
 Parcels are units of land ownership and use. Every building occupies a parcel. Parcels have owners and land prices, and using private land for public works involves acquisition and compensation. Land prices reflect demand for the land and nearby rents.
 
-Small vacant parcels with no owner are too small for any building's minimum site, so they are automatically absorbed into a neighboring parcel. The small parcel disappears and its neighbor grows (only its shape changes, even if a building stands on it). City-owned parcels are not absorbed.
-
 Parcels have three categories based on their relationship to the coastline. Buildings require compatible parcel types: ports use shore parcels, and offshore structures use water parcels.
 
 | Type | Constant | Meaning |
@@ -20,7 +18,7 @@ Parcels have three categories based on their relationship to the coastline. Buil
 | Shore | `PARCEL_SHORE` | Land touching the coastline |
 | Water | `PARCEL_WATER` | Sites for offshore structures |
 
-Ports where ships berth stand only on shore parcels whose water just outside the quay reaches the depth each port type requires. The seabed extends the slope of the land into the sea, so steep coasts have deep water nearby and suit ports (natural harbors), while on shallow, flat coasts the land must first be reclaimed out to deep water before a port can be built.
+Ports stand only on shore parcels where the water in front of the quay reaches the depth the building requires.
 
 See [land geometry](../geometries/B_land-geometry.md) for shapes and [buildings](05_buildings.md) for their relationship to buildings.
 

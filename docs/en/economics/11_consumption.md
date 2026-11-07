@@ -4,7 +4,7 @@ Households obtain goods and services for daily life through the product market. 
 
 ## 11.1. Consumption budget
 
-Discretionary income (`discretionary_income`) represents the budget a household can spend in the market. Households reserve money for rent and basic security, then spend the remainder. Savings mean unemployment does not immediately make daily life unsustainable. Self-provision covers some minimum needs that cannot be purchased ([product market](09_product-market.md)).
+Discretionary income (`discretionary_income`) represents the budget a household can spend in the market. Households reserve money for rent and basic security, then spend the remainder. Self-provision covers some minimum needs that cannot be purchased ([product market](09_product-market.md)).
 
 ## 11.2. Demand categories
 
@@ -18,7 +18,7 @@ Demand has three tiers according to priority in daily life.
 
 Households prioritize basic needs and expand consumption as resources permit. Demand depends on household size, age, health, and available leisure.
 
-A household's standard of living (income tier) shows how far its income reaches along the cost of living. A household whose income falls short of the minimum cost of living is 0, one that reaches it is 1, one that can fully meet its necessities is 2, and one that can also fully meet ordinary consumer goods is 3; a tier-3 household can afford entertainment and luxuries from its income alone.
+A household's standard of living (income tier) shows how far its income reaches along the cost of living. A household whose income falls short of the minimum cost of living is 0, one that reaches it is 1, one that can fully meet its necessities is 2, and one that can also fully meet ordinary consumer goods is 3.
 
 ## 11.3. Satisfaction
 

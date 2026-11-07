@@ -31,7 +31,7 @@ Construction requires land and construction services. Existing buildings may req
 
 Completed buildings allow facilities to produce and households or tenants to move in. Private buildings with low profitability or utilization pause and return to use when demand recovers.
 
-Buildings deteriorate with time and are maintained through repairs. Operating buildings receive daily upkeep (cleaning, inspection, and equipment maintenance) from contractors as maintenance & contract work in proportion to their total floor area, and wear out faster by the share they do not receive. The building's owner pays for it; public facilities pay from the maintenance budget. Unused or unmaintainable buildings move toward demolition or rebuilding. Collapse caused by deterioration or fire leaves ruins and can harm people and the surrounding environment ([accidents and disasters](14_accidents-and-disasters.md)).
+Buildings deteriorate with time and are kept up through daily upkeep and repairs. Public facilities pay for upkeep and repairs from the maintenance budget. Unused or unmaintainable buildings move toward demolition or rebuilding. Collapse caused by deterioration or fire leaves ruins and can harm people and the surrounding environment ([accidents and disasters](14_accidents-and-disasters.md)).
 
 See [agents](02_agents.md) for status definitions and transitions.
 
@@ -41,5 +41,5 @@ City Hall represents city government on the map. Placing it begins city developm
 
 ## 5.5. Parking
 
-Buildings have `parking_capacity`. Cars gather at workplaces and shops during the day and homes at night, so parking demand varies with time and land use. Cars exceeding building capacity overflow into nearby parking facilities and onto streets. Parking facilities are a land use that accommodates this demand. Buildings that rent floors to tenants must provide the parking area required by the parking requirement (a share of total floor area) when built. Whatever the open space on the site cannot hold is taken from the rentable floors, so the rentable floors can total less than the total floor area. Unlike the district-level building regulations, the parking requirement is citywide, and changing it affects only buildings built afterward.
+Buildings have `parking_capacity`. Cars gather at workplaces and shops during the day and homes at night, so parking demand varies with time and land use. Cars exceeding building capacity overflow into nearby parking facilities and onto streets. Parking facilities are a land use that accommodates this demand. Buildings that rent floors to tenants must provide the parking area required by the parking requirement (a share of total floor area) when built. Unlike the district-level building regulations, the parking requirement is citywide, and changing it affects only buildings built afterward.
 

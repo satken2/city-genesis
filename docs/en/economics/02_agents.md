@@ -22,11 +22,11 @@ Agents have a broad `type` (`TYPE_*`) and a more specific `variant`.
 
 ### Agent spawning
 
-Private agents spawn when conditions permit, without direct mayoral action. Households arise through independence, marriage, and immigration ([households](07_households.md)); shared buildings appear when a district lacks space for prospective occupants ([buildings](05_buildings.md)). Standard facilities enter when they can capture demand and expect to sell at a price covering costs plus profit. Export opportunities can justify entry even when local demand is insufficient.
+Private agents spawn when conditions permit, without direct mayoral action. Households arise through independence, marriage, and immigration ([households](07_households.md)); shared buildings appear when a district lacks space for prospective occupants ([buildings](05_buildings.md)). Standard facilities enter when demand and profitability look promising.
 
 ### Agent exit
 
-Standard facilities whose operating result over the past year is negative, and shared buildings with low occupancy, withdraw. The judgement spans a year so that businesses with seasonal income, such as farms, are not closed during their off-season. Buildings pause (`STATUS_PAUSED`) and their tenants leave. Facilities without their own buildings settle their funds and are deleted ([finance](12_finance.md)). Public facilities do not pause because of profitability or utilization. Paused private buildings resume when demand for their space returns in the district.
+Standard facilities that remain unprofitable, and shared buildings with low occupancy, withdraw. Buildings pause (`STATUS_PAUSED`) and their tenants leave. Facilities without their own buildings settle their funds and are deleted ([finance](12_finance.md)). Public facilities do not pause because of profitability or utilization. Paused private buildings resume when demand for their space returns in the district.
 
 ## 2.4. Agent status transitions
 

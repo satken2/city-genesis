@@ -10,7 +10,7 @@ Population counts established residents. It excludes immigrants who have not yet
 
 ## 7.2. Population changes
 
-Births, deaths, immigration, and emigration change population. Residents awaiting housing after eviction, independence, or marriage leave the city if they cannot find a home within a set period. Births depend on the age distribution of women of childbearing age and a fixed birth rate. The rate does not rise when population declines, so generational waves occur. Death depends on age and health. Nutrition, sanitation, air pollution, working hours, and medical care affect health ([scores and achievements](16_scores-and-achievements.md)). Independence and marriage create new households, which begin awaiting housing.
+Births, deaths, immigration, and emigration change population. Residents awaiting housing after eviction, independence, or marriage leave the city if they cannot find a home. Death depends on age and health. Nutrition, sanitation, air pollution, working hours, and medical care affect health ([scores and achievements](16_scores-and-achievements.md)). Independence and marriage create new households, which begin awaiting housing.
 
 Death statistics distinguish causes such as poor sanitation, disease and old age, and accidents.
 
@@ -18,7 +18,7 @@ Death statistics distinguish causes such as poor sanitation, disease and old age
 
 Immigrants arrive from outside the city as households. The mayor sets admission policy, including whether to accept them and requirements for age, household composition, and skills. Applicants apply while admission is open, but vacancies, rents, and regulations can prevent them from finding homes. Permission alone does not guarantee population growth.
 
-Applicants search for homes and become residents when they move in. Immigrants awaiting housing are excluded from population; resident social security and similar benefits apply after settlement. Applications are withdrawn after a prolonged unsuccessful search.
+Applicants search for homes and become residents when they move in. Immigrants awaiting housing are excluded from population; resident social security and similar benefits apply after settlement.
 
 Housing demand encourages private residential construction. Immigration also requires jobs, transport, and facilities supporting daily life ([real estate](06_real-estate.md)).
 
