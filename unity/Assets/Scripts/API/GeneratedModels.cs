@@ -595,8 +595,8 @@ namespace GeneratedModels
         public string front_path_name;
         /// <summary>区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区</summary>
         public int front_path_side;
-        /// <summary>道路に面する辺のインデックス</summary>
-        public int facade_edge_index;
+        /// <summary>道路に面する辺のインデックスの一覧</summary>
+        public List<object> facade_edge_index;
         /// <summary>所有者エージェントのID（民間または市政府）</summary>
         public int owner_agent_id;
         /// <summary>所有者の名称（owner_agent_idの参照解決）</summary>

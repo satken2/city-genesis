@@ -247,6 +247,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     private Vector3 frontPathShaftEnd;
     /// <summary>Arrowhead triangle vertices in world coordinates (double-sided: 6 vertices=2 triangles). Reused to avoid per-frame GC.</summary>
     private readonly List<Vector3> frontPathArrowHead = new List<Vector3>(6);
+    private PathManager pathManager;
 
     /// <summary>
     /// Current parcel visual mode.
@@ -1960,7 +1961,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// Build road access arrow world coordinates from ParcelData polygon / center_point / facade_edge_index.
-    /// Hide if front_path is absent or facade_edge_index is invalid.
+    /// Hide if front_path is absent or no road-facing edge is valid.
     /// </summary>
     private void BuildFrontPathArrow(ParcelData data)
     {
@@ -1973,8 +1974,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         if (polygon == null || polygon.Length < 2 || center == null || center.Length < 2) return;
 
         int n = polygon.Length;
-        int edgeIndex = data.facade_edge_index;
-        if (edgeIndex < 0 || edgeIndex >= n) return;
+        int edgeIndex = PickFrontEdge(data.front_path_id, polygon, GeneratedModelUtils.ToFloatList(data.facade_edge_index));
+        if (edgeIndex < 0) return;
 
         float[] a = polygon[edgeIndex];
         float[] b = polygon[(edgeIndex + 1) % n];
@@ -2019,6 +2020,50 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         frontPathArrowHead.Add(left);
 
         frontPathArrowActive = true;
+    }
+
+    /// <summary>
+    /// The road-facing edge nearest the front path's centerline. facade_edge_index lists edges facing every adjacent street,
+    /// so a corner parcel has edges toward streets other than the front path. While the front path is not resident, use the first edge.
+    /// Returns -1 when no index is within the polygon.
+    /// </summary>
+    private int PickFrontEdge(int frontPathId, float[][] polygon, List<float> facadeEdges)
+    {
+        if (facadeEdges == null) return -1;
+        if (pathManager == null) pathManager = FindAnyObjectByType<PathManager>();
+        IReadOnlyList<Vector3> line = null;
+        bool hasLine = pathManager != null && pathManager.TryGetUntrimmedPolylineShared(frontPathId, out line);
+
+        int n = polygon.Length;
+        int best = -1;
+        float bestDistSq = float.MaxValue;
+        foreach (float value in facadeEdges)
+        {
+            int i = (int)value;
+            if (i < 0 || i >= n) continue;
+            float[] a = polygon[i];
+            float[] b = polygon[(i + 1) % n];
+            if (a == null || a.Length < 2 || b == null || b.Length < 2) continue;
+            float distSq = hasLine ? DistanceToPolylineSqXZ(new Vector2((a[0] + b[0]) * 0.5f, (a[1] + b[1]) * 0.5f), line) : 0f;
+            if (distSq < bestDistSq)
+            {
+                bestDistSq = distSq;
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    private static float DistanceToPolylineSqXZ(Vector2 point, IReadOnlyList<Vector3> line)
+    {
+        float best = float.MaxValue;
+        for (int i = 0; i + 1 < line.Count; i++)
+        {
+            Vector2 start = new Vector2(line[i].x, line[i].z);
+            Vector2 end = new Vector2(line[i + 1].x, line[i + 1].z);
+            best = Mathf.Min(best, PolylineUtils.DistanceToSegmentSq(point, start, end));
+        }
+        return best;
     }
 
     /// <summary>Lift XZ coordinates to world coordinates at ground height plus offset.</summary>

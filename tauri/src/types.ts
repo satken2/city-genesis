@@ -350,7 +350,7 @@ export type ParcelData = {
   name_resource?: Record<string, string | null>;
   front_path_id: number;
   front_path_name: string | null;
-  facade_edge_index: number;
+  facade_edge_index: number[];
   owner_agent_id: number;
   owner_agent_name: string | null;
   land_price: number;

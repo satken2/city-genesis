@@ -574,8 +574,8 @@ export type ParcelData = {
   front_path_name?: string;
   /** 区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区 */
   front_path_side: number;
-  /** 道路に面する辺のインデックス */
-  facade_edge_index: number;
+  /** 道路に面する辺のインデックスの一覧 */
+  facade_edge_index: any[];
   /** 所有者エージェントのID（民間または市政府） */
   owner_agent_id: number;
   /** 所有者の名称（owner_agent_idの参照解決） */

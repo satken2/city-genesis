@@ -203,7 +203,7 @@ export function BuildingAppearancePanel({ apiBaseUrl, initialEntityId, onClose }
           `${baseUrl}/api/v1/buildings/${agentId}`,
           { signal: controller.signal },
         );
-        const parcelRes = await fetchApi<{ polygon: number[][]; center_point: number[]; facade_edge_index: number[] | number }>(
+        const parcelRes = await fetchApi<{ polygon: number[][]; center_point: number[]; facade_edge_index: number[] }>(
           `${baseUrl}/api/v1/parcels/${building.parcel_id}`,
           { signal: controller.signal },
         );
@@ -216,8 +216,7 @@ export function BuildingAppearancePanel({ apiBaseUrl, initialEntityId, onClose }
         );
         setParcelPolygon(parcelRes.polygon);
         setCenterPoint(parcelRes.center_point);
-        const facade = parcelRes.facade_edge_index;
-        setFacadeEdgeIndex(Array.isArray(facade) ? facade : facade != null ? [facade] : []);
+        setFacadeEdgeIndex(parcelRes.facade_edge_index);
         // Delivered entries include resolved fields such as model_prefix; retain only the three editable fields.
         setPlacements(
           (building.sub_buildings ?? []).map((p) => ({
