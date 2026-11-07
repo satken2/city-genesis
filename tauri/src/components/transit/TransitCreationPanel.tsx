@@ -179,7 +179,7 @@ export function TransitCreationPanel({
     setPoints(initialPoints);
     if (!isEdit) {
       setVehicleModel(defaultTransitVehicleModel(selectedEntry.transit_path_id));
-      setCarsPerTrain((cars) => Math.max(selectedEntry.freight ? 2 : 1, cars));
+      setCarsPerTrain((cars) => Math.min(selectedEntry.max_cars_per_train, Math.max(selectedEntry.freight ? 2 : 1, cars)));
     }
     void sendChangeState(
       "STATE_EDIT_TRANSIT",
@@ -375,16 +375,18 @@ export function TransitCreationPanel({
                   </div>
                 </div>
               </div>
-              <div className="bc-split-row" style={{ marginTop: 8 }}>
-                <div className="bc-split-col">
-                  <div className="bc-section-title">{t("transit.carsPerTrain")}</div>
-                  <div className="bc-stepper-row">
-                    <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={selectedEntry.freight ? 2 : 1} max={20} step={1} integerOnly={true} />
-                    <span className="bc-stepper-unit">{t("transit.carsUnit")}</span>
+              {selectedEntry.max_cars_per_train > 1 && (
+                <div className="bc-split-row" style={{ marginTop: 8 }}>
+                  <div className="bc-split-col">
+                    <div className="bc-section-title">{t("transit.carsPerTrain")}</div>
+                    <div className="bc-stepper-row">
+                      <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={selectedEntry.freight ? 2 : 1} max={selectedEntry.max_cars_per_train} step={1} integerOnly={true} />
+                      <span className="bc-stepper-unit">{t("transit.carsUnit")}</span>
+                    </div>
+                    {selectedEntry.freight && <p className="bc-description-text">{t("transit.freightConsistNote")}</p>}
                   </div>
-                  {selectedEntry.freight && <p className="bc-description-text">{t("transit.freightConsistNote")}</p>}
                 </div>
-              </div>
+              )}
             </>
           )}
           <div className="bc-split-row" style={{ marginTop: isEdit ? 0 : 8 }}>

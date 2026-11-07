@@ -144,6 +144,7 @@
     "TRANSIT_INVALID_HEADWAY": "發車間隔必須大於0。",
     "TRANSIT_INVALID_CARS": "車廂數必須為正整數。",
     "TRANSIT_MIN_CARS": "此路線每列至少需要{{minimum}}節車廂。",
+    "TRANSIT_MAX_CARS": "此路線每列最多{{maximum}}節車廂。",
     "TRANSIT_TRACK_CAPACITY_EXCEEDED": "軌道容量超限（{{details}}）。請延長發車間隔或增建軌道。{{hint}}",
     "TRANSIT_TRACK_LOAD": "軌道{{path_id}}：計畫{{load}}列/日，容量{{capacity}}列/日",
     "TRANSIT_TRACK_HEADWAY": "軌道{{path_id}}（單線）：發車間隔至少{{min_headway}}分鐘",

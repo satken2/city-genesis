@@ -144,6 +144,7 @@
     "TRANSIT_INVALID_HEADWAY": "L’intervalle de passage doit être supérieur à zéro.",
     "TRANSIT_INVALID_CARS": "Le nombre de voitures doit être un entier positif.",
     "TRANSIT_MIN_CARS": "Cette ligne nécessite au moins {{minimum}} voitures par train.",
+    "TRANSIT_MAX_CARS": "Cette ligne admet au plus {{maximum}} voitures par train.",
     "TRANSIT_TRACK_CAPACITY_EXCEEDED": "La capacité des voies est dépassée ({{details}}). Augmentez l’intervalle de passage ou ajoutez des voies. {{hint}}",
     "TRANSIT_TRACK_LOAD": "Voie {{path_id}} : {{load}} trains/jour prévus, capacité {{capacity}}",
     "TRANSIT_TRACK_HEADWAY": "Voie {{path_id}} (unique) : intervalle minimal de {{min_headway}} min",

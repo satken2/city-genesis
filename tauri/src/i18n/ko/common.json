@@ -144,6 +144,7 @@
     "TRANSIT_INVALID_HEADWAY": "운행 간격은 0보다 커야 합니다.",
     "TRANSIT_INVALID_CARS": "차량 수는 양의 정수여야 합니다.",
     "TRANSIT_MIN_CARS": "이 노선은 편성당 차량이 최소 {{minimum}}대 필요합니다.",
+    "TRANSIT_MAX_CARS": "이 노선은 편성당 차량을 최대 {{maximum}}대까지 연결할 수 있습니다.",
     "TRANSIT_TRACK_CAPACITY_EXCEEDED": "선로 용량을 초과했습니다({{details}}). 운행 간격을 늘리거나 선로를 증설해 주세요. {{hint}}",
     "TRANSIT_TRACK_LOAD": "선로 {{path_id}}: 계획 {{load}}편/일, 용량 {{capacity}}편/일",
     "TRANSIT_TRACK_HEADWAY": "선로 {{path_id}}(단선): 운행 간격 {{min_headway}}분 이상 필요",

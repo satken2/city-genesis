@@ -347,13 +347,13 @@ export function TransitDetailPanel({
     carsPerTrain !== Math.max(1, Math.round(line.cars_per_train ?? 1));
   // For types without appearance options (not cataloged), omit the entire appearance row.
   const hasVehicleOptions = transitVehicleOptions(line.path_variant).length > 0;
-  const freight = Object.values(masterData?.transit ?? {}).some(
-    (entry) => entry.transit_path_id === line.path_variant && entry.freight,
+  const transitEntry = Object.values(masterData?.transit ?? {}).find(
+    (entry) => entry.transit_path_id === line.path_variant,
   );
+  const freight = transitEntry?.freight ?? false;
   // Types that carry cars (ferries) charge no fare, so omit the fare field.
-  const freeFare = Object.values(masterData?.transit ?? {}).some(
-    (entry) => entry.transit_path_id === line.path_variant && (entry.car_capacity ?? 0) > 0,
-  );
+  const freeFare = (transitEntry?.car_capacity ?? 0) > 0;
+  const maxCars = transitEntry?.max_cars_per_train ?? 1;
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "basic", label: t("transit.tabBasicInfo") },
@@ -521,12 +521,16 @@ export function TransitDetailPanel({
                   <NumberStepper value={headway} onChange={setHeadway} min={1} max={120} step={1} integerOnly={true} />
                   <span className="transit-detail__unit">{t("transit.minutesUnit")}</span>
                 </span>
-                <span className="agent-detail-label">{t("transit.carsPerTrain")}</span>
-                <span className="agent-detail-value">
-                  <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={freight ? 2 : 1} max={20} step={1} integerOnly={true} />
-                  <span className="transit-detail__unit">{t("transit.carsUnit")}</span>
-                </span>
-                {/* Only the three fields above affect profitability; re-estimate directly below them on every change. */}
+                {maxCars > 1 && (
+                  <>
+                    <span className="agent-detail-label">{t("transit.carsPerTrain")}</span>
+                    <span className="agent-detail-value">
+                      <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={freight ? 2 : 1} max={maxCars} step={1} integerOnly={true} />
+                      <span className="transit-detail__unit">{t("transit.carsUnit")}</span>
+                    </span>
+                  </>
+                )}
+                {/* Only the fields above affect profitability; re-estimate directly below them on every change. */}
                 <div className="transit-detail__estimate">
                   <div className="transit-detail__estimate-title">
                     {t("transit.estimate.title")}

@@ -26,7 +26,7 @@ Stations consist of platforms and station buildings, which group platforms and e
 
 ## 18.3. Vehicles and capacity
 
-Lines lease vehicles from depots ([supply and transport](17_supply-and-transport.md)). Players set headways and vehicles per train. Insufficient vehicles reduce frequency; no operable train suspends service. Longer trains need platforms that can accommodate them.
+Lines lease vehicles from depots ([supply and transport](17_supply-and-transport.md)). Players set headways and, for types that couple, vehicles per train (buses and ferries run as single vehicles). Insufficient vehicles reduce frequency; no operable train suspends service. Longer trains need platforms that can accommodate them.
 
 Insufficient capacity for passengers causes crowding and increases travel burdens. Lines share road or track capacity, so adding vehicles alone cannot increase capacity indefinitely. Buses and street-running LRT are also affected by car congestion.
 

@@ -144,6 +144,7 @@
     "TRANSIT_INVALID_HEADWAY": "El intervalo de servicio debe ser mayor que cero.",
     "TRANSIT_INVALID_CARS": "La cantidad de vagones debe ser un entero positivo.",
     "TRANSIT_MIN_CARS": "Esta línea requiere al menos {{minimum}} vagones por tren.",
+    "TRANSIT_MAX_CARS": "Esta línea admite como máximo {{maximum}} vagones por tren.",
     "TRANSIT_TRACK_CAPACITY_EXCEEDED": "Se supera la capacidad de la vía ({{details}}). Aumenta el intervalo de servicio o agrega vías. {{hint}}",
     "TRANSIT_TRACK_LOAD": "Vía {{path_id}}: {{load}} trenes/día previstos, capacidad {{capacity}}",
     "TRANSIT_TRACK_HEADWAY": "Vía {{path_id}} (única): intervalo mínimo de {{min_headway}} min",

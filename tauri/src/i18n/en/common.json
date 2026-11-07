@@ -144,6 +144,7 @@
     "TRANSIT_INVALID_HEADWAY": "The service interval must be greater than zero.",
     "TRANSIT_INVALID_CARS": "The number of cars must be a positive integer.",
     "TRANSIT_MIN_CARS": "This line requires at least {{minimum}} cars per train.",
+    "TRANSIT_MAX_CARS": "This line allows at most {{maximum}} cars per train.",
     "TRANSIT_TRACK_CAPACITY_EXCEEDED": "Track capacity is exceeded ({{details}}). Increase the service interval or add tracks. {{hint}}",
     "TRANSIT_TRACK_LOAD": "Track {{path_id}}: planned {{load}} trains/day, capacity {{capacity}} trains/day",
     "TRANSIT_TRACK_HEADWAY": "Track {{path_id}} (single track): interval must be at least {{min_headway}} min",

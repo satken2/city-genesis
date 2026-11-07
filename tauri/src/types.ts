@@ -763,6 +763,8 @@ export type TransitMasterEntry = {
   freight?: boolean;
   /** Cars one vehicle carries. Positive types also carry cars and charge no fare (ferries). */
   car_capacity?: number | null;
+  /** Maximum cars per train. Types with 1 (buses, ferries) do not couple, so the car-count field is hidden. */
+  max_cars_per_train: number;
 };
 
 /**

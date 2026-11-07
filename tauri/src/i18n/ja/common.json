@@ -144,6 +144,7 @@
     "TRANSIT_INVALID_HEADWAY": "運行間隔は0より大きい値を指定してください。",
     "TRANSIT_INVALID_CARS": "車両数は正の整数を指定してください。",
     "TRANSIT_MIN_CARS": "この路線は1編成{{minimum}}両以上にしてください。",
+    "TRANSIT_MAX_CARS": "この路線は1編成{{maximum}}両以下にしてください。",
     "TRANSIT_TRACK_CAPACITY_EXCEEDED": "線路の容量を超えています（{{details}}）。運行間隔を延ばすか線路を増設してください。{{hint}}",
     "TRANSIT_TRACK_LOAD": "線路{{path_id}}：計画{{load}}本/日、容量{{capacity}}本/日",
     "TRANSIT_TRACK_HEADWAY": "線路{{path_id}}（単線）：運行間隔{{min_headway}}分以上が必要",
