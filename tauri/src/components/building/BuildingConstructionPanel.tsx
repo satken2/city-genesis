@@ -104,6 +104,14 @@ function berthDepthText(water: number, required: number): { depth: string; requi
   };
 }
 
+// Interpolation values of the too_small reason: the footprint area and the building's minimum building area (m²).
+function footprintAreaText(area: number, minimum: number): { area: string; minimum: string } {
+  return {
+    area: area.toLocaleString(undefined, { maximumFractionDigits: 1 }),
+    minimum: minimum.toLocaleString(undefined, { maximumFractionDigits: 1 }),
+  };
+}
+
 type BuildingPreviewData = {
   polygon: number[][];
   height: number;
@@ -178,6 +186,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   // Water depth just outside the quay and the building's required berth depth (m) from the latest direct/copy preview,
   // interpolated into the insufficient_water_depth reason.
   const [berthDepths, setBerthDepths] = useState<{ water: number; required: number }>({ water: 0, required: 0 });
+  // Minimum building area (m²) of the building in the latest direct/copy preview, interpolated into the too_small reason.
+  const [minBuildingArea, setMinBuildingArea] = useState(0);
   // Confirmation allowed if automatic land acquisition resolves overlaps with private parcels
   // (preview-direct requires_acquisition). The button stays enabled but opens confirmation before committing.
   const [directRequiresAcquisition, setDirectRequiresAcquisition] = useState(false);
@@ -537,6 +547,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           water_depth?: number;
           berth_depth?: number;
           berth_line?: number[] | null;
+          min_building_area?: number;
           site_invalid_reason?: string | null;
           requires_acquisition?: boolean;
           acquisition?: { count: number; estimated_cost: number } | null;
@@ -553,6 +564,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
             setCopyValid(data.valid ?? false);
             setCopyInvalidReason(data.invalid_reason ?? null);
             setBerthDepths({ water: data.water_depth ?? 0, required: data.berth_depth ?? 0 });
+            setMinBuildingArea(data.min_building_area ?? 0);
           }
           if (editAgentId == null) {
             setSiteInvalidReason(data.site_invalid_reason ?? null);
@@ -822,6 +834,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       water_depth?: number;
       berth_depth?: number;
       berth_line?: number[] | null;
+      min_building_area?: number;
       requires_acquisition?: boolean;
       acquisition?: {
         blocking_parcel_ids: number[];
@@ -860,6 +873,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         setValidatedDirectKey(directRequestKey);
         setDirectInvalidReason(data.invalid_reason ?? null);
         setBerthDepths({ water: data.water_depth ?? 0, required: data.berth_depth ?? 0 });
+        setMinBuildingArea(data.min_building_area ?? 0);
         setDirectRequiresAcquisition(data.requires_acquisition === true);
         setDirectAcquisition(
           data.requires_acquisition === true && data.acquisition
@@ -1765,6 +1779,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                         ? t(`building_construction.directInvalid.${directInvalidReason}`, {
                             defaultValue: t("building_construction.directInvalid.generic"),
                             ...berthDepthText(berthDepths.water, berthDepths.required),
+                            ...footprintAreaText(buildingPreview?.area ?? 0, minBuildingArea),
                           })
                         : t("building_construction.directInvalid.generic")}
                     </span>
@@ -1792,6 +1807,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                         ? t(`building_construction.copyInvalid.${copyInvalidReason}`, {
                             defaultValue: t("building_construction.copyInvalid.generic"),
                             ...berthDepthText(berthDepths.water, berthDepths.required),
+                            ...footprintAreaText(buildingPreview?.area ?? 0, minBuildingArea),
                           })
                         : t("building_construction.copyInvalid.generic")}
                     </span>

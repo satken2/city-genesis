@@ -117,6 +117,7 @@
       "incompatible_parcel_type": "Este edificio no se puede construir en este tipo de terreno",
       "insufficient_water_depth": "El agua frente a este muelle tiene unos {{depth}} m de profundidad. Este edificio necesita al menos {{required}} m",
       "not_city_land": "Se traslapa con una parcela que no es propiedad del municipio",
+      "too_small": "La huella mide {{area}} m², por debajo del área mínima de construcción de este edificio ({{minimum}} m²)",
       "generic": "No se puede construir en este lugar"
     },
     "directAcquisitionRequired": "Se traslapa con {{count}} parcela(s) privada(s) (al confirmar se activará la adquisición automática)",
@@ -134,6 +135,7 @@
       "incompatible_parcel_type": "Este edificio no se puede construir en este tipo de parcela",
       "insufficient_water_depth": "El agua frente a este muelle tiene unos {{depth}} m de profundidad. Este edificio necesita al menos {{required}} m",
       "regulation": "No se puede construir porque infringe la normativa de construcción",
+      "too_small": "La huella mide {{area}} m², por debajo del área mínima de construcción de este edificio ({{minimum}} m²)",
       "generic": "No se puede construir en esta parcela"
     }
   },

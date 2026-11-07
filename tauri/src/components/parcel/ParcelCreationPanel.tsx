@@ -226,6 +226,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   const [previewData, setPreviewData] = useState<ParcelPreviewItem[] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const baseUrl = apiBaseUrl.replace(/\/+$/, "");
@@ -713,6 +714,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     };
     if (import.meta.env.DEV) console.error("[ParcelDiagnostic] confirm begin", diagnosticContext);
     setStatusMessage(null);
+    setIsConfirming(true);
     try {
       const result = await fetchApi<Record<string, unknown>>(`${baseUrl}/api/v1/parcels`, {
         method: "POST",
@@ -751,6 +753,8 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
       const displayMessage = describeError(err, t);
       showNotification({ message: displayMessage, durationMs: 5000 });
+    } finally {
+      setIsConfirming(false);
     }
   }
 
@@ -765,7 +769,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     (isPathMode && selectedPathId != null) ||
     (isParcelMode && selectedParcelId != null);
 
-  const canConfirm = !previewLoading && !!previewData && previewData.length > 0;
+  const canConfirm = !previewLoading && !isConfirming && !!previewData && previewData.length > 0;
 
   const sizeInput =
     (selectedMode && SIZE_INPUT_PRESETS[selectedMode]) || DEFAULT_SIZE_INPUT;

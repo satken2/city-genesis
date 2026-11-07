@@ -117,6 +117,7 @@
       "incompatible_parcel_type": "Ce bâtiment ne peut pas être construit sur ce type de terrain",
       "insufficient_water_depth": "L'eau devant ce quai fait environ {{depth}} m de profondeur. Ce bâtiment a besoin d'au moins {{required}} m",
       "not_city_land": "Chevauche une parcelle qui n'appartient pas à la ville",
+      "too_small": "L'emprise fait {{area}} m², en dessous de la surface bâtie minimale de ce bâtiment ({{minimum}} m²)",
       "generic": "Construction impossible à cet endroit"
     },
     "directAcquisitionRequired": "Chevauche {{count}} parcelle(s) privée(s) (la confirmation déclenchera une acquisition automatique)",
@@ -134,6 +135,7 @@
       "incompatible_parcel_type": "Ce bâtiment ne peut pas être construit sur ce type de parcelle",
       "insufficient_water_depth": "L'eau devant ce quai fait environ {{depth}} m de profondeur. Ce bâtiment a besoin d'au moins {{required}} m",
       "regulation": "Construction impossible : contraire à la réglementation",
+      "too_small": "L'emprise fait {{area}} m², en dessous de la surface bâtie minimale de ce bâtiment ({{minimum}} m²)",
       "generic": "Construction impossible sur cette parcelle"
     }
   },

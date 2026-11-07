@@ -174,6 +174,7 @@
     "BUILDING_OVERLAP_CITY_BUILDING": "Chevauche une installation municipale ou un site de construction planifié",
     "BUILDING_OVERLAP_SLUM": "Chevauche un bidonville",
     "BUILDING_NOT_CITY_LAND": "Chevauche une parcelle qui n'appartient pas à la ville",
+    "BUILDING_TOO_SMALL": "L'emprise fait {{area}} m², en dessous de la surface bâtie minimale de ce bâtiment ({{minimum}} m²)",
     "PARCEL_MERGE_BLOCKED": "Seuls les terrains vacants appartenant à la ville sont modifiables",
     "UNVERIFIED_POPULATION_LIMIT": "L'authentification Steam n'a pas pu être vérifiée : aucune époque supplémentaire ne peut être exécutée. (Sans vérification, vous pouvez jouer jusqu'à une population de {{limit}} habitants.)",
     "EPOCH_ALREADY_RUNNING": "Une autre époque est déjà en cours d’exécution. Réessayez lorsqu’elle sera terminée.",

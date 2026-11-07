@@ -174,6 +174,7 @@
     "BUILDING_OVERLAP_CITY_BUILDING": "시의 시설·건설 예정지와 겹칩니다",
     "BUILDING_OVERLAP_SLUM": "판자촌과 겹칩니다",
     "BUILDING_NOT_CITY_LAND": "시정부 소유가 아닌 토지 구획과 겹칩니다",
+    "BUILDING_TOO_SMALL": "바닥 면적이 {{area}}m²로, 이 건물의 최소 건축 면적 {{minimum}}m²에 미치지 못합니다",
     "PARCEL_MERGE_BLOCKED": "시정부 소유의 빈 땅만 편집할 수 있습니다",
     "UNVERIFIED_POPULATION_LIMIT": "Steam 인증을 확인할 수 없어 더 이상 에포크를 실행할 수 없습니다. (미인증 상태에서는 인구 {{limit}}명까지 플레이할 수 있습니다)",
     "EPOCH_ALREADY_RUNNING": "다른 에포크가 이미 실행 중입니다. 완료된 후 다시 실행하세요.",

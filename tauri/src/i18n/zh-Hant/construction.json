@@ -117,6 +117,7 @@
       "incompatible_parcel_type": "此處的地形無法建造此建築",
       "insufficient_water_depth": "此處岸壁前的水深約為{{depth}}公尺。此建築需要至少{{required}}公尺",
       "not_city_land": "與非市政府所有的地塊重疊",
+      "too_small": "底面積為{{area}}m²，低於此建築的最小建築面積{{minimum}}m²",
       "generic": "無法在此處建設"
     },
     "directAcquisitionRequired": "與 {{count}} 個私有地塊重疊（確認後將自動收購）",
@@ -134,6 +135,7 @@
       "incompatible_parcel_type": "此地塊類型無法建造此建築",
       "insufficient_water_depth": "此處岸壁前的水深約為{{depth}}公尺。此建築需要至少{{required}}公尺",
       "regulation": "因牴觸建築法規而無法建設",
+      "too_small": "底面積為{{area}}m²，低於此建築的最小建築面積{{minimum}}m²",
       "generic": "無法在此地塊建設"
     }
   },

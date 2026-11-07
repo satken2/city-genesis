@@ -117,6 +117,7 @@
       "incompatible_parcel_type": "This building cannot be built on this terrain",
       "insufficient_water_depth": "The water at this quay is about {{depth}} m deep. This building needs at least {{required}} m",
       "not_city_land": "Overlaps a parcel not owned by the city",
+      "too_small": "The footprint is {{area}} m², below this building's minimum building area of {{minimum}} m²",
       "generic": "Cannot build here"
     },
     "directAcquisitionRequired": "Overlaps {{count}} privately owned parcel(s) (confirming will trigger automatic acquisition)",
@@ -134,6 +135,7 @@
       "incompatible_parcel_type": "This building cannot be built on this parcel type",
       "insufficient_water_depth": "The water at this quay is about {{depth}} m deep. This building needs at least {{required}} m",
       "regulation": "Blocked by building regulations",
+      "too_small": "The footprint is {{area}} m², below this building's minimum building area of {{minimum}} m²",
       "generic": "Cannot build on this parcel"
     }
   },

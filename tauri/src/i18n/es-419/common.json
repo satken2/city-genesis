@@ -174,6 +174,7 @@
     "BUILDING_OVERLAP_CITY_BUILDING": "Se traslapa con una instalación municipal o un sitio de construcción planificado",
     "BUILDING_OVERLAP_SLUM": "Se traslapa con un barrio marginal",
     "BUILDING_NOT_CITY_LAND": "Se traslapa con una parcela que no es propiedad del municipio",
+    "BUILDING_TOO_SMALL": "La huella mide {{area}} m², por debajo del área mínima de construcción de este edificio ({{minimum}} m²)",
     "PARCEL_MERGE_BLOCKED": "Solo se pueden editar los terrenos baldíos propiedad del municipio",
     "UNVERIFIED_POPULATION_LIMIT": "No se pudo verificar la autenticación de Steam, por lo que no es posible ejecutar más épocas. (Sin verificar se puede jugar hasta una población de {{limit}} habitantes).",
     "EPOCH_ALREADY_RUNNING": "Ya se está ejecutando otra época. Vuelve a intentarlo cuando termine.",

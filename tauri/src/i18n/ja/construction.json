@@ -117,6 +117,7 @@
       "incompatible_parcel_type": "この場所の地形にはこの建物を建設できません",
       "insufficient_water_depth": "この場所の岸壁の水深は約{{depth}}mです。この建物には{{required}}m以上必要です",
       "not_city_land": "市政府所有でない土地区画と重なっています",
+      "too_small": "底面が{{area}}m²で、この建物の最低建築面積{{minimum}}m²に足りません",
       "generic": "この場所には建設できません"
     },
     "directAcquisitionRequired": "民間の土地区画 {{count}} 件と重なっています（確定で自動買収）",
@@ -134,6 +135,7 @@
       "incompatible_parcel_type": "この土地区画の種類にはこの建物を建設できません",
       "insufficient_water_depth": "この場所の岸壁の水深は約{{depth}}mです。この建物には{{required}}m以上必要です",
       "regulation": "建築規制に抵触するため建設できません",
+      "too_small": "底面が{{area}}m²で、この建物の最低建築面積{{minimum}}m²に足りません",
       "generic": "この土地区画には建設できません"
     }
   },

@@ -174,6 +174,7 @@
     "BUILDING_OVERLAP_CITY_BUILDING": "Overlaps a city facility or planned construction site",
     "BUILDING_OVERLAP_SLUM": "Overlaps a slum",
     "BUILDING_NOT_CITY_LAND": "Overlaps a parcel not owned by the city",
+    "BUILDING_TOO_SMALL": "The footprint is {{area}} m², below this building's minimum building area of {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Only vacant city-owned parcels can be edited.",
     "UNVERIFIED_POPULATION_LIMIT": "Steam verification could not be confirmed, so no more epochs can be run. (Without verification, you can play up to a population of {{limit}}.)",
     "EPOCH_ALREADY_RUNNING": "Another epoch is already running. Try again after it finishes.",
