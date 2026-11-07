@@ -771,8 +771,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// Generate a horizontal polygon matching the footprint at the specified height.
-    /// Used for roof and ground panels.
+    /// Generate an upward-facing horizontal polygon matching the footprint at the specified height.
+    /// Used for roof and ground panels. Concave footprints such as L shapes are triangulated by ear clipping. Assumes CCW input.
     /// </summary>
     public static Mesh GenerateHorizontalPolygonMesh(Vector2[] footprint, float height)
     {
@@ -784,17 +784,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         Mesh mesh = new Mesh();
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
-
-        for (int i = 1; i < footprint.Length - 1; i++)
-        {
-            vertices.Add(new Vector3(footprint[0].x, height, footprint[0].y));
-            vertices.Add(new Vector3(footprint[i].x, height, footprint[i].y));
-            vertices.Add(new Vector3(footprint[i + 1].x, height, footprint[i + 1].y));
-
-            triangles.Add(vertices.Count - 3);
-            triangles.Add(vertices.Count - 1);
-            triangles.Add(vertices.Count - 2);
-        }
+        AddHorizontalSurface(vertices, triangles, footprint, TriangulateOrFan(footprint), height, true);
 
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
