@@ -49,7 +49,9 @@ public static class TestSubBuildingLayout
     /// satisfy each wing's min_count, then
     /// add wings maximizing weight/(placed count+1) until FILL_RATIO is reached,
     /// using D'Hondt allocation (exclude max_count-exceeded/nonfitting candidates).
-    /// Wing composition is deterministic; only positions randomize. Second/later wings of one type
+    /// Rows identical except display_name/model_prefix are one wing in different looks, so their order (representative,
+    /// minimum-count filling, D'Hondt ties) is random instead of row order; facilities without such rows keep row order.
+    /// Wing composition is deterministic; only positions and look order randomize. Second/later wings of one type
     /// prefer adjacency to existing same-type wings (clustering), then positions sharing the most boundaries
     /// with site edges/existing wings.
     /// Derive wing floors by clamping parent floors to definition min_floors–max_floors
@@ -116,15 +118,31 @@ public static class TestSubBuildingLayout
 
         // First minimum-ID wing represents the facility; always place it at the candidate nearest front edge.
         // If it cannot fit, abandon the whole plan (site decorations only).
-        if (!TryPlace(subs[0], preferFront: true, state))
+        var face = PickLook(SameWing(subs[0], subs));
+        if (!TryPlace(face, preferFront: true, state))
         {
-            Debug.LogWarning($"[MeshTest] 先頭のサブ建物{subs[0].Key}が区画に収まりませんでした。");
+            Debug.LogWarning($"[MeshTest] 先頭のサブ建物{face.Key}が区画に収まりませんでした。");
             return new List<SubBuildingPlacement>();
         }
 
         // Satisfy minimum counts, including the already placed representative. Warn/skip nonfitting wings
-        // without failing the whole plan (unlike representative-wing failure).
+        // without failing the whole plan (unlike representative-wing failure). Looks of one wing go in random order.
+        var minOrder = new List<KeyValuePair<int, MasterDataStore.SubBuildingMasterItem>>();
         foreach (var kvp in subs)
+        {
+            if (minOrder.Exists(m => m.Key == kvp.Key))
+            {
+                continue;
+            }
+            var group = SameWing(kvp, subs);
+            for (int i = group.Count - 1; i > 0; i--)
+            {
+                int k = Random.Range(0, i + 1);
+                (group[i], group[k]) = (group[k], group[i]);
+            }
+            minOrder.AddRange(group);
+        }
+        foreach (var kvp in minOrder)
         {
             (int minCount, _) = CountBounds(kvp.Value);
             while (state.Counts[kvp.Key] < minCount)
@@ -140,8 +158,8 @@ public static class TestSubBuildingLayout
 
         // Add wings preserving weight proportions until target fill ratio.
         // D'Hondt chooses maximum weight/(placed count+1); ties use
-        // first subs entry (ascending ID). Occupied cells only increase,
-        // so permanently exclude wings that cannot fit anywhere.
+        // first subs entry (ascending ID), except ties among looks of that wing, which pick randomly.
+        // Occupied cells only increase, so permanently exclude wings that cannot fit anywhere.
         var pool = subs.FindAll(kvp => Weight(kvp.Value) > 0f);
         int fillTarget = Mathf.CeilToInt(grid.Cells.Count * FILL_RATIO);
         while (state.Occupied.Count < fillTarget)
@@ -166,9 +184,17 @@ public static class TestSubBuildingLayout
             {
                 break;
             }
-            if (!TryPlace(pool[bestIndex], preferFront: false, state))
+            var best = pool[bestIndex];
+            var tied = SameWing(best, pool).FindAll(kvp =>
             {
-                pool.RemoveAt(bestIndex);
+                (_, int? max) = CountBounds(kvp.Value);
+                return (!max.HasValue || state.Counts[kvp.Key] < max.Value)
+                    && Weight(kvp.Value) / (state.Counts[kvp.Key] + 1) == bestQuotient;
+            });
+            best = PickLook(tied);
+            if (!TryPlace(best, preferFront: false, state))
+            {
+                pool.Remove(best);
             }
         }
 
@@ -188,6 +214,28 @@ public static class TestSubBuildingLayout
         public Dictionary<int, int> Counts = new Dictionary<int, int>();                                  // Wing type→placed count.
         public Dictionary<int, HashSet<(int i, int j)>> CellsBySub = new Dictionary<int, HashSet<(int i, int j)>>();  // Wing type→occupied cells (clustering).
         public Dictionary<int, bool> FirstRotated = new Dictionary<int, bool>();                          // Wing type→first placement orientation (alignment).
+    }
+
+    /// <summary>Rows in <paramref name="candidates"/> that differ from <paramref name="sub"/> only in display_name/model_prefix (row order).</summary>
+    private static List<KeyValuePair<int, MasterDataStore.SubBuildingMasterItem>> SameWing(
+        KeyValuePair<int, MasterDataStore.SubBuildingMasterItem> sub,
+        List<KeyValuePair<int, MasterDataStore.SubBuildingMasterItem>> candidates)
+    {
+        var a = sub.Value;
+        return candidates.FindAll(kvp =>
+        {
+            var b = kvp.Value;
+            return a.agent_variant == b.agent_variant && a.width == b.width && a.height == b.height
+                && a.max_floors == b.max_floors && a.min_floors == b.min_floors && a.height_per_floor == b.height_per_floor
+                && a.weight == b.weight && a.min_count == b.min_count && a.max_count == b.max_count;
+        });
+    }
+
+    /// <summary>Pick one look of a wing at random; with a single row, consume no random number.</summary>
+    private static KeyValuePair<int, MasterDataStore.SubBuildingMasterItem> PickLook(
+        List<KeyValuePair<int, MasterDataStore.SubBuildingMasterItem>> looks)
+    {
+        return looks.Count == 1 ? looks[0] : looks[Random.Range(0, looks.Count)];
     }
 
     /// <summary>Placement weight (wing-count ratio). Default 1.0; negative treated as zero.</summary>

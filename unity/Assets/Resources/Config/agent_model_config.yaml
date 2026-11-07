@@ -408,7 +408,7 @@ agents:
       - 0
   2015:
     model: true
-    prebuilt: false
+    prebuilt: true
     variants:
       - 0
       - 200
