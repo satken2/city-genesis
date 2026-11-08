@@ -1,6 +1,7 @@
 {
   "cityDevelopment": {
-    "pattern": "模式",
+    "pattern": "演算法",
+    "roadVariants": "道路類型",
     "patterns": {
       "grid": "不考慮地形的棋盤格",
       "terrain_grid": "順應地形的棋盤格",

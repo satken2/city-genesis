@@ -1,6 +1,7 @@
 {
   "cityDevelopment": {
-    "pattern": "Modèle",
+    "pattern": "Algorithme",
+    "roadVariants": "Types de voies",
     "patterns": {
       "grid": "Quadrillage sans tenir compte du relief",
       "terrain_grid": "Quadrillage suivant le relief",

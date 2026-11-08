@@ -75,7 +75,6 @@ const TerrainEditorCanvas = lazy(() => import("./components/terrain/TerrainEdito
 const Terrain3DPreviewCanvas = lazy(() => import("./components/terrain/Terrain3DPreviewCanvas").then(m => ({ default: m.Terrain3DPreviewCanvas })));
 const CityMapWindow = lazy(() => import("./components/map/CityMapWindow").then(m => ({ default: m.CityMapWindow })));
 const PropertyEditPanel = lazy(() => import("./components/debug/PropertyEditPanel").then(m => ({ default: m.PropertyEditPanel })));
-const StreetGridWindow = lazy(() => import("./components/path/StreetGridWindow").then(m => ({ default: m.StreetGridWindow })));
 const CityDevelopmentWindow = lazy(() => import("./components/development/CityDevelopmentWindow").then(m => ({ default: m.CityDevelopmentWindow })));
 const ScenarioToolsWindow = lazy(() => import("./components/scenario/ScenarioToolsWindow").then(m => ({ default: m.ScenarioToolsWindow })));
 const AgentCreationPanel = lazy(() => import("./components/scenario/AgentCreationPanel").then(m => ({ default: m.AgentCreationPanel })));
@@ -107,7 +106,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * Window types with dedicated panels. Render these with dedicated components instead of the generic JSON
  * display.
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "policy_planning", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "street_grid", "city_development", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "policy_planning", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "city_development", "agent_creation"]);
 
 
 function App() {
@@ -654,12 +653,8 @@ function App() {
               <ZoneEditWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "scenario_tools" ? (
               <ScenarioToolsWindow apiBaseUrl={context.api_base_url} />
-            ) : context.window_type === "street_grid" ? (
-              // 2D地図で指定した範囲に街路を一括で計画する。
-              <StreetGridWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "city_development" ? (
-              // ブラシで塗った範囲に道路と土地区画を自動で計画する。
-              <CityDevelopmentWindow apiBaseUrl={context.api_base_url} />
+              <CityDevelopmentWindow apiBaseUrl={context.api_base_url} initialRoadsOnly={windowExtra(context)?.initialRoadsOnly === true} />
             ) : context.window_type === "agent_creation" ? (
               // Scenario mode only. Create an already moved-in non-building agent in a shared building selected in the 3D view.
               <AgentCreationPanel apiBaseUrl={context.api_base_url} />

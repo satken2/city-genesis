@@ -1,6 +1,7 @@
 {
   "cityDevelopment": {
-    "pattern": "Patrón",
+    "pattern": "Algoritmo",
+    "roadVariants": "Tipos de vía",
     "patterns": {
       "grid": "Cuadrícula sin considerar el terreno",
       "terrain_grid": "Cuadrícula que sigue el terreno",

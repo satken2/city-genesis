@@ -10,7 +10,7 @@ import { describeError } from "../../utils/errors";
  *   2. Variant cards: use icon tabs for category classifications when present, with classification names in the list.
  *   3. Construction screen: show the selected variant card first as a summary, followed by placement settings and confirm/cancel.
  * Existing path editing preserves type/variant, so starts on the construction screen with no back navigation.
- * 街路カテゴリーのバリアント選択ヘッダーから、範囲指定による一括作成ウィンドウを開く。
+ * 街路カテゴリーの一括作成ボタンは、都市の自動開発を道路だけのアルゴリズムで開く。
  *
  * Construction flow:
  *   1. Select a card → notify the graphics program of placement mode (STATE_EDIT_PATH) through IPC.
@@ -377,10 +377,10 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
                   data-guide="path.bulk-create"
                   onClick={(event) => {
                     event.stopPropagation();
-                    void (async () => {
-                      await setHintbarText("");
-                      await invoke("open_registered_window", { windowType: "street_grid" });
-                    })().catch((error) => {
+                    void invoke("open_registered_window", {
+                      windowType: "city_development",
+                      params: { extra: { initialRoadsOnly: true } },
+                    }).catch((error) => {
                       void showNotification({ message: describeError(error, t), durationMs: 8000 });
                     });
                   }}

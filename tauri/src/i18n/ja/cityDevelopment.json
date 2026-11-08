@@ -1,6 +1,7 @@
 {
   "cityDevelopment": {
-    "pattern": "パターン",
+    "pattern": "アルゴリズム",
+    "roadVariants": "道路の種類",
     "patterns": {
       "grid": "地形を無視した碁盤",
       "terrain_grid": "地形を考慮した碁盤",

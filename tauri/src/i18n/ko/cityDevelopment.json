@@ -1,6 +1,7 @@
 {
   "cityDevelopment": {
-    "pattern": "패턴",
+    "pattern": "알고리즘",
+    "roadVariants": "도로 유형",
     "patterns": {
       "grid": "지형을 무시한 바둑판",
       "terrain_grid": "지형을 고려한 바둑판",

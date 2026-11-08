@@ -1,6 +1,7 @@
 {
   "cityDevelopment": {
-    "pattern": "Pattern",
+    "pattern": "Algorithm",
+    "roadVariants": "Road types",
     "patterns": {
       "grid": "Grid ignoring terrain",
       "terrain_grid": "Grid following terrain",
