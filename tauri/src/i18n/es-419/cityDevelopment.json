@@ -12,7 +12,11 @@
       "block_grid": "Cuadrícula de manzana",
       "block_strips": "Franjas paralelas",
       "block_perimeter": "Seguir el perímetro",
-      "block": "Calles dentro de manzanas"
+      "block": "Calles dentro de manzanas",
+      "neighborhood": "Barrios junto a vías principales",
+      "branching": "Calles ramificadas",
+      "downtown_grid": "Cuadrícula del centro urbano",
+      "subdivision": "Subdivisión progresiva de manzanas"
     },
     "spacing": "Separación de calles",
     "parcelArea": "Área de parcela",

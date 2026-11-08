@@ -12,7 +12,11 @@
       "block_grid": "街區網格",
       "block_strips": "平行條帶",
       "block_perimeter": "沿外周佈局",
-      "block": "街區內部小路"
+      "block": "街區內部小路",
+      "neighborhood": "幹道沿線住宅區",
+      "branching": "沿幹道分支延伸",
+      "downtown_grid": "市中心方格路網",
+      "subdivision": "街區逐步細分"
     },
     "spacing": "道路間距",
     "parcelArea": "地塊面積",

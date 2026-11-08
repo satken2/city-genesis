@@ -19,7 +19,9 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 import { formatArea } from "../../utils/formatArea";
 import { resolveIntlLocale } from "../../utils/locale";
 
-export const DEVELOPMENT_PATTERNS = ["grid", "terrain_grid", "arterial"] as const;
+export const DEVELOPMENT_PATTERNS = [
+  "grid", "terrain_grid", "arterial", "neighborhood", "branching", "downtown_grid", "subdivision",
+] as const;
 export const STREET_PATTERNS = ["relaxed_grid", "contour", "organic"] as const;
 export const BLOCK_PATTERNS = ["block_grid", "block_strips", "block_perimeter"] as const;
 export type DevelopmentPattern = (typeof DEVELOPMENT_PATTERNS)[number];

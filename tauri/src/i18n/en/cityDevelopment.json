@@ -12,7 +12,11 @@
       "block_grid": "Block grid",
       "block_strips": "Parallel strips",
       "block_perimeter": "Follow the perimeter",
-      "block": "Streets inside blocks"
+      "block": "Streets inside blocks",
+      "neighborhood": "Arterial-side neighborhoods",
+      "branching": "Branching roadside streets",
+      "downtown_grid": "Downtown grid",
+      "subdivision": "Incremental block subdivision"
     },
     "spacing": "Road spacing",
     "parcelArea": "Parcel area",

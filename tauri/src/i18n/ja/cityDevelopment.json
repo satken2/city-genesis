@@ -12,7 +12,11 @@
       "block_grid": "街区内の格子",
       "block_strips": "短冊",
       "block_perimeter": "外周追従",
-      "block": "街区内の細街路"
+      "block": "街区内の細街路",
+      "neighborhood": "幹線沿いの住宅地",
+      "branching": "沿道から枝を伸ばす",
+      "downtown_grid": "都市中心部の碁盤",
+      "subdivision": "街区の逐次分割"
     },
     "spacing": "道路の間隔",
     "parcelArea": "区画の面積",

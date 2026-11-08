@@ -12,7 +12,11 @@
       "block_grid": "Grille dans l’îlot",
       "block_strips": "Bandes parallèles",
       "block_perimeter": "Suivre le périmètre",
-      "block": "Rues à l’intérieur des îlots"
+      "block": "Rues à l’intérieur des îlots",
+      "neighborhood": "Quartiers le long des axes",
+      "branching": "Rues ramifiées",
+      "downtown_grid": "Quadrillage de centre-ville",
+      "subdivision": "Subdivision progressive des îlots"
     },
     "spacing": "Espacement des routes",
     "parcelArea": "Surface des parcelles",

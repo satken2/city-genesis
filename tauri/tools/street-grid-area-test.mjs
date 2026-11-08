@@ -81,7 +81,8 @@ try {
   assert.equal(algorithm.value, "arterial");
   assert.equal(algorithm.querySelectorAll("optgroup").length, 0);
   assert.deepEqual([...algorithm.options].map(option => option.value),
-    ["grid", "terrain_grid", "arterial", "relaxed_grid", "contour", "organic", "block"]);
+    ["grid", "terrain_grid", "arterial", "neighborhood", "branching", "downtown_grid", "subdivision",
+      "relaxed_grid", "contour", "organic", "block"]);
   assert.equal(guide("block_pattern"), null);
   assert.equal(roadTypes().length, 2);
   assert.deepEqual([...roadTypes()].map(input => input.checked), [true, true]);
@@ -133,6 +134,22 @@ try {
   assert.ok(!preview.disabled);
   await act(async () => clear.click());
   assert.ok(preview.disabled);
+
+  for (const pattern of ["neighborhood", "branching", "downtown_grid", "subdivision"]) {
+    await paint(80, 80);
+    await select(algorithm, pattern);
+    assert.ok(create.disabled);
+    assert.ok(guide("parcel_area"));
+    await showPlan();
+    const request = requests.at(-1);
+    assert.equal(request.pattern, pattern);
+    assert.equal(request.parcel_area, 600);
+    assert.ok(request.strokes.length > 0);
+    assert.ok(!create.disabled);
+    await act(async () => create.click());
+    assert.deepEqual(requests.at(-1), request);
+    assert.ok(preview.disabled);
+  }
 } finally {
   await act(async () => root.unmount());
   await window.happyDOM.close();
