@@ -48,13 +48,14 @@ export function DebugMap({ apiBaseUrl }: { apiBaseUrl: string }) {
   const vectorsRef = useRef<CityMapVectors | null>(null);
   const handleReload = useCallback(() => mapRef.current?.reload(), []);
   const controls = useCityMapControls(apiBaseUrl, mapRef, handleReload);
+  const { reload } = controls;
 
   useEffect(() => {
-    const unlisten = listen("session:reload", handleReload);
+    const unlisten = listen("session:reload", reload);
     return () => {
       void unlisten.then((fn) => fn());
     };
-  }, [handleReload]);
+  }, [reload]);
 
   const handleVectorsLoaded = useCallback((vectors: CityMapVectors) => {
     vectorsRef.current = vectors;
@@ -97,6 +98,7 @@ export function DebugMap({ apiBaseUrl }: { apiBaseUrl: string }) {
             heatmapMode={controls.heatmapMode}
             transitVariant={controls.transitVariant}
             infraSelection={controls.infraSelection}
+            resourceAreas={controls.resourceAreas}
             interactive
             onHeatmapStats={controls.onHeatmapStats}
             onVectorsLoaded={handleVectorsLoaded}

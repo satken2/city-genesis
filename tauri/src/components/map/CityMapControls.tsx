@@ -1,16 +1,16 @@
 /**
- * Toolbar for city map layers, overlays, overview reset, and reload, plus heatmap/infrastructure legends.
+ * Toolbar for city map layers, overlays, overview reset, and reload, plus overlay legends.
  *
  * CityMapWindow and the browser's development map page (web/debug-map/) share this toolbar.
  * This hook owns display state; callers pass it to CityMapCanvas.
  *
  * The toolbar has two rows: layer toggles and overlay selection first, then settings for the selected overlay
  * (public transport type, heatmap type, or infrastructure goods). Hide the second row for overlays without settings.
- * Public transport, heatmap, and infrastructure overlays all color the map, so select only one at a time.
+ * Overlays all color the map, so select only one at a time.
  * Infrastructure choices (useInfraProducts) and the legend (InfraMapLegend) are shared with the public facility map.
  */
 
-import { useCallback, useMemo, useState, type ReactNode, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DEFAULT_CITY_MAP_LAYERS,
@@ -21,12 +21,16 @@ import {
   type CityMapHeatmapMode,
   type CityMapHeatmapStats,
   type CityMapLayerVisibility,
+  type CityMapResourceArea,
 } from "./CityMapCanvas";
 import "./CityMapWindow.css";
 import { MAP_SYMBOLS, type MapSymbol } from "./mapSymbols";
 import { useInfraSelection, type InfraSelection } from "./infraOverlay";
 import { InfraMapLegend } from "./InfraMapLegend";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { RESOURCE_WATER } from "../../constants";
+import type { MasterData } from "../../types";
+import { buildApiUrl, describeError, fetchApi } from "../../utils/api";
 
 export function MapIcon({ name }: { name: MapSymbol }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={MAP_SYMBOLS[name]} /></svg>;
@@ -51,8 +55,33 @@ const LAYER_BUTTONS: { symbol: MapSymbol; layers: (keyof CityMapLayerVisibility)
   { symbol: "labels", layers: ["labels"] },
 ];
 
-type CityMapOverlay = "none" | "transit" | "heatmap" | "infra";
-const OVERLAYS: CityMapOverlay[] = ["none", "transit", "heatmap", "infra"];
+type CityMapOverlay = "none" | "transit" | "heatmap" | "infra" | "resources";
+const OVERLAYS: CityMapOverlay[] = ["none", "transit", "heatmap", "infra", "resources"];
+
+type ApiResourceArea = {
+  resource_type: number;
+  resource_type_label: string;
+  product_id: number;
+  polygon: [number, number][];
+};
+
+type ResourceArea = CityMapResourceArea & { resourceType: number; label: string };
+
+function buildResourceAreas(resources: ApiResourceArea[], resourceTypes?: MasterData["resource_types"]): ResourceArea[] {
+  // 水源の種別 ID はマスターに従う。マスター取得前も同じ種別には同じ色を付ける。
+  const waterTypes = new Set(resources
+    .filter(({ resource_type, product_id }) => (resourceTypes?.[resource_type]?.product_id ?? product_id) === RESOURCE_WATER)
+    .map(({ resource_type }) => resource_type));
+  return resources
+    .filter(({ polygon }) => polygon.length >= 3)
+    .map(({ resource_type, resource_type_label, polygon }) => ({
+      resourceType: resource_type,
+      label: resource_type_label,
+      polygon,
+      // 水源以外は種別 ID ごとに色相を黄金角ずつずらす。
+      color: waterTypes.has(resource_type) ? "#38bdf8" : `hsl(${(resource_type * 137.508) % 360}, 62%, 42%)`,
+    }));
+}
 
 /** Display order of heatmap types. */
 const HEATMAP_KINDS: CityMapHeatmapActiveKind[] = ["noise", "pollution", "crime", "sunshine"];
@@ -65,10 +94,12 @@ export type CityMapControls = {
   transitVariant: number | null;
   /** Pass to CityMapCanvas's infraSelection. */
   infraSelection: InfraSelection | null;
+  resourceAreas: CityMapResourceArea[] | undefined;
   /** Pass to CityMapCanvas's onHeatmapStats. */
   onHeatmapStats: (stats: CityMapHeatmapStats | null) => void;
   toolbar: ReactNode;
-  /** Legend overlaid on the map. null when neither heatmap nor infrastructure is displayed. */
+  reload: () => void;
+  /** 選択したオーバーレイの凡例。 */
   legend: ReactNode;
 };
 
@@ -87,6 +118,33 @@ export function useCityMapControls(
   const [heatmapKind, setHeatmapKind] = useState<CityMapHeatmapActiveKind>(HEATMAP_KINDS[0]);
   const [heatmapMode, setHeatmapMode] = useState<CityMapHeatmapMode>("overlay");
   const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);
+  const [resourceResult, setResourceResult] = useState<{ resources: ApiResourceArea[] } | { error: unknown } | null>(null);
+  const [resourceReloadVersion, setResourceReloadVersion] = useState(0);
+  const showResources = overlay === "resources";
+
+  useEffect(() => {
+    setResourceResult(null);
+    if (!showResources || !apiBaseUrl) return;
+
+    const controller = new AbortController();
+    fetchApi<{ resources: ApiResourceArea[] }>(buildApiUrl(apiBaseUrl, "/api/v1/resources"), {
+      signal: controller.signal,
+      cache: "reload",
+    })
+      .then(({ resources }) => {
+        if (!controller.signal.aborted) setResourceResult({ resources });
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) setResourceResult({ error });
+      });
+    return () => controller.abort();
+  }, [apiBaseUrl, showResources, resourceReloadVersion]);
+
+  const reload = useCallback(() => {
+    setResourceResult(null);
+    setResourceReloadVersion((version) => version + 1);
+    onReload();
+  }, [onReload]);
 
   const toggleLayer = useCallback((keys: (keyof CityMapLayerVisibility)[]) => {
     setLayers((prev) => {
@@ -199,7 +257,7 @@ export function useCityMapControls(
             className="city-map-window__btn"
             title={t("cityMap.reload")}
             aria-label={t("cityMap.reload")}
-            onClick={onReload}
+            onClick={reload}
           >
             <MapIcon name="reload" />
           </button>
@@ -211,11 +269,27 @@ export function useCityMapControls(
 
   const canvasLayers = useMemo(() => ({ ...layers, transitLines: overlay === "transit" }), [layers, overlay]);
   const infraSelection = overlay === "infra" ? infra.option?.selection ?? null : null;
+  const resources = showResources && resourceResult && "resources" in resourceResult ? resourceResult.resources : undefined;
+  const resourceTypes = masterData?.resource_types;
+  const resourceAreas = useMemo(() => resources && buildResourceAreas(resources, resourceTypes), [resources, resourceTypes]);
+  const resourceKeys = [...new Map(resourceAreas?.map((area) => [area.resourceType, area])).values()]
+    .sort((a, b) => a.resourceType - b.resourceType);
 
   // Heatmap legend values use citywide intensity ranges for sources and fixed adverse-impact scores for grid display.
   const legend = infraSelection ? (
     <div className="city-map-window__legend city-map-window__legend--infra">
       <InfraMapLegend selection={infraSelection} />
+    </div>
+  ) : showResources ? (
+    <div className="city-map-window__legend city-map-window__legend--resources">
+      {resourceKeys.length > 0 ? resourceKeys.map(({ resourceType, label, color }) => (
+        <span key={resourceType} className="city-map-window__resource-key">
+          <span className="city-map-window__resource-swatch" style={{ backgroundColor: color }} />
+          {label}
+        </span>
+      )) : resourceAreas ? t("cityMap.resources.noData")
+        : resourceResult && "error" in resourceResult ? describeError(resourceResult.error, t)
+        : t("common.loading")}
     </div>
   ) : overlay === "heatmap" && heatmapStats && (
     <div className="city-map-window__legend">
@@ -254,8 +328,10 @@ export function useCityMapControls(
     heatmapMode,
     transitVariant,
     infraSelection,
+    resourceAreas,
     onHeatmapStats: setHeatmapStats,
     toolbar,
+    reload,
     legend,
   };
 }

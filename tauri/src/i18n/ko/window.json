@@ -79,7 +79,11 @@
       "transit": "대중교통",
       "transitAll": "전체",
       "heatmap": "히트맵",
-      "infra": "인프라"
+      "infra": "인프라",
+      "resources": "지하자원"
+    },
+    "resources": {
+      "noData": "이 도시에는 지하자원이 없습니다"
     },
     "heatmap": {
       "sources": "발생원",

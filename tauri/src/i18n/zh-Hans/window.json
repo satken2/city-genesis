@@ -79,7 +79,11 @@
       "transit": "公共交通",
       "transitAll": "全部",
       "heatmap": "热力图",
-      "infra": "基础设施"
+      "infra": "基础设施",
+      "resources": "地下资源"
+    },
+    "resources": {
+      "noData": "这座城市没有地下资源"
     },
     "heatmap": {
       "sources": "排放源",

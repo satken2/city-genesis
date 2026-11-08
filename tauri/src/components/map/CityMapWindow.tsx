@@ -187,6 +187,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           heatmapMode={controls.heatmapMode}
           transitVariant={controls.transitVariant}
           infraSelection={controls.infraSelection}
+          resourceAreas={controls.resourceAreas}
           interactive
           onCursorWorldPos={handleCursor}
           onZoomChange={handleZoom}

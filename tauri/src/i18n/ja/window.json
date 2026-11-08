@@ -79,7 +79,11 @@
       "transit": "公共交通",
       "transitAll": "すべて",
       "heatmap": "ヒートマップ",
-      "infra": "インフラ"
+      "infra": "インフラ",
+      "resources": "地下資源"
+    },
+    "resources": {
+      "noData": "この都市に地下資源はありません"
     },
     "heatmap": {
       "sources": "発生源",

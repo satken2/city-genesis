@@ -79,7 +79,11 @@
       "transit": "Public transit",
       "transitAll": "All",
       "heatmap": "Heatmap",
-      "infra": "Infrastructure"
+      "infra": "Infrastructure",
+      "resources": "Underground resources"
+    },
+    "resources": {
+      "noData": "This city has no underground resources"
     },
     "heatmap": {
       "sources": "Sources",

@@ -213,10 +213,24 @@
   pointer-events: none;
 }
 
-/* Infrastructure legends may show networks and coverage together, so stack rows by type. */
-.city-map-window__legend--infra {
+/* Stack infrastructure and resource legend entries by type. */
+.city-map-window__legend--infra,
+.city-map-window__legend--resources {
   flex-direction: column;
   align-items: flex-start;
+}
+
+.city-map-window__resource-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.city-map-window__resource-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 1px solid #93a9c0;
+  border-radius: 2px;
 }
 
 .city-map-window__legend-title {

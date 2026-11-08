@@ -263,6 +263,11 @@ export type CityMapVectors = {
   buildings: CityMapPolygonItem[];
 };
 
+export type CityMapResourceArea = {
+  color: string;
+  polygon: [number, number][];
+};
+
 export type CityMapCanvasProps = {
   apiBaseUrl: string;
   /** Layer visibility. Omitted keys use DEFAULT_CITY_MAP_LAYERS. */
@@ -308,6 +313,8 @@ export type CityMapCanvasProps = {
  * and the coverage good's supply facilities, effect ranges, and building colors. Do not use with a heatmap.
  */
   infraSelection?: InfraSelection | null;
+  /** 地下資源の範囲。地形の上に重ね、道路や建物はその上に描く。 */
+  resourceAreas?: CityMapResourceArea[];
   /** Initial display bounds in world coordinates. Defaults to fitting the entire map. */
   initialBounds?: CityMapBounds;
   /** Whether to allow mouse/touch pan and zoom (false is recommended for embedded previews). */
@@ -1258,6 +1265,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       onVectorsLoaded,
       zoneFill,
       infraSelection = null,
+      resourceAreas,
       className,
     },
     ref
@@ -1288,6 +1296,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const heatmapStatsCbRef = useRef<CityMapCanvasProps["onHeatmapStats"]>(onHeatmapStats);
     const vectorsCbRef = useRef<CityMapCanvasProps["onVectorsLoaded"]>(onVectorsLoaded);
     const infraSelectionRef = useRef<InfraSelection | null>(infraSelection);
+    const resourcePathsRef = useRef<{ color: string; path: Path2D }[]>([]);
     const masterDataRef = useRef<MasterData | null>(masterData);
     // Unnamed interchange labels are translated at draw time, so also update them when the language changes.
     const { t } = useTranslation();
@@ -1394,6 +1403,15 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     useEffect(() => {
       engineRef.current?.draw();
     }, [overlayVersion]);
+
+    useEffect(() => {
+      // 輪郭の向きが異なる資源エリア同士が重なっても、塗りが相殺されないよう個別に描く。
+      resourcePathsRef.current = resourceAreas?.map((area) => ({
+        color: area.color,
+        path: buildPolygonPath([area], false),
+      })) ?? [];
+      engineRef.current?.draw();
+    }, [resourceAreas]);
 
     /* ---- Cursor shape: follow the parent's hover detection. ---- */
     useEffect(() => {
@@ -1666,6 +1684,20 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.fillStyle = COLOR_LAND;
           ctx.fill(coastPath, "evenodd");
         }
+
+        const resourcePaths = resourcePathsRef.current;
+        if (resourcePaths.length > 0) {
+          ctx.save();
+          // 縮小時は細い資源エリアがにじみで消えないよう、ぼかしも地図と同じ比率で縮める。
+          ctx.filter = `blur(${5 * Math.min(z, 1) * dpr}px)`;
+          ctx.globalAlpha = 0.35;
+          for (const { color, path } of resourcePaths) {
+            ctx.fillStyle = color;
+            ctx.fill(path);
+          }
+          ctx.restore();
+        }
+
         if (showBuildingShapes && vec.parkPath) {
           ctx.fillStyle = COLOR_PARK;
           ctx.fill(vec.parkPath);

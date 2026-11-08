@@ -79,7 +79,11 @@
       "transit": "Transports en commun",
       "transitAll": "Toutes",
       "heatmap": "Carte thermique",
-      "infra": "Infrastructures"
+      "infra": "Infrastructures",
+      "resources": "Ressources du sous-sol"
+    },
+    "resources": {
+      "noData": "Cette ville ne possède aucune ressource du sous-sol"
     },
     "heatmap": {
       "sources": "Sources",

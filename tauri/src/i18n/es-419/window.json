@@ -79,7 +79,11 @@
       "transit": "Transporte público",
       "transitAll": "Todas",
       "heatmap": "Mapa de calor",
-      "infra": "Infraestructura"
+      "infra": "Infraestructura",
+      "resources": "Recursos del subsuelo"
+    },
+    "resources": {
+      "noData": "Esta ciudad no tiene recursos del subsuelo"
     },
     "heatmap": {
       "sources": "Fuentes",
